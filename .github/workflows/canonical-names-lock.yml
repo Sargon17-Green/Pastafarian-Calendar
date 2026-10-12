@@ -145,3 +145,5 @@ jobs:
         run: |
           test "${{ steps.discovery_inplace_stir_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage20Tests/PastafarianCalendar.Stage20Tests.csproj --configuration Release -- --verify-expected-red
+      - name: مطابقة رقعة التحريك بالظل العاشرة مع المرجع وحفظ تلوث القديم
+        run: dotnet run --project tests/PastafarianCalendar.Stage21Tests/PastafarianCalendar.Stage21Tests.csproj --configuration Release

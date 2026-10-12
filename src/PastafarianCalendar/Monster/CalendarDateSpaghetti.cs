@@ -165,6 +165,12 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyInPlaceStir(
             calculationDay,targetDay,visibleIndex);
 
+    // رقعة الظل تقرأ جميع القيم قبل أن تثبت نتائج الأوعية الستة.
+    public static BigInteger[] EvaluatePatchedBowlStir(
+        BigInteger calculationDay,BigInteger targetDay,int visibleIndex)
+        => new MonsterManager().EvaluatePatchedBowlStir(
+            calculationDay,targetDay,visibleIndex);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

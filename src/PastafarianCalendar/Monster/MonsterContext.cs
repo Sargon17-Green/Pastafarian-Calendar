@@ -93,6 +93,11 @@ public sealed class MonsterContext
     // يبقى الإناء الذي غُيّر مباشرةً شاهداً على التلوث التاريخي.
     public BigInteger[]? LegacyStirredBowls { get; set; }
 
+    // الصورة السابقة ونتيجة الانتظار مستقلتان عن الأوعية الملتزم بها.
+    public BigInteger[]? StirVaultOld { get; set; }
+    public BigInteger[]? StirPending { get; set; }
+    public BigInteger[]? PatchedStirredBowls { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
