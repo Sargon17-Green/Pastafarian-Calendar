@@ -250,3 +250,29 @@ apre sa yon lòt invocation pwòp, ak tras, commit ak metrik orijinal.
 Nou teste tou yon depo fizik ki manke valè, yon echèk legacy anvan
 li tounen done yo, ak alias BigInt (enkli kopi limb si li ekspoze).
 Yon QA lokal ki sèvi ak doublon depandans yo pase; apre sa, suite Lua natif la sou GitHub Actions te bay `FULL_NATIVE_SUITE=PASS` ak tout sis travay vèt.
+
+
+## Stage 12 — DISCOVERY 06: yon fonksyon history ki sèlman wè gout vizib
+
+### Sipozisyon istorik
+
+Apre sèt gout kache yo te korije nan Stage 11, ansyen wout history la
+toujou te sèvi sèlman ak `dropStore[i-back]`. Li te sipoze tout
+endèks li mande yo pozitif epi yo nan tablo gout vizib la. Lè gout
+vizib nimewo 1 bezwen p1, p3 oswa p7, rezilta sa a vin nil, malgre
+sèt gout kache yo deja kalkile kòrèkteman.
+
+### Kouch ki parèt nan etap sa a
+
+Nou ajoute dispatcher `LEGACY_PRIOR` ak yon kontèks posede,
+metriks, dyagnostik, eta semantik ak prèv apèl reyèl nan HIDDEN_PATCH.
+Nou pa itilize valè hidden yo nan kalkil legacy a. Sa se erè istorik
+nou vle konsève, pa yon erè jwèt ki fèt sèlman nan tès yo.
+
+### Pwotokòl prèv la
+
+Sèt plas hidden 0, -1, -2, -3, -4, -5, -6 dwe bay egzakteman
+erè `EXPECTED_RED Stage 12 DISCOVERY 06` nan regresyon nouvo a.
+Menas ki ta chanje fonksyon legacy a oswa ki ta ranje hidden yo twò bonè
+fè tès scope ak trace yo echwe. Tout etap 1–11 dwe rete vèt.
+Stage 13 sèlman ap mete mapping `hiddenK=1-slot` pou history.

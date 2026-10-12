@@ -10,6 +10,7 @@ local LegacyStones = require("legacy_stones")
 local StonePatch = require("stone_patch")
 local LegacyHidden = require("legacy_hidden")
 local HiddenPatch = require("hidden_patch")
+local LegacyPrior = require("legacy_prior")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -110,8 +111,19 @@ function S.legacyHiddenProbe(calculationDay, targetDay)
     return LegacyHidden.execute(calculationDay, targetDay)
 end
 
+-- DISCOVERY 06: wout pwodiksyon an rele history legacy ki pa konnen hidden yo.
+function S.priorSpaghetti(dropStore, calculationDay, targetDay, i, back)
+    local value = LegacyPrior.execute(dropStore, calculationDay, targetDay, i, back)
+    return value
+end
+
+-- Konteks la montre yon kalkil hidden PATCH 05 ki egziste men ki inyore.
+function S.legacyPriorProbe(dropStore, calculationDay, targetDay, i, back)
+    return LegacyPrior.execute(dropStore, calculationDay, targetDay, i, back)
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 11", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 12", 0)
 end
 
 return S

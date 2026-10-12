@@ -274,3 +274,31 @@ dwe retounen sèt valè kòrèk ak de commit; yon echèk pa dwe kite eta
 yon lòt invocation domaje. Li verifye tou lòd aksè fizik `7,6,...,1`
 ak absans pataj BigInt, menm nan limb entèn yo lè yo aksesib.
 Tès sa a kouri nan `stage11_tests.lua`; li pa modifye kòd pwodiksyon.
+
+
+## Stage 12 — DISCOVERY 06: history pa jwenn sèt gout kache yo
+
+Nou mete ansyen `legacyPrior(dropStore,i,back)` la nan `src/legacy_prior.lua`.
+Li li `dropStore[i-back]` sèlman. Pou jou vizib nimewo 1, ak
+`back=1..7`, li mande plas 0, -1, ..., -6. Plas sa yo pa egziste
+nan depo vizib òdinè a, menm si sèt gout kache korije yo disponib nan
+`HiddenPatch.execute`. Nou fè yon apèl reyèl nan kouch hidden sa a
+pou konsève prèv depandans, men legacy a inyore rezilta li.
+
+Nou ajoute `priorSpaghetti` ak `legacyPriorProbe` nan fasad piblik la.
+Handler `LEGACY_PRIOR` anrejistre plas kalkile a, si li jwenn done,
+yon sèl komit, yon tras, metrik, dyagnostik epi yon kontèks hidden
+entèmedyè konplè. Valè vizib ki egziste yo toujou li kòrèkteman; plas
+hidden yo rete manke. Li pa panse rive nan HiddenPatch pou korije sa.
+
+Nan `test/stage12_regression_tests.lua`, nou egzije yon prèv
+`EXPECTED_RED` sou egzakteman sèt plas 0 rive -6. Odit separe a
+verifye mesaj erè a. Tès tras ak pwopriyete yo pwoteje lekti vizib,
+entegrite BigInt, kopye depo, eta tranzaksyonèl, ak lefèt ke legacy pa
+konnen yo ka li gout kache yo.
+
+`lua5.3 test/stage12_tests.lua .` dwe echwe sèlman nan dènye
+regresyon an, apre tout tès Stage 1–11 ak odit Stage 12 yo fin pase.
+
+**Pa mete PATCH 06 nan Stage 12.** Li rezève pou Stage 13: si slot >= 1,
+rele legacy; sinon k=1-slot epi li gout hidden k nan kouch PATCH 05 la.
