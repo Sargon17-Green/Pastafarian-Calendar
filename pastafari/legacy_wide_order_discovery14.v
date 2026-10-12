@@ -36,8 +36,8 @@ pub fn old_wide_pick_high_first(stream AnswerStream, n BigInt) !LegacyWideOrderT
 	mut rejected := big_zero()
 	step := if stream.step == 1 { big_one() } else { big_neg(big_one()) }
 	for big_cmp(accepted, limit) > 0 {
-		accepted = big_add(big_one(), big_regular_mod(big_add(big_sub(accepted,
-			big_one()), step), space))
+		accepted = big_add(big_one(), big_regular_mod(big_add(big_sub(accepted, big_one()), step),
+			space))
 		rejected = big_add(rejected, big_one())
 	}
 	return LegacyWideOrderTrace{
@@ -79,7 +79,7 @@ pub fn calendar_ask_bowl_rank_spaghetti(bowls []BigInt, order_at_46_latch []int,
 }
 
 pub fn calendar_post_stir_ask_bowl_rank_spaghetti(bowls_at_46 []BigInt, order_at_46 []int, queried_id int, seal BigInt, n BigInt) !BigInt {
-	stream := calendar_post_stir_answer_stream_spaghetti(bowls_at_46, order_at_46, queried_id,
-		seal)!
+	stream :=
+		calendar_post_stir_answer_stream_spaghetti(bowls_at_46, order_at_46, queried_id, seal)!
 	return calendar_choose_rank_spaghetti(stream, n)
 }

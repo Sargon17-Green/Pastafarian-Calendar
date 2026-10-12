@@ -22,15 +22,17 @@ fn discovery14_reference_little_first(stream AnswerStream, n BigInt) BigInt {
 	limit := big_mul(big_floor_div(space, n), n)
 	step := if stream.step == 1 { big_one() } else { big_neg(big_one()) }
 	for big_cmp(x, limit) > 0 {
-		x = big_add(big_one(), big_regular_mod(big_add(big_sub(x, big_one()), step),
-			space))
+		x = big_add(big_one(), big_regular_mod(big_add(big_sub(x, big_one()), step), space))
 	}
 	return big_add(big_one(), big_regular_mod(big_sub(x, big_one()), n))
 }
 
 fn test_discovery14_expected_red_two_digits_first_one_forward() {
 	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
-	s := AnswerStream{ first: big_one(), step: 1 }
+	s := AnswerStream{
+		first: big_one()
+		step:  1
+	}
 	n := big_add(m, big_one())
 	expected := discovery14_reference_little_first(s, n)
 	actual := calendar_choose_rank_spaghetti(s, n) or { big_zero() }
@@ -40,7 +42,10 @@ fn test_discovery14_expected_red_two_digits_first_one_forward() {
 
 fn test_discovery14_expected_red_two_digits_first_one_reverse() {
 	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
-	s := AnswerStream{ first: big_one(), step: -1 }
+	s := AnswerStream{
+		first: big_one()
+		step:  -1
+	}
 	n := big_mul(m, m)
 	expected := discovery14_reference_little_first(s, n)
 	actual := calendar_choose_rank_spaghetti(s, n) or { big_zero() }
@@ -50,7 +55,10 @@ fn test_discovery14_expected_red_two_digits_first_one_reverse() {
 
 fn test_discovery14_expected_red_two_digits_seed_seventeen() {
 	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
-	s := AnswerStream{ first: big_from_int(17), step: 1 }
+	s := AnswerStream{
+		first: big_from_int(17)
+		step:  1
+	}
 	n := big_mul(m, m)
 	expected := discovery14_reference_little_first(s, n)
 	actual := calendar_choose_rank_spaghetti(s, n) or { big_zero() }
@@ -60,7 +68,10 @@ fn test_discovery14_expected_red_two_digits_seed_seventeen() {
 
 fn test_discovery14_expected_red_three_digits_first_one_forward() {
 	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
-	s := AnswerStream{ first: big_one(), step: 1 }
+	s := AnswerStream{
+		first: big_one()
+		step:  1
+	}
 	n := big_add(big_mul(m, m), big_one())
 	expected := discovery14_reference_little_first(s, n)
 	actual := calendar_choose_rank_spaghetti(s, n) or { big_zero() }

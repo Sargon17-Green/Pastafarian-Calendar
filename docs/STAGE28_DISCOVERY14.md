@@ -48,7 +48,7 @@ v test ./pastafari/discovery14_expected_red_test.v
 - የnative V ኮምፓይለር V 0.5.2 7647ce1።
 - 41 የቀድሞና አዲስ GREEN test ፋይሎች PASS።
 - አራት የnormative EXPECTED_RED ማስረጃዎች በተናጠል ተረጋግጠዋል።
-- v fmt -verify ./pastafari PASS፤ በfmt -w አንድም ልዩነት አልተገኘም።
+- የV fmt -w የመጀመሪያ ልዩነቶች በnative ማስረጃ ተመዝግበው በምንጭ ፋይሎች ላይ ተተግብረዋል፤ የመጨረሻ v fmt -verify በነጻ CI ይፈተሻል።
 - Canonical Names Lock PASS።
 - LAST_COMPLETED_STAGE=28። ደረጃ 29 PATCH 14 አልተጀመረም።
 
