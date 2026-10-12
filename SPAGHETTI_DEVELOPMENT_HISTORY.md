@@ -579,3 +579,12 @@ phép SAVE, một bước đúng khi order là đồng nhất,
 sáu bát khởi đầu, 46 bước, biến lớn, chạy đồng thời,
 các bản vá cũ và kiểm toán nguồn; bốn hồi quy chuẩn
 cố ý đỏ ở rót trực tiếp, một bước khuấy và kết quả cuối.
+
+**Kết quả CI đã kiểm chứng:** 209 kiểm thử, đúng bốn hồi
+quy chuẩn đỏ, 205 bài đạt, không cảnh báo biên dịch.
+193 bài kiểm thử từ giai đoạn 1 tới 17 không hồi quy;
+12 bài kiểm soát mới đạt, khóa tên chuẩn độc lập PASS.
+Bốn sai lệch thuộc nguồn rót 1, bước khuấy đầu và kết
+quả sau 46 giọt ở các ngày khác nhau. Phần khuấy đọc
+snapshot cũ và ghi next riêng như công thức chuẩn.
+Không thêm alias của giai đoạn 19. Đóng EXPECTED_RED.

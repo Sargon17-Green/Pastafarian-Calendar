@@ -55,3 +55,22 @@ PATCH 09 giữ `LegacyPourPositions`,
 định tuyến `bowlAlias[position]=order[position]`,
 và tất cả ba nguồn rót dùng ID đã ánh xạ.
 Giữ các phép khuấy đúng, không bắt đầu DISCOVERY 10.
+
+## Kết quả kiểm chứng thực tế
+
+- Commit triển khai: `a14de0de404801cca954db020a3e45f69ff8181f`.
+- Elixir 1.18.5 / Erlang/OTP 27, 33 tệp nguồn được biên dịch.
+- 209 kiểm thử, chính xác 4 thất bại dự kiến, 205 bài đạt.
+- 4 hồi quy chuẩn đỏ: nguồn rót đầu, khuấy đầu,
+  bát sau 46 giọt, hai chiều ngày.
+- 193 bài kiểm thử giai đoạn 1-17 vẫn PASS.
+- 12 bài kiểm soát mới đều PASS, không cảnh báo biên dịch.
+- Khóa tên chuẩn độc lập PASS.
+- Oracle test-only không thay đổi; không thêm PATCH 09;
+  không sử dụng biến trạng thái dùng chung, không đổi main.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239350202
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239350320
+
+Trạng thái cuối: EXPECTED_RED đã kiểm chứng.
+Điểm tiếp theo: giai đoạn 19 PATCH 09, chưa bắt đầu.

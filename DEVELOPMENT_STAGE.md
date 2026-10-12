@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=18
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=09
-LAST_COMPLETED_STAGE=17
+LAST_COMPLETED_STAGE=18
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-08; khởi tạo sáu bát, khuấy qua 46 giọt với snapshot cũ và thứ tự ID đúng, nhưng LegacyPourPositions đọc bowls_old[position] thay vì ID qua order[position] cho ba nguồn rót.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_18_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_18_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_18_PENDING
-CI_FAILURES=STAGE_18_PENDING
+CI_TESTS=209
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -330,4 +330,15 @@ Không thêm lỗi trộn in-place của DISCOVERY 10. Không tích hợp
 12 lần khuấy sau giọt 46 hoặc truy vấn ngày lịch cuối.
 16 bài kiểm thử mới gồm 12 kiểm soát và bốn hồi quy chuẩn đỏ.
 Dự kiến 209 bài kiểm thử, đúng bốn lỗi chủ đích.
-LAST_COMPLETED_STAGE giữ 17 trước xác minh CI.
+LAST_COMPLETED_STAGE nâng lên 18 sau CI và khóa tên PASS.
+
+Giai đoạn 18 kiểm chứng trên Elixir 1.18.5, Erlang/OTP 27:
+209 kiểm thử, đúng 4 thất bại có chủ đích do nguồn rót sai;
+205 bài đạt, trong đó đủ 193 kiểm thử giai đoạn 1-17.
+Bốn hồi quy đỏ: nguồn rót đầu, bước khuấy đầu, sáu bát
+sau 46 giọt và trường hợp hai chiều ngày. Tất cả 12 bài
+kiểm soát mới đạt. Không cảnh báo biên dịch. Khóa tên
+chuẩn độc lập PASS. Không có bộ alias của PATCH 09.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239350202
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239350320
+Giai đoạn 18 đóng EXPECTED_RED; tiếp theo giai đoạn 19 PATCH 09.

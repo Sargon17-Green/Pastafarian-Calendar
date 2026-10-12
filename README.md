@@ -636,3 +636,21 @@ Giai đoạn 19, `PATCH 09`, sẽ bảo toàn LegacyPourPositions,
 thêm ánh xạ `bowlAlias[position]=order[position]` và
 cho **mọi lần đọc nguồn bát trong ba phép rót** đi qua alias
 trước khi gọi legacy. Chưa thực hiện điều này ở giai đoạn 18.
+
+## Kiểm chứng đóng giai đoạn 18
+
+GitHub Actions Elixir 1.18.5 / Erlang/OTP 27 chạy **209 kiểm thử,
+đúng bốn hồi quy chuẩn đỏ dự kiến**, 205 bài đạt,
+không có cảnh báo biên dịch. Toàn bộ 193 kiểm thử cũ
+vẫn đạt và 12 bài kiểm soát mới đều xanh.
+Bốn bài đỏ kiểm tra phép rót đầu, lần khuấy đầu,
+trạng thái sáu bát sau 46 giọt và hai hướng thời gian.
+Khóa tên chuẩn độc lập PASS.
+
+- [CI giai đoạn 18: bốn sai lệch mong đợi](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239350202)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239350320)
+
+Giai đoạn 18 kết thúc `EXPECTED_RED` đã xác minh.
+Giai đoạn 19 `PATCH 09` cần giữ `LegacyPourPositions`,
+đưa `order[position]` qua `bowlAlias` tới các nguồn rót
+và không bắt đầu lỗi trộn in-place của giai đoạn 20.
