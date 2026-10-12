@@ -968,3 +968,14 @@ Sono provati 921 casi di sei divari sotto
 soglia, 2048 combinazioni deterministiche,
 input invalidi, isolamenti e tutte le undici
 patch precedenti.
+
+### Certificazione nativa dello Stadio 24
+
+La [run GitHub Actions 38239105413](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239105413)
+ha terminato con **SUCCESS per 25 job su 25**
+sul commit `c7f5647800f02dc2f90dd694a6cce66a51f6a663`.
+La firma Stage24 è **33 PASS / 3 FAIL intenzionali**
+(sei, sette e otto divari esattamente di 5778 giorni);
+tutte le firme Stage01–Stage23 restano invariate.
+Il codice di produzione non consulta l'oracolo;
+PATCH 12 non è anticipata.

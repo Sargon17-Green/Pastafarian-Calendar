@@ -1234,3 +1234,14 @@ Adapter, handler, manager, validator,
 quattro valori diagnostici nel contesto,
 metrica e una suite di prove indipendenti.
 PATCH 12 non è anticipata; Stage23 resta GREEN.
+
+### Certificazione nativa della discovery
+
+GitHub Actions 38239105413, su
+`c7f5647800f02dc2f90dd694a6cce66a51f6a663`,
+ha concluso SUCCESS in tutti e 25 i job. La firma
+della discovery è 33 PASS e 3 FAIL volutamente
+limitati ai tre casi di confine da 5778 giorni.
+Il vecchio limite 5777 è effettivamente
+attraversato e tutte le firme degli stadi
+precedenti rimangono intatte.
