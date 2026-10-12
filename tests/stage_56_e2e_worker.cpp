@@ -3,6 +3,7 @@
 #include "reference/normative_reference.hpp"
 #include "stage_55_fast_reference.hpp"
 
+#include <array>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -44,10 +45,60 @@ Five canonical(const CalendarDate& d) {
     return {d.yearNumber, cutletIndex(d.cutletName), d.dayInCutlet,
             monthIndex(d.monthName), d.dayInMonth};
 }
+
+void requireCanonicalAc1FixedVectors() {
+    // Testimonia fixa ex README.md / AC.1 in ramo main.
+    // Non e NormativeOracle neque e codice productionis derivantur.
+    // Mutant veteris rawBowlSum has decem probationes transire non potest.
+    struct CanonicalAc1 {
+        long long c;
+        long long t;
+        long long annus;
+        int segmentum;
+        long long diesSegmenti;
+        int mensis;
+        long long diesMensis;
+    };
+    constexpr std::array<CanonicalAc1, 10> vectores{{
+        {-15055671, -15055671, 5000, 10, 503, 20, 56},
+        {-15055671, -15055672, 5000, 10, 502, 32, 21},
+        {-15055671, -15055670, 5000, 14, 1, 29, 38},
+        {-15055671, -15056171, 5000, 10, 3, 1, 29},
+        {-15055671, -15055171, 5000, 14, 500, 18, 76},
+        {-15055671, -15061671, 4999, 5, 158, 43, 3},
+        {-15055671, -15049671, 5001, 12, 95, 5, 81},
+        {-15056905, -15056448, 5000, 9, 167, 10, 65},
+        {-15054437, -15053449, 5000, 14, 10, 1, 45},
+        {-15058171, -15053171, 5002, 5, 288, 29, 13}
+    }};
+    int numerus = 0;
+    for (const CanonicalAc1& v : vectores) {
+        const SpaghettiDateFive actual =
+            pastafari::calendarDateSpaghetti(Integer{v.c}, Integer{v.t});
+        const Five expected{
+            Integer{v.annus}, v.segmentum, Integer{v.diesSegmenti},
+            v.mensis, Integer{v.diesMensis}};
+        if (canonical(actual) != expected) {
+            throw std::runtime_error(
+                "AC.1 testis canonicus " + std::to_string(numerus + 1)
+                + " discrepavit a quinque valoribus fixis main");
+        }
+        ++numerus;
+        std::cout << "GRADUS56_AC1_VECTOR_PASS=" << numerus
+                  << " C=" << v.c << " T=" << v.t << '\n' << std::flush;
+    }
+    require(numerus == 10, "decem testes AC.1 exiguntur");
+    std::cout << "GRADUS56_AC1_CANONICA=10/10_PASS\n";
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
     try {
+        if (argc == 2 && std::string(argv[1]) == "--ac1-canonical") {
+            requireCanonicalAc1FixedVectors();
+            return 0;
+        }
         require(argc == 3, "usus: stage_56_e2e_worker c t");
 
         const Integer c{argv[1]};
