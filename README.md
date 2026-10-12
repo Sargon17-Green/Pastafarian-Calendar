@@ -277,3 +277,10 @@ Cedwir y storfa ffisegol wrthdro o Gam 10 yn union, a cedwir y darllenydd anghyw
 Rhaid i bob un o saith safle k=1..7 fod yn GREEN, tra bo'r pedwar anghysondeb etifeddol k=1,2,6,7 yn aros yn alwadadwy a'r canolbwynt k=4 yn dal yn gyfatebiaeth. Mae 35 prawf BigInteger annibynnol ac 175 cydran carreg yn cael eu gwirio ar bum pâr diwrnod. **`LAST_COMPLETED_STAGE=10` hyd nes bod `run-stage11-tests.sh` yn llwyddo ar GitHub Actions.** Ni ddechreuwyd Cam 12.
 
 **Ardystiad Cam 11:** pasiodd `sh run-stage11-tests.sh` gyda'r cod a'r oracl gwreiddiol ar Kotlin 1.9.0/JDK 21, commit ffynhonnell `326c843d2fb8a7f5c070362113a3284c4cbe6aac`. Gwiriwyd 30 marc yn log GitHub Actions: `STAGE11_PATCH_GREEN_7`, `STAGE11_PRESERVED_DISCOVERY05_RED_4`, `STAGE11_FIXED_MIDPOINT_K4_GREEN`, `STAGE11_BIGINT_INDEPENDENT_GREEN_35`, `STAGE11_BIGINT_PATCH04_STONES_GREEN_175` a `STAGE11_NATIVE_GREEN`, ynghyd â holl atchweliadau Camau 1–10. **`LAST_COMPLETED_STAGE=11`**. Cam 12 (`DISCOVERY 06`) yw'r cam nesaf, heb ei ddechrau. Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38222120118
+
+
+## Cam 12 — DISCOVERY 06: legacyPrior yn gweld hanes gweledig yn unig
+
+Mae `LegacyPriorAdapter.legacyPrior(visibleStore,i,back)` yn cyfrifo `i-back`, ond nid yw'n gallu darllen slotiau hanes cudd. Yn ôl yr oracl, slot 0 yw hidden1, slot -2 yw hidden3, a slot -6 yw hidden7; mae'r hen ddarllenydd yn dychwelyd `null` yn y tri achos, felly ceir **tri `EXPECTED_RED`, sero `MATCH`**. Cedwir prawf positif `i=2,back=1` ar slot gweledig 1 yn y llwybr cynhyrchu, gan ddefnyddio hidden1 a gywirwyd gan PATCH 05 fel gwerth profi yn unig (nid oes adeiladwr diferion gweledig eto).
+
+Mae'r profion yn gwirio camau 1–11, 15 diffyg hanes cudd dros bum pâr diwrnod, 35 gwerth BigInteger annibynnol, 175 cydran carreg, guardiau a methiant strict bwriadol. Mae `LAST_COMPLETED_STAGE=11` tan ardystiad brodorol. Ni ddechreuwyd `priorPatch` na Cham 13.

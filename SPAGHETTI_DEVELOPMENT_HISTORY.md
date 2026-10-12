@@ -294,3 +294,8 @@ Mae'r lapio cywiro'n galw'r hen `legacyHiddenDirectByAssumedNearness` yn union a
 ### Cam 11 — ardystiad brodorol PASS
 
 Ar commit `326c843d2fb8a7f5c070362113a3284c4cbe6aac` llwyddodd swydd `native-stage11-kotlin-cymraeg` (rhediad `38222120118`, swydd `114720632237`) gyda Kotlin 1.9.0/JDK 21 a'r oracl gwreiddiol. Gwiriwyd 30 marc: saith `k` yn GREEN, cadw pedwar anghysondeb DISCOVERY 05, cadw'r canolbwynt k=4, 35 prawf BigInteger annibynnol, 175 cydran carreg, gwarchodion a phob atchweliad Camau 1–10. Cedwir y storfa wrthdro a'r hen ddarllenydd heb newid. Mae Cam 11 wedi'i gwblhau; ni ddechreuwyd Cam 12.
+
+
+## Cam 12 — DISCOVERY 06: graith legacyPrior weledig
+
+Mae'r helper hanesyddol yn darllen `dropStore[i-back]` o storfa weledig yn unig. Nid oes ganddo drosiad o slotiau annhebyg i bositif i hidden1..hidden7. Yn y profion `i=1,back=1,3,7` ceir y slotiau 0,-2,-6 a thair anghysondeb. Nid yw'r algorithm diferion gweledig na `priorPatch` wedi'i weithredu. Yn y llwybr cynhyrchu, mae probe positif i=2/back=1 yn profi galwad wirioneddol i'r helper. Ceir profion perchnogaeth, BigInteger ac atchweliadau gan gynnwys PATCH 05. Bydd ardystiad CI cyn symud `LAST_COMPLETED_STAGE`.

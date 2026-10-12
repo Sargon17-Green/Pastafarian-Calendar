@@ -48,7 +48,16 @@ data class BaseMonsterContext(
     var patch05LegacyDirectValue: ExactInt? = null,
     var patch05CorrectedValue: ExactInt? = null,
     var patch05Applied: Boolean = false,
-    var patch05InvocationCount: Int = 0
+    var patch05InvocationCount: Int = 0,
+    var discovery06PriorI: Int? = null,
+    var discovery06PriorBack: Int? = null,
+    var discovery06PriorSlot: Int? = null,
+    var discovery06PriorValue: ExactInt? = null,
+    var discovery06VisibleStore: List<ExactInt?>? = null,
+    var discovery06HiddenStorage: List<ExactInt>? = null,
+    var discovery06Patch05HiddenOne: ExactInt? = null,
+    var discovery06ErrorId: String? = null,
+    var discovery06InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -108,7 +117,8 @@ class MonsterBootstrapManager(
     val legacyStoneBuilder: LegacyStoneBuilder = LegacyStoneBuilder(),
     val stonePatchWrapper: StonePatchWrapper = StonePatchWrapper(),
     val legacyHiddenDropAdapter: LegacyHiddenDropAdapter = LegacyHiddenDropAdapter(),
-    val hiddenNearnessPatchWrapper: HiddenNearnessPatchWrapper = HiddenNearnessPatchWrapper(legacyHiddenDropAdapter)
+    val hiddenNearnessPatchWrapper: HiddenNearnessPatchWrapper = HiddenNearnessPatchWrapper(legacyHiddenDropAdapter),
+    val legacyPriorAdapter: LegacyPriorAdapter = LegacyPriorAdapter()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -213,6 +223,52 @@ class MonsterBootstrapManager(
             context.status = "LEGACY_HIDDEN_OBSERVED"
             metrics.bump("discovery05.builds")
             metrics.bump("discovery05.legacy.direct.read")
+        }
+        dispatcher.register("DISCOVERY_06") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_DISCOVERY06_CONTEXT_NOT_READY")
+            val i = context.discovery06PriorI ?: throw MonsterValidationException("E_DISCOVERY06_MISSING_I")
+            val back = context.discovery06PriorBack ?: throw MonsterValidationException("E_DISCOVERY06_MISSING_BACK")
+            if (i < 1 || back !in 1..7) throw MonsterValidationException("E_DISCOVERY06_INVALID_HISTORY")
+            // Mae'r llwybr dilys yn profi'r ddarllenydd hanesol go iawn.
+            // Nid ydym yn adeiladu diferion gweledig eto.
+            val c = context.calculationDay
+            val t = context.targetDay
+            val actionTag = dayTagPatchWrapper.dayTagWithFoundationScar(
+                c, legacyDayTagAdapter.oldDayTag(c))
+            val targetTag = dayTagPatchWrapper.dayTagWithFoundationScar(
+                t, legacyDayTagAdapter.oldDayTag(t))
+            val distance = distancePatchWrapper.patchDistance(
+                c, t, legacyDistanceAdapter.oldDistance(c, t)).inclusiveDistance
+            val direction = ExactInt.of(when {
+                t < c -> 1L
+                t == c -> 2L
+                else -> 3L
+            })
+            val counts = HiddenWorkCounts(
+                actionTag, targetTag, distance, actionTag + targetTag, direction)
+            val stoneTable = stonePatchWrapper.buildPatchedRows()
+            val physical = legacyHiddenDropAdapter.buildBackwardStorage(counts, stoneTable.rows)
+            // PATCH 05: galw'r graith hidden direct cyn dychwelyd hidden1 cywir.
+            val correctedHidden1 = hiddenNearnessPatchWrapper.patch(physical, 1).correctedValue
+            // STOFFA PROFI YN UNIG: slot 1 yn weledig ac yn cynnwys gwerth
+            // wedi'i wirio; nid yw'n dechrau'r algorithm diferion gweledig.
+            val visibleProbe = listOf<ExactInt?>(null, correctedHidden1)
+            // Y GRAITH STAGE 12: dim fallback i hiddenK ar slot<=0.
+            val prior = legacyPriorAdapter.legacyPrior(visibleProbe, i, back)
+            // Commidio ar ôl cyfrifiad llwyddiannus yn unig.
+            context.discovery06VisibleStore = visibleProbe
+            context.discovery06HiddenStorage = physical
+            context.discovery06Patch05HiddenOne = correctedHidden1
+            context.discovery06PriorSlot = prior.slot
+            context.discovery06PriorValue = prior.value
+            context.discovery06ErrorId =
+                if (prior.slot <= 0) "E_DISCOVERY06_MISSING_HIDDEN_HISTORY" else null
+            context.discovery06InvocationCount = 1
+            context.branchTrace.add("DISCOVERY_06")
+            context.diagnostics.add("DISCOVERY_06_VISIBLE_ONLY_LEGACY_PRIOR")
+            context.status = "LEGACY_PRIOR_OBSERVED"
+            metrics.bump("discovery06.legacy.prior.calls")
         }
         dispatcher.register("PATCH_05") { context ->
             validation.requireBootstrapContext(context)
@@ -458,6 +514,25 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY05_WRAP", e)
+        }
+    }
+
+    /** Cam 12: galwad legacyPrior o storfa WELEDIG yn unig. */
+    fun observeLegacyPrior(
+        calculationDay: ExactInt, targetDay: ExactInt, i: Int = 2, back: Int = 1
+    ): BaseMonsterContext {
+        require(i >= 1 && back in 1..7) { "E_DISCOVERY06_PRIOR_RANGE" }
+        val context = prepare(calculationDay, targetDay)
+        context.discovery06PriorI = i
+        context.discovery06PriorBack = back
+        context.phase = "DISCOVERY_06"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY06_WRAP", e)
         }
     }
 
