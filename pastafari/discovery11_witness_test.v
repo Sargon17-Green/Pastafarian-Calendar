@@ -48,7 +48,7 @@ fn test_discovery11_different_incoming_orders_share_final_post_stir_order() {
 		assert out.order_for_query == [3, 5, 1, 4, 6, 2]
 		assert out.overwrite_count == 12
 		if idx == 0 {
-			expected = out.bowls
+			expected = out.bowls.clone()
 		} else {
 			assert out.bowls == expected
 		}
