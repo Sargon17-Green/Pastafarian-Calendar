@@ -14,6 +14,7 @@ import os
 import sys
 import tempfile
 import stage1_native_route_graph as geometry
+import stage1_native_diverse_manifest_contract as native_contract
 
 LABELS=("zero_equal","foundation_cross","forward_short","reverse_short",
         "mixed_small","positive_negative","negative_positive",
@@ -87,6 +88,11 @@ def main(folder):
     require(manifest.get("schema")=="befunge-stage1-diverse-native-v1",
             "unexpected native trace manifest")
     items=manifest.get("cases",[])
+    # Independent manifest roster and byte-exact archived stdout provenance.
+    # Fail before treating any claimed trace SHA or geometry as evidence.
+    native_contract.selftest()
+    native_contract.check_manifest_cases(items)
+    native_contract.check_saved_outputs(folder,items)
     require(tuple(x.get("case") for x in items)==LABELS,
             "missing or reordered native geometry scenarios")
     require(sum(bool(x["valid"]) for x in items)==14,"native valid family missing")
