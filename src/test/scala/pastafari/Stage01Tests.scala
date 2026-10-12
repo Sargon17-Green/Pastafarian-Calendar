@@ -197,6 +197,8 @@ object Stage01Tests {
       val mainRoot = root.resolve("src/main/scala")
       val content = textFiles(mainRoot).map(read).mkString("\n")
       val forbidden =
+        (if (currentStage < 34) Vector("oldMonthNameDuplicated")
+         else Vector.empty[String]) ++
         (if (currentStage < 32) Vector("oldContiguousMonthDayGuess")
          else Vector.empty[String]) ++
         (if (currentStage < 28) Vector("VirtualLegacyList") else Vector.empty[String]) ++
