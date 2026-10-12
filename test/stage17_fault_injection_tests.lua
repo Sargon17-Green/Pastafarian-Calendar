@@ -11,7 +11,7 @@ local function recover()
     assert(table.concat(a,",")=="6,5,4,3,2,1")
     assert(c.commitToken==3 and c.status=="PATCH_PERM_RETURNED")
 end
--- Failure in corrected rank0 (different from preceding historical rank1).
+-- Piki erè nan rank0 korije a, apa de apèl rank1 istorik la.
 for drop=1,6 do
     local marker="PATCH08_FAILED_UNRANK_"..drop
     Legacy.oldPermutationUnrank0=function(rank0)
@@ -24,7 +24,7 @@ for drop=1,6 do
     recover()
     failures=failures+1
 end
--- A non-throwing corrupt unrank is not accepted by the patch.
+-- PATCH 08 pa aksepte yon unrank kòripsyon menm san eksepsyon.
 for _,mutation in ipairs({
     {1,1,3,4,5,6}, {6,5,4,3,2,1}, {1,2,3,4,5,7}
 }) do

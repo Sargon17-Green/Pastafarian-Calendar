@@ -1,5 +1,5 @@
--- PATCH 08: one-based rank -> zero-based unrank0, with legacy evidence intact.
--- No bowl pouring, mixing or post-stirring belongs to Stage 17.
+-- PATCH 08: transfere rang one-based nan unrank0, ak prèv legacy konsève.
+-- Pa gen okenn operasyon vide oubyen brase bòl nan Stage 17.
 local BigInt = require("bigint")
 local Base = require("monster_base")
 local Legacy = require("legacy_permutation")
@@ -12,8 +12,8 @@ local function copy(order)
     return out
 end
 
--- Check both permutation identity and factoradic rank, independently of
--- the legacy function that produced the table. Fail closed on bad output.
+-- Verifye id bòl ak rank factoradic, endepandan de fonksyon istorik la.
+-- Tout rezilta kòripsyon dwe bay erè.
 local function verifyOrder(order, rank0)
     assert(type(order)=="table" and #order==6, "PATCH 08: tab permutation pa valab")
     local unused={1,2,3,4,5,6}
@@ -34,8 +34,8 @@ local function verifyOrder(order, rank0)
 end
 
 function Patch.execute(dropValue)
-    -- The first two handlers execute in the unmodified historical path.
-    -- In particular rank 720 still produces its original diagnostic.
+    -- De premye handler yo kouri nan chemen istorik ki pa chanje.
+    -- Rang 720 toujou bay dyagnostik orijinal li.
     local legacyOrder,context=Legacy.execute(dropValue)
     local oneBased=context.semanticState.rankOneBased
     assert(type(oneBased)=="number" and math.type(oneBased)=="integer"
@@ -53,8 +53,8 @@ function Patch.execute(dropValue)
     context.status="PATCH_PERM_PENDING"
 
     manager.dispatcher:register("PERMUTATION_PATCH",function(active,owner)
-        -- The real legacy unrank0 is called again, now with the correct rank.
-        -- Do not mutate or repair oldOrderFromDropWrong.
+        -- Nou rele menm fonksyon unrank0 reyèl la ak rank korije a.
+        -- Pa modifye oldOrderFromDropWrong.
         local zeroBased=oneBased-1
         local corrected=Legacy.oldPermutationUnrank0(zeroBased)
         verifyOrder(corrected,zeroBased)

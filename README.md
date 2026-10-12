@@ -535,22 +535,23 @@ menm kontèks la; tès sa a detekte erè a. Kòd pwodiksyon an pa chanje.
 Rezilta lokal yo sèvi ak doublon BigInt ak MonsterManager sèlman;
 `FULL_NATIVE_SUITE` rete PENDING.
 
-## Stage 17 — PATCH 08: correct the six-bowl permutation rank
+## Stage 17 — PATCH 08: korije rang lòd sis bòl yo
 
-The Stage 16 historical path remains intact: its one-based rank is handed to
-`oldPermutationUnrank0` unmodified and still exposes 719 shifted rankings
-plus the single rank-720 rejection. Stage 17 adds `src/permutation_patch.lua`,
-which executes that legacy path first, then hands `oneBased-1` to the
-authentic zero-based unranker. The replacement is exposed by
-`Spaghetti.permutationSpaghetti` and `Spaghetti.permutationPatchProbe`;
-`Spaghetti.legacyPermutationProbe` continues to show the original defect.
+Nan Stage 16, chemen istorik la toujou transmèt rank one-based bay
+`oldPermutationUnrank0` san -1. Sa kenbe 719 lòd ki deplase ansanm ak
+sèl rejè rank 720 la. Nan Stage 17, `src/permutation_patch.lua` fè
+chemen istorik sa a kouri an premye, apre sa li pase `oneBased-1` bay
+vrè fonksyon zero-based la. Nou ekspoze koreksyon an atravè
+`Spaghetti.permutationSpaghetti` ak `Spaghetti.permutationPatchProbe`;
+`Spaghetti.legacyPermutationProbe` kontinye montre defo orijinal la.
 
-The patch retains historical diagnostics in a three-handler context, checks the
-factoradic rank and six distinct bowl IDs, returns owned copies and fails closed
-on dependency errors. No pouring or bowl mixing has been introduced.
-`test/stage17_tests.lua` includes legacy audits, 720 ranks, 237 wide/negative
-BigInt boundaries, 15 fault injections and nine genuine visible-drop inputs.
+PATCH 08 konsève dyagnostik ak twa handler nan kontèks la, verifye rank
+factoradic la ansanm ak sis id bòl diferan, retounen kopi posede,
+epi kite tout erè depandans pwopaje. Li pa ajoute okenn operasyon
+pou vide, melanje oubyen tounen bòl yo.
 
-The historical Stage 16 EXPECTED_RED audit runs as a positive verification in
-CI; it checks that the historical regression still fails by its exact message.
-Stage 17 CI must pass natively before LAST_COMPLETED_STAGE advances to 17.
+Suite `test/stage17_tests.lua` teste prèv legacy a, 720 rank, 237 antre
+BigInt laj oubyen negatif, 15 piki erè, ak 9 gout vizib reyèl.
+Nan CI, odit EXPECTED_RED Stage 16 la tounen yon verifikasyon pozitif
+ki egzije menm mesaj echèk istorik la. Stage 17 pa dwe vin COMPLETE
+anvan tout travay natif CI yo pase.

@@ -295,13 +295,13 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y lua5.3
-      - name: Validate syntax of all Lua modules and tests
+      - name: Verifye sentaks tout modil ak tès Lua
         shell: bash
         run: |
           set -euo pipefail
           find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
           test "$(git hash-object src/legacy_permutation.lua)" = 5b2c44b71ff3469230903adc05d7d65c84060f65
-      - name: Full Stage 17 native suite including earlier green and historical red audit
+      - name: Kouri suite natif Stage 17 ak odit istorik EXPECTED_RED
         shell: bash
         run: |
           set -euo pipefail

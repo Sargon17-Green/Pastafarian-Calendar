@@ -69,7 +69,7 @@ for case=1,360 do
     if expectedRank==720 then assert(nextOrder==nil)
     else assert(same(nextOrder,Legacy.oldPermutationUnrank0(expectedRank))) end
     if case%30==0 then
-        assert(same(S.permutationSpaghetti(input),nextOrder))
+        assert(same(S.legacyPermutationProbe(input),nextOrder))
     end
 end
 assert(complete+missing==360)
