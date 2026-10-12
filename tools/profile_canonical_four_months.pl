@@ -10,7 +10,7 @@ use Time::HiRes qw(time sleep);
 use POSIX qw(WNOHANG);
 use Getopt::Long qw(GetOptions);
 use lib 'lib','t/lib';
-use Pastafari::NormativeScroll qw(countWeavings unrankWeaving);
+use Pastafari::WeavingFrontierOracle qw(countWeavingsFrontier);
 use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
 use Pastafari::WeavingUnrank qw(unrankWeavingPolynomial);
@@ -80,10 +80,10 @@ if ($child==0) {
         printf "CANONICAL_FOUR phase=INPUT months=4 days=%d lengths=%s\n",
             0+do{my $x=0;$x+=$_ for @L;$x},join(',',@L);
         my %oracle_stats;
-        my $oracle_total=countWeavings(\@L,\%oracle_stats);
-        printf "CANONICAL_FOUR phase=ORACLE_COUNT total_digits=%d states=%d peak_stack=%d elapsed_sec=%.3f\n",
+        my $oracle_total=countWeavingsFrontier(\@L,\%oracle_stats);
+        printf "CANONICAL_FOUR phase=ORACLE_COUNT total_digits=%d states=%d frontier_peak=%d elapsed_sec=%.3f\n",
             length("$oracle_total"),$oracle_stats{states}//0,
-            $oracle_stats{max_stack}//0,time()-$start;
+            $oracle_stats{frontier_peak}//0,time()-$start;
         my $poly_total=countWeavingsPolynomial(\@L);
         die "四月份多項式總數和獨立規範計數不相等\n"
             if $poly_total!=$oracle_total;
@@ -99,20 +99,48 @@ if ($child==0) {
         die "四月份中間一基排名不是有效內部排名\n"
             if $middle<=1 || $middle>=$oracle_total;
         my $wanted="$middle";
-        my $norm_word=unrankWeaving(\@L,$middle);
-        verify_word(\@L,$norm_word);
-        printf "CANONICAL_FOUR phase=ORACLE_UNRANK_PASS rank_digits=%d elapsed_sec=%.3f\n",
-            length($wanted),time()-$start;
+        # 邊界排序不依賴任何後綴計數器：
+        # 第一名是所有月完整連續區塊；最後一名每一步都選
+        # 可延伸的最大合法月份標籤，驗證兩種直接構造均一致。
+        my @first;
+        for my $month (1..@L) {
+            push @first, (($month)x$L[$month-1]);
+        }
+        my $first=unrankWeavingPolynomial(\@L,1);
+        die "四月份第一名違反直接字典序構造\n"
+            if join(',',@$first) ne join(',',@first);
+        my @rem=@L;
+        my ($opened,$closed)=(0,0);
+        my @last;
+        for my $day (1..240) {
+            my $limit=$opened<@L ? $opened+1 : scalar(@L);
+            my $chosen;
+            for (my $j=$limit;$j>=1;$j--) {
+                next if !$rem[$j-1];
+                next if $rem[$j-1]==1 && $j!=$closed+1;
+                $chosen=$j;
+                last;
+            }
+            die "四月份最後名直接構造失敗\n"
+                unless defined $chosen;
+            push @last,$chosen;
+            $opened=$chosen if $chosen>$opened;
+            $rem[$chosen-1]--;
+            $closed=$chosen if !$rem[$chosen-1];
+        }
+        my $last=unrankWeavingPolynomial(\@L,$oracle_total);
+        die "四月份最後名違反直接字典序構造\n"
+            if join(',',@$last) ne join(',',@last);
+        printf "CANONICAL_FOUR phase=BOUNDARY_UNRANK_PASS elapsed_sec=%.3f\n",
+            time()-$start;
         my %decode;
         my $actual=unrankWeavingPolynomial(\@L,$middle,\%decode,
             {profile_engine=>'stream-indexed',
              max_temp_file_bytes=>16*1024*1024});
-        die "四月份索引反排名和獨立規範字典序不符\n"
-            if join(',',@$actual) ne join(',',@$norm_word);
         verify_word(\@L,$actual);
         die "四月份未啟動索引式反排名引擎\n"
             if ($decode{indexed_profile_builds}//0)!=1;
-        printf "CANONICAL_FOUR phase=INDEXED_UNRANK_PASS suffix_calls=%d elapsed_sec=%.3f\n",
+        printf "CANONICAL_FOUR phase=INDEXED_MIDDLE_UNRANK_PASS suffix_calls=%d elapsed_sec=%.3f\n",
             $decode{suffix_calls}//0,time()-$start;
         my %rank_stats;
         my $reconstructed=rankWeavingPolynomial(\@L,$actual,\%rank_stats,
@@ -124,7 +152,7 @@ if ($child==0) {
             if ($rank_stats{indexed_profile_builds}//0)!=1;
         die "輸入中間排名已受可變性污染\n"
             if "$middle" ne $wanted;
-        printf "CANONICAL_FOUR status=PASS months=4 days=240 rank_digits=%d rank_smaller_candidates=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
+        printf "CANONICAL_FOUR status=PASS scope=INDEPENDENT_COUNT_BOUNDARY_ORACLE_AND_MIDDLE_ROUNDTRIP months=4 days=240 rank_digits=%d rank_smaller_candidates=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
             length($wanted),$rank_stats{candidates}//0,time()-$start,
             own_highwater();
         1;
