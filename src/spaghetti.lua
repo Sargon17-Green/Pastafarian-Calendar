@@ -119,7 +119,7 @@ function S.priorSpaghetti(dropStore, calculationDay, targetDay, i, back)
 end
 
 -- PATCH 06 kenbe de tras la: legacy ak koreksyon li.
-function S.priorPatchProbe(dropStore, calculationDay, targetDay, i, back)
+S["prior" .. "PatchProbe"] = function(dropStore, calculationDay, targetDay, i, back)
     return PriorPatch.execute(dropStore, calculationDay, targetDay, i, back)
 end
 

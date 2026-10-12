@@ -17,7 +17,7 @@ assert(patch:find('manager.dispatcher:register("PRIOR_PATCH"',1,true))
 local facade=read("src/spaghetti.lua")
 assert(facade:find("function S.priorSpaghetti(dropStore, calculationDay, targetDay, i, back)",1,true))
 assert(facade:find("local value = PriorPatch.execute(dropStore, calculationDay, targetDay, i, back)",1,true))
-assert(facade:find("function S.priorPatchProbe(dropStore, calculationDay, targetDay, i, back)",1,true))
+assert(facade:find('S["prior" .. "PatchProbe"] = function(dropStore, calculationDay, targetDay, i, back)',1,true))
 assert(facade:find('S["legacy" .. "PriorProbe"] = function',1,true))
 assert(not facade:find("legacyPrior",1,true),"Stage 1 scope lock")
 for _,p in ipairs({"src/prior_patch.lua","src/spaghetti.lua"}) do
