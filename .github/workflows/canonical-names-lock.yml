@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage14_native_v:
-    name: V 0.5.2 — DISCOVERY 07 EXPECTED_RED
+  stage15_native_v:
+    name: V 0.5.2 — PATCH 07 validated GREEN
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -51,6 +51,15 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
+      - name: Inspect native V format for stage 15 — temporary
+        shell: bash
+        run: |
+          set -euo pipefail
+          v fmt -w ./pastafari/grind_patch07.v
+          v fmt -w ./pastafari/patch07_test.v
+          v fmt -w ./pastafari/legacy_grinds.v
+          v fmt -w ./pastafari/monster_base.v
+          git --no-pager diff -- ./pastafari/grind_patch07.v ./pastafari/patch07_test.v ./pastafari/legacy_grinds.v ./pastafari/monster_base.v
       - name: Verify V version and source formatting
         shell: bash
         run: |
@@ -121,38 +130,23 @@ jobs:
         run: v test ./pastafari/patch06_test.v
       - name: DISCOVERY 07 — legacy zero-based grind row and mixing witnesses
         run: v test ./pastafari/discovery07_witness_test.v
-      - name: DISCOVERY 07 — four precisely named RED row assertions
+      - name: PATCH 07 — four unchanged historical RED assertions now GREEN
         shell: bash
         run: |
           set -euo pipefail
           v -check ./pastafari/discovery07_expected_red_test.v
-          set +e
-          v test ./pastafari/discovery07_expected_red_test.v 2>&1 | tee stage14_expected_red.log
-          code=${PIPESTATUS[0]}
-          set -e
-          if [ "$code" -eq 0 ]; then
-            echo '::error::DISCOVERY 07 unexpectedly GREEN before PATCH 07'
-            exit 1
-          fi
-          for test_name in \
-            test_discovery07_expected_red_first_grind_row \
-            test_discovery07_expected_red_second_grind_row \
-            test_discovery07_expected_red_tenth_grind_row \
-            test_discovery07_expected_red_eleventh_grind_row; do
-            if ! grep -Fq "$test_name" stage14_expected_red.log; then
-              echo "::error::Expected RED assertion missing: $test_name"
-              exit 1
-            fi
-          done
-          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage14_expected_red.log; then
-            echo '::error::Nonzero exit lacks assertion failure evidence'
-            exit 1
-          fi
-          echo 'DISCOVERY 07 — four expected RED row assertions verified'
-      - name: Preserve stage 14 native V evidence
+          v test ./pastafari/discovery07_expected_red_test.v
+      - name: PATCH 07 — retained legacy, sentinel and 11 native grinds
+        run: v test ./pastafari/patch07_test.v
+      - name: Stage 15 — complete native V regression suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          v test ./pastafari 2>&1 | tee stage15_green.log
+      - name: Preserve stage 15 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage14-red-evidence
-          path: stage14_expected_red.log
+          name: v-amharic-stage15-green-evidence
+          path: stage15_green.log
           if-no-files-found: ignore

@@ -125,3 +125,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 14 መዝጊያ — EXPECTED_RED
 
 የV 0.5.2 (`7647ce1`) እውነተኛ formatter በሶስቱ አዳዲስ የV ፋይሎች ላይ ምንም ለውጥ አልጠየቀም። ጊዜያዊ የቅርጸት ምርመራ ከCI ተወግዶ፣ commit `c15c5848da35ebd72cd9d98ab188baf53f79f36f` ላይ GitHub Actions run `38227809414` ሁሉንም የታሰቡ ውጤቶች አረጋግጧል። 20 የቀድሞና አዲስ witness `_test.v` ፋይሎች PASS ናቸው፣ አራት የተለዩ የወፍጮ ረድፍ assertions ሆን ብለው RED ሆነዋል። `old_grind_row` በ1 ዙር ሁለተኛውን ረድፍ ያነባል፣ በ11 ዙር የማውጫ ስህተት ይመልሳል፤ ይህ የታሪክ ጉድለት ያልተጠገነ ነው። የማስረጃ ቅርስ `11737470384` ተቀምጧል። `PATCH 07` sentinel ረድፍ አልተጨመረም። ደረጃ 14 COMPLETE / EXPECTED_RED።
+
+## ደረጃ 15 — PATCH 07 (በV CI ማረጋገጫ ላይ)
+
+አዲሱ `GrindPatch07` ከ`legacy_visible_grind_table()` የታሪካዊውን 11 ረድፎች እንደነበሩ በclone ይወስዳል፣ ከእነርሱ በፊት `[0,0,0,0,0]` የsentinel ረድፍ ያስገባል። ይህ ረድፍ አይሰረዝም፤ `table[grind]` የቀጥታ ንባብ አሁን 1..11 ሲጠራ የተዛመደውን እውነተኛ የወፍጮ ረድፍ ይመልሳል። አሮጌው `old_grind_row` በgrind1 ሁለተኛውን ረድፍ የሚያነብ እና በgrind11 የerror የሚመልስ ሆኖ ይቆያል። `calendar_grind_once_spaghetti` በተጠገነው የረድፍ መርጫ የቀድሞውን ትክክለኛ የSAVE ሂሳብ ይፈጽማል። `calendar_date_spaghetti` በምርመራ መልዕክት የታሪክ እና የተጠገነውን የመጀመሪያ እና የመጨረሻ የወፍጮ ረድፍ አባላት ለይቶ ያሳያል። ደረጃ 16 አልተጀመረም።

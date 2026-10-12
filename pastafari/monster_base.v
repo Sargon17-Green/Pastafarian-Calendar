@@ -140,11 +140,15 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	patch_details := prior_details + prior_diagnostic + '; PATCH_06 priorSlot0='
 	grind_one := dispatcher.dispatch_legacy_grind(1)!
 	mut grind_eleven_status := 'AVAILABLE'
-	_ = calendar_grind_row_spaghetti(11) or {
+	_ = dispatcher.dispatch_legacy_grind(11) or {
 		grind_eleven_status = 'ERROR'
 		[]int{}
 	}
+	correct_grind_one := calendar_grind_row_spaghetti(1)!
+	correct_grind_eleven := calendar_grind_row_spaghetti(11)!
 	grind_details := patch_details + patched_prior.str() + '; DISCOVERY_07 oldGrind1A='
 	grind_last := grind_details + grind_one[0].str() + '; DISCOVERY_07 oldGrind11='
-	return error(grind_last + grind_eleven_status)
+	patch_row_one := grind_last + grind_eleven_status + '; PATCH_07 grind1A='
+	patch_row_eleven := patch_row_one + correct_grind_one[0].str() + '; PATCH_07 grind11A='
+	return error(patch_row_eleven + correct_grind_eleven[0].str())
 }

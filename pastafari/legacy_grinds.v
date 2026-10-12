@@ -40,10 +40,10 @@ pub fn (_ BaseDispatcher) dispatch_legacy_grind(grind int) ![]int {
 	return adapter.row(grind)
 }
 
-// የproduction ንዑስ መግቢያ፤ በDISCOVERY 07 የlegacy index ይጠቀማል።
+// ደረጃ 15፦ የproduction ንባብ የPATCH 07 የsentinel ረድፍ ይጠቀማል።
 pub fn calendar_grind_row_spaghetti(grind int) ![]int {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_grind(grind)
+	return dispatcher.dispatch_grind_patch07(grind)
 }
 
 // አንድ የወፍጮ ዙር በተሰጠ ረድፍ ይተገበራል፤ ስሌቱ አይሳሳትም።

@@ -82,3 +82,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 14 — DISCOVERY 07
 
 የ11 ትክክለኛ የወፍጮ መስመሮች ሰንጠረዥ `legacy_visible_grind_table` በV ዜሮ-መሠረት `0..10` ተይዟል። የታሪካዊው `old_grind_row(grind)` ግን ቁጥር `1..11` እንደ የarray ማውጫ በቀጥታ ይጠቀማል፤ ወፍጮ 1 ረድፍ 2ን ያነባል፣ ወፍጮ 11 ከሰንጠረዡ ውጪ ነው። በV ሕገ-ወጥ ንባብ ሂደት እንዳይቋረጥ በerror ይመለሳል፣ ነገር ግን የታሪክ ስህተቱ አልተጠገነም። አዲሱ `calendar_grind_once_spaghetti` በተሳሳተው የረድፍ መርጫ ላይ የትክክለኛውን የወፍጮ ሂሳብ ይፈጽማል። አራት `EXPECTED_RED` እና የታሪክ GREEN ምስክሮች ተጨምረዋል። የ`PATCH 07` sentinel ረድፍ አልተጨመረም። V 0.5.2 (`7647ce1`) በGitHub Actions run `38227809414` በቀጥታ ተረጋግጧል። `v fmt -verify` PASS፣ 20 የቀድሞና የታሪክ GREEN ፋይሎች PASS፣ አራቱ የወፍጮ ሰልፍ የታሰቡ RED assertions በስም ተረጋግጠዋል። `LAST_COMPLETED_STAGE=14` ነው። ዝርዝር፦ `docs/STAGE14_DISCOVERY07.md`።
+
+## ደረጃ 15 — PATCH 07
+
+የታሪካዊው `legacy_visible_grind_table` ያሉትን 11 ረድፎች በ0..10 እንደነበሩ ይጠብቃል፤ `old_grind_row` ያለው የቀጥታ የተሳሳተ ማውጫም አልተቀየረም። `GrindPatch07.table_with_sentinel` ለproduction ብቻ አዲስ 12-ረድፍ ሰንጠረዥ ይፈጥራል፦ ረድፍ 0 `[0,0,0,0,0]` የsentinel ነው፣ እውነተኛዎቹ 11 ረድፎች በ1..11 ናቸው። `calendar_grind_row_spaghetti` በ`BaseDispatcher.dispatch_grind_patch07` በኩል አሁንም በቀጥታ `table[grind]` ያነባል። የደረጃ 14 አራቱ RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። የV CI ማረጋገጫ እስኪሳካ `LAST_COMPLETED_STAGE=14` ነው። ዝርዝር፦ `docs/STAGE15_PATCH07.md`።
