@@ -858,3 +858,35 @@ Giai đoạn 22 kết thúc `EXPECTED_RED` đã xác minh.
 Bước tiếp theo: giai đoạn 23 `PATCH 11`, giữ legacy
 58 lần ghi và tạo orderAt46Latch riêng để truy vấn.
 Chưa thực hiện bản vá trong DISCOVERY 11.
+
+## Giai đoạn 23 — Bản vá 11: chốt thứ tự tại giọt 46
+
+Bản vá `OrderAt46LatchPatch` được đưa vào đường sản xuất,
+nhưng `LegacyOrderMemory` **không bị sửa đổi**: nó vẫn ghi
+46 lần trong chuỗi giọt và ghi thêm 12 lần vào cùng ô trong
+12 lượt khuấy cuối. Tổng `writes=58`, `last_source={:stir,12}`
+vẫn đúng như di sản của phát hiện 11.
+
+Sau khi hoàn thành giọt 46 và **trước** 12 lượt post-stir,
+`Dispatcher.bootstrap` gọi `OrderAt46LatchPatch.capture`
+trên `memory_after_drops`. Hàm chỉ chấp nhận
+`writes=46` và `last_source={:drop,46}` cùng hoán vị
+đủ sáu ID. Chốt `order_at_46_latch` được lưu trong
+`Context` riêng và không bị ghi đè trong các lượt sau.
+
+`next_bowl_spaghetti` đọc chốt này thay vì ô memory
+đã bị ghi đè. Để bảo tồn chính mã truy vấn lịch sử,
+`OrderAt46LatchPatch.next_bowl` gọi lại
+`LegacyOrderMemory.next_bowl` với bản xem
+`%{order: order_at_46_latch}`. Như vậy thuật toán
+truy vấn không được sao chép hoặc thay mới; chỉ sửa
+nguồn thứ tự được truyền vào. Các giá trị sáu bát cuối
+và cả 58 lần ghi không đổi.
+
+Bốn so sánh chuẩn đỏ từ giai đoạn 22 giữ nguyên biểu thức
+`assert` và phải trở lại xanh. Kiểm thử điều khiển cũ
+tiếp tục chứng minh hàm legacy thô trả quan hệ sai;
+đường production trả kết quả từ giọt 46. Thêm 14 bài
+kiểm thử Stage23 kiểm 720 hoán vị, các biên, bất biến,
+46+12 lượt, ngày 2048 bit, chạy song song và mã nguồn.
+Không bắt đầu giai đoạn 24.

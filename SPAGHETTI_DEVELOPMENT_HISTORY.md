@@ -752,3 +752,33 @@ Bộ nhớ bị ghi đủ 58 lần, nguồn cuối là {:stir,12}.
 Sáu bát sau 12 lần khuấy hoàn toàn đúng với oracle,
 nhưng query lấy thứ tự post-stir cuối, không phải giọt 46.
 Không thêm orderAt46Latch; đóng Stage22 EXPECTED_RED.
+
+## Giai đoạn 23 — Bản vá 11: latch thứ tự giọt 46
+
+**Giữ nguyên di sản:** Module `LegacyOrderMemory`
+vẫn chứa đúng `order`, `writes`, `last_source`
+và ghi đè `order` 58 lần. Module `PostStirCalculator`
+tiếp tục thực hiện đúng 12 lượt khuấy cuối, sau đó bộ
+nhớ lịch sử vẫn trỏ tới thứ tự của stir 12.
+
+**Tách chốt đúng thời điểm:** Sau 46 giọt,
+`memory_after_drops` phải mang
+`writes=46,last_source={:drop,46}`. Khi ấy
+`OrderAt46LatchPatch.capture` sao chép về mặt ngữ nghĩa
+thứ tự sáu ID sang `Context.order_at_46_latch`.
+Vì dữ liệu Elixir bất biến, các lần ghi tiếp theo trả
+map LegacyOrderMemory khác và không thể đụng đến chốt.
+
+**Đường truy vấn:** `Dispatcher.next_bowl` không đọc
+`order_memory.order` nữa mà truyền latch vào
+`OrderAt46LatchPatch.next_bowl`, rồi lớp vá gọi thực
+`LegacyOrderMemory.next_bowl(%{order: latch}, id)`.
+Do đó vẫn thực thi thuật toán legacy thật, chỉ thay
+nguồn thứ tự thành đúng hoán vị giọt 46.
+
+**Kiểm thử:** Bảo toàn bốn hồi quy chuẩn Stage22
+trong khi đổi hai kiểm soát lịch sử để so sánh riêng
+legacy sai và production đúng. Thêm 14 bài kiểm
+toán 720 hoán vị, 58 lần ghi, tính độc lập ngữ cảnh,
+số nguyên lớn, đầu vào không hợp lệ và ranh giới.
+Không thay oracle, SAVE hoặc các giá trị bát cuối.

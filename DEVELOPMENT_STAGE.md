@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=22
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=23
+CURRENT_KIND=PATCH
 CURRENT_PATCH=11
 LAST_COMPLETED_STAGE=22
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..10; chạy chính xác 46 lượt giọt và 12 lượt khuấy cuối; LegacyOrderMemory ghi đè cùng ô thứ tự 58 lần, truy vấn bát kế đọc thứ tự khuấy 12 chứ không giữ thứ tự giọt 46.
+MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyOrderMemory và 58 lần ghi; OrderAt46LatchPatch chốt riêng thứ tự khi writes=46,last_source={:drop,46}; Dispatcher lấy latch trước 12 lượt post-stir và định tuyến next_bowl qua hàm legacy trên bản xem latch.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_22_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_23_PENDING
+GIT_HISTORY_MUTATED=STAGE_23_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=269
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=STAGE_23_PENDING
+CI_FAILURES=STAGE_23_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -463,3 +463,21 @@ be1638f46b2190d617af0378a61b077bda10bf32.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38259198372
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38259198399
 Giai đoạn 22 đóng EXPECTED_RED; giai đoạn 23 PATCH 11 chưa bắt đầu.
+
+Giai đoạn 23 thực hiện PATCH 11, bảo toàn LegacyOrderMemory:
+46 lần ghi từ giọt và 12 lượt post-stir tiếp tục ghi đè
+ô order như lịch sử. Không đổi LegacyOrderMemory hoặc
+PostStirCalculator. Ngay khi có memory_after_drops
+(writes=46, source={:drop,46}), Dispatcher gọi
+OrderAt46LatchPatch.capture và lưu order_at_46_latch riêng
+trong Context trước khi thực hiện post-stir12.
+Lời gọi next_bowl đọc latch thông qua
+OrderAt46LatchPatch.next_bowl, đồng thời hàm này tái sử dụng
+LegacyOrderMemory.next_bowl trên bản xem order đã chốt.
+Các công thức, 46 giọt, 12 lần khuấy và sáu giá trị bát
+giữ nguyên. Bốn hồi quy chuẩn Stage22 giữ nguyên assert
+và phải xanh; hai bài điều khiển được sửa để chứng minh
+legacy vẫn trả sai trực tiếp nhưng production trả đúng.
+14 bài kiểm thử Stage23 mới; dự kiến tổng 283 bài GREEN.
+LAST_COMPLETED_STAGE vẫn 22 trước khi có CI xác minh.
+Không mở giai đoạn 24 hoặc nguồn trả lời ở các giai đoạn sau.

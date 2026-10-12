@@ -6,8 +6,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Context do
   Bảng đá đã qua bản vá 04 và bảy giọt ẩn qua bản vá 05.
   Giọt, hoán vị và ba nguồn rót đã qua bản vá 09.
   Sáu phép khuấy đọc vaultOld cố định và ghi pending.
-  Giai đoạn 22 lưu thứ tự cuối vào ô legacy ghi đè 58 lần,
-  không có chốt riêng cho thứ tự ở giọt 46.
+  Giai đoạn 23 chốt thứ tự ở giọt 46 trước 12 lượt khuấy,
+  còn ô legacy vẫn ghi đè đủ 58 lần cho lịch sử.
   Mỗi ngữ cảnh sở hữu dữ liệu riêng.
   """
 
@@ -24,6 +24,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Context do
             bowls_after_drops: nil,
             bowls_after_post_stirs: nil,
             order_memory: nil,
+            order_at_46_latch: nil,
             phase: :bootstrap,
             sub_phase: 0,
             mode: :authoritative_bootstrap,

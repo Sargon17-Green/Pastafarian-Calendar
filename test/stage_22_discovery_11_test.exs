@@ -8,6 +8,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage22Discovery11Test do
     BowlDropCalculator,
     BowlOrderManager,
     LegacyOrderMemory,
+    OrderAt46LatchPatch,
     PostStirCalculator
   }
 
@@ -146,7 +147,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage22Discovery11Test do
     end
   end
 
-  test "query legacy thực sự theo thứ tự bị ghi đè sau khuấy 12" do
+  test "legacy vẫn dùng thứ tự bị ghi đè nhưng truy vấn sản xuất dùng chốt" do
     f = Ref.foundation_day()
     ctx = Calendar.bootstrap_context(f, f)
     memory = ctx.order_memory
@@ -155,13 +156,19 @@ defmodule PastafariCalendarElixirVietnamese.Stage22Discovery11Test do
     assert memory.last_source == {:stir, 12}
 
     for bowl_id <- 1..6 do
+      historical = LegacyOrderMemory.next_bowl(memory, bowl_id)
       actual = Calendar.next_bowl_spaghetti(f, f, bowl_id)
-      assert actual == LegacyOrderMemory.next_bowl(memory, bowl_id)
-      assert actual == expected_next(memory.order, bowl_id)
+
+      assert historical == expected_next(memory.order, bowl_id)
+      assert actual == expected_next(ctx.bowl_orders[46], bowl_id)
+      assert actual == OrderAt46LatchPatch.next_bowl(ctx.order_at_46_latch, bowl_id)
     end
+
+    refute Enum.map(1..6, &LegacyOrderMemory.next_bowl(memory, &1)) ==
+             Enum.map(1..6, &Calendar.next_bowl_spaghetti(f, f, &1))
   end
 
-  test "thứ tự giọt 46 tồn tại trong map cũ nhưng query không dùng nó" do
+  test "thứ tự giọt 46 còn trong map và được chốt riêng trước khuấy" do
     f = Ref.foundation_day()
     ctx = Calendar.bootstrap_context(f, f)
     expected_order46 = Ref.sauce(f, f).order_at_drop_46
@@ -171,9 +178,14 @@ defmodule PastafariCalendarElixirVietnamese.Stage22Discovery11Test do
     assert ctx.order_memory.writes == 58
     refute ctx.order_memory.order == expected_order46
 
-    wrong = Enum.map(1..6, &Calendar.next_bowl_spaghetti(f, f, &1))
+    historical = Enum.map(1..6,
+      &LegacyOrderMemory.next_bowl(ctx.order_memory, &1))
+    actual = Enum.map(1..6, &Calendar.next_bowl_spaghetti(f, f, &1))
     correct = Enum.map(1..6, &expected_next(expected_order46, &1))
-    refute wrong == correct
+
+    assert ctx.order_at_46_latch == expected_order46
+    assert actual == correct
+    refute historical == correct
   end
 
   test "các bản vá 01 đến 10 vẫn giữ kết quả giọt và bát sau 46 vòng" do

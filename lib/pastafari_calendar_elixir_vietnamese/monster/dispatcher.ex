@@ -4,10 +4,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
-  Giai đoạn 22 tính đúng sáu bát sau 46 giọt và 12 lần
-  khuấy cuối, nhưng LegacyOrderMemory bị ghi đè 58 lần.
-  Truy vấn bát kế tiếp đọc sai thứ tự khuấy thứ 12 thay
-  vì thứ tự đã dùng ở giọt 46. Chưa tích hợp ngày lịch.
+  Giai đoạn 23 chốt thứ tự giọt 46 trước 12 lượt khuấy,
+  giữ nguyên LegacyOrderMemory vẫn bị ghi đè đúng 58 lần.
+  Truy vấn bát kế tiếp đọc latch riêng thay vì ô ghi đè.
+  Chưa tích hợp ngày lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
@@ -18,8 +18,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     DayCountManager,
     DistanceManager,
     HiddenDropManager,
-    LegacyOrderMemory,
     Metrics,
+    OrderAt46LatchPatch,
     SaveManager,
     PostStirCalculator,
     StoneManager,
@@ -75,6 +75,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
         initial_bowls, visible_drops, bowl_orders, stones_table
       )
 
+    order_at_46_latch = OrderAt46LatchPatch.capture(memory_after_drops)
+
     {bowls_after_post_stirs, order_memory} =
       PostStirCalculator.apply_all(bowls_after_drops, memory_after_drops)
 
@@ -92,6 +94,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
       bowls_after_drops: bowls_after_drops,
       bowls_after_post_stirs: bowls_after_post_stirs,
       order_memory: order_memory,
+      order_at_46_latch: order_at_46_latch,
       phase: :bootstrap,
       status: :validated,
       branch_trace: [:entry, :validated, :legacy_day_count, :day_tag_patch_02],
@@ -155,8 +158,12 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     bootstrap(calculation_day, target_day).order_memory
   end
 
+  def order_at_46_latch(calculation_day, target_day) do
+    bootstrap(calculation_day, target_day).order_at_46_latch
+  end
+
   def next_bowl(calculation_day, target_day, queried_bowl_id) do
-    order_memory(calculation_day, target_day)
-    |> LegacyOrderMemory.next_bowl(queried_bowl_id)
+    order_at_46_latch(calculation_day, target_day)
+    |> OrderAt46LatchPatch.next_bowl(queried_bowl_id)
   end
 end
