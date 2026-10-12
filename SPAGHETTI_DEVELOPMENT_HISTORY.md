@@ -878,3 +878,33 @@ OrderAt46LatchPatch blob SHA
 oracle test-only blob SHA
 `be1638f46b2190d617af0378a61b077bda10bf32`.
 Không mở giai đoạn 26; đóng Stage25 GREEN.
+
+## Giai đoạn 26 — Phát hiện 13: phép modulo thiên lệch trước từ chối
+
+**Phần tính đúng được mở:** Từ sáu bát hoàn chỉnh và
+ID kế tiếp đã vá, `AnswerStreamManager.build`
+tính first, direction_step theo hai công thức SAVE chuẩn,
+và `answer_at(k)` theo vòng 1..M với chiều +/-1.
+Với k lớn hơn M, kết quả vẫn quấn vòng chính xác.
+Không có lỗi trong nguồn bát, seal hoặc modulo vòng.
+
+**Di sản lỗi mới:** `LegacyBiasedPick.biased_legacy_pick`
+thực hiện `rem(x-1,n)+1` ngay. Đường thực
+`AnswerStreamManager.choose_rank_short_biased` chỉ
+lấy x=answer_at(0) và gọi legacy tức thời, bất kể
+x>floor(M/n)*n. Đây là lựa chọn sai về tính đều xác suất,
+không phải lỗi SAVE hoặc trường vòng đáp án.
+
+**Chứng cứ:** Với M=2^127-1, n=floor(M/2)+1,
+limit=n và vòng có first=M,step=+1, lựa chọn chuẩn
+loại x=M, nhận x=1 và trả hạng 1. Legacy không loại
+và trả n-1. Các mẫu first=M-1, hoặc n=M-3 với chiều
+đi +/-1 cũng tạo sai lệch hữu hạn. Khi n=M hoặc n=1,
+không cần loại, legacy vẫn trả đúng. Bốn hồi quy
+normative mới phải đỏ trong DISCOVERY 13.
+
+**Yêu cầu Stage27:** Giữ hàm legacy và gọi nó thật
+chỉ sau khi đã nhận x thỏa `x<=limit`. Dùng chính
+AnswerStreamManager.answer_at với chỉ số k tăng
+trên cùng vòng, không lấy ngẫu nhiên mới hoặc đổi
+hướng. Chưa thực hiện ở Stage26.

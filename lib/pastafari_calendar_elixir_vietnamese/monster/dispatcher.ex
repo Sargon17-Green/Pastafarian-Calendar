@@ -4,16 +4,17 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
-  Giai đoạn 25 chốt thứ tự giọt 46 và định tuyến truy vấn
-  qua NextBowlPatchWrapper: bộ legacy vòng ID vẫn được gọi
-  để chẩn đoán, nhưng kết quả trả về theo vị trí trong latch.
-  LegacyOrderMemory vẫn ghi đủ 58 lần; chưa tích hợp lịch.
+  Giai đoạn 26 tính vòng đáp án đúng từ sáu bát, ID kế cận
+  chuẩn và dấu hỏi, nhưng lựa chọn hạng ngắn còn gọi ngay
+  LegacyBiasedPick không loại bỏ giá trị vượt ngưỡng.
+  Các bản vá trước vẫn đúng; chưa tích hợp lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     BowlOrderManager,
     BowlSeedCalculator,
     BowlDropCalculator,
+    AnswerStreamManager,
     Context,
     DayCountManager,
     DistanceManager,
@@ -171,5 +172,26 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def next_bowl_diagnostic(calculation_day, target_day, queried_bowl_id) do
     order_at_46_latch(calculation_day, target_day)
     |> NextBowlPatchWrapper.diagnose(queried_bowl_id)
+  end
+
+  def answer_stream(calculation_day, target_day, queried_bowl_id, seal) do
+    context = bootstrap(calculation_day, target_day)
+
+    next_id =
+      NextBowlPatchWrapper.next_bowl(context.order_at_46_latch, queried_bowl_id)
+
+    AnswerStreamManager.build(
+      context.bowls_after_post_stirs, queried_bowl_id, next_id, seal
+    )
+  end
+
+  def answer_at(calculation_day, target_day, queried_bowl_id, seal, k) do
+    answer_stream(calculation_day, target_day, queried_bowl_id, seal)
+    |> AnswerStreamManager.answer_at(k)
+  end
+
+  def choose_rank_short(calculation_day, target_day, queried_bowl_id, seal, n) do
+    answer_stream(calculation_day, target_day, queried_bowl_id, seal)
+    |> AnswerStreamManager.choose_rank_short_biased(n)
   end
 end

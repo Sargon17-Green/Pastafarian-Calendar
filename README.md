@@ -1019,3 +1019,40 @@ memory lịch sử tiếp tục xảy ra. Giá trị sai của legacy
 Giai đoạn 25/55 kết thúc `GREEN` đã xác minh.
 Bước tiếp theo là giai đoạn 26 `DISCOVERY 13`;
 chưa triển khai trong giai đoạn này.
+
+## Giai đoạn 26 — Phát hiện 13: lựa chọn hạng modulo bị thiên lệch
+
+Sau PATCH 12, ID bát được hỏi và ID bát kế tiếp đều đúng.
+`AnswerStreamManager` mở **vòng đáp án chuẩn** từ sáu bát
+sau 12 lượt khuấy: `first` dùng SAVE của bình phương
+`bát_được_hỏi + dấu_hỏi + 181`, cộng
+`179*bát_kế + dấu_hỏi`. Chiều vòng là +1 hoặc -1
+theo tính chẵn lẻ của SAVE thứ hai với hệ số 193 và
+197*bát_6. Phần tử thứ k bằng
+`1+regularMod(first-1+step*k,M)`, M=2^127-1.
+Dữ liệu khởi tạo và các bước vòng phải khớp oracle
+ở mọi hướng ngày và cả số nguyên rất lớn.
+
+**Khuyết tật lịch sử thứ 13** nằm ở chọn hạng ngắn.
+`LegacyBiasedPick.biased_legacy_pick(x,N)` lập tức
+trả `1+rem(x-1,N)`. `choose_rank_short_biased`
+lấy ngay `answer_at(0)` rồi gọi hàm legacy dù x
+vượt ngưỡng chia đều `floor(M/N)*N`. Các phần dư cuối
+của miền 1..M vì vậy bị phân phối không đều. Không
+được thay phép chọn này thành rejection trước Stage27.
+
+Các hồi quy sử dụng vòng thử tổng hợp có `first=M`
+hoặc `M-1` và chiều được kiểm soát. Với N>M/2,
+ngưỡng nhận là N; phần tử M phải bị bỏ và vòng tiến
+tới 1, nhưng legacy trả một hạng khác. Với N=M-3,
+số bước từ chối khi đi lùi từ M là chính xác ba,
+không phải vòng lặp lớn. Không sửa kỳ vọng oracle
+để che khuyết tật. Thêm 19 test, gồm 15 bài kiểm soát
+và bốn hồi quy chuẩn đỏ; 317 bài của Stage1..25
+phải còn xanh.
+
+PATCH 13 tại Stage27 sẽ **giữ nguyên LegacyBiasedPick**,
+tiến trên cùng một vòng đáp án cho tới khi
+`x<=floor(M/N)*N`, rồi mới gọi legacy với x hợp lệ.
+Không thực hiện sớm ở Stage26; không mở wideDetour
+cho N>M thuộc DISCOVERY 14.

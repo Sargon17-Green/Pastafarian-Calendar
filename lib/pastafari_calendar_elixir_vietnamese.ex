@@ -2,8 +2,8 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 25 giữ bộ ID cố định của legacy để chẩn đoán
-  nhưng trả bát kế tiếp bằng vị trí thực trong chốt giọt 46.
+  Giai đoạn 26 bổ sung vòng đáp án chuẩn và nhánh chọn hạng
+  ngắn dùng ngay phép dư legacy thiên lệch khi chưa loại bỏ.
   Các bản vá trước đều còn nguyên.
   """
 
@@ -83,6 +83,18 @@ defmodule PastafariCalendarElixirVietnamese do
 
   def next_bowl_diagnostic_spaghetti(calculation_day, target_day, queried_bowl_id) do
     Dispatcher.next_bowl_diagnostic(calculation_day, target_day, queried_bowl_id)
+  end
+
+  def answer_stream_spaghetti(calculation_day, target_day, queried_bowl_id, seal) do
+    Dispatcher.answer_stream(calculation_day, target_day, queried_bowl_id, seal)
+  end
+
+  def answer_at_spaghetti(calculation_day, target_day, queried_bowl_id, seal, k) do
+    Dispatcher.answer_at(calculation_day, target_day, queried_bowl_id, seal, k)
+  end
+
+  def choose_rank_short_spaghetti(calculation_day, target_day, queried_bowl_id, seal, n) do
+    Dispatcher.choose_rank_short(calculation_day, target_day, queried_bowl_id, seal, n)
   end
 
   def calendar_date_spaghetti(calculation_day, target_day) do
