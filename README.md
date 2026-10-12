@@ -1124,3 +1124,25 @@ ha conclusione SUCCESS su tutti i **29 job**, commit
 registra **41 PASS e 3 FAIL intenzionali** esattamente ai tre ranghi
 sopra Int.MaxValue; Stage01–Stage27 conservano le firme precedenti.
 La correzione resta di competenza di Stage29 PATCH 14.
+
+## Stadio 29 — PATCH 14 (ranking virtuale BigInt senza troncamento)
+
+Il difetto della DISCOVERY 14 rimane intatto in
+`VirtualLegacyListAdapter.oldVirtualGateAt`: `rank1.toInt` tronca
+il rango a 32 bit signed. `Patch14VirtualGateWrapper.virtualGatePatch`
+attraversa davvero quel percorso legacy e pubblica poi
+`firstGateIndex + (rank1 - 1) * gateStride` usando BigInt
+per l'intero calcolo, senza allocare la lista virtuale.
+
+Il dispatcher esegue `BOOT → DISCOVERY_14_VIRTUAL_GATE_LIST →
+PATCH_14_VIRTUAL_GATE_LIST` nel medesimo contesto. Lo stato storico
+è immutato e il report espone entrambi gli indici. Un validator
+indipendente verifica sia la cicatrice modulo 2^32 sia l'identità
+aritmetica del rango 1-based.
+
+La suite `sbt -batch 'Test / runMain pastafari.Stage29Tests'`
+contiene **55 controlli**, inclusi oltre 10.000
+vettori interni riproducibili, ranghi/indici signed di oltre
+16384 bit, falsificazioni di stato e regressione delle 13 patch
+precedenti. Stage28 rimane RED storico esattamente 41/3.
+Nessuna produzione dei cancelli reali o Stage30 è anticipata.

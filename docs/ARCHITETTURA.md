@@ -486,3 +486,15 @@ La run GitHub Actions 38253085873 verifica l'isolamento della
 cicatrice virtuale e tutte le 28 suite native fino allo Stage28.
 Il significato normativo completo del motore dei cancelli resta da
 implementare nei passaggi successivi.
+
+## PATCH 14 — rango BigInt senza materializzare la lista virtuale
+
+La lista diagnostica ha cardinalità `N >= 1`, passo signed
+`s != 0`, rango `1 <= r <= N` e primo indice `g`.
+Il membro corretto è `g + (r - 1) * s`; non c'è alcun
+cast a Int o limite artificiale del rango. L'adapter originale
+usa sempre `r.toInt` e il suo valore è pubblicato nel
+medesimo report. Il validator ricalcola il narrowing legacy
+via modulo 2^32 e controlla l'equazione corretta senza
+richiamare il wrapper. I test dell'oracolo sono isolati in
+`src/test`. Nessuna lista reale di cancelli viene creata.

@@ -1378,3 +1378,14 @@ Il workflow GitHub Actions 38253085873 sul commit
 DISCOVERY 14. Sono stati corretti i controlli storici di
 presenza del codice futuro negli Stage01, Stage26 e Stage27 senza
 cambiare la semantica di alcuna patch precedente.
+
+## Stadio 29 — PATCH 14: restituzione del rango intero
+
+La cicatrice storica conserva `BigInt.toInt` e il candidato
+calcolato col rango troncato. Il wrapper attraversa davvero
+`oldVirtualGateAt` prima della correzione e calcola il candidato
+virtuale 1-based con aritmetica BigInt non limitata. Stato,
+traccia, metriche e validator indipendente impediscono di
+cancellare il risultato storico. Stage28 resta un expected-red
+intenzionale; l'insieme è sintetico e non sostituisce il
+motore canonico dei cancelli.
