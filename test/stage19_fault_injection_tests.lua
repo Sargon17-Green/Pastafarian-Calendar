@@ -29,7 +29,7 @@ for i=1,4 do
     local hits=0
     Save.savePatch=function(...)
         hits=hits+1
-        if hits==3+i then error(tag,0) end
+        if hits==2+i then error(tag,0) end
         return oldSave(...)
     end
     local ok,err=pcall(S.pourPatchProbe,121,4,bowls,stones)
