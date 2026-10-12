@@ -18,6 +18,7 @@ public final class Stage02IncrementalRouteTests {
         exhaustiveOracleUnderSingleCountBudget();
         siblingBackwardFunctionalOracleDifferential();
         siblingBackwardFunctionalFullYearProbe();
+        normalizedBackwardTailAcrossAdjacentParents();
         sharedGlobalRankRouteSmallOracle();
         sharedGlobalRankRouteFullYearInterior();
         sharedGlobalRankRouteInteroperabilityAndBudgets();
@@ -39,6 +40,71 @@ public final class Stage02IncrementalRouteTests {
             + " heap_mb=" + Runtime.getRuntime().maxMemory() / 1048576);
     }
 
+
+
+    private static void normalizedBackwardTailAcrossAdjacentParents() {
+        int[] lengths = new int[12];
+        Arrays.fill(lengths, 48);
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        int[] initial = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        int[] later = {1, 2, 3, 4, 5, 6, 7, 8, 9, 9};
+        int[] changedCut = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        BigInteger[] first = family.countSiblingBranchSizes(initial);
+        long firstBuilds = family.tailFunctionalBuildCount();
+        long firstHits = family.tailFunctionalReuseHitCount();
+        ok(firstBuilds > 0, "E_TAIL_NORMALIZED_FIRST_BUILD");
+        BigInteger[] next = family.countSiblingBranchSizes(later);
+        eq(firstBuilds, family.tailFunctionalBuildCount(),
+            "E_TAIL_NORMALIZED_NO_REBUILD_ADJACENT");
+        eq(firstHits + 1, family.tailFunctionalReuseHitCount(),
+            "E_TAIL_NORMALIZED_HIT_ON_SHORTER_BASE");
+        for (int month = 0; month < lengths.length; month++) {
+            if (next[month].signum() == 0) continue;
+            int[] extended = Arrays.copyOf(later, later.length + 1);
+            extended[later.length] = month + 1;
+            eq(family.countAfterPrefix(extended), next[month],
+                "E_TAIL_NORMALIZED_ADJACENT_DIRECT");
+        }
+        long priorBuilds = family.tailFunctionalBuildCount();
+        BigInteger[] changed = family.countSiblingBranchSizes(changedCut);
+        eq(priorBuilds + 1, family.tailFunctionalBuildCount(),
+            "E_TAIL_NORMALIZED_CUT_INVALIDATES");
+        BigInteger total = BigInteger.ZERO;
+        for (BigInteger v : changed) total = total.add(v);
+        eq(family.countAfterPrefix(changedCut), total,
+            "E_TAIL_NORMALIZED_CUT_PARTITION");
+        BigInteger beforeTotal = BigInteger.ZERO;
+        for (BigInteger v : first) beforeTotal = beforeTotal.add(v);
+        eq(family.countAfterPrefix(initial), beforeTotal,
+            "E_TAIL_NORMALIZED_OLD_PARENT_UNCHANGED");
+
+        int[] full = new int[47];
+        Arrays.fill(full, 123);
+        full[46] = 120;
+        MonsterWeavingLinearCounter longYear =
+            new MonsterWeavingLinearCounter(full);
+        int[] prefixA = {1, 2, 3, 4, 5};
+        int[] prefixB = {1, 2, 3, 4, 5, 5};
+        BigInteger[] a = longYear.countSiblingBranchSizes(prefixA);
+        long builds = longYear.tailFunctionalBuildCount();
+        long hits = longYear.tailFunctionalReuseHitCount();
+        BigInteger[] b = longYear.countSiblingBranchSizes(prefixB);
+        eq(builds, longYear.tailFunctionalBuildCount(),
+            "E_TAIL_NORMALIZED_FULL_YEAR_NO_REBUILD");
+        eq(hits + 1, longYear.tailFunctionalReuseHitCount(),
+            "E_TAIL_NORMALIZED_FULL_YEAR_HIT");
+        BigInteger sumA = BigInteger.ZERO;
+        BigInteger sumB = BigInteger.ZERO;
+        for (int i = 0; i < full.length; i++) {
+            sumA = sumA.add(a[i]);
+            sumB = sumB.add(b[i]);
+        }
+        eq(longYear.countAfterPrefix(prefixA), sumA,
+            "E_TAIL_NORMALIZED_FULL_YEAR_A");
+        eq(longYear.countAfterPrefix(prefixB), sumB,
+            "E_TAIL_NORMALIZED_FULL_YEAR_B");
+    }
 
     private static void siblingBackwardFunctionalOracleDifferential() {
         for (int[] lengths : new int[][] {
@@ -234,6 +300,8 @@ public final class Stage02IncrementalRouteTests {
         MonsterWeavingLinearCounter.RankRoute route = first;
         long start = System.nanoTime();
         int batches = 0;
+        long cachedTailHits = family.tailFunctionalReuseHitCount();
+        long cachedTailBuilds = family.tailFunctionalBuildCount();
         for (int call = 0; call < 12; call++) {
             MonsterWeavingLinearCounter.RankRoute before = route;
             route = family.advanceGlobalRankRouteShared(route, 8, 2);
@@ -262,6 +330,10 @@ public final class Stage02IncrementalRouteTests {
         System.out.println("STAGE_02_SHARED_MIDDLE_ROUTE_PASS"
             + " days=5778 calls=12 batches=" + batches
             + " prefix_days=" + route.stepsCompleted()
+            + " tail_hits=" + (family.tailFunctionalReuseHitCount()
+                - cachedTailHits)
+            + " tail_builds=" + (family.tailFunctionalBuildCount()
+                - cachedTailBuilds)
             + " routing_ms=" + routingNanos / 1000000
             + " total_ms=" + (System.nanoTime() - start) / 1000000);
     }

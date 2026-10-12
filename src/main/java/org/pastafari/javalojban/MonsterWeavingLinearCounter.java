@@ -369,40 +369,101 @@ public final class MonsterWeavingLinearCounter {
     }
 
 
-    private BigInteger[] commonSiblingTail(State parent, int cut, int days) {
-        int fullDays = days;
+
+    private static final class TailFunctional {
+        final int cut;
+        final int[] remainingTail;
+        final int maximumPrefixDays;
+        final BigInteger[] distanceWeights;
+
+        TailFunctional(State parent, int cut, int maximumPrefixDays,
+                BigInteger[] distanceWeights) {
+            this.cut = cut;
+            remainingTail = Arrays.copyOfRange(parent.remaining,
+                cut, parent.remaining.length);
+            this.maximumPrefixDays = maximumPrefixDays;
+            this.distanceWeights = distanceWeights;
+        }
+
+        boolean matches(State parent, int cut, int prefixDays) {
+            if (this.cut != cut || prefixDays > maximumPrefixDays) {
+                return false;
+            }
+            for (int m = cut; m < parent.remaining.length; m++) {
+                if (remainingTail[m - cut] != parent.remaining[m]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    private final Object tailFunctionalLock = new Object();
+    private TailFunctional cachedTailFunctional;
+    private long tailFunctionalReuseHits;
+    private long tailFunctionalBuilds;
+
+    long tailFunctionalReuseHitCount() {
+        synchronized (tailFunctionalLock) {
+            return tailFunctionalReuseHits;
+        }
+    }
+
+    long tailFunctionalBuildCount() {
+        synchronized (tailFunctionalLock) {
+            return tailFunctionalBuilds;
+        }
+    }
+
+    private TailFunctional commonSiblingTail(State parent,
+            int cut, int prefixDays) {
+        synchronized (tailFunctionalLock) {
+            if (cachedTailFunctional != null
+                    && cachedTailFunctional.matches(parent, cut, prefixDays)) {
+                tailFunctionalReuseHits++;
+                return cachedTailFunctional;
+            }
+        }
+        int fullDays = prefixDays;
         for (int month = cut; month < lengths.length; month++) {
             fullDays += parent.remaining[month];
         }
-        BigInteger[] coefficient = new BigInteger[fullDays + 2];
-        Arrays.fill(coefficient, ONE);
+        BigInteger[] current = new BigInteger[fullDays + 1];
+        Arrays.fill(current, ONE);
         for (int month = lengths.length - 1; month >= cut; month--) {
             int additional = parent.remaining[month];
             int oldDays = fullDays - additional;
-            BigInteger[] previous = new BigInteger[oldDays + 2];
+            BigInteger[] prior = new BigInteger[oldDays + 1];
             if (additional == 1) {
-                Arrays.fill(previous, 1, oldDays + 2,
-                    coefficient[oldDays + 1]);
+                Arrays.fill(prior, current[1]);
             } else {
                 BigInteger[] binomial = chooseColumn(fullDays, additional - 2);
                 BigInteger running = ZERO;
-                for (int first = oldDays + 1; first >= 2; first--) {
-                    BigInteger weight = coefficient[first];
+                prior[0] = ZERO;
+                for (int distance = 1; distance <= oldDays; distance++) {
+                    int offset = distance - 1;
+                    BigInteger weight = current[offset + additional];
                     if (weight != null && weight.signum() > 0) {
                         running = running.add(weight.multiply(
-                            binomial[fullDays - first - 1]));
+                            binomial[additional - 2 + offset]));
                     }
-                    previous[first - 1] = running;
+                    prior[distance] = running;
                 }
             }
-            coefficient = previous;
+            current = prior;
             fullDays = oldDays;
         }
-        return coefficient;
+        TailFunctional built = new TailFunctional(
+            parent, cut, prefixDays, current);
+        synchronized (tailFunctionalLock) {
+            cachedTailFunctional = built;
+            tailFunctionalBuilds++;
+        }
+        return built;
     }
 
     private BigInteger siblingPrefixDot(State child, int cut,
-            BigInteger[] coefficient) {
+            TailFunctional coefficient) {
         int days = child.remaining[child.closed];
         BigInteger[] previous = new BigInteger[days + 2];
         previous[1] = ONE;
@@ -436,13 +497,14 @@ public final class MonsterWeavingLinearCounter {
             previousTotal = newTotal;
             days = newDays;
         }
-        if (coefficient.length != previous.length) {
+        if (days > coefficient.maximumPrefixDays) {
             throw new IllegalStateException("E_WEAVE_SIBLING_SHAPE");
         }
         BigInteger total = ZERO;
         for (int i = 1; i <= days + 1; i++) {
-            if (previous[i] != null && coefficient[i] != null) {
-                total = total.add(previous[i].multiply(coefficient[i]));
+            BigInteger weight = coefficient.distanceWeights[days + 1 - i];
+            if (previous[i] != null && weight != null) {
+                total = total.add(previous[i].multiply(weight));
             }
         }
         return total;
@@ -461,7 +523,7 @@ public final class MonsterWeavingLinearCounter {
         for (int month = parent.closed; month < cut; month++) {
             prefixDays += parent.remaining[month];
         }
-        BigInteger[] coefficient = commonSiblingTail(parent, cut, prefixDays);
+        TailFunctional coefficient = commonSiblingTail(parent, cut, prefixDays);
         for (int month = parent.closed; month < lengths.length; month++) {
             if (!parent.canTake(month, lengths)) continue;
             State child = new State(parent);
