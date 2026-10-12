@@ -1,4 +1,4 @@
-# ደረጃ 21/55 — PATCH 10 (የGREEN ማረጋገጫ ይጠበቃል)
+# ደረጃ 21/55 — PATCH 10 (COMPLETE / GREEN)
 
 ## የታሪክ ስህተት ተጠብቋል
 
@@ -47,4 +47,16 @@ v test ./pastafari/patch10_test.v
 v test ./pastafari
 ```
 
-የተጠበቀው የV 0.5.2 ማረጋገጫ **31/31 PASS** ነው። እስከ የnative CI ማረጋገጫ `LAST_COMPLETED_STAGE=20` ይቆያል። ደረጃ 22 አልተጀመረም።
+የተጠበቀው የV 0.5.2 ማረጋገጫ **31/31 PASS** ነው። እስከ የnative CI ማረጋገጫ `LAST_COMPLETED_STAGE=21` ነው። ደረጃ 22 አልተጀመረም።
+
+## የተረጋገጠ የnative V ማስረጃ
+
+- የተፈተነው commit፦ `a5960112321d69da2e7643ab99783cf3af91f25d`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38258828731
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38258828731/artifacts/11751721580
+- `V 0.5.2 7647ce1`፦ `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **31/31 PASS**።
+- የ`discovery10_expected_red_test.v` አራት assertions ሳይቀየሩ GREEN ሆነዋል።
+- የ720 የቅደም ተከተሎች፣ የ420-ቢት ግቤቶች፣ የlegacy ስህተት ጥሪ፣ እና የተለየ `vaultOld/pending` መስመር ተረጋግጠዋል።
+- ደረጃ 22 — `DISCOVERY 11` አልተጀመረም።
+
+**ደረጃ 21 COMPLETE / GREEN።**

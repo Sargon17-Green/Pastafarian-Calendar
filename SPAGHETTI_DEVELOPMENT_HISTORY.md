@@ -177,3 +177,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 21 — PATCH 10 (የV CI ማረጋገጫ ይጠበቃል)
 
 አሮጌው `old_stir_bowls_in_place` አሁንም በተከታታይ መጻፍ የተበከሉ `prev` እሴቶችን ያነባል። `BowlStirPatch10.stir` ግን በእያንዳንዱ ጥሪ አንድ `vault_old` የተያዘ የንባብ ሁኔታ፣ የተለየ `pending` የውጤት ሰልፍ፣ እና ከስድስቱ ቦታዎች በኋላ የሚደረግ የጋራ commit ይጠቀማል። የታሪካዊው `dispatch_legacy_bowl_stir` እውነተኛ ጥሪ በየpatch ጥሪው ይከናወናል፣ ግን የስህተቱ ውጤት አይመለስም። `calendar_date_spaghetti` የ`DISCOVERY_10 wrongStirBowl2` እና `PATCH_10 shadowStirBowl2` ልዩነትን ይጠቁማል። የ720 የቅደም ተከተሎች፣ 420-ቢት ግቤቶች፣ የቀድሞ ታሪክና የጠሪ ባለቤትነት ይፈተሻሉ። ደረጃ 22 አልተጀመረም።
+
+### የደረጃ 21 መዝጊያ — GREEN
+
+የመጀመሪያው የGitHub Actions run `38258293325` ሙሉ 31/31 የV ፈተና ፋይሎችን PASS አድርጓል። የV 0.5.2 formatter የረድፍ ቅርጽ ልዩነቶችን በአዲሱ `bowl_stir_patch10.v`፣ የታሪክ `discovery10_witness_test.v`፣ `monster_base.v` እና `patch10_test.v` ውስጥ አሳይቷል። ከቀጥታ native formatter የተገኙ ልዩነቶች ተስተካክለው ጊዜያዊ የምርመራ እርምጃ ከCI ተወግዷል። በcommit `a5960112321d69da2e7643ab99783cf3af91f25d` ላይ GitHub Actions run `38258828731` ሁለቱም ሥራዎች PASS ናቸው። `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **31/31 PASS**። የደረጃ 20 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። `old_stir_bowls_in_place` አሁንም የተበከሉ የin-place እሴቶችን ያነባል፤ `BowlStirPatch10` ግን ከ`vault_old` ብቻ ያነባል፣ `pending` ብቻ ይጽፋል፣ ከስድስቱ ስሌቶች በኋላ ይፈጽማል። የማስረጃ ቅርስ `11751721580` ተቀምጧል። **ደረጃ 21 COMPLETE / GREEN።**
