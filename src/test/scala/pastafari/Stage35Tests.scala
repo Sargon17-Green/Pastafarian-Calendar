@@ -556,21 +556,35 @@ object Stage35Tests {
       truth(!sources.contains("NormativeOracle"),"Oracolo solo test")
       truth(sources.contains("def oldMonthNameDuplicated("),"Legacy storico")
       truth(sources.contains("def monthNameDistinctPatch("),"PATCH17")
-      truth(!sources.contains("oldSourceCatalogMismatch"),"Stage36 assente")
+      val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<36)
+        truth(!sources.contains("oldSourceCatalogMismatch"),"Stage36 assente")
+      else
+        truth(sources.contains("def oldSourceCatalogMismatch("),
+          "DISCOVERY18 successiva presente")
     }
     check("metadati Stage35 certificano la storia senza cambiarla"){
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=35"),"Current")
-      truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=17"),"Patch")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=35,"Stage35 certificato")
+      if(current==35){
+        truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=17"),"Patch")
+      } else
+        truth(st.contains("STAGE_35_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_71_PASS_0_FAIL"),
+          "PATCH17 storica certificata")
       truth(st.contains("STAGE_34_NATIVE_VERIFICATION=PASS_EXPECTED_RED_63_PASS_3_FAIL"),
         "DISCOVERY17 certificata")
       truth(st.contains("STAGE_33_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_65_PASS_0_FAIL"),
         "PATCH16 certificata")
       val done=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(done==34 || done==35,"Sequenza")
+      truth(done>=34 && done<=current,"Sequenza")
     }
     println("\nRISULTATO STADIO 35: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)

@@ -135,7 +135,11 @@ final case class BaseMonsterContext(
   var legacyMonthNameDistinctChoices: Option[BigInt] = None,
   var legacyMonthNameReplacementSpace: Option[BigInt] = None,
   var patchedDistinctMonthNameIndices: Option[Vector[Int]] = None,
-  var patch17Applied: Boolean = false
+  var patch17Applied: Boolean = false,
+  var catalogMonthIndices: Option[Vector[Int]] = None,
+  var catalogInputSnapshot: Option[Vector[Int]] = None,
+  var catalogLegacyItalianNames: Option[Vector[String]] = None,
+  var catalogFrozenVersion: Option[String] = None
 )
 
 final class BaseMetricsShell {
@@ -184,6 +188,55 @@ final class BaseValidationManager {
    * corretto o l'oracolo test-only. Ricalcola la selezione
    * storica e ricostruisce il rango dalle posizioni eliminate.
    */
+  /**
+   * DISCOVERY18: ricostruisce autonomamente il bug 1-based/0-based.
+   * Non applica il lookup corretto del catalogo ai risultati.
+   */
+  def requireDiscovery18Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="DISCOVERY_18_SOURCE_CATALOG_MISMATCH" ||
+       ctx.status!="LEGACY_SOURCE_CATALOG_MISMATCH_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_18_SOURCE_CATALOG_MISMATCH") ||
+       ctx.catalogMonthIndices.isEmpty ||
+       ctx.catalogInputSnapshot.isEmpty ||
+       ctx.catalogLegacyItalianNames.isEmpty ||
+       ctx.catalogFrozenVersion.isEmpty)
+      throw new IllegalStateException("DISCOVERY 18 non completa.")
+
+    val requested=ctx.catalogMonthIndices.get
+    if(ctx.catalogInputSnapshot.get!=requested ||
+       requested.size<3 || requested.size>47 ||
+       requested.distinct.size!=requested.size ||
+       requested.exists(i=>i<1 || i>47))
+      throw new IllegalStateException("Indici o snapshot alterati.")
+
+    val source=pastafari.catalog.SourceLanguageCatalog.Months
+    if(source.size!=47 ||
+       source.indices.exists(i=>source(i).canonicalIndex!=i+1) ||
+       ctx.catalogFrozenVersion.get!=
+         pastafari.catalog.SourceLanguageCatalog.Version)
+      throw new IllegalStateException("Identita' del catalogo alterata.")
+
+    val names=ctx.catalogLegacyItalianNames.get
+    if(names.length!=requested.length)
+      throw new IllegalStateException("Numero nomi falsificato.")
+
+    var idx=0
+    while(idx<requested.length){
+      val wrongPosition=requested(idx)%47
+      if(names(idx)!=source(wrongPosition).italian)
+        throw new IllegalStateException(
+          "Mappatura storica del catalogo falsificata.")
+      idx+=1
+    }
+
+    val historical=LegacySourceCatalogMismatchAdapter.oldSourceCatalogMismatch(
+      requested)
+    if(historical.legacyItalianMonthNames!=names ||
+       historical.frozenCatalogVersion!=ctx.catalogFrozenVersion.get)
+      throw new IllegalStateException("La cicatrice non e' riproducibile.")
+  }
+
   def requirePatch17Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_17_DISTINCT_MONTH_NAME" ||
        ctx.status!="PATCH_17_READY" ||
@@ -1480,7 +1533,8 @@ final class BaseMonsterManager {
     new Discovery16ContiguousMonthDayHandler(metrics),
     new Patch16ContiguousMonthDayHandler(metrics),
     new Discovery17DuplicatedMonthNameHandler(metrics),
-    new Patch17DistinctMonthNameHandler(metrics)
+    new Patch17DistinctMonthNameHandler(metrics),
+    new Discovery18SourceCatalogMismatchHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -2382,6 +2436,29 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("patch17",error)
+    }
+  }
+
+  def discover18SourceCatalogMismatch(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    canonicalMonthIndices: Vector[Int]
+  ): Discovery18SourceCatalogMismatchReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.catalogMonthIndices=Some(canonicalMonthIndices)
+    ctx.phase="DISCOVERY_18_SOURCE_CATALOG_MISMATCH"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery18Ready(ctx)
+      Discovery18SourceCatalogMismatchReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.catalogMonthIndices.get,
+        ctx.catalogFrozenVersion.get,
+        ctx.catalogLegacyItalianNames.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable=>
+        throw BaseErrorWrapper.wrap("discovery18",error)
     }
   }
 
