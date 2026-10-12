@@ -1,4 +1,4 @@
-# ደረጃ 15/55 — PATCH 07 (የGREEN ማረጋገጫ ይጠበቃል)
+# ደረጃ 15/55 — PATCH 07 (COMPLETE / GREEN)
 
 ## የታሪክ ስህተቱን አለመሰረዝ
 
@@ -36,4 +36,16 @@ v test ./pastafari/patch07_test.v
 v test ./pastafari
 ```
 
-የሙሉ የV እውነተኛ ሙከራ መመዘኛ **22/22 PASS** ነው። `LAST_COMPLETED_STAGE=14` እስከ CI ማረጋገጫ ይቆያል። ደረጃ 16 — `DISCOVERY 08` አይጀመርም።
+የሙሉ የV እውነተኛ ሙከራ መመዘኛ **22/22 PASS** ነው። የV 0.5.2 የCI ማረጋገጫ PASS ነው፤ `LAST_COMPLETED_STAGE=15` ነው። ደረጃ 16 — `DISCOVERY 08` አይጀመርም።
+
+## የመጨረሻ የቀጥታ V ማረጋገጫ
+
+- የተፈተነው commit፦ `42dbb4a5d9ab6ace74d4855a97888798adf31f10`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38232812419
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38232812419/artifacts/11738849261
+- `V 0.5.2 7647ce1`፦ `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **22/22 PASS**።
+- የደረጃ 14 አራት የተለዩ RED assertions በፈተናዎቹ ሳይለወጡ GREEN ሆነዋል።
+- `old_grind_row` ወደ `legacy_visible_grind_table` ያለው ታሪካዊ የindex ስህተት ተጠብቋል፤ በ`GrindPatch07` ብቻ ባለ-12-ረድፍ sentinel ሰንጠረዥ ይጠቀማል።
+- ደረጃ 16 አልተጀመረም።
+
+**ደረጃ 15 COMPLETE / GREEN።**

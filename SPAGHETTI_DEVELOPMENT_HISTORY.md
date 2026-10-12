@@ -129,3 +129,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 15 — PATCH 07 (በV CI ማረጋገጫ ላይ)
 
 አዲሱ `GrindPatch07` ከ`legacy_visible_grind_table()` የታሪካዊውን 11 ረድፎች እንደነበሩ በclone ይወስዳል፣ ከእነርሱ በፊት `[0,0,0,0,0]` የsentinel ረድፍ ያስገባል። ይህ ረድፍ አይሰረዝም፤ `table[grind]` የቀጥታ ንባብ አሁን 1..11 ሲጠራ የተዛመደውን እውነተኛ የወፍጮ ረድፍ ይመልሳል። አሮጌው `old_grind_row` በgrind1 ሁለተኛውን ረድፍ የሚያነብ እና በgrind11 የerror የሚመልስ ሆኖ ይቆያል። `calendar_grind_once_spaghetti` በተጠገነው የረድፍ መርጫ የቀድሞውን ትክክለኛ የSAVE ሂሳብ ይፈጽማል። `calendar_date_spaghetti` በምርመራ መልዕክት የታሪክ እና የተጠገነውን የመጀመሪያ እና የመጨረሻ የወፍጮ ረድፍ አባላት ለይቶ ያሳያል። ደረጃ 16 አልተጀመረም።
+
+### የደረጃ 15 መዝጊያ — GREEN
+
+በመጀመሪያው የGitHub Actions run `38232643908` ላይ ሙሉ 22/22 የV ፈተና ፋይሎች PASS ነበሩ፤ የV 0.5.2 formatter በ`patch07_test.v` ውስጥ ሶስት የ`or { big_zero() }` አጻጻፎችን ብቻ እንዲቀየሩ ጠይቋል። ልዩነቶቹ ከእውነተኛው V formatter በትክክል ተቀድተው፣ ጊዜያዊ የማረጋገጫ እርምጃ ተወግዷል። በcommit `42dbb4a5d9ab6ace74d4855a97888798adf31f10` ላይ የGitHub Actions run `38232812419` ሁለቱም ሥራዎች PASS ናቸው። በ`V 0.5.2 7647ce1` `v fmt -verify ./pastafari` PASS፤ `v test ./pastafari` **22/22 PASS**፤ የደረጃ 14 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። የታሪካዊው `old_grind_row` ተጠብቋል፤ የ`GrindPatch07` sentinel ረድፍ በindex 0 የማይሰረዝ ነው። የማስረጃ ቅርስ `11738849261` ተቀምጧል። **ደረጃ 15 COMPLETE / GREEN።**
