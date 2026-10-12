@@ -514,3 +514,82 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage23_tests.lua .
+
+  lua_stage24_smoke:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye syntax ak kadna PATCH 11/legacy
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/bowl_chain_patch.lua)" = 7b8d7969f77a3c627dacd59c94087a21dab8b6d2
+          test "$(git hash-object src/legacy_reset_chain.lua)" = 2d21fec732551c7947fc3feb2e8a1131ff908bb3
+          lua5.3 test/stage24_scope_tests.lua .
+      - name: Tès 720 lòd, fail-closed, konteks, ak odit wouj
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage24_exhaustive_tests.lua .
+          lua5.3 test/stage24_synthetic_tests.lua .
+          lua5.3 test/stage24_bigint_tests.lua .
+          lua5.3 test/stage24_fault_tests.lua .
+          lua5.3 test/stage24_reentrancy_tests.lua .
+          lua5.3 test/stage24_expected_red_audit.lua .
+
+  lua_stage24_real:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Entegrasyon natif 46 gout soti nan de jou reyèl
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage24_real_tests.lua .
+
+  lua_stage24_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye syntax Lua ak kontra eritaj
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/bowl_chain_patch.lua)" = 7b8d7969f77a3c627dacd59c94087a21dab8b6d2
+          lua5.3 test/stage24_scope_tests.lua .
+      - name: Kouri suite natif Stage 1–24 ak odit defo istorik
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage24_tests.lua .
+      - name: Regresyon normatif DISCOVERY 12 — EXPECTED_RED sèl
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage24_regression_tests.lua .

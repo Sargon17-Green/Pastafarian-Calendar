@@ -606,3 +606,17 @@ rezilta bòl, oracle endepandan, 16 defayans + 16 rekiperasyon,
 rete entak; nou itilize yon helper tès pou sekans ki pi kout.
 `LAST_COMPLETED_STAGE=23`, `EXPECTED_REPOSITORY_STATE=GREEN`.
 Pa gen Stage 24 ni douz brase final.
+
+
+## Stage 24 — DISCOVERY 12: id fiks yo pa respekte sik lòd gout 46
+
+Premye chemen nouvo a rele PATCH 11 sou tout 46 gout yo,
+epi PATCH 08 sou dènye gout la. Men chwa vwazen an toujou
+`(queriedId % 6)+1`, ki suiv non fizik 1..6 yo olye
+sik permutation 46 la. Nou anrejistre rank, lòd otantik,
+bòl ki soti nan chèn anvan an, tras konplè de premye commits
+ak twazyèm commit `LEGACY_FIXED_NAME_NEIGHBOR`.
+Oracle pa antre nan pwodiksyon; ni PATCH 12 ni douz
+brase final yo pa kòmanse. Regresyon wouj la ap konpare
+id 2 (legacy) ak id 6 (oracle) pou rank 720, queried id 1.
+Rezilta native CI rete PENDING nan etap sa a.

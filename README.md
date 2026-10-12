@@ -777,3 +777,38 @@ Tout travay anvan yo rete vèt; regresyon wouj istorik la rete
 nan odit ki ap tann menm mesaj la. `LAST_COMPLETED_STAGE=23`,
 `EXPECTED_REPOSITORY_STATE=GREEN`. Nou pa kòmanse Stage 24,
 ni `postStir12`, ni seleksyon bòl.
+
+
+## Stage 24 — DISCOVERY 12: vwazen an soti nan non bòl la olye lòd gout 46
+
+Nou ajoute `src/legacy_fixed_neighbor.lua`: li rele chèn PATCH 11
+pou **46 gout egzakteman**, epi li rele vrè PATCH 08 sou gout 46
+pou jwenn lòd sis id bòl la. Men ansyen fonksyon
+`oldNextBowlFixedName(id)` kontinye retounen `id%6+1`
+**san konsilte lòd sa a**. Erè a make nan dispatcher
+`LEGACY_FIXED_NAME_NEIGHBOR` kòm twazyèm commit.
+Tout kontèks Stage 22/23, lòd PATCH 08, kopi eta sis bòl,
+dyagnostik ak mezi rete disponib. Oracle normatif rete
+nan `test/`, pa nan modil pwodiksyon.
+
+`nextBowlSpaghetti(drops,stones,bowls,id)` retounen id
+legacy ki mal la; `legacyFixedNeighborProbe` kenbe tras yo.
+`visibleFixedNeighborProbe(c,t,id)` bati 46 gout vizib natif
+avèk istwa yo, PATCH 01–11, epi li ekspoze lòd gout 46.
+Nou pa aplike `postStir12` oubyen koreksyon PATCH 12.
+
+Sou 720 lòd leksikografik ak sis id kesyone, atant odit la
+se 3,456 move vwazen, 864 matche aksidantèlman, epi 6
+permutation kote tout sis vwazen matche. Pou rank 720,
+`id=1`, legacy chwazi bòl 2 pandan lòd gout 46 mande bòl 6.
+Regression `test/stage24_regression_tests.lua` dwe rete
+`EXPECTED_RED`; `test/stage24_expected_red_audit.lua`
+dwe pase ak mesaj egzak sa a:
+`EXPECTED_RED Stage 24 DISCOVERY 12: vwazen pa non fiks inyore lòd gout 46`.
+
+Pou suite pozitif ak odit legacy:
+`lua5.3 test/stage24_tests.lua .`
+Pou regresyon wouj entansyonèl:
+`lua5.3 test/stage24_regression_tests.lua .`
+CI Stage 24 dwe pase tout etap pozitif, epi se sèlman dènye
+step discovery sa a ki dwe echwe. **Pa ajoute PATCH 12 nan Stage 24.**
