@@ -30,4 +30,17 @@ sharedOrderMemory.write("STIR_r", order_r) // overwrites previous order
 - `test/discovery11Red.ts`: 11th deliberately-red script; three genuine mismatches at positions **1,2,6**, `DISCOVERY_11_EXPECTED_RED mismatches=3 matches=0 positions=1,2,6 writes=58`, genuine nonzero process exit.
 - All Stages1–21 regressions and earlier **10** deliberately-red scripts, TypeScript native compile, frozen canonical names SHA lock.
 
-**स्थिती:** GitHub Actions validation बाकी; success प्रमाण नसताना LAST_COMPLETED_STAGE=21 कायम. Stage23 latch patch या branch वर अजून नाही.
+**स्थिती: GitHub Actions SUCCESS.** Verified implementation commit `94f3ca8f5ab7ac440f03122889dc95ae32e87f2f`. [Run 38233277622](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38233277622): `verify` आणि `stage22-typescript-marathi` दोन्ही SUCCESS; native TypeScript typecheck, complete Stage1–22 regression suite, 11 independent deliberately-red scripts, frozen canonical names lock PASS.
+
+```text
+STAGE_22_DISCOVERY_11_GUARDS_PASS pairs=12 writesPerPair=58 rounds=46 postStirs=12 mismatches=32 matches=4 redPositions=1,2,6 witness=1 injectedFailures=5
+STAGE_22_DISCOVERY_11_PROPERTIES_PASS realPairs=12 varied=64 giant=8 cases=84 writes=4872 drops=3864 postStirs=1008 ledgerCells=29232 queryDifferences=206 queryMatches=46 redWitnesses=48 spyWrites=58
+DISCOVERY_11_EXPECTED_RED mismatches=3 matches=0 positions=1,2,6 writes=58
+```
+
+- 12 actual normative day-pairs, 36 checks at positions 1,2,6: historical last-stir order differs 32 times, accidental matches 4. Independent test-only oracle confirms every 46-drop bowl state, all 12 post-stir order states and final six bowls.
+- 64 deterministic drop1/drop46 input perturbations + 8 enormous signed bigint cases = 84 complete production histories: **4872 real shared-memory writes** (3864 drop writes; 1008 stir overwrites), 29232 frozen forensic ID entries. Three-position query comparisons: 206 historical differences, 46 coincidences, 48 examples where all positions 1,2,6 are wrong.
+- Original `LegacySharedOrderMemoryAdapter.write` instrumented and truly invoked 58 times on one buffer per run. Historical query `queryLegacyOrder()` reads only overwritten live memory; diagnostic ledger is never used by production query.
+- Five deterministic injected failures after write 1, 46, 47, 52 or 58: caller inputs and context remain unchanged; deterministic retry passes.
+- First run `38233130886` failed because of 3 QA-only TypeScript mistakes (getter was called as method, `queries` narrowing and test-only `Stone` tuple typing). Updated in `94f3ca8f5ab7ac440f03122889dc95ae32e87f2f` without touching the historical production algorithm, then both jobs PASS at run 38233277622.
+- **Stage23 PATCH 11 NOT IMPLEMENTED.** No `orderAt46Latch` or query reroute. Stage22 remains the intentionally wrong live-memory route.
