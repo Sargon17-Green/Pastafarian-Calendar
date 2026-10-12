@@ -250,3 +250,10 @@ Y graith fwriadol yw `LegacyStoneBuilder.mutateStonesWrong`: diweddarir gwenith,
 Mae `BOOT → DISCOVERY_04` yn ymrwymo 46 rhes i gyd-destun pob galwad ar wahân. Mae `run-stage08-tests.sh` yn cynnwys prawf strict sy'n methu yn fwriadol a 230 cydran wedi'u gwirio'n annibynnol gan `BigInteger`. Mae'r prawf llawn GitHub Actions yn aros; nid yw Cam 9 / PATCH 04 wedi'i weithredu, ac mae `LAST_COMPLETED_STAGE=7` hyd nes ardystiad llawn.
 
 **Ardystiad Cam 8:** ar commit `051a928af4cc5166fc5884f80db48c530b5c5931` llwyddodd holl brofion Camau 1–8 gyda'r oracl gwreiddiol, Kotlin 1.9.0 a JDK 21. Cadarnhawyd 30 marc log: `STAGE08_EXPECTED_RED_224`, `STAGE08_MATCH_1`, `STAGE08_BIGINT_INDEPENDENT_PASS_230`, `STAGE08_STRICT_RED_CONFIRMED` a `STAGE08_NATIVE_EXPECTED_RED_COMPLETE`, ynghyd â phob atchweliad blaenorol. **`LAST_COMPLETED_STAGE=8`**. Nid yw Cam 9 wedi'i ddechrau. Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38183229336
+
+
+## Cam 9 — PATCH 04: ciplun y pum carreg
+
+Mae `StonePatchWrapper.stonePatch` yn cadw ciplun o'r hen res, yn galw'n wirioneddol y mutator hanesyddol `mutateStonesWrong` ar glôn annibynnol, ac yn cadw'r `legacyGarbage`. Mae'n ailgyfrifo'r pum carreg yn llwyr o'r ciplun, heb ddarllen canlyniadau canolradd y mutator. Mae `BOOT → PATCH_04` yn ymrwymo'r ddau dabl i'r cyd-destun, gyda 45 galwad etifeddol a 46 rhes.
+
+Mae `run-stage09-tests.sh` yn cynnwys atchweliadau Camau 1–8, pob un o'r 230 cydran gywir, cadw 224 anghysondeb DISCOVERY 04, prawf BigInteger annibynnol a gwarchodion perchnogaeth. Arhosir am PASS brodorol ar Kotlin 1.9.0/JDK 21 cyn newid `LAST_COMPLETED_STAGE=8`. Ni ddechreuwyd Cam 10.

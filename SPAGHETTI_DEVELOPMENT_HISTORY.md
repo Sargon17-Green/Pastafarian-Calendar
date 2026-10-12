@@ -264,3 +264,8 @@ Mae'r adeiladwr hen ffasiwn yn newid yr un cofnod mewn trefn benodol: gwenith, b
 ### Cam 8 — ardystiad JVM brodorol llawn
 
 Ar commit `051a928af4cc5166fc5884f80db48c530b5c5931` llwyddodd swydd GitHub Actions `114600034894` (rhediad `38183229336`) gyda Kotlin 1.9.0/JDK 21 a'r oracl gwreiddiol. Cadarnhawyd 30 marc, gan gynnwys atchweliadau Camau 1–7, 224 `EXPECTED_RED` mewn 225 cydran, 230 gwirio BigInteger annibynnol, cadw rhes 1, perchnogaeth a gwarchod ail-anfon, a'r methiant strict disgwyliedig. Mae Cam 8 yn gyflawn; ni ddechreuwyd PATCH 04.
+
+
+## Cam 9 — PATCH 04: ciplun a gwastraff yr hen mutator
+
+Ni newidiwyd `mutateStonesWrong`. Cyn pob rhes newydd, cedwir ciplun o'r pum carreg hen. Galwir yr un mutator ar glôn, cofnodir y `legacyGarbage` ac wedyn cyfrifir pob maes cywir o'r ciplun gwreiddiol. Mae rhesi 2–46 yn defnyddio 45 galwad, ac mae'r tabl 230 cydran yn gorfod cyfateb yn union i'r oracl. Mae'r 224 gwahaniaeth Cam 8 yn parhau'n weladwy trwy'r llwybr etifeddol ar wahân. Bydd ardystiad CI llawn yn penderfynu cwblhau'r cam.

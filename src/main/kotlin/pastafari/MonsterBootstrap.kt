@@ -28,7 +28,11 @@ data class BaseMonsterContext(
     var patch03ReplacementApplied: Boolean? = null,
     var patch03Output: ExactInt? = null,
     var discovery04LegacyStoneRows: List<MutableStoneRow>? = null,
-    var discovery04BuiltRows: Int = 0
+    var discovery04BuiltRows: Int = 0,
+    var patch04StoneRows: List<MutableStoneRow>? = null,
+    var patch04LegacyGarbageRows: List<MutableStoneRow>? = null,
+    var patch04BuiltRows: Int = 0,
+    var patch04LegacyCalls: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -85,7 +89,8 @@ class MonsterBootstrapManager(
     val dayTagPatchWrapper: DayTagPatchWrapper = DayTagPatchWrapper(),
     val legacyDistanceAdapter: LegacyDistanceAdapter = LegacyDistanceAdapter(),
     val distancePatchWrapper: DistancePatchWrapper = DistancePatchWrapper(),
-    val legacyStoneBuilder: LegacyStoneBuilder = LegacyStoneBuilder()
+    val legacyStoneBuilder: LegacyStoneBuilder = LegacyStoneBuilder(),
+    val stonePatchWrapper: StonePatchWrapper = StonePatchWrapper()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -151,6 +156,28 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_04_LEGACY_SEQUENTIAL_STONES")
             context.status = "LEGACY_STONES_OBSERVED"
             metrics.bump("discovery04.legacy.builds")
+        }
+        dispatcher.register("PATCH_04") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_PATCH04_CONTEXT_NOT_READY")
+            // Cadw'r hen nam trwy ei alw ar glon ar gyfer POB un o'r 45 rhes.
+            val outcome = stonePatchWrapper.buildPatchedRows()
+            check(outcome.rows.size == 47 && outcome.legacyGarbageRows.size == 47 &&
+                outcome.legacyCalls == 45) { "E_PATCH04_BUILDER_COUNTS" }
+            // Ymrwymo dim ond ar ol i'r holl gyfrifiadau lwyddo.
+            context.patch04StoneRows = outcome.rows
+            context.patch04LegacyGarbageRows = outcome.legacyGarbageRows
+            context.patch04BuiltRows = 46
+            context.patch04LegacyCalls = outcome.legacyCalls
+            context.branchTrace.add("PATCH_04")
+            context.diagnostics.add("PATCH_04_SNAPSHOT_STONE_SCAR")
+            context.status = "PATCHED_STONES"
+            metrics.bump("patch04.legacy.calls") // Yn ôl nifer galwadau'r mutator
+            // Cofnodi'r gwahaniaeth yn fanwl yn hytrach na'i greu fel galwad sengl.
+            context.patch04LegacyCalls.let { count ->
+                repeat(count - 1) { metrics.bump("patch04.legacy.calls") }
+            }
+            metrics.bump("patch04.applied")
         }
         dispatcher.register("PATCH_03") { context ->
             validation.requireBootstrapContext(context)
@@ -310,6 +337,20 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY04_WRAP", e)
+        }
+    }
+
+    /** Cam 9: BOOT, 45 galwad etifeddol ar glonau, yna tabl cywir. */
+    fun applyStonePatch(calculationDay: ExactInt, targetDay: ExactInt): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.phase = "PATCH_04"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH04_WRAP", e)
         }
     }
 
