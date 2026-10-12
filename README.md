@@ -1066,3 +1066,31 @@ tutte le firme Stage01–Stage25 sono rimaste invarianti.
 L'ipotesi errata degli anni lunghi sempre 5778
 giorni rimane isolata come cicatrice diagnostica;
 PATCH 13 non è introdotta.
+
+## Stadio 27 — PATCH 13 (salto sui veri cancelli annuali)
+
+La durata massima di 5778 giorni **non** è una misura fissa degli anni. La
+DISCOVERY 13 ha lasciato visibile il salto legacy basato su 5778 giorni per
+anno e le divergenze intenzionali `avanti`, `indietro` e `porta`.
+
+`Patch13YearJumpWrapper.yearJumpPatch` esegue lo stesso helper storico,
+conserva i suoi campi nel report, quindi percorre i confini annuali effettivi
+sulla finestra diagnostica sintetica. L'intervallo appartiene all'anno se
+`open < target <= close`: l'ultimo giorno è incluso, la frontiera di
+apertura appartiene all'anno precedente. Per i giorni fuori dai vettori
+sintetici non viene inventata alcuna estensione.
+
+L'handler produce la traccia `BOOT → DISCOVERY_13_YEAR_JUMP →
+PATCH_13_YEAR_JUMP` nello stesso contesto; il validator ricostruisce
+separatamente i confini ed esige la conservazione della cicatrice. Tutta la
+produzione è in Scala e non importa `NormativeOracle`.
+
+La [run 38247877764](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38247877764)
+ha conclusione **success**: 28/28 job, Stage27 39 PASS/0 FAIL;
+Stage26 conserva 38 PASS/3 FAIL intenzionali. Quest'ultima prova riguarda
+la navigazione di un insieme di anni sintetici, non certifica ancora il
+calcolo end-to-end dell'anno 5000.
+
+```
+sbt -batch 'Test / runMain pastafari.Stage27Tests'
+```

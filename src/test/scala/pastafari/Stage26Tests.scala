@@ -414,7 +414,7 @@ object Stage26Tests {
         "Certificazione Stage25")
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed==25 || completed==26,"Ordine certificazioni")
+      truth(completed>=25 && completed<=current,"Ordine certificazioni")
     }
 
     Vector(

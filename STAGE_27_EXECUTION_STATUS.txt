@@ -1,0 +1,34 @@
+STATO_ESECUZIONE=PASS_NATIVE_SCALA
+STADIO=27
+TIPO=PATCH_13
+RISULTATO_ATTESO=GREEN
+RISULTATO_REALE=39_PASS_0_FAIL
+PATCH_WRAPPER=Patch13YearJumpWrapper.yearJumpPatch
+DISCOVERY_13_PRESERVED=YES
+LEGACY_YEAR_JUMP_FIXED_5778_UNCHANGED=YES
+PATCH_01_TO_12_PRESERVED=YES
+STAGE28_INTRODUCED=NO
+INTERVAL_CONTRACT=OPEN_LEFT_CLOSED_RIGHT
+SYNTHETIC_YEAR_LENGTH_DOMAIN=252..5778
+DETERMINISTIC_VECTOR_PAIRS=2048
+BIGINT_SIGNED_16384_BIT=PASS
+VALIDATOR_INDIPENDENTE_SEQUENTIAL=PASS
+ORACOLO_NORMATIVO=TEST_ONLY
+GITHUB_ACTIONS_RUN=38247877764
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38247877764
+GITHUB_ACTIONS_HEAD_SHA=7bf9d6a852a564966b9018b218337ffcfa6570f7
+GITHUB_ACTIONS_JOBS=28
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage27Tests'
+VERIFIED_ON=2026-10-12
+REGRESSIONE_STAGE01_TO_26=PASS_PREVIOUS_SIGNATURES
+REGRESSIONE_STAGE26=38_PASS_3_FAIL_INTENTIONAL
+REGRESSIONE_STAGE27=39_PASS_0_FAIL
+
+La PATCH 13 attraversa LegacyYearJumpAdapter.oldJumpGuess nella
+medesima invocazione, mantiene offset e intervallo storico, percorre
+i cancelli contigui sintetici per determinare l'anno vero in entrambe
+le direzioni, e respinge giorni fuori dal dominio delimitato.
+Il validator indipendente ricalcola i confini senza chiamare il wrapper
+e respinge falsificazioni di input, report, trace e flag.
+Nessuna generazione canonica di anno 5000 è introdotta in questa fase.

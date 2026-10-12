@@ -1349,3 +1349,14 @@ finestre annuali sintetiche, sei controlli
 del caso d'anno massimo e il controllo
 degli intervalli aperto/chiuso. Ogni firma
 storica da Stage01 a Stage25 rimane invariata.
+
+## 2026-10-12 — Stadio 27, PATCH 13
+
+Il salto storico di 5778 giorni per anno resta intatto. La nuova patch
+legge realmente le durate di anni sintetici adiacenti, ricostruisce
+intervalli (apertura,chiusura], esegue il legacy nello stesso contesto
+e certifica il risultato con un validator indipendente.
+La prova nativa è la run GitHub Actions 38247877764 sul commit
+7bf9d6a852a564966b9018b218337ffcfa6570f7:
+28/28 job SUCCESS, Stage27 39 PASS/0 FAIL, Stage26 RED storico conservato.
+La fase 28 non è stata iniziata.
