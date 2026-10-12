@@ -908,3 +908,14 @@ chỉ sau khi đã nhận x thỏa `x<=limit`. Dùng chính
 AnswerStreamManager.answer_at với chỉ số k tăng
 trên cùng vòng, không lấy ngẫu nhiên mới hoặc đổi
 hướng. Chưa thực hiện ở Stage26.
+
+**Kết quả thực tế DISCOVERY 13:** CI Elixir 1.18.5,
+OTP 27: 336 kiểm thử, đúng bốn sai lệch normative
+mới Stage26, 332 bài đạt, không cảnh báo; Canonical
+Names Lock PASS. Tất cả 317 test cũ và 15 kiểm soát
+Stage26 vẫn đạt. Lần CI đầu có thêm một test sai
+cho k=0, đã sửa danh sách đầu vào kiểm soát;
+không đổi implementation, không đổi các assert
+normative. Vòng đáp án đã chuẩn, chỉ lựa chọn
+x=answerAt(0) thiếu rejection khiến modulo thiên lệch.
+Stage26 đóng EXPECTED_RED, chưa làm PATCH 13.

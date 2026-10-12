@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=26
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=13
-LAST_COMPLETED_STAGE=25
+LAST_COMPLETED_STAGE=26
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..12 và ID kế cận từ chốt giọt 46; AnswerStreamManager tạo first và chiều vòng chuẩn rồi LegacyBiasedPick được gọi ngay tại answerAt(0), chọn hạng modulo không loại trước các x vượt floor(M/N)*N. Không thêm bộ bác bỏ của PATCH 13.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_26_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_26_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_26_PENDING
-CI_FAILURES=STAGE_26_PENDING
+CI_TESTS=336
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -599,4 +599,25 @@ chuẩn, bias còn tồn tại; 4 hồi quy normative có chủ đích đỏ,
 dùng vòng tổng hợp x=M hoặc M-1, step +/-1 và N sát M
 để bước từ chối hữu hạn (1 đến 3 bước).
 Dự kiến 336 bài test, 4 sai lệch chuẩn cố ý.
-LAST_COMPLETED_STAGE giữ 25 đến khi xác minh CI.
+LAST_COMPLETED_STAGE đã nâng lên 26 sau khi CI và khóa tên PASS.
+
+Giai đoạn 26 đã xác minh Elixir 1.18.5, OTP 27:
+336 kiểm thử, đúng bốn sai lệch có chủ đích Stage26,
+332 bài đạt, 0 cảnh báo biên dịch. Toàn bộ 317 bài cũ
+Stage1..25 đạt; 15 bài kiểm soát Stage26 cũng đạt.
+Bốn hồi quy chuẩn đỏ đúng ở x=M hay x=M-1, n sát M
+và chiều vòng +1 hoặc -1. Không có sai lệch khác.
+Lần CI đầu có 5 lỗi vì một bài kiểm soát vô tình
+coi k=0 là vị trí sai, trong khi k=0 là vị trí đầu
+hợp lệ của vòng; commit kiểm thử riêng chỉ bỏ k=0
+khỏi tập sai, không đổi code production hay hồi quy
+normative. CI tiếp theo đúng bốn sai lệch, 0 warning.
+Canonical Names Lock PASS độc lập.
+LegacyBiasedPick vẫn được gọi trước rejection và
+không có ShortRejectionPatch. Mọi bản vá 01..12
+vẫn đúng, oracle test-only không đổi SHA
+be1638f46b2190d617af0378a61b077bda10bf32.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274786459
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274786326
+Giai đoạn 26 đóng EXPECTED_RED; tiếp theo Stage27
+PATCH 13 sẽ gọi legacy chỉ sau rejection. Chưa bắt đầu.

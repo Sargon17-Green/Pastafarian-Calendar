@@ -1056,3 +1056,32 @@ tiến trên cùng một vòng đáp án cho tới khi
 `x<=floor(M/N)*N`, rồi mới gọi legacy với x hợp lệ.
 Không thực hiện sớm ở Stage26; không mở wideDetour
 cho N>M thuộc DISCOVERY 14.
+
+## Kiểm chứng đóng phát hiện 13
+
+GitHub Actions Elixir 1.18.5 / OTP 27 đã chạy
+**336 kiểm thử, đúng bốn hồi quy chuẩn đỏ có chủ đích**,
+332 bài đạt và 0 cảnh báo biên dịch. Toàn bộ 317 bài
+Stage1..25 đạt, cùng 15 bài kiểm soát Stage26;
+Canonical Names Lock PASS độc lập.
+
+Vòng đáp án mới và các công thức SAVE đều chuẩn.
+Bốn sai lệch chỉ xuất hiện khi `x=answer_at(0)`
+vượt `floor(M/n)*n`, nhưng hàm
+`LegacyBiasedPick.biased_legacy_pick` vẫn được gọi ngay.
+Trong các mẫu hữu hạn, oracle phải bỏ một đến ba giá trị
+trên cùng vòng, còn legacy lấy dư ngay trên x đầu.
+
+Lần CI đầu có thêm một kiểm thử kiểm soát sai vì
+coi k=0 là đầu vào không hợp lệ. Đã sửa duy nhất
+tập đầu vào sai trong bài kiểm thử, giữ nguyên các
+hồi quy chuẩn và code production. CI chạy lại đúng
+bốn lỗi mong đợi và không có cảnh báo.
+
+- [CI Stage26: đúng bốn sai lệch dự kiến](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274786459)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274786326)
+
+Giai đoạn 26/55 kết thúc `EXPECTED_RED` đã xác minh.
+PATCH 13 ở giai đoạn 27 phải giữ legacy và chỉ gọi nó
+sau khi `x<=limit`, tiến dọc chính vòng trả lời
+bằng tăng k. Chưa sửa khuyết tật ở Stage26.

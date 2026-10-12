@@ -89,3 +89,31 @@ hay các bước gate/date.
 Chỉ commit tới nhánh `Elixir+tiếng-Việt`,
 không sửa main, không commit gói HANDOFF_*,
 không nhập oracle trong mã production.
+
+## Kết quả CI và phân loại thực tế
+
+- Commit triển khai:
+  `d45485a9c4c600cf6983f0413eeee775a433630c`.
+- Commit sửa test k=0:
+  `498a6eb0f30a2659ee52dfd8e9fdc9d071850d44`.
+- Elixir 1.18.5 / Erlang OTP 27: biên dịch 43 tệp .ex.
+- **336 kiểm thử, đúng 4 thất bại cố ý, 332 bài đạt.**
+- Bốn sai lệch đều từ Stage26: x=M bước tiến,
+  x=M-1 bước tiến, x=M bước lùi và biên n=M-3.
+- Toàn bộ 317 bài Stage1..25 đạt; 15 bài kiểm soát
+  Stage26 đạt, không cảnh báo biên dịch.
+- Canonical Names Lock độc lập PASS.
+- CI đầu 336/5 do sai lầm test k=0 cần chấp nhận;
+  sửa duy nhất danh sách `bad`, không thay code hoặc
+  các giá trị so sánh normative.
+- Oracle test-only giữ nguyên blob SHA
+  `be1638f46b2190d617af0378a61b077bda10bf32`.
+- LegacyBiasedPick vẫn được gọi ngay từ x đầu.
+  Không có ShortRejectionPatch và chưa mở wideDetour.
+- Không sửa main; không có gói HANDOFF_* trong commit.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274786459
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274786326
+
+Trạng thái cuối: EXPECTED_RED đã xác minh.
+Điểm tiếp theo: Stage27 PATCH 13, chưa bắt đầu.
