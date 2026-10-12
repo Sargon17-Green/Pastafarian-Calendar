@@ -4,8 +4,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
-  Giai đoạn 16 thêm hoán vị bát qua cách đọc hạng 1..720
-  sai vào bộ mở hạng gốc không. Chưa tích hợp ngày lịch.
+  Giai đoạn 17 vá cách truyền hạng vào bộ mở hạng gốc không,
+  giữ nguyên lời gọi legacy và 46 thứ tự bát trong context.
+  Chưa tích hợp ngày lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{

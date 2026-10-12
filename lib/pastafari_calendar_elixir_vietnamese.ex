@@ -2,9 +2,8 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 16 mở chuỗi thứ tự sáu bát bằng bộ mở hạng
-  từ 0 cũ nhưng truyền nhầm hạng từ 1 đến 720.
-  Các bản vá 01-07 được giữ nguyên.
+  Giai đoạn 17 sửa cách truyền hạng sáu bát về gốc không
+  và giữ nguyên bộ mở hạng lịch sử; các bản vá 01-07 vẫn còn.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}

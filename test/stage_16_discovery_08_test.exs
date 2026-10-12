@@ -38,26 +38,30 @@ defmodule PastafariCalendarElixirVietnamese.Stage16Discovery08Test do
              LegacyPermutationUnrank0.old_permutation_unrank0(1)
   end
 
-  test "đường lỗi hiện tại chuyển hạng từ một vào hàm gốc không" do
+  test "bản vá 08 vẫn gọi hàm gốc không nhưng truyền hạng đã chỉnh" do
     for drop <- [1, 2, 3, 6, 119, 120, 719, 720, 721, 722, 1440, 1441] do
       one_based = rem(drop - 1, 720) + 1
       actual = BowlOrderManager.order_from_drop(drop)
 
-      assert actual == LegacyPermutationUnrank0.old_permutation_unrank0(one_based)
+      legacy_rank0 = one_based - 1
+      assert actual == LegacyPermutationUnrank0.old_permutation_unrank0(legacy_rank0)
       assert Enum.sort(actual) == [1, 2, 3, 4, 5, 6]
-      refute actual == correct(drop)
+      assert actual == correct(drop)
+      refute actual == LegacyPermutationUnrank0.old_permutation_unrank0(one_based)
     end
   end
 
-  test "hạng một thay vì hạng không đổi ngay hoán vị đầu tiên" do
+  test "hạng một được vá về hạng không, trong khi legacy vẫn nhận hạng một sai" do
     assert correct(1) == [1, 2, 3, 4, 5, 6]
-    assert BowlOrderManager.order_from_drop(1) == [1, 2, 3, 4, 6, 5]
+    assert BowlOrderManager.order_from_drop(1) == [1, 2, 3, 4, 5, 6]
     assert LegacyPermutationUnrank0.old_permutation_unrank0(0) == [1, 2, 3, 4, 5, 6]
+    assert LegacyPermutationUnrank0.old_permutation_unrank0(1) == [1, 2, 3, 4, 6, 5]
   end
 
-  test "hạng 720 sai vì được coi là hạng gốc không 720 và quay vòng" do
+  test "hạng 720 được vá thành 719, legacy thô vẫn quay vòng 720 về không" do
     assert correct(720) == [6, 5, 4, 3, 2, 1]
-    assert BowlOrderManager.order_from_drop(720) == [1, 2, 3, 4, 5, 6]
+    assert BowlOrderManager.order_from_drop(720) == [6, 5, 4, 3, 2, 1]
+    assert LegacyPermutationUnrank0.old_permutation_unrank0(720) == [1, 2, 3, 4, 5, 6]
     assert BowlOrderManager.order_from_drop(1440) ==
              BowlOrderManager.order_from_drop(720)
   end
@@ -76,12 +80,12 @@ defmodule PastafariCalendarElixirVietnamese.Stage16Discovery08Test do
       drop = context.visible_drops[index]
       assert orders[index] == BowlOrderManager.order_from_drop(drop)
       assert orders[index] ==
-               LegacyPermutationUnrank0.old_permutation_unrank0(rem(drop - 1, 720) + 1)
+               LegacyPermutationUnrank0.old_permutation_unrank0(rem(drop - 1, 720))
       assert Enum.sort(orders[index]) == [1, 2, 3, 4, 5, 6]
     end
   end
 
-  test "thứ tự bát hiện tại đều lệch chuẩn ở 46 giọt" do
+  test "thứ tự bát đã vá trùng chuẩn tại toàn bộ 46 giọt" do
     f = Ref.foundation_day()
 
     for {c, t} <- [{f, f}, {f - 7, f + 21}, {f + 21, f - 7}] do
@@ -89,7 +93,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage16Discovery08Test do
 
       for index <- 1..46 do
         drop = context.visible_drops[index]
-        refute context.bowl_orders[index] == correct(drop)
+        assert context.bowl_orders[index] == correct(drop)
         assert Calendar.bowl_order_spaghetti(c, t, index) == context.bowl_orders[index]
       end
     end
@@ -143,9 +147,9 @@ defmodule PastafariCalendarElixirVietnamese.Stage16Discovery08Test do
       order = BowlOrderManager.order_from_drop(drop)
       one_based = rem(drop - 1, 720) + 1
 
-      assert order == LegacyPermutationUnrank0.old_permutation_unrank0(one_based)
+      assert order == LegacyPermutationUnrank0.old_permutation_unrank0(one_based - 1)
       assert Enum.sort(order) == [1, 2, 3, 4, 5, 6]
-      refute order == correct(drop)
+      assert order == correct(drop)
     end
   end
 
@@ -169,7 +173,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage16Discovery08Test do
     end
   end
 
-  test "mã nguồn giữ bộ mở hạng gốc không và chưa có bản vá 08" do
+  test "mã nguồn giữ bộ mở hạng gốc không và sửa hạng ở lớp quản lý" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = Path.join(root, "legacy_permutation_unrank0.ex") |> File.read!()
     manager = Path.join(root, "bowl_order_manager.ex") |> File.read!()
@@ -178,10 +182,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage16Discovery08Test do
     assert legacy =~ "position0 = div(rank0, block)"
     assert legacy =~ "next_rank0 = rem(rank0, block)"
     assert manager =~ "one_based = rem(drop - 1, 720) + 1"
-    assert manager =~ "LegacyPermutationUnrank0.old_permutation_unrank0(one_based)"
+    assert manager =~ "legacy_rank0 = one_based - 1"
+    assert manager =~ "LegacyPermutationUnrank0.old_permutation_unrank0(legacy_rank0)"
     assert dispatcher =~ "BowlOrderManager.build_orders(visible_drops)"
     assert dispatcher =~ "bowl_orders: bowl_orders"
-    refute manager =~ "legacy_rank0 = one_based - 1"
+    refute manager =~ "LegacyPermutationUnrank0.old_permutation_unrank0(one_based)"
     refute legacy =~ "NormativeReference"
     refute manager =~ "NormativeReference"
     refute File.exists?(Path.join(root, "permutation_rank_patch.ex"))

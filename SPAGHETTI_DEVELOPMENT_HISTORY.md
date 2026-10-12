@@ -508,3 +508,30 @@ Bốn bài đỏ thuộc hạng 1, hạng 720 và hai giọt biên
 trong 46 thứ tự đã tạo. Bộ mở hạng gốc không không sai;
 lỗi là hạng từ một được truyền thẳng cho nó.
 Khóa tên chuẩn PASS. Đóng giai đoạn 16 ở EXPECTED_RED.
+
+## Giai đoạn 17 — Bản vá 08: giữ hoán vị gốc không
+
+**Vết lỗi lịch sử được bảo tồn:** Hàm
+`LegacyPermutationUnrank0.old_permutation_unrank0(rank0)`
+không thay đổi; nó tiếp tục coi hạng truyền vào là zero-based
+và mở hoán vị bằng sáu bước giai thừa. Chuyển trực tiếp
+hạng one-based vào nó vẫn cho hoán vị kế tiếp.
+
+**Bản vá đường gọi:** `BowlOrderManager` tính
+`one_based=rem(drop-1,720)+1`, sau đó
+`legacy_rank0=one_based-1` và gọi lại chính hàm legacy.
+Không triển khai thuật toán mở hạng mới; không sửa hàm
+legacy để biết hạng từ một. `Dispatcher.bootstrap` vẫn
+tạo đủ 46 thứ tự riêng từ 46 giọt đã vá.
+
+**Chứng minh:** Đối với mọi drop dương, dư sau khi trừ
+một nằm trong 0..719. Hàm gốc không với cùng rank0 tương
+ứng đúng với hoán vị chuẩn của hạng one-based = rank0+1.
+Khi drop là bội 720, one_based = 720 và legacy_rank0 = 719,
+do đó nhận hoán vị cuối thay vì hoán vị đầu.
+
+**Kiểm thử:** Bảo toàn bốn hồi quy chuẩn ở giai đoạn 16,
+điều chỉnh các bài kiểm soát cũ kiểm chứng lỗi để bảo vệ
+vết legacy và kết quả mới. Thêm 14 bài bao phủ 720 thứ tự,
+lịch 46 giọt, biên bội 720, số nguyên 2048 bit,
+chạy song song và chưa rót bát. Không bắt đầu giai đoạn 18.

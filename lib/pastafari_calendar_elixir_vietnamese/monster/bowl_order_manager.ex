@@ -1,17 +1,18 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.BowlOrderManager do
   @moduledoc """
-  Lần phát hiện 08 chuyển hạng 1..720 vào bộ mở hạng gốc 0.
+  Bản vá 08 chuyển đúng hạng từ 1..720 về hạng bắt đầu từ 0.
 
-  Hai miền khác nhau một đơn vị. Không trừ đi 1 trong lần
-  phát hiện này. Kết quả các lệnh mở hạng chỉ được lưu vào
-  ngữ cảnh, chưa được áp dụng vào các bát.
+  Bộ mở hạng lịch sử vẫn hoạt động và giữ nguyên; chỉ thêm
+  phép chuyển hạng một-based thành zero-based trước khi gọi.
+  Các thứ tự vẫn được lưu vào ngữ cảnh, chưa rót vào bát.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.LegacyPermutationUnrank0
 
   def order_from_drop(drop) when is_integer(drop) and drop >= 1 do
     one_based = rem(drop - 1, 720) + 1
-    LegacyPermutationUnrank0.old_permutation_unrank0(one_based)
+    legacy_rank0 = one_based - 1
+    LegacyPermutationUnrank0.old_permutation_unrank0(legacy_rank0)
   end
 
   def order_from_drop(_drop) do

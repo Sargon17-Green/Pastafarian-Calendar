@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=16
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=17
+CURRENT_KIND=PATCH
 CURRENT_PATCH=08
 LAST_COMPLETED_STAGE=16
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-07; thêm hàm mở hạng gốc không và chuyển nhầm hạng từ một vào legacy trong 46 thứ tự.
+MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyPermutationUnrank0 nguyên vẹn; BowlOrderManager chuyển one_based=rem(drop-1,720)+1 thành legacy_rank0=one_based-1 trước khi gọi hàm mở hạng cũ, giữ riêng 46 thứ tự trong context.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_16_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_17_PENDING
+GIT_HISTORY_MUTATED=STAGE_17_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=179
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=STAGE_17_PENDING
+CI_FAILURES=STAGE_17_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -294,3 +294,14 @@ thật sự được gọi trong mỗi lần tạo 46 thứ tự; lỗi chỉ n�
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38232940991
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38232941046
 Giai đoạn 16 đóng EXPECTED_RED; bước tiếp theo giai đoạn 17 PATCH 08.
+
+Giai đoạn 17 thực hiện PATCH 08 bằng chuỗi ánh xạ hạng
+one_based=rem(drop-1,720)+1, legacy_rank0=one_based-1;
+gọi thật LegacyPermutationUnrank0.old_permutation_unrank0(legacy_rank0).
+Không sửa hàm legacy, oracle hoặc bất kỳ dữ liệu hoán vị cũ.
+Bốn hồi quy chuẩn của giai đoạn 16 giữ nguyên. Các bài
+kiểm soát chứng minh sai lệch cũ được chuyển sang xác minh
+legacy vẫn sai khi gọi trực tiếp nhưng đường sản xuất đúng.
+14 bài kiểm thử Stage17 bổ sung; tổng dự kiến 193 bài GREEN,
+không lỗi. LAST_COMPLETED_STAGE giữ 16 trước CI xác minh.
+Không tiến tới giai đoạn 18 về vị trí rót bát.

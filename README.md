@@ -559,3 +559,30 @@ Giai đoạn 16/55 kết thúc `EXPECTED_RED` đã xác minh.
 Giai đoạn 17/55 là `PATCH 08`: giữ hàm mở hạng gốc không,
 đổi `one_based` thành `legacy_rank0=one_based-1`
 trước lời gọi. Chưa thêm bản vá trong giai đoạn 16.
+
+## Giai đoạn 17 — Bản vá 08: ánh xạ hạng về gốc không
+
+Giữ nguyên module lịch sử `LegacyPermutationUnrank0` và cả
+thuật toán mở hạng bằng giai thừa. Bản vá chỉ thay đường gọi
+trong `BowlOrderManager.order_from_drop`:
+
+```text
+one_based = rem(drop-1,720)+1
+legacy_rank0 = one_based-1
+order = old_permutation_unrank0(legacy_rank0)
+```
+
+Vì `drop` thuộc các số nguyên dương, `rem(drop-1,720)`
+bằng phép dư chuẩn không âm, nên `legacy_rank0` thuộc
+0..719. Kết quả đúng cả hạng 1 và 720, không còn quay vòng
+sai qua 720 trong đường sản xuất. Hàm legacy trực tiếp vẫn
+giữ nguyên cách hiểu hạng gốc không và tính chu kỳ của nó.
+
+Bốn hồi quy chuẩn từ DISCOVERY 08 không thay đổi và phải
+chuyển sang xanh. Các bài kiểm soát đã đòi kết quả sai
+được thay bằng kiểm tra đồng thời đường chuẩn và lời gọi
+legacy thô vẫn lệch một hạng. Thêm 14 bài kiểm thử mới
+để so sánh trọn bộ 720 hoán vị, 46 vị trí trong nhiều context,
+các bội 720, số nguyên lớn, không trạng thái dùng chung
+và các bản vá trước. Không triển khai phép rót bát của
+DISCOVERY 09.

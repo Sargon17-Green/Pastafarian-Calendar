@@ -4,8 +4,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Context do
 
   Nhãn ngày và khoảng cách đi qua các bản vá đã hoàn thành.
   Bảng đá đã qua bản vá 04 và bảy giọt ẩn qua bản vá 05.
-  Giọt nhìn thấy đã qua bản vá 07; thứ tự sáu bát tại
-  giai đoạn 16 vẫn dùng sai hạng hoán vị gốc không.
+  Giọt nhìn thấy đã qua bản vá 07; thứ tự sáu bát đã
+  được ánh xạ đúng về hạng gốc không qua bản vá 08.
   Mỗi ngữ cảnh sở hữu dữ liệu của riêng mình.
   """
 
