@@ -33,7 +33,8 @@ fn test_discovery06_expected_red_slot_minus_six_hidden_seven() {
 fn test_discovery06_control_positive_slot_reads_visible_one() {
 	foundation := big_from_i64(-15_055_671)
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
-	visible := [big_zero(), big_from_int(124), big_from_int(248), big_from_int(372)]
+	visible := [big_zero(), big_from_int(124), big_from_int(248),
+		big_from_int(372)]
 	got := calendar_prior_spaghetti(visible, hidden, 4, 3) or { big_zero() }
 	assert got.str() == '124'
 }
@@ -41,7 +42,8 @@ fn test_discovery06_control_positive_slot_reads_visible_one() {
 fn test_discovery06_control_positive_slot_reads_visible_three() {
 	foundation := big_from_i64(-15_055_671)
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
-	visible := [big_zero(), big_from_int(124), big_from_int(248), big_from_int(372)]
+	visible := [big_zero(), big_from_int(124), big_from_int(248),
+		big_from_int(372)]
 	got := calendar_prior_spaghetti(visible, hidden, 4, 1) or { big_zero() }
 	assert got.str() == '372'
 }
