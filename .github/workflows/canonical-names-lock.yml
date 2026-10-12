@@ -156,3 +156,5 @@ jobs:
         run: |
           test "${{ steps.discovery_overwritten_drop46_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage22Tests/PastafarianCalendar.Stage22Tests.csproj --configuration Release -- --verify-expected-red
+      - name: إثبات صحة الالتقاط المحمي لترتيب القطرة السادسة والأربعين
+        run: dotnet run --project tests/PastafarianCalendar.Stage23Tests/PastafarianCalendar.Stage23Tests.csproj --configuration Release

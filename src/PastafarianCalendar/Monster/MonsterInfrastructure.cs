@@ -389,6 +389,75 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("وعاء نهائي خارج الحفظ.");
     }
 
+    // يُفحص الالتقاط المحمي من موضعه في الحلقة قبل تثبيت أي حالة.
+    public void ValidateProtectedDrop46Sauce(
+        MonsterContext context, ProtectedDrop46SauceCandidate candidate)
+    {
+        if (context.PatchedOrderAt46Latch is not null ||
+            context.PatchedSauceFinalBowls is not null ||
+            context.PatchedSauceBowlsAfterDrops is not null ||
+            context.PatchedPostStirOrders is not null ||
+            context.LegacySauceFinalBowls is not null ||
+            context.LegacyOverwrittenQueryOrder is not null ||
+            context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سياق الصلصة المحمية مشغول مسبقاً.");
+
+        if (candidate is null || candidate.Historical is null ||
+            candidate.Patched is null ||
+            candidate.Patched.OrderAt46Latch is null ||
+            candidate.Patched.OrderAt46Latch.Length != 6 ||
+            candidate.Patched.BowlsAfterDrops is null ||
+            candidate.Patched.BowlsAfterDrops.Length != 7 ||
+            candidate.Patched.FinalBowls is null ||
+            candidate.Patched.FinalBowls.Length != 7 ||
+            candidate.Patched.PostStirOrders is null ||
+            candidate.Patched.PostStirOrders.Length != 13 ||
+            candidate.Patched.BowlsAfterDrops[0] != BigInteger.Zero ||
+            candidate.Patched.FinalBowls[0] != BigInteger.Zero ||
+            !candidate.Patched.OrderAt46Latch.OrderBy(x => x)
+                .SequenceEqual(new[]{1,2,3,4,5,6}) ||
+            ReferenceEquals(candidate.Patched.OrderAt46Latch,
+                candidate.Historical.DiagnosticDrop46Order) ||
+            ReferenceEquals(candidate.Patched.OrderAt46Latch,
+                candidate.Historical.OverwrittenQueryOrder) ||
+            ReferenceEquals(candidate.Patched.FinalBowls,
+                candidate.Historical.FinalBowls) ||
+            ReferenceEquals(candidate.Patched.BowlsAfterDrops,
+                candidate.Historical.BowlsAfterDrops) ||
+            ReferenceEquals(candidate.Patched.FinalBowls,
+                candidate.Patched.BowlsAfterDrops))
+            throw new MonsterValidationException("المرشح المحمي لا يملك صوراً منفصلةً تامة.");
+
+        // شاهد الالتقاط لا يُستخرج من ترتيب الجولة الثانية عشرة.
+        var expectedDrop46 = new BowlOrderPatchWrapper()
+            .OrderPatchFromValue(candidate.Historical.Source.Visible[46]).Order;
+        if (!candidate.Patched.OrderAt46Latch.SequenceEqual(expectedDrop46) ||
+            !candidate.Patched.OrderAt46Latch.SequenceEqual(
+                candidate.Historical.DiagnosticDrop46Order))
+            throw new MonsterValidationException("الالتقاط لا يساوي ترتيب القطرة 46.");
+
+        var replay = new Drop46OrderLatchWrapper().Run(candidate.Historical.Source);
+        if (!candidate.Patched.BowlsAfterDrops.SequenceEqual(replay.BowlsAfterDrops) ||
+            !candidate.Patched.FinalBowls.SequenceEqual(replay.FinalBowls) ||
+            !candidate.Patched.FinalBowls.SequenceEqual(candidate.Historical.FinalBowls) ||
+            !candidate.Patched.BowlsAfterDrops.SequenceEqual(candidate.Historical.BowlsAfterDrops) ||
+            !candidate.Patched.OrderAt46Latch.SequenceEqual(replay.OrderAt46Latch))
+            throw new MonsterValidationException("الصلصة المصححة لا تطابق إعادة الحساب.");
+
+        for(var stir=1;stir<=12;stir++)
+        {
+            var trace=candidate.Patched.PostStirOrders[stir];
+            if(trace is null || trace.Length != 6 ||
+               !trace.SequenceEqual(replay.PostStirOrders[stir]) ||
+               !trace.SequenceEqual(candidate.Historical.PostStirOrders[stir]) ||
+               ReferenceEquals(trace,candidate.Patched.OrderAt46Latch) ||
+               ReferenceEquals(trace,candidate.Historical.PostStirOrders[stir]))
+                throw new MonsterValidationException("ترتيب تحريك لاحق عُدّل أو يشارك ذاكرة الالتقاط.");
+        }
+        if(candidate.Patched.FinalBowls.Skip(1).Any(x=>x<1))
+            throw new MonsterValidationException("وعاء نهائي غير محفوظ.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -491,6 +560,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyInPlaceBowlStirPhaseHandler _legacyInPlaceStir;
     private readonly ShadowBowlStirPhaseHandler _shadowStir;
     private readonly LegacyOverwrittenDrop46Sauce _legacyOverwrittenSauce;
+    private readonly ProtectedDrop46SaucePhaseHandler _protectedDrop46Sauce;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -516,6 +586,7 @@ public sealed class MonsterDispatcher
         _legacyInPlaceStir = new LegacyInPlaceBowlStirPhaseHandler();
         _shadowStir = new ShadowBowlStirPhaseHandler();
         _legacyOverwrittenSauce = new LegacyOverwrittenDrop46Sauce();
+        _protectedDrop46Sauce = new ProtectedDrop46SaucePhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -1063,6 +1134,51 @@ public sealed class MonsterDispatcher
         context.Status="LEGACY_OVERWRITTEN_DROP46_ORDER_COMPLETE";
     }
 
+    public void DispatchProtectedDrop46Sauce(MonsterContext context)
+    {
+        if(!string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("التقاط الترتيب يحتاج سياقاً مؤسساً.");
+        if(context.PatchedOrderAt46Latch is not null ||
+           context.PatchedSauceFinalBowls is not null ||
+           context.PatchedSauceBowlsAfterDrops is not null ||
+           context.PatchedPostStirOrders is not null ||
+           context.LegacySauceFinalBowls is not null ||
+           context.LegacyDiagnosticDrop46Order is not null ||
+           context.LegacyOverwrittenQueryOrder is not null ||
+           context.LegacyPostStirOrders is not null ||
+           context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سياق الالتقاط غير خالٍ.");
+
+        var candidate=_protectedDrop46Sauce.Handle(context);
+        _validation.ValidateVisibleDropPatch(context,candidate.Historical.Source);
+        _validation.ValidateLegacyOverwrittenSauce(context,candidate.Historical);
+        _validation.ValidateProtectedDrop46Sauce(context,candidate);
+
+        context.PatchedCountsResult=candidate.Historical.Source.Counts;
+        context.PatchedStoneRows=candidate.Historical.Source.Stones;
+        context.LegacyHiddenReversed=candidate.Historical.Source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess=candidate.Historical.Source.HiddenAccessor;
+        context.PatchedVisibleDrops=candidate.Historical.Source.Visible;
+
+        context.LegacyDiagnosticDrop46Order=candidate.Historical.DiagnosticDrop46Order;
+        context.LegacyOverwrittenQueryOrder=candidate.Historical.OverwrittenQueryOrder;
+        context.LegacyPostStirOrders=candidate.Historical.PostStirOrders;
+        context.LegacySauceBowlsAfterDrops=candidate.Historical.BowlsAfterDrops;
+        context.LegacySauceFinalBowls=candidate.Historical.FinalBowls;
+
+        context.PatchedOrderAt46Latch=candidate.Patched.OrderAt46Latch;
+        context.PatchedSauceBowlsAfterDrops=candidate.Patched.BowlsAfterDrops;
+        context.PatchedSauceFinalBowls=candidate.Patched.FinalBowls;
+        context.PatchedPostStirOrders=candidate.Patched.PostStirOrders;
+
+        context.BranchTrace.Add("LEGACY_OVERWRITTEN_DROP46_ORDER_WITNESS");
+        context.BranchTrace.Add("PROTECTED_DROP46_ORDER_LATCH");
+        _metrics.Bump(context,"legacy.overwritten.drop46.order.witness");
+        _metrics.Bump(context,"protected.drop46.latch.dispatch");
+        context.Phase="PROTECTED_DROP46_ORDER_LATCH_COMPLETE";
+        context.Status="PROTECTED_DROP46_ORDER_LATCH_COMPLETE";
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -1499,6 +1615,26 @@ public sealed class MonsterManager
         return new LegacySauceResult(
             (BigInteger[])context.LegacySauceFinalBowls.Clone(),
             (int[])context.LegacyOverwrittenQueryOrder.Clone());
+    }
+
+    public MonsterContext ExecuteProtectedDrop46Sauce(
+        BigInteger calculationDay,BigInteger targetDay)
+    {
+        var context=Prepare(calculationDay,targetDay);
+        _dispatcher.DispatchProtectedDrop46Sauce(context);
+        return context;
+    }
+
+    public LegacySauceResult EvaluateLatchedSauce(
+        BigInteger calculationDay,BigInteger targetDay)
+    {
+        var context=ExecuteProtectedDrop46Sauce(calculationDay,targetDay);
+        if(context.PatchedSauceFinalBowls is null ||
+           context.PatchedOrderAt46Latch is null)
+            throw new MonsterValidationException("لم تُعتمد الصلصة ذات الالتقاط المحمي.");
+        return new LegacySauceResult(
+            (BigInteger[])context.PatchedSauceFinalBowls.Clone(),
+            (int[])context.PatchedOrderAt46Latch.Clone());
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

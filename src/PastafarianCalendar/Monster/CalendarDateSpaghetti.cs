@@ -176,6 +176,11 @@ public static class CalendarDateSpaghetti
         BigInteger calculationDay,BigInteger targetDay)
         => new MonsterManager().EvaluateLegacyOverwrittenSauce(calculationDay,targetDay);
 
+    // ترتيب القطرة 46 محفوظ قبل التحريكات ولا تعيد هذه الجولات الكتابة فيه.
+    public static LegacySauceResult EvaluateLatchedSauce(
+        BigInteger calculationDay,BigInteger targetDay)
+        => new MonsterManager().EvaluateLatchedSauce(calculationDay,targetDay);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

@@ -105,6 +105,12 @@ public sealed class MonsterContext
     public BigInteger[]? LegacySauceBowlsAfterDrops { get; set; }
     public BigInteger[]? LegacySauceFinalBowls { get; set; }
 
+    // الالتقاط الثابت بعد القطرة 46 لا تتصل به ترتيب التحريكات اللاحقة.
+    public int[]? PatchedOrderAt46Latch { get; set; }
+    public BigInteger[]? PatchedSauceBowlsAfterDrops { get; set; }
+    public BigInteger[]? PatchedSauceFinalBowls { get; set; }
+    public int[][]? PatchedPostStirOrders { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
