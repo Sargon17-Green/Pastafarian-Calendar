@@ -102,3 +102,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 19 — PATCH 09
 
 የታሪካዊው `old_pours_fixed_bowls` እና `LegacyPourAdapter` እንዳሉ ይቆያሉ። `PourPatch09.install_bowl_alias(order)` ለስድስቱ ቦታዎች `bowl_alias[position]=order[position-1]` የሚለውን የV ባለ-ዜሮ ኢንዴክስ ልዩነት የሚከተል ካርታ ይፈጥራል። የ`bowl_by_legacy_position` የተለየ የማንበቢያ መንገድ በ`bowls[bowl_alias[position]]` ላይ ይሠራል፤ `PourPatch09.pour` በዚህ ካርታ ከተሞላ ባለ-ቦታ የ`legacy_view` ሰልፍ በኋላ የታሪክ `BaseDispatcher.dispatch_legacy_pours` ጥሪን በእውነት ያከናውናል። የታሪክ መንገድና አዲሱ production መንገድ በአንድ ሙከራ ውስጥ ሊታዩ ይችላሉ። የደረጃ 18 አራቱ RED assertions ሳይቀየሩ GREEN መሆን አለባቸው፤ የታሪክ ምስክሮች የታሪክ ጥሪውን በdispatcher በቀጥታ ይጠቀማሉ። የ`PATCH 10` የvault/pending ተግባር አልተጨመረም። V 0.5.2 (`7647ce1`) በGitHub Actions run `38246568417` ተረጋግጧል፤ `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` 28/28 PASS። የደረጃ 18 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=19` ነው። ዝርዝር፦ `docs/STAGE19_PATCH09.md`።
+
+## ደረጃ 20 — DISCOVERY 10
+
+`old_stir_bowls_in_place` ስድስቱን ጎድጓዳ ሳህኖች በየቅደም ተከተላቸው በእውነት በቀድሞው `bowls` መያዣ ላይ ይጽፋል። `prev` እና `next` የሚለውን ሲያነብ ከቀድሞው ዙር ተቀይሮ የተጻፈ እሴት ቢኖር ያንኑ ያነባል። የስህተቱ ቦታ በአንድ ትልቅ ዙር ውስጥ የስድስቱ ጽሑፎች አቀማመጥ ነው፤ የዙሩ ቅደም ተከተል፣ የቦታ የድንጋይ ምርጫ፣ `PATCH 09` የalias ማፍሰሻዎች እና `SAVE` የሂሳብ መንገድ ተጠብቀዋል። `LegacyBowlStirAdapter` የጠሪውን ሰልፍ ለይቶ በ`old_stir_bowls_in_place` ስህተቱን በውስጡ ይፈጽማል። `calendar_stir_bowls_spaghetti` በproduction ወደዚሁ መንገድ ይሄዳል። አራት `EXPECTED_RED` assertions እና የታሪክ GREEN ምስክሮች ተጨምረዋል። `PATCH 10` የ`vaultOld/pending` ሁለት-ደረጃ ስሌት ገና አልተጨመረም። `LAST_COMPLETED_STAGE=19` እስከ native CI ማረጋገጫ ይቆያል። ዝርዝር፦ `docs/STAGE20_DISCOVERY10.md`።

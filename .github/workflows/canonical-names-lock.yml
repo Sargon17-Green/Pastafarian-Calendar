@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage19_native_v:
-    name: V 0.5.2 — PATCH 09 validated GREEN
+  stage20_native_v:
+    name: V 0.5.2 — DISCOVERY 10 EXPECTED_RED
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -51,6 +51,15 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
+      - name: Inspect native V stage 20 formatter — temporary
+        shell: bash
+        run: |
+          set -euo pipefail
+          v fmt -w ./pastafari/legacy_bowl_stir.v
+          v fmt -w ./pastafari/discovery10_witness_test.v
+          v fmt -w ./pastafari/discovery10_expected_red_test.v
+          v fmt -w ./pastafari/monster_base.v
+          git --no-pager diff -- ./pastafari/legacy_bowl_stir.v ./pastafari/discovery10_witness_test.v ./pastafari/discovery10_expected_red_test.v ./pastafari/monster_base.v
       - name: Verify V version and source formatting
         shell: bash
         run: |
@@ -149,15 +158,40 @@ jobs:
           v test ./pastafari/discovery09_expected_red_test.v
       - name: PATCH 09 — all 720 orders, alias read routing, saved legacy and large integers
         run: v test ./pastafari/patch09_test.v
-      - name: Stage 19 — full native V regression suite
+      - name: DISCOVERY 10 — in-place historical stirring witnesses
+        run: v test ./pastafari/discovery10_witness_test.v
+      - name: DISCOVERY 10 — four intentional RED snapshot assertions
         shell: bash
         run: |
           set -euo pipefail
-          v test ./pastafari 2>&1 | tee stage19_green.log
-      - name: Preserve stage 19 native V evidence
+          v -check ./pastafari/discovery10_expected_red_test.v
+          set +e
+          v test ./pastafari/discovery10_expected_red_test.v 2>&1 | tee stage20_expected_red.log
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo '::error::DISCOVERY 10 unexpectedly GREEN before PATCH 10'
+            exit 1
+          fi
+          for test_name in \
+            test_discovery10_expected_red_identity_second_bowl_snapshot \
+            test_discovery10_expected_red_identity_last_bowl_snapshot \
+            test_discovery10_expected_red_reversed_fifth_bowl_snapshot \
+            test_discovery10_expected_red_rotated_third_bowl_snapshot; do
+            if ! grep -Fq "$test_name" stage20_expected_red.log; then
+              echo "::error::Missing intentional RED assertion: $test_name"
+              exit 1
+            fi
+          done
+          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage20_expected_red.log; then
+            echo '::error::Unexpected error instead of test assertion divergence'
+            exit 1
+          fi
+          echo 'DISCOVERY 10 — four intended RED snapshot assertions verified'
+      - name: Preserve stage 20 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage19-green-evidence
-          path: stage19_green.log
+          name: v-amharic-stage20-red-evidence
+          path: stage20_expected_red.log
           if-no-files-found: ignore

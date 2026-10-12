@@ -165,3 +165,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 19 መዝጊያ — GREEN
 
 የመጀመሪያው የGitHub Actions run `38246157972` ሙሉ 28/28 የV ፈተና ፋይሎችን PASS አድርጓል። የV 0.5.2 formatter በ`discovery09_witness_test.v`፣ `monster_base.v` እና `patch09_test.v` የረድፍ አቀማመጥ ልዩነቶችን አሳይቷል። በቀጥታ ከnative formatter የተገኙት ልዩነቶች ተግብረው፣ ጊዜያዊ የformatter ምርመራ እርምጃ ተወግዷል። በcommit `0e49358618324e1200ab537d5658edc9da23e870` ላይ GitHub Actions run `38246568417` በሁለቱም ሥራዎች PASS ነው። `v fmt -verify ./pastafari` PASS፤ `v test ./pastafari` **28/28 PASS**። የደረጃ 18 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። `old_pours_fixed_bowls` በቋሚ ID የሚያነበው ታሪካዊ ስህተት ተጠብቋል፤ `PourPatch09` በየጥሪው የራሱን `bowl_alias` ይገነባል። የማስረጃ ቅርስ `11745502741` ተቀምጧል። `PATCH 10` አልተጀመረም። **ደረጃ 19 COMPLETE / GREEN።**
+
+## ደረጃ 20 — DISCOVERY 10 (በV CI ማረጋገጫ ላይ)
+
+`old_stir_bowls_in_place` በቦታ 1..6 ውስጥ በ`order` የተመረጠውን `id` በቀጥታ ወደ `bowls[id]` ይጽፋል። ከዚህ በኋላ የተጻፈውን አዲስ እሴት ለቀጣዩ `prev` ወይም `next` ሊያነብ ይችላል። የሒሳብ አባሎች `s=B[id]+2*B[prev]+3*B[next]+pour[position]+drop+stoneByPosition` እና `SAVE(s*s+5*B[prev]*B[next]+i*position)` ናቸው። ይህ ትክክለኛ የሂሳብ መስመር ላይ የተሳሳተ የstate ባለቤትነት ነው። `LegacyBowlStirAdapter` የጠሪ መረጃን ለይቶ አሮጌውን በተከታታይ ማስቀመጥ በእውነት ያከናውናል። ለ`B=[10,20,30,40,50,60],drop=2,i=1` በidentity ቅደም ተከተል ሁለተኛው ጎድጓዳ ሳህን ከ`564002` ፈንታ `96572653728` ይሆናል። የ`PATCH 10` ትክክለኛ snapshot እና pending ደረጃ 21 ብቻ ይመጣሉ።
