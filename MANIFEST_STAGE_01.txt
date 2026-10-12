@@ -71,6 +71,7 @@ t/41_stream_histogram_callback.t
 t/42_indexed_histogram_store.t
 t/43_indexed_suffix_and_rank.t
 t/44_indexed_lifecycle.t
+t/45_indexed_runner_blocked.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 t/lib/Pastafari/WeavingPolynomialStream.pm

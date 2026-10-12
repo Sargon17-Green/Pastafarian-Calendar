@@ -97,7 +97,8 @@ while (1) {
         printf "INDEXED_ROUNDTRIP status=BLOCKED reason=%s elapsed=%.3fs observed_RSS_KiB=%d\n",
             $cause,time()-$start,$peak;
         print "INDEXED_ROUNDTRIP_CHECK_COMPLETE passed=0 blocked=1 failed=0\n";
-        last;
+        # 資源封頂時不能向 GitHub Actions 回報成功。
+        exit 3;
     }
     sleep(0.025);
 }
