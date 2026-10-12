@@ -79,6 +79,13 @@ public sealed class MonsterContext
     public int? PatchedBowlLegacyRank0 { get; set; }
     public int[]? PatchedBowlOrderResult { get; set; }
 
+    // الصبّ التاريخي التاسع يستخدم أسماء الأوعية الثابتة لا مواضعها المتحركة.
+    public int? LegacyPourVisibleIndex { get; set; }
+    public BigInteger? LegacyPourDrop { get; set; }
+    public BigInteger[]? LegacyPourInitialBowls { get; set; }
+    public int[]? LegacyPourOrder { get; set; }
+    public BigInteger[]? LegacyPoursResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

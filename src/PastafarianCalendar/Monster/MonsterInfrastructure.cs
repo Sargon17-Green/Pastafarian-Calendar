@@ -170,6 +170,47 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("شاهد ترتيب الأوعية التاريخي غير مطابق للندبة.");
     }
 
+    // فحص المرشح التاريخي لا يطبق alias؛ الصبّ الثابت يبقى أثر الخطأ التاسع.
+    public void ValidateLegacyPours(MonsterContext context, LegacyPoursCandidate candidate)
+    {
+        if (context.LegacyPourVisibleIndex is not int i || i is < 1 or > 46 ||
+            context.LegacyPoursResult is not null ||
+            context.LegacyPourDrop.HasValue ||
+            context.LegacyPourOrder is not null ||
+            context.LegacyPourInitialBowls is not null ||
+            context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("حالة الصبّ التاريخي ليست خالية أو رتبة القطرة غير صالحة.");
+
+        if (candidate is null || candidate.Source is null ||
+            candidate.Source.Visible is null || candidate.Source.Visible.Length != 47 ||
+            candidate.Source.Stones is null || candidate.Source.Stones.Length != 47 ||
+            candidate.Source.Counts is null ||
+            candidate.Source.Visible[i] != candidate.Drop ||
+            candidate.InitialBowls is null || candidate.InitialBowls.Length != 7 ||
+            candidate.InitialBowls[0] != BigInteger.Zero ||
+            candidate.Order is null || candidate.Order.Length != 6 ||
+            !candidate.Order.OrderBy(x => x).SequenceEqual(new[] {1, 2, 3, 4, 5, 6}) ||
+            candidate.Pours is null || candidate.Pours.Length != 7 ||
+            candidate.Pours[0] != BigInteger.Zero ||
+            candidate.Pours[4] != BigInteger.Zero ||
+            candidate.Pours[5] != BigInteger.Zero ||
+            candidate.Pours[6] != BigInteger.Zero)
+            throw new MonsterValidationException("حزمة الصبّ التاريخية ليست مكتملة.");
+
+        var order = new BowlOrderPatchWrapper().OrderPatchFromValue(candidate.Drop).Order;
+        if (!candidate.Order.SequenceEqual(order))
+            throw new MonsterValidationException("ترتيب القطرة لا يوافق الرقعة الثامنة.");
+
+        var expectedBowls = new LegacyBowlFactory().InitialBowls(candidate.Source.Counts);
+        if (!candidate.InitialBowls.SequenceEqual(expectedBowls))
+            throw new MonsterValidationException("مصنَع الأوعية الأولي لا يوافق خماسية العمل.");
+
+        var expectedPours = new LegacyFixedBowlPours().PourIntoFixedIdentifiers(
+            i, candidate.Drop, candidate.InitialBowls, candidate.Source.Stones);
+        if (!candidate.Pours.SequenceEqual(expectedPours))
+            throw new MonsterValidationException("قيمة الصبّ القديم لا تطابق قراءة أسماء الأوعية الثابتة.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -267,6 +308,7 @@ public sealed class MonsterDispatcher
     private readonly VisibleDropPatchPhaseHandler _visibleDropPatch;
     private readonly LegacyBowlPermutationPhaseHandler _legacyBowlPermutation;
     private readonly BowlOrderPatchWrapper _bowlOrderPatch;
+    private readonly LegacyPoursPhaseHandler _legacyPours;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -287,6 +329,7 @@ public sealed class MonsterDispatcher
         _visibleDropPatch = new VisibleDropPatchPhaseHandler();
         _legacyBowlPermutation = new LegacyBowlPermutationPhaseHandler();
         _bowlOrderPatch = new BowlOrderPatchWrapper();
+        _legacyPours = new LegacyPoursPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -651,6 +694,38 @@ public sealed class MonsterDispatcher
         context.Phase = "BOWL_ORDER_PATCH_COMPLETE";
     }
 
+    public void DispatchLegacyPours(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("لا يجوز صبّ الأوعية التاريخي قبل تأسيس السياق.");
+        if (context.LegacyPourVisibleIndex is not int i || i is < 1 or > 46 ||
+            context.LegacyPoursResult is not null ||
+            context.LegacyPourDrop.HasValue ||
+            context.LegacyPourOrder is not null ||
+            context.LegacyPourInitialBowls is not null ||
+            context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سياق الصبّ القديم ناقص أو مشغول مسبقاً.");
+
+        // تُحسب كل الطبقات الثمانية السابقة والقيم التاريخية في متغيرات محلية.
+        var candidate = _legacyPours.Handle(context);
+        _validation.ValidateLegacyPours(context, candidate);
+
+        context.PatchedCountsResult = candidate.Source.Counts;
+        context.PatchedStoneRows = candidate.Source.Stones;
+        context.LegacyHiddenReversed = candidate.Source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess = candidate.Source.HiddenAccessor;
+        context.PatchedVisibleDrops = candidate.Source.Visible;
+        context.LegacyPourDrop = candidate.Drop;
+        context.LegacyPourInitialBowls = candidate.InitialBowls;
+        context.LegacyPourOrder = candidate.Order;
+        context.LegacyPoursResult = candidate.Pours;
+
+        context.BranchTrace.Add("LEGACY_FIXED_BOWL_POURS");
+        _metrics.Bump(context, "legacy.fixed.bowl.pours.dispatch");
+        context.Phase = "LEGACY_FIXED_BOWL_POURS_COMPLETE";
+        context.Status = "LEGACY_FIXED_BOWL_POURS_COMPLETE";
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -997,6 +1072,25 @@ public sealed class MonsterManager
         return ExecutePatchedBowlOrderFromVisibleDrop(
             calculationDay, targetDay, index).PatchedBowlOrderResult
             ?? throw new MonsterValidationException("لم يُنتج ترتيب القطرة الظاهرة.");
+    }
+
+    public MonsterContext ExecuteLegacyFixedBowlPours(
+        BigInteger calculationDay, BigInteger targetDay, int visibleIndex)
+    {
+        if (visibleIndex is < 1 or > 46)
+            throw new MonsterValidationException("موضع القطرة المرئية للصبّ خارج المجال.");
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacyPourVisibleIndex = visibleIndex;
+        _dispatcher.DispatchLegacyPours(context);
+        return context;
+    }
+
+    public BigInteger[] EvaluateLegacyFixedBowlPours(
+        BigInteger calculationDay, BigInteger targetDay, int visibleIndex)
+    {
+        return ExecuteLegacyFixedBowlPours(calculationDay, targetDay, visibleIndex)
+            .LegacyPoursResult ?? throw new MonsterValidationException(
+                "لم تُثبَت المزائج القديمة للأوعية الثلاثة.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

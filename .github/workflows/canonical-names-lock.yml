@@ -125,3 +125,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage16Tests/PastafarianCalendar.Stage16Tests.csproj --configuration Release -- --verify-expected-red
       - name: مطابقة رقعة ترتيب الأوعية الثامنة مع المرجع
         run: dotnet run --project tests/PastafarianCalendar.Stage17Tests/PastafarianCalendar.Stage17Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لمزائج الأوعية الثابتة
+        id: discovery_fixed_pours_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage18Tests/PastafarianCalendar.Stage18Tests.csproj --configuration Release
+      - name: إثبات توقيع الخلط بين هوية الوعاء وموقعه دون رقعة
+        if: always()
+        run: |
+          test "${{ steps.discovery_fixed_pours_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage18Tests/PastafarianCalendar.Stage18Tests.csproj --configuration Release -- --verify-expected-red

@@ -145,6 +145,14 @@ public static class CalendarDateSpaghetti
             calculationDay, targetDay, index);
     }
 
+    // الصبّ التاسع التاريخي يستخدم هويات الأوعية الثابتة لا ترتيب المواضع.
+    public static BigInteger[] EvaluateLegacyFixedBowlPours(
+        BigInteger calculationDay, BigInteger targetDay, int visibleIndex)
+    {
+        return new MonsterManager().EvaluateLegacyFixedBowlPours(
+            calculationDay, targetDay, visibleIndex);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
