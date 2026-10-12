@@ -2,6 +2,8 @@ package org.pastafari.javalojban;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public final class MonsterWeavingLinearCounter {
     public static final int MAX_DAYS = 5778;
@@ -12,6 +14,17 @@ public final class MonsterWeavingLinearCounter {
     public static final int MAX_ROUTE_BRANCH_COUNTS_PER_CALL = 64;
     private static final BigInteger ZERO = BigInteger.ZERO;
     private static final BigInteger ONE = BigInteger.ONE;
+
+    // Immutable binomial columns are shared across suffix counts of this family.
+    // The access-ordered bound prevents unbounded growth for heterogeneous months.
+    private static final int MAX_CACHED_BINOMIAL_COLUMNS = 8;
+    private final Map<Integer, BigInteger[]> binomialColumns =
+        new LinkedHashMap<Integer, BigInteger[]>(16, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<Integer, BigInteger[]> eldest) {
+                return size() > MAX_CACHED_BINOMIAL_COLUMNS;
+            }
+        };
 
     private final int[] lengths;
     private final int totalDays;
@@ -89,16 +102,24 @@ public final class MonsterWeavingLinearCounter {
         totalDays = days;
     }
 
-    private static BigInteger[] chooseColumn(int total, int width) {
-        BigInteger[] binomial = new BigInteger[total + 1];
-        BigInteger current = ONE;
-        binomial[width] = current;
-        for (int n = width + 1; n <= total; n++) {
-            current = current.multiply(BigInteger.valueOf(n))
-                .divide(BigInteger.valueOf(n - width));
-            binomial[n] = current;
+    private BigInteger[] chooseColumn(int total, int width) {
+        if (width < 0 || width > total || total > totalDays) {
+            throw new IllegalStateException("E_WEAVE_BINOMIAL_BOUNDS");
         }
-        return binomial;
+        synchronized (binomialColumns) {
+            BigInteger[] cached = binomialColumns.get(width);
+            if (cached != null) return cached;
+            BigInteger[] column = new BigInteger[totalDays + 1];
+            BigInteger current = ONE;
+            column[width] = current;
+            for (int n = width + 1; n <= totalDays; n++) {
+                current = current.multiply(BigInteger.valueOf(n))
+                    .divide(BigInteger.valueOf(n - width));
+                column[n] = current;
+            }
+            binomialColumns.put(width, column);
+            return column;
+        }
     }
 
     private BigInteger countSuffix(State state) {

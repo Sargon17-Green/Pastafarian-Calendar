@@ -13,6 +13,7 @@ public final class Stage02IncrementalRouteTests {
         exhaustiveOracleUnderSingleCountBudget();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
+        binomialCacheCallOrderNeutrality();
         multiCallFullYearInteriorWithOneCountPerCall();
         zeroBudgetDoesNotLoseSavedWork();
         System.out.println("STAGE_02_INCREMENTAL_ROUTE_PASS checks=" + checks
@@ -213,6 +214,38 @@ public final class Stage02IncrementalRouteTests {
             + " branch_counts=" + totalCounts
             + " calls_with_saved_probes=" + callsWithPersistedProbes
             + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
+    }
+
+    private static void binomialCacheCallOrderNeutrality() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter warm =
+            new MonsterWeavingLinearCounter(lengths);
+        MonsterWeavingLinearCounter cold =
+            new MonsterWeavingLinearCounter(lengths);
+        int[] first = warm.lexFirst();
+        int[] last = warm.lexLast();
+        int[] firstPrefix = Arrays.copyOf(first, 7);
+        int[] lastPrefix = Arrays.copyOf(last, 7);
+
+        // Exercise both cache-warming orders and repeated lookups. The other
+        // instance supplies independently computed cold-cache results.
+        BigInteger expectedFirst = cold.countAfterPrefix(firstPrefix);
+        BigInteger expectedLast = cold.countAfterPrefix(lastPrefix);
+        eq(expectedFirst, warm.countAfterPrefix(firstPrefix),
+            "E_BINOMIAL_COLD_FIRST");
+        eq(expectedLast, warm.countAfterPrefix(lastPrefix),
+            "E_BINOMIAL_COLD_LAST");
+        eq(expectedLast, warm.countAfterPrefix(lastPrefix),
+            "E_BINOMIAL_WARM_LAST");
+        eq(expectedFirst, warm.countAfterPrefix(firstPrefix),
+            "E_BINOMIAL_WARM_FIRST");
+        eq(expectedFirst, cold.countAfterPrefix(firstPrefix),
+            "E_BINOMIAL_COLD_REVISIT_FIRST");
+        eq(expectedLast, cold.countAfterPrefix(lastPrefix),
+            "E_BINOMIAL_COLD_REVISIT_LAST");
+        eq(cold.count(), warm.count(), "E_BINOMIAL_ROOT_CACHE_NEUTRAL");
     }
 
     private static void zeroBudgetDoesNotLoseSavedWork() {
