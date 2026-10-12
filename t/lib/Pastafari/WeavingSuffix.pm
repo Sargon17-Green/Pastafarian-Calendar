@@ -51,6 +51,32 @@ sub _sum_distribution ($distribution) {
     return $sum;
 }
 
+# 所有月份皆已首次出現時，剩餘序列只保留末次順序的
+# 約束。最末月份必須在最末日出現，其前 k-1 次出現位置
+# 可從前 N-1 日中選擇。移除此月份後再次應用相同定理。
+# 乘積的每一項都是精確 Math::BigInt 組合數，無需展開
+# 一維 E 或二維 D 分布。
+sub _full_open_last_order_count ($remaining, $closed) {
+    my $total=0;
+    $total += $_ for @$remaining;
+    my $answer=Math::BigInt->bone;
+    for (my $j=$#$remaining; $j>$closed; $j--) {
+        my $k=$remaining->[$j];
+        die "所有月份已開啟時，未結束月份必須有剩餘日數\n"
+            if $k < 1;
+        my $choose=Math::BigInt->bone;
+        my $n=$total-1;
+        my $r=$k-1;
+        $r=$n-$r if $r>$n-$r;
+        for my $i (1 .. $r) {
+            $choose->bmul($n-$r+$i)->bdiv($i);
+        }
+        $answer->bmul($choose);
+        $total -= $k;
+    }
+    return $answer;
+}
+
 sub countWeavingSuffixPolynomial ($lengths, $prefix, $stats = undef) {
     die "月份長度必須是陣列參照\n" if ref($lengths) ne 'ARRAY';
     die "月份前綴必須是陣列參照\n" if ref($prefix) ne 'ARRAY';
@@ -100,6 +126,12 @@ sub countWeavingSuffixPolynomial ($lengths, $prefix, $stats = undef) {
         %$stats = (opened => $opened, closed => $closed,
                    days_remaining => $total-@$prefix,
                    stages => 0, max_frontier => 0);
+    }
+
+    if ($opened == $m && $opened > $closed) {
+        # 所有首次出現次序已固定，僅剩最後出現次序。
+        $stats->{full_open_closed_form} = 1 if defined $stats;
+        return _full_open_last_order_count(\@remaining,$closed);
     }
 
     if ($opened == $closed) {
