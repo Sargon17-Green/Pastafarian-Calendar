@@ -16,7 +16,8 @@ use Pastafari::NormativeScroll qw(unrankWeaving);
 my $cases=0;
 for my $lengths ([2,2,2],[3,3,3],[4,4,4,4],[(4)x8],
                  [(4)x47],[(6)x17,(5)x30]) {
-    my @prefix=(1 .. (@$lengths>=3 ? 3 : @$lengths));
+    # 留下至少一個尚未首次出現的月份，強制真正建表。
+    my @prefix=(1,2);
     my %cache;
     my %resident_stats;
     my $resident=countWeavingSuffixFactored($lengths,\@prefix,
