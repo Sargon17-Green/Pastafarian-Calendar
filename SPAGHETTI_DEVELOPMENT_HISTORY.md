@@ -193,3 +193,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 23 — PATCH 11 (native V CI ይጠበቃል)
 
 `LegacyPostStirOrderStore` የአሮጌውን query order በ12ቱ ብስለቶች አሁንም ይደርሳል። የ`PostStirPatch11` ተለያዩ አስተዳዳሪዎች ግን `orderAt46Latch` ን ከእነዚህ በፊት ያደርጋሉ። የታሪክ መንገድ በdispatcher በትክክል ከሄደ በኋላ ከ12 ብስለቶች የተገኙት ስድስት ቦውሎችና የ`savedBowlSum` እንደነበሩ ይመለሳሉ። `order_for_query` ብቻ የአንድ-ጊዜ የላች ቅጂ ይሆናል። `calendar_date_spaghetti` በታሪክ `DISCOVERY_11 wrongQueryOrder` እና በአዲሱ `PATCH_11 latchedOrder` ሁለቱንም ለምርመራ ያሳያል። የ`PATCH 12` አሮጌው ቀጣይ ጎድጓዳ ሳህን አልተጨመረም።
+
+### የደረጃ 23 መዝጊያ — GREEN
+
+የመጀመሪያው GitHub Actions run `38267392920` 34/34 የnative V ፈተና ፋይሎችን አሳክቷል። የV 0.5.2 formatter በ`discovery11_witness_test.v` እና `patch11_test.v` የረድፍ ቅርጽ ልዩነቶችን አሳይቷል። ከnative formatter የተገኙ ልዩነቶች ተግብረው፣ ጊዜያዊ የformatter የምርመራ እርምጃ ከCI ተወግዷል። በcommit `322f955da0160f69873cb4675f5088ff1714a9eb` ላይ GitHub Actions run `38267794496` ሁለቱም ሥራዎች PASS፣ `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **34/34 PASS** ናቸው። ከደረጃ 22 የመጡት አራት RED assertions ሳይቀየሩ GREEN ሆነዋል። የ`old_post_stirs_overwrite_drop46_order` 12 መደረሶች ተጠብቀዋል፤ `PostStirPatch11` የ46ኛውን ቅደም ተከተል አንድ ጊዜ ከpost-stirs በፊት ይቀዳል እንጂ አይደርሰውም። የማስረጃ ቅርስ `11755656678` ነው። የ46 ጠብታዎች ሙሉ መንገድ አልተጠናቀቀም። ደረጃ 24 አልተጀመረም። **ደረጃ 23 COMPLETE / GREEN።**
