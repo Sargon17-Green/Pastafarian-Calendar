@@ -142,3 +142,16 @@ V 0.5.2 (7647ce1) በGitHub Actions run 38282248109 ተረጋግጧል። v fmt 
 ShortRejectionPatch13 ለ1≤n≤M በBigInt የተሰላውን limit=floor(M/n)*n ይጠቀማል። በተመሳሳይ የAnswerStream ክፍል ላይ የanswerAt(k) መልስ ከlimit በላይ ከሆነ ይጥለዋል። መልስ ከተቀበለ በኋላ ብቻ dispatch_legacy_biased_pick ይጠራል። የold_biased_pick የታሪክ ስህተት አልተለወጠም፤ የproduction ምርጫ ግን PATCH 13 ይጠቀማል። የደረጃ 26 አራቱ RED assertions አሁን GREEN ናቸው። n>M wide ምርጫና ሙሉ 46-drop chain ወደ ቀጣይ ደረጃዎች ተቀምጠዋል።
 
 V 0.5.2 (7647ce1) በGitHub Actions run 38284358707 ተረጋግጧል። v fmt -verify PASS፣ v test ./pastafari 40/40 PASS፣ Canonical Names Lock PASS። ዝርዝር፦ docs/STAGE27_PATCH13.md። LAST_COMPLETED_STAGE=27።
+
+
+## ደረጃ 28 — DISCOVERY 14
+
+M=2^127−1። ለn>M ከአነስተኛው M^p>=n የሆነ p የመልስ አሃዞች
+ይወሰዳሉ። ትክክለኛው የwide ሕግ 1+Σ(answerAt(j)−1)*M^j ነው፤
+የold_wide_pick_high_first የታሪክ ስህተት ግን
+አሃዞቹን በbig-first ሥርዓት ይደርዳል።
+የM^p acceptance_limit እና ተመሳሳይ አቅጣጫ
+rejection ሂደት ተጠብቀዋል። አራት የnormative
+EXPECTED_RED ማስረጃዎች በደረጃ 29 PATCH 14 ይጠገናሉ።
+የPATCH 13 short ሕግ አይቀየርም። ሙሉ 46 drops ገና
+አልተተገበሩም። ዝርዝር፦ docs/STAGE28_DISCOVERY14.md።
