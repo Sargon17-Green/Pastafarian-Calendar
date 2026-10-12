@@ -879,6 +879,10 @@ jobs:
           set -euo pipefail
           timeout 80m build_stage56_far/worker "$ANNUS" \
             2>&1 | tee "soak-logs/stage56-far-year-$ANNUS.log"
+          grep -Fx "GRADUS56_ANNUS_REMOTUS_INTERIOR=3/3_PASS YEAR=$ANNUS" \
+            "soak-logs/stage56-far-year-$ANNUS.log"
+          grep -Fx "GRADUS56_ANNUS_REMOTUS_SAVED_SUM=5/5_PASS YEAR=$ANNUS" \
+            "soak-logs/stage56-far-year-$ANNUS.log"
       - name: Servare evidentiam
         if: always()
         uses: actions/upload-artifact@v6

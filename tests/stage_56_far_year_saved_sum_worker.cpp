@@ -78,11 +78,26 @@ int main(int argc, char** argv) {
         const Big c = pastafari::FOUNDATION_DAY_OLD;
         NormativeOracle oracle(false); // saved-sum; non mutans raw-sum
         const Year annus = quaereAnnum(oracle, c, numerus);
-        const std::array<Big, 2> limites{
-            annus.openGateDay + 1, annus.closeGateDay
-        };
-        for (const Big& target : limites) probaDiem(oracle, c, annus, target);
-        std::cout << "GRADUS56_ANNUS_REMOTUS_SAVED_SUM=2/2_PASS YEAR="
+        // Quondam sola duo extrema cuiusque anni remoti probabantur.
+        // Interior anni est nunc quoque observatus: secunda dies, mediana,
+        // et paenultima, ne defectus texturæ inter portas lateat.
+        const Big first = annus.openGateDay + Big{1};
+        const Big second = annus.openGateDay + Big{2};
+        const Big middle = annus.openGateDay
+            + (annus.closeGateDay - annus.openGateDay) / Big{2};
+        const Big penultimate = annus.closeGateDay - Big{1};
+        const Big last = annus.closeGateDay;
+        exige(first < second && second < middle &&
+              middle < penultimate && penultimate < last,
+              "quinque indices diversi in anno remoto exiguntur");
+        const std::array<Big, 5> quinque{
+            first, second, middle, penultimate, last};
+        for (const Big& target : quinque) {
+            probaDiem(oracle, c, annus, target);
+        }
+        std::cout << "GRADUS56_ANNUS_REMOTUS_INTERIOR=3/3_PASS YEAR="
+                  << numerus << '\n';
+        std::cout << "GRADUS56_ANNUS_REMOTUS_SAVED_SUM=5/5_PASS YEAR="
                   << numerus << '\n';
         return 0;
     } catch (const std::exception& e) {

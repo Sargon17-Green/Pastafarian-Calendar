@@ -280,3 +280,26 @@ generantur. Scopus est invariabilitas ordinis vocationum in facie publica
 quae transit self-eating dispatcher. Utraque CI poscit
 `GRADUS56_AC1_ORDO_INVERSUS=10/10_PASS`; status novi SHA non infertur ex
 antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
+
+## Nova probationum distributio pro annis remoti temporis (PENDENS CI)
+
+- Ante hanc mutationem anni `-1`, `0`, `1` singuli solum
+  `openGateDay+1` et `closeGateDay` adversus `NormativeOracle(false)`
+  inspecti erant. In [vigilia 38275899537](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38275899537)
+  hae sex probationes prospere absolverunt; hic cursus totus
+  nondum erat conclusus dum haec auditio scribebatur.
+- Eorum logi testati sunt has longitudines remotas circa
+  `3853`, `5343`, `4617` dies; reliquae dies intra annos necdum
+  directe observatae erant. Nova electio quinque dierum per annum:
+  primus, secundus, medius, paenultimus, ultimus.
+- Omnes quinque singulorum annorum quinos campos
+  `calendarDateSpaghetti(c,t)` contra `calendariumCelerInAnno`
+  referentiae saved-sum independentis comparant.
+  Testis verificat stricte distinctos quinque dies.
+- Cursus CI separati pro `-1`, `0`, `1` nunc exigunt
+  `GRADUS56_ANNUS_REMOTUS_INTERIOR=3/3_PASS` et
+  `GRADUS56_ANNUS_REMOTUS_SAVED_SUM=5/5_PASS` per annum.
+  Summa: `15` casus, ex quibus `9` novi sunt. Non est
+  assertio CI probata donec novus SHA revera transit.
+- `src/monster.cpp` et test-only oracle non mutantur; `main`
+  inalteratum, Gradus 57 non apertus.
