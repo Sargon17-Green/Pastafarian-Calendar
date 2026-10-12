@@ -11,6 +11,13 @@ use Exporter 'import';
 
 our @EXPORT_OK = qw(countWeavingsPolynomialStream);
 
+# 回呼取得獨立的可變 BigInt 快照，不可經由參照
+# 改寫同一呼叫另外請求的 first_histories 結果。
+sub _histogram_sink_snapshot ($h) {
+    return [map {defined($_) ? $_->copy : undef} @$h];
+}
+
+
 # 第一階段參考演算法：與 WeavingPolynomial 相同的精確 D[u,v]
 # 轉移，但每個階段的舊列只從臨時檔順序讀入一次，新列隨算
 # 隨寫。RAM 只保存 O(N) 的欄累計、前綴和、二項係數與單列。
@@ -70,7 +77,7 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
         my $one=[undef,Math::BigInt->bone];
         $first_histories->[1]=$one if defined $first_histories;
         if (defined $histogram_sink) {
-            $histogram_sink->(1,$one);
+            $histogram_sink->(1,_histogram_sink_snapshot($one));
             $stats->{histogram_sink_calls}++ if defined $stats;
         }
         return Math::BigInt->bone;
@@ -96,7 +103,7 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
     my $initial_histogram=[undef,Math::BigInt->bone];
     $first_histories->[1]=$initial_histogram if defined $first_histories;
     if (defined $histogram_sink) {
-        $histogram_sink->(1,$initial_histogram);
+        $histogram_sink->(1,_histogram_sink_snapshot($initial_histogram));
         $stats->{histogram_sink_calls}++ if defined $stats;
     }
 
@@ -183,7 +190,7 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
         $first_histories->[$index+1]=\@histogram
             if defined $first_histories;
         if (defined $histogram_sink) {
-            $histogram_sink->($index+1,\@histogram);
+            $histogram_sink->($index+1,_histogram_sink_snapshot(\@histogram));
             $stats->{histogram_sink_calls}++ if defined $stats;
         }
         $answer=$stage_total;
