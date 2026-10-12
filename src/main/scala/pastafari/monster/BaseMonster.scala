@@ -62,7 +62,13 @@ final case class BaseMonsterContext(
   var legacyVaultOutput: Option[Vector[BigInt]] = None,
   var patchedVaultRounds: Option[Vector[LegacyVaultRound]] = None,
   var patchedVaultOutput: Option[Vector[BigInt]] = None,
-  var patch09Applied: Boolean = false
+  var patch09Applied: Boolean = false,
+  var penultimateDropValue: Option[BigInt] = None,
+  var finalDropValue: Option[BigInt] = None,
+  var queriedBowlInput: Option[Int] = None,
+  var legacyLatchedOrder45: Option[Vector[Int]] = None,
+  var observedOrder46: Option[Vector[Int]] = None,
+  var legacyNextBowlOutput: Option[Int] = None
 )
 
 final class BaseMetricsShell {
@@ -85,6 +91,38 @@ final class BaseValidationManager {
     }
   }
 
+
+  def requireDiscovery10Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_10_ORDER46_LATCH" ||
+        ctx.status != "LEGACY_ORDER46_LATCH_READY" ||
+        ctx.branchTrace.toVector != Vector(
+          "BOOT","DISCOVERY_10_ORDER46_LATCH") ||
+        ctx.penultimateDropValue.isEmpty || ctx.finalDropValue.isEmpty ||
+        ctx.queriedBowlInput.isEmpty ||
+        ctx.legacyLatchedOrder45.isEmpty ||
+        ctx.observedOrder46.isEmpty ||
+        ctx.legacyNextBowlOutput.isEmpty) {
+      throw new IllegalStateException("La fotografia della goccia 46 non è pronta.")
+    }
+    val queried = ctx.queriedBowlInput.get
+    val oldOrder = ctx.legacyLatchedOrder45.get
+    val finalOrder = ctx.observedOrder46.get
+    val next = ctx.legacyNextBowlOutput.get
+    if (queried < 1 || queried > 6 ||
+        next < 1 || next > 6 || next == queried ||
+        oldOrder.sorted != Vector(1,2,3,4,5,6) ||
+        finalOrder.sorted != Vector(1,2,3,4,5,6)) {
+      throw new IllegalStateException("Identificatore o ordine delle ciotole alterato.")
+    }
+    val expected = LegacyOrder46LatchAdapter.orderAt46Latch(
+      ctx.penultimateDropValue.get,ctx.finalDropValue.get,queried)
+    if (expected.order45 != oldOrder ||
+        expected.order46 != finalOrder ||
+        expected.legacyNextBowl != next) {
+      throw new IllegalStateException(
+        "Il percorso della registrazione storica è stato falsificato.")
+    }
+  }
 
   def requirePatch09Ready(ctx: BaseMonsterContext): Unit = {
     if (ctx.phase != "PATCH_09_VAULT_ROLL" ||
@@ -588,7 +626,8 @@ final class BaseMonsterManager {
     new Discovery08BowlAliasHandler(metrics),
     new Patch08BowlHandler(metrics),
     new Discovery09VaultHandler(metrics),
-    new Patch09VaultHandler(metrics)
+    new Patch09VaultHandler(metrics),
+    new Discovery10Order46LatchHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1045,6 +1084,30 @@ final class BaseMonsterManager {
       )
     } catch {
       case error: Throwable => throw BaseErrorWrapper.wrap("patch09",error)
+    }
+  }
+
+  def discover10Order46Latch(
+    calculationDay: BigInt, targetDay: BigInt,
+    drop45: BigInt, drop46: BigInt, queriedBowlId: Int
+  ): Discovery10Order46LatchReport = {
+    val ctx = bootstrap(calculationDay,targetDay)
+    ctx.penultimateDropValue = Some(drop45)
+    ctx.finalDropValue = Some(drop46)
+    ctx.queriedBowlInput = Some(queriedBowlId)
+    ctx.phase = "DISCOVERY_10_ORDER46_LATCH"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery10Ready(ctx)
+      Discovery10Order46LatchReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.penultimateDropValue.get,ctx.finalDropValue.get,
+        ctx.queriedBowlInput.get,ctx.legacyLatchedOrder45.get,
+        ctx.observedOrder46.get,ctx.legacyNextBowlOutput.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector
+      )
+    } catch {
+      case error: Throwable => throw BaseErrorWrapper.wrap("discovery10",error)
     }
   }
 

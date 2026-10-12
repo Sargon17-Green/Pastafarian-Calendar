@@ -327,3 +327,23 @@ Convalida inoltre la cicatrice storica, la
 traccia BOOT/DISCOVERY/PATCH e il possesso del
 contesto da parte dell'invocazione. L'oracolo
 completo vive soltanto nei test.
+
+## DISCOVERY 10 — ordine della goccia 46 trattenuto al punto sbagliato
+
+`LegacyOrder46LatchAdapter.orderAt46Latch` riceve
+i due valori consecutivi di goccia (45, 46)
+e l'ID della ciotola interrogata. Ricava
+separatamente i due ordini attraverso
+`Patch07PermutationWrapper.permutationPatch`,
+ma il vecchio `captured` viene fissato al
+primo ordine. La scelta del vicino avviene
+sull'ordine sbagliato, anche se la permutazione
+della goccia 46 è stata calcolata correttamente.
+
+Il manager pubblica entrambi gli ordini e
+la scelta effettiva storica, con stato e
+traccia del contesto verificati dal validator.
+L'oracolo per la scelta del vicino corretto
+resta unicamente nella suite di test. La
+prossima PATCH 10 deve lasciare intatta
+la cicatrice storica.

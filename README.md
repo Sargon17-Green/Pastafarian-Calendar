@@ -763,3 +763,35 @@ intenzionali, e tutte le suite Stage01–Stage17
 mantengono la firma storica originaria.
 Il catalogo dei nomi è bloccato; Stage20 non è
 iniziato.
+
+## Stadio 20 — DISCOVERY 10: la fotografia della goccia 46
+
+L'ordine delle sei ciotole scelto alla **goccia 46**
+deve restare disponibile anche dopo le dodici
+mescolature finali, perché determina la ciotola
+successiva durante la lettura del sugo.
+`LegacyOrder46LatchAdapter.orderAt46Latch`
+documenta un difetto storico isolato:
+la registrazione `captured` è agganciata
+all'ordine della goccia **45**, non al vero
+ordine della goccia **46**. Gli ordini derivano
+entrambi dalla PATCH 07, usando la stessa
+riduzione regolare modulo 720 dell'oracolo.
+
+Il report conserva entrambi gli ordini e
+il successore legacy. Il manager percorre
+`BOOT → DISCOVERY_10_ORDER46_LATCH`;
+validator, handler e metrica garantiscono
+il percorso storico e l'isolamento del contesto.
+La PATCH 10 non viene introdotta.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage20Tests'
+```
+
+Firma attesa RED: **24 PASS, 3 FAIL**
+per tre confronti normativi sul successore.
+720 ranghi, sei ciotole, 1.024 coppie signed
+deterministiche, BigInt di oltre 16.000 bit,
+input invalidi e nove patch precedenti
+sono verificati senza mutare gli stadi 1–19.

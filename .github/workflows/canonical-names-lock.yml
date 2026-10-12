@@ -460,3 +460,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 19: 37 PASS, 0 FAIL' stage19.log
           test "$(grep -Fc 'PASS — ' stage19.log)" -eq 37
           test "$(grep -Fc 'FAIL — ' stage19.log)" -eq 0
+
+  native-stage20-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 20 intentional RED stale drop-46 order latch
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage20Tests' > stage20.log 2>&1
+          rc=$?
+          set -e
+          cat stage20.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 20: 24 PASS, 3 FAIL' stage20.log
+          test "$(grep -Fc 'PASS — ' stage20.log)" -eq 24
+          test "$(grep -Fc 'FAIL — ' stage20.log)" -eq 3
+          for label in 'ordine diretto' 'ordine inverso' 'giro finale'; do
+            grep -Fq "FAIL — equivalenza normativa latch ${label} — Latch conserva ordine della goccia 45" stage20.log
+          done

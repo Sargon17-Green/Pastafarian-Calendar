@@ -365,20 +365,35 @@ object Stage19Tests {
       truth(source.contains("val old = vaultOld"),"Cicatrice originale")
       truth(source.contains("LegacyVaultAdapter.vaultOld(initial)"),
         "Il wrapper attraversa il vecchio codice")
-      truth(!source.contains("orderAt46Latch"),"Stage20 anticipato")
+      val metadata=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=metadata.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<20)
+        truth(!source.contains("orderAt46Latch"),"Stage20 anticipato")
+      else
+        truth(source.contains("LegacyOrder46LatchAdapter"),
+          "La cicatrice della goccia 46 deve restare isolata")
     }
     check("metadati dello Stage19 GREEN preservano Stage18 RED") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=19"),"Stage corrente")
-      truth(st.contains("CURRENT_KIND=PATCH"),"Fase")
-      truth(st.contains("CURRENT_PATCH=09"),"Versione patch")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=19,"Stage19 certificato")
+      if(current==19) {
+        truth(st.contains("CURRENT_KIND=PATCH"),"Fase")
+        truth(st.contains("CURRENT_PATCH=09"),"Versione patch")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      } else {
+        truth(st.contains("STAGE_19_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_37_PASS_0_FAIL"),
+          "Certificazione Stage19 preservata")
+      }
       truth(st.contains("STAGE_18_NATIVE_VERIFICATION=PASS_EXPECTED_RED_27_PASS_3_FAIL"),
         "Certificazione Stage18")
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed>=18&&completed<=19,"Certificazione non anticipata")
+      truth(completed>=18&&completed<=current,"Certificazione non anticipata")
     }
 
     println("\nRISULTATO STADIO 19: "+passed+" PASS, "+failed+" FAIL")

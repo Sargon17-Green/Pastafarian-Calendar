@@ -986,3 +986,46 @@ coincidono con il riferimento normativo indipendente.
 La cicatrice originale dello Stage18 continua
 a generare i tre FAIL intenzionali previsti,
 senza alterare le altre otto patch storiche.
+
+## Stadio 20 — DISCOVERY 10: il fermaglio arrivò una goccia troppo presto
+
+### Che cosa si pensava
+
+Il fermaglio di memoria del quarantaseiesimo
+ordine doveva conservarsi attraverso i dodici
+giri finali del caveau e le interrogazioni
+successive, senza utilizzare il loro nuovo
+ordine di mescolatura.
+
+### Che cosa si è scoperto
+
+Un percorso legacy prende invece la
+permutazione del quarantacinquesimo giro:
+la scelta del rango è corretta, ma il
+momento della fotografia non lo è.
+Quando i due ordini coincidono il difetto
+non è osservabile; occorrono confronti
+mirati con ordini diversi.
+
+### Che cosa è stato aggirato
+
+Nulla nella fase DISCOVERY. L'helper storico
+è realmente invocato, registra i due
+ordini e sceglie il vicino secondo il
+primo, documentando la cicatrice precisa.
+
+### Perché non è normativamente equivalente
+
+Il prossimo ID della ciotola dipende dalla
+posizione del suo identificatore **nel vero
+ordine della goccia 46**. Tre confronti
+indipendenti devono quindi fallire per
+la scelta legacy, mentre le prove di
+unranking e le nove patch precedenti
+devono restare verdi.
+
+### Strato di mostruosità aggiunto
+
+Handler, report, validator, tre risultati
+di contesto, dispatcher, metrica e test
+differenziali. Non viene avviata PATCH 10.

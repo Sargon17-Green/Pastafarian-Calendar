@@ -291,7 +291,11 @@ object Stage18Tests {
       else
         truth(src.contains("LegacyVaultAdapter.vaultOld(initial)"),
           "Il wrapper attraversa veramente lo storico")
-      truth(!src.contains("orderAt46Latch"),"Logica del prossimo stadio")
+      if(current<20)
+        truth(!src.contains("orderAt46Latch"),"Logica del prossimo stadio")
+      else
+        truth(src.contains("LegacyOrder46LatchAdapter"),
+          "Cicatrice della nuova discovery")
     }
     check("metadati dello stadio 18 sono intenzionalmente RED") {
       val text=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
