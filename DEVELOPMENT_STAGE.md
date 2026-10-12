@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=20
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=10
-LAST_COMPLETED_STAGE=19
+LAST_COMPLETED_STAGE=20
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..09; thêm LegacyInPlaceStir chạy tuần tự sáu bát, mỗi vị trí đọc current đã thay qua Map.put; ba nguồn rót qua BowlAliasPatch đúng nhưng khuấy đọc sai snapshot.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_20_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_20_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_20_PENDING
-CI_FAILURES=STAGE_20_PENDING
+CI_TESTS=239
+CI_FAILURES=14_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -379,4 +379,16 @@ Bộ tính được gọi thật từ BowlDropCalculator.step cho cả 46 giọt
 Các bài chuẩn của giai đoạn 18-19 giữ nguyên kỳ vọng,
 nên phép so sánh số bát toàn chặng có thể đỏ thêm đúng
 do lỗi nhiễm hiện tại. Tổng dự kiến 239 kiểm thử.
-LAST_COMPLETED_STAGE giữ 19 trước CI và kiểm tra tên.
+LAST_COMPLETED_STAGE nâng lên 20 sau CI và khóa tên xác minh.
+
+Giai đoạn 20 đã xác minh trên Elixir 1.18.5, Erlang/OTP 27:
+239 kiểm thử, đúng 14 thất bại do cùng lỗi ô nhiễm in-place;
+225 kiểm thử đạt, 0 cảnh báo biên dịch.
+4 hồi quy chuẩn mới Stage20 đỏ có chủ đích.
+6 kiểm thử chuẩn Stage18 và 4 kiểm thử chuẩn Stage19 đỏ
+lại do vòng khuấy nhận current đã bị sửa. Không thay các
+khẳng định normative cũ. 12 bài kiểm soát mới của Stage20 đạt.
+Khóa tên chuẩn độc lập PASS; không có vaultOld hoặc pending.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38248260572
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38248260716
+Giai đoạn 20 đóng EXPECTED_RED; tiếp theo giai đoạn 21 PATCH 10.

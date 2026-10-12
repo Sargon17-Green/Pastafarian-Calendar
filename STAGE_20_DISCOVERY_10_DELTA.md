@@ -64,3 +64,27 @@ snapshot riêng `vaultOld` đầu giọt và map `pending`.
 Mọi `compute_one` lấy cùng `vaultOld`, chỉ sau cả
 sáu lần mới commit cùng lúc các kết quả của pending.
 Không triển khai thay đổi ấy trong DISCOVERY 10.
+
+## Kết quả CI được xác minh
+
+- Commit triển khai: `0af1eac7daf66fce7e819a132ace9c026d729667`.
+- Elixir 1.18.5 / Erlang/OTP 27; biên dịch 35 tệp .ex.
+- **239 kiểm thử, chính xác 14 thất bại do lỗi in-place**;
+  225 kiểm thử đạt, không cảnh báo biên dịch.
+- 4 hồi quy chuẩn mới Stage20 đỏ tại bước khuấy đầu,
+  ngày bằng nhau, ngày đảo hướng, ngày rất lớn.
+- 6 bài Stage18 đỏ do so sánh nguồn old bất biến với
+  kết quả in-place; 4 bài Stage19 đỏ do so sánh bát
+  sau 46 giọt với oracle, gồm ngày rất lớn và song song.
+- 12 bài kiểm soát Stage20 đều PASS; ba nguồn rót qua alias
+  vẫn đúng, giọt và hoán vị vẫn đúng, map không chia sẻ.
+- Khóa tên chuẩn độc lập PASS.
+- Giữ các kiểm thử chuẩn cũ và oracle nguyên vẹn.
+- Không sửa main; không tạo vaultOld, pending,
+  hoặc sửa lỗi ở giai đoạn 21.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38248260572
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38248260716
+
+Trạng thái cuối: EXPECTED_RED đã xác minh.
+Điểm tiếp theo: giai đoạn 21 PATCH 10, chưa bắt đầu.

@@ -654,3 +654,13 @@ Chưa thực hiện vault hay pending trong giai đoạn này.
 nguồn rót chính xác, miền SAVE, 46 giọt và nhiều ngữ cảnh.
 Bốn hồi quy chuẩn mới cố ý đỏ. Giữ các kiểm thử chuẩn cũ
 dù ảnh hưởng dây chuyền tạo thêm lỗi mong đợi.
+
+**Kết quả xác minh:** CI ghi nhận 239 kiểm thử,
+14 sai lệch chuẩn được phân loại, 225 kiểm thử đạt,
+không cảnh báo. Phân loại 14 ca: bốn hồi quy mới Stage20,
+sáu ca nguồn khuấy chuẩn Stage18 và bốn ca Stage19.
+Tất cả 12 bài kiểm soát Stage20 đạt, khóa tên chuẩn PASS.
+Những khẳng định normative trước đó được giữ nguyên
+để không che lỗi mới. Hàm legacy dùng map current đã
+được cập nhật sau mỗi vị trí, nguồn rót từ BowlAliasPatch
+vẫn chính xác. Kết thúc Stage20 EXPECTED_RED.

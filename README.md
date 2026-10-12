@@ -724,3 +724,23 @@ cung cấp `vaultOld` cố định cho mọi lần gọi
 `compute_one`, lưu sáu kết quả trong `pending`,
 chỉ cập nhật kho bát sau khi tính xong cả sáu vị trí.
 Không triển khai bản vá này tại giai đoạn 20.
+
+## Kiểm chứng kết thúc phát hiện 10
+
+CI Elixir 1.18.5 / Erlang/OTP 27 xác nhận **239 kiểm thử,
+đúng 14 sai lệch được phân loại**, 225 đạt, không cảnh báo
+biên dịch. Bốn hồi quy chuẩn mới của Stage20 đỏ, cùng sáu
+phép so sánh chuẩn Stage18 và bốn phép so sánh Stage19.
+Các sai lệch đều do vòng `LegacyInPlaceStir.run` đọc lại
+map current đã được cập nhật trong cùng một giọt.
+Không có lỗi khác; 12 bài kiểm soát Stage20 đều PASS.
+Khóa tên chuẩn độc lập PASS.
+
+- [CI phát hiện 10, 14 sai lệch dự kiến](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38248260572)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38248260716)
+
+Giai đoạn 20/55 kết thúc `EXPECTED_RED` được xác minh.
+Giai đoạn 21/55 là `PATCH 10`: giữ LegacyInPlaceStir,
+đưa snapshot `vaultOld` vào sáu lần `compute_one`,
+chứa sáu kết quả trong `pending`, rồi commit đồng loạt.
+Chưa thực hiện ở giai đoạn 20.
