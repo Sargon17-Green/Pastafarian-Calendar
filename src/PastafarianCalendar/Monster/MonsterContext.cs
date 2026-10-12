@@ -62,6 +62,9 @@ public sealed class MonsterContext
     public int? LegacyGrindDirectIndex { get; set; }
     public LegacyGrindRow? LegacyGrindResult { get; set; }
 
+    // الرقعة السابعة تترك الندبة في السياق وتضيف 46 قطرة مستقلة مكتملة.
+    public BigInteger[]? PatchedVisibleDrops { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

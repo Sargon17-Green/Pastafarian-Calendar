@@ -112,3 +112,5 @@ jobs:
         run: |
           test "${{ steps.discovery_visible_grind_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage14Tests/PastafarianCalendar.Stage14Tests.csproj --configuration Release -- --verify-expected-red
+      - name: مطابقة رقعة الحارس السابعة وحساب القطرات الظاهرة مع المرجع
+        run: dotnet run --project tests/PastafarianCalendar.Stage15Tests/PastafarianCalendar.Stage15Tests.csproj --configuration Release

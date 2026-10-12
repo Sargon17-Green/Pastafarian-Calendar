@@ -100,6 +100,19 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateLegacyVisibleGrind(calculationDay, targetDay, ordinal);
     }
 
+    // المسار المُصحّح للقطرات الظاهرة يستخدم جدول الحارس ويبقي القارئ التاريخي.
+    public static BigInteger[] EvaluateVisibleDrops(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateVisibleDrops(calculationDay, targetDay);
+    }
+
+    public static BigInteger EvaluateVisibleDrop(BigInteger calculationDay, BigInteger targetDay, int ordinal)
+    {
+        var manager = new MonsterManager();
+        return manager.EvaluateVisibleDrop(calculationDay, targetDay, ordinal);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

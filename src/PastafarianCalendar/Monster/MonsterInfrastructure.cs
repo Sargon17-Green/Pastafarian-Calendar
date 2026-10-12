@@ -132,6 +132,41 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("نتيجة الرقعة السادسة لا توافق فرع القراءة الصحيح.");
     }
 
+    // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
+    public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
+    {
+        if (context.PatchedVisibleDrops is not null ||
+            context.LegacyGrindResult.HasValue ||
+            context.PatchedCountsResult is not null)
+            throw new MonsterValidationException("سياق بناء القطرات ليس خالياً قبل الالتزام.");
+        if (candidate is null || candidate.Counts is null ||
+            candidate.Stones is null || candidate.Stones.Length != 47 ||
+            candidate.ReversedHiddenStorage is null || candidate.ReversedHiddenStorage.Length != 8 ||
+            candidate.HiddenAccessor is null ||
+            !candidate.HiddenAccessor.UsesUnchangedLegacyStorage(candidate.ReversedHiddenStorage) ||
+            candidate.Visible is null || candidate.Visible.Length != 47 ||
+            candidate.Visible[0] != BigInteger.Zero ||
+            candidate.ReversedHiddenStorage[0] != BigInteger.Zero)
+            throw new MonsterValidationException("حالة القطرات أو المخزن التاريخي غير مكتملة.");
+
+        var modulus = (BigInteger.One << 127) - BigInteger.One;
+        for (var i = 1; i <= 46; i++)
+        {
+            if (candidate.Visible[i] < BigInteger.One || candidate.Visible[i] > modulus)
+                throw new MonsterValidationException("قطرة ظاهرة خارج مجال الحفظ.");
+            if (candidate.Stones[i] is not BigInteger[] row || row.Length != 6)
+                throw new MonsterValidationException("أحجار قطرة ظاهرة غير مكتملة.");
+        }
+
+        for (var grind = 1; grind <= 11; grind++)
+        {
+            var patched = SentinelVisibleGrindPatch.GrindRowWithSentinel(grind);
+            var physical = LegacyVisibleGrindTable.LegacyGrindRow(grind - 1);
+            if (patched != physical)
+                throw new MonsterValidationException("أُزيل صفّ الحارس أو غُيّر ترتيب الطحْن.");
+        }
+    }
+
     // هذا الحارس لا يعيد إنتاج المرجع المعياري: يفحص الملكية والمدى وبنية الصفوف فقط.
     public void ValidatePatchedStones(MonsterContext context, BigInteger[][] candidate)
     {
@@ -191,6 +226,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyPriorPhaseHandler _legacyPrior;
     private readonly PriorAccessWrapper _priorAccess;
     private readonly LegacyVisibleGrindPhaseHandler _legacyGrind;
+    private readonly VisibleDropPatchPhaseHandler _visibleDropPatch;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -208,6 +244,7 @@ public sealed class MonsterDispatcher
         _legacyPrior = new LegacyPriorPhaseHandler();
         _priorAccess = new PriorAccessWrapper();
         _legacyGrind = new LegacyVisibleGrindPhaseHandler();
+        _visibleDropPatch = new VisibleDropPatchPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -463,6 +500,43 @@ public sealed class MonsterDispatcher
         context.Phase = "LEGACY_VISIBLE_GRIND_COMPLETE";
     }
 
+    public void DispatchVisibleDropsPatched(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("لا يُبنى تسلسل القطرات المصحح في سياقٍ غير مؤسس.");
+        if (context.PatchedVisibleDrops is not null ||
+            context.LegacyGrindResult.HasValue || context.LegacyGrindOrdinal.HasValue ||
+            context.PatchedStoneRows is not null || context.LegacyHiddenReversed is not null ||
+            context.PatchedHiddenAccess is not null || context.PatchedCountsResult is not null)
+            throw new MonsterValidationException("لا يقبل مسار الطحن المصحح حالةً دلاليةً سابقة.");
+
+        // يُنشأ الناتج الكامل في الذاكرة المحلية أولاً؛ لا كتابة جزئية في السياق.
+        var pending = _visibleDropPatch.Handle(context);
+        _validation.ValidateVisibleDropPatch(context, pending);
+
+        // يُستدعى القارئ التاريخي فعلياً، وتُحفظ ندبته على نحو مستقل.
+        var wrongRow = _legacyGrindRowForWitness();
+        context.LegacyGrindOrdinal = 1;
+        context.LegacyGrindDirectIndex = 1;
+        context.LegacyGrindResult = wrongRow;
+
+        context.PatchedCountsResult = pending.Counts;
+        context.PatchedStoneRows = pending.Stones;
+        context.LegacyHiddenReversed = pending.ReversedHiddenStorage;
+        context.PatchedHiddenAccess = pending.HiddenAccessor;
+        context.PatchedVisibleDrops = pending.Visible;
+
+        context.BranchTrace.Add("LEGACY_VISIBLE_GRIND_WITNESS");
+        context.BranchTrace.Add("VISIBLE_GRIND_SENTINEL_PATCH");
+        _metrics.Bump(context, "legacy.visible.grind.witness");
+        _metrics.Bump(context, "visible.grind.sentinel.patch");
+        context.Status = "VISIBLE_GRIND_SENTINEL_PATCH_COMPLETE";
+        context.Phase = "VISIBLE_GRIND_SENTINEL_PATCH_COMPLETE";
+    }
+
+    private LegacyGrindRow _legacyGrindRowForWitness()
+        => LegacyVisibleGrindTable.LegacyGrindRow(1);
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -707,6 +781,30 @@ public sealed class MonsterManager
         var context = ExecuteLegacyVisibleGrind(calculationDay, targetDay, ordinal);
         return context.LegacyGrindResult
             ?? throw new MonsterValidationException("لم يُنتج مسار الطحن القديم صفّاً.");
+    }
+
+    public MonsterContext ExecutePatchedVisibleDrops(
+        BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        _dispatcher.DispatchVisibleDropsPatched(context);
+        return context;
+    }
+
+    public BigInteger[] EvaluateVisibleDrops(BigInteger calculationDay, BigInteger targetDay)
+    {
+        var context = ExecutePatchedVisibleDrops(calculationDay, targetDay);
+        return context.PatchedVisibleDrops
+            ?? throw new MonsterValidationException("لم تُثبت القطرات الظاهرة بعد رقعة الحارس.");
+    }
+
+    public BigInteger EvaluateVisibleDrop(BigInteger calculationDay, BigInteger targetDay, int i)
+    {
+        if (i is < 1 or > 46)
+            throw new MonsterValidationException("رقم القطرة الظاهرة خارج المجال.");
+        var context = ExecutePatchedVisibleDrops(calculationDay, targetDay);
+        return context.PatchedVisibleDrops?[i]
+            ?? throw new MonsterValidationException("لم تُثبت القطرة الظاهرة المطلوبة.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
