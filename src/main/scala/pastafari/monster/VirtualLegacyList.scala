@@ -60,7 +60,8 @@ final class Discovery14VirtualGateListHandler(metrics: BaseMetricsShell)
        ctx.virtualCandidateCount.isEmpty ||
        ctx.virtualRequestedRank.isEmpty ||
        ctx.legacyVirtualNarrowedRank.nonEmpty ||
-       ctx.legacyVirtualSelectedGateIndex.nonEmpty) {
+       ctx.legacyVirtualSelectedGateIndex.nonEmpty ||
+       ctx.virtualDiscoveryInputSnapshot.nonEmpty) {
       throw new IllegalStateException(
         "DISCOVERY 14 richiede un Bootstrap integro e input completi.")
     }
@@ -69,6 +70,10 @@ final class Discovery14VirtualGateListHandler(metrics: BaseMetricsShell)
       ctx.virtualCandidateCount.get,ctx.virtualRequestedRank.get)
     ctx.legacyVirtualNarrowedRank=Some(result.narrowedRank)
     ctx.legacyVirtualSelectedGateIndex=Some(result.guessedGateIndex)
+    // Una fotografia immutabile dei quattro input al momento della discovery.
+    ctx.virtualDiscoveryInputSnapshot=Some((
+      result.firstGateIndex,result.gateStride,
+      result.candidateCount,result.requestedRank))
     ctx.branchTrace.append(phase)
     metrics.bump("discovery14.virtual.gate.calls")
     ctx.status="LEGACY_VIRTUAL_GATE_READY"

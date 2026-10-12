@@ -105,6 +105,7 @@ final case class BaseMonsterContext(
   var virtualRequestedRank: Option[BigInt] = None,
   var legacyVirtualNarrowedRank: Option[Int] = None,
   var legacyVirtualSelectedGateIndex: Option[BigInt] = None,
+  var virtualDiscoveryInputSnapshot: Option[(BigInt,BigInt,BigInt,BigInt)] = None,
   var patchedVirtualSelectedGateIndex: Option[BigInt] = None,
   var patch14Applied: Boolean = false
 )
@@ -148,6 +149,7 @@ final class BaseValidationManager {
        ctx.virtualRequestedRank.isEmpty ||
        ctx.legacyVirtualNarrowedRank.isEmpty ||
        ctx.legacyVirtualSelectedGateIndex.isEmpty ||
+       ctx.virtualDiscoveryInputSnapshot.isEmpty ||
        ctx.patchedVirtualSelectedGateIndex.isEmpty ||
        !ctx.patch14Applied)
       throw new IllegalStateException("PATCH 14 non completa.")
@@ -156,6 +158,8 @@ final class BaseValidationManager {
     val step=ctx.virtualGateStride.get
     val size=ctx.virtualCandidateCount.get
     val rank=ctx.virtualRequestedRank.get
+    if(ctx.virtualDiscoveryInputSnapshot.get!=(start,step,size,rank))
+      throw new IllegalStateException("La fotografia dei dati originali è mutata.")
     if(step==0 || size<1 || rank<1 || rank>size)
       throw new IllegalStateException("Dominio virtuale invalido.")
 

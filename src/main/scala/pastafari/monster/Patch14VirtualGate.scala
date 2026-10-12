@@ -59,10 +59,18 @@ final class Patch14VirtualGateHandler(metrics: BaseMetricsShell)
        ctx.virtualRequestedRank.isEmpty ||
        ctx.legacyVirtualNarrowedRank.isEmpty ||
        ctx.legacyVirtualSelectedGateIndex.isEmpty ||
+       ctx.virtualDiscoveryInputSnapshot.isEmpty ||
        ctx.patchedVirtualSelectedGateIndex.nonEmpty ||
        ctx.patch14Applied)
       throw new IllegalStateException(
         "PATCH 14 richiede la DISCOVERY 14 completa nella stessa invocazione.")
+
+    // Anche per rank=1, la fotografia respinge il cambio di un input
+    // che non altererebbe numericamente il candidato scelto.
+    if(ctx.virtualDiscoveryInputSnapshot.get!=(
+         ctx.virtualFirstGateIndex.get,ctx.virtualGateStride.get,
+         ctx.virtualCandidateCount.get,ctx.virtualRequestedRank.get))
+      throw new IllegalStateException("Dati modificati dopo la discovery.")
 
     // Nessuna pubblicazione prima di aver verificato la cicatrice.
     val result=Patch14VirtualGateWrapper.virtualGatePatch(
