@@ -83,7 +83,7 @@ object Stage34Tests {
   def main(args:Array[String]):Unit={
     check("47 indici distinti appartengono al catalogo canonico"){
       eqv(NormativeOracle.fallingFactorial(47,47),All47,"Catalogo")
-      truth(All47>BigInt(1)<<128,"Rango arbitariamente grande")
+      truth(All47>(BigInt(1)<<128),"Rango arbitariamente grande")
     }
     check("il numero minimo di mesi e' tre"){
       eqv(legacy().monthCount,3,"Minimo")
