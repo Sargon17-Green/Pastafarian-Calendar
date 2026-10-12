@@ -26,6 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   stage26-typescript-marathi:
+    timeout-minutes: 10
     if: github.ref == 'refs/heads/TypeScript+मराठी'
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +38,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript typecheck
         run: npm run typecheck
-      - name: Stages 01-26 regressions and twelfth historical fixed numeric bowl successor discovery
+      - name: Stages 01-26 regressions and thirteenth biased modulo discovery
         shell: bash
         run: |
           set -euo pipefail

@@ -28,9 +28,13 @@ for(const n of sizes){
   for(const directionStep of [-1n,1n] as const){
    // For small n, close to M at most 922 iterations before an accepted value.
    // For wide n, space >=M² and the test-only oracle takes the wide path.
-   const stream={first:x,directionStep};
+   // Large wide N with upward steps near M can create an astronomical
+   // acceptance walk. Use a lower-bound upward stream; keep near-M downward
+   // and both directions for short and near-M wide (M+1, M+2) cases.
+   const first=n>M+2n&&directionStep===1n ? 1n+j : x;
+   const stream={first,directionStep};
    const want=chooseRank(stream,n);
-   const got=old.oldChooseModulo(x,n);
+   const got=old.oldChooseModulo(first,n);
    if(want===got)directMatches++;else directMismatches++;
    if(n>M){wideCases++;if(want!==got)wideWrong++;}
    directCases++;
