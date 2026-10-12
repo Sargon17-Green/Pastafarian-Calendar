@@ -1215,3 +1215,16 @@ mesi di lunghezza 123, 47 mesi, alterazioni dei campi e regressioni
 delle PATCH01–14. Stage30 conserva le tre divergenze intenzionali
 mentre Stage31 e' GREEN. L'esercizio usa famiglie sintetiche fornite
 dal chiamante; non dichiara completata la scelta canonica via salsa.
+
+### Certificazione nativa dello Stage31
+
+Il workflow [GitHub Actions 38262934855](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38262934855)
+sul commit `8e1183e48e88aa54431692e64c6c5723879140b7`
+si e' concluso **SUCCESS per 32/32 job**, con **66 PASS/0 FAIL**
+nella suite Stage31. La suite precedente Stage30 conserva
+**53 PASS e tre FAIL intenzionali** e le altre firme storiche
+sono state confermate. Il limite di 5778 giorni e' incluso
+e le prove di regressione delle fasi 29/30 sono state adattate
+per preservare i loro certificati mentre avanza CURRENT_STAGE.
+La correzione usa candidati sintetici, non ancora la
+generazione completa delle tessiture dal calcolo canonico.

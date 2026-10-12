@@ -1429,3 +1429,13 @@ mese tramite occorrenze nel prefisso, persino con mesi intercalati.
 Context, trace, snapshot, validator e 14 PATCH precedenti restano
 verificabili. La validazione non usa il wrapper corretto ne'
 l'oracolo test-only. Nessuna Stage32 anticipata.
+
+### Certificazione Stage31
+
+Il commit 8e1183e48e88aa54431692e64c6c5723879140b7
+ha superato tutti i 32 job nella run 38262934855:
+Stage31 66 PASS/0 FAIL, Stage30 53 PASS/3 FAIL intenzionali.
+I test coprono 252 giorni per tre tessiture, 4096 vettori
+deterministici, 47 mesi e 5778 giorni. La scelta della
+tessitura rimane identica lungo l'anno, mentre il risultato
+errato legacy e' conservato. PATCH 16 e Stage32 assenti.

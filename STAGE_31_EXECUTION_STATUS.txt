@@ -1,0 +1,43 @@
+STATO_ESECUZIONE=PASS_NATIVE_SCALA
+STADIO=31
+TIPO=PATCH_15
+RISULTATO_ATTESO=GREEN
+RISULTATO_REALE=66_PASS_0_FAIL
+PATCH_WRAPPER=Patch15MonthWeavingWrapper.daywiseWeavingPatch
+DISCOVERY_15_LEGACY_PRESERVED=YES
+LEGACY_RESELECTION_EACH_DAY_PRESERVED=YES
+PATCH_01_TO_14_PRESERVED=YES
+STAGE32_INTRODUCED=NO
+ANNUAL_WEAVING_FIXED_RANK=PASS
+MONTH_DAY_PREFIX_COUNT=PASS
+MONTH_IDS_INTERLEAVED=PASS
+MAX_YEAR_DAYS=5778
+MONTH_COUNT_TESTED=3_TO_47
+MONTH_DAYS_TESTED=4_TO_123
+DETERMINISTIC_VECTORS=4096
+FULL_YEAR_252_DAY_CHECKS=PASS
+VALIDATOR_INDEPENDENT=PASS
+INPUT_SNAPSHOT=PASS
+ORACOLO_NORMATIVO=TEST_ONLY
+DOMAIN=SYNTHETIC_PRESELECTED_LEXICOGRAPHIC_WEAVES
+GITHUB_ACTIONS_RUN=38262934855
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38262934855
+GITHUB_ACTIONS_HEAD_SHA=8e1183e48e88aa54431692e64c6c5723879140b7
+GITHUB_ACTIONS_JOBS=32
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage31Tests'
+VERIFIED_ON=2026-10-12
+REGRESSIONE_STAGE01_TO_30=PASS_PREVIOUS_SIGNATURES
+REGRESSIONE_STAGE29=55_PASS_0_FAIL
+REGRESSIONE_STAGE30=53_PASS_3_FAIL_INTENTIONAL
+REGRESSIONE_STAGE31=66_PASS_0_FAIL
+
+La selezione della tessitura mensile usa il rango annuale una volta
+sola; il mese giornaliero e' determinato da un unico candidato per
+l'intero anno. La data mensile e' contata dalle occorrenze
+dell'ID mese nel prefisso, anche se i giorni sono intercalati.
+Il vecchio helper giornaliero rimane invocato e pubblicato
+separatamente. Il validator controlla l'identita' della famiglia,
+il rango, la snapshot, la trace e l'output corretto.
+Le tessiture sono diagnostiche gia' fornite e non generate
+dal motore annuale canonico della salsa.

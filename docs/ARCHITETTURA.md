@@ -541,3 +541,11 @@ Handler e validator respingono cambi successivi alla discovery
 anche quando il mese visualizzato non muta. Questo e' un modello
 diagnostico di candidati gia' preparati, non una costruzione
 canonica della famiglia `WeavingFamily` o della salsa annuale.
+
+La verifica nativa dello Stage31 ha successo con 32/32 job
+nella run 38262934855, inclusi il validator indipendente
+e il controllo dell'immutabilita' degli input. Il limite
+inclusivo di durata dell'anno e' 5778 giorni: il caso di
+47 mesi usa 46 mesi di 123 giorni e uno di 120 giorni,
+per un totale esatto di 5778. La suite di Stage30 conserva
+le sue tre divergenze intenzionali.
