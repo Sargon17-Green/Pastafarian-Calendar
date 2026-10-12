@@ -211,3 +211,27 @@ Hoc scriptum est in commit praeparto; non est testimonium CI completum.
 - Testis proximus anni 4999 (4126 dies) et 5001 (5567 dies) in commit `bbc8e64c091991b374b2ae3e52ec926babb5078a` praevolatu [38238660658](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38238660658) transiit. Clang differentialium quoque transiit; run [38238660678](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38238660678) ante hanc mutationem nondum omnino conclusus est.
 - Mutatio nunc parata: `F-1`, `F`, `F+1` alternantur intra unum manager, simul anni 4999/5000/5001 et dies proximi portis annuis contra novem structuras reference saved-sum comparantur. Duae directio visitationum et tres gestores frigidi adduntur.
 - Haec probatio nova non est confirmata; eius SHA et CI futura seorsum verificanda sunt. Gradus 57 non incipitur; main nullo modo tangitur.
+
+## Probationes summae post AC.1, die XII Octobris MMXXVI
+
+**Status recentissimus rite verificatus pro codice anteriori:** commit
+[`af61b6996372e4dc3409462435e37cd7ee9bda29`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/af61b6996372e4dc3409462435e37cd7ee9bda29)
+habet [vigiliam 38245796663](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38245796663)
+`completed/success` cum **20/20 officiis success**. Log finales:
+`SOAK_REPETITUM=8/8_PASS`, `VIGILIA_SOAK=PASS`, `STATUS_POST_RUN=SOAK_GREEN`.
+[Praevolatus 38245796704](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38245796704)
+et [custodia nominum 38245796719](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38245796719)
+`success` quoque concluserunt.
+
+- Testimonia fixa AC.1 `10/10_PASS` a `README.md §AC.1` in `main`, non ex oracle generata: GCC et Clang idem confirmaverunt.
+- Testimonia reference: anno 5000 `4244/4244` ad `c=F` et `5160/5160` ad `c=F+1`; annis 4999 et 5001 `4126+5567=9693/9693` ad `c=F`; vicissitudines dierum calculi `F-1,F,F+1` in annis 4999–5001, `102/102` casibus et tribus contextibus recentibus.
+- Vigilia vetustior `bbc8e64c091991b374b2ae3e52ec926babb5078a` etiam [38238660678](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38238660678) `20/20 success` habet; declarationes "pending" in sectionibus historicis supra solum ad tempus inscriptionis earum pertinent.
+
+**Additamentum huius commit (PENDENS NOVAM CI):** nova imago test-only
+cache `yearNumber -> (calculationDay, openGate, closeGate)` in
+`--limina-calculorum` aestimat et singulis interrogationibus comprobat
+`guardedCacheHit` et `guardedCacheRejected`; eadem 9 paria
+`(calculationDay, yearNumber)` etiam iteratione calida
+reprobantur, cardinalitate cache constante. Hoc est auditum
+contractus cache, non mutatio algorithmica. Prioris SHA status viridis
+non imponitur novi SHA. `main` inalteratum est. Gradus 57 non apertus.

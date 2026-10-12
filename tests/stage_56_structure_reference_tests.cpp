@@ -13,6 +13,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -729,6 +730,14 @@ void exigeLiminaCumDiebusCalculiIntertextis() {
           "referentiae novem annorum ex tribus c desunt");
 
     BaseMonsterManager manager;
+    // Umbra test-only quae in cache semanticum nihil mutat: imitamur
+    // solam clavem veterem yearNumber et probationes triple custodis.
+    std::map<Big, std::tuple<Big, Big, Big>> cacheImago;
+    std::set<std::pair<Big, Big>> iamRecalefacti;
+    std::size_t frigidi = 0;
+    std::size_t accepti = 0;
+    std::size_t reiecti = 0;
+    int recalefacti = 0;
     int recentia = 0;
     std::size_t comprobati = 0;
     for (int circuitus = 0; circuitus < 2; ++circuitus) {
@@ -750,6 +759,17 @@ void exigeLiminaCumDiebusCalculiIntertextis() {
                 exige(expected.annus.openGateDay < t &&
                       t <= expected.annus.closeGateDay,
                       "anno erroneo dies secundum oraculum collocatus");
+                const auto m = cacheImago.find(a.number);
+                const bool inCache = m != cacheImago.end();
+                const auto tria = std::make_tuple(
+                    c, expected.annus.openGateDay,
+                    expected.annus.closeGateDay);
+                const bool debetAccipere = inCache && m->second == tria;
+                const bool debetReicere = inCache && !debetAccipere;
+                if (debetAccipere) ++accepti;
+                else if (debetReicere) ++reiecti;
+                else ++frigidi;
+
                 const auto actual =
                     manager.executeFinalIntegrationStage56(c, t);
                 const std::string label =
@@ -758,9 +778,37 @@ void exigeLiminaCumDiebusCalculiIntertextis() {
                     + "/" + std::to_string(ci);
                 exige(actual.ready && actual.status == "GREEN",
                       label + ": integratio non viridis");
+                exige(actual.guardedCacheHit == debetAccipere &&
+                      actual.guardedCacheRejected == debetReicere,
+                      label + ": guardian cache differt a speculo test-only");
                 comparaStructuram(actual, expected, label);
                 comparaDiem(actual.result, diesExReference(expected, t),
                             label);
+                cacheImago[a.number] = tria;
+                exige(manager.stage56FinalStructureCacheSizeDiagnostic()
+                          == cacheImago.size(),
+                      label + ": cardinalitas cache contra exemplar differt");
+
+                // In quolibet (c, anno) primus reditus eundem annum cache
+                // calidum servare debet; intermixtio c postea retractat
+                // entry alienum et ponit guardedCacheRejected.
+                if (iamRecalefacti.emplace(c, a.number).second) {
+                    const auto iterum =
+                        manager.executeFinalIntegrationStage56(c, t);
+                    exige(iterum.ready && iterum.status == "GREEN" &&
+                          iterum.guardedCacheHit &&
+                          !iterum.guardedCacheRejected,
+                          label + ": iteratio calida non accepit cache");
+                    comparaStructuram(iterum, expected,
+                                      label + ": iteratio calida");
+                    comparaDiem(iterum.result,
+                                diesExReference(expected, t),
+                                label + ": iteratio calida");
+                    exige(manager.stage56FinalStructureCacheSizeDiagnostic()
+                              == cacheImago.size(),
+                          label + ": iteratio calida auxit cache");
+                    ++recalefacti;
+                }
                 if (circuitus == 0 && j == 0) {
                     const auto recens =
                         BaseMonsterManager{}.executeFinalIntegrationStage56(c, t);
@@ -779,6 +827,16 @@ void exigeLiminaCumDiebusCalculiIntertextis() {
     exige(recentia == 3 &&
           comprobati == 2 * totalisUniusCircuitus,
           "ordo intertextus non omnes dies aut c enumeravit");
+    exige(frigidi == 3 && reiecti > 0 &&
+          cacheImago.size() == 3 && recalefacti == 9 &&
+          iamRecalefacti.size() == 9 &&
+          frigidi + accepti + reiecti == comprobati,
+          "custodia cache: primus miss, reiectio, acceptatio non integra");
+    std::cout << "GRADUS56_LIMINA_CACHE=PASS COLD=" << frigidi
+              << " HITS=" << accepti
+              << " REJECTS=" << reiecti
+              << " WARM_RECHECKS=" << recalefacti
+              << " CACHE_ANNI=" << cacheImago.size() << "\n";
     std::cout << "GRADUS56_LIMINA_CALCULORUM=PASS C=3 ANNI=9 CASES="
               << comprobati << " RECENTIA=" << recentia << "/3\n";
 }
