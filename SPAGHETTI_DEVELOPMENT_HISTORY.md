@@ -171,3 +171,7 @@ Exact rank2 order `[1,2,3,4,6,5]` चे IDs 4,5,6 तीन independent histori
 ## Stage 25 PATCH 12 — verified and closed
 
 स्थिर numeric bowl-ID successor हा जुन्या दोषाचा अंश आहे. नवीन `Patch12PermutationSuccessorAdapter` हा immutable Stage23 DROP46 latch च्या permutation position मध्ये पुढचा ID निवडतो; जुन्या `LegacyNextBowlFixedNameAdapter` चा खरा call स्वतंत्र राखला. Full 58 shared writes आणि test-only reference मधील स्वतंत्रता राखली. GitHub Actions run 38242303724 दोन्ही jobs SUCCESS. 720×6 सर्व दुरुस्त, 804 पूर्ण histories मधील शून्य corrected mismatches, 12 ऐतिहासिक intentional reds अजूनही expected nonzero; LAST_COMPLETED_STAGE=25.
+
+## Stage 26 DISCOVERY 13 — implementation submitted for CI
+
+मूळ biased first-answer modulo selection हा नियमाधारित rejection/wide `chooseRank` चा पर्याय नाही. नवीन historical old adapter प्रत्यक्ष चालतो; Stage25 chain आणि प्रश्न-उत्तर SAVE सूत्र जसेच्या तसे राखलेले. स्वतंत्र test-only oracle, top-of-M rejection witnesses, wide-family under-coverage, 804 genuine precursor histories व तेरावा intentional expected-red regressions जोडल्यानंतर CI verification बाकी आहे. Completion stage अद्याप 25.

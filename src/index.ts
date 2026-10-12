@@ -26,3 +26,5 @@ export * from "./patch11OrderLatch.ts";
 export * from "./discovery12LegacyFixedNextBowl.ts";
 
 export * from "./patch12NextBowl.ts";
+
+export * from "./discovery13LegacyBiasedModulo.ts";
