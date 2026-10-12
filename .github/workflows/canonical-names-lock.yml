@@ -361,3 +361,34 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage19_tests.lua .
+
+  lua_stage20_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye syntax Lua ak eritaj
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/pour_patch.lua)" = 8962bb10503c8a33161e89517c855d6b09bb27a3
+          test "$(git hash-object src/legacy_fixed_pours.lua)" = 7061e02bc3d3f45efe21f307b38b1626b01d662c
+          lua5.3 test/stage20_scope_tests.lua .
+      - name: Kouri Stage 1-20, tout tès pozitif ak odit alias
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage20_tests.lua .
+      - name: Regression normatif DISCOVERY 10 — EXPECTED_RED sèl
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage20_regression_tests.lua .

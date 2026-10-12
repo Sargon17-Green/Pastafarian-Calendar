@@ -627,3 +627,24 @@ permutation yo bay vide koreksyon ki matche ak oracle tès endepandan;
 16 piki erè ak 16 rekiperasyon, epi 4 apèl nested konfime koreksyon
 an. Tès Stage 18 la toujou verifye defo istorik la sèlman sou
 chemen `legacyFixedBowlPoursProbe`. Pa gen brase bòl nan PATCH 09.
+
+## Stage 20 — DISCOVERY 10: alias pandan brase sis bòl yo
+
+Nan nouvo `src/legacy_aliased_stir.lua`, twa vide yo pase nan
+PATCH 09 ki kòrèk, epi premye brase sis bòl la sèvi ak lòd sis
+id PATCH 08 la. Men `old` ak `nextBowls` lonje dwèt sou **menm
+tab lokal** la. Premye kalkil nan brase a ka matche oracle a;
+pwochen yo li valè deja chanje nan pozisyon anvan yo. Sa se defo
+istorik ki dwe parèt nan `DISCOVERY 10`, pa yon koreksyon.
+
+Tab bòl moun k ap rele a rete pwoteje pa yon kopi apa. Erè a se
+**nan anndan brase a**: old/next sèvi ak menm tablo. Chemen PATCH 09
+la kouri reyèlman anvan brase istorik la; nou kenbe twa commit,
+twa handler, diagnostik ak mezi kontèks. Yon apèl piblik
+`openingStirSpaghetti(c,t)` travèse tout chemen premye gout
+vizib la.
+
+Regresyon normatif Stage 20 dwe bay `EXPECTED_RED` nan etap CI
+dedye a; odit pozitif la verifye egzakteman erè sa a. Stage 21
+PATCH 10 pral separe snapshot ak nextBowls pou korije alias la.
+Nou pa lanse lòt 45 gout yo, `postStir12`, ni seleksyon ki vini apre.

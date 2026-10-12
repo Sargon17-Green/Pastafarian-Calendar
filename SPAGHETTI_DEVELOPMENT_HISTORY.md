@@ -524,3 +524,13 @@ pozitif. Suit Stage 19 pase 720 permutation, 140 gwo BigInt,
 27 vide reyèl, 16 erè enjekte, 16 rekiperasyon ak 4 apèl nested.
 `LAST_COMPLETED_STAGE=19`; pwodiksyon korije, legacy toujou mal
 jan li dwe rete pou tras. Pa gen okenn travay Stage 20.
+
+## Stage 20 — DISCOVERY 10: move alias old/next pandan brase
+
+Apre PATCH 09, tout twa vide yo matche ak oracle. Premye chèn
+brase sis bòl la mete `old=working` epi `nextBowls=working`,
+ki vle di chak update chanje done lòt pozisyon yo pral li.
+Nan `LEGACY_ALIASED_STIR`, nou konsève tout rezilta istorik,
+metrik, branchTrace ak de premye patch pou vide yo. Nou pa fè
+PATCH 10, ni melanj douz etap ki vin apre a. Fòk tès normatif
+la kontinye echwe sèlman pou alias sa a nan Stage 20.

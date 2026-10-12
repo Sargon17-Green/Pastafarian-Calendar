@@ -18,6 +18,7 @@ local LegacyPermutation = require("legacy_permutation")
 local PermutationPatch = require("permutation_patch")
 local LegacyFixedPours = require("legacy_fixed_pours")
 local PourPatch = require("pour_patch")
+local LegacyAliasedStir = require("legacy_aliased_stir")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -222,8 +223,34 @@ function S.openingPoursSpaghetti(calculationDay,targetDay)
     return result
 end
 
+-- DISCOVERY 10: vire sis bòl yo ak menm tab fizik la.
+function S.aliasedStirSpaghetti(drop,index,bowls,stones)
+    local result=LegacyAliasedStir.execute(drop,index,bowls,stones)
+    return result
+end
+
+function S.legacyAliasedStirProbe(drop,index,bowls,stones)
+    return LegacyAliasedStir.execute(drop,index,bowls,stones)
+end
+
+function S.openingStirProbe(calculationDay,targetDay)
+    local bowls=LegacyFixedPours.initialBowls(calculationDay,targetDay)
+    local stones=StonePatch.buildPatchedTable()[1]
+    local drop,visibleContext=S.visibleDropSpaghetti(calculationDay,targetDay,1,{})
+    local result,context=LegacyAliasedStir.execute(drop,1,bowls,stones)
+    context.firstVisibleDrop=BigInt.from(drop)
+    context.visibleContext=visibleContext
+    context.metrics["discovery10.opening.probes"]=1
+    return result,context
+end
+
+function S.openingStirSpaghetti(calculationDay,targetDay)
+    local result=S.openingStirProbe(calculationDay,targetDay)
+    return result
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 19", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 20", 0)
 end
 
 return S
