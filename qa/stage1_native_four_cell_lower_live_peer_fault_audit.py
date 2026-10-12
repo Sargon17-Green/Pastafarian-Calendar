@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Independent finite Native four-cell lower fault/live peer report audit."""
-import copy,json,re,sys
+import copy,hashlib,json,re,sys
 from pathlib import Path
 BASE="560d6aa5807a7f766213a33835cce85eab0fa40c"
 CAND="d965ce4bdfa282f2d3b82690808def5a2dde10a8"
@@ -33,6 +33,20 @@ def verify(r):
              row["faulted_memory_cells"]>=row["unique_failed_p_targets"] and
              type(row.get("faulted_memory_sha256")) is str and
              SHA.fullmatch(row["faulted_memory_sha256"]) and
+             type(row.get("faulted_memory_snapshot")) is list and
+             len(row["faulted_memory_snapshot"])==row["faulted_memory_cells"] and
+             all(type(cell) is list and len(cell)==3 and
+                 all(type(v) is int for v in cell)
+                 for cell in row["faulted_memory_snapshot"]) and
+             [tuple(cell[:2]) for cell in row["faulted_memory_snapshot"]]==
+                 sorted(set(tuple(cell[:2]) for cell in
+                            row["faulted_memory_snapshot"])) and
+             (951,1337) in [tuple(cell[:2]) for cell in
+                             row["faulted_memory_snapshot"]] and
+             row["faulted_memory_sha256"]==hashlib.sha256(
+                 json.dumps(row["faulted_memory_snapshot"],
+                            sort_keys=True,
+                            separators=(",",":")).encode("ascii")).hexdigest() and
              all(row.get(key) is True for key in
                  ("survived_peer_without_space_mutation",
                   "no_peer_change_at_injected_step",
@@ -58,6 +72,8 @@ def main(folder):
      ("false_runtime_effect",lambda x:x["records"][1].__setitem__(
          "fault_opcode_coordinate",[0,0])),
      ("false_reference",lambda x:x["records"][0]["reference_peer"].pop()),
+     ("forged_cell_content",lambda x:x["records"][0]
+      ["faulted_memory_snapshot"][0].__setitem__(2,123456)),
      ("zero_real_overlap",lambda x:x["records"][0].__setitem__("overlap_rounds",0)),
      ("lost_fault_writes",lambda x:x["records"][1].__setitem__(
          "unique_failed_p_targets",0)),
@@ -72,7 +88,7 @@ def main(folder):
         try:verify(bad)
         except AssertionError:pass
         else:raise AssertionError("forged lower live fault evidence accepted: "+name)
-    print("NATIVE_FOUR_CELL_LOWER_LIVE_PEER_FAULT_AUDIT_8_FALSIFICATIONS_REJECT_PASS")
+    print("NATIVE_FOUR_CELL_LOWER_LIVE_PEER_FAULT_AUDIT_9_FALSIFICATIONS_REJECT_PASS")
 if __name__=="__main__":
     need(len(sys.argv)==2,"usage: Native 4-cell live lower fault evidence directory")
     main(sys.argv[1])

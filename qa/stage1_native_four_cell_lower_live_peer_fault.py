@@ -181,6 +181,7 @@ def scenario(code,failed_label,peer_label,order,reference):
         unique_peer_p_targets=len(writes["p"]),
         faulted_memory_cells=len(frozen_cells[0]),
         faulted_memory_sha256=frozen_digest[0],
+        faulted_memory_snapshot=frozen_cells[0],
         survived_peer_without_space_mutation=True,
         no_peer_change_at_injected_step=True,
         recovered_same_program_object=True,
