@@ -51,6 +51,12 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
+      - name: Inspect native V formatting of stage 13 tests — temporary
+        shell: bash
+        run: |
+          set -euo pipefail
+          v fmt -w ./pastafari/patch06_test.v
+          git --no-pager diff -- ./pastafari/patch06_test.v
       - name: Verify V version and source formatting
         shell: bash
         run: |
