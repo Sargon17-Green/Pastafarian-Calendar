@@ -94,7 +94,19 @@ data class BaseMonsterContext(
     var discovery08Undefined: Boolean? = null,
     var discovery08ErrorId: String? = null,
     var discovery08LegacyCalls: Int = 0,
-    var discovery08InvocationCount: Int = 0
+    var discovery08InvocationCount: Int = 0,
+    var patch08DropValue: ExactInt? = null,
+    var patch08OneBased: Int? = null,
+    var patch08CorrectedRank0: Int? = null,
+    var patch08LegacyPassedRank0: Int? = null,
+    var patch08LegacyOrder: List<Int>? = null,
+    var patch08LegacyUndefined: Boolean? = null,
+    var patch08LegacyErrorId: String? = null,
+    var patch08CorrectedOrder: List<Int>? = null,
+    var patch08LegacyCalls: Int = 0,
+    var patch08CorrectedCalls: Int = 0,
+    var patch08Applied: Boolean = false,
+    var patch08InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -159,7 +171,9 @@ class MonsterBootstrapManager(
     val priorPatchWrapper: PriorPatchWrapper = PriorPatchWrapper(legacyPriorAdapter, hiddenNearnessPatchWrapper),
     val legacyGrindTableAdapter: LegacyGrindTableAdapter = LegacyGrindTableAdapter(),
     val grindPatchWrapper: GrindPatchWrapper = GrindPatchWrapper(legacyGrindTableAdapter),
-    val legacyPermutationOrderAdapter: LegacyPermutationOrderAdapter = LegacyPermutationOrderAdapter()
+    val legacyPermutationOrderAdapter: LegacyPermutationOrderAdapter = LegacyPermutationOrderAdapter(),
+    val permutationPatchWrapper: PermutationPatchWrapper =
+        PermutationPatchWrapper(legacyPermutationOrderAdapter)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -333,6 +347,42 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("PATCH_08") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_PATCH08_CONTEXT_NOT_READY")
+            val drop = context.patch08DropValue
+                ?: throw MonsterValidationException("E_PATCH08_NO_DROP")
+            // Cam 17: galw'r hen caller cyn tynnu un yn y wrapper.
+            val outcome = permutationPatchWrapper.patch(drop)
+            check(outcome.dropValue == drop &&
+                outcome.oneBased in 1..720 &&
+                outcome.correctedRank0 == outcome.oneBased - 1 &&
+                outcome.legacyRead.legacyCalls == 1 &&
+                outcome.correctedUnrankCalls == 1 &&
+                outcome.correctedOrder.size == 6 &&
+                outcome.correctedOrder != outcome.legacyRead.legacyOrder) {
+                "E_PATCH08_RESULT_SHAPE"
+            }
+            // Ymrwymo'r holl feysydd ar ôl llwyddiant; dim cyflwr traws-alwad.
+            context.patch08OneBased = outcome.oneBased
+            context.patch08CorrectedRank0 = outcome.correctedRank0
+            context.patch08LegacyPassedRank0 = outcome.legacyRead.passedRank0
+            context.patch08LegacyOrder = outcome.legacyRead.legacyOrder?.toList()
+            context.patch08LegacyUndefined = outcome.legacyRead.undefined
+            context.patch08LegacyErrorId = outcome.legacyRead.errorId
+            context.patch08CorrectedOrder = outcome.correctedOrder.toList()
+            context.patch08LegacyCalls = outcome.legacyRead.legacyCalls
+            context.patch08CorrectedCalls = outcome.correctedUnrankCalls
+            context.patch08Applied = true
+            context.patch08InvocationCount = 1
+            context.branchTrace.add("PATCH_08")
+            context.diagnostics.add("PATCH_08_ONE_BASED_TO_ZERO_BASED")
+            context.status = "PATCHED_PERMUTATION"
+            metrics.bump("patch08.legacy.wrong.calls")
+            metrics.bump("patch08.corrected.unrank.calls")
+            metrics.bump("patch08.applied")
         }
         dispatcher.register("DISCOVERY_08") { context ->
             validation.requireBootstrapContext(context)
@@ -703,6 +753,24 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 17: cyfieithu one-based -> zero-based, cadw'r graith fyw. */
+    fun applyPermutationPatch(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        dropValue: ExactInt = ExactInt.ONE
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.patch08DropValue = dropValue
+        context.phase = "PATCH_08"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH08_WRAP", e)
         }
     }
 

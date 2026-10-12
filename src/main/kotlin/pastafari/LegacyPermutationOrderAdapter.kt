@@ -56,3 +56,44 @@ class LegacyPermutationOrderAdapter {
         )
     }
 }
+
+/**
+ * Cam 17 — PATCH 08. Mae'r caller anghywir DISCOVERY 08 yn aros
+ * heb ei newid; galwir ef cyn y cyfieithiad cywir.
+ */
+data class PermutationPatchOutcome(
+    val dropValue: ExactInt,
+    val oneBased: Int,
+    val correctedRank0: Int,
+    val legacyRead: LegacyPermutationRead,
+    val correctedOrder: List<Int>,
+    val correctedUnrankCalls: Int
+)
+
+class PermutationPatchWrapper(
+    private val legacyAdapter: LegacyPermutationOrderAdapter = LegacyPermutationOrderAdapter()
+) {
+    fun patch(dropValue: ExactInt): PermutationPatchOutcome {
+        // Rhaid galw'r caller etifeddol wirioneddol, gan gadw ei graith.
+        val old = legacyAdapter.legacyPermutationOrderFromDropWrong(dropValue)
+        require(old.dropValue == dropValue && old.oneBased in 1..720 &&
+            old.passedRank0 == old.oneBased && old.legacyCalls == 1 &&
+            old.undefined == (old.oneBased == 720) &&
+            (if (old.undefined) old.legacyOrder == null &&
+                old.errorId == "E_DISCOVERY08_RANK0_RANGE"
+             else old.legacyOrder?.size == 6 && old.errorId == null)) {
+            "E_PATCH08_LEGACY_SHAPE"
+        }
+        val rank0 = old.oneBased - 1
+        val corrected = legacyAdapter.oldPermutationUnrank0(rank0).toList()
+        require(rank0 in 0..719 && corrected.size == 6 &&
+            corrected.sorted() == listOf(1,2,3,4,5,6) &&
+            corrected != old.legacyOrder) {
+            "E_PATCH08_CORRECTED_SHAPE"
+        }
+        return PermutationPatchOutcome(
+            dropValue, old.oneBased, rank0, old,
+            corrected, 1
+        )
+    }
+}

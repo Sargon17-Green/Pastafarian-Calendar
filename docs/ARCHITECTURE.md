@@ -62,3 +62,17 @@ gorffennodd y swydd Kotlin a'r swydd cloi enwau ill dwy â SUCCESS.
 **`LAST_COMPLETED_STAGE=16`**. Mae Cam 17 (`PATCH 08`) yn
 nesaf, heb ei ddechrau. Cedwir y nam cynhyrchu byw, heb adeiladwr
 diferion gweledig na chywiriad cynnar.
+
+
+## Cam 17 — PATCH 08: addasu rheng y permutation
+
+Mae `PermutationPatchWrapper.patch` yn galw'r caller hanesyddol
+anghywir yn wirioneddol ac yn cadw 719 canlyniad anghywir a'r
+achos `undefined` ar ordinal 720. Wedyn mae'n trosi
+`rank0 = oneBased - 1` a galw'r helper zero-based cywir.
+Mae `MonsterBootstrapManager.applyPermutationPatch` yn
+cadw'r graith a'r canlyniad cywir mewn cyd-destun unigryw.
+Rhaid profi 720/720 GREEN, 720 RED etifeddol, 4,320 tyst
+BigInteger a phob atchweliad Camau 1–16 cyn ardystio Cam 17.
+Nid oes adeiladwr diferion gweledig na pours yng Ngham 17.
+Mae `LAST_COMPLETED_STAGE=16` nes cwblhau'r CI brodorol.
