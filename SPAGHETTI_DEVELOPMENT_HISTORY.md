@@ -472,3 +472,13 @@ prèv ke apèl `LEGACY_ONE_BASED_RANK` oubyen `LEGACY_PERM_UNRANK0` ki
 lanse yon lòt invocation pa sal eta, tras oswa commit yo. Yon tès
 mutation sou kontèks pataje ap echwe jan li dwe. Pa gen okenn chanjman
 semantik ni okenn kòd PATCH 08 nan tès sa a.
+
+## Stage 17 — PATCH 08
+
+Nou prezève fonksyon istorik oldPermutationUnrank0 ak erè one-based la.
+Nan nouvo kouch la, Legacy.execute kouri anvan koreksyon: nou konsève
+2 commit ak de tras li yo, answit dispatcher PERMUTATION_PATCH rele
+oldPermutationUnrank0(oneBased-1) toutbon, ak validasyon rank factoradic.
+Nou teste 720 lòd, BigInt negatif ak anpil chif, erè enjekte, kopi posede,
+ak nèf gout vizib reyèl. Nou pa ajoute okenn mouvman bòl.
+Tès natif CI Stage 17 dwe pase anvan nou fèmen etap la.

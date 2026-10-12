@@ -15,6 +15,7 @@ local PriorPatch = require("prior_patch")
 local LegacyGrinds = require("legacy_grinds")
 local GrindPatch = require("grind_patch")
 local LegacyPermutation = require("legacy_permutation")
+local PermutationPatch = require("permutation_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -155,13 +156,17 @@ function S.legacyVisibleDropProbe(calculationDay, targetDay, visibleIndex, dropS
     return LegacyGrinds.visibleDropLegacy(calculationDay, targetDay, visibleIndex, dropStore)
 end
 
--- DISCOVERY 08: rang one-based la ale nan unrank0 san koreksyon.
+-- PATCH 08: korije rank one-based la pandan legacy rete disponib.
 function S.permutationSpaghetti(dropValue)
-    local order = LegacyPermutation.execute(dropValue)
+    local order = PermutationPatch.execute(dropValue)
     return order
 end
 
--- Kontèks ak de tras konsève idantite apèl ki mal la.
+function S.permutationPatchProbe(dropValue)
+    return PermutationPatch.execute(dropValue)
+end
+
+-- Dyagnostik Stage 16 rete sou chemen istorik la, san chanjman.
 function S.legacyPermutationProbe(dropValue)
     return LegacyPermutation.execute(dropValue)
 end

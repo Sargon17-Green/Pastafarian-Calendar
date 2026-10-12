@@ -11,7 +11,7 @@ local function same(a,b)
     return true
 end
 for drop=1,720 do
-    local result=S.permutationSpaghetti(BigInt.from(drop))
+    local result=S.legacyPermutationProbe(BigInt.from(drop))
     local normative=O.bowlOrderFromDrop(BigInt.from(drop))
     if result==nil then
         assert(drop==720,"Gout ki manke a pa sèl endis 720")

@@ -534,3 +534,23 @@ Tès mutation `QA_ONLY/verify_reentrancy_mutant.lua` fòse tout apèl pataje
 menm kontèks la; tès sa a detekte erè a. Kòd pwodiksyon an pa chanje.
 Rezilta lokal yo sèvi ak doublon BigInt ak MonsterManager sèlman;
 `FULL_NATIVE_SUITE` rete PENDING.
+
+## Stage 17 — PATCH 08: correct the six-bowl permutation rank
+
+The Stage 16 historical path remains intact: its one-based rank is handed to
+`oldPermutationUnrank0` unmodified and still exposes 719 shifted rankings
+plus the single rank-720 rejection. Stage 17 adds `src/permutation_patch.lua`,
+which executes that legacy path first, then hands `oneBased-1` to the
+authentic zero-based unranker. The replacement is exposed by
+`Spaghetti.permutationSpaghetti` and `Spaghetti.permutationPatchProbe`;
+`Spaghetti.legacyPermutationProbe` continues to show the original defect.
+
+The patch retains historical diagnostics in a three-handler context, checks the
+factoradic rank and six distinct bowl IDs, returns owned copies and fails closed
+on dependency errors. No pouring or bowl mixing has been introduced.
+`test/stage17_tests.lua` includes legacy audits, 720 ranks, 237 wide/negative
+BigInt boundaries, 15 fault injections and nine genuine visible-drop inputs.
+
+The historical Stage 16 EXPECTED_RED audit runs as a positive verification in
+CI; it checks that the historical regression still fails by its exact message.
+Stage 17 CI must pass natively before LAST_COMPLETED_STAGE advances to 17.

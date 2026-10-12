@@ -15,9 +15,11 @@ assert(facade:find('local LegacyPermutation = require("legacy_permutation")',1,t
 assert(facade:find("function S.permutationSpaghetti(dropValue)",1,true))
 assert(facade:find("function S.legacyPermutationProbe(dropValue)",1,true))
 assert(not facade:find("oldPermutationUnrank0",1,true),"Stage 1 kadna pa respekte")
+-- Apati Stage 17, facade a ka rele PATCH 08; pa fè tès Stage 16 la rejte sa.
+assert(src:find("function LegacyPermutation.oldOrderFromDropWrong",1,true))
 for _,path in ipairs({"src/legacy_permutation.lua","src/spaghetti.lua"}) do
     local code=read(path)
-    for _,forbidden in ipairs({"normative_oracle","permutationPatch", "orderPatchFromValue",
+    for _,forbidden in ipairs({"normative_oracle","orderPatchFromValue",
         "legacyRank0", "bowlAlias", "vaultOld", "orderAt46Latch", "oldNextBowlFixedName"}) do
         assert(not code:find(forbidden,1,true),path.." gen travay ki pou Stage 17 oubyen pita: "..forbidden)
     end
