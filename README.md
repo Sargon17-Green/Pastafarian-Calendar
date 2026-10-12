@@ -425,3 +425,112 @@ Suite Lua Stage 1–15 la konfime onz ranje yo, sentinel fizik la,
 99 grind nan nèf gout vizib normatif, ak EXPECTED_RED legacy a
 kòm yon odit ki rete toujou aktif. Rezilta: GREEN.
 
+## Stage 16 — DISCOVERY 08: rang one-based voye bay unrank0
+
+Nan premye chemen pou lòd sis bòl yo, nou ajoute `src/legacy_permutation.lua`.
+Fonksyon istorik `oldPermutationUnrank0(rank0)` kòrèk pou **tout** rang
+`0..719`: yon dekonpozisyon factoradic bay permutasyon leksikografik sis
+idantite `1..6`. Men chemen k ap rele li a kalkile nimewo **one-based**
+`1..720` apati valè gout la epi li voye nimewo sa a dirèkteman bay
+fonksyon ki mande rang **zero-based**. Sa se erè ki pou Stage 16, pa yon
+koreksyon ki pou Stage 17.
+
+Handler `LEGACY_ONE_BASED_RANK` kalkile rang gout la avèk BigInt egzak;
+handler `LEGACY_PERM_UNRANK0` anrejistre apèl ki mal la. Kontèks yo posede
+apa epi yo kenbe de commit, de tras, metrik, dyagnostik ak ranje ki manke
+lè rang one-based la egal `720`. 
+
+Nou ekspoze `permutationSpaghetti(drop)` ak `legacyPermutationProbe(drop)`
+nan fasad `src/spaghetti.lua`. Kòd pwodiksyon an pa enpòte oracle tès la.
+
+**Prèv DISCOVERY 08:** pou 719 premye rang yo, rezilta legacy a deplase
+nan pwochen permutasyon. Pou rang `720`, fonksyon 0-based la rejte rang
+nan. Tès odit la egzije egzakteman mesaj sa a:
+
+`EXPECTED_RED Stage 16 DISCOVERY 08: 719 rang deplase, rang 720 rejte`
+
+`test/stage16_factoradic_tests.lua` pase nan 720 permutasyon endepandan ak
+yon jeneratè leksikografik Lua. `stage16_property_tests.lua` verifye
+719 deplasman ak rejè rank 720 ak oracle branch sa a; `stage16_boundary_tests.lua`
+verifye 147 valè, enkli gwo antye >256 bit; `stage16_fault_injection_tests.lua`
+kouvri 13 echèk ki pa kontamine nouvo invocation. Yon erè factoradic
+oswa yon eksepsyon dependency, menm sou rank 720, pwopaje kòm erè reyèl;
+sèlman refi range istorik 720 la vin rezilta MISSING pou odit.
+
+Apre upload, kouri tout suite Stage 1–15 ak tès pozitif Stage 16 yo, epi
+kite sèlman tès regresyon normatif Stage 16 la wouj. **Pa mete PATCH 08,
+pa fè konvèsyon `legacyRank0=oneBased-1`, pa demare Stage 17.**
+
+### Entegrasyon gout vizib reyèl yo
+
+`test/stage16_visible_integration_tests.lua` pran nèf gout nan
+`visibleDropSpaghetti` sou twa koup jou, atravè vrè kouch PATCH 07.
+Li konpare ansyen lòd rank la ak oracle branch la, egzije ke pwodiksyon
+kenbe erè one-based la (oswa rejè 720), epi pwouve ke Stage 17 poko antre.
+Tès sa a mande tout kòd branch natif la; QA ak doublon pa ka sètifye li.
+
+
+### Fail-closed sou erè unrank0 (ranfòsman QA Stage 16)
+
+Nou pa konpare fragman mesaj erè pou rekonèt rejè rang 720 ankò.
+Validatè `requireRank0` la voye yon token prive ki gen yon mesaj
+li ka afiche nòmalman; se idantite token sa a sèlman ki ka tounen
+`LEGACY_PERM_RANK_OUT_OF_RANGE`, epi sa fèt sèlman pou rang 720.
+Yon lòt panik, menm si li pote menm tèks la, rete yon echèk reyèl.
+`test/stage16_error_identity_tests.lua` enjekte sis kalite fo erè ak
+sis apèl rekiperasyon, san okenn koreksyon sou ansyen erè 1..720 lan.
+
+
+### Prèv ke refi rank 720 soti nan validatè orijinal la (QA v004)
+
+Menm token prive yon validatè te deja voye kapab rete nan men yon
+wrapper oubyen yon fonksyon ranplase. Se poutèt sa, nan chemen
+`LEGACY_PERM_UNRANK0`, nou egzije **tou de** idantite token sa a
+**ak** idantite fonksyon `oldPermutationUnrank0` orijinal la anvan
+nou aksepte yon refi rank 720 kòm `MISSING`. Si yon wrapper rele
+fonksyon orijinal la men rejwe erè a, sa rete yon erè ki dwe pwopaje.
+`test/stage16_authentic_validation_tests.lua` kouvri de atak sa yo
+ak de invocation pwòp apre sa. Nou pa modifye dezakò 719/720 a.
+
+
+### Pa teste idantite yon fonksyon apre li fin kouri (ranfòsman v005)
+
+Anvan nou rele `oldPermutationUnrank0`, nou kenbe referans
+`invokedUnrank` ki pral egzekite reyèlman. Nou sèvi ak referans sa a
+pou verifye provenans erè a: yon wrapper pa ka retabli chan tab la
+ak fonksyon orijinal la **apre apel la komanse men anvan li voye
+token an**. Twazyèm ka adversarial la pwouve pwoteksyon sa a.
+
+
+### Peryodisite ran yo atravè gwo antye (QA v006)
+
+`test/stage16_periodicity_tests.lua` verifye **2,199** invocation sou tout
+720 klas ran yo, ansanm ak `+720`, `-720` ak antye desimal ki depase
+plizyè santèn chif. Kalkil rezidi tès la sèvi ak chif desimal yo dirèkteman,
+pa fonksyon modulo BigInt ki nan production. Kontra sa a kenbe erè
+legacy a: 2,189 rang yo deplase, 10 eksepsyon rang 720 jwenn refi
+historik. Tès mutation separe a pwouve ke yon erè modulo sou kantite
+negatif yo pa ta kache anba `EXPECTED_RED`. Sa PA fè PATCH 08 antre.
+
+### QA adisyonèl Stage 16: entèlasman ak tounaj istorik yo
+
+Nou verifye 360 BigInt ki gen ant 70 ak 246 chif, avèk 720 apèl
+endepandan pou konteks, tras, metrik ak kopi rezilta yo. Yon mutasyon
+ki fòse pataj konteks la fè tès la echwe.
+
+Nan QA_ONLY sèlman, nou rasanble vrè modil Lua Stage 14, 15 ak 16:
+onz ranje sentinel korije, onz aksè legacy ki toujou mal, ak
+55 lekti rank sou menm fasad. Se sèlman bigint ak MonsterBase nou
+ranplase ak doublon nan QA sa a. Tout tès sa yo pase lokalman, men
+sa pa egal yon PASS sou suite natif Stage 1..16.
+
+### QA sou apèl rekiran nan Stage 16
+
+`test/stage16_reentrancy_tests.lua` fè uit apèl nested pandan dispatcher
+rank one-based oubyen unrank0 a poko fini. Li egzije uit kontèks outer ak
+uit kontèks inner endepandan, de commit pa apèl, menm lòd legacy ki mal
+pou rank 1..719, epi de panik ki pa gen dwa kache anba erè rank 720.
+Tès mutation `QA_ONLY/verify_reentrancy_mutant.lua` fòse tout apèl pataje
+menm kontèks la; tès sa a detekte erè a. Kòd pwodiksyon an pa chanje.
+Rezilta lokal yo sèvi ak doublon BigInt ak MonsterManager sèlman;
+`FULL_NATIVE_SUITE` rete PENDING.

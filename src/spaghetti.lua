@@ -14,6 +14,7 @@ local LegacyPrior = require("legacy_prior")
 local PriorPatch = require("prior_patch")
 local LegacyGrinds = require("legacy_grinds")
 local GrindPatch = require("grind_patch")
+local LegacyPermutation = require("legacy_permutation")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -154,8 +155,19 @@ function S.legacyVisibleDropProbe(calculationDay, targetDay, visibleIndex, dropS
     return LegacyGrinds.visibleDropLegacy(calculationDay, targetDay, visibleIndex, dropStore)
 end
 
+-- DISCOVERY 08: rang one-based la ale nan unrank0 san koreksyon.
+function S.permutationSpaghetti(dropValue)
+    local order = LegacyPermutation.execute(dropValue)
+    return order
+end
+
+-- Kontèks ak de tras konsève idantite apèl ki mal la.
+function S.legacyPermutationProbe(dropValue)
+    return LegacyPermutation.execute(dropValue)
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 15", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 16", 0)
 end
 
 return S

@@ -373,3 +373,102 @@ test-only la konfime nèf gout vizib ak 99 grind; onz ranje
 nouvèl yo mache, pandan odit EXPECTED_RED Stage 14 la toujou
 detekte tout onz move ranje legacy yo. Nou pa mete okenn etap 16.
 
+## Stage 16 — DISCOVERY 08: rank six-bowl la te glise
+
+### Sa ansyen kòd la te kwè
+
+Apre premye kalkil gout vizib yo, ansyen ouvèti lòd sis bòl yo te sèvi
+ak `oldPermutationUnrank0`. Fonksyon an te byen kalkile factoradic pou
+0..719; menm non li montre li atann zewo. Men moun ki te rele li a te
+pase rang 1..720 san adaptasyon.
+
+### Ki prèv ki montre move sipozisyon an
+
+Enumerasyon endepandan tout 720 permutasyon yo montre unrank0 a kòrèk.
+Pwoblèm nan se sèlman premye apèl la: `1` chwazi dezyèm permutasyon,
+`719` chwazi dènye a, epi `720` pa gen dwa antre. Odit EXPECTED_RED la
+fè distenksyon ant 719 permutasyon deplase ak yon rang ki rejte.
+
+### Ki kouch monstr nou te ajoute
+
+Nou konsève unrank0, epi nou ajoute de handler `LEGACY_ONE_BASED_RANK`
+ak `LEGACY_PERM_UNRANK0`, de commit ak branch-trace, metrics, ak dyagnostik.
+Nan rang 720, pwodiksyon an kenbe yon rezilta `nil` ak yon rapò presi
+olye li fabrike yon lòd bòl.
+
+### Sa nou poko fè
+
+Nou pa korije rang anvan unrank0 a, nou pa fè okenn pours, pa gen
+`bowlAlias`, ni okenn kòd PATCH 08. Stage 17 sèlman pral ajoute chèn
+`oneBased=regularMod(drop-1,720)+1`, `legacyRank0=oneBased-1`, epi
+`oldPermutationUnrank0(legacyRank0)`, pandan l ap konsève tras istorik la.
+
+### Lè yon erè diferan rive
+
+Yon ansyen tès te trete tout erè ki soti nan unrank0 tankou rang 720 manke.
+Nou limite anvlòp sa a: se sèlman mesaj validasyon istwa a, sou rang
+720 toutbon, ki vin MISSING. Yon pann sou rang 1..719, oswa yon lòt pann
+sou 720, pase klèman pou odit la pa bay fo prèv EXPECTED_RED.
+
+### Chèn gout vizib rive jiska rank
+
+Tès entegre a egzèse kalkil gout vizib ki sot nan PATCH 07, ak tout
+11 tounaj, anvan li pase valè sa yo nan legacy permutation. Pa gen
+valè oracle ki antre kòm antre pwodiksyon. Se sèlman tès yo ki itilize
+oracle pou mezire erè rank ki te deja la.
+
+
+### Distenksyon echèk yo nan menm etap Discovery 08 la
+
+Yon mekanis tretman erè te konfonn yon mesaj ki sanble ak erè
+istorik rang 720 ak validasyon reyèl unrank0 la. Nou kenbe menm
+konpòtman istorik pou rang yo, men nou bay validatè 0..719 la
+yon token erè prive. Se idantite token sa a, pa mo ki nan mesaj la,
+ki fè konteks Discovery 08 la mete `MISSING`. Yon faux panik rete
+yon faux panik; tès kalite yo pa ka bay fo PASS sou sa.
+
+
+### Provenans erè a, pa idantite erè a sèlman (QA v004)
+
+Yon wrapper ka atrap vrè token erè validatè a, epi voye menm objè
+lan ankò. Tès ak idantite token sèlman te aksepte sa. Nou
+konplete baryè a avèk yon referans ki rete sou fonksyon legacy
+original la. Nou teste `replay-direct` ak `wrapper-calling-original`,
+ansanm ak rekiperasyon apre yo. Mòd Discovery 08 la rete
+an menm erè one-based li te genyen an.
+
+
+### Fenèt chanjman ant apèl ak verifikasyon (QA v005)
+
+Nan premye tantativ ranfòsman an, nou konpare fonksyon aktyèl la
+apre `pcall`; yon wrapper te ka retabli referans ansyen fonksyon an
+an tablo a pandan apèl la, epi re-voye token otantik la. Nou fèmen
+fenèt sa a lè nou konsève referans fonksyon REYÈLMAN rele a anvan
+`pcall` epi nou konpare li ak orijinal la. Twa atak ak twa
+rekiperasyon pase, san korije erè istorik rank 1..720 lan.
+
+
+### Peryodisite ki pa depann de gwosè BigInt (QA Stage 16 v006)
+
+Nou egzije menm rang legacy a lè yon valè chanje pa `+720` oswa
+`-720`, menm sou antre negatif ak antye 512 chif. 2,199 invocation
+verifye pa yon kalkil rezidi desimal ki endepandan; okenn koreksyon
+unrank0 pa antre. Mutation tès sèlman ki deregle modulo negatif la
+se detekte.
+
+### Verifikasyon siplemantè pou Stage 16
+
+Nou ajoute yon tès entèlasman pou 360 gwo BigInt ak 720 invocation,
+ki teste ke repons yo ak branchTrace/diagnostics/metrics pa pataje
+referans ki ka koule soti nan yon apèl pou ale nan yon lòt. Mutasyon
+pataj konteks la detekte. QA izole kouri vrè legacy_grinds, grind_patch
+ak legacy_permutation ansanm; seulement bigint ak MonsterBase se doublon.
+Pa gen okenn chanjman kòd production ni okenn patch ki pou Stage 17.
+
+### Izolasyon pandan apèl nested (Stage 16)
+
+Nan DISCOVERY 08, plizyè dispatcher kapab aktif ansanm. Nou ajoute
+prèv ke apèl `LEGACY_ONE_BASED_RANK` oubyen `LEGACY_PERM_UNRANK0` ki
+lanse yon lòt invocation pa sal eta, tras oswa commit yo. Yon tès
+mutation sou kontèks pataje ap echwe jan li dwe. Pa gen okenn chanjman
+semantik ni okenn kòd PATCH 08 nan tès sa a.
