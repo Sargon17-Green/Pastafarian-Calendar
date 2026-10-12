@@ -234,7 +234,7 @@ object Stage19Tests {
             foundation,foundation,ExactInt.of(720L))
         insist("E_PATCH09_PATCH08_PRESERVED",
             permutation.patch08CorrectedOrder == listOf(6,5,4,3,2,1) &&
-            permutation.patch08LegacyUndefined)
+            permutation.patch08LegacyUndefined == true)
         val grind = manager.applyGrindPatch(foundation,foundation,11)
         insist("E_PATCH09_PATCH07_PRESERVED",
             grind.patch07CorrectedRow == VisibleGrindRow(37,41,43,47,0))
