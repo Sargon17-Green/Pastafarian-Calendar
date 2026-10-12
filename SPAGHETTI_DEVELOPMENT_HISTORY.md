@@ -860,3 +860,21 @@ các kiểm soát Stage24 tách hành vi legacy trực tiếp
 khỏi lời gọi production. Bổ sung 16 bài kiểm thử về
 tất cả 720 hoán vị, dữ liệu xa, bối cảnh song song,
 giới hạn và chẩn đoán trực tiếp. Giai đoạn 26 chưa mở.
+
+**Kết quả thực tế Stage25:** 317 kiểm thử Elixir 1.18.5,
+OTP 27, 0 lỗi, 0 cảnh báo biên dịch. Canonical Names Lock
+PASS. Cả 12 sai lệch trước đây từ Stage22/23/24 đã
+trở lại xanh; 16 bài thử Stage25 mới đạt.
+Hàm cố định lịch sử vẫn được gọi và giá trị sai
+được cất trong chẩn đoán, nhưng đường sản xuất trả
+đúng successor từ chốt giọt 46.
+
+LegacyFixedNameSuccessor blob SHA
+`56397c39d13a4a1b7bc345d98c5b37029b3fcdf0`;
+LegacyOrderMemory blob SHA
+`4d7610e41443d4a37d60befa76a456cd8c85e06d`;
+OrderAt46LatchPatch blob SHA
+`9c695184dbe79cdccd6250915d5ac09128c96f9d`;
+oracle test-only blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+Không mở giai đoạn 26; đóng Stage25 GREEN.

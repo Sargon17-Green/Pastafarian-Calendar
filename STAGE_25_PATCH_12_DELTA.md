@@ -73,3 +73,31 @@ Với queried ID 1 là phần tử cuối, kết quả chuẩn
 ## Commit
 
 Giai đoạn 25: sửa vòng bát theo latch, giữ legacy để chẩn đoán
+
+## Kết quả CI và bằng chứng hoàn tất
+
+- Commit triển khai:
+  `78c75fd00875e71eb9a3d1a56d860bfa90a241f6`.
+- Elixir 1.18.5 / OTP 27, 41 tệp .ex được biên dịch.
+- 317 kiểm thử, không có lỗi và không có cảnh báo.
+- Bốn hồi quy Stage24, sáu bài Stage22 và hai bài
+  Stage23 đều xanh trở lại. Giá trị chuẩn expected
+  không được thay đổi.
+- 16 bài kiểm thử Stage25 mới đều đạt.
+- Canonical Names Lock PASS độc lập.
+- Source legacy ID cố định giữ nguyên SHA:
+  `56397c39d13a4a1b7bc345d98c5b37029b3fcdf0`.
+- LegacyOrderMemory không đổi, SHA:
+  `4d7610e41443d4a37d60befa76a456cd8c85e06d`.
+- OrderAt46LatchPatch không đổi, SHA:
+  `9c695184dbe79cdccd6250915d5ac09128c96f9d`.
+- Oracle test-only không đổi, SHA:
+  `be1638f46b2190d617af0378a61b077bda10bf32`.
+- Không sửa main, vẫn 58 lần ghi memory lịch sử,
+  không bắt đầu giai đoạn 26.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38269570216
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38269570259
+
+Trạng thái cuối: GREEN đã xác minh.
+Điểm tiếp theo: giai đoạn 26/55 DISCOVERY 13.

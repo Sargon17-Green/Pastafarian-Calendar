@@ -996,3 +996,26 @@ kiểm chứng riêng. Thêm 16 bài Stage25 gồm 720 hoán vị
 x 6 ID, sai lệch chẩn đoán, biên cuối-đầu, ngày lớn,
 không trạng thái chung, tính bất biến và mã nguồn.
 Không bắt đầu DISCOVERY 13.
+
+## Kiểm chứng đóng bản vá 12
+
+CI Elixir 1.18.5 / Erlang OTP 27 xác nhận **317 kiểm thử,
+0 thất bại và 0 cảnh báo biên dịch**; khóa tên chuẩn độc
+lập PASS. Mười hai bài từng đỏ tại DISCOVERY 12 đều xanh.
+16 bài kiểm thử Stage25 mới đều đạt, bao gồm 720 hoán vị
+x sáu ID và truy vấn chẩn đoán song song.
+
+`LegacyFixedNameSuccessor` và `LegacyOrderMemory`
+không thay đổi. `NextBowlPatchWrapper` tiếp tục gọi
+hàm ID cố định và giữ giá trị `legacy_next_id`, nhưng
+trả `correct_next_id` lấy từ hoán vị giọt 46.
+`OrderAt46LatchPatch` cũng giữ nguyên và 58 lần ghi
+memory lịch sử tiếp tục xảy ra. Giá trị sai của legacy
+được giữ làm bằng chứng, không dùng làm kết quả chính.
+
+- [CI Stage25: 317/317](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38269570216)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38269570259)
+
+Giai đoạn 25/55 kết thúc `GREEN` đã xác minh.
+Bước tiếp theo là giai đoạn 26 `DISCOVERY 13`;
+chưa triển khai trong giai đoạn này.

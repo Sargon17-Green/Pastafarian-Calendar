@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=25
 CURRENT_KIND=PATCH
 CURRENT_PATCH=12
-LAST_COMPLETED_STAGE=24
+LAST_COMPLETED_STAGE=25
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyFixedNameSuccessor với vòng ID 1..6; NextBowlPatchWrapper luôn gọi legacy để lấy báo cáo chẩn đoán, nhưng kết quả công khai từ OrderAt46LatchPatch.next_bowl đọc vị trí ID trong latch giọt 46. LegacyOrderMemory vẫn ghi 58 lần; giữ PATCH 01..11.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_25_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_25_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_25_PENDING
-CI_FAILURES=STAGE_25_PENDING
+CI_TESTS=317
+CI_FAILURES=0
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -555,5 +555,27 @@ toán nguồn Stage23. Với hồi quy fixture Stage24,
 đường gọi chuẩn chuyển sang wrapper, nhưng expected
 vẫn như cũ, chứng cứ legacy trực tiếp còn trong test.
 Thêm 16 kiểm thử Stage25, tổng dự kiến 317 GREEN.
-LAST_COMPLETED_STAGE giữ 24 trước CI. Không bắt đầu
+LAST_COMPLETED_STAGE đã nâng lên 25 sau khi CI và khóa tên PASS. Không bắt đầu
 giai đoạn 26 về luồng đáp án hoặc lịch cuối.
+
+Giai đoạn 25 đã được xác minh trên Elixir 1.18.5 / OTP 27:
+317 kiểm thử, 0 thất bại, 0 cảnh báo biên dịch.
+12 bài Stage24/22/23 trước đó đỏ đều xanh, không thay
+kỳ vọng normative. Bốn hồi quy Stage24 giữ nguyên kỳ vọng,
+riêng test fixture chuyển lời gọi chuẩn sang wrapper;
+lời gọi legacy thô vẫn chứng minh kết quả cố định sai.
+16 kiểm thử Stage25 mới đều PASS; đầy đủ 720 hoán vị x
+sáu ID, thứ tự vòng cuối-đầu, ngày rất lớn, song song,
+chẩn đoán và các kiểm toán source.
+LegacyFixedNameSuccessor giữ nguyên blob SHA
+56397c39d13a4a1b7bc345d98c5b37029b3fcdf0.
+LegacyOrderMemory giữ nguyên blob SHA
+4d7610e41443d4a37d60befa76a456cd8c85e06d.
+OrderAt46LatchPatch giữ nguyên blob SHA
+9c695184dbe79cdccd6250915d5ac09128c96f9d.
+Oracle test-only giữ nguyên blob SHA
+be1638f46b2190d617af0378a61b077bda10bf32.
+Khóa tên chuẩn độc lập PASS.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38269570216
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38269570259
+Giai đoạn 25 đóng GREEN; giai đoạn 26 DISCOVERY 13 chưa mở.
