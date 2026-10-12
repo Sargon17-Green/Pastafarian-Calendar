@@ -106,3 +106,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 20 — DISCOVERY 10
 
 `old_stir_bowls_in_place` ስድስቱን ጎድጓዳ ሳህኖች በየቅደም ተከተላቸው በእውነት በቀድሞው `bowls` መያዣ ላይ ይጽፋል። `prev` እና `next` የሚለውን ሲያነብ ከቀድሞው ዙር ተቀይሮ የተጻፈ እሴት ቢኖር ያንኑ ያነባል። የስህተቱ ቦታ በአንድ ትልቅ ዙር ውስጥ የስድስቱ ጽሑፎች አቀማመጥ ነው፤ የዙሩ ቅደም ተከተል፣ የቦታ የድንጋይ ምርጫ፣ `PATCH 09` የalias ማፍሰሻዎች እና `SAVE` የሂሳብ መንገድ ተጠብቀዋል። `LegacyBowlStirAdapter` የጠሪውን ሰልፍ ለይቶ በ`old_stir_bowls_in_place` ስህተቱን በውስጡ ይፈጽማል። `calendar_stir_bowls_spaghetti` በproduction ወደዚሁ መንገድ ይሄዳል። አራት `EXPECTED_RED` assertions እና የታሪክ GREEN ምስክሮች ተጨምረዋል። `PATCH 10` የ`vaultOld/pending` ሁለት-ደረጃ ስሌት ገና አልተጨመረም። V 0.5.2 (`7647ce1`) በGitHub Actions run `38254290745` በቀጥታ ተረጋግጧል። `v fmt -verify ./pastafari` PASS፣ 29 የቀድሞና አዲስ የታሪክ witness ፋይሎች PASS፣ አራቱ `EXPECTED_RED` የsnapshot assertions በተናጠል ተረጋግጠዋል። `LAST_COMPLETED_STAGE=20` ነው። ዝርዝር፦ `docs/STAGE20_DISCOVERY10.md`።
+
+## ደረጃ 21 — PATCH 10
+
+`old_stir_bowls_in_place` እና `LegacyBowlStirAdapter` ሳይቀየሩ ይቀራሉ። `BowlStirPatch10` ከቀድሞዎቹ ስድስት ጎድጓዳ ሳህኖች `vault_old` የተለየ ቅጂ ይፈጥራል፣ `pending` ሌላ ቅጂ ያዘጋጃል፣ እና የታሪክ `dispatch_legacy_bowl_stir` እውነተኛ ጥሪን ለምርመራ ብቻ ያከናውናል። ለስድስቱ ቦታዎች ሂሳቡ ሁሉንም ንባቦች ከ`vault_old` ብቻ ያደርጋል፣ ውጤቶቹንም በ`pending` ብቻ ይጽፋል። ስድስቱ ከተሰሉ በኋላ ብቻ የ`committed` ሰልፍ ይሞላል። የደረጃ 20 አራቱ RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። የታሪክ ምስክሮች `dispatch_legacy_bowl_stir` በቀጥታ ይጠራሉ። `LAST_COMPLETED_STAGE=20` እውነተኛው native V CI እስኪሳካ ድረስ ይቆያል። ዝርዝር፦ `docs/STAGE21_PATCH10.md`።

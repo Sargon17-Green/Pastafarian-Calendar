@@ -59,8 +59,8 @@ pub fn (_ BaseDispatcher) dispatch_legacy_bowl_stir(i int, drop BigInt, stones S
 	return adapter.stir(i, drop, stones, bowls, order, pours)
 }
 
-// ደረጃ 20፦ የህይወት መንገዱ በተፈጥሮው የታሪክ የin-place መንገድ ላይ ይወድቃል።
+// ደረጃ 21፦ የproduction ጥሪ የPATCH 10 የተለየ የማንበቢያና የመጻፊያ ሰልፍ ይጠቀማል።
 pub fn calendar_stir_bowls_spaghetti(i int, drop BigInt, stones Stones, bowls []BigInt, order []int, pours []BigInt) ![]BigInt {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_bowl_stir(i, drop, stones, bowls, order, pours)
+	return dispatcher.dispatch_bowl_stir_patch10(i, drop, stones, bowls, order, pours)
 }
