@@ -171,6 +171,11 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluatePatchedBowlStir(
             calculationDay,targetDay,visibleIndex);
 
+    // مسار كامل تاريخي تعيد فيه التحريكات اللاحقة كتابة ترتيب سؤال القطرة 46.
+    public static LegacySauceResult EvaluateLegacyOverwrittenSauce(
+        BigInteger calculationDay,BigInteger targetDay)
+        => new MonsterManager().EvaluateLegacyOverwrittenSauce(calculationDay,targetDay);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

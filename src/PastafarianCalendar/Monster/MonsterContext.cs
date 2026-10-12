@@ -98,6 +98,13 @@ public sealed class MonsterContext
     public BigInteger[]? StirPending { get; set; }
     public BigInteger[]? PatchedStirredBowls { get; set; }
 
+    // شاهد ترتيب القطرة 46 التشخيصي؛ لا تستخدمه الواجهة التاريخية.
+    public int[]? LegacyDiagnosticDrop46Order { get; set; }
+    public int[]? LegacyOverwrittenQueryOrder { get; set; }
+    public int[][]? LegacyPostStirOrders { get; set; }
+    public BigInteger[]? LegacySauceBowlsAfterDrops { get; set; }
+    public BigInteger[]? LegacySauceFinalBowls { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

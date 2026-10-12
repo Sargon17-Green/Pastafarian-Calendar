@@ -147,3 +147,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage20Tests/PastafarianCalendar.Stage20Tests.csproj --configuration Release -- --verify-expected-red
       - name: مطابقة رقعة التحريك بالظل العاشرة مع المرجع وحفظ تلوث القديم
         run: dotnet run --project tests/PastafarianCalendar.Stage21Tests/PastafarianCalendar.Stage21Tests.csproj --configuration Release
+      - name: تشغيل الاختبار الأحمر لتبدّل ترتيب القطرة الأخيرة
+        id: discovery_overwritten_drop46_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage22Tests/PastafarianCalendar.Stage22Tests.csproj --configuration Release
+      - name: إثبات أن فشل ترتيب السؤال تاريخي لا فشل تجميع
+        if: always()
+        run: |
+          test "${{ steps.discovery_overwritten_drop46_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage22Tests/PastafarianCalendar.Stage22Tests.csproj --configuration Release -- --verify-expected-red

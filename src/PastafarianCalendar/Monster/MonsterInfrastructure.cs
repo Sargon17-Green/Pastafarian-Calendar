@@ -329,6 +329,66 @@ public sealed class MonsterValidationManager
                 throw new MonsterValidationException("نتيجة وعاء غير محفوظة.");
     }
 
+    // جميع الأوعية والترتيبات تُراجع قبل كتابة حالة المعنى أو القياسات.
+    public void ValidateLegacyOverwrittenSauce(
+        MonsterContext context, LegacyOverwrittenSauceCandidate candidate)
+    {
+        if(context.LegacySauceFinalBowls is not null ||
+           context.LegacyOverwrittenQueryOrder is not null ||
+           context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سياق الصلصة التاريخية ليس خالياً.");
+        if(candidate is null || candidate.Source is null ||
+           candidate.Source.Visible is null || candidate.Source.Visible.Length!=47 ||
+           candidate.Source.Stones is null || candidate.Source.Stones.Length!=47 ||
+           candidate.DiagnosticDrop46Order is null ||
+           candidate.OverwrittenQueryOrder is null ||
+           candidate.PostStirOrders is null || candidate.PostStirOrders.Length!=13 ||
+           candidate.BowlsAfterDrops is null || candidate.BowlsAfterDrops.Length!=7 ||
+           candidate.FinalBowls is null || candidate.FinalBowls.Length!=7 ||
+           candidate.BowlsAfterDrops[0]!=0 || candidate.FinalBowls[0]!=0 ||
+           ReferenceEquals(candidate.FinalBowls,candidate.BowlsAfterDrops) ||
+           candidate.DiagnosticDrop46Order.Length!=6 ||
+           candidate.OverwrittenQueryOrder.Length!=6 ||
+           ReferenceEquals(candidate.OverwrittenQueryOrder,candidate.DiagnosticDrop46Order))
+            throw new MonsterValidationException("حزمة الصلصة القديمة غير مكتملة.");
+
+        var unrank=new BowlOrderPatchWrapper();
+        var expected46=unrank.OrderPatchFromValue(candidate.Source.Visible[46]).Order;
+        if(!candidate.DiagnosticDrop46Order.SequenceEqual(expected46))
+            throw new MonsterValidationException("الترتيب التشخيصي للقطرة الأخيرة غير صحيح.");
+        if(!candidate.PostStirOrders[12].SequenceEqual(candidate.OverwrittenQueryOrder))
+            throw new MonsterValidationException("لا تظهر ندبة محو ترتيب السؤال بالتحريك الأخير.");
+
+        // أعد تشغيل المراحل التي نُفذت بالفعل، دون مرجع الاختبار.
+        var bowls=new LegacyBowlFactory().InitialBowls(candidate.Source.Counts);
+        var aliases=new BowlAliasPatchWrapper();
+        var stir=new ShadowBowlStirPatch();
+        for(var i=1;i<=46;i++)
+        {
+            var drop=candidate.Source.Visible[i];
+            var order=unrank.OrderPatchFromValue(drop).Order;
+            var map=aliases.InstallOrderAliases(order);
+            var pour=aliases.PatchedPours(i,drop,candidate.Source.Stones,bowls,map);
+            stir.StirOneDropViaShadow(bowls,i,drop,candidate.Source.Stones,order,pour);
+        }
+        if(!bowls.SequenceEqual(candidate.BowlsAfterDrops))
+            throw new MonsterValidationException("أوعية القطرات الست والأربعين غير مطابقة.");
+
+        var round=new LegacyPostStirRound();
+        for(var ordinal=1;ordinal<=12;ordinal++)
+        {
+            var replay=round.Stir(bowls,ordinal);
+            var trace=candidate.PostStirOrders[ordinal];
+            if(trace is null || trace.Length!=6 ||
+               !trace.SequenceEqual(replay.Order))
+                throw new MonsterValidationException("تاريخ أوامر التحريك اللاحقة غير مطابق.");
+        }
+        if(!bowls.SequenceEqual(candidate.FinalBowls))
+            throw new MonsterValidationException("الأوعية النهائية لا تطابق التحريك اللاحق.");
+        if(candidate.FinalBowls.Skip(1).Any(x=>x<1))
+            throw new MonsterValidationException("وعاء نهائي خارج الحفظ.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
