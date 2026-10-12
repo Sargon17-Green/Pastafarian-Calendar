@@ -333,7 +333,7 @@ public final class Stage02IncrementalRouteTests {
                     - Runtime.getRuntime().freeMemory();
                 long hits = family.tailFunctionalReuseHitCount() - hitBaseline;
                 long builds = family.tailFunctionalBuildCount() - buildBaseline;
-                eq(count, hits + builds,
+                eq((long) count, hits + builds,
                     "E_SHARED_EXTENDED_ACCOUNTING");
                 eq(count, route.stepsCompleted(),
                     "E_SHARED_EXTENDED_STEPS_EQUAL_BATCHES");
