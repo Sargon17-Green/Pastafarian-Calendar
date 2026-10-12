@@ -380,10 +380,20 @@ public final class MonsterWeavingLinearCounter {
         private final BigInteger upper;
         private final int suffixTargetDays;
         private final int lastCountCalls;
+        private final int probedBranches;
+        private final BigInteger skippedChoices;
 
         private RankRoute(MonsterWeavingLinearCounter owner, State state,
                 int[] prefix, BigInteger globalRank, BigInteger lower,
                 BigInteger upper, int suffixTargetDays, int lastCountCalls) {
+            this(owner, state, prefix, globalRank, lower, upper,
+                suffixTargetDays, lastCountCalls, 0, ZERO);
+        }
+
+        private RankRoute(MonsterWeavingLinearCounter owner, State state,
+                int[] prefix, BigInteger globalRank, BigInteger lower,
+                BigInteger upper, int suffixTargetDays, int lastCountCalls,
+                int probedBranches, BigInteger skippedChoices) {
             this.owner = owner;
             this.state = new State(state);
             this.prefix = prefix.clone();
@@ -392,6 +402,8 @@ public final class MonsterWeavingLinearCounter {
             this.upper = upper;
             this.suffixTargetDays = suffixTargetDays;
             this.lastCountCalls = lastCountCalls;
+            this.probedBranches = probedBranches;
+            this.skippedChoices = skippedChoices;
         }
 
         public int[] fixedPrefixCopy() { return prefix.clone(); }
@@ -404,6 +416,8 @@ public final class MonsterWeavingLinearCounter {
         public int stepsCompleted() { return prefix.length; }
         public int suffixTargetDays() { return suffixTargetDays; }
         public int lastCountCalls() { return lastCountCalls; }
+        public int probedBranches() { return probedBranches; }
+        public BigInteger skippedChoices() { return skippedChoices; }
         public boolean complete() { return remainingDays() <= suffixTargetDays; }
     }
 
@@ -538,7 +552,7 @@ public final class MonsterWeavingLinearCounter {
         }
         validateRouteBudgets(maximumSteps, maximumBranchCounts);
         if (maximumSteps > 0 && maximumBranchCounts >= 1
-                && !previous.complete()) {
+                && !previous.complete() && previous.probedBranches == 0) {
             BigInteger fromFirst = previous.globalRank.subtract(previous.lower);
             BigInteger fromLast = previous.upper.subtract(previous.globalRank);
             BigInteger edge = BigInteger.valueOf(MAX_EDGE_DISTANCE);
@@ -559,18 +573,26 @@ public final class MonsterWeavingLinearCounter {
         BigInteger blockSize = previous.upper.subtract(previous.lower).add(ONE);
         int countCalls = 0;
         int advanced = 0;
+        int probed = previous.probedBranches;
+        BigInteger skipped = previous.skippedChoices;
+        boolean budgetReached = false;
         while (totalDays - size > previous.suffixTargetDays
-                && advanced < maximumSteps) {
+                && advanced < maximumSteps && !budgetReached) {
             int[] eligible = new int[lengths.length];
             int options = 0;
             for (int month = state.closed; month < lengths.length; month++) {
                 if (state.canTake(month, lengths)) eligible[options++] = month;
             }
-            if (options == 0) throw new IllegalStateException("E_WEAVE_ROUTE_STATE");
-            if (options - 1 > maximumBranchCounts - countCalls) break;
-            BigInteger skipped = ZERO;
+            if (options == 0 || probed >= options) {
+                throw new IllegalStateException("E_WEAVE_ROUTE_STATE");
+            }
             boolean selected = false;
-            for (int i = 0; i < options; i++) {
+            for (int i = probed; i < options; i++) {
+                if (i < options - 1 && countCalls >= maximumBranchCounts) {
+                    probed = i;
+                    budgetReached = true;
+                    break;
+                }
                 int month = eligible[i];
                 State trial = new State(state);
                 trial.take(month, lengths);
@@ -581,6 +603,9 @@ public final class MonsterWeavingLinearCounter {
                     sizeOfBranch = countSuffix(trial);
                     countCalls++;
                 }
+                if (sizeOfBranch.signum() <= 0) {
+                    throw new IllegalStateException("E_WEAVE_ROUTE_BRANCH");
+                }
                 BigInteger start = lower.add(skipped);
                 BigInteger end = start.add(sizeOfBranch);
                 if (previous.globalRank.compareTo(end) < 0) {
@@ -590,16 +615,21 @@ public final class MonsterWeavingLinearCounter {
                     prefix[size] = month + 1;
                     size++;
                     advanced++;
+                    probed = 0;
+                    skipped = ZERO;
                     selected = true;
                     break;
                 }
                 skipped = skipped.add(sizeOfBranch);
+                probed = i + 1;
             }
-            if (!selected) throw new IllegalStateException("E_WEAVE_ROUTE_RANK");
+            if (!selected && !budgetReached) {
+                throw new IllegalStateException("E_WEAVE_ROUTE_RANK");
+            }
         }
         return new RankRoute(this, state, Arrays.copyOf(prefix, size),
             previous.globalRank, lower, lower.add(blockSize).subtract(ONE),
-            previous.suffixTargetDays, countCalls);
+            previous.suffixTargetDays, countCalls, probed, skipped);
     }
 
     public int[] finishGlobalRankRoute(RankRoute route) {

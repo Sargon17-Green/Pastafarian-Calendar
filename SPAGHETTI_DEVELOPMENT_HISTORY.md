@@ -173,3 +173,7 @@ ni'o lo nu lo ranki se lamji lo pamoi .a lo romoi pagbu cu curmi lo pa `countSuf
 ### lo mulno nanca ranki pluta fi lo kunti pamoi pagbu
 
 ni'o lo nanca be li 5778 djedi cu se cipra fi lo mulno ranki po'o .i lo so'i `RankRoute` se jmina cu te fanmo lo porsi. lo pamoi ranki .a lo romoi ranki lamji ranki cu se cipra .i lo ro drata mutce se xanri ranki cu za'o na se snada ca ti.
+
+### lo se xanri namcu cu ralte lo pluta
+
+ni'o lo `RankRoute` cu ralte lo `probedBranches` .e lo `skippedChoices` tezu'e lo nu lo ranki pluta cu kakne lo nu ca'o pilno lo mutce cmalu namcu se namcu be ro mebu. lo se ba'o cipra namcu na se namcu re'u. lo se bridi ke ganra ranki se cuxna cu na se te snada lo mulno nanca fi lo ro ranki ca ti.

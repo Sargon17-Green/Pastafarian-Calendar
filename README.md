@@ -212,3 +212,7 @@ ni'o lo `advanceGlobalRankRoute` cu se platu fi lo ranki poi se lamji lo pamoi .
 ## lo mulno nanca ranki pluta te fanmo
 
 ni'o lo `Stage02FullRouteCompletionTests` cu zbasu lo se jmina porsi fi lo mulno ranki po'o .i lo pamoi pagbu cu kunti .i lo porsi be li 5778 djedi cu se benji fi lo so'i `RankRoute` se jmina pe li 512 djedi .i ro lo se jmina cu te namcu pamei lo se stali porsi. lo jalge cu se cipra fi lo `unrank1` .e lo se stodi `MonsterCalendarResolver` .i lo midju ranki cu za'o nitcu lo drata balvi cipra.
+
+## lo se stodi ranki pluta pe lo so'i pagbu
+
+ni'o lo `RankRoute` cu ralte lo namcu be lo se snada cilce pagbu .e lo se ba'o skicu se cunso ranki. lo `probedBranches` .e lo `skippedChoices` cu stodi lo se xanri pamoi pagbu datni fi lo nanca porsi. lo `advanceGlobalRankRoute` cu cupra lo so'i nu benji fi lo se jimte pe lo mebu namcu gi'e na sarcu lo nu za'u re'u se namcu lo pagbu poi ba'o se namcu. lo pagbu cuxna cu na galfi lo stodi munje ranki. ko benji `sh run_stage02_incremental_route_tests.sh`.

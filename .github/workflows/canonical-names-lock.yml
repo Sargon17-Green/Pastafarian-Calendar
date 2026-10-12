@@ -92,3 +92,5 @@ jobs:
         run: sh run_stage02_near_edge_routing_tests.sh
       - name: Stage 02 full-length global near-edge route completion
         run: sh run_stage02_full_route_completion_tests.sh
+      - name: Stage 02 exact incremental rank routing with persisted branch counts
+        run: sh run_stage02_incremental_route_tests.sh
