@@ -104,6 +104,10 @@ jobs:
             logs_stage56_praeflight/whole-years-neighbors.log
           grep -F 'GRADUS56_ANNI_VICINI=2/2_PASS TOTAL_DAYS=' \
             logs_stage56_praeflight/whole-years-neighbors.log
+          timeout 25m build_stage56_praeflight/stage_56_structure_reference_tests --limina-calculorum \
+            2>&1 | tee logs_stage56_praeflight/calculation-day-seams.log
+          grep -F 'GRADUS56_LIMINA_CALCULORUM=PASS C=3 ANNI=9 CASES=' \
+            logs_stage56_praeflight/calculation-day-seams.log
           echo 'PRAEVOLATUS_GRADUS56=PASS'
 
       - name: Servare evidentiam etiam in defectu

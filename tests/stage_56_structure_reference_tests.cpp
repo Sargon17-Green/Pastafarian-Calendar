@@ -669,6 +669,120 @@ void exigeAnnosVicinosPerSingulosDies() {
               << summa << " CACHE_ANNI=3\n";
 }
 
+
+void exigeLiminaCumDiebusCalculiIntertextis() {
+    // Hic non recalcantur multi milia dierum. Probantur limites
+    // annorum 4999/5000/5001 sub tribus diebus calculationis
+    // vicinis et ordine intertexto, ne cache ex alio c infectet.
+    const Big fundamentum = pastafari::FOUNDATION_DAY_OLD;
+    const std::array<Big, 3> calculi{
+        fundamentum - Big{1}, fundamentum, fundamentum + Big{1}};
+    NormativeOracle oracle(false); // saved-sum, numquam mutant raw-sum
+    std::map<std::pair<Big, Big>, Exspectatio> references;
+    std::map<Big, std::vector<Big>> quaestiones;
+    std::size_t maxima = 0;
+    std::size_t totalisUniusCircuitus = 0;
+
+    for (const Big& c : calculi) {
+        const Year medius = oracle.year5000(c);
+        const Year prior = oracle.previousYear(c, medius);
+        const Year posterior = oracle.nextYear(c, medius);
+        exige(prior.number == 4999 && medius.number == 5000 &&
+              posterior.number == 5001,
+              "numeri annorum sub mutatione calculationis variant");
+        exige(prior.closeGateDay == medius.openGateDay &&
+              medius.closeGateDay == posterior.openGateDay,
+              "portae annorum vicinorum non contiguae sunt");
+        const std::array<Year, 3> anni{prior, medius, posterior};
+        std::set<Big> dies;
+        for (const Year& y : anni) {
+            const Big initium = y.openGateDay + 1;
+            const Big finis = y.closeGateDay;
+            exige(initium + 2 < finis, "annus ad limites probandos brevis");
+            dies.insert(initium);
+            dies.insert(initium + 1);
+            dies.insert((initium + finis) / 2);
+            dies.insert(finis - 1);
+            dies.insert(finis);
+            auto e = construeIndependenter(oracle, c, y);
+            exigeLegesStructurae(e);
+            const auto key = std::make_pair(c, y.number);
+            exige(references.emplace(key, std::move(e)).second,
+                  "oraculum anni duplicatum");
+        }
+        for (const Big& limen :
+             std::array<Big, 2>{prior.closeGateDay, medius.closeGateDay}) {
+            for (int mutatio = -2; mutatio <= 2; ++mutatio) {
+                const Big t = limen + Big{mutatio};
+                exige(t > prior.openGateDay && t <= posterior.closeGateDay,
+                      "testis trans tres annos limites excessit");
+                dies.insert(t);
+            }
+        }
+        exige(dies.size() >= 15, "pauci dies ad mutationes c probati");
+        auto& series = quaestiones[c];
+        series.assign(dies.begin(), dies.end());
+        maxima = std::max(maxima, series.size());
+        totalisUniusCircuitus += series.size();
+    }
+    exige(references.size() == 9 && quaestiones.size() == 3,
+          "referentiae novem annorum ex tribus c desunt");
+
+    BaseMonsterManager manager;
+    int recentia = 0;
+    std::size_t comprobati = 0;
+    for (int circuitus = 0; circuitus < 2; ++circuitus) {
+        for (std::size_t j = 0; j < maxima; ++j) {
+            for (std::size_t k = 0; k < calculi.size(); ++k) {
+                const std::size_t ci = (j + k + (circuitus == 0 ? 0 : 2))
+                    % calculi.size();
+                const Big& c = calculi[ci];
+                const auto& series = quaestiones.at(c);
+                if (j >= series.size()) continue;
+                const Big& t = circuitus == 0
+                    ? series[j] : series[series.size() - 1 - j];
+                const Year a = oracle.findTargetYear(c, t);
+                const auto it = references.find(
+                    std::make_pair(c, a.number));
+                exige(it != references.end(),
+                      "dies ad alium annum extra 4999/5001 pertinet");
+                const Exspectatio& expected = it->second;
+                exige(expected.annus.openGateDay < t &&
+                      t <= expected.annus.closeGateDay,
+                      "anno erroneo dies secundum oraculum collocatus");
+                const auto actual =
+                    manager.executeFinalIntegrationStage56(c, t);
+                const std::string label =
+                    "limen intertextum " + std::to_string(circuitus)
+                    + "/" + std::to_string(j)
+                    + "/" + std::to_string(ci);
+                exige(actual.ready && actual.status == "GREEN",
+                      label + ": integratio non viridis");
+                comparaStructuram(actual, expected, label);
+                comparaDiem(actual.result, diesExReference(expected, t),
+                            label);
+                if (circuitus == 0 && j == 0) {
+                    const auto recens =
+                        BaseMonsterManager{}.executeFinalIntegrationStage56(c, t);
+                    exige(recens.ready && recens.status == "GREEN" &&
+                          !recens.guardedCacheHit && !recens.guardedCacheRejected,
+                          label + ": manager recens non frigidus");
+                    comparaStructuram(recens, expected, label + ": recens");
+                    comparaDiem(recens.result, actual.result,
+                                label + ": memoria contra recentem");
+                    ++recentia;
+                }
+                ++comprobati;
+            }
+        }
+    }
+    exige(recentia == 3 &&
+          comprobati == 2 * totalisUniusCircuitus,
+          "ordo intertextus non omnes dies aut c enumeravit");
+    std::cout << "GRADUS56_LIMINA_CALCULORUM=PASS C=3 ANNI=9 CASES="
+              << comprobati << " RECENTIA=" << recentia << "/3\n";
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -683,6 +797,10 @@ int main(int argc, char** argv) {
         }
         if (argc == 2 && std::string(argv[1]) == "--anni-vicini") {
             exigeAnnosVicinosPerSingulosDies();
+            return 0;
+        }
+        if (argc == 2 && std::string(argv[1]) == "--limina-calculorum") {
+            exigeLiminaCumDiebusCalculiIntertextis();
             return 0;
         }
         exige(argc == 1, "argumenta testis ignota");

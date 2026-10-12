@@ -203,3 +203,11 @@ Hoc scriptum est in commit praeparto; non est testimonium CI completum.
 - Eius logum: \`GRADUS56_ANNUS_ALTERO=PASS YEAR=5000 C_OFFSET=1 DAYS=5160\` et, ad primum calculationis diem, \`4244/4244_PASS\`.
 - Utraque via differentiali GCC et Clang etiam \`5160/5160\` exhibet; vigilia plena \`38236062173\` nondum conclusa erat dum hoc testimonium scribebatur. Nulla eius conclusio fingitur.
 - Additamentum sequentis SHA: ambo anni 4999 et 5001 omnino explorabuntur, eodem calculationis die ac annus 5000, cum reference saved-sum, continuitate portarum, cache tribus annis et probatione reditus ad annum medium. Novi testes adhuc **NON** certificati sunt.
+
+## Varia c inter annos fines suos convertunt — nova custodia
+
+- Commit exacte probatus: `0c2e0cb8b9c6bd46c32870498873fff77e5bea6a`, vigilia [38236062173](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38236062173), `20/20 success`, `VIGILIA_SOAK=PASS`, `SOAK_REPETITUM=8/8_PASS`, `SOAK_GREEN`.
+- Annus 5000 cum die calculationis `F+1` habet 5160 dies, versus 4244 cum `F`. Uterque annus pro omnibus diebus GCC/Clang comprobatus est.
+- Testis proximus anni 4999 (4126 dies) et 5001 (5567 dies) in commit `bbc8e64c091991b374b2ae3e52ec926babb5078a` praevolatu [38238660658](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38238660658) transiit. Clang differentialium quoque transiit; run [38238660678](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38238660678) ante hanc mutationem nondum omnino conclusus est.
+- Mutatio nunc parata: `F-1`, `F`, `F+1` alternantur intra unum manager, simul anni 4999/5000/5001 et dies proximi portis annuis contra novem structuras reference saved-sum comparantur. Duae directio visitationum et tres gestores frigidi adduntur.
+- Haec probatio nova non est confirmata; eius SHA et CI futura seorsum verificanda sunt. Gradus 57 non incipitur; main nullo modo tangitur.

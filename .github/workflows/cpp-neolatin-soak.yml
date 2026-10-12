@@ -621,6 +621,11 @@ jobs:
           grep -F 'GRADUS56_VICINUS=PASS YEAR=5001 DAYS=' soak-logs/whole-years-neighbors.log
           grep -F 'GRADUS56_ANNI_VICINI=2/2_PASS TOTAL_DAYS=' soak-logs/whole-years-neighbors.log
 
+          timeout 25m build_soak/differential/structure --limina-calculorum \
+            2>&1 | tee soak-logs/calculation-day-seams.log
+          grep -F 'GRADUS56_LIMINA_CALCULORUM=PASS C=3 ANNI=9 CASES=' \
+            soak-logs/calculation-day-seams.log
+
       - name: Servare logs differentialia
         if: always()
         # CICATRIX: olim `uses: actions/upload-artifact@v4`.
