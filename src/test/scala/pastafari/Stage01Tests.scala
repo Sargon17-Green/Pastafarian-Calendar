@@ -224,7 +224,8 @@ object Stage01Tests {
         (if (currentStage < 25) Vector("yearMaxPatch") else Vector.empty[String]) ++
         (if (currentStage < 26) Vector("oldJumpGuess") else Vector.empty[String]) ++
         (if (currentStage < 27) Vector("yearJumpPatch") else Vector.empty[String]) ++
-        (if (currentStage < 28) Vector("oldVirtualGateAt") else Vector.empty[String])
+        (if (currentStage < 28) Vector("oldVirtualGateAt") else Vector.empty[String]) ++
+        (if (currentStage < 29) Vector("def virtualGatePatch(") else Vector.empty[String])
       val present = (forbidden ++ phaseSpecific).filter(content.contains)
       equal(present, Vector.empty[String], "simboli futuri trovati")
     }

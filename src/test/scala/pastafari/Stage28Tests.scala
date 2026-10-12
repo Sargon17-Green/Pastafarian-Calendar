@@ -330,20 +330,34 @@ object Stage28Tests {
       truth(!source.contains("NormativeOracle"),"Oracolo")
       truth(source.contains("object VirtualLegacyListAdapter"),"Cicatrice")
       truth(source.contains("val narrow=rank1.toInt"),"Troncamento vero")
-      truth(!source.contains("def virtualGatePatch("),"PATCH14 anticipata")
+      val meta=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=meta.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<29)
+        truth(!source.contains("def virtualGatePatch("),"PATCH14 anticipata")
+      else
+        truth(source.contains("def virtualGatePatch("),"PATCH14 ora disponibile")
     }
     check("metadati Stage28 conservano tutti i certificati precedenti"){
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=28"),"Stage28")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"),"DISCOVERY")
-      truth(st.contains("CURRENT_PATCH=13"),"PATCH 13 preservata")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=28,"Stage28 certificato")
+      if(current==28) {
+        truth(st.contains("CURRENT_KIND=DISCOVERY"),"DISCOVERY")
+        truth(st.contains("CURRENT_PATCH=13"),"PATCH 13 preservata")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      } else {
+        truth(st.contains("STAGE_28_NATIVE_VERIFICATION=PASS_EXPECTED_RED_41_PASS_3_FAIL"),
+          "Firma RED storica conservata")
+      }
       truth(st.contains("STAGE_27_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_39_PASS_0_FAIL"),
         "Certificato Stage27")
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed==27 || completed==28,"Sequenza")
+      truth(completed>=27 && completed<=current,"Sequenza")
     }
 
     Vector(

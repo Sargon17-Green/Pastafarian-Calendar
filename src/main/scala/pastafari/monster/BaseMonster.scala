@@ -104,7 +104,9 @@ final case class BaseMonsterContext(
   var virtualCandidateCount: Option[BigInt] = None,
   var virtualRequestedRank: Option[BigInt] = None,
   var legacyVirtualNarrowedRank: Option[Int] = None,
-  var legacyVirtualSelectedGateIndex: Option[BigInt] = None
+  var legacyVirtualSelectedGateIndex: Option[BigInt] = None,
+  var patchedVirtualSelectedGateIndex: Option[BigInt] = None,
+  var patch14Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -130,6 +132,52 @@ final class BaseValidationManager {
 
   /** Ricalcolo separato: né wrapper corretto né oracolo test-only. */
   /** Verifica indipendente della cicatrice di troncamento signed 32 bit. */
+  /**
+   * PATCH 14: prova della scelta BigInt senza richiamare il wrapper corretto.
+   * Un ranking 1-based valido deve soddisfare:
+   * selected-first == stride*(rank-1).
+   */
+  def requirePatch14Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_14_VIRTUAL_GATE_LIST" ||
+       ctx.status!="PATCH_14_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_14_VIRTUAL_GATE_LIST","PATCH_14_VIRTUAL_GATE_LIST") ||
+       ctx.virtualFirstGateIndex.isEmpty ||
+       ctx.virtualGateStride.isEmpty ||
+       ctx.virtualCandidateCount.isEmpty ||
+       ctx.virtualRequestedRank.isEmpty ||
+       ctx.legacyVirtualNarrowedRank.isEmpty ||
+       ctx.legacyVirtualSelectedGateIndex.isEmpty ||
+       ctx.patchedVirtualSelectedGateIndex.isEmpty ||
+       !ctx.patch14Applied)
+      throw new IllegalStateException("PATCH 14 non completa.")
+
+    val start=ctx.virtualFirstGateIndex.get
+    val step=ctx.virtualGateStride.get
+    val size=ctx.virtualCandidateCount.get
+    val rank=ctx.virtualRequestedRank.get
+    if(step==0 || size<1 || rank<1 || rank>size)
+      throw new IllegalStateException("Dominio virtuale invalido.")
+
+    // Il residuo signed 32-bit viene ricostruito senza usare il helper.
+    val width=BigInt(1)<<32
+    val low=rank & (width-1)
+    val signed=if(low >= (BigInt(1)<<31)) low-width else low
+    val oldIndex=start+(signed-1)*step
+    if(ctx.legacyVirtualNarrowedRank.get!=signed.toInt ||
+       ctx.legacyVirtualSelectedGateIndex.get!=oldIndex)
+      throw new IllegalStateException("Cicatrice storica alterata.")
+
+    val original=VirtualLegacyListAdapter.oldVirtualGateAt(start,step,size,rank)
+    if(original.narrowedRank!=ctx.legacyVirtualNarrowedRank.get ||
+       original.guessedGateIndex!=ctx.legacyVirtualSelectedGateIndex.get)
+      throw new IllegalStateException("Il vero legacy non corrisponde.")
+
+    val selected=ctx.patchedVirtualSelectedGateIndex.get
+    if(selected-start != (rank-BigInt(1))*step)
+      throw new IllegalStateException("Rango BigInt corretto falsificato.")
+  }
+
   def requireDiscovery14Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="DISCOVERY_14_VIRTUAL_GATE_LIST" ||
        ctx.status!="LEGACY_VIRTUAL_GATE_READY" ||
@@ -1029,7 +1077,8 @@ final class BaseMonsterManager {
     new Patch12YearCeilingHandler(metrics),
     new Discovery13YearJumpHandler(metrics),
     new Patch13YearJumpHandler(metrics),
-    new Discovery14VirtualGateListHandler(metrics)
+    new Discovery14VirtualGateListHandler(metrics),
+    new Patch14VirtualGateHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1724,6 +1773,39 @@ final class BaseMonsterManager {
         ctx.phase,ctx.status,ctx.branchTrace.toVector)
     } catch {
       case error: Throwable => throw BaseErrorWrapper.wrap("discovery14",error)
+    }
+  }
+
+  def patch14VirtualGateList(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    firstGateIndex: BigInt,
+    gateStride: BigInt,
+    candidateCount: BigInt,
+    rank1: BigInt
+  ): Patch14VirtualGateReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.virtualFirstGateIndex=Some(firstGateIndex)
+    ctx.virtualGateStride=Some(gateStride)
+    ctx.virtualCandidateCount=Some(candidateCount)
+    ctx.virtualRequestedRank=Some(rank1)
+    ctx.phase="DISCOVERY_14_VIRTUAL_GATE_LIST"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery14Ready(ctx)
+      ctx.phase="PATCH_14_VIRTUAL_GATE_LIST"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch14Ready(ctx)
+      Patch14VirtualGateReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.virtualFirstGateIndex.get,ctx.virtualGateStride.get,
+        ctx.virtualCandidateCount.get,ctx.virtualRequestedRank.get,
+        ctx.legacyVirtualNarrowedRank.get,
+        ctx.legacyVirtualSelectedGateIndex.get,
+        ctx.patchedVirtualSelectedGateIndex.get,
+        ctx.patch14Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable => throw BaseErrorWrapper.wrap("patch14",error)
     }
   }
 
