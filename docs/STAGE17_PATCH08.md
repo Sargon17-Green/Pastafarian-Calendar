@@ -1,4 +1,4 @@
-# ደረጃ 17/55 — PATCH 08 (የGREEN ማረጋገጫ ይጠበቃል)
+# ደረጃ 17/55 — PATCH 08 (COMPLETE / GREEN)
 
 ## የታሪክ ስህተቱ እንዳይጠፋ
 
@@ -34,4 +34,17 @@ v test ./pastafari/patch08_test.v
 v test ./pastafari
 ```
 
-የV 0.5.2 ሙሉ መመዘኛ **25/25 PASS** ነው። `LAST_COMPLETED_STAGE=16` እስከ CI ማረጋገጫ ይቆያል። `DISCOVERY 09` የደረጃ 18 ሥራ አይጀመርም።
+የV 0.5.2 ሙሉ መመዘኛ **25/25 PASS** ነው። የV 0.5.2 የCI ማረጋገጫ PASS ነው፤ `LAST_COMPLETED_STAGE=17` ነው። `DISCOVERY 09` የደረጃ 18 ሥራ አይጀመርም።
+
+## የተረጋገጠ የመጨረሻ V ማስረጃ
+
+- የተፈተነው commit፦ `0a60fcf7fad772f22f9d706bf5990d8830bd2f35`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239438620
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239438620/artifacts/11742521217
+- `V 0.5.2 7647ce1`፦ `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **25/25 PASS**።
+- በ`discovery08_expected_red_test.v` ውስጥ ያሉት አራት RED assertions ሳይቀየሩ GREEN ሆነዋል።
+- `old_permutation_unrank0` የ720 ቅደም ተከተሎች ትክክለኛ የዜሮ-መሠረት መፍቻ እንዳለ ተጠብቋል።
+- `LegacyPermutationAdapter.order_for_drop` የታሪካዊውን የone-based ስህተት አሁንም በቀጥታ ይፈጽማል።
+- ደረጃ 18 — `DISCOVERY 09` አልተጀመረም።
+
+**ደረጃ 17 COMPLETE / GREEN።**
