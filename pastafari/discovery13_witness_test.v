@@ -34,12 +34,17 @@ fn test_discovery13_seed_uses_correct_circular_successor() {
 
 fn test_discovery13_direction_uses_second_save_parity() {
 	bowls := discovery13_bowls()
-	stream := calendar_answer_stream_spaghetti(bowls, [2, 3, 1, 4, 5, 6], 3,
-		big_from_int(31)) or { panic(err.msg()) }
+	stream := calendar_answer_stream_spaghetti(bowls, [2, 3, 1, 4, 5, 6], 3, big_from_int(31)) or {
+		panic(err.msg())
+	}
 	z := big_add(stream.first, big_from_int(225))
-	d := calendar_save_spaghetti(big_add(big_add(big_square(z), big_mul_small(stream.first,
-		193)), big_mul_small(bowls[6], 197)))
-	assert stream.step == (if big_mod_small_nonnegative(d, 2) == 1 { 1 } else { -1 })
+	d := calendar_save_spaghetti(big_add(big_add(big_square(z), big_mul_small(stream.first, 193)),
+		big_mul_small(bowls[6], 197)))
+	assert stream.step == (if big_mod_small_nonnegative(d, 2) == 1 {
+		1
+	} else {
+		-1
+	})
 }
 
 fn test_discovery13_forward_wrap_and_arbitrary_large_k() {
@@ -57,8 +62,8 @@ fn test_discovery13_backward_wrap_and_arbitrary_large_k() {
 	s := discovery13_stream(big_one(), -1)
 	assert (calendar_answer_at_spaghetti(s, big_zero()) or { big_zero() }).str() == '1'
 	assert big_eq(calendar_answer_at_spaghetti(s, big_one()) or { big_zero() }, m)
-	assert big_eq(calendar_answer_at_spaghetti(s, big_from_int(2)) or { big_zero() },
-		big_sub(m, big_one()))
+	assert big_eq(calendar_answer_at_spaghetti(s, big_from_int(2)) or { big_zero() }, big_sub(m,
+		big_one()))
 	k := big_add(big_mul_small(m, 7), big_one())
 	assert big_eq(calendar_answer_at_spaghetti(s, k) or { big_zero() }, m)
 }
@@ -69,9 +74,7 @@ fn test_discovery13_modulo_bias_witness_and_legacy_dispatch() {
 	limit := big_mul(big_floor_div(m, n), n)
 	assert big_eq(limit, n)
 	assert big_cmp(m, limit) > 0
-	legacy := new_base_dispatcher().dispatch_legacy_biased_pick(m, n) or {
-		panic(err.msg())
-	}
+	legacy := new_base_dispatcher().dispatch_legacy_biased_pick(m, n) or { panic(err.msg()) }
 	assert big_eq(legacy, big_sub(n, big_one()))
 	assert big_eq(calendar_choose_rank_short_spaghetti(discovery13_stream(m, 1), n) or {
 		big_zero()
@@ -84,9 +87,8 @@ fn test_discovery13_dividing_ranges_have_no_bias() {
 		for step in [-1, 1] {
 			s := discovery13_stream(x, step)
 			assert big_eq(calendar_choose_rank_short_spaghetti(s, m) or { big_zero() }, x)
-			assert big_eq(calendar_choose_rank_short_spaghetti(s, big_one()) or {
-				big_zero()
-			}, big_one())
+			assert big_eq(calendar_choose_rank_short_spaghetti(s, big_one()) or { big_zero() },
+				big_one())
 		}
 	}
 }
@@ -139,8 +141,7 @@ fn test_discovery13_invalid_bowls_latch_and_seal_rejected() {
 	}
 	assert failed
 	failed = false
-	_ = calendar_answer_stream_spaghetti(bowls, [1, 2, 3, 4, 5, 5], 1,
-		big_one()) or {
+	_ = calendar_answer_stream_spaghetti(bowls, [1, 2, 3, 4, 5, 5], 1, big_one()) or {
 		failed = true
 		AnswerStream{}
 	}
@@ -158,8 +159,9 @@ fn test_discovery13_post_stir_chain_and_latch_reused() {
 	bowls := discovery13_bowls()
 	order := [1, 3, 5, 2, 4, 6]
 	after := calendar_post_stir12_spaghetti(bowls, order) or { panic(err.msg()) }
-	via_chain := calendar_post_stir_answer_stream_spaghetti(bowls, order, 1,
-		big_from_int(21)) or { panic(err.msg()) }
+	via_chain := calendar_post_stir_answer_stream_spaghetti(bowls, order, 1, big_from_int(21)) or {
+		panic(err.msg())
+	}
 	direct := calendar_answer_stream_spaghetti(after.bowls, after.order_for_query, 1,
 		big_from_int(21)) or { panic(err.msg()) }
 	assert big_eq(via_chain.first, direct.first)
@@ -178,13 +180,15 @@ fn test_discovery13_interleaving_and_public_short_wrapper() {
 		first := calendar_answer_stream_spaghetti(bowls, a, 6, big_from_int(21)) or {
 			panic(err.msg())
 		}
-		assert big_eq(calendar_ask_bowl_short_spaghetti(bowls, a, 6, big_from_int(21),
-			m) or { big_zero() }, first.first)
+		assert big_eq(calendar_ask_bowl_short_spaghetti(bowls, a, 6, big_from_int(21), m) or {
+			big_zero()
+		}, first.first)
 		second := calendar_answer_stream_spaghetti(bowls, b, 3, big_from_int(31)) or {
 			panic(err.msg())
 		}
-		assert big_eq(calendar_ask_bowl_short_spaghetti(bowls, b, 3, big_from_int(31),
-			m) or { big_zero() }, second.first)
+		assert big_eq(calendar_ask_bowl_short_spaghetti(bowls, b, 3, big_from_int(31), m) or {
+			big_zero()
+		}, second.first)
 	}
 	assert a == [6, 5, 4, 3, 2, 1]
 	assert b == [2, 3, 1, 4, 5, 6]
