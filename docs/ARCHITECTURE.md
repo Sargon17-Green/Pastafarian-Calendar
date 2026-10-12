@@ -182,3 +182,24 @@ Mae'r profion Cam 20 yn mynnu 720 `EXPECTED_RED`,
 gweledig yn parhau'n fewnbynnau allanol. Nid oes PATCH 10.
 
 `LAST_COMPLETED_STAGE=19` nes llwyddiant CI brodorol.
+
+
+## Ardystiad brodorol Cam 20 — COMPLETE
+
+Ar commit `06eee4647f56f665db8e7b9fcb3f580a7273a07a` pasiodd GitHub Actions
+[`38264758391`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38264758391),
+swydd Kotlin `114863999405` ar Kotlin 1.9.0/JDK 21.
+Gwiriwyd **41 marc** uniongyrchol yn log y swydd:
+holl gamau 1–19 yn PASS; 720 `EXPECTED_RED`,
+0 `MATCH`, 720 ysgrifen gyntaf GREEN, 3,600 o
+ysgrifeniadau byw anghywir; 4,320 tyst BigInteger
+annibynnol, 21,600 ysgrifen byw anghywir; 46 diferion
+identity, reverse a naturiol yn `EXPECTED_RED`,
+guardiau BOOT/replay, perchnogaeth a methiant strict
+bwriadol. Gwelwyd `STAGE20_FULL_NATIVE_EXPECTED_RED_COMPLETE`,
+a llwyddodd y swydd Kotlin a swydd cloi enwau.
+
+**`LAST_COMPLETED_STAGE=20`**. Cam 21 (`PATCH 10`)
+yw'r nesaf, heb ei ddechrau; rhaid cadw'r mutator
+etifeddol anghywir yn fyw. Ni adeiladwyd diferion
+gweledig cynhyrchu o fewn Cam 20.
