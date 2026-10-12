@@ -29,7 +29,7 @@ for _,pair in ipairs(pairs) do
         local prev=order[(p+4)%6+1]
         local nextId=order[p%6+1]
         local s=old[id]+B.from(2)*old[prev]+B.from(3)*old[nextId]
-          +(p<=3 and pours[p] or B.from(0))+drop+rock[({"w","b","s","m","r","w"})[p]==nil and 1 or ({"w","b","s","m","r","w"})[p]]
+          +(p<=3 and pours[p] or B.from(0))+drop+rock[({1,2,3,4,5,1})[p]]
         expected[id]=O.SAVE(s*s+B.from(5)*old[prev]*old[nextId]+B.from(i*p))
     end
     local mismatches=0
