@@ -109,6 +109,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage20Discovery10Test do
 
     assert LegacyInPlaceStir.run(@old, pours, drop, row, @order, 3) == threaded
     refute BowlDropCalculator.step(@old, drop, @order, stones, 3) == threaded
+    assert BowlVaultPatch.run(@old, pours, drop, row, @order, 3) ==
+             correct_step(@old, drop, @order, stones, 3)
     assert BowlDropCalculator.step(@old, drop, @order, stones, 3) ==
              correct_step(@old, drop, @order, stones, 3)
     refute threaded == correct_step(@old, drop, @order, stones, 3)
