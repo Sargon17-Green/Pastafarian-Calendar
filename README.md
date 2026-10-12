@@ -70,3 +70,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 11 — PATCH 05
 
 ሰባቱ የhidden ጠብታዎች በታሪካዊው `hidden7 … hidden1` የማከማቻ ቅደም ተከተል እንዳሉ ይቀራሉ። `old_hidden_slot(backward,k)` የቀድሞውን `backward[k-1]` ስህተት ይይዛል። አዲሱ `HiddenPatch05` የቅርበት መጠይቅን በአንድ-መሠረት `8-k`፣ በV ዜሮ-መሠረት `7-k` ወደ የታሪክ ማከማቻ ቦታ ይለውጣል። የproduction `calendar_hidden_by_nearness` ከdispatcher በኩል ይሄዳል፣ የቀድሞ አራት RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` ተረጋግጧል፤ `v fmt -verify` PASS፣ `v test ./pastafari` 16/16 PASS። የደረጃ 10 አራት RED assertions ሳይቀየሩ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=11` ነው። ዝርዝር፦ `docs/STAGE11_PATCH05.md`።
+
+## ደረጃ 12 — DISCOVERY 06
+
+የታሪካዊው `legacy_prior(drop_store,i,back)` የሚጠቀመው `slot=i-back` እና በ1-መሠረት `drop_store[slot]` ብቻ ነው። የV አካላዊ ዜሮ ሰልፍ sentinel ነው፤ `slot<=0` ስለሆነ ምንም ታሪካዊ የሚታይ ጠብታ አይኖርም፣ የታሪክ መንገድም ስውር ጠብታን አያነብም። ከተሰባሰበው ሰንጠረዥ ውጭ የሆነ index የV ሂደትን እንዳያቋርጥ በerror ይወጣል። `calendar_prior_spaghetti` በደረጃ 12 ሆን ብሎ ይህን የታሪክ መንገድ ብቻ ይጠራል። አራት የታሰቡ RED assertions በ`slot=0,-1,-2,-6` ይለያሉ፤ ትክክለኛ የሚታዩ አዎንታዊ slots ግን GREEN ናቸው። `PATCH 06` አልተጨመረም፣ የV አገርኛ CI ማረጋገጫ እስኪያልቅ `LAST_COMPLETED_STAGE=11` ይቆያል። ዝርዝር፦ `docs/STAGE12_DISCOVERY06.md`።

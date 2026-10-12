@@ -101,3 +101,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38157358354` ተፈትኗል። ቅ�
 ### የደረጃ 11 መዝጊያ — GREEN
 
 V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017b153641a36bd0e55b2c1deaf82f` ላይ በቀጥታ ተሳክቷል። `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` 16/16 PASS። የደረጃ 10 አራቱ የኖርማቲቭ የRED assertions ያለ ለውጥ GREEN ሆነዋል። `old_hidden_slot` ያለውን ታሪካዊ የተሳሳተ ንባብ አልጣለም፤ የሰባቱ ጠብታዎች `hidden7 … hidden1` ማከማቻ አልተገለበጠም። `HiddenPatch05` በV የዜሮ-መሠረት `backward[7-k]` በኩል ሎጂካዊ ቅርበት ይመልሳል። ሁለቱ የGitHub Actions ሥራዎች PASS ናቸው፤ የማስረጃ ቅርስ `11712298133` ተቀምጧል። ደረጃ 11 COMPLETE / GREEN ነው።
+
+## ደረጃ 12 — DISCOVERY 06 (በV ማረጋገጫ ላይ)
+
+ታሪካዊው `legacy_prior` የሚታዩ ጠብታዎችን በ1-መሠረት `drop_store[i-back]` እንደነበረ ይመለከታል። `slot=0` እና አሉታዊ slots የስውር ጠብታዎች ትርጉም የላቸውም። የV runtime ሕገ-ወጥ የarray መለያን እንዳይፈጽም የተሳሳተ መለያ በerror ይመለሳል፣ ከhidden ግን ምንም አያነብም። `LegacyPriorAdapter`፣ `BaseDispatcher.dispatch_legacy_prior` እና `calendar_prior_spaghetti` ወደ production ንዑስ ሂደት ተያይዘዋል። በ`calendar_date_spaghetti` ምርመራ መልዕክት `DISCOVERY_06 oldPriorSlot0=ERROR` ይመዘገባል። የ`PATCH 06` መለያ ማስተካከያ ወደ ደረጃ 13 ይቀራል።

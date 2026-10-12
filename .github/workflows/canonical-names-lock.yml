@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage11_native_v:
-    name: V 0.5.2 — PATCH 05 validated GREEN
+  stage12_native_v:
+    name: V 0.5.2 — DISCOVERY 06 EXPECTED_RED
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -109,15 +109,40 @@ jobs:
           v test ./pastafari/discovery05_expected_red_test.v
       - name: PATCH 05 — 8-minus-k indexing and original backward storage
         run: v test ./pastafari/patch05_test.v
-      - name: Stage 11 — complete native V regression suite
+      - name: DISCOVERY 06 — historical visible-only reads and zero-slot failures
+        run: v test ./pastafari/discovery06_witness_test.v
+      - name: DISCOVERY 06 — four intended negative-slot RED assertions
         shell: bash
         run: |
           set -euo pipefail
-          v test ./pastafari 2>&1 | tee stage11_green.log
-      - name: Preserve stage 11 native V evidence
+          v -check ./pastafari/discovery06_expected_red_test.v
+          set +e
+          v test ./pastafari/discovery06_expected_red_test.v 2>&1 | tee stage12_expected_red.log
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo '::error::DISCOVERY 06 unexpectedly GREEN before PATCH 06'
+            exit 1
+          fi
+          for test_name in \
+            test_discovery06_expected_red_slot_zero_hidden_one \
+            test_discovery06_expected_red_slot_minus_one_hidden_two \
+            test_discovery06_expected_red_slot_minus_two_hidden_three \
+            test_discovery06_expected_red_slot_minus_six_hidden_seven; do
+            if ! grep -Fq "$test_name" stage12_expected_red.log; then
+              echo "::error::Intended RED assertion missing: $test_name"
+              exit 1
+            fi
+          done
+          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage12_expected_red.log; then
+            echo '::error::Unexpected nonzero exit without assertion failure'
+            exit 1
+          fi
+          echo 'DISCOVERY 06 — four intended RED assertions verified'
+      - name: Preserve stage 12 native evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage11-green-evidence
-          path: stage11_green.log
+          name: v-amharic-stage12-red-evidence
+          path: stage12_expected_red.log
           if-no-files-found: ignore
