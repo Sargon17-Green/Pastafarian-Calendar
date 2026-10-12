@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CountDownLatch;
 
 public final class Stage02IncrementalRouteTests {
     private static int checks;
@@ -17,6 +18,8 @@ public final class Stage02IncrementalRouteTests {
         binomialCacheCallOrderNeutrality();
         suffixCountCacheReuseAndEviction();
         partialDpReuseAcrossDistinctSuffixStates();
+        partialDpOpenedGuardAndBoundedEviction();
+        concurrentPartialDpReuse();
         concurrentSuffixCountNeutrality();
         multiCallFullYearInteriorWithOneCountPerCall();
         zeroBudgetDoesNotLoseSavedWork();
@@ -340,6 +343,89 @@ public final class Stage02IncrementalRouteTests {
             "E_PARTIAL_DP_OLD_STATE_NEUTRAL");
         eq(0L, independent.partialDpReuseHitCount(),
             "E_PARTIAL_DP_INSTANCE_INDEPENDENCE");
+    }
+
+    private static void partialDpOpenedGuardAndBoundedEviction() {
+        int[] lengths = new int[12];
+        Arrays.fill(lengths, 48);
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        for (int opened = 8; opened <= 12; opened++) {
+            int[] prefix = new int[opened];
+            for (int i = 0; i < opened; i++) prefix[i] = i + 1;
+            long priorHits = family.partialDpReuseHitCount();
+            BigInteger value = family.countAfterPrefix(prefix);
+            if (opened == 8 || opened == 9) {
+                eq(new MonsterWeavingLinearCounter(lengths)
+                    .countAfterPrefix(prefix), value,
+                    "E_PARTIAL_DP_OPENED_REFERENCE");
+            }
+            eq(priorHits, family.partialDpReuseHitCount(),
+                "E_PARTIAL_DP_OPENED_MUST_NOT_REUSE");
+            ok(family.partialDpCacheEntryCount() <= 4,
+                "E_PARTIAL_DP_CACHE_BOUND_DURING_EVICTION");
+        }
+        ok(family.partialDpEvictionCount() > 0,
+            "E_PARTIAL_DP_EVICTION_OBSERVED");
+        eq(4, family.partialDpCacheEntryCount(),
+            "E_PARTIAL_DP_CACHE_BOUND_AFTER_EVICTION");
+    }
+
+    private static void concurrentPartialDpReuse() {
+        int[] lengths = new int[12];
+        Arrays.fill(lengths, 48);
+        int[][] prefixes = new int[4][];
+        BigInteger[] expected = new BigInteger[4];
+        for (int i = 0; i < 4; i++) {
+            prefixes[i] = new int[10 + i];
+            for (int j = 0; j < 9; j++) prefixes[i][j] = j + 1;
+            for (int j = 9; j < prefixes[i].length; j++) {
+                prefixes[i][j] = 9;
+            }
+            expected[i] = new MonsterWeavingLinearCounter(lengths)
+                .countAfterPrefix(prefixes[i]);
+        }
+        MonsterWeavingLinearCounter shared =
+            new MonsterWeavingLinearCounter(lengths);
+        shared.countAfterPrefix(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9});
+        long hitBaseline = shared.partialDpReuseHitCount();
+        CountDownLatch start = new CountDownLatch(1);
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        Thread[] workers = new Thread[4];
+        for (int i = 0; i < 4; i++) {
+            final int index = i;
+            workers[i] = new Thread(() -> {
+                try {
+                    start.await();
+                    for (int j = 0; j < 16; j++) {
+                        BigInteger answer = shared.countAfterPrefix(prefixes[index]);
+                        if (!expected[index].equals(answer)) {
+                            throw new AssertionError("E_PARTIAL_DP_THREAD_VALUE");
+                        }
+                    }
+                } catch (Throwable problem) {
+                    failure.compareAndSet(null, problem);
+                }
+            });
+            workers[i].start();
+        }
+        start.countDown();
+        for (Thread worker : workers) {
+            try {
+                worker.join();
+            } catch (InterruptedException problem) {
+                Thread.currentThread().interrupt();
+                throw new AssertionError("E_PARTIAL_DP_THREAD_INTERRUPTED",
+                    problem);
+            }
+        }
+        if (failure.get() != null) {
+            throw new AssertionError("E_PARTIAL_DP_CONCURRENT", failure.get());
+        }
+        ok(shared.partialDpReuseHitCount() > hitBaseline,
+            "E_PARTIAL_DP_CONCURRENT_REUSE");
+        ok(shared.partialDpCacheEntryCount() <= 4,
+            "E_PARTIAL_DP_CONCURRENT_CACHE_BOUND");
     }
 
     private static void concurrentSuffixCountNeutrality() {

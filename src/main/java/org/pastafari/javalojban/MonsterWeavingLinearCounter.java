@@ -83,6 +83,7 @@ public final class MonsterWeavingLinearCounter {
     private static final int MAX_PARTIAL_DP_DAYS = 2048;
     private final ArrayDeque<PartialDP> partialDps = new ArrayDeque<>();
     private long partialDpReuseHits;
+    private long partialDpEvictions;
 
     private static final class PartialDP {
         final int[] originalRemaining;
@@ -140,6 +141,7 @@ public final class MonsterWeavingLinearCounter {
         synchronized (partialDps) {
             if (partialDps.size() == MAX_PARTIAL_DP_CACHE_ENTRIES) {
                 partialDps.removeFirst();
+                partialDpEvictions++;
             }
             partialDps.addLast(new PartialDP(
                 state, month, days, previous, previousTotal));
@@ -155,6 +157,12 @@ public final class MonsterWeavingLinearCounter {
     int partialDpCacheEntryCount() {
         synchronized (partialDps) {
             return partialDps.size();
+        }
+    }
+
+    long partialDpEvictionCount() {
+        synchronized (partialDps) {
+            return partialDpEvictions;
         }
     }
 
