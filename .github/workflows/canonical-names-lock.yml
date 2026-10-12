@@ -178,3 +178,26 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_four_months.pl --seconds 185 --rss-kib 393216
+
+  canonical-memo-prefix:
+    name: 真實 240 日記憶式獨立前綴排名（受控子程序）
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-canonical-memo]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對獨立記憶式前綴稽核的原生語法
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_prefix.pl
+      - name: 受控稽核真實四月份 24 個 BigInt 前綴決策
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_prefix.pl --days 24 --seconds 185 --rss-kib 393216
