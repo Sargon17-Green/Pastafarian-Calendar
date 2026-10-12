@@ -132,3 +132,26 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 185s perl -Ilib -It/lib tools/profile_indexed_rank_roundtrip.pl --seconds 135 --rss-kib 262144
+
+  canonical-month-selection:
+    name: 錨定年份真實月長與雙月精確交織（獨立監督）
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-canonical-months]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 驗證錨定月長工具的語法
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_month_selection.pl
+      - name: 受控實測 5000 年月份選擇與真實雙月
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 235s perl -Ilib -It/lib tools/profile_canonical_month_selection.pl --seconds 180 --rss-kib 393216
