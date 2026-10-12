@@ -463,3 +463,15 @@ trong kiểm thử.
 và các hồi quy cũ. Sửa chỉ mười bài kiểm soát từng đòi
 trạng thái lỗi để kiểm trạng thái lịch sử có sentinel.
 Thêm 12 kiểm thử mới. Chưa bắt đầu DISCOVERY 08.
+
+**Bằng chứng xác minh:** GitHub Actions chạy 163 kiểm thử,
+tất cả đạt, không cảnh báo biên dịch. 16 phép so sánh
+normative đã đỏ ở lần phát hiện 07 chuyển sang xanh mà
+không sửa kỳ vọng. Có 12 kiểm thử mới đạt và khóa tên PASS.
+Một escape dư trong phép kiểm toán chuỗi nguồn được loại
+bỏ ở commit kiểm thử riêng, không thay mã sản xuất.
+
+Mã legacy còn nguyên biểu thức tra hàng
+`Enum.at(@real_rows, number, @missing_row)`.
+Sentinel thật vẫn ở index 0, 11 hàng nghiền ở 1..11.
+Giai đoạn 15 khép GREEN, chưa bắt đầu DISCOVERY 08.

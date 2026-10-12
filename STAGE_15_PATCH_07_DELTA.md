@@ -55,3 +55,23 @@ tiền nhiệm, hidden, bootstrap, phân nhánh PATCH 06 không đổi.
 ## Tiêu đề commit
 
 Giai đoạn 15: đặt sentinel giữ nguyên cách đọc bảng nghiền lịch sử
+
+## Kiểm chứng CI và quyết định đóng
+
+- Commit triển khai: `399f042717078760f95233b7ec7b551966cbacbb`.
+- Commit sửa kiểm thử nguồn: `acacae6a3521c8a9e56b9a3b63a67f91251f3abb`.
+- Elixir 1.18.5 / Erlang/OTP 27.
+- 163 kiểm thử, 0 thất bại, 0 cảnh báo biên dịch.
+- Tất cả 16 bài đã đỏ ở giai đoạn 14 hiện xanh.
+- Bốn hồi quy chuẩn Stage14 vẫn nguyên từng khẳng định.
+- 12 bài kiểm thử Stage15 bổ sung đạt.
+- Khóa tên chuẩn độc lập PASS.
+- Hàm đọc `Enum.at(@real_rows, number, @missing_row)` giữ nguyên.
+- Sentinel thật ở index 0, đủ 11 hàng ở index 1..11.
+- Không dùng oracle trong production, không thay main.
+- Chưa bắt đầu giai đoạn 16, DISCOVERY 08.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38229835498
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38229835434
+
+Trạng thái cuối: GREEN đã xác minh. Giai đoạn 16 chưa bắt đầu.

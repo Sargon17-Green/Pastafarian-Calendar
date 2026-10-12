@@ -492,3 +492,22 @@ không thay đổi. Thêm 12 kiểm thử mạnh về ánh xạ chỉ số,
 đủ 46 giọt, số nguyên tới 2048 bit, tính độc lập,
 tính đồng thời, những bản vá đã có và các biên.
 Chưa tích hợp ngày lịch cuối, hoặc phát hiện 08.
+
+## Kiểm chứng hoàn tất giai đoạn 15
+
+CI Elixir 1.18.5 / Erlang/OTP 27 xác nhận **163 kiểm thử,
+0 thất bại, 0 cảnh báo biên dịch**. Cả 16 hồi quy đã đỏ
+vì lỗi nghiền giai đoạn 14 hiện xanh, không thay kỳ vọng chuẩn.
+12 kiểm thử mới đều đạt; khóa tên chuẩn PASS độc lập.
+
+Một lỗi escape trong bài kiểm toán mã nguồn mới được sửa
+mà không ảnh hưởng mã sản xuất, phép đọc legacy hoặc dữ liệu bảng.
+Sentinel vẫn nằm nguyên trong bảng tại index 0 và
+11 hàng nghiền thật nằm ở index 1..11.
+
+- [CI hoàn tất Stage15: 163/163](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38229835498)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38229835434)
+
+Giai đoạn 15/55 khép `GREEN`. Giai đoạn 16/55 tiếp theo
+là `DISCOVERY 08` về xếp hạng hoán vị gốc không.
+Chưa triển khai nhánh phát hiện tiếp theo.
