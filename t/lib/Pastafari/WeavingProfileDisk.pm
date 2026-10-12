@@ -4,7 +4,7 @@ use utf8;
 use strict;
 use warnings;
 use Math::BigInt;
-use File::Temp qw(tempfile);
+use File::Temp;
 use Storable qw(store_fd fd_retrieve);
 use Exporter 'import';
 use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
@@ -16,7 +16,8 @@ our @EXPORT_OK = qw(buildWeavingProfileDisk);
 # 一次寫入暫存檔，只有索引與最近讀取的一個階段常駐於記憶體。
 # 讀取時交付 BigInt 深複製，以免外部修改污染快取。
 #
-# 此檔案採 File::Temp(UNLINK=>1)，在正常釋放及例外下清除；
+# 使用 File::Temp->new(UNLINK=>1) 的持有生命週期物件，
+# 在最後參照解除時立即關閉並刪除暫存索引，而非只在程序結束時清除；
 # SIGKILL 無法保證執行 Perl 的關閉／解構。
 sub buildWeavingProfileDisk ($lengths, $max_bytes = 128*1024*1024) {
     die "索引式直方圖暫存容量限制須為 1..1073741824 位元組\n"
@@ -24,7 +25,8 @@ sub buildWeavingProfileDisk ($lengths, $max_bytes = 128*1024*1024) {
         || "$max_bytes" !~ /\A[1-9][0-9]*\z/
         || length("$max_bytes") > 10 || $max_bytes > 1_073_741_824;
     $max_bytes=0+"$max_bytes";
-    my ($fh,$path)=tempfile(UNLINK=>1);
+    my $fh=File::Temp->new(UNLINK=>1);
+    my $path=$fh->filename;
     binmode($fh) or die "索引式直方圖暫存檔無法設定二進位模式\n";
     my @offsets;
     my $previous_stage=0;

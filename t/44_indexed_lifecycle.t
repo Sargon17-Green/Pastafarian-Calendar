@@ -5,6 +5,8 @@ use strict;
 use warnings;
 use Test::More;
 use Math::BigInt;
+use File::Temp qw(tempdir);
+use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
 use lib 'lib','t/lib';
 use Pastafari::WeavingProfileDisk qw(buildWeavingProfileDisk);
 use Pastafari::WeavingSuffixFactor qw(countWeavingSuffixFactored);
@@ -60,3 +62,27 @@ for my $n (0,1,2,3) {
           '超限時原因可識別');
 }
 done_testing;
+
+# 將新建的階段暫存檔限定到一個可枚舉的私人目錄：
+# 每次階段轉換應立刻清除舊矩陣，成功或例外都不能
+# 將數百份臨時檔留在執行中的長壽 Perl 程序裡。
+my $scratch=tempdir(CLEANUP=>1);
+{
+    local $ENV{TMPDIR}=$scratch;
+    my $exact=countWeavingsPolynomialStream([4,4,4,4]);
+    ok("$exact" ne '', '私有暫存目錄下的精確串流計數正常完成');
+    opendir my $dh,$scratch or die "無法讀取私有暫存目錄：$!\n";
+    my @left=grep {$_ ne '.' && $_ ne '..'} readdir($dh);
+    closedir $dh;
+    is(scalar(@left),0,'所有階段檔於計數返回後均立即刪除');
+    my $good=eval {
+        countWeavingsPolynomialStream([4,4,4],undef,undef,
+                                      {max_temp_file_bytes=>1});
+        1;
+    };
+    ok(!$good,'磁碟容量失敗確實觸發例外路徑');
+    opendir my $dh2,$scratch or die "無法再次讀取暫存目錄：$!\n";
+    @left=grep {$_ ne '.' && $_ ne '..'} readdir($dh2);
+    closedir $dh2;
+    is(scalar(@left),0,'容量失敗後部分寫入的階段檔也立即刪除');
+}

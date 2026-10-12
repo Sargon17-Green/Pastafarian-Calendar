@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Math::BigInt;
 use Scalar::Util qw(blessed);
-use File::Temp qw(tempfile);
+use File::Temp;
 use Storable qw(store_fd fd_retrieve);
 use Exporter 'import';
 
@@ -18,7 +18,9 @@ our @EXPORT_OK = qw(countWeavingsPolynomialStream);
 # 無邊際直方圖輸出時核心 RAM 為 O(N) 個 BigInt；若要求
 # 每個階段的首次出現直方圖，另需 O(Σ T_stage) 個 BigInt。
 # 暫存磁碟空間可能為 O(N²)，且僅限制「每一檔」的最大位元組數。
-# File::Temp(UNLINK=>1) 確保正常完成及擲出例外均清除私有暫存檔。
+# 改用持有生命週期的 File::Temp->new(UNLINK=>1) 物件：
+# 舊 tempfile(UNLINK=>1) 僅在程序結束時清理，不足以保證
+# 大型多階段計算在釋放上個階段時即回收磁碟。
 sub countWeavingsPolynomialStream ($lengths, $stats = undef,
                                   $first_histories = undef, $options = undef,
                                   $histogram_sink = undef) {
@@ -74,7 +76,7 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
         return Math::BigInt->bone;
     }
 
-    my ($old_fh, $old_path)=tempfile(UNLINK=>1);
+    my $old_fh=File::Temp->new(UNLINK=>1);
     binmode($old_fh) or die "無法將暫存檔切換成二進位模式\n";
     my $T=$sizes[0];
     for my $u (1 .. $T) {
@@ -103,9 +105,9 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
         my $k=$sizes[$index];
         my $newT=$T+$k;
         my $last_stage=($index==$#sizes);
-        my ($new_fh,$new_path);
+        my $new_fh;
         if (!$last_stage) {
-            ($new_fh,$new_path)=tempfile(UNLINK=>1);
+            $new_fh=File::Temp->new(UNLINK=>1);
             binmode($new_fh) or die "無法將暫存檔切換成二進位模式\n";
         }
         my @weights;
@@ -195,7 +197,6 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
         if (!$last_stage) {
             seek($new_fh,0,0) or die "暫存檔無法重新讀取\n";
             $old_fh=$new_fh;
-            $old_path=$new_path;
         }
         $T=$newT;
     }

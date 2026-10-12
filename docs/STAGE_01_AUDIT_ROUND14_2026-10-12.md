@@ -48,3 +48,10 @@
 **BLOCKED 控制流程補強：** 先前工具在偵測時間或監看 RSS 超限時雖明確輸出 BLOCKED，卻曾以成功退出碼結束。後續修正使 BLOCKED 以專用非零退出碼 3 結束，故 GitHub Actions 不能再把資源未完成誤標為整個實驗成功。新增 `t/45_indexed_runner_blocked.t` 在 Linux 上以真實 1 秒時間限制執行工具，要求 BLOCKED 與非零退出碼。任何未完成都不能用於宣稱數學結果已驗證。
 
 本輪仍沒有證明 5,778 日規範上界的實用資源界線，也尚未驗證這個 252 日月份分布一定由規範年選擇器產生。保持 `LAST_COMPLETED_STAGE=1`，不進入 Stage 2，不動 `main`。
+
+
+## File::Temp 生命週期缺陷與修正
+
+原生 `t/44_indexed_lifecycle.t` 在 commit `60fb073aae2824a0746eb74b5c9dcde25e2a58a8` 發現兩項失敗：解除索引物件的最後參照後，暫存檔仍存在。原因不是計數錯誤，而是 Perl `tempfile(UNLINK=>1)` 這個函式介面只把刪除安排到程序結束，**不保證在 Filehandle 解除參照時清理**；在長壽、高負載程序這會累積磁碟暫存檔。
+
+修正改成以 `File::Temp->new(UNLINK=>1)` 產生真正擁有私有暫存檔的物件；當最後參照離開作用範圍時即關閉並刪除。修正同時涵蓋 `WeavingProfileDisk` 的索引物件及 `WeavingPolynomialStream` 逐階段的舊、新矩陣檔。原 `t/44` 兩項明確生命週期斷言保留，另在私人 TMPDIR 下檢查成功與容量例外後沒有遺留檔案。不得刪掉失敗的回歸測試去換取假 PASS。
