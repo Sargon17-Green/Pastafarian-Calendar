@@ -8,9 +8,8 @@ fn discovery11_fixture_bowls() []BigInt {
 
 fn test_discovery11_twelve_stirs_overwrite_original_identity_order() {
 	original := [1, 2, 3, 4, 5, 6]
-	result := new_base_dispatcher().dispatch_legacy_post_stir12(discovery11_fixture_bowls(), original) or {
-		LegacyPostStir12Result{}
-	}
+	result := new_base_dispatcher().dispatch_legacy_post_stir12(discovery11_fixture_bowls(),
+		original) or { LegacyPostStir12Result{} }
 	assert result.final_stir_number == 12
 	assert result.overwrite_count == 12
 	assert result.order_for_query == [3, 5, 1, 4, 6, 2]

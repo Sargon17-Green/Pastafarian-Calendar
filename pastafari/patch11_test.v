@@ -8,11 +8,9 @@ fn patch11_fixture_bowls() []BigInt {
 
 fn test_patch11_four_historic_red_order_cases_become_green() {
 	bowls := patch11_fixture_bowls()
-	for order in [[1, 2, 3, 4, 5, 6], [6, 5, 4, 3, 2, 1],
-		[2, 3, 1, 4, 5, 6], [1, 3, 5, 2, 4, 6]] {
-		production := calendar_post_stir12_spaghetti(bowls, order) or {
-			LegacyPostStir12Result{}
-		}
+	for order in [[1, 2, 3, 4, 5, 6], [6, 5, 4, 3, 2, 1], [2, 3, 1, 4, 5, 6],
+		[1, 3, 5, 2, 4, 6]] {
+		production := calendar_post_stir12_spaghetti(bowls, order) or { LegacyPostStir12Result{} }
 		legacy := new_base_dispatcher().dispatch_legacy_post_stir12(bowls, order) or {
 			LegacyPostStir12Result{}
 		}
