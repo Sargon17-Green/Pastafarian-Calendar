@@ -363,3 +363,21 @@ Canlyniad: 719 cyfnewidiad anghywir, un `undefined` ar 720,
 graith heb PATCH 08 na gwerth cywir cynhyrchu. Ni ddechreuwyd
 adeiladwr diferion gweledig na pours. `LAST_COMPLETED_STAGE=15`
 nes bo'r CI brodorol wedi pasio.
+
+
+## Ardystiad brodorol Cam 16 — COMPLETE
+
+Ar commit `3cf687cc17a799e01528b0e3e9ff04740190d97e` pasiodd GitHub Actions
+[`38246266578`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38246266578),
+swydd `114800790604`, gyda Kotlin 1.9.0/JDK 21.
+Gwelwyd pob un o 33 marc gwiriad allweddol yn log y swydd:
+Camau 1–15 yn PASS; helper zero-based 720/720 GREEN;
+caller anghywir 720/720 EXPECTED_RED, sero MATCH,
+719 canlyniad anghywir ac un undefined; 4,320 tyst BigInteger,
+strict red bwriadol, BOOT/replay a pherchnogaeth.
+Gwelwyd `STAGE16_FULL_NATIVE_EXPECTED_RED_COMPLETE`;
+gorffennodd y swydd Kotlin a'r swydd cloi enwau ill dwy â SUCCESS.
+
+**`LAST_COMPLETED_STAGE=16`**. Mae Cam 17 (`PATCH 08`) yn
+nesaf, heb ei ddechrau. Cedwir y nam cynhyrchu byw, heb adeiladwr
+diferion gweledig na chywiriad cynnar.
