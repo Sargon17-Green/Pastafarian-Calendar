@@ -100,12 +100,36 @@ def scenario(code,failed_label,peer_label,order,reference):
                     peer_step_before_fault[0]=peer["steps"]
                 else:
                     before=None;pcell=None
+                # Raise OUT of the real native execute_step call after the
+                # fetched lower semantic literal has completed its effects.
+                fault_here=(owner=="f" and xy==NEW_LITERAL)
+                if fault_here:
+                    original_step=item["program"].execute_step
+                    def faulting_step(self):
+                        result=original_step()
+                        raise FaultAfterNativeLowerLiteral(
+                            "injected after executed Native lower '1'")
+                    item["program"].execute_step=faulting_step.__get__(
+                        item["program"],item["program"].__class__)
+                raised_from_native_step=False
                 active[0]=owner
                 try:
                     pair.tick(item)
+                except FaultAfterNativeLowerLiteral:
+                    need(fault_here,
+                         "Native injected exception escaped wrong Program")
+                    raised_from_native_step=True
+                    # pair.tick never updates the step count when the
+                    # instrumented execute_step propagates an exception,
+                    # although the Befunge instruction itself executed.
+                    item["steps"]+=1
                 finally:
                     active[0]=None
-                if owner=="f" and xy==NEW_LITERAL:
+                    if fault_here:
+                        del item["program"].execute_step
+                need(raised_from_native_step==fault_here,
+                     "required Native post-opcode fault was not observed")
+                if fault_here:
                     need(pair.state(peer)==before and
                          cells(peer,writes["p"],orig_get)==pcell,
                          "single Native lower literal unexpectedly advanced peer")
@@ -121,12 +145,8 @@ def scenario(code,failed_label,peer_label,order,reference):
                     frozen_stdin_pos[0]=failed["stdin"].tell()
                     frozen_cells[0]=cells(failed,GUARDS|writes["f"],orig_get)
                     frozen_digest[0]=signature(frozen_cells[0])
-                    # Exception deliberately injected after the actual Native
-                    # opcode, not an artificial source byte substitution.
-                    try:
-                        raise FaultAfterNativeLowerLiteral()
-                    except FaultAfterNativeLowerLiteral:
-                        pass
+                    # The actual execute_step exception was caught outside
+                    # the Native interpreter call, not simulated here.
             if injected[0] and rounds%313==0:
                 need(cells(failed,GUARDS|writes["f"],orig_get)==frozen_cells[0],
                      "surviving peer changed abandoned Native Funge-space")
@@ -183,6 +203,7 @@ def scenario(code,failed_label,peer_label,order,reference):
         faulted_memory_sha256=frozen_digest[0],
         faulted_memory_snapshot=frozen_cells[0],
         survived_peer_without_space_mutation=True,
+        actual_native_execute_step_exception_caught=True,
         no_peer_change_at_injected_step=True,
         recovered_same_program_object=True,
         old_io_unchanged=True,

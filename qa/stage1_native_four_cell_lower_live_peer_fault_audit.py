@@ -49,6 +49,7 @@ def verify(r):
                             separators=(",",":")).encode("ascii")).hexdigest() and
              all(row.get(key) is True for key in
                  ("survived_peer_without_space_mutation",
+                  "actual_native_execute_step_exception_caught",
                   "no_peer_change_at_injected_step",
                   "recovered_same_program_object","old_io_unchanged")) and
              row.get("stage1_complete") is False,
@@ -71,6 +72,8 @@ def main(folder):
          "survived_peer_without_space_mutation",False)),
      ("false_runtime_effect",lambda x:x["records"][1].__setitem__(
          "fault_opcode_coordinate",[0,0])),
+     ("fake_exception",lambda x:x["records"][0].__setitem__(
+         "actual_native_execute_step_exception_caught",False)),
      ("false_reference",lambda x:x["records"][0]["reference_peer"].pop()),
      ("forged_cell_content",lambda x:x["records"][0]
       ["faulted_memory_snapshot"][0].__setitem__(2,123456)),
@@ -88,7 +91,7 @@ def main(folder):
         try:verify(bad)
         except AssertionError:pass
         else:raise AssertionError("forged lower live fault evidence accepted: "+name)
-    print("NATIVE_FOUR_CELL_LOWER_LIVE_PEER_FAULT_AUDIT_9_FALSIFICATIONS_REJECT_PASS")
+    print("NATIVE_FOUR_CELL_LOWER_LIVE_PEER_FAULT_AUDIT_10_FALSIFICATIONS_REJECT_PASS")
 if __name__=="__main__":
     need(len(sys.argv)==2,"usage: Native 4-cell live lower fault evidence directory")
     main(sys.argv[1])
