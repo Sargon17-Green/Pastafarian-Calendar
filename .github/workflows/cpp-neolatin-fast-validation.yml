@@ -23,7 +23,7 @@ jobs:
   praevolatus:
     name: Praevolatus C++20 novarum probationum
     runs-on: ubuntu-24.04
-    timeout-minutes: 65
+    timeout-minutes: 85
     steps:
       - name: Excerpere fontem
         uses: actions/checkout@v5
@@ -88,6 +88,10 @@ jobs:
             logs_stage56_praeflight/structure-reference.log
           grep -F 'FACADE=15/15_PASS' \
             logs_stage56_praeflight/structure-reference.log
+          timeout 35m build_stage56_praeflight/stage_56_structure_reference_tests --annus-integer \
+            2>&1 | tee logs_stage56_praeflight/whole-year-reference.log
+          grep -Fx 'GRADUS56_ANNUS_INTEGER=4244/4244_PASS YEAR=5000' \
+            logs_stage56_praeflight/whole-year-reference.log
           echo 'PRAEVOLATUS_GRADUS56=PASS'
 
       - name: Servare evidentiam etiam in defectu

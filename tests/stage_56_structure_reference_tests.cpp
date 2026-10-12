@@ -485,10 +485,58 @@ void exigeTerminosInversosEtFaciemPublicam(
               << "/15_PASS\n";
 }
 
+
+void exigeAnnumIntegrumPerSingulosDies() {
+    // Testis independentis dies singulos anni 5000 requirit: nullum
+    // specimen rarum pro die intra mensem hic satis est.
+    const Big c = pastafari::FOUNDATION_DAY_OLD;
+    NormativeOracle oraculum(false);
+    const Year y = oraculum.year5000(c);
+    const Exspectatio expected = construeIndependenter(oraculum, c, y);
+    exigeLegesStructurae(expected);
+    const Big first = y.openGateDay + 1;
+    const Big length = y.closeGateDay - y.openGateDay;
+    exige(y.number == 5000 && length == 4244,
+          "testimonium anni 5000 mutatum est");
+    BaseMonsterManager manager;
+    std::size_t numerus = 0;
+    const std::size_t n = length.convert_to<std::size_t>();
+    for (std::size_t i = 0; i < n; ++i) {
+        const Big t = first + Big{i};
+        const auto actual = manager.executeFinalIntegrationStage56(c, t);
+        const std::string label = "annus 5000 dies "
+            + std::to_string(i + 1);
+        exige(actual.ready && actual.status == "GREEN",
+              label + ": integratio non viridis");
+        comparaStructuram(actual, expected, label);
+        comparaDiem(actual.result, diesExReference(expected, t), label);
+        if (i == 0) {
+            exige(!actual.guardedCacheHit && !actual.guardedCacheRejected,
+                  "annus integer: initium non frigidum est");
+        } else {
+            exige(actual.guardedCacheHit && !actual.guardedCacheRejected,
+                  label + ": cache non calidus intra eundem annum");
+        }
+        ++numerus;
+        if (numerus % 512 == 0 || numerus == n) {
+            std::cout << "GRADUS56_ANNUS_INTEGER_PROGRESS="
+                      << numerus << "/" << n << '\n' << std::flush;
+        }
+    }
+    exige(numerus == n, "annus integer non omnes dies consumpsit");
+    std::cout << "GRADUS56_ANNUS_INTEGER=" << numerus
+              << "/" << n << "_PASS YEAR=" << y.number << '\n';
+}
+
 } // namespace
 
-int main() {
+int main(int argc, char** argv) {
     try {
+        if (argc == 2 && std::string(argv[1]) == "--annus-integer") {
+            exigeAnnumIntegrumPerSingulosDies();
+            return 0;
+        }
+        exige(argc == 1, "argumenta testis ignota");
         const Big fundamentum = pastafari::FOUNDATION_DAY_OLD;
         NormativeOracle oracle(false); // saved-sum, numquam raw-sum
         const Year y5000 = oracle.year5000(fundamentum);

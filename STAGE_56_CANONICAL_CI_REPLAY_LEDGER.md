@@ -177,3 +177,12 @@ Hoc scriptum est in commit praeparto; non est testimonium CI completum.
 - Custodia nominum `38212657381`: **success**.
 - Commit historicus `9aa3607`: compendium fast YAML imperfectum et variabilis `primus` bis declarata in test-only; utrumque ante hanc probationem correctum.
 - Nova pars huius commit sequens: dies terminales inversi per quinque annos et 15 vocationes per faciem publicam; **non probata** donec novus CI ad SHA novo viridis sit.
+
+## Exploratio per singulos dies anni 5000 — nova probatio, nondum verificata
+
+- Cursus viridis superior: commit `7468c06d8712c4f38cde564cdc06efe80c54c237`.
+- Vigilia integra `38221413132`: 20/20 officia success, `SOAK_GREEN`.
+- Praevolatus `38221413110` et custodia nominum `38221413157`: success.
+- `GRADUS56_TERMINI_REFERENCE=PASS ANNI=5 CASUS=712`, `GRADUS56_TERMINI_INVERSI=PASS ANNI=5 CASUS=712 FACADE=15/15_PASS`.
+- Nova via `--annus-integer` examinat omnes 4244 dies anni 5000 pro `calculationDay=FOUNDATION_DAY_OLD` cum structura independenti saved-sum et cache calido.
+- GCC/Clang differentialia et praevolatus idem instrumentum in modo separato currunt; exitus huius mutationis NON PRAESUMITUR.

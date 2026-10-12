@@ -514,7 +514,7 @@ jobs:
     name: Decem paria contra reference canonica — ${{ matrix.label }}
     needs: custodia-arboris
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 100
     strategy:
       fail-fast: false
       matrix:
@@ -607,6 +607,9 @@ jobs:
           grep -F 'GRADUS56_TERMINI_INVERSI=PASS ANNI=5 CASUS=' soak-logs/structure-reference.log
           grep -F 'FACADE=15/15_PASS' soak-logs/structure-reference.log
           grep -Fx 'GRADUS56_ORDO_INVOCATIONUM=28/28_PASS CONTEXTUS=2 CACHE_ANNI=3' soak-logs/structure-reference.log
+          timeout 35m build_soak/differential/structure --annus-integer \
+            2>&1 | tee soak-logs/whole-year-reference.log
+          grep -Fx 'GRADUS56_ANNUS_INTEGER=4244/4244_PASS YEAR=5000' soak-logs/whole-year-reference.log
 
       - name: Servare logs differentialia
         if: always()
