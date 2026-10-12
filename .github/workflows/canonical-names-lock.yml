@@ -25,7 +25,7 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage23-typescript-marathi:
+  stage24-typescript-marathi:
     if: github.ref == 'refs/heads/TypeScript+मराठी'
     runs-on: ubuntu-latest
     steps:
@@ -37,54 +37,56 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript typecheck
         run: npm run typecheck
-      - name: Stages 01-23 regressions and eleventh historical order memory latch patch
+      - name: Stages 01-24 regressions and twelfth historical fixed numeric bowl successor discovery
         shell: bash
         run: |
           set -euo pipefail
-          npm test | tee stage23-results.log
-          grep -Fq 'STAGE_01_PASS' stage23-results.log
-          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage23-results.log
-          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage23-results.log
-          grep -Fq 'STAGE_04_DISCOVERY_02_GUARDS_PASS mismatches=3 matches=2 cases=5' stage23-results.log
-          grep -Eq 'STAGE_05_PATCH_02_PASS pairs=[0-9]+ days=[0-9]+ plusOne=[1-9][0-9]* scarChecks=[1-9][0-9]* scarForces=0 mismatches=0' stage23-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_GUARDS_PASS mismatches=4 matches=1' stage23-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_PROPERTIES_PASS pairs=225' stage23-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_LARGE_AND_ISOLATION_PASS' stage23-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_ERRORS_PASS' stage23-results.log
-          grep -Fq 'STAGE_06_DISCOVERY_03_LIFECYCLE_PASS' stage23-results.log
-          grep -Eq 'STAGE_07_PATCH_03_PASS pairs=[0-9]+ overridden=[1-9][0-9]* preserved=[1-9][0-9]* mismatches=0' stage23-results.log
-          grep -Fq 'STAGE_08_DISCOVERY_04_GUARDS_PASS mismatches=4 matches=1 divergentSteps=45' stage23-results.log
-          grep -Fq 'STAGE_08_DISCOVERY_04_PROPERTIES_PASS cases=516 values=2580' stage23-results.log
-          grep -Eq 'STAGE_09_PATCH_04_PASS cases=1076 cells=5380 legacyCalls=1076 overwritten=[1-9][0-9]* mismatches=0' stage23-results.log
-          grep -Eq 'STAGE_09_PATCH_04_METAMORPHIC_PASS comparisons=301 cells=1505 historicalDifferences=[1-9][0-9]*' stage23-results.log
-          grep -Eq 'STAGE_10_DISCOVERY_05_GUARDS_PASS firstMismatches=6 firstMatches=1 oracleCases=9 oracleMismatches=[1-9][0-9]* oracleMatches=[1-9][0-9]*' stage23-results.log
-          grep -Eq 'STAGE_10_DISCOVERY_05_PROPERTIES_PASS cases=1030 slots=7210 mismatches=[1-9][0-9]* matches=[1-9][0-9]*' stage23-results.log
-          grep -Eq 'STAGE_11_PATCH_05_ORACLE_PASS cases=105 slots=735 legacyDifferences=[1-9][0-9]* legacyMatches=[1-9][0-9]* mismatches=0' stage23-results.log
-          grep -Eq 'STAGE_11_PATCH_05_PROPERTIES_PASS cases=2062 slots=14434 legacyDifferences=[1-9][0-9]* legacyMatches=[1-9][0-9]*' stage23-results.log
-          grep -Fq 'STAGE_12_DISCOVERY_06_GUARDS_PASS mismatches=11 matches=4 hidden=11 visible=4' stage23-results.log
-          grep -Fq 'STAGE_12_DISCOVERY_06_PROPERTIES_PASS days=16 cases=2208 hiddenMisses=176 visibleMatches=2032' stage23-results.log
-          grep -Fq 'STAGE_13_PATCH_06_GUARDS_PASS cases=15 hidden=11 visible=4 mismatches=0' stage23-results.log
-          grep -Fq 'STAGE_13_PATCH_06_PROPERTIES_PASS days=16 cases=2208 hidden=176 visible=2032 mismatches=0 giantCases=138 giantMismatches=0' stage23-results.log
-          grep -Fq 'STAGE_14_DISCOVERY_07_GUARDS_PASS mismatches=11 matches=0 missing=1 shifted=10' stage23-results.log
-          grep -Fq 'STAGE_14_DISCOVERY_07_PROPERTIES_PASS cases=2816 shifted=2560 missing=256 differences=2816 giantCases=22 giantValues=20' stage23-results.log
-          grep -Fq 'STAGE_15_PATCH_07_GUARDS_PASS rows=11 shifted=10 missing=1 mismatches=0' stage23-results.log
-          grep -Fq 'STAGE_15_PATCH_07_PROPERTIES_PASS runs=1280 cases=14080 shifted=12800 missing=1280 mismatches=0 chains=64 chainedGrinds=704 chainMismatches=0 giantCases=22 giantMismatches=0' stage23-results.log
-          grep -Fq 'STAGE_16_DISCOVERY_08_GUARDS_PASS mismatches=10 matches=0 accepted=5 rejected=5 witnesses=10' stage23-results.log
-          grep -Fq 'STAGE_16_DISCOVERY_08_PROPERTIES_PASS direct=720 unique=720 cases=2880 mismatches=2880 accepted=1439 rejected=1441 giant=8' stage23-results.log
-          grep -Fq 'STAGE_17_PATCH_08_GUARDS_PASS cases=17 shifted=9 rejected=8 mismatches=0' stage23-results.log
-          grep -Eq 'STAGE_17_PATCH_08_PROPERTIES_PASS cases=6209 shifted=[0-9]+ rejected=[0-9]+ mismatches=0 unique=720 seeded=2048 visibleDays=12 visibleCases=552 giantCases=9' stage23-results.log
-          grep -Fq 'STAGE_18_DISCOVERY_09_GUARDS_PASS witnesses=8 cells=24 mismatches=16 matches=8' stage23-results.log
-          grep -Eq 'STAGE_18_DISCOVERY_09_PROPERTIES_PASS rankOrders=720 rankCells=2160 rankMatches=360 rankMismatches=1800 realPairs=12 realDrops=552 realCells=1656 realMismatches=[1-9][0-9]* realMatches=[1-9][0-9]* giantCases=8 giantCells=24' stage23-results.log
-          grep -Fq 'STAGE_19_PATCH_09_GUARDS_PASS witnesses=8 cells=24 mismatches=0 historicalWrong=16 historicalMatches=8 aliases=6 originalCalls=2' stage23-results.log
-          grep -Fq 'STAGE_19_PATCH_09_PROPERTIES_PASS cases=3328 cells=9984 mismatches=0 rankOrders=720 rankWrong=1800 rankMatches=360 realPairs=12 realDrops=552 realWrong=1383 realMatches=273 seeded=2048 giant=8' stage23-results.log
-          grep -Fq 'STAGE_20_DISCOVERY_10_GUARDS_PASS witnesses=8 positions=48 mismatches=40 matches=8 overwrittenReads=48 contaminatedPositions=40' stage23-results.log
-          grep -Eq 'STAGE_20_DISCOVERY_10_PROPERTIES_PASS orders=720 rankCells=4320 rankMismatches=3600 rankMatches=720 cases=2304 cells=13824 mismatches=11520 matches=2304 overwritten=13824 realPairs=12 realDrops=552 realErrors=2760 evolvingPairs=12 evolvingDrops=552 evolvingMismatches=[1-9][0-9]* seeded=1024 giant=8' stage23-results.log
-          grep -Fq 'STAGE_21_PATCH_10_GUARDS_PASS witnesses=8 cells=48 mismatches=0 historicWrong=40 historicMatches=8 vaultReads=6 pendingWrites=6 committedWrites=6 injectedFailures=6 legacyCalls=1' stage23-results.log
-          grep -Fq 'STAGE_21_PATCH_10_PROPERTIES_PASS orders=720 orderWrong=3600 orderMatches=720 cases=2304 cells=13824 mismatches=0 oldWrong=11520 oldMatches=2304 vaultReads=13824 pendingWrites=13824 committedWrites=13824 realPairs=12 realDrops=552 evolvingPairs=12 evolvingDrops=552 evolvingMismatches=0 historicalFinalMismatches=72 seeded=1024 giant=8' stage23-results.log
-          grep -Eq 'STAGE_22_DISCOVERY_11_GUARDS_PASS pairs=12 writesPerPair=58 rounds=46 postStirs=12 mismatches=[1-9][0-9]* matches=[0-9]+ redPositions=1,2,6 witness=1 injectedFailures=5' stage23-results.log
-          grep -Eq 'STAGE_22_DISCOVERY_11_PROPERTIES_PASS realPairs=12 varied=64 giant=8 cases=84 writes=4872 drops=3864 postStirs=1008 ledgerCells=29232 queryDifferences=[1-9][0-9]* queryMatches=[0-9]+ redWitnesses=[1-9][0-9]* spyWrites=58' stage23-results.log
-          grep -Fq 'STAGE_23_PATCH_11_GUARDS_PASS pairs=12 cells=36 mismatches=0 oldWrong=32 oldMatches=4 latchWrites=1 latchAt=46 sharedWrites=58 legacyCalls=58 injectedFailures=6' stage23-results.log
-          grep -Eq 'STAGE_23_PATCH_11_PROPERTIES_PASS realPairs=12 varied=64 giant=8 ranks=720 unique=720 cases=804 cells=4824 mismatches=0 latchWrites=804 sharedWrites=46632 historicalDifferences=[1-9][0-9]* historicalMatches=[0-9]+ first84Differences=206 first84Matches=46' stage23-results.log
+          npm test | tee stage24-results.log
+          grep -Fq 'STAGE_01_PASS' stage24-results.log
+          grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage24-results.log
+          grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage24-results.log
+          grep -Fq 'STAGE_04_DISCOVERY_02_GUARDS_PASS mismatches=3 matches=2 cases=5' stage24-results.log
+          grep -Eq 'STAGE_05_PATCH_02_PASS pairs=[0-9]+ days=[0-9]+ plusOne=[1-9][0-9]* scarChecks=[1-9][0-9]* scarForces=0 mismatches=0' stage24-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_GUARDS_PASS mismatches=4 matches=1' stage24-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_PROPERTIES_PASS pairs=225' stage24-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_LARGE_AND_ISOLATION_PASS' stage24-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_ERRORS_PASS' stage24-results.log
+          grep -Fq 'STAGE_06_DISCOVERY_03_LIFECYCLE_PASS' stage24-results.log
+          grep -Eq 'STAGE_07_PATCH_03_PASS pairs=[0-9]+ overridden=[1-9][0-9]* preserved=[1-9][0-9]* mismatches=0' stage24-results.log
+          grep -Fq 'STAGE_08_DISCOVERY_04_GUARDS_PASS mismatches=4 matches=1 divergentSteps=45' stage24-results.log
+          grep -Fq 'STAGE_08_DISCOVERY_04_PROPERTIES_PASS cases=516 values=2580' stage24-results.log
+          grep -Eq 'STAGE_09_PATCH_04_PASS cases=1076 cells=5380 legacyCalls=1076 overwritten=[1-9][0-9]* mismatches=0' stage24-results.log
+          grep -Eq 'STAGE_09_PATCH_04_METAMORPHIC_PASS comparisons=301 cells=1505 historicalDifferences=[1-9][0-9]*' stage24-results.log
+          grep -Eq 'STAGE_10_DISCOVERY_05_GUARDS_PASS firstMismatches=6 firstMatches=1 oracleCases=9 oracleMismatches=[1-9][0-9]* oracleMatches=[1-9][0-9]*' stage24-results.log
+          grep -Eq 'STAGE_10_DISCOVERY_05_PROPERTIES_PASS cases=1030 slots=7210 mismatches=[1-9][0-9]* matches=[1-9][0-9]*' stage24-results.log
+          grep -Eq 'STAGE_11_PATCH_05_ORACLE_PASS cases=105 slots=735 legacyDifferences=[1-9][0-9]* legacyMatches=[1-9][0-9]* mismatches=0' stage24-results.log
+          grep -Eq 'STAGE_11_PATCH_05_PROPERTIES_PASS cases=2062 slots=14434 legacyDifferences=[1-9][0-9]* legacyMatches=[1-9][0-9]*' stage24-results.log
+          grep -Fq 'STAGE_12_DISCOVERY_06_GUARDS_PASS mismatches=11 matches=4 hidden=11 visible=4' stage24-results.log
+          grep -Fq 'STAGE_12_DISCOVERY_06_PROPERTIES_PASS days=16 cases=2208 hiddenMisses=176 visibleMatches=2032' stage24-results.log
+          grep -Fq 'STAGE_13_PATCH_06_GUARDS_PASS cases=15 hidden=11 visible=4 mismatches=0' stage24-results.log
+          grep -Fq 'STAGE_13_PATCH_06_PROPERTIES_PASS days=16 cases=2208 hidden=176 visible=2032 mismatches=0 giantCases=138 giantMismatches=0' stage24-results.log
+          grep -Fq 'STAGE_14_DISCOVERY_07_GUARDS_PASS mismatches=11 matches=0 missing=1 shifted=10' stage24-results.log
+          grep -Fq 'STAGE_14_DISCOVERY_07_PROPERTIES_PASS cases=2816 shifted=2560 missing=256 differences=2816 giantCases=22 giantValues=20' stage24-results.log
+          grep -Fq 'STAGE_15_PATCH_07_GUARDS_PASS rows=11 shifted=10 missing=1 mismatches=0' stage24-results.log
+          grep -Fq 'STAGE_15_PATCH_07_PROPERTIES_PASS runs=1280 cases=14080 shifted=12800 missing=1280 mismatches=0 chains=64 chainedGrinds=704 chainMismatches=0 giantCases=22 giantMismatches=0' stage24-results.log
+          grep -Fq 'STAGE_16_DISCOVERY_08_GUARDS_PASS mismatches=10 matches=0 accepted=5 rejected=5 witnesses=10' stage24-results.log
+          grep -Fq 'STAGE_16_DISCOVERY_08_PROPERTIES_PASS direct=720 unique=720 cases=2880 mismatches=2880 accepted=1439 rejected=1441 giant=8' stage24-results.log
+          grep -Fq 'STAGE_17_PATCH_08_GUARDS_PASS cases=17 shifted=9 rejected=8 mismatches=0' stage24-results.log
+          grep -Eq 'STAGE_17_PATCH_08_PROPERTIES_PASS cases=6209 shifted=[0-9]+ rejected=[0-9]+ mismatches=0 unique=720 seeded=2048 visibleDays=12 visibleCases=552 giantCases=9' stage24-results.log
+          grep -Fq 'STAGE_18_DISCOVERY_09_GUARDS_PASS witnesses=8 cells=24 mismatches=16 matches=8' stage24-results.log
+          grep -Eq 'STAGE_18_DISCOVERY_09_PROPERTIES_PASS rankOrders=720 rankCells=2160 rankMatches=360 rankMismatches=1800 realPairs=12 realDrops=552 realCells=1656 realMismatches=[1-9][0-9]* realMatches=[1-9][0-9]* giantCases=8 giantCells=24' stage24-results.log
+          grep -Fq 'STAGE_19_PATCH_09_GUARDS_PASS witnesses=8 cells=24 mismatches=0 historicalWrong=16 historicalMatches=8 aliases=6 originalCalls=2' stage24-results.log
+          grep -Fq 'STAGE_19_PATCH_09_PROPERTIES_PASS cases=3328 cells=9984 mismatches=0 rankOrders=720 rankWrong=1800 rankMatches=360 realPairs=12 realDrops=552 realWrong=1383 realMatches=273 seeded=2048 giant=8' stage24-results.log
+          grep -Fq 'STAGE_20_DISCOVERY_10_GUARDS_PASS witnesses=8 positions=48 mismatches=40 matches=8 overwrittenReads=48 contaminatedPositions=40' stage24-results.log
+          grep -Eq 'STAGE_20_DISCOVERY_10_PROPERTIES_PASS orders=720 rankCells=4320 rankMismatches=3600 rankMatches=720 cases=2304 cells=13824 mismatches=11520 matches=2304 overwritten=13824 realPairs=12 realDrops=552 realErrors=2760 evolvingPairs=12 evolvingDrops=552 evolvingMismatches=[1-9][0-9]* seeded=1024 giant=8' stage24-results.log
+          grep -Fq 'STAGE_21_PATCH_10_GUARDS_PASS witnesses=8 cells=48 mismatches=0 historicWrong=40 historicMatches=8 vaultReads=6 pendingWrites=6 committedWrites=6 injectedFailures=6 legacyCalls=1' stage24-results.log
+          grep -Fq 'STAGE_21_PATCH_10_PROPERTIES_PASS orders=720 orderWrong=3600 orderMatches=720 cases=2304 cells=13824 mismatches=0 oldWrong=11520 oldMatches=2304 vaultReads=13824 pendingWrites=13824 committedWrites=13824 realPairs=12 realDrops=552 evolvingPairs=12 evolvingDrops=552 evolvingMismatches=0 historicalFinalMismatches=72 seeded=1024 giant=8' stage24-results.log
+          grep -Eq 'STAGE_22_DISCOVERY_11_GUARDS_PASS pairs=12 writesPerPair=58 rounds=46 postStirs=12 mismatches=[1-9][0-9]* matches=[0-9]+ redPositions=1,2,6 witness=1 injectedFailures=5' stage24-results.log
+          grep -Eq 'STAGE_22_DISCOVERY_11_PROPERTIES_PASS realPairs=12 varied=64 giant=8 cases=84 writes=4872 drops=3864 postStirs=1008 ledgerCells=29232 queryDifferences=[1-9][0-9]* queryMatches=[0-9]+ redWitnesses=[1-9][0-9]* spyWrites=58' stage24-results.log
+          grep -Fq 'STAGE_23_PATCH_11_GUARDS_PASS pairs=12 cells=36 mismatches=0 oldWrong=32 oldMatches=4 latchWrites=1 latchAt=46 sharedWrites=58 legacyCalls=58 injectedFailures=6' stage24-results.log
+          grep -Eq 'STAGE_23_PATCH_11_PROPERTIES_PASS realPairs=12 varied=64 giant=8 ranks=720 unique=720 cases=804 cells=4824 mismatches=0 latchWrites=804 sharedWrites=46632 historicalDifferences=[1-9][0-9]* historicalMatches=[0-9]+ first84Differences=206 first84Matches=46' stage24-results.log
+          grep -Eq 'STAGE_24_DISCOVERY_12_GUARDS_PASS dayPairs=12 cells=72 mismatches=[1-9][0-9]* matches=[1-9][0-9]* rank2Wrong=3 actualLegacyCalls=2 injectedFailures=1' stage24-results.log
+          grep -Eq 'STAGE_24_DISCOVERY_12_PROPERTIES_PASS orders=720 cells=4320 wrong=3456 matches=864 numericWrap=720 positionWrap=720 positionWrapWrong=576 realPairs=12 varied=64 giant=8 ranks=720 unique=720 histories=804 sharedWrites=46632 queryWrong=[1-9][0-9]* queryMatches=[1-9][0-9]* realWrong=[1-9][0-9]* realMatches=[0-9]+' stage24-results.log
       - name: Verify intentional expected-red regression
         shell: bash
         run: |
@@ -233,3 +235,17 @@ jobs:
             exit 1
           fi
           grep -Fq 'DISCOVERY_11_EXPECTED_RED mismatches=3 matches=0 positions=1,2,6 writes=58' discovery11-red.log
+
+      - name: Verify DISCOVERY 12 historical expected-red
+        shell: bash
+        run: |
+          set +e
+          npm run test:discovery12:red > discovery12-red.log 2>&1
+          result=$?
+          set -e
+          cat discovery12-red.log
+          if [ "$result" -eq 0 ]; then
+            echo "::error::Historical DISCOVERY 12 unexpectedly passed"
+            exit 1
+          fi
+          grep -Fq 'DISCOVERY_12_EXPECTED_RED mismatches=3 matches=0 ids=4,5,6 order=1,2,3,4,6,5' discovery12-red.log
