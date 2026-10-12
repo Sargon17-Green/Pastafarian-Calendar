@@ -22,6 +22,7 @@ local LegacyAliasedStir = require("legacy_aliased_stir")
 local StirPatch = require("stir_patch")
 local LegacyResetChain = require("legacy_reset_chain")
 local BowlChainPatch = require("bowl_chain_patch")
+local LegacyFixedNeighbor = require("legacy_fixed_neighbor")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -333,8 +334,49 @@ function S.visibleResetChainSpaghetti(calculationDay,targetDay,count)
     return result
 end
 
+-- DISCOVERY 12: li lòd 46 gout korije yo, men chwazi vwazen pa id fiks.
+function S.nextBowlSpaghetti(drops,stoneRows,initialBowls,queriedId)
+    local fixed=LegacyFixedNeighbor.execute(drops,stoneRows,initialBowls,queriedId)
+    return fixed
+end
+
+function S.legacyFixedNeighborProbe(drops,stoneRows,initialBowls,queriedId)
+    return LegacyFixedNeighbor.execute(drops,stoneRows,initialBowls,queriedId)
+end
+
+-- Non siklik sa a toujou mal pou pifò permutation, san efè sou state.
+function S.oldNextBowlFixedNameProbe(queriedId)
+    return LegacyFixedNeighbor.oldNextBowlFixedName(queriedId)
+end
+
+-- Sa se chemen 46 gout otantik: PATCH 01–11, apre sa legacy vwazen.
+function S.visibleFixedNeighborProbe(calculationDay,targetDay,queriedId)
+    local bowls=LegacyFixedPours.initialBowls(calculationDay,targetDay)
+    local rocks=StonePatch.buildPatchedTable()
+    local drops,stones,store,contexts={},{},{},{}
+    for i=1,46 do
+        local drop,child=S.visibleDropSpaghetti(calculationDay,targetDay,i,store)
+        assert(child.status=="PATCH_VISIBLE_COMPLETE" and child.completedGrinds==11,
+            "Gout vizib PATCH 07 pa konplè")
+        drops[i]=BigInt.from(drop)
+        store[i]=BigInt.from(drop)
+        stones[i]=rocks[i]
+        contexts[i]=child
+    end
+    local fixed,context=LegacyFixedNeighbor.execute(drops,stones,bowls,queriedId)
+    context.visibleDropContexts=contexts
+    context.metrics["discovery12.visible.calls"]=1
+    context.visibleDropCount=46
+    return fixed,context
+end
+
+function S.visibleFixedNeighborSpaghetti(calculationDay,targetDay,queriedId)
+    local fixed=S.visibleFixedNeighborProbe(calculationDay,targetDay,queriedId)
+    return fixed
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 22", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 24", 0)
 end
 
 return S
