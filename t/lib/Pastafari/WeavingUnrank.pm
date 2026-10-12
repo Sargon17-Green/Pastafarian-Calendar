@@ -141,9 +141,19 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
                 $ways = $remaining_ways->copy;
                 $shortcut_steps++;
             } else {
-                $ways = countWeavingSuffixFactored(
-                    $lengths,\@word,\%future_cache,\%factor_diagnostics
-                );
+                # 使用已驗證、由本解碼器持有的當前剩餘向量。
+                # 候選在此暫時消耗一天，計數完成立即回復；
+                # 只有確認接受時才正式消耗該日。
+                my $was_remaining=$remaining[$j-1];
+                my $candidate_opened=$j>$opened ? $j : $opened;
+                my $candidate_closed=$was_remaining==1 ? $j : $closed;
+                $remaining[$j-1]--;
+                $ways=Pastafari::WeavingSuffixFactor::_countWeavingSuffixFactoredState(
+                        $lengths,\@remaining,
+                        $candidate_opened,$candidate_closed,
+                        \%future_cache,\%factor_diagnostics
+                    );
+                $remaining[$j-1]++;
                 $calls++;
                 $remaining_ways->bsub($ways);
             }

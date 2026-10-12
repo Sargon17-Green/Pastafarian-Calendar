@@ -78,6 +78,20 @@ sub countWeavingSuffixFactored ($lengths, $prefix,
         }
     }
 
+    return _countWeavingSuffixFactoredState(
+        \@sizes,\@remaining,$opened,$closed,$shared_cache,$diagnostics
+    );
+}
+# 僅限反排名內部使用。呼叫者已驗證月長和整個前綴，
+# 並擁有「剩餘向量／opened／closed」狀態；此捷徑不可
+# 用作未經驗證的公開輸入界面。
+sub _countWeavingSuffixFactoredState ($lengths, $remaining,
+                                     $opened, $closed,
+                                     $shared_cache = undef,
+                                     $diagnostics = undef) {
+    my @sizes=map { 0+"$_" } @$lengths;
+    my @remaining=@$remaining;
+    my $m=scalar @sizes;
     $diagnostics->{factor_calls}++ if defined $diagnostics;
 
     my @active = $opened ? @remaining[0 .. $opened-1] : ();
