@@ -78,3 +78,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 13 — PATCH 06
 
 የታሪካዊው `legacy_prior(drop_store,i,back)` በትክክል ያለውን በሚታዩ ጠብታዎች ብቻ የሚያነብ ስህተት እንዳለ ይቆያል። አዲሱ `PriorPatch06` የ`slot=i-back` ሁኔታን ያያል። `slot>=1` ከሆነ `BaseDispatcher.dispatch_legacy_prior` በእውነት ይጠራል፤ ካልሆነ `hidden_k=1-slot` በሚለው የአንድ-መሠረት የቅርበት አመልካች በ`calendar_hidden_by_nearness` በኩል ይመለሳል። የደረጃ 12 አራት RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። V 0.5.2 (`7647ce1`) በGitHub Actions run `38223816213` ተረጋግጧል፤ `v fmt -verify` PASS፣ `v test ./pastafari` 19/19 PASS። የደረጃ 12 አራት RED assertions ሳይቀየሩ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=13` ነው። `docs/STAGE13_PATCH06.md` ይመልከቱ።
+
+## ደረጃ 14 — DISCOVERY 07
+
+የ11 ትክክለኛ የወፍጮ መስመሮች ሰንጠረዥ `legacy_visible_grind_table` በV ዜሮ-መሠረት `0..10` ተይዟል። የታሪካዊው `old_grind_row(grind)` ግን ቁጥር `1..11` እንደ የarray ማውጫ በቀጥታ ይጠቀማል፤ ወፍጮ 1 ረድፍ 2ን ያነባል፣ ወፍጮ 11 ከሰንጠረዡ ውጪ ነው። በV ሕገ-ወጥ ንባብ ሂደት እንዳይቋረጥ በerror ይመለሳል፣ ነገር ግን የታሪክ ስህተቱ አልተጠገነም። አዲሱ `calendar_grind_once_spaghetti` በተሳሳተው የረድፍ መርጫ ላይ የትክክለኛውን የወፍጮ ሂሳብ ይፈጽማል። አራት `EXPECTED_RED` እና የታሪክ GREEN ምስክሮች ተጨምረዋል። የ`PATCH 07` sentinel ረድፍ አልተጨመረም። `LAST_COMPLETED_STAGE=13` የV CI ማረጋገጫ እስኪጠናቀቅ ይቆያል። ዝርዝር፦ `docs/STAGE14_DISCOVERY07.md`።

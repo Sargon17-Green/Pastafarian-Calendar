@@ -138,5 +138,13 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	patched_prior := calendar_prior_spaghetti(visible, hidden, 1, 1)!
 	prior_details := final_details + patched_hidden_one.str() + '; DISCOVERY_06 oldPriorSlot0='
 	patch_details := prior_details + prior_diagnostic + '; PATCH_06 priorSlot0='
-	return error(patch_details + patched_prior.str())
+	grind_one := dispatcher.dispatch_legacy_grind(1)!
+	mut grind_eleven_status := 'AVAILABLE'
+	_ = calendar_grind_row_spaghetti(11) or {
+		grind_eleven_status = 'ERROR'
+		[]int{}
+	}
+	grind_details := patch_details + patched_prior.str() + '; DISCOVERY_07 oldGrind1A='
+	grind_last := grind_details + grind_one[0].str() + '; DISCOVERY_07 oldGrind11='
+	return error(grind_last + grind_eleven_status)
 }

@@ -117,3 +117,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 13 መዝጊያ — GREEN
 
 በመጀመሪያው የV ሙከራ `patch06_test.v` ውስጥ አንድ የformatter ልዩነት ታይቷል። የV 0.5.2 (`7647ce1`) እውነተኛ formatter ተጠቅመን ልዩነቱን አስተካክለናል፤ ጊዜያዊ የአመርማሪ የCI እርምጃ ተወግዷል። በcommit `6192a870e1af98398e6f4ed70f9dcf49aca60a28` ላይ የGitHub Actions run `38223816213` በአገርኛው የV ኮምፓይለር ሙሉ PASS ነው። ሁሉም 19 የV ፈተና ፋይሎች GREEN ናቸው፣ የደረጃ 12 አራቱ RED assertions ሳይለወጡ አልፈዋል። `legacy_prior` የታሪክ ስህተቱ ተጠብቋል፣ `PriorPatch06` አዎንታዊ slot ሲሆን በdispatcher ወደ `legacy_prior` በእውነት ይመለሳል። የማስረጃ ቅርስ `11735158009` ነው። ደረጃ 13 COMPLETE / GREEN ነው።
+
+## ደረጃ 14 — DISCOVERY 07 (EXPECTED_RED በቀጥተኛ ማረጋገጫ ላይ)
+
+ከ11 የወፍጮ ረድፎች ጋር `legacy_visible_grind_table` ተጨምሯል። `old_grind_row(grind)` በ0..10 የተደራጀውን ሰንጠረዥ በ1..11 የሎጂክ ቁጥር በቀጥታ ያነባል። `LegacyGrindAdapter` እና `BaseDispatcher.dispatch_legacy_grind` በproduction `calendar_grind_row_spaghetti` ውስጥ በእውነት ይሠራሉ። በ`legacy_grind_once` የተሳሳተው ረድፍ በመደበኛው SAVE የሂሳብ መስመር ሲገባ ውጤቱ 210 ነው፣ የትክክለኛው የመጀመሪያ ረድፍ ሂሳብ ግን 154 ነው። አራት የተመረጡ RED assertions የ1,2,10,11 ወፍጮዎችን ይመረምራሉ፤ የታሪክ ስህተት በራሱ ምስክር ይቀራል። የsentinel ረድፍ ለ`PATCH 07` ይጠበቃል።
