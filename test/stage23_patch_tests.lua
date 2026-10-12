@@ -13,7 +13,9 @@ for _,drops in ipairs(samples) do
  local stones,oracleRows={},{}
  for i=1,#drops do stones[i]=row;oracleRows[i]={2,3,5,7,11} end
  local corrected,ctx=S.bowlChainPatchProbe(drops,stones,initial)
- local reference=O.applyVisibleDropsToBowls(initial,drops,oracleRows)
+ local oracleDrops={}
+ for i=1,#drops do oracleDrops[i]=B.from(drops[i]) end
+ local reference=O.applyVisibleDropsToBowls(initial,oracleDrops,oracleRows)
  local legacy,oldctx=S.legacyResetBowlsProbe(drops,stones,initial)
  assert(ctx.mode=="STAGE_23_PATCH_11"
     and ctx.phase=="PATCH_CARRY_BOWLS_BETWEEN_DROPS"
