@@ -98,7 +98,13 @@ final case class BaseMonsterContext(
   var patchedJumpOffset: Option[BigInt] = None,
   var patchedJumpOpenDay: Option[BigInt] = None,
   var patchedJumpCloseDay: Option[BigInt] = None,
-  var patch13Applied: Boolean = false
+  var patch13Applied: Boolean = false,
+  var virtualFirstGateIndex: Option[BigInt] = None,
+  var virtualGateStride: Option[BigInt] = None,
+  var virtualCandidateCount: Option[BigInt] = None,
+  var virtualRequestedRank: Option[BigInt] = None,
+  var legacyVirtualNarrowedRank: Option[Int] = None,
+  var legacyVirtualSelectedGateIndex: Option[BigInt] = None
 )
 
 final class BaseMetricsShell {
@@ -123,6 +129,43 @@ final class BaseValidationManager {
 
 
   /** Ricalcolo separato: né wrapper corretto né oracolo test-only. */
+  /** Verifica indipendente della cicatrice di troncamento signed 32 bit. */
+  def requireDiscovery14Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="DISCOVERY_14_VIRTUAL_GATE_LIST" ||
+       ctx.status!="LEGACY_VIRTUAL_GATE_READY" ||
+       ctx.branchTrace.toVector!=Vector("BOOT","DISCOVERY_14_VIRTUAL_GATE_LIST") ||
+       ctx.virtualFirstGateIndex.isEmpty ||
+       ctx.virtualGateStride.isEmpty ||
+       ctx.virtualCandidateCount.isEmpty ||
+       ctx.virtualRequestedRank.isEmpty ||
+       ctx.legacyVirtualNarrowedRank.isEmpty ||
+       ctx.legacyVirtualSelectedGateIndex.isEmpty) {
+      throw new IllegalStateException("DISCOVERY 14 incompleta.")
+    }
+    val first=ctx.virtualFirstGateIndex.get
+    val stride=ctx.virtualGateStride.get
+    val count=ctx.virtualCandidateCount.get
+    val rank=ctx.virtualRequestedRank.get
+    if(stride==0 || count<1 || rank<1 || rank>count)
+      throw new IllegalStateException("Dominio virtuale contraffatto.")
+
+    // Calcolo indipendente di Int signed modulo 2^32 senza toInt.
+    val modulus=BigInt(1)<<32
+    val unsigned=rank & (modulus-1)
+    val signed=if(unsigned >= (BigInt(1)<<31))
+      unsigned-modulus else unsigned
+    val expected=first+(signed-1)*stride
+    if(ctx.legacyVirtualNarrowedRank.get!=signed.toInt ||
+       ctx.legacyVirtualSelectedGateIndex.get!=expected)
+      throw new IllegalStateException("La cicatrice virtuale è falsificata.")
+    val original=VirtualLegacyListAdapter.oldVirtualGateAt(
+      first,stride,count,rank)
+    if(original.narrowedRank!=ctx.legacyVirtualNarrowedRank.get ||
+       original.guessedGateIndex!=ctx.legacyVirtualSelectedGateIndex.get)
+      throw new IllegalStateException(
+        "Il percorso storico della lista virtuale non è riproducibile.")
+  }
+
   def requirePatch13Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_13_YEAR_JUMP" ||
        ctx.status!="PATCH_13_READY" ||
@@ -985,7 +1028,8 @@ final class BaseMonsterManager {
     new Discovery12YearCeilingHandler(metrics),
     new Patch12YearCeilingHandler(metrics),
     new Discovery13YearJumpHandler(metrics),
-    new Patch13YearJumpHandler(metrics)
+    new Patch13YearJumpHandler(metrics),
+    new Discovery14VirtualGateListHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1651,6 +1695,35 @@ final class BaseMonsterManager {
         ctx.patch13Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector)
     } catch {
       case error: Throwable => throw BaseErrorWrapper.wrap("patch13",error)
+    }
+  }
+
+  def discover14VirtualGateList(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    firstGateIndex: BigInt,
+    gateStride: BigInt,
+    candidateCount: BigInt,
+    rank1: BigInt
+  ): Discovery14VirtualGateListReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.virtualFirstGateIndex=Some(firstGateIndex)
+    ctx.virtualGateStride=Some(gateStride)
+    ctx.virtualCandidateCount=Some(candidateCount)
+    ctx.virtualRequestedRank=Some(rank1)
+    ctx.phase="DISCOVERY_14_VIRTUAL_GATE_LIST"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery14Ready(ctx)
+      Discovery14VirtualGateListReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.virtualFirstGateIndex.get,ctx.virtualGateStride.get,
+        ctx.virtualCandidateCount.get,ctx.virtualRequestedRank.get,
+        ctx.legacyVirtualNarrowedRank.get,
+        ctx.legacyVirtualSelectedGateIndex.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error: Throwable => throw BaseErrorWrapper.wrap("discovery14",error)
     }
   }
 

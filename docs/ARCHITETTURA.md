@@ -469,3 +469,15 @@ bootstrap, la traccia e la pubblicazione dei confini.
 La ricerca sequenziale della norma appare soltanto
 nei test e non corregge il codice legacy di questa
 DISCOVERY.
+
+## DISCOVERY 14 — selezione virtuale con rango ristretto a Int
+
+`VirtualLegacyListAdapter.oldVirtualGateAt` tratta una famiglia
+sintetica non materializzata di indici di cancello con rango
+1-based BigInt. L'indice per rango `r` è matematicamente
+`firstGateIndex + (r-1)*gateStride`; il legacy applica invece
+`r.toInt`, causando wrapping signed sui ranghi alti.
+La cardinalità e il passo rimangono BigInt.
+Il validator controlla il wrapping con aritmetica modulo 2^32
+indipendente dal helper. La traccia è BOOT/DISCOVERY 14.
+Non è ancora una implementazione del motore reale dei cancelli.

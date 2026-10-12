@@ -648,3 +648,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 27: 39 PASS, 0 FAIL' stage27.log
           test "$(grep -Fc 'PASS — ' stage27.log)" -eq 39
           test "$(grep -Fc 'FAIL — ' stage27.log)" -eq 0
+
+  native-stage28-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 28 intentional RED virtual-rank narrowing
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage28Tests' > stage28.log 2>&1
+          rc=$?
+          set -e
+          cat stage28.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 28: 39 PASS, 3 FAIL' stage28.log
+          test "$(grep -Fc 'PASS — ' stage28.log)" -eq 39
+          test "$(grep -Fc 'FAIL — ' stage28.log)" -eq 3
+          for rank in 2147483648 4294967296 18446744073709551617; do
+            grep -Fq "FAIL — equivalenza normativa lista virtuale rango ${rank} — Troncamento Int cambia il candidato: rango ${rank}" stage28.log
+          done

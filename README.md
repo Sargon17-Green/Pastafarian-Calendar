@@ -1094,3 +1094,24 @@ calcolo end-to-end dell'anno 5000.
 ```
 sbt -batch 'Test / runMain pastafari.Stage27Tests'
 ```
+
+## Stadio 28 — DISCOVERY 14 (rango BigInt di una lista virtuale)
+
+La scelta di un candidato in una sequenza virtuale di indici di cancello
+non deve convertire il rango 1-based da BigInt a Int. L'adapter storico
+`VirtualLegacyListAdapter.oldVirtualGateAt` fa esattamente questo:
+`rank1.toInt` trattiene solo i 32 bit bassi signed; la lista sintetica
+diagnostica è definita da `firstGateIndex + (rank1-1)*gateStride`.
+La cardinalità è BigInt, non viene allocata una lista materiale.
+
+I tre test di confronto intenzionalmente RED usano i ranghi
+2^31, 2^32 e 2^64+1. Il codice mantiene l'output storico,
+lo stato posseduto da ogni invocazione e un validator indipendente
+dell'errore. Il confronto normativo vive solo nei test. Questo esercizio
+non equivale a una implementazione dei veri cancelli del calendario
+né avvia la PATCH 14.
+
+Comando nativo: `sbt -batch 'Test / runMain pastafari.Stage28Tests'`.
+
+Firma prevista: 39 PASS e 3 FAIL intenzionali; tutti i job
+storici rimangono necessari per certificare il nuovo commit.

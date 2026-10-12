@@ -352,13 +352,27 @@ object Stage27Tests {
       truth(sources.contains("val estimate=if(relative<0 && r!=0)q-1 else q"),
         "Formula legacy immutata")
       truth(sources.contains("def yearJumpPatch("),"PATCH 13 presente")
-      truth(!sources.contains("VirtualLegacyList"),"Stage28 non anticipato")
+      val stage=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=stage.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<28)
+        truth(!sources.contains("VirtualLegacyList"),"Stage28 non anticipato")
+      else
+        truth(sources.contains("object VirtualLegacyListAdapter"),
+          "Stage28 aggiunto dopo la PATCH 13")
     }
     check("metadati Stage27 e certificazione Stage26 preservata") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=27"),"Stage27")
-      truth(st.contains("CURRENT_KIND=PATCH"),"Patch")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=27,"Stage27 disponibile")
+      if(current==27)
+        truth(st.contains("CURRENT_KIND=PATCH"),"Stadio PATCH")
+      else
+        truth(st.contains("STAGE_27_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_39_PASS_0_FAIL"),
+          "Certificazione PATCH 13 storica")
       truth(st.contains("CURRENT_PATCH=13"),"Patch13")
       truth(st.contains("STAGE_26_NATIVE_VERIFICATION=PASS_EXPECTED_RED_38_PASS_3_FAIL"),
         "Stage26")

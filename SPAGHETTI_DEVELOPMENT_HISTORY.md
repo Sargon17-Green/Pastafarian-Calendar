@@ -1360,3 +1360,12 @@ La prova nativa è la run GitHub Actions 38247877764 sul commit
 7bf9d6a852a564966b9018b218337ffcfa6570f7:
 28/28 job SUCCESS, Stage27 39 PASS/0 FAIL, Stage26 RED storico conservato.
 La fase 28 non è stata iniziata.
+
+## Stadio 28 — DISCOVERY 14: la lista virtuale con rango amputato
+
+La base dei candidati e il passo sono BigInt, ma il percorso
+storico tronca il rango 1-based a Int signed da 32 bit. La selezione
+per grandi indici restituisce un candidato matematicamente distinto;
+il difetto è isolato su una famiglia sintetica, senza materializzazione
+né generazione dei cancelli reali. Tre divergenze intenzionali
+sono attese; il legacy resta da correggere soltanto nella PATCH 14.

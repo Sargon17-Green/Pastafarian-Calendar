@@ -394,7 +394,13 @@ object Stage26Tests {
         truth(!source.contains("yearJumpPatch"),"PATCH 13 anticipata")
       else
         truth(source.contains("def yearJumpPatch("),"PATCH 13 successiva presente")
-      truth(!source.contains("VirtualLegacyList"),"Futura fase anticipata")
+      val current=stage.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<28)
+        truth(!source.contains("VirtualLegacyList"),"Futura fase anticipata")
+      else
+        truth(source.contains("object VirtualLegacyListAdapter"),
+          "DISCOVERY 14 successiva disponibile")
     }
     check("metadati Stage26 RED conservano Stage25 GREEN") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
