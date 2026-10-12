@@ -571,6 +571,7 @@ public final class Stage02IncrementalRouteTests {
         int counted = 0;
         long partialHitsBefore = family.partialDpReuseHitCount();
         long exactHitsBefore = family.suffixCacheHitCount();
+        long closedFormBefore = family.closedFormTransitionCount();
         long started = System.nanoTime();
         for (int call = 0; call < 24; call++) {
             MonsterWeavingLinearCounter.RankRoute before = current;
@@ -601,6 +602,8 @@ public final class Stage02IncrementalRouteTests {
         long afterRoute = System.nanoTime();
         long partialHits = family.partialDpReuseHitCount() - partialHitsBefore;
         long exactHits = family.suffixCacheHitCount() - exactHitsBefore;
+        long closedFormSkips =
+            family.closedFormTransitionCount() - closedFormBefore;
         eq(current.remainingChoices(),
             family.countAfterPrefix(current.fixedPrefixCopy()),
             "E_LONG_ROUTE_SUFFIX_EXACT");
@@ -612,6 +615,7 @@ public final class Stage02IncrementalRouteTests {
             + " prefix_days=" + moved + " counts=" + counted
             + " partial_dp_hits=" + partialHits
             + " exact_suffix_hits=" + exactHits
+            + " closed_form_skips=" + closedFormSkips
             + " route_ms=" + (afterRoute - started) / 1000000
             + " audit_ms=" + (afterAudit - afterRoute) / 1000000
             + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
