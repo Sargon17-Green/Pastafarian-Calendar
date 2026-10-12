@@ -392,7 +392,11 @@ object Stage30Tests {
       else
         truth(source.contains("def daywiseWeavingPatch("),
           "PATCH 15 successiva disponibile")
-      truth(!source.contains("oldContiguousMonthDayGuess"),"Stage32 anticipato")
+      if(current<32)
+        truth(!source.contains("oldContiguousMonthDayGuess"),"Stage32 anticipato")
+      else
+        truth(source.contains("def oldContiguousMonthDayGuess("),
+          "DISCOVERY 16 posteriore disponibile")
     }
     check("metadati Stage30 conservano i certificati di Stage29"){
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),

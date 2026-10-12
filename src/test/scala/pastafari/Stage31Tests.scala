@@ -525,21 +525,36 @@ object Stage31Tests {
       truth(!sources.contains("NormativeOracle"),"Oracle")
       truth(sources.contains("def legacyChooseEachDaySeparately("),"Legacy")
       truth(sources.contains("def daywiseWeavingPatch("),"PATCH 15")
-      truth(!sources.contains("oldContiguousMonthDayGuess"),"Stage32 assente")
+      val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<32)
+        truth(!sources.contains("oldContiguousMonthDayGuess"),"Stage32 assente")
+      else
+        truth(sources.contains("def oldContiguousMonthDayGuess("),
+          "DISCOVERY 16 posteriore presente")
     }
     check("metadati Stage31 mantengono le certificazioni precedenti"){
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=31"),"Stadio")
-      truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=15"),"Patch")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=31,"Stadio")
+      if(current==31){
+        truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=15"),"Patch")
+      } else {
+        truth(st.contains("STAGE_31_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_66_PASS_0_FAIL"),
+          "PATCH 15 storica certificata")
+      }
       truth(st.contains("STAGE_30_NATIVE_VERIFICATION=PASS_EXPECTED_RED_53_PASS_3_FAIL"),
         "Discovery 15")
       truth(st.contains("STAGE_29_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_55_PASS_0_FAIL"),
         "Patch 14")
       val done=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(done==30 || done==31,"Sequenza")
+      truth(done>=30 && done<=current,"Sequenza")
     }
     println("\nRISULTATO STADIO 31: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)

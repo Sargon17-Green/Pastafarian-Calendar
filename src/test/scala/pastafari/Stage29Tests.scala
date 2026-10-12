@@ -461,7 +461,11 @@ object Stage29Tests {
       else
         truth(sources.contains("def legacyChooseEachDaySeparately("),
           "DISCOVERY 15 posteriore presente")
-      truth(!sources.contains("oldContiguousMonthDayGuess"),"Fase futura")
+      if(current<32)
+        truth(!sources.contains("oldContiguousMonthDayGuess"),"Fase futura")
+      else
+        truth(sources.contains("def oldContiguousMonthDayGuess("),
+          "DISCOVERY 16 successiva presente")
     }
     check("metadati Stage29 conservano la certificazione Stage28"){
       val text=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
