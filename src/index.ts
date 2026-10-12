@@ -38,3 +38,5 @@ export * from "./patch14WideChoice.ts";
 export * from "./discovery15LegacyPositiveGate.ts";
 
 export * from "./patch15SignedGate.ts";
+
+export * from "./discovery16LegacyYearMax.ts";
