@@ -137,3 +137,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 16 — DISCOVERY 08 (በV ማረጋገጫ ላይ)
 
 `old_permutation_unrank0` ከ0 እስከ719 ያለውን የስድስት ጎድጓዳ ሳህኖች ደረጃ በትክክል ይፈታል፤ በራሱ የታሪክ ኮድ ስህተት የለም። ነገር ግን `LegacyPermutationAdapter.order_for_drop` የ1..720 የቅደም ተከተል ቁጥርን በቀጥታ እንደ rank0 ይልካል። `BaseDispatcher.dispatch_legacy_permutation` እና `calendar_bowl_order_spaghetti` በproduction መንገድ ላይ በእውነት እዚህ ይደርሳሉ። `calendar_date_spaghetti` የdrop=1 ሙከራ በስህተት `rank0=1` እና `[1,2,3,4,6,5]` ይመልሳል። የስህተቱ ምክንያት በ0 እና 1 መሠረቶች መቀላቀል ነው፤ `PATCH 08` የoneBased-1 መጠገኛ በደረጃ 17 ብቻ ይገባል።
+
+### የደረጃ 16 መዝጊያ — EXPECTED_RED
+
+በመጀመሪያው የGitHub Actions run `38235201547` የV 0.5.2 formatter በሁለት አዲስ `_test.v` ፋይሎች የረድፍ ቅርጽ ልዩነት ጠይቋል። በእውነተኛው formatter የተገኙት ልዩነቶች ብቻ ተስተካክለው፣ ጊዜያዊ የformatter ምርመራ ከCI ተወግዷል። commit `d40d313615367c6cdd9202711f2127200903fecf` ላይ GitHub Actions run `38235387422` በሁለቱም ሥራዎች PASS ነው። የV ቅርጸት ምርመራ PASS፣ 23 የቀድሞ እና አዲስ ምስክር ፈተናዎች PASS፣ `drop=1,2,719,720` ላይ አራት በስም የተመረጡ RED assertions ተረጋግጠዋል። `old_permutation_unrank0` የ720 ትክክለኛ መፍቻ እንደነበረው ይቀራል፣ የተሳሳተው `LegacyPermutationAdapter` ጥሪም በproduction አሁንም ይሠራል። የማስረጃ ቅርስ `11740715370` ተቀምጧል። `PATCH 08` አልተጨመረም። **ደረጃ 16 COMPLETE / EXPECTED_RED።**

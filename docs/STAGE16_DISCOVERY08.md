@@ -1,4 +1,4 @@
-# ደረጃ 16/55 — DISCOVERY 08 (EXPECTED_RED)
+# ደረጃ 16/55 — DISCOVERY 08 (COMPLETE / EXPECTED_RED)
 
 ## የታሪካዊው የቅደም ተከተል ጉድለት
 
@@ -35,4 +35,16 @@ v -check ./pastafari/discovery08_expected_red_test.v
 v test ./pastafari/discovery08_expected_red_test.v
 ```
 
-የቀድሞ 22 ፈተና ፋይሎችና አዲሱ witness በአጠቃላይ 23/23 GREEN መሆን አለባቸው። `discovery08_expected_red_test.v` ላይ አራቱ የታሰቡ RED assertions በስም መረጋገጥ አለባቸው። `LAST_COMPLETED_STAGE=15` እስከ ቀጥተኛ የV CI ማረጋገጫ ይቆያል፤ `PATCH 08` እና ደረጃ 17 አይጀመሩም።
+የቀድሞ 22 ፈተና ፋይሎችና አዲሱ witness በአጠቃላይ 23/23 GREEN መሆን አለባቸው። `discovery08_expected_red_test.v` ላይ አራቱ የታሰቡ RED assertions በስም መረጋገጥ አለባቸው። የV 0.5.2 CI ማረጋገጫ PASS ነው፤ `LAST_COMPLETED_STAGE=16` ነው፤ `PATCH 08` እና ደረጃ 17 አይጀመሩም።
+
+## የተረጋገጠ የV ማስረጃ
+
+- የተፈተነ commit፦ `d40d313615367c6cdd9202711f2127200903fecf`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235387422
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235387422/artifacts/11740715370
+- `V 0.5.2 7647ce1`፦ `v fmt -verify ./pastafari` PASS።
+- 23 የቀድሞ እና አዲስ `_test.v` witness ፋይሎች PASS፤ 4 የታሰቡ RED assertions በተናጠል ተረጋግጠዋል።
+- `old_permutation_unrank0` እንደነበረ ተጠብቋል፣ `LegacyPermutationAdapter` የተሳሳተውን የ1..720 ደረጃ በቀጥታ ይልካል።
+- `PATCH 08` በደረጃ 17 ብቻ ይመጣል።
+
+**ደረጃ 16 COMPLETE / EXPECTED_RED።**

@@ -89,4 +89,4 @@ v fmt -verify ./pastafari
 
 ## ደረጃ 16 — DISCOVERY 08
 
-የታሪካዊው `old_permutation_unrank0(rank0)` የስድስት ጎድጓዳ ሳህኖች 720 የቅደም ተከተሎችን በዜሮ-መሠረት በትክክል ይፈታል። የታሪካዊው የproduction ጥሪ ግን `oneBased=regularMod(drop-1,720)+1` በማስላት፣ ሳይቀንሰው በቀጥታ ወደ `old_permutation_unrank0(oneBased)` ይልካል። ይህ ወደ ቀጣዩ ቅደም ተከተል ይሄዳል፤ `oneBased=720` ሲሆን ደግሞ ከ`rank0=0..719` ውጪ ስለሆነ error ያስከትላል። አራት የታሰቡ RED assertions እና የታሪክ GREEN ምስክሮች ተጨምረዋል፤ `PATCH 08` አልተጨመረም። `LAST_COMPLETED_STAGE=15` የV CI ማረጋገጫ እስኪጠናቀቅ ይቆያል። ዝርዝር፦ `docs/STAGE16_DISCOVERY08.md`።
+የታሪካዊው `old_permutation_unrank0(rank0)` የስድስት ጎድጓዳ ሳህኖች 720 የቅደም ተከተሎችን በዜሮ-መሠረት በትክክል ይፈታል። የታሪካዊው የproduction ጥሪ ግን `oneBased=regularMod(drop-1,720)+1` በማስላት፣ ሳይቀንሰው በቀጥታ ወደ `old_permutation_unrank0(oneBased)` ይልካል። ይህ ወደ ቀጣዩ ቅደም ተከተል ይሄዳል፤ `oneBased=720` ሲሆን ደግሞ ከ`rank0=0..719` ውጪ ስለሆነ error ያስከትላል። አራት የታሰቡ RED assertions እና የታሪክ GREEN ምስክሮች ተጨምረዋል፤ `PATCH 08` አልተጨመረም። V 0.5.2 (`7647ce1`) በGitHub Actions run `38235387422` ተረጋግጧል፤ `v fmt -verify` PASS፣ 23 የቀድሞና አዲስ የGREEN ፈተና ፋይሎች PASS፣ አራቱ የሆን ተብሎ RED የቅደም ተከተል assertions ተረጋግጠዋል። `LAST_COMPLETED_STAGE=16` ነው። ዝርዝር፦ `docs/STAGE16_DISCOVERY08.md`።
