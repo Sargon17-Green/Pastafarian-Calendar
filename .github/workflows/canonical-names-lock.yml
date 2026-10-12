@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage25_native_v:
-    name: V 0.5.2 — PATCH 12 validated GREEN
+  stage26_native_v:
+    name: V 0.5.2 — DISCOVERY 13 intentional RED
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -179,15 +179,41 @@ jobs:
           v test ./pastafari/discovery12_expected_red_test.v
       - name: PATCH 12 — 4320 circular successor checks and saved legacy scar
         run: v test ./pastafari/patch12_test.v
-      - name: Stage 25 — complete native V regression suite
+      - name: DISCOVERY 13 — answer-stream and legacy modulo witnesses
+        run: v test ./pastafari/discovery13_witness_test.v
+      - name: DISCOVERY 13 — four intentional RED normative regressions
         shell: bash
         run: |
           set -euo pipefail
-          v test ./pastafari 2>&1 | tee stage25_green.log
-      - name: Preserve stage 25 native V evidence
+          v -check ./pastafari/discovery13_expected_red_test.v
+          set +e
+          v test ./pastafari/discovery13_expected_red_test.v 2>&1 | tee stage26_expected_red.log
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo '::error::Stage26 unexpectedly GREEN before PATCH 13'
+            exit 1
+          fi
+          for test_name in \
+            test_discovery13_expected_red_forward_m_skips_one \
+            test_discovery13_expected_red_forward_m_minus_one_skips_two \
+            test_discovery13_expected_red_reverse_m_skips_three \
+            test_discovery13_expected_red_forward_m_boundary; do
+            if ! grep -Fq "$test_name" stage26_expected_red.log; then
+              echo "::error::Missing intentional failure $test_name"
+              exit 1
+            fi
+          done
+          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage26_expected_red.log; then
+            echo '::error::No regression failure shown'
+            exit 1
+          fi
+          test "$(find ./pastafari -maxdepth 1 -name '*_test.v' ! -name 'discovery13_expected_red_test.v' | wc -l)" -eq 38
+          echo 'Stage26: 38 prior-and-witness GREEN files plus four intentional RED assertions'
+      - name: Preserve stage 26 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage25-green-evidence
-          path: stage25_green.log
+          name: v-amharic-stage26-red-evidence
+          path: stage26_expected_red.log
           if-no-files-found: ignore
