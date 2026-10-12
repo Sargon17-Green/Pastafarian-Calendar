@@ -563,3 +563,23 @@ Kotlin a swydd cloi enwau ill dwy.
 yw'r nesaf, heb ei ddechrau. Mae'r hen mutator
 `mutateBowlsWrong` yn parhau'n fyw, ac nid yw
 adeiladwr diferion gweledig wedi'i weithredu.
+
+
+## Cam 22 — DISCOVERY 11: cache hen sum yn y 12 stir
+
+Ar ôl 46 diferion, mae `LegacyCachedStirAdapter.oldCachedPostStir12`
+yn ailadrodd 12 cymysgiad ond yn ail-ddefnyddio
+`savedBowlSum` o stir 1 am stir 2..12. Mae stir 1
+yn gywir; mae'r order PATCH 08 a'r chwe chyfrifiad
+snapshot yn gywir ar gyfer y sum a roddir. **Y cache**
+yw'r unig nam newydd, ac ni chaniateir cywiro'r cache
+tan Gam 23 — PATCH 11.
+
+Mae `BOOT → DISCOVERY_11` yn cadw pob hen snapshot,
+saved sum, order a bowls ar bob stir. Mae'r profion
+yn mynnu 720 RED ar stir 2 a chanlyniad 12 stir,
+4,320 tyst BigInteger â 51,840 cam, strict RED,
+a holl atchweliadau Camau 1–21. Mae'r bowls ôl-46
+yn fewnbwn allanol; dim adeiladwr diferion gweledig.
+
+`LAST_COMPLETED_STAGE=21` hyd nes PASS Kotlin brodorol.

@@ -148,7 +148,14 @@ data class BaseMonsterContext(
     var patch10LegacyWrites: Int = 0,
     var patch10CorrectedWrites: Int = 0,
     var patch10Applied: Boolean = false,
-    var patch10InvocationCount: Int = 0
+    var patch10InvocationCount: Int = 0,
+    var discovery11InitialBowls: List<ExactInt>? = null,
+    var discovery11Steps: List<LegacyCachedStirStep>? = null,
+    var discovery11FinalBowls: List<ExactInt>? = null,
+    var discovery11CachedSum: ExactInt? = null,
+    var discovery11CacheComputations: Int = 0,
+    var discovery11PermutationPatchCalls: Int = 0,
+    var discovery11InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -223,7 +230,9 @@ class MonsterBootstrapManager(
     val legacyInPlaceBowlAdapter: LegacyInPlaceBowlAdapter =
         LegacyInPlaceBowlAdapter(pourPatchWrapper),
     val bowlSnapshotPatchWrapper: BowlSnapshotPatchWrapper =
-        BowlSnapshotPatchWrapper(legacyInPlaceBowlAdapter)
+        BowlSnapshotPatchWrapper(legacyInPlaceBowlAdapter),
+    val legacyCachedStirAdapter: LegacyCachedStirAdapter =
+        LegacyCachedStirAdapter(permutationPatchWrapper)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -397,6 +406,37 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("DISCOVERY_11") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_DISCOVERY11_CONTEXT_NOT_READY")
+            val initial = context.discovery11InitialBowls
+                ?: throw MonsterValidationException("E_DISCOVERY11_NO_INITIAL")
+            val result = legacyCachedStirAdapter.oldCachedPostStir12(initial)
+            check(result.totalStirs == 12 &&
+                result.steps.size == 12 &&
+                result.finalBowls.size == 7 &&
+                result.cachedSumComputations == 1 &&
+                result.permutationPatchCalls == 12 &&
+                result.steps.map { it.stir } == (1..12).toList() &&
+                result.steps.all { step ->
+                    step.savedSumUsed == result.originalCachedSum &&
+                    step.sumCacheOriginStir == 1 &&
+                    step.correctedPermutationOrder.sorted() ==
+                        listOf(1,2,3,4,5,6) &&
+                    step.patchedPermutationCalls == 1
+                }) { "E_DISCOVERY11_RUN_SHAPE" }
+            context.discovery11Steps = result.steps.toList()
+            context.discovery11FinalBowls = result.finalBowls.toList()
+            context.discovery11CachedSum = result.originalCachedSum
+            context.discovery11CacheComputations = result.cachedSumComputations
+            context.discovery11PermutationPatchCalls = result.permutationPatchCalls
+            context.discovery11InvocationCount = 1
+            context.branchTrace.add("DISCOVERY_11")
+            context.diagnostics.add("DISCOVERY_11_STALE_STIR1_SAVED_BOWL_SUM")
+            context.status = "LEGACY_CACHED_STIR_OBSERVED"
+            metrics.bump("discovery11.cached.poststir.runs")
         }
         dispatcher.register("PATCH_10") { context ->
             validation.requireBootstrapContext(context)
@@ -951,6 +991,24 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 22: arsylwi hen cached sum mewn 12 stir ar ôl 46 diferion. */
+    fun observeLegacyCachedStir(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        initialAfterDrops: List<ExactInt>
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay,targetDay)
+        context.discovery11InitialBowls = initialAfterDrops.toList()
+        context.phase = "DISCOVERY_11"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY11_WRAP",e)
         }
     }
 
