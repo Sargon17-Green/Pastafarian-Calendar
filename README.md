@@ -98,3 +98,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 18 — DISCOVERY 09
 
 የ`calendar_initial_bowls_spaghetti` ተግባር ስድስቱን ጎድጓዳ ሳህኖች በ`BOWL_PRIME=[17,19,23,29,31,37]` እና በተጠገነው SAVE ያስነሳል። ለዙር `i=1..46` የታሪክ `old_pours_fixed_bowls` የ`order` ቅደም ተከተልን ሳይከተል ሁልጊዜ ከ`bowls[1],bowls[2],bowls[3]` ያነባል፤ የትክክለኛው ንባብ ግን የየቦታው `bowls[order[1]],bowls[order[2]],bowls[order[3]]` ነው። ሶስቱ የታሪክ ማፍሰሻ ሂሳቦችን አልተካንም፣ የ`LegacyPourAdapter` እና `BaseDispatcher.dispatch_legacy_pours` መንገድ በproduction ውስጥ ተያይዟል። `discovery09_expected_red_test.v` አራት በሆን ተብሎ RED መሆን ያለባቸው ሙከራዎችን ይይዛል። `PATCH 09` የ`bowlAlias` ካርታ ገና አልተጨመረም፤ `LAST_COMPLETED_STAGE=17` በV 0.5.2 ተረጋግጧል፤ 26/26 PASS እና 4 EXPECTED_RED። ዝርዝር፦ `docs/STAGE18_DISCOVERY09.md`።
+
+## ደረጃ 19 — PATCH 09
+
+የታሪካዊው `old_pours_fixed_bowls` እና `LegacyPourAdapter` እንዳሉ ይቆያሉ። `PourPatch09.install_bowl_alias(order)` ለስድስቱ ቦታዎች `bowl_alias[position]=order[position-1]` የሚለውን የV ባለ-ዜሮ ኢንዴክስ ልዩነት የሚከተል ካርታ ይፈጥራል። የ`bowl_by_legacy_position` የተለየ የማንበቢያ መንገድ በ`bowls[bowl_alias[position]]` ላይ ይሠራል፤ `PourPatch09.pour` በዚህ ካርታ ከተሞላ ባለ-ቦታ የ`legacy_view` ሰልፍ በኋላ የታሪክ `BaseDispatcher.dispatch_legacy_pours` ጥሪን በእውነት ያከናውናል። የታሪክ መንገድና አዲሱ production መንገድ በአንድ ሙከራ ውስጥ ሊታዩ ይችላሉ። የደረጃ 18 አራቱ RED assertions ሳይቀየሩ GREEN መሆን አለባቸው፤ የታሪክ ምስክሮች የታሪክ ጥሪውን በdispatcher በቀጥታ ይጠቀማሉ። የ`PATCH 10` የvault/pending ተግባር አልተጨመረም። `LAST_COMPLETED_STAGE=18` እስከ CI ማረጋገጫ ይቆያል። ዝርዝር፦ `docs/STAGE19_PATCH09.md`።

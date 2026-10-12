@@ -162,8 +162,12 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	initial_bowls := calendar_initial_bowls_spaghetti(counts)
 	pour_drop := big_from_int(720)
 	pour_order := calendar_bowl_order_spaghetti(pour_drop)!
-	legacy_pours := calendar_pours_spaghetti(1, pour_drop, initial_stones(), initial_bowls,
+	legacy_pours := dispatcher.dispatch_legacy_pours(1, pour_drop, initial_stones(), initial_bowls,
 		pour_order)!
+	patched_pours := calendar_pours_spaghetti(1, pour_drop, initial_stones(), initial_bowls, pour_order)!
+	bowl_alias := PourPatch09{}.install_bowl_alias(pour_order)!
 	pour_details := perm_details + '; DISCOVERY_09 oldPour1=' + legacy_pours[1].str()
-	return error(pour_details + '; DISCOVERY_09 firstOrderedBowl=' + pour_order[0].str())
+	legacy_details := pour_details + '; DISCOVERY_09 firstOrderedBowl=' + pour_order[0].str()
+	alias_details := legacy_details + '; PATCH_09 bowlAlias1=' + bowl_alias[1].str()
+	return error(alias_details + '; PATCH_09 pour1=' + patched_pours[1].str())
 }

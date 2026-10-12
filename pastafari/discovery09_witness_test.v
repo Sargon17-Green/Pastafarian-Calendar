@@ -43,7 +43,7 @@ fn test_discovery09_wrong_fixed_bowl_ids_ignore_reversed_order() {
 	first := dispatcher.dispatch_legacy_pours(1, big_from_int(2), initial_stones(), bowls, identity) or {
 		[]BigInt{}
 	}
-	second := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls, reversed) or {
+	second := dispatcher.dispatch_legacy_pours(1, big_from_int(2), initial_stones(), bowls, reversed) or {
 		[]BigInt{}
 	}
 	assert first.len == 7
@@ -65,7 +65,7 @@ fn test_discovery09_legacy_order_change_never_changes_pours() {
 		[3, 6, 2, 4, 1, 5],
 	]
 	for order in orders {
-		pours := calendar_pours_spaghetti(7, big_from_int(13), initial_stones(), bowls, order) or {
+		pours := new_base_dispatcher().dispatch_legacy_pours(7, big_from_int(13), initial_stones(), bowls, order) or {
 			[]BigInt{}
 		}
 		assert pours[1].str() == '360'
@@ -108,7 +108,7 @@ fn test_discovery09_preserves_inputs_and_works_with_large_signed_numbers() {
 	drop := big_neg(huge)
 	stones := initial_stones()
 	order := [6, 5, 4, 3, 2, 1]
-	pours := calendar_pours_spaghetti(46, drop, stones, bowls, order) or { []BigInt{} }
+	pours := new_base_dispatcher().dispatch_legacy_pours(46, drop, stones, bowls, order) or { []BigInt{} }
 	expected := calendar_save_spaghetti(big_add(big_add(big_square(drop), big_mul(stones.w,
 		bowls[1])), big_from_int(138)))
 	assert big_eq(pours[1], expected)
@@ -123,7 +123,7 @@ fn test_discovery09_actual_permutation_and_monster_probe() {
 	order := calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }
 	assert order == [6, 5, 4, 3, 2, 1]
 	bowls := calendar_initial_bowls_spaghetti(hidden_counts_spaghetti(foundation, foundation))
-	pours := calendar_pours_spaghetti(1, big_from_int(720), initial_stones(), bowls, order) or {
+	pours := new_base_dispatcher().dispatch_legacy_pours(1, big_from_int(720), initial_stones(), bowls, order) or {
 		[]BigInt{}
 	}
 	assert pours.len == 7
@@ -137,4 +137,6 @@ fn test_discovery09_actual_permutation_and_monster_probe() {
 	assert diagnostic.contains('PATCH_08 permOrder=[1, 2, 3, 4, 5, 6]')
 	assert diagnostic.contains('DISCOVERY_09 oldPour1=')
 	assert diagnostic.contains('DISCOVERY_09 firstOrderedBowl=6')
+	assert diagnostic.contains('PATCH_09 bowlAlias1=6')
+	assert diagnostic.contains('PATCH_09 pour1=')
 }

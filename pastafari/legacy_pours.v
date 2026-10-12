@@ -56,8 +56,8 @@ pub fn (_ BaseDispatcher) dispatch_legacy_pours(i int, drop BigInt, stones Stone
 	return adapter.pour(i, drop, stones, bowls, order)
 }
 
-// የproduction መንገድ በDISCOVERY 09 የቋሚ ID ስህተትን በእውነት ይጠራል።
+// ደረጃ 19፦ የproduction ማፍሰሻዎች በPATCH 09 የቦታ-ID መተርጎሚያ ያልፋሉ።
 pub fn calendar_pours_spaghetti(i int, drop BigInt, stones Stones, bowls []BigInt, order []int) ![]BigInt {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_pours(i, drop, stones, bowls, order)
+	return dispatcher.dispatch_pours_patch09(i, drop, stones, bowls, order)
 }
