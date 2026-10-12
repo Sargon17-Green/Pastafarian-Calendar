@@ -48,6 +48,7 @@ t/24_polynomial_suffix.t
 t/25_polynomial_unranking.t
 t/26_suffix_partition.t
 t/27_unrank_partition_shortcut.t
+t/28_first_rank_fastpath.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 t/lib/Pastafari/WeavingSuffix.pm

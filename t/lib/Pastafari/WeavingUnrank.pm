@@ -29,6 +29,22 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
     my $m = scalar @remaining;
     my $days = 0; $days += $_ for @remaining;
     my ($opened,$closed) = (0,0);
+    # 字典序第一名可直接寫出每個月份的完整連續區塊：
+    # 1..m 的月份標籤最小，先使用較小月份的全部日子
+    # 永遠不會違反首次或末次出現次序。
+    # 仍先執行全域精確計數及排名驗證，以確保錯誤契約不變。
+    if ($rank == 1) {
+        my @first;
+        for my $j (1 .. $m) {
+            push @first, (($j) x $remaining[$j-1]);
+        }
+        if (defined $stats) {
+            %$stats = (days => $days, suffix_calls => 0,
+                       considered => $days, shortcut_steps => $days,
+                       first_rank_fastpath => 1);
+        }
+        return \@first;
+    }
     my @word;
     my $current_total = $total->copy;
     my ($calls,$considered,$shortcut_steps)=(0,0,0);
@@ -77,7 +93,8 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
     die "交織解碼終點計數不為一\n" if $current_total != 1;
     if (defined $stats) {
         %$stats = (days => $days, suffix_calls => $calls,
-                   considered => $considered, shortcut_steps => $shortcut_steps);
+                   considered => $considered, shortcut_steps => $shortcut_steps,
+                   first_rank_fastpath => 0);
     }
     return \@word;
 }
