@@ -541,3 +541,25 @@ a holl atchweliadau Camau 1–20. Nid oes adeiladwr
 diferion gweledig cynhyrchu o hyd.
 
 `LAST_COMPLETED_STAGE=20` nes PASS Kotlin brodorol.
+
+
+## Ardystiad brodorol Cam 21 — COMPLETE
+
+Ar commit `a8d5beef2665123e543dde9cf3340359a484dda4` llwyddodd GitHub Actions
+[`38268225516`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38268225516),
+swydd Kotlin `114875745625`, ar Kotlin 1.9.0/JDK 21.
+Gwiriwyd **39 marc** yn uniongyrchol yn log y swydd:
+holl gamau 1–20 yn PASS; 720 permutation gywir,
+4,320 ysgrifen o'r snapshot cywir, 720 o hen ganlyniadau
+RED wedi'u cadw, 3,600 hen ysgrifen anghywir;
+4,320 tyst BigInteger GREEN gyda 21,600 ysgrifen etifeddol
+anghywir; 46 diferyn identity, reverse a naturiol yn GREEN
+yn erbyn yr oracl. Pasiodd y guardiau, BOOT/replay,
+perchnogaeth a holl lwybrau blaenorol.
+Gwelwyd `STAGE21_FULL_NATIVE_GREEN`, a llwyddodd y swydd
+Kotlin a swydd cloi enwau ill dwy.
+
+**`LAST_COMPLETED_STAGE=21`**. Cam 22 (`DISCOVERY 11`)
+yw'r nesaf, heb ei ddechrau. Mae'r hen mutator
+`mutateBowlsWrong` yn parhau'n fyw, ac nid yw
+adeiladwr diferion gweledig wedi'i weithredu.
