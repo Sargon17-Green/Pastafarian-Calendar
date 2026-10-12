@@ -481,3 +481,8 @@ La cardinalità e il passo rimangono BigInt.
 Il validator controlla il wrapping con aritmetica modulo 2^32
 indipendente dal helper. La traccia è BOOT/DISCOVERY 14.
 Non è ancora una implementazione del motore reale dei cancelli.
+
+La run GitHub Actions 38253085873 verifica l'isolamento della
+cicatrice virtuale e tutte le 28 suite native fino allo Stage28.
+Il significato normativo completo del motore dei cancelli resta da
+implementare nei passaggi successivi.

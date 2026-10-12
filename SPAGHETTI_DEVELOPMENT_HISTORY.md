@@ -1369,3 +1369,12 @@ per grandi indici restituisce un candidato matematicamente distinto;
 il difetto è isolato su una famiglia sintetica, senza materializzazione
 né generazione dei cancelli reali. Tre divergenze intenzionali
 sono attese; il legacy resta da correggere soltanto nella PATCH 14.
+
+### Certificazione Stage28
+
+Il workflow GitHub Actions 38253085873 sul commit
+`5b783ea3cddef448ea6363d995fb0e3398f3a8a6` è SUCCESS,
+29/29 job, con la firma 41 PASS e 3 FAIL intenzionali per la
+DISCOVERY 14. Sono stati corretti i controlli storici di
+presenza del codice futuro negli Stage01, Stage26 e Stage27 senza
+cambiare la semantica di alcuna patch precedente.

@@ -1115,3 +1115,12 @@ Comando nativo: `sbt -batch 'Test / runMain pastafari.Stage28Tests'`.
 
 Firma prevista: 41 PASS e 3 FAIL intenzionali; tutti i job
 storici rimangono necessari per certificare il nuovo commit.
+
+### Certificazione nativa di Stage28
+
+La [run 38253085873](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38253085873)
+ha conclusione SUCCESS su tutti i **29 job**, commit
+`5b783ea3cddef448ea6363d995fb0e3398f3a8a6`. La prova Stage28
+registra **41 PASS e 3 FAIL intenzionali** esattamente ai tre ranghi
+sopra Int.MaxValue; Stage01–Stage27 conservano le firme precedenti.
+La correzione resta di competenza di Stage29 PATCH 14.
