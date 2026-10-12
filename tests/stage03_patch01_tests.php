@@ -89,7 +89,7 @@ foreach ($iterator as $file) {
     $contents = (string)file_get_contents($file->getPathname());
     sah(!str_contains($contents, 'NormativeMath'), 'ORACLE_DALAM_PRODUKSI');
     // Parut dan tampalan kedua dibenarkan; penemuan keempat belum dibenarkan.
-    sah(!str_contains($contents, 'mutateStonesWrong'), 'PENEMUAN_04_TERLALU_AWAL');
+    sah(!str_contains($contents, 'stonePatch('), 'TAMPALAN_04_TERLALU_AWAL');
 }
 
 echo "LULUS Stage 3 PATCH 01 kes={$jumlah} baki_sifar={$bilanganNol} warisan=3\n";

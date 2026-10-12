@@ -152,3 +152,26 @@ Pengujian sejarah Stage 6 masih mesti keluar dengan kod 1 untuk tepat 144 penyim
 ### Bukti CI sebenar pada 11 Oktober 2026
 
 Run `38157374399` bagi commit `3b2984b29f2881a960e2df4b643f2726f7521c25` selesai dengan **success** dalam kedua-dua kerja `verify` dan `audit_php_bahasa_melayu`. Ujian sintaks dan kunci nama kanonik lulus; 15/15 ujian Stage 1 lulus; regresi pembahagian `kes=1014 tambahan=8` lulus dan fixture dijana tanpa diff. Pengesah sejarah masih melaporkan tiga penyimpangan SAVE, 65 penyimpangan bagi nombor hari, dan 144 penyimpangan legacy jarak yang dijangka; pengesah bagi setiap peringkat menerima corak itu. Ujian Stage 3 mencatat 94 kes lulus, Stage 5 mencatat 4,618 kes lulus, dan Stage 7 menghasilkan `LULUS Stage 7 PATCH 03 kes=16668 oracle=16656 tepi=12 simetri=16668 anjakan=1285`. Oleh itu tahap ini GREEN, tetapi kesilapan `oldDistance` masih wujud sebagai bukti sejarah.
+
+
+## Stage 8 — DISCOVERY 04: Mutasi berturutan mencemarkan batu
+
+### Andaian sejarah
+
+Pembina lama menyangka lima batu boleh diubah secara berurutan dalam satu keadaan yang sama. Semasa mengira `b`, ia membaca `w` baharu; bagi `s`, ia membaca `b` baharu; bagi `m`, ia membaca `s` baharu; bagi `r`, ia membaca `w` dan `m` baharu. Formula normatif sebaliknya memerlukan setiap komponen membaca rekod lama bagi langkah yang sama.
+
+### Bukti perbezaan
+
+Pada langkah 2, nilai legacy ialah `(w=378,b=1434,s=3780,m=9932,r=25047)`, manakala oracle PHP garis ini ialah `(w=378,b=1073,s=2375,m=6195,r=10493)`. Pengesahan membandingkan 46 rekod menggunakan oracle PHP tempatan; rekod pertama sepadan dan baki 45 dijangka menyimpang. Perbezaan ini bukan kegagalan tidak terkawal: pembalut memeriksa output merah dan keluar dengan kod 0 hanya jika corak bukti tepat.
+
+### Lapisan tambahan
+
+`LegacyStoneMutation` menerima pembetul SAVE yang sudah wujud dari Stage 3. Dispatcher `STONE_MUTATION_LEGACY` membuat instance dan konteks baharu bagi setiap panggilan. Jadual asal diwariskan dengan semantik copy-on-write PHP; tiada keadaan boleh ubah yang dikongsi antara panggilan. Metrik direkodkan selepas pembinaan dan tidak menjadi input keputusan. Oracle hanya wujud dalam direktori `tests/oracle`.
+
+### Had tahap
+
+`mutateStonesWrong` belum dibetulkan. Tiada `stonePatch`, snapshot `old` atau penindihan semua lima hasil sehingga Stage 9. Semua regresi terdahulu kekal wajib lulus.
+
+### Titik asas
+
+Penemuan ini dibina selepas pembetulan kanonik Stage 7 pada commit `5743a0ffeb7ef87016f8ff2a6166460abfcaddea`, yang telah lulus GitHub Actions sebelum perubahan Stage 8.

@@ -87,6 +87,18 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'distance.patch03.calls');
             return $result;
         });
+        $this->dispatcher->register('STONE_MUTATION_LEGACY', function(BootstrapContext $context): array {
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyStoneMutation(
+                new \Pastafari\Stage01\Patches\SavePatch01(
+                    new \Pastafari\Stage01\Legacy\LegacyRemainder()
+                )
+            );
+            $table = $legacy->buildStonesWrong();
+            $context->semanticState['legacyStoneTable'] = $table;
+            $context->status = 'STONE_MUTATION_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.stones.builds');
+            return $table;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -140,4 +152,20 @@ final class BootstrapKernel
             fn(): BigInt => $this->dispatcher->dispatch('DISTANCE_PATCH_03', $context)
         );
     }
+    /**
+     * Laluan batu lama sengaja memakai mutasi berturutan yang tidak tepat.
+     * Setiap panggilan membina jadual dan konteks semantiknya sendiri.
+     *
+     * @return array<int,array{w:BigInt,b:BigInt,s:BigInt,m:BigInt,r:BigInt}>
+     */
+    public function stones(): array
+    {
+        $context = new BootstrapContext(0, 0);
+        $context->phase = 'STONE_MUTATION_LEGACY';
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('STONE_MUTATION_LEGACY', $context)
+        );
+    }
+
 }

@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 7 (PATCH 03)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 8 (DISCOVERY 04)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -111,3 +111,14 @@ php -d memory_limit=512M tests/stage07_patch03_tests.php
 ```
 
 Ujian sejarah langsung `stage06_discovery03_tests.php` masih sengaja keluar dengan kod `1` untuk 144 penyimpangan; kedua-dua arahan di atas mesti keluar dengan kod `0`. Ujian baharu merangkumi 16,668 pasangan dan 1,285 semakan anjakan, termasuk hujung `PHP_INT_MIN/MAX`. Semua ujian terdahulu, fixture dan katalog nama mesti kekal hijau. Jangan mulakan DISCOVERY 04 sebelum diminta.
+
+## Stage 8 — DISCOVERY 04: Mutasi batu lama yang sengaja salah
+
+`LegacyStoneMutation::mutateStonesWrong` mengemas kini lima batu secara berturutan dan membaca nilai yang sudah berubah. `buildStonesWrong()` menghasilkan 46 rekod dalam laluan `BootstrapKernel::stones()` melalui dispatcher `STONE_MUTATION_LEGACY`. Pada langkah 2 hanya batu `w` sepadan dengan oracle; empat batu lain tersasar. Pembaikan berasaskan snapshot mesti menunggu Stage 9.
+
+```text
+php -d memory_limit=512M tests/stage08_discovery04_tests.php
+php -d memory_limit=512M tests/verify_stage08_discovery04.php
+```
+
+Perintah pertama mesti keluar dengan kod 1 selepas merekodkan 45 perbezaan yang dijangka dan satu baris asas yang sepadan. Pengesah kedua mesti keluar dengan kod 0. Semua ujian Stage 1–7, penjanaan fixture dan kunci nama kanonik mesti kekal hijau. Kaedah `stonePatch` tidak diwujudkan pada Stage 8.
