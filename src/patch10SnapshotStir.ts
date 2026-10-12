@@ -122,7 +122,10 @@ export class Patch10SnapshotStirHandler {
   private readonly shadow=new Patch10ShadowBowlAdapter();
   private readonly historical=new LegacyInPlaceBowlStirAdapter();
   private readonly metrics=new BaseMetricsManager();
-  constructor(private readonly afterPendingWrite?: (position:number)=>void){}
+  private readonly afterPendingWrite?: (position:number)=>void;
+  constructor(afterPendingWrite?: (position:number)=>void){
+    this.afterPendingWrite=afterPendingWrite;
+  }
 
   run(ctx:MonsterContext,i:number,d:bigint,b:readonly bigint[],
       stone:readonly bigint[]):Patch10StirObservation{
