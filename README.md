@@ -591,3 +591,14 @@ oswa tras PATCH 08 ki pa konplè. Tès sa a enjekte 16 defayans
 epi mande 16 rekiperasyon pwòp. Yon lòt tès fè uit apèl nested
 pandan handler rank oswa pandan kalkil matematik vide yo.
 Toujou pa gen PATCH 09 ni okenn koreksyon id bòl.
+
+### Konfimasyon natif DISCOVERY 09
+
+GitHub Actions run `38274743802` te gen **10 travay PASS** ak yon
+sèl travay `lua_stage18_discovery` ki te echwe entansyonèlman nan
+dènye etap `Regression normatif DISCOVERY 09 — EXPECTED_RED sèl`.
+Sentaks, gad scope, suite Stage 1–17 ak tout tès pozitif Stage 18
+te pase: 48 bòl inisyal, 3 gout vizib premye yo, 16 piki erè ak
+16 rekiperasyon, 8 apèl nested. Mesaj erè egzak la rete:
+`EXPECTED_RED Stage 18 DISCOVERY 09: 3 gout, vide id fiks kont lòd korije`.
+Etap 18 fini kòm EXPECTED_RED; Stage 19 pa kòmanse.

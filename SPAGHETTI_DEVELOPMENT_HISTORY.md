@@ -497,3 +497,11 @@ twa premye pozisyon lòd permutation sa a. Nou konsève fonksyon
 `legacyPoursToFixedBowlIds`, metrik, dyagnostik, tras tranzaksyon,
 premye eta bòl yo ak wout reyèl gout vizib premye a. Nou pa
 chanje mwayen vide yo; Stage 19 sèlman ap korije erè id bòl sa a.
+
+### Fèmti Stage 18: EXPECTED_RED konfime
+
+Run `38274743802`: 10/10 travay anvan yo PASS. Travay discovery la
+pase syntax, scope, tout suite pozitif, injection, reentrance ak odit,
+men li bay sèl echèk normatif istorik la nan dènye step la. Sa
+pwouve 3 gout yo toujou vide sou bòl 1,2,3 olye order permutation.
+Nou make LAST_COMPLETED_STAGE=18. Pa gen okenn PATCH 09.
