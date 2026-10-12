@@ -60,8 +60,7 @@ for _,drops in ipairs(samples) do
    for id=1,6 do
      assert(row.inputBowls[id]==tostring(original[id]))
      if i>1 then
-       assert(row.previousDropOutput[id]==row.prevOut or
-           row.previousDropOutput[id]==ctx.semanticState.perDrop[i-1].outputBowls[id])
+       assert(row.previousDropOutput[id]==ctx.semanticState.perDrop[i-1].outputBowls[id])
      end
    end
  end

@@ -19,6 +19,17 @@ assert(ctx.semanticState.completedDropCount==46)
 assert(ctx.semanticState.ignoredPreviousOutputs==45 and #ctx.childContexts==46)
 local lastOnly=S.stirPatchProbe(arr[46],46,bowls,stones[46])
 for id=1,6 do assert(B.compare(latest[id],lastOnly[id])==0) end
+-- Kontra oracle endepandan: yon chèn 46 gout dwe pote eta pi devan.
+local oracleStones={}
+for i=1,46 do
+  oracleStones[i]={stones[i].w,stones[i].b,stones[i].s,stones[i].m,stones[i].r}
+end
+local future=O.applyVisibleDropsToBowls(bowls,arr,oracleStones)
+local differs=0
+for id=1,6 do
+   if B.compare(latest[id],future[id])~=0 then differs=differs+1 end
+end
+assert(differs>=1,"Oracle 46 gout pa detekte reset ant gout yo")
 for i=1,46 do
   assert(ctx.childContexts[i].commitToken==4)
   assert(ctx.semanticState.perDrop[i].inputBowls[1]==tostring(bowls[1]))

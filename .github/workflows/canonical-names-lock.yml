@@ -454,7 +454,7 @@ jobs:
         run: |
           set -euo pipefail
           find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
-          test "$(git hash-object src/stir_patch.lua)" = $(git hash-object src/stir_patch.lua)
+          test "$(git hash-object src/stir_patch.lua)" = a0a5a9f92cc559b0f7626dfb131aba7c9b2d17a3
           test "$(git hash-object src/legacy_aliased_stir.lua)" = b799a09f68cf68f4a7710694daa522d57e04a179
           lua5.3 test/stage22_scope_tests.lua .
       - name: Kouri suite Stage 1 rive Stage 22
