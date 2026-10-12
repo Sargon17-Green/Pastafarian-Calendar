@@ -326,7 +326,8 @@ public final class Stage02IncrementalRouteTests {
             "E_PARTIAL_DP_SNAPSHOT_CREATED");
         long hits = shared.partialDpReuseHitCount();
         long completeHits = shared.suffixCacheHitCount();
-        BigInteger expectedSecond = independent.countAfterPrefix(second);
+        BigInteger expectedSecond =
+            new MonsterWeavingLinearCounter(lengths).countAfterPrefix(second);
         BigInteger actualSecond = shared.countAfterPrefix(second);
         eq(expectedSecond, actualSecond, "E_PARTIAL_DP_SECOND_EXACT");
         ok(shared.partialDpReuseHitCount() > hits,
