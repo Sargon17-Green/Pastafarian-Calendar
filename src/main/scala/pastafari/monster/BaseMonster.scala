@@ -169,7 +169,7 @@ final class BaseValidationManager {
       while(i<before.size && !found) {
         val previous=boundary-BigInt(before(i))
         if(previous<ctx.targetDay && ctx.targetDay<=boundary) {
-          offset=-BigInt(i)-1;open=previous;close=boundary;found=true
+          offset = -BigInt(i) - 1; open=previous; close=boundary; found=true
         }
         boundary=previous
         i+=1
