@@ -782,3 +782,14 @@ legacy sai và production đúng. Thêm 14 bài kiểm
 toán 720 hoán vị, 58 lần ghi, tính độc lập ngữ cảnh,
 số nguyên lớn, đầu vào không hợp lệ và ranh giới.
 Không thay oracle, SAVE hoặc các giá trị bát cuối.
+
+**Kết quả thực tế:** CI Elixir 1.18.5 / OTP 27:
+283 kiểm thử, 0 lỗi, 0 cảnh báo biên dịch;
+Canonical Names Lock PASS. Bốn hồi quy chuẩn Stage22
+đạt với khẳng định cũ; 14 kiểm thử Stage23 mới đạt.
+LegacyOrderMemory giữ nguyên blob SHA
+`4d7610e41443d4a37d60befa76a456cd8c85e06d`;
+oracle giữ nguyên blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+Memory vẫn bị ghi 58 lần, latch riêng lưu thứ tự giọt
+46 để truy vấn. Giai đoạn 23 đóng GREEN, chưa mở Stage24.

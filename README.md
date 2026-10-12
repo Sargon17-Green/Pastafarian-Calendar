@@ -890,3 +890,23 @@ tiếp tục chứng minh hàm legacy thô trả quan hệ sai;
 kiểm thử Stage23 kiểm 720 hoán vị, các biên, bất biến,
 46+12 lượt, ngày 2048 bit, chạy song song và mã nguồn.
 Không bắt đầu giai đoạn 24.
+
+## Kiểm chứng đóng bản vá 11
+
+GitHub Actions Elixir 1.18.5 / Erlang OTP 27 xác nhận
+**283 kiểm thử, 0 thất bại và 0 cảnh báo biên dịch**.
+Bốn hồi quy chuẩn Stage22 trở lại xanh mà không thay kỳ vọng;
+14 bài Stage23 mới đều đạt. Khóa tên chuẩn PASS độc lập.
+
+Vết lỗi lịch sử còn nguyên: LegacyOrderMemory tiếp tục
+58 lần ghi và kết thúc với `last_source={:stir,12}`.
+Bản vá tạo `order_at_46_latch` từ memory ở giọt 46
+trước khi có 12 lần ghi thêm. Truy vấn production dùng latch
+và vẫn gọi hàm đọc LegacyOrderMemory thực.
+Module legacy và oracle test-only không bị sửa.
+
+- [CI Stage23 283/283](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38263249194)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38263249280)
+
+Giai đoạn 23/55 kết thúc `GREEN`. Điểm tiếp theo:
+giai đoạn 24/55 `DISCOVERY 12`; chưa bắt đầu.
