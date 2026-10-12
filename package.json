@@ -1,6 +1,6 @@
 {
   "name": "pastafari-calendar-typescript-marathi",
-  "version": "0.19.0-stage.19",
+  "version": "0.20.0-stage.20",
   "private": true,
   "type": "module",
   "description": "मगिलत हाएतिमच्या नियमाधारित दिनदर्शिकेसाठी स्वतंत्र TypeScript आणि मराठी अंमलबजावणी मार्ग",
@@ -9,7 +9,7 @@
     "test:stage01": "node --experimental-strip-types test/run.ts",
     "test:discovery01": "node --experimental-strip-types test/discovery01.ts",
     "test:discovery01:red": "node --experimental-strip-types test/discovery01Red.ts",
-    "test": "npm run test:stage01 && npm run test:discovery01 && npm run test:patch01 && npm run test:discovery02 && npm run test:patch02 && npm run test:discovery03 && npm run test:patch03 && npm run test:discovery04 && npm run test:patch04 && npm run test:discovery05 && npm run test:patch05 && npm run test:discovery06 && npm run test:patch06 && npm run test:discovery07 && npm run test:patch07 && npm run test:discovery08 && npm run test:patch08 && npm run test:discovery09 && npm run test:patch09",
+    "test": "npm run test:stage01 && npm run test:discovery01 && npm run test:patch01 && npm run test:discovery02 && npm run test:patch02 && npm run test:discovery03 && npm run test:patch03 && npm run test:discovery04 && npm run test:patch04 && npm run test:discovery05 && npm run test:patch05 && npm run test:discovery06 && npm run test:patch06 && npm run test:discovery07 && npm run test:patch07 && npm run test:discovery08 && npm run test:patch08 && npm run test:discovery09 && npm run test:patch09 && npm run test:discovery10",
     "test:patch01": "node --experimental-strip-types test/patch01.ts",
     "test:discovery02": "node --experimental-strip-types test/discovery02.ts",
     "test:discovery02:red": "node --experimental-strip-types test/discovery02Red.ts",
@@ -34,7 +34,9 @@
     "test:patch08": "node --experimental-strip-types test/patch08.ts && node --experimental-strip-types test/patch08Properties.ts",
     "test:discovery09": "node --experimental-strip-types test/discovery09.ts && node --experimental-strip-types test/discovery09Properties.ts",
     "test:discovery09:red": "node --experimental-strip-types test/discovery09Red.ts",
-    "test:patch09": "node --experimental-strip-types test/patch09.ts && node --experimental-strip-types test/patch09Properties.ts"
+    "test:patch09": "node --experimental-strip-types test/patch09.ts && node --experimental-strip-types test/patch09Properties.ts",
+    "test:discovery10": "node --experimental-strip-types test/discovery10.ts && node --experimental-strip-types test/discovery10Properties.ts",
+    "test:discovery10:red": "node --experimental-strip-types test/discovery10Red.ts"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

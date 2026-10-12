@@ -19,3 +19,4 @@ export * from "./discovery08LegacyPermutation.ts";
 export * from "./patch08Permutation.ts";
 export * from "./discovery09LegacyFixedPours.ts";
 export * from "./patch09BowlAlias.ts";
+export * from "./discovery10LegacyInPlaceStir.ts";
