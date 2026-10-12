@@ -80,7 +80,7 @@ const original=LegacyInPlaceBowlStirAdapter.prototype.stirInPlace;
 const calls:(readonly bigint[])[]=[];
 try{
  LegacyInPlaceBowlStirAdapter.prototype.stirInPlace=function(...args){
-   calls.push(args[6]);
+   calls.push(args[7]);
    return original.apply(this,args);
  };
  const o=discoverLegacyInPlaceStir(F,F,2,120n,b,stone);
