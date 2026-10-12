@@ -19,3 +19,15 @@ For Year 5000, the canonical candidate order is ascending by year length, with a
 `test/discovery17Red.ts`: seventeenth standalone deliberately failing full-route witness comparing two equal-length 1000-day entries sorted in reversed opening-day order. The normal `npm test` invokes its independent nonzero-result verifier `test/verifyDiscovery17ExpectedRed.mjs`; prior sixteen intentionally failing historical scripts remain unchanged.
 
 Stage34 closes only after both GitHub Actions jobs (native TypeScript full regression and frozen-name-lock check) pass. **Stage35 PATCH17 tie correction must NOT be applied in Stage34**. No main/other branch edits, no HANDOFF archives committed.
+
+## Verified native CI — October 12 2026
+
+[Implementation commit bccf5474](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/bccf5474192fd5e65944bc3dd9438d0fe6345b6d) and [GitHub Actions run 38283939340](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38283939340): independent `verify` and historic-name `stage27-typescript-marathi` jobs both SUCCESS. Native TypeScript typecheck and full Stage1–34 suite passed. All original 16 intentionally-red scripts remain verified; the seventeenth standalone expected RED was separately verified as a nonzero execution with exact marker. The frozen name hash remains unchanged.
+
+```text
+STAGE_34_DISCOVERY_17_GUARDS_PASS anchors=4 positive=2 negative=2 wrongSelections=4 rankWrong=0 tieInversions=4 realPredecessors=17 sharedWrites=986 originalPredicateCalls=12 comparatorSpy=1 stableSortSpy=1 selectorSpy=3 predicateSpy=3 faults=4
+STAGE_34_DISCOVERY_17_PROPERTIES_PASS directFamilies=256 directOldWrong=256 directComparatorCalls=512 realGates=12 positive=6 negative=6 realRankWrong=0 realTieWrong=12 originalGateCalls=63 realYearSelectors=24 realPredecessors=87 realWrites=5046 varied=64 giants=8 ranks=720 unique=720 variants=792 variantPredecessors=2376 variantWrites=137808 totalPredecessors=2463 totalWrites=142854 streamWrong=0 selectorWrong=0 wrongTieWitnesses=792
+STAGE_34_DISCOVERY_17_EXPECTED_RED_VERIFIED nonzero=1 mismatches=2 matches=0 length=1000
+```
+
+**Stage34 complete; LAST_COMPLETED_STAGE=34.** Original year-length-only comparator and stable ordering remain uncorrected and genuinely executed; Stage35 PATCH17 not started. Alternative opening/closing gate boundaries used in diagnostic ties are explicitly injected synthetic candidates, not genuine normative gate pairs.
