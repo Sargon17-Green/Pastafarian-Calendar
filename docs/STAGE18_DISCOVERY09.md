@@ -1,4 +1,4 @@
-# ደረጃ 18/55 — DISCOVERY 09 (EXPECTED_RED)
+# ደረጃ 18/55 — DISCOVERY 09 (COMPLETE / EXPECTED_RED)
 
 ## ስድስቱ ጎድጓዳ ሳህኖችና የታሪክ የማፍሰሻ ስህተት
 
@@ -40,4 +40,9 @@ v -check ./pastafari/discovery09_expected_red_test.v
 v test ./pastafari/discovery09_expected_red_test.v
 ```
 
-የቀድሞ 25 ፋይሎች እና አዲሱ የታሪክ ምስክር በአጠቃላይ **26/26 GREEN** መሆን አለባቸው። አራቱ የታሰቡ RED assertions በስም መረጋገጥ አለባቸው። `PATCH 09` alias እና `PATCH 10` shadow አይጀመሩም፤ `LAST_COMPLETED_STAGE=17` የnative V ማረጋገጫ እስኪጠናቀቅ ይቆያል።
+የቀድሞ 25 ፋይሎች እና አዲሱ የታሪክ ምስክር በአጠቃላይ **26/26 GREEN** መሆን አለባቸው። አራቱ የታሰቡ RED assertions በስም መረጋገጥ አለባቸው። `PATCH 09` alias እና `PATCH 10` shadow አይጀመሩም፤ `LAST_COMPLETED_STAGE=18` በV 0.5.2 ተረጋግጧል፤ 26/26 PASS፣ 4 EXPECTED_RED።
+
+
+## የመጨረሻው ማረጋገጫ
+
+GitHub Actions 38243013488። የተፈተነ commit 90a3fd0e2fccf7433379932d9822c9de1e3d6b85። የማስረጃ ቅርስ 11744096831። PATCH 09 አልተጀመረም።

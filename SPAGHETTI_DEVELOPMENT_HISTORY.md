@@ -153,3 +153,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 18 — DISCOVERY 09 (በV ማረጋገጫ ላይ)
 
 `old_pours_fixed_bowls` የታሪክ ስህተት እንዳለ ተገልጧል። ሶስቱ ማፍሰሻዎች `SAVE(drop²+stones.w*bowls[1]+3*i)`፣ `SAVE(drop²+stones.b*bowls[2]+5*i)` እና `SAVE(drop²+stones.s*bowls[3]+7*i)` ናቸው፣ ምንም እንኳን `order` ቦታዎቹን የተለያዩ ID ቢመድብም። በ`i=1,drop=2,oldBowls=[10,20,30,40,50,60]` ውስጥ የታሪክ ውጤት `[177,589,1301]` ሲሆን `order=[6,5,4,3,2,1]` የሚጠይቀው ትክክለኛ ውጤት `[1027,1459,1731]` ነው። በሌላ `order=[2,3,1,4,5,6]` የመጀመሪያው ማፍሰሻ 347 መሆን አለበት። ለደረጃ 18 የሚታሰቡት አራት RED assertions እነዚህን ይወስናሉ። የ`calendar_initial_bowls_spaghetti` ተጨመረ፣ የ`calendar_date_spaghetti` ምርመራ ለየታሪክ የpour ውጤት ተገናኝቷል። የ`PATCH 09` alias እና የ`PATCH 10` shadow ገና አልተጨመሩም።
+
+### የደረጃ 18 መዝጊያ — EXPECTED_RED
+
+የV 0.5.2 ማረጋገጫ በGitHub Actions run `38243013488` ላይ PASS ነው። 26/26 የቀድሞና አዲስ GREEN ፈተና ፋይሎች ተሳክተዋል፣ 4 የተለዩ RED assertions በታሰቡት ቦታዎች ተረጋግጠዋል። `old_pours_fixed_bowls` የታሪክ ንባቡን ተጠብቆ ይቆያል፤ `bowlAlias` የPATCH 09 ሥራ እስከ ደረጃ 19 ድረስ አይገባም። የማስረጃ ቅርስ `11744096831` ነው። **ደረጃ 18 COMPLETE / EXPECTED_RED።**
