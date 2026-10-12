@@ -490,6 +490,7 @@ public sealed class MonsterDispatcher
     private readonly BowlAliasPatchPhaseHandler _aliasPatch;
     private readonly LegacyInPlaceBowlStirPhaseHandler _legacyInPlaceStir;
     private readonly ShadowBowlStirPhaseHandler _shadowStir;
+    private readonly LegacyOverwrittenDrop46Sauce _legacyOverwrittenSauce;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -514,6 +515,7 @@ public sealed class MonsterDispatcher
         _aliasPatch = new BowlAliasPatchPhaseHandler();
         _legacyInPlaceStir = new LegacyInPlaceBowlStirPhaseHandler();
         _shadowStir = new ShadowBowlStirPhaseHandler();
+        _legacyOverwrittenSauce = new LegacyOverwrittenDrop46Sauce();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -1030,6 +1032,37 @@ public sealed class MonsterDispatcher
         context.Status="SHADOW_BOWL_STIR_PATCH_COMPLETE";
     }
 
+    public void DispatchLegacyOverwrittenSauce(MonsterContext context)
+    {
+        if(!string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("تتطلب الصلصة القديمة سياقاً مؤسساً.");
+        if(context.LegacySauceFinalBowls is not null ||
+           context.LegacyOverwrittenQueryOrder is not null ||
+           context.LegacyDiagnosticDrop46Order is not null ||
+           context.LegacyPostStirOrders is not null ||
+           context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("حالة الصلصة القديمة مشغولة.");
+
+        var candidate=_legacyOverwrittenSauce.Evaluate(context);
+        _validation.ValidateVisibleDropPatch(context,candidate.Source);
+        _validation.ValidateLegacyOverwrittenSauce(context,candidate);
+
+        context.PatchedCountsResult=candidate.Source.Counts;
+        context.PatchedStoneRows=candidate.Source.Stones;
+        context.LegacyHiddenReversed=candidate.Source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess=candidate.Source.HiddenAccessor;
+        context.PatchedVisibleDrops=candidate.Source.Visible;
+        context.LegacyDiagnosticDrop46Order=candidate.DiagnosticDrop46Order;
+        context.LegacyOverwrittenQueryOrder=candidate.OverwrittenQueryOrder;
+        context.LegacyPostStirOrders=candidate.PostStirOrders;
+        context.LegacySauceBowlsAfterDrops=candidate.BowlsAfterDrops;
+        context.LegacySauceFinalBowls=candidate.FinalBowls;
+        context.BranchTrace.Add("LEGACY_OVERWRITTEN_DROP46_ORDER");
+        _metrics.Bump(context,"legacy.overwritten.drop46.order.dispatch");
+        context.Phase="LEGACY_OVERWRITTEN_DROP46_ORDER_COMPLETE";
+        context.Status="LEGACY_OVERWRITTEN_DROP46_ORDER_COMPLETE";
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -1447,6 +1480,26 @@ public sealed class MonsterManager
         => ExecutePatchedBowlStir(calculationDay,targetDay,visibleIndex)
             .PatchedStirredBowls ??
             throw new MonsterValidationException("لم تُنتج أوعية التحريك المصححة.");
+
+    public MonsterContext ExecuteLegacyOverwrittenSauce(
+        BigInteger calculationDay,BigInteger targetDay)
+    {
+        var context=Prepare(calculationDay,targetDay);
+        _dispatcher.DispatchLegacyOverwrittenSauce(context);
+        return context;
+    }
+
+    public LegacySauceResult EvaluateLegacyOverwrittenSauce(
+        BigInteger calculationDay,BigInteger targetDay)
+    {
+        var context=ExecuteLegacyOverwrittenSauce(calculationDay,targetDay);
+        if(context.LegacySauceFinalBowls is null ||
+           context.LegacyOverwrittenQueryOrder is null)
+            throw new MonsterValidationException("لم تكتمل الصلصة القديمة.");
+        return new LegacySauceResult(
+            (BigInteger[])context.LegacySauceFinalBowls.Clone(),
+            (int[])context.LegacyOverwrittenQueryOrder.Clone());
+    }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
