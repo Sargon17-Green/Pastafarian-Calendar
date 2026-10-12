@@ -39,3 +39,25 @@ GitHub Actions：https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/
 - 需要在受控條件下重測全開啟閉式捷徑是否改善中間排名，並考慮未開啟月份部分的狀態及多項式變換重用。
 - 最大 5,778 日、47 月份的非極端排名仍未驗證實用效能及記憶體。
 - `LAST_COMPLETED_STAGE=1` 不變，沒有開始 Stage 2，沒有將 `t/lib` 實驗代碼引入生產，也未提交使用者專用 HANDOFF 檔。
+
+## 五、同限額重測
+
+提交 `00905951824f8a85f3fef39bf3e7cc1508a27ffe` 再次以相同原生量測工具、同樣每例 20 秒和 196,608 KiB RSS 觀測限額執行。GitHub Actions：https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38223128775，12,545 assertions / 32 檔 PASS。
+
+| 分布 | 重測結果 | 秒數 | VmHWM 或觀測 VmRSS |
+| --- | --- | ---: | ---: |
+| 4×4 | PASS | 0.038 | 14,680 KiB VmHWM |
+| 6×4 | PASS | 0.219 | 16,812 KiB VmHWM |
+| 8×4 | PASS | 0.507 | 14,180 KiB VmHWM |
+| 47×4 | BLOCKED（時間） | 20.016 | 18,080 KiB VmRSS |
+| 17×6＋30×5 | BLOCKED（時間） | 20.017 | 21,776 KiB VmRSS |
+
+小例子的耗時略微減少；由於執行分別發生在不同 CI 作業環境，不能由這些數字證明穩定的加速比例。兩個 47 月份案例仍未完成，故全數月份已開啟閉式的效益尚不足以解決一般中間排名的運算成本。
+
+## 六、只剩最後一個月份尚未開啟的進一步閉式
+
+提交 `17a08a98a7c9ead2aa96867d8fb2b5c48eef4894` 將 `t/lib/Pastafari/WeavingSuffix.pm` 的末次順序乘積適用條件從 `opened=m` 擴展為 `opened≥m−1`（且仍有未關閉月份）。若只有最後一月 m 尚未首次出現，因 m−1 月的真正首次出現已位於固定前綴，任何 m 月的第一次出現都晚於它；又沒有更後面的月份須保留首次次序。因此剩餘部分只需依序完成各月份的最後出現。
+
+新增 `t/32_last_unopened_suffix_closed_form.t`，涵蓋 60 組具原本規範 Oracle 的小案例、已有關閉月份的前綴，以及只有第 47 月尚未開啟的 47 月份情況。此擴張是末端局部捷徑，不代表解決全部尚未開啟月份的二維模型瓶頸。
+
+原生驗證：https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38223812823，12,738 個斷言／33 個測試檔 PASS，包含 `t/32_last_unopened_suffix_closed_form.t`。本輪驗證沒有發現失敗的斷言或編碼警告。
