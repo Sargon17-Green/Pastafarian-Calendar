@@ -185,3 +185,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 22 — DISCOVERY 11 (native V ማረጋገጫ ይጠበቃል)
 
 የLegacyPostStirOrderStore የquery_order መያዣ በ12 የpost-stir ቅደም ተከተሎች በተከታታይ ተደርሷል። old_overwrite_query_order የቀድሞውን ቅደም ተከተል በዚሁ መያዣ ውስጥ አይጠብቅም። LegacyPostStir12Adapter እና BaseDispatcher.dispatch_legacy_post_stir12 በproduction እውነተኛ ጥሪ ይፈጽማሉ። በB=[10,20,30,40,50,60] የ12ኛው የብስለት order [3,5,1,4,6,2] ነው፣ እና ይኸው ለquery ይመለሳል። እስከ ደረጃ 23 የorderAt46Latch ቅጂ አይገነባም። ሙሉ የ46 ጠብታ ማስኬጃ በዚህ ደረጃ አልተጨመረም።
+
+### የደረጃ 22 መዝጊያ — EXPECTED_RED
+
+በመጀመሪያው GitHub Actions run 38262694322 የV array ownership ስህተት ታይቷል፤ working=pending ወደ pending.clone() ተቀይሯል። ቀጣዩ run 38263102902 የtest ሰልፍ ቅጂ እንዲሆን ጠይቋል፣ እና expected=out.bowls.clone() ተደርጓል። የV formatter ትክክለኛ ቅርጽ በአዲሶቹ ፋይሎች ተተግብሯል። commit c9d2c218259ce1d9fb4373ffc0e5070866c1db0e ላይ GitHub Actions run 38263332678 ሁለቱም ሥራዎች PASS ናቸው፤ 32 የGREEN test ፋይሎች PASS፣ 4 ሆን ብለው RED assertions ተረጋግጠዋል። artifact 11752704606 ተቀምጧል። የታሪክ query order አሁንም በ12 post-stirs ይደረሳል፤ PATCH 11 orderAt46Latch አልተጨመረም። የ46 ጠብታዎች ሙሉ መንገድ አልተጠናቀቀም። **ደረጃ 22 COMPLETE / EXPECTED_RED።**

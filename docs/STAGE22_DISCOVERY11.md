@@ -1,4 +1,4 @@
-# ደረጃ 22/55 — DISCOVERY 11 (EXPECTED_RED)
+# ደረጃ 22/55 — DISCOVERY 11 (COMPLETE / EXPECTED_RED)
 
 ## የታሪክ ጉድለቱ
 
@@ -16,4 +16,14 @@
 
 discovery11_witness_test.v የታሪክ 12 ዙሮችን፣ የአሮጌ መያዣ መደረስን፣ የ720 የመጀመሪያ ቅደም ተከተሎች ተቀባይነት፣ 412-ቢት ግቤቶችና አለመለወጥን ይፈትሻል። discovery11_expected_red_test.v አራት ሆን ብለው RED እና ሦስት GREEN ይይዛል። የቀድሞ 31 ፋይሎች ከአዲሱ witness ጋር 32 GREEN መሆን አለባቸው።
 
-የcalendar_date_spaghetti የምርመራ ምሳሌ ከpour_drop=720 ይጀምራል፤ የ46 ጠብታዎች ሙሉ የመጨረሻ እሴት አይደለም። ይህ የተለየ ንዑስ መንገድ የorder መደረስ ጉድለትን ብቻ ያረጋግጣል። LAST_COMPLETED_STAGE=21 እስከ native V CI ድረስ ይቆያል።
+የcalendar_date_spaghetti የምርመራ ምሳሌ ከpour_drop=720 ይጀምራል፤ የ46 ጠብታዎች ሙሉ የመጨረሻ እሴት አይደለም። ይህ የተለየ ንዑስ መንገድ የorder መደረስ ጉድለትን ብቻ ያረጋግጣል። LAST_COMPLETED_STAGE=22 ነው።
+
+## የnative V ማስረጃ
+
+- የተፈተነ commit፦ c9d2c218259ce1d9fb4373ffc0e5070866c1db0e
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38263332678
+- artifact፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38263332678/artifacts/11752704606
+- V 0.5.2 7647ce1፦ v fmt -verify ./pastafari PASS፣ 32/32 GREEN witnesses PASS፣ 4 EXPECTED_RED assertions በተናጠል ተረጋግጠዋል።
+- PATCH 11 አልተጨመረም፤ ደረጃ 23 አልተጀመረም።
+
+**ደረጃ 22 COMPLETE / EXPECTED_RED።**
