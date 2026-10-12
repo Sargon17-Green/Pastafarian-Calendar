@@ -153,6 +153,12 @@ public static class CalendarDateSpaghetti
             calculationDay, targetDay, visibleIndex);
     }
 
+    // رقعة الأسماء المؤقتة تجعل الموضع التاريخي يشير إلى هوية الوعاء في الترتيب.
+    public static BigInteger[] EvaluatePatchedBowlPours(
+        BigInteger calculationDay,BigInteger targetDay,int visibleIndex)
+        => new MonsterManager().EvaluatePatchedBowlPours(
+            calculationDay,targetDay,visibleIndex);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

@@ -118,3 +118,13 @@ dotnet run --project tests/PastafarianCalendar.Stage18Tests/PastafarianCalendar.
 لا تُضاف خريطة alias ولا يُفعّل مزج الأوعية قبل الطور التاسع عشر.
 
 أكّد تشغيل CI رقم `38239694075` وجود `366` حالة صبّ مختلفة من `368` قطرة إنتاجية و`924` اختلافاً في مواضع الصبّ الثلاثة، مع حالتين متطابقتين؛ ومن `720` ترتيباً، تطابقت ستة ترتيبات فقط مع القراءة القديمة. اجتاز `5888` فحصاً ومُثبِت التوقيع الأحمر مع جميع الاختبارات السابقة. لا توجد خريطة alias مصححة حتى المرحلة التاسعة عشرة.
+
+## الطور التاسع عشر — رقعة خريطة الأسماء للأوعية
+
+تُنشئ `BowlAliasPatchWrapper` خريطة الأسماء المؤقتة `bowlAlias[position]=order[position]`، وتصبح كل قراءة وعاء للمزائج المصححة عبر `BowlByLegacyPosition`. المسار العام `CalendarDateSpaghetti.EvaluatePatchedBowlPours(c,t,i)` يعيد ثلاث قيم صبّ مرتبة حسب الموضع، مع إبقاء `EvaluateLegacyFixedBowlPours` القديمة معيبةً عمداً.
+
+```text
+dotnet run --project tests/PastafarianCalendar.Stage19Tests/PastafarianCalendar.Stage19Tests.csproj --configuration Release
+```
+
+لا تبدأ تحديثات الأوعية أو رقعة مخزن الصورة القديمة في هذا الطور.

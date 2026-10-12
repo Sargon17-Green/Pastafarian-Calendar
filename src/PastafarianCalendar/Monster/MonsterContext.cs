@@ -86,6 +86,10 @@ public sealed class MonsterContext
     public int[]? LegacyPourOrder { get; set; }
     public BigInteger[]? LegacyPoursResult { get; set; }
 
+    // خريطة أسماء المواضع تُملَك لكل استدعاء؛ وتبقى الصبّات الثابتة في حقل مستقل.
+    public int[]? BowlAliases { get; set; }
+    public BigInteger[]? PatchedPoursResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

@@ -211,6 +211,42 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("قيمة الصبّ القديم لا تطابق قراءة أسماء الأوعية الثابتة.");
     }
 
+    // يفحص الحارس أن كل قراءة وعاء مصححة مرّت بخريطة المواضع، دون مرجع اختبار.
+    public void ValidateBowlAliasPatch(MonsterContext context, BowlAliasPatchCandidate candidate)
+    {
+        if (context.BowlAliases is not null || context.PatchedPoursResult is not null ||
+            context.LegacyPoursResult is not null || context.LegacyPourDrop.HasValue ||
+            context.LegacyPourInitialBowls is not null ||
+            context.LegacyPourOrder is not null)
+            throw new MonsterValidationException("رقعة الأسماء البديلة تتطلب سياقاً خالياً.");
+
+        if (candidate is null || candidate.Legacy is null ||
+            candidate.Legacy.Order is null || candidate.Legacy.Order.Length != 6 ||
+            candidate.Aliases is null || candidate.Aliases.Length != 7 ||
+            candidate.Aliases[0] != 0 ||
+            candidate.PatchedPours is null || candidate.PatchedPours.Length != 7 ||
+            ReferenceEquals(candidate.PatchedPours,candidate.Legacy.Pours) ||
+            candidate.PatchedPours[0] != 0 ||
+            candidate.PatchedPours[4] != 0 ||
+            candidate.PatchedPours[5] != 0 ||
+            candidate.PatchedPours[6] != 0)
+            throw new MonsterValidationException("مرشح أسماء الأوعية غير مكتمل.");
+
+        for (var position=1; position<=6; position++)
+            if (candidate.Aliases[position] != candidate.Legacy.Order[position-1])
+                throw new MonsterValidationException("اسم الوعاء البديل لا يوافق موضع ترتيبه.");
+
+        var wrapper = new BowlAliasPatchWrapper();
+        var reference = wrapper.PatchedPours(
+            context.LegacyPourVisibleIndex!.Value,candidate.Legacy.Drop,
+            candidate.Legacy.Source.Stones,candidate.Legacy.InitialBowls,candidate.Aliases);
+        if (!candidate.PatchedPours.SequenceEqual(reference))
+            throw new MonsterValidationException("الصبّ المصحح لم يقرأ الأوعية عبر خريطة المواضع.");
+        for(var position=1;position<=3;position++)
+            if(candidate.PatchedPours[position]<1)
+                throw new MonsterValidationException("الصبّ المصحح غير محفوظ.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -309,6 +345,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyBowlPermutationPhaseHandler _legacyBowlPermutation;
     private readonly BowlOrderPatchWrapper _bowlOrderPatch;
     private readonly LegacyPoursPhaseHandler _legacyPours;
+    private readonly BowlAliasPatchPhaseHandler _aliasPatch;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -330,6 +367,7 @@ public sealed class MonsterDispatcher
         _legacyBowlPermutation = new LegacyBowlPermutationPhaseHandler();
         _bowlOrderPatch = new BowlOrderPatchWrapper();
         _legacyPours = new LegacyPoursPhaseHandler();
+        _aliasPatch = new BowlAliasPatchPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -726,6 +764,42 @@ public sealed class MonsterDispatcher
         context.Status = "LEGACY_FIXED_BOWL_POURS_COMPLETE";
     }
 
+    public void DispatchBowlAliasPatched(MonsterContext context)
+    {
+        if (!string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("لا تُركّب خريطة الأوعية قبل تأسيس سياق الاستدعاء.");
+        if (context.LegacyPourVisibleIndex is not int ordinal || ordinal is < 1 or > 46 ||
+            context.LegacyPoursResult is not null || context.PatchedPoursResult is not null ||
+            context.BowlAliases is not null || context.LegacyPourDrop.HasValue ||
+            context.LegacyPourOrder is not null || context.LegacyPourInitialBowls is not null ||
+            context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("رقعة الأوعية تحتاج قطرة محددة وسياقاً خالياً.");
+
+        // كل المرشحات والشواهد والمطابقة تُحتسب قبل التزام أية نتيجة.
+        var candidate = _aliasPatch.Handle(context);
+        _validation.ValidateLegacyPours(context,candidate.Legacy);
+        _validation.ValidateBowlAliasPatch(context,candidate);
+
+        context.PatchedCountsResult = candidate.Legacy.Source.Counts;
+        context.PatchedStoneRows = candidate.Legacy.Source.Stones;
+        context.LegacyHiddenReversed = candidate.Legacy.Source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess = candidate.Legacy.Source.HiddenAccessor;
+        context.PatchedVisibleDrops = candidate.Legacy.Source.Visible;
+        context.LegacyPourDrop = candidate.Legacy.Drop;
+        context.LegacyPourInitialBowls = candidate.Legacy.InitialBowls;
+        context.LegacyPourOrder = candidate.Legacy.Order;
+        context.LegacyPoursResult = candidate.Legacy.Pours;
+        context.BowlAliases = candidate.Aliases;
+        context.PatchedPoursResult = candidate.PatchedPours;
+
+        context.BranchTrace.Add("LEGACY_FIXED_BOWL_POURS_WITNESS");
+        context.BranchTrace.Add("BOWL_ALIAS_PATCH");
+        _metrics.Bump(context,"legacy.fixed.bowl.pours.witness");
+        _metrics.Bump(context,"bowl.alias.patch.dispatch");
+        context.Phase = "BOWL_ALIAS_PATCH_COMPLETE";
+        context.Status = "BOWL_ALIAS_PATCH_COMPLETE";
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -1092,6 +1166,23 @@ public sealed class MonsterManager
             .LegacyPoursResult ?? throw new MonsterValidationException(
                 "لم تُثبَت المزائج القديمة للأوعية الثلاثة.");
     }
+
+    public MonsterContext ExecutePatchedBowlPours(
+        BigInteger calculationDay,BigInteger targetDay,int visibleIndex)
+    {
+        if (visibleIndex is < 1 or > 46)
+            throw new MonsterValidationException("القطرة المطلوبة للصبّ المصحح خارج المجال.");
+        var context=Prepare(calculationDay,targetDay);
+        context.LegacyPourVisibleIndex=visibleIndex;
+        _dispatcher.DispatchBowlAliasPatched(context);
+        return context;
+    }
+
+    public BigInteger[] EvaluatePatchedBowlPours(
+        BigInteger calculationDay,BigInteger targetDay,int visibleIndex)
+        => ExecutePatchedBowlPours(calculationDay,targetDay,visibleIndex)
+            .PatchedPoursResult ??
+            throw new MonsterValidationException("لم تُثبت الصبّات المصححة للأوعية.");
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
