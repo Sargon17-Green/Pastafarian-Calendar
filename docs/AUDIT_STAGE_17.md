@@ -36,3 +36,21 @@ y strict RED hanesyddol, yna'n profi:
 Rhaid gweld `STAGE17_FULL_NATIVE_GREEN` gyda swydd GitHub Actions
 lwyddiannus ar Kotlin 1.9.0 a JDK 21 cyn gosod
 `LAST_COMPLETED_STAGE=17`. Y cam nesaf yw 18 — DISCOVERY 09.
+
+
+## Ardystiad brodorol Cam 17 — COMPLETE
+
+Ar commit `d6aa1486c36c3b410c7a9b459927496ec54a428d` llwyddodd rhediad GitHub Actions
+[`38252648589`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38252648589),
+swydd Kotlin `114822613414`, gyda Kotlin 1.9.0/JDK 21 a'r
+oracl ffynhonnell gwreiddiol. Gwiriwyd **32 marc** yn uniongyrchol
+yn log y swydd. Pasiodd pob atchweliad Camau 1–16;
+720 permutation gywir ac unigryw, 720 graith etifeddol RED wedi'u
+cadw, 719 hen allbwn anghywir ac un undefined; 4,320 tyst
+BigInteger cywir gyda 4,314 hen wall rhifol a 6 undefined;
+ffiniau, cyfnodedd ±720, BOOT/replay, perchnogaeth a'r llwybrau
+blaenorol. Gwelwyd `STAGE17_FULL_NATIVE_GREEN`, a gorffennodd
+y swydd Kotlin a swydd cloi enwau â `SUCCESS`.
+
+**`LAST_COMPLETED_STAGE=17`**. Cam 18 (`DISCOVERY 09`) yw'r
+nesaf; ni ddechreuwyd. Nid oes adeiladwr diferion gweledig na pours.
