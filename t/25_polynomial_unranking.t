@@ -51,8 +51,10 @@ for my $lengths ([4,4,4],[4,4,4,4],[(4)x5]) {
         is_deeply($answer,unrankWeaving($lengths,$rank),
             '大排名和規範字典序相同：'.join('-',@$lengths)."/$rank");
         is($stats{days},scalar(@$answer),'診斷總日數與解碼一致');
-        cmp_ok($stats{suffix_calls},'>=', $stats{days},
-            '每一步至少執行一次合法後綴計數');
+        is($stats{suffix_calls} + $stats{shortcut_steps},
+           $stats{considered},'計算後綴次數加上推導數量等於所考察候選數');
+        cmp_ok($stats{suffix_calls},'<=',$stats{considered},
+            '最後候選無須重新執行後綴計數');
     }
 }
 my $input=Math::BigInt->new('2');

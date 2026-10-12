@@ -30,18 +30,38 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
     my $days = 0; $days += $_ for @remaining;
     my ($opened,$closed) = (0,0);
     my @word;
-    my ($calls,$considered)=(0,0);
+    my $current_total = $total->copy;
+    my ($calls,$considered,$shortcut_steps)=(0,0,0);
     for my $step (1 .. $days) {
         my $upper = $opened < $m ? $opened+1 : $m;
-        my $accepted = 0;
+        my @eligible;
         for my $j (1 .. $upper) {
             next if !$remaining[$j-1];
             next if $remaining[$j-1] == 1 && $j != $closed+1;
+            push @eligible,$j;
+        }
+        die "交織字典序解碼無合法選擇\n" if !@eligible;
+        # 子樹的大小把母前綴的完成集合劃分為互不相交的部分。
+        # 最後一個候選之大小等於母前綴減去前面候選的大小；
+        # 若只有一個候選，更可完全免去這一步的後綴 DP 計算。
+        my $remaining_ways = $current_total->copy;
+        my $accepted = 0;
+        for my $i (0 .. $#eligible) {
+            my $j = $eligible[$i];
             $considered++;
             push @word, $j;
-            my $ways = countWeavingSuffixPolynomial($lengths,\@word);
-            $calls++;
+            my $ways;
+            if ($i == $#eligible) {
+                $ways = $remaining_ways->copy;
+                $shortcut_steps++;
+            } else {
+                $ways = countWeavingSuffixPolynomial($lengths,\@word);
+                $calls++;
+                $remaining_ways->bsub($ways);
+            }
+            die "交織候選分割計數不一致\n" if $ways < 0;
             if ($rank <= $ways) {
+                $current_total = $ways->copy;
                 $remaining[$j-1]--;
                 $opened = $j if $j > $opened;
                 $closed = $j if !$remaining[$j-1];
@@ -54,9 +74,10 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
         die "交織字典序解碼無合法選擇\n" if !$accepted;
     }
     die "交織解碼後仍有月份未結束\n" if $closed != $m;
+    die "交織解碼終點計數不為一\n" if $current_total != 1;
     if (defined $stats) {
         %$stats = (days => $days, suffix_calls => $calls,
-                   considered => $considered);
+                   considered => $considered, shortcut_steps => $shortcut_steps);
     }
     return \@word;
 }
