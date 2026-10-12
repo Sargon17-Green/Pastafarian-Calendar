@@ -351,3 +351,15 @@ a holl lwybrau blaenorol. Gwelwyd `STAGE15_FULL_NATIVE_GREEN`;
 gorffennodd y swydd frodorol a swydd cloi enwau gyda `SUCCESS`.
 **`LAST_COMPLETED_STAGE=15`**. Cam 16 (`DISCOVERY 08`) yw'r nesaf,
 heb ei ddechrau. Nid yw'r adeiladwr diferion gweledig wedi'i weithredu.
+
+
+## Cam 16 — DISCOVERY 08: derbyn ordinal one-based gan unrank zero-based
+
+Mae `oldPermutationUnrank0` yn gywir ar 0..719 ond mae'r caller
+hanesyddol yn pasio `mod(drop-1,720)+1` yn uniongyrchol iddo.
+Canlyniad: 719 cyfnewidiad anghywir, un `undefined` ar 720,
+720/720 `EXPECTED_RED` a 0 `MATCH`. Mae
+`MonsterBootstrapManager.observeLegacyPermutation` yn cofnodi'r
+graith heb PATCH 08 na gwerth cywir cynhyrchu. Ni ddechreuwyd
+adeiladwr diferion gweledig na pours. `LAST_COMPLETED_STAGE=15`
+nes bo'r CI brodorol wedi pasio.

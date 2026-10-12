@@ -31,7 +31,7 @@ if ! kotlinc \
   src/main/kotlin/pastafari/StonePatchWrapper.kt \
   src/main/kotlin/pastafari/LegacyHiddenDropAdapter.kt \
   src/main/kotlin/pastafari/HiddenNearnessPatchWrapper.kt \
-  src/main/kotlin/pastafari/LegacyPriorAdapter.kt src/main/kotlin/pastafari/PriorPatchWrapper.kt src/main/kotlin/pastafari/LegacyGrindTableAdapter.kt src/main/kotlin/pastafari/MonsterBootstrap.kt \
+  src/main/kotlin/pastafari/LegacyPriorAdapter.kt src/main/kotlin/pastafari/PriorPatchWrapper.kt src/main/kotlin/pastafari/LegacyGrindTableAdapter.kt src/main/kotlin/pastafari/LegacyPermutationOrderAdapter.kt src/main/kotlin/pastafari/MonsterBootstrap.kt \
   src/test/kotlin/pastafari/NormativeCore.kt \
   src/test/kotlin/pastafari/NormativeCalendar.kt \
   src/test/kotlin/pastafari/Stage11Tests.kt \

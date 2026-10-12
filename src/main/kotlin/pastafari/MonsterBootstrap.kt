@@ -86,7 +86,15 @@ data class BaseMonsterContext(
     var patch07TranslatedIndex: Int? = null,
     var patch07CorrectedRow: VisibleGrindRow? = null,
     var patch07Applied: Boolean = false,
-    var patch07InvocationCount: Int = 0
+    var patch07InvocationCount: Int = 0,
+    var discovery08DropValue: ExactInt? = null,
+    var discovery08OneBased: Int? = null,
+    var discovery08PassedRank0: Int? = null,
+    var discovery08LegacyOrder: List<Int>? = null,
+    var discovery08Undefined: Boolean? = null,
+    var discovery08ErrorId: String? = null,
+    var discovery08LegacyCalls: Int = 0,
+    var discovery08InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -150,7 +158,8 @@ class MonsterBootstrapManager(
     val legacyPriorAdapter: LegacyPriorAdapter = LegacyPriorAdapter(),
     val priorPatchWrapper: PriorPatchWrapper = PriorPatchWrapper(legacyPriorAdapter, hiddenNearnessPatchWrapper),
     val legacyGrindTableAdapter: LegacyGrindTableAdapter = LegacyGrindTableAdapter(),
-    val grindPatchWrapper: GrindPatchWrapper = GrindPatchWrapper(legacyGrindTableAdapter)
+    val grindPatchWrapper: GrindPatchWrapper = GrindPatchWrapper(legacyGrindTableAdapter),
+    val legacyPermutationOrderAdapter: LegacyPermutationOrderAdapter = LegacyPermutationOrderAdapter()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -324,6 +333,34 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("DISCOVERY_08") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_DISCOVERY08_CONTEXT_NOT_READY")
+            val drop = context.discovery08DropValue
+                ?: throw MonsterValidationException("E_DISCOVERY08_NO_DROP")
+            // Galw'r caller anghywir yn wirioneddol, heb gywiriad.
+            val actual = legacyPermutationOrderAdapter.legacyPermutationOrderFromDropWrong(drop)
+            check(actual.dropValue == drop && actual.oneBased in 1..720 &&
+                actual.passedRank0 == actual.oneBased &&
+                actual.legacyCalls == 1 &&
+                actual.undefined == (actual.oneBased == 720) &&
+                (actual.legacyOrder?.size == 6 || actual.undefined)) {
+                "E_DISCOVERY08_PRODUCTION_SHAPE"
+            }
+            // Ymrwymo'n atomig, heb ollyngiad rhwng galwadau.
+            context.discovery08OneBased = actual.oneBased
+            context.discovery08PassedRank0 = actual.passedRank0
+            context.discovery08LegacyOrder = actual.legacyOrder?.toList()
+            context.discovery08Undefined = actual.undefined
+            context.discovery08ErrorId = actual.errorId
+            context.discovery08LegacyCalls = actual.legacyCalls
+            context.discovery08InvocationCount = 1
+            context.branchTrace.add("DISCOVERY_08")
+            context.diagnostics.add("DISCOVERY_08_ONE_BASED_AS_RANK0")
+            context.status = "LEGACY_PERMUTATION_OBSERVED"
+            metrics.bump("discovery08.legacy.unrank.calls")
         }
         dispatcher.register("PATCH_07") { context ->
             validation.requireBootstrapContext(context)
@@ -666,6 +703,24 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 16: cadw canlyniad anghywir y caller one-based, heb PATCH 08. */
+    fun observeLegacyPermutation(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        dropValue: ExactInt = ExactInt.ONE
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.discovery08DropValue = dropValue
+        context.phase = "DISCOVERY_08"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY08_WRAP", e)
         }
     }
 
