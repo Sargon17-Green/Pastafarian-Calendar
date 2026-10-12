@@ -534,3 +534,12 @@ Nan `LEGACY_ALIASED_STIR`, nou konsève tout rezilta istorik,
 metrik, branchTrace ak de premye patch pou vide yo. Nou pa fè
 PATCH 10, ni melanj douz etap ki vin apre a. Fòk tès normatif
 la kontinye echwe sèlman pou alias sa a nan Stage 20.
+
+### Fèmti Stage 20: alias confime natif
+
+Run `38281453888`: 12/12 travay ansyen ak tout tès pozitif PASS,
+sèl echèk la se regresyon istorik ki fèt espre sou id alias old/next.
+9 gout reyèl, 100 BigInt, 12 piki/12 rekiperasyon, 8 nested PASS.
+Nou kenbe modil legacy a san koreksyon e n make
+`LAST_COMPLETED_STAGE=20`, `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
+Pa gen PATCH 10 ni brase 12 etap yo.

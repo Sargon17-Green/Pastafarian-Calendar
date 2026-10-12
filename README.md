@@ -654,3 +654,17 @@ Nou pa lanse lòt 45 gout yo, `postStir12`, ni seleksyon ki vini apre.
 Uit reentrance reyèl sou `Pour.execute` ak `Save.savePatch` dwe kenbe
 chak kontèks ki gen twa commit ak sis bòl pwòp, san aliase repons
 apèl nested yo ak repons apèl deyò a. Tès sa yo pa fè PATCH 10.
+
+### Fèmti Stage 20 — EXPECTED_RED konfime
+
+GitHub Actions `38281453888` pase **12 travay vèt**,
+ak yon sèl travay `lua_stage20_discovery` wouj, sèlman nan
+dènye step `Regression normatif DISCOVERY 10 — EXPECTED_RED sèl`.
+Tout sentaks, tès legacy, 7 lòd sentetik, 100 BigInt, 9 gout reyèl,
+12 injections ak 12 rekiperasyon, 8 nested apèl ak odit erè istorik
+la pase. Mesaj erè natif la egzakteman:
+`EXPECTED_RED Stage 20 DISCOVERY 10: ansyen bòl yo vin alias ak nouvo bòl`.
+
+Yon travay smoke endepandan verifye premye gout ak sis bòl yo san
+rale tout suite ki pi ansyen an. Etap 20 fini kòm DISCOVERY,
+san PATCH 10. Etap 21 poko kòmanse.
