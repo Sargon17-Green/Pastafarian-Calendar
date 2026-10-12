@@ -42,3 +42,5 @@ export * from "./patch15SignedGate.ts";
 export * from "./discovery16LegacyYearMax.ts";
 
 export * from "./patch16YearMax.ts";
+
+export * from "./discovery17LegacyYearTie.ts";
