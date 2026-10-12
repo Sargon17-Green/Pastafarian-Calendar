@@ -191,3 +191,7 @@ Stage28 short-only historical zero rank for N>M remains unchanged and actually i
 ## Stage 30 DISCOVERY 15 — verified and closed
 
 Historical gate question always selects FOUNDATION+abs(index), including negative -1,-2, instead of normative FOUNDATION-index magnitude. Every queried positive-side gap uses the real Stage29 full pipeline (58 shared-memory writes per query), and the old gate day is accumulated with signed direction. Native test-only normative GateEngine independently evaluates correct negative-side Sauce. The fifteenth historical expected-red is independently verified. Stage31 correction not yet implemented. GitHub Actions run 38265673925 both jobs SUCCESS, all 12 signed real gates and 834 authentic production predecessor runs, 48,372 writes, zero upstream disagreements, 15th historic expected red verified.
+
+## Stage 31 PATCH15 — submitted for CI
+
+Full historical Stage30 legacy gate (F+abs(n)) is actually executed and retained. Correct signed questions use F+n or F-n with true Stage29 producer and 58 writes. On positive indices the prior correct predecessor result is reused, while negative indices add an actual separate Sauce run. Independent reference signed GateEngine, 720 permutation sequences, giant signed data, failure rollback and 15 archived RED proofs. Stage32 not started. Await CI before stage closure.

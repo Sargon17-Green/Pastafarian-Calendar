@@ -1,0 +1,9 @@
+# Stage 31 — PATCH 15: signed negative gate
+
+F=-15055671. Correct gate question is Sauce(F,F+s) for each nonzero signed step s. Each gap is 41+rank, where Bowl 1, seal 1, N=922. The original historical Stage30 oldQuestionDay(s)=F+abs(s) is unchanged and genuinely called for every legacy gap.
+
+The new handler takes two complete source sequences: original positive-side source ingredients, and correct signed-side ingredients with an explicit targetDay. It runs the full Stage30 chain first. Positive gates reuse that already-correct Stage29 predecessor result; negative gates physically call another full Stage29 predecessor at F-n. Each actual predecessor performs 58 shared writes. The corrected gate accumulates signed correct gaps. Both historical and corrected gate days and gap ledgers remain visible. Test-only oracle is not imported by production; input preflight and transactional outer commit preserve failure rollback.
+
+Guards: 8 true signed gates ±1..±4, 30 full predecessor calls, 1740 shared writes, five injected failure points, independent context and Stage54 barrier. Properties: 12 true signed gates ±1..±6, 63 full predecessor calls; 792 additional explicitly noncanonical mutated negative-side vectors (64 varied, 8 enormous signed, 720 distinct DROP46 orders), each with both historical and new corrected predecessor; 1647 property-suite calls, 95526 real shared writes. Independent normative GateEngine validates actual signed indices, and independent test-only bowl replay validates synthetic vectors. Prior 15 intentional RED tests remain unchanged.
+
+Status: CI pending, LAST_COMPLETED_STAGE=30. Stage32 not started.
