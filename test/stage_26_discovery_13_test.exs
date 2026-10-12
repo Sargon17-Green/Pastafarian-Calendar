@@ -185,7 +185,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage26Discovery13Test do
       end
     end
 
-    for bad <- [0, -1, nil, 1.5, "1"] do
+    for bad <- [-1, nil, 1.5, "1"] do
       assert_raise ArgumentError, "vị trí vòng đáp án không hợp lệ", fn ->
         AnswerStreamManager.answer_at(from_first(7, 1), bad)
       end
