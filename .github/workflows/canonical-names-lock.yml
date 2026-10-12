@@ -82,3 +82,9 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 145s perl -Ilib -It/lib tools/profile_unrank_middle.pl --seconds 20 --rss-kib 196608
+      - name: 僅限指定提交之長時間 47 月份中間排名量測（含 BLOCKED 分類）
+        if: contains(github.event.head_commit.message, '[weaving-unrank-middle-long]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 210s perl -Ilib -It/lib tools/profile_unrank_middle.pl --seconds 75 --rss-kib 262144

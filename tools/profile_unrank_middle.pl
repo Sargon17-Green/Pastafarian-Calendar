@@ -18,7 +18,7 @@ use Pastafari::NormativeScroll qw(unrankWeaving);
 my ($seconds,$rss_limit_kib)=(20,196608);
 GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_limit_kib)
     or die "稽核工具參數錯誤\n";
-die "時間限額須在 1..60 秒\n" if $seconds < 1 || $seconds > 60;
+die "時間限額須在 1..90 秒\n" if $seconds < 1 || $seconds > 90;
 die "RSS 限額須在 32768..1048576 KiB\n"
     if $rss_limit_kib < 32768 || $rss_limit_kib > 1048576;
 die "需要 Linux /proc\n" if !-r '/proc/self/status';
