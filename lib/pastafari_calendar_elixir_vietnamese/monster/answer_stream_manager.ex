@@ -3,18 +3,17 @@ defmodule PastafariCalendarElixirVietnamese.Monster.AnswerStreamManager do
   Xây dựng vòng đáp án từ sáu bát đúng và ID kế cận đã vá.
 
   Công thức first, hướng chạy và từng phần tử vòng đều chuẩn.
-  Bản vá 13 vẫn xử lý đúng hạng ngắn n<=M. Trong
-  phát hiện 14, khi n>M đường chọn hạng tổng quát
-  dùng LegacySingleDigitWidePick sai vì chỉ lấy một
-  phần tử answer_at(0) thay vì ghép nhiều chữ số.
+  Bản vá 13 xử lý hạng ngắn n<=M. Bản vá 14 ghép
+  nhiều chữ số trên cùng answer ring để xử lý n>M,
+  và loại bỏ phần dư của không gian wide đúng chuẩn.
   """
 
   import Bitwise
 
   alias PastafariCalendarElixirVietnamese.Monster.{
-    LegacySingleDigitWidePick,
     SaveManager,
-    ShortRejectionPatch
+    ShortRejectionPatch,
+    WideDetourPatch
   }
 
   @m (1 <<< 127) - 1
@@ -77,7 +76,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.AnswerStreamManager do
 
   def choose_rank(%__MODULE__{} = stream, n)
       when is_integer(n) and n > @m do
-    LegacySingleDigitWidePick.choose_rank(stream, n)
+    WideDetourPatch.choose_rank_wide(stream, n)
   end
 
   def choose_rank(_stream, _n) do

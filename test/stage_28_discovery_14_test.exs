@@ -38,7 +38,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage28Discovery14Test do
 
   test "hạng legacy không thể vượt M khi N lớn hơn M" do
     for first <- [1, 2, 37, @m - 1, @m], n <- [@m + 1, @m * @m + 1] do
-      rank = AnswerStreamManager.choose_rank(ring(first, 1), n)
+      rank = LegacySingleDigitWidePick.choose_rank(ring(first, 1), n)
       assert rank >= 1
       assert rank <= @m
       assert rank <= n
@@ -71,7 +71,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage28Discovery14Test do
     n = @m + 1
 
     assert LegacySingleDigitWidePick.choose_rank(stream, n) == 1
-    assert AnswerStreamManager.choose_rank(stream, n) == 1
+    assert AnswerStreamManager.choose_rank(stream, n) == @m + 1
     assert Ref.choose_rank_wide(reference_ring(1, 1), n) == @m + 1
   end
 
@@ -121,7 +121,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage28Discovery14Test do
 
     assert next_digit == @m
     assert AnswerStreamManager.answer_at(stream, 0) == 1
-    assert AnswerStreamManager.choose_rank(stream, @m + 1) == 1
+    assert AnswerStreamManager.choose_rank(stream, @m + 1) ==
+             Ref.choose_rank(reference_ring(1, -1), @m + 1)
     assert LegacySingleDigitWidePick.choose_rank(stream, @m + 1) == 1
   end
 
@@ -133,8 +134,9 @@ defmodule PastafariCalendarElixirVietnamese.Stage28Discovery14Test do
       stream = Calendar.answer_stream_spaghetti(c, t, id, seal)
       actual = Calendar.choose_rank_spaghetti(c, t, id, seal, @m + 1)
 
-      assert actual == LegacySingleDigitWidePick.choose_rank(stream, @m + 1)
-      assert actual == stream.first
+      expected = Ref.sauce(c, t) |> Ref.ask_bowl(id, seal) |> Ref.choose_rank(@m + 1)
+      assert actual == expected
+      assert LegacySingleDigitWidePick.choose_rank(stream, @m + 1) == stream.first
       assert stream.first in 1..@m
     end
   end
@@ -178,7 +180,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage28Discovery14Test do
 
       assert stream.first == expected.first
       assert stream.direction_step == expected.direction_step
-      assert Calendar.choose_rank_spaghetti(c, t, 2, 31, @m + 1) == stream.first
+      assert Calendar.choose_rank_spaghetti(c, t, 2, 31, @m + 1) ==
+               Ref.choose_rank(expected, @m + 1)
     end
   end
 
@@ -198,7 +201,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage28Discovery14Test do
       expected_stream = Ref.sauce(c, t) |> Ref.ask_bowl(4, 21)
       assert stream.first == expected_stream.first
       assert stream.direction_step == expected_stream.direction_step
-      assert rank == stream.first
+      assert rank == Ref.choose_rank(expected_stream, @m + 1)
     end)
   end
 
@@ -209,12 +212,12 @@ defmodule PastafariCalendarElixirVietnamese.Stage28Discovery14Test do
     dispatcher = Path.join(root, "dispatcher.ex") |> File.read!()
 
     assert manager =~ "ShortRejectionPatch.choose_rank_short(stream, n)"
-    assert manager =~ "LegacySingleDigitWidePick.choose_rank(stream, n)"
+    assert manager =~ "WideDetourPatch.choose_rank_wide(stream, n)"
     assert legacy =~ "AnswerStreamManager.answer_at(stream, 0)"
     assert legacy =~ "LegacyBiasedPick.biased_legacy_pick(x, n)"
     assert dispatcher =~ "AnswerStreamManager.choose_rank(n)"
     refute legacy =~ "smallest_power_count"
-    refute File.exists?(Path.join(root, "wide_detour_patch.ex"))
+    assert File.exists?(Path.join(root, "wide_detour_patch.ex"))
   end
 
   test "hồi quy chuẩn: N=M+1 cần hai chữ số, cố ý đỏ" do
