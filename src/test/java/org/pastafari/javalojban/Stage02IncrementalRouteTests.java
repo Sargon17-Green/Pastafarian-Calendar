@@ -311,6 +311,11 @@ public final class Stage02IncrementalRouteTests {
         long buildBaseline = family.tailFunctionalBuildCount();
         long usedHeapStart = Runtime.getRuntime().totalMemory()
             - Runtime.getRuntime().freeMemory();
+        long previousSegmentNanos = start;
+        long previousSegmentHits = 0;
+        long previousSegmentBuilds = 0;
+        int previousOpened = 0;
+        int previousClosed = 0;
         for (int call = 1; call <= 24; call++) {
             MonsterWeavingLinearCounter.RankRoute prior = route;
             route = family.advanceGlobalRankRouteShared(route, 8, 2);
@@ -327,6 +332,39 @@ public final class Stage02IncrementalRouteTests {
                     && route.upperRank().compareTo(rank) >= 0,
                 "E_SHARED_EXTENDED_RANK_CONTAINED");
             count += route.lastSharedBatchCalls();
+            if (call % 4 == 0) {
+                int[] currentPrefix = route.fixedPrefixCopy();
+                int[] occurrences = new int[lengths.length];
+                int opened = 0;
+                for (int month : currentPrefix) {
+                    occurrences[month - 1]++;
+                    opened = Math.max(opened, month);
+                }
+                int closed = 0;
+                while (closed < lengths.length
+                        && occurrences[closed] == lengths[closed]) {
+                    closed++;
+                }
+                ok(opened >= previousOpened && closed >= previousClosed,
+                    "E_SHARED_EXTENDED_MONOTONE_MONTH_COUNTS");
+                ok(closed <= opened, "E_SHARED_EXTENDED_CLOSED_BOUND");
+                long now = System.nanoTime();
+                long hits = family.tailFunctionalReuseHitCount() - hitBaseline;
+                long builds = family.tailFunctionalBuildCount() - buildBaseline;
+                System.out.println("STAGE_02_SHARED_FOUR_STEP_PROFILE_PASS"
+                    + " calls=" + call
+                    + " prefix_days=" + route.stepsCompleted()
+                    + " opened=" + opened
+                    + " closed=" + closed
+                    + " segment_ms=" + (now - previousSegmentNanos) / 1000000
+                    + " segment_hits=" + (hits - previousSegmentHits)
+                    + " segment_builds=" + (builds - previousSegmentBuilds));
+                previousSegmentNanos = now;
+                previousSegmentHits = hits;
+                previousSegmentBuilds = builds;
+                previousOpened = opened;
+                previousClosed = closed;
+            }
             if (call == 12 || call == 24) {
                 long now = System.nanoTime();
                 long used = Runtime.getRuntime().totalMemory()
