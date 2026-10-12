@@ -95,7 +95,7 @@ export class Discovery15PositiveSideGateHandler {
          preceding.selectionMode!=="SHORT_LEGACY"||
          preceding.preceding.preceding.preceding.legacyModuloCalls!==1||
          preceding.preceding.preceding.preceding.preceding.preceding.latchCaptures!==1||
-         preceding.preceding.preceding.preceding.preceding.preceding.preceding.historical.latestSource!=="STIR_12")
+         preceding.preceding.preceding.preceding.preceding.preceding.historical.latestSource!=="STIR_12")
         throw new MonsterStageError("Stage29 ची पूर्ण 58-write chain आवश्यक");
       const rank=preceding.correctedRank;
       if(rank<1n||rank>922n)
