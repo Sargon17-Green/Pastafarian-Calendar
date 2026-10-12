@@ -3,14 +3,13 @@ module pastafari
 // ደረጃ 20፦ አራቱ የቀድሞ አንድ-ጊዜ የቦውል ማንበቢያ መስፈርቶች።
 // በDISCOVERY 10 እነዚህ ሆን ብለው RED ናቸው፤ በPATCH 10 ብቻ GREEN ይሆናሉ።
 fn discovery10_red_fixture(order []int) []BigInt {
-	bowls := [big_zero(), big_from_int(10), big_from_int(20), big_from_int(30),
-		big_from_int(40), big_from_int(50), big_from_int(60)]
+	bowls := [big_zero(), big_from_int(10), big_from_int(20),
+		big_from_int(30), big_from_int(40), big_from_int(50),
+		big_from_int(60)]
 	drop := big_from_int(2)
 	stones := initial_stones()
 	pours := calendar_pours_spaghetti(1, drop, stones, bowls, order) or { []BigInt{} }
-	return calendar_stir_bowls_spaghetti(1, drop, stones, bowls, order, pours) or {
-		[]BigInt{}
-	}
+	return calendar_stir_bowls_spaghetti(1, drop, stones, bowls, order, pours) or { []BigInt{} }
 }
 
 fn test_discovery10_expected_red_identity_second_bowl_snapshot() {
@@ -44,10 +43,11 @@ fn test_discovery10_control_reversed_first_position_uncontaminated() {
 }
 
 fn test_discovery10_control_previous_patch09_pours_correct() {
-	bowls := [big_zero(), big_from_int(10), big_from_int(20), big_from_int(30),
-		big_from_int(40), big_from_int(50), big_from_int(60)]
-	pours := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls,
-		[6, 5, 4, 3, 2, 1]) or { []BigInt{} }
+	bowls := [big_zero(), big_from_int(10), big_from_int(20),
+		big_from_int(30), big_from_int(40), big_from_int(50),
+		big_from_int(60)]
+	pours := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls, [6, 5, 4, 3,
+		2, 1]) or { []BigInt{} }
 	assert pours[1].str() == '1027'
 	assert pours[2].str() == '1459'
 	assert pours[3].str() == '1731'

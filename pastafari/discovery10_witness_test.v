@@ -11,9 +11,7 @@ fn discovery10_fixture_result(order []int) []BigInt {
 	drop := big_from_int(2)
 	stones := initial_stones()
 	pours := calendar_pours_spaghetti(1, drop, stones, bowls, order) or { []BigInt{} }
-	return calendar_stir_bowls_spaghetti(1, drop, stones, bowls, order, pours) or {
-		[]BigInt{}
-	}
+	return calendar_stir_bowls_spaghetti(1, drop, stones, bowls, order, pours) or { []BigInt{} }
 }
 
 fn test_discovery10_identity_order_shows_sequential_contamination() {
@@ -30,10 +28,10 @@ fn test_discovery10_legacy_is_really_mutating_in_place() {
 	orig := discovery10_fixture_bowls()
 	mut working := discovery10_fixture_bowls()
 	order := [1, 2, 3, 4, 5, 6]
-	pours := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), orig,
-		order) or { []BigInt{} }
-	old_stir_bowls_in_place(1, big_from_int(2), initial_stones(), mut working, order,
-		pours) or {
+	pours := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), orig, order) or {
+		[]BigInt{}
+	}
+	old_stir_bowls_in_place(1, big_from_int(2), initial_stones(), mut working, order, pours) or {
 		assert false
 		return
 	}
@@ -46,12 +44,13 @@ fn test_discovery10_legacy_is_really_mutating_in_place() {
 fn test_discovery10_legacy_wrapper_separates_caller_input() {
 	bowls := discovery10_fixture_bowls()
 	order := [1, 2, 3, 4, 5, 6]
-	pours := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls,
-		order) or { []BigInt{} }
-	first := calendar_stir_bowls_spaghetti(1, big_from_int(2), initial_stones(), bowls,
-		order, pours) or { []BigInt{} }
-	second := new_base_dispatcher().dispatch_legacy_bowl_stir(1, big_from_int(2),
-		initial_stones(), bowls, order, pours) or { []BigInt{} }
+	pours := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls, order) or {
+		[]BigInt{}
+	}
+	first := calendar_stir_bowls_spaghetti(1, big_from_int(2), initial_stones(), bowls, order,
+		pours) or { []BigInt{} }
+	second := new_base_dispatcher().dispatch_legacy_bowl_stir(1, big_from_int(2), initial_stones(),
+		bowls, order, pours) or { []BigInt{} }
 	assert first == second
 	assert bowls[1].str() == '10'
 	assert bowls[6].str() == '60'
@@ -82,21 +81,23 @@ fn test_discovery10_reject_invalid_inputs_before_mutation() {
 	bowls := discovery10_fixture_bowls()
 	mut working := discovery10_fixture_bowls()
 	order := [1, 2, 3, 4, 5, 6]
-	valid := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls,
-		order) or { []BigInt{} }
+	valid := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls, order) or {
+		[]BigInt{}
+	}
 	for invalid_i in [-1, 0, 47] {
 		mut rejected := false
-		old_stir_bowls_in_place(invalid_i, big_from_int(2), initial_stones(), mut working,
-			order, valid) or { rejected = true }
+		old_stir_bowls_in_place(invalid_i, big_from_int(2), initial_stones(), mut working, order,
+			valid) or { rejected = true }
 		assert rejected
 	}
 	mut rejected := false
-	old_stir_bowls_in_place(1, big_from_int(2), initial_stones(), mut working,
-		[1, 2, 3, 4, 5, 5], valid) or { rejected = true }
+	old_stir_bowls_in_place(1, big_from_int(2), initial_stones(), mut working, [1, 2, 3, 4, 5,
+		5], valid) or { rejected = true }
 	assert rejected
 	rejected = false
-	old_stir_bowls_in_place(1, big_from_int(2), initial_stones(), mut working, order,
-		[big_zero()]) or { rejected = true }
+	old_stir_bowls_in_place(1, big_from_int(2), initial_stones(), mut working, order, [
+		big_zero(),
+	]) or { rejected = true }
 	assert rejected
 	assert working == bowls
 }
@@ -109,12 +110,8 @@ fn test_discovery10_large_negative_inputs_stable() {
 	stones := initial_stones()
 	order := [6, 5, 4, 3, 2, 1]
 	pours := calendar_pours_spaghetti(46, drop, stones, bowls, order) or { []BigInt{} }
-	first := calendar_stir_bowls_spaghetti(46, drop, stones, bowls, order, pours) or {
-		[]BigInt{}
-	}
-	second := calendar_stir_bowls_spaghetti(46, drop, stones, bowls, order, pours) or {
-		[]BigInt{}
-	}
+	first := calendar_stir_bowls_spaghetti(46, drop, stones, bowls, order, pours) or { []BigInt{} }
+	second := calendar_stir_bowls_spaghetti(46, drop, stones, bowls, order, pours) or { []BigInt{} }
 	assert first == second
 	assert bowls[1].str() == huge.str()
 	assert bowls[2].str() == big_neg(huge).str()
@@ -132,8 +129,9 @@ fn test_discovery10_all_720_orders_keep_legacy_sequential_path() {
 		pours := calendar_pours_spaghetti(2, big_from_int(17), stones, bowls, order) or {
 			[]BigInt{}
 		}
-		result := calendar_stir_bowls_spaghetti(2, big_from_int(17), stones, bowls,
-			order, pours) or { []BigInt{} }
+		result := calendar_stir_bowls_spaghetti(2, big_from_int(17), stones, bowls, order, pours) or {
+			[]BigInt{}
+		}
 		assert result.len == 7
 		assert result[0].is_zero()
 		for id in 1 .. 7 {
