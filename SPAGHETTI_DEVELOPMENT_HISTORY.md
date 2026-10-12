@@ -398,3 +398,32 @@ khóa tên chuẩn PASS.
 Oracle test-only không đổi, blob SHA
 `be1638f46b2190d617af0378a61b077bda10bf32`.
 Đóng giai đoạn 13 ở GREEN; chưa bắt đầu DISCOVERY 07.
+
+## Giai đoạn 14 — Phát hiện 07: chỉ số sai trong bảng nghiền
+
+**Lỗi lịch sử được tạo trên đường sản xuất:** Bảng
+`LegacyGrindTable` chứa 11 hàng nghiền thực từ vị trí
+0 đến 10, trong khi bộ đọc `legacy_row(number)` được
+viết như thể bảng bắt đầu tại vị trí 1. Bộ đọc gọi
+`Enum.at(@real_rows,number,@missing_row)` với number
+từ 1 đến 11; giá trị dự phòng cố định tại lần đọc cuối
+là `{0,0,0,0,1}`. Hàng thực thứ nhất bị bỏ qua.
+
+**Vết sai có thể tái lập:** Thay vì 11 hàng đúng, mã
+dùng hàng thứ 2..11 rồi hàng dự phòng. Bảy giọt ẩn,
+ba lần đọc lịch sử qua PATCH 06, bảng đá và SAVE
+đều còn đúng. Sai lệch sinh ra trong 11 phép nghiền
+mỗi giọt và lan qua các giọt 1..46.
+
+**Bằng chứng kiểm thử:** 14 bài kiểm thử mới gồm kiểm tra
+mười lần dịch hàng, fallback, tính độc lập, đối chứng giọt
+đầu và giọt cuối, số nguyên rất lớn, mã nguồn và tham số.
+Các kiểm thử chuẩn cũ không được sửa để che lỗi mới:
+các kiểm thử so sánh giọt nhìn thấy với oracle phải
+đỏ cho đến khi bản vá 07 được triển khai.
+
+**Giới hạn của lần phát hiện:** Không đưa sentinel vào
+index 0 tại giai đoạn 14. Bản vá 07 của giai đoạn 15
+phải thêm sentinel ở index 0, 11 hàng thực tại 1..11,
+và giữ nguyên phép đọc chỉ số `legacy_row`. Không
+mở các lỗi hoán vị và bát ở các giai đoạn sau.

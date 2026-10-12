@@ -427,3 +427,29 @@ lớp vá 01–05, kho các giọt hay giới hạn chưa tích hợp lịch.
 Trạng thái giai đoạn 13/55: `GREEN` đã được xác minh.
 Giai đoạn tiếp theo là 14/55, `DISCOVERY 07`,
 liên quan sai lệch chỉ số của bảng nghiền. Chưa khởi động.
+
+## Giai đoạn 14 — Phát hiện 07: bảng nghiền sai chỉ số
+
+Đã có 11 hàng nghiền đúng trong chương trình giai đoạn 13,
+nhưng lần phát hiện thứ bảy lưu chúng từ index 0 trong
+`LegacyGrindTable` và cho hàm `legacy_row(number)` đọc
+trực tiếp index từ 1 đến 11. Vì vậy lần nghiền thứ nhất
+sử dụng hàng thứ hai; lần thứ mười sử dụng hàng thứ mười một;
+lần thứ mười một dùng hàng dự phòng `{0,0,0,0,1}`.
+
+`VisibleDropCalculator` gọi hàm legacy thực cho cả 11 lần,
+không bỏ qua lời gọi nào. SAVE, bảng đá, các giọt ẩn và cách
+đọc ba giá trị trước đó vẫn qua sáu bản vá đã xác minh.
+Các giá trị giọt nhìn thấy lệch chuẩn do thứ tự hàng nghiền,
+không phải lỗi tính toán của các thành phần trước.
+
+Giai đoạn DISCOVERY 07 không được sửa bảng hay đưa sentinel
+vào index 0. Giai đoạn 15, `PATCH 07`, sẽ **đặt một hàng
+sentinel thực tại index 0** và để 11 hàng nghiền thật tại
+index 1..11, không thay hàm `legacy_row` hoặc xóa sentinel.
+
+Giữ các kiểm thử đối chiếu chuẩn từ giai đoạn trước: lỗi mới
+ảnh hưởng cả đường sản xuất, nên những kiểm thử đầu ra cũ có
+thể đỏ có chủ đích và phải xanh lại sau PATCH 07. 14 kiểm thử
+mới chứng minh dãy hàng lệch, giá trị dự phòng và toàn bộ
+đường gọi thực. Không sửa các kỳ vọng chuẩn.

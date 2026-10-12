@@ -1,27 +1,14 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.VisibleDropCalculator do
   @moduledoc """
-  Sinh 46 giọt nhìn thấy với bản vá 06 định tuyến ba lần đọc lịch sử.
+  Sinh 46 giọt nhìn thấy với đường đọc quá khứ đã vá đúng.
 
-  Với địa chỉ dương, dùng LegacyPrior thực trên kho nhìn thấy.
-  Với ô âm hoặc ô không, bản vá gọi HiddenDropManager để lấy
-  giọt ẩn đã tính trong bootstrap. Các kho luôn tách biệt.
+  Phát hiện 07 cố ý lấy hàng nghiền qua chỉ số 1..11 của
+  LegacyGrindTable lưu từ chỉ số 0. Phép đọc lịch sử này
+  chưa được sửa; các giọt ẩn và công thức SAVE vẫn chính xác.
   """
 
-  alias PastafariCalendarElixirVietnamese.Monster.{PriorPatch, SaveManager}
+  alias PastafariCalendarElixirVietnamese.Monster.{LegacyGrindTable, PriorPatch, SaveManager}
 
-  @grinds [
-    {3, 5, 7, 11, 1},
-    {5, 7, 11, 13, 2},
-    {7, 11, 13, 17, 3},
-    {11, 13, 17, 19, 4},
-    {13, 17, 19, 23, 5},
-    {17, 19, 23, 29, 1},
-    {19, 23, 29, 31, 2},
-    {23, 29, 31, 37, 3},
-    {29, 31, 37, 41, 4},
-    {31, 37, 41, 43, 5},
-    {37, 41, 43, 47, 1}
-  ]
 
   def calculate(calculation_day, target_day, action_tag, target_tag, distance, stones, hidden_storage)
       when is_integer(calculation_day) and is_integer(target_day) do
@@ -53,7 +40,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.VisibleDropCalculator do
         )
 
       result =
-        Enum.reduce(@grinds, seed, fn {a, b, c, d, kind}, old_value ->
+        Enum.reduce(1..11, seed, fn grind_number, old_value ->
+          {a, b, c, d, kind} = LegacyGrindTable.legacy_row(grind_number)
           SaveManager.calculate(
             old_value * old_value +
               a * old_value +
