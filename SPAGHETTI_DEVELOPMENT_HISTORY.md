@@ -161,3 +161,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 19 — PATCH 09 (በV CI ማረጋገጫ ላይ)
 
 `PourPatch09` አዲስ በእያንዳንዱ ጥሪ የሚገነባ `bowl_alias` ካርታ አስገብቷል። አሮጌው `old_pours_fixed_bowls` እንደበፊቱ `bowls[1]`፣ `bowls[2]` እና `bowls[3]` ያነባል፤ አዲሱ wrapper ግን በalias ተዘጋጅቶ የየቦታውን የጎድጓዳ ሳህን እሴት ወደ አሮጌው አካል ያስገባል። የlegacy ሂሳቡ እና የSAVE ጥሪው በእውነት ይተገበራሉ። `calendar_date_spaghetti` በምርመራ መልዕክት `DISCOVERY_09 oldPour1` እና `PATCH_09 pour1` ውጤቶችን በተለያዩ መንገዶች ያሳያል። `patch09_test.v` ሁሉንም 720 ቅደም ተከተሎች፣ 390-ቢት የተፈረሙ ግቤቶችን፣ የታሪክ ስህተት ጥሪን፣ የማይቀየሩ ግቤቶችን፣ ያልተፈቀዱ ቅደም ተከተሎችንና ተደጋጋሚ ጥሪዎችን ይፈትሻል። ደረጃ 20 አልተጀመረም።
+
+### የደረጃ 19 መዝጊያ — GREEN
+
+የመጀመሪያው የGitHub Actions run `38246157972` ሙሉ 28/28 የV ፈተና ፋይሎችን PASS አድርጓል። የV 0.5.2 formatter በ`discovery09_witness_test.v`፣ `monster_base.v` እና `patch09_test.v` የረድፍ አቀማመጥ ልዩነቶችን አሳይቷል። በቀጥታ ከnative formatter የተገኙት ልዩነቶች ተግብረው፣ ጊዜያዊ የformatter ምርመራ እርምጃ ተወግዷል። በcommit `0e49358618324e1200ab537d5658edc9da23e870` ላይ GitHub Actions run `38246568417` በሁለቱም ሥራዎች PASS ነው። `v fmt -verify ./pastafari` PASS፤ `v test ./pastafari` **28/28 PASS**። የደረጃ 18 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። `old_pours_fixed_bowls` በቋሚ ID የሚያነበው ታሪካዊ ስህተት ተጠብቋል፤ `PourPatch09` በየጥሪው የራሱን `bowl_alias` ይገነባል። የማስረጃ ቅርስ `11745502741` ተቀምጧል። `PATCH 10` አልተጀመረም። **ደረጃ 19 COMPLETE / GREEN።**
