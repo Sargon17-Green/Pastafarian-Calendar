@@ -76,9 +76,12 @@ fn test_discovery13_modulo_bias_witness_and_legacy_dispatch() {
 	assert big_cmp(m, limit) > 0
 	legacy := new_base_dispatcher().dispatch_legacy_biased_pick(m, n) or { panic(err.msg()) }
 	assert big_eq(legacy, big_sub(n, big_one()))
-	assert big_eq(calendar_choose_rank_short_spaghetti(discovery13_stream(m, 1), n) or {
+	// የታሪኩ modulo ስህተት ይቀራል፤ ሆኖም production ትክክለኛ ነው።
+	patched := calendar_choose_rank_short_spaghetti(discovery13_stream(m, 1), n) or {
 		big_zero()
-	}, legacy)
+	}
+	assert big_eq(patched, big_one())
+	assert !big_eq(patched, legacy)
 }
 
 fn test_discovery13_dividing_ranges_have_no_bias() {

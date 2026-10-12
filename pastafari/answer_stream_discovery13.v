@@ -45,12 +45,8 @@ pub fn calendar_answer_at_spaghetti(stream AnswerStream, k BigInt) !BigInt {
 
 // የታሪክ ስህተት፦ x>floor(M/n)*n እንኳ ሳይጣል ወዲያውኑ ይመረጣል።
 pub fn calendar_choose_rank_short_spaghetti(stream AnswerStream, n BigInt) !BigInt {
-	m := legacy_m_old()
-	if big_cmp(n, big_one()) < 0 || big_cmp(n, m) > 0 {
-		return error('የአጭር ምርጫ n ከ1 እስከ M መሆን አለበት')
-	}
-	x := calendar_answer_at_spaghetti(stream, big_zero())!
-	return new_base_dispatcher().dispatch_legacy_biased_pick(x, n)
+	result := new_base_dispatcher().dispatch_short_rejection_patch13(stream, n)!
+	return result.rank
 }
 
 // PATCH 11 የተጠበቀውን የ46ኛው ቅደም ተከተል ያስተላልፋል።
