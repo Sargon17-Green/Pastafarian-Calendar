@@ -130,7 +130,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage29Patch14Test do
 
   test "các miền rộng 127 đến 2048 bit đều khớp oracle" do
     for n <- [@m + 1, @m * @m - 1, @m * @m + 1, @m * @m * @m,
-               @m ** 7, @m ** 8 + 1, 1 <<< 2048],
+               Integer.pow(@m, 7), Integer.pow(@m, 8) + 1, 1 <<< 2048],
         first <- [1, 2, 17, @m - 1], step <- [-1, 1] do
       assert WideDetourPatch.choose_rank_wide(ring(first, step), n) ==
                Ref.choose_rank(oracle(first, step), n)
@@ -138,7 +138,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage29Patch14Test do
   end
 
   test "báo cáo wide tự nhất quán với phép chọn và điều kiện rejection" do
-    for n <- [@m + 1, @m * @m, @m * @m + 1, @m ** 4],
+    for n <- [@m + 1, @m * @m, @m * @m + 1, Integer.pow(@m, 4)],
         first <- [1, 2, 17, @m], step <- [-1, 1] do
       stream = ring(first, step)
       report = WideDetourPatch.diagnose(stream, n)
@@ -207,7 +207,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage29Patch14Test do
 
   test "LegacySingleDigitWidePick không bị sửa bởi bản vá" do
     stream = ring(1, 1)
-    for n <- [@m + 1, @m * @m, @m ** 3 + 1] do
+    for n <- [@m + 1, @m * @m, Integer.pow(@m, 3) + 1] do
       assert LegacySingleDigitWidePick.choose_rank(stream, n) == 1
       assert AnswerStreamManager.choose_rank(stream, n) > 1
     end
