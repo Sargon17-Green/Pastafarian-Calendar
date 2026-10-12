@@ -38,12 +38,30 @@ fn test_discovery08_historical_caller_uses_one_based_as_rank0() {
 	dispatcher := new_base_dispatcher()
 	assert (dispatcher.dispatch_legacy_permutation(big_one()) or { []int{} }) == [1, 2, 3, 4, 6,
 		5]
-	assert (dispatcher.dispatch_legacy_permutation(big_from_int(2)) or { []int{} }) == [1, 2,
-		3, 5, 4, 6]
-	assert (dispatcher.dispatch_legacy_permutation(big_from_int(719)) or { []int{} }) == [6,
-		5, 4, 3, 2, 1]
-	assert (dispatcher.dispatch_legacy_permutation(big_from_int(721)) or { []int{} }) == [1,
-		2, 3, 4, 6, 5]
+	assert (dispatcher.dispatch_legacy_permutation(big_from_int(2)) or { []int{} }) == [
+		1,
+		2,
+		3,
+		5,
+		4,
+		6,
+	]
+	assert (dispatcher.dispatch_legacy_permutation(big_from_int(719)) or { []int{} }) == [
+		6,
+		5,
+		4,
+		3,
+		2,
+		1,
+	]
+	assert (dispatcher.dispatch_legacy_permutation(big_from_int(721)) or { []int{} }) == [
+		1,
+		2,
+		3,
+		4,
+		6,
+		5,
+	]
 }
 
 fn test_discovery08_historical_drop_720_rejects_one_based_rank_720() {
@@ -67,8 +85,8 @@ fn test_discovery08_large_and_negative_drops_keep_legacy_modulo_behavior() {
 		big_add(big_neg(huge), big_one()),
 		big_from_int(-719),
 	] {
-		assert (dispatcher.dispatch_legacy_permutation(drop) or { []int{} }) == [1, 2, 3, 4,
-			6, 5]
+		assert (dispatcher.dispatch_legacy_permutation(drop) or { []int{} }) == [1, 2, 3, 4, 6,
+			5]
 	}
 }
 

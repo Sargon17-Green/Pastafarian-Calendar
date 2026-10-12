@@ -17,12 +17,12 @@ fn test_patch08_boundaries_and_explicit_permutation_fixtures() {
 	assert patch.legacy_rank0(big_from_int(720)) == 719
 	assert patch.legacy_rank0(big_from_int(721)) == 0
 	assert (calendar_bowl_order_spaghetti(big_zero()) or { []int{} }) == [6, 5, 4, 3, 2, 1]
-	assert (calendar_bowl_order_spaghetti(big_from_int(719)) or { []int{} }) == [6, 5, 4,
-		3, 1, 2]
-	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6, 5, 4,
-		3, 2, 1]
-	assert (calendar_bowl_order_spaghetti(big_from_int(721)) or { []int{} }) == [1, 2, 3,
-		4, 5, 6]
+	assert (calendar_bowl_order_spaghetti(big_from_int(719)) or { []int{} }) == [6, 5, 4, 3, 1,
+		2]
+	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6, 5, 4, 3, 2,
+		1]
+	assert (calendar_bowl_order_spaghetti(big_from_int(721)) or { []int{} }) == [1, 2, 3, 4, 5,
+		6]
 }
 
 fn test_patch08_exhaustive_720_orders_match_old_zero_based_unrank() {
@@ -47,8 +47,8 @@ fn test_patch08_exhaustive_720_orders_match_old_zero_based_unrank() {
 fn test_patch08_legacy_wrong_caller_remains_accessible() {
 	dispatcher := new_base_dispatcher()
 	assert (old_permutation_unrank0(0) or { []int{} }) == [1, 2, 3, 4, 5, 6]
-	assert (dispatcher.dispatch_legacy_permutation(big_one()) or { []int{} }) == [1, 2,
-		3, 4, 6, 5]
+	assert (dispatcher.dispatch_legacy_permutation(big_one()) or { []int{} }) == [1, 2, 3, 4, 6,
+		5]
 	assert (calendar_bowl_order_spaghetti(big_one()) or { []int{} }) == [1, 2, 3, 4, 5, 6]
 	mut failed := false
 	_ = dispatcher.dispatch_legacy_permutation(big_from_int(720)) or {
@@ -56,8 +56,8 @@ fn test_patch08_legacy_wrong_caller_remains_accessible() {
 		[]int{}
 	}
 	assert failed
-	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6, 5,
-		4, 3, 2, 1]
+	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6, 5, 4, 3, 2,
+		1]
 }
 
 fn test_patch08_720_periodic_wrap_across_negative_and_positive_drops() {
@@ -65,8 +65,7 @@ fn test_patch08_720_periodic_wrap_across_negative_and_positive_drops() {
 	for base in [-1441, -720, -719, -1, 0, 1, 2, 719, 720, 721, 1440, 1441] {
 		for turns in [-3, -1, 0, 1, 3] {
 			moved := base + turns * 720
-			expected_rank := int(big_mod_small_nonnegative(big_sub(big_from_int(base), big_one()),
-				720))
+			expected_rank := int(big_mod_small_nonnegative(big_sub(big_from_int(base), big_one()), 720))
 			actual_rank := patch.legacy_rank0(big_from_int(moved))
 			assert actual_rank == expected_rank
 			expected := calendar_bowl_order_spaghetti(big_from_int(base)) or { []int{} }
@@ -101,9 +100,7 @@ fn test_patch08_reentrant_inputs_and_no_shared_registry_order() {
 	for repeat in 0 .. 12 {
 		assert (calendar_bowl_order_spaghetti(first) or { []int{} }) == expected_first
 		assert (calendar_bowl_order_spaghetti(second) or { []int{} }) == expected_second
-		assert (new_base_dispatcher().dispatch_permutation_patch08(first) or {
-			[]int{}
-		}) == expected_first
+		assert (new_base_dispatcher().dispatch_permutation_patch08(first) or { []int{} }) == expected_first
 	}
 }
 
