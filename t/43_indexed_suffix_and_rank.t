@@ -13,6 +13,18 @@ use Pastafari::WeavingRank qw(rankWeavingPolynomial);
 use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 use Pastafari::NormativeScroll qw(unrankWeaving);
 
+my $normalized=Pastafari::WeavingSuffixFactor::_normalize_profile_options(
+    {profile_engine=>'stream-indexed'});
+is($normalized->{max_temp_file_bytes},128*1024*1024,
+   '索引引擎預設容量會完整傳遞至下游磁碟儲存');
+my $explicit=Pastafari::WeavingSuffixFactor::_normalize_profile_options(
+    {profile_engine=>'stream-indexed',max_temp_file_bytes=>2048});
+is($explicit->{max_temp_file_bytes},2048,
+   '索引引擎指定容量保持不變');
+my $resident=Pastafari::WeavingSuffixFactor::_normalize_profile_options(
+    {profile_engine=>'resident'});
+ok(!exists($resident->{max_temp_file_bytes}),
+   '常駐引擎不暴露未請求的磁碟容量');
 my $cases=0;
 for my $lengths ([2,2,2],[3,3,3],[4,4,4,4],[(4)x8],
                  [(4)x47],[(6)x17,(5)x30]) {

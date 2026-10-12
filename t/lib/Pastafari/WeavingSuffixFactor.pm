@@ -37,7 +37,7 @@ sub _normalize_profile_options ($options = undef) {
         $max_bytes=0+"$max_bytes";
     }
     return {profile_engine=>$engine,
-            ($engine eq 'stream' ? (max_temp_file_bytes=>$max_bytes) : ())};
+            ($engine ne 'resident' ? (max_temp_file_bytes=>$max_bytes) : ())};
 }
 
 
