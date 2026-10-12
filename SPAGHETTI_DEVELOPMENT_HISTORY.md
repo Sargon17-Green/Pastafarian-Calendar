@@ -324,3 +324,15 @@ Mae'r hen adalydd yn storio union 11 rhes ffisegol zero-based ar gyfer yr unardd
 ### Cam 14 — ardystiad JVM brodorol llawn
 
 Ar commit `634b30b4ccdf2830b0cb16a98d19e689462ea8e4` llwyddodd swydd `native-stage14-kotlin-cymraeg` (`114757365134`, rhediad `38233182742`) gyda Kotlin 1.9.0/JDK 21, ffynonellau gwreiddiol a'r oracl. Gwiriwyd 43 marc o log y swydd: yr holl atchweliadau Camau 1–13, 11 rhes grind zero-based heb sentinel, 11 `EXPECTED_RED`, 0 `MATCH`, 66 prawf BigInteger annibynnol, drysau a methiant strict bwriadol. Mae Cam 14 yn gyflawn; ni ddechreuwyd PATCH 07/Cam 15.
+
+
+## Cam 15 — PATCH 07: cyfieithydd sentinel y rhesi malu
+
+Mae'r adapter DISCOVERY 07 yn parhau'n union fel yr oedd. Mae
+`GrindPatchWrapper.patch` yn galw'r darllenydd hen yn gyntaf ac yna'n
+creu golwg gyda sentinel `null` yn safle 0; mae ordinal 1..11 yn darllen
+rhes 1..11 yn gywir heb drosysgrifo'r tabl ffisegol. Mae
+`MonsterBootstrapManager.applyGrindPatch` yn cadw'r hen wahaniaeth,
+yr allbwn cywir a pherchnogaeth pob galwad. Nid yw Cam 15 yn adeiladu
+diferion gweledig. Mae'r ardystiad Kotlin/JVM brodorol yn aros am CI;
+cedwir `LAST_COMPLETED_STAGE=14` hyd at hynny.

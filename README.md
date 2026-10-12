@@ -304,3 +304,15 @@ Mae `LegacyGrindTableAdapter` yn storio 11 rhes grŵp malu gwirioneddol, heb sen
 Mae `run-stage14-tests.sh` yn rhedeg Camau 1–13 ac yn gwirio'r 11 rhes, 66 tyst `BigInteger` annibynnol, gwarchodion a methiant strict bwriadol. **`LAST_COMPLETED_STAGE=13` nes bod y CI brodorol wedi pasio.** Nid oes sentinel, PATCH 07 na chyfrifiad diferion gweledig yng Ngham 14.
 
 **Ardystiad Cam 14:** llwyddodd `sh run-stage14-tests.sh` ar commit `634b30b4ccdf2830b0cb16a98d19e689462ea8e4`, Kotlin 1.9.0 a JDK 21 gyda'r ffynonellau ac oracl gwreiddiol. Gwiriwyd 43 marc yn y log GitHub Actions: 11 `EXPECTED_RED` ac 0 `MATCH`, grind 1→rhes 2, grind 10→rhes 11, grind 11→`undefined`, 66 tyst BigInteger annibynnol, prawf strict disgwyliedig a holl atchweliadau Camau 1–13. **`LAST_COMPLETED_STAGE=14`**. Cam 15 (`PATCH 07`) yw'r nesaf; nid yw wedi'i ddechrau. Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38233182742
+
+
+## Cam 15 — PATCH 07: cyfieithydd sentinel y rhesi malu
+
+Mae'r adapter DISCOVERY 07 yn parhau'n union fel yr oedd. Mae
+`GrindPatchWrapper.patch` yn galw'r darllenydd hen yn gyntaf ac yna'n
+creu golwg gyda sentinel `null` yn safle 0; mae ordinal 1..11 yn darllen
+rhes 1..11 yn gywir heb drosysgrifo'r tabl ffisegol. Mae
+`MonsterBootstrapManager.applyGrindPatch` yn cadw'r hen wahaniaeth,
+yr allbwn cywir a pherchnogaeth pob galwad. Nid yw Cam 15 yn adeiladu
+diferion gweledig. Mae'r ardystiad Kotlin/JVM brodorol yn aros am CI;
+cedwir `LAST_COMPLETED_STAGE=14` hyd at hynny.

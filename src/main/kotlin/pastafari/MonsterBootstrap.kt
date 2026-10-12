@@ -76,7 +76,17 @@ data class BaseMonsterContext(
     var discovery07LegacyRow: VisibleGrindRow? = null,
     var discovery07Undefined: Boolean? = null,
     var discovery07PhysicalRows: List<VisibleGrindRow>? = null,
-    var discovery07InvocationCount: Int = 0
+    var discovery07InvocationCount: Int = 0,
+    var patch07RequestedGrind: Int? = null,
+    var patch07LegacyDirectIndex: Int? = null,
+    var patch07LegacyRow: VisibleGrindRow? = null,
+    var patch07LegacyUndefined: Boolean? = null,
+    var patch07PhysicalRows: List<VisibleGrindRow>? = null,
+    var patch07SentinelRows: List<VisibleGrindRow?>? = null,
+    var patch07TranslatedIndex: Int? = null,
+    var patch07CorrectedRow: VisibleGrindRow? = null,
+    var patch07Applied: Boolean = false,
+    var patch07InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -139,7 +149,8 @@ class MonsterBootstrapManager(
     val hiddenNearnessPatchWrapper: HiddenNearnessPatchWrapper = HiddenNearnessPatchWrapper(legacyHiddenDropAdapter),
     val legacyPriorAdapter: LegacyPriorAdapter = LegacyPriorAdapter(),
     val priorPatchWrapper: PriorPatchWrapper = PriorPatchWrapper(legacyPriorAdapter, hiddenNearnessPatchWrapper),
-    val legacyGrindTableAdapter: LegacyGrindTableAdapter = LegacyGrindTableAdapter()
+    val legacyGrindTableAdapter: LegacyGrindTableAdapter = LegacyGrindTableAdapter(),
+    val grindPatchWrapper: GrindPatchWrapper = GrindPatchWrapper(legacyGrindTableAdapter)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -313,6 +324,36 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("PATCH_07") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_PATCH07_CONTEXT_NOT_READY")
+            val grind = context.patch07RequestedGrind
+                ?: throw MonsterValidationException("E_PATCH07_NO_GRIND")
+            if (grind !in 1..11)
+                throw MonsterValidationException("E_PATCH07_GRIND_RANGE")
+            val result = grindPatchWrapper.patch(grind)
+            check(result.translatedIndex == grind &&
+                result.sentinelRows.size == 12 &&
+                result.sentinelRows[0] == null &&
+                result.sentinelRows[grind] == result.correctedRow &&
+                result.physicalRows.size == 11) { "E_PATCH07_TRANSLATION_SHAPE" }
+            // Ymrwymo yn atomig: dim cyflwr wedi'i storio cyn llwyddiant.
+            context.patch07LegacyDirectIndex = result.legacyRead.directIndex
+            context.patch07LegacyRow = result.legacyRead.row
+            context.patch07LegacyUndefined = result.legacyRead.undefined
+            context.patch07PhysicalRows = result.physicalRows
+            context.patch07SentinelRows = result.sentinelRows
+            context.patch07TranslatedIndex = result.translatedIndex
+            context.patch07CorrectedRow = result.correctedRow
+            context.patch07Applied = true
+            context.patch07InvocationCount = 1
+            context.branchTrace.add("PATCH_07")
+            context.diagnostics.add("PATCH_07_SENTINEL_TRANSLATOR")
+            context.status = "PATCHED_GRIND"
+            metrics.bump("patch07.legacy.grind.calls")
+            metrics.bump("patch07.applied")
         }
         dispatcher.register("PATCH_06") { context ->
             validation.requireBootstrapContext(context)
@@ -625,6 +666,24 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 15: cynhyrchu'r rhes gywir â chyfieithydd sentinel; dim diferion gweledig. */
+    fun applyGrindPatch(
+        calculationDay: ExactInt, targetDay: ExactInt, grind: Int = 1
+    ): BaseMonsterContext {
+        require(grind in 1..11) { "E_PATCH07_GRIND_RANGE" }
+        val context = prepare(calculationDay, targetDay)
+        context.patch07RequestedGrind = grind
+        context.phase = "PATCH_07"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH07_WRAP", e)
         }
     }
 

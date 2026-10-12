@@ -42,3 +42,39 @@ class LegacyGrindTableAdapter {
         return LegacyGrindRead(grind, grind, row, row == null)
     }
 }
+
+/**
+ * Cam 15 — PATCH 07. Cadw'r tabl etifeddol a'i fynegai anghywir yn fyw;
+ * ychwanegu sentinel lleol yn y cyfieithydd, nid yn y storfa wreiddiol.
+ */
+data class GrindPatchOutcome(
+    val requestedGrind: Int,
+    val legacyRead: LegacyGrindRead,
+    val physicalRows: List<VisibleGrindRow>,
+    val sentinelRows: List<VisibleGrindRow?>,
+    val translatedIndex: Int,
+    val correctedRow: VisibleGrindRow
+)
+
+class GrindPatchWrapper(
+    private val legacyAdapter: LegacyGrindTableAdapter = LegacyGrindTableAdapter()
+) {
+    fun patch(grind: Int): GrindPatchOutcome {
+        require(grind in 1..11) { "E_PATCH07_GRIND_RANGE" }
+        // Y graith wirioneddol: galw'r hen helper CYN cyfieithu.
+        val raw = legacyAdapter.legacyGrindRow(grind)
+        val physical = legacyAdapter.physicalRows()
+        require(physical.size == 11 && raw.requestedGrind == grind &&
+            raw.directIndex == grind && raw.row == physical.getOrNull(grind) &&
+            raw.undefined == (raw.row == null)) { "E_PATCH07_LEGACY_SHAPE" }
+        val sentinel: List<VisibleGrindRow?> =
+            listOf<VisibleGrindRow?>(null) + physical
+        require(sentinel.size == 12 && sentinel[0] == null) {
+            "E_PATCH07_SENTINEL_SHAPE"
+        }
+        val corrected = requireNotNull(sentinel[grind]) {
+            "E_PATCH07_TRANSLATED_ROW_MISSING"
+        }
+        return GrindPatchOutcome(grind, raw, physical, sentinel, grind, corrected)
+    }
+}
