@@ -604,3 +604,12 @@ posizionale di `m` cifre in base47: non elimina
 i nomi selezionati dalle cifre successive. Le ripetizioni
 sono quindi possibili. Questo isola il difetto senza
 implementare la PATCH17 o la salsa del calendario.
+
+La run 38279304043 (commit
+c2259e5c15693cfdc0ffa3640976705a2c0d6094)
+ha concluso 35/35 job SUCCESS, attestando
+63 PASS/3 FAIL intenzionali. Il caso di riporto a tre
+nomi passa correttamente al rango 2210 (1-based).
+La selezione rimane sintetica e limitata al dominio
+del prodotto decrescente: la salsa annuale e la
+PATCH17 senza rimpiazzo restano fuori da Stage34.

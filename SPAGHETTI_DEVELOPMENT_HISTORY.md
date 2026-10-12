@@ -1491,3 +1491,15 @@ la selezione, non l'ampliamento del dominio. Il validator
 indipendente verifica cifre, cardinalità, snapshot e
 tracce senza eseguire l'unrank corretto. Stage35 non
 viene anticipata.
+
+### Certificazione Stage34: scelta duplicata dei nomi mensili
+
+La run GitHub Actions 38279304043 sul commit
+c2259e5c15693cfdc0ffa3640976705a2c0d6094 ha
+confermato **35/35 job SUCCESS** e Stage34
+**63 PASS/3 FAIL intenzionali**. La cicatrice della
+scelta con rimpiazzo è riprodotta nei tre casi prescritti,
+con regole normative senza duplicati nel codice test-only.
+Il validator autonomo, le PATCH01–16 e il catalogo
+congelato sono preservati. Non introdurre PATCH17 prima
+di Stage35.

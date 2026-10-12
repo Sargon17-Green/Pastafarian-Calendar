@@ -1336,3 +1336,23 @@ delle precedenti 16 patch.
 La riparazione con unrank senza rimpiazzo è rinviata
 esclusivamente a Stage35 PATCH17. La produzione non deriva
 ancora il rango dalla salsa normativa.
+
+### Certificazione nativa dello Stage34
+
+La [run GitHub Actions 38279304043](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38279304043),
+commit `c2259e5c15693cfdc0ffa3640976705a2c0d6094`,
+ha superato **35/35 job**. La firma Stage34 è
+**63 PASS e tre FAIL intenzionali**, esattamente per
+`rango1_tre_mesi`, `rango2_tre_mesi` e
+`rango1_47_mesi`. Stage33 mantiene 65 PASS/0 FAIL
+e tutte le suite storiche rimangono valide.
+
+La suite iniziale aveva una parentesizzazione errata
+dell'operatore BigInt `<<` e un caso di test che
+collocava il riporto base47 al rango 2209 anziché 2210:
+entrambi sono stati corretti senza modificare il legacy.
+Una diversa run aveva inoltre un fallimento di recupero
+di sbt su GitHub Actions, non riprodotto nella certificazione.
+
+La selezione resta diagnostica; la PATCH17 senza ripetizioni
+e il rango ricavato dalla salsa attendono le fasi successive.
