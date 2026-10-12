@@ -149,3 +149,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 17 መዝጊያ — GREEN
 
 የመጀመሪያው የGitHub Actions run `38239182189` 25/25 የV ፈተና ፋይሎችን PASS አድርጓል። የV 0.5.2 formatter በሁለት አዲስ እና የተዘመኑ ፈተና ፋይሎች የቅርጽ ልዩነት ጠይቋል። እነዚህ ልዩነቶች በቀጥታ ከnative formatter ተወስደው ተስተካክለዋል፣ የCI ጊዜያዊ የምርመራ እርምጃው ተወግዷል። commit `0a60fcf7fad772f22f9d706bf5990d8830bd2f35` ላይ የGitHub Actions run `38239438620` በሁለቱም ሥራዎች PASS ነው። `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` 25/25 PASS። የደረጃ 16 አራቱ የRED assertions ሳይቀየሩ GREEN ሆነዋል። የ720 ቅደም ተከተሎች ሁሉ ተፈትሸዋል፤ ትልቅና አሉታዊ የጠብታ እሴቶች ተረጋግጠዋል። `LegacyPermutationAdapter` የሚጠራው የታሪክ የተሳሳተ መንገድ አልተሰረዘም። የማስረጃ ቅርስ `11742521217` ነው። **ደረጃ 17 COMPLETE / GREEN።**
+
+## ደረጃ 18 — DISCOVERY 09 (በV ማረጋገጫ ላይ)
+
+`old_pours_fixed_bowls` የታሪክ ስህተት እንዳለ ተገልጧል። ሶስቱ ማፍሰሻዎች `SAVE(drop²+stones.w*bowls[1]+3*i)`፣ `SAVE(drop²+stones.b*bowls[2]+5*i)` እና `SAVE(drop²+stones.s*bowls[3]+7*i)` ናቸው፣ ምንም እንኳን `order` ቦታዎቹን የተለያዩ ID ቢመድብም። በ`i=1,drop=2,oldBowls=[10,20,30,40,50,60]` ውስጥ የታሪክ ውጤት `[177,589,1301]` ሲሆን `order=[6,5,4,3,2,1]` የሚጠይቀው ትክክለኛ ውጤት `[1027,1459,1731]` ነው። በሌላ `order=[2,3,1,4,5,6]` የመጀመሪያው ማፍሰሻ 347 መሆን አለበት። ለደረጃ 18 የሚታሰቡት አራት RED assertions እነዚህን ይወስናሉ። የ`calendar_initial_bowls_spaghetti` ተጨመረ፣ የ`calendar_date_spaghetti` ምርመራ ለየታሪክ የpour ውጤት ተገናኝቷል። የ`PATCH 09` alias እና የ`PATCH 10` shadow ገና አልተጨመሩም።

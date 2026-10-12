@@ -94,3 +94,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 17 — PATCH 08
 
 የታሪካዊው `old_permutation_unrank0` እና የተሳሳተው `LegacyPermutationAdapter.order_for_drop` ያልተለወጡ ይቆያሉ። የproduction መንገድ አሁን በ`BaseDispatcher.dispatch_permutation_patch08` ወደ `PermutationPatch08` ይገባል። አዲሱ wrapper የሶስት-እርምጃ ሕግን `one_based=regularMod(drop-1,720)+1`፣ `legacy_rank0=one_based-1`፣ `old_permutation_unrank0(legacy_rank0)` በቀጥታ ይፈጽማል። በዚህ መንገድ የታሪካዊው የ0..719 መፍቻ ይጠበቃል፣ የሎጂክ 1..720 ቅደም ተከተል ግን ይመለሳል። የደረጃ 16 አራቱ RED assertions ሳይለወጡ GREEN መሆን አለባቸው። የቀድሞ ምስክሮች በተለየው legacy dispatcher ላይ የታሪክ ጉድለቱን ይጠብቃሉ። V 0.5.2 (`7647ce1`) በGitHub Actions run `38239438620` ተረጋግጧል፤ `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` 25/25 PASS። የደረጃ 16 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=17` ነው። ዝርዝር፦ `docs/STAGE17_PATCH08.md`።
+
+## ደረጃ 18 — DISCOVERY 09
+
+የ`calendar_initial_bowls_spaghetti` ተግባር ስድስቱን ጎድጓዳ ሳህኖች በ`BOWL_PRIME=[17,19,23,29,31,37]` እና በተጠገነው SAVE ያስነሳል። ለዙር `i=1..46` የታሪክ `old_pours_fixed_bowls` የ`order` ቅደም ተከተልን ሳይከተል ሁልጊዜ ከ`bowls[1],bowls[2],bowls[3]` ያነባል፤ የትክክለኛው ንባብ ግን የየቦታው `bowls[order[1]],bowls[order[2]],bowls[order[3]]` ነው። ሶስቱ የታሪክ ማፍሰሻ ሂሳቦችን አልተካንም፣ የ`LegacyPourAdapter` እና `BaseDispatcher.dispatch_legacy_pours` መንገድ በproduction ውስጥ ተያይዟል። `discovery09_expected_red_test.v` አራት በሆን ተብሎ RED መሆን ያለባቸው ሙከራዎችን ይይዛል። `PATCH 09` የ`bowlAlias` ካርታ ገና አልተጨመረም፤ `LAST_COMPLETED_STAGE=17` የV ማረጋገጫ እስኪጠናቀቅ ይቆያል። ዝርዝር፦ `docs/STAGE18_DISCOVERY09.md`።

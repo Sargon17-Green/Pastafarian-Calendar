@@ -157,5 +157,13 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	last_grind := patch_row_eleven + correct_grind_eleven[0].str() + '; DISCOVERY_08 oldPermRank0=1'
 	historical_details := last_grind + '; DISCOVERY_08 oldPermOrder=' + legacy_permutation.str()
 	patch_rank := historical_details + '; PATCH_08 permRank0=' + patched_rank0.str()
-	return error(patch_rank + '; PATCH_08 permOrder=' + patched_permutation.str())
+	patch_details := patch_rank + '; PATCH_08 permOrder=' + patched_permutation.str()
+	counts := hidden_counts_spaghetti(calculation_day, target_day)
+	initial_bowls := calendar_initial_bowls_spaghetti(counts)
+	pour_drop := big_from_int(720)
+	pour_order := calendar_bowl_order_spaghetti(pour_drop)!
+	legacy_pours := calendar_pours_spaghetti(1, pour_drop, initial_stones(), initial_bowls,
+		pour_order)!
+	pour_details := patch_details + '; DISCOVERY_09 oldPour1=' + legacy_pours[1].str()
+	return error(pour_details + '; DISCOVERY_09 firstOrderedBowl=' + pour_order[0].str())
 }
