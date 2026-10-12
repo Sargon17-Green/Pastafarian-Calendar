@@ -482,3 +482,22 @@ swydd Kotlin ill dwy yn `SUCCESS`.
 yw'r nesaf, heb ei ddechrau. Cedwir y nodwedd mewnbynnau
 diferion gweledig allanol a'r gwarchodaeth rhag alias in-place;
 nid yw adeiladwr diferion gweledig yn rhan o'r cam hwn.
+
+
+## Cam 20 — DISCOVERY 10: bowls byw yn lle hen snapshot
+
+Mae `LegacyInPlaceBowlAdapter.mutateBowlsWrong` yn galw
+`PourPatchWrapper.patch` yn gyntaf, gan gadw'r arllwys
+etifeddol a'i gywiriad Cam 19. Yna mae'n diweddaru chwe bowl
+**yn eu lle** yn nhrefn y permutation: mae safleoedd 2..6 yn
+darllen bowls a newidiodd eisoes, er bod y contract normadol
+yn gofyn am hen snapshot ar gyfer pob un o'r chwe darlleniad.
+Caiff pob darlleniad byw a phob ysgrifen ei gadw fel tyst.
+
+Mae'r profion Cam 20 yn mynnu 720 `EXPECTED_RED`,
+720 ysgrifen gyntaf GREEN, 3600 ysgrifen anghywir,
+4320 prawf BigInteger, 46 diferyn a holl atchweliadau Camau
+1–19. Nid yw'r oracl yn rhan o gynhyrchu; mae'r diferion
+gweledig yn parhau'n fewnbynnau allanol. Nid oes PATCH 10.
+
+`LAST_COMPLETED_STAGE=19` nes llwyddiant CI brodorol.

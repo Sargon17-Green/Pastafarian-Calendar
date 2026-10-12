@@ -124,7 +124,17 @@ data class BaseMonsterContext(
     var patch09CorrectedPourCalls: Int = 0,
     var patch09PermutationPatchCalls: Int = 0,
     var patch09Applied: Boolean = false,
-    var patch09InvocationCount: Int = 0
+    var patch09InvocationCount: Int = 0,
+    var discovery10InitialBowls: List<ExactInt>? = null,
+    var discovery10VisibleDrops: List<ExactInt>? = null,
+    var discovery10Steps: List<LegacyInPlaceBowlStep>? = null,
+    var discovery10FinalBowls: List<ExactInt>? = null,
+    var discovery10OrderAt46: List<Int>? = null,
+    var discovery10PatchedPourCalls: Int = 0,
+    var discovery10LegacyPourCalls: Int = 0,
+    var discovery10PermutationPatchCalls: Int = 0,
+    var discovery10InPlaceWrites: Int = 0,
+    var discovery10InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -195,7 +205,9 @@ class MonsterBootstrapManager(
     val legacyFixedPourAdapter: LegacyFixedPourAdapter =
         LegacyFixedPourAdapter(permutationPatchWrapper),
     val pourPatchWrapper: PourPatchWrapper =
-        PourPatchWrapper(legacyFixedPourAdapter)
+        PourPatchWrapper(legacyFixedPourAdapter),
+    val legacyInPlaceBowlAdapter: LegacyInPlaceBowlAdapter =
+        LegacyInPlaceBowlAdapter(pourPatchWrapper)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -369,6 +381,42 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("DISCOVERY_10") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_DISCOVERY10_CONTEXT_NOT_READY")
+            val initial = context.discovery10InitialBowls
+                ?: throw MonsterValidationException("E_DISCOVERY10_NO_INITIAL")
+            val visible = context.discovery10VisibleDrops
+                ?: throw MonsterValidationException("E_DISCOVERY10_NO_VISIBLE")
+            // Mae pour PATCH 09 yn gywir; darlleniadau byw yw'r unig nam.
+            val result = legacyInPlaceBowlAdapter.runWrongInPlace(initial, visible)
+            check(result.steps.size == 46 &&
+                result.finalBowls.size == 7 &&
+                result.orderAt46.sorted() == listOf(1,2,3,4,5,6) &&
+                result.patchedPourCalls == 46 &&
+                result.preservedLegacyPourCalls == 46 &&
+                result.permutationPatchCalls == 46 &&
+                result.inPlaceWrites == 276 &&
+                result.steps.all { step ->
+                    step.writes.map { it.position } == (1..6).toList() &&
+                    step.pourPatch.sourceIdsByPosition ==
+                        step.pourPatch.order.take(3)
+                }) { "E_DISCOVERY10_RUN_SHAPE" }
+            // Dim ymrwymo nes bod pob un o'r 46 cymysgiad wedi llwyddo.
+            context.discovery10Steps = result.steps.toList()
+            context.discovery10FinalBowls = result.finalBowls.toList()
+            context.discovery10OrderAt46 = result.orderAt46.toList()
+            context.discovery10PatchedPourCalls = result.patchedPourCalls
+            context.discovery10LegacyPourCalls = result.preservedLegacyPourCalls
+            context.discovery10PermutationPatchCalls = result.permutationPatchCalls
+            context.discovery10InPlaceWrites = result.inPlaceWrites
+            context.discovery10InvocationCount = 1
+            context.branchTrace.add("DISCOVERY_10")
+            context.diagnostics.add("DISCOVERY_10_IN_PLACE_LIVE_BOWL_READS")
+            context.status = "LEGACY_IN_PLACE_BOWLS_OBSERVED"
+            metrics.bump("discovery10.inplace.runs")
         }
         dispatcher.register("PATCH_09") { context ->
             validation.requireBootstrapContext(context)
@@ -840,6 +888,25 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 20: archwilio chwe diweddariad byw fesul un o'r 46 diferion. */
+    fun observeLegacyInPlaceBowls(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        initialBowls: List<ExactInt>, visibleDrops: List<ExactInt>
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay, targetDay)
+        context.discovery10InitialBowls = initialBowls.toList()
+        context.discovery10VisibleDrops = visibleDrops.toList()
+        context.phase = "DISCOVERY_10"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY10_WRAP", e)
         }
     }
 
