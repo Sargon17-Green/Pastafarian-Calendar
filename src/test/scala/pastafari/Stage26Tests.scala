@@ -189,7 +189,7 @@ object Stage26Tests {
     check("giorni assoluti BigInt signed oltre 16384 bit") {
       val huge=(BigInt(1)<<16384)+17
       val positive=legacy(target=huge)
-      val negative=legacy(target=-huge)
+      val negative=legacy(target = -huge)
       truth(positive.guessedOffset>0,"Offset positivo")
       truth(negative.guessedOffset<0,"Offset negativo")
       eqv(positive.guessedCloseDay-positive.guessedOpenDay,
