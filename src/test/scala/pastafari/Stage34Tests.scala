@@ -476,8 +476,6 @@ object Stage34Tests {
       else
         truth(sources.contains("def monthNameDistinctPatch("),
           "PATCH17 successiva presente")
-      val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
-        StandardCharsets.UTF_8)
       truth(st.contains("SOURCE_LANGUAGE_CATALOG_FROZEN=YES"),
         "Catalogo congelato")
     }
