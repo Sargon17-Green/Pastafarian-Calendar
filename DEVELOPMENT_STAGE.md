@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=22
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=11
-LAST_COMPLETED_STAGE=21
+LAST_COMPLETED_STAGE=22
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..10; chạy chính xác 46 lượt giọt và 12 lượt khuấy cuối; LegacyOrderMemory ghi đè cùng ô thứ tự 58 lần, truy vấn bát kế đọc thứ tự khuấy 12 chứ không giữ thứ tự giọt 46.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_22_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_22_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_22_PENDING
-CI_FAILURES=STAGE_22_PENDING
+CI_TESTS=269
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -444,4 +444,22 @@ sáu bát, rót alias, vaultOld và pending chính xác.
 đối chiếu chuẩn cố ý đỏ. Dự kiến 269 kiểm thử, đúng bốn
 hồi quy chuẩn đỏ. Giữ oracle nguyên vẹn, không mở
 PATCH 11 của giai đoạn 23.
-LAST_COMPLETED_STAGE giữ 21 trước khi CI xác minh.
+LAST_COMPLETED_STAGE đã nâng lên 22 sau khi CI và khóa tên xác minh.
+
+Giai đoạn 22 được kiểm chứng Elixir 1.18.5 / OTP 27:
+269 kiểm thử, đúng 4 hồi quy chuẩn đỏ cố ý tại truy vấn
+next-bowl; 265 bài đạt, cả 253 bài giai đoạn 1..21 đều đạt.
+12 bài điều khiển mới đạt. Không cảnh báo biên dịch.
+Khóa tên chuẩn PASS độc lập.
+Lần đầu có 5 bài đỏ vì phép kiểm toán nguồn Stage18 vẫn
+tìm lời gọi bootstrap cũ và một cảnh báo alias chưa dùng
+trong Stage22; commit sửa kiểm thử chỉ cập nhật đường gọi
+và dùng alias để đối chiếu, không thay code sản xuất.
+Lần CI cuối: chính xác 4 lỗi normative Stage22, 0 warning.
+LegacyOrderMemory ghi 58 lần, last_source={:stir,12};
+không có orderAt46Latch và không có PATCH 11.
+Oracle test-only giữ nguyên SHA
+be1638f46b2190d617af0378a61b077bda10bf32.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38259198372
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38259198399
+Giai đoạn 22 đóng EXPECTED_RED; giai đoạn 23 PATCH 11 chưa bắt đầu.

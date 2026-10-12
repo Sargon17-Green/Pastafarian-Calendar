@@ -77,3 +77,32 @@ Tại thời điểm giọt 46, chốt riêng
 Các lời gọi next-bowl của production phải lấy hoán vị từ
 latch đúng, không sửa công thức sáu bát hoặc 12 lượt khuấy.
 Không thực hiện sớm ở giai đoạn 22.
+
+## Bằng chứng CI thực tế và phân loại
+
+- Commit triển khai:
+  `f805c78042d96e63e8344e7d0c4526b73765862d`.
+- Commit sửa kiểm thử cấu trúc và alias:
+  `141192c0a5a0762b4f2447e448cb93221f395d8a`.
+- Elixir 1.18.5 / Erlang OTP 27, biên dịch 38 tệp nguồn.
+- **269 bài kiểm thử, đúng bốn thất bại cố ý**, 265 bài đạt.
+- 4 hồi quy chuẩn đỏ đều ở Stage22: ID 1 tại ngày gốc,
+  sáu ID cùng ngày, sáu ID ngày ngược hướng,
+  sáu ID ngày số nguyên 512 bit.
+- Tất cả 253 bài kiểm thử giai đoạn 1–21 đạt.
+- 12 bài điều khiển Stage22 PASS, 0 cảnh báo biên dịch.
+- Khóa tên chuẩn PASS độc lập.
+- 46 lượt drop, 12 lượt post-stir, memory.writes=58,
+  last_source={:stir,12}; sáu bát cuối chuẩn xác.
+- Lần đầu đỏ thêm một bài kiểm toán nguồn Stage18,
+  do bootstrap đổi sang `apply_all_with_order_memory`,
+  và warning unused alias trong bài Stage22. Đã sửa
+  hai bài kiểm soát, không thay production hoặc oracle.
+- Không có orderAt46Latch; không có PATCH 11.
+- Không đổi main, chưa bắt đầu giai đoạn 23.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38259198372
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38259198399
+
+Trạng thái cuối: EXPECTED_RED đã xác minh.
+Bước kế tiếp: giai đoạn 23 PATCH 11, chưa bắt đầu.

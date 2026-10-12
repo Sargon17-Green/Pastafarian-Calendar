@@ -831,3 +831,30 @@ giọt 46, đủ 12 lần khuấy, SAVE, các bản vá 01..10,
 số nguyên 2048 bit, đồng thời, và bốn hồi quy truy vấn
 so sánh với thứ tự giọt 46. Không mở hệ thống dòng câu trả lời
 hoặc logic chọn cổng của các giai đoạn sau.
+
+## Kiểm chứng đóng phát hiện 11
+
+CI trên Elixir 1.18.5 / Erlang OTP 27 chạy
+**269 kiểm thử với chính xác bốn hồi quy chuẩn đỏ có chủ đích**,
+265 bài đạt, 0 cảnh báo biên dịch. Cả 253 bài kiểm thử cũ
+từ giai đoạn 1..21 đều đạt; 12 bài điều khiển mới cũng đạt.
+Khóa tên chuẩn độc lập PASS.
+
+Bốn bài đỏ kiểm tra quan hệ bát kế tiếp dùng hoán vị giọt
+thứ 46 ở ngày gốc, ngày ngược hướng và ngày nguyên rất lớn.
+Trong production, `LegacyOrderMemory` vẫn bị ghi lại
+46+12=58 lần và query dùng thứ tự lượt khuấy thứ 12.
+Cả 12 lượt khuấy và các giá trị sáu bát sau cùng khớp oracle.
+
+Đã sửa một kiểm thử kiểm toán từ Stage18 trỏ sang tên
+đường bootstrap mới và dùng alias đã khai báo trong
+kiểm thử Stage22; không thay production, không che
+bất kỳ hồi quy normative nào.
+
+- [CI phát hiện 11: đúng bốn hồi quy đỏ](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38259198372)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38259198399)
+
+Giai đoạn 22 kết thúc `EXPECTED_RED` đã xác minh.
+Bước tiếp theo: giai đoạn 23 `PATCH 11`, giữ legacy
+58 lần ghi và tạo orderAt46Latch riêng để truy vấn.
+Chưa thực hiện bản vá trong DISCOVERY 11.

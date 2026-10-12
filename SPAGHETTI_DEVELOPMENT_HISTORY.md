@@ -738,3 +738,17 @@ giữ bất biến 253 kiểm thử trước. Bốn hồi quy mới
 cố ý đỏ ở thứ tự kế cận của các ID và nhiều ngày.
 PATCH 11 tại giai đoạn 23 sẽ cần chốt orderAt46
 và đọc latch đó để sửa mà không xóa di sản 58 lần ghi.
+
+**Kết quả kiểm chứng:** CI Elixir 1.18.5 / OTP 27
+có 269 kiểm thử, đúng bốn hồi quy chuẩn đỏ thuộc
+truy vấn next-bowl Stage22, 265 bài đạt, 0 cảnh báo.
+Toàn bộ 253 bài Stage1..21 đạt. Bài kiểm toán nguồn
+Stage18 được cập nhật theo tên hàm bootstrap mới,
+một alias Stage22 được dùng trực tiếp; không đổi
+hàm sản xuất hoặc khẳng định normative.
+Khóa tên chuẩn PASS độc lập.
+
+Bộ nhớ bị ghi đủ 58 lần, nguồn cuối là {:stir,12}.
+Sáu bát sau 12 lần khuấy hoàn toàn đúng với oracle,
+nhưng query lấy thứ tự post-stir cuối, không phải giọt 46.
+Không thêm orderAt46Latch; đóng Stage22 EXPECTED_RED.
