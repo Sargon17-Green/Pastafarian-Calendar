@@ -24,6 +24,59 @@ public final class MonsterWeavingLinearCounter {
             }
         };
 
+
+    private static final int MAX_CACHED_SUFFIX_STATES = 64;
+    private final Map<SuffixKey, BigInteger> suffixCounts =
+        new LinkedHashMap<SuffixKey, BigInteger>(64, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<SuffixKey, BigInteger> eldest) {
+                return size() > MAX_CACHED_SUFFIX_STATES;
+            }
+        };
+    private long suffixCacheHits;
+
+    private static final class SuffixKey {
+        private final int[] remaining;
+        private final int opened;
+        private final int closed;
+        private final int hash;
+
+        SuffixKey(State state) {
+            remaining = state.remaining.clone();
+            opened = state.opened;
+            closed = state.closed;
+            int h = Arrays.hashCode(remaining);
+            h = 31 * h + opened;
+            hash = 31 * h + closed;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object value) {
+            if (this == value) return true;
+            if (!(value instanceof SuffixKey)) return false;
+            SuffixKey other = (SuffixKey) value;
+            return opened == other.opened && closed == other.closed
+                && Arrays.equals(remaining, other.remaining);
+        }
+    }
+
+    long suffixCacheHitCount() {
+        synchronized (suffixCounts) {
+            return suffixCacheHits;
+        }
+    }
+
+    int suffixCacheEntryCount() {
+        synchronized (suffixCounts) {
+            return suffixCounts.size();
+        }
+    }
+
     private final int[] lengths;
     private final int totalDays;
     private BigInteger rootCount;
@@ -122,6 +175,22 @@ public final class MonsterWeavingLinearCounter {
 
     private BigInteger countSuffix(State state) {
         if (state.closed == lengths.length) return ONE;
+        SuffixKey key = new SuffixKey(state);
+        synchronized (suffixCounts) {
+            BigInteger found = suffixCounts.get(key);
+            if (found != null) {
+                suffixCacheHits++;
+                return found;
+            }
+        }
+        BigInteger result = countSuffixUncached(state);
+        synchronized (suffixCounts) {
+            suffixCounts.put(key, result);
+        }
+        return result;
+    }
+
+    private BigInteger countSuffixUncached(State state) {
         int days = state.remaining[state.closed];
         BigInteger[] previous = new BigInteger[days + 2];
         previous[1] = ONE;

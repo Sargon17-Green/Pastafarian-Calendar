@@ -14,6 +14,7 @@ public final class Stage02IncrementalRouteTests {
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
         binomialCacheCallOrderNeutrality();
+        suffixCountCacheReuseAndEviction();
         multiCallFullYearInteriorWithOneCountPerCall();
         zeroBudgetDoesNotLoseSavedWork();
         System.out.println("STAGE_02_INCREMENTAL_ROUTE_PASS checks=" + checks
@@ -253,6 +254,50 @@ public final class Stage02IncrementalRouteTests {
         eq(expectedLast, cold.countAfterPrefix(lastPrefix),
             "E_BINOMIAL_COLD_REVISIT_LAST");
         eq(cold.count(), warm.count(), "E_BINOMIAL_ROOT_CACHE_NEUTRAL");
+    }
+
+    private static void suffixCountCacheReuseAndEviction() {
+        int[] lengths = new int[71];
+        Arrays.fill(lengths, 1);
+        MonsterWeavingLinearCounter warm =
+            new MonsterWeavingLinearCounter(lengths);
+        MonsterWeavingLinearCounter isolated =
+            new MonsterWeavingLinearCounter(lengths);
+        int[] full = warm.lexFirst();
+        int[] first = Arrays.copyOf(full, 1);
+        eq(BigInteger.ONE, isolated.countAfterPrefix(first),
+            "E_SUFFIX_COLD_REFERENCE");
+        eq(BigInteger.ONE, warm.countAfterPrefix(first),
+            "E_SUFFIX_COLD_FIRST");
+        long hits = warm.suffixCacheHitCount();
+        eq(BigInteger.ONE, warm.countAfterPrefix(first),
+            "E_SUFFIX_WARM_FIRST");
+        eq(hits + 1, warm.suffixCacheHitCount(),
+            "E_SUFFIX_IDENTICAL_STATE_HIT");
+        eq(0L, isolated.suffixCacheHitCount(),
+            "E_SUFFIX_INSTANCE_OWNERSHIP");
+
+        for (int size = 2; size <= 70; size++) {
+            eq(BigInteger.ONE,
+                warm.countAfterPrefix(Arrays.copyOf(full, size)),
+                "E_SUFFIX_EVICTION_VALUES");
+        }
+        eq(64, warm.suffixCacheEntryCount(),
+            "E_SUFFIX_LRU_BOUND");
+        hits = warm.suffixCacheHitCount();
+        eq(BigInteger.ONE, warm.countAfterPrefix(Arrays.copyOf(full, 70)),
+            "E_SUFFIX_MOST_RECENT_VALUE");
+        eq(hits + 1, warm.suffixCacheHitCount(),
+            "E_SUFFIX_MOST_RECENT_HIT");
+        hits = warm.suffixCacheHitCount();
+        eq(BigInteger.ONE, warm.countAfterPrefix(first),
+            "E_SUFFIX_EVICTED_RECOMPUTE");
+        eq(hits, warm.suffixCacheHitCount(),
+            "E_SUFFIX_OLDEST_WAS_EVICTED");
+        eq(64, warm.suffixCacheEntryCount(),
+            "E_SUFFIX_REINSERT_STILL_BOUNDED");
+        eq(0L, isolated.suffixCacheHitCount(),
+            "E_SUFFIX_OTHER_INSTANCE_UNTOUCHED");
     }
 
     private static void zeroBudgetDoesNotLoseSavedWork() {
