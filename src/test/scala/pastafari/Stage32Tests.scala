@@ -434,20 +434,34 @@ object Stage32Tests {
       finally walk.close()
       truth(!source.contains("NormativeOracle"),"Oracolo test-only")
       truth(source.contains("def oldContiguousMonthDayGuess("),"Cicatrice")
-      truth(!source.contains("def contiguousMonthDayPatch("),"PATCH 16 prematura")
+      val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<33)
+        truth(!source.contains("def contiguousMonthDayPatch("),"PATCH 16 prematura")
+      else
+        truth(source.contains("def contiguousMonthDayPatch("),
+          "PATCH 16 successiva disponibile")
     }
     check("metadati Stage32 preservano la certificazione Stage31"){
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=32"),"Stage32")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"),"DISCOVERY")
-      truth(st.contains("CURRENT_PATCH=15"),"PATCH15 preservata")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=32,"Stage32 certificato")
+      if(current==32){
+        truth(st.contains("CURRENT_KIND=DISCOVERY"),"DISCOVERY")
+        truth(st.contains("CURRENT_PATCH=15"),"PATCH15 preservata")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      } else
+        truth(st.contains("STAGE_32_NATIVE_VERIFICATION=PASS_EXPECTED_RED_58_PASS_3_FAIL"),
+          "DISCOVERY 16 storica certificata")
       truth(st.contains("STAGE_31_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_66_PASS_0_FAIL"),
         "Stage31 certificato")
       val done=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(done==31 || done==32,"Sequenza")
+      truth(done>=31 && done<=current,"Sequenza")
     }
 
     Vector(

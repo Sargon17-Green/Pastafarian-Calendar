@@ -124,7 +124,10 @@ final case class BaseMonsterContext(
   var legacyContiguousMonthLengths: Option[Vector[Int]] = None,
   var legacyContiguousSelectedMonthId: Option[Int] = None,
   var legacyContiguousAssumedStartOffset: Option[Int] = None,
-  var legacyContiguousDayInMonth: Option[Int] = None
+  var legacyContiguousDayInMonth: Option[Int] = None,
+  var patchedContiguousMonthId: Option[Int] = None,
+  var patchedContiguousDayInMonth: Option[Int] = None,
+  var patch16Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -162,6 +165,78 @@ final class BaseValidationManager {
    * L'oracolo del prefisso tessuto NON è usato in produzione:
    * lo scopo è certificare proprio il difetto di DISCOVERY 16.
    */
+  /**
+   * PATCH 16: prova indipendente della selezione di un mese già fisso
+   * e del numero di apparizioni fino al giorno richiesto.
+   * Non chiama il wrapper corretto o l'oracolo dei test.
+   */
+  def requirePatch16Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_16_CONTIGUOUS_MONTH_DAY" ||
+       ctx.status!="PATCH_16_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_16_CONTIGUOUS_MONTH_DAY",
+         "PATCH_16_CONTIGUOUS_MONTH_DAY") ||
+       ctx.contiguousAnnualWeaving.isEmpty ||
+       ctx.contiguousDayOffset.isEmpty ||
+       ctx.contiguousInputSnapshot.isEmpty ||
+       ctx.legacyContiguousMonthLengths.isEmpty ||
+       ctx.legacyContiguousSelectedMonthId.isEmpty ||
+       ctx.legacyContiguousAssumedStartOffset.isEmpty ||
+       ctx.legacyContiguousDayInMonth.isEmpty ||
+       ctx.patchedContiguousMonthId.isEmpty ||
+       ctx.patchedContiguousDayInMonth.isEmpty ||
+       !ctx.patch16Applied)
+      throw new IllegalStateException("PATCH 16 non completa.")
+
+    val annual=ctx.contiguousAnnualWeaving.get
+    val day=ctx.contiguousDayOffset.get
+    if(ctx.contiguousInputSnapshot.get!=(annual,day))
+      throw new IllegalStateException(
+        "Fotografia originaria della tessitura o del giorno falsificata.")
+    try LegacyDaywiseWeavingAdapter.validateCandidates(Vector(annual))
+    catch {
+      case ex:IllegalArgumentException =>
+        throw new IllegalStateException("Tessitura annuale illegale.",ex)
+    }
+    if(day<0 || day>=annual.size)
+      throw new IllegalStateException("Giorno fuori intervallo.")
+
+    // Ricostruzione autonoma del conto contiguo sbagliato.
+    val monthCount=annual.max
+    val lengths=Array.fill(monthCount)(0)
+    var i=0
+    while(i<annual.size){
+      lengths(annual(i)-1)+=1
+      i+=1
+    }
+    val id=annual(day)
+    var oldStart=0
+    i=0
+    while(i<id-1){
+      oldStart+=lengths(i)
+      i+=1
+    }
+    val oldDay=day-oldStart+1
+    if(ctx.legacyContiguousMonthLengths.get!=lengths.toVector ||
+       ctx.legacyContiguousSelectedMonthId.get!=id ||
+       ctx.legacyContiguousAssumedStartOffset.get!=oldStart ||
+       ctx.legacyContiguousDayInMonth.get!=oldDay)
+      throw new IllegalStateException("Cicatrice dei mesi contigui falsificata.")
+
+    // La seguente scansione non richiama né patch né adapter legacy:
+    // conta esattamente quante volte e' apparso l'ID del mese.
+    var trueDay=0
+    i=0
+    while(i<=day){
+      if(annual(i)==id)trueDay+=1
+      i+=1
+    }
+    if(trueDay<1 || trueDay>lengths(id-1) ||
+       ctx.patchedContiguousMonthId.get!=id ||
+       ctx.patchedContiguousDayInMonth.get!=trueDay)
+      throw new IllegalStateException("Contatore mensile tessuto falsificato.")
+  }
+
   def requireDiscovery16Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="DISCOVERY_16_CONTIGUOUS_MONTH_DAY" ||
        ctx.status!="LEGACY_CONTIGUOUS_MONTH_DAY_READY" ||
@@ -1264,7 +1339,8 @@ final class BaseMonsterManager {
     new Patch14VirtualGateHandler(metrics),
     new Discovery15DaywiseWeavingHandler(metrics),
     new Patch15MonthWeavingHandler(metrics),
-    new Discovery16ContiguousMonthDayHandler(metrics)
+    new Discovery16ContiguousMonthDayHandler(metrics),
+    new Patch16ContiguousMonthDayHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -2077,6 +2153,38 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable=>
         throw BaseErrorWrapper.wrap("discovery16",error)
+    }
+  }
+
+  def patch16ContiguousMonthDay(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    annualWeaving: Vector[Int],
+    dayOffset: Int
+  ): Patch16ContiguousMonthDayReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.contiguousAnnualWeaving=Some(annualWeaving)
+    ctx.contiguousDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_16_CONTIGUOUS_MONTH_DAY"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery16Ready(ctx)
+      ctx.phase="PATCH_16_CONTIGUOUS_MONTH_DAY"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch16Ready(ctx)
+      Patch16ContiguousMonthDayReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.contiguousAnnualWeaving.get,ctx.contiguousDayOffset.get,
+        ctx.legacyContiguousMonthLengths.get,
+        ctx.legacyContiguousSelectedMonthId.get,
+        ctx.legacyContiguousAssumedStartOffset.get,
+        ctx.legacyContiguousDayInMonth.get,
+        ctx.patchedContiguousMonthId.get,
+        ctx.patchedContiguousDayInMonth.get,
+        ctx.patch16Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("patch16",error)
     }
   }
 
