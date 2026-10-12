@@ -182,3 +182,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage26Tests/PastafarianCalendar.Stage26Tests.csproj --configuration Release -- --verify-expected-red
       - name: تكافؤ رقعة حاتم سؤال الصلصة الثالثة عشرة مع المرجع وحفظ ندبة القديم
         run: dotnet run --project tests/PastafarianCalendar.Stage27Tests/PastafarianCalendar.Stage27Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لبدء تيار الإجابات من الخطوة الأولى
+        id: discovery_one_based_answer_step_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage28Tests/PastafarianCalendar.Stage28Tests.csproj --configuration Release
+      - name: إثبات انزياح خطوة واحدة دون ترقيع عداد التيار
+        if: always()
+        run: |
+          test "${{ steps.discovery_one_based_answer_step_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage28Tests/PastafarianCalendar.Stage28Tests.csproj --configuration Release -- --verify-expected-red

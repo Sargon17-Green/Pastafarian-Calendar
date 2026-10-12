@@ -125,6 +125,10 @@ public sealed class MonsterContext
     // الرقعة الثالثة عشرة: الجواب المختوم الصحيح منفصل عن الشاهد القديم.
     public LegacyBowlQuestionResult? PatchedBowlQuestionResult { get; set; }
 
+    // الخطأ التاريخي الرابع عشر: عدّ خطوات تيار الإجابات من واحد لا من صفر.
+    public BigInteger? LegacyAnswerStepIndex { get; set; }
+    public BigInteger? LegacyOneBasedAnswerAtResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

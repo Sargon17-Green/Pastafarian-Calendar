@@ -205,6 +205,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateBowlQuestion(
             calculationDay,targetDay,queriedBowlId,seal);
 
+    // الاكتشاف الرابع عشر: السطر التاريخي يستعمل k+1 قبل تقدّم التيار.
+    public static BigInteger EvaluateLegacyOneBasedAnswer(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger k)
+        => new MonsterManager().EvaluateLegacyOneBasedAnswer(
+            calculationDay,targetDay,queriedBowlId,seal,k);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
