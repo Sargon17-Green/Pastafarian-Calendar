@@ -264,3 +264,25 @@ a holl atchweliadau Camau 1–21. Mae'r bowls ôl-46
 yn fewnbwn allanol; dim adeiladwr diferion gweledig.
 
 `LAST_COMPLETED_STAGE=21` hyd nes PASS Kotlin brodorol.
+
+
+## Ardystiad brodorol Cam 22 — COMPLETE
+
+Ar commit `27f5969992a96b49dcea9c0f78e508556ae99be5` llwyddodd GitHub Actions
+[`38274017335`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274017335),
+swydd Kotlin `114894971609`, ar Kotlin 1.9.0/JDK 21.
+Gwiriwyd **41 marc** yn uniongyrchol yn log gwirioneddol y swydd:
+Camau 1–21 i gyd yn PASS; stir 1 yn GREEN i 720/720,
+stir 2 yn EXPECTED_RED i 720/720 a stir 12 terfynol
+yn EXPECTED_RED i 720/720, sero MATCH. Llwyddodd
+4,320 tyst BigInteger annibynnol gyda 51,840 stir wedi'u
+gwirio, achosion positif a negatif enfawr, guardiau,
+strict RED bwriadol, BOOT/replay a pherchnogaeth.
+Gwelwyd `STAGE22_FULL_NATIVE_EXPECTED_RED_COMPLETE`,
+a gorffennodd y swydd Kotlin a'r swydd cloi enwau yn SUCCESS.
+
+**`LAST_COMPLETED_STAGE=22`**. Cam 23 (`PATCH 11`)
+yw'r nesaf, heb ei ddechrau. Rhaid cadw'r
+`LegacyCachedStirAdapter.oldCachedPostStir12` byw ac
+anghywir ar gyfer y patch nesaf. Dim adeiladwr diferion
+gweledig cynhyrchu yma.
