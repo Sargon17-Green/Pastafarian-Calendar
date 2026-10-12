@@ -47,3 +47,22 @@ galwad yn unig. Ni chofnodir metrigau PATCH 06 cyn llwyddiant.
 **Prawf derbyn:** `sh run-stage13-tests.sh` ar Kotlin 1.9.0/JDK 21
 gyda'r oracl gwreiddiol, cod ymadael 0 a `STAGE13_NATIVE_GREEN`.
 Tan y dystysgrif hon, `LAST_COMPLETED_STAGE=12`.
+
+
+## Ardystiad CI brodorol — COMPLETE
+
+**Mae'r adran hon yn disodli'r statws PENDING uchod.**
+
+- Gangen: `Kotlin+Cymraeg`; commit ffynhonnell `d043e234822f57250bf5f178a32aee16e5ceb875`.
+- GitHub Actions: rhediad `38227553115`, swydd `114738687143` — **SUCCESS**.
+- Kotlin 1.9.0, JDK 21, `run-stage13-tests.sh`, ffynonellau ac oracl gwreiddiol.
+- Dilyswyd 35 marc o'r log, heb unrhyw farc ar goll.
+- PASS: Camau 1–12, gan gynnwys `STAGE12_NATIVE_EXPECTED_RED_COMPLETE`.
+- PASS: `STAGE13_POSITIVE_LEGACY_CALLED_PASS`, `STAGE13_POSITIVE_NO_HIDDEN_STORE_REQUIRED_PASS`, saith `STAGE13_HIDDEN_K*_GREEN`, `STAGE13_HIDDEN_GREEN_7`, `STAGE13_PRESERVED_DISCOVERY06_RED_3`, `STAGE13_BRANCH_DISPATCH_COUNTS_PASS`, `STAGE13_HIDDEN_TRANSLATOR_GREEN_7`, `STAGE13_BOUNDARY_GUARDS_PASS`, `STAGE13_BOOT_REPLAY_GUARDS_PASS`, `STAGE13_INVOCATION_OWNERSHIP_PASS`, `STAGE13_EARLIER_ROUTES_PASS` a `STAGE13_NATIVE_GREEN`.
+- PASS: `STAGE13_BIGINT_VISIBLE_GREEN_5`, `STAGE13_BIGINT_HIDDEN_GREEN_35`, `STAGE13_BIGINT_STONES_GREEN_175`, `STAGE13_BIGINT_PRESERVED_DISCOVERY06_RED_15`.
+- Ni newidiwyd `LegacyPriorAdapter.kt`, `HiddenNearnessPatchWrapper.kt`, `ExactInt.kt` na'r oracl.
+
+Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38227553115
+
+**Dyfarniad:** Cam 13 wedi'i gwblhau a'i ardystio. `LAST_COMPLETED_STAGE=13`.
+Cam 14 (`DISCOVERY 07`) sydd nesaf; ni ddechreuwyd.

@@ -309,3 +309,8 @@ Ar commit `7fac959fc06edb8c59d0b7f0105fbf91151da87b` llwyddodd swydd GitHub Acti
 ## Cam 13 — PATCH 06: priorPatch ar gyfer slotiau negyddol
 
 Mae'r helper visible-only yn parhau'n alwadadwy heb ei newid. Mae'r lapio newydd yn gwahaniaethu yn union wrth `slot=i-back`: ar slot positif mae'n galw'r hen prior go iawn; ar slot di-bositif mae'n defnyddio `hiddenK=1-slot` drwy gyfieithydd hiddenByNearness PATCH 05, heb alw'r hen prior. Mae'r llwybr PATCH 06 newydd yn cadw tystiolaeth y gangen a'r allbwn yn annibynnol ar bob galwad. Mae'r hen dri achos EXPECTED_RED o Gam 12 i aros yn RED ar y llwybr DISCOVERY 06, tra bo pob un o'r saith safle cudd yn GREEN ar y llwybr cywiriedig. Arhosir am dystysgrif JVM brodorol cyn cau Cam 13.
+
+
+### Cam 13 — ardystiad brodorol llawn
+
+Ar commit `d043e234822f57250bf5f178a32aee16e5ceb875` llwyddodd swydd Kotlin `114738687143` (rhediad `38227553115`) ar Kotlin 1.9.0/JDK 21. Gwiriwyd 35 marc yn uniongyrchol o log y swydd: atchweliadau Camau 1–12, 7 darlleniad hidden GREEN, galw'r helper raw ar y gangen bositif yn unig, profi'r gangen bositif heb storfa gudd, 35 prawf BigInteger annibynnol, 175 cydran carreg a chadw 15 tyst o'r tri diffyg hanesyddol. Mae `LAST_COMPLETED_STAGE=13`; ni ddechreuwyd Cam 14.
