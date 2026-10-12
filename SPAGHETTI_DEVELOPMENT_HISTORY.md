@@ -1336,3 +1336,16 @@ Helper storico, report, handler, stato
 per invocazione, validator indipendente,
 metrica e suite con prove BigInt.
 La PATCH 13 non è anticipata.
+
+### Certificazione nativa dello Stage26
+
+La run 38245718502 sul commit
+`727cfa5debaed924ed4b3818986699f32a1f34da`
+ha concluso SUCCESS in tutti i 27 job GitHub Actions.
+La prova nativa della DISCOVERY 13 ha prodotto
+38 PASS e precisamente tre FAIL intenzionali.
+La verifica include date BigInt enormi,
+finestre annuali sintetiche, sei controlli
+del caso d'anno massimo e il controllo
+degli intervalli aperto/chiuso. Ogni firma
+storica da Stage01 a Stage25 rimane invariata.

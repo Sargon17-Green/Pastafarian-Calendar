@@ -1054,3 +1054,15 @@ un cancello sintetico. La suite confronta la ricerca
 corretta sequenziale test-only, date assolute BigInt,
 2.048 vettori deterministici, 1.024 offset e tutte
 le dodici patch storiche. Nessuna PATCH 13 anticipata.
+
+### Certificazione nativa di DISCOVERY 13
+
+La [GitHub Actions run 38245718502](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38245718502)
+ha terminato **SUCCESS per tutti i 27 job** sul commit
+`727cfa5debaed924ed4b3818986699f32a1f34da`.
+Stage26 ha eseguito **38 PASS e tre FAIL intenzionali**
+(limitati ad avanti, indietro e confine di porta);
+tutte le firme Stage01–Stage25 sono rimaste invarianti.
+L'ipotesi errata degli anni lunghi sempre 5778
+giorni rimane isolata come cicatrice diagnostica;
+PATCH 13 non è introdotta.
