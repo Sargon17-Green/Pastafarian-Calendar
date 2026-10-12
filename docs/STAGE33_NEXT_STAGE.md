@@ -1,0 +1,17 @@
+# Stage33 पूर्ण — Stage34 DISCOVERY17 continuation
+
+Repository Sargon17-Green/Pastafarian-Calendar; ONLY branch `TypeScript+मराठी`. 55 stages in all; **LAST_COMPLETED_STAGE=33**; next exactly **34 DISCOVERY17** (do NOT begin Stage35 PATCH17).
+
+Read live HEAD, `DEVELOPMENT_STAGE.md`, `docs/STAGE33_PATCH16_VERIFICATION.md`, `src/patch16YearMax.ts`, `src/discovery16LegacyYearMax.ts`, `test/normativeOracle.ts`, and authoritative original Library document `06-implementation-prompt.md` around lines 820–830 (Patch17). Stage33 commit `91c252379726eefa5c31478c0bb0d8b0e465aaac`; GitHub Actions run 38280247898: both jobs SUCCESS, Stage1–33 native TypeScript, all sixteen archived intentionally-red witnesses and canonical name lock PASS. The workflow job label still says stage27 but executes current `npm test`.
+
+Stage33 physically calls unchanged Stage32 `LEGACY_YEAR_MAX=5781n` predicate on every raw candidate, preserves original stable length-only historical sorted ledger, and separately applies `REAL_YEAR_MAX_PATCH=5778n` before its corrected sorted/selected family. Stage29 real seal10 selector receives corrected N, never 5779..5781; a 5781-only legacy family throws before any corrected selector invocation. Genuine signed Stage31 opening gate predecessor and all previous old scars remain physical. Close-gate candidate boundaries used by tests are explicitly injected/synthetic and cannot be passed off as normative gates.
+
+Verified:
+```text
+STAGE_33_PATCH_16_GUARDS_PASS boundary=8 signedAnchors=4 positive=2 negative=2 oldAccepted=20 removedLong=12 correctedWrong=0 wrongSelected=0 predecessorCalls=26 sharedWrites=1508 oldPredicateSpy=3 signedSpy=1 selectorSpy=3 emptySelectorCalls=0 faults=3
+STAGE_33_PATCH_16_PROPERTIES_PASS direct=255 oldDirectAccepted=128 newDirectAccepted=116 falseAccepts=12 directWrong=0 hugeCases=12 realGates=12 positive=6 negative=6 anchorWrong=0 rankWrong=0 oldKept=60 correctedKept=24 removedLong=36 originalGateCalls=42 extraSigned=21 realSelectors=12 realCalls=75 realWrites=4350 varied=64 giants=8 ranks=720 unique=720 variants=792 variantCalls=1584 variantWrites=91872 totalCalls=1659 totalWrites=96222 streamWrong=0 variantRankWrong=0 variantSelectedWrong=0 filterWrong=0
+```
+
+Stage34 DISCOVERY17 historical fault: old stable **year-length-only** sort orders equal-length year candidates by original input order, while normative year5000 ordering requires a secondary earlier opening-gate day within equal lengths. The original stable comparator MUST physically run and a 17th intentionally-red test must witness a tied length with opening gates in reverse order; do not fix it in Stage34. Stage35 PATCH17 subsequently fixes by finding same-length runs AFTER the historical sort and sorting ONLY those runs by earlier opening gate; never clean-replace with a two-key sort. Stage34 can create an independent legacy sort adapter if Stage33's candidate API (all same anchored opening gate) cannot represent the diagnostic tie; clearly distinguish synthetic candidate pairs from genuine gate pairs.
+
+Preserve the previous 16 historical expected-red scripts, frozen catalog, pure TypeScript source and Marathi prose, full historical signed gate/58-write path where appropriate, ownership, fault rollback and Stage54 calendar integration barrier. Never work on main or another branch, no user-only HANDOFF artifacts. Expected-SHA fast-forward only. One stage per user turn.

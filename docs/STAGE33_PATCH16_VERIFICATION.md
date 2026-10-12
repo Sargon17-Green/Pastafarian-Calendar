@@ -17,3 +17,14 @@ The canonical maximum was checked against the independent test-only `YEAR_MAX_DA
 `test/patch16Properties.ts`: all 255 old-vs-corrected length/gap combinations (12 known historical false accepts, **zero corrected mismatches**), 12 huge candidate integer boundary tests (up to 32768 bits), 12 genuine signed gate anchors (±1..±6) including old positive-side scar and independent canonical gate/selector ranking, and 792 **explicitly noncanonical** year-question variation fixtures (64 varied, 8 huge signed, 720 distinct DROP46 orders), independently replaying Sauce final bowls and seal10 answer stream. Full previous-stage 58-write chains and complete absence of forbidden 5779..5781 from corrected selector families must be proved. All earlier 16 expected RED checks are preserved unchanged in `npm test`.
 
 Stage33 cannot be marked complete until BOTH GitHub Actions jobs (native TypeScript full regression and frozen name lock) succeed; `LAST_COMPLETED_STAGE=32` until then. Stage34 DISCOVERY17 must not be started.
+
+## Verified — 12 October 2026
+
+[Implementation commit 91c2523](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/91c252379726eefa5c31478c0bb0d8b0e465aaac), [GitHub Actions run 38280247898](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38280247898): both verify and legacy-named stage27-typescript-marathi jobs SUCCESS. Full Stage1–33 regression and TypeScript typecheck PASS; all sixteen deliberately red historical tests remain checked; frozen name catalog unchanged.
+
+```text
+STAGE_33_PATCH_16_GUARDS_PASS boundary=8 signedAnchors=4 positive=2 negative=2 oldAccepted=20 removedLong=12 correctedWrong=0 wrongSelected=0 predecessorCalls=26 sharedWrites=1508 oldPredicateSpy=3 signedSpy=1 selectorSpy=3 emptySelectorCalls=0 faults=3
+STAGE_33_PATCH_16_PROPERTIES_PASS direct=255 oldDirectAccepted=128 newDirectAccepted=116 falseAccepts=12 directWrong=0 hugeCases=12 realGates=12 positive=6 negative=6 anchorWrong=0 rankWrong=0 oldKept=60 correctedKept=24 removedLong=36 originalGateCalls=42 extraSigned=21 realSelectors=12 realCalls=75 realWrites=4350 varied=64 giants=8 ranks=720 unique=720 variants=792 variantCalls=1584 variantWrites=91872 totalCalls=1659 totalWrites=96222 streamWrong=0 variantRankWrong=0 variantSelectedWrong=0 filterWrong=0
+```
+
+Stage33 is complete, LAST_COMPLETED_STAGE=33. Stage34 DISCOVERY17 not started. Close-gate candidate boundaries are deliberately injected synthetic test values, not claimed authentic normative gate pairs.
