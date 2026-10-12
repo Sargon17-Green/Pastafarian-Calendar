@@ -282,7 +282,11 @@ object Stage20Tests {
       else
         truth(sources.contains("LegacyOrder46LatchAdapter.orderAt46Latch("),
           "La patch deve attraversare il latch storico")
-      truth(!sources.contains("biasedLegacyPick"),"Fase successiva anticipata")
+      if(current<22)
+        truth(!sources.contains("biasedLegacyPick"),"Fase successiva anticipata")
+      else
+        truth(sources.contains("LegacyBiasedPickAdapter.biasedLegacyPick("),
+          "La fase nuova deve attraversare il legacy reale")
     }
     check("metadati Stage20 RED preservano Stage19 GREEN") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
