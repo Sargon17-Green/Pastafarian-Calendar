@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=14
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=15
+CURRENT_KIND=PATCH
 CURRENT_PATCH=07
 LAST_COMPLETED_STAGE=14
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-06; tách 11 hàng nghiền thực vào LegacyGrindTable lưu từ index 0, phép đọc lịch sử vẫn dùng chỉ số 1..11 khiến thiếu hàng đầu và dùng fallback cuối; VisibleDropCalculator chạy lỗi này trên đường sản xuất.
+MONSTER_ARCHITECTURE_GROWTH=Giữ phép đọc legacy Enum.at(@real_rows,number,@missing_row) bất biến; đặt sentinel thật tại index 0 và 11 hàng nghiền chuẩn tại index 1..11; VisibleDropCalculator giữ lời gọi legacy, các lớp vá 01-06 không đổi.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_14_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_15_PENDING
+GIT_HISTORY_MUTATED=STAGE_15_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=151
-CI_FAILURES=16_EXPECTED_ONLY
+CI_TESTS=STAGE_15_PENDING
+CI_FAILURES=STAGE_15_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -255,3 +255,15 @@ Khóa tên chuẩn PASS độc lập.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38213818081
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38213818145
 Giai đoạn 14 kết thúc EXPECTED_RED; tiếp theo giai đoạn 15 PATCH 07.
+
+Giai đoạn 15 thực hiện PATCH 07. Chỉ thêm một sentinel thật
+{0,0,0,0,1} vào đầu @real_rows của LegacyGrindTable,
+đưa 11 hàng nghiền nguyên bản đến vị trí 1..11.
+Giữ nguyên chính xác biểu thức đọc lịch sử
+Enum.at(@real_rows, number, @missing_row), không xóa sentinel.
+VisibleDropCalculator vẫn gọi bộ đọc lịch sử 11 lần cho mỗi giọt.
+Không thay oracle và bốn hồi quy chuẩn giai đoạn 14.
+Mười kiểm thử khám phá cũ được chuyển thành kiểm soát lịch sử
+và cấu trúc bảng đã vá; 12 kiểm thử mới kiểm chứng toàn diện.
+Dự kiến 163 kiểm thử, không lỗi, khóa tên chuẩn PASS.
+LAST_COMPLETED_STAGE giữ 14 cho đến khi CI được xác minh.

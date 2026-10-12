@@ -34,30 +34,33 @@ defmodule PastafariCalendarElixirVietnamese.Stage14Discovery07Test do
     Ref.build_visible_drops(counts, stones, hidden)
   end
 
-  test "hàng nghiền thực bắt đầu từ ô 0, nhưng lần một đọc nhầm hàng hai" do
-    assert LegacyGrindTable.row_at_zero() == hd(@real_grinds)
-    assert LegacyGrindTable.legacy_row(1) == Enum.at(@real_grinds, 1)
-    refute LegacyGrindTable.legacy_row(1) == hd(@real_grinds)
+  test "sentinel thật nằm ở index không, các bước một đến mười một khớp chuẩn" do
+    assert LegacyGrindTable.row_at_zero() == {0, 0, 0, 0, 1}
+    assert LegacyGrindTable.sentinel_row() == LegacyGrindTable.row_at_zero()
+    assert LegacyGrindTable.all_rows_with_sentinel() ==
+             [LegacyGrindTable.sentinel_row() | @real_grinds]
 
-    for step <- 1..10 do
-      assert LegacyGrindTable.legacy_row(step) == Enum.at(@real_grinds, step)
+    for step <- 1..11 do
+      assert LegacyGrindTable.legacy_row(step) == Enum.at(@real_grinds, step - 1)
     end
 
-    assert LegacyGrindTable.legacy_row(11) == LegacyGrindTable.fallback_row()
+    assert LegacyGrindTable.legacy_row(1) == hd(@real_grinds)
+    assert LegacyGrindTable.legacy_row(11) == List.last(@real_grinds)
     assert LegacyGrindTable.fallback_row() == {0, 0, 0, 0, 1}
-    refute LegacyGrindTable.legacy_row(11) == List.last(@real_grinds)
+    refute LegacyGrindTable.legacy_row(11) == LegacyGrindTable.fallback_row()
   end
 
-  test "mười một lần đọc vẫn thực hiện nhưng hàng một không được sử dụng" do
+  test "mười một lần đọc legacy chạy đủ số hàng thật, không chạm sentinel" do
     values = Enum.map(1..11, &LegacyGrindTable.legacy_row/1)
 
     assert length(values) == 11
-    assert values == tl(@real_grinds) ++ [{0, 0, 0, 0, 1}]
-    assert Enum.count(values, &(&1 == hd(@real_grinds))) == 0
-    assert List.last(values) == {0, 0, 0, 0, 1}
+    assert values == @real_grinds
+    assert Enum.count(values, &(&1 == hd(@real_grinds))) == 1
+    assert List.last(values) == List.last(@real_grinds)
+    refute Enum.member?(values, LegacyGrindTable.sentinel_row())
   end
 
-  test "kết quả các bước nghiền độc lập khớp truy cập legacy sai" do
+  test "giữ bằng chứng chỉ số cũ lệch và bộ đọc nay được che bằng sentinel" do
     m = Ref.m()
     seed = 37
     previous_1 = 41
@@ -72,20 +75,20 @@ defmodule PastafariCalendarElixirVietnamese.Stage14Discovery07Test do
       )
     end
 
-    legacy =
+    corrected =
       Enum.reduce(1..11, seed, fn step, prior ->
         fold.(LegacyGrindTable.legacy_row(step), prior)
       end)
 
-    shifted = Enum.reduce(tl(@real_grinds) ++ [{0, 0, 0, 0, 1}], seed, fold)
-    correct = Enum.reduce(@real_grinds, seed, fold)
+    expected = Enum.reduce(@real_grinds, seed, fold)
+    historical = Enum.reduce(tl(@real_grinds) ++ [{0, 0, 0, 0, 1}], seed, fold)
 
-    assert legacy == shifted
-    refute legacy == correct
-    assert legacy >= 1 and legacy <= m
+    assert corrected == expected
+    refute corrected == historical
+    assert corrected >= 1 and corrected <= m
   end
 
-  test "giọt đầu đi qua công thức seed chuẩn nhưng bảng nghiền sai" do
+  test "giọt đầu dùng công thức seed và đủ mười một hàng đúng qua legacy" do
     f = Ref.foundation_day()
     c = f - 11
     t = f + 19
@@ -102,22 +105,27 @@ defmodule PastafariCalendarElixirVietnamese.Stage14Discovery07Test do
     assert PriorPatch.read(%{}, hidden, 1, 7) == p7
 
     seed =
-      Ref.save(w * counts.action + b * counts.target + s * counts.distance +
+      Ref.save(
+        w * counts.action + b * counts.target + s * counts.distance +
           meat * counts.connection + rice * counts.direction +
-          p1 + 3 * p3 + 5 * p7 + 1)
+          p1 + 3 * p3 + 5 * p7 + 1
+      )
 
-    wrong =
+    result =
       Enum.reduce(1..11, seed, fn step, prev ->
         {a, bb, cc, dd, kind} = LegacyGrindTable.legacy_row(step)
-        Ref.save(prev * prev + a * prev + bb * p1 + cc * p3 + dd * p7 +
-          elem(context.stones_table[1], kind - 1))
+
+        Ref.save(
+          prev * prev + a * prev + bb * p1 + cc * p3 + dd * p7 +
+            elem(context.stones_table[1], kind - 1)
+        )
       end)
 
-    assert context.visible_drops[1] == wrong
-    refute context.visible_drops[1] == oracle(c, t)[1]
+    assert context.visible_drops[1] == result
+    assert context.visible_drops[1] == oracle(c, t)[1]
   end
 
-  test "đường tính sản xuất đầy đủ dùng cùng bảng lịch sử" do
+  test "đường tính sản xuất đầy đủ đã vá vẫn dùng bảng legacy cũ" do
     f = Ref.foundation_day()
     c = f + 21
     t = f - 37
@@ -135,10 +143,10 @@ defmodule PastafariCalendarElixirVietnamese.Stage14Discovery07Test do
     assert Enum.all?(Map.values(rebuilt), fn value ->
       value >= 1 and value <= Ref.m()
     end)
-    refute rebuilt == oracle(c, t)
+    assert rebuilt == oracle(c, t)
   end
 
-  test "bản vá lịch sử trước vẫn trả đúng đá, giọt ẩn và ba tiền nhiệm" do
+  test "các bản vá trước vẫn trả đúng đá, giọt ẩn và ba tiền nhiệm" do
     f = Ref.foundation_day()
     context = Calendar.bootstrap_context(f, f + 3)
     assert context.stones_table == Ref.build_stones()
@@ -154,7 +162,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage14Discovery07Test do
     end
   end
 
-  test "những giọt ngày cực lớn vẫn ở miền SAVE và thuộc sở hữu mỗi context" do
+  test "ngày cực lớn vẫn ở miền SAVE và thuộc sở hữu mỗi context" do
     f = Ref.foundation_day()
     shift = (1 <<< 512) + 7
 
@@ -168,10 +176,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage14Discovery07Test do
       copied = %{context | visible_drops: Map.put(context.visible_drops, 1, 0)}
       refute copied.visible_drops == context.visible_drops
       assert Calendar.bootstrap_context(c, t).visible_drops == context.visible_drops
+      assert context.visible_drops == oracle(c, t)
     end
   end
 
-  test "hàng nghiền sai được xác nhận trên nhiều luồng chạy song song" do
+  test "bảng nghiền được vá và giữ đúng trong nhiều luồng chạy song song" do
     f = Ref.foundation_day()
     pairs = for i <- -8..8, do: {f + 7 * i, f - 11 * i}
 
@@ -185,11 +194,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage14Discovery07Test do
     |> Enum.each(fn {{c, t}, ctx} ->
       assert ctx.visible_drops == Calendar.visible_drops_spaghetti(c, t)
       assert ctx.hidden_drops_storage == Calendar.hidden_drops_storage_spaghetti(c, t)
-      refute ctx.visible_drops == oracle(c, t)
+      assert ctx.visible_drops == oracle(c, t)
     end)
   end
 
-  test "chỉ số nghiền hợp lệ từ một tới mười một, chỉ số khác lỗi rõ ràng" do
+  test "chỉ số nghiền hợp lệ từ một tới mười một, ngoài miền báo lỗi" do
     for wrong <- [-1, 0, 12, 46, nil, :khong_hop_le, 1.0, "1"] do
       assert_raise ArgumentError, "chỉ số lần nghiền phải từ 1 đến 11", fn ->
         LegacyGrindTable.legacy_row(wrong)
@@ -204,18 +213,19 @@ defmodule PastafariCalendarElixirVietnamese.Stage14Discovery07Test do
     end
   end
 
-  test "kiểm toán nguồn cho thấy chỉ số cũ vẫn gọi trực tiếp và chưa có sentinel đầu" do
+  test "kiểm toán mã nguồn giữ cách đọc legacy và thêm sentinel thật ở index 0" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = Path.join(root, "legacy_grind_table.ex") |> File.read!()
     calculator = Path.join(root, "visible_drop_calculator.ex") |> File.read!()
     prior = Path.join(root, "prior_patch.ex") |> File.read!()
 
     assert legacy =~ "Enum.at(@real_rows, number, @missing_row)"
+    assert legacy =~ "@sentinel_row {0, 0, 0, 0, 1}"
+    assert legacy =~ "@real_rows [\\n    @sentinel_row,"
     assert legacy =~ "@missing_row {0, 0, 0, 0, 1}"
     assert calculator =~ "Enum.reduce(1..11, seed, fn grind_number, old_value ->"
     assert calculator =~ "LegacyGrindTable.legacy_row(grind_number)"
     assert prior =~ "HiddenDropManager.read(hidden_storage, hidden_number)"
-    refute legacy =~ "@real_rows [\n    @missing_row,"
     refute calculator =~ "NormativeReference"
     refute File.exists?(Path.join(root, "grind_table_patch.ex"))
   end

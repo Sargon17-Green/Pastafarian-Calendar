@@ -470,3 +470,25 @@ không bị che khuất. Khóa tên chuẩn độc lập đạt.
 Giai đoạn 14/55 kết thúc `EXPECTED_RED` đã được xác minh.
 Giai đoạn 15/55 là `PATCH 07`: thêm sentinel tại index 0,
 đặt 11 hàng thực ở 1..11 và giữ nguyên hàm đọc legacy.
+
+## Giai đoạn 15 — Bản vá 07: giữ chỉ số cũ, thêm sentinel
+
+Lỗi phát hiện 07 được sửa **bằng dữ liệu bảng**, không bằng
+sửa phép đọc legacy. Bảng `LegacyGrindTable.@real_rows` giờ
+chứa 12 hàng: `sentinel={0,0,0,0,1}` ở index 0 và
+đủ 11 hàng nghiền nguyên bản ở index 1..11.
+`LegacyGrindTable.legacy_row(number)` tiếp tục thực thi
+`Enum.at(@real_rows,number,@missing_row)`, giữ nguyên cả
+nhánh xử lý lỗi. `VisibleDropCalculator` tiếp tục gọi
+hàm này cho cả 11 bước và 46 giọt thực.
+
+Đường sản xuất không đảo bảng, không thay biến đếm, không
+bỏ qua sentinel trong dữ liệu, và không gọi oracle trong
+các module sản xuất. 16 sai lệch trong giai đoạn 14
+phải chuyển thành xanh với kỳ vọng chuẩn giữ nguyên.
+Mười bài kiểm soát cũ được chỉnh chỉ để kiểm cả sentinel
+và hàm lịch sử; bốn hồi quy chuẩn của giai đoạn 14
+không thay đổi. Thêm 12 kiểm thử mạnh về ánh xạ chỉ số,
+đủ 46 giọt, số nguyên tới 2048 bit, tính độc lập,
+tính đồng thời, những bản vá đã có và các biên.
+Chưa tích hợp ngày lịch cuối, hoặc phát hiện 08.

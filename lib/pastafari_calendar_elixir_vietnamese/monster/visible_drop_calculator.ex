@@ -2,9 +2,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.VisibleDropCalculator do
   @moduledoc """
   Sinh 46 giọt nhìn thấy với đường đọc quá khứ đã vá đúng.
 
-  Phát hiện 07 cố ý lấy hàng nghiền qua chỉ số 1..11 của
-  LegacyGrindTable lưu từ chỉ số 0. Phép đọc lịch sử này
-  chưa được sửa; các giọt ẩn và công thức SAVE vẫn chính xác.
+  Bản vá 07 đặt sentinel ở index 0 của LegacyGrindTable,
+  nên cách đọc legacy từ index 1..11 vẫn dùng đủ 11 hàng
+  nghiền thật. Giữ nguyên bản vá 06, giọt ẩn và SAVE.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{LegacyGrindTable, PriorPatch, SaveManager}

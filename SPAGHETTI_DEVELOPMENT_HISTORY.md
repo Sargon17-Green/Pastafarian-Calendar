@@ -435,3 +435,31 @@ mới của giai đoạn 14, năm bài cũ từ giai đoạn 12 và bảy bài
 cũ từ giai đoạn 13. Giữ nguyên các kiểm thử cũ, không
 sửa kỳ vọng của oracle. Cả mười bài điều khiển Stage14
 đều PASS; khóa tên chuẩn PASS. Kết thúc EXPECTED_RED.
+
+## Giai đoạn 15 — Bản vá 07: thêm hàng canh tại ô không
+
+**Di sản vẫn được thực thi:** Hàm
+`LegacyGrindTable.legacy_row(number)` giữ nguyên
+`Enum.at(@real_rows,number,@missing_row)` và miền number=1..11.
+Không thay phép tính number thành number-1, không xóa
+hàm legacy, không chỉnh `VisibleDropCalculator` khỏi
+đường gọi lịch sử.
+
+**Cách vá:** Thêm `@sentinel_row` tại index 0 của
+`@real_rows`, đẩy toàn bộ 11 hàng nghiền chuẩn tới index 1..11.
+Sentinel là phần tử thật của bảng, không phải comment hay
+giá trị logic bị lọc trước khi đọc. Hàm `row_at_zero`
+nay quan sát được sentinel; fallback cũ vẫn giữ nguyên.
+
+**Chứng minh:** Với mọi number từ 1 đến 11, sau khi chèn
+sentinel, `Enum.at(@real_rows,number,@missing_row)`
+trả đúng hàng nghiền số number. Kết quả 11 lần nghiền cho
+giọt đầu khớp oracle; vì mọi tiền nhiệm đã được vá, theo
+quy nạp 46 giọt đều khớp. Lịch sử bị lệch ở giai đoạn 14
+vẫn thể hiện qua thứ tự cũ trước khi chèn và các đối chứng
+trong kiểm thử.
+
+**Kiểm thử:** Giữ nguyên bốn hồi quy chuẩn giai đoạn 14
+và các hồi quy cũ. Sửa chỉ mười bài kiểm soát từng đòi
+trạng thái lỗi để kiểm trạng thái lịch sử có sentinel.
+Thêm 12 kiểm thử mới. Chưa bắt đầu DISCOVERY 08.
