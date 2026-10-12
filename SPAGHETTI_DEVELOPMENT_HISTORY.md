@@ -319,3 +319,8 @@ Ar commit `d043e234822f57250bf5f178a32aee16e5ceb875` llwyddodd swydd Kotlin `114
 ## Cam 14 — DISCOVERY 07: gwall mynegeio tabl malu
 
 Mae'r hen adalydd yn storio union 11 rhes ffisegol zero-based ar gyfer yr unarddeg malu a ddiffinnir gan yr oracl. Nid oes rhes sentinel. Galwir `legacyGrindRow(grind)` gan lwybr cynhyrchu `DISCOVERY_07` ac mae'n defnyddio'r ordinal un-based yn uniongyrchol fel index, felly grind 1 → row 2, grind 10 → row 11, grind 11 → undefined. Mae'r holl 11 cais yn `EXPECTED_RED`; ni chaiff unrhyw un fod yn `MATCH`. Cedwir perchnogaeth y cyd-destun a'r pob un o'r hen lwybrau, heb roi'r cywiriad PATCH 07 na'r adeiladwr diferion gweledig ar waith. Mae'r cam yn aros am ardystiad JVM brodorol.
+
+
+### Cam 14 — ardystiad JVM brodorol llawn
+
+Ar commit `634b30b4ccdf2830b0cb16a98d19e689462ea8e4` llwyddodd swydd `native-stage14-kotlin-cymraeg` (`114757365134`, rhediad `38233182742`) gyda Kotlin 1.9.0/JDK 21, ffynonellau gwreiddiol a'r oracl. Gwiriwyd 43 marc o log y swydd: yr holl atchweliadau Camau 1–13, 11 rhes grind zero-based heb sentinel, 11 `EXPECTED_RED`, 0 `MATCH`, 66 prawf BigInteger annibynnol, drysau a methiant strict bwriadol. Mae Cam 14 yn gyflawn; ni ddechreuwyd PATCH 07/Cam 15.

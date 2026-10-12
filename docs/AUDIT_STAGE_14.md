@@ -51,3 +51,32 @@ yn gyntaf (pob cam 1–13), yna'n profi:
 
 Rhaid gweld `STAGE14_NATIVE_EXPECTED_RED_COMPLETE` gyda chod
 ymadael 0 ar Kotlin 1.9.0/JDK 21 cyn llofnodi Cam 14.
+
+
+## Ardystiad CI brodorol — COMPLETE
+
+**Mae'r adran hon yn disodli'r statws PENDING uchod.**
+
+- Gangen `Kotlin+Cymraeg`, commit ffynhonnell `634b30b4ccdf2830b0cb16a98d19e689462ea8e4`.
+- GitHub Actions `38233182742`, swydd `114757365134`: **SUCCESS**.
+- Kotlin 1.9.0, JDK 21, `run-stage14-tests.sh`, ffynonellau ac oracl gwreiddiol.
+- Dilyswyd 43 marc log, heb unrhyw un ar goll.
+- PASS: pob atchweliad Camau 1–13, gan gynnwys `STAGE13_NATIVE_GREEN`.
+- PASS: `STAGE14_PHYSICAL_ROWS_GREEN_11`, `STAGE14_SENTINEL_ABSENT_PASS`,
+  `STAGE14_GRIND1_EXPECTED_RED` ... `STAGE14_GRIND11_EXPECTED_RED`,
+  `STAGE14_EXPECTED_RED_11`, `STAGE14_MATCH_0`,
+  `STAGE14_GRIND1_IS_ROW2_PASS`, `STAGE14_GRIND10_IS_ROW11_PASS`,
+  `STAGE14_GRIND11_UNDEFINED_PASS`.
+- PASS: `STAGE14_PRODUCTION_REAL_ADAPTER_PASS`,
+  `STAGE14_PRODUCTION_PROBE_G1_PASS`, `STAGE14_PRODUCTION_UNDEFINED_G11_PASS`,
+  `STAGE14_GUARDS_REPLAY_PASS`, `STAGE14_CONTEXT_OWNERSHIP_PASS`.
+- PASS: `STAGE14_BIGINT_INDEPENDENT_RED_66`,
+  `STAGE14_BIGINT_SHIFTED_NUMERIC_60`, `STAGE14_BIGINT_UNDEFINED_6`,
+  `STAGE14_STRICT_RED_CONFIRMED`, `STAGE14_NATIVE_EXPECTED_RED_COMPLETE`.
+- Mae `LegacyGrindTableAdapter.legacyGrindRow` yn parhau'n anghywir a heb
+  unrhyw gyfieithydd sentinel; nid oes cod PATCH 07 na builder diferion gweledig.
+
+Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38233182742
+
+**Dyfarniad:** Cam 14 wedi'i gwblhau fel `EXPECTED_RED`. `LAST_COMPLETED_STAGE=14`.
+Cam 15 (`PATCH 07`) yw'r nesaf; nid yw wedi dechrau.
