@@ -56,6 +56,7 @@ t/30_unrank_local_tail_shortcut.t
 t/31_full_open_suffix_closed_form.t
 t/32_last_unopened_suffix_closed_form.t
 t/33_factored_suffix.t
+t/34_factored_unranking.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 t/lib/Pastafari/WeavingSuffix.pm

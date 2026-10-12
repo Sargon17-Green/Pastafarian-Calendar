@@ -7,7 +7,7 @@ use Math::BigInt;
 use Scalar::Util qw(blessed);
 use Exporter 'import';
 use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
-use Pastafari::WeavingSuffix qw(countWeavingSuffixPolynomial);
+use Pastafari::WeavingSuffixFactor qw(countWeavingSuffixFactored);
 
 our @EXPORT_OK = qw(unrankWeavingPolynomial);
 
@@ -78,6 +78,7 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
     my @word;
     my $current_total = $total->copy;
     my ($calls,$considered,$shortcut_steps)=(0,0,0);
+    my (%future_cache,%factor_diagnostics);
     my ($tail_shortcut_days,$tail_shortcut_kind)=(0,0);
     for my $step (1 .. $days) {
         # 即使最初排名並非 1 或總數，已接受某個較小的字典序
@@ -140,7 +141,9 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
                 $ways = $remaining_ways->copy;
                 $shortcut_steps++;
             } else {
-                $ways = countWeavingSuffixPolynomial($lengths,\@word);
+                $ways = countWeavingSuffixFactored(
+                    $lengths,\@word,\%future_cache,\%factor_diagnostics
+                );
                 $calls++;
                 $remaining_ways->bsub($ways);
             }
@@ -165,7 +168,10 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
                    considered => $considered, shortcut_steps => $shortcut_steps,
                    first_rank_fastpath => 0, last_rank_fastpath => 0,
                    tail_shortcut_days => $tail_shortcut_days,
-                   tail_shortcut_kind => $tail_shortcut_kind);
+                   tail_shortcut_kind => $tail_shortcut_kind,
+                   future_cache_hits => ($factor_diagnostics{future_cache_hits}//0),
+                   future_cache_misses => ($factor_diagnostics{future_cache_misses}//0),
+                   factored_suffix_calls => ($factor_diagnostics{factor_calls}//0));
     }
     return \@word;
 }
