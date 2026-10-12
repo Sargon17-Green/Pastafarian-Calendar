@@ -38,7 +38,17 @@ data class BaseMonsterContext(
     var discovery05BackwardStorage: List<ExactInt>? = null,
     var discovery05HiddenCount: Int = 0,
     var discovery05RequestedK: Int? = null,
-    var discovery05Actual: ExactInt? = null
+    var discovery05Actual: ExactInt? = null,
+    var patch05PatchedStoneRows: List<MutableStoneRow>? = null,
+    var patch05BackwardStorage: List<ExactInt>? = null,
+    var patch05StoneLegacyCalls: Int = 0,
+    var patch05HiddenCount: Int = 0,
+    var patch05RequestedK: Int? = null,
+    var patch05PhysicalSlot: Int? = null,
+    var patch05LegacyDirectValue: ExactInt? = null,
+    var patch05CorrectedValue: ExactInt? = null,
+    var patch05Applied: Boolean = false,
+    var patch05InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -97,7 +107,8 @@ class MonsterBootstrapManager(
     val distancePatchWrapper: DistancePatchWrapper = DistancePatchWrapper(),
     val legacyStoneBuilder: LegacyStoneBuilder = LegacyStoneBuilder(),
     val stonePatchWrapper: StonePatchWrapper = StonePatchWrapper(),
-    val legacyHiddenDropAdapter: LegacyHiddenDropAdapter = LegacyHiddenDropAdapter()
+    val legacyHiddenDropAdapter: LegacyHiddenDropAdapter = LegacyHiddenDropAdapter(),
+    val hiddenNearnessPatchWrapper: HiddenNearnessPatchWrapper = HiddenNearnessPatchWrapper(legacyHiddenDropAdapter)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -202,6 +213,52 @@ class MonsterBootstrapManager(
             context.status = "LEGACY_HIDDEN_OBSERVED"
             metrics.bump("discovery05.builds")
             metrics.bump("discovery05.legacy.direct.read")
+        }
+        dispatcher.register("PATCH_05") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_PATCH05_CONTEXT_NOT_READY")
+            val k = context.patch05RequestedK
+                ?: throw MonsterValidationException("E_PATCH05_NO_REQUESTED_K")
+            if (k !in 1..7) throw MonsterValidationException("E_PATCH05_INVALID_K")
+            // Adeiladu'r un storfa gorfforol yn ôl â DISCOVERY 05:
+            // PATCH 02 + PATCH 03 + PATCH 04, heb alw'r oracl prawf.
+            val c = context.calculationDay
+            val t = context.targetDay
+            val actionTag = dayTagPatchWrapper.dayTagWithFoundationScar(
+                c, legacyDayTagAdapter.oldDayTag(c))
+            val targetTag = dayTagPatchWrapper.dayTagWithFoundationScar(
+                t, legacyDayTagAdapter.oldDayTag(t))
+            val distance = distancePatchWrapper.patchDistance(
+                c, t, legacyDistanceAdapter.oldDistance(c, t)).inclusiveDistance
+            val direction = ExactInt.of(when {
+                t < c -> 1L
+                t == c -> 2L
+                else -> 3L
+            })
+            val counts = HiddenWorkCounts(
+                actionTag, targetTag, distance, actionTag + targetTag, direction)
+            val stoneTable = stonePatchWrapper.buildPatchedRows()
+            val physical = legacyHiddenDropAdapter.buildBackwardStorage(counts, stoneTable.rows)
+            // Mae patch() yn galw'r hen ddarllenydd yn gyntaf, cyn trosi 8-k.
+            val outcome = hiddenNearnessPatchWrapper.patch(physical, k)
+            check(outcome.physicalSlot in 1..7 && stoneTable.legacyCalls == 45) {
+                "E_PATCH05_BUILD_COUNTS"
+            }
+            // Ymrwymo'n atomig ar ôl llwyddiant yr holl gyfrifiad.
+            context.patch05PatchedStoneRows = stoneTable.rows
+            context.patch05BackwardStorage = physical
+            context.patch05StoneLegacyCalls = stoneTable.legacyCalls
+            context.patch05HiddenCount = 7
+            context.patch05PhysicalSlot = outcome.physicalSlot
+            context.patch05LegacyDirectValue = outcome.legacyDirectValue
+            context.patch05CorrectedValue = outcome.correctedValue
+            context.patch05Applied = true
+            context.patch05InvocationCount = 1
+            context.branchTrace.add("PATCH_05")
+            context.diagnostics.add("PATCH_05_HIDDEN_NEARNESS_8_MINUS_K")
+            context.status = "PATCHED_HIDDEN"
+            metrics.bump("patch05.legacy.direct.calls")
+            metrics.bump("patch05.applied")
         }
         dispatcher.register("PATCH_04") { context ->
             validation.requireBootstrapContext(context)
@@ -401,6 +458,24 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY05_WRAP", e)
+        }
+    }
+
+    /** Cam 11: BOOT, hen ddarlleniad anghywir, yna slot 8-k cywir. */
+    fun applyHiddenNearnessPatch(
+        calculationDay: ExactInt, targetDay: ExactInt, k: Int = 1
+    ): BaseMonsterContext {
+        require(k in 1..7) { "E_PATCH05_K_RANGE" }
+        val context = prepare(calculationDay, targetDay)
+        context.patch05RequestedK = k
+        context.phase = "PATCH_05"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH05_WRAP", e)
         }
     }
 

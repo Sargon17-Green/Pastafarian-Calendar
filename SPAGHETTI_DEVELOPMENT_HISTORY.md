@@ -284,3 +284,8 @@ Defnyddir y cerrig PATCH 04 cywir a'r cyfrifon PATCH 02/03 i greu saith gwerth c
 ### Cam 10 — ardystiad CI brodorol
 
 Ar commit `b2c0a978ca452545c98ff9a7349c6cddd5db345b` llwyddodd swydd `native-stage10-kotlin-cymraeg` (`114696619440`, rhediad `38214703144`) gyda Kotlin 1.9.0/JDK 21 a'r oracl gwreiddiol. Cafwyd `STAGE10_BACKWARD_STORAGE_PASS_7`, `STAGE10_EXPECTED_RED_4`, `STAGE10_MATCH_1`, `STAGE10_BIGINT_INDEPENDENT_PASS_35`, `STAGE10_BIGINT_PATCH04_STONES_GREEN_175`, `STAGE10_STRICT_RED_CONFIRMED` a `STAGE10_NATIVE_EXPECTED_RED_COMPLETE`. Cadwyd holl atchweliadau Camau 1–9. Mae Cam 10 yn gyflawn; ni ddechreuwyd PATCH 05.
+
+
+## Cam 11 — PATCH 05: hiddenByNearness yn defnyddio 8-k
+
+Mae'r lapio cywiro'n galw'r hen `legacyHiddenDirectByAssumedNearness` yn union ac yn cofnodi'r gwerth anghywir, cyn galw'r cyfieithydd newydd `hiddenByNearness` sy'n dychwelyd y slot ffisegol `8-k`. Ni newidir y storfa backward na'r hen graith. Mae'r llwybr cynhyrchu ar wahân yn cadw'r k, y slot, y graith, yr allbwn cywir a'r cyfrif galwadau yng nghyd-destun y galwad. Disgwylir 7 GREEN newydd, y 4 anghysondeb etifeddol a 35 prawf BigInteger annibynnol, gyda 175 cydran carreg. Mae'r cam yn aros am ardystiad CI brodorol llawn; ni ddechreuwyd Cam 12.

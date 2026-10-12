@@ -38,7 +38,7 @@ if ! kotlinc \
     src/main/kotlin/pastafari/LegacyStoneBuilder.kt \
     src/main/kotlin/pastafari/StonePatchWrapper.kt \
     src/main/kotlin/pastafari/LegacyHiddenDropAdapter.kt \
-    src/main/kotlin/pastafari/MonsterBootstrap.kt \
+    src/main/kotlin/pastafari/HiddenNearnessPatchWrapper.kt src/main/kotlin/pastafari/MonsterBootstrap.kt \
     src/test/kotlin/pastafari/NormativeCore.kt \
     src/test/kotlin/pastafari/NormativeCalendar.kt \
     src/test/kotlin/pastafari/Stage03Tests.kt \
