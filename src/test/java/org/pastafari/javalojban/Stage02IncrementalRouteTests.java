@@ -19,6 +19,7 @@ public final class Stage02IncrementalRouteTests {
         siblingBackwardFunctionalOracleDifferential();
         siblingBackwardFunctionalFullYearProbe();
         normalizedBackwardTailAcrossAdjacentParents();
+        normalizedTailDepthGrowthAndConcurrentParents();
         sharedGlobalRankRouteSmallOracle();
         sharedGlobalRankRouteFullYearInterior();
         sharedGlobalRankRouteInteroperabilityAndBudgets();
@@ -104,6 +105,83 @@ public final class Stage02IncrementalRouteTests {
             "E_TAIL_NORMALIZED_FULL_YEAR_A");
         eq(longYear.countAfterPrefix(prefixB), sumB,
             "E_TAIL_NORMALIZED_FULL_YEAR_B");
+    }
+
+    private static void normalizedTailDepthGrowthAndConcurrentParents() {
+        int[] lengths = new int[12];
+        Arrays.fill(lengths, 48);
+        int[][] prefixes = {
+            {1, 2, 3, 4, 5, 6, 7, 8, 9},
+            {1, 2, 3, 4, 5, 6, 7, 8, 9, 9},
+            {1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9},
+            {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+        };
+        MonsterWeavingLinearCounter grown =
+            new MonsterWeavingLinearCounter(lengths);
+        grown.countSiblingBranchSizes(prefixes[2]);
+        long before = grown.tailFunctionalBuildCount();
+        BigInteger[] expanded = grown.countSiblingBranchSizes(prefixes[0]);
+        eq(before + 1, grown.tailFunctionalBuildCount(),
+            "E_TAIL_DEPTH_GROWTH_REBUILDS");
+        long hitBefore = grown.tailFunctionalReuseHitCount();
+        BigInteger[] shortened = grown.countSiblingBranchSizes(prefixes[1]);
+        eq(hitBefore + 1, grown.tailFunctionalReuseHitCount(),
+            "E_TAIL_DEPTH_GROWTH_SUBSEQUENT_REUSE");
+        BigInteger total = BigInteger.ZERO;
+        for (BigInteger v : expanded) total = total.add(v);
+        eq(grown.countAfterPrefix(prefixes[0]), total,
+            "E_TAIL_DEPTH_GROWTH_PARTITION");
+        total = BigInteger.ZERO;
+        for (BigInteger v : shortened) total = total.add(v);
+        eq(grown.countAfterPrefix(prefixes[1]), total,
+            "E_TAIL_DEPTH_GROWTH_SHORTER_PARTITION");
+
+        BigInteger[][] expected = new BigInteger[prefixes.length][];
+        for (int i = 0; i < prefixes.length; i++) {
+            expected[i] = new MonsterWeavingLinearCounter(lengths)
+                .countSiblingBranchSizes(prefixes[i]);
+        }
+        MonsterWeavingLinearCounter shared =
+            new MonsterWeavingLinearCounter(lengths);
+        shared.countSiblingBranchSizes(prefixes[0]);
+        CountDownLatch start = new CountDownLatch(1);
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        Thread[] workers = new Thread[4];
+        for (int i = 0; i < workers.length; i++) {
+            final int ownPrefix = i;
+            workers[i] = new Thread(() -> {
+                try {
+                    start.await();
+                    for (int repeat = 0; repeat < 8; repeat++) {
+                        BigInteger[] actual =
+                            shared.countSiblingBranchSizes(prefixes[ownPrefix]);
+                        if (!Arrays.equals(expected[ownPrefix], actual)) {
+                            throw new AssertionError("E_TAIL_CONCURRENT_VALUES");
+                        }
+                    }
+                } catch (Throwable error) {
+                    failure.compareAndSet(null, error);
+                }
+            });
+            workers[i].start();
+        }
+        start.countDown();
+        for (Thread worker : workers) {
+            try {
+                worker.join();
+            } catch (InterruptedException error) {
+                Thread.currentThread().interrupt();
+                throw new AssertionError("E_TAIL_CONCURRENT_INTERRUPTED",
+                    error);
+            }
+        }
+        if (failure.get() != null) {
+            throw new AssertionError("E_TAIL_CONCURRENT", failure.get());
+        }
+        ok(shared.tailFunctionalReuseHitCount() > 0,
+            "E_TAIL_CONCURRENT_REUSE");
+        ok(shared.tailFunctionalBuildCount() >= 1,
+            "E_TAIL_CONCURRENT_BUILD");
     }
 
     private static void siblingBackwardFunctionalOracleDifferential() {
