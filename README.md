@@ -719,3 +719,18 @@ Tès normatif endepandan dwe rete `EXPECTED_RED` pou gout 2+;
 gout 1 dwe matche. Koreksyon `PATCH 11` ap pase bòl ki soti
 nan gout i-1 pou brase gout i, nan Stage 23. Nou pa fè
 `postStir12`, ni latching lòd nan gout 46, ni seleksyon bòl.
+
+### Fèmti natif Stage 22 — EXPECTED_RED otantifye
+
+GitHub Actions `38287878912` konfime **16 travay PASS**, epi
+yon sèl travay `lua_stage22_discovery` echwe ekspre nan
+dènye step `Regression normatif DISCOVERY 11 — EXPECTED_RED sèl`.
+Tout etap pozitif te pase: sèt sekans, 46 gout ak 276 rezilta
+brase sis bòl, oracle endepandan pou 46 gout, nèf gout reyèl,
+13 injections/13 rekiperasyon, ak senk apèl nested. Mesaj echèk
+egzak la se:
+`EXPECTED_RED Stage 22 DISCOVERY 11: chak gout rekòmanse ak bòl inisyal`.
+
+`LAST_COMPLETED_STAGE=22` ak `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
+Kòd istorik reset chak gout la rete entak; Stage 23 PATCH 11
+pa kòmanse.

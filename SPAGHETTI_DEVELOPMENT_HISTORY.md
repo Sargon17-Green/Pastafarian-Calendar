@@ -573,3 +573,13 @@ konte sou six bowls ki soti nan gout anvan an. Sous
 nouvo branch/commit, epi context kenbe childContexts natif,
 perDrop tras, metrik ak diagnostik. Stage 23 ap korije
 transmisyon eta a. Pa gen `postStir12` oubyen seleksyon.
+
+### Fèmti Stage 22: native CI ak scar istorik
+
+Run `38287878912` te bay 16/16 lòt travay vèt. Yon sèl
+echèk te nan regresyon normatif DISCOVERY 11 a, jan nou te
+mande a. QA natif verifye 46 gout ak oracle endepandan,
+9 gout vizib reyèl, 13 defayans ak 13 rekiperasyon, epi
+5 nested chains endepandan. Nou make
+`LAST_COMPLETED_STAGE=22`, `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
+PATCH 11 rete pou Stage 23.
