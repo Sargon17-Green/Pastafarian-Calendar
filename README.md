@@ -1168,3 +1168,27 @@ vòng đáp án 2048 bit và nhiều task song song;
 bốn hồi quy chuẩn đỏ ở n=M+1, M², M²+1 và M³+1
 với vòng tổng hợp first=1,step=+1. Không sửa oracle
 test-only hoặc các bản vá 01..13. Không tạo lịch cuối.
+
+## Kiểm chứng đóng phát hiện 14
+
+CI Elixir 1.18.5 / Erlang OTP 27 đã chạy
+**374 kiểm thử, đúng bốn sai lệch chuẩn đỏ cố ý**,
+370 bài đạt và 0 cảnh báo biên dịch.
+Toàn bộ 354 bài của Stage1..27 đều đạt; 16 bài
+kiểm soát Stage28 mới đều PASS. Canonical Names
+Lock độc lập PASS.
+
+Bốn hồi quy chuẩn đỏ đều đến từ chọn hạng n>M
+dùng một chữ số đầu, không có lỗi ở short rejection,
+SAVE, answer ring, bát hoặc ID kế tiếp. Các miền
+n=M+1, M², M²+1 và M³+1 cần lần lượt hai, hai,
+ba và bốn chữ số theo cơ số M, nhưng nhánh legacy
+trả 1 cho cả bốn fixture first=1,step=+1.
+
+- [CI phát hiện 14, bốn sai lệch mong đợi](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38283015914)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38283016003)
+
+Giai đoạn 28/55 đóng `EXPECTED_RED` được xác minh.
+Stage29 `PATCH 14` phải giữ module lịch sử, xây
+k chữ số từ cùng answer ring rồi thực hiện wide
+rejection +/-1 trên modulo M^k. Chưa làm ở Stage28.

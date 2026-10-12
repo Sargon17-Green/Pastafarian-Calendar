@@ -995,3 +995,12 @@ ring (cơ số M, chữ số đầu ít trọng số nhất),
 dùng bước +/-1 trên không gian rộng M^k khi
 giá trị lớn hơn giới hạn chia đều. Chưa làm
 bước vá ở DISCOVERY 14.
+
+**Kết quả CI thật của Stage28:** Elixir 1.18.5 /
+OTP 27: 374 kiểm thử, đúng bốn hồi quy chuẩn đỏ,
+370 bài đạt, không cảnh báo và Canonical Names Lock
+PASS. Toàn bộ 354 bài Stage1..27 đạt. 16 điều khiển
+Stage28 PASS, khẳng định hàm legacy wide chỉ đọc
+answer_at(0) nên không thể trả hạng M+1..n.
+Cả bốn so sánh ở n=M+1, M², M²+1, M³+1 đỏ đúng.
+Không thêm wideDetour; Stage28 đóng EXPECTED_RED.

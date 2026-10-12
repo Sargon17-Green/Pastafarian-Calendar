@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=28
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=14
-LAST_COMPLETED_STAGE=27
+LAST_COMPLETED_STAGE=28
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..13 và ShortRejectionPatch đúng với n<=M; thêm LegacySingleDigitWidePick đọc answer_at(stream,0) duy nhất và gọi LegacyBiasedPick ngay cho n>M; AnswerStreamManager.choose_rank phân nhánh đúng short hoặc wide legacy, chưa có wideDetour nhiều chữ số.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_28_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_28_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_28_PENDING
-CI_FAILURES=STAGE_28_PENDING
+CI_TESTS=374
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -683,4 +683,21 @@ không chỉnh oracle. Dự kiến tổng 374 bài, đúng 4
 sai lệch mới; CI xác định kết quả thực tế.
 Không triển khai wideDetour hoặc wide rejection
 cho các hạng rộng trước PATCH 14 giai đoạn 29.
-LAST_COMPLETED_STAGE giữ 27 trước CI.
+LAST_COMPLETED_STAGE đã nâng lên 28 sau CI và khóa tên xác minh.
+
+Giai đoạn 28 đã xác minh trên Elixir 1.18.5, OTP 27:
+374 kiểm thử, đúng bốn hồi quy normative Stage28 đỏ cố ý,
+370 bài đạt, 0 cảnh báo biên dịch. Toàn bộ 354 kiểm thử
+Stage1..27 đạt; 16 kiểm soát mới Stage28 cũng đạt.
+Bốn sai lệch mới lần lượt ở n=M+1, M², M²+1, M³+1
+với first=1,step=+1. LegacySingleDigitWidePick trả 1
+trong cả bốn trường hợp thay vì số rộng nhiều chữ số.
+Không có lỗi khác. Canonical Names Lock PASS độc lập.
+LegacyBiasedPick vẫn giữ nguyên blob SHA
+94816d3aac30296eeded3abdd0bfaea5f46614ae.
+Oracle test-only vẫn giữ nguyên blob SHA
+be1638f46b2190d617af0378a61b077bda10bf32.
+Không có WideDetourPatch; không sửa main.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38283015914
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38283016003
+Giai đoạn 28 đóng EXPECTED_RED; tiếp theo Stage29 PATCH 14.

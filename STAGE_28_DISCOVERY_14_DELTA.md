@@ -78,3 +78,26 @@ làm trước PATCH 14, không tích hợp lịch.
 
 Không thay branch main, không commit HANDOFF_*,
 không nhập module oracle vào mã production.
+
+## Kết quả GitHub Actions đã xác minh
+
+- Commit triển khai:
+  `4da3dafeef74f57c97a4a308095942fa312b3137`.
+- CI Elixir 1.18.5 / OTP 27: biên dịch 45 tệp .ex.
+- **374 kiểm thử, đúng bốn thất bại cố ý, 370 đạt.**
+- Bốn hồi quy normative Stage28 đỏ: n=M+1, M²,
+  M²+1 và M³+1; tất cả do legacy một chữ số.
+- 354 bài cũ và 16 điều khiển Stage28 đều đạt,
+  0 cảnh báo biên dịch.
+- Canonical Names Lock PASS độc lập.
+- LegacyBiasedPick không đổi blob SHA:
+  `94816d3aac30296eeded3abdd0bfaea5f46614ae`.
+- Oracle test-only không đổi blob SHA:
+  `be1638f46b2190d617af0378a61b077bda10bf32`.
+- Không sửa main, không làm WideDetourPatch Stage29.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38283015914
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38283016003
+
+Trạng thái kết thúc: EXPECTED_RED đã xác minh.
+Điểm tiếp theo: Stage29 PATCH 14.
