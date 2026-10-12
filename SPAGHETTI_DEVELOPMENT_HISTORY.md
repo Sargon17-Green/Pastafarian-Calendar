@@ -179,3 +179,7 @@ Exact rank2 order `[1,2,3,4,6,5]` चे IDs 4,5,6 तीन independent histori
 ## Stage 27 PATCH 13 — verified and closed
 
 Corrected rejection-sampling rank selection short/wide दोन्ही domain मध्ये स्वतंत्र production implementation; Stage26 real old modulo method unchanged and invoked, corrected full Stage25 chain reused. O(1) exact skip of +1/-1 cyclic rejected suffix avoids worst-case M iterations. Independent finite-base exhaustive brute oracle, canonical TypeScript test oracle bounded witnesses, 12 day pairs, 64 varied, eight signed-bigint, 720 rank paths. GitHub Actions run 38253073014: both CI jobs PASS, 2560 canonical short comparisons and 13926 finite-base brute-force proofs, 804 real histories with zero corrected mismatches, 13 old expected-red scripts unchanged. LAST_COMPLETED_STAGE=27.
+
+## Stage 28 DISCOVERY 14 — initial implementation, verification pending
+
+Historical short-only choice assumes N<=M. The actual old method handles N<=M by invoking Stage27 short rejection, but for N>M it records blocked/invalid rank zero instead of hanging at zero acceptance bound. Full Stage27 production chain and old Stage26 modulo scar remain real and unchanged. Tests cover short and wide boundary discrepancies and preserve prior 13 historical reds; new 14th expected-red runs through a standalone verifier in npm test. No Stage29 fix.

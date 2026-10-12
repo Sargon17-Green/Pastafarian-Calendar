@@ -30,3 +30,5 @@ export * from "./patch12NextBowl.ts";
 export * from "./discovery13LegacyBiasedModulo.ts";
 
 export * from "./patch13RejectionRank.ts";
+
+export * from "./discovery14LegacyShortOnlyWide.ts";
