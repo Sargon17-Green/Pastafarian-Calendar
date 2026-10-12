@@ -196,8 +196,8 @@ jobs:
         run: |
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_memo_prefix.pl
-      - name: 受控稽核真實四月份 24 個 BigInt 前綴決策
+      - name: 受控稽核真實四月份全部 240 個 BigInt 前綴決策
         shell: bash
         run: |
           set -euo pipefail
-          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_prefix.pl --days 24 --seconds 185 --rss-kib 393216
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_prefix.pl --days 240 --seconds 185 --rss-kib 393216

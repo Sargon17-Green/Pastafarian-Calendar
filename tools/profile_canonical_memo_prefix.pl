@@ -16,7 +16,7 @@ use Pastafari::WeavingUnrank qw(unrankWeavingPolynomial);
 
 # 四個真正月份、240 日的獨立 BigInt 逐日前綴核查。執行時限與
 # RSS 界限均由父程序強制。父程序不把 BLOCKED 當成 PASS。
-my ($days,$seconds,$rss_limit)=(24,185,393216);
+my ($days,$seconds,$rss_limit)=(240,185,393216);
 GetOptions('days=i'=>\$days,'seconds=i'=>\$seconds,
            'rss-kib=i'=>\$rss_limit)
     or die "參數無效\n";
