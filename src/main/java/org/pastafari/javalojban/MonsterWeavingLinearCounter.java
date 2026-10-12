@@ -402,6 +402,10 @@ public final class MonsterWeavingLinearCounter {
     private TailFunctional cachedTailFunctional;
     private long tailFunctionalReuseHits;
     private long tailFunctionalBuilds;
+    private long tailFunctionalBuildNanos;
+    private long siblingPrefixDotNanos;
+    private long siblingPrefixDotCalls;
+    private long siblingPrefixMonthTransitions;
 
     long tailFunctionalReuseHitCount() {
         synchronized (tailFunctionalLock) {
@@ -415,6 +419,30 @@ public final class MonsterWeavingLinearCounter {
         }
     }
 
+    long tailFunctionalBuildElapsedNanos() {
+        synchronized (tailFunctionalLock) {
+            return tailFunctionalBuildNanos;
+        }
+    }
+
+    long siblingPrefixDotElapsedNanos() {
+        synchronized (tailFunctionalLock) {
+            return siblingPrefixDotNanos;
+        }
+    }
+
+    long siblingPrefixDotCallCount() {
+        synchronized (tailFunctionalLock) {
+            return siblingPrefixDotCalls;
+        }
+    }
+
+    long siblingPrefixMonthTransitionCount() {
+        synchronized (tailFunctionalLock) {
+            return siblingPrefixMonthTransitions;
+        }
+    }
+
     private TailFunctional commonSiblingTail(State parent,
             int cut, int prefixDays) {
         synchronized (tailFunctionalLock) {
@@ -424,6 +452,7 @@ public final class MonsterWeavingLinearCounter {
                 return cachedTailFunctional;
             }
         }
+        long started = System.nanoTime();
         int fullDays = prefixDays;
         for (int month = cut; month < lengths.length; month++) {
             fullDays += parent.remaining[month];
@@ -458,17 +487,21 @@ public final class MonsterWeavingLinearCounter {
         synchronized (tailFunctionalLock) {
             cachedTailFunctional = built;
             tailFunctionalBuilds++;
+            tailFunctionalBuildNanos += System.nanoTime() - started;
         }
         return built;
     }
 
     private BigInteger siblingPrefixDot(State child, int cut,
             TailFunctional coefficient) {
+        long started = System.nanoTime();
+        long monthTransitions = 0;
         int days = child.remaining[child.closed];
         BigInteger[] previous = new BigInteger[days + 2];
         previous[1] = ONE;
         BigInteger previousTotal = ONE;
         for (int month = child.closed + 1; month < cut; month++) {
+            monthTransitions++;
             int additional = child.remaining[month];
             int newDays = days + additional;
             BigInteger[] next = new BigInteger[newDays + 2];
@@ -506,6 +539,11 @@ public final class MonsterWeavingLinearCounter {
             if (previous[i] != null && weight != null) {
                 total = total.add(previous[i].multiply(weight));
             }
+        }
+        synchronized (tailFunctionalLock) {
+            siblingPrefixDotCalls++;
+            siblingPrefixDotNanos += System.nanoTime() - started;
+            siblingPrefixMonthTransitions += monthTransitions;
         }
         return total;
     }

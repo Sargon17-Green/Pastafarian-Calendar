@@ -309,11 +309,20 @@ public final class Stage02IncrementalRouteTests {
         long previousElapsed = 0;
         long hitBaseline = family.tailFunctionalReuseHitCount();
         long buildBaseline = family.tailFunctionalBuildCount();
+        long backwardNanosBaseline = family.tailFunctionalBuildElapsedNanos();
+        long forwardNanosBaseline = family.siblingPrefixDotElapsedNanos();
+        long forwardCallsBaseline = family.siblingPrefixDotCallCount();
+        long forwardTransitionsBaseline =
+            family.siblingPrefixMonthTransitionCount();
         long usedHeapStart = Runtime.getRuntime().totalMemory()
             - Runtime.getRuntime().freeMemory();
         long previousSegmentNanos = start;
         long previousSegmentHits = 0;
         long previousSegmentBuilds = 0;
+        long previousBackwardNanos = 0;
+        long previousForwardNanos = 0;
+        long previousForwardCalls = 0;
+        long previousForwardTransitions = 0;
         int previousOpened = 0;
         int previousClosed = 0;
         for (int call = 1; call <= 24; call++) {
@@ -351,6 +360,21 @@ public final class Stage02IncrementalRouteTests {
                 long now = System.nanoTime();
                 long hits = family.tailFunctionalReuseHitCount() - hitBaseline;
                 long builds = family.tailFunctionalBuildCount() - buildBaseline;
+                long backwardNanos = family.tailFunctionalBuildElapsedNanos()
+                    - backwardNanosBaseline;
+                long forwardNanos = family.siblingPrefixDotElapsedNanos()
+                    - forwardNanosBaseline;
+                long forwardCalls = family.siblingPrefixDotCallCount()
+                    - forwardCallsBaseline;
+                long forwardTransitions =
+                    family.siblingPrefixMonthTransitionCount()
+                    - forwardTransitionsBaseline;
+                ok(backwardNanos >= previousBackwardNanos
+                        && forwardNanos >= previousForwardNanos,
+                    "E_SHARED_TIMING_MONOTONE");
+                ok(forwardCalls >= previousForwardCalls
+                        && forwardTransitions >= previousForwardTransitions,
+                    "E_SHARED_WORK_MONOTONE");
                 System.out.println("STAGE_02_SHARED_FOUR_STEP_PROFILE_PASS"
                     + " calls=" + call
                     + " prefix_days=" + route.stepsCompleted()
@@ -358,8 +382,20 @@ public final class Stage02IncrementalRouteTests {
                     + " closed=" + closed
                     + " segment_ms=" + (now - previousSegmentNanos) / 1000000
                     + " segment_hits=" + (hits - previousSegmentHits)
-                    + " segment_builds=" + (builds - previousSegmentBuilds));
+                    + " segment_builds=" + (builds - previousSegmentBuilds)
+                    + " backward_ms=" + (backwardNanos
+                        - previousBackwardNanos) / 1000000
+                    + " forward_ms=" + (forwardNanos
+                        - previousForwardNanos) / 1000000
+                    + " forward_calls=" + (forwardCalls
+                        - previousForwardCalls)
+                    + " forward_month_transitions=" + (forwardTransitions
+                        - previousForwardTransitions));
                 previousSegmentNanos = now;
+                previousBackwardNanos = backwardNanos;
+                previousForwardNanos = forwardNanos;
+                previousForwardCalls = forwardCalls;
+                previousForwardTransitions = forwardTransitions;
                 previousSegmentHits = hits;
                 previousSegmentBuilds = builds;
                 previousOpened = opened;
@@ -392,6 +428,15 @@ public final class Stage02IncrementalRouteTests {
             }
         }
         eq(48, count, "E_SHARED_EXTENDED_48_BATCHES");
+        ok(family.tailFunctionalBuildElapsedNanos() > backwardNanosBaseline,
+            "E_SHARED_BACKWARD_TIMING_RECORDED");
+        ok(family.siblingPrefixDotElapsedNanos() > forwardNanosBaseline,
+            "E_SHARED_FORWARD_TIMING_RECORDED");
+        ok(family.siblingPrefixDotCallCount() > forwardCallsBaseline,
+            "E_SHARED_FORWARD_CALLS_RECORDED");
+        ok(family.siblingPrefixMonthTransitionCount()
+                > forwardTransitionsBaseline,
+            "E_SHARED_FORWARD_TRANSITIONS_RECORDED");
         eq(48, route.stepsCompleted(),
             "E_SHARED_EXTENDED_48_PREFIX_DAYS");
         eq(route.remainingChoices(),
