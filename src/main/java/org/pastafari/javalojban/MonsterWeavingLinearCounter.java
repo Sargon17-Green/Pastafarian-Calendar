@@ -83,6 +83,7 @@ public final class MonsterWeavingLinearCounter {
     private static final int MAX_PARTIAL_DP_DAYS = 2048;
     private final ArrayDeque<PartialDP> partialDps = new ArrayDeque<>();
     private long partialDpReuseHits;
+    private long closedFormTransitions;
     private long partialDpEvictions;
 
     private static final class PartialDP {
@@ -151,6 +152,12 @@ public final class MonsterWeavingLinearCounter {
     long partialDpReuseHitCount() {
         synchronized (partialDps) {
             return partialDpReuseHits;
+        }
+    }
+
+    long closedFormTransitionCount() {
+        synchronized (partialDps) {
+            return closedFormTransitions;
         }
     }
 
@@ -279,6 +286,16 @@ public final class MonsterWeavingLinearCounter {
         return result;
     }
 
+    private static BigInteger combinations(int total, int choose) {
+        int width = Math.min(choose, total - choose);
+        BigInteger result = ONE;
+        for (int n = 1; n <= width; n++) {
+            result = result.multiply(BigInteger.valueOf(total - width + n))
+                .divide(BigInteger.valueOf(n));
+        }
+        return result;
+    }
+
     private BigInteger countSuffixUncached(State state) {
         PartialDP partial = cachedPartial(state);
         int days;
@@ -302,6 +319,20 @@ public final class MonsterWeavingLinearCounter {
             int additional = state.remaining[month];
             if (additional < 1) throw new IllegalStateException("E_WEAVE_STATE");
             int newDays = days + additional;
+            boolean enforceOpen = month - 1 >= state.opened;
+            boolean snapshotNeeded = newDays <= MAX_PARTIAL_DP_DAYS
+                && (month == state.closed + 7 || month == state.closed + 15);
+            boolean nextMonthEnforcesOpen = month >= state.opened;
+            if (!enforceOpen && !snapshotNeeded
+                    && !nextMonthEnforcesOpen) {
+                previousTotal = previousTotal.multiply(
+                    combinations(newDays - 1, additional - 1));
+                days = newDays;
+                synchronized (partialDps) {
+                    closedFormTransitions++;
+                }
+                continue;
+            }
             BigInteger[] next = new BigInteger[newDays + 2];
             BigInteger newTotal = ZERO;
 
@@ -309,7 +340,6 @@ public final class MonsterWeavingLinearCounter {
                 next[days + 1] = previousTotal;
                 newTotal = previousTotal;
             } else {
-                boolean enforceOpen = month - 1 >= state.opened;
                 BigInteger[] binomial = chooseColumn(newDays, additional - 2);
                 BigInteger eligible = enforceOpen ? ZERO : previousTotal;
                 for (int first = 1; first <= days + 1; first++) {

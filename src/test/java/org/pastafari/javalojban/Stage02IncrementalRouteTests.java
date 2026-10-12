@@ -19,6 +19,7 @@ public final class Stage02IncrementalRouteTests {
         suffixCountCacheReuseAndEviction();
         partialDpReuseAcrossDistinctSuffixStates();
         partialDpOpenedGuardAndBoundedEviction();
+        closedFormTransitionsMatchSmallOracle();
         partialDpClosedGuardRejectsCrossBoundary();
         concurrentPartialDpReuse();
         concurrentSuffixCountNeutrality();
@@ -345,6 +346,47 @@ public final class Stage02IncrementalRouteTests {
             "E_PARTIAL_DP_OLD_STATE_NEUTRAL");
         eq(0L, independent.partialDpReuseHitCount(),
             "E_PARTIAL_DP_INSTANCE_INDEPENDENCE");
+    }
+
+    private static void closedFormTransitionsMatchSmallOracle() {
+        for (int[] lengths : new int[][]{
+                {2, 2, 2}, {2, 2, 2, 2}, {2, 3, 2, 2}
+        }) {
+            MonsterWeavingLinearCounter family =
+                new MonsterWeavingLinearCounter(lengths);
+            NormativeOracle.WeavingFamily oracle =
+                new NormativeOracle.WeavingFamily(lengths);
+            BigInteger total = oracle.count();
+            int expected = total.intValueExact();
+            int[] opened = new int[lengths.length];
+            for (int i = 0; i < opened.length; i++) opened[i] = i + 1;
+            BigInteger exact = BigInteger.ZERO;
+            for (int rank = 1; rank <= expected; rank++) {
+                int[] weaving = oracle.unrank1(BigInteger.valueOf(rank));
+                if (weaving.length >= opened.length
+                        && Arrays.equals(Arrays.copyOf(weaving,
+                            opened.length), opened)) {
+                    exact = exact.add(BigInteger.ONE);
+                }
+            }
+            eq(exact, family.countAfterPrefix(opened),
+                "E_CLOSED_FORM_ORACLE_EXACT");
+            ok(family.closedFormTransitionCount() > 0,
+                "E_CLOSED_FORM_ACTUALLY_USED");
+            eq(exact, family.countAfterPrefix(opened),
+                "E_CLOSED_FORM_REPEATED_EXACT");
+        }
+        int[] longer = new int[12];
+        Arrays.fill(longer, 48);
+        int[] prefix = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        MonsterWeavingLinearCounter fast =
+            new MonsterWeavingLinearCounter(longer);
+        MonsterWeavingLinearCounter reverse =
+            new MonsterWeavingLinearCounter(longer);
+        eq(reverse.countAfterPrefix(prefix), fast.countAfterPrefix(prefix),
+            "E_CLOSED_FORM_LONGER_REFERENCE");
+        ok(fast.closedFormTransitionCount() > 0,
+            "E_CLOSED_FORM_LONGER_USED");
     }
 
     private static void partialDpOpenedGuardAndBoundedEviction() {
