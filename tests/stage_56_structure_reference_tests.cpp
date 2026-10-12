@@ -678,6 +678,8 @@ void exigeLiminaCumDiebusCalculiIntertextis() {
     const Big fundamentum = pastafari::FOUNDATION_DAY_OLD;
     const std::array<Big, 3> calculi{
         fundamentum - Big{1}, fundamentum, fundamentum + Big{1}};
+    const std::array<Big, 3> numeriAnnorum{
+        Big{4999}, Big{5000}, Big{5001}};
     NormativeOracle oracle(false); // saved-sum, numquam mutant raw-sum
     std::map<std::pair<Big, Big>, Exspectatio> references;
     std::map<Big, std::vector<Big>> quaestiones;
@@ -729,6 +731,30 @@ void exigeLiminaCumDiebusCalculiIntertextis() {
     exige(references.size() == 9 && quaestiones.size() == 3,
           "referentiae novem annorum ex tribus c desunt");
 
+    // Ipsa via findTargetYear, cum exploratione normativi anni 5000,
+    // in utroque extremo uniuscuiusque structurae probatur (9*2).
+    // Ceteros 102 dies ex limitibus iam testatis resolvimus ne
+    // eandem quaestionem annum quinque milium centies repetamus.
+    int finesOraculi = 0;
+    for (const Big& c : calculi) {
+        for (const Big& n : numeriAnnorum) {
+            const Exspectatio& e = references.at(std::make_pair(c, n));
+            const std::array<Big, 2> extrema{
+                e.annus.openGateDay + Big{1}, e.annus.closeGateDay};
+            for (const Big& t : extrema) {
+                const Year repertus = oracle.findTargetYear(c, t);
+                exige(repertus.number == n &&
+                      repertus.openGateDay == e.annus.openGateDay &&
+                      repertus.closeGateDay == e.annus.closeGateDay,
+                      "oraculum membership in extremis anni discrepavit");
+                ++finesOraculi;
+            }
+        }
+    }
+    exige(finesOraculi == 18, "oraculum XVIII extremis non exploratum");
+    std::cout << "GRADUS56_LIMINA_YEAR_MEMBERSHIP=PASS ANNI=9 EDGES="
+              << finesOraculi << "/18\n";
+
     BaseMonsterManager manager;
     // Umbra test-only quae in cache semanticum nihil mutat: imitamur
     // solam clavem veterem yearNumber et probationes triple custodis.
@@ -750,16 +776,24 @@ void exigeLiminaCumDiebusCalculiIntertextis() {
                 if (j >= series.size()) continue;
                 const Big& t = circuitus == 0
                     ? series[j] : series[series.size() - 1 - j];
-                const Year a = oracle.findTargetYear(c, t);
-                const auto it = references.find(
-                    std::make_pair(c, a.number));
-                exige(it != references.end(),
-                      "dies ad alium annum extra 4999/5001 pertinet");
-                const Exspectatio& expected = it->second;
-                exige(expected.annus.openGateDay < t &&
-                      t <= expected.annus.closeGateDay,
-                      "anno erroneo dies secundum oraculum collocatus");
-                const auto m = cacheImago.find(a.number);
+                const Exspectatio* inventus = nullptr;
+                for (const Big& numerus : numeriAnnorum) {
+                    const auto it = references.find(
+                        std::make_pair(c, numerus));
+                    exige(it != references.end(),
+                          "structura anni in tabula testis non inventa");
+                    const Year& y = it->second.annus;
+                    if (y.openGateDay < t && t <= y.closeGateDay) {
+                        exige(inventus == nullptr,
+                              "annorum intervalla inter se superponuntur");
+                        inventus = &it->second;
+                    }
+                }
+                exige(inventus != nullptr,
+                      "dies extra annos 4999/5000/5001 est");
+                const Exspectatio& expected = *inventus;
+                const Big& annusNumerus = expected.annus.number;
+                const auto m = cacheImago.find(annusNumerus);
                 const bool inCache = m != cacheImago.end();
                 const auto tria = std::make_tuple(
                     c, expected.annus.openGateDay,
@@ -784,7 +818,7 @@ void exigeLiminaCumDiebusCalculiIntertextis() {
                 comparaStructuram(actual, expected, label);
                 comparaDiem(actual.result, diesExReference(expected, t),
                             label);
-                cacheImago[a.number] = tria;
+                cacheImago[annusNumerus] = tria;
                 exige(manager.stage56FinalStructureCacheSizeDiagnostic()
                           == cacheImago.size(),
                       label + ": cardinalitas cache contra exemplar differt");
@@ -792,7 +826,7 @@ void exigeLiminaCumDiebusCalculiIntertextis() {
                 // In quolibet (c, anno) primus reditus eundem annum cache
                 // calidum servare debet; intermixtio c postea retractat
                 // entry alienum et ponit guardedCacheRejected.
-                if (iamRecalefacti.emplace(c, a.number).second) {
+                if (iamRecalefacti.emplace(c, annusNumerus).second) {
                     const auto iterum =
                         manager.executeFinalIntegrationStage56(c, t);
                     exige(iterum.ready && iterum.status == "GREEN" &&

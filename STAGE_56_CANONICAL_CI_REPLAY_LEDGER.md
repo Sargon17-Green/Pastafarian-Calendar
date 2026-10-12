@@ -235,3 +235,21 @@ cache `yearNumber -> (calculationDay, openGate, closeGate)` in
 reprobantur, cardinalitate cache constante. Hoc est auditum
 contractus cache, non mutatio algorithmica. Prioris SHA status viridis
 non imponitur novi SHA. `main` inalteratum est. Gradus 57 non apertus.
+
+## Efficientia custodiae liminum (mutatio sequens, adhuc CI pendens)
+
+- In commit `51ec5b5370975e031ea021a8f01e94abc25ce157`, praevolatus
+  [38258419210](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38258419210)
+  success et GCC/Clang in
+  [38258419174](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38258419174)
+  ambos `GRADUS56_LIMINA_CACHE=PASS COLD=3 HITS=2 REJECTS=97 WARM_RECHECKS=9 CACHE_ANNI=3`
+  demonstraverunt. Status totius vigiliae nondum notus erat tempore huius mutationis.
+- Computatio `NormativeOracle::findTargetYear` pro omnibus 102 interrogationibus
+  repetita erat, quamquam structurae annorum novem iam in memoria testis aderant.
+  Nunc 18 probationes independentes de membership extrema (initium inclusum et
+  finis inclusus) cum `oracle.findTargetYear` manent; 102 dies in structuris
+  already independently generated per interval `(open, close]` resolvuntur.
+  Numerus probationum C++, indicia cache, paritas reference et duo cursus
+  (ante/retrorsum) non mutantur. Exitus `EDGES=18/18` in utroque
+  workflow expresse requiritur. Haec tantum emendatio testis est, non mutationis
+  algoritmi calendarii. STATUS = PENDING_NEW_SHA_CI.

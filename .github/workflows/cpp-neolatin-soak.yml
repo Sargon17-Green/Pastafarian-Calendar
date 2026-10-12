@@ -626,6 +626,8 @@ jobs:
 
           timeout 25m build_soak/differential/structure --limina-calculorum \
             2>&1 | tee soak-logs/calculation-day-seams.log
+          grep -Fx 'GRADUS56_LIMINA_YEAR_MEMBERSHIP=PASS ANNI=9 EDGES=18/18' \
+            soak-logs/calculation-day-seams.log
           grep -F 'GRADUS56_LIMINA_CALCULORUM=PASS C=3 ANNI=9 CASES=' \
             soak-logs/calculation-day-seams.log
 
