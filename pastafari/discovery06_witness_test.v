@@ -4,14 +4,17 @@ fn test_discovery06_legacy_store_has_visible_one_based_sentinel() {
 	empty := new_legacy_visible_drop_store()
 	assert empty.len == 1
 	assert empty[0].str() == '0'
-	visible := [big_zero(), big_from_int(101), big_from_int(202), big_from_int(303)]
+	visible := [big_zero(), big_from_int(101), big_from_int(202),
+		big_from_int(303)]
 	assert (legacy_prior(visible, 4, 1) or { big_zero() }).str() == '303'
 	assert (legacy_prior(visible, 4, 2) or { big_zero() }).str() == '202'
 	assert (legacy_prior(visible, 4, 3) or { big_zero() }).str() == '101'
 }
 
 fn test_discovery06_valid_visible_slots_still_use_legacy() {
-	visible := [big_zero(), big_from_int(111), big_from_int(222), big_from_int(333), big_from_int(444), big_from_int(555), big_from_int(666), big_from_int(777)]
+	visible := [big_zero(), big_from_int(111), big_from_int(222),
+		big_from_int(333), big_from_int(444), big_from_int(555),
+		big_from_int(666), big_from_int(777)]
 	foundation := big_from_i64(-15_055_671)
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
 	dispatcher := new_base_dispatcher()

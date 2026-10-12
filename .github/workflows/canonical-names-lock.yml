@@ -51,13 +51,6 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
-      - name: Inspect V 0.5.2 formatter for stage 12 tests — temporary
-        shell: bash
-        run: |
-          set -euo pipefail
-          v fmt -w ./pastafari/discovery06_witness_test.v
-          v fmt -w ./pastafari/discovery06_expected_red_test.v
-          git --no-pager diff -- ./pastafari/discovery06_witness_test.v ./pastafari/discovery06_expected_red_test.v
       - name: Verify V version and source formatting
         shell: bash
         run: |
