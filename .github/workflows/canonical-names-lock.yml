@@ -51,16 +51,6 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
-      - name: Inspect native V stage 25 formatting — temporary
-        shell: bash
-        run: |
-          set -euo pipefail
-          v fmt -w ./pastafari/next_bowl_patch12.v
-          v fmt -w ./pastafari/patch12_test.v
-          v fmt -w ./pastafari/discovery12_witness_test.v
-          v fmt -w ./pastafari/legacy_next_bowl.v
-          v fmt -w ./pastafari/monster_base.v
-          git --no-pager diff -- ./pastafari/next_bowl_patch12.v ./pastafari/patch12_test.v ./pastafari/discovery12_witness_test.v ./pastafari/legacy_next_bowl.v ./pastafari/monster_base.v
       - name: Verify V version and source formatting
         shell: bash
         run: |

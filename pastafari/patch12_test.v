@@ -47,9 +47,7 @@ fn test_patch12_all_720_orders_and_all_six_ids_match_independent_successor() {
 			expected := patch12_independent_successor(queried_id, order)
 			actual := calendar_next_bowl_spaghetti(queried_id, order) or { 0 }
 			assert actual == expected
-			legacy := new_base_dispatcher().dispatch_legacy_next_bowl(queried_id, order) or {
-				0
-			}
+			legacy := new_base_dispatcher().dispatch_legacy_next_bowl(queried_id, order) or { 0 }
 			assert legacy == (queried_id % 6) + 1
 			if legacy != actual {
 				legacy_disagreements++
@@ -62,8 +60,8 @@ fn test_patch12_all_720_orders_and_all_six_ids_match_independent_successor() {
 }
 
 fn test_patch12_successor_wraps_at_last_position_not_at_bowl_id_six() {
-	for order in [[1, 2, 3, 4, 5, 6], [6, 5, 4, 3, 2, 1],
-		[2, 3, 1, 4, 5, 6], [1, 3, 5, 2, 4, 6]] {
+	for order in [[1, 2, 3, 4, 5, 6], [6, 5, 4, 3, 2, 1], [2, 3, 1, 4, 5, 6],
+		[1, 3, 5, 2, 4, 6]] {
 		first_id := order[0]
 		last_id := order[5]
 		assert (calendar_next_bowl_spaghetti(last_id, order) or { 0 }) == first_id
@@ -73,15 +71,13 @@ fn test_patch12_successor_wraps_at_last_position_not_at_bowl_id_six() {
 
 fn test_patch12_post_stir_real_call_uses_original_drop46_latch() {
 	bowls := patch12_fixture_bowls()
-	for order in [[1, 2, 3, 4, 5, 6], [6, 5, 4, 3, 2, 1],
-		[2, 3, 1, 4, 5, 6], [1, 3, 5, 2, 4, 6]] {
+	for order in [[1, 2, 3, 4, 5, 6], [6, 5, 4, 3, 2, 1], [2, 3, 1, 4, 5, 6],
+		[1, 3, 5, 2, 4, 6]] {
 		post := calendar_post_stir12_spaghetti(bowls, order) or { LegacyPostStir12Result{} }
 		assert post.order_for_query == order
 		assert post.overwrite_count == 12
 		for queried_id in [order[0], order[3], order[5]] {
-			from_chain := calendar_post_stir_next_bowl_spaghetti(bowls, order, queried_id) or {
-				0
-			}
+			from_chain := calendar_post_stir_next_bowl_spaghetti(bowls, order, queried_id) or { 0 }
 			expected := patch12_independent_successor(queried_id, order)
 			assert from_chain == expected
 		}
@@ -113,8 +109,8 @@ fn test_patch12_rejects_invalid_ids_and_permutations_before_selection() {
 		}
 		assert failed
 	}
-	for bad_order in [[1, 2, 3], [1, 2, 3, 4, 5, 5],
-		[1, 2, 3, 4, 5, 7], [0, 2, 3, 4, 5, 6]] {
+	for bad_order in [[1, 2, 3], [1, 2, 3, 4, 5, 5], [1, 2, 3, 4, 5, 7],
+		[0, 2, 3, 4, 5, 6]] {
 		mut failed := false
 		_ = calendar_next_bowl_spaghetti(1, bad_order) or {
 			failed = true
