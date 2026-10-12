@@ -1,0 +1,27 @@
+name: One-time Stage26 stale-run cleanup
+
+on:
+  push:
+    paths:
+      - docs/STAGE26_NEXT_STAGE.md
+
+permissions:
+  contents: read
+
+jobs:
+  stop-superseded-ci:
+    if: github.ref == 'refs/heads/TypeScript+मराठी'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel obsolete Stage26 validation with unbounded oracle witness
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/38246441494" --jq .status)"
+          if [ "$status" != "completed" ]; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/38246441494/cancel"
+          fi

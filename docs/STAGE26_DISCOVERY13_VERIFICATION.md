@@ -1,4 +1,4 @@
-# Stage 26 — DISCOVERY 13: biased modulo rank selection (CI submission)
+# Stage 26 — DISCOVERY 13: biased modulo rank selection (CI verified PASS)
 
 ## नियमाधारित स्रोत व दोषाची अचूक व्याख्या
 
@@ -28,4 +28,12 @@ Corrected `chooseRank` किंवा test-only reference production import न
 - `test/discovery13Red.ts`: intentional thirteenth RED (3 mismatches, 0 matches at `first=M`, `N=2,3,5`). Twelve historical RED scripts untouched.
 - GitHub Actions: `stage26-typescript-marathi` runs typecheck, Stage1–26 green suite, 13 independent archived intentionally-red checks; `verify` checks frozen names.
 
-**Stage26 status: implementation submitted, CI not yet verified. LAST_COMPLETED_STAGE remains 25.** No Stage27 PATCH13 implementation.
+**Stage26 verified and closed.** [Implementation commit c024cac](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/c024cacdc53556bf8a0e82891f97dd13eb1ea807); [GitHub Actions run 38246972763](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38246972763): jobs `verify` and `stage26-typescript-marathi` **SUCCESS**. Native TypeScript typecheck, Stage1–26 tests, canonical lock, 13 expected-red scripts independently PASS (all exited nonzero with intended witness).
+
+```text
+STAGE_26_DISCOVERY_13_GUARDS_PASS dayPairs=12 cells=72 oldWrong=16 oldMatches=56 wideWrong=16 wideSame=0 redWitnesses=3 moduloCalls=2 correctedNextCalls=2 oldNextCalls=2 injectedFailures=2
+STAGE_26_DISCOVERY_13_PROPERTIES_PASS analyticalSizes=256 biasedFamilies=255 topRejections=255 directCases=984 directWrong=426 directMatches=558 wideCases=328 wideWrong=326 thresholdWitnesses=3 realPairs=12 varied=64 giant=8 ranks=720 unique=720 histories=804 sharedWrites=46632 streamMismatches=0 oldWrong=177 oldMatches=627
+DISCOVERY_13_EXPECTED_RED mismatches=3 matches=0 sizes=2,3,5 first=M
+```
+
+पहिल्या CI प्रयत्नात अतिदूरचा upward wide oracle acceptance-walk अवास्तव होता. [Corrected commit c024cac](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/c024cacdc53556bf8a0e82891f97dd13eb1ea807) bounded finite witness input वापरतो; दुरुस्त production selection Stage26 मध्ये अजून नाही. **LAST_COMPLETED_STAGE=26**. Stage27 PATCH13 out of scope.
