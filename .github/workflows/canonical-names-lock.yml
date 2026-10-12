@@ -100,3 +100,9 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 200s perl -Ilib -It/lib tools/profile_polynomial_stream.pl --seconds 40 --rss-kib 262144 --temp-file-bytes 268435456
+      - name: 僅限標記提交之 47 月份 252 日串流雙向精確排名驗證
+        if: contains(github.event.head_commit.message, '[weaving-stream-roundtrip-252]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 205s perl -Ilib -It/lib tools/profile_stream_rank_roundtrip.pl --seconds 165 --rss-kib 262144

@@ -77,6 +77,7 @@ tools/profile_weaving.pl
 tools/profile_polynomial.pl
 tools/profile_unrank_middle.pl
 tools/profile_rank_roundtrip.pl
+tools/profile_stream_rank_roundtrip.pl
 tools/profile_polynomial_stream.pl
 CANONICAL_NAMES_LOCK.sha256
 .github/workflows/canonical-names-lock.yml

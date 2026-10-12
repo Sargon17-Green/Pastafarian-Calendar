@@ -27,7 +27,15 @@
 ## 原生驗證與資源限制
 
 - 後綴引擎提交 `f96ddd5c75e2ad1f485b35445ef9ae8a7b647170`：https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38241799626 ，25,193 斷言／40 檔 PASS；包括 `t/39_stream_profile_factor.t`，無失敗斷言。
-- 反排名／正向排名選項 commit / CI：必須另行通過完整 Perl 5.40 原生套件，並確認所有 40 個測試檔；不得只依 syntax OK 宣稱完成。
+- 雙向排名引擎提交 `8891dfe44fbaa17ff44d4668abe343b1d34921ae`：https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38242596023 ，25,339 斷言／41 檔 PASS；包括 `t/40_stream_rank_roundtrip.t`、47 月份 188 日非極端一基排名的串流精確往返、全部非法選項拒絕與來源 BigInt 不變性。
 - 延伸到 47 月份／252 日的雙向排名及最高 5,778 日還需要明確、受控的資源上限。新模型的流式核心只對當前列使用線性數量的 BigInt；若仍要求保存全部月份階段邊際直方圖，直方圖本身仍隨月份及日數成長，不能保證整體為 O(N) 位元組。
 - 暫存檔在正常回收及可捕捉例外時由 File::Temp 自動移除；SIGKILL 不保證執行解構，因此重型測量應維持隔離 runner 的臨時目錄和明確監測。
 - `LAST_COMPLETED_STAGE=1` 不變。沒有進入 Stage 2、修改 main 或提交 HANDOFF_* 使用者材料。
+
+## 大型 252 日串流雙向驗證的 opt-in 入口
+
+新增受控工具 `tools/profile_stream_rank_roundtrip.pl` 及工作流程標記 `[weaving-stream-roundtrip-252]`。在獨立 Linux 子程序內，對 17 個六日月份與 30 個五日月份（47 個月，252 日）精確計算一基中間排名，使用 `profile_engine=>'stream'` 與每檔 128 MiB 限額反排名，再使用**另一個獨立的**串流直方圖及另一種排名累加控制流程重建同一個 BigInt。要求總日數、月份數、BigInt 排名完全相同，並實際觀測兩次串流直方圖建立。受控父程序提供 165 秒限制、262,144 KiB 週期性 RSS 監測與 SIGKILL。
+
+若逾時或超過 RSS，必須記錄 BLOCKED 而不是 PASS。由於時間僅每 0.025 秒取樣，這是資源稽核而不是嚴格的作業系統資源沙箱。完整結果必須以 GitHub Actions 原生紀錄為準；前一次常駐引擎雙向驗證 PASS 不等於本次串流引擎已 PASS。
+
+新工具只在明確提交標記時運行，不干擾一般 Stage 1 回歸；無法外推成 5,778 日的保證。
