@@ -196,3 +196,10 @@ Hoc scriptum est in commit praeparto; non est testimonium CI completum.
 - Termini mensium/segmentorum in utroque ordine 712/712, facies publica 15/15, ordo invocationum 28/28.
 - **Emendatio nondum comprobata in novo commit:** additur exhauriens annus 5000 ad `c=FOUNDATION_DAY_OLD+1`; idem manager primum cache prioris calculationis implet, deinde quamlibet diem adversus reference indepentem et cache frigidum verificat. Eius success non ex priori vigilia infertur.
 - Documenta huius sectionis scribuntur post commit probatum: haec mutatio documentationis et novi testis novum SHA facit. Main intactus et Gradus 57 non apertus.
+
+## Novum experimentum duorum annorum finitimorum (status pendens)
+
+- In commit \`0c2e0cb8b9c6bd46c32870498873fff77e5bea6a\`, praevolatus \`38236062193\` success conclusit.
+- Eius logum: \`GRADUS56_ANNUS_ALTERO=PASS YEAR=5000 C_OFFSET=1 DAYS=5160\` et, ad primum calculationis diem, \`4244/4244_PASS\`.
+- Utraque via differentiali GCC et Clang etiam \`5160/5160\` exhibet; vigilia plena \`38236062173\` nondum conclusa erat dum hoc testimonium scribebatur. Nulla eius conclusio fingitur.
+- Additamentum sequentis SHA: ambo anni 4999 et 5001 omnino explorabuntur, eodem calculationis die ac annus 5000, cum reference saved-sum, continuitate portarum, cache tribus annis et probatione reditus ad annum medium. Novi testes adhuc **NON** certificati sunt.

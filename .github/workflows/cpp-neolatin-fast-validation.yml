@@ -96,6 +96,14 @@ jobs:
             2>&1 | tee logs_stage56_praeflight/whole-year-alternate-c.log
           grep -F 'GRADUS56_ANNUS_ALTERO=PASS YEAR=5000 C_OFFSET=1 DAYS=' \
             logs_stage56_praeflight/whole-year-alternate-c.log
+          timeout 35m build_stage56_praeflight/stage_56_structure_reference_tests --anni-vicini \
+            2>&1 | tee logs_stage56_praeflight/whole-years-neighbors.log
+          grep -F 'GRADUS56_VICINUS=PASS YEAR=4999 DAYS=' \
+            logs_stage56_praeflight/whole-years-neighbors.log
+          grep -F 'GRADUS56_VICINUS=PASS YEAR=5001 DAYS=' \
+            logs_stage56_praeflight/whole-years-neighbors.log
+          grep -F 'GRADUS56_ANNI_VICINI=2/2_PASS TOTAL_DAYS=' \
+            logs_stage56_praeflight/whole-years-neighbors.log
           echo 'PRAEVOLATUS_GRADUS56=PASS'
 
       - name: Servare evidentiam etiam in defectu

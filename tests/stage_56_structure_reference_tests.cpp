@@ -589,6 +589,86 @@ void exigeAnnumIntegrumAlteroDieCalculi() {
               << " C_OFFSET=1 DAYS=" << numerus << '\n';
 }
 
+
+void exigeAnnosVicinosPerSingulosDies() {
+    // Toti anni finitimi (4999, 5001) eodem calculationis die.
+    // Testis integer quinque campos probat, non tantum limites.
+    const Big c = pastafari::FOUNDATION_DAY_OLD;
+    NormativeOracle oraculum(false); // saved-sum, non mutant raw-sum
+    const Year fundamentalis = oraculum.year5000(c);
+    const Year prior = oraculum.previousYear(c, fundamentalis);
+    const Year posterior = oraculum.nextYear(c, fundamentalis);
+    exige(prior.number == 4999 && fundamentalis.number == 5000 &&
+          posterior.number == 5001,
+          "anni 4999/5000/5001 non contigui in numero");
+    exige(prior.closeGateDay == fundamentalis.openGateDay &&
+          fundamentalis.closeGateDay == posterior.openGateDay,
+          "intervalla annorum finitima lacunam vel superpositionem habent");
+
+    BaseMonsterManager manager;
+    // Structura medii anni praecedit; deinde idem manager ad fines
+    // 4999 et 5001 redit, ne cache anni 5000 in alium annum influat.
+    const auto medium =
+        manager.executeFinalIntegrationStage56(c, c);
+    exige(medium.ready && medium.status == "GREEN" &&
+          medium.targetYear.number == 5000 &&
+          !medium.guardedCacheHit,
+          "manager anni 5000 non est cache frigidus");
+    const std::vector<Year> anni{prior, posterior};
+    std::size_t summa = 0;
+    for (const Year& y : anni) {
+        const Exspectatio expected = construeIndependenter(oraculum, c, y);
+        exigeLegesStructurae(expected);
+        const Big first = y.openGateDay + 1;
+        const Big length = y.closeGateDay - y.openGateDay;
+        exige(length >= 252 && length <= 5778,
+              "longitudo anni finitimi extra fines");
+        const std::size_t n = length.convert_to<std::size_t>();
+        for (std::size_t i = 0; i < n; ++i) {
+            const Big t = first + Big{i};
+            const auto actual = manager.executeFinalIntegrationStage56(c, t);
+            const std::string label = "annus finitimus "
+                + y.number.convert_to<std::string>()
+                + " dies " + std::to_string(i + 1);
+            exige(actual.ready && actual.status == "GREEN",
+                  label + ": integratio non viridis");
+            comparaStructuram(actual, expected, label);
+            comparaDiem(actual.result, diesExReference(expected, t), label);
+            if (i == 0) {
+                exige(!actual.guardedCacheHit,
+                      label + ": cache alieni anni falso adhibitus");
+            } else {
+                exige(actual.guardedCacheHit && !actual.guardedCacheRejected,
+                      label + ": cache anni non calidus");
+            }
+            ++summa;
+            if ((i + 1) % 512 == 0 || i + 1 == n) {
+                std::cout << "GRADUS56_VICINI_PROGRESS_YEAR="
+                          << y.number << " DAYS=" << (i + 1)
+                          << "/" << n << '\n' << std::flush;
+            }
+        }
+        // Finis anni quoque dies infra claudendi portam est.
+        const auto finis =
+            manager.executeFinalIntegrationStage56(c, y.closeGateDay);
+        exige(finis.ready && finis.status == "GREEN" &&
+              finis.targetYear.number == y.number &&
+              finis.guardedCacheHit && !finis.guardedCacheRejected,
+              "dies clausurae finitimi non est eiusdem anni");
+        std::cout << "GRADUS56_VICINUS=PASS YEAR=" << y.number
+                  << " DAYS=" << n << '\n' << std::flush;
+    }
+    exige(manager.stage56FinalStructureCacheSizeDiagnostic() == 3,
+          "tres anni in cache non servantur");
+    const auto mediusIterum =
+        manager.executeFinalIntegrationStage56(c, c);
+    exige(mediusIterum.ready && mediusIterum.status == "GREEN" &&
+          mediusIterum.guardedCacheHit && !mediusIterum.guardedCacheRejected,
+          "annus medius post vicinos cache errat");
+    std::cout << "GRADUS56_ANNI_VICINI=2/2_PASS TOTAL_DAYS="
+              << summa << " CACHE_ANNI=3\n";
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
@@ -599,6 +679,10 @@ int main(int argc, char** argv) {
         }
         if (argc == 2 && std::string(argv[1]) == "--annus-altero") {
             exigeAnnumIntegrumAlteroDieCalculi();
+            return 0;
+        }
+        if (argc == 2 && std::string(argv[1]) == "--anni-vicini") {
+            exigeAnnosVicinosPerSingulosDies();
             return 0;
         }
         exige(argc == 1, "argumenta testis ignota");
