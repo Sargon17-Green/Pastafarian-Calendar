@@ -39,7 +39,7 @@ def straight_motion_witness(point,delta,opcode,quoted,source_height,source_width
 
 
 def check_straight_transition(rows,changed,prev_point,prev_delta,
-                              prev_opcode,prev_quoted,point,
+                              prev_opcode,prev_quoted,point,next_delta,
                               source_height,source_width):
     """Return witnessed distance, or None outside this conservative domain.
 
@@ -62,6 +62,9 @@ def check_straight_transition(rows,changed,prev_point,prev_delta,
             (x,y)==(px+distance*dx,py+distance*dy),
             "impossible straight-line Native IP movement: "
             "from %r along %r to %r" % (prev_point,prev_delta,point))
+    require(tuple(next_delta)==tuple(prev_delta),
+            "impossible straight-line Native IP movement: "
+            "velocity changed from %r to %r" % (prev_delta,next_delta))
     for step in range(1,distance):
         skipped=(px+step*dx,py+step*dy)
         byte=changed.get(skipped,initial_byte(rows,*skipped))
@@ -175,7 +178,7 @@ def analyze(rows,trace_path):
                     prev_point,prev_delta,prev_op,prev_quoted=previous_motion
                     distance=check_straight_transition(
                         rows,changed,prev_point,prev_delta,prev_op,
-                        prev_quoted,point,source_height,source_width)
+                        prev_quoted,point,(dx,dy),source_height,source_width)
                     if distance is not None:
                         stats["native_straight_edges_checked"]+=1
                         stats["native_straight_blank_cells_skipped"]+=distance-1
@@ -479,6 +482,16 @@ def selftest():
         blocked_source[100]=" "*600+"1"+" "*3+"2"+" "*696
         reject_trace("forged_skip_over_nonblank",blank_skip,blocked_source,
                      "skipped nonblank Funge-space cell")
+        # Ordinary opcodes cannot rotate the IP even if the next
+        # executed cell lies on the correct straight-line ray.
+        forged_velocity=[line.replace(
+            "STEP\\t510\\t1\\t601\\t100\\t1\\t0\\t32\\t0",
+            "STEP\\t510\\t1\\t601\\t100\\t0\\t1\\t32\\t0")
+            for line in trace_lines]
+        require(forged_velocity!=trace_lines,
+                "synthetic velocity forgery did not alter the trace")
+        reject_trace("forged_straight_velocity",forged_velocity,source,
+                     "velocity changed")
         # A sideways jump is invalid even if both endpoints are blank.
         lateral_jump=[line.replace(
             "STEP\t510\t1\t601\t100\t1\t0\t32\t0",
@@ -489,11 +502,11 @@ def selftest():
         # A prior p write changes the ray's memory version. Skipping over
         # that newly executable cell must fail even if source was blank.
         check_straight_transition(source,{},(600,100),(1,0),ord("1"),
-                                  False,(605,100),len(source),len(source[100]))
+                                  False,(605,100),(1,0),len(source),len(source[100]))
         try:
             check_straight_transition(source,{(604,100):ord("2")},
                                       (600,100),(1,0),ord("1"),False,
-                                      (605,100),len(source),len(source[100]))
+                                      (605,100),(1,0),len(source),len(source[100]))
         except AssertionError as err:
             require("skipped nonblank Funge-space cell" in str(err),
                     "versioned dynamic obstacle rejected for wrong reason")
