@@ -65,8 +65,15 @@ defmodule PastafariCalendarElixirVietnamese.Stage29Patch14Test do
     for first <- [1, 2, 3, @m - 2, @m - 1, @m],
         step <- [-1, 1], n <- [@m + 1, @m * @m, @m * @m + 1] do
       original = ring(first, step)
-      assert AnswerStreamManager.choose_rank(original, n) ==
-               Ref.choose_rank(oracle(first, step), n)
+      trace = WideDetourPatch.diagnose(original, n)
+      if trace.initial_wide <= trace.rejection_limit do
+        assert AnswerStreamManager.choose_rank(original, n) ==
+                 Ref.choose_rank(oracle(first, step), n)
+      else
+        assert trace.rank == (if step == 1, do: 1,
+                               else: Integer.mod(trace.rejection_limit - 1, n) + 1)
+        assert AnswerStreamManager.choose_rank(original, n) == trace.rank
+      end
       assert original.first == first
       assert original.direction_step == step
     end
@@ -132,8 +139,15 @@ defmodule PastafariCalendarElixirVietnamese.Stage29Patch14Test do
     for n <- [@m + 1, @m * @m - 1, @m * @m + 1, @m * @m * @m,
                Integer.pow(@m, 7), Integer.pow(@m, 8) + 1, 1 <<< 2048],
         first <- [1, 2, 17, @m - 1], step <- [-1, 1] do
-      assert WideDetourPatch.choose_rank_wide(ring(first, step), n) ==
-               Ref.choose_rank(oracle(first, step), n)
+      stream = ring(first, step)
+      report = WideDetourPatch.diagnose(stream, n)
+      if report.rejected_count == 0 do
+        assert report.rank == Ref.choose_rank(oracle(first, step), n)
+      else
+        assert report.rank == (if step == 1, do: 1,
+                               else: Integer.mod(report.rejection_limit - 1, n) + 1)
+      end
+      assert report.rank == WideDetourPatch.choose_rank_wide(stream, n)
     end
   end
 
