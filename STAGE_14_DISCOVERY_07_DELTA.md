@@ -56,3 +56,29 @@ Thêm sentinel thật tại index 0, chuyển 11 hàng nghiền đúng sang
 index 1..11, **không đổi legacy_row(number)** và không xóa
 sentinel. Những kiểm thử oracle đã có phải trở lại xanh.
 Không đưa bản vá vào lần phát hiện hiện tại.
+
+## Kiểm chứng thực tế và phân loại sai lệch
+
+- Commit triển khai: `fb3a163dba277511c87cb52dcea34b067be2dee4`.
+- Elixir 1.18.5 / Erlang/OTP 27.
+- **151 kiểm thử; đúng 16 thất bại vì lỗi nghiền**, 135 bài đạt.
+- 4 hồi quy chuẩn mới giai đoạn 14 đỏ: hàng đầu, hàng cuối,
+  giọt nhìn thấy đầu tiên và giọt nhìn thấy 46.
+- 5 bài chuẩn giai đoạn 12 đỏ: bốn hồi quy chuẩn và phép
+  kiểm công thức đầu ra chuẩn ở bài kiểm thử kết hợp.
+- 7 bài chuẩn giai đoạn 13 đỏ: đối chiếu toàn bộ giọt,
+  ngữ cảnh, giọt đầu, số nguyên cực lớn, đồng thời,
+  vùng tiếp giáp và bất biến kho lịch sử.
+- 10 bài kiểm soát Stage14 đều đạt: chứng minh lỗi index,
+  thực hiện đủ 11 vòng, ô dự phòng, đường sản xuất, tài nguyên
+  riêng, số nguyên lớn, lỗi đầu vào và không có bản vá 07.
+- Không cảnh báo biên dịch, khóa tên chuẩn PASS độc lập.
+- Không sửa các kỳ vọng chuẩn cũ hoặc oracle.
+- `LegacyGrindTable` còn thiếu sentinel ở index 0 có chủ đích.
+- Không thay main, chưa bắt đầu giai đoạn 15.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38213818081
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38213818145
+
+Trạng thái cuối giai đoạn 14: EXPECTED_RED đã được xác minh.
+Bước tiếp theo: giai đoạn 15 PATCH 07, chưa bắt đầu.

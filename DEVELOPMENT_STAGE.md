@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=14
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=07
-LAST_COMPLETED_STAGE=13
+LAST_COMPLETED_STAGE=14
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-06; tách 11 hàng nghiền thực vào LegacyGrindTable lưu từ index 0, phép đọc lịch sử vẫn dùng chỉ số 1..11 khiến thiếu hàng đầu và dùng fallback cuối; VisibleDropCalculator chạy lỗi này trên đường sản xuất.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_14_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_14_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_14_PENDING
-CI_FAILURES=STAGE_14_PENDING
+CI_TESTS=151
+CI_FAILURES=16_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -240,5 +240,18 @@ Hàm VisibleDropCalculator thực hiện đủ 11 lần lặp theo chỉ số c�
 Các bản vá SAVE, đá, giọt ẩn, lịch sử trước tiếp tục không đổi.
 Các kiểm thử chuẩn giai đoạn 12-13 phải giữ nguyên để lưu
 bằng chứng lỗi mới, dù đầu ra 46 giọt hiện cố ý sai.
-14 kiểm thử bổ sung; tổng dự kiến 151, số thất bại xác minh CI.
-LAST_COMPLETED_STAGE giữ 13 trước khi CI và khóa tên xác nhận.
+14 kiểm thử bổ sung, tổng 151 kiểm thử; 16 thất bại đã phân loại.
+LAST_COMPLETED_STAGE nâng lên 14 sau khi CI và khóa tên đã xác nhận.
+
+Giai đoạn 14 đã được kiểm chứng trên Elixir 1.18.5, Erlang/OTP 27.
+151 kiểm thử, 16 thất bại đều có nguyên nhân xác minh là
+lỗi bảng nghiền đang cố ý được để lộ; 135 kiểm thử đạt.
+Trong số thất bại: 4 hồi quy chuẩn mới thuộc giai đoạn 14,
+5 phép so sánh chuẩn cũ thuộc giai đoạn 12, và 7 phép so sánh
+chuẩn từ giai đoạn 13. Các kiểm thử cũ giữ nguyên kỳ vọng.
+10 kiểm thử điều khiển mới đạt, xác minh phép đọc lệch chỉ số
+và chuỗi bước nghiền sai. Không có cảnh báo biên dịch.
+Khóa tên chuẩn PASS độc lập.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38213818081
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38213818145
+Giai đoạn 14 kết thúc EXPECTED_RED; tiếp theo giai đoạn 15 PATCH 07.

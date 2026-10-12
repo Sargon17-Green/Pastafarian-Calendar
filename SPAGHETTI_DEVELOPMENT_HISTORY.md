@@ -427,3 +427,11 @@ index 0 tại giai đoạn 14. Bản vá 07 của giai đoạn 15
 phải thêm sentinel ở index 0, 11 hàng thực tại 1..11,
 và giữ nguyên phép đọc chỉ số `legacy_row`. Không
 mở các lỗi hoán vị và bát ở các giai đoạn sau.
+
+**Kết quả CI phát hiện 07:** Tổng 151 kiểm thử, 16 sai lệch
+đều do hàng nghiền bị đọc lệch một chỉ số (135 bài đạt),
+0 cảnh báo biên dịch. Phân loại lỗi: bốn hồi quy chuẩn
+mới của giai đoạn 14, năm bài cũ từ giai đoạn 12 và bảy bài
+cũ từ giai đoạn 13. Giữ nguyên các kiểm thử cũ, không
+sửa kỳ vọng của oracle. Cả mười bài điều khiển Stage14
+đều PASS; khóa tên chuẩn PASS. Kết thúc EXPECTED_RED.

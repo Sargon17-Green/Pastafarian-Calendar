@@ -453,3 +453,20 @@ Giữ các kiểm thử đối chiếu chuẩn từ giai đoạn trước: lỗi
 thể đỏ có chủ đích và phải xanh lại sau PATCH 07. 14 kiểm thử
 mới chứng minh dãy hàng lệch, giá trị dự phòng và toàn bộ
 đường gọi thực. Không sửa các kỳ vọng chuẩn.
+
+## Kiểm chứng kết thúc phát hiện 07
+
+CI Elixir 1.18.5 / OTP 27 chạy **151 kiểm thử, đúng 16 sai lệch
+được phân loại**, 135 bài đạt, không cảnh báo biên dịch.
+Trong 16 bài đỏ: 4 bài mới trực tiếp kiểm hàng nghiền và
+kết quả chuẩn, 5 bài cũ ở giai đoạn 12, 7 bài cũ ở giai đoạn 13.
+Cả mười bài kiểm soát mới đều đạt. Những kỳ vọng chuẩn cũ
+được giữ nguyên để kiểm tra rằng tác động của sai thứ tự nghiền
+không bị che khuất. Khóa tên chuẩn độc lập đạt.
+
+- [CI phát hiện 07, 16 sai lệch dự kiến](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38213818081)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38213818145)
+
+Giai đoạn 14/55 kết thúc `EXPECTED_RED` đã được xác minh.
+Giai đoạn 15/55 là `PATCH 07`: thêm sentinel tại index 0,
+đặt 11 hàng thực ở 1..11 và giữ nguyên hàm đọc legacy.
