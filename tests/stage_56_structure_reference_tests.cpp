@@ -7,7 +7,9 @@
 #include <array>
 #include <cstddef>
 #include <iostream>
+#include <iterator>
 #include <map>
+#include <numeric>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -61,6 +63,97 @@ Exspectatio construeIndependenter(
         familia.numerusOmnium());
     s.monthWeaving = familia.aperiGradum(gradus);
     return Exspectatio{annus, std::move(s)};
+}
+
+
+void exigeLegesStructurae(const Exspectatio& e) {
+    // Haec sunt invariantes canonicae test-only, separatim ab
+    // comparatione productionis et reference: errores communes detegunt.
+    const auto& y = e.annus;
+    const auto& s = e.structura;
+    const Big annusDies = y.closeGateDay - y.openGateDay;
+    const Big portaIntervalla = y.closeGateIndex - y.openGateIndex;
+    exige(annusDies >= 252 && annusDies <= 5778,
+          "longitudo anni extra fines canonicos");
+    exige(portaIntervalla >= 6 && portaIntervalla <= 137,
+          "numerus intervallorum annui absurdus");
+    exige(s.cutletCount >= 6 && s.cutletCount <= 17 &&
+          static_cast<int>(s.cutlets.size()) == s.cutletCount &&
+          static_cast<int>(s.cutletPartition.size()) == s.cutletCount &&
+          static_cast<int>(s.cutletNameIndices.size()) == s.cutletCount,
+          "numeri segmentorum et vectorum discrepant");
+    exige(s.monthCount >= 3 && s.monthCount <= 47 &&
+          static_cast<int>(s.monthLengths.size()) == s.monthCount &&
+          static_cast<int>(s.monthNameIndices.size()) == s.monthCount,
+          "numeri mensium et vectorum discrepant");
+
+    std::set<int> nominaSegmentorum;
+    Big porta = y.openGateIndex;
+    Big primusDies = y.openGateDay + 1;
+    for (int j = 0; j < s.cutletCount; ++j) {
+        const std::size_t i = static_cast<std::size_t>(j);
+        const int gaps = s.cutletPartition[i];
+        const auto& cutlet = s.cutlets[i];
+        exige(gaps >= 1, "partitio segmenti habet intervallum non positivum");
+        exige(cutlet.openGateIndex == porta &&
+              cutlet.closeGateIndex == porta + gaps &&
+              cutlet.firstDay == primusDies &&
+              cutlet.lastDay >= cutlet.firstDay,
+              "segmenta non sunt contigua per portas et dies");
+        const int nomen = s.cutletNameIndices[i];
+        exige(cutlet.nameIndex == nomen &&
+              nomen >= 1 && nomen <= 17 &&
+              nominaSegmentorum.insert(nomen).second,
+              "index nominis segmenti repetitus vel invalidus");
+        porta = cutlet.closeGateIndex;
+        primusDies = cutlet.lastDay + 1;
+    }
+    exige(porta == y.closeGateIndex &&
+          primusDies == y.closeGateDay + 1,
+          "partitio segmentorum non totum annum claudit");
+    exige(Big{std::accumulate(s.cutletPartition.begin(),
+                             s.cutletPartition.end(), 0)} == portaIntervalla,
+          "summa intervallorum segmentorum non congruit");
+
+    std::set<int> nominaMensium;
+    int diesMensium = 0;
+    for (int j = 0; j < s.monthCount; ++j) {
+        const std::size_t i = static_cast<std::size_t>(j);
+        const int longitudo = s.monthLengths[i];
+        const int nomen = s.monthNameIndices[i];
+        exige(longitudo >= 4 && longitudo <= 123,
+              "longitudo mensis extra fines canonicos");
+        exige(nomen >= 1 && nomen <= 47 &&
+              nominaMensium.insert(nomen).second,
+              "nomen mensis repetitum vel invalidum");
+        diesMensium += longitudo;
+    }
+    exige(Big{diesMensium} == annusDies &&
+          s.monthWeaving.size() == static_cast<std::size_t>(diesMensium),
+          "summa dierum mensium non est longitudo anni");
+
+    std::vector<int> reliqui = s.monthLengths;
+    int aperti = 0;
+    int clausi = 0;
+    for (const int mensis : s.monthWeaving) {
+        exige(mensis >= 1 && mensis <= s.monthCount,
+              "index mensis extra fines in textura");
+        const std::size_t i = static_cast<std::size_t>(mensis - 1);
+        exige(reliqui[i] > 0, "mensis frequentior quam longitudo sua");
+        if (reliqui[i] == s.monthLengths[i]) {
+            exige(mensis == aperti + 1, "ordo primae apparitionis non legalis");
+            aperti = mensis;
+        }
+        --reliqui[i];
+        if (reliqui[i] == 0) {
+            exige(mensis == clausi + 1, "ordo clausurae non legalis");
+            clausi = mensis;
+        }
+    }
+    exige(aperti == s.monthCount && clausi == s.monthCount &&
+          std::all_of(reliqui.begin(), reliqui.end(),
+                      [](int v) { return v == 0; }),
+          "textura mensium non omnes menses exacte complevit");
 }
 
 void comparaStructuram(
@@ -157,11 +250,8 @@ std::set<Big> eligeTerminos(const Exspectatio& e) {
 
     std::set<Big> targets{first, first + 1, (first + last) / 2,
                           last - 1, last};
-    const std::array<std::size_t, 3> cutletIds{
-        0, s.cutlets.size() / 2, s.cutlets.size() - 1
-    };
-    for (const std::size_t k : cutletIds) {
-        const auto& cutlet = s.cutlets[k];
+    // Quorumlibet segmentorum dies primus et ultimus, non tantum tria.
+    for (const auto& cutlet : s.cutlets) {
         targets.insert(cutlet.firstDay);
         targets.insert(cutlet.lastDay);
     }
@@ -169,26 +259,37 @@ std::set<Big> eligeTerminos(const Exspectatio& e) {
     const std::size_t absent = s.monthWeaving.size();
     const std::size_t count = static_cast<std::size_t>(s.monthCount);
     std::vector<std::size_t> firstMonth(count, absent);
+    std::vector<std::size_t> middleMonth(count, absent);
     std::vector<std::size_t> lastMonth(count, absent);
+    std::vector<int> appearances(count, 0);
     for (std::size_t pos = 0; pos < s.monthWeaving.size(); ++pos) {
         const int id = s.monthWeaving[pos];
         exige(id > 0 && static_cast<std::size_t>(id) <= count,
               "index mensis reference extra fines");
         const std::size_t i = static_cast<std::size_t>(id - 1);
         if (firstMonth[i] == absent) firstMonth[i] = pos;
+        ++appearances[i];
+        if (appearances[i] == (s.monthLengths[i] + 1) / 2)
+            middleMonth[i] = pos;
         lastMonth[i] = pos;
     }
-    const std::array<std::size_t, 3> monthIds{0, count / 2, count - 1};
-    for (const std::size_t k : monthIds) {
-        exige(firstMonth[k] != absent && lastMonth[k] != absent,
-              "mensis reference non apparuit");
+    // Omnium mensium prima et ultima apparentia in textura.
+    // Etiam menses non contigui ad dies reales recte proiciendi sunt.
+    for (std::size_t k = 0; k < count; ++k) {
+        exige(firstMonth[k] != absent &&
+              middleMonth[k] != absent &&
+              lastMonth[k] != absent &&
+              appearances[k] == s.monthLengths[k],
+              "mensis reference omnes positiones non habet");
         targets.insert(first + Big{firstMonth[k]});
+        targets.insert(first + Big{middleMonth[k]});
         targets.insert(first + Big{lastMonth[k]});
     }
     for (const Big& t : targets) {
         exige(first <= t && t <= last, "sample intra annum non est");
     }
-    exige(targets.size() >= 9, "termini distincti insufficientes sunt");
+    exige(targets.size() >= 3 * count,
+          "prima/media/ultima cuiusque mensis non selecta est");
     return targets;
 }
 
@@ -197,10 +298,19 @@ void exigeProiectionesFinium(
     const std::map<std::pair<Big, Big>, Exspectatio>& references) {
     int casus = 0;
     int anni = 0;
+    int minimumCasuum = 0;
+    int frigidiIndependentes = 0;
     for (const auto& [key, expected] : references) {
+        minimumCasuum += 3 * expected.structura.monthCount;
         const Big& c = key.first;
         const std::set<Big> targets = eligeTerminos(expected);
+        const auto mid = std::next(targets.begin(),
+            static_cast<std::ptrdiff_t>(targets.size() / 2));
+        const Big primus = *targets.begin();
+        const Big medius = *mid;
+        const Big ultimus = *targets.rbegin();
         bool cacheCalidus = false;
+        bool primus = true;
         for (const Big& t : targets) {
             const auto actual = manager.executeFinalIntegrationStage56(c, t);
             const std::string label = "terminus " + std::to_string(anni + 1)
@@ -209,8 +319,28 @@ void exigeProiectionesFinium(
                   label + ": integratio non viridis");
             comparaStructuram(actual, expected, label);
             comparaDiem(actual.result, diesExReference(expected, t), label);
+            // Triades frigidae ex calculo novo, praeter structuram cache.
+            if (t == primus || t == medius || t == ultimus) {
+                const auto recens =
+                    BaseMonsterManager{}.executeFinalIntegrationStage56(c, t);
+                exige(recens.ready && recens.status == "GREEN" &&
+                      !recens.guardedCacheHit && !recens.guardedCacheRejected,
+                      label + ": manager recens non frigidus");
+                comparaStructuram(recens, expected, label + ": recens");
+                comparaDiem(recens.result, actual.result,
+                            label + ": frigidus adversus calidum");
+                ++frigidiIndependentes;
+            }
+            // Prima vocatio huius anni potest alium fingerprint de cache
+            // ab invocationibus prioribus recipere. Ceterae omnes in
+            // eodem c/anno debent cache uti, sine recalculatione.
+            if (!primus) {
+                exige(actual.guardedCacheHit && !actual.guardedCacheRejected,
+                      label + ": cache intra idem c/annum non calidus");
+            }
             if (actual.guardedCacheHit && !actual.guardedCacheRejected)
                 cacheCalidus = true;
+            primus = false;
             ++casus;
         }
         exige(cacheCalidus, "cache annum testatum nunquam calefecit");
@@ -220,8 +350,11 @@ void exigeProiectionesFinium(
                   << " YEAR=" << expected.annus.number
                   << '\n' << std::flush;
     }
-    exige(anni == 5 && casus >= 45,
-          "coverage quinque annorum et saltem XLV terminorum defecit");
+    exige(anni == 5 && casus >= minimumCasuum,
+          "non omnes termini mensium in quinque annis examinati sunt");
+    exige(frigidiIndependentes == 15,
+          "probationes XV frigidae independentes defecerunt");
+    std::cout << "GRADUS56_FRIGIDI=15/15_PASS\n";
     std::cout << "GRADUS56_TERMINI_REFERENCE=PASS"
               << " ANNI=" << anni << " CASUS=" << casus << '\n';
 }
@@ -329,6 +462,7 @@ int main() {
             auto it = referencePerAnnum.find(clavis);
             if (it == referencePerAnnum.end()) {
                 auto expected = construeIndependenter(oracle, c, y);
+                exigeLegesStructurae(expected);
                 it = referencePerAnnum.emplace(clavis, std::move(expected)).first;
             }
             const Stage54IntegrationReport actual =

@@ -603,6 +603,8 @@ jobs:
           echo 'DIFFERENTIA_DECEM_PARIA=10/10_PASS'
           timeout 20m build_soak/differential/structure \
             2>&1 | tee soak-logs/structure-reference.log
+          grep -Fx 'GRADUS56_FRIGIDI=15/15_PASS' soak-logs/structure-reference.log
+          grep -Fx 'GRADUS56_ORDO_INVOCATIONUM=28/28_PASS CONTEXTUS=2 CACHE_ANNI=3' soak-logs/structure-reference.log
 
       - name: Servare logs differentialia
         if: always()

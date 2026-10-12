@@ -134,3 +134,29 @@ non reaperitur nec Gradus 57 incipitur.
 Clausula exactitudinis: SHA huius relationis verificatum est 37e2eba tantum.
 Additamentum ulteriorum limitum mensium et segmentorum in commit novo nondum verificatum est.
 Gradus 57 non incipitur; main non mutatur.
+
+## Praevolatus ordinis et terminorum die XII Octobris MMXXVI
+
+- `b1b508794ec75bf62e8ae05259e1dbc8b586ed0e`: [praevolatus 38180393388](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38180393388) `success`; `GRADUS56_TERMINI_REFERENCE=PASS ANNI=5 CASUS=65`.
+- `eeeb9a5074b60a908af04a291c0c53ef7142c929`: [praevolatus 38180827120](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38180827120) `success`; ex log `GRADUS56_ORDO_INVOCATIONUM=28/28_PASS CONTEXTUS=2 CACHE_ANNI=3`.
+- Eiusdem praevolatus: 65/65 termini; 7/7 casus et 5/5 structurae concordant.
+- Cursus plenus `b1b5087` = `38180393359` et `eeeb9a5` = `38180827276`: **non pro success completis annotandi ante singulorum conclusionem**.
+- Proxima probatio praeparata sed non confirmata: totius quinque structurarum segmentorum et mensium termini; leges independentes de partitionibus, nominum unicitate, longitudinibus, textura; posterior quisque casus eiusdem anni cache calidum requirit.
+- Documenta probata `37e2eba` manent basis certe 20/20: ullum PASS sequentis commit non extrapolatur.
+
+## Propositum probationis additae — mediae apparitiones mensium
+
+Praeter initium et finem cuiusque mensis, nunc mediam apparitionem
+in textura non-contigua seligimus. Quisque ex quinque annis
+saltem tres posiciones pro unoquoque mense examinabit, cum
+comparatione structuralis oraculi saved-sum et diei intra mensem.
+Hoc scriptum est in commit praeparto; non est testimonium CI completum.
+
+## Ultima plena vigilia C++ Latina — commit eeeb9a5
+
+- Exactus commit probatus: `eeeb9a5074b60a908af04a291c0c53ef7142c929`.
+- Cursus plenus `38180827276`: `success`, 20/20 officia et finalis `STATUS_POST_RUN=SOAK_GREEN`.
+- Cursus plenus prior `38180393359`: `success`, 20/20 officia.
+- Praevolatus `38180827120`: `success`; custodia nominum `38180827083`: `success`.
+- Structurae saved-sum reference quinque anni; 65 termini et 28 permutationes ordinis invocationum iam probationibus praeteritis confirmatae.
+- In hoc commit sequente nova probatio omnium mensium in primis/mediis/ultimis diebus et XV invocationum independentium **nondum** confirmata est; CI novae revisionis observandum.
