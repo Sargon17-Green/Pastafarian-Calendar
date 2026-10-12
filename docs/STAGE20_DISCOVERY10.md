@@ -1,4 +1,4 @@
-# ደረጃ 20/55 — DISCOVERY 10 (EXPECTED_RED)
+# ደረጃ 20/55 — DISCOVERY 10 (COMPLETE / EXPECTED_RED)
 
 ## የስድስቱ ጎድጓዳ ሳህኖች የታሪክ የin-place ስህተት
 
@@ -42,4 +42,8 @@ v -check ./pastafari/discovery10_expected_red_test.v
 v test ./pastafari/discovery10_expected_red_test.v
 ```
 
-ከደረጃ 19 አጠቃላይ 28 የGREEN ፈተና ፋይሎች ጋር አዲሱ witness ተደምሮ **29/29 GREEN** መሆን አለበት። አራቱ RED assertions ሆን ብለው ይቀራሉ። `vaultOld` እና `pending` አልተጨመሩም፤ የ`PATCH 10` ሥራ እስከ ደረጃ 21 ይጠበቃል። `LAST_COMPLETED_STAGE=19` እስከ native V CI ማረጋገጫ ይቆያል።
+ከደረጃ 19 አጠቃላይ 28 የGREEN ፈተና ፋይሎች ጋር አዲሱ witness ተደምሮ **29/29 GREEN** መሆን አለበት። አራቱ RED assertions ሆን ብለው ይቀራሉ። `vaultOld` እና `pending` አልተጨመሩም፤ የ`PATCH 10` ሥራ እስከ ደረጃ 21 ይጠበቃል። `LAST_COMPLETED_STAGE=20` እስከ native V CI ማረጋገጫ ይቆያል።
+
+## የተረጋገጠ ማስረጃ
+
+V 0.5.2፦ 29/29 GREEN፣ 4 EXPECTED_RED። GitHub Actions run `38254290745`፣ commit `cfd789f6ff0ff2dc85c54aa44cac3a29343c32cc`፣ artifact `11748214870`። `PATCH 10` አልተጨመረም።

@@ -169,3 +169,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 20 — DISCOVERY 10 (በV CI ማረጋገጫ ላይ)
 
 `old_stir_bowls_in_place` በቦታ 1..6 ውስጥ በ`order` የተመረጠውን `id` በቀጥታ ወደ `bowls[id]` ይጽፋል። ከዚህ በኋላ የተጻፈውን አዲስ እሴት ለቀጣዩ `prev` ወይም `next` ሊያነብ ይችላል። የሒሳብ አባሎች `s=B[id]+2*B[prev]+3*B[next]+pour[position]+drop+stoneByPosition` እና `SAVE(s*s+5*B[prev]*B[next]+i*position)` ናቸው። ይህ ትክክለኛ የሂሳብ መስመር ላይ የተሳሳተ የstate ባለቤትነት ነው። `LegacyBowlStirAdapter` የጠሪ መረጃን ለይቶ አሮጌውን በተከታታይ ማስቀመጥ በእውነት ያከናውናል። ለ`B=[10,20,30,40,50,60],drop=2,i=1` በidentity ቅደም ተከተል ሁለተኛው ጎድጓዳ ሳህን ከ`564002` ፈንታ `96572653728` ይሆናል። የ`PATCH 10` ትክክለኛ snapshot እና pending ደረጃ 21 ብቻ ይመጣሉ።
+
+### የደረጃ 20 መዝጊያ — EXPECTED_RED
+
+በመጀመሪያው የGitHub Actions run `38253593115` 29 የGREEN ፈተና ፋይሎች ተሳክተዋል፣ በስም የተመረጡ አራት `EXPECTED_RED` የsnapshot ውጤቶች በትክክል ወድቀዋል። የV 0.5.2 formatter የጠየቀው ሁለት የፈተና ፋይሎች የመስመር ቅርጸት በnative ለውጦቹ መሠረት ተስተካክሏል፣ ጊዜያዊ የformat እርምጃ ከCI ተወግዷል። በcommit `cfd789f6ff0ff2dc85c54aa44cac3a29343c32cc` ላይ run `38254290745` ሁለቱም ሥራዎች PASS ናቸው። `v fmt -verify ./pastafari` PASS፣ 29/29 የታሪክ እና የቀድሞ ፈተና ፋይሎች PASS፣ አራት RED assertions ተረጋግጠዋል። `old_stir_bowls_in_place` የተለወጠውን `prev` በውስጣዊ መያዣ ውስጥ አሁንም ያነባል። `vaultOld/pending` በደረጃ 21 ብቻ ይጨመራሉ። የማስረጃ ቅርስ `11748214870` ነው። **ደረጃ 20 COMPLETE / EXPECTED_RED።**
