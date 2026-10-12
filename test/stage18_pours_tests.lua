@@ -46,7 +46,7 @@ end
 comparison(1,4,0)
 comparison(121,4,2)
 comparison(241,4,3)
-local first,ctx=comparison(B.from("170141183460469231731687303715884105728"),5,0)
+local first,ctx=comparison(B.add(B.mul(B.from("1"..string.rep("0",80)),720),1),5,0)
 -- drop M+1 gives identity rank; no difference is an incidental match.
 first[1].d[1]=999
 ctx.semanticState.usedBowlIds[1]=999

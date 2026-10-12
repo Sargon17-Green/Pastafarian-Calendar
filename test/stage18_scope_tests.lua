@@ -19,6 +19,6 @@ for _,s in ipairs({fixed,facade}) do
         assert(not s:find(forbidden,1,true),"Stage 19+ pa dwe antre: "..forbidden)
     end
 end
-assert(not fixed:find("oldBowls[order[position]]",1,true),
+assert(not fixed:find("local fromFixedBowl=B.from(oldBowls[order[position]])",1,true),
        "PATCH 09 antre twò bonè")
 print("PASS limit Stage 18: id fizik 1,2,3, rank korije, pa gen PATCH 09")

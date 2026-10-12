@@ -192,7 +192,8 @@ function S.openingPoursProbe(calculationDay,targetDay)
     local stones=StonePatch.buildPatchedTable()[1]
     local drop,visibleContext=S.visibleDropSpaghetti(calculationDay,targetDay,1,{})
     local result,context=LegacyFixedPours.execute(drop,1,bowls,stones)
-    context.initialBowls=LegacyFixedPours.initialBowls(calculationDay,targetDay)
+    context.initialBowls={}
+    for id=1,6 do context.initialBowls[id]=BigInt.from(bowls[id]) end
     context.firstVisibleDrop=BigInt.from(drop)
     context.visibleContext=visibleContext
     context.metrics["discovery09.opening.probes"]=1
