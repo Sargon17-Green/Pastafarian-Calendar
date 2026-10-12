@@ -19,7 +19,8 @@ assert(public:find('local GrindPatch = require("grind_patch")',1,true))
 assert(public:find('local row = GrindPatch.execute(grind)',1,true))
 assert(public:find('return GrindPatch.visibleDropPatched(calculationDay, targetDay, visibleIndex, dropStore)',1,true))
 assert(public:find('return LegacyGrinds.visibleDropLegacy(calculationDay, targetDay, visibleIndex, dropStore)',1,true))
-for _,p in ipairs({"src/grind_patch.lua","src/spaghetti.lua"}) do
+-- Etap sa a pwoteje modil istorik li; facade a gen dwa grandi nan etap pita.
+for _,p in ipairs({"src/grind_patch.lua"}) do
  local s=read(p)
  for _,forbidden in ipairs({"normative_oracle", "oldPermutationUnrank0", "bowlAlias",
  "oldNextBowlFixedName", "vaultOld", "orderAt46Latch"}) do

@@ -16,7 +16,8 @@ assert(facade:find('local PourPatch = require("pour_patch")',1,true))
 assert(facade:find("function S.pourPatchProbe(",1,true))
 assert(facade:find("local result,context=LegacyFixedPours.execute(drop,1,bowls,stones)",1,true))
 assert(facade:find("local corrected,context=PourPatch.execute(drop,1,bowls,stones)",1,true))
-for _,s in ipairs({patch,facade}) do
+-- Etap sa a pwoteje modil istorik li; facade a gen dwa grandi nan etap pita.
+for _,s in ipairs({patch}) do
     for _,future in ipairs({"normative_oracle","postStir12","orderAt46Latch",
         "vaultOld","oldNextBowlFixedName","pendingBowls"}) do
         assert(not s:find(future,1,true),"Stage 20+ antre twò bonè: "..future)

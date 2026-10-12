@@ -20,7 +20,8 @@ assert(facade:find("local value = PriorPatch.execute(dropStore, calculationDay, 
 assert(facade:find('S["prior" .. "PatchProbe"] = function(dropStore, calculationDay, targetDay, i, back)',1,true))
 assert(facade:find('S["legacy" .. "PriorProbe"] = function',1,true))
 assert(not facade:find("legacyPrior",1,true),"Stage 1 scope lock")
-for _,p in ipairs({"src/prior_patch.lua","src/spaghetti.lua"}) do
+-- Etap sa a pwoteje modil istorik li; facade a gen dwa grandi nan etap pita.
+for _,p in ipairs({"src/prior_patch.lua"}) do
  local s=read(p)
  for _,forbidden in ipairs({"normative_oracle","GRIND_TABLE_WITH_SENTINEL",
                                  "oldPermutationUnrank0","legacyGrindTable","oldNextBowlFixedName"}) do

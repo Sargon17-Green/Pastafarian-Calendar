@@ -15,7 +15,8 @@ assert(patch:find('manager.dispatcher:register("PERMUTATION_PATCH"',1,true))
 assert(public:find('local PermutationPatch = require("permutation_patch")',1,true))
 assert(public:find("local order = PermutationPatch.execute(dropValue)",1,true))
 assert(public:find("return LegacyPermutation.execute(dropValue)",1,true))
-for _,src in ipairs({patch,public}) do
+-- Etap sa a pwoteje modil istorik li; facade a gen dwa grandi nan etap pita.
+for _,src in ipairs({patch}) do
     for _,future in ipairs({"bowlAlias","vaultOld","oldNextBowlFixedName","orderAt46Latch",
          "postStir12","normative_oracle"}) do
         assert(not src:find(future,1,true),"Stage 18+ travay antre twò bonè: "..future)

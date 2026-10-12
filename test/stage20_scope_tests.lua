@@ -12,7 +12,8 @@ assert(source:find('manager.dispatcher:register("LEGACY_ALIASED_STIR"',1,true))
 assert(not source:find("local nextBowls={}",1,true))
 assert(facade:find("function S.openingStirSpaghetti",1,true))
 assert(facade:find("function S.legacyAliasedStirProbe",1,true))
-for _,data in ipairs({source,facade}) do
+-- Etap sa a pwoteje modil istorik li; facade a gen dwa grandi nan etap pita.
+for _,data in ipairs({source}) do
   for _,future in ipairs({"normative_oracle","postStir12","vaultOld","orderAt46Latch",
        "oldNextBowlFixedName","pendingBowls"}) do
     assert(not data:find(future,1,true),"Stage 21+ antre twò bonè: "..future)

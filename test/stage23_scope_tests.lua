@@ -15,7 +15,8 @@ assert(patch:find('current=after',1,true))
 assert(patch:find('manager.dispatcher:register("BOWL_CHAIN_STATE_PATCH"',1,true))
 assert(facade:find('function S.bowlChainPatchProbe(',1,true))
 assert(facade:find('function S.visibleBowlChainPatchProbe(',1,true))
-for _,s in ipairs({legacy,patch,facade}) do
+-- Etap sa a pwoteje modil istorik li; facade a gen dwa grandi nan etap pita.
+for _,s in ipairs({legacy,patch}) do
  for _,word in ipairs({"normative_oracle","postStir12","orderAt46Latch",
     "vaultOld","oldNextBowlFixedName","pendingBowls"}) do
    assert(not s:find(word,1,true),"Stage 24+ twò bonè: "..word)

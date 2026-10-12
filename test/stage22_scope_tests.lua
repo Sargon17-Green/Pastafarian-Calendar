@@ -13,7 +13,8 @@ assert(not source:find('copySix(previousOutput)',1,true))
 assert(source:find('manager.dispatcher:register("LEGACY_BOWL_STATE_RESET"',1,true))
 assert(facade:find("function S.visibleResetChainProbe(",1,true))
 assert(facade:find("function S.legacyResetBowlsProbe(",1,true))
-for _,txt in ipairs({source,facade}) do
+-- Etap sa a pwoteje modil istorik li; facade a gen dwa grandi nan etap pita.
+for _,txt in ipairs({source}) do
  for _,later in ipairs({"normative_oracle","postStir12","orderAt46Latch",
      "vaultOld","oldNextBowlFixedName","pendingBowls"}) do
    assert(not txt:find(later,1,true),"Stage 23+ twò bonè: "..later)

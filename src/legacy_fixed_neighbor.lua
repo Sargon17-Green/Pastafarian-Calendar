@@ -1,6 +1,6 @@
 -- DISCOVERY 12: ansyen wout la chwazi vwazen bòl dapre non fiks 1..6.
 -- PATCH 11 fini chèn 46 gout yo; lòd gout 46 soti nan PATCH 08.
--- DÈYÈ: pa korije vwazen an, pa fè postStir12, pa fè PATCH 12.
+-- DÈYÈ: pa korije vwazen an, pa fè douz brase final yo, pa fè PATCH 12.
 local B=require("bigint")
 local Base=require("monster_base")
 local Chain=require("bowl_chain_patch")

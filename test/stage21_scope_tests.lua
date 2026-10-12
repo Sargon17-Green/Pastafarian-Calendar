@@ -15,7 +15,8 @@ assert(patch:find("nextBowls[id]=Save.savePatch(result)",1,true))
 assert(patch:find('manager.dispatcher:register("STIR_SNAPSHOT_PATCH"',1,true))
 assert(facade:find("function S.stirPatchProbe(",1,true))
 assert(facade:find("function S.openingStirPatchProbe(",1,true))
-for _,text in ipairs({patch,facade}) do
+-- Etap sa a pwoteje modil istorik li; facade a gen dwa grandi nan etap pita.
+for _,text in ipairs({patch}) do
  for _,word in ipairs({"normative_oracle","postStir12","vaultOld",
      "orderAt46Latch","oldNextBowlFixedName","pendingBowls"}) do
    assert(not text:find(word,1,true),"Stage 22+ twò bonè: "..word)

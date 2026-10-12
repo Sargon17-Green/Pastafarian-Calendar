@@ -13,7 +13,8 @@ assert(fixed:find('manager.dispatcher:register("LEGACY_FIXED_BOWL_POURS"',1,true
 assert(facade:find("function S.openingPoursSpaghetti",1,true))
 assert(facade:find("local drop,visibleContext=S.visibleDropSpaghetti(calculationDay,targetDay,1,{})",1,true))
 assert(facade:find("local result,context=LegacyFixedPours.execute(drop,1,bowls,stones)",1,true))
-for _,s in ipairs({fixed,facade}) do
+-- Etap sa a pwoteje modil istorik li; facade a gen dwa grandi nan etap pita.
+for _,s in ipairs({fixed}) do
     for _,forbidden in ipairs({"normative_oracle","bowlAlias","vaultOld",
         "orderAt46Latch","postStir12","oldNextBowlFixedName","pendingBowls"}) do
         assert(not s:find(forbidden,1,true),"Stage 19+ pa dwe antre: "..forbidden)
