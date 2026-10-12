@@ -171,3 +171,12 @@ jobs:
 
       - name: إثبات تكافؤ رقعة الجار الثانية عشرة مع المرجع وحفظ ندبة القديم
         run: dotnet run --project tests/PastafarianCalendar.Stage25Tests/PastafarianCalendar.Stage25Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لحذف الحاتم من مربع سؤال الصلصة
+        id: discovery_unsealed_question_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage26Tests/PastafarianCalendar.Stage26Tests.csproj --configuration Release
+      - name: إثبات توقيع حذف الحاتم وحماية الرقعة الثانية عشرة
+        if: always()
+        run: |
+          test "${{ steps.discovery_unsealed_question_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage26Tests/PastafarianCalendar.Stage26Tests.csproj --configuration Release -- --verify-expected-red

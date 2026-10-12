@@ -118,6 +118,10 @@ public sealed class MonsterContext
     // نتيجة الرقعة الثانية عشرة مستقلة عن شاهد الجار ذي الهوية الثابتة.
     public int? PatchedNextBowlResult { get; set; }
 
+    // الندبة الثالثة عشرة في سؤال الصلصة: يُحفظ الحاتم والشاهد القديم دون رقعة.
+    public int? LegacyBowlQuestionSeal { get; set; }
+    public LegacyBowlQuestionResult? LegacyUnsealedBowlQuestionResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

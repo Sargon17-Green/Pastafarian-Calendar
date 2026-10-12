@@ -193,6 +193,12 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateNextBowl(
             calculationDay,targetDay,queriedBowlId);
 
+    // اكتشاف العيب الثالث عشر في سؤال الصلصة؛ لا تُجرى الرقعة حتى الطور 27.
+    public static LegacyBowlQuestionResult EvaluateLegacyUnsealedBowlQuestion(
+        BigInteger calculationDay,BigInteger targetDay,int queriedBowlId,int seal)
+        => new MonsterManager().EvaluateLegacyUnsealedBowlQuestion(
+            calculationDay,targetDay,queriedBowlId,seal);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

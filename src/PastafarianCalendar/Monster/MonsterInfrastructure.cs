@@ -513,6 +513,35 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("اختيار الجار المصحح لا يطابق ترتيب القطرة.");
     }
 
+
+    // هذا الحارس يصون العيب التاريخي ولا يستورد الصيغة النمطية من الاختبارات.
+    public void ValidateLegacyUnsealedBowlQuestion(
+        MonsterContext context, LegacyUnsealedBowlQuestionCandidate candidate)
+    {
+        if (context is null ||
+            context.LegacyBowlQuestionSeal is not int seal ||
+            seal is not (21 or 31) ||
+            context.LegacyQueriedBowlId is not int queried ||
+            queried is < 1 or > 6 ||
+            context.LegacyUnsealedBowlQuestionResult is not null ||
+            context.PatchedNextBowlResult.HasValue ||
+            context.PatchedSauceFinalBowls is not null ||
+            context.PatchedVisibleDrops is not null ||
+            candidate is null || candidate.Historical is null ||
+            candidate.Answer is null || candidate.Seal != seal)
+            throw new MonsterValidationException("مرشح السؤال التاريخي غير صالح أو السياق مشغول.");
+
+        ValidatePatchedNextBowl(context,candidate.Historical);
+        var finalBowls=candidate.Historical.Historical.Sauce.Patched.FinalBowls;
+        var correctNext=candidate.Historical.NextBowlId;
+        var old = new LegacyUnsealedBowlQuestion().Ask(
+            finalBowls,queried,correctNext,seal);
+        if (candidate.Answer != old ||
+            candidate.Answer.First < 1 ||
+            candidate.Answer.DirectionStep is not (1 or -1))
+            throw new MonsterValidationException("تغيّر شاهد الخطأ في سؤال الصلصة.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -618,6 +647,7 @@ public sealed class MonsterDispatcher
     private readonly ProtectedDrop46SaucePhaseHandler _protectedDrop46Sauce;
     private readonly LegacyFixedNextBowlPhaseHandler _legacyFixedNextBowl;
     private readonly PatchedNextBowlPhaseHandler _patchedNextBowl;
+    private readonly LegacyUnsealedBowlQuestionPhaseHandler _legacyUnsealedQuestion;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -646,6 +676,7 @@ public sealed class MonsterDispatcher
         _protectedDrop46Sauce = new ProtectedDrop46SaucePhaseHandler();
         _legacyFixedNextBowl = new LegacyFixedNextBowlPhaseHandler();
         _patchedNextBowl = new PatchedNextBowlPhaseHandler();
+        _legacyUnsealedQuestion = new LegacyUnsealedBowlQuestionPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -1336,6 +1367,64 @@ public sealed class MonsterDispatcher
         context.Phase = context.Status;
     }
 
+
+    public void DispatchLegacyUnsealedBowlQuestion(MonsterContext context)
+    {
+        if (!string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("سؤال الصلصة التاريخي يحتاج سياقاً مؤسساً.");
+        if (context.LegacyQueriedBowlId is not int id || id is < 1 or > 6 ||
+            context.LegacyBowlQuestionSeal is not int seal ||
+            seal is not (21 or 31) ||
+            context.LegacyUnsealedBowlQuestionResult is not null ||
+            context.PatchedNextBowlResult.HasValue ||
+            context.LegacyFixedNextBowlResult.HasValue ||
+            context.PatchedSauceFinalBowls is not null ||
+            context.LegacySauceFinalBowls is not null ||
+            context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سؤال الصلصة التاريخي مشغول أو معرّفاته باطلة.");
+
+        var candidate=_legacyUnsealedQuestion.Handle(context);
+        var patched=candidate.Historical;
+        var historical=patched.Historical;
+        _validation.ValidateVisibleDropPatch(context,historical.Sauce.Historical.Source);
+        _validation.ValidateLegacyOverwrittenSauce(context,historical.Sauce.Historical);
+        _validation.ValidateProtectedDrop46Sauce(context,historical.Sauce);
+        _validation.ValidateLegacyFixedNextBowl(context,historical);
+        _validation.ValidatePatchedNextBowl(context,patched);
+        _validation.ValidateLegacyUnsealedBowlQuestion(context,candidate);
+
+        // تثبيت ذري بعد فحص جميع السلاسل؛ لا تمس الرقع أو الندوب السابقة.
+        var source=historical.Sauce.Historical.Source;
+        var sauceOld=historical.Sauce.Historical;
+        var sauceCorrect=historical.Sauce.Patched;
+        context.PatchedCountsResult=source.Counts;
+        context.PatchedStoneRows=source.Stones;
+        context.LegacyHiddenReversed=source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess=source.HiddenAccessor;
+        context.PatchedVisibleDrops=source.Visible;
+        context.LegacyDiagnosticDrop46Order=sauceOld.DiagnosticDrop46Order;
+        context.LegacyOverwrittenQueryOrder=sauceOld.OverwrittenQueryOrder;
+        context.LegacyPostStirOrders=sauceOld.PostStirOrders;
+        context.LegacySauceBowlsAfterDrops=sauceOld.BowlsAfterDrops;
+        context.LegacySauceFinalBowls=sauceOld.FinalBowls;
+        context.PatchedOrderAt46Latch=sauceCorrect.OrderAt46Latch;
+        context.PatchedSauceBowlsAfterDrops=sauceCorrect.BowlsAfterDrops;
+        context.PatchedSauceFinalBowls=sauceCorrect.FinalBowls;
+        context.PatchedPostStirOrders=sauceCorrect.PostStirOrders;
+        context.LegacyFixedNextBowlResult=historical.LegacyNextBowlId;
+        context.PatchedNextBowlResult=patched.NextBowlId;
+        context.LegacyUnsealedBowlQuestionResult=candidate.Answer;
+
+        context.BranchTrace.Add("LEGACY_OVERWRITTEN_DROP46_ORDER_WITNESS");
+        context.BranchTrace.Add("PROTECTED_DROP46_ORDER_LATCH_WITNESS");
+        context.BranchTrace.Add("LEGACY_FIXED_NEXT_BOWL_WITNESS");
+        context.BranchTrace.Add("PATCHED_NEXT_BOWL_ORDER_WITNESS");
+        context.BranchTrace.Add("LEGACY_UNSEALED_BOWL_QUESTION");
+        _metrics.Bump(context,"legacy.unsealed.bowl.question.dispatch");
+        context.Status="LEGACY_UNSEALED_BOWL_QUESTION_COMPLETE";
+        context.Phase=context.Status;
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -1829,6 +1918,26 @@ public sealed class MonsterManager
         => ExecutePatchedNextBowl(calculationDay,targetDay,queriedBowlId)
             .PatchedNextBowlResult ??
             throw new MonsterValidationException("لم يُنتج مسار الرقعة الجار المصحح.");
+
+
+    public MonsterContext ExecuteLegacyUnsealedBowlQuestion(
+        BigInteger calculationDay,BigInteger targetDay,int queriedBowlId,int seal)
+    {
+        if (queriedBowlId is < 1 or > 6 || seal is not (21 or 31))
+            throw new MonsterValidationException("معرّف الوعاء أو حاتم السؤال غير صالح.");
+        var context=Prepare(calculationDay,targetDay);
+        context.LegacyQueriedBowlId=queriedBowlId;
+        context.LegacyBowlQuestionSeal=seal;
+        _dispatcher.DispatchLegacyUnsealedBowlQuestion(context);
+        return context;
+    }
+
+    public LegacyBowlQuestionResult EvaluateLegacyUnsealedBowlQuestion(
+        BigInteger calculationDay,BigInteger targetDay,int queriedBowlId,int seal)
+        => ExecuteLegacyUnsealedBowlQuestion(
+            calculationDay,targetDay,queriedBowlId,seal)
+            .LegacyUnsealedBowlQuestionResult ??
+            throw new MonsterValidationException("لم يكتمل سؤال الصلصة التاريخي.");
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
