@@ -212,6 +212,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyOneBasedAnswer(
             calculationDay,targetDay,queriedBowlId,seal,k);
 
+    // الرقعة الرابعة عشرة: فهرس k الصفري يصون شاهد الانزياح التاريخي.
+    public static BigInteger EvaluateAnswerAt(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger k)
+        => new MonsterManager().EvaluateAnswerAt(
+            calculationDay,targetDay,queriedBowlId,seal,k);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

@@ -129,6 +129,9 @@ public sealed class MonsterContext
     public BigInteger? LegacyAnswerStepIndex { get; set; }
     public BigInteger? LegacyOneBasedAnswerAtResult { get; set; }
 
+    // نتيجة الخطوة ذات الفهرسة الصفرية مستقلة عن شاهد الخطوة التاريخية.
+    public BigInteger? PatchedAnswerAtResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
