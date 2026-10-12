@@ -160,3 +160,20 @@ Hoc scriptum est in commit praeparto; non est testimonium CI completum.
 - Praevolatus `38180827120`: `success`; custodia nominum `38180827083`: `success`.
 - Structurae saved-sum reference quinque anni; 65 termini et 28 permutationes ordinis invocationum iam probationibus praeteritis confirmatae.
 - In hoc commit sequente nova probatio omnium mensium in primis/mediis/ultimis diebus et XV invocationum independentium **nondum** confirmata est; CI novae revisionis observandum.
+
+## Probatio ad futuras revisionem praeparata (adhuc CI nondum probata)
+
+- Dies in ordine inverso per omnes 5 structuras et omnes terminationes mensium/segmentorum.
+- Validatio cache calidi pro omni interrogatione intra idem c/annum praeter primam.
+- 15 probationes directae API publicae calendarDateSpaghetti adversus oracle test-only.
+- Praeparatio tantum; haec additio **non** pertinet ad probationem SHA 0667ab3.
+
+## Canonica vigilia post emendationem compilationis — die XII Octobris MMXXVI
+
+- Commit exacte probatus `0667ab3b38de730c9883fbf8101594bd352d6642`.
+- Cursus plenus `38212657377`: **20/20 success**, log `VIGILIA_SOAK=PASS` et `STATUS_POST_RUN=SOAK_GREEN`.
+- Cursus celer `38212657368`: **success**, log `GRADUS56_TERMINI_REFERENCE=PASS ANNI=5 CASUS=712`.
+- Cursus idem: `GRADUS56_FRIGIDI=15/15_PASS`, `GRADUS56_ORDO_INVOCATIONUM=28/28_PASS CONTEXTUS=2 CACHE_ANNI=3` et `GRADUS56_STRUCTURA_REFERENCE=7/7_PASS STRUCTURAE=5/5_PASS`.
+- Custodia nominum `38212657381`: **success**.
+- Commit historicus `9aa3607`: compendium fast YAML imperfectum et variabilis `primus` bis declarata in test-only; utrumque ante hanc probationem correctum.
+- Nova pars huius commit sequens: dies terminales inversi per quinque annos et 15 vocationes per faciem publicam; **non probata** donec novus CI ad SHA novo viridis sit.

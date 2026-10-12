@@ -431,6 +431,60 @@ void exigeOrdinemInvocationumNeutrum(
               << " CONTEXTUS=2 CACHE_ANNI=3\n";
 }
 
+
+void exigeTerminosInversosEtFaciemPublicam(
+    const std::map<std::pair<Big, Big>, Exspectatio>& references) {
+    // Non tantum ordo invocationum paucorum dierum: omnes termini
+    // ex quinque annis sunt in ordine inverso, etiam inter annos/c.
+    // Comparatio fit cum reference test-only et API publico.
+    BaseMonsterManager inversus;
+    int numerus = 0;
+    int anni = 0;
+    int publica = 0;
+    int minimum = 0;
+    for (auto it = references.rbegin(); it != references.rend(); ++it) {
+        const Big& c = it->first.first;
+        const Exspectatio& expected = it->second;
+        const std::set<Big> dates = eligeTerminos(expected);
+        minimum += 3 * expected.structura.monthCount;
+        const Big first = *dates.begin();
+        const Big middle = *std::next(dates.begin(),
+            static_cast<std::ptrdiff_t>(dates.size() / 2));
+        const Big last = *dates.rbegin();
+        bool prima = true;
+        for (auto t = dates.rbegin(); t != dates.rend(); ++t) {
+            const auto r = inversus.executeFinalIntegrationStage56(c, *t);
+            const std::string label = "inversus " + std::to_string(anni + 1)
+                + "/" + std::to_string(numerus + 1);
+            exige(r.ready && r.status == "GREEN",
+                  label + ": non viridis");
+            comparaStructuram(r, expected, label);
+            const auto diei = diesExReference(expected, *t);
+            comparaDiem(r.result, diei, label);
+            if (!prima) {
+                exige(r.guardedCacheHit && !r.guardedCacheRejected,
+                      label + ": cache inversus non calidus");
+            }
+            if (*t == first || *t == middle || *t == last) {
+                const auto publicus = pastafari::calendarDateSpaghetti(c, *t);
+                comparaDiem(publicus, diei, label + ": facies publica");
+                ++publica;
+            }
+            prima = false;
+            ++numerus;
+        }
+        ++anni;
+        std::cout << "GRADUS56_TERMINI_INVERSI_ANNUS_PASS=" << anni
+                  << " CASES=" << dates.size()
+                  << '\n' << std::flush;
+    }
+    exige(anni == 5 && numerus >= minimum && publica == 15,
+          "termini inversi aut API publica insufficientia");
+    std::cout << "GRADUS56_TERMINI_INVERSI=PASS ANNI=" << anni
+              << " CASUS=" << numerus << " FACADE=" << publica
+              << "/15_PASS\n";
+}
+
 } // namespace
 
 int main() {
@@ -483,6 +537,7 @@ int main() {
               "coverage septem casuum et quinque structuram defecit");
         exigeProiectionesFinium(manager, referencePerAnnum);
         exigeOrdinemInvocationumNeutrum(casus, referencePerAnnum);
+        exigeTerminosInversosEtFaciemPublicam(referencePerAnnum);
         std::cout << "GRADUS56_STRUCTURA_REFERENCE=7/7_PASS"
                   << " STRUCTURAE=5/5_PASS\n";
         return 0;
