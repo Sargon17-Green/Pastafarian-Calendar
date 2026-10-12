@@ -566,3 +566,9 @@ giorno erroneo, anche se negativo. Il validator ricostruisce
 le durate e la formula storica senza richiamare la formula
 normativa a prefisso. La famiglia è diagnostica: nessuna
 salsa annuale o elenco canonico completo viene prodotto.
+
+Il validator Stage32 è indipendente dalla scelta corretta e
+ripete soltanto il calcolo contiguo della cicatrice. La run
+38268359013 sul commit b138a00a997cbba43c93dbf7169ab4bd3739e969
+conferma 33/33 lavori superati e le tre divergenze
+intenzionali. La fase successiva è PATCH16 nello Stage33.

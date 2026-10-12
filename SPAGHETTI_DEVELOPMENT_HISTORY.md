@@ -1450,3 +1450,12 @@ intrecciati il contatore può diventare negativo oppure
 saltare giorni. Report, validator separato, snapshot, fase
 e metriche preservano il difetto reale senza anticipare
 PATCH16. La firma intenzionale è 58 PASS/3 FAIL.
+
+### Certificazione Stage32
+
+Il commit b138a00a997cbba43c93dbf7169ab4bd3739e969
+ha superato 33/33 lavori nella run 38268359013. La
+DISCOVERY 16 conserva 58 PASS/3 FAIL attesi, mostrando
+il calcolo errato dell'indice giornaliero per mesi intrecciati.
+Tutti i validator e le regressioni fino allo Stage31
+rimangono attivi. PATCH16 non viene introdotta.

@@ -1251,3 +1251,16 @@ verifica 58 condizioni che passano e tre divergenze
 intenzionali: `C giorno2`, `C giorno3` e `B giorno1`.
 L'oracolo a prefisso è confinato ai test. Nessuna PATCH16
 o costruzione canonica delle tessiture dalla salsa è anticipata.
+
+### Certificazione nativa dello Stage32
+
+La [run GitHub Actions 38268359013](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38268359013)
+sul commit `b138a00a997cbba43c93dbf7169ab4bd3739e969`
+ha superato **33/33 job**. La suite Stage32 ha conservato la firma
+**58 PASS/3 FAIL intenzionali**, con divergenze esattamente
+nei casi `C giorno2`, `C giorno3`, `B giorno1`.
+Stage31 continua a passare 66/66 e le firme delle suite
+precedenti sono conservate. Il test di confine è stato
+corretto per rifiutare solo mesi oltre 123 giorni; un
+precedente errore di download sbt in un runner non si
+è ripetuto nella run certificata.
