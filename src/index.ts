@@ -34,3 +34,5 @@ export * from "./patch13RejectionRank.ts";
 export * from "./discovery14LegacyShortOnlyWide.ts";
 
 export * from "./patch14WideChoice.ts";
+
+export * from "./discovery15LegacyPositiveGate.ts";

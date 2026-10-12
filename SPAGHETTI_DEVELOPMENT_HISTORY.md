@@ -187,3 +187,7 @@ Historical short-only choice assumes N<=M. The actual old method handles N<=M by
 ## Stage 29 PATCH 14 — verified and closed
 
 Stage28 short-only historical zero rank for N>M remains unchanged and actually invoked. Production dispatcher reuses the real old short result when N<=M, and for N>M physically calls the already verified Stage27 M-adic Wide Choice on the saved answer ring. It does not recompute answer digits while rejecting full composite values. Canonical independent oracle, 2560 direct short, 30 wide boundary, 804 full historical 58-write traces, fault-injected rollback and 14 archived intentional-red tests. Stage30 not started. CI run 38260956581 SUCCESS; 2560 short, 30 wide and 804 full histories, 46632 shared writes, zero corrected mismatches. Fourteen historical expected-red checks retained.
+
+## Stage 30 DISCOVERY 15 — CI submission
+
+Historical gate question always selects FOUNDATION+abs(index), including negative -1,-2, instead of normative FOUNDATION-index magnitude. Every queried positive-side gap uses the real Stage29 full pipeline (58 shared-memory writes per query), and the old gate day is accumulated with signed direction. Native test-only normative GateEngine independently evaluates correct negative-side Sauce. The fifteenth historical expected-red is independently verified. Stage31 correction not yet implemented. CI pending.
