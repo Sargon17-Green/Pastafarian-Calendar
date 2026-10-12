@@ -163,3 +163,10 @@ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286136749
 አራቱ intentional EXPECTED_RED assertions በተናጠል
 ተረጋግጠዋል፣ Canonical Names Lock PASS።
 LAST_COMPLETED_STAGE=28፤ PATCH 14 አልተጀመረም።
+
+
+የደረጃ 28 የመጨረሻው ንጹህ native CI ማረጋገጫ፦
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286516480
+በcommit c8b3e7f1ad86d19b38a9b86e6f3042c230bb6ce4።
+v fmt -verify ያለ fmt -w PASS፣ 41 GREEN test
+ፋይሎች PASS፣ 4 intentional RED ተረጋግጠዋል።

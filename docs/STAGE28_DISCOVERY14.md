@@ -42,9 +42,9 @@ v test ./pastafari/discovery14_expected_red_test.v
 
 ## የnative CI ማረጋገጫ
 
-- የተፈተነ commit: 4ad8b3bd449c7ea90332a925b08e78898bb40b09
-- GitHub Actions: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286136749
-- Artifact: 11763271971 (v-amharic-stage28-red-evidence)
+- የተፈተነ commit: c8b3e7f1ad86d19b38a9b86e6f3042c230bb6ce4
+- GitHub Actions: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286516480
+- Artifact: 11763501585 (v-amharic-stage28-red-evidence)
 - የnative V ኮምፓይለር V 0.5.2 7647ce1።
 - 41 የቀድሞና አዲስ GREEN test ፋይሎች PASS።
 - አራት የnormative EXPECTED_RED ማስረጃዎች በተናጠል ተረጋግጠዋል።
@@ -53,3 +53,13 @@ v test ./pastafari/discovery14_expected_red_test.v
 - LAST_COMPLETED_STAGE=28። ደረጃ 29 PATCH 14 አልተጀመረም።
 
 **ደረጃ 28 COMPLETE / EXPECTED_RED።**
+
+
+## የመጨረሻ የማይለወጥ ምንጭ native ማረጋገጫ
+
+በcommit c8b3e7f1ad86d19b38a9b86e6f3042c230bb6ce4
+በGitHub Actions run 38286516480 የfmt -w የሥራ ጊዜ
+ለውጦች ሙሉ በሙሉ ተወግደው v fmt -verify
+ብቻ ተፈትሿል። 41 GREEN test ፋይሎች PASS፣
+የታሰቡት አራቱ RED assertions በየስማቸው
+ተረጋግጠዋል፣ Canonical Names Lock PASS።
