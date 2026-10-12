@@ -23,10 +23,14 @@ our @EXPORT_OK = qw(countWeavingsPolynomial);
 # 使用掃描 u 時的欄累積和與當列的 b 前綴和，可在每一新增月份
 # O((T+k)^2) 個精確 BigInt 運算內完成，工作記憶體為 O((T+k)^2)。
 
-sub countWeavingsPolynomial ($lengths, $stats = undef) {
+sub countWeavingsPolynomial ($lengths, $stats = undef,
+                            $first_histories = undef) {
     die "月份長度必須是陣列參照\n" if ref($lengths) ne 'ARRAY';
     die "診斷記錄必須是雜湊參照\n"
         if defined($stats) && ref($stats) ne 'HASH';
+    die "每階段首次位置分布必須是陣列參照\n"
+        if defined($first_histories) && ref($first_histories) ne 'ARRAY';
+    @$first_histories=() if defined $first_histories;
     my @sizes;
     my $total = 0;
     for my $item (@$lengths) {
@@ -48,11 +52,32 @@ sub countWeavingsPolynomial ($lengths, $stats = undef) {
     }
 
     return Math::BigInt->bone if !@sizes;
-    return Math::BigInt->bone if @sizes == 1;
+    if (@sizes == 1) {
+        $first_histories->[1] = [undef, Math::BigInt->bone]
+            if defined $first_histories;
+        return Math::BigInt->bone;
+    }
+
+    # 計數 D[u,v] 時，額外保留每個階段「最後一月
+    # 首次出現於 u」的精確邊際分布。只在明確需要
+    # 共用未開啟後綴時建立；一般全域計數路徑不受影響。
+    my $record_histogram = sub ($stage, $matrix) {
+        return if !defined $first_histories;
+        my @histogram;
+        for my $u (1 .. $#$matrix) {
+            next if !defined $matrix->[$u];
+            my $sum=Math::BigInt->bzero;
+            $sum->badd($_) for grep { defined $_ } @{$matrix->[$u]};
+            $histogram[$u]=$sum if !$sum->is_zero;
+        }
+        $first_histories->[$stage]=\@histogram;
+    };
 
     my $T = $sizes[0];
     my @distribution;
     $distribution[1][$T] = Math::BigInt->bone;
+    $record_histogram->(1,\@distribution);
+    my $stage=1;
 
     for my $k (@sizes[1 .. $#sizes]) {
         my $nextT = $T+$k;
@@ -118,6 +143,8 @@ sub countWeavingsPolynomial ($lengths, $stats = undef) {
 
         @distribution = @next_distribution;
         $T = $nextT;
+        $stage++;
+        $record_histogram->($stage,\@distribution);
         if (defined $stats) {
             $stats->{stages}++;
             $stats->{last_frontier} = $frontier;

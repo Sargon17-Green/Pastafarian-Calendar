@@ -95,21 +95,54 @@ sub countWeavingSuffixFactored ($lengths, $prefix,
 
     my %private_cache;
     my $cache = defined($shared_cache) ? $shared_cache : \%private_cache;
-    my $key=join(',',@sizes).'|'.$opened.'|'.$T;
+    my $signature=join(',',@sizes);
+    my $key=$signature.'|'.$opened.'|'.$T;
     my $future;
     if (exists $cache->{$key}) {
         $future=$cache->{$key}->copy;
         $diagnostics->{future_cache_hits}++ if defined $diagnostics;
     } else {
-        if (!$T) {
-            # 已開啟月份均已結束，餘下完全等於新的獨立月份序列。
-            my @rest=@sizes[$opened .. $m-1];
-            $future=countWeavingsPolynomial(\@rest);
-        } else {
-            # 首次出現順序已在真實前綴固定的虛擬月份。
-            # 因為前綴至少使用一天，虛擬總日數不超過原始總日數。
-            my @virtual=($T+1,@sizes[$opened .. $m-1]);
-            $future=countWeavingSuffixPolynomial(\@virtual,[1]);
+        # 對所有未開啟的月份反轉日期及月份標籤，可把
+        # 「正序第 1 未開啟月份的末次位置 z」轉為
+        # 「反序最後月份的首次位置 u」，並有 z=U+1-u。
+        # 在一個反序全域多項式 DP 中，一次取得所有
+        # 未開啟後綴長度的首次位置直方圖，再共享於各 p。
+        my $profile_key='reversed-first-hist|'.$signature;
+        if (!exists $cache->{$profile_key}) {
+            my @reversed=reverse @sizes;
+            my @histories;
+            countWeavingsPolynomial(\@reversed,undef,\@histories);
+            $cache->{$profile_key}=\@histories;
+            $diagnostics->{profile_builds}++ if defined $diagnostics;
+        }
+        my $future_months=$m-$opened;
+        my $histogram=$cache->{$profile_key}[$future_months];
+        die "缺少未開啟後綴的精確首次位置直方圖\n"
+            if !defined($histogram);
+        my $U=0;
+        $U+=$_ for @sizes[$opened .. $m-1];
+
+        # 固定任何一個合法的已開啟 A 序列與未開啟 B
+        # 序列。若 B 第一個月份最後出現於 z，
+        # 恰有 C(T+z-1,T) 種插入 A 的方法，
+        # 且 A 的最後一日必早於該個 B 符號。
+        # 相鄰 u 的組合數以精確整數遞推，而非重建 DP。
+        my $n=$T+$U-1;
+        my $r=$T;
+        $r=$n-$r if $r>$n-$r;
+        my $weight=Math::BigInt->bone;
+        for my $i (1 .. $r) {
+            $weight->bmul($n-$r+$i)->bdiv($i);
+        }
+        $future=Math::BigInt->bzero;
+        for my $u (1 .. $U) {
+            if (defined $histogram->[$u]) {
+                $future->badd($histogram->[$u]->copy->bmul($weight));
+            }
+            if ($u<$U) {
+                my $current_n=$T+$U-$u;
+                $weight->bmul($current_n-$T)->bdiv($current_n);
+            }
         }
         $cache->{$key}=$future->copy;
         $diagnostics->{future_cache_misses}++ if defined $diagnostics;
