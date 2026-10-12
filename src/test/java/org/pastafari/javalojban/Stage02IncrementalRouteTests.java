@@ -3,6 +3,7 @@ package org.pastafari.javalojban;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class Stage02IncrementalRouteTests {
     private static int checks;
@@ -15,6 +16,7 @@ public final class Stage02IncrementalRouteTests {
         progressInFullYearInterior();
         binomialCacheCallOrderNeutrality();
         suffixCountCacheReuseAndEviction();
+        concurrentSuffixCountNeutrality();
         multiCallFullYearInteriorWithOneCountPerCall();
         zeroBudgetDoesNotLoseSavedWork();
         System.out.println("STAGE_02_INCREMENTAL_ROUTE_PASS checks=" + checks
@@ -163,6 +165,7 @@ public final class Stage02IncrementalRouteTests {
         int totalMoved = 0;
         int totalCounts = 0;
         int callsWithPersistedProbes = 0;
+        int auditCacheHits = 0;
         long started = System.nanoTime();
         long routeNanos = 0;
         long auditNanos = 0;
@@ -187,9 +190,13 @@ public final class Stage02IncrementalRouteTests {
                     && rank.compareTo(next.upperRank()) <= 0,
                 "E_MULTICALL_RANK_CONTAINED");
             long auditStarted = System.nanoTime();
+            long hitsBeforeAudit = family.suffixCacheHitCount();
             BigInteger independentlyCounted =
                 family.countAfterPrefix(next.fixedPrefixCopy());
             auditNanos += System.nanoTime() - auditStarted;
+            if (family.suffixCacheHitCount() > hitsBeforeAudit) {
+                auditCacheHits++;
+            }
             eq(next.remainingChoices(), independentlyCounted,
                 "E_MULTICALL_INTERVAL_EXACT");
             array(originalPrefix, before.fixedPrefixCopy(),
@@ -215,12 +222,14 @@ public final class Stage02IncrementalRouteTests {
         }
         ok(totalMoved > 0, "E_MULTICALL_MIDDLE_ADVANCED");
         ok(totalCounts <= 12, "E_MULTICALL_TOTAL_COUNT_BUDGET");
+        ok(auditCacheHits > 0, "E_MULTICALL_AUDIT_CACHE_USED");
         ok(route.stepsCompleted() < 5778 - 512,
             "E_MULTICALL_NO_FALSE_COMPLETION");
         System.out.println("STAGE_02_MIDDLE_MULTICALL_PASS calls=12"
             + " prefix_days=" + route.stepsCompleted()
             + " branch_counts=" + totalCounts
             + " calls_with_saved_probes=" + callsWithPersistedProbes
+            + " audit_cache_hits=" + auditCacheHits
             + " route_ms=" + routeNanos / 1000000
             + " audit_ms=" + auditNanos / 1000000
             + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
@@ -298,6 +307,62 @@ public final class Stage02IncrementalRouteTests {
             "E_SUFFIX_REINSERT_STILL_BOUNDED");
         eq(0L, isolated.suffixCacheHitCount(),
             "E_SUFFIX_OTHER_INSTANCE_UNTOUCHED");
+    }
+
+    private static void concurrentSuffixCountNeutrality() {
+        int[] lengths = {2, 3, 2, 3, 2};
+        int[][] prefixes = {
+            {1}, {1, 1}, {1, 2}, {1, 2, 3},
+            {1, 2, 3, 2}, {1, 2, 3, 2, 4}
+        };
+        MonsterWeavingLinearCounter reference =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger[] expected = new BigInteger[prefixes.length];
+        for (int i = 0; i < prefixes.length; i++) {
+            expected[i] = reference.countAfterPrefix(prefixes[i]);
+        }
+        MonsterWeavingLinearCounter shared =
+            new MonsterWeavingLinearCounter(lengths);
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        Thread[] workers = new Thread[6];
+        for (int worker = 0; worker < workers.length; worker++) {
+            final int workerNumber = worker;
+            workers[worker] = new Thread(() -> {
+                try {
+                    for (int iteration = 0; iteration < 100; iteration++) {
+                        int which = (iteration + workerNumber) % prefixes.length;
+                        BigInteger answer =
+                            shared.countAfterPrefix(prefixes[which]);
+                        if (!expected[which].equals(answer)) {
+                            throw new AssertionError("E_SUFFIX_CONCURRENT_VALUE");
+                        }
+                    }
+                } catch (Throwable error) {
+                    failure.compareAndSet(null, error);
+                }
+            });
+            workers[worker].start();
+        }
+        for (Thread worker : workers) {
+            try {
+                worker.join();
+            } catch (InterruptedException exception) {
+                Thread.currentThread().interrupt();
+                throw new AssertionError("E_SUFFIX_CONCURRENT_INTERRUPTED",
+                    exception);
+            }
+        }
+        Throwable problem = failure.get();
+        if (problem != null) {
+            throw new AssertionError("E_SUFFIX_CONCURRENT", problem);
+        }
+        ok(shared.suffixCacheHitCount() > 0,
+            "E_SUFFIX_CONCURRENT_CACHE_HITS");
+        ok(shared.suffixCacheEntryCount() <= 64,
+            "E_SUFFIX_CONCURRENT_BOUNDED");
+        eq(BigInteger.ONE,
+            new MonsterWeavingLinearCounter(new int[]{1}).count(),
+            "E_SUFFIX_CONCURRENT_NO_CROSS_OWNER_STATE");
     }
 
     private static void zeroBudgetDoesNotLoseSavedWork() {
