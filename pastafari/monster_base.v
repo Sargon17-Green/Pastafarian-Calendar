@@ -184,7 +184,9 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	wrong := ordered + '; DISCOVERY_11 wrongQueryOrder=' + legacy_post_stir.order_for_query.str()
 	overwrite := wrong + '; DISCOVERY_11 overwriteCount=' + legacy_post_stir.overwrite_count.str()
 	latched := overwrite + '; PATCH_11 latchedOrder=' + patched_post_stir.order_for_query.str()
-	wrong_next := calendar_next_bowl_spaghetti(6, patched_post_stir.order_for_query)!
+	wrong_next := dispatcher.dispatch_legacy_next_bowl(6, patched_post_stir.order_for_query)!
+	patched_next := calendar_next_bowl_spaghetti(6, patched_post_stir.order_for_query)!
 	query_details := latched + '; DISCOVERY_12 queriedId=6'
-	return error(query_details + '; DISCOVERY_12 wrongNextBowl=' + wrong_next.str())
+	historical_next := query_details + '; DISCOVERY_12 wrongNextBowl=' + wrong_next.str()
+	return error(historical_next + '; PATCH_12 nextBowl=' + patched_next.str())
 }

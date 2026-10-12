@@ -25,10 +25,10 @@ pub fn (_ BaseDispatcher) dispatch_legacy_next_bowl(queried_id int, order_at_46_
 	return adapter.next(queried_id, order_at_46_latch)
 }
 
-// ደረጃ 24 የproduction query መስመር የቋሚ-ID ታሪኩን ይጠቀማል።
+// ደረጃ 25፦ የproduction query መስመር የላች circular successor ይመለሳል።
 pub fn calendar_next_bowl_spaghetti(queried_id int, order_at_46_latch []int) !int {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_next_bowl(queried_id, order_at_46_latch)
+	return dispatcher.dispatch_next_bowl_patch12(queried_id, order_at_46_latch)
 }
 
 // ከ12 post-stirs በኋላ የPATCH 11 የተጠበቀው order በእውነት ይተላለፋል፤

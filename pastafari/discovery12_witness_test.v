@@ -16,17 +16,17 @@ fn test_discovery12_historical_fixed_id_cycle() {
 
 fn test_discovery12_reversed_order_is_ignored_by_legacy_query() {
 	order := [6, 5, 4, 3, 2, 1]
-	assert (calendar_next_bowl_spaghetti(6, order) or { 0 }) == 1
-	assert (calendar_next_bowl_spaghetti(1, order) or { 0 }) == 2
+	assert (new_base_dispatcher().dispatch_legacy_next_bowl(6, order) or { 0 }) == 1
+	assert (new_base_dispatcher().dispatch_legacy_next_bowl(1, order) or { 0 }) == 2
 	assert order == [6, 5, 4, 3, 2, 1]
 }
 
 fn test_discovery12_rotated_and_shuffled_order_ignored() {
 	rotated := [2, 3, 1, 4, 5, 6]
 	shuffled := [1, 3, 5, 2, 4, 6]
-	assert (calendar_next_bowl_spaghetti(3, rotated) or { 0 }) == 4
-	assert (calendar_next_bowl_spaghetti(1, shuffled) or { 0 }) == 2
-	assert (calendar_next_bowl_spaghetti(6, shuffled) or { 0 }) == 1
+	assert (new_base_dispatcher().dispatch_legacy_next_bowl(3, rotated) or { 0 }) == 4
+	assert (new_base_dispatcher().dispatch_legacy_next_bowl(1, shuffled) or { 0 }) == 2
+	assert (new_base_dispatcher().dispatch_legacy_next_bowl(6, shuffled) or { 0 }) == 1
 	assert rotated == [2, 3, 1, 4, 5, 6]
 }
 
@@ -35,7 +35,7 @@ fn test_discovery12_all_720_permutations_take_same_fixed_name_route() {
 	for rank0 in 0 .. 720 {
 		order := old_permutation_unrank0(rank0) or { []int{} }
 		for id in 1 .. 7 {
-			got := calendar_next_bowl_spaghetti(id, order) or { 0 }
+			got := new_base_dispatcher().dispatch_legacy_next_bowl(id, order) or { 0 }
 			assert got == (id % 6) + 1
 			count++
 		}
@@ -49,19 +49,19 @@ fn test_discovery12_live_post_stirs_keep_latch_but_query_ignores_it() {
 	after := calendar_post_stir12_spaghetti(bowls, order) or { LegacyPostStir12Result{} }
 	assert after.order_for_query == order
 	assert after.overwrite_count == 12
-	assert (calendar_post_stir_next_bowl_spaghetti(bowls, order, 6) or { 0 }) == 1
-	assert (calendar_post_stir_next_bowl_spaghetti(bowls, order, 1) or { 0 }) == 2
+	assert (new_base_dispatcher().dispatch_legacy_next_bowl(6, after.order_for_query) or { 0 }) == 1
+	assert (new_base_dispatcher().dispatch_legacy_next_bowl(1, after.order_for_query) or { 0 }) == 2
 	assert bowls[6].str() == '60'
 }
 
-fn test_discovery12_legacy_adapter_and_public_dispatch_agree() {
+fn test_discovery12_legacy_adapter_and_historic_dispatch_agree() {
 	order := [1, 3, 5, 2, 4, 6]
 	adapter := LegacyNextBowlAdapter{}
 	dispatcher := new_base_dispatcher()
 	for id in 1 .. 7 {
 		direct := adapter.next(id, order) or { 0 }
 		from_dispatch := dispatcher.dispatch_legacy_next_bowl(id, order) or { 0 }
-		public := calendar_next_bowl_spaghetti(id, order) or { 0 }
+		public := new_base_dispatcher().dispatch_legacy_next_bowl(id, order) or { 0 }
 		assert direct == public
 		assert from_dispatch == public
 	}
@@ -93,12 +93,12 @@ fn test_discovery12_invalid_queried_id_and_invalid_permutation_rejected() {
 	}
 }
 
-fn test_discovery12_repeated_queries_do_not_change_inputs() {
+fn test_discovery12_repeated_legacy_queries_do_not_change_inputs() {
 	bowls := discovery12_bowls_fixture()
 	order := [2, 3, 1, 4, 5, 6]
 	for round in 0 .. 15 {
-		assert (calendar_post_stir_next_bowl_spaghetti(bowls, order, 3) or { 0 }) == 4
-		assert (calendar_next_bowl_spaghetti(6, order) or { 0 }) == 1
+		assert (new_base_dispatcher().dispatch_legacy_next_bowl(3, order) or { 0 }) == 4
+		assert (new_base_dispatcher().dispatch_legacy_next_bowl(6, order) or { 0 }) == 1
 	}
 	assert bowls[1].str() == '10'
 	assert bowls[6].str() == '60'
@@ -117,4 +117,5 @@ fn test_discovery12_monster_path_and_prior_patches_are_still_wired() {
 	assert message.contains('PATCH_11 latchedOrder=')
 	assert message.contains('DISCOVERY_12 wrongNextBowl=')
 	assert message.contains('DISCOVERY_12 queriedId=6')
+	assert message.contains('PATCH_12 nextBowl=')
 }
