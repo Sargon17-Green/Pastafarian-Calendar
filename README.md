@@ -654,3 +654,27 @@ Giai đoạn 18 kết thúc `EXPECTED_RED` đã xác minh.
 Giai đoạn 19 `PATCH 09` cần giữ `LegacyPourPositions`,
 đưa `order[position]` qua `bowlAlias` tới các nguồn rót
 và không bắt đầu lỗi trộn in-place của giai đoạn 20.
+
+## Giai đoạn 19 — Bản vá 09: định tuyến ba nguồn rót qua danh tính bát
+
+`LegacyPourPositions.read_old(bowls_old,position)` tiếp tục
+đọc `Map.fetch!(bowls_old,position)`. Hàm này được bảo tồn
+nguyên vẹn, kể cả lỗi lịch sử nếu gọi với map ID bát thật.
+Không sửa chỉ số trong hàm legacy.
+
+Lớp mới `BowlAliasPatch` tạo bản xem riêng chỉ gồm ba vị trí
+rót: `bowlAlias[position]=old[order[position]]`
+với position 1..3. Sau đó lớp vá thực sự gọi
+`LegacyPourPositions.pour(bowlAlias,...)`. Bằng cách đó,
+cả ba nguồn đọc giá trị của ID bát phù hợp với thứ tự hiện tại,
+nhưng hàm lịch sử vẫn được sử dụng. Kho `old` không thay đổi;
+cả sáu phép khuấy khác tiếp tục đọc từ snapshot ID nguyên bản
+và ghi vào map `next` riêng.
+
+Bốn hồi quy chuẩn của giai đoạn 18 được giữ nguyên kỳ vọng;
+riêng tiền xử lý ở bài kiểm thử rót trực tiếp được đổi để gọi
+đường bản vá. Các kiểm thử cấu trúc cũ cũng phải chứng minh
+hàm legacy còn tồn tại. Bổ sung 14 bài thử, bao gồm toàn bộ
+720 hoán vị và ba nguồn rót, nhiều cặp ngày, số nguyên lớn,
+thực thi song song, bất biến kho và ranh giới còn chưa tích hợp.
+Chưa làm lỗi contamination in-place ở DISCOVERY 10.

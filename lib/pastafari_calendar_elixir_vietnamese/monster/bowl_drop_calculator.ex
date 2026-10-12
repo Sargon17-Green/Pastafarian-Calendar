@@ -1,15 +1,15 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.BowlDropCalculator do
   @moduledoc """
-  Cập nhật sáu bát qua 46 giọt với lỗi rót theo tên vị trí cũ.
+  Bản vá 09 ánh xạ ba nguồn rót từ vị trí sang ID bát thật.
 
-  Chỉ phần đọc ba nguồn rót dùng LegacyPourPositions sai.
-  Các phép khuấy của sáu vị trí đều đọc từ snapshot old
-  và ghi vào map next riêng; không thêm lỗi in-place của
-  DISCOVERY 10 hoặc phần khuấy sau giọt 46.
+  BowlAliasPatch cung cấp một bản xem rót riêng và vẫn gọi
+  LegacyPourPositions thực. Các phép khuấy của sáu vị trí
+  luôn đọc snapshot old gốc và ghi map next độc lập;
+  chưa mở lỗi in-place của DISCOVERY 10.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
-    LegacyPourPositions,
+    BowlAliasPatch,
     SaveManager
   }
 
@@ -31,8 +31,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.BowlDropCalculator do
 
     pours = Map.new(1..3, fn position ->
       value =
-        LegacyPourPositions.pour(
-          old, drop, elem(row, position - 1), index, position
+        BowlAliasPatch.pour(
+          old, order, drop, elem(row, position - 1), index, position
         )
 
       {position, value}

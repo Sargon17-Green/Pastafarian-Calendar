@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=18
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=19
+CURRENT_KIND=PATCH
 CURRENT_PATCH=09
 LAST_COMPLETED_STAGE=18
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-08; khởi tạo sáu bát, khuấy qua 46 giọt với snapshot cũ và thứ tự ID đúng, nhưng LegacyPourPositions đọc bowls_old[position] thay vì ID qua order[position] cho ba nguồn rót.
+MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyPourPositions đọc bowls_old[position]; BowlAliasPatch tạo bản xem riêng với bowlAlias[position]=old[order[position]] cho ba phép rót, gọi thật legacy và giữ old bất biến cho sáu phép khuấy.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_18_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_19_PENDING
+GIT_HISTORY_MUTATED=STAGE_19_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=209
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=STAGE_19_PENDING
+CI_FAILURES=STAGE_19_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -342,3 +342,15 @@ chuẩn độc lập PASS. Không có bộ alias của PATCH 09.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239350202
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239350320
 Giai đoạn 18 đóng EXPECTED_RED; tiếp theo giai đoạn 19 PATCH 09.
+
+Giai đoạn 19 thực hiện PATCH 09, chỉ sửa ba nguồn rót thông qua
+BowlAliasPatch.alias_view. Các khóa vị trí 1..3 trong alias
+nhận giá trị từ ID bát thật theo order. Module LegacyPourPositions
+giữ nguyên, kể cả lời gọi trực tiếp sai nếu dùng old không alias.
+BowlDropCalculator dùng BowlAliasPatch.pour cho cả ba vị trí,
+không sửa công thức SAVE hoặc đường khuấy với snapshot old.
+Bốn hồi quy chuẩn của giai đoạn 18 giữ nguyên mọi assert,
+chỉ chuyển đường gọi trực tiếp ở ca một qua lớp vá.
+Thêm 14 bài kiểm thử Stage19. Dự kiến 223 bài, 0 lỗi.
+LAST_COMPLETED_STAGE vẫn 18 trước khi xác minh CI.
+Không bắt đầu lỗi in-place ở giai đoạn 20 DISCOVERY 10.

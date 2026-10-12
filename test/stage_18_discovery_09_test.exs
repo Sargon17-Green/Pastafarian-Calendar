@@ -7,6 +7,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
   alias PastafariCalendarElixirVietnamese.Monster.{
     BowlDropCalculator,
     BowlSeedCalculator,
+    BowlAliasPatch,
     LegacyPourPositions
   }
 
@@ -114,7 +115,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
              correct_step(old, drop, order, stones, 1)
   end
 
-  test "sai lệch ở bước đầu xuất hiện dù cập nhật vẫn dùng ID đúng" do
+  test "bản vá 09 cập nhật đúng ID qua alias mà vẫn giữ snapshot cũ" do
     old = %{1 => 19, 2 => 23, 3 => 29, 4 => 31, 5 => 37, 6 => 41}
     order = [4, 5, 6, 1, 2, 3]
     stones = Ref.build_stones()
@@ -123,7 +124,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
     next_correct = correct_step(old, drop, order, stones, 1)
 
     assert Enum.sort(Map.keys(next_wrong)) == Enum.to_list(1..6)
-    refute next_wrong == next_correct
+    assert next_wrong == next_correct
     assert Enum.all?(Map.values(next_wrong), fn n -> n >= 1 and n <= Ref.m() end)
     assert old == %{1 => 19, 2 => 23, 3 => 29, 4 => 31, 5 => 37, 6 => 41}
   end
@@ -139,10 +140,10 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
     assert Calendar.bowls_after_drops_spaghetti(f - 9, f + 17) ==
              ctx.bowls_after_drops
     assert Enum.sort(Map.keys(ctx.bowls_after_drops)) == Enum.to_list(1..6)
-    refute ctx.bowls_after_drops == correct_after
+    assert ctx.bowls_after_drops == correct_after
   end
 
-  test "nguồn rót sai độc lập với bản vá thứ tự bát" do
+  test "nguồn rót qua alias giữ thứ tự bát chuẩn" do
     f = Ref.foundation_day()
     c = f - 31
     t = f + 57
@@ -232,26 +233,29 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
     end
   end
 
-  test "mã nguồn giữ lookup vị trí cũ, chưa có bản vá alias 09" do
+  test "mã nguồn giữ lookup legacy cũ và dùng alias cho cả ba nguồn rót" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = Path.join(root, "legacy_pour_positions.ex") |> File.read!()
     calculator = Path.join(root, "bowl_drop_calculator.ex") |> File.read!()
+    patch = Path.join(root, "bowl_alias_patch.ex") |> File.read!()
     dispatcher = Path.join(root, "dispatcher.ex") |> File.read!()
 
     assert legacy =~ "Map.fetch!(bowls_old, position)"
-    assert calculator =~ "LegacyPourPositions.pour("
+    assert calculator =~ "BowlAliasPatch.pour("
+    assert patch =~ "LegacyPourPositions.pour(bowl_alias, drop, stone, index, position)"
+    assert patch =~ "Map.put(bowl_alias, position, Map.fetch!(bowls_old, id))"
     assert calculator =~ "Map.put(next, id, updated)"
     assert calculator =~ "Map.fetch!(old, id)"
     assert dispatcher =~ "BowlDropCalculator.apply_all("
     refute legacy =~ "bowl_alias"
-    refute calculator =~ "bowl_alias"
-    refute File.exists?(Path.join(root, "bowl_alias_patch.ex"))
+    assert File.exists?(Path.join(root, "bowl_alias_patch.ex"))
+    refute calculator =~ "LegacyPourPositions.pour("
   end
 
   test "hồi quy chuẩn nguồn rót đầu tiên: cố ý đỏ cho phát hiện 09" do
     old = %{1 => 13, 2 => 17, 3 => 23, 4 => 29, 5 => 31, 6 => 37}
     order = [4, 5, 6, 1, 2, 3]
-    got = LegacyPourPositions.pour(old, 41, 47, 1, 1)
+    got = BowlAliasPatch.pour(old, order, 41, 47, 1, 1)
     assert got == correct_pour(old, 41, 47, 1, 1, order)
   end
 

@@ -588,3 +588,31 @@ Bốn sai lệch thuộc nguồn rót 1, bước khuấy đầu và kết
 quả sau 46 giọt ở các ngày khác nhau. Phần khuấy đọc
 snapshot cũ và ghi next riêng như công thức chuẩn.
 Không thêm alias của giai đoạn 19. Đóng EXPECTED_RED.
+
+## Giai đoạn 19 — Bản vá 09: bảo tồn legacy và thêm bản xem alias
+
+**Hàm lịch sử còn nguyên:** `LegacyPourPositions` vẫn lấy
+`Map.fetch!(bowls_old,position)` cho các vị trí 1..3.
+Khi được gọi trên map sáu ID bát thật, nó vẫn đọc ID sai
+như bằng chứng của DISCOVERY 09. Không có sửa chữa bên
+trong hàm legacy, không thay vị trí hay hệ số rót.
+
+**Lớp vá:** `BowlAliasPatch.alias_view(old,order)` ánh xạ
+ba khóa vị trí tới `old[order[position]]`. `pour` chuyển
+bản xem này vào đúng hàm legacy hiện có, để ba lời gọi
+vị trí 1..3 đều qua alias. Các phép khuấy của sáu bát
+tiếp tục đọc snapshot `old` thật, ghi map `next` mới;
+không mở lỗi ghi đè in-place giai đoạn 20.
+
+**Chứng minh:** Với mọi hoán vị hợp lệ, mỗi `position`
+trong 1..3 được ánh xạ đúng đến ID của vị trí đó.
+Legacy dùng đúng khóa `position` trong bản xem, do đó
+có cùng giá trị đầu vào và SAVE như công thức chuẩn.
+Vì sáu phép khuấy và snapshot `old` đã đúng, trạng thái
+sau giọt đầu chính xác; quy nạp qua 46 giọt chứng minh
+kho `bowls_after_drops` chính xác.
+
+**Kiểm thử:** Giữ bốn hồi quy chuẩn giai đoạn 18, sửa
+riêng tiền xử lý và kiểm tra cấu trúc cần thiết,
+thêm 14 bài thử, giữ bất biến các bản vá 01..08 và
+không thay oracle. Giai đoạn 20 chưa khởi động.
