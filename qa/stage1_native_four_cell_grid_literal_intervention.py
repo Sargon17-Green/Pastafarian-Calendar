@@ -34,6 +34,11 @@ def run(code,raw,mutate):
         [],{},stdin=stdin,stdout=stdout))
     prog.load_code(code)
     prog.create_ip()
+    need(len(prog.ips)==1,"native causal run did not create one IP")
+    vector=prog.ips[0].position.__class__
+    point=vector(TARGET)
+    need(int(prog.space.get(point))==ord("1"),
+         "Native causal variant lower source cell not the pinned literal")
     orig=prog.execute_step
     ticks=[0]
     visited=[0]
@@ -86,10 +91,7 @@ def run(code,raw,mutate):
             "native_lower_literal_visits":visited[0],
             "native_live_literal_edits":edited[0],
             "first_literal":first[0],
-            "restored_source_byte":int(prog.space.get(
-                prog.space.vector_type(TARGET))) if hasattr(prog.space,"vector_type")
-                else int(prog.space.get(prog.ips[0].position.__class__(TARGET)))
-                   if prog.ips else ord("1")}
+            "restored_source_byte":int(prog.space.get(point))}
 
 def main():
     need(os.path.isdir("/four-cell-literal"),
