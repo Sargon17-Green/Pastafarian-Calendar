@@ -9,6 +9,7 @@ use Exporter 'import';
 use Pastafari::WeavingSuffix qw(countWeavingSuffixPolynomial);
 use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
+use Pastafari::WeavingProfileDisk qw(buildWeavingProfileDisk);
 
 our @EXPORT_OK = qw(countWeavingSuffixFactored);
 
@@ -22,12 +23,13 @@ sub _normalize_profile_options ($options = undef) {
         if grep {$_ ne 'profile_engine' && $_ ne 'max_temp_file_bytes'}
                 keys %$options;
     my $engine=$options->{profile_engine} // 'resident';
-    die "交織計數引擎必須是 resident 或 stream\n"
-        if ref($engine) || ($engine ne 'resident' && $engine ne 'stream');
+    die "交織計數引擎必須是 resident、stream 或 stream-indexed\n"
+        if ref($engine) || ($engine ne 'resident' &&
+                            $engine ne 'stream' && $engine ne 'stream-indexed');
     die "常駐矩陣引擎不能指定磁碟容量\n"
         if $engine eq 'resident' && exists $options->{max_temp_file_bytes};
     my $max_bytes;
-    if ($engine eq 'stream') {
+    if ($engine eq 'stream' || $engine eq 'stream-indexed') {
         $max_bytes=$options->{max_temp_file_bytes} // (128*1024*1024);
         die "單一暫存檔容量限制須為 1..1073741824 的整數位元組\n"
             if ref($max_bytes) || "$max_bytes" !~ /\A[1-9][0-9]*\z/
@@ -161,7 +163,25 @@ sub _countWeavingSuffixFactoredState ($lengths, $remaining,
         if (!exists $cache->{$profile_key}) {
             my @reversed=reverse @sizes;
             my @histories;
-            if ($engine eq 'stream') {
+            if ($engine eq 'stream-indexed') {
+                my $store=buildWeavingProfileDisk(\@reversed,$budget);
+                my $disk_stats=$store->diagnostics;
+                $cache->{$profile_key}=$store;
+                if (defined $diagnostics) {
+                    $diagnostics->{profile_disk_builds}++;
+                    $diagnostics->{profile_indexed_builds}++;
+                    $diagnostics->{profile_spool_bytes}=
+                        $disk_stats->{spool_bytes};
+                    $diagnostics->{profile_rows_serialized}+=
+                        $disk_stats->{serialized_rows};
+                    my $prior=$diagnostics->{profile_max_temp_file_bytes}//0;
+                    my $max=$disk_stats->{temp_frontier_bytes};
+                    $max=$disk_stats->{spool_bytes} if
+                        $disk_stats->{spool_bytes}>$max;
+                    $diagnostics->{profile_max_temp_file_bytes}=
+                        $max>$prior ? $max : $prior;
+                }
+            } elsif ($engine eq 'stream') {
                 my %stream_stats;
                 countWeavingsPolynomialStream(\@reversed,\%stream_stats,
                     \@histories,{max_temp_file_bytes=>$budget});
@@ -178,11 +198,23 @@ sub _countWeavingSuffixFactoredState ($lengths, $remaining,
                 countWeavingsPolynomial(\@reversed,undef,\@histories);
             }
             # 建表成功後才發表快取：失敗、超限時不能暴露半成品。
-            $cache->{$profile_key}=\@histories;
+            $cache->{$profile_key}=\@histories
+                if $engine ne 'stream-indexed';
             $diagnostics->{profile_builds}++ if defined $diagnostics;
         }
         my $future_months=$m-$opened;
-        my $histogram=$cache->{$profile_key}[$future_months];
+        my $histogram;
+        if ($engine eq 'stream-indexed') {
+            my $indexed=$cache->{$profile_key};
+            $histogram=$indexed->histogram($future_months);
+            if (defined $diagnostics) {
+                my $state=$indexed->diagnostics;
+                $diagnostics->{profile_index_reads}=$state->{histogram_reads};
+                $diagnostics->{profile_index_hits}=$state->{histogram_hits};
+            }
+        } else {
+            $histogram=$cache->{$profile_key}[$future_months];
+        }
         die "缺少未開啟後綴的精確首次位置直方圖\n"
             if !defined($histogram);
         my $U=0;

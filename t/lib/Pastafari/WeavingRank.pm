@@ -78,7 +78,11 @@ sub rankWeavingPolynomial ($lengths, $word, $stats=undef,
                  future_cache_misses=>($diagnostics{future_cache_misses}//0),
                  reverse_histogram_builds=>($diagnostics{profile_builds}//0),
                  stream_profile_builds=>($diagnostics{profile_disk_builds}//0),
-                 stream_max_temp_file_bytes=>($diagnostics{profile_max_temp_file_bytes}//0));
+                 stream_max_temp_file_bytes=>($diagnostics{profile_max_temp_file_bytes}//0),
+                 indexed_profile_builds=>($diagnostics{profile_indexed_builds}//0),
+                 indexed_spool_bytes=>($diagnostics{profile_spool_bytes}//0),
+                 indexed_reads=>($diagnostics{profile_index_reads}//0),
+                 indexed_hits=>($diagnostics{profile_index_hits}//0));
     }
     return $rank;
 }

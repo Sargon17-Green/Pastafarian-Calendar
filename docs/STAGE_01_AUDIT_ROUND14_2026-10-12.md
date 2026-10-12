@@ -25,3 +25,13 @@
 待兩步的原生 Perl CI 均完成 PASS 後，才能新增明確選項 `profile_engine => 'stream-indexed'` 供 `WeavingSuffixFactor` 讀取磁碟索引。必須將該引擎和有效容量預算納入共用快取命名空間，並在每次反排名呼叫內獨立持有 File::Temp 物件，避免一個呼叫關閉暫存檔後另一個仍試圖使用。預設 resident、現有 stream 的正確性和延伸資源稽核均須維持不變。
 
 請在收到原生完整結果後，把 PASS/FAIL、斷言數、commit、CI 連結補入紀錄，並以實際量測判定是否要擴大到近 5778 日的受控試驗。這一輪並不宣稱最高年長度完成驗證。
+
+## 第三步：可選 `stream-indexed` 引擎（需通過原生回歸）
+
+將選項 `profile_engine => 'stream-indexed'` 加入 `WeavingSuffixFactor`、`WeavingUnrank` 與 `WeavingRank` 的 Stage 1 參考程式。此引擎在首次需要未開啟月份的反序位置分布時建立一次 `WeavingProfileDisk`，之後以相同私有快取持有暫存物件，按剩餘月份階段透過索引檔讀取單一 BigInt 直方圖。
+
+與現有 `resident`、`stream` 模式的快取鍵完全隔離，還包含有效磁碟容量上限，以免不同引擎或不同預算間發生錯誤重用。新引擎對外回傳 BigInt 深複製，不允許直接修改索引中的值。完成整個排名／反排名後，私有快取與它擁有的 File::Temp 物件一同釋放。預設仍是 `resident`，舊串流引擎 `stream` 不變。
+
+`t/43_indexed_suffix_and_rank.t` 測試 47 個月份兩組長度、原始規範後綴計數、共享 HASH 中三種引擎的隔離、小額／大額磁碟配額，以及小空間完整字典序雙向排名。另須在原生 CI 完成之後，才能宣稱此新引擎的語義驗證成功。
+
+注意：索引後綴減少的是所有階段 BigInt 直方圖常駐記憶體，並未限制未開啟月份因子快取、單一 BigInt 位元數、總可用磁碟空間及計算時間。尚未測試 5,778 日上限。正式標記 Stage 1 已完成的狀態不因本研究而改變。

@@ -189,7 +189,11 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef,
                    reverse_histogram_builds => ($factor_diagnostics{profile_builds}//0),
                    stream_profile_builds => ($factor_diagnostics{profile_disk_builds}//0),
                    stream_rows_serialized => ($factor_diagnostics{profile_rows_serialized}//0),
-                   stream_max_temp_file_bytes => ($factor_diagnostics{profile_max_temp_file_bytes}//0));
+                   stream_max_temp_file_bytes => ($factor_diagnostics{profile_max_temp_file_bytes}//0),
+                   indexed_profile_builds => ($factor_diagnostics{profile_indexed_builds}//0),
+                   indexed_spool_bytes => ($factor_diagnostics{profile_spool_bytes}//0),
+                   indexed_reads => ($factor_diagnostics{profile_index_reads}//0),
+                   indexed_hits => ($factor_diagnostics{profile_index_hits}//0));
     }
     return \@word;
 }
