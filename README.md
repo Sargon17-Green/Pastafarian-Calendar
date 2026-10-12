@@ -690,3 +690,26 @@ drop46 yn fewnbynnau allanol; nid yw adeiladwr
 diferion gweledig cynhyrchu yn rhan o'r cam hwn.
 
 `LAST_COMPLETED_STAGE=24` nes PASS Kotlin brodorol.
+
+
+## Ardystiad brodorol Cam 25 — COMPLETE
+
+Ar commit `f724f87341d8073ec7de09807e783c95db3b3ed7` llwyddodd GitHub Actions
+[`38287842044`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38287842044),
+swydd Kotlin `114940381953` gyda Kotlin 1.9.0/JDK 21.
+Gwiriwyd **42 marc** yn uniongyrchol yn log gwirioneddol y swydd.
+Llwyddodd holl atchweliadau Camau 1–24; 8,640 ymholiad
+wedi'u cywiro GREEN, 6,912 hen RED wedi'u cadw,
+1,728 MATCH damweiniol wedi'u cadw, a 12 cylch
+rhifol damweiniol. Llwyddodd 25,920 ymholiad
+BigInteger GREEN gyda 20,736 hen RED a 5,184 MATCH;
+pasiodd guardiau, BOOT/replay, perchnogaeth,
+mewnbynnau naturiol o'r oracl, a phob llwybr blaenorol.
+Gwelwyd `STAGE25_FULL_NATIVE_GREEN`, gyda'r swydd
+Kotlin a swydd cloi enwau ill dwy yn SUCCESS.
+
+**`LAST_COMPLETED_STAGE=25`**. Cam 26
+(`DISCOVERY 13`) yw'r nesaf, heb ei ddechrau.
+Cedwir `LegacyNumericNeighborAdapter.oldNumericNeighborQuestion`
+yn fyw ac yn anghywir. Ni adeiladwyd diferion gweledig
+cynhyrchu yn y cam hwn.
