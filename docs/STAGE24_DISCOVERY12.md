@@ -1,4 +1,4 @@
-# ደረጃ 24/55 — DISCOVERY 12 (EXPECTED_RED)
+# ደረጃ 24/55 — DISCOVERY 12 (COMPLETE / EXPECTED_RED)
 
 ## የታሪክ ስህተት
 
@@ -24,4 +24,15 @@ v -check ./pastafari/discovery12_expected_red_test.v
 v test ./pastafari/discovery12_expected_red_test.v
 ```
 
-ከደረጃ 23 34 የGREEN ፋይሎች እና አዲሱ witness ተደምሮ 35/35 GREEN መሆን አለበት። አራቱ የተለዩ RED assertions በተጠበቀው ሁኔታ ይወድቃሉ። `PATCH 12` የላች ቅደም ተከተል ቦታ ፍለጋ እና የቀጣዩን ID ንባብ ወደ ደረጃ 25 ተዘግቷል። `LAST_COMPLETED_STAGE=23` እስከ native V CI ማረጋገጫ ይቆያል። ደረጃ 25 አልተጀመረም።
+ከደረጃ 23 34 የGREEN ፋይሎች እና አዲሱ witness ተደምሮ 35/35 GREEN መሆን አለበት። አራቱ የተለዩ RED assertions በተጠበቀው ሁኔታ ይወድቃሉ። `PATCH 12` የላች ቅደም ተከተል ቦታ ፍለጋ እና የቀጣዩን ID ንባብ ወደ ደረጃ 25 ተዘግቷል። `LAST_COMPLETED_STAGE=24` ነው። ደረጃ 25 አልተጀመረም።
+
+## የመጨረሻ የV 0.5.2 ማስረጃ
+
+- የተፈተነ commit፦ `c340137f363e7852a5766944c4b3e19877c64802`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274496981
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274496981/artifacts/11758052621
+- `V 0.5.2 7647ce1`፦ `v fmt -verify ./pastafari` PASS፣ 35/35 የቀድሞና አዲስ GREEN የፈተና ፋይሎች PASS።
+- በ`discovery12_expected_red_test.v` ውስጥ አራት `EXPECTED_RED` የcircular successor ምስክሮች በስም ተረጋግጠዋል።
+- `old_next_bowl_fixed_name` የታሪክ ስህተት ተጠብቋል፤ `PATCH 12` አልተጨመረም፣ ደረጃ 25 አልተጀመረም።
+
+**ደረጃ 24 COMPLETE / EXPECTED_RED።**

@@ -201,3 +201,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 24 — DISCOVERY 12 (በnative V CI ማረጋገጫ ላይ)
 
 የታሪክ `old_next_bowl_fixed_name` የቅደም ተከተልን ትርጉም ችላ ብሎ የቋሚ ID ቀጣዩን `queried_id%6+1` ይመልሳል። `LegacyNextBowlAdapter` የተሟላ የPATCH 11 ላች ቅደም ተከተል እንደሆነ ያረጋግጣል እንጂ በላቹ ውስጥ የqueriedId ቦታ አይፈልግም። ለ`orderAt46Latch=[6,5,4,3,2,1]` የ6 ቀጣይ በlegacy 1 ነው፣ ኖርማቲቩ ግን 5 ነው። `calendar_post_stir_next_bowl_spaghetti` 12ቱን ብስለቶች እና ላቹን በእውነት ያከናውናል፣ የመጨረሻው የቋሚ-ID ጥሪ አሁንም ስህተት ነው። የደረጃ 23 `PostStirPatch11` አልተቀየረም። በምስክር ፈተና 720 ቅደም ተከተሎች እና 4320 የID ጥሪዎች የቋሚ ስም ሂደትን ያሳያሉ። የPATCH 12 ለደረጃ 25 ተቀምጧል።
+
+### የደረጃ 24 መዝጊያ — EXPECTED_RED
+
+የመጀመሪያው GitHub Actions run `38274165901` 35 የGREEN ፈተና ፋይሎችን PASS አድርጓል፣ አራቱ የታሰቡ `EXPECTED_RED` የቀጣይ ጎድጓዳ ሳህን ምርጫ ልዩነቶች በተናጠል ተረጋግጠዋል። የnative V formatter ምንም ልዩነት አላገኘም። ጊዜያዊ የformatter ምርመራ ከCI ተወግዶ commit `c340137f363e7852a5766944c4b3e19877c64802` በGitHub Actions run `38274496981` ተፈትሿል፤ ሁለቱም ሥራዎች PASS፣ 35/35 GREEN፣ 4/4 የታሰቡ RED። የማስረጃ ቅርስ `11758052621` ነው። `old_next_bowl_fixed_name` አሁንም በቋሚ ID ላይ `queried_id%6+1` ይመልሳል፤ `PostStirPatch11` ያስቀመጠው `orderAt46Latch` በquery ምርጫ አይነበብም። የ`PATCH 12` የcircular successor መጠገኛ አልተጨመረም። **ደረጃ 24 COMPLETE / EXPECTED_RED።**
