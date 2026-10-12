@@ -1013,3 +1013,15 @@ falsificazione dello stato, regressione delle
 undici patch precedenti e il confine annuale.
 La firma storica dello Stage24 rimane
 **33 PASS e 3 FAIL intenzionali**.
+
+### Certificazione nativa di Stage25
+
+La [run GitHub Actions 38241773207](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38241773207)
+ha concluso **SUCCESS in tutti i 26 job** sul commit
+`2aa1334193fbb4afd9f804e9133ba25ace4ae915`. Stage25 ha riportato **42 PASS e 0 FAIL**.
+La firma Stage24 continua a riportare
+**33 PASS, 3 FAIL intenzionali**; tutte le firme
+Stage01–Stage23 rimangono invariate.
+La cicatrice dell'anno 5777 è riproducibile,
+ma il giudizio normativo include 5778.
+Non è stata anticipata DISCOVERY 13.

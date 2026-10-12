@@ -1285,3 +1285,14 @@ Un wrapper, handler, doppio report,
 validator, tre campi nel contesto,
 metrica e suite nativa dedicata, senza
 anticipare la futura DISCOVERY 13.
+
+### Certificazione nativa compiuta
+
+La run 38241773207 del commit `2aa1334193fbb4afd9f804e9133ba25ace4ae915`
+ha concluso SUCCESS per tutti i ventisei job.
+La PATCH 12 ha superato 42 controlli senza
+alcun FAIL e accetta l'anno di 5778 giorni
+senza mutare il vecchio giudizio 5777.
+Lo Stage24 rimane RED esattamente con tre
+divergenze intenzionali e nessun'altra
+regressione; il catalogo resta bloccato.
