@@ -610,6 +610,10 @@ jobs:
           timeout 35m build_soak/differential/structure --annus-integer \
             2>&1 | tee soak-logs/whole-year-reference.log
           grep -Fx 'GRADUS56_ANNUS_INTEGER=4244/4244_PASS YEAR=5000' soak-logs/whole-year-reference.log
+          timeout 35m build_soak/differential/structure --annus-altero \
+            2>&1 | tee soak-logs/whole-year-alternate-c.log
+          grep -F 'GRADUS56_ANNUS_ALTERO=PASS YEAR=5000 C_OFFSET=1 DAYS=' \
+            soak-logs/whole-year-alternate-c.log
 
       - name: Servare logs differentialia
         if: always()

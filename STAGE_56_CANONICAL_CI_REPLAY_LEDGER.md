@@ -186,3 +186,13 @@ Hoc scriptum est in commit praeparto; non est testimonium CI completum.
 - `GRADUS56_TERMINI_REFERENCE=PASS ANNI=5 CASUS=712`, `GRADUS56_TERMINI_INVERSI=PASS ANNI=5 CASUS=712 FACADE=15/15_PASS`.
 - Nova via `--annus-integer` examinat omnes 4244 dies anni 5000 pro `calculationDay=FOUNDATION_DAY_OLD` cum structura independenti saved-sum et cache calido.
 - GCC/Clang differentialia et praevolatus idem instrumentum in modo separato currunt; exitus huius mutationis NON PRAESUMITUR.
+
+## Comprobatio vigiliae exhaurientis die XII Octobris MMXXVI
+
+- Commit cuius codex vere probatus est: `5d1a715cc37c16d7a038926345dd96d97f0a1573`.
+- Vigilia plena [38227036981](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38227036981): **20/20 success**, `VIGILIA_SOAK=PASS`, `STATUS_POST_RUN=SOAK_GREEN`.
+- Praevolatus [38227036925](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38227036925) `success`; nominum custodia [38227037013](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38227037013) `success`.
+- Testis totius anni 5000 ad `c=FOUNDATION_DAY_OLD`: `4244/4244_PASS` in GCC et Clang, quinque campis singulorum dierum adversus structuram test-only saved-sum comparatis.
+- Termini mensium/segmentorum in utroque ordine 712/712, facies publica 15/15, ordo invocationum 28/28.
+- **Emendatio nondum comprobata in novo commit:** additur exhauriens annus 5000 ad `c=FOUNDATION_DAY_OLD+1`; idem manager primum cache prioris calculationis implet, deinde quamlibet diem adversus reference indepentem et cache frigidum verificat. Eius success non ex priori vigilia infertur.
+- Documenta huius sectionis scribuntur post commit probatum: haec mutatio documentationis et novi testis novum SHA facit. Main intactus et Gradus 57 non apertus.

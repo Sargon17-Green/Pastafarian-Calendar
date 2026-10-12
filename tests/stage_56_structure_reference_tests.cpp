@@ -528,12 +528,77 @@ void exigeAnnumIntegrumPerSingulosDies() {
               << "/" << n << "_PASS YEAR=" << y.number << '\n';
 }
 
+
+void exigeAnnumIntegrumAlteroDieCalculi() {
+    // Dies calculationis proximus, non alias diei-quaesiti specimen:
+    // totus annus cum reference saved-sum independenter construitur.
+    const Big fundamentum = pastafari::FOUNDATION_DAY_OLD;
+    const Big c = fundamentum + 1;
+    NormativeOracle oraculum(false);
+    const Year y = oraculum.year5000(c);
+    const Exspectatio expected = construeIndependenter(oraculum, c, y);
+    exigeLegesStructurae(expected);
+    const Big first = y.openGateDay + 1;
+    const Big length = y.closeGateDay - y.openGateDay;
+    exige(y.number == 5000 && length >= 252 && length <= 5778,
+          "alter dies calculationis annum 5000 invalidum dedit");
+
+    BaseMonsterManager manager;
+    // Primus calculi dies priorem fingerprint eiusdem numeri anni condit.
+    // Reusus cache alterius calculationis diem contaminare non debet.
+    const auto praecedens =
+        manager.executeFinalIntegrationStage56(fundamentum, fundamentum);
+    exige(praecedens.ready && praecedens.status == "GREEN" &&
+          praecedens.targetYear.number == 5000,
+          "praeparatio cache priori die calculationis defecit");
+
+    const std::size_t n = length.convert_to<std::size_t>();
+    std::size_t numerus = 0;
+    for (std::size_t i = 0; i < n; ++i) {
+        const Big t = first + Big{i};
+        const auto actual = manager.executeFinalIntegrationStage56(c, t);
+        const std::string label = "annus 5000 calculi alterius dies "
+            + std::to_string(i + 1);
+        exige(actual.ready && actual.status == "GREEN",
+              label + ": integratio non viridis");
+        comparaStructuram(actual, expected, label);
+        comparaDiem(actual.result, diesExReference(expected, t), label);
+        if (i == 0) {
+            exige(!actual.guardedCacheHit,
+                  "cache alieni diei calculationis falso adhibitus");
+            const auto recens =
+                BaseMonsterManager{}.executeFinalIntegrationStage56(c, t);
+            exige(recens.ready && recens.status == "GREEN" &&
+                  !recens.guardedCacheHit && !recens.guardedCacheRejected,
+                  "manager alterius c recens non frigidus");
+            comparaStructuram(recens, expected, label + ": recens");
+            comparaDiem(recens.result, actual.result,
+                        label + ": cache pristinus contra frigidum");
+        } else {
+            exige(actual.guardedCacheHit && !actual.guardedCacheRejected,
+                  label + ": cache intra idem c/annum non calidus");
+        }
+        ++numerus;
+        if (numerus % 512 == 0 || numerus == n) {
+            std::cout << "GRADUS56_ANNUS_ALTERO_PROGRESS="
+                      << numerus << "/" << n << '\n' << std::flush;
+        }
+    }
+    exige(numerus == n, "annus alter non omnes dies consumpsit");
+    std::cout << "GRADUS56_ANNUS_ALTERO=PASS YEAR=" << y.number
+              << " C_OFFSET=1 DAYS=" << numerus << '\n';
+}
+
 } // namespace
 
 int main(int argc, char** argv) {
     try {
         if (argc == 2 && std::string(argv[1]) == "--annus-integer") {
             exigeAnnumIntegrumPerSingulosDies();
+            return 0;
+        }
+        if (argc == 2 && std::string(argv[1]) == "--annus-altero") {
+            exigeAnnumIntegrumAlteroDieCalculi();
             return 0;
         }
         exige(argc == 1, "argumenta testis ignota");

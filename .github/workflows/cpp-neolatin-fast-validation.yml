@@ -92,6 +92,10 @@ jobs:
             2>&1 | tee logs_stage56_praeflight/whole-year-reference.log
           grep -Fx 'GRADUS56_ANNUS_INTEGER=4244/4244_PASS YEAR=5000' \
             logs_stage56_praeflight/whole-year-reference.log
+          timeout 35m build_stage56_praeflight/stage_56_structure_reference_tests --annus-altero \
+            2>&1 | tee logs_stage56_praeflight/whole-year-alternate-c.log
+          grep -F 'GRADUS56_ANNUS_ALTERO=PASS YEAR=5000 C_OFFSET=1 DAYS=' \
+            logs_stage56_praeflight/whole-year-alternate-c.log
           echo 'PRAEVOLATUS_GRADUS56=PASS'
 
       - name: Servare evidentiam etiam in defectu
