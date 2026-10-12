@@ -670,3 +670,23 @@ gyda'r swydd Kotlin a swydd cloi enwau yn SUCCESS.
 Cedwir `oldNumericNeighborQuestion` yn fyw ac
 yn anghywir. Nid oes adeiladwr diferion gweledig
 cynhyrchu yn y cam hwn.
+
+
+## Cam 25 — PATCH 12: gwir gymydog diferyn 46
+
+Mae `PositionalNeighborPatchWrapper.patch` yn galw'r
+hen caller rhifol `oldNumericNeighborQuestion` ar
+giplun cyn unrhyw gywiriad. Mae'n cadw'r canlyniad
+anghywir; yna, gan ailddefnyddio'r un permutation
+PATCH 08 o ddiferyn 46, mae'n dewis y bowl nesaf
+yn ôl **safle** ac yn ailgyfrifo'r first answer a'r
+direction â'r fformiwlâu normadol.
+
+Mae'r profion yn mynnu 8,640 GREEN gyda 6,912
+legacy RED a 1,728 MATCH wedi'u cadw; 25,920
+BigInteger GREEN gyda 20,736 legacy RED, a holl
+at chweliadau Camau 1–24. Mae bowls terfynol a
+drop46 yn fewnbynnau allanol; nid yw adeiladwr
+diferion gweledig cynhyrchu yn rhan o'r cam hwn.
+
+`LAST_COMPLETED_STAGE=24` nes PASS Kotlin brodorol.
