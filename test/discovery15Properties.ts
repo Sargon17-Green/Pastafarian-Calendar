@@ -34,7 +34,7 @@ for(const side of [1n,-1n] as const){
     entry.predecessorWrites===58&&
     entry.preceding.predecessorSharedWrites===58&&
     entry.preceding.preceding.preceding.preceding.preceding.latchCaptures===1&&
-    entry.preceding.preceding.preceding.preceding.preceding.historical.latestSource==="STIR_12"&&
+    entry.preceding.preceding.preceding.preceding.preceding.preceding.historical.latestSource==="STIR_12"&&
     entry.preceding.correctedRank===expectedRank&&
     entry.preceding.legacyShortOnlyRank===expectedRank,
     "genuine Foundation signed gate question and complete chain");
@@ -79,7 +79,7 @@ function verifyInjected(v:readonly bigint[],bowls:readonly bigint[],kind:"varied
    old.preceding.preceding.preceding.preceding.preceding.afterDropBowls.every((b,j)=>b===drops.bowls[j])&&
    old.preceding.preceding.preceding.preceding.preceding.orderAt46Latch.join(",")===order.join(",")&&
    old.preceding.preceding.preceding.preceding.preceding.sharedMemoryWrites===58&&
-   old.preceding.preceding.preceding.preceding.preceding.historical.latestSource==="STIR_12"&&
+   old.preceding.preceding.preceding.preceding.preceding.preceding.historical.latestSource==="STIR_12"&&
    out.historicalGateDay===F-(41n+expected)&&
    out.actualPredecessorCalls===1&&out.predecessorSharedWrites===58n&&
    !variantContexts.has(out.context)&&

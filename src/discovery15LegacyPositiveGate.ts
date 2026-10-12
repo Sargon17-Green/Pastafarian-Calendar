@@ -73,7 +73,7 @@ export class Discovery15PositiveSideGateHandler {
            !Array.isArray(row)||row.length!==5||
            Array.from({length:5},(_,j)=>typeof row[j]!=="bigint").some(Boolean))||
          !Array.isArray(q.startBowls)||q.startBowls.length!==6||
-         q.startBowls.some(x=>typeof x!=="bigint"))
+         q.startBowls.some((x:unknown)=>typeof x!=="bigint"))
         throw new MonsterValidationError("प्रत्येक gate प्रश्नासाठी 46 drops/stones आणि सहा वाट्या आवश्यक");
     }
 
@@ -95,7 +95,7 @@ export class Discovery15PositiveSideGateHandler {
          preceding.selectionMode!=="SHORT_LEGACY"||
          preceding.preceding.preceding.preceding.legacyModuloCalls!==1||
          preceding.preceding.preceding.preceding.preceding.preceding.latchCaptures!==1||
-         preceding.preceding.preceding.preceding.preceding.preceding.historical.latestSource!=="STIR_12")
+         preceding.preceding.preceding.preceding.preceding.preceding.preceding.historical.latestSource!=="STIR_12")
         throw new MonsterStageError("Stage29 ची पूर्ण 58-write chain आवश्यक");
       const rank=preceding.correctedRank;
       if(rank<1n||rank>922n)

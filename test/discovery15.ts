@@ -66,7 +66,7 @@ for(const k of [1n,2n,3n,4n,-1n,-2n,-3n,-4n]){
     gap.preceding.preceding.preceding.correctedRank===rank&&
     gap.preceding.preceding.preceding.preceding.legacyModuloCalls===1&&
     gap.preceding.preceding.preceding.preceding.preceding.latchCaptures===1&&
-    gap.preceding.preceding.preceding.preceding.preceding.historical.latestSource==="STIR_12"&&
+    gap.preceding.preceding.preceding.preceding.preceding.preceding.historical.latestSource==="STIR_12"&&
     gap.preceding.context!==out.context&&
     Object.isFrozen(gap)&&values[i]!.startBowls.every((v,j)=>v===initialBowls[i]![j]),
     "genuine Stage29 predecessor and canonical positive-side computed question");
