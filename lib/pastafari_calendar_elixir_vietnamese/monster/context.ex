@@ -5,7 +5,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Context do
   Nhãn ngày và khoảng cách đi qua các bản vá đã hoàn thành.
   Bảng đá đã qua bản vá 04 và bảy giọt ẩn qua bản vá 05.
   Giọt, hoán vị và ba nguồn rót đã qua bản vá 09.
-  Bộ đọc legacy vẫn hiện diện, nhận bản xem alias riêng.
+  Sáu phép khuấy hiện đọc map đã cập nhật, phát hiện 10.
   Mỗi ngữ cảnh sở hữu dữ liệu của riêng mình.
   """
 

@@ -233,10 +233,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
     end
   end
 
-  test "mã nguồn giữ lookup legacy cũ và dùng alias cho cả ba nguồn rót" do
+  test "mã nguồn giữ alias rót và chuyển khuấy qua legacy in-place" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = Path.join(root, "legacy_pour_positions.ex") |> File.read!()
     calculator = Path.join(root, "bowl_drop_calculator.ex") |> File.read!()
+    legacy_stir = Path.join(root, "legacy_in_place_stir.ex") |> File.read!()
     patch = Path.join(root, "bowl_alias_patch.ex") |> File.read!()
     dispatcher = Path.join(root, "dispatcher.ex") |> File.read!()
 
@@ -244,8 +245,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
     assert calculator =~ "BowlAliasPatch.pour("
     assert patch =~ "LegacyPourPositions.pour(bowl_alias, drop, stone, index, position)"
     assert patch =~ "Map.put(bowl_alias, position, Map.fetch!(bowls_old, id))"
-    assert calculator =~ "Map.put(next, id, updated)"
-    assert calculator =~ "Map.fetch!(old, id)"
+    assert legacy_stir =~ "Map.put(current, id, updated)"
+    assert legacy_stir =~ "Map.fetch!(source, id)"
     assert dispatcher =~ "BowlDropCalculator.apply_all("
     refute legacy =~ "bowl_alias"
     assert File.exists?(Path.join(root, "bowl_alias_patch.ex"))

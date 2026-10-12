@@ -218,24 +218,25 @@ defmodule PastafariCalendarElixirVietnamese.Stage19Patch09Test do
     end
   end
 
-  test "bằng chứng nguồn: giữ nguyên Map.fetch legacy và ủy quyền qua alias" do
+  test "bằng chứng nguồn: giữ alias rót và thực thi khuấy in-place lịch sử" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = Path.join(root, "legacy_pour_positions.ex") |> File.read!()
     patch = Path.join(root, "bowl_alias_patch.ex") |> File.read!()
     calculator = Path.join(root, "bowl_drop_calculator.ex") |> File.read!()
+    legacy_stir = Path.join(root, "legacy_in_place_stir.ex") |> File.read!()
 
     assert legacy =~ "Map.fetch!(bowls_old, position)"
     refute legacy =~ "BowlAliasPatch"
     assert patch =~ "Map.put(bowl_alias, position, Map.fetch!(bowls_old, id))"
     assert patch =~ "LegacyPourPositions.pour(bowl_alias, drop, stone, index, position)"
     assert calculator =~ "BowlAliasPatch.pour("
-    assert calculator =~ "Map.fetch!(old, id)"
-    assert calculator =~ "Map.put(next, id, updated)"
+    assert legacy_stir =~ "Map.fetch!(source, id)"
+    assert legacy_stir =~ "Map.put(current, id, updated)"
     refute calculator =~ "LegacyPourPositions.pour("
     refute patch =~ "NormativeReference"
   end
 
-  test "chưa bắt đầu phần khuấy in-place hay lịch hoàn chỉnh" do
+  test "đã phát hiện lỗi khuấy in-place nhưng lịch vẫn chưa tích hợp" do
     f = Ref.foundation_day()
     ctx = Calendar.bootstrap_context(f, f)
 

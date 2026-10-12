@@ -698,3 +698,29 @@ old cho sáu phép khuấy. Khóa tên chuẩn PASS.
 Trạng thái Stage19/55 là `GREEN`, đã xác minh.
 Tiếp theo Stage20 `DISCOVERY 10` về ghi đè bát in-place;
 chưa bắt đầu.
+
+## Giai đoạn 20 — Phát hiện 10: ghi đè bát khi khuấy
+
+Các giai đoạn trước đã sửa nguồn rót và thứ tự sáu ID.
+Trong phát hiện 10, ba nguồn rót vẫn đọc đúng snapshot
+`old` qua `BowlAliasPatch`, nhưng đường khuấy lịch sử
+`LegacyInPlaceStir.run` nhận map `current` và thực hiện
+tuần tự sáu vị trí. Ngay khi tính một ID, nó
+`Map.put(current,id,updated)`, rồi đưa map mới ấy cho lần
+tiếp theo. Elixir có map bất biến, song cách truyền map
+đã cập nhật tái tạo chính xác lỗi in-place: nguồn lân cận
+của các vị trí sau không còn là snapshot đầu vòng.
+
+`LegacyInPlaceStir.compute_one` giữ công thức khuấy và
+giao diện riêng có thể gọi với source. Vị trí 1 còn đúng
+vì chưa có ghi đè; vị trí 2 và các vị trí tiếp theo bị
+nhiễm do đọc source đã thay, ngay cả khi hoán vị là đồng nhất.
+Kết quả sau 46 giọt khác oracle nhưng các bước SAVE, đá,
+giọt, hoán vị và rót còn chính xác. Không có trạng thái
+ngữ nghĩa toàn cục.
+
+Giai đoạn 21, `PATCH 10`, phải giữ module lịch sử và
+cung cấp `vaultOld` cố định cho mọi lần gọi
+`compute_one`, lưu sáu kết quả trong `pending`,
+chỉ cập nhật kho bát sau khi tính xong cả sáu vị trí.
+Không triển khai bản vá này tại giai đoạn 20.

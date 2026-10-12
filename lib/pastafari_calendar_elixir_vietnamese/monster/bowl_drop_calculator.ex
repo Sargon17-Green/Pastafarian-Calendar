@@ -1,19 +1,17 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.BowlDropCalculator do
   @moduledoc """
-  Bản vá 09 ánh xạ ba nguồn rót từ vị trí sang ID bát thật.
+  Phát hiện 10 đưa lỗi ghi đè tuần tự vào khuấy sáu bát.
 
-  BowlAliasPatch cung cấp một bản xem rót riêng và vẫn gọi
-  LegacyPourPositions thực. Các phép khuấy của sáu vị trí
-  luôn đọc snapshot old gốc và ghi map next độc lập;
-  chưa mở lỗi in-place của DISCOVERY 10.
+  BowlAliasPatch tiếp tục vá đúng ba nguồn rót và gọi legacy.
+  LegacyInPlaceStir tính rồi thay ngay bát của từng vị trí,
+  khiến những vị trí sau đọc giá trị đã bị cập nhật; chưa
+  dùng vaultOld hay pending của bản vá 10.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     BowlAliasPatch,
-    SaveManager
+    LegacyInPlaceStir
   }
-
-  @stir_stones [1, 2, 3, 4, 5, 1]
 
   def apply_all(initial_bowls, visible, orders, stones)
       when is_map(initial_bowls) and is_map(visible) and
@@ -38,34 +36,11 @@ defmodule PastafariCalendarElixirVietnamese.Monster.BowlDropCalculator do
       {position, value}
     end)
 
-    Enum.reduce(1..6, %{}, fn position, next ->
-      id = Enum.at(order, position - 1)
-      prev_id = Enum.at(order, wrap1(position - 1) - 1)
-      next_id = Enum.at(order, wrap1(position + 1) - 1)
-      stone_kind = Enum.at(@stir_stones, position - 1)
-
-      mix =
-        Map.fetch!(old, id) +
-          2 * Map.fetch!(old, prev_id) +
-          3 * Map.fetch!(old, next_id) +
-          Map.get(pours, position, 0) +
-          drop +
-          elem(row, stone_kind - 1)
-
-      updated =
-        SaveManager.calculate(
-          mix * mix +
-            5 * Map.fetch!(old, prev_id) * Map.fetch!(old, next_id) +
-            index * position
-        )
-
-      Map.put(next, id, updated)
-    end)
+    LegacyInPlaceStir.run(old, pours, drop, row, order, index)
   end
 
   def step(_old, _drop, _order, _stones, _index) do
     raise ArgumentError, "đầu vào khuấy bát không hợp lệ"
   end
 
-  defp wrap1(position), do: rem(position + 11, 6) + 1
 end

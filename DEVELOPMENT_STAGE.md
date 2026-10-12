@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=19
-CURRENT_KIND=PATCH
-CURRENT_PATCH=09
+CURRENT_STAGE=20
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=10
 LAST_COMPLETED_STAGE=19
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyPourPositions đọc bowls_old[position]; BowlAliasPatch tạo bản xem riêng với bowlAlias[position]=old[order[position]] cho ba phép rót, gọi thật legacy và giữ old bất biến cho sáu phép khuấy.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..09; thêm LegacyInPlaceStir chạy tuần tự sáu bát, mỗi vị trí đọc current đã thay qua Map.put; ba nguồn rót qua BowlAliasPatch đúng nhưng khuấy đọc sai snapshot.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_19_PATCH_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_20_PENDING
+GIT_HISTORY_MUTATED=STAGE_20_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=223
-CI_FAILURES=0
+CI_TESTS=STAGE_20_PENDING
+CI_FAILURES=STAGE_20_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -367,3 +367,16 @@ be1638f46b2190d617af0378a61b077bda10bf32.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38242471594
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38242471534
 Giai đoạn 19 đóng GREEN; tiếp theo giai đoạn 20 DISCOVERY 10.
+
+Giai đoạn 20 DISCOVERY 10 làm lộ lỗi in-place khi cập nhật sáu bát.
+LegacyInPlaceStir.compute_one chứa nguyên công thức chuẩn khuấy,
+nhưng run truyền map current vừa Map.put ở vị trí trước vào
+compute_one cho vị trí sau. Ba phép rót vẫn được tính trước
+và thông qua BowlAliasPatch chính xác. Không thêm vaultOld
+hoặc pending của PATCH 10, không khuấy 12 lần sau giọt 46.
+Bộ tính được gọi thật từ BowlDropCalculator.step cho cả 46 giọt.
+16 kiểm thử mới: 12 kiểm soát, bốn hồi quy chuẩn cố ý đỏ.
+Các bài chuẩn của giai đoạn 18-19 giữ nguyên kỳ vọng,
+nên phép so sánh số bát toàn chặng có thể đỏ thêm đúng
+do lỗi nhiễm hiện tại. Tổng dự kiến 239 kiểm thử.
+LAST_COMPLETED_STAGE giữ 19 trước CI và kiểm tra tên.

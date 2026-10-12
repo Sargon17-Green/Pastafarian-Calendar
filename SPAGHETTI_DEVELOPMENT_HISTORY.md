@@ -625,3 +625,32 @@ blob SHA `6ab77efeb07c74fb88fe1d62ad04c523d23c3c80`,
 oracle test-only vẫn nguyên blob SHA
 `be1638f46b2190d617af0378a61b077bda10bf32`.
 Kết thúc giai đoạn 19 GREEN, chưa bắt đầu DISCOVERY 10.
+
+## Giai đoạn 20 — Phát hiện 10: ô nhiễm in-place giữa các vị trí
+
+**Di sản mới:** `LegacyInPlaceStir.compute_one` chứa
+công thức chuẩn của mỗi lần khuấy sáu bát, kể cả các ID
+láng giềng từ thứ tự hoán vị, SAVE và loại đá tương ứng.
+`LegacyInPlaceStir.run` thực hiện `Enum.reduce`
+qua 1..6, đọc map `current`, rồi lập tức
+`Map.put(current,id,updated)`. Dữ liệu vừa được cập nhật
+được chuyển vào lần khuấy tiếp theo. Đây là lỗi in-place
+về mặt ngữ nghĩa dù cấu trúc dữ liệu Elixir bất biến.
+
+**Biên lỗi:** `BowlAliasPatch` vẫn cung cấp ba giá trị
+rót từ ID chính xác trên snapshot ban đầu của bước.
+Dữ liệu đầu vào, giọt nhìn thấy, vị trí hoán vị,
+hệ số khuấy và thứ tự ghi ID không đổi. Chỉ nguồn đọc
+của vòng khuấy thứ 2..6 bị nhiễm giá trị cập nhật.
+
+**Điều phải sửa ở giai đoạn 21:** Bảo tồn LegacyInPlaceStir,
+tạo `vaultOld` từ trạng thái đầu vòng; mỗi vị trí tính bằng
+`compute_one(vaultOld,...)`, ghi kết quả vào `pending`,
+và chỉ sau sáu phép tính mới hợp nhất vào kho bát.
+Chưa thực hiện vault hay pending trong giai đoạn này.
+
+**Chứng cứ:** 16 bài kiểm thử mới gồm bước đầu vẫn chuẩn,
+đọc giá trị bị ghi đè ở vị trí thứ hai, mô phỏng vòng 6,
+nguồn rót chính xác, miền SAVE, 46 giọt và nhiều ngữ cảnh.
+Bốn hồi quy chuẩn mới cố ý đỏ. Giữ các kiểm thử chuẩn cũ
+dù ảnh hưởng dây chuyền tạo thêm lỗi mong đợi.
