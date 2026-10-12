@@ -44,3 +44,24 @@ yn erbyn yr oracl gwreiddiol ac yna:
 
 Dim ond ar ôl `STAGE19_FULL_NATIVE_GREEN` a PASS GitHub Actions
 gellir symud `LAST_COMPLETED_STAGE` i 19.
+
+
+## Ardystiad brodorol Cam 19 — COMPLETE
+
+Ar commit `5e7f405f6f3f9750268c20f1ef2bdb3b43aa38ec` llwyddodd GitHub Actions
+[`38261542258`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38261542258),
+swydd Kotlin `114853018881`, ar Kotlin 1.9.0/JDK 21.
+Gwiriwyd **39 marc** yn uniongyrchol yn log gwirioneddol y swydd.
+Pasiodd holl atchweliadau Camau 1–18; 720 o arllwysiadau
+cywir, 714 nam legacy RED, 6 MATCH damweiniol a 1,800
+cell legacy anghywir; 46 tro gwrthdro, union a naturiol yn
+GREEN yn erbyn yr oracl; 4,320 tyst BigInteger GREEN gyda
+4,284 legacy RED, 36 MATCH ac 10,800 cell anghywir.
+Pasiodd BOOT, replay, metrigau, perchnogaeth a'r llwybrau blaenorol.
+Gwelwyd `STAGE19_FULL_NATIVE_GREEN`, gyda swydd cloi enwau a
+swydd Kotlin ill dwy yn `SUCCESS`.
+
+**`LAST_COMPLETED_STAGE=19`**. Cam 20 (`DISCOVERY 10`)
+yw'r nesaf, heb ei ddechrau. Cedwir y nodwedd mewnbynnau
+diferion gweledig allanol a'r gwarchodaeth rhag alias in-place;
+nid yw adeiladwr diferion gweledig yn rhan o'r cam hwn.
