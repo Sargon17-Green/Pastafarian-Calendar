@@ -48,6 +48,6 @@ fn test_discovery09_control_positions_four_to_six_have_zero_pour() {
 }
 
 fn test_discovery09_control_previous_permutation_patch() {
-	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6,
-		5, 4, 3, 2, 1]
+	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6, 5, 4, 3, 2,
+		1]
 }

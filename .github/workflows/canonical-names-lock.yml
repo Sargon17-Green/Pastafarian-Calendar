@@ -51,15 +51,6 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
-      - name: Inspect native V stage 18 formatting — temporary
-        shell: bash
-        run: |
-          set -euo pipefail
-          v fmt -w ./pastafari/legacy_pours.v
-          v fmt -w ./pastafari/discovery09_witness_test.v
-          v fmt -w ./pastafari/discovery09_expected_red_test.v
-          v fmt -w ./pastafari/monster_base.v
-          git --no-pager diff -- ./pastafari/legacy_pours.v ./pastafari/discovery09_witness_test.v ./pastafari/discovery09_expected_red_test.v ./pastafari/monster_base.v
       - name: Verify V version and source formatting
         shell: bash
         run: |
