@@ -624,3 +624,25 @@ oracl prawf yng nghynhyrchu. Nid oes adeiladwr
 diferion gweledig cynhyrchu o hyd.
 
 `LAST_COMPLETED_STAGE=22` nes cwblhau CI brodorol.
+
+
+## Ardystiad brodorol Cam 23 — COMPLETE
+
+Ar commit `d9623a9eeb5b39c41bbfc07b055099e29903e0d5` pasiodd GitHub Actions
+[`38278498810`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38278498810),
+swydd Kotlin `114909725837`, gyda Kotlin 1.9.0/JDK 21.
+Gwiriwyd **40 marc** yn uniongyrchol yn log gwirioneddol y swydd:
+holl Gamau 1–22 yn PASS; 720/720 canlyniad PATCH 11
+GREEN, 720/720 RED etifeddol wedi'u cadw, 8,640
+stir wedi'u gwirio â'r oracl ffynhonnell gwreiddiol;
+4,320 achos BigInteger GREEN, 4,320 hen RED, 51,840
+stir annibynnol; rhifau anferth, guards, BOOT/replay,
+perchnogaeth a'r holl lwybrau blaenorol yn PASS.
+Gwelwyd `STAGE23_FULL_NATIVE_GREEN`, a gorffennodd
+y swydd Kotlin a'r swydd cloi enwau yn SUCCESS.
+
+**`LAST_COMPLETED_STAGE=23`**. Cam 24
+(`DISCOVERY 12`) yw'r nesaf, heb ei ddechrau.
+Mae `oldCachedPostStir12` yn aros yn fyw ac yn
+anghywir. Mae mewnbynnau bowls ôl-46 yn dal yn
+allanol; nid oes adeiladwr diferion gweledig cynhyrchu.
