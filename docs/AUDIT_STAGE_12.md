@@ -36,3 +36,28 @@ Mae `run-stage12-tests.sh` yn ail-redeg Camau 1–11 yn gyntaf. Yna:
 
 **Statws tan dystysgrif CI:** `EXPECTED_RED`, nid yw Cam 12 wedi'i
 ardystio eto. `LAST_COMPLETED_STAGE=11`.
+
+
+## Ardystiad CI brodorol — COMPLETE
+
+**Mae'r adran hon yn disodli'r statws PENDING uchod.**
+
+- Gangen `Kotlin+Cymraeg`, commit ffynhonnell `7fac959fc06edb8c59d0b7f0105fbf91151da87b`.
+- GitHub Actions `38224902493`, swydd `114729897099` — **SUCCESS**.
+- Kotlin 1.9.0, JDK 21, `run-stage12-tests.sh`, oracl a ffynonellau gwreiddiol.
+- Cadarnhawyd 30 marc yn uniongyrchol yn log y swydd.
+- PASS: pob atchweliad Camau 1–11, gan gynnwys `STAGE11_NATIVE_GREEN`.
+- PASS: `STAGE12_VISIBLE_PROBE_MATCH_1`, `STAGE12_HIDDEN_SLOT_0_EXPECTED_RED`,
+  `STAGE12_HIDDEN_SLOT_-2_EXPECTED_RED`, `STAGE12_HIDDEN_SLOT_-6_EXPECTED_RED`,
+  `STAGE12_EXPECTED_RED_3`, `STAGE12_MISSING_HISTORY_MATCH_0`.
+- PASS: `STAGE12_PRODUCTION_HIDDEN_RED_3`, `STAGE12_GUARDS_REPLAY_PASS`,
+  `STAGE12_DIFFERENT_DAYS_OWNERSHIP_PASS`, `STAGE12_EARLIER_ROUTES_PASS`.
+- PASS: `STAGE12_BIGINT_INDEPENDENT_GREEN_35`,
+  `STAGE12_BIGINT_PATCH04_STONES_GREEN_175`,
+  `STAGE12_BIGINT_MISSING_HIDDEN_RED_15`, `STAGE12_STRICT_RED_CONFIRMED`,
+  `STAGE12_NATIVE_EXPECTED_RED_COMPLETE`.
+
+Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38224902493
+
+**Dyfarniad:** Cam 12 wedi'i gwblhau fel `EXPECTED_RED`.
+`LAST_COMPLETED_STAGE=12`. Cedwir y graith visible-only; nid oes `priorPatch` na chod Cam 13.

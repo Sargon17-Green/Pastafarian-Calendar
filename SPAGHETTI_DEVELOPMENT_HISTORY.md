@@ -299,3 +299,8 @@ Ar commit `326c843d2fb8a7f5c070362113a3284c4cbe6aac` llwyddodd swydd `native-sta
 ## Cam 12 — DISCOVERY 06: graith legacyPrior weledig
 
 Mae'r helper hanesyddol yn darllen `dropStore[i-back]` o storfa weledig yn unig. Nid oes ganddo drosiad o slotiau annhebyg i bositif i hidden1..hidden7. Yn y profion `i=1,back=1,3,7` ceir y slotiau 0,-2,-6 a thair anghysondeb. Nid yw'r algorithm diferion gweledig na `priorPatch` wedi'i weithredu. Yn y llwybr cynhyrchu, mae probe positif i=2/back=1 yn profi galwad wirioneddol i'r helper. Ceir profion perchnogaeth, BigInteger ac atchweliadau gan gynnwys PATCH 05. Bydd ardystiad CI cyn symud `LAST_COMPLETED_STAGE`.
+
+
+### Cam 12 — ardystiad JVM brodorol llawn
+
+Ar commit `7fac959fc06edb8c59d0b7f0105fbf91151da87b` llwyddodd swydd GitHub Actions `114729897099` (rhediad `38224902493`) gyda Kotlin 1.9.0 a JDK 21. Gwiriwyd 30 marc o log y swydd: yr holl atchweliadau Camau 1–11, tri slot hanes cudd anghywir `0,-2,-6`, profi positif slot 1, 35 cyfrifiad BigInteger annibynnol, 175 cydran carreg, 15 tyst coll ar bum pâr diwrnod a methiant strict disgwyliedig. `LAST_COMPLETED_STAGE=12`; ni ddechreuwyd Cam 13.
