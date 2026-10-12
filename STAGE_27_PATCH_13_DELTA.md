@@ -81,3 +81,28 @@ Chỉ đóng `LAST_COMPLETED_STAGE=27` sau khi
 GitHub Actions CI chạy được 354/354 và Canonical
 Names Lock PASS trên commit triển khai; sau đó
 chạy lại cả hai trên commit đóng.
+
+## Kết quả CI và bằng chứng đóng
+
+- Commit triển khai:
+  `c5e1862eb710a8c8d0bee23b9376a108587031dc`.
+- Elixir 1.18.5 / OTP 27, biên dịch 44 tệp .ex.
+- **354 bài kiểm thử, 0 lỗi, 0 cảnh báo biên dịch.**
+- Bốn hồi quy chuẩn Stage26 đạt mà không sửa expected.
+- 18 bài Stage27 mới PASS, gồm hướng tiến/lùi,
+  n=M, n=1, M-1, M-2, M-3, vùng thừa n=3,
+  dữ liệu 2048-bit, gọi lặp và đồng thời.
+- Canonical Names Lock PASS độc lập.
+- LegacyBiasedPick SHA không đổi:
+  `94816d3aac30296eeded3abdd0bfaea5f46614ae`.
+- Oracle test-only SHA không đổi:
+  `be1638f46b2190d617af0378a61b077bda10bf32`.
+- Bộ tìm ID legacy và bộ nhớ legacy Stage24/22 không đổi.
+- `LAST_COMPLETED_STAGE=27`, `EXPECTED_REPOSITORY_STATE=GREEN`.
+- Không chỉnh main, không triển khai wideDetour Stage28.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38280022089
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38280022253
+
+Giai đoạn 27 đóng GREEN đã xác minh.
+Giai đoạn tiếp: 28/55 DISCOVERY 14, chưa bắt đầu.

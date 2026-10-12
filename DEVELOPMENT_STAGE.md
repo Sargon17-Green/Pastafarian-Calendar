@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=27
 CURRENT_KIND=PATCH
 CURRENT_PATCH=13
-LAST_COMPLETED_STAGE=26
+LAST_COMPLETED_STAGE=27
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyBiasedPick nguyên dạng; ShortRejectionPatch tính limit=floor(M/n)*n rồi duyệt AnswerStreamManager.answer_at(stream,k) với k tăng trên cùng vòng; chỉ khi x<=limit mới gọi LegacyBiasedPick. AnswerStreamManager giữ API cũ nhưng định tuyến sang patch. Giữ PATCH 01..12.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_27_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_27_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_27_PENDING
-CI_FAILURES=STAGE_27_PENDING
+CI_TESTS=354
+CI_FAILURES=0
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -641,4 +641,25 @@ hai điều khiển Stage26 đòi đường lỗi được thay để chứng
 minh legacy sai nếu gọi trực tiếp và production đúng.
 Thêm 18 kiểm thử Stage27. Dự kiến 354 bài xanh, 0 warning.
 Không thêm wideDetour n>M của DISCOVERY 14 (Stage28).
-LAST_COMPLETED_STAGE giữ 26 trước CI xác minh.
+LAST_COMPLETED_STAGE đã nâng lên 27 sau khi CI và khóa tên PASS.
+
+Giai đoạn 27 được xác minh bởi Elixir 1.18.5 / OTP 27:
+354 kiểm thử, 0 thất bại, 0 cảnh báo biên dịch.
+Bốn hồi quy chuẩn Stage26 giữ nguyên expected và đều đạt.
+18 bài kiểm thử Stage27 mới đều PASS. Các test về dấu
++/-1, thời điểm nhận k=0,1,2,3, số nguyên 2048 bit,
+biên n và truy vấn đồng thời đều được kiểm chứng.
+Canonical Names Lock độc lập PASS.
+LegacyBiasedPick vẫn giữ nguyên blob SHA:
+94816d3aac30296eeded3abdd0bfaea5f46614ae.
+Oracle test-only vẫn giữ nguyên blob SHA:
+be1638f46b2190d617af0378a61b077bda10bf32.
+LegacyFixedNameSuccessor giữ nguyên SHA:
+56397c39d13a4a1b7bc345d98c5b37029b3fcdf0.
+LegacyOrderMemory giữ nguyên SHA:
+4d7610e41443d4a37d60befa76a456cd8c85e06d.
+Chọn hạng thực sự tiến cùng answer ring cho đến x<=limit
+và chỉ sau đó gọi LegacyBiasedPick; không dùng rộng n>M.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38280022089
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38280022253
+Giai đoạn 27 đóng GREEN; giai đoạn 28 DISCOVERY 14 chưa mở.

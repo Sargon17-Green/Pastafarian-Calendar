@@ -1117,3 +1117,26 @@ biên M, 720 và các giá trị lớn, gọi lại legacy
 sau accept, dữ liệu ngày thực, đồng thời và nguồn.
 Mọi giai đoạn trước giữ nguyên. Không mở wideDetour
 cho N>M hay DISCOVERY 14, không công bố lịch hoàn chỉnh.
+
+## Kiểm chứng đóng bản vá 13
+
+GitHub Actions Elixir 1.18.5 / Erlang OTP 27 đã chạy
+**354 kiểm thử, 0 thất bại, 0 cảnh báo biên dịch**.
+Bốn hồi quy chuẩn từng đỏ ở Stage26 đều xanh trở lại,
+giữ nguyên giá trị expected. 18 bài Stage27 mới
+cũng đạt; Canonical Names Lock độc lập PASS.
+
+`ShortRejectionPatch` giữ nguyên stream đầu vào,
+đọc các phần tử tuần tự từ `answer_at(stream,k)`
+cho tới khi `x<=div(M,n)*n`, chỉ sau đó gọi hàm
+legacy cũ. Báo cáo trace cho biết chính xác phần tử
+được nhận, vị trí và số lần loại bỏ. Cả hạt, hướng,
+SAVE, ID kế cận và 12 lần khuấy cuối đều giữ nguyên.
+`LegacyBiasedPick` và oracle test-only không thay đổi.
+
+- [CI Stage27: 354/354](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38280022089)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38280022253)
+
+Giai đoạn 27/55 kết thúc `GREEN`. Bước tiếp theo
+là Stage28/55 `DISCOVERY 14` của lựa chọn miền
+rộng n>M; chưa triển khai trong Stage27.

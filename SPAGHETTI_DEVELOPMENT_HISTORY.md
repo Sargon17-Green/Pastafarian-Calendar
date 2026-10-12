@@ -950,3 +950,18 @@ Bốn hồi quy Stage26 sẽ quay về xanh với expected
 oracle giữ nguyên. Thêm 18 kiểm thử Stage27,
 không sửa các lỗi lịch sử 01..12 hoặc oracle.
 Stage28 (DISCOVERY 14) chưa bắt đầu.
+
+**Kết quả CI thực tế Stage27:** Elixir 1.18.5 / OTP 27:
+354 kiểm thử, 0 lỗi, 0 cảnh báo; Canonical Names Lock PASS.
+Bốn hồi quy Stage26 trở lại xanh với expected giữ nguyên.
+18 bài Stage27 mới PASS. ShortRejectionPatch đi trong
+cùng answer ring, tăng k khi x>limit và gọi lại chính
+LegacyBiasedPick một lần chỉ sau khi chấp nhận.
+Trace độc lập cho từng lần gọi, không có nguồn random khác.
+
+LegacyBiasedPick blob SHA
+`94816d3aac30296eeded3abdd0bfaea5f46614ae`;
+oracle test-only blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+Không đổi main, không có wideDetour, chưa mở Stage28.
+Đóng Stage27 GREEN.
