@@ -118,3 +118,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 23 — PATCH 11
 
 `PostStirPatch11.latch_order_at_46` የ46ኛውን ጠብታ `order` ከ12ቱ የመጨረሻ ብስለቶች በፊት ወደ `order_at_46_latch` ይቀዳል። `PostStirPatch11.post_stir` ለ12ቱ ብስለቶች እውነተኛ የ`dispatch_legacy_post_stir12` ጥሪ ያደርጋል፤ የlegacy ቅደም ተከተል በታሪክ እንደነበረ 12 ጊዜ ይደረሳል። የቦውሎች ሂሳብና የመጨረሻ `savedBowlSum` ከlegacy ይወሰዳሉ። ወደ query የሚመለሰው ብቻ አንድ ጊዜ ተቀድቶ ያልተደረሰው `order_at_46_latch` ነው። `old_post_stirs_overwrite_drop46_order` እና የታሪኩ adapter ሳይቀየሩ ተጠብቀዋል። `discovery11_expected_red_test.v` አራቱ የቀድሞ RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። `patch11_test.v` 720 የቅደም ተከተሎችን፣ 512-ቢት ግቤቶችን፣ የጠሪ ስርዓትንና የታሪክ መደረሶችን ይፈትሻል። የ46 ጠብታዎች ሙሉ ሂደት አሁንም አልተሠራም። ዝርዝር፦ `docs/STAGE23_PATCH11.md`። V 0.5.2 (`7647ce1`) በGitHub Actions run `38267794496` ተረጋግጧል፤ `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **34/34 PASS**። የደረጃ 22 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=23` ነው።
+
+## ደረጃ 24 — DISCOVERY 12
+
+በታሪካዊው `old_next_bowl_fixed_name(queried_id)` የጎድጓዳ ሳህን ID ብቻ ይታያል፤ `(queried_id % 6) + 1` ይመልሳል። የ46ኛውን ጠብታ `order_at_46_latch` የተቀበለው `LegacyNextBowlAdapter` ቅደም ተከተሉን ቢያረጋግጥም ለቀጣዩ ጎድጓዳ ሳህን ምርጫ አይጠቀምበትም። `calendar_next_bowl_spaghetti` በተግባር ይህን legacy መንገድ ይጠራል፤ `calendar_post_stir_next_bowl_spaghetti` የPATCH 11 ላችን ከ12 የpost-stirs በኋላ ያስተላልፋል፣ ነገር ግን ቀጣዩ ምርጫ አሁንም ቋሚ-ID ነው። አራት የ`EXPECTED_RED` የcircular successor ምስክሮችና ለታሪክ የGREEN ምስክሮች ተጨምረዋል። የ`PATCH 12` በቅደም ተከተል ውስጥ ተጠይቆ ID የማግኘት እና የሚቀጥለውን የመምረጥ ሕግ በደረጃ 25 ብቻ ይመጣል። `LAST_COMPLETED_STAGE=23` እስከ native V CI ማረጋገጫ ይቆያል። ዝርዝር፦ `docs/STAGE24_DISCOVERY12.md`።

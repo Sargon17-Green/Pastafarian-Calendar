@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage23_native_v:
-    name: V 0.5.2 — PATCH 11 validated GREEN
+  stage24_native_v:
+    name: V 0.5.2 — DISCOVERY 12 EXPECTED_RED
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -51,6 +51,15 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
+      - name: Inspect native V stage 24 formatting — temporary
+        shell: bash
+        run: |
+          set -euo pipefail
+          v fmt -w ./pastafari/legacy_next_bowl.v
+          v fmt -w ./pastafari/discovery12_witness_test.v
+          v fmt -w ./pastafari/discovery12_expected_red_test.v
+          v fmt -w ./pastafari/monster_base.v
+          git --no-pager diff -- ./pastafari/legacy_next_bowl.v ./pastafari/discovery12_witness_test.v ./pastafari/discovery12_expected_red_test.v ./pastafari/monster_base.v
       - name: Verify V version and source formatting
         shell: bash
         run: |
@@ -169,15 +178,40 @@ jobs:
           v test ./pastafari/discovery11_expected_red_test.v
       - name: PATCH 11 — preserve legacy and latch all 720 permutations
         run: v test ./pastafari/patch11_test.v
-      - name: Stage 23 — full native V regression
+      - name: DISCOVERY 12 — fixed-ID historical next-bowl witnesses
+        run: v test ./pastafari/discovery12_witness_test.v
+      - name: DISCOVERY 12 — four intentionally RED circular-successor assertions
         shell: bash
         run: |
           set -euo pipefail
-          v test ./pastafari 2>&1 | tee stage23_green.log
-      - name: Preserve stage 23 native V evidence
+          v -check ./pastafari/discovery12_expected_red_test.v
+          set +e
+          v test ./pastafari/discovery12_expected_red_test.v 2>&1 | tee stage24_expected_red.log
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo '::error::DISCOVERY 12 unexpectedly GREEN before PATCH 12'
+            exit 1
+          fi
+          for test_name in \
+            test_discovery12_expected_red_reversed_six_to_five \
+            test_discovery12_expected_red_reversed_one_to_six \
+            test_discovery12_expected_red_rotated_three_to_one \
+            test_discovery12_expected_red_shuffled_one_to_three; do
+            if ! grep -Fq "$test_name" stage24_expected_red.log; then
+              echo "::error::Missing intended RED assertion $test_name"
+              exit 1
+            fi
+          done
+          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage24_expected_red.log; then
+            echo '::error::No snapshot order divergence in expected RED failure'
+            exit 1
+          fi
+          echo 'DISCOVERY 12 — four intended RED next-bowl assertions verified'
+      - name: Preserve stage 24 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage23-green-evidence
-          path: stage23_green.log
+          name: v-amharic-stage24-red-evidence
+          path: stage24_expected_red.log
           if-no-files-found: ignore

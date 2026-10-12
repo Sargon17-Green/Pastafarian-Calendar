@@ -197,3 +197,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 23 መዝጊያ — GREEN
 
 የመጀመሪያው GitHub Actions run `38267392920` 34/34 የnative V ፈተና ፋይሎችን አሳክቷል። የV 0.5.2 formatter በ`discovery11_witness_test.v` እና `patch11_test.v` የረድፍ ቅርጽ ልዩነቶችን አሳይቷል። ከnative formatter የተገኙ ልዩነቶች ተግብረው፣ ጊዜያዊ የformatter የምርመራ እርምጃ ከCI ተወግዷል። በcommit `322f955da0160f69873cb4675f5088ff1714a9eb` ላይ GitHub Actions run `38267794496` ሁለቱም ሥራዎች PASS፣ `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **34/34 PASS** ናቸው። ከደረጃ 22 የመጡት አራት RED assertions ሳይቀየሩ GREEN ሆነዋል። የ`old_post_stirs_overwrite_drop46_order` 12 መደረሶች ተጠብቀዋል፤ `PostStirPatch11` የ46ኛውን ቅደም ተከተል አንድ ጊዜ ከpost-stirs በፊት ይቀዳል እንጂ አይደርሰውም። የማስረጃ ቅርስ `11755656678` ነው። የ46 ጠብታዎች ሙሉ መንገድ አልተጠናቀቀም። ደረጃ 24 አልተጀመረም። **ደረጃ 23 COMPLETE / GREEN።**
+
+## ደረጃ 24 — DISCOVERY 12 (በnative V CI ማረጋገጫ ላይ)
+
+የታሪክ `old_next_bowl_fixed_name` የቅደም ተከተልን ትርጉም ችላ ብሎ የቋሚ ID ቀጣዩን `queried_id%6+1` ይመልሳል። `LegacyNextBowlAdapter` የተሟላ የPATCH 11 ላች ቅደም ተከተል እንደሆነ ያረጋግጣል እንጂ በላቹ ውስጥ የqueriedId ቦታ አይፈልግም። ለ`orderAt46Latch=[6,5,4,3,2,1]` የ6 ቀጣይ በlegacy 1 ነው፣ ኖርማቲቩ ግን 5 ነው። `calendar_post_stir_next_bowl_spaghetti` 12ቱን ብስለቶች እና ላቹን በእውነት ያከናውናል፣ የመጨረሻው የቋሚ-ID ጥሪ አሁንም ስህተት ነው። የደረጃ 23 `PostStirPatch11` አልተቀየረም። በምስክር ፈተና 720 ቅደም ተከተሎች እና 4320 የID ጥሪዎች የቋሚ ስም ሂደትን ያሳያሉ። የPATCH 12 ለደረጃ 25 ተቀምጧል።

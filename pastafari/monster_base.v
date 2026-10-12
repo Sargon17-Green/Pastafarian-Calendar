@@ -183,5 +183,8 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	ordered := previous + '; DISCOVERY_11 originalOrder=' + pour_order.str()
 	wrong := ordered + '; DISCOVERY_11 wrongQueryOrder=' + legacy_post_stir.order_for_query.str()
 	overwrite := wrong + '; DISCOVERY_11 overwriteCount=' + legacy_post_stir.overwrite_count.str()
-	return error(overwrite + '; PATCH_11 latchedOrder=' + patched_post_stir.order_for_query.str())
+	latched := overwrite + '; PATCH_11 latchedOrder=' + patched_post_stir.order_for_query.str()
+	wrong_next := calendar_next_bowl_spaghetti(6, patched_post_stir.order_for_query)!
+	query_details := latched + '; DISCOVERY_12 queriedId=6'
+	return error(query_details + '; DISCOVERY_12 wrongNextBowl=' + wrong_next.str())
 }
