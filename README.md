@@ -617,3 +617,13 @@ toujou montre erè istorik Stage 18. Tès Stage 18 la kontinye pwouve
 `EXPECTED_RED` sou chemen sa a; nan CI li pase atravè odit ki
 egzije mesaj istorik egzak la. Stage 19 mande tès natif konplè
 anvan LAST_COMPLETED_STAGE vin 19.
+
+### Konfimasyon final PATCH 09
+
+GitHub Actions `38278529281` pase **12/12 travay vèt**. Tout 720
+permutation yo bay vide koreksyon ki matche ak oracle tès endepandan;
+1800 vide legacy diferan epi 6 permutation kenbe menm twa id fizik
+1, 2, 3. Yon seri 140 BigInt laj ak negatif, 9 gout reyèl/27 vide,
+16 piki erè ak 16 rekiperasyon, epi 4 apèl nested konfime koreksyon
+an. Tès Stage 18 la toujou verifye defo istorik la sèlman sou
+chemen `legacyFixedBowlPoursProbe`. Pa gen brase bòl nan PATCH 09.

@@ -515,3 +515,12 @@ Yon nouvo handler `BOWL_ORDER_POUR_PATCH` komèt eta koreksyon an
 san detwi prèv id fizik 1, 2, 3. Chemen piblik premye gout la
 fè koreksyon sa a, tandiske probe istorik la rete disponib.
 Pa gen melanj bòl oswa operasyon etap pita.
+
+### Fèmti Stage 19
+
+Run `38278529281`: 12 travay PASS, `lua_stage18_discovery`
+vin vèt paske regresyon istorik EXPECTED_RED kouri anndan odit
+pozitif. Suit Stage 19 pase 720 permutation, 140 gwo BigInt,
+27 vide reyèl, 16 erè enjekte, 16 rekiperasyon ak 4 apèl nested.
+`LAST_COMPLETED_STAGE=19`; pwodiksyon korije, legacy toujou mal
+jan li dwe rete pou tras. Pa gen okenn travay Stage 20.
