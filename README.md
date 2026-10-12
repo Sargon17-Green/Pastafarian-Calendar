@@ -417,3 +417,11 @@ test-only la (99 grind nan total).
 Kòmand suite konplè: lua5.3 test/stage15_tests.lua .
 Rezilta espere: GREEN. Pa gen kòd Stage 16 ni permutation ranking.
 
+
+### Konfimasyon natif Stage 15
+
+GitHub Actions run 38237011389 te pase tout uit travay yo.
+Suite Lua Stage 1–15 la konfime onz ranje yo, sentinel fizik la,
+99 grind nan nèf gout vizib normatif, ak EXPECTED_RED legacy a
+kòm yon odit ki rete toujou aktif. Rezilta: GREEN.
+

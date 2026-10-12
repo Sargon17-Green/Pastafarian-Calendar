@@ -365,3 +365,11 @@ Prèv obligatwa yo enkli onz ranje korije, onz divèjans legacy,
 konpetisyon test-only kont nèf gout vizib ak 99 tounaj, ak regression
 tout etap 1..15. Tout travay Stage 16 rete entèdi nan patch sa a.
 
+
+### Prèv final natif PATCH 07
+
+Run 38237011389: uit travay yo tout success. Tès endepandan
+test-only la konfime nèf gout vizib ak 99 grind; onz ranje
+nouvèl yo mache, pandan odit EXPECTED_RED Stage 14 la toujou
+detekte tout onz move ranje legacy yo. Nou pa mete okenn etap 16.
+
