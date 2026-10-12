@@ -77,7 +77,11 @@ final case class BaseMonsterContext(
   var selectionFamilySizeInput: Option[BigInt] = None,
   var legacyBiasedSampleOutput: Option[BigInt] = None,
   var legacyBiasedRankOutput: Option[BigInt] = None,
-  var legacyAcceptanceLimitOutput: Option[BigInt] = None
+  var legacyAcceptanceLimitOutput: Option[BigInt] = None,
+  var patchedAcceptedSample: Option[BigInt] = None,
+  var patchedShortPickRank: Option[BigInt] = None,
+  var patchedSkippedSamples: Option[BigInt] = None,
+  var patch11Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -100,6 +104,65 @@ final class BaseValidationManager {
     }
   }
 
+
+  def requirePatch11Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_11_SHORT_REJECTION" ||
+        ctx.status != "PATCH_11_READY" ||
+        ctx.branchTrace.toVector != Vector(
+          "BOOT","DISCOVERY_11_BIASED_SHORT_PICK","PATCH_11_SHORT_REJECTION") ||
+        ctx.selectionSampleInput.isEmpty || ctx.selectionDirectionInput.isEmpty ||
+        ctx.selectionFamilySizeInput.isEmpty ||
+        ctx.legacyBiasedSampleOutput.isEmpty ||
+        ctx.legacyBiasedRankOutput.isEmpty ||
+        ctx.legacyAcceptanceLimitOutput.isEmpty ||
+        ctx.patchedAcceptedSample.isEmpty ||
+        ctx.patchedShortPickRank.isEmpty ||
+        ctx.patchedSkippedSamples.isEmpty || !ctx.patch11Applied) {
+      throw new IllegalStateException(
+        "PATCH 11 richiede una DISCOVERY 11 completa nella stessa invocazione.")
+    }
+    val first = ctx.selectionSampleInput.get
+    val direction = ctx.selectionDirectionInput.get
+    val n = ctx.selectionFamilySizeInput.get
+    val legacySample = ctx.legacyBiasedSampleOutput.get
+    val legacyRank = ctx.legacyBiasedRankOutput.get
+    val legacyLimit = ctx.legacyAcceptanceLimitOutput.get
+    val accepted = ctx.patchedAcceptedSample.get
+    val rank = ctx.patchedShortPickRank.get
+    val skipped = ctx.patchedSkippedSamples.get
+    val modulus = (BigInt(1)<<127)-1
+    if (first<1 || first>modulus || n<1 || n>modulus ||
+        (direction!=1 && direction != -1) ||
+        legacySample!=first || legacyLimit!=(modulus/n)*n ||
+        legacyRank!=((first-1)%n)+1) {
+      throw new IllegalStateException("Cicatrice di scelta corta contraffatta.")
+    }
+    // Validatore indipendente: calcola l'intervallo di rifiuto
+    // [limite+1,M] e la sua distanza ciclica dal prossimo ammesso.
+    val limit=(modulus/n)*n
+    val rejected=first>limit
+    val wantedSkip =
+      if (!rejected) BigInt(0)
+      else if (direction==1) modulus-first+1
+      else first-limit
+    val wantedAccepted =
+      if (!rejected) first
+      else if (direction==1) BigInt(1)
+      else limit
+    val wantedRank=((wantedAccepted-1)%n)+1
+    if (skipped!=wantedSkip || accepted!=wantedAccepted ||
+        rank!=wantedRank || accepted<1 || accepted>limit ||
+        rank<1 || rank>n || skipped<0 || skipped>modulus-limit) {
+      throw new IllegalStateException(
+        "PATCH 11 non coincide con il flusso normativo di accettazione.")
+    }
+    val historic=LegacyBiasedPickAdapter.biasedLegacyPick(first,direction,n)
+    if (historic.firstSample!=legacySample ||
+        historic.legacyRank!=legacyRank ||
+        historic.acceptanceLimit!=legacyLimit) {
+      throw new IllegalStateException("Il percorso storico è stato manomesso.")
+    }
+  }
 
   def requireDiscovery11Ready(ctx: BaseMonsterContext): Unit = {
     if (ctx.phase != "DISCOVERY_11_BIASED_SHORT_PICK" ||
@@ -729,7 +792,8 @@ final class BaseMonsterManager {
     new Patch09VaultHandler(metrics),
     new Discovery10Order46LatchHandler(metrics),
     new Patch10Order46Handler(metrics),
-    new Discovery11BiasedPickHandler(metrics)
+    new Discovery11BiasedPickHandler(metrics),
+    new Patch11ShortPickHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1262,6 +1326,38 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("discovery11",e)
+    }
+  }
+
+  def patch11ShortPick(
+    calculationDay: BigInt, targetDay: BigInt,
+    firstSample: BigInt, directionStep: Int, familySize: BigInt
+  ): Patch11ShortPickReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.selectionSampleInput=Some(firstSample)
+    ctx.selectionDirectionInput=Some(directionStep)
+    ctx.selectionFamilySizeInput=Some(familySize)
+    ctx.phase="DISCOVERY_11_BIASED_SHORT_PICK"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery11Ready(ctx)
+      ctx.phase="PATCH_11_SHORT_REJECTION"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch11Ready(ctx)
+      Patch11ShortPickReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.selectionSampleInput.get,ctx.selectionDirectionInput.get,
+        ctx.selectionFamilySizeInput.get,
+        ctx.legacyBiasedSampleOutput.get,
+        ctx.legacyBiasedRankOutput.get,
+        ctx.legacyAcceptanceLimitOutput.get,
+        ctx.patchedAcceptedSample.get,
+        ctx.patchedShortPickRank.get,
+        ctx.patchedSkippedSamples.get,
+        ctx.patch11Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector
+      )
+    } catch {
+      case error: Throwable => throw BaseErrorWrapper.wrap("patch11",error)
     }
   }
 

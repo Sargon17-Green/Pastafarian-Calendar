@@ -383,3 +383,27 @@ una scelta di rango distorta quando `M` non è
 multiplo di `N`. Il report espone campione,
 limite e rango; la discovery non anticipa la
 futura PATCH 11. L'oracolo resta test-only.
+
+## PATCH 11 — salto aritmetico del segmento di rifiuto
+
+Lo spazio dei campioni è `[1,M]`, il limite
+di accettazione è `L = floor(M/N)*N` e il
+segmento rifiutato è precisamente `[L+1,M]`.
+
+Se `X <= L`, il campione è accettato senza
+scarto. Se `X > L` e il passo è positivo,
+si raggiunge il primo campione accettato `1`
+dopo `M-X+1` passi circolari. Se il passo è
+negativo, il primo accettato è `L` dopo
+`X-L` passi. In ogni caso il rango finale
+è `((accettato-1) mod N)+1`.
+
+`Patch11ShortPickWrapper` conserva il report
+del vero `LegacyBiasedPickAdapter`; manager,
+handler e validator mantengono stato e proprietà
+separati per invocazione. Il validator calcola
+indipendentemente l'intervallo di rifiuto e
+confronta tutti i campi senza chiamare il
+wrapper corretto. La prova contro l'oracolo
+di test è utilizzata solo dove il numero
+di passi è trattabile.

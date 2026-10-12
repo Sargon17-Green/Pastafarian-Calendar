@@ -1143,3 +1143,45 @@ La firma verificata della DISCOVERY 11 è
 (positiva, negativa, soglia); le firme
 Stage01–Stage21 restano tutte intatte.
 Non è stata introdotta la correzione della PATCH 11.
+
+## Stadio 23 — PATCH 11: lo scarto giusto senza miliardi di passi
+
+### Che cosa si pensava
+
+La prima risposta del flusso sembrava già
+un rango sufficientemente casuale, quindi
+il vecchio adapter prendeva subito il resto.
+
+### Che cosa si è scoperto
+
+Il resto introduce un bias se N non divide M.
+La norma impone il rifiuto della coda finale
+del dominio dei campioni, e l'avanzamento
+circolare fino a un campione valido.
+
+### Che cosa è stato aggirato
+
+La patch esegue davvero la selezione legacy,
+ne conserva la prova e calcola il primo
+campione ammissibile. Poiché i campioni
+vietati sono contigui, il numero di passi
+può essere calcolato esattamente senza
+eseguirli uno ad uno.
+
+### Perché è normativamente equivalente
+
+I campioni ammessi non cambiano.
+Per un campione vietato, un passo positivo
+porta infine a 1, un passo negativo al
+limite ammesso. Le prove exhaustive sui
+720 valori piccoli di N confrontano ogni
+rango con l'oracolo; valori BigInt molto
+grandi controllano la scorciatoia esatta.
+
+### Strato di mostruosità aggiunto
+
+Wrapper, handler, report con entrambi i
+ranghi e campioni, contatore BigInt degli
+scarti, validator indipendente, campi nel
+contesto e metrica. Stage22 rimane
+intenzionalmente rosso con tre divergenze.

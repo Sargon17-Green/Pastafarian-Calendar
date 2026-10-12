@@ -888,3 +888,36 @@ Stage22 esibisce **34 PASS / 3 FAIL intenzionali**,
 limitati a scelta positiva, negativa e soglia.
 Le 21 suite precedenti, incluso il loro RED storico,
 sono rimaste immutate. PATCH 11 non è introdotta.
+
+## Stadio 23 — PATCH 11: selezione corta senza bias
+
+La scorciatoia legacy `biasedLegacyPick` riduce
+direttamente il primo campione modulo `N` e produce
+un bias quando `M` non è multiplo di `N`.
+`Patch11ShortPickWrapper.shortPickPatch` attraversa
+davvero la cicatrice prima di calcolare la selezione
+normativa: accetta solo `X <= floor(M/N)*N`,
+proseguendo nel flusso con passo `+1` o `-1`
+fino al primo campione ammesso.
+
+Il tratto rifiutato è un unico intervallo finale.
+Per questo il wrapper computa con aritmetica BigInt
+il primo valore accettabile e il numero esatto di
+campioni saltati, senza iterare fino a circa
+`2^126` volte per famiglie vicine a `M/2`.
+È matematicamente equivalente al cammino circolare.
+Un validator indipendente verifica anche il rango,
+il conteggio degli scarti, la soglia e tutti i dati
+storici nello stesso contesto BOOT/DISCOVERY/PATCH.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage23Tests'
+```
+
+Firma GREEN prevista: **42 PASS / 0 FAIL**.
+I casi comprendono 720 cardinalità, 2.048 campioni
+deterministici, test BigInt di oltre 16.384 bit,
+rejection multi-campione, salto astronomico,
+falsificazioni e regressioni delle dieci patch
+precedenti. Stage22 resta atteso RED con
+34 PASS / 3 FAIL intenzionali.

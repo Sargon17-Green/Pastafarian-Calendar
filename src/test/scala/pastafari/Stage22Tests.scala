@@ -341,21 +341,36 @@ object Stage22Tests {
       truth(source.contains("def biasedLegacyPick("),"Cicatrice reale")
       truth(source.contains("val rank=((firstSample-1)%familySize)+1"),
         "Nessuna rejection anticipata")
-      truth(!source.contains("shortPickPatch"),"PATCH 11 anticipata")
+      val meta=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=meta.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<23)
+        truth(!source.contains("shortPickPatch"),"PATCH 11 anticipata")
+      else
+        truth(source.contains("LegacyBiasedPickAdapter.biasedLegacyPick("),
+          "La PATCH deve attraversare la cicatrice")
       truth(!source.contains("LEGACY_YEAR_MAX"),"Logica futura introdotta")
     }
     check("metadati Stage22 RED preservano Stage21 GREEN") {
       val state=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(state.contains("CURRENT_STAGE=22"),"Stadio")
-      truth(state.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(state.contains("CURRENT_PATCH=10"),"Patch precedente")
-      truth(state.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      val current=state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=22,"Stage22 conservato")
+      if(current==22) {
+        truth(state.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(state.contains("CURRENT_PATCH=10"),"Patch precedente")
+        truth(state.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      } else {
+        truth(state.contains("STAGE_22_NATIVE_VERIFICATION=PASS_EXPECTED_RED_34_PASS_3_FAIL"),
+          "La firma storica Stage22 rimane registrata")
+      }
       truth(state.contains("STAGE_21_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_40_PASS_0_FAIL"),
         "Certificazione Stage21")
       val completed=state.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed==21 || completed==22,"Ordine certificazioni")
+      truth(completed>=21 && completed<=current,"Ordine certificazioni")
     }
 
     check("equivalenza normativa scelta positiva") {
