@@ -648,3 +648,9 @@ Regresyon normatif Stage 20 dwe bay `EXPECTED_RED` nan etap CI
 dedye a; odit pozitif la verifye egzakteman erè sa a. Stage 21
 PATCH 10 pral separe snapshot ak nextBowls pou korije alias la.
 Nou pa lanse lòt 45 gout yo, `postStir12`, ni seleksyon ki vini apre.
+
+### Gad reentrance pou Stage 20
+
+Uit reentrance reyèl sou `Pour.execute` ak `Save.savePatch` dwe kenbe
+chak kontèks ki gen twa commit ak sis bòl pwòp, san aliase repons
+apèl nested yo ak repons apèl deyò a. Tès sa yo pa fè PATCH 10.
