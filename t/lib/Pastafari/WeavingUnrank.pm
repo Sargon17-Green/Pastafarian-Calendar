@@ -14,7 +14,10 @@ our @EXPORT_OK = qw(unrankWeavingPolynomial);
 # 第一階段驗證用，不是生產程式。對每一步按月份標籤字典序嘗試
 # 合法候選，透過多項式「指定前綴的完工數」比較一基排名。
 # 計數器的每次呼叫都獨立，不跨日期共用可變狀態。
-sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
+sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef,
+                            $options = undef) {
+    # 即使首名與末名走貪婪捷徑，也不能忽略錯誤的引擎選項。
+    my $normalized=Pastafari::WeavingSuffixFactor::_normalize_profile_options($options);
     die "診斷記錄必須是雜湊參照\n"
         if defined($stats) && ref($stats) ne 'HASH';
     die "交織排名必須是正整數\n"
@@ -151,7 +154,8 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
                 $ways=Pastafari::WeavingSuffixFactor::_countWeavingSuffixFactoredState(
                         $lengths,\@remaining,
                         $candidate_opened,$candidate_closed,
-                        \%future_cache,\%factor_diagnostics
+                        \%future_cache,\%factor_diagnostics,
+                        $normalized
                     );
                 $remaining[$j-1]++;
                 $calls++;
@@ -182,7 +186,10 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
                    future_cache_hits => ($factor_diagnostics{future_cache_hits}//0),
                    future_cache_misses => ($factor_diagnostics{future_cache_misses}//0),
                    factored_suffix_calls => ($factor_diagnostics{factor_calls}//0),
-                   reverse_histogram_builds => ($factor_diagnostics{profile_builds}//0));
+                   reverse_histogram_builds => ($factor_diagnostics{profile_builds}//0),
+                   stream_profile_builds => ($factor_diagnostics{profile_disk_builds}//0),
+                   stream_rows_serialized => ($factor_diagnostics{profile_rows_serialized}//0),
+                   stream_max_temp_file_bytes => ($factor_diagnostics{profile_max_temp_file_bytes}//0));
     }
     return \@word;
 }

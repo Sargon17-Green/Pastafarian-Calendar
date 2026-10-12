@@ -16,7 +16,9 @@ our @EXPORT_OK = qw(rankWeavingPolynomial);
 # 完工序列數相加，最後再加一取得一基排名。
 # 與反排名器使用相同已獨立驗證的精確計數公式，
 # 但候選順序及排名累加由另一個獨立控制流程實作。
-sub rankWeavingPolynomial ($lengths, $word, $stats=undef) {
+sub rankWeavingPolynomial ($lengths, $word, $stats=undef,
+                          $options=undef) {
+    my $normalized=Pastafari::WeavingSuffixFactor::_normalize_profile_options($options);
     die "月份長度必須是陣列參照\n" if ref($lengths) ne 'ARRAY';
     die "完整月份序列必須是陣列參照\n" if ref($word) ne 'ARRAY';
     die "診斷記錄必須是雜湊參照\n"
@@ -58,7 +60,7 @@ sub rankWeavingPolynomial ($lengths, $word, $stats=undef) {
             my $ways=
                 Pastafari::WeavingSuffixFactor::_countWeavingSuffixFactoredState(
                     $lengths,\@remaining,$next_opened,$next_closed,
-                    \%cache,\%diagnostics
+                    \%cache,\%diagnostics,$normalized
                 );
             $remaining[$j-1]++;
             $rank->badd($ways);
@@ -74,7 +76,9 @@ sub rankWeavingPolynomial ($lengths, $word, $stats=undef) {
         %$stats=(days=>$expected_days,candidates=>$candidates,
                  future_cache_hits=>($diagnostics{future_cache_hits}//0),
                  future_cache_misses=>($diagnostics{future_cache_misses}//0),
-                 reverse_histogram_builds=>($diagnostics{profile_builds}//0));
+                 reverse_histogram_builds=>($diagnostics{profile_builds}//0),
+                 stream_profile_builds=>($diagnostics{profile_disk_builds}//0),
+                 stream_max_temp_file_bytes=>($diagnostics{profile_max_temp_file_bytes}//0));
     }
     return $rank;
 }
