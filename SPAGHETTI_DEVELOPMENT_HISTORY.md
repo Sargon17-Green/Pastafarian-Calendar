@@ -181,3 +181,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 21 መዝጊያ — GREEN
 
 የመጀመሪያው የGitHub Actions run `38258293325` ሙሉ 31/31 የV ፈተና ፋይሎችን PASS አድርጓል። የV 0.5.2 formatter የረድፍ ቅርጽ ልዩነቶችን በአዲሱ `bowl_stir_patch10.v`፣ የታሪክ `discovery10_witness_test.v`፣ `monster_base.v` እና `patch10_test.v` ውስጥ አሳይቷል። ከቀጥታ native formatter የተገኙ ልዩነቶች ተስተካክለው ጊዜያዊ የምርመራ እርምጃ ከCI ተወግዷል። በcommit `a5960112321d69da2e7643ab99783cf3af91f25d` ላይ GitHub Actions run `38258828731` ሁለቱም ሥራዎች PASS ናቸው። `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **31/31 PASS**። የደረጃ 20 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። `old_stir_bowls_in_place` አሁንም የተበከሉ የin-place እሴቶችን ያነባል፤ `BowlStirPatch10` ግን ከ`vault_old` ብቻ ያነባል፣ `pending` ብቻ ይጽፋል፣ ከስድስቱ ስሌቶች በኋላ ይፈጽማል። የማስረጃ ቅርስ `11751721580` ተቀምጧል። **ደረጃ 21 COMPLETE / GREEN።**
+
+## ደረጃ 22 — DISCOVERY 11 (native V ማረጋገጫ ይጠበቃል)
+
+የLegacyPostStirOrderStore የquery_order መያዣ በ12 የpost-stir ቅደም ተከተሎች በተከታታይ ተደርሷል። old_overwrite_query_order የቀድሞውን ቅደም ተከተል በዚሁ መያዣ ውስጥ አይጠብቅም። LegacyPostStir12Adapter እና BaseDispatcher.dispatch_legacy_post_stir12 በproduction እውነተኛ ጥሪ ይፈጽማሉ። በB=[10,20,30,40,50,60] የ12ኛው የብስለት order [3,5,1,4,6,2] ነው፣ እና ይኸው ለquery ይመለሳል። እስከ ደረጃ 23 የorderAt46Latch ቅጂ አይገነባም። ሙሉ የ46 ጠብታ ማስኬጃ በዚህ ደረጃ አልተጨመረም።
