@@ -386,16 +386,30 @@ object Stage26Tests {
       truth(source.contains("def oldJumpGuess("),"Cicatrice del salto")
       truth(source.contains("val estimate=if(relative<0 && r!=0)q-1 else q"),
         "Divisione storica e arrotondamento")
-      truth(!source.contains("yearJumpPatch"),"PATCH 13 anticipata")
+      val stage=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=stage.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<27)
+        truth(!source.contains("yearJumpPatch"),"PATCH 13 anticipata")
+      else
+        truth(source.contains("def yearJumpPatch("),"PATCH 13 successiva presente")
       truth(!source.contains("VirtualLegacyList"),"Futura fase anticipata")
     }
     check("metadati Stage26 RED conservano Stage25 GREEN") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=26"),"Stadio")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=12"),"Patch precedente")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=26,"Stadio")
+      if(current==26) {
+        truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=12"),"Patch precedente")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      } else {
+        truth(st.contains("STAGE_26_EXPECTED_RESULT=38_PASS_3_FAIL_INTENTIONAL"),
+          "Firma storica RED conservata")
+      }
       truth(st.contains("STAGE_25_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_42_PASS_0_FAIL"),
         "Certificazione Stage25")
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))

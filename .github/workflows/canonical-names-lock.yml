@@ -628,3 +628,23 @@ jobs:
           for label in 'avanti' 'indietro' 'porta'; do
             grep -Fq "FAIL — equivalenza normativa salto ${label} — Salto fisso 5778 ignora cancelli: ${label}" stage26.log
           done
+
+  native-stage27-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 27 corrected sequential year-boundary PATCH 13
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage27Tests' 2>&1 | tee stage27.log
+          grep -Fq 'RISULTATO STADIO 27: 39 PASS, 0 FAIL' stage27.log
+          test "$(grep -Fc 'PASS — ' stage27.log)" -eq 39
+          test "$(grep -Fc 'FAIL — ' stage27.log)" -eq 0

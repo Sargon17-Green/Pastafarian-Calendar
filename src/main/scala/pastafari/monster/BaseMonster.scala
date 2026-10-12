@@ -94,7 +94,11 @@ final case class BaseMonsterContext(
   var jumpFromAnchorLengths: Option[Vector[Int]] = None,
   var legacyJumpOffset: Option[BigInt] = None,
   var legacyJumpOpenDay: Option[BigInt] = None,
-  var legacyJumpCloseDay: Option[BigInt] = None
+  var legacyJumpCloseDay: Option[BigInt] = None,
+  var patchedJumpOffset: Option[BigInt] = None,
+  var patchedJumpOpenDay: Option[BigInt] = None,
+  var patchedJumpCloseDay: Option[BigInt] = None,
+  var patch13Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -117,6 +121,67 @@ final class BaseValidationManager {
     }
   }
 
+
+  /** Ricalcolo separato: né wrapper corretto né oracolo test-only. */
+  def requirePatch13Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_13_YEAR_JUMP" ||
+       ctx.status!="PATCH_13_READY" ||
+       ctx.branchTrace.toVector!=Vector("BOOT","DISCOVERY_13_YEAR_JUMP",
+         "PATCH_13_YEAR_JUMP") ||
+       ctx.jumpAnchorOpenDay.isEmpty ||
+       ctx.jumpBeforeLengths.isEmpty || ctx.jumpFromAnchorLengths.isEmpty ||
+       ctx.legacyJumpOffset.isEmpty || ctx.legacyJumpOpenDay.isEmpty ||
+       ctx.legacyJumpCloseDay.isEmpty || ctx.patchedJumpOffset.isEmpty ||
+       ctx.patchedJumpOpenDay.isEmpty || ctx.patchedJumpCloseDay.isEmpty ||
+       !ctx.patch13Applied)
+      throw new IllegalStateException("PATCH 13 incompleta.")
+    val before=ctx.jumpBeforeLengths.get
+    val after=ctx.jumpFromAnchorLengths.get
+    if(before.isEmpty || after.isEmpty ||
+       (before++after).exists(x=>x<252 || x>5778))
+      throw new IllegalStateException("Durate fuori dominio.")
+    val anchor=ctx.jumpAnchorOpenDay.get
+    val old=LegacyYearJumpAdapter.oldJumpGuess(
+      anchor,before,after,ctx.targetDay)
+    if(ctx.legacyJumpOffset.get!=old.guessedOffset ||
+       ctx.legacyJumpOpenDay.get!=old.guessedOpenDay ||
+       ctx.legacyJumpCloseDay.get!=old.guessedCloseDay)
+      throw new IllegalStateException("Cicatrice storica alterata.")
+
+    var offset=BigInt(0)
+    var open=anchor
+    var close=anchor
+    var found=false
+    if(ctx.targetDay>anchor) {
+      var boundary=anchor
+      var i=0
+      while(i<after.size && !found) {
+        val next=boundary+BigInt(after(i))
+        if(boundary<ctx.targetDay && ctx.targetDay<=next) {
+          offset=BigInt(i);open=boundary;close=next;found=true
+        }
+        boundary=next
+        i+=1
+      }
+    } else {
+      var boundary=anchor
+      var i=0
+      while(i<before.size && !found) {
+        val previous=boundary-BigInt(before(i))
+        if(previous<ctx.targetDay && ctx.targetDay<=boundary) {
+          offset=-BigInt(i)-1;open=previous;close=boundary;found=true
+        }
+        boundary=previous
+        i+=1
+      }
+    }
+    if(!found ||
+       ctx.patchedJumpOffset.get!=offset ||
+       ctx.patchedJumpOpenDay.get!=open ||
+       ctx.patchedJumpCloseDay.get!=close)
+      throw new IllegalStateException(
+        "Il confine normativo o l'offset della PATCH 13 è falsificato.")
+  }
 
   def requireDiscovery13Ready(ctx: BaseMonsterContext): Unit = {
     if (ctx.phase != "DISCOVERY_13_YEAR_JUMP" ||
@@ -919,7 +984,8 @@ final class BaseMonsterManager {
     new Patch11ShortPickHandler(metrics),
     new Discovery12YearCeilingHandler(metrics),
     new Patch12YearCeilingHandler(metrics),
-    new Discovery13YearJumpHandler(metrics)
+    new Discovery13YearJumpHandler(metrics),
+    new Patch13YearJumpHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1557,6 +1623,34 @@ final class BaseMonsterManager {
       )
     } catch {
       case error: Throwable => throw BaseErrorWrapper.wrap("discovery13",error)
+    }
+  }
+
+  def patch13YearJump(
+    calculationDay: BigInt, targetDay: BigInt,
+    anchorOpenDay: BigInt, yearsBefore: Vector[Int],
+    yearsFromAnchor: Vector[Int]
+  ): Patch13YearJumpReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.jumpAnchorOpenDay=Some(anchorOpenDay)
+    ctx.jumpBeforeLengths=Some(yearsBefore)
+    ctx.jumpFromAnchorLengths=Some(yearsFromAnchor)
+    ctx.phase="DISCOVERY_13_YEAR_JUMP"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery13Ready(ctx)
+      ctx.phase="PATCH_13_YEAR_JUMP"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch13Ready(ctx)
+      Patch13YearJumpReport(
+        ctx.calculationDay,ctx.targetDay,ctx.jumpAnchorOpenDay.get,
+        ctx.jumpBeforeLengths.get,ctx.jumpFromAnchorLengths.get,
+        ctx.legacyJumpOffset.get,ctx.legacyJumpOpenDay.get,
+        ctx.legacyJumpCloseDay.get,ctx.patchedJumpOffset.get,
+        ctx.patchedJumpOpenDay.get,ctx.patchedJumpCloseDay.get,
+        ctx.patch13Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error: Throwable => throw BaseErrorWrapper.wrap("patch13",error)
     }
   }
 
