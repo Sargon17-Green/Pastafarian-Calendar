@@ -368,6 +368,107 @@ public final class MonsterWeavingLinearCounter {
         return rootCount;
     }
 
+
+    private BigInteger[] commonSiblingTail(State parent, int cut, int days) {
+        int fullDays = days;
+        for (int month = cut; month < lengths.length; month++) {
+            fullDays += parent.remaining[month];
+        }
+        BigInteger[] coefficient = new BigInteger[fullDays + 2];
+        Arrays.fill(coefficient, ONE);
+        for (int month = lengths.length - 1; month >= cut; month--) {
+            int additional = parent.remaining[month];
+            int oldDays = fullDays - additional;
+            BigInteger[] previous = new BigInteger[oldDays + 2];
+            if (additional == 1) {
+                Arrays.fill(previous, 1, oldDays + 2,
+                    coefficient[oldDays + 1]);
+            } else {
+                BigInteger[] binomial = chooseColumn(fullDays, additional - 2);
+                BigInteger running = ZERO;
+                for (int first = oldDays + 1; first >= 2; first--) {
+                    BigInteger weight = coefficient[first];
+                    if (weight != null && weight.signum() > 0) {
+                        running = running.add(weight.multiply(
+                            binomial[fullDays - first - 1]));
+                    }
+                    previous[first - 1] = running;
+                }
+            }
+            coefficient = previous;
+            fullDays = oldDays;
+        }
+        return coefficient;
+    }
+
+    private BigInteger siblingPrefixDot(State child, int cut,
+            BigInteger[] coefficient) {
+        int days = child.remaining[child.closed];
+        BigInteger[] previous = new BigInteger[days + 2];
+        previous[1] = ONE;
+        BigInteger previousTotal = ONE;
+        for (int month = child.closed + 1; month < cut; month++) {
+            int additional = child.remaining[month];
+            int newDays = days + additional;
+            BigInteger[] next = new BigInteger[newDays + 2];
+            BigInteger newTotal = ZERO;
+            if (additional == 1) {
+                next[days + 1] = previousTotal;
+                newTotal = previousTotal;
+            } else {
+                boolean enforceOpen = month - 1 >= child.opened;
+                BigInteger[] binomial = chooseColumn(newDays, additional - 2);
+                BigInteger eligible = enforceOpen ? ZERO : previousTotal;
+                for (int first = 1; first <= days + 1; first++) {
+                    if (enforceOpen && first > 1) {
+                        BigInteger earlier = previous[first - 1];
+                        if (earlier != null) eligible = eligible.add(earlier);
+                    }
+                    if (eligible.signum() > 0) {
+                        BigInteger ways = eligible.multiply(
+                            binomial[newDays - first - 1]);
+                        next[first] = ways;
+                        newTotal = newTotal.add(ways);
+                    }
+                }
+            }
+            previous = next;
+            previousTotal = newTotal;
+            days = newDays;
+        }
+        if (coefficient.length != previous.length) {
+            throw new IllegalStateException("E_WEAVE_SIBLING_SHAPE");
+        }
+        BigInteger total = ZERO;
+        for (int i = 1; i <= days + 1; i++) {
+            if (previous[i] != null && coefficient[i] != null) {
+                total = total.add(previous[i].multiply(coefficient[i]));
+            }
+        }
+        return total;
+    }
+
+    BigInteger[] countSiblingBranchSizes(int[] prefix) {
+        State parent = afterPrefix(prefix);
+        BigInteger[] branchSizes = new BigInteger[lengths.length];
+        Arrays.fill(branchSizes, ZERO);
+        if (parent.closed == lengths.length) return branchSizes;
+        int cut = Math.min(lengths.length, parent.opened + 2);
+        int prefixDays = -1;
+        for (int month = parent.closed; month < cut; month++) {
+            prefixDays += parent.remaining[month];
+        }
+        BigInteger[] coefficient = commonSiblingTail(parent, cut, prefixDays);
+        for (int month = parent.closed; month < lengths.length; month++) {
+            if (!parent.canTake(month, lengths)) continue;
+            State child = new State(parent);
+            child.take(month, lengths);
+            branchSizes[month] = child.closed == lengths.length ? ONE
+                : siblingPrefixDot(child, cut, coefficient);
+        }
+        return branchSizes;
+    }
+
     public BigInteger countAfterPrefix(int[] prefix) {
         State state = afterPrefix(prefix);
         if (prefix.length == 0) return count();

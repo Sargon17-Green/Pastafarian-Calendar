@@ -3,6 +3,9 @@ package org.pastafari.javalojban;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.CountDownLatch;
 
@@ -13,6 +16,8 @@ public final class Stage02IncrementalRouteTests {
 
     public static void main(String[] args) {
         exhaustiveOracleUnderSingleCountBudget();
+        siblingBackwardFunctionalOracleDifferential();
+        siblingBackwardFunctionalFullYearProbe();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
         binomialCacheCallOrderNeutrality();
@@ -29,6 +34,75 @@ public final class Stage02IncrementalRouteTests {
         System.out.println("STAGE_02_INCREMENTAL_ROUTE_PASS checks=" + checks
             + " full_days=5778 counts_per_call=1"
             + " heap_mb=" + Runtime.getRuntime().maxMemory() / 1048576);
+    }
+
+
+    private static void siblingBackwardFunctionalOracleDifferential() {
+        for (int[] lengths : new int[][] {
+                {2, 2, 2}, {2, 3, 2}, {3, 3, 3}, {2, 3, 3, 2}
+        }) {
+            MonsterWeavingLinearCounter family =
+                new MonsterWeavingLinearCounter(lengths);
+            NormativeOracle.WeavingFamily oracle =
+                new NormativeOracle.WeavingFamily(lengths);
+            int n = oracle.count().intValueExact();
+            List<int[]> all = new ArrayList<>();
+            for (int rank = 1; rank <= n; rank++) {
+                all.add(oracle.unrank1(BigInteger.valueOf(rank)));
+            }
+            Map<String, int[]> prefixes = new LinkedHashMap<>();
+            int[] sample = {0, n / 3, 2 * n / 3, n - 1};
+            for (int index : sample) {
+                int[] weaving = all.get(index);
+                for (int size = 0; size <= Math.min(4, weaving.length - 1); size++) {
+                    int[] prefix = Arrays.copyOf(weaving, size);
+                    prefixes.put(Arrays.toString(prefix), prefix);
+                }
+            }
+            for (int[] prefix : prefixes.values()) {
+                BigInteger[] sibling = family.countSiblingBranchSizes(prefix);
+                BigInteger total = BigInteger.ZERO;
+                for (int month = 0; month < lengths.length; month++) {
+                    int expected = 0;
+                    for (int[] weaving : all) {
+                        if (weaving[prefix.length] != month + 1) continue;
+                        if (Arrays.equals(prefix,
+                                Arrays.copyOf(weaving, prefix.length))) {
+                            expected++;
+                        }
+                    }
+                    eq(BigInteger.valueOf(expected), sibling[month],
+                        "E_SIBLING_BACKWARD_ORACLE");
+                    total = total.add(sibling[month]);
+                }
+                eq(family.countAfterPrefix(prefix), total,
+                    "E_SIBLING_BACKWARD_PARENT_PARTITION");
+            }
+        }
+    }
+
+    private static void siblingBackwardFunctionalFullYearProbe() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        int[] prefix = {1, 2, 3, 4, 5};
+        long started = System.nanoTime();
+        BigInteger[] sizes = family.countSiblingBranchSizes(prefix);
+        long sharedMillis = (System.nanoTime() - started) / 1000000;
+        BigInteger total = BigInteger.ZERO;
+        for (BigInteger size : sizes) total = total.add(size);
+        eq(family.countAfterPrefix(prefix), total,
+            "E_SIBLING_BACKWARD_5778_PARTITION");
+        for (int month = 0; month < 3; month++) {
+            int[] extended = Arrays.copyOf(prefix, prefix.length + 1);
+            extended[prefix.length] = month + 1;
+            eq(family.countAfterPrefix(extended), sizes[month],
+                "E_SIBLING_BACKWARD_5778_DIRECT_COUNT");
+        }
+        System.out.println("STAGE_02_SIBLING_BACKWARD_PASS days=5778"
+            + " prefix_days=5 branches=6 shared_ms=" + sharedMillis);
     }
 
     private static void exhaustiveOracleUnderSingleCountBudget() {
