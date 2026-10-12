@@ -626,3 +626,24 @@ y swydd Kotlin a'r swydd cloi enwau yn SUCCESS.
 Mae `oldCachedPostStir12` yn aros yn fyw ac yn
 anghywir. Mae mewnbynnau bowls ôl-46 yn dal yn
 allanol; nid oes adeiladwr diferion gweledig cynhyrchu.
+
+
+## Cam 24 — DISCOVERY 12: cymydog bowl yn ôl ID, nid safle
+
+Mae `LegacyNumericNeighborAdapter.oldNumericNeighborQuestion` yn
+defnyddio bowls terfynol cywir PATCH 11 a'r permutation gywir
+o ddiferyn 46 trwy PATCH 08. Mae'r hen caller yn darllen
+bowl rhifol nesaf (1→2→3→4→5→6→1) yn lle'r bowl nesaf
+yn y permutation; cedwir y ddau ID fel tystion. Mae'r
+fformiwla first/direction yn normadol ar wahân i'r
+ID ffynhonnell anghywir. Dim PATCH 12 na newid i'r
+hen gamau sydd wedi'u hardystio.
+
+Mae prawf Cam 24 yn cynnwys 8,640 ymholiad dros 720
+permutation, 6 bowl a 2 sêl, ynghyd â 25,920 ymholiad
+BigInteger, strict RED, perchnogaeth, BOOT/replay a'r
+holl atchweliadau Camau 1–23. Mae final bowls a
+diferyn 46 yn fewnbynnau allanol; nid oes adeiladwr
+diferion gweledig cynhyrchu yn y cam hwn.
+
+`LAST_COMPLETED_STAGE=23` tan PASS CI brodorol.

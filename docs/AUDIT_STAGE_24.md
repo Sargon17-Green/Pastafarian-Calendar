@@ -1,0 +1,51 @@
+# Cam 24 — DISCOVERY 12: y bowl nesaf yn ôl ID rhifol yn lle safle
+
+## Cwmpas
+Gangen `Kotlin+Cymraeg`. Sylfaen Cam 23 wedi'i hardystio:
+`051fad0ad37123a009a59268c9b78a3d02baf9d9`. Cedwir `LAST_COMPLETED_STAGE=23` tan lwyddo'r
+prawf Kotlin brodorol. Cam 25 PATCH 12 heb ddechrau.
+
+## Y contract normadol a'r nam
+Ar ôl 46 diferyn gweledig a 12 stir, mae'r chwe bowl
+terfynol yn gywir o PATCH 11. Mae'r cymydog a ofynnir
+iddo yn dibynnu ar drefn **diferyn 46**, nid ar drefn y
+stir olaf nac ar rif y bowl.
+
+Mae `LegacyNumericNeighborAdapter.oldNumericNeighborQuestion`
+yn derbyn y chwe bowl terfynol cywir, gwerth diferyn 46,
+ID y bowl a sêl. Mae'n galw'r un `PermutationPatchWrapper.patch`
+sy'n rhoi'r union permutation cywir ar gyfer diferyn 46,
+ac yn cofnodi'r ID cymydog normadol yn y drefn honno.
+
+Mae'r NAM hanesyddol yn y darlleniad o'r bowl cymydog:
+`queriedBowlId + 1` neu `1` ar ôl `6`, hyd yn oed
+pan fo'r cymydog yn wahanol yn y permutation.
+Mae cyfrifiadau `firstAnswer`, `directionNumber`, a
+`directionStep` yn aros gyda'r un fformiwlâu SAVE
+normadol. Nid oes newid i'r bowls, y permutation na'r
+camau 1–23, ac nid oes PATCH 12 eto.
+
+Mae `BOOT → DISCOVERY_12` yn ysgrifennu'r graith,
+y ddau ID cymydog, yr ateb a'r cam cyfeiriad i un
+context annibynnol ar ôl llwyddo'n gyfan gwbl.
+
+## Tystiolaeth brodorol
+`sh run-stage24-tests.sh` yn ail-redeg Camau 1–23
+gan gynnwys yr holl strict RED hanesyddol ac wedyn:
+- 720 permutation × 6 bowl × 2 sêl (21 a 31):
+  8,640 ymholiad, 6,912 EXPECTED_RED, 1,728
+  cydweddiad damweiniol; 12 achos (permutation/sêl)
+  lle mae pob un o'r 6 cymydog yn cyd-fynd;
+- gwrthdroad ordinal 720, cylchdroi 6→1,
+  prawf strict RED gwirioneddol, guards,
+  BOOT/replay a pherchnogaeth;
+- 25,920 ymholiad BigInteger annibynnol mewn
+  6 chylch × 720 × 6: 20,736 RED, 5,184 MATCH;
+- mewnbynnau gwirioneddol o'r llwybrau PATCH 10,
+  PATCH 11 a'r oracl prawf heb ddefnyddio'r oracl
+  yn y cod cynhyrchu.
+
+Ni chaniateir gosod `LAST_COMPLETED_STAGE=24`
+nes bod `STAGE24_FULL_NATIVE_EXPECTED_RED_COMPLETE`
+wedi'i gadarnhau gyda PASS CI Kotlin 1.9.0/JDK 21.
+Cam 25 fydd PATCH 12.

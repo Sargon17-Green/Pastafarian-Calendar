@@ -165,7 +165,19 @@ data class BaseMonsterContext(
     var patch11LegacyPermutationCalls: Int = 0,
     var patch11CorrectedPermutationCalls: Int = 0,
     var patch11Applied: Boolean = false,
-    var patch11InvocationCount: Int = 0
+    var patch11InvocationCount: Int = 0,
+    var discovery12FinalBowls: List<ExactInt>? = null,
+    var discovery12Drop46: ExactInt? = null,
+    var discovery12QueryBowl: Int? = null,
+    var discovery12Seal: Int? = null,
+    var discovery12Read: LegacyNumericNeighborRead? = null,
+    var discovery12ActualNumericNeighbor: Int? = null,
+    var discovery12ExpectedPositionalNeighbor: Int? = null,
+    var discovery12FirstAnswer: ExactInt? = null,
+    var discovery12DirectionStep: Int? = null,
+    var discovery12PermutationCalls: Int = 0,
+    var discovery12NumericNeighborCalls: Int = 0,
+    var discovery12InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -244,7 +256,9 @@ class MonsterBootstrapManager(
     val legacyCachedStirAdapter: LegacyCachedStirAdapter =
         LegacyCachedStirAdapter(permutationPatchWrapper),
     val freshStirPatchWrapper: FreshStirPatchWrapper =
-        FreshStirPatchWrapper(legacyCachedStirAdapter, permutationPatchWrapper)
+        FreshStirPatchWrapper(legacyCachedStirAdapter, permutationPatchWrapper),
+    val legacyNumericNeighborAdapter: LegacyNumericNeighborAdapter =
+        LegacyNumericNeighborAdapter(permutationPatchWrapper)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -418,6 +432,48 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("DISCOVERY_12") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_DISCOVERY12_CONTEXT_NOT_READY")
+            val bowls = context.discovery12FinalBowls
+                ?: throw MonsterValidationException("E_DISCOVERY12_NO_BOWLS")
+            val drop = context.discovery12Drop46
+                ?: throw MonsterValidationException("E_DISCOVERY12_NO_DROP46")
+            val query = context.discovery12QueryBowl
+                ?: throw MonsterValidationException("E_DISCOVERY12_NO_QUERY")
+            val seal = context.discovery12Seal
+                ?: throw MonsterValidationException("E_DISCOVERY12_NO_SEAL")
+            val result = legacyNumericNeighborAdapter.oldNumericNeighborQuestion(
+                bowls,drop,query,seal)
+            check(result.drop46 == drop &&
+                result.queriedBowlId == query && result.seal == seal &&
+                result.drop46Order.sorted() == listOf(1,2,3,4,5,6) &&
+                result.positionalNeighborIdExpected ==
+                    result.drop46Order[
+                        (result.drop46Order.indexOf(query) + 1) % 6] &&
+                result.actualNeighborIdWrong ==
+                    (if (query == 6) 1 else query + 1) &&
+                result.permutationPatchCalls == 1 &&
+                result.numericNeighborCalls == 1 &&
+                result.directionStep in listOf(-1,1)) {
+                "E_DISCOVERY12_RESULT_SHAPE"
+            }
+            context.discovery12Read = result.copy(
+                drop46Order = result.drop46Order.toList())
+            context.discovery12ActualNumericNeighbor = result.actualNeighborIdWrong
+            context.discovery12ExpectedPositionalNeighbor =
+                result.positionalNeighborIdExpected
+            context.discovery12FirstAnswer = result.firstAnswer
+            context.discovery12DirectionStep = result.directionStep
+            context.discovery12PermutationCalls = 1
+            context.discovery12NumericNeighborCalls = 1
+            context.discovery12InvocationCount = 1
+            context.branchTrace.add("DISCOVERY_12")
+            context.diagnostics.add("DISCOVERY_12_NUMERIC_ID_NOT_DROP46_NEXT")
+            context.status = "LEGACY_NUMERIC_NEIGHBOR_OBSERVED"
+            metrics.bump("discovery12.numeric.neighbor.calls")
         }
         dispatcher.register("PATCH_11") { context ->
             validation.requireBootstrapContext(context)
@@ -1041,6 +1097,28 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 24: cofnodi next bowl anghywir yn ôl ID rhifol. */
+    fun observeLegacyNumericNeighbor(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        finalBowls: List<ExactInt>, drop46: ExactInt,
+        queriedBowlId: Int, seal: Int
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay,targetDay)
+        context.discovery12FinalBowls = finalBowls.toList()
+        context.discovery12Drop46 = drop46
+        context.discovery12QueryBowl = queriedBowlId
+        context.discovery12Seal = seal
+        context.phase = "DISCOVERY_12"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY12_WRAP",e)
         }
     }
 

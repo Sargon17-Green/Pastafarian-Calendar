@@ -46,7 +46,7 @@ if ! kotlinc \
   src/main/kotlin/pastafari/LegacyInPlaceBowlAdapter.kt \
   src/main/kotlin/pastafari/BowlSnapshotPatchWrapper.kt \
   src/main/kotlin/pastafari/LegacyCachedStirAdapter.kt \
-  src/main/kotlin/pastafari/FreshStirPatchWrapper.kt \
+  src/main/kotlin/pastafari/FreshStirPatchWrapper.kt src/main/kotlin/pastafari/LegacyNumericNeighborAdapter.kt \
   src/main/kotlin/pastafari/MonsterBootstrap.kt \
   src/test/kotlin/pastafari/NormativeCore.kt \
   src/test/kotlin/pastafari/NormativeCalendar.kt \
