@@ -72,6 +72,9 @@ defmodule PastafariCalendarElixirVietnamese.Stage24Discovery12Test do
     assert ctx.order_at_46_latch == ctx.bowl_orders[46]
     assert ctx.order_at_46_latch == Ref.sauce(f, f).order_at_drop_46
     assert ctx.order_memory.order != ctx.order_at_46_latch
+    assert LegacyOrderMemory.next_bowl(ctx.order_memory, 1) ==
+             Enum.at(ctx.order_memory.order,
+               rem(Enum.find_index(ctx.order_memory.order, &(&1 == 1)) + 1, 6))
   end
 
   test "đường production thật chọn vòng ID cố định cho mọi tên bát" do

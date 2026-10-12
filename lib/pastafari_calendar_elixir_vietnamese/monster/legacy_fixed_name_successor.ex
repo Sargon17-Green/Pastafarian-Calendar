@@ -4,7 +4,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.LegacyFixedNameSuccessor do
 
   Hàm lịch sử này coi sáu tên ID là một vòng số học
   1 → 2 → 3 → 4 → 5 → 6 → 1. Nó không biết
-  orderAt46Latch và không tìm vị trí của ID được hỏi
+  order_at_46_latch và không tìm vị trí của ID được hỏi
   trong thứ tự thực tế. Bản vá 12 phải giữ nguyên
   hàm và chỉ dùng kết quả sai làm chứng cứ chẩn đoán.
   """

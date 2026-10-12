@@ -250,7 +250,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage23Patch11Test do
     end
   end
 
-  test "kiểm toán mã nguồn: latch trước post-stir, query vẫn gọi legacy" do
+  test "kiểm toán mã nguồn: latch giữ nguyên, query giai đoạn 24 dùng vòng tên cố định" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = Path.join(root, "legacy_order_memory.ex") |> File.read!()
     patch = Path.join(root, "order_at_46_latch_patch.ex") |> File.read!()
@@ -262,7 +262,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage23Patch11Test do
     assert patch =~ "writes: 46, last_source: {:drop, 46}"
     assert patch =~ "LegacyOrderMemory.next_bowl("
     assert dispatcher =~ "OrderAt46LatchPatch.capture(memory_after_drops)"
-    assert dispatcher =~ "OrderAt46LatchPatch.next_bowl(queried_bowl_id)"
+    assert dispatcher =~ "LegacyFixedNameSuccessor.old_next_bowl_fixed_name(queried_bowl_id)"
+    assert patch =~ "LegacyOrderMemory.next_bowl("
     assert post_stir =~ "LegacyOrderMemory.write(memory, order, {:stir, stir})"
     refute legacy =~ "order_at_46_latch"
     refute post_stir =~ "order_at_46_latch"
