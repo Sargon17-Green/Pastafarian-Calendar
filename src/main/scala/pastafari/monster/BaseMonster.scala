@@ -133,7 +133,9 @@ final case class BaseMonsterContext(
   var monthNameInputSnapshot: Option[(Int,BigInt)] = None,
   var legacyMonthNameIndices: Option[Vector[Int]] = None,
   var legacyMonthNameDistinctChoices: Option[BigInt] = None,
-  var legacyMonthNameReplacementSpace: Option[BigInt] = None
+  var legacyMonthNameReplacementSpace: Option[BigInt] = None,
+  var patchedDistinctMonthNameIndices: Option[Vector[Int]] = None,
+  var patch17Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -177,6 +179,79 @@ final class BaseValidationManager {
    * Non chiama il wrapper corretto o l'oracolo dei test.
    */
   /** DISCOVERY17: certifica senza correggerla la base 47 CON rimpiazzo. */
+  /**
+   * PATCH 17: verifica indipendente senza chiamare il wrapper
+   * corretto o l'oracolo test-only. Ricalcola la selezione
+   * storica e ricostruisce il rango dalle posizioni eliminate.
+   */
+  def requirePatch17Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_17_DISTINCT_MONTH_NAME" ||
+       ctx.status!="PATCH_17_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_17_DUPLICATED_MONTH_NAME",
+         "PATCH_17_DISTINCT_MONTH_NAME") ||
+       ctx.monthNameCount.isEmpty || ctx.monthNameRank1.isEmpty ||
+       ctx.monthNameInputSnapshot.isEmpty ||
+       ctx.legacyMonthNameIndices.isEmpty ||
+       ctx.legacyMonthNameDistinctChoices.isEmpty ||
+       ctx.legacyMonthNameReplacementSpace.isEmpty ||
+       ctx.patchedDistinctMonthNameIndices.isEmpty ||
+       !ctx.patch17Applied)
+      throw new IllegalStateException("PATCH 17 non completa.")
+
+    val count=ctx.monthNameCount.get
+    val rank=ctx.monthNameRank1.get
+    if(count<3 || count>47 || ctx.monthNameInputSnapshot.get!=(count,rank))
+      throw new IllegalStateException("Snapshot dei nomi falsificata.")
+
+    var domain=BigInt(1)
+    var index=0
+    while(index<count){domain*=BigInt(47-index);index+=1}
+    if(rank<1 || rank>domain ||
+       ctx.legacyMonthNameDistinctChoices.get!=domain ||
+       ctx.legacyMonthNameReplacementSpace.get!=BigInt(47).pow(count))
+      throw new IllegalStateException("Cardinalita' e rango falsificati.")
+
+    // Reimposta la scelta storica usando la rappresentazione base47.
+    val legacy=ctx.legacyMonthNameIndices.get
+    if(legacy.length!=count || legacy.exists(x=>x<1 || x>47))
+      throw new IllegalStateException("Nomi legacy fuori catalogo.")
+    var base47=BigInt(0)
+    legacy.foreach(name=>base47=base47*47+BigInt(name-1))
+    if(base47+1!=rank)
+      throw new IllegalStateException("Scelta legacy alterata.")
+
+    // Ricostruisce il numero ordinale (rank-1) dell'intera
+    // sequenza distinta, senza l'unrank della PATCH17.
+    val names=ctx.patchedDistinctMonthNameIndices.get
+    if(names.length!=count || names.distinct.length!=count ||
+       names.exists(x=>x<1 || x>47))
+      throw new IllegalStateException("Nomi ripetuti o invalidi.")
+
+    val available=scala.collection.mutable.ArrayBuffer.from(1 to 47)
+    var reconstructed=BigInt(0)
+    index=0
+    while(index<count){
+      val chosen=names(index)
+      val digit=available.indexOf(chosen)
+      if(digit<0)throw new IllegalStateException(
+        "Nome già usato non più disponibile.")
+
+      var suffixChoices=BigInt(1)
+      var t=0
+      while(t<count-index-1){
+        suffixChoices*=BigInt(available.size-1-t)
+        t+=1
+      }
+      reconstructed+=BigInt(digit)*suffixChoices
+      available.remove(digit)
+      index+=1
+    }
+    if(reconstructed+1!=rank)
+      throw new IllegalStateException(
+        "Il rango dei nomi senza rimpiazzo è falsificato.")
+  }
+
   def requireDiscovery17Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="DISCOVERY_17_DUPLICATED_MONTH_NAME" ||
        ctx.status!="LEGACY_DUPLICATED_MONTH_NAMES_READY" ||
@@ -1404,7 +1479,8 @@ final class BaseMonsterManager {
     new Patch15MonthWeavingHandler(metrics),
     new Discovery16ContiguousMonthDayHandler(metrics),
     new Patch16ContiguousMonthDayHandler(metrics),
-    new Discovery17DuplicatedMonthNameHandler(metrics)
+    new Discovery17DuplicatedMonthNameHandler(metrics),
+    new Patch17DistinctMonthNameHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -2275,6 +2351,37 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("discovery17",error)
+    }
+  }
+
+  def patch17DistinctMonthName(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    monthCount: Int,
+    rank1: BigInt
+  ): Patch17DistinctMonthNameReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.monthNameCount=Some(monthCount)
+    ctx.monthNameRank1=Some(rank1)
+    ctx.phase="DISCOVERY_17_DUPLICATED_MONTH_NAME"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery17Ready(ctx)
+      ctx.phase="PATCH_17_DISTINCT_MONTH_NAME"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch17Ready(ctx)
+      Patch17DistinctMonthNameReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.monthNameCount.get,ctx.monthNameRank1.get,
+        ctx.legacyMonthNameDistinctChoices.get,
+        ctx.legacyMonthNameReplacementSpace.get,
+        ctx.legacyMonthNameIndices.get,
+        ctx.patchedDistinctMonthNameIndices.get,
+        ctx.patch17Applied,ctx.phase,ctx.status,
+        ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("patch17",error)
     }
   }
 

@@ -467,7 +467,15 @@ object Stage34Tests {
       finally stream.close()
       truth(!sources.contains("NormativeOracle"),"Test-only")
       truth(sources.contains("def oldMonthNameDuplicated("),"Cicatrice")
-      truth(!sources.contains("def monthNameDistinctPatch("),"PATCH17 prematura")
+      val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<35)
+        truth(!sources.contains("def monthNameDistinctPatch("),"PATCH17 prematura")
+      else
+        truth(sources.contains("def monthNameDistinctPatch("),
+          "PATCH17 successiva presente")
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
       truth(st.contains("SOURCE_LANGUAGE_CATALOG_FROZEN=YES"),
@@ -476,15 +484,21 @@ object Stage34Tests {
     check("metadati Stage34 conservano il certificato Stage33"){
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=34"),"Stage")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=16"),"PATCH precedente")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=34,"Stage34 preservato")
+      if(current==34){
+        truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=16"),"PATCH precedente")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      } else
+        truth(st.contains("STAGE_34_NATIVE_VERIFICATION=PASS_EXPECTED_RED_63_PASS_3_FAIL"),
+          "DISCOVERY17 storica certificata")
       truth(st.contains("STAGE_33_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_65_PASS_0_FAIL"),
         "Stage33")
       val done=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(done==33 || done==34,"Sequenza")
+      truth(done>=33 && done<=current,"Sequenza")
     }
 
     Vector(
