@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=24
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=12
-LAST_COMPLETED_STAGE=23
+LAST_COMPLETED_STAGE=24
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..11, orderAt46Latch chốt đúng và LegacyOrderMemory ghi đủ 58 lần; thêm LegacyFixedNameSuccessor trả vòng tên 1->2->3->4->5->6->1, Dispatcher.next_bowl cố ý dùng vòng ID cố định thay vì tìm vị trí trong latch.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_24_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_24_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_24_PENDING
-CI_FAILURES=STAGE_24_PENDING
+CI_TESTS=301
+CI_FAILURES=12_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -517,4 +517,25 @@ số hồi quy đỏ cũ được phân loại qua log CI.
 PATCH 12 giai đoạn 25 phải giữ nguyên và gọi legacy
 chỉ để chẩn đoán, định tuyến kết quả chính từ
 vị trí queriedId trong orderAt46Latch, có vòng nối cuối-đầu.
-LAST_COMPLETED_STAGE vẫn 23 trước khi xác minh CI.
+LAST_COMPLETED_STAGE nâng lên 24 sau khi phân loại CI và khóa tên PASS.
+
+Giai đoạn 24 đã được xác minh bởi Elixir 1.18.5 / OTP 27:
+301 kiểm thử, chính xác 12 thất bại thuộc lỗi fixed-name
+của DISCOVERY 12; 289 bài đạt, 0 cảnh báo biên dịch.
+4 hồi quy chuẩn mới Stage24 đỏ (fixture ID 3, cùng ngày,
+đảo hướng và ngày số nguyên lớn); 6 bài Stage22 đỏ
+(4 hồi quy normative và 2 điều khiển production với latch);
+2 bài Stage23 đỏ (truy vấn production theo latch).
+Các phép tính sáu bát, latch giọt 46, 58 lần ghi legacy
+và các bản vá 01..11 vẫn đúng. Không có thất bại khác.
+Lần CI đầu có 14 lỗi vì 2 kiểm toán mã nguồn cũ
+không khớp tên mới và cảnh báo unused alias;
+commit sửa sau chỉ đổi chú thích, kiểm toán source
+và dùng alias đã khai báo, không đổi số học hoặc so chuẩn.
+Canonical Names Lock PASS độc lập.
+Oracle test-only SHA không đổi:
+be1638f46b2190d617af0378a61b077bda10bf32.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38265844932
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38265844794
+Giai đoạn 24 đóng EXPECTED_RED; điểm tiếp theo
+giai đoạn 25 PATCH 12, chưa bắt đầu.

@@ -939,3 +939,29 @@ Trong PATCH 12 phải giữ `old_next_bowl_fixed_name`
 nguyên vẹn và gọi riêng cho chẩn đoán, nhưng trả kết quả
 qua tìm vị trí `queriedId` trong `orderAt46Latch`,
 sau đó lấy phần tử tiếp theo với vòng 6→1.
+
+## Kiểm chứng đóng phát hiện 12
+
+CI Elixir 1.18.5 / Erlang OTP 27 đã chạy **301 bài kiểm thử,
+đúng 12 thất bại có chủ đích**, 289 bài đạt, không cảnh
+báo biên dịch; Canonical Names Lock PASS. Phân loại:
+4 hồi quy chuẩn mới Stage24, 6 bài Stage22 và
+2 bài Stage23 đỏ trở lại do query chọn vòng tên ID cố định.
+Tất cả thất bại đều do `old_next_bowl_fixed_name`
+không tìm vị trí trong latch; các phép SAVE, 46 giọt,
+12 lần khuấy, sáu bát, chốt order giọt 46 vẫn đúng.
+
+Trong lần CI đầu có thêm hai lỗi kiểm toán nguồn cũ
+và một cảnh báo alias trong bài Stage24. Đã cập nhật
+kiểm toán theo tên mới, sửa chú thích tránh token bị
+cấm của Stage01, dùng alias LegacyOrderMemory trực tiếp.
+Không đổi công thức sản xuất hoặc khẳng định oracle.
+
+- [CI phát hiện 12: chính xác 12 sai lệch dự kiến](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38265844932)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38265844794)
+
+Giai đoạn 24/55 kết thúc `EXPECTED_RED` đã xác minh.
+Giai đoạn 25 `PATCH 12`: giữ và gọi hàm
+`old_next_bowl_fixed_name` để chẩn đoán, còn kết quả
+phải tìm ID trong `order_at_46_latch` và lấy phần tử
+tiếp theo theo vòng sáu vị trí. Chưa bắt đầu giai đoạn 25.

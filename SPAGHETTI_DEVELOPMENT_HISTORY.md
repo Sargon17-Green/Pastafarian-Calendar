@@ -821,3 +821,15 @@ nhưng trả `nextBowlFromOrderAt46Latch` bằng cách
 tìm vị trí ID rồi lấy phần tử tiếp theo mod 6. Chưa
 triển khai trong DISCOVERY 12. Giữ mọi hồi quy chuẩn,
 phân loại số thất bại từ CI trước khi đóng giai đoạn.
+
+**Kết quả CI thực tế:** Elixir 1.18.5 / OTP 27,
+301 kiểm thử, 12 sai lệch đã phân loại, 289 bài đạt,
+0 cảnh báo, Canonical Names Lock PASS. Bốn bài Stage24,
+sáu bài Stage22, hai bài Stage23 đỏ do fixed-name
+successor thay cho vị trí trong latch. Các bài còn lại
+đều đạt. Hai kiểm toán nguồn từ CI đầu đã được cập
+nhật, một alias unused đã dùng trong kiểm thử;
+không thay các phép so chuẩn hay số học production.
+Giai đoạn 24 đóng EXPECTED_RED. Kế tiếp PATCH 12
+phải bảo tồn và thực thi legacy cố định cho chẩn đoán,
+trả kết quả từ vị trí thực trong latch.

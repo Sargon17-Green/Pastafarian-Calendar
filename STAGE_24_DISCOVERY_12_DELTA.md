@@ -58,3 +58,33 @@ Lớp `NextBowlPatchWrapper` sẽ tìm ID được hỏi trong
 `orderAt46Latch` và lấy phần tử kế tiếp mod 6,
 trả kết quả đã vá (không phải chẩn đoán legacy).
 Không triển khai bản vá này trong DISCOVERY 12.
+
+## Kết quả kiểm chứng và phân loại
+
+- Commit triển khai:
+  `757dbe8427e71c1a40504c68da646b05720a4a8d`.
+- Commit kiểm toán nguồn và alias:
+  `12dcf74a8c61529f11f7136c59c03eb868133b72`.
+- Elixir 1.18.5 / OTP 27: biên dịch 40 tệp .ex.
+- 301 kiểm thử, 12 thất bại có chủ đích, 289 đạt.
+- 4 hồi quy chuẩn Stage24 đỏ: ID 3 tại fixture,
+  sáu ID cùng ngày, đảo ngày và ngày nguyên rất lớn.
+- 6 bài Stage22 đỏ (4 so chuẩn + 2 kiểm thử đường query
+  không còn đọc latch); 2 bài Stage23 đỏ (so truy vấn
+  production với latch ở các ngày thường và rất lớn).
+- Không có lỗi ngoài fixed-name query, 0 cảnh báo.
+- Canonical Names Lock độc lập PASS.
+- Oracle test-only vẫn giữ blob SHA
+  `be1638f46b2190d617af0378a61b077bda10bf32`.
+- Bản vá 01..11 không bị xoá, orderAt46Latch vẫn đúng,
+  LegacyOrderMemory vẫn ghi 58 lần, số học bát cuối đúng.
+- CI đầu có 14 lỗi, trong đó 2 kiểm toán source cũ;
+  sửa đúng hai kiểm toán và unused alias, không sửa
+  so sánh normative hoặc thuật toán sản xuất.
+- Không chỉnh main, không thêm PATCH 12.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38265844932
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38265844794
+
+Trạng thái cuối: EXPECTED_RED đã xác minh.
+Điểm tiếp theo: giai đoạn 25 PATCH 12, chưa bắt đầu.
