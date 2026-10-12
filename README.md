@@ -200,3 +200,13 @@ Stage 17 ची `oneBased=regularMod(drop-1,720)+1`, `legacyRank0=oneBased-1`, `
 `LegacyFixedBowlPoursAdapter.legacyFixedPours` मध्ये जुन्या तीन pours साठी fixed bowls 1,2,3 वाचले जातात, जरी Stage 17 चा योग्य क्रम वेगळा असेल. सुधारित bowl alias अजून लावलेले नाही. `discoverLegacyFixedPours` मध्ये per-call frozen snapshots, trace/metrics व हा ऐतिहासिक दोष जतन केला. `test/discovery09Red.ts` हा नववा archived intentional expected-red आहे.
 
 [GitHub Actions 38182044313](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38182044313): दोन्ही jobs PASS; पूर्ण 720 orders ×3 = 2160 comparisons, 1800 जुने mismatches/360 accidental matches; 12 day-pairs ×46 actual drops वर 1383 mismatches/273 matches; 8 giant bigint साक्षी. Stage 1–17 regressions, 9 historical expected-red आणि names lock PASS. तपशील `docs/STAGE18_DISCOVERY09_VERIFICATION.md`, पुढील `HANDOFF_STAGE_18.md`. Stage 19 च्या `bowlAlias[position]=order[position]` दुरुस्तीला आगाऊ हात घातला नाही.
+
+## टप्पा 19/55 — PATCH 09: six-position bowl alias
+
+नवीन `patch09Pours(c,t,i,drop,oldBowls,stone)` हा स्वतंत्र corrected मार्ग `bowlAlias[position]=order[position]` या नियमानुसार सहा स्थानांची immutable alias table तयार करतो. प्रत्यक्ष जुना `LegacyFixedBowlPoursAdapter.legacyFixedPours` method **बदललेला नाही**. Handler मूळ bowls वर त्याची ऐतिहासिक call करून जुन्या चुकीच्या तीन pours नोंदवतो, मग `oldBowls[alias[position]-1]` ने तयार केलेल्या virtual six-bowl view वर त्याच helper ला दुसरी call करून normative corrected pours मिळवतो.
+
+`npm run test:patch09` मध्ये 8 सीमा witnesses, पूर्ण 720 permutations, 12 वास्तविक day-pairs × 46 visible drops, 2048 seeded signed values, 8 विशाल signed inputs, immutable input snapshots, real legacy invocation आणि state isolation यांची पडताळणी आहे. `npm test` सर्व Stage 1–19 green tests चालवते; सर्व नऊ `test:discoveryXX:red` हे CI मध्ये intentional nonzero exit पुरावे म्हणून जपलेले आहेत.
+
+**Stage 19 verified:** [GitHub Actions 38212645315](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38212645315), commit `616df1cad4f24a4bd596955759dc1a488cdd1a3d`, दोन्ही jobs PASS. `STAGE_19_PATCH_09_GUARDS_PASS witnesses=8 cells=24 mismatches=0 historicalWrong=16 historicalMatches=8 aliases=6 originalCalls=2`; `STAGE_19_PATCH_09_PROPERTIES_PASS cases=3328 cells=9984 mismatches=0 rankOrders=720 rankWrong=1800 rankMatches=360 realPairs=12 realDrops=552 realWrong=1383 realMatches=273 seeded=2048 giant=8`.
+
+पुढील एकमेव टप्पा **20 — DISCOVERY 10**, जुन्या in-place bowl stir contamination चा स्वतंत्र historical error demonstration. Stage 21 मध्येच vaultOld/pending clone fix लावावा. `HANDOFF_STAGE_19.md` पहा.

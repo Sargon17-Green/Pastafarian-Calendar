@@ -22,4 +22,15 @@ Implementation TypeScript zero-based bowl storage मध्ये `legacyPositio
 - Stage 1–18 regressions, 9 deliberately-red historical regressions, TypeScript native typecheck आणि canonical names lock बदललेले नाहीत.
 - Stage 20 in-place contamination, Stage 21 vaultOld/pending writes, Stage 54 final date integration यांपैकी काहीही आत्ता जोडलेले नाही.
 
-स्थिती: GitHub Actions run प्रमाणित झाल्यावरच Stage 19 पूर्ण मानावा.
+स्थिती: **PASS**. Tested implementation commit `616df1cad4f24a4bd596955759dc1a488cdd1a3d`, [GitHub Actions run 38212645315](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38212645315). Jobs `verify` आणि `stage19-typescript-marathi` दोन्ही `success`. TypeScript typecheck, stages 1–19 regressions, सर्व 9 historical expected-red scripts, canonical names lock PASS.
+
+```text
+STAGE_19_PATCH_09_GUARDS_PASS witnesses=8 cells=24 mismatches=0 historicalWrong=16 historicalMatches=8 aliases=6 originalCalls=2
+STAGE_19_PATCH_09_PROPERTIES_PASS cases=3328 cells=9984 mismatches=0 rankOrders=720 rankWrong=1800 rankMatches=360 realPairs=12 realDrops=552 realWrong=1383 realMatches=273 seeded=2048 giant=8
+```
+
+- All 720 permutation orders, 2160 pour positions, 1800 historic wrong/360 accidental matching unchanged; fixed code correct.
+- 552 normative visible drops from 12 day-pairs and original initial bowl values, original 1383 wrong /273 accidental matching preserved; corrected 0 mismatches.
+- 2048 independently seeded signed bigints and 8 enormous positive/negative bigint inputs; no corrected mismatches.
+- Stage 19 performs only position-to-ID aliasing for pours, **not** bowl-stir in-place mutation or its subsequent correction.
+- All nine archived intentionally-red tests still exit nonzero as required; workflow treats them as expected historical evidence.
