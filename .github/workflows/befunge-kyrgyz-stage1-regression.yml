@@ -2574,6 +2574,45 @@ jobs:
           path: ${{ runner.temp }}/native-lower-wide-rejoin/
           retention-days: 30
 
+  native-four-cell-exhaustive-small-signed-grid:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin production BF98 and compile finite signed-grid QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_cell_exhaustive_small_grid.py qa/stage1_native_four_cell_exhaustive_small_grid_audit.py
+          python3 qa/stage1_native_four_cell_exhaustive_small_grid_audit.py --selftest
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Exhaustively replay the 7 by 7 signed-day grid and eight invalid lexemes with actual BF98
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/four-cell-small-grid"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/four-cell-small-grid:/four-cell-small-grid" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1030s python -u qa/stage1_native_four_cell_exhaustive_small_grid.py
+            '
+          test -s "$RUNNER_TEMP/four-cell-small-grid/small_grid_native_parity.json"
+          test -s "$RUNNER_TEMP/four-cell-small-grid/small_grid_candidate.b98"
+          python3 qa/stage1_native_four_cell_exhaustive_small_grid_audit.py "$RUNNER_TEMP/four-cell-small-grid"
+          echo FOUR_CELL_EXHAUSTIVE_SIGNED_SMALL_GRID_FINITE_PASS_STAGE1_OPEN
+      - name: Retain isolated BF98 49 valid and 8 invalid Native signed-grid evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-four-cell-native-signed-grid
+          path: ${{ runner.temp }}/four-cell-small-grid/
+          retention-days: 30
+
   native-lower-feedback-four-cell-semantic-candidate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
