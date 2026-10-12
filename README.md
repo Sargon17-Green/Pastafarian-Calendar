@@ -564,3 +564,21 @@ ak 15 rekiperasyon, 9 gout vizib reyèl, 180 entèlasman (360 apèl),
 ak 8 apèl nested. Odit Stage 16 lan toujou detekte 719 rank
 deplase ak sèl rejè rank 720 la. PATCH 08 fèmen; pa gen okenn
 kòd pou brase bòl ki antre.
+
+## Stage 18 — DISCOVERY 09: twa vide sou id bòl fiks
+
+Fonksyon `src/legacy_fixed_pours.lua` kalkile sis bòl inisyal yo ak
+PATCH 01/02/03, epi li resevwa lòd sis bòl ki deja korije nan PATCH 08.
+Sepandan twa vide istorik yo sèvi ak `oldBowls[position]` pou position
+1, 2, 3, **pa** ak bòl la ki nan pozisyon sa a nan permutation a. Se
+egzakteman defo n ap ekspoze nan DISCOVERY 09.
+
+Chemen pwodiksyon `openingPoursSpaghetti(c,t)` kalkile premye gout vizib
+reyèl la atravè PATCH 01–07, rank bòl yo atravè PATCH 08, epi li fè yon
+sèl apèl pou twa vide istorik sa yo. `openingPoursProbe` bay menm
+rezilta ak kontèks pou dyagnostik. Depo bòl la pa chanje.
+
+Sa se etap DISCOVERY sèlman: tès istorik la dwe rete EXPECTED_RED;
+`test/stage18_expected_red_audit.lua` asire mesaj erè egzak la.
+Koreksyon pozisyon-vè-id bòl la se PATCH 09 nan Stage 19. Pa gen
+kòd pou alias id bòl, pou brase bòl, oubyen pou PATCH 10.

@@ -488,3 +488,12 @@ Tès natif CI Stage 17 dwe pase anvan nou fèmen etap la.
 CI natif `38266889952` fini ak 10/10 travay PASS. Tout 720 rang
 korije, 237 ka BigInt, 15 fault injections, 9 gout vivan, 180
 entèlasman ak 8 apèl nested verifye. LAST_COMPLETED_STAGE=17.
+
+## Stage 18 — DISCOVERY 09: vide istorik yo sou id fiks
+
+Lòd permutation sis bòl la sòti kòrèkteman nan PATCH 08. Men premye
+twa vide yo toujou pran bòl fizik 1, 2, 3, olye id bòl ki parèt nan
+twa premye pozisyon lòd permutation sa a. Nou konsève fonksyon
+`legacyPoursToFixedBowlIds`, metrik, dyagnostik, tras tranzaksyon,
+premye eta bòl yo ak wout reyèl gout vizib premye a. Nou pa
+chanje mwayen vide yo; Stage 19 sèlman ap korije erè id bòl sa a.

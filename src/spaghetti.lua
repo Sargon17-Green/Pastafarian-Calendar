@@ -16,6 +16,7 @@ local LegacyGrinds = require("legacy_grinds")
 local GrindPatch = require("grind_patch")
 local LegacyPermutation = require("legacy_permutation")
 local PermutationPatch = require("permutation_patch")
+local LegacyFixedPours = require("legacy_fixed_pours")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -171,8 +172,40 @@ function S.legacyPermutationProbe(dropValue)
     return LegacyPermutation.execute(dropValue)
 end
 
+-- DISCOVERY 09: premye twa vide yo toujou gade id fizik 1,2,3.
+-- Chemen sa a gen sèlman yon probe Discovery 09 pa invocation.
+function S.fixedBowlPoursSpaghetti(drop,index,oldBowls,stoneRow)
+    local result=LegacyFixedPours.execute(drop,index,oldBowls,stoneRow)
+    return result
+end
+
+function S.legacyFixedBowlPoursProbe(drop,index,oldBowls,stoneRow)
+    return LegacyFixedPours.execute(drop,index,oldBowls,stoneRow)
+end
+
+function S.initialBowlsSpaghetti(calculationDay,targetDay)
+    return LegacyFixedPours.initialBowls(calculationDay,targetDay)
+end
+
+function S.openingPoursProbe(calculationDay,targetDay)
+    local bowls=LegacyFixedPours.initialBowls(calculationDay,targetDay)
+    local stones=StonePatch.buildPatchedTable()[1]
+    local drop,visibleContext=S.visibleDropSpaghetti(calculationDay,targetDay,1,{})
+    local result,context=LegacyFixedPours.execute(drop,1,bowls,stones)
+    context.initialBowls=LegacyFixedPours.initialBowls(calculationDay,targetDay)
+    context.firstVisibleDrop=BigInt.from(drop)
+    context.visibleContext=visibleContext
+    context.metrics["discovery09.opening.probes"]=1
+    return result,context
+end
+
+function S.openingPoursSpaghetti(calculationDay,targetDay)
+    local result=S.openingPoursProbe(calculationDay,targetDay)
+    return result
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 16", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 18", 0)
 end
 
 return S

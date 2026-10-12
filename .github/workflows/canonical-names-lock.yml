@@ -306,3 +306,33 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage17_tests.lua .
+
+  lua_stage18_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye sentaks ak gad kont kòd twò bonè
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_permutation.lua)" = 5b2c44b71ff3469230903adc05d7d65c84060f65
+          lua5.3 test/stage18_scope_tests.lua .
+      - name: Kouri tout tès Stage 1 a 18, ak odit erè istorik
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage18_tests.lua .
+      - name: Regression normatif DISCOVERY 09 — EXPECTED_RED sèl
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage18_regression_tests.lua .
