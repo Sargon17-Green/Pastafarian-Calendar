@@ -78,7 +78,46 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
     my @word;
     my $current_total = $total->copy;
     my ($calls,$considered,$shortcut_steps)=(0,0,0);
+    my ($tail_shortcut_days,$tail_shortcut_kind)=(0,0);
     for my $step (1 .. $days) {
+        # 即使最初排名並非 1 或總數，已接受某個較小的字典序
+        # 區塊後，其剩餘的一基局部排名也可能恰為 1 或目前區塊
+        # 總數。此時不再逐日重新計算後綴，而可在剩餘序列中
+        # 按最小／最大合法下一標籤直接走到葉節點。
+        if ($rank == 1 || $rank == $current_total) {
+            my $choose_largest = $rank != 1;
+            $tail_shortcut_kind = $choose_largest ? 2 : 1;
+            for my $remaining_step ($step .. $days) {
+                my $upper = $opened < $m ? $opened+1 : $m;
+                my $chosen;
+                if ($choose_largest) {
+                    for (my $j=$upper; $j>=1; $j--) {
+                        next if !$remaining[$j-1];
+                        next if $remaining[$j-1]==1 && $j!=$closed+1;
+                        $chosen=$j;
+                        last;
+                    }
+                } else {
+                    for my $j (1 .. $upper) {
+                        next if !$remaining[$j-1];
+                        next if $remaining[$j-1]==1 && $j!=$closed+1;
+                        $chosen=$j;
+                        last;
+                    }
+                }
+                die "交織局部排名捷徑沒有合法延伸\n"
+                    if !defined $chosen;
+                push @word,$chosen;
+                $opened=$chosen if $chosen>$opened;
+                $remaining[$chosen-1]--;
+                $closed=$chosen if !$remaining[$chosen-1];
+                $considered++;
+                $shortcut_steps++;
+                $tail_shortcut_days++;
+            }
+            $current_total=Math::BigInt->bone;
+            last;
+        }
         my $upper = $opened < $m ? $opened+1 : $m;
         my @eligible;
         for my $j (1 .. $upper) {
@@ -124,7 +163,9 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
     if (defined $stats) {
         %$stats = (days => $days, suffix_calls => $calls,
                    considered => $considered, shortcut_steps => $shortcut_steps,
-                   first_rank_fastpath => 0, last_rank_fastpath => 0);
+                   first_rank_fastpath => 0, last_rank_fastpath => 0,
+                   tail_shortcut_days => $tail_shortcut_days,
+                   tail_shortcut_kind => $tail_shortcut_kind);
     }
     return \@word;
 }
