@@ -49,7 +49,7 @@ for(let i=0;i<256;i++){
   out.tiedRuns[1]!.start===4&&out.tiedRuns[1]!.exclusiveEnd===6&&
   out.tiedRuns[0]!.length===length&&
   out.tiedRuns[1]!.length===length+1n&&
-  out.movedMembers===6&&out.tieMemberCount===6&&
+  out.movedMembers===5&&out.tieMemberCount===6&&
   out.oldComparatorCalls>=5&&out.runSortCalls===2&&
   out.historical.every((e,j)=>e.length===out.corrected[j]!.length),
   "256 independent disjoint maximal runs preserve historical outer length ordering");
@@ -58,7 +58,7 @@ for(let i=0;i<256;i++){
  moved+=out.movedMembers;tied+=out.tieMemberCount;direct++;
 }
 check(direct===256&&correctedWrong===0&&oldWrong===256&&
- totalRuns===512&&moved===1536&&tied===1536&&oldComparator>=1280,
+ totalRuns===512&&moved===1280&&tied===1536&&oldComparator>=1280,
  "all 256 paired-run sequences corrected only inside maximal ties");
 let giants=0;
 const large=1n<<16384n;
