@@ -11,7 +11,7 @@ use lib 'lib','t/lib';
 use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
 
-sub values ($h) {
+sub histogram_as_strings ($h) {
     return [map {defined($_) ? "$_" : undef} @$h];
 }
 my @lengths=(3,2,4);
@@ -32,7 +32,7 @@ my $answer=countWeavingsPolynomialStream(
 is("$answer","$expected",'接收器改寫不會改變最終精確 BigInt');
 is($stats{histogram_sink_calls},3,'回呼階段數正確');
 for my $stage (1 .. 3) {
-    is_deeply(values($retained[$stage]),values($oracle[$stage]),
+    is_deeply(histogram_as_strings($retained[$stage]),histogram_as_strings($oracle[$stage]),
        "第 $stage 階段保留的完整位置分布不受改寫");
     isnt(refaddr($retained[$stage]),refaddr($delivered[$stage]),
        "第 $stage 階段 ARRAY 並非相同參照");
@@ -45,7 +45,7 @@ for my $stage (1 .. 3) {
          refaddr($delivered[$stage][$first]),
          "第 $stage 階段 BigInt 並非相同參照");
     $delivered[$stage][$first]->badd(8000);
-    is_deeply(values($retained[$stage]),values($oracle[$stage]),
+    is_deeply(histogram_as_strings($retained[$stage]),histogram_as_strings($oracle[$stage]),
         "第 $stage 階段接收器的延後修改不污染保留值");
 }
 my $calls=0;
