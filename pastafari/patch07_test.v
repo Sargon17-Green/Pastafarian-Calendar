@@ -75,9 +75,7 @@ fn test_patch07_all_eleven_grinds_apply_the_right_coefficients() {
 		reference = big_add(reference, big_mul_small(p7, u32(row[3])))
 		reference = big_add(reference, hidden_stone_component(stone, row[4]))
 		reference = calendar_save_spaghetti(reference)
-		actual := calendar_grind_once_spaghetti(grind, x, p1, p3, p7, stone) or {
-			big_zero()
-		}
+		actual := calendar_grind_once_spaghetti(grind, x, p1, p3, p7, stone) or { big_zero() }
 		assert big_eq(actual, reference)
 		x = actual
 	}
@@ -105,12 +103,8 @@ fn test_patch07_large_numbers_signed_inputs_and_repeated_runs() {
 		expected = big_add(expected, big_mul_small(p7, u32(row[3])))
 		expected = big_add(expected, hidden_stone_component(stone, row[4]))
 		expected = calendar_save_spaghetti(expected)
-		first := calendar_grind_once_spaghetti(grind, x, p1, p3, p7, stone) or {
-			big_zero()
-		}
-		second := calendar_grind_once_spaghetti(grind, x, p1, p3, p7, stone) or {
-			big_zero()
-		}
+		first := calendar_grind_once_spaghetti(grind, x, p1, p3, p7, stone) or { big_zero() }
+		second := calendar_grind_once_spaghetti(grind, x, p1, p3, p7, stone) or { big_zero() }
 		assert big_eq(first, expected)
 		assert big_eq(second, expected)
 	}
