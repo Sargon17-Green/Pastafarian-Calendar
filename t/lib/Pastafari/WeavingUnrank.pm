@@ -41,9 +41,39 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
         if (defined $stats) {
             %$stats = (days => $days, suffix_calls => 0,
                        considered => $days, shortcut_steps => $days,
-                       first_rank_fastpath => 1);
+                       first_rank_fastpath => 1, last_rank_fastpath => 0);
         }
         return \@first;
+    }
+    # 字典序最後一名可貪婪地選擇「目前可用的最大月份」。
+    # 任何符合局部首次/末次次序的前綴均有完工方法：
+    # 先按次序結束所有已開啟月份，再依序開啟、結束其餘月份。
+    # 因此最大合法下一月份的子樹必非空，可反覆選取而無須
+    # 重新計算任何前綴完工數。
+    if ($rank == $total) {
+        my @last;
+        for my $step (1 .. $days) {
+            my $upper = $opened < $m ? $opened+1 : $m;
+            my $selected;
+            for (my $j = $upper; $j >= 1; $j--) {
+                next if !$remaining[$j-1];
+                next if $remaining[$j-1] == 1 && $j != $closed+1;
+                $selected = $j;
+                last;
+            }
+            die "交織最後排名無合法選擇\n" if !defined $selected;
+            push @last,$selected;
+            $opened = $selected if $selected > $opened;
+            $remaining[$selected-1]--;
+            $closed = $selected if !$remaining[$selected-1];
+        }
+        die "交織最後排名的月份尚未全部關閉\n" if $closed != $m;
+        if (defined $stats) {
+            %$stats = (days => $days, suffix_calls => 0,
+                       considered => $days, shortcut_steps => $days,
+                       first_rank_fastpath => 0, last_rank_fastpath => 1);
+        }
+        return \@last;
     }
     my @word;
     my $current_total = $total->copy;
@@ -94,7 +124,7 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
     if (defined $stats) {
         %$stats = (days => $days, suffix_calls => $calls,
                    considered => $considered, shortcut_steps => $shortcut_steps,
-                   first_rank_fastpath => 0);
+                   first_rank_fastpath => 0, last_rank_fastpath => 0);
     }
     return \@word;
 }
