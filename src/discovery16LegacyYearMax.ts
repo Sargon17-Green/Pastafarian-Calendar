@@ -61,8 +61,8 @@ export class LegacyYearMaxCandidateFilter {
          x.closeGateDay<=x.openGateDay)
         throw new MonsterValidationError("प्रत्येक वर्ष-जोडीला वाढते gate index आणि दिवस आवश्यक");
     }
-    const entries:LegacyYearCandidateEntry[]=candidates.map((x,i)=>{
-      const length=x.closeGateDay-x.openGateDay;
+    const entries:LegacyYearCandidateEntry[]=candidates.map((x:LegacyYearCandidate,i:number)=>{
+      const length:bigint=x.closeGateDay-x.openGateDay;
       const accepted=this.old.oldEligibleYear(length,x.closeGateIndex-x.openGateIndex);
       return Object.freeze({
         candidate:Object.freeze({...x}),length,accepted,originalPosition:i
