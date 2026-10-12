@@ -413,3 +413,18 @@ y swydd Kotlin a swydd cloi enwau â `SUCCESS`.
 
 **`LAST_COMPLETED_STAGE=17`**. Cam 18 (`DISCOVERY 09`) yw'r
 nesaf; ni ddechreuwyd. Nid oes adeiladwr diferion gweledig na pours.
+
+
+## Cam 18 — DISCOVERY 09: darlleniad arllwys sefydlog
+
+Mae `LegacyFixedPourAdapter.oldFixedPour` yn galw'r
+trefnydd cywir PATCH 08 ond yn tynnu'r tri mewnbwn arllwys o
+`old[1], old[2], old[3]` yn hytrach na
+`old[order[0]], old[order[1]], old[order[2]]`.
+Mae `BOOT → DISCOVERY_09` yn cadw tystiolaeth 46 cymysgiad,
+cipluniau a'r trefn olaf. Cedwir yr addasiad chwe bowlen
+ar sail ciplun, heb ddechrau PATCH 09, PATCH 10, adeiladwr
+diferion gweledig, na'r cymysgiadau terfynol.
+Gwirir pob 720 trefn (714 RED, 6 MATCH damweiniol),
+4,320 tyst BigInteger a holl Gamau 1–17.
+**`LAST_COMPLETED_STAGE=17`** tan PASS native CI.

@@ -106,7 +106,15 @@ data class BaseMonsterContext(
     var patch08LegacyCalls: Int = 0,
     var patch08CorrectedCalls: Int = 0,
     var patch08Applied: Boolean = false,
-    var patch08InvocationCount: Int = 0
+    var patch08InvocationCount: Int = 0,
+    var discovery09VisibleDrops: List<ExactInt>? = null,
+    var discovery09InitialBowls: List<ExactInt>? = null,
+    var discovery09Steps: List<LegacyPourStep>? = null,
+    var discovery09FinalBowls: List<ExactInt>? = null,
+    var discovery09OrderAt46: List<Int>? = null,
+    var discovery09FixedPourCalls: Int = 0,
+    var discovery09PermutationPatchCalls: Int = 0,
+    var discovery09InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -173,7 +181,9 @@ class MonsterBootstrapManager(
     val grindPatchWrapper: GrindPatchWrapper = GrindPatchWrapper(legacyGrindTableAdapter),
     val legacyPermutationOrderAdapter: LegacyPermutationOrderAdapter = LegacyPermutationOrderAdapter(),
     val permutationPatchWrapper: PermutationPatchWrapper =
-        PermutationPatchWrapper(legacyPermutationOrderAdapter)
+        PermutationPatchWrapper(legacyPermutationOrderAdapter),
+    val legacyFixedPourAdapter: LegacyFixedPourAdapter =
+        LegacyFixedPourAdapter(permutationPatchWrapper)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -347,6 +357,35 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("DISCOVERY_09") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_DISCOVERY09_CONTEXT_NOT_READY")
+            val initial = context.discovery09InitialBowls
+                ?: throw MonsterValidationException("E_DISCOVERY09_NO_INITIAL")
+            val visible = context.discovery09VisibleDrops
+                ?: throw MonsterValidationException("E_DISCOVERY09_NO_VISIBLE")
+            // Y nam yw'r dair ffynhonnell sefydlog, nid y cymysgiad.
+            val result = legacyFixedPourAdapter.runWrongPours(initial, visible)
+            check(result.steps.size == 46 && result.finalBowls.size == 7 &&
+                result.orderAt46.size == 6 &&
+                result.fixedPourCalls == 46 &&
+                result.permutationPatchCalls == 46 &&
+                result.steps.all { it.fixedPour.sourceIdsWrong == listOf(1,2,3) }) {
+                "E_DISCOVERY09_RUN_SHAPE"
+            }
+            // Ymrwymo dim ond ar ôl llwyddiant holl 46 cylch.
+            context.discovery09Steps = result.steps.toList()
+            context.discovery09FinalBowls = result.finalBowls.toList()
+            context.discovery09OrderAt46 = result.orderAt46.toList()
+            context.discovery09FixedPourCalls = result.fixedPourCalls
+            context.discovery09PermutationPatchCalls = result.permutationPatchCalls
+            context.discovery09InvocationCount = 1
+            context.branchTrace.add("DISCOVERY_09")
+            context.diagnostics.add("DISCOVERY_09_FIXED_IDS_NOT_ORDER_POSITIONS")
+            context.status = "LEGACY_FIXED_POURS_OBSERVED"
+            metrics.bump("discovery09.fixed.pour.calls")
         }
         dispatcher.register("PATCH_08") { context ->
             validation.requireBootstrapContext(context)
@@ -753,6 +792,26 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 18: arsylwi 46 arllwys â ffynonellau 1,2,3 sefydlog. */
+    fun observeLegacyFixedPours(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        initialBowls: List<ExactInt>, visibleDrops: List<ExactInt>
+    ): BaseMonsterContext {
+        // Nid yw adeiladwr diferion gweledig yn rhan o Gam 18.
+        val context = prepare(calculationDay, targetDay)
+        context.discovery09InitialBowls = initialBowls.toList()
+        context.discovery09VisibleDrops = visibleDrops.toList()
+        context.phase = "DISCOVERY_09"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY09_WRAP", e)
         }
     }
 
