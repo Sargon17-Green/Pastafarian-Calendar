@@ -910,3 +910,32 @@ Module legacy và oracle test-only không bị sửa.
 
 Giai đoạn 23/55 kết thúc `GREEN`. Điểm tiếp theo:
 giai đoạn 24/55 `DISCOVERY 12`; chưa bắt đầu.
+
+## Giai đoạn 24 — Phát hiện 12: tìm bát kế tiếp theo tên cố định
+
+Một lỗi mới được phơi bày mà không phá các bản vá trước.
+`OrderAt46LatchPatch` vẫn chốt đúng hoán vị sáu ID khi
+giọt thứ 46 hoàn tất, và `LegacyOrderMemory` vẫn ghi đè
+46+12=58 lần như hợp đồng lịch sử. Sáu giá trị bát cuối
+vẫn đúng với oracle. Tuy nhiên, đường truy vấn mới
+`LegacyFixedNameSuccessor.old_next_bowl_fixed_name(id)`
+bỏ qua **vị trí của ID trong hoán vị đã chốt** và chỉ trả
+vòng tên cố định `1→2→3→4→5→6→1`.
+
+Ví dụ với `orderAt46Latch=[4,5,2,3,6,1]`, hỏi ID 3
+thì phần tử kế theo hoán vị là **6**, nhưng hàm legacy
+trả **4**. Hỏi ID 1 cho 2 thay vì 4, hỏi ID 5 cho 6 thay
+vì 2. `Dispatcher.next_bowl` thực sự gọi hàm legacy
+cố định, còn latch chuẩn vẫn có trong Context để kiểm chứng.
+
+Thêm 18 bài kiểm thử: 14 bài kiểm soát vòng fixed ID,
+đủ 720 hoán vị, nguồn latch, 58 lần ghi, lỗi đầu vào,
+ngày rất lớn, đồng thời và kiểm toán mã nguồn; bốn hồi
+quy chuẩn cố ý đỏ. Giữ các biểu thức normative từ giai
+đoạn 22/23, dù có thể đỏ lại do query cố định.
+Không thêm `NextBowlPatchWrapper` của giai đoạn 25.
+
+Trong PATCH 12 phải giữ `old_next_bowl_fixed_name`
+nguyên vẹn và gọi riêng cho chẩn đoán, nhưng trả kết quả
+qua tìm vị trí `queriedId` trong `orderAt46Latch`,
+sau đó lấy phần tử tiếp theo với vòng 6→1.

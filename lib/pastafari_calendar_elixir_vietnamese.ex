@@ -2,9 +2,9 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 23 chốt thứ tự tại giọt 46 trước các lượt
-  khuấy cuối; truy vấn đọc chốt riêng trong khi bộ nhớ
-  legacy vẫn được ghi 58 lần. Các bản vá cũ được giữ.
+  Giai đoạn 24 vẫn chốt đúng thứ tự giọt 46 nhưng truy vấn
+  bát kế tiếp cố ý theo vòng ID 1..6 cố định của legacy,
+  bỏ qua vị trí thật trong latch. Các bản vá cũ được giữ.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}

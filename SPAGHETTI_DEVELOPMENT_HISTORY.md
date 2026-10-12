@@ -793,3 +793,31 @@ oracle giữ nguyên blob SHA
 `be1638f46b2190d617af0378a61b077bda10bf32`.
 Memory vẫn bị ghi 58 lần, latch riêng lưu thứ tự giọt
 46 để truy vấn. Giai đoạn 23 đóng GREEN, chưa mở Stage24.
+
+## Giai đoạn 24 — Phát hiện 12: vòng tên ID cố định
+
+**Di sản mới:** `LegacyFixedNameSuccessor` trả
+`rem(id,6)+1` với ID 1..6, tương đương
+1→2→3→4→5→6→1. Không tìm ID đang hỏi trong
+`orderAt46Latch`, dù latch đã được PATCH 11
+chốt chuẩn ở giọt 46.
+
+**Đường production lỗi có chủ đích:** `Dispatcher.next_bowl`
+bootstrap toàn bộ context, nhưng chỉ dùng
+`LegacyFixedNameSuccessor.old_next_bowl_fixed_name`
+thay vì thuật toán đọc hoán vị của latch. Sáu ID bát,
+12 post-stir và 58 lần ghi memory giữ nguyên. Công thức
+SAVE, stone, hidden, visible và các bản vá 01..11
+không bị sửa. Lỗi chỉ ở cách chọn ID kế cận.
+
+**Chứng cứ:** Với latch [4,5,2,3,6,1], ID 3 có kế
+cận 6, còn legacy trả 4. ID 1 và 5 cũng sai.
+Đủ 720 hoán vị, chỉ 6 thứ tự xoay của vòng cố định
+có ánh xạ next-bowl trùng vòng tên legacy.
+
+**Giai đoạn 25:** Không được xoá hay thay hàm
+legacy; phải dùng nó để ghi nhận kết quả chẩn đoán
+nhưng trả `nextBowlFromOrderAt46Latch` bằng cách
+tìm vị trí ID rồi lấy phần tử tiếp theo mod 6. Chưa
+triển khai trong DISCOVERY 12. Giữ mọi hồi quy chuẩn,
+phân loại số thất bại từ CI trước khi đóng giai đoạn.

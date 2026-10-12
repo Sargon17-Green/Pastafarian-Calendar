@@ -4,10 +4,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
-  Giai đoạn 23 chốt thứ tự giọt 46 trước 12 lượt khuấy,
-  giữ nguyên LegacyOrderMemory vẫn bị ghi đè đúng 58 lần.
-  Truy vấn bát kế tiếp đọc latch riêng thay vì ô ghi đè.
-  Chưa tích hợp ngày lịch.
+  Giai đoạn 24 vẫn chốt đúng thứ tự giọt 46 trước khuấy,
+  giữ LegacyOrderMemory với đủ 58 lần ghi. Nhưng truy vấn
+  bát kế tiếp gọi vòng tên ID cố định của legacy thay vì
+  tìm vị trí trong latch. Chưa tích hợp ngày lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
@@ -18,6 +18,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     DayCountManager,
     DistanceManager,
     HiddenDropManager,
+    LegacyFixedNameSuccessor,
     Metrics,
     OrderAt46LatchPatch,
     SaveManager,
@@ -163,7 +164,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   end
 
   def next_bowl(calculation_day, target_day, queried_bowl_id) do
-    order_at_46_latch(calculation_day, target_day)
-    |> OrderAt46LatchPatch.next_bowl(queried_bowl_id)
+    _latch = order_at_46_latch(calculation_day, target_day)
+    LegacyFixedNameSuccessor.old_next_bowl_fixed_name(queried_bowl_id)
   end
 end
