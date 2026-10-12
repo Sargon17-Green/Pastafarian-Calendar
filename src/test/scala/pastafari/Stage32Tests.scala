@@ -220,8 +220,8 @@ object Stage32Tests {
         eqv(old.selectedMonthId,w(d),"ID "+i)
       }
     }
-    check("120 posizioni di intreccio sono legalmente rifiutate sopra 84"){
-      for(p<-85 to 120)
+    check("le aperture con un mese oltre 123 giorni sono rifiutate"){
+      for(p<-124 to 140)
         rejectArg("Posizione "+p){historical(singleInsertion(p),0)}
     }
     check("durate fuori 4..123 sono rifiutate"){
