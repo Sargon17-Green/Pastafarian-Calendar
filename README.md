@@ -1406,3 +1406,32 @@ un doppio `val st` che impediva la compilazione delle suite;
 è stato eliminato senza modificare la semantica del legacy.
 I nomi congelati del catalogo e la salsa normativa restano
 estranei a questo wrapper diagnostico.
+
+## Stadio 36 — DISCOVERY18: disallineamento tra indici e catalogo
+
+PATCH17 seleziona correttamente, senza duplicati, gli
+indici canonici dei mesi `1..47`; il catalogo italiano
+congelato in `SourceLanguageCatalog.Months` usa tuttavia
+posizioni `0..46`. Il percorso legacy
+`oldSourceCatalogMismatch` sbaglia deliberatamente
+convertendo l'indice `i` nella posizione `i % 47`,
+mentre il lookup corretto è `i-1`.
+
+Questo bug è diverso dalla scelta CON rimpiazzo scoperta
+nella DISCOVERY17: la selezione di indici resta immutabile,
+ma l'**etichetta italiana** associata a ciascun indice è
+quella del mese successivo. L'indice 47, che dovrebbe
+indicare `sabbia`, produce `argilla`.
+
+La DISCOVERY18 conserva gli ID canonici, la versione
+del catalogo congelato, i nomi storici sbagliati,
+snapshot, trace e validator indipendente. La suite
+Stage36 ha firma prevista **59 PASS/3 FAIL
+intenzionali** su index1, wrap 47 e catalogo completo,
+con 4096 casi riproducibili di permutazioni, controllo
+di catalogo immutabile e regressioni PATCH01–17.
+
+La futura PATCH18 può mappare usando il lookup
+corretto, ma **non viene anticipata**. Le sequenze
+sono indici sintetici già scelti: la salsa normativa
+e la conversione completa sono ancora fuori fase.

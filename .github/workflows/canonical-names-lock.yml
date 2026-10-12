@@ -836,3 +836,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 35: 71 PASS, 0 FAIL' stage35.log
           test "$(grep -Fc 'PASS — ' stage35.log)" -eq 71
           test "$(grep -Fc 'FAIL — ' stage35.log)" -eq 0
+
+  native-stage36-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage36 expected-RED frozen month name catalog mismatch
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage36Tests' > stage36.log 2>&1
+          rc=$?
+          set -e
+          cat stage36.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 36: 59 PASS, 3 FAIL' stage36.log
+          test "$(grep -Fc 'PASS — ' stage36.log)" -eq 59
+          test "$(grep -Fc 'FAIL — ' stage36.log)" -eq 3
+          for label in INDEX1_ITALIAN_NAME INDEX47_WRAP INDEX1_TO_47; do
+            grep -Fq "FAIL — equivalenza normativa catalogo ${label} — Indice canonico convertito male: ${label}" stage36.log
+          done

@@ -639,3 +639,20 @@ m=3..47 con cardinalità BigInt. L'algoritmo è limitato
 alla selezione di un rank già prodotto dal chiamante;
 non simula la salsa annuale completa né afferma
 che ogni conversione di calendario sia pronta.
+
+## DISCOVERY18 — passaggio ID→nome del catalogo italiano
+
+In un vettore annuale sintetico di `m=3..47`
+ID canonici distinti, ogni `id` appartiene a
+`1..47`. L'unica mappatura corretta al catalogo
+italiano congelato è `SourceLanguageCatalog.month(id)`
+oppure `SourceLanguageCatalog.Months(id-1)`.
+
+La nuova cicatrice `oldSourceCatalogMismatch`
+valida gli ID distinti ma sceglie invece
+`SourceLanguageCatalog.Months(id % 47)`: per
+`id=1` viene restituito `melagrana` invece di
+`argilla`, per `id=47` viene restituito
+`argilla` invece di `sabbia`. Il validator
+ricostruisce soltanto la mappatura erronea,
+così la correzione resta compito di PATCH18.

@@ -1525,3 +1525,15 @@ italiano resta congelato, il vecchio adapter con nomi
 duplicati resta riproducibile, mentre il ramo corretto
 seleziona disposizioni senza ripetizioni. La validazione
 del rank è indipendente dall'unrank. Stage36 assente.
+
+## Stadio 36 — DISCOVERY18: indice canonico contro posizione Vector
+
+Il nuovo ponte diagnostico a nomi italiani preserva
+l'erronea conversione di `i=1..47` nella posizione
+`i % 47` della collezione congelata anziché `i-1`.
+Ciò non duplica nomi selezionati: **sposta** tutte
+le etichette di una posizione. Il catalogo originale
+non è modificato. Report, snapshot, validator, trace,
+metriche e i test di regressione per PATCH01–17 sono
+mantenuti. Il risultato atteso della fase è
+59 PASS/3 FAIL intenzionali.
