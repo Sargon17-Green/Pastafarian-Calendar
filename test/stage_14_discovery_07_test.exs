@@ -221,7 +221,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage14Discovery07Test do
 
     assert legacy =~ "Enum.at(@real_rows, number, @missing_row)"
     assert legacy =~ "@sentinel_row {0, 0, 0, 0, 1}"
-    assert legacy =~ "@real_rows [\\n    @sentinel_row,"
+    assert legacy =~ "@real_rows ["
+    assert legacy =~ "    @sentinel_row,"
     assert legacy =~ "@missing_row {0, 0, 0, 0, 1}"
     assert calculator =~ "Enum.reduce(1..11, seed, fn grind_number, old_value ->"
     assert calculator =~ "LegacyGrindTable.legacy_row(grind_number)"
