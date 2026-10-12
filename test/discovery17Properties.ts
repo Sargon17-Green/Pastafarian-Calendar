@@ -139,7 +139,8 @@ function verifyInjected(v:readonly bigint[],bowls:readonly bigint[],kind:"varied
   out.yearSelection.preceding.preceding.preceding.preceding.orderAt46Latch.join(",")===order.join(",")&&
   out.yearSelection.preceding.preceding.preceding.preceding.sharedMemoryWrites===58&&
   out.yearSelection.preceding.preceding.preceding.preceding.preceding.historical.latestSource==="STIR_12"&&
-  out.preceding.yearSelection.correctedRank===expectedRank&&
+  out.preceding.yearSelection.correctedRank===1n&&
+  out.preceding.yearSelection.familySize===1n&&
   out.oldSorted[0]!.candidate.openGateDay===g&&
   out.oldSorted[1]!.candidate.openGateDay===g-100n&&
   out.lengthTieInversions===1&&
