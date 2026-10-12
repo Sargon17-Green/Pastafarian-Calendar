@@ -506,3 +506,16 @@ rimane zero per ogni passo. La DISCOVERY14 conserva quindi
 una fotografia separata `(first, step, count, rank)` e
 PATCH14 con validator la confrontano con gli input correnti.
 La run 38256237425 (30/30 job) verifica anche questo caso.
+
+## DISCOVERY 15 — scelta giornaliera della tessitura dei mesi
+
+Il sistema normativo sceglie una sola sequenza annuale di ID mese,
+poi usa la posizione del giorno all'interno di quella sequenza. Il
+vecchio `legacyChooseEachDaySeparately` aggiunge `dayOffset`
+al rango della famiglia, con wraparound modulo `candidateCount`.
+Il difetto è dimostrato su un sottoinsieme diagnostico di tessiture
+complete, valide (inizio/fine mesi in ordine), lessicograficamente
+ordinate, di 252 giorni. I candidati e il rango sono proprietà del
+contesto; il validator verifica il percorso storico autonomamente
+e la snapshot degli input. La costruzione canonica della salsa,
+le famiglie complete e la correzione PATCH15 non sono anticipate.

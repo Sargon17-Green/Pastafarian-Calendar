@@ -1158,3 +1158,27 @@ silenziosa del passo a rango 1 è stato individuato dai test:
 la DISCOVERY conserva ora una fotografia dei quattro input e
 la PATCH con il validator la verifica prima della pubblicazione.
 Le suite Stage01–Stage27 mantengono le firme precedenti.
+
+## Stadio 30 — DISCOVERY 15 (tessitura rieletta ogni giorno)
+
+La norma seleziona una **unica** tessitura dei mesi a partire dalla
+salsa del primo giorno dell'anno e usa quella stessa sequenza per
+tutti i giorni successivi. La cicatrice
+`LegacyDaywiseWeavingAdapter.legacyChooseEachDaySeparately`
+usa erroneamente `1 + ((rank-1+dayOffset) mod N)` al posto
+del rango annuale costante.
+
+La dimostrazione usa soltanto una famiglia sintetica *lessicografica*
+di tre tessiture legali di 252 giorni, ciascuna con tre mesi di 84
+giorni. Sono verificate la cardinalità, la legalità di apertura e
+chiusura dei mesi, l'ordine rigoroso, la ripetibilità, la proprietà
+dei dati per invocazione e la firma dei guasti. Il riferimento del
+rango fisso vive solo nei test; la selezione vera mediante salsa e
+famiglia `WeavingFamily` non viene riprodotta in produzione in
+questa fase.
+
+Comando: `sbt -batch 'Test / runMain pastafari.Stage30Tests'`.
+Risultato intenzionale: **53 PASS e 3 FAIL**, precisamente ai
+casi `rango2_giorno1`, `rango3_giorno1` e
+`rango3_giorno2`. La PATCH15 rimane futura; tutte le PATCH1–14
+restano disponibili nel manager.

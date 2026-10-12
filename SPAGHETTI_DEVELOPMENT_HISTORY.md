@@ -1399,3 +1399,13 @@ intenzionali della DISCOVERY14 invariati. L'audit ha rivelato
 un bug nel validator quando rank=1 e il passo veniva falsificato:
 ora un'istantanea dei quattro input viene conservata nella discovery
 ed esaminata dalla patch. Nessun Stage30 introdotto.
+
+## Stadio 30 — DISCOVERY 15: la tessitura annua viene scelta ogni mattina
+
+Il rango della tessitura dei mesi deve essere determinato una volta
+sola per l'intero anno. Un vecchio percorso ricalcola invece il
+rango secondo il giorno e seleziona un'altra tessitura, anche quando
+il mese risultante cambia. Per dimostrarlo senza introdurre la
+PATCH15, la produzione riceve tre candidati sintetici validi e
+ordinati su 252 giorni, preservando report, trace e validator della
+formula errata. Le tre divergenze attese sono coperte in Stage30Tests.

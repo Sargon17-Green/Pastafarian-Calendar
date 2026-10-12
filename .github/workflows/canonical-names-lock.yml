@@ -695,3 +695,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 29: 55 PASS, 0 FAIL' stage29.log
           test "$(grep -Fc 'PASS — ' stage29.log)" -eq 55
           test "$(grep -Fc 'FAIL — ' stage29.log)" -eq 0
+
+  native-stage30-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage30 expected-RED per-day month weaving legacy
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage30Tests' > stage30.log 2>&1
+          rc=$?
+          set -e
+          cat stage30.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 30: 53 PASS, 3 FAIL' stage30.log
+          test "$(grep -Fc 'PASS — ' stage30.log)" -eq 53
+          test "$(grep -Fc 'FAIL — ' stage30.log)" -eq 3
+          for label in rango2_giorno1 rango3_giorno1 rango3_giorno2; do
+            grep -Fq "FAIL — equivalenza normativa tessitura ${label} — Ricampionamento giornaliero: ${label}" stage30.log
+          done
