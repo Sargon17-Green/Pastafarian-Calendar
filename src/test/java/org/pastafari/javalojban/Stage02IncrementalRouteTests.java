@@ -527,6 +527,8 @@ public final class Stage02IncrementalRouteTests {
             family.beginGlobalRankRoute(target, 512);
         int moved = 0;
         int counted = 0;
+        long partialHitsBefore = family.partialDpReuseHitCount();
+        long exactHitsBefore = family.suffixCacheHitCount();
         long started = System.nanoTime();
         for (int call = 0; call < 24; call++) {
             MonsterWeavingLinearCounter.RankRoute before = current;
@@ -554,12 +556,22 @@ public final class Stage02IncrementalRouteTests {
             "E_LONG_ROUTE_PREFIX_TOTAL");
         ok(moved >= 5, "E_LONG_ROUTE_DISTINCT_PROGRESS");
         ok(counted <= 48, "E_LONG_ROUTE_TOTAL_COUNT_BUDGET");
+        long afterRoute = System.nanoTime();
+        long partialHits = family.partialDpReuseHitCount() - partialHitsBefore;
+        long exactHits = family.suffixCacheHitCount() - exactHitsBefore;
         eq(current.remainingChoices(),
             family.countAfterPrefix(current.fixedPrefixCopy()),
             "E_LONG_ROUTE_SUFFIX_EXACT");
+        long afterAudit = System.nanoTime();
+        ok(family.partialDpCacheEntryCount() <= 4,
+            "E_LONG_ROUTE_PARTIAL_DP_CACHE_BUDGET");
         ok(!current.complete(), "E_LONG_ROUTE_NOT_FALSE_COMPLETION");
         System.out.println("STAGE_02_LONG_INTERIOR_ROUTE_PASS calls=24"
             + " prefix_days=" + moved + " counts=" + counted
+            + " partial_dp_hits=" + partialHits
+            + " exact_suffix_hits=" + exactHits
+            + " route_ms=" + (afterRoute - started) / 1000000
+            + " audit_ms=" + (afterAudit - afterRoute) / 1000000
             + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
     }
 
