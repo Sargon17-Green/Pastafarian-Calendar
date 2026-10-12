@@ -48,3 +48,27 @@ Ni chaiff `LAST_COMPLETED_STAGE` ddod yn 11 cyn gweld
 1.9.0/JDK 21.
 
 **Cyn yr ardystiad:** LAST_COMPLETED_STAGE=10; PATCH 05 yn aros am CI.
+
+
+## Ardystiad CI brodorol — COMPLETE
+
+**Mae'r adran hon yn disodli'r statws PENDING uchod.**
+
+- Gangen `Kotlin+Cymraeg`, commit ffynhonnell `326c843d2fb8a7f5c070362113a3284c4cbe6aac`.
+- GitHub Actions `38222120118`, swydd `114720632237`: **SUCCESS**.
+- Kotlin 1.9.0, JDK 21, `sh run-stage11-tests.sh`, ffynonellau gwreiddiol ac oracl gwreiddiol.
+- Dilyswyd 30 marc log yn uniongyrchol, heb unrhyw un ar goll.
+- PASS: holl atchweliadau Camau 1–10 gan gynnwys `STAGE10_NATIVE_EXPECTED_RED_COMPLETE`.
+- PASS: pob un o `STAGE11_K1_GREEN` ... `STAGE11_K7_GREEN`,
+  `STAGE11_PATCH_GREEN_7`, `STAGE11_PRESERVED_DISCOVERY05_RED_4`,
+  `STAGE11_FIXED_MIDPOINT_K4_GREEN`, `STAGE11_WRONG_ACCESS_CALLED_7`,
+  `STAGE11_TRANSLATOR_7_PASS`, `STAGE11_CONTEXT_OWNERSHIP_PASS`,
+  `STAGE11_BOOT_REPLAY_GUARDS_PASS`, `STAGE11_EARLIER_ROUTES_PASS`,
+  `STAGE11_BIGINT_INDEPENDENT_GREEN_35`,
+  `STAGE11_BIGINT_PATCH04_STONES_GREEN_175`, `STAGE11_NATIVE_GREEN`.
+- Ni newidiwyd yr hen `LegacyHiddenDropAdapter.kt`, `ExactInt.kt` na'r oracl.
+
+Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38222120118
+
+**Dyfarniad:** Cam 11 wedi'i gwblhau, `LAST_COMPLETED_STAGE=11`.
+Cam 12 (`DISCOVERY 06`) yw'r cam nesaf; nid yw wedi dechrau.

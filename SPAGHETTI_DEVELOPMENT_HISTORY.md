@@ -289,3 +289,8 @@ Ar commit `b2c0a978ca452545c98ff9a7349c6cddd5db345b` llwyddodd swydd `native-sta
 ## Cam 11 — PATCH 05: hiddenByNearness yn defnyddio 8-k
 
 Mae'r lapio cywiro'n galw'r hen `legacyHiddenDirectByAssumedNearness` yn union ac yn cofnodi'r gwerth anghywir, cyn galw'r cyfieithydd newydd `hiddenByNearness` sy'n dychwelyd y slot ffisegol `8-k`. Ni newidir y storfa backward na'r hen graith. Mae'r llwybr cynhyrchu ar wahân yn cadw'r k, y slot, y graith, yr allbwn cywir a'r cyfrif galwadau yng nghyd-destun y galwad. Disgwylir 7 GREEN newydd, y 4 anghysondeb etifeddol a 35 prawf BigInteger annibynnol, gyda 175 cydran carreg. Mae'r cam yn aros am ardystiad CI brodorol llawn; ni ddechreuwyd Cam 12.
+
+
+### Cam 11 — ardystiad brodorol PASS
+
+Ar commit `326c843d2fb8a7f5c070362113a3284c4cbe6aac` llwyddodd swydd `native-stage11-kotlin-cymraeg` (rhediad `38222120118`, swydd `114720632237`) gyda Kotlin 1.9.0/JDK 21 a'r oracl gwreiddiol. Gwiriwyd 30 marc: saith `k` yn GREEN, cadw pedwar anghysondeb DISCOVERY 05, cadw'r canolbwynt k=4, 35 prawf BigInteger annibynnol, 175 cydran carreg, gwarchodion a phob atchweliad Camau 1–10. Cedwir y storfa wrthdro a'r hen ddarllenydd heb newid. Mae Cam 11 wedi'i gwblhau; ni ddechreuwyd Cam 12.
