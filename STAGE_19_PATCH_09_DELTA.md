@@ -60,3 +60,23 @@ SAVE, công thức khuấy, hoặc 12 lần khuấy sau giọt 46
 Giai đoạn 20 DISCOVERY 10 sẽ mở lỗi ghi đè in-place
 trên sáu bát. Bản vá hiện tại không gây lỗi này và
 không được thực hiện trước giai đoạn sau.
+
+## Xác minh CI và kết luận
+
+- Commit triển khai: `8b4e58e29f9030ac8e9bfa9c91ab6b34719e3605`.
+- Elixir 1.18.5 / Erlang/OTP 27; biên dịch 34 tệp .ex.
+- 223 kiểm thử, 0 thất bại, 0 cảnh báo biên dịch.
+- Bốn hồi quy chuẩn giai đoạn 18 giữ nguyên assert, đều đạt.
+- 14 bài kiểm thử Stage19 mới đều đạt.
+- Khóa tên chuẩn độc lập PASS.
+- LegacyPourPositions không đổi, blob SHA
+  `6ab77efeb07c74fb88fe1d62ad04c523d23c3c80`.
+- Oracle test-only không đổi, blob SHA
+  `be1638f46b2190d617af0378a61b077bda10bf32`.
+- Sáu phép khuấy tiếp tục đọc old và viết next riêng.
+- Không đổi main và chưa bắt đầu giai đoạn 20.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38242471594
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38242471534
+
+Trạng thái cuối: GREEN đã xác minh, kế tiếp DISCOVERY 10.

@@ -678,3 +678,23 @@ hàm legacy còn tồn tại. Bổ sung 14 bài thử, bao gồm toàn bộ
 720 hoán vị và ba nguồn rót, nhiều cặp ngày, số nguyên lớn,
 thực thi song song, bất biến kho và ranh giới còn chưa tích hợp.
 Chưa làm lỗi contamination in-place ở DISCOVERY 10.
+
+## Kiểm chứng hoàn tất bản vá 09
+
+CI Elixir 1.18.5 / Erlang/OTP 27 chạy **223 kiểm thử,
+0 thất bại và 0 cảnh báo biên dịch**. Bốn hồi quy chuẩn
+của phát hiện 09 chuyển sang đạt, kỳ vọng giữ nguyên.
+14 bài kiểm thử Stage19 mới đều đạt, bao gồm kiểm tra
+720 hoán vị và ba nguồn rót qua alias.
+
+Hàm LegacyPourPositions không đổi và tiếp tục thực thi
+Map.fetch! theo position, nhưng bản xem alias mới đưa
+giá trị ID bát đúng vào cả ba lời gọi. Không đổi snapshot
+old cho sáu phép khuấy. Khóa tên chuẩn PASS.
+
+- [CI Stage19 223/223](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38242471594)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38242471534)
+
+Trạng thái Stage19/55 là `GREEN`, đã xác minh.
+Tiếp theo Stage20 `DISCOVERY 10` về ghi đè bát in-place;
+chưa bắt đầu.

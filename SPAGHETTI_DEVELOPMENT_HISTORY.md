@@ -616,3 +616,12 @@ kho `bowls_after_drops` chính xác.
 riêng tiền xử lý và kiểm tra cấu trúc cần thiết,
 thêm 14 bài thử, giữ bất biến các bản vá 01..08 và
 không thay oracle. Giai đoạn 20 chưa khởi động.
+
+**Kết quả CI thực tế:** 223 kiểm thử, 0 lỗi,
+0 cảnh báo biên dịch, khóa tên chuẩn PASS.
+Bốn hồi quy chuẩn từ giai đoạn 18 đạt với kỳ vọng nguyên vẹn,
+14 bài kiểm thử mới đạt. LegacyPourPositions vẫn nguyên
+blob SHA `6ab77efeb07c74fb88fe1d62ad04c523d23c3c80`,
+oracle test-only vẫn nguyên blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+Kết thúc giai đoạn 19 GREEN, chưa bắt đầu DISCOVERY 10.
