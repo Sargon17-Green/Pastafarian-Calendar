@@ -86,3 +86,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 15 — PATCH 07
 
 የታሪካዊው `legacy_visible_grind_table` ያሉትን 11 ረድፎች በ0..10 እንደነበሩ ይጠብቃል፤ `old_grind_row` ያለው የቀጥታ የተሳሳተ ማውጫም አልተቀየረም። `GrindPatch07.table_with_sentinel` ለproduction ብቻ አዲስ 12-ረድፍ ሰንጠረዥ ይፈጥራል፦ ረድፍ 0 `[0,0,0,0,0]` የsentinel ነው፣ እውነተኛዎቹ 11 ረድፎች በ1..11 ናቸው። `calendar_grind_row_spaghetti` በ`BaseDispatcher.dispatch_grind_patch07` በኩል አሁንም በቀጥታ `table[grind]` ያነባል። የደረጃ 14 አራቱ RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። V 0.5.2 (`7647ce1`) በGitHub Actions run `38232812419` ተረጋግጧል። `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` 22/22 PASS፣ የደረጃ 14 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። `LAST_COMPLETED_STAGE=15` ነው። ዝርዝር፦ `docs/STAGE15_PATCH07.md`።
+
+## ደረጃ 16 — DISCOVERY 08
+
+የታሪካዊው `old_permutation_unrank0(rank0)` የስድስት ጎድጓዳ ሳህኖች 720 የቅደም ተከተሎችን በዜሮ-መሠረት በትክክል ይፈታል። የታሪካዊው የproduction ጥሪ ግን `oneBased=regularMod(drop-1,720)+1` በማስላት፣ ሳይቀንሰው በቀጥታ ወደ `old_permutation_unrank0(oneBased)` ይልካል። ይህ ወደ ቀጣዩ ቅደም ተከተል ይሄዳል፤ `oneBased=720` ሲሆን ደግሞ ከ`rank0=0..719` ውጪ ስለሆነ error ያስከትላል። አራት የታሰቡ RED assertions እና የታሪክ GREEN ምስክሮች ተጨምረዋል፤ `PATCH 08` አልተጨመረም። `LAST_COMPLETED_STAGE=15` የV CI ማረጋገጫ እስኪጠናቀቅ ይቆያል። ዝርዝር፦ `docs/STAGE16_DISCOVERY08.md`።

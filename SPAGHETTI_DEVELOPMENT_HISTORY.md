@@ -133,3 +133,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 15 መዝጊያ — GREEN
 
 በመጀመሪያው የGitHub Actions run `38232643908` ላይ ሙሉ 22/22 የV ፈተና ፋይሎች PASS ነበሩ፤ የV 0.5.2 formatter በ`patch07_test.v` ውስጥ ሶስት የ`or { big_zero() }` አጻጻፎችን ብቻ እንዲቀየሩ ጠይቋል። ልዩነቶቹ ከእውነተኛው V formatter በትክክል ተቀድተው፣ ጊዜያዊ የማረጋገጫ እርምጃ ተወግዷል። በcommit `42dbb4a5d9ab6ace74d4855a97888798adf31f10` ላይ የGitHub Actions run `38232812419` ሁለቱም ሥራዎች PASS ናቸው። በ`V 0.5.2 7647ce1` `v fmt -verify ./pastafari` PASS፤ `v test ./pastafari` **22/22 PASS**፤ የደረጃ 14 አራቱ RED assertions ሳይቀየሩ GREEN ሆነዋል። የታሪካዊው `old_grind_row` ተጠብቋል፤ የ`GrindPatch07` sentinel ረድፍ በindex 0 የማይሰረዝ ነው። የማስረጃ ቅርስ `11738849261` ተቀምጧል። **ደረጃ 15 COMPLETE / GREEN።**
+
+## ደረጃ 16 — DISCOVERY 08 (በV ማረጋገጫ ላይ)
+
+`old_permutation_unrank0` ከ0 እስከ719 ያለውን የስድስት ጎድጓዳ ሳህኖች ደረጃ በትክክል ይፈታል፤ በራሱ የታሪክ ኮድ ስህተት የለም። ነገር ግን `LegacyPermutationAdapter.order_for_drop` የ1..720 የቅደም ተከተል ቁጥርን በቀጥታ እንደ rank0 ይልካል። `BaseDispatcher.dispatch_legacy_permutation` እና `calendar_bowl_order_spaghetti` በproduction መንገድ ላይ በእውነት እዚህ ይደርሳሉ። `calendar_date_spaghetti` የdrop=1 ሙከራ በስህተት `rank0=1` እና `[1,2,3,4,6,5]` ይመልሳል። የስህተቱ ምክንያት በ0 እና 1 መሠረቶች መቀላቀል ነው፤ `PATCH 08` የoneBased-1 መጠገኛ በደረጃ 17 ብቻ ይገባል።

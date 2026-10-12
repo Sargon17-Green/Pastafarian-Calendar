@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage15_native_v:
-    name: V 0.5.2 — PATCH 07 validated GREEN
+  stage16_native_v:
+    name: V 0.5.2 — DISCOVERY 08 EXPECTED_RED
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -51,6 +51,14 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
+      - name: Inspect native V stage 16 formatting — temporary
+        shell: bash
+        run: |
+          set -euo pipefail
+          v fmt -w ./pastafari/legacy_permutation.v
+          v fmt -w ./pastafari/discovery08_witness_test.v
+          v fmt -w ./pastafari/discovery08_expected_red_test.v
+          git --no-pager diff -- ./pastafari/legacy_permutation.v ./pastafari/discovery08_witness_test.v ./pastafari/discovery08_expected_red_test.v
       - name: Verify V version and source formatting
         shell: bash
         run: |
@@ -129,15 +137,40 @@ jobs:
           v test ./pastafari/discovery07_expected_red_test.v
       - name: PATCH 07 — retained legacy, sentinel and 11 native grinds
         run: v test ./pastafari/patch07_test.v
-      - name: Stage 15 — complete native V regression suite
+      - name: DISCOVERY 08 — preserve zero-based unrank and historic one-based caller
+        run: v test ./pastafari/discovery08_witness_test.v
+      - name: DISCOVERY 08 — four intended RED rank assertions
         shell: bash
         run: |
           set -euo pipefail
-          v test ./pastafari 2>&1 | tee stage15_green.log
-      - name: Preserve stage 15 native V evidence
+          v -check ./pastafari/discovery08_expected_red_test.v
+          set +e
+          v test ./pastafari/discovery08_expected_red_test.v 2>&1 | tee stage16_expected_red.log
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo '::error::DISCOVERY 08 unexpectedly GREEN before PATCH 08'
+            exit 1
+          fi
+          for test_name in \
+            test_discovery08_expected_red_first_permutation \
+            test_discovery08_expected_red_second_permutation \
+            test_discovery08_expected_red_last_permutation \
+            test_discovery08_expected_red_wrap_from_720; do
+            if ! grep -Fq "$test_name" stage16_expected_red.log; then
+              echo "::error::Missing historical RED assertion: $test_name"
+              exit 1
+            fi
+          done
+          if ! grep -Eq '(FAIL|FAILED|assert|Assertion)' stage16_expected_red.log; then
+            echo '::error::Nonzero exit without a proven assertion failure'
+            exit 1
+          fi
+          echo 'DISCOVERY 08 — four intended RED rank assertions verified'
+      - name: Preserve stage 16 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v-amharic-stage15-green-evidence
-          path: stage15_green.log
+          name: v-amharic-stage16-red-evidence
+          path: stage16_expected_red.log
           if-no-files-found: ignore
