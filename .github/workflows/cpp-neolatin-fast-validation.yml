@@ -78,21 +78,11 @@ jobs:
             2>&1 | tee logs_stage56_praeflight/structure-reference.log
           grep -Fx 'GRADUS56_STRUCTURA_REFERENCE=7/7_PASS STRUCTURAE=5/5_PASS' \
             logs_stage56_praeflight/structure-reference.log
-          grep -Fx 'GRADUS56_ORDO_INVOCATIONUM=28/28_PASS CONTEXTUS=2 CACHE_ANNI=3' \
-            logs_stage56_praeflight/structure-reference.log
           grep -Fx 'GRADUS56_FRIGIDI=15/15_PASS' \
             logs_stage56_praeflight/structure-reference.log
-          grep -E '^GRADUS56_TERMINI_REFERENCE=PASS ANNI=5 CASUS=[0-9]+
-
-      - name: Servare evidentiam etiam in defectu
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: cpp-latina-stage56-praeflight
-          path: logs_stage56_praeflight/
-          if-no-files-found: warn
-          retention-days: 30
- \
+          grep -Fx 'GRADUS56_ORDO_INVOCATIONUM=28/28_PASS CONTEXTUS=2 CACHE_ANNI=3' \
+            logs_stage56_praeflight/structure-reference.log
+          grep -F 'GRADUS56_TERMINI_REFERENCE=PASS ANNI=5 CASUS=' \
             logs_stage56_praeflight/structure-reference.log
           echo 'PRAEVOLATUS_GRADUS56=PASS'
 
