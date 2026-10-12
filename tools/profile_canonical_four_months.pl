@@ -127,6 +127,50 @@ if ($child==0) {
             length("$f11"),length("$f12"),
             $prefix_stats{frontier_peak}//0,$expected_second,time()-$start;
 
+        # 將中間排名在第二日已決定的區段中轉為局部一基排名。
+        # 按合法的第三日標籤將第二日的完整後綴集合繼續分割；
+        # 全部計數仍由不共享後綴 DP 的正向前沿 Oracle 獨立提供。
+        my $parent=$expected_second==1 ? $f11 : $f12;
+        my $local_rank=$middle->copy;
+        $local_rank->bsub($f11) if $expected_second==2;
+        die "第二日剩餘局部排名不在合法區段\n"
+            if $local_rank<1 || $local_rank>$parent;
+        my @third_candidates=$expected_second==1 ? (1,2) : (1,2,3);
+        my $partition_sum=Math::BigInt->bzero;
+        my $walk_rank=$local_rank->copy;
+        my $expected_third;
+        my $third_peak=0;
+        for my $candidate (@third_candidates) {
+            my @third_prefix=(1,$expected_second,$candidate);
+            my %branch_stats;
+            my $branch_ways=countWeavingsFrontier(
+                \@L,\%branch_stats,\@third_prefix
+            );
+            $partition_sum->badd($branch_ways);
+            my $factor_count=countWeavingSuffixFactored(
+                \@L,\@third_prefix,undef,undef,$opts
+            );
+            die "第三日候選的獨立前沿與索引式後綴計數不符\n"
+                if $branch_ways!=$factor_count;
+            if (!defined($expected_third)) {
+                if ($walk_rank<=$branch_ways) {
+                    $expected_third=$candidate;
+                } else {
+                    $walk_rank->bsub($branch_ways);
+                }
+            }
+            my $peak=$branch_stats{frontier_peak}//0;
+            $third_peak=$peak if $peak>$third_peak;
+        }
+        die "第三日合法候選沒有構成第二日前綴的完整分割\n"
+            if $partition_sum!=$parent;
+        die "無法在第三日分割定位精確中間排名\n"
+            if !defined($expected_third);
+        printf "CANONICAL_FOUR phase=INDEPENDENT_THIRD_DAY_PARTITION_PASS second=%d third=%d candidates=%d max_frontier=%d elapsed_sec=%.3f\n",
+            $expected_second,$expected_third,scalar(@third_candidates),
+            $third_peak,time()-$start;
+
+
         # 邊界排序不依賴任何後綴計數器：
         # 第一名是所有月完整連續區塊；最後一名每一步都選
         # 可延伸的最大合法月份標籤，驗證兩種直接構造均一致。
@@ -167,6 +211,8 @@ if ($child==0) {
              max_temp_file_bytes=>16*1024*1024});
         die "中間排名的第二個月份標籤與獨立前沿分支計數矛盾\n"
             if $actual->[1]!=$expected_second;
+        die "中間排名的第三日選擇與獨立前沿分割矛盾\n"
+            if $actual->[2]!=$expected_third;
         verify_word(\@L,$actual);
         die "四月份未啟動索引式反排名引擎\n"
             if ($decode{indexed_profile_builds}//0)!=1;
@@ -182,7 +228,7 @@ if ($child==0) {
             if ($rank_stats{indexed_profile_builds}//0)!=1;
         die "輸入中間排名已受可變性污染\n"
             if "$middle" ne $wanted;
-        printf "CANONICAL_FOUR status=PASS scope=INDEPENDENT_COUNT_PREFIX_PARTITION_BOUNDARY_AND_MIDDLE_ROUNDTRIP months=4 days=240 rank_digits=%d rank_smaller_candidates=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
+        printf "CANONICAL_FOUR status=PASS scope=INDEPENDENT_COUNT_THREE_DAY_PREFIX_BOUNDARY_AND_MIDDLE_ROUNDTRIP months=4 days=240 rank_digits=%d rank_smaller_candidates=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
             length($wanted),$rank_stats{candidates}//0,time()-$start,
             own_highwater();
         1;
