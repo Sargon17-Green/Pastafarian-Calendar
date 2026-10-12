@@ -19,9 +19,11 @@ public final class Stage02IncrementalRouteTests {
         suffixCountCacheReuseAndEviction();
         partialDpReuseAcrossDistinctSuffixStates();
         partialDpOpenedGuardAndBoundedEviction();
+        partialDpClosedGuardRejectsCrossBoundary();
         concurrentPartialDpReuse();
         concurrentSuffixCountNeutrality();
         multiCallFullYearInteriorWithOneCountPerCall();
+        longerInteriorRouteUnderBoundedCalls();
         zeroBudgetDoesNotLoseSavedWork();
         System.out.println("STAGE_02_INCREMENTAL_ROUTE_PASS checks=" + checks
             + " full_days=5778 counts_per_call=1"
@@ -371,6 +373,35 @@ public final class Stage02IncrementalRouteTests {
             "E_PARTIAL_DP_CACHE_BOUND_AFTER_EVICTION");
     }
 
+    private static void partialDpClosedGuardRejectsCrossBoundary() {
+        int[] lengths = new int[12];
+        Arrays.fill(lengths, 48);
+        MonsterWeavingLinearCounter shared =
+            new MonsterWeavingLinearCounter(lengths);
+        int[] opened = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        int[] closed = Arrays.copyOf(opened, opened.length + 47);
+        Arrays.fill(closed, opened.length, closed.length, 1);
+
+        BigInteger first = shared.countAfterPrefix(opened);
+        ok(first.signum() > 0, "E_PARTIAL_DP_CLOSED_BASE");
+        ok(shared.partialDpCacheEntryCount() > 0,
+            "E_PARTIAL_DP_CLOSED_INITIAL_SNAPSHOT");
+        long reused = shared.partialDpReuseHitCount();
+        BigInteger reference = new MonsterWeavingLinearCounter(lengths)
+            .countAfterPrefix(closed);
+        BigInteger actual = shared.countAfterPrefix(closed);
+        eq(reference, actual, "E_PARTIAL_DP_CLOSED_REFERENCE");
+        eq(reused, shared.partialDpReuseHitCount(),
+            "E_PARTIAL_DP_CLOSED_MUST_NOT_REUSE");
+        ok(shared.partialDpCacheEntryCount() <= 4,
+            "E_PARTIAL_DP_CLOSED_CAP");
+        long sameStateHits = shared.suffixCacheHitCount();
+        eq(actual, shared.countAfterPrefix(closed),
+            "E_PARTIAL_DP_CLOSED_REPEAT");
+        eq(sameStateHits + 1, shared.suffixCacheHitCount(),
+            "E_PARTIAL_DP_CLOSED_EXACT_CACHE_HIT");
+    }
+
     private static void concurrentPartialDpReuse() {
         int[] lengths = new int[12];
         Arrays.fill(lengths, 48);
@@ -482,6 +513,54 @@ public final class Stage02IncrementalRouteTests {
         eq(BigInteger.ONE,
             new MonsterWeavingLinearCounter(new int[]{1}).count(),
             "E_SUFFIX_CONCURRENT_NO_CROSS_OWNER_STATE");
+    }
+
+    private static void longerInteriorRouteUnderBoundedCalls() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger target = family.count().add(BigInteger.ONE)
+            .divide(BigInteger.TWO);
+        MonsterWeavingLinearCounter.RankRoute current =
+            family.beginGlobalRankRoute(target, 512);
+        int moved = 0;
+        int counted = 0;
+        long started = System.nanoTime();
+        for (int call = 0; call < 24; call++) {
+            MonsterWeavingLinearCounter.RankRoute before = current;
+            MonsterWeavingLinearCounter.RankRoute next =
+                family.advanceGlobalRankRoute(before, 16, 2);
+            int advanced = next.stepsCompleted() - before.stepsCompleted();
+            ok(advanced >= 0 && advanced <= 16,
+                "E_LONG_ROUTE_STEP_BUDGET");
+            ok(next.lastCountCalls() >= 0 && next.lastCountCalls() <= 2,
+                "E_LONG_ROUTE_COUNT_BUDGET");
+            eq(target, next.globalRank(), "E_LONG_ROUTE_RANK_STABLE");
+            ok(next.lowerRank().compareTo(target) <= 0
+                    && next.upperRank().compareTo(target) >= 0,
+                "E_LONG_ROUTE_GLOBAL_INTERVAL");
+            ok(next.lowerRank().compareTo(before.lowerRank()) >= 0
+                    && next.upperRank().compareTo(before.upperRank()) <= 0,
+                "E_LONG_ROUTE_NESTED_INTERVAL");
+            ok(advanced > 0 || next.probedBranches() > before.probedBranches(),
+                "E_LONG_ROUTE_PROGRESS");
+            moved += advanced;
+            counted += next.lastCountCalls();
+            current = next;
+        }
+        eq(moved, current.stepsCompleted(),
+            "E_LONG_ROUTE_PREFIX_TOTAL");
+        ok(moved >= 5, "E_LONG_ROUTE_DISTINCT_PROGRESS");
+        ok(counted <= 48, "E_LONG_ROUTE_TOTAL_COUNT_BUDGET");
+        eq(current.remainingChoices(),
+            family.countAfterPrefix(current.fixedPrefixCopy()),
+            "E_LONG_ROUTE_SUFFIX_EXACT");
+        ok(!current.complete(), "E_LONG_ROUTE_NOT_FALSE_COMPLETION");
+        System.out.println("STAGE_02_LONG_INTERIOR_ROUTE_PASS calls=24"
+            + " prefix_days=" + moved + " counts=" + counted
+            + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
     }
 
     private static void zeroBudgetDoesNotLoseSavedWork() {
