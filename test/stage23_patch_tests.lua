@@ -2,6 +2,7 @@ local root=arg[1] or "."
 package.path=root.."/src/?.lua;"..root.."/test/?.lua;"..package.path
 local B=require("bigint")
 local O=require("normative_oracle")
+local Helper=require("stage23_oracle_helper")
 local S=require("spaghetti")
 local rows={}
 local row={w=2,b=3,s=5,m=7,r=11}
@@ -15,7 +16,7 @@ for _,drops in ipairs(samples) do
  local corrected,ctx=S.bowlChainPatchProbe(drops,stones,initial)
  local oracleDrops={}
  for i=1,#drops do oracleDrops[i]=B.from(drops[i]) end
- local reference=O.applyVisibleDropsToBowls(initial,oracleDrops,oracleRows)
+ local reference=Helper.apply(initial,oracleDrops,oracleRows)
  local legacy,oldctx=S.legacyResetBowlsProbe(drops,stones,initial)
  assert(ctx.mode=="STAGE_23_PATCH_11"
     and ctx.phase=="PATCH_CARRY_BOWLS_BETWEEN_DROPS"

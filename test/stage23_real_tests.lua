@@ -2,6 +2,7 @@ local root=arg[1] or "."
 package.path=root.."/src/?.lua;"..root.."/test/?.lua;"..package.path
 local B=require("bigint")
 local O=require("normative_oracle")
+local Helper=require("stage23_oracle_helper")
 local S=require("spaghetti")
 local F=O.FOUNDATION_DAY
 local pairs={{F,F},{F+1,F-1},{F-5,F+9}}
@@ -19,7 +20,7 @@ for _,pair in ipairs(pairs) do
    oracleRows[i]={rock[1],rock[2],rock[3],rock[4],rock[5]}
  end
  local result,ctx=S.bowlChainPatchProbe(drops,stones,initial)
- local expected=O.applyVisibleDropsToBowls(initial,drops,oracleRows)
+ local expected=Helper.apply(initial,drops,oracleRows)
  assert(ctx.semanticState.carriedPreviousOutputs==2
     and #ctx.childContexts==3 and #ctx.patchedChildContexts==3)
  for id=1,6 do assert(B.compare(result[id],expected[id])==0) end
