@@ -257,7 +257,7 @@ Pou kouri tout suite a sou branch konplè a, avèk Lua 5.3:
 lua5.3 test/stage11_tests.lua .
 ```
 
-Rezilta espere apre upload ak GitHub Actions: **GREEN**. Pa demare Stage 12.
+Rezilta konfime sou GitHub Actions: **GREEN**, sis travay PASS, tout etap 1–11. Pa demare Stage 12 anvan etap sa a fini; etap 11 la kounye a verifye.
 
 
 ### Verifikasyon konbinatwa PATCH 05

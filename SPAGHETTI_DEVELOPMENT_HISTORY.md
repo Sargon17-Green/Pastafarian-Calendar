@@ -236,7 +236,7 @@ regresyon legacy apa a toujou bay egzakteman sis pozisyon ki mal:
 1, 2, 3, 5, 6, 7. Nou fè tès mapping, izolasyon ak kontèks sou 36 koup jou
 ak 252 pozisyon; menm gout mitan an rete an plas. Runner prensipal Stage 11
 pral kouri tout etap 1–11 nan CI. Nan handoff sa a, tès kouch mapping nan
-te pase lokalman avèk doublon depandans; CI konplè a rete pou upload itilizatè a.
+te pase lokalman avèk doublon depandans; apre sa, CI konplè GitHub Actions te pase pou etap 1–11.
 
 
 Yon lòt verifikasyon Stage 11 enumere tout 5,040 permutasyon sèt idantite diferan, ak 35,280 lekti lojik. Sa kenbe prèv tradiksyon endis la se yon envèsyon jeneral epi li pa depann de yon sèl pè jou oswa yon sèl konbinezon gout.
@@ -249,5 +249,4 @@ chak nan sèt aksè fizik yo. Nou egzije yon echèk ki parèt klèman,
 apre sa yon lòt invocation pwòp, ak tras, commit ak metrik orijinal.
 Nou teste tou yon depo fizik ki manke valè, yon echèk legacy anvan
 li tounen done yo, ak alias BigInt (enkli kopi limb si li ekspoze).
-Yon QA lokal ki sèvi ak doublon depandans yo pase; konklizyon
-`FULL_NATIVE_SUITE=PASS` ap tann kòd baz konplè a sou machin itilizatè a.
+Yon QA lokal ki sèvi ak doublon depandans yo pase; apre sa, suite Lua natif la sou GitHub Actions te bay `FULL_NATIVE_SUITE=PASS` ak tout sis travay vèt.
