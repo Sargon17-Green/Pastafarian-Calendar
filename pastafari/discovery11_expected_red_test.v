@@ -4,8 +4,9 @@ module pastafari
 // በ12 post-stirs መጨረሻ ለquery እንዳለ መቆየት አለበት።
 // አራቱ የሚከተሉት assertions እስከ PATCH 11 ድረስ RED መሆን አለባቸው።
 fn discovery11_red_result(order []int) LegacyPostStir12Result {
-	bowls := [big_zero(), big_from_int(10), big_from_int(20), big_from_int(30),
-		big_from_int(40), big_from_int(50), big_from_int(60)]
+	bowls := [big_zero(), big_from_int(10), big_from_int(20),
+		big_from_int(30), big_from_int(40), big_from_int(50),
+		big_from_int(60)]
 	return calendar_post_stir12_spaghetti(bowls, order) or { LegacyPostStir12Result{} }
 }
 

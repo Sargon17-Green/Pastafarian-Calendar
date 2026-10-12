@@ -16,7 +16,7 @@ pub fn new_legacy_post_stir_order_store(order []int) LegacyPostStirOrderStore {
 		copied[position] = order[position]
 	}
 	return LegacyPostStirOrderStore{
-		query_order: copied
+		query_order:     copied
 		overwrite_count: 0
 	}
 }
@@ -69,13 +69,13 @@ pub fn old_post_stirs_overwrite_drop46_order(bowls []BigInt, order_at_drop46 []i
 			cross := big_mul_small(big_mul(old[prev_id], old[next_id]), 7)
 			pending[bowl_id] = calendar_save_spaghetti(big_add(big_square(sum), cross))
 		}
-		working = pending
+		working = pending.clone()
 	}
 	return LegacyPostStir12Result{
-		bowls: working
-		order_for_query: old_store.query_order
-		overwrite_count: old_store.overwrite_count
-		final_saved_sum: final_saved_sum
+		bowls:             working
+		order_for_query:   old_store.query_order
+		overwrite_count:   old_store.overwrite_count
+		final_saved_sum:   final_saved_sum
 		final_stir_number: 12
 	}
 }

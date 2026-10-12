@@ -60,9 +60,7 @@ fn test_discovery11_different_incoming_orders_share_final_post_stir_order() {
 fn test_discovery11_legacy_dispatcher_and_public_entry_match() {
 	order := [6, 5, 4, 3, 2, 1]
 	bowls := discovery11_fixture_bowls()
-	public_result := calendar_post_stir12_spaghetti(bowls, order) or {
-		LegacyPostStir12Result{}
-	}
+	public_result := calendar_post_stir12_spaghetti(bowls, order) or { LegacyPostStir12Result{} }
 	dispatcher := new_base_dispatcher()
 	legacy_result := dispatcher.dispatch_legacy_post_stir12(bowls, order) or {
 		LegacyPostStir12Result{}
@@ -81,8 +79,7 @@ fn test_discovery11_first_post_stir_sum_and_rank_are_grounded() {
 	}
 	saved := calendar_save_spaghetti(sum)
 	assert saved.str() == '359'
-	assert (calendar_bowl_order_spaghetti(saved) or { []int{} }) == [3, 6, 5, 4,
-		1, 2]
+	assert (calendar_bowl_order_spaghetti(saved) or { []int{} }) == [3, 6, 5, 4, 1, 2]
 }
 
 fn test_discovery11_all_720_inputs_are_valid_for_overwrite_store() {
@@ -102,8 +99,8 @@ fn test_discovery11_all_720_inputs_are_valid_for_overwrite_store() {
 
 fn test_discovery11_post_stirs_large_bowls_and_no_input_mutation() {
 	huge := big_pow_small(big_from_int(2), 412)
-	bowls := [big_zero(), huge, big_neg(huge), big_from_int(7), huge,
-		big_from_int(41), big_from_int(43)]
+	bowls := [big_zero(), huge, big_neg(huge), big_from_int(7), huge, big_from_int(41),
+		big_from_int(43)]
 	original := [2, 3, 1, 4, 5, 6]
 	first := calendar_post_stir12_spaghetti(bowls, original) or { LegacyPostStir12Result{} }
 	second := calendar_post_stir12_spaghetti(bowls, original) or { LegacyPostStir12Result{} }
@@ -140,8 +137,8 @@ fn test_discovery11_previous_patches_and_monster_probe() {
 	foundation := big_from_i64(-15_055_671)
 	assert calendar_distance_spaghetti(foundation, foundation).str() == '1'
 	assert calendar_stones_spaghetti(2, initial_stones()).b.str() == '1073'
-	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6,
-		5, 4, 3, 2, 1]
+	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6, 5, 4, 3, 2,
+		1]
 	mut diagnostic := ''
 	_ = calendar_date_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
