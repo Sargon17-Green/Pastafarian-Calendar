@@ -128,9 +128,18 @@ sub countWeavingSuffixPolynomial ($lengths, $prefix, $stats = undef) {
                    stages => 0, max_frontier => 0);
     }
 
-    if ($opened == $m && $opened > $closed) {
-        # 所有首次出現次序已固定，僅剩最後出現次序。
-        $stats->{full_open_closed_form} = 1 if defined $stats;
+    if ($opened >= $m-1 && $opened > $closed) {
+        # 若所有月份都已開啟，首次出現次序已固定。
+        # 若僅有最後月份尚未開啟，它的首次出現自然晚於
+        # 所有已開啟月份，且沒有更後面的月份須加以限制。
+        # 因此兩種情形的後綴都只需保持末次出現次序。
+        if (defined $stats) {
+            if ($opened == $m) {
+                $stats->{full_open_closed_form} = 1;
+            } else {
+                $stats->{one_unopened_closed_form} = 1;
+            }
+        }
         return _full_open_last_order_count(\@remaining,$closed);
     }
 

@@ -54,6 +54,7 @@ t/28_first_rank_fastpath.t
 t/29_last_rank_fastpath.t
 t/30_unrank_local_tail_shortcut.t
 t/31_full_open_suffix_closed_form.t
+t/32_last_unopened_suffix_closed_form.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 t/lib/Pastafari/WeavingSuffix.pm
