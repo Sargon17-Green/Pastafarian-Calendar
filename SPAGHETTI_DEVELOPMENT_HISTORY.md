@@ -105,3 +105,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 12 — DISCOVERY 06 (በV ማረጋገጫ ላይ)
 
 ታሪካዊው `legacy_prior` የሚታዩ ጠብታዎችን በ1-መሠረት `drop_store[i-back]` እንደነበረ ይመለከታል። `slot=0` እና አሉታዊ slots የስውር ጠብታዎች ትርጉም የላቸውም። የV runtime ሕገ-ወጥ የarray መለያን እንዳይፈጽም የተሳሳተ መለያ በerror ይመለሳል፣ ከhidden ግን ምንም አያነብም። `LegacyPriorAdapter`፣ `BaseDispatcher.dispatch_legacy_prior` እና `calendar_prior_spaghetti` ወደ production ንዑስ ሂደት ተያይዘዋል። በ`calendar_date_spaghetti` ምርመራ መልዕክት `DISCOVERY_06 oldPriorSlot0=ERROR` ይመዘገባል። የ`PATCH 06` መለያ ማስተካከያ ወደ ደረጃ 13 ይቀራል።
+
+### የደረጃ 12 መዝጊያ — EXPECTED_RED
+
+የመጀመሪያው የCI ሙከራ በሁለት አዲስ የV ፈተና ፋይሎች የቅርጸት ልዩነት ቆሟል። ከV 0.5.2 (`7647ce1`) እውነተኛ የformatter ውጤት እነዚህ ልዩነቶች ተስተካክለው፣ ጊዜያዊ የምርመራ የCI እርምጃ ተወግዷል። በcommit `4426662ddbfd426b2db12c09f72a1b94da55cd5f` የGitHub Actions run `38222220614` ሙሉ PASS ነው፤ 17 የGREEN የሙከራ ፋይሎች ተሳክተዋል፣ 4 በተለዩ የhistory ጉድለት assertions የተጠበቀው RED ተረጋግጧል። የቅርስ ማስረጃ `11735060045` ተሰጥቷል። `legacy_prior` እውነተኛ የታዩ ጠብታዎችን ብቻ እንደነበረው ያነባል፣ ከዜሮ እና ከአሉታዊ slot የሚመለሰው የV error የruntime ጥበቃ ብቻ ነው። `PATCH 06` አልተጨመረም፣ ደረጃ 12 COMPLETE / EXPECTED_RED ነው።

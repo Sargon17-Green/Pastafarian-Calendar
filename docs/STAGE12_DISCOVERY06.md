@@ -1,4 +1,4 @@
-# ደረጃ 12/55 — DISCOVERY 06 (EXPECTED_RED)
+# ደረጃ 12/55 — DISCOVERY 06 (COMPLETE / EXPECTED_RED)
 
 ## የታሪካዊው ስህተት
 
@@ -33,3 +33,14 @@ v test ./pastafari/discovery06_expected_red_test.v
 ```
 
 የመጨረሻው የRED ፋይል አራት የተለዩ assertions በሆን ተብሎ ይወድቃሉ። የቀድሞ 16 ፋይሎች እና አዲሱ የታሪክ witness በአጠቃላይ 17/17 GREEN ይቀራሉ። `PATCH 06` ሳይፈቀድ አይጨመርም፤ በደረጃ 13 ብቻ ይጀመራል።
+
+## የV 0.5.2 የተረጋገጠ መዝጊያ
+
+- የተፈተነው commit፦ `4426662ddbfd426b2db12c09f72a1b94da55cd5f`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38222220614
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38222220614/artifacts/11735060045
+- `V 0.5.2 7647ce1`፤ `v fmt -verify ./pastafari` PASS።
+- 17 የቀድሞ እና አዲስ witness `_test.v` ፋይሎች PASS ናቸው፤ በ`slot=0,-1,-2,-6` ላይ 4 የታሰቡ RED assertions በስም ተረጋግጠዋል።
+- `PATCH 06` አልተጨመረም፤ `LAST_COMPLETED_STAGE=12` ነው።
+
+**ደረጃ 12 COMPLETE / EXPECTED_RED።**
