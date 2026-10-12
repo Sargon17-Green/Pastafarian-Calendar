@@ -56,12 +56,6 @@ jobs:
         run: |
           set -euo pipefail
           v version
-          v fmt -w ./pastafari/legacy_wide_order_discovery14.v
-          v fmt -w ./pastafari/discovery14_witness_test.v
-          v fmt -w ./pastafari/discovery14_expected_red_test.v
-          echo '=== STAGE28 NATIVE FORMAT DIFF START ==='
-          git diff -- ./pastafari/legacy_wide_order_discovery14.v ./pastafari/discovery14_witness_test.v ./pastafari/discovery14_expected_red_test.v
-          echo '=== STAGE28 NATIVE FORMAT DIFF END ==='
           v fmt -verify ./pastafari
       - name: Stage 1 — normative reference
         run: v test ./pastafari/normative_oracle_test.v

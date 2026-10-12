@@ -1,4 +1,4 @@
-# ደረጃ 28/55 — DISCOVERY 14 (EXPECTED_RED)
+# ደረጃ 28/55 — DISCOVERY 14 (COMPLETE / EXPECTED_RED)
 
 ## የwide አሃዞች ቅደም ተከተል ስህተት
 
@@ -38,3 +38,18 @@ v test ./pastafari/discovery14_expected_red_test.v
 
 41 የቀድሞና አዲስ GREEN test ፋይሎች፣
 4 ሆን ተብለው RED assertions መረጋገጥ አለባቸው።
+
+
+## የnative CI ማረጋገጫ
+
+- የተፈተነ commit: 4ad8b3bd449c7ea90332a925b08e78898bb40b09
+- GitHub Actions: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286136749
+- Artifact: 11763271971 (v-amharic-stage28-red-evidence)
+- የnative V ኮምፓይለር V 0.5.2 7647ce1።
+- 41 የቀድሞና አዲስ GREEN test ፋይሎች PASS።
+- አራት የnormative EXPECTED_RED ማስረጃዎች በተናጠል ተረጋግጠዋል።
+- v fmt -verify ./pastafari PASS፤ በfmt -w አንድም ልዩነት አልተገኘም።
+- Canonical Names Lock PASS።
+- LAST_COMPLETED_STAGE=28። ደረጃ 29 PATCH 14 አልተጀመረም።
+
+**ደረጃ 28 COMPLETE / EXPECTED_RED።**

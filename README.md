@@ -155,3 +155,11 @@ rejection ሂደት ተጠብቀዋል። አራት የnormative
 EXPECTED_RED ማስረጃዎች በደረጃ 29 PATCH 14 ይጠገናሉ።
 የPATCH 13 short ሕግ አይቀየርም። ሙሉ 46 drops ገና
 አልተተገበሩም። ዝርዝር፦ docs/STAGE28_DISCOVERY14.md።
+
+
+ደረጃ 28 በV 0.5.2 (7647ce1) በCI run
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286136749
+ተረጋግጧል። 41/41 የGREEN test ፋይሎች PASS፣
+አራቱ intentional EXPECTED_RED assertions በተናጠል
+ተረጋግጠዋል፣ Canonical Names Lock PASS።
+LAST_COMPLETED_STAGE=28፤ PATCH 14 አልተጀመረም።
