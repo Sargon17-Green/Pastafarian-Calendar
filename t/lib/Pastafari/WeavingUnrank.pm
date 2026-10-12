@@ -171,7 +171,8 @@ sub unrankWeavingPolynomial ($lengths, $rank1, $stats = undef) {
                    tail_shortcut_kind => $tail_shortcut_kind,
                    future_cache_hits => ($factor_diagnostics{future_cache_hits}//0),
                    future_cache_misses => ($factor_diagnostics{future_cache_misses}//0),
-                   factored_suffix_calls => ($factor_diagnostics{factor_calls}//0));
+                   factored_suffix_calls => ($factor_diagnostics{factor_calls}//0),
+                   reverse_histogram_builds => ($factor_diagnostics{profile_builds}//0));
     }
     return \@word;
 }

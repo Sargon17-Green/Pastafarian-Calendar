@@ -81,9 +81,9 @@ for my $case (@cases) {
                 die "原始規範 Oracle 的字典序結果不一致\n"
                     if "@$expected" ne "@$word";
             }
-            printf "CASE label=%s status=PASS days=%d rank_digits=%d wall=%.3fs VmHWM_KiB=%d suffix_calls=%d considered=%d shortcut_steps=%d tail_days=%d tail_kind=%d\n",
+            printf "CASE label=%s status=PASS days=%d rank_digits=%d wall=%.3fs VmHWM_KiB=%d suffix_calls=%d considered=%d shortcut_steps=%d tail_days=%d tail_kind=%d future_hits=%d future_misses=%d reverse_profile_builds=%d\n",
                 $case->{label},scalar(@$word),length("$rank"),time()-$start,
-                highwater_kib(),@stats{qw(suffix_calls considered shortcut_steps tail_shortcut_days tail_shortcut_kind)};
+                highwater_kib(),@stats{qw(suffix_calls considered shortcut_steps tail_shortcut_days tail_shortcut_kind future_cache_hits future_cache_misses reverse_histogram_builds)};
             1;
         };
         if (!$ok) {
