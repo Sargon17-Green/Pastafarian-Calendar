@@ -28,3 +28,5 @@ export * from "./discovery12LegacyFixedNextBowl.ts";
 export * from "./patch12NextBowl.ts";
 
 export * from "./discovery13LegacyBiasedModulo.ts";
+
+export * from "./patch13RejectionRank.ts";

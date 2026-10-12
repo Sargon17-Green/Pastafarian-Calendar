@@ -175,3 +175,7 @@ Exact rank2 order `[1,2,3,4,6,5]` चे IDs 4,5,6 तीन independent histori
 ## Stage 26 DISCOVERY 13 — verified and closed
 
 मूळ biased first-answer modulo selection हा नियमाधारित rejection/wide `chooseRank` चा पर्याय नाही. नवीन historical old adapter प्रत्यक्ष चालतो; Stage25 chain आणि प्रश्न-उत्तर SAVE सूत्र जसेच्या तसे राखलेले. स्वतंत्र test-only oracle, top-of-M rejection witnesses, wide-family under-coverage, 804 genuine precursor histories व तेरावा intentional expected-red regressions जोडल्यानंतर CI verification बाकी आहे. GitHub Actions run 38246972763: दोन्ही jobs SUCCESS. 256 पैकी 255 family sizes मध्ये modulo bias; 804 full histories मध्ये canonical stream error शून्य, historical rank differences 177. 13 archived intentionally-red tests expected-nonzero. Stage26 बंद.
+
+## Stage 27 PATCH 13 — submitted for CI
+
+Corrected rejection-sampling rank selection short/wide दोन्ही domain मध्ये स्वतंत्र production implementation; Stage26 real old modulo method unchanged and invoked, corrected full Stage25 chain reused. O(1) exact skip of +1/-1 cyclic rejected suffix avoids worst-case M iterations. Independent finite-base exhaustive brute oracle, canonical TypeScript test oracle bounded witnesses, 12 day pairs, 64 varied, eight signed-bigint, 720 rank paths. Stage complete only after both GitHub Actions jobs PASS.
