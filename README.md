@@ -337,3 +337,10 @@ plas ki manke, validasyon, de commit ak 22 echèk izole ki gen
 etap 1 rive 13 sou runtime Lua natif la.
 
 **Pa kòmanse Stage 14 la.** Okenn tab grind sentinel pa antre nan branch sa a.
+
+### Konfimasyon GitHub Actions Stage 13
+
+Run `38229918405` te pase tout **sèt** travay yo sou Lua natif.
+Lòd history vizib ak sèt hidden yo matche ak oracle la; odit legacy
+Stage 12 la toujou montre egzakteman sèt mank istorik yo.
+Rezilta: `STAGE13_NATIVE_SUITE=PASS`, `STAGE13_REMOTE_CI=PASS`.

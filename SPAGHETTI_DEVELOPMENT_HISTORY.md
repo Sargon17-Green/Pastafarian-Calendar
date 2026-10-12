@@ -307,3 +307,10 @@ Nou kenbe regresyon wouj Stage 12 la kòm yon prèv legacy separe ki
 egzije egzakteman sèt plas ki manke yo. Regresyon pwodiksyon an ak
 tès 24 koup jou yo vin vèt; yon suite nouvo ajoute 22 erè piki.
 `GRIND_TABLE_WITH_SENTINEL` ak tout etap Stage 14 yo poko antre.
+
+### Vèdik natif Stage 13
+
+GitHub Actions `38229918405` konfime sèt travay `success`.
+Yon tès endepandan sou Lua 5.3 rapòte 1,344 lekti (672 hidden,
+672 vizib), 22 piki echèk izole, 15 rekiperasyon ak PASS Stage 13.
+Se sèlman apre prèv sa yo nou fèmen PATCH 06.
