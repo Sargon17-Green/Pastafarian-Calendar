@@ -135,3 +135,10 @@ v fmt -verify ./pastafari
 የመልስ ዙሩ በትክክል የPATCH 11 ላችን፣ የPATCH 12 circular successor እና ከ12 post-stirs በኋላ የሚገኙትን ስድስት ቦውሎች ይጠቀማል። የመጀመሪያውን first፣ የመሄጃ አቅጣጫ step እና ማንኛውንም የBigInt k የanswerAt(k) እሴት ይሰላል። የታሪካዊው old_biased_pick ግን የrejection limit ሳይመረምር 1+regularMod(x−1,n) ይመልሳል፤ በዚህ ደረጃ ስህተቱን ሆን ብለን አስቀምጠናል። ለመጠገን የPATCH 13 ደረጃ 27 ይጠብቃል።
 
 V 0.5.2 (7647ce1) በGitHub Actions run 38282248109 ተረጋግጧል። v fmt -verify PASS፣ 38/38 GREEN የፈተና ፋይሎች PASS፣ አራት EXPECTED_RED የnormative bias ማስረጃዎች ተለይተው ተረጋግጠዋል። Canonical Names Lock PASS። LAST_COMPLETED_STAGE=26። ዝርዝር፦ docs/STAGE26_DISCOVERY13.md።
+
+
+## ደረጃ 27 — PATCH 13
+
+ShortRejectionPatch13 ለ1≤n≤M በBigInt የተሰላውን limit=floor(M/n)*n ይጠቀማል። በተመሳሳይ የAnswerStream ክፍል ላይ የanswerAt(k) መልስ ከlimit በላይ ከሆነ ይጥለዋል። መልስ ከተቀበለ በኋላ ብቻ dispatch_legacy_biased_pick ይጠራል። የold_biased_pick የታሪክ ስህተት አልተለወጠም፤ የproduction ምርጫ ግን PATCH 13 ይጠቀማል። የደረጃ 26 አራቱ RED assertions አሁን GREEN ናቸው። n>M wide ምርጫና ሙሉ 46-drop chain ወደ ቀጣይ ደረጃዎች ተቀምጠዋል።
+
+V 0.5.2 (7647ce1) በGitHub Actions run 38284358707 ተረጋግጧል። v fmt -verify PASS፣ v test ./pastafari 40/40 PASS፣ Canonical Names Lock PASS። ዝርዝር፦ docs/STAGE27_PATCH13.md። LAST_COMPLETED_STAGE=27።
