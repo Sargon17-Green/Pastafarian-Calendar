@@ -121,3 +121,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 14 — DISCOVERY 07 (EXPECTED_RED በቀጥተኛ ማረጋገጫ ላይ)
 
 ከ11 የወፍጮ ረድፎች ጋር `legacy_visible_grind_table` ተጨምሯል። `old_grind_row(grind)` በ0..10 የተደራጀውን ሰንጠረዥ በ1..11 የሎጂክ ቁጥር በቀጥታ ያነባል። `LegacyGrindAdapter` እና `BaseDispatcher.dispatch_legacy_grind` በproduction `calendar_grind_row_spaghetti` ውስጥ በእውነት ይሠራሉ። በ`legacy_grind_once` የተሳሳተው ረድፍ በመደበኛው SAVE የሂሳብ መስመር ሲገባ ውጤቱ 210 ነው፣ የትክክለኛው የመጀመሪያ ረድፍ ሂሳብ ግን 154 ነው። አራት የተመረጡ RED assertions የ1,2,10,11 ወፍጮዎችን ይመረምራሉ፤ የታሪክ ስህተት በራሱ ምስክር ይቀራል። የsentinel ረድፍ ለ`PATCH 07` ይጠበቃል።
+
+### የደረጃ 14 መዝጊያ — EXPECTED_RED
+
+የV 0.5.2 (`7647ce1`) እውነተኛ formatter በሶስቱ አዳዲስ የV ፋይሎች ላይ ምንም ለውጥ አልጠየቀም። ጊዜያዊ የቅርጸት ምርመራ ከCI ተወግዶ፣ commit `c15c5848da35ebd72cd9d98ab188baf53f79f36f` ላይ GitHub Actions run `38227809414` ሁሉንም የታሰቡ ውጤቶች አረጋግጧል። 20 የቀድሞና አዲስ witness `_test.v` ፋይሎች PASS ናቸው፣ አራት የተለዩ የወፍጮ ረድፍ assertions ሆን ብለው RED ሆነዋል። `old_grind_row` በ1 ዙር ሁለተኛውን ረድፍ ያነባል፣ በ11 ዙር የማውጫ ስህተት ይመልሳል፤ ይህ የታሪክ ጉድለት ያልተጠገነ ነው። የማስረጃ ቅርስ `11737470384` ተቀምጧል። `PATCH 07` sentinel ረድፍ አልተጨመረም። ደረጃ 14 COMPLETE / EXPECTED_RED።

@@ -1,4 +1,4 @@
-# ደረጃ 14/55 — DISCOVERY 07 (EXPECTED_RED)
+# ደረጃ 14/55 — DISCOVERY 07 (COMPLETE / EXPECTED_RED)
 
 ## የታሪክ የወፍጮ ሰልፍ ስህተት
 
@@ -34,4 +34,16 @@ v -check ./pastafari/discovery07_expected_red_test.v
 v test ./pastafari/discovery07_expected_red_test.v
 ```
 
-20 የቀድሞና አዲስ witness ፋይሎች GREEN መሆን አለባቸው። የ`discovery07_expected_red_test.v` አራት የሎጂክ መርጫ assertions በሆን ተብሎ RED መሆን አለባቸው። የ`PATCH 07` sentinel ረድፍ ለደረጃ 15 ይቀራል፤ `LAST_COMPLETED_STAGE=13` የV CI ማረጋገጫ እስኪጠናቀቅ ይቆያል።
+20 የቀድሞና አዲስ witness ፋይሎች GREEN መሆን አለባቸው። የ`discovery07_expected_red_test.v` አራት የሎጂክ መርጫ assertions በሆን ተብሎ RED መሆን አለባቸው። የ`PATCH 07` sentinel ረድፍ ለደረጃ 15 ይቀራል፤ V 0.5.2 የCI ማረጋገጫ PASS ነው፤ `LAST_COMPLETED_STAGE=14`።
+
+## የተረጋገጠ የV ማስረጃ
+
+- የተፈተነ commit፦ `c15c5848da35ebd72cd9d98ab188baf53f79f36f`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38227809414
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38227809414/artifacts/11737470384
+- `V 0.5.2 7647ce1`፤ `v fmt -verify ./pastafari` PASS።
+- 20 የቀድሞና አዲስ የታሪክ ምስክር ፋይሎች PASS። በ`grind=1,2,10,11` ላይ 4 የታሰቡ RED assertions በተናጠል ተረጋግጠዋል።
+- `old_grind_row` እና ረድፎቹ 0..10 እንዳሉ ይቀራሉ። `PATCH 07` ለደረጃ 15 ይጠበቃል።
+- ደረጃ 15 አልተጀመረም።
+
+**ደረጃ 14 COMPLETE / EXPECTED_RED።**
