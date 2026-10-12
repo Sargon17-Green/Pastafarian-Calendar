@@ -460,12 +460,97 @@ public final class MonsterWeavingLinearCounter {
             globalRank, block.lowerRank(), block.upperRank(), targetSuffixDays, 0);
     }
 
+
+    private int[] extremeFromRoute(RankRoute route, boolean latest) {
+        int[] result = Arrays.copyOf(route.prefix, totalDays);
+        State state = new State(route.state);
+        for (int pos = route.prefix.length; pos < totalDays; pos++) {
+            int chosen = -1;
+            if (latest) {
+                for (int month = lengths.length - 1; month >= state.closed; month--) {
+                    if (state.canTake(month, lengths)) {
+                        chosen = month;
+                        break;
+                    }
+                }
+            } else {
+                for (int month = state.closed; month < lengths.length; month++) {
+                    if (state.canTake(month, lengths)) {
+                        chosen = month;
+                        break;
+                    }
+                }
+            }
+            if (chosen < 0) throw new IllegalStateException("E_WEAVE_ROUTE_EXTREME");
+            result[pos] = chosen + 1;
+            state.take(chosen, lengths);
+        }
+        return result;
+    }
+
+    private RankRoute advanceNearEdge(RankRoute route, int maximumSteps,
+            boolean fromLast, int distance) {
+        int stop = Math.min(totalDays - route.suffixTargetDays,
+            route.prefix.length + maximumSteps);
+        int[][] neighbors = new int[distance + 1][];
+        neighbors[0] = extremeFromRoute(route, fromLast);
+        for (int i = 1; i <= distance; i++) {
+            neighbors[i] = fromLast
+                ? lexPrevious(neighbors[i - 1]) : lexNext(neighbors[i - 1]);
+            if (neighbors[i] == null || !sharesPrefix(neighbors[i], route.prefix)) {
+                throw new IllegalStateException("E_WEAVE_ROUTE_EDGE");
+            }
+        }
+        int[] witness = neighbors[distance];
+        int[] chosenPrefix = Arrays.copyOf(witness, stop);
+        int firstShared = -1;
+        for (int i = 0; i <= distance; i++) {
+            if (sharesPrefix(neighbors[i], chosenPrefix)) {
+                firstShared = i;
+                break;
+            }
+        }
+        if (firstShared < 0) throw new IllegalStateException("E_WEAVE_ROUTE_EDGE");
+        State state = new State(route.state);
+        for (int pos = route.prefix.length; pos < stop; pos++) {
+            state.take(witness[pos] - 1, lengths);
+        }
+        BigInteger remaining = countSuffix(state);
+        BigInteger lower = fromLast
+            ? route.upper.subtract(BigInteger.valueOf(firstShared))
+                .subtract(remaining).add(ONE)
+            : route.lower.add(BigInteger.valueOf(firstShared));
+        BigInteger upper = lower.add(remaining).subtract(ONE);
+        if (lower.compareTo(route.globalRank) > 0
+                || upper.compareTo(route.globalRank) < 0
+                || lower.compareTo(route.lower) < 0
+                || upper.compareTo(route.upper) > 0) {
+            throw new IllegalStateException("E_WEAVE_ROUTE_EDGE_INTERVAL");
+        }
+        return new RankRoute(this, state, chosenPrefix, route.globalRank,
+            lower, upper, route.suffixTargetDays, 1);
+    }
+
     public RankRoute advanceGlobalRankRoute(RankRoute previous,
             int maximumSteps, int maximumBranchCounts) {
         if (previous == null || previous.owner != this) {
             throw new IllegalArgumentException("E_WEAVE_ROUTE_OWNER");
         }
         validateRouteBudgets(maximumSteps, maximumBranchCounts);
+        if (maximumSteps > 0 && maximumBranchCounts >= 1
+                && !previous.complete()) {
+            BigInteger fromFirst = previous.globalRank.subtract(previous.lower);
+            BigInteger fromLast = previous.upper.subtract(previous.globalRank);
+            BigInteger edge = BigInteger.valueOf(MAX_EDGE_DISTANCE);
+            if (fromFirst.compareTo(edge) <= 0) {
+                return advanceNearEdge(previous, maximumSteps,
+                    false, fromFirst.intValueExact());
+            }
+            if (fromLast.compareTo(edge) <= 0) {
+                return advanceNearEdge(previous, maximumSteps,
+                    true, fromLast.intValueExact());
+            }
+        }
         State state = new State(previous.state);
         int[] prefix = Arrays.copyOf(previous.prefix,
             Math.min(totalDays, previous.prefix.length + maximumSteps));

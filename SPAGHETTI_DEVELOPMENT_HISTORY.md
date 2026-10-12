@@ -165,3 +165,7 @@ ni'o lo `beginGlobalRankRouteWithinPrefix` cu cpacu lo ranki pluta poi se jicmu 
 ### lo mulno nanca pamoi .e romoi ranki detri
 
 ni'o lo se cuxna te javni cu kakne lo nu zbasu lo detri fi lo ranki po'o ca lo nu lo ranki cu stuzi lo pamoi .a lo romoi pagbu. lo drata ranki cu za'o nitcu lo se jimte se xanri pagbu pluta. lo stadi 2 cu za'o na mulno.
+
+### lo lamji ranki pluta be lo se jimte te namcu
+
+ni'o lo nu lo ranki se lamji lo pamoi .a lo romoi pagbu cu curmi lo pa `countSuffix` pe lo pluta se jmina. lo `RankRoute` cu ralte lo drani jicmu ranki .e lo se stali ranki girzu. lo `Stage02NearEdgeRoutingTests` cu cipra lo so'i narmanci namcu .e lo barda nanca pe li 5778 djedi fi lo 256 mebibaiti te jimte.

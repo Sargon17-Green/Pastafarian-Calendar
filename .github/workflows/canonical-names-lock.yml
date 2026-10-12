@@ -88,3 +88,5 @@ jobs:
         run: sh run_stage02_route_calendar_tests.sh
       - name: Stage 02 automatic full-year boundary route dates
         run: sh run_stage02_automatic_boundary_route_tests.sh
+      - name: Stage 02 amortized near-edge global routing
+        run: sh run_stage02_near_edge_routing_tests.sh
