@@ -60,12 +60,31 @@ function LegacyFixedPours.initialBowls(calculationDay,targetDay)
     return copyBigints(bowls,6)
 end
 
+local function verifyCorrectedOrder(order,context)
+    assert(type(order)=="table" and #order==6,
+           "Lòd PATCH 08 la pa yon permutation sis bòl")
+    assert(type(context)=="table" and context.mode=="STAGE_17_PATCH_08"
+           and context.status=="PATCH_PERM_RETURNED" and context.commitToken==3,
+           "Tras PATCH 08 la pa konplè")
+    local unique={}
+    for position=1,6 do
+        local id=order[position]
+        assert(type(id)=="number" and math.type(id)=="integer"
+               and id>=1 and id<=6 and not unique[id],
+               "Bòl permutation la repete oubyen pa valab")
+        unique[id]=true
+    end
+    assert(context.semanticState.permutation==table.concat(order,","),
+           "Lòd PATCH 08 la pa dakò ak tras otoritè li")
+end
+
 -- Pa chanje erè istorik la: oldBowls[position] olye oldBowls[order[position]].
 -- Permutation.execute se PATCH 08 reyèl la, pa yon oracle test.
 function LegacyFixedPours.legacyPoursToFixedBowlIds(drop,index,oldBowls,stoneRow)
     validate(index,oldBowls,stoneRow)
     local value=B.from(drop)
     local order,permutationContext=Permutation.execute(value)
+    verifyCorrectedOrder(order,permutationContext)
     local square=B.mul(value,value)
     local pours={}
     for position=1,3 do

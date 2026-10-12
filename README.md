@@ -582,3 +582,12 @@ Sa se etap DISCOVERY sèlman: tès istorik la dwe rete EXPECTED_RED;
 `test/stage18_expected_red_audit.lua` asire mesaj erè egzak la.
 Koreksyon pozisyon-vè-id bòl la se PATCH 09 nan Stage 19. Pa gen
 kòd pou alias id bòl, pou brase bòl, oubyen pou PATCH 10.
+
+### QA adisyonèl DISCOVERY 09
+
+Yon validasyon ki pa modifye fòmil legacy a rejte permutation falsifye
+oswa tras PATCH 08 ki pa konplè. Tès sa a enjekte 16 defayans
+(4 sou PATCH 08, 4 sou SAVE, 4 sou BigInt, 4 sou permutation)
+epi mande 16 rekiperasyon pwòp. Yon lòt tès fè uit apèl nested
+pandan handler rank oswa pandan kalkil matematik vide yo.
+Toujou pa gen PATCH 09 ni okenn koreksyon id bòl.
