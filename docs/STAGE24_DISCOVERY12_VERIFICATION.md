@@ -20,4 +20,16 @@
 
 `test/discovery12Red.ts`: twelve-th explicitly expected-red standalone script; rank2 order `[1,2,3,4,6,5]`, IDs 4,5,6 deliberately return wrong numeric next bowls; marker `DISCOVERY_12_EXPECTED_RED mismatches=3 matches=0 ids=4,5,6 order=1,2,3,4,6,5` and nonzero process exit. Earlier eleven historical expected-red scripts retained and independently checked by GitHub Actions.
 
-**स्थिती:** native TypeScript CI आणि GitHub Actions होण्याआधी Stage24 verified नाही. पुढील Stage25 मध्येच actual permutation-position successor दुरुस्ती; Stage24 source मध्ये patch नाही.
+**स्थिती: GitHub Actions पूर्ण PASS.** Verified implementation commit `e5c03c15c7fb6b99126b2290dfa8e90ede457b4d`; [run 38239449544](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239449544): jobs `verify` आणि `stage24-typescript-marathi` दोन्ही SUCCESS. Native TypeScript typecheck, complete Stage1–24 regression suite, all **12** independent archival deliberately-red scripts, frozen canonical-names SHA lock PASS.
+
+```text
+STAGE_24_DISCOVERY_12_GUARDS_PASS dayPairs=12 cells=72 mismatches=60 matches=12 rank2Wrong=3 actualLegacyCalls=2 injectedFailures=1
+STAGE_24_DISCOVERY_12_PROPERTIES_PASS orders=720 cells=4320 wrong=3456 matches=864 numericWrap=720 positionWrap=720 positionWrapWrong=576 realPairs=12 varied=64 giant=8 ranks=720 unique=720 histories=804 sharedWrites=46632 queryWrong=629 queryMatches=175 realWrong=11 realMatches=1
+DISCOVERY_12_EXPECTED_RED mismatches=3 matches=0 ids=4,5,6 order=1,2,3,4,6,5
+```
+
+- **720 ranks ×6 queried IDs:** exactly 3456 wrong numeric successors and 864 coincident correct. ID6 numeric wrap 720 times, permutation-position6 wrap 720 times, of which 576 old next-names incorrect.
+- **12 real canonical day-pairs ×6 IDs:** 72 actual complete histories/queries, old wrong 60, accidentally correct 12; all Stage21/23 bowl states and correct immutable drop46 latches independently validated.
+- **804 complete 46-drop+12-post-stir histories** = 12 actual +64 varied +8 huge signed +720 distinct drop46 rank cases, 46632 actual old order-memory writes, old successor wrong 629/correct by coincidence 175 in sampled full histories; 12 real sampled ID queries wrong 11/same 1. Stage23 corrected order latch is used as input witness, **not** as a correction to the old numeric successor.
+- Historical old method instrumented and physically invoked, injected throw at old successor after full chain leaves input/context untouched, retry and independent ownership passed. All previous 11 deliberately-red scripts remained unchanged, new 12th nonzero proof confirmed by CI.
+- Stage25 PATCH12 has **not** been implemented. The legacy incorrect helper `oldNextBowlFixedName` is the archived source of the defect; the test-only `canonicalNextBowl` is not present in production.
