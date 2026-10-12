@@ -500,3 +500,11 @@ hàm gốc không, chu kỳ ở 720, công thức gán hạng sai,
 cả 46 thứ tự, số nguyên rất lớn, đồng thời, mã nguồn
 và bốn hồi quy chuẩn cố ý đỏ. Những kiểm thử giai đoạn
 1-15 phải tiếp tục xanh.
+
+**Bằng chứng thực tế:** CI chạy 179 kiểm thử với đúng bốn
+hồi quy chuẩn đỏ của phát hiện 08, 175 bài đạt, 0 cảnh báo.
+Tất cả 163 bài của các giai đoạn 1–15 đều giữ kết quả xanh.
+Bốn bài đỏ thuộc hạng 1, hạng 720 và hai giọt biên
+trong 46 thứ tự đã tạo. Bộ mở hạng gốc không không sai;
+lỗi là hạng từ một được truyền thẳng cho nó.
+Khóa tên chuẩn PASS. Đóng giai đoạn 16 ở EXPECTED_RED.

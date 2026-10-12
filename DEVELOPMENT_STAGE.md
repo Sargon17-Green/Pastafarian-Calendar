@@ -4,7 +4,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=16
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=08
-LAST_COMPLETED_STAGE=15
+LAST_COMPLETED_STAGE=16
 EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -16,16 +16,16 @@ NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-07; thêm hàm mở hạng gốc không và chuyển nhầm hạng từ một vào legacy trong 46 thứ tự.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=STAGE_16_PENDING
+GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_16_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=STAGE_16_PENDING
-CI_FAILURES=STAGE_16_PENDING
+CI_TESTS=179
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -283,3 +283,14 @@ Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/
 Giai đoạn 15 đóng GREEN; tiếp theo giai đoạn 16, DISCOVERY 08.
 
 Giai đoạn 16 phát hiện lỗi hạng hoán vị từ một truyền thẳng vào LegacyPermutationUnrank0 bắt đầu từ không. Quay vòng hạng 720 để giữ thứ tự hợp lệ nhưng sai. Xây 46 thứ tự trong context; chưa dùng các thứ tự để rót vào bát. Thêm 16 kiểm thử: 12 điều khiển, bốn hồi quy chuẩn cố ý đỏ. Dự kiến 179 kiểm thử với đúng bốn lỗi. Giữ LAST_COMPLETED_STAGE=15 đến khi xác minh CI; PATCH 08 thuộc giai đoạn 17.
+
+Giai đoạn 16 đã kiểm chứng trên Elixir 1.18.5 và Erlang/OTP 27:
+179 kiểm thử, đúng bốn thất bại dự kiến tại hạng 1, hạng 720,
+giọt đầu, giọt 46. 175 kiểm thử khác đạt, bao gồm cả 163
+bài kiểm thử giai đoạn 1-15. Không có cảnh báo biên dịch.
+Khóa tên chuẩn độc lập PASS. Hàm old_permutation_unrank0
+thật sự được gọi trong mỗi lần tạo 46 thứ tự; lỗi chỉ nằm
+ở một đơn vị hạng truyền vào. Không khởi động PATCH 08.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38232940991
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38232941046
+Giai đoạn 16 đóng EXPECTED_RED; bước tiếp theo giai đoạn 17 PATCH 08.

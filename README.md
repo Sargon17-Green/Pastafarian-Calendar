@@ -542,3 +542,20 @@ legacyRank0 = oneBased-1
 order = oldPermutationUnrank0(legacyRank0)
 ```
 Không dùng chuỗi vá này trong lần phát hiện hiện tại.
+
+## Kiểm chứng hoàn tất giai đoạn 16
+
+GitHub Actions với Elixir 1.18.5 / Erlang/OTP 27 chạy
+**179 kiểm thử, đúng 4 hồi quy chuẩn đỏ có chủ đích**, 175 đạt,
+0 cảnh báo biên dịch. Cả 163 bài kiểm thử thuộc giai đoạn
+1–15 vẫn xanh. Các bài đỏ chỉ tại hạng 1, hạng 720,
+thứ tự của giọt đầu và thứ tự của giọt thứ 46.
+Khóa tên chuẩn độc lập PASS.
+
+- [CI phát hiện 08, 4 hồi quy đỏ dự kiến](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38232940991)
+- [Khóa tên chuẩn PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38232941046)
+
+Giai đoạn 16/55 kết thúc `EXPECTED_RED` đã xác minh.
+Giai đoạn 17/55 là `PATCH 08`: giữ hàm mở hạng gốc không,
+đổi `one_based` thành `legacy_rank0=one_based-1`
+trước lời gọi. Chưa thêm bản vá trong giai đoạn 16.
