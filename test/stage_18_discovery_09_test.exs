@@ -247,7 +247,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
     assert patch =~ "Map.put(bowl_alias, position, Map.fetch!(bowls_old, id))"
     assert legacy_stir =~ "Map.put(current, id, updated)"
     assert legacy_stir =~ "Map.fetch!(source, id)"
-    assert dispatcher =~ "BowlDropCalculator.apply_all("
+    assert dispatcher =~ "BowlDropCalculator.apply_all_with_order_memory("
     refute legacy =~ "bowl_alias"
     assert File.exists?(Path.join(root, "bowl_alias_patch.ex"))
     refute calculator =~ "LegacyPourPositions.pour("

@@ -61,6 +61,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage22Discovery11Test do
     assert memory.last_source == {:drop, 46}
     assert memory.order == context.bowl_orders[46]
     assert memory.order == Ref.bowl_order_from_drop(context.visible_drops[46])
+    assert memory.order == BowlOrderManager.order_from_drop(context.visible_drops[46])
   end
 
   test "12 lần khuấy cuối ghi đè cùng ô và nâng số lần ghi lên 58" do
