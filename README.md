@@ -1386,3 +1386,23 @@ immutabile di 47 nomi resta invariato.
 Questa fase usa un rango già scelto dal chiamante:
 la salsa annuale, le famiglie complete e l'integrazione
 della data finale non sono dichiarate terminate.
+
+### Certificazione nativa dello Stage35
+
+La [run GitHub Actions 38284097901](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38284097901)
+sul commit `0fbed9f251bae9bbec5105818776892fd1365679`
+si è conclusa **SUCCESS in 36/36 job**. La suite Stage35
+ha restituito **71 PASS/0 FAIL** e Stage34 ha mantenuto
+**63 PASS/3 FAIL intenzionali**. Tutte le firme delle
+suite precedenti sono state ripetute nella stessa run.
+
+I test di Stage35 verificano 47!, ordinali BigInt superiori
+a 128 bit, 4096 vettori confrontati all'oracolo, 4096 vettori
+invertiti, assenza di nomi duplicati, confini e stati falsificati.
+La scelta legacy con ripetizioni rimane nella stessa trace.
+
+Nel passaggio da Stage34, una verifica storica conteneva
+un doppio `val st` che impediva la compilazione delle suite;
+è stato eliminato senza modificare la semantica del legacy.
+I nomi congelati del catalogo e la salsa normativa restano
+estranei a questo wrapper diagnostico.

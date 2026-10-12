@@ -1514,3 +1514,14 @@ validator non chiama il wrapper della patch ma ricostruisce
 il rank dal vettore ottenuto; snapshot, tracing, regressioni
 e confronto storico rimangono attivi. Stage34 conserva i
 tre fallimenti deliberati, nessuna Stage36 anticipata.
+
+### Certificazione Stage35 PATCH17
+
+GitHub Actions run 38284097901, commit
+0fbed9f251bae9bbec5105818776892fd1365679:
+**36/36 job SUCCESS**, **71 PASS/0 FAIL** di Stage35,
+**63 PASS/3 FAIL intenzionali** di Stage34. Il catalogo
+italiano resta congelato, il vecchio adapter con nomi
+duplicati resta riproducibile, mentre il ramo corretto
+seleziona disposizioni senza ripetizioni. La validazione
+del rank è indipendente dall'unrank. Stage36 assente.

@@ -1,0 +1,39 @@
+STATO_ESECUZIONE=PASS_NATIVE_SCALA
+STADIO=35
+TIPO=PATCH_17
+RISULTATO_ATTESO=GREEN
+RISULTATO_REALE=71_PASS_0_FAIL
+PATCH_WRAPPER=Patch17DistinctMonthNameWrapper.monthNameDistinctPatch
+DISCOVERY_17_LEGACY_PRESERVED=YES
+MONTH_NAMES_WITHOUT_REPLACEMENT=YES
+LEGACY_WITH_REPLACEMENT_RESULT_PRESERVED=YES
+PATCH_01_TO_16_PRESERVED=YES
+STAGE36_INTRODUCED=NO
+MONTH_NAME_CATALOG_COUNT=47
+MONTH_COUNT_RANGE=3_TO_47
+RANK_DOMAIN=FALLING_FACTORIAL_47_MONTHCOUNT
+RANK_BIGINT_TESTED_ABOVE_128_BITS=YES
+RANK_INVERSION_VALIDATOR_INDEPENDENT=PASS
+DETERMINISTIC_ORACLE_CASES=4096
+DETERMINISTIC_RANK_INVERSION_CASES=4096
+INPUT_SNAPSHOT=PASS
+GITHUB_ACTIONS_RUN=38284097901
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38284097901
+GITHUB_ACTIONS_HEAD_SHA=0fbed9f251bae9bbec5105818776892fd1365679
+GITHUB_ACTIONS_JOBS=36
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage35Tests'
+VERIFIED_ON=2026-10-12
+REGRESSIONE_STAGE01_TO_34=PASS_PREVIOUS_SIGNATURES
+REGRESSIONE_STAGE34=63_PASS_3_FAIL_INTENTIONAL
+REGRESSIONE_STAGE35=71_PASS_0_FAIL
+
+La PATCH17 seleziona nomi distinti dal catalogo congelato 1..47
+tramite unrank lessicografico con rank BigInt 1-based. Il vecchio
+adapter dei duplicati è invocato e restituito in un rapporto
+separato nella stessa invocazione. L'algoritmo corretto
+rimuove il nome selezionato dalla lista disponibile.
+Il validator indipendente verifica il rank inverso, il dominio,
+l'immutabilità dello snapshot, il risultato legacy e la trace.
+Questo è un test diagnostico di rank già scelto: non genera
+ancora il rank dalla salsa annuale completa o l'output canonico.

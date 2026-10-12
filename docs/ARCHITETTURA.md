@@ -630,3 +630,12 @@ snapshot del contesto.
 La PATCH17 resta sintetica: riceve il rank normativo
 dall'esterno, non calcola la salsa annuale reale. Nessun
 nome del catalogo congelato viene modificato.
+
+La run 38284097901 (commit
+0fbed9f251bae9bbec5105818776892fd1365679)
+conferma PATCH17 con 36/36 job e 71 PASS/0 FAIL.
+L'inverse ranking è verificato su tutto il dominio
+m=3..47 con cardinalità BigInt. L'algoritmo è limitato
+alla selezione di un rank già prodotto dal chiamante;
+non simula la salsa annuale completa né afferma
+che ogni conversione di calendario sia pronta.
