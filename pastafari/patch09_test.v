@@ -14,6 +14,7 @@ fn patch09_independent_expected(i int, drop BigInt, stones Stones, bowls []BigIn
 			2 { stones.b }
 			else { stones.s }
 		}
+
 		mut value := big_square(drop)
 		value = big_add(value, big_mul(kind_stone, bowls[order[position - 1]]))
 		value = big_add(value, big_from_int((2 * position + 1) * i))
@@ -28,8 +29,8 @@ fn test_patch09_alias_is_one_based_order_mapping() {
 	reversed := patch.install_bowl_alias([6, 5, 4, 3, 2, 1]) or { []int{} }
 	assert identity == [0, 1, 2, 3, 4, 5, 6]
 	assert reversed == [0, 6, 5, 4, 3, 2, 1]
-	assert (patch.install_bowl_alias([2, 3, 1, 4, 5, 6]) or { []int{} }) == [0,
-		2, 3, 1, 4, 5, 6]
+	assert (patch.install_bowl_alias([2, 3, 1, 4, 5, 6]) or { []int{} }) == [0, 2, 3, 1, 4, 5,
+		6]
 	bowls := patch09_fixture_bowls()
 	for position in 1 .. 7 {
 		value := patch.bowl_by_legacy_position(bowls, reversed, position) or { big_zero() }
@@ -42,10 +43,11 @@ fn test_patch09_alias_is_one_based_order_mapping() {
 fn test_patch09_reversed_fixture_all_three_positions_and_history() {
 	bowls := patch09_fixture_bowls()
 	order := [6, 5, 4, 3, 2, 1]
-	legacy := new_base_dispatcher().dispatch_legacy_pours(1, big_from_int(2),
-		initial_stones(), bowls, order) or { []BigInt{} }
-	patched := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls,
-		order) or { []BigInt{} }
+	legacy := new_base_dispatcher().dispatch_legacy_pours(1, big_from_int(2), initial_stones(),
+		bowls, order) or { []BigInt{} }
+	patched := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls, order) or {
+		[]BigInt{}
+	}
 	assert legacy[1].str() == '177'
 	assert legacy[2].str() == '589'
 	assert legacy[3].str() == '1301'
@@ -56,8 +58,8 @@ fn test_patch09_reversed_fixture_all_three_positions_and_history() {
 		assert patched[position].str() == '0'
 	}
 	assert patched[0].str() == '0'
-	assert patched == patch09_independent_expected(1, big_from_int(2), initial_stones(),
-		bowls, order)
+	assert patched == patch09_independent_expected(1, big_from_int(2), initial_stones(), bowls,
+		order)
 }
 
 fn test_patch09_rotated_order_and_identity_compatibility() {
@@ -65,14 +67,16 @@ fn test_patch09_rotated_order_and_identity_compatibility() {
 	stones := initial_stones()
 	identity := [1, 2, 3, 4, 5, 6]
 	rotated := [2, 3, 1, 4, 5, 6]
-	identity_actual := calendar_pours_spaghetti(1, big_from_int(2), stones, bowls,
-		identity) or { []BigInt{} }
+	identity_actual := calendar_pours_spaghetti(1, big_from_int(2), stones, bowls, identity) or {
+		[]BigInt{}
+	}
 	identity_old := old_pours_fixed_bowls(1, big_from_int(2), stones, bowls, identity) or {
 		[]BigInt{}
 	}
 	assert identity_actual == identity_old
-	rotated_actual := calendar_pours_spaghetti(1, big_from_int(2), stones, bowls,
-		rotated) or { []BigInt{} }
+	rotated_actual := calendar_pours_spaghetti(1, big_from_int(2), stones, bowls, rotated) or {
+		[]BigInt{}
+	}
 	assert rotated_actual[1].str() == '347'
 	assert rotated_actual[2].str() == '879'
 	assert rotated_actual[3].str() == '441'
@@ -88,8 +92,7 @@ fn test_patch09_all_720_orders_exactly_match_independent_pours() {
 		actual := calendar_pours_spaghetti(7, big_from_int(13), stones, bowls, order) or {
 			[]BigInt{}
 		}
-		expected := patch09_independent_expected(7, big_from_int(13), stones, bowls,
-			order)
+		expected := patch09_independent_expected(7, big_from_int(13), stones, bowls, order)
 		assert actual.len == 7
 		for position in 0 .. 7 {
 			assert big_eq(actual[position], expected[position])
@@ -152,8 +155,14 @@ fn test_patch09_alias_and_pour_validation_fail_closed() {
 	}
 	for invalid_i in [-4, 0, 47] {
 		mut rejected := false
-		_ = calendar_pours_spaghetti(invalid_i, big_one(), initial_stones(), bowls,
-			[1, 2, 3, 4, 5, 6]) or {
+		_ = calendar_pours_spaghetti(invalid_i, big_one(), initial_stones(), bowls, [
+			1,
+			2,
+			3,
+			4,
+			5,
+			6,
+		]) or {
 			rejected = true
 			[]BigInt{}
 		}
@@ -174,13 +183,11 @@ fn test_patch09_permutation_dispatch_and_reentrancy_are_stable() {
 	expected_second := patch09_independent_expected(2, second, stone, bowls, almost_identity)
 	for repeat in 0 .. 15 {
 		a := calendar_pours_spaghetti(1, first, stone, bowls, reverse_order) or { []BigInt{} }
-		b := calendar_pours_spaghetti(2, second, stone, bowls, almost_identity) or {
-			[]BigInt{}
-		}
+		b := calendar_pours_spaghetti(2, second, stone, bowls, almost_identity) or { []BigInt{} }
 		assert a == expected_reverse
 		assert b == expected_second
-		assert (PourPatch09{}.install_bowl_alias(reverse_order) or { []int{} }) == [0,
-			6, 5, 4, 3, 2, 1]
+		assert (PourPatch09{}.install_bowl_alias(reverse_order) or { []int{} }) == [0, 6, 5, 4,
+			3, 2, 1]
 	}
 }
 
@@ -189,8 +196,8 @@ fn test_patch09_monster_probe_preserves_legacy_and_new_branch() {
 	assert calendar_distance_spaghetti(foundation, foundation).str() == '1'
 	assert calendar_stones_spaghetti(2, initial_stones()).b.str() == '1073'
 	assert (calendar_grind_row_spaghetti(11) or { []int{} }) == [37, 41, 43, 47, 1]
-	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6,
-		5, 4, 3, 2, 1]
+	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6, 5, 4, 3, 2,
+		1]
 	mut diagnostic := ''
 	_ = calendar_date_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
