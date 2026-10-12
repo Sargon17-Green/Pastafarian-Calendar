@@ -209,3 +209,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 25 — PATCH 12 (በnative V ማረጋገጫ ላይ)
 
 የደረጃ 24 `old_next_bowl_fixed_name` ቋሚ መለያ በታሪክ መንገድ አሁንም `(queried_id % 6)+1` ይመልሳል። `NextBowlPatch12` በ`orderAt46Latch` ውስጥ የ`queried_id` ን ቦታ ያገኛል፣ የዚያን ቦታ የሚከተለውን የእውነተኛውን ቦውል ID ይመልሳል። አሮጌው adapter በdispatcher በእውነት ተጠርቷል ነገር ግን ውጤቱ ለመመለሻ አይውልም። በ`discovery12_witness_test.v` ውስጥ የታሪክ ፈተናዎች አሮጌውን dispatcher በቀጥታ ይጠራሉ፤ `discovery12_expected_red_test.v` አራቱ የቀድሞ ምስክሮች ሳይቀየሩ ይቆያሉ። የPATCH 13 የbiased modulo ምርጫ ገና አልተጀመረም።
+
+### የደረጃ 25 መዝጊያ — GREEN
+
+የመጀመሪያው run 38278935540 ሁለቱንም የGitHub Actions ሥራዎች በPASS ጨርሷል፣ 37/37 የV ፈተና ፋይሎች ተሳክተዋል። የV formatter የጠየቀው የ`patch12_test.v` አራት የጽሑፍ ቅርጽ ልዩነቶች በቀጥታ ተግብረዋል፣ ጊዜያዊ የformatter ምርመራ ከCI ተወግዷል። በcommit `7f6783c1c4b42861a7ff050bf71f66b574ab5402` ላይ የnative V run `38279265900` ሁለቱም ሥራዎች PASS ናቸው። `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **37/37 PASS**፤ በ`discovery12_expected_red_test.v` ያሉት አራቱ assertions ሳይቀየሩ GREEN ሆነዋል። ሁሉም 720 የቅደም ተከተሎች × 6 ቦውሎች = 4320 የላች circular successor ምርጫዎች ተረጋግጠዋል። የlegacy `old_next_bowl_fixed_name` የታሪክ ጉድለት አልተለወጠም። የማስረጃ ቅርስ `11760980342` ተቀምጧል። ደረጃ 26 አልተጀመረም። **ደረጃ 25 COMPLETE / GREEN።**

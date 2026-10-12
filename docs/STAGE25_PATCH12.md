@@ -1,4 +1,4 @@
-# ደረጃ 25/55 — PATCH 12 (የGREEN ማረጋገጫ ይጠበቃል)
+# ደረጃ 25/55 — PATCH 12 (COMPLETE / GREEN)
 
 ## የታሪክ ጉድለትን ሳያጠፋ የትክክለኛው ቀጣይ ቦውል ምርጫ
 
@@ -36,4 +36,17 @@ v test ./pastafari/patch12_test.v
 v test ./pastafari
 ```
 
-የGREEN መመዘኛው 37/37 የV ፈተና ፋይሎች ነው። የ`PATCH 13` ሥራ አልተጀመረም፣ የ46 ጠብታዎች ሙሉ ማስኬጃ ይቀራል። `LAST_COMPLETED_STAGE=24` የnative CI መመዘኛው እስኪሳካ ይቆያል።
+የGREEN መመዘኛው 37/37 የV ፈተና ፋይሎች ነው። የ`PATCH 13` ሥራ አልተጀመረም፣ የ46 ጠብታዎች ሙሉ ማስኬጃ ይቀራል። `LAST_COMPLETED_STAGE=25` የnative CI መመዘኛው እስኪሳካ ይቆያል።
+
+## የመጨረሻ የnative V ማስረጃ
+
+- የተፈተነ commit፦ `7f6783c1c4b42861a7ff050bf71f66b574ab5402`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38279265900
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38279265900/artifacts/11760980342
+- `V 0.5.2 7647ce1`፦ `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` **37/37 PASS**።
+- አራቱ የደረጃ 24 RED assertions ሳይቀየሩ GREEN ሆነዋል።
+- 720 የላች ቅደም ተከተሎች × 6 መለያዎች = 4320 የcircular successor ምርጫዎች ተፈትሸዋል።
+- `old_next_bowl_fixed_name` አሁንም በቋሚ ID ላይ ተመስርቶ ይመልሳል፤ የproduction መንገድ ግን ከ`orderAt46Latch` ይወስናል።
+- ደረጃ 26 — `DISCOVERY 13` አልተጀመረም።
+
+**ደረጃ 25 COMPLETE / GREEN።**
