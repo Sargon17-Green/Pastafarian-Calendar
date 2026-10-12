@@ -21,6 +21,7 @@ local PourPatch = require("pour_patch")
 local LegacyAliasedStir = require("legacy_aliased_stir")
 local StirPatch = require("stir_patch")
 local LegacyResetChain = require("legacy_reset_chain")
+local BowlChainPatch = require("bowl_chain_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -269,8 +270,13 @@ end
 -- DISCOVERY 11: premye brase a kòrèk, men chak gout apre sa
 -- rdemare sou sis bòl inisyal yo olye rezilta gout anvan an.
 function S.resetBowlsSpaghetti(drops,stoneRows,initialBowls)
-    local result=LegacyResetChain.execute(drops,stoneRows,initialBowls)
+    local result=BowlChainPatch.execute(drops,stoneRows,initialBowls)
     return result
+end
+
+-- PATCH 11 kenbe tras DISCOVERY 11 an epi ajoute yon dezyèm commit.
+function S.bowlChainPatchProbe(drops,stoneRows,initialBowls)
+    return BowlChainPatch.execute(drops,stoneRows,initialBowls)
 end
 
 function S.legacyResetBowlsProbe(drops,stoneRows,initialBowls)
@@ -300,8 +306,30 @@ function S.visibleResetChainProbe(calculationDay,targetDay,count)
     return result,context
 end
 
+function S.visibleBowlChainPatchProbe(calculationDay,targetDay,count)
+    assert(type(count)=="number" and math.type(count)=="integer"
+        and count>=1 and count<=46,"Kantite gout vizib dwe 1..46")
+    local bowls=LegacyFixedPours.initialBowls(calculationDay,targetDay)
+    local stoneTable=StonePatch.buildPatchedTable()
+    local drops,stones,store,visibleContexts={},{},{},{}
+    for i=1,count do
+        local drop,child=S.visibleDropSpaghetti(calculationDay,targetDay,i,store)
+        assert(child.status=="PATCH_VISIBLE_COMPLETE"
+            and child.completedGrinds==11,"Gout vizib PATCH 07 pa konplè")
+        drops[i]=BigInt.from(drop)
+        store[i]=BigInt.from(drop)
+        stones[i]=stoneTable[i]
+        visibleContexts[i]=child
+    end
+    local corrected,context=BowlChainPatch.execute(drops,stones,bowls)
+    context.visibleContexts=visibleContexts
+    context.visibleDropCount=count
+    context.metrics["patch11.visible.calls"]=1
+    return corrected,context
+end
+
 function S.visibleResetChainSpaghetti(calculationDay,targetDay,count)
-    local result=S.visibleResetChainProbe(calculationDay,targetDay,count)
+    local result=S.visibleBowlChainPatchProbe(calculationDay,targetDay,count)
     return result
 end
 
