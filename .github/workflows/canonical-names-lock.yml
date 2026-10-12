@@ -769,3 +769,23 @@ jobs:
           for label in 'C giorno2' 'C giorno3' 'B giorno1'; do
             grep -Fq "FAIL — equivalenza normativa contatore ${label} — Mese contiguo errato: ${label}" stage32.log
           done
+
+  native-stage33-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage33 exact interleaved month-day PATCH16
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage33Tests' 2>&1 | tee stage33.log
+          grep -Fq 'RISULTATO STADIO 33: 65 PASS, 0 FAIL' stage33.log
+          test "$(grep -Fc 'PASS — ' stage33.log)" -eq 65
+          test "$(grep -Fc 'FAIL — ' stage33.log)" -eq 0

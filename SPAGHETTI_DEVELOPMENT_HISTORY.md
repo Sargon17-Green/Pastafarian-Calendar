@@ -1459,3 +1459,13 @@ DISCOVERY 16 conserva 58 PASS/3 FAIL attesi, mostrando
 il calcolo errato dell'indice giornaliero per mesi intrecciati.
 Tutti i validator e le regressioni fino allo Stage31
 rimangono attivi. PATCH16 non viene introdotta.
+
+## Stadio 33 — PATCH 16: data mensile del mese intrecciato
+
+Il valore legacy contiguo (eventualmente negativo) è calcolato
+davvero e conservato. Il valore corretto conta le occorrenze
+dell'ID del mese nel prefisso tessuto fino al giorno richiesto.
+Una snapshot dell'input e un validator autonomo impediscono
+manomissioni tra discovery e patch. I test comprendono
+giorni intercalati, mesi da 123 giorni, 47 mesi e la soglia
+inclusiva di 5778 giorni. Nessuna Stage34 anticipata.

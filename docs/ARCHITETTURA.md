@@ -572,3 +572,15 @@ ripete soltanto il calcolo contiguo della cicatrice. La run
 38268359013 sul commit b138a00a997cbba43c93dbf7169ab4bd3739e969
 conferma 33/33 lavori superati e le tre divergenze
 intenzionali. La fase successiva è PATCH16 nello Stage33.
+
+## PATCH 16 — contatore del mese intrecciato
+
+Con `w` tessitura annua fissata, `d` offset zero-based
+e `m = w(d)`, il giorno canonico nel mese è
+`|{ i : 0 <= i <= d, w(i) = m }|`.
+Il vecchio algoritmo `d - sum(lengths(1..m-1)) + 1`
+resta intatto e viene invocato prima del risultato corretto.
+La validazione indipendente ricostruisce entrambi, protegge
+snapshot e report, senza usare l'oracolo dei test in produzione.
+L'input è un vettore sintetico legale già preparato, non la
+famiglia completa derivata dalla salsa.

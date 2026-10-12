@@ -1264,3 +1264,31 @@ precedenti sono conservate. Il test di confine è stato
 corretto per rifiutare solo mesi oltre 123 giorni; un
 precedente errore di download sbt in un runner non si
 è ripetuto nella run certificata.
+
+## Stadio 33 — PATCH 16 (giorno del mese da prefisso reale)
+
+La scelta corretta usa la tessitura annuale valida e già fissata.
+`Patch16ContiguousMonthDayWrapper.contiguousMonthDayPatch`
+chiama prima **davvero** il legacy `oldContiguousMonthDayGuess`
+per preservare il vecchio indice contiguo, quindi determina il
+mese tramite `annualWeaving(dayOffset)` e conta le sue occorrenze
+nei giorni `0..dayOffset`. Non presume mai la contiguità.
+
+Il dispatcher percorre `BOOT → DISCOVERY_16 → PATCH_16`
+nella stessa invocazione. Il report pubblica valore storico,
+valore corretto, ID mese, offset, durate, trace e status.
+Il validator indipendente ricostruisce sia la cicatrice
+contigua sia il conteggio del prefisso, e confronta gli
+input con la snapshot originale prima di accettare output.
+
+`sbt -batch 'Test / runMain pastafari.Stage33Tests'`
+contiene **65 controlli** con copertura esaustiva dei
+252 giorni per tre tessiture, 4096 vettori pseudo-casuali
+riproducibili, 47 mesi e limite 5778 giorni, alterazioni
+maliziose del contesto, isolamento di manager e regressioni
+delle 15 patch precedenti. Stage32 rimane RED storico
+con esattamente tre divergenze; Stage33 è GREEN.
+
+Come le fasi vicine, lo scenario è sintetico e usa sequenze
+annuali già selezionate. L'integrazione completa della salsa
+e della famiglia canonica non è dichiarata finita.
