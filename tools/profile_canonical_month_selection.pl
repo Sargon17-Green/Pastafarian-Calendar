@@ -12,13 +12,15 @@ use Digest::SHA qw(sha256_hex);
 use lib 'lib', 't/lib';
 use Pastafari::NormativeScroll qw(
     FOUNDATION_DAY resetGateCache year5000
-    countWeavings
+    countWeavings unrankWeaving
 );
 use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
 use Pastafari::WeavingProfileDisk qw(buildWeavingProfileDisk);
 use Pastafari::WeavingSuffix qw(countWeavingSuffixPolynomial);
 use Pastafari::WeavingSuffixFactor qw(countWeavingSuffixFactored);
+use Pastafari::WeavingUnrank qw(unrankWeavingPolynomial);
+use Pastafari::WeavingRank qw(rankWeavingPolynomial);
 
 # 只驗證真實年份選出的月長及相鄰兩月的精確交織。
 # 不呼叫昂貴的整年度反排名，不將局部證據稱為全年度 PASS。
@@ -105,6 +107,40 @@ sub verify_pair ($pair,$label) {
         $indexed->diagnostics->{spool_bytes};
 }
 
+
+# 除雙月閉式計數之外，再用獨立規範 Oracle 檢驗真實三月
+# 中間一基排名的字典序：不能只用排名器的自身回推自證。
+sub verify_triple ($lengths,$label) {
+    my $norm=countWeavings($lengths);
+    my $resident=countWeavingsPolynomial($lengths);
+    die "真實三月常駐總數和規範 Oracle 不一致：$label\n"
+        if $resident!=$norm;
+    my $middle=$norm->copy->bdiv(2)->badd(1);
+    die "真實三月中間排名無效：$label\n"
+        if $middle<=1 || $middle>=$norm;
+    my $oracle_word=unrankWeaving($lengths,$middle);
+    my %decode_stats;
+    my $indexed_word=unrankWeavingPolynomial(
+        $lengths,$middle,\%decode_stats,
+        {profile_engine=>'stream-indexed',max_temp_file_bytes=>8*1024*1024}
+    );
+    die "真實三月的中間字典序與規範反排名不一致：$label\n"
+        if join(',',@$oracle_word) ne join(',',@$indexed_word);
+    my %rank_stats;
+    my $reconstructed=rankWeavingPolynomial(
+        $lengths,$indexed_word,\%rank_stats,
+        {profile_engine=>'stream-indexed',max_temp_file_bytes=>8*1024*1024}
+    );
+    die "真實三月中間 BigInt 排名無法雙向重建：$label\n"
+        if $reconstructed!=$middle;
+    die "真實三月沒有啟用受測索引模型：$label\n"
+        if ($decode_stats{indexed_profile_builds}//0)!=1
+        || ($rank_stats{indexed_profile_builds}//0)!=1;
+    printf "CANONICAL_MONTH_TRIPLE status=PASS label=%s lengths=%s total_digits=%d rank_digits=%d decoder_suffix_calls=%d rank_candidates=%d\n",
+        $label,join(',',@$lengths),length("$norm"),length("$middle"),
+        $decode_stats{suffix_calls}//0,$rank_stats{candidates}//0;
+}
+
 my $pid=fork();
 die "無法建立受控子程序：$!\n" if !defined $pid;
 if (!$pid) {
@@ -147,9 +183,11 @@ if (!$pid) {
         printf "CANONICAL_MONTHS phase=LENGTHS_SELECTED days=%d months=%d min=%d max=%d sha256=%s first=%d,%d last=%d,%d\n",
             $L,$count,$min,$max,$digest,
             @$lengths[0,1],@$lengths[$count-2,$count-1];
+        print "CANONICAL_MONTHS phase=VECTOR values=",join(',',@$lengths),"\n";
         verify_pair([@$lengths[0,1]],'first');
         verify_pair([@$lengths[$count-2,$count-1]],'last');
-        printf "CANONICAL_MONTHS status=PASS scope=YEAR5000_MONTH_LENGTHS_AND_TWO_PAIRS elapsed_sec=%.3f VmHWM_KiB=%d\n",
+        verify_triple([@$lengths[0,1,2]],'first');
+        printf "CANONICAL_MONTHS status=PASS scope=YEAR5000_MONTH_LENGTHS_TWO_PAIRS_AND_FIRST_TRIPLE elapsed_sec=%.3f VmHWM_KiB=%d\n",
             time()-$start,peak_kib();
         1;
     };

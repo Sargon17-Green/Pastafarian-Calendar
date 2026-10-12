@@ -26,3 +26,25 @@ GitHub Actions https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/ru
 **重要限制：** 首／末雙月精確結果不驗證整個 4,244 日月份交織的排名／反排名，也不構成最高 5,778 日的效能或空間保證。若月份選擇超過預算必須如實列為 BLOCKED。收到原生完整記錄後才能標定 PASS 或分析 BLOCKED。
 
 \`LAST_COMPLETED_STAGE=1\` 不變，不得改動 \`main\`，不得新增或提交 \`HANDOFF_*\` 使用者資料。
+
+## 第一份原生選樣結果（第十七輪初版）
+
+受控 commit \`c5dfc08aacf955e43df06dee543c272ba0ccfcfe\`，
+Job \`canonical-month-selection\` PASS。
+規範第 5000 年：4,244 日、45 個月、最短 25 日、最長 122 日。
+完整月長序列 SHA-256：
+\`6d64022344c04935e6423aa6f96b285098d35b9b5ecb4b8c57a4c7149773a134\`。
+首兩月 115、108 日；末兩月 122、105 日。
+兩組雙月對照全數 PASS，總耗時 46.635 秒，VmHWM 71,656 KiB。
+初版 GitHub Actions：https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38273879555 。
+
+## 下一步：真實三月之中位排名（待原生驗證）
+
+原版僅證明雙月精確計數。本次將真正選出的前三個月作為單一連續三月向量：
+先以獨立的 \`NormativeScroll::countWeavings\` 計算精確總數，再由它本身的
+\`unrankWeaving\` 確定中間一基排名的完整規範字典序；
+用不同多項式及磁碟索引式反排名產生同一字典序，最後以正向排名器重建原始 BigInt。
+這比對只證明真實三個相鄰月份的子問題，不可推論整年 45 個月份的完整交織也已驗證。
+
+另在受控輸出中記錄選出的全部 45 個月長，讓後續稽核可以獨立重現固定向量。
+測試完成前不可把這項三月新驗證列為 PASS。
