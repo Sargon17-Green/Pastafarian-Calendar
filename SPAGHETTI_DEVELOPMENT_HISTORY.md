@@ -1479,3 +1479,15 @@ La selezione del mese resta stabile per l'anno e il giorno
 nel mese è contato nel prefisso, anche per mesi intrecciati.
 Il legacy contiguo e le PATCH01–15 sono preservati.
 Stage34 non è stata anticipata.
+
+## Stadio 34 — DISCOVERY 17: nomi mensili duplicati
+
+L'oracolo normativo costruisce disposizioni senza ripetizioni
+di 3..47 nomi fra 47. Il legacy diagnostico preservato
+usa invece parole in base47 con rimpiazzo, producendo
+nomi identici per mesi distinti. Il dominio del rango
+resta quello delle disposizioni valide; il bug concerne
+la selezione, non l'ampliamento del dominio. Il validator
+indipendente verifica cifre, cardinalità, snapshot e
+tracce senza eseguire l'unrank corretto. Stage35 non
+viene anticipata.

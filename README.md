@@ -1307,3 +1307,32 @@ non corretti a posteriori. Il contatore vero usa l'occorrenza
 dell'ID nel prefisso annuale senza ipotizzare mesi contigui.
 Questa verifica riguarda una tessitura sintetica valida già
 selezionata e non rivendica l'integrazione della salsa normativa.
+
+## Stadio 34 — DISCOVERY 17 (nomi dei mesi con rimpiazzo)
+
+La struttura canonica assegna ai mesi nomi **distinti** da un
+catalogo congelato di 47. I vettori di nomi sono ordinati
+lessicograficamente con rango 1-based e cardinalità
+`47!/(47-m)!`, dove `3 <= m <= 47`. La selezione normativa
+usa `SealMonthNames=33` e unrank delle disposizioni distinte.
+
+La cicatrice
+`LegacyDuplicatedMonthNameAdapter.oldMonthNameDuplicated`
+usa invece una decomposizione del rango in **base 47 con
+rimpiazzo**, senza rimuovere i nomi già scelti; può quindi
+restituire `[1,1,1]` per tre mesi invece del vettore normativo
+`[1,2,3]`. Il numero di mesi e il rango vengono convalidati
+sul dominio **normativo** decrescente, senza estendere
+artificialmente lo spazio di selezione.
+
+Il manager attraversa `BOOT → DISCOVERY_17_DUPLICATED_MONTH_NAME`;
+report, snapshot, trace, metriche e validator indipendente
+preservano l'output storico. La suite Stage34 contiene **63
+PASS e tre FAIL intenzionali** nei casi di rango 1/2 per tre
+mesi e rango 1 per 47 mesi, oltre a 4096 vettori deterministici,
+ranghi oltre 128 bit, limiti del catalogo e regressioni
+delle precedenti 16 patch.
+
+La riparazione con unrank senza rimpiazzo è rinviata
+esclusivamente a Stage35 PATCH17. La produzione non deriva
+ancora il rango dalla salsa normativa.

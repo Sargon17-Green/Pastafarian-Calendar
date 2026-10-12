@@ -591,3 +591,16 @@ confermato 34/34 job; il wrapper corretto produce
 65 PASS/0 FAIL. La certificazione riguarda la tessitura
 annuale sintetica già fornita, non il calcolo normativo completo
 della salsa e della selezione delle famiglie annuali.
+
+## DISCOVERY 17 — nomi mensili con rimpiazzo
+
+L'anno contiene `m=3..47` mesi con nomi distinti
+indicizzati `1..47`. La scelta normativa è una
+disposizione senza rimpiazzo in ordine lessicografico
+di `P(47,m)=47*46*...*(48-m)` candidati. Il legacy
+`oldMonthNameDuplicated` convalida `rank1` rispetto a
+`P(47,m)`, ma decodifica `rank1-1` come parola
+posizionale di `m` cifre in base47: non elimina
+i nomi selezionati dalle cifre successive. Le ripetizioni
+sono quindi possibili. Questo isola il difetto senza
+implementare la PATCH17 o la salsa del calendario.

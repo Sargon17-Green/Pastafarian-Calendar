@@ -789,3 +789,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 33: 65 PASS, 0 FAIL' stage33.log
           test "$(grep -Fc 'PASS — ' stage33.log)" -eq 65
           test "$(grep -Fc 'FAIL — ' stage33.log)" -eq 0
+
+  native-stage34-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage34 expected-RED duplicate month names
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage34Tests' > stage34.log 2>&1
+          rc=$?
+          set -e
+          cat stage34.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 34: 63 PASS, 3 FAIL' stage34.log
+          test "$(grep -Fc 'PASS — ' stage34.log)" -eq 63
+          test "$(grep -Fc 'FAIL — ' stage34.log)" -eq 3
+          for label in rango1_tre_mesi rango2_tre_mesi rango1_47_mesi; do
+            grep -Fq "FAIL — equivalenza normativa nomi ${label} — Nomi con rimpiazzo: ${label}" stage34.log
+          done
