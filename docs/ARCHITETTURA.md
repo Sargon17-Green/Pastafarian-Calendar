@@ -347,3 +347,22 @@ L'oracolo per la scelta del vicino corretto
 resta unicamente nella suite di test. La
 prossima PATCH 10 deve lasciare intatta
 la cicatrice storica.
+
+## PATCH 10 — fotografia corretta della goccia 46
+
+`Patch10Order46Wrapper.order46Patch` esegue la
+cicatrice reale, poi calcola l'ordine normativo
+al quarantaseiesimo getto attraverso la PATCH 07.
+Il `Vector[Int]` risultante non cambia quando
+vengono eseguite le dodici mescolature del caveau.
+L'ID successivo è quello che segue il richiesto
+nell'ordine 46, con ritorno ciclico in posizione 1.
+
+La `BaseValidationManager.requirePatch10Ready`
+verifica indipendentemente i due ordini tramite
+decomposizione fattoriale, conservando anche
+l'output errato del vecchio latch. Il controllo
+richiede la stessa invocazione
+`BOOT/DISCOVERY_10/PATCH_10` e non dipende
+dall'oracolo di test. Il report espone entrambi
+i successori per agevolare la prova differenziale.

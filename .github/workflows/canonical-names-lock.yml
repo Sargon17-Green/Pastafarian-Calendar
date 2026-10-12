@@ -487,3 +487,23 @@ jobs:
           for label in 'ordine diretto' 'ordine inverso' 'giro finale'; do
             grep -Fq "FAIL — equivalenza normativa latch ${label} — Latch conserva ordine della goccia 45" stage20.log
           done
+
+  native-stage21-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 21 corrected immutable drop-46 latch PATCH 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage21Tests' 2>&1 | tee stage21.log
+          grep -Fq 'RISULTATO STADIO 21: 40 PASS, 0 FAIL' stage21.log
+          test "$(grep -Fc 'PASS — ' stage21.log)" -eq 40
+          test "$(grep -Fc 'FAIL — ' stage21.log)" -eq 0

@@ -808,3 +808,34 @@ l'ordine al passo 45 resta distinto
 e riproducibile. Le firme native Stage01–Stage19
 sono preservate senza nuove regressioni.
 Il catalogo è bloccato, PATCH 10 non è iniziata.
+
+## Stadio 21 — PATCH 10: fotografare la vera goccia 46
+
+La `DISCOVERY 10` mantiene un difetto storico
+isolato: `LegacyOrder46LatchAdapter.orderAt46Latch`
+salva per errore l'ordine della goccia 45.
+`Patch10Order46Wrapper.order46Patch` attraversa
+davvero quel codice storico e ne conserva i tre
+risultati diagnostici; poi aggancia in un Vector
+immutabile l'ordine della goccia **46** e sceglie
+il successore ciclico della ciotola interrogata
+secondo il vero ordine, come prescritto dalla norma.
+
+Il manager attraversa `BOOT → DISCOVERY_10_ORDER46_LATCH
+→ PATCH_10_ORDER46_FREEZE` nello stesso contesto.
+Il validator indipendente svolge l'unranking
+fattoriale e verifica autonomamente entrambi gli
+ordini, il successore storico e il successore
+corretto. Le dodici mescolature finali del caveau
+non modificano il latch della goccia 46.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage21Tests'
+```
+
+La suite copre i 720 ranghi, tutti e sei gli ID,
+BigInt signed di oltre 16.000 bit, isolamento dei
+contesti, falsificazioni e le nove patch
+precedenti. La firma Stage20 (26 PASS, tre FAIL
+intenzionali) rimane invariata; Stage22 non
+viene anticipato.

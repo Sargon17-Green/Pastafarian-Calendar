@@ -1042,3 +1042,43 @@ controllo è rosso. La cicatrice del
 quarantacinquesimo ordine resta verificabile,
 mentre tutte le nove patch precedenti
 e i certificati Stage01–Stage19 restano integri.
+
+## Stadio 21 — PATCH 10: il fermaglio finalmente alla goccia 46
+
+### Che cosa si pensava
+
+La permutazione giusta veniva già calcolata
+nella discovery, ma il vecchio fermaglio
+continuava a prendere quella precedente.
+
+### Che cosa si è scoperto
+
+Il bug cambia il successore ciclico di una
+ciotola anche quando le sei ciotole e le dodici
+mescolature successive sono corrette.
+È una perdita dell'ordine storico, non una
+corruzione dei valori delle ciotole.
+
+### Che cosa è stato aggirato
+
+Il wrapper attraversa davvero il vecchio
+latch, lo registra e ne conserva il risultato
+sbagliato. Successivamente aggancia
+l'ordine 46 normativo dalla PATCH 07 e
+interroga il vicino su quel Vector immutabile.
+
+### Perché è normativamente equivalente
+
+Il validator rifà indipendentemente
+l'unranking fattoriale di entrambe le
+permutazioni; i test confrontano il successore
+con l'oracolo che conserva l'ordine 46 anche
+dopo le dodici mescolature. Il difetto
+Stage20 resta riproducibile e rosso.
+
+### Strato di mostruosità aggiunto
+
+Wrapper, handler, report storico/corretto,
+validator autonomo, metrica, tre campi nel
+contesto e nuovo passaggio di fase. Nessun
+codice Stage22 viene anticipato.

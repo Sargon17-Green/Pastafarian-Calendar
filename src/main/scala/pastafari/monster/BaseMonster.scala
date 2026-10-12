@@ -68,7 +68,10 @@ final case class BaseMonsterContext(
   var queriedBowlInput: Option[Int] = None,
   var legacyLatchedOrder45: Option[Vector[Int]] = None,
   var observedOrder46: Option[Vector[Int]] = None,
-  var legacyNextBowlOutput: Option[Int] = None
+  var legacyNextBowlOutput: Option[Int] = None,
+  var patchedLatchedOrder46: Option[Vector[Int]] = None,
+  var patchedNextBowlOutput: Option[Int] = None,
+  var patch10Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -91,6 +94,62 @@ final class BaseValidationManager {
     }
   }
 
+
+  def requirePatch10Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "PATCH_10_ORDER46_FREEZE" ||
+        ctx.status != "PATCH_10_READY" ||
+        ctx.branchTrace.toVector != Vector(
+          "BOOT","DISCOVERY_10_ORDER46_LATCH","PATCH_10_ORDER46_FREEZE") ||
+        ctx.penultimateDropValue.isEmpty || ctx.finalDropValue.isEmpty ||
+        ctx.queriedBowlInput.isEmpty ||
+        ctx.legacyLatchedOrder45.isEmpty || ctx.observedOrder46.isEmpty ||
+        ctx.legacyNextBowlOutput.isEmpty ||
+        ctx.patchedLatchedOrder46.isEmpty || ctx.patchedNextBowlOutput.isEmpty ||
+        !ctx.patch10Applied) {
+      throw new IllegalStateException(
+        "PATCH 10 richiede una DISCOVERY 10 completa nella stessa invocazione.")
+    }
+    val queried = ctx.queriedBowlInput.get
+    val drop45 = ctx.penultimateDropValue.get
+    val drop46 = ctx.finalDropValue.get
+    val old = ctx.legacyLatchedOrder45.get
+    val observed = ctx.observedOrder46.get
+    val fixed = ctx.patchedLatchedOrder46.get
+    val previousNext = ctx.legacyNextBowlOutput.get
+    val patchedNext = ctx.patchedNextBowlOutput.get
+    if (queried < 1 || queried > 6 ||
+        patchedNext < 1 || patchedNext > 6 || patchedNext == queried ||
+        fixed.sorted != Vector(1,2,3,4,5,6) ||
+        observed.sorted != Vector(1,2,3,4,5,6) ||
+        old.sorted != Vector(1,2,3,4,5,6)) {
+      throw new IllegalStateException("Domini della PATCH 10 malformati.")
+    }
+    // Unranking fattoriale indipendente dal wrapper PATCH 10.
+    def expectedOrder(drop: BigInt): Vector[Int] = {
+      val mod = BigInt(720)
+      var remainingRank = (((drop-1)%mod+mod)%mod).toInt
+      var available = Vector(1,2,3,4,5,6)
+      val out = Vector.newBuilder[Int]
+      for (count <- 6 to 1 by -1) {
+        val factorial = (1 until count).product
+        val position = remainingRank / factorial
+        remainingRank = remainingRank % factorial
+        out += available(position)
+        available = available.patch(position,Vector.empty[Int],1)
+      }
+      out.result()
+    }
+    val order45 = expectedOrder(drop45)
+    val order46 = expectedOrder(drop46)
+    val legacyPosition = order45.indexOf(queried)
+    val correctPosition = order46.indexOf(queried)
+    if (old != order45 || observed != order46 || fixed != order46 ||
+        previousNext != order45((legacyPosition+1)%6) ||
+        patchedNext != order46((correctPosition+1)%6)) {
+      throw new IllegalStateException(
+        "Il latch storico o il nuovo latch PATCH 10 è stato contraffatto.")
+    }
+  }
 
   def requireDiscovery10Ready(ctx: BaseMonsterContext): Unit = {
     if (ctx.phase != "DISCOVERY_10_ORDER46_LATCH" ||
@@ -627,7 +686,8 @@ final class BaseMonsterManager {
     new Patch08BowlHandler(metrics),
     new Discovery09VaultHandler(metrics),
     new Patch09VaultHandler(metrics),
-    new Discovery10Order46LatchHandler(metrics)
+    new Discovery10Order46LatchHandler(metrics),
+    new Patch10Order46Handler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1108,6 +1168,34 @@ final class BaseMonsterManager {
       )
     } catch {
       case error: Throwable => throw BaseErrorWrapper.wrap("discovery10",error)
+    }
+  }
+
+  def patch10Order46(
+    calculationDay: BigInt, targetDay: BigInt,
+    drop45: BigInt, drop46: BigInt, queriedBowlId: Int
+  ): Patch10Order46Report = {
+    val ctx = bootstrap(calculationDay,targetDay)
+    ctx.penultimateDropValue = Some(drop45)
+    ctx.finalDropValue = Some(drop46)
+    ctx.queriedBowlInput = Some(queriedBowlId)
+    ctx.phase = "DISCOVERY_10_ORDER46_LATCH"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery10Ready(ctx)
+      ctx.phase = "PATCH_10_ORDER46_FREEZE"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch10Ready(ctx)
+      Patch10Order46Report(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.penultimateDropValue.get,ctx.finalDropValue.get,
+        ctx.queriedBowlInput.get,ctx.legacyLatchedOrder45.get,
+        ctx.observedOrder46.get,ctx.legacyNextBowlOutput.get,
+        ctx.patchedLatchedOrder46.get,ctx.patchedNextBowlOutput.get,
+        ctx.patch10Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("patch10",e)
     }
   }
 
