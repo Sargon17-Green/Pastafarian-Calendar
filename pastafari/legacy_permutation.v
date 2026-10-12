@@ -42,8 +42,8 @@ pub fn (_ BaseDispatcher) dispatch_legacy_permutation(drop BigInt) ![]int {
 	return adapter.order_for_drop(drop)
 }
 
-// ይህ የproduction መንገድ በደረጃ 16 የተሳሳተውን የrank መላክ በእውነት ይጠቀማል።
+// ደረጃ 17፦ የproduction ጥሪ PATCH 08 ያልፋል፤ የታሪክ adapter ይቀራል።
 pub fn calendar_bowl_order_spaghetti(drop BigInt) ![]int {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_permutation(drop)
+	return dispatcher.dispatch_permutation_patch08(drop)
 }

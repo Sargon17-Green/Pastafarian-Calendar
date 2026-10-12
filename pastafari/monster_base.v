@@ -150,7 +150,12 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	grind_last := grind_details + grind_one[0].str() + '; DISCOVERY_07 oldGrind11='
 	patch_row_one := grind_last + grind_eleven_status + '; PATCH_07 grind1A='
 	patch_row_eleven := patch_row_one + correct_grind_one[0].str() + '; PATCH_07 grind11A='
-	legacy_permutation := calendar_bowl_order_spaghetti(big_one())!
+	legacy_permutation := dispatcher.dispatch_legacy_permutation(big_one())!
+	patch := PermutationPatch08{}
+	patched_rank0 := patch.legacy_rank0(big_one())
+	patched_permutation := calendar_bowl_order_spaghetti(big_one())!
 	last_grind := patch_row_eleven + correct_grind_eleven[0].str() + '; DISCOVERY_08 oldPermRank0=1'
-	return error(last_grind + '; DISCOVERY_08 oldPermOrder=' + legacy_permutation.str())
+	historical_details := last_grind + '; DISCOVERY_08 oldPermOrder=' + legacy_permutation.str()
+	patch_rank := historical_details + '; PATCH_08 permRank0=' + patched_rank0.str()
+	return error(patch_rank + '; PATCH_08 permOrder=' + patched_permutation.str())
 }

@@ -141,3 +141,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 16 መዝጊያ — EXPECTED_RED
 
 በመጀመሪያው የGitHub Actions run `38235201547` የV 0.5.2 formatter በሁለት አዲስ `_test.v` ፋይሎች የረድፍ ቅርጽ ልዩነት ጠይቋል። በእውነተኛው formatter የተገኙት ልዩነቶች ብቻ ተስተካክለው፣ ጊዜያዊ የformatter ምርመራ ከCI ተወግዷል። commit `d40d313615367c6cdd9202711f2127200903fecf` ላይ GitHub Actions run `38235387422` በሁለቱም ሥራዎች PASS ነው። የV ቅርጸት ምርመራ PASS፣ 23 የቀድሞ እና አዲስ ምስክር ፈተናዎች PASS፣ `drop=1,2,719,720` ላይ አራት በስም የተመረጡ RED assertions ተረጋግጠዋል። `old_permutation_unrank0` የ720 ትክክለኛ መፍቻ እንደነበረው ይቀራል፣ የተሳሳተው `LegacyPermutationAdapter` ጥሪም በproduction አሁንም ይሠራል። የማስረጃ ቅርስ `11740715370` ተቀምጧል። `PATCH 08` አልተጨመረም። **ደረጃ 16 COMPLETE / EXPECTED_RED።**
+
+## ደረጃ 17 — PATCH 08 (በV CI ማረጋገጫ ላይ)
+
+`old_permutation_unrank0(rank0)` የታሪክ ቅደም ተከተል መፍቻ በሙሉ ተጠብቋል። `LegacyPermutationAdapter.order_for_drop` በስህተት `one_based` እንደ `rank0` ይልካል፣ የታሪክ ምስክሮቹ ከ`BaseDispatcher.dispatch_legacy_permutation` በቀጥታ ይህን ስህተት ያረጋግጣሉ። `PermutationPatch08` በproduction ጥሪ ከ`big_mod_small_nonnegative(drop-1,720)+1` የone-based ቁጥር በኋላ `one_based-1` ያደርጋል እና የቀድሞውን የ0..719 መፍቻ ይጠራል። `calendar_date_spaghetti` የመርመሪያ መልዕክት ሁለቱንም ተለያዩ ምርመራዎች `DISCOVERY_08 oldPermRank0=1` እና `PATCH_08 permRank0=0` ያሳያል። የ720 ደረጃዎች፣ ትልቅ 420-ቢት ግቤቶች፣ አሉታዊ ግቤቶች፣ ተደጋጋሚ ጥሪዎችና የቀድሞ መጠገኛዎች በ`patch08_test.v` ይፈተሻሉ። ደረጃ 18 አልተጀመረም።
