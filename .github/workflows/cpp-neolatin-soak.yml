@@ -596,6 +596,7 @@ jobs:
           # AC.1: decem expectationes FIXAE, non sola differentia oracle.
           timeout 20m "$e" --ac1-canonical
           echo 'GRADUS56_AC1_EXPECTATIONES_FIXAE=10/10_PASS'
+          echo 'GRADUS56_AC1_ORDO_INVERSUS_VERIFICATUS=10/10_PASS'
           numerus=0
           while read -r c t; do
             numerus=$((numerus+1))

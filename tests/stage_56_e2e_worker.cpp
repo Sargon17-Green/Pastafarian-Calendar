@@ -88,7 +88,28 @@ void requireCanonicalAc1FixedVectors() {
                   << " C=" << v.c << " T=" << v.t << '\n' << std::flush;
     }
     require(numerus == 10, "decem testes AC.1 exiguntur");
-    std::cout << "GRADUS56_AC1_CANONICA=10/10_PASS\n";
+    std::cout << "GRADUS56_AC1_CANONICA=10/10_PASS\n" << std::flush;
+
+    // Eaedem decem exspectationes FIXAE denuo in ordine adverso,
+    // intra eundem processum post omnes primas invocationes: hoc
+    // detectat state leakage et latentem dependentiam ab ordine API.
+    int inversi = 0;
+    for (auto it = vectores.rbegin(); it != vectores.rend(); ++it) {
+        const CanonicalAc1& v = *it;
+        const Five expected{
+            Integer{v.annus}, v.segmentum, Integer{v.diesSegmenti},
+            v.mensis, Integer{v.diesMensis}};
+        const Five actual = canonical(pastafari::calendarDateSpaghetti(
+            Integer{v.c}, Integer{v.t}));
+        require(actual == expected,
+                "AC.1 ordo inversus discrepavit a valoribus fixis main");
+        ++inversi;
+        std::cout << "GRADUS56_AC1_INVERSE_VECTOR_PASS=" << inversi
+                  << " ORIGINAL_INDEX=" << (vectores.size() - inversi + 1)
+                  << '\n' << std::flush;
+    }
+    require(inversi == 10, "decem testes inversi AC.1 exiguntur");
+    std::cout << "GRADUS56_AC1_ORDO_INVERSUS=10/10_PASS\n";
 }
 
 } // namespace

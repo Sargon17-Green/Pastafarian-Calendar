@@ -253,3 +253,30 @@ non imponitur novi SHA. `main` inalteratum est. Gradus 57 non apertus.
   (ante/retrorsum) non mutantur. Exitus `EDGES=18/18` in utroque
   workflow expresse requiritur. Haec tantum emendatio testis est, non mutationis
   algoritmi calendarii. STATUS = PENDING_NEW_SHA_CI.
+
+## Certificatio integra f9132e4a, die XII Octobris MMXXVI
+
+- **Exacte probatus SHA:** `f9132e4a29c5f16df9d821882921fa3b4d3580b9`.
+- [Vigilia 38264314183](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38264314183):
+  `completed/success`, **20/20 officia**.
+- [Praevolatus 38264314169](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38264314169)
+  et [custodia nominum 38264314217](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38264314217):
+  uterque `completed/success`.
+- Ex ipsis logis: `SOAK_REPETITUM=8/8_PASS`,
+  `VIGILIA_SOAK=PASS`, `STATUS_POST_RUN=SOAK_GREEN`.
+- GCC et Clang singuli:
+  `GRADUS56_LIMINA_YEAR_MEMBERSHIP=PASS ANNI=9 EDGES=18/18`;
+  `GRADUS56_LIMINA_CALCULORUM=PASS C=3 ANNI=9 CASES=102 RECENTIA=3/3`;
+  `GRADUS56_LIMINA_CACHE=PASS COLD=3 HITS=2 REJECTS=97 WARM_RECHECKS=9 CACHE_ANNI=3`;
+  `GRADUS56_AC1_CANONICA=10/10_PASS` et `9693` dies annorum 4999+5001.
+- [Vigilia 38258419174](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38258419174)
+  pro codice `51ec5b5370975e031ea021a8f01e94abc25ce157`
+  etiam `20/20` success conclusit.
+
+**Nova probatio huius commit (NON CERTIFICATA):** iteratio inversa omnium
+decem vectorum fixorum AC.1 intra *eundem processum* post cursum directum;
+expectationes numericae ex `main README AC.1` manent et ex oracle non
+generantur. Scopus est invariabilitas ordinis vocationum in facie publica
+quae transit self-eating dispatcher. Utraque CI poscit
+`GRADUS56_AC1_ORDO_INVERSUS=10/10_PASS`; status novi SHA non infertur ex
+antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.

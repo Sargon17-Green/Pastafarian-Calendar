@@ -83,6 +83,8 @@ jobs:
             2>&1 | tee logs_stage56_praeflight/ac1-canonical-vectors.log
           grep -Fx 'GRADUS56_AC1_CANONICA=10/10_PASS' \
             logs_stage56_praeflight/ac1-canonical-vectors.log
+          grep -Fx 'GRADUS56_AC1_ORDO_INVERSUS=10/10_PASS' \
+            logs_stage56_praeflight/ac1-canonical-vectors.log
           timeout 20m build_stage56_praeflight/stage_56_structure_reference_tests \
             2>&1 | tee logs_stage56_praeflight/structure-reference.log
           grep -Fx 'GRADUS56_STRUCTURA_REFERENCE=7/7_PASS STRUCTURAE=5/5_PASS' \
