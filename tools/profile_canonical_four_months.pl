@@ -139,6 +139,7 @@ if ($child==0) {
         my $partition_sum=Math::BigInt->bzero;
         my $walk_rank=$local_rank->copy;
         my $expected_third;
+        my $selected_third_ways;
         my $third_peak=0;
         for my $candidate (@third_candidates) {
             my @third_prefix=(1,$expected_second,$candidate);
@@ -155,6 +156,7 @@ if ($child==0) {
             if (!defined($expected_third)) {
                 if ($walk_rank<=$branch_ways) {
                     $expected_third=$candidate;
+                    $selected_third_ways=$branch_ways->copy;
                 } else {
                     $walk_rank->bsub($branch_ways);
                 }
@@ -170,6 +172,62 @@ if ($child==0) {
             $expected_second,$expected_third,scalar(@third_candidates),
             $third_peak,time()-$start;
 
+
+        # 下一個位置不依賴解碼器的候選列舉：
+        # 從已由獨立 BigInt 分支確定的完整三日合法前綴，
+        # 自己重建目前 opened / closed / 剩餘長度。
+        my @three=(1,$expected_second,$expected_third);
+        my @remaining_fourth=@L;
+        my ($open_fourth,$closed_fourth)=(0,0);
+        for my $j (@three) {
+            die "已獨立選中的三日前綴不合法\n"
+                if $j>$open_fourth+1 || !$remaining_fourth[$j-1]
+                || ($remaining_fourth[$j-1]==1 && $j!=$closed_fourth+1);
+            $open_fourth=$j if $j>$open_fourth;
+            $remaining_fourth[$j-1]--;
+            $closed_fourth=$j if !$remaining_fourth[$j-1];
+        }
+        my @fourth_candidates=grep {
+            $remaining_fourth[$_-1]>0
+            && ($remaining_fourth[$_-1]!=1 || $_==$closed_fourth+1)
+        } (1 .. ($open_fourth<@L ? $open_fourth+1 : scalar(@L)));
+        die "未取得獨立合法的第四日候選\n" if !@fourth_candidates;
+        die "第三日局部 BigInt 排名不在已選分支內\n"
+            if !defined($selected_third_ways)
+            || $walk_rank<1 || $walk_rank>$selected_third_ways;
+        my $fourth_partition=Math::BigInt->bzero;
+        my $fourth_local_rank=$walk_rank->copy;
+        my $expected_fourth;
+        my $fourth_peak=0;
+        for my $j (@fourth_candidates) {
+            my @four=(1,$expected_second,$expected_third,$j);
+            my %stats_fourth;
+            my $ways=countWeavingsFrontier(
+                \@L,\%stats_fourth,\@four
+            );
+            my $index_count=countWeavingSuffixFactored(
+                \@L,\@four,undef,undef,$opts
+            );
+            die "第四日候選的前沿與索引後綴計數不相符\n"
+                if $ways!=$index_count;
+            $fourth_partition->badd($ways);
+            if (!defined $expected_fourth) {
+                if ($fourth_local_rank<=$ways) {
+                    $expected_fourth=$j;
+                } else {
+                    $fourth_local_rank->bsub($ways);
+                }
+            }
+            my $peak=$stats_fourth{frontier_peak}//0;
+            $fourth_peak=$peak if $peak>$fourth_peak;
+        }
+        die "第四日完整候選和與第三日前綴完工數不符\n"
+            if $fourth_partition!=$selected_third_ways;
+        die "第四日無法由獨立前沿定位中間 BigInt 分支\n"
+            if !defined $expected_fourth;
+        printf "CANONICAL_FOUR phase=INDEPENDENT_FOURTH_DAY_PARTITION_PASS third=%d fourth=%d candidates=%d max_frontier=%d elapsed_sec=%.3f\n",
+            $expected_third,$expected_fourth,scalar(@fourth_candidates),
+            $fourth_peak,time()-$start;
 
         # 邊界排序不依賴任何後綴計數器：
         # 第一名是所有月完整連續區塊；最後一名每一步都選
@@ -213,6 +271,8 @@ if ($child==0) {
             if $actual->[1]!=$expected_second;
         die "中間排名的第三日選擇與獨立前沿分割矛盾\n"
             if $actual->[2]!=$expected_third;
+        die "中間排名的第四日選擇與獨立前沿分割矛盾\n"
+            if $actual->[3]!=$expected_fourth;
         verify_word(\@L,$actual);
         die "四月份未啟動索引式反排名引擎\n"
             if ($decode{indexed_profile_builds}//0)!=1;
@@ -228,7 +288,7 @@ if ($child==0) {
             if ($rank_stats{indexed_profile_builds}//0)!=1;
         die "輸入中間排名已受可變性污染\n"
             if "$middle" ne $wanted;
-        printf "CANONICAL_FOUR status=PASS scope=INDEPENDENT_COUNT_THREE_DAY_PREFIX_BOUNDARY_AND_MIDDLE_ROUNDTRIP months=4 days=240 rank_digits=%d rank_smaller_candidates=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
+        printf "CANONICAL_FOUR status=PASS scope=INDEPENDENT_COUNT_FOUR_DAY_PREFIX_BOUNDARY_AND_MIDDLE_ROUNDTRIP months=4 days=240 rank_digits=%d rank_smaller_candidates=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
             length($wanted),$rank_stats{candidates}//0,time()-$start,
             own_highwater();
         1;
