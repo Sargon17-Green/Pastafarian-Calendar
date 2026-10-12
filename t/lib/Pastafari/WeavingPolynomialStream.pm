@@ -20,7 +20,12 @@ our @EXPORT_OK = qw(countWeavingsPolynomialStream);
 # 暫存磁碟空間可能為 O(N²)，且僅限制「每一檔」的最大位元組數。
 # File::Temp(UNLINK=>1) 確保正常完成及擲出例外均清除私有暫存檔。
 sub countWeavingsPolynomialStream ($lengths, $stats = undef,
-                                  $first_histories = undef, $options = undef) {
+                                  $first_histories = undef, $options = undef,
+                                  $histogram_sink = undef) {
+    # 回呼僅持有當前階段的邊際位置直方圖；後續階段不保留參照。
+    # 可讓呼叫者寫到持久的暫存索引，避免存下所有階段的 BigInt。
+    die "位置直方圖接收器必須是程式參照\n"
+        if defined($histogram_sink) && ref($histogram_sink) ne 'CODE';
     die "月份長度必須是陣列參照\n" if ref($lengths) ne 'ARRAY';
     die "診斷記錄必須是雜湊參照\n"
         if defined($stats) && ref($stats) ne 'HASH';
@@ -55,12 +60,17 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
     if (defined $stats) {
         %$stats=(stages=>0,total_days=>$days,
                  last_frontier=>0,max_frontier=>0,
-                 max_temp_file_bytes=>0,rows_serialized=>0);
+                 max_temp_file_bytes=>0,rows_serialized=>0,
+                 histogram_sink_calls=>0);
     }
     return Math::BigInt->bone if !@sizes;
     if (@sizes == 1) {
-        $first_histories->[1]=[undef,Math::BigInt->bone]
-            if defined $first_histories;
+        my $one=[undef,Math::BigInt->bone];
+        $first_histories->[1]=$one if defined $first_histories;
+        if (defined $histogram_sink) {
+            $histogram_sink->(1,$one);
+            $stats->{histogram_sink_calls}++ if defined $stats;
+        }
         return Math::BigInt->bone;
     }
 
@@ -81,8 +91,12 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
         }
     }
     seek($old_fh,0,0) or die "暫存檔無法重新讀取\n";
-    $first_histories->[1]=[undef,Math::BigInt->bone]
-        if defined $first_histories;
+    my $initial_histogram=[undef,Math::BigInt->bone];
+    $first_histories->[1]=$initial_histogram if defined $first_histories;
+    if (defined $histogram_sink) {
+        $histogram_sink->(1,$initial_histogram);
+        $stats->{histogram_sink_calls}++ if defined $stats;
+    }
 
     my $answer=Math::BigInt->bone;
     for my $index (1 .. $#sizes) {
@@ -148,8 +162,9 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
             my $row_total=Math::BigInt->bzero;
             $row_total->badd($_) for grep {defined $_} @row;
             $stage_total->badd($row_total);
-            $histogram[$u]=$row_total if defined($first_histories)
-                                                 && !$row_total->is_zero;
+            $histogram[$u]=$row_total
+                if (defined($first_histories) || defined($histogram_sink))
+                   && !$row_total->is_zero;
             if (!$last_stage) {
                 store_fd(\@row,$new_fh);
                 my $bytes=tell($new_fh);
@@ -165,6 +180,10 @@ sub countWeavingsPolynomialStream ($lengths, $stats = undef,
         }
         $first_histories->[$index+1]=\@histogram
             if defined $first_histories;
+        if (defined $histogram_sink) {
+            $histogram_sink->($index+1,\@histogram);
+            $stats->{histogram_sink_calls}++ if defined $stats;
+        }
         $answer=$stage_total;
         if (defined $stats) {
             $stats->{stages}++;

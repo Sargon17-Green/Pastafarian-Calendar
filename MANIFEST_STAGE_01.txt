@@ -66,6 +66,7 @@ t/37_rank_roundtrip.t
 t/38_streamed_polynomial_disk.t
 t/39_stream_profile_factor.t
 t/40_stream_rank_roundtrip.t
+t/41_stream_histogram_callback.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 t/lib/Pastafari/WeavingPolynomialStream.pm
