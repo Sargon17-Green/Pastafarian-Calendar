@@ -878,3 +878,13 @@ per campione respinto con direzione positiva, negativa e
 caso di soglia. La suite verifica 720 cardinalità,
 2.048 campioni signed deterministici, BigInt oltre
 16.384 bit e la preservazione delle dieci patch precedenti.
+
+### Certificazione nativa della DISCOVERY 11
+
+La [GitHub Actions run 38228272450](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38228272450)
+ha concluso SUCCESS per **23 job su 23** sul commit
+`13fe8d60508dd4804372f73d2cb340918e2faa5d`.
+Stage22 esibisce **34 PASS / 3 FAIL intenzionali**,
+limitati a scelta positiva, negativa e soglia.
+Le 21 suite precedenti, incluso il loro RED storico,
+sono rimaste immutate. PATCH 11 non è introdotta.

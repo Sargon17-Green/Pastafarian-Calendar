@@ -1132,3 +1132,14 @@ Helper, handler, report, registrazioni
 nel contesto, metrica, validator autonomo
 e test dedicati. Le dieci patch esistenti
 rimangono intatte; PATCH 11 non anticipata.
+
+### Certificazione native Stage22
+
+La run GitHub Actions 38228272450, sul commit
+`13fe8d60508dd4804372f73d2cb340918e2faa5d`,
+ha concluso SUCCESS in tutti i 23 job.
+La firma verificata della DISCOVERY 11 è
+34 PASS e precisamente tre FAIL intenzionali
+(positiva, negativa, soglia); le firme
+Stage01–Stage21 restano tutte intatte.
+Non è stata introdotta la correzione della PATCH 11.
