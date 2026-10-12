@@ -44,9 +44,10 @@ fn test_discovery06_seven_hidden_values_exist_but_are_ignored() {
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
 	visible := new_legacy_visible_drop_store()
 	assert hidden.len == 7
+	dispatcher := new_base_dispatcher()
 	mut rejected := 0
 	for back in 1 .. 8 {
-		_ = calendar_prior_spaghetti(visible, hidden, 1, back) or {
+		_ = dispatcher.dispatch_legacy_prior(visible, 1, back) or {
 			rejected++
 			big_zero()
 		}

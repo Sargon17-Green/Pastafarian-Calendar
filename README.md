@@ -74,3 +74,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 12 — DISCOVERY 06
 
 የታሪካዊው `legacy_prior(drop_store,i,back)` የሚጠቀመው `slot=i-back` እና በ1-መሠረት `drop_store[slot]` ብቻ ነው። የV አካላዊ ዜሮ ሰልፍ sentinel ነው፤ `slot<=0` ስለሆነ ምንም ታሪካዊ የሚታይ ጠብታ አይኖርም፣ የታሪክ መንገድም ስውር ጠብታን አያነብም። ከተሰባሰበው ሰንጠረዥ ውጭ የሆነ index የV ሂደትን እንዳያቋርጥ በerror ይወጣል። `calendar_prior_spaghetti` በደረጃ 12 ሆን ብሎ ይህን የታሪክ መንገድ ብቻ ይጠራል። አራት የታሰቡ RED assertions በ`slot=0,-1,-2,-6` ይለያሉ፤ ትክክለኛ የሚታዩ አዎንታዊ slots ግን GREEN ናቸው። `PATCH 06` አልተጨመረም፣ የV 0.5.2 (`7647ce1`) ቀጥተኛ ማረጋገጫ በGitHub Actions run `38222220614` ላይ PASS ሆኗል። 17 የቀድሞ እና አዲስ የGREEN ፈተና ፋይሎች PASS ናቸው፤ 4 ስማቸው የተመዘገበ የRED assertions በሆን ተብለው ተረጋግጠዋል። `LAST_COMPLETED_STAGE=12` ነው። ዝርዝር፦ `docs/STAGE12_DISCOVERY06.md`።
+
+## ደረጃ 13 — PATCH 06
+
+የታሪካዊው `legacy_prior(drop_store,i,back)` በትክክል ያለውን በሚታዩ ጠብታዎች ብቻ የሚያነብ ስህተት እንዳለ ይቆያል። አዲሱ `PriorPatch06` የ`slot=i-back` ሁኔታን ያያል። `slot>=1` ከሆነ `BaseDispatcher.dispatch_legacy_prior` በእውነት ይጠራል፤ ካልሆነ `hidden_k=1-slot` በሚለው የአንድ-መሠረት የቅርበት አመልካች በ`calendar_hidden_by_nearness` በኩል ይመለሳል። የደረጃ 12 አራት RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። እስከ ቀጥተኛ የV CI ማረጋገጫ `LAST_COMPLETED_STAGE=12` ይቆያል። `docs/STAGE13_PATCH06.md` ይመልከቱ።

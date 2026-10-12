@@ -131,10 +131,12 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	final_details := hidden_details + legacy_hidden_one.str() + '; PATCH_05 hidden1='
 	visible := new_legacy_visible_drop_store()
 	mut prior_diagnostic := 'AVAILABLE'
-	_ = calendar_prior_spaghetti(visible, hidden, 1, 1) or {
+	_ = dispatcher.dispatch_legacy_prior(visible, 1, 1) or {
 		prior_diagnostic = 'ERROR'
 		big_zero()
 	}
+	patched_prior := calendar_prior_spaghetti(visible, hidden, 1, 1)!
 	prior_details := final_details + patched_hidden_one.str() + '; DISCOVERY_06 oldPriorSlot0='
-	return error(prior_details + prior_diagnostic)
+	patch_details := prior_details + prior_diagnostic + '; PATCH_06 priorSlot0='
+	return error(patch_details + patched_prior.str())
 }

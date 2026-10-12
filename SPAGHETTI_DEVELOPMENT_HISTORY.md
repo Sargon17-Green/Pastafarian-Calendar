@@ -109,3 +109,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 12 መዝጊያ — EXPECTED_RED
 
 የመጀመሪያው የCI ሙከራ በሁለት አዲስ የV ፈተና ፋይሎች የቅርጸት ልዩነት ቆሟል። ከV 0.5.2 (`7647ce1`) እውነተኛ የformatter ውጤት እነዚህ ልዩነቶች ተስተካክለው፣ ጊዜያዊ የምርመራ የCI እርምጃ ተወግዷል። በcommit `4426662ddbfd426b2db12c09f72a1b94da55cd5f` የGitHub Actions run `38222220614` ሙሉ PASS ነው፤ 17 የGREEN የሙከራ ፋይሎች ተሳክተዋል፣ 4 በተለዩ የhistory ጉድለት assertions የተጠበቀው RED ተረጋግጧል። የቅርስ ማስረጃ `11735060045` ተሰጥቷል። `legacy_prior` እውነተኛ የታዩ ጠብታዎችን ብቻ እንደነበረው ያነባል፣ ከዜሮ እና ከአሉታዊ slot የሚመለሰው የV error የruntime ጥበቃ ብቻ ነው። `PATCH 06` አልተጨመረም፣ ደረጃ 12 COMPLETE / EXPECTED_RED ነው።
+
+## ደረጃ 13 — PATCH 06 (በቀጥተኛ የV CI ሙከራ ላይ)
+
+`legacy_prior` የቀድሞውን የ`drop_store[i-back]` ብቻ ሕግ ይጠብቃል። የ`PriorPatch06.prior` አዲሱ የhistory አገናኝ `slot>=1` ሲሆን የታሪክ መንገድን በdispatcher ይጠራል። ያለዚያ `hidden_k=1-slot` ያሰላል፣ የተጠገነውን `HiddenPatch05` በ`calendar_hidden_by_nearness` በኩል ይጠቀማል። `LegacyPriorAdapter` እና የደረጃ 12 አራቱ ኖርማቲቭ assertions ይጠበቃሉ። የ`calendar_date_spaghetti` የእንቅስቃሴ ምርመራ ሁለቱንም `DISCOVERY_06 oldPriorSlot0=ERROR` እና `PATCH_06 priorSlot0` ያሳያል። ደረጃ 14 አልተጀመረም።

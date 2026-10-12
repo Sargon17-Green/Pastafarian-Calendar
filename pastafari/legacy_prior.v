@@ -30,10 +30,8 @@ pub fn (_ BaseDispatcher) dispatch_legacy_prior(drop_store []BigInt, i int, back
 	return adapter.prior(drop_store, i, back)
 }
 
-// የproduction ንዑስ መግቢያ፤ hidden ተሰጥቶት ቢሆንም
-// በDISCOVERY 06 ውስጥ አይጠቀምበትም። PATCH 06 ገና የለም።
+// ደረጃ 13፦ የproduction ጥሪ አሁን PATCH 06 ያልፋል።
 pub fn calendar_prior_spaghetti(drop_store []BigInt, hidden []BigInt, i int, back int) !BigInt {
-	_ = hidden
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_prior(drop_store, i, back)
+	return dispatcher.dispatch_prior_patch06(drop_store, hidden, i, back)
 }
