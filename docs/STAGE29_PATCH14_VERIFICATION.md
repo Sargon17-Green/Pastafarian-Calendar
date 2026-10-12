@@ -19,3 +19,14 @@ The earlier full production chain still performs 46 drops, 12 post-stirs and 58 
 Workflow `stage27-typescript-marathi` still bears the historical stage label because previous attempts to change workflow YAML were blocked. Nevertheless, its `npm test` runs the entire Stage1–29 suite. Do not mark LAST_COMPLETED_STAGE=29 until that job and the independent `verify` name-lock job pass.
 
 Status: **implementation prepared for CI**, not yet verified.
+
+## Verified production result — 12 October 2026
+
+[GitHub Actions 38260956581](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38260956581): verify and the historically named stage27-typescript-marathi jobs both SUCCESS. The stage27 label remains old but actual npm test covers all Stage1–29 tests. Native TypeScript check passed; all 14 intentional historical red witnesses retained and verified.
+
+```text
+STAGE_29_PATCH_14_GUARDS_PASS pairs=12 cells=72 short=51 wide=21 correctedWrong=0 oldWrong=21 oldMatches=51 boundaries=11 oldMethodCalls=2 wideMethodCalls=2 shortMethodCalls=2 faultCases=3
+STAGE_29_PATCH_14_PROPERTIES_PASS shortCases=2560 shortWrong=0 shortRejected=1402 shortWrap=701 wideDirect=30 wideHistoricalBlocked=30 wideDirectWrong=0 wideDigits=462 realPairs=12 varied=64 giant=8 ranks=720 unique=720 histories=804 sharedWrites=46632 streamWrong=0 correctedWrong=0 short=566 wide=238 oldWrong=238 oldMatches=566 actualExtraWide=238
+```
+
+LAST_COMPLETED_STAGE=29. No Stage30 implementation.
