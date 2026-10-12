@@ -519,3 +519,8 @@ ordinate, di 252 giorni. I candidati e il rango sono proprietà del
 contesto; il validator verifica il percorso storico autonomamente
 e la snapshot degli input. La costruzione canonica della salsa,
 le famiglie complete e la correzione PATCH15 non sono anticipate.
+
+La run 38260196811 (31 job SUCCESS) dimostra tre divergenze
+specifiche del ricalcolo del rango giorno per giorno. Il modello
+di riferimento della scelta annuale costante è test-only; la
+PATCH15 e la reale selezione annuale della salsa restano future.

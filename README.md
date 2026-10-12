@@ -1182,3 +1182,12 @@ Risultato intenzionale: **53 PASS e 3 FAIL**, precisamente ai
 casi `rango2_giorno1`, `rango3_giorno1` e
 `rango3_giorno2`. La PATCH15 rimane futura; tutte le PATCH1–14
 restano disponibili nel manager.
+
+### Certificazione nativa di Stage30
+
+La [run GitHub Actions 38260196811](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38260196811)
+sul commit `b6ed673666bcae8b0e02bffb6e09d42cc5900e23`
+ha conclusione **SUCCESS in 31/31 job**, con **53 PASS e 3 FAIL
+intenzionali** nello Stage30. Stage29 conserva 55 PASS/0 FAIL
+e tutte le firme anteriori rimangono previste. La fase
+successiva è Stage31 PATCH15; non è ancora implementata.

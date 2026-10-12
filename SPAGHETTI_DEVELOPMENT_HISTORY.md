@@ -1409,3 +1409,12 @@ il mese risultante cambia. Per dimostrarlo senza introdurre la
 PATCH15, la produzione riceve tre candidati sintetici validi e
 ordinati su 252 giorni, preservando report, trace e validator della
 formula errata. Le tre divergenze attese sono coperte in Stage30Tests.
+
+### Certificazione nativa Stage30
+
+GitHub Actions run 38260196811 ha superato tutti i 31 job
+sul commit b6ed673666bcae8b0e02bffb6e09d42cc5900e23.
+La firma Stage30 è 53 PASS e 3 FAIL intenzionali, limitati
+esattamente a rango2_giorno1, rango3_giorno1 e rango3_giorno2.
+Il validator e la snapshot difendono gli input. Il legacy
+è preservato, senza anticipare PATCH15 o l'oracolo in produzione.
