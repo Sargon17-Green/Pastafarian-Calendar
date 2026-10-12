@@ -43,6 +43,8 @@ def run(code,raw,mutate):
     ticks=[0]
     visited=[0]
     edited=[0]
+    immediate_restorations=[0]
+    restored_after_step=[None]
     first=[None]
     def observed_step(self):
         ticks[0]+=1
@@ -65,7 +67,11 @@ def run(code,raw,mutate):
                 result=orig()
             finally:
                 if edit_this:
-                    self.space.put(ip.position,ord("1"))
+                    self.space.put(point,ord("1"))
+                    restored_after_step[0]=int(self.space.get(point))
+                    need(restored_after_step[0]==ord("1"),
+                         "Native temporary lower-literal byte not restored immediately")
+                    immediate_restorations[0]+=1
             need(self.ips and ip in self.ips and
                  len(ip.stack[0])==before+1 and
                  int(ip.stack[0][-1])==(0 if edit_this else 1),
@@ -90,8 +96,10 @@ def run(code,raw,mutate):
             "output":stdout.getvalue().split(),
             "native_lower_literal_visits":visited[0],
             "native_live_literal_edits":edited[0],
-            "first_literal":first[0],
-            "restored_source_byte":int(prog.space.get(point))}
+            "immediate_restorations":immediate_restorations[0],
+            "restored_source_byte":restored_after_step[0],
+            "final_source_byte":int(prog.space.get(point)),
+            "first_literal":first[0]}
 
 def main():
     need(os.path.isdir("/four-cell-literal"),
@@ -121,8 +129,12 @@ def main():
                  mutant["native_live_literal_edits"]==
                  (1 if control["native_lower_literal_visits"]>0 else 0),
                  "Native intervention did not occur once at actually executed literal")
-            need(control["restored_source_byte"]==mutant["restored_source_byte"]==ord("1"),
-                 "intervened Native BF98 instruction was not restored")
+            need(control["immediate_restorations"]==0 and
+                 control["restored_source_byte"] is None and
+                 mutant["immediate_restorations"]==mutant["native_live_literal_edits"] and
+                 mutant["restored_source_byte"]==
+                     (ord("1") if mutant["native_live_literal_edits"] else None),
+                 "temporarily changed Native literal was not immediately restored")
             if control["native_lower_literal_visits"]==0:
                 need(mutant["status"]=="normal" and
                      mutant["remaining_ips"]==0 and mutant["output"]==want,
@@ -147,7 +159,10 @@ def main():
        "status":"FINITE_NATIVE_ACTUAL_INSTRUCTION_INTERVENTION_STAGE1_OPEN",
        "base_git_blob":BASE,"candidate_git_blob":CAND,
        "literal_coordinate":list(TARGET),"baseline_opcode":ord("1"),
-       "temporary_opcode":ord("0"),"instruction_restored_after_native_step":True,
+       "temporary_opcode":ord("0"),
+       "restoration_check":"immediately_after_edited_native_step",
+       "final_source_byte_is_ordinary_mutable_funge_space":True,
+       "instruction_restored_after_native_step":True,
        "grid_domain":list(DOMAIN),"input_cases":49,
        "native_candidate_control_programs":49,
        "native_candidate_intervention_programs":49,

@@ -25,6 +25,8 @@ def verify(doc,require_effect=True):
          doc.get("literal_coordinate")==[951,1337] and
          doc.get("baseline_opcode")==49 and doc.get("temporary_opcode")==48 and
          doc.get("instruction_restored_after_native_step") is True and
+         doc.get("restoration_check")=="immediately_after_edited_native_step" and
+         doc.get("final_source_byte_is_ordinary_mutable_funge_space") is True and
          doc.get("grid_domain")==list(DOM) and doc.get("input_cases")==49 and
          doc.get("native_candidate_control_programs")==49 and
          doc.get("native_candidate_intervention_programs")==49 and
@@ -49,13 +51,18 @@ def verify(doc,require_effect=True):
              all(type(v) is str and NUM.fullmatch(v) for v in ref) and
              type(control) is dict and type(mutant) is dict,
              "Native first-literal input or independent oracle forged")
-        for candidate,expected_edit in ((control,0),(mutant,None)):
+        for candidate in (control,mutant):
             need(candidate.get("status") in ("normal","step_limit") and
                  type(candidate.get("steps")) is int and candidate["steps"]>0 and
                  type(candidate.get("native_lower_literal_visits")) is int and
                  candidate["native_lower_literal_visits"]>=0 and
                  type(candidate.get("native_live_literal_edits")) is int and
-                 candidate.get("restored_source_byte")==49 and
+                 candidate["native_live_literal_edits"] in (0,1) and
+                 type(candidate.get("immediate_restorations")) is int and
+                 candidate["immediate_restorations"]==candidate["native_live_literal_edits"] and
+                 candidate.get("restored_source_byte")==(
+                     49 if candidate["native_live_literal_edits"] else None) and
+                 type(candidate.get("final_source_byte")) is int and
                  type(candidate.get("remaining_ips")) is int and
                  candidate.get("remaining_ips") in (0,1) and
                  type(candidate.get("output")) is list and
@@ -77,7 +84,8 @@ def verify(doc,require_effect=True):
         edits=mutant["native_live_literal_edits"]
         need(control["status"]=="normal" and control["remaining_ips"]==0 and
              control["output"]==ref and
-             control["native_live_literal_edits"]==0 and edits==int(hits>0),
+             control["native_live_literal_edits"]==0 and
+             control["immediate_restorations"]==0 and edits==int(hits>0),
              "Native one-opcode mutation control/oracle/provenance differs")
         if hits==0:
             need(mutant["status"]=="normal" and mutant["remaining_ips"]==0 and
@@ -104,7 +112,8 @@ def synthetic():
         raw=" ".join(map(str,fields))+"\n"
         control={"status":"normal","steps":100,"remaining_ips":0,"output":["0"]*7,
                  "native_lower_literal_visits":0,"native_live_literal_edits":0,
-                 "first_literal":None,"restored_source_byte":49}
+                 "first_literal":None,"restored_source_byte":None,
+                 "immediate_restorations":0,"final_source_byte":32}
         mutant=copy.deepcopy(control)
         rows.append({"signed_days":[x,y],"fields":list(fields),
             "input_sha256":hashlib.sha256(raw.encode("ascii")).hexdigest(),
@@ -114,7 +123,10 @@ def synthetic():
        "status":"FINITE_NATIVE_ACTUAL_INSTRUCTION_INTERVENTION_STAGE1_OPEN",
        "base_git_blob":BASE,"candidate_git_blob":CAND,
        "literal_coordinate":[951,1337],"baseline_opcode":49,
-       "temporary_opcode":48,"instruction_restored_after_native_step":True,
+       "temporary_opcode":48,
+       "restoration_check":"immediately_after_edited_native_step",
+       "final_source_byte_is_ordinary_mutable_funge_space":True,
+       "instruction_restored_after_native_step":True,
        "grid_domain":list(DOM),"input_cases":49,
        "native_candidate_control_programs":49,"native_candidate_intervention_programs":49,
        "independent_befunge_reference_programs":147,
@@ -132,7 +144,7 @@ def synthetic():
       ("mutation_without_literal",lambda d:d["records"][2]["intervention"].__setitem__("native_live_literal_edits",1)),
       ("fake_reach",lambda d:d.__setitem__("actual_literal_reached_input_cases",1)),
       ("fake_causal",lambda d:d["records"][3].__setitem__("causal_output_or_termination_effect",True)),
-      ("unrestored_opcode",lambda d:d["records"][5]["intervention"].__setitem__("restored_source_byte",48)),
+      ("fake_immediate_restore",lambda d:d["records"][5]["intervention"].__setitem__("restored_source_byte",48)),
       ("fake_process_count",lambda d:d.__setitem__("independent_befunge_reference_programs",146)),
       ("source_drift",lambda d:d.__setitem__("candidate_git_blob","0"*40)),
       ("stage_closure",lambda d:d.__setitem__("stage1_complete",True)),
