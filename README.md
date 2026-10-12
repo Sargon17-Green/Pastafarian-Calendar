@@ -1085,3 +1085,35 @@ Giai đoạn 26/55 kết thúc `EXPECTED_RED` đã xác minh.
 PATCH 13 ở giai đoạn 27 phải giữ legacy và chỉ gọi nó
 sau khi `x<=limit`, tiến dọc chính vòng trả lời
 bằng tăng k. Chưa sửa khuyết tật ở Stage26.
+
+## Giai đoạn 27 — Bản vá 13: từ chối trước khi dùng legacy chọn hạng
+
+`LegacyBiasedPick.biased_legacy_pick(x,n)` vẫn giữ
+nguyên `rem(x-1,n)+1`. Hàm legacy chỉ chính xác
+cho cách chọn đồng đều khi x trước đó đã được lọc.
+Không sửa hàm hoặc gọi nó trên giá trị vượt ngưỡng.
+
+`ShortRejectionPatch` tính
+`limit=div(M,n)*n` với M=2^127-1. Bắt đầu
+`k=0`, lấy `x=AnswerStreamManager.answer_at(stream,k)`.
+Nếu x>limit thì tăng k và đọc tiếp **trên cùng vòng**
+đã có hạt và chiều không đổi. Khi x<=limit mới gọi
+thật `LegacyBiasedPick.biased_legacy_pick(x,n)`.
+Đây là bộ tính legacy nguyên vẹn sau lớp loại bỏ,
+không phải bản sao công thức thay thế.
+
+Bản vá cung cấp trace chứa số phần tử bị bỏ,
+vị trí nhận, giá trị nhận, limit và rank. Đường
+production `AnswerStreamManager.choose_rank_short_biased`
+vẫn giữ tên tương thích nhưng trả kết quả từ bản vá.
+Bốn so sánh chuẩn của Stage26 giữ nguyên kỳ vọng,
+nhưng phải xanh. Hai kiểm thử kiểm soát Stage26
+được sửa để xác nhận legacy vẫn thiên lệch trực tiếp
+và lớp mới bác bỏ trước khi gọi nó.
+
+18 kiểm thử Stage27 mới bao gồm nhiều n=1..M,
+ràng buộc x<=limit, quấn vòng tiến/lùi, vị trí 0,
+biên M, 720 và các giá trị lớn, gọi lại legacy
+sau accept, dữ liệu ngày thực, đồng thời và nguồn.
+Mọi giai đoạn trước giữ nguyên. Không mở wideDetour
+cho N>M hay DISCOVERY 14, không công bố lịch hoàn chỉnh.

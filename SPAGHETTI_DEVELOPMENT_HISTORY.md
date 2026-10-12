@@ -919,3 +919,34 @@ không đổi implementation, không đổi các assert
 normative. Vòng đáp án đã chuẩn, chỉ lựa chọn
 x=answerAt(0) thiếu rejection khiến modulo thiên lệch.
 Stage26 đóng EXPECTED_RED, chưa làm PATCH 13.
+
+## Giai đoạn 27 — Bản vá 13: rejection trên cùng answer ring
+
+**Giữ legacy:** Hàm `LegacyBiasedPick` vẫn chọn
+`1+rem(x-1,n)` và không biết giới hạn. Nó được
+gọi thực trong đường chọn hạng, nhưng từ đây chỉ
+sau khi lọc x hợp lệ bằng lớp vá mới.
+
+**Đường sản xuất:** `AnswerStreamManager` giữ
+nguyên các công thức SAVE, first, direction_step
+và answer_at(k). `choose_rank_short_biased`
+định tuyến qua `ShortRejectionPatch`.
+Lớp này tính `limit=div(M,n)*n`, đọc tuần tự
+`answer_at(stream,0)`, rồi k=1,2,... khi x>limit.
+Chỉ khi có x<=limit, gọi hàm legacy chính xác
+một lần và dùng kết quả trả về. Trace riêng chỉ
+ghi vị trí, giá trị đã nhận, số lần bác bỏ và rank;
+không thay trạng thái stream hay dùng số ngẫu nhiên.
+
+**Chứng minh:** Vì `answer_at` đi trong vòng đủ
+M số với bước +/-1, mọi n hợp lệ có limit>=1 và
+sẽ gặp giá trị được nhận. Chuỗi bị bác bỏ có thể
+dài; vòng không đặt giới hạn tùy tiện. Ở n=M hoặc
+n=1, không có phần tử bị bỏ và legacy được gọi
+ngay. Dùng fixture x=M,M-1 với n sát M để quan sát
+1..3 lần bác bỏ mà không cần chờ vòng lớn.
+
+Bốn hồi quy Stage26 sẽ quay về xanh với expected
+oracle giữ nguyên. Thêm 18 kiểm thử Stage27,
+không sửa các lỗi lịch sử 01..12 hoặc oracle.
+Stage28 (DISCOVERY 14) chưa bắt đầu.

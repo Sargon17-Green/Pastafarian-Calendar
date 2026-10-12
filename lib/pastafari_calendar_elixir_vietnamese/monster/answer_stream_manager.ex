@@ -3,16 +3,17 @@ defmodule PastafariCalendarElixirVietnamese.Monster.AnswerStreamManager do
   Xây dựng vòng đáp án từ sáu bát đúng và ID kế cận đã vá.
 
   Công thức first, hướng chạy và từng phần tử vòng đều chuẩn.
-  Phát hiện 13 chỉ đưa khuyết tật vào lựa chọn hạng ngắn:
-  thay vì từ chối x vượt ngưỡng chia đều, dùng ngay hàm
-  LegacyBiasedPick trên phần tử đầu tiên.
+  Bản vá 13 sửa thứ tự xử lý lựa chọn hạng ngắn:
+  ShortRejectionPatch tiến trên cùng vòng khi x vượt
+  ngưỡng, sau đó mới gọi thật LegacyBiasedPick cũ.
+  Vòng, hướng và hạt đáp án không bị thay đổi.
   """
 
   import Bitwise
 
   alias PastafariCalendarElixirVietnamese.Monster.{
-    LegacyBiasedPick,
-    SaveManager
+    SaveManager,
+    ShortRejectionPatch
   }
 
   @m (1 <<< 127) - 1
@@ -61,8 +62,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.AnswerStreamManager do
 
   def choose_rank_short_biased(%__MODULE__{} = stream, n)
       when is_integer(n) and n >= 1 and n <= @m do
-    x = answer_at(stream, 0)
-    LegacyBiasedPick.biased_legacy_pick(x, n)
+    ShortRejectionPatch.choose_rank_short(stream, n)
   end
 
   def choose_rank_short_biased(_stream, _n) do

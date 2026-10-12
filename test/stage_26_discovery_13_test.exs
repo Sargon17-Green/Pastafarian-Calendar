@@ -7,7 +7,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage26Discovery13Test do
   alias PastafariCalendarElixirVietnamese.Monster.{
     AnswerStreamManager,
     LegacyBiasedPick,
-    NextBowlPatchWrapper
+    NextBowlPatchWrapper,
+    ShortRejectionPatch
   }
 
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
@@ -126,7 +127,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage26Discovery13Test do
     assert LegacyBiasedPick.biased_legacy_pick(@m, n) == n - 1
   end
 
-  test "đường chọn ngắn thật gọi legacy cả khi x vượt limit" do
+  test "đường chọn ngắn từ chối trước legacy, hàm cũ vẫn lệch" do
     n = div(@m, 2) + 1
     limit = div(@m, n) * n
     stream = from_first(@m, 1)
@@ -134,9 +135,10 @@ defmodule PastafariCalendarElixirVietnamese.Stage26Discovery13Test do
     assert limit == n
     assert stream.first > limit
     assert AnswerStreamManager.choose_rank_short_biased(stream, n) ==
-             LegacyBiasedPick.biased_legacy_pick(@m, n)
-    refute AnswerStreamManager.choose_rank_short_biased(stream, n) ==
              Ref.choose_rank_short(oracle_from_first(@m, 1), n)
+    refute AnswerStreamManager.choose_rank_short_biased(stream, n) ==
+             LegacyBiasedPick.biased_legacy_pick(@m, n)
+    assert ShortRejectionPatch.diagnose(stream, n).rejected_count == 1
   end
 
   test "khi N chia hết M, lựa chọn không cần từ chối vẫn đúng" do
@@ -200,19 +202,21 @@ defmodule PastafariCalendarElixirVietnamese.Stage26Discovery13Test do
     end
   end
 
-  test "kiểm toán nguồn: stream chính xác, legacy chưa có rejection" do
+  test "kiểm toán nguồn: stream đúng, bản vá gọi legacy sau rejection" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     source = Path.join(root, "answer_stream_manager.ex") |> File.read!()
     legacy = Path.join(root, "legacy_biased_pick.ex") |> File.read!()
     dispatcher = Path.join(root, "dispatcher.ex") |> File.read!()
+    patch = Path.join(root, "short_rejection_patch.ex") |> File.read!()
 
     assert legacy =~ "rem(x - 1, n) + 1"
-    assert source =~ "LegacyBiasedPick.biased_legacy_pick(x, n)"
-    assert source =~ "x = answer_at(stream, 0)"
+    assert source =~ "ShortRejectionPatch.choose_rank_short(stream, n)"
+    assert patch =~ "AnswerStreamManager.answer_at(stream, k)"
+    assert patch =~ "if x <= limit do"
+    assert patch =~ "LegacyBiasedPick.biased_legacy_pick(x, n)"
     assert dispatcher =~ "AnswerStreamManager.choose_rank_short_biased(n)"
-    refute source =~ "rejection_limit"
-    refute source =~ "reject_before_pick"
-    refute File.exists?(Path.join(root, "short_rejection_patch.ex"))
+    refute source =~ "LegacyBiasedPick.biased_legacy_pick(x, n)"
+    assert File.exists?(Path.join(root, "short_rejection_patch.ex"))
   end
 
   test "hồi quy chuẩn: x=M phải bị từ chối trước khi chọn N>M/2" do
