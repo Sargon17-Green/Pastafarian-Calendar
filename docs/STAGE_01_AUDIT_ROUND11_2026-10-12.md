@@ -38,7 +38,7 @@
 
 工具 `tools/profile_unrank_middle.pl` 各案獨立 fork 子程序，每例最多 20 秒、監看 RSS 196,608 KiB；測量程式在監控之上另檢查精確月份日數與首次末次次序。`BLOCKED` 代表未完成，不是成功。提交 `926061a4d3f67a83c4dababfd4f31612d5b29e12` 的原生執行：https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38228970766。
 
-量測的成敗、用時和快取統計須以該執行的最終原生日誌為準。絕不能將尚在執行中的 47 月份案例算作 PASS。記錄 `suffix_calls`、`future_hits`、`future_misses`、`reverse_profile_builds`，以及各案是否含原始規範 Oracle 全量字典序對照。
+該次 20 秒限額的原生結果：14,485 斷言／37 檔 PASS；47×4（188 日）中位排名在 14.204 秒內完成、21,444 KiB VmHWM；47 月份 252 日仍在 20.013 秒因 TIME_LIMIT 而 BLOCKED。這證明 188 日的中間排名首次完成，但 252 日不能冒稱已通過。47 月份輸出通過完整日數和首次／末次順序檢查，卻不能以資源成功取代獨立排名核對。
 
 ## 契約與後續問題
 
@@ -55,3 +55,48 @@
 完整公開輸入介面 `countWeavingSuffixFactored` 保留所有長度、標籤、次序與 BigInt 驗證。內部狀態方法以底線開頭、不對外匯出，並以 `t/36_factored_state_interface.t` 從規範 Oracle 選取合法序列的每個中間狀態，與完整前綴輸入路徑逐一比對，且驗證沒有修改傳入的剩餘向量。
 
 此次原生 CI 與包含 47 月份的受控中間排名效能重測為 https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38230050324 。其最終 PASS/BLOCKED 狀態必須按照真實原生日誌判定；所使用的上限仍為每案 20 秒、RSS 觀測 196,608 KiB。
+
+## 延長受控時間後完成 47 月份／252 日的中間排名
+
+2026-10-12，提交 `b92c50e6a8f911eb1d23678b0353503ee9543eee` 在原有 20 秒 smoke 測試之外增加明確 opt-in 的 `[weaving-unrank-middle-long]`；每一個獨立子程序限 75 秒、父程序觀測 VmRSS 限 262,144 KiB，不改動演算法。原生驗證：https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38233478362。常規測試 14,488 斷言／37 檔 PASS；五個負載案例全部 PASS。
+
+| 分布 | 精確中間排名反解碼 | 時間 | 最高 VmHWM | 附註 |
+| --- | --- | ---: | ---: | --- |
+| 4×4 | PASS | 0.029 秒 | 14,872 KiB | Oracle 核對 |
+| 6×4 | PASS | 0.119 秒 | 17,008 KiB | Oracle 核對 |
+| 8×4 | PASS | 0.152 秒 | 14,424 KiB | 獨立合法性核對 |
+| 47×4（188 日） | PASS | 17.602 秒 | 21,448 KiB | 168 位中間排名 |
+| 17×6＋30×5（47 月份、252 日） | **PASS** | **37.381 秒** | **27,216 KiB** | **270 位中間排名** |
+
+最後一例的字典序反排名動用了 3,074 次精確完工數查詢，其中 1,986 次共用已有因子、131 次產生新因子；反序分布僅建立一次。由於僅有一個固定的 252 日月份長度分布通過，且該分布未證實會由原始年選擇器實際產生，不能將此結果外推到所有規範年份（尤其 5,778 日上界）。
+
+輸出已核對每月日數和全部首次／末次出現次序；大案例不能使用原指數剩餘向量 DP 直接比對 270 位排名。後續反向排名器的目的就是提供獨立控制流程的雙向核對，並以小空間 Oracle 證明一基排名值的還原。
+
+## 獨立反向排名校驗（原生 CI PASS）
+
+新增 `t/lib/Pastafari/WeavingRank.pm` 及 `t/37_rank_roundtrip.t`（提交 `783569a6a352911a5acaeda981a7c8b88dba32af`），對一個完整合法序列，逐個位置計算所有字典序較小、仍可合法完工的候選分支，從 1 開始累加成精確排名。與反排名器的分支接受／減法流程相反，採另一套排名累加控制流程；但兩者共用已核對的精確因式分解計數核心，故不能視為全然獨立的數學模型。已加入無效序列拒絕、輸入不變性、小空間 Oracle、雙向往返和 47 月份最小排名案例；GitHub Actions https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38234235108 已完成 14,710 個斷言／38 檔 PASS，包含 `t/37_rank_roundtrip.t`。
+
+## 47 個月份、252 日、270 位中間排名的雙向精確驗證
+
+提交 `74bc2449c069b1d5bd3e719d44b32ee083f98e3b` 提供只在提交註解含 `[weaving-rank-roundtrip-252]` 時執行的受控工具 `tools/profile_rank_roundtrip.pl`。原生執行：https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38234860175。
+
+同一個子程序先以精確 BigInt 計算 47 月份（`17×6＋30×5`，252 日）全部合法交織數，選一基中間排名 `floor(total/2)+1`，以 `unrankWeavingPolynomial` 解出完整月份序列；再由獨立的 `rankWeavingPolynomial` 字典序加法控制流程重建一基排名，要求 BigInt 完全相同。
+
+| 驗證項目 | 原生結果 |
+| --- | --- |
+| 完整 Stage 1 測試 | **14,713 斷言／38 檔 PASS** |
+| 47 月份中間排名 270 位的雙向來回 | **PASS** |
+| 反排名耗時 | 37.679 秒 |
+| 反排名＋正向排名總耗時 | 65.669 秒 |
+| Perl 子程序 VmHWM | 26,616 KiB |
+| 解碼精確後綴計數呼叫 | 3,074 |
+| 解碼反序直方圖建立次數 | 1 |
+| 排名重新計算時考察較小候選的次數 | 2,878 |
+| 排名重新計算反序直方圖建立次數 | 1 |
+| 防護 | 130 秒時間上限、父程序觀測 RSS 262,144 KiB；未達限制 |
+
+本次雙向核對的控制流程不同，但共用經過小空間原始 NormativeScroll Oracle 對照的 `WeavingSuffixFactor` 精確計數核心，因此不能聲稱是完全相互獨立的計數實現。雙向一致、獨立小空間參考、分解定理以及不變條件共同建立目前證據。
+
+**範圍限定：**成功的是長度 252 日的固定 47 月份向量，不代表此向量會被規範年份選擇流程實際選中。更不代表對任何 252..5778 日月份長度分布皆有實用記憶體與時間。下一輪可進行實際規範年選擇器的月份長度交叉核對、低記憶體反序直方圖或更大型月份向量的受控測量。
+
+`LAST_COMPLETED_STAGE=1` 保持不變；Stage 2 未開始。僅修改 `Perl+國語`，未修改 `main`，未提交使用者專屬 HANDOFF_* 檔案。
