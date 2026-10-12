@@ -16,6 +16,7 @@ docs/STAGE_01_AUDIT_ROUND8_2026-10-11.md
 docs/STAGE_01_AUDIT_ROUND9_2026-10-12.md
 docs/STAGE_01_AUDIT_ROUND10_2026-10-12.md
 docs/STAGE_01_AUDIT_ROUND11_2026-10-12.md
+docs/STAGE_01_AUDIT_ROUND12_2026-10-12.md
 lib/Pastafari/Monster/BaseContext.pm
 lib/Pastafari/Monster/BaseDispatcher.pm
 lib/Pastafari/Monster/BaseErrorBoundary.pm
@@ -73,5 +74,6 @@ tools/profile_weaving.pl
 tools/profile_polynomial.pl
 tools/profile_unrank_middle.pl
 tools/profile_rank_roundtrip.pl
+tools/profile_polynomial_stream.pl
 CANONICAL_NAMES_LOCK.sha256
 .github/workflows/canonical-names-lock.yml

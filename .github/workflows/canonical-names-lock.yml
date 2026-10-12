@@ -94,3 +94,9 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 165s perl -Ilib -It/lib tools/profile_rank_roundtrip.pl --seconds 130 --rss-kib 262144
+      - name: 僅限標記提交：同機記憶體與磁碟串流精確計數對照
+        if: contains(github.event.head_commit.message, '[weaving-stream-profile]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 200s perl -Ilib -It/lib tools/profile_polynomial_stream.pl --seconds 40 --rss-kib 262144 --temp-file-bytes 268435456
