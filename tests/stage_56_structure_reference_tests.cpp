@@ -306,7 +306,7 @@ void exigeProiectionesFinium(
         const std::set<Big> targets = eligeTerminos(expected);
         const auto mid = std::next(targets.begin(),
             static_cast<std::ptrdiff_t>(targets.size() / 2));
-        const Big primus = *targets.begin();
+        const Big diesPrimus = *targets.begin();
         const Big medius = *mid;
         const Big ultimus = *targets.rbegin();
         bool cacheCalidus = false;
@@ -320,7 +320,7 @@ void exigeProiectionesFinium(
             comparaStructuram(actual, expected, label);
             comparaDiem(actual.result, diesExReference(expected, t), label);
             // Triades frigidae ex calculo novo, praeter structuram cache.
-            if (t == primus || t == medius || t == ultimus) {
+            if (t == diesPrimus || t == medius || t == ultimus) {
                 const auto recens =
                     BaseMonsterManager{}.executeFinalIntegrationStage56(c, t);
                 exige(recens.ready && recens.status == "GREEN" &&
