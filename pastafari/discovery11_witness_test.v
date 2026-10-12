@@ -8,7 +8,7 @@ fn discovery11_fixture_bowls() []BigInt {
 
 fn test_discovery11_twelve_stirs_overwrite_original_identity_order() {
 	original := [1, 2, 3, 4, 5, 6]
-	result := calendar_post_stir12_spaghetti(discovery11_fixture_bowls(), original) or {
+	result := new_base_dispatcher().dispatch_legacy_post_stir12(discovery11_fixture_bowls(), original) or {
 		LegacyPostStir12Result{}
 	}
 	assert result.final_stir_number == 12
@@ -44,7 +44,9 @@ fn test_discovery11_different_incoming_orders_share_final_post_stir_order() {
 	]
 	mut expected := []BigInt{}
 	for idx, order in original_orders {
-		out := calendar_post_stir12_spaghetti(bowls, order) or { LegacyPostStir12Result{} }
+		out := new_base_dispatcher().dispatch_legacy_post_stir12(bowls, order) or {
+			LegacyPostStir12Result{}
+		}
 		assert out.order_for_query == [3, 5, 1, 4, 6, 2]
 		assert out.overwrite_count == 12
 		if idx == 0 {
@@ -57,7 +59,7 @@ fn test_discovery11_different_incoming_orders_share_final_post_stir_order() {
 	assert bowls[6].str() == '60'
 }
 
-fn test_discovery11_legacy_dispatcher_and_public_entry_match() {
+fn test_discovery11_legacy_dispatcher_still_overwrites_despite_patch11() {
 	order := [6, 5, 4, 3, 2, 1]
 	bowls := discovery11_fixture_bowls()
 	public_result := calendar_post_stir12_spaghetti(bowls, order) or { LegacyPostStir12Result{} }
@@ -65,7 +67,9 @@ fn test_discovery11_legacy_dispatcher_and_public_entry_match() {
 	legacy_result := dispatcher.dispatch_legacy_post_stir12(bowls, order) or {
 		LegacyPostStir12Result{}
 	}
-	assert public_result.order_for_query == legacy_result.order_for_query
+	assert public_result.order_for_query == order
+	assert legacy_result.order_for_query == [3, 5, 1, 4, 6, 2]
+	assert public_result.order_for_query != legacy_result.order_for_query
 	assert public_result.overwrite_count == legacy_result.overwrite_count
 	assert public_result.bowls == legacy_result.bowls
 	assert order == [6, 5, 4, 3, 2, 1]
@@ -102,8 +106,12 @@ fn test_discovery11_post_stirs_large_bowls_and_no_input_mutation() {
 	bowls := [big_zero(), huge, big_neg(huge), big_from_int(7), huge, big_from_int(41),
 		big_from_int(43)]
 	original := [2, 3, 1, 4, 5, 6]
-	first := calendar_post_stir12_spaghetti(bowls, original) or { LegacyPostStir12Result{} }
-	second := calendar_post_stir12_spaghetti(bowls, original) or { LegacyPostStir12Result{} }
+	first := new_base_dispatcher().dispatch_legacy_post_stir12(bowls, original) or {
+		LegacyPostStir12Result{}
+	}
+	second := new_base_dispatcher().dispatch_legacy_post_stir12(bowls, original) or {
+		LegacyPostStir12Result{}
+	}
 	assert first.bowls == second.bowls
 	assert first.order_for_query == second.order_for_query
 	assert first.overwrite_count == 12
@@ -148,4 +156,5 @@ fn test_discovery11_previous_patches_and_monster_probe() {
 	assert diagnostic.contains('DISCOVERY_11 originalOrder=')
 	assert diagnostic.contains('DISCOVERY_11 wrongQueryOrder=')
 	assert diagnostic.contains('DISCOVERY_11 overwriteCount=12')
+	assert diagnostic.contains('PATCH_11 latchedOrder=')
 }

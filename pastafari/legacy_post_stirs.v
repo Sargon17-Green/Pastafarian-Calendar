@@ -91,9 +91,9 @@ pub fn (_ BaseDispatcher) dispatch_legacy_post_stir12(bowls []BigInt, order_at_d
 	return adapter.post_stir(bowls, order_at_drop46)
 }
 
-// የproduction መንገድ በDISCOVERY 11 የ12ኛውን የpost-stir order
-// ለምርመራ መመለሱን ይቀጥላል።
+// ደረጃ 23፦ የproduction ጥሪ የPATCH 11 orderAt46Latch መንገድ ይጠቀማል።
+// የታሪክ adapter እና old_post_stirs_overwrite_drop46_order አልተለወጡም።
 pub fn calendar_post_stir12_spaghetti(bowls []BigInt, order_at_drop46 []int) !LegacyPostStir12Result {
 	dispatcher := new_base_dispatcher()
-	return dispatcher.dispatch_legacy_post_stir12(bowls, order_at_drop46)
+	return dispatcher.dispatch_post_stir_patch11(bowls, order_at_drop46)
 }

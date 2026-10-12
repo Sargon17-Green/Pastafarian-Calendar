@@ -177,9 +177,11 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 		pour_order, patched_pours)!
 	stir_details := pour_final + '; DISCOVERY_10 wrongStirBowl2=' + wrong_stirred[2].str()
 	stir_order_details := stir_details + '; DISCOVERY_10 orderFirst=' + pour_order[0].str()
-	probe := calendar_post_stir12_spaghetti(patched_stirred, pour_order)!
+	legacy_post_stir := dispatcher.dispatch_legacy_post_stir12(patched_stirred, pour_order)!
+	patched_post_stir := calendar_post_stir12_spaghetti(patched_stirred, pour_order)!
 	previous := stir_order_details + '; PATCH_10 shadowStirBowl2=' + patched_stirred[2].str()
 	ordered := previous + '; DISCOVERY_11 originalOrder=' + pour_order.str()
-	wrong := ordered + '; DISCOVERY_11 wrongQueryOrder=' + probe.order_for_query.str()
-	return error(wrong + '; DISCOVERY_11 overwriteCount=' + probe.overwrite_count.str())
+	wrong := ordered + '; DISCOVERY_11 wrongQueryOrder=' + legacy_post_stir.order_for_query.str()
+	overwrite := wrong + '; DISCOVERY_11 overwriteCount=' + legacy_post_stir.overwrite_count.str()
+	return error(overwrite + '; PATCH_11 latchedOrder=' + patched_post_stir.order_for_query.str())
 }

@@ -114,3 +114,7 @@ v fmt -verify ./pastafari
 ## ደረጃ 22 — DISCOVERY 11
 
 የታሪክ LegacyPostStirOrderStore ከ46ኛው ጠብታ ቅደም ተከተል ምትክ በእያንዳንዱ ከ12 የመጨረሻ ብስለቶች አዲሱን order በquery_order ላይ ደግሞ ደጋግሞ ይጽፋል። old_post_stirs_overwrite_drop46_order የአስራ ሁለቱን ብስለቶች በተመሳሳይ old snapshot ይሰላል፤ savedBowlSum=SAVE(sum(old[1..6])+149*stir) እና የቅደም ተከተል ምርጫ ትክክለኛ ናቸው። ጉድለቱ ለquery የሚመለሰው ቅደም ተከተል የ12ኛው ብስለት እንጂ የ46ኛው ጠብታ አይደለም። አራት EXPECTED_RED የquery-order ምስክሮች ተጨምረዋል። የPATCH 11 orderAt46Latch አልተጨመረም። የ46 ጠብታዎች ሙሉ ሰንሰለት በዚህ ደረጃ አልተገነባም፤ ንዑስ መንገዱ ተለይቶ ተፈትሿል። V 0.5.2 (7647ce1) በGitHub Actions run 38263332678 ተረጋግጧል፤ 32/32 የቀድሞና አዲስ GREEN witness ፋይሎች PASS፣ አራት ሆን ተብሎ RED assertions በስም ተረጋግጠዋል። LAST_COMPLETED_STAGE=22 ነው። ዝርዝር፦ docs/STAGE22_DISCOVERY11.md።
+
+## ደረጃ 23 — PATCH 11
+
+`PostStirPatch11.latch_order_at_46` የ46ኛውን ጠብታ `order` ከ12ቱ የመጨረሻ ብስለቶች በፊት ወደ `order_at_46_latch` ይቀዳል። `PostStirPatch11.post_stir` ለ12ቱ ብስለቶች እውነተኛ የ`dispatch_legacy_post_stir12` ጥሪ ያደርጋል፤ የlegacy ቅደም ተከተል በታሪክ እንደነበረ 12 ጊዜ ይደረሳል። የቦውሎች ሂሳብና የመጨረሻ `savedBowlSum` ከlegacy ይወሰዳሉ። ወደ query የሚመለሰው ብቻ አንድ ጊዜ ተቀድቶ ያልተደረሰው `order_at_46_latch` ነው። `old_post_stirs_overwrite_drop46_order` እና የታሪኩ adapter ሳይቀየሩ ተጠብቀዋል። `discovery11_expected_red_test.v` አራቱ የቀድሞ RED assertions ሳይቀየሩ GREEN መሆን አለባቸው። `patch11_test.v` 720 የቅደም ተከተሎችን፣ 512-ቢት ግቤቶችን፣ የጠሪ ስርዓትንና የታሪክ መደረሶችን ይፈትሻል። የ46 ጠብታዎች ሙሉ ሂደት አሁንም አልተሠራም። ዝርዝር፦ `docs/STAGE23_PATCH11.md`። `LAST_COMPLETED_STAGE=22` እስከ native V CI ማረጋገጫ ይቆያል።

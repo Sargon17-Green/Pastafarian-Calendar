@@ -189,3 +189,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ### የደረጃ 22 መዝጊያ — EXPECTED_RED
 
 በመጀመሪያው GitHub Actions run 38262694322 የV array ownership ስህተት ታይቷል፤ working=pending ወደ pending.clone() ተቀይሯል። ቀጣዩ run 38263102902 የtest ሰልፍ ቅጂ እንዲሆን ጠይቋል፣ እና expected=out.bowls.clone() ተደርጓል። የV formatter ትክክለኛ ቅርጽ በአዲሶቹ ፋይሎች ተተግብሯል። commit c9d2c218259ce1d9fb4373ffc0e5070866c1db0e ላይ GitHub Actions run 38263332678 ሁለቱም ሥራዎች PASS ናቸው፤ 32 የGREEN test ፋይሎች PASS፣ 4 ሆን ብለው RED assertions ተረጋግጠዋል። artifact 11752704606 ተቀምጧል። የታሪክ query order አሁንም በ12 post-stirs ይደረሳል፤ PATCH 11 orderAt46Latch አልተጨመረም። የ46 ጠብታዎች ሙሉ መንገድ አልተጠናቀቀም። **ደረጃ 22 COMPLETE / EXPECTED_RED።**
+
+## ደረጃ 23 — PATCH 11 (native V CI ይጠበቃል)
+
+`LegacyPostStirOrderStore` የአሮጌውን query order በ12ቱ ብስለቶች አሁንም ይደርሳል። የ`PostStirPatch11` ተለያዩ አስተዳዳሪዎች ግን `orderAt46Latch` ን ከእነዚህ በፊት ያደርጋሉ። የታሪክ መንገድ በdispatcher በትክክል ከሄደ በኋላ ከ12 ብስለቶች የተገኙት ስድስት ቦውሎችና የ`savedBowlSum` እንደነበሩ ይመለሳሉ። `order_for_query` ብቻ የአንድ-ጊዜ የላች ቅጂ ይሆናል። `calendar_date_spaghetti` በታሪክ `DISCOVERY_11 wrongQueryOrder` እና በአዲሱ `PATCH_11 latchedOrder` ሁለቱንም ለምርመራ ያሳያል። የ`PATCH 12` አሮጌው ቀጣይ ጎድጓዳ ሳህን አልተጨመረም።
