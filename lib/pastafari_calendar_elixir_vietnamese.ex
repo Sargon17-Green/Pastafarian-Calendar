@@ -2,8 +2,9 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 20 giữ nguồn rót đã vá nhưng thực thi phép khuấy
-  sáu bát theo map mới đã ghi đè; các bản vá 01-09 còn nguyên.
+  Giai đoạn 21 vá khuấy sáu bát qua vaultOld và pending;
+  hàm khuấy in-place cũ còn nguyên để kiểm chứng lịch sử.
+  Các bản vá 01-09 đều giữ nguyên.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}

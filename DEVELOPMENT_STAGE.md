@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=20
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=21
+CURRENT_KIND=PATCH
 CURRENT_PATCH=10
 LAST_COMPLETED_STAGE=20
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..09; thêm LegacyInPlaceStir chạy tuần tự sáu bát, mỗi vị trí đọc current đã thay qua Map.put; ba nguồn rót qua BowlAliasPatch đúng nhưng khuấy đọc sai snapshot.
+MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyInPlaceStir.run ghi đè tuần tự; BowlVaultPatch sử dụng LegacyInPlaceStir.compute_one với một vault_old cố định và tích lũy sáu kết quả vào pending, Map.merge một lần sau cùng. Giữ PATCH 01..09.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_20_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_21_PENDING
+GIT_HISTORY_MUTATED=STAGE_21_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=239
-CI_FAILURES=14_EXPECTED_ONLY
+CI_TESTS=STAGE_21_PENDING
+CI_FAILURES=STAGE_21_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -392,3 +392,19 @@ Khóa tên chuẩn độc lập PASS; không có vaultOld hoặc pending.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38248260572
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38248260716
 Giai đoạn 20 đóng EXPECTED_RED; tiếp theo giai đoạn 21 PATCH 10.
+
+Giai đoạn 21 thực hiện PATCH 10: giữ byte-for-byte
+LegacyInPlaceStir.run và compute_one của lần phát hiện 10.
+BowlVaultPatch.run chọn vault_old=old và tạo pending riêng;
+cả sáu LegacyInPlaceStir.compute_one đều đọc vault_old,
+chỉ sau khi tính sáu vị trí mới Map.merge(vault_old,pending).
+BowlDropCalculator.step chuyển toàn bộ đường sản xuất qua
+BowlVaultPatch, không đổi ba phép rót qua BowlAliasPatch,
+công thức khuấy, sáu tên ID hoặc 46 giọt.
+Bốn hồi quy chuẩn Stage20 giữ nguyên assert.
+Mười hồi quy chuẩn Stage18-19 giữ nguyên assert,
+đều phải trở lại xanh. Mười hai điều khiển Stage20 tiếp tục
+chứng minh legacy sai nếu gọi trực tiếp, production đã sửa.
+Thêm 14 kiểm thử Stage21, tổng dự kiến 253 kiểm thử GREEN.
+LAST_COMPLETED_STAGE giữ 20 trước khi CI được xác minh.
+Không mở giai đoạn 22 hay phần khuấy sau 46 giọt.

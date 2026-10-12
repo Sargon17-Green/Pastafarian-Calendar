@@ -664,3 +664,31 @@ Những khẳng định normative trước đó được giữ nguyên
 để không che lỗi mới. Hàm legacy dùng map current đã
 được cập nhật sau mỗi vị trí, nguồn rót từ BowlAliasPatch
 vẫn chính xác. Kết thúc Stage20 EXPECTED_RED.
+
+## Giai đoạn 21 — Bản vá 10: snapshot và commit sáu bát
+
+**Di sản không sửa:** `LegacyInPlaceStir.run` vẫn
+thực hiện Enum.reduce với map `current` rồi
+Map.put ngay sau mỗi vị trí; gọi nó trực tiếp vẫn
+tạo ô nhiễm. `LegacyInPlaceStir.compute_one`
+vẫn chứa công thức chuẩn của một vị trí.
+
+**Bản vá:** Module mới `BowlVaultPatch` tạo
+`vault_old=old` trước khi bắt đầu. Sáu lần gọi
+`LegacyInPlaceStir.compute_one` lấy duy nhất map này.
+Mọi giá trị tính ra được cất trong `pending`, chưa
+được dùng làm nguồn cho vị trí sau. Sau sáu vị trí,
+`Map.merge(vault_old,pending)` thực hiện commit chung.
+Elixir vẫn giữ giá trị old bất biến cho caller.
+`BowlDropCalculator.step` dùng lớp vá này mà vẫn
+dùng BowlAliasPatch cho ba nguồn rót.
+
+**Chứng minh:** Với bất kỳ hoán vị ID hợp lệ của sáu
+bát, các lần tính vị trí đều đọc cùng trạng thái
+`vault_old`; công thức trong compute_one chính là
+công thức oracle. Sáu ID đích là một hoán vị nên
+`pending` chứa đủ đúng sáu khóa không trùng nhau.
+Commit cuối áp dụng sáu giá trị đồng thời. Quy nạp
+qua 46 giọt cho sáu bát đúng, không sửa lỗi từ các
+giai đoạn khác. Giữ nguyên hồi quy cũ, thêm 14 bài.
+Chưa bắt đầu DISCOVERY 11.

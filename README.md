@@ -744,3 +744,29 @@ Giai đoạn 21/55 là `PATCH 10`: giữ LegacyInPlaceStir,
 đưa snapshot `vaultOld` vào sáu lần `compute_one`,
 chứa sáu kết quả trong `pending`, rồi commit đồng loạt.
 Chưa thực hiện ở giai đoạn 20.
+
+## Giai đoạn 21 — Bản vá 10: vaultOld cố định và pending sáu bát
+
+Hàm `LegacyInPlaceStir.run` **giữ nguyên** lỗi lịch sử:
+mỗi lần khuấy một vị trí, nó đưa ngay map `current` đã
+ghi kết quả vào lần khuấy tiếp theo. Module này vẫn được
+giữ để tái hiện sai lệch phát hiện 10. Không sửa
+`LegacyInPlaceStir.compute_one`, công thức SAVE, đá,
+thứ tự ID hoặc các phép rót.
+
+`BowlVaultPatch.run` thay đường gọi production:
+`vault_old=old` là snapshot cố định của cả sáu vị trí.
+Với mỗi position 1..6, gọi chính
+`LegacyInPlaceStir.compute_one(vault_old,...)`, gom
+`{id,updated}` vào map `pending` riêng. Chỉ sau khi
+cả sáu giá trị đã được tính, thực hiện
+`Map.merge(vault_old,pending)` đúng một lần. Như vậy
+không vị trí nào đọc dữ liệu được viết trong cùng giọt.
+Ba nguồn rót vẫn thông qua `BowlAliasPatch` và
+`LegacyPourPositions` nguyên bản.
+
+Bốn hồi quy chuẩn của Stage20 cùng mười hồi quy từ
+Stage18-19 được giữ nguyên để chứng minh sửa tận gốc.
+Bổ sung 14 bài kiểm thử về 720 hoán vị sáu bát,
+tính đồng thời, số nguyên rất lớn, giới hạn và bất biến
+snapshot; chưa tích hợp 12 lần khuấy cuối và lịch.

@@ -4,9 +4,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
-  Giai đoạn 20 giữ ba nguồn rót đúng qua BowlAliasPatch,
-  nhưng sáu phép khuấy lịch sử đọc map đã cập nhật qua
-  LegacyInPlaceStir. Chưa tích hợp ngày lịch.
+  Giai đoạn 21 vá khuấy bát qua vaultOld và pending:
+  sáu phép khuấy gọi LegacyInPlaceStir.compute_one với
+  cùng snapshot, commit kết quả chung. Chưa tích hợp lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{

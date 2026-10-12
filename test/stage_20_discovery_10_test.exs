@@ -7,6 +7,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage20Discovery10Test do
   alias PastafariCalendarElixirVietnamese.Monster.{
     BowlAliasPatch,
     BowlDropCalculator,
+    BowlVaultPatch,
     LegacyInPlaceStir,
     LegacyPourPositions
   }
@@ -96,7 +97,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage20Discovery10Test do
     assert independent == correct_step(@old, drop, @order, stones, 1)[second_id]
   end
 
-  test "mô phỏng sáu lần ghi đè trùng toàn bộ LegacyInPlaceStir.run" do
+  test "mô phỏng lỗi legacy còn nguyên nhưng bản vá không ghi đè lần lượt" do
     stones = Ref.build_stones()
     drop = 79
     {row, pours} = prepare(@old, @order, stones, 3, drop)
@@ -107,7 +108,9 @@ defmodule PastafariCalendarElixirVietnamese.Stage20Discovery10Test do
     end)
 
     assert LegacyInPlaceStir.run(@old, pours, drop, row, @order, 3) == threaded
-    assert BowlDropCalculator.step(@old, drop, @order, stones, 3) == threaded
+    refute BowlDropCalculator.step(@old, drop, @order, stones, 3) == threaded
+    assert BowlDropCalculator.step(@old, drop, @order, stones, 3) ==
+             correct_step(@old, drop, @order, stones, 3)
     refute threaded == correct_step(@old, drop, @order, stones, 3)
   end
 
@@ -131,14 +134,14 @@ defmodule PastafariCalendarElixirVietnamese.Stage20Discovery10Test do
     end
   end
 
-  test "kể cả thứ tự đồng nhất vẫn nhiễm khi bước sau dùng bát trước" do
+  test "hoán vị đồng nhất được vá, còn legacy vẫn nhiễm nguồn" do
     stones = Ref.build_stones()
     identity = [1, 2, 3, 4, 5, 6]
     actual = BowlDropCalculator.step(@old, 89, identity, stones, 1)
     expected = correct_step(@old, 89, identity, stones, 1)
 
     assert actual[1] == expected[1]
-    refute actual == expected
+    assert actual == expected
     assert Enum.sort(Map.keys(actual)) == [1, 2, 3, 4, 5, 6]
   end
 
@@ -157,7 +160,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage20Discovery10Test do
     assert @old == %{1 => 13, 2 => 17, 3 => 23, 4 => 29, 5 => 31, 6 => 37}
   end
 
-  test "bootstrap thật thực hiện đủ 46 lần cập nhật bị nhiễm" do
+  test "bootstrap thực hiện đủ 46 lần cập nhật không nhiễm" do
     f = Ref.foundation_day()
     c = f - 33
     t = f + 77
@@ -172,7 +175,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage20Discovery10Test do
     {initial, visible, expected} = correct_final(c, t)
     assert ctx.initial_bowls == initial
     assert ctx.visible_drops == visible
-    refute ctx.bowls_after_drops == expected
+    assert ctx.bowls_after_drops == expected
   end
 
   test "các bản vá từ một tới chín còn đúng trước khâu khuấy" do
@@ -252,22 +255,28 @@ defmodule PastafariCalendarElixirVietnamese.Stage20Discovery10Test do
     end
   end
 
-  test "mã nguồn chứng minh truyền map đã đổi và chưa có vaultOld" do
+  test "mã nguồn giữ legacy ghi đè và thêm bản vá vaultOld pending" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = Path.join(root, "legacy_in_place_stir.ex") |> File.read!()
     calculator = Path.join(root, "bowl_drop_calculator.ex") |> File.read!()
     alias_patch = Path.join(root, "bowl_alias_patch.ex") |> File.read!()
+    vault_patch = Path.join(root, "bowl_vault_patch.ex") |> File.read!()
 
     assert legacy =~ "Enum.reduce(1..6, old, fn position, current ->"
     assert legacy =~ "compute_one(current, pours, drop, row, order, index, position)"
     assert legacy =~ "Map.put(current, id, updated)"
     assert legacy =~ "Map.fetch!(source, prev_id)"
     assert legacy =~ "Map.fetch!(source, next_id)"
-    assert calculator =~ "LegacyInPlaceStir.run(old, pours, drop, row, order, index)"
+    assert calculator =~ "BowlVaultPatch.run(old, pours, drop, row, order, index)"
+    assert vault_patch =~ "vault_old = old"
+    assert vault_patch =~ "pending ="
+    assert vault_patch =~ "LegacyInPlaceStir.compute_one("
+    assert vault_patch =~ "Map.merge(vault_old, pending)"
     assert alias_patch =~ "LegacyPourPositions.pour(bowl_alias, drop, stone, index, position)"
     refute legacy =~ "vault_old"
     refute calculator =~ "vault_old"
-    refute File.exists?(Path.join(root, "bowl_vault_patch.ex"))
+    assert File.exists?(Path.join(root, "bowl_vault_patch.ex"))
+    refute vault_patch =~ "LegacyInPlaceStir.run("
   end
 
   test "hồi quy chuẩn lần khuấy đầu: cố ý đỏ tại phát hiện 10" do

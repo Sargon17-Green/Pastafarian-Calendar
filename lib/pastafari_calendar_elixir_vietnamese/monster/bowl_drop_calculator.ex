@@ -1,16 +1,16 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.BowlDropCalculator do
   @moduledoc """
-  Phát hiện 10 đưa lỗi ghi đè tuần tự vào khuấy sáu bát.
+  Bản vá 10 ngăn dữ liệu bát mới làm nhiễm sáu lần khuấy.
 
-  BowlAliasPatch tiếp tục vá đúng ba nguồn rót và gọi legacy.
-  LegacyInPlaceStir tính rồi thay ngay bát của từng vị trí,
-  khiến những vị trí sau đọc giá trị đã bị cập nhật; chưa
-  dùng vaultOld hay pending của bản vá 10.
+  BowlAliasPatch tiếp tục xử lý ba nguồn rót và gọi legacy.
+  BowlVaultPatch giữ vaultOld bất biến trong cả sáu lần
+  LegacyInPlaceStir.compute_one, gom pending, rồi commit
+  đồng loạt; lỗi lịch sử trong LegacyInPlaceStir.run còn nguyên.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     BowlAliasPatch,
-    LegacyInPlaceStir
+    BowlVaultPatch
   }
 
   def apply_all(initial_bowls, visible, orders, stones)
@@ -36,7 +36,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.BowlDropCalculator do
       {position, value}
     end)
 
-    LegacyInPlaceStir.run(old, pours, drop, row, order, index)
+    BowlVaultPatch.run(old, pours, drop, row, order, index)
   end
 
   def step(_old, _drop, _order, _stones, _index) do
