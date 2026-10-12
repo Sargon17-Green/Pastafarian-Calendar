@@ -1,4 +1,4 @@
-# ደረጃ 13/55 — PATCH 06 (የGREEN ማረጋገጫ ይጠበቃል)
+# ደረጃ 13/55 — PATCH 06 (COMPLETE / GREEN)
 
 ## ሊቀየር የማይገባው ታሪካዊ ክፍል
 
@@ -38,4 +38,17 @@ v test ./pastafari/patch06_test.v
 v test ./pastafari
 ```
 
-የV 0.5.2 አጠቃላይ ማረጋገጫ 19/19 PASS መሆን አለበት። `LAST_COMPLETED_STAGE=12` እስከ CI ማረጋገጫ ይቆያል። ደረጃ 14 — `DISCOVERY 07` አይጀመርም።
+የV 0.5.2 አጠቃላይ ማረጋገጫ 19/19 PASS መሆን አለበት። የV 0.5.2 ማረጋገጫ PASS ነው፤ `LAST_COMPLETED_STAGE=13` ሆኗል። ደረጃ 14 — `DISCOVERY 07` አይጀመርም።
+
+## የመጨረሻ የማረጋገጫ ማስረጃ
+
+- የተፈተነ commit፦ `6192a870e1af98398e6f4ed70f9dcf49aca60a28`
+- GitHub Actions፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38223816213
+- የማስረጃ ቅርስ፦ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38223816213/artifacts/11735158009
+- የኮምፓይለር ስሪት፦ `V 0.5.2 7647ce1`።
+- `v fmt -verify ./pastafari` PASS፤ `v test ./pastafari` 19/19 PASS።
+- አራቱ የደረጃ 12 RED assertions ሳይቀየሩ GREEN ሆነዋል።
+- `legacy_prior` እና `LegacyPriorAdapter` የታሪክ ሕጋቸውን ጠብቀዋል።
+- ደረጃ 14 አልተጀመረም።
+
+**ደረጃ 13 COMPLETE / GREEN።**

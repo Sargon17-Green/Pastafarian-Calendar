@@ -113,3 +113,7 @@ V 0.5.2 (`7647ce1`) በGitHub Actions run `38166616826` በcommit `a48d1c7920017
 ## ደረጃ 13 — PATCH 06 (በቀጥተኛ የV CI ሙከራ ላይ)
 
 `legacy_prior` የቀድሞውን የ`drop_store[i-back]` ብቻ ሕግ ይጠብቃል። የ`PriorPatch06.prior` አዲሱ የhistory አገናኝ `slot>=1` ሲሆን የታሪክ መንገድን በdispatcher ይጠራል። ያለዚያ `hidden_k=1-slot` ያሰላል፣ የተጠገነውን `HiddenPatch05` በ`calendar_hidden_by_nearness` በኩል ይጠቀማል። `LegacyPriorAdapter` እና የደረጃ 12 አራቱ ኖርማቲቭ assertions ይጠበቃሉ። የ`calendar_date_spaghetti` የእንቅስቃሴ ምርመራ ሁለቱንም `DISCOVERY_06 oldPriorSlot0=ERROR` እና `PATCH_06 priorSlot0` ያሳያል። ደረጃ 14 አልተጀመረም።
+
+### የደረጃ 13 መዝጊያ — GREEN
+
+በመጀመሪያው የV ሙከራ `patch06_test.v` ውስጥ አንድ የformatter ልዩነት ታይቷል። የV 0.5.2 (`7647ce1`) እውነተኛ formatter ተጠቅመን ልዩነቱን አስተካክለናል፤ ጊዜያዊ የአመርማሪ የCI እርምጃ ተወግዷል። በcommit `6192a870e1af98398e6f4ed70f9dcf49aca60a28` ላይ የGitHub Actions run `38223816213` በአገርኛው የV ኮምፓይለር ሙሉ PASS ነው። ሁሉም 19 የV ፈተና ፋይሎች GREEN ናቸው፣ የደረጃ 12 አራቱ RED assertions ሳይለወጡ አልፈዋል። `legacy_prior` የታሪክ ስህተቱ ተጠብቋል፣ `PriorPatch06` አዎንታዊ slot ሲሆን በdispatcher ወደ `legacy_prior` በእውነት ይመለሳል። የማስረጃ ቅርስ `11735158009` ነው። ደረጃ 13 COMPLETE / GREEN ነው።
