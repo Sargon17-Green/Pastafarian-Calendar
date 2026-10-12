@@ -482,3 +482,9 @@ oldPermutationUnrank0(oneBased-1) toutbon, ak validasyon rank factoradic.
 Nou teste 720 lòd, BigInt negatif ak anpil chif, erè enjekte, kopi posede,
 ak nèf gout vizib reyèl. Nou pa ajoute okenn mouvman bòl.
 Tès natif CI Stage 17 dwe pase anvan nou fèmen etap la.
+
+### Fèmti Stage 17
+
+CI natif `38266889952` fini ak 10/10 travay PASS. Tout 720 rang
+korije, 237 ka BigInt, 15 fault injections, 9 gout vivan, 180
+entèlasman ak 8 apèl nested verifye. LAST_COMPLETED_STAGE=17.

@@ -555,3 +555,12 @@ BigInt laj oubyen negatif, 15 piki erè, 9 gout vizib reyèl, 180 ka entèlasman
 Nan CI, odit EXPECTED_RED Stage 16 la tounen yon verifikasyon pozitif
 ki egzije menm mesaj echèk istorik la. Stage 17 pa dwe vin COMPLETE
 anvan tout travay natif CI yo pase.
+
+### Prèv final natif Stage 17
+
+GitHub Actions `38266889952` fin pase tout 10 travay yo. Suite Lua
+Stage 1–17 la bay 720/720 rank kòrèk, 237 ka BigInt, 15 piki
+ak 15 rekiperasyon, 9 gout vizib reyèl, 180 entèlasman (360 apèl),
+ak 8 apèl nested. Odit Stage 16 lan toujou detekte 719 rank
+deplase ak sèl rejè rank 720 la. PATCH 08 fèmen; pa gen okenn
+kòd pou brase bòl ki antre.
