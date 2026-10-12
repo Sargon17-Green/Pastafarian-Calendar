@@ -1435,3 +1435,19 @@ La futura PATCH18 può mappare usando il lookup
 corretto, ma **non viene anticipata**. Le sequenze
 sono indici sintetici già scelti: la salsa normativa
 e la conversione completa sono ancora fuori fase.
+
+### Certificazione nativa dello Stage36
+
+La [run GitHub Actions 38287852443](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38287852443),
+sul commit `31e6c3304c2afe1cc1efcdcc36fe3395dcf89063`,
+ha ottenuto **SUCCESS 37/37 job** e la firma esatta
+**59 PASS / 3 FAIL intenzionali** nella suite Stage36.
+I tre casi divergenti sono `INDEX1_ITALIAN_NAME`,
+`INDEX47_WRAP` e `INDEX1_TO_47`.
+
+Il vecchio collegamento fra indice canonico 1-based
+e posizione Vector 0-based è mantenuto e verificato
+senza modificare nessuno dei 47 nomi italiani congelati.
+Stage35 rimane 71 PASS/0 FAIL e tutte le regressioni
+native conservano la loro firma storica. La correzione
+senza rotazione del catalogo resta riservata a Stage37.

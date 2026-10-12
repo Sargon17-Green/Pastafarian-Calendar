@@ -656,3 +656,12 @@ valida gli ID distinti ma sceglie invece
 `argilla` invece di `sabbia`. Il validator
 ricostruisce soltanto la mappatura erronea,
 così la correzione resta compito di PATCH18.
+
+La run 38287852443 su commit
+31e6c3304c2afe1cc1efcdcc36fe3395dcf89063
+ha attestato 37/37 job successivi, con 59 PASS/3 FAIL
+intenzionali di Stage36. La vecchia regola
+`Months(id % 47)` è riprodotta per i 47 ID, mentre
+la norma `Months(id-1)` rimane riferimento solo test.
+Il catalogo, la sua versione e gli indici canonici non
+vengono alterati dal percorso legacy.

@@ -1537,3 +1537,13 @@ non è modificato. Report, snapshot, validator, trace,
 metriche e i test di regressione per PATCH01–17 sono
 mantenuti. Il risultato atteso della fase è
 59 PASS/3 FAIL intenzionali.
+
+### Certificazione Stage36 DISCOVERY18
+
+Il commit 31e6c3304c2afe1cc1efcdcc36fe3395dcf89063
+ha superato **37/37 job** nella run 38287852443.
+La suite Stage36 conserva **59 PASS / 3 FAIL**
+voluti, tutti dovuti allo scarto fra indice canonico
+1-based e posizione del catalogo italiano 0-based.
+Il catalogo congelato resta invariato, così come
+PATCH01–17 e le prove storiche. PATCH18 ancora assente.
