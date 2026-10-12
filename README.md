@@ -1192,3 +1192,27 @@ Giai đoạn 28/55 đóng `EXPECTED_RED` được xác minh.
 Stage29 `PATCH 14` phải giữ module lịch sử, xây
 k chữ số từ cùng answer ring rồi thực hiện wide
 rejection +/-1 trên modulo M^k. Chưa làm ở Stage28.
+
+
+## Giai đoạn 29/55 — PATCH 14, chọn hạng rộng chuẩn (đã đóng)
+
+WideDetourPatch tạo đúng k chữ số từ cùng AnswerStreamManager,
+k tối thiểu sao cho M^k>=N; ghép little-endian và giới hạn
+limit=floor(M^k/N)*N. Nếu wide0>limit, bước +/-1 trên vòng
+wide được tính bằng công thức tương đương chính xác,
+không đổi hạt, chiều hay thứ tự các chữ số.
+Lớp ShortRejectionPatch cho N<=M và module
+LegacySingleDigitWidePick sai lịch sử được giữ nguyên.
+Không nhập oracle test-only vào production.
+
+Bốn hồi quy chuẩn Stage28 nay đạt, thêm 19 kiểm thử Stage29:
+**393/393 PASS, 0 thất bại, không cảnh báo biên dịch Elixir**
+trên Elixir 1.18.5, Erlang/OTP 27.
+Canonical Names Lock PASS độc lập. Cảnh báo Node.js 20
+từ checkout@v4 là cảnh báo nền tảng workflow, không phải biên dịch.
+
+- [CI Stage29 đóng GREEN](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286909827)
+- [Canonical Names Lock PASS](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286909853)
+
+Stage29 hoàn tất, NEXT=Stage30/55 DISCOVERY 15.
+Không sửa nhánh main, không tích hợp lịch đầy đủ tại Stage29.
