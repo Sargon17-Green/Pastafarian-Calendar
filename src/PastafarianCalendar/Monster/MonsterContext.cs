@@ -71,6 +71,14 @@ public sealed class MonsterContext
     public int[]? LegacyBowlOrderResult { get; set; }
     public int? LegacyBowlVisibleIndex { get; set; }
 
+    // أثر القديم محفوظ: عند الرتبة 720 يُسجل فشله بدلاً من اختلاق ترتيب قديم.
+    public bool LegacyBowlRankOutOfRange { get; set; }
+
+    // الرتبة الواحدية والرتبة الصفرية المتعاقبتان لا تُختزلان في الرقعة الثامنة.
+    public int? PatchedBowlOneBasedRank { get; set; }
+    public int? PatchedBowlLegacyRank0 { get; set; }
+    public int[]? PatchedBowlOrderResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

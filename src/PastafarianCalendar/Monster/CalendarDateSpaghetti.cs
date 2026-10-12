@@ -129,6 +129,22 @@ public static class CalendarDateSpaghetti
             calculationDay, targetDay, index);
     }
 
+    // رقعة ترتيب الأوعية الثامنة: يُستدعى المفكك القديم بعد تصحيح دليل الرتبة.
+    public static int[] EvaluateBowlOrder(
+        BigInteger calculationDay, BigInteger targetDay, BigInteger dropValue)
+    {
+        return new MonsterManager().EvaluateBowlOrder(
+            calculationDay, targetDay, dropValue);
+    }
+
+    // المدخل المصحح من قطرة ظاهرة حقيقية وليس من مرجع الاختبار.
+    public static int[] EvaluateBowlOrderFromVisibleDrop(
+        BigInteger calculationDay, BigInteger targetDay, int index)
+    {
+        return new MonsterManager().EvaluateBowlOrderFromVisibleDrop(
+            calculationDay, targetDay, index);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

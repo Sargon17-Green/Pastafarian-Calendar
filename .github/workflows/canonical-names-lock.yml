@@ -123,3 +123,5 @@ jobs:
         run: |
           test "${{ steps.discovery_bowl_order_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage16Tests/PastafarianCalendar.Stage16Tests.csproj --configuration Release -- --verify-expected-red
+      - name: مطابقة رقعة ترتيب الأوعية الثامنة مع المرجع
+        run: dotnet run --project tests/PastafarianCalendar.Stage17Tests/PastafarianCalendar.Stage17Tests.csproj --configuration Release
