@@ -8,8 +8,36 @@ use Scalar::Util qw(blessed);
 use Exporter 'import';
 use Pastafari::WeavingSuffix qw(countWeavingSuffixPolynomial);
 use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
+use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
 
 our @EXPORT_OK = qw(countWeavingSuffixFactored);
+
+# 所有入口均先驗證引擎與磁碟預算；不允許使用相同共享快取
+# 時，以其它預算先算好的結果繞過較嚴格的限制。
+sub _normalize_profile_options ($options = undef) {
+    die "交織計數選項必須是雜湊參照\n"
+        if defined($options) && ref($options) ne 'HASH';
+    $options //= {};
+    die "未知的交織計數選項\n"
+        if grep {$_ ne 'profile_engine' && $_ ne 'max_temp_file_bytes'}
+                keys %$options;
+    my $engine=$options->{profile_engine} // 'resident';
+    die "交織計數引擎必須是 resident 或 stream\n"
+        if ref($engine) || ($engine ne 'resident' && $engine ne 'stream');
+    die "常駐矩陣引擎不能指定磁碟容量\n"
+        if $engine eq 'resident' && exists $options->{max_temp_file_bytes};
+    my $max_bytes;
+    if ($engine eq 'stream') {
+        $max_bytes=$options->{max_temp_file_bytes} // (128*1024*1024);
+        die "單一暫存檔容量限制須為 1..1073741824 的整數位元組\n"
+            if ref($max_bytes) || "$max_bytes" !~ /\A[1-9][0-9]*\z/
+            || length("$max_bytes") > 10 || $max_bytes > 1_073_741_824;
+        $max_bytes=0+"$max_bytes";
+    }
+    return {profile_engine=>$engine,
+            ($engine eq 'stream' ? (max_temp_file_bytes=>$max_bytes) : ())};
+}
+
 
 # 第 1 階段實驗：依「已開啟月份的最後次序」與
 # 「未開啟月份的首次及最後次序」拆開後綴。
@@ -29,7 +57,9 @@ our @EXPORT_OK = qw(countWeavingSuffixFactored);
 # 共用快取僅由呼叫者擁有，應在單次反排名內建立；
 # 鍵包含全部月份長度，不跨不同日曆輸入互相污染。
 sub countWeavingSuffixFactored ($lengths, $prefix,
-                               $shared_cache = undef, $diagnostics = undef) {
+                               $shared_cache = undef, $diagnostics = undef,
+                               $options = undef) {
+    my $normalized=_normalize_profile_options($options);
     die "月份長度必須是陣列參照\n" if ref($lengths) ne 'ARRAY';
     die "月份前綴必須是陣列參照\n" if ref($prefix) ne 'ARRAY';
     die "共用後綴快取必須是雜湊參照\n"
@@ -79,7 +109,8 @@ sub countWeavingSuffixFactored ($lengths, $prefix,
     }
 
     return _countWeavingSuffixFactoredState(
-        \@sizes,\@remaining,$opened,$closed,$shared_cache,$diagnostics
+        \@sizes,\@remaining,$opened,$closed,$shared_cache,$diagnostics,
+        $normalized
     );
 }
 # 僅限反排名內部使用。呼叫者已驗證月長和整個前綴，
@@ -88,7 +119,11 @@ sub countWeavingSuffixFactored ($lengths, $prefix,
 sub _countWeavingSuffixFactoredState ($lengths, $remaining,
                                      $opened, $closed,
                                      $shared_cache = undef,
-                                     $diagnostics = undef) {
+                                     $diagnostics = undef,
+                                     $options = undef) {
+    my $normalized=_normalize_profile_options($options);
+    my $engine=$normalized->{profile_engine};
+    my $budget=$normalized->{max_temp_file_bytes} // '-';
     my @sizes=map { 0+"$_" } @$lengths;
     my @remaining=@$remaining;
     my $m=scalar @sizes;
@@ -110,7 +145,8 @@ sub _countWeavingSuffixFactoredState ($lengths, $remaining,
     my %private_cache;
     my $cache = defined($shared_cache) ? $shared_cache : \%private_cache;
     my $signature=join(',',@sizes);
-    my $key=$signature.'|'.$opened.'|'.$T;
+    my $namespace=join('|','profile-v1',$engine,$budget,$signature);
+    my $key=$namespace.'|'.$opened.'|'.$T;
     my $future;
     if (exists $cache->{$key}) {
         $future=$cache->{$key}->copy;
@@ -121,11 +157,27 @@ sub _countWeavingSuffixFactoredState ($lengths, $remaining,
         # 「反序最後月份的首次位置 u」，並有 z=U+1-u。
         # 在一個反序全域多項式 DP 中，一次取得所有
         # 未開啟後綴長度的首次位置直方圖，再共享於各 p。
-        my $profile_key='reversed-first-hist|'.$signature;
+        my $profile_key='reversed-first-hist|'.$namespace;
         if (!exists $cache->{$profile_key}) {
             my @reversed=reverse @sizes;
             my @histories;
-            countWeavingsPolynomial(\@reversed,undef,\@histories);
+            if ($engine eq 'stream') {
+                my %stream_stats;
+                countWeavingsPolynomialStream(\@reversed,\%stream_stats,
+                    \@histories,{max_temp_file_bytes=>$budget});
+                if (defined $diagnostics) {
+                    $diagnostics->{profile_disk_builds}++;
+                    my $previous=$diagnostics->{profile_max_temp_file_bytes}//0;
+                    my $now=$stream_stats{max_temp_file_bytes}//0;
+                    $diagnostics->{profile_max_temp_file_bytes}=
+                        $now>$previous ? $now : $previous;
+                    $diagnostics->{profile_rows_serialized}+=
+                        $stream_stats{rows_serialized}//0;
+                }
+            } else {
+                countWeavingsPolynomial(\@reversed,undef,\@histories);
+            }
+            # 建表成功後才發表快取：失敗、超限時不能暴露半成品。
             $cache->{$profile_key}=\@histories;
             $diagnostics->{profile_builds}++ if defined $diagnostics;
         }

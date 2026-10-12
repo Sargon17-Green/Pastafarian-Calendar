@@ -63,6 +63,7 @@ t/35_reverse_first_histogram.t
 t/36_factored_state_interface.t
 t/37_rank_roundtrip.t
 t/38_streamed_polynomial_disk.t
+t/39_stream_profile_factor.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 t/lib/Pastafari/WeavingPolynomialStream.pm
