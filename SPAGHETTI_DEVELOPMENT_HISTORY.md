@@ -386,3 +386,15 @@ nghiền cho giọt đầu chính xác; theo quy nạp toàn bộ
 sửa riêng các khẳng định dây nối từng đòi kết quả sai.
 Không bắt đầu lỗi bảng nghiền có chỉ số lệch
 của giai đoạn 14 hoặc thay đổi các nguồn chuẩn.
+
+**Kiểm chứng cuối:** Trong Elixir 1.18.5, Erlang/OTP 27,
+CI chạy 137 kiểm thử, 0 lỗi và không có cảnh báo biên dịch.
+Bốn hồi quy chuẩn của giai đoạn 12 đều chuyển sang đạt
+mà không đổi kỳ vọng. Mười một kiểm thử mới đều đạt;
+khóa tên chuẩn PASS.
+
+`LegacyPrior` không đổi, blob SHA
+`4c2b416bf089f8a538908fd4d310bcb6900c2419`.
+Oracle test-only không đổi, blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+Đóng giai đoạn 13 ở GREEN; chưa bắt đầu DISCOVERY 07.

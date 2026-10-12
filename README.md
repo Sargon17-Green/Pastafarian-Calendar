@@ -409,3 +409,21 @@ Bốn hồi quy từ giai đoạn 12 được giữ nguyên và phải chuyển 
 11 kiểm thử giai đoạn 13 xác minh những vùng tiếp giáp,
 46 giọt, ngày số nguyên lớn, thực thi song song,
 đường legacy còn nguyên và các lớp vá trước.
+
+## Kiểm chứng đóng giai đoạn 13
+
+GitHub Actions xác nhận **137 kiểm thử, 0 thất bại, 0 cảnh báo biên dịch**.
+Bốn hồi quy chuẩn từ phát hiện 06 giữ nguyên kỳ vọng và đều đạt.
+Mười một kiểm thử mới đều đạt; khóa tên chuẩn hoàn tất.
+
+`LegacyPrior` và bộ tham chiếu chuẩn test-only giữ nguyên.
+`PriorPatch` phân nhánh chỉ trên vị trí của giọt trước,
+vẫn gọi legacy thật khi vị trí dương. Không thay đổi các
+lớp vá 01–05, kho các giọt hay giới hạn chưa tích hợp lịch.
+
+- [Kiểm thử xanh của giai đoạn 13](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38212531371)
+- [Khóa tên chuẩn đạt](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38212531416)
+
+Trạng thái giai đoạn 13/55: `GREEN` đã được xác minh.
+Giai đoạn tiếp theo là 14/55, `DISCOVERY 07`,
+liên quan sai lệch chỉ số của bảng nghiền. Chưa khởi động.

@@ -61,3 +61,24 @@ back = 1, 3, 7 và 11 phép nghiền vẫn như giai đoạn 12.
 ## Commit
 
 Giai đoạn 13: vá truy cập giọt trước qua kho ẩn
+
+## Kết quả thực tế được xác minh
+
+- Commit triển khai: `441566e689b064334658af3b490158d89cae3cea`.
+- Elixir 1.18.5 / Erlang/OTP 27.
+- 137 kiểm thử, 0 thất bại, không cảnh báo biên dịch.
+- Bốn hồi quy chuẩn từ phát hiện 06 không đổi, đều đạt.
+- Mười một kiểm thử mới đạt; đối chiếu đủ 46 giọt và
+  các miền ẩn/hiện, số nguyên 2048 bit, song song, lỗi tham số.
+- Khóa tên chuẩn độc lập PASS.
+- LegacyPrior giữ nguyên blob SHA
+  `4c2b416bf089f8a538908fd4d310bcb6900c2419`.
+- Oracle test-only giữ nguyên blob SHA
+  `be1638f46b2190d617af0378a61b077bda10bf32`.
+- Không sửa main, không bắt đầu giai đoạn 14.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38212531371
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38212531416
+
+Trạng thái cuối giai đoạn 13: GREEN đã được xác minh.
+Tiếp theo giai đoạn 14, DISCOVERY 07, chưa bắt đầu.
