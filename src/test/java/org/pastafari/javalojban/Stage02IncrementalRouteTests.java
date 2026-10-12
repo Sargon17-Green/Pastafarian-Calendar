@@ -80,9 +80,18 @@ public final class Stage02IncrementalRouteTests {
             BigInteger.valueOf(8)) > 0, "E_NOT_NEAR_FIRST");
         ok(initial.upperRank().subtract(rank).compareTo(
             BigInteger.valueOf(8)) > 0, "E_NOT_NEAR_LAST");
+        BigInteger partition = BigInteger.ZERO;
+        for (int month = 1; month <= 4; month++) {
+            int[] branch = Arrays.copyOf(prefix, prefix.length + 1);
+            branch[branch.length - 1] = month;
+            partition = partition.add(family.countAfterPrefix(branch));
+        }
+        eq(initial.remainingChoices(), partition, "E_EXACT_PARENT_PARTITION");
         MonsterWeavingLinearCounter.RankRoute current = initial;
         BigInteger lastSkipped = BigInteger.ZERO;
-        for (int expectedProbes = 1; expectedProbes <= 3; expectedProbes++) {
+        for (int expectedProbes = 1; expectedProbes <= 2; expectedProbes++) {
+            int priorIndex = current.probedBranches();
+            BigInteger priorSkip = current.skippedChoices();
             MonsterWeavingLinearCounter.RankRoute next =
                 family.advanceGlobalRankRoute(current, 1, 1);
             eq(initial.stepsCompleted(), next.stepsCompleted(),
@@ -95,17 +104,17 @@ public final class Stage02IncrementalRouteTests {
                 "E_PARENT_INTERVAL_STABLE");
             eq(initial.upperRank(), next.upperRank(),
                 "E_PARENT_INTERVAL_UPPER");
-            eq(0, current.probedBranches() == 0 ? 0 : 0,
-                "E_IMMUTABLE_EARLIER_ROUTE");
+            eq(priorIndex, current.probedBranches(), "E_OLD_INDEX_UNCHANGED");
+            eq(priorSkip, current.skippedChoices(), "E_OLD_SUM_UNCHANGED");
             lastSkipped = next.skippedChoices();
             current = next;
         }
         MonsterWeavingLinearCounter.RankRoute selected =
-            family.advanceGlobalRankRoute(current, 1, 0);
+            family.advanceGlobalRankRoute(current, 1, 1);
         eq(5, selected.stepsCompleted(), "E_SELECTED_FIFTH_DAY");
         eq(0, selected.probedBranches(), "E_CLEAR_PROBES");
         eq(BigInteger.ZERO, selected.skippedChoices(), "E_CLEAR_SKIPS");
-        eq(0, selected.lastCountCalls(), "E_COMPLETED_WITH_REMAINDER");
+        eq(1, selected.lastCountCalls(), "E_FINAL_SPLIT_ONE_COUNT");
         array(chosenChild, selected.fixedPrefixCopy(), "E_CHOSEN_CHILD");
         eq(child.lowerRank(), selected.lowerRank(), "E_CHILD_LOWER");
         eq(child.upperRank(), selected.upperRank(), "E_CHILD_UPPER");
