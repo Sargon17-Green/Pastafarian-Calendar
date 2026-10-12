@@ -1,0 +1,39 @@
+STATO_ESECUZIONE=PASS_NATIVE_SCALA
+STADIO=29
+TIPO=PATCH_14
+RISULTATO_ATTESO=GREEN
+RISULTATO_REALE=55_PASS_0_FAIL
+PATCH_WRAPPER=Patch14VirtualGateWrapper.virtualGatePatch
+DISCOVERY_14_PRESERVED=YES
+LEGACY_INT_32_NARROWING_PRESERVED=YES
+PATCH_01_TO_13_PRESERVED=YES
+STAGE30_INTRODUCED=NO
+RANK_CONTRACT=ONE_BASED_BIGINT
+VIRTUAL_LIST_MATERIALIZED=NO
+MAX_BIGINT_VERIFIED_GT_16384_BITS=YES
+DETERMINISTIC_SMALL_VECTORS=4096
+DETERMINISTIC_LARGE_VECTORS=4096
+DETERMINISTIC_ULTRA_WIDE_VECTORS=2048
+DISCOVERY_INPUT_SNAPSHOT=PASS
+VALIDATOR_INDIPENDENTE=PASS
+ORACOLO_NORMATIVO=TEST_ONLY
+GITHUB_ACTIONS_RUN=38256237425
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38256237425
+GITHUB_ACTIONS_HEAD_SHA=92b2fcaad104fe7152d1461585d9f5c35291a60c
+GITHUB_ACTIONS_JOBS=30
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage29Tests'
+VERIFIED_ON=2026-10-12
+REGRESSIONE_STAGE01_TO_28=PASS_PREVIOUS_SIGNATURES
+REGRESSIONE_STAGE28=41_PASS_3_FAIL_INTENTIONAL
+REGRESSIONE_STAGE29=55_PASS_0_FAIL
+
+La PATCH 14 percorre veramente la cicatrice a rango Int 32 bit,
+poi applica la formula esatta first+(rank1-1)*stride in BigInt.
+L'output storico non viene modificato, e il validator ricalcola
+separatamente sia la cicatrice che l'equazione corretta.
+Una fotografia immutabile dei quattro valori della DISCOVERY 14
+rileva modifiche ai parametri, anche quando il rango uno maschera
+numericamente una modifica del passo.
+La famiglia resta una progressione sintetica virtuale, non la
+costruzione dei cancelli del calendario canonico.

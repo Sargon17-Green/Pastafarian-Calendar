@@ -1146,3 +1146,15 @@ vettori interni riproducibili, ranghi/indici signed di oltre
 16384 bit, falsificazioni di stato e regressione delle 13 patch
 precedenti. Stage28 rimane RED storico esattamente 41/3.
 Nessuna produzione dei cancelli reali o Stage30 è anticipata.
+
+### Certificazione nativa dello Stadio 29
+
+La [run 38256237425](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38256237425),
+commit `92b2fcaad104fe7152d1461585d9f5c35291a60c`,
+è terminata con **SUCCESS in tutti i 30 job**:
+Stage29 **55 PASS / 0 FAIL** e Stage28
+**41 PASS / 3 FAIL intenzionali**. Un caso di mutazione
+silenziosa del passo a rango 1 è stato individuato dai test:
+la DISCOVERY conserva ora una fotografia dei quattro input e
+la PATCH con il validator la verifica prima della pubblicazione.
+Le suite Stage01–Stage27 mantengono le firme precedenti.

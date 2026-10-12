@@ -1389,3 +1389,13 @@ traccia, metriche e validator indipendente impediscono di
 cancellare il risultato storico. Stage28 resta un expected-red
 intenzionale; l'insieme è sintetico e non sostituisce il
 motore canonico dei cancelli.
+
+### Verifica nativa dello Stage29
+
+La run GitHub Actions 38256237425 ha terminato SUCCESS per tutti
+i 30 job sul commit 92b2fcaad104fe7152d1461585d9f5c35291a60c.
+La PATCH14 produce 55 PASS e 0 FAIL, con i tre FAIL storici
+intenzionali della DISCOVERY14 invariati. L'audit ha rivelato
+un bug nel validator quando rank=1 e il passo veniva falsificato:
+ora un'istantanea dei quattro input viene conservata nella discovery
+ed esaminata dalla patch. Nessun Stage30 introdotto.

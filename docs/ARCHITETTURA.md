@@ -498,3 +498,11 @@ medesimo report. Il validator ricalcola il narrowing legacy
 via modulo 2^32 e controlla l'equazione corretta senza
 richiamare il wrapper. I test dell'oracolo sono isolati in
 `src/test`. Nessuna lista reale di cancelli viene creata.
+
+Il test di falsificazione ha mostrato che la verifica della sola
+equazione `selected-first = step*(rank-1)` non garantisce
+l'immutabilità degli input a rango uno, perché il lato destro
+rimane zero per ogni passo. La DISCOVERY14 conserva quindi
+una fotografia separata `(first, step, count, rank)` e
+PATCH14 con validator la confrontano con gli input correnti.
+La run 38256237425 (30/30 job) verifica anche questo caso.
