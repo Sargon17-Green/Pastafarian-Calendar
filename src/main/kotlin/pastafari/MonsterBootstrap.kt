@@ -155,7 +155,17 @@ data class BaseMonsterContext(
     var discovery11CachedSum: ExactInt? = null,
     var discovery11CacheComputations: Int = 0,
     var discovery11PermutationPatchCalls: Int = 0,
-    var discovery11InvocationCount: Int = 0
+    var discovery11InvocationCount: Int = 0,
+    var patch11InitialBowls: List<ExactInt>? = null,
+    var patch11Steps: List<FreshStirStep>? = null,
+    var patch11LegacyRun: LegacyCachedStirRun? = null,
+    var patch11FinalBowls: List<ExactInt>? = null,
+    var patch11LegacyCacheComputations: Int = 0,
+    var patch11FreshSumComputations: Int = 0,
+    var patch11LegacyPermutationCalls: Int = 0,
+    var patch11CorrectedPermutationCalls: Int = 0,
+    var patch11Applied: Boolean = false,
+    var patch11InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -232,7 +242,9 @@ class MonsterBootstrapManager(
     val bowlSnapshotPatchWrapper: BowlSnapshotPatchWrapper =
         BowlSnapshotPatchWrapper(legacyInPlaceBowlAdapter),
     val legacyCachedStirAdapter: LegacyCachedStirAdapter =
-        LegacyCachedStirAdapter(permutationPatchWrapper)
+        LegacyCachedStirAdapter(permutationPatchWrapper),
+    val freshStirPatchWrapper: FreshStirPatchWrapper =
+        FreshStirPatchWrapper(legacyCachedStirAdapter, permutationPatchWrapper)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -406,6 +418,44 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("PATCH_11") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_PATCH11_CONTEXT_NOT_READY")
+            val initial = context.patch11InitialBowls
+                ?: throw MonsterValidationException("E_PATCH11_NO_INITIAL")
+            val run = freshStirPatchWrapper.patch(initial)
+            check(run.steps.size == 12 && run.finalBowls.size == 7 &&
+                run.legacyRun.steps.size == 12 && run.legacyRuns == 1 &&
+                run.legacyCacheComputations == 1 &&
+                run.correctedSumComputations == 12 &&
+                run.legacyPermutationCalls == 12 &&
+                run.correctedPermutationCalls == 12 &&
+                run.steps.map { it.stir } == (1..12).toList() &&
+                run.steps.all { it.permutationPatchCalls == 1 &&
+                    it.correctedPermutationOrder.sorted() ==
+                        listOf(1,2,3,4,5,6) } &&
+                run.legacyRun.steps.all {
+                    it.savedSumUsed == run.legacyRun.originalCachedSum }) {
+                "E_PATCH11_RUN_SHAPE"
+            }
+            // Cadw pob maes dim ond ar ôl llwyddo'n llwyr.
+            context.patch11Steps = run.steps.toList()
+            context.patch11LegacyRun = run.legacyRun
+            context.patch11FinalBowls = run.finalBowls.toList()
+            context.patch11LegacyCacheComputations = run.legacyCacheComputations
+            context.patch11FreshSumComputations = run.correctedSumComputations
+            context.patch11LegacyPermutationCalls = run.legacyPermutationCalls
+            context.patch11CorrectedPermutationCalls = run.correctedPermutationCalls
+            context.patch11Applied = true
+            context.patch11InvocationCount = 1
+            context.branchTrace.add("PATCH_11")
+            context.diagnostics.add("PATCH_11_FRESH_SUM_EACH_STIR")
+            context.status = "PATCHED_FRESH_STIR_SUM"
+            metrics.bump("patch11.legacy.cached.stir.runs")
+            metrics.bump("patch11.corrected.fresh.stir.runs")
+            metrics.bump("patch11.applied")
         }
         dispatcher.register("DISCOVERY_11") { context ->
             validation.requireBootstrapContext(context)
@@ -991,6 +1041,24 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 23: 12 saved sums cywir a graith cache Cam 22 yn fyw. */
+    fun applyFreshStirPatch(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        initialAfterDrops: List<ExactInt>
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay,targetDay)
+        context.patch11InitialBowls = initialAfterDrops.toList()
+        context.phase = "PATCH_11"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH11_WRAP",e)
         }
     }
 

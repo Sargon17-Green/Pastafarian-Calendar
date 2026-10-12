@@ -605,3 +605,22 @@ yw'r nesaf, heb ei ddechrau. Rhaid cadw'r
 `LegacyCachedStirAdapter.oldCachedPostStir12` byw ac
 anghywir ar gyfer y patch nesaf. Dim adeiladwr diferion
 gweledig cynhyrchu yma.
+
+
+## Cam 23 — PATCH 11: savedBowlSum newydd ym mhob stir
+
+Mae `FreshStirPatchWrapper.patch` yn galw'r hen
+`oldCachedPostStir12` ar glôn ac yn cadw'r graith
+cache stir 1 yn llawn. Ar ôl hynny, mae'n ailgyfrifo
+`save(sum(old[1..6]) + 149*s)` ar bob stir 1..12,
+yn defnyddio PATCH 08 ar gyfer y permutation, ac yn
+ysgrifennu chwe bowls newydd o'r un hen snapshot.
+
+Mae'r profion yn mynnu 720 GREEN cywir a 720 RED
+etifeddol, 8,640 stir unigol wedi'u gwirio gyda'r
+oracl gwreiddiol, 4,320 prawf BigInteger gyda 51,840
+stir, a phob atchweliad Camau 1–22. Ni ddefnyddir
+oracl prawf yng nghynhyrchu. Nid oes adeiladwr
+diferion gweledig cynhyrchu o hyd.
+
+`LAST_COMPLETED_STAGE=22` nes cwblhau CI brodorol.
