@@ -61,7 +61,6 @@ for my $n (0,1,2,3) {
     like($@,qr/暫存容量限制|暫存檔超過容量限制/,
           '超限時原因可識別');
 }
-done_testing;
 
 # 將新建的階段暫存檔限定到一個可枚舉的私人目錄：
 # 每次階段轉換應立刻清除舊矩陣，成功或例外都不能
@@ -86,3 +85,4 @@ my $scratch=tempdir(CLEANUP=>1);
     closedir $dh2;
     is(scalar(@left),0,'容量失敗後部分寫入的階段檔也立即刪除');
 }
+done_testing;
