@@ -37,7 +37,14 @@ di sản và đối chiếu oracle test-only.
 
 ## Đóng giai đoạn
 
-Đợi GitHub Actions với Elixir 1.18.5 / OTP 27,
-393 kiểm thử (374+19), 0 lỗi, 0 cảnh báo và
-Canonical Names Lock PASS trước khi nâng LAST_COMPLETED_STAGE.
+GitHub Actions tại commit fa8a18f0253192939732d5fe8aae84bdfd8e51ee
+đã xác minh Elixir 1.18.5 / OTP 27: biên dịch 46 tệp,
+393 kiểm thử, 0 thất bại, không cảnh báo biên dịch Elixir.
+Canonical Names Lock PASS độc lập.
+Lưu ý cảnh báo Node.js 20 từ actions/checkout@v4 thuộc nền tảng CI,
+không phải mã Elixir.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286727802
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286727805
+Đóng Stage29 GREEN; Stage30 DISCOVERY 15 chưa bắt đầu.
 Không sửa main. Không commit HANDOFF_*. Không tích hợp lịch.

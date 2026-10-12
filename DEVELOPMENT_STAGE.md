@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=29
 CURRENT_KIND=PATCH
 CURRENT_PATCH=14
-LAST_COMPLETED_STAGE=28
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=29
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..13 và ShortRejectionPatch đúng với n<=M; thêm LegacySingleDigitWidePick đọc answer_at(stream,0) duy nhất và gọi LegacyBiasedPick ngay cho n>M; AnswerStreamManager.choose_rank phân nhánh đúng short hoặc wide legacy, chưa có wideDetour nhiều chữ số.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..13 và ShortRejectionPatch cho n<=M; giữ LegacySingleDigitWidePick sai nguyên vẹn, thêm WideDetourPatch ghép k chữ số little-endian trên cùng answer ring, tính detour +/-1 tương đương bằng số nguyên chính xác cho n>M; production chọn patch 14.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_29_PATCH_IMPLEMENTATION_COMMIT
+GIT_HISTORY_MUTATED=STAGE_29_PATCH_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_YET_VERIFIED
-CI_FAILURES=NOT_YET_VERIFIED
+CI_TESTS=393
+CI_FAILURES=0
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -706,3 +706,12 @@ Giai đoạn 29 triển khai WideDetourPatch và định tuyến chọn N>M qua 
 Giữ LegacySingleDigitWidePick và chuẩn oracle test-only không đổi.
 Bốn hồi quy chuẩn Stage28 giữ expected gốc. 19 kiểm thử Stage29 mới.
 Chưa chốt LAST_COMPLETED_STAGE=29 trước khi CI + khóa tên cùng PASS.
+
+Giai đoạn 29: PATCH 14 đã qua CI Elixir 1.18.5 / OTP 27 tại commit fa8a18f0253192939732d5fe8aae84bdfd8e51ee.
+393 kiểm thử, 0 lỗi, không cảnh báo từ trình biên dịch Elixir; Canonical Names Lock PASS.
+19 bài Stage29 mới và bốn hồi quy normative Stage28 đều đạt.
+Ngưỡng short N<=M vẫn chạy ShortRejectionPatch và các lớp legacy giữ nguyên.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286727802
+Tên chuẩn: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286727805
+Lưu ý: checkout@v4 phát cảnh báo nền tảng Node.js 20, không phải cảnh báo biên dịch Elixir.
+Đóng Stage29 GREEN; bước tiếp theo Stage30/55 DISCOVERY 15 chưa bắt đầu.
