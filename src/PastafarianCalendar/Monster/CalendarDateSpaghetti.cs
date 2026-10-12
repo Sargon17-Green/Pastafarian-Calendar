@@ -181,6 +181,12 @@ public static class CalendarDateSpaghetti
         BigInteger calculationDay,BigInteger targetDay)
         => new MonsterManager().EvaluateLatchedSauce(calculationDay,targetDay);
 
+    // الندبة التاريخية الثانية عشرة: اختيار الوعاء التالي بهويته الثابتة بدلاً من ترتيب القطرة.
+    public static int EvaluateLegacyFixedNextBowl(
+        BigInteger calculationDay, BigInteger targetDay, int queriedBowlId)
+        => new MonsterManager().EvaluateLegacyFixedNextBowl(
+            calculationDay,targetDay,queriedBowlId);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

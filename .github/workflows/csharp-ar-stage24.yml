@@ -1,0 +1,40 @@
+name: C# العربية الفصحى — Discovery 12
+
+on:
+  push:
+    branches:
+      - C#+العربية-الفصحى
+  workflow_dispatch:
+
+jobs:
+  discovery_12:
+    name: اكتشاف اختيار الوعاء التالي واختبارات الرجوع
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: بناء مشروع الاكتشاف
+        run: dotnet build tests/PastafarianCalendar.Stage24Tests/PastafarianCalendar.Stage24Tests.csproj -c Release
+      - name: اختبار الأحمر المتوقع ومدقق التوقيع
+        run: |
+          if dotnet run --project tests/PastafarianCalendar.Stage24Tests/PastafarianCalendar.Stage24Tests.csproj -c Release; then
+            echo "ERROR: direct discovery must remain red"
+            exit 1
+          fi
+          dotnet run --project tests/PastafarianCalendar.Stage24Tests/PastafarianCalendar.Stage24Tests.csproj -c Release -- --verify-expected-red
+      - name: الانحدار الكامل للأطوار السابقة
+        shell: bash
+        run: |
+          for n in $(seq -w 1 23); do
+            project="tests/PastafarianCalendar.Stage${n}Tests/PastafarianCalendar.Stage${n}Tests.csproj"
+            if ((10#$n % 2 == 0)); then
+              dotnet run --project "$project" -c Release -- --verify-expected-red
+            else
+              dotnet run --project "$project" -c Release
+            fi
+          done
+      - name: قفل الأسماء
+        run: |
+          sha256sum -c CANONICAL_NAMES_LOCK.sha256

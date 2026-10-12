@@ -111,6 +111,10 @@ public sealed class MonsterContext
     public BigInteger[]? PatchedSauceFinalBowls { get; set; }
     public int[][]? PatchedPostStirOrders { get; set; }
 
+    // شاهد السؤال التاريخي الثاني عشر؛ لا يُلغي ترتيب القطرة 46 المحمي.
+    public int? LegacyQueriedBowlId { get; set; }
+    public int? LegacyFixedNextBowlResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
