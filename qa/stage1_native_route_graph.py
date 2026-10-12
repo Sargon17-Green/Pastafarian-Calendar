@@ -485,8 +485,8 @@ def selftest():
         # Ordinary opcodes cannot rotate the IP even if the next
         # executed cell lies on the correct straight-line ray.
         forged_velocity=[line.replace(
-            "STEP\\t510\\t1\\t601\\t100\\t1\\t0\\t32\\t0",
-            "STEP\\t510\\t1\\t601\\t100\\t0\\t1\\t32\\t0")
+            "STEP\t510\t1\t601\t100\t1\t0\t32\t0",
+            "STEP\t510\t1\t601\t100\t0\t1\t32\t0")
             for line in trace_lines]
         require(forged_velocity!=trace_lines,
                 "synthetic velocity forgery did not alter the trace")
