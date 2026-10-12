@@ -391,20 +391,35 @@ object Stage21Tests {
         "La PATCH attraversa la vera cicatrice")
       truth(source.contains("val captured = Patch07PermutationWrapper.permutationPatch(finalRank)"),
         "Il latch normativo usa la vera goccia 46")
-      truth(!source.contains("biasedLegacyPick"),"Stage22 anticipato")
+      val metadata=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=metadata.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<22)
+        truth(!source.contains("biasedLegacyPick"),"Stage22 anticipato")
+      else
+        truth(source.contains("LegacyBiasedPickAdapter.biasedLegacyPick("),
+          "La discovery di selezione corta è disponibile")
     }
     check("metadati Stage21 GREEN preservano Stage20 RED") {
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=21"),"Stage corrente")
-      truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=10"),"Patch")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=21,"Stage 21 disponibile")
+      if(current==21) {
+        truth(st.contains("CURRENT_KIND=PATCH"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=10"),"Patch")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      } else {
+        truth(st.contains("STAGE_21_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_40_PASS_0_FAIL"),
+          "La certificazione Stage21 deve essere conservata")
+      }
       truth(st.contains("STAGE_20_NATIVE_VERIFICATION=PASS_EXPECTED_RED_26_PASS_3_FAIL"),
         "Certificazione Stage20")
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed>=20&&completed<=21,"Certificazione cronologica")
+      truth(completed>=20&&completed<=current,"Certificazione cronologica")
     }
     println("\nRISULTATO STADIO 21: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)

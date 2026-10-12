@@ -366,3 +366,20 @@ richiede la stessa invocazione
 `BOOT/DISCOVERY_10/PATCH_10` e non dipende
 dall'oracolo di test. Il report espone entrambi
 i successori per agevolare la prova differenziale.
+
+## DISCOVERY 11 — selezione corta con residuo non uniformemente distribuito
+
+Il flusso ha valori in `[1,M]` e una direzione
+di incremento o decremento circolare. Per una
+famiglia corta di cardinalità `N <= M`,
+l'algoritmo canonico rifiuta ogni campione
+maggiore di `floor(M/N)*N` prima di calcolare
+il rango con riduzione modulo `N`.
+
+`LegacyBiasedPickAdapter.biasedLegacyPick` riproduce
+invece la scorciatoia storica: usa il primo valore
+anche fuori dal dominio di accettazione, causando
+una scelta di rango distorta quando `M` non è
+multiplo di `N`. Il report espone campione,
+limite e rango; la discovery non anticipa la
+futura PATCH 11. L'oracolo resta test-only.

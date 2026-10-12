@@ -71,7 +71,13 @@ final case class BaseMonsterContext(
   var legacyNextBowlOutput: Option[Int] = None,
   var patchedLatchedOrder46: Option[Vector[Int]] = None,
   var patchedNextBowlOutput: Option[Int] = None,
-  var patch10Applied: Boolean = false
+  var patch10Applied: Boolean = false,
+  var selectionSampleInput: Option[BigInt] = None,
+  var selectionDirectionInput: Option[Int] = None,
+  var selectionFamilySizeInput: Option[BigInt] = None,
+  var legacyBiasedSampleOutput: Option[BigInt] = None,
+  var legacyBiasedRankOutput: Option[BigInt] = None,
+  var legacyAcceptanceLimitOutput: Option[BigInt] = None
 )
 
 final class BaseMetricsShell {
@@ -94,6 +100,41 @@ final class BaseValidationManager {
     }
   }
 
+
+  def requireDiscovery11Ready(ctx: BaseMonsterContext): Unit = {
+    if (ctx.phase != "DISCOVERY_11_BIASED_SHORT_PICK" ||
+        ctx.status != "LEGACY_BIASED_PICK_READY" ||
+        ctx.branchTrace.toVector != Vector("BOOT","DISCOVERY_11_BIASED_SHORT_PICK") ||
+        ctx.selectionSampleInput.isEmpty ||
+        ctx.selectionDirectionInput.isEmpty ||
+        ctx.selectionFamilySizeInput.isEmpty ||
+        ctx.legacyBiasedSampleOutput.isEmpty ||
+        ctx.legacyBiasedRankOutput.isEmpty ||
+        ctx.legacyAcceptanceLimitOutput.isEmpty) {
+      throw new IllegalStateException("La selezione corta storica non è pronta.")
+    }
+    val m=(BigInt(1)<<127)-1
+    val sample=ctx.selectionSampleInput.get
+    val direction=ctx.selectionDirectionInput.get
+    val n=ctx.selectionFamilySizeInput.get
+    val rank=ctx.legacyBiasedRankOutput.get
+    val limit=ctx.legacyAcceptanceLimitOutput.get
+    if (sample<1 || sample>m || n<1 || n>m ||
+        (direction!=1 && direction != -1) ||
+        ctx.legacyBiasedSampleOutput.get!=sample ||
+        rank<1 || rank>n ||
+        limit!=(m/n)*n ||
+        rank!=((sample-1)%n)+1) {
+      throw new IllegalStateException(
+        "Dati della selezione corta storica falsificati.")
+    }
+    val actual=LegacyBiasedPickAdapter.biasedLegacyPick(sample,direction,n)
+    if (actual.firstSample!=ctx.legacyBiasedSampleOutput.get ||
+        actual.legacyRank!=rank ||
+        actual.acceptanceLimit!=limit) {
+      throw new IllegalStateException("Il legacy non è stato attraversato.")
+    }
+  }
 
   def requirePatch10Ready(ctx: BaseMonsterContext): Unit = {
     if (ctx.phase != "PATCH_10_ORDER46_FREEZE" ||
@@ -687,7 +728,8 @@ final class BaseMonsterManager {
     new Discovery09VaultHandler(metrics),
     new Patch09VaultHandler(metrics),
     new Discovery10Order46LatchHandler(metrics),
-    new Patch10Order46Handler(metrics)
+    new Patch10Order46Handler(metrics),
+    new Discovery11BiasedPickHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -1196,6 +1238,30 @@ final class BaseMonsterManager {
       )
     } catch {
       case e: Throwable => throw BaseErrorWrapper.wrap("patch10",e)
+    }
+  }
+
+  def discover11BiasedPick(
+    calculationDay: BigInt, targetDay: BigInt,
+    firstSample: BigInt, directionStep: Int, familySize: BigInt
+  ): Discovery11BiasedPickReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.selectionSampleInput=Some(firstSample)
+    ctx.selectionDirectionInput=Some(directionStep)
+    ctx.selectionFamilySizeInput=Some(familySize)
+    ctx.phase="DISCOVERY_11_BIASED_SHORT_PICK"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery11Ready(ctx)
+      Discovery11BiasedPickReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.selectionSampleInput.get,ctx.selectionDirectionInput.get,
+        ctx.selectionFamilySizeInput.get,ctx.legacyBiasedSampleOutput.get,
+        ctx.legacyBiasedRankOutput.get,ctx.legacyAcceptanceLimitOutput.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector
+      )
+    } catch {
+      case e: Throwable => throw BaseErrorWrapper.wrap("discovery11",e)
     }
   }
 

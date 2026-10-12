@@ -1095,3 +1095,40 @@ latch della goccia 45 resta eseguito e
 diagnosticato. Lo Stage20 continua ad avere
 esattamente tre confronti rossi intenzionali
 e tutte le firme precedenti sono invariate.
+
+## Stadio 22 — DISCOVERY 11: un resto preso troppo presto
+
+### Che cosa si pensava
+
+Bastava ricondurre la prima risposta del flusso
+fra 1 e N. Per quasi tutti i campioni piccoli
+questo sembra equivalente alla regola normativa.
+
+### Che cosa si è scoperto
+
+L'intervallo dei valori possibili ha lunghezza
+M. Se N non divide M, il calcolo del semplice
+resto privilegia alcuni ranghi. La normativa
+esige di rifiutare il tratto finale oltre
+`floor(M/N)*N` e proseguire nel flusso.
+
+### Che cosa è stato aggirato
+
+Nulla nella discovery: l'adapter legacy
+preserva il calcolo distorto, insieme al
+campione e alla soglia di accettazione.
+
+### Perché non è normativamente equivalente
+
+Tre casi di frontiera rendono osservabile
+la divergenza: ultimo campione con direzione
+positiva, ultimo campione con direzione
+negativa e penultimo campione con direzione
+negativa. In tutti e tre cambia il rango.
+
+### Strato di mostruosità aggiunto
+
+Helper, handler, report, registrazioni
+nel contesto, metrica, validator autonomo
+e test dedicati. Le dieci patch esistenti
+rimangono intatte; PATCH 11 non anticipata.

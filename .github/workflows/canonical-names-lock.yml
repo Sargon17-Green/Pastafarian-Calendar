@@ -507,3 +507,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 21: 40 PASS, 0 FAIL' stage21.log
           test "$(grep -Fc 'PASS — ' stage21.log)" -eq 40
           test "$(grep -Fc 'FAIL — ' stage21.log)" -eq 0
+
+  native-stage22-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 22 intentional RED biased short-family rank
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage22Tests' > stage22.log 2>&1
+          rc=$?
+          set -e
+          cat stage22.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 22: 34 PASS, 3 FAIL' stage22.log
+          test "$(grep -Fc 'PASS — ' stage22.log)" -eq 34
+          test "$(grep -Fc 'FAIL — ' stage22.log)" -eq 3
+          for label in 'positiva' 'negativa' 'soglia'; do
+            grep -Fq "FAIL — equivalenza normativa scelta ${label} — Campione respinto ignorato: ${label}" stage22.log
+          done

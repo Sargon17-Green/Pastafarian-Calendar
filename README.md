@@ -850,3 +850,31 @@ mantiene la firma storica **26 PASS / 3 FAIL
 intenzionali**, mentre Stage01–Stage19 preservano
 tutte le firme precedenti. L'oracolo resta
 test-only; non è stato introdotto lo Stage22.
+
+## Stadio 22 — DISCOVERY 11: il rango distorto nella scelta corta
+
+Il metodo normativo `chooseRankShort` accetta un campione
+`X` soltanto se `X <= floor(M/N)*N`, poi seleziona il
+rango `((X-1) mod N)+1`; se il limite viene superato,
+continua nel flusso in direzione `+1` o `-1` fino
+alla prima risposta valida. La cicatrice
+`LegacyBiasedPickAdapter.biasedLegacyPick`
+salta l'accettazione e usa immediatamente
+il primo campione, anche quando è invalido.
+
+`BaseMonsterManager.discover11BiasedPick` attraversa realmente
+`BOOT → DISCOVERY_11_BIASED_SHORT_PICK`, pubblicando
+il primo campione, il rango legacy e il limite di accettazione.
+Il validator controlla l'origine delle informazioni e lo stato
+della stessa invocazione. Non vi è correzione anticipata
+nel codice di produzione.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage22Tests'
+```
+
+Firma storica attesa: **34 PASS, 3 FAIL intenzionali**,
+per campione respinto con direzione positiva, negativa e
+caso di soglia. La suite verifica 720 cardinalità,
+2.048 campioni signed deterministici, BigInt oltre
+16.384 bit e la preservazione delle dieci patch precedenti.
