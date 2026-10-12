@@ -812,3 +812,22 @@ Pou regresyon wouj entansyonèl:
 `lua5.3 test/stage24_regression_tests.lua .`
 CI Stage 24 dwe pase tout etap pozitif, epi se sèlman dènye
 step discovery sa a ki dwe echwe. **Pa ajoute PATCH 12 nan Stage 24.**
+
+### Fèmti Stage 24 — EXPECTED_RED natif otantifye
+
+GitHub Actions run `38292918409`: **20 travay PASS**, epi
+`lua_stage24_discovery` echwe fè espre **sèlman** nan dènye
+etap regresyon normatif la. Suite pozitif Stage 1–24 pase
+anvan echèk sa a. Odit separe a verifye egzakteman:
+`EXPECTED_RED Stage 24 DISCOVERY 12: vwazen pa non fiks inyore lòd gout 46`.
+
+Egzamen endepandan kouvri 720 lòd × 6 id = 4,320 kesyon:
+3,456 vwazen mal, 864 matche aksidantèlman, sèlman sis
+permutation ki matche pou tout bòl. Tès 46 gout ak BigInt
+gwo/negatif, 9 echèk + 9 rekiperasyon, 3 nested chains
+ki genyen 46 gout, ak entegrasyon 46 gout vizib natif,
+tout pase. PATCH 11 rete intact, lòd gout 46 konsève,
+legacy chwazi 2 pandan oracle la chwazi 6 pou rank 720/id 1.
+`LAST_COMPLETED_STAGE=24` epi
+`EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
+**Pa kòmanse Stage 25; pa gen PATCH 12 ni douz brase final yo.**

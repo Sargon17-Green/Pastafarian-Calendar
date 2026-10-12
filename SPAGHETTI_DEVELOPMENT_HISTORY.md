@@ -619,4 +619,16 @@ ak twazyèm commit `LEGACY_FIXED_NAME_NEIGHBOR`.
 Oracle pa antre nan pwodiksyon; ni PATCH 12 ni douz
 brase final yo pa kòmanse. Regresyon wouj la ap konpare
 id 2 (legacy) ak id 6 (oracle) pou rank 720, queried id 1.
-Rezilta native CI rete PENDING nan etap sa a.
+Rezilta CI natif te verifye sou run 38292918409.
+
+### Fèmti DISCOVERY 12 — Stage 24
+
+Run `38292918409`: 20/20 travay endepandan PASS. Job
+`lua_stage24_discovery` pase suite konplè Stage 1–24,
+apre sa li echwe egzakteman sou regresyon normatif ki
+rezève pou DISCOVERY 12. Prèv: 720 lòd, 4,320 vwazen,
+3,456 diferans, 864 matche, 46 gout vre, BigInt >256 bit,
+9 defayans/9 rekiperasyon, ak 3 nested chains.
+Fichye Stage 23 yo rete ak lojik orijinal yo; sa pa fè
+PATCH 12 oswa brase final yo antre.
+`LAST_COMPLETED_STAGE=24`, `EXPECTED_RED_VERIFIED`.
