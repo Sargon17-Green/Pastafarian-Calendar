@@ -189,13 +189,13 @@ public final class Stage02IncrementalRouteTests {
 
     private static void siblingSharedWeightNormativeOracleDifferential() {
         for (int[] lengths : new int[][] {
-                {2, 2, 2, 2, 2}, {2, 3, 2, 2, 2}
+                {3, 3, 3, 2}, {3, 4, 3, 2}
         }) {
             MonsterWeavingLinearCounter family =
                 new MonsterWeavingLinearCounter(lengths);
             NormativeOracle.WeavingFamily oracle =
                 new NormativeOracle.WeavingFamily(lengths);
-            int[] prefix = {1, 2, 3, 4};
+            int[] prefix = {1, 2, 3};
             BigInteger[] actual = family.countSiblingBranchSizes(prefix);
             ok(family.siblingPrefixSharedWeightHitCount() >= 2,
                 "E_SHARED_WEIGHT_USED_FOR_SIBLINGS");
