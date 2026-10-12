@@ -475,3 +475,28 @@ Mã legacy còn nguyên biểu thức tra hàng
 `Enum.at(@real_rows, number, @missing_row)`.
 Sentinel thật vẫn ở index 0, 11 hàng nghiền ở 1..11.
 Giai đoạn 15 khép GREEN, chưa bắt đầu DISCOVERY 08.
+
+## Giai đoạn 16 — Phát hiện 08: hạng hoán vị bị lệch một
+
+**Hàm lịch sử:** `LegacyPermutationUnrank0.old_permutation_unrank0`
+dùng hạng từ 0, lấy chữ số giai thừa trong sáu ID bát,
+và quay vòng theo 720 hoán vị. Với rank0 = 0, thứ tự là
+[1,2,3,4,5,6]; rank0 = 719 tạo thứ tự đảo ngược.
+
+**Sai lầm của lần phát hiện:** `BowlOrderManager` xác định
+hạng chuẩn một-based bằng `rem(drop-1,720)+1` nhưng
+đưa thẳng giá trị ấy cho hàm gốc không. Đối với hạng 720,
+hàm cũ quay vòng thành 0, do đó vẫn trả một hoán vị
+hợp lệ nhưng không phải hoán vị chuẩn của hạng 720.
+Tất cả 46 thứ tự được tạo trên đường sản xuất thật.
+
+**Ranh giới:** Không sửa thành `one_based-1` trước
+giai đoạn 17. Không thay hàm gốc không để nhận hạng một,
+không gọi oracle từ production, không tích hợp các phép
+rót bát hoặc lỗi tiếp theo của lịch sử.
+
+**Bằng chứng:** 16 kiểm thử mới kiểm tra đủ 720 hạng của
+hàm gốc không, chu kỳ ở 720, công thức gán hạng sai,
+cả 46 thứ tự, số nguyên rất lớn, đồng thời, mã nguồn
+và bốn hồi quy chuẩn cố ý đỏ. Những kiểm thử giai đoạn
+1-15 phải tiếp tục xanh.

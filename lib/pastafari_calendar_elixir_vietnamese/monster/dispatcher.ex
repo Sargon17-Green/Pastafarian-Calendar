@@ -3,12 +3,13 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   Bộ phân phối sản xuất duy trì các nhánh SAVE và nhãn ngày đã được vá.
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
-  Bảy giọt ẩn được đọc đúng qua bản vá 05; giọt nhìn thấy
-  dùng bản vá 06 để tìm các ô trước ở kho ẩn hoặc kho nhìn thấy.
-  Chưa tích hợp ngày lịch.
+  Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
+  Giai đoạn 16 thêm hoán vị bát qua cách đọc hạng 1..720
+  sai vào bộ mở hạng gốc không. Chưa tích hợp ngày lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
+    BowlOrderManager,
     Context,
     DayCountManager,
     DistanceManager,
@@ -49,6 +50,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
         hidden_storage
       )
 
+    bowl_orders = BowlOrderManager.build_orders(visible_drops)
+
     %Context{
       calculation_day: calculation_day,
       target_day: target_day,
@@ -58,6 +61,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
       stones_table: stones_table,
       hidden_drops_storage: hidden_storage,
       visible_drops: visible_drops,
+      bowl_orders: bowl_orders,
       phase: :bootstrap,
       status: :validated,
       branch_trace: [:entry, :validated, :legacy_day_count, :day_tag_patch_02],
@@ -94,5 +98,14 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def visible_drop(calculation_day, target_day, index) do
     visible_drops(calculation_day, target_day)
     |> VisibleDropManager.read(index)
+  end
+
+  def bowl_orders(calculation_day, target_day) do
+    bootstrap(calculation_day, target_day).bowl_orders
+  end
+
+  def bowl_order(calculation_day, target_day, index) do
+    bowl_orders(calculation_day, target_day)
+    |> BowlOrderManager.read_order(index)
   end
 end

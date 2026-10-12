@@ -511,3 +511,34 @@ Sentinel vẫn nằm nguyên trong bảng tại index 0 và
 Giai đoạn 15/55 khép `GREEN`. Giai đoạn 16/55 tiếp theo
 là `DISCOVERY 08` về xếp hạng hoán vị gốc không.
 Chưa triển khai nhánh phát hiện tiếp theo.
+
+## Giai đoạn 16 — Phát hiện 08: nhầm hạng hoán vị từ một với gốc không
+
+Dãy thứ tự sáu bát được chọn từ từng giọt nhìn thấy trong 46 giọt.
+Bộ mở hạng lịch sử `LegacyPermutationUnrank0.old_permutation_unrank0(rank0)`
+mở hoán vị bằng hệ giai thừa, với hạng bắt đầu từ **0**.
+Dạng đại diện chạy vòng cho các bội của 720 để không có lỗi ngoài
+miền, nhưng cách đánh số của thuật toán lịch sử vẫn gốc không.
+
+Lần phát hiện 08 đặt `one_based=rem(drop-1,720)+1`
+rồi **truyền trực tiếp `one_based`** vào hàm lịch sử thay vì
+`one_based-1`. Do đó hạng 1 nhận thứ tự thứ hai, hạng
+719 nhận thứ tự cuối, còn 720 quay về thứ tự đầu tiên.
+Mọi hoán vị vẫn chứa đủ sáu ID 1..6 nhưng lệch chuẩn một hạng.
+
+`BowlOrderManager.build_orders` tạo 46 thứ tự từ
+`visible_drops` đã chính xác, và `Dispatcher.bootstrap`
+giữ kết quả trong `Context.bowl_orders`. Giai đoạn này
+chưa rót vào bát hoặc cập nhật trạng thái sáu bát.
+Bốn hồi quy chuẩn mới phải đỏ ở hạng 1, 720, giọt đầu
+và giọt cuối. Các bước SAVE, hidden, stone, grind và
+46 giọt vẫn đúng; không đổi oracle hoặc các kiểm thử cũ.
+
+Ở giai đoạn 17, PATCH 08 phải giữ hàm lịch sử và chuyển
+theo chuỗi chuẩn:
+```text
+oneBased = regularMod(drop-1,720)+1
+legacyRank0 = oneBased-1
+order = oldPermutationUnrank0(legacyRank0)
+```
+Không dùng chuỗi vá này trong lần phát hiện hiện tại.
