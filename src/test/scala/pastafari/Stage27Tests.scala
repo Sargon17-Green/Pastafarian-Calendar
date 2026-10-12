@@ -373,7 +373,11 @@ object Stage27Tests {
       else
         truth(st.contains("STAGE_27_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_39_PASS_0_FAIL"),
           "Certificazione PATCH 13 storica")
-      truth(st.contains("CURRENT_PATCH=13"),"Patch13")
+      if(current==27)
+        truth(st.contains("CURRENT_PATCH=13"),"Patch13 attiva")
+      else
+        truth(st.contains("STAGE_27_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_39_PASS_0_FAIL"),
+          "PATCH 13 certificata anche dopo stadi futuri")
       truth(st.contains("STAGE_26_NATIVE_VERIFICATION=PASS_EXPECTED_RED_38_PASS_3_FAIL"),
         "Stage26")
       truth(st.contains("STAGE_27_NATIVE_VERIFICATION="),"Status Stage27")
