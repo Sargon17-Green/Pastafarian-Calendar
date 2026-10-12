@@ -70,6 +70,7 @@ t/40_stream_rank_roundtrip.t
 t/41_stream_histogram_callback.t
 t/42_indexed_histogram_store.t
 t/43_indexed_suffix_and_rank.t
+t/44_indexed_lifecycle.t
 t/lib/Pastafari/NormativeScroll.pm
 t/lib/Pastafari/WeavingPolynomial.pm
 t/lib/Pastafari/WeavingPolynomialStream.pm
@@ -83,6 +84,7 @@ tools/profile_polynomial.pl
 tools/profile_unrank_middle.pl
 tools/profile_rank_roundtrip.pl
 tools/profile_stream_rank_roundtrip.pl
+tools/profile_indexed_rank_roundtrip.pl
 tools/profile_polynomial_stream.pl
 CANONICAL_NAMES_LOCK.sha256
 .github/workflows/canonical-names-lock.yml

@@ -106,3 +106,25 @@ jobs:
         run: |
           set -euo pipefail
           timeout --signal=TERM --kill-after=5s 205s perl -Ilib -It/lib tools/profile_stream_rank_roundtrip.pl --seconds 165 --rss-kib 262144
+  indexed-roundtrip252:
+    name: 47 月份 252 日索引式雙向排名（獨立資源監督）
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-indexed-roundtrip-252]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對單一索引式雙向驗證腳本的語法
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_indexed_rank_roundtrip.pl
+      - name: 受控執行完整 270 位排名往返
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 185s perl -Ilib -It/lib tools/profile_indexed_rank_roundtrip.pl --seconds 135 --rss-kib 262144
