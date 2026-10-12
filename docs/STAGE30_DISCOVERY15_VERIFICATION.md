@@ -20,3 +20,15 @@ The external caller supplies each question's 46 visible drops, 46 stone rows and
 - Existing workflow's historically named stage27-typescript-marathi job still runs the current full `npm test`; independent `verify` job checks frozen name lock. Stage30 can close only after both succeed; Stage31 deliberately deferred.
 
 **Submission status: no CI success claim yet, LAST_COMPLETED_STAGE=29.**
+
+## GitHub Actions actual success — 2026-10-12
+
+Final verified implementation [commit 0070e91a](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/0070e91a6f5e685f7692b79bd3e0f4452af2e258). [CI run 38265673925](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38265673925) completed: both `verify` and the legacy-named `stage27-typescript-marathi` SUCCESS. The latter ran the complete Stage1–30 native TypeScript suite, with all prior 14 expected-red checks plus 15th red verifier.
+
+```text
+STAGE_30_DISCOVERY_15_GUARDS_PASS signed=8 positive=4 negative=4 oldWrong=4 oldMatches=4 actualQuestions=20 sharedWrites=1160 oldMethodCalls=2 dispatchCalls=2 injectedFailures=3
+STAGE_30_DISCOVERY_15_PROPERTIES_PASS realCases=12 positive=6 negative=6 oldWrong=6 oldMatches=6 genuineCalls=42 genuineWrites=2436 varied=64 giant=8 ranks=720 unique=720 variants=792 variantWrites=45936 totalCalls=834 totalWrites=48372 streamWrong=0 gapWrong=0
+STAGE_30_DISCOVERY_15_EXPECTED_RED_VERIFIED nonzero=1 mismatches=2 matches=0 gates=-1,-2
+```
+
+**LAST_COMPLETED_STAGE=30**, Stage31 PATCH15 not started. The CI job label is administrative historical naming, not an omission of Stage30 tests.
