@@ -12,6 +12,7 @@ local LegacyHidden = require("legacy_hidden")
 local HiddenPatch = require("hidden_patch")
 local LegacyPrior = require("legacy_prior")
 local PriorPatch = require("prior_patch")
+local LegacyGrinds = require("legacy_grinds")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -128,8 +129,23 @@ S["legacy" .. "PriorProbe"] = function(dropStore, calculationDay, targetDay, i, 
     return LegacyPrior.execute(dropStore, calculationDay, targetDay, i, back)
 end
 
+-- DISCOVERY 07: aksè sa yo li tab zero-based la ak endis 1..11 ki pa anfòm.
+function S.grindRowSpaghetti(grind)
+    local row = LegacyGrinds.execute(grind)
+    return row
+end
+
+function S.legacyGrindProbe(grind)
+    return LegacyGrinds.execute(grind)
+end
+
+-- Wout gout vizib la rive jiska onzyèm tounaj kote tablo istorik la manke.
+function S.visibleDropSpaghetti(calculationDay, targetDay, visibleIndex, dropStore)
+    return LegacyGrinds.visibleDropLegacy(calculationDay, targetDay, visibleIndex, dropStore)
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 13", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 14", 0)
 end
 
 return S

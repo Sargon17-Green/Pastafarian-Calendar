@@ -344,3 +344,48 @@ Run `38229918405` te pase tout **sèt** travay yo sou Lua natif.
 Lòd history vizib ak sèt hidden yo matche ak oracle la; odit legacy
 Stage 12 la toujou montre egzakteman sèt mank istorik yo.
 Rezilta: `STAGE13_NATIVE_SUITE=PASS`, `STAGE13_REMOTE_CI=PASS`.
+
+
+## Stage 14 — DISCOVERY 07: tablo onz tounaj yo gen endis ki pa bon
+
+Nou ajoute `src/legacy_grinds.lua` ak tablo istorik 11 ranje tounaj yo,
+men tablo sa a sèvi ak endis fizik `0..10`. Ansyen `oldGrindRow(g)`
+mande `ORIGINAL_ROWS[g]` pou tounaj lojik `g=1..11`. Se konsa premye
+dis tounaj yo pran ranje ki vin apre a, epi tounaj nimewo 11 la pa gen
+okenn ranje. **Sa se erè indexing ansyen an, pa yon koreksyon.**
+
+Tablo koefisyan yo gen onz ranje kòrèk yo, men nan plas fizik ki mal yo:
+`{3,5,7,11,w}` nan plas 0, `{5,7,11,13,b}` nan plas 1,
+jiska `{37,41,43,47,w}` nan plas 10. Nou kenbe
+`originalPhysicalRow` ak `oldGrindRow` ansanm pou odit, epi nou ajoute
+handler `LEGACY_GRIND_INDEX` ak yon commit, yon tras, metrik ak
+dyagnostik `GRIND_ROW_SHIFTED_BY_ONE` oubyen `GRIND_11_ROW_MISSING`.
+
+Nan fasad `spaghetti.lua`, `grindRowSpaghetti` sèvi ak menm
+handler istorik la. `visibleDropSpaghetti` itilize kalkil jou, wòch,
+`PRIOR_PATCH` pou p1/p3/p7, ak `SAVE_PATCH`, epi li eseye fè
+11 tounaj reyèl atravè legacy. Apre 10 tounaj, li jwenn ranje
+nimewo 11 ki manke. Li retounen yon rapò dyagnostik, pa yon gout
+normatif envante.
+
+`test/stage14_property_tests.lua` verifye onz ranje fizik yo, dis
+deplasman ak yon mank. Odit `EXPECTED_RED` la mande egzakteman
+11 divergences (`1..11`), avèk dènye ranje a ki manke.
+`test/stage14_visible_smoke_tests.lua` egzèse wout gout vizib la
+avèk vrè sous Lua anvan li rive nan erè history la.
+
+```text
+lua5.3 test/stage14_property_tests.lua .
+lua5.3 test/stage14_scope_tests.lua .
+lua5.3 test/stage14_visible_smoke_tests.lua .
+lua5.3 test/stage14_expected_red_audit.lua .
+lua5.3 test/stage14_tests.lua .
+```
+
+Kat premye tès yo dwe pase; dènye a dwe bay `EXPECTED_RED Stage 14
+DISCOVERY 07` pou onz ranje yo sèlman. Tout regresyon Stage 1–13
+dwe rete vèt.
+
+**Pa gen PATCH 07 nan Stage 14.** Stage 15 sèlman pral kreye yon
+tab ak sentinel fizik nan endis 0 epi onz tounaj reyèl 1..11,
+san efase fonksyon legacy a ni sa li te fè.

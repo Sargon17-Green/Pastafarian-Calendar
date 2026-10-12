@@ -314,3 +314,36 @@ GitHub Actions `38229918405` konfime sèt travay `success`.
 Yon tès endepandan sou Lua 5.3 rapòte 1,344 lekti (672 hidden,
 672 vizib), 22 piki echèk izole, 15 rekiperasyon ak PASS Stage 13.
 Se sèlman apre prèv sa yo nou fèmen PATCH 06.
+
+
+## Stage 14 — DISCOVERY 07: tounaj ki chita sou move endis
+
+### Sa nou te fè nan ansyen kalkil la
+
+Yon tab onz ranje te konte pozisyon fizik yo depi 0. Men bouk
+tounaj yo te konte `g=1` rive `11`, epi `oldGrindRow(g)`
+te itilize `ORIGINAL_ROWS[g]` san korije orijin endis la.
+Nou konsève defo sa a kòm yon istwa aktif, pa yon mock tès sèlman.
+
+### Prèv ki fè defo a klè
+
+Tounaj 1 li paramèt tounaj 2; menm deplasman an repete jiska
+tounaj 10 ki li paramèt tounaj 11. Tounaj 11 pa gen ranje ditou.
+Nou ajoute tès tab endepandan ki egzije egzakteman 11 divergences,
+epi yon odit EXPECTED_RED ki verifye mesaj la, san aksepte
+echèk sentaks oswa regression yon lòt etap kòm prèv.
+
+### Kouch monstr ki grandi
+
+Nou ajoute `LEGACY_GRIND_INDEX`, yon dispatcher, eta semantik ki
+posede, metrik, dyagnostik ak depo fizik ki rete envèse.
+Nou konekte li ak premye wout gout vizib la, ki konsome fonksyon
+PATCH 06, wòch 46 yo, SAVE ak konte jou yo. Chemen an montre
+tou de dis tounaj yo ak mank onzyèm lan. Li pa gen okenn sentinel.
+
+### Sa ki rezève pou pwochen etap la
+
+Nan Stage 15 sèlman nou pral mete yon ranje sentinel nan plas fizik
+0 epi onz vrè ranje yo nan plas 1..11, pandan n ap konsève fonksyon
+indexing legacy a ak dyagnostik li. Pa entwodui fonksyon
+permutation Stage 16 oswa lòt travay ki vini pita.
