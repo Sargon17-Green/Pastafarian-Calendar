@@ -279,3 +279,8 @@ Llwyddodd y swydd `native-stage09-kotlin-cymraeg` (rhediad GitHub Actions `38186
 ## Cam 10 — DISCOVERY 05: darllen cudd wedi'i wrthdroi
 
 Defnyddir y cerrig PATCH 04 cywir a'r cyfrifon PATCH 02/03 i greu saith gwerth cudd heb ymgynghori â'r oracl prawf. Yn fwriadol, mae'r storfa gorfforol yn trefnu hidden7 ... hidden1. Mae `legacyHiddenDirectByAssumedNearness` yn dychwelyd y slot k yn union, er mai hidden(8-k) sydd yno. Mae'r canolbwynt k=4 yn gywir trwy gyd-ddigwyddiad, a disgwylir pedwar gwahaniaeth ar k=1,2,6,7. Cedwir y cyflwr fesul galwad; nid yw cyfieithydd na chywiriad PATCH 05 yn bodoli. Bydd CI yn gwirio pob cam cyn ardystio Cam 10.
+
+
+### Cam 10 — ardystiad CI brodorol
+
+Ar commit `b2c0a978ca452545c98ff9a7349c6cddd5db345b` llwyddodd swydd `native-stage10-kotlin-cymraeg` (`114696619440`, rhediad `38214703144`) gyda Kotlin 1.9.0/JDK 21 a'r oracl gwreiddiol. Cafwyd `STAGE10_BACKWARD_STORAGE_PASS_7`, `STAGE10_EXPECTED_RED_4`, `STAGE10_MATCH_1`, `STAGE10_BIGINT_INDEPENDENT_PASS_35`, `STAGE10_BIGINT_PATCH04_STONES_GREEN_175`, `STAGE10_STRICT_RED_CONFIRMED` a `STAGE10_NATIVE_EXPECTED_RED_COMPLETE`. Cadwyd holl atchweliadau Camau 1–9. Mae Cam 10 yn gyflawn; ni ddechreuwyd PATCH 05.

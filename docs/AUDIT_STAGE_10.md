@@ -35,3 +35,24 @@ Mae `run-stage10-tests.sh` yn ailredeg Camau 1–9 yn gyntaf. Wedi hynny:
 
 **Statws cyn yr ardystiad CI:** cod newydd wedi'i baratoi; nid yw'r
 rhediad brodorol llawn wedi'i gadarnhau eto. `LAST_COMPLETED_STAGE=9`.
+
+
+## Ardystiad CI brodorol — COMPLETE
+
+**Mae'r adran hon yn disodli'r statws PENDING uchod.**
+
+- Gangen: `Kotlin+Cymraeg`, commit ffynhonnell `b2c0a978ca452545c98ff9a7349c6cddd5db345b`.
+- Rhediad GitHub Actions: `38214703144`; swydd `114696619440` — **SUCCESS**.
+- Kotlin 1.9.0, JDK 21, `run-stage10-tests.sh`, a'r oracl gwreiddiol.
+- Dilyswyd 24 marc yn uniongyrchol o'r log.
+- PASS: holl atchweliadau Camau 1–9, gan gynnwys `STAGE09_NATIVE_GREEN`.
+- PASS: `STAGE10_BACKWARD_STORAGE_PASS_7`, `STAGE10_PATCH04_ROWS_GREEN_230`,
+  `STAGE10_PRODUCTION_WRONG_K1_PASS`, `STAGE10_EXPECTED_RED_4`, `STAGE10_MATCH_1`,
+  `STAGE10_CONTEXT_GUARDS_REPLAY_PASS`, `STAGE10_BIGINT_INDEPENDENT_PASS_35`,
+  `STAGE10_BIGINT_PATCH04_STONES_GREEN_175`, `STAGE10_STRICT_RED_CONFIRMED`,
+  a `STAGE10_NATIVE_EXPECTED_RED_COMPLETE`.
+
+Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38214703144
+
+**Dyfarniad:** Cam 10 yn gyflawn fel `EXPECTED_RED`. `LAST_COMPLETED_STAGE=10`.
+Cedwir y darllenydd anghywir; nid oes PATCH 05 na chod Cam 11.
