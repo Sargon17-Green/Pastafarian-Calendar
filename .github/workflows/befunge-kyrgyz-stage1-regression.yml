@@ -3123,11 +3123,14 @@ jobs:
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=5s 1150s python -u qa/stage1_native_four_cell_candidate_state_ownership.py
               timeout --kill-after=5s 250s python -u qa/stage1_native_four_cell_lower_fault_recovery.py
+              timeout --kill-after=5s 250s python -u qa/stage1_native_four_cell_lower_live_peer_fault.py
             '
           test -s "$RUNNER_TEMP/native-four-cell-ownership/native_four_cell_candidate_ownership.json"
           python3 qa/stage1_native_four_cell_candidate_state_ownership_audit.py "$RUNNER_TEMP/native-four-cell-ownership"
           test -s "$RUNNER_TEMP/native-four-cell-ownership/native_four_cell_lower_fault_recovery.json"
           python3 qa/stage1_native_four_cell_lower_fault_recovery_audit.py "$RUNNER_TEMP/native-four-cell-ownership"
+          test -s "$RUNNER_TEMP/native-four-cell-ownership/native_four_cell_lower_live_peer_fault.json"
+          python3 qa/stage1_native_four_cell_lower_live_peer_fault_audit.py "$RUNNER_TEMP/native-four-cell-ownership"
           test -s "$RUNNER_TEMP/native-four-cell-ownership/native_four_cell_candidate_ownership_audit.json"
           echo NATIVE_CANDIDATE_OWNERSHIP_FINITE_12_PAIRS_12_RESETS_STAGE1_OPEN
       - name: Retain isolated four-cell candidate ownership and hostile evidence
