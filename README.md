@@ -1356,3 +1356,33 @@ di sbt su GitHub Actions, non riprodotto nella certificazione.
 
 La selezione resta diagnostica; la PATCH17 senza ripetizioni
 e il rango ricavato dalla salsa attendono le fasi successive.
+
+## Stadio 35 — PATCH17 (nomi dei mesi senza ripetizioni)
+
+La PATCH17 corregge la selezione dei nomi mensili scegliendo
+un vettore di `m=3..47` indici **distinti** da 47 nomi
+canonici, rispettando l'ordinamento lessicografico 1-based di
+`P(47,m)=47!/(47-m)!` candidati. Il rango BigInt non viene
+troncato né convertito in un Int tranne i singoli indici di
+selezione dimostrabilmente compresi in `0..46`.
+
+Il wrapper `monthNameDistinctPatch` invoca realmente
+`oldMonthNameDuplicated`, pubblica il risultato storico
+con ripetizioni e in parallelo elimina dalla lista dei nomi
+disponibili ciascun indice scelto dall'unrank corretto.
+La trace `BOOT → DISCOVERY_17 → PATCH_17` opera nella stessa
+invocazione. Validator indipendente, snapshot, flag e metriche
+impediscono manipolazioni e contaminazioni fra richieste.
+
+La suite Stage35 contiene **71 PASS/0 FAIL** attesi:
+primo/ultimo rango per tutti i conteggi mensili, 4096
+campioni rispetto all'oracolo test-only, altri 4096 con
+inversione del rango, 512 ranghi oltre 128 bit, controlli
+di unicità e ordinamento, mutazioni del contesto e
+regressioni delle 16 patch precedenti. Stage34 mantiene
+**63 PASS e tre FAIL intenzionali** e il catalogo
+immutabile di 47 nomi resta invariato.
+
+Questa fase usa un rango già scelto dal chiamante:
+la salsa annuale, le famiglie complete e l'integrazione
+della data finale non sono dichiarate terminate.

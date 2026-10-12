@@ -816,3 +816,23 @@ jobs:
           for label in rango1_tre_mesi rango2_tre_mesi rango1_47_mesi; do
             grep -Fq "FAIL — equivalenza normativa nomi ${label} — Nomi con rimpiazzo: ${label}" stage34.log
           done
+
+  native-stage35-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage35 BigInt distinct month-name PATCH17
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage35Tests' 2>&1 | tee stage35.log
+          grep -Fq 'RISULTATO STADIO 35: 71 PASS, 0 FAIL' stage35.log
+          test "$(grep -Fc 'PASS — ' stage35.log)" -eq 71
+          test "$(grep -Fc 'FAIL — ' stage35.log)" -eq 0

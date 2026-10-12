@@ -1503,3 +1503,14 @@ con regole normative senza duplicati nel codice test-only.
 Il validator autonomo, le PATCH01–16 e il catalogo
 congelato sono preservati. Non introdurre PATCH17 prima
 di Stage35.
+
+## Stadio 35 — PATCH17: scelta distinta dei nomi
+
+Si conserva la scelta base47 CON rimpiazzo del legacy, ma
+la PATCH17 usa unrank BigInt lessicografico delle disposizioni
+SENZA rimpiazzo dal catalogo immutabile 1..47. A ogni passo,
+il candidato viene rimosso dall'elenco disponibile. Il
+validator non chiama il wrapper della patch ma ricostruisce
+il rank dal vettore ottenuto; snapshot, tracing, regressioni
+e confronto storico rimangono attivi. Stage34 conserva i
+tre fallimenti deliberati, nessuna Stage36 anticipata.

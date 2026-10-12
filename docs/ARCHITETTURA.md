@@ -613,3 +613,20 @@ nomi passa correttamente al rango 2210 (1-based).
 La selezione rimane sintetica e limitata al dominio
 del prodotto decrescente: la salsa annuale e la
 PATCH17 senza rimpiazzo restano fuori da Stage34.
+
+## PATCH17 — unrank lessicografico senza rimpiazzo
+
+Dato `m=3..47` e `1 <= rank <= P(47,m)`, il rank zero-based
+viene separato iterativamente in blocchi
+`P(remaining-1,m-position-1)`. Ogni quoziente indica
+l'indice di uno dei nomi ancora disponibili, che viene
+rimosso dalla lista prima del passo seguente. Il
+validator indipendente applica il processo opposto:
+calcola il valore ordinale del vettore senza richiamare
+l'unrank corretto. Parallelamente ricostruisce il rango
+storico con cifre base47 CON rimpiazzo e protegge la
+snapshot del contesto.
+
+La PATCH17 resta sintetica: riceve il rank normativo
+dall'esterno, non calcola la salsa annuale reale. Nessun
+nome del catalogo congelato viene modificato.
