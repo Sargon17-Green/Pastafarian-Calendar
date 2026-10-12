@@ -81,6 +81,86 @@ def check_saved_outputs(folder, items):
     return True
 
 
+
+# Independent of the producer and the fresh-process replay implementation.
+NATIVE_REPLAY_PROGRAM_PINS = {
+    "src/interleaved_work_counts.b98":
+        "560d6aa5807a7f766213a33835cce85eab0fa40c",
+    "reference/work_counts.b98":
+        "f941efc793c9eee4accf5d03873f8ed029b16725",
+    "reference/save.b98":
+        "7b5e79aa6e2bfb636717cb018a3db6a13fb2bb44",
+}
+NATIVE_REPLAY_REJECTIONS = [
+    "forged_manifest", "forged_saved_stdout",
+    "coordinated_manifest_and_saved_stdout",
+    "coordinated_production_claim_and_saved_stdout",
+]
+
+
+def verify_native_replay_document(doc, items, folder):
+    need(type(doc) is dict and
+         doc.get("schema") == "befunge-stage1-diverse-independent-native-replay-v1" and
+         doc.get("source_git_blobs") == NATIVE_REPLAY_PROGRAM_PINS and
+         doc.get("scope") == "QA_ONLY_NOT_STAGE1_ACCEPTANCE" and
+         doc.get("native_production_reexecutions") == 17 and
+         doc.get("independent_native_reference_executions") == 42 and
+         doc.get("fresh_native_processes") == 59 and
+         doc.get("invalid_cases_checked_with_native_production_and_sentinels") == 3 and
+         doc.get("hostile_output_reports_rejected") == NATIVE_REPLAY_REJECTIONS and
+         doc.get("stage1_complete") is False and
+         doc.get("functional_stage1_gate") == "OPEN" and
+         doc.get("geometric_stage1_gate") == "OPEN",
+         "independent Native replay report provenance/counters/Stage1 drifted")
+    rows = doc.get("records")
+    need(type(rows) is list and len(rows) == 17 and len(items) == 17,
+         "independent Native replay report lost 17 ordered cases")
+    for recorded, item in zip(rows, items):
+        name, output = item["case"], item["output"]
+        digest = hashlib.sha256((" ".join(output) + "\n").encode("ascii")).hexdigest()
+        need(type(recorded) is dict and
+             recorded.get("case") == name and
+             recorded.get("fields") == item["fields"] and
+             recorded.get("valid") is item["valid"] and
+             type(recorded.get("reference_native_runs")) is int and
+             recorded["reference_native_runs"] == (3 if item["valid"] else 0),
+             "independent Native replay case/inputs drifted: " + name)
+        need(recorded.get("native_reference_output") ==
+             recorded.get("native_production_output") == output and
+             recorded.get("saved_output_sha256") == digest and
+             hashlib.sha256((Path(folder) / (name + ".out")).read_bytes()).hexdigest() == digest,
+             "independent Native replay output/sha differs: " + name)
+    return True
+
+
+def check_native_replay_report(folder, items):
+    filename = Path(folder) / "native_diverse_independent_replay.json"
+    need(filename.is_file(), "fresh Native reference replay artifact is missing")
+    data = json.loads(filename.read_text(encoding="utf-8"))
+    need(verify_native_replay_document(data, items, folder),
+         "native reference replay report rejected")
+    attacks = (
+        ("forged_reference_answer", lambda d:
+         d["records"][0]["native_reference_output"].__setitem__(0, "-12345")),
+        ("missing_replay_record", lambda d: d["records"].pop()),
+        ("inflated_native_processes", lambda d:
+         d.__setitem__("fresh_native_processes", 60)),
+        ("premature_stage_completion", lambda d:
+         d.__setitem__("stage1_complete", True)),
+    )
+    for name, mutate in attacks:
+        forged = copy.deepcopy(data)
+        mutate(forged)
+        try:
+            verify_native_replay_document(forged, items, folder)
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError("Native replay forged report accepted: " + name)
+    print("NATIVE_DIVERSE_INDEPENDENT_REPLAY_REPORT_AUDIT_AND_4_TAMPERS_PASS")
+    return True
+
+
 def selftest():
     """Synthetic corruption checks; never count as actual Native results."""
     items = [dict(case=name, fields=list(fields), valid=valid,

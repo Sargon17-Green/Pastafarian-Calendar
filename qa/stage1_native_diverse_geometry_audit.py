@@ -93,6 +93,7 @@ def main(folder):
     native_contract.selftest()
     native_contract.check_manifest_cases(items)
     native_contract.check_saved_outputs(folder,items)
+    native_contract.check_native_replay_report(folder,items)
     require(tuple(x.get("case") for x in items)==LABELS,
             "missing or reordered native geometry scenarios")
     require(sum(bool(x["valid"]) for x in items)==14,"native valid family missing")
