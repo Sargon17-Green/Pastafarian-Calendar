@@ -49,8 +49,8 @@ fn test_discovery10_legacy_wrapper_separates_caller_input() {
 	pours := calendar_pours_spaghetti(1, big_from_int(2), initial_stones(), bowls, order) or {
 		[]BigInt{}
 	}
-	first := new_base_dispatcher().dispatch_legacy_bowl_stir(1, big_from_int(2), initial_stones(), bowls, order,
-		pours) or { []BigInt{} }
+	first := new_base_dispatcher().dispatch_legacy_bowl_stir(1, big_from_int(2), initial_stones(),
+		bowls, order, pours) or { []BigInt{} }
 	second := new_base_dispatcher().dispatch_legacy_bowl_stir(1, big_from_int(2), initial_stones(),
 		bowls, order, pours) or { []BigInt{} }
 	assert first == second
@@ -135,9 +135,8 @@ fn test_discovery10_all_720_orders_keep_legacy_sequential_path() {
 		pours := calendar_pours_spaghetti(2, big_from_int(17), stones, bowls, order) or {
 			[]BigInt{}
 		}
-		result := new_base_dispatcher().dispatch_legacy_bowl_stir(2, big_from_int(17), stones, bowls, order, pours) or {
-			[]BigInt{}
-		}
+		result := new_base_dispatcher().dispatch_legacy_bowl_stir(2, big_from_int(17), stones,
+			bowls, order, pours) or { []BigInt{} }
 		assert result.len == 7
 		assert result[0].is_zero()
 		for id in 1 .. 7 {

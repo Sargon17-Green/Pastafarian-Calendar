@@ -22,8 +22,8 @@ pub fn (patch BowlStirPatch10) stir(i int, drop BigInt, stones Stones, bowls []B
 	dispatcher := new_base_dispatcher()
 
 	// የታሪካዊው ጥሪ እንዳለ ይቀራል፤ የተበከለውን ውጤት አንጠቀምም።
-	legacy_garbage := dispatcher.dispatch_legacy_bowl_stir(i, drop, stones, vault_old,
-		order, pours)!
+	legacy_garbage :=
+		dispatcher.dispatch_legacy_bowl_stir(i, drop, stones, vault_old, order, pours)!
 	if legacy_garbage.len != 7 {
 		return error('የታሪክ ምርመራ ሰልፍ የተሳሳተ ብዛት አለው')
 	}

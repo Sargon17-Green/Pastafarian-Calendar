@@ -22,6 +22,7 @@ fn patch10_independent_snapshot(i int, drop BigInt, stones Stones, bowls []BigIn
 			4 { stones.m }
 			else { stones.r }
 		}
+
 		mut s := big_add(bowls[id], big_mul_small(bowls[prev_id], 2))
 		s = big_add(s, big_mul_small(bowls[next_id], 3))
 		s = big_add(s, pours[position])
@@ -46,11 +47,10 @@ fn test_patch10_identity_and_reversed_snapshots_are_correct() {
 		expected := patch10_independent_snapshot(1, drop, stones, bowls, order, pours)
 		assert actual == expected
 	}
-	pours := calendar_pours_spaghetti(1, drop, stones, bowls, [1, 2, 3, 4, 5, 6]) or {
+	pours := calendar_pours_spaghetti(1, drop, stones, bowls, [1, 2, 3, 4, 5, 6]) or { []BigInt{} }
+	actual := calendar_stir_bowls_spaghetti(1, drop, stones, bowls, [1, 2, 3, 4, 5, 6], pours) or {
 		[]BigInt{}
 	}
-	actual := calendar_stir_bowls_spaghetti(1, drop, stones, bowls, [1, 2, 3, 4, 5, 6],
-		pours) or { []BigInt{} }
 	assert actual[1].str() == '154997'
 	assert actual[2].str() == '564002'
 	assert actual[6].str() == '46187'
@@ -62,11 +62,10 @@ fn test_patch10_original_legacy_still_produces_wrong_history() {
 	stones := initial_stones()
 	drop := big_from_int(2)
 	pours := calendar_pours_spaghetti(1, drop, stones, bowls, order) or { []BigInt{} }
-	legacy := new_base_dispatcher().dispatch_legacy_bowl_stir(1, drop, stones, bowls,
-		order, pours) or { []BigInt{} }
-	correct := calendar_stir_bowls_spaghetti(1, drop, stones, bowls, order, pours) or {
+	legacy := new_base_dispatcher().dispatch_legacy_bowl_stir(1, drop, stones, bowls, order, pours) or {
 		[]BigInt{}
 	}
+	correct := calendar_stir_bowls_spaghetti(1, drop, stones, bowls, order, pours) or { []BigInt{} }
 	assert legacy[1].str() == '154997'
 	assert legacy[2].str() == '96572653728'
 	assert legacy[6].str() == '45533754091847225581732030291798637831'
@@ -122,12 +121,8 @@ fn test_patch10_huge_negative_inputs_remain_exact_and_repeatable() {
 	order := [2, 3, 1, 4, 5, 6]
 	pours := calendar_pours_spaghetti(46, drop, stones, bowls, order) or { []BigInt{} }
 	expected := patch10_independent_snapshot(46, drop, stones, bowls, order, pours)
-	first := calendar_stir_bowls_spaghetti(46, drop, stones, bowls, order, pours) or {
-		[]BigInt{}
-	}
-	second := calendar_stir_bowls_spaghetti(46, drop, stones, bowls, order, pours) or {
-		[]BigInt{}
-	}
+	first := calendar_stir_bowls_spaghetti(46, drop, stones, bowls, order, pours) or { []BigInt{} }
+	second := calendar_stir_bowls_spaghetti(46, drop, stones, bowls, order, pours) or { []BigInt{} }
 	assert first == expected
 	assert second == expected
 	assert bowls[1].str() == huge.str()
@@ -143,8 +138,7 @@ fn test_patch10_fail_closed_before_commit_on_invalid_inputs() {
 	pours := calendar_pours_spaghetti(1, drop, stones, bowls, order) or { []BigInt{} }
 	for invalid_i in [-1, 0, 47] {
 		mut rejected := false
-		_ = calendar_stir_bowls_spaghetti(invalid_i, drop, stones, bowls, order,
-			pours) or {
+		_ = calendar_stir_bowls_spaghetti(invalid_i, drop, stones, bowls, order, pours) or {
 			rejected = true
 			[]BigInt{}
 		}
@@ -152,8 +146,7 @@ fn test_patch10_fail_closed_before_commit_on_invalid_inputs() {
 	}
 	for invalid_order in [[1, 2, 3], [1, 2, 3, 4, 5, 5], [1, 2, 3, 4, 5, 7]] {
 		mut rejected := false
-		_ = calendar_stir_bowls_spaghetti(1, drop, stones, bowls, invalid_order,
-			pours) or {
+		_ = calendar_stir_bowls_spaghetti(1, drop, stones, bowls, invalid_order, pours) or {
 			rejected = true
 			[]BigInt{}
 		}

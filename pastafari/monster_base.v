@@ -173,8 +173,8 @@ pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !Calen
 	pour_final := alias_details + '; PATCH_09 pour1=' + patched_pours[1].str()
 	wrong_stirred := dispatcher.dispatch_legacy_bowl_stir(1, pour_drop, initial_stones(),
 		initial_bowls, pour_order, patched_pours)!
-	patched_stirred := calendar_stir_bowls_spaghetti(1, pour_drop, initial_stones(),
-		initial_bowls, pour_order, patched_pours)!
+	patched_stirred := calendar_stir_bowls_spaghetti(1, pour_drop, initial_stones(), initial_bowls,
+		pour_order, patched_pours)!
 	stir_details := pour_final + '; DISCOVERY_10 wrongStirBowl2=' + wrong_stirred[2].str()
 	stir_order_details := stir_details + '; DISCOVERY_10 orderFirst=' + pour_order[0].str()
 	return error(stir_order_details + '; PATCH_10 shadowStirBowl2=' + patched_stirred[2].str())
