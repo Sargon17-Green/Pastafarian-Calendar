@@ -429,3 +429,15 @@ oedd rhybudd Node.js 20 GitHub Actions digyswllt â'r mathemateg.
 **`LAST_COMPLETED_STAGE=18`** a `EXPECTED_REPOSITORY_STATE=EXPECTED_RED`,
 fel y dylai fod i gam DISCOVERY. Cam 19 (`PATCH 09`) yw'r nesaf,
 heb ei ddechrau. Nid yw'r graith etifeddol wedi'i dileu.
+
+
+## Cam 19 — PATCH 09: arllwys o safleoedd y permutation
+
+Mae `PourPatchWrapper` yn galw'r hen arllwys sefydlog 1,2,3
+cyn cywiro'r tri ID ffynhonnell yn ôl `order[0..2]`.
+Cedwir y canlyniadau etifeddol ac mae `BOOT → PATCH_09`
+yn cwblhau'r 46 cymysgiad ar giplunau heb alias in-place.
+Bwriedir profi 720 arllwys GREEN, 714 legacy RED,
+4,320 prawf BigInteger a'r holl atchweliadau Camau 1–18.
+Nid oes adeiladwr diferion gweledig yn y cam hwn.
+`LAST_COMPLETED_STAGE=18` nes cwblhau CI brodorol.

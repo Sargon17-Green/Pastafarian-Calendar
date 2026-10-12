@@ -114,7 +114,17 @@ data class BaseMonsterContext(
     var discovery09OrderAt46: List<Int>? = null,
     var discovery09FixedPourCalls: Int = 0,
     var discovery09PermutationPatchCalls: Int = 0,
-    var discovery09InvocationCount: Int = 0
+    var discovery09InvocationCount: Int = 0,
+    var patch09InitialBowls: List<ExactInt>? = null,
+    var patch09VisibleDrops: List<ExactInt>? = null,
+    var patch09Steps: List<PatchedPourStep>? = null,
+    var patch09FinalBowls: List<ExactInt>? = null,
+    var patch09OrderAt46: List<Int>? = null,
+    var patch09LegacyFixedPourCalls: Int = 0,
+    var patch09CorrectedPourCalls: Int = 0,
+    var patch09PermutationPatchCalls: Int = 0,
+    var patch09Applied: Boolean = false,
+    var patch09InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -183,7 +193,9 @@ class MonsterBootstrapManager(
     val permutationPatchWrapper: PermutationPatchWrapper =
         PermutationPatchWrapper(legacyPermutationOrderAdapter),
     val legacyFixedPourAdapter: LegacyFixedPourAdapter =
-        LegacyFixedPourAdapter(permutationPatchWrapper)
+        LegacyFixedPourAdapter(permutationPatchWrapper),
+    val pourPatchWrapper: PourPatchWrapper =
+        PourPatchWrapper(legacyFixedPourAdapter)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -357,6 +369,42 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("PATCH_09") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_PATCH09_CONTEXT_NOT_READY")
+            val initial = context.patch09InitialBowls
+                ?: throw MonsterValidationException("E_PATCH09_NO_INITIAL")
+            val visible = context.patch09VisibleDrops
+                ?: throw MonsterValidationException("E_PATCH09_NO_VISIBLE")
+            // Cywiro'r IDau ffynhonnell drwy'r order; galw'r graith gyntaf.
+            val run = pourPatchWrapper.runPatchedPours(initial, visible)
+            check(run.steps.size == 46 &&
+                run.finalBowls.size == 7 &&
+                run.orderAt46.sorted() == listOf(1,2,3,4,5,6) &&
+                run.legacyFixedPourCalls == 46 &&
+                run.correctedPourCalls == 46 &&
+                run.permutationPatchCalls == 46 &&
+                run.steps.all { step ->
+                    step.pourPatch.legacyRead.sourceIdsWrong == listOf(1,2,3) &&
+                    step.pourPatch.sourceIdsByPosition == step.order.take(3)
+                }) { "E_PATCH09_RUN_SHAPE" }
+            // Ymrwymo'n atomig ar ôl cwblhau pob cam.
+            context.patch09Steps = run.steps.toList()
+            context.patch09FinalBowls = run.finalBowls.toList()
+            context.patch09OrderAt46 = run.orderAt46.toList()
+            context.patch09LegacyFixedPourCalls = run.legacyFixedPourCalls
+            context.patch09CorrectedPourCalls = run.correctedPourCalls
+            context.patch09PermutationPatchCalls = run.permutationPatchCalls
+            context.patch09Applied = true
+            context.patch09InvocationCount = 1
+            context.branchTrace.add("PATCH_09")
+            context.diagnostics.add("PATCH_09_ORDER_POSITION_SOURCE_IDS")
+            context.status = "PATCHED_POURS"
+            metrics.bump("patch09.legacy.fixed.pour.calls")
+            metrics.bump("patch09.corrected.pour.calls")
+            metrics.bump("patch09.applied")
         }
         dispatcher.register("DISCOVERY_09") { context ->
             validation.requireBootstrapContext(context)
@@ -792,6 +840,26 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 19: cadw'r arllwys anghywir, cywiro drwy safleoedd yr order. */
+    fun applyPourPatch(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        initialBowls: List<ExactInt>, visibleDrops: List<ExactInt>
+    ): BaseMonsterContext {
+        // Nid yw adeiladwr diferion gweledig yn rhan o Gam 19.
+        val context = prepare(calculationDay, targetDay)
+        context.patch09InitialBowls = initialBowls.toList()
+        context.patch09VisibleDrops = visibleDrops.toList()
+        context.phase = "PATCH_09"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_PATCH09_WRAP", e)
         }
     }
 
