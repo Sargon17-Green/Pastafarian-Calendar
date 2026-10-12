@@ -549,3 +549,20 @@ inclusivo di durata dell'anno e' 5778 giorni: il caso di
 47 mesi usa 46 mesi di 123 giorni e uno di 120 giorni,
 per un totale esatto di 5778. La suite di Stage30 conserva
 le sue tre divergenze intenzionali.
+
+## DISCOVERY 16 — giorno del mese calcolato su blocchi contigui
+
+Data una tessitura annuale sintetica già validata
+`weave[0..L-1]`, il mese del giorno `d` viene individuato
+correttamente come `m = weave(d)`. La vecchia formula
+`d - sum(lengths.take(m-1)) + 1` presume che i giorni di
+ogni mese costituiscano un blocco consecutivo; questa
+ipotesi non vale quando sono intrecciati. La norma vera
+richiede il conteggio delle occorrenze di `m` nel prefisso
+`weave(0..d)` ed è usata solo nei test della discovery.
+
+L'handler mantiene l'ID mese corretto ma pubblica il
+giorno erroneo, anche se negativo. Il validator ricostruisce
+le durate e la formula storica senza richiamare la formula
+normativa a prefisso. La famiglia è diagnostica: nessuna
+salsa annuale o elenco canonico completo viene prodotto.

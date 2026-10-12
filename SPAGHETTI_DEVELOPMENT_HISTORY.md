@@ -1439,3 +1439,14 @@ I test coprono 252 giorni per tre tessiture, 4096 vettori
 deterministici, 47 mesi e 5778 giorni. La scelta della
 tessitura rimane identica lungo l'anno, mentre il risultato
 errato legacy e' conservato. PATCH 16 e Stage32 assenti.
+
+## Stadio 32 — DISCOVERY 16: il vecchio mese contiguo
+
+Il nuovo adapter diagnostico usa una tessitura annuale valida,
+elegge l'ID mese dal giorno effettivo, ma calcola erroneamente
+il giorno nel mese sottraendo le lunghezze cumulate degli
+altri mesi, come se fossero blocchi consecutivi. Nei mesi
+intrecciati il contatore può diventare negativo oppure
+saltare giorni. Report, validator separato, snapshot, fase
+e metriche preservano il difetto reale senza anticipare
+PATCH16. La firma intenzionale è 58 PASS/3 FAIL.

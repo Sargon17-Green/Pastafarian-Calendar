@@ -1228,3 +1228,26 @@ e le prove di regressione delle fasi 29/30 sono state adattate
 per preservare i loro certificati mentre avanza CURRENT_STAGE.
 La correzione usa candidati sintetici, non ancora la
 generazione completa delle tessiture dal calcolo canonico.
+
+## Stadio 32 — DISCOVERY 16 (giorno mensile erroneamente contiguo)
+
+Il calendario normativo conta il giorno del mese come il numero
+di occorrenze dello stesso ID mese nel **prefisso** della tessitura
+annuale. Il percorso storico
+`LegacyContiguousMonthDayAdapter.oldContiguousMonthDayGuess`
+presume invece che tutti i giorni precedenti appartengano ai mesi
+già terminati. Sottrae quindi la somma delle durate dei mesi
+precedenti al giorno assoluto dell'anno, producendo perfino
+giorni mensili negativi quando i mesi sono intercalati.
+
+La DISCOVERY 16 non modifica PATCH15 e non seleziona una nuova
+tessitura per giorno. Riceve una tessitura sintetica già scelta,
+lecita, di 252..5778 giorni e 3..47 mesi da 4..123 giorni;
+verifica l'ordine di apertura e chiusura, preserva la cicatrice,
+l'istantanea di input, la trace e il validator indipendente.
+
+`sbt -batch 'Test / runMain pastafari.Stage32Tests'`
+verifica 58 condizioni che passano e tre divergenze
+intenzionali: `C giorno2`, `C giorno3` e `B giorno1`.
+L'oracolo a prefisso è confinato ai test. Nessuna PATCH16
+o costruzione canonica delle tessiture dalla salsa è anticipata.

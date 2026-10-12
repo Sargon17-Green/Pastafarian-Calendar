@@ -742,3 +742,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 31: 66 PASS, 0 FAIL' stage31.log
           test "$(grep -Fc 'PASS — ' stage31.log)" -eq 66
           test "$(grep -Fc 'FAIL — ' stage31.log)" -eq 0
+
+  native-stage32-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage32 intentional RED contiguous month-day legacy
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage32Tests' > stage32.log 2>&1
+          rc=$?
+          set -e
+          cat stage32.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 32: 58 PASS, 3 FAIL' stage32.log
+          test "$(grep -Fc 'PASS — ' stage32.log)" -eq 58
+          test "$(grep -Fc 'FAIL — ' stage32.log)" -eq 3
+          for label in 'C giorno2' 'C giorno3' 'B giorno1'; do
+            grep -Fq "FAIL — equivalenza normativa contatore ${label} — Mese contiguo errato: ${label}" stage32.log
+          done
