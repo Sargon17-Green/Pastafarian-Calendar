@@ -452,7 +452,15 @@ object Stage29Tests {
       truth(!sources.contains("NormativeOracle"),"Oracolo")
       truth(sources.contains("val narrow=rank1.toInt"),"Legacy Int")
       truth(sources.contains("def virtualGatePatch("),"PATCH 14 disponibile")
-      truth(!sources.contains("legacyChooseEachDaySeparately"),"Fase futura")
+      val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<30)
+        truth(!sources.contains("legacyChooseEachDaySeparately"),"Fase futura")
+      else
+        truth(sources.contains("def legacyChooseEachDaySeparately("),
+          "DISCOVERY 15 posteriore presente")
       truth(!sources.contains("oldContiguousMonthDayGuess"),"Fase futura")
     }
     check("metadati Stage29 conservano la certificazione Stage28"){

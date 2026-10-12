@@ -196,9 +196,10 @@ object Stage01Tests {
         .getOrElse(throw new IllegalStateException("CURRENT_STAGE non dichiarato."))
       val mainRoot = root.resolve("src/main/scala")
       val content = textFiles(mainRoot).map(read).mkString("\n")
-      val forbidden = Vector(
-        "legacyChooseEachDaySeparately", "oldContiguousMonthDayGuess"
-      ) ++ (if (currentStage < 28) Vector("VirtualLegacyList") else Vector.empty[String])
+      val forbidden = Vector("oldContiguousMonthDayGuess") ++
+        (if (currentStage < 28) Vector("VirtualLegacyList") else Vector.empty[String]) ++
+        (if (currentStage < 30) Vector("legacyChooseEachDaySeparately")
+         else Vector.empty[String])
       val phaseSpecific = (if (currentStage < 2) Vector("oldRemainder") else Vector.empty[String]) ++
         (if (currentStage < 3) Vector("savePatch") else Vector.empty[String]) ++
         (if (currentStage < 4) Vector("oldDayTag") else Vector.empty[String]) ++
