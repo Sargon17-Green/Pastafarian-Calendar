@@ -1185,3 +1185,14 @@ ranghi e campioni, contatore BigInt degli
 scarti, validator indipendente, campi nel
 contesto e metrica. Stage22 rimane
 intenzionalmente rosso con tre divergenze.
+
+### Certificazione nativa con prove storiche conservate
+
+La run GitHub Actions 38232681790, commit
+`64545b94fbccc90f74faedf658b68e022ea14a54`,
+si è conclusa SUCCESS in tutti i 24 job.
+La PATCH 11 ha superato 42 verifiche senza
+alcun FAIL; la cicatrice Stage22 resta RED
+con 34 PASS e tre divergenze intenzionali.
+Tutti i certificati e le regressioni anteriori
+sono stati preservati senza introdurre Stage24.

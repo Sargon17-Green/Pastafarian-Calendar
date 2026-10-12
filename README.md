@@ -921,3 +921,16 @@ rejection multi-campione, salto astronomico,
 falsificazioni e regressioni delle dieci patch
 precedenti. Stage22 resta atteso RED con
 34 PASS / 3 FAIL intenzionali.
+
+### Certificazione nativa dello Stage23
+
+La [GitHub Actions run 38232681790](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38232681790)
+ha terminato SUCCESS **24 job su 24** sul commit
+`64545b94fbccc90f74faedf658b68e022ea14a54`.
+Stage23 ha raggiunto **42 PASS / 0 FAIL**, mentre
+Stage22 conserva esattamente **34 PASS / 3 FAIL
+intenzionali**. Le suite Stage01–Stage21
+preservano le firme native storiche. La PATCH 11
+conserva il vecchio rango e il numero dei rifiuti,
+inclusi casi BigInt in cui un ciclo non sarebbe
+computabile nel tempo utile. Stage24 non iniziato.
