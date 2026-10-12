@@ -113,6 +113,22 @@ public static class CalendarDateSpaghetti
         return manager.EvaluateVisibleDrop(calculationDay, targetDay, ordinal);
     }
 
+    // باب التاريخ لترتيب الأوعية: تُمرر الرتبة الواحدية خطأً إلى مفكك صفري.
+    public static int[] EvaluateLegacyBowlOrder(
+        BigInteger calculationDay, BigInteger targetDay, BigInteger dropValue)
+    {
+        return new MonsterManager().EvaluateLegacyBowlOrder(
+            calculationDay, targetDay, dropValue);
+    }
+
+    // يختبر باباً إنتاجياً حقيقياً يبدأ من القطرة الظاهرة المصححة.
+    public static int[] EvaluateLegacyBowlOrderFromVisibleDrop(
+        BigInteger calculationDay, BigInteger targetDay, int index)
+    {
+        return new MonsterManager().EvaluateLegacyBowlOrderFromVisibleDrop(
+            calculationDay, targetDay, index);
+    }
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

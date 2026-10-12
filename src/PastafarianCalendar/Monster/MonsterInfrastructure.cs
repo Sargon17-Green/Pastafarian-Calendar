@@ -227,6 +227,7 @@ public sealed class MonsterDispatcher
     private readonly PriorAccessWrapper _priorAccess;
     private readonly LegacyVisibleGrindPhaseHandler _legacyGrind;
     private readonly VisibleDropPatchPhaseHandler _visibleDropPatch;
+    private readonly LegacyBowlPermutationPhaseHandler _legacyBowlPermutation;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -245,6 +246,7 @@ public sealed class MonsterDispatcher
         _priorAccess = new PriorAccessWrapper();
         _legacyGrind = new LegacyVisibleGrindPhaseHandler();
         _visibleDropPatch = new VisibleDropPatchPhaseHandler();
+        _legacyBowlPermutation = new LegacyBowlPermutationPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -537,6 +539,26 @@ public sealed class MonsterDispatcher
     private LegacyGrindRow _legacyGrindRowForWitness()
         => LegacyVisibleGrindTable.LegacyGrindRow(1);
 
+    public void DispatchLegacyBowlOrder(MonsterContext context)
+    {
+        if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
+            throw new MonsterValidationException("ترتيب الأوعية التاريخي يحتاج سياقاً مؤسساً.");
+        if (context.LegacyBowlOrderInput is null ||
+            context.LegacyBowlOrderResult is not null ||
+            context.LegacyBowlOneBasedRank.HasValue)
+            throw new MonsterValidationException("قيمة القطرة مفقودة أو حُفظ ترتيب قديم من قبل.");
+
+        // لا نغيّر الحالة أو السجلات قبل نجاح المفكك؛ الرتبة 720 ترمي استثناءً.
+        var pending = _legacyBowlPermutation.Handle(context);
+        var rank = LegacyBowlPermutation.WrongOneBasedRank(context.LegacyBowlOrderInput.Value);
+        context.LegacyBowlOneBasedRank = rank;
+        context.LegacyBowlOrderResult = pending;
+        context.BranchTrace.Add("LEGACY_BOWL_PERMUTATION");
+        _metrics.Bump(context, "legacy.bowl.permutation.dispatch");
+        context.Status = "LEGACY_BOWL_PERMUTATION_COMPLETE";
+        context.Phase = "LEGACY_BOWL_PERMUTATION_COMPLETE";
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -805,6 +827,46 @@ public sealed class MonsterManager
         var context = ExecutePatchedVisibleDrops(calculationDay, targetDay);
         return context.PatchedVisibleDrops?[i]
             ?? throw new MonsterValidationException("لم تُثبت القطرة الظاهرة المطلوبة.");
+    }
+
+    public MonsterContext ExecuteLegacyBowlOrder(
+        BigInteger calculationDay, BigInteger targetDay, BigInteger dropValue)
+    {
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacyBowlOrderInput = dropValue;
+        _dispatcher.DispatchLegacyBowlOrder(context);
+        return context;
+    }
+
+    public int[] EvaluateLegacyBowlOrder(
+        BigInteger calculationDay, BigInteger targetDay, BigInteger dropValue)
+    {
+        var context = ExecuteLegacyBowlOrder(calculationDay, targetDay, dropValue);
+        return context.LegacyBowlOrderResult ??
+            throw new MonsterValidationException("لم يُنتج ترتيب الأوعية القديم.");
+    }
+
+    public MonsterContext ExecuteLegacyBowlOrderFromVisibleDrop(
+        BigInteger calculationDay, BigInteger targetDay, int index)
+    {
+        if (index is < 1 or > 46)
+            throw new MonsterValidationException("رقم القطرة الظاهرة خارج المجال.");
+
+        // هذه القطرة تأتي من سلسلة الطحْن المصححة فعلياً، لا من مرجع الاختبار.
+        var dropValue = EvaluateVisibleDrop(calculationDay, targetDay, index);
+        var context = Prepare(calculationDay, targetDay);
+        context.LegacyBowlVisibleIndex = index;
+        context.LegacyBowlOrderInput = dropValue;
+        _dispatcher.DispatchLegacyBowlOrder(context);
+        return context;
+    }
+
+    public int[] EvaluateLegacyBowlOrderFromVisibleDrop(
+        BigInteger calculationDay, BigInteger targetDay, int index)
+    {
+        return ExecuteLegacyBowlOrderFromVisibleDrop(calculationDay, targetDay, index)
+            .LegacyBowlOrderResult ?? throw new MonsterValidationException(
+                "لم يُنتج ترتيب الأوعية من القطرة الظاهرة.");
     }
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)

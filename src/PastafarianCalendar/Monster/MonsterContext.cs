@@ -65,6 +65,12 @@ public sealed class MonsterContext
     // الرقعة السابعة تترك الندبة في السياق وتضيف 46 قطرة مستقلة مكتملة.
     public BigInteger[]? PatchedVisibleDrops { get; set; }
 
+    // مصفوفة ترتيب الأوعية التاريخية مملوكة للاستدعاء، مع رقم الرتبة الواحدي الخاطئ.
+    public BigInteger? LegacyBowlOrderInput { get; set; }
+    public int? LegacyBowlOneBasedRank { get; set; }
+    public int[]? LegacyBowlOrderResult { get; set; }
+    public int? LegacyBowlVisibleIndex { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

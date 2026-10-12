@@ -114,3 +114,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage14Tests/PastafarianCalendar.Stage14Tests.csproj --configuration Release -- --verify-expected-red
       - name: مطابقة رقعة الحارس السابعة وحساب القطرات الظاهرة مع المرجع
         run: dotnet run --project tests/PastafarianCalendar.Stage15Tests/PastafarianCalendar.Stage15Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لفهرسة ترتيب الأوعية
+        id: discovery_bowl_order_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage16Tests/PastafarianCalendar.Stage16Tests.csproj --configuration Release
+      - name: إثبات توقيع انزياح الرتبة الثامنة دون الرقعة
+        if: always()
+        run: |
+          test "${{ steps.discovery_bowl_order_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage16Tests/PastafarianCalendar.Stage16Tests.csproj --configuration Release -- --verify-expected-red
