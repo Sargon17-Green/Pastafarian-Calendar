@@ -20,6 +20,7 @@ public final class Stage02IncrementalRouteTests {
         siblingBackwardFunctionalFullYearProbe();
         sharedGlobalRankRouteSmallOracle();
         sharedGlobalRankRouteFullYearInterior();
+        sharedGlobalRankRouteInteroperabilityAndBudgets();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
         binomialCacheCallOrderNeutrality();
@@ -145,6 +146,79 @@ public final class Stage02IncrementalRouteTests {
                     "E_SHARED_ROUTE_ORACLE");
             }
         }
+    }
+
+
+    private static void sharedGlobalRankRouteInteroperabilityAndBudgets() {
+        int[] lengths = {5, 5, 5, 5};
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        int[] prefix = {1, 2, 3, 4};
+        int[] chosenChild = {1, 2, 3, 4, 4};
+        MonsterWeavingLinearCounter.BoundaryBlock child =
+            family.globalBlockForPrefix(chosenChild);
+        BigInteger rank = child.lowerRank().add(child.upperRank())
+            .divide(BigInteger.TWO);
+        MonsterWeavingLinearCounter.RankRoute initial =
+            family.beginGlobalRankRouteWithinPrefix(prefix, rank, 0);
+        MonsterWeavingLinearCounter.RankRoute legacyProbe =
+            family.advanceGlobalRankRoute(initial, 1, 1);
+        ok(legacyProbe.probedBranches() > 0,
+            "E_SHARED_MIX_LEGACY_PROBE");
+        MonsterWeavingLinearCounter.RankRoute zero =
+            family.advanceGlobalRankRouteShared(legacyProbe, 1, 0);
+        eq(0, zero.lastSharedBatchCalls(),
+            "E_SHARED_MIX_ZERO_BUDGET");
+        eq(legacyProbe.probedBranches(), zero.probedBranches(),
+            "E_SHARED_MIX_ZERO_PROBES");
+        eq(legacyProbe.skippedChoices(), zero.skippedChoices(),
+            "E_SHARED_MIX_ZERO_SKIPPED");
+        array(legacyProbe.fixedPrefixCopy(), zero.fixedPrefixCopy(),
+            "E_SHARED_MIX_ZERO_PREFIX");
+        MonsterWeavingLinearCounter.RankRoute shared =
+            family.advanceGlobalRankRouteShared(zero, 1, 1);
+        eq(1, shared.lastSharedBatchCalls(),
+            "E_SHARED_MIX_ONE_BATCH");
+        eq(0, shared.lastCountCalls(),
+            "E_SHARED_MIX_NO_ORDINARY_COUNTS");
+        eq(5, shared.stepsCompleted(), "E_SHARED_MIX_ONE_STEP");
+        array(chosenChild, shared.fixedPrefixCopy(),
+            "E_SHARED_MIX_EXPECTED_CHILD");
+        eq(child.lowerRank(), shared.lowerRank(),
+            "E_SHARED_MIX_CHILD_LOWER");
+        eq(child.upperRank(), shared.upperRank(),
+            "E_SHARED_MIX_CHILD_UPPER");
+        eq(1, legacyProbe.probedBranches(),
+            "E_SHARED_MIX_PREVIOUS_IMMUTABLE");
+        MonsterWeavingLinearCounter.RankRoute backToLegacy =
+            family.advanceGlobalRankRoute(shared, 1, 1);
+        ok(backToLegacy.lowerRank().compareTo(rank) <= 0
+                && backToLegacy.upperRank().compareTo(rank) >= 0,
+            "E_SHARED_MIX_BACK_TO_LEGACY");
+        ok(backToLegacy.stepsCompleted() >= shared.stepsCompleted(),
+            "E_SHARED_MIX_LEGACY_MONOTONE");
+        MonsterWeavingLinearCounter foreign =
+            new MonsterWeavingLinearCounter(lengths);
+        boolean rejected = false;
+        try {
+            foreign.advanceGlobalRankRouteShared(shared, 1, 1);
+        } catch (IllegalArgumentException expected) {
+            rejected = true;
+        }
+        ok(rejected, "E_SHARED_MIX_FOREIGN_OWNER_REJECTED");
+        rejected = false;
+        try {
+            family.advanceGlobalRankRouteShared(shared, 1, 65);
+        } catch (IllegalArgumentException expected) {
+            rejected = true;
+        }
+        ok(rejected, "E_SHARED_MIX_OVER_BUDGET_REJECTED");
+        MonsterWeavingLinearCounter.RankRoute noSteps =
+            family.advanceGlobalRankRouteShared(shared, 0, 0);
+        eq(0, noSteps.lastSharedBatchCalls(),
+            "E_SHARED_MIX_NO_STEPS_NO_BATCHES");
+        array(shared.fixedPrefixCopy(), noSteps.fixedPrefixCopy(),
+            "E_SHARED_MIX_NO_STEPS_OWNERSHIP");
     }
 
     private static void sharedGlobalRankRouteFullYearInterior() {
