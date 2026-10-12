@@ -1191,3 +1191,27 @@ ha conclusione **SUCCESS in 31/31 job**, con **53 PASS e 3 FAIL
 intenzionali** nello Stage30. Stage29 conserva 55 PASS/0 FAIL
 e tutte le firme anteriori rimangono previste. La fase
 successiva è Stage31 PATCH15; non è ancora implementata.
+
+## Stadio 31 — PATCH 15 (tessitura mensile annuale unica)
+
+La selezione corretta deve usare un **solo rango annuale** e la
+**stessa tessitura** per ogni posizione quotidiana. Il wrapper
+`Patch15MonthWeavingWrapper.daywiseWeavingPatch` attraversa
+davvero `LegacyDaywiseWeavingAdapter.legacyChooseEachDaySeparately`
+mantenendo il risultato sbagliato, poi usa soltanto
+`candidates(yearRank1 - 1)` per identificare il mese e il giorno
+del mese, contando le occorrenze dell'ID fino al giorno richiesto.
+
+La trace nella stessa invocazione e' `BOOT → DISCOVERY_15 →
+PATCH_15`. Il validator indipendente ricostruisce la scelta legacy,
+la sequenza annuale e il contatore discontinuo di ogni mese.
+Verifica inoltre la snapshot dei candidati e del rango originario
+e rifiuta manipolazioni dello stato.
+
+`sbt -batch 'Test / runMain pastafari.Stage31Tests'`
+esegue 66 controlli, fra cui l'intera annata di 252 giorni
+per tre ranghi, oltre 4096 vettori deterministici su 24 tessiture,
+mesi di lunghezza 123, 47 mesi, alterazioni dei campi e regressioni
+delle PATCH01–14. Stage30 conserva le tre divergenze intenzionali
+mentre Stage31 e' GREEN. L'esercizio usa famiglie sintetiche fornite
+dal chiamante; non dichiara completata la scelta canonica via salsa.

@@ -1418,3 +1418,14 @@ La firma Stage30 è 53 PASS e 3 FAIL intenzionali, limitati
 esattamente a rango2_giorno1, rango3_giorno1 e rango3_giorno2.
 Il validator e la snapshot difendono gli input. Il legacy
 è preservato, senza anticipare PATCH15 o l'oracolo in produzione.
+
+## Stadio 31 — PATCH 15: una sola tessitura per tutto l'anno
+
+Il vecchio helper viene davvero richiamato prima del risultato
+corretto, preservando `dayRank1` e `monthId` legacy; il wrapper
+seleziona l'intera tessitura in base al rango annuale 1-based,
+indipendentemente da `dayOffset`, quindi conta il giorno nel
+mese tramite occorrenze nel prefisso, persino con mesi intercalati.
+Context, trace, snapshot, validator e 14 PATCH precedenti restano
+verificabili. La validazione non usa il wrapper corretto ne'
+l'oracolo test-only. Nessuna Stage32 anticipata.

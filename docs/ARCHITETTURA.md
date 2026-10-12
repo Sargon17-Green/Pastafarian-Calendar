@@ -524,3 +524,20 @@ La run 38260196811 (31 job SUCCESS) dimostra tre divergenze
 specifiche del ricalcolo del rango giorno per giorno. Il modello
 di riferimento della scelta annuale costante è test-only; la
 PATCH15 e la reale selezione annuale della salsa restano future.
+
+## PATCH 15 — tessitura annuale fissa e giorno nel mese
+
+La scelta sintetica della tessitura annuale si compie con
+`candidates((yearRank1 - 1).toInt)`, essendo il rango validato
+rispetto a una famiglia materializzata e quindi limitata a Int.
+Per ogni giorno `d`, l'ID del mese e' `weave(d)`; il giorno nel
+mese e' il numero di occorrenze del medesimo ID nel prefisso
+`weave(0..d)`. I mesi possono essere intrecciati, quindi non
+si assume mai che i loro giorni siano contigui.
+
+Il legacy ricalcola ancora il rango in funzione di `d` e
+resta disponibile con il proprio risultato nella stessa trace.
+Handler e validator respingono cambi successivi alla discovery
+anche quando il mese visualizzato non muta. Questo e' un modello
+diagnostico di candidati gia' preparati, non una costruzione
+canonica della famiglia `WeavingFamily` o della salsa annuale.

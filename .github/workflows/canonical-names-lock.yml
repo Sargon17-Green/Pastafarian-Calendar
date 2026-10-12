@@ -722,3 +722,23 @@ jobs:
           for label in rango2_giorno1 rango3_giorno1 rango3_giorno2; do
             grep -Fq "FAIL — equivalenza normativa tessitura ${label} — Ricampionamento giornaliero: ${label}" stage30.log
           done
+
+  native-stage31-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage31 single annual month weaving PATCH 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage31Tests' 2>&1 | tee stage31.log
+          grep -Fq 'RISULTATO STADIO 31: 66 PASS, 0 FAIL' stage31.log
+          test "$(grep -Fc 'PASS — ' stage31.log)" -eq 66
+          test "$(grep -Fc 'FAIL — ' stage31.log)" -eq 0
