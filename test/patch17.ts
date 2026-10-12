@@ -197,7 +197,7 @@ try{
  };
  patch17Year5000Tie(f.day,-1n,f.historical,f.signed,f.year,f.anchor,f.multi);
  check(realOldSort===2&&realOldComparisons>=2&&
-  realSelectionCalls===4&&realPredicateCalls===3,
+  realSelectionCalls===5&&realPredicateCalls===3,
   "Stage34 old + Stage35 additional historical sorter and four actual full selectors");
 }finally{
  LegacyYear5000LengthOnlySorter.prototype.oldSortStable=oldSort;
@@ -236,7 +236,7 @@ for(const where of ["old_predicate","signed_gate","old_sort","second_old_sort","
   else
    Patch14WideChoiceDispatcher.prototype.dispatch=function(...args){
     calls++;
-    if(calls===(where==="signed_gate"?2:4))throw Error(mark);
+    if(calls===(where==="signed_gate"?2:5))throw Error(mark);
     return dispatch.apply(this,args);
    };
   try{
