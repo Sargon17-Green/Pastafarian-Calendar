@@ -965,3 +965,34 @@ Giai đoạn 25 `PATCH 12`: giữ và gọi hàm
 `old_next_bowl_fixed_name` để chẩn đoán, còn kết quả
 phải tìm ID trong `order_at_46_latch` và lấy phần tử
 tiếp theo theo vòng sáu vị trí. Chưa bắt đầu giai đoạn 25.
+
+## Giai đoạn 25 — Bản vá 12: bát kế tiếp theo vị trí, legacy chỉ chẩn đoán
+
+`LegacyFixedNameSuccessor.old_next_bowl_fixed_name(id)` được
+giữ nguyên, vẫn trả vòng ID cố định `rem(id,6)+1`.
+Bản vá không thay thuật toán legacy, cũng không bỏ nó
+khỏi đường chạy. `NextBowlPatchWrapper.diagnose` gọi
+**thật** hàm legacy để lấy `legacy_next_id`, rồi gọi
+`OrderAt46LatchPatch.next_bowl` để lấy `correct_next_id`
+qua vị trí của ID trong hoán vị đã chốt sau giọt 46.
+Báo cáo riêng cho từng lời gọi có cả hai kết quả và
+cờ `diverges`; API sản xuất `next_bowl_spaghetti`
+chỉ trả `correct_next_id`.
+
+Với thứ tự [4,5,2,3,6,1], ID 3 nhận giá trị chuẩn 6
+trong khi báo cáo legacy giữ nguyên kết quả sai 4.
+Với ID ở vị trí thứ sáu, kết quả quay về phần tử
+đầu danh sách theo thứ tự thực. Đường public cho phép
+xem chẩn đoán tách biệt, không dùng biến chung hoặc
+đưa giá trị sai vào tính toán chuẩn.
+
+Chốt giọt 46, cả 58 lần ghi LegacyOrderMemory, 12 lượt
+khuấy cuối và sáu bát đều giữ nguyên. Mười hai phép
+so sánh đỏ từ giai đoạn 24 cần trở lại đạt:
+bốn hồi quy Stage24, sáu Stage22 và hai Stage23.
+Ở bài fixture Stage24 vẫn giữ giá trị chuẩn kỳ vọng
+nhưng gọi wrapper, còn lời gọi thô legacy vẫn được
+kiểm chứng riêng. Thêm 16 bài Stage25 gồm 720 hoán vị
+x 6 ID, sai lệch chẩn đoán, biên cuối-đầu, ngày lớn,
+không trạng thái chung, tính bất biến và mã nguồn.
+Không bắt đầu DISCOVERY 13.

@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=24
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=25
+CURRENT_KIND=PATCH
 CURRENT_PATCH=12
 LAST_COMPLETED_STAGE=24
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..11, orderAt46Latch chốt đúng và LegacyOrderMemory ghi đủ 58 lần; thêm LegacyFixedNameSuccessor trả vòng tên 1->2->3->4->5->6->1, Dispatcher.next_bowl cố ý dùng vòng ID cố định thay vì tìm vị trí trong latch.
+MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyFixedNameSuccessor với vòng ID 1..6; NextBowlPatchWrapper luôn gọi legacy để lấy báo cáo chẩn đoán, nhưng kết quả công khai từ OrderAt46LatchPatch.next_bowl đọc vị trí ID trong latch giọt 46. LegacyOrderMemory vẫn ghi 58 lần; giữ PATCH 01..11.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_24_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_25_PENDING
+GIT_HISTORY_MUTATED=STAGE_25_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=301
-CI_FAILURES=12_EXPECTED_ONLY
+CI_TESTS=STAGE_25_PENDING
+CI_FAILURES=STAGE_25_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -539,3 +539,21 @@ CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38265844
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38265844794
 Giai đoạn 24 đóng EXPECTED_RED; điểm tiếp theo
 giai đoạn 25 PATCH 12, chưa bắt đầu.
+
+Giai đoạn 25 PATCH 12: không sửa LegacyFixedNameSuccessor,
+giữ vòng ID cố định rem(id,6)+1 và gọi thật legacy qua
+NextBowlPatchWrapper.diagnose(order_at_46_latch,queried_id).
+Đồng thời lấy correct_next_id qua OrderAt46LatchPatch.next_bowl
+với ID trong hoán vị giọt 46. Báo cáo có queried_id,
+legacy_next_id, correct_next_id và diverges; giá trị trả
+cho Dispatcher.next_bowl là correct_next_id, không phải
+legacy_next_id. API chẩn đoán mới chỉ để quan sát bằng chứng.
+Không sửa 46 giọt, 12 khuấy, order latch hay 58 lần ghi.
+Giữ các khẳng định normative Stage22-24, chỉ cập nhật
+bài kiểm soát Stage24 đòi production còn sai và kiểm
+toán nguồn Stage23. Với hồi quy fixture Stage24,
+đường gọi chuẩn chuyển sang wrapper, nhưng expected
+vẫn như cũ, chứng cứ legacy trực tiếp còn trong test.
+Thêm 16 kiểm thử Stage25, tổng dự kiến 317 GREEN.
+LAST_COMPLETED_STAGE giữ 24 trước CI. Không bắt đầu
+giai đoạn 26 về luồng đáp án hoặc lịch cuối.

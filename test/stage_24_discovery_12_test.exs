@@ -6,6 +6,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage24Discovery12Test do
   alias PastafariCalendarElixirVietnamese.Monster.{
     LegacyFixedNameSuccessor,
     LegacyOrderMemory,
+    NextBowlPatchWrapper,
     OrderAt46LatchPatch
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
@@ -77,13 +78,19 @@ defmodule PastafariCalendarElixirVietnamese.Stage24Discovery12Test do
                rem(Enum.find_index(ctx.order_memory.order, &(&1 == 1)) + 1, 6))
   end
 
-  test "đường production thật chọn vòng ID cố định cho mọi tên bát" do
+  test "đường production dùng latch, vòng ID cố định chỉ làm chẩn đoán" do
     f = Ref.foundation_day()
 
     for {c, t} <- [{f, f}, {f - 11, f + 19}, {f + 19, f - 11}],
         id <- @ids do
       assert Calendar.next_bowl_spaghetti(c, t, id) ==
+               OrderAt46LatchPatch.next_bowl(
+                 Calendar.order_at_46_latch_spaghetti(c, t), id)
+
+      diagnostic = Calendar.next_bowl_diagnostic_spaghetti(c, t, id)
+      assert diagnostic.legacy_next_id ==
                LegacyFixedNameSuccessor.old_next_bowl_fixed_name(id)
+      assert diagnostic.correct_next_id == Calendar.next_bowl_spaghetti(c, t, id)
     end
   end
 
@@ -124,7 +131,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage24Discovery12Test do
     end
   end
 
-  test "số ngày 2048 bit không tác động công thức vòng cố định" do
+  test "số ngày 2048 bit giữ legacy cố định nhưng đường chính theo latch" do
     f = Ref.foundation_day()
     shift = (1 <<< 2048) + 1
 
@@ -134,7 +141,10 @@ defmodule PastafariCalendarElixirVietnamese.Stage24Discovery12Test do
       assert ctx.order_memory.writes == 58
 
       for id <- @ids do
-        assert Calendar.next_bowl_spaghetti(c, t, id) == rem(id, 6) + 1
+        assert Calendar.next_bowl_spaghetti(c, t, id) ==
+                 OrderAt46LatchPatch.next_bowl(ctx.order_at_46_latch, id)
+        assert Calendar.next_bowl_diagnostic_spaghetti(c, t, id).legacy_next_id ==
+                 rem(id, 6) + 1
       end
     end
   end
@@ -153,7 +163,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage24Discovery12Test do
     |> Enum.each(fn {{c, t}, ctx} ->
       assert ctx.order_at_46_latch == Ref.sauce(c, t).order_at_drop_46
       assert ctx.order_memory.writes == 58
-      assert Calendar.next_bowl_spaghetti(c, t, 6) == 1
+      assert Calendar.next_bowl_spaghetti(c, t, 6) ==
+               OrderAt46LatchPatch.next_bowl(ctx.order_at_46_latch, 6)
     end)
   end
 
@@ -170,23 +181,26 @@ defmodule PastafariCalendarElixirVietnamese.Stage24Discovery12Test do
     end
   end
 
-  test "kiểm toán mã nguồn giữ tên vòng cố định và chưa có Patch 12" do
+  test "kiểm toán mã nguồn giữ vòng ID cũ và chuyển production qua Patch 12" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = Path.join(root, "legacy_fixed_name_successor.ex") |> File.read!()
     dispatcher = Path.join(root, "dispatcher.ex") |> File.read!()
     latch = Path.join(root, "order_at_46_latch_patch.ex") |> File.read!()
+    patch = Path.join(root, "next_bowl_patch_wrapper.ex") |> File.read!()
 
     assert legacy =~ "rem(id, 6) + 1"
-    assert dispatcher =~ "LegacyFixedNameSuccessor.old_next_bowl_fixed_name(queried_bowl_id)"
-    assert dispatcher =~ "_latch = order_at_46_latch(calculation_day, target_day)"
+    assert dispatcher =~ "NextBowlPatchWrapper.next_bowl(queried_bowl_id)"
+    assert dispatcher =~ "NextBowlPatchWrapper.diagnose(queried_bowl_id)"
     assert latch =~ "LegacyOrderMemory.next_bowl("
+    assert patch =~ "LegacyFixedNameSuccessor.old_next_bowl_fixed_name(queried_id)"
+    assert patch =~ "OrderAt46LatchPatch.next_bowl(order_at_46_latch, queried_id)"
+    assert File.exists?(Path.join(root, "next_bowl_patch_wrapper.ex"))
     refute legacy =~ "OrderAt46LatchPatch"
-    refute File.exists?(Path.join(root, "next_bowl_patch_wrapper.ex"))
   end
 
   test "hồi quy chuẩn vòng giả lập ID 3: cố ý đỏ phát hiện 12" do
     expected = next_from_order(@fixture, 3)
-    assert LegacyFixedNameSuccessor.old_next_bowl_fixed_name(3) == expected
+    assert NextBowlPatchWrapper.next_bowl(@fixture, 3) == expected
   end
 
   test "hồi quy chuẩn toàn bộ ID ngày gốc: cố ý đỏ phát hiện 12" do

@@ -2,9 +2,9 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 24 vẫn chốt đúng thứ tự giọt 46 nhưng truy vấn
-  bát kế tiếp cố ý theo vòng ID 1..6 cố định của legacy,
-  bỏ qua vị trí thật trong latch. Các bản vá cũ được giữ.
+  Giai đoạn 25 giữ bộ ID cố định của legacy để chẩn đoán
+  nhưng trả bát kế tiếp bằng vị trí thực trong chốt giọt 46.
+  Các bản vá trước đều còn nguyên.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}
@@ -79,6 +79,10 @@ defmodule PastafariCalendarElixirVietnamese do
 
   def next_bowl_spaghetti(calculation_day, target_day, queried_bowl_id) do
     Dispatcher.next_bowl(calculation_day, target_day, queried_bowl_id)
+  end
+
+  def next_bowl_diagnostic_spaghetti(calculation_day, target_day, queried_bowl_id) do
+    Dispatcher.next_bowl_diagnostic(calculation_day, target_day, queried_bowl_id)
   end
 
   def calendar_date_spaghetti(calculation_day, target_day) do

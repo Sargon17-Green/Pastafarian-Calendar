@@ -833,3 +833,30 @@ không thay các phép so chuẩn hay số học production.
 Giai đoạn 24 đóng EXPECTED_RED. Kế tiếp PATCH 12
 phải bảo tồn và thực thi legacy cố định cho chẩn đoán,
 trả kết quả từ vị trí thực trong latch.
+
+## Giai đoạn 25 — Bản vá 12: giữ vòng ID làm bằng chứng, trả kết quả từ latch
+
+**Di sản:** `LegacyFixedNameSuccessor` giữ nguyên,
+vẫn tính `rem(id,6)+1` mà không biết thứ tự bát.
+Với dữ liệu fixture Stage24, hỏi ID 3 trực tiếp qua
+legacy vẫn cho 4, không phải 6. Không có sửa
+LegacyOrderMemory, OrderAt46LatchPatch hoặc các bước
+tính bát và giọt trước đó.
+
+**Bản vá mới:** `NextBowlPatchWrapper` gọi
+`LegacyFixedNameSuccessor.old_next_bowl_fixed_name`
+cho mỗi truy vấn và cất kết quả vào trường
+`legacy_next_id` của chẩn đoán. Nó gọi tiếp
+`OrderAt46LatchPatch.next_bowl(order_at_46_latch,id)`
+để tính `correct_next_id`, sử dụng đúng vị trí của
+ID trong hoán vị đã chốt, kể cả vòng từ vị trí cuối
+về đầu. Cờ `diverges` phản ánh sự khác nhau giữa
+hai giá trị; `next_bowl` chỉ trả kết quả đúng.
+
+**Bảo toàn:** Cả 58 lần ghi legacy, thứ tự giọt 46,
+12 lần khuấy cuối và mọi giá trị SAVE được giữ.
+Các so sánh oracle thuộc Stage22..24 không đổi kỳ vọng,
+các kiểm soát Stage24 tách hành vi legacy trực tiếp
+khỏi lời gọi production. Bổ sung 16 bài kiểm thử về
+tất cả 720 hoán vị, dữ liệu xa, bối cảnh song song,
+giới hạn và chẩn đoán trực tiếp. Giai đoạn 26 chưa mở.
