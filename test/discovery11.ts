@@ -97,14 +97,17 @@ check(sample.legacyQueryOrder!==sample.ledger[57]!.order,
   "query copies mutable memory; forensic log not runtime query source");
 
 // The original one-buffer adapter really rewrites the *same* object 58 times.
-const mem=new LegacySharedOrderMemoryAdapter(),same=mem.memoryIdentity();
+const mem=new LegacySharedOrderMemoryAdapter(),same=mem.memoryIdentity;
 for(let k=1;k<=46;k++){
   mem.write("DROP_"+k,[1,2,3,4,5,6]);
-  check(mem.memoryIdentity()===same,"physical general memory identity unchanged");
+  check(mem.memoryIdentity===same,"physical general memory identity unchanged");
 }
 for(let k=1;k<=12;k++)mem.write("STIR_"+k,[6,5,4,3,2,1]);
-check(mem.writes===58&&mem.latestSource==="STIR_12"&&mem.queries===0&&
-  mem.queryLegacyOrder().join(",")==="6,5,4,3,2,1"&&mem.queries===1,
+const beforeQuery=mem.queries;
+const queried=mem.queryLegacyOrder();
+const afterQuery=mem.queries;
+check(mem.writes===58&&mem.latestSource==="STIR_12"&&beforeQuery===0&&
+  queried.join(",")==="6,5,4,3,2,1"&&afterQuery===1,
   "query actually invokes last-value memory");
 check(rejects(()=>mem.write("STIR_13",[1,2,3,4,5,6]),MonsterValidationError)&&
   rejects(()=>mem.write("DROP_47",[1,2,3,4,5,6]),MonsterValidationError)&&

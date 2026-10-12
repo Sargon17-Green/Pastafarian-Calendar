@@ -12,7 +12,7 @@ const contexts=new Set<object>();
 let cases=0,writes=0,dropRounds=0,postStirs=0,ledgerCells=0;
 let queryDifferences=0,queryMatches=0,threePositionWitnesses=0;
 function verify(c:bigint,t:bigint,visible:readonly bigint[],
-  start:readonly bigint[],stones:readonly (readonly bigint[])[]):void{
+  start:readonly bigint[],stones:typeof STONES):void{
   const obs=discoverLegacyOrderMemory(c,t,visible,stones,start);
   const normativeDrops=applyVisibleDropsToBowls(
     [...start] as [bigint,bigint,bigint,bigint,bigint,bigint],visible,stones);
