@@ -546,3 +546,36 @@ Hàm lịch sử giữ nguyên blob SHA
 Oracle test-only giữ nguyên blob SHA
 `be1638f46b2190d617af0378a61b077bda10bf32`.
 Bản vá 08 kết thúc GREEN. Chưa bắt đầu DISCOVERY 09.
+
+## Giai đoạn 18 — Phát hiện 09: ba nguồn rót dùng vị trí cũ
+
+**Điểm xuất phát:** Các bước SAVE, day tag, distance, đá,
+hidden, visible, bảng nghiền và hoán vị sáu bát đã qua
+PATCH 01..08. Đường sản xuất mới tính sáu bát ban đầu và
+46 bước khuấy với snapshots bất biến trong mỗi lần cập nhật.
+
+**Hàm lỗi lịch sử:** `LegacyPourPositions.read_old`
+thực hiện `Map.fetch!(bowls_old,position)` với position
+thuộc 1..3. Nó không biết rằng hoán vị hiện tại ánh xạ
+mỗi vị trí sang một ID bát khác. Ba phép rót dùng
+`drop² + stone(position)*old[position] + (2*position+1)*i`
+bên trong SAVE. Công thức chuẩn phải dùng
+`old[order[position]]`.
+
+**Ranh giới trách nhiệm:** Chỉ phép đọc nguồn ba lần
+rót được làm sai; kết quả cập nhật của mỗi vị trí vẫn
+được lưu dưới ID bát thật, các bát trước/sau vẫn đọc từ
+`old`. Không đưa lỗi contamination in-place hay lỗi latch
+sớm hơn các giai đoạn đã định.
+
+**Bản vá tương lai:** PATCH 09 sẽ giữ
+`LegacyPourPositions` nhưng định tuyến
+`bowlAlias[position]=order[position]` tới mỗi lần
+đọc của ba phép rót. Không đổi thứ tự bát đã vá hoặc
+hệ số của công thức.
+
+**Kiểm thử:** 16 bài mới: 12 điều khiển vị trí sai,
+phép SAVE, một bước đúng khi order là đồng nhất,
+sáu bát khởi đầu, 46 bước, biến lớn, chạy đồng thời,
+các bản vá cũ và kiểm toán nguồn; bốn hồi quy chuẩn
+cố ý đỏ ở rót trực tiếp, một bước khuấy và kết quả cuối.

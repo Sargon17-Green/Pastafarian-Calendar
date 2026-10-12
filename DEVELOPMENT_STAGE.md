@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=17
-CURRENT_KIND=PATCH
-CURRENT_PATCH=08
+CURRENT_STAGE=18
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=09
 LAST_COMPLETED_STAGE=17
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ LegacyPermutationUnrank0 nguyên vẹn; BowlOrderManager chuyển one_based=rem(drop-1,720)+1 thành legacy_rank0=one_based-1 trước khi gọi hàm mở hạng cũ, giữ riêng 46 thứ tự trong context.
+MONSTER_ARCHITECTURE_GROWTH=Giữ các bản vá 01-08; khởi tạo sáu bát, khuấy qua 46 giọt với snapshot cũ và thứ tự ID đúng, nhưng LegacyPourPositions đọc bowls_old[position] thay vì ID qua order[position] cho ba nguồn rót.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_17_PATCH_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_18_PENDING
+GIT_HISTORY_MUTATED=STAGE_18_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=193
-CI_FAILURES=0
+CI_TESTS=STAGE_18_PENDING
+CI_FAILURES=STAGE_18_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -318,3 +318,16 @@ be1638f46b2190d617af0378a61b077bda10bf32.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235528620
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38235528637
 Giai đoạn 17 đóng GREEN; tiếp theo giai đoạn 18 DISCOVERY 09.
+
+Giai đoạn 18 mở lần phát hiện 09 về phép rót vào bát.
+BowlSeedCalculator tính sáu bát ban đầu theo chuẩn.
+BowlDropCalculator áp dụng đủ 46 giọt và 6 vị trí,
+đọc snapshot old, ghi map next mới cho mỗi lần cập nhật.
+Chỉ ba nguồn rót bị sai: LegacyPourPositions đọc
+Map.fetch!(bowls_old,position) cho position=1..3 thay vì
+ID bát tại order[position]. Số ID đích được lấy đúng từ order.
+Không thêm lỗi trộn in-place của DISCOVERY 10. Không tích hợp
+12 lần khuấy sau giọt 46 hoặc truy vấn ngày lịch cuối.
+16 bài kiểm thử mới gồm 12 kiểm soát và bốn hồi quy chuẩn đỏ.
+Dự kiến 209 bài kiểm thử, đúng bốn lỗi chủ đích.
+LAST_COMPLETED_STAGE giữ 17 trước xác minh CI.

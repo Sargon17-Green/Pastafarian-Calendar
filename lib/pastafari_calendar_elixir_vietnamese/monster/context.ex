@@ -4,8 +4,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Context do
 
   Nhãn ngày và khoảng cách đi qua các bản vá đã hoàn thành.
   Bảng đá đã qua bản vá 04 và bảy giọt ẩn qua bản vá 05.
-  Giọt nhìn thấy đã qua bản vá 07; thứ tự sáu bát đã
-  được ánh xạ đúng về hạng gốc không qua bản vá 08.
+  Giọt và hoán vị bát đã được vá; đường rót giai đoạn 18
+  đọc nhầm ID bát như vị trí cũ ở ba lần rót.
   Mỗi ngữ cảnh sở hữu dữ liệu của riêng mình.
   """
 
@@ -18,6 +18,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Context do
             hidden_drops_storage: nil,
             visible_drops: nil,
             bowl_orders: nil,
+            initial_bowls: nil,
+            bowls_after_drops: nil,
             phase: :bootstrap,
             sub_phase: 0,
             mode: :authoritative_bootstrap,

@@ -4,13 +4,15 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
-  Giai đoạn 17 vá cách truyền hạng vào bộ mở hạng gốc không,
-  giữ nguyên lời gọi legacy và 46 thứ tự bát trong context.
-  Chưa tích hợp ngày lịch.
+  Giai đoạn 18 cập nhật sáu bát qua 46 giọt. Ba nguồn rót
+  cố ý đọc ID bát theo vị trí cũ, bỏ qua thứ tự ID hiện tại.
+  Các bản vá trước không đổi; chưa tích hợp ngày lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     BowlOrderManager,
+    BowlSeedCalculator,
+    BowlDropCalculator,
     Context,
     DayCountManager,
     DistanceManager,
@@ -53,6 +55,21 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
     bowl_orders = BowlOrderManager.build_orders(visible_drops)
 
+    direction =
+      cond do
+        target_day < calculation_day -> 1
+        target_day == calculation_day -> 2
+        true -> 3
+      end
+
+    initial_bowls =
+      BowlSeedCalculator.calculate(
+        calculation_tag, target_tag, corrected_distance, direction
+      )
+
+    bowls_after_drops =
+      BowlDropCalculator.apply_all(initial_bowls, visible_drops, bowl_orders, stones_table)
+
     %Context{
       calculation_day: calculation_day,
       target_day: target_day,
@@ -63,6 +80,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
       hidden_drops_storage: hidden_storage,
       visible_drops: visible_drops,
       bowl_orders: bowl_orders,
+      initial_bowls: initial_bowls,
+      bowls_after_drops: bowls_after_drops,
       phase: :bootstrap,
       status: :validated,
       branch_trace: [:entry, :validated, :legacy_day_count, :day_tag_patch_02],
@@ -108,5 +127,13 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def bowl_order(calculation_day, target_day, index) do
     bowl_orders(calculation_day, target_day)
     |> BowlOrderManager.read_order(index)
+  end
+
+  def initial_bowls(calculation_day, target_day) do
+    bootstrap(calculation_day, target_day).initial_bowls
+  end
+
+  def bowls_after_drops(calculation_day, target_day) do
+    bootstrap(calculation_day, target_day).bowls_after_drops
   end
 end

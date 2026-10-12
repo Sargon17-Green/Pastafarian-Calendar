@@ -2,8 +2,9 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 17 sửa cách truyền hạng sáu bát về gốc không
-  và giữ nguyên bộ mở hạng lịch sử; các bản vá 01-07 vẫn còn.
+  Giai đoạn 18 dùng hoán vị bát đúng, nhưng phép rót
+  vẫn đọc ID bát theo vị trí cũ, sai ở ba nguồn rót.
+  Các bản vá 01-08 còn nguyên.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}
@@ -54,6 +55,14 @@ defmodule PastafariCalendarElixirVietnamese do
 
   def bowl_order_spaghetti(calculation_day, target_day, index) do
     Dispatcher.bowl_order(calculation_day, target_day, index)
+  end
+
+  def initial_bowls_spaghetti(calculation_day, target_day) do
+    Dispatcher.initial_bowls(calculation_day, target_day)
+  end
+
+  def bowls_after_drops_spaghetti(calculation_day, target_day) do
+    Dispatcher.bowls_after_drops(calculation_day, target_day)
   end
 
   def calendar_date_spaghetti(calculation_day, target_day) do

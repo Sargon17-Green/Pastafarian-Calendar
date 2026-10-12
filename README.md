@@ -607,3 +607,32 @@ Giai đoạn 17/55 kết thúc `GREEN`. Điểm tiếp theo là
 giai đoạn 18/55, `DISCOVERY 09`: lỗi các lần rót
 tham chiếu đến vị trí cũ thay vì danh tính bát cố định.
 Chưa bắt đầu giai đoạn 18.
+
+## Giai đoạn 18 — Phát hiện 09: rót sai vì nhầm vị trí với ID bát
+
+Sau khi tính chính xác 46 giọt và 46 hoán vị sáu ID bát,
+chương trình khởi tạo sáu bát `initial_bowls` theo công thức
+chuẩn rồi đi qua cả 46 lần khuấy, mỗi lần dùng snapshot
+`old` và map `next` độc lập. Đường sản xuất thực được
+kết nối tới `Dispatcher.bootstrap`, lưu
+`Context.initial_bowls` và `Context.bowls_after_drops`.
+
+Sai lầm lịch sử thứ chín nằm chính xác ở ba nguồn rót:
+`LegacyPourPositions.read_old(bowls_old,position)` đọc
+`bowls_old[position]` trực tiếp đối với vị trí 1, 2, 3,
+dù theo thứ tự `order` thì ID bát thực tại vị trí đó
+là `order[position]`. Công thức cho mỗi lần rót đúng
+ở các hệ số, SAVE và độ lệch theo số giọt, nhưng dùng
+giá trị của **bát sai**. Các bước khuấy tiếp theo đặt kết
+quả vào ID bát thật, đọc đúng các bát lân cận từ snapshot;
+không giới thiệu lỗi ghi đè in-place của giai đoạn 20.
+
+Bốn hồi quy chuẩn mới đối chiếu một lần rót, bước khuấy
+đầu và kết quả sau 46 giọt tại nhiều ngày. Chúng cố ý
+đỏ; các bản vá từ 01 tới 08 vẫn phải xanh. Không làm
+12 lần khuấy bổ sung sau giọt 46, không tích hợp lịch cuối.
+
+Giai đoạn 19, `PATCH 09`, sẽ bảo toàn LegacyPourPositions,
+thêm ánh xạ `bowlAlias[position]=order[position]` và
+cho **mọi lần đọc nguồn bát trong ba phép rót** đi qua alias
+trước khi gọi legacy. Chưa thực hiện điều này ở giai đoạn 18.
