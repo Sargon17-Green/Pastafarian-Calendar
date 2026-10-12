@@ -21,3 +21,15 @@ Important provenance: candidate close-gate days/indices in these stress witnesse
 `test/discovery16Red.ts`: sixteenth deliberately failing full production witness with three forbidden candidate lengths 5779, 5780 and 5781, including an actual Stage31 gate predecessor and an actual seal10 selection. The expected nonzero exception is verified via `test/verifyDiscovery16ExpectedRed.mjs` in normal `npm test`; previous fifteen historical expected-red scripts remain unchanged.
 
 CI closure requires both the independent names-lock job and the full native TypeScript test job SUCCESS. Preserve Stage33 PATCH16 entirely unimplemented, including no 5778 late filter. Last completed stage remains 31 until verified.
+
+## Verified GitHub Actions — 2026-10-12
+
+[Implementation commit cfc2dd9](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/cfc2dd9cb279ac096c1d3a875f45d325be10862a), [Actions run 38274577638](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38274577638), both `verify` and historical-named `stage27-typescript-marathi` jobs SUCCESS. Native TypeScript typecheck, all Stage1–32 regression cases, first fifteen archived intentionally-red proofs, sixteenth new historical RED verified with deliberate nonzero exit. Frozen name catalog hash unchanged.
+
+```text
+STAGE_32_DISCOVERY_16_GUARDS_PASS anchorSides=2 actualCases=4 legacyLongAccepted=6 selectorWrong=0 predicateCalls=12 selectorCalls=4 fullWrites=580 oldCalls=1 signedCalls=1 dispatchCalls=3 faultCases=2
+STAGE_32_DISCOVERY_16_PROPERTIES_PASS direct=255 wrongAccepted=12 directMismatch=12 realGates=12 positive=6 negative=6 anchorWrong=0 rankWrong=0 legacyCalls=42 extraSigned=21 realSelectors=12 realCalls=75 realWrites=4350 varied=64 giant=8 ranks=720 unique=720 variants=792 variantCalls=1584 variantWrites=91872 totalCalls=1659 totalWrites=96222 streamWrong=0 rankMismatch=0 selectedWrong=0
+STAGE_32_DISCOVERY_16_EXPECTED_RED_VERIFIED nonzero=1 mismatches=3 matches=0 oldMax=5781
+```
+
+**Stage32 complete, LAST_COMPLETED_STAGE=32.** The 5781 old predicate is unchanged; Stage33 5778 repair not implemented. All 5779..5781 demonstration boundaries are explicitly synthetic, and the signed opening gates / selection streams are physically computed.
