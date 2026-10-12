@@ -58,5 +58,6 @@ t/lib/Pastafari/WeavingSuffix.pm
 t/lib/Pastafari/WeavingUnrank.pm
 tools/profile_weaving.pl
 tools/profile_polynomial.pl
+tools/profile_unrank_middle.pl
 CANONICAL_NAMES_LOCK.sha256
 .github/workflows/canonical-names-lock.yml
