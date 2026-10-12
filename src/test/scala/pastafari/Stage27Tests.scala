@@ -131,12 +131,13 @@ object Stage27Tests {
     check("la fine dell'ultima finestra positiva è inclusiva") {
       same(patched(4000),Position(4,3000,4000))
     }
-    check("la fine dell'ultima finestra negativa è inclusiva a destra") {
-      same(patched(-3000),Position(-5,-3000,-2200))
+    check("l'ultimo giorno della finestra negativa è incluso") {
+      same(patched(-2999),Position(-5,-3000,-2200))
     }
     check("le due finestre esteriori non consentono estrapolazioni") {
       rejectArg("Troppo avanti"){patched(4001)}
-      rejectArg("Troppo indietro"){patched(-3001)}
+      rejectArg("Troppo indietro"){patched(-3000)}
+      rejectArg("Ancora indietro"){patched(-3001)}
     }
     check("anni massimi da 5778 non cambiano gli offset") {
       for(k<- -4 to 4) {
@@ -159,7 +160,7 @@ object Stage27Tests {
     }
     check("traslazione immensa signed non cambia i risultati") {
       val anchor=(BigInt(1)<<16384)+20261012
-      for(day<-Vector(BigInt(-3000),BigInt(-900),BigInt(-401),
+      for(day<-Vector(BigInt(-2999),BigInt(-900),BigInt(-401),
           BigInt(-400),BigInt(0),BigInt(1),BigInt(600),BigInt(601),
           BigInt(1300),BigInt(1301),BigInt(4000))) {
         val r=patched(anchor+day,anchor)
