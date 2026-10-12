@@ -209,3 +209,45 @@ Nou pwoteje done retounen yo kont alias ak kontèks lòt invocation.
 Nan Stage 10, nou kite chemen lekti a san tradiksyon endis. **Stage 11 —
 PATCH 05** pral ajoute aksè `8-k` men li p ap ranvèse tablo fizik la ni
 retire chemen istorik la. Nou pa fè travay Stage 12 oswa pita.
+
+
+## Stage 11 — PATCH 05: lekti lojik sèt gout yo
+
+### Ki jan nou kenbe vye erè a
+
+Nou kite `legacy_hidden.lua` ak depo fizik ranvèse a nèt tankou nan Stage 10.
+Fonksyon `oldHiddenAt(storage,k)` la pa konnen tradiksyon endis la; li
+kontinye li move plas `k` la. Nou pa chanje ni kalkil gout yo, ni kote
+sèt valè yo ekri nan tablo fizik la.
+
+### Nouvo kouch PATCH 05 la
+
+Nou ajoute `hiddenByNearness(storage,k)` ki tounen
+`LegacyHidden.oldHiddenAt(storage,8-k)`, san modifye `storage`.
+Nan dispatcher la, `HIDDEN_PATCH` vini apre apèl reyèl `LEGACY_HIDDEN`;
+nou kenbe de commit semantik ak de tras, ansanm ak sèt plas fizik,
+sèt gout lojik ak dyagnostik de fason lekti a te repare. Nou pa retire
+fonksyon istorik la. Ni oracle ni okenn eleman Stage 12 pa nan production.
+
+### Prèv koreksyon an
+
+Regresyon normatif Stage 10 la vin vèt pou tout sèt gout, pandan
+regresyon legacy apa a toujou bay egzakteman sis pozisyon ki mal:
+1, 2, 3, 5, 6, 7. Nou fè tès mapping, izolasyon ak kontèks sou 36 koup jou
+ak 252 pozisyon; menm gout mitan an rete an plas. Runner prensipal Stage 11
+pral kouri tout etap 1–11 nan CI. Nan handoff sa a, tès kouch mapping nan
+te pase lokalman avèk doublon depandans; CI konplè a rete pou upload itilizatè a.
+
+
+Yon lòt verifikasyon Stage 11 enumere tout 5,040 permutasyon sèt idantite diferan, ak 35,280 lekti lojik. Sa kenbe prèv tradiksyon endis la se yon envèsyon jeneral epi li pa depann de yon sèl pè jou oswa yon sèl konbinezon gout.
+
+
+### Rezilyans kont echèk lokal yo
+
+Anvan handoff Stage 11, nou ajoute yon tès fault-injection apa pou
+chak nan sèt aksè fizik yo. Nou egzije yon echèk ki parèt klèman,
+apre sa yon lòt invocation pwòp, ak tras, commit ak metrik orijinal.
+Nou teste tou yon depo fizik ki manke valè, yon echèk legacy anvan
+li tounen done yo, ak alias BigInt (enkli kopi limb si li ekspoze).
+Yon QA lokal ki sèvi ak doublon depandans yo pase; konklizyon
+`FULL_NATIVE_SUITE=PASS` ap tann kòd baz konplè a sou machin itilizatè a.

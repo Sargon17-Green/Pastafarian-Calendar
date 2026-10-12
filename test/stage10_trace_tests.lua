@@ -36,9 +36,11 @@ for k=1,7 do
     assert(ctx.semanticState["physical"..k]==expected[k])
     assert(B.compare(H.oldHiddenAt(raw,k),raw[k])==0)
 end
-assert(tostring(S.hiddenDropSpaghetti(F,F,1))==expected[1])
+assert(tostring(S.hiddenDropSpaghetti(F,F,1))==expected[7])
 assert(tostring(S.hiddenDropSpaghetti(F,F,4))==expected[4])
-assert(tostring(S.hiddenDropSpaghetti(F,F,7))==expected[7])
+local corrected = S.hiddenDropsSpaghetti(F,F)
+for k=1,7 do assert(tostring(corrected[k])==expected[8-k]) end
+assert(tostring(S.hiddenDropSpaghetti(F,F,7))==expected[1])
 -- Chak apèl posede yon nouvo kontèks, yon depo ak tout BigInt yo.
 raw[1]=B.from(5)
 ctx.semanticState.physical1="CHANJE"

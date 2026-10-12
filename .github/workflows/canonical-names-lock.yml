@@ -141,7 +141,7 @@ jobs:
           set -euo pipefail
           lua5.3 test/stage09_tests.lua .
 
-  lua_stage10_discovery:
+  lua_stage11_patch:
     if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
     runs-on: ubuntu-latest
     timeout-minutes: 35
@@ -153,11 +153,12 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y lua5.3
-      - name: Verifye sentaks ak idantite tout kouch anvan yo
+      - name: Verifye sentaks ak idantite tout kouch legacy yo
         shell: bash
         run: |
           set -euo pipefail
           find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_hidden.lua)" = 7d90ddc3bc540933107ae978ee555d4e516dc105
           test "$(git hash-object src/legacy_stones.lua)" = 2381c972e0149324fe96af84aad3f00f168c6572
           test "$(git hash-object src/legacy_save.lua)" = 86d8bee9f0976c6f0394de96bf0d23d31c505ecd
           test "$(git hash-object src/legacy_day_tag.lua)" = ccf1111ea51ec059ee3214a53a14e201e602ddfd
@@ -166,16 +167,8 @@ jobs:
           test "$(git hash-object src/day_tag_patch.lua)" = 7a4ec7b65aa96ead2b71d6a5af6bb66b5d13be53
           test "$(git hash-object src/distance_patch.lua)" = 31d79cf8e28c363bb7308fa56b1eda8fa1ba1cc9
           test "$(git hash-object src/stone_patch.lua)" = fb5cc5090706cf28f3c5c7f2fbc8f0d052ea993e
-      - name: Verifye sèt gout yo, depandans ak odit EXPECTED_RED
+      - name: Kouri tout tès Stage 1 rive Stage 11
         shell: bash
         run: |
           set -euo pipefail
-          lua5.3 test/stage10_trace_tests.lua .
-          lua5.3 test/stage10_property_tests.lua .
-          lua5.3 test/stage10_scope_tests.lua .
-          lua5.3 test/stage10_expected_red_audit.lua .
-      - name: Regresyon depo envèse a — echèk istorik espere
-        shell: bash
-        run: |
-          set -euo pipefail
-          lua5.3 test/stage10_regression_tests.lua .
+          lua5.3 test/stage11_tests.lua .

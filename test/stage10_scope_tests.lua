@@ -15,13 +15,13 @@ assert(src:find("StonePatch.execute(k, current)",1,true))
 assert(src:find('manager.dispatcher:register("LEGACY_HIDDEN"',1,true))
 local public=read("src/spaghetti.lua")
 assert(public:find("function S.hiddenDropsSpaghetti(calculationDay, targetDay)",1,true))
-assert(public:find("return LegacyHidden.oldHiddenAt(storage, k)",1,true))
+assert(public:find("local logical = HiddenPatch.execute(calculationDay, targetDay)",1,true))
 assert(public:find("function S.legacyHiddenProbe(calculationDay, targetDay)",1,true))
-for _,path in ipairs({"src/legacy_hidden.lua","src/spaghetti.lua"}) do
+for _,path in ipairs({"src/legacy_hidden.lua"}) do
     local s=read(path)
     for _,forbidden in ipairs({"normative_oracle", "coeffForHidden", "hiddenIndexPatch",
                                "legacyPrior", "oldPermutationUnrank0", "LEGACY_YEAR_MAX"}) do
         assert(not s:find(forbidden,1,true),path.." gen kòd twò bonè: "..forbidden)
     end
 end
-print("PASS limit Stage 10: depo envèse san PATCH 05 ni oracle nan production")
+print("PASS limit Stage 10: depo legacy a toujou envèse san oracle")

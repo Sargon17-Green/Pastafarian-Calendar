@@ -1,4 +1,5 @@
 local Base = require("monster_base")
+local BigInt = require("bigint")
 local LegacySave = require("legacy_save")
 local SavePatch = require("save_patch")
 local LegacyDayTag = require("legacy_day_tag")
@@ -8,6 +9,7 @@ local DistancePatch = require("distance_patch")
 local LegacyStones = require("legacy_stones")
 local StonePatch = require("stone_patch")
 local LegacyHidden = require("legacy_hidden")
+local HiddenPatch = require("hidden_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -85,25 +87,31 @@ function S.stoneTableSpaghetti()
     return StonePatch.buildPatchedTable()
 end
 
--- DISCOVERY 05: hidden[k] ekspoze depo fizik envèse a, san konvèsyon.
+-- PATCH 05: yo toujou estoke gout yo envèse, men lekti piblik la korije.
 function S.hiddenDropsSpaghetti(calculationDay, targetDay)
-    local storage = LegacyHidden.execute(calculationDay, targetDay)
-    return storage
+    local logical = HiddenPatch.execute(calculationDay, targetDay)
+    return logical
 end
 
 function S.hiddenDropSpaghetti(calculationDay, targetDay, k)
     assert(type(k) == "number" and math.type(k) == "integer" and k >= 1 and k <= 7,
            "Endis gout kache a dwe ant 1 ak 7")
-    local storage = LegacyHidden.execute(calculationDay, targetDay)
-    return LegacyHidden.oldHiddenAt(storage, k)
+    local logical = HiddenPatch.execute(calculationDay, targetDay)
+    return BigInt.from(logical[k])
 end
 
+-- Tras PATCH 05 la montre de handler yo ak plas fizik yo toujou envèse.
+function S.hiddenPatchProbe(calculationDay, targetDay)
+    return HiddenPatch.execute(calculationDay, targetDay)
+end
+
+-- Chemen Discovery 05 la toujou montre depo envèse a san tradiksyon.
 function S.legacyHiddenProbe(calculationDay, targetDay)
     return LegacyHidden.execute(calculationDay, targetDay)
 end
 
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 10", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 11", 0)
 end
 
 return S

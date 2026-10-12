@@ -19,12 +19,14 @@ for i,pair in ipairs(cases) do
     local c,t=pair[1],pair[2]
     local expected=O.buildHiddenDrops(O.workCounts(c,t),O.STONES)
     local physical,context=S.legacyHiddenProbe(c,t)
+    local logical=S.hiddenDropsSpaghetti(c,t)
     assert(#physical==7 and context.commitToken==1)
     assert(context.pendingSemanticState==nil and context.rollbackSnapshot==nil)
     for k=1,7 do
         assert(B.compare(physical[k],expected[8-k])==0,
                "Depo fizik la pa hidden(8-k): echantiyon "..i..", index "..k)
         assert(B.compare(H.oldHiddenAt(physical,k),physical[k])==0)
+        assert(B.compare(logical[k],expected[k])==0, "PATCH 05 pa korek")
         assert(context.semanticState["physical"..k]==tostring(physical[k]))
         assert(B.compare(physical[k],1)>=0 and B.compare(physical[k],O.M)<=0)
         if k==4 then

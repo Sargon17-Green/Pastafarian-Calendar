@@ -220,9 +220,57 @@ texlua test/stage10_expected_red_audit.lua .
 texlua test/stage10_tests.lua .
 ```
 
-Kat premye tès yo dwe pase; dènye a dwe fini ak
+Nan checkpoint Discovery 05 la, kat premye tès yo te pase, epi dènye a te fini ak
 `EXPECTED_RED Stage 10 DISCOVERY 05: 6 hidden drops nan move plas: 1,2,3,5,6,7`.
-Tès pou tout etap anvan yo dwe rete vèt.
+Depi Stage 11, runner piblik la dwe pase tou, pandan odit la kenbe erè legacy a.
 
-**Pa gen PATCH 05.** Nou pa sèvi ak koreksyon endis `8-k` sou lekti, nou pa
-ranvèse tablo ki deja ekri a, epi nou pa entwodui okenn fonksyon ki pou Stage 11.
+**Nan Stage 10, pa t gen PATCH 05.** Chemen legacy a toujou pa fè tradiksyon `8-k`;
+sèlman nouvo kouch Stage 11 lan ranje lekti a. Nou pa ranvèse depo fizik la.
+
+
+## Stage 11 — PATCH 05: lekti pa endis `8-k` san chanje depo a
+
+Nou kite `src/legacy_hidden.lua` san okenn chanjman: li toujou estoke
+`hidden7, hidden6, ..., hidden1`, epi `oldHiddenAt(storage,k)` toujou li
+`storage[k]` dirèkteman. Nou ajoute `src/hidden_patch.lua`, avèk fonksyon
+`hiddenByNearness(storage,k)` ki sèvi ak apèl legacy a sou **endis `8-k`**.
+Pa gen envèsyon tablo fizik la, pa gen kopi oracle tès nan production, epi
+pa gen entwodiksyon `legacyPrior` ki rezève pou Stage 12.
+
+`hiddenDropsSpaghetti(c,t)` ak `hiddenDropSpaghetti(c,t,k)` kounye a bay
+sèt gout yo nan bon lòd normatif. `hiddenPatchProbe(c,t)` retounen rezilta
+ak kontèks dispatcher li; `legacyHiddenProbe(c,t)` kontinye ekspoze
+vye depo a. Menm kontèks `LEGACY_HIDDEN` la ajoute `HIDDEN_PATCH`: de
+tranzaksyon, de tras, metrik pou sèt tradiksyon endis yo, ak dyagnostik
+ki montre plas fizik 1 a pa chanje. Tout BigInt ak lis rezilta yo posede
+apa ant invocation yo.
+
+`test/stage10_regression_tests.lua` retounen vèt. Nou konsève
+`test/stage10_legacy_regression_tests.lua` ki toujou echwe ak sis pozisyon
+istorik egzak yo, epi `test/stage10_expected_red_audit.lua` verifye li.
+Nou ajoute 252 konparezon pozisyon sou 36 pè jou diferan, ansanm ak
+verifikasyon `BigInt`, transfòmasyon konteks, izolasyon ak antre ki pa valab.
+
+Pou kouri tout suite a sou branch konplè a, avèk Lua 5.3:
+
+```text
+lua5.3 test/stage11_tests.lua .
+```
+
+Rezilta espere apre upload ak GitHub Actions: **GREEN**. Pa demare Stage 12.
+
+
+### Verifikasyon konbinatwa PATCH 05
+
+`test/stage11_index_properties.lua` teste tout 5,040 permutasyon posib sèt plas fizik yo (35,280 lekti). Li kouvri zewo, siy negatif, baryè SAVE, de gwo antye ki depase 256 bit, aksè fizik legacy san chanjman, epi rejè endis ilegal. Tès sa a pa chanje lòd depo a; li egzamine sèlman tradiksyon lekti `8-k`. Li kouri ansanm ak tout tès Stage 1–11 nan `test/stage11_tests.lua`.
+
+
+### Tès enjeksyon echèk PATCH 05
+
+`test/stage11_fault_injection_tests.lua` verifye tout sèt pozisyon kote
+`oldHiddenAt` ka voye yon erè, yon erè anvan legacy retounen depo a,
+ak sèt ka kote yon plas fizik manke. Apre chak echèk, yon nouvo apèl
+dwe retounen sèt valè kòrèk ak de commit; yon echèk pa dwe kite eta
+yon lòt invocation domaje. Li verifye tou lòd aksè fizik `7,6,...,1`
+ak absans pataj BigInt, menm nan limb entèn yo lè yo aksesib.
+Tès sa a kouri nan `stage11_tests.lua`; li pa modifye kòd pwodiksyon.
