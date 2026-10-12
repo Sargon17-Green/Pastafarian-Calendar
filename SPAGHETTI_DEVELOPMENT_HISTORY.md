@@ -168,6 +168,6 @@ Exact rank2 order `[1,2,3,4,6,5]` चे IDs 4,5,6 तीन independent histori
 
 [Verified CI 38239449544](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38239449544) implementation `e5c03c15c7fb6b99126b2290dfa8e90ede457b4d`: two PASS jobs, full TypeScript Stage1–24 suite and **all twelve** archival deliberately-red scripts success as expected nonzero failures, frozen canonical names lock PASS. Negative/malformed IDs and arrays, observed old function calls, injected failure and owner isolation verified. Stage24 COMPLETE/EXPECTED_RED; Stage25 PATCH12 alone shall fix permutation-position successor.
 
-## Stage 25 PATCH 12 — implementation submitted for CI
+## Stage 25 PATCH 12 — verified and closed
 
-स्थिर numeric bowl-ID successor हा जुन्या दोषाचा अंश आहे. नवीन `Patch12PermutationSuccessorAdapter` हा immutable Stage23 DROP46 latch च्या permutation position मध्ये पुढचा ID निवडतो; जुन्या `LegacyNextBowlFixedNameAdapter` चा खरा call स्वतंत्र राखला. Full 58 shared writes आणि test-only reference मधील स्वतंत्रता राखली. CI green झाल्याशिवाय LAST_COMPLETED_STAGE बदलायचा नाही.
+स्थिर numeric bowl-ID successor हा जुन्या दोषाचा अंश आहे. नवीन `Patch12PermutationSuccessorAdapter` हा immutable Stage23 DROP46 latch च्या permutation position मध्ये पुढचा ID निवडतो; जुन्या `LegacyNextBowlFixedNameAdapter` चा खरा call स्वतंत्र राखला. Full 58 shared writes आणि test-only reference मधील स्वतंत्रता राखली. GitHub Actions run 38242303724 दोन्ही jobs SUCCESS. 720×6 सर्व दुरुस्त, 804 पूर्ण histories मधील शून्य corrected mismatches, 12 ऐतिहासिक intentional reds अजूनही expected nonzero; LAST_COMPLETED_STAGE=25.
