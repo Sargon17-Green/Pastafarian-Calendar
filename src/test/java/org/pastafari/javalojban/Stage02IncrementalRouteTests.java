@@ -13,6 +13,7 @@ public final class Stage02IncrementalRouteTests {
         exhaustiveOracleUnderSingleCountBudget();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
+        multiCallFullYearInteriorWithOneCountPerCall();
         zeroBudgetDoesNotLoseSavedWork();
         System.out.println("STAGE_02_INCREMENTAL_ROUTE_PASS checks=" + checks
             + " full_days=5778 counts_per_call=1"
@@ -143,6 +144,75 @@ public final class Stage02IncrementalRouteTests {
         ok(advanced.lowerRank().compareTo(rank) <= 0, "E_FULL_LOWER");
         ok(rank.compareTo(advanced.upperRank()) <= 0, "E_FULL_UPPER");
         ok(!advanced.complete(), "E_FULL_STILL_PENDING");
+    }
+
+
+    private static void multiCallFullYearInteriorWithOneCountPerCall() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger rank = family.count().add(BigInteger.ONE)
+            .divide(BigInteger.TWO);
+        MonsterWeavingLinearCounter.RankRoute route =
+            family.beginGlobalRankRoute(rank, 512);
+        eq(0, route.stepsCompleted(), "E_MULTICALL_MIDDLE_START");
+        int totalMoved = 0;
+        int totalCounts = 0;
+        int callsWithPersistedProbes = 0;
+        long started = System.nanoTime();
+
+        for (int call = 0; call < 12; call++) {
+            MonsterWeavingLinearCounter.RankRoute before = route;
+            int[] originalPrefix = before.fixedPrefixCopy();
+            int originalProbes = before.probedBranches();
+            BigInteger originalSkipped = before.skippedChoices();
+            MonsterWeavingLinearCounter.RankRoute next =
+                family.advanceGlobalRankRoute(before, 8, 1);
+            int moved = next.stepsCompleted() - before.stepsCompleted();
+            ok(moved >= 0 && moved <= 8, "E_MULTICALL_STEP_BUDGET");
+            ok(next.lastCountCalls() >= 0 && next.lastCountCalls() <= 1,
+                "E_MULTICALL_COUNT_BUDGET");
+            ok(moved > 0 || next.probedBranches() > originalProbes,
+                "E_MULTICALL_NO_PROGRESS");
+            eq(rank, next.globalRank(), "E_MULTICALL_RANK_IMMUTABLE");
+            ok(next.lowerRank().compareTo(rank) <= 0
+                    && rank.compareTo(next.upperRank()) <= 0,
+                "E_MULTICALL_RANK_CONTAINED");
+            eq(next.remainingChoices(),
+                family.countAfterPrefix(next.fixedPrefixCopy()),
+                "E_MULTICALL_INTERVAL_EXACT");
+            array(originalPrefix, before.fixedPrefixCopy(),
+                "E_MULTICALL_PREVIOUS_PREFIX_IMMUTABLE");
+            eq(originalProbes, before.probedBranches(),
+                "E_MULTICALL_PREVIOUS_PROBES_IMMUTABLE");
+            eq(originalSkipped, before.skippedChoices(),
+                "E_MULTICALL_PREVIOUS_SKIPPED_IMMUTABLE");
+
+            int[] exposed = next.fixedPrefixCopy();
+            if (exposed.length > 0) {
+                int first = exposed[0];
+                exposed[0] = 0;
+                eq(first, next.fixedPrefixCopy()[0],
+                    "E_MULTICALL_PREFIX_DEFENSIVE_COPY");
+            }
+            if (next.probedBranches() > originalProbes) {
+                callsWithPersistedProbes++;
+            }
+            totalMoved += moved;
+            totalCounts += next.lastCountCalls();
+            route = next;
+        }
+        ok(totalMoved > 0, "E_MULTICALL_MIDDLE_ADVANCED");
+        ok(totalCounts <= 12, "E_MULTICALL_TOTAL_COUNT_BUDGET");
+        ok(route.stepsCompleted() < 5778 - 512,
+            "E_MULTICALL_NO_FALSE_COMPLETION");
+        System.out.println("STAGE_02_MIDDLE_MULTICALL_PASS calls=12"
+            + " prefix_days=" + route.stepsCompleted()
+            + " branch_counts=" + totalCounts
+            + " calls_with_saved_probes=" + callsWithPersistedProbes
+            + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
     }
 
     private static void zeroBudgetDoesNotLoseSavedWork() {
