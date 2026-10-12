@@ -63,6 +63,10 @@ function Reset.legacyResetEachDrop(drops,stoneRows,initialBowls)
                and child.status=="PATCH_STIR_RETURNED"
                and child.commitToken==4
                and #child.branchTrace==4
+               and child.branchTrace[1]=="LEGACY_FIXED_BOWL_POURS"
+               and child.branchTrace[2]=="BOWL_ORDER_POUR_PATCH"
+               and child.branchTrace[3]=="LEGACY_ALIASED_STIR"
+               and child.branchTrace[4]=="STIR_SNAPSHOT_PATCH"
                and child.pendingSemanticState==nil
                and child.rollbackSnapshot==nil,
                "PATCH 10 pa otantik pou gout "..i)
