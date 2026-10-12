@@ -734,3 +734,46 @@ egzak la se:
 `LAST_COMPLETED_STAGE=22` ak `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
 Kòd istorik reset chak gout la rete entak; Stage 23 PATCH 11
 pa kòmanse.
+
+
+## Stage 23 — PATCH 11: sis bòl yo kontinye viv ant gout yo
+
+Nan Stage 22, kalkil sis bòl pou chak gout te kòrèk pou yon sèl
+gout, men chèn istorik `src/legacy_reset_chain.lua` te toujou
+retounen nan sis bòl inisyal yo lè li kòmanse gout ki vin apre a.
+
+Nou **pa modifye kòd legacy sa a**. Nou ajoute
+`src/bowl_chain_patch.lua`: li egzekite `LegacyResetChain.execute`
+an premye pou anrejistre erè orijinal la. Apre li fin valide
+tras, komit ak rezilta sa a, li egzekite menm `StirPatch.execute`
+otantik pou chak gout, men li bay rezilta gout i kòm antre gout i+1.
+Handler `BOWL_CHAIN_STATE_PATCH` ajoute yon dezyèm commit nan
+kontèks prensipal la. Kontèks yo kenbe tras reset legacy a, tras
+koreksyon an, kontèks pitit pou chak gout nan toude chemen yo,
+metrik, dyagnostik ak kopi eta BigInt ki posede apa.
+
+`resetBowlsSpaghetti` ak `visibleResetChainSpaghetti` kounye a
+bay **sis bòl ki korije** yo. Pou enspekte de commit yo, sèvi ak
+`bowlChainPatchProbe(drops,stones,initial)` oubyen
+`visibleBowlChainPatchProbe(c,t,count)`. Pou teste defo ansyen
+an, `legacyResetBowlsProbe` ak `visibleResetChainProbe` rete
+disponib. Odit `EXPECTED_RED` Stage 22 la kontinye pase epi
+egzije mesaj erè istorik egzak la sou chemen legacy apa a.
+
+Tès natif `lua5.3 test/stage23_tests.lua .` kouvri tout etap 1–23,
+sèt sekans kout ak 28 gout, 46 gout avèk BigInt >256 bit, 16 piki
+erè oswa falsifikasyon ak 16 rekiperasyon, senk chèn nested, nèf
+gout vizib natif sou twa pè jou, ak yon oracle tès endepandan.
+Fonksyon `test/stage23_oracle_helper.lua` egzamine sekans kout;
+`test/normative_oracle.lua` ki gen kontra fiks pou 46 gout
+**pa chanje**.
+
+### Fèmti Stage 23 — CI natif vèt
+
+GitHub Actions `38290676201` te konplete avèk **18/18 travay PASS**.
+Travay `lua_stage23_patch` la pase verifikasyon sentaks Lua,
+kadna idantite legacy Stage 22, epi suite natif Stage 1–23.
+Tout travay anvan yo rete vèt; regresyon wouj istorik la rete
+nan odit ki ap tann menm mesaj la. `LAST_COMPLETED_STAGE=23`,
+`EXPECTED_REPOSITORY_STATE=GREEN`. Nou pa kòmanse Stage 24,
+ni `postStir12`, ni seleksyon bòl.

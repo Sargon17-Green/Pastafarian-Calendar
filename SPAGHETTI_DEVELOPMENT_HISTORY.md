@@ -583,3 +583,26 @@ mande a. QA natif verifye 46 gout ak oracle endepandan,
 5 nested chains endepandan. Nou make
 `LAST_COMPLETED_STAGE=22`, `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
 PATCH 11 rete pou Stage 23.
+
+
+## Stage 23 — PATCH 11: pote eta bòl yo atravè tout gout
+
+Nou kite `legacy_reset_chain.lua` byte-pou-byte ak defo reset
+la. `bowl_chain_patch.lua` fè chèn legacy a pase an premye
+epi ajoute handler `BOWL_CHAIN_STATE_PATCH`, avèk dezyèm
+commit li, kopi sis bòl yo ak `patchedChildContexts` apa.
+Depi gout 2, antre `StirPatch.execute` soti nan rezilta
+gout anvan an. Kontèks prensipal la konsève ansyen
+`legacySemanticState` ak `legacyLastBowls`. Mank kontinwite
+historik Stage 22 la rete vizib nan `legacyResetBowlsProbe`.
+
+### Fèmti Stage 23
+
+Run natif `38290676201`: **18/18 travay PASS**. Suite Stage 1–23
+pase sèt sekans kout / 28 gout, chèn konplè 46 gout ak 276
+rezilta bòl, oracle endepandan, 16 defayans + 16 rekiperasyon,
+5 nested chains, 3 pè jou / 9 gout natif ak odit
+`EXPECTED_RED` Stage 22 otantik. Oracle 46-gout orijinal la
+rete entak; nou itilize yon helper tès pou sekans ki pi kout.
+`LAST_COMPLETED_STAGE=23`, `EXPECTED_REPOSITORY_STATE=GREEN`.
+Pa gen Stage 24 ni douz brase final.
