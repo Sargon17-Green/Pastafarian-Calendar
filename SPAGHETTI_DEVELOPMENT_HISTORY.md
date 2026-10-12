@@ -553,3 +553,12 @@ nou refè sis pozisyon brase ak `old` separe de `nextBowls`,
 kòm kontrè egzak erè Stage 20. Tès Stage 20 la kontinye
 teste move alias la sou probe legacy li sèlman.
 Sa pa enkli lòt 45 gout ni `postStir12`.
+
+### Fèmti Stage 21: native CI vèt
+
+`38285581054` se run konplè sou commit `ba0201ac`.
+15/15 jobs PASS. Tout 720 lòd sis bòl, 111 BigInt, 54 bòl
+nan 9 gout reyèl, 15/15 rekiperasyon ak 8 apèl nested PASS.
+Legacy Stage 20 konsève; chemen piblik ale nan
+`STIR_SNAPSHOT_PATCH`. `LAST_COMPLETED_STAGE=21`.
+Etap 22 pa lanse.

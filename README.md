@@ -687,3 +687,14 @@ Chemen piblik `aliasedStirSpaghetti` ak
 rezilta alias istorik la, ki rete anba odit EXPECTED_RED
 nan Stage 20. `postStir12` ak gout #2..#46 pa antre nan
 premye wout piblik la ankò: yo mande etap ki vini apre.
+
+### Fèmti natif Stage 21
+
+Run GitHub Actions `38285581054` bay **15/15 travay PASS**,
+san okenn echèk. Nou verifye 720 permutation, 111 BigInt
+jiska >256-bit ak siy negatif, 9 gout vizib reyèl/54 bòl,
+15 piki erè ak 15 rekiperasyon pwòp, ansanm ak 8 apèl nested.
+Kontra eritaj Stage 20 rete `EXPECTED_RED` nan audit pozitif li.
+Nou pa touche `src/legacy_aliased_stir.lua`; li toujou fè
+move alias la. PATCH 10 sèlman korije etap yon sèl brase sis bòl.
+`LAST_COMPLETED_STAGE=21`, repo GREEN.
