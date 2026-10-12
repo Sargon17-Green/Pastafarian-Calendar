@@ -21,3 +21,26 @@ Mae `buildPatchedRows()` yn creu rhes sentinela 0, rhes gychwyn 1 (`17,29,43,71,
 **Statws cyn CI:** PENDING. Ni ddylid newid `LAST_COMPLETED_STAGE=8` heb `STAGE09_NATIVE_GREEN` gan Kotlin/JVM gwreiddiol.
 
 **Cam nesaf ar ôl ardystiad:** Cam 10 — DISCOVERY 05. Ni ddechreuwyd ef.
+
+
+## Ardystiad CI brodorol — COMPLETE
+
+**Mae'r adran hon yn disodli'r statws PENDING uchod.**
+
+- Gangen `Kotlin+Cymraeg`, commit ffynhonnell `8145a9b7c07affe982c09ce0668dc1cf0610b068`.
+- GitHub Actions `38186462459`, swydd `114609724515`: **SUCCESS**.
+- Kotlin 1.9.0, JDK 21, y cod a'r oracl normadol gwreiddiol, `sh run-stage09-tests.sh`.
+- Gwiriwyd 19 marc yn uniongyrchol yn log y swydd.
+- PASS: holl atchweliadau Camau 1–8, gan gynnwys `STAGE08_NATIVE_EXPECTED_RED_COMPLETE`.
+- PASS: `STAGE09_PATCH_GREEN_0`, `STAGE09_PRESERVED_DISCOVERY04_RED_224`,
+  `STAGE09_GARBAGE_CAPTURE_PASS`, `STAGE09_WHOLE_TABLE_GREEN_230`,
+  `STAGE09_SNAPSHOT_AND_CALLS_PASS`, `STAGE09_OWNERSHIP_GUARDS_REPLAY_PASS`,
+  `STAGE09_EARLIER_ROUTES_PASS`, `STAGE09_COMPLETE_GREEN`,
+  `STAGE09_BIGINT_INDEPENDENT_GREEN_230`,
+  `STAGE09_BIGINT_GARBAGE_CAPTURE_PASS` a `STAGE09_NATIVE_GREEN`.
+- Ni newidiwyd `LegacyStoneBuilder.mutateStonesWrong` na'r oracl gwreiddiol.
+
+Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38186462459
+
+**Dyfarniad:** Cam 9 wedi'i gwblhau a'i ardystio. `LAST_COMPLETED_STAGE=9`.
+Cam 10 (`DISCOVERY 05`) yw'r cam nesaf; ni ddechreuwyd eto.

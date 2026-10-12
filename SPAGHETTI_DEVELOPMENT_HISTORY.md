@@ -269,3 +269,8 @@ Ar commit `051a928af4cc5166fc5884f80db48c530b5c5931` llwyddodd swydd GitHub Acti
 ## Cam 9 — PATCH 04: ciplun a gwastraff yr hen mutator
 
 Ni newidiwyd `mutateStonesWrong`. Cyn pob rhes newydd, cedwir ciplun o'r pum carreg hen. Galwir yr un mutator ar glôn, cofnodir y `legacyGarbage` ac wedyn cyfrifir pob maes cywir o'r ciplun gwreiddiol. Mae rhesi 2–46 yn defnyddio 45 galwad, ac mae'r tabl 230 cydran yn gorfod cyfateb yn union i'r oracl. Mae'r 224 gwahaniaeth Cam 8 yn parhau'n weladwy trwy'r llwybr etifeddol ar wahân. Bydd ardystiad CI llawn yn penderfynu cwblhau'r cam.
+
+
+### Cam 9 — ardystiad brodorol PASS
+
+Llwyddodd y swydd `native-stage09-kotlin-cymraeg` (rhediad GitHub Actions `38186462459`, swydd `114609724515`) gyda'r oracl gwreiddiol ar Kotlin 1.9.0/JDK 21. Cadarnhawyd pob un o 19 marc a ddewiswyd o'r log swydd, gan gynnwys pob atchweliad Camau 1–8, 230 cydran wedi'u trwsio heb anghysondeb, 230 prawf BigInteger annibynnol, 45 galwad i'r mutator hanesyddol, a'r 224 anghysondeb DISCOVERY_04 a gadwyd. Mae Cam 9 wedi'i gwblhau; ni ddechreuwyd Cam 10.
