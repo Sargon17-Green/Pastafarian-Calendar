@@ -13,12 +13,16 @@ our @EXPORT_OK = qw(countWeavingsFrontier);
 # 最後一種月份首次出現後，所有先後首次條件均已滿足：
 # 利用逐次固定最後字元的組合恆等式完成剩餘月份，避免遍歷大量
 # 全開狀態。這並非以被測多項式引擎當作預言機。
-sub countWeavingsFrontier ($lengths,$stats=undef) {
+sub countWeavingsFrontier ($lengths,$stats=undef,$prefix=undef) {
     die "月份長度必須是陣列參照\n" if ref($lengths) ne 'ARRAY';
     die "診斷記錄必須是雜湊參照\n"
         if defined($stats) && ref($stats) ne 'HASH';
     die "獨立前綴稽核最多驗證四個月\n"
         if @$lengths>4;
+    die "指定前綴必須是陣列參照\n"
+        if defined($prefix) && ref($prefix) ne 'ARRAY';
+    $prefix //= [];
+
     my @sizes;
     my $total=0;
     for my $item (@$lengths) {
@@ -38,8 +42,29 @@ sub countWeavingsFrontier ($lengths,$stats=undef) {
             total_days=>$total,
         );
     }
-    return Math::BigInt->bone if !@sizes;
     my $m=scalar @sizes;
+    die "指定前綴比全部月份日數更長\n" if @$prefix>$total;
+    my @seed=@sizes;
+    my ($seed_opened,$seed_closed)=(0,0);
+    for my $value (@$prefix) {
+        die "指定前綴標籤必須是 1..m 的正整數\n"
+            if !defined($value)
+            || (ref($value) && !(blessed($value) && $value->isa('Math::BigInt')))
+            || "$value" !~ /\A[0-9]+\z/
+            || $value<1 || $value>$m;
+        my $j=0+"$value";
+        die "指定前綴違反月份首次出現次序\n"
+            if $j>$seed_opened+1;
+        die "指定前綴重複使用已耗盡的月份\n"
+            if !$seed[$j-1];
+        die "指定前綴違反月份末次出現次序\n"
+            if $seed[$j-1]==1 && $j!=$seed_closed+1;
+        $seed_opened=$j if $j>$seed_opened;
+        $seed[$j-1]--;
+        $seed_closed=$j if !$seed[$j-1];
+    }
+    return Math::BigInt->bone if !@sizes;
+
 
     # 計算 C(n,k)；只有本次驗證有效的可變 BigInt 私有快取，
     # 有限項數防止過度常駐記憶體。
@@ -80,7 +105,10 @@ sub countWeavingsFrontier ($lengths,$stats=undef) {
         return $factor;
     };
 
-    my %frontier=(pack('C*',@sizes,0,0)=>Math::BigInt->bone);
+    # 指定前綴可令全部月份已開啟，這時直接使用獨立的
+    # 末次出現組合恆等式，不能再逐日展開龐大全開狀態。
+    return $finish->(\@seed,$seed_closed) if $seed_opened==$m;
+    my %frontier=(pack('C*',@seed,$seed_opened,$seed_closed)=>Math::BigInt->bone);
     my $answer=Math::BigInt->bzero;
     while (%frontier) {
         my %next;

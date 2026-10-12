@@ -15,6 +15,7 @@ use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
 use Pastafari::WeavingUnrank qw(unrankWeavingPolynomial);
 use Pastafari::WeavingRank qw(rankWeavingPolynomial);
+use Pastafari::WeavingSuffixFactor qw(countWeavingSuffixFactored);
 
 # 只檢驗真實年份相鄰四個月的局部精確排名；並非整年度排名。
 # 相鄰 40、25、77、98 日位於實測 5000 年末段。
@@ -99,6 +100,33 @@ if ($child==0) {
         die "四月份中間一基排名不是有效內部排名\n"
             if $middle<=1 || $middle>=$oracle_total;
         my $wanted="$middle";
+
+        # 全域第一日只能選 1；第二日只有合法分支 1 與 2。
+        # 由完全獨立的正向前沿 Oracle 逐一計算分支的精確
+        # 完工數，而非從解碼器或共享後綴快取獲得答案。
+        my %prefix_stats;
+        my $f1=countWeavingsFrontier(\@L,undef,[1]);
+        my $f11=countWeavingsFrontier(\@L,\%prefix_stats,[1,1]);
+        my $f12=countWeavingsFrontier(\@L,undef,[1,2]);
+        die "第一月份首日已固定但前綴計數並非全域總數\n"
+            if $f1!=$oracle_total;
+        die "第二日兩個合法候選不構成完整不相交分割\n"
+            if $f11->copy->badd($f12)!=$oracle_total;
+        my $opts={profile_engine=>'stream-indexed',
+                  max_temp_file_bytes=>16*1024*1024};
+        my $factored_11=countWeavingSuffixFactored(
+            \@L,[1,1],undef,undef,$opts);
+        my $factored_12=countWeavingSuffixFactored(
+            \@L,[1,2],undef,undef,$opts);
+        die "多項式索引後綴和獨立前沿的第一候選分支不一致\n"
+            if $f11!=$factored_11;
+        die "多項式索引後綴和獨立前沿的第二候選分支不一致\n"
+            if $f12!=$factored_12;
+        my $expected_second=$middle<=$f11 ? 1 : 2;
+        printf "CANONICAL_FOUR phase=INDEPENDENT_PREFIX_PARTITION_PASS first_branch_digits=%d second_branch_digits=%d independent_frontier_peak=%d mid_second=%d elapsed_sec=%.3f\n",
+            length("$f11"),length("$f12"),
+            $prefix_stats{frontier_peak}//0,$expected_second,time()-$start;
+
         # 邊界排序不依賴任何後綴計數器：
         # 第一名是所有月完整連續區塊；最後一名每一步都選
         # 可延伸的最大合法月份標籤，驗證兩種直接構造均一致。
@@ -137,6 +165,8 @@ if ($child==0) {
         my $actual=unrankWeavingPolynomial(\@L,$middle,\%decode,
             {profile_engine=>'stream-indexed',
              max_temp_file_bytes=>16*1024*1024});
+        die "中間排名的第二個月份標籤與獨立前沿分支計數矛盾\n"
+            if $actual->[1]!=$expected_second;
         verify_word(\@L,$actual);
         die "四月份未啟動索引式反排名引擎\n"
             if ($decode{indexed_profile_builds}//0)!=1;
@@ -152,7 +182,7 @@ if ($child==0) {
             if ($rank_stats{indexed_profile_builds}//0)!=1;
         die "輸入中間排名已受可變性污染\n"
             if "$middle" ne $wanted;
-        printf "CANONICAL_FOUR status=PASS scope=INDEPENDENT_COUNT_BOUNDARY_ORACLE_AND_MIDDLE_ROUNDTRIP months=4 days=240 rank_digits=%d rank_smaller_candidates=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
+        printf "CANONICAL_FOUR status=PASS scope=INDEPENDENT_COUNT_PREFIX_PARTITION_BOUNDARY_AND_MIDDLE_ROUNDTRIP months=4 days=240 rank_digits=%d rank_smaller_candidates=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
             length($wanted),$rank_stats{candidates}//0,time()-$start,
             own_highwater();
         1;
