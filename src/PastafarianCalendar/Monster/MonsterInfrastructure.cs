@@ -247,6 +247,37 @@ public sealed class MonsterValidationManager
                 throw new MonsterValidationException("الصبّ المصحح غير محفوظ.");
     }
 
+    // فحص التحريك التاريخي لا يقارن المرجع النظيف ولا يضيف مخزن صورة قديمة.
+    public void ValidateLegacyInPlaceStir(MonsterContext context, LegacyInPlaceStirCandidate candidate)
+    {
+        if (context.LegacyPourVisibleIndex is not int index || index is < 1 or > 46 ||
+            context.LegacyStirredBowls is not null ||
+            context.PatchedPoursResult is not null || context.LegacyPoursResult is not null ||
+            context.BowlAliases is not null || context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سياق التحريك القديم ليس جاهزاً.");
+
+        if (candidate is null || candidate.Source is null ||
+            candidate.Source.Legacy is null ||
+            candidate.Source.Legacy.InitialBowls is null ||
+            candidate.Source.Legacy.InitialBowls.Length != 7 ||
+            candidate.MutatedBowls is null || candidate.MutatedBowls.Length != 7 ||
+            ReferenceEquals(candidate.MutatedBowls,candidate.Source.Legacy.InitialBowls) ||
+            candidate.MutatedBowls[0] != BigInteger.Zero)
+            throw new MonsterValidationException("النتيجة القديمة لا تملك أوعية مستقلة.");
+
+        for (var id=1;id<=6;id++)
+            if (candidate.MutatedBowls[id] < BigInteger.One)
+                throw new MonsterValidationException("وعاء بعد التحريك القديم خارج مجال الحفظ.");
+
+        var replay=(BigInteger[])candidate.Source.Legacy.InitialBowls.Clone();
+        new LegacyInPlaceBowlStir().StirDirectlyIntoBowls(
+            replay,index,candidate.Source.Legacy.Drop,
+            candidate.Source.Legacy.Source.Stones,candidate.Source.Legacy.Order,
+            candidate.Source.PatchedPours);
+        if (!candidate.MutatedBowls.SequenceEqual(replay))
+            throw new MonsterValidationException("فُقدت بصمة الكتابة المباشرة في التحريك القديم.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -346,6 +377,7 @@ public sealed class MonsterDispatcher
     private readonly BowlOrderPatchWrapper _bowlOrderPatch;
     private readonly LegacyPoursPhaseHandler _legacyPours;
     private readonly BowlAliasPatchPhaseHandler _aliasPatch;
+    private readonly LegacyInPlaceBowlStirPhaseHandler _legacyInPlaceStir;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -368,6 +400,7 @@ public sealed class MonsterDispatcher
         _bowlOrderPatch = new BowlOrderPatchWrapper();
         _legacyPours = new LegacyPoursPhaseHandler();
         _aliasPatch = new BowlAliasPatchPhaseHandler();
+        _legacyInPlaceStir = new LegacyInPlaceBowlStirPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -800,6 +833,42 @@ public sealed class MonsterDispatcher
         context.Status = "BOWL_ALIAS_PATCH_COMPLETE";
     }
 
+    public void DispatchLegacyInPlaceStir(MonsterContext context)
+    {
+        if (!string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("التحريك القديم يحتاج سياقاً مؤسساً.");
+        if (context.LegacyPourVisibleIndex is not int ordinal || ordinal is < 1 or > 46 ||
+            context.LegacyStirredBowls is not null ||
+            context.LegacyPoursResult is not null || context.PatchedPoursResult is not null ||
+            context.BowlAliases is not null || context.LegacyPourDrop.HasValue ||
+            context.LegacyPourOrder is not null || context.LegacyPourInitialBowls is not null ||
+            context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سياق التحريك القديم ناقص أو مشغول.");
+
+        var candidate=_legacyInPlaceStir.Handle(context);
+        _validation.ValidateLegacyPours(context,candidate.Source.Legacy);
+        _validation.ValidateBowlAliasPatch(context,candidate.Source);
+        _validation.ValidateLegacyInPlaceStir(context,candidate);
+
+        context.PatchedCountsResult=candidate.Source.Legacy.Source.Counts;
+        context.PatchedStoneRows=candidate.Source.Legacy.Source.Stones;
+        context.LegacyHiddenReversed=candidate.Source.Legacy.Source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess=candidate.Source.Legacy.Source.HiddenAccessor;
+        context.PatchedVisibleDrops=candidate.Source.Legacy.Source.Visible;
+        context.LegacyPourDrop=candidate.Source.Legacy.Drop;
+        context.LegacyPourInitialBowls=candidate.Source.Legacy.InitialBowls;
+        context.LegacyPourOrder=candidate.Source.Legacy.Order;
+        context.LegacyPoursResult=candidate.Source.Legacy.Pours;
+        context.BowlAliases=candidate.Source.Aliases;
+        context.PatchedPoursResult=candidate.Source.PatchedPours;
+        context.LegacyStirredBowls=candidate.MutatedBowls;
+
+        context.BranchTrace.Add("LEGACY_IN_PLACE_BOWL_STIR");
+        _metrics.Bump(context,"legacy.in.place.bowl.stir.dispatch");
+        context.Phase="LEGACY_IN_PLACE_BOWL_STIR_COMPLETE";
+        context.Status="LEGACY_IN_PLACE_BOWL_STIR_COMPLETE";
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -1183,6 +1252,23 @@ public sealed class MonsterManager
         => ExecutePatchedBowlPours(calculationDay,targetDay,visibleIndex)
             .PatchedPoursResult ??
             throw new MonsterValidationException("لم تُثبت الصبّات المصححة للأوعية.");
+
+    public MonsterContext ExecuteLegacyInPlaceStir(
+        BigInteger calculationDay,BigInteger targetDay,int visibleIndex)
+    {
+        if (visibleIndex is < 1 or > 46)
+            throw new MonsterValidationException("موضع القطرة المطلوبة للتحريك خارج المجال.");
+        var context=Prepare(calculationDay,targetDay);
+        context.LegacyPourVisibleIndex=visibleIndex;
+        _dispatcher.DispatchLegacyInPlaceStir(context);
+        return context;
+    }
+
+    public BigInteger[] EvaluateLegacyInPlaceStir(
+        BigInteger calculationDay,BigInteger targetDay,int visibleIndex)
+        => ExecuteLegacyInPlaceStir(calculationDay,targetDay,visibleIndex)
+            .LegacyStirredBowls ??
+            throw new MonsterValidationException("لم تُنتج أوعية التحريك التاريخية.");
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

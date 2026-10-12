@@ -159,6 +159,12 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluatePatchedBowlPours(
             calculationDay,targetDay,visibleIndex);
 
+    // مسار التحريك التاريخي يكتب مباشرة في الأوعية الحيّة.
+    public static BigInteger[] EvaluateLegacyInPlaceStir(
+        BigInteger calculationDay,BigInteger targetDay,int visibleIndex)
+        => new MonsterManager().EvaluateLegacyInPlaceStir(
+            calculationDay,targetDay,visibleIndex);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

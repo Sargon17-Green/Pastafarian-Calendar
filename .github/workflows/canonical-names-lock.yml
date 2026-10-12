@@ -136,3 +136,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage18Tests/PastafarianCalendar.Stage18Tests.csproj --configuration Release -- --verify-expected-red
       - name: مطابقة رقعة خريطة أسماء الأوعية التاسعة مع المرجع
         run: dotnet run --project tests/PastafarianCalendar.Stage19Tests/PastafarianCalendar.Stage19Tests.csproj --configuration Release
+- name: تشغيل الأحمر التاريخي لتلوث أوعية التحريك المباشر
+        id: discovery_inplace_stir_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage20Tests/PastafarianCalendar.Stage20Tests.csproj --configuration Release
+      - name: إثبات توقيع التلوث عند الكتابة في الوعاء قبل انتهاء الدورة
+        if: always()
+        run: |
+          test "${{ steps.discovery_inplace_stir_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage20Tests/PastafarianCalendar.Stage20Tests.csproj --configuration Release -- --verify-expected-red

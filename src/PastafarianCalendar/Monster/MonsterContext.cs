@@ -90,6 +90,9 @@ public sealed class MonsterContext
     public int[]? BowlAliases { get; set; }
     public BigInteger[]? PatchedPoursResult { get; set; }
 
+    // يبقى الإناء الذي غُيّر مباشرةً شاهداً على التلوث التاريخي.
+    public BigInteger[]? LegacyStirredBowls { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
