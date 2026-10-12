@@ -22,7 +22,7 @@ wide>limit ሲሆን wide=1+regularMod(wide−1+step,space)
 1. first=1, step=+1, n=M+1 ⇒ M+1 (legacy: 2)
 2. first=1, step=−1, n=M² ⇒ M²−M+1 (legacy: M)
 3. first=17, step=+1, n=M² ⇒ 17M+17 (legacy: 16M+18)
-4. first=1, step=+1, n=M²+1 ⇒ M−1 (legacy: 2M)
+4. first=1, step=+1, n=M²+1 ⇒ M−1 (legacy: M+3)
 
 የPATCH 14 ምርጫ ጥገና እስከ ደረጃ 29 አይገባም።
 old_wide_pick_high_first እና LegacyWideOrderAdapter ሁለቱም

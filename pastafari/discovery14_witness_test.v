@@ -54,7 +54,7 @@ fn test_discovery14_three_digits_first_one_is_reversed() {
 	}
 	assert trace.places == 3
 	assert big_eq(trace.space, big_mul(m2, m))
-	assert big_eq(trace.rank, big_mul_small(m, 2))
+	assert big_eq(trace.rank, big_add(m, big_from_int(3)))
 	assert !big_eq(trace.rank, big_sub(m, big_one()))
 	assert trace.rejected_count.str() == '0'
 }
