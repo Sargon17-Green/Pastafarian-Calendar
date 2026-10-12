@@ -128,3 +128,10 @@ v fmt -verify ./pastafari
 የ`old_next_bowl_fixed_name(queried_id)` ቋሚ ID ሂሳብ እና `LegacyNextBowlAdapter` እንደበፊቱ ተጠብቀዋል። አዲሱ `NextBowlPatch12.next` የ`orderAt46Latch` ስድስት መለያዎችን በ`PostStirPatch11.latch_order_at_46` በኩል በአዲስ ሰልፍ ያረጋግጣል። በተለየ የlegacy dispatcher እውነተኛ ጥሪ የታሪኩን የቋሚ-ID ውጤት ይቀበላል ነገር ግን ለquery ውሳኔ አይጠቀምበትም። `queried_id` በላቹ ውስጥ ይፈለጋል፣ በተገኘው position የሚቀጥለው መለያ በመዞር ይመለሳል። የ`calendar_post_stir_next_bowl_spaghetti` መንገድ ከ12 post-stirs የመጣውን የPATCH 11 ላች በእውነት ወደዚህ ትክክለኛ ምርጫ ያስተላልፋል። የደረጃ 24 አራቱ RED ፈተናዎች ሳይቀየሩ GREEN መሆን አለባቸው። `patch12_test.v` የ720 ቅደም ተከተሎች × 6 የስም መለያዎች = 4320 ምርጫዎችን ይፈትሻል። የ46 ጠብታዎች ሙሉ ሂደት ገና አልተሠራም፤ `LAST_COMPLETED_STAGE=25` ነው። ዝርዝር፦ `docs/STAGE25_PATCH12.md`።
 
 የV 0.5.2 የመጨረሻ native CI ማረጋገጫ `38279265900` PASS ነው። `v fmt -verify ./pastafari` PASS፣ `v test ./pastafari` 37/37 PASS፣ አራቱ የቀድሞ RED assertions ሳይቀየሩ GREEN፣ 4320 የcircular successor ጥምረቶች ተረጋግጠዋል። የታሪክ ጉድለት ተጠብቋል።
+
+
+## ደረጃ 26 — DISCOVERY 13
+
+የመልስ ዙሩ በትክክል የPATCH 11 ላችን፣ የPATCH 12 circular successor እና ከ12 post-stirs በኋላ የሚገኙትን ስድስት ቦውሎች ይጠቀማል። የመጀመሪያውን first፣ የመሄጃ አቅጣጫ step እና ማንኛውንም የBigInt k የanswerAt(k) እሴት ይሰላል። የታሪካዊው old_biased_pick ግን የrejection limit ሳይመረምር 1+regularMod(x−1,n) ይመልሳል፤ በዚህ ደረጃ ስህተቱን ሆን ብለን አስቀምጠናል። ለመጠገን የPATCH 13 ደረጃ 27 ይጠብቃል።
+
+V 0.5.2 (7647ce1) በGitHub Actions run 38282248109 ተረጋግጧል። v fmt -verify PASS፣ 38/38 GREEN የፈተና ፋይሎች PASS፣ አራት EXPECTED_RED የnormative bias ማስረጃዎች ተለይተው ተረጋግጠዋል። Canonical Names Lock PASS። LAST_COMPLETED_STAGE=26። ዝርዝር፦ docs/STAGE26_DISCOVERY13.md።
