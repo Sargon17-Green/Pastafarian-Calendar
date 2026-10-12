@@ -2,7 +2,7 @@ local root=arg[1] or "."
 local function run(path)
  local fn,err=loadfile(root.."/"..path);assert(fn,err)
  local before=arg;arg={root}
- local ok,msg=pcall(fn);arg=before
+ local ok,msg=xpcall(fn,debug.traceback);arg=before
  if not ok then error(path.." echwe: "..tostring(msg),0) end
 end
 run("test/stage19_tests.lua")

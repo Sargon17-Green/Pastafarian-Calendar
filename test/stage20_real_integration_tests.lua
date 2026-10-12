@@ -4,6 +4,16 @@ local B=require("bigint")
 local O=require("normative_oracle")
 local S=require("spaghetti")
 local F=O.FOUNDATION_DAY
+-- Envestigasyon native: bay yon tras konplè si BigInt refize yon valè.
+local savedFrom=B.from
+B.from=function(value)
+  if value==nil or (type(value)~="string" and type(value)~="number"
+      and not (type(value)=="table" and getmetatable(value)==B)) then
+    error("STAGE20_BAD_BIGINT_ARGUMENT type="..type(value)..
+        " value="..tostring(value).."\n"..debug.traceback("",2),0)
+  end
+  return savedFrom(value)
+end
 local pairs={{F,F},{F+1,F-1},{F-5,F+9}}
 local count,bad=0,0
 local names={"w","b","s","m","r","w"}

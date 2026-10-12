@@ -392,3 +392,21 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage20_regression_tests.lua .
+
+  lua_stage20_smoke:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Tès endepandan premye gout ak oracle 6 bòl
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage20_real_integration_tests.lua .
