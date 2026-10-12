@@ -47,6 +47,6 @@ local first,ctx=S.openingStirProbe(F,F)
 assert(ctx.mode=="STAGE_20_DISCOVERY_10" and ctx.commitToken==3)
 assert(ctx.visibleContext.status=="PATCH_VISIBLE_COMPLETE")
 assert(ctx.metrics["discovery10.opening.probes"]==1)
-local again=S.openingStirSpaghetti(F,F)
+local again=select(1,S.openingStirProbe(F,F))
 for id=1,6 do assert(B.compare(first[id],again[id])==0) end
 print("PASS Stage 20 real: 9 gout, brase 6 bòl, alias vizib san modifye antre")

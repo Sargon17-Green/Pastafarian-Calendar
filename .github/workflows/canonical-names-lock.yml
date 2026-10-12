@@ -387,11 +387,11 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage20_tests.lua .
-      - name: Regression normatif DISCOVERY 10 — EXPECTED_RED sèl
+      - name: Odit istorik DISCOVERY 10 rete EXPECTED_RED
         shell: bash
         run: |
           set -euo pipefail
-          lua5.3 test/stage20_regression_tests.lua .
+          lua5.3 test/stage20_expected_red_audit.lua .
 
   lua_stage20_smoke:
     if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
@@ -410,3 +410,29 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage20_real_integration_tests.lua .
+
+  lua_stage21_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye syntax ak imutabilite eritaj
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_aliased_stir.lua)" = b799a09f68cf68f4a7710694daa522d57e04a179
+          test "$(git hash-object src/pour_patch.lua)" = 8962bb10503c8a33161e89517c855d6b09bb27a3
+          lua5.3 test/stage21_scope_tests.lua .
+      - name: Kouri suite tout Stage 1 rive Stage 21
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage21_tests.lua .

@@ -61,7 +61,7 @@ for _,case in ipairs(cases) do
     changed=changed+count
 end
 assert(firstMatches==#cases and changed>=7)
-local returned=S.aliasedStirSpaghetti(121,17,inputs,stones)
+local returned=select(1,S.legacyAliasedStirProbe(121,17,inputs,stones))
 local direct=S.legacyAliasedStirProbe(121,17,inputs,stones)
 for id=1,6 do assert(B.compare(returned[id],direct[id])==0) end
 assert(select("#",S.aliasedStirSpaghetti(1,1,inputs,stones))==1)

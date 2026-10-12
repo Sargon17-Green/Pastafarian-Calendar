@@ -668,3 +668,22 @@ la pase. Mesaj erè natif la egzakteman:
 Yon travay smoke endepandan verifye premye gout ak sis bòl yo san
 rale tout suite ki pi ansyen an. Etap 20 fini kòm DISCOVERY,
 san PATCH 10. Etap 21 poko kòmanse.
+
+## Stage 21 — PATCH 10: brase sis bòl ak snapshot separe
+
+Nou rele `Legacy.execute` nan `src/legacy_aliased_stir.lua`
+**an premye**; li toujou fè move alias lokal `old=nextBowls`.
+Nou ajoute `src/stir_patch.lua` ak nouvo handler
+`STIR_SNAPSHOT_PATCH`. Yon kopi `old` rete imuiab,
+`nextBowls` se yon tab vid apa, epi chak lekti sis pozisyon
+yo jwenn **sèlman** done ki te egziste anvan brase a.
+Tou le kat tranzaksyon, kat branchTrace, tras legacy,
+metrik, dyagnostik ak dosye BigInt yo rete posede pa
+chak invocation.
+
+Chemen piblik `aliasedStirSpaghetti` ak
+`openingStirSpaghetti` kounye a retounen sis bòl korije.
+`legacyAliasedStirProbe` ak `openingStirProbe` toujou bay
+rezilta alias istorik la, ki rete anba odit EXPECTED_RED
+nan Stage 20. `postStir12` ak gout #2..#46 pa antre nan
+premye wout piblik la ankò: yo mande etap ki vini apre.

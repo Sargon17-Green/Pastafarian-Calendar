@@ -543,3 +543,13 @@ sèl echèk la se regresyon istorik ki fèt espre sou id alias old/next.
 Nou kenbe modil legacy a san koreksyon e n make
 `LAST_COMPLETED_STAGE=20`, `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
 Pa gen PATCH 10 ni brase 12 etap yo.
+
+## Stage 21 — PATCH 10: separe snapshot avan brase
+
+Nou konsève `legacy_aliased_stir.lua` byte-pou-byte.
+Nou kouri `LEGACY_ALIASED_STIR` natif anvan koreksyon.
+`STIR_SNAPSHOT_PATCH` se katriyèm commit nan kontèks la:
+nou refè sis pozisyon brase ak `old` separe de `nextBowls`,
+kòm kontrè egzak erè Stage 20. Tès Stage 20 la kontinye
+teste move alias la sou probe legacy li sèlman.
+Sa pa enkli lòt 45 gout ni `postStir12`.
