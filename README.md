@@ -934,3 +934,37 @@ preservano le firme native storiche. La PATCH 11
 conserva il vecchio rango e il numero dei rifiuti,
 inclusi casi BigInt in cui un ciclo non sarebbe
 computabile nel tempo utile. Stage24 non iniziato.
+
+## Stadio 24 — DISCOVERY 12: l'anno perde il giorno 5778
+
+La norma accetta un anno con almeno sei divari di
+cancello, ciascuno compreso fra 42 e 963 giorni,
+e una lunghezza complessiva fra **252 e 5778**
+giorni inclusi. La cicatrice
+`LegacyYearCeilingAdapter.legacyYearMax` conserva
+invece un tetto storico **5777**, che esclude il
+giorno estremo ammesso. Si tratta di un errore
+di frontiera, non di uno scarto per durata
+inferiore o numero insufficiente di cancelli.
+
+La manager `discover12YearCeiling` percorre
+`BOOT → DISCOVERY_12_YEAR_CEILING` nello stesso
+contesto, pubblica tutti i divari immutabili,
+la durata esatta, il tetto storico e il
+verdetto legacy. Il validator ricostruisce
+la somma e il verdetto senza chiamare l'oracolo;
+il test normativo usa soltanto le costanti
+test-only dell'oracolo. Nessuna PATCH 12
+viene anticipata.
+
+```text
+sbt -batch 'Test / runMain pastafari.Stage24Tests'
+```
+
+Firma attesa: **33 PASS, 3 FAIL intenzionali**
+su tre strutture sintetiche diverse, ciascuna
+di 5778 giorni: sei, sette e otto divari.
+Sono provati 921 casi di sei divari sotto
+soglia, 2048 combinazioni deterministiche,
+input invalidi, isolamenti e tutte le undici
+patch precedenti.

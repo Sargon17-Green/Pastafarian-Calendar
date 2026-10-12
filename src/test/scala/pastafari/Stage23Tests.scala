@@ -471,22 +471,37 @@ object Stage23Tests {
         "La patch attraversa il legacy")
       truth(source.contains("val limit=historical.acceptanceLimit"),
         "Soglia di accettazione reale")
-      truth(!source.contains("LEGACY_YEAR_MAX"),"Stage24 anticipato")
+      val state=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<24)
+        truth(!source.contains("LEGACY_YEAR_MAX"),"Stage24 anticipato")
+      else
+        truth(source.contains("LegacyYearCeilingAdapter.legacyYearMax("),
+          "Discovery12 storica disponibile")
     }
     check("Stage23 GREEN preserva le firme native degli stadi 21/22") {
       val state=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(state.contains("CURRENT_STAGE=23"),"Stadio")
-      truth(state.contains("CURRENT_KIND=PATCH"),"Tipo")
-      truth(state.contains("CURRENT_PATCH=11"),"Patch")
-      truth(state.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      val current=state.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=23,"Stage23 certificato")
+      if(current==23) {
+        truth(state.contains("CURRENT_KIND=PATCH"),"Tipo")
+        truth(state.contains("CURRENT_PATCH=11"),"Patch")
+        truth(state.contains("EXPECTED_REPOSITORY_STATE=GREEN"),"GREEN")
+      } else {
+        truth(state.contains("STAGE_23_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_42_PASS_0_FAIL"),
+          "Certificazione dello Stage23")
+      }
       truth(state.contains("STAGE_22_NATIVE_VERIFICATION=PASS_EXPECTED_RED_34_PASS_3_FAIL"),
         "Stage22 RED storico")
       truth(state.contains("STAGE_21_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_40_PASS_0_FAIL"),
         "Stage21 GREEN")
       val completed=state.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(completed==22 || completed==23,"Ordine certificazioni")
+      truth(completed>=22 && completed<=current,"Ordine certificazioni")
     }
     println("\nRISULTATO STADIO 23: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)

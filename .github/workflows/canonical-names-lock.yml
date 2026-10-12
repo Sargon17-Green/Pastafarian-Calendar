@@ -554,3 +554,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 23: 42 PASS, 0 FAIL' stage23.log
           test "$(grep -Fc 'PASS — ' stage23.log)" -eq 42
           test "$(grep -Fc 'FAIL — ' stage23.log)" -eq 0
+
+  native-stage24-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage 24 intentional RED historical 5777-day ceiling
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage24Tests' > stage24.log 2>&1
+          rc=$?
+          set -e
+          cat stage24.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 24: 33 PASS, 3 FAIL' stage24.log
+          test "$(grep -Fc 'PASS — ' stage24.log)" -eq 33
+          test "$(grep -Fc 'FAIL — ' stage24.log)" -eq 3
+          for label in 'sei divari' 'sette divari' 'otto divari'; do
+            grep -Fq "FAIL — equivalenza normativa limite ${label} — Tetto legacy 5777: ${label}" stage24.log
+          done

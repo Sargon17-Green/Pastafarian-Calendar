@@ -350,7 +350,11 @@ object Stage22Tests {
       else
         truth(source.contains("LegacyBiasedPickAdapter.biasedLegacyPick("),
           "La PATCH deve attraversare la cicatrice")
-      truth(!source.contains("LEGACY_YEAR_MAX"),"Logica futura introdotta")
+      if(current<24)
+        truth(!source.contains("LEGACY_YEAR_MAX"),"Logica futura introdotta")
+      else
+        truth(source.contains("LegacyYearCeilingAdapter.legacyYearMax("),
+          "Discovery12 disponibile")
     }
     check("metadati Stage22 RED preservano Stage21 GREEN") {
       val state=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),

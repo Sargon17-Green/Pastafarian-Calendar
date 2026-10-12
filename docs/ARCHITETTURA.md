@@ -407,3 +407,26 @@ confronta tutti i campi senza chiamare il
 wrapper corretto. La prova contro l'oracolo
 di test è utilizzata solo dove il numero
 di passi è trattabile.
+
+## DISCOVERY 12 — tetto storico errato per la lunghezza dell'anno
+
+`LegacyYearCeilingAdapter.legacyYearMax` prende
+un `Vector[Int]` di divari consecutivi e
+accetta soltanto i valori in [42,963].
+Somma la durata con `BigInt` e usa un minimo
+di sei divari, una durata minima di 252
+giorni e un tetto volutamente storico di
+**5777**. Il predicato canonico indipendente,
+definito nei test dalle costanti
+`NormativeOracle.YearMaxDays=5778`,
+differisce solo al confine incluso.
+
+Tre test differenziali distinguono sei
+divari da 963 giorni, sette divari
+`963*5 + 900 + 63` e otto divari
+`963*5 + 321*3`, sempre in forma di
+durata totale 5778. Le costruzioni sono
+sintetiche e non pretendono di essere
+sequenze di cancelli realmente generate
+dalla salsa; misurano il predicato
+locale di ammissibilità.

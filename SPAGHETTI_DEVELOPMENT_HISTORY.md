@@ -1196,3 +1196,41 @@ alcun FAIL; la cicatrice Stage22 resta RED
 con 34 PASS e tre divergenze intenzionali.
 Tutti i certificati e le regressioni anteriori
 sono stati preservati senza introdurre Stage24.
+
+## Stadio 24 — DISCOVERY 12: un anno di un giorno troppo corto
+
+### Che cosa si pensava
+
+La durata massima dell'anno sembrava fermarsi
+a 5777 giorni. La maggior parte delle candidate
+valide continuava a passare inosservata.
+
+### Che cosa si è scoperto
+
+Il tetto normativo è **5778**, inclusivo.
+Con sei cancelli consecutivi ognuno dei
+sei divari può essere lungo esattamente 963
+giorni, per un totale di 5778. Anche
+partizioni di sette e otto divari possono
+raggiungere la stessa durata.
+
+### Che cosa è stato aggirato
+
+Nulla nella discovery: l'helper storico
+resta genuinamente errato, esponendo
+l'intero vettore dei divari, il suo totale
+e il verdetto di un anno troppo breve.
+
+### Perché non è normativamente equivalente
+
+Tre confronti su strutture di sei, sette
+e otto divari raggiungono esattamente
+la durata canonica 5778 e falliscono
+deliberatamente solo per l'ultimo giorno.
+
+### Strato di mostruosità aggiunto
+
+Adapter, handler, manager, validator,
+quattro valori diagnostici nel contesto,
+metrica e una suite di prove indipendenti.
+PATCH 12 non è anticipata; Stage23 resta GREEN.
