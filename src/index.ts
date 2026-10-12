@@ -18,3 +18,4 @@ export * from "./patch07Grind.ts";
 export * from "./discovery08LegacyPermutation.ts";
 export * from "./patch08Permutation.ts";
 export * from "./discovery09LegacyFixedPours.ts";
+export * from "./patch09BowlAlias.ts";
