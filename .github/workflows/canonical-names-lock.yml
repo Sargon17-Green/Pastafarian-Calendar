@@ -168,3 +168,6 @@ jobs:
         run: |
           test "${{ steps.discovery_fixed_next_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage24Tests/PastafarianCalendar.Stage24Tests.csproj --configuration Release -- --verify-expected-red
+
+      - name: إثبات تكافؤ رقعة الجار الثانية عشرة مع المرجع وحفظ ندبة القديم
+        run: dotnet run --project tests/PastafarianCalendar.Stage25Tests/PastafarianCalendar.Stage25Tests.csproj --configuration Release

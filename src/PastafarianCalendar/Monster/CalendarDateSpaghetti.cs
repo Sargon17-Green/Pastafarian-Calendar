@@ -187,6 +187,12 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyFixedNextBowl(
             calculationDay,targetDay,queriedBowlId);
 
+    // رقعة الجار الثانية عشرة: اختيار التالي في ترتيب القطرة السادسة والأربعين.
+    public static int EvaluateNextBowl(
+        BigInteger calculationDay, BigInteger targetDay, int queriedBowlId)
+        => new MonsterManager().EvaluateNextBowl(
+            calculationDay,targetDay,queriedBowlId);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

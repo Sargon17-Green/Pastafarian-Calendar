@@ -479,6 +479,40 @@ public sealed class MonsterValidationManager
         // لا نُصحّح هذا العيب بمقارنة الجار الصحيح: المرجع حكر على الاختبار.
     }
 
+
+    // يُتحقق من المرشح قبل تثبيت الجار في الحالة. المرجع الاختباري لا يدخل الإنتاج.
+    public void ValidatePatchedNextBowl(
+        MonsterContext context, PatchedNextBowlCandidate candidate)
+    {
+        if (context.PatchedNextBowlResult.HasValue ||
+            context.LegacyFixedNextBowlResult.HasValue ||
+            context.PatchedOrderAt46Latch is not null ||
+            context.PatchedSauceFinalBowls is not null ||
+            context.PatchedVisibleDrops is not null ||
+            candidate is null || candidate.Historical is null ||
+            candidate.Historical.Sauce is null ||
+            candidate.Historical.Sauce.Historical is null ||
+            candidate.Historical.Sauce.Patched is null ||
+            candidate.Historical.Sauce.Patched.OrderAt46Latch is not {Length:6} ||
+            candidate.Historical.Sauce.Historical.Source is null ||
+            candidate.Historical.Sauce.Historical.Source.Visible is not {Length:47} ||
+            candidate.NextBowlId is < 1 or > 6)
+            throw new MonsterValidationException("مرشح رقعة الجار غير صالح أو السياق مشغول.");
+
+        // التوقيع القديم لا يُحذف ولا يُستبدل بالنتيجة المصححة.
+        ValidateLegacyFixedNextBowl(context,candidate.Historical);
+        var protectedOrder=candidate.Historical.Sauce.Patched.OrderAt46Latch;
+        var fromDrop46 = new BowlOrderPatchWrapper().OrderPatchFromValue(
+            candidate.Historical.Sauce.Historical.Source.Visible[46]).Order;
+        if (!protectedOrder.SequenceEqual(fromDrop46))
+            throw new MonsterValidationException("ترتيب الجار غير مشتق من القطرة الأخيرة.");
+
+        var expected = new NextBowlOrderPatchWrapper().Patch(
+            protectedOrder,candidate.Historical.QueriedBowlId);
+        if (candidate.NextBowlId != expected)
+            throw new MonsterValidationException("اختيار الجار المصحح لا يطابق ترتيب القطرة.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -583,6 +617,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyOverwrittenDrop46Sauce _legacyOverwrittenSauce;
     private readonly ProtectedDrop46SaucePhaseHandler _protectedDrop46Sauce;
     private readonly LegacyFixedNextBowlPhaseHandler _legacyFixedNextBowl;
+    private readonly PatchedNextBowlPhaseHandler _patchedNextBowl;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -610,6 +645,7 @@ public sealed class MonsterDispatcher
         _legacyOverwrittenSauce = new LegacyOverwrittenDrop46Sauce();
         _protectedDrop46Sauce = new ProtectedDrop46SaucePhaseHandler();
         _legacyFixedNextBowl = new LegacyFixedNextBowlPhaseHandler();
+        _patchedNextBowl = new PatchedNextBowlPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -1247,6 +1283,59 @@ public sealed class MonsterDispatcher
         context.Phase = context.Status;
     }
 
+
+    public void DispatchPatchedNextBowl(MonsterContext context)
+    {
+        if (!string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("تحتاج رقعة الجار سياقاً مؤسساً.");
+        if (context.LegacyQueriedBowlId is not int id || id is < 1 or > 6 ||
+            context.LegacyFixedNextBowlResult.HasValue ||
+            context.PatchedNextBowlResult.HasValue ||
+            context.LegacySauceFinalBowls is not null ||
+            context.PatchedSauceFinalBowls is not null ||
+            context.PatchedOrderAt46Latch is not null ||
+            context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سياق رقعة الجار غير خالٍ أو السؤال ناقص.");
+
+        var candidate = _patchedNextBowl.Handle(context);
+        var historical = candidate.Historical;
+        _validation.ValidateVisibleDropPatch(context,historical.Sauce.Historical.Source);
+        _validation.ValidateLegacyOverwrittenSauce(context,historical.Sauce.Historical);
+        _validation.ValidateProtectedDrop46Sauce(context,historical.Sauce);
+        _validation.ValidateLegacyFixedNextBowl(context,historical);
+        _validation.ValidatePatchedNextBowl(context,candidate);
+
+        // لا تغيير دلالي ولا تسجيل تشخيص قبل أن تنجح جميع التحققات.
+        var source = historical.Sauce.Historical.Source;
+        var sauceOld = historical.Sauce.Historical;
+        var saucePatched = historical.Sauce.Patched;
+        context.PatchedCountsResult = source.Counts;
+        context.PatchedStoneRows = source.Stones;
+        context.LegacyHiddenReversed = source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess = source.HiddenAccessor;
+        context.PatchedVisibleDrops = source.Visible;
+        context.LegacyDiagnosticDrop46Order = sauceOld.DiagnosticDrop46Order;
+        context.LegacyOverwrittenQueryOrder = sauceOld.OverwrittenQueryOrder;
+        context.LegacyPostStirOrders = sauceOld.PostStirOrders;
+        context.LegacySauceBowlsAfterDrops = sauceOld.BowlsAfterDrops;
+        context.LegacySauceFinalBowls = sauceOld.FinalBowls;
+        context.PatchedOrderAt46Latch = saucePatched.OrderAt46Latch;
+        context.PatchedSauceBowlsAfterDrops = saucePatched.BowlsAfterDrops;
+        context.PatchedSauceFinalBowls = saucePatched.FinalBowls;
+        context.PatchedPostStirOrders = saucePatched.PostStirOrders;
+        context.LegacyFixedNextBowlResult = historical.LegacyNextBowlId;
+        context.PatchedNextBowlResult = candidate.NextBowlId;
+
+        context.BranchTrace.Add("LEGACY_OVERWRITTEN_DROP46_ORDER_WITNESS");
+        context.BranchTrace.Add("PROTECTED_DROP46_ORDER_LATCH_WITNESS");
+        context.BranchTrace.Add("LEGACY_FIXED_NEXT_BOWL_WITNESS");
+        context.BranchTrace.Add("PATCHED_NEXT_BOWL_ORDER");
+        _metrics.Bump(context,"legacy.fixed.next.bowl.witness");
+        _metrics.Bump(context,"patched.next.bowl.order.dispatch");
+        context.Status = "PATCHED_NEXT_BOWL_ORDER_COMPLETE";
+        context.Phase = context.Status;
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -1722,6 +1811,24 @@ public sealed class MonsterManager
         => ExecuteLegacyFixedNextBowl(calculationDay,targetDay,queriedBowlId)
             .LegacyFixedNextBowlResult ??
             throw new MonsterValidationException("لم يكتمل اختيار الجار القديم.");
+
+
+    public MonsterContext ExecutePatchedNextBowl(
+        BigInteger calculationDay, BigInteger targetDay, int queriedBowlId)
+    {
+        if (queriedBowlId is < 1 or > 6)
+            throw new MonsterValidationException("هوية الوعاء المطلوبة خارج المجال.");
+        var context = Prepare(calculationDay,targetDay);
+        context.LegacyQueriedBowlId = queriedBowlId;
+        _dispatcher.DispatchPatchedNextBowl(context);
+        return context;
+    }
+
+    public int EvaluateNextBowl(
+        BigInteger calculationDay, BigInteger targetDay, int queriedBowlId)
+        => ExecutePatchedNextBowl(calculationDay,targetDay,queriedBowlId)
+            .PatchedNextBowlResult ??
+            throw new MonsterValidationException("لم يُنتج مسار الرقعة الجار المصحح.");
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

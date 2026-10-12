@@ -115,6 +115,9 @@ public sealed class MonsterContext
     public int? LegacyQueriedBowlId { get; set; }
     public int? LegacyFixedNextBowlResult { get; set; }
 
+    // نتيجة الرقعة الثانية عشرة مستقلة عن شاهد الجار ذي الهوية الثابتة.
+    public int? PatchedNextBowlResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
