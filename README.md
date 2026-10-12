@@ -796,3 +796,38 @@ không cảnh báo, không sửa production.
 Giai đoạn 21/55 kết thúc `GREEN`. Tiếp theo giai đoạn
 22/55 `DISCOVERY 11`; chưa tích hợp 12 lần khuấy sau
 46 giọt hoặc tính lịch hoàn chỉnh.
+
+## Giai đoạn 22 — Phát hiện 11: ô thứ tự bát bị ghi đè 58 lần
+
+Đường sản xuất tiếp tục xử lý chính xác 46 giọt
+bằng `BowlVaultPatch` và sáu ID bát. Sau đó
+`PostStirCalculator` thực hiện **12 lần khuấy cuối**
+theo đúng công thức, dùng tổng SAVE của sáu bát cộng
+`149 * stir`, chọn hoán vị và tính sáu ID từ snapshot
+`old` riêng của từng lượt.
+
+**Lỗi lịch sử thứ mười một chỉ nằm trong bộ nhớ thứ tự:**
+`LegacyOrderMemory` lưu cùng một trường `order`.
+Mỗi giọt ghi lại hoán vị của nó (46 lần); mỗi lần khuấy
+cuối cũng ghi đè hoán vị vào đúng trường đó (12 lần).
+Sau 58 lần, thứ tự cuối đến từ `{:stir,12}` chứ không
+phải `{:drop,46}`. Truy vấn bát kế tiếp thật
+`next_bowl_spaghetti/3` cố ý đọc bộ nhớ bị ghi đè.
+`bowl_orders[46]` vẫn còn như dữ liệu kết quả các giọt,
+nhưng **chưa có latch riêng** tại điểm giọt 46 dành cho
+truy vấn nên đường truy vấn không sử dụng nó.
+
+Sáu bát sau 12 lần khuấy phải khớp đầy đủ với
+`NormativeReference.post_stir12` và `sauce.bowls`,
+còn hồi quy truy vấn bát kế tiếp phải đỏ. Không sửa
+`LegacyOrderMemory` trong phát hiện 11. PATCH 11
+ở giai đoạn 23 phải giữ bộ nhớ lịch sử và chốt riêng
+`orderAt46Latch` ngay tại giọt 46, rồi định tuyến
+truy vấn tới latch thay vì bộ nhớ bị ghi đè. Không
+thực hiện latch trong giai đoạn 22.
+
+Thêm 16 kiểm thử bao gồm nguồn của 58 lần ghi, hoán vị
+giọt 46, đủ 12 lần khuấy, SAVE, các bản vá 01..10,
+số nguyên 2048 bit, đồng thời, và bốn hồi quy truy vấn
+so sánh với thứ tự giọt 46. Không mở hệ thống dòng câu trả lời
+hoặc logic chọn cổng của các giai đoạn sau.

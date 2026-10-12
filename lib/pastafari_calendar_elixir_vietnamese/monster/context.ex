@@ -5,8 +5,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Context do
   Nhãn ngày và khoảng cách đi qua các bản vá đã hoàn thành.
   Bảng đá đã qua bản vá 04 và bảy giọt ẩn qua bản vá 05.
   Giọt, hoán vị và ba nguồn rót đã qua bản vá 09.
-  Sáu phép khuấy đọc vaultOld cố định và ghi pending tại
-  bản vá 10. Mỗi ngữ cảnh sở hữu dữ liệu riêng.
+  Sáu phép khuấy đọc vaultOld cố định và ghi pending.
+  Giai đoạn 22 lưu thứ tự cuối vào ô legacy ghi đè 58 lần,
+  không có chốt riêng cho thứ tự ở giọt 46.
+  Mỗi ngữ cảnh sở hữu dữ liệu riêng.
   """
 
   defstruct calculation_day: nil,
@@ -20,6 +22,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Context do
             bowl_orders: nil,
             initial_bowls: nil,
             bowls_after_drops: nil,
+            bowls_after_post_stirs: nil,
+            order_memory: nil,
             phase: :bootstrap,
             sub_phase: 0,
             mode: :authoritative_bootstrap,

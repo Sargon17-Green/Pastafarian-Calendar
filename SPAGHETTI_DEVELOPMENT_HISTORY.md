@@ -708,3 +708,33 @@ Oracle test-only giữ nguyên blob SHA
 Bản vá dùng cùng vaultOld cho sáu kết quả pending,
 chỉ sau đó áp dụng Map.merge. Kết thúc Stage21 GREEN,
 chưa mở Stage22.
+
+## Giai đoạn 22 — Phát hiện 11: mất hoán vị giọt 46 vì ghi đè
+
+**Nền:** Giai đoạn 21 đóng GREEN với 253 bài kiểm thử
+đạt và 0 cảnh báo. Hệ thống đã tính đúng 46 giọt và
+sáu bát kết quả tại giọt 46.
+
+**Mở rộng đúng:** `PostStirCalculator` thực hiện
+12 lượt khuấy cuối theo đúng hợp đồng: saved sum
+bằng SAVE của tổng sáu giá trị old cộng 149*stir;
+hoán vị dựa trên saved sum; sáu phép tính đọc chung
+snapshot old; giá trị khuấy lưu SAVE với hệ số 3,5,7.
+Đầu ra `bowls_after_post_stirs` phải chính xác
+với oracle, không thêm sai số số học.
+
+**Dấu vết lỗi mới:** `LegacyOrderMemory` ghi
+đè một ô `order`: 46 lần từ các giọt, 12 lần từ khuấy.
+Sau 58 lần, `last_source={:stir,12}`. Thứ tự giọt 46
+vẫn có trong map các giọt nhưng không được chốt thành
+latch dành cho truy vấn. `next_bowl` đọc ô overwritable
+nên dùng thứ tự lần khuấy thứ mười hai và sai chuẩn.
+Không thêm latch, không sửa hàm legacy hoặc oracle
+trong giai đoạn 22.
+
+**Bằng chứng kiểm thử:** 12 bài điều khiển xác nhận
+cả 58 lần ghi, đủ 12 lượt và kết quả bát chuẩn,
+giữ bất biến 253 kiểm thử trước. Bốn hồi quy mới
+cố ý đỏ ở thứ tự kế cận của các ID và nhiều ngày.
+PATCH 11 tại giai đoạn 23 sẽ cần chốt orderAt46
+và đọc latch đó để sửa mà không xóa di sản 58 lần ghi.

@@ -4,9 +4,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
-  Giai đoạn 21 vá khuấy bát qua vaultOld và pending:
-  sáu phép khuấy gọi LegacyInPlaceStir.compute_one với
-  cùng snapshot, commit kết quả chung. Chưa tích hợp lịch.
+  Giai đoạn 22 tính đúng sáu bát sau 46 giọt và 12 lần
+  khuấy cuối, nhưng LegacyOrderMemory bị ghi đè 58 lần.
+  Truy vấn bát kế tiếp đọc sai thứ tự khuấy thứ 12 thay
+  vì thứ tự đã dùng ở giọt 46. Chưa tích hợp ngày lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
@@ -17,8 +18,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     DayCountManager,
     DistanceManager,
     HiddenDropManager,
+    LegacyOrderMemory,
     Metrics,
     SaveManager,
+    PostStirCalculator,
     StoneManager,
     Validator,
     VisibleDropManager
@@ -67,8 +70,13 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
         calculation_tag, target_tag, corrected_distance, direction
       )
 
-    bowls_after_drops =
-      BowlDropCalculator.apply_all(initial_bowls, visible_drops, bowl_orders, stones_table)
+    {bowls_after_drops, memory_after_drops} =
+      BowlDropCalculator.apply_all_with_order_memory(
+        initial_bowls, visible_drops, bowl_orders, stones_table
+      )
+
+    {bowls_after_post_stirs, order_memory} =
+      PostStirCalculator.apply_all(bowls_after_drops, memory_after_drops)
 
     %Context{
       calculation_day: calculation_day,
@@ -82,6 +90,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
       bowl_orders: bowl_orders,
       initial_bowls: initial_bowls,
       bowls_after_drops: bowls_after_drops,
+      bowls_after_post_stirs: bowls_after_post_stirs,
+      order_memory: order_memory,
       phase: :bootstrap,
       status: :validated,
       branch_trace: [:entry, :validated, :legacy_day_count, :day_tag_patch_02],
@@ -135,5 +145,18 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   def bowls_after_drops(calculation_day, target_day) do
     bootstrap(calculation_day, target_day).bowls_after_drops
+  end
+
+  def bowls_after_post_stirs(calculation_day, target_day) do
+    bootstrap(calculation_day, target_day).bowls_after_post_stirs
+  end
+
+  def order_memory(calculation_day, target_day) do
+    bootstrap(calculation_day, target_day).order_memory
+  end
+
+  def next_bowl(calculation_day, target_day, queried_bowl_id) do
+    order_memory(calculation_day, target_day)
+    |> LegacyOrderMemory.next_bowl(queried_bowl_id)
   end
 end

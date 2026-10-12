@@ -10,7 +10,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.BowlDropCalculator do
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     BowlAliasPatch,
-    BowlVaultPatch
+    BowlVaultPatch,
+    LegacyOrderMemory
   }
 
   def apply_all(initial_bowls, visible, orders, stones)
@@ -19,6 +20,18 @@ defmodule PastafariCalendarElixirVietnamese.Monster.BowlDropCalculator do
     Enum.reduce(1..46, initial_bowls, fn index, old ->
       step(old, Map.fetch!(visible, index), Map.fetch!(orders, index), stones, index)
     end)
+  end
+
+  def apply_all_with_order_memory(initial_bowls, visible, orders, stones)
+      when is_map(initial_bowls) and is_map(visible) and
+           is_map(orders) and is_map(stones) do
+    Enum.reduce(1..46, {initial_bowls, LegacyOrderMemory.new()},
+      fn index, {old, memory} ->
+        drop = Map.fetch!(visible, index)
+        order = Map.fetch!(orders, index)
+        next = step(old, drop, order, stones, index)
+        {next, LegacyOrderMemory.write(memory, order, {:drop, index})}
+      end)
   end
 
   def step(old, drop, order, stones, index)

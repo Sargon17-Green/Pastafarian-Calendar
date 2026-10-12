@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=21
-CURRENT_KIND=PATCH
-CURRENT_PATCH=10
+CURRENT_STAGE=22
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=11
 LAST_COMPLETED_STAGE=21
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyInPlaceStir.run ghi đè tuần tự; BowlVaultPatch sử dụng LegacyInPlaceStir.compute_one với một vault_old cố định và tích lũy sáu kết quả vào pending, Map.merge một lần sau cùng. Giữ PATCH 01..09.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..10; chạy chính xác 46 lượt giọt và 12 lượt khuấy cuối; LegacyOrderMemory ghi đè cùng ô thứ tự 58 lần, truy vấn bát kế đọc thứ tự khuấy 12 chứ không giữ thứ tự giọt 46.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_21_PATCH_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_22_PENDING
+GIT_HISTORY_MUTATED=STAGE_22_DISCOVERY_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=253
-CI_FAILURES=0
+CI_TESTS=STAGE_22_PENDING
+CI_FAILURES=STAGE_22_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -429,3 +429,19 @@ CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38254477
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38254477452
 Giai đoạn 21 đóng GREEN; tiếp theo giai đoạn 22 DISCOVERY 11,
 chưa bắt đầu.
+
+Giai đoạn 22 DISCOVERY 11: chương trình tính đầy đủ đúng sáu bát
+sau 46 giọt và 12 lần khuấy cuối theo công thức nguồn chuẩn.
+BowlDropCalculator.apply_all_with_order_memory ghi thứ tự mỗi
+giọt 1..46 vào một LegacyOrderMemory; PostStirCalculator.apply_all
+ghi tiếp cùng ô ở 12 lượt khuấy. Tổng 58 lần, nguồn cuối
+{:stir,12}. Không tạo order_at_drop_46 latch riêng trong
+Context. Truy vấn next_bowl đọc order_memory.order bị ghi đè,
+không đọc thứ tự giọt 46 đã còn trong map bowl_orders.
+Giữ bản vá 01..10, các bộ đếm, SAVE, đá, hidden, visible,
+sáu bát, rót alias, vaultOld và pending chính xác.
+16 kiểm thử Stage22 mới gồm 12 điều khiển và bốn
+đối chiếu chuẩn cố ý đỏ. Dự kiến 269 kiểm thử, đúng bốn
+hồi quy chuẩn đỏ. Giữ oracle nguyên vẹn, không mở
+PATCH 11 của giai đoạn 23.
+LAST_COMPLETED_STAGE giữ 21 trước khi CI xác minh.
