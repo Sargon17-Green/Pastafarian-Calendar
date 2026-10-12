@@ -1029,3 +1029,16 @@ devono restare verdi.
 Handler, report, validator, tre risultati
 di contesto, dispatcher, metrica e test
 differenziali. Non viene avviata PATCH 10.
+
+### Risultato della verifica nativa
+
+La run GitHub Actions 38212623612 sul commit
+`8dd1253520bccfb5a51fe1a1d08afa3a43c41d26`
+ha concluso SUCCESS in tutti i ventuno job.
+La firma della DISCOVERY 10 è precisamente
+26 PASS, 3 FAIL intenzionali (ordine diretto,
+ordine inverso, giro finale); nessun altro
+controllo è rosso. La cicatrice del
+quarantacinquesimo ordine resta verificabile,
+mentre tutte le nove patch precedenti
+e i certificati Stage01–Stage19 restano integri.

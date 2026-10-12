@@ -795,3 +795,16 @@ per tre confronti normativi sul successore.
 deterministiche, BigInt di oltre 16.000 bit,
 input invalidi e nove patch precedenti
 sono verificati senza mutare gli stadi 1–19.
+
+### Certificazione nativa dello Stadio 20
+
+La [GitHub Actions run 38212623612](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38212623612)
+ha concluso **SUCCESS per tutti i 21 job**
+al commit `8dd1253520bccfb5a51fe1a1d08afa3a43c41d26`.
+Stage20 mantiene intenzionalmente
+**26 PASS / 3 FAIL** per i tre confronti
+con il successore normativo della goccia 46;
+l'ordine al passo 45 resta distinto
+e riproducibile. Le firme native Stage01–Stage19
+sono preservate senza nuove regressioni.
+Il catalogo è bloccato, PATCH 10 non è iniziata.
