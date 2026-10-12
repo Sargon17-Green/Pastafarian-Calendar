@@ -163,14 +163,18 @@ public final class Stage02IncrementalRouteTests {
         int totalCounts = 0;
         int callsWithPersistedProbes = 0;
         long started = System.nanoTime();
+        long routeNanos = 0;
+        long auditNanos = 0;
 
         for (int call = 0; call < 12; call++) {
             MonsterWeavingLinearCounter.RankRoute before = route;
             int[] originalPrefix = before.fixedPrefixCopy();
             int originalProbes = before.probedBranches();
             BigInteger originalSkipped = before.skippedChoices();
+            long routeStarted = System.nanoTime();
             MonsterWeavingLinearCounter.RankRoute next =
                 family.advanceGlobalRankRoute(before, 8, 1);
+            routeNanos += System.nanoTime() - routeStarted;
             int moved = next.stepsCompleted() - before.stepsCompleted();
             ok(moved >= 0 && moved <= 8, "E_MULTICALL_STEP_BUDGET");
             ok(next.lastCountCalls() >= 0 && next.lastCountCalls() <= 1,
@@ -181,8 +185,11 @@ public final class Stage02IncrementalRouteTests {
             ok(next.lowerRank().compareTo(rank) <= 0
                     && rank.compareTo(next.upperRank()) <= 0,
                 "E_MULTICALL_RANK_CONTAINED");
-            eq(next.remainingChoices(),
-                family.countAfterPrefix(next.fixedPrefixCopy()),
+            long auditStarted = System.nanoTime();
+            BigInteger independentlyCounted =
+                family.countAfterPrefix(next.fixedPrefixCopy());
+            auditNanos += System.nanoTime() - auditStarted;
+            eq(next.remainingChoices(), independentlyCounted,
                 "E_MULTICALL_INTERVAL_EXACT");
             array(originalPrefix, before.fixedPrefixCopy(),
                 "E_MULTICALL_PREVIOUS_PREFIX_IMMUTABLE");
@@ -213,6 +220,8 @@ public final class Stage02IncrementalRouteTests {
             + " prefix_days=" + route.stepsCompleted()
             + " branch_counts=" + totalCounts
             + " calls_with_saved_probes=" + callsWithPersistedProbes
+            + " route_ms=" + routeNanos / 1000000
+            + " audit_ms=" + auditNanos / 1000000
             + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
     }
 
