@@ -22,6 +22,7 @@ public final class Stage02IncrementalRouteTests {
         normalizedTailDepthGrowthAndConcurrentParents();
         sharedGlobalRankRouteSmallOracle();
         sharedGlobalRankRouteFullYearInterior();
+        sharedGlobalRankRouteExtendedResourceProfile();
         sharedGlobalRankRouteInteroperabilityAndBudgets();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
@@ -292,6 +293,74 @@ public final class Stage02IncrementalRouteTests {
         }
     }
 
+
+    private static void sharedGlobalRankRouteExtendedResourceProfile() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger rank = family.count().add(BigInteger.ONE)
+            .divide(BigInteger.TWO);
+        MonsterWeavingLinearCounter.RankRoute route =
+            family.beginGlobalRankRoute(rank, 512);
+        long start = System.nanoTime();
+        int count = 0;
+        long previousElapsed = 0;
+        long hitBaseline = family.tailFunctionalReuseHitCount();
+        long buildBaseline = family.tailFunctionalBuildCount();
+        long usedHeapStart = Runtime.getRuntime().totalMemory()
+            - Runtime.getRuntime().freeMemory();
+        for (int call = 1; call <= 24; call++) {
+            MonsterWeavingLinearCounter.RankRoute prior = route;
+            route = family.advanceGlobalRankRouteShared(route, 8, 2);
+            ok(route.lastSharedBatchCalls() <= 2,
+                "E_SHARED_EXTENDED_BATCH_LIMIT");
+            eq(0, route.lastCountCalls(),
+                "E_SHARED_EXTENDED_NO_ORDINARY_COUNT");
+            ok(route.stepsCompleted() >= prior.stepsCompleted(),
+                "E_SHARED_EXTENDED_PREFIX_MONOTONE");
+            ok(route.lowerRank().compareTo(prior.lowerRank()) >= 0
+                    && route.upperRank().compareTo(prior.upperRank()) <= 0,
+                "E_SHARED_EXTENDED_NESTED_INTERVAL");
+            ok(route.lowerRank().compareTo(rank) <= 0
+                    && route.upperRank().compareTo(rank) >= 0,
+                "E_SHARED_EXTENDED_RANK_CONTAINED");
+            count += route.lastSharedBatchCalls();
+            if (call == 12 || call == 24) {
+                long now = System.nanoTime();
+                long used = Runtime.getRuntime().totalMemory()
+                    - Runtime.getRuntime().freeMemory();
+                long hits = family.tailFunctionalReuseHitCount() - hitBaseline;
+                long builds = family.tailFunctionalBuildCount() - buildBaseline;
+                eq(count, hits + builds,
+                    "E_SHARED_EXTENDED_ACCOUNTING");
+                eq(count, route.stepsCompleted(),
+                    "E_SHARED_EXTENDED_STEPS_EQUAL_BATCHES");
+                System.out.println("STAGE_02_SHARED_EXTENDED_CHECKPOINT_PASS"
+                    + " calls=" + call
+                    + " batches=" + count
+                    + " prefix_days=" + route.stepsCompleted()
+                    + " tail_hits=" + hits
+                    + " tail_builds=" + builds
+                    + " interval_digits=" + route.remainingChoices()
+                        .toString().length()
+                    + " route_ms=" + (now - start) / 1000000
+                    + " segment_ms=" + ((now - start) / 1000000
+                        - previousElapsed)
+                    + " used_heap_mb=" + used / 1048576
+                    + " initial_heap_mb=" + usedHeapStart / 1048576);
+                previousElapsed = (now - start) / 1000000;
+            }
+        }
+        eq(48, count, "E_SHARED_EXTENDED_48_BATCHES");
+        eq(48, route.stepsCompleted(),
+            "E_SHARED_EXTENDED_48_PREFIX_DAYS");
+        eq(route.remainingChoices(),
+            family.countAfterPrefix(route.fixedPrefixCopy()),
+            "E_SHARED_EXTENDED_FINAL_SUFFIX_DIFFERENTIAL");
+        ok(!route.complete(), "E_SHARED_EXTENDED_NOT_FALSE_COMPLETION");
+    }
 
     private static void sharedGlobalRankRouteInteroperabilityAndBudgets() {
         int[] lengths = {5, 5, 5, 5};
