@@ -295,3 +295,10 @@ Cyfrifir `slot=i-back` gan `PriorPatchWrapper.priorPatch`. Pan fo'r slot yn bosi
 Bydd `run-stage13-tests.sh` yn ail-redeg Camau 1–12 a gwirio pob un o saith `hiddenK`, y gangen bositif, 35 cyfrifiad BigInteger annibynnol a phum darlleniad positif, gan gadw'r 15 `EXPECTED_RED` hen. Mae `LAST_COMPLETED_STAGE=12` tan PASS y CI brodorol. Ni ddechreuwyd Cam 14.
 
 **Ardystiad Cam 13:** llwyddodd `sh run-stage13-tests.sh` ar commit `d043e234822f57250bf5f178a32aee16e5ceb875`, gyda Kotlin 1.9.0, JDK 21, y ffynonellau gwreiddiol a'r oracl normadol gwreiddiol. Gwiriwyd 35 marc log: pob atchweliad Camau 1–12, 7 darlleniad cudd yn GREEN, galwad wirioneddol i `legacyPrior` ar slot positif, 3 `EXPECTED_RED` wedi'u cadw, 35 prawf BigInteger cudd, 5 darlleniad positif a 175 cydran carreg. **`LAST_COMPLETED_STAGE=13`**. Cam 14 (`DISCOVERY 07`) yw'r nesaf; ni ddechreuwyd. Tystiolaeth: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38227553115
+
+
+## Cam 14 — DISCOVERY 07: mynegai zero-based yr unarddeg malu
+
+Mae `LegacyGrindTableAdapter` yn storio 11 rhes grŵp malu gwirioneddol, heb sentinel, mewn trefn zero-based. Mae'r hen helper `legacyGrindRow(grind)` yn defnyddio ordinal 1-based yn union fel index ffisegol: grind 1 yn darllen rhes normadol 2, grind 10 yn darllen rhes 11, a grind 11 yn dychwelyd `undefined`. Mae **11 `EXPECTED_RED` ac 0 `MATCH`**. Mae `BOOT → DISCOVERY_07` yn galw'r hen helper yn wirioneddol, yn cadw'r index uniongyrchol a'r rhes anghywir neu `null`, ac yn gwahanu'r cyflwr rhwng galwadau.
+
+Mae `run-stage14-tests.sh` yn rhedeg Camau 1–13 ac yn gwirio'r 11 rhes, 66 tyst `BigInteger` annibynnol, gwarchodion a methiant strict bwriadol. **`LAST_COMPLETED_STAGE=13` nes bod y CI brodorol wedi pasio.** Nid oes sentinel, PATCH 07 na chyfrifiad diferion gweledig yng Ngham 14.

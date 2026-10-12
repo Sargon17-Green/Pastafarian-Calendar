@@ -314,3 +314,8 @@ Mae'r helper visible-only yn parhau'n alwadadwy heb ei newid. Mae'r lapio newydd
 ### Cam 13 — ardystiad brodorol llawn
 
 Ar commit `d043e234822f57250bf5f178a32aee16e5ceb875` llwyddodd swydd Kotlin `114738687143` (rhediad `38227553115`) ar Kotlin 1.9.0/JDK 21. Gwiriwyd 35 marc yn uniongyrchol o log y swydd: atchweliadau Camau 1–12, 7 darlleniad hidden GREEN, galw'r helper raw ar y gangen bositif yn unig, profi'r gangen bositif heb storfa gudd, 35 prawf BigInteger annibynnol, 175 cydran carreg a chadw 15 tyst o'r tri diffyg hanesyddol. Mae `LAST_COMPLETED_STAGE=13`; ni ddechreuwyd Cam 14.
+
+
+## Cam 14 — DISCOVERY 07: gwall mynegeio tabl malu
+
+Mae'r hen adalydd yn storio union 11 rhes ffisegol zero-based ar gyfer yr unarddeg malu a ddiffinnir gan yr oracl. Nid oes rhes sentinel. Galwir `legacyGrindRow(grind)` gan lwybr cynhyrchu `DISCOVERY_07` ac mae'n defnyddio'r ordinal un-based yn uniongyrchol fel index, felly grind 1 → row 2, grind 10 → row 11, grind 11 → undefined. Mae'r holl 11 cais yn `EXPECTED_RED`; ni chaiff unrhyw un fod yn `MATCH`. Cedwir perchnogaeth y cyd-destun a'r pob un o'r hen lwybrau, heb roi'r cywiriad PATCH 07 na'r adeiladwr diferion gweledig ar waith. Mae'r cam yn aros am ardystiad JVM brodorol.

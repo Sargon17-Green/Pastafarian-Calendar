@@ -70,7 +70,13 @@ data class BaseMonsterContext(
     var patch06Patch05HiddenOne: ExactInt? = null,
     var patch06StoneLegacyCalls: Int = 0,
     var patch06Applied: Boolean = false,
-    var patch06InvocationCount: Int = 0
+    var patch06InvocationCount: Int = 0,
+    var discovery07RequestedGrind: Int? = null,
+    var discovery07DirectIndex: Int? = null,
+    var discovery07LegacyRow: VisibleGrindRow? = null,
+    var discovery07Undefined: Boolean? = null,
+    var discovery07PhysicalRows: List<VisibleGrindRow>? = null,
+    var discovery07InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -132,7 +138,8 @@ class MonsterBootstrapManager(
     val legacyHiddenDropAdapter: LegacyHiddenDropAdapter = LegacyHiddenDropAdapter(),
     val hiddenNearnessPatchWrapper: HiddenNearnessPatchWrapper = HiddenNearnessPatchWrapper(legacyHiddenDropAdapter),
     val legacyPriorAdapter: LegacyPriorAdapter = LegacyPriorAdapter(),
-    val priorPatchWrapper: PriorPatchWrapper = PriorPatchWrapper(legacyPriorAdapter, hiddenNearnessPatchWrapper)
+    val priorPatchWrapper: PriorPatchWrapper = PriorPatchWrapper(legacyPriorAdapter, hiddenNearnessPatchWrapper),
+    val legacyGrindTableAdapter: LegacyGrindTableAdapter = LegacyGrindTableAdapter()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -283,6 +290,29 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_06_VISIBLE_ONLY_LEGACY_PRIOR")
             context.status = "LEGACY_PRIOR_OBSERVED"
             metrics.bump("discovery06.legacy.prior.calls")
+        }
+        dispatcher.register("DISCOVERY_07") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY") throw MonsterValidationException("E_DISCOVERY07_CONTEXT_NOT_READY")
+            val grind = context.discovery07RequestedGrind
+                ?: throw MonsterValidationException("E_DISCOVERY07_NO_GRIND")
+            if (grind !in 1..11) throw MonsterValidationException("E_DISCOVERY07_GRIND_RANGE")
+            // Mae'n rhaid defnyddio'r hen helper yn wirioneddol, heb sentinel.
+            val actual = legacyGrindTableAdapter.legacyGrindRow(grind)
+            val physical = legacyGrindTableAdapter.physicalRows()
+            check(physical.size == 11 && actual.directIndex == grind) {
+                "E_DISCOVERY07_PHYSICAL_SHAPE"
+            }
+            // Dim cofnodi ar ôl methiant: yr holl werthoedd yng nghyd-destun y galwad.
+            context.discovery07DirectIndex = actual.directIndex
+            context.discovery07LegacyRow = actual.row
+            context.discovery07Undefined = actual.undefined
+            context.discovery07PhysicalRows = physical
+            context.discovery07InvocationCount = 1
+            context.branchTrace.add("DISCOVERY_07")
+            context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
+            context.status = "LEGACY_GRIND_OBSERVED"
+            metrics.bump("discovery07.legacy.grind.calls")
         }
         dispatcher.register("PATCH_06") { context ->
             validation.requireBootstrapContext(context)
@@ -577,6 +607,24 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY05_WRAP", e)
+        }
+    }
+
+    /** Cam 14: ymholi am ordinal 1-based fel index zero-based heb ei gywiro. */
+    fun observeLegacyGrind(
+        calculationDay: ExactInt, targetDay: ExactInt, grind: Int = 1
+    ): BaseMonsterContext {
+        require(grind in 1..11) { "E_DISCOVERY07_GRIND_RANGE" }
+        val context = prepare(calculationDay, targetDay)
+        context.discovery07RequestedGrind = grind
+        context.phase = "DISCOVERY_07"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY07_WRAP", e)
         }
     }
 
