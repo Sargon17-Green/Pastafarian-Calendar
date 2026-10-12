@@ -158,3 +158,13 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage22Tests/PastafarianCalendar.Stage22Tests.csproj --configuration Release -- --verify-expected-red
       - name: إثبات صحة الالتقاط المحمي لترتيب القطرة السادسة والأربعين
         run: dotnet run --project tests/PastafarianCalendar.Stage23Tests/PastafarianCalendar.Stage23Tests.csproj --configuration Release
+
+      - name: تشغيل الأحمر التاريخي لاختيار الوعاء التالي بمعرف ثابت
+        id: discovery_fixed_next_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage24Tests/PastafarianCalendar.Stage24Tests.csproj --configuration Release
+      - name: إثبات توقيع الاختلافات مع ترتيب القطرة السادسة والأربعين
+        if: always()
+        run: |
+          test "${{ steps.discovery_fixed_next_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage24Tests/PastafarianCalendar.Stage24Tests.csproj --configuration Release -- --verify-expected-red
