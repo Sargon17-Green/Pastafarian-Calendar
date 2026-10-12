@@ -3,8 +3,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   Bộ phân phối sản xuất duy trì các nhánh SAVE và nhãn ngày đã được vá.
 
   Hai nhãn ngày, khoảng cách và bảng đá đã qua các bản vá cũ.
-  Bảy giọt ẩn được đọc đúng qua bản vá 05; giọt nhìn thấy ở
-  giai đoạn 12 chỉ đọc kho nhìn thấy và bỏ sót giọt ẩn.
+  Bảy giọt ẩn được đọc đúng qua bản vá 05; giọt nhìn thấy
+  dùng bản vá 06 để tìm các ô trước ở kho ẩn hoặc kho nhìn thấy.
   Chưa tích hợp ngày lịch.
   """
 
@@ -45,7 +45,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
         calculation_tag,
         target_tag,
         corrected_distance,
-        stones_table
+        stones_table,
+        hidden_storage
       )
 
     %Context{

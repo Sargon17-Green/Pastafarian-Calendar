@@ -1,13 +1,13 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.VisibleDropCalculator do
   @moduledoc """
-  Sinh 46 giọt nhìn thấy bằng đường lịch sử thiếu bảy giọt ẩn.
+  Sinh 46 giọt nhìn thấy với bản vá 06 định tuyến ba lần đọc lịch sử.
 
-  Bảy giá trị ẩn đã được tính ở bước bootstrap, nhưng phép đọc
-  lịch sử chỉ tìm trong kho giọt nhìn thấy; các ô âm bị thay bằng 0.
-  Mọi công thức số học khác vẫn theo đúng hợp đồng.
+  Với địa chỉ dương, dùng LegacyPrior thực trên kho nhìn thấy.
+  Với ô âm hoặc ô không, bản vá gọi HiddenDropManager để lấy
+  giọt ẩn đã tính trong bootstrap. Các kho luôn tách biệt.
   """
 
-  alias PastafariCalendarElixirVietnamese.Monster.{LegacyPrior, SaveManager}
+  alias PastafariCalendarElixirVietnamese.Monster.{PriorPatch, SaveManager}
 
   @grinds [
     {3, 5, 7, 11, 1},
@@ -23,7 +23,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.VisibleDropCalculator do
     {37, 41, 43, 47, 1}
   ]
 
-  def calculate(calculation_day, target_day, action_tag, target_tag, distance, stones)
+  def calculate(calculation_day, target_day, action_tag, target_tag, distance, stones, hidden_storage)
       when is_integer(calculation_day) and is_integer(target_day) do
     connection = action_tag + target_tag
 
@@ -35,9 +35,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.VisibleDropCalculator do
       end
 
     Enum.reduce(1..46, %{}, fn index, visible_store ->
-      previous_1 = LegacyPrior.legacy_prior(visible_store, index, 1)
-      previous_3 = LegacyPrior.legacy_prior(visible_store, index, 3)
-      previous_7 = LegacyPrior.legacy_prior(visible_store, index, 7)
+      previous_1 = PriorPatch.read(visible_store, hidden_storage, index, 1)
+      previous_3 = PriorPatch.read(visible_store, hidden_storage, index, 3)
+      previous_7 = PriorPatch.read(visible_store, hidden_storage, index, 7)
       stone_row = Map.fetch!(stones, index)
 
       {w, b, s, m, r} = stone_row

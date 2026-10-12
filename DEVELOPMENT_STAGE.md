@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=12
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=13
+CURRENT_KIND=PATCH
 CURRENT_PATCH=06
 LAST_COMPLETED_STAGE=12
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ năm bản vá cũ, thêm LegacyPrior chỉ đọc visible_store[index-back], ô trống dùng 0; VisibleDropCalculator tạo 46 giọt mà chưa liên hệ bảy giọt ẩn, context giữ hai kho riêng.
+MONSTER_ARCHITECTURE_GROWTH=Giữ nguyên LegacyPrior chỉ đọc giọt nhìn thấy; thêm PriorPatch chọn slot dương qua legacy, slot không dương qua HiddenDropManager, chuyển đúng kho ẩn đã tạo trong bootstrap đến bộ tính 46 giọt.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
-GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_12_DISCOVERY_COMMIT
+GITHUB_ACTIONS_PERFORMED=STAGE_13_PENDING
+GIT_HISTORY_MUTATED=STAGE_13_PATCH_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=126
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=STAGE_13_PENDING
+CI_FAILURES=STAGE_13_PENDING
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -204,3 +204,15 @@ Khóa tên chuẩn độc lập PASS.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165148360
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38165148358
 Giai đoạn 12 đóng EXPECTED_RED. Giai đoạn 13 là PATCH 06.
+
+Giai đoạn 13 đưa PriorPatch vào đường tính 46 giọt nhìn thấy.
+Đối với slot=index-back >=1, bản vá gọi LegacyPrior thật;
+với slot<=0, lấy hidden_number=1-slot từ HiddenDropManager
+trên đúng tuple đảo đã được xây trong ngữ cảnh bootstrap.
+Không thay đổi LegacyPrior, HiddenDropCalculator, hay oracle;
+bản vá số 05 tiếp tục được sử dụng cho mọi truy cập hidden.
+Bốn hồi quy chuẩn của phát hiện 06 giữ nguyên kỳ vọng.
+Hai bài kiểm thử khám phá theo dây nối đã đổi để xác nhận
+đường công khai đúng nhưng đường legacy vẫn sai.
+Mười một kiểm thử Stage13 mới. Tổng dự kiến 137 bài, 0 lỗi.
+LAST_COMPLETED_STAGE vẫn 12 trước khi xác minh CI cuối.

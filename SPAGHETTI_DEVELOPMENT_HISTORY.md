@@ -357,3 +357,32 @@ trong kiểm thử mới. Chỉ điều chỉnh kiểm thử sang `Map.filter`,
 không sửa mã sản xuất hoặc kỳ vọng chuẩn. Lần kiểm chứng cuối
 không cảnh báo biên dịch. Giai đoạn 12 khép EXPECTED_RED;
 bản vá đọc giọt ẩn của giai đoạn 13 chưa được thêm.
+
+## Giai đoạn 13 — Bản vá 06: phân nhánh địa chỉ giọt quá khứ
+
+**Di sản còn sống:** `LegacyPrior.legacy_prior` tiếp tục
+lấy `visible_store[i-back]` và trả 0 khi vị trí vắng.
+Không sửa hoặc xóa hàm này. Kho các giọt nhìn thấy và
+tuple bảy giọt ẩn tiếp tục có chủ sở hữu riêng.
+
+**Lớp vá mới:** `PriorPatch.read` tính `slot=i-back`.
+Khi `slot>=1`, gọi lại hàm legacy trên kho giọt nhìn thấy;
+khi `slot<=0`, ánh xạ `hidden_number=1-slot` và
+đọc qua `HiddenDropManager.read`, vốn dùng ánh xạ 8-k
+đã hoàn thành ở bản vá 05. `VisibleDropCalculator`
+thay ba lần gọi legacy trực tiếp bằng ba lần gọi bản vá,
+nhận tuple ẩn từ `Dispatcher.bootstrap`.
+
+**Chứng minh:** Với mỗi i từ 1 đến 46 và các bước lùi
+1, 3, 7, slot thuộc một trong hai miền rời nhau.
+Ở miền dương, nó ứng đúng với giọt nhìn thấy đã tính;
+ở miền không dương, vị trí 0..-6 ứng đúng hidden1..7.
+Vì cả ba giá trị trước được lấy đúng, công thức 11 phép
+nghiền cho giọt đầu chính xác; theo quy nạp toàn bộ
+46 giọt tiếp theo chính xác. Cách tính, SAVE và đá
+đã được kiểm chứng ở các giai đoạn trước.
+
+**Giới hạn:** Bảo toàn bốn hồi quy chuẩn từ giai đoạn 12;
+sửa riêng các khẳng định dây nối từng đòi kết quả sai.
+Không bắt đầu lỗi bảng nghiền có chỉ số lệch
+của giai đoạn 14 hoặc thay đổi các nguồn chuẩn.

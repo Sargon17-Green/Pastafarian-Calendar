@@ -385,3 +385,27 @@ Giai đoạn 12/55 khép ở trạng thái `EXPECTED_RED` đã xác minh.
 Giai đoạn 13/55, `PATCH 06`, sẽ giữ `LegacyPrior` để đọc
 những vị trí dương, còn vị trí 0 đến -6 phải được ánh xạ về
 giọt ẩn số `1-slot`. Không thêm phần sửa này ở giai đoạn 12.
+
+## Giai đoạn 13 — Bản vá 06 cho ba giọt quá khứ
+
+Lỗi từ giai đoạn 12 đã được cô lập ở `LegacyPrior`: hàm cũ
+chỉ tra các vị trí thuộc kho giọt nhìn thấy, và trả về 0 nếu
+vị trí không tồn tại. **Hàm này được giữ nguyên**.
+
+`PriorPatch.read(visible_store, hidden_storage, i, back)`
+tính `slot=i-back`. Nếu `slot>=1`, gọi
+`LegacyPrior.legacy_prior(visible_store,i,back)` thực sự.
+Nếu `slot<=0`, tính `hidden_number=1-slot` rồi lấy
+giọt tương ứng qua `HiddenDropManager.read(hidden_storage,hidden_number)`,
+tức tiếp tục dùng bản vá 05 cho thứ tự lưu đảo.
+Không đảo hoặc gộp hai kho, không thay dữ liệu lịch sử.
+
+`VisibleDropManager.build` nhận tuple giọt ẩn đã tính một lần
+trong `Dispatcher.bootstrap`, truyền qua
+`VisibleDropCalculator.calculate` và `PriorPatch.read`
+cho cả ba độ lùi 1, 3, 7. Bộ tính vẫn dùng 11 hàng nghiền
+và SAVE; đầu ra 46 giọt phải khớp bộ chuẩn.
+Bốn hồi quy từ giai đoạn 12 được giữ nguyên và phải chuyển xanh.
+11 kiểm thử giai đoạn 13 xác minh những vùng tiếp giáp,
+46 giọt, ngày số nguyên lớn, thực thi song song,
+đường legacy còn nguyên và các lớp vá trước.

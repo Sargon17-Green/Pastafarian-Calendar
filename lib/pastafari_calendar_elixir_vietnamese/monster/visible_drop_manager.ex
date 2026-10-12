@@ -1,21 +1,22 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.VisibleDropManager do
   @moduledoc """
-  Bộ quản lý giọt nhìn thấy qua đường cũ chưa biết giọt ẩn.
+  Bộ quản lý giọt nhìn thấy đi qua bản vá lịch sử 06.
 
-  Kết quả của 46 giọt được xây trong mỗi lần gọi riêng biệt.
-  Không sửa phép đọc lịch sử cho các địa chỉ âm trước giai đoạn 13.
+  Cả 46 giọt được tạo trong mỗi lần gọi riêng; kho giọt ẩn được
+  truyền từ ngữ cảnh hiện tại, không tính lại và không dùng biến chung.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.VisibleDropCalculator
 
-  def build(calculation_day, target_day, action_tag, target_tag, distance, stones) do
+  def build(calculation_day, target_day, action_tag, target_tag, distance, stones, hidden_storage) do
     VisibleDropCalculator.calculate(
       calculation_day,
       target_day,
       action_tag,
       target_tag,
       distance,
-      stones
+      stones,
+      hidden_storage
     )
   end
 

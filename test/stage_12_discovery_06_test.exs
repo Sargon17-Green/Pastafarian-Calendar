@@ -68,7 +68,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage12Discovery06Test do
         Ref.day_count(c),
         Ref.day_count(t),
         Ref.work_counts(c, t).distance,
-        Ref.build_stones()
+        Ref.build_stones(),
+        context.hidden_drops_storage
       )
 
     assert context.visible_drops == calculated
@@ -120,7 +121,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage12Discovery06Test do
         Ref.save(prior_x * prior_x + a * prior_x + elem(stones[1], kind - 1))
       end)
 
-    assert Calendar.visible_drop_spaghetti(c, t, 1) == computed
+    refute Calendar.visible_drop_spaghetti(c, t, 1) == computed
+    assert Calendar.visible_drop_spaghetti(c, t, 1) == oracle(c, t)[1]
     refute computed == oracle(c, t)[1]
   end
 
@@ -214,22 +216,26 @@ defmodule PastafariCalendarElixirVietnamese.Stage12Discovery06Test do
                  fn -> LegacyPrior.legacy_prior(%{}, 1, 2) end
   end
 
-  test "mã nguồn phải giữ lookup thiếu lịch sử và không có bản vá 06" do
+  test "mã nguồn giữ lookup cũ nhưng định tuyến qua bản vá 06" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = Path.join(root, "legacy_prior.ex") |> File.read!()
     calculator = Path.join(root, "visible_drop_calculator.ex") |> File.read!()
+    patch = Path.join(root, "prior_patch.ex") |> File.read!()
     dispatcher = Path.join(root, "dispatcher.ex") |> File.read!()
 
     assert legacy =~ "slot = index - back"
     assert legacy =~ "Map.get(visible_store, slot, 0)"
     refute legacy =~ "HiddenDropManager"
-    assert calculator =~ "LegacyPrior.legacy_prior(visible_store, index, 1)"
-    assert calculator =~ "LegacyPrior.legacy_prior(visible_store, index, 3)"
-    assert calculator =~ "LegacyPrior.legacy_prior(visible_store, index, 7)"
+    assert calculator =~ "PriorPatch.read(visible_store, hidden_storage, index, 1)"
+    assert calculator =~ "PriorPatch.read(visible_store, hidden_storage, index, 3)"
+    assert calculator =~ "PriorPatch.read(visible_store, hidden_storage, index, 7)"
     assert dispatcher =~ "VisibleDropManager.build("
     assert dispatcher =~ "visible_drops: visible_drops"
     refute calculator =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "prior_patch.ex"))
+    assert File.exists?(Path.join(root, "prior_patch.ex"))
+    assert patch =~ "LegacyPrior.legacy_prior(visible_store, index, back)"
+    assert patch =~ "HiddenDropManager.read(hidden_storage, hidden_number)"
+    assert patch =~ "hidden_number = 1 - slot"
   end
 
   test "hồi quy chuẩn giọt nhìn thấy thứ nhất: cố ý đỏ cho phát hiện 06" do
