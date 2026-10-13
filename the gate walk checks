@@ -13,3 +13,27 @@ To check the first signed gate positions:
   Locate a gate given -1.
   If the gate walk's current position is not -15056174,
     put "Gate -1 was not 503 days before Foundation." into the check report; exit.
+
+
+\ Verify the ownership of a gap when moving across gate zero.
+\ Gap at negative gate -1 is 503 days; positive gap +1 is 345.
+\ These four single steps must never request a gap for index zero.
+To check gate zero crossings:
+  Put -1 into the gate walk's current index.
+  Put -15056174 into the gate walk's current position.
+  Move to the next positive gate.
+  If the gate walk's current index is not 0,
+    put "Crossing from gate -1 ended at the wrong index." into the check report; exit.
+  If the gate walk's current position is not -15055671,
+    put "Crossing from gate -1 to zero used the wrong gap." into the check report; exit.
+  Move to the next positive gate.
+  If the gate walk's current position is not -15055326,
+    put "Crossing from gate zero to +1 used the wrong gap." into the check report; exit.
+  Move to the next negative gate.
+  If the gate walk's current index is not 0,
+    put "Returning from gate +1 ended at the wrong index." into the check report; exit.
+  If the gate walk's current position is not -15055671,
+    put "Returning from gate +1 to zero used the wrong gap." into the check report; exit.
+  Move to the next negative gate.
+  If the gate walk's current position is not -15056174,
+    put "Returning from gate zero to -1 used the wrong gap." into the check report; exit.
