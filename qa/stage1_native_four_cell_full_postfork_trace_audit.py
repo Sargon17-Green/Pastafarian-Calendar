@@ -17,6 +17,12 @@ CANDIDATE="d965ce4bdfa282f2d3b82690808def5a2dde10a8"
 CASES=("zero_equal","foundation_cross","forward_short","mixed_small")
 PHYSICAL_FORK_GATE=(951,1335)
 OPS=("|","_","[","]","r","w","k","j","{","}","u","p","g","x")
+# Conservative set of BF98 operations that cannot turn an IP.
+# Include quoted character pushes; omit turns, skips and flow controls.
+STRAIGHT_BYTES=frozenset(map(ord, ' 0123456789abcdef+-*/%!`:$.,&~pg')) | frozenset((92,))
+def straight_instruction(byte,stringmode):
+    return stringmode==1 or byte==ord('"') or byte in STRAIGHT_BYTES
+
 def need(ok,msg):
     if not ok:raise AssertionError(msg)
 def gitblob(data):
@@ -101,6 +107,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
              "Native complete pre-fork trajectory truncated or inflated")
         pre_memory={}
         last_pg=None
+        last_straight_delta=None
         expected_prefork_stringmode=0
         for index,entry in enumerate(pretrace):
             need(type(entry) is list and len(entry)==7 and
@@ -114,6 +121,9 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
                  "Native pre-fork stringmode not caused by physical quote opcode")
             if byte==ord('"'):
                 expected_prefork_stringmode=1-expected_prefork_stringmode
+            if last_straight_delta is not None:
+                need((dx,dy)==last_straight_delta,
+                     "Native pre-fork nonturning opcode changed IP direction")
             if last_pg is not None:
                 px,py,pdx,pdy=last_pg
                 need((dx,dy)==(pdx,pdy) and
@@ -128,6 +138,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
                 need(event is not None and event[1]==chr(byte),
                      "Executed pre-fork p/g missing its Native receipt")
                 last_pg=(x,y,dx,dy)
+            last_straight_delta=(dx,dy) if straight_instruction(byte,stringmode) else None
             if event is not None:
                 need(stringmode==0 and byte==ord(event[1]),
                      "Forged Native pre-fork p/g event on wrong opcode")
@@ -176,6 +187,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
     beyond512=set()
     executed_modified=0;ops=Counter()
     pending_pg_motion=None
+    pending_straight_delta=None
     expected_postfork_stringmode=0
     for i,datum in enumerate(trace):
         need(type(datum) is list and len(datum)==7
@@ -189,6 +201,9 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
              "Native post-fork stringmode not caused by physical quote opcode")
         if byte==ord('"'):
             expected_postfork_stringmode=1-expected_postfork_stringmode
+        if pending_straight_delta is not None:
+            need((dx,dy)==pending_straight_delta,
+                 "Native post-fork nonturning opcode changed IP direction")
         # Native p/g changes Funge-space but not IP direction. Walking
         # may skip spaces or normalize across Funge-space bounds; check
         # the directed axis, not a one-cell step distance.
@@ -219,6 +234,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
             need(event is not None and event[1]==chr(byte),
                  "Native executed p/g opcode missing its physical event receipt")
             pending_pg_motion=(x,y,dx,dy)
+        pending_straight_delta=(dx,dy) if straight_instruction(byte,stringmode) else None
         if event is not None:
             kind=event[1]
             need(stringmode==0 and byte==ord(kind),
