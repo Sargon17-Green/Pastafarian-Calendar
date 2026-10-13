@@ -26,7 +26,7 @@ To calculate a gate interval given a number:
   Put 1 into the seal inquiry's seal number.
   Begin a sealed inquiry.
   Put "922" into an interval options wide quantity.
-  Choose a narrow quantity from the interval options wide quantity.
+  Choose an equal option given the interval options wide quantity.
   Convert the seal inquiry's selected quantity to a chosen interval number.
   Add 41 to the chosen interval number.
   Put the chosen interval number into the gate inquiry's interval length.
