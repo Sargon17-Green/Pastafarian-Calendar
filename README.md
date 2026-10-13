@@ -167,6 +167,11 @@ written in Plain English Programming:
   format a successful five-part date as a readable English string
   without modifying its canonical numeric components. Invalid or
   stale date results produce no display text.
+- **the date file output** and **the date file checks**:
+  provide an explicit callable procedure, `Write a calendar date for
+  a calendar day and another calendar day`. It writes the English
+  five-part date, or an explanatory failure reason, to
+  `pastafarian-date.txt`. It does not run in the default quick QA.
 - **the canonical date vectors**: ten optional end-to-end reference
   checks for the authoritative AC.1 table on the main branch, including
   past and future year transitions. The obsolete mutant table is
@@ -179,7 +184,7 @@ written in Plain English Programming:
   Foundation-day (5000, 10, 503, 20, 56) comparison is an optional
   slow oracle, not a demonstrated result of running the program.
 
-The source now includes **78 groups of checks**, some of which compare several
+The source now includes **79 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -331,7 +336,7 @@ root, outside the compile input. Use the matching CAL standard library
 supplied by the compiler. No successful compiler execution has been
 reported.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 78 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 79 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
