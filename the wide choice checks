@@ -86,8 +86,8 @@ To check the three digit wide choice:
     put "The three digit wide choice used the wrong M power." into the check report; exit.
   If the wide option work's acceptance limit is not "4925250774549309901534880012517951725519175319570864638069965690522027313584902188861905533211546994915210673782780",
     put "The three digit wide choice computed the wrong acceptance limit." into the check report; exit.
-  If the wide option work's constructed answer is not "1",
-    put "The three digit wide choice did not reject correctly." into the check report; exit.
+  If the wide option work's constructed answer is not "57896044618658097711785492504343953926124568782438874324533730092808912502786",
+    put "The three digit wide choice built the wrong wide value." into the check report; exit.
   If the seal inquiry's selected quantity is not "170141183460469231731687303715884105726",
     put "The three digit wide choice chose the wrong option." into the check report; exit.
   If the seal inquiry's current answer is not the seal inquiry's starting answer,
