@@ -410,21 +410,36 @@ object Stage36Tests {
       finally stream.close()
       truth(!sources.contains("NormativeOracle"),"Oracolo test-only")
       truth(sources.contains("def oldSourceCatalogMismatch("),"Cicatrice")
-      truth(!sources.contains("def sourceCatalogIndexPatch("),"PATCH18 anticipata")
+      val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      if(current<37)
+        truth(!sources.contains("def sourceCatalogIndexPatch("),
+          "PATCH18 anticipata")
+      else
+        truth(sources.contains("def sourceCatalogIndexPatch("),
+          "PATCH18 successiva presente")
       eqv(SourceLanguageCatalog.Months,Catalog,"Catalogo immutabile")
     }
     check("metadati Stage36 preservano Stage35"){
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=36"),"Stage")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=17"),"Patch precedente")
-      truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .map(_.stripPrefix("CURRENT_STAGE=").toInt).get
+      truth(current>=36,"Stage36 certificato")
+      if(current==36){
+        truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=17"),"Patch precedente")
+        truth(st.contains("EXPECTED_REPOSITORY_STATE=EXPECTED_RED"),"RED")
+      } else
+        truth(st.contains("STAGE_36_NATIVE_VERIFICATION=PASS_EXPECTED_RED_59_PASS_3_FAIL"),
+          "DISCOVERY18 storica certificata")
       truth(st.contains("STAGE_35_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_71_PASS_0_FAIL"),
         "PATCH17 certificata")
       val done=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(done==35 || done==36,"Sequenza")
+      truth(done>=35 && done<=current,"Sequenza")
     }
 
     Vector(

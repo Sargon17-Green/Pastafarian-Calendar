@@ -139,7 +139,9 @@ final case class BaseMonsterContext(
   var catalogMonthIndices: Option[Vector[Int]] = None,
   var catalogInputSnapshot: Option[Vector[Int]] = None,
   var catalogLegacyItalianNames: Option[Vector[String]] = None,
-  var catalogFrozenVersion: Option[String] = None
+  var catalogFrozenVersion: Option[String] = None,
+  var patchedCatalogItalianNames: Option[Vector[String]] = None,
+  var patch18Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -192,6 +194,63 @@ final class BaseValidationManager {
    * DISCOVERY18: ricostruisce autonomamente il bug 1-based/0-based.
    * Non applica il lookup corretto del catalogo ai risultati.
    */
+  /**
+   * PATCH18: valida con una scansione indipendente la cicatrice
+   * dell'indice ruotato e la mappatura esatta dell'ID canonico.
+   * Non richiama mai Patch18SourceCatalogWrapper.
+   */
+  def requirePatch18Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_18_SOURCE_CATALOG_INDEX" ||
+       ctx.status!="PATCH_18_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_18_SOURCE_CATALOG_MISMATCH",
+         "PATCH_18_SOURCE_CATALOG_INDEX") ||
+       ctx.catalogMonthIndices.isEmpty ||
+       ctx.catalogInputSnapshot.isEmpty ||
+       ctx.catalogLegacyItalianNames.isEmpty ||
+       ctx.catalogFrozenVersion.isEmpty ||
+       ctx.patchedCatalogItalianNames.isEmpty ||
+       !ctx.patch18Applied)
+      throw new IllegalStateException("PATCH 18 non completa.")
+
+    val indices=ctx.catalogMonthIndices.get
+    if(ctx.catalogInputSnapshot.get!=indices ||
+       indices.size<3 || indices.size>47 ||
+       indices.distinct.size!=indices.size ||
+       indices.exists(i=>i<1 || i>47))
+      throw new IllegalStateException("Input o snapshot catalogo falsificati.")
+
+    val source=pastafari.catalog.SourceLanguageCatalog.Months
+    if(source.size!=47 ||
+       source.indices.exists(i=>source(i).canonicalIndex!=i+1) ||
+       source.map(_.italian).distinct.size!=47 ||
+       ctx.catalogFrozenVersion.get!=
+         pastafari.catalog.SourceLanguageCatalog.Version)
+      throw new IllegalStateException("Catalogo congelato non integro.")
+
+    val oldNames=ctx.catalogLegacyItalianNames.get
+    val correctNames=ctx.patchedCatalogItalianNames.get
+    if(oldNames.size!=indices.size || correctNames.size!=indices.size)
+      throw new IllegalStateException("Numero di nomi falsificato.")
+
+    var pos=0
+    while(pos<indices.size){
+      val id=indices(pos)
+      // Ricostruzione OLD: ID usato come posizione zero-based.
+      val previous=source(id%47)
+      // Ricostruzione PATCH: ID canonico tradotto alla posizione id-1.
+      val expected=source(id-1)
+      if(oldNames(pos)!=previous.italian ||
+         correctNames(pos)!=expected.italian ||
+         expected.canonicalIndex!=id)
+        throw new IllegalStateException(
+          "Mappatura del mese storico o corretto falsificata.")
+      pos+=1
+    }
+    if(correctNames.distinct.size!=indices.size)
+      throw new IllegalStateException("Nomi corretti duplicati.")
+  }
+
   def requireDiscovery18Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="DISCOVERY_18_SOURCE_CATALOG_MISMATCH" ||
        ctx.status!="LEGACY_SOURCE_CATALOG_MISMATCH_READY" ||
@@ -1534,7 +1593,8 @@ final class BaseMonsterManager {
     new Patch16ContiguousMonthDayHandler(metrics),
     new Discovery17DuplicatedMonthNameHandler(metrics),
     new Patch17DistinctMonthNameHandler(metrics),
-    new Discovery18SourceCatalogMismatchHandler(metrics)
+    new Discovery18SourceCatalogMismatchHandler(metrics),
+    new Patch18SourceCatalogHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -2459,6 +2519,34 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable=>
         throw BaseErrorWrapper.wrap("discovery18",error)
+    }
+  }
+
+  def patch18SourceCatalogIndex(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    canonicalMonthIndices: Vector[Int]
+  ): Patch18SourceCatalogReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.catalogMonthIndices=Some(canonicalMonthIndices)
+    ctx.phase="DISCOVERY_18_SOURCE_CATALOG_MISMATCH"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery18Ready(ctx)
+      ctx.phase="PATCH_18_SOURCE_CATALOG_INDEX"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch18Ready(ctx)
+      Patch18SourceCatalogReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.catalogMonthIndices.get,
+        ctx.catalogFrozenVersion.get,
+        ctx.catalogLegacyItalianNames.get,
+        ctx.patchedCatalogItalianNames.get,
+        ctx.patch18Applied,ctx.phase,ctx.status,
+        ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable=>
+        throw BaseErrorWrapper.wrap("patch18",error)
     }
   }
 
