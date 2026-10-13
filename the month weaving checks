@@ -107,3 +107,7 @@ To check four-month weaving count:
   Count all possible month weavings.
   If the weaving selection's total completions is not "177260",
     put "Four months with four days each have the wrong weaving count." into the check report; exit.
+  If the weaving selection's resource limit reached is not 0,
+    put "The small four-month reference exceeded the memoization guard." into the check report; exit.
+  If the weaving selection's memo entry count is greater than 4096,
+    put "The small reference exceeded the declared memo entry limit." into the check report; exit.
