@@ -1,0 +1,111 @@
+\ All 720 ways of putting six bowls in a row, in dictionary order.
+\ The fixed bowl identities are 1, 2, 3, 4, 5, and 6.
+\ A drop D chooses rank 1 + ((D-1) remainder 720).
+\ All operations on D happen before conversion to a small CAL number.
+\ This is source code and has not yet been compiled by CAL.
+
+A bowl order has
+  a number called first identity,
+  a number called second identity,
+  a number called third identity,
+  a number called fourth identity,
+  a number called fifth identity,
+  a number called sixth identity.
+
+A bowl chooser has
+  a number called remaining rank,
+  a number called slot,
+  a number called factorial,
+  a number called skip count,
+  a number called candidate,
+  a number called chosen identity,
+  a number called used status,
+  a number called first used,
+  a number called second used,
+  a number called third used,
+  a number called fourth used,
+  a number called fifth used,
+  a number called sixth used.
+
+The chosen bowl order is a bowl order.
+The bowl chooser is a bowl chooser.
+
+\ The factorials for the six successive positions are 120, 24,
+\ 6, 2, 1, and 1. The last position has no choice left.
+To choose the next factorial:
+  If the bowl chooser's slot is 1, put 120 into the bowl chooser's factorial.
+  If the bowl chooser's slot is 2, put 24 into the bowl chooser's factorial.
+  If the bowl chooser's slot is 3, put 6 into the bowl chooser's factorial.
+  If the bowl chooser's slot is 4, put 2 into the bowl chooser's factorial.
+  If the bowl chooser's slot is 5, put 1 into the bowl chooser's factorial.
+  If the bowl chooser's slot is 6, put 1 into the bowl chooser's factorial.
+
+\ Check whether the current candidate bowl was chosen earlier.
+\ If it has not been used, skip some available bowls or choose it.
+To consider a bowl candidate:
+  Put 0 into the bowl chooser's used status.
+  If the bowl chooser's candidate is 1, put the bowl chooser's first used into the bowl chooser's used status.
+  If the bowl chooser's candidate is 2, put the bowl chooser's second used into the bowl chooser's used status.
+  If the bowl chooser's candidate is 3, put the bowl chooser's third used into the bowl chooser's used status.
+  If the bowl chooser's candidate is 4, put the bowl chooser's fourth used into the bowl chooser's used status.
+  If the bowl chooser's candidate is 5, put the bowl chooser's fifth used into the bowl chooser's used status.
+  If the bowl chooser's candidate is 6, put the bowl chooser's sixth used into the bowl chooser's used status.
+  If the bowl chooser's used status is not 0, exit.
+  If the bowl chooser's skip count is greater than 0,
+    subtract 1 from the bowl chooser's skip count; exit.
+  Put the bowl chooser's candidate into the bowl chooser's chosen identity.
+  If the bowl chooser's candidate is 1, put 1 into the bowl chooser's first used.
+  If the bowl chooser's candidate is 2, put 1 into the bowl chooser's second used.
+  If the bowl chooser's candidate is 3, put 1 into the bowl chooser's third used.
+  If the bowl chooser's candidate is 4, put 1 into the bowl chooser's fourth used.
+  If the bowl chooser's candidate is 5, put 1 into the bowl chooser's fifth used.
+  If the bowl chooser's candidate is 6, put 1 into the bowl chooser's sixth used.
+
+\ After finding the selected unused identity, record its position.
+To remember the selected bowl:
+  If the bowl chooser's slot is 1, put the bowl chooser's chosen identity into the chosen bowl order's first identity.
+  If the bowl chooser's slot is 2, put the bowl chooser's chosen identity into the chosen bowl order's second identity.
+  If the bowl chooser's slot is 3, put the bowl chooser's chosen identity into the chosen bowl order's third identity.
+  If the bowl chooser's slot is 4, put the bowl chooser's chosen identity into the chosen bowl order's fourth identity.
+  If the bowl chooser's slot is 5, put the bowl chooser's chosen identity into the chosen bowl order's fifth identity.
+  If the bowl chooser's slot is 6, put the bowl chooser's chosen identity into the chosen bowl order's sixth identity.
+
+\ Select exactly one identity from the remaining unused bowls.
+\ The quotient picks the unused bowl; the remainder sets the next rank.
+To choose one position of the bowl order:
+  Choose the next factorial.
+  Divide the bowl chooser's remaining rank by the bowl chooser's factorial giving a quotient number and a remainder number.
+  Put the quotient number into the bowl chooser's skip count.
+  Put the remainder number into the bowl chooser's remaining rank.
+  Put 0 into the bowl chooser's chosen identity.
+  Put 1 into the bowl chooser's candidate.
+  Loop.
+    If the bowl chooser's candidate is greater than 6, break.
+    Consider the bowl candidate.
+    If the bowl chooser's chosen identity is greater than 0, break.
+    Add 1 to the bowl chooser's candidate.
+  Repeat.
+  Remember the selected bowl.
+
+\ D is positive and already in the saved sauce range 1..M.
+\ Its remainder is at most 719, and therefore fits in a CAL number.
+To choose a bowl order from a wide quantity:
+  Put the wide quantity into a rank wide quantity.
+  Put "1" into a one wide quantity.
+  Subtract the one wide quantity from the rank wide quantity.
+  Put "720" into a divisor wide quantity.
+  Reduce the rank wide quantity modulo the divisor wide quantity.
+  Convert the rank wide quantity to a small rank number.
+  Put the small rank number into the bowl chooser's remaining rank.
+  Put 0 into the bowl chooser's first used.
+  Put 0 into the bowl chooser's second used.
+  Put 0 into the bowl chooser's third used.
+  Put 0 into the bowl chooser's fourth used.
+  Put 0 into the bowl chooser's fifth used.
+  Put 0 into the bowl chooser's sixth used.
+  Put 1 into the bowl chooser's slot.
+  Loop.
+    If the bowl chooser's slot is greater than 6, break.
+    Choose one position of the bowl order.
+    Add 1 to the bowl chooser's slot.
+  Repeat.
