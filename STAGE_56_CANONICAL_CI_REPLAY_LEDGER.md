@@ -1,5 +1,13 @@
 # Registrum canonicum CI — C++ et Latina Nova — Gradus 56
 
+**Ultima certificatio codicis:** [`b69fdb8534a7787a5eeb9fb6f31eaf5d11ecc6da`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/b69fdb8534a7787a5eeb9fb6f31eaf5d11ecc6da),
+[vigilia 38278361432](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38278361432),
+`completed/success` **20/20 officia**, `SOAK_GREEN` die XII Octobris MMXXVI.
+Pars infra ante hanc notitiam alios status historicos, etiam `PENDING`,
+memoravit ad tempus quo scriptae sunt; notitia probata in sectione ultima
+omnem statum veterem superat. Hoc editum solam documentationem mutat;
+SHA documentationis non idem est ac SHA codicis probati.
+
 ## Testimonium quod vere consummatum est
 
 - Ramus: `C++&Latina`.
@@ -303,3 +311,42 @@ antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
   assertio CI probata donec novus SHA revera transit.
 - `src/monster.cpp` et test-only oracle non mutantur; `main`
   inalteratum, Gradus 57 non apertus.
+
+## Certificatio b69fdb85 — clausura vigiliae et novorum 9 dierum interiorum
+
+- SHA exactus probatus: [`b69fdb8534a7787a5eeb9fb6f31eaf5d11ecc6da`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/b69fdb8534a7787a5eeb9fb6f31eaf5d11ecc6da).
+- Vigilia [38278361432](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38278361432):
+  `completed/success`, **20/20 officia** (sex compilationes
+  GCC/Clang O1/O2/O3, regressionum quattuor partes, Stage 55, duo
+  differentialia, sanitatores, tres annos remotos, repetitio et porta finalis).
+- [Custodia nominum 38278361294](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38278361294):
+  `completed/success`.
+- Ex job `114939694352` repetito: `SOAK_REPETITUM=8/8_PASS`.
+  Ex job finali `114951019510`:
+  `VIGILIA_SOAK=PASS`, `STATUS_POST_RUN=SOAK_GREEN`.
+- Tria officia anni remoti, omnia `completed/success`:
+  - annus `-1`, job `114925371662`:
+    `GRADUS56_ANNUS_REMOTUS_INTERIOR=3/3_PASS YEAR=-1`,
+    `GRADUS56_ANNUS_REMOTUS_SAVED_SUM=5/5_PASS YEAR=-1`;
+  - annus `0`, job `114925371554`:
+    `GRADUS56_ANNUS_REMOTUS_INTERIOR=3/3_PASS YEAR=0`,
+    `GRADUS56_ANNUS_REMOTUS_SAVED_SUM=5/5_PASS YEAR=0`;
+  - annus `1`, job `114925371540`:
+    `GRADUS56_ANNUS_REMOTUS_INTERIOR=3/3_PASS YEAR=1`,
+    `GRADUS56_ANNUS_REMOTUS_SAVED_SUM=5/5_PASS YEAR=1`.
+  Omnino **15/15** casus; novi dies interiores **9/9**.
+  Sex testimonia portarum priorum immutata remanserunt.
+- GCC job `114925371614` et Clang job `114925371475`:
+  `GRADUS56_AC1_ORDO_INVERSUS=10/10_PASS`,
+  `GRADUS56_LIMINA_YEAR_MEMBERSHIP=PASS ANNI=9 EDGES=18/18`,
+  `GRADUS56_LIMINA_CACHE=PASS COLD=3 HITS=2 REJECTS=97 WARM_RECHECKS=9 CACHE_ANNI=3`,
+  `GRADUS56_ANNI_VICINI=2/2_PASS TOTAL_DAYS=9693 CACHE_ANNI=3`.
+- In SHA [`a7276849`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/a7276849b43a625579e81c834c77f8743ff95341)
+  vigilia [38275899537](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38275899537)
+  quoque **20/20** viridis confirmata est;
+  eius praevolatus [38275899752](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38275899752)
+  transiit. Mutatio `b69fdb85` sola testis remoti et CI/documentorum,
+  non motoris `src/monster.cpp`, fuit.
+- **Ratio versionum:** nova haec documentatio SHA novum recipit et workflow
+  novum excitare potest, sed affirmatio `20/20` pertinet ad
+  codicem exactum `b69fdb8534a7787a5eeb9fb6f31eaf5d11ecc6da`. Neque `main` mutatur neque Gradus 57 aperitur.
