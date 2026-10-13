@@ -124,6 +124,14 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check native and wide counter agreement.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the native and wide sauce input bridge.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check an immense wide sauce input.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check wide gate input counters.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check invalid zero gate indices.
+  If the check report is not "The checks agree with the examples.", exit.
   Check two-month weaving.
   If the check report is not "The checks agree with the examples.", exit.
   Check three-month weaving.
