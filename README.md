@@ -53,8 +53,12 @@ written in Plain English Programming:
   calculate A0, stream direction D, answer stepping, and exact narrow
   equal choice for 1 <= N <= M. Includes Foundation-Day seal vectors
   and exact rejection-boundary tests.
+- **the gate intervals** and **the gate interval checks**: calculate the
+  interval selected by seal 1 in bowl 1 using the sauce made for
+  (Foundation, Foundation+n), including negative n. Independent
+  reference calculations give 345 days for n=1 and 503 for n=-1.
 
-The source now includes **31 groups of checks**, some of which compare several
+The source now includes **33 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -72,11 +76,13 @@ normalized, nonnegative strings. Plain subtraction requires the destination
 to be at least as large as the number being subtracted. A positive divisor
 is required for ordinary remainder. Direct SAVE requires nonnegative input;
 a separate operation supports signed differences between numbers in 1..M.
-The current first-stage day-count conversion still uses CAL's 32-bit number
-type and needs a wide-number replacement for extreme dates.
+The current first-stage day-count conversion and signed gate indexing still
+use CAL's 32-bit number type and need wide-number replacements for extreme
+dates and gate indices.
 
-**Not yet built:** wide equal choice when N exceeds M, the gate sequence,
-year selection, cutlets, months, and a complete Pastafarian date.
+**Not yet built:** wide equal choice when N exceeds M, integration of
+individual gate intervals into the full gate sequence, year selection,
+cutlets, months, and a complete Pastafarian date.
 The narrow sealed-answer mechanism is written, but still untested in CAL.
 No shortcuts, approximate answers, or hard-coded final dates are allowed.
 
@@ -158,7 +164,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English source files in this branch must be present when compiling. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 31 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 33 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
