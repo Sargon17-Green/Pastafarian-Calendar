@@ -127,7 +127,7 @@ To travel backward to the target day:
   Repeat.
 
 \ First argument is the calculation day; second is the requested day.
-\ The complete date has not yet been resolved into cutlets and months.
+\ The full date's cutlet and month structure is selected after this year walk.
 To find the year for a calendar day and another calendar day:
   Put the other calendar day into the target year day.
   Find year 5000 for the calendar day.
