@@ -734,3 +734,25 @@ positive/negative, strict RED, BOOT/replay a
 holl atchweliadau Camau 1–25. Dim PATCH 13.
 
 `LAST_COMPLETED_STAGE=25` nes PASS brodorol.
+
+
+## Ardystiad brodorol Cam 26 — COMPLETE
+
+Ar commit `86673c940e9c003bc42fb5ae00d87c2ca9da4d84` llwyddodd GitHub Actions
+[`38376236629`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38376236629),
+swydd Kotlin `115225200264`, ar Kotlin 1.9.0/JDK 21.
+Gwiriwyd **48 marc** yn uniongyrchol yn y log:
+pob cam 1–25 yn PASS; 922 achos positive
+EXPECTED_RED, 922 achos negative EXPECTED_RED,
+8 achos rejection ymyl (7 RED, 1 MATCH damweiniol),
+11,064 BigInteger EXPECTED_RED, dau stream sauce naturiol
+positive a negative, strict RED gwirioneddol,
+BOOT/replay, perchnogaeth a holl lwybrau blaenorol.
+Gwelwyd `STAGE26_FULL_NATIVE_EXPECTED_RED_COMPLETE`,
+ac roedd y swydd Kotlin a'r swydd cloi enwau yn SUCCESS.
+
+**`LAST_COMPLETED_STAGE=26`**. Cam 27
+(`PATCH 13`) yw'r nesaf, heb ei ddechrau.
+Cedwir `oldGateGapWithoutRank1` yn fyw ac
+yn anghywir; mae'r stream sauce yn fewnbwn allanol
+tan adeiladwr y diferion gweledig diweddarach.
