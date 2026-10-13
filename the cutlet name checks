@@ -1,0 +1,61 @@
+\ Fast regressions for lexicographically ordered cutlet name sequences.
+\ The names are distinct and chosen without replacement from 1..17.
+\ These tests use exact ranks rather than the slow Foundation sauce.
+
+To check the count of cutlet name sequences:
+  Put 1 into the selected cutlet count.
+  Count all cutlet name sequences.
+  If the cutlet name choice's total sequences is not "17",
+    put "One cutlet should have seventeen possible names." into the check report; exit.
+  Put 3 into the selected cutlet count.
+  Count all cutlet name sequences.
+  If the cutlet name choice's total sequences is not "4080",
+    put "Three cutlets should have 4080 distinct name sequences." into the check report; exit.
+  Put 17 into the selected cutlet count.
+  Count all cutlet name sequences.
+  If the cutlet name choice's total sequences is not "355687428096000",
+    put "The seventeen-name permutation count is not 17 factorial." into the check report; exit.
+
+To verify three cutlet name indices given a number and another number and a third number:
+  Put the chosen cutlet names' first into the examined cutlet name assignment.
+  If the examined cutlet name assignment is nil,
+    put "The first cutlet name was missing." into the check report; exit.
+  If the examined cutlet name assignment's name index is not the number,
+    put "The first cutlet name index differs from its reference." into the check report; exit.
+  Put the examined cutlet name assignment's next into the examined cutlet name assignment.
+  If the examined cutlet name assignment is nil,
+    put "The second cutlet name was missing." into the check report; exit.
+  If the examined cutlet name assignment's name index is not the other number,
+    put "The second cutlet name index differs from its reference." into the check report; exit.
+  Put the examined cutlet name assignment's next into the examined cutlet name assignment.
+  If the examined cutlet name assignment is nil,
+    put "The third cutlet name was missing." into the check report; exit.
+  If the examined cutlet name assignment's name index is not the third number,
+    put "The third cutlet name index differs from its reference." into the check report; exit.
+  If the examined cutlet name assignment's next is not nil,
+    put "A three-cutlet name list includes extra names." into the check report; exit.
+
+To check lexicographic cutlet names:
+  Put 3 into the selected cutlet count.
+  Put "1" into a name rank wide quantity.
+  Select cutlet names from the name rank wide quantity.
+  If the cutlet name choice's selection success is not 1,
+    put "First name sequence was not selected." into the check report; exit.
+  Verify three cutlet name indices given 1 and 2 and 3.
+  Put "15" into the name rank wide quantity.
+  Select cutlet names from the name rank wide quantity.
+  Verify three cutlet name indices given 1 and 2 and 17.
+  Put "16" into the name rank wide quantity.
+  Select cutlet names from the name rank wide quantity.
+  Verify three cutlet name indices given 1 and 3 and 2.
+  Put "4080" into the name rank wide quantity.
+  Select cutlet names from the name rank wide quantity.
+  Verify three cutlet name indices given 17 and 16 and 15.
+  Put "4081" into the name rank wide quantity.
+  Select cutlet names from the name rank wide quantity.
+  If the cutlet name choice's selection success is not 0,
+    put "An out-of-range name-sequence rank was accepted." into the check report; exit.
+  Put "0" into the name rank wide quantity.
+  Select cutlet names from the name rank wide quantity.
+  If the cutlet name choice's selection success is not 0,
+    put "Rank zero was accepted for a name sequence." into the check report; exit.
