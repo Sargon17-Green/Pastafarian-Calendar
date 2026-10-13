@@ -95,7 +95,7 @@ To subtract a wide quantity from another wide quantity:
 
 \ Multiplication by one decimal digit never needs a large intermediate.
 \ The digit parameter must be from 0 to 9.
-To multiply a wide quantity by a decimal digit number:
+To scale a wide quantity by a decimal digit number:
   Put the wide quantity into a remaining string.
   Put "" into a product string.
   Put 0 into a carry number.
@@ -133,7 +133,7 @@ To multiply a wide quantity by another wide quantity:
     If the remaining string is blank, break.
     Take the last decimal digit from the remaining string into a digit number.
     Put the multiplicand wide quantity into a partial wide quantity.
-    Multiply the partial wide quantity by the digit number.
+    Scale the partial wide quantity by the digit number.
     Append decimal zeroes to the partial wide quantity given the position number.
     Add the partial wide quantity to the product wide quantity.
     Add 1 to the position number.
