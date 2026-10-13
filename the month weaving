@@ -280,13 +280,19 @@ To choose the next woven day:
   Repeat.
 
 \ The caller supplies a one-based rank of the full weaving sequence.
+\ Unranking consumes remaining counts. Rebuild them from the
+\ original month lengths BEFORE every requested rank, even after
+\ a previous full or streaming selection. The exact memo cache may
+\ remain because the original month lengths have not changed.
 To select a month weaving from a wide quantity:
   Put 0 into the weaving selection's selection success.
   Destroy the chosen woven days.
   Put 0 into the woven requested month ordinal.
   Put 0 into the woven requested day in month.
+  If the weaving selection's resource limit reached is 1, exit.
   If the wide quantity is "0", exit.
   If the weaving selection's total completions is numerically smaller than the wide quantity, exit.
+  Prepare the woven month states.
   Put the wide quantity into the weaving selection's current rank.
   Put 0 into the weaving selection's position.
   Loop.
