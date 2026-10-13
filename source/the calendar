@@ -135,6 +135,8 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the narrow and wide selection boundary.
   If the check report is not "The checks agree with the examples.", exit.
+  Check zero option count refusal.
+  If the check report is not "The checks agree with the examples.", exit.
   Check year candidate eligibility.
   If the check report is not "The checks agree with the examples.", exit.
   Check year candidate order.
