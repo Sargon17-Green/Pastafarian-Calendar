@@ -55,6 +55,7 @@ A weaving selection has
   a number called position,
   a number called target position,
   a number called selection success,
+  a number called recursion depth,
   a number called memo entry count,
   a number called memo entry limit,
   a number called resource limit reached,
@@ -163,7 +164,20 @@ To save weaving completions given a string and a wide quantity:
 \ Recursion uses local candidate number and local sum. The mutable
 \ remaining-count vector is always restored before moving to the
 \ next candidate. Cached zero counts are legitimate as well.
+\\ Keep the call stack bounded even if few memo entries have been
+\\ allocated. All exits from the recursive body come back here, so the
+\\ recursion depth is restored on success and on resource failure.
 To count weaving completions into a wide quantity:
+  If the weaving selection's resource limit reached is 1,
+    put "0" into the wide quantity; exit.
+  If the weaving selection's recursion depth is not less than 256,
+    put 1 into the weaving selection's resource limit reached;
+    put "0" into the wide quantity; exit.
+  Add 1 to the weaving selection's recursion depth.
+  Resolve weaving completions into the wide quantity.
+  Subtract 1 from the weaving selection's recursion depth.
+
+To resolve weaving completions into a wide quantity:
   If the weaving selection's resource limit reached is 1,
     put "0" into the wide quantity; exit.
   If the weaving selection's days remaining is 0,
@@ -216,6 +230,7 @@ To count all possible month weavings:
   Put 0 into the weaving selection's selection success.
   Put 0 into the weaving selection's resource limit reached.
   Put 0 into the weaving selection's memo entry count.
+  Put 0 into the weaving selection's recursion depth.
   Put 4096 into the weaving selection's memo entry limit.
   Count weaving completions into the weaving selection's total completions.
   If the weaving selection's resource limit reached is 1,
