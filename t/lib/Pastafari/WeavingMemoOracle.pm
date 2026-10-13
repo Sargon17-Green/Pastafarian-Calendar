@@ -9,7 +9,8 @@ use Scalar::Util qw(blessed);
 # 四月份第 1 階段獨立驗證模型，非正式生產曆法實作。
 # 按「目前各月剩餘天數 + 已開/已關月數」遞迴計數後綴；
 # 和位置分布多項式模型沒有共同的後綴計數器或共享快取。
-# 每個狀態的可變 BigInt 答案於本物件內快取，對外傳回 copy。
+# 未全開時把 BigInt 私有答案快取；已全開可直接計算，不必存狀態。
+# 對外只交付獨立可變的 BigInt 副本。
 sub new ($class,$lengths) {
     die "月份長度須為 ARRAY 參照\n" if ref($lengths) ne 'ARRAY';
     die "獨立記憶式 Oracle 只支援最多四個月份\n" if @$lengths>4;
@@ -71,12 +72,18 @@ sub _last_order ($self,$remaining,$closed) {
 sub _count_state ($self,$remaining,$opened,$closed,$depth) {
     $self->{visits}++;
     $self->{peak_depth}=$depth if $depth>$self->{peak_depth};
+    # 已開啟全部月份時，剩餘問題有可直接計算的精確組合式：
+    # 不必為每一種末月已開的狀態配置長期 BigInt 快取項。
+    # 仍保留 0/1 月極小退化向量的既有查詢診斷契約。
+    my $m=$self->{months};
+    if ($m>=2 && $opened==$m) {
+        return $self->_last_order($remaining,$closed);
+    }
     my $key=pack('C*',@$remaining,$opened,$closed);
     if (exists $self->{counts}{$key}) {
         $self->{cache_hits}++;
         return $self->{counts}{$key}->copy;
     }
-    my $m=$self->{months};
     my $answer;
     if ($opened==$m) {
         $answer=$self->_last_order($remaining,$closed);

@@ -262,3 +262,22 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_window40_count.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window40_count.pl --seconds 185 --rss-kib 393216
+
+  canonical-window40-middle:
+    name: 322 日四月份中間 BigInt 排名完整獨立驗證（有界資源）
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-canonical-window40-middle]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對語法和 322 日完整獨立中位排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 40 --case-filter middle --seconds 185 --rss-kib 393216

@@ -18,15 +18,18 @@ use Pastafari::WeavingRank qw(rankWeavingPolynomial);
 # 第 5000 年兩種真實相鄰四月份樣本，各自精確驗證完整 BigInt 排名。
 # 使用一份與受測排名器完全分離的記憶式狀態計數快取，並
 # 每次以新索引計數實際跑正反向排名；且有父進程資源守衛。
-my ($seconds,$rss_limit,$offset)=(185,393216,39);
+my ($seconds,$rss_limit,$offset,$case_filter)=(185,393216,39,'all');
 GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_limit,
-           'window-offset=i'=>\$offset)
+           'window-offset=i'=>\$offset,
+           'case-filter=s'=>\$case_filter)
     or die "參數格式錯誤\n";
 die "second 必須在 1..230\n" if $seconds<1 || $seconds>230;
 die "rss-kib 必須在 32768..1048576\n"
     if $rss_limit<32768 || $rss_limit>1048576;
-die "window-offset 只支援已核對的 38 或 39\n"
-    if $offset!=38 && $offset!=39;
+die "window-offset 只支援 38、39 或 40\n"
+    if $offset!=38 && $offset!=39 && $offset!=40;
+die "case-filter 只支援 all 或 middle\n"
+    if $case_filter ne 'all' && $case_filter ne 'middle';
 die "需要 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -58,13 +61,15 @@ if (!$pid) {
             if sha256_hex(join(',',@year)) ne
                 '6d64022344c04935e6423aa6f96b285098d35b9b5ecb4b8c57a4c7149773a134';
         my @L=@year[$offset .. $offset+3];
-        my $expected=$offset==38 ? '88,40,25,77' : '40,25,77,98';
+        my $expected=$offset==38 ? '88,40,25,77'
+                    : $offset==39 ? '40,25,77,98'
+                    : '25,77,98,122';
         die "固定真正月份向量不符\n"
             if join(',',@L) ne $expected;
         my $days=0;
         $days+=$_ for @L;
         die "真實視窗合計日數不符\n"
-            unless $days==($offset==38 ? 230 : 240);
+            unless $days==($offset==38 ? 230 : $offset==39 ? 240 : 322);
         printf "CANONICAL_MULTI_RANK phase=WINDOW offset=%d days=%d lengths=%s\n",
             $offset,$days,join(',',@L);
         my $counter=Pastafari::WeavingMemoOracle->new(\@L);
@@ -90,6 +95,8 @@ if (!$pid) {
             ['last',$total->copy],
         );
         my $test_count=0;
+        @named=grep {$_->[0] eq 'middle'} @named
+            if $case_filter eq 'middle';
         for my $case (@named) {
             my ($label,$rank)=@$case;
             my $rank_text="$rank";
@@ -159,10 +166,11 @@ if (!$pid) {
                 $offset,$label,$test_count,length($rank_text),$days,
                 $diag->{entries},$diag->{cache_hits},time()-$start;
         }
-        die "14 種固定且重要的字典序邊界排名未全部執行\n"
-            if $test_count!=14;
+        my $expected_count=$case_filter eq 'all' ? 14 : 1;
+        die "字典序重要排名樣本未全部執行\n"
+            if $test_count!=$expected_count;
         my $diag=$counter->diagnostics;
-        printf "CANONICAL_MULTI_RANK status=PASS scope=14_DISTINCT_REAL_FOUR_MONTH_WINDOW_RANKS window=%d cases=%d days_per_rank=%d total_digits=%d memo_entries=%d memo_hits=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
+        printf "CANONICAL_MULTI_RANK status=PASS scope=FOUR_MONTH_WINDOW_LEXICOGRAPHIC_BRANCHES window=%d cases=%d days_per_rank=%d total_digits=%d memo_entries=%d memo_hits=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
             $offset,$test_count,$days,length("$total"),$diag->{entries},
             $diag->{cache_hits},time()-$start,peak_self();
         1;
