@@ -738,3 +738,11 @@ konbine chif yo an lòd pwa piti an premye, epi sote rejè kontig
 avèk prèv limit olye iterasyon ki ka twò long. Pa gen okenn chwa
 wide nan ansyen modil legacy, ni melanj final 12 brase yo.
 Tès ak CI Stage 29 poko verifye.
+
+### Tès Stage 29 ki soumèt pou CI
+
+Nou konpare chwa laj ak oracle endepandan, verifye
+lòd chif baz M, limit akseptasyon, skippage matematik,
+10 defayans/10 rekiperasyon, de apèl nested ak sauce.
+Regresyon Stage 28 rete yon odit istorik; job Stage 28
+pa echwe entansyonèlman apre PATCH 14. CI poko konfime.

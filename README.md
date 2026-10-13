@@ -1046,3 +1046,12 @@ kontig pou rejè ki ka depase 64 bit. Commit koreksyon an suiv
 commit blokaj la, avèk eta semantik apa ak prèv chif yo.
 Pou `N<=M`, `choiceSpaghetti` toujou sèvi ak PATCH 13.
 Tès ak CI natif Stage 29 rete pou verifye; pa gen `postStir12`.
+
+### Verifikasyon Stage 29 — Suite natif
+
+Nou ajoute `stage29_tests.lua` ak job CI apa pou oracle wide,
+sekans ki depase `2^64` rejè lojik, 10 echèk/rekiperasyon,
+de reentrances, sauce otantik ak kadna SHA modil legacy.
+Odit kat regresyon wouj Stage 28 la toujou egziste,
+men suite pozitif la pa rele script wouj la kòm echèk job ankò.
+Tout rezilta native CI rete pou verifye.

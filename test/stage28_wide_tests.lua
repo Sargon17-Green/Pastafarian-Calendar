@@ -35,7 +35,9 @@ for _,c in ipairs(cases) do
  assert(ctx.metrics["legacy.wideBlocked.calls"]==1
     and ctx.metrics["legacy.wideBlocked.shortAttempt"]==1
     and ctx.diagnostics[1].code=="DISCOVERY_14_WIDE_SHORT_ONLY_BLOCK")
- assert(S.choiceSpaghetti(first,step,n)==nil)
+ local blockedAgain,ctxAgain=S.legacyShortOnlyChoiceProbe(first,step,n)
+ assert(blockedAgain==nil and ctxAgain~=ctx
+    and ctxAgain.status=="LEGACY_WIDE_CHOICE_BLOCKED")
  local expected=O.chooseRankWide({first=first,directionStep=step},n)
  assert(B.compare(expected,1)>=0 and B.compare(expected,n)<=0)
  assert(B.compare(S.answerAtSpaghetti(first,step,1),
