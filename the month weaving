@@ -17,7 +17,9 @@
 \ recomputing the same suffix. Strings have separators between counts,
 \ so states never collide. All counts are arbitrary-precision strings.
 \ Unranking visits candidates 1..m in order and skips complete blocks.
-\ The chosen weaving is stored, not approximated by monthly ranges.
+\ The selected path is unranked in full. Tests may retain the whole
+\ weaving, while ordinary date conversion stores only the requested
+\ day's month identity and occurrence, without allocating every day.
 \
 \ LIMITATION: sparse memoization can still use prohibitive memory for
 \ 47 months and long years. A strict 4096-state limit causes an explicit
@@ -54,6 +56,7 @@ A weaving selection has
   a number called selected ordinal,
   a number called position,
   a number called target position,
+  a number called preserve full weaving,
   a number called selection success,
   a number called recursion depth,
   a number called memo entry count,
@@ -232,11 +235,13 @@ To count all possible month weavings:
   Put 0 into the weaving selection's memo entry count.
   Put 0 into the weaving selection's recursion depth.
   Put 4096 into the weaving selection's memo entry limit.
+  Put 1 into the weaving selection's preserve full weaving.
   Count weaving completions into the weaving selection's total completions.
   If the weaving selection's resource limit reached is 1,
     put "0" into the weaving selection's total completions.
 
 To store the accepted woven day:
+  If the weaving selection's preserve full weaving is 0, exit.
   Allocate memory for a woven day record.
   Put the weaving selection's selected ordinal into the woven day record's month ordinal.
   Append the woven day record to the chosen woven days.
@@ -296,6 +301,7 @@ To select a month weaving from a wide quantity:
 To choose the canonical month weaving:
   Count all possible month weavings.
   If the weaving selection's total completions is "0", exit.
+  Put 0 into the weaving selection's preserve full weaving.
   Prepare the year structure sauce.
   Put 4 into the seal inquiry's bowl identity.
   Put 32 into the seal inquiry's seal number.
