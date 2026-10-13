@@ -41,12 +41,23 @@ function Legacy.execute(signedStep,first,direction)
   and choiceContext.mode=="STAGE_27_PATCH_13"
   and choiceContext.status=="PATCH_SHORT_CHOICE_COMPLETE"
   and choiceContext.commitToken==3
+  and #choiceContext.branchTrace==3
+  and choiceContext.branchTrace[1]=="LEGACY_REPLY_STREAM"
+  and choiceContext.branchTrace[2]=="LEGACY_BIASED_MODULO_PICK"
+  and choiceContext.branchTrace[3]=="SHORT_CHOICE_REJECTION_PATCH"
+  and choiceContext.currentHandler=="SHORT_CHOICE_REJECTION_PATCH"
+  and type(choiceContext.metrics)=="table"
+  and choiceContext.metrics["shortChoice.patch.calls"]==1
+  and type(choiceContext.diagnostics)=="table"
+  and #choiceContext.diagnostics==3
+  and choiceContext.diagnostics[3].code=="PATCH_13_ACCEPTANCE_THRESHOLD_AND_REJECTION"
   and choiceContext.semanticState.correctedRankDecimal==tostring(rank)
   and choiceContext.semanticState.firstDecimal==tostring(seed)
   and choiceContext.semanticState.optionCountDecimal==tostring(RANK_COUNT)
   and choiceContext.semanticState.directionStep==direction
   and choiceContext.pendingSemanticState==nil
-  and B.compare(rank,ONE)>=0 and B.compare(rank,RANK_COUNT)<=0,
+  and B.compare(rank,ONE)>=0 and B.compare(rank,RANK_COUNT)<=0
+  and B.compare(rank,ShortChoice.chooseShort(seed,direction,RANK_COUNT))==0,
   "DISCOVERY 16: rank PATCH 13 pa otantik")
  ctx.choiceSemanticState=clone(choiceContext.semanticState)
  ctx.choiceCommitCount=choiceContext.commitToken
@@ -59,7 +70,7 @@ function Legacy.execute(signedStep,first,direction)
  manager.dispatcher:register("LEGACY_GATE_GAP_PLUS_ONE",function(active,owner)
   local wrong=Legacy.oldGateGapFromRank(rank)
   assert(B.compare(wrong,B.add(OLD_OFFSET,rank))==0,
-   "DISCOVERY 16: legacy +1 not authentic")
+   "DISCOVERY 16: lonjè legacy +1 pa otantik")
   local state={
    source="LEGACY_GATE_GAP_EXTRA_ONE",
    signedStepDecimal=tostring(step),
