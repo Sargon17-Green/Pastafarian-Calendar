@@ -26,6 +26,7 @@ A cutlet partition has
   a number called remaining parts,
   a number called remaining boundary,
   a number called candidate length,
+  a number called part chosen,
   a wide quantity called total choices,
   a wide quantity called suffix choices,
   a wide quantity called current rank,
@@ -143,13 +144,19 @@ To update the remaining cutlet boundary:
 \ Try each positive length in ascending order, skipping its entire
 \ block if its count is smaller than the desired one-based rank.
 To choose the next cutlet length:
+  Put 0 into the cutlet partition's part chosen.
   Put 1 into the cutlet partition's candidate length.
   Loop.
+    Put the cutlet partition's remaining spans into a maximum length number.
+    Subtract the cutlet partition's remaining parts from the maximum length number.
+    Add 1 to the maximum length number.
+    If the cutlet partition's candidate length is greater than the maximum length number, break.
     Count the current cutlet suffix.
+    If the cutlet partition's suffix choices is "0",
+      add 1 to the cutlet partition's candidate length.
     If the cutlet partition's suffix choices is not "0",
       consider the current cutlet length.
-    If the cutlet partition's candidate length is greater than 0,
-      break.
+    If the cutlet partition's part chosen is 1, break.
   Repeat.
 
 To consider the current cutlet length:
@@ -158,7 +165,7 @@ To consider the current cutlet length:
     add 1 to the cutlet partition's candidate length;
     exit.
   Remember the selected cutlet length.
-  Put 0 into the cutlet partition's candidate length.
+  Put 1 into the cutlet partition's part chosen.
 
 \ The candidate-length loop finishes when one candidate is selected.
 \ All parts are determined by arithmetic counts, not random guessing.
@@ -175,6 +182,7 @@ To select a cutlet partition from a wide quantity:
   Loop.
     If the cutlet partition's remaining parts is 0, break.
     Choose the next cutlet length.
+    If the cutlet partition's part chosen is not 1, exit.
   Repeat.
   Put 1 into the cutlet partition's valid selection.
 
@@ -184,6 +192,7 @@ To choose the canonical cutlet partition:
   Put the chosen year's span count into the cutlet partition's total spans.
   Put the selected cutlet count into the cutlet partition's part count.
   Count the permitted cutlet partitions.
+  If the cutlet partition's total choices is "0", exit.
   Put 2 into the seal inquiry's bowl identity.
   Put 21 into the seal inquiry's seal number.
   Begin a sealed inquiry.
