@@ -72,3 +72,23 @@ To check wide number division:
   Reduce the first wide number modulo the second wide number.
   If the first wide number is not "1",
     put "The wide division check failed on a small dividend." into the check report; exit.
+
+
+\ These are the four boundary identities in the canonical rules.
+To check sauce saving:
+  Put "0" into a value wide number.
+  Keep the value wide number for the sauce.
+  If the value wide number is not "170141183460469231731687303715884105727",
+    put "The sauce SAVE check failed for zero." into the check report; exit.
+  Put "170141183460469231731687303715884105727" into the value wide number.
+  Keep the value wide number for the sauce.
+  If the value wide number is not "170141183460469231731687303715884105727",
+    put "The sauce SAVE check failed for M." into the check report; exit.
+  Put "170141183460469231731687303715884105728" into the value wide number.
+  Keep the value wide number for the sauce.
+  If the value wide number is not "1",
+    put "The sauce SAVE check failed for M plus one." into the check report; exit.
+  Put "340282366920938463463374607431768211454" into the value wide number.
+  Keep the value wide number for the sauce.
+  If the value wide number is not "170141183460469231731687303715884105727",
+    put "The sauce SAVE check failed for twice M." into the check report; exit.
