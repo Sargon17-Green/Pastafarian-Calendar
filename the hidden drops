@@ -1,0 +1,143 @@
+\ The seven hidden drops before visible drop 1.
+\ This implements section F of the canonical main-branch README.
+\ Hidden drop k is stored at chronological position 1-k.
+\ The seven grind steps use the fixed stones of visible drop k.
+\ All coefficients are small, and all sauce values use exact decimal text.
+\ The source has not yet been run in CAL.
+
+A sauce question has
+  a wide quantity called calculation count,
+  a wide quantity called requested count,
+  a wide quantity called distance count,
+  a wide quantity called sum count,
+  a wide quantity called direction count.
+
+A hidden calculation has
+  a number called index,
+  a number called grinding step,
+  a wide quantity called value,
+  a wide quantity called grinding stone.
+
+A hidden drop shelf has
+  a wide quantity called first drop,
+  a wide quantity called second drop,
+  a wide quantity called third drop,
+  a wide quantity called fourth drop,
+  a wide quantity called fifth drop,
+  a wide quantity called sixth drop,
+  a wide quantity called seventh drop.
+
+The sauce input is a sauce question.
+The hidden work is a hidden calculation.
+The hidden drops are a hidden drop shelf.
+
+\ The main calendar currently uses small day counts. Copy them as decimal
+\ strings without converting any wide values back into 32-bit numbers.
+To copy a calendar question into the sauce input:
+  Convert the calendar question's calculation count to a string.
+  Put the string into the sauce input's calculation count.
+  Convert the calendar question's requested count to a string.
+  Put the string into the sauce input's requested count.
+  Convert the calendar question's day distance to a string.
+  Put the string into the sauce input's distance count.
+  Convert the calendar question's day sum to a string.
+  Put the string into the sauce input's sum count.
+  Convert the calendar question's day direction to a string.
+  Put the string into the sauce input's direction count.
+
+\ Before the grinding, take the five stones at the same index k.
+\ The four coefficients are 2k+1, 3k+1, 4k+2, and 4k+4.
+To begin a hidden drop given a number:
+  Put the number into the hidden work's index.
+  Reach the stones for the number.
+  Put the sauce input's calculation count into the hidden work's value.
+  Put the number into a factor number.
+  Multiply the factor number by 2.
+  Add 1 to the factor number.
+  Add the sauce input's requested count to the hidden work's value given the factor number.
+  Put the number into the factor number.
+  Multiply the factor number by 3.
+  Add 1 to the factor number.
+  Add the sauce input's distance count to the hidden work's value given the factor number.
+  Put the number into the factor number.
+  Multiply the factor number by 4.
+  Add 2 to the factor number.
+  Add the sauce input's sum count to the hidden work's value given the factor number.
+  Put the number into the factor number.
+  Multiply the factor number by 4.
+  Add 4 to the factor number.
+  Add the sauce input's direction count to the hidden work's value given the factor number.
+  Add the current stones' wheat to the hidden work's value.
+  Add the current stones' barley to the hidden work's value.
+  Add the current stones' salt to the hidden work's value.
+  Add the current stones' bitter to the hidden work's value.
+  Add the current stones' red to the hidden work's value.
+  Keep the hidden work's value for the sauce.
+
+\ Steps 1 and 6 use wheat; steps 2 and 7 use barley.
+\ The other steps use salt, bitter, and red respectively.
+To select the hidden grinding stone:
+  If the hidden work's grinding step is 1,
+    put the current stones' wheat into the hidden work's grinding stone; exit.
+  If the hidden work's grinding step is 2,
+    put the current stones' barley into the hidden work's grinding stone; exit.
+  If the hidden work's grinding step is 3,
+    put the current stones' salt into the hidden work's grinding stone; exit.
+  If the hidden work's grinding step is 4,
+    put the current stones' bitter into the hidden work's grinding stone; exit.
+  If the hidden work's grinding step is 5,
+    put the current stones' red into the hidden work's grinding stone; exit.
+  If the hidden work's grinding step is 6,
+    put the current stones' wheat into the hidden work's grinding stone; exit.
+  If the hidden work's grinding step is 7,
+    put the current stones' barley into the hidden work's grinding stone; exit.
+
+\ The rule for step r is SAVE(x squared + 3 times old x + stone + r).
+To grind a hidden drop:
+  Select the hidden grinding stone.
+  Put the hidden work's value into a squared wide quantity.
+  Multiply the hidden work's value by the squared wide quantity.
+  Put the hidden work's value into a tripled wide quantity.
+  Multiply the tripled wide quantity by 3.
+  Add the tripled wide quantity to the squared wide quantity.
+  Add the hidden work's grinding stone to the squared wide quantity.
+  Add the hidden work's grinding step to the squared wide quantity.
+  Keep the squared wide quantity for the sauce.
+  Put the squared wide quantity into the hidden work's value.
+
+To store a hidden drop:
+  If the hidden work's index is 1,
+    put the hidden work's value into the hidden drops' first drop; exit.
+  If the hidden work's index is 2,
+    put the hidden work's value into the hidden drops' second drop; exit.
+  If the hidden work's index is 3,
+    put the hidden work's value into the hidden drops' third drop; exit.
+  If the hidden work's index is 4,
+    put the hidden work's value into the hidden drops' fourth drop; exit.
+  If the hidden work's index is 5,
+    put the hidden work's value into the hidden drops' fifth drop; exit.
+  If the hidden work's index is 6,
+    put the hidden work's value into the hidden drops' sixth drop; exit.
+  If the hidden work's index is 7,
+    put the hidden work's value into the hidden drops' seventh drop; exit.
+
+To make a hidden drop given a number:
+  Begin a hidden drop given the number.
+  Put 1 into the hidden work's grinding step.
+  Loop.
+    If the hidden work's grinding step is greater than 7, break.
+    Grind the hidden drop.
+    Add 1 to the hidden work's grinding step.
+  Repeat.
+  Store the hidden drop.
+
+\ Computing the rows in index order does not change their chronological
+\ order: hidden drop 7 is the earliest, and hidden drop 1 is immediately
+\ before the first visible drop.
+To make all seven hidden drops:
+  Put 1 into a position number.
+  Loop.
+    If the position number is greater than 7, break.
+    Make a hidden drop given the position number.
+    Add 1 to the position number.
+  Repeat.
