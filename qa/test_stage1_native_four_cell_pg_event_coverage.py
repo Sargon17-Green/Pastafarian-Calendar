@@ -168,5 +168,69 @@ def main():
     print("POSTFORK_PG_VECTOR_AXIS_2_NEGATIVE_CONTROLS_PASS")
 
 
+def prefork_provenance_regression():
+    # Two actual opcode bytes at the gate side of a small synthetic fixture;
+    # 514 subsequent steps preserve the existing regression corpus.
+    source, run = fixture()
+    raw = bytearray(source[0])
+    raw[600] = ord("p")
+    raw[601] = ord("|")
+    source = [bytes(raw)]
+    run["steps"] += 1
+    run["gate"]["step"] += 1
+    for item in run["complete_postfork_trace"]:
+        item[0] += 1
+    for item in run["native_p_history"] + run["native_g_history"]:
+        item["tick"] += 1
+    run["native_p_history"].insert(0, {
+        "tick": 1, "coordinate": [701, 0], "value": "7"
+    })
+    run["total_p_writes"] += 1
+    run["native_g_history"][0]["read_before"] = "7"
+    run["native_g_history"][0]["returned"] = "7"
+    run["complete_prefork_trace"] = [
+        [1, 600, 0, 1, 0, ord("p"), 0],
+        [2, 601, 0, 1, 0, ord("|"), 0],
+    ]
+    positive = audit.verify_run(run, source, require_prefork=True)
+    if positive["verified_prefork_executed_steps"] != 2:
+        raise AssertionError("Native pre-fork opcode witness not verified")
+    original = copy.deepcopy(run)
+    probes = (
+        ("forged_prefork_p_at_gate", lambda d: (
+            d["native_p_history"].insert(1, {
+                "tick": 2, "coordinate": [222222, 333333], "value": "99"
+            }), d.__setitem__("total_p_writes", d["total_p_writes"] + 1))),
+        ("missing_actual_prefork_p", lambda d: (
+            d["native_p_history"].pop(0),
+            d.__setitem__("total_p_writes", d["total_p_writes"] - 1),
+            d["native_g_history"][0].__setitem__("read_before", "32"),
+            d["native_g_history"][0].__setitem__("returned", "32"))),
+        ("prefork_source_byte_forgery", lambda d:
+            d["complete_prefork_trace"][0].__setitem__(5, 32)),
+        ("prefork_gate_opcode_forgery", lambda d:
+            d["complete_prefork_trace"][1].__setitem__(5, 32)),
+        ("missing_new_schema_prefork", lambda d:
+            d.pop("complete_prefork_trace")),
+        ("truncated_prefork", lambda d:
+            d["complete_prefork_trace"].pop(0)),
+        ("prefork_out_of_order", lambda d:
+            d["complete_prefork_trace"][0].__setitem__(0, 2)),
+    )
+    for name, corrupt in probes:
+        bad = copy.deepcopy(run)
+        corrupt(bad)
+        try:
+            audit.verify_run(bad, source, require_prefork=True)
+        except AssertionError:
+            print("EXPECTED_REJECTION", name)
+        else:
+            raise AssertionError("forged Native pre-fork opcode receipt accepted: " + name)
+    if run != original:
+        raise AssertionError("Native pre-fork auditor modified caller-owned evidence")
+    print("NATIVE_PREFORK_ALL_OPCODES_SEVEN_FALSIFICATIONS_REJECT_PASS")
+
+
 if __name__ == "__main__":
     main()
+    prefork_provenance_regression()
