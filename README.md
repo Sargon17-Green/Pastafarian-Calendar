@@ -79,11 +79,13 @@ written in Plain English Programming:
   reference calculations give 345 days for n=1 and 503 for n=-1.
 - **the gate walk**, **the gate walk checks** and **the gate
   budget checks**: start at gate zero, Foundation Day, and accumulate
-  exact intervals in either direction. Signed gap ownership is handled
-  across gate zero; index zero is not a gap identifier. A shared
-  allowance of at most 1024 gate-gap computations per complete date
-  search stops impractically distant scans without inventing an
-  incomplete year or cutlet. This is a resource limit, not a date rule.
+  exact intervals in either direction. Gate-gap zero is never valid.
+  Native gate moves now commit index and coordinate atomically,
+  after validating the canonical 42..963-day interval; unsupported
+  indices and distant stand-alone locates fail before expensive sauces.
+  A shared allowance of 1024 full gate-gap calculations per complete
+  date is a resource limit, not a calendar rule. Synthetic tests cover
+  all four cross-zero moves and refusal of invalid intervals.
 - **the year candidates** and **the year candidate checks**: check
   the eligibility and canonical ordering of pairs of year-boundary gates.
 - **the year 5000**, **the year 5000 checks**, and **the year
@@ -209,14 +211,19 @@ written in Plain English Programming:
   outside +/-400000000 to avoid counter overflow.
 - **the wide gate positions** and **the wide gate position checks**:
   add an independent, signed-wide gate-coordinate walker with atomic
-  position updates and mathematically correct gap ownership in both
-  directions across Foundation. It refuses traversal requests needing
-  more than 1024 full sauces, and leaves a blocked position unchanged.
-  The default tests exercise cross-zero gap choices, all four
-  measured Foundation crossings, rejection of invalid interval lengths
-  and resource failure without running the expensive sauce; one optional
-  slow test checks the positive first-gate coordinate. The native year
-  and cutlet walkers have not yet been converted to this machinery.
+  position updates and correct gap ownership in both directions
+  across Foundation. It refuses requests needing over 1024 sauces,
+  leaving blocked coordinates unchanged. Quick checks exercise all
+  four measured Foundation crossings and invalid interval lengths;
+  one optional slow test checks the full positive first-gate sauce.
+- **the wide year candidates** and **the wide year candidate checks**:
+  represent year boundary coordinates and gate indices as signed-wide
+  integers, with exact lengths and span counts. They enforce
+  (opening, closing] containment, 6+ gate spans, 252..5778 days,
+  physical 42..963-day gap bounds and canonical duration/opening order.
+  Three synthetic check groups use 49-digit coordinates, including
+  invalid boundary and span cases. Full native year discovery and
+  cutlet/month selection have NOT yet been migrated to wide values.
 - **the canonical date vectors**: ten optional end-to-end reference
   checks for the authoritative AC.1 table on the main branch, including
   past and future year transitions. The obsolete mutant table is
@@ -229,7 +236,7 @@ written in Plain English Programming:
   Foundation-day (5000, 10, 503, 20, 56) comparison is an optional
   slow oracle, not a demonstrated result of running the program.
 
-The source now includes **93 groups of checks**, some of which compare several
+The source now includes **98 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -381,7 +388,7 @@ root, outside the compile input. Use the matching CAL standard library
 supplied by the compiler. No successful compiler execution has been
 reported.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 93 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 98 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
