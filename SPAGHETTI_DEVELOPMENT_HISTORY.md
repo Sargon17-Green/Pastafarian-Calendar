@@ -715,4 +715,16 @@ rete san chanjman. Oracle wide sèlman nan `test/`
 montre repons valab ki pa disponib sou chemen sa a,
 ak 4 scripts EXPECTED_RED ak plizyè gwosè >256 bit.
 Pa gen wideDetour PATCH 14, ni chif wide nan production.
-Natif CI poko verifye.
+Natif CI verifye sou run `38435176181`.
+
+### Fèmti DISCOVERY 14 — Stage 28
+
+GitHub Actions `38435176181`: **34/34 travay pozitif PASS**;
+`lua_stage28_discovery` pase tout Stage 1–28 anvan li echwe
+sèlman sou `EXPECTED_RED Stage 28 DISCOVERY 14 witness 1: N>M blocked by short-only legacy`.
+Kat witness istorik yo pase audit egzak. 59 chwa short
+PATCH 13 pa bouje; sèt rank wide valab bloke nan
+legacy, BigInt rive `M^5+1`, 8 erè/8 rekiperasyon,
+de nested contexts ak sauce reyèl pase. Pa gen
+PATCH 14 ni brase final davans.
+`LAST_COMPLETED_STAGE=28`, `EXPECTED_RED_VERIFIED`.

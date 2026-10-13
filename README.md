@@ -1017,3 +1017,20 @@ oracle wide, fail-closed, reentrancy, ak sous sauce.
 Stage 29 PATCH 14 ap bezwen yon wide detour apa;
 Stage 28 pa kapab ajoute koreksyon an, ni final
 douz brase yo.
+
+### Fèmti Stage 28 — EXPECTED_RED natif verifye
+
+GitHub Actions run `38435176181`: **34/34 travay pozitif PASS**.
+`lua_stage28_discovery` pase tout suite Stage 1–28, kat odit
+istorik `EXPECTED_RED`, epi li echwe sèlman nan dènye etap
+wouj la ak mesaj egzak `EXPECTED_RED Stage 28 DISCOVERY 14 witness 1: N>M blocked by short-only legacy`.
+Nou verifye 59 chwa short PATCH 13, sèt rank wide oracle
+ki valab pandan dispatcher istorik la bloke, kat witness
+wouj, limit BigInt jiska `M^5+1`, 8 echèk/8 rekiperasyon,
+de kontèks nested ak yon sous sauce otantik.
+`short_choice_patch.lua` pa chanje; pa gen PATCH 14 ni
+`postStir12` nan production. Sa se echèk normatif ki fèt
+espre, pa echèk suite pozitif la.
+
+`LAST_COMPLETED_STAGE=28`;
+`EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
