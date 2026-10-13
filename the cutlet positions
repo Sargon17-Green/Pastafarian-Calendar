@@ -10,6 +10,7 @@
 The requested cutlet number is a number.
 The requested day in cutlet is a number.
 The cutlet opening day is a calendar day.
+The cutlet ordinal number is a number.
 The examined cutlet piece is a cutlet piece.
 
 \ Advance by exactly the number of gate spans in a selected cutlet.
