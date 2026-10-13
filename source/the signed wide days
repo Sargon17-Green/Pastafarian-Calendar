@@ -70,9 +70,9 @@ To add opposite-signed day magnitudes given a wide signed day and another wide s
 
 \ Subtracting x from y is adding -x to y without modifying x.
 To subtract a wide signed day from another wide signed day:
-  Put the wide signed day into a negated signed day.
-  Multiply -1 by the negated signed day's polarity.
-  Add the negated signed day to the other wide signed day.
+  Put the wide signed day into a temporary wide signed day.
+  Multiply -1 by the temporary wide signed day's polarity.
+  Add the temporary wide signed day to the other wide signed day.
 
 \ Convert the signed day into plain decimal text for display/logging.
 \ The string parameter is the target; the signed day is unchanged.
