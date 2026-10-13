@@ -1,6 +1,7 @@
 \ The Pastafarian Calendar, in Plain English.
 \ This first part counts days. It does not yet give a complete calendar date.
 \ Read the README before using it.
+\ This text has not yet been tested with the CAL compiler.
 
 A calendar day is a number.
 A day count is a number.
@@ -18,14 +19,17 @@ A calendar question has
   a day direction.
 
 The example is a calendar question.
+The check report is a string.
 
 To run:
-  Put -15055671 into the example's calculation day.
-  Put -15055671 into the example's requested day.
-  Answer the example.
+  Put "The checks agree with the examples." into the check report.
   Check the beginning.
   Check the previous day.
   Check the following day.
+  Check the days on both sides.
+  Check the reverse order.
+  Check the same later day.
+  Write the check report to "calendar-checks.txt".
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
@@ -73,35 +77,95 @@ To answer a calendar question:
     put 2 into the calendar question's day direction.
   Add 1 to the calendar question's day distance.
 
-\ Checks use the fixed examples in the original rules.
-\ A failed check ends the program instead of hiding a wrong result.
+\ Each check uses answers that can be counted by hand.
+\ If any check fails, the report will name the first known error.
 
 To check the beginning:
   Put -15055671 into the example's calculation day.
   Put -15055671 into the example's requested day.
   Answer the example.
-  If the example's calculation count is not 1, exit.
-  If the example's requested count is not 1, exit.
-  If the example's day distance is not 1, exit.
-  If the example's day sum is not 2, exit.
-  If the example's day direction is not 2, exit.
+  If the example's calculation count is not 1,
+    put "The beginning check failed." into the check report; exit.
+  If the example's requested count is not 1,
+    put "The beginning check failed." into the check report; exit.
+  If the example's day distance is not 1,
+    put "The beginning check failed." into the check report; exit.
+  If the example's day sum is not 2,
+    put "The beginning check failed." into the check report; exit.
+  If the example's day direction is not 2,
+    put "The beginning check failed." into the check report; exit.
 
 To check the previous day:
   Put -15055671 into the example's calculation day.
   Put -15055672 into the example's requested day.
   Answer the example.
-  If the example's calculation count is not 1, exit.
-  If the example's requested count is not 2, exit.
-  If the example's day distance is not 2, exit.
-  If the example's day sum is not 3, exit.
-  If the example's day direction is not 1, exit.
+  If the example's calculation count is not 1,
+    put "The previous day check failed." into the check report; exit.
+  If the example's requested count is not 2,
+    put "The previous day check failed." into the check report; exit.
+  If the example's day distance is not 2,
+    put "The previous day check failed." into the check report; exit.
+  If the example's day sum is not 3,
+    put "The previous day check failed." into the check report; exit.
+  If the example's day direction is not 1,
+    put "The previous day check failed." into the check report; exit.
 
 To check the following day:
   Put -15055671 into the example's calculation day.
   Put -15055670 into the example's requested day.
   Answer the example.
-  If the example's calculation count is not 1, exit.
-  If the example's requested count is not 3, exit.
-  If the example's day distance is not 2, exit.
-  If the example's day sum is not 4, exit.
-  If the example's day direction is not 3, exit.
+  If the example's calculation count is not 1,
+    put "The following day check failed." into the check report; exit.
+  If the example's requested count is not 3,
+    put "The following day check failed." into the check report; exit.
+  If the example's day distance is not 2,
+    put "The following day check failed." into the check report; exit.
+  If the example's day sum is not 4,
+    put "The following day check failed." into the check report; exit.
+  If the example's day direction is not 3,
+    put "The following day check failed." into the check report; exit.
+
+To check the days on both sides:
+  Put -15055674 into the example's calculation day.
+  Put -15055668 into the example's requested day.
+  Answer the example.
+  If the example's calculation count is not 6,
+    put "The both sides check failed." into the check report; exit.
+  If the example's requested count is not 7,
+    put "The both sides check failed." into the check report; exit.
+  If the example's day distance is not 7,
+    put "The both sides check failed." into the check report; exit.
+  If the example's day sum is not 13,
+    put "The both sides check failed." into the check report; exit.
+  If the example's day direction is not 3,
+    put "The both sides check failed." into the check report; exit.
+
+To check the reverse order:
+  Put -15055668 into the example's calculation day.
+  Put -15055674 into the example's requested day.
+  Answer the example.
+  If the example's calculation count is not 7,
+    put "The reverse order check failed." into the check report; exit.
+  If the example's requested count is not 6,
+    put "The reverse order check failed." into the check report; exit.
+  If the example's day distance is not 7,
+    put "The reverse order check failed." into the check report; exit.
+  If the example's day sum is not 13,
+    put "The reverse order check failed." into the check report; exit.
+  If the example's day direction is not 1,
+    put "The reverse order check failed." into the check report; exit.
+
+To check the same later day:
+  Put -15055661 into the example's calculation day.
+  Put -15055661 into the example's requested day.
+  Answer the example.
+  If the example's calculation count is not 21,
+    put "The later day check failed." into the check report; exit.
+  If the example's requested count is not 21,
+    put "The later day check failed." into the check report; exit.
+  If the example's day distance is not 1,
+    put "The later day check failed." into the check report; exit.
+  If the example's day sum is not 42,
+    put "The later day check failed." into the check report; exit.
+  If the example's day direction is not 2,
+    put "The later day check failed." into the check report; exit.
