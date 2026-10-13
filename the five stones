@@ -1,0 +1,96 @@
+\ The five stones for each of the 46 visible drops.
+\ This is the exact five-value recurrence in section E of the main rules.
+\ All five new values use the same old row; none uses a partly new row.
+\ The caller begins with drop 1 and advances through drops 2 to 46.
+\ CAL compilation has not yet been verified.
+
+A stone row has
+  a wide quantity called wheat,
+  a wide quantity called barley,
+  a wide quantity called salt,
+  a wide quantity called bitter,
+  a wide quantity called red.
+
+A stone formula has
+  a wide quantity called base,
+  a wide quantity called neighbor,
+  a wide quantity called extra,
+  a number called factor,
+  a wide quantity called result.
+
+The current stones are a stone row.
+The next stones are a stone row.
+The working stone formula is a stone formula.
+
+To begin the stone sequence:
+  Put "17" into the current stones' wheat.
+  Put "29" into the current stones' barley.
+  Put "43" into the current stones' salt.
+  Put "71" into the current stones' bitter.
+  Put "101" into the current stones' red.
+
+\ The recipe computes SAVE(base squared + factor times neighbor + extra).
+\ Decimal strings keep even very large intermediate results exact.
+To calculate a stone formula:
+  Put the stone formula's base into the stone formula's result.
+  Multiply the stone formula's base by the stone formula's result.
+  Put the stone formula's neighbor into a scaled wide quantity.
+  Convert the stone formula's factor to a factor string.
+  Put the factor string into a factor wide quantity.
+  Multiply the scaled wide quantity by the factor wide quantity.
+  Add the scaled wide quantity to the stone formula's result.
+  Add the stone formula's extra to the stone formula's result.
+  Keep the stone formula's result for the sauce.
+
+\ Drop 1 is the seed. Advance only with a drop index from 2 through 46.
+\ Save the proposed new values separately until all five are complete.
+To advance the stones given a number:
+  If the number is less than 2, exit.
+  If the number is greater than 46, exit.
+  Convert the number to an index string.
+  Put the current stones' wheat into the working stone formula's base.
+  Put the current stones' barley into the working stone formula's neighbor.
+  Put the index string into the working stone formula's extra.
+  Put 3 into the working stone formula's factor.
+  Calculate the working stone formula.
+  Put the working stone formula's result into the next stones' wheat.
+  Put the current stones' barley into the working stone formula's base.
+  Put the current stones' salt into the working stone formula's neighbor.
+  Put the current stones' wheat into the working stone formula's extra.
+  Put 5 into the working stone formula's factor.
+  Calculate the working stone formula.
+  Put the working stone formula's result into the next stones' barley.
+  Put the current stones' salt into the working stone formula's base.
+  Put the current stones' bitter into the working stone formula's neighbor.
+  Put the current stones' barley into the working stone formula's extra.
+  Put 7 into the working stone formula's factor.
+  Calculate the working stone formula.
+  Put the working stone formula's result into the next stones' salt.
+  Put the current stones' bitter into the working stone formula's base.
+  Put the current stones' red into the working stone formula's neighbor.
+  Put the current stones' salt into the working stone formula's extra.
+  Put 11 into the working stone formula's factor.
+  Calculate the working stone formula.
+  Put the working stone formula's result into the next stones' bitter.
+  Put the current stones' red into the working stone formula's base.
+  Put the current stones' wheat into the working stone formula's neighbor.
+  Put the current stones' bitter into the working stone formula's extra.
+  Put 13 into the working stone formula's factor.
+  Calculate the working stone formula.
+  Put the working stone formula's result into the next stones' red.
+  Put the next stones' wheat into the current stones' wheat.
+  Put the next stones' barley into the current stones' barley.
+  Put the next stones' salt into the current stones' salt.
+  Put the next stones' bitter into the current stones' bitter.
+  Put the next stones' red into the current stones' red.
+
+\ Each step uses one stone advancement, so CAL has no nested loops.
+To reach the stones for a visible drop number:
+  Begin the stone sequence.
+  Put 2 into a position number.
+  Loop.
+    If the position number is greater than the visible drop number, break.
+    If the position number is greater than 46, break.
+    Advance the stones given the position number.
+    Add 1 to the position number.
+  Repeat.
