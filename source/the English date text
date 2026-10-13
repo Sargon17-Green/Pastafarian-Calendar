@@ -1,0 +1,27 @@
+\ Plain English presentation for a successfully completed date.
+\ This is NOT a change to the canonical five numeric components:
+\ their indices remain authoritative for equality and testing.
+\ The English labels come from the frozen source-language catalogue.
+\ Never render an unsuccessful or incomplete date as an old result.
+
+The complete English date text is a string.
+
+To render the complete date in English:
+  Put "" into the complete English date text.
+  If the complete date status is not 1, exit.
+  Read the English cutlet name given the complete date answer's cutlet name index.
+  Read the English month name given the complete date answer's month name index.
+  If the English cutlet name is blank, exit.
+  If the English month name is blank, exit.
+  Convert the complete date answer's year number to a string.
+  Put the string into the complete English date text.
+  Append ", " to the complete English date text.
+  Append the English cutlet name to the complete English date text.
+  Append ", " to the complete English date text.
+  Convert the complete date answer's day within cutlet to a string.
+  Append the string to the complete English date text.
+  Append ", " to the complete English date text.
+  Append the English month name to the complete English date text.
+  Append ", " to the complete English date text.
+  Convert the complete date answer's day within month to a string.
+  Append the string to the complete English date text.
