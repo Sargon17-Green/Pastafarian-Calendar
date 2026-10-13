@@ -11,8 +11,34 @@ A gate walk has
 
 The gate walk is a gate walk.
 
+\ Budget full conversion by number of exact gate gaps requested.
+\ Every gap requires a complete separate sauce. A distant target must
+\ never launch an effectively endless calculation from Foundation.
+\ The cap is an implementation resource limit, not a calendar rule.
+\ Only a new user-level year search or stand-alone gate lookup resets
+\ the budget. All later year/cutlet walking shares the same allowance.
+A gate step budget has
+  a number called enabled,
+  a number called steps remaining,
+  a number called exhausted.
+
+The gate step budget is a gate step budget.
+
+To begin bounded gate walking:
+  Put 1 into the gate step budget's enabled.
+  Put 1024 into the gate step budget's steps remaining.
+  Put 0 into the gate step budget's exhausted.
+
+To request another bounded gate step:
+  If the gate step budget's enabled is not 1, exit.
+  If the gate step budget's steps remaining is less than 1,
+    put 1 into the gate step budget's exhausted; exit.
+  Subtract 1 from the gate step budget's steps remaining.
+
 \ Move one step towards a positive gate index.
 To move to the next positive gate:
+  Request another bounded gate step.
+  If the gate step budget's exhausted is 1, exit.
   Put the gate walk's current index into a gap index number.
   Add 1 to the gate walk's current index.
   If the gap index number is not less than 0,
@@ -24,6 +50,8 @@ To move to the next positive gate:
 \ is positiveGap(oldIndex), not a gap at the new smaller index.
 \ From zero and below, the interval belongs to the new negative index.
 To move to the next negative gate:
+  Request another bounded gate step.
+  If the gate step budget's exhausted is 1, exit.
   Put the gate walk's current index into a gap index number.
   Subtract 1 from the gate walk's current index.
   If the gap index number is not greater than 0,
@@ -34,6 +62,7 @@ To move to the next negative gate:
 \ The signed index must fit CAL's native number type.
 \ Each step invokes the exact canonical sauce for its own day pair.
 To locate a gate given a number:
+  Begin bounded gate walking.
   Put the number into the gate walk's requested index.
   Put 0 into the gate walk's current index.
   Put -15055671 into the gate walk's current position.
@@ -41,4 +70,5 @@ To locate a gate given a number:
     If the gate walk's current index is the gate walk's requested index, break.
     If the gate walk's requested index is greater than 0, move to the next positive gate.
     If the gate walk's requested index is less than 0, move to the next negative gate.
+    If the gate step budget's exhausted is 1, exit.
   Repeat.
