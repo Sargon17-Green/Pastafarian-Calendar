@@ -195,3 +195,22 @@ To wrap the sauce difference given a wide quantity and another wide quantity:
   Put "170141183460469231731687303715884105727" into a wrapped wide quantity.
   Subtract the difference wide quantity from the wrapped wide quantity.
   Put the wrapped wide quantity into the other wide quantity.
+
+
+\ These helpers accept ordinary nonnegative CAL numbers as multipliers.
+\ A wide quantity is never converted to a CAL number.
+To multiply a wide quantity by a number:
+  Convert the number to a string.
+  Put the string into a factor wide quantity.
+  Multiply the factor wide quantity by the wide quantity.
+
+To add a number to a wide quantity:
+  Convert the number to a string.
+  Put the string into an added wide quantity.
+  Add the added wide quantity to the wide quantity.
+
+\ Add factor times first value to the second value.
+To add a weighted wide quantity to another wide quantity given a number:
+  Put the wide quantity into a weighted wide quantity.
+  Multiply the weighted wide quantity by the number.
+  Add the weighted wide quantity to the other wide quantity.
