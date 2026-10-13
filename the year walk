@@ -1,0 +1,129 @@
+\ Move from the chosen year 5000 in either calendar direction.
+\ NEXT uses seal 11 and the old closing gate as its opening gate.
+\ PREVIOUS uses seal 12 and the old opening gate as its closing gate.
+\ The sauce pair is (original calculation day, boundary gate day).
+\ Every future or previous year begins or ends exactly at that boundary.
+\ Candidate years have at least six intervals and 252..5778 days.
+\ Candidate ordering remains shortest first, then earlier opening gate.
+\ The original calculation day never changes while walking across years.
+\ This code is pending a genuine CAL compiler test.
+
+The transition boundary is a calendar day.
+The transition seal is a number.
+The current year number is a number.
+The target year day is a calendar day.
+
+\ Only the directionally eligible side is scanned. Since every new gap
+\ is positive, elapsed year duration increases monotonically; therefore
+\ candidates are appended directly in canonical shortest-first order.
+To gather following year candidates:
+  Destroy the eligible year ledger.
+  Put 0 into the eligible year count.
+  Put the chosen year's closing day into the transition boundary.
+  Put 11 into the transition seal.
+  Put the chosen year's closing index into the gate walk's current index.
+  Put the transition boundary into the gate walk's current position.
+  Loop.
+    Move to the next positive gate.
+    Put the transition boundary into the candidate under construction's opening day.
+    Put the chosen year's closing index into the candidate under construction's opening index.
+    Put the gate walk's current position into the candidate under construction's closing day.
+    Put the gate walk's current index into the candidate under construction's closing index.
+    Measure the candidate under construction.
+    If the candidate under construction's year length is greater than 5778, break.
+    If the candidate under construction's span count is less than 6, repeat.
+    Add one following candidate.
+  Repeat.
+
+To add one following candidate:
+  Create a year option.
+  Put the candidate under construction into the year option's year candidate.
+  Append the year option to the eligible year ledger.
+  Add 1 to the eligible year count.
+
+\ Scanning backward also encounters shortest durations first; equal
+\ durations cannot arise when one boundary gate is held fixed.
+To gather preceding year candidates:
+  Destroy the eligible year ledger.
+  Put 0 into the eligible year count.
+  Put the chosen year's opening day into the transition boundary.
+  Put 12 into the transition seal.
+  Put the chosen year's opening index into the gate walk's current index.
+  Put the transition boundary into the gate walk's current position.
+  Loop.
+    Move to the next negative gate.
+    Put the gate walk's current position into the candidate under construction's opening day.
+    Put the gate walk's current index into the candidate under construction's opening index.
+    Put the transition boundary into the candidate under construction's closing day.
+    Put the chosen year's opening index into the candidate under construction's closing index.
+    Measure the candidate under construction.
+    If the candidate under construction's year length is greater than 5778, break.
+    If the candidate under construction's span count is less than 6, repeat.
+    Add one following candidate.
+  Repeat.
+
+\ This selection uses c from year selection day and the fixed boundary,
+\ not the pair that was used for a preceding gate gap.
+To select the adjacent year:
+  Put the year selection day into the example's calculation day.
+  Put the transition boundary into the example's requested day.
+  Answer the example.
+  Copy the example into the sauce input.
+  Make the complete sauce.
+  Put 1 into the seal inquiry's bowl identity.
+  Put the transition seal into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  Convert the eligible year count to a string.
+  Put the string into a transition count wide quantity.
+  Choose an equal option given the transition count wide quantity.
+  Convert the seal inquiry's selected quantity to the selected year rank.
+  Read the selected year candidate.
+
+\ A failed scan must never overwrite the last successfully selected year.
+To advance to the following year:
+  Put 0 into the year selection success.
+  Gather following year candidates.
+  If the eligible year count is 0,
+    destroy the eligible year ledger; exit.
+  Select the adjacent year.
+  Add 1 to the current year number.
+  Put 1 into the year selection success.
+  Destroy the eligible year ledger.
+
+To move to the preceding year:
+  Put 0 into the year selection success.
+  Gather preceding year candidates.
+  If the eligible year count is 0,
+    destroy the eligible year ledger; exit.
+  Select the adjacent year.
+  Subtract 1 from the current year number.
+  Put 1 into the year selection success.
+  Destroy the eligible year ledger.
+
+\ Forward and backward movement use different routines so CAL sees only
+\ one loop in each routine.
+To travel forward to the target day:
+  Loop.
+    If the target year day is not greater than the chosen year's closing day, break.
+    Advance to the following year.
+    If the year selection success is not 1, exit.
+  Repeat.
+
+To travel backward to the target day:
+  Loop.
+    If the target year day is greater than the chosen year's opening day, break.
+    Move to the preceding year.
+    If the year selection success is not 1, exit.
+  Repeat.
+
+\ First argument is the calculation day; second is the requested day.
+\ The complete date has not yet been resolved into cutlets and months.
+To find the year for a calendar day and another calendar day:
+  Put the other calendar day into the target year day.
+  Find year 5000 for the calendar day.
+  If the year selection success is not 1, exit.
+  Put 5000 into the current year number.
+  If the target year day is greater than the chosen year's closing day,
+    travel forward to the target day; exit.
+  If the target year day is less than or equal to the chosen year's opening day,
+    travel backward to the target day; exit.
