@@ -125,6 +125,11 @@ written in Plain English Programming:
   eight four-day months requires 1635 cached states with these
   shortcuts, compared with 14756 using the original general DP.
   Tests also cover a 73-digit count for 47 previously started months.
+- **the weaving streaming checks**: compare a full stored weaving
+  against streaming selection at the same exact rank. Ordinary
+  conversion now stores only the requested day's month and occurrence,
+  rather than allocating a node for every woven day. Full-word
+  materialization remains available during QA.
 - **the list cleanup**: explicit CAL list destructors to release
   the project's owned linked records and memo buffers.
 - **the complete date**: joins the independently selected year,
@@ -133,7 +138,7 @@ written in Plain English Programming:
   (5000, 10, 503, 20, 56) comparison is an optional slow oracle,
   not a demonstrated result of running the program.
 
-The source now includes **64 groups of checks**, some of which compare several
+The source now includes **65 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -253,7 +258,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English **program and check files** must be present when compiling. Select only those source files for CAL's file list: do **not** compile the extensionless `LICENSE` document, which is prose for people rather than program instructions. The ordinary `README.md` is likewise documentation, not source. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 64 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 65 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
