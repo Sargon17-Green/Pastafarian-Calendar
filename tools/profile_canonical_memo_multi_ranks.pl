@@ -28,8 +28,9 @@ die "rss-kib 必須在 32768..1048576\n"
     if $rss_limit<32768 || $rss_limit>1048576;
 die "window-offset 只支援 38、39 或 40\n"
     if $offset!=38 && $offset!=39 && $offset!=40;
-die "case-filter 只支援 all 或 middle\n"
-    if $case_filter ne 'all' && $case_filter ne 'middle';
+die "case-filter 只支援 all、middle、first-half、last-half\n"
+    if $case_filter ne 'all' && $case_filter ne 'middle'
+    && $case_filter ne 'first-half' && $case_filter ne 'last-half';
 die "需要 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -97,6 +98,16 @@ if (!$pid) {
         my $test_count=0;
         @named=grep {$_->[0] eq 'middle'} @named
             if $case_filter eq 'middle';
+        @named=@named[0..6] if $case_filter eq 'first-half';
+        @named=@named[7..13] if $case_filter eq 'last-half';
+        my $expected_labels=$case_filter eq 'first-half'
+            ? 'first,second,third,fourth,p10,p25,pre_middle'
+            : $case_filter eq 'last-half'
+            ? 'middle,p75,p90,near_last3,near_last2,near_last1,last'
+            : undef;
+        die "分片樣本並非七個完整、互不重複的固定排名\n"
+            if defined($expected_labels)
+            && join(',',map {$_->[0]} @named) ne $expected_labels;
         for my $case (@named) {
             my ($label,$rank)=@$case;
             my $rank_text="$rank";
@@ -166,12 +177,13 @@ if (!$pid) {
                 $offset,$label,$test_count,length($rank_text),$days,
                 $diag->{entries},$diag->{cache_hits},time()-$start;
         }
-        my $expected_count=$case_filter eq 'all' ? 14 : 1;
+        my $expected_count=$case_filter eq 'all' ? 14
+                          : $case_filter eq 'middle' ? 1 : 7;
         die "字典序重要排名樣本未全部執行\n"
             if $test_count!=$expected_count;
         my $diag=$counter->diagnostics;
-        printf "CANONICAL_MULTI_RANK status=PASS scope=FOUR_MONTH_WINDOW_LEXICOGRAPHIC_BRANCHES window=%d cases=%d days_per_rank=%d total_digits=%d memo_entries=%d memo_hits=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
-            $offset,$test_count,$days,length("$total"),$diag->{entries},
+        printf "CANONICAL_MULTI_RANK status=PASS scope=FOUR_MONTH_WINDOW_LEXICOGRAPHIC_BRANCHES filter=%s window=%d cases=%d days_per_rank=%d total_digits=%d memo_entries=%d memo_hits=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
+            $case_filter,$offset,$test_count,$days,length("$total"),$diag->{entries},
             $diag->{cache_hits},time()-$start,peak_self();
         1;
     };
