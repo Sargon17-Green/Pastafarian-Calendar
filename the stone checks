@@ -2,7 +2,7 @@
 \ The rows are checked independently against the arithmetic definition.
 \ These are source-level checks, not claims of a CAL run.
 
-To check stones at visible drop 1:
+To check the seed stones:
   Reach the stones for 1.
   If the current stones' wheat is not "17",
     put "The stone check failed at drop 1, wheat." into the check report; exit.
@@ -15,7 +15,7 @@ To check stones at visible drop 1:
   If the current stones' red is not "101",
     put "The stone check failed at drop 1, red." into the check report; exit.
 
-To check stones at visible drop 2:
+To check the second stone row:
   Reach the stones for 2.
   If the current stones' wheat is not "378",
     put "The stone check failed at drop 2, wheat." into the check report; exit.
@@ -28,7 +28,7 @@ To check stones at visible drop 2:
   If the current stones' red is not "10493",
     put "The stone check failed at drop 2, red." into the check report; exit.
 
-To check stones at visible drop 3:
+To check the third stone row:
   Reach the stones for 3.
   If the current stones' wheat is not "146106",
     put "The stone check failed at drop 3, wheat." into the check report; exit.
@@ -41,7 +41,7 @@ To check stones at visible drop 3:
   If the current stones' red is not "110114158",
     put "The stone check failed at drop 3, red." into the check report; exit.
 
-To check stones at visible drop 7:
+To check the seventh stone row:
   Reach the stones for 7.
   If the current stones' wheat is not "84121676802438019752984998333044433970",
     put "The stone check failed at drop 7, wheat." into the check report; exit.
@@ -54,7 +54,7 @@ To check stones at visible drop 7:
   If the current stones' red is not "3317775612520290492148692481184641941",
     put "The stone check failed at drop 7, red." into the check report; exit.
 
-To check stones at visible drop 46:
+To check the final stone row:
   Reach the stones for 46.
   If the current stones' wheat is not "73799454308499791987382386781055001470",
     put "The stone check failed at drop 46, wheat." into the check report; exit.
