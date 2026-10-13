@@ -26,10 +26,20 @@ The complete date answer is a complete date answer.
 The complete date status is a number.
 The complete date error is a string.
 
+\ The five public numeric fields must be zero unless status is one.
+\ Clear all fields before doing any work, not only after success.
+To reset the complete date answer:
+  Put 0 into the complete date status.
+  Put 0 into the complete date answer's year number.
+  Put 0 into the complete date answer's cutlet name index.
+  Put 0 into the complete date answer's day within cutlet.
+  Put 0 into the complete date answer's month name index.
+  Put 0 into the complete date answer's day within month.
+  Put "The complete calendar date was not resolved." into the complete date error.
+
 \ Every required selection must succeed before any result is published.
 To calculate a complete date for a calendar day and another calendar day:
-  Put 0 into the complete date status.
-  Put "The complete calendar date was not resolved." into the complete date error.
+  Reset the complete date answer.
   Find the year for the calendar day and the other calendar day.
   If the year selection success is not 1,
     put "The requested Pastafarian year could not be selected." into the complete date error; exit.
