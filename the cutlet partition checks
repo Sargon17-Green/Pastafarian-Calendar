@@ -88,3 +88,7 @@ To check pinned cutlet ranking:
   Select a cutlet partition from the sample rank wide quantity.
   If the cutlet partition's valid selection is not 0,
     put "Out-of-range cutlet rank was accepted." into the check report; exit.
+  Put "0" into the sample rank wide quantity.
+  Select a cutlet partition from the sample rank wide quantity.
+  If the cutlet partition's valid selection is not 0,
+    put "Zero was accepted as a one-based cutlet rank." into the check report; exit.
