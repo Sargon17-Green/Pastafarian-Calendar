@@ -1164,3 +1164,18 @@ sove eta semantik seleksyon an, epi ajoute 4yèm commit
 Nan Stage 32, pa gen PATCH 16, pa gen chèn pòtay konplè,
 pa gen `postStir12`. Sous rank la soti nan kòd natif
 PATCH 13, pa nan oracle tès la. Validasyon natif poko fèt.
+
+### Tès Stage 32 — DISCOVERY 16
+
+`lua5.3 test/stage32_tests.lua .` kouvri tout Stage 1–32,
+70 tras chwa rank ak oracle endepandan, 8 kestyon BigInt
+gwo, 10 enjèksyon erè ak 10 rekiperasyon, twa nested
+contexts, ak de rank ki sòti nan sauce kanonik reyèl.
+Twa scripts `stage32_expected_red_1..3.lua` montre
+diferans egzak `42+rank` kont `41+rank`; audit
+pozitif la verifye tout mesaj yo. Kat jobs CI natif
+teste sa; `lua_stage32_discovery` dwe echwe sèlman
+nan dènye etap `EXPECTED_RED`, apre tout pozitif PASS.
+Kadna SHA verifye PATCH 13, PATCH 15 ak legacy sign-day.
+Stage 33 pral repare offset la san efase erè a.
+Rezilta CI Stage 32 poko verifye.

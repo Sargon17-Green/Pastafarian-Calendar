@@ -831,3 +831,14 @@ Premye twa commits kestyon an rete; nou ajoute katriyèm
 commit ki anrejistre rank, kestyon jou, ansyen offset
 ak longè move a. Defòmasyon istorik la rete akeyir.
 Tès ak CI Stage 32 poko verifye; PATCH 16 pa antre.
+
+### QA DISCOVERY 16 ki soumèt nan CI
+
+70 konparezon rank oracle ak tras 4 commits; 8 gwo
+kestyon siyen BigInt; 10 defayans ak rekiperasyon;
+twa reentrances ak de sauce natif. Twa witness
+`EXPECTED_RED` endepandan verifye +1 anplis.
+Kat jobs CI ajoute, youn gen dènye etap wouj ki
+dwe echwe entansyonèlman sèlman. PATCH 13, PATCH 15
+ak legacy sign-day anba kadna SHA.
+Tès natif poko konfime.
