@@ -182,7 +182,7 @@ To resolve weaving completions into a wide quantity:
     put "0" into the wide quantity; exit.
   If the weaving selection's days remaining is 0,
     put "1" into the wide quantity; exit.
-  Count an all-started weaving suffix.
+  Count an ordered-last weaving suffix.
   If the started weaving suffix's available is 1,
     put the started weaving suffix's completions into the wide quantity; exit.
   Count a short weaving suffix.
