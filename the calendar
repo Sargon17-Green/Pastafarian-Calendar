@@ -35,6 +35,7 @@ To run:
   Check wide number multiplication.
   Check wide number division.
   Check sauce saving.
+  Check sauce subtraction.
   Put the check report into a buffer.
   Write the buffer to "calendar-checks.txt".
 
