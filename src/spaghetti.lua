@@ -24,6 +24,7 @@ local LegacyResetChain = require("legacy_reset_chain")
 local BowlChainPatch = require("bowl_chain_patch")
 local LegacyFixedNeighbor = require("legacy_fixed_neighbor")
 local NeighborPatch = require("neighbor_patch")
+local LegacyBiasedChoice = require("legacy_biased_choice")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -410,8 +411,26 @@ function S.visibleNeighborSpaghetti(calculationDay,targetDay,queriedId)
     return nextId
 end
 
+-- DISCOVERY 13: sous repons lan kòrèk; modulo san rejection se defo istorik.
+function S.answerAtSpaghetti(first,direction,k)
+    return LegacyBiasedChoice.answerAt(first,direction,k)
+end
+
+function S.legacyBiasedChoiceProbe(first,direction,optionCount)
+    return LegacyBiasedChoice.execute(first,direction,optionCount)
+end
+
+function S.oldBiasedModuloPickProbe(first,direction,optionCount)
+    return LegacyBiasedChoice.oldBiasedModuloPick(first,direction,optionCount)
+end
+
+function S.choiceSpaghetti(first,direction,optionCount)
+    local biased=LegacyBiasedChoice.execute(first,direction,optionCount)
+    return biased
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 25", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 26", 0)
 end
 
 return S
