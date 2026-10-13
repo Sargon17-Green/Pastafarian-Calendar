@@ -13,14 +13,22 @@ The gate walk is a gate walk.
 
 \ Move one step towards a positive gate index.
 To move to the next positive gate:
+  Put the gate walk's current index into a gap index number.
   Add 1 to the gate walk's current index.
-  Calculate a gate interval given the gate walk's current index.
+  If the gap index number is not less than 0,
+    put the gate walk's current index into the gap index number.
+  Calculate a gate interval given the gap index number.
   Add the gate inquiry's interval length to the gate walk's current position.
 
-\ Move one step towards a negative gate index.
+\ When moving backwards from a positive gate, its outgoing interval
+\ is positiveGap(oldIndex), not a gap at the new smaller index.
+\ From zero and below, the interval belongs to the new negative index.
 To move to the next negative gate:
+  Put the gate walk's current index into a gap index number.
   Subtract 1 from the gate walk's current index.
-  Calculate a gate interval given the gate walk's current index.
+  If the gap index number is not greater than 0,
+    put the gate walk's current index into the gap index number.
+  Calculate a gate interval given the gap index number.
   Subtract the gate inquiry's interval length from the gate walk's current position.
 
 \ The signed index must fit CAL's native number type.
