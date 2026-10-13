@@ -129,6 +129,10 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check pinned cutlet ranking.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the count of cutlet name sequences.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check lexicographic cutlet names.
+  If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
