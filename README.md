@@ -961,3 +961,21 @@ gen QA Stage 1–27, gwo BigInt, 12 faults+12 recoveries,
 nested context ak repons ki sòti nan sauce kanonik.
 Path wide `N>M`, douz brase final yo nan production,
 ak kouch gate yo pa antre nan Stage 27.
+
+### Fèmti Stage 27 — PATCH 13 verifye nativman
+
+GitHub Actions run `38430726689` fini ak **31/31 jobs PASS**.
+Suite natif `lua_stage27_patch` pase tout Stage 1–27, ak
+`lua_stage26_expected_red_audit` verifye kat ansyen
+diferans modulo yo toujou egziste sou wout legacy a.
+`lua_stage27_smoke` pase 1,239 konparezon kont oracle,
+pami yo 165 kote PATCH 13 korije legacy; `lua_stage27_resilience`
+pase >2^64 rejè lojik ak prèv premye akseptasyon, 12
+defayans/12 rekiperasyon ak de nested contexts.
+`lua_stage27_real` pase de sous repons soti nan sauce
+kanonik la. Etap 26 a rete kòm prèv istorik, pa kòm
+echèk CI ki pa atann.
+
+`LAST_COMPLETED_STAGE=27` epi
+`EXPECTED_REPOSITORY_STATE=GREEN`.
+Pa gen chwa wide `N>M` ni final douz brase nan PATCH 13.

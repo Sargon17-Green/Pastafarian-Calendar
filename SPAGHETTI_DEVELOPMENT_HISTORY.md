@@ -692,4 +692,14 @@ N=M//2+1, premye=M, direksyon -1 mande plis pase
 `2^64` rejè lojik; kòd la itilize prèv rejyon kontig
 pou rive egzakteman nan premye akseptasyon an.
 Tout kalkil toujou fèt ak BigInt Lua; pa gen wide detour.
-Rezilta native CI rete annatant.
+Rezilta CI native final la verifye nan run 38430726689.
+
+### Fèmti natif Stage 27
+
+GitHub Actions `38430726689`: **31/31 PASS**.
+Tout Stage 1–27 pase ansanm, 1,239 rank oracle,
+165 bias legacy korije, >2^64 rejè lojik, 12 fault/recovery,
+de kontex reentrant, de sauce kanonik, ak kat odit
+`EXPECTED_RED` istorik Stage 26. Legacy rete byte-pou-byte
+e modil oracle pa antre nan production.
+`LAST_COMPLETED_STAGE=27` / `EXPECTED_REPOSITORY_STATE=GREEN`.
