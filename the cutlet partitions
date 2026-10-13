@@ -173,6 +173,7 @@ To select a cutlet partition from a wide quantity:
   Put 0 into the cutlet partition's valid selection.
   Destroy the chosen cutlet pieces.
   Put the wide quantity into the cutlet partition's current rank.
+  If the cutlet partition's current rank is "0", exit.
   Count the permitted cutlet partitions.
   If the cutlet partition's total choices is "0", exit.
   If the cutlet partition's total choices is numerically smaller than the cutlet partition's current rank, exit.
