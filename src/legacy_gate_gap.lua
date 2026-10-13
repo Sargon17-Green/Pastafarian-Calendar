@@ -58,6 +58,8 @@ function Legacy.execute(signedStep,first,direction)
  local manager=Base.MonsterManager.new(ctx)
  manager.dispatcher:register("LEGACY_GATE_GAP_PLUS_ONE",function(active,owner)
   local wrong=Legacy.oldGateGapFromRank(rank)
+  assert(B.compare(wrong,B.add(OLD_OFFSET,rank))==0,
+   "DISCOVERY 16: legacy +1 not authentic")
   local state={
    source="LEGACY_GATE_GAP_EXTRA_ONE",
    signedStepDecimal=tostring(step),
