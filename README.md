@@ -62,6 +62,15 @@ written in Plain English Programming:
 - **the option safety checks**: ensure that public, narrow and wide
   equal-choice routines reject an empty or zero option count without
   reaching division by zero, and still accept a later valid choice.
+- **the native day bounds** and **the native day bound checks**:
+  check both input days before attempting full conversion. Until
+  absolute day coordinates and all five initial counters have an
+  arbitrary-precision implementation, each requested day must lie
+  between -415055671 and 384944329, inclusive. This conservative
+  temporary range keeps native 32-bit day counts, their sum and the
+  inclusive distance within their representable limits. The low-level
+  day-counter routine itself remains unrestricted and should only be
+  used with inputs meeting this precondition.
 - **the gate intervals** and **the gate interval checks**: calculate the
   interval selected by seal 1 in bowl 1 using the sauce made for
   (Foundation, Foundation+n), including negative n. Independent
@@ -151,7 +160,7 @@ written in Plain English Programming:
   Foundation-day (5000, 10, 503, 20, 56) comparison is an optional
   slow oracle, not a demonstrated result of running the program.
 
-The source now includes **70 groups of checks**, some of which compare several
+The source now includes **71 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -303,7 +312,7 @@ root, outside the compile input. Use the matching CAL standard library
 supplied by the compiler. No successful compiler execution has been
 reported.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 70 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 71 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
