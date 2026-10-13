@@ -21,6 +21,10 @@ To prepare a wide gate sauce question given a wide signed day:
   Answer the wide calendar example.
 
 To calculate a gate interval for a wide signed day:
+  \ A wide gap has no representable native signed-index field.
+  \ Clear that field so an earlier native value is not mistaken for
+  \ the current wide index by another caller.
+  Put 0 into the gate inquiry's signed index.
   Put 0 into the gate inquiry's interval length.
   If the wide signed day's polarity is 0, exit.
   Prepare a wide gate sauce question given the wide signed day.
