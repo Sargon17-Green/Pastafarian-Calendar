@@ -116,8 +116,10 @@ written in Plain English Programming:
   first-occurrence and last-occurrence order, then unrank a complete
   weaving with bowl 4 and seal 32. The requested day's month ordinal
   and its one-based occurrence in that month are recorded. The
-  memoized reference algorithm can still require enormous space
-  and time for realistic years with many months.
+  reference implementation bounds its memo cache at 4096 states
+  and explicitly fails rather than returning an incorrect date when
+  the limit is reached. This is not yet a scalable implementation for
+  realistic years with many months.
 - **the complete date**: joins the independently selected year,
   cutlet lengths, cutlet names, month lengths, month names and the
   full weaving into five fields. The canonical Foundation-day
@@ -151,6 +153,9 @@ a tested or production-ready calendar.** The CAL compiler has not run it.
 The day axis and gate indices still use 32-bit numbers. Sparse
 memoization of the month-weaving recurrence is exact but can have a
 prohibitively large state space for a real year with many months.
+A hard cap of 4096 cached suffix states prevents uncontrolled growth:
+if exceeded, the source reports a failed calculation instead of
+publishing an unverified or approximate calendar date.
 Further work is required for CAL syntax validation, complete differential
 execution, large-instance performance, broad date support and resource
 ownership, even though all five stages now have source implementations.
