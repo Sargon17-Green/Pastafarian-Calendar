@@ -1,0 +1,22 @@
+\ Temporary bridge from a native signed CAL day into an exact
+\ signed-wide day. The destination is a wide signed day record.
+\ The native minimum -2147483648 cannot be negated within a signed
+\ 32-bit number, so this bridge refuses that one input explicitly.
+\ The full calendar still uses the stricter temporary safety bounds.
+\ Arbitrary-wide dates do not pass through this bridge.
+
+The converted wide signed day is a wide signed day.
+The native to wide conversion succeeded is a number.
+
+To convert a calendar day into a wide signed day:
+  Put 0 into the native to wide conversion succeeded.
+  If the calendar day is less than -2147483647, exit.
+  Put the calendar day into an absolute calendar day.
+  Put 1 into a native day polarity number.
+  If the absolute calendar day is less than 0,
+    multiply -1 by the absolute calendar day;
+    put -1 into the native day polarity number.
+  Convert the absolute calendar day to a string.
+  Put the string into a native day magnitude wide quantity.
+  Set the converted wide signed day from the native day magnitude wide quantity given the native day polarity number.
+  Put 1 into the native to wide conversion succeeded.
