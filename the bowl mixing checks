@@ -1,0 +1,81 @@
+\ The canonical Foundation question: calculation day and target are both
+\ the Foundation Day. Its input counts are [1, 1, 1, 2, 2].
+\ Expected results for post-mix states are calculated independently
+\ from the exact equations in sections J and K of the main README.
+\ These checks are waiting for a genuine CAL compiler run.
+
+To check the first Foundation bowl mixing:
+  Prepare the Foundation sauce question.
+  Make visible drops through 1.
+  Initialize the six bowls.
+  Mix bowls for the visible drop.
+  If the current bowls' first bowl is not "57695780043902099215028347501863562479",
+    put "The first visible mix failed in fixed bowl 1." into the check report; exit.
+  If the current bowls' second bowl is not "23340029745717527497295540206261219928",
+    put "The first visible mix failed in fixed bowl 2." into the check report; exit.
+  If the current bowls' third bowl is not "30718218098719704968737222407739418730",
+    put "The first visible mix failed in fixed bowl 3." into the check report; exit.
+  If the current bowls' fourth bowl is not "41226076602775620998613152223649804686",
+    put "The first visible mix failed in fixed bowl 4." into the check report; exit.
+  If the current bowls' fifth bowl is not "105677332408547826903247323778890421477",
+    put "The first visible mix failed in fixed bowl 5." into the check report; exit.
+  If the current bowls' sixth bowl is not "76821746188749053768288858890025937580",
+    put "The first visible mix failed in fixed bowl 6." into the check report; exit.
+
+\ Execute all 46 visible mixes, check the intermediate state, then
+\ execute twelve more rounds and compare the original final output.
+\ The saved visible order must not be replaced by a final-round order.
+To check the complete Foundation bowl mixing:
+  Prepare the Foundation sauce question.
+  Make the sauce through the visible drops.
+  If the last visible drop is not "141872771689426650819909896585756512282",
+    put "The final visible value changed during mixing." into the check report; exit.
+  If the last visible bowl order's first identity is not 4,
+    put "The saved visible bowl order is wrong at position 1." into the check report; exit.
+  If the last visible bowl order's second identity is not 5,
+    put "The saved visible bowl order is wrong at position 2." into the check report; exit.
+  If the last visible bowl order's third identity is not 2,
+    put "The saved visible bowl order is wrong at position 3." into the check report; exit.
+  If the last visible bowl order's fourth identity is not 3,
+    put "The saved visible bowl order is wrong at position 4." into the check report; exit.
+  If the last visible bowl order's fifth identity is not 6,
+    put "The saved visible bowl order is wrong at position 5." into the check report; exit.
+  If the last visible bowl order's sixth identity is not 1,
+    put "The saved visible bowl order is wrong at position 6." into the check report; exit.
+  If the current bowls' first bowl is not "158647627791824705753458596359979774258",
+    put "The bowl state after visible drop 46 failed at bowl 1." into the check report; exit.
+  If the current bowls' second bowl is not "53737453411033753933621896344530133343",
+    put "The bowl state after visible drop 46 failed at bowl 2." into the check report; exit.
+  If the current bowls' third bowl is not "5850566851108052745653019732167070087",
+    put "The bowl state after visible drop 46 failed at bowl 3." into the check report; exit.
+  If the current bowls' fourth bowl is not "121053834370018962014234508229559060928",
+    put "The bowl state after visible drop 46 failed at bowl 4." into the check report; exit.
+  If the current bowls' fifth bowl is not "77488486037977078204305482951744071156",
+    put "The bowl state after visible drop 46 failed at bowl 5." into the check report; exit.
+  If the current bowls' sixth bowl is not "24212665747035624126930420082272675784",
+    put "The bowl state after visible drop 46 failed at bowl 6." into the check report; exit.
+  Finish twelve final rounds.
+  If the current bowls' first bowl is not "65286679584284972964194865805379907599",
+    put "The final bowl state failed in fixed bowl 1." into the check report; exit.
+  If the current bowls' second bowl is not "127720283375330263615328810127751035299",
+    put "The final bowl state failed in fixed bowl 2." into the check report; exit.
+  If the current bowls' third bowl is not "54364069496183805843611594721403108554",
+    put "The final bowl state failed in fixed bowl 3." into the check report; exit.
+  If the current bowls' fourth bowl is not "93072329024469476118876155742008280619",
+    put "The final bowl state failed in fixed bowl 4." into the check report; exit.
+  If the current bowls' fifth bowl is not "54867842942953573450868747713087920246",
+    put "The final bowl state failed in fixed bowl 5." into the check report; exit.
+  If the current bowls' sixth bowl is not "111207247632761530752404582123499651367",
+    put "The final bowl state failed in fixed bowl 6." into the check report; exit.
+  If the last visible bowl order's first identity is not 4,
+    put "The twelve final rounds altered saved visible order 1." into the check report; exit.
+  If the last visible bowl order's second identity is not 5,
+    put "The twelve final rounds altered saved visible order 2." into the check report; exit.
+  If the last visible bowl order's third identity is not 2,
+    put "The twelve final rounds altered saved visible order 3." into the check report; exit.
+  If the last visible bowl order's fourth identity is not 3,
+    put "The twelve final rounds altered saved visible order 4." into the check report; exit.
+  If the last visible bowl order's fifth identity is not 6,
+    put "The twelve final rounds altered saved visible order 5." into the check report; exit.
+  If the last visible bowl order's sixth identity is not 1,
+    put "The twelve final rounds altered saved visible order 6." into the check report; exit.
