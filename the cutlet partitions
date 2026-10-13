@@ -1,0 +1,191 @@
+\ Cutlet partition by positive gate-span lengths in lexicographic order.
+\ The total is G spans, and the number of cutlets is K.
+\ A partition is (x1,...,xK), xi positive, sum xi=G.
+\ If the calculation day is an internal gate at offset q, at least
+\ one partial sum must be exactly q. Here q=0 means no restriction.
+\
+\ Counting is exact, with no enumeration of the potentially enormous
+\ set of partitions. Each partition corresponds to choosing K-1 cuts
+\ among G-1 internal gate boundaries. If a fixed cut q is required,
+\ there are C(G-2,K-2) instead of C(G-1,K-1) choices.
+\ Lexicographic unranking considers candidate first lengths ascending,
+\ counting the complete suffix before moving to the next candidate.
+\ All counts and ranks use decimal wide quantities.
+
+A cutlet piece is a thing with
+  a number called span length.
+
+The chosen cutlet pieces are some cutlet pieces.
+The new cutlet piece is a cutlet piece.
+
+A cutlet partition has
+  a number called total spans,
+  a number called part count,
+  a number called required boundary,
+  a number called remaining spans,
+  a number called remaining parts,
+  a number called remaining boundary,
+  a number called candidate length,
+  a wide quantity called total choices,
+  a wide quantity called suffix choices,
+  a wide quantity called current rank,
+  a number called valid selection.
+
+The cutlet partition is a cutlet partition.
+
+\ Find a gate coinciding with c strictly inside the selected year.
+\ G_0 is at the chosen year's opening index; the closing index cannot
+\ be internal. Scan one gate at a time to avoid repeated full gate walks.
+\ This scan uses the sauce and must precede the year-structure sauce.
+To find the restricted internal cutlet boundary:
+  Put 0 into the cutlet partition's required boundary.
+  Put the chosen year's opening index into the gate walk's current index.
+  Put the chosen year's opening day into the gate walk's current position.
+  Loop.
+    Put the gate walk's current index into a following index number.
+    Add 1 to the following index number.
+    If the following index number is greater than or equal to the chosen year's closing index, break.
+    Move to the next positive gate.
+    If the gate walk's current position is the year selection day,
+      put the gate walk's current index into the cutlet partition's required boundary;
+      subtract the chosen year's opening index from the cutlet partition's required boundary;
+      break.
+    If the gate walk's current position is greater than the year selection day, break.
+  Repeat.
+
+\ Calculate the total number of permitted partitions, optionally
+\ requiring the one distinguished internal gate boundary.
+To count the permitted cutlet partitions:
+  Put "0" into the cutlet partition's total choices.
+  If the cutlet partition's part count is less than 1, exit.
+  If the cutlet partition's part count is greater than the cutlet partition's total spans, exit.
+  If the cutlet partition's required boundary is greater than 0,
+    count cutlet partitions with a required boundary; exit.
+  Put the cutlet partition's total spans into a first binomial number.
+  Subtract 1 from the first binomial number.
+  Put the cutlet partition's part count into a second binomial number.
+  Subtract 1 from the second binomial number.
+  Calculate a binomial coefficient given the first binomial number and the second binomial number.
+  Put the binomial result into the cutlet partition's total choices.
+
+\ One fixed interior cut uses one of the K-1 interior boundaries.
+To count cutlet partitions with a required boundary:
+  If the cutlet partition's required boundary is greater than or equal to the cutlet partition's total spans, exit.
+  If the cutlet partition's part count is less than 2, exit.
+  Put the cutlet partition's total spans into a first binomial number.
+  Subtract 2 from the first binomial number.
+  Put the cutlet partition's part count into a second binomial number.
+  Subtract 2 from the second binomial number.
+  Calculate a binomial coefficient given the first binomial number and the second binomial number.
+  Put the binomial result into the cutlet partition's total choices.
+
+\ Count suffixes if we take candidate length x at the current stage.
+\ If the required cut is after x, one interior suffix cut is fixed:
+\ C((R-x)-2,(P-1)-2). If x equals the cut, it is satisfied:
+\ C((R-x)-1,(P-1)-1). If there is no pin, use the latter.
+To count the current cutlet suffix:
+  Put "0" into the cutlet partition's suffix choices.
+  Put the cutlet partition's remaining spans into a suffix spans number.
+  Subtract the cutlet partition's candidate length from the suffix spans number.
+  Put the cutlet partition's remaining parts into a suffix parts number.
+  Subtract 1 from the suffix parts number.
+  If the suffix parts number is 0,
+    count the last cutlet suffix; exit.
+  If the cutlet partition's remaining boundary is greater than 0,
+    count a suffix with a restricted boundary; exit.
+  Put the suffix spans number into a first binomial number.
+  Subtract 1 from the first binomial number.
+  Put the suffix parts number into a second binomial number.
+  Subtract 1 from the second binomial number.
+  Calculate a binomial coefficient given the first binomial number and the second binomial number.
+  Put the binomial result into the cutlet partition's suffix choices.
+
+To count the last cutlet suffix:
+  If the suffix spans number is not 0, exit.
+  If the cutlet partition's remaining boundary is greater than 0, exit.
+  Put "1" into the cutlet partition's suffix choices.
+
+To count a suffix with a restricted boundary:
+  If the cutlet partition's candidate length is greater than the cutlet partition's remaining boundary, exit.
+  If the cutlet partition's candidate length is the cutlet partition's remaining boundary,
+    count a suffix after satisfying its restriction; exit.
+  If the suffix parts number is less than 2, exit.
+  Put the suffix spans number into a first binomial number.
+  Subtract 2 from the first binomial number.
+  Put the suffix parts number into a second binomial number.
+  Subtract 2 from the second binomial number.
+  Calculate a binomial coefficient given the first binomial number and the second binomial number.
+  Put the binomial result into the cutlet partition's suffix choices.
+
+To count a suffix after satisfying its restriction:
+  Put the suffix spans number into a first binomial number.
+  Subtract 1 from the first binomial number.
+  Put the suffix parts number into a second binomial number.
+  Subtract 1 from the second binomial number.
+  Calculate a binomial coefficient given the first binomial number and the second binomial number.
+  Put the binomial result into the cutlet partition's suffix choices.
+
+\ Append one selected part to the permanent composition result.
+To remember the selected cutlet length:
+  Allocate memory for the new cutlet piece.
+  Put the cutlet partition's candidate length into the new cutlet piece's span length.
+  Append the new cutlet piece to the chosen cutlet pieces.
+  Subtract the cutlet partition's candidate length from the cutlet partition's remaining spans.
+  Subtract 1 from the cutlet partition's remaining parts.
+  If the cutlet partition's remaining boundary is greater than 0,
+    update the remaining cutlet boundary.
+
+To update the remaining cutlet boundary:
+  If the cutlet partition's candidate length is the cutlet partition's remaining boundary,
+    put 0 into the cutlet partition's remaining boundary; exit.
+  Subtract the cutlet partition's candidate length from the cutlet partition's remaining boundary.
+
+\ Try each positive length in ascending order, skipping its entire
+\ block if its count is smaller than the desired one-based rank.
+To choose the next cutlet length:
+  Put 1 into the cutlet partition's candidate length.
+  Loop.
+    Count the current cutlet suffix.
+    If the cutlet partition's suffix choices is not "0",
+      consider the current cutlet length.
+    If the cutlet partition's candidate length is greater than 0,
+      break.
+  Repeat.
+
+To consider the current cutlet length:
+  If the cutlet partition's suffix choices is numerically smaller than the cutlet partition's current rank,
+    subtract the cutlet partition's suffix choices from the cutlet partition's current rank;
+    add 1 to the cutlet partition's candidate length;
+    exit.
+  Remember the selected cutlet length.
+  Put 0 into the cutlet partition's candidate length.
+
+\ The candidate-length loop finishes when one candidate is selected.
+\ All parts are determined by arithmetic counts, not random guessing.
+To select a cutlet partition from a wide quantity:
+  Put 0 into the cutlet partition's valid selection.
+  Put the wide quantity into the cutlet partition's current rank.
+  Count the permitted cutlet partitions.
+  If the cutlet partition's total choices is "0", exit.
+  If the cutlet partition's total choices is numerically smaller than the cutlet partition's current rank, exit.
+  Destroy the chosen cutlet pieces.
+  Put the cutlet partition's total spans into the cutlet partition's remaining spans.
+  Put the cutlet partition's part count into the cutlet partition's remaining parts.
+  Put the cutlet partition's required boundary into the cutlet partition's remaining boundary.
+  Loop.
+    If the cutlet partition's remaining parts is 0, break.
+    Choose the next cutlet length.
+  Repeat.
+  Put 1 into the cutlet partition's valid selection.
+
+\ The structural sauce was prepared after the internal gate scan.
+\ Bowl 2 with seal 21 selects an exact one-based composition rank.
+To choose the canonical cutlet partition:
+  Put the chosen year's span count into the cutlet partition's total spans.
+  Put the selected cutlet count into the cutlet partition's part count.
+  Count the permitted cutlet partitions.
+  Put 2 into the seal inquiry's bowl identity.
+  Put 21 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  Choose an equal option given the cutlet partition's total choices.
+  Select a cutlet partition from the seal inquiry's selected quantity.
