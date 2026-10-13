@@ -33,8 +33,8 @@ To check year candidate eligibility:
   Measure the first candidate.
   If the first candidate contains the year candidate test day,
     put "Candidate exceeding 5778 days was accepted." into the check report; exit.
-  Put -15056750 into the first candidate's opening day.
-  Put -15056500 into the first candidate's closing day.
+  Put -15055771 into the first candidate's opening day.
+  Put -15055521 into the first candidate's closing day.
   Measure the first candidate.
   If the first candidate contains the year candidate test day,
     put "Candidate shorter than 252 days was accepted." into the check report; exit.
