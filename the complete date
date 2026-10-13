@@ -56,6 +56,8 @@ To calculate a complete date for a calendar day and another calendar day:
   Put the target year day into the weaving selection's target position.
   Subtract the chosen year's opening day from the weaving selection's target position.
   Choose the canonical month weaving.
+  If the weaving selection's resource limit reached is 1,
+    put "The exact month weaving exceeded the safe memoization limit; no date was returned." into the complete date error; exit.
   If the weaving selection's selection success is not 1,
     put "The month weaving could not be selected." into the complete date error; exit.
   If the woven requested month ordinal is 0,
