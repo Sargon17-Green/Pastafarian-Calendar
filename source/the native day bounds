@@ -16,26 +16,26 @@
 \ absolute and relative day quantities arbitrary precision.
 \ Fail closed rather than silently wrapping native numbers.
 
-The native day bounds are a thing with
+The native day limit pair are a thing with
   a calendar day called earliest accepted,
   a calendar day called latest accepted.
 
-The native day bounds are a native day bounds.
-The native date input is valid is a flag.
+The native day limit pair are a native day limit pair.
+The native date input validity is a flag.
 
-To prepare native day bounds:
-  Put -415055671 into the native day bounds' earliest accepted.
-  Put 384944329 into the native day bounds' latest accepted.
+To prepare native day limit pair:
+  Put -415055671 into the native day limit pair' earliest accepted.
+  Put 384944329 into the native day limit pair' latest accepted.
 
 To inspect one native calendar day given a calendar day:
-  If the calendar day is less than the native day bounds' earliest accepted,
-    put no into the native date input is valid; exit.
-  If the calendar day is greater than the native day bounds' latest accepted,
-    put no into the native date input is valid.
+  If the calendar day is less than the native day limit pair' earliest accepted,
+    put no into the native date input validity; exit.
+  If the calendar day is greater than the native day limit pair' latest accepted,
+    put no into the native date input validity.
 
 To check native day coordinate inputs given a calendar day and another calendar day:
-  Put yes into the native date input is valid.
-  Prepare native day bounds.
+  Put yes into the native date input validity.
+  Prepare native day limit pair.
   Inspect one native calendar day given the calendar day.
-  If the native date input is valid is no, exit.
+  If the native date input validity is no, exit.
   Inspect one native calendar day given the other calendar day.
