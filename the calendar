@@ -113,6 +113,8 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the weaving recursion depth limit.
   If the check report is not "The checks agree with the examples.", exit.
+  Check streamed and complete weaving equality.
+  If the check report is not "The checks agree with the examples.", exit.
   Check the two digit forward choice.
   If the check report is not "The checks agree with the examples.", exit.
   Check the two digit backward choice.
