@@ -141,6 +141,19 @@ def main():
         raise AssertionError("pre-fork verification mutated caller-owned Native evidence")
     print("POSTFORK_PG_PREFORK_SEED_ISOLATION_2_NEGATIVE_CONTROLS_PASS")
 
+    # Funge-98 may skip whitespace, so do not assume that the next
+    # executed instruction is exactly one cell away. However p/g cannot
+    # rotate the IP or move it off its established directed axis.
+    for label,index,motion in (
+        ("p_transverse_teleport",11,[91,1,1,0]),
+        ("g_forged_velocity_reversal",21,[21,0,-1,0]),
+    ):
+        forged=copy.deepcopy(good)
+        forged["complete_postfork_trace"][index][1:5]=motion
+        forged["first_512_motion"][index]=list(motion)
+        reject(source, forged, label)
+    print("POSTFORK_PG_VECTOR_AXIS_2_NEGATIVE_CONTROLS_PASS")
+
 
 if __name__ == "__main__":
     main()
