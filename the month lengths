@@ -1,0 +1,171 @@
+\ Exact month length composition for the selected year.
+\ If a year has L days and m months, choose an ordered sequence
+\ (L1,...,Lm) with 4 <= Lj <= 123 and sum Lj = L.
+\ The sequences are ranked lexicographically by their day lengths.
+\ No actual month may be longer than 123 days or shorter than 4.
+\
+\ Subtract four from each Lj. The new lengths are in 0..119.
+\ The number of sequences of R days and P months is the coefficient
+\ of x^(R-4P) in (1+x+...+x^119)^P. Inclusion/exclusion gives:
+\   sum(j=0..floor((R-4P)/120)) (-1)^j *
+\   C(P,j) * C(R-4P-120j+P-1,P-1).
+\ All terms are nonnegative integers. Accumulate the positive and
+\ negative terms separately to avoid signed large-number arithmetic.
+\ The final subtraction is exact and nonnegative.
+\ Use the number of suffix completions to unrank the desired sequence;
+\ do not enumerate the complete, potentially huge solution space.
+\ CAL compilation and execution have not yet been verified.
+
+A month length record is a thing with
+  a number called days in month.
+
+The chosen month lengths are some month length records.
+The new month length record is a month length record.
+
+A month length work has
+  a number called extra days,
+  a number called excluded blocks,
+  a number called maximum excluded blocks,
+  a number called remaining days,
+  a number called remaining months,
+  a number called candidate days,
+  a number called maximum candidate days,
+  a number called part selected,
+  a number called valid selection,
+  a wide quantity called positive terms,
+  a wide quantity called negative terms,
+  a wide quantity called count result,
+  a wide quantity called suffix possibilities,
+  a wide quantity called total possibilities,
+  a wide quantity called current rank.
+
+The month length work is a month length work.
+
+\ The count result is exact, or zero if no composition is feasible.
+To count month lengths given a number and another number:
+  Put "0" into the month length work's count result.
+  If the other number is 0,
+    count the empty month suffix; exit.
+  If the other number is less than 0, exit.
+  Put the number into the month length work's extra days.
+  Put the other number into a minimum month days number.
+  Multiply the minimum month days number by 4.
+  Subtract the minimum month days number from the month length work's extra days.
+  If the month length work's extra days is less than 0, exit.
+  Put the other number into a maximum extra days number.
+  Multiply the maximum extra days number by 119.
+  If the month length work's extra days is greater than the maximum extra days number, exit.
+  Put "0" into the month length work's positive terms.
+  Put "0" into the month length work's negative terms.
+  Put 0 into the month length work's excluded blocks.
+  Loop.
+    Put the month length work's excluded blocks into an excluded days number.
+    Multiply the excluded days number by 120.
+    If the excluded days number is greater than the month length work's extra days, break.
+    If the month length work's excluded blocks is greater than the other number, break.
+    Add the next month counting term given the other number.
+    Add 1 to the month length work's excluded blocks.
+  Repeat.
+  Put the month length work's positive terms into the month length work's count result.
+  Subtract the month length work's negative terms from the month length work's count result.
+
+To count the empty month suffix:
+  If the number is 0, put "1" into the month length work's count result.
+
+\ The current inclusion/exclusion term is
+\ C(P,j) * C(S-120j+P-1,P-1).
+To add the next month counting term given a number:
+  Calculate a binomial coefficient given the number and the month length work's excluded blocks.
+  Put the binomial result into an inclusion term wide quantity.
+  Put the month length work's extra days into a adjusted excess number.
+  Put the month length work's excluded blocks into an excluded days number.
+  Multiply the excluded days number by 120.
+  Subtract the excluded days number from the adjusted excess number.
+  Add the number to the adjusted excess number.
+  Subtract 1 from the adjusted excess number.
+  Put the number into a remaining slots number.
+  Subtract 1 from the remaining slots number.
+  Calculate a binomial coefficient given the adjusted excess number and the remaining slots number.
+  Multiply the binomial result by the inclusion term wide quantity.
+  Put the month length work's excluded blocks into a parity number.
+  Divide the parity number by 2 giving a quotient number and a remainder number.
+  If the remainder number is 0,
+    add the inclusion term wide quantity to the month length work's positive terms; exit.
+  Add the inclusion term wide quantity to the month length work's negative terms.
+
+\ Count suffixes with the candidate first month fixed.
+To count the current month suffix:
+  Put the month length work's remaining days into a suffix days number.
+  Subtract the month length work's candidate days from the suffix days number.
+  Put the month length work's remaining months into a suffix months number.
+  Subtract 1 from the suffix months number.
+  Count month lengths given the suffix days number and the suffix months number.
+  Put the month length work's count result into the month length work's suffix possibilities.
+
+To remember the selected month length:
+  Allocate memory for the new month length record.
+  Put the month length work's candidate days into the new month length record's days in month.
+  Append the new month length record to the chosen month lengths.
+  Subtract the month length work's candidate days from the month length work's remaining days.
+  Subtract 1 from the month length work's remaining months.
+  Put 1 into the month length work's part selected.
+
+\ Choose one month in ascending length order and skip rejected blocks.
+To consider the current month length:
+  If the month length work's suffix possibilities is numerically smaller than the month length work's current rank,
+    subtract the month length work's suffix possibilities from the month length work's current rank;
+    add 1 to the month length work's candidate days; exit.
+  Remember the selected month length.
+
+To choose the next month length:
+  Put 0 into the month length work's part selected.
+  Put 4 into the month length work's candidate days.
+  Put the month length work's remaining months into a other months number.
+  Subtract 1 from the other months number.
+  Multiply the other months number by 4.
+  Put the month length work's remaining days into the month length work's maximum candidate days.
+  Subtract the other months number from the month length work's maximum candidate days.
+  If the month length work's maximum candidate days is greater than 123,
+    put 123 into the month length work's maximum candidate days.
+  Loop.
+    If the month length work's candidate days is greater than the month length work's maximum candidate days, break.
+    Count the current month suffix.
+    If the month length work's suffix possibilities is "0",
+      add 1 to the month length work's candidate days.
+    If the month length work's suffix possibilities is not "0",
+      consider the current month length.
+    If the month length work's part selected is 1, break.
+  Repeat.
+
+To select month lengths from a wide quantity:
+  Put 0 into the month length work's valid selection.
+  Destroy the chosen month lengths.
+  If the wide quantity is "0", exit.
+  Put the wide quantity into the month length work's current rank.
+  Put the chosen year's year length into the month length work's remaining days.
+  Put the selected month count into the month length work's remaining months.
+  Count month lengths given the month length work's remaining days and the month length work's remaining months.
+  Put the month length work's count result into the month length work's total possibilities.
+  If the month length work's total possibilities is "0", exit.
+  If the month length work's total possibilities is numerically smaller than the month length work's current rank, exit.
+  Loop.
+    If the month length work's remaining months is 0, break.
+    Choose the next month length.
+    If the month length work's part selected is not 1, exit.
+  Repeat.
+  Put 1 into the month length work's valid selection.
+
+\ Questions about the structure all use sauce for (c, first day).
+\ Rebuild the shared sauce if a preceding gate walk overwrote the bowls.
+\ Bowl 3 / seal 31 chooses an index among all bounded compositions.
+To choose the canonical month lengths:
+  Prepare the year structure sauce.
+  Put the chosen year's year length into a whole year days number.
+  Count month lengths given the whole year days number and the selected month count.
+  Put the month length work's count result into the month length work's total possibilities.
+  If the month length work's total possibilities is "0", exit.
+  Put 3 into the seal inquiry's bowl identity.
+  Put 31 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  Choose an equal option given the month length work's total possibilities.
+  Select month lengths from the seal inquiry's selected quantity.
