@@ -109,6 +109,10 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the narrow and wide selection boundary.
   If the check report is not "The checks agree with the examples.", exit.
+  Check year candidate eligibility.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check year candidate order.
+  If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
