@@ -175,3 +175,23 @@ To keep a wide number for the sauce:
   Put "170141183460469231731687303715884105727" into a limit wide number.
   Reduce the wide number modulo the limit wide number.
   If the wide number is "0", put the limit wide number into the wide number.
+
+
+\ Both operands here must already be in the saved range 1..M.
+\ These two routines implement SAVE(a-b), including negative differences,
+\ without ever storing a negative decimal string.
+\ The first is the number being subtracted; the second receives the answer.
+To subtract a wide number from another wide number with sauce wrapping:
+  If the other wide number is less than the wide number,
+    wrap the sauce difference given the wide number and the other wide number; exit.
+  Subtract the wide number from the other wide number.
+  Keep the other wide number for the sauce.
+
+\ If the second operand b is smaller than the first operand a,
+\ then SAVE(b-a) is M-(a-b), since both operands are in 1..M.
+To wrap the sauce difference given a wide number and another wide number:
+  Put the wide number into a difference wide number.
+  Subtract the other wide number from the difference wide number.
+  Put "170141183460469231731687303715884105727" into a wrapped wide number.
+  Subtract the difference wide number from the wrapped wide number.
+  Put the wrapped wide number into the other wide number.
