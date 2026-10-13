@@ -44,8 +44,8 @@ def reject(source, run, label):
 def main():
     source, good = fixture()
     observed = audit.verify_run(good, source)
-    assert observed["verified_p_writes"] == 1
-    assert observed["verified_g_reads"] == 1
+    if observed["verified_p_writes"] != 1 or observed["verified_g_reads"] != 1:
+        raise AssertionError("valid physical p/g receipts not counted correctly")
     print("POSITIVE_PG_RECEIPTS_PASS")
 
     no_p = copy.deepcopy(good)
