@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""QA-only: Native BF98 executed straight instructions cannot rotate the IP.
+
+Synthetic tests run without PyFunge. Optional archive or output folder
+replays independent saved Native evidence, never certifying Stage 1.
+"""
+import copy
+import json
+import sys
+import zipfile
+from pathlib import Path
+import stage1_native_four_cell_full_postfork_trace_audit as audit
+
+
+def reject(source, run, name, prefork=False):
+    try:
+        audit.verify_run(run, source, require_prefork=prefork)
+    except AssertionError:
+        print("EXPECTED_STRAIGHT_VECTOR_REJECTION", name)
+        return
+    raise AssertionError("Forged nonturning Native IP direction accepted: " + name)
+
+
+def fixture():
+    row = b" " * 10 + b"p" + b" " * 9 + b"g" + b" " * 600
+    source = [row]
+    trace = [[i + 2, i, 0, 1, 0, row[i], 0] for i in range(514)]
+    run = dict(
+        status="normal", remaining_ips=0, steps=515,
+        gate=dict(step=1, original=0, executed=0),
+        complete_postfork_trace=trace,
+        first_512_motion=[e[1:5] for e in trace[:512]],
+        native_p_history=[dict(tick=12, coordinate=[700, 0], value="7")],
+        native_g_history=[dict(tick=22, coordinate=[701, 0],
+                               read_before="32", returned="32")],
+        total_p_writes=1, total_g_reads=1)
+    return source, run
+
+
+def synthetic():
+    source, run = fixture()
+    row = bytearray(source[0])
+    row[100] = ord("3")
+    source = [bytes(row)]
+    run["complete_postfork_trace"][100][5] = ord("3")
+    audit.verify_run(run, source)
+    altered = copy.deepcopy(run)
+    altered["complete_postfork_trace"][101][3:5] = [0, 1]
+    altered["first_512_motion"][101] = altered["complete_postfork_trace"][101][1:5]
+    reject(source, altered, "digit_spontaneous_turn")
+
+    source, run = fixture()
+    row = bytearray(source[0])
+    row[200:203] = b'"p"'
+    source = [bytes(row)]
+    for index, mode in ((200, 0), (201, 1), (202, 1)):
+        run["complete_postfork_trace"][index][5:7] = [row[index], mode]
+    audit.verify_run(run, source)
+    altered = copy.deepcopy(run)
+    altered["complete_postfork_trace"][202][3:5] = [0, 1]
+    altered["first_512_motion"][202] = altered["complete_postfork_trace"][202][1:5]
+    reject(source, altered, "quoted_p_spontaneous_turn")
+
+    source, run = fixture()
+    row = bytearray(source[0])
+    row[600:602] = b"0|"
+    source = [bytes(row)]
+    run["steps"] += 1
+    run["gate"]["step"] += 1
+    for e in run["complete_postfork_trace"]:
+        e[0] += 1
+    for e in run["native_p_history"] + run["native_g_history"]:
+        e["tick"] += 1
+    run["complete_prefork_trace"] = [
+        [1, 600, 0, 1, 0, ord("0"), 0],
+        [2, 601, 0, 1, 0, ord("|"), 0],
+    ]
+    audit.verify_run(run, source, require_prefork=True)
+    altered = copy.deepcopy(run)
+    altered["complete_prefork_trace"][1][3:5] = [0, 1]
+    reject(source, altered, "prefork_digit_spontaneous_turn", prefork=True)
+    print("NATIVE_THREE_STRAIGHT_VECTOR_SYNTHETIC_CONTROLS_PASS")
+
+
+def historical(path):
+    path = Path(path)
+    if path.is_dir():
+        source = (path / "four_cell_candidate.b98").read_bytes().split(b"\n")
+        data = json.loads((path / "native_full_postfork_four_pairs.json").read_text())
+    else:
+        with zipfile.ZipFile(path) as z:
+            if z.testzip() is not None:
+                raise AssertionError("Native archive ZIP CRC failure")
+            source = z.read("four_cell_candidate.b98").split(b"\n")
+            data = json.loads(z.read("native_full_postfork_four_pairs.json"))
+    checks = []
+    for row in data["records"]:
+        for side in ("control", "forced"):
+            run = row[side]
+            audit.verify_run(run, source, require_gate_anchor=True)
+            transitions = sum(audit.straight_instruction(z[5], z[6])
+                              for z in run["complete_postfork_trace"][:-1])
+            checks.append((row["label"], side, transitions))
+    if len(checks) != 8 or min(x[2] for x in checks) <= 0:
+        raise AssertionError("Eight real Native nonturning paths not verified")
+    sample = copy.deepcopy(data["records"][0]["control"])
+    trace = sample["complete_postfork_trace"]
+    if trace[515][5] != ord("0"):
+        raise AssertionError("Historical actual digit witness changed")
+    prior = trace[516][3:5]
+    trace[516][3:5] = [prior[1], -prior[0]]
+    reject(source, sample, "historical_native_digit_turn")
+    print("NATIVE_EIGHT_HISTORICAL_NONTURNING_TRAJECTORIES_PASS",
+          sum(x[2] for x in checks))
+
+
+if __name__ == "__main__":
+    synthetic()
+    if len(sys.argv) == 2:
+        historical(sys.argv[1])
+    else:
+        print("HISTORICAL_NATIVE_NOT_SUPPLIED_SYNTHETIC_ONLY")
