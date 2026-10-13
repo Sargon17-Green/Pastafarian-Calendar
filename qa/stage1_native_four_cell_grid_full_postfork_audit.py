@@ -144,7 +144,7 @@ def main(root):
              len(run.get("complete_postfork_trace",[]))==row["complete_postfork_steps"] and
              len(run.get("complete_prefork_trace",[]))==row["complete_prefork_steps"],
              "Native full-route meta, oracle, physical p/g event totals drifted")
-        rec=full.verify_run(run,source,require_prefork=True)
+        rec=full.verify_run(run,source,require_prefork=True,require_gate_anchor=True)
         lit=sum(int((z[1],z[2])==(951,1337) and
                     z[5]==49 and z[6]==0) for z in run["complete_postfork_trace"])
         need(lit==row["literal_executions"],
@@ -175,7 +175,7 @@ def main(root):
     for name,mutator in bad:
         altered=copy.deepcopy(run)
         mutator(altered)
-        try:full.verify_run(altered,source,require_prefork=True)
+        try:full.verify_run(altered,source,require_prefork=True,require_gate_anchor=True)
         except AssertionError:pass
         else:raise AssertionError("forged actual Native full route accepted "+name)
     summary=dict(
