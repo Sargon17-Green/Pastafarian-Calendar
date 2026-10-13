@@ -36,28 +36,51 @@ To request another bounded gate step:
   Subtract 1 from the gate step budget's steps remaining.
 
 \ Move one step towards a positive gate index.
+\ Prepare both integer fields first; publish neither until the full
+\ sauce returns one canonical interval from 42 through 963 days.
 To move to the next positive gate:
   Request another bounded gate step.
   If the gate step budget's exhausted is 1, exit.
-  Put the gate walk's current index into a gap index number.
-  Add 1 to the gate walk's current index.
-  If the gap index number is not less than 0,
-    put the gate walk's current index into the gap index number.
-  Calculate a gate interval given the gap index number.
-  Add the gate inquiry's interval length to the gate walk's current position.
+  If the gate walk's current index is greater than or equal to 400000000,
+    put 1 into the gate step budget's exhausted; exit.
+  Put the gate walk's current index into a prospective positive index number.
+  Add 1 to the prospective positive index number.
+  Put the prospective positive index number into a positive gap index number.
+  If the gate walk's current index is less than 0,
+    put the gate walk's current index into the positive gap index number.
+  Calculate a gate interval given the positive gap index number.
+  If the gate inquiry's interval length is less than 42,
+    put 1 into the gate step budget's exhausted; exit.
+  If the gate inquiry's interval length is greater than 963,
+    put 1 into the gate step budget's exhausted; exit.
+  Put the gate walk's current position into a prospective positive day.
+  Add the gate inquiry's interval length to the prospective positive day.
+  Put the prospective positive index number into the gate walk's current index.
+  Put the prospective positive day into the gate walk's current position.
 
 \ When moving backwards from a positive gate, its outgoing interval
 \ is positiveGap(oldIndex), not a gap at the new smaller index.
 \ From zero and below, the interval belongs to the new negative index.
+\ Do not publish the new index or coordinate until the gap is valid.
 To move to the next negative gate:
   Request another bounded gate step.
   If the gate step budget's exhausted is 1, exit.
-  Put the gate walk's current index into a gap index number.
-  Subtract 1 from the gate walk's current index.
-  If the gap index number is not greater than 0,
-    put the gate walk's current index into the gap index number.
-  Calculate a gate interval given the gap index number.
-  Subtract the gate inquiry's interval length from the gate walk's current position.
+  If the gate walk's current index is less than or equal to -400000000,
+    put 1 into the gate step budget's exhausted; exit.
+  Put the gate walk's current index into a prospective negative index number.
+  Subtract 1 from the prospective negative index number.
+  Put the prospective negative index number into a negative gap index number.
+  If the gate walk's current index is greater than 0,
+    put the gate walk's current index into the negative gap index number.
+  Calculate a gate interval given the negative gap index number.
+  If the gate inquiry's interval length is less than 42,
+    put 1 into the gate step budget's exhausted; exit.
+  If the gate inquiry's interval length is greater than 963,
+    put 1 into the gate step budget's exhausted; exit.
+  Put the gate walk's current position into a prospective negative day.
+  Subtract the gate inquiry's interval length from the prospective negative day.
+  Put the prospective negative index number into the gate walk's current index.
+  Put the prospective negative day into the gate walk's current position.
 
 \ The signed index must fit CAL's native number type.
 \ Each step invokes the exact canonical sauce for its own day pair.
