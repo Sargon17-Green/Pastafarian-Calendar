@@ -1,0 +1,41 @@
+\ Changing the month lengths requires a fresh memo namespace.
+\ Each call to Count all possible month weavings rebuilds the month
+\ state and clears the previous cache. Alternating configurations must
+\ not reuse an old suffix count with the same remaining-count vector.
+\ Alternating ranks must never consume the input month lengths.
+
+To check changing month weaving configurations:
+  Prepare two synthetic months.
+  Count all possible month weavings.
+  If the weaving selection's total completions is not "20",
+    put "The first two-month total is wrong." into the check report; exit.
+  Put 1 into the weaving selection's preserve full weaving.
+  Put "20" into a configuration rank wide quantity.
+  Select a month weaving from the configuration rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "12221112",
+    put "The last two-month rank was selected incorrectly." into the check report; exit.
+  Prepare three synthetic months.
+  Count all possible month weavings.
+  If the weaving selection's total completions is not "1301",
+    put "The three-month total was polluted by the previous memo." into the check report; exit.
+  Put "1301" into the configuration rank wide quantity.
+  Select a month weaving from the configuration rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "123332211123",
+    put "Three-month unranking reused the two-month state." into the check report; exit.
+  Put "0" into the configuration rank wide quantity.
+  Select a month weaving from the configuration rank wide quantity.
+  If the weaving selection's selection success is not 0,
+    put "Invalid rank zero was accepted after a successful selection." into the check report; exit.
+  Prepare two synthetic months.
+  Count all possible month weavings.
+  If the weaving selection's total completions is not "20",
+    put "Returning to two months reused the three-month memo." into the check report; exit.
+  Put "10" into the configuration rank wide quantity.
+  Select a month weaving from the configuration rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "11222112",
+    put "Returning to two months produced a stale weaving." into the check report; exit.
+  If the weaving selection's recursion depth is not 0,
+    put "Repeated configurations leaked recursion depth." into the check report; exit.
