@@ -479,3 +479,26 @@ prawf yng nghynhyrchu; mae stream sauce yn
 fewnbwn allanol tan adeiladwr diferion gweledig.
 
 `LAST_COMPLETED_STAGE=26` hyd nes PASS CI brodorol.
+
+
+## Ardystiad brodorol Cam 27 — COMPLETE
+
+Ar commit `b7f514d7c3c2526ae11472454a946d7b9ba5e6f6` llwyddodd GitHub Actions
+[`38430144336`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38430144336),
+swydd Kotlin `115409873362`, gyda Kotlin 1.9.0/JDK 21.
+Gwiriwyd **51 marc** yn uniongyrchol yn log y swydd:
+pob cam 1–26 yn PASS; 1,844 gap cywir GREEN a
+1,844 hen gap RED wedi'u cadw; 8 ffin rejection
+(8 GREEN, 7 legacy RED, 1 MATCH damweiniol);
+11,064 BigInteger GREEN, 11,064 hen RED, 442
+BigInteger rejection GREEN gyda'r trace gyfan;
+gwerthoedd naturiol positif/negatif, BOOT/replay,
+perchnogaeth a'r holl lwybrau blaenorol yn PASS.
+Gwelwyd `STAGE27_FULL_NATIVE_GREEN`; gorffennodd
+Kotlin a swydd cloi enwau yn SUCCESS.
+
+**`LAST_COMPLETED_STAGE=27`**. Cam 28
+(`DISCOVERY 14`) yw'r nesaf, heb ei ddechrau.
+Cedwir `LegacyGateGapRankAdapter.oldGateGapWithoutRank1`
+yn fyw ac anghywir; mae'r stream sauce yn parhau'n
+fewnbwn allanol tan adeiladwr diferion gweledig.
