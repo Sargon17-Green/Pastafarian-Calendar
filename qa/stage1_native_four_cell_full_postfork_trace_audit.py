@@ -240,6 +240,12 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
             need(stringmode==0 and byte==ord(kind),
                  "Native claimed p/g event does not match executed opcode/mode")
             if kind=="p":current[event[2]]=int(event[3]["value"])
+    # This pinned single-IP four-cell candidate terminates by executing @.
+    # A forged trace ending after '.', a digit, etc. must not be accepted
+    # merely because its untrusted metadata claims zero remaining IPs.
+    # The byte was independently replayed from mutable Funge-space above.
+    need(trace[-1][5]==ord("@") and trace[-1][6]==0,
+         "Native complete route ended without executed terminating @")
     need(pending_pg_motion is None,
          "Native supposedly terminated directly after nonterminating p/g instruction")
     need(len(beyond512)>0,"full Native run added no states outside the prior window")
