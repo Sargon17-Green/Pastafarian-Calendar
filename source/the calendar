@@ -108,6 +108,8 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the English complete date text.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the public date report.
+  If the check report is not "The checks agree with the examples.", exit.
   Check two-month weaving.
   If the check report is not "The checks agree with the examples.", exit.
   Check three-month weaving.
