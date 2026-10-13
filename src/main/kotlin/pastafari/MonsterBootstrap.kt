@@ -199,7 +199,21 @@ data class BaseMonsterContext(
     var discovery13WrongGap: Int? = null,
     var discovery13OneShotReads: Int = 0,
     var discovery13RejectedCandidatesProcessed: Int = 0,
-    var discovery13InvocationCount: Int = 0
+    var discovery13InvocationCount: Int = 0,
+    var patch13GateIndex: ExactInt? = null,
+    var patch13StreamFirst: ExactInt? = null,
+    var patch13DirectionStep: Int? = null,
+    var patch13Outcome: GateGapPatchOutcome? = null,
+    var patch13CorrectedRank1: Int? = null,
+    var patch13CorrectedGateGap: Int? = null,
+    var patch13AcceptedAnswer: ExactInt? = null,
+    var patch13RejectedCandidates: List<ExactInt>? = null,
+    var patch13LegacyRank0Calls: Int = 0,
+    var patch13CorrectedRankCalls: Int = 0,
+    var patch13AcceptedAnswerReads: Int = 0,
+    var patch13RejectionChecks: Int = 0,
+    var patch13Applied: Boolean = false,
+    var patch13InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -284,7 +298,9 @@ class MonsterBootstrapManager(
     val positionalNeighborPatchWrapper: PositionalNeighborPatchWrapper =
         PositionalNeighborPatchWrapper(legacyNumericNeighborAdapter),
     val legacyGateGapRankAdapter: LegacyGateGapRankAdapter =
-        LegacyGateGapRankAdapter()
+        LegacyGateGapRankAdapter(),
+    val gateGapRankPatchWrapper: GateGapRankPatchWrapper =
+        GateGapRankPatchWrapper(legacyGateGapRankAdapter)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -458,6 +474,51 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("PATCH_13") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_PATCH13_CONTEXT_NOT_READY")
+            val index = context.patch13GateIndex
+                ?: throw MonsterValidationException("E_PATCH13_NO_INDEX")
+            val first = context.patch13StreamFirst
+                ?: throw MonsterValidationException("E_PATCH13_NO_FIRST")
+            val direction = context.patch13DirectionStep
+                ?: throw MonsterValidationException("E_PATCH13_NO_DIRECTION")
+            val outcome=gateGapRankPatchWrapper.patch(index,first,direction)
+            check(outcome.gateIndex==index &&
+                outcome.streamFirst==first &&
+                outcome.directionStep==direction &&
+                outcome.correctedRank1 in 1..922 &&
+                outcome.correctedGateGap==41+outcome.correctedRank1 &&
+                outcome.correctedGateGap in 42..963 &&
+                outcome.rejectedCandidates.size==outcome.acceptedAnswerIndex0 &&
+                outcome.acceptedAnswerReads==outcome.acceptedAnswerIndex0+1 &&
+                outcome.rejectionChecks==outcome.acceptedAnswerReads &&
+                outcome.legacyRank0Calls==1 &&
+                outcome.correctedRankCalls==1 &&
+                outcome.legacyRead.gateGapWrong==
+                    41+outcome.legacyRead.rank0Wrong &&
+                outcome.legacyRead.oneShotReads==1 &&
+                outcome.seal==1){"E_PATCH13_RESULT_SHAPE"}
+            context.patch13Outcome=outcome.copy(
+                rejectedCandidates=outcome.rejectedCandidates.toList())
+            context.patch13CorrectedRank1=outcome.correctedRank1
+            context.patch13CorrectedGateGap=outcome.correctedGateGap
+            context.patch13AcceptedAnswer=outcome.acceptedAnswer
+            context.patch13RejectedCandidates=outcome.rejectedCandidates.toList()
+            context.patch13LegacyRank0Calls=1
+            context.patch13CorrectedRankCalls=1
+            context.patch13AcceptedAnswerReads=outcome.acceptedAnswerReads
+            context.patch13RejectionChecks=outcome.rejectionChecks
+            context.patch13Applied=true
+            context.patch13InvocationCount=1
+            context.branchTrace.add("PATCH_13")
+            context.diagnostics.add("PATCH_13_UNRANK1_AND_REJECTION")
+            context.status="PATCHED_GATE_GAP_RANK1"
+            metrics.bump("patch13.legacy.gate.gap.calls")
+            metrics.bump("patch13.corrected.gate.gap.calls")
+            metrics.bump("patch13.applied")
         }
         dispatcher.register("DISCOVERY_13") { context ->
             validation.requireBootstrapContext(context)
@@ -1208,6 +1269,27 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 27: galw'r hen rank0 cyn gwir unrank1 â rejection. */
+    fun applyGateGapRankPatch(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        gateIndex: ExactInt, streamFirst: ExactInt,
+        directionStep: Int
+    ): BaseMonsterContext {
+        val context=prepare(calculationDay,targetDay)
+        context.patch13GateIndex=gateIndex
+        context.patch13StreamFirst=streamFirst
+        context.patch13DirectionStep=directionStep
+        context.phase="PATCH_13"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch(e:MonsterValidationException) {
+            throw e
+        } catch(e:Throwable) {
+            throw errors.wrap("E_PATCH13_WRAP",e)
         }
     }
 

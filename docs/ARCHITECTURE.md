@@ -457,3 +457,25 @@ ac roedd y swydd Kotlin a'r swydd cloi enwau yn SUCCESS.
 Cedwir `oldGateGapWithoutRank1` yn fyw ac
 yn anghywir; mae'r stream sauce yn fewnbwn allanol
 tan adeiladwr y diferion gweledig diweddarach.
+
+
+## Cam 27 — PATCH 13: cywiro gap giât ag unrank1/rejection
+
+Mae `GateGapRankPatchWrapper.patch` yn galw'r hen
+`oldGateGapWithoutRank1` yn gyntaf ac yn cadw
+y rank0 anghywir a'r gap 41..962. Wedyn mae'n
+derbyn `answerAt(k)` cyntaf sy'n bodloni
+`x <= floor(M/922)*922`, gan gofnodi pob
+rejection a symud yn y cyfeiriad cywir gyda wrap
+mod M. Cyfrifir `rank1=1+((x-1) mod 922)`
+a `gap=41+rank1`, yn 42..963.
+
+Mae'r profion yn mynnu 1,844 GREEN a 1,844
+legacy RED, 8 ffin rejection (8 GREEN, 7 hen
+RED, 1 MATCH), 11,064 BigInteger GREEN, 442
+rejection pellach BigInteger, BOOT/replay a
+holl atchweliadau Camau 1–26. Nid oes oracl
+prawf yng nghynhyrchu; mae stream sauce yn
+fewnbwn allanol tan adeiladwr diferion gweledig.
+
+`LAST_COMPLETED_STAGE=26` hyd nes PASS CI brodorol.

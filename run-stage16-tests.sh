@@ -37,7 +37,7 @@ if ! kotlinc \
   src/main/kotlin/pastafari/LegacyPriorAdapter.kt \
   src/main/kotlin/pastafari/PriorPatchWrapper.kt \
   src/main/kotlin/pastafari/LegacyGrindTableAdapter.kt \
-  src/main/kotlin/pastafari/LegacyPermutationOrderAdapter.kt src/main/kotlin/pastafari/LegacyFixedPourAdapter.kt src/main/kotlin/pastafari/LegacyInPlaceBowlAdapter.kt src/main/kotlin/pastafari/BowlSnapshotPatchWrapper.kt src/main/kotlin/pastafari/LegacyCachedStirAdapter.kt src/main/kotlin/pastafari/FreshStirPatchWrapper.kt src/main/kotlin/pastafari/LegacyNumericNeighborAdapter.kt src/main/kotlin/pastafari/PositionalNeighborPatchWrapper.kt src/main/kotlin/pastafari/LegacyGateGapRankAdapter.kt \
+  src/main/kotlin/pastafari/LegacyPermutationOrderAdapter.kt src/main/kotlin/pastafari/LegacyFixedPourAdapter.kt src/main/kotlin/pastafari/LegacyInPlaceBowlAdapter.kt src/main/kotlin/pastafari/BowlSnapshotPatchWrapper.kt src/main/kotlin/pastafari/LegacyCachedStirAdapter.kt src/main/kotlin/pastafari/FreshStirPatchWrapper.kt src/main/kotlin/pastafari/LegacyNumericNeighborAdapter.kt src/main/kotlin/pastafari/PositionalNeighborPatchWrapper.kt src/main/kotlin/pastafari/LegacyGateGapRankAdapter.kt src/main/kotlin/pastafari/GateGapRankPatchWrapper.kt \
   src/main/kotlin/pastafari/MonsterBootstrap.kt \
   src/test/kotlin/pastafari/NormativeCore.kt \
   src/test/kotlin/pastafari/NormativeCalendar.kt \

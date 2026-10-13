@@ -50,7 +50,7 @@ if ! kotlinc \
   src/main/kotlin/pastafari/FreshStirPatchWrapper.kt \
   src/main/kotlin/pastafari/LegacyNumericNeighborAdapter.kt \
   src/main/kotlin/pastafari/PositionalNeighborPatchWrapper.kt \
-  src/main/kotlin/pastafari/LegacyGateGapRankAdapter.kt \
+  src/main/kotlin/pastafari/LegacyGateGapRankAdapter.kt src/main/kotlin/pastafari/GateGapRankPatchWrapper.kt \
   src/main/kotlin/pastafari/MonsterBootstrap.kt \
   src/test/kotlin/pastafari/NormativeCore.kt \
   src/test/kotlin/pastafari/NormativeCalendar.kt \
