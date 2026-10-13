@@ -82,8 +82,23 @@ written in Plain English Programming:
   prepare one sauce for (c, first day of year) and select the cutlet
   count with bowl 2/seal 20 and the month count with bowl 3/seal 30.
   Fast tests cover the exact count ranges and extreme year lengths.
+- **the combination arithmetic** and **the combination checks**:
+  divide decimal integers by small positive integers without losing
+  remainder information, and calculate exact binomial coefficients.
+- **the cutlet partitions** and **the cutlet partition checks**:
+  count and unrank all positive gate-span compositions in
+  lexicographic order. If the calculation day coincides with an
+  internal gate, that gate is required as a cutlet boundary.
+  Combinatorial counts replace infeasible brute-force enumeration.
+- **the cutlet positions** and **the cutlet position checks**:
+  locate the requested day within the selected cutlet, using actual
+  variable-length gate intervals rather than assuming equal spans.
+- **the cutlet names** and **the cutlet name checks**:
+  choose K distinct names from the canonical 17 indices with
+  bowl 5 and seal 22. The selected name index is not necessarily the
+  ordinal position of its cutlet in the year.
 
-The source now includes **45 groups of checks**, some of which compare several
+The source now includes **52 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -106,8 +121,10 @@ use CAL's 32-bit number type and need wide-number replacements for extreme
 dates and gate indices.
 
 **Not yet built:** arbitrary-precision day coordinates and gate indices;
-the cutlet compositions, names and day positions; exact month-length
-compositions, weaving and names; and the five-part final Pastafarian date.
+exact month-length compositions, month weaving and names, and the final
+five-part Pastafarian date. Cutlet compositions, their distinct canonical
+names and the requested day within a cutlet are written in source but
+have not been compiled or executed by CAL.
 Year 5000, following/preceding year selection and the initial cutlet/month
 count choices are present as source but have not been compiled in CAL.
 The narrow and wide equal-choice mechanisms and gate/year-selection
@@ -192,7 +209,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English **program and check files** must be present when compiling. Select only those source files for CAL's file list: do **not** compile the extensionless `LICENSE` document, which is prose for people rather than program instructions. The ordinary `README.md` is likewise documentation, not source. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 45 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 52 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
