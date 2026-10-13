@@ -20,8 +20,10 @@
 \ The chosen weaving is stored, not approximated by monthly ranges.
 \
 \ LIMITATION: sparse memoization can still use prohibitive memory for
-\ 47 months and long years. This is an exact reference implementation,
-\ not an optimized large-instance release. CAL compilation is unverified.
+\ 47 months and long years. A strict 4096-state limit causes an explicit
+\ failure instead of a fabricated date or unbounded memory growth.
+\ This is an exact reference implementation, not an optimized
+\ large-instance release. CAL compilation is unverified.
 
 A woven month state is a thing with
   a number called ordinal,
@@ -53,6 +55,9 @@ A weaving selection has
   a number called position,
   a number called target position,
   a number called selection success,
+  a number called memo entry count,
+  a number called memo entry limit,
+  a number called resource limit reached,
   a wide quantity called total completions,
   a wide quantity called current rank,
   a string called state signature.
@@ -147,15 +152,20 @@ To find a cached weaving result given a string:
   Repeat.
 
 To save weaving completions given a string and a wide quantity:
+  If the weaving selection's memo entry count is not less than the weaving selection's memo entry limit,
+    put 1 into the weaving selection's resource limit reached; exit.
   Allocate memory for a weave cached result.
   Put the string into the weave cached result's signature.
   Put the wide quantity into the weave cached result's completions.
   Append the weave cached result to the weave completion cache.
+  Add 1 to the weaving selection's memo entry count.
 
 \ Recursion uses local candidate number and local sum. The mutable
 \ remaining-count vector is always restored before moving to the
 \ next candidate. Cached zero counts are legitimate as well.
 To count weaving completions into a wide quantity:
+  If the weaving selection's resource limit reached is 1,
+    put "0" into the wide quantity; exit.
   If the weaving selection's days remaining is 0,
     put "1" into the wide quantity; exit.
   Make the weaving state signature.
@@ -171,7 +181,11 @@ To count weaving completions into a wide quantity:
     Add the child wide quantity to the sum wide quantity.
     Add 1 to the candidate month number.
   Repeat.
+  If the weaving selection's resource limit reached is 1,
+    put "0" into the wide quantity; exit.
   Save weaving completions given the saved signature string and the sum wide quantity.
+  If the weaving selection's resource limit reached is 1,
+    put "0" into the wide quantity; exit.
   Put the sum wide quantity into the wide quantity.
 
 \ Decrease the candidate's count, ask recursively, then restore both
@@ -193,7 +207,13 @@ To count the eligible candidate's weaving suffix given a number into a wide quan
 To count all possible month weavings:
   Prepare the woven month states.
   Destroy the weave completion cache.
+  Put 0 into the weaving selection's selection success.
+  Put 0 into the weaving selection's resource limit reached.
+  Put 0 into the weaving selection's memo entry count.
+  Put 4096 into the weaving selection's memo entry limit.
   Count weaving completions into the weaving selection's total completions.
+  If the weaving selection's resource limit reached is 1,
+    put "0" into the weaving selection's total completions.
 
 To store the accepted woven day:
   Allocate memory for a woven day record.
