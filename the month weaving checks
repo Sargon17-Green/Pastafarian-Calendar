@@ -1,0 +1,109 @@
+\ Independent month-weaving examples for the canonical endpoint rules.
+\ Month lengths 4,4 give twenty legal words, not seventy.
+\ Month lengths 4,4,4 give exactly 1301 legal words.
+\ Month lengths 4,4,4,4 give 177260 legal words.
+\ Each result was enumerated or counted by an independent recurrence.
+\ CAL has not yet compiled or executed these checks.
+
+The woven test text is a string.
+
+\ Rebuild a synthetic month-length list without needing a year sauce.
+To add a synthetic month with a number:
+  Allocate memory for a month length record.
+  Put the number into the month length record's days in month.
+  Append the month length record to the chosen month lengths.
+
+To prepare two synthetic months:
+  Destroy the chosen month lengths.
+  Put 2 into the selected month count.
+  Add a synthetic month with 4.
+  Add a synthetic month with 4.
+
+To prepare three synthetic months:
+  Prepare two synthetic months.
+  Put 3 into the selected month count.
+  Add a synthetic month with 4.
+
+To prepare four synthetic months:
+  Prepare three synthetic months.
+  Put 4 into the selected month count.
+  Add a synthetic month with 4.
+
+\ The test words use month ORDINALS, not name indices.
+To write the selected weaving as test text:
+  Put "" into the woven test text.
+  Put the chosen woven days' first into an examined woven day record.
+  Loop.
+    If the examined woven day record is nil, break.
+    Convert the examined woven day record's month ordinal to a digit string.
+    Append the digit string to the woven test text.
+    Put the examined woven day record's next into the examined woven day record.
+  Repeat.
+
+To check two-month weaving:
+  Prepare two synthetic months.
+  Count all possible month weavings.
+  If the weaving selection's total completions is not "20",
+    put "Four-and-four months should admit 20 eligible weavings." into the check report; exit.
+  Put 5 into the weaving selection's target position.
+  Put "1" into a weaving rank wide quantity.
+  Select a month weaving from the weaving rank wide quantity.
+  If the weaving selection's selection success is not 1,
+    put "The first two-month weaving was rejected." into the check report; exit.
+  Write the selected weaving as test text.
+  If the woven test text is not "11112222",
+    put "The first two-month weaving differs from its reference." into the check report; exit.
+  Put "10" into the weaving rank wide quantity.
+  Select a month weaving from the weaving rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "11222112",
+    put "The middle two-month weaving differs from its reference." into the check report; exit.
+  If the woven requested month ordinal is not 2,
+    put "The middle weave selected the wrong target month." into the check report; exit.
+  If the woven requested day in month is not 3,
+    put "The middle weave selected the wrong day within its month." into the check report; exit.
+  Put "20" into the weaving rank wide quantity.
+  Select a month weaving from the weaving rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "12221112",
+    put "The final two-month weaving differs from its reference." into the check report; exit.
+
+To check three-month weaving:
+  Prepare three synthetic months.
+  Count all possible month weavings.
+  If the weaving selection's total completions is not "1301",
+    put "Four-four-four weaving has the wrong total." into the check report; exit.
+  Put 7 into the weaving selection's target position.
+  Put "1" into a weaving rank wide quantity.
+  Select a month weaving from the weaving rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "111122223333",
+    put "The first three-month weaving differs from its reference." into the check report; exit.
+  Put "651" into the weaving rank wide quantity.
+  Select a month weaving from the weaving rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "121232131323",
+    put "The middle three-month weaving differs from its reference." into the check report; exit.
+  If the woven requested month ordinal is not 1,
+    put "The middle three-month weaving has the wrong month on day seven." into the check report; exit.
+  If the woven requested day in month is not 3,
+    put "The middle three-month weaving has the wrong intra-month day." into the check report; exit.
+  Put "1301" into the weaving rank wide quantity.
+  Select a month weaving from the weaving rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "123332211123",
+    put "The last three-month weaving differs from its reference." into the check report; exit.
+  Put "1302" into the weaving rank wide quantity.
+  Select a month weaving from the weaving rank wide quantity.
+  If the weaving selection's selection success is not 0,
+    put "An out-of-range month weaving rank was accepted." into the check report; exit.
+  Put "0" into the weaving rank wide quantity.
+  Select a month weaving from the weaving rank wide quantity.
+  If the weaving selection's selection success is not 0,
+    put "Month weaving rank zero was accepted." into the check report; exit.
+
+To check four-month weaving count:
+  Prepare four synthetic months.
+  Count all possible month weavings.
+  If the weaving selection's total completions is not "177260",
+    put "Four months with four days each have the wrong weaving count." into the check report; exit.
