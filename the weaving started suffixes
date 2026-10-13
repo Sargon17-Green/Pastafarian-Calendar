@@ -1,0 +1,62 @@
+\ Exact direct count after every month has appeared at least once.
+\ Once all months have started, the first-occurrence condition is
+\ satisfied forever. Only the order of their FINAL occurrences remains.
+\
+\ In any unfinished suffix, list positive remaining counts of months
+\ in increasing original month order as r1,r2,...,rk.
+\ S_j = r1+...+r_j.
+\ The number of completions whose last occurrences retain the order
+\ 1,2,...,k is exactly:
+\   product(j=1..k) C(S_j-1,r_j-1).
+\
+\ Proof: reverse each completed suffix. The final-occurrence condition
+\ becomes first-appearance order k,k-1,...,1. Among permutations of a
+\ multiset the first NEW symbol follows size-biased ordering; the
+\ probability for that prescribed order is
+\   product(j=k..2) r_j/S_j.
+\ Multiplication by the multinomial coefficient simplifies into the
+\ integer binomial product above. The formula remains valid with any
+\ earlier months already fully exhausted.
+\
+\ This shortcut works with arbitrarily many previously started months.
+\ It needs NO recursive calls, NO memo entries and NO nested loops.
+\ The binomial coefficient calculator preserves arbitrary precision.
+\ The shortcut never applies if even one month has not yet started.
+\ CAL compilation and execution remain unverified.
+
+A started weaving suffix has
+  a number called available,
+  a number called accumulated remaining,
+  a number called binomial top,
+  a number called binomial bottom,
+  a wide quantity called completions.
+
+The started weaving suffix is a started weaving suffix.
+The started weaving month is a woven month state.
+
+To count an all-started weaving suffix:
+  Put 0 into the started weaving suffix's available.
+  Inspect the woven month status.
+  If the weaving selection's already started is not the selected month count, exit.
+  Put 1 into the started weaving suffix's available.
+  Put 0 into the started weaving suffix's accumulated remaining.
+  Put "1" into the started weaving suffix's completions.
+  Put the woven month states' first into the started weaving month.
+  Loop.
+    If the started weaving month is nil, break.
+    If the started weaving month's remaining days is greater than 0,
+      accumulate the started weaving month.
+    Put the started weaving month's next into the started weaving month.
+  Repeat.
+
+\ For one unfinished month this factor is C(r-1,r-1) = 1.
+\ Later factors preserve the exact last-occurrence ordering.
+To accumulate the started weaving month:
+  Put the started weaving suffix's accumulated remaining into the started weaving suffix's binomial top.
+  Add the started weaving month's remaining days to the started weaving suffix's binomial top.
+  Subtract 1 from the started weaving suffix's binomial top.
+  Put the started weaving month's remaining days into the started weaving suffix's binomial bottom.
+  Subtract 1 from the started weaving suffix's binomial bottom.
+  Calculate a binomial coefficient given the started weaving suffix's binomial top and the started weaving suffix's binomial bottom.
+  Multiply the binomial result by the started weaving suffix's completions.
+  Add the started weaving month's remaining days to the started weaving suffix's accumulated remaining.
