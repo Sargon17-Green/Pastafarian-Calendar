@@ -33,7 +33,7 @@ To normalize a wide quantity:
 
 \ Compare two positive or zero whole numbers, not their textual spelling.
 \ A shorter normalized decimal number is always smaller.
-To decide if a wide quantity is less than another wide quantity:
+To decide if a wide quantity is numerically smaller than another wide quantity:
   If the wide quantity's length is less than the other wide quantity's length, say yes.
   If the wide quantity's length is greater than the other wide quantity's length, say no.
   Put the wide quantity into a left string.
@@ -145,7 +145,7 @@ To multiply a wide quantity by another wide quantity:
 \ The long-division caller guarantees that this takes no more than 9 steps.
 To remove copies of a wide quantity from another wide quantity:
   Loop.
-    If the other wide quantity is less than the wide quantity, break.
+    If the other wide quantity is numerically smaller than the wide quantity, break.
     Subtract the wide quantity from the other wide quantity.
   Repeat.
 
@@ -182,7 +182,7 @@ To keep a wide quantity for the sauce:
 \ without ever storing a negative decimal string.
 \ The first is the number being subtracted; the second receives the answer.
 To subtract a wide quantity from another wide quantity with sauce wrapping:
-  If the other wide quantity is less than the wide quantity,
+  If the other wide quantity is numerically smaller than the wide quantity,
     wrap the sauce difference given the wide quantity and the other wide quantity; exit.
   Subtract the wide quantity from the other wide quantity.
   Keep the other wide quantity for the sauce.
