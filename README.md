@@ -57,8 +57,11 @@ written in Plain English Programming:
   interval selected by seal 1 in bowl 1 using the sauce made for
   (Foundation, Foundation+n), including negative n. Independent
   reference calculations give 345 days for n=1 and 503 for n=-1.
+- **the gate walk** and **the gate walk checks**: start at gate zero,
+  Foundation Day, and accumulate the exact chosen intervals in either
+  direction; check the adjacent positions and the zero anchor.
 
-The source now includes **33 groups of checks**, some of which compare several
+The source now includes **34 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -80,10 +83,11 @@ The current first-stage day-count conversion and signed gate indexing still
 use CAL's 32-bit number type and need wide-number replacements for extreme
 dates and gate indices.
 
-**Not yet built:** wide equal choice when N exceeds M, integration of
-individual gate intervals into the full gate sequence, year selection,
+**Not yet built:** wide equal choice when N exceeds M, unbounded-date and large-index support for
+the new gate walk, year selection,
 cutlets, months, and a complete Pastafarian date.
-The narrow sealed-answer mechanism is written, but still untested in CAL.
+The narrow sealed-answer and bidirectional gate-walk mechanisms are written,
+but still untested in CAL.
 No shortcuts, approximate answers, or hard-coded final dates are allowed.
 
 ## The idea, explained simply
@@ -164,7 +168,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English source files in this branch must be present when compiling. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 33 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 34 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
