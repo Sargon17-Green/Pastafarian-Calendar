@@ -110,6 +110,14 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the public date report.
   If the check report is not "The checks agree with the examples.", exit.
+  Check signed wide day normalization.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check signed wide day additions.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check signed wide day subtractions.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check signed wide day order.
+  If the check report is not "The checks agree with the examples.", exit.
   Check two-month weaving.
   If the check report is not "The checks agree with the examples.", exit.
   Check three-month weaving.
