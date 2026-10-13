@@ -17,7 +17,7 @@ To take the last decimal digit from a string into a number:
 
 \ Turn a small number from 0 to 9 into its printable decimal character.
 To prepend a number to a string:
-  Put the decimal digit number into another number.
+  Put the number into another number.
   Add 48 to the other number.
   Put the other number into a byte.
   Prepend the byte to the string.
@@ -102,7 +102,7 @@ To scale a wide quantity by a number:
   Loop.
     If the remaining string is blank, break.
     Take the last decimal digit from the remaining string into a digit number.
-    Put the digit number times the decimal digit number plus the carry number into a column number.
+    Put the digit number times the number plus the carry number into a column number.
     Divide the column number by 10 giving a quotient number and a remainder number.
     Put the quotient number into the carry number.
     Prepend the remainder number to the product string.
