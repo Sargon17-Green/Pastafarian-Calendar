@@ -122,6 +122,8 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check immense wide day counters.
   If the check report is not "The checks agree with the examples.", exit.
+  Check native and wide counter agreement.
+  If the check report is not "The checks agree with the examples.", exit.
   Check two-month weaving.
   If the check report is not "The checks agree with the examples.", exit.
   Check three-month weaving.
