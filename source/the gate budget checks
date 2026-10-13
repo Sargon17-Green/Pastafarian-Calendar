@@ -1,0 +1,30 @@
+\ Resource-limit tests for exact gate walking.
+\ A full gate interval invokes a complete sauce. To avoid an
+\ effectively endless scan toward distant coordinates, each
+\ user-level year search has at most 1024 gate-gap calculations.
+\ These synthetic checks exhaust the limit BEFORE the sauce call;
+\ they do not have to compute hundreds of actual gate intervals.
+\ Moving from a blocked gate must not alter its index or position.
+
+To check the exhausted gate work budget:
+  Begin bounded gate walking.
+  Put 0 into the gate step budget's steps remaining.
+  Put 0 into the gate walk's current index.
+  Put -15055671 into the gate walk's current position.
+  Move to the next positive gate.
+  If the gate step budget's exhausted is not 1,
+    put "A positive gate move ignored the exhausted gate budget." into the check report; exit.
+  If the gate walk's current index is not 0,
+    put "A blocked positive gate move changed the index." into the check report; exit.
+  If the gate walk's current position is not -15055671,
+    put "A blocked positive gate move changed the day." into the check report; exit.
+  Move to the next negative gate.
+  If the gate walk's current index is not 0,
+    put "A blocked negative gate move changed the index." into the check report; exit.
+  If the gate walk's current position is not -15055671,
+    put "A blocked negative gate move changed the day." into the check report; exit.
+  Begin bounded gate walking.
+  If the gate step budget's exhausted is not 0,
+    put "A fresh gate query inherited exhausted status." into the check report; exit.
+  If the gate step budget's steps remaining is not 1024,
+    put "A fresh gate query did not restore its bounded allowance." into the check report; exit.
