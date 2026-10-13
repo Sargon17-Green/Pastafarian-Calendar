@@ -1,0 +1,90 @@
+\ Exact closed-form weave counts when at most two months remain.
+\ A suffix can contain only unfinished months, because all other
+\ month counts are already zero. Their ordinal identities are kept.
+\
+\ Zero unfinished months: exactly one empty suffix.
+\ One unfinished month: exactly one uniform suffix.
+\ Two unfinished months i<j with a remaining days, b remaining days:
+\   If i has not started, it must appear FIRST and j must appear LAST:
+\     C(a+b-2, a-1).
+\   If i has already started, only the final-occurrence restriction
+\   remains, so j must appear LAST:
+\     C(a+b-1, a).
+\ A state with j already started but i never started cannot be reached
+\ through any legal weaving; reject it rather than inventing a count.
+\
+\ This exact shortcut does not add an entry to the memoization cache.
+\ It does not replace the general recurrence for three or more months.
+\ No nested loop is used. CAL execution remains unverified.
+
+A short weaving suffix has
+  a number called completed,
+  a number called unfinished,
+  a number called first remaining,
+  a number called second remaining,
+  a number called first started,
+  a number called second started,
+  a wide quantity called completions.
+
+The short weaving suffix is a short weaving suffix.
+
+\ Record at most two positive remaining counts in ascending month order.
+To inspect a short weaving suffix:
+  Put 0 into the short weaving suffix's unfinished.
+  Put 1 into the short weaving suffix's completed.
+  Put the woven month states' first into a short month state.
+  Loop.
+    If the short month state is nil, break.
+    If the short month state's remaining days is greater than 0,
+      remember the unfinished short month.
+    If the short weaving suffix's unfinished is greater than 2,
+      put 0 into the short weaving suffix's completed; exit.
+    Put the short month state's next into the short month state.
+  Repeat.
+
+To remember the unfinished short month:
+  Add 1 to the short weaving suffix's unfinished.
+  If the short weaving suffix's unfinished is 1,
+    remember the first short month; exit.
+  If the short weaving suffix's unfinished is 2,
+    remember the second short month.
+
+To remember the first short month:
+  Put the short month state's remaining days into the short weaving suffix's first remaining.
+  Put 0 into the short weaving suffix's first started.
+  If the short month state's remaining days is less than the short month state's total days,
+    put 1 into the short weaving suffix's first started.
+
+To remember the second short month:
+  Put the short month state's remaining days into the short weaving suffix's second remaining.
+  Put 0 into the short weaving suffix's second started.
+  If the short month state's remaining days is less than the short month state's total days,
+    put 1 into the short weaving suffix's second started.
+
+\ If one or no months remain, the only legal continuation repeats
+\ the sole remaining month until all its days have been consumed.
+To count a short weaving suffix:
+  Inspect a short weaving suffix.
+  If the short weaving suffix's completed is 0, exit.
+  Put "1" into the short weaving suffix's completions.
+  If the short weaving suffix's unfinished is less than 2, exit.
+  If the short weaving suffix's first started is 0,
+    count an unstarted first month; exit.
+  Put the short weaving suffix's first remaining into a binomial top number.
+  Add the short weaving suffix's second remaining to the binomial top number.
+  Subtract 1 from the binomial top number.
+  Calculate a binomial coefficient given the binomial top number and the short weaving suffix's first remaining.
+  Put the binomial result into the short weaving suffix's completions.
+
+\ The lower-index month has not started. The higher-index month must
+\ also be unstarted, and the first/last letters are forced.
+To count an unstarted first month:
+  Put "0" into the short weaving suffix's completions.
+  If the short weaving suffix's second started is 1, exit.
+  Put the short weaving suffix's first remaining into a binomial top number.
+  Add the short weaving suffix's second remaining to the binomial top number.
+  Subtract 2 from the binomial top number.
+  Put the short weaving suffix's first remaining into a binomial bottom number.
+  Subtract 1 from the binomial bottom number.
+  Calculate a binomial coefficient given the binomial top number and the binomial bottom number.
+  Put the binomial result into the short weaving suffix's completions.
