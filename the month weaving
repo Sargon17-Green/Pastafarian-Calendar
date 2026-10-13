@@ -158,7 +158,7 @@ To save weaving completions given a string and a wide quantity:
   Allocate memory for a weave cached result.
   Put the string into the weave cached result's signature.
   Put the wide quantity into the weave cached result's completions.
-  Append the weave cached result to the weave completion cache.
+  Prepend the weave cached result to the weave completion cache.
   Add 1 to the weaving selection's memo entry count.
 
 \ Recursion uses local candidate number and local sum. The mutable
