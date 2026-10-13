@@ -23,6 +23,7 @@ local StirPatch = require("stir_patch")
 local LegacyResetChain = require("legacy_reset_chain")
 local BowlChainPatch = require("bowl_chain_patch")
 local LegacyFixedNeighbor = require("legacy_fixed_neighbor")
+local NeighborPatch = require("neighbor_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -336,8 +337,8 @@ end
 
 -- DISCOVERY 12: li lòd 46 gout korije yo, men chwazi vwazen pa id fiks.
 function S.nextBowlSpaghetti(drops,stoneRows,initialBowls,queriedId)
-    local fixed=LegacyFixedNeighbor.execute(drops,stoneRows,initialBowls,queriedId)
-    return fixed
+    local corrected=NeighborPatch.execute(drops,stoneRows,initialBowls,queriedId)
+    return corrected
 end
 
 function S.legacyFixedNeighborProbe(drops,stoneRows,initialBowls,queriedId)
@@ -375,8 +376,42 @@ function S.visibleFixedNeighborSpaghetti(calculationDay,targetDay,queriedId)
     return fixed
 end
 
+-- PATCH 12 ekspoze nwayo, legacy ak lòd gout 46 san chanje istorik la.
+function S.neighborPatchProbe(drops,stoneRows,initialBowls,queriedId)
+    return NeighborPatch.execute(drops,stoneRows,initialBowls,queriedId)
+end
+
+function S.nextInDrop46OrderProbe(order,queriedId)
+    return NeighborPatch.nextInOrder(order,queriedId)
+end
+
+function S.visibleNeighborPatchProbe(calculationDay,targetDay,queriedId)
+    local bowls=LegacyFixedPours.initialBowls(calculationDay,targetDay)
+    local rocks=StonePatch.buildPatchedTable()
+    local drops,stones,store,contexts={},{},{},{}
+    for i=1,46 do
+        local drop,child=S.visibleDropSpaghetti(calculationDay,targetDay,i,store)
+        assert(child.status=="PATCH_VISIBLE_COMPLETE" and child.completedGrinds==11,
+            "PATCH 12: gout vizib PATCH 07 pa konplè")
+        drops[i]=BigInt.from(drop)
+        store[i]=BigInt.from(drop)
+        stones[i]=rocks[i]
+        contexts[i]=child
+    end
+    local corrected,context=NeighborPatch.execute(drops,stones,bowls,queriedId)
+    context.visibleDropContexts=contexts
+    context.visibleDropCount=46
+    context.metrics["patch12.visible.calls"]=1
+    return corrected,context
+end
+
+function S.visibleNeighborSpaghetti(calculationDay,targetDay,queriedId)
+    local nextId=S.visibleNeighborPatchProbe(calculationDay,targetDay,queriedId)
+    return nextId
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 24", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 25", 0)
 end
 
 return S

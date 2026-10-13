@@ -14,7 +14,8 @@ assert(src:find('context.stage23SemanticState=copyData(context.semanticState)',1
 assert(facade:find('function S.nextBowlSpaghetti(',1,true))
 assert(facade:find('function S.visibleFixedNeighborProbe(',1,true))
 assert(chain:find('current=after',1,true))
-for _,s in ipairs({src,facade}) do
+-- Kadna a aplike sou modil istorik Stage 24; facade a grandi nan Stage 25.
+for _,s in ipairs({src}) do
  for _,word in ipairs({"normative_oracle","postStir12","vaultOld",
       "orderAt46Latch","pendingBowls","neighborPatch","fixedNeighborPatch"}) do
    assert(not s:find(word,1,true),"Etap 25+ antre twò bonè: "..word)
