@@ -1,0 +1,107 @@
+\ The Pastafarian Calendar, in Plain English.
+\ This first part counts days. It does not yet give a complete calendar date.
+\ Read the README before using it.
+
+A calendar day is a number.
+A day count is a number.
+A day distance is a number.
+A day direction is a number.
+A day sum is a number.
+
+A calendar question has
+  a calendar day called calculation day,
+  a calendar day called requested day,
+  a day count called calculation count,
+  a day count called requested count,
+  a day distance,
+  a day sum,
+  a day direction.
+
+The example is a calendar question.
+
+To run:
+  Put -15055671 into the example's calculation day.
+  Put -15055671 into the example's requested day.
+  Answer the example.
+  Check the beginning.
+  Check the previous day.
+  Check the following day.
+
+\ We use the same continuous count of days as the original calendar.
+\ Foundation Day is the day at position -15055671.
+\ The rule below gives Foundation Day the number 1.
+\ Earlier days get even numbers. Later days get odd numbers.
+
+To number a calendar day into a day count:
+  If the calendar day is -15055671,
+    put 1 into the day count; exit.
+  If the calendar day is greater than -15055671,
+    put the calendar day plus 15055671 into the day count;
+    multiply the day count by 2;
+    add 1 to the day count;
+    exit.
+  Put -15055671 minus the calendar day into the day count.
+  Multiply the day count by 2.
+
+\ Every calculation asks about two days.
+\ The distance includes both days. It is 1 when the days are equal.
+
+To answer a calendar question:
+  Number the calendar question's calculation day
+    into the calendar question's calculation count.
+  Number the calendar question's requested day
+    into the calendar question's requested count.
+  Put the calendar question's calculation count
+    into the calendar question's day sum.
+  Add the calendar question's requested count
+    to the calendar question's day sum.
+  If the calendar question's requested day
+    is greater than the calendar question's calculation day,
+    put the calendar question's requested day
+      minus the calendar question's calculation day
+      into the calendar question's day distance;
+    put 3 into the calendar question's day direction.
+  If the calendar question's requested day
+    is less than the calendar question's calculation day,
+    put the calendar question's calculation day
+      minus the calendar question's requested day
+      into the calendar question's day distance;
+    put 1 into the calendar question's day direction.
+  If the calendar question's requested day
+    is the calendar question's calculation day,
+    put 0 into the calendar question's day distance;
+    put 2 into the calendar question's day direction.
+  Add 1 to the calendar question's day distance.
+
+\ Checks use the fixed examples in the original rules.
+\ A failed check ends the program instead of hiding a wrong result.
+
+To check the beginning:
+  Put -15055671 into the example's calculation day.
+  Put -15055671 into the example's requested day.
+  Answer the example.
+  If the example's calculation count is not 1, exit.
+  If the example's requested count is not 1, exit.
+  If the example's day distance is not 1, exit.
+  If the example's day sum is not 2, exit.
+  If the example's day direction is not 2, exit.
+
+To check the previous day:
+  Put -15055671 into the example's calculation day.
+  Put -15055672 into the example's requested day.
+  Answer the example.
+  If the example's calculation count is not 1, exit.
+  If the example's requested count is not 2, exit.
+  If the example's day distance is not 2, exit.
+  If the example's day sum is not 3, exit.
+  If the example's day direction is not 1, exit.
+
+To check the following day:
+  Put -15055671 into the example's calculation day.
+  Put -15055670 into the example's requested day.
+  Answer the example.
+  If the example's calculation count is not 1, exit.
+  If the example's requested count is not 3, exit.
+  If the example's day distance is not 2, exit.
+  If the example's day sum is not 4, exit.
+  If the example's day direction is not 3, exit.
