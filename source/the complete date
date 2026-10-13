@@ -45,8 +45,10 @@ To calculate a complete date for a calendar day and another calendar day:
     put "The requested day is outside the currently safe 32-bit CAL range." into the complete date error; exit.
   Find the year for the calendar day and the other calendar day.
   If the year selection success is not 1,
-    put "The requested Pastafarian year could not be selected." into the complete date error; exit.
+    put "The requested Pastafarian year could not be selected within available resources." into the complete date error; exit.
   Find the restricted internal cutlet boundary.
+  If the gate step budget's exhausted is 1,
+    put "The exact gate search exceeded the bounded calculation budget." into the complete date error; exit.
   Choose the structural counts.
   Choose the canonical cutlet partition.
   If the cutlet partition's valid selection is not 1,
@@ -55,6 +57,8 @@ To calculate a complete date for a calendar day and another calendar day:
   If the structure audit's passed is not 1,
     put "The chosen cutlet partition has an invalid span count or total." into the complete date error; exit.
   Resolve the cutlet of the target day.
+  If the gate step budget's exhausted is 1,
+    put "The cutlet gate traversal exceeded the bounded calculation budget." into the complete date error; exit.
   If the requested cutlet number is 0,
     put "The requested day was not found inside the cutlet partition." into the complete date error; exit.
   Choose the canonical cutlet names.
