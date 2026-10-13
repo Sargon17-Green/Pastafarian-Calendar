@@ -1,0 +1,134 @@
+\ Give each of K cutlets a distinct name from the canonical 17 names.
+\ Names use canonical indices 1..17 and their index is the displayed
+\ cutlet value. The cutlet's ORDINAL position is a different number.
+\ The first sequence in dictionary order is 1,2,...,K.
+\ The final sequence for K=3 is 17,16,15.
+\ There are 17!/(17-K)! possible sequences without repeated names.
+\ Bowl 5 and seal 22 choose one exact sequence from the shared year sauce.
+\ This source has not been compiled or executed by CAL.
+
+A cutlet name assignment is a thing with
+  a number called name index.
+
+The chosen cutlet names are some cutlet name assignments.
+The new cutlet name assignment is a cutlet name assignment.
+The examined cutlet name assignment is a cutlet name assignment.
+
+A cutlet name choice has
+  a number called names chosen,
+  a number called candidate index,
+  a number called used status,
+  a number called selection success,
+  a number called available names,
+  a number called names still required,
+  a wide quantity called total sequences,
+  a wide quantity called tail sequences,
+  a wide quantity called remaining rank.
+
+The cutlet name choice is a cutlet name choice.
+The requested cutlet name index is a number.
+
+\ Compute a falling factorial, not a power of seventeen.
+To count all cutlet name sequences:
+  Put "1" into the cutlet name choice's total sequences.
+  Put 17 into the cutlet name choice's available names.
+  Put the selected cutlet count into the cutlet name choice's names still required.
+  Loop.
+    If the cutlet name choice's names still required is 0, break.
+    Multiply the cutlet name choice's total sequences by the cutlet name choice's available names.
+    Subtract 1 from the cutlet name choice's available names.
+    Subtract 1 from the cutlet name choice's names still required.
+  Repeat.
+
+\ Once one more name has been fixed, the number of complete suffixes
+\ is P(17-chosen-1, K-chosen-1), independent of the candidate identity.
+To count cutlet name suffixes:
+  Put "1" into the cutlet name choice's tail sequences.
+  Put 17 into the cutlet name choice's available names.
+  Subtract the cutlet name choice's names chosen from the cutlet name choice's available names.
+  Subtract 1 from the cutlet name choice's available names.
+  Put the selected cutlet count into the cutlet name choice's names still required.
+  Subtract the cutlet name choice's names chosen from the cutlet name choice's names still required.
+  Subtract 1 from the cutlet name choice's names still required.
+  Loop.
+    If the cutlet name choice's names still required is 0, break.
+    Multiply the cutlet name choice's tail sequences by the cutlet name choice's available names.
+    Subtract 1 from the cutlet name choice's available names.
+    Subtract 1 from the cutlet name choice's names still required.
+  Repeat.
+
+\ Each candidate is inspected against the names already committed.
+To inspect the candidate cutlet name:
+  Put 0 into the cutlet name choice's used status.
+  Put the chosen cutlet names' first into the examined cutlet name assignment.
+  Loop.
+    If the examined cutlet name assignment is nil, break.
+    If the examined cutlet name assignment's name index is the cutlet name choice's candidate index,
+      put 1 into the cutlet name choice's used status; break.
+    Put the examined cutlet name assignment's next into the examined cutlet name assignment.
+  Repeat.
+
+To remember the new cutlet name:
+  Allocate memory for the new cutlet name assignment.
+  Put the cutlet name choice's candidate index into the new cutlet name assignment's name index.
+  Append the new cutlet name assignment to the chosen cutlet names.
+  Add 1 to the cutlet name choice's names chosen.
+
+\ Unranking skips an entire lexicographic block for every unused name
+\ that comes before the name at the requested one-based position.
+To select the next cutlet name:
+  Count cutlet name suffixes.
+  Put 1 into the cutlet name choice's candidate index.
+  Loop.
+    If the cutlet name choice's candidate index is greater than 17, break.
+    Inspect the candidate cutlet name.
+    If the cutlet name choice's used status is 1,
+      add 1 to the cutlet name choice's candidate index; repeat.
+    If the cutlet name choice's tail sequences is numerically smaller than the cutlet name choice's remaining rank,
+      subtract the cutlet name choice's tail sequences from the cutlet name choice's remaining rank;
+      add 1 to the cutlet name choice's candidate index;
+      repeat.
+    Remember the new cutlet name.
+    Break.
+  Repeat.
+
+To select cutlet names from a wide quantity:
+  Put 0 into the cutlet name choice's selection success.
+  Destroy the chosen cutlet names.
+  If the selected cutlet count is less than 1, exit.
+  If the selected cutlet count is greater than 17, exit.
+  If the wide quantity is "0", exit.
+  Count all cutlet name sequences.
+  If the cutlet name choice's total sequences is numerically smaller than the wide quantity, exit.
+  Put the wide quantity into the cutlet name choice's remaining rank.
+  Put 0 into the cutlet name choice's names chosen.
+  Loop.
+    If the cutlet name choice's names chosen is the selected cutlet count, break.
+    Select the next cutlet name.
+    If the cutlet name choice's candidate index is greater than 17, exit.
+  Repeat.
+  Put 1 into the cutlet name choice's selection success.
+
+\ Rebuild the SAME structure sauce if a gate walk has overwritten bowls.
+\ Do not choose again the cutlet partition or cutlet count.
+To choose the canonical cutlet names:
+  Prepare the year structure sauce.
+  Count all cutlet name sequences.
+  Put 5 into the seal inquiry's bowl identity.
+  Put 22 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  Choose an equal option given the cutlet name choice's total sequences.
+  Select cutlet names from the seal inquiry's selected quantity.
+
+\ Convert a cutlet ordinal position (1..K) into its canonical name.
+To read the requested cutlet name:
+  Put 0 into the requested cutlet name index.
+  Put 1 into a name ordinal number.
+  Put the chosen cutlet names' first into the examined cutlet name assignment.
+  Loop.
+    If the examined cutlet name assignment is nil, break.
+    If the name ordinal number is the requested cutlet number,
+      put the examined cutlet name assignment's name index into the requested cutlet name index; break.
+    Put the examined cutlet name assignment's next into the examined cutlet name assignment.
+    Add 1 to the name ordinal number.
+  Repeat.
