@@ -1,0 +1,213 @@
+\ The 46 visible drops, before any pouring into the six bowls.
+\ This implements section G of the canonical main-branch rules.
+\ At visible drop i, the old drop history gives i-1, i-3, and i-7.
+\ The first seven old values are the hidden drops, in reverse order.
+\ All calculations use exact wide quantities; no CAL number can overflow.
+\ CAL compilation and execution have not yet been verified.
+
+A drop history has
+  a wide quantity called first previous,
+  a wide quantity called second previous,
+  a wide quantity called third previous,
+  a wide quantity called fourth previous,
+  a wide quantity called fifth previous,
+  a wide quantity called sixth previous,
+  a wide quantity called seventh previous.
+
+A dough ingredient has
+  a wide quantity called stone,
+  a wide quantity called count,
+  a wide quantity called contribution.
+
+A visible calculation has
+  a number called index,
+  a number called grinding step,
+  a number called value factor,
+  a number called first previous factor,
+  a number called third previous factor,
+  a number called seventh previous factor,
+  a wide quantity called value,
+  a wide quantity called grinding stone.
+
+The previous drops are a drop history.
+The dough work is a dough ingredient.
+The visible work is a visible calculation.
+The last visible drop is a wide quantity.
+
+\ In the first visible drop, position 0 is hidden drop 1.
+\ Position -2 is hidden drop 3, and position -6 is hidden drop 7.
+To prepare the previous drops:
+  Put the hidden drops' first drop into the previous drops' first previous.
+  Put the hidden drops' second drop into the previous drops' second previous.
+  Put the hidden drops' third drop into the previous drops' third previous.
+  Put the hidden drops' fourth drop into the previous drops' fourth previous.
+  Put the hidden drops' fifth drop into the previous drops' fifth previous.
+  Put the hidden drops' sixth drop into the previous drops' sixth previous.
+  Put the hidden drops' seventh drop into the previous drops' seventh previous.
+
+\ Multiply one stone by its corresponding day count and add the result.
+To add the dough ingredient:
+  Put the dough work's stone into the dough work's contribution.
+  Multiply the dough work's count by the dough work's contribution.
+  Add the dough work's contribution to the visible work's value.
+
+\ The first dough is SAVE(wheat*c + barley*t + salt*distance +
+\ bitter*sum + red*direction + drop[i-1] + 3*drop[i-3] +
+\ 5*drop[i-7] + i). The same definition is used for all 46 drops.
+To make the visible dough:
+  Put "0" into the visible work's value.
+  Put the current stones' wheat into the dough work's stone.
+  Put the sauce input's calculation count into the dough work's count.
+  Add the dough ingredient.
+  Put the current stones' barley into the dough work's stone.
+  Put the sauce input's requested count into the dough work's count.
+  Add the dough ingredient.
+  Put the current stones' salt into the dough work's stone.
+  Put the sauce input's distance count into the dough work's count.
+  Add the dough ingredient.
+  Put the current stones' bitter into the dough work's stone.
+  Put the sauce input's sum count into the dough work's count.
+  Add the dough ingredient.
+  Put the current stones' red into the dough work's stone.
+  Put the sauce input's direction count into the dough work's count.
+  Add the dough ingredient.
+  Add the previous drops' first previous to the visible work's value.
+  Put the previous drops' third previous into a third term wide quantity.
+  Multiply the third term wide quantity by 3.
+  Add the third term wide quantity to the visible work's value.
+  Put the previous drops' seventh previous into a seventh term wide quantity.
+  Multiply the seventh term wide quantity by 5.
+  Add the seventh term wide quantity to the visible work's value.
+  Add the visible work's index to the visible work's value.
+  Keep the visible work's value for the sauce.
+
+\ Each row below gives four multipliers followed by a fixed stone.
+\ A step always uses all three previous-drop positions from the same
+\ drop history. These positions do not change until grinding ends.
+To choose the visible grinding recipe:
+  \ Grinding step 1: [3, 5, 7, 11, wheat].
+  If the visible work's grinding step is 1, put 3 into the visible work's value factor.
+  If the visible work's grinding step is 1, put 5 into the visible work's first previous factor.
+  If the visible work's grinding step is 1, put 7 into the visible work's third previous factor.
+  If the visible work's grinding step is 1, put 11 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 1, put the current stones' wheat into the visible work's grinding stone.
+  \ Grinding step 2: [5, 7, 11, 13, barley].
+  If the visible work's grinding step is 2, put 5 into the visible work's value factor.
+  If the visible work's grinding step is 2, put 7 into the visible work's first previous factor.
+  If the visible work's grinding step is 2, put 11 into the visible work's third previous factor.
+  If the visible work's grinding step is 2, put 13 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 2, put the current stones' barley into the visible work's grinding stone.
+  \ Grinding step 3: [7, 11, 13, 17, salt].
+  If the visible work's grinding step is 3, put 7 into the visible work's value factor.
+  If the visible work's grinding step is 3, put 11 into the visible work's first previous factor.
+  If the visible work's grinding step is 3, put 13 into the visible work's third previous factor.
+  If the visible work's grinding step is 3, put 17 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 3, put the current stones' salt into the visible work's grinding stone.
+  \ Grinding step 4: [11, 13, 17, 19, bitter].
+  If the visible work's grinding step is 4, put 11 into the visible work's value factor.
+  If the visible work's grinding step is 4, put 13 into the visible work's first previous factor.
+  If the visible work's grinding step is 4, put 17 into the visible work's third previous factor.
+  If the visible work's grinding step is 4, put 19 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 4, put the current stones' bitter into the visible work's grinding stone.
+  \ Grinding step 5: [13, 17, 19, 23, red].
+  If the visible work's grinding step is 5, put 13 into the visible work's value factor.
+  If the visible work's grinding step is 5, put 17 into the visible work's first previous factor.
+  If the visible work's grinding step is 5, put 19 into the visible work's third previous factor.
+  If the visible work's grinding step is 5, put 23 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 5, put the current stones' red into the visible work's grinding stone.
+  \ Grinding step 6: [17, 19, 23, 29, wheat].
+  If the visible work's grinding step is 6, put 17 into the visible work's value factor.
+  If the visible work's grinding step is 6, put 19 into the visible work's first previous factor.
+  If the visible work's grinding step is 6, put 23 into the visible work's third previous factor.
+  If the visible work's grinding step is 6, put 29 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 6, put the current stones' wheat into the visible work's grinding stone.
+  \ Grinding step 7: [19, 23, 29, 31, barley].
+  If the visible work's grinding step is 7, put 19 into the visible work's value factor.
+  If the visible work's grinding step is 7, put 23 into the visible work's first previous factor.
+  If the visible work's grinding step is 7, put 29 into the visible work's third previous factor.
+  If the visible work's grinding step is 7, put 31 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 7, put the current stones' barley into the visible work's grinding stone.
+  \ Grinding step 8: [23, 29, 31, 37, salt].
+  If the visible work's grinding step is 8, put 23 into the visible work's value factor.
+  If the visible work's grinding step is 8, put 29 into the visible work's first previous factor.
+  If the visible work's grinding step is 8, put 31 into the visible work's third previous factor.
+  If the visible work's grinding step is 8, put 37 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 8, put the current stones' salt into the visible work's grinding stone.
+  \ Grinding step 9: [29, 31, 37, 41, bitter].
+  If the visible work's grinding step is 9, put 29 into the visible work's value factor.
+  If the visible work's grinding step is 9, put 31 into the visible work's first previous factor.
+  If the visible work's grinding step is 9, put 37 into the visible work's third previous factor.
+  If the visible work's grinding step is 9, put 41 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 9, put the current stones' bitter into the visible work's grinding stone.
+  \ Grinding step 10: [31, 37, 41, 43, red].
+  If the visible work's grinding step is 10, put 31 into the visible work's value factor.
+  If the visible work's grinding step is 10, put 37 into the visible work's first previous factor.
+  If the visible work's grinding step is 10, put 41 into the visible work's third previous factor.
+  If the visible work's grinding step is 10, put 43 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 10, put the current stones' red into the visible work's grinding stone.
+  \ Grinding step 11: [37, 41, 43, 47, wheat].
+  If the visible work's grinding step is 11, put 37 into the visible work's value factor.
+  If the visible work's grinding step is 11, put 41 into the visible work's first previous factor.
+  If the visible work's grinding step is 11, put 43 into the visible work's third previous factor.
+  If the visible work's grinding step is 11, put 47 into the visible work's seventh previous factor.
+  If the visible work's grinding step is 11, put the current stones' wheat into the visible work's grinding stone.
+
+\ SAVE(x squared + a*x + b*drop[i-1] + c*drop[i-3] +
+\ d*drop[i-7] + the selected stone).
+To grind a visible drop:
+  Choose the visible grinding recipe.
+  Put the visible work's value into a result wide quantity.
+  Multiply the visible work's value by the result wide quantity.
+  Put the visible work's value into a weighted wide quantity.
+  Multiply the weighted wide quantity by the visible work's value factor.
+  Add the weighted wide quantity to the result wide quantity.
+  Put the previous drops' first previous into the weighted wide quantity.
+  Multiply the weighted wide quantity by the visible work's first previous factor.
+  Add the weighted wide quantity to the result wide quantity.
+  Put the previous drops' third previous into the weighted wide quantity.
+  Multiply the weighted wide quantity by the visible work's third previous factor.
+  Add the weighted wide quantity to the result wide quantity.
+  Put the previous drops' seventh previous into the weighted wide quantity.
+  Multiply the weighted wide quantity by the visible work's seventh previous factor.
+  Add the weighted wide quantity to the result wide quantity.
+  Add the visible work's grinding stone to the result wide quantity.
+  Keep the result wide quantity for the sauce.
+  Put the result wide quantity into the visible work's value.
+
+\ Insert a finished drop in front of the last seven previous values.
+\ Shift from oldest to newest so nothing is overwritten too early.
+To remember the new visible drop:
+  Put the previous drops' sixth previous into the previous drops' seventh previous.
+  Put the previous drops' fifth previous into the previous drops' sixth previous.
+  Put the previous drops' fourth previous into the previous drops' fifth previous.
+  Put the previous drops' third previous into the previous drops' fourth previous.
+  Put the previous drops' second previous into the previous drops' third previous.
+  Put the previous drops' first previous into the previous drops' second previous.
+  Put the visible work's value into the previous drops' first previous.
+
+\ All eleven grinding steps are completed before updating history.
+To make a visible drop given a number:
+  Put the number into the visible work's index.
+  Reach the stones for the number.
+  Make the visible dough.
+  Put 1 into the visible work's grinding step.
+  Loop.
+    If the visible work's grinding step is greater than 11, break.
+    Grind the visible drop.
+    Add 1 to the visible work's grinding step.
+  Repeat.
+  Put the visible work's value into the last visible drop.
+  Remember the new visible drop.
+
+\ The sauce input must already contain the five exact counters.
+\ The requested last drop must be between 1 and 46 inclusive.
+To make visible drops through a number:
+  Make all seven hidden drops.
+  Prepare the previous drops.
+  Put 1 into a visible position number.
+  Loop.
+    If the visible position number is greater than the number, break.
+    If the visible position number is greater than 46, break.
+    Make a visible drop given the visible position number.
+    Add 1 to the visible position number.
+  Repeat.
