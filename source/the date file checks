@@ -1,0 +1,25 @@
+\ File-output report checks do not invoke expensive date calculations.
+\ They exercise the same formatter the explicit output entrypoint
+\ uses after either success or failure.
+
+To check the public date report:
+  Put 1 into the complete date status.
+  Put 5000 into the complete date answer's year number.
+  Put 10 into the complete date answer's cutlet name index.
+  Put 503 into the complete date answer's day within cutlet.
+  Put 20 into the complete date answer's month name index.
+  Put 56 into the complete date answer's day within month.
+  Prepare the calendar date report.
+  If the calendar date report is not "5000, Scorpion, 503, Well, 56",
+    put "A successful date did not yield readable output." into the check report; exit.
+  Put 0 into the complete date status.
+  Put "Sample failure reason." into the complete date error.
+  Prepare the calendar date report.
+  If the calendar date report is not "Sample failure reason.",
+    put "A failed date report did not explain the failure." into the check report; exit.
+  Put 1 into the complete date status.
+  Put 48 into the complete date answer's month name index.
+  Prepare the calendar date report.
+  If the calendar date report is not "The calculated date could not be given its English names.",
+    put "An unknown calendar name did not cause a safe error." into the check report; exit.
+  Reset the complete date answer.
