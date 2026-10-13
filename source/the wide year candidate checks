@@ -1,0 +1,99 @@
+\ Synthetic wide year candidates far beyond the signed 32-bit axis.
+\ Opening and closing coordinates differ by 2070 days, with six
+\ distinct gate spans. This is a valid physically possible year.
+\ Its coordinates and gate indices are themselves 49-digit values.
+\ These tests do not invoke any full sauce or gate traversal.
+
+The wide year test magnitude is a wide quantity.
+The wide year test day is a wide signed day.
+
+To prepare the synthetic immense wide year:
+  Put "1000000000000000000000000000000000000000000000000" into the wide year test magnitude.
+  Set the first wide candidate's opening day from the wide year test magnitude given 1.
+  Put "1000000000000000000000000000000000000000000002070" into the wide year test magnitude.
+  Set the first wide candidate's closing day from the wide year test magnitude given 1.
+  Put "1000000000000000000000000000000000000000001000000" into the wide year test magnitude.
+  Set the first wide candidate's opening index from the wide year test magnitude given 1.
+  Put "1000000000000000000000000000000000000000001000006" into the wide year test magnitude.
+  Set the first wide candidate's closing index from the wide year test magnitude given 1.
+  Measure the first wide candidate.
+
+To check enormous wide year containment:
+  Prepare the synthetic immense wide year.
+  If the first wide candidate's valid is not 1,
+    put "The immense but short year candidate was rejected." into the check report; exit.
+  If the first wide candidate's year length is not "2070",
+    put "The immense wide year day length was wrong." into the check report; exit.
+  If the first wide candidate's span count is not "6",
+    put "The immense wide year gate-span count was wrong." into the check report; exit.
+  Put "1000000000000000000000000000000000000000000000000" into the wide year test magnitude.
+  Set the wide year test day from the wide year test magnitude given 1.
+  If the first wide candidate contains the wide year test day,
+    put "An immense year included its opening gate." into the check report; exit.
+  Put "1000000000000000000000000000000000000000000000001" into the wide year test magnitude.
+  Set the wide year test day from the wide year test magnitude given 1.
+  If the first wide candidate does not contain the wide year test day,
+    put "An immense year excluded the day after its opening gate." into the check report; exit.
+  Put "1000000000000000000000000000000000000000000002070" into the wide year test magnitude.
+  Set the wide year test day from the wide year test magnitude given 1.
+  If the first wide candidate does not contain the wide year test day,
+    put "An immense year excluded its closing gate." into the check report; exit.
+  Put "1000000000000000000000000000000000000000000002071" into the wide year test magnitude.
+  Set the wide year test day from the wide year test magnitude given 1.
+  If the first wide candidate contains the wide year test day,
+    put "An immense year included the day after its closing gate." into the check report; exit.
+
+To check enormous wide year ordering:
+  Prepare the synthetic immense wide year.
+  Put "1000000000000000000000000000000000000000000000010" into the wide year test magnitude.
+  Set the second wide candidate's opening day from the wide year test magnitude given 1.
+  Put "1000000000000000000000000000000000000000000002080" into the wide year test magnitude.
+  Set the second wide candidate's closing day from the wide year test magnitude given 1.
+  Put "1000000000000000000000000000000000000000001000010" into the wide year test magnitude.
+  Set the second wide candidate's opening index from the wide year test magnitude given 1.
+  Put "1000000000000000000000000000000000000000001000016" into the wide year test magnitude.
+  Set the second wide candidate's closing index from the wide year test magnitude given 1.
+  Measure the second wide candidate.
+  If the second wide candidate's valid is not 1,
+    put "The competing wide year was unexpectedly invalid." into the check report; exit.
+  If the first wide candidate does not come before the second wide candidate,
+    put "Equal-length wide years did not sort by earlier opening." into the check report; exit.
+  If the second wide candidate comes before the first wide candidate,
+    put "The wide year tie-breaker was not antisymmetric." into the check report; exit.
+  Put "1000000000000000000000000000000000000000000001810" into the wide year test magnitude.
+  Set the second wide candidate's closing day from the wide year test magnitude given 1.
+  Measure the second wide candidate.
+  If the second wide candidate does not come before the first wide candidate,
+    put "A shorter wide year did not precede a longer one." into the check report; exit.
+
+To check invalid wide year endpoints:
+  Prepare the synthetic immense wide year.
+  Put "1000000000000000000000000000000000000000001000005" into the wide year test magnitude.
+  Set the first wide candidate's closing index from the wide year test magnitude given 1.
+  Measure the first wide candidate.
+  If the first wide candidate's valid is not 0,
+    put "A wide year containing fewer than six gaps was accepted." into the check report; exit.
+  Put "1000000000000000000000000000000000000000001000100" into the wide year test magnitude.
+  Set the first wide candidate's closing index from the wide year test magnitude given 1.
+  Measure the first wide candidate.
+  If the first wide candidate's valid is not 0,
+    put "Wide year length ignored the 42-day minimum per gap." into the check report; exit.
+  Put "1000000000000000000000000000000000000000001000006" into the wide year test magnitude.
+  Set the first wide candidate's closing index from the wide year test magnitude given 1.
+  Put "1000000000000000000000000000000000000000000000000" into the wide year test magnitude.
+  Set the first wide candidate's closing day from the wide year test magnitude given 1.
+  Measure the first wide candidate.
+  If the first wide candidate's valid is not 0,
+    put "A zero-duration wide year candidate was accepted." into the check report; exit.
+  Prepare the synthetic immense wide year.
+  Put "1000000000000000000000000000000000000000000000250" into the wide year test magnitude.
+  Set the first wide candidate's closing day from the wide year test magnitude given 1.
+  Measure the first wide candidate.
+  If the first wide candidate's valid is not 0,
+    put "A wide year shorter than 252 days was accepted." into the check report; exit.
+  Prepare the synthetic immense wide year.
+  Put "1000000000000000000000000000000000000000000005779" into the wide year test magnitude.
+  Set the first wide candidate's closing day from the wide year test magnitude given 1.
+  Measure the first wide candidate.
+  If the first wide candidate's valid is not 0,
+    put "A wide year longer than 5778 days was accepted." into the check report; exit.
