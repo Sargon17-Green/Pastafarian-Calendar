@@ -337,3 +337,79 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --seconds 185 --rss-kib 393216
+
+  canonical-triples-0:
+    name: 真實第 5000 年相鄰三月份 0..10 精確計數
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triples]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對語法與獨立三模型精確 BigInt 完整窗口計數
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_all_triples.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_all_triples.pl --batch-start 0 --batch-count 11 --seconds 185 --rss-kib 393216
+
+  canonical-triples-11:
+    name: 真實第 5000 年相鄰三月份 11..21 精確計數
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triples]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對語法與獨立三模型精確 BigInt 完整窗口計數
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_all_triples.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_all_triples.pl --batch-start 11 --batch-count 11 --seconds 185 --rss-kib 393216
+
+  canonical-triples-22:
+    name: 真實第 5000 年相鄰三月份 22..32 精確計數
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triples]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對語法與獨立三模型精確 BigInt 完整窗口計數
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_all_triples.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_all_triples.pl --batch-start 22 --batch-count 11 --seconds 185 --rss-kib 393216
+
+  canonical-triples-33:
+    name: 真實第 5000 年相鄰三月份 33..42 精確計數
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triples]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對語法與獨立三模型精確 BigInt 完整窗口計數
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_all_triples.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_all_triples.pl --batch-start 33 --batch-count 10 --seconds 185 --rss-kib 393216
