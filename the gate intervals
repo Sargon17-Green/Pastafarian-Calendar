@@ -1,0 +1,32 @@
+\ The exact interval preceding or following each gate of the cutlets.
+\ For positive n the sauce input is (Foundation, Foundation+n).
+\ For negative -n it is (Foundation, Foundation-n).
+\ Ask fixed bowl 1 with seal 1, choose 1..922 and add 41.
+\ The permitted interval is 42..963 days.
+\ The signed gate index must fit the current 32-bit CAL day-axis adapter.
+\ This is not yet an unlimited-date implementation.
+
+A gate inquiry has
+  a number called signed index,
+  a number called interval length.
+
+The gate inquiry is a gate inquiry.
+
+\ The signed index must not be zero. Zero is Foundation itself.
+\ Converting day positions to full wide counters is a future requirement.
+To calculate a gate interval given a number:
+  Put the number into the gate inquiry's signed index.
+  Put -15055671 into the example's calculation day.
+  Put -15055671 into the example's requested day.
+  Add the number to the example's requested day.
+  Answer the example.
+  Copy the example into the sauce input.
+  Make the complete sauce.
+  Put 1 into the seal inquiry's bowl identity.
+  Put 1 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  Put "922" into an interval options wide quantity.
+  Choose a narrow quantity from the interval options wide quantity.
+  Convert the seal inquiry's selected quantity to a chosen interval number.
+  Add 41 to the chosen interval number.
+  Put the chosen interval number into the gate inquiry's interval length.
