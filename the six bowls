@@ -1,0 +1,46 @@
+\ The six fixed bowls and their starting values (canonical section H).
+\ Bowl identities stay the same even when the mixing order changes.
+\ For bowl b, p is 17, 19, 23, 29, 31, or 37, respectively.
+\ Start = SAVE((c + b*t + distance + sum + direction + p*p)^2 + b).
+\ The six bowls are independent at this starting stage.
+
+A bowl state has
+  a wide quantity called first bowl,
+  a wide quantity called second bowl,
+  a wide quantity called third bowl,
+  a wide quantity called fourth bowl,
+  a wide quantity called fifth bowl,
+  a wide quantity called sixth bowl.
+
+The current bowls are a bowl state.
+
+\ The first small number is bowl identity b. The second is p squared.
+\ All intermediate sums and products are arbitrary-precision decimals.
+To initialize a bowl given a number and another number:
+  Put the sauce input's calculation count into an initial wide quantity.
+  Put the sauce input's requested count into a weighted wide quantity.
+  Multiply the weighted wide quantity by the number.
+  Add the weighted wide quantity to the initial wide quantity.
+  Add the sauce input's distance count to the initial wide quantity.
+  Add the sauce input's sum count to the initial wide quantity.
+  Add the sauce input's direction count to the initial wide quantity.
+  Add the other number to the initial wide quantity.
+  Put the initial wide quantity into a squared wide quantity.
+  Multiply the initial wide quantity by the squared wide quantity.
+  Add the number to the squared wide quantity.
+  Keep the squared wide quantity for the sauce.
+  If the number is 1, put the squared wide quantity into the current bowls' first bowl.
+  If the number is 2, put the squared wide quantity into the current bowls' second bowl.
+  If the number is 3, put the squared wide quantity into the current bowls' third bowl.
+  If the number is 4, put the squared wide quantity into the current bowls' fourth bowl.
+  If the number is 5, put the squared wide quantity into the current bowls' fifth bowl.
+  If the number is 6, put the squared wide quantity into the current bowls' sixth bowl.
+
+\ The squared constants are 17^2, 19^2, 23^2, 29^2, 31^2, 37^2.
+To initialize the six bowls:
+  Initialize a bowl given 1 and 289.
+  Initialize a bowl given 2 and 361.
+  Initialize a bowl given 3 and 529.
+  Initialize a bowl given 4 and 841.
+  Initialize a bowl given 5 and 961.
+  Initialize a bowl given 6 and 1369.
