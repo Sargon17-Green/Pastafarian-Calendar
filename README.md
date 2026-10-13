@@ -1073,3 +1073,19 @@ Oracle rete sèlman anba `test/`; nou pa ajoute `postStir12`
 ni okenn travay Stage 30 davans.
 `LAST_COMPLETED_STAGE=29`;
 `EXPECTED_REPOSITORY_STATE=GREEN`.
+
+## Stage 30 — DISCOVERY 15: kestyon pòtay negatif sou move bò Fondasyon
+
+Nou mete `src/legacy_gate_question_adapter.lua`. Li gen
+`oldGateQuestionDay(n)=FOUNDATION_DAY_OLD+n`, men adaptè
+istorik la toujou pase `abs(signedStep)`. Pou `-n`, li mande
+`FOUNDATION_DAY_OLD+n` olye jou normatif
+`FOUNDATION_DAY_OLD-n`. De commits kenbe demann orijinal
+ak jou erone a apa; public `gateQuestionDaySpaghetti`
+montre erè istorik sa a. `legacyGateQuestionProbe` retounen
+kontèks konplè, san korije rezilta a.
+
+Nan Stage 30, nou pa aplike PATCH 15, nou pa konstwi chèn
+pòtay, e nou pa entegre `postStir12`. Regrèsyon normatif
+negatif yo dwe rete `EXPECTED_RED` jouk Stage 31.
+CI natif Stage 30 poko verifye.

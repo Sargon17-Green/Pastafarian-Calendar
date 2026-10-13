@@ -28,6 +28,7 @@ local LegacyBiasedChoice = require("legacy_biased_choice")
 local ShortChoicePatch = require("short_choice_patch")
 local LegacyShortOnlyChoice = require("legacy_short_only_choice")
 local WideChoicePatch = require("wide_choice_patch")
+local LegacyGateQuestionAdapter = require("legacy_gate_question_adapter")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -461,8 +462,22 @@ function S.wideChoiceCoreProbe(first,direction,optionCount)
     return WideChoicePatch.chooseWide(first,direction,optionCount)
 end
 
+-- DISCOVERY 15: adaptè istorik la pèdi siy etap negatif pòtay yo.
+function S.legacyGateQuestionProbe(signedStep)
+    return LegacyGateQuestionAdapter.execute(signedStep)
+end
+
+function S.oldGateQuestionDayProbe(distance)
+    return LegacyGateQuestionAdapter.oldGateQuestionDay(distance)
+end
+
+function S.gateQuestionDaySpaghetti(signedStep)
+    local wrong=LegacyGateQuestionAdapter.execute(signedStep)
+    return wrong
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 29", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 30", 0)
 end
 
 return S

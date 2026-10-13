@@ -760,3 +760,15 @@ Pa gen okenn modil oracle nan production, ni melanj
 `postStir12`, ni kòd Stage 30. Premye commit blokaj la
 rete nan tras anvan dezyèm commit koreksyon wide la.
 `LAST_COMPLETED_STAGE=29` / `EXPECTED_REPOSITORY_STATE=GREEN`.
+
+## Stage 30 — DISCOVERY 15: siy etap pòtay negatif efase
+
+Adaptè a resevwa etap pòtay siyen, epi premye commit la
+kenbe valè li. Ansyen `oldGateQuestionDay` pa konn siy:
+li ajoute yon distans pozitif sou jou Fondasyon an. Dezyèm
+commit la sèvi ak `abs(signedStep)`, konsa etap negatif
+`-n` mande bò pozitif `F+n` olye `F-n`.
+Sa se defo istorik nou dwe konsève. Yon PATCH 15 pou
+korije jou negatif yo ap vini sèlman nan Stage 31.
+Pa gen rekalkil pòtay antye oswa `postStir12`.
+CI native pa ko verifye.
