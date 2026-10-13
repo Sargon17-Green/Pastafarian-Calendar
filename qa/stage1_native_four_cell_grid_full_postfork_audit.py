@@ -87,7 +87,7 @@ def selftest():
       ("missing_pair",lambda d:d["records"].pop()),
       ("wrong_signed_day",lambda d:d["records"][0].__setitem__("signed_days",[2,2])),
       ("wrong_index",lambda d:d["records"][10].__setitem__("index",50)),
-      ("wrong_native_hash",lambda d:d["records"][2].__setitem__("trace_file_sha256","0"*64)),
+      ("malformed_native_hash",lambda d:d["records"][2].__setitem__("trace_file_sha256","0"*63)),
       ("changed_input",lambda d:d["records"][0]["fields"].__setitem__(3,99)),
       ("invented_lower_route",lambda d:d["records"][25].__setitem__("literal_executions",2)),
       ("erased_lower_route",lambda d:d["records"][0].__setitem__("literal_executions",0)),
