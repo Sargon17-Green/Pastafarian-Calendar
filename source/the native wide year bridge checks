@@ -4,6 +4,8 @@
 \ All cases are synthetic; neither format invokes an expensive sauce.
 \ Invalid candidates must remain invalid after widening.
 
+The sample native year day is a calendar day.
+
 To check the native and wide year candidate bridge:
   Put -15056000 into the first candidate's opening day.
   Put -15055655 into the first candidate's closing day.
@@ -23,7 +25,7 @@ To check the native and wide year candidate bridge:
     put "Widening a native year changed its day length." into the check report; exit.
   If the first wide candidate's span count is not "6",
     put "Widening a native year changed its gate span count." into the check report; exit.
-  Put -15055671 into a sample native year day.
+  Put -15055671 into the sample native year day.
   If the first candidate does not contain the sample native year day,
     put "A valid native year excluded an interior day." into the check report; exit.
   Convert the sample native year day into a wide signed day.
