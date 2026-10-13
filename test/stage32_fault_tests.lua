@@ -39,6 +39,21 @@ for mode=1,2 do
  assert(not ok,"Forged PATCH 13 result accepted")
  errors=errors+1;recover()
 end
+for mode=1,2 do
+ Short.execute=function(first,dir,n)
+  local rank,ctx=oldChoice(first,dir,n)
+  if mode==1 then
+   ctx.branchTrace[3]="FORGED_HANDLER"
+  else
+   ctx.metrics["shortChoice.patch.calls"]=nil
+  end
+  return rank,ctx
+ end
+ local ok=pcall(S.legacyGateGapProbe,-2,1,1)
+ Short.execute=oldChoice
+ assert(not ok,"Forge PATCH 13 provenance accepted: "..mode)
+ errors=errors+1;recover()
+end
 assert(Short.execute==oldChoice and L.oldGateGapFromRank==oldGap
- and errors==10 and recoveries==10)
-print("PASS Stage 32 faults: 10 corruptions rejected, 10 recoveries, no state leakage")
+ and errors==12 and recoveries==12)
+print("PASS Stage 32 faults: 12 corruptions rejected, 12 recoveries, no state leakage")
