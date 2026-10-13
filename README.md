@@ -77,19 +77,22 @@ written in Plain English Programming:
   interval selected by seal 1 in bowl 1 using the sauce made for
   (Foundation, Foundation+n), including negative n. Independent
   reference calculations give 345 days for n=1 and 503 for n=-1.
-- **the gate walk** and **the gate walk checks**: start at gate zero,
-  Foundation Day, and accumulate the exact chosen intervals in either
-  direction. Signed gap ownership is handled separately when crossing
-  gate zero, with regressions in both directions; index zero is not a
-  gap identifier.
+- **the gate walk**, **the gate walk checks** and **the gate
+  budget checks**: start at gate zero, Foundation Day, and accumulate
+  exact intervals in either direction. Signed gap ownership is handled
+  across gate zero; index zero is not a gap identifier. A shared
+  allowance of at most 1024 gate-gap computations per complete date
+  search stops impractically distant scans without inventing an
+  incomplete year or cutlet. This is a resource limit, not a date rule.
 - **the year candidates** and **the year candidate checks**: check
   the eligibility and canonical ordering of pairs of year-boundary gates.
-- **the year 5000** and **the year 5000 checks**: enumerate all eligible
-  gate pairs around the calculation day (within the maximum year length),
-  sort by length and earliest opening gate, and use bowl 1, seal 10,
-  on the sauce for (c,c) to choose the anchor year. The normal tests
-  exercise an invented eleven-candidate ledger; a separate slow check
-  compares the real Foundation year to its canonical gate boundaries.
+- **the year 5000**, **the year 5000 checks**, and **the year
+  ranking checks**: enumerate eligible gate pairs around the
+  calculation day, sort them by duration and earliest opening gate,
+  and use bowl 1, seal 10 on the sauce for (c,c). Normal tests
+  exercise an invented eleven-candidate ledger and reject invalid
+  ranks, truncated lists and incorrectly included opening gates.
+  A slow test compares Foundation against the canonical year bounds.
 - **the year walk** and **the year walk checks**: calculate following and
   preceding years from their fixed shared gate, using seals 11 and 12
   with the original calculation day. The boundary oracle is a slow
@@ -154,6 +157,10 @@ written in Plain English Programming:
   bounds, and the number, range and **uniqueness** of their chosen
   names. They also check that resetting a date cannot expose fields
   from a prior result.
+- **the canonical date vectors**: ten optional end-to-end reference
+  checks for the authoritative AC.1 table on the main branch, including
+  past and future year transitions. The obsolete mutant table is
+  specifically excluded. These expensive checks are not run by default.
 - **the complete date**: joins the independently selected year,
   cutlet lengths, cutlet names, month lengths, month names and the
   full weaving into five fields. The five fields are explicitly cleared
@@ -162,7 +169,7 @@ written in Plain English Programming:
   Foundation-day (5000, 10, 503, 20, 56) comparison is an optional
   slow oracle, not a demonstrated result of running the program.
 
-The source now includes **72 groups of checks**, some of which compare several
+The source now includes **75 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -314,7 +321,7 @@ root, outside the compile input. Use the matching CAL standard library
 supplied by the compiler. No successful compiler execution has been
 reported.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 72 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 75 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
