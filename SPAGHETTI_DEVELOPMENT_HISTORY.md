@@ -792,3 +792,17 @@ koup sauce kanonik pase. Twa witness wouj yo odit egzak.
 Diferans jou kestyon an se `F+n` olye `F-n` pou n>0.
 Etap 31 ap repare l san efase prèv istorik la.
 `LAST_COMPLETED_STAGE=30` / `EXPECTED_RED_VERIFIED`.
+
+## Stage 31 — PATCH 15: kestyon pòtay avèk siy egzak
+
+Nou kite `legacy_gate_question_adapter.lua` byte-pou-byte
+entak. `gate_question_patch.lua` verifye de commits,
+jou erone `F+abs(step)`, siy orijinal, provenance ak metrik.
+Lè step negatif, li soustrè de fwa distans absoli a,
+apre sa li verifye egzakteman `F+step`. Lè step pozitif
+oswa zewo, li pa chanje kestyon istorik la. Yon twazyèm
+commit posede anrejistre jou korije a, ansanm ak snapshot
+eta semantik ansyen an. Public `gateQuestionDaySpaghetti`
+retounen rezilta PATCH 15; sond legacy rete ansyen an.
+Pa gen chèn pòtay antye oswa `postStir12`.
+Rezilta CI poko disponib.

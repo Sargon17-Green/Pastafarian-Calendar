@@ -29,6 +29,7 @@ local ShortChoicePatch = require("short_choice_patch")
 local LegacyShortOnlyChoice = require("legacy_short_only_choice")
 local WideChoicePatch = require("wide_choice_patch")
 local LegacyGateQuestionAdapter = require("legacy_gate_question_adapter")
+local GateQuestionPatch = require("gate_question_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -471,13 +472,22 @@ function S.oldGateQuestionDayProbe(distance)
     return LegacyGateQuestionAdapter.oldGateQuestionDay(distance)
 end
 
+-- PATCH 15: premye konsève query istorik la, apre sa retabli siy la.
 function S.gateQuestionDaySpaghetti(signedStep)
-    local wrong=LegacyGateQuestionAdapter.execute(signedStep)
-    return wrong
+    local right=GateQuestionPatch.execute(signedStep)
+    return right
+end
+
+function S.gateQuestionPatchProbe(signedStep)
+    return GateQuestionPatch.execute(signedStep)
+end
+
+function S.gateQuestionCoreProbe(signedStep,legacyDay)
+    return GateQuestionPatch.correctQuestionDay(signedStep,legacyDay)
 end
 
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 30", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 31", 0)
 end
 
 return S

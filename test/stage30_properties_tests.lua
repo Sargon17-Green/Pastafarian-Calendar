@@ -5,8 +5,8 @@ local O=require("normative_oracle")
 local S=require("spaghetti")
 local F=B.from(O.FOUNDATION_DAY)
 for n=1,150 do
- local pos=S.gateQuestionDaySpaghetti(n)
- local neg=S.gateQuestionDaySpaghetti(-n)
+ local pos=S.legacyGateQuestionProbe(n)
+ local neg=S.legacyGateQuestionProbe(-n)
  local wantPositive=B.add(F,n)
  local wantNegative=B.sub(F,n)
  assert(B.compare(pos,wantPositive)==0

@@ -11,9 +11,10 @@ assert(old:find('manager.dispatcher:register("LEGACY_SIGNED_GATE_STEP"',1,true))
 assert(old:find('manager.dispatcher:register("LEGACY_ABSOLUTE_GATE_QUERY"',1,true))
 assert(facade:find("function S.legacyGateQuestionProbe(",1,true))
 assert(facade:find("function S.gateQuestionDaySpaghetti(",1,true))
-for _,s in ipairs({old,facade}) do
+for _,s in ipairs({old}) do
  for _,bad in ipairs({"normative_oracle","gateQuestionPatch","correctNegativeGate","postStir12","PATCH_15_NEGATIVE_GATE"}) do
   assert(not s:find(bad,1,true),"Stage 31+ entèdi: "..bad)
  end
 end
-print("PASS Stage 30 scope: original negative sign-losing query, two commits and no PATCH 15")
+assert(not facade:find("normative_oracle",1,true) and not facade:find("postStir12",1,true))
+print("PASS Stage 30 scope: immutable negative sign-losing legacy, two commits preserved")

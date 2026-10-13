@@ -12,7 +12,7 @@ for _,step in ipairs(cases) do
  local history=B.add(F,abs)
  local wanted=B.add(F,step)
  assert(B.compare(actual,history)==0
-  and B.compare(S.gateQuestionDaySpaghetti(step),history)==0
+  and B.compare(S.legacyGateQuestionProbe(step),history)==0
   and B.compare(S.oldGateQuestionDayProbe(abs),history)==0)
  assert(ctx.mode=="STAGE_30_DISCOVERY_15"
   and ctx.status=="LEGACY_GATE_QUERY_COMPLETE"

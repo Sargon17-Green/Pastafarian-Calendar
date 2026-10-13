@@ -1117,3 +1117,18 @@ ak twa scripts wouj istorik verifye pa audit.
 Pa gen PATCH 15 oswa `postStir12`.
 `LAST_COMPLETED_STAGE=30`;
 `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
+
+## Stage 31 — PATCH 15: retabli siy kestyon pòtay negatif
+
+Nou ajoute `src/gate_question_patch.lua` pou rele adaptè
+istorik Stage 30 an premye. De commits legacy yo rete,
+ak snapshot semantik ki dokimante demann ki gen siy
+epi move jou `F+abs(n)`. Nou egzije provenance,
+metrik, diagnostics, epi jou kestyon istorik ki egzak.
+Twazyèm commit `SIGNED_GATE_QUESTION_PATCH` repare jou a:
+sou etap negatif, `F+abs(n)-2*abs(n)=F+n`; sou etap
+pozitif oswa zewo, jou a pa chanje. Tout kalkil se
+BigInt natif; pa gen oracle pwodiksyon.
+`legacyGateQuestionProbe` kontinye revele defo Stage 30 a.
+Nou pa konstwi chèn pòtay, ni `postStir12`.
+QA natif Stage 31 poko konplete.
