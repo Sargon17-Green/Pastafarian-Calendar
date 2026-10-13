@@ -1,0 +1,90 @@
+\ The complete five-part Pastafarian date relative to a calculation day.
+\ Every choice is made from the canonical sauce and seal prescribed in
+\ the main source of rules. The calculation day remains fixed, even
+\ if the requested date lies in a much earlier or later year.
+\
+\ The output fields are:
+\   year number since Creation,
+\   canonical cutlet NAME index (not cutlet ordinal),
+\   one-based day within its cutlet,
+\   canonical month NAME index (not month ordinal),
+\   one-based occurrence of that month through the requested day.
+\
+\ The current calendar-day axis still uses signed 32-bit numbers.
+\ The memoized month weaving may be computationally prohibitive for
+\ large realistic year/month combinations. This full-date entrypoint
+\ is source only and HAS NOT BEEN TESTED WITH A CAL COMPILER.
+
+A complete date answer has
+  a number called year number,
+  a number called cutlet name index,
+  a number called day within cutlet,
+  a number called month name index,
+  a number called day within month.
+
+The complete date answer is a complete date answer.
+The complete date status is a number.
+The complete date error is a string.
+
+\ Every required selection must succeed before any result is published.
+To calculate a complete date for a calendar day and another calendar day:
+  Put 0 into the complete date status.
+  Put "The complete calendar date was not resolved." into the complete date error.
+  Find the year for the calendar day and the other calendar day.
+  If the year selection success is not 1,
+    put "The requested Pastafarian year could not be selected." into the complete date error; exit.
+  Find the restricted internal cutlet boundary.
+  Choose the structural counts.
+  Choose the canonical cutlet partition.
+  If the cutlet partition's valid selection is not 1,
+    put "The cutlet partition could not be selected." into the complete date error; exit.
+  Resolve the cutlet of the target day.
+  If the requested cutlet number is 0,
+    put "The requested day was not found inside the cutlet partition." into the complete date error; exit.
+  Choose the canonical cutlet names.
+  If the cutlet name choice's selection success is not 1,
+    put "The cutlet name sequence could not be selected." into the complete date error; exit.
+  Read the requested cutlet name.
+  If the requested cutlet name index is 0,
+    put "The required cutlet name was not found." into the complete date error; exit.
+  Choose the canonical month lengths.
+  If the month length work's valid selection is not 1,
+    put "The month length sequence could not be selected." into the complete date error; exit.
+  Choose the canonical month names.
+  If the month name choice's selection success is not 1,
+    put "The month name sequence could not be selected." into the complete date error; exit.
+  Put the target year day into the weaving selection's target position.
+  Subtract the chosen year's opening day from the weaving selection's target position.
+  Choose the canonical month weaving.
+  If the weaving selection's selection success is not 1,
+    put "The month weaving could not be selected." into the complete date error; exit.
+  If the woven requested month ordinal is 0,
+    put "The requested day was not found inside the woven months." into the complete date error; exit.
+  Put the woven requested month ordinal into the requested month ordinal.
+  Read the requested month name.
+  If the requested month name index is 0,
+    put "The woven month has no selected canonical name." into the complete date error; exit.
+  Put the current year number into the complete date answer's year number.
+  Put the requested cutlet name index into the complete date answer's cutlet name index.
+  Put the requested day in cutlet into the complete date answer's day within cutlet.
+  Put the requested month name index into the complete date answer's month name index.
+  Put the woven requested day in month into the complete date answer's day within month.
+  Put 1 into the complete date status.
+  Put "" into the complete date error.
+
+\ This wrapper tests the complete date at the canonical Foundation day.
+\ It is a slow reference check and deliberately NOT part of To run.
+To check the canonical complete Foundation date:
+  Calculate a complete date for -15055671 and -15055671.
+  If the complete date status is not 1,
+    put "The complete Foundation date calculation did not succeed." into the check report; exit.
+  If the complete date answer's year number is not 5000,
+    put "Foundation has the wrong year number." into the check report; exit.
+  If the complete date answer's cutlet name index is not 10,
+    put "Foundation has the wrong cutlet name index." into the check report; exit.
+  If the complete date answer's day within cutlet is not 503,
+    put "Foundation has the wrong day within its cutlet." into the check report; exit.
+  If the complete date answer's month name index is not 20,
+    put "Foundation has the wrong month name index." into the check report; exit.
+  If the complete date answer's day within month is not 56,
+    put "Foundation has the wrong woven day within the month." into the check report; exit.
