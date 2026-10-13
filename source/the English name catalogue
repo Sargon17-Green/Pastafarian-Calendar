@@ -1,0 +1,85 @@
+\ Fixed canonical English source-language name catalogue.
+\ Names are presentation only. Every algorithm operates on immutable
+\ canonical numeric indices. No user-locale or display wording may
+\ change rankings, rejection limits, cached states, or sauce outputs.
+\
+\ Named places and coined lexical items retain stable Latin spellings.
+\ Meaningful Maltese words have natural English translations.
+\ Four Ninths and Three Fifths are exact fraction labels.
+\ The two coined names Palgurax and Karxumav, and Kozz, are retained.
+\ The source-language name at each index must never change at runtime.
+\ These calls return an empty string for an invalid index.
+\ CAL compilation remains unverified.
+
+The English cutlet name is a string.
+The English month name is a string.
+
+To read the English cutlet name given a number:
+  Put "" into the English cutlet name.
+  If the number is 1, put "Bronze" into the English cutlet name; exit.
+  If the number is 2, put "Fox" into the English cutlet name; exit.
+  If the number is 3, put "Kidney" into the English cutlet name; exit.
+  If the number is 4, put "Lagash" into the English cutlet name; exit.
+  If the number is 5, put "Thought" into the English cutlet name; exit.
+  If the number is 6, put "Four Ninths" into the English cutlet name; exit.
+  If the number is 7, put "Palgurax" into the English cutlet name; exit.
+  If the number is 8, put "Papyrus" into the English cutlet name; exit.
+  If the number is 9, put "Cluster" into the English cutlet name; exit.
+  If the number is 10, put "Scorpion" into the English cutlet name; exit.
+  If the number is 11, put "Ash" into the English cutlet name; exit.
+  If the number is 12, put "Wheat" into the English cutlet name; exit.
+  If the number is 13, put "River" into the English cutlet name; exit.
+  If the number is 14, put "Laughter" into the English cutlet name; exit.
+  If the number is 15, put "Akkad" into the English cutlet name; exit.
+  If the number is 16, put "Horn" into the English cutlet name; exit.
+  If the number is 17, put "The Empty Jar" into the English cutlet name; exit.
+
+To read the English month name given a number:
+  Put "" into the English month name.
+  If the number is 1, put "Clay" into the English month name; exit.
+  If the number is 2, put "Pomegranate" into the English month name; exit.
+  If the number is 3, put "Elbow" into the English month name; exit.
+  If the number is 4, put "Envy" into the English month name; exit.
+  If the number is 5, put "Eridu" into the English month name; exit.
+  If the number is 6, put "Toothpaste" into the English month name; exit.
+  If the number is 7, put "Three Fifths" into the English month name; exit.
+  If the number is 8, put "Karxumav" into the English month name; exit.
+  If the number is 9, put "Leopard" into the English month name; exit.
+  If the number is 10, put "Tin" into the English month name; exit.
+  If the number is 11, put "Mist" into the English month name; exit.
+  If the number is 12, put "Doors" into the English month name; exit.
+  If the number is 13, put "Spindle" into the English month name; exit.
+  If the number is 14, put "Rib" into the English month name; exit.
+  If the number is 15, put "Carob" into the English month name; exit.
+  If the number is 16, put "Uruk" into the English month name; exit.
+  If the number is 17, put "Shame" into the English month name; exit.
+  If the number is 18, put "Camel" into the English month name; exit.
+  If the number is 19, put "Copper" into the English month name; exit.
+  If the number is 20, put "Well" into the English month name; exit.
+  If the number is 21, put "Egg Yolk" into the English month name; exit.
+  If the number is 22, put "Star" into the English month name; exit.
+  If the number is 23, put "Honey" into the English month name; exit.
+  If the number is 24, put "Spleen" into the English month name; exit.
+  If the number is 25, put "Limestone" into the English month name; exit.
+  If the number is 26, put "Joy" into the English month name; exit.
+  If the number is 27, put "Fig" into the English month name; exit.
+  If the number is 28, put "Nineveh" into the English month name; exit.
+  If the number is 29, put "Frog" into the English month name; exit.
+  If the number is 30, put "Pitch" into the English month name; exit.
+  If the number is 31, put "Lamp" into the English month name; exit.
+  If the number is 32, put "The Closed Door" into the English month name; exit.
+  If the number is 33, put "Sesame" into the English month name; exit.
+  If the number is 34, put "Kozz" into the English month name; exit.
+  If the number is 35, put "Silver" into the English month name; exit.
+  If the number is 36, put "Susa" into the English month name; exit.
+  If the number is 37, put "Storm" into the English month name; exit.
+  If the number is 38, put "Donkey" into the English month name; exit.
+  If the number is 39, put "Flour" into the English month name; exit.
+  If the number is 40, put "Regret" into the English month name; exit.
+  If the number is 41, put "Babylon" into the English month name; exit.
+  If the number is 42, put "Tongue" into the English month name; exit.
+  If the number is 43, put "Flax" into the English month name; exit.
+  If the number is 44, put "Salt" into the English month name; exit.
+  If the number is 45, put "Pear" into the English month name; exit.
+  If the number is 46, put "Bow" into the English month name; exit.
+  If the number is 47, put "Sand" into the English month name; exit.
