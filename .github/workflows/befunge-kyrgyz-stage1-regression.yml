@@ -2613,6 +2613,44 @@ jobs:
           path: ${{ runner.temp }}/four-cell-small-grid/
           retention-days: 30
 
+  native-four-cell-wide-literal-stack-mediation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin BF98 reference and challenge wide Native mediation schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_native_four_cell_wide_literal_mediation.py qa/stage1_native_four_cell_wide_literal_mediation_audit.py
+          python3 qa/stage1_native_four_cell_wide_literal_mediation_audit.py --selftest
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Measure 32 BF98 wide-input live literal interventions with one-value stack rescues
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/four-cell-wide-mediation"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/four-cell-wide-mediation:/four-cell-wide-mediation" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1250s python -u qa/stage1_native_four_cell_wide_literal_mediation.py
+            '
+          test -s "$RUNNER_TEMP/four-cell-wide-mediation/native_wide_literal_mediation_32.json"
+          python3 qa/stage1_native_four_cell_wide_literal_mediation_audit.py "$RUNNER_TEMP/four-cell-wide-mediation"
+          echo FOUR_CELL_WIDE_STACK_MEDIATION_FINITE_PASS_STAGE1_OPEN
+      - name: Preserve wide signed-input Native 32-case stack mediation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-kyrgyz-four-cell-wide-literal-mediation
+          path: ${{ runner.temp }}/four-cell-wide-mediation/
+          retention-days: 30
+
   native-four-cell-lower-literal-stack-mediation:
     runs-on: ubuntu-latest
     timeout-minutes: 22
