@@ -97,6 +97,8 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the first signed gate positions.
   If the check report is not "The checks agree with the examples.", exit.
+  Check gate zero crossings.
+  If the check report is not "The checks agree with the examples.", exit.
   Check the two digit forward choice.
   If the check report is not "The checks agree with the examples.", exit.
   Check the two digit backward choice.
