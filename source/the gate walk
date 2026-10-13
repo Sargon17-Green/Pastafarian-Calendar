@@ -49,14 +49,7 @@ To move to the next positive gate:
   If the gate walk's current index is less than 0,
     put the gate walk's current index into the positive gap index number.
   Calculate a gate interval given the positive gap index number.
-  If the gate inquiry's interval length is less than 42,
-    put 1 into the gate step budget's exhausted; exit.
-  If the gate inquiry's interval length is greater than 963,
-    put 1 into the gate step budget's exhausted; exit.
-  Put the gate walk's current position into a prospective positive day.
-  Add the gate inquiry's interval length to the prospective positive day.
-  Put the prospective positive index number into the gate walk's current index.
-  Put the prospective positive day into the gate walk's current position.
+  Publish the measured positive gate gap given the prospective positive index number and the gate inquiry's interval length.
 
 \ When moving backwards from a positive gate, its outgoing interval
 \ is positiveGap(oldIndex), not a gap at the new smaller index.
@@ -73,14 +66,7 @@ To move to the next negative gate:
   If the gate walk's current index is greater than 0,
     put the gate walk's current index into the negative gap index number.
   Calculate a gate interval given the negative gap index number.
-  If the gate inquiry's interval length is less than 42,
-    put 1 into the gate step budget's exhausted; exit.
-  If the gate inquiry's interval length is greater than 963,
-    put 1 into the gate step budget's exhausted; exit.
-  Put the gate walk's current position into a prospective negative day.
-  Subtract the gate inquiry's interval length from the prospective negative day.
-  Put the prospective negative index number into the gate walk's current index.
-  Put the prospective negative day into the gate walk's current position.
+  Publish the measured negative gate gap given the prospective negative index number and the gate inquiry's interval length.
 
 \ The signed index must fit CAL's native number type.
 \ Each step invokes the exact canonical sauce for its own day pair.
@@ -101,3 +87,27 @@ To locate a gate given a number:
     If the gate walk's requested index is less than 0, move to the next negative gate.
     If the gate step budget's exhausted is 1, exit.
   Repeat.
+
+
+\ The canonical gap length is checked before any public field changes.
+\ Separating this commit from its sauce permits cheap regression tests
+\ of invalid lengths and exact reversible Foundation crossings.
+To publish the measured positive gate gap given a number and another number:
+  If the other number is less than 42,
+    put 1 into the gate step budget's exhausted; exit.
+  If the other number is greater than 963,
+    put 1 into the gate step budget's exhausted; exit.
+  Put the gate walk's current position into a prospective positive day.
+  Add the other number to the prospective positive day.
+  Put the number into the gate walk's current index.
+  Put the prospective positive day into the gate walk's current position.
+
+To publish the measured negative gate gap given a number and another number:
+  If the other number is less than 42,
+    put 1 into the gate step budget's exhausted; exit.
+  If the other number is greater than 963,
+    put 1 into the gate step budget's exhausted; exit.
+  Put the gate walk's current position into a prospective negative day.
+  Subtract the other number from the prospective negative day.
+  Put the number into the gate walk's current index.
+  Put the prospective negative day into the gate walk's current position.
