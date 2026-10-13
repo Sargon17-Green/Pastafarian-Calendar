@@ -728,3 +728,13 @@ legacy, BigInt rive `M^5+1`, 8 erè/8 rekiperasyon,
 de nested contexts ak sauce reyèl pase. Pa gen
 PATCH 14 ni brase final davans.
 `LAST_COMPLETED_STAGE=28`, `EXPECTED_RED_VERIFIED`.
+
+## Stage 29 — PATCH 14: detou baz M pou N>M
+
+`wide_choice_patch.lua` konsève premye commit blokaj Stage 28,
+verifye diagnostics, eta ak provenance li, epi ajoute yon dezyèm
+commit `WIDE_CHOICE_REJECTION_PATCH`. Li itilize repons SAVE natif,
+konbine chif yo an lòd pwa piti an premye, epi sote rejè kontig
+avèk prèv limit olye iterasyon ki ka twò long. Pa gen okenn chwa
+wide nan ansyen modil legacy, ni melanj final 12 brase yo.
+Tès ak CI Stage 29 poko verifye.

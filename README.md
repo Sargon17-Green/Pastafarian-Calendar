@@ -1034,3 +1034,15 @@ espre, pa echèk suite pozitif la.
 
 `LAST_COMPLETED_STAGE=28`;
 `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
+
+## Stage 29 — PATCH 14: detou laj apre blokaj istorik la
+
+Nou ajoute `src/wide_choice_patch.lua` san chanje `legacy_short_only_choice.lua`
+ni `short_choice_patch.lua`. Pou `N>M`, nou premye egzekite chemen
+legacy ki bloke epi valide commit li. Apre sa, nou bati pi piti
+`k` kote `M^k>=N`; `A_0` gen pwa 1, `A_1` pwa M, elatriye.
+Nou sèvi ak limit akseptasyon `floor(M^k/N)*N`, ak yon sote
+kontig pou rejè ki ka depase 64 bit. Commit koreksyon an suiv
+commit blokaj la, avèk eta semantik apa ak prèv chif yo.
+Pou `N<=M`, `choiceSpaghetti` toujou sèvi ak PATCH 13.
+Tès ak CI natif Stage 29 rete pou verifye; pa gen `postStir12`.

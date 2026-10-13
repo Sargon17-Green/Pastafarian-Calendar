@@ -27,6 +27,7 @@ local NeighborPatch = require("neighbor_patch")
 local LegacyBiasedChoice = require("legacy_biased_choice")
 local ShortChoicePatch = require("short_choice_patch")
 local LegacyShortOnlyChoice = require("legacy_short_only_choice")
+local WideChoicePatch = require("wide_choice_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -430,8 +431,8 @@ end
 function S.choiceSpaghetti(first,direction,optionCount)
     local size=BigInt.from(optionCount)
     if BigInt.compare(size,BigInt.from("170141183460469231731687303715884105727"))>0 then
-        local blocked=LegacyShortOnlyChoice.execute(first,direction,optionCount)
-        return blocked
+        local corrected=WideChoicePatch.execute(first,direction,optionCount)
+        return corrected
     end
     local corrected=ShortChoicePatch.execute(first,direction,optionCount)
     return corrected
@@ -451,8 +452,17 @@ function S.legacyShortOnlyChoiceProbe(first,direction,optionCount)
     return LegacyShortOnlyChoice.execute(first,direction,optionCount)
 end
 
+-- PATCH 14: tras legacy laj, apre sa dezyèm commit ki bay rank laj.
+function S.wideChoicePatchProbe(first,direction,optionCount)
+    return WideChoicePatch.execute(first,direction,optionCount)
+end
+
+function S.wideChoiceCoreProbe(first,direction,optionCount)
+    return WideChoicePatch.chooseWide(first,direction,optionCount)
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 28", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 29", 0)
 end
 
 return S
