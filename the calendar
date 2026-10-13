@@ -105,6 +105,12 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check four-month weaving count.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the two-month closed weaving counts.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the all-started weaving product.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check a forty seven month started suffix.
+  If the check report is not "The checks agree with the examples.", exit.
   Check the two digit forward choice.
   If the check report is not "The checks agree with the examples.", exit.
   Check the two digit backward choice.
