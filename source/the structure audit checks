@@ -1,0 +1,94 @@
+\ Regression checks for date-output ownership and structural validity.
+\ These are short synthetic tests. They do not need the full sauce.
+\ A failed conversion must not leak fields from an earlier answer.
+
+To check complete date clearing:
+  Put 1 into the complete date status.
+  Put 5000 into the complete date answer's year number.
+  Put 10 into the complete date answer's cutlet name index.
+  Put 503 into the complete date answer's day within cutlet.
+  Put 20 into the complete date answer's month name index.
+  Put 56 into the complete date answer's day within month.
+  Reset the complete date answer.
+  If the complete date status is not 0,
+    put "Reset did not invalidate the previous date." into the check report; exit.
+  If the complete date answer's year number is not 0,
+    put "Previous year survived an invalidation." into the check report; exit.
+  If the complete date answer's cutlet name index is not 0,
+    put "Previous cutlet name survived an invalidation." into the check report; exit.
+  If the complete date answer's day within cutlet is not 0,
+    put "Previous cutlet day survived an invalidation." into the check report; exit.
+  If the complete date answer's month name index is not 0,
+    put "Previous month name survived an invalidation." into the check report; exit.
+  If the complete date answer's day within month is not 0,
+    put "Previous month day survived an invalidation." into the check report; exit.
+  If the complete date error is blank,
+    put "A failed date lacks an explicit error." into the check report; exit.
+
+To check cutlet structure invariants:
+  Put 10 into the chosen year's span count.
+  Put 3 into the selected cutlet count.
+  Put 10 into the cutlet partition's total spans.
+  Put 3 into the cutlet partition's part count.
+  Put 0 into the cutlet partition's required boundary.
+  Put "1" into a structural test rank wide quantity.
+  Select a cutlet partition from the structural test rank wide quantity.
+  Verify the selected cutlet partition.
+  If the structure audit's passed is not 1,
+    put "An ordinary cutlet partition failed the structural audit." into the check report; exit.
+  Put 11 into the chosen year's span count.
+  Verify the selected cutlet partition.
+  If the structure audit's passed is not 0,
+    put "An incorrect year span total passed the cutlet audit." into the check report; exit.
+  Put 10 into the chosen year's span count.
+  Put 4 into the selected cutlet count.
+  Verify the selected cutlet partition.
+  If the structure audit's passed is not 0,
+    put "An incorrect cutlet count passed the audit." into the check report; exit.
+  Put 3 into the selected cutlet count.
+  Select cutlet names from the structural test rank wide quantity.
+  Verify the selected cutlet names.
+  If the structure audit's passed is not 1,
+    put "Valid distinct cutlet names failed the audit." into the check report; exit.
+  Put the chosen cutlet names' first into an inspected cutlet name assignment.
+  Put 18 into the inspected cutlet name assignment's name index.
+  Verify the selected cutlet names.
+  If the structure audit's passed is not 0,
+    put "Out-of-range cutlet name passed the audit." into the check report; exit.
+  Put 4 into the selected cutlet count.
+  Verify the selected cutlet names.
+  If the structure audit's passed is not 0,
+    put "Wrong number of cutlet names passed the audit." into the check report; exit.
+
+To check month structure invariants:
+  Put 128 into the chosen year's year length.
+  Put 2 into the selected month count.
+  Put "1" into a structural test rank wide quantity.
+  Select month lengths from the structural test rank wide quantity.
+  Verify the selected month lengths.
+  If the structure audit's passed is not 1,
+    put "Valid bounded month lengths failed the audit." into the check report; exit.
+  Put 129 into the chosen year's year length.
+  Verify the selected month lengths.
+  If the structure audit's passed is not 0,
+    put "Inexact year length passed the month audit." into the check report; exit.
+  Put 128 into the chosen year's year length.
+  Put the chosen month lengths' first into an inspected month length record.
+  Put 3 into the inspected month length record's days in month.
+  Verify the selected month lengths.
+  If the structure audit's passed is not 0,
+    put "Month with fewer than four days passed the audit." into the check report; exit.
+  Put 3 into the selected month count.
+  Select month names from the structural test rank wide quantity.
+  Verify the selected month names.
+  If the structure audit's passed is not 1,
+    put "Valid distinct month names failed the audit." into the check report; exit.
+  Put the chosen month names' first into an inspected month name assignment.
+  Put 48 into the inspected month name assignment's name index.
+  Verify the selected month names.
+  If the structure audit's passed is not 0,
+    put "Out-of-range month name passed the audit." into the check report; exit.
+  Put 4 into the selected month count.
+  Verify the selected month names.
+  If the structure audit's passed is not 0,
+    put "Wrong number of month names passed the audit." into the check report; exit.
