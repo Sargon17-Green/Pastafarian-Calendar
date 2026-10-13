@@ -99,6 +99,12 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check gate zero crossings.
   If the check report is not "The checks agree with the examples.", exit.
+  Check two-month weaving.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check three-month weaving.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check four-month weaving count.
+  If the check report is not "The checks agree with the examples.", exit.
   Check the two digit forward choice.
   If the check report is not "The checks agree with the examples.", exit.
   Check the two digit backward choice.
