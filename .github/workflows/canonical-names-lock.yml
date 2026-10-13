@@ -588,8 +588,99 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage24_tests.lua .
-      - name: Regresyon normatif DISCOVERY 12 — EXPECTED_RED sèl
+      - name: Odit EXPECTED_RED istorik DISCOVERY 12
         shell: bash
         run: |
           set -euo pipefail
-          lua5.3 test/stage24_regression_tests.lua .
+          lua5.3 test/stage24_expected_red_audit.lua .
+
+  lua_stage25_smoke:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Kadna sous Stage 24 ak syntax Lua
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_fixed_neighbor.lua)" = 6cd2e1ea0b8da10249a971524373e355862a57a2
+          test "$(git hash-object src/bowl_chain_patch.lua)" = 7b8d7969f77a3c627dacd59c94087a21dab8b6d2
+          lua5.3 test/stage25_scope_tests.lua .
+      - name: Exhaustif 720 lòd + 46 gout + erè istorik konsève
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage25_exhaustive_tests.lua .
+          lua5.3 test/stage25_patch_tests.lua .
+          lua5.3 test/stage24_expected_red_audit.lua .
+
+  lua_stage25_resilience:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: BigInt 46 gout, injections, récupération, reentrance
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage25_bigint_tests.lua .
+          lua5.3 test/stage25_fault_tests.lua .
+          lua5.3 test/stage25_reentrancy_tests.lua .
+
+  lua_stage25_real:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Entegrasyon natif 46 gout ak oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage25_real_tests.lua .
+
+  lua_stage25_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye syntax ak tras legacy pa chanje
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_fixed_neighbor.lua)" = 6cd2e1ea0b8da10249a971524373e355862a57a2
+          lua5.3 test/stage25_scope_tests.lua .
+      - name: Kouri tout suite natif Stage 1 rive Stage 25
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage25_tests.lua .
