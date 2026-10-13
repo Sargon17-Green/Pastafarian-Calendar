@@ -1089,3 +1089,16 @@ Nan Stage 30, nou pa aplike PATCH 15, nou pa konstwi chèn
 pòtay, e nou pa entegre `postStir12`. Regrèsyon normatif
 negatif yo dwe rete `EXPECTED_RED` jouk Stage 31.
 CI natif Stage 30 poko verifye.
+
+### Tès Stage 30 — DISCOVERY 15
+
+`lua5.3 test/stage30_tests.lua .` kouri tout Stage 1–30.
+Tès yo kouvri 300 demann pozitif/negatif, twa BigInt ki gwo,
+8 piki erè ak 8 rekiperasyon, twa kontèks nested, ak
+twa kestyon pòtay sou sauce kanonik. Scripts wouj yo
+teste `-1`, `-2`, `-10`; `stage30_expected_red_audit.lua`
+verifye twa mesaj egzak san fè suite pozitif la echwe.
+Nan CI, kat jobs pozitif dwe pase; job
+`lua_stage30_discovery` dwe pase suite pozitif,
+apre sa li dwe echwe sèlman nan etap `EXPECTED_RED` final la.
+Verifikasyon natif poko fini.

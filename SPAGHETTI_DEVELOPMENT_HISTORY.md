@@ -772,3 +772,11 @@ Sa se defo istorik nou dwe konsève. Yon PATCH 15 pou
 korije jou negatif yo ap vini sèlman nan Stage 31.
 Pa gen rekalkil pòtay antye oswa `postStir12`.
 CI native pa ko verifye.
+
+### Prèv Stage 30 ki soumèt nan CI
+
+Sètifika planifye: 300 kestyon siy ak twa distans BigInt,
+8 erè/8 rekiperasyon, twa nested calls, twa sauce reyèl,
+kat jobs pozitif, ak twa regleman `EXPECTED_RED` egzak.
+Regresyon wouj final la dwe sèl echèk volontè CI a.
+Pa gen PATCH 15 nan production. CI poko konfime.
