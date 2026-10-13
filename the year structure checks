@@ -1,0 +1,52 @@
+\ Fast, sauce-independent structural-range regressions.
+\ These test exactly the permitted cutlet and month counts.
+\ The selection itself is exercised by optional full-calendar tests.
+\ They do not require a real Foundation gate search.
+
+To check the cutlet count boundaries:
+  Put 6 into the chosen year's span count.
+  Prepare the cutlet count range.
+  If the cutlet count range's first option is not 6,
+    put "A year with six spans may have fewer than six cutlets." into the check report; exit.
+  If the cutlet count range's last option is not 6,
+    put "A year with six spans may have more than six cutlets." into the check report; exit.
+  If the cutlet count range's option count is not 1,
+    put "Six spans must permit exactly one cutlet count." into the check report; exit.
+  Put 10 into the chosen year's span count.
+  Prepare the cutlet count range.
+  If the cutlet count range's last option is not 10,
+    put "The cutlet upper bound was not limited to the span count." into the check report; exit.
+  If the cutlet count range's option count is not 5,
+    put "Ten spans should permit five cutlet counts." into the check report; exit.
+  Put 18 into the chosen year's span count.
+  Prepare the cutlet count range.
+  If the cutlet count range's last option is not 17,
+    put "The cutlet count exceeded seventeen." into the check report; exit.
+  If the cutlet count range's option count is not 12,
+    put "A long enough year should permit twelve cutlet counts." into the check report; exit.
+
+To check the month count boundaries:
+  Put 252 into the chosen year's year length.
+  Prepare the month count range.
+  If the month count range's first option is not 3,
+    put "The minimum year needs at least three months." into the check report; exit.
+  If the month count range's last option is not 47,
+    put "The maximum month count for 252 days was wrong." into the check report; exit.
+  If the month count range's option count is not 45,
+    put "The 252-day month count interval is not 3 through 47." into the check report; exit.
+  Put 4244 into the chosen year's year length.
+  Prepare the month count range.
+  If the month count range's first option is not 35,
+    put "A 4244-day year needs at least 35 months." into the check report; exit.
+  If the month count range's last option is not 47,
+    put "A 4244-day year permits no more than 47 months." into the check report; exit.
+  If the month count range's option count is not 13,
+    put "The 4244-day month count interval is not 35 through 47." into the check report; exit.
+  Put 5778 into the chosen year's year length.
+  Prepare the month count range.
+  If the month count range's first option is not 47,
+    put "The longest year needs 47 months." into the check report; exit.
+  If the month count range's last option is not 47,
+    put "The longest year may have no more than 47 months." into the check report; exit.
+  If the month count range's option count is not 1,
+    put "The longest year must have exactly one month-count option." into the check report; exit.
