@@ -137,8 +137,9 @@ written in Plain English Programming:
 - **the structure audit** and **the structure audit checks**: independently
   verify the total gate spans of selected cutlets, the total number
   of calendar days in selected months, their permitted length
-  bounds, and the number and range of their chosen names. They also
-  check that resetting a date cannot expose fields from a prior result.
+  bounds, and the number, range and **uniqueness** of their chosen
+  names. They also check that resetting a date cannot expose fields
+  from a prior result.
 - **the complete date**: joins the independently selected year,
   cutlet lengths, cutlet names, month lengths, month names and the
   full weaving into five fields. The five fields are explicitly cleared
