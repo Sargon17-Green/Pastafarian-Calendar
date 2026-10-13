@@ -165,3 +165,13 @@ To reduce a wide number modulo another wide number:
   Repeat.
   Put the remainder wide number into the wide number.
   Normalize the wide number.
+
+
+\ The calendar's SAVE rule is not the ordinary remainder.
+\ With M = 2^127 - 1, every output must be in the range 1 through M.
+\ For nonnegative input: reduce modulo M, then replace zero with M.
+\ Signed modular subtraction is a separate future requirement.
+To keep a wide number for the sauce:
+  Put "170141183460469231731687303715884105727" into a limit wide number.
+  Reduce the wide number modulo the limit wide number.
+  If the wide number is "0", put the limit wide number into the wide number.
