@@ -1,0 +1,91 @@
+\ Wide equal choice for a requested number of options N greater than M.
+\ M is 2^127 minus 1. All values are exact decimal strings.
+\ Choose the smallest k with M^k >= N, then read k consecutive
+\ sealed answers A0,A1,...,A(k-1), least significant digit first.
+\ W = 1 + sum((A(j)-1)*M^j), with W in 1..M^k.
+\ Accept only W <= L, where L=floor(M^k/N)*N.
+\ The rejected interval is contiguous: (L, M^k].
+\ Walking forwards from a rejected W first accepts 1; walking
+\ backwards first accepts L. This equals the prescribed point-by-point
+\ walk on the circle, without a potentially enormous time-consuming loop.
+\ All source is Plain English Programming. CAL execution is unverified.
+
+A wide option work has
+  a number called digit count,
+  a number called digit index,
+  a wide quantity called period,
+  a wide quantity called place value,
+  a wide quantity called constructed answer,
+  a wide quantity called acceptance limit.
+
+The wide option work is a wide option work.
+
+\ At the end period=M^k and k is minimal for the requested N.
+To prepare a wide option given a wide quantity:
+  Put "170141183460469231731687303715884105727" into the wide option work's period.
+  Put 1 into the wide option work's digit count.
+  Loop.
+    If the wide option work's period is not numerically smaller than the wide quantity, break.
+    Put "170141183460469231731687303715884105727" into a base wide quantity.
+    Multiply the base wide quantity by the wide option work's period.
+    Add 1 to the wide option work's digit count.
+  Repeat.
+
+\ The first answer digit uses A0, not the following value.
+\ After the last digit, the answer stream is reset to A0 so repeated
+\ queries have identical results and no leaked cursor state.
+To construct the first wide answer:
+  Put "1" into the wide option work's constructed answer.
+  Put "1" into the wide option work's place value.
+  Put 1 into the wide option work's digit index.
+  Put the seal inquiry's starting answer into the seal inquiry's current answer.
+  Loop.
+    If the wide option work's digit index is greater than the wide option work's digit count, break.
+    Put the seal inquiry's current answer into a digit wide quantity.
+    Put "1" into a one wide quantity.
+    Subtract the one wide quantity from the digit wide quantity.
+    Multiply the wide option work's place value by the digit wide quantity.
+    Add the digit wide quantity to the wide option work's constructed answer.
+    Put "170141183460469231731687303715884105727" into a base wide quantity.
+    Multiply the base wide quantity by the wide option work's place value.
+    Step the sealed answer.
+    Add 1 to the wide option work's digit index.
+  Repeat.
+  Put the seal inquiry's starting answer into the seal inquiry's current answer.
+
+\ L=M^k-(M^k mod N), which never exceeds the period.
+To prepare the wide acceptance limit given a wide quantity:
+  Put the wide option work's period into the wide option work's acceptance limit.
+  Put the wide option work's period into a remaining wide quantity.
+  Reduce the remaining wide quantity modulo the wide quantity.
+  Subtract the remaining wide quantity from the wide option work's acceptance limit.
+
+\ The canonical correction for an initially rejected W must start at W.
+\ The first accepted value is exactly 1 (forward) or L (backwards),
+\ because the rejection interval has no accepted interior members.
+To skip rejected wide answers:
+  If the seal inquiry's answer direction is 1,
+    put "1" into the wide option work's constructed answer; exit.
+  Put the wide option work's acceptance limit into the wide option work's constructed answer.
+
+\ Output 1+((W-1) mod N) after any required directional rejection.
+To choose a wide option given a wide quantity:
+  Prepare a wide option given the wide quantity.
+  Construct the first wide answer.
+  Prepare the wide acceptance limit given the wide quantity.
+  If the wide option work's acceptance limit is numerically smaller than the wide option work's constructed answer,
+    skip rejected wide answers.
+  Put the wide option work's constructed answer into a result wide quantity.
+  Put "1" into a one wide quantity.
+  Subtract the one wide quantity from the result wide quantity.
+  Reduce the result wide quantity modulo the wide quantity.
+  Add 1 to the result wide quantity.
+  Put the result wide quantity into the seal inquiry's selected quantity.
+
+\ One public entrypoint covers both canonical regimes, with no
+\ loss of accuracy and no conversion of large N into a machine integer.
+To choose an equal option given a wide quantity:
+  Put "170141183460469231731687303715884105727" into a base wide quantity.
+  If the base wide quantity is numerically smaller than the wide quantity,
+    choose a wide option given the wide quantity; exit.
+  Choose a narrow quantity from the wide quantity.
