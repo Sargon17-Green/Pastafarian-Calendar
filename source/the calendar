@@ -1,5 +1,6 @@
 \ The Pastafarian Calendar, in Plain English.
-\ This first part counts days. It does not yet give a complete calendar date.
+\ The default entrypoint runs short arithmetic and structural checks.
+\ The full five-part conversion lives in the separate complete-date module.
 \ Read the README before using it.
 \ This text has not yet been tested with the CAL compiler.
 
