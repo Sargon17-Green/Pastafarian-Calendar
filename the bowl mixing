@@ -1,0 +1,252 @@
+\ The mixing of six fixed bowls by changing their temporary order.
+\ All sauce operations use exact decimal quantities.
+\ A complete round always reads one old snapshot and writes a separate new state.
+\ The last visible order is remembered; final rounds do not replace it.
+\ This file contains no CAL test results.
+
+A mixing task has
+  a number called phase,
+  a number called round index,
+  a number called position,
+  a number called chosen identity,
+  a number called previous identity,
+  a number called following identity,
+  a wide quantity called chosen old,
+  a wide quantity called previous old,
+  a wide quantity called following old,
+  a wide quantity called direct pour,
+  a wide quantity called chosen stone,
+  a wide quantity called fresh value,
+  a wide quantity called shared sauce value.
+
+The mixing task is a mixing task.
+The old bowls are a bowl state.
+The new bowls are a bowl state.
+The last visible bowl order is a bowl order.
+
+\ Taking a snapshot first is vital: no new bowl enters another calculation
+\ until the whole round has been completed.
+To remember the old bowls:
+  Put the current bowls' first bowl into the old bowls' first bowl.
+  Put the current bowls' second bowl into the old bowls' second bowl.
+  Put the current bowls' third bowl into the old bowls' third bowl.
+  Put the current bowls' fourth bowl into the old bowls' fourth bowl.
+  Put the current bowls' fifth bowl into the old bowls' fifth bowl.
+  Put the current bowls' sixth bowl into the old bowls' sixth bowl.
+
+To commit the new bowls:
+  Put the new bowls' first bowl into the current bowls' first bowl.
+  Put the new bowls' second bowl into the current bowls' second bowl.
+  Put the new bowls' third bowl into the current bowls' third bowl.
+  Put the new bowls' fourth bowl into the current bowls' fourth bowl.
+  Put the new bowls' fifth bowl into the current bowls' fifth bowl.
+  Put the new bowls' sixth bowl into the current bowls' sixth bowl.
+
+\ A bowl's identity is fixed, no matter which position it occupies.
+To read the old bowl given a number into a wide quantity:
+  If the number is 1, put the old bowls' first bowl into the wide quantity; exit.
+  If the number is 2, put the old bowls' second bowl into the wide quantity; exit.
+  If the number is 3, put the old bowls' third bowl into the wide quantity; exit.
+  If the number is 4, put the old bowls' fourth bowl into the wide quantity; exit.
+  If the number is 5, put the old bowls' fifth bowl into the wide quantity; exit.
+  If the number is 6, put the old bowls' sixth bowl into the wide quantity; exit.
+
+\ Positions refer to the CURRENT chosen permutation, not fixed identities.
+To read the ordered identity given a number into another number:
+  If the number is 1, put the chosen bowl order's first identity into the other number; exit.
+  If the number is 2, put the chosen bowl order's second identity into the other number; exit.
+  If the number is 3, put the chosen bowl order's third identity into the other number; exit.
+  If the number is 4, put the chosen bowl order's fourth identity into the other number; exit.
+  If the number is 5, put the chosen bowl order's fifth identity into the other number; exit.
+  If the number is 6, put the chosen bowl order's sixth identity into the other number; exit.
+
+\ Record the last VISIBLE order before the twelve final rounds change the
+\ working order. Seal questions will refer to this saved order later.
+To remember the final visible order:
+  Put the chosen bowl order's first identity into the last visible bowl order's first identity.
+  Put the chosen bowl order's second identity into the last visible bowl order's second identity.
+  Put the chosen bowl order's third identity into the last visible bowl order's third identity.
+  Put the chosen bowl order's fourth identity into the last visible bowl order's fourth identity.
+  Put the chosen bowl order's fifth identity into the last visible bowl order's fifth identity.
+  Put the chosen bowl order's sixth identity into the last visible bowl order's sixth identity.
+
+\ This is the only routine that writes one new bowl by its fixed identity.
+To store the mixed bowl:
+  If the mixing task's chosen identity is 1, put the mixing task's fresh value into the new bowls' first bowl; exit.
+  If the mixing task's chosen identity is 2, put the mixing task's fresh value into the new bowls' second bowl; exit.
+  If the mixing task's chosen identity is 3, put the mixing task's fresh value into the new bowls' third bowl; exit.
+  If the mixing task's chosen identity is 4, put the mixing task's fresh value into the new bowls' fourth bowl; exit.
+  If the mixing task's chosen identity is 5, put the mixing task's fresh value into the new bowls' fifth bowl; exit.
+  If the mixing task's chosen identity is 6, put the mixing task's fresh value into the new bowls' sixth bowl; exit.
+
+\ Find current, previous and next bowls in the circular chosen order.
+\ Position 1 follows position 6. Position 6 precedes position 1.
+To find the three neighboring bowls:
+  Put the mixing task's position into a position number.
+  Read the ordered identity given the position number into an identity number.
+  Put the identity number into the mixing task's chosen identity.
+  Put the position number into a previous position number.
+  If the previous position number is 1, put 7 into the previous position number.
+  Subtract 1 from the previous position number.
+  Read the ordered identity given the previous position number into the identity number.
+  Put the identity number into the mixing task's previous identity.
+  Put the position number into a following position number.
+  Add 1 to the following position number.
+  If the following position number is greater than 6, put 1 into the following position number.
+  Read the ordered identity given the following position number into the identity number.
+  Put the identity number into the mixing task's following identity.
+  Read the old bowl given the mixing task's chosen identity into the mixing task's chosen old.
+  Read the old bowl given the mixing task's previous identity into the mixing task's previous old.
+  Read the old bowl given the mixing task's following identity into the mixing task's following old.
+
+\ Visible drop positions 1..6 use wheat, barley, salt, bitter, red, wheat.
+To select the stone in a mixing position:
+  If the mixing task's position is 1, put the current stones' wheat into the mixing task's chosen stone; exit.
+  If the mixing task's position is 2, put the current stones' barley into the mixing task's chosen stone; exit.
+  If the mixing task's position is 3, put the current stones' salt into the mixing task's chosen stone; exit.
+  If the mixing task's position is 4, put the current stones' bitter into the mixing task's chosen stone; exit.
+  If the mixing task's position is 5, put the current stones' red into the mixing task's chosen stone; exit.
+  If the mixing task's position is 6, put the current stones' wheat into the mixing task's chosen stone; exit.
+
+\ The first three positions get one direct pour each.
+\ These pours are saved quantities ADDED to u; the old bowls do not change.
+\ The factors for positions 1, 2 and 3 are 3*i, 5*i and 7*i.
+To calculate the direct visible pour:
+  Put "0" into the mixing task's direct pour.
+  If the mixing task's position is greater than 3, exit.
+  Put the last visible drop into a poured wide quantity.
+  Multiply the last visible drop by the poured wide quantity.
+  Put the mixing task's chosen stone into a multiplied stone wide quantity.
+  Multiply the mixing task's chosen old by the multiplied stone wide quantity.
+  Add the multiplied stone wide quantity to the poured wide quantity.
+  Put the mixing task's position into a factor number.
+  Multiply the factor number by 2.
+  Add 1 to the factor number.
+  Multiply the factor number by the visible work's index.
+  Add the factor number to the poured wide quantity.
+  Keep the poured wide quantity for the sauce.
+  Put the poured wide quantity into the mixing task's direct pour.
+
+\ Visible mixing: u=old(B)+2*old(P)+3*old(N)+directPour+D+stone(q).
+\ new(B)=SAVE(u*u+5*old(P)*old(N)+i*q).
+To mix a bowl for a visible drop:
+  Find the three neighboring bowls.
+  Select the stone in a mixing position.
+  Calculate the direct visible pour.
+  Put the mixing task's chosen old into the mixing task's fresh value.
+  Put the mixing task's previous old into a weighted previous wide quantity.
+  Multiply the weighted previous wide quantity by 2.
+  Add the weighted previous wide quantity to the mixing task's fresh value.
+  Put the mixing task's following old into a weighted following wide quantity.
+  Multiply the weighted following wide quantity by 3.
+  Add the weighted following wide quantity to the mixing task's fresh value.
+  Add the mixing task's direct pour to the mixing task's fresh value.
+  Add the last visible drop to the mixing task's fresh value.
+  Add the mixing task's chosen stone to the mixing task's fresh value.
+  Put the mixing task's fresh value into a result wide quantity.
+  Multiply the mixing task's fresh value by the result wide quantity.
+  Put the mixing task's previous old into a neighbor product wide quantity.
+  Multiply the mixing task's following old by the neighbor product wide quantity.
+  Multiply the neighbor product wide quantity by 5.
+  Add the neighbor product wide quantity to the result wide quantity.
+  Put the visible work's index into a term number.
+  Multiply the term number by the mixing task's position.
+  Add the term number to the result wide quantity.
+  Keep the result wide quantity for the sauce.
+  Put the result wide quantity into the mixing task's fresh value.
+  Store the mixed bowl.
+
+\ A final mixing round must use SAVED S_r both to choose the order and in u.
+\ u=old(B)+3*old(P)+5*old(N)+S_r+r+q*q.
+\ new(B)=SAVE(u*u+7*old(P)*old(N)).
+To mix a bowl for a final round:
+  Find the three neighboring bowls.
+  Put the mixing task's chosen old into the mixing task's fresh value.
+  Put the mixing task's previous old into a weighted previous wide quantity.
+  Multiply the weighted previous wide quantity by 3.
+  Add the weighted previous wide quantity to the mixing task's fresh value.
+  Put the mixing task's following old into a weighted following wide quantity.
+  Multiply the weighted following wide quantity by 5.
+  Add the weighted following wide quantity to the mixing task's fresh value.
+  Add the mixing task's shared sauce value to the mixing task's fresh value.
+  Add the mixing task's round index to the mixing task's fresh value.
+  Put the mixing task's position into a squared position number.
+  Multiply the squared position number by the mixing task's position.
+  Add the squared position number to the mixing task's fresh value.
+  Put the mixing task's fresh value into a result wide quantity.
+  Multiply the mixing task's fresh value by the result wide quantity.
+  Put the mixing task's previous old into a neighbor product wide quantity.
+  Multiply the mixing task's following old by the neighbor product wide quantity.
+  Multiply the neighbor product wide quantity by 7.
+  Add the neighbor product wide quantity to the result wide quantity.
+  Keep the result wide quantity for the sauce.
+  Put the result wide quantity into the mixing task's fresh value.
+  Store the mixed bowl.
+
+\ Six results are computed from the SAME old snapshot, never in place.
+To finish one mixing round:
+  Put 1 into the mixing task's position.
+  Loop.
+    If the mixing task's position is greater than 6, break.
+    If the mixing task's phase is 1, mix a bowl for a visible drop.
+    If the mixing task's phase is 2, mix a bowl for a final round.
+    Add 1 to the mixing task's position.
+  Repeat.
+  Commit the new bowls.
+
+\ The stone row and drop D have already been computed for this index.
+To mix bowls for the visible drop:
+  Put 1 into the mixing task's phase.
+  Choose a bowl order from the last visible drop.
+  If the visible work's index is 46, remember the final visible order.
+  Remember the old bowls.
+  Finish one mixing round.
+
+\ Final round r begins by saving S_r=SAVE(sum(old bowls)+149*r).
+\ Both the permutation and all six u expressions use this one value.
+To prepare the final round given a number:
+  Put the number into the mixing task's round index.
+  Remember the old bowls.
+  Put "0" into the mixing task's shared sauce value.
+  Add the old bowls' first bowl to the mixing task's shared sauce value.
+  Add the old bowls' second bowl to the mixing task's shared sauce value.
+  Add the old bowls' third bowl to the mixing task's shared sauce value.
+  Add the old bowls' fourth bowl to the mixing task's shared sauce value.
+  Add the old bowls' fifth bowl to the mixing task's shared sauce value.
+  Add the old bowls' sixth bowl to the mixing task's shared sauce value.
+  Put the mixing task's round index into a weighted round number.
+  Multiply the weighted round number by 149.
+  Add the weighted round number to the mixing task's shared sauce value.
+  Keep the mixing task's shared sauce value for the sauce.
+  Choose a bowl order from the mixing task's shared sauce value.
+  Put 2 into the mixing task's phase.
+
+To finish one final round given a number:
+  Prepare the final round given the number.
+  Finish one mixing round.
+
+To finish twelve final rounds:
+  Put 1 into a final round number.
+  Loop.
+    If the final round number is greater than 12, break.
+    Finish one final round given the final round number.
+    Add 1 to the final round number.
+  Repeat.
+
+\ Prepare the sauce input first. This routine is shared by the regression
+\ checks and the future complete date conversion.
+To make the sauce through the visible drops:
+  Make all seven hidden drops.
+  Prepare the previous drops.
+  Initialize the six bowls.
+  Put 1 into a visible position number.
+  Loop.
+    If the visible position number is greater than 46, break.
+    Make a visible drop given the visible position number.
+    Mix bowls for the visible drop.
+    Add 1 to the visible position number.
+  Repeat.
+
+To make the complete sauce:
+  Make the sauce through the visible drops.
+  Finish twelve final rounds.
