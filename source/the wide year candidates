@@ -58,15 +58,7 @@ To verify a wide year length and span count:
 
 To decide if a wide year candidate contains a wide signed day:
   If the wide year candidate's valid is not 1, say no.
-  If the wide signed day numerically precedes the wide year candidate's closing day,
-    check the wide year candidate's opening bound given the wide signed day; exit.
-  If the wide signed day's polarity is the wide year candidate's closing day's polarity,
-    if the wide signed day's magnitude is the wide year candidate's closing day's magnitude,
-      check the wide year candidate's opening bound given the wide signed day; exit.
-  Say no.
-
-\ Strict opening bound: opening < day. Closing bound is inclusive.
-To decide if a wide year candidate's opening bound contains a wide signed day:
+  If the wide year candidate's closing day numerically precedes the wide signed day, say no.
   If the wide year candidate's opening day numerically precedes the wide signed day, say yes.
   Say no.
 
