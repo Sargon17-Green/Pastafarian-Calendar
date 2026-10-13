@@ -6,15 +6,15 @@
 To check wide quantity order:
   Put "9" into a first wide quantity.
   Put "10" into a second wide quantity.
-  If the first wide quantity is not less than the second wide quantity,
+  If the first wide quantity is not numerically smaller than the second wide quantity,
     put "The wide order check failed on different lengths." into the check report; exit.
-  If the second wide quantity is less than the first wide quantity,
+  If the second wide quantity is numerically smaller than the first wide quantity,
     put "The wide order check failed on reversed lengths." into the check report; exit.
   Put "170141183460469231731687303715884105726" into the first wide quantity.
   Put "170141183460469231731687303715884105727" into the second wide quantity.
-  If the first wide quantity is not less than the second wide quantity,
+  If the first wide quantity is not numerically smaller than the second wide quantity,
     put "The wide order check failed on equal lengths." into the check report; exit.
-  If the second wide quantity is less than the second wide quantity,
+  If the second wide quantity is numerically smaller than the second wide quantity,
     put "The wide order check failed on equality." into the check report; exit.
 
 To check wide quantity addition:
