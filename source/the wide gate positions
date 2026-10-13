@@ -73,6 +73,7 @@ To commit the prepared wide gate movement:
 \ canonical gaps, without recalculating the costly 46-drop sauce.
 \ Reject a malformed length before changing either public coordinate.
 To apply a measured wide gate gap given a number:
+  Put 0 into the wide gate movement's succeeded.
   If the number is less than 42, exit.
   If the number is greater than 963, exit.
   Convert the number to a string.
