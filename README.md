@@ -831,3 +831,48 @@ legacy chwazi 2 pandan oracle la chwazi 6 pou rank 720/id 1.
 `LAST_COMPLETED_STAGE=24` epi
 `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
 **Pa kòmanse Stage 25; pa gen PATCH 12 ni douz brase final yo.**
+
+
+## Stage 25 — PATCH 12: vwazen an swiv lòd sis bòl gout 46 la
+
+Ansyen `src/legacy_fixed_neighbor.lua` **pa chanje**. Nou ajoute
+`src/neighbor_patch.lua` ki **egzekite chemen DISCOVERY 12 la an
+premye**, valide twa commit li yo, 46 gout PATCH 11 la, ansanm ak
+prèv vrè PATCH 08 la pou permutation gout 46. Li konpare lòd sa a
+ak unrank factoradic istorik la sou rank korije a, epi li ajoute
+yon katriyèm commit `DROP46_NEIGHBOR_ORDER_PATCH`.
+Nou chwazi bòl ki vini aprè id kesyone a nan sik
+`orderAtDrop46`, pa `(queriedId%6)+1`.
+
+Pou rank 720 ak id kesyone 1, nouvo rezilta a se **6** pandan
+ansyen wout la toujou retounen **2**. Nan 720 permutation × sis
+kesyon, fonksyon PATCH 12 la matche oracle endepandan an nan
+**4,320/4,320** ka; 3,456 nan yo repare rezilta istorik,
+epi 864 lòt yo te deja matche pa aza.
+
+`nextBowlSpaghetti(drops,stones,bowls,id)` se chemen korije a;
+`neighborPatchProbe` montre kontèks kat commit yo;
+`nextInDrop46OrderProbe` verifye nwayo permutation an san
+rekalkile gout; `visibleNeighborPatchProbe(c,t,id)` bati
+46 gout natif ak tout kontèks yo; `visibleNeighborSpaghetti`
+se antre piblik korije sou jou reyèl.
+`legacyFixedNeighborProbe`, `visibleFixedNeighborProbe`,
+ak `oldNextBowlFixedNameProbe` rete istorik; okenn oracle
+pa enpòte nan production.
+
+`lua5.3 test/stage25_tests.lua .` kouvri tout Stage 1–25,
+720 permutation, chèn BigInt >256 bit negatif 46 gout/276 bòl,
+8 injections oswa falsifikasyon ak 8 rekiperasyon pwòp,
+reentrancy vre sou de envokasyon 46 gout, ak 46 gout natif.
+Odit `test/stage24_expected_red_audit.lua` konsève egzak
+mesaj wouj Stage 24 la, men li pase kòm yon tès pozitif.
+Pa gen `postStir12`, ni PATCH 13, ni seleksyon bòl.
+
+### Fèmti natif Stage 25 — GitHub Actions vèt
+
+Run `38372225320` fini avèk **25/25 jobs PASS**. Suite
+`lua_stage25_patch` pase Stage 1–25 an antye; jobs
+`lua_stage25_smoke`, `lua_stage25_resilience`,
+`lua_stage25_real` pase separeman, ansanm ak tout suites
+istorik yo. Ansyen chèn ak ansyen erè Stage 24 konsève.
+`LAST_COMPLETED_STAGE=25`; `EXPECTED_REPOSITORY_STATE=GREEN`.

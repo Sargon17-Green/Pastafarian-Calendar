@@ -632,3 +632,29 @@ rezève pou DISCOVERY 12. Prèv: 720 lòd, 4,320 vwazen,
 Fichye Stage 23 yo rete ak lojik orijinal yo; sa pa fè
 PATCH 12 oswa brase final yo antre.
 `LAST_COMPLETED_STAGE=24`, `EXPECTED_RED_VERIFIED`.
+
+
+## Stage 25 — PATCH 12: rekonsilyasyon vwazen apre gout 46
+
+`neighbor_patch.lua` rele tout chèn istorik 46 gout la
+ki rive jis nan `LEGACY_FIXED_NAME_NEIGHBOR`.
+San efase ansyen kalkil la, li verifye rank ak lòd
+permutation PATCH 08, sis bòl PATCH 11, tras legacy ak
+diagnostics, epi li ajoute katriyèm commit
+`DROP46_NEIGHBOR_ORDER_PATCH`. Eta istorik la rete
+nan `legacyNeighborSemanticState`; kontèks pitit ak
+eta BigInt posede yo pa pataje ant envokasyon.
+
+Tout 720 permutation × 6 id bay 4,320 repons ki matche
+oracle; 3,456 repare vwazen mal, 864 yo matche deja.
+BigInt negatif >256 bit, 46 gout/276 bòl, 8 piki erè
+ak 8 rekiperasyon, tès nested 46 gout ak gout reyèl
+pase sou Lua 5.3. Egzanp rank 720, id 1: legacy=2,
+PATCH 12=6. PATCH 13 ak douz brase final yo pa antre.
+
+### Fèmti Stage 25
+
+GitHub Actions `38372225320`: **25/25 jobs PASS**.
+Suite Stage 1–25 vèt, odit `EXPECTED_RED` Stage 24
+toujou egzije mesaj erè istorik egzak la sou wout legacy a.
+`LAST_COMPLETED_STAGE=25`, `EXPECTED_REPOSITORY_STATE=GREEN`.
