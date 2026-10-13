@@ -915,3 +915,16 @@ Nan CI: travay `lua_stage26_stream` dwe pase; travay
 `lua_stage26_discovery` dwe pase tout suite pozitif,
 apre sa li dwe echwe *sèlman* nan dènye step wouj la.
 Koreksyon rejection sampling rete pou Stage 27.
+
+### Fèmti Stage 26 — EXPECTED_RED natif verifye
+
+Run GitHub Actions `38375388629` fini egzakteman
+jan kontrak DISCOVERY 13 mande: **26/26 lòt jobs PASS**.
+Travay `lua_stage26_discovery` pase tout suite pozitif
+Stage 1–26, epi li echwe **sèlman** nan etap regresyon wouj final,
+ak mesaj egzak `EXPECTED_RED Stage 26 DISCOVERY 13 witness 1: modulo san rejè`.
+Nou verifye 409 repons SAVE kont oracle, 10 tras modulo,
+kat diferans normatif, uit erè/uit rekiperasyon, ak de kouran
+nested san eta pataje. Tout prèv erè a prezève pou PATCH 13.
+`LAST_COMPLETED_STAGE=26`;
+`EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.

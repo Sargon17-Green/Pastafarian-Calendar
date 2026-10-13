@@ -670,3 +670,13 @@ gen de commits, metrik ak diagnostics pou temwaye de faz yo.
 Tès oracle short path yo ak kat witness wouj yo distenge
 mechanism valid la de bias la. Stage 27 dwe ajoute rejè
 san efase chemen istorik la. CI/verification poko fini.
+
+### Fèmti DISCOVERY 13 — Stage 26
+
+GitHub Actions run `38375388629`: 26/26 travay pozitif
+vèt, `lua_stage26_discovery` pase Stage 1–26, epi echwe sèlman
+sou `EXPECTED_RED Stage 26 DISCOVERY 13 witness 1: modulo san rejè`.
+Kat witness yo te verifye pa audit, 409 repons kont oracle
+te pase, 8 fault / 8 recovery ak 2 nested streams te pase.
+Pa gen PATCH 13 nan Stage 26.
+`LAST_COMPLETED_STAGE=26`, `EXPECTED_RED_VERIFIED`.
