@@ -1,0 +1,20 @@
+\ Independent small-number checks of all six initial bowls.
+\ Foundation-Day question: calculation=1, requested=1, distance=1,
+\ sum=2, direction=2. All six expected results are small enough to
+\ verify directly by squaring the initial sums.
+
+To check the six initial Foundation bowls:
+  Prepare the Foundation sauce question.
+  Initialize the six bowls.
+  If the current bowls' first bowl is not "87617",
+    put "The initial first bowl check failed." into the check report; exit.
+  If the current bowls' second bowl is not "136163",
+    put "The initial second bowl check failed." into the check report; exit.
+  If the current bowls' third bowl is not "289447",
+    put "The initial third bowl check failed." into the check report; exit.
+  If the current bowls' fourth bowl is not "724205",
+    put "The initial fourth bowl check failed." into the check report; exit.
+  If the current bowls' fifth bowl is not "944789",
+    put "The initial fifth bowl check failed." into the check report; exit.
+  If the current bowls' sixth bowl is not "1907167",
+    put "The initial sixth bowl check failed." into the check report; exit.
