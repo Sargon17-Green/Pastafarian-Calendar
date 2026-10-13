@@ -95,6 +95,52 @@ def main():
         raise AssertionError("independent Native memory histories not retained")
     print("POSTFORK_PG_STATE_OWNERSHIP_REENTRANCY_PASS")
 
+    # A write recorded BEFORE the fork must seed the post-fork memory replay.
+    # The post-fork trace is shifted by one tick; its geometry is unchanged.
+    # Pre-fork opcode provenance is outside this auditor's trace scope.
+    def prefork_written(value):
+        case = copy.deepcopy(good)
+        case["steps"] += 1
+        case["gate"]["step"] += 1
+        for event in case["complete_postfork_trace"]:
+            event[0] += 1
+        for event in case["native_p_history"] + case["native_g_history"]:
+            event["tick"] += 1
+        case["native_p_history"].insert(0, {
+            "tick": 1, "coordinate": [701, 0], "value": str(value)
+        })
+        case["total_p_writes"] += 1
+        case["native_g_history"][0]["read_before"] = str(value)
+        case["native_g_history"][0]["returned"] = str(value)
+        return case
+
+    before7 = prefork_written(7)
+    before9 = prefork_written(9)
+    before7_snapshot = copy.deepcopy(before7)
+    before9_snapshot = copy.deepcopy(before9)
+    seven_result = audit.verify_run(before7, source)
+    nine_result = audit.verify_run(before9, source)
+    if seven_result["verified_p_writes"] != 2 or nine_result["verified_p_writes"] != 2:
+        raise AssertionError("pre-fork write not counted in Native state replay")
+    if audit.verify_run(before9, source) != nine_result:
+        raise AssertionError("pre-fork memory history changed across repeated verification")
+    if audit.verify_run(before7, source) != seven_result:
+        raise AssertionError("pre-fork memory history leaked across input order")
+
+    forged_before = copy.deepcopy(before7)
+    forged_before["native_g_history"][0]["returned"] = "9"
+    forged_before["native_g_history"][0]["read_before"] = "9"
+    reject(source, forged_before, "forged_prefork_write_read_value")
+    missing_before = copy.deepcopy(before7)
+    missing_before["native_p_history"].pop(0)
+    missing_before["total_p_writes"] -= 1
+    reject(source, missing_before, "missing_prefork_write_receipt")
+    if audit.verify_run(before7, source) != seven_result:
+        raise AssertionError("failed pre-fork verification poisoned valid memory history")
+    if before7 != before7_snapshot or before9 != before9_snapshot:
+        raise AssertionError("pre-fork verification mutated caller-owned Native evidence")
+    print("POSTFORK_PG_PREFORK_SEED_ISOLATION_2_NEGATIVE_CONTROLS_PASS")
+
 
 if __name__ == "__main__":
     main()
