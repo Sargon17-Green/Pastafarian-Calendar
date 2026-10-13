@@ -1,0 +1,212 @@
+\ Normative English source catalogue checks for all 64 names.
+\ Every canonical index must map to one fixed human-readable label.
+\ Invalid indices yield empty text rather than an unrelated name.
+\ Numeric choices never depend on these display strings.
+
+To check every English cutlet name:
+  Read the English cutlet name given 1.
+  If the English cutlet name is not "Bronze",
+    put "The English cutlet catalogue mismatched canonical index 1." into the check report; exit.
+  Read the English cutlet name given 2.
+  If the English cutlet name is not "Fox",
+    put "The English cutlet catalogue mismatched canonical index 2." into the check report; exit.
+  Read the English cutlet name given 3.
+  If the English cutlet name is not "Kidney",
+    put "The English cutlet catalogue mismatched canonical index 3." into the check report; exit.
+  Read the English cutlet name given 4.
+  If the English cutlet name is not "Lagash",
+    put "The English cutlet catalogue mismatched canonical index 4." into the check report; exit.
+  Read the English cutlet name given 5.
+  If the English cutlet name is not "Thought",
+    put "The English cutlet catalogue mismatched canonical index 5." into the check report; exit.
+  Read the English cutlet name given 6.
+  If the English cutlet name is not "Four Ninths",
+    put "The English cutlet catalogue mismatched canonical index 6." into the check report; exit.
+  Read the English cutlet name given 7.
+  If the English cutlet name is not "Palgurax",
+    put "The English cutlet catalogue mismatched canonical index 7." into the check report; exit.
+  Read the English cutlet name given 8.
+  If the English cutlet name is not "Papyrus",
+    put "The English cutlet catalogue mismatched canonical index 8." into the check report; exit.
+  Read the English cutlet name given 9.
+  If the English cutlet name is not "Cluster",
+    put "The English cutlet catalogue mismatched canonical index 9." into the check report; exit.
+  Read the English cutlet name given 10.
+  If the English cutlet name is not "Scorpion",
+    put "The English cutlet catalogue mismatched canonical index 10." into the check report; exit.
+  Read the English cutlet name given 11.
+  If the English cutlet name is not "Ash",
+    put "The English cutlet catalogue mismatched canonical index 11." into the check report; exit.
+  Read the English cutlet name given 12.
+  If the English cutlet name is not "Wheat",
+    put "The English cutlet catalogue mismatched canonical index 12." into the check report; exit.
+  Read the English cutlet name given 13.
+  If the English cutlet name is not "River",
+    put "The English cutlet catalogue mismatched canonical index 13." into the check report; exit.
+  Read the English cutlet name given 14.
+  If the English cutlet name is not "Laughter",
+    put "The English cutlet catalogue mismatched canonical index 14." into the check report; exit.
+  Read the English cutlet name given 15.
+  If the English cutlet name is not "Akkad",
+    put "The English cutlet catalogue mismatched canonical index 15." into the check report; exit.
+  Read the English cutlet name given 16.
+  If the English cutlet name is not "Horn",
+    put "The English cutlet catalogue mismatched canonical index 16." into the check report; exit.
+  Read the English cutlet name given 17.
+  If the English cutlet name is not "The Empty Jar",
+    put "The English cutlet catalogue mismatched canonical index 17." into the check report; exit.
+  Read the English cutlet name given 0.
+  If the English cutlet name is not "",
+    put "The English cutlet catalogue accepted zero." into the check report; exit.
+  Read the English cutlet name given 18.
+  If the English cutlet name is not "",
+    put "The English cutlet catalogue accepted index 18." into the check report; exit.
+
+To check every English month name:
+  Read the English month name given 1.
+  If the English month name is not "Clay",
+    put "The English month catalogue mismatched canonical index 1." into the check report; exit.
+  Read the English month name given 2.
+  If the English month name is not "Pomegranate",
+    put "The English month catalogue mismatched canonical index 2." into the check report; exit.
+  Read the English month name given 3.
+  If the English month name is not "Elbow",
+    put "The English month catalogue mismatched canonical index 3." into the check report; exit.
+  Read the English month name given 4.
+  If the English month name is not "Envy",
+    put "The English month catalogue mismatched canonical index 4." into the check report; exit.
+  Read the English month name given 5.
+  If the English month name is not "Eridu",
+    put "The English month catalogue mismatched canonical index 5." into the check report; exit.
+  Read the English month name given 6.
+  If the English month name is not "Toothpaste",
+    put "The English month catalogue mismatched canonical index 6." into the check report; exit.
+  Read the English month name given 7.
+  If the English month name is not "Three Fifths",
+    put "The English month catalogue mismatched canonical index 7." into the check report; exit.
+  Read the English month name given 8.
+  If the English month name is not "Karxumav",
+    put "The English month catalogue mismatched canonical index 8." into the check report; exit.
+  Read the English month name given 9.
+  If the English month name is not "Leopard",
+    put "The English month catalogue mismatched canonical index 9." into the check report; exit.
+  Read the English month name given 10.
+  If the English month name is not "Tin",
+    put "The English month catalogue mismatched canonical index 10." into the check report; exit.
+  Read the English month name given 11.
+  If the English month name is not "Mist",
+    put "The English month catalogue mismatched canonical index 11." into the check report; exit.
+  Read the English month name given 12.
+  If the English month name is not "Doors",
+    put "The English month catalogue mismatched canonical index 12." into the check report; exit.
+  Read the English month name given 13.
+  If the English month name is not "Spindle",
+    put "The English month catalogue mismatched canonical index 13." into the check report; exit.
+  Read the English month name given 14.
+  If the English month name is not "Rib",
+    put "The English month catalogue mismatched canonical index 14." into the check report; exit.
+  Read the English month name given 15.
+  If the English month name is not "Carob",
+    put "The English month catalogue mismatched canonical index 15." into the check report; exit.
+  Read the English month name given 16.
+  If the English month name is not "Uruk",
+    put "The English month catalogue mismatched canonical index 16." into the check report; exit.
+  Read the English month name given 17.
+  If the English month name is not "Shame",
+    put "The English month catalogue mismatched canonical index 17." into the check report; exit.
+  Read the English month name given 18.
+  If the English month name is not "Camel",
+    put "The English month catalogue mismatched canonical index 18." into the check report; exit.
+  Read the English month name given 19.
+  If the English month name is not "Copper",
+    put "The English month catalogue mismatched canonical index 19." into the check report; exit.
+  Read the English month name given 20.
+  If the English month name is not "Well",
+    put "The English month catalogue mismatched canonical index 20." into the check report; exit.
+  Read the English month name given 21.
+  If the English month name is not "Egg Yolk",
+    put "The English month catalogue mismatched canonical index 21." into the check report; exit.
+  Read the English month name given 22.
+  If the English month name is not "Star",
+    put "The English month catalogue mismatched canonical index 22." into the check report; exit.
+  Read the English month name given 23.
+  If the English month name is not "Honey",
+    put "The English month catalogue mismatched canonical index 23." into the check report; exit.
+  Read the English month name given 24.
+  If the English month name is not "Spleen",
+    put "The English month catalogue mismatched canonical index 24." into the check report; exit.
+  Read the English month name given 25.
+  If the English month name is not "Limestone",
+    put "The English month catalogue mismatched canonical index 25." into the check report; exit.
+  Read the English month name given 26.
+  If the English month name is not "Joy",
+    put "The English month catalogue mismatched canonical index 26." into the check report; exit.
+  Read the English month name given 27.
+  If the English month name is not "Fig",
+    put "The English month catalogue mismatched canonical index 27." into the check report; exit.
+  Read the English month name given 28.
+  If the English month name is not "Nineveh",
+    put "The English month catalogue mismatched canonical index 28." into the check report; exit.
+  Read the English month name given 29.
+  If the English month name is not "Frog",
+    put "The English month catalogue mismatched canonical index 29." into the check report; exit.
+  Read the English month name given 30.
+  If the English month name is not "Pitch",
+    put "The English month catalogue mismatched canonical index 30." into the check report; exit.
+  Read the English month name given 31.
+  If the English month name is not "Lamp",
+    put "The English month catalogue mismatched canonical index 31." into the check report; exit.
+  Read the English month name given 32.
+  If the English month name is not "The Closed Door",
+    put "The English month catalogue mismatched canonical index 32." into the check report; exit.
+  Read the English month name given 33.
+  If the English month name is not "Sesame",
+    put "The English month catalogue mismatched canonical index 33." into the check report; exit.
+  Read the English month name given 34.
+  If the English month name is not "Kozz",
+    put "The English month catalogue mismatched canonical index 34." into the check report; exit.
+  Read the English month name given 35.
+  If the English month name is not "Silver",
+    put "The English month catalogue mismatched canonical index 35." into the check report; exit.
+  Read the English month name given 36.
+  If the English month name is not "Susa",
+    put "The English month catalogue mismatched canonical index 36." into the check report; exit.
+  Read the English month name given 37.
+  If the English month name is not "Storm",
+    put "The English month catalogue mismatched canonical index 37." into the check report; exit.
+  Read the English month name given 38.
+  If the English month name is not "Donkey",
+    put "The English month catalogue mismatched canonical index 38." into the check report; exit.
+  Read the English month name given 39.
+  If the English month name is not "Flour",
+    put "The English month catalogue mismatched canonical index 39." into the check report; exit.
+  Read the English month name given 40.
+  If the English month name is not "Regret",
+    put "The English month catalogue mismatched canonical index 40." into the check report; exit.
+  Read the English month name given 41.
+  If the English month name is not "Babylon",
+    put "The English month catalogue mismatched canonical index 41." into the check report; exit.
+  Read the English month name given 42.
+  If the English month name is not "Tongue",
+    put "The English month catalogue mismatched canonical index 42." into the check report; exit.
+  Read the English month name given 43.
+  If the English month name is not "Flax",
+    put "The English month catalogue mismatched canonical index 43." into the check report; exit.
+  Read the English month name given 44.
+  If the English month name is not "Salt",
+    put "The English month catalogue mismatched canonical index 44." into the check report; exit.
+  Read the English month name given 45.
+  If the English month name is not "Pear",
+    put "The English month catalogue mismatched canonical index 45." into the check report; exit.
+  Read the English month name given 46.
+  If the English month name is not "Bow",
+    put "The English month catalogue mismatched canonical index 46." into the check report; exit.
+  Read the English month name given 47.
+  If the English month name is not "Sand",
+    put "The English month catalogue mismatched canonical index 47." into the check report; exit.
+  Read the English month name given 0.
+  If the English month name is not "",
+    put "The English month catalogue accepted zero." into the check report; exit.
+  Read the English month name given 48.
+  If the English month name is not "",
+    put "The English month catalogue accepted index 48." into the check report; exit.
