@@ -168,6 +168,9 @@ To count weaving completions into a wide quantity:
     put "0" into the wide quantity; exit.
   If the weaving selection's days remaining is 0,
     put "1" into the wide quantity; exit.
+  Count a short weaving suffix.
+  If the short weaving suffix's completed is 1,
+    put the short weaving suffix's completions into the wide quantity; exit.
   Make the weaving state signature.
   Put the weaving selection's state signature into a saved signature string.
   Find a cached weaving result given the saved signature string.
