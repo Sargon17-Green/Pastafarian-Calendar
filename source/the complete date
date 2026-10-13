@@ -40,6 +40,9 @@ To reset the complete date answer:
 \ Every required selection must succeed before any result is published.
 To calculate a complete date for a calendar day and another calendar day:
   Reset the complete date answer.
+  Check native day coordinate inputs given the calendar day and the other calendar day.
+  If the native date input validity is no,
+    put "The requested day is outside the currently safe 32-bit CAL range." into the complete date error; exit.
   Find the year for the calendar day and the other calendar day.
   If the year selection success is not 1,
     put "The requested Pastafarian year could not be selected." into the complete date error; exit.
