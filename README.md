@@ -111,8 +111,20 @@ written in Plain English Programming:
   order, using the shared year sauce and bowl 5 / seal 33.
   Name indices differ from the ordinal position of a month in the
   year and can require wide equal-choice arithmetic.
+- **the month weaving** and **the month weaving checks**:
+  count exact suffixes by a memoized recurrence, enforcing both
+  first-occurrence and last-occurrence order, then unrank a complete
+  weaving with bowl 4 and seal 32. The requested day's month ordinal
+  and its one-based occurrence in that month are recorded. The
+  memoized reference algorithm can still require enormous space
+  and time for realistic years with many months.
+- **the complete date**: joins the independently selected year,
+  cutlet lengths, cutlet names, month lengths, month names and the
+  full weaving into five fields. The canonical Foundation-day
+  (5000, 10, 503, 20, 56) comparison is an optional slow oracle,
+  not a demonstrated result of running the program.
 
-The source now includes **57 groups of checks**, some of which compare several
+The source now includes **60 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -134,11 +146,14 @@ The current first-stage day-count conversion and signed gate indexing still
 use CAL's 32-bit number type and need wide-number replacements for extreme
 dates and gate indices.
 
-**Not yet built:** arbitrary-precision day coordinates and gate indices;
-month weaving, the requested day's woven month position, and the final
-five-part Pastafarian date. Cutlet structures, exact month-length
-compositions and distinct month names are written in source; none has
-yet been compiled or executed by CAL.
+**The source pipeline now reaches all five date fields, but this is not
+a tested or production-ready calendar.** The CAL compiler has not run it.
+The day axis and gate indices still use 32-bit numbers. Sparse
+memoization of the month-weaving recurrence is exact but can have a
+prohibitively large state space for a real year with many months.
+Further work is required for CAL syntax validation, complete differential
+execution, large-instance performance, broad date support and resource
+ownership, even though all five stages now have source implementations.
 Year 5000, following/preceding year selection and the initial cutlet/month
 count choices are present as source but have not been compiled in CAL.
 The narrow and wide equal-choice mechanisms and gate/year-selection
@@ -223,7 +238,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English **program and check files** must be present when compiling. Select only those source files for CAL's file list: do **not** compile the extensionless `LICENSE` document, which is prose for people rather than program instructions. The ordinary `README.md` is likewise documentation, not source. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 57 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 60 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
