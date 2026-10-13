@@ -1169,7 +1169,7 @@ PATCH 13, pa nan oracle tès la. Validasyon natif poko fèt.
 
 `lua5.3 test/stage32_tests.lua .` kouvri tout Stage 1–32,
 70 tras chwa rank ak oracle endepandan, 8 kestyon BigInt
-gwo, 10 enjèksyon erè ak 10 rekiperasyon, twa nested
+gwo, 12 enjèksyon erè ak 12 rekiperasyon, twa nested
 contexts, ak de rank ki sòti nan sauce kanonik reyèl.
 Twa scripts `stage32_expected_red_1..3.lua` montre
 diferans egzak `42+rank` kont `41+rank`; audit

@@ -835,7 +835,7 @@ Tès ak CI Stage 32 poko verifye; PATCH 16 pa antre.
 ### QA DISCOVERY 16 ki soumèt nan CI
 
 70 konparezon rank oracle ak tras 4 commits; 8 gwo
-kestyon siyen BigInt; 10 defayans ak rekiperasyon;
+kestyon siyen BigInt; 12 defayans ak rekiperasyon;
 twa reentrances ak de sauce natif. Twa witness
 `EXPECTED_RED` endepandan verifye +1 anplis.
 Kat jobs CI ajoute, youn gen dènye etap wouj ki
