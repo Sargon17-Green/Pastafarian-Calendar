@@ -63,6 +63,7 @@ def main():
               "trace_file_sha256":hashlib.sha256(contents).hexdigest(),
               "native_steps":observed["steps"],
               "fork_step":observed["gate"]["step"],
+              "complete_prefork_steps":len(observed["complete_prefork_trace"]),
               "complete_postfork_steps":len(trace),
               "literal_executions":literal,
               "p_writes":observed["total_p_writes"],
@@ -76,7 +77,7 @@ def main():
     reached=sum(z["literal_executions"]>0 for z in rows)
     need(len(rows)==49 and reached==21,
          "49 full Native trajectories did not cover the 21 lower and 28 upper routes")
-    doc=dict(schema="befunge-stage1-four-cell-49-complete-native-postfork-v1",
+    doc=dict(schema="befunge-stage1-four-cell-49-complete-native-postfork-v2",
       status="FINITE_49_COMPLETE_NATIVE_TRAJECTORIES_STAGE1_OPEN",
       base_git_blob=BASE,candidate_git_blob=FOUR,
       signed_domain=list(DOMAIN),
