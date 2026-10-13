@@ -1,0 +1,82 @@
+\ Explicit ownership cleanup for all linked lists in this branch.
+\ The CAL system library has REMOVE and DEALLOCATE primitives but no
+\ catch-all DESTROY routine for an arbitrary "some things" list.
+\ A list's nodes must be detached before their memory is deallocated.
+\ Clearing dynamically allocated strings prevents stale owned buffers.
+\ Never clear a list by merely voiding its first and last pointers.
+\ All of these routines have exactly one loop each.
+
+To destroy some gate marks:
+  Loop.
+    If the gate marks are empty, break.
+    Put the gate marks' first into a gate mark.
+    Remove the gate mark from the gate marks.
+    Deallocate the gate mark.
+  Repeat.
+
+To destroy some year options:
+  Loop.
+    If the year options are empty, break.
+    Put the year options' first into a year option.
+    Remove the year option from the year options.
+    Deallocate the year option.
+  Repeat.
+
+To destroy some cutlet pieces:
+  Loop.
+    If the cutlet pieces are empty, break.
+    Put the cutlet pieces' first into a cutlet piece.
+    Remove the cutlet piece from the cutlet pieces.
+    Deallocate the cutlet piece.
+  Repeat.
+
+To destroy some cutlet name assignments:
+  Loop.
+    If the cutlet name assignments are empty, break.
+    Put the cutlet name assignments' first into a cutlet name assignment.
+    Remove the cutlet name assignment from the cutlet name assignments.
+    Deallocate the cutlet name assignment.
+  Repeat.
+
+To destroy some month length records:
+  Loop.
+    If the month length records are empty, break.
+    Put the month length records' first into a month length record.
+    Remove the month length record from the month length records.
+    Deallocate the month length record.
+  Repeat.
+
+To destroy some month name assignments:
+  Loop.
+    If the month name assignments are empty, break.
+    Put the month name assignments' first into a month name assignment.
+    Remove the month name assignment from the month name assignments.
+    Deallocate the month name assignment.
+  Repeat.
+
+To destroy some woven month states:
+  Loop.
+    If the woven month states are empty, break.
+    Put the woven month states' first into a woven month state.
+    Remove the woven month state from the woven month states.
+    Deallocate the woven month state.
+  Repeat.
+
+To destroy some woven day records:
+  Loop.
+    If the woven day records are empty, break.
+    Put the woven day records' first into a woven day record.
+    Remove the woven day record from the woven day records.
+    Deallocate the woven day record.
+  Repeat.
+
+To destroy some weave cached results:
+  Loop.
+    If the weave cached results are empty, break.
+    Put the weave cached results' first into a weave cached result.
+    Remove the weave cached result from the weave cached results.
+    Clear the weave cached result's signature.
+    Clear the weave cached result's completions.
+    Deallocate the weave cached result.
+  Repeat.
+
