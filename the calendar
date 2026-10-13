@@ -23,21 +23,48 @@ The check report is a string.
 
 To run:
   Put "The checks agree with the examples." into the check report.
-  Check the beginning.
-  Check the previous day.
-  Check the following day.
-  Check the days on both sides.
-  Check the reverse order.
-  Check the same later day.
-  Check wide quantity order.
-  Check wide quantity addition.
-  Check wide quantity subtraction.
-  Check wide quantity multiplication.
-  Check wide quantity division.
-  Check sauce saving.
-  Check sauce subtraction.
+  Run all the checks.
   Put the check report into a buffer.
   Write the buffer to "calendar-checks.txt".
+
+\ Stop at the first failed check, but always write the report in To run.
+To run all the checks:
+  Check the beginning.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the previous day.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the following day.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the days on both sides.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the reverse order.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the same later day.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check wide quantity order.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check wide quantity addition.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check wide quantity subtraction.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check wide quantity multiplication.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check wide quantity division.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check sauce saving.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check sauce subtraction.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check stones at visible drop 1.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check stones at visible drop 2.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check stones at visible drop 3.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check stones at visible drop 7.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check stones at visible drop 46.
+  If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
