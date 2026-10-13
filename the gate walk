@@ -1,0 +1,36 @@
+\ Walk along the gate positions from Foundation, gate zero.
+\ G(n)=G(n-1)+positive interval(n) for positive n.
+\ G(-n)=G(-(n-1))-negative interval(n) for positive n.
+\ Each interval comes from a complete separate sauce calculation.
+\ Very large gate indices require a future arbitrary-precision day axis.
+
+A gate walk has
+  a number called requested index,
+  a number called current index,
+  a calendar day called current position.
+
+The gate walk is a gate walk.
+
+\ Move one step towards a positive gate index.
+To move to the next positive gate:
+  Add 1 to the gate walk's current index.
+  Calculate a gate interval given the gate walk's current index.
+  Add the gate inquiry's interval length to the gate walk's current position.
+
+\ Move one step towards a negative gate index.
+To move to the next negative gate:
+  Subtract 1 from the gate walk's current index.
+  Calculate a gate interval given the gate walk's current index.
+  Subtract the gate inquiry's interval length from the gate walk's current position.
+
+\ The signed index must fit CAL's native number type.
+\ Each step invokes the exact canonical sauce for its own day pair.
+To locate a gate given a number:
+  Put the number into the gate walk's requested index.
+  Put 0 into the gate walk's current index.
+  Put -15055671 into the gate walk's current position.
+  Loop.
+    If the gate walk's current index is the gate walk's requested index, break.
+    If the gate walk's requested index is greater than 0, move to the next positive gate.
+    If the gate walk's requested index is less than 0, move to the next negative gate.
+  Repeat.
