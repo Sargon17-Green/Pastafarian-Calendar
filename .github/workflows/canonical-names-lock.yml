@@ -1063,7 +1063,79 @@ jobs:
           set -euo pipefail
           find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
           lua5.3 test/stage30_tests.lua .
-      - name: One intentional Stage 30 DISCOVERY 15 red regression
+      - name: Audit Stage 30 historical red scars after PATCH 15
         run: |
           set -euo pipefail
-          lua5.3 test/stage30_expected_red_1.lua .
+          lua5.3 test/stage30_expected_red_audit.lua .
+
+  lua_stage31_smoke:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Syntax, historical Stage 30 immutable, 301 signed day oracle cases
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_gate_question_adapter.lua)" = d7c86d6c41c61de06816c681417caa035c0e5337
+          lua5.3 test/stage31_scope_tests.lua .
+          lua5.3 test/stage31_signed_tests.lua .
+          lua5.3 test/stage30_expected_red_audit.lua .
+
+  lua_stage31_resilience:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Huge signed BigInt, ten forged errors, three nested patches
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage31_bigint_tests.lua .
+          lua5.3 test/stage31_fault_tests.lua .
+          lua5.3 test/stage31_reentrancy_tests.lua .
+
+  lua_stage31_real:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Two signed real canonical Foundation-side sauce pairs
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage31_real_tests.lua .
+
+  lua_stage31_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Full Stage 1–31 native and historical expected-red audits
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_gate_question_adapter.lua)" = d7c86d6c41c61de06816c681417caa035c0e5337
+          lua5.3 test/stage31_tests.lua .
