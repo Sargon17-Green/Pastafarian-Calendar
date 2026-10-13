@@ -8,8 +8,8 @@ import {Patch16YearLengthGuard,REAL_YEAR_MAX_PATCH} from "./patch16YearMax.ts";
 import {Patch17EqualLengthRunSorter} from "./patch17Year5000Tie.ts";
 import {patch14WideChoice} from "./patch14WideChoice.ts";
 import type {Patch14WideChoiceObservation} from "./patch14WideChoice.ts";
-import {discoverLegacyJumpGuess} from "./discovery18LegacyJump.ts";
-import type {Discovery18JumpObservation} from "./discovery18LegacyJump.ts";
+import {discoverLegacyJumpGuess,Legacy365JumpDiagnostic} from "./discovery18LegacyJump.ts";
+import type {Discovery18JumpObservation,Legacy365JumpProbe} from "./discovery18LegacyJump.ts";
 
 // PATCH18: 365-दिवसांचा जुना अंदाज telemetry म्हणून प्रत्यक्ष जतन.
 // खरे वर्ष शोधताना कोणतीही वर्ष-उडी नाही: दरवेळी SEAL11 किंवा SEAL12
@@ -263,7 +263,8 @@ export type Patch18YearWalkObservation=Readonly<{
  calculationDay:bigint;targetDay:bigint;
  legacy:Discovery18JumpObservation;
  authoritative:Patch18WalkResult;
- oldGuess:bigint;authoritativeYear:Patch18Year;
+ oldGuess:bigint;historicalSyntheticGuess:bigint;
+ realSeedGuess:Legacy365JumpProbe;authoritativeYear:Patch18Year;
  predecessorCallCount:number;predecessorSharedWrites:bigint;
  authoritativeSource:"RECOMPUTED_GATES_AND_SEAL10_11_12";
  originalSyntheticYearNotUsed:true;
@@ -271,6 +272,7 @@ export type Patch18YearWalkObservation=Readonly<{
 }>;
 export class Patch18YearWalkHandler {
  private readonly walker=new Patch18OneYearWalker();
+ private readonly ghost=new Legacy365JumpDiagnostic();
  private readonly metrics=new BaseMetricsManager();
 
  run(ctx:MonsterContext,anchorGateIndex:bigint,
@@ -297,11 +299,19 @@ export class Patch18YearWalkHandler {
   const authoritative=this.walker.walk(
    ctx.calculationDay,ctx.targetDay,positive,negative,trueYearQuestion,
    transitionQuestion,maximumSteps);
+  // Re-ask the unmodified old /365 helper with the newly VERIFIED Year5000,
+  // never with the synthetic Stage36 anchor as the authoritative seed.
+  const realSeedGuess=this.ghost.measure(Object.freeze({
+   number:authoritative.seed.number,
+   firstDay:authoritative.seed.openGateDay+1n,
+   lastDay:authoritative.seed.closeGateDay
+  }),ctx.targetDay);
   const predecessorCallCount=legacy.predecessorCallCount+
     authoritative.realPredecessorCount;
   const output=Object.freeze({
    calculationDay:ctx.calculationDay,targetDay:ctx.targetDay,
-   legacy,authoritative,oldGuess:legacy.ghostYearNumber,
+   legacy,authoritative,oldGuess:realSeedGuess.estimatedYearNumber,
+   historicalSyntheticGuess:legacy.ghostYearNumber,realSeedGuess,
    authoritativeYear:authoritative.selected,predecessorCallCount,
    predecessorSharedWrites:legacy.predecessorSharedWrites+
      authoritative.realPredecessorWrites,
@@ -311,12 +321,14 @@ export class Patch18YearWalkHandler {
   ctx.branchTrace.push("PATCH_18_EXECUTE_OLD_365_GHOST_AND_ALL_STAGE36_SCARS");
   ctx.branchTrace.push("PATCH_18_PHYSICALLY_RECOMPUTE_SIGNED_GATES");
   ctx.branchTrace.push("PATCH_18_REAL_YEAR5000_FROM_ACTUAL_GATE_PAIRS");
+  ctx.branchTrace.push("PATCH_18_OLD_365_TELEMETRY_REASK_TRUE_SEED");
   ctx.branchTrace.push("PATCH_18_STEP_SEAL11_12_ONE_YEAR_AT_A_TIME");
   this.metrics.bump(ctx,"patch18.calls");
   ctx.metrics.set("patch18.real_gate_questions",
     BigInt(authoritative.realGateQuestionCalls));
   ctx.metrics.set("patch18.actual_steps",BigInt(authoritative.steps.length));
-  ctx.metrics.set("patch18.old_guess",legacy.ghostYearNumber);
+  ctx.metrics.set("patch18.old_guess",realSeedGuess.estimatedYearNumber);
+  ctx.metrics.set("patch18.synthetic_old_guess",legacy.ghostYearNumber);
   ctx.metrics.set("patch18.actual_year",authoritative.selected.number);
   ctx.metrics.set("patch18.full_predecessor_58_write_sequences",
     BigInt(predecessorCallCount));

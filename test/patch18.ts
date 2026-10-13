@@ -81,6 +81,9 @@ check(forward.authoritative.forwardSteps===2&&
  forward.authoritative.legacyGuessUsedForNavigation===false&&
  forward.authoritative.gateProvenance==="PHYSICALLY_RECOMPUTED_SIGNED_GATES"&&
  forward.legacy.guess.role==="TELEMETRY_ONLY"&&
+ forward.realSeedGuess.role==="TELEMETRY_ONLY"&&
+ forward.realSeedGuess.anchor.firstDay===seed.openGateDay+1n&&
+ forward.historicalSyntheticGuess===forward.legacy.ghostYearNumber&&
  forward.originalSyntheticYearNotUsed===true&&
  forward.authoritative.realGateQuestionCalls===positiveCount+negativeCount&&
  forward.authoritative.realYearQuestionCalls===3&&
@@ -127,7 +130,7 @@ try{
   oldYear,fakeSeed,fakeTie,plus,minus,trueYear,transition,1);
  assertYear(noisy.authoritativeYear,next1,
    "nonsense legacy guess cannot affect authoritative year");
- check(noisy.oldGuess===-9999999999999999n&&ghostCalls===1&&
+ check(noisy.oldGuess===-9999999999999999n&&ghostCalls===2&&
    noisy.authoritative.forwardSteps===1,
   "physically called old method remained telemetry only");
 }finally{Legacy365JumpGuessAdapter.prototype.oldJumpGuess=old;}
