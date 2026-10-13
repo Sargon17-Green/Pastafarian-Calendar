@@ -1,0 +1,95 @@
+\ Precise gate-index sauce inputs, independent of the full sauce.
+\ These quick checks do not run the costly 46-drop pipeline.
+\ A signed index is NOT an absolute day. Index -1 must give the
+\ pair (Foundation, Foundation-1); index +1 uses Foundation+1.
+\ Large-index vectors include 49-digit signed day coordinates.
+
+The sample gate index is a wide signed day.
+The sample gate magnitude is a wide quantity.
+
+To check wide gate input counters:
+  Put "1" into the sample gate magnitude.
+  Set the sample gate index from the sample gate magnitude given -1.
+  Prepare a wide gate sauce question given the sample gate index.
+  If the wide calendar example's calculation count is not "1",
+    put "Wide gate source calculation count failed case 1." into the check report; exit.
+  If the wide calendar example's requested count is not "2",
+    put "Wide gate source requested count failed case 1." into the check report; exit.
+  If the wide calendar example's day distance is not "2",
+    put "Wide gate source distance failed case 1." into the check report; exit.
+  If the wide calendar example's day sum is not "3",
+    put "Wide gate source sum failed case 1." into the check report; exit.
+  If the wide calendar example's day direction is not 1,
+    put "Wide gate source direction failed case 1." into the check report; exit.
+  Put "1" into the sample gate magnitude.
+  Set the sample gate index from the sample gate magnitude given 1.
+  Prepare a wide gate sauce question given the sample gate index.
+  If the wide calendar example's calculation count is not "1",
+    put "Wide gate source calculation count failed case 2." into the check report; exit.
+  If the wide calendar example's requested count is not "3",
+    put "Wide gate source requested count failed case 2." into the check report; exit.
+  If the wide calendar example's day distance is not "2",
+    put "Wide gate source distance failed case 2." into the check report; exit.
+  If the wide calendar example's day sum is not "4",
+    put "Wide gate source sum failed case 2." into the check report; exit.
+  If the wide calendar example's day direction is not 3,
+    put "Wide gate source direction failed case 2." into the check report; exit.
+  Put "1000000000000000000000000000000000000000000000000" into the sample gate magnitude.
+  Set the sample gate index from the sample gate magnitude given -1.
+  Prepare a wide gate sauce question given the sample gate index.
+  If the wide calendar example's calculation count is not "1",
+    put "Wide gate source calculation count failed case 3." into the check report; exit.
+  If the wide calendar example's requested count is not "2000000000000000000000000000000000000000000000000",
+    put "Wide gate source requested count failed case 3." into the check report; exit.
+  If the wide calendar example's day distance is not "1000000000000000000000000000000000000000000000001",
+    put "Wide gate source distance failed case 3." into the check report; exit.
+  If the wide calendar example's day sum is not "2000000000000000000000000000000000000000000000001",
+    put "Wide gate source sum failed case 3." into the check report; exit.
+  If the wide calendar example's day direction is not 1,
+    put "Wide gate source direction failed case 3." into the check report; exit.
+  Put "1000000000000000000000000000000000000000000000000" into the sample gate magnitude.
+  Set the sample gate index from the sample gate magnitude given 1.
+  Prepare a wide gate sauce question given the sample gate index.
+  If the wide calendar example's calculation count is not "1",
+    put "Wide gate source calculation count failed case 4." into the check report; exit.
+  If the wide calendar example's requested count is not "2000000000000000000000000000000000000000000000001",
+    put "Wide gate source requested count failed case 4." into the check report; exit.
+  If the wide calendar example's day distance is not "1000000000000000000000000000000000000000000000001",
+    put "Wide gate source distance failed case 4." into the check report; exit.
+  If the wide calendar example's day sum is not "2000000000000000000000000000000000000000000000002",
+    put "Wide gate source sum failed case 4." into the check report; exit.
+  If the wide calendar example's day direction is not 3,
+    put "Wide gate source direction failed case 4." into the check report; exit.
+
+To check invalid zero gate indices:
+  Put "0" into the sample gate magnitude.
+  Set the sample gate index from the sample gate magnitude given -1.
+  Put 999 into the gate inquiry's interval length.
+  Calculate a gate interval for the sample gate index.
+  If the gate inquiry's interval length is not 0,
+    put "A signed-wide gate index zero was treated as a gap." into the check report; exit.
+  Calculate a gate interval given 0.
+  If the gate inquiry's interval length is not 0,
+    put "A native gate index zero was treated as a gap." into the check report; exit.
+  Calculate a gate interval given 400000001.
+  If the gate inquiry's interval length is not 0,
+    put "An unsafe positive native gate index was accepted." into the check report; exit.
+  Calculate a gate interval given -400000001.
+  If the gate inquiry's interval length is not 0,
+    put "An unsafe negative native gate index was accepted." into the check report; exit.
+
+\ Optional SLOW integration: compare completed signed-wide gate
+\ sauce against the canonical positive and negative first intervals.
+To check wide gate interval positive one:
+  Put "1" into the sample gate magnitude.
+  Set the sample gate index from the sample gate magnitude given 1.
+  Calculate a gate interval for the sample gate index.
+  If the gate inquiry's interval length is not 345,
+    put "The complete wide positive gate interval should be 345." into the check report; exit.
+
+To check wide gate interval negative one:
+  Put "1" into the sample gate magnitude.
+  Set the sample gate index from the sample gate magnitude given -1.
+  Calculate a gate interval for the sample gate index.
+  If the gate inquiry's interval length is not 503,
+    put "The complete wide negative gate interval should be 503." into the check report; exit.
