@@ -1,0 +1,27 @@
+\ Feed arbitrary-precision signed day counters into the real sauce.
+\ The existing 46 visible drops and six-bowl mixer already accept
+\ five decimal-wide counters; they do not require native day numbers.
+\ This adapter is a limited but real integration point for wide dates.
+\ It does not migrate gate coordinates, year traversal or month layout.
+\
+\ The sauce input's five fields are fully overwritten on each call.
+\ Day direction is the only small integer; the other fields are copied
+\ as decimal-wide quantities without conversion to machine integers.
+\ The calculation reads the chosen input pair, then makes the same
+\ deterministic complete sauce used by native-day calculations.
+\ CAL compilation and large-coordinate sauce execution are pending.
+
+To copy a wide calendar question into the sauce input:
+  Put the wide calendar question's calculation count into the sauce input's calculation count.
+  Put the wide calendar question's requested count into the sauce input's requested count.
+  Put the wide calendar question's day distance into the sauce input's distance count.
+  Put the wide calendar question's day sum into the sauce input's sum count.
+  Convert the wide calendar question's day direction to a string.
+  Put the string into the sauce input's direction count.
+
+\ Compute the complete, canonical sauce from signed-wide day inputs.
+\ No native calendar-day or native day-count variable is involved.
+To make the complete sauce for a wide calendar question:
+  Answer the wide calendar question.
+  Copy the wide calendar question into the sauce input.
+  Make the complete sauce.
