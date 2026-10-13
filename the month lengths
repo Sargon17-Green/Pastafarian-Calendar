@@ -45,7 +45,7 @@ The month length work is a month length work.
 To count month lengths given a number and another number:
   Put "0" into the month length work's count result.
   If the other number is 0,
-    count the empty month suffix; exit.
+    count the empty month suffix given the number; exit.
   If the other number is less than 0, exit.
   Put the number into the month length work's extra days.
   Put the other number into a minimum month days number.
@@ -69,7 +69,7 @@ To count month lengths given a number and another number:
   Put the month length work's positive terms into the month length work's count result.
   Subtract the month length work's negative terms from the month length work's count result.
 
-To count the empty month suffix:
+To count the empty month suffix given a number:
   If the number is 0, put "1" into the month length work's count result.
 
 \ The current inclusion/exclusion term is
