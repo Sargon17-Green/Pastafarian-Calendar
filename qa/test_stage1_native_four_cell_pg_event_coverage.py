@@ -231,6 +231,88 @@ def prefork_provenance_regression():
     print("NATIVE_PREFORK_ALL_OPCODES_SEVEN_FALSIFICATIONS_REJECT_PASS")
 
 
+
+def gate_anchor_regression():
+    # Genuine pinned physical | at (951,1335); two executed pre-fork
+    # opcodes; 514 post-fork opcodes including p and g.
+    row0=b" "*10+b"p"+b" "*9+b"g"+b" "*600
+    source=[row0]+[b""]*1333+[b" "*951+b"0",b" "*950+b"p||"]
+    trace=[[step+3,step,0,1,0,source[0][step],0]
+           for step in range(514)]
+    trace[0]=[3,951,1334,0,-1,ord("0"),0]
+    run=dict(status="normal",remaining_ips=0,steps=516,
+        gate=dict(step=2,original=1,executed=1),
+        complete_prefork_trace=[[1,950,1335,1,0,ord("p"),0],
+                                [2,951,1335,1,0,ord("|"),0]],
+        complete_postfork_trace=trace,
+        first_512_motion=[entry[1:5] for entry in trace[:512]],
+        native_p_history=[dict(tick=1,coordinate=[701,0],value="7"),
+                          dict(tick=13,coordinate=[700,0],value="7")],
+        native_g_history=[dict(tick=23,coordinate=[701,0],
+                               read_before="7",returned="7")],
+        total_p_writes=2,total_g_reads=1)
+    preserved=copy.deepcopy(run)
+    positive=audit.verify_run(run,source,require_prefork=True,
+                               require_gate_anchor=True)
+    if positive["verified_prefork_executed_steps"]!=2:
+        raise AssertionError("physical gate Native pretrace not verified")
+    print("GATE_ANCHOR_STRICT_V2_POSITIVE_PASS")
+
+    def shift_first_x(r):
+        r["complete_postfork_trace"][0][1]=952
+        r["complete_postfork_trace"][0][5]=32
+    def flip_first_delta(r):
+        r["complete_postfork_trace"][0][4]=1
+    def flip_gate_operand(r):
+        r["gate"]["executed"]=0
+    def shift_gate_coordinate(r):
+        r["complete_prefork_trace"][-1][1]=952
+    def skip_first_cell(r):
+        r["complete_postfork_trace"][0][2]=1332
+        r["complete_postfork_trace"][0][5]=32
+    for name,mutate in (
+        ("wrong_postfork_x",shift_first_x),
+        ("wrong_postfork_delta",flip_first_delta),
+        ("wrong_branch_operand",flip_gate_operand),
+        ("wrong_prefork_gate_x",shift_gate_coordinate),
+        ("skipped_physical_first_cell",skip_first_cell)):
+        bad=copy.deepcopy(run)
+        mutate(bad)
+        bad["first_512_motion"][0]=bad["complete_postfork_trace"][0][1:5]
+        # Prove rejection comes from the new physical gate invariant.
+        audit.verify_run(bad,source,require_prefork=True,
+                         require_gate_anchor=False)
+        try:
+            audit.verify_run(bad,source,require_prefork=True,
+                             require_gate_anchor=True)
+        except AssertionError:
+            print("GATE_ANCHOR_EXPECTED_REJECTION",name)
+        else:
+            raise AssertionError("forged physical | passed gate anchor: "+name)
+
+    # Legacy evidence without pre-fork instructions must never claim that
+    # a p-overwritten physical | was executed, even if its post-route fits.
+    legacy=copy.deepcopy(run)
+    legacy.pop("complete_prefork_trace")
+    legacy["native_p_history"][0]["coordinate"]=[951,1335]
+    legacy["native_p_history"][0]["value"]="32"
+    legacy["native_g_history"][0]["read_before"]="32"
+    legacy["native_g_history"][0]["returned"]="32"
+    audit.verify_run(legacy,source,require_prefork=False,
+                     require_gate_anchor=False)
+    try:
+        audit.verify_run(legacy,source,require_prefork=False,
+                         require_gate_anchor=True)
+    except AssertionError:
+        print("GATE_ANCHOR_EXPECTED_REJECTION","legacy_overwritten_gate")
+    else:
+        raise AssertionError("overwritten physical | passed legacy check")
+    if run!=preserved:
+        raise AssertionError("physical gate verifier mutated caller-owned data")
+    print("GATE_ANCHOR_SIX_TARGETED_FALSIFICATIONS_REJECT_PASS")
+
+
 if __name__ == "__main__":
     main()
     prefork_provenance_regression()
+    gate_anchor_regression()
