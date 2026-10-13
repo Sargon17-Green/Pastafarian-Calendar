@@ -1,0 +1,21 @@
+\ Slow integration oracle for the canonical Foundation-Day cutlet.
+\ The full original date tuple for calculation and target at Foundation is
+\ (year 5000, cutlet 10, day-in-cutlet 503, month 20, day-in-month 56).
+\ Only the year and cutlet fields are currently available to compare.
+\ This test performs real gate scans and the entire year structure sauce.
+\ It is excluded from the default short check runner.
+
+To check the complete Foundation cutlet:
+  Find the year for -15055671 and -15055671.
+  If the year selection success is not 1,
+    put "The Foundation year was not found before cutlet selection." into the check report; exit.
+  If the current year number is not 5000,
+    put "The Foundation cutlet is not in year 5000." into the check report; exit.
+  Choose the cutlet structure for the selected year.
+  If the cutlet partition's valid selection is not 1,
+    put "The Foundation cutlet partition could not be chosen." into the check report; exit.
+  Resolve the cutlet of the target day.
+  If the requested cutlet number is not 10,
+    put "Foundation should lie in cutlet 10." into the check report; exit.
+  If the requested day in cutlet is not 503,
+    put "Foundation should be day 503 of cutlet 10." into the check report; exit.
