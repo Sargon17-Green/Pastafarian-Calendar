@@ -55,15 +55,17 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check sauce subtraction.
   If the check report is not "The checks agree with the examples.", exit.
-  Check stones at visible drop 1.
+  Check the seed stones.
   If the check report is not "The checks agree with the examples.", exit.
-  Check stones at visible drop 2.
+  Check the second stone row.
   If the check report is not "The checks agree with the examples.", exit.
-  Check stones at visible drop 3.
+  Check the third stone row.
   If the check report is not "The checks agree with the examples.", exit.
-  Check stones at visible drop 7.
+  Check the seventh stone row.
   If the check report is not "The checks agree with the examples.", exit.
-  Check stones at visible drop 46.
+  Check the final stone row.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the seven Foundation hidden drops.
   If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
