@@ -1,0 +1,129 @@
+\ Reading an answer from the six finished bowls with a seal.
+\ These routines implement the narrow-choice part of sections M and N.
+\ The successor of bowl B is found in the saved visible-drop-46 order,
+\ NOT in the temporary order of any of the twelve final mixing rounds.
+\ This file does not implement wide choices where N is greater than M.
+
+A seal inquiry has
+  a number called bowl identity,
+  a number called seal number,
+  a number called following identity,
+  a number called answer direction,
+  a wide quantity called starting answer,
+  a wide quantity called direction answer,
+  a wide quantity called current answer,
+  a wide quantity called acceptance ceiling,
+  a wide quantity called selected quantity.
+
+The seal inquiry is a seal inquiry.
+
+\ Read the completed bowl Q[B] by its fixed identity.
+To read the finished bowl given a number into a wide quantity:
+  If the number is 1, put the current bowls' first bowl into the wide quantity; exit.
+  If the number is 2, put the current bowls' second bowl into the wide quantity; exit.
+  If the number is 3, put the current bowls' third bowl into the wide quantity; exit.
+  If the number is 4, put the current bowls' fourth bowl into the wide quantity; exit.
+  If the number is 5, put the current bowls' fifth bowl into the wide quantity; exit.
+  If the number is 6, put the current bowls' sixth bowl into the wide quantity; exit.
+
+\ Read the fixed identity at one position of the stored final-visible order.
+To read the remembered identity given a number into another number:
+  If the number is 1, put the last visible bowl order's first identity into the other number; exit.
+  If the number is 2, put the last visible bowl order's second identity into the other number; exit.
+  If the number is 3, put the last visible bowl order's third identity into the other number; exit.
+  If the number is 4, put the last visible bowl order's fourth identity into the other number; exit.
+  If the number is 5, put the last visible bowl order's fifth identity into the other number; exit.
+  If the number is 6, put the last visible bowl order's sixth identity into the other number; exit.
+
+\ Find the bowl immediately after B in the original circular order.
+\ This routine never reads the current working mixing order.
+To find the following fixed bowl:
+  Put 1 into an order position number.
+  Loop.
+    If the order position number is greater than 6, break.
+    Read the remembered identity given the order position number into an identity number.
+    If the identity number is the seal inquiry's bowl identity, break.
+    Add 1 to the order position number.
+  Repeat.
+  Add 1 to the order position number.
+  If the order position number is greater than 6, put 1 into the order position number.
+  Read the remembered identity given the order position number into an identity number.
+  Put the identity number into the seal inquiry's following identity.
+
+\ A0=SAVE((Q[B]+z+181)^2+179*Q[next]+z).
+To calculate the first sealed answer:
+  Find the following fixed bowl.
+  Read the finished bowl given the seal inquiry's bowl identity into a sum wide quantity.
+  Add the seal inquiry's seal number to the sum wide quantity.
+  Add 181 to the sum wide quantity.
+  Put the sum wide quantity into a result wide quantity.
+  Multiply the sum wide quantity by the result wide quantity.
+  Read the finished bowl given the seal inquiry's following identity into a following wide quantity.
+  Multiply the following wide quantity by 179.
+  Add the following wide quantity to the result wide quantity.
+  Add the seal inquiry's seal number to the result wide quantity.
+  Keep the result wide quantity for the sauce.
+  Put the result wide quantity into the seal inquiry's starting answer.
+  Put the result wide quantity into the seal inquiry's current answer.
+
+\ D=SAVE((A0+z+194)^2+193*A0+197*Q[6]).
+\ An odd D moves forwards; an even D moves backwards.
+To choose the sealed answer direction:
+  Put the seal inquiry's starting answer into a sum wide quantity.
+  Add the seal inquiry's seal number to the sum wide quantity.
+  Add 194 to the sum wide quantity.
+  Put the sum wide quantity into a result wide quantity.
+  Multiply the sum wide quantity by the result wide quantity.
+  Put the seal inquiry's starting answer into a weighted wide quantity.
+  Multiply the weighted wide quantity by 193.
+  Add the weighted wide quantity to the result wide quantity.
+  Put the current bowls' sixth bowl into the weighted wide quantity.
+  Multiply the weighted wide quantity by 197.
+  Add the weighted wide quantity to the result wide quantity.
+  Keep the result wide quantity for the sauce.
+  Put the result wide quantity into the seal inquiry's direction answer.
+  Put "2" into a two wide quantity.
+  Reduce the result wide quantity modulo the two wide quantity.
+  Put -1 into the seal inquiry's answer direction.
+  If the result wide quantity is "1", put 1 into the seal inquiry's answer direction.
+
+\ Set a bowl identity from 1 to 6 and a nonnegative seal number first.
+To begin a sealed inquiry:
+  Calculate the first sealed answer.
+  Choose the sealed answer direction.
+
+\ The exact successor A(k+1) is SAVE(A(k) +/- 1) on 1..M.
+\ It is useful when a later operation needs the full answer stream.
+To step the sealed answer:
+  If the seal inquiry's answer direction is 1,
+    add 1 to the seal inquiry's current answer; keep the seal inquiry's current answer for the sauce; exit.
+  Put "1" into a one wide quantity.
+  Subtract the one wide quantity from the seal inquiry's current answer with sauce wrapping.
+
+\ A narrow choice has N in the inclusive interval 1..M.
+\ The acceptance ceiling is L=M-(M mod N).
+To prepare a narrow choice of a wide quantity:
+  Put "170141183460469231731687303715884105727" into the seal inquiry's acceptance ceiling.
+  Put the seal inquiry's acceptance ceiling into a remainder wide quantity.
+  Reduce the remainder wide quantity modulo the wide quantity.
+  Subtract the remainder wide quantity from the seal inquiry's acceptance ceiling.
+
+\ Rejected answers are a single contiguous interval (L, M].
+\ If A0 falls there, a forward walk first accepts at 1, while a
+\ backward walk first accepts at L. This skips only rejected answers;
+\ it is exactly equivalent to walking one by one around the M-cycle.
+To choose a narrow quantity from a wide quantity:
+  Prepare a narrow choice of the wide quantity.
+  If the seal inquiry's acceptance ceiling is numerically smaller than the seal inquiry's current answer,
+    skip the rejected sealed answers.
+  Put "1" into a one wide quantity.
+  Put the seal inquiry's current answer into a result wide quantity.
+  Subtract the one wide quantity from the result wide quantity.
+  Reduce the result wide quantity modulo the wide quantity.
+  Add 1 to the result wide quantity.
+  Put the result wide quantity into the seal inquiry's selected quantity.
+
+To skip the rejected sealed answers:
+  If the seal inquiry's answer direction is 1,
+    put "1" into the seal inquiry's current answer; exit.
+  Put the seal inquiry's acceptance ceiling into the seal inquiry's current answer.
