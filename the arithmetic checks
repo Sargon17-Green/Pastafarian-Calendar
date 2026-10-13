@@ -92,3 +92,26 @@ To check sauce saving:
   Keep the value wide number for the sauce.
   If the value wide number is not "170141183460469231731687303715884105727",
     put "The sauce SAVE check failed for twice M." into the check report; exit.
+
+
+To check sauce subtraction:
+  Put "2" into a first wide number.
+  Put "1" into a second wide number.
+  Subtract the first wide number from the second wide number with sauce wrapping.
+  If the second wide number is not "170141183460469231731687303715884105726",
+    put "The sauce subtraction check failed for a negative difference." into the check report; exit.
+  Put "1" into the first wide number.
+  Put "2" into the second wide number.
+  Subtract the first wide number from the second wide number with sauce wrapping.
+  If the second wide number is not "1",
+    put "The sauce subtraction check failed for a positive difference." into the check report; exit.
+  Put "1" into the first wide number.
+  Put "1" into the second wide number.
+  Subtract the first wide number from the second wide number with sauce wrapping.
+  If the second wide number is not "170141183460469231731687303715884105727",
+    put "The sauce subtraction check failed for a zero difference." into the check report; exit.
+  Put "170141183460469231731687303715884105727" into the first wide number.
+  Put "1" into the second wide number.
+  Subtract the first wide number from the second wide number with sauce wrapping.
+  If the second wide number is not "1",
+    put "The sauce subtraction check failed for the largest negative difference." into the check report; exit.
