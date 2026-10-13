@@ -1,0 +1,262 @@
+\ Select the complete month weaving with bowl 4 and seal 32.
+\ Each month occurs exactly as many times as its chosen length.
+\ The first occurrence of month 1 precedes that of month 2, etc.
+\ The last occurrence of month 1 also precedes that of month 2, etc.
+\ These are two independent restrictions; BOTH must be enforced.
+\
+\ Exact completion recurrence:
+\ F(r) = sum over eligible month i of F(r with r[i] reduced by one).
+\ F(0,...,0)=1. A candidate is eligible when:
+\   1. its remaining count is positive;
+\   2. it has already appeared, or is the next never-seen month;
+\   3. if this is its last occurrence, its ordinal is the smallest
+\      month which has not yet finished.
+\ Thus the first and last occurrences each follow 1..m.
+\
+\ A memo table keyed by the exact vector of remaining counts avoids
+\ recomputing the same suffix. Strings have separators between counts,
+\ so states never collide. All counts are arbitrary-precision strings.
+\ Unranking visits candidates 1..m in order and skips complete blocks.
+\ The chosen weaving is stored, not approximated by monthly ranges.
+\
+\ LIMITATION: sparse memoization can still use prohibitive memory for
+\ 47 months and long years. This is an exact reference implementation,
+\ not an optimized large-instance release. CAL compilation is unverified.
+
+A woven month state is a thing with
+  a number called ordinal,
+  a number called total days,
+  a number called remaining days.
+
+A woven day record is a thing with
+  a number called month ordinal.
+
+A weave cached result is a thing with
+  a string called signature,
+  a wide quantity called completions.
+
+The woven month states are some woven month states.
+The chosen woven days are some woven day records.
+The weave completion cache is some weave cached results.
+
+The examined woven month state is a woven month state.
+The examined woven day record is a woven day record.
+The matched weave result is a weave cached result.
+
+A weaving selection has
+  a number called days remaining,
+  a number called already started,
+  a number called already finished,
+  a number called candidate ordinal,
+  a number called candidate legal,
+  a number called selected ordinal,
+  a number called position,
+  a number called target position,
+  a number called selection success,
+  a wide quantity called total completions,
+  a wide quantity called current rank,
+  a string called state signature.
+
+The weaving selection is a weaving selection.
+The woven requested month ordinal is a number.
+The woven requested day in month is a number.
+
+\ Read month lengths into independent state records without modifying
+\ the selected year lengths. Each list has month indices 1..m.
+To prepare the woven month states:
+  Destroy the woven month states.
+  Put 0 into the weaving selection's days remaining.
+  Put 1 into a month ordinal number.
+  Put the chosen month lengths' first into an examined month length record.
+  Loop.
+    If the examined month length record is nil, break.
+    Allocate memory for a woven month state.
+    Put the month ordinal number into the woven month state's ordinal.
+    Put the examined month length record's days in month into the woven month state's total days.
+    Put the woven month state's total days into the woven month state's remaining days.
+    Append the woven month state to the woven month states.
+    Add the woven month state's total days to the weaving selection's days remaining.
+    Add 1 to the month ordinal number.
+    Put the examined month length record's next into the examined month length record.
+  Repeat.
+
+\ Lookup always uses a month ordinal, never a name index.
+To find the woven month state given a number:
+  Put the woven month states' first into the examined woven month state.
+  Loop.
+    If the examined woven month state is nil, break.
+    If the examined woven month state's ordinal is the number, break.
+    Put the examined woven month state's next into the examined woven month state.
+  Repeat.
+
+\ Every started month is a prefix 1..f. Every finished month is 1..d.
+\ These facts follow from the prescribed first and last order.
+To inspect the woven month status:
+  Put 0 into the weaving selection's already started.
+  Put 0 into the weaving selection's already finished.
+  Put the woven month states' first into the examined woven month state.
+  Loop.
+    If the examined woven month state is nil, break.
+    If the examined woven month state's remaining days is less than the examined woven month state's total days,
+      add 1 to the weaving selection's already started.
+    If the examined woven month state's remaining days is 0,
+      add 1 to the weaving selection's already finished.
+    Put the examined woven month state's next into the examined woven month state.
+  Repeat.
+
+\ A first appearance cannot jump over an unstarted month. A last
+\ appearance cannot finish a month before all earlier ones finish.
+To inspect a candidate woven month given a number:
+  Put 0 into the weaving selection's candidate legal.
+  Find the woven month state given the number.
+  If the examined woven month state is nil, exit.
+  If the examined woven month state's remaining days is 0, exit.
+  Inspect the woven month status.
+  Put the weaving selection's already started into an allowed first number.
+  Add 1 to the allowed first number.
+  If the number is greater than the allowed first number, exit.
+  If the examined woven month state's remaining days is 1,
+    check the candidate's final occurrence given the number; exit.
+  Put 1 into the weaving selection's candidate legal.
+
+To check the candidate's final occurrence given a number:
+  Put the weaving selection's already finished into an allowed last number.
+  Add 1 to the allowed last number.
+  If the number is the allowed last number,
+    put 1 into the weaving selection's candidate legal.
+
+\ The signature is lossless even when a month has 123 remaining days.
+To make the weaving state signature:
+  Put "" into the weaving selection's state signature.
+  Put the woven month states' first into the examined woven month state.
+  Loop.
+    If the examined woven month state is nil, break.
+    Convert the examined woven month state's remaining days to a remaining text string.
+    Append the remaining text string to the weaving selection's state signature.
+    Append "/" to the weaving selection's state signature.
+    Put the examined woven month state's next into the examined woven month state.
+  Repeat.
+
+To find a cached weaving result given a string:
+  Put the weave completion cache's first into the matched weave result.
+  Loop.
+    If the matched weave result is nil, break.
+    If the matched weave result's signature is the string, break.
+    Put the matched weave result's next into the matched weave result.
+  Repeat.
+
+To save weaving completions given a string and a wide quantity:
+  Allocate memory for a weave cached result.
+  Put the string into the weave cached result's signature.
+  Put the wide quantity into the weave cached result's completions.
+  Append the weave cached result to the weave completion cache.
+
+\ Recursion uses local candidate number and local sum. The mutable
+\ remaining-count vector is always restored before moving to the
+\ next candidate. Cached zero counts are legitimate as well.
+To count weaving completions into a wide quantity:
+  If the weaving selection's days remaining is 0,
+    put "1" into the wide quantity; exit.
+  Make the weaving state signature.
+  Put the weaving selection's state signature into a saved signature string.
+  Find a cached weaving result given the saved signature string.
+  If the matched weave result is not nil,
+    put the matched weave result's completions into the wide quantity; exit.
+  Put "0" into a sum wide quantity.
+  Put 1 into a candidate month number.
+  Loop.
+    If the candidate month number is greater than the selected month count, break.
+    Count the eligible candidate's weaving suffix given the candidate month number into a child wide quantity.
+    Add the child wide quantity to the sum wide quantity.
+    Add 1 to the candidate month number.
+  Repeat.
+  Save weaving completions given the saved signature string and the sum wide quantity.
+  Put the sum wide quantity into the wide quantity.
+
+\ Decrease the candidate's count, ask recursively, then restore both
+\ its remaining count and the total. Never use a pointer retained from
+\ the recursive call, because its lookup state may have changed.
+To count the eligible candidate's weaving suffix given a number into a wide quantity:
+  Put "0" into the wide quantity.
+  Inspect a candidate woven month given the number.
+  If the weaving selection's candidate legal is not 1, exit.
+  Find the woven month state given the number.
+  Subtract 1 from the examined woven month state's remaining days.
+  Subtract 1 from the weaving selection's days remaining.
+  Count weaving completions into the wide quantity.
+  Find the woven month state given the number.
+  Add 1 to the examined woven month state's remaining days.
+  Add 1 to the weaving selection's days remaining.
+
+\ Prepare a new exact counting session from chosen month lengths.
+To count all possible month weavings:
+  Prepare the woven month states.
+  Destroy the weave completion cache.
+  Count weaving completions into the weaving selection's total completions.
+
+To store the accepted woven day:
+  Allocate memory for a woven day record.
+  Put the weaving selection's selected ordinal into the woven day record's month ordinal.
+  Append the woven day record to the chosen woven days.
+
+\ The candidate's suffix block has already been counted without
+\ consuming a permanent day. Compare that block with the rank.
+To consider the next woven candidate given a number and a wide quantity:
+  If the wide quantity is "0", exit.
+  If the wide quantity is numerically smaller than the weaving selection's current rank,
+    subtract the wide quantity from the weaving selection's current rank; exit.
+  Put the number into the weaving selection's selected ordinal.
+  Find the woven month state given the number.
+  Subtract 1 from the examined woven month state's remaining days.
+  Subtract 1 from the weaving selection's days remaining.
+  Add 1 to the weaving selection's position.
+  Store the accepted woven day.
+  If the weaving selection's position is the weaving selection's target position,
+    remember the target's woven month and day.
+  
+To remember the target's woven month and day:
+  Put the weaving selection's selected ordinal into the woven requested month ordinal.
+  Find the woven month state given the woven requested month ordinal.
+  Put the examined woven month state's total days into the woven requested day in month.
+  Subtract the examined woven month state's remaining days from the woven requested day in month.
+
+\ Each lexicographic candidate is counted before any is selected.
+To choose the next woven day:
+  Put 0 into the weaving selection's selected ordinal.
+  Put 1 into a candidate ordinal number.
+  Loop.
+    If the candidate ordinal number is greater than the selected month count, break.
+    Count the eligible candidate's weaving suffix given the candidate ordinal number into a block wide quantity.
+    Consider the next woven candidate given the candidate ordinal number and the block wide quantity.
+    If the weaving selection's selected ordinal is greater than 0, break.
+    Add 1 to the candidate ordinal number.
+  Repeat.
+
+\ The caller supplies a one-based rank of the full weaving sequence.
+To select a month weaving from a wide quantity:
+  Put 0 into the weaving selection's selection success.
+  Destroy the chosen woven days.
+  Put 0 into the woven requested month ordinal.
+  Put 0 into the woven requested day in month.
+  If the wide quantity is "0", exit.
+  If the weaving selection's total completions is numerically smaller than the wide quantity, exit.
+  Put the wide quantity into the weaving selection's current rank.
+  Put 0 into the weaving selection's position.
+  Loop.
+    If the weaving selection's days remaining is 0, break.
+    Choose the next woven day.
+    If the weaving selection's selected ordinal is 0, exit.
+  Repeat.
+  Put 1 into the weaving selection's selection success.
+
+\ All questions for month structure use (c, first day of year).
+\ Month lengths and their count must already have been selected.
+To choose the canonical month weaving:
+  Count all possible month weavings.
+  If the weaving selection's total completions is "0", exit.
+  Prepare the year structure sauce.
+  Put 4 into the seal inquiry's bowl identity.
+  Put 32 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  Choose an equal option given the weaving selection's total completions.
+  Select a month weaving from the seal inquiry's selected quantity.
