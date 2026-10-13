@@ -71,6 +71,14 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the final Foundation visible drop.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the first bowl arrangement.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the last bowl arrangement.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the wrapped bowl arrangement.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the canonical final-drop bowl arrangement.
+  If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
