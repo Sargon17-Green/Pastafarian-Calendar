@@ -85,6 +85,12 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the complete Foundation bowl mixing.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the Foundation sealed answers.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the sealed answer wraparound.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the narrow choice rejection.
+  If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
