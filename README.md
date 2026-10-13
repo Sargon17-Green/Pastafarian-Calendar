@@ -115,18 +115,25 @@ written in Plain English Programming:
   count exact suffixes by a memoized recurrence, enforcing both
   first-occurrence and last-occurrence order, then unrank a complete
   weaving with bowl 4 and seal 32. The requested day's month ordinal
-  and its one-based occurrence in that month are recorded. The
-  reference implementation bounds its memo cache at 4096 states
-  and explicitly fails rather than returning an incorrect date when
-  the limit is reached. This is not yet a scalable implementation for
-  realistic years with many months.
+  and its one-based occurrence in that month are recorded.
+- **the weaving short suffixes**, **the weaving started suffixes**,
+  and **the weaving shortcut checks**: bypass recursion and the memo
+  for one or two unfinished months, and for arbitrary suffixes when
+  all months except possibly the last have appeared. The direct
+  formula is a product of exact binomial coefficients that enforces
+  the final-occurrence order. An independently calculated case with
+  eight four-day months requires 1635 cached states with these
+  shortcuts, compared with 14756 using the original general DP.
+  Tests also cover a 73-digit count for 47 previously started months.
+- **the list cleanup**: explicit CAL list destructors to release
+  the project's owned linked records and memo buffers.
 - **the complete date**: joins the independently selected year,
   cutlet lengths, cutlet names, month lengths, month names and the
   full weaving into five fields. The canonical Foundation-day
   (5000, 10, 503, 20, 56) comparison is an optional slow oracle,
   not a demonstrated result of running the program.
 
-The source now includes **60 groups of checks**, some of which compare several
+The source now includes **64 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -153,9 +160,12 @@ a tested or production-ready calendar.** The CAL compiler has not run it.
 The day axis and gate indices still use 32-bit numbers. Sparse
 memoization of the month-weaving recurrence is exact but can have a
 prohibitively large state space for a real year with many months.
-A hard cap of 4096 cached suffix states prevents uncontrolled growth:
-if exceeded, the source reports a failed calculation instead of
-publishing an unverified or approximate calendar date.
+A hard cap of 4096 cached suffix states and a maximum of 256
+nested weaving-count calls prevent uncontrolled memo growth and deep
+recursion. Either limit produces an explicit failed calculation
+instead of publishing an unverified or approximate calendar date.
+The linked-list cache is still not a practical high-performance
+solution for the full range of real calendar years.
 Further work is required for CAL syntax validation, complete differential
 execution, large-instance performance, broad date support and resource
 ownership, even though all five stages now have source implementations.
@@ -243,7 +253,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English **program and check files** must be present when compiling. Select only those source files for CAL's file list: do **not** compile the extensionless `LICENSE` document, which is prose for people rather than program instructions. The ordinary `README.md` is likewise documentation, not source. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 60 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 64 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
