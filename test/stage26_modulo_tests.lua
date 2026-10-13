@@ -14,7 +14,7 @@ local cases={
  {first=B.from(M),step=1,n=5},
  {first=B.from(M),step=1,n=11},
  {first=B.from(M),step=-1,n=B.from(M)},
- {first=B.from("9"..string.rep("7",90)),step=1,n=97}
+ {first=B.add(B.from(1),B.mod(B.from("9"..string.rep("7",90)),M)),step=1,n=97}
 }
 local mismatches=0
 for _,c in ipairs(cases) do
