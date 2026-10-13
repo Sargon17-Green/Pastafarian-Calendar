@@ -3,8 +3,10 @@
 \ For negative -n it is (Foundation, Foundation-n).
 \ Ask fixed bowl 1 with seal 1, choose 1..922 and add 41.
 \ The permitted interval is 42..963 days.
-\ The signed gate index must fit the current 32-bit CAL day-axis adapter.
-\ This is not yet an unlimited-date implementation.
+\ This NATIVE gate-index adapter is restricted to +/-400000000.
+\ Zero is not a valid gate gap, and out-of-range requests return
+\ interval length zero rather than overflowing native arithmetic.
+\ The independent wide gate-index implementation is in its own file.
 
 A gate inquiry has
   a number called signed index,
@@ -15,13 +17,23 @@ The gate inquiry is a gate inquiry.
 \ The signed index must not be zero. Zero is Foundation itself.
 \ Converting day positions to full wide counters is a future requirement.
 To calculate a gate interval given a number:
+  Put 0 into the gate inquiry's interval length.
   Put the number into the gate inquiry's signed index.
+  If the number is 0, exit.
+  If the number is greater than 400000000, exit.
+  If the number is less than -400000000, exit.
   Put -15055671 into the example's calculation day.
   Put -15055671 into the example's requested day.
   Add the number to the example's requested day.
   Answer the example.
   Copy the example into the sauce input.
   Make the complete sauce.
+  Select the sealed gate interval.
+
+\ Both the native-index and signed-wide-index gate routines use the
+\ identical canonical bowl 1 / seal 1 choice. This is deliberately
+\ separate from constructing the five counters.
+To select the sealed gate interval:
   Put 1 into the seal inquiry's bowl identity.
   Put 1 into the seal inquiry's seal number.
   Begin a sealed inquiry.
