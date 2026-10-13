@@ -1,0 +1,102 @@
+\ Seal regression checks using the canonical Foundation-Day final bowls.
+\ Run these AFTER the full Foundation sauce mixing test has produced the
+\ final bowls and saved visible-drop-46 order.
+\ The expected values were independently calculated from sections M and N.
+\ There has been no CAL compiler run.
+
+To check the Foundation sealed answers:
+  Put 1 into the seal inquiry's bowl identity.
+  Put 1 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  If the seal inquiry's following identity is not 4,
+    put "The seal 1 query of bowl 1 has the wrong successor." into the check report; exit.
+  If the seal inquiry's starting answer is not "90411690289794975082828500805689671121",
+    put "The seal 1 query of bowl 1 has the wrong A0." into the check report; exit.
+  If the seal inquiry's direction answer is not "103408030743865802233775702891907675594",
+    put "The seal 1 query of bowl 1 has the wrong D." into the check report; exit.
+  If the seal inquiry's answer direction is not -1,
+    put "The seal 1 query of bowl 1 has the wrong direction." into the check report; exit.
+  Put "922" into a choice width wide quantity.
+  Choose a narrow quantity from the choice width wide quantity.
+  If the seal inquiry's selected quantity is not "189",
+    put "The seal 1 query of bowl 1 chose the wrong number." into the check report; exit.
+  Put 2 into the seal inquiry's bowl identity.
+  Put 1 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  If the seal inquiry's following identity is not 3,
+    put "The seal 1 query of bowl 2 has the wrong successor." into the check report; exit.
+  If the seal inquiry's starting answer is not "146177222370062006968514571248409839416",
+    put "The seal 1 query of bowl 2 has the wrong A0." into the check report; exit.
+  If the seal inquiry's direction answer is not "75756687149197622631454357713579898261",
+    put "The seal 1 query of bowl 2 has the wrong D." into the check report; exit.
+  If the seal inquiry's answer direction is not 1,
+    put "The seal 1 query of bowl 2 has the wrong direction." into the check report; exit.
+  Put "922" into a choice width wide quantity.
+  Choose a narrow quantity from the choice width wide quantity.
+  If the seal inquiry's selected quantity is not "146",
+    put "The seal 1 query of bowl 2 chose the wrong number." into the check report; exit.
+  Put 6 into the seal inquiry's bowl identity.
+  Put 1 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  If the seal inquiry's following identity is not 1,
+    put "The seal 1 query of bowl 6 has the wrong successor." into the check report; exit.
+  If the seal inquiry's starting answer is not "79095780211202732600232672687611165248",
+    put "The seal 1 query of bowl 6 has the wrong A0." into the check report; exit.
+  If the seal inquiry's direction answer is not "72453127137386817133259358437555956498",
+    put "The seal 1 query of bowl 6 has the wrong D." into the check report; exit.
+  If the seal inquiry's answer direction is not -1,
+    put "The seal 1 query of bowl 6 has the wrong direction." into the check report; exit.
+  Put "922" into a choice width wide quantity.
+  Choose a narrow quantity from the choice width wide quantity.
+  If the seal inquiry's selected quantity is not "216",
+    put "The seal 1 query of bowl 6 chose the wrong number." into the check report; exit.
+  Put 1 into the seal inquiry's bowl identity.
+  Put 10 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  If the seal inquiry's following identity is not 4,
+    put "The seal 10 query of bowl 1 has the wrong successor." into the check report; exit.
+  If the seal inquiry's starting answer is not "74583638583639866316524959291339271180",
+    put "The seal 10 query of bowl 1 has the wrong A0." into the check report; exit.
+  If the seal inquiry's direction answer is not "124196423541296618550165437934792016607",
+    put "The seal 10 query of bowl 1 has the wrong D." into the check report; exit.
+  If the seal inquiry's answer direction is not 1,
+    put "The seal 10 query of bowl 1 has the wrong direction." into the check report; exit.
+  Put "200" into a choice width wide quantity.
+  Choose a narrow quantity from the choice width wide quantity.
+  If the seal inquiry's selected quantity is not "180",
+    put "The seal 10 query of bowl 1 chose the wrong number." into the check report; exit.
+
+\ Validate the circular stream at both ends, including the special
+\ SAVE(0)=M convention for a backwards step from 1.
+To check the sealed answer wraparound:
+  Put "170141183460469231731687303715884105727" into the seal inquiry's current answer.
+  Put 1 into the seal inquiry's answer direction.
+  Step the sealed answer.
+  If the seal inquiry's current answer is not "1",
+    put "The sealed answer failed to wrap forwards at M." into the check report; exit.
+  Put "1" into the seal inquiry's current answer.
+  Put -1 into the seal inquiry's answer direction.
+  Step the sealed answer.
+  If the seal inquiry's current answer is not "170141183460469231731687303715884105727",
+    put "The sealed answer failed to wrap backwards at 1." into the check report; exit.
+
+\ If N=922, L is an exact multiple of N. Rejection of a value
+\ above L walks forwards to 1 or backwards to L.
+To check the narrow choice rejection:
+  Put "922" into a choice width wide quantity.
+  Put "170141183460469231731687303715884105727" into the seal inquiry's current answer.
+  Put 1 into the seal inquiry's answer direction.
+  Choose a narrow quantity from the choice width wide quantity.
+  If the seal inquiry's acceptance ceiling is not "170141183460469231731687303715884105506",
+    put "The narrow choice ceiling is wrong." into the check report; exit.
+  If the seal inquiry's current answer is not "1",
+    put "Forward short rejection did not reach the first accepted number." into the check report; exit.
+  If the seal inquiry's selected quantity is not "1",
+    put "Forward short rejection selected the wrong option." into the check report; exit.
+  Put "170141183460469231731687303715884105727" into the seal inquiry's current answer.
+  Put -1 into the seal inquiry's answer direction.
+  Choose a narrow quantity from the choice width wide quantity.
+  If the seal inquiry's current answer is not "170141183460469231731687303715884105506",
+    put "Backward short rejection did not reach the acceptance ceiling." into the check report; exit.
+  If the seal inquiry's selected quantity is not "922",
+    put "Backward short rejection selected the wrong option." into the check report; exit.
