@@ -42,8 +42,9 @@ for _,c in ipairs(cases) do
     and ctx.diagnostics[2].code=="DISCOVERY_13_SKIPS_ACCEPTANCE_LIMIT")
  local wanted=O.chooseRankShort({first=c.first,directionStep=c.step},c.n)
  if B.compare(value,wanted)~=0 then mismatches=mismatches+1 end
- local public=S.choiceSpaghetti(c.first,c.step,c.n)
- assert(B.compare(public,value)==0)
+ -- Tès DISCOVERY 13 la egzije wout legacy a apre Stage 27.
+ local historical=S.legacyBiasedChoiceProbe(c.first,c.step,c.n)
+ assert(B.compare(historical,value)==0)
  assert(B.compare(S.oldBiasedModuloPickProbe(c.first,c.step,c.n),value)==0)
 end
 assert(mismatches>=4)
