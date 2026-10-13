@@ -312,7 +312,94 @@ def gate_anchor_regression():
     print("GATE_ANCHOR_SIX_TARGETED_FALSIFICATIONS_REJECT_PASS")
 
 
+
+def stringmode_continuity_regression():
+    # In a legitimate BF98 quote pair, the bytes inside the pair are
+    # pushed as literals. An in-string p has NO physical write receipt.
+    source, run = fixture()
+    row = bytearray(source[0])
+    for x, value in ((200, 34), (201, ord("p")), (202, 34)):
+        row[x] = value
+    source = [bytes(row)]
+    for x, mode in ((200, 0), (201, 1), (202, 1)):
+        run["complete_postfork_trace"][x][5] = row[x]
+        run["complete_postfork_trace"][x][6] = mode
+    unchanged = copy.deepcopy(run)
+    a = audit.verify_run(run, source)
+    if a["verified_p_writes"] != 1 or a["verified_g_reads"] != 1:
+        raise AssertionError("genuine quoted BF98 p was not treated as data")
+    print("NATIVE_STRINGMODE_REAL_QUOTES_POSITIVE_PASS")
+
+    for index, label in (
+        (200, "quote_open_wrong_mode"),
+        (201, "in_string_p_wrong_mode"),
+        (202, "quote_close_wrong_mode"),
+        (203, "stale_stringmode_after_close"),
+        (513, "spontaneous_late_stringmode"),
+    ):
+        bad = copy.deepcopy(run)
+        bad["complete_postfork_trace"][index][6] ^= 1
+        reject(source, bad, label)
+    hidden_p = copy.deepcopy(run)
+    hidden_p["complete_postfork_trace"][10][6] = 1
+    hidden_p["native_p_history"] = []
+    hidden_p["total_p_writes"] = 0
+    reject(source, hidden_p, "p_receipt_hidden_using_forged_stringmode")
+    hidden_g = copy.deepcopy(run)
+    hidden_g["complete_postfork_trace"][20][6] = 1
+    hidden_g["native_g_history"] = []
+    hidden_g["total_g_reads"] = 0
+    reject(source, hidden_g, "g_receipt_hidden_using_forged_stringmode")
+    if run != unchanged:
+        raise AssertionError("postfork mode verifier mutated caller-owned data")
+
+    before, seeded = fixture()
+    physical = bytearray(before[0])
+    physical[600:605] = b'"p"p|'
+    before = [bytes(physical)]
+    seeded["steps"] += 4
+    seeded["gate"]["step"] += 4
+    for entry in seeded["complete_postfork_trace"]:
+        entry[0] += 4
+    for entry in seeded["native_p_history"] + seeded["native_g_history"]:
+        entry["tick"] += 4
+    seeded["native_p_history"].insert(0, {
+        "tick": 4, "coordinate": [701, 0], "value": "7"
+    })
+    seeded["total_p_writes"] += 1
+    seeded["native_g_history"][0]["read_before"] = "7"
+    seeded["native_g_history"][0]["returned"] = "7"
+    seeded["complete_prefork_trace"] = [
+        [1, 600, 0, 1, 0, 34, 0],
+        [2, 601, 0, 1, 0, ord("p"), 1],
+        [3, 602, 0, 1, 0, 34, 1],
+        [4, 603, 0, 1, 0, ord("p"), 0],
+        [5, 604, 0, 1, 0, ord("|"), 0],
+    ]
+    original = copy.deepcopy(seeded)
+    if audit.verify_run(seeded, before, require_prefork=True)[
+            "verified_prefork_executed_steps"] != 5:
+        raise AssertionError("genuine prefork quote sequence rejected")
+    for index, label in ((0, "spontaneous_initial_prefork_stringmode"),
+                         (2, "closing_prefork_quote_forgery")):
+        bad = copy.deepcopy(seeded)
+        bad["complete_prefork_trace"][index][6] ^= 1
+        reject_prefork_mode(before, bad, label)
+    if seeded != original:
+        raise AssertionError("prefork stringmode verifier mutated input")
+    print("NATIVE_STRINGMODE_NINE_MODE_FORGERIES_REJECT_PASS")
+
+
+def reject_prefork_mode(source, run, label):
+    try:
+        audit.verify_run(run, source, require_prefork=True)
+    except AssertionError:
+        print("EXPECTED_REJECTION", label)
+        return
+    raise AssertionError("accepted pre-fork BF98 stringmode forgery: " + label)
+
 if __name__ == "__main__":
     main()
     prefork_provenance_regression()
     gate_anchor_regression()
+    stringmode_continuity_regression()
