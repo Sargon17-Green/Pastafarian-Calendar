@@ -50,14 +50,14 @@ To add a wide signed day to another wide signed day:
   If the other wide signed day's polarity is 0,
     put the wide signed day into the other wide signed day; exit.
   If the wide signed day's polarity is the other wide signed day's polarity,
-    add like-signed day magnitudes; exit.
-  Add opposite-signed day magnitudes.
+    add like-signed day magnitudes given the wide signed day and the other wide signed day; exit.
+  Add opposite-signed day magnitudes given the wide signed day and the other wide signed day.
 
-To add like-signed day magnitudes:
+To add like-signed day magnitudes given a wide signed day and another wide signed day:
   Add the wide signed day's magnitude to the other wide signed day's magnitude.
 
 \ Opposite signs: the larger magnitude determines the resulting sign.
-To add opposite-signed day magnitudes:
+To add opposite-signed day magnitudes given a wide signed day and another wide signed day:
   If the wide signed day's magnitude is the other wide signed day's magnitude,
     put "0" into the other wide signed day's magnitude;
     put 0 into the other wide signed day's polarity; exit.
@@ -71,15 +71,8 @@ To add opposite-signed day magnitudes:
 \ Subtracting x from y is adding -x to y without modifying x.
 To subtract a wide signed day from another wide signed day:
   Put the wide signed day into a negated signed day.
-  If the negated signed day's polarity is 1,
-    put -1 into the negated signed day's polarity.
-  If the negated signed day's polarity is -1,
-    reverse a negative signed day.
+  Multiply -1 by the negated signed day's polarity.
   Add the negated signed day to the other wide signed day.
-
-\ Keep this helper separate to avoid toggling a positive value twice.
-To reverse a negative signed day:
-  Put 1 into the negated signed day's polarity.
 
 \ Convert the signed day into plain decimal text for display/logging.
 \ The string parameter is the target; the signed day is unchanged.
