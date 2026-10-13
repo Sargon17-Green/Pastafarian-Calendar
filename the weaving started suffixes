@@ -36,7 +36,7 @@ A started weaving suffix has
 The started weaving suffix is a started weaving suffix.
 The started weaving month is a woven month state.
 
-To count an all-started weaving suffix:
+To count an ordered-last weaving suffix:
   Put 0 into the started weaving suffix's available.
   Inspect the woven month status.
   Put the selected month count into a required started number.
