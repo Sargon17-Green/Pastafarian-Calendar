@@ -1,0 +1,29 @@
+\ Gate gaps selected from arbitrary-precision signed gate INDICES.
+\ A gate index is a count from zero, not a calendar-day coordinate.
+\ For index n != 0, the source sauce is (Foundation, Foundation+n).
+\ The zero index is Foundation itself and has NO preceding/following
+\ gap. Its interval length is set to zero without making a sauce.
+\ This implementation uses the same bowl 1 / seal 1 reader as the
+\ existing native gate-gap routine; result lies from 42 to 963.
+\
+\ Even when the signed index exceeds native 32-bit integer bounds,
+\ both sauce dates and all five counters remain wide signed values.
+\ This is a building block: the gate-position walker still uses
+\ native indices and coordinates and has not been migrated.
+\ Large inputs may require substantial exact-decimal computation.
+\ No CAL compiler run has validated this module yet.
+
+To prepare a wide gate sauce question given a wide signed day:
+  Put "15055671" into a foundation magnitude wide quantity.
+  Set the wide calendar example's calculation day from the foundation magnitude wide quantity given -1.
+  Put the wide calendar example's calculation day into the wide calendar example's requested day.
+  Add the wide signed day to the wide calendar example's requested day.
+  Answer the wide calendar example.
+
+To calculate a gate interval for a wide signed day:
+  Put 0 into the gate inquiry's interval length.
+  If the wide signed day's polarity is 0, exit.
+  Prepare a wide gate sauce question given the wide signed day.
+  Copy the wide calendar example into the sauce input.
+  Make the complete sauce.
+  Select the sealed gate interval.
