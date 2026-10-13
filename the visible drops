@@ -46,7 +46,7 @@ To prepare the previous drops:
   Put the hidden drops' seventh drop into the previous drops' seventh previous.
 
 \ Multiply one stone by its corresponding day count and add the result.
-To add the dough ingredient:
+To collect the dough contribution:
   Put the dough work's stone into the dough work's contribution.
   Multiply the dough work's count by the dough work's contribution.
   Add the dough work's contribution to the visible work's value.
@@ -58,19 +58,19 @@ To make the visible dough:
   Put "0" into the visible work's value.
   Put the current stones' wheat into the dough work's stone.
   Put the sauce input's calculation count into the dough work's count.
-  Add the dough ingredient.
+  Collect the dough contribution.
   Put the current stones' barley into the dough work's stone.
   Put the sauce input's requested count into the dough work's count.
-  Add the dough ingredient.
+  Collect the dough contribution.
   Put the current stones' salt into the dough work's stone.
   Put the sauce input's distance count into the dough work's count.
-  Add the dough ingredient.
+  Collect the dough contribution.
   Put the current stones' bitter into the dough work's stone.
   Put the sauce input's sum count into the dough work's count.
-  Add the dough ingredient.
+  Collect the dough contribution.
   Put the current stones' red into the dough work's stone.
   Put the sauce input's direction count into the dough work's count.
-  Add the dough ingredient.
+  Collect the dough contribution.
   Add the previous drops' first previous to the visible work's value.
   Put the previous drops' third previous into a third term wide quantity.
   Multiply the third term wide quantity by 3.
