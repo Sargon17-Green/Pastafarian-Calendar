@@ -185,13 +185,29 @@ written in Plain English Programming:
   compute the five Foundation-relative counters from arbitrary-width
   signed day inputs. Two check groups cover the Foundation day and
   both directions across a pair of coordinates at plus/minus
-  10^48 days. This replaces only the standalone counting logic,
-  not the sauce input structures or gate/year algorithms.
+  10^48 days. The wide counters are now also connected to the
+  complete sauce through a separate adapter; gate-position traversal
+  and year/cutlet/month selection remain native-width.
 - **the native wide day bridge** and **the native wide bridge checks**:
   safely convert native day coordinates into signed wide day values
   (except the unnegatable 32-bit minimum), then compare all five
   wide and original native counters on six existing fixtures. This
   is a differential migration aid, not yet a full wide-calendar path.
+- **the wide sauce bridge** and **the wide sauce bridge checks**:
+  map exact wide day counters into the same five sauce fields used by
+  the complete 46-drop, six-bowl calculation. Quick tests compare all
+  five source fields against the native path for six known day pairs
+  and a pair beyond 32-bit limits. An optional slow test checks the
+  complete Foundation sauce against all six canonical final bowls.
+- **the wide gate intervals** and **the wide gate interval checks**:
+  use exact signed gate indices to form (Foundation, Foundation+index),
+  then run the same canonical seal 1 after the complete sauce. The
+  zero index is rejected as a nonexistent gap. Quick tests verify
+  four gate-counter input vectors including indices at +/-10^48;
+  two optional slow tests check the positive and negative first gaps.
+  The native gate adapter also explicitly rejects zero and indices
+  outside +/-400000000 to avoid counter overflow. The actual gate
+  position walker still uses native signed integers.
 - **the canonical date vectors**: ten optional end-to-end reference
   checks for the authoritative AC.1 table on the main branch, including
   past and future year transitions. The obsolete mutant table is
@@ -204,7 +220,7 @@ written in Plain English Programming:
   Foundation-day (5000, 10, 503, 20, 56) comparison is an optional
   slow oracle, not a demonstrated result of running the program.
 
-The source now includes **86 groups of checks**, some of which compare several
+The source now includes **90 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -356,7 +372,7 @@ root, outside the compile input. Use the matching CAL standard library
 supplied by the compiler. No successful compiler execution has been
 reported.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 86 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 90 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
