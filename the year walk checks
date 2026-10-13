@@ -1,0 +1,42 @@
+\ Slow integration checks for NEXT with seal 11 and PREVIOUS with seal 12.
+\ These checks require repeated complete sauce calculations for many gates.
+\ They are deliberately not called by the ordinary test runner.
+\ They compare boundary inclusion and canonical year numbering.
+\ The calculation day in all cases is exactly Foundation Day.
+\
+\ Year 5000 for Foundation has opening -15057703 and closing -15053459.
+\ The following year must open at -15053459, and the preceding year
+\ must close at -15057703. The target boundary is included in the
+\ previous year, since all year intervals are (opening, closing].
+
+To check the complete Foundation year walk:
+  Find the year for -15055671 and -15055671.
+  If the year selection success is not 1,
+    put "Unable to find the canonical Foundation year." into the check report; exit.
+  If the current year number is not 5000,
+    put "Foundation was not assigned year 5000." into the check report; exit.
+  If the chosen year's opening day is not -15057703,
+    put "Foundation year 5000 has the wrong opening gate." into the check report; exit.
+  If the chosen year's closing day is not -15053459,
+    put "Foundation year 5000 has the wrong closing gate." into the check report; exit.
+  Find the year for -15055671 and -15053459.
+  If the current year number is not 5000,
+    put "A closing gate incorrectly moved into the next year." into the check report; exit.
+  Find the year for -15055671 and -15053458.
+  If the year selection success is not 1,
+    put "Unable to advance from year 5000." into the check report; exit.
+  If the current year number is not 5001,
+    put "NEXT11 did not advance to year 5001." into the check report; exit.
+  If the chosen year's opening day is not -15053459,
+    put "NEXT11 did not preserve the year boundary." into the check report; exit.
+  If the chosen year's closing day is less than -15053458,
+    put "NEXT11 selected a year before the requested day." into the check report; exit.
+  Find the year for -15055671 and -15057703.
+  If the year selection success is not 1,
+    put "Unable to move backwards from year 5000." into the check report; exit.
+  If the current year number is not 4999,
+    put "PREVIOUS12 did not select year 4999." into the check report; exit.
+  If the chosen year's closing day is not -15057703,
+    put "PREVIOUS12 did not preserve the year boundary." into the check report; exit.
+  If the chosen year's opening day is greater than or equal to -15057703,
+    put "PREVIOUS12 incorrectly excludes its closing day." into the check report; exit.
