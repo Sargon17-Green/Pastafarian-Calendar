@@ -47,8 +47,8 @@ def verify_index(doc):
              row.get("trace_filename")=="pair_%02d.json"%i and
              type(row.get("trace_file_sha256")) is str and
              DIGEST.fullmatch(row["trace_file_sha256"]) and
-             row.get("native_steps",0)>0 and
-             row.get("fork_step",0)>0 and
+             type(row.get("native_steps")) is int and row["native_steps"]>0 and
+             type(row.get("fork_step")) is int and row["fork_step"]>0 and
              type(row.get("complete_postfork_steps")) is int and
              row["complete_postfork_steps"]>512 and
              type(row.get("literal_executions")) is int and
@@ -88,6 +88,8 @@ def selftest():
       ("wrong_signed_day",lambda d:d["records"][0].__setitem__("signed_days",[2,2])),
       ("wrong_index",lambda d:d["records"][10].__setitem__("index",50)),
       ("malformed_native_hash",lambda d:d["records"][2].__setitem__("trace_file_sha256","0"*63)),
+      ("boolean_native_steps",lambda d:d["records"][2].__setitem__("native_steps",True)),
+      ("fractional_fork_step",lambda d:d["records"][2].__setitem__("fork_step",1.5)),
       ("changed_input",lambda d:d["records"][0]["fields"].__setitem__(3,99)),
       ("invented_lower_route",lambda d:d["records"][25].__setitem__("literal_executions",2)),
       ("erased_lower_route",lambda d:d["records"][0].__setitem__("literal_executions",0)),
@@ -103,7 +105,7 @@ def selftest():
         try:verify_index(bad)
         except AssertionError:continue
         raise AssertionError("full Native manifest forgery accepted: "+name)
-    print("NATIVE_49_FULL_POSTFORK_MANIFEST_12_FALSIFICATIONS_REJECT_PASS")
+    print("NATIVE_49_FULL_POSTFORK_MANIFEST_14_FALSIFICATIONS_REJECT_PASS")
 def main(root):
     selftest()
     path=Path(root)
@@ -181,7 +183,7 @@ def main(root):
                                         for x in measured),
       total_replayed_native_p_writes=sum(x["physical_p_writes"] for x in measured),
       total_replayed_native_g_reads=sum(x["physical_g_reads"] for x in measured),
-      adversarial_manifest_reports_rejected=12,
+      adversarial_manifest_reports_rejected=14,
       adversarial_actual_trajectories_rejected=3,
       stage1_complete=False,stage2_started=False,
       records=measured)
