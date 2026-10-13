@@ -210,7 +210,7 @@ To add a number to a wide quantity:
   Add the added wide quantity to the wide quantity.
 
 \ Add factor times first value to the second value.
-To add a weighted wide quantity to another wide quantity given a number:
+To add a wide quantity to another wide quantity given a number:
   Put the wide quantity into a weighted wide quantity.
   Multiply the weighted wide quantity by the number.
   Add the weighted wide quantity to the other wide quantity.
