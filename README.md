@@ -713,3 +713,24 @@ Kotlin a swydd cloi enwau ill dwy yn SUCCESS.
 Cedwir `LegacyNumericNeighborAdapter.oldNumericNeighborQuestion`
 yn fyw ac yn anghywir. Ni adeiladwyd diferion gweledig
 cynhyrchu yn y cam hwn.
+
+
+## Cam 26 — DISCOVERY 13: off-by-one gap giât a dim rejection
+
+Mae `LegacyGateGapRankAdapter.oldGateGapWithoutRank1` yn
+cymryd stream ateb canonig seal=1 ar gyfer gate n
+positif/negatif, ond yn dewis `41+(first-1) mod 922`
+yn lle `41+chooseRankInt(stream,922)`. Mae'n
+anghofio `+1` y rank1 a'r gwrthod yn y stream.
+Felly ceir gap anghywir yn 41..962 yn lle 42..963.
+Mae'r stream yn fewnbwn allanol hyd nes adeiladwr
+diferion gweledig y camau diweddarach; nid yw
+oracl prawf yn rhan o gynhyrchu.
+
+Mae'r profion yn mynnu 1,844 EXPECTED_RED,
+8 ffin rejection (7 RED, 1 MATCH damweiniol),
+11,064 prawf BigInteger RED, dau achos naturiol
+positive/negative, strict RED, BOOT/replay a
+holl atchweliadau Camau 1–25. Dim PATCH 13.
+
+`LAST_COMPLETED_STAGE=25` nes PASS brodorol.

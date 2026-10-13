@@ -191,7 +191,15 @@ data class BaseMonsterContext(
     var patch12CorrectedNeighborCalls: Int = 0,
     var patch12PermutationPatchCalls: Int = 0,
     var patch12Applied: Boolean = false,
-    var patch12InvocationCount: Int = 0
+    var patch12InvocationCount: Int = 0,
+    var discovery13GateIndex: ExactInt? = null,
+    var discovery13StreamFirst: ExactInt? = null,
+    var discovery13DirectionStep: Int? = null,
+    var discovery13LegacyRead: LegacyGateGapRankRead? = null,
+    var discovery13WrongGap: Int? = null,
+    var discovery13OneShotReads: Int = 0,
+    var discovery13RejectedCandidatesProcessed: Int = 0,
+    var discovery13InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -274,7 +282,9 @@ class MonsterBootstrapManager(
     val legacyNumericNeighborAdapter: LegacyNumericNeighborAdapter =
         LegacyNumericNeighborAdapter(permutationPatchWrapper),
     val positionalNeighborPatchWrapper: PositionalNeighborPatchWrapper =
-        PositionalNeighborPatchWrapper(legacyNumericNeighborAdapter)
+        PositionalNeighborPatchWrapper(legacyNumericNeighborAdapter),
+    val legacyGateGapRankAdapter: LegacyGateGapRankAdapter =
+        LegacyGateGapRankAdapter()
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -448,6 +458,40 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
+        }
+        dispatcher.register("DISCOVERY_13") { context ->
+            validation.requireBootstrapContext(context)
+            if (context.status != "READY")
+                throw MonsterValidationException("E_DISCOVERY13_CONTEXT_NOT_READY")
+            val index = context.discovery13GateIndex
+                ?: throw MonsterValidationException("E_DISCOVERY13_NO_INDEX")
+            val first = context.discovery13StreamFirst
+                ?: throw MonsterValidationException("E_DISCOVERY13_NO_FIRST")
+            val direction = context.discovery13DirectionStep
+                ?: throw MonsterValidationException("E_DISCOVERY13_NO_DIRECTION")
+            val scar = legacyGateGapRankAdapter.oldGateGapWithoutRank1(
+                index,first,direction)
+            check(scar.gateIndex == index &&
+                scar.streamFirst == first &&
+                scar.streamDirectionStep == direction &&
+                scar.rank0Wrong in 0..921 &&
+                scar.gateGapWrong == 41 + scar.rank0Wrong &&
+                scar.gateGapWrong in 41..962 &&
+                scar.oneShotReads == 1 &&
+                scar.rejectedCandidatesProcessed == 0 &&
+                scar.seal == 1) {
+                "E_DISCOVERY13_RESULT_SHAPE"
+            }
+            context.discovery13LegacyRead = scar
+            context.discovery13WrongGap = scar.gateGapWrong
+            context.discovery13OneShotReads = scar.oneShotReads
+            context.discovery13RejectedCandidatesProcessed =
+                scar.rejectedCandidatesProcessed
+            context.discovery13InvocationCount = 1
+            context.branchTrace.add("DISCOVERY_13")
+            context.diagnostics.add("DISCOVERY_13_GATE_GAP_RANK0_NO_REJECTION")
+            context.status = "LEGACY_GATE_GAP_RANK0_OBSERVED"
+            metrics.bump("discovery13.gate.gap.rank0.calls")
         }
         dispatcher.register("PATCH_12") { context ->
             validation.requireBootstrapContext(context)
@@ -1164,6 +1208,27 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
+        }
+    }
+
+    /** Cam 26: gweld hen ordinal rank0 o stream gap y giât. */
+    fun observeLegacyGateGapRank(
+        calculationDay: ExactInt, targetDay: ExactInt,
+        gateIndex: ExactInt, streamFirst: ExactInt,
+        directionStep: Int
+    ): BaseMonsterContext {
+        val context = prepare(calculationDay,targetDay)
+        context.discovery13GateIndex = gateIndex
+        context.discovery13StreamFirst = streamFirst
+        context.discovery13DirectionStep = directionStep
+        context.phase = "DISCOVERY_13"
+        return try {
+            dispatcher.dispatch(context)
+            context
+        } catch (e: MonsterValidationException) {
+            throw e
+        } catch (e: Throwable) {
+            throw errors.wrap("E_DISCOVERY13_WRAP",e)
         }
     }
 
