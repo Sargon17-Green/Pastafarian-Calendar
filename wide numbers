@@ -1,0 +1,167 @@
+\ The Pastafarian Calendar: exact arithmetic with long, nonnegative numbers.
+\ Every arithmetic routine here is Plain English Programming.
+\ The digits are decimal text, with no leading zeroes except for "0".
+\ All callers must give nonempty strings containing only ASCII digits.
+\ This is a source implementation. CAL compilation has not yet been verified.
+
+A wide number is a string.
+
+\ Taking the final digit also removes it from the given text.
+\ An empty string supplies a zero digit, useful when adding numbers.
+To take the last decimal digit from a string into a number:
+  Put 0 into the number.
+  If the string is blank, exit.
+  Put the string's last's target into the number.
+  Subtract 48 from the number.
+  Remove the last byte from the string.
+
+\ Turn a small number from 0 to 9 into its printable decimal character.
+To prepend a decimal digit number to a string:
+  Put the decimal digit number into another number.
+  Add 48 to the other number.
+  Put the other number into a byte.
+  Prepend the byte to the string.
+
+\ Keep one zero if all of the digits were zero.
+To normalize a wide number:
+  If the wide number is blank, put "0" into the wide number; exit.
+  Loop.
+    If the wide number's length is 1, break.
+    If the wide number's first's target is not the zero byte, break.
+    Remove the first byte from the wide number.
+  Repeat.
+
+\ Compare two positive or zero whole numbers, not their textual spelling.
+\ A shorter normalized decimal number is always smaller.
+To decide if a wide number is less than another wide number:
+  If the wide number's length is less than the other wide number's length, say yes.
+  If the wide number's length is greater than the other wide number's length, say no.
+  Put the wide number into a left string.
+  Put the other wide number into a right string.
+  Slap a substring on the left string.
+  Slap another substring on the right string.
+  Loop.
+    If the substring is blank, say no.
+    If the substring's first's target is less than the other substring's first's target, say yes.
+    If the substring's first's target is greater than the other substring's first's target, say no.
+    Add 1 to the substring's first.
+    Add 1 to the other substring's first.
+  Repeat.
+
+\ Add the first value into the second; the first is not changed.
+To add a wide number to another wide number:
+  Put the wide number into a left string.
+  Put the other wide number into a right string.
+  Put "" into a combined string.
+  Put 0 into a carry number.
+  Put the left string's length into a remaining number.
+  If the right string's length is greater than the remaining number,
+    put the right string's length into the remaining number.
+  Loop.
+    If the remaining number is 0, break.
+    Take the last decimal digit from the left string into a left digit number.
+    Take the last decimal digit from the right string into a right digit number.
+    Put the left digit number plus the right digit number plus the carry number into a column number.
+    Divide the column number by 10 giving a quotient number and a remainder number.
+    Put the quotient number into the carry number.
+    Prepend the remainder number to the combined string.
+    Subtract 1 from the remaining number.
+  Repeat.
+  If the carry number is not 0, prepend the carry number to the combined string.
+  Put the combined string into the other wide number.
+  Normalize the other wide number.
+
+\ Subtract the first from the second. Precondition: second >= first.
+\ Callers of this routine must check the order before subtracting.
+To subtract a wide number from another wide number:
+  Put the wide number into a smaller string.
+  Put the other wide number into a larger string.
+  Put "" into a difference string.
+  Put 0 into a borrow number.
+  Put the larger string's length into a remaining number.
+  Loop.
+    If the remaining number is 0, break.
+    Take the last decimal digit from the larger string into a large digit number.
+    Take the last decimal digit from the smaller string into a small digit number.
+    Put the large digit number minus the small digit number minus the borrow number into a difference digit number.
+    Put 0 into the borrow number.
+    If the difference digit number is less than 0,
+      add 10 to the difference digit number; put 1 into the borrow number.
+    Prepend the difference digit number to the difference string.
+    Subtract 1 from the remaining number.
+  Repeat.
+  Put the difference string into the other wide number.
+  Normalize the other wide number.
+
+\ Multiplication by one decimal digit never needs a large intermediate.
+\ The digit parameter must be from 0 to 9.
+To multiply a wide number by a decimal digit number:
+  Put the wide number into a remaining string.
+  Put "" into a product string.
+  Put 0 into a carry number.
+  Loop.
+    If the remaining string is blank, break.
+    Take the last decimal digit from the remaining string into a digit number.
+    Put the digit number times the decimal digit number plus the carry number into a column number.
+    Divide the column number by 10 giving a quotient number and a remainder number.
+    Put the quotient number into the carry number.
+    Prepend the remainder number to the product string.
+  Repeat.
+  If the carry number is not 0, prepend the carry number to the product string.
+  Put the product string into the wide number.
+  Normalize the wide number.
+
+\ Add place-value zeroes after a number (multiplication by a power of ten).
+To append decimal zeroes to a wide number given a number:
+  Privatize the number.
+  Loop.
+    If the number is less than 1, break.
+    Append "0" to the wide number.
+    Subtract 1 from the number.
+  Repeat.
+  Normalize the wide number.
+
+\ Schoolbook multiplication; the second operand receives the result.
+\ A separate helper performs the inner digit multiplication, so the
+\ compiler never needs to handle a loop inside another loop.
+To multiply a wide number by another wide number:
+  Put the wide number into a multiplicand wide number.
+  Put the other wide number into a remaining string.
+  Put "0" into a product wide number.
+  Put 0 into a position number.
+  Loop.
+    If the remaining string is blank, break.
+    Take the last decimal digit from the remaining string into a digit number.
+    Put the multiplicand wide number into a partial wide number.
+    Multiply the partial wide number by the digit number.
+    Append decimal zeroes to the partial wide number given the position number.
+    Add the partial wide number to the product wide number.
+    Add 1 to the position number.
+  Repeat.
+  Put the product wide number into the other wide number.
+  Normalize the other wide number.
+
+\ Keep subtracting a divisor while a partial remainder is large enough.
+\ The long-division caller guarantees that this takes no more than 9 steps.
+To remove copies of a wide number from another wide number:
+  Loop.
+    If the other wide number is less than the wide number, break.
+    Subtract the wide number from the other wide number.
+  Repeat.
+
+\ Long division, one decimal digit at a time. The first operand
+\ receives the remainder, in the range from zero to divisor minus one.
+\ Precondition: divisor is positive and both numbers are normalized.
+To reduce a wide number modulo another wide number:
+  Put the wide number into a source string.
+  Put "0" into a remainder wide number.
+  Slap a substring on the source string.
+  Loop.
+    If the substring is blank, break.
+    Append the substring's first's target to the remainder wide number.
+    Normalize the remainder wide number.
+    Remove copies of the other wide number from the remainder wide number.
+    Add 1 to the substring's first.
+  Repeat.
+  Put the remainder wide number into the wide number.
+  Normalize the wide number.
