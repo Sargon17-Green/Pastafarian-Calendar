@@ -48,21 +48,33 @@ To calculate a complete date for a calendar day and another calendar day:
   Choose the canonical cutlet partition.
   If the cutlet partition's valid selection is not 1,
     put "The cutlet partition could not be selected." into the complete date error; exit.
+  Verify the selected cutlet partition.
+  If the structure audit's passed is not 1,
+    put "The chosen cutlet partition has an invalid span count or total." into the complete date error; exit.
   Resolve the cutlet of the target day.
   If the requested cutlet number is 0,
     put "The requested day was not found inside the cutlet partition." into the complete date error; exit.
   Choose the canonical cutlet names.
   If the cutlet name choice's selection success is not 1,
     put "The cutlet name sequence could not be selected." into the complete date error; exit.
+  Verify the selected cutlet names.
+  If the structure audit's passed is not 1,
+    put "The cutlet names have an invalid size or index." into the complete date error; exit.
   Read the requested cutlet name.
   If the requested cutlet name index is 0,
     put "The required cutlet name was not found." into the complete date error; exit.
   Choose the canonical month lengths.
   If the month length work's valid selection is not 1,
     put "The month length sequence could not be selected." into the complete date error; exit.
+  Verify the selected month lengths.
+  If the structure audit's passed is not 1,
+    put "The month lengths do not form an exact permitted year." into the complete date error; exit.
   Choose the canonical month names.
   If the month name choice's selection success is not 1,
     put "The month name sequence could not be selected." into the complete date error; exit.
+  Verify the selected month names.
+  If the structure audit's passed is not 1,
+    put "The month names have an invalid size or index." into the complete date error; exit.
   Put the target year day into the weaving selection's target position.
   Subtract the chosen year's opening day from the weaving selection's target position.
   Choose the canonical month weaving.
