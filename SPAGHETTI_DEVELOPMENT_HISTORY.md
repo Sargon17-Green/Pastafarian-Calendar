@@ -1560,3 +1560,13 @@ il wrapper corretto. La verifica copre tutti i 47 nomi,
 le combinazioni a 3..47 mesi, input falsificati e gli
 output distinti su manager intercalati. Stage38 non
 è anticipato.
+
+### Certificazione Stage37 PATCH18
+
+La run 38375586081 sul commit
+f2c43aaa74b491ed8fceb0a32674d1859108ae3c
+ha superato 38/38 job. Stage37: 63 PASS/0 FAIL;
+Stage36: 59 PASS/3 FAIL intenzionali. La PATCH18
+traduce indici canonici 1..47 in nomi del catalogo
+immutato, distinguendoli dal legacy slittato di un nome.
+Il validator è indipendente dal wrapper. Stage38 assente.

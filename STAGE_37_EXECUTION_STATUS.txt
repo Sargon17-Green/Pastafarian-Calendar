@@ -1,0 +1,40 @@
+STATO_ESECUZIONE=PASS_NATIVE_SCALA
+STADIO=37
+TIPO=PATCH_18
+RISULTATO_ATTESO=GREEN
+RISULTATO_REALE=63_PASS_0_FAIL
+PATCH_WRAPPER=Patch18SourceCatalogWrapper.sourceCatalogIndexPatch
+DISCOVERY_18_LEGACY_PRESERVED=YES
+LEGACY_SHIFT_ID_MOD_47_PRESERVED=YES
+PATCH_01_TO_17_PRESERVED=YES
+STAGE38_INTRODUCED=NO
+MONTH_NAME_CATALOG_COUNT=47
+MONTH_COUNT_RANGE=3_TO_47
+CORRECT_MAPPING=SourceLanguageCatalog.month(ID)
+LEGACY_MAPPING=Months(ID_MOD_47)
+FROZEN_CATALOG_VERSION=UNCHANGED
+DETERMINISTIC_VECTORS=8192
+ALL_47_MONTH_NAMES=PASS
+VALIDATOR_INDEPENDENT=PASS
+INPUT_SNAPSHOT=PASS
+TEST_ONLY_ORACLE=YES
+GITHUB_ACTIONS_RUN=38375586081
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38375586081
+GITHUB_ACTIONS_HEAD_SHA=f2c43aaa74b491ed8fceb0a32674d1859108ae3c
+GITHUB_ACTIONS_JOBS=38
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage37Tests'
+VERIFIED_ON=2026-10-13
+REGRESSIONE_STAGE01_TO_36=PASS_PREVIOUS_SIGNATURES
+REGRESSIONE_STAGE35=71_PASS_0_FAIL
+REGRESSIONE_STAGE36=59_PASS_3_FAIL_INTENTIONAL
+REGRESSIONE_STAGE37=63_PASS_0_FAIL
+
+La patch traduce ciascun ID canonico 1..47 nel nome
+italiano corrispondente con SourceLanguageCatalog.month(id),
+senza toccare il catalogo congelato. Il vecchio adapter
+continua a usare Months(id%47) e la sua cicatrice rimane
+verificabile nel report. Validator, trace e snapshot
+distinguono l'output corretto da quello sbagliato.
+La sequenza di input è sintetica, già scelta: la salsa
+e la conversione completa del calendario restano fuori.

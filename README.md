@@ -1479,3 +1479,23 @@ intenzionali.
 Il test usa indici canonici già selezionati. La salsa
 annuale e l'integrazione della conversione completa del
 calendario restano fuori da questa fase.
+
+### Certificazione nativa dello Stage37
+
+La [run GitHub Actions 38375586081](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38375586081),
+commit `f2c43aaa74b491ed8fceb0a32674d1859108ae3c`,
+è terminata **SUCCESS per tutti i 38 job**. La suite Stage37
+restituisce **63 PASS/0 FAIL**; Stage36 preserva
+**59 PASS/3 FAIL intenzionali** e Stage35 **71 PASS/0 FAIL**.
+Le firme delle precedenti suite sono state riprodotte.
+
+La verifica include tutti i 47 nomi italiani del catalogo
+congelato, il caso limite 47→`sabbia`, 8192 campioni
+riproducibili, isolamento dei manager e rifiuto delle
+manomissioni di nomi, indici, snapshot e trace. Il legacy
+ruotato viene invocato e conservato senza alterarne
+la versione; il catalogo sorgente non è stato modificato.
+
+L'ingresso è un vettore di indici già selezionati; la
+generazione normativa del rango dalla salsa annuale resta
+esclusa dall'implementazione di Stage37.

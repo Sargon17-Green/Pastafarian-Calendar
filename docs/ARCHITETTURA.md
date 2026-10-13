@@ -677,3 +677,12 @@ verifica la stessa relazione tramite
 `Months(id - 1).canonicalIndex == id`, con controllo
 della versione congelata, della snapshot e della trace
 delle tre fasi. Il catalogo non è modificato.
+
+La run 38375586081 sul commit
+f2c43aaa74b491ed8fceb0a32674d1859108ae3c
+conferma PATCH18 con 38/38 job e 63 PASS/0 FAIL.
+I dati sorgente rimangono immutati, l'indice storico
+modulo 47 rimane riproducibile e il validator verifica
+la relazione ID↔nome senza usare il wrapper corretto.
+La selezione degli indici e la salsa normativa completa
+sono ancora fuori dal perimetro di questa fase.
