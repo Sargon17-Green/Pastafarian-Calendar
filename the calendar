@@ -67,6 +67,10 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the seven Foundation hidden drops.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the first Foundation visible drop.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the final Foundation visible drop.
+  If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
