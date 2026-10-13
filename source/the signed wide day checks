@@ -9,43 +9,45 @@
 The first signed day fixture is a wide signed day.
 The second signed day fixture is a wide signed day.
 The third signed day fixture is a wide signed day.
+The sample signed magnitude is a wide quantity.
+The signed fixture text is a string.
 
 To check signed wide day normalization:
-  Put "0000" into a wide day digits.
-  Set the first signed day fixture from the wide day digits given -1.
+  Put "0000" into the sample signed magnitude.
+  Set the first signed day fixture from the sample signed magnitude given -1.
   If the first signed day fixture's polarity is not 0,
     put "Signed zero retained a negative sign." into the check report; exit.
   If the first signed day fixture's magnitude is not "0",
     put "Signed zero retained unnecessary decimal digits." into the check report; exit.
-  Put "000045" into the wide day digits.
-  Set the first signed day fixture from the wide day digits given -99.
+  Put "000045" into the sample signed magnitude.
+  Set the first signed day fixture from the sample signed magnitude given -99.
   If the first signed day fixture's polarity is not -1,
     put "Negative polarity was not normalized to minus one." into the check report; exit.
   If the first signed day fixture's magnitude is not "45",
     put "Leading zeroes survived signed normalization." into the check report; exit.
-  Spell the first signed day fixture into a signed fixture text.
+  Spell the first signed day fixture into the signed fixture text.
   If the signed fixture text is not "-45",
     put "A signed negative day was not spelled correctly." into the check report; exit.
 
 To check signed wide day additions:
-  Put "999999999999999999999999999999999999999999999999" into a wide day digits.
-  Set the first signed day fixture from the wide day digits given 1.
-  Put "1" into the wide day digits.
-  Set the second signed day fixture from the wide day digits given 1.
+  Put "999999999999999999999999999999999999999999999999" into the sample signed magnitude.
+  Set the first signed day fixture from the sample signed magnitude given 1.
+  Put "1" into the sample signed magnitude.
+  Set the second signed day fixture from the sample signed magnitude given 1.
   Add the first signed day fixture to the second signed day fixture.
   If the second signed day fixture's magnitude is not "1000000000000000000000000000000000000000000000000",
     put "A 48-digit positive addition lost its carry." into the check report; exit.
   If the second signed day fixture's polarity is not 1,
     put "A wide positive sum changed sign." into the check report; exit.
-  Put "999999999999999999999999999999999999999999999999" into the wide day digits.
-  Set the first signed day fixture from the wide day digits given -1.
+  Put "999999999999999999999999999999999999999999999999" into the sample signed magnitude.
+  Set the first signed day fixture from the sample signed magnitude given -1.
   Add the first signed day fixture to the second signed day fixture.
   If the second signed day fixture's magnitude is not "1",
     put "Opposite signed quantities did not cancel to one." into the check report; exit.
   If the second signed day fixture's polarity is not 1,
     put "A positive one has the wrong sign after cancellation." into the check report; exit.
-  Put "1" into the wide day digits.
-  Set the third signed day fixture from the wide day digits given -1.
+  Put "1" into the sample signed magnitude.
+  Set the third signed day fixture from the sample signed magnitude given -1.
   Add the third signed day fixture to the second signed day fixture.
   If the second signed day fixture's magnitude is not "0",
     put "Exactly opposed quantities did not cancel to zero." into the check report; exit.
@@ -53,10 +55,10 @@ To check signed wide day additions:
     put "A zero signed sum retained its sign." into the check report; exit.
 
 To check signed wide day subtractions:
-  Put "1000000000000000000000000000000000000000000000000" into a wide day digits.
-  Set the first signed day fixture from the wide day digits given 1.
-  Put "1" into the wide day digits.
-  Set the second signed day fixture from the wide day digits given 1.
+  Put "1000000000000000000000000000000000000000000000000" into the sample signed magnitude.
+  Set the first signed day fixture from the sample signed magnitude given 1.
+  Put "1" into the sample signed magnitude.
+  Set the second signed day fixture from the sample signed magnitude given 1.
   Subtract the first signed day fixture from the second signed day fixture.
   If the second signed day fixture's polarity is not -1,
     put "Subtraction failed to produce a negative day." into the check report; exit.
@@ -64,8 +66,8 @@ To check signed wide day subtractions:
     put "Subtraction lost precision above 32 bits." into the check report; exit.
   If the first signed day fixture's magnitude is not "1000000000000000000000000000000000000000000000000",
     put "Subtraction changed its input operand." into the check report; exit.
-  Put "999999999999999999999999999999999999999999999999" into the wide day digits.
-  Set the third signed day fixture from the wide day digits given -1.
+  Put "999999999999999999999999999999999999999999999999" into the sample signed magnitude.
+  Set the third signed day fixture from the sample signed magnitude given -1.
   Subtract the third signed day fixture from the second signed day fixture.
   If the second signed day fixture's polarity is not 0,
     put "Subtracting a negative wide day did not cancel the result." into the check report; exit.
@@ -73,21 +75,21 @@ To check signed wide day subtractions:
     put "Subtracting a negative wide day left a nonzero magnitude." into the check report; exit.
 
 To check signed wide day order:
-  Put "10000000000000000000000000000" into a wide day digits.
-  Set the first signed day fixture from the wide day digits given -1.
-  Put "9999999999999999999999999999" into the wide day digits.
-  Set the second signed day fixture from the wide day digits given -1.
+  Put "10000000000000000000000000000" into the sample signed magnitude.
+  Set the first signed day fixture from the sample signed magnitude given -1.
+  Put "9999999999999999999999999999" into the sample signed magnitude.
+  Set the second signed day fixture from the sample signed magnitude given -1.
   If the first signed day fixture does not numerically precede the second signed day fixture,
     put "Large negative quantities were compared backwards." into the check report; exit.
   If the second signed day fixture numerically precedes the first signed day fixture,
     put "Negative wide order is not antisymmetric." into the check report; exit.
-  Put "0" into the wide day digits.
-  Set the third signed day fixture from the wide day digits given 1.
+  Put "0" into the sample signed magnitude.
+  Set the third signed day fixture from the sample signed magnitude given 1.
   If the second signed day fixture does not numerically precede the third signed day fixture,
     put "A negative wide day did not precede zero." into the check report; exit.
   If the third signed day fixture numerically precedes the second signed day fixture,
     put "Zero incorrectly preceded a negative day." into the check report; exit.
-  Put "1" into the wide day digits.
-  Set the first signed day fixture from the wide day digits given 1.
+  Put "1" into the sample signed magnitude.
+  Set the first signed day fixture from the sample signed magnitude given 1.
   If the third signed day fixture does not numerically precede the first signed day fixture,
     put "Zero did not precede a positive wide day." into the check report; exit.
