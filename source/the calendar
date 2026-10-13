@@ -101,6 +101,10 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the exhausted gate work budget.
   If the check report is not "The checks agree with the examples.", exit.
+  Check every English cutlet name.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check every English month name.
+  If the check report is not "The checks agree with the examples.", exit.
   Check two-month weaving.
   If the check report is not "The checks agree with the examples.", exit.
   Check three-month weaving.
