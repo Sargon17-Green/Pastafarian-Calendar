@@ -24,6 +24,7 @@ def need(v,msg):
 
 def run_full(source,raw,opposite):
     trace=[]
+    pretrace=[]
     step=[0]
     post=[False]
     gates=[0]
@@ -35,11 +36,12 @@ def run_full(source,raw,opposite):
         ip=self.ips[0]
         xy=(int(ip.position[0]),int(ip.position[1]))
         gate=(xy==fork.GATE)
-        if post[0]:
-            trace.append([step[0],xy[0],xy[1],
-                          int(ip.delta[0]),int(ip.delta[1]),
-                          int(self.space.get(ip.position)),
-                          int(bool(ip.stringmode))])
+        witness=[step[0],xy[0],xy[1],
+                 int(ip.delta[0]),int(ip.delta[1]),
+                 int(self.space.get(ip.position)),
+                 int(bool(ip.stringmode))]
+        if post[0]:trace.append(witness)
+        else:pretrace.append(witness)
         result=original_step(self)
         if gate:
             gates[0]+=1
@@ -53,6 +55,10 @@ def run_full(source,raw,opposite):
     need(gates[0]==1 and len(measured["gates"])==1,
          "exactly one actual native conditional fork required")
     tick=measured["gates"][0]["step"]
+    need(len(pretrace)==tick and pretrace[0][0]==1 and
+         pretrace[-1][0]==tick and pretrace[-1][5]==ord("|") and
+         pretrace[-1][6]==0,
+         "Native complete pre-fork instruction trace not recorded")
     need(step[0]==measured["steps"]
          and len(trace)==measured["steps"]-tick
          and len(trace)>512 and trace[0][0]==tick+1
@@ -72,6 +78,7 @@ def run_full(source,raw,opposite):
        "native_p_history":measured["native_p_writes_raw"],
        "native_g_history":measured["native_g_reads_raw"],
        "first_512_motion":[list(e[:4]) for e in measured["route"]],
+       "complete_prefork_trace":pretrace,
        "complete_postfork_trace":trace,
        "final_scratch_value":measured["final_scratch_value"]
     }
@@ -112,7 +119,7 @@ def main():
               "final_output_causal",b["output"]!=expected)
         sys.stdout.flush()
     report={
-       "schema":"befunge-stage1-four-cell-native-full-postfork-trace-v1",
+       "schema":"befunge-stage1-four-cell-native-full-postfork-trace-v2",
        "status":"QA_ONLY_COMPLETE_POSTFORK_FOUR_INPUT_PAIRS_STAGE1_OPEN",
        "source_git_blob":PIN,"candidate_git_blob":CANDIDATE,
        "selected_cases":list(CASES),"native_executions":8,
