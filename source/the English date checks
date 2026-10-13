@@ -1,0 +1,24 @@
+\ Render names from canonical indices only AFTER the date succeeded.
+\ This check avoids gate calculations: it tests the display adapter
+\ independently of the sauce and of the year-selection algorithm.
+
+To check the English complete date text:
+  Put 1 into the complete date status.
+  Put 5000 into the complete date answer's year number.
+  Put 10 into the complete date answer's cutlet name index.
+  Put 503 into the complete date answer's day within cutlet.
+  Put 20 into the complete date answer's month name index.
+  Put 56 into the complete date answer's day within month.
+  Render the complete date in English.
+  If the complete English date text is not "5000, Scorpion, 503, Well, 56",
+    put "The Foundation English date rendering does not match its names." into the check report; exit.
+  Put 0 into the complete date status.
+  Render the complete date in English.
+  If the complete English date text is not "",
+    put "An invalidated date was rendered with stale English text." into the check report; exit.
+  Put 1 into the complete date status.
+  Put 48 into the complete date answer's month name index.
+  Render the complete date in English.
+  If the complete English date text is not "",
+    put "An unknown month index was rendered as a valid English date." into the check report; exit.
+  Reset the complete date answer.
