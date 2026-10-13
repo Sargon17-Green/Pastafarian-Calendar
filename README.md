@@ -66,13 +66,24 @@ written in Plain English Programming:
 - **the gate walk** and **the gate walk checks**: start at gate zero,
   Foundation Day, and accumulate the exact chosen intervals in either
   direction; check the adjacent positions and the zero anchor.
-- **the year candidates** and **the year candidate checks**: test
-  year-5000 eligibility for (opening, closing], at least six gate
-  intervals and length 252..5778; apply the required shortest-first,
-  earlier-opening tie-break rule. Full candidate enumeration and
-  the year-5000 choice have not been written yet.
+- **the year candidates** and **the year candidate checks**: check
+  the eligibility and canonical ordering of pairs of year-boundary gates.
+- **the year 5000** and **the year 5000 checks**: enumerate all eligible
+  gate pairs around the calculation day (within the maximum year length),
+  sort by length and earliest opening gate, and use bowl 1, seal 10,
+  on the sauce for (c,c) to choose the anchor year. The normal tests
+  exercise an invented eleven-candidate ledger; a separate slow check
+  compares the real Foundation year to its canonical gate boundaries.
+- **the year walk** and **the year walk checks**: calculate following and
+  preceding years from their fixed shared gate, using seals 11 and 12
+  with the original calculation day. The boundary oracle is a slow
+  integration check, not a default test.
+- **the year structure counts** and **the year structure checks**:
+  prepare one sauce for (c, first day of year) and select the cutlet
+  count with bowl 2/seal 20 and the month count with bowl 3/seal 30.
+  Fast tests cover the exact count ranges and extreme year lengths.
 
-The source now includes **42 groups of checks**, some of which compare several
+The source now includes **45 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -94,10 +105,13 @@ The current first-stage day-count conversion and signed gate indexing still
 use CAL's 32-bit number type and need wide-number replacements for extreme
 dates and gate indices.
 
-**Not yet built:** unbounded-date and large-index support for the gate
-walk, candidate enumeration and year selection, cutlets, months, and a complete Pastafarian date.
-The narrow and wide equal-choice mechanisms, bidirectional gate walk, and
-initial year-candidate rules are written, but remain untested in CAL.
+**Not yet built:** arbitrary-precision day coordinates and gate indices;
+the cutlet compositions, names and day positions; exact month-length
+compositions, weaving and names; and the five-part final Pastafarian date.
+Year 5000, following/preceding year selection and the initial cutlet/month
+count choices are present as source but have not been compiled in CAL.
+The narrow and wide equal-choice mechanisms and gate/year-selection
+machinery are written, but remain untested in CAL.
 No shortcuts, approximate answers, or hard-coded final dates are allowed.
 
 ## The idea, explained simply
@@ -178,7 +192,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English source files in this branch must be present when compiling. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 42 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 45 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
