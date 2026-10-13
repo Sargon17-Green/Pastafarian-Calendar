@@ -1,0 +1,54 @@
+\ Fast reference checks for the 47 canonical month-name indices.
+\ Three names: 47*46*45 = 97290 ordered distinct sequences.
+\ The last three-name sequence is 47,46,45.
+\ For 47 names the total is 47 factorial and exceeds sauce modulus M.
+
+To check the month name sequence counts:
+  Put 3 into the selected month count.
+  Count all month name sequences.
+  If the month name choice's total sequences is not "97290",
+    put "Three distinct month names have the wrong count." into the check report; exit.
+  Put 47 into the selected month count.
+  Count all month name sequences.
+  If the month name choice's total sequences is not "258623241511168180642964355153611979969197632389120000000000",
+    put "A complete 47-name permutation count was rounded or truncated." into the check report; exit.
+
+To verify three month name indices given a number and another number and a third number:
+  Put the chosen month names' first into the examined month name assignment.
+  If the examined month name assignment is nil,
+    put "The first month name is missing." into the check report; exit.
+  If the examined month name assignment's name index is not the number,
+    put "The first month name differs from the reference." into the check report; exit.
+  Put the examined month name assignment's next into the examined month name assignment.
+  If the examined month name assignment is nil,
+    put "The second month name is missing." into the check report; exit.
+  If the examined month name assignment's name index is not the other number,
+    put "The second month name differs from the reference." into the check report; exit.
+  Put the examined month name assignment's next into the examined month name assignment.
+  If the examined month name assignment is nil,
+    put "The third month name is missing." into the check report; exit.
+  If the examined month name assignment's name index is not the third number,
+    put "The third month name differs from the reference." into the check report; exit.
+  If the examined month name assignment's next is not nil,
+    put "A three-month name list has extra entries." into the check report; exit.
+
+To check the month name lexical ranking:
+  Put 3 into the selected month count.
+  Put "1" into a month name rank wide quantity.
+  Select month names from the month name rank wide quantity.
+  If the month name choice's selection success is not 1,
+    put "The first month-name sequence was rejected." into the check report; exit.
+  Verify three month name indices given 1 and 2 and 3.
+  Put "45" into the month name rank wide quantity.
+  Select month names from the month name rank wide quantity.
+  Verify three month name indices given 1 and 2 and 47.
+  Put "46" into the month name rank wide quantity.
+  Select month names from the month name rank wide quantity.
+  Verify three month name indices given 1 and 3 and 2.
+  Put "97290" into the month name rank wide quantity.
+  Select month names from the month name rank wide quantity.
+  Verify three month name indices given 47 and 46 and 45.
+  Put "97291" into the month name rank wide quantity.
+  Select month names from the month name rank wide quantity.
+  If the month name choice's selection success is not 0,
+    put "The month name chooser accepted an out-of-range rank." into the check report; exit.
