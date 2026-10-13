@@ -1,0 +1,87 @@
+\ The first structural choices after selecting the requested year.
+\ All structure questions use one sauce pair:
+\   (calculation day, first day of the selected year).
+\ The year's first day is opening gate plus one calendar day.
+\ Bowl 2, seal 20 selects how many cutlets (6..min(17,G)),
+\ where G is the number of gate intervals in the year.
+\ Bowl 3, seal 30 selects how many months, 3..47, subject to
+\ 4..123 calendar days for each month and the exact year length.
+\ Both choices are uniformly mapped with the canonical equal-choice
+\ mechanism, not ordinary modulo without rejection.
+\ This file does not assign cutlet lengths, names or month weaving.
+\ CAL compilation has not yet been verified.
+
+A structural count range has
+  a number called first option,
+  a number called last option,
+  a number called option count.
+
+The cutlet count range is a structural count range.
+The month count range is a structural count range.
+The selected cutlet count is a number.
+The selected month count is a number.
+
+\ G is the year candidate's span count, never its length in days.
+To prepare the cutlet count range:
+  Put 6 into the cutlet count range's first option.
+  Put the chosen year's span count into the cutlet count range's last option.
+  If the cutlet count range's last option is greater than 17,
+    put 17 into the cutlet count range's last option.
+  Put the cutlet count range's last option into the cutlet count range's option count.
+  Subtract 5 from the cutlet count range's option count.
+
+\ For positive year length L, floor((L+122)/123) is ceil(L/123).
+\ The largest permitted month count is min(47,floor(L/4)).
+To prepare the month count range:
+  Put the chosen year's year length into the month count range's first option.
+  Add 122 to the month count range's first option.
+  Divide the month count range's first option by 123.
+  Put the chosen year's year length into the month count range's last option.
+  Divide the month count range's last option by 4.
+  If the month count range's last option is greater than 47,
+    put 47 into the month count range's last option.
+  Put the month count range's last option into the month count range's option count.
+  Subtract the month count range's first option from the month count range's option count.
+  Add 1 to the month count range's option count.
+
+\ Keep the chosen structural sauce in the current bowls until all
+\ choices for the same year have finished. No gate query may overwrite it.
+To prepare the year structure sauce:
+  Put the year selection day into the example's calculation day.
+  Put the chosen year's opening day into the example's requested day.
+  Add 1 to the example's requested day.
+  Answer the example.
+  Copy the example into the sauce input.
+  Make the complete sauce.
+
+\ For a range [a,b], the accepted option is a-1+choice in 1..b-a+1.
+To choose the cutlet count:
+  Prepare the cutlet count range.
+  Put 2 into the seal inquiry's bowl identity.
+  Put 20 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  Convert the cutlet count range's option count to a string.
+  Put the string into a structural options wide quantity.
+  Choose an equal option given the structural options wide quantity.
+  Convert the seal inquiry's selected quantity to the selected cutlet count.
+  Add the cutlet count range's first option to the selected cutlet count.
+  Subtract 1 from the selected cutlet count.
+
+\ The month count uses the SAME bowls but its own seal and identity.
+To choose the month count:
+  Prepare the month count range.
+  Put 3 into the seal inquiry's bowl identity.
+  Put 30 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  Convert the month count range's option count to a string.
+  Put the string into a structural options wide quantity.
+  Choose an equal option given the structural options wide quantity.
+  Convert the seal inquiry's selected quantity to the selected month count.
+  Add the month count range's first option to the selected month count.
+  Subtract 1 from the selected month count.
+
+\ A caller first locates the requested year, then makes one sauce.
+To choose the structural counts:
+  Prepare the year structure sauce.
+  Choose the cutlet count.
+  Choose the month count.
