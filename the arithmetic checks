@@ -1,0 +1,74 @@
+\ Examples and boundary checks for the exact decimal arithmetic.
+\ This file uses only Plain English Programming.
+\ The checks are not yet verified by a CAL execution.
+\ Each failure leaves a meaningful message in the check report.
+
+To check wide number order:
+  Put "9" into a first wide number.
+  Put "10" into a second wide number.
+  If the first wide number is not less than the second wide number,
+    put "The wide order check failed on different lengths." into the check report; exit.
+  If the second wide number is less than the first wide number,
+    put "The wide order check failed on reversed lengths." into the check report; exit.
+  Put "170141183460469231731687303715884105726" into the first wide number.
+  Put "170141183460469231731687303715884105727" into the second wide number.
+  If the first wide number is not less than the second wide number,
+    put "The wide order check failed on equal lengths." into the check report; exit.
+  If the second wide number is less than the second wide number,
+    put "The wide order check failed on equality." into the check report; exit.
+
+To check wide number addition:
+  Put "999999999999999999999999999999" into a first wide number.
+  Put "1" into a second wide number.
+  Add the first wide number to the second wide number.
+  If the second wide number is not "1000000000000000000000000000000",
+    put "The wide addition check failed on a long carry." into the check report; exit.
+  Put "170141183460469231731687303715884105727" into the first wide number.
+  Put "1" into the second wide number.
+  Add the first wide number to the second wide number.
+  If the second wide number is not "170141183460469231731687303715884105728",
+    put "The wide addition check failed at the sauce modulus." into the check report; exit.
+
+To check wide number subtraction:
+  Put "170141183460469231731687303715884105727" into a first wide number.
+  Put "170141183460469231731687303715884105727" into a second wide number.
+  Subtract the first wide number from the second wide number.
+  If the second wide number is not "0",
+    put "The wide subtraction check failed on equality." into the check report; exit.
+  Put "999999999999999999999999999999" into the first wide number.
+  Put "1000000000000000000000000000000" into the second wide number.
+  Subtract the first wide number from the second wide number.
+  If the second wide number is not "1",
+    put "The wide subtraction check failed on a long borrow." into the check report; exit.
+
+To check wide number multiplication:
+  Put "123456789012345678901234567890" into a first wide number.
+  Put "987654321098765432109876543210" into a second wide number.
+  Multiply the first wide number by the second wide number.
+  If the second wide number is not "121932631137021795226185032733622923332237463801111263526900",
+    put "The wide multiplication check failed." into the check report; exit.
+  Put "170141183460469231731687303715884105727" into the first wide number.
+  Put "2" into the second wide number.
+  Multiply the first wide number by the second wide number.
+  If the second wide number is not "340282366920938463463374607431768211454",
+    put "The wide multiplication check failed on the sauce modulus." into the check report; exit.
+  Put "0" into the first wide number.
+  Put "987654321098765432109876543210" into the second wide number.
+  Multiply the first wide number by the second wide number.
+  If the second wide number is not "0",
+    put "The wide multiplication check failed on zero." into the check report; exit.
+
+To check wide number division:
+  Put "121932631137021795226185032733622923332237463801111263526900" into a first wide number.
+  Put "170141183460469231731687303715884105727" into a second wide number.
+  Reduce the first wide number modulo the second wide number.
+  If the first wide number is not "144875469711726358240874201207950817872",
+    put "The wide division check failed on a large remainder." into the check report; exit.
+  Put "340282366920938463463374607431768211454" into the first wide number.
+  Reduce the first wide number modulo the second wide number.
+  If the first wide number is not "0",
+    put "The wide division check failed on an exact multiple." into the check report; exit.
+  Put "1" into the first wide number.
+  Reduce the first wide number modulo the second wide number.
+  If the first wide number is not "1",
+    put "The wide division check failed on a small dividend." into the check report; exit.
