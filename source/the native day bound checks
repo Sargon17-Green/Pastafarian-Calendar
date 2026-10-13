@@ -25,3 +25,31 @@ To check native date coordinate bounds:
   Check native day coordinate inputs given 384944329 and 384944329.
   If the native date input validity is no,
     put "A later safe pair remained rejected after invalid input." into the check report; exit.
+
+
+\ The bound is chosen so the two counters, their sum and their
+\ inclusive distance all fit 32 bits even for opposite endpoints.
+\ Exercise those exact values without invoking a gate scan.
+To check native day counter endpoints:
+  Put -415055671 into the example's calculation day.
+  Put 384944329 into the example's requested day.
+  Answer the example.
+  If the example's calculation count is not 800000000,
+    put "The earliest accepted day has the wrong even count." into the check report; exit.
+  If the example's requested count is not 800000001,
+    put "The latest accepted day has the wrong odd count." into the check report; exit.
+  If the example's day sum is not 1600000001,
+    put "The sum of the two maximum native counts was wrong." into the check report; exit.
+  If the example's day distance is not 800000001,
+    put "The inclusive extreme-endpoint distance was wrong." into the check report; exit.
+  If the example's day direction is not 3,
+    put "The extreme endpoints have the wrong forward direction." into the check report; exit.
+  Put 384944329 into the example's calculation day.
+  Put -415055671 into the example's requested day.
+  Answer the example.
+  If the example's day direction is not 1,
+    put "Reversed native endpoints have the wrong direction." into the check report; exit.
+  If the example's day sum is not 1600000001,
+    put "Reversed native endpoints changed the sum." into the check report; exit.
+  If the example's day distance is not 800000001,
+    put "Reversed native endpoints changed the distance." into the check report; exit.
