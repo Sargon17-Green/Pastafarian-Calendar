@@ -25,6 +25,8 @@ A cutlet partition has
   a number called remaining spans,
   a number called remaining parts,
   a number called remaining boundary,
+  a number called suffix spans,
+  a number called suffix parts,
   a number called candidate length,
   a number called part chosen,
   a wide quantity called total choices,
@@ -86,23 +88,23 @@ To count cutlet partitions with a required boundary:
 \ C((R-x)-1,(P-1)-1). If there is no pin, use the latter.
 To count the current cutlet suffix:
   Put "0" into the cutlet partition's suffix choices.
-  Put the cutlet partition's remaining spans into a suffix spans number.
-  Subtract the cutlet partition's candidate length from the suffix spans number.
-  Put the cutlet partition's remaining parts into a suffix parts number.
-  Subtract 1 from the suffix parts number.
-  If the suffix parts number is 0,
+  Put the cutlet partition's remaining spans into the cutlet partition's suffix spans.
+  Subtract the cutlet partition's candidate length from the cutlet partition's suffix spans.
+  Put the cutlet partition's remaining parts into the cutlet partition's suffix parts.
+  Subtract 1 from the cutlet partition's suffix parts.
+  If the cutlet partition's suffix parts is 0,
     count the last cutlet suffix; exit.
   If the cutlet partition's remaining boundary is greater than 0,
     count a suffix with a restricted boundary; exit.
-  Put the suffix spans number into a first binomial number.
+  Put the cutlet partition's suffix spans into a first binomial number.
   Subtract 1 from the first binomial number.
-  Put the suffix parts number into a second binomial number.
+  Put the cutlet partition's suffix parts into a second binomial number.
   Subtract 1 from the second binomial number.
   Calculate a binomial coefficient given the first binomial number and the second binomial number.
   Put the binomial result into the cutlet partition's suffix choices.
 
 To count the last cutlet suffix:
-  If the suffix spans number is not 0, exit.
+  If the cutlet partition's suffix spans is not 0, exit.
   If the cutlet partition's remaining boundary is greater than 0, exit.
   Put "1" into the cutlet partition's suffix choices.
 
@@ -110,18 +112,18 @@ To count a suffix with a restricted boundary:
   If the cutlet partition's candidate length is greater than the cutlet partition's remaining boundary, exit.
   If the cutlet partition's candidate length is the cutlet partition's remaining boundary,
     count a suffix after satisfying its restriction; exit.
-  If the suffix parts number is less than 2, exit.
-  Put the suffix spans number into a first binomial number.
+  If the cutlet partition's suffix parts is less than 2, exit.
+  Put the cutlet partition's suffix spans into a first binomial number.
   Subtract 2 from the first binomial number.
-  Put the suffix parts number into a second binomial number.
+  Put the cutlet partition's suffix parts into a second binomial number.
   Subtract 2 from the second binomial number.
   Calculate a binomial coefficient given the first binomial number and the second binomial number.
   Put the binomial result into the cutlet partition's suffix choices.
 
 To count a suffix after satisfying its restriction:
-  Put the suffix spans number into a first binomial number.
+  Put the cutlet partition's suffix spans into a first binomial number.
   Subtract 1 from the first binomial number.
-  Put the suffix parts number into a second binomial number.
+  Put the cutlet partition's suffix parts into a second binomial number.
   Subtract 1 from the second binomial number.
   Calculate a binomial coefficient given the first binomial number and the second binomial number.
   Put the binomial result into the cutlet partition's suffix choices.
