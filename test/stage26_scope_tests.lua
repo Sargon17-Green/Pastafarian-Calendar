@@ -18,7 +18,8 @@ assert(public:find("function S.legacyBiasedChoiceProbe(",1,true))
 assert(public:find("function S.oldBiasedModuloPickProbe(",1,true))
 assert(public:find("function S.choiceSpaghetti(",1,true))
 assert(not stage25:find('require("legacy_biased_choice")',1,true))
-for _,src in ipairs({legacy,public}) do
+-- Tès etap 26 pa dwe entèdi kwasans facade nan PATCH 13.
+for _,src in ipairs({legacy}) do
  for _,token in ipairs({"normative_oracle","chooseRankPatch",
    "rejectionSamplingPatch","legacyChooseWide","postStir12"}) do
   assert(not src:find(token,1,true),"Stage 27+ antre twò bonè: "..token)

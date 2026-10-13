@@ -25,6 +25,7 @@ local BowlChainPatch = require("bowl_chain_patch")
 local LegacyFixedNeighbor = require("legacy_fixed_neighbor")
 local NeighborPatch = require("neighbor_patch")
 local LegacyBiasedChoice = require("legacy_biased_choice")
+local ShortChoicePatch = require("short_choice_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -425,12 +426,21 @@ function S.oldBiasedModuloPickProbe(first,direction,optionCount)
 end
 
 function S.choiceSpaghetti(first,direction,optionCount)
-    local biased=LegacyBiasedChoice.execute(first,direction,optionCount)
-    return biased
+    local corrected=ShortChoicePatch.execute(first,direction,optionCount)
+    return corrected
+end
+
+-- PATCH 13 rejte repons ki pi gran pase limit, san efase modulo legacy.
+function S.shortChoicePatchProbe(first,direction,optionCount)
+    return ShortChoicePatch.execute(first,direction,optionCount)
+end
+
+function S.shortChoiceCoreProbe(first,direction,optionCount)
+    return ShortChoicePatch.chooseShort(first,direction,optionCount)
 end
 
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 26", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 27", 0)
 end
 
 return S
