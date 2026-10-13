@@ -25,6 +25,7 @@ To gather following year candidates:
   Put the transition boundary into the gate walk's current position.
   Loop.
     Move to the next positive gate.
+    If the gate step budget's exhausted is 1, exit.
     Put the transition boundary into the candidate under construction's opening day.
     Put the chosen year's closing index into the candidate under construction's opening index.
     Put the gate walk's current position into the candidate under construction's closing day.
@@ -52,6 +53,7 @@ To gather preceding year candidates:
   Put the transition boundary into the gate walk's current position.
   Loop.
     Move to the next negative gate.
+    If the gate step budget's exhausted is 1, exit.
     Put the gate walk's current position into the candidate under construction's opening day.
     Put the gate walk's current index into the candidate under construction's opening index.
     Put the transition boundary into the candidate under construction's closing day.
@@ -83,6 +85,8 @@ To select the adjacent year:
 To advance to the following year:
   Put 0 into the year selection success.
   Gather following year candidates.
+  If the gate step budget's exhausted is 1,
+    destroy the eligible year ledger; exit.
   If the eligible year count is 0,
     destroy the eligible year ledger; exit.
   Select the adjacent year.
@@ -95,6 +99,8 @@ To advance to the following year:
 To move to the preceding year:
   Put 0 into the year selection success.
   Gather preceding year candidates.
+  If the gate step budget's exhausted is 1,
+    destroy the eligible year ledger; exit.
   If the eligible year count is 0,
     destroy the eligible year ledger; exit.
   Select the adjacent year.
