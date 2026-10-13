@@ -703,3 +703,16 @@ de kontex reentrant, de sauce kanonik, ak kat odit
 `EXPECTED_RED` istorik Stage 26. Legacy rete byte-pou-byte
 e modil oracle pa antre nan production.
 `LAST_COMPLETED_STAGE=27` / `EXPECTED_REPOSITORY_STATE=GREEN`.
+
+## Stage 28 — DISCOVERY 14: short-only dispatcher bloke N>M
+
+Nou pa modifye PATCH 13. Modil `legacy_short_only_choice.lua`
+rele chemen short korije a menm lè N depase M.
+Pou N>M, verifikasyon short la rejte gwosè opsyon an
+e chemen legacy retounen rank nil ak MonsterContext
+ki gen yon commit ak diagnostics. Pou N<=M, PATCH 13
+rete san chanjman. Oracle wide sèlman nan `test/`
+montre repons valab ki pa disponib sou chemen sa a,
+ak 4 scripts EXPECTED_RED ak plizyè gwosè >256 bit.
+Pa gen wideDetour PATCH 14, ni chif wide nan production.
+Natif CI poko verifye.

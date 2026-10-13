@@ -979,3 +979,41 @@ echèk CI ki pa atann.
 `LAST_COMPLETED_STAGE=27` epi
 `EXPECTED_REPOSITORY_STATE=GREEN`.
 Pa gen chwa wide `N>M` ni final douz brase nan PATCH 13.
+
+## Stage 28 — DISCOVERY 14: dispatcher legacy san chemen N>M
+
+Apre PATCH 13, `choiceSpaghetti` toujou korije pou
+`1<=N<=M`, men lòd done istorik yo pa konn chwa laj
+lè `N>M`. Nou ajoute `src/legacy_short_only_choice.lua`,
+ki eseye rele **PATCH 13 reyèl la** menm sou N>M.
+Erè gwosè short la bloke rank (rezilta nil); nou konsève
+li nan yon MonsterContext posede, avèk handler
+`LEGACY_WIDE_SENT_TO_SHORT_PATH`, yon commit,
+metrik, diagnostic ak `shortError`. Pa gen ran
+artificiel oswa repons 0 ki ta sanble valab.
+
+`legacyShortOnlyChoiceProbe(first,direction,N)` kenbe
+tras istorik la pou short ak wide. Sou short, li verifye
+twa commits PATCH 13 epi li retounen rank egzak la; sou
+wide, li retounen nil ak `STAGE_28_DISCOVERY_14`.
+`choiceSpaghetti` konsève PATCH 13 pou N<=M epi li
+ekspoze blokaj short-only pou N>M. Modil
+`short_choice_patch.lua` rete byte-pou-byte entak.
+
+Oracle tès endepandan an gen yon `chooseRankWide` ki
+chèche minimòm `k` ak `M^k>=N`, li pran k repons
+yon sèl fwa epi li fòme chif baz M, ak chif pi ba a an
+premye. Nou sèvi avè l sèlman nan `test/` pou pwouve
+ke kat witness `N=M+1`, `N=M^2`, ak gwosè
+jiska `M^3+1` kapab jwenn rank otantik pandan legacy
+a bloke. Yon blòk vrè sauce kanonik teste menm defo a.
+
+Kat fichye `test/stage28_expected_red_1..4.lua`
+gen mesaj wouj egzak. `stage28_expected_red_audit.lua`
+dwe pase si kat erè yo byen jwenn. `lua5.3
+test/stage28_tests.lua .` kouvri tout Stage 1–28,
+chwa short koreksyon PATCH 13, sizes jiska M^5+1,
+oracle wide, fail-closed, reentrancy, ak sous sauce.
+Stage 29 PATCH 14 ap bezwen yon wide detour apa;
+Stage 28 pa kapab ajoute koreksyon an, ni final
+douz brase yo.
