@@ -34,9 +34,10 @@ long division are broken into separate routines, without nested loops.
 **Important limitations:** The arithmetic routines take nonempty, normalized,
 nonnegative decimal numbers. Subtraction requires the second number to be at
 least as large as the first. The ordinary remainder routine requires a
-positive divisor. SAVE currently handles only nonnegative arguments; handling
-negative intermediate results without losing the original calendar's meaning
-still needs to be built.
+positive divisor. Direct SAVE currently handles only nonnegative arguments. A separate sauce
+subtraction routine handles SAVE(a-b) even if a-b is negative, provided that
+both operands were already saved in the range 1..M. More general signed
+arithmetic and CAL execution testing remain unfinished.
 
 **Compilation and execution are not verified.** The source has been written
 from documented CAL language constructs, but no CAL compiler is available in
