@@ -24,7 +24,7 @@ def valid_output(a):
         type(z) is str and DECIMAL.fullmatch(z) for z in a)
 def verify_index(doc):
     need(type(doc) is dict and
-         doc.get("schema")=="befunge-stage1-four-cell-49-complete-native-postfork-v1" and
+         doc.get("schema")=="befunge-stage1-four-cell-49-complete-native-postfork-v2" and
          doc.get("status")=="FINITE_49_COMPLETE_NATIVE_TRAJECTORIES_STAGE1_OPEN" and
          doc.get("base_git_blob")==BASE and doc.get("candidate_git_blob")==CAND and
          doc.get("signed_domain")==list(DOM) and
@@ -51,6 +51,9 @@ def verify_index(doc):
              type(row.get("fork_step")) is int and row["fork_step"]>0 and
              type(row.get("complete_postfork_steps")) is int and
              row["complete_postfork_steps"]>512 and
+             type(row.get("complete_prefork_steps")) is int and
+             row["complete_prefork_steps"]==row["fork_step"] and
+             row["complete_prefork_steps"]+row["complete_postfork_steps"]==row["native_steps"] and
              type(row.get("literal_executions")) is int and
              (row["literal_executions"]>0)==(dc<0) and
              type(row.get("p_writes")) is int and row["p_writes"]>=0 and
@@ -67,11 +70,11 @@ def fixture():
         raw=" ".join(map(str,fields))+"\n"
         rows.append(dict(index=i,signed_days=[dc,dt],fields=list(fields),
           trace_filename="pair_%02d.json"%i,trace_file_sha256="a"*64,
-          native_steps=19000,fork_step=11000,complete_postfork_steps=8000,
+          native_steps=19000,fork_step=11000,complete_prefork_steps=11000,complete_postfork_steps=8000,
           literal_executions=int(dc<0),p_writes=1,g_reads=1,
           reference_output=["0"]*7,
           input_sha256=hashlib.sha256(raw.encode("ascii")).hexdigest()))
-    return dict(schema="befunge-stage1-four-cell-49-complete-native-postfork-v1",
+    return dict(schema="befunge-stage1-four-cell-49-complete-native-postfork-v2",
        status="FINITE_49_COMPLETE_NATIVE_TRAJECTORIES_STAGE1_OPEN",
        base_git_blob=BASE,candidate_git_blob=CAND,signed_domain=list(DOM),
        original_native_candidate_executions=49,
@@ -90,6 +93,8 @@ def selftest():
       ("malformed_native_hash",lambda d:d["records"][2].__setitem__("trace_file_sha256","0"*63)),
       ("boolean_native_steps",lambda d:d["records"][2].__setitem__("native_steps",True)),
       ("fractional_fork_step",lambda d:d["records"][2].__setitem__("fork_step",1.5)),
+      ("missing_prefork_count",lambda d:d["records"][2].pop("complete_prefork_steps")),
+      ("forged_prefork_count",lambda d:d["records"][2].__setitem__("complete_prefork_steps",11001)),
       ("changed_input",lambda d:d["records"][0]["fields"].__setitem__(3,99)),
       ("invented_lower_route",lambda d:d["records"][25].__setitem__("literal_executions",2)),
       ("erased_lower_route",lambda d:d["records"][0].__setitem__("literal_executions",0)),
@@ -105,7 +110,7 @@ def selftest():
         try:verify_index(bad)
         except AssertionError:continue
         raise AssertionError("full Native manifest forgery accepted: "+name)
-    print("NATIVE_49_FULL_POSTFORK_MANIFEST_14_FALSIFICATIONS_REJECT_PASS")
+    print("NATIVE_49_FULL_POSTFORK_MANIFEST_16_FALSIFICATIONS_REJECT_PASS")
 def main(root):
     selftest()
     path=Path(root)
@@ -136,9 +141,10 @@ def main(root):
              run.get("gate",{}).get("step")==row["fork_step"] and
              run.get("total_p_writes")==row["p_writes"] and
              run.get("total_g_reads")==row["g_reads"] and
-             len(run.get("complete_postfork_trace",[]))==row["complete_postfork_steps"],
+             len(run.get("complete_postfork_trace",[]))==row["complete_postfork_steps"] and
+             len(run.get("complete_prefork_trace",[]))==row["complete_prefork_steps"],
              "Native full-route meta, oracle, physical p/g event totals drifted")
-        rec=full.verify_run(run,source)
+        rec=full.verify_run(run,source,require_prefork=True)
         lit=sum(int((z[1],z[2])==(951,1337) and
                     z[5]==49 and z[6]==0) for z in run["complete_postfork_trace"])
         need(lit==row["literal_executions"],
@@ -146,6 +152,7 @@ def main(root):
         measured.append(dict(
           signed_days=row["signed_days"],
           complete_postfork_events=rec["complete_postfork_events"],
+          verified_prefork_executed_steps=rec["verified_prefork_executed_steps"],
           unique_directed_nodes=rec["unique_directed_nodes"],
           unique_directed_edges=rec["unique_edges"],
           physical_p_writes=rec["verified_p_writes"],
@@ -168,7 +175,7 @@ def main(root):
     for name,mutator in bad:
         altered=copy.deepcopy(run)
         mutator(altered)
-        try:full.verify_run(altered,source)
+        try:full.verify_run(altered,source,require_prefork=True)
         except AssertionError:pass
         else:raise AssertionError("forged actual Native full route accepted "+name)
     summary=dict(
@@ -179,11 +186,12 @@ def main(root):
       independent_native_reference_executions=147,
       literal_reached_trajectories=21,
       literal_unreached_trajectories=28,
+      complete_prefork_instructions=sum(x["verified_prefork_executed_steps"] for x in measured),
       complete_postfork_instructions=sum(x["complete_postfork_events"]
                                         for x in measured),
       total_replayed_native_p_writes=sum(x["physical_p_writes"] for x in measured),
       total_replayed_native_g_reads=sum(x["physical_g_reads"] for x in measured),
-      adversarial_manifest_reports_rejected=14,
+      adversarial_manifest_reports_rejected=16,
       adversarial_actual_trajectories_rejected=3,
       stage1_complete=False,stage2_started=False,
       records=measured)
