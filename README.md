@@ -48,8 +48,13 @@ written in Plain English Programming:
   preserve the final visible order for later queries. The checks compare
   the first mixed drop, the complete state after drop 46, and all six
   final bowls with independent canonical Foundation-Day values.
+- **the sealed answers** and **the sealed answer checks**: use the bowls
+  after the twelve final mixes and the remembered drop-46 circle to
+  calculate A0, stream direction D, answer stepping, and exact narrow
+  equal choice for 1 <= N <= M. Includes Foundation-Day seal vectors
+  and exact rejection-boundary tests.
 
-The source now includes **28 groups of checks**, some of which compare several
+The source now includes **31 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -70,9 +75,10 @@ a separate operation supports signed differences between numbers in 1..M.
 The current first-stage day-count conversion still uses CAL's 32-bit number
 type and needs a wide-number replacement for extreme dates.
 
-**Not yet built:** interpreting the final bowls with their official seals,
-gate discovery, year selection, cutlets, months, and a complete Pastafarian
-date. No shortcuts, approximate answers, or hard-coded final dates are allowed.
+**Not yet built:** wide equal choice when N exceeds M, the gate sequence,
+year selection, cutlets, months, and a complete Pastafarian date.
+The narrow sealed-answer mechanism is written, but still untested in CAL.
+No shortcuts, approximate answers, or hard-coded final dates are allowed.
 
 ## The idea, explained simply
 
@@ -122,7 +128,8 @@ The entire sauce calculation has now been written as Plain English source:
 five stones, seven hidden drops, 46 visible drops, six starting bowls,
 720 bowl orders, three pours for each visible drop, a simultaneous
 six-bowl mixing round for each drop, and twelve final rounds. The order
-selected at visible drop 46 is preserved for future seal questions.
+selected at visible drop 46 is preserved for seal questions. Narrow sealed
+answers and equal-choice selection have also been implemented in source.
 **None of this has yet been successfully compiled or run by CAL.**
 
 The full rule makes numbers grow very large. It uses one huge limit: start with 1, double it 127 times, and take away 1. Whenever a sauce number grows past this limit, it wraps around rather than growing forever. In this system, the last number before wrapping is kept instead of being turned into zero.
@@ -151,7 +158,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English source files in this branch must be present when compiling. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 28 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 31 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
