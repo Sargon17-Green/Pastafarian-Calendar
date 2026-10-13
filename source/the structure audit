@@ -1,0 +1,91 @@
+\ Validate selected structural lists before publishing a date.
+\ Selection algorithms are not a substitute for checking invariants.
+\ Every cutlet has a positive number of whole gate intervals;
+\ the sum must equal the selected year's gate-span count.
+\ Every month has between four and 123 days, inclusive; the
+\ total must equal the selected year's duration in days.
+\ Canonical names are distinct by construction, but an independent
+\ audit verifies their ranges and the exact number assigned.
+\ The audits only read committed lists and never recalculate a sauce.
+\ They are safe to run repeatedly without changing the calendar.
+
+A structure audit has
+  a number called passed,
+  a number called items checked,
+  a number called units checked.
+
+The structure audit is a structure audit.
+The inspected cutlet piece is a cutlet piece.
+The inspected cutlet name is a cutlet name assignment.
+The inspected month length is a month length record.
+The inspected month name is a month name assignment.
+
+To verify the selected cutlet partition:
+  Put 1 into the structure audit's passed.
+  Put 0 into the structure audit's items checked.
+  Put 0 into the structure audit's units checked.
+  Put the chosen cutlet pieces' first into the inspected cutlet piece.
+  Loop.
+    If the inspected cutlet piece is nil, break.
+    If the inspected cutlet piece's span length is less than 1,
+      put 0 into the structure audit's passed; exit.
+    Add 1 to the structure audit's items checked.
+    Add the inspected cutlet piece's span length to the structure audit's units checked.
+    Put the inspected cutlet piece's next into the inspected cutlet piece.
+  Repeat.
+  If the structure audit's items checked is not the selected cutlet count,
+    put 0 into the structure audit's passed; exit.
+  If the structure audit's units checked is not the chosen year's span count,
+    put 0 into the structure audit's passed.
+
+To verify the selected cutlet names:
+  Put 1 into the structure audit's passed.
+  Put 0 into the structure audit's items checked.
+  Put the chosen cutlet names' first into the inspected cutlet name.
+  Loop.
+    If the inspected cutlet name is nil, break.
+    If the inspected cutlet name's name index is less than 1,
+      put 0 into the structure audit's passed; exit.
+    If the inspected cutlet name's name index is greater than 17,
+      put 0 into the structure audit's passed; exit.
+    Add 1 to the structure audit's items checked.
+    Put the inspected cutlet name's next into the inspected cutlet name.
+  Repeat.
+  If the structure audit's items checked is not the selected cutlet count,
+    put 0 into the structure audit's passed.
+
+To verify the selected month lengths:
+  Put 1 into the structure audit's passed.
+  Put 0 into the structure audit's items checked.
+  Put 0 into the structure audit's units checked.
+  Put the chosen month lengths' first into the inspected month length.
+  Loop.
+    If the inspected month length is nil, break.
+    If the inspected month length's days in month is less than 4,
+      put 0 into the structure audit's passed; exit.
+    If the inspected month length's days in month is greater than 123,
+      put 0 into the structure audit's passed; exit.
+    Add 1 to the structure audit's items checked.
+    Add the inspected month length's days in month to the structure audit's units checked.
+    Put the inspected month length's next into the inspected month length.
+  Repeat.
+  If the structure audit's items checked is not the selected month count,
+    put 0 into the structure audit's passed; exit.
+  If the structure audit's units checked is not the chosen year's year length,
+    put 0 into the structure audit's passed.
+
+To verify the selected month names:
+  Put 1 into the structure audit's passed.
+  Put 0 into the structure audit's items checked.
+  Put the chosen month names' first into the inspected month name.
+  Loop.
+    If the inspected month name is nil, break.
+    If the inspected month name's name index is less than 1,
+      put 0 into the structure audit's passed; exit.
+    If the inspected month name's name index is greater than 47,
+      put 0 into the structure audit's passed; exit.
+    Add 1 to the structure audit's items checked.
+    Put the inspected month name's next into the inspected month name.
+  Repeat.
+  If the structure audit's items checked is not the selected month count,
+    put 0 into the structure audit's passed.
