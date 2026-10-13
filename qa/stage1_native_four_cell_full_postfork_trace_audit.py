@@ -11,6 +11,7 @@ from collections import Counter,defaultdict
 from pathlib import Path
 
 SCHEMA="befunge-stage1-four-cell-native-full-postfork-trace-v1"
+SCHEMA_V2="befunge-stage1-four-cell-native-full-postfork-trace-v2"
 SOURCE="560d6aa5807a7f766213a33835cce85eab0fa40c"
 CANDIDATE="d965ce4bdfa282f2d3b82690808def5a2dde10a8"
 CASES=("zero_equal","foundation_cross","forward_short","mixed_small")
@@ -24,7 +25,7 @@ def integer(s):
         (bool(s) and s[0] in "123456789" and s.isdigit()) or
         (len(s)>1 and s[0]=="-" and s[1] in "123456789" and s[1:].isdigit()))
 
-def verify_run(run,source):
+def verify_run(run,source,require_prefork=False):
     need(type(run) is dict and run.get("status")=="normal"
          and run.get("remaining_ips")==0
          and type(run.get("steps")) is int and 0<run["steps"]<=750000,
@@ -86,6 +87,48 @@ def verify_run(run,source):
             need(int(entry["returned"])==current.get(coord,source_byte(coord)),
                  "Native g violates independent mutable-space write chronology")
     events_by_tick={e[0]:e for e in events}
+    # v2: replay the *executed* instruction at every tick through the fork.
+    # A claimed pre-fork p/g event is no longer accepted on chronology alone:
+    # it must match the opcode physically executed in mutable Funge-space.
+    # Legacy v1 post-fork evidence remains readable, but cannot make that claim.
+    pretrace=run.get("complete_prefork_trace")
+    if pretrace is None:
+        need(not require_prefork,
+             "Native full pre-fork instruction trajectory missing")
+    else:
+        need(type(pretrace) is list and len(pretrace)==gate["step"],
+             "Native complete pre-fork trajectory truncated or inflated")
+        pre_memory={}
+        last_pg=None
+        for index,entry in enumerate(pretrace):
+            need(type(entry) is list and len(entry)==7 and
+                 all(type(value) is int for value in entry),
+                 "Native pre-fork instruction witness malformed")
+            tick,x,y,dx,dy,byte,stringmode=entry
+            need(tick==index+1 and (dx!=0 or dy!=0) and
+                 stringmode in (0,1),
+                 "Native pre-fork tick, vector or mode invalid")
+            if last_pg is not None:
+                px,py,pdx,pdy=last_pg
+                need((dx,dy)==(pdx,pdy) and
+                     (x-px)*pdy==(y-py)*pdx,
+                     "Native pre-fork p/g successor trajectory forged")
+                last_pg=None
+            xy=(x,y)
+            need(byte==pre_memory.get(xy,source_byte(xy)),
+                 "Native pre-fork opcode not supported by mutable source bytes")
+            event=events_by_tick.get(tick)
+            if stringmode==0 and byte in (ord("p"),ord("g")):
+                need(event is not None and event[1]==chr(byte),
+                     "Executed pre-fork p/g missing its Native receipt")
+                last_pg=(x,y,dx,dy)
+            if event is not None:
+                need(stringmode==0 and byte==ord(event[1]),
+                     "Forged Native pre-fork p/g event on wrong opcode")
+                if event[1]=="p":pre_memory[event[2]]=int(event[3]["value"])
+        need(last_pg is None and pretrace[-1][5]==ord("|") and
+             pretrace[-1][6]==0,
+             "Native final pre-fork instruction must be real conditional gate")
     first_tick=gate["step"]+1
     current={}
     for tick,kind,coord,entry in events:
@@ -144,6 +187,7 @@ def verify_run(run,source):
     need(len(beyond512)>0,"full Native run added no states outside the prior window")
     return {
        "complete_postfork_events":len(trace),
+       "verified_prefork_executed_steps":len(pretrace) if pretrace is not None else 0,
        "unique_directed_nodes":len(nodes),
        "unique_edges":sum(len(v) for v in edges.values()),
        "fork_nodes":sum(len(v)>1 for v in edges.values()),
@@ -159,7 +203,7 @@ def verify_run(run,source):
     }
 
 def verify(doc,source):
-    need(type(doc) is dict and doc.get("schema")==SCHEMA
+    need(type(doc) is dict and doc.get("schema") in (SCHEMA,SCHEMA_V2)
          and doc.get("status")=="QA_ONLY_COMPLETE_POSTFORK_FOUR_INPUT_PAIRS_STAGE1_OPEN"
          and doc.get("source_git_blob")==SOURCE
          and doc.get("candidate_git_blob")==CANDIDATE
@@ -194,8 +238,8 @@ def verify(doc,source):
              and gb.get("executed")==1-ga.get("executed"),
              "Native original and forced opposite physical gate disagree")
         result.append({"label":row["label"],
-                       "control":verify_run(a,source),
-                       "forced":verify_run(b,source),
+                       "control":verify_run(a,source,require_prefork=doc["schema"]==SCHEMA_V2),
+                       "forced":verify_run(b,source,require_prefork=doc["schema"]==SCHEMA_V2),
                        "changed_final_output":row["changed_final_output"]})
     need(sum(int(x["changed_final_output"]) for x in result)==2,
          "2 expected output-causal genuine fork interventions not reproduced")
@@ -251,7 +295,7 @@ def main(folder):
       "schema":"befunge-stage1-four-pair-complete-native-postfork-audit-v1",
       "scope":"FOUR_VALID_INPUT_PAIRS_COMPLETE_POSTFORK_UNTIL_HALT",
       "not_all_possible_inputs":True,
-      "pre_fork_trajectory_not_included":True,
+      "pre_fork_trajectory_not_included":data["schema"]!=SCHEMA_V2,
       "stage1_complete":False,
       "full_functional_acceptance":False,
       "geometric_acceptance":False,
