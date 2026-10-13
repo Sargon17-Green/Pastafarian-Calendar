@@ -1,6 +1,8 @@
-\ Exact direct count after every month has appeared at least once.
-\ Once all months have started, the first-occurrence condition is
-\ satisfied forever. Only the order of their FINAL occurrences remains.
+\ Exact direct count when all but possibly the final month started.
+\ Once months 1..m-1 have started, there is at most one never-seen
+\ month, namely month m. Its future first occurrence cannot violate
+\ the first-occurrence ordering because every earlier name already
+\ appeared. Therefore only the order of FINAL occurrences remains.
 \
 \ In any unfinished suffix, list positive remaining counts of months
 \ in increasing original month order as r1,r2,...,rk.
@@ -21,7 +23,7 @@
 \ This shortcut works with arbitrarily many previously started months.
 \ It needs NO recursive calls, NO memo entries and NO nested loops.
 \ The binomial coefficient calculator preserves arbitrary precision.
-\ The shortcut never applies if even one month has not yet started.
+\ It does not apply while two or more later months remain unstarted.
 \ CAL compilation and execution remain unverified.
 
 A started weaving suffix has
@@ -37,7 +39,9 @@ The started weaving month is a woven month state.
 To count an all-started weaving suffix:
   Put 0 into the started weaving suffix's available.
   Inspect the woven month status.
-  If the weaving selection's already started is not the selected month count, exit.
+  Put the selected month count into a required started number.
+  Subtract 1 from the required started number.
+  If the weaving selection's already started is less than the required started number, exit.
   Put 1 into the started weaving suffix's available.
   Put 0 into the started weaving suffix's accumulated remaining.
   Put "1" into the started weaving suffix's completions.
