@@ -1,0 +1,103 @@
+\ Exact signed-wide gate position arithmetic, alongside the native walker.
+\ A gate index and a gate coordinate are both signed-wide decimal
+\ records. The gap 0 does not exist. Crossing gate zero uses the gap
+\ owned by the side from which the traversal proceeds:
+\    -1 -> 0 uses interval(-1);  0 -> +1 uses interval(+1)
+\    +1 -> 0 uses interval(+1);  0 -> -1 uses interval(-1).
+\
+\ All four signs and every coordinate change use signed wide numbers;
+\ no gate index or position is converted to an ordinary CAL number.
+\ The interval LENGTH remains an ordinary number in 42..963.
+\ The position commits only after a valid canonical interval arrives.
+\ This reference traversal is budgeted to 1024 gaps and still invokes
+\ a full exact sauce per gap, so it is not suitable for far-away days.
+\ The native year/cutlet walkers do NOT yet use this module.
+\ CAL compiler execution has not verified this code.
+
+A wide gate position has
+  a wide signed day called index,
+  a wide signed day called coordinate,
+  a number called reached.
+
+A wide gate movement has
+  a wide signed day called old index,
+  a wide signed day called next index,
+  a wide signed day called gap index,
+  a number called direction,
+  a number called succeeded.
+
+The current wide gate is a wide gate position.
+The wide gate movement is a wide gate movement.
+
+To begin a wide gate traversal:
+  Put "0" into a wide zero magnitude.
+  Set the current wide gate's index from the wide zero magnitude given 0.
+  Put "15055671" into a wide foundation magnitude.
+  Set the current wide gate's coordinate from the wide foundation magnitude given -1.
+  Put 1 into the current wide gate's reached.
+  Begin bounded gate walking.
+
+\ No costly sauce work is performed when preparing a move.
+To prepare a wide forward gate movement:
+  Put 1 into the wide gate movement's direction.
+  Put the current wide gate's index into the wide gate movement's old index.
+  Put the wide gate movement's old index into the wide gate movement's next index.
+  Put "1" into a wide step magnitude.
+  Set a wide step day from the wide step magnitude given 1.
+  Add the wide step day to the wide gate movement's next index.
+  Put the wide gate movement's next index into the wide gate movement's gap index.
+  If the wide gate movement's old index's polarity is less than 0,
+    put the wide gate movement's old index into the wide gate movement's gap index.
+
+To prepare a wide backward gate movement:
+  Put -1 into the wide gate movement's direction.
+  Put the current wide gate's index into the wide gate movement's old index.
+  Put the wide gate movement's old index into the wide gate movement's next index.
+  Put "1" into a wide step magnitude.
+  Set a wide step day from the wide step magnitude given 1.
+  Subtract the wide step day from the wide gate movement's next index.
+  Put the wide gate movement's next index into the wide gate movement's gap index.
+  If the wide gate movement's old index's polarity is greater than 0,
+    put the wide gate movement's old index into the wide gate movement's gap index.
+
+\ The interval source must have a canonical gap, not index zero.
+\ A blocked movement leaves BOTH index and coordinate unchanged.
+To commit the prepared wide gate movement:
+  Put 0 into the wide gate movement's succeeded.
+  Request another bounded gate step.
+  If the gate step budget's exhausted is 1, exit.
+  Calculate a gate interval for the wide gate movement's gap index.
+  If the gate inquiry's interval length is less than 42, exit.
+  If the gate inquiry's interval length is greater than 963, exit.
+  Convert the gate inquiry's interval length to a string.
+  Put the string into a wide gap magnitude.
+  Set a wide gap displacement from the wide gap magnitude given the wide gate movement's direction.
+  Add the wide gap displacement to the current wide gate's coordinate.
+  Put the wide gate movement's next index into the current wide gate's index.
+  Put 1 into the wide gate movement's succeeded.
+
+To move to the next positive wide gate:
+  Prepare a wide forward gate movement.
+  Commit the prepared wide gate movement.
+
+To move to the next negative wide gate:
+  Prepare a wide backward gate movement.
+  Commit the prepared wide gate movement.
+
+\ A caller that requests more than 1024 gaps fails immediately.
+\ For a reachable index, every intermediate position remains wide.
+To locate a wide gate given a wide signed day:
+  Begin a wide gate traversal.
+  Put 0 into the current wide gate's reached.
+  Put "1024" into a maximum wide gate steps.
+  If the maximum wide gate steps is numerically smaller than the wide signed day's magnitude, exit.
+  Loop.
+    If the current wide gate's index's polarity is the wide signed day's polarity,
+      if the current wide gate's index's magnitude is the wide signed day's magnitude,
+        put 1 into the current wide gate's reached; break.
+    If the current wide gate's index numerically precedes the wide signed day,
+      move to the next positive wide gate.
+    If the wide signed day numerically precedes the current wide gate's index,
+      move to the next negative wide gate.
+    If the wide gate movement's succeeded is not 1, break.
+  Repeat.
