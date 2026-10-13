@@ -12,13 +12,13 @@ The other branches have their own rules. This branch does not change them.
 
 ## What works so far
 
-The file named **the calendar** is a first working part of the calendar's calculation, written in Plain English Programming.
+The file named **the calendar** is a first written part of the calendar's calculation, written in Plain English Programming.
 
-It takes two day positions and calculates five starting numbers. It can also check three examples near the day that the calendar calls its beginning.
+It takes two day positions and calculates five starting numbers. It includes six small checks covering Foundation Day, nearby days, both orders of a day pair, and a later day.
 
 **This is not yet a complete date converter.** In particular, it does not yet make the sauce, find the year, divide the year into cutlets and months, or give a finished Pastafarian date. Those parts must not be guessed, shortened, or replaced with fixed answers.
 
-The code has been reviewed as Plain English source, but it has not yet passed a test with the CAL compiler in this environment. A reader should not treat this early version as a tested application.
+The code has not yet passed a test with the CAL compiler in this environment. A reader should not treat this early version as a tested application.
 
 ## The idea, explained simply
 
@@ -92,7 +92,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences.
 
-The examples use Foundation Day and its neighbors. If a later release is compiled and run, its outputs must be checked against the examples in this README and, ultimately, against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** if all six small checks pass, or name a check that failed. That report is only about these early rules; it is not proof that the entire calendar works. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
