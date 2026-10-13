@@ -26,6 +26,7 @@ local LegacyFixedNeighbor = require("legacy_fixed_neighbor")
 local NeighborPatch = require("neighbor_patch")
 local LegacyBiasedChoice = require("legacy_biased_choice")
 local ShortChoicePatch = require("short_choice_patch")
+local LegacyShortOnlyChoice = require("legacy_short_only_choice")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -425,7 +426,13 @@ function S.oldBiasedModuloPickProbe(first,direction,optionCount)
     return LegacyBiasedChoice.oldBiasedModuloPick(first,direction,optionCount)
 end
 
+-- Stage 28: short rete PATCH 13, men wide route toujou eseye short la.
 function S.choiceSpaghetti(first,direction,optionCount)
+    local size=BigInt.from(optionCount)
+    if BigInt.compare(size,BigInt.from("170141183460469231731687303715884105727"))>0 then
+        local blocked=LegacyShortOnlyChoice.execute(first,direction,optionCount)
+        return blocked
+    end
     local corrected=ShortChoicePatch.execute(first,direction,optionCount)
     return corrected
 end
@@ -439,8 +446,13 @@ function S.shortChoiceCoreProbe(first,direction,optionCount)
     return ShortChoicePatch.chooseShort(first,direction,optionCount)
 end
 
+-- DISCOVERY 14: mòd legacy short-only ak tras blokaj N>M.
+function S.legacyShortOnlyChoiceProbe(first,direction,optionCount)
+    return LegacyShortOnlyChoice.execute(first,direction,optionCount)
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 27", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 28", 0)
 end
 
 return S
