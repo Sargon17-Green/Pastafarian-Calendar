@@ -113,6 +113,9 @@ To prepare a narrow choice of a wide quantity:
 \ backward walk first accepts at L. This skips only rejected answers;
 \ it is exactly equivalent to walking one by one around the M-cycle.
 To choose a narrow quantity from a wide quantity:
+  Put "0" into the seal inquiry's selected quantity.
+  If the wide quantity is blank, exit.
+  If the wide quantity is "0", exit.
   Prepare a narrow choice of the wide quantity.
   If the seal inquiry's acceptance ceiling is numerically smaller than the seal inquiry's current answer,
     skip the rejected sealed answers.
