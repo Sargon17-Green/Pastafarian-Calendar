@@ -70,6 +70,9 @@ To skip rejected wide answers:
 
 \ Output 1+((W-1) mod N) after any required directional rejection.
 To choose a wide option given a wide quantity:
+  Put "0" into the seal inquiry's selected quantity.
+  If the wide quantity is blank, exit.
+  If the wide quantity is "0", exit.
   Prepare a wide option given the wide quantity.
   Construct the first wide answer.
   Prepare the wide acceptance limit given the wide quantity.
@@ -85,6 +88,9 @@ To choose a wide option given a wide quantity:
 \ One public entrypoint covers both canonical regimes, with no
 \ loss of accuracy and no conversion of large N into a machine integer.
 To choose an equal option given a wide quantity:
+  Put "0" into the seal inquiry's selected quantity.
+  If the wide quantity is blank, exit.
+  If the wide quantity is "0", exit.
   Put "170141183460469231731687303715884105727" into a base wide quantity.
   If the base wide quantity is numerically smaller than the wide quantity,
     choose a wide option given the wide quantity; exit.
