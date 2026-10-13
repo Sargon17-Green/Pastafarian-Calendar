@@ -318,3 +318,22 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 40 --case-filter last-half --seconds 185 --rss-kib 393216
+
+  canonical-window41-count:
+    name: 真實 5000 年四月 402 日獨立前沿總數與三算法對照
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-canonical-window41]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 受控四月份 402 日計數及字典序邊界檢查
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --seconds 185 --rss-kib 393216
