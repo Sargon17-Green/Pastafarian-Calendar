@@ -67,6 +67,34 @@ def main():
     reject(source, in_string, "p_receipt_in_stringmode")
     print("POSTFORK_PG_EVENT_COVERAGE_4_NEGATIVE_CONTROLS_PASS")
 
+    # Reentrancy and state ownership: separate Native receipts must not
+    # share mutable Funge-space; failures must not poison later checks.
+    changed = copy.deepcopy(good)
+    changed["native_p_history"][0]["coordinate"] = [702, 0]
+    changed["native_g_history"][0]["coordinate"] = [702, 0]
+    changed["native_g_history"][0]["read_before"] = "7"
+    changed["native_g_history"][0]["returned"] = "7"
+    original_good = copy.deepcopy(good)
+    original_changed = copy.deepcopy(changed)
+    first = audit.verify_run(good, source)
+    second = audit.verify_run(changed, source)
+    if audit.verify_run(good, source) != first:
+        raise AssertionError("auditor control result depends on previous Funge-space")
+    if audit.verify_run(changed, source) != second:
+        raise AssertionError("auditor read-after-write result depends on call order")
+    bad_changed = copy.deepcopy(changed)
+    bad_changed["native_g_history"][0]["returned"] = "8"
+    reject(source, bad_changed, "bad_read_after_write_does_not_poison_next_call")
+    if audit.verify_run(changed, source) != second:
+        raise AssertionError("failed verification poisoned subsequent valid call")
+    if audit.verify_run(good, source) != first:
+        raise AssertionError("failed verification poisoned original control call")
+    if good != original_good or changed != original_changed:
+        raise AssertionError("auditor mutated caller-owned Native evidence")
+    if first["verified_p_writes"] != 1 or second["verified_g_reads"] != 1:
+        raise AssertionError("independent Native memory histories not retained")
+    print("POSTFORK_PG_STATE_OWNERSHIP_REENTRANCY_PASS")
+
 
 if __name__ == "__main__":
     main()
