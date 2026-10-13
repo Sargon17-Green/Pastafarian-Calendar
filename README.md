@@ -244,13 +244,29 @@ The whole sauce needs exact whole-number arithmetic. The ordinary CAL number typ
 
 ### Step 4: Find the year and its smaller parts
 
-This part is **not yet implemented** in this branch.
+The full sequence of calendar rules **has source code now**, but it is not
+yet a verified working CAL program.
 
-The calendar marks special days called **gates**. The sauce decides how far apart many of the gates are. The year is found using these gates and further rules. The rules give year 5000 a special fixed place near Foundation Day.
+The calendar marks special days called **gates**. Their distances come from
+complete sauce calculations. Gate pairs determine eligible years; seal 10
+chooses year 5000, and seals 11 and 12 choose following and preceding years.
 
-A year is cut into parts called **cutlets**. Each cutlet can contain several months, and the lengths and names of the months come from more careful choices. The result has five pieces: the year, the cutlet, the day within that cutlet, the month, and the day within that month.
+Within a year, seals 20 and 21 choose the number and lengths of its
+**cutlets**. Seal 22 assigns their distinct names. The requested cutlet
+ordinal (its position in the year) is not necessarily its name index.
 
-The order of every step matters. Even one wrong number near the beginning can change the final date.
+Seals 30 and 31 choose the number and lengths of the **months**, seal 32
+weaves their occurrences day by day, and seal 33 assigns distinct month
+names. A woven month's ordinal and its canonical name index also differ.
+The resulting date has five pieces: year number, cutlet name, day within
+that cutlet, month name, and occurrence within that month.
+
+The entire computation is deterministic. The exact monthly weaving
+shortcut code has independently checked examples, but large instances can
+still fail the explicit resource limits. The CAL compiler has **not**
+compiled or executed any of these files, and the native day axis still
+needs an arbitrary-precision replacement. Never treat a written routine
+or reference value as a successful integration test.
 
 ## How to read or use the first part
 
