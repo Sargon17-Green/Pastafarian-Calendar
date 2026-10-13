@@ -41,6 +41,18 @@ class NativeBudgetExceeded(Exception):pass
 def blob(data):
     return hashlib.sha1("blob %d\0%s"%(len(data),data)).hexdigest()
 
+def actual_memory_opcode(byte,stringmode):
+    """Only executed (non-stringmode) p/g may change or read Funge-space.
+
+    The source byte alone is insufficient: inside Befunge-98 string mode,
+    the characters p and g are stack data, not memory instructions.
+    """
+    if stringmode:
+        return None
+    if byte==ord("p"):return "p"
+    if byte==ord("g"):return "g"
+    return None
+
 def native_run(source,raw,opposite):
     out=StringIO.StringIO()
     input_stream=StringIO.StringIO(raw)
@@ -111,14 +123,16 @@ def native_run(source,raw,opposite):
         pending_g=None
         if self.ips:
             active=self.ips[0]
-            if self.space.get(active.position)==ord("p"):
+            kind=actual_memory_opcode(
+                int(self.space.get(active.position)), bool(active.stringmode))
+            if kind=="p":
                 values=active.stack[0]
                 require(len(values)>=3,
                         "Native current fork reached p with too few operands")
                 expected_value,px,py=map(int,list(values)[-3:])
                 point=active.position.__class__((px,py))
                 pending_p=(point,(px,py),expected_value)
-            elif self.space.get(active.position)==ord("g"):
+            elif kind=="g":
                 values=active.stack[0]
                 require(len(values)>=2,
                         "Native current fork reached g with too few coordinates")
