@@ -1,0 +1,66 @@
+\ Exact reference vectors for the new arbitrary-width day counters.
+\ None of the test coordinates is converted to a native CAL number.
+\ The wide sauce/gate implementations still need separate migration.
+
+The test day magnitude is a wide quantity.
+
+To check wide counters around Foundation:
+  Put "15055671" into the test day magnitude.
+  Set the wide calendar example's calculation day from the test day magnitude given -1.
+  Set the wide calendar example's requested day from the test day magnitude given -1.
+  Answer the wide calendar example.
+  If the wide calendar example's calculation count is not "1",
+    put "Wide Foundation calculation count was not one." into the check report; exit.
+  If the wide calendar example's requested count is not "1",
+    put "Wide Foundation requested count was not one." into the check report; exit.
+  If the wide calendar example's day distance is not "1",
+    put "Wide Foundation self-distance was not one." into the check report; exit.
+  If the wide calendar example's day sum is not "2",
+    put "Wide Foundation count sum was not two." into the check report; exit.
+  If the wide calendar example's day direction is not 2,
+    put "Wide Foundation direction was not equal." into the check report; exit.
+  Put "15055672" into the test day magnitude.
+  Set the wide calendar example's calculation day from the test day magnitude given -1.
+  Put "15055670" into the test day magnitude.
+  Set the wide calendar example's requested day from the test day magnitude given -1.
+  Answer the wide calendar example.
+  If the wide calendar example's calculation count is not "2",
+    put "Wide previous-day numbering was wrong." into the check report; exit.
+  If the wide calendar example's requested count is not "3",
+    put "Wide next-day numbering was wrong." into the check report; exit.
+  If the wide calendar example's day distance is not "3",
+    put "Wide neighboring-day distance was wrong." into the check report; exit.
+  If the wide calendar example's day sum is not "5",
+    put "Wide neighboring-day count sum was wrong." into the check report; exit.
+  If the wide calendar example's day direction is not 3,
+    put "Wide neighboring-day direction was wrong." into the check report; exit.
+
+To check immense wide day counters:
+  Put "1000000000000000000000000000000000000000000000000" into the test day magnitude.
+  Set the wide calendar example's calculation day from the test day magnitude given -1.
+  Set the wide calendar example's requested day from the test day magnitude given 1.
+  Answer the wide calendar example.
+  If the wide calendar example's calculation count is not "1999999999999999999999999999999999999999969888658",
+    put "Enormous earlier calculation-day count lost precision." into the check report; exit.
+  If the wide calendar example's requested count is not "2000000000000000000000000000000000000000030111343",
+    put "Enormous later requested-day count lost precision." into the check report; exit.
+  If the wide calendar example's day sum is not "4000000000000000000000000000000000000000000000001",
+    put "Enormous day counter sum lost precision." into the check report; exit.
+  If the wide calendar example's day distance is not "2000000000000000000000000000000000000000000000001",
+    put "Enormous inclusive day distance lost precision." into the check report; exit.
+  If the wide calendar example's day direction is not 3,
+    put "Enormous forward day direction was wrong." into the check report; exit.
+  Put "1000000000000000000000000000000000000000000000000" into the test day magnitude.
+  Set the wide calendar example's calculation day from the test day magnitude given 1.
+  Set the wide calendar example's requested day from the test day magnitude given -1.
+  Answer the wide calendar example.
+  If the wide calendar example's calculation count is not "2000000000000000000000000000000000000000030111343",
+    put "Reversing enormous days changed the wrong calculation count." into the check report; exit.
+  If the wide calendar example's requested count is not "1999999999999999999999999999999999999999969888658",
+    put "Reversing enormous days changed the wrong requested count." into the check report; exit.
+  If the wide calendar example's day sum is not "4000000000000000000000000000000000000000000000001",
+    put "Reversing enormous days changed the sum." into the check report; exit.
+  If the wide calendar example's day distance is not "2000000000000000000000000000000000000000000000001",
+    put "Reversing enormous days changed the inclusive distance." into the check report; exit.
+  If the wide calendar example's day direction is not 1,
+    put "Reversing enormous days failed to reverse the direction." into the check report; exit.
