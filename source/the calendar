@@ -139,6 +139,8 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check native date coordinate bounds.
   If the check report is not "The checks agree with the examples.", exit.
+  Check native day counter endpoints.
+  If the check report is not "The checks agree with the examples.", exit.
   Check year candidate eligibility.
   If the check report is not "The checks agree with the examples.", exit.
   Check year candidate order.
