@@ -1,0 +1,28 @@
+\ A legal equal-choice width is always a positive integer.
+\ Invalid option counts must never reach decimal division by zero.
+\ The public, narrow and wide entrypoints all fail closed by placing
+\ zero in the selected quantity (zero is never a valid option index).
+
+To check zero option count refusal:
+  Put "1" into the seal inquiry's current answer.
+  Put "100" into the seal inquiry's selected quantity.
+  Put "0" into an invalid options wide quantity.
+  Choose an equal option given the invalid options wide quantity.
+  If the seal inquiry's selected quantity is not "0",
+    put "The public chooser accepted zero options." into the check report; exit.
+  Put "100" into the seal inquiry's selected quantity.
+  Choose a narrow quantity from the invalid options wide quantity.
+  If the seal inquiry's selected quantity is not "0",
+    put "The narrow chooser accepted zero options." into the check report; exit.
+  Put "100" into the seal inquiry's selected quantity.
+  Choose a wide option given the invalid options wide quantity.
+  If the seal inquiry's selected quantity is not "0",
+    put "The wide chooser accepted zero options." into the check report; exit.
+  Put "" into the invalid options wide quantity.
+  Choose an equal option given the invalid options wide quantity.
+  If the seal inquiry's selected quantity is not "0",
+    put "The public chooser accepted a blank option count." into the check report; exit.
+  Put "1" into the invalid options wide quantity.
+  Choose an equal option given the invalid options wide quantity.
+  If the seal inquiry's selected quantity is not "1",
+    put "Rejecting zero poisoned a later valid choice." into the check report; exit.
