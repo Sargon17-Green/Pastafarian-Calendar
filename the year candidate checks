@@ -1,0 +1,63 @@
+\ Reference checks for year-5000 candidate rules, before enumeration.
+\ They test the interval boundary, minimum spans, duration bounds,
+\ and both parts of the canonical length/earlier-opening sorting rule.
+
+The year candidate test day is a calendar day.
+
+To check year candidate eligibility:
+  Put -15055671 into the year candidate test day.
+  Put -15057000 into the first candidate's opening day.
+  Put -15054000 into the first candidate's closing day.
+  Put -3 into the first candidate's opening index.
+  Put 5 into the first candidate's closing index.
+  Measure the first candidate.
+  If the first candidate's year length is not 3000,
+    put "Year length measurement failed." into the check report; exit.
+  If the first candidate's span count is not 8,
+    put "Year gate-span measurement failed." into the check report; exit.
+  If the first candidate does not contain the year candidate test day,
+    put "Eligible candidate was incorrectly rejected." into the check report; exit.
+  Put -15057000 into the year candidate test day.
+  If the first candidate contains the year candidate test day,
+    put "Opening-day boundary was wrongly included." into the check report; exit.
+  Put -15054000 into the year candidate test day.
+  If the first candidate does not contain the year candidate test day,
+    put "Closing-day boundary was wrongly excluded." into the check report; exit.
+  Put -15055671 into the year candidate test day.
+  Put 2 into the first candidate's closing index.
+  Measure the first candidate.
+  If the first candidate contains the year candidate test day,
+    put "Candidate with only five gate spans was accepted." into the check report; exit.
+  Put 5 into the first candidate's closing index.
+  Put -15051221 into the first candidate's closing day.
+  Measure the first candidate.
+  If the first candidate contains the year candidate test day,
+    put "Candidate exceeding 5778 days was accepted." into the check report; exit.
+  Put -15056750 into the first candidate's opening day.
+  Put -15056500 into the first candidate's closing day.
+  Measure the first candidate.
+  If the first candidate contains the year candidate test day,
+    put "Candidate shorter than 252 days was accepted." into the check report; exit.
+
+To check year candidate order:
+  Put -15057000 into the first candidate's opening day.
+  Put -15054000 into the first candidate's closing day.
+  Put -3 into the first candidate's opening index.
+  Put 5 into the first candidate's closing index.
+  Measure the first candidate.
+  Put -15056800 into the second candidate's opening day.
+  Put -15054200 into the second candidate's closing day.
+  Put -3 into the second candidate's opening index.
+  Put 6 into the second candidate's closing index.
+  Measure the second candidate.
+  If the second candidate does not come before the first candidate,
+    put "The shorter eligible candidate was not first." into the check report; exit.
+  If the first candidate comes before the second candidate,
+    put "The longer eligible candidate was wrongly first." into the check report; exit.
+  Put -15057100 into the second candidate's opening day.
+  Put -15054100 into the second candidate's closing day.
+  Measure the second candidate.
+  If the second candidate does not come before the first candidate,
+    put "Earlier opening gate did not win the length tie." into the check report; exit.
+  If the first candidate comes before the second candidate,
+    put "Later opening gate wrongly won the length tie." into the check report; exit.
