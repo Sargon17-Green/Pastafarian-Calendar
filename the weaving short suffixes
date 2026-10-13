@@ -27,12 +27,13 @@ A short weaving suffix has
   a wide quantity called completions.
 
 The short weaving suffix is a short weaving suffix.
+The short month state is a woven month state.
 
 \ Record at most two positive remaining counts in ascending month order.
 To inspect a short weaving suffix:
   Put 0 into the short weaving suffix's unfinished.
   Put 1 into the short weaving suffix's completed.
-  Put the woven month states' first into a short month state.
+  Put the woven month states' first into the short month state.
   Loop.
     If the short month state is nil, break.
     If the short month state's remaining days is greater than 0,
