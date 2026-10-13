@@ -1,0 +1,69 @@
+\ Known five-stone results derived from section E of the canonical README.
+\ The rows are checked independently against the arithmetic definition.
+\ These are source-level checks, not claims of a CAL run.
+
+To check stones at visible drop 1:
+  Reach the stones for 1.
+  If the current stones' wheat is not "17",
+    put "The stone check failed at drop 1, wheat." into the check report; exit.
+  If the current stones' barley is not "29",
+    put "The stone check failed at drop 1, barley." into the check report; exit.
+  If the current stones' salt is not "43",
+    put "The stone check failed at drop 1, salt." into the check report; exit.
+  If the current stones' bitter is not "71",
+    put "The stone check failed at drop 1, bitter." into the check report; exit.
+  If the current stones' red is not "101",
+    put "The stone check failed at drop 1, red." into the check report; exit.
+
+To check stones at visible drop 2:
+  Reach the stones for 2.
+  If the current stones' wheat is not "378",
+    put "The stone check failed at drop 2, wheat." into the check report; exit.
+  If the current stones' barley is not "1073",
+    put "The stone check failed at drop 2, barley." into the check report; exit.
+  If the current stones' salt is not "2375",
+    put "The stone check failed at drop 2, salt." into the check report; exit.
+  If the current stones' bitter is not "6195",
+    put "The stone check failed at drop 2, bitter." into the check report; exit.
+  If the current stones' red is not "10493",
+    put "The stone check failed at drop 2, red." into the check report; exit.
+
+To check stones at visible drop 3:
+  Reach the stones for 3.
+  If the current stones' wheat is not "146106",
+    put "The stone check failed at drop 3, wheat." into the check report; exit.
+  If the current stones' barley is not "1163582",
+    put "The stone check failed at drop 3, barley." into the check report; exit.
+  If the current stones' salt is not "5685063",
+    put "The stone check failed at drop 3, salt." into the check report; exit.
+  If the current stones' bitter is not "38495823",
+    put "The stone check failed at drop 3, bitter." into the check report; exit.
+  If the current stones' red is not "110114158",
+    put "The stone check failed at drop 3, red." into the check report; exit.
+
+To check stones at visible drop 7:
+  Reach the stones for 7.
+  If the current stones' wheat is not "84121676802438019752984998333044433970",
+    put "The stone check failed at drop 7, wheat." into the check report; exit.
+  If the current stones' barley is not "75062854538141098591095576102039435045",
+    put "The stone check failed at drop 7, barley." into the check report; exit.
+  If the current stones' salt is not "79839723963025329600630412889312919371",
+    put "The stone check failed at drop 7, salt." into the check report; exit.
+  If the current stones' bitter is not "4804214943898171981313916379429075320",
+    put "The stone check failed at drop 7, bitter." into the check report; exit.
+  If the current stones' red is not "3317775612520290492148692481184641941",
+    put "The stone check failed at drop 7, red." into the check report; exit.
+
+To check stones at visible drop 46:
+  Reach the stones for 46.
+  If the current stones' wheat is not "73799454308499791987382386781055001470",
+    put "The stone check failed at drop 46, wheat." into the check report; exit.
+  If the current stones' barley is not "147925408106533232424672641008220632365",
+    put "The stone check failed at drop 46, barley." into the check report; exit.
+  If the current stones' salt is not "94499522601819303005579577099149028685",
+    put "The stone check failed at drop 46, salt." into the check report; exit.
+  If the current stones' bitter is not "108473647672201258090947028490673028834",
+    put "The stone check failed at drop 46, bitter." into the check report; exit.
+  If the current stones' red is not "137131922036975206684616468948804344042",
+    put "The stone check failed at drop 46, red." into the check report; exit.
+
