@@ -34,19 +34,19 @@ The selected year rank is a number.
 The year selection success is a number.
 
 \ Copy the current gate-walk position into a new linked mark.
-To create a current gate mark:
+To create a gate mark:
   Allocate memory for the gate mark.
   Put the gate walk's current position into the gate mark's position.
   Put the gate walk's current index into the gate mark's index.
 
 \ The positive scan appends marks in ascending chronological order.
 To record a positive gate mark:
-  Create a current gate mark.
+  Create a gate mark.
   Append the gate mark to the nearby gate ledger.
 
 \ The negative scan prepends marks in ascending chronological order.
 To record a negative gate mark:
-  Create a current gate mark.
+  Create a gate mark.
   Prepend the gate mark to the nearby gate ledger.
 
 \ Scan positive gates only if the requested window reaches Foundation.
