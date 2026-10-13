@@ -19,3 +19,15 @@ The authoritative 55-stage contract states that the historical estimate `oldJump
 `test/discovery18Red.ts`: eighteenth deliberately failing *full production* example whose synthetic but physically selected 1000-day anchor's last day is necessarily inside Year5000, whereas old /365 emits Year5002. Normal `npm test` verifies the exact nonzero exception via `test/verifyDiscovery18ExpectedRed.mjs`. All previous seventeen historical expected RED scripts remain independently verified and untouched.
 
 Close only after native TypeScript typecheck, every Stage1–36 test and all 18 intentional expected RED proofs, as well as independent frozen SourceLanguageCatalog/hash job, pass GitHub Actions. Until then `LAST_COMPLETED_STAGE=35`; Stage37 PATCH18 not started.
+
+## Native CI verified — 13 October 2026
+
+[Implementation 214f2bb](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/214f2bb629326bf5de607f909da506abdcb7dec9), [GitHub Actions run 38376499660](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38376499660): BOTH independent frozen-name `verify` and historical-label `stage27-typescript-marathi` native TypeScript jobs SUCCESS; all Stage1–36 regressions and **18 archived intentionally red** witnesses verified.
+
+```text
+STAGE_36_DISCOVERY_18_GUARDS_PASS boundaries=14 signedAnchors=8 positive=2 negative=2 falseWithin=4 estimateWrong=0 rankWrong=0 legacyCalls=1 priorSelectorCalls=5 originalPredicateCalls=3 truePredecessors=42 sharedWrites=2436 telemetryOnly=8 faultCases=4
+STAGE_36_DISCOVERY_18_PROPERTIES_PASS floorGrid=801 floorWrong=0 wrongWithinCells=328 negativeFloors=395 giantDeltas=8 genuineSeedPair=1 normativeNext=1 normativePrevious=1 forwardOldWrong=1 backwardOldWrong=1 realAnchors=24 positive=6 negative=6 realGhostWrong=0 realRankWrong=0 realKnownMismatches=12 realPredecessors=198 realWrites=11484 varied=64 giants=8 ranks=720 unique=720 variants=792 variantPredecessors=3168 variantWrites=183744 totalPredecessors=3366 totalWrites=195228 streamWrong=0 rankWrong=0 ghostWrong=0 selectionChanged=0
+STAGE_36_DISCOVERY_18_EXPECTED_RED_VERIFIED nonzero=1 mismatches=1 matches=0 oldGuess=5002
+```
+
+LAST_COMPLETED_STAGE=36. 365-day jump remains diagnostic only and never selects a year; Stage37 one-year authoritative traversal not implemented. Real signed opening gates and Sauce question streams are physical production; other year-candidate boundaries are labeled injected, and test-only true next/previous comparisons used a geometrically valid but hypothetical Year5000 seed.
