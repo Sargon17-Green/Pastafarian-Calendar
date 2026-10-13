@@ -1,0 +1,15 @@
+\ The first two canonical gate intervals around Foundation Day.
+\ Positive gate 1: (Foundation, Foundation+1) -> 345 days.
+\ Negative gate -1: (Foundation, Foundation-1) -> 503 days.
+\ These vectors are calculated independently from the exact source
+\ equations and need confirmation by a CAL run.
+
+To check the first positive gate interval:
+  Calculate a gate interval given 1.
+  If the gate inquiry's interval length is not 345,
+    put "The first positive gate interval is not 345." into the check report; exit.
+
+To check the first negative gate interval:
+  Calculate a gate interval given -1.
+  If the gate inquiry's interval length is not 503,
+    put "The first negative gate interval is not 503." into the check report; exit.
