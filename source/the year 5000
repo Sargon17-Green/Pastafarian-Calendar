@@ -57,6 +57,7 @@ To gather the positive gate marks:
   Put -15055671 into the gate walk's current position.
   Loop.
     Move to the next positive gate.
+    If the gate step budget's exhausted is 1, exit.
     If the gate walk's current position is greater than the upper gate cutoff, break.
     If the gate walk's current position is less than the lower gate cutoff, repeat.
     Record a positive gate mark.
@@ -69,6 +70,7 @@ To gather the negative gate marks:
   Put -15055671 into the gate walk's current position.
   Loop.
     Move to the next negative gate.
+    If the gate step budget's exhausted is 1, exit.
     If the gate walk's current position is less than the lower gate cutoff, break.
     If the gate walk's current position is greater than the upper gate cutoff, repeat.
     Record a negative gate mark.
@@ -185,7 +187,10 @@ To choose year 5000 for the calculation day:
 \ A zero result status is an explicit failure, never a fabricated year.
 To find year 5000 for a calendar day:
   Put 0 into the year selection success.
+  Begin bounded gate walking.
   Gather the nearby gate marks for the calendar day.
+  If the gate step budget's exhausted is 1,
+    destroy the nearby gate ledger; exit.
   Gather eligible year candidates.
   If the eligible year count is 0,
     destroy the eligible year ledger; destroy the nearby gate ledger; exit.
