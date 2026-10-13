@@ -30,7 +30,7 @@ To resolve the cutlet of the target day:
   Put the chosen year's opening day into the gate walk's current position.
   Put the chosen year's opening index into the gate walk's current index.
   Put the chosen cutlet pieces' first into the examined cutlet piece.
-  Put 1 into a cutlet ordinal number.
+  Put 1 into the cutlet ordinal number.
   Loop.
     If the examined cutlet piece is nil, break.
     Put the gate walk's current position into the cutlet opening day.
