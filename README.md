@@ -1451,3 +1451,31 @@ senza modificare nessuno dei 47 nomi italiani congelati.
 Stage35 rimane 71 PASS/0 FAIL e tutte le regressioni
 native conservano la loro firma storica. La correzione
 senza rotazione del catalogo resta riservata a Stage37.
+
+## Stadio 37 — PATCH 18 (mappatura corretta del catalogo dei mesi)
+
+Il catalogo sorgente in italiano contiene 47 nomi, immutabili,
+con identificatori canonici **1..47**. PATCH 18 risolve
+l'indice `i` tramite `SourceLanguageCatalog.month(i)`
+invece del vecchio accesso `Months(i % 47)` che slittava
+tutti i nomi di una posizione e trasformava `sabbia`
+(ID 47) in `argilla` (ID 1).
+
+`Patch18SourceCatalogWrapper.sourceCatalogIndexPatch` esegue
+il vecchio adapter per preservare la cicatrice storica, poi
+restituisce i nomi corretti. Il manager attraversa
+`BOOT → DISCOVERY_18 → PATCH_18`, senza cambiare il
+catalogo congelato e senza anticipare Stage38. Il validator
+indipendente confronta posizione `id % 47` e posizione
+`id - 1`, snapshot, versione, trace e proprietà degli indici.
+
+La suite Stage37 ha **63 PASS/0 FAIL** attesi; include tutti
+i 47 nomi, 4096 vettori con riferimento test-only e altri
+4096 vettori su due manager, integrità del catalogo e controlli
+contro input o output manomessi. Le 17 patch precedenti
+rimangono operative e Stage36 mantiene tre divergenze
+intenzionali.
+
+Il test usa indici canonici già selezionati. La salsa
+annuale e l'integrazione della conversione completa del
+calendario restano fuori da questa fase.

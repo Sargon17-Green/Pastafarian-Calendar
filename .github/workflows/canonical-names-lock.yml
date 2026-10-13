@@ -863,3 +863,23 @@ jobs:
           for label in INDEX1_ITALIAN_NAME INDEX47_WRAP INDEX1_TO_47; do
             grep -Fq "FAIL — equivalenza normativa catalogo ${label} — Indice canonico convertito male: ${label}" stage36.log
           done
+
+  native-stage37-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage37 canonical Italian month name catalog PATCH18
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage37Tests' 2>&1 | tee stage37.log
+          grep -Fq 'RISULTATO STADIO 37: 63 PASS, 0 FAIL' stage37.log
+          test "$(grep -Fc 'PASS — ' stage37.log)" -eq 63
+          test "$(grep -Fc 'FAIL — ' stage37.log)" -eq 0

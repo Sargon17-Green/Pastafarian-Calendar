@@ -665,3 +665,15 @@ intenzionali di Stage36. La vecchia regola
 la norma `Months(id-1)` rimane riferimento solo test.
 Il catalogo, la sua versione e gli indici canonici non
 vengono alterati dal percorso legacy.
+
+## PATCH18 — catalogo congelato e ID 1-based
+
+Dati `indices: Vector[Int]`, con 3..47 ID distinti fra 1..47,
+il risultato corretto associa a ciascun `id` il nome
+italiano del `SourceLanguageCatalog.month(id)`. Il risultato
+storico usa invece `Months(id % 47)`, e viene pubblicato
+separatamente nel report. Il validator indipendente
+verifica la stessa relazione tramite
+`Months(id - 1).canonicalIndex == id`, con controllo
+della versione congelata, della snapshot e della trace
+delle tre fasi. Il catalogo non è modificato.

@@ -1547,3 +1547,16 @@ voluti, tutti dovuti allo scarto fra indice canonico
 1-based e posizione del catalogo italiano 0-based.
 Il catalogo congelato resta invariato, così come
 PATCH01–17 e le prove storiche. PATCH18 ancora assente.
+
+## Stadio 37 — PATCH18: ID canonici e nome italiano corretto
+
+Il difetto introdotto in DISCOVERY18 resta riproducibile:
+l'indice canonico i veniva usato come posizione zero-based
+i%47, e quindi ogni nome mensile slittava di una voce.
+PATCH18 usa il lookup canonico del catalogo immutato,
+conservando la cicatrice nello stesso report. Il validator
+autonomo ricostruisce entrambi i percorsi senza invocare
+il wrapper corretto. La verifica copre tutti i 47 nomi,
+le combinazioni a 3..47 mesi, input falsificati e gli
+output distinti su manager intercalati. Stage38 non
+è anticipato.
