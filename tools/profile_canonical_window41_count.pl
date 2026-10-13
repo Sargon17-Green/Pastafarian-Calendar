@@ -74,13 +74,15 @@ if (!$pid) {
         die "5000 年原生月長 SHA-256 不符\n"
             if sha256_hex(join(',',@year)) ne
                 '6d64022344c04935e6423aa6f96b285098d35b9b5ecb4b8c57a4c7149773a134';
-        my @L=@year[41..44];
+        my $window_offset=41;
+        my @L=@year[$window_offset .. $window_offset+3];
         die "原生四月序列不是 77,98,122,105\n"
             if join(',',@L) ne '77,98,122,105';
         my $days=0;
         $days+=$_ for @L;
         die "四個真實月份並非 402 日\n" if $days!=402;
-        print "CANONICAL_WINDOW41 phase=INPUT offset=40 months=4 days=402 lengths=77,98,122,105\n";
+        printf "CANONICAL_WINDOW41 phase=INPUT offset=%d months=4 days=%d lengths=%s\n",
+            $window_offset,$days,join(',',@L);
         my %frontier_stats;
         my $oracle=countWeavingsFrontier(\@L,\%frontier_stats);
         printf "CANONICAL_WINDOW41 phase=ORACLE_COUNT status=PASS digits=%d states=%d max_frontier=%d elapsed_sec=%.3f\n",
