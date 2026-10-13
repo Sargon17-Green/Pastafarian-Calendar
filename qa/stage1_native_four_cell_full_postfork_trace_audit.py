@@ -88,37 +88,6 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
             need(int(entry["returned"])==current.get(coord,source_byte(coord)),
                  "Native g violates independent mutable-space write chronology")
     events_by_tick={e[0]:e for e in events}
-    if require_gate_anchor:
-        # The test-only pinned four-cell candidate has a physical | at this
-        # coordinate. This is not a generic Befunge interpreter invariant.
-        gx,gy=PHYSICAL_FORK_GATE
-        need(source_byte((gx,gy))==ord("|"),
-             "Native candidate physical fork source byte drifted")
-        live_gate=source_byte((gx,gy))
-        for tick,kind,coord,entry in events:
-            if tick>=gate["step"]:break
-            if kind=="p" and coord==(gx,gy):
-                live_gate=int(entry["value"])
-        need(live_gate==ord("|"),
-             "Native physical | overwritten before the claimed fork")
-        if pretrace is not None:
-            final_pre=pretrace[-1]
-            need(final_pre[1:3]==[gx,gy] and final_pre[5]==ord("|")
-                 and final_pre[6]==0,
-                 "Native pre-fork trace not anchored to physical | cell")
-        step_direction=1 if gate["executed"]==0 else -1
-        first=trace[0]
-        need(first[:5]==[gate["step"]+1,gx,gy+step_direction,0,step_direction]
-             and first[6]==0,
-             "Native IP did not leave physical | in claimed gate direction")
-        next_coord=(gx,gy+step_direction)
-        live_next=source_byte(next_coord)
-        for tick,kind,coord,entry in events:
-            if tick>=first[0]:break
-            if kind=="p" and coord==next_coord:
-                live_next=int(entry["value"])
-        need(first[5]==live_next,
-             "Native first post-fork opcode differs from physical Funge-space")
     # v2: replay the *executed* instruction at every tick through the fork.
     # A claimed pre-fork p/g event is no longer accepted on chronology alone:
     # it must match the opcode physically executed in mutable Funge-space.
@@ -161,6 +130,37 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
         need(last_pg is None and pretrace[-1][5]==ord("|") and
              pretrace[-1][6]==0,
              "Native final pre-fork instruction must be real conditional gate")
+    if require_gate_anchor:
+        # The test-only pinned four-cell candidate has a physical | at this
+        # coordinate. This is not a generic Befunge interpreter invariant.
+        gx,gy=PHYSICAL_FORK_GATE
+        need(source_byte((gx,gy))==ord("|"),
+             "Native candidate physical fork source byte drifted")
+        live_gate=source_byte((gx,gy))
+        for tick,kind,coord,entry in events:
+            if tick>=gate["step"]:break
+            if kind=="p" and coord==(gx,gy):
+                live_gate=int(entry["value"])
+        need(live_gate==ord("|"),
+             "Native physical | overwritten before the claimed fork")
+        if pretrace is not None:
+            final_pre=pretrace[-1]
+            need(final_pre[1:3]==[gx,gy] and final_pre[5]==ord("|")
+                 and final_pre[6]==0,
+                 "Native pre-fork trace not anchored to physical | cell")
+        step_direction=1 if gate["executed"]==0 else -1
+        first=trace[0]
+        need(first[:5]==[gate["step"]+1,gx,gy+step_direction,0,step_direction]
+             and first[6]==0,
+             "Native IP did not leave physical | in claimed gate direction")
+        next_coord=(gx,gy+step_direction)
+        live_next=source_byte(next_coord)
+        for tick,kind,coord,entry in events:
+            if tick>=first[0]:break
+            if kind=="p" and coord==next_coord:
+                live_next=int(entry["value"])
+        need(first[5]==live_next,
+             "Native first post-fork opcode differs from physical Funge-space")
     first_tick=gate["step"]+1
     current={}
     for tick,kind,coord,entry in events:
