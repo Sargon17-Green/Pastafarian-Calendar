@@ -141,6 +141,19 @@ def main():
         raise AssertionError("pre-fork verification mutated caller-owned Native evidence")
     print("POSTFORK_PG_PREFORK_SEED_ISOLATION_2_NEGATIVE_CONTROLS_PASS")
 
+    # Allow a nonadjacent instruction on the same travel axis: native
+    # whitespace scanning must not be mistaken for a forged teleport.
+    skipped=copy.deepcopy(good)
+    skipped["complete_postfork_trace"][11][1:5]=[91,0,1,0]
+    skipped["first_512_motion"][11]=[91,0,1,0]
+    skip_result=audit.verify_run(skipped,source)
+    if (skip_result["verified_p_writes"]!=1 or
+        skip_result["verified_g_reads"]!=1):
+        raise AssertionError("legitimate collinear whitespace skip wrongly rejected")
+    if skip_result["complete_trace_sha256"]==observed["complete_trace_sha256"]:
+        raise AssertionError("changed route geometry not recorded in trace hash")
+    print("POSTFORK_PG_COLLINEAR_WHITESPACE_SKIP_ACCEPT_PASS")
+
     # Funge-98 may skip whitespace, so do not assume that the next
     # executed instruction is exactly one cell away. However p/g cannot
     # rotate the IP or move it off its established directed axis.
