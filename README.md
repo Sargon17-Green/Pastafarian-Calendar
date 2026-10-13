@@ -132,13 +132,22 @@ written in Plain English Programming:
   materialization remains available during QA.
 - **the list cleanup**: explicit CAL list destructors to release
   the project's owned linked records and memo buffers.
+- **the weaving reentrancy checks**: exercise changes between two
+  and three months, repeated rank selections and invalid rank handling.
+- **the structure audit** and **the structure audit checks**: independently
+  verify the total gate spans of selected cutlets, the total number
+  of calendar days in selected months, their permitted length
+  bounds, and the number and range of their chosen names. They also
+  check that resetting a date cannot expose fields from a prior result.
 - **the complete date**: joins the independently selected year,
   cutlet lengths, cutlet names, month lengths, month names and the
-  full weaving into five fields. The canonical Foundation-day
-  (5000, 10, 503, 20, 56) comparison is an optional slow oracle,
-  not a demonstrated result of running the program.
+  full weaving into five fields. The five fields are explicitly cleared
+  at the start of each conversion and are only published after the
+  selected structures pass their integrity checks. The canonical
+  Foundation-day (5000, 10, 503, 20, 56) comparison is an optional
+  slow oracle, not a demonstrated result of running the program.
 
-The source now includes **65 groups of checks**, some of which compare several
+The source now includes **69 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -290,7 +299,7 @@ root, outside the compile input. Use the matching CAL standard library
 supplied by the compiler. No successful compiler execution has been
 reported.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 65 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 69 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
