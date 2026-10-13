@@ -112,6 +112,7 @@ To inspect a candidate woven month given a number:
   If the examined woven month state is nil, exit.
   If the examined woven month state's remaining days is 0, exit.
   Inspect the woven month status.
+  Find the woven month state given the number.
   Put the weaving selection's already started into an allowed first number.
   Add 1 to the allowed first number.
   If the number is greater than the allowed first number, exit.
