@@ -49,6 +49,7 @@ To find the restricted internal cutlet boundary:
     Add 1 to the following index number.
     If the following index number is greater than or equal to the chosen year's closing index, break.
     Move to the next positive gate.
+    If the gate step budget's exhausted is 1, exit.
     If the gate walk's current position is the year selection day,
       put the gate walk's current index into the cutlet partition's required boundary;
       subtract the chosen year's opening index from the cutlet partition's required boundary;
