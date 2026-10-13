@@ -104,8 +104,13 @@ written in Plain English Programming:
   inclusion/exclusion and exact arithmetic, without enumerating
   all month sequences. A separate optional check covers 47-month
   cases with very large combinatorial counts.
+- **the month names** and **the month name checks**:
+  select distinct month-name indices from 1..47 in lexicographic
+  order, using the shared year sauce and bowl 5 / seal 33.
+  Name indices differ from the ordinal position of a month in the
+  year and can require wide equal-choice arithmetic.
 
-The source now includes **54 groups of checks**, some of which compare several
+The source now includes **56 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -128,10 +133,10 @@ use CAL's 32-bit number type and need wide-number replacements for extreme
 dates and gate indices.
 
 **Not yet built:** arbitrary-precision day coordinates and gate indices;
-month weaving and month names, the requested day's woven month
-position, and the final five-part Pastafarian date. Cutlet structures
-and exact month-length compositions are written in source, but none
-has been compiled or executed by CAL.
+month weaving, the requested day's woven month position, and the final
+five-part Pastafarian date. Cutlet structures, exact month-length
+compositions and distinct month names are written in source; none has
+yet been compiled or executed by CAL.
 Year 5000, following/preceding year selection and the initial cutlet/month
 count choices are present as source but have not been compiled in CAL.
 The narrow and wide equal-choice mechanisms and gate/year-selection
@@ -216,7 +221,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English **program and check files** must be present when compiling. Select only those source files for CAL's file list: do **not** compile the extensionless `LICENSE` document, which is prose for people rather than program instructions. The ordinary `README.md` is likewise documentation, not source. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 54 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 56 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
