@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=31
 CURRENT_KIND=PATCH
 CURRENT_PATCH=15
-LAST_COMPLETED_STAGE=30
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=31
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..14; Stage31 thêm NegativeGateGapPatch gọi LegacyMirroredNegativeGateGap trước khi tính lại gap chuẩn từ FOUNDATION-n. GateGapManager chọn patch cho phía âm, timeline vẫn dùng state bất biến.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_31_PATCH_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_31_PATCH_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_YET_VERIFIED
-CI_FAILURES=NOT_YET_VERIFIED
+CI_TESTS=431
+CI_FAILURES=0
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -744,3 +744,16 @@ thực thi legacy rồi gọi Dispatcher.answer_stream(FOUNDATION,FOUNDATION-n,1
 và chọn hạng trong miền 922. Bốn hồi quy normative Stage30 vẫn giữ expected.
 18 kiểm thử Stage31 mới, dự kiến 431 kiểm thử GREEN; chờ CI + khóa tên.
 Không tích hợp năm/lịch, không sửa main, không nhập oracle vào production.
+
+Giai đoạn 31 PATCH 15 được xác minh bằng CI trên Elixir 1.18.5, OTP 27
+tại commit `274c153e7d24fb578c5835648ba14af46a3a080e`.
+Biên dịch 50 tệp .ex, **431/431 kiểm thử PASS**, 0 lỗi và
+không cảnh báo biên dịch Elixir; Canonical Names Lock PASS.
+Giữ nguyên blob SHA của LegacyMirroredNegativeGateGap
+`f83ed6a47550dd9c4306146d09ab48d50ab81caf`,
+oracle test-only `be1638f46b2190d617af0378a61b077bda10bf32`.
+Cảnh báo Node.js 20 thuộc checkout@v4 của CI, không phải nguồn Elixir.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38367321898
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38367321846
+Stage31 đóng GREEN. Stage32/55 DISCOVERY 16 chưa bắt đầu.
+Không đổi main; không nhập oracle vào production.

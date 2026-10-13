@@ -1051,3 +1051,27 @@ biên dịch; **Canonical Names Lock PASS**. Bốn sai lệch nằm duy nhất
 Stage30 đóng EXPECTED_RED. Bước kế tiếp là Stage31 PATCH 15:
 giữ LegacyMirroredNegativeGateGap nguyên vẹn, thêm lớp sửa riêng,
 và chuyển bốn hồi quy trở lại xanh mà không thay expected.
+
+## Giai đoạn 31/55 — PATCH 15: cổng âm trở lại chuẩn
+
+`NegativeGateGapPatch` gọi thật `LegacyMirroredNegativeGateGap`
+nhưng dùng `FOUNDATION-n` cho phép tính chuẩn. Bản vá lưu lại
+cả độ dài legacy, độ dài chuẩn, hai ngày hỏi và phần chênh lệch.
+`GateGapManager.negative_gap` dùng patch; `GateTimelineManager`
+không cần thay thuật toán và state vẫn bất biến.
+Bốn hồi quy chuẩn cổng -1..-4 từ Stage30 giữ nguyên expected
+và đều trở lại xanh; thêm 18 bài Stage31, bao gồm cổng -8..8,
+số nguyên 2048-bit, đồng thời và bất biến legacy.
+
+Giai đoạn 31 PATCH 15 được xác minh bằng CI trên Elixir 1.18.5, OTP 27
+tại commit `274c153e7d24fb578c5835648ba14af46a3a080e`.
+Biên dịch 50 tệp .ex, **431/431 kiểm thử PASS**, 0 lỗi và
+không cảnh báo biên dịch Elixir; Canonical Names Lock PASS.
+Giữ nguyên blob SHA của LegacyMirroredNegativeGateGap
+`f83ed6a47550dd9c4306146d09ab48d50ab81caf`,
+oracle test-only `be1638f46b2190d617af0378a61b077bda10bf32`.
+Cảnh báo Node.js 20 thuộc checkout@v4 của CI, không phải nguồn Elixir.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38367321898
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38367321846
+Stage31 đóng GREEN. Stage32/55 DISCOVERY 16 chưa bắt đầu.
+Không đổi main; không nhập oracle vào production.
