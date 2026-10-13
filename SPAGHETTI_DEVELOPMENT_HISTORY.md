@@ -771,7 +771,7 @@ commit la sèvi ak `abs(signedStep)`, konsa etap negatif
 Sa se defo istorik nou dwe konsève. Yon PATCH 15 pou
 korije jou negatif yo ap vini sèlman nan Stage 31.
 Pa gen rekalkil pòtay antye oswa `postStir12`.
-CI native pa ko verifye.
+CI native verifye: run `38444537164`.
 
 ### Prèv Stage 30 ki soumèt nan CI
 
@@ -779,4 +779,16 @@ Sètifika planifye: 300 kestyon siy ak twa distans BigInt,
 8 erè/8 rekiperasyon, twa nested calls, twa sauce reyèl,
 kat jobs pozitif, ak twa regleman `EXPECTED_RED` egzak.
 Regresyon wouj final la dwe sèl echèk volontè CI a.
-Pa gen PATCH 15 nan production. CI poko konfime.
+Pa gen PATCH 15 nan production. CI konfime: 43 travay pozitif pase; sèl echèk la se witness wouj final.
+
+### Fèmti DISCOVERY 15 — prèv natif
+
+Run `38444537164`: **43 travay pozitif pase**; yon job
+`lua_stage30_discovery` echwe sèlman sou dènye etap
+`EXPECTED_RED Stage 30 DISCOVERY 15 witness 1: negative gate sign lost`.
+Tout tès Stage 1–30, 300 rekèt siy, twa BigInt gwo,
+8 defayans/8 rekiperasyon, twa reentrances ak twa
+koup sauce kanonik pase. Twa witness wouj yo odit egzak.
+Diferans jou kestyon an se `F+n` olye `F-n` pou n>0.
+Etap 31 ap repare l san efase prèv istorik la.
+`LAST_COMPLETED_STAGE=30` / `EXPECTED_RED_VERIFIED`.

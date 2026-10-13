@@ -1088,7 +1088,7 @@ kontèks konplè, san korije rezilta a.
 Nan Stage 30, nou pa aplike PATCH 15, nou pa konstwi chèn
 pòtay, e nou pa entegre `postStir12`. Regrèsyon normatif
 negatif yo dwe rete `EXPECTED_RED` jouk Stage 31.
-CI natif Stage 30 poko verifye.
+CI natif Stage 30 verifye sou run `38444537164`.
 
 ### Tès Stage 30 — DISCOVERY 15
 
@@ -1101,4 +1101,19 @@ verifye twa mesaj egzak san fè suite pozitif la echwe.
 Nan CI, kat jobs pozitif dwe pase; job
 `lua_stage30_discovery` dwe pase suite pozitif,
 apre sa li dwe echwe sèlman nan etap `EXPECTED_RED` final la.
-Verifikasyon natif poko fini.
+Verifikasyon natif fini: 43 travay pozitif PASS ak yon echèk wouj istorik entansyonèl.
+
+### Fèmti DISCOVERY 15 — Stage 30
+
+GitHub Actions run `38444537164`: **43/43 travay pozitif PASS**,
+epi yon sèl travay `lua_stage30_discovery` echwe entansyonèlman
+sou dènye etap li, avèk mesaj egzak
+`EXPECTED_RED Stage 30 DISCOVERY 15 witness 1: negative gate sign lost`.
+Suite natif Stage 1–30 anvan etap wouj la pase nèt.
+Prèv yo kouvri 300 kestyon siy, 11 tras avèk senk
+divèjans negatif, twa BigInt masif, 8 erè/8 rekiperasyon,
+twa nested calls, twa konparezon sauce kanonik,
+ak twa scripts wouj istorik verifye pa audit.
+Pa gen PATCH 15 oswa `postStir12`.
+`LAST_COMPLETED_STAGE=30`;
+`EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
