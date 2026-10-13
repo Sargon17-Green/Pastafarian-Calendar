@@ -1,0 +1,53 @@
+\ Exact combinatorial arithmetic for the calendar's finite choices.
+\ A wide decimal string can be divided by a small native whole number
+\ without using floating point or overflowing a CAL number.
+\ At each position: old remainder * 10 + next decimal digit.
+\ The divisor must be positive and the number must be normalized.
+\ The quotient replaces the input. The last remainder is published.
+\ Neither procedure has nested loops.
+
+The small division remainder is a number.
+The binomial result is a wide quantity.
+
+To divide a wide quantity by a number and retain the remainder:
+  Put the wide quantity into a source string.
+  Put "" into a quotient string.
+  Put 0 into a current remainder number.
+  Slap a substring on the source string.
+  Loop.
+    If the substring is blank, break.
+    Put the substring's first's target into a digit number.
+    Subtract 48 from the digit number.
+    Put the current remainder number times 10 plus the digit number into a column number.
+    Divide the column number by the number giving a quotient number and a remainder number.
+    Put the remainder number into the current remainder number.
+    Add 48 to the quotient number.
+    Put the quotient number into a byte.
+    Append the byte to the quotient string.
+    Add 1 to the substring's first.
+  Repeat.
+  Put quotient string into the wide quantity.
+  Normalize the wide quantity.
+  Put the current remainder number into the small division remainder.
+
+\ Calculate C(n,k) using successive exact integer divisions:
+\ C(n,k) = product over i=1..k of (n-k+i)/i.
+\ Each intermediate C(n-k+i,i) is integral, so no rounding occurs.
+\ For invalid k (<0 or >n), the result is exactly zero.
+\ Both input numbers must be nonnegative and small enough for CAL.
+To calculate a binomial coefficient given a number and another number:
+  Put "0" into the binomial result.
+  If the number is less than 0, exit.
+  If the other number is less than 0, exit.
+  If the other number is greater than the number, exit.
+  Put "1" into the binomial result.
+  Put the number into a numerator number.
+  Subtract the other number from the numerator number.
+  Put 1 into a binomial step number.
+  Loop.
+    If the binomial step number is greater than the other number, break.
+    Add 1 to the numerator number.
+    Multiply the binomial result by the numerator number.
+    Divide the binomial result by the binomial step number and retain the remainder.
+    Add 1 to the binomial step number.
+  Repeat.
