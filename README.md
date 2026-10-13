@@ -12,42 +12,57 @@ The other branches have their own rules. This branch does not change them.
 
 ## What has been written so far
 
-The extensionless file **the calendar** contains the first part of the
-calculation. Given the positions of two days, it calculates the five starting
-numbers: the count of each day, their inclusive distance, their sum, and their
-direction. There are six small example checks.
+The file **the calendar** takes two calendar-day positions and computes the
+five starting counters. It runs a sequence of checks, stops at the first
+failure, and writes the result to **calendar-checks.txt**.
 
-Two more extensionless Plain English files have now been added:
+All files containing program instructions have no filename extension and are
+written in Plain English Programming:
 
-- **wide numbers** contains nonnegative, arbitrary-precision whole-number
-  arithmetic: comparison, addition, subtraction, multiplication, ordinary
-  remainder, and the calendar's special SAVE operation.
-- **the arithmetic checks** contains worked checks for long carries, long
-  borrows, order, multiplication, ordinary remainders, and sauce-limit
-  boundaries. The main program calls these checks.
+- **wide numbers**: exact decimal-string arithmetic for nonnegative integers,
+  including comparison, addition, subtraction, multiplication, remainder,
+  and the sauce's SAVE operation. It also handles signed *differences*
+  between two already-saved values.
+- **the arithmetic checks**: checks long arithmetic and modulus boundaries.
+- **the five stones**: grows all 46 rows of five stones, calculating each
+  new row entirely from the old row.
+- **the stone checks**: checks all five stones at rows 1, 2, 3, 7, and 46.
+- **the hidden drops**: computes the seven hidden drops, each using its
+  four coefficients, the five stones of the matching visible row, and
+  seven grinding steps.
+- **the hidden drop checks**: compares all seven Foundation-Day hidden drops
+  with the exact numbers published in the original rules.
+- **the visible drops**: computes up to 46 visible drops, preserving their
+  preceding seven-drop history and performing all eleven grinding steps
+  before advancing the history.
+- **the visible drop checks**: checks the first and last Foundation-Day
+  visible drops against the published exact results.
 
-The arithmetic stores a whole number as its decimal digits in a string. This
-is essential because CAL's built-in numbers are signed 32-bit integers. The
-individual columns never exceed small machine numbers. Multiplication and
-long division are broken into separate routines, without nested loops.
+The source now includes **21 groups of checks**, some of which compare several
+values. CAL's built-in number is only 32 bits; the sauce therefore uses
+decimal strings so it never depends on machine-sized large integers. Each
+individual decimal arithmetic column still uses ordinary small numbers.
+No single routine contains nested loops.
 
-**Important limitations:** The arithmetic routines take nonempty, normalized,
-nonnegative decimal numbers. Subtraction requires the second number to be at
-least as large as the first. The ordinary remainder routine requires a
-positive divisor. Direct SAVE currently handles only nonnegative arguments. A separate sauce
-subtraction routine handles SAVE(a-b) even if a-b is negative, provided that
-both operands were already saved in the range 1..M. More general signed
-arithmetic and CAL execution testing remain unfinished.
+**Compilation and execution have not been verified.** These are real source
+routines and expected outcomes, not evidence of a successful CAL run. The
+arithmetic values and Foundation-Day drop outputs have been checked
+independently against the equations and the published original examples, but
+a compiler may still uncover errors in the Plain English syntax or library
+integration.
 
-**Compilation and execution are not verified.** The source has been written
-from documented CAL language constructs, but no CAL compiler is available in
-the current environment. The checks are specifications embedded in the code,
-not results from a successful test run. A reader must not treat the arithmetic
-or the application as a tested release.
+**Current restrictions:** decimal arithmetic inputs must be nonempty,
+normalized, nonnegative strings. Plain subtraction requires the destination
+to be at least as large as the number being subtracted. A positive divisor
+is required for ordinary remainder. Direct SAVE requires nonnegative input;
+a separate operation supports signed differences between numbers in 1..M.
+The current first-stage day-count conversion still uses CAL's 32-bit number
+type and needs a wide-number replacement for extreme dates.
 
-**This is not yet a complete date converter.** The full sauce, gates, year,
-cutlets, months, and final Pastafarian date have not been implemented. They
-must not be guessed or replaced by fixed answers.
+**Not yet built:** the six-bowl initial state, 720 possible bowl orders,
+pouring and mixing of each visible drop, twelve final mixes, gate discovery,
+year selection, cutlets, months, and a complete Pastafarian date. No shortcuts,
+approximate answers, or hard-coded final dates are allowed.
 
 ## The idea, explained simply
 
@@ -93,8 +108,9 @@ These five numbers are the ingredients for everything that follows.
 
 ### Step 3: Make the sauce
 
-The full sauce is **not yet implemented** in this branch. Its exact-number
-arithmetic and nonnegative SAVE operation are now written, but not compiler-tested.
+The stones, hidden drops, and visible drops have now been written as Plain
+English source. The six bowls, their permutations, pours, and mixing are still
+missing; none of the sauce code has yet passed a CAL compilation test.
 
 The full rule makes numbers grow very large. It uses one huge limit: start with 1, double it 127 times, and take away 1. Whenever a sauce number grows past this limit, it wraps around rather than growing forever. In this system, the last number before wrapping is kept instead of being turned into zero.
 
@@ -104,7 +120,7 @@ There are six bowls. The drops are poured into the bowls. Their order changes ac
 
 The final bowls can answer carefully specified questions. Their answers only *look* unpredictable. The same pair of days always produces the same result.
 
-The whole sauce needs exact whole-number arithmetic. The ordinary CAL number type is too small for the biggest values. A future part of this branch must teach Plain English to do long arithmetic with strings of digits, just as a person can do it on paper. It must not call a program written in another language.
+The whole sauce needs exact whole-number arithmetic. The ordinary CAL number type is too small for the biggest values. The arithmetic routines already do long arithmetic with strings of digits, as a person can do on paper. They must still be verified in CAL. They do not call a program written in another language.
 
 ### Step 4: Find the year and its smaller parts
 
@@ -120,9 +136,9 @@ The order of every step matters. Even one wrong number near the beginning can ch
 
 Plain English Programming is an actual programming language. Its CAL compiler is a separate tool. This branch does not include a compiler, a copy of its code, or any helper code in another language.
 
-Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. The two additional extensionless Plain English files must be present when compiling. CAL also needs its usual Plain English library supplied by the compiler's development environment.
+Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English source files in this branch must be present when compiling. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if the six day-count checks and all of the added arithmetic checks pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 21 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
