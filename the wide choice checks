@@ -1,0 +1,102 @@
+\ Wide equal-choice reference vectors computed with exact decimal arithmetic.
+\ These test both directions, wrapped digits, rejection, and k=3.
+\ Inputs are ordinary decimal text; no CAL native integer carries them.
+\ The CAL compiler has not yet run these checks.
+
+To check the two digit forward choice:
+  Put "170141183460469231731687303715884105727" into the seal inquiry's starting answer.
+  Put 1 into the seal inquiry's answer direction.
+  Put "170141183460469231731687303715884105728" into a requested options wide quantity.
+  Choose an equal option given the requested options wide quantity.
+  If the wide option work's digit count is not 2,
+    put "The two digit forward choice used the wrong digit count." into the check report; exit.
+  If the wide option work's period is not "28948022309329048855892746252171976962977213799489202546401021394546514198529",
+    put "The two digit forward choice used the wrong M power." into the check report; exit.
+  If the wide option work's acceptance limit is not "28948022309329048855892746252171976962977213799489202546401021394546514198528",
+    put "The two digit forward choice computed the wrong acceptance limit." into the check report; exit.
+  If the wide option work's constructed answer is not "170141183460469231731687303715884105727",
+    put "The two digit forward choice built the wrong wide value." into the check report; exit.
+  If the seal inquiry's selected quantity is not "170141183460469231731687303715884105727",
+    put "The two digit forward choice chose the wrong option." into the check report; exit.
+  If the seal inquiry's current answer is not the seal inquiry's starting answer,
+    put "The two digit forward choice changed the stream cursor." into the check report; exit.
+
+To check the two digit backward choice:
+  Put "1" into the seal inquiry's starting answer.
+  Put -1 into the seal inquiry's answer direction.
+  Put "170141183460469231731687303715884105728" into a requested options wide quantity.
+  Choose an equal option given the requested options wide quantity.
+  If the wide option work's digit count is not 2,
+    put "The two digit backward choice used the wrong digit count." into the check report; exit.
+  If the wide option work's period is not "28948022309329048855892746252171976962977213799489202546401021394546514198529",
+    put "The two digit backward choice used the wrong M power." into the check report; exit.
+  If the wide option work's acceptance limit is not "28948022309329048855892746252171976962977213799489202546401021394546514198528",
+    put "The two digit backward choice computed the wrong acceptance limit." into the check report; exit.
+  If the wide option work's constructed answer is not "28948022309329048855892746252171976962807072616028733314669334090830630092803",
+    put "The two digit backward choice built the wrong wide value." into the check report; exit.
+  If the seal inquiry's selected quantity is not "3",
+    put "The two digit backward choice chose the wrong option." into the check report; exit.
+  If the seal inquiry's current answer is not the seal inquiry's starting answer,
+    put "The two digit backward choice changed the stream cursor." into the check report; exit.
+
+To check the forward rejected wide choice:
+  Put "170141183460469231731687303715884105726" into the seal inquiry's starting answer.
+  Put 1 into the seal inquiry's answer direction.
+  Put "170141183460469231731687303715884105729" into a requested options wide quantity.
+  Choose an equal option given the requested options wide quantity.
+  If the wide option work's digit count is not 2,
+    put "The forward rejected wide choice used the wrong digit count." into the check report; exit.
+  If the wide option work's period is not "28948022309329048855892746252171976962977213799489202546401021394546514198529",
+    put "The forward rejected wide choice used the wrong M power." into the check report; exit.
+  If the wide option work's acceptance limit is not "28948022309329048855892746252171976962977213799489202546401021394546514198525",
+    put "The forward rejected wide choice computed the wrong acceptance limit." into the check report; exit.
+  If the wide option work's constructed answer is not "1",
+    put "The forward rejected wide choice did not reject correctly." into the check report; exit.
+  If the seal inquiry's selected quantity is not "1",
+    put "The forward rejected wide choice chose the wrong option." into the check report; exit.
+  If the seal inquiry's current answer is not the seal inquiry's starting answer,
+    put "The forward rejected wide choice changed the stream cursor." into the check report; exit.
+
+To check the backward rejected wide choice:
+  Put "170141183460469231731687303715884105727" into the seal inquiry's starting answer.
+  Put -1 into the seal inquiry's answer direction.
+  Put "14474011154664524427946373126085988481488606899744601273200510697273257099265" into a requested options wide quantity.
+  Choose an equal option given the requested options wide quantity.
+  If the wide option work's digit count is not 2,
+    put "The backward rejected wide choice used the wrong digit count." into the check report; exit.
+  If the wide option work's period is not "28948022309329048855892746252171976962977213799489202546401021394546514198529",
+    put "The backward rejected wide choice used the wrong M power." into the check report; exit.
+  If the wide option work's acceptance limit is not "14474011154664524427946373126085988481488606899744601273200510697273257099265",
+    put "The backward rejected wide choice computed the wrong acceptance limit." into the check report; exit.
+  If the wide option work's constructed answer is not "14474011154664524427946373126085988481488606899744601273200510697273257099265",
+    put "The backward rejected wide choice did not reject correctly." into the check report; exit.
+  If the seal inquiry's selected quantity is not "14474011154664524427946373126085988481488606899744601273200510697273257099265",
+    put "The backward rejected wide choice chose the wrong option." into the check report; exit.
+  If the seal inquiry's current answer is not the seal inquiry's starting answer,
+    put "The backward rejected wide choice changed the stream cursor." into the check report; exit.
+
+To check the three digit wide choice:
+  Put "1" into the seal inquiry's starting answer.
+  Put 1 into the seal inquiry's answer direction.
+  Put "28948022309329048855892746252171976962977213799489202546401021394546514198530" into a requested options wide quantity.
+  Choose an equal option given the requested options wide quantity.
+  If the wide option work's digit count is not 3,
+    put "The three digit wide choice used the wrong digit count." into the check report; exit.
+  If the wide option work's period is not "4925250774549309901534880012517951725548123341880193686925858436774199290547709261477934266526216329006041303875583",
+    put "The three digit wide choice used the wrong M power." into the check report; exit.
+  If the wide option work's acceptance limit is not "4925250774549309901534880012517951725519175319570864638069965690522027313584902188861905533211546994915210673782780",
+    put "The three digit wide choice computed the wrong acceptance limit." into the check report; exit.
+  If the wide option work's constructed answer is not "1",
+    put "The three digit wide choice did not reject correctly." into the check report; exit.
+  If the seal inquiry's selected quantity is not "170141183460469231731687303715884105726",
+    put "The three digit wide choice chose the wrong option." into the check report; exit.
+  If the seal inquiry's current answer is not the seal inquiry's starting answer,
+    put "The three digit wide choice changed the stream cursor." into the check report; exit.
+
+To check the narrow and wide selection boundary:
+  Put "170141183460469231731687303715884105727" into a requested options wide quantity.
+  Put "170141183460469231731687303715884105727" into the seal inquiry's current answer.
+  Put 1 into the seal inquiry's answer direction.
+  Choose an equal option given the requested options wide quantity.
+  If the seal inquiry's selected quantity is not "170141183460469231731687303715884105727",
+    put "The N=M choice boundary failed." into the check report; exit.
