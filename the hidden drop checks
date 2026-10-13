@@ -1,0 +1,26 @@
+\ Seven reference hidden drops for Foundation Day as calculation and target.
+\ The values below are printed in the main branch's canonical README.
+\ This checks all seven outputs, not just the first hidden drop.
+\ A failure is reported through the same report as the earlier checks.
+
+To check the seven Foundation hidden drops:
+  Put "1" into the sauce input's calculation count.
+  Put "1" into the sauce input's requested count.
+  Put "1" into the sauce input's distance count.
+  Put "2" into the sauce input's sum count.
+  Put "2" into the sauce input's direction count.
+  Make all seven hidden drops.
+  If the hidden drops' first drop is not "119390830530032782664128530203002080344",
+    put "The Foundation hidden drop 1 check failed." into the check report; exit.
+  If the hidden drops' second drop is not "11877236279154673426874867061566696749",
+    put "The Foundation hidden drop 2 check failed." into the check report; exit.
+  If the hidden drops' third drop is not "24217814924229232987463457533828175476",
+    put "The Foundation hidden drop 3 check failed." into the check report; exit.
+  If the hidden drops' fourth drop is not "166629231917547214614573522551290204247",
+    put "The Foundation hidden drop 4 check failed." into the check report; exit.
+  If the hidden drops' fifth drop is not "81202913407267092008896220686064041568",
+    put "The Foundation hidden drop 5 check failed." into the check report; exit.
+  If the hidden drops' sixth drop is not "73551520026920072430116213847585486272",
+    put "The Foundation hidden drop 6 check failed." into the check report; exit.
+  If the hidden drops' seventh drop is not "6164285870955721082771365327359496898",
+    put "The Foundation hidden drop 7 check failed." into the check report; exit.
