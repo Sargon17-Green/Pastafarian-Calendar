@@ -1131,4 +1131,20 @@ pozitif oswa zewo, jou a pa chanje. Tout kalkil se
 BigInt natif; pa gen oracle pwodiksyon.
 `legacyGateQuestionProbe` kontinye revele defo Stage 30 a.
 Nou pa konstwi chèn pòtay, ni `postStir12`.
-QA natif Stage 31 poko konplete.
+QA natif Stage 31 konfime nan run `38456163489`.
+### Fèmti natif Stage 31 — PATCH 15
+
+GitHub Actions run `38456163489`: **48/48 travay PASS**,
+san okenn echèk. Tout Stage 1–31 pase ansanm. Nou teste
+301 jou kestyon kont oracle endepandan, 150 koreksyon
+sou bò negatif Fondasyon, twa distans BigInt gwo,
+10 erè/10 rekiperasyon, twa nested calls ak de koup
+sauce kanonik. Audit twa `EXPECTED_RED` Stage 30
+toujou konfime move chemen istorik la.
+Kadna SHA sou `legacy_gate_question_adapter.lua` pase:
+`d7c86d6c41c61de06816c681417caa035c0e5337`.
+Twa commits posede yo rete nan lòd: demann avèk siy,
+move kestyon legacy, kestyon siyen repare. Pa gen
+chèn pòtay antye, oracle nan production oswa `postStir12`.
+`LAST_COMPLETED_STAGE=31` / `EXPECTED_REPOSITORY_STATE=GREEN`.
+

@@ -805,4 +805,17 @@ commit posede anrejistre jou korije a, ansanm ak snapshot
 eta semantik ansyen an. Public `gateQuestionDaySpaghetti`
 retounen rezilta PATCH 15; sond legacy rete ansyen an.
 Pa gen chèn pòtay antye oswa `postStir12`.
-Rezilta CI poko disponib.
+Rezilta CI konfime sou run `38456163489`: 48/48 travay pase.
+### Fèmti PATCH 15 — Stage 31
+
+Run GitHub Actions `38456163489`: **48/48 PASS**.
+Suite konplè Stage 1–31 ak 301 chwa kestyon jou
+oracle, 150 diferans negatif korije, twa distans BigInt,
+10 erè/10 rekiperasyon, twa reentrances ak de koup
+sauce kanonik pase. Twa prèv `EXPECTED_RED` Stage 30
+rete oditab, modil legacy a toujou gen SHA
+`d7c86d6c41c61de06816c681417caa035c0e5337`.
+Patch la ajoute twazyèm commit apre de commits eritaj yo,
+san gate sequence oswa postStir12.
+`LAST_COMPLETED_STAGE=31` / `GREEN`.
+
