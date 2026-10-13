@@ -737,7 +737,7 @@ commit `WIDE_CHOICE_REJECTION_PATCH`. Li itilize repons SAVE natif,
 konbine chif yo an lòd pwa piti an premye, epi sote rejè kontig
 avèk prèv limit olye iterasyon ki ka twò long. Pa gen okenn chwa
 wide nan ansyen modil legacy, ni melanj final 12 brase yo.
-Tès ak CI Stage 29 poko verifye.
+Tès ak CI Stage 29 verifye sou run `38439596829`.
 
 ### Tès Stage 29 ki soumèt pou CI
 
@@ -745,4 +745,18 @@ Nou konpare chwa laj ak oracle endepandan, verifye
 lòd chif baz M, limit akseptasyon, skippage matematik,
 10 defayans/10 rekiperasyon, de apèl nested ak sauce.
 Regresyon Stage 28 rete yon odit istorik; job Stage 28
-pa echwe entansyonèlman apre PATCH 14. CI poko konfime.
+pa echwe entansyonèlman apre PATCH 14. CI konfime.
+
+### Fèmti natif Stage 29
+
+GitHub Actions run `38439596829`: **39/39 travay PASS**.
+Job `lua_stage29_patch` pase tout Stage 1–29, avèk
+25 chwa laj kont oracle endepandan, rejè matematik
+plis pase `2^64`, BigInt rive `M^5+1`,
+10 defayans/10 rekiperasyon, de kontèks nested, de sous
+sauce kanonik ak kat odit `EXPECTED_RED` Stage 28.
+Chemen legacy short-only ak PATCH 13 pa chanje (hash lock PASS).
+Pa gen okenn modil oracle nan production, ni melanj
+`postStir12`, ni kòd Stage 30. Premye commit blokaj la
+rete nan tras anvan dezyèm commit koreksyon wide la.
+`LAST_COMPLETED_STAGE=29` / `EXPECTED_REPOSITORY_STATE=GREEN`.

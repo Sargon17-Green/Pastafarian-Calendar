@@ -1045,7 +1045,7 @@ Nou sèvi ak limit akseptasyon `floor(M^k/N)*N`, ak yon sote
 kontig pou rejè ki ka depase 64 bit. Commit koreksyon an suiv
 commit blokaj la, avèk eta semantik apa ak prèv chif yo.
 Pou `N<=M`, `choiceSpaghetti` toujou sèvi ak PATCH 13.
-Tès ak CI natif Stage 29 rete pou verifye; pa gen `postStir12`.
+Tès ak CI natif Stage 29 verifye; pa gen `postStir12`.
 
 ### Verifikasyon Stage 29 — Suite natif
 
@@ -1054,4 +1054,22 @@ sekans ki depase `2^64` rejè lojik, 10 echèk/rekiperasyon,
 de reentrances, sauce otantik ak kadna SHA modil legacy.
 Odit kat regresyon wouj Stage 28 la toujou egziste,
 men suite pozitif la pa rele script wouj la kòm echèk job ankò.
-Tout rezilta native CI rete pou verifye.
+Rezilta CI natif yo verifye nan run `38439596829`.
+
+### Fèmti Stage 29 — PATCH 14 verifye nativman
+
+GitHub Actions run `38439596829`: **39/39 travay PASS**, san okenn
+travay echwe. Job `lua_stage29_patch` pase tout suite natif
+Stage 1–29. Nou verifye 25 chwa laj ak oracle endepandan,
+rejè laj plis pase `2^64`, gwosè rive `M^5+1`, 10 erè
+ak 10 rekiperasyon, de apèl nested, ak de kouran sauce
+kanonik. Kat `EXPECTED_RED` Stage 28 yo toujou verifye
+atravè audit sou legacy short-only; yo pa yon echèk CI.
+
+Kadna Git hash sou `legacy_short_only_choice.lua` ak
+`short_choice_patch.lua` pase. `wide_choice_patch.lua`
+kenbe commit blokaj istorik la anvan commit koreksyon laj la.
+Oracle rete sèlman anba `test/`; nou pa ajoute `postStir12`
+ni okenn travay Stage 30 davans.
+`LAST_COMPLETED_STAGE=29`;
+`EXPECTED_REPOSITORY_STATE=GREEN`.
