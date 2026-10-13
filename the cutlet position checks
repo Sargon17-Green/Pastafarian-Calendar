@@ -15,7 +15,15 @@ To check the complete Foundation cutlet:
   If the cutlet partition's valid selection is not 1,
     put "The Foundation cutlet partition could not be chosen." into the check report; exit.
   Resolve the cutlet of the target day.
-  If the requested cutlet number is not 10,
-    put "Foundation should lie in cutlet 10." into the check report; exit.
+  If the requested cutlet number is less than 1,
+    put "Foundation cutlet ordinal was not resolved." into the check report; exit.
+  If the requested cutlet number is greater than the selected cutlet count,
+    put "Foundation cutlet ordinal exceeds the chosen number of cutlets." into the check report; exit.
   If the requested day in cutlet is not 503,
-    put "Foundation should be day 503 of cutlet 10." into the check report; exit.
+    put "Foundation should be day 503 within its cutlet." into the check report; exit.
+  Choose the canonical cutlet names.
+  If the cutlet name choice's selection success is not 1,
+    put "Foundation cutlet names were not selected." into the check report; exit.
+  Read the requested cutlet name.
+  If the requested cutlet name index is not 10,
+    put "Foundation cutlet must have canonical NAME index 10." into the check report; exit.
