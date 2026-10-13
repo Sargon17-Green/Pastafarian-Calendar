@@ -79,13 +79,15 @@ To select the adjacent year:
   Convert the seal inquiry's selected quantity to the selected year rank.
   Read the selected year candidate.
 
-\ A failed scan must never overwrite the last successfully selected year.
+\ A failed scan or invalid rank must never overwrite the last successfully selected year.
 To advance to the following year:
   Put 0 into the year selection success.
   Gather following year candidates.
   If the eligible year count is 0,
     destroy the eligible year ledger; exit.
   Select the adjacent year.
+  If the selected year available is not 1,
+    destroy the eligible year ledger; exit.
   Add 1 to the current year number.
   Put 1 into the year selection success.
   Destroy the eligible year ledger.
@@ -96,6 +98,8 @@ To move to the preceding year:
   If the eligible year count is 0,
     destroy the eligible year ledger; exit.
   Select the adjacent year.
+  If the selected year available is not 1,
+    destroy the eligible year ledger; exit.
   Subtract 1 from the current year number.
   Put 1 into the year selection success.
   Destroy the eligible year ledger.
