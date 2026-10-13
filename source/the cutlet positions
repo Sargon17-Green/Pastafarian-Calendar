@@ -36,6 +36,7 @@ To resolve the cutlet of the target day:
     If the examined cutlet piece is nil, break.
     Put the gate walk's current position into the cutlet opening day.
     Reach the end of one cutlet.
+    If the gate step budget's exhausted is 1, exit.
     If the target year day is greater than the cutlet opening day,
       examine the closing cutlet boundary.
     If the requested cutlet number is greater than 0, break.
