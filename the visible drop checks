@@ -1,0 +1,23 @@
+\ Canonical visible-drop results for the Foundation-Day question.
+\ Both expected values are printed in the original main README.
+\ The seventh hidden drop remains a distinct earlier position, not drop 0.
+\ Test status is pending an actual CAL compiler run.
+
+To prepare the Foundation sauce question:
+  Put "1" into the sauce input's calculation count.
+  Put "1" into the sauce input's requested count.
+  Put "1" into the sauce input's distance count.
+  Put "2" into the sauce input's sum count.
+  Put "2" into the sauce input's direction count.
+
+To check the first Foundation visible drop:
+  Prepare the Foundation sauce question.
+  Make visible drops through 1.
+  If the last visible drop is not "56644603826892212324764499696091907135",
+    put "The first Foundation visible drop check failed." into the check report; exit.
+
+To check the final Foundation visible drop:
+  Prepare the Foundation sauce question.
+  Make visible drops through 46.
+  If the last visible drop is not "141872771689426650819909896585756512282",
+    put "The final Foundation visible drop check failed." into the check report; exit.
