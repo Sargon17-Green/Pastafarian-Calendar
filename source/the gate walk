@@ -89,6 +89,12 @@ To locate a gate given a number:
   Put the number into the gate walk's requested index.
   Put 0 into the gate walk's current index.
   Put -15055671 into the gate walk's current position.
+  \ An index farther than the remaining step allowance cannot be
+  \ reached. Reject it immediately, before any expensive sauce.
+  If the number is greater than 1024,
+    put 1 into the gate step budget's exhausted; exit.
+  If the number is less than -1024,
+    put 1 into the gate step budget's exhausted; exit.
   Loop.
     If the gate walk's current index is the gate walk's requested index, break.
     If the gate walk's requested index is greater than 0, move to the next positive gate.
