@@ -67,6 +67,14 @@ To check the year 5000 candidate enumeration:
     put "Last candidate did not close at gate 7." into the check report; exit.
   If the chosen year's year length is not 5400,
     put "Last candidate had the wrong maximum eligible length." into the check report; exit.
+  Put -15055670 into the year selection day.
+  Gather eligible year candidates.
+  If the eligible year count is not 13,
+    put "Moving one day after Foundation must allow gate zero to open." into the check report; exit.
+  Put 1 into the selected year rank.
+  Read the selected year candidate.
+  If the chosen year's year length is not 3600,
+    put "Rebuilding the sorted ledger changed its first duration." into the check report; exit.
   Destroy the eligible year ledger.
   Destroy the nearby gate ledger.
 
