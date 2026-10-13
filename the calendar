@@ -115,6 +115,10 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the year 5000 candidate enumeration.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the cutlet count boundaries.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the month count boundaries.
+  If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
