@@ -120,10 +120,13 @@ def verify_run(run,source):
         if stringmode==0 and byte in map(ord,OPS):
             ops[chr(byte)]+=1
         event=events_by_tick.get(tick)
+        if stringmode==0 and byte in (ord("p"),ord("g")):
+            need(event is not None and event[1]==chr(byte),
+                 "Native executed p/g opcode missing its physical event receipt")
         if event is not None:
             kind=event[1]
-            need(byte==ord(kind),
-                 "Native claimed p/g instruction does not match executed byte")
+            need(stringmode==0 and byte==ord(kind),
+                 "Native claimed p/g event does not match executed opcode/mode")
             if kind=="p":current[event[2]]=int(event[3]["value"])
     need(len(beyond512)>0,"full Native run added no states outside the prior window")
     return {
