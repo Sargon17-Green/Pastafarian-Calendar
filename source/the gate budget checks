@@ -28,3 +28,76 @@ To check the exhausted gate work budget:
     put "A fresh gate query inherited exhausted status." into the check report; exit.
   If the gate step budget's steps remaining is not 1024,
     put "A fresh gate query did not restore its bounded allowance." into the check report; exit.
+
+
+\ These checks commit known canonical gap lengths directly, so they
+\ catch broken atomic updates without running the 46-drop sauce.
+To check atomic native gate movement:
+  Begin bounded gate walking.
+  Put 0 into the gate walk's current index.
+  Put -15055671 into the gate walk's current position.
+  Publish the measured positive gate gap given 1 and 345.
+  If the gate walk's current index is not 1,
+    put "The measured positive native gap chose the wrong gate." into the check report; exit.
+  If the gate walk's current position is not -15055326,
+    put "The measured positive native gap chose the wrong position." into the check report; exit.
+  Publish the measured negative gate gap given 0 and 345.
+  If the gate walk's current index is not 0,
+    put "The measured backward native gap did not reach zero." into the check report; exit.
+  If the gate walk's current position is not -15055671,
+    put "The measured backward native gap did not return to Foundation." into the check report; exit.
+  Publish the measured negative gate gap given -1 and 503.
+  If the gate walk's current index is not -1,
+    put "The measured negative native gap chose the wrong gate." into the check report; exit.
+  If the gate walk's current position is not -15056174,
+    put "The measured negative native gap chose the wrong position." into the check report; exit.
+  Publish the measured positive gate gap given 0 and 503.
+  If the gate walk's current index is not 0,
+    put "The measured positive return did not reach gate zero." into the check report; exit.
+  If the gate walk's current position is not -15055671,
+    put "The measured positive return did not reach Foundation." into the check report; exit.
+  Publish the measured positive gate gap given 1 and 41.
+  If the gate step budget's exhausted is not 1,
+    put "A too-short native gate interval did not mark failure." into the check report; exit.
+  If the gate walk's current index is not 0,
+    put "An invalid short native gap changed the gate." into the check report; exit.
+  If the gate walk's current position is not -15055671,
+    put "An invalid short native gap changed the position." into the check report; exit.
+  Begin bounded gate walking.
+  Publish the measured negative gate gap given -1 and 964.
+  If the gate step budget's exhausted is not 1,
+    put "A too-long native gate interval did not mark failure." into the check report; exit.
+  If the gate walk's current index is not 0,
+    put "An invalid long native gap changed the gate." into the check report; exit.
+  If the gate walk's current position is not -15055671,
+    put "An invalid long native gap changed the position." into the check report; exit.
+
+\ Reject unreachable native indices immediately, without a sauce call.
+To check native gate rejection boundaries:
+  Begin bounded gate walking.
+  Put 400000000 into the gate walk's current index.
+  Put -15055671 into the gate walk's current position.
+  Move to the next positive gate.
+  If the gate step budget's exhausted is not 1,
+    put "An unsupported positive gate index did not fail." into the check report; exit.
+  If the gate walk's current index is not 400000000,
+    put "A failed positive gate move changed its index." into the check report; exit.
+  If the gate walk's current position is not -15055671,
+    put "A failed positive gate move changed its coordinate." into the check report; exit.
+  Begin bounded gate walking.
+  Put -400000000 into the gate walk's current index.
+  Move to the next negative gate.
+  If the gate step budget's exhausted is not 1,
+    put "An unsupported negative gate index did not fail." into the check report; exit.
+  If the gate walk's current index is not -400000000,
+    put "A failed negative gate move changed its index." into the check report; exit.
+  Locate a gate given 1025.
+  If the gate step budget's exhausted is not 1,
+    put "A distant positive gate locate was not rejected immediately." into the check report; exit.
+  If the gate walk's current index is not 0,
+    put "A rejected positive locate moved the gate." into the check report; exit.
+  Locate a gate given -1025.
+  If the gate step budget's exhausted is not 1,
+    put "A distant negative gate locate was not rejected immediately." into the check report; exit.
+  If the gate walk's current index is not 0,
+    put "A rejected negative locate moved the gate." into the check report; exit.
