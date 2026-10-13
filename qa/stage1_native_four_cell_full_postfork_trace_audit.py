@@ -101,6 +101,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
              "Native complete pre-fork trajectory truncated or inflated")
         pre_memory={}
         last_pg=None
+        expected_prefork_stringmode=0
         for index,entry in enumerate(pretrace):
             need(type(entry) is list and len(entry)==7 and
                  all(type(value) is int for value in entry),
@@ -109,6 +110,10 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
             need(tick==index+1 and (dx!=0 or dy!=0) and
                  stringmode in (0,1),
                  "Native pre-fork tick, vector or mode invalid")
+            need(stringmode==expected_prefork_stringmode,
+                 "Native pre-fork stringmode not caused by physical quote opcode")
+            if byte==ord('"'):
+                expected_prefork_stringmode=1-expected_prefork_stringmode
             if last_pg is not None:
                 px,py,pdx,pdy=last_pg
                 need((dx,dy)==(pdx,pdy) and
@@ -171,6 +176,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
     beyond512=set()
     executed_modified=0;ops=Counter()
     pending_pg_motion=None
+    expected_postfork_stringmode=0
     for i,datum in enumerate(trace):
         need(type(datum) is list and len(datum)==7
              and all(type(value) is int for value in datum),
@@ -179,6 +185,10 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
         need(tick==first_tick+i and (dx!=0 or dy!=0)
              and stringmode in (0,1),
              "Native exact IP execution chronology or vector malformed")
+        need(stringmode==expected_postfork_stringmode,
+             "Native post-fork stringmode not caused by physical quote opcode")
+        if byte==ord('"'):
+            expected_postfork_stringmode=1-expected_postfork_stringmode
         # Native p/g changes Funge-space but not IP direction. Walking
         # may skip spaces or normalize across Funge-space bounds; check
         # the directed axis, not a one-cell step distance.
