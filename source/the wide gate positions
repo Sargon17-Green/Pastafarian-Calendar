@@ -67,9 +67,15 @@ To commit the prepared wide gate movement:
   Request another bounded gate step.
   If the gate step budget's exhausted is 1, exit.
   Calculate a gate interval for the wide gate movement's gap index.
-  If the gate inquiry's interval length is less than 42, exit.
-  If the gate inquiry's interval length is greater than 963, exit.
-  Convert the gate inquiry's interval length to a string.
+  Apply a measured wide gate gap given the gate inquiry's interval length.
+
+\ This pure movement commit helper is separately testable with known
+\ canonical gaps, without recalculating the costly 46-drop sauce.
+\ Reject a malformed length before changing either public coordinate.
+To apply a measured wide gate gap given a number:
+  If the number is less than 42, exit.
+  If the number is greater than 963, exit.
+  Convert the number to a string.
   Put the string into a wide gap magnitude.
   Set a wide gap displacement from the wide gap magnitude given the wide gate movement's direction.
   Add the wide gap displacement to the current wide gate's coordinate.
