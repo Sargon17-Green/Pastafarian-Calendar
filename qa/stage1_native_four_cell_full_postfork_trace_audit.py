@@ -95,6 +95,7 @@ def verify_run(run,source):
     prior=None
     beyond512=set()
     executed_modified=0;ops=Counter()
+    pending_pg_motion=None
     for i,datum in enumerate(trace):
         need(type(datum) is list and len(datum)==7
              and all(type(value) is int for value in datum),
@@ -103,6 +104,15 @@ def verify_run(run,source):
         need(tick==first_tick+i and (dx!=0 or dy!=0)
              and stringmode in (0,1),
              "Native exact IP execution chronology or vector malformed")
+        # Native p/g changes Funge-space but not IP direction. Walking
+        # may skip spaces or normalize across Funge-space bounds; check
+        # the directed axis, not a one-cell step distance.
+        if pending_pg_motion is not None:
+            px,py,pdx,pdy=pending_pg_motion
+            need((dx,dy)==(pdx,pdy) and
+                 (x-px)*pdy==(y-py)*pdx,
+                 "Native p/g successor changed delta or left the directed travel axis")
+            pending_pg_motion=None
         xy=(x,y)
         original=source_byte(xy)
         need(byte==current.get(xy,original),
@@ -123,11 +133,14 @@ def verify_run(run,source):
         if stringmode==0 and byte in (ord("p"),ord("g")):
             need(event is not None and event[1]==chr(byte),
                  "Native executed p/g opcode missing its physical event receipt")
+            pending_pg_motion=(x,y,dx,dy)
         if event is not None:
             kind=event[1]
             need(stringmode==0 and byte==ord(kind),
                  "Native claimed p/g event does not match executed opcode/mode")
             if kind=="p":current[event[2]]=int(event[3]["value"])
+    need(pending_pg_motion is None,
+         "Native supposedly terminated directly after nonterminating p/g instruction")
     need(len(beyond512)>0,"full Native run added no states outside the prior window")
     return {
        "complete_postfork_events":len(trace),
