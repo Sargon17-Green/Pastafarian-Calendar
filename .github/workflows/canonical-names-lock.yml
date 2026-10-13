@@ -684,3 +684,56 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage25_tests.lua .
+
+  lua_stage26_stream:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Verifye syntax, SAVE stream, modulo bias ak 4 scar istorik
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/neighbor_patch.lua)" = bdbb076d4ceac5c6d379d05dacd74c4874991def
+          lua5.3 test/stage26_scope_tests.lua .
+          lua5.3 test/stage26_stream_tests.lua .
+          lua5.3 test/stage26_modulo_tests.lua .
+          lua5.3 test/stage26_expected_red_audit.lua .
+
+  lua_stage26_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Sentaks ak kadna Stage 25
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/neighbor_patch.lua)" = bdbb076d4ceac5c6d379d05dacd74c4874991def
+          lua5.3 test/stage26_scope_tests.lua .
+      - name: Kouri Stage 1 rive 26 ak kat odit EXPECTED_RED ki dwe pase
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage26_tests.lua .
+      - name: Yon regresyon normatif DISCOVERY 13 — EXPECTED_RED sèl
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage26_expected_red_1.lua .

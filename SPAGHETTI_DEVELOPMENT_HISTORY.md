@@ -658,3 +658,15 @@ GitHub Actions `38372225320`: **25/25 jobs PASS**.
 Suite Stage 1–25 vèt, odit `EXPECTED_RED` Stage 24
 toujou egzije mesaj erè istorik egzak la sou wout legacy a.
 `LAST_COMPLETED_STAGE=25`, `EXPECTED_REPOSITORY_STATE=GREEN`.
+
+## Stage 26 — DISCOVERY 13: chwa modulo san rejè
+
+Apre PATCH 12, nou separe mekanis repons SAVE ak mekanis
+seleksyon. Sous la itilize `A_k = SAVE(A_0+direction*k)`;
+seleksyon istorik la kenbe `1+((A_0-1) mod N)` san tcheke
+`floor(M/N)*N`. Nou pa modifye 46 gout, bowls, permutation,
+oswa `neighbor_patch.lua`. `legacy_biased_choice.lua`
+gen de commits, metrik ak diagnostics pou temwaye de faz yo.
+Tès oracle short path yo ak kat witness wouj yo distenge
+mechanism valid la de bias la. Stage 27 dwe ajoute rejè
+san efase chemen istorik la. CI/verification poko fini.

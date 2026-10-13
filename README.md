@@ -876,3 +876,42 @@ Run `38372225320` fini avèk **25/25 jobs PASS**. Suite
 `lua_stage25_real` pase separeman, ansanm ak tout suites
 istorik yo. Ansyen chèn ak ansyen erè Stage 24 konsève.
 `LAST_COMPLETED_STAGE=25`; `EXPECTED_REPOSITORY_STATE=GREEN`.
+
+## Stage 26 — DISCOVERY 13: modulo dirèk bay yon chwa ki gen bias
+
+`src/legacy_biased_choice.lua` ajoute yon vrè sous repons
+`A_k = SAVE(A_0 + direction*k)`, ak (1 ≤ A_0 ≤ M),
+`direction = +1/-1`, epi `M = 2^127-1`. Nou valide premye
+repons lan, direksyon an, index nonnegatif ak kantite opsyon
+`1 <= N <= M`; BigInt travay san limit 64/256 bit.
+
+Erè istorik `oldBiasedModuloPick` pran premye repons lan sèlman:
+`rank = 1 + ((A_0 - 1) mod N)`. Li pa verifye si
+`A_0 > floor(M/N)*N`; se poutèt sa kèk rank resevwa
+plis repons pase lòt yo. San `PATCH 13`, okenn repons
+apre `A_0` pa konsome. De handler otantik
+`LEGACY_REPLY_STREAM` ak `LEGACY_BIASED_MODULO_PICK`
+kenbe de commit, métriques ak diagnostics.
+
+`answerAtSpaghetti(first,direction,k)` bay sous la san bias;
+`choiceSpaghetti(first,direction,N)` rete legacy ak bias;
+`legacyBiasedChoiceProbe` bay rezilta ak context;
+`oldBiasedModuloPickProbe` ekspoze chwa istorik la.
+Modil Stage 25 yo rete entak. Nan etap sa a, kantite opsyon
+pi gwo pase M ak final `postStir12` pa antre nan pipeline:
+se modil seleksyon izole epi verifikab, pa yon kalkil dat nèt.
+
+Kat sak diferans normatif ki dwe rete `EXPECTED_RED`:
+- N=5, A0=M, direction=+1: legacy 2, oracle 1
+- N=5, A0=M, direction=-1: legacy 2, oracle 5
+- N=5, A0=M-1, direction=-1: legacy 1, oracle 5
+- N=11, A0=M, direction=+1: legacy 6, oracle 1
+
+`lua5.3 test/stage26_tests.lua .` teste toude chemen yo,
+endepandans eta, negatif/BigInt, rekiperasyon erè ak 4
+`EXPECTED_RED` odit. Chak script wouj `stage26_expected_red_1..4.lua`
+dwe echwe dirèkteman apre li valide premye diferans normatif la.
+Nan CI: travay `lua_stage26_stream` dwe pase; travay
+`lua_stage26_discovery` dwe pase tout suite pozitif,
+apre sa li dwe echwe *sèlman* nan dènye step wouj la.
+Koreksyon rejection sampling rete pou Stage 27.
