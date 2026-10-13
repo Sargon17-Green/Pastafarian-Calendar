@@ -1,0 +1,56 @@
+\ Compare exact wide counters against the six existing short day vectors.
+\ This exercises the native-to-wide adapter and every wide counter
+\ using values already established independently by the original
+\ short source-level examples.
+
+To compare a native calendar question with wide counters:
+  Answer the example.
+  Convert the example's calculation day into a wide signed day.
+  If the native to wide conversion succeeded is not 1,
+    put "Conversion of the native calculation day failed." into the check report; exit.
+  Put the converted wide signed day into the wide calendar example's calculation day.
+  Convert the example's requested day into a wide signed day.
+  If the native to wide conversion succeeded is not 1,
+    put "Conversion of the native requested day failed." into the check report; exit.
+  Put the converted wide signed day into the wide calendar example's requested day.
+  Answer the wide calendar example.
+  Convert the example's calculation count to a string.
+  If the wide calendar example's calculation count is not the string,
+    put "Wide and native calculation counts disagree." into the check report; exit.
+  Convert the example's requested count to a string.
+  If the wide calendar example's requested count is not the string,
+    put "Wide and native requested counts disagree." into the check report; exit.
+  Convert the example's day distance to a string.
+  If the wide calendar example's day distance is not the string,
+    put "Wide and native inclusive day distances disagree." into the check report; exit.
+  Convert the example's day sum to a string.
+  If the wide calendar example's day sum is not the string,
+    put "Wide and native counter sums disagree." into the check report; exit.
+  If the wide calendar example's day direction is not the example's day direction,
+    put "Wide and native directions disagree." into the check report; exit.
+
+To check native and wide counter agreement:
+  Put -15055671 into the example's calculation day.
+  Put -15055671 into the example's requested day.
+  Compare a native calendar question with wide counters.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055671 into the example's calculation day.
+  Put -15055672 into the example's requested day.
+  Compare a native calendar question with wide counters.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055671 into the example's calculation day.
+  Put -15055670 into the example's requested day.
+  Compare a native calendar question with wide counters.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055674 into the example's calculation day.
+  Put -15055668 into the example's requested day.
+  Compare a native calendar question with wide counters.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055668 into the example's calculation day.
+  Put -15055674 into the example's requested day.
+  Compare a native calendar question with wide counters.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055661 into the example's calculation day.
+  Put -15055661 into the example's requested day.
+  Compare a native calendar question with wide counters.
+  If the check report is not "The checks agree with the examples.", exit.
