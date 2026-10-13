@@ -12,7 +12,7 @@ The other branches have their own rules. This branch does not change them.
 
 ## What has been written so far
 
-The file **the calendar** takes two calendar-day positions and computes the
+The file **source/the calendar** takes two calendar-day positions and computes the
 five starting counters. It runs a sequence of checks, stops at the first
 failure, and writes the result to **calendar-checks.txt**.
 
@@ -268,11 +268,27 @@ compiled or executed any of these files, and the native day axis still
 needs an arbitrary-precision replacement. Never treat a written routine
 or reference value as a successful integration test.
 
+## Project layout
+
+- **`source/`** — all Plain English program and check files; choose
+  this folder, **not the repository root**, as CAL's source directory.
+- **`README.md`** — this readable guide (not compiled).
+- **`LICENSE`** — the legal text (not compiled).
+
 ## How to read or use the first part
 
 Plain English Programming is an actual programming language. Its CAL compiler is a separate tool. This branch does not include a compiler, a copy of its code, or any helper code in another language.
 
-Get a CAL compiler that supports Plain English Programming, then prepare a **separate compilation directory**. In CAL-4700, the original editor/compiler may automatically compile every extensionless file in its source directory. This branch currently includes an extensionless `LICENSE` document, which is readable legal prose **but not valid program source**. Do not compile directly from the repository root unless the compiler supports an explicit source-file selection that excludes it. Copy the extensionless **program and check files** (including **the calendar**, **the list cleanup**, and the weaving modules) into the compilation directory, omitting `LICENSE` and `README.md`. Use the matching CAL standard library. These are future native-run instructions; no successful compiler execution has been reported.
+Get a CAL compiler that supports Plain English Programming, and select
+**`source/`** inside this branch as the source directory. It contains the
+extensionless program and check files, including **`source/the calendar`**,
+and no extra documents. CAL can compile a single source folder without a
+special `noodle` subfolder. In compatible CAL versions, the compiler
+automatically reads extensionless files in the selected source folder.
+The **`README.md`** and **`LICENSE`** documents stay at the repository
+root, outside the compile input. Use the matching CAL standard library
+supplied by the compiler. No successful compiler execution has been
+reported.
 
 The examples use Foundation Day and its neighbors, and include whole-sauce Foundation reference vectors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 65 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
