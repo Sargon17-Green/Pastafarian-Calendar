@@ -19,6 +19,32 @@ The inspected cutlet piece is a cutlet piece.
 The inspected cutlet name is a cutlet name assignment.
 The inspected month length is a month length record.
 The inspected month name is a month name assignment.
+The scanned cutlet name is a cutlet name assignment.
+The scanned month name is a month name assignment.
+The audited label frequency is a number.
+
+\ Name uniqueness is checked separately from the count of list nodes.
+\ These small bounded linked lists have at most 17 or 47 entries, so a
+\ second traversal is inexpensive and avoids machine-sized bit masks.
+To count uses of a cutlet name given a number:
+  Put 0 into the audited label frequency.
+  Put the chosen cutlet names' first into the scanned cutlet name.
+  Loop.
+    If the scanned cutlet name is nil, break.
+    If the scanned cutlet name's name index is the number,
+      add 1 to the audited label frequency.
+    Put the scanned cutlet name's next into the scanned cutlet name.
+  Repeat.
+
+To count uses of a month name given a number:
+  Put 0 into the audited label frequency.
+  Put the chosen month names' first into the scanned month name.
+  Loop.
+    If the scanned month name is nil, break.
+    If the scanned month name's name index is the number,
+      add 1 to the audited label frequency.
+    Put the scanned month name's next into the scanned month name.
+  Repeat.
 
 To verify the selected cutlet partition:
   Put 1 into the structure audit's passed.
@@ -47,6 +73,9 @@ To verify the selected cutlet names:
     If the inspected cutlet name's name index is less than 1,
       put 0 into the structure audit's passed; exit.
     If the inspected cutlet name's name index is greater than 17,
+      put 0 into the structure audit's passed; exit.
+    Count uses of a cutlet name given the inspected cutlet name's name index.
+    If the audited label frequency is not 1,
       put 0 into the structure audit's passed; exit.
     Add 1 to the structure audit's items checked.
     Put the inspected cutlet name's next into the inspected cutlet name.
@@ -83,6 +112,9 @@ To verify the selected month names:
     If the inspected month name's name index is less than 1,
       put 0 into the structure audit's passed; exit.
     If the inspected month name's name index is greater than 47,
+      put 0 into the structure audit's passed; exit.
+    Count uses of a month name given the inspected month name's name index.
+    If the audited label frequency is not 1,
       put 0 into the structure audit's passed; exit.
     Add 1 to the structure audit's items checked.
     Put the inspected month name's next into the inspected month name.
