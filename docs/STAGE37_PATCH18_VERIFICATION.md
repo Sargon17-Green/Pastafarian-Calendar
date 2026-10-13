@@ -23,3 +23,14 @@ All 18 prior standalone intentionally failing historical discovery tests MUST re
 ## Strengthened /365 audit on genuine Year5000
 
 Stage37 preserves **both** physically invoked wrong helpers: the exact untouched Stage36 call on the previously injected candidate anchor, and a second call to the same `Legacy365JumpDiagnostic.measure` on the newly recomputed, independently verified genuine Year5000 seed. The outer `oldGuess` is now the diagnostic on the TRUE seed, with `historicalSyntheticGuess` retaining the old Stage36 scar. Both carry `role=TELEMETRY_ONLY`. The new true-seed estimate is never read by the one-year walker. Test spies verify both calls and that even an adversarial oldGuess override cannot alter the selected year. This avoids falsely attributing the synthetic seed's /365 result to the true seed.
+
+## Verified native CI — 13 October 2026
+
+[Corrected implementation commit 0c30cce](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/0c30cce20fc0a43aca3bd534dc37c5a68a5a2381), [GitHub Actions 38431563771](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38431563771): `verify` and legacy-named `stage27-typescript-marathi` jobs BOTH SUCCESS. Native TypeScript typecheck passed, Stage1–37 native tests and eighteen intentionally failing old discovery proofs were confirmed with their expected-red verifiers. Immutable SourceLanguageCatalog hash unchanged.
+
+```text
+STAGE_37_PATCH_18_GUARDS_PASS positiveGates=24 negativeGates=26 verifiedGates=50 seedOpen=-6 seedClose=3 forwardSteps=2 backwardSteps=2 ghostActualCalls=2 budgetFaults=2 transitionFaults=1 gateSharedWrites=2900 forwardFullCalls=57 backwardFullCalls=57 referenceMismatches=0
+STAGE_37_PATCH_18_PROPERTIES_PASS calculations=4 realGateQuestions=68 gateWrong=0 walkCases=36 zeroSteps=8 forwardCases=12 backwardCases=16 steps=52 seal11=24 seal12=28 seedWrong=0 yearWrong=0 rankWrong=0 continuityWrong=0 fullPredecessors=2536 fullWrites=147088 originalPredicateCalls=564 physicalDispatcherSpy=70 explicitBudgetFailure=1
+```
+
+**LAST_COMPLETED_STAGE=37.** Real production replays an externally supplied signed question stream, not an independent source-question generator yet. The generated year records are computed only from physically reconstructed real gates and physical Seal10/11/12 Sauce. Synthetic old Stage36 candidate boundaries and both old /365 telemetry guesses remain in evidence but do not control the authoritative walk. A finite explicit gate window and step budget are prerequisites; the Stage54 full calendar interface is deliberately not integrated. Stage38 not started.
