@@ -55,6 +55,11 @@ To check cutlet structure invariants:
   Verify the selected cutlet names.
   If the structure audit's passed is not 0,
     put "Out-of-range cutlet name passed the audit." into the check report; exit.
+  Put 2 into the inspected cutlet name assignment's name index.
+  Verify the selected cutlet names.
+  If the structure audit's passed is not 0,
+    put "A repeated cutlet name passed the audit." into the check report; exit.
+  Put 1 into the inspected cutlet name assignment's name index.
   Put 4 into the selected cutlet count.
   Verify the selected cutlet names.
   If the structure audit's passed is not 0,
@@ -88,6 +93,11 @@ To check month structure invariants:
   Verify the selected month names.
   If the structure audit's passed is not 0,
     put "Out-of-range month name passed the audit." into the check report; exit.
+  Put 2 into the inspected month name assignment's name index.
+  Verify the selected month names.
+  If the structure audit's passed is not 0,
+    put "A repeated month name passed the audit." into the check report; exit.
+  Put 1 into the inspected month name assignment's name index.
   Put 4 into the selected month count.
   Verify the selected month names.
   If the structure audit's passed is not 0,
