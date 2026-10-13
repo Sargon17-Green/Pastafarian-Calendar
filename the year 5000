@@ -1,0 +1,186 @@
+\ The canonical choice of year 5000 for a calculation day.
+\ Enumerate pairs of gates that contain c and are at most 5778 days
+\ apart. At least six gate intervals are required for a valid year.
+\ Eligible pairs are sorted by duration and then earlier opening gate.
+\ Ask bowl 1 with seal 10 using the sauce for (c,c).
+\ The chosen candidate is year 5000, and no alternative may replace it.
+\
+\ Gate gaps are never guessed: every new gate comes from its own
+\ full canonical sauce calculation, computed once during the scan.
+\ The gate ledger and candidate ledger are released after selection.
+\ The current day-axis adapter is still limited to native CAL numbers.
+\ Compilation and execution with CAL are not yet verified.
+
+A gate mark is a thing with
+  a calendar day called position,
+  a number called index.
+
+A year option is a thing with
+  a year candidate.
+
+The nearby gate ledger is some gate marks.
+The eligible year ledger is some year options.
+The opening gate mark is a gate mark.
+The closing gate mark is a gate mark.
+The examined year option is a year option.
+The selected year option is a year option.
+The chosen year is a year candidate.
+The candidate under construction is a year candidate.
+The year selection day is a calendar day.
+The lower gate cutoff is a calendar day.
+The upper gate cutoff is a calendar day.
+The eligible year count is a number.
+The selected year rank is a number.
+The year selection success is a number.
+
+\ Copy the current gate-walk position into a new linked mark.
+To create a current gate mark:
+  Allocate memory for the gate mark.
+  Put the gate walk's current position into the gate mark's position.
+  Put the gate walk's current index into the gate mark's index.
+
+\ The positive scan appends marks in ascending chronological order.
+To record a positive gate mark:
+  Create a current gate mark.
+  Append the gate mark to the nearby gate ledger.
+
+\ The negative scan prepends marks in ascending chronological order.
+To record a negative gate mark:
+  Create a current gate mark.
+  Prepend the gate mark to the nearby gate ledger.
+
+\ Scan positive gates only if the requested window reaches Foundation.
+To gather the positive gate marks:
+  If the upper gate cutoff is less than -15055671, exit.
+  Put 0 into the gate walk's current index.
+  Put -15055671 into the gate walk's current position.
+  Loop.
+    Move to the next positive gate.
+    If the gate walk's current position is greater than the upper gate cutoff, break.
+    If the gate walk's current position is less than the lower gate cutoff, repeat.
+    Record a positive gate mark.
+  Repeat.
+
+\ Scan negative gates only if the requested window reaches Foundation.
+To gather the negative gate marks:
+  If the lower gate cutoff is greater than -15055671, exit.
+  Put 0 into the gate walk's current index.
+  Put -15055671 into the gate walk's current position.
+  Loop.
+    Move to the next negative gate.
+    If the gate walk's current position is less than the lower gate cutoff, break.
+    If the gate walk's current position is greater than the upper gate cutoff, repeat.
+    Record a negative gate mark.
+  Repeat.
+
+\ The original day-zero gate is inserted only when it is in range.
+To gather the nearby gate marks for a calendar day:
+  Destroy the nearby gate ledger.
+  Put the calendar day into the year selection day.
+  Put the calendar day into the lower gate cutoff.
+  Subtract 5778 from the lower gate cutoff.
+  Put the calendar day into the upper gate cutoff.
+  Add 5778 to the upper gate cutoff.
+  If the lower gate cutoff is less than or equal to -15055671,
+    record Foundation in the nearby gate ledger.
+  Gather the negative gate marks.
+  Gather the positive gate marks.
+
+\ Create the Foundation gate without accidentally reading a previous
+\ value left in the gate walk by some unrelated calculation.
+To record Foundation in the nearby gate ledger:
+  Put 0 into the gate walk's current index.
+  Put -15055671 into the gate walk's current position.
+  If the upper gate cutoff is less than -15055671, exit.
+  Record a positive gate mark.
+
+\ Copy a gate pair to the candidate and derive both durations.
+To measure the gate pair as a candidate:
+  Put the opening gate mark's position into the candidate under construction's opening day.
+  Put the closing gate mark's position into the candidate under construction's closing day.
+  Put the opening gate mark's index into the candidate under construction's opening index.
+  Put the closing gate mark's index into the candidate under construction's closing index.
+  Measure the candidate under construction.
+
+\ The first eligible year is placed before the next longer candidate.
+\ Equal lengths are sorted by earlier opening gate.
+To insert a sorted year candidate:
+  Create a year option.
+  Put the candidate under construction into the year option's year candidate.
+  Put the eligible year ledger's first into the examined year option.
+  Loop.
+    If the examined year option is nil, break.
+    If the candidate under construction comes before the examined year option's year candidate,
+      insert the year option into the eligible year ledger before the examined year option; exit.
+    Put the examined year option's next into the examined year option.
+  Repeat.
+  Append the year option to the eligible year ledger.
+
+To create a year option:
+  Allocate memory for the year option.
+
+\ A single opening gate has only later closing candidates.
+\ Because gates are sorted, a too-long pair ends this inner scan.
+To gather candidate years for the opening gate:
+  Put the opening gate mark's next into the closing gate mark.
+  Loop.
+    If the closing gate mark is nil, break.
+    Measure the gate pair as a candidate.
+    If the candidate under construction's year length is greater than 5778, break.
+    If the candidate under construction contains the year selection day,
+      insert a sorted year candidate; add 1 to the eligible year count.
+    Put the closing gate mark's next into the closing gate mark.
+  Repeat.
+
+\ Stop opening-gate enumeration as soon as open >= calculation day.
+To gather eligible year candidates:
+  Destroy the eligible year ledger.
+  Put 0 into the eligible year count.
+  Put the nearby gate ledger's first into the opening gate mark.
+  Loop.
+    If the opening gate mark is nil, break.
+    If the opening gate mark's position is greater than or equal to the year selection day, break.
+    Gather candidate years for the opening gate.
+    Put the opening gate mark's next into the opening gate mark.
+  Repeat.
+
+\ Retrieve the nth member in the sorted ledger with a one-based rank.
+To read the selected year candidate:
+  Put the eligible year ledger's first into the selected year option.
+  Put 1 into a current rank number.
+  Loop.
+    If the current rank number is the selected year rank, break.
+    Put the selected year option's next into the selected year option.
+    Add 1 to the current rank number.
+  Repeat.
+  Put the selected year option's year candidate into the chosen year.
+
+\ The year-5000 choice uses the sauce for (c,c), not the last gate
+\ pair or a cutlet year whose identity is already known.
+To choose year 5000 for the calculation day:
+  Put the year selection day into the example's calculation day.
+  Put the year selection day into the example's requested day.
+  Answer the example.
+  Copy the example into the sauce input.
+  Make the complete sauce.
+  Put 1 into the seal inquiry's bowl identity.
+  Put 10 into the seal inquiry's seal number.
+  Begin a sealed inquiry.
+  Convert the eligible year count to a string.
+  Put the string into a year option count wide quantity.
+  Choose an equal option given the year option count wide quantity.
+  Convert the seal inquiry's selected quantity to the selected year rank.
+  Read the selected year candidate.
+
+\ This routine is the year-5000 entrypoint.
+\ A zero result status is an explicit failure, never a fabricated year.
+To find year 5000 for a calendar day:
+  Put 0 into the year selection success.
+  Gather the nearby gate marks for the calendar day.
+  Gather eligible year candidates.
+  If the eligible year count is 0,
+    destroy the eligible year ledger; destroy the nearby gate ledger; exit.
+  Choose year 5000 for the calculation day.
+  Put 1 into the year selection success.
+  Destroy the eligible year ledger.
+  Destroy the nearby gate ledger.
