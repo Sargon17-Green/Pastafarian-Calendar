@@ -1,0 +1,39 @@
+\ A complete weaving is selected by the same rank in both modes.
+\ The ordinary date converter needs the selected target day, but it
+\ does not need a linked node for each other day in the year.
+\ Streaming and full-output modes must return identical date fields.
+\ Streaming must not secretly retain a complete woven-day list.
+\ This is source-level QA, pending a CAL run.
+
+To check streamed and complete weaving equality:
+  Prepare two synthetic months.
+  Count all possible month weavings.
+  Put 5 into the weaving selection's target position.
+  Put "10" into a streaming test rank wide quantity.
+  Select a month weaving from the streaming test rank wide quantity.
+  If the weaving selection's selection success is not 1,
+    put "The full-output reference weaving failed." into the check report; exit.
+  If the woven requested month ordinal is not 2,
+    put "The full-output weaving chose the wrong month." into the check report; exit.
+  If the woven requested day in month is not 3,
+    put "The full-output weaving chose the wrong day in its month." into the check report; exit.
+  Write the selected weaving as test text.
+  If the woven test text is not "11222112",
+    put "The complete reference weaving has the wrong letters." into the check report; exit.
+  Prepare the woven month states.
+  Put 0 into the weaving selection's preserve full weaving.
+  Select a month weaving from the streaming test rank wide quantity.
+  If the weaving selection's selection success is not 1,
+    put "Streaming selection failed for a legal rank." into the check report; exit.
+  If the woven requested month ordinal is not 2,
+    put "Streaming changed the target month." into the check report; exit.
+  If the woven requested day in month is not 3,
+    put "Streaming changed the target day within the month." into the check report; exit.
+  If the chosen woven days are not empty,
+    put "Streaming unexpectedly allocated woven-day records." into the check report; exit.
+  Prepare the woven month states.
+  Put 1 into the weaving selection's preserve full weaving.
+  Select a month weaving from the streaming test rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "11222112",
+    put "Returning to full-output mode changed the weaving." into the check report; exit.
