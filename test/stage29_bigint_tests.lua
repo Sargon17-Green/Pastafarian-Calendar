@@ -7,7 +7,7 @@ local M=O.M
 local P=B.mul(M,M)
 local n=B.add(B.floorDiv(P,2),1)
 local rank,proof=S.wideChoiceCoreProbe(M,-1,n)
-local w=B.sub(P,B.add(M,1))
+local w=B.sub(P,M)
 local expectedRejected=B.sub(w,n)
 assert(proof.digitCount==2
  and B.compare(proof.initial,w)==0
