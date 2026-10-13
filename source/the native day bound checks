@@ -1,0 +1,27 @@
+\ Temporary safe day coordinates, including extreme opposite pairs.
+\ These tests inspect bounds only: they do not invoke expensive
+\ far-distant gate walks. Their purpose is to reject coordinates that
+\ could overflow a signed 32-bit calculation count or counter sum.
+
+To check native date coordinate bounds:
+  Check native day coordinate inputs given -15055671 and -15055671.
+  If the native date input validity is no,
+    put "Foundation was rejected by native safety bounds." into the check report; exit.
+  Check native day coordinate inputs given -415055671 and 384944329.
+  If the native date input validity is no,
+    put "The safe endpoints were incorrectly rejected." into the check report; exit.
+  Check native day coordinate inputs given 384944329 and -415055671.
+  If the native date input validity is no,
+    put "The reversed safe endpoints were incorrectly rejected." into the check report; exit.
+  Check native day coordinate inputs given -415055672 and -15055671.
+  If the native date input validity is yes,
+    put "An overflowing earlier day was accepted." into the check report; exit.
+  Check native day coordinate inputs given -15055671 and 384944330.
+  If the native date input validity is yes,
+    put "An overflowing later day was accepted." into the check report; exit.
+  Check native day coordinate inputs given 384944329 and -415055672.
+  If the native date input validity is yes,
+    put "A pair with one unsafe day was accepted." into the check report; exit.
+  Check native day coordinate inputs given 384944329 and 384944329.
+  If the native date input validity is no,
+    put "A later safe pair remained rejected after invalid input." into the check report; exit.
