@@ -4,7 +4,7 @@
 \ A candidate has at least six gate spans and length 252..5778.
 \ Canonical ordering: shortest calendar duration first; if durations
 \ agree, earlier opening gate first. These rules come from section Q.
-\ The full enumeration and selection of year 5000 still remain to do.
+\ The full enumeration and rank selection are in the year-5000 module.
 
 A year candidate has
   a calendar day called opening day,
