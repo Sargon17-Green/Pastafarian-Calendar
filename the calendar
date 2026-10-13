@@ -97,6 +97,18 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the first signed gate positions.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the two digit forward choice.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the two digit backward choice.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the forward rejected wide choice.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the backward rejected wide choice.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the three digit wide choice.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the narrow and wide selection boundary.
+  If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
