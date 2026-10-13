@@ -1,0 +1,97 @@
+\ Compare the OLD small-day sauce input with the NEW signed-wide one.
+\ These checks stop before the expensive 46-drop sauce itself. They
+\ prove that the wide integration writes the same five ingredients on
+\ all six previously known short-day examples.
+\ No native CAL execution has occurred.
+
+The reference sauce input is a sauce question.
+
+To compare a native sauce input with the wide sauce input:
+  Answer the example.
+  Copy the example into the sauce input.
+  Put the sauce input into the reference sauce input.
+  Convert the example's calculation day into a wide signed day.
+  If the native to wide conversion succeeded is not 1,
+    put "Failed to widen the native calculation day." into the check report; exit.
+  Put the converted wide signed day into the wide calendar example's calculation day.
+  Convert the example's requested day into a wide signed day.
+  If the native to wide conversion succeeded is not 1,
+    put "Failed to widen the native requested day." into the check report; exit.
+  Put the converted wide signed day into the wide calendar example's requested day.
+  Answer the wide calendar example.
+  Copy the wide calendar example into the sauce input.
+  If the sauce input's calculation count is not the reference sauce input's calculation count,
+    put "Wide and native sauce calculation counts differ." into the check report; exit.
+  If the sauce input's requested count is not the reference sauce input's requested count,
+    put "Wide and native sauce requested counts differ." into the check report; exit.
+  If the sauce input's distance count is not the reference sauce input's distance count,
+    put "Wide and native sauce distances differ." into the check report; exit.
+  If the sauce input's sum count is not the reference sauce input's sum count,
+    put "Wide and native sauce count sums differ." into the check report; exit.
+  If the sauce input's direction count is not the reference sauce input's direction count,
+    put "Wide and native sauce directions differ." into the check report; exit.
+
+To check the native and wide sauce input bridge:
+  Put -15055671 into the example's calculation day.
+  Put -15055671 into the example's requested day.
+  Compare a native sauce input with the wide sauce input.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055671 into the example's calculation day.
+  Put -15055672 into the example's requested day.
+  Compare a native sauce input with the wide sauce input.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055671 into the example's calculation day.
+  Put -15055670 into the example's requested day.
+  Compare a native sauce input with the wide sauce input.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055674 into the example's calculation day.
+  Put -15055668 into the example's requested day.
+  Compare a native sauce input with the wide sauce input.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055668 into the example's calculation day.
+  Put -15055674 into the example's requested day.
+  Compare a native sauce input with the wide sauce input.
+  If the check report is not "The checks agree with the examples.", exit.
+  Put -15055661 into the example's calculation day.
+  Put -15055661 into the example's requested day.
+  Compare a native sauce input with the wide sauce input.
+  If the check report is not "The checks agree with the examples.", exit.
+
+\ This check also exercises the exact unsigned sauce-input bridge
+\ on coordinates that are completely outside any native CAL day type.
+To check an immense wide sauce input:
+  Put "1000000000000000000000000000000000000000000000000" into an immense day magnitude wide quantity.
+  Set the wide calendar example's calculation day from the immense day magnitude wide quantity given -1.
+  Set the wide calendar example's requested day from the immense day magnitude wide quantity given 1.
+  Answer the wide calendar example.
+  Copy the wide calendar example into the sauce input.
+  If the sauce input's calculation count is not "1999999999999999999999999999999999999999969888658",
+    put "The huge wide sauce calculation count lost precision." into the check report; exit.
+  If the sauce input's requested count is not "2000000000000000000000000000000000000000030111343",
+    put "The huge wide sauce requested count lost precision." into the check report; exit.
+  If the sauce input's distance count is not "2000000000000000000000000000000000000000000000001",
+    put "The huge wide sauce distance lost precision." into the check report; exit.
+  If the sauce input's sum count is not "4000000000000000000000000000000000000000000000001",
+    put "The huge wide sauce sum lost precision." into the check report; exit.
+  If the sauce input's direction count is not "3",
+    put "The huge wide sauce direction was not forward." into the check report; exit.
+
+\ Slow integration oracle, deliberately not in the default quick suite.
+\ The six canonical reference bowls are from the authoritative README.
+To check the complete wide Foundation sauce:
+  Put "15055671" into a foundation magnitude wide quantity.
+  Set the wide calendar example's calculation day from the foundation magnitude wide quantity given -1.
+  Set the wide calendar example's requested day from the foundation magnitude wide quantity given -1.
+  Make the complete sauce for the wide calendar example.
+  If the current bowls' first bowl is not "65286679584284972964194865805379907599",
+    put "Wide Foundation sauce bowl one failed." into the check report; exit.
+  If the current bowls' second bowl is not "127720283375330263615328810127751035299",
+    put "Wide Foundation sauce bowl two failed." into the check report; exit.
+  If the current bowls' third bowl is not "54364069496183805843611594721403108554",
+    put "Wide Foundation sauce bowl three failed." into the check report; exit.
+  If the current bowls' fourth bowl is not "93072329024469476118876155742008280619",
+    put "Wide Foundation sauce bowl four failed." into the check report; exit.
+  If the current bowls' fifth bowl is not "54867842942953573450868747713087920246",
+    put "Wide Foundation sauce bowl five failed." into the check report; exit.
+  If the current bowls' sixth bowl is not "111207247632761530752404582123499651367",
+    put "Wide Foundation sauce bowl six failed." into the check report; exit.
