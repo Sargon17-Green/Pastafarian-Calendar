@@ -20,7 +20,7 @@ To check streamed and complete weaving equality:
   Write the selected weaving as test text.
   If the woven test text is not "11222112",
     put "The complete reference weaving has the wrong letters." into the check report; exit.
-  Prepare the woven month states.
+  \ Do not prepare the month states here: selection must do it.
   Put 0 into the weaving selection's preserve full weaving.
   Select a month weaving from the streaming test rank wide quantity.
   If the weaving selection's selection success is not 1,
@@ -31,9 +31,21 @@ To check streamed and complete weaving equality:
     put "Streaming changed the target day within the month." into the check report; exit.
   If the chosen woven days are not empty,
     put "Streaming unexpectedly allocated woven-day records." into the check report; exit.
-  Prepare the woven month states.
+  \ Switching back must also restore the remaining day counts.
   Put 1 into the weaving selection's preserve full weaving.
   Select a month weaving from the streaming test rank wide quantity.
   Write the selected weaving as test text.
   If the woven test text is not "11222112",
     put "Returning to full-output mode changed the weaving." into the check report; exit.
+  If the weaving selection's recursion depth is not 0,
+    put "Repeated selections leaked a recursion-stack counter." into the check report; exit.
+  Put "1" into the streaming test rank wide quantity.
+  Select a month weaving from the streaming test rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "11112222",
+    put "Alternating ranks reused stale days from a previous weaving." into the check report; exit.
+  Put "10" into the streaming test rank wide quantity.
+  Select a month weaving from the streaming test rank wide quantity.
+  Write the selected weaving as test text.
+  If the woven test text is not "11222112",
+    put "Selecting an earlier rank poisoned a subsequent rank." into the check report; exit.
