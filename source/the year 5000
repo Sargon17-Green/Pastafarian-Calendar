@@ -32,6 +32,7 @@ The upper gate cutoff is a calendar day.
 The eligible year count is a number.
 The selected year rank is a number.
 The year selection success is a number.
+The selected year available is a number.
 
 \ Copy the current gate-walk position into a new linked mark.
 To create a gate mark:
@@ -144,16 +145,24 @@ To gather eligible year candidates:
     Put the opening gate mark's next into the opening gate mark.
   Repeat.
 
-\ Retrieve the nth member in the sorted ledger with a one-based rank.
+\ Retrieve a one-based rank without ever dereferencing a missing
+\ list entry. The chosen year is updated only after validation succeeds.
+\ Failed rank requests leave the prior chosen year unchanged.
 To read the selected year candidate:
+  Put 0 into the selected year available.
+  If the selected year rank is less than 1, exit.
+  If the selected year rank is greater than the eligible year count, exit.
   Put the eligible year ledger's first into the selected year option.
   Put 1 into a current rank number.
   Loop.
+    If the selected year option is nil, exit.
     If the current rank number is the selected year rank, break.
     Put the selected year option's next into the selected year option.
     Add 1 to the current rank number.
   Repeat.
+  If the selected year option is nil, exit.
   Put the selected year option's year candidate into the chosen year.
+  Put 1 into the selected year available.
 
 \ The year-5000 choice uses the sauce for (c,c), not the last gate
 \ pair or a cutlet year whose identity is already known.
@@ -181,6 +190,8 @@ To find year 5000 for a calendar day:
   If the eligible year count is 0,
     destroy the eligible year ledger; destroy the nearby gate ledger; exit.
   Choose year 5000 for the calculation day.
+  If the selected year available is not 1,
+    destroy the eligible year ledger; destroy the nearby gate ledger; exit.
   Put 1 into the year selection success.
   Destroy the eligible year ledger.
   Destroy the nearby gate ledger.
