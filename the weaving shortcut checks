@@ -1,0 +1,93 @@
+\ Regression tests for exact non-recursive month weaving shortcuts.
+\ All test values were independently verified against the full recurrence.
+\ The two-month examples need no memo records.
+\ For 47 already-started months, the result is 93 double factorial,
+\ equal to the product of the odd numbers 1,3,...,93 (73 digits).
+\ These are pending CAL compilation and native execution.
+
+To check the two-month closed weaving counts:
+  Prepare two synthetic months.
+  Count all possible month weavings.
+  If the weaving selection's total completions is not "20",
+    put "The closed two-month initial count should be twenty." into the check report; exit.
+  If the weaving selection's memo entry count is not 0,
+    put "Two-month counting unexpectedly allocated memo records." into the check report; exit.
+  Find the woven month state given 1.
+  Put 3 into the examined woven month state's remaining days.
+  Put 7 into the weaving selection's days remaining.
+  Count weaving completions into a short check wide quantity.
+  If the short check wide quantity is not "20",
+    put "The first started month has an incorrect closed count." into the check report; exit.
+  Find the woven month state given 2.
+  Put 3 into the examined woven month state's remaining days.
+  Put 6 into the weaving selection's days remaining.
+  Count weaving completions into the short check wide quantity.
+  If the short check wide quantity is not "10",
+    put "Two started unfinished months should have ten completions." into the check report; exit.
+  Find the woven month state given 1.
+  Put 4 into the examined woven month state's remaining days.
+  Put 7 into the weaving selection's days remaining.
+  Count weaving completions into the short check wide quantity.
+  If the short check wide quantity is not "0",
+    put "A later started month cannot precede an unstarted earlier month." into the check report; exit.
+  Find the woven month state given 1.
+  Put 0 into the examined woven month state's remaining days.
+  Find the woven month state given 2.
+  Put 4 into the examined woven month state's remaining days.
+  Put 4 into the weaving selection's days remaining.
+  Count weaving completions into the short check wide quantity.
+  If the short check wide quantity is not "1",
+    put "A single unfinished month does not have one continuation." into the check report; exit.
+  If the weaving selection's memo entry count is not 0,
+    put "Closed two-month cases used the sparse memo unnecessarily." into the check report; exit.
+
+To set the first three woven remaining counts to two:
+  Put 1 into a checked month ordinal number.
+  Loop.
+    If the checked month ordinal number is greater than 3, break.
+    Find the woven month state given the checked month ordinal number.
+    Put 2 into the examined woven month state's remaining days.
+    Add 1 to the checked month ordinal number.
+  Repeat.
+
+To check the all-started weaving product:
+  Prepare three synthetic months.
+  Count all possible month weavings.
+  Set the first three woven remaining counts to two.
+  Put 6 into the weaving selection's days remaining.
+  Count weaving completions into a started check wide quantity.
+  If the started check wide quantity is not "15",
+    put "Three started months with two days each have an incorrect product." into the check report; exit.
+  Prepare four synthetic months.
+  Count all possible month weavings.
+  Set the first three woven remaining counts to two.
+  Find the woven month state given 4.
+  Put 2 into the examined woven month state's remaining days.
+  Put 8 into the weaving selection's days remaining.
+  Count weaving completions into the started check wide quantity.
+  If the started check wide quantity is not "105",
+    put "Four started months with two days each have an incorrect product." into the check report; exit.
+
+To check a forty seven month started suffix:
+  Destroy the chosen month lengths.
+  Put 47 into the selected month count.
+  Put 1 into a synthetic month number.
+  Loop.
+    If the synthetic month number is greater than 47, break.
+    Add a synthetic month with 4.
+    Add 1 to the synthetic month number.
+  Repeat.
+  Prepare the woven month states.
+  Put the woven month states' first into a stress month state.
+  Loop.
+    If the stress month state is nil, break.
+    Put 2 into the stress month state's remaining days.
+    Put the stress month state's next into the stress month state.
+  Repeat.
+  Put 94 into the weaving selection's days remaining.
+  Put 0 into the weaving selection's resource limit reached.
+  Count weaving completions into a stress wide quantity.
+  If the stress wide quantity is not "2987435000850314871976096554696085799164511452611632783323554397412109375",
+    put "Forty seven started months lost precision in their final-order count." into the check report; exit.
+  If the weaving selection's resource limit reached is not 0,
+    put "The direct forty seven month calculation reached the resource limit." into the check report; exit.
