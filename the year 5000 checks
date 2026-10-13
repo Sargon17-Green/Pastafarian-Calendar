@@ -1,0 +1,86 @@
+\ Fast synthetic test for the exhaustive year-candidate enumeration.
+\ Eleven invented gates are six hundred days apart, numbered -3..7.
+\ Foundation is gate zero, and the calculation day equals Foundation.
+\ There are exactly eleven eligible (opening, closing] year pairs
+\ with at least six intervals and no more than 5778 days.
+\ The first three choices have length 3600 and opening indices -3,-2,-1.
+\ The fourth has length 4200 and opening index -3.
+\ The last has length 5400 and opening index -2.
+\ No sauce calculation is needed for this synthetic sorting test.
+
+To add a synthetic gate given a number and a calendar day:
+  Put the number into the gate walk's current index.
+  Put the calendar day into the gate walk's current position.
+  Record a positive gate mark.
+
+To make synthetic year gates:
+  Destroy the nearby gate ledger.
+  Add a synthetic gate given -3 and -15057471.
+  Add a synthetic gate given -2 and -15056871.
+  Add a synthetic gate given -1 and -15056271.
+  Add a synthetic gate given 0 and -15055671.
+  Add a synthetic gate given 1 and -15055071.
+  Add a synthetic gate given 2 and -15054471.
+  Add a synthetic gate given 3 and -15053871.
+  Add a synthetic gate given 4 and -15053271.
+  Add a synthetic gate given 5 and -15052671.
+  Add a synthetic gate given 6 and -15052071.
+  Add a synthetic gate given 7 and -15051471.
+  Put -15055671 into the year selection day.
+
+To check the year 5000 candidate enumeration:
+  Make synthetic year gates.
+  Gather eligible year candidates.
+  If the eligible year count is not 11,
+    put "Synthetic year enumeration did not find eleven pairs." into the check report; exit.
+  Put 1 into the selected year rank.
+  Read the selected year candidate.
+  If the chosen year's opening index is not -3,
+    put "First candidate did not open at gate -3." into the check report; exit.
+  If the chosen year's closing index is not 3,
+    put "First candidate did not close at gate 3." into the check report; exit.
+  If the chosen year's year length is not 3600,
+    put "First candidate does not have the shortest length." into the check report; exit.
+  Put 2 into the selected year rank.
+  Read the selected year candidate.
+  If the chosen year's opening index is not -2,
+    put "Second candidate did not open at gate -2." into the check report; exit.
+  If the chosen year's closing index is not 4,
+    put "Second candidate did not close at gate 4." into the check report; exit.
+  Put 3 into the selected year rank.
+  Read the selected year candidate.
+  If the chosen year's opening index is not -1,
+    put "Third candidate did not open at gate -1." into the check report; exit.
+  If the chosen year's closing index is not 5,
+    put "Third candidate did not close at gate 5." into the check report; exit.
+  Put 4 into the selected year rank.
+  Read the selected year candidate.
+  If the chosen year's year length is not 4200,
+    put "Fourth candidate did not begin the next length group." into the check report; exit.
+  If the chosen year's opening index is not -3,
+    put "Fourth candidate tie break did not choose gate -3." into the check report; exit.
+  Put 11 into the selected year rank.
+  Read the selected year candidate.
+  If the chosen year's opening index is not -2,
+    put "Last candidate did not open at gate -2." into the check report; exit.
+  If the chosen year's closing index is not 7,
+    put "Last candidate did not close at gate 7." into the check report; exit.
+  If the chosen year's year length is not 5400,
+    put "Last candidate had the wrong maximum eligible length." into the check report; exit.
+  Destroy the eligible year ledger.
+  Destroy the nearby gate ledger.
+
+\ This is a much slower integration check, using the actual gate sauce.
+\ It is intentionally NOT part of the ordinary short test sequence.
+\ After a real CAL run it should locate exactly the historical
+\ Foundation-Day year-5000 interval recorded in the main README.
+To check the complete Foundation year 5000:
+  Find year 5000 for -15055671.
+  If the year selection success is not 1,
+    put "The Foundation year 5000 was not selected." into the check report; exit.
+  If the chosen year's opening day is not -15057703,
+    put "Year 5000 has an incorrect opening gate." into the check report; exit.
+  If the chosen year's closing day is not -15053459,
+    put "Year 5000 has an incorrect closing gate." into the check report; exit.
+  If the chosen year's year length is not 4244,
+    put "Year 5000 has an incorrect duration." into the check report; exit.
