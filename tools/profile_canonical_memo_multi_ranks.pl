@@ -15,15 +15,18 @@ use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 use Pastafari::WeavingUnrank qw(unrankWeavingPolynomial);
 use Pastafari::WeavingRank qw(rankWeavingPolynomial);
 
-# 真正年份固定四個相鄰月份 240 日，精確多個大整數一基排名。
+# 第 5000 年兩種真實相鄰四月份樣本，各自精確驗證完整 BigInt 排名。
 # 使用一份與受測排名器完全分離的記憶式狀態計數快取，並
 # 每次以新索引計數實際跑正反向排名；且有父進程資源守衛。
-my ($seconds,$rss_limit)=(185,393216);
-GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_limit)
+my ($seconds,$rss_limit,$offset)=(185,393216,39);
+GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_limit,
+           'window-offset=i'=>\$offset)
     or die "參數格式錯誤\n";
 die "second 必須在 1..230\n" if $seconds<1 || $seconds>230;
 die "rss-kib 必須在 32768..1048576\n"
     if $rss_limit<32768 || $rss_limit>1048576;
+die "window-offset 只支援已核對的 38 或 39\n"
+    if $offset!=38 && $offset!=39;
 die "需要 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -54,9 +57,16 @@ if (!$pid) {
         die "原生年份月份快照雜湊不符\n"
             if sha256_hex(join(',',@year)) ne
                 '6d64022344c04935e6423aa6f96b285098d35b9b5ecb4b8c57a4c7149773a134';
-        my @L=@year[39..42];
+        my @L=@year[$offset .. $offset+3];
+        my $expected=$offset==38 ? '88,40,25,77' : '40,25,77,98';
         die "固定真正月份向量不符\n"
-            if join(',',@L) ne '40,25,77,98';
+            if join(',',@L) ne $expected;
+        my $days=0;
+        $days+=$_ for @L;
+        die "真實視窗合計日數不符\n"
+            unless $days==($offset==38 ? 230 : 240);
+        printf "CANONICAL_MULTI_RANK phase=WINDOW offset=%d days=%d lengths=%s\n",
+            $offset,$days,join(',',@L);
         my $counter=Pastafari::WeavingMemoOracle->new(\@L);
         my $total=$counter->count_prefix([]);
         my $poly=countWeavingsPolynomial(\@L);
@@ -91,7 +101,7 @@ if (!$pid) {
                 {profile_engine=>'stream-indexed',
                  max_temp_file_bytes=>16*1024*1024}
             );
-            die "$label 字序不是完整 240 日\n" if @$word!=240;
+            die "$label 字序長度不等於目前真實四月日數\n" if @$word!=$days;
             my %rank_stats;
             my $back=rankWeavingPolynomial(
                 \@L,$word,\%rank_stats,
@@ -104,7 +114,7 @@ if (!$pid) {
             my @remaining=@L;
             my ($opened,$closed)=(0,0);
             my $local=$rank->copy;
-            for my $day (1..240) {
+            for my $day (1..$days) {
                 my $parent=$counter->count_prefix(\@prefix);
                 die "$label/$day 局部 BigInt 名次超出母區段\n"
                     if $local<1 || $local>$parent;
@@ -140,20 +150,20 @@ if (!$pid) {
             }
             die "$label 完整字序後月長仍未歸零\n"
                 if grep {$_!=0} @remaining;
-            die "$label 完成 240 日後局部排名不是 1\n" if $local!=1;
+            die "$label 完成所有月份日後局部排名不是 1\n" if $local!=1;
             die "$label 輸入 BigInt 排名被污染\n"
                 if "$rank" ne $rank_text;
             $test_count++;
             my $diag=$counter->diagnostics;
-            printf "CANONICAL_MULTI_RANK status=PASS case=%s index=%d digits=%d checked_days=240 memo_entries=%d memo_hits=%d elapsed_sec=%.3f\n",
-                $label,$test_count,length($rank_text),
+            printf "CANONICAL_MULTI_RANK status=PASS window=%d case=%s index=%d digits=%d checked_days=%d memo_entries=%d memo_hits=%d elapsed_sec=%.3f\n",
+                $offset,$label,$test_count,length($rank_text),$days,
                 $diag->{entries},$diag->{cache_hits},time()-$start;
         }
         die "14 種固定且重要的字典序邊界排名未全部執行\n"
             if $test_count!=14;
         my $diag=$counter->diagnostics;
-        printf "CANONICAL_MULTI_RANK status=PASS scope=14_DISTINCT_REAL_240_DAY_RANKS cases=%d days_per_rank=240 total_digits=%d memo_entries=%d memo_hits=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
-            $test_count,length("$total"),$diag->{entries},
+        printf "CANONICAL_MULTI_RANK status=PASS scope=14_DISTINCT_REAL_FOUR_MONTH_WINDOW_RANKS window=%d cases=%d days_per_rank=%d total_digits=%d memo_entries=%d memo_hits=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
+            $offset,$test_count,$days,length("$total"),$diag->{entries},
             $diag->{cache_hits},time()-$start,peak_self();
         1;
     };
