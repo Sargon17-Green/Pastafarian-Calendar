@@ -171,11 +171,11 @@ To consider the current cutlet length:
 \ All parts are determined by arithmetic counts, not random guessing.
 To select a cutlet partition from a wide quantity:
   Put 0 into the cutlet partition's valid selection.
+  Destroy the chosen cutlet pieces.
   Put the wide quantity into the cutlet partition's current rank.
   Count the permitted cutlet partitions.
   If the cutlet partition's total choices is "0", exit.
   If the cutlet partition's total choices is numerically smaller than the cutlet partition's current rank, exit.
-  Destroy the chosen cutlet pieces.
   Put the cutlet partition's total spans into the cutlet partition's remaining spans.
   Put the cutlet partition's part count into the cutlet partition's remaining parts.
   Put the cutlet partition's required boundary into the cutlet partition's remaining boundary.
