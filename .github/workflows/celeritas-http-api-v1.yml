@@ -5,6 +5,7 @@ on:
     branches:
       - Celeritas-per-Sepulcra-HTTP-API
       - Celeritas-per-Sepulcra
+      - qa/cpp-latina-celeritas-integration-20261013
   pull_request:
 
 permissions:

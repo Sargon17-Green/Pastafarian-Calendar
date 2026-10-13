@@ -1,0 +1,137 @@
+name: Praevolatus Gradus 56 — concurrentia, cache et structura
+
+on:
+  push:
+    branches:
+      - 'qa/cpp-latina-celeritas-integration-20261013'
+    paths:
+      - 'src/monster.cpp'
+      - 'include/pastafari/monster.hpp'
+      - 'tests/stage_56_dispatch_concurrency_tests.cpp'
+      - 'tests/stage_56_transactional_cache_audit_tests.cpp'
+      - 'tests/stage_56_structure_reference_tests.cpp'
+      - 'tests/reference/normative_reference.cpp'
+      - 'tests/reference/normative_reference.hpp'
+      - 'tests/stage_55_fast_reference.hpp'
+      - '.github/workflows/cpp-neolatin-fast-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  praevolatus:
+    name: Praevolatus C++20 novarum probationum
+    runs-on: ubuntu-24.04
+    timeout-minutes: 85
+    steps:
+      - name: Excerpere fontem
+        uses: actions/checkout@v5
+
+      - name: Praeparare Boost et compilatorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          g++ --version | head -1
+
+      - name: Compilare probationes C++20
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build_stage56_praeflight logs_stage56_praeflight
+          flags=(-std=c++20 -O2 -Wall -Wextra -Wpedantic -pthread -Iinclude -Itests -I.)
+          g++ "${flags[@]}" -c src/monster.cpp -o build_stage56_praeflight/monster.o 2>&1 |
+            tee logs_stage56_praeflight/monster-compile.log
+          for nomen in \
+            stage_56_saved_sum_self_monkey_patch_tests \
+            stage_56_dispatch_concurrency_tests \
+            stage_56_transactional_cache_audit_tests; do
+            g++ "${flags[@]}" "tests/${nomen}.cpp" \
+              build_stage56_praeflight/monster.o \
+              -o "build_stage56_praeflight/${nomen}" \
+              2>&1 | tee "logs_stage56_praeflight/${nomen}-compile.log"
+          done
+          # Testis totius structurae opus habet oraculo separato test-only.
+          g++ "${flags[@]}" -c tests/reference/normative_reference.cpp \
+            -o build_stage56_praeflight/reference.o \
+            2>&1 | tee logs_stage56_praeflight/reference-compile.log
+          g++ "${flags[@]}" tests/stage_56_e2e_worker.cpp \
+            build_stage56_praeflight/monster.o \
+            build_stage56_praeflight/reference.o \
+            -o build_stage56_praeflight/stage_56_e2e_worker \
+            2>&1 | tee logs_stage56_praeflight/ac1-compile.log
+          g++ "${flags[@]}" tests/stage_56_structure_reference_tests.cpp \
+            build_stage56_praeflight/monster.o \
+            build_stage56_praeflight/reference.o \
+            -o build_stage56_praeflight/stage_56_structure_reference_tests \
+            2>&1 | tee logs_stage56_praeflight/structure-compile.log
+
+      - name: Currere probationes cum evidentia
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 3m build_stage56_praeflight/stage_56_saved_sum_self_monkey_patch_tests \
+            2>&1 | tee logs_stage56_praeflight/monkey.log
+          timeout 5m build_stage56_praeflight/stage_56_dispatch_concurrency_tests \
+            2>&1 | tee logs_stage56_praeflight/concurrency.log
+          timeout 20m build_stage56_praeflight/stage_56_transactional_cache_audit_tests \
+            2>&1 | tee logs_stage56_praeflight/cache-recovery.log
+          timeout 20m build_stage56_praeflight/stage_56_e2e_worker --ac1-canonical \
+            2>&1 | tee logs_stage56_praeflight/ac1-canonical-vectors.log
+          grep -Fx 'GRADUS56_AC1_CANONICA=10/10_PASS' \
+            logs_stage56_praeflight/ac1-canonical-vectors.log
+          grep -Fx 'GRADUS56_AC1_ORDO_INVERSUS=10/10_PASS' \
+            logs_stage56_praeflight/ac1-canonical-vectors.log
+          timeout 20m build_stage56_praeflight/stage_56_structure_reference_tests \
+            2>&1 | tee logs_stage56_praeflight/structure-reference.log
+          grep -Fx 'GRADUS56_STRUCTURA_REFERENCE=7/7_PASS STRUCTURAE=5/5_PASS' \
+            logs_stage56_praeflight/structure-reference.log
+          grep -Fx 'GRADUS56_FRIGIDI=15/15_PASS' \
+            logs_stage56_praeflight/structure-reference.log
+          grep -Fx 'GRADUS56_ORDO_INVOCATIONUM=28/28_PASS CONTEXTUS=2 CACHE_ANNI=3' \
+            logs_stage56_praeflight/structure-reference.log
+          grep -F 'GRADUS56_TERMINI_REFERENCE=PASS ANNI=5 CASUS=' \
+            logs_stage56_praeflight/structure-reference.log
+          grep -F 'GRADUS56_TERMINI_INVERSI=PASS ANNI=5 CASUS=' \
+            logs_stage56_praeflight/structure-reference.log
+          grep -F 'FACADE=15/15_PASS' \
+            logs_stage56_praeflight/structure-reference.log
+          timeout 35m build_stage56_praeflight/stage_56_structure_reference_tests --annus-integer \
+            2>&1 | tee logs_stage56_praeflight/whole-year-reference.log
+          grep -Fx 'GRADUS56_ANNUS_INTEGER=4244/4244_PASS YEAR=5000' \
+            logs_stage56_praeflight/whole-year-reference.log
+          timeout 35m build_stage56_praeflight/stage_56_structure_reference_tests --annus-altero \
+            2>&1 | tee logs_stage56_praeflight/whole-year-alternate-c.log
+          grep -F 'GRADUS56_ANNUS_ALTERO=PASS YEAR=5000 C_OFFSET=1 DAYS=' \
+            logs_stage56_praeflight/whole-year-alternate-c.log
+          timeout 35m build_stage56_praeflight/stage_56_structure_reference_tests --anni-vicini \
+            2>&1 | tee logs_stage56_praeflight/whole-years-neighbors.log
+          grep -F 'GRADUS56_VICINUS=PASS YEAR=4999 DAYS=' \
+            logs_stage56_praeflight/whole-years-neighbors.log
+          grep -F 'GRADUS56_VICINUS=PASS YEAR=5001 DAYS=' \
+            logs_stage56_praeflight/whole-years-neighbors.log
+          grep -F 'GRADUS56_ANNI_VICINI=2/2_PASS TOTAL_DAYS=' \
+            logs_stage56_praeflight/whole-years-neighbors.log
+          timeout 25m build_stage56_praeflight/stage_56_structure_reference_tests --limina-calculorum \
+            2>&1 | tee logs_stage56_praeflight/calculation-day-seams.log
+          grep -Fx 'GRADUS56_LIMINA_YEAR_MEMBERSHIP=PASS ANNI=9 EDGES=18/18' \
+            logs_stage56_praeflight/calculation-day-seams.log
+          grep -F 'GRADUS56_LIMINA_CALCULORUM=PASS C=3 ANNI=9 CASES=' \
+            logs_stage56_praeflight/calculation-day-seams.log
+          grep -F 'GRADUS56_LIMINA_CACHE=PASS COLD=3 HITS=' \
+            logs_stage56_praeflight/calculation-day-seams.log
+          grep -F ' WARM_RECHECKS=9 CACHE_ANNI=3' \
+            logs_stage56_praeflight/calculation-day-seams.log
+          echo 'PRAEVOLATUS_GRADUS56=PASS'
+
+      - name: Servare evidentiam etiam in defectu
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cpp-latina-stage56-praeflight
+          path: logs_stage56_praeflight/
+          if-no-files-found: warn
+          retention-days: 30
