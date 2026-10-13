@@ -1,0 +1,27 @@
+\ Convert an existing native year candidate into its wide equivalent.
+\ This adapter is for differential checks and incremental migration.
+\ Both absolute boundary days and gate indices are signed-wide fields;
+\ day length and span count are recomputed, not copied on faith.
+\ Only conversion-safe native integers may be passed. The full date
+\ entrypoint already enforces a stricter native-safe coordinate bound.
+\ A failed field conversion leaves the adapter's success flag zero.
+\ This is not yet a wide year-discovery algorithm.
+
+The widened year conversion succeeded is a number.
+
+To copy a year candidate into a wide year candidate:
+  Put 0 into the widened year conversion succeeded.
+  Convert the year candidate's opening day into a wide signed day.
+  If the native to wide conversion succeeded is not 1, exit.
+  Put the converted wide signed day into the wide year candidate's opening day.
+  Convert the year candidate's closing day into a wide signed day.
+  If the native to wide conversion succeeded is not 1, exit.
+  Put the converted wide signed day into the wide year candidate's closing day.
+  Convert the year candidate's opening index into a wide signed day.
+  If the native to wide conversion succeeded is not 1, exit.
+  Put the converted wide signed day into the wide year candidate's opening index.
+  Convert the year candidate's closing index into a wide signed day.
+  If the native to wide conversion succeeded is not 1, exit.
+  Put the converted wide signed day into the wide year candidate's closing index.
+  Measure the wide year candidate.
+  Put 1 into the widened year conversion succeeded.
