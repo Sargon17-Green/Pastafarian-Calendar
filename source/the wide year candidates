@@ -1,0 +1,77 @@
+\ Exactly measured candidate years between signed-wide gate positions.
+\ This adds a correct candidate representation at very large absolute
+\ day coordinates and gate indices; native year discovery still uses
+\ the original 32-bit candidate record and must be migrated later.
+\
+\ A year is (opening gate, closing gate]; its duration is whole DAYS,
+\ not the number of gate spans. At least six positive gate gaps are
+\ required, and the day length must lie between 252 and 5778.
+\ Since each gap is 42..963 days, also enforce 42*G <= L <= 963*G.
+\ These physical inequalities reject inconsistent synthetic endpoints.
+\ Ordered candidates compare day length first, then earlier signed-wide
+\ opening coordinate. Gate indices never act as a tie-breaker.
+\
+\ Native signed arithmetic is used only for small constant factors.
+\ All positions, differences, span counts and lengths are exact wide.
+\ This module has not been compiled or run under CAL.
+
+A wide year candidate has
+  a wide signed day called opening day,
+  a wide signed day called closing day,
+  a wide signed day called opening index,
+  a wide signed day called closing index,
+  a wide quantity called span count,
+  a wide quantity called year length,
+  a number called valid.
+
+The first wide candidate is a wide year candidate.
+The second wide candidate is a wide year candidate.
+
+To measure a wide year candidate:
+  Put 0 into the wide year candidate's valid.
+  Put "0" into the wide year candidate's year length.
+  Put "0" into the wide year candidate's span count.
+  Put the wide year candidate's closing day into a wide day difference.
+  Subtract the wide year candidate's opening day from the wide day difference.
+  If the wide day difference's polarity is not 1, exit.
+  Put the wide day difference's magnitude into the wide year candidate's year length.
+  Put the wide year candidate's closing index into a wide index difference.
+  Subtract the wide year candidate's opening index from the wide index difference.
+  If the wide index difference's polarity is not 1, exit.
+  Put the wide index difference's magnitude into the wide year candidate's span count.
+  Verify a wide year length and span count.
+
+To verify a wide year length and span count:
+  Put "6" into a minimum wide spans.
+  If the wide year candidate's span count is numerically smaller than the minimum wide spans, exit.
+  Put "252" into a minimum wide year days.
+  If the wide year candidate's year length is numerically smaller than the minimum wide year days, exit.
+  Put "5778" into a maximum wide year days.
+  If the maximum wide year days is numerically smaller than the wide year candidate's year length, exit.
+  Put the wide year candidate's span count into a shortest legal wide days.
+  Multiply the shortest legal wide days by 42.
+  If the wide year candidate's year length is numerically smaller than the shortest legal wide days, exit.
+  Put the wide year candidate's span count into a longest legal wide days.
+  Multiply the longest legal wide days by 963.
+  If the longest legal wide days is numerically smaller than the wide year candidate's year length, exit.
+  Put 1 into the wide year candidate's valid.
+
+To decide if a wide year candidate contains a wide signed day:
+  If the wide year candidate's valid is not 1, say no.
+  If the wide signed day numerically precedes the wide year candidate's closing day,
+    check the wide year candidate's opening bound given the wide signed day; exit.
+  If the wide signed day's polarity is the wide year candidate's closing day's polarity,
+    if the wide signed day's magnitude is the wide year candidate's closing day's magnitude,
+      check the wide year candidate's opening bound given the wide signed day; exit.
+  Say no.
+
+\ Strict opening bound: opening < day. Closing bound is inclusive.
+To decide if a wide year candidate's opening bound contains a wide signed day:
+  If the wide year candidate's opening day numerically precedes the wide signed day, say yes.
+  Say no.
+
+To decide if a wide year candidate comes before another wide year candidate:
+  If the wide year candidate's year length is numerically smaller than the other wide year candidate's year length, say yes.
+  If the other wide year candidate's year length is numerically smaller than the wide year candidate's year length, say no.
+  If the wide year candidate's opening day numerically precedes the other wide year candidate's opening day, say yes.
+  Say no.
