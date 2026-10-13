@@ -3,7 +3,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.GateTimelineManager do
   Dãy chỉ số cổng nguyên hai chiều, neo tại FOUNDATION.
   Giai đoạn 30 mở rộng cổng dương và âm bằng GateGapManager,
   giữ mọi ô trong bản đồ riêng và không thay đổi trạng thái cũ.
-  Nhánh âm dùng hàm phản chiếu lỗi lịch sử của phát hiện 15.
+  Nhánh âm đã được sửa qua GateGapManager và PATCH 15.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.GateGapManager

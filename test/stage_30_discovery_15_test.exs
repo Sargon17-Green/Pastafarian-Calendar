@@ -46,12 +46,13 @@ defmodule PastafariCalendarElixirVietnamese.Stage30Discovery15Test do
     for n <- 1..4 do
       assert LegacyMirroredNegativeGateGap.negative_gap(n) ==
                GateGapManager.positive_gap(n)
-      assert GateGapManager.negative_gap(n) ==
+      assert GateGapManager.negative_gap(n) == Ref.negative_gate_gap(n)
+      refute GateGapManager.negative_gap(n) ==
                LegacyMirroredNegativeGateGap.negative_gap(n)
     end
   end
 
-  test "cổng âm sản xuất thật trừ các gap của nhánh sai" do
+  test "cổng âm sản xuất thật trừ các gap đã vá" do
     state = Calendar.gate_state_spaghetti(-4)
     assert state.gate[0] == @foundation
     assert state.min_index == -4 and state.max_index == 0
@@ -149,7 +150,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage30Discovery15Test do
     assert_raise ArgumentError, fn -> GateTimelineManager.day_at(%{}, 0) end
   end
 
-  test "kiểm toán nguồn: cổng âm dùng dấu cộng sai, chưa có PATCH 15" do
+  test "kiểm toán nguồn: legacy dùng dấu cộng, patch đã hoạt động" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = File.read!(Path.join(root, "legacy_mirrored_negative_gate_gap.ex"))
     gap = File.read!(Path.join(root, "gate_gap_manager.ex"))
@@ -157,11 +158,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage30Discovery15Test do
     dispatcher = File.read!(Path.join(root, "dispatcher.ex"))
     assert legacy =~ "@foundation + n"
     assert legacy =~ "Dispatcher.answer_stream"
-    assert gap =~ "LegacyMirroredNegativeGateGap.negative_gap(n)"
+    assert gap =~ "NegativeGateGapPatch.negative_gap(n)"
     assert timeline =~ "GateGapManager.negative_gap(abs(n))"
     assert dispatcher =~ "GateTimelineManager.gate_day(index)"
     refute legacy =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "negative_gate_gap_patch.ex"))
+    assert File.exists?(Path.join(root, "negative_gate_gap_patch.ex"))
   end
 
   test "hồi quy chuẩn đỏ: cổng -1 phải dùng FOUNDATION-1" do

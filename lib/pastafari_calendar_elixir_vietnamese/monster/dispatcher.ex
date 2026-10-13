@@ -6,8 +6,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   Bảy giọt ẩn và 46 giọt nhìn thấy đều được tính đúng.
   Giai đoạn 29 đã vá chọn hạng rộng nhiều chữ số trên cùng
   answer ring. Giai đoạn 30 đưa dãy cổng hai chiều vào
-  production; phía âm cố ý phản chiếu ngày tính độ dài cổng
-  qua Ngày Nền, chờ PATCH 15. Chưa tích hợp năm hoặc lịch.
+  production; PATCH 15 sửa nguồn ngày cổng âm và giữ legacy.
+  Chưa tích hợp năm hoặc lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
