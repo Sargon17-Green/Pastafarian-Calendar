@@ -115,6 +115,14 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check streamed and complete weaving equality.
   If the check report is not "The checks agree with the examples.", exit.
+  Check changing month weaving configurations.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check complete date clearing.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check cutlet structure invariants.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check month structure invariants.
+  If the check report is not "The checks agree with the examples.", exit.
   Check the two digit forward choice.
   If the check report is not "The checks agree with the examples.", exit.
   Check the two digit backward choice.
