@@ -20,6 +20,7 @@ To reach the end of one cutlet:
   Loop.
     If the spans to cross number is 0, break.
     Move to the next positive gate.
+    If the gate step budget's exhausted is 1, exit.
     Subtract 1 from the spans to cross number.
   Repeat.
 
