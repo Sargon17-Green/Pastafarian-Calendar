@@ -147,6 +147,10 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the year 5000 candidate enumeration.
   If the check report is not "The checks agree with the examples.", exit.
+  Check invalid year candidate ranks.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check synthetic year boundary containment.
+  If the check report is not "The checks agree with the examples.", exit.
   Check the cutlet count boundaries.
   If the check report is not "The checks agree with the examples.", exit.
   Check the month count boundaries.
