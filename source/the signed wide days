@@ -1,0 +1,89 @@
+\ Arbitrary-precision signed day coordinates.
+\ This module is a replacement building block for native 32-bit
+\ calendar days. It does not itself migrate the gate/year algorithms.
+\ The magnitude is an exact nonnegative decimal wide quantity.
+\ Polarity is -1, 0 or +1. Zero is uniquely (0,"0").
+\ No operation on the magnitude converts it to a CAL number.
+\ This is integer arithmetic, not SAVE modulo the sauce modulus.
+\
+\ Addition and subtraction put their result in the SECOND signed day.
+\ None of the procedures mutates the first signed day parameter.
+\ Signed comparisons are mathematical, not lexicographic strings.
+\ All intermediate unsigned operations reuse the decimal wide library.
+\ This source still requires CAL compiler validation.
+
+A wide signed day has
+  a number called polarity,
+  a wide quantity called magnitude.
+
+\ Make zero canonical and make nonzero polarity exactly +1 or -1.
+To normalize a wide signed day:
+  Normalize the wide signed day's magnitude.
+  If the wide signed day's magnitude is "0",
+    put 0 into the wide signed day's polarity; exit.
+  If the wide signed day's polarity is less than 0,
+    put -1 into the wide signed day's polarity; exit.
+  Put 1 into the wide signed day's polarity.
+
+\ The caller supplies an unsigned decimal magnitude and the sign.
+To set a wide signed day from a wide quantity given a number:
+  Put the wide quantity into the wide signed day's magnitude.
+  Put the number into the wide signed day's polarity.
+  Normalize the wide signed day.
+
+\ A negative value sorts below zero, which sorts below positive.
+\ Within negatives the larger magnitude precedes the smaller one.
+To decide if a wide signed day numerically precedes another wide signed day:
+  If the wide signed day's polarity is less than the other wide signed day's polarity, say yes.
+  If the wide signed day's polarity is greater than the other wide signed day's polarity, say no.
+  If the wide signed day's polarity is 0, say no.
+  If the wide signed day's polarity is 1,
+    if the wide signed day's magnitude is numerically smaller than the other wide signed day's magnitude, say yes;
+    say no.
+  If the other wide signed day's magnitude is numerically smaller than the wide signed day's magnitude, say yes.
+  Say no.
+
+\ Compare signs before comparing magnitudes to avoid a signed overflow.
+\ The second operand is the output, matching the existing wide library.
+To add a wide signed day to another wide signed day:
+  If the wide signed day's polarity is 0, exit.
+  If the other wide signed day's polarity is 0,
+    put the wide signed day into the other wide signed day; exit.
+  If the wide signed day's polarity is the other wide signed day's polarity,
+    add like-signed day magnitudes; exit.
+  Add opposite-signed day magnitudes.
+
+To add like-signed day magnitudes:
+  Add the wide signed day's magnitude to the other wide signed day's magnitude.
+
+\ Opposite signs: the larger magnitude determines the resulting sign.
+To add opposite-signed day magnitudes:
+  If the wide signed day's magnitude is the other wide signed day's magnitude,
+    put "0" into the other wide signed day's magnitude;
+    put 0 into the other wide signed day's polarity; exit.
+  If the wide signed day's magnitude is numerically smaller than the other wide signed day's magnitude,
+    subtract the wide signed day's magnitude from the other wide signed day's magnitude; exit.
+  Put the wide signed day's magnitude into a difference wide quantity.
+  Subtract the other wide signed day's magnitude from the difference wide quantity.
+  Put the difference wide quantity into the other wide signed day's magnitude.
+  Put the wide signed day's polarity into the other wide signed day's polarity.
+
+\ Subtracting x from y is adding -x to y without modifying x.
+To subtract a wide signed day from another wide signed day:
+  Put the wide signed day into a negated signed day.
+  If the negated signed day's polarity is 1,
+    put -1 into the negated signed day's polarity.
+  If the negated signed day's polarity is -1,
+    reverse a negative signed day.
+  Add the negated signed day to the other wide signed day.
+
+\ Keep this helper separate to avoid toggling a positive value twice.
+To reverse a negative signed day:
+  Put 1 into the negated signed day's polarity.
+
+\ Convert the signed day into plain decimal text for display/logging.
+\ The string parameter is the target; the signed day is unchanged.
+To spell a wide signed day into a string:
+  Put "" into the string.
+  If the wide signed day's polarity is less than 0, append "-" to the string.
+  Append the wide signed day's magnitude to the string.
