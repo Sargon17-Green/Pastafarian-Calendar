@@ -1,0 +1,83 @@
+\ Tests of bounded ordered month lengths with 4..123 days each.
+\ Small cases were independently enumerated; extreme year counts were
+\ checked by an independent inclusion/exclusion computation.
+\ These tests do not claim a successful CAL compiler execution.
+
+To check bounded month length counts:
+  Count month lengths given 12 and 3.
+  If the month length work's count result is not "1",
+    put "Twelve days in three months has more than one partition." into the check report; exit.
+  Count month lengths given 13 and 3.
+  If the month length work's count result is not "3",
+    put "Thirteen days in three months does not have three partitions." into the check report; exit.
+  Count month lengths given 20 and 3.
+  If the month length work's count result is not "45",
+    put "Twenty days in three months has the wrong count." into the check report; exit.
+  Count month lengths given 123 and 1.
+  If the month length work's count result is not "1",
+    put "A 123-day month was not accepted." into the check report; exit.
+  Count month lengths given 124 and 1.
+  If the month length work's count result is not "0",
+    put "An illegal 124-day month was accepted." into the check report; exit.
+  Count month lengths given 128 and 2.
+  If the month length work's count result is not "119",
+    put "Two months with 128 days have the wrong count." into the check report; exit.
+  Count month lengths given 246 and 2.
+  If the month length work's count result is not "1",
+    put "Two maximum-length months should have one partition." into the check report; exit.
+  Count month lengths given 247 and 2.
+  If the month length work's count result is not "0",
+    put "Two months cannot hold 247 days." into the check report; exit.
+  Count month lengths given 252 and 3.
+  If the month length work's count result is not "7021",
+    put "Three months in a 252-day year have the wrong count." into the check report; exit.
+
+To verify two month lengths given a number and another number:
+  Put the chosen month lengths' first into an examined month length record.
+  If the examined month length record is nil,
+    put "Month length one is missing." into the check report; exit.
+  If the examined month length record's days in month is not the number,
+    put "Month length one differs from its reference." into the check report; exit.
+  Put the examined month length record's next into the examined month length record.
+  If the examined month length record is nil,
+    put "Month length two is missing." into the check report; exit.
+  If the examined month length record's days in month is not the other number,
+    put "Month length two differs from its reference." into the check report; exit.
+  If the examined month length record's next is not nil,
+    put "A two-month partition has an unwanted third month." into the check report; exit.
+
+To check month length lexical ranking:
+  Put 128 into the chosen year's year length.
+  Put 2 into the selected month count.
+  Put "1" into a test month rank wide quantity.
+  Select month lengths from the test month rank wide quantity.
+  If the month length work's valid selection is not 1,
+    put "The first two-month length sequence was rejected." into the check report; exit.
+  Verify two month lengths given 5 and 123.
+  Put "60" into the test month rank wide quantity.
+  Select month lengths from the test month rank wide quantity.
+  Verify two month lengths given 64 and 64.
+  Put "119" into the test month rank wide quantity.
+  Select month lengths from the test month rank wide quantity.
+  Verify two month lengths given 123 and 5.
+  Put "120" into the test month rank wide quantity.
+  Select month lengths from the test month rank wide quantity.
+  If the month length work's valid selection is not 0,
+    put "An out-of-range month-length rank was accepted." into the check report; exit.
+  Put "0" into the test month rank wide quantity.
+  Select month lengths from the test month rank wide quantity.
+  If the month length work's valid selection is not 0,
+    put "A zero month-length rank was accepted." into the check report; exit.
+
+\ This is expensive because it evaluates inclusion/exclusion for a
+\ 47-month year with 4244 days. It is an optional slow check.
+To check a large month length count:
+  Count month lengths given 252 and 47.
+  If the month length work's count result is not "22747362824110665179416185383175",
+    put "A 252-day 47-month count lost big-number precision." into the check report; exit.
+  Count month lengths given 4244 and 47.
+  If the month length work's count result is not "32170173581666034502316982845062598233361029508388020389719545988110540721085603322536940",
+    put "The 4244-day 47-month count lost big-number precision." into the check report; exit.
+  Count month lengths given 5778 and 47.
+  If the month length work's count result is not "18424",
+    put "The longest year has the wrong maximal month-count compositions." into the check report; exit.
