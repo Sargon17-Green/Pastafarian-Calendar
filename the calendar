@@ -119,6 +119,16 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check the month count boundaries.
   If the check report is not "The checks agree with the examples.", exit.
+  Check the long small division.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check the binomial coefficients.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check cutlet partition counts.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check unrestricted cutlet ranking.
+  If the check report is not "The checks agree with the examples.", exit.
+  Check pinned cutlet ranking.
+  If the check report is not "The checks agree with the examples.", exit.
 
 \ We use the same continuous count of days as the original calendar.
 \ Foundation Day is the day at position -15055671.
