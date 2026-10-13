@@ -29,11 +29,11 @@ To run:
   Check the days on both sides.
   Check the reverse order.
   Check the same later day.
-  Check wide number order.
-  Check wide number addition.
-  Check wide number subtraction.
-  Check wide number multiplication.
-  Check wide number division.
+  Check wide quantity order.
+  Check wide quantity addition.
+  Check wide quantity subtraction.
+  Check wide quantity multiplication.
+  Check wide quantity division.
   Check sauce saving.
   Check sauce subtraction.
   Put the check report into a buffer.
