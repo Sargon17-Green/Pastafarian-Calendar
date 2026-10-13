@@ -1,0 +1,64 @@
+\ Fail-closed rank checks for the year-candidate ledger.
+\ The candidate record and status must not change when a rank is
+\ invalid. The list reader also must not dereference NIL when
+\ its count is accidentally larger than its real linked-list length.
+\ These are fast synthetic checks: no sauce calculation is needed.
+\ CAL compilation and native execution remain outstanding.
+
+To check invalid year candidate ranks:
+  Make synthetic year gates.
+  Gather eligible year candidates.
+  If the eligible year count is not 11,
+    put "The synthetic year rank setup has the wrong number of years." into the check report; exit.
+  Put 1 into the selected year rank.
+  Read the selected year candidate.
+  If the selected year available is not 1,
+    put "The first valid year rank was rejected." into the check report; exit.
+  If the chosen year's opening index is not -3,
+    put "The first year rank selected an incorrect opening gate." into the check report; exit.
+  Put 0 into the selected year rank.
+  Read the selected year candidate.
+  If the selected year available is not 0,
+    put "Year candidate rank zero was accepted." into the check report; exit.
+  If the chosen year's opening index is not -3,
+    put "Invalid rank zero overwrote the prior chosen year." into the check report; exit.
+  Put 12 into the selected year rank.
+  Read the selected year candidate.
+  If the selected year available is not 0,
+    put "A rank above the eligible count was accepted." into the check report; exit.
+  If the chosen year's opening index is not -3,
+    put "An out-of-range rank changed the chosen year." into the check report; exit.
+  Put 11 into the selected year rank.
+  Read the selected year candidate.
+  If the selected year available is not 1,
+    put "The final valid year rank was rejected after invalid ranks." into the check report; exit.
+  If the chosen year's opening index is not -2,
+    put "The final valid year rank selected the wrong opening gate." into the check report; exit.
+  Put 100 into the eligible year count.
+  Put 99 into the selected year rank.
+  Read the selected year candidate.
+  If the selected year available is not 0,
+    put "A truncated year ledger accepted a missing linked record." into the check report; exit.
+  If the chosen year's opening index is not -2,
+    put "A truncated ledger overwrote the last valid chosen year." into the check report; exit.
+  Destroy the eligible year ledger.
+  Destroy the nearby gate ledger.
+
+\ This test uses the same candidate and checks the ordinal behavior
+\ when calculation day falls exactly on the opening or closing gate.
+To check synthetic year boundary containment:
+  Put -15055671 into the year selection day.
+  Make synthetic year gates.
+  Gather eligible year candidates.
+  Put 1 into the selected year rank.
+  Read the selected year candidate.
+  If the selected year available is not 1,
+    put "The boundary test did not select a synthetic year." into the check report; exit.
+  Put the chosen year's opening day into a boundary test day.
+  If the chosen year contains the boundary test day,
+    put "A year incorrectly contains its own opening gate." into the check report; exit.
+  Put the chosen year's closing day into the boundary test day.
+  If the chosen year does not contain the boundary test day,
+    put "A year incorrectly excludes its own closing gate." into the check report; exit.
+  Destroy the eligible year ledger.
+  Destroy the nearby gate ledger.
