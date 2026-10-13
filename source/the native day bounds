@@ -16,11 +16,11 @@
 \ absolute and relative day quantities arbitrary precision.
 \ Fail closed rather than silently wrapping native numbers.
 
-The native day limit pair are a thing with
+A native day limit pair has
   a calendar day called earliest accepted,
   a calendar day called latest accepted.
 
-The native day limit pair are a native day limit pair.
+The native day limit pair is a native day limit pair.
 The native date input validity is a flag.
 
 To prepare native day limit pair:
