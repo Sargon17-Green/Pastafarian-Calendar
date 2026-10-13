@@ -48,3 +48,5 @@ export * from "./discovery17LegacyYearTie.ts";
 export * from "./patch17Year5000Tie.ts";
 
 export * from "./discovery18LegacyJump.ts";
+
+export * from "./patch18YearWalk.ts";
