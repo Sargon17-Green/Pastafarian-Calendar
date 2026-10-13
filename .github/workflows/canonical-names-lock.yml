@@ -193,3 +193,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage28Tests/PastafarianCalendar.Stage28Tests.csproj --configuration Release -- --verify-expected-red
       - name: مطابقة رقعة الخطوة الصفرية الرابعة عشرة مع المرجع وحفظ الانزياح القديم
         run: dotnet run --project tests/PastafarianCalendar.Stage29Tests/PastafarianCalendar.Stage29Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لباقي الدرجة القصيرة دون طرح واحد
+        id: discovery_short_rank_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage30Tests/PastafarianCalendar.Stage30Tests.csproj --configuration Release
+      - name: إثبات توقيع باقي الدرجة القصيرة وحماية رقعة الخطوة الصفرية
+        if: always()
+        run: |
+          test "${{ steps.discovery_short_rank_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage30Tests/PastafarianCalendar.Stage30Tests.csproj --configuration Release -- --verify-expected-red

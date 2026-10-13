@@ -132,6 +132,10 @@ public sealed class MonsterContext
     // نتيجة الخطوة ذات الفهرسة الصفرية مستقلة عن شاهد الخطوة التاريخية.
     public BigInteger? PatchedAnswerAtResult { get; set; }
 
+    // الندبة الخامسة عشرة: شغل المرتبة القصيرة باستخدام x بدل x-1.
+    public BigInteger? LegacyShortFamilySize { get; set; }
+    public BigInteger? LegacyShortFamilyRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
