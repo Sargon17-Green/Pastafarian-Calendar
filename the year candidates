@@ -1,0 +1,42 @@
+\ Year-candidate eligibility and sorting for the anchor year 5000.
+\ A Pastafarian year is (opening gate, closing gate].
+\ It contains the calculation day if opening < calculation <= closing.
+\ A candidate has at least six gate spans and length 252..5778.
+\ Canonical ordering: shortest calendar duration first; if durations
+\ agree, earlier opening gate first. These rules come from section Q.
+\ The full enumeration and selection of year 5000 still remain to do.
+
+A year candidate has
+  a calendar day called opening day,
+  a calendar day called closing day,
+  a number called opening index,
+  a number called closing index,
+  a number called span count,
+  a number called year length.
+
+The first candidate is a year candidate.
+The second candidate is a year candidate.
+
+\ Update derived fields before checking or comparing a candidate.
+To measure a year candidate:
+  Put the year candidate's closing day into the year candidate's year length.
+  Subtract the year candidate's opening day from the year candidate's year length.
+  Put the year candidate's closing index into the year candidate's span count.
+  Subtract the year candidate's opening index from the year candidate's span count.
+
+\ Test all four independent canonical restrictions.
+To decide if a year candidate contains a calendar day:
+  If the year candidate's opening day is greater than or equal to the calendar day, say no.
+  If the year candidate's closing day is less than the calendar day, say no.
+  If the year candidate's span count is less than 6, say no.
+  If the year candidate's year length is less than 252, say no.
+  If the year candidate's year length is greater than 5778, say no.
+  Say yes.
+
+\ Sorting uses no random tie-breaker and does not compare gate indexes
+\ before duration. Equal durations are ordered by earlier opening days.
+To decide if a year candidate comes before another year candidate:
+  If the year candidate's year length is less than the other year candidate's year length, say yes.
+  If the year candidate's year length is greater than the other year candidate's year length, say no.
+  If the year candidate's opening day is less than the other year candidate's opening day, say yes.
+  Say no.
