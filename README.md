@@ -37,8 +37,13 @@ written in Plain English Programming:
   before advancing the history.
 - **the visible drop checks**: checks the first and last Foundation-Day
   visible drops against the published exact results.
+- **the bowl order** and **the bowl order checks**: select and test all
+  six-bowl arrangements by lexicographic rank, including the original
+  final-drop ordering [4,5,2,3,6,1].
+- **the six bowls** and **the six bowl checks**: calculate and check the
+  six independent starting bowl values using their fixed identities.
 
-The source now includes **21 groups of checks**, some of which compare several
+The source now includes **26 groups of checks**, some of which compare several
 values. CAL's built-in number is only 32 bits; the sauce therefore uses
 decimal strings so it never depends on machine-sized large integers. Each
 individual decimal arithmetic column still uses ordinary small numbers.
@@ -59,9 +64,10 @@ a separate operation supports signed differences between numbers in 1..M.
 The current first-stage day-count conversion still uses CAL's 32-bit number
 type and needs a wide-number replacement for extreme dates.
 
-**Not yet built:** the six-bowl initial state, 720 possible bowl orders,
-pouring and mixing of each visible drop, twelve final mixes, gate discovery,
-year selection, cutlets, months, and a complete Pastafarian date. No shortcuts,
+**Not yet built:** the three direct pours per visible drop, mixing the six
+bowls from simultaneous snapshots, the twelve additional mixes,
+gate discovery, year selection, cutlets, months, and a complete
+Pastafarian date. No shortcuts,
 approximate answers, or hard-coded final dates are allowed.
 
 ## The idea, explained simply
@@ -109,8 +115,9 @@ These five numbers are the ingredients for everything that follows.
 ### Step 3: Make the sauce
 
 The stones, hidden drops, and visible drops have now been written as Plain
-English source. The six bowls, their permutations, pours, and mixing are still
-missing; none of the sauce code has yet passed a CAL compilation test.
+English source. The starting six bowls and their permutations are now written too. The
+pours and mixing are still missing; none of the sauce code has yet passed
+a CAL compilation test.
 
 The full rule makes numbers grow very large. It uses one huge limit: start with 1, double it 127 times, and take away 1. Whenever a sauce number grows past this limit, it wraps around rather than growing forever. In this system, the last number before wrapping is kept instead of being turned into zero.
 
@@ -138,7 +145,7 @@ Plain English Programming is an actual programming language. Its CAL compiler is
 
 Get a CAL compiler that supports Plain English Programming. Open the extensionless source file called **the calendar** in the compiler's development environment. The source starts with a small set of examples, then explains the rules as short English sentences. All extensionless Plain English source files in this branch must be present when compiling. CAL also needs its usual Plain English library supplied by the compiler's development environment.
 
-The examples use Foundation Day and its neighbors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 21 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
+The examples use Foundation Day and its neighbors. The program is written to create a file called **calendar-checks.txt** when it is run. The file should say **The checks agree with the examples.** only if all 26 check groups pass. Otherwise it should name a failing check. Those checks are not proof that the full calendar works or even that the code compiles. Compare future outputs against the original calendar rules. **No successful CAL compilation or execution is claimed yet.**
 
 ## The original rules
 
