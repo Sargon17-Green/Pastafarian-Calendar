@@ -30,6 +30,7 @@ local LegacyShortOnlyChoice = require("legacy_short_only_choice")
 local WideChoicePatch = require("wide_choice_patch")
 local LegacyGateQuestionAdapter = require("legacy_gate_question_adapter")
 local GateQuestionPatch = require("gate_question_patch")
+local LegacyGateGap = require("legacy_gate_gap")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -486,8 +487,22 @@ function S.gateQuestionCoreProbe(signedStep,legacyDay)
     return GateQuestionPatch.correctQuestionDay(signedStep,legacyDay)
 end
 
+-- DISCOVERY 16: espas pòtay istorik la ogmante rank la yon sèl twòp.
+function S.legacyGateGapProbe(signedStep,first,direction)
+    return LegacyGateGap.execute(signedStep,first,direction)
+end
+
+function S.oldGateGapFromRankProbe(rank)
+    return LegacyGateGap.oldGateGapFromRank(rank)
+end
+
+function S.gateGapSpaghetti(signedStep,first,direction)
+    local historic=LegacyGateGap.execute(signedStep,first,direction)
+    return historic
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 31", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 32", 0)
 end
 
 return S

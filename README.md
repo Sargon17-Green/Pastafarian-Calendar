@@ -1148,3 +1148,19 @@ move kestyon legacy, kestyon siyen repare. Pa gen
 chèn pòtay antye, oracle nan production oswa `postStir12`.
 `LAST_COMPLETED_STAGE=31` / `EXPECTED_REPOSITORY_STATE=GREEN`.
 
+
+## Stage 32 — DISCOVERY 16: espas pòtay istorik la twò long pa youn
+
+Apre `gateQuestionDaySpaghetti` PATCH 15 ak seleksyon
+`choiceSpaghetti` PATCH 13 pou 922 opsyon, ansyen fòmil
+`oldGateGapFromRank(rank)` ajoute **42+rank**.
+Fòmil normatif la se **41+rank**, konsa rank 1..922
+ta dwe pwodui yon espas 42..963; legacy bay 43..964.
+Se yon defo reyèl fòmil offset la, pa yon fèy-repons fo.
+`legacy_gate_gap.lua` konsève 3 commits kestyon siyen,
+sove eta semantik seleksyon an, epi ajoute 4yèm commit
+`LEGACY_GATE_GAP_PLUS_ONE` ki prezève rezilta erone a.
+
+Nan Stage 32, pa gen PATCH 16, pa gen chèn pòtay konplè,
+pa gen `postStir12`. Sous rank la soti nan kòd natif
+PATCH 13, pa nan oracle tès la. Validasyon natif poko fèt.

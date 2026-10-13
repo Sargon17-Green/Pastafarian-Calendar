@@ -819,3 +819,15 @@ Patch la ajoute twazyèm commit apre de commits eritaj yo,
 san gate sequence oswa postStir12.
 `LAST_COMPLETED_STAGE=31` / `GREEN`.
 
+
+## Stage 32 — DISCOVERY 16: +1 anplis nan longè pòtay
+
+Nou itilize kestyon jou siyen ki deja korije nan PATCH 15,
+ak rank 1..922 nan kòd natif PATCH 13. Ansyen fonksyon
+`oldGateGapFromRank(rank)` toujou ajoute 42 olye 41.
+Se poutèt sa longè pòtay la depase oracle pa youn nan
+tout ka ki valab, menm si kestyon jou a ak rank la kòrèk.
+Premye twa commits kestyon an rete; nou ajoute katriyèm
+commit ki anrejistre rank, kestyon jou, ansyen offset
+ak longè move a. Defòmasyon istorik la rete akeyir.
+Tès ak CI Stage 32 poko verifye; PATCH 16 pa antre.
