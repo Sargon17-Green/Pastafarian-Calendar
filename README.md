@@ -928,3 +928,36 @@ kat diferans normatif, uit erè/uit rekiperasyon, ak de kouran
 nested san eta pataje. Tout prèv erè a prezève pou PATCH 13.
 `LAST_COMPLETED_STAGE=26`;
 `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
+
+## Stage 27 — PATCH 13: eliminasyon bias modulo pou N<=M
+
+Nou konsève modil `legacy_biased_choice.lua` byte-pou-byte.
+`src/short_choice_patch.lua` rele vrè `Legacy.execute` **an premye**,
+valide tout de commit yo, tras ak métriques, epi ajoute
+`SHORT_CHOICE_REJECTION_PATCH` kòm twazyèm commit.
+
+Limit pou `1<=N<=M` se `floor(M/N)*N`. Nou pran premye
+`A_k=SAVE(A_0+direction*k)` kote `A_k<=limit`, epi nou
+retounen `1+((A_k-1)%N)`. Erè modulo Stage 26 la rete
+vizib kòm `legacyChoiceSemanticState` ak `legacyChoiceRank`.
+API `choiceSpaghetti` sèvi ak chemen PATCH 13; sondaj
+`shortChoicePatchProbe` ak `shortChoiceCoreProbe` bay
+kontèks ak prèv, pandan `legacyBiasedChoiceProbe` pa chanje.
+
+Sik repons lan deplase egzakteman +1 oswa -1. Si A0 tonbe
+nan rejyon rejte kontig `[limit+1,M]`, nou kapab sote
+tousuit rive nan premye repons ki valab: pou +1 li se
+1; pou -1 li se limit. Nou verifye premye repons
+aksepte a, echantiyon anvan li, ak jiska 64 premye rejè,
+epi nou anrejistre kantite rejè *lojik* konplè kòm BigInt.
+Sa evite fè plis pase `2^64` iterasyon lè `N=M//2+1`,
+san chanje premye repons akseptab la.
+
+Tès endepandan yo konpare kont oracle normatif pou plizyè
+N, direksyon, A0 ak ka limit. Kat witness Stage 26 yo dwe
+kounye a bay rank korije, pandan tès historical EXPECTED_RED
+la toujou pase kòm audit. Suite `lua5.3 test/stage27_tests.lua .`
+gen QA Stage 1–27, gwo BigInt, 12 faults+12 recoveries,
+nested context ak repons ki sòti nan sauce kanonik.
+Path wide `N>M`, douz brase final yo nan production,
+ak kouch gate yo pa antre nan Stage 27.

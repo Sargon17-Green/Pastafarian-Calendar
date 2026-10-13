@@ -680,3 +680,16 @@ Kat witness yo te verifye pa audit, 409 repons kont oracle
 te pase, 8 fault / 8 recovery ak 2 nested streams te pase.
 Pa gen PATCH 13 nan Stage 26.
 `LAST_COMPLETED_STAGE=26`, `EXPECTED_RED_VERIFIED`.
+
+## Stage 27 — PATCH 13: premye repons ki nan limit akseptasyon
+
+`short_choice_patch.lua` rele `legacy_biased_choice.lua`
+anvan tout koreksyon. Li ajoute twazyèm commit ak prèv
+`floor(M/N)*N`, premye index akseptab la, kantite rejè,
+rank korije, rank legacy ak state apa. Nou prezève
+kat witness EXPECTED_RED Stage 26 nan audit pozitif.
+N=M//2+1, premye=M, direksyon -1 mande plis pase
+`2^64` rejè lojik; kòd la itilize prèv rejyon kontig
+pou rive egzakteman nan premye akseptasyon an.
+Tout kalkil toujou fèt ak BigInt Lua; pa gen wide detour.
+Rezilta native CI rete annatant.

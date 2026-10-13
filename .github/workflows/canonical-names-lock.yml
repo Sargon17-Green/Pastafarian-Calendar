@@ -732,8 +732,90 @@ jobs:
         run: |
           set -euo pipefail
           lua5.3 test/stage26_tests.lua .
-      - name: Yon regresyon normatif DISCOVERY 13 — EXPECTED_RED sèl
+      - name: Odit kat EXPECTED_RED istorik Stage 26
         shell: bash
         run: |
           set -euo pipefail
-          lua5.3 test/stage26_expected_red_1.lua .
+          lua5.3 test/stage26_expected_red_audit.lua .
+
+  lua_stage27_smoke:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Syntax, legacy hash lock, exhaustive oracle ak witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_biased_choice.lua)" = 5145cbba53bd8a98e8b48c649b69a214fba24dff
+          test "$(git hash-object src/neighbor_patch.lua)" = bdbb076d4ceac5c6d379d05dacd74c4874991def
+          lua5.3 test/stage27_scope_tests.lua .
+          lua5.3 test/stage27_exhaustive_tests.lua .
+          lua5.3 test/stage27_patch_tests.lua .
+          lua5.3 test/stage26_expected_red_audit.lua .
+
+  lua_stage27_resilience:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: BigInt >2^64 skips, 12 fail-closed recoveries, nested streams
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage27_bigint_tests.lua .
+          lua5.3 test/stage27_fault_tests.lua .
+          lua5.3 test/stage27_reentrancy_tests.lua .
+
+  lua_stage27_real:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Two genuine sauce-derived canonical selection streams
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage27_real_tests.lua .
+
+  lua_stage27_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Full Stage 1–27 native suite and historical red audits
+        shell: bash
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_biased_choice.lua)" = 5145cbba53bd8a98e8b48c649b69a214fba24dff
+          lua5.3 test/stage27_tests.lua .
