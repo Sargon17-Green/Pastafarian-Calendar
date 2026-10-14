@@ -65,6 +65,14 @@ def main():
     in_string = copy.deepcopy(good)
     in_string["complete_postfork_trace"][10][6] = 1
     reject(source, in_string, "p_receipt_in_stringmode")
+    # A normal termination claim must be backed by an executed @, not merely
+    # by a normal status and zero remaining IPs. This catches regressions
+    # where a synthetic trace silently stops after a nonterminating opcode.
+    forged_halt = copy.deepcopy(good)
+    forged_halt["complete_postfork_trace"][-1][5] = ord(" ")
+    reject(source, forged_halt, "terminal_at_replaced_by_blank")
+    print("POSTFORK_TERMINAL_OPCODE_FORGERY_REJECT_PASS")
+
     print("POSTFORK_PG_EVENT_COVERAGE_4_NEGATIVE_CONTROLS_PASS")
 
     # Reentrancy and state ownership: separate Native receipts must not
