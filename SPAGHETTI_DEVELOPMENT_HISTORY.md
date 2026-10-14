@@ -1570,3 +1570,22 @@ Stage36: 59 PASS/3 FAIL intenzionali. La PATCH18
 traduce indici canonici 1..47 in nomi del catalogo
 immutato, distinguendoli dal legacy slittato di un nome.
 Il validator è indipendente dal wrapper. Stage38 assente.
+
+
+### Stage38 DISCOVERY19 — avvio controllato
+
+La cicatrice di Stage38 e' distinta da DISCOVERY18: il catalogo
+canonico resta risolto correttamente. Il ponte errato associa il nome
+al resto del giorno `dayOffset % numeroMesi`, anziche' al mese
+effettivamente selezionato dalla tessitura annuale. Per esempio,
+nella tessitura A il giorno 1 appartiene ancora al primo mese,
+ma il ponte riporta il secondo nome. Nella tessitura C il giorno 2
+appartiene al secondo mese ma riporta il terzo. Con 47 mesi e
+il giorno 46 riporta l'ultimo nome pur trovandosi nel mese 8.
+
+Sono stati introdotti adapter Scala, handler, validator indipendente,
+test di input avversari, 1024 campioni deterministici e un job CI
+EXPECTED_RED a firma stretta (45 PASS e 3 FAIL previsti).
+Lo stato resta PENDING_NATIVE_SCALA: non e' certificato
+finche' non viene eseguita e confermata una run sul commit finale.
+Nessuna PATCH19 e' inclusa.
