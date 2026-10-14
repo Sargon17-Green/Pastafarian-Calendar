@@ -7,6 +7,13 @@ on:
       - 'qa/test_stage1_native_four_cell_pg_event_coverage.py'
       - 'qa/stage1_native_four_cell_full_postfork_trace_audit.py'
       - '.github/workflows/qa-befunge98-stage1-auditor.yml'
+  pull_request:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/test_stage1_native_four_cell_pg_event_coverage.py'
+      - 'qa/stage1_native_four_cell_full_postfork_trace_audit.py'
+      - '.github/workflows/qa-befunge98-stage1-auditor.yml'
   workflow_dispatch:
 permissions:
   contents: read
