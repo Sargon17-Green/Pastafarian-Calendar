@@ -17,9 +17,12 @@ CANDIDATE="d965ce4bdfa282f2d3b82690808def5a2dde10a8"
 CASES=("zero_equal","foundation_cross","forward_short","mixed_small")
 PHYSICAL_FORK_GATE=(951,1335)
 OPS=("|","_","[","]","r","w","k","j","{","}","u","p","g","x")
-# Conservative set of BF98 operations that cannot turn an IP.
+# Conservative set of BF98 operations that cannot change IP direction.
+# & and ~ are deliberately EXCLUDED: on input exhaustion, PyFunge 0.5-rc2
+# reflects the IP, as observed in 49 native receipts at ~ (13,5), tick 9340.
+# Without a captured input-consumption witness, do not assume they move straight.
 # Include quoted character pushes; omit turns, skips and flow controls.
-STRAIGHT_BYTES=frozenset(map(ord, ' 0123456789abcdef+-*/%!`:$.,&~pg')) | frozenset((92,))
+STRAIGHT_BYTES=frozenset(map(ord, ' 0123456789abcdef+-*/%!`:$.,pg')) | frozenset((92,))
 # Deterministic Befunge-98 direction setters; unlike arbitrary turns,
 # these instructions have a uniquely prescribed resulting velocity.
 FIXED_TURNS={ord(">"):(1,0),ord("<"):(-1,0),
