@@ -686,3 +686,23 @@ modulo 47 rimane riproducibile e il validator verifica
 la relazione ID↔nome senza usare il wrapper corretto.
 La selezione degli indici e la salsa normativa completa
 sono ancora fuori dal perimetro di questa fase.
+
+
+### DISCOVERY19 — associazione del nome al mese tessuto
+
+La decisione del mese del giorno `d` discende dal vettore annuale
+immutabile `weaving(d)` (identificatore 1-based), non dalla posizione
+`d % numeroMesi`. La selezione canonica dei nomi proveniente dalla
+PATCH17 e la risoluzione di PATCH18 sono input gia' fissati.
+La nuova cicatrice storica ignora `weaving(d)` nel lookup del nome,
+ma conserva l'ID tessuto nel report per consentire una prova separata.
+
+Il validator ricostruisce lo slot sbagliato e il nome legacy
+mediante una ricerca autonoma nel catalogo congelato: non invoca
+l'adapter come unico oracolo. Le verifiche normative (nome associato
+all'ID tessuto, test su 3..47 mesi, input avversari) rimangono
+in `src/test/scala/pastafari/Stage38Tests.scala`.
+
+Questa fase non implementa la salsa o la selezione normativa
+della tessitura; i vettori annuali sintetici rispettano l'ordine
+di apertura/chiusura e le durate dei mesi. Stage39 non introdotto.
