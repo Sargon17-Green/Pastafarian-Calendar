@@ -22,7 +22,8 @@ def reject(source, run, name, prefork=False):
 
 
 def fixture():
-    row = b" " * 10 + b"p" + b" " * 9 + b"g" + b" " * 600
+    # End the 514-instruction synthetic path with an executed halt.
+    row = b" " * 10 + b"p" + b" " * 9 + b"g" + b" " * 492 + b"@" + b" " * 107
     source = [row]
     trace = [[i + 2, i, 0, 1, 0, row[i], 0] for i in range(514)]
     run = dict(
