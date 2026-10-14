@@ -23,6 +23,7 @@ from funge.exception import IPQuitted, IPStopped
 
 import stage1_native_diverse_geometry as native
 import stage1_native_lower_feedback_semantic_candidate as candidate
+import stage1_native_peer_write_guard as ownership
 
 BASE="560d6aa5807a7f766213a33835cce85eab0fa40c"
 FOUR="d965ce4bdfa282f2d3b82690808def5a2dde10a8"
@@ -114,6 +115,7 @@ def tick_one(program):
         for existing in list(program.ips):
             program.remove_ip(existing)
 
+guarded_physical_p_total=0
 for ia,ib in ((0,1),(2,3),(4,5)):
     label_a,fields_a=cases[ia]
     label_b,fields_b=cases[ib]
@@ -124,7 +126,7 @@ for ia,ib in ((0,1),(2,3),(4,5)):
     # Before executing any opcode, prove one Program's stepping cannot
     # mutate the other Program's untouched Funge-space.
     untouched_b=sample(b)
-    tick_one(a)
+    guarded_physical_p_total+=ownership.guarded_step(a,b,tick_one)
     need(sample(b)==untouched_b,
          "first Native candidate step changed the other live Program's source")
     ticks=1
@@ -133,11 +135,11 @@ for ia,ib in ((0,1),(2,3),(4,5)):
         # Each one-step transition is checked against the *other* live
         # interpreter's mutable Funge-space, not only the final outputs.
         untouched_b=sample(b)
-        tick_one(a)
+        guarded_physical_p_total+=ownership.guarded_step(a,b,tick_one)
         need(sample(b)==untouched_b,
              "executing A mutated B's Funge-space at tick %d"%ticks)
         untouched_a=sample(a)
-        tick_one(b)
+        guarded_physical_p_total+=ownership.guarded_step(b,a,tick_one)
         need(sample(a)==untouched_a,
              "executing B mutated A's Funge-space at tick %d"%ticks)
         ticks+=1
@@ -152,5 +154,8 @@ for ia,ib in ((0,1),(2,3),(4,5)):
           label_a,label_b,"ticks",ticks)
     sys.stdout.flush()
 
+need(guarded_physical_p_total>0,
+     "Native candidate interleaving did not exercise any physical p events")
+print("NATIVE_FOUR_CELL_PHYSICAL_P_PEER_ISOLATION_PASS",guarded_physical_p_total)
 print("NATIVE_FOUR_CELL_SAME_PROCESS_14_SEQUENTIAL_3_INTERLEAVED_PAIRS_PASS")
 print("QA_ONLY; SAME_PROGRAM_OBJECT_REUSE_WITHOUT_RESET_NOT_CLAIMED; STAGE1_OPEN")
