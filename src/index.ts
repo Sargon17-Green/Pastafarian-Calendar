@@ -52,3 +52,5 @@ export * from "./discovery18LegacyJump.ts";
 export * from "./patch18YearWalk.ts";
 
 export * from "./discovery19LegacyYearCache.ts";
+
+export * from "./patch19GuardedYearCache.ts";
