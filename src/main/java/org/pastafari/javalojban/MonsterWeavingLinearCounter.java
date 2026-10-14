@@ -408,6 +408,7 @@ public final class MonsterWeavingLinearCounter {
     private long siblingPrefixMonthTransitions;
     private long siblingPrefixClosedFormTransitions;
     private long siblingPrefixSharedWeightHits;
+    private long siblingScalarBatchBuilds;
 
     long tailFunctionalReuseHitCount() {
         synchronized (tailFunctionalLock) {
@@ -457,6 +458,12 @@ public final class MonsterWeavingLinearCounter {
         }
     }
 
+    long siblingScalarBatchBuildCount() {
+        synchronized (tailFunctionalLock) {
+            return siblingScalarBatchBuilds;
+        }
+    }
+
     private BigInteger unconstrainedPrefixTotal(State child, int cut) {
         int days = child.remaining[child.closed];
         BigInteger total = ONE;
@@ -468,6 +475,49 @@ public final class MonsterWeavingLinearCounter {
             days = newDays;
         }
         return total;
+    }
+
+    private BigInteger[] unconstrainedSiblingScalars(State parent) {
+        int cut = parent.opened;
+        int closed = parent.closed;
+        BigInteger[] scalars = new BigInteger[cut];
+        if (closed >= cut) return scalars;
+        int[] days = new int[cut];
+        int running = 0;
+        for (int month = closed; month < cut; month++) {
+            running += parent.remaining[month];
+            days[month] = running;
+        }
+        BigInteger base = unconstrainedPrefixTotal(parent, cut);
+        BigInteger suffixNumerator = ONE;
+        BigInteger suffixDenominator = ONE;
+        for (int month = cut - 1; month >= closed; month--) {
+            BigInteger numerator = base.multiply(suffixNumerator);
+            BigInteger denominator = suffixDenominator;
+            if (month > closed) {
+                numerator = numerator.multiply(
+                    BigInteger.valueOf(parent.remaining[month] - 1));
+                denominator = denominator.multiply(
+                    BigInteger.valueOf(days[month] - 1));
+            }
+            BigInteger[] quotient = numerator.divideAndRemainder(denominator);
+            if (quotient[1].signum() != 0) {
+                throw new IllegalStateException(
+                    "E_WEAVE_SIBLING_SCALAR_RATIO");
+            }
+            scalars[month] = quotient[0];
+            if (month > closed) {
+                suffixNumerator = suffixNumerator.multiply(
+                    BigInteger.valueOf(days[month]
+                        - parent.remaining[month]));
+                suffixDenominator = suffixDenominator.multiply(
+                    BigInteger.valueOf(days[month] - 1));
+            }
+        }
+        synchronized (tailFunctionalLock) {
+            siblingScalarBatchBuilds++;
+        }
+        return scalars;
     }
 
     private TailFunctional commonSiblingTail(State parent,
@@ -601,6 +651,7 @@ public final class MonsterWeavingLinearCounter {
         }
         TailFunctional coefficient = commonSiblingTail(parent, cut, prefixDays);
         BigInteger sharedWeight = null;
+        BigInteger[] sharedScalars = null;
         for (int month = parent.closed; month < lengths.length; month++) {
             if (!parent.canTake(month, lengths)) continue;
             State child = new State(parent);
@@ -608,8 +659,10 @@ public final class MonsterWeavingLinearCounter {
             if (child.closed == lengths.length) {
                 branchSizes[month] = ONE;
             } else if (month < parent.opened) {
-                BigInteger scalar = unconstrainedPrefixTotal(
-                    child, parent.opened);
+                if (sharedScalars == null) {
+                    sharedScalars = unconstrainedSiblingScalars(parent);
+                }
+                BigInteger scalar = sharedScalars[month];
                 if (sharedWeight == null) {
                     BigInteger direct =
                         siblingPrefixDot(child, cut, coefficient);

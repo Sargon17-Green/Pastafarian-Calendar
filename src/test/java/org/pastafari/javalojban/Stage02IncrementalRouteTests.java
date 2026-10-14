@@ -429,6 +429,7 @@ public final class Stage02IncrementalRouteTests {
             family.beginGlobalRankRoute(rank, 512);
         long started = System.nanoTime();
         long sharedBaseline = family.siblingPrefixSharedWeightHitCount();
+        long scalarBatchBaseline = family.siblingScalarBatchBuildCount();
         int lastOpened = 0;
         int lastClosed = 0;
         for (int call = 1; call <= 96; call++) {
@@ -475,12 +476,19 @@ public final class Stage02IncrementalRouteTests {
                     + " shared_weight_hits="
                     + (family.siblingPrefixSharedWeightHitCount()
                         - sharedBaseline)
+                    + " scalar_batch_builds="
+                    + (family.siblingScalarBatchBuildCount()
+                        - scalarBatchBaseline)
                     + " route_ms="
                     + (System.nanoTime() - started) / 1000000);
             }
         }
         eq(192, route.stepsCompleted(),
             "E_SHARED_192_TOTAL_PREFIX_DAYS");
+        ok(family.siblingScalarBatchBuildCount() > scalarBatchBaseline,
+            "E_SHARED_192_SCALAR_BATCH_USED");
+        ok(family.siblingPrefixSharedWeightHitCount() > sharedBaseline,
+            "E_SHARED_192_SCALAR_REUSE_USED");
         ok(!route.complete(), "E_SHARED_192_NOT_FALSE_COMPLETE");
     }
 
