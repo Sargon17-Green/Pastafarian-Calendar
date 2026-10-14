@@ -2,9 +2,9 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 29 đã vá chọn hạng rộng. Giai đoạn 30 mở
-  dãy cổng hai chiều, cố ý để lộ lỗi ngày đối xứng
-  ở phía âm trước PATCH 15. Chưa tích hợp lịch đầy đủ.
+  Giai đoạn 31 đã sửa cổng âm; Stage32 mở chọn năm 5000
+  nhưng di sản sắp ứng viên năm dài trước năm ngắn.
+  Chưa tích hợp lịch đầy đủ.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}
@@ -105,6 +105,9 @@ defmodule PastafariCalendarElixirVietnamese do
   def negative_gate_gap_spaghetti(n), do: Dispatcher.negative_gate_gap(n)
   def gate_day_spaghetti(index), do: Dispatcher.gate_day(index)
   def gate_state_spaghetti(index), do: Dispatcher.gate_state(index)
+
+  def year5000_spaghetti(calculation_day), do: Dispatcher.year5000(calculation_day)
+  def year5000_diagnostic_spaghetti(calculation_day), do: Dispatcher.year5000_diagnostic(calculation_day)
 
   def calendar_date_spaghetti(calculation_day, target_day) do
     _context = Dispatcher.bootstrap(calculation_day, target_day)

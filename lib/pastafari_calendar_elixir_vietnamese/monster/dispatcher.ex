@@ -7,7 +7,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   Giai đoạn 29 đã vá chọn hạng rộng nhiều chữ số trên cùng
   answer ring. Giai đoạn 30 đưa dãy cổng hai chiều vào
   production; PATCH 15 sửa nguồn ngày cổng âm và giữ legacy.
-  Chưa tích hợp năm hoặc lịch.
+  Stage32 mở chọn năm 5000 với di sản sắp năm dài trước.
+  Chưa tích hợp lịch hoàn chỉnh.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
@@ -28,7 +29,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     PostStirCalculator,
     StoneManager,
     Validator,
-    VisibleDropManager
+    VisibleDropManager,
+    Year5000Manager
   }
 
   def bootstrap(calculation_day, target_day) do
@@ -206,4 +208,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def negative_gate_gap(n), do: GateGapManager.negative_gap(n)
   def gate_day(index), do: GateTimelineManager.gate_day(index)
   def gate_state(index), do: GateTimelineManager.ensure_index(GateTimelineManager.new(), index)
+
+  def year5000(calculation_day), do: Year5000Manager.year5000(calculation_day)
+  def year5000_diagnostic(calculation_day), do: Year5000Manager.diagnose(calculation_day)
 end

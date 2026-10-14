@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=31
-CURRENT_KIND=PATCH
-CURRENT_PATCH=15
+CURRENT_STAGE=32
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=16
 LAST_COMPLETED_STAGE=31
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..14; Stage31 thêm NegativeGateGapPatch gọi LegacyMirroredNegativeGateGap trước khi tính lại gap chuẩn từ FOUNDATION-n. GateGapManager chọn patch cho phía âm, timeline vẫn dùng state bất biến.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..15; Stage32 mở Year5000CandidateManager, LegacyLongestFirstYear5000, Year5000Manager và Year. Tập ứng viên và rank được tính đúng, nhưng đường production sắp độ dài năm giảm dần thay vì tăng dần.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_31_PATCH_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_32_DISCOVERY_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=431
-CI_FAILURES=0
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -757,3 +757,14 @@ Cảnh báo Node.js 20 thuộc checkout@v4 của CI, không phải nguồn Elixi
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38367321846
 Stage31 đóng GREEN. Stage32/55 DISCOVERY 16 chưa bắt đầu.
 Không đổi main; không nhập oracle vào production.
+
+Giai đoạn 32 DISCOVERY 16 mở chọn năm neo 5000.
+Cổng được mở đủ cho [c-5778,c+5778], ứng viên i<j với
+j-i>=6, 252<=length<=5778 và gate(i)<c<=gate(j).
+Di sản LegacyLongestFirstYear5000 sắp xếp sai theo
+(-length,open_gate_day) thay vì (length,open_gate_day).
+Chọn rank bằng cùng Dispatcher.answer_stream(c,c,1,10),
+sau đó Enum.at(historical_order,rank-1) trong production thật.
+Dự kiến thêm 20 kiểm thử, trong đó 4 normative cố ý đỏ.
+Chỉ nâng LAST_COMPLETED_STAGE sau khi CI xác nhận đúng 4 lỗi
+và Canonical Names Lock PASS. Không tích hợp ngày lịch cuối.
