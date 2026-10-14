@@ -73,7 +73,15 @@ def main():
     # Mutate the physical source too, so the only remaining reason to reject
     # is the absence of an executed terminal @, not source-byte mismatch.
     forged_source = [source[0][:513] + b" " + source[0][514:]]
-    reject(forged_source, forged_halt, "terminal_at_replaced_by_blank")
+    # Assert the *specific* terminal invariant, not merely some unrelated
+    # validation failure (e.g. a mismatch elsewhere in the receipt).
+    try:
+        audit.verify_run(forged_halt, forged_source)
+    except AssertionError as exc:
+        if "Native complete route ended without executed terminating @" not in str(exc):
+            raise AssertionError("terminal mutation rejected for wrong reason: " + str(exc)) from exc
+    else:
+        raise AssertionError("auditor accepted a physically nonterminating final instruction")
     print("POSTFORK_TERMINAL_OPCODE_FORGERY_REJECT_PASS")
 
     print("POSTFORK_PG_EVENT_COVERAGE_4_NEGATIVE_CONTROLS_PASS")
@@ -244,13 +252,16 @@ def prefork_provenance_regression():
 
 
 def gate_anchor_regression():
-    # Genuine pinned physical | at (951,1335); two executed pre-fork
-    # opcodes; 514 post-fork opcodes including p and g.
+    # Synthetic event fixture, physically anchored to the pinned | cell at
+    # (951,1335). Immediately after the downward-to-upward gate branch, a
+    # real > turns the IP right. It then executes p, g and finally @ along
+    # one contiguous horizontal line, with no invented direction change.
     row0=b" "*10+b"p"+b" "*9+b"g"+b" "*492+b"@"+b" "*107
-    source=[row0]+[b""]*1333+[b" "*951+b"0",b" "*950+b"p||"]
-    trace=[[step+3,step,0,1,0,source[0][step],0]
-           for step in range(514)]
-    trace[0]=[3,951,1334,0,-1,ord("0"),0]
+    row1334=b" "*951+b">>"+b" "*8+b"p"+b" "*9+b"g"+b" "*492+b"@"+b" "*107
+    source=[row0]+[b""]*1332+[b" "*951+b">",row1334,b" "*950+b"p||"]
+    trace=[[3,951,1334,0,-1,ord(">"),0]]
+    trace += [[step+3,951+step,1334,1,0,source[1334][951+step],0]
+              for step in range(1,514)]
     run=dict(status="normal",remaining_ips=0,steps=516,
         gate=dict(step=2,original=1,executed=1),
         complete_prefork_trace=[[1,950,1335,1,0,ord("p"),0],
@@ -269,9 +280,53 @@ def gate_anchor_regression():
         raise AssertionError("physical gate Native pretrace not verified")
     print("GATE_ANCHOR_STRICT_V2_POSITIVE_PASS")
 
+    # A physical > must set the next IP velocity to east. Do not allow a
+    # forged westward velocity to hide behind otherwise correct source bytes.
+    wrong_fixed_turn = copy.deepcopy(run)
+    wrong_fixed_turn["complete_postfork_trace"][1][3] = -1
+    wrong_fixed_turn["first_512_motion"][1][2] = -1
+    try:
+        audit.verify_run(wrong_fixed_turn, source, require_prefork=True,
+                         require_gate_anchor=True)
+    except AssertionError as exc:
+        if "Native post-fork fixed turn opcode did not set required direction" not in str(exc):
+            raise AssertionError("fixed-turn forgery rejected for wrong reason: " + str(exc)) from exc
+    else:
+        raise AssertionError("forged westward successor to > was accepted")
+    print("GATE_ANCHOR_FIXED_TURN_DIRECTION_FORGERY_REJECT_PASS")
+
+    # Test the SAME fixed-turn contract *before* the physical fork.
+    # Replacing the physical p with > changes no postfork evidence: the
+    # postfork p still writes 7 before g reads it.
+    preturn_source=copy.deepcopy(source)
+    preturn_row=bytearray(preturn_source[-1])
+    preturn_row[950]=ord(">")
+    preturn_source[-1]=bytes(preturn_row)
+    preturn=copy.deepcopy(run)
+    preturn["complete_prefork_trace"][0][5]=ord(">")
+    preturn["native_p_history"].pop(0)
+    preturn["total_p_writes"]-=1
+    # The removed prefork p supplied the later g-read cell [701,0].
+    # Move the physical postfork p receipt to that SAME cell so the
+    # positive fixture still has authentic read-after-write provenance.
+    preturn["native_p_history"][0]["coordinate"]=[701,0]
+    audit.verify_run(preturn,preturn_source,require_prefork=True,
+                     require_gate_anchor=True)
+    forged_preturn=copy.deepcopy(preturn)
+    forged_preturn["complete_prefork_trace"][1][3]=-1
+    try:
+        audit.verify_run(forged_preturn,preturn_source,require_prefork=True,
+                         require_gate_anchor=True)
+    except AssertionError as exc:
+        if "Native pre-fork fixed turn opcode did not set required direction" not in str(exc):
+            raise AssertionError("prefork fixed-turn forgery rejected for wrong reason: "+str(exc)) from exc
+    else:
+        raise AssertionError("forged westward successor to prefork > was accepted")
+    print("GATE_ANCHOR_PREFORK_FIXED_TURN_FORGERY_REJECT_PASS")
+
     def shift_first_x(r):
         r["complete_postfork_trace"][0][1]=952
-        r["complete_postfork_trace"][0][5]=32
+        r["complete_postfork_trace"][0][5]=ord(">")
     def flip_first_delta(r):
         r["complete_postfork_trace"][0][4]=1
     def flip_gate_operand(r):
@@ -279,8 +334,8 @@ def gate_anchor_regression():
     def shift_gate_coordinate(r):
         r["complete_prefork_trace"][-1][1]=952
     def skip_first_cell(r):
-        r["complete_postfork_trace"][0][2]=1332
-        r["complete_postfork_trace"][0][5]=32
+        r["complete_postfork_trace"][0][2]=1333
+        r["complete_postfork_trace"][0][5]=ord(">")
     for name,mutate in (
         ("wrong_postfork_x",shift_first_x),
         ("wrong_postfork_delta",flip_first_delta),
