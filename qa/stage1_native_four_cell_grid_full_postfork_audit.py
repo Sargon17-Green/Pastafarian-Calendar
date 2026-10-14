@@ -8,6 +8,7 @@ Does NOT infer numerical calendar values or universal Stage-1 completion.
 import copy,hashlib,json,re,sys
 from pathlib import Path
 import stage1_native_four_cell_full_postfork_trace_audit as full
+from stage1_native_strict_evidence_json import strict_evidence_loads
 
 BASE="560d6aa5807a7f766213a33835cce85eab0fa40c"
 CAND="d965ce4bdfa282f2d3b82690808def5a2dde10a8"
@@ -118,7 +119,7 @@ def main(root):
     need(full.gitblob(raw)==CAND,
          "four-cell complete-route physical program identity drifted")
     source=raw.split(b"\n")
-    data=json.loads((path/"native_full_postfork_signed_grid_49.json")
+    data=strict_evidence_loads((path/"native_full_postfork_signed_grid_49.json")
                     .read_text(encoding="utf-8"))
     need(verify_index(data),"Native 49-case manifest disagrees with frozen roster")
     measured=[]
@@ -126,7 +127,7 @@ def main(root):
         payload=(path/row["trace_filename"]).read_bytes()
         need(hashlib.sha256(payload).hexdigest()==row["trace_file_sha256"],
              "Native 49-case route file changed: "+row["trace_filename"])
-        case=json.loads(payload.decode("ascii"))
+        case=strict_evidence_loads(payload.decode("ascii"))
         need(type(case) is dict and case.get("index")==row["index"] and
              case.get("signed_days")==row["signed_days"] and
              case.get("fields")==row["fields"] and
@@ -165,7 +166,7 @@ def main(root):
         sys.stdout.flush()
     # Challenge *actual saved trajectory* against three independent
     # byte/version/time invariants, not only the index fields.
-    first=json.loads((path/data["records"][0]["trace_filename"]).read_text("ascii"))
+    first=strict_evidence_loads((path/data["records"][0]["trace_filename"]).read_text("ascii"))
     run=first["run"]
     bad=[
       ("forged_step",lambda r:r["complete_postfork_trace"][100].__setitem__(0,0)),
