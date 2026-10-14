@@ -17,7 +17,9 @@ for n=2,3 do
   end
   return original(step,first,dir)
  end
- local ok,outer,ctx=pcall(S.legacyPositiveGateProbe,n,streams)
+ local outerStreams={}
+ for i=1,n do outerStreams[i]=streams[i] end
+ local ok,outer,ctx=pcall(S.legacyPositiveGateProbe,n,outerStreams)
  Gap.execute=original
  assert(ok,"Stage 34 nested n="..n.." outer call threw: "..tostring(outer))
  assert(type(ctx)=="table" and type(child)=="table",
