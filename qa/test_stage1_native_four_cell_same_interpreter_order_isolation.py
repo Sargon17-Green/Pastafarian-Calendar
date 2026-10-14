@@ -130,8 +130,16 @@ for ia,ib in ((0,1),(2,3),(4,5)):
     ticks=1
     while a.ips or b.ips:
         need(ticks<100000,"Native interleaved candidate ran beyond 100000 ticks")
+        # Each one-step transition is checked against the *other* live
+        # interpreter's mutable Funge-space, not only the final outputs.
+        untouched_b=sample(b)
         tick_one(a)
+        need(sample(b)==untouched_b,
+             "executing A mutated B's Funge-space at tick %d"%ticks)
+        untouched_a=sample(a)
         tick_one(b)
+        need(sample(a)==untouched_a,
+             "executing B mutated A's Funge-space at tick %d"%ticks)
         ticks+=1
     need(ao.getvalue().split()==oracle[label_a],
          "interleaved candidate A diverged from Native reference "+label_a)
