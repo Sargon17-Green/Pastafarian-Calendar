@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - 'Befunge+Кыргызча'
+      - 'qa-befunge98-stage1-order-isolation-20261008'
   workflow_dispatch:
 
 permissions:
