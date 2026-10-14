@@ -883,3 +883,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 37: 63 PASS, 0 FAIL' stage37.log
           test "$(grep -Fc 'PASS — ' stage37.log)" -eq 63
           test "$(grep -Fc 'FAIL — ' stage37.log)" -eq 0
+
+  native-stage38-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage38 day-indexed name expected-RED signature
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage38Tests' > stage38.log 2>&1
+          rc=$?
+          set -e
+          cat stage38.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 38: 45 PASS, 3 FAIL' stage38.log
+          test "$(grep -Fc 'PASS — ' stage38.log)" -eq 45
+          test "$(grep -Fc 'FAIL — ' stage38.log)" -eq 3
+          for label in DAY1_MONTH1 INTERLEAVED_DAY2_MONTH2 MONTH47_DAY46; do
+            grep -Fq "FAIL — equivalenza normativa nome ${label} — Nome ricalcolato dal giorno anziché dal mese: ${label}" stage38.log
+          done
