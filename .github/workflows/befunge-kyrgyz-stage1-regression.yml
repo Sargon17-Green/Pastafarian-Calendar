@@ -11,6 +11,12 @@ on:
 permissions:
   contents: read
 
+# Queue new runs by ref without cancelling historical acceptance evidence.
+# Distinct workflows retain independent concurrency groups.
+concurrency:
+  group: befunge-stage1-native-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   native-regression:
     runs-on: ubuntu-latest
