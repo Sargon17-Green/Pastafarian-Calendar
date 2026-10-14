@@ -22,6 +22,7 @@ class Space:
 class IP:
     def __init__(self, stack, pos=(4, 2), offset=(0, 0), stringmode=False):
         self.position = Vector(pos)
+        self.delta = Vector((1, 0))
         self.offset = Vector(offset)
         self.stack = [list(stack)]
         self.stringmode = stringmode
@@ -102,5 +103,51 @@ def main():
     print("NATIVE_PEER_PHYSICAL_WRITE_8_SYNTHETIC_CASES_PASS")
 
 
+
+def test_s_store_ownership():
+    def store_actor(actor):
+        ip = actor.ips[0]
+        dest = Vector((ip.position[0] + ip.delta[0],
+                       ip.position[1] + ip.delta[1]))
+        actor.space.put(dest, ip.stack[0][-1] if ip.stack[0] else 0)
+
+    # s writes at physical IP + delta, independent of the storage offset.
+    a = Program([81], offset=(999, -999), opcode='s')
+    b = Program([])
+    if guarded_step(a, b, store_actor) != 1:
+        raise AssertionError('executed native s was not monitored')
+    if a.space.get(Vector((5, 2))) != 81 or b.space.get(Vector((5, 2))) != 32:
+        raise AssertionError('s physical next-cell address incorrect')
+
+    # Cross-program corruption beyond all fixed Native sentinel positions.
+    a = Program([81], opcode='s')
+    b = Program([])
+    def forged_s(actor):
+        store_actor(actor)
+        b.space.put(Vector((5, 2)), 66)
+    reject(lambda: guarded_step(a, b, forged_s), 'other Program')
+
+    # Reject an apparently executed s that wrote a different actor cell.
+    a = Program([81], opcode='s')
+    b = Program([])
+    def wrong_cell(actor):
+        actor.space.put(Vector((6, 2)), 81)
+    reject(lambda: guarded_step(a, b, wrong_cell), 'expected physical')
+
+    # Underflow in Funge-98 makes an empty-stack s store zero.
+    a = Program([], opcode='s')
+    b = Program([])
+    if guarded_step(a, b, store_actor) != 1 or a.space.get(Vector((5, 2))) != 0:
+        raise AssertionError('s stack-underflow store contract failed')
+
+    # The literal character s within stringmode is NOT an executed store.
+    a = Program([81], opcode='s', stringmode=True)
+    b = Program([])
+    if guarded_step(a, b, lambda _: None) != 0:
+        raise AssertionError('quoted s incorrectly treated as memory write')
+    print('NATIVE_PEER_PHYSICAL_STORE_S_5_SYNTHETIC_CASES_PASS')
+
+
 if __name__ == '__main__':
     main()
+    test_s_store_ownership()
