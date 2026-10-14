@@ -11,6 +11,7 @@ on:
       - 'qa/stage1_native_peer_store_s_probe.py'
       - 'qa/test_stage1_native_peer_write_guard.py'
       - 'qa/test_stage1_native_peer_runtime_identity.py'
+      - 'qa/test_stage1_native_peer_fault_isolation.py'
       - 'qa/test_stage1_native_nonturning_vector.py'
       - 'qa/test_stage1_native_pg_physical_address.py'
       - 'qa/stage1_native_pg_physical_address.py'
@@ -31,6 +32,7 @@ on:
       - 'qa/stage1_native_peer_store_s_probe.py'
       - 'qa/test_stage1_native_peer_write_guard.py'
       - 'qa/test_stage1_native_peer_runtime_identity.py'
+      - 'qa/test_stage1_native_peer_fault_isolation.py'
       - 'qa/test_stage1_native_nonturning_vector.py'
       - 'qa/test_stage1_native_pg_physical_address.py'
       - 'qa/stage1_native_pg_physical_address.py'
@@ -53,7 +55,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Validate Python syntax
-        run: python -m py_compile qa/test_stage1_native_four_cell_pg_event_coverage.py qa/stage1_native_four_cell_full_postfork_trace_audit.py qa/test_stage1_native_nonturning_vector.py qa/stage1_native_pg_physical_address.py qa/test_stage1_native_pg_physical_address.py qa/stage1_native_peer_write_guard.py qa/test_stage1_native_peer_write_guard.py qa/test_stage1_native_peer_runtime_identity.py qa/stage1_native_peer_store_s_probe.py qa/stage1_native_current_fork_route_differential.py qa/stage1_native_pg_stringmode_receipt_probe.py qa/stage1_native_strict_evidence_json.py qa/test_stage1_native_strict_evidence_json.py qa/stage1_native_four_cell_grid_full_postfork_audit.py
+        run: python -m py_compile qa/test_stage1_native_four_cell_pg_event_coverage.py qa/stage1_native_four_cell_full_postfork_trace_audit.py qa/test_stage1_native_nonturning_vector.py qa/stage1_native_pg_physical_address.py qa/test_stage1_native_pg_physical_address.py qa/stage1_native_peer_write_guard.py qa/test_stage1_native_peer_write_guard.py qa/test_stage1_native_peer_runtime_identity.py qa/stage1_native_peer_store_s_probe.py qa/stage1_native_current_fork_route_differential.py qa/stage1_native_pg_stringmode_receipt_probe.py qa/stage1_native_strict_evidence_json.py qa/test_stage1_native_strict_evidence_json.py qa/stage1_native_four_cell_grid_full_postfork_audit.py qa/test_stage1_native_peer_fault_isolation.py
       - name: Verify physical p/g receipts, gate, stringmode, and terminal opcode
         run: python -B qa/test_stage1_native_four_cell_pg_event_coverage.py
       - name: Verify fixed-turn physical axes before and after the fork
@@ -74,6 +76,10 @@ jobs:
         run: python -B qa/test_stage1_native_peer_runtime_identity.py
       - name: Repeat peer runtime ownership mutations with assertions disabled
         run: python -O -B qa/test_stage1_native_peer_runtime_identity.py
+      - name: Preserve peer ownership despite injected Native p/s faults
+        run: python -B qa/test_stage1_native_peer_fault_isolation.py
+      - name: Repeat Native fault isolation under optimized Python
+        run: python -O -B qa/test_stage1_native_peer_fault_isolation.py
       - name: Reject duplicate keys and hostile numeric literals in Native evidence
         run: python -B qa/test_stage1_native_strict_evidence_json.py
       - name: Repeat strict JSON evidence tests with assertions disabled
