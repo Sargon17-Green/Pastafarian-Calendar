@@ -19,7 +19,7 @@ To prepare the calendar date report:
   Put the complete English date text into the calendar date report.
 
 To write a calendar date for a calendar day and another calendar day:
-  Calculate a complete date for the calendar day and the other calendar day.
+  Calculate complete date values given the calendar day and the other calendar day.
   Prepare the calendar date report.
   Put the calendar date report into a buffer.
   Write the buffer to "pastafarian-date.txt".

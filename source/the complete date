@@ -39,7 +39,7 @@ To reset the complete date answer:
   Put "The complete calendar date was not resolved." into the complete date error.
 
 \ Every required selection must succeed before any result is published.
-To calculate a complete date for a calendar day and another calendar day:
+To calculate complete date values given a calendar day and another calendar day:
   Reset the complete date answer.
   Check native day coordinate inputs given the calendar day and the other calendar day.
   If the native date input validity is no,
@@ -107,7 +107,7 @@ To calculate a complete date for a calendar day and another calendar day:
 \ This wrapper tests the complete date at the canonical Foundation day.
 \ It is a slow reference check and deliberately NOT part of To run.
 To check the canonical complete Foundation date:
-  Calculate a complete date for -15055671 and -15055671.
+  Calculate complete date values given -15055671 and -15055671.
   If the complete date status is not 1,
     put "The complete Foundation date calculation did not succeed." into the check report; exit.
   If the complete date answer's year number is not 5000,
