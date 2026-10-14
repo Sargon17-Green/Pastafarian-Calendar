@@ -73,7 +73,15 @@ def main():
     # Mutate the physical source too, so the only remaining reason to reject
     # is the absence of an executed terminal @, not source-byte mismatch.
     forged_source = [source[0][:513] + b" " + source[0][514:]]
-    reject(forged_source, forged_halt, "terminal_at_replaced_by_blank")
+    # Assert the *specific* terminal invariant, not merely some unrelated
+    # validation failure (e.g. a mismatch elsewhere in the receipt).
+    try:
+        audit.verify_run(forged_halt, forged_source)
+    except AssertionError as exc:
+        if "Native complete route ended without executed terminating @" not in str(exc):
+            raise AssertionError("terminal mutation rejected for wrong reason: " + str(exc)) from exc
+    else:
+        raise AssertionError("auditor accepted a physically nonterminating final instruction")
     print("POSTFORK_TERMINAL_OPCODE_FORGERY_REJECT_PASS")
 
     print("POSTFORK_PG_EVENT_COVERAGE_4_NEGATIVE_CONTROLS_PASS")
