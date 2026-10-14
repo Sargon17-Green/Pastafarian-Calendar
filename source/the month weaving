@@ -68,7 +68,7 @@ A weaving selection has
 
 The weaving selection is a weaving selection.
 The woven requested month ordinal is a number.
-The woven requested day in month is a number.
+The woven requested month day is a number.
 
 \ Read month lengths into independent state records without modifying
 \ the selected year lengths. Each list has month indices 1..m.
@@ -264,8 +264,8 @@ To consider the next woven candidate given a number and a wide quantity:
 To remember the target's woven month and day:
   Put the weaving selection's selected ordinal into the woven requested month ordinal.
   Find the woven month state given the woven requested month ordinal.
-  Put the examined woven month state's total days into the woven requested day in month.
-  Subtract the examined woven month state's remaining days from the woven requested day in month.
+  Put the examined woven month state's total days into the woven requested month day.
+  Subtract the examined woven month state's remaining days from the woven requested month day.
 
 \ Each lexicographic candidate is counted before any is selected.
 To choose the next woven day:
@@ -288,7 +288,7 @@ To select a month weaving from a wide quantity:
   Put 0 into the weaving selection's selection success.
   Destroy the chosen woven days.
   Put 0 into the woven requested month ordinal.
-  Put 0 into the woven requested day in month.
+  Put 0 into the woven requested month day.
   If the weaving selection's resource limit reached is 1, exit.
   If the wide quantity is "0", exit.
   If the weaving selection's total completions is numerically smaller than the wide quantity, exit.

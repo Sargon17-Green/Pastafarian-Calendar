@@ -15,7 +15,7 @@ To check streamed and complete weaving equality:
     put "The full-output reference weaving failed." into the check report; exit.
   If the woven requested month ordinal is not 2,
     put "The full-output weaving chose the wrong month." into the check report; exit.
-  If the woven requested day in month is not 3,
+  If the woven requested month day is not 3,
     put "The full-output weaving chose the wrong day in its month." into the check report; exit.
   Write the selected weaving as test text.
   If the woven test text is not "11222112",
@@ -27,7 +27,7 @@ To check streamed and complete weaving equality:
     put "Streaming selection failed for a legal rank." into the check report; exit.
   If the woven requested month ordinal is not 2,
     put "Streaming changed the target month." into the check report; exit.
-  If the woven requested day in month is not 3,
+  If the woven requested month day is not 3,
     put "Streaming changed the target day within the month." into the check report; exit.
   If the chosen woven days are not empty,
     put "Streaming unexpectedly allocated woven-day records." into the check report; exit.

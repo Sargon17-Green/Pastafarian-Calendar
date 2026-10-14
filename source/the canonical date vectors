@@ -15,11 +15,11 @@ To check canonical date vector 1:
     put "Canonical date vector 1 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 10,
     put "Canonical date vector 1 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 503,
+  If the complete date answer's cutlet day is not 503,
     put "Canonical date vector 1 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 20,
     put "Canonical date vector 1 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 56,
+  If the complete date answer's month day is not 56,
     put "Canonical date vector 1 has the wrong month day." into the check report; exit.
 
 To check canonical date vector 2:
@@ -30,11 +30,11 @@ To check canonical date vector 2:
     put "Canonical date vector 2 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 10,
     put "Canonical date vector 2 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 502,
+  If the complete date answer's cutlet day is not 502,
     put "Canonical date vector 2 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 32,
     put "Canonical date vector 2 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 21,
+  If the complete date answer's month day is not 21,
     put "Canonical date vector 2 has the wrong month day." into the check report; exit.
 
 To check canonical date vector 3:
@@ -45,11 +45,11 @@ To check canonical date vector 3:
     put "Canonical date vector 3 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 14,
     put "Canonical date vector 3 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 1,
+  If the complete date answer's cutlet day is not 1,
     put "Canonical date vector 3 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 29,
     put "Canonical date vector 3 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 38,
+  If the complete date answer's month day is not 38,
     put "Canonical date vector 3 has the wrong month day." into the check report; exit.
 
 To check canonical date vector 4:
@@ -60,11 +60,11 @@ To check canonical date vector 4:
     put "Canonical date vector 4 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 10,
     put "Canonical date vector 4 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 3,
+  If the complete date answer's cutlet day is not 3,
     put "Canonical date vector 4 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 1,
     put "Canonical date vector 4 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 29,
+  If the complete date answer's month day is not 29,
     put "Canonical date vector 4 has the wrong month day." into the check report; exit.
 
 To check canonical date vector 5:
@@ -75,11 +75,11 @@ To check canonical date vector 5:
     put "Canonical date vector 5 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 14,
     put "Canonical date vector 5 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 500,
+  If the complete date answer's cutlet day is not 500,
     put "Canonical date vector 5 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 18,
     put "Canonical date vector 5 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 76,
+  If the complete date answer's month day is not 76,
     put "Canonical date vector 5 has the wrong month day." into the check report; exit.
 
 To check canonical date vector 6:
@@ -90,11 +90,11 @@ To check canonical date vector 6:
     put "Canonical date vector 6 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 5,
     put "Canonical date vector 6 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 158,
+  If the complete date answer's cutlet day is not 158,
     put "Canonical date vector 6 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 43,
     put "Canonical date vector 6 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 3,
+  If the complete date answer's month day is not 3,
     put "Canonical date vector 6 has the wrong month day." into the check report; exit.
 
 To check canonical date vector 7:
@@ -105,11 +105,11 @@ To check canonical date vector 7:
     put "Canonical date vector 7 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 12,
     put "Canonical date vector 7 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 95,
+  If the complete date answer's cutlet day is not 95,
     put "Canonical date vector 7 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 5,
     put "Canonical date vector 7 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 81,
+  If the complete date answer's month day is not 81,
     put "Canonical date vector 7 has the wrong month day." into the check report; exit.
 
 To check canonical date vector 8:
@@ -120,11 +120,11 @@ To check canonical date vector 8:
     put "Canonical date vector 8 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 9,
     put "Canonical date vector 8 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 167,
+  If the complete date answer's cutlet day is not 167,
     put "Canonical date vector 8 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 10,
     put "Canonical date vector 8 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 65,
+  If the complete date answer's month day is not 65,
     put "Canonical date vector 8 has the wrong month day." into the check report; exit.
 
 To check canonical date vector 9:
@@ -135,11 +135,11 @@ To check canonical date vector 9:
     put "Canonical date vector 9 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 14,
     put "Canonical date vector 9 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 10,
+  If the complete date answer's cutlet day is not 10,
     put "Canonical date vector 9 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 1,
     put "Canonical date vector 9 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 45,
+  If the complete date answer's month day is not 45,
     put "Canonical date vector 9 has the wrong month day." into the check report; exit.
 
 To check canonical date vector 10:
@@ -150,11 +150,11 @@ To check canonical date vector 10:
     put "Canonical date vector 10 has the wrong year." into the check report; exit.
   If the complete date answer's cutlet name index is not 5,
     put "Canonical date vector 10 has the wrong cutlet." into the check report; exit.
-  If the complete date answer's day within cutlet is not 288,
+  If the complete date answer's cutlet day is not 288,
     put "Canonical date vector 10 has the wrong cutlet day." into the check report; exit.
   If the complete date answer's month name index is not 29,
     put "Canonical date vector 10 has the wrong month." into the check report; exit.
-  If the complete date answer's day within month is not 13,
+  If the complete date answer's month day is not 13,
     put "Canonical date vector 10 has the wrong month day." into the check report; exit.
 
 \ Do not run this full suite on a machine without adequate resources.

@@ -98,9 +98,9 @@ To calculate a complete date for a calendar day and another calendar day:
     put "The woven month has no selected canonical name." into the complete date error; exit.
   Put the current year number into the complete date answer's year number.
   Put the requested cutlet name index into the complete date answer's cutlet name index.
-  Put the requested day in cutlet into the complete date answer's cutlet day.
+  Put the requested cutlet day into the complete date answer's cutlet day.
   Put the requested month name index into the complete date answer's month name index.
-  Put the woven requested day in month into the complete date answer's month day.
+  Put the woven requested month day into the complete date answer's month day.
   Put 1 into the complete date status.
   Put "" into the complete date error.
 

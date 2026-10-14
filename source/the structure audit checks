@@ -6,9 +6,9 @@ To check complete date clearing:
   Put 1 into the complete date status.
   Put 5000 into the complete date answer's year number.
   Put 10 into the complete date answer's cutlet name index.
-  Put 503 into the complete date answer's day within cutlet.
+  Put 503 into the complete date answer's cutlet day.
   Put 20 into the complete date answer's month name index.
-  Put 56 into the complete date answer's day within month.
+  Put 56 into the complete date answer's month day.
   Reset the complete date answer.
   If the complete date status is not 0,
     put "Reset did not invalidate the previous date." into the check report; exit.
@@ -16,11 +16,11 @@ To check complete date clearing:
     put "Previous year survived an invalidation." into the check report; exit.
   If the complete date answer's cutlet name index is not 0,
     put "Previous cutlet name survived an invalidation." into the check report; exit.
-  If the complete date answer's day within cutlet is not 0,
+  If the complete date answer's cutlet day is not 0,
     put "Previous cutlet day survived an invalidation." into the check report; exit.
   If the complete date answer's month name index is not 0,
     put "Previous month name survived an invalidation." into the check report; exit.
-  If the complete date answer's day within month is not 0,
+  If the complete date answer's month day is not 0,
     put "Previous month day survived an invalidation." into the check report; exit.
   If the complete date error is blank,
     put "A failed date lacks an explicit error." into the check report; exit.

@@ -18,10 +18,10 @@ To render the complete date in English:
   Append ", " to the complete English date text.
   Append the English cutlet name to the complete English date text.
   Append ", " to the complete English date text.
-  Convert the complete date answer's day within cutlet to a string.
+  Convert the complete date answer's cutlet day to a string.
   Append the string to the complete English date text.
   Append ", " to the complete English date text.
   Append the English month name to the complete English date text.
   Append ", " to the complete English date text.
-  Convert the complete date answer's day within month to a string.
+  Convert the complete date answer's month day to a string.
   Append the string to the complete English date text.

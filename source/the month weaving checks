@@ -60,7 +60,7 @@ To check two-month weaving:
     put "The middle two-month weaving differs from its reference." into the check report; exit.
   If the woven requested month ordinal is not 2,
     put "The middle weave selected the wrong target month." into the check report; exit.
-  If the woven requested day in month is not 3,
+  If the woven requested month day is not 3,
     put "The middle weave selected the wrong day within its month." into the check report; exit.
   Put "20" into the weaving rank wide quantity.
   Select a month weaving from the weaving rank wide quantity.
@@ -86,7 +86,7 @@ To check three-month weaving:
     put "The middle three-month weaving differs from its reference." into the check report; exit.
   If the woven requested month ordinal is not 1,
     put "The middle three-month weaving has the wrong month on day seven." into the check report; exit.
-  If the woven requested day in month is not 3,
+  If the woven requested month day is not 3,
     put "The middle three-month weaving has the wrong intra-month day." into the check report; exit.
   Put "1301" into the weaving rank wide quantity.
   Select a month weaving from the weaving rank wide quantity.

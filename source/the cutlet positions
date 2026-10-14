@@ -8,7 +8,7 @@
 \ later seal questions without restoring the shared year sauce.
 
 The requested cutlet number is a number.
-The requested day in cutlet is a number.
+The requested cutlet day is a number.
 The cutlet opening day is a calendar day.
 The cutlet ordinal number is a number.
 The examined cutlet piece is a cutlet piece.
@@ -27,7 +27,7 @@ To reach the end of one cutlet:
 \ The target day must already be inside the chosen year's open/close.
 To resolve the cutlet of the target day:
   Put 0 into the requested cutlet number.
-  Put 0 into the requested day in cutlet.
+  Put 0 into the requested cutlet day.
   Put the chosen year's opening day into the gate walk's current position.
   Put the chosen year's opening index into the gate walk's current index.
   Put the chosen cutlet pieces' first into the examined cutlet piece.
@@ -49,5 +49,5 @@ To resolve the cutlet of the target day:
 To examine the closing cutlet boundary:
   If the target year day is greater than the gate walk's current position, exit.
   Put the cutlet ordinal number into the requested cutlet number.
-  Put the target year day into the requested day in cutlet.
-  Subtract the cutlet opening day from the requested day in cutlet.
+  Put the target year day into the requested cutlet day.
+  Subtract the cutlet opening day from the requested cutlet day.

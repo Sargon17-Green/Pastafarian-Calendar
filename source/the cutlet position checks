@@ -19,7 +19,7 @@ To check the complete Foundation cutlet:
     put "Foundation cutlet ordinal was not resolved." into the check report; exit.
   If the requested cutlet number is greater than the selected cutlet count,
     put "Foundation cutlet ordinal exceeds the chosen number of cutlets." into the check report; exit.
-  If the requested day in cutlet is not 503,
+  If the requested cutlet day is not 503,
     put "Foundation should be day 503 within its cutlet." into the check report; exit.
   Choose the canonical cutlet names.
   If the cutlet name choice's selection success is not 1,
