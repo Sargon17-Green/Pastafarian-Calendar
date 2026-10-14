@@ -61,6 +61,6 @@ To accumulate the started weaving month:
   Subtract 1 from the started weaving suffix's binomial top.
   Put the started weaving month's remaining days into the started weaving suffix's binomial bottom.
   Subtract 1 from the started weaving suffix's binomial bottom.
-  Calculate a binomial coefficient given the started weaving suffix's binomial top and the started weaving suffix's binomial bottom.
+  Calculate binomial coefficients given the started weaving suffix's binomial top and the started weaving suffix's binomial bottom.
   Multiply the binomial result by the started weaving suffix's completions.
   Add the started weaving month's remaining days to the started weaving suffix's accumulated remaining.

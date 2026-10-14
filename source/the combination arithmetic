@@ -35,7 +35,7 @@ To divide a wide quantity by a number and retain the remainder:
 \ Each intermediate C(n-k+i,i) is integral, so no rounding occurs.
 \ For invalid k (<0 or >n), the result is exactly zero.
 \ Both input numbers must be nonnegative and small enough for CAL.
-To calculate a binomial coefficient given a number and another number:
+To calculate binomial coefficients given a number and another number:
   Put "0" into the binomial result.
   If the number is less than 0, exit.
   If the other number is less than 0, exit.

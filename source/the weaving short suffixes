@@ -74,7 +74,7 @@ To count a short weaving suffix:
   Put the short weaving suffix's first remaining into a binomial top number.
   Add the short weaving suffix's second remaining to the binomial top number.
   Subtract 1 from the binomial top number.
-  Calculate a binomial coefficient given the binomial top number and the short weaving suffix's first remaining.
+  Calculate binomial coefficients given the binomial top number and the short weaving suffix's first remaining.
   Put the binomial result into the short weaving suffix's completions.
 
 \ The lower-index month has not started. The higher-index month must
@@ -87,5 +87,5 @@ To count an unstarted first month:
   Subtract 2 from the binomial top number.
   Put the short weaving suffix's first remaining into a binomial bottom number.
   Subtract 1 from the binomial bottom number.
-  Calculate a binomial coefficient given the binomial top number and the binomial bottom number.
+  Calculate binomial coefficients given the binomial top number and the binomial bottom number.
   Put the binomial result into the short weaving suffix's completions.

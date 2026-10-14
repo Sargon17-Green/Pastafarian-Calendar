@@ -17,21 +17,21 @@ To check the long small division:
     put "Long division by ten returned the wrong remainder." into the check report; exit.
 
 To check the binomial coefficients:
-  Calculate a binomial coefficient given 5 and 0.
+  Calculate binomial coefficients given 5 and 0.
   If the binomial result is not "1",
     put "C(5,0) is not one." into the check report; exit.
-  Calculate a binomial coefficient given 5 and 2.
+  Calculate binomial coefficients given 5 and 2.
   If the binomial result is not "10",
     put "C(5,2) is not ten." into the check report; exit.
-  Calculate a binomial coefficient given 15 and 6.
+  Calculate binomial coefficients given 15 and 6.
   If the binomial result is not "5005",
     put "C(15,6) is wrong." into the check report; exit.
-  Calculate a binomial coefficient given 50 and 15.
+  Calculate binomial coefficients given 50 and 15.
   If the binomial result is not "2250829575120",
     put "C(50,15) is wrong." into the check report; exit.
-  Calculate a binomial coefficient given 130 and 16.
+  Calculate binomial coefficients given 130 and 16.
   If the binomial result is not "121515484051014339000",
     put "C(130,16) lost big-number precision." into the check report; exit.
-  Calculate a binomial coefficient given 10 and 11.
+  Calculate binomial coefficients given 10 and 11.
   If the binomial result is not "0",
     put "An impossible binomial coefficient was not zero." into the check report; exit.

@@ -75,7 +75,7 @@ To count the empty month suffix given a number:
 \ The current inclusion/exclusion term is
 \ C(P,j) * C(S-120j+P-1,P-1).
 To add the next month counting term given a number:
-  Calculate a binomial coefficient given the number and the month length work's excluded blocks.
+  Calculate binomial coefficients given the number and the month length work's excluded blocks.
   Put the binomial result into an inclusion term wide quantity.
   Put the month length work's extra days into a adjusted excess number.
   Put the month length work's excluded blocks into an excluded days number.
@@ -85,7 +85,7 @@ To add the next month counting term given a number:
   Subtract 1 from the adjusted excess number.
   Put the number into a remaining slots number.
   Subtract 1 from the remaining slots number.
-  Calculate a binomial coefficient given the adjusted excess number and the remaining slots number.
+  Calculate binomial coefficients given the adjusted excess number and the remaining slots number.
   Multiply the binomial result by the inclusion term wide quantity.
   Put the month length work's excluded blocks into a parity number.
   Divide the parity number by 2 giving a quotient number and a remainder number.
