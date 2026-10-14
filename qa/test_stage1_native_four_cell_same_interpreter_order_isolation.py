@@ -13,6 +13,7 @@ PyFunge's ended Program object is not a fresh execution environment.
 """
 from __future__ import print_function
 import hashlib
+import sys
 import StringIO
 
 from funge.program import Program
@@ -95,7 +96,8 @@ for index in sequence:
     for held,saved in anchors:
         need(sample(held)==saved,
              "completed candidate Program state mutated by another Native execution")
-    print("NATIVE_FOUR_CELL_REPEATED_ORDER",label,"PASS",flush=True)
+    print("NATIVE_FOUR_CELL_REPEATED_ORDER",label,"PASS")
+    sys.stdout.flush()
 program=None
 print("NATIVE_FOUR_CELL_CANDIDATE_ALTERNATING_ORDER_14_PASS")
 
@@ -133,7 +135,8 @@ for ia,ib in ((0,1),(2,3),(4,5)):
         need(sample(held)==saved,
              "candidate interleaving poisoned completed prior Program")
     print("NATIVE_FOUR_CELL_INTERLEAVED_ORDER_PASS",
-          label_a,label_b,"ticks",ticks,flush=True)
+          label_a,label_b,"ticks",ticks)
+    sys.stdout.flush()
 
 print("NATIVE_FOUR_CELL_SAME_PROCESS_14_SEQUENTIAL_3_INTERLEAVED_PAIRS_PASS")
 print("QA_ONLY; SAME_PROGRAM_OBJECT_REUSE_WITHOUT_RESET_NOT_CLAIMED; STAGE1_OPEN")
