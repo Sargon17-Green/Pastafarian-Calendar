@@ -20,6 +20,10 @@ OPS=("|","_","[","]","r","w","k","j","{","}","u","p","g","x")
 # Conservative set of BF98 operations that cannot turn an IP.
 # Include quoted character pushes; omit turns, skips and flow controls.
 STRAIGHT_BYTES=frozenset(map(ord, ' 0123456789abcdef+-*/%!`:$.,&~pg')) | frozenset((92,))
+# Deterministic Befunge-98 direction setters; unlike arbitrary turns,
+# these instructions have a uniquely prescribed resulting velocity.
+FIXED_TURNS={ord(">"):(1,0),ord("<"):(-1,0),
+             ord("^"):(0,-1),ord("v"):(0,1)}
 def straight_instruction(byte,stringmode):
     return stringmode==1 or byte==ord('"') or byte in STRAIGHT_BYTES
 
@@ -188,6 +192,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
     executed_modified=0;ops=Counter()
     pending_pg_motion=None
     pending_straight_delta=None
+    pending_fixed_turn_delta=None
     expected_postfork_stringmode=0
     for i,datum in enumerate(trace):
         need(type(datum) is list and len(datum)==7
@@ -204,6 +209,9 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
         if pending_straight_delta is not None:
             need((dx,dy)==pending_straight_delta,
                  "Native post-fork nonturning opcode changed IP direction")
+        if pending_fixed_turn_delta is not None:
+            need((dx,dy)==pending_fixed_turn_delta,
+                 "Native post-fork fixed turn opcode did not set required direction")
         # Native p/g changes Funge-space but not IP direction. Walking
         # may skip spaces or normalize across Funge-space bounds; check
         # the directed axis, not a one-cell step distance.
@@ -235,6 +243,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
                  "Native executed p/g opcode missing its physical event receipt")
             pending_pg_motion=(x,y,dx,dy)
         pending_straight_delta=(dx,dy) if straight_instruction(byte,stringmode) else None
+        pending_fixed_turn_delta=FIXED_TURNS.get(byte) if stringmode==0 else None
         if event is not None:
             kind=event[1]
             need(stringmode==0 and byte==ord(kind),
