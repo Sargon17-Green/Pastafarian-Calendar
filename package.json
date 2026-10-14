@@ -1,6 +1,6 @@
 {
   "name": "pastafari-calendar-typescript-marathi",
-  "version": "0.37.0-stage.37",
+  "version": "0.38.0-stage.38",
   "private": true,
   "type": "module",
   "description": "मगिलत हाएतिमच्या नियमाधारित दिनदर्शिकेसाठी स्वतंत्र TypeScript आणि मराठी अंमलबजावणी मार्ग",
@@ -9,7 +9,7 @@
     "test:stage01": "node --experimental-strip-types test/run.ts",
     "test:discovery01": "node --experimental-strip-types test/discovery01.ts",
     "test:discovery01:red": "node --experimental-strip-types test/discovery01Red.ts",
-    "test": "npm run test:stage01 && npm run test:discovery01 && npm run test:patch01 && npm run test:discovery02 && npm run test:patch02 && npm run test:discovery03 && npm run test:patch03 && npm run test:discovery04 && npm run test:patch04 && npm run test:discovery05 && npm run test:patch05 && npm run test:discovery06 && npm run test:patch06 && npm run test:discovery07 && npm run test:patch07 && npm run test:discovery08 && npm run test:patch08 && npm run test:discovery09 && npm run test:patch09 && npm run test:discovery10 && npm run test:patch10 && npm run test:discovery11 && npm run test:patch11 && npm run test:discovery12 && npm run test:patch12 && npm run test:discovery13 && npm run test:patch13 && npm run test:discovery14 && npm run test:patch14 && npm run test:discovery15 && npm run test:patch15 && npm run test:discovery16 && npm run test:patch16 && npm run test:discovery17 && npm run test:patch17 && npm run test:discovery18 && npm run test:patch18",
+    "test": "npm run test:stage01 && npm run test:discovery01 && npm run test:patch01 && npm run test:discovery02 && npm run test:patch02 && npm run test:discovery03 && npm run test:patch03 && npm run test:discovery04 && npm run test:patch04 && npm run test:discovery05 && npm run test:patch05 && npm run test:discovery06 && npm run test:patch06 && npm run test:discovery07 && npm run test:patch07 && npm run test:discovery08 && npm run test:patch08 && npm run test:discovery09 && npm run test:patch09 && npm run test:discovery10 && npm run test:patch10 && npm run test:discovery11 && npm run test:patch11 && npm run test:discovery12 && npm run test:patch12 && npm run test:discovery13 && npm run test:patch13 && npm run test:discovery14 && npm run test:patch14 && npm run test:discovery15 && npm run test:patch15 && npm run test:discovery16 && npm run test:patch16 && npm run test:discovery17 && npm run test:patch17 && npm run test:discovery18 && npm run test:patch18 && npm run test:discovery19",
     "test:patch01": "node --experimental-strip-types test/patch01.ts",
     "test:discovery02": "node --experimental-strip-types test/discovery02.ts",
     "test:discovery02:red": "node --experimental-strip-types test/discovery02Red.ts",
@@ -61,7 +61,9 @@
     "test:patch17": "node --experimental-strip-types test/patch17.ts && node --experimental-strip-types test/patch17Properties.ts",
     "test:discovery18": "node --experimental-strip-types test/discovery18.ts && node --experimental-strip-types test/discovery18Properties.ts && node test/verifyDiscovery18ExpectedRed.mjs",
     "test:discovery18:red": "node --experimental-strip-types test/discovery18Red.ts",
-    "test:patch18": "node --experimental-strip-types test/patch18.ts && node --experimental-strip-types test/patch18Properties.ts"
+    "test:patch18": "node --experimental-strip-types test/patch18.ts && node --experimental-strip-types test/patch18Properties.ts",
+    "test:discovery19": "node --experimental-strip-types test/discovery19.ts && node --experimental-strip-types test/discovery19Properties.ts && node test/verifyDiscovery19ExpectedRed.mjs",
+    "test:discovery19:red": "node --experimental-strip-types test/discovery19Red.ts"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
