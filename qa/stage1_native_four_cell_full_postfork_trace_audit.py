@@ -116,6 +116,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
         last_pg=None
         last_straight_delta=None
         last_fixed_turn_delta=None
+        last_fixed_turn_position=None
         expected_prefork_stringmode=0
         for index,entry in enumerate(pretrace):
             need(type(entry) is list and len(entry)==7 and
@@ -140,6 +141,9 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
             if last_fixed_turn_delta is not None:
                 need((dx,dy)==last_fixed_turn_delta,
                      "Native pre-fork fixed turn opcode did not set required direction")
+                px,py=last_fixed_turn_position
+                need((x-px)*dy==(y-py)*dx,
+                     "Native pre-fork fixed turn successor left directed axis")
             if last_pg is not None:
                 px,py,pdx,pdy=last_pg
                 need((dx,dy)==(pdx,pdy) and
@@ -156,6 +160,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
                 last_pg=(x,y,dx,dy)
             last_straight_delta=(x,y,dx,dy) if straight_instruction(byte,stringmode) else None
             last_fixed_turn_delta=FIXED_TURNS.get(byte) if stringmode==0 else None
+            last_fixed_turn_position=(x,y) if last_fixed_turn_delta is not None else None
             if event is not None:
                 need(stringmode==0 and byte==ord(event[1]),
                      "Forged Native pre-fork p/g event on wrong opcode")
@@ -206,6 +211,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
     pending_pg_motion=None
     pending_straight_delta=None
     pending_fixed_turn_delta=None
+    pending_fixed_turn_position=None
     expected_postfork_stringmode=0
     for i,datum in enumerate(trace):
         need(type(datum) is list and len(datum)==7
@@ -228,6 +234,9 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
         if pending_fixed_turn_delta is not None:
             need((dx,dy)==pending_fixed_turn_delta,
                  "Native post-fork fixed turn opcode did not set required direction")
+            px,py=pending_fixed_turn_position
+            need((x-px)*dy==(y-py)*dx,
+                 "Native post-fork fixed turn successor left directed axis")
         # Native p/g changes Funge-space but not IP direction. Walking
         # may skip spaces or normalize across Funge-space bounds; check
         # the directed axis, not a one-cell step distance.
@@ -260,6 +269,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
             pending_pg_motion=(x,y,dx,dy)
         pending_straight_delta=(x,y,dx,dy) if straight_instruction(byte,stringmode) else None
         pending_fixed_turn_delta=FIXED_TURNS.get(byte) if stringmode==0 else None
+        pending_fixed_turn_position=(x,y) if pending_fixed_turn_delta is not None else None
         if event is not None:
             kind=event[1]
             need(stringmode==0 and byte==ord(kind),
