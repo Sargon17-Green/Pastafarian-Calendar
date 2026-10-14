@@ -129,8 +129,51 @@ def historical(path):
           sum(x[2] for x in checks))
 
 
+def cardinal_axis_regression():
+    """Cardinal BF98 nonturning steps cannot teleport perpendicular to travel.
+
+    The forged successor retains its original direction and its physical
+    opcode byte; without the axis invariant an old auditor accepted it.
+    """
+    source, run = fixture()
+    row = bytearray(source[0])
+    row[100] = ord("3")
+    source = [bytes(row), bytes(row)]
+    run["complete_postfork_trace"][100][5] = ord("3")
+    audit.verify_run(run, source)
+    sideways = copy.deepcopy(run)
+    sideways["complete_postfork_trace"][101][2] = 1
+    sideways["first_512_motion"][101] = sideways["complete_postfork_trace"][101][1:5]
+    reject(source, sideways, "postfork_digit_perpendicular_teleport",
+           expected_error="post-fork nonturning opcode left cardinal travel axis")
+
+    # The same requirement must hold during the recorded Native pre-fork path.
+    source, run = fixture()
+    row = bytearray(source[0])
+    row[600:602] = b"0|"
+    source = [bytes(row), bytes(row)]
+    run["steps"] += 1
+    run["gate"]["step"] += 1
+    for event in run["complete_postfork_trace"]:
+        event[0] += 1
+    for event in run["native_p_history"] + run["native_g_history"]:
+        event["tick"] += 1
+    run["complete_prefork_trace"] = [
+        [1, 600, 0, 1, 0, ord("0"), 0],
+        [2, 601, 0, 1, 0, ord("|"), 0],
+    ]
+    audit.verify_run(run, source, require_prefork=True)
+    sideways = copy.deepcopy(run)
+    sideways["complete_prefork_trace"][1][2] = 1
+    reject(source, sideways, "prefork_digit_perpendicular_teleport",
+           prefork=True,
+           expected_error="pre-fork nonturning opcode left cardinal travel axis")
+    print("NATIVE_CARDINAL_TRAVEL_AXIS_TWO_FALSIFICATIONS_REJECT_PASS")
+
+
 if __name__ == "__main__":
     synthetic()
+    cardinal_axis_regression()
     if len(sys.argv) == 2:
         historical(sys.argv[1])
     else:
