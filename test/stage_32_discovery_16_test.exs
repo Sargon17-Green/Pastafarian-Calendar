@@ -127,10 +127,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage32Discovery16Test do
     assert report.rank in 1..report.candidate_count
   end
 
-  test "bản sản xuất thật chọn từ danh sách legacy theo rank" do
+  test "bản sản xuất chọn từ danh sách đã sửa, legacy vẫn lưu nguyên" do
     for c <- [@foundation, @foundation + 31] do
       report = Year5000Manager.diagnose(c)
-      selected = Enum.at(report.historical_order, report.rank - 1)
+      selected = Enum.at(report.corrected_order, report.rank - 1)
+      assert report.historical_order == LegacyLongestFirstYear5000.sort(report.candidates)
       assert report.year.open_gate_index == selected.open_gate_index
       assert report.year.close_gate_index == selected.close_gate_index
       assert Calendar.year5000_spaghetti(c) == report.year
@@ -164,11 +165,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage32Discovery16Test do
     selector = File.read!(Path.join(root, "year5000_manager.ex"))
     candidates = File.read!(Path.join(root, "year5000_candidate_manager.ex"))
     assert legacy =~ "{-candidate.length, candidate.open_gate_day}"
-    assert selector =~ "LegacyLongestFirstYear5000.sort(candidates)"
-    assert selector =~ "Enum.at(historical_order, rank - 1)"
+    assert selector =~ "ShortestFirstYear5000Patch.diagnose(candidates)"
+    assert selector =~ "Enum.at(corrected_order, rank - 1)"
     assert candidates =~ "GateTimelineManager.ensure_index"
     refute selector =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "shortest_first_year5000_patch.ex"))
+    assert File.exists?(Path.join(root, "shortest_first_year5000_patch.ex"))
   end
 
   test "đầu vào năm 5000 phải là số nguyên" do

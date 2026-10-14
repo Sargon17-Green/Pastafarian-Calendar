@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=32
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=33
+CURRENT_KIND=PATCH
 CURRENT_PATCH=16
 LAST_COMPLETED_STAGE=32
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..15; Stage32 mở Year5000CandidateManager, LegacyLongestFirstYear5000, Year5000Manager và Year. Tập ứng viên và rank được tính đúng, nhưng đường production sắp độ dài năm giảm dần thay vì tăng dần.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..15; Stage33 thêm ShortestFirstYear5000Patch vẫn gọi legacy dài-trước, rồi sắp lại {length,open_gate_day} tăng dần. Year5000Manager chọn theo corrected_order; tập ứng viên, gate, rank và oracle không đổi.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_32_DISCOVERY_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_33_PATCH_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=451
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -783,3 +783,5 @@ CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565791
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565791544
 Cảnh báo Node.js 20 từ checkout@v4 là cảnh báo nền tảng, không phải Elixir.
 Đóng Stage32 EXPECTED_RED. Stage33 PATCH 16 chưa bắt đầu.
+
+Giai đoạn 33 PATCH 16: tạo ShortestFirstYear5000Patch, gọi thật LegacyLongestFirstYear5000.sort để giữ di sản lỗi. Sau đó sắp ứng viên theo {length,open_gate_day} tăng dần; chọn đúng rank 1-based trong corrected_order. Giữ nguyên 4 expected normative Stage32, chỉ đổi các kiểm thử điều khiển lịch sử để nhận diện production mới. Thêm 20 kiểm thử Stage33; mục tiêu 471 kiểm thử, 0 lỗi, 0 cảnh báo biên dịch. Không nâng LAST_COMPLETED_STAGE=33 trước khi CI và khóa tên đạt PASS.

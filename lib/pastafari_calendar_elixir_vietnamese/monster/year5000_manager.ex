@@ -1,15 +1,15 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.Year5000Manager do
   @moduledoc """
   Chọn năm neo 5000 từ các cặp cổng hợp lệ.
-  Stage32: danh sách ứng viên và rank là chuẩn,
-  nhưng thứ tự dùng LegacyLongestFirstYear5000
-  theo độ dài giảm dần, cố ý cho kết quả sai.
+  Stage33: tập ứng viên và rank vẫn chuẩn. Lớp PATCH 16
+  giữ và gọi thật legacy dài-trước, rồi sắp lại ngắn-trước
+  với ngày mở sớm hơn làm tiêu chí phụ.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     AnswerStreamManager,
     Dispatcher,
-    LegacyLongestFirstYear5000,
+    ShortestFirstYear5000Patch,
     Year,
     Year5000CandidateManager
   }
@@ -23,10 +23,12 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Year5000Manager do
     {candidates, state} = Year5000CandidateManager.build(calculation_day)
     if candidates == [], do: raise(ArgumentError, "không tìm thấy năm neo 5000")
 
-    historical_order = LegacyLongestFirstYear5000.sort(candidates)
+    order_report = ShortestFirstYear5000Patch.diagnose(candidates)
+    historical_order = order_report.historical_order
+    corrected_order = order_report.corrected_order
     stream = Dispatcher.answer_stream(calculation_day, calculation_day, @bowl, @seal)
     rank = AnswerStreamManager.choose_rank(stream, length(candidates))
-    selected = Enum.at(historical_order, rank - 1)
+    selected = Enum.at(corrected_order, rank - 1)
 
     year = %Year{
       number: 5000,
@@ -37,7 +39,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Year5000Manager do
     }
 
     %{year: year, gate_state: state, candidates: candidates,
-      historical_order: historical_order, candidate_count: length(candidates),
+      historical_order: historical_order, corrected_order: corrected_order,
+      order_was_corrected: order_report.changed,
+      candidate_count: length(candidates),
       rank: rank, bowl: @bowl, seal: @seal}
   end
 
