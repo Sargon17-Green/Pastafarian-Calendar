@@ -130,7 +130,7 @@ To travel backward to the target day:
 \ The full date's cutlet and month structure is selected after this year walk.
 To find the year for a calendar day and another calendar day:
   Put the other calendar day into the target year day.
-  Find year 5000 for the calendar day.
+  Find year five thousand for the calendar day.
   If the year selection success is not 1, exit.
   Put 5000 into the current year number.
   If the target year day is greater than the chosen year's closing day,

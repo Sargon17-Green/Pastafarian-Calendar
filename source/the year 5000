@@ -168,7 +168,7 @@ To read the selected year candidate:
 
 \ The year-5000 choice uses the sauce for (c,c), not the last gate
 \ pair or a cutlet year whose identity is already known.
-To choose year 5000 for the calculation day:
+To choose year five thousand for the calculation day:
   Put the year selection day into the example's calculation day.
   Put the year selection day into the example's requested day.
   Answer the example.
@@ -185,7 +185,7 @@ To choose year 5000 for the calculation day:
 
 \ This routine is the year-5000 entrypoint.
 \ A zero result status is an explicit failure, never a fabricated year.
-To find year 5000 for a calendar day:
+To find year five thousand for a calendar day:
   Put 0 into the year selection success.
   Begin bounded gate walking.
   Gather the nearby gate marks for the calendar day.
@@ -194,7 +194,7 @@ To find year 5000 for a calendar day:
   Gather eligible year candidates.
   If the eligible year count is 0,
     destroy the eligible year ledger; destroy the nearby gate ledger; exit.
-  Choose year 5000 for the calculation day.
+  Choose year five thousand for the calculation day.
   If the selected year available is not 1,
     destroy the eligible year ledger; destroy the nearby gate ledger; exit.
   Put 1 into the year selection success.

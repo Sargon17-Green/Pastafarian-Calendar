@@ -198,7 +198,7 @@ To run all the checks:
   If the check report is not "The checks agree with the examples.", exit.
   Check year candidate order.
   If the check report is not "The checks agree with the examples.", exit.
-  Check the year 5000 candidate enumeration.
+  Check the year five thousand candidate enumeration.
   If the check report is not "The checks agree with the examples.", exit.
   Check invalid year candidate ranks.
   If the check report is not "The checks agree with the examples.", exit.

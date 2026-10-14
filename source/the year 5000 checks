@@ -28,7 +28,7 @@ To make synthetic year gates:
   Add a synthetic gate given 7 and -15051471.
   Put -15055671 into the year selection day.
 
-To check the year 5000 candidate enumeration:
+To check the year five thousand candidate enumeration:
   Make synthetic year gates.
   Gather eligible year candidates.
   If the eligible year count is not 11,
@@ -82,8 +82,8 @@ To check the year 5000 candidate enumeration:
 \ It is intentionally NOT part of the ordinary short test sequence.
 \ After a real CAL run it should locate exactly the historical
 \ Foundation-Day year-5000 interval recorded in the main README.
-To check the complete Foundation year 5000:
-  Find year 5000 for -15055671.
+To check the complete Foundation year five thousand:
+  Find year five thousand for -15055671.
   If the year selection success is not 1,
     put "The Foundation year 5000 was not selected." into the check report; exit.
   If the chosen year's opening day is not -15057703,

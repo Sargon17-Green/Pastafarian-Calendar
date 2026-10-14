@@ -7,7 +7,7 @@
 \ real date calculation routine.
 \ Native CAL has not compiled or executed these checks.
 
-To check canonical date vector 1:
+To check canonical date vector one:
   Calculate a complete date for -15055671 and -15055671.
   If the complete date status is not 1,
     put "Canonical date vector 1 failed to calculate." into the check report; exit.
@@ -22,7 +22,7 @@ To check canonical date vector 1:
   If the complete date answer's month day is not 56,
     put "Canonical date vector 1 has the wrong month day." into the check report; exit.
 
-To check canonical date vector 2:
+To check canonical date vector two:
   Calculate a complete date for -15055671 and -15055672.
   If the complete date status is not 1,
     put "Canonical date vector 2 failed to calculate." into the check report; exit.
@@ -37,7 +37,7 @@ To check canonical date vector 2:
   If the complete date answer's month day is not 21,
     put "Canonical date vector 2 has the wrong month day." into the check report; exit.
 
-To check canonical date vector 3:
+To check canonical date vector three:
   Calculate a complete date for -15055671 and -15055670.
   If the complete date status is not 1,
     put "Canonical date vector 3 failed to calculate." into the check report; exit.
@@ -52,7 +52,7 @@ To check canonical date vector 3:
   If the complete date answer's month day is not 38,
     put "Canonical date vector 3 has the wrong month day." into the check report; exit.
 
-To check canonical date vector 4:
+To check canonical date vector four:
   Calculate a complete date for -15055671 and -15056171.
   If the complete date status is not 1,
     put "Canonical date vector 4 failed to calculate." into the check report; exit.
@@ -67,7 +67,7 @@ To check canonical date vector 4:
   If the complete date answer's month day is not 29,
     put "Canonical date vector 4 has the wrong month day." into the check report; exit.
 
-To check canonical date vector 5:
+To check canonical date vector five:
   Calculate a complete date for -15055671 and -15055171.
   If the complete date status is not 1,
     put "Canonical date vector 5 failed to calculate." into the check report; exit.
@@ -82,7 +82,7 @@ To check canonical date vector 5:
   If the complete date answer's month day is not 76,
     put "Canonical date vector 5 has the wrong month day." into the check report; exit.
 
-To check canonical date vector 6:
+To check canonical date vector six:
   Calculate a complete date for -15055671 and -15061671.
   If the complete date status is not 1,
     put "Canonical date vector 6 failed to calculate." into the check report; exit.
@@ -97,7 +97,7 @@ To check canonical date vector 6:
   If the complete date answer's month day is not 3,
     put "Canonical date vector 6 has the wrong month day." into the check report; exit.
 
-To check canonical date vector 7:
+To check canonical date vector seven:
   Calculate a complete date for -15055671 and -15049671.
   If the complete date status is not 1,
     put "Canonical date vector 7 failed to calculate." into the check report; exit.
@@ -112,7 +112,7 @@ To check canonical date vector 7:
   If the complete date answer's month day is not 81,
     put "Canonical date vector 7 has the wrong month day." into the check report; exit.
 
-To check canonical date vector 8:
+To check canonical date vector eight:
   Calculate a complete date for -15056905 and -15056448.
   If the complete date status is not 1,
     put "Canonical date vector 8 failed to calculate." into the check report; exit.
@@ -127,7 +127,7 @@ To check canonical date vector 8:
   If the complete date answer's month day is not 65,
     put "Canonical date vector 8 has the wrong month day." into the check report; exit.
 
-To check canonical date vector 9:
+To check canonical date vector nine:
   Calculate a complete date for -15054437 and -15053449.
   If the complete date status is not 1,
     put "Canonical date vector 9 failed to calculate." into the check report; exit.
@@ -142,7 +142,7 @@ To check canonical date vector 9:
   If the complete date answer's month day is not 45,
     put "Canonical date vector 9 has the wrong month day." into the check report; exit.
 
-To check canonical date vector 10:
+To check canonical date vector ten:
   Calculate a complete date for -15058171 and -15053171.
   If the complete date status is not 1,
     put "Canonical date vector 10 failed to calculate." into the check report; exit.
@@ -159,23 +159,23 @@ To check canonical date vector 10:
 
 \ Do not run this full suite on a machine without adequate resources.
 To check all canonical dates:
-  Check canonical date vector 1.
+  Check canonical date vector one.
   If the check report is not "The checks agree with the examples.", exit.
-  Check canonical date vector 2.
+  Check canonical date vector two.
   If the check report is not "The checks agree with the examples.", exit.
-  Check canonical date vector 3.
+  Check canonical date vector three.
   If the check report is not "The checks agree with the examples.", exit.
-  Check canonical date vector 4.
+  Check canonical date vector four.
   If the check report is not "The checks agree with the examples.", exit.
-  Check canonical date vector 5.
+  Check canonical date vector five.
   If the check report is not "The checks agree with the examples.", exit.
-  Check canonical date vector 6.
+  Check canonical date vector six.
   If the check report is not "The checks agree with the examples.", exit.
-  Check canonical date vector 7.
+  Check canonical date vector seven.
   If the check report is not "The checks agree with the examples.", exit.
-  Check canonical date vector 8.
+  Check canonical date vector eight.
   If the check report is not "The checks agree with the examples.", exit.
-  Check canonical date vector 9.
+  Check canonical date vector nine.
   If the check report is not "The checks agree with the examples.", exit.
-  Check canonical date vector 10.
+  Check canonical date vector ten.
   If the check report is not "The checks agree with the examples.", exit.
