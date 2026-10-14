@@ -865,7 +865,7 @@ istorik yo. Senkyèm commit repare `41+rank`, 42..963,
 san efase eta legacy oswa ranvèse rank la. Wout
 legacy rete byte-pou-byte konstan. Pa gen gate
 sequence ni `postStir12` nan etap sa a.
-CI natif poko verifye.
+CI natif verifye sou run `38565993353`.
 
 ### Tès PATCH 16 ki soumèt pou verifikasyon
 
@@ -875,4 +875,17 @@ ak 14 rekiperasyon, twa nested contexts ak de
 sauce kanonik; twa `EXPECTED_RED` Stage 32 yo
 rete audit istorik. CI Stage 33 gen kat nouvo jobs,
 ak job Stage 32 ki rete vèt aprè PATCH 16.
-Rezilta natif poko konfime.
+Rezilta natif konfime: 56/56 travay PASS.
+### Fèmti PATCH 16 — Stage 33
+
+Run `38565993353`: **56/56 PASS**.
+Tout suite Stage 1–33, 234 konparezon oracle,
+234 koreksyon longè pòtay, uit BigInt siyen,
+14 enjeksyon/recovery, twa nested PATCH 16 ak
+de sous sauce kanonik pase. Kadna SHA verifye
+legacy gate-gap, PATCH 13 ak PATCH 15 pa chanje.
+Twa sak `EXPECTED_RED` Stage 32 toujou pase audit;
+senkyèm commit koreksyon an pa efase prèv istorik la.
+Pa gen gate sequence oswa `postStir12`.
+`LAST_COMPLETED_STAGE=33` / `GREEN`.
+
