@@ -66,17 +66,24 @@ def guarded_step(actor, peer, step):
     untouched_peer_queue = peer.ips
     untouched_peer_semantics = getattr(peer, 'semantics', None)
     untouched_peer_platform = getattr(untouched_peer_semantics, 'platform', None)
-    step(actor)
+    # Native p/s execution can fail after partially mutating shared state.
+    # Inspect the peer even if step(actor) raises; preserve the original
+    # exception when the peer is still untouched. Only a completed Native
+    # step is required to have successfully committed the actor's write.
+    try:
+        step(actor)
+    finally:
+        # Validate identities before dereferencing possibly replaced objects.
+        if (peer.space is not untouched_peer_space or
+                peer.ips is not untouched_peer_queue or
+                getattr(peer, 'semantics', None) is not untouched_peer_semantics or
+                getattr(getattr(peer, 'semantics', None), 'platform', None)
+                is not untouched_peer_platform):
+            raise AssertionError("Native p/s replaced the other Program's owned runtime objects")
+        if peer.space.get(peer_target) != untouched_peer_byte:
+            raise AssertionError("Native p/s mutated the other Program's corresponding Funge-space cell")
+        if peer_ip_snapshot(peer) != untouched_peer_ip:
+            raise AssertionError("Native p/s mutated the other Program's IP or stack-stack state")
     if int(actor.space.get(target)) != expected:
         raise AssertionError("Native p/s did not write its expected physical Funge-space cell")
-    if peer.space.get(peer_target) != untouched_peer_byte:
-        raise AssertionError("Native p/s mutated the other Program's corresponding Funge-space cell")
-    if peer_ip_snapshot(peer) != untouched_peer_ip:
-        raise AssertionError("Native p/s mutated the other Program's IP or stack-stack state")
-    if (peer.space is not untouched_peer_space or
-            peer.ips is not untouched_peer_queue or
-            getattr(peer, 'semantics', None) is not untouched_peer_semantics or
-            getattr(getattr(peer, 'semantics', None), 'platform', None)
-            is not untouched_peer_platform):
-        raise AssertionError("Native p/s replaced the other Program's owned runtime objects")
     return 1
