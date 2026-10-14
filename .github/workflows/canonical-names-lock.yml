@@ -29,7 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build DMG ROM using official RGBDS v1.0.4
+      - name: Audit arithmetic model independently of SM83 binaries
+        run: python3 tests/test_arithmetic_invariants.py
+      - name: Build DMG ROM using RGBDS v1.0.4
         run: |
           docker run --rm --mount type=bind,src="$PWD",dst=/work \
             -w /work ghcr.io/gbdev/rgbds:v1.0.4 \
