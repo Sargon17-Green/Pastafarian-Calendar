@@ -26,6 +26,11 @@ local function validate(n,streams)
   and n>=1 and n<=32,"DISCOVERY 17: index pozitif dwe 1..32")
  assert(type(streams)=="table" and #streams==n,
   "DISCOVERY 17: egzakteman n sous SAVE yo obligatwa")
+ for key in pairs(streams) do
+  assert(type(key)=="number" and math.type(key)=="integer"
+    and key>=1 and key<=n,
+   "DISCOVERY 17: sous SAVE pa dwe gen endis depase 1..n")
+ end
  for i=1,n do
   local s=streams[i]
   assert(type(s)=="table" and s.first~=nil

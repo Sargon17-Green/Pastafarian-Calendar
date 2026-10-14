@@ -21,6 +21,9 @@ for _,bad in ipairs({0,-1,1.5,"2",33,false,{}}) do
  assert(not pcall(S.legacyPositiveGateProbe,bad,streams))
 end
 assert(not pcall(S.legacyPositiveGateProbe,1,nil))
+assert(not pcall(S.legacyPositiveGateProbe,1,{[1]={first=1,directionStep=1},[0]={first=2,directionStep=1}}))
+assert(not pcall(S.legacyPositiveGateProbe,1,{[1]={first=1,directionStep=1},note="bad-extra-key"}))
+assert(not pcall(S.legacyPositiveGateProbe,2,{[1]={first=1,directionStep=1},[3]={first=2,directionStep=1}}))
 for _,bad in ipairs({false,"not-a-list",{},{{first=1,directionStep=2}},{{first=0,directionStep=1}}}) do
  assert(not pcall(S.legacyPositiveGateProbe,1,bad))
 end

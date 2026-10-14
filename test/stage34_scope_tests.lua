@@ -12,6 +12,8 @@ assert(old:find('local GateGap=require("gate_gap_patch")',1,true)
  and old:find('manager.dispatcher:register("LEGACY_POSITIVE_GATE_RESETS_FOUNDATION"',1,true)
  and old:find('active:commitSemanticUpdate()',1,true)
  and not old:find('require("positive_gate_patch")',1,true))
+assert(not old:find("correctCumulativeDayForAudit",1,true))
+assert(not old:find("running=B.add",1,true))
 assert(facade:find("function S.legacyPositiveGateProbe(",1,true)
  and facade:find("function S.positiveGateDaySpaghetti(",1,true))
 for _,s in ipairs({old,facade}) do
