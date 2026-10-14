@@ -60,3 +60,5 @@ jobs:
         run: php -d memory_limit=512M tests/stage07_patch03_tests.php
       - name: Penemuan 04 — sahkan mutasi batu merah yang dijangka
         run: php -d memory_limit=512M tests/verify_stage08_discovery04.php
+      - name: Tampalan 04 — kesetaraan normatif batu dan parut mutasi
+        run: php -d memory_limit=512M tests/stage09_patch04_tests.php

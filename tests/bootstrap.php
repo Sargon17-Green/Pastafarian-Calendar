@@ -12,6 +12,7 @@ require_once $root . '/src/Legacy/LegacyStoneMutation.php';
 require_once $root . '/src/Patches/SavePatch01.php';
 require_once $root . '/src/Patches/FoundationScarPatch02.php';
 require_once $root . '/src/Patches/DistanceCountPatch03.php';
+require_once $root . '/src/Patches/StonePatch04.php';
 require_once $root . '/src/BootstrapKernel.php';
 require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';

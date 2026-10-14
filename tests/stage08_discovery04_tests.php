@@ -17,10 +17,10 @@ use Pastafari\Stage01\Patches\SavePatch01;
 $kernel = new BootstrapKernel();
 $legacy = new LegacyStoneMutation(new SavePatch01(new LegacyRemainder()));
 $correct = (new NormativeSauce())->buildStones();
-$wrong = $kernel->stones();
+$wrong = $legacy->buildStonesWrong();
 $direct = $legacy->buildStonesWrong();
-$repeated = $kernel->stones();
-$another = (new BootstrapKernel())->stones();
+$repeated = $legacy->buildStonesWrong();
+$another = (new LegacyStoneMutation(new SavePatch01(new LegacyRemainder())))->buildStonesWrong();
 
 $unexpected = 0;
 $divergences = 0;

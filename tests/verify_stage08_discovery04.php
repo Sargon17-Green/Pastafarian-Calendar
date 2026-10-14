@@ -36,13 +36,20 @@ $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)
 );
 $legacyFound = false;
+$patchFound = false;
 foreach ($iterator as $file) {
     if (strtolower($file->getExtension()) !== 'php') {
         continue;
     }
     $body = (string)file_get_contents($file->getPathname());
-    if (str_contains($body, 'NormativeMath') || str_contains($body, 'stonePatch(')) {
+    if (str_contains($body, 'NormativeMath') || str_contains($body, 'NormativeSauce')) {
         $valid = false;
+    }
+    if (str_contains($body, 'function stonePatch(')) {
+        $patchFound = $patchFound || $file->getFilename() === 'StonePatch04.php';
+        if ($file->getFilename() !== 'StonePatch04.php') {
+            $valid = false;
+        }
     }
     if (str_contains($body, 'function mutateStonesWrong(')) {
         $legacyFound = $legacyFound || $file->getFilename() === 'LegacyStoneMutation.php';
@@ -52,10 +59,11 @@ foreach ($iterator as $file) {
     }
 }
 $kernel = (string)file_get_contents($root . '/BootstrapKernel.php');
-$valid = $valid && $legacyFound
-    && str_contains($kernel, "dispatch('STONE_MUTATION_LEGACY', " . '$context)');
+$valid = $valid && $legacyFound && $patchFound
+    && str_contains($kernel, "register('STONE_MUTATION_LEGACY'")
+    && str_contains($kernel, "dispatch('STONE_PATCH_04', " . '$context)');
 if (!$valid) {
-    fwrite(STDERR, "GAGAL: bukti mutasi merah bukan corak Stage 8 yang ditetapkan\n");
+    fwrite(STDERR, "GAGAL: bukti mutasi merah atau pemisahan tampalan tidak sah\n");
     exit(1);
 }
-echo "LULUS kontrak merah 04; mutasi legacy aktif, tampalan 04 belum hadir\n";
+echo "LULUS kontrak merah 04; legacy kekal salah dan produksi ditampal\n";

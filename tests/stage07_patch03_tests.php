@@ -159,7 +159,7 @@ foreach ($iterator as $file) {
     if (strtolower($file->getExtension()) !== 'php') continue;
     $source = (string)file_get_contents($file->getPathname());
     sahJarak(!str_contains($source, 'NormativeMath'), 'ORACLE_DI_PRODUKSI');
-    sahJarak(!str_contains($source, 'stonePatch('), 'TAMPALAN_04_TIDAK_DIBENARKAN');
+    sahJarak(!str_contains($source, 'NormativeSauce'), 'ORACLE_SOS_DI_PRODUKSI');
 }
 
 sahJarak($cases === 16668 && $oracleCases === 16656 && $largeCases === 12, 'BILANGAN_KES');

@@ -175,3 +175,26 @@ Pada langkah 2, nilai legacy ialah `(w=378,b=1434,s=3780,m=9932,r=25047)`, manak
 ### Titik asas
 
 Penemuan ini dibina selepas pembetulan kanonik Stage 7 pada commit `5743a0ffeb7ef87016f8ff2a6166460abfcaddea`, yang telah lulus GitHub Actions sebelum perubahan Stage 8.
+
+
+## Stage 9 — PATCH 04: Pembalut snapshot bagi lima batu
+
+### Sebab pembetulan diperlukan
+
+Pengiraan `LegacyStoneMutation::mutateStonesWrong` membaca hasil terkini komponen yang sudah berubah. Ia telah terbukti berbeza daripada `NormativeSauce::buildStones` pada 45 daripada 46 baris dalam Stage 8. Punca sejarah tidak dipadam, kerana kerosakan semantik ialah bukti wajib.
+
+### Cara pembetulan yang ditetapkan
+
+`StonePatch04::stonePatch(i,state)` membina `old` (snapshot array dan objek BigInt tidak berubah), kemudian `garbage` daripada salinan bebas dan **benar-benar** memanggil `mutateStonesWrong(i,garbage)`. Semua lima medan `garbage` selepas itu ditulis semula dengan `savePatch` dan formula asli yang hanya membaca `old`. Hasil pengeluaran `buildStones` ialah 46 baris, setiap baris memiliki rekod tersendiri.
+
+### Lapisan tambahan untuk pertumbuhan monster
+
+Dispatcher lama `STONE_MUTATION_LEGACY` kekal untuk sejarah. Dispatcher produksi baharu `STONE_PATCH_04` membina penampal berserta objek legacy dan SAVE; `BootstrapKernel::stones` kini melalui laluan baharu, dalam konteks panggilan per-instance. Metrik dan status hanya pemerhatian, tidak menjadi input semantik, dan tiada oracle dalam laluan produksi.
+
+### Bukti regresi dan pengasingan
+
+Ujian langsung Stage 8 masih keluar kod 1 untuk 45 baris legacy yang salah. Pemeriksa Stage 8 mengesahkan merah yang tepat dan menerima pembalut Stage 9. Ujian hijau Stage 9 membandingkan semua 230 komponen jadual dengan oracle tempatan, melakukan 315 ujian terus bagi snapshot termasuk input negatif dan besar melebihi 256 bit, memeriksa panggilan lama benar-benar wujud, determinisme, pemilikan keadaan, input yang tidak diubah serta ralat. Semua regresi Stage 1–7 terus diwajibkan.
+
+### Had tahap
+
+Tiada penyimpanan tersembunyi terbalik atau tampalan 05 dibina dalam Stage 9. Struktur nama sumber dan fixture kanonik tidak disentuh; langkah berikut ialah Stage 10, DISCOVERY 05.

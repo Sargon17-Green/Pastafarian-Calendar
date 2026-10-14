@@ -99,6 +99,18 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'legacy.stones.builds');
             return $table;
         });
+        $this->dispatcher->register('STONE_PATCH_04', function(BootstrapContext $context): array {
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyStoneMutation($save);
+            $patch = new \Pastafari\Stage01\Patches\StonePatch04($legacy, $save);
+            $table = $patch->buildStones();
+            $context->semanticState['correctedStoneTable'] = $table;
+            $context->status = 'STONE_PATCH_04_RETURNED';
+            $this->metrics->bump($context, 'stone.patch04.builds');
+            return $table;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -153,7 +165,7 @@ final class BootstrapKernel
         );
     }
     /**
-     * Laluan batu lama sengaja memakai mutasi berturutan yang tidak tepat.
+     * Laluan batu produksi memakai snapshot di atas mutasi legacy yang kekal.
      * Setiap panggilan membina jadual dan konteks semantiknya sendiri.
      *
      * @return array<int,array{w:BigInt,b:BigInt,s:BigInt,m:BigInt,r:BigInt}>
@@ -161,10 +173,10 @@ final class BootstrapKernel
     public function stones(): array
     {
         $context = new BootstrapContext(0, 0);
-        $context->phase = 'STONE_MUTATION_LEGACY';
+        $context->phase = 'STONE_PATCH_04';
         return $this->boundary->run(
             $context,
-            fn(): array => $this->dispatcher->dispatch('STONE_MUTATION_LEGACY', $context)
+            fn(): array => $this->dispatcher->dispatch('STONE_PATCH_04', $context)
         );
     }
 
