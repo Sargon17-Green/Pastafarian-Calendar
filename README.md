@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 9 (PATCH 04)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 10 (DISCOVERY 05)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -134,3 +134,15 @@ php -d memory_limit=512M tests/stage09_patch04_tests.php
 ```
 
 Penemuan Stage 8 kekal merah melalui panggilan langsung ke legacy (45 rekod menyimpang, satu rekod asas sepadan); pembalut pengesah mesti hijau. Ujian Stage 9 memeriksa 46 rekod × 5 batu, sekurang-kurangnya 315 input sintetik serta had integer besar, pemilikan keadaan dan regresi Stage 1–7. Tiada kerja untuk Stage 10 dimulakan.
+
+
+## Stage 10 — DISCOVERY 05: Stor titisan tersembunyi disongsangkan
+
+`LegacyHiddenBackward::buildStoredBackward` mengira tujuh titisan tersembunyi melalui rumus PHP tulen, tetapi menyimpan `hidden7` pada slot 1 hingga `hidden1` pada slot 7. Pembaca sejarah `wrongNearness` salah menganggap slot `k` menyimpan titisan `k` yang terdekat. Ini menghasilkan perbezaan terancang dalam `BootstrapKernel::hiddenDrops(c,t)` melalui penghala `HIDDEN_BACKWARD_LEGACY`.
+
+```text
+php -d memory_limit=512M tests/stage10_discovery05_tests.php
+php -d memory_limit=512M tests/verify_stage10_discovery05.php
+```
+
+Ujian pertama sengaja merah: 12 pasangan hari dengan 72 penyimpangan dan 12 padanan pada slot 4. Pengesah kedua hijau hanya apabila setiap penyimpangan sepadan dengan stor songsang dan tiada ralat lain. Ujian Stage 1–9 kekal hijau. **Jangan balikkan stor dan jangan tambahkan `hiddenByNearness` sehingga Stage 11.**

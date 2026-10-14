@@ -9,6 +9,7 @@ require_once $root . '/src/Legacy/LegacyRemainder.php';
 require_once $root . '/src/Legacy/LegacyDayTag.php';
 require_once $root . '/src/Legacy/LegacyDistance.php';
 require_once $root . '/src/Legacy/LegacyStoneMutation.php';
+require_once $root . '/src/Legacy/LegacyHiddenBackward.php';
 require_once $root . '/src/Patches/SavePatch01.php';
 require_once $root . '/src/Patches/FoundationScarPatch02.php';
 require_once $root . '/src/Patches/DistanceCountPatch03.php';

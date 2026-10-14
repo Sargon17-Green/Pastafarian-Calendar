@@ -198,3 +198,22 @@ Ujian langsung Stage 8 masih keluar kod 1 untuk 45 baris legacy yang salah. Peme
 ### Had tahap
 
 Tiada penyimpanan tersembunyi terbalik atau tampalan 05 dibina dalam Stage 9. Struktur nama sumber dan fixture kanonik tidak disentuh; langkah berikut ialah Stage 10, DISCOVERY 05.
+
+
+## Stage 10 — DISCOVERY 05: Titisan tersembunyi dalam stor songsang
+
+### Andaian sejarah yang salah
+
+Sistem mula menyimpan tujuh titisan dengan `hidden7` di slot 1 dan `hidden1` di slot 7. Pembaca lama `wrongNearness` menganggap slot `k` sendiri ialah titisan `k` dari yang terdekat. Penyimpanan dilakukan oleh `buildStoredBackward` selepas rumus untuk setiap `k` dihitung mengikut rujukan normatif; hanya susunannya songsang.
+
+### Pendedahan sebenar
+
+Penghala `HIDDEN_BACKWARD_LEGACY` membina kiraan menggunakan tampalan hari dan jarak sedia ada, jadual batu yang sudah dibetulkan oleh Stage 9, lalu memanggil penyimpan legacy. Hasil produksi masih dibaca melalui indeks salah. Ujian membandingkan keluaran dengan `NormativeSauce::buildHiddenDrops` dalam direktori oracle PHP tempatan sahaja. Untuk 12 pasangan hari, enam daripada tujuh slot dijangka berbeza dan slot tengah, 4, tetap sepadan. Keseluruhan 72 perbezaan keluar merah dengan kod 1, dan pemeriksa khusus menerima hanya corak tepat itu.
+
+### Pertambahan sistem
+
+Penyimpan legacy, pendedah salah, dispatcher serta konteks per-panggilan menjadikan sejarah stor kelihatan jelas. Tiada input matematik diambil daripada metrik atau log. Katalog nama, fixture, fungsi SAVE, jarak dan batu tidak diubah.
+
+### Had yang sengaja dikekalkan
+
+Tiada pembetulan peta `8-k` diwujudkan lagi. Jangan menterbalikkan susunan stor untuk membetulkan gejala; perkara ini ialah tugas Stage 11 (PATCH 05).

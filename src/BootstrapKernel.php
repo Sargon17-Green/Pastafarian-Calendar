@@ -111,6 +111,30 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'stone.patch04.builds');
             return $table;
         });
+        $this->dispatcher->register('HIDDEN_BACKWARD_LEGACY', function(BootstrapContext $context): array {
+            $c = $context->calculationDay;
+            $t = $context->targetDay;
+            $action = $this->dayCount($c);
+            $target = $this->dayCount($t);
+            $distance = $this->distance($c, $t);
+            $counts = [
+                'action' => $action,
+                'target' => $target,
+                'distance' => $distance,
+                'connection' => $action->add($target),
+                'direction' => $t < $c ? 1 : ($t === $c ? 2 : 3),
+            ];
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyHiddenBackward($save);
+            $stored = $legacy->buildStoredBackward($counts, $this->stones());
+            $context->semanticState['hiddenBackward'] = $stored;
+            $revealed = $legacy->revealWrong($stored);
+            $context->status = 'HIDDEN_BACKWARD_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.hidden.reveals');
+            return $revealed;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -177,6 +201,22 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('STONE_PATCH_04', $context)
+        );
+    }
+
+    /**
+     * Akses titisan tersembunyi lama menggunakan susunan slot yang salah.
+     * Perbaikan pemetaan slot hanya dibenarkan bermula Stage 11.
+     *
+     * @return array<int,BigInt>
+     */
+    public function hiddenDrops(int $calculationDay, int $targetDay): array
+    {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'HIDDEN_BACKWARD_LEGACY';
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('HIDDEN_BACKWARD_LEGACY', $context)
         );
     }
 
