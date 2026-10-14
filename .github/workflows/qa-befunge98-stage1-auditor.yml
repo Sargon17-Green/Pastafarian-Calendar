@@ -8,6 +8,10 @@ on:
       - 'qa/stage1_native_four_cell_full_postfork_trace_audit.py'
       - 'qa/test_stage1_native_four_cell_same_interpreter_order_isolation.py'
       - 'qa/test_stage1_native_nonturning_vector.py'
+      - 'qa/test_stage1_native_pg_physical_address.py'
+      - 'qa/stage1_native_pg_physical_address.py'
+      - 'qa/stage1_native_current_fork_route_differential.py'
+      - 'qa/stage1_native_pg_stringmode_receipt_probe.py'
       - '.github/workflows/qa-befunge98-stage1-auditor.yml'
   pull_request:
     branches:
@@ -17,6 +21,10 @@ on:
       - 'qa/stage1_native_four_cell_full_postfork_trace_audit.py'
       - 'qa/test_stage1_native_four_cell_same_interpreter_order_isolation.py'
       - 'qa/test_stage1_native_nonturning_vector.py'
+      - 'qa/test_stage1_native_pg_physical_address.py'
+      - 'qa/stage1_native_pg_physical_address.py'
+      - 'qa/stage1_native_current_fork_route_differential.py'
+      - 'qa/stage1_native_pg_stringmode_receipt_probe.py'
       - '.github/workflows/qa-befunge98-stage1-auditor.yml'
   workflow_dispatch:
 permissions:
@@ -31,7 +39,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Validate Python syntax
-        run: python -m py_compile qa/test_stage1_native_four_cell_pg_event_coverage.py qa/stage1_native_four_cell_full_postfork_trace_audit.py qa/test_stage1_native_nonturning_vector.py
+        run: python -m py_compile qa/test_stage1_native_four_cell_pg_event_coverage.py qa/stage1_native_four_cell_full_postfork_trace_audit.py qa/test_stage1_native_nonturning_vector.py qa/stage1_native_pg_physical_address.py qa/test_stage1_native_pg_physical_address.py qa/stage1_native_current_fork_route_differential.py qa/stage1_native_pg_stringmode_receipt_probe.py
       - name: Verify physical p/g receipts, gate, stringmode, and terminal opcode
         run: python -B qa/test_stage1_native_four_cell_pg_event_coverage.py
       - name: Verify fixed-turn physical axes before and after the fork
@@ -40,6 +48,10 @@ jobs:
         run: python -O -B qa/test_stage1_native_four_cell_pg_event_coverage.py
       - name: Verify fixed-turn physical axes with assertions disabled
         run: python -O -B qa/test_stage1_native_nonturning_vector.py
+      - name: Verify native physical p/g coordinate and underflow contracts
+        run: python -B qa/test_stage1_native_pg_physical_address.py
+      - name: Verify physical p/g contracts with assertions disabled
+        run: python -O -B qa/test_stage1_native_pg_physical_address.py
 
   native-same-interpreter-isolation:
     runs-on: ubuntu-latest
