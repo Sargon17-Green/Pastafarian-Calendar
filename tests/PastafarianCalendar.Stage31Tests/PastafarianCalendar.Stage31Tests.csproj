@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>14.0</LangVersion>
+    <RootNamespace>PastafarianCalendar.Stage31Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/PastafarianCalendar/PastafarianCalendar.csproj" />
+    <Compile Include="../PastafarianCalendar.Stage01Tests/Normative/NormativeScroll.Arithmetic.cs" Link="Normative/NormativeScroll.Arithmetic.cs" />
+    <Compile Include="../PastafarianCalendar.Stage01Tests/Normative/NormativeTypes.cs" Link="Normative/NormativeTypes.cs" />
+    <Compile Include="../PastafarianCalendar.Stage01Tests/Normative/NormativeScroll.Sauce.cs" Link="Normative/NormativeScroll.Sauce.cs" />
+  </ItemGroup>
+</Project>
