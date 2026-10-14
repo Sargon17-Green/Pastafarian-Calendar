@@ -15,7 +15,7 @@ local wanted=B.add(F,B.add(expectedGaps[1],B.add(expectedGaps[2],expectedGaps[3]
 local legacy,ctx=S.legacyPositiveGateProbe(3,streams)
 assert(B.compare(legacy,B.add(F,expectedGaps[3]))==0
  and B.compare(legacy,wanted)~=0
- and B.compare(ctx.correctCumulativeDayForAudit,wanted)==0
+ and ctx.correctCumulativeDayForAudit==nil
  and ctx.gapSourceStates[1].questionDayDecimal==tostring(B.add(F,1))
  and ctx.gapSourceStates[2].questionDayDecimal==tostring(B.add(F,2))
  and ctx.gapSourceStates[3].questionDayDecimal==tostring(B.add(F,3)))

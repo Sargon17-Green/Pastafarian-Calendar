@@ -14,7 +14,7 @@ end
 local value,ctx=S.legacyPositiveGateProbe(32,streams)
 local lastGap=ctx.positiveGapDecimals[32]
 assert(B.compare(value,B.add(F,lastGap))==0
- and B.compare(ctx.correctCumulativeDayForAudit,sum)==0
+ and ctx.correctCumulativeDayForAudit==nil
  and ctx.gateIndex==32 and #ctx.positiveGapDecimals==32
  and ctx.commitToken==6 and B.compare(value,sum)<0)
 for _,bad in ipairs({0,-1,1.5,"2",33,false,{}}) do

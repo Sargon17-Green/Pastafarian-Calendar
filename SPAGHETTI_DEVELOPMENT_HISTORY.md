@@ -899,7 +899,8 @@ n: `G_legacy(n)=F+gap(n)`. Oracle mande
 Tout gap endividyèl yo soti dirèkteman nan PATCH 16,
 ak PATCH 13/15 anba li; yo pa modifye yo.
 Sizyèm commit ki suiv senk commits gap final la
-kenbe jou mal la ak snapshots tout gap yo.
+kenbe jou mal la ak snapshots tout gap yo, san
+kalkile sòm kòrèk la nan kòd production.
 Entrées SAVE pou chak i soti nan caller (jan QA
 ka derive yo nan sauce otantik); pa gen sauce
 pwodiksyon oswa pòtay negatif nan DISCOVERY 17.

@@ -1251,8 +1251,8 @@ gap ak kestyon gen valè normatif.
 `src/legacy_positive_gate_position.lua` mande yon lis
 n sous SAVE otantik (premye repons ak direksyon);
 li pa fabrike sauce nan production. Pou chak i, li
-rele PATCH 16 reyèl epi kenbe snapshots prive ak
-kalkil kimen pozitif pou audit. Li konsève senk commits
+rele PATCH 16 reyèl epi kenbe snapshots prive gap yo, san kalkile
+jou kimen normatif nan production. Li konsève senk commits
 PATCH 16 pou dènye gap la epi ajoute yon sizyèm
 commit `LEGACY_POSITIVE_GATE_RESETS_FOUNDATION`.
 `positiveGateDaySpaghetti` ekspoze sa a kòm defo

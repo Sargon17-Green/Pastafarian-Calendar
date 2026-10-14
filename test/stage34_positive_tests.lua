@@ -35,8 +35,8 @@ for n=1,8 do
    and st.foundationDayDecimal==tostring(F)
    and st.lastGapDecimal==tostring(gaps[n])
    and st.historicalGateDayDecimal==tostring(wrong)
-   and st.referenceCumulativeDayDecimal==tostring(expected)
-   and st.resetOriginEachStep and st.usedOnlyLastGap
+   and st.resetOriginEachStep and st.noCorrectCumulativeResultComputed
+   and st.usedOnlyLastGap
    and st.noCumulativeChain and st.signedQuestionsAndGapPatchCorrect
    and st.historicalDivergence==(n>1)
    and st.previousGapCommitCount==5
@@ -44,8 +44,8 @@ for n=1,8 do
   assert(#st.gapDecimals==n and #ctx.gapSourceStates==n
    and #ctx.positiveGapDecimals==n
    and ctx.gateIndex==n
+   and ctx.correctCumulativeDayForAudit==nil
    and B.compare(ctx.lastCorrectedGap,gaps[n])==0
-   and B.compare(ctx.correctCumulativeDayForAudit,expected)==0
    and ctx.metrics["legacy.positiveGate.calls"]==1
    and #ctx.diagnostics==6
    and ctx.diagnostics[6].code=="DISCOVERY_17_FORGETS_PREVIOUS_POSITIVE_GAPS")

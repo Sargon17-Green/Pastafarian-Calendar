@@ -47,7 +47,6 @@ end
 function Legacy.execute(index,streams)
  local n=validate(index,streams)
  local gaps,ownedStates={},{}
- local running=B.from(F)
  local latestCtx
  for i=1,n do
   local source=streams[i]
@@ -68,7 +67,6 @@ function Legacy.execute(index,streams)
    "DISCOVERY 17: PATCH 16 gap oswa provenance pa otantik")
   gaps[i]=B.from(gap)
   ownedStates[i]=clone(child.semanticState)
-  running=B.add(running,gap)
   latestCtx=child
  end
  local old=Legacy.oldPositivePosition(gaps[n])
@@ -78,7 +76,6 @@ function Legacy.execute(index,streams)
  latestCtx.positiveGapDecimals={}
  for i=1,n do latestCtx.positiveGapDecimals[i]=tostring(gaps[i]) end
  latestCtx.lastCorrectedGap=B.from(gaps[n])
- latestCtx.correctCumulativeDayForAudit=B.from(running)
  latestCtx.gateIndex=n
  latestCtx.previousGateGapState=clone(latestCtx.semanticState)
  latestCtx.mode="STAGE_34_DISCOVERY_17"
@@ -96,8 +93,8 @@ function Legacy.execute(index,streams)
    gapDecimals=clone(active.positiveGapDecimals),
    lastGapDecimal=tostring(gaps[n]),
    historicalGateDayDecimal=tostring(result),
-   referenceCumulativeDayDecimal=tostring(running),
    resetOriginEachStep=true,
+   noCorrectCumulativeResultComputed=true,
    usedOnlyLastGap=true,
    noCumulativeChain=true,
    signedQuestionsAndGapPatchCorrect=true,
@@ -115,7 +112,7 @@ function Legacy.execute(index,streams)
   active.diagnostics[#active.diagnostics+1]={
    code="DISCOVERY_17_FORGETS_PREVIOUS_POSITIVE_GAPS",
    gateIndex=n,historicalDay=tostring(result),
-   cumulativeDay=tostring(running)
+   previousGapCount=n-1
   }
   active.status="LEGACY_POSITIVE_GATE_COMPLETE"
   return B.from(result)
