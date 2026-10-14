@@ -45,6 +45,11 @@ def synthetic():
     source = [bytes(row)]
     run["complete_postfork_trace"][100][5] = ord("3")
     audit.verify_run(run, source)
+    # Negative control: normal-status metadata cannot excuse a missing executed @.
+    no_halt = copy.deepcopy(run)
+    no_halt["complete_postfork_trace"][-1][5] = ord(" ")
+    no_halt_source = [source[0][:513] + b" " + source[0][514:]]
+    reject(no_halt_source, no_halt, "missing_executed_halt")
     altered = copy.deepcopy(run)
     altered["complete_postfork_trace"][101][3:5] = [0, 1]
     altered["first_512_motion"][101] = altered["complete_postfork_trace"][101][1:5]
