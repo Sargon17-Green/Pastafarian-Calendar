@@ -350,3 +350,34 @@ antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
 - **Ratio versionum:** nova haec documentatio SHA novum recipit et workflow
   novum excitare potest, sed affirmatio `20/20` pertinet ad
   codicem exactum `b69fdb8534a7787a5eeb9fb6f31eaf5d11ecc6da`. Neque `main` mutatur neque Gradus 57 aperitur.
+
+## Custodia portarum annorum remotorum — probatio nova post 9d8063a (PENDENS CI)
+
+- Commit testatus ante mutationem: [`9d8063a475b0c022f078b2b180551c66e5d214d3`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/9d8063a475b0c022f078b2b180551c66e5d214d3).
+  Vigilia [38367247398](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38367247398):
+  **20/20** `completed/success`, cum `SOAK_REPETITUM=8/8_PASS`,
+  `VIGILIA_SOAK=PASS` et `SOAK_GREEN`;
+  custodia nominum [38367247433](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38367247433)
+  `success`.
+- Testis remotorum iam quinque dies intra unumquemque annum `-1,0,1`
+  conferebat; tamen dies immediate **ante primum** et **post ultimum**
+  non in eodem processu probabantur.
+- Nova via test-only `AnniFinitimi` retinet **annum posteriorem
+  ex descensu canonico ab anno 5000**, et annum priorem per
+  `NormativeOracle::previousYear`. Non praesumitur
+  `NEXT` esse inverse `PREVIOUS`: haec non est regula ex
+  qua calendaris annus remotus invenitur.
+- Pro quolibet anno duo casus adiciuntur:
+  `t=openGateDay` debet esse ultimus dies anni prioris;
+  `t=closeGateDay+1` debet esse primus dies anni posterioris.
+  Verificantur annorum numeri, identitas indicum portarum,
+  continuitas dierum et quinque campi output publici per
+  reference saved-sum in eodem processu.
+- Exitus novi `GRADUS56_ANNUS_REMOTUS_LIMINA_VICINA=2/2_PASS YEAR=...`
+  et `GRADUS56_ANNUS_REMOTUS_SEPTEM=7/7_PASS YEAR=...`
+  pro tribus annis a CI `grep -Fx` exiguntur.
+  Summa **21 casus** in tribus processibus, **6 novi**;
+  a CI nondum probati donec novus commit succedit.
+- Haec mutatio solum `tests/`, workflow, documenta mutat.
+  `src/monster.cpp`, oracle normativum, `main` non mutata sunt.
+  Gradus 57 non aperitur.

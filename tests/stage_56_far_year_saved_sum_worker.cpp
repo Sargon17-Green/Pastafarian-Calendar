@@ -27,11 +27,20 @@ bool eademDies(const SpaghettiDateFive& a, const CalendarDate& b) {
            a.dayInMonth == b.dayInMonth;
 }
 
-Year quaereAnnum(NormativeOracle& oracle, const Big& c, const Big& desideratus) {
+struct AnniFinitimi {
+    Year prior;
+    Year annus;
+    Year posterior;
+};
+
+AnniFinitimi quaereAnnum(NormativeOracle& oracle, const Big& c,
+                         const Big& desideratus) {
     Year annus = oracle.year5000(c);
+    Year posterior = annus;
     exige(annus.number == 5000, "annus fundamentalis 5000 deest");
     while (annus.number > desideratus) {
         const Year anterior = oracle.previousYear(c, annus);
+        posterior = annus; // successor from canonical year-5000 backward chain
         exige(anterior.number == annus.number - 1,
               "numerus anni sine successione computatus est");
         exige(anterior.closeGateDay == annus.openGateDay,
@@ -45,7 +54,18 @@ Year quaereAnnum(NormativeOracle& oracle, const Big& c, const Big& desideratus) 
     exige(annus.number == desideratus, "annus desideratus non inventus est");
     exige(annus.closeGateDay > annus.openGateDay,
           "annus remoti temporis non positivus est");
-    return annus;
+    // For -1, 0, 1 a successor was encountered during the walk back
+    // from 5000. Never infer it by reversing NEXT/PREVIOUS selectors.
+    exige(posterior.number == annus.number + 1 &&
+          posterior.openGateDay == annus.closeGateDay &&
+          posterior.openGateIndex == annus.closeGateIndex,
+          "annus posterior in catena canonica deest");
+    const Year prior = oracle.previousYear(c, annus);
+    exige(prior.number == annus.number - 1 &&
+          prior.closeGateDay == annus.openGateDay &&
+          prior.closeGateIndex == annus.openGateIndex,
+          "annus prior in catena canonica non continuus est");
+    return AnniFinitimi{prior, annus, posterior};
 }
 
 void probaDiem(NormativeOracle& oracle, const Big& c, const Year& annus,
@@ -77,7 +97,8 @@ int main(int argc, char** argv) {
         const Big numerus{argumentum};
         const Big c = pastafari::FOUNDATION_DAY_OLD;
         NormativeOracle oracle(false); // saved-sum; non mutans raw-sum
-        const Year annus = quaereAnnum(oracle, c, numerus);
+        const AnniFinitimi tria = quaereAnnum(oracle, c, numerus);
+        const Year& annus = tria.annus;
         // Quondam sola duo extrema cuiusque anni remoti probabantur.
         // Interior anni est nunc quoque observatus: secunda dies, mediana,
         // et paenultima, ne defectus texturæ inter portas lateat.
@@ -98,6 +119,16 @@ int main(int argc, char** argv) {
         std::cout << "GRADUS56_ANNUS_REMOTUS_INTERIOR=3/3_PASS YEAR="
                   << numerus << '\n';
         std::cout << "GRADUS56_ANNUS_REMOTUS_SAVED_SUM=5/5_PASS YEAR="
+                  << numerus << '\n';
+
+        // Immediate neighbors of both gates, using the exact year chain
+        // discovered from year 5000, not a conjectured inverse path.
+        // Same process, same calculation day and public dispatcher.
+        probaDiem(oracle, c, tria.prior, annus.openGateDay);
+        probaDiem(oracle, c, tria.posterior, annus.closeGateDay + Big{1});
+        std::cout << "GRADUS56_ANNUS_REMOTUS_LIMINA_VICINA=2/2_PASS YEAR="
+                  << numerus << '\n';
+        std::cout << "GRADUS56_ANNUS_REMOTUS_SEPTEM=7/7_PASS YEAR="
                   << numerus << '\n';
         return 0;
     } catch (const std::exception& e) {

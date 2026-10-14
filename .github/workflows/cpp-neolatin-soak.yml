@@ -871,7 +871,7 @@ jobs:
             build_stage56_far/monster.o build_stage56_far/reference.o \
             -o build_stage56_far/worker \
             2>&1 | tee soak-logs/far-worker-build.log
-      - name: Comparare primum et extremum diem
+      - name: Comparare septem dies et confinia annorum remotorum
         shell: bash
         env:
           ANNUS: ${{ matrix.annus }}
@@ -882,6 +882,10 @@ jobs:
           grep -Fx "GRADUS56_ANNUS_REMOTUS_INTERIOR=3/3_PASS YEAR=$ANNUS" \
             "soak-logs/stage56-far-year-$ANNUS.log"
           grep -Fx "GRADUS56_ANNUS_REMOTUS_SAVED_SUM=5/5_PASS YEAR=$ANNUS" \
+            "soak-logs/stage56-far-year-$ANNUS.log"
+          grep -Fx "GRADUS56_ANNUS_REMOTUS_LIMINA_VICINA=2/2_PASS YEAR=$ANNUS" \
+            "soak-logs/stage56-far-year-$ANNUS.log"
+          grep -Fx "GRADUS56_ANNUS_REMOTUS_SEPTEM=7/7_PASS YEAR=$ANNUS" \
             "soak-logs/stage56-far-year-$ANNUS.log"
       - name: Servare evidentiam
         if: always()
