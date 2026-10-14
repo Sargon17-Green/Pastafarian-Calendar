@@ -19,12 +19,20 @@ for n=2,3 do
  end
  local ok,outer,ctx=pcall(S.legacyPositiveGateProbe,n,streams)
  Gap.execute=original
- assert(ok and ctx~=child
-  and ctx.commitToken==6 and child.commitToken==6
-  and ctx.semanticState~=child.semanticState
-  and ctx.gapSourceStates~=child.gapSourceStates
-  and ctx.positiveGapDecimals~=child.positiveGapDecimals
-  and ctx.diagnostics~=child.diagnostics)
+ assert(ok,"Stage 34 nested n="..n.." outer call threw: "..tostring(outer))
+ assert(type(ctx)=="table" and type(child)=="table",
+  "Stage 34 nested n="..n.." missing outer/inner context")
+ assert(ctx~=child,"Stage 34 nested n="..n.." context alias")
+ assert(ctx.commitToken==6 and child.commitToken==6,
+  "Stage 34 nested n="..n.." commit counts "..tostring(ctx.commitToken).."/"..tostring(child.commitToken))
+ assert(ctx.semanticState~=child.semanticState,
+  "Stage 34 nested n="..n.." semanticState alias")
+ assert(ctx.gapSourceStates~=child.gapSourceStates,
+  "Stage 34 nested n="..n.." gapSourceStates alias")
+ assert(ctx.positiveGapDecimals~=child.positiveGapDecimals,
+  "Stage 34 nested n="..n.." positiveGapDecimals alias")
+ assert(ctx.diagnostics~=child.diagnostics,
+  "Stage 34 nested n="..n.." diagnostics alias")
  child.semanticState.lastGapDecimal="TAMPERED"
  child.gapSourceStates[1].correctedGapDecimal="TAMPERED"
  assert(ctx.semanticState.lastGapDecimal~="TAMPERED"
