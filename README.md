@@ -1163,7 +1163,7 @@ sove eta semantik seleksyon an, epi ajoute 4yèm commit
 
 Nan Stage 32, pa gen PATCH 16, pa gen chèn pòtay konplè,
 pa gen `postStir12`. Sous rank la soti nan kòd natif
-PATCH 13, pa nan oracle tès la. Validasyon natif poko fèt.
+PATCH 13, pa nan oracle tès la. Validasyon natif konfime sou run `38463642837`.
 
 ### Tès Stage 32 — DISCOVERY 16
 
@@ -1178,4 +1178,20 @@ teste sa; `lua_stage32_discovery` dwe echwe sèlman
 nan dènye etap `EXPECTED_RED`, apre tout pozitif PASS.
 Kadna SHA verifye PATCH 13, PATCH 15 ak legacy sign-day.
 Stage 33 pral repare offset la san efase erè a.
-Rezilta CI Stage 32 poko verifye.
+Rezilta CI Stage 32 verifye: 51 travay pozitif PASS; yon sèl echèk `EXPECTED_RED` entansyonèl.
+### Fèmti DISCOVERY 16 — Stage 32
+
+GitHub Actions run `38463642837`: **51/51 travay pozitif PASS**,
+avèk yon sèl job `lua_stage32_discovery` ki echwe
+entansyonèlman nan dènye etap li:
+`EXPECTED_RED Stage 32 DISCOVERY 16 witness 1: gate gap legacy offset plus one`.
+Tout Stage 1–32 pase avan etap wouj la. Twa witness
+istorik yo pase audit egzak, 70 chwa oracle verifye,
+8 gwo kestyon BigInt, 12 echèk/12 rekiperasyon, twa
+nested calls ak de rank soti nan sauce kanonik.
+Kadna SHA sou PATCH 13, PATCH 15 ak ansyen kestyon siyen
+pase; defo `42+rank` istorik la rete disponib pou audit.
+`LAST_COMPLETED_STAGE=32`;
+`EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
+Pa gen PATCH 16, chèn pòtay oswa `postStir12`.
+

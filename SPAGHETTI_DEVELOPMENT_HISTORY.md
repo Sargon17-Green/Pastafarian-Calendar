@@ -830,7 +830,7 @@ tout ka ki valab, menm si kestyon jou a ak rank la kòrèk.
 Premye twa commits kestyon an rete; nou ajoute katriyèm
 commit ki anrejistre rank, kestyon jou, ansyen offset
 ak longè move a. Defòmasyon istorik la rete akeyir.
-Tès ak CI Stage 32 poko verifye; PATCH 16 pa antre.
+Tès ak CI Stage 32 konfime nan run `38463642837`; PATCH 16 pa antre.
 
 ### QA DISCOVERY 16 ki soumèt nan CI
 
@@ -841,4 +841,16 @@ twa reentrances ak de sauce natif. Twa witness
 Kat jobs CI ajoute, youn gen dènye etap wouj ki
 dwe echwe entansyonèlman sèlman. PATCH 13, PATCH 15
 ak legacy sign-day anba kadna SHA.
-Tès natif poko konfime.
+Tès natif konfime: 51 travay pozitif PASS ak yon sèl EXPECTED_RED istorik.
+### Fèmti DISCOVERY 16 — prèv natif
+
+Run `38463642837`: **51 travay pozitif pase**, epi
+`lua_stage32_discovery` echwe sèlman sou dènye etap
+`EXPECTED_RED Stage 32 DISCOVERY 16 witness 1: gate gap legacy offset plus one`.
+Suite konplè Stage 1–32 te pase avan etap wouj la;
+70 oracle ranks, 8 BigInt, 12 erè/12 rekiperasyon,
+twa nested states ak de sauce kanonik pase. Twa
+witness wouj yo verifye pa audit. Dènye kalkil legacy
+rete `42+rank` olye `41+rank`, san PATCH 16.
+`LAST_COMPLETED_STAGE=32` / `EXPECTED_RED_VERIFIED`.
+
