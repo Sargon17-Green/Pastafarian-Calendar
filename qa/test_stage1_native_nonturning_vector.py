@@ -12,10 +12,14 @@ from pathlib import Path
 import stage1_native_four_cell_full_postfork_trace_audit as audit
 
 
-def reject(source, run, name, prefork=False):
+def reject(source, run, name, prefork=False, expected_error=None):
     try:
         audit.verify_run(run, source, require_prefork=prefork)
-    except AssertionError:
+    except AssertionError as exc:
+        if expected_error is not None and expected_error not in str(exc):
+            raise AssertionError(
+                "Rejected for the wrong reason in " + name + ": " + str(exc)
+            ) from exc
         print("EXPECTED_STRAIGHT_VECTOR_REJECTION", name)
         return
     raise AssertionError("Forged nonturning Native IP direction accepted: " + name)
@@ -49,7 +53,8 @@ def synthetic():
     no_halt = copy.deepcopy(run)
     no_halt["complete_postfork_trace"][-1][5] = ord(" ")
     no_halt_source = [source[0][:513] + b" " + source[0][514:]]
-    reject(no_halt_source, no_halt, "missing_executed_halt")
+    reject(no_halt_source, no_halt, "missing_executed_halt",
+           expected_error="without executed terminating @")
     altered = copy.deepcopy(run)
     altered["complete_postfork_trace"][101][3:5] = [0, 1]
     altered["first_512_motion"][101] = altered["complete_postfork_trace"][101][1:5]
