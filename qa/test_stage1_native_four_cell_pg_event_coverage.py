@@ -252,13 +252,16 @@ def prefork_provenance_regression():
 
 
 def gate_anchor_regression():
-    # Genuine pinned physical | at (951,1335); two executed pre-fork
-    # opcodes; 514 post-fork opcodes including p and g.
+    # Synthetic event fixture, physically anchored to the pinned | cell at
+    # (951,1335). Immediately after the downward-to-upward gate branch, a
+    # real > turns the IP right. It then executes p, g and finally @ along
+    # one contiguous horizontal line, with no invented direction change.
     row0=b" "*10+b"p"+b" "*9+b"g"+b" "*492+b"@"+b" "*107
-    source=[row0]+[b""]*1333+[b" "*951+b"0",b" "*950+b"p||"]
-    trace=[[step+3,step,0,1,0,source[0][step],0]
-           for step in range(514)]
-    trace[0]=[3,951,1334,0,-1,ord("0"),0]
+    row1334=b" "*951+b">>"+b" "*8+b"p"+b" "*9+b"g"+b" "*492+b"@"+b" "*107
+    source=[row0]+[b""]*1332+[b" "*951+b">",row1334,b" "*950+b"p||"]
+    trace=[[3,951,1334,0,-1,ord(">"),0]]
+    trace += [[step+3,951+step,1334,1,0,source[1334][951+step],0]
+              for step in range(1,514)]
     run=dict(status="normal",remaining_ips=0,steps=516,
         gate=dict(step=2,original=1,executed=1),
         complete_prefork_trace=[[1,950,1335,1,0,ord("p"),0],
@@ -279,7 +282,7 @@ def gate_anchor_regression():
 
     def shift_first_x(r):
         r["complete_postfork_trace"][0][1]=952
-        r["complete_postfork_trace"][0][5]=32
+        r["complete_postfork_trace"][0][5]=ord(">")
     def flip_first_delta(r):
         r["complete_postfork_trace"][0][4]=1
     def flip_gate_operand(r):
@@ -287,8 +290,8 @@ def gate_anchor_regression():
     def shift_gate_coordinate(r):
         r["complete_prefork_trace"][-1][1]=952
     def skip_first_cell(r):
-        r["complete_postfork_trace"][0][2]=1332
-        r["complete_postfork_trace"][0][5]=32
+        r["complete_postfork_trace"][0][2]=1333
+        r["complete_postfork_trace"][0][5]=ord(">")
     for name,mutate in (
         ("wrong_postfork_x",shift_first_x),
         ("wrong_postfork_delta",flip_first_delta),
