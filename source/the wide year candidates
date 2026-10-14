@@ -24,8 +24,8 @@ A wide year candidate has
   a wide quantity called year length,
   a number called valid.
 
-The first wide candidate is a wide year candidate.
-The second wide candidate is a wide year candidate.
+The first extended candidate is a wide year candidate.
+The second extended candidate is a wide year candidate.
 
 To measure a wide year candidate:
   Put 0 into the wide year candidate's valid.

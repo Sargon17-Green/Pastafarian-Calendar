@@ -5,11 +5,11 @@
 \ The full calendar still uses the stricter temporary safety bounds.
 \ Arbitrary-wide dates do not pass through this bridge.
 
-The converted wide signed day is a wide signed day.
-The native wide conversion succeeded is a number.
+The converted signed day result is a wide signed day.
+The native widening succeeded is a number.
 
 To convert a calendar day into a wide signed day:
-  Put 0 into the native wide conversion succeeded.
+  Put 0 into the native widening succeeded.
   If the calendar day is less than -2147483647, exit.
   Put the calendar day into an absolute calendar day.
   Put 1 into a native day polarity number.
@@ -18,5 +18,5 @@ To convert a calendar day into a wide signed day:
     put -1 into the native day polarity number.
   Convert the absolute calendar day to a string.
   Put the string into a native day magnitude wide quantity.
-  Set the converted wide signed day from the native day magnitude wide quantity given the native day polarity number.
-  Put 1 into the native wide conversion succeeded.
+  Set the converted signed day result from the native day magnitude wide quantity given the native day polarity number.
+  Put 1 into the native widening succeeded.

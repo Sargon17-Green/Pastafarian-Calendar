@@ -16,37 +16,37 @@ To check the native and wide year candidate bridge:
     put "Native year bridge fixture has the wrong duration." into the check report; exit.
   If the first candidate's span count is not 6,
     put "Native year bridge fixture has the wrong number of spans." into the check report; exit.
-  Copy the first candidate into the first wide candidate.
+  Copy the first candidate into the first extended candidate.
   If the widened year conversion succeeded is not 1,
     put "A supported native year could not be widened." into the check report; exit.
-  If the first wide candidate's valid is not 1,
+  If the first extended candidate's valid is not 1,
     put "Widening a valid native year changed its eligibility." into the check report; exit.
-  If the first wide candidate's year length is not "345",
+  If the first extended candidate's year length is not "345",
     put "Widening a native year changed its day length." into the check report; exit.
-  If the first wide candidate's span count is not "6",
+  If the first extended candidate's span count is not "6",
     put "Widening a native year changed its gate span count." into the check report; exit.
   Put -15055671 into the sample native year day.
   If the first candidate does not contain the sample native year day,
     put "A valid native year excluded an interior day." into the check report; exit.
   Convert the sample native year day into a wide signed day.
-  If the first wide candidate does not contain the converted wide signed day,
+  If the first extended candidate does not contain the converted signed day result,
     put "A widened year excluded the same interior day." into the check report; exit.
   Put -15056000 into the sample native year day.
   If the first candidate contains the sample native year day,
     put "The native year included the opening gate." into the check report; exit.
   Convert the sample native year day into a wide signed day.
-  If the first wide candidate contains the converted wide signed day,
+  If the first extended candidate contains the converted signed day result,
     put "The widened year included the opening gate." into the check report; exit.
   Put -15055655 into the sample native year day.
   If the first candidate does not contain the sample native year day,
     put "The native year excluded the closing gate." into the check report; exit.
   Convert the sample native year day into a wide signed day.
-  If the first wide candidate does not contain the converted wide signed day,
+  If the first extended candidate does not contain the converted signed day result,
     put "The widened year excluded the closing gate." into the check report; exit.
   Put 0 into the first candidate's closing index.
   Measure the first candidate.
-  Copy the first candidate into the first wide candidate.
+  Copy the first candidate into the first extended candidate.
   If the first candidate contains the sample native year day,
     put "Native candidate with five gate spans was not rejected." into the check report; exit.
-  If the first wide candidate's valid is not 0,
+  If the first extended candidate's valid is not 0,
     put "Widened year with five gate spans was not rejected." into the check report; exit.
