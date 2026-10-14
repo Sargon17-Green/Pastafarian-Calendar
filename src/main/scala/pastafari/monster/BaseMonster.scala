@@ -141,7 +141,15 @@ final case class BaseMonsterContext(
   var catalogLegacyItalianNames: Option[Vector[String]] = None,
   var catalogFrozenVersion: Option[String] = None,
   var patchedCatalogItalianNames: Option[Vector[String]] = None,
-  var patch18Applied: Boolean = false
+  var patch18Applied: Boolean = false,
+  var dayNameWeaving: Option[Vector[Int]] = None,
+  var dayNameCanonicalIndices: Option[Vector[Int]] = None,
+  var dayNameOffset: Option[Int] = None,
+  var dayNameSnapshot: Option[(Vector[Int],Vector[Int],Int)] = None,
+  var dayNameLegacyMonthId: Option[Int] = None,
+  var dayNameLegacySlot: Option[Int] = None,
+  var dayNameLegacyItalian: Option[String] = None,
+  var dayNameFrozenVersion: Option[String] = None
 )
 
 final class BaseMetricsShell {
@@ -199,6 +207,51 @@ final class BaseValidationManager {
    * dell'indice ruotato e la mappatura esatta dell'ID canonico.
    * Non richiama mai Patch18SourceCatalogWrapper.
    */
+  /**
+   * DISCOVERY19: ricostruisce la lettura storica del nome con
+   * l'offset del giorno, senza richiamare l'adapter o un oracolo test.
+   */
+  def requireDiscovery19Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="DISCOVERY_19_DAY_INDEXED_MONTH_NAME" ||
+       ctx.status!="LEGACY_DAY_INDEXED_MONTH_NAME_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_19_DAY_INDEXED_MONTH_NAME") ||
+       ctx.dayNameWeaving.isEmpty ||
+       ctx.dayNameCanonicalIndices.isEmpty ||
+       ctx.dayNameOffset.isEmpty ||
+       ctx.dayNameSnapshot.isEmpty ||
+       ctx.dayNameLegacyMonthId.isEmpty ||
+       ctx.dayNameLegacySlot.isEmpty ||
+       ctx.dayNameLegacyItalian.isEmpty ||
+       ctx.dayNameFrozenVersion.isEmpty)
+      throw new IllegalStateException("DISCOVERY19 non completa.")
+
+    val w=ctx.dayNameWeaving.get
+    val ids=ctx.dayNameCanonicalIndices.get
+    val day=ctx.dayNameOffset.get
+    if(ctx.dayNameSnapshot.get!=(w,ids,day))
+      throw new IllegalStateException("Snapshot DISCOVERY19 alterata.")
+    LegacyDaywiseWeavingAdapter.validateCandidates(Vector(w))
+    if(day<0 || day>=w.size || ids.size!=w.max ||
+       ids.distinct.size!=ids.size ||
+       ids.exists(i=>i<1 || i>47))
+      throw new IllegalStateException("Input DISCOVERY19 non valido.")
+    val source=pastafari.catalog.SourceLanguageCatalog.Months
+    if(source.size!=47 ||
+       source.indices.exists(i=>source(i).canonicalIndex!=i+1) ||
+       ctx.dayNameFrozenVersion.get!=
+         pastafari.catalog.SourceLanguageCatalog.Version)
+      throw new IllegalStateException("Catalogo congelato alterato.")
+    val wrongSlot=day%ids.size
+    val wrongId=ids(wrongSlot)
+    val wrongName=source.find(_.canonicalIndex==wrongId)
+      .getOrElse(throw new IllegalStateException("ID assente.")).italian
+    if(ctx.dayNameLegacyMonthId.get!=w(day) ||
+       ctx.dayNameLegacySlot.get!=wrongSlot ||
+       ctx.dayNameLegacyItalian.get!=wrongName)
+      throw new IllegalStateException("Cicatrice DISCOVERY19 falsificata.")
+  }
+
   def requirePatch18Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_18_SOURCE_CATALOG_INDEX" ||
        ctx.status!="PATCH_18_READY" ||
@@ -1594,7 +1647,8 @@ final class BaseMonsterManager {
     new Discovery17DuplicatedMonthNameHandler(metrics),
     new Patch17DistinctMonthNameHandler(metrics),
     new Discovery18SourceCatalogMismatchHandler(metrics),
-    new Patch18SourceCatalogHandler(metrics)
+    new Patch18SourceCatalogHandler(metrics),
+    new Discovery19DayIndexedMonthNameHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -2547,6 +2601,34 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable=>
         throw BaseErrorWrapper.wrap("patch18",error)
+    }
+  }
+
+  def discover19DayIndexedMonthName(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    annualWeaving: Vector[Int],
+    canonicalMonthNameIndices: Vector[Int],
+    dayOffset: Int
+  ): Discovery19DayIndexedMonthNameReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.dayNameWeaving=Some(annualWeaving)
+    ctx.dayNameCanonicalIndices=Some(canonicalMonthNameIndices)
+    ctx.dayNameOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_19_DAY_INDEXED_MONTH_NAME"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery19Ready(ctx)
+      Discovery19DayIndexedMonthNameReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.dayNameWeaving.get,ctx.dayNameCanonicalIndices.get,
+        ctx.dayNameOffset.get,ctx.dayNameLegacyMonthId.get,
+        ctx.dayNameLegacySlot.get,ctx.dayNameFrozenVersion.get,
+        ctx.dayNameLegacyItalian.get,ctx.phase,ctx.status,
+        ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("discovery19",error)
     }
   }
 
