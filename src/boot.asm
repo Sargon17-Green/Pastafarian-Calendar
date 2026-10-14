@@ -39,6 +39,10 @@ Bootstrap:
     cp $a5
     jr nz, .done
     call RunMultiplyTests
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .done
+    call RunRAMBankTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -47,7 +51,9 @@ Bootstrap:
 INCLUDE "src/runtime/save127.asm"
 INCLUDE "src/runtime/savewide256.asm"
 INCLUDE "src/runtime/mul128.asm"
+INCLUDE "src/runtime/mbc5.asm"
 INCLUDE "src/runtime/dispatcher.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
+INCLUDE "src/tests/ram_test.asm"

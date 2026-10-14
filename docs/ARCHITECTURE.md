@@ -18,7 +18,7 @@ WRAM observable bootstrap locations:
 | Address | Name | Meaning |
 |---|---|---|
 | C000 | wTestResult | A5 arithmetic smoke PASS; E0 failure; 00 unstarted |
-| C001 | wTestCase | currently executed test (1..10) |
+| C001 | wTestCase | currently executed test (1..24) |
 | C002 | wRunStatus | 40 means calendar engine deliberately not implemented |
 | C003..C012 | wValue | 128-bit LE working value |
 | C013..C022 | wAddend | 128-bit LE addend |
@@ -28,6 +28,28 @@ Save127 handles a single 128-bit unsigned input, exactly, with
 M=2^127-1; it is not a substitute for arbitrary precision.
 Add16 has the explicit precondition 0 <= a,b <= M; it does not support
 unrestricted 128-bit addition with overflow.
+
+## DMG-compatible external scratch memory
+
+The DMG offers 8 KiB internal WRAM, which is insufficient for multiple
+simultaneously live multi-kilobyte exact integers. This branch therefore
+selects an MBC5+RAM cartridge (header 0147=1A, RAM-size 0149=04)
+with 16 banks of 8 KiB = 128 KiB external RAM. This remains compatible
+with the original monochrome DMG; it is a *cartridge* feature and does
+not rely on Game Boy Color WRAM banking.
+
+The representative bound 47^5778 is smaller than 2^32095, or 4012 bytes,
+so a single 8 KiB SRAM bank can contain such an unsigned integer; its
+scratch copies and additional operands require distinct banks. This is
+only a conservative architectural example, not a proof of the full
+normative upper bound for all intermediate quantities.
+
+The bootstrap SRAM test stores unique bytes into all 16 bank-0 offsets,
+then confirms bank isolation; it separately tests the upper address BFFF
+in banks 0 and 15. Future dynamic bank ownership and cleanup are NOT
+implemented. Cartridge RAM must be initialized before semantic use.
+See [Pan Docs MBC5](https://gbdev.io/pandocs/MBC5.html) and
+[Cartridge Header](https://gbdev.io/pandocs/The_Cartridge_Header.html).
 
 ## Main correctness boundaries not yet met
 

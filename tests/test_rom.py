@@ -12,15 +12,15 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 22
+TOTAL_CASES = 24
 
 
 def check_header(data: bytes) -> None:
     assert len(data) == 32768, f"expected 32 KiB ROM; got {len(data)} bytes"
     assert data[0x143] == 0, "not a pure DMG cartridge"
-    assert data[0x147] == 0, "expected ROM-only cartridge"
+    assert data[0x147] == 0x1A, "expected MBC5+RAM cartridge"
     assert data[0x148] == 0, "expected 32 KiB ROM size encoding"
-    assert data[0x149] == 0, "expected no cartridge SRAM"
+    assert data[0x149] == 0x04, "expected 128 KiB cartridge SRAM"
     checksum = 0
     for b in data[0x134:0x14D]:
         checksum = (checksum - b - 1) & 0xFF
@@ -28,7 +28,7 @@ def check_header(data: bytes) -> None:
     actual_global = (sum(data) - data[0x14E] - data[0x14F]) & 0xFFFF
     stored_global = (data[0x14E] << 8) | data[0x14F]
     assert stored_global == actual_global, "incorrect global checksum"
-    print("ROM_HEADER=PASS DMG=YES MBC=ROM_ONLY", flush=True)
+    print("ROM_HEADER=PASS DMG=YES MBC=MBC5_RAM_128K", flush=True)
 
 
 def wait_for_completion(boy: object, max_frames: int = MAX_BOOT_AND_TEST_FRAMES) -> tuple[int, int, int, int]:
