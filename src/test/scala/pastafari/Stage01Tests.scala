@@ -197,6 +197,8 @@ object Stage01Tests {
       val mainRoot = root.resolve("src/main/scala")
       val content = textFiles(mainRoot).map(read).mkString("\n")
       val forbidden =
+        (if (currentStage < 38) Vector("def oldDayIndexedMonthName(")
+         else Vector.empty[String]) ++
         (if (currentStage < 37) Vector("def sourceCatalogIndexPatch(")
          else Vector.empty[String]) ++
         (if (currentStage < 36) Vector("oldSourceCatalogMismatch")
