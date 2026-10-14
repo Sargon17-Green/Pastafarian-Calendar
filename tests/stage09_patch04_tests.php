@@ -108,7 +108,10 @@ foreach ($states as $stateNumber => $state) {
                 $unchanged++;
             }
         }
-        sahBatu($fixed === $patch->stonePatch($index, $state), 'DETERMINISTIK_' . $stateNumber . '_' . $index);
+        $again = $patch->stonePatch($index, $state);
+        foreach ($keys as $key) {
+            sahBatu($fixed[$key]->equals($again[$key]), 'DETERMINISTIK_' . $stateNumber . '_' . $index . '_' . $key);
+        }
         $cases++;
     }
 }
