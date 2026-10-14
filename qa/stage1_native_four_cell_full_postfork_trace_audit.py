@@ -115,6 +115,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
         pre_memory={}
         last_pg=None
         last_straight_delta=None
+        last_fixed_turn_delta=None
         expected_prefork_stringmode=0
         for index,entry in enumerate(pretrace):
             need(type(entry) is list and len(entry)==7 and
@@ -131,6 +132,9 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
             if last_straight_delta is not None:
                 need((dx,dy)==last_straight_delta,
                      "Native pre-fork nonturning opcode changed IP direction")
+            if last_fixed_turn_delta is not None:
+                need((dx,dy)==last_fixed_turn_delta,
+                     "Native pre-fork fixed turn opcode did not set required direction")
             if last_pg is not None:
                 px,py,pdx,pdy=last_pg
                 need((dx,dy)==(pdx,pdy) and
@@ -146,6 +150,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
                      "Executed pre-fork p/g missing its Native receipt")
                 last_pg=(x,y,dx,dy)
             last_straight_delta=(dx,dy) if straight_instruction(byte,stringmode) else None
+            last_fixed_turn_delta=FIXED_TURNS.get(byte) if stringmode==0 else None
             if event is not None:
                 need(stringmode==0 and byte==ord(event[1]),
                      "Forged Native pre-fork p/g event on wrong opcode")
