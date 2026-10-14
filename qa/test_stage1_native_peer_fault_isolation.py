@@ -53,6 +53,10 @@ def main():
     corruptions = (
         ('peer_cell', lambda p, t: p.space.put(t, 17)),
         ('peer_stack', lambda p, t: p.ips[0].stack[0].append(1729)),
+        ('peer_stack_stack_replaced', lambda p, t:
+            setattr(p.ips[0], 'stack', [list(frame) for frame in p.ips[0].stack])),
+        ('peer_stack_frame_replaced', lambda p, t:
+            p.ips[0].stack.__setitem__(0, list(p.ips[0].stack[0]))),
         ('peer_position', lambda p, t: setattr(p.ips[0], 'position', Vec((555, -23)))),
         ('peer_offset', lambda p, t: setattr(p.ips[0], 'offset', Vec((9, 90)))),
         ('peer_space', lambda p, t: setattr(p, 'space', Space(p.space.cells))),
@@ -65,7 +69,7 @@ def main():
         check(opcode, 'after_write_clean_fault')
         for name, mutation in corruptions:
             check(opcode, name, mutation)
-    print('NATIVE_P_S_FAULT_PATH_16_PEER_CORRUPTIONS_4_CLEAN_ERRORS_PASS')
+    print('NATIVE_P_S_FAULT_PATH_20_PEER_CORRUPTIONS_4_CLEAN_ERRORS_PASS')
 
 
 if __name__ == '__main__':
