@@ -137,10 +137,18 @@ object Stage38Tests {
     }
     check("il percorso storico non riusa la rotazione di DISCOVERY18"){
       val r=old(A,First,0)
-      eqv(r.legacyItalianMonthName,"argilla","PATCH18 disponibile")
+      eqv(r.legacyItalianMonthName,"argilla","Lookup canonico")
       truth(r.legacyItalianMonthName!=
         LegacySourceCatalogMismatchAdapter.oldSourceCatalogMismatch(First)
           .legacyItalianMonthNames.head,"Difetti distinti")
+      val src=new String(Files.readAllBytes(root().resolve(
+        "src/main/scala/pastafari/monster/LegacyDayIndexedMonthName.scala")),
+        StandardCharsets.UTF_8)
+      truth(!src.contains(
+        "Patch18SourceCatalogWrapper.sourceCatalogIndexPatch("),
+        "Adapter legacy accoppiato alla PATCH18")
+      truth(src.contains("SourceLanguageCatalog.month(i).italian"),
+        "Lettura canonica separata")
     }
     check("il legacy conserva il vettore annuale e gli ID richiesti"){
       val r=old(C,First,2)
