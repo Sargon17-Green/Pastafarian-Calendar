@@ -194,7 +194,7 @@ object Stage38Tests {
       truth(a.legacyItalianMonthName!=b.legacyItalianMonthName,
         "Cambio di nome scorretto")
     }
-    check("1024 permutazioni di nomi mantengono il difetto riproducibile"){
+    check("1024 permutazioni e 225 casi 3..47 mesi hanno difetto stabile"){
       val rng=new Random(38102026L)
       for(i<-1 to 1024){
         val names=rng.shuffle(All).take(3).toVector
@@ -203,6 +203,26 @@ object Stage38Tests {
         eqv(r.legacyItalianMonthName,
           legacyReference(names,day),"Legacy "+i)
         eqv(r.selectedMonthId,C(day),"Weave "+i)
+      }
+      // Cinque permutazioni riproducibili per ogni cardinalita':
+      // nomi selezionati senza rimpiazzo e mese effettivo della
+      // tessitura indipendente dal modulo sull'indice del giorno.
+      for(n<-3 to 47; iteration<-0 until 5){
+        val w=uniform(n)
+        val names=rng.shuffle(All).take(n).toVector
+        val day=rng.nextInt(w.length)
+        val r=old(w,names,day)
+        eqv(r.canonicalMonthNameIndices,names,
+          "Identita' "+n+"/"+iteration)
+        eqv(r.selectedMonthId,w(day),
+          "Mese tessuto "+n+"/"+iteration)
+        eqv(r.legacyNameSlot,day%n,
+          "Slot storico "+n+"/"+iteration)
+        eqv(r.legacyItalianMonthName,
+          legacyReference(names,day),"Nome storico "+n+"/"+iteration)
+        eqv(reference(w,names,day),
+          SourceLanguageCatalog.month(names(w(day)-1)).italian,
+          "Nome normativo "+n+"/"+iteration)
       }
     }
     check("intercalazione non altera il nome quando offset e ID coincidono"){
@@ -214,9 +234,13 @@ object Stage38Tests {
     check("nessun output dipende da manager usati in precedenza"){
       val before=old(C,First,2)
       val m=new BaseMonsterManager
-      m.discover19DayIndexedMonthName(1,2,A,First,1)
+      val first=m.discover19DayIndexedMonthName(1,2,A,First,1)
+      val preserved=first.copy()
       m.discover19DayIndexedMonthName(3,4,Q,All,46)
       eqv(old(C,First,2),before,"Determinismo")
+      eqv(first,preserved,"Report precedente intatto")
+      eqv(m.metricsSnapshot("discovery19.day.name.calls"),
+        BigInt(2),"Conteggio invocazioni")
     }
     check("rifiuta meno di tre nomi"){
       rejectArg("Due nomi"){old(A,Vector(1,2),1)}
