@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""QA-only Native Funge-space ownership guard at every actually executed p.
+"""QA-only Native Funge-space ownership guard at each executed p or s write.
 
 Independent Program objects can have distinct `space` wrappers but accidentally
 share or poison underlying cells. Sparse fixed sentinels alone cannot detect a
-cross-write elsewhere. This helper checks the exact *physical* put target
+cross-write elsewhere. This helper checks the exact *physical* p/s write target
 against the other live Program before/after every put. It is Python 2/3 safe.
 """
 from stage1_native_pg_physical_address import physical_pg_operands
 
 
 def guarded_step(actor, peer, step):
-    """Execute one Native step, prove actual p writes only actor-owned memory.
+    """Execute one Native step, prove actual p/s writes only actor-owned memory.
 
     `step(actor)` must execute one actual PyFunge step and perform the caller's
-    usual IPStopped/IPQuitted handling. Return 1 for checked executed p, else 0.
+    usual IPStopped/IPQuitted handling. Return 1 for an executed checked p or s, else 0.
     This witness is deliberately a single-cell noninterference check; it does
     not claim complete program-state isolation or detect an uninstrumented
     write to an unrelated cell.
@@ -27,15 +27,25 @@ def guarded_step(actor, peer, step):
     if len(actor.ips) != 1:
         raise AssertionError("Native peer ownership witness expects one active IP")
     ip = actor.ips[0]
-    if bool(ip.stringmode) or int(actor.space.get(ip.position)) != ord('p'):
+    opcode = int(actor.space.get(ip.position))
+    if bool(ip.stringmode) or opcode not in (ord('p'), ord('s')):
         step(actor)
         return 0
-    target, coordinates, expected = physical_pg_operands(ip, 'p')
+    if opcode == ord('p'):
+        target, coordinates, expected = physical_pg_operands(ip, 'p')
+    else:
+        # Funge-98 s stores into (IP position + IP delta), not relative
+        # to the storage offset used by p/g. An empty TOSS pops zero.
+        coordinates = (int(ip.position[0]) + int(ip.delta[0]),
+                       int(ip.position[1]) + int(ip.delta[1]))
+        target = ip.position.__class__(coordinates)
+        stack = ip.stack[0]
+        expected = int(stack[-1]) if stack else 0
     peer_target = peer._qa_point(coordinates)
     untouched_peer_byte = peer.space.get(peer_target)
     step(actor)
     if int(actor.space.get(target)) != expected:
-        raise AssertionError("Native p did not write its expected physical Funge-space cell")
+        raise AssertionError("Native p/s did not write its expected physical Funge-space cell")
     if peer.space.get(peer_target) != untouched_peer_byte:
-        raise AssertionError("Native p mutated the other Program's corresponding Funge-space cell")
+        raise AssertionError("Native p/s mutated the other Program's corresponding Funge-space cell")
     return 1
