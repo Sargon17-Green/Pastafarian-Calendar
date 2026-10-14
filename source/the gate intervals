@@ -16,7 +16,7 @@ The gate inquiry is a gate inquiry.
 
 \ The signed index must not be zero. Zero is Foundation itself.
 \ Converting day positions to full wide counters is a future requirement.
-To calculate a gate interval given a number:
+To calculate native gate spacing given a number:
   Put 0 into the gate inquiry's interval length.
   Put the number into the gate inquiry's signed index.
   If the number is 0, exit.

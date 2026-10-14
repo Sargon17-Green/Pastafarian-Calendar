@@ -66,7 +66,7 @@ To commit the prepared wide gate movement:
   Put 0 into the wide gate movement's succeeded.
   Request another bounded gate step.
   If the gate step budget's exhausted is 1, exit.
-  Calculate a gate interval for the wide gate movement's gap index.
+  Calculate extended gate spacing for the wide gate movement's gap index.
   Apply a measured wide gate gap given the gate inquiry's interval length.
 
 \ This pure movement commit helper is separately testable with known

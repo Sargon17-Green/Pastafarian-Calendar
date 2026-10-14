@@ -48,7 +48,7 @@ To move to the next positive gate:
   Put the prospective positive index number into a positive gap index number.
   If the gate walk's current index is less than 0,
     put the gate walk's current index into the positive gap index number.
-  Calculate a gate interval given the positive gap index number.
+  Calculate native gate spacing given the positive gap index number.
   Publish the measured positive gate gap given the prospective positive index number and the gate inquiry's interval length.
 
 \ When moving backwards from a positive gate, its outgoing interval
@@ -65,7 +65,7 @@ To move to the next negative gate:
   Put the prospective negative index number into a negative gap index number.
   If the gate walk's current index is greater than 0,
     put the gate walk's current index into the negative gap index number.
-  Calculate a gate interval given the negative gap index number.
+  Calculate native gate spacing given the negative gap index number.
   Publish the measured negative gate gap given the prospective negative index number and the gate inquiry's interval length.
 
 \ The signed index must fit CAL's native number type.

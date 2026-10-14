@@ -8,24 +8,24 @@
 \ The last has length 5400 and opening index -2.
 \ No sauce calculation is needed for this synthetic sorting test.
 
-To add a synthetic gate given a number and a calendar day:
+To append synthetic gate fixture given a number and a calendar day:
   Put the number into the gate walk's current index.
   Put the calendar day into the gate walk's current position.
   Record a positive gate mark.
 
 To make synthetic year gates:
   Destroy the nearby gate ledger.
-  Add a synthetic gate given -3 and -15057471.
-  Add a synthetic gate given -2 and -15056871.
-  Add a synthetic gate given -1 and -15056271.
-  Add a synthetic gate given 0 and -15055671.
-  Add a synthetic gate given 1 and -15055071.
-  Add a synthetic gate given 2 and -15054471.
-  Add a synthetic gate given 3 and -15053871.
-  Add a synthetic gate given 4 and -15053271.
-  Add a synthetic gate given 5 and -15052671.
-  Add a synthetic gate given 6 and -15052071.
-  Add a synthetic gate given 7 and -15051471.
+  Append synthetic gate fixture given -3 and -15057471.
+  Append synthetic gate fixture given -2 and -15056871.
+  Append synthetic gate fixture given -1 and -15056271.
+  Append synthetic gate fixture given 0 and -15055671.
+  Append synthetic gate fixture given 1 and -15055071.
+  Append synthetic gate fixture given 2 and -15054471.
+  Append synthetic gate fixture given 3 and -15053871.
+  Append synthetic gate fixture given 4 and -15053271.
+  Append synthetic gate fixture given 5 and -15052671.
+  Append synthetic gate fixture given 6 and -15052071.
+  Append synthetic gate fixture given 7 and -15051471.
   Put -15055671 into the year selection day.
 
 To check the year five thousand candidate enumeration:

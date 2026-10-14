@@ -8,7 +8,7 @@
 The woven test text is a string.
 
 \ Rebuild a synthetic month-length list without needing a year sauce.
-To add a synthetic month with a number:
+To append synthetic month fixture with a number:
   Allocate memory for a month length record.
   Put the number into the month length record's month length days.
   Append the month length record to the chosen month lengths.
@@ -16,18 +16,18 @@ To add a synthetic month with a number:
 To prepare two synthetic months:
   Destroy the chosen month lengths.
   Put 2 into the selected month count.
-  Add a synthetic month with 4.
-  Add a synthetic month with 4.
+  Append synthetic month fixture with 4.
+  Append synthetic month fixture with 4.
 
 To prepare three synthetic months:
   Prepare two synthetic months.
   Put 3 into the selected month count.
-  Add a synthetic month with 4.
+  Append synthetic month fixture with 4.
 
 To prepare four synthetic months:
   Prepare three synthetic months.
   Put 4 into the selected month count.
-  Add a synthetic month with 4.
+  Append synthetic month fixture with 4.
 
 \ The test words use month ORDINALS, not name indices.
 To write the selected weaving as test text:

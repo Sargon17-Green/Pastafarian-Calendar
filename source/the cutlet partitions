@@ -96,7 +96,7 @@ To count the current cutlet suffix:
   If the cutlet partition's suffix parts is 0,
     count the last cutlet suffix; exit.
   If the cutlet partition's remaining boundary is greater than 0,
-    count a suffix with a restricted boundary; exit.
+    count restricted cutlet suffixes; exit.
   Put the cutlet partition's suffix spans into a first binomial number.
   Subtract 1 from the first binomial number.
   Put the cutlet partition's suffix parts into a second binomial number.
@@ -109,10 +109,10 @@ To count the last cutlet suffix:
   If the cutlet partition's remaining boundary is greater than 0, exit.
   Put "1" into the cutlet partition's suffix choices.
 
-To count a suffix with a restricted boundary:
+To count restricted cutlet suffixes:
   If the cutlet partition's candidate length is greater than the cutlet partition's remaining boundary, exit.
   If the cutlet partition's candidate length is the cutlet partition's remaining boundary,
-    count a suffix after satisfying its restriction; exit.
+    count satisfied cutlet suffixes; exit.
   If the cutlet partition's suffix parts is less than 2, exit.
   Put the cutlet partition's suffix spans into a first binomial number.
   Subtract 2 from the first binomial number.
@@ -121,7 +121,7 @@ To count a suffix with a restricted boundary:
   Calculate binomial coefficients given the first binomial number and the second binomial number.
   Put the binomial result into the cutlet partition's suffix choices.
 
-To count a suffix after satisfying its restriction:
+To count satisfied cutlet suffixes:
   Put the cutlet partition's suffix spans into a first binomial number.
   Subtract 1 from the first binomial number.
   Put the cutlet partition's suffix parts into a second binomial number.

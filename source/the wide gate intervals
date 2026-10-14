@@ -20,7 +20,7 @@ To prepare a wide gate sauce question given a wide signed day:
   Add the wide signed day to the wide calendar example's requested day.
   Answer the wide calendar example.
 
-To calculate a gate interval for a wide signed day:
+To calculate extended gate spacing for a wide signed day:
   \ A wide gap has no representable native signed-index field.
   \ Clear that field so an earlier native value is not mistaken for
   \ the current wide index by another caller.
