@@ -70,6 +70,9 @@ sub _last_order ($self,$remaining,$closed) {
 }
 
 sub _count_state ($self,$remaining,$opened,$closed,$depth) {
+    # 大月份的合法 DFS 深度可達 300+；深度受原始日數與
+    # 外部資源守衛限制，只有 Perl 的 100 層提示須靜音。
+    no warnings 'recursion';
     $self->{visits}++;
     $self->{peak_depth}=$depth if $depth>$self->{peak_depth};
     # 已開啟全部月份時，剩餘問題有可直接計算的精確組合式：

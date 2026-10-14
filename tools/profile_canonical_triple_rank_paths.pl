@@ -93,8 +93,20 @@ if (!$pid) {
             );
             die "$name 解碼長度不等於全部月份天數\n"
                 if @$word!=$days;
-            die "$name 反排名沒有實際建立磁碟索引\n"
-                if ($unrank_stats{indexed_profile_builds}//0)!=1;
+            # 字典序首名和末名在 Stage 1 反排名器中刻意走
+            # 已驗證的貪婪快速路徑；不能把「沒有建索引」
+            # 誤判成數學 FAIL。非邊界中位名次仍須建索引。
+            if ($name eq 'first' || $name eq 'last') {
+                my $key=$name eq 'first'
+                    ? 'first_rank_fastpath' : 'last_rank_fastpath';
+                die "$name 沒有使用明確的字典序邊界捷徑\n"
+                    if ($unrank_stats{$key}//0)!=1;
+                die "$name 邊界捷徑意外啟動磁碟索引\n"
+                    if ($unrank_stats{indexed_profile_builds}//0)!=0;
+            } else {
+                die "$name 內部排名沒有實際建立磁碟索引\n"
+                    if ($unrank_stats{indexed_profile_builds}//0)<1;
+            }
 
             my $remaining=[@L];
             my ($opened,$closed)=(0,0);
@@ -145,8 +157,19 @@ if (!$pid) {
             );
             die "$name 正向排名不能精確還原原 BigInt\n"
                 if "$back" ne $rank_text;
-            die "$name 正向排名沒有建立私人索引\n"
-                if ($rank_stats{indexed_profile_builds}//0)!=1;
+            # 正向排名第一名無更小候選，故不需要前綴
+            # 後綴計數和磁碟索引；其餘兩個樣本須有候選。
+            if ($name eq 'first') {
+                die "首名字序仍計算了不必要的較小候選\n"
+                    if ($rank_stats{candidates}//0)!=0;
+                die "首名字序意外建立磁碟索引\n"
+                    if ($rank_stats{indexed_profile_builds}//0)!=0;
+            } else {
+                die "$name 正向排名沒有計數任何較小候選\n"
+                    if ($rank_stats{candidates}//0)<1;
+                die "$name 正向排名未建立所需的私人索引\n"
+                    if ($rank_stats{indexed_profile_builds}//0)<1;
+            }
             die "$name 原始可變 BigInt 排名被污染\n"
                 if "$rank" ne $rank_text;
             $passed++;
