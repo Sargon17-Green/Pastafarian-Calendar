@@ -492,7 +492,16 @@ object Stage37Tests {
       truth(!sources.contains("NormativeOracle"),"Oracolo test-only")
       truth(sources.contains("def oldSourceCatalogMismatch("),"Cicatrice")
       truth(sources.contains("def sourceCatalogIndexPatch("),"PATCH18")
-      truth(!sources.contains("oldCutletNameIndexRotated"),"Stage38 futura")
+      val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
+        StandardCharsets.UTF_8)
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      if(current<38)
+        truth(!sources.contains("def oldDayIndexedMonthName("),
+          "Stage38 non anticipata")
+      else
+        truth(sources.contains("def oldDayIndexedMonthName("),
+          "Discovery19 successiva presente")
       eqv(SourceLanguageCatalog.Months,Catalog,"Catalogo intatto")
     }
     check("metadati Stage37 conservano Stage36 e lo stato GREEN"){
