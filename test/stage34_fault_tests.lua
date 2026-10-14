@@ -33,7 +33,7 @@ for mode=1,9 do
  assert(not ok,"Malformed legacy position accepted: "..mode)
  errors=errors+1;recover()
 end
-for mode=1,5 do
+for mode=1,9 do
  Gap.execute=function(step,first,dir)
   if mode==1 then error("upstream gate gap failure",0) end
   local gap,ctx=originalGap(step,first,dir)
@@ -41,6 +41,10 @@ for mode=1,5 do
   if mode==3 then ctx.commitToken=4 end
   if mode==4 then ctx.semanticState.correctedGapDecimal="FORGED" end
   if mode==5 then ctx.status="FORGED" end
+  if mode==6 then ctx.branchTrace[4]="FORGED_HANDLER" end
+  if mode==7 then ctx.metrics["gateGap.patch.calls"]=nil end
+  if mode==8 then ctx.diagnostics[5].code="FORGED_DIAGNOSTIC" end
+  if mode==9 then ctx.semanticState.originalSignedQueryPreserved=false end
   return gap,ctx
  end
  local ok=pcall(S.legacyPositiveGateProbe,2,streams)
@@ -49,5 +53,5 @@ for mode=1,5 do
  errors=errors+1;recover()
 end
 assert(Old.oldPositivePosition==originalPosition and Gap.execute==originalGap
- and errors==14 and recoveries==14)
-print("PASS Stage 34 fault: 14 legacy/upstream failures rejected and 14 clean recoveries")
+ and errors==18 and recoveries==18)
+print("PASS Stage 34 fault: 18 legacy/upstream failures rejected and 18 clean recoveries")

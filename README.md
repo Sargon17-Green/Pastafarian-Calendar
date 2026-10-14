@@ -1266,8 +1266,8 @@ ni `postStir12`. Tès ak CI natif poko verifye.
 
 Suite `lua5.3 test/stage34_tests.lua .` kouvri
 24 chèn konpare kont oracle (21 ka istorikman
-diferan), 32 sous BigInt sou valè `M`, 14
-enjeksyon erè/14 rekiperasyon, de nested contexts,
+diferan), 32 sous BigInt sou valè `M`, 18
+enjeksyon erè/18 rekiperasyon, de nested contexts,
 ak twa sous sauce kanonik reyèl ki verifye
 `O.ensureGateIndex(3)` se sòm pozitif la.
 Twa scripts `stage34_expected_red_1..3.lua`

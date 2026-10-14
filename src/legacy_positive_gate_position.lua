@@ -55,6 +55,11 @@ function Legacy.execute(index,streams)
     and child.status=="PATCH_GATE_GAP_COMPLETE"
     and child.phase=="PATCH_GATE_GAP_OFFSET"
     and child.commitToken==5 and #child.branchTrace==5
+    and child.branchTrace[1]=="LEGACY_SIGNED_GATE_STEP"
+    and child.branchTrace[2]=="LEGACY_ABSOLUTE_GATE_QUERY"
+    and child.branchTrace[3]=="SIGNED_GATE_QUESTION_PATCH"
+    and child.branchTrace[4]=="LEGACY_GATE_GAP_PLUS_ONE"
+    and child.branchTrace[5]=="GATE_GAP_OFFSET_PATCH"
     and child.currentHandler=="GATE_GAP_OFFSET_PATCH"
     and child.pendingSemanticState==nil and child.rollbackSnapshot==nil
     and child.semanticState.source=="PATCH_16_GATE_GAP_OFFSET"
@@ -62,7 +67,15 @@ function Legacy.execute(index,streams)
     and child.semanticState.firstDecimal==tostring(B.from(source.first))
     and child.semanticState.directionStep==source.directionStep
     and child.semanticState.correctedGapDecimal==tostring(gap)
+    and child.semanticState.correctedOffsetDecimal=="41"
+    and child.semanticState.originalSignedQueryPreserved==true
+    and child.semanticState.originalChoiceRankPreserved==true
+    and child.semanticState.legacyExtraOnePreserved==true
+    and type(child.metrics)=="table"
     and child.metrics["gateGap.patch.calls"]==1
+    and type(child.diagnostics)=="table" and #child.diagnostics==5
+    and child.diagnostics[5].code=="PATCH_16_REMOVE_GATE_GAP_EXTRA_ONE"
+    and child.diagnostics[5].correctedGap==tostring(gap)
     and B.compare(gap,LO)>=0 and B.compare(gap,HI)<=0,
    "DISCOVERY 17: PATCH 16 gap oswa provenance pa otantik")
   gaps[i]=B.from(gap)

@@ -909,7 +909,7 @@ Koreksyon akimilasyon ap tann PATCH 17.
 ### QA Stage 34 soumèt
 
 24 chèn oracle pozitif, 21 divèjans legacy, longè
-jiska 32 gaps, 14 injections/14 recoveries,
+jiska 32 gaps, 18 injections/18 recoveries,
 de nested states, twa soup sauce orijinal ak
 twa `EXPECTED_RED` egzak. Stage 34 pa korije
 akimilasyon; patch kap vini an dwe retounen
