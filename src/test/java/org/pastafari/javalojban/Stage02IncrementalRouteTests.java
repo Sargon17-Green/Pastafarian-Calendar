@@ -20,6 +20,7 @@ public final class Stage02IncrementalRouteTests {
         siblingForwardClosedFormOracleDifferential();
         siblingSharedWeightNormativeOracleDifferential();
         siblingSharedWeightNearClosureOracleDifferential();
+        siblingSharedWeightFiveMonthClosureOracleDifferential();
         siblingBackwardFunctionalFullYearProbe();
         normalizedBackwardTailAcrossAdjacentParents();
         normalizedTailDepthGrowthAndConcurrentParents();
@@ -188,6 +189,60 @@ public final class Stage02IncrementalRouteTests {
             "E_TAIL_CONCURRENT_REUSE");
         ok(shared.tailFunctionalBuildCount() >= 1,
             "E_TAIL_CONCURRENT_BUILD");
+    }
+
+    private static void siblingSharedWeightFiveMonthClosureOracleDifferential() {
+        int[][] families = {
+            {2, 3, 3, 3, 2},
+            {3, 3, 3, 3, 2}
+        };
+        int[][] prefixes = {
+            {1, 2, 3, 4, 1},
+            {1, 2, 3, 4, 1, 1}
+        };
+        for (int test = 0; test < families.length; test++) {
+            int[] lengths = families[test];
+            int[] prefix = prefixes[test];
+            MonsterWeavingLinearCounter family =
+                new MonsterWeavingLinearCounter(lengths);
+            NormativeOracle.WeavingFamily oracle =
+                new NormativeOracle.WeavingFamily(lengths);
+            BigInteger[] actual = family.countSiblingBranchSizes(prefix);
+            ok(family.siblingPrefixSharedWeightHitCount() >= 2,
+                "E_SHARED_FIVE_MONTH_CLOSED_REUSE");
+            BigInteger[] expected = new BigInteger[lengths.length];
+            Arrays.fill(expected, BigInteger.ZERO);
+            int n = oracle.count().intValueExact();
+            for (int rank = 1; rank <= n; rank++) {
+                int[] weaving = oracle.unrank1(BigInteger.valueOf(rank));
+                if (!Arrays.equals(prefix,
+                        Arrays.copyOf(weaving, prefix.length))) {
+                    continue;
+                }
+                expected[weaving[prefix.length] - 1] =
+                    expected[weaving[prefix.length] - 1].add(BigInteger.ONE);
+            }
+            BigInteger total = BigInteger.ZERO;
+            for (int month = 0; month < lengths.length; month++) {
+                eq(expected[month], actual[month],
+                    "E_SHARED_FIVE_MONTH_CLOSED_ORACLE");
+                total = total.add(actual[month]);
+                if (actual[month].signum() > 0) {
+                    int[] extended = Arrays.copyOf(prefix,
+                        prefix.length + 1);
+                    extended[prefix.length] = month + 1;
+                    eq(family.countAfterPrefix(extended), actual[month],
+                        "E_SHARED_FIVE_MONTH_CLOSED_SUFFIX");
+                }
+            }
+            eq(family.countAfterPrefix(prefix), total,
+                "E_SHARED_FIVE_MONTH_CLOSED_PARTITION");
+            MonsterWeavingLinearCounter independent =
+                new MonsterWeavingLinearCounter(lengths);
+            eq(Arrays.asList(actual),
+                Arrays.asList(independent.countSiblingBranchSizes(prefix)),
+                "E_SHARED_FIVE_MONTH_CLOSED_INSTANCE_NEUTRALITY");
+        }
     }
 
     private static void siblingSharedWeightNearClosureOracleDifferential() {
