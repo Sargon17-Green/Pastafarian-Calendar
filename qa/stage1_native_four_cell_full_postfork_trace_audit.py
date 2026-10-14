@@ -130,8 +130,13 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
             if byte==ord('"'):
                 expected_prefork_stringmode=1-expected_prefork_stringmode
             if last_straight_delta is not None:
-                need((dx,dy)==last_straight_delta,
+                px,py,pdx,pdy=last_straight_delta
+                need((dx,dy)==(pdx,pdy),
                      "Native pre-fork nonturning opcode changed IP direction")
+                # The wrapped BF98 coordinate may change along its travel axis,
+                # but a cardinal move cannot jump to a perpendicular row/column.
+                need((pdy!=0 or y==py) and (pdx!=0 or x==px),
+                     "Native pre-fork nonturning opcode left cardinal travel axis")
             if last_fixed_turn_delta is not None:
                 need((dx,dy)==last_fixed_turn_delta,
                      "Native pre-fork fixed turn opcode did not set required direction")
@@ -149,7 +154,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
                 need(event is not None and event[1]==chr(byte),
                      "Executed pre-fork p/g missing its Native receipt")
                 last_pg=(x,y,dx,dy)
-            last_straight_delta=(dx,dy) if straight_instruction(byte,stringmode) else None
+            last_straight_delta=(x,y,dx,dy) if straight_instruction(byte,stringmode) else None
             last_fixed_turn_delta=FIXED_TURNS.get(byte) if stringmode==0 else None
             if event is not None:
                 need(stringmode==0 and byte==ord(event[1]),
@@ -215,8 +220,11 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
         if byte==ord('"'):
             expected_postfork_stringmode=1-expected_postfork_stringmode
         if pending_straight_delta is not None:
-            need((dx,dy)==pending_straight_delta,
+            px,py,pdx,pdy=pending_straight_delta
+            need((dx,dy)==(pdx,pdy),
                  "Native post-fork nonturning opcode changed IP direction")
+            need((pdy!=0 or y==py) and (pdx!=0 or x==px),
+                 "Native post-fork nonturning opcode left cardinal travel axis")
         if pending_fixed_turn_delta is not None:
             need((dx,dy)==pending_fixed_turn_delta,
                  "Native post-fork fixed turn opcode did not set required direction")
@@ -250,7 +258,7 @@ def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
             need(event is not None and event[1]==chr(byte),
                  "Native executed p/g opcode missing its physical event receipt")
             pending_pg_motion=(x,y,dx,dy)
-        pending_straight_delta=(dx,dy) if straight_instruction(byte,stringmode) else None
+        pending_straight_delta=(x,y,dx,dy) if straight_instruction(byte,stringmode) else None
         pending_fixed_turn_delta=FIXED_TURNS.get(byte) if stringmode==0 else None
         if event is not None:
             kind=event[1]
