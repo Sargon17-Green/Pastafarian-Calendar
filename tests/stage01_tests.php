@@ -277,7 +277,7 @@ $h->test('year5000_fixture', function() use ($h,$fixture,$oracle): void {
 $h->test('no_future_patch_code_in_src', function() use ($h): void {
     $root = dirname(__DIR__) . '/src';
     $banned = [
-        'oldRemainder','oldDayTag','oldDistance','mutateStonesWrong','hiddenBackward',
+        'oldRemainder','oldDayTag','oldDistance','mutateStonesWrong','hiddenByNearness',
         'GRIND_TABLE_WITH_SENTINEL','oldPermutationUnrank0','bowlAlias','vaultOld','pendingSnapshot',
         'orderAt46Latch','oldNextBowlFixedName','biasedLegacyPick','wideDetour','oldGateQuestionDay',
         'LEGACY_YEAR_MAX','oldJumpGuess','LEGACY_STRUCTURE_CACHE_BY_YEAR_NUMBER','oldStructureSauce',
