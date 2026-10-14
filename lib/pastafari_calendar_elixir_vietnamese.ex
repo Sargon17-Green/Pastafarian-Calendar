@@ -2,8 +2,8 @@ defmodule PastafariCalendarElixirVietnamese do
   @moduledoc """
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
-  Giai đoạn 31 đã sửa cổng âm; Stage32 mở chọn năm 5000
-  nhưng di sản sắp ứng viên năm dài trước năm ngắn.
+  Giai đoạn 33 đã vá thứ tự năm 5000.
+  Stage34 mở năm tiếp theo, cố ý hỏi sai ngày từ legacy.
   Chưa tích hợp lịch đầy đủ.
   """
 
@@ -108,6 +108,9 @@ defmodule PastafariCalendarElixirVietnamese do
 
   def year5000_spaghetti(calculation_day), do: Dispatcher.year5000(calculation_day)
   def year5000_diagnostic_spaghetti(calculation_day), do: Dispatcher.year5000_diagnostic(calculation_day)
+
+  def next_year_spaghetti(calculation_day), do: Dispatcher.next_year(calculation_day)
+  def next_year_diagnostic_spaghetti(calculation_day), do: Dispatcher.next_year_diagnostic(calculation_day)
 
   def calendar_date_spaghetti(calculation_day, target_day) do
     _context = Dispatcher.bootstrap(calculation_day, target_day)

@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=33
-CURRENT_KIND=PATCH
-CURRENT_PATCH=16
+CURRENT_STAGE=34
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=17
 LAST_COMPLETED_STAGE=33
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..15; Stage33 thêm ShortestFirstYear5000Patch vẫn gọi legacy dài-trước, rồi sắp lại {length,open_gate_day} tăng dần. Year5000Manager chọn theo corrected_order; tập ứng viên, gate, rank và oracle không đổi.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..16; Stage34 thêm NextYearCandidateManager đúng và LegacyCurrentDayNextYearSeed sai nguồn ngày, nối vào NextYearManager. Năm 5000 và gate vẫn chuẩn; năm sau chọn sai sauce(c,c) thay vì sauce(c,open_day).
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_33_PATCH_CLOSURE
+GIT_HISTORY_MUTATED=STAGE_34_DISCOVERY_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=471
-CI_FAILURES=0
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -801,3 +801,12 @@ CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38586793
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38586793164
 Đóng Stage33 GREEN, tiếp theo Stage34 DISCOVERY 17 chưa bắt đầu.
 Không thay main hoặc tích hợp lịch hoàn chỉnh.
+
+Giai đoạn 34 DISCOVERY 17: tìm năm tiếp theo sau năm neo 5000.
+NextYearCandidateManager mở rộng gate tới open_day+5778, chỉ chọn
+close_index>open_index với ít nhất 6 khoảng và độ dài 252..5778;
+thứ tự tăng dần theo độ dài. LegacyCurrentDayNextYearSeed dùng
+Dispatcher.answer_stream(c,c,1,11) thay vì normative (c,open_day,1,11).
+Rank sai đi vào production NextYearManager; không sửa oracle.
+20 kiểm thử mới: 16 điều khiển gate/lọc/seed sai và 4 hồi quy chuẩn đỏ.
+Đóng chỉ sau CI xác minh đúng 4 sai lệch và Canonical Names Lock PASS.
