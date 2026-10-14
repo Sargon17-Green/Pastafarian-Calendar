@@ -31,6 +31,7 @@ local WideChoicePatch = require("wide_choice_patch")
 local LegacyGateQuestionAdapter = require("legacy_gate_question_adapter")
 local GateQuestionPatch = require("gate_question_patch")
 local LegacyGateGap = require("legacy_gate_gap")
+local GateGapPatch = require("gate_gap_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -497,12 +498,21 @@ function S.oldGateGapFromRankProbe(rank)
 end
 
 function S.gateGapSpaghetti(signedStep,first,direction)
-    local historic=LegacyGateGap.execute(signedStep,first,direction)
-    return historic
+    local corrected=GateGapPatch.execute(signedStep,first,direction)
+    return corrected
+end
+
+-- PATCH 16: apre 4 commits legacy, ajoute senkyèm commit koreksyon offset.
+function S.gateGapPatchProbe(signedStep,first,direction)
+    return GateGapPatch.execute(signedStep,first,direction)
+end
+
+function S.gateGapCoreProbe(rank,historicalGap)
+    return GateGapPatch.correctGateGap(rank,historicalGap)
 end
 
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 32", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 33", 0)
 end
 
 return S

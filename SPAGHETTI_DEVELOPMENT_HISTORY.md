@@ -854,3 +854,15 @@ witness wouj yo verifye pa audit. Dènye kalkil legacy
 rete `42+rank` olye `41+rank`, san PATCH 16.
 `LAST_COMPLETED_STAGE=32` / `EXPECTED_RED_VERIFIED`.
 
+
+## Stage 33 — PATCH 16: koreksyon offset gap +1
+
+Modil `gate_gap_patch.lua` konsève premye kat commits
+ki dokimante kestyon Fondasyon siyen ak kalkil eritaj
+`42+rank`. Li verifye provenance rank 922 opsyon
+nan PATCH 13, eta PATCH 15, diagnostics ak metrik
+istorik yo. Senkyèm commit repare `41+rank`, 42..963,
+san efase eta legacy oswa ranvèse rank la. Wout
+legacy rete byte-pou-byte konstan. Pa gen gate
+sequence ni `postStir12` nan etap sa a.
+CI natif poko verifye.

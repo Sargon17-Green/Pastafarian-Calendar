@@ -13,8 +13,7 @@ for signed=-3,3 do
    local legacy=B.add(42,normRank)
    local value,ctx=S.legacyGateGapProbe(signed,first,dir)
    assert(B.compare(value,legacy)==0
-    and B.compare(value,B.add(norm,1))==0
-    and B.compare(S.gateGapSpaghetti(signed,first,dir),legacy)==0)
+    and B.compare(value,B.add(norm,1))==0)
    assert(ctx.mode=="STAGE_32_DISCOVERY_16"
     and ctx.phase=="LEGACY_GATE_GAP_OFFSET"
     and ctx.status=="LEGACY_GATE_GAP_COMPLETE"

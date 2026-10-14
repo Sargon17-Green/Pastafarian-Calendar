@@ -1195,3 +1195,16 @@ pase; defo `42+rank` istorik la rete disponib pou audit.
 `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
 Pa gen PATCH 16, chèn pòtay oswa `postStir12`.
 
+
+## Stage 33 — PATCH 16: retabli espas pòtay normatif 42..963
+
+Nou ajoute `src/gate_gap_patch.lua`: li fè apèl reyèl
+`legacy_gate_gap.execute` an premye, verifye kestyon
+siyen PATCH 15, rank PATCH 13 ak kat commits istorik yo,
+epi sove state `42+rank` ansanm ak question day la.
+Apre sa, senkyèm commit `GATE_GAP_OFFSET_PATCH`
+retire 1: `(42+rank)-1=41+rank`, rank 1..922,
+gap 42..963. Fonksyon piblik `gateGapSpaghetti`
+pran PATCH 16, pandan `legacyGateGapProbe` rete pou audit.
+Pa gen oracle nan production, pa gen chèn pòtay antye,
+ni `postStir12`. QA natif poko verifye.
