@@ -13,7 +13,18 @@ for i=1,32 do
 end
 local value,ctx=S.legacyPositiveGateProbe(32,streams)
 local lastGap=ctx.positiveGapDecimals[32]
-assert(B.compare(value,B.add(F,lastGap))==0
+-- M mod 922 = 221: all M-i for i=1..32 are beyond the acceptance
+-- threshold. Negative directions accept limit (rank 922);
+-- positive directions wrap to 1 (rank 1).
+assert(B.compare(B.mod(O.M,922),221)==0)
+for i=1,32 do
+ assert(ctx.positiveGapDecimals[i]==(i%2==0 and "42" or "963"),
+  "Wrong BigInt acceptance wrap at positive gate "..i)
+end
+assert(B.compare(sum,B.add(F,16080))==0
+ and lastGap=="42"
+ and B.compare(value,B.add(F,42))==0
+ and B.compare(value,B.add(F,lastGap))==0
  and ctx.correctCumulativeDayForAudit==nil
  and ctx.gateIndex==32 and #ctx.positiveGapDecimals==32
  and ctx.commitToken==6 and B.compare(value,sum)<0)
