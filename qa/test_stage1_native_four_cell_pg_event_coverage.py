@@ -280,6 +280,21 @@ def gate_anchor_regression():
         raise AssertionError("physical gate Native pretrace not verified")
     print("GATE_ANCHOR_STRICT_V2_POSITIVE_PASS")
 
+    # A physical > must set the next IP velocity to east. Do not allow a
+    # forged westward velocity to hide behind otherwise correct source bytes.
+    wrong_fixed_turn = copy.deepcopy(run)
+    wrong_fixed_turn["complete_postfork_trace"][1][3] = -1
+    wrong_fixed_turn["first_512_motion"][1][2] = -1
+    try:
+        audit.verify_run(wrong_fixed_turn, source, require_prefork=True,
+                         require_gate_anchor=True)
+    except AssertionError as exc:
+        if "Native post-fork fixed turn opcode did not set required direction" not in str(exc):
+            raise AssertionError("fixed-turn forgery rejected for wrong reason: " + str(exc)) from exc
+    else:
+        raise AssertionError("forged westward successor to > was accepted")
+    print("GATE_ANCHOR_FIXED_TURN_DIRECTION_FORGERY_REJECT_PASS")
+
     def shift_first_x(r):
         r["complete_postfork_trace"][0][1]=952
         r["complete_postfork_trace"][0][5]=ord(">")
