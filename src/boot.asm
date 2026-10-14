@@ -1,6 +1,4 @@
-; DMG-only bootstrap. SM83 instructions; never link host-language code.
-; The machine-visible test signal is WRAM $C000 (A5 pass / E0 fail).
-
+; DMG-only bootstrap. SM83 instructions; no host-language code linked.
 SECTION "Reset entry", ROM0[$0100]
     nop
     jp Bootstrap
@@ -18,6 +16,11 @@ wExpected::   ds 16
 wWideInput::  ds 32
 wWideCurrentByte:: ds 1
 wWideBytesRemaining:: ds 1
+wMulA::       ds 16
+wMulB::       ds 16
+wMulCurrentByte:: ds 1
+wMulBitFlag:: ds 1
+wMulBytesRemaining:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -30,15 +33,21 @@ Bootstrap:
     call RunSelfTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .skipWide
+    jr nz, .done
     call RunWideTests
-.skipWide:
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .done
+    call RunMultiplyTests
+.done:
     call calendarDateSpaghetti
 .hold:
     jr .hold
 
 INCLUDE "src/runtime/save127.asm"
 INCLUDE "src/runtime/savewide256.asm"
+INCLUDE "src/runtime/mul128.asm"
 INCLUDE "src/runtime/dispatcher.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
+INCLUDE "src/tests/mul_test.asm"

@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """Host-side DMG ROM inspector; does not implement calendar semantics."""
 from __future__ import annotations
-
 import argparse
 from pathlib import Path
-
 
 def check_header(data: bytes) -> None:
     assert len(data) == 32768, f"expected 32 KiB ROM; got {len(data)} bytes"
@@ -21,7 +19,6 @@ def check_header(data: bytes) -> None:
     assert stored_global == actual_global, "incorrect global checksum"
     print("ROM_HEADER=PASS DMG=YES MBC=ROM_ONLY")
 
-
 def check_emulator(path: Path) -> None:
     try:
         from pyboy import PyBoy
@@ -36,12 +33,11 @@ def check_emulator(path: Path) -> None:
         stage = boy.memory[0xC002]
         print(f"ROM_NATIVE_STATUS={result:02X} LAST_TEST_CASE={case} DISPATCH_STATUS={stage:02X}")
         assert result == 0xA5, f"SM83 self-test failed at case {case}"
-        assert case == 16, "SM83 did not run all 16 test cases"
+        assert case == 22, "SM83 did not run all 22 test cases"
         assert stage == 0x40, "production dispatcher must explicitly refuse a date"
         print("STAGE1_ARITHMETIC_SMOKE=PASS")
     finally:
         boy.stop()
-
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -49,7 +45,6 @@ def main() -> None:
     args = parser.parse_args()
     check_header(args.rom.read_bytes())
     check_emulator(args.rom)
-
 
 if __name__ == "__main__":
     main()

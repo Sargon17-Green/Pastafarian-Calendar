@@ -6,7 +6,7 @@ SM83-Assembly+ግዕዝ is an independent, from-zero Assembly branch for the ori
 
 CURRENT_STAGE=1 (BOOTSTRAP). LAST_COMPLETED_STAGE=0. No Pastafarian date has been computed and no full Stage-1 verification has been claimed. The source-language names and classical-language review are outstanding; English technical notes here are a declared localization gap, not Ge'ez text.
 
-Build a real 32 KiB ROM with make build. Run the independent emulator inspection with make test (RGBDS and PyBoy required). ROM WRAM C000 = A5 means ten smoke checks passed, E0 means a failed check; C001 is the case number. WRAM C002 = 40 explicitly marks that the calendar dispatcher is not yet implemented. Arithmetic smoke tests are not a substitute for the normative Stage-1 oracle and full calendar implementation.
+Build a real 32 KiB ROM with make build. Run the independent emulator inspection with make test (RGBDS and PyBoy required). ROM WRAM C000 = A5 means 22 smoke checks passed, E0 means a failed check; C001 is the case number. WRAM C002 = 40 explicitly marks that the calendar dispatcher is not yet implemented. Unsigned 128x128 multiplication with a full 256-bit output and 256-bit SAVE reduction are now implemented in Assembly. Arithmetic smoke tests are not a substitute for the normative Stage-1 oracle and full calendar implementation.
 
 The authoritative calendar rules and canonical content remain available in the main branch. Never import a production implementation from another language branch. Keep the historical 55-stage BOOTSTRAP, DISCOVERY, PATCH, INTEGRATION and AUDIT sequence, without jumping to later patches.
 
