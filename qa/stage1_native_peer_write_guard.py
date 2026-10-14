@@ -10,6 +10,20 @@ against the other live Program before/after every put. It is Python 2/3 safe.
 from stage1_native_pg_physical_address import physical_pg_operands
 
 
+def peer_ip_snapshot(peer):
+    """Read-only full IP/stack-stack witness across one executed p/s step.
+
+    This is intentionally captured only at an actual source write to avoid
+    copying every live stack at every Native instruction.
+    """
+    return tuple((id(ip), tuple(ip.position), tuple(ip.delta),
+                  tuple(ip.offset), bool(ip.stringmode),
+                  bool(getattr(ip, 'invertmode', False)),
+                  bool(getattr(ip, 'queuemode', False)),
+                  tuple(tuple(int(value) for value in frame)
+                        for frame in ip.stack)) for ip in peer.ips)
+
+
 def guarded_step(actor, peer, step):
     """Execute one Native step, prove actual p/s writes only actor-owned memory.
 
@@ -43,9 +57,12 @@ def guarded_step(actor, peer, step):
         expected = int(stack[-1]) if stack else 0
     peer_target = peer._qa_point(coordinates)
     untouched_peer_byte = peer.space.get(peer_target)
+    untouched_peer_ip = peer_ip_snapshot(peer)
     step(actor)
     if int(actor.space.get(target)) != expected:
         raise AssertionError("Native p/s did not write its expected physical Funge-space cell")
     if peer.space.get(peer_target) != untouched_peer_byte:
         raise AssertionError("Native p/s mutated the other Program's corresponding Funge-space cell")
+    if peer_ip_snapshot(peer) != untouched_peer_ip:
+        raise AssertionError("Native p/s mutated the other Program's IP or stack-stack state")
     return 1
