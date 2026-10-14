@@ -58,7 +58,8 @@ def synthetic():
     altered = copy.deepcopy(run)
     altered["complete_postfork_trace"][101][3:5] = [0, 1]
     altered["first_512_motion"][101] = altered["complete_postfork_trace"][101][1:5]
-    reject(source, altered, "digit_spontaneous_turn")
+    reject(source, altered, "digit_spontaneous_turn",
+           expected_error="nonturning opcode changed IP direction")
 
     source, run = fixture()
     row = bytearray(source[0])
@@ -70,7 +71,8 @@ def synthetic():
     altered = copy.deepcopy(run)
     altered["complete_postfork_trace"][202][3:5] = [0, 1]
     altered["first_512_motion"][202] = altered["complete_postfork_trace"][202][1:5]
-    reject(source, altered, "quoted_p_spontaneous_turn")
+    reject(source, altered, "quoted_p_spontaneous_turn",
+           expected_error="nonturning opcode changed IP direction")
 
     source, run = fixture()
     row = bytearray(source[0])
@@ -89,7 +91,8 @@ def synthetic():
     audit.verify_run(run, source, require_prefork=True)
     altered = copy.deepcopy(run)
     altered["complete_prefork_trace"][1][3:5] = [0, 1]
-    reject(source, altered, "prefork_digit_spontaneous_turn", prefork=True)
+    reject(source, altered, "prefork_digit_spontaneous_turn", prefork=True,
+           expected_error="nonturning opcode changed IP direction")
     print("NATIVE_THREE_STRAIGHT_VECTOR_SYNTHETIC_CONTROLS_PASS")
 
 
@@ -120,7 +123,8 @@ def historical(path):
         raise AssertionError("Historical actual digit witness changed")
     prior = trace[516][3:5]
     trace[516][3:5] = [prior[1], -prior[0]]
-    reject(source, sample, "historical_native_digit_turn")
+    reject(source, sample, "historical_native_digit_turn",
+           expected_error="nonturning opcode changed IP direction")
     print("NATIVE_EIGHT_HISTORICAL_NONTURNING_TRAJECTORIES_PASS",
           sum(x[2] for x in checks))
 
