@@ -171,8 +171,58 @@ def cardinal_axis_regression():
     print("NATIVE_CARDINAL_TRAVEL_AXIS_TWO_FALSIFICATIONS_REJECT_PASS")
 
 
+
+def fixed_turn_axis_regression():
+    # The original verifier checked the new velocity after a fixed cardinal
+    # turn, but allowed the next IP to appear on a parallel, distant line.
+    # Keep source bytes and the following 313 steps consistent with that
+    # forged line, so only the missing turn-axis contract can reject it.
+    source, run = fixture()
+    row = bytearray(source[0])
+    row[200] = ord(">")
+    source = [bytes(row), bytes(row)]
+    run["complete_postfork_trace"][200][5] = ord(">")
+    audit.verify_run(run, source)
+
+    warped = copy.deepcopy(run)
+    for entry in warped["complete_postfork_trace"][201:]:
+        entry[2] = 1
+    warped["first_512_motion"] = [
+        entry[1:5] for entry in warped["complete_postfork_trace"][:512]
+    ]
+    reject(source, warped, "postfork_fixed_east_lateral_teleport",
+           expected_error="post-fork fixed turn successor left directed axis")
+
+    # Repeat before the physical | gate. Anchor-free generic replay permits
+    # the synthetic gate at either row, but no cardinal > can move between
+    # the two rows. Post-fork evidence, p/g receipts and byte provenance
+    # remain otherwise unchanged.
+    source, run = fixture()
+    row = bytearray(source[0])
+    row[600:602] = b">|"
+    source = [bytes(row), bytes(row)]
+    run["steps"] += 1
+    run["gate"]["step"] += 1
+    for entry in run["complete_postfork_trace"]:
+        entry[0] += 1
+    for entry in run["native_p_history"] + run["native_g_history"]:
+        entry["tick"] += 1
+    run["complete_prefork_trace"] = [
+        [1, 600, 0, 1, 0, ord(">"), 0],
+        [2, 601, 0, 1, 0, ord("|"), 0],
+    ]
+    audit.verify_run(run, source, require_prefork=True)
+    warped = copy.deepcopy(run)
+    warped["complete_prefork_trace"][1][2] = 1
+    reject(source, warped, "prefork_fixed_east_lateral_teleport",
+           prefork=True,
+           expected_error="pre-fork fixed turn successor left directed axis")
+    print("NATIVE_FIXED_TURN_AXIS_TWO_FORGERIES_REJECT_PASS")
+
+
 if __name__ == "__main__":
     synthetic()
+    fixed_turn_axis_regression()
     cardinal_axis_regression()
     if len(sys.argv) == 2:
         historical(sys.argv[1])
