@@ -1499,3 +1499,22 @@ la versione; il catalogo sorgente non è stato modificato.
 L'ingresso è un vettore di indici già selezionati; la
 generazione normativa del rango dalla salsa annuale resta
 esclusa dall'implementazione di Stage37.
+
+
+### Stage38 — DISCOVERY19: il nome indicizzato dal giorno (in sviluppo)
+
+Questa nuova discovery distingue la tessitura dei giorni dal catalogo
+dei nomi. La PATCH16 identifica il mese reale per il giorno
+`annualWeaving(dayOffset)`; la PATCH18 traduce gli ID canonici 1..47
+nei nomi italiani del catalogo immutato. L'adapter storico
+`oldDayIndexedMonthName` usa invece `dayOffset % monthCount`
+come posizione di un nome, cambiando erroneamente il nome anche se
+il mese della tessitura non cambia.
+
+L'oracolo indipendente resta esclusivamente in `Stage38Tests.scala`.
+Le tre divergenze previste sono DAY1_MONTH1,
+INTERLEAVED_DAY2_MONTH2 e MONTH47_DAY46. Si usano tessiture
+sintetiche valide e ID gia' selezionati; nessun calcolo della salsa
+annuale o dell'anno completo viene rivendicato. Stage39 / PATCH19
+non sono introdotti. Stage37 resta l'ultima fase certificata
+fino all'esito del CI nativo Stage38.
