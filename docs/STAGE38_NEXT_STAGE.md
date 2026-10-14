@@ -1,0 +1,20 @@
+# Stage38 closed — Stage39 PATCH19 continuation
+
+Repository `Sargon17-Green/Pastafarian-Calendar`, branch **`TypeScript+मराठी` ONLY**. Total 55 alternating discovery/patch stages; **LAST_COMPLETED_STAGE=38**, NEXT_STAGE=39 PATCH19; do not begin Stage40 DISCOVERY20 in same turn.
+
+Read current live HEAD, `DEVELOPMENT_STAGE.md`, `docs/STAGE38_DISCOVERY19_VERIFICATION.md`, `src/discovery19LegacyYearCache.ts`, `src/patch18YearWalk.ts`, `test/discovery19.ts`, `test/discovery19Properties.ts`, `test/discovery19Fixtures.ts`, `test/normativeOracle.ts`, and authoritative Library `06-implementation-prompt.md` Patch19 canonical contract.
+
+Verified Stage38 [commit c233e06](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/c233e06ad04834f7153222a3b97e88a3509953d1), [Actions 38585298407](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38585298407): two native jobs SUCCESS, TypeScript Stage1–38 regression plus all **19** intentionally failing historical wrong-method scripts; immutable names hash PASS. Note Node --experimental-strip-types cannot run TS constructor parameter properties; use explicit class declarations / assignments.
+
+Stage38 `LegacyYearNumberOnlyCache.oldGet(yearNumber)` and `oldPut(yearNumber,value)` PHYSICALLY use `Map<bigint, Discovery19YearValue>` under **year.number only** with no calculation-day/gate validation. `Discovery19YearNumberCacheHandler.run(ctx,q)` genuinely reruns complete Stage37 true signed gates/Year5000/Seal10/11/12 plus both old /365 diagnostics BEFORE real oldGet; keeps immutable `fresh` true Year5000 value, but on HIT actually serves the OLD cached record even if `calculationDay`, opening gate or closing gate differ. This WRONG HIT is intentional Stage38 scar and must remain in its original implementation. Independent true normative Year5000(c) witnesses for c=gate(-2)+1 and c=gate(+2)+1 have year.number=5000 but different genuine boundaries. Original 512 signed/32768-bit direct cache collisions and the nineteenth expected-red child process are preserved.
+
+Verified native logs:
+```text
+STAGE_38_DISCOVERY_19_GUARDS_PASS fullWalks=3 physicalOldGet=3 physicalOldPut=1 wrongHits=1 trueYear5000Different=1 realGateQuestionsPerWalk=26 allRealPredecessors=100 allRealWrites=5800 faultCases=2 noGuardFix=1
+STAGE_38_DISCOVERY_19_PROPERTIES_PASS directKeys=512 directStaleHits=512 actionMismatches=512 openGateMismatches=512 bigIntBits=32768 realReverseFullWalks=3 realReverseWrongHits=2 realGateQuestionsPerWalk=26 realTotalPredecessors=66 realTotalWrites=3828 actualYearWalkSpy=1 historical365Spy=2 cacheGuardApplied=0
+STAGE_38_DISCOVERY_19_EXPECTED_RED_VERIFIED nonzero=1 wrongHits=1 matches=0 year=5000
+```
+
+**Stage39 PATCH19:** RETAIN the bad cache key year.number and physically invoke the old getter even after correction; do not replace map with a compound key. Store cache entries (at minimum) with `calculationDayFingerprint`, `openGate`, `closeGate`, `value`. A HIT is authoritative only when **ALL THREE** guards match exactly: stored calculationDay fingerprint must equal current cDay, stored openGate must equal new genuine year.openGateDay and stored closeGate must equal year.closeGateDay. If any mismatch, treat as MISS and recompute/update the old keyed slot by invoking the original oldPut. Keep the original oldGet's returned stale record in a diagnostic field; never serve it on mismatch. New guard checks should be demonstrated individually (cDay-only mismatch, opening-only, closing-only, combinations) using actual input where possible, plus full true Stage37 cross-cDay and reversed order. Preserve original wrong oldGet/oldPut and original intentionally red script; no Stage40 structure sauce code. Cover cache ownership, fault rollback, giant BigInt, long-lived handler state, original Stage37 full predecessor, Stage54 barrier, both CI jobs.
+
+Pure TypeScript production, Marathi human-readable documentation/comments, immutable frozen SourceLanguageCatalog, no oracle in production, no main/other branch edits, Git optimistic expected SHA / no force, never commit user-only HANDOFF_* files. No user action required.

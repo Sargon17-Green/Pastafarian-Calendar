@@ -19,3 +19,15 @@ The authoritative 55-stage contract's Patch19 specifies the original cache `LEGA
 `test/discovery19Red.ts` is the nineteenth **deliberately failing**, standalone full real Stage37 witness: the first true year5000(c-2) is cached; asking true year5000(c+2) returns the former under key `5000` despite different true gate boundaries. `test/verifyDiscovery19ExpectedRed.mjs` verifies the exact error marker and nonzero exit in a child process; normal `npm test` checks this rather than treating the historical bug as corrected. All eighteen earlier intentionally failing scripts continue to be checked.
 
 Close only after both independent GitHub Actions jobs (native full TypeScript Stage1–38 regression and immutable SourceLanguageCatalog/hash verification) pass. No Stage39 guards, no code on main/other branches, no oracle imports into production and no user-only HANDOFF archives committed.
+
+## Native CI verification — 14 October 2026
+
+[Implementation commit c233e06](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/c233e06ad04834f7153222a3b97e88a3509953d1) and [GitHub Actions 38585298407](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38585298407) BOTH `verify` and legacy-labeled `stage27-typescript-marathi` jobs SUCCESS. Native TypeScript typecheck and full Stage1–38 test suite passed, including independently expected-nonzero results for all **19 deliberately failing historical discovery scripts**. Frozen SourceLanguageCatalog/hash unchanged. An initial CI run failed due to unsupported Node 22 strip-types parameter-property syntax; fixed by explicit `readonly legacyCache` member and constructor assignment, without any cache behavioral change. The corrected CI run is the authoritative evidence.
+
+```text
+STAGE_38_DISCOVERY_19_GUARDS_PASS fullWalks=3 physicalOldGet=3 physicalOldPut=1 wrongHits=1 trueYear5000Different=1 realGateQuestionsPerWalk=26 allRealPredecessors=100 allRealWrites=5800 faultCases=2 noGuardFix=1
+STAGE_38_DISCOVERY_19_PROPERTIES_PASS directKeys=512 directStaleHits=512 actionMismatches=512 openGateMismatches=512 bigIntBits=32768 realReverseFullWalks=3 realReverseWrongHits=2 realGateQuestionsPerWalk=26 realTotalPredecessors=66 realTotalWrites=3828 actualYearWalkSpy=1 historical365Spy=2 cacheGuardApplied=0
+STAGE_38_DISCOVERY_19_EXPECTED_RED_VERIFIED nonzero=1 wrongHits=1 matches=0 year=5000
+```
+
+Stage38 complete; LAST_COMPLETED_STAGE=38. `oldGet` still serves the previously cached year by number alone even when it mismatches the freshly computed authentic Year5000(c), and no Stage39 guards were introduced. Stage39 PATCH19 must repair HIT conditions while preserving and actually invoking the bad historical map keyed only by year number. All source question vectors for the real full Stage37 predecessor are externally supplied and physically processed with genuine Sauce. The Stage54 integrated date route remains intentionally blocked.
