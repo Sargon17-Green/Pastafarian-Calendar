@@ -19,6 +19,7 @@ public final class Stage02IncrementalRouteTests {
         siblingBackwardFunctionalOracleDifferential();
         siblingForwardClosedFormOracleDifferential();
         siblingSharedWeightNormativeOracleDifferential();
+        siblingSharedWeightNearClosureOracleDifferential();
         siblingBackwardFunctionalFullYearProbe();
         normalizedBackwardTailAcrossAdjacentParents();
         normalizedTailDepthGrowthAndConcurrentParents();
@@ -26,6 +27,7 @@ public final class Stage02IncrementalRouteTests {
         sharedGlobalRankRouteFullYearInterior();
         sharedGlobalRankRouteExtendedResourceProfile();
         sharedGlobalRankRoute96PrefixProof();
+        sharedGlobalRankRoute192PrefixProof();
         sharedGlobalRankRouteInteroperabilityAndBudgets();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
@@ -186,6 +188,53 @@ public final class Stage02IncrementalRouteTests {
             "E_TAIL_CONCURRENT_REUSE");
         ok(shared.tailFunctionalBuildCount() >= 1,
             "E_TAIL_CONCURRENT_BUILD");
+    }
+
+    private static void siblingSharedWeightNearClosureOracleDifferential() {
+        int[] lengths = {3, 3, 3, 2};
+        int[][] prefixes = {
+            {1, 2, 3, 1},
+            {1, 2, 3, 1, 2},
+            {1, 2, 3, 1, 1},
+            {1, 2, 3, 1, 1, 2}
+        };
+        NormativeOracle.WeavingFamily oracle =
+            new NormativeOracle.WeavingFamily(lengths);
+        int allRanks = oracle.count().intValueExact();
+        for (int[] prefix : prefixes) {
+            MonsterWeavingLinearCounter family =
+                new MonsterWeavingLinearCounter(lengths);
+            BigInteger[] actual = family.countSiblingBranchSizes(prefix);
+            BigInteger[] expected = new BigInteger[lengths.length];
+            Arrays.fill(expected, BigInteger.ZERO);
+            for (int rank = 1; rank <= allRanks; rank++) {
+                int[] weaving = oracle.unrank1(BigInteger.valueOf(rank));
+                if (!Arrays.equals(prefix,
+                        Arrays.copyOf(weaving, prefix.length))) {
+                    continue;
+                }
+                int nextMonth = weaving[prefix.length] - 1;
+                expected[nextMonth] = expected[nextMonth].add(BigInteger.ONE);
+            }
+            BigInteger partition = BigInteger.ZERO;
+            for (int month = 0; month < lengths.length; month++) {
+                eq(expected[month], actual[month],
+                    "E_SHARED_NEAR_CLOSURE_ORACLE_BRANCH");
+                partition = partition.add(actual[month]);
+                if (actual[month].signum() > 0) {
+                    int[] extended = Arrays.copyOf(prefix, prefix.length + 1);
+                    extended[prefix.length] = month + 1;
+                    eq(family.countAfterPrefix(extended), actual[month],
+                        "E_SHARED_NEAR_CLOSURE_INDEPENDENT_SUFFIX");
+                }
+            }
+            eq(family.countAfterPrefix(prefix), partition,
+                "E_SHARED_NEAR_CLOSURE_PARTITION");
+            if (prefix.length == 4) {
+                ok(family.siblingPrefixSharedWeightHitCount() >= 2,
+                    "E_SHARED_NEAR_CLOSURE_REUSE");
+            }
+        }
     }
 
     private static void siblingSharedWeightNormativeOracleDifferential() {
@@ -367,6 +416,73 @@ public final class Stage02IncrementalRouteTests {
         }
     }
 
+
+    private static void sharedGlobalRankRoute192PrefixProof() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger rank = family.count().add(BigInteger.ONE)
+            .divide(BigInteger.TWO);
+        MonsterWeavingLinearCounter.RankRoute route =
+            family.beginGlobalRankRoute(rank, 512);
+        long started = System.nanoTime();
+        long sharedBaseline = family.siblingPrefixSharedWeightHitCount();
+        int lastOpened = 0;
+        int lastClosed = 0;
+        for (int call = 1; call <= 96; call++) {
+            MonsterWeavingLinearCounter.RankRoute prior = route;
+            route = family.advanceGlobalRankRouteShared(route, 16, 2);
+            eq(2, route.lastSharedBatchCalls(),
+                "E_SHARED_192_TWO_BATCHES_PER_CALL");
+            eq(0, route.lastCountCalls(),
+                "E_SHARED_192_LEGACY_COUNT_BUDGET");
+            eq(call * 2, route.stepsCompleted(),
+                "E_SHARED_192_PREFIX_PROGRESS");
+            ok(route.lowerRank().compareTo(prior.lowerRank()) >= 0
+                    && route.upperRank().compareTo(prior.upperRank()) <= 0,
+                "E_SHARED_192_INTERVAL_NESTING");
+            ok(route.lowerRank().compareTo(rank) <= 0
+                    && route.upperRank().compareTo(rank) >= 0,
+                "E_SHARED_192_RANK_CONTAINMENT");
+            if (call == 48 || call == 72 || call == 96) {
+                int[] prefix = route.fixedPrefixCopy();
+                int[] seen = new int[lengths.length];
+                int opened = 0;
+                for (int month : prefix) {
+                    seen[month - 1]++;
+                    opened = Math.max(opened, month);
+                }
+                int closed = 0;
+                while (closed < lengths.length
+                        && seen[closed] == lengths[closed]) {
+                    closed++;
+                }
+                ok(opened >= lastOpened && closed >= lastClosed,
+                    "E_SHARED_192_OPENED_CLOSED_MONOTONE");
+                ok(closed <= opened, "E_SHARED_192_CLOSED_BOUND");
+                lastOpened = opened;
+                lastClosed = closed;
+                eq(route.remainingChoices(),
+                    family.countAfterPrefix(prefix),
+                    "E_SHARED_192_CHECKPOINT_SUFFIX_DIFFERENTIAL");
+                System.out.println("STAGE_02_SHARED_192_PREFIX_CHECKPOINT_PASS"
+                    + " calls=" + call
+                    + " prefix_days=" + prefix.length
+                    + " opened_months=" + opened
+                    + " closed_months=" + closed
+                    + " shared_weight_hits="
+                    + (family.siblingPrefixSharedWeightHitCount()
+                        - sharedBaseline)
+                    + " route_ms="
+                    + (System.nanoTime() - started) / 1000000);
+            }
+        }
+        eq(192, route.stepsCompleted(),
+            "E_SHARED_192_TOTAL_PREFIX_DAYS");
+        ok(!route.complete(), "E_SHARED_192_NOT_FALSE_COMPLETE");
+    }
 
     private static void sharedGlobalRankRoute96PrefixProof() {
         int[] lengths = new int[47];
