@@ -62,6 +62,10 @@ MUTATIONS = (
     ('semantics_identity', mutate_semantics),
     ('platform_identity', mutate_platform),
     ('ip_queue_identity', mutate_ip_queue),
+    ('stack_stack_identity', lambda peer:
+        setattr(peer.ips[0], 'stack', [list(frame) for frame in peer.ips[0].stack])),
+    ('stack_frame_identity', lambda peer:
+        peer.ips[0].stack.__setitem__(0, list(peer.ips[0].stack[0]))),
 )
 
 
@@ -87,7 +91,10 @@ def main():
             try:
                 guarded_step(actor, peer, hostile_step)
             except AssertionError as error:
-                if "other Program's owned runtime objects" not in str(error):
+                expected_reason = ("other Program's IP or stack-stack state"
+                    if label.startswith('stack_') else
+                    "other Program's owned runtime objects")
+                if expected_reason not in str(error):
                     raise AssertionError('unexpected reason for ' + label + ': ' + str(error))
             else:
                 raise AssertionError('accepted swapped peer runtime object: ' + label)
@@ -99,7 +106,7 @@ def main():
         if guarded_step(actor, peer, lambda runner: write_actor(runner, opcode)) != 1:
             raise AssertionError('valid p/s execution rejected')
         count += 1
-    print('NATIVE_PEER_RUNTIME_IDENTITY_8_FALSIFICATIONS_2_POSITIVES_PASS', count)
+    print('NATIVE_PEER_RUNTIME_IDENTITY_12_FALSIFICATIONS_2_POSITIVES_PASS', count)
 
 
 if __name__ == '__main__':
