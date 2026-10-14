@@ -381,3 +381,28 @@ antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
 - Haec mutatio solum `tests/`, workflow, documenta mutat.
   `src/monster.cpp`, oracle normativum, `main` non mutata sunt.
   Gradus 57 non aperitur.
+
+## Certificatio 8e664b38 et novae probationes ordine inverso, XIV Octobris MMXXVI
+
+- Commit exacte probatus `8e664b38527a3fe485281e9bc90e78c8c16018f5`: [vigilia 38565843638](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565843638)
+  **20/20 success**; nominum custodia [38565843691](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565843691) success.
+- Ex logis: `SOAK_REPETITUM=8/8_PASS` (job `115881079297`),
+  `VIGILIA_SOAK=PASS`, `STATUS_POST_RUN=SOAK_GREEN` (job `115893631792`).
+- In annis `-1`, `0`, `1` septem dies per annum et duo termini
+  annorum finitimorum comprobati sunt: `21/21`, `6/6` transitus;
+  singuli `GRADUS56_ANNUS_REMOTUS_SEPTEM=7/7_PASS` et
+  `GRADUS56_ANNUS_REMOTUS_LIMINA_VICINA=2/2_PASS`.
+- GCC et Clang singuli: `GRADUS56_AC1_ORDO_INVERSUS=10/10_PASS`,
+  `GRADUS56_LIMINA_YEAR_MEMBERSHIP=PASS ANNI=9 EDGES=18/18`,
+  `GRADUS56_LIMINA_CACHE=PASS COLD=3 HITS=2 REJECTS=97 WARM_RECHECKS=9 CACHE_ANNI=3`.
+- **Additamentum huius sequentis commit (NON CERTIFICATUM):** Post quinque
+  visitationes anno remoto et duas visitationes in annis finitimis
+  idem processus iterum visitat ultimam, deinde primam diem anni
+  originalis. Exitus ad `NormativeOracle(false)` et ad valores
+  servatos ex prima visitatione comparantur, ut memoria ordinis
+  publici dispatcher detectetur. CI exigit
+  `GRADUS56_ANNUS_REMOTUS_REDITUS=2/2_PASS` et
+  `GRADUS56_ANNUS_REMOTUS_NOVEM=9/9_PASS` in annis
+  `-1, 0, 1`: nova probatio `27` casuum, ex quibus
+  `6` reditus duplices sunt. Nullum successum novi SHA fingimus.
+  Productionis motor, oracle, main immutata; Gradus 57 non aperitur.

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace {
 using pastafari::Integer;
@@ -20,6 +21,14 @@ void exige(bool ok, const char* nuntius) {
 }
 
 bool eademDies(const SpaghettiDateFive& a, const CalendarDate& b) {
+    return a.yearNumber == b.yearNumber &&
+           a.cutletName == b.cutletName &&
+           a.dayInCutlet == b.dayInCutlet &&
+           a.monthName == b.monthName &&
+           a.dayInMonth == b.dayInMonth;
+}
+
+bool eademDies(const SpaghettiDateFive& a, const SpaghettiDateFive& b) {
     return a.yearNumber == b.yearNumber &&
            a.cutletName == b.cutletName &&
            a.dayInCutlet == b.dayInCutlet &&
@@ -68,8 +77,8 @@ AnniFinitimi quaereAnnum(NormativeOracle& oracle, const Big& c,
     return AnniFinitimi{prior, annus, posterior};
 }
 
-void probaDiem(NormativeOracle& oracle, const Big& c, const Year& annus,
-               const Big& target) {
+SpaghettiDateFive probaDiem(NormativeOracle& oracle, const Big& c,
+                           const Year& annus, const Big& target) {
     const CalendarDate expected =
         pastafari::stage55audit::calendariumCelerInAnno(
             oracle, c, target, annus);
@@ -85,6 +94,7 @@ void probaDiem(NormativeOracle& oracle, const Big& c, const Year& annus,
               << actual.cutletName << "," << actual.dayInCutlet << ","
               << actual.monthName << "," << actual.dayInMonth << "]\n"
               << std::flush;
+    return actual;
 }
 } // namespace
 
@@ -113,9 +123,13 @@ int main(int argc, char** argv) {
               "quinque indices diversi in anno remoto exiguntur");
         const std::array<Big, 5> quinque{
             first, second, middle, penultimate, last};
+        std::vector<SpaghettiDateFive> originalia;
+        originalia.reserve(quinque.size());
         for (const Big& target : quinque) {
-            probaDiem(oracle, c, annus, target);
+            originalia.push_back(probaDiem(oracle, c, annus, target));
         }
+        exige(originalia.size() == quinque.size(),
+              "quinque testimonia originalia deesse");
         std::cout << "GRADUS56_ANNUS_REMOTUS_INTERIOR=3/3_PASS YEAR="
                   << numerus << '\n';
         std::cout << "GRADUS56_ANNUS_REMOTUS_SAVED_SUM=5/5_PASS YEAR="
@@ -129,6 +143,21 @@ int main(int argc, char** argv) {
         std::cout << "GRADUS56_ANNUS_REMOTUS_LIMINA_VICINA=2/2_PASS YEAR="
                   << numerus << '\n';
         std::cout << "GRADUS56_ANNUS_REMOTUS_SEPTEM=7/7_PASS YEAR="
+                  << numerus << '\n';
+
+        // Ex anno priori et posteriori redeundo, ultima et prima dies
+        // in ordine inverso repetuntur. Exitus in eodem processu
+        // cum valore originali et reference saved-sum conferuntur.
+        const SpaghettiDateFive ultimusIteratus =
+            probaDiem(oracle, c, annus, last);
+        const SpaghettiDateFive primusIteratus =
+            probaDiem(oracle, c, annus, first);
+        exige(eademDies(ultimusIteratus, originalia.back()) &&
+              eademDies(primusIteratus, originalia.front()),
+              "annus remotus post fines transitos exitus mutavit");
+        std::cout << "GRADUS56_ANNUS_REMOTUS_REDITUS=2/2_PASS YEAR="
+                  << numerus << '\n';
+        std::cout << "GRADUS56_ANNUS_REMOTUS_NOVEM=9/9_PASS YEAR="
                   << numerus << '\n';
         return 0;
     } catch (const std::exception& e) {
