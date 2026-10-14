@@ -23,6 +23,7 @@ my @sources=(
     ['tools/profile_canonical_window40_count.pl', qr/\bmy\s+\@year\s*=\s*\(([^()]*)\)\s*;/s],
     ['tools/profile_canonical_window41_count.pl', qr/\bmy\s+\@year\s*=\s*\(([^()]*)\)\s*;/s],
     ['tools/profile_canonical_all_triples.pl', qr/\bmy\s+\@year\s*=\s*\(([^()]*)\)\s*;/s],
+    ['tools/profile_canonical_triple_rank_paths.pl', qr/\bmy\s+\@year\s*=\s*\(([^()]*)\)\s*;/s],
 );
 
 my %source;
@@ -57,7 +58,7 @@ for my $spec (@sources) {
     $vector{$relative}=\@months;
 }
 is(scalar(keys %vector),scalar(@sources),
-   '全部八份規範年份快照均解析並通過來源完整性驗證');
+   '全部九份規範年份快照均解析並通過來源完整性驗證');
 
 my $vec=$vector{'t/48_canonical_year_month_vector.t'};
 if ($vec) {
