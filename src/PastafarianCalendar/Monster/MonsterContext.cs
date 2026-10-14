@@ -136,6 +136,9 @@ public sealed class MonsterContext
     public BigInteger? LegacyShortFamilySize { get; set; }
     public BigInteger? LegacyShortFamilyRankResult { get; set; }
 
+    // الرقعة الخامسة عشرة: مرتبة الأسرة المصححة مستقلة عن شاهد باقي x.
+    public BigInteger? PatchedShortFamilyRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

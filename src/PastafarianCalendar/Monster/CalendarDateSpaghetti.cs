@@ -226,6 +226,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyUnshiftedShortRank(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة الخامسة عشرة: تدور المرتبة القديمة خطوةً إلى الخلف لتبدأ من x-1.
+    public static BigInteger EvaluateShortFamilyRank(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateShortFamilyRank(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

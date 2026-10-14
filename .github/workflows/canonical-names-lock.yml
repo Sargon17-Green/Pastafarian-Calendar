@@ -202,3 +202,5 @@ jobs:
         run: |
           test "${{ steps.discovery_short_rank_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage30Tests/PastafarianCalendar.Stage30Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ رقعة الرتبة القصيرة الخامسة عشرة وحفظ باقي x التاريخي
+        run: dotnet run --project tests/PastafarianCalendar.Stage31Tests/PastafarianCalendar.Stage31Tests.csproj --configuration Release
