@@ -16,7 +16,9 @@ def peer_ip_snapshot(peer):
     This is intentionally captured only at an actual source write to avoid
     copying every live stack at every Native instruction.
     """
-    return tuple((id(ip), tuple(ip.position), tuple(ip.delta),
+    return tuple((id(ip), id(ip.stack),
+                  tuple(id(frame) for frame in ip.stack),
+                  tuple(ip.position), tuple(ip.delta),
                   tuple(ip.offset), bool(ip.stringmode),
                   bool(getattr(ip, 'invertmode', False)),
                   bool(getattr(ip, 'queuemode', False)),
