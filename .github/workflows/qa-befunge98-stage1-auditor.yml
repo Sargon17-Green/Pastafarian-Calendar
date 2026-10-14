@@ -1,0 +1,27 @@
+name: Befunge-98 Stage 1 QA Auditor
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/test_stage1_native_four_cell_pg_event_coverage.py'
+      - 'qa/stage1_native_four_cell_full_postfork_trace_audit.py'
+      - '.github/workflows/qa-befunge98-stage1-auditor.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic-native-receipt-auditor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate Python syntax
+        run: python -m py_compile qa/test_stage1_native_four_cell_pg_event_coverage.py qa/stage1_native_four_cell_full_postfork_trace_audit.py
+      - name: Verify physical p/g receipts, gate, stringmode, and terminal opcode
+        run: python -B qa/test_stage1_native_four_cell_pg_event_coverage.py
+      - name: Repeat with Python assertions disabled
+        run: python -O -B qa/test_stage1_native_four_cell_pg_event_coverage.py
