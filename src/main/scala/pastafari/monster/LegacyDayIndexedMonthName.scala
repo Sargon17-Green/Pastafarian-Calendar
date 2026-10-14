@@ -30,10 +30,16 @@ object LegacyDayIndexedMonthNameAdapter {
     val n=annualWeaving.max
     require(canonicalMonthNameIndices.size==n,
       "Un ID di nome canonico per ogni mese.")
-    // PATCH18 mantiene la semantica 1-based del catalogo, ma questa
-    // discovery NON invoca la vecchia rotazione di DISCOVERY18.
-    val monthNames=Patch18SourceCatalogWrapper.sourceCatalogIndexPatch(
-      canonicalMonthNameIndices).correctedItalianMonthNames
+    // L'invariante corretta della PATCH18 (ID 1-based) e' gia'
+    // disponibile sul catalogo sorgente. Non chiamare il wrapper
+    // PATCH18: invocarlo eseguirebbe anche la rotazione storica
+    // DISCOVERY18 e accoppierebbe indebitamente le due cicatrici.
+    require(canonicalMonthNameIndices.distinct.size==n,
+      "I nomi canonici dei mesi non ammettono ripetizioni.")
+    require(canonicalMonthNameIndices.forall(i=>i>=1 && i<=47),
+      "Indice del nome fuori dal catalogo congelato.")
+    val monthNames=canonicalMonthNameIndices.map(i=>
+      SourceLanguageCatalog.month(i).italian)
     require(dayOffset>=0 && dayOffset<annualWeaving.size,
       "Indice giornaliero fuori dalla tessitura.")
     val slot=dayOffset%n // CICATRICE: conta i giorni, non gli ID dei mesi
