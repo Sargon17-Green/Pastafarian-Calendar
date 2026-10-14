@@ -21,12 +21,14 @@ A calendar question has
 
 The example is a calendar question.
 The check report is a string.
+The check report path is a path.
 
 To run:
   Put "The checks agree with the examples." into the check report.
   Run all the checks.
   Put the check report into a buffer.
-  Write the buffer to "calendar-checks.txt".
+  Put the module's directory then "calendar-checks.txt" into the check report path.
+  Write the buffer to the check report path.
 
 \ Stop at the first failed check, but always write the report in To run.
 To run all the checks:
