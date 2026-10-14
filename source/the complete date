@@ -15,12 +15,13 @@
 \ large realistic year/month combinations. This full-date entrypoint
 \ is source only and HAS NOT BEEN TESTED WITH A CAL COMPILER.
 
+\ CAL treats "within" as a preposition, so field names avoid that word.
 A complete date answer has
   a number called year number,
   a number called cutlet name index,
-  a number called day within cutlet,
+  a number called cutlet day,
   a number called month name index,
-  a number called day within month.
+  a number called month day.
 
 The complete date answer is a complete date answer.
 The complete date status is a number.
@@ -32,9 +33,9 @@ To reset the complete date answer:
   Put 0 into the complete date status.
   Put 0 into the complete date answer's year number.
   Put 0 into the complete date answer's cutlet name index.
-  Put 0 into the complete date answer's day within cutlet.
+  Put 0 into the complete date answer's cutlet day.
   Put 0 into the complete date answer's month name index.
-  Put 0 into the complete date answer's day within month.
+  Put 0 into the complete date answer's month day.
   Put "The complete calendar date was not resolved." into the complete date error.
 
 \ Every required selection must succeed before any result is published.
@@ -97,9 +98,9 @@ To calculate a complete date for a calendar day and another calendar day:
     put "The woven month has no selected canonical name." into the complete date error; exit.
   Put the current year number into the complete date answer's year number.
   Put the requested cutlet name index into the complete date answer's cutlet name index.
-  Put the requested day in cutlet into the complete date answer's day within cutlet.
+  Put the requested day in cutlet into the complete date answer's cutlet day.
   Put the requested month name index into the complete date answer's month name index.
-  Put the woven requested day in month into the complete date answer's day within month.
+  Put the woven requested day in month into the complete date answer's month day.
   Put 1 into the complete date status.
   Put "" into the complete date error.
 
@@ -113,9 +114,9 @@ To check the canonical complete Foundation date:
     put "Foundation has the wrong year number." into the check report; exit.
   If the complete date answer's cutlet name index is not 10,
     put "Foundation has the wrong cutlet name index." into the check report; exit.
-  If the complete date answer's day within cutlet is not 503,
+  If the complete date answer's cutlet day is not 503,
     put "Foundation has the wrong day within its cutlet." into the check report; exit.
   If the complete date answer's month name index is not 20,
     put "Foundation has the wrong month name index." into the check report; exit.
-  If the complete date answer's day within month is not 56,
+  If the complete date answer's month day is not 56,
     put "Foundation has the wrong woven day within the month." into the check report; exit.
