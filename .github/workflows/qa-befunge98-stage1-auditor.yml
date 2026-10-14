@@ -12,6 +12,9 @@ on:
       - 'qa/stage1_native_pg_physical_address.py'
       - 'qa/stage1_native_current_fork_route_differential.py'
       - 'qa/stage1_native_pg_stringmode_receipt_probe.py'
+      - 'qa/stage1_native_strict_evidence_json.py'
+      - 'qa/test_stage1_native_strict_evidence_json.py'
+      - 'qa/stage1_native_four_cell_grid_full_postfork_audit.py'
       - '.github/workflows/qa-befunge98-stage1-auditor.yml'
   pull_request:
     branches:
@@ -25,6 +28,9 @@ on:
       - 'qa/stage1_native_pg_physical_address.py'
       - 'qa/stage1_native_current_fork_route_differential.py'
       - 'qa/stage1_native_pg_stringmode_receipt_probe.py'
+      - 'qa/stage1_native_strict_evidence_json.py'
+      - 'qa/test_stage1_native_strict_evidence_json.py'
+      - 'qa/stage1_native_four_cell_grid_full_postfork_audit.py'
       - '.github/workflows/qa-befunge98-stage1-auditor.yml'
   workflow_dispatch:
 permissions:
@@ -39,7 +45,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Validate Python syntax
-        run: python -m py_compile qa/test_stage1_native_four_cell_pg_event_coverage.py qa/stage1_native_four_cell_full_postfork_trace_audit.py qa/test_stage1_native_nonturning_vector.py qa/stage1_native_pg_physical_address.py qa/test_stage1_native_pg_physical_address.py qa/stage1_native_current_fork_route_differential.py qa/stage1_native_pg_stringmode_receipt_probe.py
+        run: python -m py_compile qa/test_stage1_native_four_cell_pg_event_coverage.py qa/stage1_native_four_cell_full_postfork_trace_audit.py qa/test_stage1_native_nonturning_vector.py qa/stage1_native_pg_physical_address.py qa/test_stage1_native_pg_physical_address.py qa/stage1_native_current_fork_route_differential.py qa/stage1_native_pg_stringmode_receipt_probe.py qa/stage1_native_strict_evidence_json.py qa/test_stage1_native_strict_evidence_json.py qa/stage1_native_four_cell_grid_full_postfork_audit.py
       - name: Verify physical p/g receipts, gate, stringmode, and terminal opcode
         run: python -B qa/test_stage1_native_four_cell_pg_event_coverage.py
       - name: Verify fixed-turn physical axes before and after the fork
@@ -52,6 +58,12 @@ jobs:
         run: python -B qa/test_stage1_native_pg_physical_address.py
       - name: Verify physical p/g contracts with assertions disabled
         run: python -O -B qa/test_stage1_native_pg_physical_address.py
+      - name: Reject duplicate keys and hostile numeric literals in Native evidence
+        run: python -B qa/test_stage1_native_strict_evidence_json.py
+      - name: Repeat strict JSON evidence tests with assertions disabled
+        run: python -O -B qa/test_stage1_native_strict_evidence_json.py
+      - name: Verify original 49-grid manifest falsification guards
+        run: python -B qa/stage1_native_four_cell_grid_full_postfork_audit.py --selftest
 
   native-same-interpreter-isolation:
     runs-on: ubuntu-latest
@@ -106,8 +118,9 @@ jobs:
           import hashlib,json
           from pathlib import Path
           from qa import stage1_native_four_cell_full_postfork_trace_audit as audit
+          from qa.stage1_native_strict_evidence_json import strict_evidence_loads
           root=Path("evidence/native-grid")
-          doc=json.loads((root/"native_full_postfork_signed_grid_49.json").read_text())
+          doc=strict_evidence_loads((root/"native_full_postfork_signed_grid_49.json").read_text())
           assert doc["schema"]=="befunge-stage1-four-cell-49-complete-native-postfork-v2"
           assert doc["original_native_candidate_executions"]==49
           assert len(doc["records"])==49
@@ -118,7 +131,7 @@ jobs:
               assert entry["index"]==i
               content=(root/entry["trace_filename"]).read_bytes()
               assert hashlib.sha256(content).hexdigest()==entry["trace_file_sha256"]
-              record=json.loads(content)
+              record=strict_evidence_loads(content)
               assert record["index"]==i and record["fields"]==entry["fields"]
               raw=(" ".join(map(str,entry["fields"]))+"\n").encode("ascii")
               assert record["input_sha256"]==entry["input_sha256"]==hashlib.sha256(raw).hexdigest()
