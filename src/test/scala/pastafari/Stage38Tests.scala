@@ -352,21 +352,37 @@ object Stage38Tests {
         .map(p=>new String(Files.readAllBytes(p),StandardCharsets.UTF_8))
         .mkString("\n")
       finally s.close()
-      truth(!sources.contains("def dayIndexedNamePatch("),"PATCH19 anticipata")
+      val metadata=new String(Files.readAllBytes(root().resolve(
+        "DEVELOPMENT_STAGE.md")),StandardCharsets.UTF_8)
+      val current=metadata.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      if(current<39)
+        truth(!sources.contains("def dayIndexedNamePatch("),
+          "PATCH19 anticipata")
+      else
+        truth(sources.contains("def dayIndexedNamePatch("),
+          "PATCH19 successiva presente")
       truth(!sources.contains("NormativeOracle"),"Oracolo nel codice")
     }
     check("metadati Stage38 mantengono Stage37 certificato"){
       val st=new String(Files.readAllBytes(root().resolve(
         "DEVELOPMENT_STAGE.md")),StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=38"),"Stage 38")
-      truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
-      truth(st.contains("CURRENT_PATCH=18"),"Patch non introdotta")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      truth(current>=38,"Stage 38 conservato")
+      if(current==38){
+        truth(st.contains("CURRENT_KIND=DISCOVERY"),"Tipo")
+        truth(st.contains("CURRENT_PATCH=18"),"Patch non introdotta")
+      } else
+        truth(st.contains(
+          "STAGE_38_NATIVE_VERIFICATION=PASS_EXPECTED_RED_45_PASS_3_FAIL"),
+          "DISCOVERY19 storica certificata")
       truth(st.contains(
         "STAGE_37_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_63_PASS_0_FAIL"),
         "Stage37 conservato")
       val n=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .get.split("=",2)(1).toInt
-      truth(n==37 || n==38,"Sequenza")
+      truth(n>=37 && n<=current,"Sequenza")
     }
 
     // Tre equivalenze normative impossibili nel vecchio modello.
