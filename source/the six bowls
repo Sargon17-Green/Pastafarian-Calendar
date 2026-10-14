@@ -16,7 +16,7 @@ The current bowls are a bowl state.
 
 \ The first small number is bowl identity b. The second is p squared.
 \ All intermediate sums and products are arbitrary-precision decimals.
-To initialize a bowl given a number and another number:
+To initialize bowl values given a number and another number:
   Put the sauce input's calculation count into an initial wide quantity.
   Put the sauce input's requested count into a weighted wide quantity.
   Multiply the weighted wide quantity by the number.
@@ -38,9 +38,9 @@ To initialize a bowl given a number and another number:
 
 \ The squared constants are 17^2, 19^2, 23^2, 29^2, 31^2, 37^2.
 To initialize the six bowls:
-  Initialize a bowl given 1 and 289.
-  Initialize a bowl given 2 and 361.
-  Initialize a bowl given 3 and 529.
-  Initialize a bowl given 4 and 841.
-  Initialize a bowl given 5 and 961.
-  Initialize a bowl given 6 and 1369.
+  Initialize bowl values given 1 and 289.
+  Initialize bowl values given 2 and 361.
+  Initialize bowl values given 3 and 529.
+  Initialize bowl values given 4 and 841.
+  Initialize bowl values given 5 and 961.
+  Initialize bowl values given 6 and 1369.

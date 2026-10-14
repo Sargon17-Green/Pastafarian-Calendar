@@ -42,7 +42,7 @@ To choose the next factorial:
 
 \ Check whether the current candidate bowl was chosen earlier.
 \ If it has not been used, skip some available bowls or choose it.
-To consider a bowl candidate:
+To inspect bowl candidate selection:
   Put 0 into the bowl chooser's used status.
   If the bowl chooser's candidate is 1, put the bowl chooser's first used into the bowl chooser's used status.
   If the bowl chooser's candidate is 2, put the bowl chooser's second used into the bowl chooser's used status.
@@ -81,7 +81,7 @@ To choose one position of the bowl order:
   Put 1 into the bowl chooser's candidate.
   Loop.
     If the bowl chooser's candidate is greater than 6, break.
-    Consider the bowl candidate.
+    Inspect bowl candidate selection.
     If the bowl chooser's chosen identity is greater than 0, break.
     Add 1 to the bowl chooser's candidate.
   Repeat.

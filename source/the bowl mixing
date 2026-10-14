@@ -129,7 +129,7 @@ To calculate the direct visible pour:
 
 \ Visible mixing: u=old(B)+2*old(P)+3*old(N)+directPour+D+stone(q).
 \ new(B)=SAVE(u*u+5*old(P)*old(N)+i*q).
-To mix a bowl for a visible drop:
+To perform visible bowl mixing:
   Find the three neighboring bowls.
   Select the stone in a mixing position.
   Calculate the direct visible pour.
@@ -159,7 +159,7 @@ To mix a bowl for a visible drop:
 \ A final mixing round must use SAVED S_r both to choose the order and in u.
 \ u=old(B)+3*old(P)+5*old(N)+S_r+r+q*q.
 \ new(B)=SAVE(u*u+7*old(P)*old(N)).
-To mix a bowl for a final round:
+To perform final bowl mixing:
   Find the three neighboring bowls.
   Put the mixing task's chosen old into the mixing task's fresh value.
   Put the mixing task's previous old into a weighted previous wide quantity.
@@ -188,8 +188,8 @@ To finish one mixing round:
   Put 1 into the mixing task's position.
   Loop.
     If the mixing task's position is greater than 6, break.
-    If the mixing task's phase is 1, mix a bowl for a visible drop.
-    If the mixing task's phase is 2, mix a bowl for a final round.
+    If the mixing task's phase is 1, perform visible bowl mixing.
+    If the mixing task's phase is 2, perform final bowl mixing.
     Add 1 to the mixing task's position.
   Repeat.
   Commit the new bowls.
