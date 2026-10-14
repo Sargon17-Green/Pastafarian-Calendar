@@ -121,7 +121,13 @@ for ia,ib in ((0,1),(2,3),(4,5)):
     b,bo=new_program(fields_b)
     make_point(a);make_point(b)
     need(a.space is not b.space,"two simultaneous candidate Programs share Funge-space")
-    ticks=0
+    # Before executing any opcode, prove one Program's stepping cannot
+    # mutate the other Program's untouched Funge-space.
+    untouched_b=sample(b)
+    tick_one(a)
+    need(sample(b)==untouched_b,
+         "first Native candidate step changed the other live Program's source")
+    ticks=1
     while a.ips or b.ips:
         need(ticks<100000,"Native interleaved candidate ran beyond 100000 ticks")
         tick_one(a)
