@@ -20,7 +20,8 @@ assert(B.compare(value,B.add(F,lastGap))==0
 for _,bad in ipairs({0,-1,1.5,"2",33,false,{}}) do
  assert(not pcall(S.legacyPositiveGateProbe,bad,streams))
 end
-for _,bad in ipairs({nil,false,"not-a-list",{},{{first=1,directionStep=2}},{{first=0,directionStep=1}}}) do
+assert(not pcall(S.legacyPositiveGateProbe,1,nil))
+for _,bad in ipairs({false,"not-a-list",{},{{first=1,directionStep=2}},{{first=0,directionStep=1}}}) do
  assert(not pcall(S.legacyPositiveGateProbe,1,bad))
 end
 assert(not pcall(S.oldPositiveGateFromLastGapProbe,41))
