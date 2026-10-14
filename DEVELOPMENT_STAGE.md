@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=32
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=16
-LAST_COMPLETED_STAGE=31
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=32
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..15; Stage32 mở Year5000CandidateManager, LegacyLongestFirstYear5000, Year5000Manager và Year. Tập ứng viên và rank được tính đúng, nhưng đường production sắp độ dài năm giảm dần thay vì tăng dần.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_32_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_32_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=451
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -768,3 +768,18 @@ sau đó Enum.at(historical_order,rank-1) trong production thật.
 Dự kiến thêm 20 kiểm thử, trong đó 4 normative cố ý đỏ.
 Chỉ nâng LAST_COMPLETED_STAGE sau khi CI xác nhận đúng 4 lỗi
 và Canonical Names Lock PASS. Không tích hợp ngày lịch cuối.
+
+Giai đoạn 32 DISCOVERY 16 đã xác minh Elixir 1.18.5 / OTP 27
+trên GitHub Actions: biên dịch 54 tệp .ex,
+**451 kiểm thử, 447 PASS, đúng bốn hồi quy normative sai cố ý**,
+không cảnh báo biên dịch Elixir. Canonical Names Lock PASS.
+Bốn fixture c=FOUNDATION, FOUNDATION+1, FOUNDATION+417,
+FOUNDATION-539 đều trả cặp chỉ số cổng sai do xếp độ dài giảm dần.
+393+38 bài từ các giai đoạn trước (431 bài Stage1..31)
+và 16 kiểm soát Stage32 đều xanh.
+Không thay oracle test-only, Year5000CandidateManager hoặc các patch 01..15
+để che sai lệch. Không tích hợp tìm năm mục tiêu hoặc lịch cuối.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565791324
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565791544
+Cảnh báo Node.js 20 từ checkout@v4 là cảnh báo nền tảng, không phải Elixir.
+Đóng Stage32 EXPECTED_RED. Stage33 PATCH 16 chưa bắt đầu.

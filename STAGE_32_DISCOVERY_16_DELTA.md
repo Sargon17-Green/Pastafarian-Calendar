@@ -29,3 +29,20 @@ FOUNDATION+417, FOUNDATION-539. Không sửa oracle hay PATCH 01..15.
 Dự kiến 451 kiểm thử, đúng bốn hồi quy đỏ và 0 compiler warnings.
 Đóng chỉ khi CI xác minh, Canonical Names Lock PASS.
 Không thay main; không tạo lịch hoàn chỉnh.
+
+## Kết quả chạy CI
+
+Giai đoạn 32 DISCOVERY 16 đã xác minh Elixir 1.18.5 / OTP 27
+trên GitHub Actions: biên dịch 54 tệp .ex,
+**451 kiểm thử, 447 PASS, đúng bốn hồi quy normative sai cố ý**,
+không cảnh báo biên dịch Elixir. Canonical Names Lock PASS.
+Bốn fixture c=FOUNDATION, FOUNDATION+1, FOUNDATION+417,
+FOUNDATION-539 đều trả cặp chỉ số cổng sai do xếp độ dài giảm dần.
+393+38 bài từ các giai đoạn trước (431 bài Stage1..31)
+và 16 kiểm soát Stage32 đều xanh.
+Không thay oracle test-only, Year5000CandidateManager hoặc các patch 01..15
+để che sai lệch. Không tích hợp tìm năm mục tiêu hoặc lịch cuối.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565791324
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565791544
+Cảnh báo Node.js 20 từ checkout@v4 là cảnh báo nền tảng, không phải Elixir.
+Đóng Stage32 EXPECTED_RED. Stage33 PATCH 16 chưa bắt đầu.

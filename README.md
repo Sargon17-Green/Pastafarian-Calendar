@@ -1263,3 +1263,35 @@ Cảnh báo Node.js 20 thuộc checkout@v4 của CI, không phải nguồn Elixi
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38367321846
 Stage31 đóng GREEN. Stage32/55 DISCOVERY 16 chưa bắt đầu.
 Không đổi main; không nhập oracle vào production.
+
+## Giai đoạn 32/55 — DISCOVERY 16: sắp năm 5000 từ dài tới ngắn
+
+Year5000CandidateManager dùng dãy cổng hai chiều đã qua
+PATCH 15; phủ cửa sổ +/-5778 ngày rồi chọn mọi cặp cổng
+i<j có ít nhất 6 khoảng, độ dài 252..5778 ngày,
+gate(i)<c<=gate(j). Rank được chọn đúng bằng bát 1,
+chốt 10 từ sauce(c,c).
+
+LegacyLongestFirstYear5000.sort sắp độ dài giảm dần,
+ngược với chuẩn tăng dần. Đường production
+Year5000Manager thực sự chọn phần tử thứ rank trong
+danh sách legacy. Bốn hồi quy chuẩn mới cố ý đỏ;
+không có lỗi ở tập ứng viên, cổng hoặc rank.
+
+Giai đoạn 32 DISCOVERY 16 đã xác minh Elixir 1.18.5 / OTP 27
+trên GitHub Actions: biên dịch 54 tệp .ex,
+**451 kiểm thử, 447 PASS, đúng bốn hồi quy normative sai cố ý**,
+không cảnh báo biên dịch Elixir. Canonical Names Lock PASS.
+Bốn fixture c=FOUNDATION, FOUNDATION+1, FOUNDATION+417,
+FOUNDATION-539 đều trả cặp chỉ số cổng sai do xếp độ dài giảm dần.
+393+38 bài từ các giai đoạn trước (431 bài Stage1..31)
+và 16 kiểm soát Stage32 đều xanh.
+Không thay oracle test-only, Year5000CandidateManager hoặc các patch 01..15
+để che sai lệch. Không tích hợp tìm năm mục tiêu hoặc lịch cuối.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565791324
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38565791544
+Cảnh báo Node.js 20 từ checkout@v4 là cảnh báo nền tảng, không phải Elixir.
+Đóng Stage32 EXPECTED_RED. Stage33 PATCH 16 chưa bắt đầu.
+
+Stage33 phải giữ legacy và sửa riêng phép sắp thứ tự năm;
+bốn expected normative không thay.
