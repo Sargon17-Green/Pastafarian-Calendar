@@ -17,7 +17,7 @@
 \ CAL compilation and execution have not yet been verified.
 
 A month length record is a thing with
-  a number called days in month.
+  a number called month length days.
 
 The chosen month lengths are some month length records.
 The new month length record is a month length record.
@@ -104,7 +104,7 @@ To count the current month suffix:
 
 To remember the selected month length:
   Allocate memory for the new month length record.
-  Put the month length work's candidate days into the new month length record's days in month.
+  Put the month length work's candidate days into the new month length record's month length days.
   Append the new month length record to the chosen month lengths.
   Subtract the month length work's candidate days from the month length work's remaining days.
   Subtract 1 from the month length work's remaining months.

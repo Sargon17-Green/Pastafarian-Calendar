@@ -6,11 +6,11 @@
 To compare a native calendar question with wide counters:
   Answer the example.
   Convert the example's calculation day into a wide signed day.
-  If the native to wide conversion succeeded is not 1,
+  If the native wide conversion succeeded is not 1,
     put "Conversion of the native calculation day failed." into the check report; exit.
   Put the converted wide signed day into the wide calendar example's calculation day.
   Convert the example's requested day into a wide signed day.
-  If the native to wide conversion succeeded is not 1,
+  If the native wide conversion succeeded is not 1,
     put "Conversion of the native requested day failed." into the check report; exit.
   Put the converted wide signed day into the wide calendar example's requested day.
   Answer the wide calendar example.

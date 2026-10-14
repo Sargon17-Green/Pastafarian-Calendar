@@ -90,12 +90,12 @@ To verify the selected month lengths:
   Put the chosen month lengths' first into the inspected month length.
   Loop.
     If the inspected month length is nil, break.
-    If the inspected month length's days in month is less than 4,
+    If the inspected month length's month length days is less than 4,
       put 0 into the structure audit's passed; exit.
-    If the inspected month length's days in month is greater than 123,
+    If the inspected month length's month length days is greater than 123,
       put 0 into the structure audit's passed; exit.
     Add 1 to the structure audit's items checked.
-    Add the inspected month length's days in month to the structure audit's units checked.
+    Add the inspected month length's month length days to the structure audit's units checked.
     Put the inspected month length's next into the inspected month length.
   Repeat.
   If the structure audit's items checked is not the selected month count,

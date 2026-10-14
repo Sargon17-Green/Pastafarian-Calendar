@@ -25,7 +25,7 @@ The closing gate mark is a gate mark.
 The examined year option is a year option.
 The selected year option is a year option.
 The chosen year is a year candidate.
-The candidate under construction is a year candidate.
+The working year candidate is a year candidate.
 The year selection day is a calendar day.
 The lower gate cutoff is a calendar day.
 The upper gate cutoff is a calendar day.
@@ -99,21 +99,21 @@ To record Foundation in the nearby gate ledger:
 
 \ Copy a gate pair to the candidate and derive both durations.
 To measure the gate pair as a candidate:
-  Put the opening gate mark's position into the candidate under construction's opening day.
-  Put the closing gate mark's position into the candidate under construction's closing day.
-  Put the opening gate mark's index into the candidate under construction's opening index.
-  Put the closing gate mark's index into the candidate under construction's closing index.
-  Measure the candidate under construction.
+  Put the opening gate mark's position into the working year candidate's opening day.
+  Put the closing gate mark's position into the working year candidate's closing day.
+  Put the opening gate mark's index into the working year candidate's opening index.
+  Put the closing gate mark's index into the working year candidate's closing index.
+  Measure the working year candidate.
 
 \ The first eligible year is placed before the next longer candidate.
 \ Equal lengths are sorted by earlier opening gate.
 To insert a sorted year candidate:
   Create a year option.
-  Put the candidate under construction into the year option's year candidate.
+  Put the working year candidate into the year option's year candidate.
   Put the eligible year ledger's first into the examined year option.
   Loop.
     If the examined year option is nil, break.
-    If the candidate under construction comes before the examined year option's year candidate,
+    If the working year candidate comes before the examined year option's year candidate,
       insert the year option into the eligible year ledger before the examined year option; exit.
     Put the examined year option's next into the examined year option.
   Repeat.
@@ -129,8 +129,8 @@ To gather candidate years for the opening gate:
   Loop.
     If the closing gate mark is nil, break.
     Measure the gate pair as a candidate.
-    If the candidate under construction's year length is greater than 5778, break.
-    If the candidate under construction contains the year selection day,
+    If the working year candidate's year length is greater than 5778, break.
+    If the working year candidate contains the year selection day,
       insert a sorted year candidate; add 1 to the eligible year count.
     Put the closing gate mark's next into the closing gate mark.
   Repeat.

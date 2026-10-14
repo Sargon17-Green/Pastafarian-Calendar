@@ -26,19 +26,19 @@ To gather following year candidates:
   Loop.
     Move to the next positive gate.
     If the gate step budget's exhausted is 1, exit.
-    Put the transition boundary into the candidate under construction's opening day.
-    Put the chosen year's closing index into the candidate under construction's opening index.
-    Put the gate walk's current position into the candidate under construction's closing day.
-    Put the gate walk's current index into the candidate under construction's closing index.
-    Measure the candidate under construction.
-    If the candidate under construction's year length is greater than 5778, break.
-    If the candidate under construction's span count is less than 6, repeat.
+    Put the transition boundary into the working year candidate's opening day.
+    Put the chosen year's closing index into the working year candidate's opening index.
+    Put the gate walk's current position into the working year candidate's closing day.
+    Put the gate walk's current index into the working year candidate's closing index.
+    Measure the working year candidate.
+    If the working year candidate's year length is greater than 5778, break.
+    If the working year candidate's span count is less than 6, repeat.
     Add one following candidate.
   Repeat.
 
 To add one following candidate:
   Create a year option.
-  Put the candidate under construction into the year option's year candidate.
+  Put the working year candidate into the year option's year candidate.
   Append the year option to the eligible year ledger.
   Add 1 to the eligible year count.
 
@@ -54,13 +54,13 @@ To gather preceding year candidates:
   Loop.
     Move to the next negative gate.
     If the gate step budget's exhausted is 1, exit.
-    Put the gate walk's current position into the candidate under construction's opening day.
-    Put the gate walk's current index into the candidate under construction's opening index.
-    Put the transition boundary into the candidate under construction's closing day.
-    Put the chosen year's opening index into the candidate under construction's closing index.
-    Measure the candidate under construction.
-    If the candidate under construction's year length is greater than 5778, break.
-    If the candidate under construction's span count is less than 6, repeat.
+    Put the gate walk's current position into the working year candidate's opening day.
+    Put the gate walk's current index into the working year candidate's opening index.
+    Put the transition boundary into the working year candidate's closing day.
+    Put the chosen year's opening index into the working year candidate's closing index.
+    Measure the working year candidate.
+    If the working year candidate's year length is greater than 5778, break.
+    If the working year candidate's span count is less than 6, repeat.
     Add one following candidate.
   Repeat.
 

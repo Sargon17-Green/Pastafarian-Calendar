@@ -11,11 +11,11 @@ To compare a native sauce input with the wide sauce input:
   Copy the example into the sauce input.
   Put the sauce input into the reference sauce input.
   Convert the example's calculation day into a wide signed day.
-  If the native to wide conversion succeeded is not 1,
+  If the native wide conversion succeeded is not 1,
     put "Failed to widen the native calculation day." into the check report; exit.
   Put the converted wide signed day into the wide calendar example's calculation day.
   Convert the example's requested day into a wide signed day.
-  If the native to wide conversion succeeded is not 1,
+  If the native wide conversion succeeded is not 1,
     put "Failed to widen the native requested day." into the check report; exit.
   Put the converted wide signed day into the wide calendar example's requested day.
   Answer the wide calendar example.

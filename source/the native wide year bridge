@@ -12,16 +12,16 @@ The widened year conversion succeeded is a number.
 To copy a year candidate into a wide year candidate:
   Put 0 into the widened year conversion succeeded.
   Convert the year candidate's opening day into a wide signed day.
-  If the native to wide conversion succeeded is not 1, exit.
+  If the native wide conversion succeeded is not 1, exit.
   Put the converted wide signed day into the wide year candidate's opening day.
   Convert the year candidate's closing day into a wide signed day.
-  If the native to wide conversion succeeded is not 1, exit.
+  If the native wide conversion succeeded is not 1, exit.
   Put the converted wide signed day into the wide year candidate's closing day.
   Convert the year candidate's opening index into a wide signed day.
-  If the native to wide conversion succeeded is not 1, exit.
+  If the native wide conversion succeeded is not 1, exit.
   Put the converted wide signed day into the wide year candidate's opening index.
   Convert the year candidate's closing index into a wide signed day.
-  If the native to wide conversion succeeded is not 1, exit.
+  If the native wide conversion succeeded is not 1, exit.
   Put the converted wide signed day into the wide year candidate's closing index.
   Measure the wide year candidate.
   Put 1 into the widened year conversion succeeded.

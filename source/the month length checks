@@ -36,12 +36,12 @@ To verify two month lengths given a number and another number:
   Put the chosen month lengths' first into an examined month length record.
   If the examined month length record is nil,
     put "Month length one is missing." into the check report; exit.
-  If the examined month length record's days in month is not the number,
+  If the examined month length record's month length days is not the number,
     put "Month length one differs from its reference." into the check report; exit.
   Put the examined month length record's next into the examined month length record.
   If the examined month length record is nil,
     put "Month length two is missing." into the check report; exit.
-  If the examined month length record's days in month is not the other number,
+  If the examined month length record's month length days is not the other number,
     put "Month length two differs from its reference." into the check report; exit.
   If the examined month length record's next is not nil,
     put "A two-month partition has an unwanted third month." into the check report; exit.

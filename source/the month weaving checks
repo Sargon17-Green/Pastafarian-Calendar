@@ -10,7 +10,7 @@ The woven test text is a string.
 \ Rebuild a synthetic month-length list without needing a year sauce.
 To add a synthetic month with a number:
   Allocate memory for a month length record.
-  Put the number into the month length record's days in month.
+  Put the number into the month length record's month length days.
   Append the month length record to the chosen month lengths.
 
 To prepare two synthetic months:

@@ -79,7 +79,7 @@ To check month structure invariants:
     put "Inexact year length passed the month audit." into the check report; exit.
   Put 128 into the chosen year's year length.
   Put the chosen month lengths' first into an inspected month length record.
-  Put 3 into the inspected month length record's days in month.
+  Put 3 into the inspected month length record's month length days.
   Verify the selected month lengths.
   If the structure audit's passed is not 0,
     put "Month with fewer than four days passed the audit." into the check report; exit.

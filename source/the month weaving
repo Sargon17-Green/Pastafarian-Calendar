@@ -81,7 +81,7 @@ To prepare the woven month states:
     If the examined month length record is nil, break.
     Allocate memory for a woven month state.
     Put the month ordinal number into the woven month state's ordinal.
-    Put the examined month length record's days in month into the woven month state's total days.
+    Put the examined month length record's month length days into the woven month state's total days.
     Put the woven month state's total days into the woven month state's remaining days.
     Append the woven month state to the woven month states.
     Add the woven month state's total days to the weaving selection's days remaining.
