@@ -1208,3 +1208,17 @@ gap 42..963. Fonksyon piblik `gateGapSpaghetti`
 pran PATCH 16, pandan `legacyGateGapProbe` rete pou audit.
 Pa gen oracle nan production, pa gen chèn pòtay antye,
 ni `postStir12`. QA natif poko verifye.
+
+### QA Stage 33 — PATCH 16
+
+Suite `lua5.3 test/stage33_tests.lua .` ajoute
+234 konparezon oracle egzak sou longè pòtay, 234
+koreksyon `+1`, bornes 42..963, uit kestyon
+BigInt siyen gwo, 14 enjeksyon erè ak 14 rekiperasyon,
+twa nested PATCH 16 ak de kouran sauce kanonik reyèl.
+Kadna SHA verifye modil legacy DISCOVERY 16 la,
+PATCH 15 ak PATCH 13 pa chanje. Twa witness
+`EXPECTED_RED` Stage 32 toujou disponib nan
+`stage32_expected_red_audit.lua` kòm prèv istorik;
+job Stage 32 a pa gen etap echèk volontè apre PATCH 16.
+Kat jobs CI Stage 33 yo soumèt; QA natif poko verifye.

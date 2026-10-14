@@ -866,3 +866,13 @@ san efase eta legacy oswa ranvèse rank la. Wout
 legacy rete byte-pou-byte konstan. Pa gen gate
 sequence ni `postStir12` nan etap sa a.
 CI natif poko verifye.
+
+### Tès PATCH 16 ki soumèt pou verifikasyon
+
+234 rank oracle kòrèk, kat commits ansyen ak yon
+senkyèm commit reparasyon, 8 gwo BigInt, 14 defayans
+ak 14 rekiperasyon, twa nested contexts ak de
+sauce kanonik; twa `EXPECTED_RED` Stage 32 yo
+rete audit istorik. CI Stage 33 gen kat nouvo jobs,
+ak job Stage 32 ki rete vèt aprè PATCH 16.
+Rezilta natif poko konfime.
