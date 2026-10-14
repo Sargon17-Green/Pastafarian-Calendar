@@ -21,6 +21,7 @@ import sys
 from funge.program import Program
 from funge.languages.funge98 import Befunge98
 from funge.platform import BufferedPlatform
+from stage1_native_pg_physical_address import physical_pg_operands
 import stage1_native_diverse_geometry as native
 import stage1_native_reflective_candidate_domain_matrix as wide
 
@@ -126,20 +127,14 @@ def native_run(source,raw,opposite):
             kind=actual_memory_opcode(
                 int(self.space.get(active.position)), bool(active.stringmode))
             if kind=="p":
-                values=active.stack[0]
-                require(len(values)>=3,
-                        "Native current fork reached p with too few operands")
-                expected_value,px,py=map(int,list(values)[-3:])
-                point=active.position.__class__((px,py))
-                pending_p=(point,(px,py),expected_value)
+                # Physical p/g coordinates include the active BF98 storage
+                # offset. Underflow supplies zero operands, not an error.
+                point,coord,expected_value=physical_pg_operands(active,"p")
+                pending_p=(point,coord,expected_value)
             elif kind=="g":
-                values=active.stack[0]
-                require(len(values)>=2,
-                        "Native current fork reached g with too few coordinates")
-                px,py=map(int,list(values)[-2:])
-                point=active.position.__class__((px,py))
+                point,coord,_=physical_pg_operands(active,"g")
                 before=int(self.space.get(point))
-                pending_g=(point,(px,py),before,active)
+                pending_g=(point,coord,before,active)
         result=old_step()
         if pending_p is not None:
             point,coord,expected_value=pending_p
