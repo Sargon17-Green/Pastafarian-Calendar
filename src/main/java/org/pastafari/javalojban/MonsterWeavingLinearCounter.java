@@ -84,6 +84,7 @@ public final class MonsterWeavingLinearCounter {
     private final ArrayDeque<PartialDP> partialDps = new ArrayDeque<>();
     private long partialDpReuseHits;
     private long closedFormTransitions;
+    private long allOpenedSuffixClosedFormComputations;
     private long partialDpEvictions;
 
     private static final class PartialDP {
@@ -158,6 +159,12 @@ public final class MonsterWeavingLinearCounter {
     long closedFormTransitionCount() {
         synchronized (partialDps) {
             return closedFormTransitions;
+        }
+    }
+
+    long allOpenedSuffixClosedFormComputationCount() {
+        synchronized (partialDps) {
+            return allOpenedSuffixClosedFormComputations;
         }
     }
 
@@ -279,7 +286,17 @@ public final class MonsterWeavingLinearCounter {
                 return found;
             }
         }
-        BigInteger result = countSuffixUncached(state);
+        BigInteger result;
+        if (state.opened == lengths.length) {
+            result = unconstrainedPrefixTotal(state, lengths.length);
+            synchronized (partialDps) {
+                allOpenedSuffixClosedFormComputations++;
+                closedFormTransitions +=
+                    Math.max(0, lengths.length - state.closed - 1);
+            }
+        } else {
+            result = countSuffixUncached(state);
+        }
         synchronized (suffixCounts) {
             suffixCounts.put(key, result);
         }

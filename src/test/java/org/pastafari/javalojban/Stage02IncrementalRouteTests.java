@@ -23,6 +23,7 @@ public final class Stage02IncrementalRouteTests {
         siblingSharedWeightAllSmallPrefixesOracle();
         siblingSharedWeightFiveMonthClosureOracleDifferential();
         siblingAllOpenedClosedFormOracleDifferential();
+        allOpenedFullYearExactPartitionProbe();
         siblingBackwardFunctionalFullYearProbe();
         normalizedBackwardTailAcrossAdjacentParents();
         normalizedTailDepthGrowthAndConcurrentParents();
@@ -193,6 +194,48 @@ public final class Stage02IncrementalRouteTests {
             "E_TAIL_CONCURRENT_BUILD");
     }
 
+    private static void allOpenedFullYearExactPartitionProbe() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        int[] prefix = new int[lengths.length];
+        for (int month = 0; month < prefix.length; month++) {
+            prefix[month] = month + 1;
+        }
+        long started = System.nanoTime();
+        BigInteger[] branches = family.countSiblingBranchSizes(prefix);
+        eq(0L, family.siblingPrefixDotCallCount(),
+            "E_ALL_OPENED_5778_NO_FORWARD_DP");
+        eq(0L, family.tailFunctionalBuildCount(),
+            "E_ALL_OPENED_5778_NO_BACKWARD_DP");
+        eq(1L, family.siblingScalarBatchBuildCount(),
+            "E_ALL_OPENED_5778_SCALAR_BATCH");
+        BigInteger sum = BigInteger.ZERO;
+        for (BigInteger value : branches) sum = sum.add(value);
+        eq(family.countAfterPrefix(prefix), sum,
+            "E_ALL_OPENED_5778_EXACT_PARENT");
+        eq(1L, family.allOpenedSuffixClosedFormComputationCount(),
+            "E_ALL_OPENED_5778_EXACT_SUFFIX_FAST_PATH");
+        for (int month : new int[] {0, 23, 46}) {
+            int[] child = Arrays.copyOf(prefix, prefix.length + 1);
+            child[prefix.length] = month + 1;
+            eq(family.countAfterPrefix(child), branches[month],
+                "E_ALL_OPENED_5778_EXACT_CHILD");
+        }
+        long cacheHits = family.suffixCacheHitCount();
+        eq(sum, family.countAfterPrefix(prefix),
+            "E_ALL_OPENED_5778_REPEAT_EXACT");
+        eq(cacheHits + 1, family.suffixCacheHitCount(),
+            "E_ALL_OPENED_5778_CACHE_REUSE");
+        System.out.println("STAGE_02_ALL_OPENED_5778_PASS"
+            + " days=5778 opened_months=47 branches=47"
+            + " exact_suffix_fast_paths="
+            + family.allOpenedSuffixClosedFormComputationCount()
+            + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
+    }
+
     private static void siblingAllOpenedClosedFormOracleDifferential() {
         int[][] families = {
             {3, 3, 3, 3},
@@ -243,6 +286,8 @@ public final class Stage02IncrementalRouteTests {
             }
             eq(family.countAfterPrefix(prefix), partition,
                 "E_ALL_OPENED_PARENT_PARTITION");
+            ok(family.allOpenedSuffixClosedFormComputationCount() > 0,
+                "E_ALL_OPENED_SUFFIX_CLOSED_FORM_USED");
             eq(0L, family.siblingPrefixDotCallCount(),
                 "E_ALL_OPENED_AUDIT_NO_FORWARD_DOT");
         }
