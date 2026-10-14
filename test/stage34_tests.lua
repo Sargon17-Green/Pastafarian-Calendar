@@ -8,6 +8,7 @@ end
 run("test/stage33_tests.lua")
 run("test/stage34_scope_tests.lua")
 run("test/stage34_positive_tests.lua")
+run("test/stage34_properties_tests.lua")
 run("test/stage34_bigint_tests.lua")
 run("test/stage34_fault_tests.lua")
 run("test/stage34_reentrancy_tests.lua")

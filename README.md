@@ -1276,3 +1276,11 @@ Gen kat jobs CI, twa pozitif ak youn ki dwe echwe
 sèlman nan dènye etap `EXPECTED_RED`. Kadna SHA
 sou PATCH 16 ak DISCOVERY 16 rete. Rezilta CI
 natif poko verifye.
+
+### Pwopriyete anplis — pòtay pozitif
+
+Nou ajoute 96 chèn detèminis, ak 92 diferans
+korekisyon kumilatif, plis ka kote gate(2) legacy
+vin avan gate(1), ansanm ak prèv ke chanje premye
+gap la pa chanje `G_legacy(2)` si dènye gap la
+rete menm. Oracle pozitif la sèlman nan `test/`.

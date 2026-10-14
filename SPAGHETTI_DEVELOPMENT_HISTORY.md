@@ -915,3 +915,10 @@ twa `EXPECTED_RED` egzak. Stage 34 pa korije
 akimilasyon; patch kap vini an dwe retounen
 `G(n)=F+sum(gap(1)..gap(n))`. Kat jobs CI
 soumèt pou verifye etap la; poko gen rezilta.
+
+### Odit siplemantè pwopriyete Stage 34
+
+96 chèn pwopriyete, 92 diferans ak pozisyon normatif,
+yon vyolasyon lòd gate(2) apre gate(1), epi
+endepandans rezilta legacy kont tout gaps anvan
+dènye a. Konparezon kòrèk yo sèlman nan test.

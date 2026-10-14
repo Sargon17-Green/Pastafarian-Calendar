@@ -1311,6 +1311,7 @@ jobs:
           test "$(git hash-object src/legacy_gate_gap.lua)" = a26b7191eea1099ff9ee03f3e002a6826267e807
           lua5.3 test/stage34_scope_tests.lua .
           lua5.3 test/stage34_positive_tests.lua .
+          lua5.3 test/stage34_properties_tests.lua .
           lua5.3 test/stage34_expected_red_audit.lua .
 
   lua_stage34_resilience:
