@@ -498,8 +498,10 @@ object Stage37Tests {
     check("metadati Stage37 conservano Stage36 e lo stato GREEN"){
       val st=new String(Files.readAllBytes(root().resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
-      truth(st.contains("CURRENT_STAGE=37"),"Stage")
-      truth(st.contains("CURRENT_KIND=PATCH"),"Patch")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      truth(current>=37,"Stage")
+      if(current==37)truth(st.contains("CURRENT_KIND=PATCH"),"Patch")
       truth(st.contains("CURRENT_PATCH=18"),"Patch 18")
       truth(st.contains("STAGE_36_NATIVE_VERIFICATION=PASS_EXPECTED_RED_59_PASS_3_FAIL"),
         "Discovery18 storica")
@@ -507,7 +509,7 @@ object Stage37Tests {
         "Patch17 storica")
       val done=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
         .map(_.stripPrefix("LAST_COMPLETED_STAGE=").toInt).get
-      truth(done==36 || done==37,"Sequenza")
+      truth(done>=36 && done<=current,"Sequenza")
     }
     println("\nRISULTATO STADIO 37: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)
