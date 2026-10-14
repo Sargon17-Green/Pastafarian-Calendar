@@ -30,7 +30,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Audit arithmetic model independently of SM83 binaries
-        run: python3 tests/test_arithmetic_invariants.py
+        run: |
+          python3 tests/test_arithmetic_invariants.py
+          python3 tests/test_emulator_wait.py
       - name: Build DMG ROM using RGBDS v1.0.4
         run: |
           docker run --rm --mount type=bind,src="$PWD",dst=/work \
