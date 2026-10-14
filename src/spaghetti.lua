@@ -32,6 +32,7 @@ local LegacyGateQuestionAdapter = require("legacy_gate_question_adapter")
 local GateQuestionPatch = require("gate_question_patch")
 local LegacyGateGap = require("legacy_gate_gap")
 local GateGapPatch = require("gate_gap_patch")
+local LegacyPositiveGate = require("legacy_positive_gate_position")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -511,8 +512,22 @@ function S.gateGapCoreProbe(rank,historicalGap)
     return GateGapPatch.correctGateGap(rank,historicalGap)
 end
 
+-- DISCOVERY 17: legacy pèdi akimilasyon gap(1)..gap(n) sou bò pozitif.
+function S.legacyPositiveGateProbe(index,streams)
+    return LegacyPositiveGate.execute(index,streams)
+end
+
+function S.oldPositiveGateFromLastGapProbe(gap)
+    return LegacyPositiveGate.oldPositivePosition(gap)
+end
+
+function S.positiveGateDaySpaghetti(index,streams)
+    local historic=LegacyPositiveGate.execute(index,streams)
+    return historic
+end
+
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 33", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 34", 0)
 end
 
 return S

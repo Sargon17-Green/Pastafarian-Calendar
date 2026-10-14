@@ -1237,3 +1237,27 @@ repare `41+rank` pou espas 42..963. Pa gen
 gate sequence ni `postStir12`.
 `LAST_COMPLETED_STAGE=33` / `EXPECTED_REPOSITORY_STATE=GREEN`.
 
+
+## Stage 34 — DISCOVERY 17: pòtay pozitif bliye entèval avan yo
+
+Apre PATCH 16, `gateGapSpaghetti` gen gap egzak
+42..963 pou nenpòt kestyon Fondasyon siyen. Men lè
+nou konstwi pozisyon pòtay pozitif `G(n)`, ansyen
+`oldPositivePosition` kalkile `F+gap(n)` olye
+`F+gap(1)+...+gap(n)`. Premye pòtay la kòrèk;
+pòtay 2..n yo twò pre Fondasyon, menm lè chak
+gap ak kestyon gen valè normatif.
+
+`src/legacy_positive_gate_position.lua` mande yon lis
+n sous SAVE otantik (premye repons ak direksyon);
+li pa fabrike sauce nan production. Pou chak i, li
+rele PATCH 16 reyèl epi kenbe snapshots prive ak
+kalkil kimen pozitif pou audit. Li konsève senk commits
+PATCH 16 pou dènye gap la epi ajoute yon sizyèm
+commit `LEGACY_POSITIVE_GATE_RESETS_FOUNDATION`.
+`positiveGateDaySpaghetti` ekspoze sa a kòm defo
+istorik; `legacyPositiveGateProbe` retounen tras la.
+
+Limit Stage 34 se 1..32 etap pozitif ak sous ki bay
+deja. Li pa fè rechèch pòtay negatif, pa gen PATCH 17,
+ni `postStir12`. Tès ak CI natif poko verifye.

@@ -889,3 +889,18 @@ senkyèm commit koreksyon an pa efase prèv istorik la.
 Pa gen gate sequence oswa `postStir12`.
 `LAST_COMPLETED_STAGE=33` / `GREEN`.
 
+
+## Stage 34 — DISCOVERY 17: pèdi akimilasyon pòtay pozitif
+
+Kòm sèl nouvo defo nan etap sa a, ansyen pozisyon
+pòtay la mezire `gap(n)` soti Fondasyon pou tout
+n: `G_legacy(n)=F+gap(n)`. Oracle mande
+`G(n)=G(n-1)+gap(n)`, avèk `G(0)=F`.
+Tout gap endividyèl yo soti dirèkteman nan PATCH 16,
+ak PATCH 13/15 anba li; yo pa modifye yo.
+Sizyèm commit ki suiv senk commits gap final la
+kenbe jou mal la ak snapshots tout gap yo.
+Entrées SAVE pou chak i soti nan caller (jan QA
+ka derive yo nan sauce otantik); pa gen sauce
+pwodiksyon oswa pòtay negatif nan DISCOVERY 17.
+Koreksyon akimilasyon ap tann PATCH 17.
