@@ -17,7 +17,7 @@ def fixture():
     # A 514-step postfork trace; both p and g are genuine executed opcodes.
     # The write targets an unvisited Funge-space coordinate to isolate receipt
     # completeness from byte-replay effects at later instruction positions.
-    source = [b" " * 10 + b"p" + b" " * 9 + b"g" + b" " * 600]
+    source = [b" " * 10 + b"p" + b" " * 9 + b"g" + b" " * 492 + b"@" + b" " * 107]
     trace = [[i + 2, i, 0, 1, 0, source[0][i], 0] for i in range(514)]
     run = {
         "status": "normal", "remaining_ips": 0, "steps": 515,
@@ -235,7 +235,7 @@ def prefork_provenance_regression():
 def gate_anchor_regression():
     # Genuine pinned physical | at (951,1335); two executed pre-fork
     # opcodes; 514 post-fork opcodes including p and g.
-    row0=b" "*10+b"p"+b" "*9+b"g"+b" "*600
+    row0=b" "*10+b"p"+b" "*9+b"g"+b" "*492+b"@"+b" "*107
     source=[row0]+[b""]*1333+[b" "*951+b"0",b" "*950+b"p||"]
     trace=[[step+3,step,0,1,0,source[0][step],0]
            for step in range(514)]
