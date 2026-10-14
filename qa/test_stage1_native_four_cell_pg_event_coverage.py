@@ -70,7 +70,10 @@ def main():
     # where a synthetic trace silently stops after a nonterminating opcode.
     forged_halt = copy.deepcopy(good)
     forged_halt["complete_postfork_trace"][-1][5] = ord(" ")
-    reject(source, forged_halt, "terminal_at_replaced_by_blank")
+    # Mutate the physical source too, so the only remaining reason to reject
+    # is the absence of an executed terminal @, not source-byte mismatch.
+    forged_source = [source[0][:513] + b" " + source[0][514:]]
+    reject(forged_source, forged_halt, "terminal_at_replaced_by_blank")
     print("POSTFORK_TERMINAL_OPCODE_FORGERY_REJECT_PASS")
 
     print("POSTFORK_PG_EVENT_COVERAGE_4_NEGATIVE_CONTROLS_PASS")
