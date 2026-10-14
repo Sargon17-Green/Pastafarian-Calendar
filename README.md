@@ -1261,3 +1261,18 @@ istorik; `legacyPositiveGateProbe` retounen tras la.
 Limit Stage 34 se 1..32 etap pozitif ak sous ki bay
 deja. Li pa fè rechèch pòtay negatif, pa gen PATCH 17,
 ni `postStir12`. Tès ak CI natif poko verifye.
+
+### Tès Stage 34 — DISCOVERY 17
+
+Suite `lua5.3 test/stage34_tests.lua .` kouvri
+24 chèn konpare kont oracle (21 ka istorikman
+diferan), 32 sous BigInt sou valè `M`, 14
+enjeksyon erè/14 rekiperasyon, de nested contexts,
+ak twa sous sauce kanonik reyèl ki verifye
+`O.ensureGateIndex(3)` se sòm pozitif la.
+Twa scripts `stage34_expected_red_1..3.lua`
+pwouve ke `F+gap(n)` pa egale `G(n)` pou n>=2.
+Gen kat jobs CI, twa pozitif ak youn ki dwe echwe
+sèlman nan dènye etap `EXPECTED_RED`. Kadna SHA
+sou PATCH 16 ak DISCOVERY 16 rete. Rezilta CI
+natif poko verifye.

@@ -904,3 +904,13 @@ Entrées SAVE pou chak i soti nan caller (jan QA
 ka derive yo nan sauce otantik); pa gen sauce
 pwodiksyon oswa pòtay negatif nan DISCOVERY 17.
 Koreksyon akimilasyon ap tann PATCH 17.
+
+### QA Stage 34 soumèt
+
+24 chèn oracle pozitif, 21 divèjans legacy, longè
+jiska 32 gaps, 14 injections/14 recoveries,
+de nested states, twa soup sauce orijinal ak
+twa `EXPECTED_RED` egzak. Stage 34 pa korije
+akimilasyon; patch kap vini an dwe retounen
+`G(n)=F+sum(gap(1)..gap(n))`. Kat jobs CI
+soumèt pou verifye etap la; poko gen rezilta.
