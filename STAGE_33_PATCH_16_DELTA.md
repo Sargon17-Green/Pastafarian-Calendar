@@ -25,3 +25,21 @@ Không dùng oracle trong production; không tích hợp lịch hoàn chỉnh.
 ## Điều kiện đóng
 Elixir 1.18.5 / OTP 27 chạy đầy đủ mix test, không warning source.
 Canonical Names Lock PASS. Không sửa main, không commit HANDOFF_*.
+
+## Đóng PATCH 16
+
+Giai đoạn 33 PATCH 16 đã qua kiểm chứng thật bằng
+Elixir 1.18.5 / Erlang OTP 27: biên dịch 55 tệp,
+**471/471 kiểm thử PASS, 0 thất bại, không cảnh báo biên dịch Elixir**.
+Canonical Names Lock độc lập PASS.
+Bốn hồi quy normative của DISCOVERY 16 trở lại xanh với expected giữ nguyên.
+20 bài Stage33 và 451 bài trước đều PASS.
+Giữ nguyên LegacyLongestFirstYear5000 blob
+`b4a0908392090f61d06bc1781e5bef636b91b27a`,
+oracle test-only blob
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+Cảnh báo duy nhất thuộc nền tảng checkout@v4 (Node.js 20).
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38586793285
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38586793164
+Đóng Stage33 GREEN, tiếp theo Stage34 DISCOVERY 17 chưa bắt đầu.
+Không thay main hoặc tích hợp lịch hoàn chỉnh.

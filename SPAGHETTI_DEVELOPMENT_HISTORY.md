@@ -1107,3 +1107,27 @@ Cảnh báo Node.js 20 từ checkout@v4 là cảnh báo nền tảng, không ph�
 
 Stage33 phải giữ legacy và sửa riêng phép sắp thứ tự năm;
 bốn expected normative không thay.
+
+## Giai đoạn 33/55 — PATCH 16: năm 5000 ngắn trước
+
+ShortestFirstYear5000Patch gọi thật hàm
+LegacyLongestFirstYear5000.sort và giữ thứ tự lỗi để kiểm toán.
+Lớp này sắp lại theo (độ dài tăng dần, ngày mở tăng dần).
+Year5000Manager tiếp tục tạo đúng tập ứng viên và rank rồi
+chọn từ corrected_order. Không đổi oracle hoặc 15 patch cũ.
+
+Giai đoạn 33 PATCH 16 đã qua kiểm chứng thật bằng
+Elixir 1.18.5 / Erlang OTP 27: biên dịch 55 tệp,
+**471/471 kiểm thử PASS, 0 thất bại, không cảnh báo biên dịch Elixir**.
+Canonical Names Lock độc lập PASS.
+Bốn hồi quy normative của DISCOVERY 16 trở lại xanh với expected giữ nguyên.
+20 bài Stage33 và 451 bài trước đều PASS.
+Giữ nguyên LegacyLongestFirstYear5000 blob
+`b4a0908392090f61d06bc1781e5bef636b91b27a`,
+oracle test-only blob
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+Cảnh báo duy nhất thuộc nền tảng checkout@v4 (Node.js 20).
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38586793285
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38586793164
+Đóng Stage33 GREEN, tiếp theo Stage34 DISCOVERY 17 chưa bắt đầu.
+Không thay main hoặc tích hợp lịch hoàn chỉnh.
