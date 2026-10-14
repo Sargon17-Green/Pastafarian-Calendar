@@ -6,7 +6,7 @@ SECTION "Reset entry", ROM0[$0100]
     jp Bootstrap
 
 SECTION "Cartridge header reserved", ROM0[$0104]
-    ds $4c, 0  ; RGBFIX supplies Nintendo logo, title and checksums.
+    ds $4c, 0
 
 SECTION "Invocation state", WRAM0[$C000]
 wTestResult:: ds 1
@@ -15,6 +15,9 @@ wRunStatus::  ds 1
 wValue::      ds 16
 wAddend::     ds 16
 wExpected::   ds 16
+wWideInput::  ds 32
+wWideCurrentByte:: ds 1
+wWideBytesRemaining:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -25,10 +28,17 @@ Bootstrap:
     ld [wTestCase], a
     ld [wRunStatus], a
     call RunSelfTests
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .skipWide
+    call RunWideTests
+.skipWide:
     call calendarDateSpaghetti
 .hold:
     jr .hold
 
 INCLUDE "src/runtime/save127.asm"
+INCLUDE "src/runtime/savewide256.asm"
 INCLUDE "src/runtime/dispatcher.asm"
 INCLUDE "src/tests/selftest.asm"
+INCLUDE "src/tests/wide_test.asm"

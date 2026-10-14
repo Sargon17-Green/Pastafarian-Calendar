@@ -36,7 +36,7 @@ def check_emulator(path: Path) -> None:
         stage = boy.memory[0xC002]
         print(f"ROM_NATIVE_STATUS={result:02X} LAST_TEST_CASE={case} DISPATCH_STATUS={stage:02X}")
         assert result == 0xA5, f"SM83 self-test failed at case {case}"
-        assert case == 10, "SM83 did not run all 10 test cases"
+        assert case == 16, "SM83 did not run all 16 test cases"
         assert stage == 0x40, "production dispatcher must explicitly refuse a date"
         print("STAGE1_ARITHMETIC_SMOKE=PASS")
     finally:

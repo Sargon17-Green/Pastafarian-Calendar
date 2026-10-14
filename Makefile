@@ -7,7 +7,7 @@ PYTHON ?= python3
 all: build
 build: build/calendar.gb
 
-build/calendar.o: src/boot.asm src/runtime/save127.asm src/runtime/dispatcher.asm src/tests/selftest.asm
+build/calendar.o: src/boot.asm src/runtime/save127.asm src/runtime/savewide256.asm src/runtime/dispatcher.asm src/tests/selftest.asm src/tests/wide_test.asm
 	mkdir -p build
 	$(RGBASM) -Wall -o $@ src/boot.asm
 
