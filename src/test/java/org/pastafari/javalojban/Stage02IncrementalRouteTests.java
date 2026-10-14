@@ -24,6 +24,7 @@ public final class Stage02IncrementalRouteTests {
         siblingSharedWeightFiveMonthClosureOracleDifferential();
         siblingAllOpenedClosedFormOracleDifferential();
         allOpenedFullYearExactPartitionProbe();
+        allOpenedFullYear512SuffixRoundTrip();
         siblingBackwardFunctionalFullYearProbe();
         normalizedBackwardTailAcrossAdjacentParents();
         normalizedTailDepthGrowthAndConcurrentParents();
@@ -192,6 +193,57 @@ public final class Stage02IncrementalRouteTests {
             "E_TAIL_CONCURRENT_REUSE");
         ok(shared.tailFunctionalBuildCount() >= 1,
             "E_TAIL_CONCURRENT_BUILD");
+    }
+
+    private static void allOpenedFullYear512SuffixRoundTrip() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        int totalDays = 5778;
+        int suffixDays = 512;
+        int[] prefix = new int[totalDays - suffixDays];
+        int[] remaining = lengths.clone();
+        int used = 0;
+        for (int month = 0; month < lengths.length; month++) {
+            prefix[used++] = month + 1;
+            remaining[month]--;
+        }
+        for (int month = 0; month < lengths.length
+                && used < prefix.length; month++) {
+            while (remaining[month] > 0 && used < prefix.length) {
+                prefix[used++] = month + 1;
+                remaining[month]--;
+            }
+        }
+        eq(prefix.length, used, "E_ALL_OPENED_512_PREFIX_COMPLETE");
+        long started = System.nanoTime();
+        BigInteger total = family.countAfterPrefix(prefix);
+        BigInteger middle = total.add(BigInteger.ONE).divide(BigInteger.TWO);
+        int[] weaving = family.unrankAfterPrefix(prefix, middle);
+        eq(totalDays, weaving.length,
+            "E_ALL_OPENED_512_FULL_YEAR_LENGTH");
+        array(prefix, Arrays.copyOf(weaving, prefix.length),
+            "E_ALL_OPENED_512_PREFIX_PRESERVED");
+        eq(middle, family.rankAfterPrefix(prefix, weaving),
+            "E_ALL_OPENED_512_MIDDLE_RANK_ROUND_TRIP");
+        int[] first = family.unrankAfterPrefix(prefix, BigInteger.ONE);
+        eq(BigInteger.ONE, family.rankAfterPrefix(prefix, first),
+            "E_ALL_OPENED_512_FIRST_RANK_ROUND_TRIP");
+        int[] last = family.unrankAfterPrefix(prefix, total);
+        eq(total, family.rankAfterPrefix(prefix, last),
+            "E_ALL_OPENED_512_LAST_RANK_ROUND_TRIP");
+        ok(family.allOpenedSuffixClosedFormComputationCount() > 0,
+            "E_ALL_OPENED_512_FAST_SUFFIX_USED");
+        System.out.println("STAGE_02_ALL_OPENED_512_SUFFIX_PASS"
+            + " full_days=" + totalDays
+            + " fixed_prefix_days=" + prefix.length
+            + " suffix_days=" + suffixDays
+            + " middle_rank_digits=" + middle.toString().length()
+            + " exact_fast_counts="
+            + family.allOpenedSuffixClosedFormComputationCount()
+            + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
     }
 
     private static void allOpenedFullYearExactPartitionProbe() {
