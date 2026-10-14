@@ -295,6 +295,31 @@ def gate_anchor_regression():
         raise AssertionError("forged westward successor to > was accepted")
     print("GATE_ANCHOR_FIXED_TURN_DIRECTION_FORGERY_REJECT_PASS")
 
+    # Test the SAME fixed-turn contract *before* the physical fork.
+    # Replacing the physical p with > changes no postfork evidence: the
+    # postfork p still writes 7 before g reads it.
+    preturn_source=copy.deepcopy(source)
+    preturn_row=bytearray(preturn_source[-1])
+    preturn_row[950]=ord(">")
+    preturn_source[-1]=bytes(preturn_row)
+    preturn=copy.deepcopy(run)
+    preturn["complete_prefork_trace"][0][5]=ord(">")
+    preturn["native_p_history"].pop(0)
+    preturn["total_p_writes"]-=1
+    audit.verify_run(preturn,preturn_source,require_prefork=True,
+                     require_gate_anchor=True)
+    forged_preturn=copy.deepcopy(preturn)
+    forged_preturn["complete_prefork_trace"][1][3]=-1
+    try:
+        audit.verify_run(forged_preturn,preturn_source,require_prefork=True,
+                         require_gate_anchor=True)
+    except AssertionError as exc:
+        if "Native pre-fork fixed turn opcode did not set required direction" not in str(exc):
+            raise AssertionError("prefork fixed-turn forgery rejected for wrong reason: "+str(exc)) from exc
+    else:
+        raise AssertionError("forged westward successor to prefork > was accepted")
+    print("GATE_ANCHOR_PREFORK_FIXED_TURN_FORGERY_REJECT_PASS")
+
     def shift_first_x(r):
         r["complete_postfork_trace"][0][1]=952
         r["complete_postfork_trace"][0][5]=ord(">")
