@@ -60,6 +60,7 @@ def main():
             rows.append({
               "index":index,"signed_days":[dc,dt],"fields":list(fields),
               "trace_filename":filename,
+              "input_sha256":hashlib.sha256(raw.encode("ascii")).hexdigest(),
               "trace_file_sha256":hashlib.sha256(contents).hexdigest(),
               "native_steps":observed["steps"],
               "fork_step":observed["gate"]["step"],
