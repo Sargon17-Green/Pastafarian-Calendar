@@ -97,10 +97,10 @@ To locate a wide gate given a wide signed day:
   Begin a wide gate traversal.
   Put 0 into the current extended gate's reached.
   Put "1024" into a maximum wide gate steps.
-  If the maximum wide gate steps is numerically smaller than the wide signed day's magnitude, exit.
+  If the maximum wide gate steps is numerically smaller than the wide signed day's absolute quantity, exit.
   Loop.
     If the current extended gate's index's polarity is the wide signed day's polarity,
-      if the current extended gate's index's magnitude is the wide signed day's magnitude,
+      if the current extended gate's index's absolute quantity is the wide signed day's absolute quantity,
         put 1 into the current extended gate's reached; break.
     If the current extended gate's index numerically precedes the wide signed day,
       move to the next positive wide gate.

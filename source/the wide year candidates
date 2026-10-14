@@ -34,11 +34,11 @@ To measure a wide year candidate:
   Put the wide year candidate's closing day into a wide day difference.
   Subtract the wide year candidate's opening day from the wide day difference.
   If the wide day difference's polarity is not 1, exit.
-  Put the wide day difference's magnitude into the wide year candidate's year length.
+  Put the wide day difference's absolute quantity into the wide year candidate's year length.
   Put the wide year candidate's closing index into a wide index difference.
   Subtract the wide year candidate's opening index from the wide index difference.
   If the wide index difference's polarity is not 1, exit.
-  Put the wide index difference's magnitude into the wide year candidate's span count.
+  Put the wide index difference's absolute quantity into the wide year candidate's span count.
   Verify a wide year length and span count for the wide year candidate.
 
 To verify a wide year length and span count for a wide year candidate:

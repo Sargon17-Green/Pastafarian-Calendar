@@ -14,12 +14,12 @@
 
 A wide signed day has
   a number called polarity,
-  a wide quantity called magnitude.
+  a wide quantity called absolute quantity.
 
 \ Make zero canonical and make nonzero polarity exactly +1 or -1.
 To normalize a wide signed day:
-  Normalize the wide signed day's magnitude.
-  If the wide signed day's magnitude is "0",
+  Normalize the wide signed day's absolute quantity.
+  If the wide signed day's absolute quantity is "0",
     put 0 into the wide signed day's polarity; exit.
   If the wide signed day's polarity is less than 0,
     put -1 into the wide signed day's polarity; exit.
@@ -27,7 +27,7 @@ To normalize a wide signed day:
 
 \ The caller supplies an unsigned decimal magnitude and the sign.
 To set a wide signed day from a wide quantity given a number:
-  Put the wide quantity into the wide signed day's magnitude.
+  Put the wide quantity into the wide signed day's absolute quantity.
   Put the number into the wide signed day's polarity.
   Normalize the wide signed day.
 
@@ -38,9 +38,9 @@ To decide if a wide signed day numerically precedes another wide signed day:
   If the wide signed day's polarity is greater than the other wide signed day's polarity, say no.
   If the wide signed day's polarity is 0, say no.
   If the wide signed day's polarity is 1,
-    if the wide signed day's magnitude is numerically smaller than the other wide signed day's magnitude, say yes;
+    if the wide signed day's absolute quantity is numerically smaller than the other wide signed day's absolute quantity, say yes;
     say no.
-  If the other wide signed day's magnitude is numerically smaller than the wide signed day's magnitude, say yes.
+  If the other wide signed day's absolute quantity is numerically smaller than the wide signed day's absolute quantity, say yes.
   Say no.
 
 \ Compare signs before comparing magnitudes to avoid a signed overflow.
@@ -54,18 +54,18 @@ To add a wide signed day to another wide signed day:
   Add opposite-signed day magnitudes given the wide signed day and the other wide signed day.
 
 To add like-signed day magnitudes given a wide signed day and another wide signed day:
-  Add the wide signed day's magnitude to the other wide signed day's magnitude.
+  Add the wide signed day's absolute quantity to the other wide signed day's absolute quantity.
 
 \ Opposite signs: the larger magnitude determines the resulting sign.
 To add opposite-signed day magnitudes given a wide signed day and another wide signed day:
-  If the wide signed day's magnitude is the other wide signed day's magnitude,
-    put "0" into the other wide signed day's magnitude;
+  If the wide signed day's absolute quantity is the other wide signed day's absolute quantity,
+    put "0" into the other wide signed day's absolute quantity;
     put 0 into the other wide signed day's polarity; exit.
-  If the wide signed day's magnitude is numerically smaller than the other wide signed day's magnitude,
-    subtract the wide signed day's magnitude from the other wide signed day's magnitude; exit.
-  Put the wide signed day's magnitude into a difference wide quantity.
-  Subtract the other wide signed day's magnitude from the difference wide quantity.
-  Put the difference wide quantity into the other wide signed day's magnitude.
+  If the wide signed day's absolute quantity is numerically smaller than the other wide signed day's absolute quantity,
+    subtract the wide signed day's absolute quantity from the other wide signed day's absolute quantity; exit.
+  Put the wide signed day's absolute quantity into a difference wide quantity.
+  Subtract the other wide signed day's absolute quantity from the difference wide quantity.
+  Put the difference wide quantity into the other wide signed day's absolute quantity.
   Put the wide signed day's polarity into the other wide signed day's polarity.
 
 \ Subtracting x from y is adding -x to y without modifying x.
@@ -79,4 +79,4 @@ To subtract a wide signed day from another wide signed day:
 To spell a wide signed day into a string:
   Put "" into the string.
   If the wide signed day's polarity is less than 0, append "-" to the string.
-  Append the wide signed day's magnitude to the string.
+  Append the wide signed day's absolute quantity to the string.

@@ -16,14 +16,14 @@ To check wide gate gap ownership:
     put "Wide gate -1 did not move next to zero." into the check report; exit.
   If the wide gate movement's gap index's polarity is not -1,
     put "Crossing negative gate -1 failed to retain its gap." into the check report; exit.
-  If the wide gate movement's gap index's magnitude is not "1",
+  If the wide gate movement's gap index's absolute quantity is not "1",
     put "The negative gap index has an incorrect magnitude." into the check report; exit.
   Put "0" into the tested gate magnitude.
   Set the current extended gate's index from the tested gate magnitude given 0.
   Prepare a wide forward gate movement.
   If the wide gate movement's gap index's polarity is not 1,
     put "Moving from zero to positive one selected a nonpositive gap." into the check report; exit.
-  If the wide gate movement's gap index's magnitude is not "1",
+  If the wide gate movement's gap index's absolute quantity is not "1",
     put "Moving from zero to positive one selected the wrong gap." into the check report; exit.
   Put "1" into the tested gate magnitude.
   Set the current extended gate's index from the tested gate magnitude given 1.
@@ -32,7 +32,7 @@ To check wide gate gap ownership:
     put "Backward positive one did not reach zero." into the check report; exit.
   If the wide gate movement's gap index's polarity is not 1,
     put "Backward positive crossing selected a negative gap." into the check report; exit.
-  If the wide gate movement's gap index's magnitude is not "1",
+  If the wide gate movement's gap index's absolute quantity is not "1",
     put "Backward positive crossing selected the wrong gap." into the check report; exit.
   Put "0" into the tested gate magnitude.
   Set the current extended gate's index from the tested gate magnitude given 0.
@@ -41,7 +41,7 @@ To check wide gate gap ownership:
     put "Backward movement from zero did not reach minus one." into the check report; exit.
   If the wide gate movement's gap index's polarity is not -1,
     put "Backward movement from zero used the wrong signed gap." into the check report; exit.
-  If the wide gate movement's gap index's magnitude is not "1",
+  If the wide gate movement's gap index's absolute quantity is not "1",
     put "Backward movement from zero used the wrong gap magnitude." into the check report; exit.
 
 To check blocked wide gate movements:
@@ -53,7 +53,7 @@ To check blocked wide gate movements:
     put "Exhausted wide gate movement was incorrectly committed." into the check report; exit.
   If the current extended gate's index's polarity is not 0,
     put "Blocked wide gate movement changed its index." into the check report; exit.
-  If the current extended gate's coordinate's magnitude is not "15055671",
+  If the current extended gate's coordinate's absolute quantity is not "15055671",
     put "Blocked wide gate movement changed the Foundation coordinate." into the check report; exit.
   Begin a wide gate traversal.
   Put "1000000000000000000000000000000000000000000000000" into the tested gate magnitude.
@@ -61,9 +61,9 @@ To check blocked wide gate movements:
   Locate a wide gate given the tested extended gate index.
   If the current extended gate's reached is not 0,
     put "A distant wide gate escaped the bounded traversal." into the check report; exit.
-  If the current extended gate's index's magnitude is not "0",
+  If the current extended gate's index's absolute quantity is not "0",
     put "A distant rejected gate moved the working index." into the check report; exit.
-  If the current extended gate's coordinate's magnitude is not "15055671",
+  If the current extended gate's coordinate's absolute quantity is not "15055671",
     put "A distant rejected gate moved the Foundation position." into the check report; exit.
   Put "0" into the tested gate magnitude.
   Set the tested extended gate index from the tested gate magnitude given 0.
@@ -81,12 +81,12 @@ To check a wide gate crossing Foundation:
     put "A wide positive gate move failed." into the check report; exit.
   If the current extended gate's coordinate's polarity is not -1,
     put "The first wide positive gate has an incorrect sign." into the check report; exit.
-  If the current extended gate's coordinate's magnitude is not "15055326",
+  If the current extended gate's coordinate's absolute quantity is not "15055326",
     put "The first positive wide gate must be Foundation plus 345 days." into the check report; exit.
   Move to the next negative wide gate.
   If the wide gate movement's succeeded is not 1,
     put "A wide backward gate move failed." into the check report; exit.
-  If the current extended gate's coordinate's magnitude is not "15055671",
+  If the current extended gate's coordinate's absolute quantity is not "15055671",
     put "Returning to Foundation did not undo the first wide gap." into the check report; exit.
 
 
@@ -100,25 +100,25 @@ To check measured wide gate crossings:
     put "The first positive measured wide gate move failed." into the check report; exit.
   If the current extended gate's index's polarity is not 1,
     put "The measured positive move has the wrong gate index." into the check report; exit.
-  If the current extended gate's coordinate's magnitude is not "15055326",
+  If the current extended gate's coordinate's absolute quantity is not "15055326",
     put "The first positive gate must be Foundation plus 345." into the check report; exit.
   Prepare a wide backward gate movement.
   Apply a measured wide gate gap given 345.
   If the current extended gate's index's polarity is not 0,
     put "Returning from positive one did not reach zero." into the check report; exit.
-  If the current extended gate's coordinate's magnitude is not "15055671",
+  If the current extended gate's coordinate's absolute quantity is not "15055671",
     put "Returning from positive one did not reach Foundation." into the check report; exit.
   Prepare a wide backward gate movement.
   Apply a measured wide gate gap given 503.
   If the current extended gate's index's polarity is not -1,
     put "Moving to negative one has the wrong index." into the check report; exit.
-  If the current extended gate's coordinate's magnitude is not "15056174",
+  If the current extended gate's coordinate's absolute quantity is not "15056174",
     put "The first negative gate must be Foundation minus 503." into the check report; exit.
   Prepare a wide forward gate movement.
   Apply a measured wide gate gap given 503.
   If the current extended gate's index's polarity is not 0,
     put "Returning from negative one did not reach gate zero." into the check report; exit.
-  If the current extended gate's coordinate's magnitude is not "15055671",
+  If the current extended gate's coordinate's absolute quantity is not "15055671",
     put "Returning from negative one did not reach Foundation." into the check report; exit.
   Prepare a wide forward gate movement.
   Apply a measured wide gate gap given 41.
@@ -129,5 +129,5 @@ To check measured wide gate crossings:
   Apply a measured wide gate gap given 964.
   If the wide gate movement's succeeded is not 0,
     put "A too-long measured gate gap was accepted." into the check report; exit.
-  If the current extended gate's coordinate's magnitude is not "15055671",
+  If the current extended gate's coordinate's absolute quantity is not "15055671",
     put "A rejected long gate gap changed its position." into the check report; exit.

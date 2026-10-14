@@ -32,7 +32,7 @@ To number a wide signed day into a wide quantity:
   Subtract the foundation wide signed day from the difference wide signed day.
   If the difference wide signed day's polarity is 0,
     put "1" into the wide quantity; exit.
-  Put the difference wide signed day's magnitude into the wide quantity.
+  Put the difference wide signed day's absolute quantity into the wide quantity.
   Multiply the wide quantity by 2.
   If the difference wide signed day's polarity is greater than 0,
     add 1 to the wide quantity.
@@ -44,7 +44,7 @@ To answer a wide calendar question:
   Add the wide calendar question's requested count to the wide calendar question's day sum.
   Put the wide calendar question's requested day into a relative wide signed day.
   Subtract the wide calendar question's calculation day from the relative wide signed day.
-  Put the relative wide signed day's magnitude into the wide calendar question's day distance.
+  Put the relative wide signed day's absolute quantity into the wide calendar question's day distance.
   Add 1 to the wide calendar question's day distance.
   Put 2 into the wide calendar question's day direction.
   If the relative wide signed day's polarity is greater than 0,

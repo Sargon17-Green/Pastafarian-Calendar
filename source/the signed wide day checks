@@ -17,13 +17,13 @@ To check signed wide day normalization:
   Set the first signed day fixture from the sample signed magnitude given -1.
   If the first signed day fixture's polarity is not 0,
     put "Signed zero retained a negative sign." into the check report; exit.
-  If the first signed day fixture's magnitude is not "0",
+  If the first signed day fixture's absolute quantity is not "0",
     put "Signed zero retained unnecessary decimal digits." into the check report; exit.
   Put "000045" into the sample signed magnitude.
   Set the first signed day fixture from the sample signed magnitude given -99.
   If the first signed day fixture's polarity is not -1,
     put "Negative polarity was not normalized to minus one." into the check report; exit.
-  If the first signed day fixture's magnitude is not "45",
+  If the first signed day fixture's absolute quantity is not "45",
     put "Leading zeroes survived signed normalization." into the check report; exit.
   Spell the first signed day fixture into the signed fixture text.
   If the signed fixture text is not "-45",
@@ -35,21 +35,21 @@ To check signed wide day additions:
   Put "1" into the sample signed magnitude.
   Set the second signed day fixture from the sample signed magnitude given 1.
   Add the first signed day fixture to the second signed day fixture.
-  If the second signed day fixture's magnitude is not "1000000000000000000000000000000000000000000000000",
+  If the second signed day fixture's absolute quantity is not "1000000000000000000000000000000000000000000000000",
     put "A 48-digit positive addition lost its carry." into the check report; exit.
   If the second signed day fixture's polarity is not 1,
     put "A wide positive sum changed sign." into the check report; exit.
   Put "999999999999999999999999999999999999999999999999" into the sample signed magnitude.
   Set the first signed day fixture from the sample signed magnitude given -1.
   Add the first signed day fixture to the second signed day fixture.
-  If the second signed day fixture's magnitude is not "1",
+  If the second signed day fixture's absolute quantity is not "1",
     put "Opposite signed quantities did not cancel to one." into the check report; exit.
   If the second signed day fixture's polarity is not 1,
     put "A positive one has the wrong sign after cancellation." into the check report; exit.
   Put "1" into the sample signed magnitude.
   Set the third signed day fixture from the sample signed magnitude given -1.
   Add the third signed day fixture to the second signed day fixture.
-  If the second signed day fixture's magnitude is not "0",
+  If the second signed day fixture's absolute quantity is not "0",
     put "Exactly opposed quantities did not cancel to zero." into the check report; exit.
   If the second signed day fixture's polarity is not 0,
     put "A zero signed sum retained its sign." into the check report; exit.
@@ -62,16 +62,16 @@ To check signed wide day subtractions:
   Subtract the first signed day fixture from the second signed day fixture.
   If the second signed day fixture's polarity is not -1,
     put "Subtraction failed to produce a negative day." into the check report; exit.
-  If the second signed day fixture's magnitude is not "999999999999999999999999999999999999999999999999",
+  If the second signed day fixture's absolute quantity is not "999999999999999999999999999999999999999999999999",
     put "Subtraction lost precision above 32 bits." into the check report; exit.
-  If the first signed day fixture's magnitude is not "1000000000000000000000000000000000000000000000000",
+  If the first signed day fixture's absolute quantity is not "1000000000000000000000000000000000000000000000000",
     put "Subtraction changed its input operand." into the check report; exit.
   Put "999999999999999999999999999999999999999999999999" into the sample signed magnitude.
   Set the third signed day fixture from the sample signed magnitude given -1.
   Subtract the third signed day fixture from the second signed day fixture.
   If the second signed day fixture's polarity is not 0,
     put "Subtracting a negative wide day did not cancel the result." into the check report; exit.
-  If the second signed day fixture's magnitude is not "0",
+  If the second signed day fixture's absolute quantity is not "0",
     put "Subtracting a negative wide day left a nonzero magnitude." into the check report; exit.
 
 To check signed wide day order:
