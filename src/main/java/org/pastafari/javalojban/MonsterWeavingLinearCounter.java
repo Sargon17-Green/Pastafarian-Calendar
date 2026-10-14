@@ -644,6 +644,15 @@ public final class MonsterWeavingLinearCounter {
         BigInteger[] branchSizes = new BigInteger[lengths.length];
         Arrays.fill(branchSizes, ZERO);
         if (parent.closed == lengths.length) return branchSizes;
+        if (parent.opened == lengths.length) {
+            BigInteger[] scalars = unconstrainedSiblingScalars(parent);
+            for (int month = parent.closed; month < lengths.length; month++) {
+                if (parent.canTake(month, lengths)) {
+                    branchSizes[month] = scalars[month];
+                }
+            }
+            return branchSizes;
+        }
         int cut = Math.min(lengths.length, parent.opened + 2);
         int prefixDays = -1;
         for (int month = parent.closed; month < cut; month++) {
