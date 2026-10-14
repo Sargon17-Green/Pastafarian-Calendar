@@ -306,6 +306,10 @@ def gate_anchor_regression():
     preturn["complete_prefork_trace"][0][5]=ord(">")
     preturn["native_p_history"].pop(0)
     preturn["total_p_writes"]-=1
+    # The removed prefork p supplied the later g-read cell [701,0].
+    # Move the physical postfork p receipt to that SAME cell so the
+    # positive fixture still has authentic read-after-write provenance.
+    preturn["native_p_history"][0]["coordinate"]=[701,0]
     audit.verify_run(preturn,preturn_source,require_prefork=True,
                      require_gate_anchor=True)
     forged_preturn=copy.deepcopy(preturn)
