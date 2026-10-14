@@ -98,8 +98,11 @@ export type Discovery19CacheObservation=Readonly<{
 }>;
 export class Discovery19YearNumberCacheHandler {
   private readonly metrics=new BaseMetricsManager();
-  constructor(readonly legacyCache:LegacyYearNumberOnlyCache=
-    new LegacyYearNumberOnlyCache()){}
+  readonly legacyCache:LegacyYearNumberOnlyCache;
+  constructor(legacyCache:LegacyYearNumberOnlyCache=
+    new LegacyYearNumberOnlyCache()){
+    this.legacyCache=legacyCache;
+  }
 
   run(ctx:MonsterContext,q:Discovery19Request):Discovery19CacheObservation {
     if(ctx.phase!=="READY"||ctx.status!=="VALIDATED")
