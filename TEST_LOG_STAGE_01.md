@@ -156,3 +156,7 @@ GitHub Actions [run 38789386350](https://github.com/Sargon17-Green/Pastafarian-C
 ## Five bounded normative work counters — candidate
 
 ROM tests 93..108 cover pair reversal, same-day counters, crossing Foundation, extreme signed-32 offsets, exact 2^32 distance, sums and direction. Host oracle independently examines 14,121 pairs. Native evidence is pending. `STAGE1_NATIVE_108_SMOKE=PENDING_CI`; no Stage-2 work.
+
+## Verified native five-counter subset — 108/108 PASS
+
+[GitHub Actions run 38790223535](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38790223535), commit `c3766c8c0b4018eee54fa0c5246a7411697d210a`, finished with both jobs successful. Actual DMG ROM output: `ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=108 DISPATCH_STATUS=40 FRAMES=1016`; independent host reference: `HOST_WORK_COUNTERS_DELTA32=PASS cases=14121`. These results verify only the signed-32 bounded numerical prefix of the normative calendar. Full Stage 1 still incomplete; Stage 2 not started.

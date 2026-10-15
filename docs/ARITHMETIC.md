@@ -27,7 +27,7 @@ ROM tests 1..10 check the original 128-bit SAVE and Add16 cases.
 Tests 11..16 cover wider SAVE values including 2^255 and 2^256-1.
 Tests 17..22 cover exact full-width products and their reduced values.
 
-NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_92_CASES_RUN_38789386350. This is a self-contained arithmetic subset,
+NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_108_CASES_RUN_38790223535. This is a self-contained arithmetic subset,
 not a completed normative oracle or calendar implementation.
 Remaining work includes signed date counters, more than 256-bit math
 for combinatorial counts, Year 5000, full source catalog and native QA.
@@ -68,3 +68,7 @@ is explicit. Native cases 67..80 passed in GitHub Actions run 38788682300,
 alongside the host's 600 randomized transitions. Allocation is bank-granular,
 not a general BigInt representation; further semantic-state ownership and
 calendar logic remain outstanding.
+
+## First normative work counters (bounded, native PASS)
+
+The ROM now computes N(c), N(t), exact chronological inclusive distance, count sum, and direction on signed-32 offsets around Foundation. All 108 ROM smoke cases passed in Actions run 38790223535; host checks covered 14,121 pairs. This is not the unrestricted full oracle.

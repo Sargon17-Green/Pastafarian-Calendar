@@ -166,3 +166,7 @@ Verified native run 38789386350 passed all 92 cases, including signed-32 DayCoun
 ## Exact bounded five work counters — implementation candidate
 
 `WorkCountsFromOffsets32` derives calculation-day and target-day counters, inclusive **chronological** distance, their sum, and chronological direction from two signed 32-bit offsets relative to Foundation. Unsigned 5-byte LE outputs hold the full exact range, including 2^32 distance and up to 2^33 sum. Signed ordering is obtained by flipping the top sign bit before unsigned comparison; subtraction of ordered two's-complement offsets is exact modulo 2^32 since the magnitude is at most 2^32-1. Input bytes are never changed. This is not an unbounded ordinal or the full normative calendar.
+
+## Five-counter verification ledger
+
+All native cases 93..108 passed in GitHub Actions run 38790223535, alongside 14,121 host-model pair cases. Numerical correctness is limited to signed 32-bit Foundation offsets; full BigInt and calendar support remain outstanding.

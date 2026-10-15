@@ -54,3 +54,7 @@ Native cases 81..92 passed under PyBoy in run 38789386350. This numerical subset
 ## Five bounded numeric counters — Stage 1 candidate
 
 Paired signed-32 Foundation offsets now flow through native SM83 counters. Full arbitrary-precision counters, sauce, gates, selection, weaving and calendar date construction remain unimplemented. Native tests 93..108 pending.
+
+## Verified 108-case numeric bootstrap
+
+Bounded day-pair counters passed DMG-native run 38790223535. Stage 1 remains IN_PROGRESS pending unrestricted arithmetic, full normative oracle and Classical Ge'ez catalog. Historical DISCOVERY/PATCH sequence remains untouched.
