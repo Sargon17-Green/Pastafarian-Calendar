@@ -2,7 +2,7 @@
 
 | Stage | Kind | Status | Note |
 |---|---|---|---|
-| 1 | BOOTSTRAP | IN_PROGRESS | SM83 exact primitives, 108 native ROM smoke cases, scratch leases and bounded work counters; full calendar absent |
+| 1 | BOOTSTRAP | IN_PROGRESS | SM83 exact primitives, 122 native ROM smoke cases, scratch leases, bounded work counters and length normalization; full calendar absent |
 | 2 | DISCOVERY_01 | NOT_STARTED | Must preserve intentional historical wrong behavior |
 | 3 | PATCH_01 | NOT_STARTED | Must retain Stage 2 scar as diagnostic copy |
 | 4..53 | DISCOVERY/PATCH | NOT_STARTED | 25 further discovery/patch pairs |
@@ -64,5 +64,5 @@ Bounded day-pair counters passed DMG-native run 38790223535. Stage 1 remains IN_
 Stage 1 adds a non-mutating MBC5 SRAM magnitude-length scanner and a
 two-byte canonical length field on successful signed addition, including
 carry into byte 4097. Invalid encodings zeroize the length metadata
-before returning failure. ROM cases 109..122 are pending native CI.
+before returning failure. ROM cases 109..122 passed native CI in run 38794654298.
 No historical DISCOVERY/PATCH stage is started.

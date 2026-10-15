@@ -27,7 +27,7 @@ ROM tests 1..10 check the original 128-bit SAVE and Add16 cases.
 Tests 11..16 cover wider SAVE values including 2^255 and 2^256-1.
 Tests 17..22 cover exact full-width products and their reduced values.
 
-NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_108_CASES_RUN_38790223535. This is a self-contained arithmetic subset,
+NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_122_CASES_RUN_38794654298. This is a self-contained arithmetic subset,
 not a completed normative oracle or calendar implementation.
 Remaining work includes signed date counters, more than 256-bit math
 for combinatorial counts, Year 5000, full source catalog and native QA.
@@ -73,11 +73,11 @@ calendar logic remain outstanding.
 
 The ROM now computes N(c), N(t), exact chronological inclusive distance, count sum, and direction on signed-32 offsets around Foundation. All 108 ROM smoke cases passed in Actions run 38790223535; host checks covered 14,121 pairs. This is not the unrestricted full oracle.
 
-## Canonical SRAM byte-length scan — candidate
+## Canonical SRAM byte-length scan — native smoke verified
 
 A native SM83 scanner returns the number of significant little-endian
 bytes for an initialized bank region up to 8192 bytes. Signed addition
 records the 0..4097 canonical result length and resets that metadata on
 validation errors. This is essential metadata for future variable-length
 numbers, but is not yet a BigInt allocation or arbitrary-length operation.
-Native ROM tests 109..122 and an independent Python length model are pending.
+Native ROM tests 109..122 passed in run 38794654298, together with an independent Python length model (1,829 host cases). Stage 1 remains incomplete.

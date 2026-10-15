@@ -58,7 +58,7 @@ See [Pan Docs MBC5](https://gbdev.io/pandocs/MBC5.html) and
 * Complete independent normative oracle and full golden fixtures.
 * Canonical Ge'ez name catalog with canonicalIndex and native language QA.
 * Real calendar invocation path, ancient/negative and far-date conversion.
-* Full Stage-1 native verification beyond the successful 80-case arithmetic/SRAM ROM smoke suite.
+* Full Stage-1 native verification beyond the successful 122-case arithmetic/SRAM ROM smoke suite.
 
 The cartridge self-tests do not imply Stage 1 PASS. The historical
 DISCOVERY/PATCH stages may begin only after a complete and verified Stage 1.
@@ -171,7 +171,7 @@ Verified native run 38789386350 passed all 92 cases, including signed-32 DayCoun
 
 All native cases 93..108 passed in GitHub Actions run 38790223535, alongside 14,121 host-model pair cases. Numerical correctness is limited to signed 32-bit Foundation offsets; full BigInt and calendar support remain outstanding.
 
-## Canonical magnitude length (new Stage 1 candidate)
+## Canonical magnitude length (Stage 1 native smoke verified)
 
 `SRAMMeasureLength` takes an MBC5 bank (A), a last-byte SRAM address (HL)
 and exact capacity (BC, 1..8192), with HL=A000+BC-1. It returns the
@@ -181,5 +181,4 @@ without changing any bank data. The selected bank is preserved.
 (`wSignedResultLength`, 0..4097) and ensures that invalid input resets
 length and sign. Its full 4097-byte result cannot silently be described as
 4096 bytes on carry. The scanner does not allocate, own or free memory.
-Cases 109..122 must pass actual SM83 execution before this extension is
-marked native verified. General variable-length BigInt is still absent.
+Cases 109..122 passed actual SM83 execution in Actions run 38794654298. General variable-length BigInt is still absent.

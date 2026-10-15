@@ -161,11 +161,33 @@ ROM tests 93..108 cover pair reversal, same-day counters, crossing Foundation, e
 
 [GitHub Actions run 38790223535](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38790223535), commit `c3766c8c0b4018eee54fa0c5246a7411697d210a`, finished with both jobs successful. Actual DMG ROM output: `ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=108 DISPATCH_STATUS=40 FRAMES=1016`; independent host reference: `HOST_WORK_COUNTERS_DELTA32=PASS cases=14121`. These results verify only the signed-32 bounded numerical prefix of the normative calendar. Full Stage 1 still incomplete; Stage 2 not started.
 
-## Canonical magnitude length candidate — verification pending
+## Canonical magnitude length extension — native CI PASS
 
 Candidate ROM cases 109..122 exercise 8192-byte zero/boundary
 normalization, 4097-byte carry, 4096-byte high byte, signed result
 length metadata, cancellation, negative-zero rejection, invalid
 signs and recovery. The host reference is separate evidence.
-Do not upgrade `LAST_COMPLETED_STAGE` or claim native PASS until
-both GitHub Actions jobs pass on the implementation commit.
+Both GitHub Actions jobs (`verify` and `dmg-native-smoke`) passed on
+commit `813499265e4807fbf41ea6f5f81b071fc5ca63e4`,
+[run 38794654298](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38794654298).
+RGBDS v1.0.4 built the native DMG ROM, executed in PyBoy 2.x:
+
+```text
+HOST_SRAM_MAGNITUDE_LENGTH=PASS cases=1829
+ROM_HEADER=PASS DMG=YES MBC=MBC5_RAM_128K
+ROM_PROGRESS_FRAME=1243 CASE=122
+ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=122 DISPATCH_STATUS=40 FRAMES=1278
+STAGE1_ARITHMETIC_SMOKE=PASS
+```
+
+The first candidate run 38794538863 failed *before building the ROM*:
+a host fixture randomized the expected most significant nonzero byte and
+could overwrite it with zero. The fixture generator was corrected not to
+alter that byte and the next run passed. This is not evidence of a failing
+SM83 routine.
+
+**Verified scope:** 1..8192-byte SRAM scanning and exact 0..4097-byte
+signed-add result-length metadata, without mutation and with fail-closed
+metadata on invalid sign/negative zero. These are building blocks only;
+unbounded BigInt, complete normative calendar and verified Ge'ez catalog
+remain absent. `LAST_COMPLETED_STAGE=0`.
