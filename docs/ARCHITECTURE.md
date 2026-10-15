@@ -18,7 +18,7 @@ WRAM observable bootstrap locations:
 | Address | Name | Meaning |
 |---|---|---|
 | C000 | wTestResult | A5 arithmetic smoke PASS; E0 failure; 00 unstarted |
-| C001 | wTestCase | currently executed test (1..33) |
+| C001 | wTestCase | currently executed test (1..80) |
 | C002 | wRunStatus | 40 means calendar engine deliberately not implemented |
 | C003..C012 | wValue | 128-bit LE working value |
 | C013..C022 | wAddend | 128-bit LE addend |
@@ -46,8 +46,8 @@ normative upper bound for all intermediate quantities.
 
 The bootstrap SRAM test stores unique bytes into all 16 bank-0 offsets,
 then confirms bank isolation; it separately tests the upper address BFFF
-in banks 0 and 15. Future dynamic bank ownership and cleanup are NOT
-implemented. Cartridge RAM must be initialized before semantic use.
+in banks 0 and 15. Dynamic scratch-bank leasing and cleanup now exist for banks 3..15;
+per-invocation ownership and rollback remain NOT implemented. Cartridge RAM must be initialized before semantic use.
 See [Pan Docs MBC5](https://gbdev.io/pandocs/MBC5.html) and
 [Cartridge Header](https://gbdev.io/pandocs/The_Cartridge_Header.html).
 
@@ -58,7 +58,7 @@ See [Pan Docs MBC5](https://gbdev.io/pandocs/MBC5.html) and
 * Complete independent normative oracle and full golden fixtures.
 * Canonical Ge'ez name catalog with canonicalIndex and native language QA.
 * Real calendar invocation path, ancient/negative and far-date conversion.
-* Full Stage-1 native verification beyond the successful 66-case arithmetic/SRAM ROM smoke suite.
+* Full Stage-1 native verification beyond the successful 80-case arithmetic/SRAM ROM smoke suite.
 
 The cartridge self-tests do not imply Stage 1 PASS. The historical
 DISCOVERY/PATCH stages may begin only after a complete and verified Stage 1.
@@ -127,7 +127,7 @@ MBC5 RAM enabled by caller and does not provide variable-length allocation,
 reentrancy or an interface for feeding a 4097-byte result into another
 4096-byte operation. Native ROM cases 53..66 passed in Actions run 38781963706. These are fixed-capacity tests, not complete Stage-1 verification.
 
-## MBC5 scratch-bank lease manager — candidate, Stage 1
+## MBC5 scratch-bank lease manager — native smoke verified, Stage 1
 
 `LeaseResetAll` (destructive, explicit) zeroizes scratch SRAM banks 3..15
 and marks them free; banks 0..2 are reserved for the established fixed-width
@@ -142,5 +142,4 @@ not safe during a live invocation. Lease status, last handle and per-bank
 states are WRAM fields. These primitives are not yet a variable-length
 BigInt type, a reentrant frame system, or an invocation rollback mechanism.
 
-Native ROM cases 67..80 and an independent host transition model are
-blocking gates before calling this extension verified.
+Native ROM cases 67..80 and the independent 600-transition host model passed in Actions run 38788682300. Stage 1 overall remains uncompleted.

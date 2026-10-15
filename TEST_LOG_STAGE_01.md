@@ -113,7 +113,7 @@ The fixed-capacity signed-sum primitive is native-smoke verified, but
 `LAST_COMPLETED_STAGE=0`. The complete normative calendar,
 arbitrary-length state ownership and verified Ge'ez names remain absent.
 
-## Destructive-reset scratch SRAM leases — pending native smoke
+## Destructive-reset scratch SRAM leases — native smoke PASS
 
 Implemented a separate bank-lease primitive with deterministic lowest-bank
 allocation (banks 3..15), full 8-KiB scrub on release/reset, 0..2 reserved,
@@ -122,4 +122,20 @@ cases 67..80 check bank isolation, upper/lower edges, exhaustion, reallocation
 and preservation of reserved bank 2. The host model is independent and is
 not a substitute for native RGBDS/PyBoy execution.
 
-`STAGE1_NATIVE_80_SMOKE=PENDING_CI`. Do not mark Stage 1 complete.
+Verified at commit `736eeca17e51692d1a3a77340977377332bd5641`
+via [Actions run 38788682300](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38788682300).
+Both `verify` and `dmg-native-smoke` concluded SUCCESS.
+The actual RGBDS 1.0.4 ROM executed under PyBoy 2.x:
+
+```text
+HOST_SRAM_LEASE_MODEL=PASS randomized_transitions=600 banks=13
+ROM_HEADER=PASS DMG=YES MBC=MBC5_RAM_128K
+ROM_PROGRESS_FRAME=953 CASE=80
+ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=80 DISPATCH_STATUS=40 FRAMES=1014
+STAGE1_ARITHMETIC_SMOKE=PASS
+```
+
+Only the explicitly scoped SRAM scratch-bank lease mechanism is verified.
+No variable-length BigInt objects, dynamic per-invocation state, full
+normative oracle or complete Ge'ez catalog yet exist. Maintain
+`LAST_COMPLETED_STAGE=0` and do not start Stage 2.

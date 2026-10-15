@@ -2,7 +2,7 @@
 
 | Stage | Kind | Status | Note |
 |---|---|---|---|
-| 1 | BOOTSTRAP | IN_PROGRESS | SM83 entry, exact 128-bit SAVE primitive, ten native arithmetic checks |
+| 1 | BOOTSTRAP | IN_PROGRESS | SM83 exact primitives, 80 native ROM smoke cases, scratch-bank leases; normative calendar still absent |
 | 2 | DISCOVERY_01 | NOT_STARTED | Must preserve intentional historical wrong behavior |
 | 3 | PATCH_01 | NOT_STARTED | Must retain Stage 2 scar as diagnostic copy |
 | 4..53 | DISCOVERY/PATCH | NOT_STARTED | 25 further discovery/patch pairs |
@@ -36,6 +36,5 @@ verified.
 ## Stage 1 scratch SRAM bank leases — candidate
 
 A separate MBC5-native scratch allocator leases 13 SRAM banks after
-reserving banks 0..2 for existing arithmetic. The 14 ROM cases 67..80
-must pass natively. This is not the final semantic-state owner or
+reserving banks 0..2 for existing arithmetic. The 14 ROM cases 67..80 passed natively in Actions run 38788682300. This is not the final semantic-state owner or
 unrestricted BigInt allocator; no historical discovery/patch work starts.

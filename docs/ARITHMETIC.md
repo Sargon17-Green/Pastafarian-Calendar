@@ -27,7 +27,7 @@ ROM tests 1..10 check the original 128-bit SAVE and Add16 cases.
 Tests 11..16 cover wider SAVE values including 2^255 and 2^256-1.
 Tests 17..22 cover exact full-width products and their reduced values.
 
-NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_66_CASES_RUN_38781963706. This is a self-contained arithmetic subset,
+NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_80_CASES_RUN_38788682300. This is a self-contained arithmetic subset,
 not a completed normative oracle or calendar implementation.
 Remaining work includes signed date counters, more than 256-bit math
 for combinatorial counts, Year 5000, full source catalog and native QA.
@@ -56,3 +56,15 @@ Native ROM cases 53..66 passed in GitHub Actions run 38781963706
 the independent host reference passed 1,088 cases.
 This does not imply unrestricted BigInt arithmetic, ownership, full
 selection/weaving or a completed normative calendar.
+
+## Scratch-bank leasing (native smoke verified)
+
+On original DMG/MBC5 cartridge hardware, `LeaseResetAll` destructively
+zeroizes scratch SRAM banks 3..15, `LeaseAlloc` selects the lowest free
+bank, and `LeaseFree` validates ownership and zeroizes all 8KiB before
+release. Banks 0..2 remain reserved for existing arithmetic. Invalid
+bank numbers and double-free attempts fail closed; allocation exhaustion
+is explicit. Native cases 67..80 passed in GitHub Actions run 38788682300,
+alongside the host's 600 randomized transitions. Allocation is bank-granular,
+not a general BigInt representation; further semantic-state ownership and
+calendar logic remain outstanding.
