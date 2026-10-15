@@ -30,9 +30,11 @@ def main() -> None:
             high = rng.randrange(capacity + 1)
             if high:
                 raw[high - 1] = rng.randrange(1, 256)
+            # Randomize strictly below the nonzero leading byte:
+            # overwriting it with zero would change the expected length.
             for _ in range(6):
-                i = rng.randrange(high) if high else 0
-                if high:
+                if high > 1:
+                    i = rng.randrange(high - 1)
                     raw[i] = rng.randrange(256)
             assert reference_length(raw) == high, (capacity, high)
             checked += 1
