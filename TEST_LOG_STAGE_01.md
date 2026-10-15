@@ -112,3 +112,14 @@ not a demonstrated failure in native SM83 arithmetic.
 The fixed-capacity signed-sum primitive is native-smoke verified, but
 `LAST_COMPLETED_STAGE=0`. The complete normative calendar,
 arbitrary-length state ownership and verified Ge'ez names remain absent.
+
+## Destructive-reset scratch SRAM leases — pending native smoke
+
+Implemented a separate bank-lease primitive with deterministic lowest-bank
+allocation (banks 3..15), full 8-KiB scrub on release/reset, 0..2 reserved,
+invalid-handle and double-free guards, and explicit exhaustion. Native
+cases 67..80 check bank isolation, upper/lower edges, exhaustion, reallocation
+and preservation of reserved bank 2. The host model is independent and is
+not a substitute for native RGBDS/PyBoy execution.
+
+`STAGE1_NATIVE_80_SMOKE=PENDING_CI`. Do not mark Stage 1 complete.

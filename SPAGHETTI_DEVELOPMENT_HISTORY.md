@@ -32,3 +32,10 @@ which |B|>|A|. Invalid signed encodings fail closed. Native ROM cases
 53..66 passed native CI in run 38781963706 and remain a bootstrap subset only. Stage 1 remains IN_PROGRESS until
 the normative calendar and full source-language catalog are independently
 verified.
+
+## Stage 1 scratch SRAM bank leases — candidate
+
+A separate MBC5-native scratch allocator leases 13 SRAM banks after
+reserving banks 0..2 for existing arithmetic. The 14 ROM cases 67..80
+must pass natively. This is not the final semantic-state owner or
+unrestricted BigInt allocator; no historical discovery/patch work starts.

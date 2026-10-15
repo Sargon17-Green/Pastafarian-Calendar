@@ -5,14 +5,14 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-MAX_BOOT_AND_TEST_FRAMES = 1200
+MAX_BOOT_AND_TEST_FRAMES = 3600
 WRAM_RESULT = 0xC000
 WRAM_TEST_CASE = 0xC001
 WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 66
+TOTAL_CASES = 80
 
 
 def check_header(data: bytes) -> None:

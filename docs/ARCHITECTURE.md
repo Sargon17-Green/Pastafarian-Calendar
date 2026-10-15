@@ -126,3 +126,21 @@ Input banks remain unchanged; bank 2 is selected on return. This requires
 MBC5 RAM enabled by caller and does not provide variable-length allocation,
 reentrancy or an interface for feeding a 4097-byte result into another
 4096-byte operation. Native ROM cases 53..66 passed in Actions run 38781963706. These are fixed-capacity tests, not complete Stage-1 verification.
+
+## MBC5 scratch-bank lease manager — candidate, Stage 1
+
+`LeaseResetAll` (destructive, explicit) zeroizes scratch SRAM banks 3..15
+and marks them free; banks 0..2 are reserved for the established fixed-width
+arithmetic engine and are not scrubbed by a lease reset. Each scratch bank
+contains 8 KiB. `LeaseAlloc` deterministically leases the lowest available
+bank, zeroizing it before exposing the handle; status 1 means exhaustion.
+`LeaseFree` takes a bank number in A, scrubs the full 8 KiB before release,
+and rejects reserved/invalid banks (status 2) or unleased/double-free handles
+(status 3), without changing selected-bank mapping on rejection.
+The caller MUST enable MBC5 RAM and serialize these operations; a reset is
+not safe during a live invocation. Lease status, last handle and per-bank
+states are WRAM fields. These primitives are not yet a variable-length
+BigInt type, a reentrant frame system, or an invocation rollback mechanism.
+
+Native ROM cases 67..80 and an independent host transition model are
+blocking gates before calling this extension verified.

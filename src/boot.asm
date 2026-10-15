@@ -30,6 +30,11 @@ wSignedSignB:: ds 1
 wSignedCmpStatus:: ds 1
 wSignedAddStatus:: ds 1
 wSignedResultSign:: ds 1
+wLeaseTable:: ds 16
+wLeaseIter:: ds 1
+wLeaseBank:: ds 1
+wLeaseStatus:: ds 1
+wLeaseTestNext:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -72,6 +77,10 @@ Bootstrap:
     cp $a5
     jr nz, .done
     call RunSignedAdditionTests
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .done
+    call RunLeaseTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -81,6 +90,7 @@ INCLUDE "src/runtime/save127.asm"
 INCLUDE "src/runtime/savewide256.asm"
 INCLUDE "src/runtime/mul128.asm"
 INCLUDE "src/runtime/mbc5.asm"
+INCLUDE "src/runtime/sram_lease.asm"
 INCLUDE "src/runtime/banked_add.asm"
 INCLUDE "src/runtime/banked_sub.asm"
 INCLUDE "src/runtime/banked_cmp.asm"
@@ -96,3 +106,4 @@ INCLUDE "src/tests/banked_sub_test.asm"
 INCLUDE "src/tests/banked_cmp_test.asm"
 INCLUDE "src/tests/signed_cmp_test.asm"
 INCLUDE "src/tests/signed_add_test.asm"
+INCLUDE "src/tests/sram_lease_test.asm"
