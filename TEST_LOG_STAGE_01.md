@@ -79,7 +79,7 @@ DISPATCH_STATUS=40 FRAMES=459`. Host reference independently reported
 This verifies the fixed-capacity comparison primitive, not the normative calendar
 oracle. `LAST_COMPLETED_STAGE=0`.
 
-## Signed exact 4096-byte sum extension — native results pending
+## Signed exact 4096-byte sum extension — native CI PASS
 
 SM83 `SignedAdd4096` adds two canonical signed magnitudes stored in banks 0
 and 1; a complete 4097-byte unsigned magnitude and canonical sign are
@@ -90,5 +90,25 @@ Native cases 53..66 target carry into byte 4097, both subtraction directions,
 cancellation to positive zero, invalid input and recovery, plus determinism.
 A separate Python reference is only host-side evidence.
 
-Do not claim Stage 1 or the candidate primitive verified before both native
-ROM and repository-lock jobs have passed.
+GitHub Actions [run 38781963706](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38781963706),
+at commit `61718272208fbe57ae04b36e844540709cb4d2fc`,
+completed both `verify` and `dmg-native-smoke` jobs successfully.
+Actual RGBDS v1.0.4 ROM was executed by the PyBoy 2.x emulator:
+
+```text
+ROM_HEADER=PASS DMG=YES MBC=MBC5_RAM_128K
+ROM_PROGRESS_FRAME=781 CASE=66
+ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=66 DISPATCH_STATUS=40 FRAMES=813
+STAGE1_ARITHMETIC_SMOKE=PASS
+HOST_SIGNED_SUM_REFERENCE=PASS cases=1088 capacity_bytes=4096
+```
+
+The initial new-suite run 38781831273 failed before ROM assembly:
+the Python host reference mistakenly asserted `-LIMIT < value` for
+two negative inputs. Corrected to the valid `-2*LIMIT < value`;
+the subsequent CI run passed. This was a host-test-bound defect,
+not a demonstrated failure in native SM83 arithmetic.
+
+The fixed-capacity signed-sum primitive is native-smoke verified, but
+`LAST_COMPLETED_STAGE=0`. The complete normative calendar,
+arbitrary-length state ownership and verified Ge'ez names remain absent.

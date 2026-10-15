@@ -58,7 +58,7 @@ See [Pan Docs MBC5](https://gbdev.io/pandocs/MBC5.html) and
 * Complete independent normative oracle and full golden fixtures.
 * Canonical Ge'ez name catalog with canonicalIndex and native language QA.
 * Real calendar invocation path, ancient/negative and far-date conversion.
-* Full Stage-1 native verification beyond the successful 33-case arithmetic/SRAM ROM smoke suite.
+* Full Stage-1 native verification beyond the successful 66-case arithmetic/SRAM ROM smoke suite.
 
 The cartridge self-tests do not imply Stage 1 PASS. The historical
 DISCOVERY/PATCH stages may begin only after a complete and verified Stage 1.
@@ -100,7 +100,7 @@ signed ordinal handling, arbitrary precision, or the calendar oracle.
 `BankedCmp4096` does an unsigned, high-to-low comparison of little-endian
 SRAM bank 0 and 1 operands and writes only `wCmpStatus` (0/1/2). The
 operation cannot be confused with signed date ordering: a signed-magnitude
-layer has not yet been built. Cases 34..40 passed under the native emulator in run 38686711132.
+layer is now documented below. Cases 34..40 passed under the native emulator in run 38686711132.
 This subroutine has a 4096-byte fixed capacity, so Stage 1 remains open.
 
 ## Signed 4096-byte comparison candidate
@@ -114,7 +114,7 @@ not a general BigInt allocator or a complete signed/calendar engine.
 Native tests 41..52 passed in GitHub Actions run 38691700266; the
 complete 52-case arithmetic smoke suite is verified. Stage 1 remains incomplete.
 
-## Exact signed addition, fixed-width SRAM operands — candidate
+## Exact signed addition, fixed-width SRAM operands — native smoke verified
 
 `SignedAdd4096` accepts two initialized, canonical signed-magnitude
 integers in SRAM banks 0 and 1 (4096 little-endian bytes each). Signs in
@@ -125,4 +125,4 @@ is scrubbed; if valid, `wSignedAddStatus=0` and zero always has sign 0.
 Input banks remain unchanged; bank 2 is selected on return. This requires
 MBC5 RAM enabled by caller and does not provide variable-length allocation,
 reentrancy or an interface for feeding a 4097-byte result into another
-4096-byte operation. Native ROM cases 53..66 are the next verification gate.
+4096-byte operation. Native ROM cases 53..66 passed in Actions run 38781963706. These are fixed-capacity tests, not complete Stage-1 verification.

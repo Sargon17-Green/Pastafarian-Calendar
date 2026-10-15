@@ -29,6 +29,6 @@ GitHub Actions run 38691700266 (52/52 ROM cases); Stage 1 remains open.
 Added a fixed-capacity `SignedAdd4096` primitive, using existing unsigned
 addition/subtraction/compare and a reversed subtraction path for cases in
 which |B|>|A|. Invalid signed encodings fail closed. Native ROM cases
-53..66 are a bootstrap subset only. Stage 1 remains IN_PROGRESS until
+53..66 passed native CI in run 38781963706 and remain a bootstrap subset only. Stage 1 remains IN_PROGRESS until
 the normative calendar and full source-language catalog are independently
 verified.

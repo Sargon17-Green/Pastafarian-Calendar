@@ -27,7 +27,7 @@ ROM tests 1..10 check the original 128-bit SAVE and Add16 cases.
 Tests 11..16 cover wider SAVE values including 2^255 and 2^256-1.
 Tests 17..22 cover exact full-width products and their reduced values.
 
-NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_52_CASES_RUN_38691700266. This is a self-contained arithmetic subset,
+NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_66_CASES_RUN_38781963706. This is a self-contained arithmetic subset,
 not a completed normative oracle or calendar implementation.
 Remaining work includes signed date counters, more than 256-bit math
 for combinatorial counts, Year 5000, full source catalog and native QA.
@@ -42,3 +42,17 @@ bank. The selected SRAM bank on return is 1. The test suite is expanded from
 of the high byte, the low-byte tie-breaker, both inequality directions,
 non-mutation and repeated-call status reset. The seven ROM tests passed under **native SM83 emulation** in GitHub
 Actions run 38686711132. This is still only a fixed-capacity primitive.
+
+## Exact signed-magnitude 4096-byte sum (native smoke verified)
+
+`SignedAdd4096` combines canonical signs 0/1 with 4096-byte magnitudes
+from SRAM banks 0 and 1. The exact output is up to 4097 bytes in bank 2,
+with the canonical zero sign 0. Opposite signs use exact unsigned magnitude
+comparison and either A-B or B-A. Negative zero and invalid sign bytes
+produce an explicit status and scrub the output. Inputs are preserved.
+
+Native ROM cases 53..66 passed in GitHub Actions run 38781963706
+(RGBDS v1.0.4 / PyBoy 2.x, case 66, A5, 813 frames);
+the independent host reference passed 1,088 cases.
+This does not imply unrestricted BigInt arithmetic, ownership, full
+selection/weaving or a completed normative calendar.
