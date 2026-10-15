@@ -70,7 +70,7 @@ To move to the next negative gate:
 
 \ The signed index must fit CAL's native number type.
 \ Each step invokes the exact canonical sauce for its own day pair.
-To locate a gate given a number:
+To locate gate index given a number:
   Begin bounded gate walking.
   Put the number into the gate walk's requested index.
   Put 0 into the gate walk's current index.

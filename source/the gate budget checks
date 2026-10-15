@@ -91,12 +91,12 @@ To check native gate rejection boundaries:
     put "An unsupported negative gate index did not fail." into the check report; exit.
   If the gate walk's current index is not -400000000,
     put "A failed negative gate move changed its index." into the check report; exit.
-  Locate a gate given 1025.
+  Locate gate index given 1025.
   If the gate step budget's exhausted is not 1,
     put "A distant positive gate locate was not rejected immediately." into the check report; exit.
   If the gate walk's current index is not 0,
     put "A rejected positive locate moved the gate." into the check report; exit.
-  Locate a gate given -1025.
+  Locate gate index given -1025.
   If the gate step budget's exhausted is not 1,
     put "A distant negative gate locate was not rejected immediately." into the check report; exit.
   If the gate walk's current index is not 0,

@@ -4,13 +4,13 @@
 \ This does not test arbitrarily distant gate positions.
 
 To check the first signed gate positions:
-  Locate a gate given 0.
+  Locate gate index given 0.
   If the gate walk's current position is not -15055671,
     put "Gate zero did not stay at Foundation." into the check report; exit.
-  Locate a gate given 1.
+  Locate gate index given 1.
   If the gate walk's current position is not -15055326,
     put "Gate 1 was not 345 days after Foundation." into the check report; exit.
-  Locate a gate given -1.
+  Locate gate index given -1.
   If the gate walk's current position is not -15056174,
     put "Gate -1 was not 503 days before Foundation." into the check report; exit.
 
