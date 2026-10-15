@@ -29,7 +29,7 @@ To begin bounded gate walking:
   Put 1024 into the gate step budget's steps remaining.
   Put 0 into the gate step budget's exhausted.
 
-To request another bounded gate step:
+To consume the next gate budget step:
   If the gate step budget's enabled is not 1, exit.
   If the gate step budget's steps remaining is less than 1,
     put 1 into the gate step budget's exhausted; exit.
@@ -39,7 +39,7 @@ To request another bounded gate step:
 \ Prepare both integer fields first; publish neither until the full
 \ sauce returns one canonical interval from 42 through 963 days.
 To move to the next positive gate:
-  Request another bounded gate step.
+  Consume the next gate budget step.
   If the gate step budget's exhausted is 1, exit.
   If the gate walk's current index is greater than or equal to 400000000,
     put 1 into the gate step budget's exhausted; exit.
@@ -56,7 +56,7 @@ To move to the next positive gate:
 \ From zero and below, the interval belongs to the new negative index.
 \ Do not publish the new index or coordinate until the gap is valid.
 To move to the next negative gate:
-  Request another bounded gate step.
+  Consume the next gate budget step.
   If the gate step budget's exhausted is 1, exit.
   If the gate walk's current index is less than or equal to -400000000,
     put 1 into the gate step budget's exhausted; exit.
