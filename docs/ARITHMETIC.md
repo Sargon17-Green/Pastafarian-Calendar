@@ -27,7 +27,7 @@ ROM tests 1..10 check the original 128-bit SAVE and Add16 cases.
 Tests 11..16 cover wider SAVE values including 2^255 and 2^256-1.
 Tests 17..22 cover exact full-width products and their reduced values.
 
-NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_80_CASES_RUN_38788682300. This is a self-contained arithmetic subset,
+NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_92_CASES_RUN_38789386350. This is a self-contained arithmetic subset,
 not a completed normative oracle or calendar implementation.
 Remaining work includes signed date counters, more than 256-bit math
 for combinatorial counts, Year 5000, full source catalog and native QA.

@@ -160,3 +160,5 @@ Important limitation: this entry accepts only signed 32-bit offsets from
 Foundation; it is not the general arbitrary-precision ordinal API required
 for full Stage 1. A future BigInt-backed path must preserve identical
 values on their common domain and extend beyond them without truncation.
+
+Verified native run 38789386350 passed all 92 cases, including signed-32 DayCount edge cases. The unbounded ordinal API remains unimplemented.

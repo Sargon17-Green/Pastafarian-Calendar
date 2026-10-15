@@ -46,3 +46,7 @@ for signed 32-bit offsets from Foundation, preserving exact even/odd
 mapping in a 5-byte output. Cases 81..92 are pending native verification.
 The narrow input is explicit, so the historical stages and full oracle
 remain unclaimed.
+
+## Verified bounded Day Count subset
+
+Native cases 81..92 passed under PyBoy in run 38789386350. This numerical subset is not Stage 1 completion.
