@@ -21,6 +21,7 @@ wMulB::       ds 16
 wMulCurrentByte:: ds 1
 wMulBitFlag:: ds 1
 wMulBytesRemaining:: ds 1
+wBankCarry:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -43,6 +44,10 @@ Bootstrap:
     cp $a5
     jr nz, .done
     call RunRAMBankTests
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .done
+    call RunBankedAdditionTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -52,8 +57,10 @@ INCLUDE "src/runtime/save127.asm"
 INCLUDE "src/runtime/savewide256.asm"
 INCLUDE "src/runtime/mul128.asm"
 INCLUDE "src/runtime/mbc5.asm"
+INCLUDE "src/runtime/banked_add.asm"
 INCLUDE "src/runtime/dispatcher.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
 INCLUDE "src/tests/ram_test.asm"
+INCLUDE "src/tests/banked_add_test.asm"

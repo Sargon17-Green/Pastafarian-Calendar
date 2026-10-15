@@ -18,7 +18,7 @@ WRAM observable bootstrap locations:
 | Address | Name | Meaning |
 |---|---|---|
 | C000 | wTestResult | A5 arithmetic smoke PASS; E0 failure; 00 unstarted |
-| C001 | wTestCase | currently executed test (1..24) |
+| C001 | wTestCase | currently executed test (1..28) |
 | C002 | wRunStatus | 40 means calendar engine deliberately not implemented |
 | C003..C012 | wValue | 128-bit LE working value |
 | C013..C022 | wAddend | 128-bit LE addend |
@@ -62,3 +62,20 @@ See [Pan Docs MBC5](https://gbdev.io/pandocs/MBC5.html) and
 
 The cartridge self-tests do not imply Stage 1 PASS. The historical
 DISCOVERY/PATCH stages may begin only after a complete and verified Stage 1.
+
+## Fixed 4096-byte banked addition (Stage 1 extension)
+
+`BankedAdd4096` adds two full-width unsigned 4096-byte operands, stored
+little-endian in separate cartridge SRAM banks 0 and 1. Its exact result
+occupies 4097 bytes of bank 2, including the carry byte at B000.
+
+Preconditions: MBC5 external RAM has been enabled and each operand has
+been explicitly initialized. It does not allocate semantic state, normalize
+lengths or implement the unrestricted BigInt API. This is intentionally a
+low-level independently testable building block.
+
+Tests 25..28 validate zero, a carry across all 4096 bytes, a two-byte
+carry chain, input immutability and reinitialization of carry across calls.
+These tests must pass natively in PyBoy before this extension is considered
+verified. A much larger memory allocator, signed integers, more operations
+and full calendar oracle remain outstanding.
