@@ -19,7 +19,7 @@ def signed_sum_reference(a_sign: int, a: bytes, b_sign: int, b: bytes) -> tuple[
             or (b_sign == 1 and y == 0)):
         return (1, 0, bytes(BYTES + 1))
     value = (-x if a_sign else x) + (-y if b_sign else y)
-    assert -LIMIT < value < LIMIT * 2
+    assert -2 * LIMIT < value < 2 * LIMIT
     return (0, int(value < 0), abs(value).to_bytes(BYTES+1, "little"))
 
 def main() -> None:
