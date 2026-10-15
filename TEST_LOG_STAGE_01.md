@@ -78,3 +78,17 @@ DISPATCH_STATUS=40 FRAMES=459`. Host reference independently reported
 `HOST_BANKED_SIGNED_COMPARE_REFERENCE_PASS cases=375`.
 This verifies the fixed-capacity comparison primitive, not the normative calendar
 oracle. `LAST_COMPLETED_STAGE=0`.
+
+## Signed exact 4096-byte sum extension — native results pending
+
+SM83 `SignedAdd4096` adds two canonical signed magnitudes stored in banks 0
+and 1; a complete 4097-byte unsigned magnitude and canonical sign are
+written to bank 2/WRAM. Opposite signs route through a magnitude comparison
+and either A-B or B-A, without changing the operands. Illegal signs and
+negative zero scrub the entire output and expose an explicit failure status.
+Native cases 53..66 target carry into byte 4097, both subtraction directions,
+cancellation to positive zero, invalid input and recovery, plus determinism.
+A separate Python reference is only host-side evidence.
+
+Do not claim Stage 1 or the candidate primitive verified before both native
+ROM and repository-lock jobs have passed.

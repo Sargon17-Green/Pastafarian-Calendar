@@ -113,3 +113,16 @@ bank 1 is selected on return. This is a fixed-capacity primitive,
 not a general BigInt allocator or a complete signed/calendar engine.
 Native tests 41..52 passed in GitHub Actions run 38691700266; the
 complete 52-case arithmetic smoke suite is verified. Stage 1 remains incomplete.
+
+## Exact signed addition, fixed-width SRAM operands — candidate
+
+`SignedAdd4096` accepts two initialized, canonical signed-magnitude
+integers in SRAM banks 0 and 1 (4096 little-endian bytes each). Signs in
+`wSignedSignA/B` are 0 or 1; negative zero and other sign bytes are invalid.
+The exact result uses all 4097 output bytes in SRAM bank 2, with a separate
+`wSignedResultSign`. If invalid, `wSignedAddStatus=1` and the full output
+is scrubbed; if valid, `wSignedAddStatus=0` and zero always has sign 0.
+Input banks remain unchanged; bank 2 is selected on return. This requires
+MBC5 RAM enabled by caller and does not provide variable-length allocation,
+reentrancy or an interface for feeding a 4097-byte result into another
+4096-byte operation. Native ROM cases 53..66 are the next verification gate.

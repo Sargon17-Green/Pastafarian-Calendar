@@ -23,3 +23,12 @@ marked complete, and the 40-case smoke subset passed native CI (run 38686711132)
 Stage 1 extension adds canonical signed-magnitude comparison plus ROM
 tests 41..52. The historical 55-stage route is unchanged. Native QA passed in
 GitHub Actions run 38691700266 (52/52 ROM cases); Stage 1 remains open.
+
+## Candidate: exact signed SRAM sum
+
+Added a fixed-capacity `SignedAdd4096` primitive, using existing unsigned
+addition/subtraction/compare and a reversed subtraction path for cases in
+which |B|>|A|. Invalid signed encodings fail closed. Native ROM cases
+53..66 are a bootstrap subset only. Stage 1 remains IN_PROGRESS until
+the normative calendar and full source-language catalog are independently
+verified.

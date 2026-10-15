@@ -28,6 +28,8 @@ wCmpStatus:: ds 1
 wSignedSignA:: ds 1
 wSignedSignB:: ds 1
 wSignedCmpStatus:: ds 1
+wSignedAddStatus:: ds 1
+wSignedResultSign:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -66,6 +68,10 @@ Bootstrap:
     cp $a5
     jr nz, .done
     call RunSignedComparisonTests
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .done
+    call RunSignedAdditionTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -79,6 +85,7 @@ INCLUDE "src/runtime/banked_add.asm"
 INCLUDE "src/runtime/banked_sub.asm"
 INCLUDE "src/runtime/banked_cmp.asm"
 INCLUDE "src/runtime/signed_cmp.asm"
+INCLUDE "src/runtime/signed_add.asm"
 INCLUDE "src/runtime/dispatcher.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
@@ -88,3 +95,4 @@ INCLUDE "src/tests/banked_add_test.asm"
 INCLUDE "src/tests/banked_sub_test.asm"
 INCLUDE "src/tests/banked_cmp_test.asm"
 INCLUDE "src/tests/signed_cmp_test.asm"
+INCLUDE "src/tests/signed_add_test.asm"
