@@ -139,3 +139,12 @@ Only the explicitly scoped SRAM scratch-bank lease mechanism is verified.
 No variable-length BigInt objects, dynamic per-invocation state, full
 normative oracle or complete Ge'ez catalog yet exist. Maintain
 `LAST_COMPLETED_STAGE=0` and do not start Stage 2.
+
+## Normative day-count signed offset subset — candidate
+
+Proposed native cases 81..92 implement the precise mapping from a 32-bit
+signed offset around Foundation to its even/odd Pastafarian day number,
+without mutating the input. The full signed range and 5-byte result are
+tested independently on the host; native RGBDS/PyBoy evidence is still
+required. Does not imply a complete day ordinal or calendar calculation.
+`STAGE1_NATIVE_92_SMOKE=PENDING_CI`. Stage 1 remains IN_PROGRESS.

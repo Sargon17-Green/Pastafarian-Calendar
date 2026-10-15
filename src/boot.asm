@@ -35,6 +35,10 @@ wLeaseIter:: ds 1
 wLeaseBank:: ds 1
 wLeaseStatus:: ds 1
 wLeaseTestNext:: ds 1
+wDayOffset:: ds 4
+wDayCount:: ds 5
+wDayExpected:: ds 5
+wDayNeg:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -81,6 +85,10 @@ Bootstrap:
     cp $a5
     jr nz, .done
     call RunLeaseTests
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .done
+    call RunDayCountTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -91,6 +99,7 @@ INCLUDE "src/runtime/savewide256.asm"
 INCLUDE "src/runtime/mul128.asm"
 INCLUDE "src/runtime/mbc5.asm"
 INCLUDE "src/runtime/sram_lease.asm"
+INCLUDE "src/runtime/day_count32.asm"
 INCLUDE "src/runtime/banked_add.asm"
 INCLUDE "src/runtime/banked_sub.asm"
 INCLUDE "src/runtime/banked_cmp.asm"
@@ -107,3 +116,4 @@ INCLUDE "src/tests/banked_cmp_test.asm"
 INCLUDE "src/tests/signed_cmp_test.asm"
 INCLUDE "src/tests/signed_add_test.asm"
 INCLUDE "src/tests/sram_lease_test.asm"
+INCLUDE "src/tests/day_count32_test.asm"

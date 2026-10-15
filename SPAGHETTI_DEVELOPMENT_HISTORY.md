@@ -38,3 +38,11 @@ verified.
 A separate MBC5-native scratch allocator leases 13 SRAM banks after
 reserving banks 0..2 for existing arithmetic. The 14 ROM cases 67..80 passed natively in Actions run 38788682300. This is not the final semantic-state owner or
 unrestricted BigInt allocator; no historical discovery/patch work starts.
+
+## Stage 1 bounded day-count implementation — candidate
+
+The first normative numeric calendar operation now has native SM83 code
+for signed 32-bit offsets from Foundation, preserving exact even/odd
+mapping in a 5-byte output. Cases 81..92 are pending native verification.
+The narrow input is explicit, so the historical stages and full oracle
+remain unclaimed.

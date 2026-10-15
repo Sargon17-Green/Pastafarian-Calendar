@@ -143,3 +143,20 @@ states are WRAM fields. These primitives are not yet a variable-length
 BigInt type, a reentrant frame system, or an invocation rollback mechanism.
 
 Native ROM cases 67..80 and the independent 600-transition host model passed in Actions run 38788682300. Stage 1 overall remains uncompleted.
+
+## Normative Day Count from signed Foundation offset — bounded candidate
+
+`DayCountFromOffset` accepts an exact four-byte signed little-endian
+two's-complement integer `delta=d-Foundation` in `wDayOffset` and writes
+the unsigned five-byte `wDayCount`:
+`2*(-delta)` for negative delta and `2*delta+1` otherwise.
+The input is not mutated. Exact arithmetic includes `INT32_MIN`, whose
+result is `2^32` and therefore needs byte five. Cases 81..92 check zero,
+±1, ±2, large powers of two, negative bounds and recovery after sign
+changes. The independent host model examines 12,014 offsets and rejects
+out-of-range host calls.
+
+Important limitation: this entry accepts only signed 32-bit offsets from
+Foundation; it is not the general arbitrary-precision ordinal API required
+for full Stage 1. A future BigInt-backed path must preserve identical
+values on their common domain and extend beyond them without truncation.
