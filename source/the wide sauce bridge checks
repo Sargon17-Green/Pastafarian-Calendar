@@ -59,7 +59,7 @@ To check the native and wide sauce input bridge:
 
 \ This check also exercises the exact unsigned sauce-input bridge
 \ on coordinates that are completely outside any native CAL day type.
-To check an immense wide sauce input:
+To check immense wide sauce inputs:
   Put "1000000000000000000000000000000000000000000000000" into an immense day magnitude wide quantity.
   Set the wide calendar example's calculation day from the immense day magnitude wide quantity given -1.
   Set the wide calendar example's requested day from the immense day magnitude wide quantity given 1.

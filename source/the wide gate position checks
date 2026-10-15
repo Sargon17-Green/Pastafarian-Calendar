@@ -74,7 +74,7 @@ To check blocked wide gate movements:
     put "The exact zero gate has a nonzero index." into the check report; exit.
 
 \ Slow integration verifies exact positions using two complete sauces.
-To check a wide gate crossing Foundation:
+To check gate traversal across Foundation:
   Begin a wide gate traversal.
   Move to the next positive wide gate.
   If the wide gate movement's succeeded is not 1,

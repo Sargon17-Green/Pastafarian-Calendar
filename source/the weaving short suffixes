@@ -70,7 +70,7 @@ To count a short weaving suffix:
   Put "1" into the short weaving suffix's completions.
   If the short weaving suffix's unfinished is less than 2, exit.
   If the short weaving suffix's first started is 0,
-    count an unstarted first month; exit.
+    count unstarted first month completions; exit.
   Put the short weaving suffix's first remaining into a binomial top number.
   Add the short weaving suffix's second remaining to the binomial top number.
   Subtract 1 from the binomial top number.
@@ -79,7 +79,7 @@ To count a short weaving suffix:
 
 \ The lower-index month has not started. The higher-index month must
 \ also be unstarted, and the first/last letters are forced.
-To count an unstarted first month:
+To count unstarted first month completions:
   Put "0" into the short weaving suffix's completions.
   If the short weaving suffix's second started is 1, exit.
   Put the short weaving suffix's first remaining into a binomial top number.

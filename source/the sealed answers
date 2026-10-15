@@ -102,7 +102,7 @@ To step the sealed answer:
 
 \ A narrow choice has N in the inclusive interval 1..M.
 \ The acceptance ceiling is L=M-(M mod N).
-To prepare a narrow choice of a wide quantity:
+To prepare narrow choice given a wide quantity:
   Put "170141183460469231731687303715884105727" into the seal inquiry's acceptance ceiling.
   Put the seal inquiry's acceptance ceiling into a remainder wide quantity.
   Reduce the remainder wide quantity modulo the wide quantity.
@@ -112,11 +112,11 @@ To prepare a narrow choice of a wide quantity:
 \ If A0 falls there, a forward walk first accepts at 1, while a
 \ backward walk first accepts at L. This skips only rejected answers;
 \ it is exactly equivalent to walking one by one around the M-cycle.
-To choose a narrow quantity from a wide quantity:
+To choose narrow quantity values from a wide quantity:
   Put "0" into the seal inquiry's selected quantity.
   If the wide quantity is blank, exit.
   If the wide quantity is "0", exit.
-  Prepare a narrow choice of the wide quantity.
+  Prepare narrow choice given the wide quantity.
   If the seal inquiry's acceptance ceiling is numerically smaller than the seal inquiry's current answer,
     skip the rejected sealed answers.
   Put "1" into a one wide quantity.

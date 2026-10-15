@@ -80,7 +80,7 @@ To check the all-started weaving product:
   If the started check wide quantity is not "1260",
     put "A final unstarted fourth month has the wrong suffix count." into the check report; exit.
 
-To check a forty seven month started suffix:
+To check forty seven month started suffixes:
   Destroy the chosen month lengths.
   Put 47 into the selected month count.
   Put 1 into a synthetic month number.

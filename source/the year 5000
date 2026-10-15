@@ -41,12 +41,12 @@ To create a gate mark:
   Put the gate walk's current index into the gate mark's index.
 
 \ The positive scan appends marks in ascending chronological order.
-To record a positive gate mark:
+To record positive gate marks:
   Create a gate mark.
   Append the gate mark to the nearby gate ledger.
 
 \ The negative scan prepends marks in ascending chronological order.
-To record a negative gate mark:
+To record negative gate marks:
   Create a gate mark.
   Prepend the gate mark to the nearby gate ledger.
 
@@ -60,7 +60,7 @@ To gather the positive gate marks:
     If the gate step budget's exhausted is 1, exit.
     If the gate walk's current position is greater than the upper gate cutoff, break.
     If the gate walk's current position is less than the lower gate cutoff, repeat.
-    Record a positive gate mark.
+    Record positive gate marks.
   Repeat.
 
 \ Scan negative gates only if the requested window reaches Foundation.
@@ -73,7 +73,7 @@ To gather the negative gate marks:
     If the gate step budget's exhausted is 1, exit.
     If the gate walk's current position is less than the lower gate cutoff, break.
     If the gate walk's current position is greater than the upper gate cutoff, repeat.
-    Record a negative gate mark.
+    Record negative gate marks.
   Repeat.
 
 \ The original day-zero gate is inserted only when it is in range.
@@ -95,10 +95,10 @@ To record Foundation in the nearby gate ledger:
   Put 0 into the gate walk's current index.
   Put -15055671 into the gate walk's current position.
   If the upper gate cutoff is less than -15055671, exit.
-  Record a positive gate mark.
+  Record positive gate marks.
 
 \ Copy a gate pair to the candidate and derive both durations.
-To measure the gate pair as a candidate:
+To measure gate pairs for candidate selection:
   Put the opening gate mark's position into the working year candidate's opening day.
   Put the closing gate mark's position into the working year candidate's closing day.
   Put the opening gate mark's index into the working year candidate's opening index.
@@ -128,7 +128,7 @@ To gather candidate years for the opening gate:
   Put the opening gate mark's next into the closing gate mark.
   Loop.
     If the closing gate mark is nil, break.
-    Measure the gate pair as a candidate.
+    Measure gate pairs for candidate selection.
     If the working year candidate's year length is greater than 5778, break.
     If the working year candidate contains the year selection day,
       insert a sorted year candidate; add 1 to the eligible year count.

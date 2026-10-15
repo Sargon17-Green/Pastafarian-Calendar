@@ -35,7 +35,7 @@ To check cutlet partition counts:
 
 \ Verify three positive selected lengths and make sure no extra part
 \ is silently attached to the linked result.
-To verify a three-cutlet example given a number and another number and a third number:
+To verify three selected cutlet spans given a number and another number and a third number:
   Put the chosen cutlet pieces' first into an examined cutlet piece.
   If the examined cutlet piece is nil,
     put "A cutlet partition was unexpectedly empty." into the check report; exit.
@@ -62,12 +62,12 @@ To check unrestricted cutlet ranking:
   Select a cutlet partition from the sample rank wide quantity.
   If the cutlet partition's valid selection is not 1,
     put "First unrestricted composition was not accepted." into the check report; exit.
-  Verify a three-cutlet example given 1 and 1 and 8.
+  Verify three selected cutlet spans given 1 and 1 and 8.
   Put "36" into the sample rank wide quantity.
   Select a cutlet partition from the sample rank wide quantity.
   If the cutlet partition's valid selection is not 1,
     put "Last unrestricted composition was not accepted." into the check report; exit.
-  Verify a three-cutlet example given 8 and 1 and 1.
+  Verify three selected cutlet spans given 8 and 1 and 1.
 
 To check pinned cutlet ranking:
   Put 10 into the cutlet partition's total spans.
@@ -77,13 +77,13 @@ To check pinned cutlet ranking:
   Select a cutlet partition from the sample rank wide quantity.
   If the cutlet partition's valid selection is not 1,
     put "First pinned composition was not accepted." into the check report; exit.
-  Verify a three-cutlet example given 1 and 3 and 6.
+  Verify three selected cutlet spans given 1 and 3 and 6.
   Put "5" into the sample rank wide quantity.
   Select a cutlet partition from the sample rank wide quantity.
-  Verify a three-cutlet example given 4 and 2 and 4.
+  Verify three selected cutlet spans given 4 and 2 and 4.
   Put "8" into the sample rank wide quantity.
   Select a cutlet partition from the sample rank wide quantity.
-  Verify a three-cutlet example given 4 and 5 and 1.
+  Verify three selected cutlet spans given 4 and 5 and 1.
   Put "9" into the sample rank wide quantity.
   Select a cutlet partition from the sample rank wide quantity.
   If the cutlet partition's valid selection is not 0,

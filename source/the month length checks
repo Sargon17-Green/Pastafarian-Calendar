@@ -71,7 +71,7 @@ To check month length lexical ranking:
 
 \ This is expensive because it evaluates inclusion/exclusion for a
 \ 47-month year with 4244 days. It is an optional slow check.
-To check a large month length count:
+To check large month length counts:
   Count month lengths given 252 and 47.
   If the month length work's count result is not "22747362824110665179416185383175",
     put "A 252-day 47-month count lost big-number precision." into the check report; exit.

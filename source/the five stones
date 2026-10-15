@@ -85,7 +85,7 @@ To advance the stones given a number:
   Put the next stones' red into the current stones' red.
 
 \ Each step uses one stone advancement, so CAL has no nested loops.
-To reach the stones for a visible drop number:
+To reach the stones for a number:
   Begin the stone sequence.
   Put 2 into a position number.
   Loop.

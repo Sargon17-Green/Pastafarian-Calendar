@@ -115,7 +115,7 @@ To inspect the woven month status:
 
 \ A first appearance cannot jump over an unstarted month. A last
 \ appearance cannot finish a month before all earlier ones finish.
-To inspect a candidate woven month given a number:
+To inspect candidate woven months given a number:
   Put 0 into the weaving selection's candidate legal.
   Find the woven month state given the number.
   If the examined woven month state is nil, exit.
@@ -185,7 +185,7 @@ To resolve weaving completions into a wide quantity:
     put "0" into the wide quantity; exit.
   If the weaving selection's days remaining is 0,
     put "1" into the wide quantity; exit.
-  Count an ordered-last weaving suffix.
+  Count ordered last weaving suffix completions.
   If the started weaving suffix's available is 1,
     put the started weaving suffix's completions into the wide quantity; exit.
   Count a short weaving suffix.
@@ -216,7 +216,7 @@ To resolve weaving completions into a wide quantity:
 \ the recursive call, because its lookup state may have changed.
 To count the eligible candidate's weaving suffix given a number into a wide quantity:
   Put "0" into the wide quantity.
-  Inspect a candidate woven month given the number.
+  Inspect candidate woven months given the number.
   If the weaving selection's candidate legal is not 1, exit.
   Find the woven month state given the number.
   Subtract 1 from the examined woven month state's remaining days.

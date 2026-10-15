@@ -64,7 +64,7 @@ To count the permitted cutlet partitions:
   If the cutlet partition's part count is less than 1, exit.
   If the cutlet partition's part count is greater than the cutlet partition's total spans, exit.
   If the cutlet partition's required boundary is greater than 0,
-    count cutlet partitions with a required boundary; exit.
+    count cutlet partitions with required boundaries; exit.
   Put the cutlet partition's total spans into a first binomial number.
   Subtract 1 from the first binomial number.
   Put the cutlet partition's part count into a second binomial number.
@@ -73,7 +73,7 @@ To count the permitted cutlet partitions:
   Put the binomial result into the cutlet partition's total choices.
 
 \ One fixed interior cut uses one of the K-1 interior boundaries.
-To count cutlet partitions with a required boundary:
+To count cutlet partitions with required boundaries:
   If the cutlet partition's required boundary is greater than or equal to the cutlet partition's total spans, exit.
   If the cutlet partition's part count is less than 2, exit.
   Put the cutlet partition's total spans into a first binomial number.
