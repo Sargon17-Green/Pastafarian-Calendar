@@ -58,7 +58,7 @@ See [Pan Docs MBC5](https://gbdev.io/pandocs/MBC5.html) and
 * Complete independent normative oracle and full golden fixtures.
 * Canonical Ge'ez name catalog with canonicalIndex and native language QA.
 * Real calendar invocation path, ancient/negative and far-date conversion.
-* Stage-1 native ROM assembly, emulator run and toolchain logs.
+* Full Stage-1 native verification beyond the successful 33-case arithmetic/SRAM ROM smoke suite.
 
 The cartridge self-tests do not imply Stage 1 PASS. The historical
 DISCOVERY/PATCH stages may begin only after a complete and verified Stage 1.
