@@ -2,7 +2,7 @@
 
 | Stage | Kind | Status | Note |
 |---|---|---|---|
-| 1 | BOOTSTRAP | IN_PROGRESS | SM83 exact primitives, 80 native ROM smoke cases, scratch-bank leases; normative calendar still absent |
+| 1 | BOOTSTRAP | IN_PROGRESS | SM83 exact primitives, 108 native ROM smoke cases, scratch leases and bounded work counters; full calendar absent |
 | 2 | DISCOVERY_01 | NOT_STARTED | Must preserve intentional historical wrong behavior |
 | 3 | PATCH_01 | NOT_STARTED | Must retain Stage 2 scar as diagnostic copy |
 | 4..53 | DISCOVERY/PATCH | NOT_STARTED | 25 further discovery/patch pairs |
@@ -43,7 +43,7 @@ unrestricted BigInt allocator; no historical discovery/patch work starts.
 
 The first normative numeric calendar operation now has native SM83 code
 for signed 32-bit offsets from Foundation, preserving exact even/odd
-mapping in a 5-byte output. Cases 81..92 are pending native verification.
+mapping in a 5-byte output. Cases 81..92 subsequently passed native verification in run 38789386350.
 The narrow input is explicit, so the historical stages and full oracle
 remain unclaimed.
 
@@ -53,7 +53,7 @@ Native cases 81..92 passed under PyBoy in run 38789386350. This numerical subset
 
 ## Five bounded numeric counters — Stage 1 candidate
 
-Paired signed-32 Foundation offsets now flow through native SM83 counters. Full arbitrary-precision counters, sauce, gates, selection, weaving and calendar date construction remain unimplemented. Native tests 93..108 pending.
+Paired signed-32 Foundation offsets now flow through native SM83 counters. Full arbitrary-precision counters, sauce, gates, selection, weaving and calendar date construction remain unimplemented. Native tests 93..108 subsequently passed in run 38790223535.
 
 ## Verified 108-case numeric bootstrap
 

@@ -140,22 +140,22 @@ No variable-length BigInt objects, dynamic per-invocation state, full
 normative oracle or complete Ge'ez catalog yet exist. Maintain
 `LAST_COMPLETED_STAGE=0` and do not start Stage 2.
 
-## Normative day-count signed offset subset — candidate
+## Normative day-count signed offset subset — verified
 
 Proposed native cases 81..92 implement the precise mapping from a 32-bit
 signed offset around Foundation to its even/odd Pastafarian day number,
 without mutating the input. The full signed range and 5-byte result are
-tested independently on the host; native RGBDS/PyBoy evidence is still
-required. Does not imply a complete day ordinal or calendar calculation.
-`STAGE1_NATIVE_92_SMOKE=PENDING_CI`. Stage 1 remains IN_PROGRESS.
+tested independently on the host; subsequent native RGBDS/PyBoy execution
+passed in run 38789386350. Does not imply a complete day ordinal or calendar calculation.
+`STAGE1_NATIVE_92_SMOKE=PASS_GITHUB_ACTIONS_38789386350`. Stage 1 remains IN_PROGRESS.
 
 ## Verified bounded native day count — 92/92 PASS
 
 GitHub Actions [run 38789386350](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38789386350) passed both jobs at commit `f29974497834a13227e589c66fd282c6c7228322`. The RGBDS-built DMG ROM ran under PyBoy: `ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=92 DISPATCH_STATUS=40 FRAMES=1014`. The independent host model passed 12,014 signed 32-bit offsets (`HOST_DAY_COUNT_DELTA32=PASS`). This is not an arbitrary-precision calendar or completion of Stage 1.
 
-## Five bounded normative work counters — candidate
+## Five bounded normative work counters — verified
 
-ROM tests 93..108 cover pair reversal, same-day counters, crossing Foundation, extreme signed-32 offsets, exact 2^32 distance, sums and direction. Host oracle independently examines 14,121 pairs. Native evidence is pending. `STAGE1_NATIVE_108_SMOKE=PENDING_CI`; no Stage-2 work.
+ROM tests 93..108 cover pair reversal, same-day counters, crossing Foundation, extreme signed-32 offsets, exact 2^32 distance, sums and direction. Host oracle independently examines 14,121 pairs. Native execution passed in run 38790223535. `STAGE1_NATIVE_108_SMOKE=PASS_GITHUB_ACTIONS_38790223535`; no Stage-2 work.
 
 ## Verified native five-counter subset — 108/108 PASS
 
