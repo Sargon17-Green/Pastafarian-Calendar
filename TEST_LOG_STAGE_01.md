@@ -47,3 +47,21 @@ Stage-1 requirements:
 
 Native status: BOOTSTRAP_SUBSET_PASS.
 Stage status: STAGE1_INCOMPLETE.
+
+## Comparison extension: 40-case native smoke PASS
+
+On commit `339cdbdc048c0529e88e604cb4bef29928bfbd8d`,
+[GitHub Actions run 38686711132](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38686711132)
+completed with `conclusion=success` for **both** `verify` and
+`dmg-native-smoke` jobs. The native ROM exercised all **40** cases,
+including high-byte precedence, 4096-byte full equality, non-mutation,
+comparison-direction reversal, and repeated-call status reset.
+
+An earlier run 38686631616 for the implementation commit already showed
+`ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=40 DISPATCH_STATUS=40 FRAMES=383`,
+while its independent name-lock job failed because the locked README was
+changed. The README change was reverted without modifying the arithmetic
+implementation, and the subsequent full run 38686711132 passed both jobs.
+
+**Interpretation:** 40-case native arithmetic/SRAM smoke PASS only.
+This is not Stage 1 normative-oracle completion; `LAST_COMPLETED_STAGE=0`.

@@ -32,7 +32,7 @@ not a completed normative oracle or calendar implementation.
 Remaining work includes signed date counters, more than 256-bit math
 for combinatorial counts, Year 5000, full source catalog and native QA.
 
-## Exact banked comparison candidate (native check pending)
+## Exact banked comparison (native smoke passed)
 
 `BankedCmp4096` compares the 4096-byte magnitudes in SRAM banks 0 and 1,
 starting at the most-significant end. It stores **0 (equal), 1 (A>B), or
@@ -40,5 +40,5 @@ starting at the most-significant end. It stores **0 (equal), 1 (A>B), or
 bank. The selected SRAM bank on return is 1. The test suite is expanded from
 33 to 40 cases; cases 34..40 check the full-width equality scan, dominance
 of the high byte, the low-byte tie-breaker, both inequality directions,
-non-mutation and repeated-call status reset. Completion requires **native
-PyBoy execution**, not only host reference tests.
+non-mutation and repeated-call status reset. The seven ROM tests passed under **native SM83 emulation** in GitHub
+Actions run 38686711132. This is still only a fixed-capacity primitive.

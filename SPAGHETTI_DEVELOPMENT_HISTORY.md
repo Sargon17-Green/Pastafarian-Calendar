@@ -16,4 +16,4 @@ SM83 production runtime. No future stage is marked complete or bypassed.
 
 The unsigned, fixed-capacity SRAM compare subroutine was added alongside
 seven new native tests (cases 34..40). No calendar semantic stage has been
-marked complete, and the extension must be verified by native CI.
+marked complete, and the 40-case smoke subset passed native CI (run 38686711132).
