@@ -21,5 +21,5 @@ marked complete, and the 40-case smoke subset passed native CI (run 38686711132)
 ## Signed comparison candidate
 
 Stage 1 extension adds canonical signed-magnitude comparison plus ROM
-tests 41..52. The historical 55-stage route is unchanged. Native QA
-for this candidate is pending; Stage 1 remains open.
+tests 41..52. The historical 55-stage route is unchanged. Native QA passed in
+GitHub Actions run 38691700266 (52/52 ROM cases); Stage 1 remains open.

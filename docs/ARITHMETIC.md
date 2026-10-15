@@ -1,4 +1,4 @@
-# SM83 arithmetic ledger — Stage 1 (unverified native)
+# SM83 arithmetic ledger — Stage 1 (native smoke subset verified)
 
 All production operations in this ledger are SM83 instructions assembled with RGBDS.
 Host Python is used only for independent fixtures and ROM inspection.
@@ -27,7 +27,7 @@ ROM tests 1..10 check the original 128-bit SAVE and Add16 cases.
 Tests 11..16 cover wider SAVE values including 2^255 and 2^256-1.
 Tests 17..22 cover exact full-width products and their reduced values.
 
-NATIVE_STATUS=UNVERIFIED. This is a self-contained arithmetic subset,
+NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_52_CASES_RUN_38691700266. This is a self-contained arithmetic subset,
 not a completed normative oracle or calendar implementation.
 Remaining work includes signed date counters, more than 256-bit math
 for combinatorial counts, Year 5000, full source catalog and native QA.

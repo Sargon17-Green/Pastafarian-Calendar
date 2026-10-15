@@ -66,10 +66,15 @@ implementation, and the subsequent full run 38686711132 passed both jobs.
 **Interpretation:** 40-case native arithmetic/SRAM smoke PASS only.
 This is not Stage 1 normative-oracle completion; `LAST_COMPLETED_STAGE=0`.
 
-## Signed comparison candidate (native CI pending)
+## Signed comparison extension — native CI PASS
 
 `SignedCmp4096` reads sign flags 0/1 plus fixed-width magnitudes,
 rejects negative zero and invalid sign bytes, and compares both signed
 operands without SRAM mutation. ROM tests 41..52 exercise signed order,
-invalid input, recovery and return bank. Do not report native 52/52 PASS
-without a completed emulator run; `LAST_COMPLETED_STAGE=0`.
+invalid input, recovery and return bank. Run [38691700266](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38691700266)
+completed with both jobs successful. Native RGBDS 1.0.4 compilation and PyBoy
+2.x execution reported `ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=52
+DISPATCH_STATUS=40 FRAMES=459`. Host reference independently reported
+`HOST_BANKED_SIGNED_COMPARE_REFERENCE_PASS cases=375`.
+This verifies the fixed-capacity comparison primitive, not the normative calendar
+oracle. `LAST_COMPLETED_STAGE=0`.

@@ -111,4 +111,5 @@ Negative zero and other sign values are invalid; result byte 3 is
 fail-closed. Otherwise 0=equal,1=A>B,2=A<B. Inputs are unchanged and
 bank 1 is selected on return. This is a fixed-capacity primitive,
 not a general BigInt allocator or a complete signed/calendar engine.
-Native ROM verification for cases 41..52 is pending.
+Native tests 41..52 passed in GitHub Actions run 38691700266; the
+complete 52-case arithmetic smoke suite is verified. Stage 1 remains incomplete.
