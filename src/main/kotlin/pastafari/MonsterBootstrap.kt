@@ -213,18 +213,7 @@ data class BaseMonsterContext(
     var patch13AcceptedAnswerReads: Int = 0,
     var patch13RejectionChecks: Int = 0,
     var patch13Applied: Boolean = false,
-    var patch13InvocationCount: Int = 0,
-    var patch14Magnitude: ExactInt? = null,
-    var patch14PreviousNegativeGate: ExactInt? = null,
-    var patch14PositiveGap: Int? = null,
-    var patch14NegativeStreamFirst: ExactInt? = null,
-    var patch14NegativeStreamStep: Int? = null,
-    var patch14Outcome: NegativeGateDirectionPatchOutcome? = null,
-    var patch14CorrectedNegativeGate: ExactInt? = null,
-    var patch14LegacyNegativeGate: ExactInt? = null,
-    var patch14CorrectedNegativeGap: Int? = null,
-    var patch14Applied: Boolean = false,
-    var patch14InvocationCount: Int = 0
+    var patch13InvocationCount: Int = 0
 )
 
 class MonsterValidationException(val machineCode: String) : RuntimeException(machineCode)
@@ -311,9 +300,7 @@ class MonsterBootstrapManager(
     val legacyGateGapRankAdapter: LegacyGateGapRankAdapter =
         LegacyGateGapRankAdapter(),
     val gateGapRankPatchWrapper: GateGapRankPatchWrapper =
-        GateGapRankPatchWrapper(legacyGateGapRankAdapter),
-    val negativeGateDirectionPatchWrapper: NegativeGateDirectionPatchWrapper =
-        NegativeGateDirectionPatchWrapper()
+        GateGapRankPatchWrapper(legacyGateGapRankAdapter)
 ) {
     init {
         dispatcher.register("BOOT") { context ->
@@ -487,43 +474,6 @@ class MonsterBootstrapManager(
             context.diagnostics.add("DISCOVERY_07_ZERO_BASED_ORDINAL_INDEX")
             context.status = "LEGACY_GRIND_OBSERVED"
             metrics.bump("discovery07.legacy.grind.calls")
-        }
-        dispatcher.register("PATCH_14") { context ->
-            validation.requireBootstrapContext(context)
-            if (context.status != "READY")
-                throw MonsterValidationException("E_PATCH14_CONTEXT_NOT_READY")
-            val magnitude = context.patch14Magnitude
-                ?: throw MonsterValidationException("E_PATCH14_NO_MAGNITUDE")
-            val previous = context.patch14PreviousNegativeGate
-                ?: throw MonsterValidationException("E_PATCH14_NO_PREVIOUS_GATE")
-            val positiveGap = context.patch14PositiveGap
-                ?: throw MonsterValidationException("E_PATCH14_NO_POSITIVE_GAP")
-            val first = context.patch14NegativeStreamFirst
-                ?: throw MonsterValidationException("E_PATCH14_NO_NEGATIVE_FIRST")
-            val step = context.patch14NegativeStreamStep
-                ?: throw MonsterValidationException("E_PATCH14_NO_NEGATIVE_DIRECTION")
-            // Cwblhau'r cyfrifiad cyn ymrwymo: dim cyflwr rhannol os oes eithriad.
-            val result = negativeGateDirectionPatchWrapper.patch(
-                magnitude, previous, positiveGap, first, step)
-            check(result.correctedNegativeGate ==
-                previous - ExactInt.of(result.negativeGap.toLong()) &&
-                result.legacyNegativeGate ==
-                previous - ExactInt.of(positiveGap.toLong()) &&
-                result.legacyCalls == 1 && result.correctedCalls == 1) {
-                "E_PATCH14_RESULT_SHAPE"
-            }
-            context.patch14Outcome = result
-            context.patch14LegacyNegativeGate = result.legacyNegativeGate
-            context.patch14CorrectedNegativeGate = result.correctedNegativeGate
-            context.patch14CorrectedNegativeGap = result.negativeGap
-            context.patch14Applied = true
-            context.patch14InvocationCount = 1
-            context.branchTrace.add("PATCH_14")
-            context.diagnostics.add("PATCH_14_NEGATIVE_SAUCE_DIRECTION")
-            context.status = "PATCHED_NEGATIVE_GATE_DIRECTION"
-            metrics.bump("patch14.experimental.legacy.calls")
-            metrics.bump("patch14.corrected.negative.calls")
-            metrics.bump("patch14.applied")
         }
         dispatcher.register("PATCH_13") { context ->
             validation.requireBootstrapContext(context)
@@ -1319,30 +1269,6 @@ class MonsterBootstrapManager(
             throw e
         } catch (e: Throwable) {
             throw errors.wrap("E_DISCOVERY07_WRAP", e)
-        }
-    }
-
-    /** Cam 29: defnyddio stream negyddol canonaidd, gan gadw graith Cam 28. */
-    fun applyNegativeGateDirectionPatch(
-        calculationDay: ExactInt, targetDay: ExactInt,
-        magnitude: ExactInt, previousNegativeGate: ExactInt,
-        positiveGap: Int, negativeStreamFirst: ExactInt,
-        negativeStreamStep: Int
-    ): BaseMonsterContext {
-        val context = prepare(calculationDay,targetDay)
-        context.patch14Magnitude = magnitude
-        context.patch14PreviousNegativeGate = previousNegativeGate
-        context.patch14PositiveGap = positiveGap
-        context.patch14NegativeStreamFirst = negativeStreamFirst
-        context.patch14NegativeStreamStep = negativeStreamStep
-        context.phase = "PATCH_14"
-        return try {
-            dispatcher.dispatch(context)
-            context
-        } catch(e:MonsterValidationException) {
-            throw e
-        } catch(e:Throwable) {
-            throw errors.wrap("E_PATCH14_WRAP",e)
         }
     }
 

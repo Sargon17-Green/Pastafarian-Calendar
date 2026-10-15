@@ -16,12 +16,12 @@ object Stage29Tests {
         val f = NormativeCore.FOUNDATION_DAY
         val oracle = NormativeCalendar()
         val wrapper = NegativeGateDirectionPatchWrapper()
-        val manager = MonsterBootstrapManager()
+        val manager = NegativeGateDirectionPatchManager()
         var prior = f
         var red = 0
         var match = 0
         var native = 0
-        var lastContext: BaseMonsterContext? = null
+        var lastContext: NegativeGateDirectionPatchSession? = null
         for (i in 1..24) {
             val n = ExactInt.of(i.toLong())
             val sauce = NormativeCore.sauce(f, f - n)
@@ -45,12 +45,15 @@ object Stage29Tests {
             insist("E_PATCH14_MANAGER_$i",
                 ctx.phase == "PATCH_14" &&
                 ctx.status == "PATCHED_NEGATIVE_GATE_DIRECTION" &&
-                ctx.branchTrace == listOf("BOOT", "PATCH_14") &&
-                ctx.diagnostics == listOf("PATCH_14_NEGATIVE_SAUCE_DIRECTION") &&
-                ctx.patch14Applied && ctx.patch14InvocationCount == 1 &&
-                ctx.patch14Outcome?.correctedNegativeGate == correct &&
-                ctx.patch14LegacyNegativeGate == output.legacyNegativeGate &&
-                ctx.patch14CorrectedNegativeGap == output.negativeGap)
+                ctx.branchTrace == listOf("BOOT", "PATCH_13", "PATCH_14") &&
+                ctx.diagnostics == listOf(
+                    "PATCH_13_UNRANK1_AND_REJECTION",
+                    "PATCH_14_NEGATIVE_SAUCE_DIRECTION") &&
+                ctx.applied && ctx.invocationCount == 1 &&
+                ctx.outcome.correctedNegativeGate == correct &&
+                ctx.outcome.legacyNegativeGate == output.legacyNegativeGate &&
+                ctx.outcome.negativeGap == output.negativeGap &&
+                ctx.baseContext.patch13CorrectedGateGap == output.negativeGap)
             lastContext = ctx
             prior = correct
             native++
@@ -113,40 +116,38 @@ object Stage29Tests {
         println("STAGE29_BIGINT_AND_INPUT_GUARDS_PASS")
 
         val ctx = lastContext ?: error("E_PATCH14_MISSING_CONTEXT")
-        val originalResult = ctx.patch14Outcome
+        val originalResult = ctx.outcome
         val originalTrace = ctx.branchTrace.toList()
         val originalDiag = ctx.diagnostics.toList()
         val counts = manager.metrics.snapshot()
+        val baseCounts = manager.bootstrap.metrics.snapshot()
         insist("E_PATCH14_COUNTS",
             counts["patch14.applied"] == 24L &&
             counts["patch14.experimental.legacy.calls"] == 24L &&
-            counts["patch14.corrected.negative.calls"] == 24L)
+            counts["patch14.corrected.negative.calls"] == 24L &&
+            baseCounts["patch13.applied"] == 24L)
         insist("E_PATCH14_REPLAY",
-            machine { manager.dispatcher.dispatch(ctx) } ==
-                "E_PATCH14_CONTEXT_NOT_READY" &&
-            ctx.patch14Outcome === originalResult &&
+            machine {
+                manager.bootstrap.dispatcher.dispatch(ctx.baseContext)
+            } == "E_PATCH13_CONTEXT_NOT_READY" &&
+            ctx.outcome === originalResult &&
             ctx.branchTrace == originalTrace &&
             ctx.diagnostics == originalDiag &&
-            manager.metrics.snapshot() == counts)
-        val missing = BaseMonsterContext(f, f,
-            phase = "PATCH_14", status = "READY")
-        insist("E_PATCH14_MISSING",
-            machine { manager.dispatcher.dispatch(missing) } ==
-                "E_PATCH14_NO_MAGNITUDE" &&
-            missing.patch14Outcome == null && !missing.patch14Applied &&
-            missing.branchTrace.isEmpty() &&
-            manager.metrics.snapshot() == counts)
-        val invalid = BaseMonsterContext(f, f, phase = "PATCH_14",
-            status = "READY", patch14Magnitude = ExactInt.ONE,
-            patch14PreviousNegativeGate = f, patch14PositiveGap = 42,
-            patch14NegativeStreamFirst = ExactInt.ZERO,
-            patch14NegativeStreamStep = 1)
-        rejects { manager.dispatcher.dispatch(invalid) }
+            manager.metrics.snapshot() == counts &&
+            manager.bootstrap.metrics.snapshot() == baseCounts)
+        rejects {
+            manager.applyNegativeGateDirectionPatch(
+                f, f, ExactInt.ZERO, f, 42, ExactInt.ONE, 1)
+        }
+        rejects {
+            manager.applyNegativeGateDirectionPatch(
+                f, f, ExactInt.ONE, f, 42, ExactInt.ZERO, 1)
+        }
         insist("E_PATCH14_ROLLBACK",
-            invalid.patch14Outcome == null && !invalid.patch14Applied &&
-            invalid.patch14InvocationCount == 0 &&
-            invalid.branchTrace.isEmpty() && invalid.diagnostics.isEmpty() &&
-            manager.metrics.snapshot() == counts)
+            ctx.outcome === originalResult &&
+            ctx.baseContext.patch13Applied &&
+            manager.metrics.snapshot() == counts &&
+            manager.bootstrap.metrics.snapshot() == baseCounts)
         println("STAGE29_MANAGER_REPLAY_ROLLBACK_AND_METRICS_GREEN")
         println("STAGE29_PATCH_NATIVE_GREEN")
     }
