@@ -47,7 +47,7 @@ To copy a calendar question into the sauce input:
 
 \ Before the grinding, take the five stones at the same index k.
 \ The four coefficients are 2k+1, 3k+1, 4k+2, and 4k+4.
-To begin a hidden drop given a number:
+To start hidden drop calculation given a number:
   Put the number into the hidden work's index.
   Reach the stones for the number.
   Put the sauce input's calculation count into the hidden work's value.
@@ -93,7 +93,7 @@ To select the hidden grinding stone:
     put the current stones' barley into the hidden work's grinding stone; exit.
 
 \ The rule for step r is SAVE(x squared + 3 times old x + stone + r).
-To grind a hidden drop:
+To perform hidden drop grinding:
   Select the hidden grinding stone.
   Put the hidden work's value into a squared wide quantity.
   Multiply the hidden work's value by the squared wide quantity.
@@ -105,7 +105,7 @@ To grind a hidden drop:
   Keep the squared wide quantity for the sauce.
   Put the squared wide quantity into the hidden work's value.
 
-To store a hidden drop:
+To record hidden drop result:
   If the hidden work's index is 1,
     put the hidden work's value into the hidden drops' first drop; exit.
   If the hidden work's index is 2,
@@ -121,15 +121,15 @@ To store a hidden drop:
   If the hidden work's index is 7,
     put the hidden work's value into the hidden drops' seventh drop; exit.
 
-To make a hidden drop given a number:
-  Begin a hidden drop given the number.
+To calculate hidden drop given a number:
+  Start hidden drop calculation given the number.
   Put 1 into the hidden work's grinding step.
   Loop.
     If the hidden work's grinding step is greater than 7, break.
-    Grind the hidden drop.
+    Perform hidden drop grinding.
     Add 1 to the hidden work's grinding step.
   Repeat.
-  Store the hidden drop.
+  Record hidden drop result.
 
 \ Computing the rows in index order does not change their chronological
 \ order: hidden drop 7 is the earliest, and hidden drop 1 is immediately
@@ -138,6 +138,6 @@ To make all seven hidden drops:
   Put 1 into a position number.
   Loop.
     If the position number is greater than 7, break.
-    Make a hidden drop given the position number.
+    Calculate hidden drop given the position number.
     Add 1 to the position number.
   Repeat.
