@@ -102,3 +102,13 @@ SRAM bank 0 and 1 operands and writes only `wCmpStatus` (0/1/2). The
 operation cannot be confused with signed date ordering: a signed-magnitude
 layer has not yet been built. Cases 34..40 passed under the native emulator in run 38686711132.
 This subroutine has a 4096-byte fixed capacity, so Stage 1 remains open.
+
+## Signed 4096-byte comparison candidate
+
+`SignedCmp4096` consumes two 4096-byte unsigned magnitudes in initialized
+MBC5 banks 0/1 and sign flags `wSignedSignA/B` (0=nonnegative,1=negative).
+Negative zero and other sign values are invalid; result byte 3 is
+fail-closed. Otherwise 0=equal,1=A>B,2=A<B. Inputs are unchanged and
+bank 1 is selected on return. This is a fixed-capacity primitive,
+not a general BigInt allocator or a complete signed/calendar engine.
+Native ROM verification for cases 41..52 is pending.

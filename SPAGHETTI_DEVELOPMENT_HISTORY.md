@@ -17,3 +17,9 @@ SM83 production runtime. No future stage is marked complete or bypassed.
 The unsigned, fixed-capacity SRAM compare subroutine was added alongside
 seven new native tests (cases 34..40). No calendar semantic stage has been
 marked complete, and the 40-case smoke subset passed native CI (run 38686711132).
+
+## Signed comparison candidate
+
+Stage 1 extension adds canonical signed-magnitude comparison plus ROM
+tests 41..52. The historical 55-stage route is unchanged. Native QA
+for this candidate is pending; Stage 1 remains open.
