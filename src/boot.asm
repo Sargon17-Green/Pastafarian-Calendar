@@ -30,6 +30,7 @@ wSignedSignB:: ds 1
 wSignedCmpStatus:: ds 1
 wSignedAddStatus:: ds 1
 wSignedResultSign:: ds 1
+wSignedResultLength:: ds 2
 wLeaseTable:: ds 16
 wLeaseIter:: ds 1
 wLeaseBank:: ds 1
@@ -106,6 +107,10 @@ Bootstrap:
     cp $a5
     jr nz, .done
     call RunWorkCountTests
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .done
+    call RunLengthTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -116,6 +121,7 @@ INCLUDE "src/runtime/savewide256.asm"
 INCLUDE "src/runtime/mul128.asm"
 INCLUDE "src/runtime/mbc5.asm"
 INCLUDE "src/runtime/sram_lease.asm"
+INCLUDE "src/runtime/magnitude_length.asm"
 INCLUDE "src/runtime/day_count32.asm"
 INCLUDE "src/runtime/work_counts32.asm"
 INCLUDE "src/runtime/banked_add.asm"
@@ -136,3 +142,4 @@ INCLUDE "src/tests/signed_add_test.asm"
 INCLUDE "src/tests/sram_lease_test.asm"
 INCLUDE "src/tests/day_count32_test.asm"
 INCLUDE "src/tests/work_counts32_test.asm"
+INCLUDE "src/tests/magnitude_length_test.asm"

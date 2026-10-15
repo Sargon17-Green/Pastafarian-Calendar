@@ -72,3 +72,12 @@ calendar logic remain outstanding.
 ## First normative work counters (bounded, native PASS)
 
 The ROM now computes N(c), N(t), exact chronological inclusive distance, count sum, and direction on signed-32 offsets around Foundation. All 108 ROM smoke cases passed in Actions run 38790223535; host checks covered 14,121 pairs. This is not the unrestricted full oracle.
+
+## Canonical SRAM byte-length scan — candidate
+
+A native SM83 scanner returns the number of significant little-endian
+bytes for an initialized bank region up to 8192 bytes. Signed addition
+records the 0..4097 canonical result length and resets that metadata on
+validation errors. This is essential metadata for future variable-length
+numbers, but is not yet a BigInt allocation or arbitrary-length operation.
+Native ROM tests 109..122 and an independent Python length model are pending.

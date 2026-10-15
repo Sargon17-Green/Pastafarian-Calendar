@@ -170,3 +170,16 @@ Verified native run 38789386350 passed all 92 cases, including signed-32 DayCoun
 ## Five-counter verification ledger
 
 All native cases 93..108 passed in GitHub Actions run 38790223535, alongside 14,121 host-model pair cases. Numerical correctness is limited to signed 32-bit Foundation offsets; full BigInt and calendar support remain outstanding.
+
+## Canonical magnitude length (new Stage 1 candidate)
+
+`SRAMMeasureLength` takes an MBC5 bank (A), a last-byte SRAM address (HL)
+and exact capacity (BC, 1..8192), with HL=A000+BC-1. It returns the
+canonical significant byte length in BC (zero for an all-zero magnitude),
+without changing any bank data. The selected bank is preserved.
+`SignedAdd4096` now records a two-byte little-endian result length
+(`wSignedResultLength`, 0..4097) and ensures that invalid input resets
+length and sign. Its full 4097-byte result cannot silently be described as
+4096 bytes on carry. The scanner does not allocate, own or free memory.
+Cases 109..122 must pass actual SM83 execution before this extension is
+marked native verified. General variable-length BigInt is still absent.

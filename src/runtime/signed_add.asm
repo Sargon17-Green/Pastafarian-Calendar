@@ -70,6 +70,8 @@ SignedAdd4096::
     ld [wSignedAddStatus], a
     xor a
     ld [wSignedResultSign], a
+    ld [wSignedResultLength], a
+    ld [wSignedResultLength+1], a
 
     ; Reuse one canonical sign/negative-zero validation route.
     call SignedCmp4096
@@ -135,6 +137,22 @@ SignedAdd4096::
     ret
 
 .success:
+    ; Canonical significant length: full 4097-byte output is already
+    ; initialized on every successful route. No high-byte truncation.
+    ld a, 2
+    ld hl, $b000
+    ld bc, 4097
+    call SRAMMeasureLength
+    ld a, c
+    ld [wSignedResultLength], a
+    ld a, b
+    ld [wSignedResultLength+1], a
+    ld a, b
+    or c
+    jr nz, .nonzero
+    xor a
+    ld [wSignedResultSign], a
+.nonzero:
     xor a
     ld [wSignedAddStatus], a
     ret

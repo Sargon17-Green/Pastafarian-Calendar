@@ -160,3 +160,12 @@ ROM tests 93..108 cover pair reversal, same-day counters, crossing Foundation, e
 ## Verified native five-counter subset — 108/108 PASS
 
 [GitHub Actions run 38790223535](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38790223535), commit `c3766c8c0b4018eee54fa0c5246a7411697d210a`, finished with both jobs successful. Actual DMG ROM output: `ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=108 DISPATCH_STATUS=40 FRAMES=1016`; independent host reference: `HOST_WORK_COUNTERS_DELTA32=PASS cases=14121`. These results verify only the signed-32 bounded numerical prefix of the normative calendar. Full Stage 1 still incomplete; Stage 2 not started.
+
+## Canonical magnitude length candidate — verification pending
+
+Candidate ROM cases 109..122 exercise 8192-byte zero/boundary
+normalization, 4097-byte carry, 4096-byte high byte, signed result
+length metadata, cancellation, negative-zero rejection, invalid
+signs and recovery. The host reference is separate evidence.
+Do not upgrade `LAST_COMPLETED_STAGE` or claim native PASS until
+both GitHub Actions jobs pass on the implementation commit.

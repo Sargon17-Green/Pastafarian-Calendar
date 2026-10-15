@@ -58,3 +58,11 @@ Paired signed-32 Foundation offsets now flow through native SM83 counters. Full 
 ## Verified 108-case numeric bootstrap
 
 Bounded day-pair counters passed DMG-native run 38790223535. Stage 1 remains IN_PROGRESS pending unrestricted arithmetic, full normative oracle and Classical Ge'ez catalog. Historical DISCOVERY/PATCH sequence remains untouched.
+
+## Candidate: explicit canonical length metadata
+
+Stage 1 adds a non-mutating MBC5 SRAM magnitude-length scanner and a
+two-byte canonical length field on successful signed addition, including
+carry into byte 4097. Invalid encodings zeroize the length metadata
+before returning failure. ROM cases 109..122 are pending native CI.
+No historical DISCOVERY/PATCH stage is started.
