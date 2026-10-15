@@ -162,3 +162,7 @@ for full Stage 1. A future BigInt-backed path must preserve identical
 values on their common domain and extend beyond them without truncation.
 
 Verified native run 38789386350 passed all 92 cases, including signed-32 DayCount edge cases. The unbounded ordinal API remains unimplemented.
+
+## Exact bounded five work counters — implementation candidate
+
+`WorkCountsFromOffsets32` derives calculation-day and target-day counters, inclusive **chronological** distance, their sum, and chronological direction from two signed 32-bit offsets relative to Foundation. Unsigned 5-byte LE outputs hold the full exact range, including 2^32 distance and up to 2^33 sum. Signed ordering is obtained by flipping the top sign bit before unsigned comparison; subtraction of ordered two's-complement offsets is exact modulo 2^32 since the magnitude is at most 2^32-1. Input bytes are never changed. This is not an unbounded ordinal or the full normative calendar.

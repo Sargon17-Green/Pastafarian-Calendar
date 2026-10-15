@@ -152,3 +152,7 @@ required. Does not imply a complete day ordinal or calendar calculation.
 ## Verified bounded native day count — 92/92 PASS
 
 GitHub Actions [run 38789386350](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38789386350) passed both jobs at commit `f29974497834a13227e589c66fd282c6c7228322`. The RGBDS-built DMG ROM ran under PyBoy: `ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=92 DISPATCH_STATUS=40 FRAMES=1014`. The independent host model passed 12,014 signed 32-bit offsets (`HOST_DAY_COUNT_DELTA32=PASS`). This is not an arbitrary-precision calendar or completion of Stage 1.
+
+## Five bounded normative work counters — candidate
+
+ROM tests 93..108 cover pair reversal, same-day counters, crossing Foundation, extreme signed-32 offsets, exact 2^32 distance, sums and direction. Host oracle independently examines 14,121 pairs. Native evidence is pending. `STAGE1_NATIVE_108_SMOKE=PENDING_CI`; no Stage-2 work.

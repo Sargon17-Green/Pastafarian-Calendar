@@ -39,6 +39,19 @@ wDayOffset:: ds 4
 wDayCount:: ds 5
 wDayExpected:: ds 5
 wDayNeg:: ds 1
+wPairCalcOffset:: ds 4
+wPairTargetOffset:: ds 4
+wWorkCalcCount:: ds 5
+wWorkTargetCount:: ds 5
+wWorkDistance:: ds 5
+wWorkSum:: ds 5
+wWorkDirection:: ds 1
+wWorkExpectedCalc:: ds 5
+wWorkExpectedTarget:: ds 5
+wWorkExpectedDistance:: ds 5
+wWorkExpectedSum:: ds 5
+wWorkExpectedDirection:: ds 1
+wWorkLeft:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -89,6 +102,10 @@ Bootstrap:
     cp $a5
     jr nz, .done
     call RunDayCountTests
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .done
+    call RunWorkCountTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -100,6 +117,7 @@ INCLUDE "src/runtime/mul128.asm"
 INCLUDE "src/runtime/mbc5.asm"
 INCLUDE "src/runtime/sram_lease.asm"
 INCLUDE "src/runtime/day_count32.asm"
+INCLUDE "src/runtime/work_counts32.asm"
 INCLUDE "src/runtime/banked_add.asm"
 INCLUDE "src/runtime/banked_sub.asm"
 INCLUDE "src/runtime/banked_cmp.asm"
@@ -117,3 +135,4 @@ INCLUDE "src/tests/signed_cmp_test.asm"
 INCLUDE "src/tests/signed_add_test.asm"
 INCLUDE "src/tests/sram_lease_test.asm"
 INCLUDE "src/tests/day_count32_test.asm"
+INCLUDE "src/tests/work_counts32_test.asm"

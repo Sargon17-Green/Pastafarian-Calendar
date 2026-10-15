@@ -50,3 +50,7 @@ remain unclaimed.
 ## Verified bounded Day Count subset
 
 Native cases 81..92 passed under PyBoy in run 38789386350. This numerical subset is not Stage 1 completion.
+
+## Five bounded numeric counters — Stage 1 candidate
+
+Paired signed-32 Foundation offsets now flow through native SM83 counters. Full arbitrary-precision counters, sauce, gates, selection, weaving and calendar date construction remain unimplemented. Native tests 93..108 pending.
