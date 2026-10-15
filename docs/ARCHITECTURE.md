@@ -18,7 +18,7 @@ WRAM observable bootstrap locations:
 | Address | Name | Meaning |
 |---|---|---|
 | C000 | wTestResult | A5 arithmetic smoke PASS; E0 failure; 00 unstarted |
-| C001 | wTestCase | currently executed test (1..28) |
+| C001 | wTestCase | currently executed test (1..33) |
 | C002 | wRunStatus | 40 means calendar engine deliberately not implemented |
 | C003..C012 | wValue | 128-bit LE working value |
 | C013..C022 | wAddend | 128-bit LE addend |
@@ -79,3 +79,18 @@ carry chain, input immutability and reinitialization of carry across calls.
 These tests must pass natively in PyBoy before this extension is considered
 verified. A much larger memory allocator, signed integers, more operations
 and full calendar oracle remain outstanding.
+
+## Exact fixed-width nonnegative subtraction
+
+`BankedSub4096` reads unsigned operands in banks 0 and 1 and computes
+A-B into bank 2. It returns an explicit wBankStatus byte:
+0 for success, 1 for underflow. On underflow the entire output span
+of 4097 bytes is scrubbed, preventing a modular negative result
+from being misinterpreted as a valid nonnegative BigInt.
+
+Tests 29..33 check no-op subtraction, borrow across 4095 bytes,
+underflow fail-closed behavior, reset of carry and status after a
+failure, and immediate determinism of repeated calls.
+
+The operation is unsigned and fixed-capacity; this DOES NOT complete
+signed ordinal handling, arbitrary precision, or the calendar oracle.
