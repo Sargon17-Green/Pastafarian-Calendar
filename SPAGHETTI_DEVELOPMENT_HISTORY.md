@@ -11,3 +11,9 @@
 
 No code from another programming-language branch has been copied into the
 SM83 production runtime. No future stage is marked complete or bypassed.
+
+## Candidate extension — 4096-byte magnitude comparison
+
+The unsigned, fixed-capacity SRAM compare subroutine was added alongside
+seven new native tests (cases 34..40). No calendar semantic stage has been
+marked complete, and the extension must be verified by native CI.

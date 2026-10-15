@@ -31,3 +31,14 @@ NATIVE_STATUS=UNVERIFIED. This is a self-contained arithmetic subset,
 not a completed normative oracle or calendar implementation.
 Remaining work includes signed date counters, more than 256-bit math
 for combinatorial counts, Year 5000, full source catalog and native QA.
+
+## Exact banked comparison candidate (native check pending)
+
+`BankedCmp4096` compares the 4096-byte magnitudes in SRAM banks 0 and 1,
+starting at the most-significant end. It stores **0 (equal), 1 (A>B), or
+2 (A<B)** in `wCmpStatus`, without writing either operand or the output
+bank. The selected SRAM bank on return is 1. The test suite is expanded from
+33 to 40 cases; cases 34..40 check the full-width equality scan, dominance
+of the high byte, the low-byte tie-breaker, both inequality directions,
+non-mutation and repeated-call status reset. Completion requires **native
+PyBoy execution**, not only host reference tests.

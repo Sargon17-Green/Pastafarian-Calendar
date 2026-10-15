@@ -94,3 +94,11 @@ failure, and immediate determinism of repeated calls.
 
 The operation is unsigned and fixed-capacity; this DOES NOT complete
 signed ordinal handling, arbitrary precision, or the calendar oracle.
+
+## Fixed 4096-byte banked magnitude comparison — candidate
+
+`BankedCmp4096` does an unsigned, high-to-low comparison of little-endian
+SRAM bank 0 and 1 operands and writes only `wCmpStatus` (0/1/2). The
+operation cannot be confused with signed date ordering: a signed-magnitude
+layer has not yet been built. Cases 34..40 are added to the native harness.
+This subroutine has a 4096-byte fixed capacity, so Stage 1 remains open.
