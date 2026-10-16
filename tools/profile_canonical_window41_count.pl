@@ -16,16 +16,20 @@ use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
 use Pastafari::WeavingUnrank qw(unrankWeavingPolynomial);
 use Pastafari::WeavingRank qw(rankWeavingPolynomial);
 
-# 真實 5000 年第 42..45 月之四個連續月份，四月合計 402 日。
+# 原生 5000 年的數個分散四月份窗口（預設末四月 402 日）。
 # 前沿獨立狀態 Oracle 只驗證總數；中位排名的雙向還原不是
 # 另一個獨立的全字典序預言機。邊界詞另有獨立貪婪構造。
-my ($seconds,$rss_kib)=(185,393216);
-GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_kib)
+my ($seconds,$rss_kib,$requested_offset)=(185,393216,undef);
+GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_kib,
+           'window-offset=i'=>\$requested_offset)
     or die "參數無效\n";
 die "seconds 必須在 1..230 範圍\n"
     if $seconds<1 || $seconds>230;
 die "rss-kib 必須在 32768..1048576 範圍\n"
     if $rss_kib<32768 || $rss_kib>1048576;
+die "指定位置只允許 10、20、28、36、41；其餘窗口不得默默通過\n"
+    if defined($requested_offset)
+    && !grep { $requested_offset==$_ } (10,20,28,36,41);
 die "本工具需 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -75,12 +79,23 @@ if (!$pid) {
             if sha256_hex(join(',',@year)) ne
                 '6d64022344c04935e6423aa6f96b285098d35b9b5ecb4b8c57a4c7149773a134';
         my $window_offset=41;
+        $window_offset=$requested_offset if defined $requested_offset;
+        my %expected=(
+            10=>'98,52,81,97',
+            20=>'106,115,119,39',
+            28=>'55,119,97,50',
+            36=>'101,83,88,40',
+            41=>'77,98,122,105',
+        );
         my @L=@year[$window_offset .. $window_offset+3];
-        die "原生四月序列不是 77,98,122,105\n"
-            if join(',',@L) ne '77,98,122,105';
+        die "固定的原生月份窗口與窗口索引不相符\n"
+            if join(',',@L) ne $expected{$window_offset};
         my $days=0;
         $days+=$_ for @L;
-        die "四個真實月份並非 402 日\n" if $days!=402;
+        my $expected_days=0;
+        $expected_days+=$_ for split(',', $expected{$window_offset});
+        die "原生月份日數和固定月份窗口不符\n"
+            if $days!=$expected_days;
         printf "CANONICAL_WINDOW41 phase=INPUT offset=%d months=4 days=%d lengths=%s\n",
             $window_offset,$days,join(',',@L);
         my %frontier_stats;
@@ -89,13 +104,13 @@ if (!$pid) {
             length("$oracle"),$frontier_stats{states},
             $frontier_stats{frontier_peak},time()-$start;
         my $resident=countWeavingsPolynomial(\@L);
-        die "402 日位置多項式總數與獨立前沿不符\n"
+        die "真實月份位置多項式總數與獨立前沿不符\n"
             if $resident!=$oracle;
         my %stream_stats;
         my $stream=countWeavingsPolynomialStream(
             \@L,\%stream_stats,undef,{max_temp_file_bytes=>16*1024*1024}
         );
-        die "402 日磁碟串流總數與獨立前沿不符\n"
+        die "真實月份磁碟串流總數與獨立前沿不符\n"
             if $stream!=$oracle;
         printf "CANONICAL_WINDOW41 phase=THREE_COUNTS_PASS stream_rows=%d elapsed_sec=%.3f\n",
             $stream_stats{rows_serialized},time()-$start;
@@ -153,8 +168,8 @@ if (!$pid) {
         die "索引式正向排名未建立自己的索引\n"
             if ($rank_stats{indexed_profile_builds}//0)!=1;
         die "原始中間 BigInt 被不當修改\n" if "$middle" ne $wanted;
-        printf "CANONICAL_WINDOW41 status=PASS scope=INDEPENDENT_TOTAL_BOUNDARY_AND_MIDDLE_ROUNDTRIP days=402 months=4 total_digits=%d rank_digits=%d frontier_states=%d max_frontier=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
-            length("$oracle"),length($wanted),$frontier_stats{states},
+        printf "CANONICAL_WINDOW41 status=PASS scope=INDEPENDENT_TOTAL_BOUNDARY_AND_MIDDLE_ROUNDTRIP offset=%d days=%d months=4 total_digits=%d rank_digits=%d frontier_states=%d max_frontier=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
+            $window_offset,$days,length("$oracle"),length($wanted),$frontier_stats{states},
             $frontier_stats{frontier_peak},time()-$start,peak_kib();
         1;
     };

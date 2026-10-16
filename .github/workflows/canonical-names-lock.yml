@@ -1027,3 +1027,54 @@ jobs:
             timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
           done
           echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=40 count=3 last=42"
+
+  canonical-quad-frontier-10:
+    name: 真實第 5000 年四月索引 10 三算法精確 BigInt 核對
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-quad-distributed]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 有界三算法總數和頭尾字序
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 10 --seconds 185 --rss-kib 393216
+
+  canonical-quad-frontier-28:
+    name: 真實第 5000 年四月索引 28 三算法精確 BigInt 核對
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-quad-distributed]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 有界三算法總數和頭尾字序
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 28 --seconds 185 --rss-kib 393216
+
+  canonical-quad-frontier-36:
+    name: 真實第 5000 年四月索引 36 三算法精確 BigInt 核對
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-quad-distributed]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 有界三算法總數和頭尾字序
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 36 --seconds 185 --rss-kib 393216
