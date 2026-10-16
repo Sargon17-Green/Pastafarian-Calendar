@@ -537,35 +537,65 @@ public final class Stage02IncrementalRouteTests {
 
     private static void siblingForwardClosedFormOracleDifferential() {
         int[][] families = {{2, 2, 2, 2}, {2, 3, 2, 2}};
+        int[][] prefixes = {{1, 2, 3}, {1, 2, 3, 4}};
         for (int[] lengths : families) {
-            MonsterWeavingLinearCounter family =
-                new MonsterWeavingLinearCounter(lengths);
             NormativeOracle.WeavingFamily oracle =
                 new NormativeOracle.WeavingFamily(lengths);
-            int[] prefix = {1, 2, 3, 4};
-            BigInteger[] actual = family.countSiblingBranchSizes(prefix);
-            ok(family.siblingPrefixClosedFormTransitionCount() > 0,
-                "E_SIBLING_CLOSED_FORM_USED");
-            BigInteger[] expected = new BigInteger[lengths.length];
-            Arrays.fill(expected, BigInteger.ZERO);
-            int count = oracle.count().intValueExact();
-            for (int rank = 1; rank <= count; rank++) {
-                int[] weaving =
-                    oracle.unrank1(BigInteger.valueOf(rank));
-                if (!Arrays.equals(prefix,
-                        Arrays.copyOf(weaving, prefix.length))) {
-                    continue;
+            for (int[] prefix : prefixes) {
+                MonsterWeavingLinearCounter family =
+                    new MonsterWeavingLinearCounter(lengths);
+                BigInteger[] actual = family.countSiblingBranchSizes(prefix);
+                if (prefix.length < lengths.length) {
+                    ok(family.siblingPrefixClosedFormTransitionCount() > 0,
+                        "E_SIBLING_CLOSED_FORM_USED_WHILE_OPENING");
+                    ok(family.siblingPrefixDotCallCount() > 0,
+                        "E_SIBLING_OPENING_FORWARD_DOT_USED");
+                } else {
+                    eq(0L, family.siblingPrefixDotCallCount(),
+                        "E_SIBLING_ALL_OPENED_AVOIDS_FORWARD_DOT");
+                    eq(1L, family.siblingScalarBatchBuildCount(),
+                        "E_SIBLING_ALL_OPENED_SCALARS_BUILT");
+                    eq(0L, family.tailFunctionalBuildCount(),
+                        "E_SIBLING_ALL_OPENED_AVOIDS_BACKWARD_BUILD");
                 }
-                int nextMonth = weaving[prefix.length] - 1;
-                expected[nextMonth] = expected[nextMonth].add(BigInteger.ONE);
+                BigInteger[] expected = new BigInteger[lengths.length];
+                Arrays.fill(expected, BigInteger.ZERO);
+                int count = oracle.count().intValueExact();
+                for (int rank = 1; rank <= count; rank++) {
+                    int[] weaving =
+                        oracle.unrank1(BigInteger.valueOf(rank));
+                    if (!Arrays.equals(prefix,
+                            Arrays.copyOf(weaving, prefix.length))) {
+                        continue;
+                    }
+                    int nextMonth = weaving[prefix.length] - 1;
+                    expected[nextMonth] =
+                        expected[nextMonth].add(BigInteger.ONE);
+                }
+                BigInteger partition = BigInteger.ZERO;
+                for (int i = 0; i < lengths.length; i++) {
+                    eq(expected[i], actual[i],
+                        "E_SIBLING_CLOSED_FORM_ORACLE_BRANCH");
+                    partition = partition.add(actual[i]);
+                    if (actual[i].signum() > 0) {
+                        int[] child = Arrays.copyOf(prefix,
+                            prefix.length + 1);
+                        child[prefix.length] = i + 1;
+                        eq(actual[i], family.countAfterPrefix(child),
+                            "E_SIBLING_CLOSED_FORM_CHILD_SUFFIX");
+                    }
+                }
+                eq(partition, family.countAfterPrefix(prefix),
+                    "E_SIBLING_CLOSED_FORM_PARENT_PARTITION");
+                eq(Arrays.asList(expected), Arrays.asList(
+                    family.countSiblingBranchSizes(prefix)),
+                    "E_SIBLING_CLOSED_FORM_REPEAT_NEUTRALITY");
+                MonsterWeavingLinearCounter cold =
+                    new MonsterWeavingLinearCounter(lengths);
+                eq(Arrays.asList(actual),
+                    Arrays.asList(cold.countSiblingBranchSizes(prefix)),
+                    "E_SIBLING_CLOSED_FORM_INSTANCE_NEUTRALITY");
             }
-            for (int i = 0; i < lengths.length; i++) {
-                eq(expected[i], actual[i],
-                    "E_SIBLING_CLOSED_FORM_ORACLE_BRANCH");
-            }
-            eq(Arrays.asList(expected), Arrays.asList(
-                family.countSiblingBranchSizes(prefix)),
-                "E_SIBLING_CLOSED_FORM_REPEAT_NEUTRALITY");
         }
     }
 
