@@ -74,59 +74,59 @@ Bootstrap:
     call RunSelfTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunWideTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunMultiplyTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunRAMBankTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunBankedAdditionTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunBankedSubtractionTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunBankedComparisonTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunSignedComparisonTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunSignedAdditionTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunLeaseTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunDayCountTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunWorkCountTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunLengthTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunDivisionTests
     ld a, [wTestResult]
     cp $a5
-    jr nz, .done
+    jp nz, .done
     call RunSignedDivisionTests
 .done:
     call calendarDateSpaghetti
