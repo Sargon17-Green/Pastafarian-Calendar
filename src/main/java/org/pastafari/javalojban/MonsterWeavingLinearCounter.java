@@ -1277,6 +1277,23 @@ public final class MonsterWeavingLinearCounter {
             previous.suffixTargetDays, countCalls, probed, skipped);
     }
 
+    public int[] unrankGlobalViaSharedRoute(BigInteger globalRank) {
+        if (totalDays <= MAX_UNRANK_DAYS) {
+            return unrank1(globalRank);
+        }
+        RankRoute route =
+            beginGlobalRankRoute(globalRank, MAX_UNRANK_DAYS);
+        while (!route.complete()) {
+            RankRoute next = advanceGlobalRankRouteShared(route,
+                MAX_ROUTE_STEPS_PER_CALL, MAX_ROUTE_BRANCH_COUNTS_PER_CALL);
+            if (next.stepsCompleted() <= route.stepsCompleted()) {
+                throw new IllegalStateException("E_WEAVE_SHARED_ROUTE_STALLED");
+            }
+            route = next;
+        }
+        return finishGlobalRankRoute(route);
+    }
+
     public int[] finishGlobalRankRoute(RankRoute route) {
         if (route == null || route.owner != this) {
             throw new IllegalArgumentException("E_WEAVE_ROUTE_OWNER");
