@@ -46,7 +46,7 @@ for mode=1,6 do
   local repaired,proof=oldCore(n,gaps,wrong)
   if mode==3 then proof.addedPriorGaps=0 end
   if mode==4 then proof.previousDay=B.add(wrong,1) end
-  if mode==5 then proof.lastGap=B.from(43) end
+  if mode==5 then proof.lastGap=B.from(44) end
   if mode==6 then proof.recomputedFromFoundation=B.add(repaired,1) end
   return repaired,proof
  end
