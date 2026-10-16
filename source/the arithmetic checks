@@ -3,9 +3,13 @@
 \ The checks are not yet verified by a CAL execution.
 \ Each failure leaves a meaningful message in the check report.
 
+The first wide quantity is a wide quantity.
+The second wide quantity is a wide quantity.
+The value wide quantity is a wide quantity.
+
 To check wide quantity order:
-  Put "9" into a first wide quantity.
-  Put "10" into a second wide quantity.
+  Put "9" into the first wide quantity.
+  Put "10" into the second wide quantity.
   If the first wide quantity is not numerically smaller than the second wide quantity,
     put "The wide order check failed on different lengths." into the check report; exit.
   If the second wide quantity is numerically smaller than the first wide quantity,
@@ -18,8 +22,8 @@ To check wide quantity order:
     put "The wide order check failed on equality." into the check report; exit.
 
 To check wide quantity addition:
-  Put "999999999999999999999999999999" into a first wide quantity.
-  Put "1" into a second wide quantity.
+  Put "999999999999999999999999999999" into the first wide quantity.
+  Put "1" into the second wide quantity.
   Add the first wide quantity to the second wide quantity.
   If the second wide quantity is not "1000000000000000000000000000000",
     put "The wide addition check failed on a long carry." into the check report; exit.
@@ -30,8 +34,8 @@ To check wide quantity addition:
     put "The wide addition check failed at the sauce modulus." into the check report; exit.
 
 To check wide quantity subtraction:
-  Put "170141183460469231731687303715884105727" into a first wide quantity.
-  Put "170141183460469231731687303715884105727" into a second wide quantity.
+  Put "170141183460469231731687303715884105727" into the first wide quantity.
+  Put "170141183460469231731687303715884105727" into the second wide quantity.
   Subtract the first wide quantity from the second wide quantity.
   If the second wide quantity is not "0",
     put "The wide subtraction check failed on equality." into the check report; exit.
@@ -42,8 +46,8 @@ To check wide quantity subtraction:
     put "The wide subtraction check failed on a long borrow." into the check report; exit.
 
 To check wide quantity multiplication:
-  Put "123456789012345678901234567890" into a first wide quantity.
-  Put "987654321098765432109876543210" into a second wide quantity.
+  Put "123456789012345678901234567890" into the first wide quantity.
+  Put "987654321098765432109876543210" into the second wide quantity.
   Multiply the first wide quantity by the second wide quantity.
   If the second wide quantity is not "121932631137021795226185032733622923332237463801111263526900",
     put "The wide multiplication check failed." into the check report; exit.
@@ -59,8 +63,8 @@ To check wide quantity multiplication:
     put "The wide multiplication check failed on zero." into the check report; exit.
 
 To check wide quantity division:
-  Put "121932631137021795226185032733622923332237463801111263526900" into a first wide quantity.
-  Put "170141183460469231731687303715884105727" into a second wide quantity.
+  Put "121932631137021795226185032733622923332237463801111263526900" into the first wide quantity.
+  Put "170141183460469231731687303715884105727" into the second wide quantity.
   Calculate decimal remainder given the first wide quantity and the second wide quantity.
   If the first wide quantity is not "144875469711726358240874201207950817872",
     put "The wide division check failed on a large remainder." into the check report; exit.
@@ -76,7 +80,7 @@ To check wide quantity division:
 
 \ These are the four boundary identities in the canonical rules.
 To check sauce saving:
-  Put "0" into a value wide quantity.
+  Put "0" into the value wide quantity.
   Keep the value wide quantity for the sauce.
   If the value wide quantity is not "170141183460469231731687303715884105727",
     put "The sauce SAVE check failed for zero." into the check report; exit.
@@ -95,8 +99,8 @@ To check sauce saving:
 
 
 To check sauce subtraction:
-  Put "2" into a first wide quantity.
-  Put "1" into a second wide quantity.
+  Put "2" into the first wide quantity.
+  Put "1" into the second wide quantity.
   Subtract the first wide quantity from the second wide quantity with sauce wrapping.
   If the second wide quantity is not "170141183460469231731687303715884105726",
     put "The sauce subtraction check failed for a negative difference." into the check report; exit.
