@@ -16,6 +16,8 @@ A year candidate has
 
 The first candidate is a year candidate.
 The second candidate is a year candidate.
+The native year containment result is a number.
+The native year ordering result is a number.
 
 \ Update derived fields before checking or comparing a candidate.
 To measure a year candidate:
@@ -25,18 +27,21 @@ To measure a year candidate:
   Subtract the year candidate's opening index from the year candidate's span count.
 
 \ Test all four independent canonical restrictions.
-To decide if a year candidate contains a calendar day:
-  If the year candidate's opening day is greater than or equal to the calendar day, say no.
-  If the year candidate's closing day is less than the calendar day, say no.
-  If the year candidate's span count is less than 6, say no.
-  If the year candidate's year length is less than 252, say no.
-  If the year candidate's year length is greater than 5778, say no.
-  Say yes.
+To evaluate native year containment given a year candidate and a calendar day:
+  Put 0 into the native year containment result.
+  If the year candidate's opening day is greater than or equal to the calendar day, exit.
+  If the year candidate's closing day is less than the calendar day, exit.
+  If the year candidate's span count is less than 6, exit.
+  If the year candidate's year length is less than 252, exit.
+  If the year candidate's year length is greater than 5778, exit.
+  Put 1 into the native year containment result.
 
 \ Sorting uses no random tie-breaker and does not compare gate indexes
 \ before duration. Equal durations are ordered by earlier opening days.
-To decide if a year candidate comes before another year candidate:
-  If the year candidate's year length is less than the other year candidate's year length, say yes.
-  If the year candidate's year length is greater than the other year candidate's year length, say no.
-  If the year candidate's opening day is less than the other year candidate's opening day, say yes.
-  Say no.
+To evaluate native year ordering given a year candidate and another year candidate:
+  Put 0 into the native year ordering result.
+  If the year candidate's year length is less than the other year candidate's year length,
+    put 1 into the native year ordering result; exit.
+  If the year candidate's year length is greater than the other year candidate's year length, exit.
+  If the year candidate's opening day is less than the other year candidate's opening day,
+    put 1 into the native year ordering result.

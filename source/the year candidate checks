@@ -15,28 +15,34 @@ To check year candidate eligibility:
     put "Year length measurement failed." into the check report; exit.
   If the first candidate's span count is not 8,
     put "Year gate-span measurement failed." into the check report; exit.
-  If the first candidate does not contain the year candidate test day,
+  Evaluate native year containment given the first candidate and the year candidate test day.
+  If the native year containment result is not 1,
     put "Eligible candidate was incorrectly rejected." into the check report; exit.
   Put -15057000 into the year candidate test day.
-  If the first candidate contains the year candidate test day,
+  Evaluate native year containment given the first candidate and the year candidate test day.
+  If the native year containment result is 1,
     put "Opening-day boundary was wrongly included." into the check report; exit.
   Put -15054000 into the year candidate test day.
-  If the first candidate does not contain the year candidate test day,
+  Evaluate native year containment given the first candidate and the year candidate test day.
+  If the native year containment result is not 1,
     put "Closing-day boundary was wrongly excluded." into the check report; exit.
   Put -15055671 into the year candidate test day.
   Put 2 into the first candidate's closing index.
   Measure the first candidate.
-  If the first candidate contains the year candidate test day,
+  Evaluate native year containment given the first candidate and the year candidate test day.
+  If the native year containment result is 1,
     put "Candidate with only five gate spans was accepted." into the check report; exit.
   Put 5 into the first candidate's closing index.
   Put -15051221 into the first candidate's closing day.
   Measure the first candidate.
-  If the first candidate contains the year candidate test day,
+  Evaluate native year containment given the first candidate and the year candidate test day.
+  If the native year containment result is 1,
     put "Candidate exceeding 5778 days was accepted." into the check report; exit.
   Put -15055771 into the first candidate's opening day.
   Put -15055521 into the first candidate's closing day.
   Measure the first candidate.
-  If the first candidate contains the year candidate test day,
+  Evaluate native year containment given the first candidate and the year candidate test day.
+  If the native year containment result is 1,
     put "Candidate shorter than 252 days was accepted." into the check report; exit.
 
 To check year candidate order:
@@ -50,14 +56,18 @@ To check year candidate order:
   Put -3 into the second candidate's opening index.
   Put 6 into the second candidate's closing index.
   Measure the second candidate.
-  If the second candidate does not come before the first candidate,
+  Evaluate native year ordering given the second candidate and the first candidate.
+  If the native year ordering result is not 1,
     put "The shorter eligible candidate was not first." into the check report; exit.
-  If the first candidate comes before the second candidate,
+  Evaluate native year ordering given the first candidate and the second candidate.
+  If the native year ordering result is 1,
     put "The longer eligible candidate was wrongly first." into the check report; exit.
   Put -15057100 into the second candidate's opening day.
   Put -15054100 into the second candidate's closing day.
   Measure the second candidate.
-  If the second candidate does not come before the first candidate,
+  Evaluate native year ordering given the second candidate and the first candidate.
+  If the native year ordering result is not 1,
     put "Earlier opening gate did not win the length tie." into the check report; exit.
-  If the first candidate comes before the second candidate,
+  Evaluate native year ordering given the first candidate and the second candidate.
+  If the native year ordering result is 1,
     put "Later opening gate wrongly won the length tie." into the check report; exit.

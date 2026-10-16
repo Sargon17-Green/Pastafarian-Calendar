@@ -113,7 +113,8 @@ To insert a sorted year candidate:
   Put the eligible year ledger's first into the examined year option.
   Loop.
     If the examined year option is nil, break.
-    If the working year candidate comes before the examined year option's year candidate,
+    Evaluate native year ordering given the working year candidate and the examined year option's year candidate.
+    If the native year ordering result is 1,
       insert the year option into the eligible year ledger before the examined year option; exit.
     Put the examined year option's next into the examined year option.
   Repeat.
@@ -130,7 +131,8 @@ To gather candidate years for the opening gate:
     If the closing gate mark is nil, break.
     Measure gate pairs for candidate selection.
     If the working year candidate's year length is greater than 5778, break.
-    If the working year candidate contains the year selection day,
+    Evaluate native year containment given the working year candidate and the year selection day.
+    If the native year containment result is 1,
       insert a sorted year candidate; add 1 to the eligible year count.
     Put the closing gate mark's next into the closing gate mark.
   Repeat.

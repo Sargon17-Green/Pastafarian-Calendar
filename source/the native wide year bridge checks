@@ -26,21 +26,24 @@ To check the native and wide year candidate bridge:
   If the first extended candidate's span count is not "6",
     put "Widening a native year changed its gate span count." into the check report; exit.
   Put -15055671 into the sample native year day.
-  If the first candidate does not contain the sample native year day,
+  Evaluate native year containment given the first candidate and the sample native year day.
+  If the native year containment result is not 1,
     put "A valid native year excluded an interior day." into the check report; exit.
   Convert the sample native year day into a wide signed day.
   Evaluate extended year containment given the first extended candidate and the converted signed day result.
   If the extended year containment result is not 1,
     put "A widened year excluded the same interior day." into the check report; exit.
   Put -15056000 into the sample native year day.
-  If the first candidate contains the sample native year day,
+  Evaluate native year containment given the first candidate and the sample native year day.
+  If the native year containment result is 1,
     put "The native year included the opening gate." into the check report; exit.
   Convert the sample native year day into a wide signed day.
   Evaluate extended year containment given the first extended candidate and the converted signed day result.
   If the extended year containment result is 1,
     put "The widened year included the opening gate." into the check report; exit.
   Put -15055655 into the sample native year day.
-  If the first candidate does not contain the sample native year day,
+  Evaluate native year containment given the first candidate and the sample native year day.
+  If the native year containment result is not 1,
     put "The native year excluded the closing gate." into the check report; exit.
   Convert the sample native year day into a wide signed day.
   Evaluate extended year containment given the first extended candidate and the converted signed day result.
@@ -49,7 +52,8 @@ To check the native and wide year candidate bridge:
   Put 0 into the first candidate's closing index.
   Measure the first candidate.
   Copy the first candidate into the first extended candidate.
-  If the first candidate contains the sample native year day,
+  Evaluate native year containment given the first candidate and the sample native year day.
+  If the native year containment result is 1,
     put "Native candidate with five gate spans was not rejected." into the check report; exit.
   If the first extended candidate's valid is not 0,
     put "Widened year with five gate spans was not rejected." into the check report; exit.
