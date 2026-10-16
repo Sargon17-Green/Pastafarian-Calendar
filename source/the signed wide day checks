@@ -79,17 +79,22 @@ To check signed wide day order:
   Set the first signed day fixture from the sample signed magnitude given -1.
   Put "9999999999999999999999999999" into the sample signed magnitude.
   Set the second signed day fixture from the sample signed magnitude given -1.
-  If the first signed day fixture does not numerically precede the second signed day fixture,
+  Compare the first signed day fixture with the second signed day fixture.
+  If the signed day precedence result is not 1,
     put "Large negative quantities were compared backwards." into the check report; exit.
-  If the second signed day fixture numerically precedes the first signed day fixture,
+  Compare the second signed day fixture with the first signed day fixture.
+  If the signed day precedence result is 1,
     put "Negative wide order is not antisymmetric." into the check report; exit.
   Put "0" into the sample signed magnitude.
   Set the third signed day fixture from the sample signed magnitude given 1.
-  If the second signed day fixture does not numerically precede the third signed day fixture,
+  Compare the second signed day fixture with the third signed day fixture.
+  If the signed day precedence result is not 1,
     put "A negative wide day did not precede zero." into the check report; exit.
-  If the third signed day fixture numerically precedes the second signed day fixture,
+  Compare the third signed day fixture with the second signed day fixture.
+  If the signed day precedence result is 1,
     put "Zero incorrectly preceded a negative day." into the check report; exit.
   Put "1" into the sample signed magnitude.
   Set the first signed day fixture from the sample signed magnitude given 1.
-  If the third signed day fixture does not numerically precede the first signed day fixture,
+  Compare the third signed day fixture with the first signed day fixture.
+  If the signed day precedence result is not 1,
     put "Zero did not precede a positive wide day." into the check report; exit.

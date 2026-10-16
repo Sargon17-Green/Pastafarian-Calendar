@@ -102,9 +102,9 @@ To locate a wide gate given a wide signed day:
     If the current extended gate's index's polarity is the wide signed day's polarity,
       if the current extended gate's index's absolute quantity is the wide signed day's absolute quantity,
         put 1 into the current extended gate's reached; break.
-    If the current extended gate's index numerically precedes the wide signed day,
-      move to the next positive wide gate.
-    If the wide signed day numerically precedes the current extended gate's index,
-      move to the next negative wide gate.
+    Compare the current extended gate's index with the wide signed day.
+    If the signed day precedence result is 1, move to the next positive wide gate.
+    Compare the wide signed day with the current extended gate's index.
+    If the signed day precedence result is 1, move to the next negative wide gate.
     If the wide gate movement's succeeded is not 1, break.
   Repeat.

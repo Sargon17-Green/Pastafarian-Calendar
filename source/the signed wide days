@@ -16,6 +16,8 @@ A wide signed day has
   a number called polarity,
   a wide quantity called absolute quantity.
 
+The signed day precedence result is a number.
+
 \ Make zero canonical and make nonzero polarity exactly +1 or -1.
 To normalize a wide signed day:
   Normalize the wide signed day's absolute quantity.
@@ -33,15 +35,18 @@ To set a wide signed day from a wide quantity given a number:
 
 \ A negative value sorts below zero, which sorts below positive.
 \ Within negatives the larger magnitude precedes the smaller one.
-To decide if a wide signed day numerically precedes another wide signed day:
-  If the wide signed day's polarity is less than the other wide signed day's polarity, say yes.
-  If the wide signed day's polarity is greater than the other wide signed day's polarity, say no.
-  If the wide signed day's polarity is 0, say no.
+To compare a wide signed day with another wide signed day:
+  Put 0 into the signed day precedence result.
+  If the wide signed day's polarity is less than the other wide signed day's polarity,
+    put 1 into the signed day precedence result; exit.
+  If the wide signed day's polarity is greater than the other wide signed day's polarity, exit.
+  If the wide signed day's polarity is 0, exit.
   If the wide signed day's polarity is 1,
-    if the wide signed day's absolute quantity is numerically smaller than the other wide signed day's absolute quantity, say yes;
-    say no.
-  If the other wide signed day's absolute quantity is numerically smaller than the wide signed day's absolute quantity, say yes.
-  Say no.
+    if the wide signed day's absolute quantity is numerically smaller than the other wide signed day's absolute quantity,
+      put 1 into the signed day precedence result;
+    exit.
+  If the other wide signed day's absolute quantity is numerically smaller than the wide signed day's absolute quantity,
+    put 1 into the signed day precedence result.
 
 \ Compare signs before comparing magnitudes to avoid a signed overflow.
 \ The second operand is the output, matching the existing wide library.

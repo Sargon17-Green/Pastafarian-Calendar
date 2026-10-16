@@ -58,12 +58,15 @@ To verify a wide year length and span count for a wide year candidate:
 
 To decide if a wide year candidate contains a wide signed day:
   If the wide year candidate's valid is not 1, say no.
-  If the wide year candidate's closing day numerically precedes the wide signed day, say no.
-  If the wide year candidate's opening day numerically precedes the wide signed day, say yes.
+  Compare the wide year candidate's closing day with the wide signed day.
+  If the signed day precedence result is 1, say no.
+  Compare the wide year candidate's opening day with the wide signed day.
+  If the signed day precedence result is 1, say yes.
   Say no.
 
 To decide if a wide year candidate comes before another wide year candidate:
   If the wide year candidate's year length is numerically smaller than the other wide year candidate's year length, say yes.
   If the other wide year candidate's year length is numerically smaller than the wide year candidate's year length, say no.
-  If the wide year candidate's opening day numerically precedes the other wide year candidate's opening day, say yes.
+  Compare the wide year candidate's opening day with the other wide year candidate's opening day.
+  If the signed day precedence result is 1, say yes.
   Say no.
