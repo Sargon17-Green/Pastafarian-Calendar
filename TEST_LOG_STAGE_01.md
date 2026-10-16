@@ -224,3 +224,34 @@ The smoke suite verifies exact 4096-byte dividend /u8 arithmetic and
 division-by-zero rejection, not general BigInt, normative sauce,
 combinatorial selection, gates, cutlets, months or final dates.
 `LAST_COMPLETED_STAGE=0`.
+
+## Signed Euclidean division by positive byte — native CI PASS (2026-10-16)
+
+At commit `747bb48e2449eeade2e4123dfe3d461472a1087e`,
+[Actions run 38889938257](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38889938257)
+concluded SUCCESS for both `verify` and `dmg-native-smoke`.
+The real SM83 DMG ROM built with RGBDS v1.0.4 and ran with PyBoy 2.x.
+Native cases 139..150 cover canonical positive/negative quotients,
+Euclidean nonnegative remainders, exact and inexact division,
+byte-length preservation, negative-zero rejection, invalid sign,
+division by zero, failure scrubbing and recovery, plus input immutability.
+
+```text
+HOST_SIGNED_EUCLIDEAN_U8=PASS cases=890 width_bytes=4096
+ROM_HEADER=PASS DMG=YES MBC=MBC5_RAM_128K
+ROM_PROGRESS_FRAME=4276 CASE=150
+ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=150 DISPATCH_STATUS=40 FRAMES=4407
+STAGE1_ARITHMETIC_SMOKE=PASS
+```
+
+The initial candidate commit e803919344eb9e6f1c3469fc56a07f13087ff9ac
+failed during ROM *linking*, after host reference passed: a short SM83 JR
+to the common test exit exceeded its +/-127-byte reach. Replacing bootstrap
+test-exit JRs by long JPs resolved the linker issue; no calendar/oracle
+claim depends on the failed run.
+
+For all nonzero positive byte divisors, the new signed operation exposes
+`n = quotient*divisor + remainder` with `0 <= remainder < divisor`.
+All output magnitudes remain fixed to 4096 bytes. This does *not*
+complete variable-length BigInt, normative sauce or selection, calendar
+dates, the Ge'ez catalog, or Stage 1. `LAST_COMPLETED_STAGE=0`.
