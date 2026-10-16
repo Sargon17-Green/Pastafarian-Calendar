@@ -26,6 +26,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     Metrics,
     NextBowlPatchWrapper,
     NextYearManager,
+    PreviousYearManager,
     OrderAt46LatchPatch,
     SaveManager,
     PostStirCalculator,
@@ -215,4 +216,6 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def year5000_diagnostic(calculation_day), do: Year5000Manager.diagnose(calculation_day)
   def next_year(calculation_day), do: NextYearManager.next_year(calculation_day)
   def next_year_diagnostic(calculation_day), do: NextYearManager.diagnose(calculation_day)
+  def previous_year(day), do: PreviousYearManager.previous_year(day)
+  def previous_year_diagnostic(day), do: PreviousYearManager.diagnose(day)
 end
