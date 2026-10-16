@@ -26,8 +26,8 @@ GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_limit,
 die "second 必須在 1..230\n" if $seconds<1 || $seconds>230;
 die "rss-kib 必須在 32768..1048576\n"
     if $rss_limit<32768 || $rss_limit>1048576;
-die "window-offset 只支援 38、39 或 40\n"
-    if $offset!=38 && $offset!=39 && $offset!=40;
+die "window-offset 只支援 37、38、39 或 40\n"
+    if $offset!=37 && $offset!=38 && $offset!=39 && $offset!=40;
 die "case-filter 只支援 all、middle、first-half、last-half\n"
     if $case_filter ne 'all' && $case_filter ne 'middle'
     && $case_filter ne 'first-half' && $case_filter ne 'last-half';
@@ -62,7 +62,8 @@ if (!$pid) {
             if sha256_hex(join(',',@year)) ne
                 '6d64022344c04935e6423aa6f96b285098d35b9b5ecb4b8c57a4c7149773a134';
         my @L=@year[$offset .. $offset+3];
-        my $expected=$offset==38 ? '88,40,25,77'
+        my $expected=$offset==37 ? '83,88,40,25'
+                    : $offset==38 ? '88,40,25,77'
                     : $offset==39 ? '40,25,77,98'
                     : '25,77,98,122';
         die "固定真正月份向量不符\n"
@@ -70,7 +71,7 @@ if (!$pid) {
         my $days=0;
         $days+=$_ for @L;
         die "真實視窗合計日數不符\n"
-            unless $days==($offset==38 ? 230 : $offset==39 ? 240 : 322);
+            unless $days==($offset==37 ? 236 : $offset==38 ? 230 : $offset==39 ? 240 : 322);
         printf "CANONICAL_MULTI_RANK phase=WINDOW offset=%d days=%d lengths=%s\n",
             $offset,$days,join(',',@L);
         my $counter=Pastafari::WeavingMemoOracle->new(\@L);

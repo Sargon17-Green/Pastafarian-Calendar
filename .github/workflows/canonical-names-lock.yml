@@ -1469,3 +1469,20 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 37 --sixth-day-target assembly --seconds 185 --rss-kib 393216
+
+  canonical-window37-full-independent-middle:
+    name: 真實 236 日四月份中間 BigInt 排名全長獨立記憶式前綴核對
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-window37-full-middle]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 完整 236 天每個合法子分支的獨立精確 BigInt 驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 37 --case-filter middle --seconds 185 --rss-kib 393216
