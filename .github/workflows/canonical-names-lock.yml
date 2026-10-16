@@ -26,49 +26,24 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   windows-native-stage22:
-    name: Verify Stage 22 with native Windows PowerShell 5.1
+    name: Native Windows PowerShell 5.1 stage gate
     runs-on: windows-latest
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
-      - name: Run native Stage 1 regression and Stage 22 discovery
+      - name: Verify native runtime and stage regression
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) {
-            throw ('Native Windows PowerShell 5.1 required: ' + $PSVersionTable.PSVersion.ToString())
+            throw ('Windows PowerShell 5.1 required: ' + $PSVersionTable.PSVersion.ToString())
           }
           Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
           $stageMeta = Get-Content -Raw -Encoding UTF8 .\DEVELOPMENT_STAGE.md
-          if (($stageMeta -match '(?m)^CURRENT_STAGE=22\s*
-      - name: Retain runner-side stage metadata
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-powershell-tagalog-stage22-metadata
-          path: DEVELOPMENT_STAGE.md
-          if-no-files-found: error
-) -and
-              ($stageMeta -match '(?m)^LAST_COMPLETED_STAGE=21\s*
-      - name: Retain runner-side stage metadata
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-powershell-tagalog-stage22-metadata
-          path: DEVELOPMENT_STAGE.md
-          if-no-files-found: error
-)) {
+          if (($stageMeta -match '(?m)^CURRENT_STAGE=22\\s*$') -and ($stageMeta -match '(?m)^LAST_COMPLETED_STAGE=21\\s*$')) {
             & .\Run-Stage22.ps1
             if (-not $?) { throw 'Stage 22 verification failed' }
-          } elseif ($stageMeta -match '(?m)^STAGE22_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*
-      - name: Retain runner-side stage metadata
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-powershell-tagalog-stage22-metadata
-          path: DEVELOPMENT_STAGE.md
-          if-no-files-found: error
-) {
+          } elseif ($stageMeta -match '(?m)^STAGE22_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\\s*$') {
             Write-Host 'STAGE22_PREVIOUSLY_VERIFIED=YES'
             & .\tests\Stage01.Tests.ps1
             if (-not $?) { throw 'Stage 1 regression failed after Stage 22 seal' }
