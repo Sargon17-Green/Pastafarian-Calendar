@@ -39,11 +39,11 @@ jobs:
             throw ('Windows PowerShell 5.1 required: ' + $PSVersionTable.PSVersion.ToString())
           }
           Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
-          $stageMeta = Get-Content -Raw -Encoding UTF8 .\DEVELOPMENT_STAGE.md
-          if (($stageMeta -match '(?m)^CURRENT_STAGE=22\\s*$') -and ($stageMeta -match '(?m)^LAST_COMPLETED_STAGE=21\\s*$')) {
+          $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          if (($stageLines -contains 'CURRENT_STAGE=22') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=21')) {
             & .\Run-Stage22.ps1
             if (-not $?) { throw 'Stage 22 verification failed' }
-          } elseif ($stageMeta -match '(?m)^STAGE22_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\\s*$') {
+          } elseif ($stageLines -contains 'STAGE22_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED') {
             Write-Host 'STAGE22_PREVIOUSLY_VERIFIED=YES'
             & .\tests\Stage01.Tests.ps1
             if (-not $?) { throw 'Stage 1 regression failed after Stage 22 seal' }
