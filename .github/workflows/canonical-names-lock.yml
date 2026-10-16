@@ -68,3 +68,5 @@ jobs:
         run: php -d memory_limit=512M tests/stage11_patch05_tests.php
       - name: Penemuan 06 — pastikan pembaca prior legacy buta terhadap hidden
         run: php -d memory_limit=512M tests/verify_stage12_discovery06.php
+      - name: Tampalan 06 — akses prior positif dan hidden
+        run: php -d memory_limit=512M tests/stage13_patch06_tests.php

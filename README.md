@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 12 (DISCOVERY 06)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 13 (PATCH 06)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -172,3 +172,17 @@ php -d memory_limit=512M tests/verify_stage12_discovery06.php
 ```
 
 Ujian pertama dijangka keluar kod 1 dengan tepat 44 kehilangan slot hidden, 508 bacaan terlihat yang betul, 28 nilai hidden yang sepadan dan sifar ralat tidak dijangka. Pembalut kedua menerima RED yang tepat dengan kod 0. GitHub Actions run `38894141862` bagi commit `255fc02e37a8071bc7ab98948a91df4abcef1c34` telah **lulus kedua-dua kerja**, termasuk pembalut baharu dan semua ujian Stage 1–11. Stage 13 belum bermula.
+
+
+## Stage 13 — PATCH 06: Akses prior dari sejarah dan hidden
+
+`PriorAccessPatch06::priorPatch(dropStore,legacyHidden,i,back)` mengira `slot=i-back`. Untuk `slot>=1`, ia **mesti** memanggil `LegacyVisiblePrior::legacyPrior` yang wujud sejak Stage 12. Apabila `slot<=0`, `k=1-slot` dipetakan melalui `HiddenNearnessPatch05::hiddenByNearness(legacyHidden,k)`, tanpa menyusun semula stor hidden7..hidden1. Ini memulihkan akses hidden1..hidden7 tanpa menghapus fungsi legacy yang salah.
+
+`BootstrapKernel::prior` menghala ke `PRIOR_PATCH_06` melalui konteks setiap panggilan, manakala `priorLegacy` dan `VISIBLE_PRIOR_LEGACY` kekal untuk bukti sejarah. Panggilan produksi menerima stor visible dan hidden yang disediakan pemanggil, kerana penjanaan 46 titisan visible hanya bermula pada tahap seterusnya.
+
+```text
+php -d memory_limit=512M tests/verify_stage12_discovery06.php
+php -d memory_limit=512M tests/stage13_patch06_tests.php
+```
+
+Ujian Stage 13 meliputi 6 pasangan hari, 762 akses visible, 66 akses hidden dan 42 nilai hidden yang dibandingkan dengan oracle PHP, disertai 2,688 kes stor sintetik, 7 penolakan input serta regresi lama. Bukti sejarah Stage 12 masih merah secara langsung (44 missing/508 found/28 hidden pada 4 pasangan), tetapi pembalutnya hijau. Pengesahan CI hanya diiktiraf selepas hasil run sebenar diperiksa. Stage 14 tidak dimulakan.

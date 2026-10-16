@@ -15,16 +15,22 @@ $valid=$exit===1&&$err===''&&substr_count($out,'GAGAL_DIJANGKA kes=')===44
 $root=dirname(__DIR__).'/src';
 $iterator=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS));
 $seen=false;
+$patchSeen=false;
 foreach($iterator as $file){
  if(strtolower($file->getExtension())!=='php')continue;
  $s=(string)file_get_contents($file->getPathname());
- if(str_contains($s,'NormativeMath')||str_contains($s,'NormativeSauce')||str_contains($s,'function priorPatch('))$valid=false;
+ if(str_contains($s,'NormativeMath')||str_contains($s,'NormativeSauce'))$valid=false;
+ if(str_contains($s,'function priorPatch(')){
+   if($file->getFilename()!=='PriorAccessPatch06.php')$valid=false;
+   else $patchSeen=true;
+ }
  if(str_contains($s,'function legacyPrior(')){
    if($file->getFilename()!=='LegacyVisiblePrior.php')$valid=false;else $seen=true;
  }
 }
 $k=(string)file_get_contents($root.'/BootstrapKernel.php');
-$valid=$valid&&$seen&&str_contains($k,"dispatch('VISIBLE_PRIOR_LEGACY', ".'$context)')
+$valid=$valid&&$seen&&$patchSeen&&str_contains($k,"dispatch('PRIOR_PATCH_06', ".'$context)')
+ &&str_contains($k,"dispatch('VISIBLE_PRIOR_LEGACY', ".'$context)')
  &&str_contains($k,"dispatch('HIDDEN_PATCH_05', ".'$context)');
 if(!$valid){fwrite(STDERR,"GAGAL: sejarah prior tidak terbukti\n");exit(1);}
 echo "LULUS kontrak merah 06; prior legacy buta terhadap hidden\n";

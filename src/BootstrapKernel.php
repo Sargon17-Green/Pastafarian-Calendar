@@ -175,6 +175,28 @@ final class BootstrapKernel
             $this->metrics->bump($context, $value === null ? 'visible.prior.missing' : 'visible.prior.found');
             return $value;
         });
+        $this->dispatcher->register('PRIOR_PATCH_06', function(BootstrapContext $context): BigInt {
+            $visible = $context->semanticState['visibleDropStore'] ?? null;
+            $hidden = $context->semanticState['legacyHidden'] ?? null;
+            $i = $context->semanticState['dropIndex'] ?? null;
+            $back = $context->semanticState['lookback'] ?? null;
+            if (!is_array($visible) || !is_array($hidden) || !is_int($i) || !is_int($back)) {
+                throw new \InvalidArgumentException('PRIOR_PATCH_ARGUMENTS');
+            }
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $hiddenLegacy = new \Pastafari\Stage01\Legacy\LegacyHiddenBackward($save);
+            $patch05 = new \Pastafari\Stage01\Patches\HiddenNearnessPatch05($hiddenLegacy);
+            $patch06 = new \Pastafari\Stage01\Patches\PriorAccessPatch06(
+                new \Pastafari\Stage01\Legacy\LegacyVisiblePrior(), $patch05
+            );
+            $value = $patch06->priorPatch($visible, $hidden, $i, $back);
+            $context->semanticState['patchedPriorResult'] = $value;
+            $context->status = 'PRIOR_PATCH_06_RETURNED';
+            $this->metrics->bump($context, 'prior.patch06.calls');
+            return $value;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -273,6 +295,27 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): ?BigInt => $this->dispatcher->dispatch('VISIBLE_PRIOR_LEGACY', $context)
+        );
+    }
+
+    /**
+     * Pintu masuk sah membalut legacyPrior dan hiddenByNearness.
+     * Stor terlihat dan hidden ialah parameter per-panggilan, bukan global.
+     *
+     * @param array<int,BigInt> $dropStore
+     * @param array<int,BigInt> $legacyHidden
+     */
+    public function prior(array $dropStore, array $legacyHidden, int $i, int $back): BigInt
+    {
+        $context = new BootstrapContext(0, 0);
+        $context->phase = 'PRIOR_PATCH_06';
+        $context->semanticState['visibleDropStore'] = $dropStore;
+        $context->semanticState['legacyHidden'] = $legacyHidden;
+        $context->semanticState['dropIndex'] = $i;
+        $context->semanticState['lookback'] = $back;
+        return $this->boundary->run(
+            $context,
+            fn(): BigInt => $this->dispatcher->dispatch('PRIOR_PATCH_06', $context)
         );
     }
 

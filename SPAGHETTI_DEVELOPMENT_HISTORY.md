@@ -253,3 +253,22 @@ Pembaca `LegacyVisiblePrior::legacyPrior` mencari `dropStore[i-back]` sahaja. Ba
 Empat pasangan tarikh × 46 indeks terlihat × tiga jarak-undur (1,3,7) menghasilkan tepat 44 kekosongan hidden yang dijangka, 508 bacaan terlihat yang betul, dan 28 nilai hidden setara oracle. Pembalut menerima hanya RED terkawal, tanpa ralat tambahan. Run GitHub Actions `38894141862` pada SHA `255fc02e37a8071bc7ab98948a91df4abcef1c34` menghasilkan `KEPUTUSAN MERAH_DIJANGKA missing=44 found=508 hidden=28 lain=0` dan `LULUS kontrak merah 06; prior legacy buta terhadap hidden`. Kedua-dua kerja CI hijau. Kunci nama, fixture dan regresi Stage 1–11 kekal lulus.
 
 `priorPatch` dan pembacaan slot tidak positif melalui `hiddenByNearness` tidak ditambah pada Stage 12. Tugasnya ialah Stage 13 — PATCH 06. Fungsi penjanaan titisan terlihat dan oracle tidak disentuh.
+
+
+## Stage 13 — PATCH 06: Pembaikan bacaan prior dengan slot hidden
+
+### Mengapa pembaca sejarah tidak diubah
+
+Pembaca `LegacyVisiblePrior::legacyPrior` hanya mengakses `dropStore[i-back]`. Bagi slot 0..-6, ia memulangkan `null` walaupun hidden sedia dihitung. Penemuan ini disimpan sepenuhnya; ia masih boleh diuji melalui `priorLegacy`. Tiada fallback sifar palsu.
+
+### Penghala dan pembaikan
+
+`PriorAccessPatch06` menerima pembaca legacy dan adapter `HiddenNearnessPatch05`. `slot=i-back` diputuskan pada satu titik: jika positif, pembaca legacy **benar-benar** dipanggil. Jika sifar atau negatif, `k=1-slot` diserahkan kepada `hiddenByNearness`, yang sudah memetakan hidden dengan indeks `8-k` melalui pembaca backward legacy. Penghala produksi `PRIOR_PATCH_06` menggunakan konteks dan metrik setiap panggilan tanpa berkongsi cache boleh ubah.
+
+### Skop ujian
+
+Penguji membaca enam pasangan tarikh daripada oracle PHP tempatan untuk nilai hidden sebenar; semua 46 slot visible × tiga lookback (1,3,7) diliputi pada setiap pasangan. Sebanyak 762 bacaan visible mengekalkan warisan tepat dan 66 bacaan hidden mengikut oracle tanpa null. Selainnya, 128 stor sintetik × 21 akses menguji peta slot dan neutraliti input; tujuh kes tidak sah menguji sempadan. Ujian Stage 12 diubah pada pengesahnya sahaja agar menerima pembetul baharu tanpa melemahkan bukti legacy. Semuanya tertakluk kepada pengesahan CI penuh.
+
+### Perkara yang belum dibina
+
+Tahap ini tidak membina 46 titisan visible, kerana kerja itu bermula pada Stage 14. Tiada oracle dalam kod produksi, tiada pembetulan sejarah terus, tiada perubahan nama kanonik, fixture atau main.
