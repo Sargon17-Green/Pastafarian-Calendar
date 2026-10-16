@@ -154,7 +154,7 @@ To choose the visible grinding recipe:
 
 \ SAVE(x squared + a*x + b*drop[i-1] + c*drop[i-3] +
 \ d*drop[i-7] + the selected stone).
-To grind a visible drop:
+To perform visible drop grinding:
   Choose the visible grinding recipe.
   Put the visible work's value into a result wide quantity.
   Multiply the visible work's value by the result wide quantity.
@@ -176,7 +176,7 @@ To grind a visible drop:
 
 \ Insert a finished drop in front of the last seven previous values.
 \ Shift from oldest to newest so nothing is overwritten too early.
-To remember the new visible drop:
+To record visible drop result:
   Put the previous drops' sixth previous into the previous drops' seventh previous.
   Put the previous drops' fifth previous into the previous drops' sixth previous.
   Put the previous drops' fourth previous into the previous drops' fifth previous.
@@ -186,18 +186,18 @@ To remember the new visible drop:
   Put the visible work's value into the previous drops' first previous.
 
 \ All eleven grinding steps are completed before updating history.
-To make a visible drop given a number:
+To calculate visible drop given a number:
   Put the number into the visible work's index.
   Reach the stones for the number.
   Make the visible dough.
   Put 1 into the visible work's grinding step.
   Loop.
     If the visible work's grinding step is greater than 11, break.
-    Grind the visible drop.
+    Perform visible drop grinding.
     Add 1 to the visible work's grinding step.
   Repeat.
   Put the visible work's value into the last visible drop.
-  Remember the new visible drop.
+  Record visible drop result.
 
 \ The sauce input must already contain the five exact counters.
 \ The requested last drop must be between 1 and 46 inclusive.
@@ -208,6 +208,6 @@ To make visible drops through a number:
   Loop.
     If the visible position number is greater than the number, break.
     If the visible position number is greater than 46, break.
-    Make a visible drop given the visible position number.
+    Calculate visible drop given the visible position number.
     Add 1 to the visible position number.
   Repeat.

@@ -242,7 +242,7 @@ To make the sauce through the visible drops:
   Put 1 into a visible position number.
   Loop.
     If the visible position number is greater than 46, break.
-    Make a visible drop given the visible position number.
+    Calculate visible drop given the visible position number.
     Mix bowls for the visible drop.
     Add 1 to the visible position number.
   Repeat.
