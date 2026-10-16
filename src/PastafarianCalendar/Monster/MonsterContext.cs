@@ -143,6 +143,9 @@ public sealed class MonsterContext
     public BigInteger? LegacyWideFamilySize { get; set; }
     public BigInteger? LegacyReversedWideRankResult { get; set; }
 
+    // الرقعة السادسة عشرة: رتبة الأرقام من الموضع الأقل وزناً مع بقاء القديم.
+    public BigInteger? PatchedWideRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

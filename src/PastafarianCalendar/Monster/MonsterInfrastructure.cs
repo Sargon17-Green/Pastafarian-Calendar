@@ -695,6 +695,31 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("شاهد الأرقام الواسعة التاريخي قد تبدّل.");
     }
 
+
+    // تدقيق جواب الرقعة مع الاحتفاظ بالشاهد القديم وبكل المرشحات السابقة.
+    public void ValidatePatchedWideRank(
+        MonsterContext context, PatchedWideRankCandidate candidate)
+    {
+        if(context is null ||
+           context.LegacyWideFamilySize is not BigInteger n ||
+           n<=((BigInteger.One<<127)-BigInteger.One) ||
+           context.LegacyAnswerStepIndex is not BigInteger k || !k.IsZero ||
+           context.PatchedWideRankResult.HasValue ||
+           context.LegacyReversedWideRankResult.HasValue ||
+           context.PatchedAnswerAtResult.HasValue ||
+           context.LegacyOneBasedAnswerAtResult.HasValue ||
+           context.PatchedSauceFinalBowls is not null ||
+           context.PatchedVisibleDrops is not null ||
+           candidate is null || candidate.Historical is null)
+            throw new MonsterValidationException("رقعة أوزان الأرقام مفقودة أو السياق مستعمل.");
+
+        ValidateLegacyReversedWideRank(context,candidate.Historical);
+        var expected=new WideDigitOrderPatchWrapper().Patch(
+            candidate.Historical.Step.Historical.Question.Answer,n);
+        if(candidate.Rank!=expected || candidate.Rank<1 || candidate.Rank>n)
+            throw new MonsterValidationException("تلف رتبة الأرقام الواسعة المصححة.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -807,6 +832,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyUnshiftedShortRankPhaseHandler _legacyShortRank;
     private readonly PatchedShortRankPhaseHandler _patchedShortRank;
     private readonly LegacyReversedWideRankPhaseHandler _legacyWideRank;
+    private readonly PatchedWideRankPhaseHandler _patchedWideRank;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -842,6 +868,7 @@ public sealed class MonsterDispatcher
         _legacyShortRank = new LegacyUnshiftedShortRankPhaseHandler();
         _patchedShortRank = new PatchedShortRankPhaseHandler();
         _legacyWideRank = new LegacyReversedWideRankPhaseHandler();
+        _patchedWideRank = new PatchedWideRankPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -2051,6 +2078,95 @@ public sealed class MonsterDispatcher
         context.Phase=context.Status;
     }
 
+
+    public void DispatchPatchedWideRank(MonsterContext context)
+    {
+        if(context is null ||
+           !string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("يتطلب إصلاح الرتبة الواسعة سياقاً مؤسساً.");
+        if(context.LegacyQueriedBowlId is not int id || id is < 1 or > 6 ||
+           context.LegacyBowlQuestionSeal is not int seal || seal is not (21 or 31) ||
+           context.LegacyWideFamilySize is not BigInteger n ||
+           n<=((BigInteger.One<<127)-BigInteger.One) ||
+           context.LegacyAnswerStepIndex is not BigInteger k || !k.IsZero ||
+           context.PatchedWideRankResult.HasValue ||
+           context.LegacyReversedWideRankResult.HasValue ||
+           context.LegacyShortFamilyRankResult.HasValue ||
+           context.PatchedShortFamilyRankResult.HasValue ||
+           context.PatchedAnswerAtResult.HasValue ||
+           context.LegacyOneBasedAnswerAtResult.HasValue ||
+           context.PatchedBowlQuestionResult is not null ||
+           context.LegacyUnsealedBowlQuestionResult is not null ||
+           context.PatchedNextBowlResult.HasValue ||
+           context.LegacySauceFinalBowls is not null ||
+           context.PatchedSauceFinalBowls is not null ||
+           context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("سياق الأسرة الواسعة مكرر أو غير صالح.");
+
+        var candidate=_patchedWideRank.Handle(context);
+        var oldWide=candidate.Historical;
+        var step=oldWide.Step;
+        var oneBased=step.Historical;
+        var sealedQuestion=oneBased.Question;
+        var oldQuestion=sealedQuestion.Historical;
+        var correctedNext=oldQuestion.Historical;
+        var oldNext=correctedNext.Historical;
+        var source=oldNext.Sauce.Historical.Source;
+        var sauceOld=oldNext.Sauce.Historical;
+        var sauceCorrect=oldNext.Sauce.Patched;
+
+        _validation.ValidateVisibleDropPatch(context,source);
+        _validation.ValidateLegacyOverwrittenSauce(context,sauceOld);
+        _validation.ValidateProtectedDrop46Sauce(context,oldNext.Sauce);
+        _validation.ValidateLegacyFixedNextBowl(context,oldNext);
+        _validation.ValidatePatchedNextBowl(context,correctedNext);
+        _validation.ValidateLegacyUnsealedBowlQuestion(context,oldQuestion);
+        _validation.ValidatePatchedBowlQuestion(context,sealedQuestion);
+        _validation.ValidateLegacyOneBasedAnswerStep(context,oneBased);
+        _validation.ValidatePatchedAnswerStep(context,step);
+        _validation.ValidateLegacyReversedWideRank(context,oldWide);
+        _validation.ValidatePatchedWideRank(context,candidate);
+
+        // الدليل القديم والجواب الجديد يُلتزمان معاً بعد قبول المرشح.
+        context.PatchedCountsResult=source.Counts;
+        context.PatchedStoneRows=source.Stones;
+        context.LegacyHiddenReversed=source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess=source.HiddenAccessor;
+        context.PatchedVisibleDrops=source.Visible;
+        context.LegacyDiagnosticDrop46Order=sauceOld.DiagnosticDrop46Order;
+        context.LegacyOverwrittenQueryOrder=sauceOld.OverwrittenQueryOrder;
+        context.LegacyPostStirOrders=sauceOld.PostStirOrders;
+        context.LegacySauceBowlsAfterDrops=sauceOld.BowlsAfterDrops;
+        context.LegacySauceFinalBowls=sauceOld.FinalBowls;
+        context.PatchedOrderAt46Latch=sauceCorrect.OrderAt46Latch;
+        context.PatchedSauceBowlsAfterDrops=sauceCorrect.BowlsAfterDrops;
+        context.PatchedSauceFinalBowls=sauceCorrect.FinalBowls;
+        context.PatchedPostStirOrders=sauceCorrect.PostStirOrders;
+        context.LegacyFixedNextBowlResult=oldNext.LegacyNextBowlId;
+        context.PatchedNextBowlResult=correctedNext.NextBowlId;
+        context.LegacyUnsealedBowlQuestionResult=oldQuestion.Answer;
+        context.PatchedBowlQuestionResult=sealedQuestion.Answer;
+        context.LegacyOneBasedAnswerAtResult=oneBased.Value;
+        context.PatchedAnswerAtResult=step.Value;
+        context.LegacyReversedWideRankResult=oldWide.Rank;
+        context.PatchedWideRankResult=candidate.Rank;
+
+        context.BranchTrace.Add("LEGACY_OVERWRITTEN_DROP46_ORDER_WITNESS");
+        context.BranchTrace.Add("PROTECTED_DROP46_ORDER_LATCH_WITNESS");
+        context.BranchTrace.Add("LEGACY_FIXED_NEXT_BOWL_WITNESS");
+        context.BranchTrace.Add("PATCHED_NEXT_BOWL_ORDER_WITNESS");
+        context.BranchTrace.Add("LEGACY_UNSEALED_BOWL_QUESTION_WITNESS");
+        context.BranchTrace.Add("PATCHED_SEALED_BOWL_QUESTION_WITNESS");
+        context.BranchTrace.Add("LEGACY_ONE_BASED_ANSWER_STEP_WITNESS");
+        context.BranchTrace.Add("PATCHED_ZERO_BASED_ANSWER_STEP_WITNESS");
+        context.BranchTrace.Add("LEGACY_REVERSED_WIDE_DIGITS_WITNESS");
+        context.BranchTrace.Add("PATCHED_WIDE_DIGIT_ORDER");
+        _metrics.Bump(context,"legacy.reversed.wide.digits.witness");
+        _metrics.Bump(context,"patched.wide.digit.order.dispatch");
+        context.Status="PATCHED_WIDE_DIGIT_ORDER_COMPLETE";
+        context.Phase=context.Status;
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -2703,6 +2819,30 @@ public sealed class MonsterManager
             calculationDay,targetDay,queriedBowlId,seal,familySize)
             .LegacyReversedWideRankResult ??
             throw new MonsterValidationException("لم تكتمل نتيجة الأسرة الواسعة القديمة.");
+
+
+    public MonsterContext ExecutePatchedWideRank(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+    {
+        if(queriedBowlId is < 1 or > 6 || seal is not (21 or 31) ||
+           familySize<=((BigInteger.One<<127)-BigInteger.One))
+            throw new MonsterValidationException("سؤال الأسرة الواسعة غير صالح.");
+        var context=Prepare(calculationDay,targetDay);
+        context.LegacyQueriedBowlId=queriedBowlId;
+        context.LegacyBowlQuestionSeal=seal;
+        context.LegacyAnswerStepIndex=BigInteger.Zero;
+        context.LegacyWideFamilySize=familySize;
+        _dispatcher.DispatchPatchedWideRank(context);
+        return context;
+    }
+
+    public BigInteger EvaluateWideFamilyRank(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => ExecutePatchedWideRank(calculationDay,targetDay,queriedBowlId,seal,familySize)
+            .PatchedWideRankResult ??
+            throw new MonsterValidationException("لم تصدر رتبة الأسرة الواسعة المصححة.");
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

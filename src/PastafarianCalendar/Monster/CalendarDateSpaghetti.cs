@@ -240,6 +240,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyReversedWideRank(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة السادسة عشرة: ترتيب الأرقام من الأقل وزناً مع صون المسار القديم.
+    public static BigInteger EvaluateWideFamilyRank(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateWideFamilyRank(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

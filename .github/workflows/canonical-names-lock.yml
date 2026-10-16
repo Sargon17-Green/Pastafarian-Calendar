@@ -213,3 +213,5 @@ jobs:
         run: |
           test "${{ steps.discovery_wide_reversed_digits_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage32Tests/PastafarianCalendar.Stage32Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تحقق رقعة ترتيب أرقام الأسرة الواسعة السادسة عشرة مع المرجع
+        run: dotnet run --project tests/PastafarianCalendar.Stage33Tests/PastafarianCalendar.Stage33Tests.csproj --configuration Release
