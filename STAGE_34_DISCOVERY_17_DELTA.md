@@ -32,3 +32,10 @@ FOUNDATION-539 tình cờ chọn cùng ứng viên ở nhánh legacy và normati
 Không thay thuật toán hay oracle; thay riêng fixture hồi quy 4 bằng
 FOUNDATION+2 và yêu cầu CI xác nhận bốn sai lệch thực tế.
 CI đầu tiên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38590861266
+
+CI của commit 092a3333 xác nhận FOUNDATION+2 sai thật nhưng
+FOUNDATION tình cờ vẫn bằng nhau. Kết hợp các fixture đỏ đã xác nhận
+từ hai lần CI: FOUNDATION-539, FOUNDATION+1, FOUNDATION+417,
+FOUNDATION+2. Vì vậy chỉ thay fixture 1 từ FOUNDATION thành
+FOUNDATION-539; giữ ba fixture khác, kỳ vọng và mã production.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38889972332

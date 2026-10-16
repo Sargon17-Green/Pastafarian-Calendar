@@ -173,8 +173,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage34Discovery17Test do
     refute manager =~ "NormativeReference"
   end
 
-  test "hồi quy normative đỏ 1: năm kế sau FOUNDATION" do
-    c = @foundation
+  test "hồi quy normative đỏ 1: năm kế sau FOUNDATION-539" do
+    c = @foundation - 539
     assert production_next_year(c) == reference_next_year(c)
   end
 
