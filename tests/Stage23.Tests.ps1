@@ -43,8 +43,8 @@ foreach ($pos in @(1,2,6)) {
     if ([int]$legacy[$pos-1] -ne [int]$expected[$pos-1]) { $red++ }
 }
 Assert-StageEqual 3 $red 'Exactly three historical red positions remain'
-Assert-StageEqual 46 $ctx.patch09InvocationCount 'All 46 bowl-pour rounds retained'
-Assert-StageEqual 46 $ctx.patch10InvocationCount 'All 46 snapshot bowl rounds retained'
+Assert-StageEqual 47 $ctx.patch09InvocationCount '46 bowl rounds plus preserved production probe'
+Assert-StageEqual 47 $ctx.patch10InvocationCount '46 snapshot rounds plus preserved production probe'
 Assert-StageEqual 1 $ctx.discovery11InvocationCount 'Full historical pass retained'
 Assert-StageEqual 'SNAPSHOT_BOWL_UPDATE_PATCH_ACTIVE' $ctx.patch10Status 'Predecessor Patch 10 remains active'
 Assert-StageTrue -Condition (-not [object]::ReferenceEquals($ctx.orderAt46Latch,$ctx.legacyOverwritableOrderMemory)) -Name 'Latch does not alias general memory'
