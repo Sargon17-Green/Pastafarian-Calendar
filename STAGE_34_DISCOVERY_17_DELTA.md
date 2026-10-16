@@ -39,3 +39,19 @@ từ hai lần CI: FOUNDATION-539, FOUNDATION+1, FOUNDATION+417,
 FOUNDATION+2. Vì vậy chỉ thay fixture 1 từ FOUNDATION thành
 FOUNDATION-539; giữ ba fixture khác, kỳ vọng và mã production.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38889972332
+
+## Đóng giai đoạn sau xác minh CI
+
+Giai đoạn 34 DISCOVERY 17 được xác minh trên Elixir 1.18.5 / OTP 27:
+491 kiểm thử, 487 PASS và đúng bốn hồi quy normative cố ý đỏ
+tại c=FOUNDATION-539, FOUNDATION+1, FOUNDATION+417, FOUNDATION+2.
+Không có lỗi điều khiển, không cảnh báo biên dịch Elixir;
+Canonical Names Lock PASS. Các fixture đỏ đã được xác nhận
+bởi CI trên commit `7c92a0bdb8218bf08047fecf3d9c624547e9f8e7`.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890087448
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890087434
+Lỗi là hạt ngày hỏi c,c ở LegacyCurrentDayNextYearSeed,
+thay vì c,open_day; candidate set, gate và năm 5000 không đổi.
+Cảnh báo checkout@v4 về Node.js 20 không phải warning Elixir.
+Stage34 đóng EXPECTED_RED; Stage35 PATCH 17 chưa bắt đầu.
+Không đổi main, không đổi oracle test-only hoặc các patch cũ.

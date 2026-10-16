@@ -1131,3 +1131,29 @@ CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38586793
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38586793164
 Đóng Stage33 GREEN, tiếp theo Stage34 DISCOVERY 17 chưa bắt đầu.
 Không thay main hoặc tích hợp lịch hoàn chỉnh.
+
+## Giai đoạn 34/55 — DISCOVERY 17: nguồn ngày hỏi của năm tiếp theo
+
+NextYearCandidateManager tạo năm sau năm neo 5000 bằng cổng mở
+đúng, lọc ít nhất 6 khoảng, độ dài 252..5778 ngày; thứ tự
+ứng viên chuẩn và rank vẫn chọn trong answer stream bát 1, chốt 11.
+Lỗi có chủ đích nằm riêng ở LegacyCurrentDayNextYearSeed:
+nó hỏi sauce(c,c) thay vì sauce(c,open_day).
+Đã bổ sung 20 kiểm thử; bốn hồi quy normative giữ kỳ vọng đúng.
+
+Giai đoạn 34 DISCOVERY 17 được xác minh trên Elixir 1.18.5 / OTP 27:
+491 kiểm thử, 487 PASS và đúng bốn hồi quy normative cố ý đỏ
+tại c=FOUNDATION-539, FOUNDATION+1, FOUNDATION+417, FOUNDATION+2.
+Không có lỗi điều khiển, không cảnh báo biên dịch Elixir;
+Canonical Names Lock PASS. Các fixture đỏ đã được xác nhận
+bởi CI trên commit `7c92a0bdb8218bf08047fecf3d9c624547e9f8e7`.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890087448
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890087434
+Lỗi là hạt ngày hỏi c,c ở LegacyCurrentDayNextYearSeed,
+thay vì c,open_day; candidate set, gate và năm 5000 không đổi.
+Cảnh báo checkout@v4 về Node.js 20 không phải warning Elixir.
+Stage34 đóng EXPECTED_RED; Stage35 PATCH 17 chưa bắt đầu.
+Không đổi main, không đổi oracle test-only hoặc các patch cũ.
+
+Bước sau: Stage35 PATCH 17 giữ nguyên legacy và tính lại rank
+từ nguồn ngày hỏi open_day, sau đó đưa bốn hồi quy trở lại xanh.

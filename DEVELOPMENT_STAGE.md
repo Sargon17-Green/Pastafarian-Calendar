@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=34
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=17
-LAST_COMPLETED_STAGE=33
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=34
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..16; Stage34 thêm NextYearCandidateManager đúng và LegacyCurrentDayNextYearSeed sai nguồn ngày, nối vào NextYearManager. Năm 5000 và gate vẫn chuẩn; năm sau chọn sai sauce(c,c) thay vì sauce(c,open_day).
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_34_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_34_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=491
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -810,3 +810,17 @@ Dispatcher.answer_stream(c,c,1,11) thay vì normative (c,open_day,1,11).
 Rank sai đi vào production NextYearManager; không sửa oracle.
 20 kiểm thử mới: 16 điều khiển gate/lọc/seed sai và 4 hồi quy chuẩn đỏ.
 Đóng chỉ sau CI xác minh đúng 4 sai lệch và Canonical Names Lock PASS.
+
+Giai đoạn 34 DISCOVERY 17 được xác minh trên Elixir 1.18.5 / OTP 27:
+491 kiểm thử, 487 PASS và đúng bốn hồi quy normative cố ý đỏ
+tại c=FOUNDATION-539, FOUNDATION+1, FOUNDATION+417, FOUNDATION+2.
+Không có lỗi điều khiển, không cảnh báo biên dịch Elixir;
+Canonical Names Lock PASS. Các fixture đỏ đã được xác nhận
+bởi CI trên commit `7c92a0bdb8218bf08047fecf3d9c624547e9f8e7`.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890087448
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890087434
+Lỗi là hạt ngày hỏi c,c ở LegacyCurrentDayNextYearSeed,
+thay vì c,open_day; candidate set, gate và năm 5000 không đổi.
+Cảnh báo checkout@v4 về Node.js 20 không phải warning Elixir.
+Stage34 đóng EXPECTED_RED; Stage35 PATCH 17 chưa bắt đầu.
+Không đổi main, không đổi oracle test-only hoặc các patch cũ.
