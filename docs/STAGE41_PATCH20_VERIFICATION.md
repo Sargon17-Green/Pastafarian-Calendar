@@ -27,3 +27,14 @@ The first-day question source must be independently prepared by caller and valid
 `test/patch20Properties.ts` verifies 128 direct genuine native first-day sauces with test-only independent canonical answers, including 64 8192-bit signed action days, 720 distinct explicit DROP46 permutations checked against independent bowl replay and post-stir calculation, eight enormous signed injected source/bowl values (explicitly noncanonical test inputs), and two complete true Year5000 Stage39+40+41 routes. It compares all 58-write ledgers, immutability and no added extra work on exact first-day coincidence.
 
 All **twenty** historical deliberately failing discovery witnesses are still run through their expected-red verifiers by the existing `npm test`. Completion requires both independent GitHub Actions jobs (native tsc + full Stage1–41 suite, and frozen source language catalog/hash) to pass. The authorizing Stage40 previous signing CI run is 38894027444 and the last signed branch HEAD is cedefb455ca47ff17e4e6766e960b468b2d8dc06. No Stage42 or main branch edits.
+
+## Native CI verified — 16 October 2026
+
+Implementation [commit 2def43a](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/2def43a3141cbaf2634a44371aa51b634558f55b); [GitHub Actions 38916199438](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38916199438): BOTH frozen-name `verify` and native TypeScript full-regression `stage27-typescript-marathi` jobs SUCCESS. Native `tsc`, all Stage1–41 tests and twenty previously archived intentional-RED witnesses verified. Stage41's historical old target-based physical 58-write route remains unchanged and is physically invoked before the corrected true-first-day 58-write route, except when first day already matches target, where no duplicate full Sauce runs.
+
+```text
+STAGE_41_PATCH_20_GUARDS_PASS realYears=2 oldSauceCalls=2 correctedFirstDayCalls=2 correctedWrong=0 ghostPreserved=2 oldWrongCacheHITPreserved=1 exactFirstDayReuse=1 exactFirstDayNewCalls=0 deepFaults=2 correctedSauceSharedWrites=116 realPredecessors=70 realWrites=4060
+STAGE_41_PATCH_20_PROPERTIES_PASS directSauces=128 signedGiantDays=64 directWrong=0 directWrites=7424 drop46Variants=720 uniqueOrders=720 permutationWrong=0 permutationWrites=41760 giantSources=8 giantSourceWrites=464 realYears=2 correctedWrong=0 oldFortuitousMatches=0 fullRealPredecessors=70 fullRealWrites=4060
+```
+
+LAST_COMPLETED_STAGE=41; NEXT_STAGE=42 DISCOVERY21. Stage42 not started. The canonical Central Library branch registry must be updated without overwriting concurrent work.
