@@ -19,8 +19,7 @@ for n=1,8 do
   end
   local historic,ctx=S.legacyPositiveGateProbe(n,streams)
   local wrong=B.add(F,gaps[n])
-  assert(B.compare(historic,wrong)==0
-   and B.compare(S.positiveGateDaySpaghetti(n,streams),wrong)==0)
+  assert(B.compare(historic,wrong)==0)
   assert(ctx.mode=="STAGE_34_DISCOVERY_17"
    and ctx.phase=="LEGACY_POSITIVE_GATE_ANCHOR"
    and ctx.status=="LEGACY_POSITIVE_GATE_COMPLETE"

@@ -33,6 +33,7 @@ local GateQuestionPatch = require("gate_question_patch")
 local LegacyGateGap = require("legacy_gate_gap")
 local GateGapPatch = require("gate_gap_patch")
 local LegacyPositiveGate = require("legacy_positive_gate_position")
+local PositiveGatePatch = require("positive_gate_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -522,12 +523,21 @@ function S.oldPositiveGateFromLastGapProbe(gap)
 end
 
 function S.positiveGateDaySpaghetti(index,streams)
-    local historic=LegacyPositiveGate.execute(index,streams)
-    return historic
+    local repaired=PositiveGatePatch.execute(index,streams)
+    return repaired
+end
+
+-- PATCH 17: sis commits istorik epi setyèm commit akimilasyon.
+function S.positiveGatePatchProbe(index,streams)
+    return PositiveGatePatch.execute(index,streams)
+end
+
+function S.positiveGateCoreProbe(index,gaps,historicalDay)
+    return PositiveGatePatch.correctPositiveDay(index,gaps,historicalDay)
 end
 
 function S.calendarDateSpaghetti()
-    error("calendarDateSpaghetti poko entegre nan Stage 34", 0)
+    error("calendarDateSpaghetti poko entegre nan Stage 35", 0)
 end
 
 return S

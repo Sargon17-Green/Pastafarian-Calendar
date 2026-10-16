@@ -1297,3 +1297,18 @@ kouran sauce kanonik pase. Twa witness wouj yo
 toujou verifye nan audit. Pa gen PATCH 17 ni
 `postStir12` nan production. `LAST_COMPLETED_STAGE=34`;
 `EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
+
+## Stage 35 — PATCH 17: reyini tout espas pòtay pozitif yo
+
+Modil `src/positive_gate_patch.lua` rele DISCOVERY 17 reyèl
+an premye pou jwenn jou istorik `F+gap(n)`, konsève sis
+commits posede yo, ak snapshots semantik tout gap yo.
+Li revalide orijin SAVE ak rank PATCH 13, jou siyen
+PATCH 15 ak gap PATCH 16 pou chak i. Se sèlman lè sa a
+li ajoute setyèm commit `POSITIVE_GATE_CUMULATIVE_PATCH`:
+`G(n)=F+gap(1)+...+gap(n)`. N=1 pa chanje jou a,
+epi n=2..32 retounen nan lòd normatif. Pa gen oracle
+nan production, pa gen chèn negatif, ni `postStir12`.
+`legacyPositiveGateProbe` rete defo istorik la;
+`positiveGateDaySpaghetti` pran PATCH 17.
+QA natif Stage 35 poko verifye.

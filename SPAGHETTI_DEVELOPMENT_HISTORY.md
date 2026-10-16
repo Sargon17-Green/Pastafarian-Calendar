@@ -933,3 +933,14 @@ istorik la pa akimile espas yo; 96 chèn ak
 92 divèjans, 18 pàn/18 rekiperasyon, 2 nested
 ak 3 sauce otantik verifye. `LAST_COMPLETED_STAGE=34` /
 `EXPECTED_RED_VERIFIED`. Pa gen PATCH 17 nan etap sa a.
+
+## Stage 35 — PATCH 17: pozisyon pòtay pozitif kumilatif
+
+Nou kenbe modil `legacy_positive_gate_position.lua` san
+chanjman: li toujou retounen `F+gap(n)` ak sizyèm commit
+istorik. Nou ajoute `positive_gate_patch.lua`, ki
+verifye eta sous, rank, provenance, ak tout sis commits.
+Setyèm commit repare akimilasyon depi Fondasyon epi
+konsève `legacyPositiveSemanticState` kòm prèv.
+Limit 1..32, san negative gates, san `postStir12`.
+CI poko verifye.
