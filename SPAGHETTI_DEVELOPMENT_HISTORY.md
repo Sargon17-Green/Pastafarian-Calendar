@@ -307,3 +307,22 @@ LULUS kontrak merah 07; indeks grind legacy salah, sentinel belum ditambah
 ```
 
 Keadaan `EXPECTED_RED` adalah benar-benar terbukti: hanya ujian sejarah langsung keluar dengan kod 1; pembalut khas keluar dengan kod 0. Tiada ralat luar jangka dan semua ujian Stage 1–13 termasuk kunci nama serta fixture telah lulus. Stage15 — PATCH07 belum dimulakan.
+
+
+## Stage 15 — PATCH 07: Pemetaan baris dengan sentinel tanpa kehilangan legacy
+
+### Asal kecacatan dan cara rawatan
+
+`LegacyVisibleGrind::legacyGrindRows` kekal dengan sebelas baris pada indeks 0..10, dan `legacyRowAt(g)` tetap membaca `rows[g] ?? rows[0]` bagi `g=1..11`. Untuk mengekalkan parut sejarah, kod lama tidak diubah. `GrindTablePatch07::rowsWithSentinel` menghasilkan satu jadual baharu, menambah `[0,0,0,0,'none']` pada slot 0 dan mengalihkan setiap baris sejarah kepada slot `index+1`. Nilai sentinel tidak pernah dikira sebagai pengisaran sebenar kerana pembaca lama bermula pada 1.
+
+### Integrasi monsternya
+
+`GrindTablePatch07` membalut satu `LegacyVisibleGrind` yang dibina dengan suntikan jadual sentinel. `grindPatch(g)` memanggil `legacyRowAt(g)` untuk membuktikan akses lama hidup; `buildVisible` memanggil `buildVisibleWrong` yang sama, tetapi dengan jadual baharu. Penghala `VISIBLE_GRIND_LEGACY` tidak dibuang; `visibleDropsLegacy` memperlihatkan kegagalan lampau. Penghala baharu `VISIBLE_GRIND_PATCH_07` menjadi laluan keluaran `visibleDrops`. Metrik dan keadaan semantik dimiliki konteks setiap panggilan, bukan input matematik.
+
+### Bukti wajib
+
+Ujian Stage 14 masih mesti mengembalikan kod 1 dengan 138 perbezaan berbanding oracle, sementara pembalut pengesah keluar 0. Ujian Stage 15 membandingkan 46 titisan × 8 pasangan hari = 368 komponen normatif, tiga pasangan sejarah yang terus berbeza pada 138 komponen, kesetaraan jadual sentinel, pembaca legacy sebenar, pemilikan state, sempadan indeks dan semua regresi Stage 1–13. Keputusan CI sebenar dan SHA akan direkodkan selepas sah.
+
+### Had tahap
+
+Tampalan ini tidak mengubah fungsi SAVE, susunan batu, rumus visible, keturunan hidden, atau pemilihan permutasi. Stage 16 (DISCOVERY 08) ditangguhkan sehingga PATCH 07 hijau di GitHub Actions.

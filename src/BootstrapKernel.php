@@ -226,6 +226,35 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'legacy.visible.grinds');
             return $visible;
         });
+        $this->dispatcher->register('VISIBLE_GRIND_PATCH_07', function(BootstrapContext $context): array {
+            $c = $context->calculationDay;
+            $t = $context->targetDay;
+            $action = $this->dayCount($c);
+            $target = $this->dayCount($t);
+            $counts = [
+                'action' => $action,
+                'target' => $target,
+                'distance' => $this->distance($c, $t),
+                'connection' => $action->add($target),
+                'direction' => $t < $c ? 1 : ($t === $c ? 2 : 3),
+            ];
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $hiddenOld = new \Pastafari\Stage01\Legacy\LegacyHiddenBackward($save);
+            $prior = new \Pastafari\Stage01\Patches\PriorAccessPatch06(
+                new \Pastafari\Stage01\Legacy\LegacyVisiblePrior(),
+                new \Pastafari\Stage01\Patches\HiddenNearnessPatch05($hiddenOld)
+            );
+            $stones = $this->stones();
+            $stored = $hiddenOld->buildStoredBackward($counts, $stones);
+            $patch = new \Pastafari\Stage01\Patches\GrindTablePatch07($save, $prior);
+            $visible = $patch->buildVisible($counts, $stones, $stored);
+            $context->semanticState['patchedVisibleTable'] = $visible;
+            $context->status = 'VISIBLE_GRIND_PATCH_07_RETURNED';
+            $this->metrics->bump($context, 'visible.grind.patch07');
+            return $visible;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -349,18 +378,33 @@ final class BootstrapKernel
     }
 
     /**
-     * Pengeluaran titisan terlihat sejarah dengan indeks jadual salah.
-     * Fungsi ini belum menerima sentinel pembetul Stage 15.
+     * Jalan sejarah mengekalkan cacat baris g=1..11 pada array 0..10.
      *
      * @return array<int,BigInt>
      */
-    public function visibleDrops(int $calculationDay, int $targetDay): array
+    public function visibleDropsLegacy(int $calculationDay, int $targetDay): array
     {
         $context = new BootstrapContext($calculationDay, $targetDay);
         $context->phase = 'VISIBLE_GRIND_LEGACY';
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('VISIBLE_GRIND_LEGACY', $context)
+        );
+    }
+
+    /**
+     * Pengeluaran sah: sentinel pada indeks 0, baris benar pada 1..11.
+     * Laluan sejarah masih diakses melalui visibleDropsLegacy.
+     *
+     * @return array<int,BigInt>
+     */
+    public function visibleDrops(int $calculationDay, int $targetDay): array
+    {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'VISIBLE_GRIND_PATCH_07';
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('VISIBLE_GRIND_PATCH_07', $context)
         );
     }
 

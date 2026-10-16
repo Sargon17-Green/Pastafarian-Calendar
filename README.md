@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 14 (DISCOVERY 07)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 15 (PATCH 07)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -202,3 +202,19 @@ php -d memory_limit=512M tests/verify_stage14_discovery07.php
 Ujian pertama mesti merah secara terkawal dengan tepat 138 ketakpadanan (3 pasangan hari × 46 titisan), ketiga-tiga jadual berbentuk betul dan nilai modulo dalam julat. Pengesah kedua mesti hijau hanya bagi bukti merah itu. Semua regresi Stage 1–13, termasuk bukti sejarah Stage 12, kekal diwajibkan.
 
 Stage 15 (PATCH 07) kelak akan menambah **baris sentinel di indeks 0** dan mengalihkan 11 baris nyata ke `1..11` tanpa membuang pembaca sejarah `legacyRowAt`. Jangan tambah sentinel pada Stage 14. Jangan bina permutasi Stage 16 lebih awal.
+
+
+## Stage 15 — PATCH 07: Sentinel bagi jadual pengisaran terlihat
+
+`GrindTablePatch07` membina jadual baharu tanpa mengubah `LegacyVisibleGrind::legacyGrindRows`. Pada indeks **0** terdapat baris `[0,0,0,0,'none']` sebagai sentinel; sebelas baris sejarah asal dipetakan menurut `new[index+1]=old[index]`, tepat pada indeks **1..11**. Pengira produksi memanggil `LegacyVisibleGrind::buildVisibleWrong` melalui instance yang disuntik jadual pembetul, maka `legacyRowAt(g)` tetap dibaca secara sebenar pada semua 11 pengisaran.
+
+`BootstrapKernel::visibleDrops` melalui `VISIBLE_GRIND_PATCH_07`, manakala `BootstrapKernel::visibleDropsLegacy` melalui `VISIBLE_GRIND_LEGACY`, dengan pembinaan konteks berasingan. Formula SAVE, batu, hidden, prior dan 46 titisan terlihat tidak ditulis semula; kelas legacy lama dan cacat indeksnya masih wujud. Tiada oracle di kod produksi.
+
+```text
+php -d memory_limit=512M tests/verify_stage14_discovery07.php
+php -d memory_limit=512M tests/stage15_patch07_tests.php
+```
+
+Ujian PATCH 07 mesti memeriksa setiap 46 titisan bagi lapan pasangan tarikh, menghasilkan 368 perbandingan terhadap oracle tempatan, tiga jadual sejarah merah yang masing-masing berbeza pada 46 titisan (138 parut) dan pemilikan konteks. Ia juga menguji setiap baris sentinel dan indeks 1..11, 1,408 pemeriksaan baris, serta input indeks salah. Ujian sejarah Stage 14 tetap merah secara langsung dan pengesahnya hijau. Semua ujian Stage 1–13 masih wajib lulus.
+
+Stage 16 — DISCOVERY 08 belum dimulakan; jangan cipta penilaian permutasi lebih awal.

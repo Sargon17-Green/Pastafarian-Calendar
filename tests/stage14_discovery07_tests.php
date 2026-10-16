@@ -64,7 +64,7 @@ foreach ($cases as [$name, $c, $t]) {
     $counts = NormativeMath::workCounts($c, $t);
     $hidden = $oracle->buildHiddenDrops($counts, $stones);
     $expected = $oracle->buildVisibleDrops($counts, $stones, $hidden);
-    $actual = $kernel->visibleDrops($c, $t);
+    $actual = $kernel->visibleDropsLegacy($c, $t);
     if (array_keys($actual) !== range(1, 46)
         || array_keys($expected) !== range(1, 46)) {
         echo "RALAT_BENTUK kes={$name}\n";

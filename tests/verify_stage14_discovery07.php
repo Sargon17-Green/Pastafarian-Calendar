@@ -28,23 +28,29 @@ $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($src, FilesystemIterator::SKIP_DOTS)
 );
 $foundLegacy = false;
+$foundPatch = false;
 foreach ($iterator as $file) {
     if (strtolower($file->getExtension()) !== 'php') continue;
     $s = (string)file_get_contents($file->getPathname());
     if (str_contains($s, 'NormativeMath')
         || str_contains($s, 'NormativeSauce')
-        || str_contains($s, 'function grindPatch(')) $valid = false;
+       ) $valid = false;
+    if (str_contains($s, 'function grindPatch(')) {
+        if ($file->getFilename() !== 'GrindTablePatch07.php') $valid = false;
+        else $foundPatch = true;
+    }
     if (str_contains($s, 'function legacyRowAt(')) {
         if ($file->getFilename() !== 'LegacyVisibleGrind.php') $valid = false;
         else $foundLegacy = true;
     }
 }
 $kernel = (string)file_get_contents($src . '/BootstrapKernel.php');
-$valid = $valid && $foundLegacy
+$valid = $valid && $foundLegacy && $foundPatch
+    && str_contains($kernel, "dispatch('VISIBLE_GRIND_PATCH_07', " . '$context)')
     && str_contains($kernel, "dispatch('VISIBLE_GRIND_LEGACY', " . '$context)')
     && str_contains($kernel, "dispatch('PRIOR_PATCH_06', " . '$context)');
 if (!$valid) {
     fwrite(STDERR, "GAGAL: bukti indeks grind legacy bukan merah yang tepat\n");
     exit(1);
 }
-echo "LULUS kontrak merah 07; indeks grind legacy salah, sentinel belum ditambah\n";
+echo "LULUS kontrak merah 07; legacy kekal salah dan sentinel hanya dalam tampalan\n";
