@@ -188,8 +188,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage34Discovery17Test do
     assert production_next_year(c) == reference_next_year(c)
   end
 
-  test "hồi quy normative đỏ 4: năm kế sau FOUNDATION-539" do
-    c = @foundation - 539
+  test "hồi quy normative đỏ 4: năm kế sau FOUNDATION+2" do
+    c = @foundation + 2
     assert production_next_year(c) == reference_next_year(c)
   end
 end
