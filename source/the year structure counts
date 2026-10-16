@@ -59,7 +59,7 @@ To choose the cutlet count:
   Prepare the cutlet count range.
   Put 2 into the seal inquiry's bowl identity.
   Put 20 into the seal inquiry's seal number.
-  Begin a sealed inquiry.
+  Begin a seal inquiry.
   Convert the cutlet count range's option count to a string.
   Put the string into a structural options wide quantity.
   Choose an equal option given the structural options wide quantity.
@@ -72,7 +72,7 @@ To choose the month count:
   Prepare the month count range.
   Put 3 into the seal inquiry's bowl identity.
   Put 30 into the seal inquiry's seal number.
-  Begin a sealed inquiry.
+  Begin a seal inquiry.
   Convert the month count range's option count to a string.
   Put the string into a structural options wide quantity.
   Choose an equal option given the structural options wide quantity.

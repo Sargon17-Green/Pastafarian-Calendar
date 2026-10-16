@@ -199,7 +199,7 @@ To choose the canonical cutlet partition:
   If the cutlet partition's total choices is "0", exit.
   Put 2 into the seal inquiry's bowl identity.
   Put 21 into the seal inquiry's seal number.
-  Begin a sealed inquiry.
+  Begin a seal inquiry.
   Choose an equal option given the cutlet partition's total choices.
   Select a cutlet partition from the seal inquiry's selected quantity.
 

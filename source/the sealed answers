@@ -88,7 +88,7 @@ To choose the sealed answer direction:
   If the result wide quantity is "1", put 1 into the seal inquiry's answer direction.
 
 \ Set a bowl identity from 1 to 6 and a nonnegative seal number first.
-To begin a sealed inquiry:
+To begin a seal inquiry:
   Calculate the first sealed answer.
   Choose the sealed answer direction.
 

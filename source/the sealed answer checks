@@ -7,7 +7,7 @@
 To check the Foundation sealed answers:
   Put 1 into the seal inquiry's bowl identity.
   Put 1 into the seal inquiry's seal number.
-  Begin a sealed inquiry.
+  Begin a seal inquiry.
   If the seal inquiry's following identity is not 4,
     put "The seal 1 query of bowl 1 has the wrong successor." into the check report; exit.
   If the seal inquiry's starting answer is not "90411690289794975082828500805689671121",
@@ -22,7 +22,7 @@ To check the Foundation sealed answers:
     put "The seal 1 query of bowl 1 chose the wrong number." into the check report; exit.
   Put 2 into the seal inquiry's bowl identity.
   Put 1 into the seal inquiry's seal number.
-  Begin a sealed inquiry.
+  Begin a seal inquiry.
   If the seal inquiry's following identity is not 3,
     put "The seal 1 query of bowl 2 has the wrong successor." into the check report; exit.
   If the seal inquiry's starting answer is not "146177222370062006968514571248409839416",
@@ -37,7 +37,7 @@ To check the Foundation sealed answers:
     put "The seal 1 query of bowl 2 chose the wrong number." into the check report; exit.
   Put 6 into the seal inquiry's bowl identity.
   Put 1 into the seal inquiry's seal number.
-  Begin a sealed inquiry.
+  Begin a seal inquiry.
   If the seal inquiry's following identity is not 1,
     put "The seal 1 query of bowl 6 has the wrong successor." into the check report; exit.
   If the seal inquiry's starting answer is not "79095780211202732600232672687611165248",
@@ -52,7 +52,7 @@ To check the Foundation sealed answers:
     put "The seal 1 query of bowl 6 chose the wrong number." into the check report; exit.
   Put 1 into the seal inquiry's bowl identity.
   Put 10 into the seal inquiry's seal number.
-  Begin a sealed inquiry.
+  Begin a seal inquiry.
   If the seal inquiry's following identity is not 4,
     put "The seal 10 query of bowl 1 has the wrong successor." into the check report; exit.
   If the seal inquiry's starting answer is not "74583638583639866316524959291339271180",
