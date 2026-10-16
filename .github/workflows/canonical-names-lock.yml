@@ -731,3 +731,79 @@ jobs:
             timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --seconds 185 --rss-kib 393216
           done
           echo "CANONICAL_TRIPLE_RANK_BATCH status=PASS start=40 count=3 last=42"
+
+  canonical-triple-neighbor-0:
+    name: 真實三月起點 0：第二名、四分位及倒數第二完整獨立排名
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 獨立核對四種完整一基 BigInt 名次
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset 0 --rank-set neighbors --seconds 185 --rss-kib 393216
+
+  canonical-triple-neighbor-14:
+    name: 真實三月起點 14：第二名、四分位及倒數第二完整獨立排名
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 獨立核對四種完整一基 BigInt 名次
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset 14 --rank-set neighbors --seconds 185 --rss-kib 393216
+
+  canonical-triple-neighbor-28:
+    name: 真實三月起點 28：第二名、四分位及倒數第二完整獨立排名
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 獨立核對四種完整一基 BigInt 名次
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset 28 --rank-set neighbors --seconds 185 --rss-kib 393216
+
+  canonical-triple-neighbor-42:
+    name: 真實三月起點 42：第二名、四分位及倒數第二完整獨立排名
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 取得來源
+        uses: actions/checkout@v4
+      - name: 安裝 Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 獨立核對四種完整一基 BigInt 名次
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset 42 --rank-set neighbors --seconds 185 --rss-kib 393216

@@ -18,13 +18,16 @@ use Pastafari::WeavingRank qw(rankWeavingPolynomial);
 # 取實測第 5000 年三個真正連續月份，獨立核對首／中／末
 # 三個字典序 BigInt 排名的「每一天、所有合法分支」。
 # 不以被測多項式排序流程的內部快取計數作為獨立預言機。
-my ($offset,$seconds,$rss_limit)=(0,185,393216);
+my ($offset,$seconds,$rss_limit,$rank_set)=(0,185,393216,'core');
 GetOptions('window-offset=i'=>\$offset,
+           'rank-set=s'=>\$rank_set,
            'seconds=i'=>\$seconds,
            'rss-kib=i'=>\$rss_limit)
     or die "參數無效\n";
 die "三月窗口起點必須在 0..42\n"
     if $offset<0 || $offset>42;
+die "rank-set 只能是 core 或 neighbors\n"
+    if $rank_set ne 'core' && $rank_set ne 'neighbors';
 die "時間預算須在 1..230 秒\n"
     if $seconds<1 || $seconds>230;
 die "RSS 上限須在 32768..1048576 KiB\n"
@@ -76,11 +79,28 @@ if (!$pid) {
         die "三月局部記憶式和多項式總數不符\n"
             if $total!=$poly;
         die "三月局部有不合理的空計數\n" if $total<3;
-        my @samples=(
-            ['first',Math::BigInt->bone],
-            ['middle',$total->copy->bdiv(2)->badd(1)],
-            ['last',$total->copy],
-        );
+        # core 保持第 40–41 輪既有數學合約；
+        # neighbors 專測字典序下端借位、上下四分位、
+        # 以及最後兩個 BigInt 名次的區段交界。
+        my @samples=$rank_set eq 'core'
+            ? (
+                ['first',Math::BigInt->bone],
+                ['middle',$total->copy->bdiv(2)->badd(1)],
+                ['last',$total->copy],
+              )
+            : (
+                ['second',Math::BigInt->new(2)],
+                ['lower_quartile',$total->copy->bdiv(4)],
+                ['upper_quartile',$total->copy->bmul(3)->bdiv(4)],
+                ['penultimate',$total->copy->bsub(1)],
+              );
+        my $previous=Math::BigInt->bzero;
+        for my $case (@samples) {
+            die "候選排名並未嚴格遞增、或超出 BigInt 完工總數\n"
+                if $case->[1]<1 || $case->[1]>$total
+                || $case->[1]<=$previous;
+            $previous=$case->[1]->copy;
+        }
         my $passed=0;
         for my $sample (@samples) {
             my ($name,$rank)=@$sample;
@@ -178,11 +198,16 @@ if (!$pid) {
                 $offset,$name,length($rank_text),$days,
                 $diag->{entries},$diag->{cache_hits},time()-$start;
         }
-        die "三個必選排名未全數核對\n" if $passed!=3;
+        my $required=$rank_set eq 'core' ? 3 : 4;
+        die "必要排名樣本未全數核對\n" if $passed!=$required;
+        my $scope=$rank_set eq 'core'
+            ? 'THREE_COMPLETE_INDEPENDENT_RANK_PATHS'
+            : 'FOUR_NEIGHBOR_QUARTILE_RANK_PATHS';
         my $diag=$oracle->diagnostics;
-        printf "CANONICAL_TRIPLE_RANKS status=PASS scope=THREE_COMPLETE_INDEPENDENT_RANK_PATHS offset=%d cases=%d days_per_case=%d total_digits=%d memo_states=%d cache_hits=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
-            $offset,$passed,$days,length("$total"),$diag->{entries},
-            $diag->{cache_hits},time()-$start,child_peak();
+        printf "CANONICAL_TRIPLE_RANKS status=PASS scope=%s offset=%d cases=%d days_per_case=%d total_digits=%d memo_states=%d cache_hits=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
+            $scope,$offset,$passed,$days,length("$total"),
+            $diag->{entries},$diag->{cache_hits},
+            time()-$start,child_peak();
         1;
     };
     if (!$ok) {
