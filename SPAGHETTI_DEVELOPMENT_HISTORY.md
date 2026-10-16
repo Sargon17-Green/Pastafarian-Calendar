@@ -1157,3 +1157,26 @@ Không đổi main, không đổi oracle test-only hoặc các patch cũ.
 
 Bước sau: Stage35 PATCH 17 giữ nguyên legacy và tính lại rank
 từ nguồn ngày hỏi open_day, sau đó đưa bốn hồi quy trở lại xanh.
+
+## Giai đoạn 35/55 — PATCH 17: sửa nguồn hạt năm tiếp theo
+
+NextYearSeedPatch gọi thật LegacyCurrentDayNextYearSeed(c,count)
+để ghi lại rank sai lịch sử, sau đó chọn rank chuẩn bằng
+answer_stream(c,open_day,1,11), trong đó open_day là
+cổng đóng của năm đã biết. Candidate, gate và Year5000
+giữ nguyên; NextYearManager trả năm 5001 theo rank chuẩn.
+
+Thêm 20 kiểm thử; bốn normative Stage34 vẫn giữ nguyên expected.
+Giai đoạn 35 PATCH 17 đã được xác minh trên Elixir 1.18.5 / Erlang OTP 27:
+biên dịch 59 tệp .ex, **511/511 kiểm thử PASS**, 0 lỗi và
+không cảnh báo biên dịch Elixir. Canonical Names Lock PASS độc lập.
+Bốn hồi quy normative của Stage34 đều chuyển xanh, không sửa expected.
+LegacyCurrentDayNextYearSeed giữ blob SHA
+`4fc34f60bf4703a348e4b2d49809e9100717d119`;
+oracle test-only giữ blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890792213
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890792155
+Stage35 đóng GREEN. Stage36 DISCOVERY 18 chưa bắt đầu.
+Không sửa main, không nhập oracle vào production, chưa hoàn thiện lịch cuối.
+

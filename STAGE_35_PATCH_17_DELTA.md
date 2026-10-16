@@ -22,3 +22,18 @@ mở rộng các phép đối chiếu cổng, ứng viên, oracle, trạng thái
 
 Dự kiến 511 bài, không thất bại, Canonical Names Lock PASS.
 Không sửa main, không commit HANDOFF_*, chưa tích hợp ngày lịch cuối.
+
+## Kết quả và đóng giai đoạn
+
+Giai đoạn 35 PATCH 17 đã được xác minh trên Elixir 1.18.5 / Erlang OTP 27:
+biên dịch 59 tệp .ex, **511/511 kiểm thử PASS**, 0 lỗi và
+không cảnh báo biên dịch Elixir. Canonical Names Lock PASS độc lập.
+Bốn hồi quy normative của Stage34 đều chuyển xanh, không sửa expected.
+LegacyCurrentDayNextYearSeed giữ blob SHA
+`4fc34f60bf4703a348e4b2d49809e9100717d119`;
+oracle test-only giữ blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890792213
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890792155
+Stage35 đóng GREEN. Stage36 DISCOVERY 18 chưa bắt đầu.
+Không sửa main, không nhập oracle vào production, chưa hoàn thiện lịch cuối.
