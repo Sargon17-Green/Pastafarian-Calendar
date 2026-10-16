@@ -15,15 +15,17 @@ use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 use Pastafari::WeavingPolynomialStream qw(countWeavingsPolynomialStream);
 use Pastafari::WeavingUnrank qw(unrankWeavingPolynomial);
 use Pastafari::WeavingRank qw(rankWeavingPolynomial);
+use Pastafari::WeavingSuffixFactor qw(countWeavingSuffixFactored);
 
 # 原生 5000 年的數個分散四月份窗口（預設末四月 402 日）。
 # 前沿獨立狀態 Oracle 只驗證總數；中位排名的雙向還原不是
 # 另一個獨立的全字典序預言機。邊界詞另有獨立貪婪構造。
-my ($seconds,$rss_kib,$requested_offset,$second_day_partition,$third_day_partition)=(185,393216,undef,0,0);
+my ($seconds,$rss_kib,$requested_offset,$second_day_partition,$third_day_partition,$third_day_target)=(185,393216,undef,0,0,undef);
 GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_kib,
            'window-offset=i'=>\$requested_offset,
            'second-day-partition!'=>\$second_day_partition,
-           'third-day-partition!'=>\$third_day_partition)
+           'third-day-partition!'=>\$third_day_partition,
+           'third-day-target=s'=>\$third_day_target)
     or die "參數無效\n";
 die "seconds 必須在 1..230 範圍\n"
     if $seconds<1 || $seconds>230;
@@ -39,6 +41,13 @@ die "第三日實驗只能在第 37 個窗口單獨啟用\n"
     if $third_day_partition
     && ($second_day_partition || !defined($requested_offset)
         || $requested_offset!=37);
+die "第三日分片只准 parent、1、2、3、assembly\n"
+    if defined($third_day_target)
+    && $third_day_target !~ /\A(?:parent|[123]|assembly)\z/;
+die "第三日分片必須單獨啟用並指定窗口 37\n"
+    if defined($third_day_target)
+    && (!defined($requested_offset) || $requested_offset!=37
+        || $second_day_partition || $third_day_partition);
 die "本工具需 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -201,6 +210,71 @@ if (!$pid) {
                 length("$p12"),$highest,time()-$start;
         }
 
+        # 第 47 輪全在同一子程序執行而 TIME_LIMIT BLOCKED。
+        # 分片模式每個子程序僅跑一個合法前綴的獨立前沿；
+        # assembly 子程序用另一個已受分片比對的精確後綴模型
+        # 驗證三個數的和與全球中間 BigInt 字典序。
+        my ($split_second,$split_third);
+        if (defined $third_day_target) {
+            my $options={
+                profile_engine=>'stream-indexed',
+                max_temp_file_bytes=>16*1024*1024
+            };
+            if ($third_day_target ne 'assembly') {
+                my @prefix=$third_day_target eq 'parent'
+                    ? (1,2) : (1,2,0+$third_day_target);
+                my %prefix_stats;
+                my $forward=countWeavingsFrontier(
+                    \@L,\%prefix_stats,\@prefix
+                );
+                my $factor=countWeavingSuffixFactored(
+                    \@L,\@prefix,undef,undef,$options
+                );
+                die "指定前綴的正向獨立 Oracle 與多項式後綴不相等\n"
+                    if $forward<1 || $forward!=$factor;
+                printf "CANONICAL_WINDOW41 phase=THIRD_PIECE_PASS target=%s prefix=%s digits=%d states=%d elapsed_sec=%.3f\n",
+                    $third_day_target,join(',',@prefix),length("$forward"),
+                    $prefix_stats{states},time()-$start;
+            } else {
+                my $parent=countWeavingSuffixFactored(
+                    \@L,[1,2],undef,undef,$options
+                );
+                die "第三日父前綴必須非空且小於完整總數\n"
+                    if $parent<1 || $parent>=$oracle;
+                my $global=$oracle->copy->bdiv(2)->badd(1);
+                my $before=$oracle->copy->bsub($parent);
+                die "全球中位排名不在第二天選 2 的分支\n"
+                    if $global<=$before;
+                my $local=$global->copy->bsub($before);
+                my $sum=Math::BigInt->bzero;
+                my $choice;
+                for my $j (1,2,3) {
+                    my @prefix=(1,2,$j);
+                    my $ways=countWeavingSuffixFactored(
+                        \@L,\@prefix,undef,undef,$options
+                    );
+                    die "合法第三日 BigInt 分支不能為零\n"
+                        if $ways<1;
+                    $sum->badd($ways);
+                    if (!defined $choice) {
+                        if ($local<=$ways) {
+                            $choice=$j;
+                        } else {
+                            $local->bsub($ways);
+                        }
+                    }
+                }
+                die "三條第三日 BigInt 分支之和不同於第二日父前綴\n"
+                    if $sum!=$parent;
+                die "中間名次無法從所有合法第三日分支定位\n"
+                    if !defined($choice) || $local<1;
+                ($split_second,$split_third)=(2,$choice);
+                printf "CANONICAL_WINDOW41 phase=THIRD_ASSEMBLY_PASS second=%d third=%d branches=3 parent_digits=%d elapsed_sec=%.3f\n",
+                    $split_second,$split_third,length("$parent"),
+                    time()-$start;
+            }
+        }
+
         my @direct_first;
         for my $m (1..@L) {
             push @direct_first,(($m)x$L[$m-1]);
@@ -249,6 +323,10 @@ if (!$pid) {
         die "第三日的獨立前沿 BigInt 分割與索引反排名不相符\n"
             if defined($independent_third)
             && $word->[2]!=$independent_third;
+        die "分片中位排名的第二天選擇不相符\n"
+            if defined($split_second) && $word->[1]!=$split_second;
+        die "分片中位排名的第三天選擇不相符\n"
+            if defined($split_third) && $word->[2]!=$split_third;
         die "索引式解碼未建立實際私人索引\n"
             if ($unrank_stats{indexed_profile_builds}//0)!=1;
         my %rank_stats;

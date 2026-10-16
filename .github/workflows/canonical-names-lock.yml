@@ -1112,3 +1112,88 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 37 --third-day-partition --seconds 185 --rss-kib 393216
+
+  canonical-window37-third-piece-parent:
+    name: 真實 236 日第三天 BigInt 分片 parent
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-window37-third-split]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對精確前綴 BigInt 分片與全局計數
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 37 --third-day-target parent --seconds 185 --rss-kib 393216
+
+  canonical-window37-third-piece-1:
+    name: 真實 236 日第三天 BigInt 分片 1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-window37-third-split]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對精確前綴 BigInt 分片與全局計數
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 37 --third-day-target 1 --seconds 185 --rss-kib 393216
+
+  canonical-window37-third-piece-2:
+    name: 真實 236 日第三天 BigInt 分片 2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-window37-third-split]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對精確前綴 BigInt 分片與全局計數
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 37 --third-day-target 2 --seconds 185 --rss-kib 393216
+
+  canonical-window37-third-piece-3:
+    name: 真實 236 日第三天 BigInt 分片 3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-window37-third-split]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對精確前綴 BigInt 分片與全局計數
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 37 --third-day-target 3 --seconds 185 --rss-kib 393216
+
+  canonical-window37-third-piece-assembly:
+    name: 真實 236 日第三天 BigInt 分片 assembly
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-window37-third-split]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 核對精確前綴 BigInt 分片與全局計數
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 37 --third-day-target assembly --seconds 185 --rss-kib 393216
