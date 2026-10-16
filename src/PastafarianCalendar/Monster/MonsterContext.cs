@@ -149,6 +149,9 @@ public sealed class MonsterContext
     // الندبة السابعة عشرة: يُرفض الحدّ المسموح نفسه في العائلة الواسعة.
     public BigInteger? LegacyInclusiveWideLimitRankResult { get; set; }
 
+    // الرقعة السابعة عشرة: يظل شاهد رفض الحدّ منفصلاً عن المرتبة المقبولة.
+    public BigInteger? PatchedInclusiveWideLimitRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

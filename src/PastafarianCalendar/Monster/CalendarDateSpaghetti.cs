@@ -254,6 +254,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyInclusiveWideLimit(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة السابعة عشرة: المساواة عند حد قبول الأسرة الواسعة لا تُرفض.
+    public static BigInteger EvaluateInclusiveWideLimit(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateInclusiveWideLimit(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

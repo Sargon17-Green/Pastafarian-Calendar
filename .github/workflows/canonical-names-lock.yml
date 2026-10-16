@@ -224,3 +224,5 @@ jobs:
         run: |
           test "${{ steps.discovery_inclusive_wide_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage34Tests/PastafarianCalendar.Stage34Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ رقعة حدّ قبول الأسرة الواسعة السابعة عشرة وحفظ رفض المساواة التاريخي
+        run: dotnet run --project tests/PastafarianCalendar.Stage35Tests/PastafarianCalendar.Stage35Tests.csproj --configuration Release
