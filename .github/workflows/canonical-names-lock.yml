@@ -24,3 +24,27 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+
+  windows-native-stage22:
+    name: Verify Stage 22 with native Windows PowerShell 5.1
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run native Stage 1 regression and Stage 22 discovery
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) {
+            throw ('Native Windows PowerShell 5.1 required: ' + $PSVersionTable.PSVersion.ToString())
+          }
+          Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
+          & .\Run-Stage22.ps1
+          if (-not $?) { throw 'Stage 22 verification failed' }
+      - name: Retain runner-side stage metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-powershell-tagalog-stage22-metadata
+          path: DEVELOPMENT_STAGE.md
+          if-no-files-found: error
