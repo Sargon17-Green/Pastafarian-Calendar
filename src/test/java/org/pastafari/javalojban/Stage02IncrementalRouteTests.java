@@ -32,7 +32,7 @@ public final class Stage02IncrementalRouteTests {
         sharedGlobalRankRouteFullYearInterior();
         sharedGlobalRankRouteExtendedResourceProfile();
         sharedGlobalRankRoute96PrefixProof();
-        sharedGlobalRankRoute192PrefixProof();
+        sharedGlobalRankRoute224PrefixProof();
         sharedGlobalRankRouteInteroperabilityAndBudgets();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
@@ -708,7 +708,7 @@ public final class Stage02IncrementalRouteTests {
     }
 
 
-    private static void sharedGlobalRankRoute192PrefixProof() {
+    private static void sharedGlobalRankRoute224PrefixProof() {
         int[] lengths = new int[47];
         Arrays.fill(lengths, 123);
         lengths[46] = 120;
@@ -723,7 +723,7 @@ public final class Stage02IncrementalRouteTests {
         long scalarBatchBaseline = family.siblingScalarBatchBuildCount();
         int lastOpened = 0;
         int lastClosed = 0;
-        for (int call = 1; call <= 96; call++) {
+        for (int call = 1; call <= 112; call++) {
             MonsterWeavingLinearCounter.RankRoute prior = route;
             route = family.advanceGlobalRankRouteShared(route, 16, 2);
             eq(2, route.lastSharedBatchCalls(),
@@ -738,7 +738,7 @@ public final class Stage02IncrementalRouteTests {
             ok(route.lowerRank().compareTo(rank) <= 0
                     && route.upperRank().compareTo(rank) >= 0,
                 "E_SHARED_192_RANK_CONTAINMENT");
-            if (call == 48 || call == 72 || call == 96) {
+            if (call == 48 || call == 72 || call == 96 || call == 112) {
                 int[] prefix = route.fixedPrefixCopy();
                 int[] seen = new int[lengths.length];
                 int opened = 0;
@@ -759,7 +759,9 @@ public final class Stage02IncrementalRouteTests {
                 eq(route.remainingChoices(),
                     family.countAfterPrefix(prefix),
                     "E_SHARED_192_CHECKPOINT_SUFFIX_DIFFERENTIAL");
-                System.out.println("STAGE_02_SHARED_192_PREFIX_CHECKPOINT_PASS"
+                System.out.println((call <= 96
+                    ? "STAGE_02_SHARED_192_PREFIX_CHECKPOINT_PASS"
+                    : "STAGE_02_SHARED_224_PREFIX_CHECKPOINT_PASS")
                     + " calls=" + call
                     + " prefix_days=" + prefix.length
                     + " opened_months=" + opened
@@ -774,8 +776,8 @@ public final class Stage02IncrementalRouteTests {
                     + (System.nanoTime() - started) / 1000000);
             }
         }
-        eq(192, route.stepsCompleted(),
-            "E_SHARED_192_TOTAL_PREFIX_DAYS");
+        eq(224, route.stepsCompleted(),
+            "E_SHARED_224_TOTAL_PREFIX_DAYS");
         ok(family.siblingScalarBatchBuildCount() > scalarBatchBaseline,
             "E_SHARED_192_SCALAR_BATCH_USED");
         ok(family.siblingPrefixSharedWeightHitCount() > sharedBaseline,
