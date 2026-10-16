@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=35
-CURRENT_KIND=PATCH
-CURRENT_PATCH=17
-LAST_COMPLETED_STAGE=35
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_STAGE=36
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=18
+LAST_COMPLETED_STAGE=36
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,16 +14,16 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..16 và legacy DISCOVERY17. Stage35 thêm NextYearSeedPatch gọi legacy trước, rồi chọn rank trên Dispatcher.answer_stream(c,open_day,1,11) chuẩn; NextYearManager sử dụng corrected_rank.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..17. Stage36 thêm PreviousYearCandidateManager, LegacyNextYearSealForPreviousSeed và PreviousYearManager; năm 4999 dùng đúng gate/candidates và (c,close_day) nhưng sai chốt 11 thay vì 12.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_35_PATCH_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_36_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=511
-CI_FAILURES=0
+CI_TESTS=531
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
 CLOSURE_VERIFICATION_PENDING=NO
 
@@ -844,3 +844,12 @@ CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890792
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38890792155
 Stage35 đóng GREEN. Stage36 DISCOVERY 18 chưa bắt đầu.
 Không sửa main, không nhập oracle vào production, chưa hoàn thiện lịch cuối.
+
+Giai đoạn 36 DISCOVERY 18 đã xác minh qua Elixir 1.18.5 / OTP 27:
+531 bài, 527 PASS, đúng bốn hồi quy normative đỏ; không có
+lỗi điều khiển và không có cảnh báo biên dịch Elixir.
+Canonical Names Lock PASS. Di sản nhầm chốt 11 giữ nguyên,
+Stage37 PATCH18 chưa bắt đầu.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38915227760
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38915227891
+Không thay main, oracle hoặc các patch cũ.
