@@ -62,6 +62,15 @@ jobs:
             echo "PAIRS=$PAIRS_PER_SHARD"
           } | tee cross-logs/provenance.txt
 
+      - name: Praeparare Boost
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p cross-logs
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+          echo BOOST_MULTIPRECISION_HEADER=PASS | tee cross-logs/boost.txt
       - name: Compilare utrumque C++20 per Clang
         shell: bash
         run: |
