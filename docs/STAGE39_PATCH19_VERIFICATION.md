@@ -17,3 +17,14 @@ Stage39 implements a separate guarded owner, `Patch19GuardedYearNumberCache`, ho
 `test/patch19Properties.ts` tests 512 independent positive/negative 32768-bit year-number keys: each receives one original MISS, two valid triple-match HITs, and independent MISSes for cDay-only, opening-only, closing-only, and all-three mismatch, with exact old getter/writer counts. Six real full Stage37/38 Year5000 calls reverse the insertion order and independently verify that every corrected served record matches the true Year5000(c), while the historical Stage38 cache **still** reports its archived bad wrong HITs. Spies verify every physical Stage37 walk and both old /365 ghost calls on each full query. All old 19 intentionally failing discovery witnesses are left unchanged.
 
 **No Stage40 development** in this checkpoint. Completion requires two independent GitHub Actions jobs SUCCESS for native TypeScript typecheck, full Stage1–39 suite and frozen names lock. Do not mark LAST_COMPLETED_STAGE=39 until CI proof.
+
+## Native CI validation — 16 October 2026
+
+Implementation [8f6648a](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/8f6648a17001ad8fc2c6208132df135f6f9474fa), [GitHub Actions 38588328651](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38588328651): `verify` and the legacy-labelled `stage27-typescript-marathi` jobs both SUCCESS. Full native TypeScript typecheck, Stage1–39 regressions, all nineteen archived intentionally failing historical discoveries (verified by expected-RED harnesses) and frozen names lock PASS.
+
+```text
+STAGE_39_PATCH_19_GUARDS_PASS directMisses=5 directHits=1 individualGuards=3 externalTamperMiss=1 preloadedNoGuardMiss=1 actualYear5000Queries=4 correctedMisses=3 correctedHits=1 staleHistoricalStage38StillServed=1 oldGetSpy=8 oldPutSpy=4 stage37WalkSpy=4 truePredecessors=134 sharedWrites=7772 lateFaultCases=2 rankWrong=0
+STAGE_39_PATCH_19_PROPERTIES_PASS directKeys=512 fingerprintUnique=512 cDayOnlyMiss=512 openingOnlyMiss=512 closingOnlyMiss=512 tripleMiss=512 emptyMiss=512 trueDirectHits=1024 historicalWouldBeWrong=512 originalMapGets=3584 originalMapPuts=2560 bigIntBits=32768 realQueries=6 realHITs=2 realMISSes=4 originalWrongHITs=3 correctedWrong=0 stage37Walks=6 old365Calls=12 realPredecessors=198 realWrites=11484 correctedKeyCount=1
+```
+
+**Stage39 complete; LAST_COMPLETED_STAGE=39.** All corrected results match actual physically computed Stage37 Year5000; only an all-three-guard and old-slot coherent HIT is authoritative, with year.number unchanged as key and oldGet/oldPut physically run. Historic Stage38 stale served output is independently retained uncorrected as evidence. Stage40 has not started.
