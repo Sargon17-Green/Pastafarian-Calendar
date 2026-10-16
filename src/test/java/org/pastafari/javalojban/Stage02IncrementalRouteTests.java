@@ -236,6 +236,62 @@ public final class Stage02IncrementalRouteTests {
             "E_ALL_OPENED_512_LAST_RANK_ROUND_TRIP");
         ok(family.allOpenedSuffixClosedFormComputationCount() > 0,
             "E_ALL_OPENED_512_FAST_SUFFIX_USED");
+        int[] alternate = new int[prefix.length];
+        int alternativeDays = 0;
+        for (int month = 0; month < lengths.length; month++) {
+            alternate[alternativeDays++] = month + 1;
+        }
+        for (int month = 0; month < 41; month++) {
+            for (int i = 1; i < lengths[month]; i++) {
+                alternate[alternativeDays++] = month + 1;
+            }
+        }
+        for (int i = 0; i < 96; i++) {
+            alternate[alternativeDays++] = 42;
+        }
+        for (int i = 0; i < 121; i++) {
+            alternate[alternativeDays++] = 43;
+        }
+        eq(prefix.length, alternativeDays,
+            "E_ALL_OPENED_512_CLOSURE_ALT_PREFIX_DAYS");
+        int[] seen = new int[lengths.length];
+        for (int month : prefix) seen[month - 1]++;
+        int closed = 0;
+        while (closed < lengths.length
+                && seen[closed] == lengths[closed]) closed++;
+        eq(42, closed, "E_ALL_OPENED_512_CLOSURE_ORIGINAL");
+        Arrays.fill(seen, 0);
+        for (int month : alternate) seen[month - 1]++;
+        closed = 0;
+        while (closed < lengths.length
+                && seen[closed] == lengths[closed]) closed++;
+        eq(41, closed, "E_ALL_OPENED_512_CLOSURE_ALTERNATE");
+        BigInteger alternateCount = family.countAfterPrefix(alternate);
+        BigInteger alternateMiddle = alternateCount.add(BigInteger.ONE)
+            .divide(BigInteger.TWO);
+        int[] alternateWeaving =
+            family.unrankAfterPrefix(alternate, alternateMiddle);
+        eq(alternateMiddle,
+            family.rankAfterPrefix(alternate, alternateWeaving),
+            "E_ALL_OPENED_512_CLOSURE_ALTERNATE_RANK_ROUNDTRIP");
+        BigInteger[] alternateBranches =
+            family.countSiblingBranchSizes(alternate);
+        BigInteger alternatePartition = BigInteger.ZERO;
+        for (BigInteger branch : alternateBranches) {
+            alternatePartition = alternatePartition.add(branch);
+        }
+        eq(alternateCount, alternatePartition,
+            "E_ALL_OPENED_512_CLOSURE_ALTERNATE_PARTITION");
+        eq(alternateCount, new MonsterWeavingLinearCounter(lengths)
+            .countAfterPrefix(alternate),
+            "E_ALL_OPENED_512_CLOSURE_ALTERNATE_COLD");
+        eq(0L, family.siblingPrefixDotCallCount(),
+            "E_ALL_OPENED_512_CLOSURE_NO_FORWARD_DOT");
+        System.out.println("STAGE_02_ALL_OPENED_512_CLOSURE_PASS"
+            + " closed_original=42 closed_alternate=41"
+            + " suffix_days=512"
+            + " alternate_middle_rank_digits="
+            + alternateMiddle.toString().length());
         System.out.println("STAGE_02_ALL_OPENED_512_SUFFIX_PASS"
             + " full_days=" + totalDays
             + " fixed_prefix_days=" + prefix.length
