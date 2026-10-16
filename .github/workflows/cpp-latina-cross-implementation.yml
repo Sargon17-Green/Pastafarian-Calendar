@@ -6,6 +6,8 @@ on:
       - 'C\+\+&Latina'
     paths:
       - '.github/workflows/cpp-latina-cross-implementation.yml'
+      - 'src/**'
+      - 'include/**'
   workflow_dispatch:
 
 permissions:
