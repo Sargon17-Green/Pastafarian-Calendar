@@ -29,19 +29,22 @@ To check the native and wide year candidate bridge:
   If the first candidate does not contain the sample native year day,
     put "A valid native year excluded an interior day." into the check report; exit.
   Convert the sample native year day into a wide signed day.
-  If the first extended candidate does not contain the converted signed day result,
+  Evaluate extended year containment given the first extended candidate and the converted signed day result.
+  If the extended year containment result is not 1,
     put "A widened year excluded the same interior day." into the check report; exit.
   Put -15056000 into the sample native year day.
   If the first candidate contains the sample native year day,
     put "The native year included the opening gate." into the check report; exit.
   Convert the sample native year day into a wide signed day.
-  If the first extended candidate contains the converted signed day result,
+  Evaluate extended year containment given the first extended candidate and the converted signed day result.
+  If the extended year containment result is 1,
     put "The widened year included the opening gate." into the check report; exit.
   Put -15055655 into the sample native year day.
   If the first candidate does not contain the sample native year day,
     put "The native year excluded the closing gate." into the check report; exit.
   Convert the sample native year day into a wide signed day.
-  If the first extended candidate does not contain the converted signed day result,
+  Evaluate extended year containment given the first extended candidate and the converted signed day result.
+  If the extended year containment result is not 1,
     put "The widened year excluded the closing gate." into the check report; exit.
   Put 0 into the first candidate's closing index.
   Measure the first candidate.

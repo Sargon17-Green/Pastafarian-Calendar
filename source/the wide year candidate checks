@@ -28,19 +28,23 @@ To check enormous wide year containment:
     put "The immense wide year gate-span count was wrong." into the check report; exit.
   Put "1000000000000000000000000000000000000000000000000" into the wide year test magnitude.
   Set the wide year test day from the wide year test magnitude given 1.
-  If the first extended candidate contains the wide year test day,
+  Evaluate extended year containment given the first extended candidate and the wide year test day.
+  If the extended year containment result is 1,
     put "An immense year included its opening gate." into the check report; exit.
   Put "1000000000000000000000000000000000000000000000001" into the wide year test magnitude.
   Set the wide year test day from the wide year test magnitude given 1.
-  If the first extended candidate does not contain the wide year test day,
+  Evaluate extended year containment given the first extended candidate and the wide year test day.
+  If the extended year containment result is not 1,
     put "An immense year excluded the day after its opening gate." into the check report; exit.
   Put "1000000000000000000000000000000000000000000002070" into the wide year test magnitude.
   Set the wide year test day from the wide year test magnitude given 1.
-  If the first extended candidate does not contain the wide year test day,
+  Evaluate extended year containment given the first extended candidate and the wide year test day.
+  If the extended year containment result is not 1,
     put "An immense year excluded its closing gate." into the check report; exit.
   Put "1000000000000000000000000000000000000000000002071" into the wide year test magnitude.
   Set the wide year test day from the wide year test magnitude given 1.
-  If the first extended candidate contains the wide year test day,
+  Evaluate extended year containment given the first extended candidate and the wide year test day.
+  If the extended year containment result is 1,
     put "An immense year included the day after its closing gate." into the check report; exit.
 
 To check enormous wide year ordering:
@@ -56,14 +60,17 @@ To check enormous wide year ordering:
   Measure the second extended candidate.
   If the second extended candidate's valid is not 1,
     put "The competing wide year was unexpectedly invalid." into the check report; exit.
-  If the first extended candidate does not come before the second extended candidate,
+  Evaluate extended year ordering given the first extended candidate and the second extended candidate.
+  If the extended year ordering result is not 1,
     put "Equal-length wide years did not sort by earlier opening." into the check report; exit.
-  If the second extended candidate comes before the first extended candidate,
+  Evaluate extended year ordering given the second extended candidate and the first extended candidate.
+  If the extended year ordering result is 1,
     put "The wide year tie-breaker was not antisymmetric." into the check report; exit.
   Put "1000000000000000000000000000000000000000000001810" into the wide year test magnitude.
   Set the second extended candidate's closing day from the wide year test magnitude given 1.
   Measure the second extended candidate.
-  If the second extended candidate does not come before the first extended candidate,
+  Evaluate extended year ordering given the second extended candidate and the first extended candidate.
+  If the extended year ordering result is not 1,
     put "A shorter wide year did not precede a longer one." into the check report; exit.
 
 To check invalid wide year endpoints:

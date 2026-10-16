@@ -26,6 +26,8 @@ A wide year candidate has
 
 The first extended candidate is a wide year candidate.
 The second extended candidate is a wide year candidate.
+The extended year containment result is a number.
+The extended year ordering result is a number.
 
 To measure a wide year candidate:
   Put 0 into the wide year candidate's valid.
@@ -56,17 +58,20 @@ To verify a wide year length and span count for a wide year candidate:
   If the longest legal wide days is numerically smaller than the wide year candidate's year length, exit.
   Put 1 into the wide year candidate's valid.
 
-To decide if a wide year candidate contains a wide signed day:
-  If the wide year candidate's valid is not 1, say no.
+To evaluate extended year containment given a wide year candidate and a wide signed day:
+  Put 0 into the extended year containment result.
+  If the wide year candidate's valid is not 1, exit.
   Compare the wide year candidate's closing day with the wide signed day.
-  If the signed day precedence result is 1, say no.
+  If the signed day precedence result is 1, exit.
   Compare the wide year candidate's opening day with the wide signed day.
-  If the signed day precedence result is 1, say yes.
-  Say no.
+  If the signed day precedence result is 1,
+    put 1 into the extended year containment result.
 
-To decide if a wide year candidate comes before another wide year candidate:
-  If the wide year candidate's year length is numerically smaller than the other wide year candidate's year length, say yes.
-  If the other wide year candidate's year length is numerically smaller than the wide year candidate's year length, say no.
+To evaluate extended year ordering given a wide year candidate and another wide year candidate:
+  Put 0 into the extended year ordering result.
+  If the wide year candidate's year length is numerically smaller than the other wide year candidate's year length,
+    put 1 into the extended year ordering result; exit.
+  If the other wide year candidate's year length is numerically smaller than the wide year candidate's year length, exit.
   Compare the wide year candidate's opening day with the other wide year candidate's opening day.
-  If the signed day precedence result is 1, say yes.
-  Say no.
+  If the signed day precedence result is 1,
+    put 1 into the extended year ordering result.
