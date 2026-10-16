@@ -18,7 +18,7 @@ def divide_by_byte(raw: bytes, divisor: int) -> tuple[int, bytes, int, int]:
     remainder = 0
     for i in range(N - 1, -1, -1):
         quotient[i], remainder = divmod((remainder << 8) | raw[i], divisor)
-    used = len(bytes(quotient).rstrip(b"\\x00"))
+    used = len(bytes(quotient).rstrip(bytes([0])))
     return 0, bytes(quotient), remainder, used
 
 
