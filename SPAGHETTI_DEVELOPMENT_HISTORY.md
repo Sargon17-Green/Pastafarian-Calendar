@@ -217,3 +217,22 @@ Penyimpan legacy, pendedah salah, dispatcher serta konteks per-panggilan menjadi
 ### Had yang sengaja dikekalkan
 
 Tiada pembetulan peta `8-k` diwujudkan lagi. Jangan menterbalikkan susunan stor untuk membetulkan gejala; perkara ini ialah tugas Stage 11 (PATCH 05).
+
+
+## Stage 11 — PATCH 05: Pembetulan kedekatan melalui indeks 8-k
+
+### Apa yang dielakkan
+
+Stage 10 memperkenalkan `LegacyHiddenBackward` dengan susunan `hidden7,hidden6,...,hidden1` di dalam stor dan pembaca `wrongNearness` yang salah menganggap slot 1 paling dekat. Pemindahan atau penyongsangan stor akan memusnahkan bukti asal. Oleh itu stor, fungsi pembaca salah dan dispatcher sejarah kekal utuh.
+
+### Mengapa patch setara
+
+`HiddenNearnessPatch05` menerima `k` dengan had 1..7, menterjemah hanya akses kepada slot `8-k`, dan memanggil `wrongNearness` pada stor yang sama. Ini memulihkan nilai titisan yang betul tanpa mengubah rumus atau urutan penyimpanan. Setiap pembinaan melalui `BootstrapKernel::hiddenDrops(c,t)` mempunyai konteks semantik dan objek patch sendiri.
+
+### Bukti ujian
+
+Regresi Stage 10 kekal merah secara langsung pada legacy, dengan 72 ketakpadanan dan 12 padanan bagi 12 pasangan. Penerimaan Stage 11 wajib membandingkan pengeluaran dengan `NormativeSauce` dalam skop ujian sahaja, meliputi 37 pasangan, 259 nilai titisan, 128 stor sintetik × tujuh slot, setiap penanda legacy, ralat input dan kesetaraan semantik Stage 1–9. Pemuat ujian lama masih hijau.
+
+### Had
+
+Stage 12 (DISCOVERY 06 — penggunaan sejarah yang tidak mengenali slot hidden bagi indeks tidak positif) belum ditambah. Tidak berlaku bacaan oracle dalam kod produksi.

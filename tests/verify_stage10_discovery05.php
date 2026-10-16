@@ -37,15 +37,21 @@ $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($src, FilesystemIterator::SKIP_DOTS)
 );
 $foundWrongStorage = false;
+$foundPatch = false;
 foreach ($iterator as $file) {
     if (strtolower($file->getExtension()) !== 'php') {
         continue;
     }
     $body = (string)file_get_contents($file->getPathname());
     if (str_contains($body, 'NormativeMath')
-        || str_contains($body, 'NormativeSauce')
-        || str_contains($body, 'function hiddenByNearness(')) {
+        || str_contains($body, 'NormativeSauce')) {
         $valid = false;
+    }
+    if (str_contains($body, 'function hiddenByNearness(')) {
+        $foundPatch = $foundPatch || $file->getFilename() === 'HiddenNearnessPatch05.php';
+        if ($file->getFilename() !== 'HiddenNearnessPatch05.php') {
+            $valid = false;
+        }
     }
     if (str_contains($body, 'function wrongNearness(')) {
         $foundWrongStorage = $foundWrongStorage
@@ -56,10 +62,11 @@ foreach ($iterator as $file) {
     }
 }
 $kernel = (string)file_get_contents($src . '/BootstrapKernel.php');
-$valid = $valid && $foundWrongStorage
-    && str_contains($kernel, "dispatch('HIDDEN_BACKWARD_LEGACY', " . '$context)');
+$valid = $valid && $foundWrongStorage && $foundPatch
+    && str_contains($kernel, "register('HIDDEN_BACKWARD_LEGACY'")
+    && str_contains($kernel, "dispatch('HIDDEN_PATCH_05', " . '$context)');
 if (!$valid) {
-    fwrite(STDERR, "GAGAL: bukti stor terbalik bukan merah yang diwajibkan\n");
+    fwrite(STDERR, "GAGAL: bukti stor terbalik atau pengasingan tampalan salah\n");
     exit(1);
 }
-echo "LULUS kontrak merah 05; stor terbalik wujud dan pembetulan belum hadir\n";
+echo "LULUS kontrak merah 05; stor terbalik kekal dan pembetulan aktif\n";

@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 10 (DISCOVERY 05)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 11 (PATCH 05)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -146,3 +146,15 @@ php -d memory_limit=512M tests/verify_stage10_discovery05.php
 ```
 
 Ujian pertama sengaja merah: 12 pasangan hari dengan 72 penyimpangan dan 12 padanan pada slot 4. Pengesah kedua hijau hanya apabila setiap penyimpangan sepadan dengan stor songsang dan tiada ralat lain. Ujian Stage 1–9 kekal hijau. **Jangan balikkan stor dan jangan tambahkan `hiddenByNearness` sehingga Stage 11.**
+
+
+## Stage 11 — PATCH 05: Akses titisan menurut jarak
+
+`HiddenNearnessPatch05::hiddenByNearness` mengubah indeks bacaan kepada `8-k` lalu memanggil pembaca sejarah `LegacyHiddenBackward::wrongNearness` **tanpa menyusun semula tatasusunan**. Penghala produksi `HIDDEN_PATCH_05` masih membina stor terbalik dan mengekalkan penghala `HIDDEN_BACKWARD_LEGACY` untuk bukti sejarah.
+
+```text
+php -d memory_limit=512M tests/verify_stage10_discovery05.php
+php -d memory_limit=512M tests/stage11_patch05_tests.php
+```
+
+Ujian penemuan Stage 10 dijalankan terus terhadap legacy dan kekal merah dengan 72 perbezaan, 12 padanan, manakala pembalut pengesahnya hijau. Ujian Stage 11 memeriksa kesetaraan 37 pasangan × tujuh titisan, 128 set slot sintetik, hasil berulang/per-instance, ralat indeks dan regresi penuh Stage 1–9. Tiada tampalan 06 atau perubahan oracle.

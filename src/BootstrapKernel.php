@@ -135,6 +135,32 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'legacy.hidden.reveals');
             return $revealed;
         });
+        $this->dispatcher->register('HIDDEN_PATCH_05', function(BootstrapContext $context): array {
+            $c = $context->calculationDay;
+            $t = $context->targetDay;
+            $action = $this->dayCount($c);
+            $target = $this->dayCount($t);
+            $distance = $this->distance($c, $t);
+            $counts = [
+                'action' => $action,
+                'target' => $target,
+                'distance' => $distance,
+                'connection' => $action->add($target),
+                'direction' => $t < $c ? 1 : ($t === $c ? 2 : 3),
+            ];
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyHiddenBackward($save);
+            $patch = new \Pastafari\Stage01\Patches\HiddenNearnessPatch05($legacy);
+            $stored = $legacy->buildStoredBackward($counts, $this->stones());
+            $context->semanticState['hiddenBackward'] = $stored;
+            $revealed = $patch->revealByNearness($stored);
+            $context->semanticState['hiddenNearness'] = $revealed;
+            $context->status = 'HIDDEN_PATCH_05_RETURNED';
+            $this->metrics->bump($context, 'hidden.patch05.reveals');
+            return $revealed;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -205,18 +231,18 @@ final class BootstrapKernel
     }
 
     /**
-     * Akses titisan tersembunyi lama menggunakan susunan slot yang salah.
-     * Perbaikan pemetaan slot hanya dibenarkan bermula Stage 11.
+     * Akses sah menggunakan tampalan indeks 8-k ke atas stor legacy songsang.
+     * Pembaca legacy yang salah kekal dapat diuji terus.
      *
      * @return array<int,BigInt>
      */
     public function hiddenDrops(int $calculationDay, int $targetDay): array
     {
         $context = new BootstrapContext($calculationDay, $targetDay);
-        $context->phase = 'HIDDEN_BACKWARD_LEGACY';
+        $context->phase = 'HIDDEN_PATCH_05';
         return $this->boundary->run(
             $context,
-            fn(): array => $this->dispatcher->dispatch('HIDDEN_BACKWARD_LEGACY', $context)
+            fn(): array => $this->dispatcher->dispatch('HIDDEN_PATCH_05', $context)
         );
     }
 

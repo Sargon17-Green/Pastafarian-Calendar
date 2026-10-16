@@ -44,11 +44,11 @@ $keys = range(1, 7);
 foreach ($cases as [$name, $c, $t]) {
     $expectedCounts = NormativeMath::workCounts($c, $t);
     $expected = $normative->buildHiddenDrops($expectedCounts, $normativeStones);
-    $actual = $kernel->hiddenDrops($c, $t);
-    $stored = $legacy->buildStoredBackward($expectedCounts, $kernel->stones());
+    $actual = $legacy->revealWrong($storedPlaceholder = $legacy->buildStoredBackward($expectedCounts, $kernel->stones()));
+    $stored = $storedPlaceholder;
     $direct = $legacy->revealWrong($stored);
-    $repeat = $kernel->hiddenDrops($c, $t);
-    $newKernel = (new BootstrapKernel())->hiddenDrops($c, $t);
+    $repeat = $legacy->revealWrong($stored);
+    $newKernel = (new LegacyHiddenBackward(new SavePatch01(new LegacyRemainder())))->revealWrong($stored);
 
     if (array_keys($actual) !== $keys || array_keys($stored) !== $keys
         || count($expected) !== 7) {

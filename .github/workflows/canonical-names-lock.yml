@@ -64,3 +64,5 @@ jobs:
         run: php -d memory_limit=512M tests/stage09_patch04_tests.php
       - name: Penemuan 05 — sahkan stor hidden terbalik
         run: php -d memory_limit=512M tests/verify_stage10_discovery05.php
+      - name: Tampalan 05 — bandingkan hidden dengan oracle normatif
+        run: php -d memory_limit=512M tests/stage11_patch05_tests.php
