@@ -355,6 +355,34 @@ public final class Stage02IncrementalRouteTests {
             "E_CLOSED_GLOBAL_INDEPENDENT_LOCAL_RANK");
         array(family.unrankAfterPrefix(prefix, localRank), weaving,
             "E_CLOSED_GLOBAL_DIRECT_UNRANK_EQUIVALENCE");
+        eq(BigInteger.ONE, block.lowerRank(),
+            "E_CLOSED_GLOBAL_FIRST_BLOCK_STARTS_AT_ONE");
+        MonsterWeavingLinearCounter.RankRoute firstRoute =
+            family.beginGlobalRankRouteWithinPrefix(
+                prefix, block.lowerRank(), 448);
+        for (int call = 1; call <= 4; call++) {
+            firstRoute =
+                family.advanceGlobalRankRouteShared(firstRoute, 16, 16);
+            eq(5266 + 16 * call, firstRoute.stepsCompleted(),
+                "E_CLOSED_GLOBAL_FIRST_STEPS");
+            eq(firstRoute.remainingChoices(),
+                family.countAfterPrefix(firstRoute.fixedPrefixCopy()),
+                "E_CLOSED_GLOBAL_FIRST_SUFFIX_DIFFERENTIAL");
+        }
+        int[] firstSeen = new int[lengths.length];
+        for (int id : firstRoute.fixedPrefixCopy()) firstSeen[id - 1]++;
+        int closedAfter = 0;
+        while (closedAfter < lengths.length
+                && firstSeen[closedAfter] == lengths[closedAfter]) {
+            closedAfter++;
+        }
+        eq(43, closedAfter, "E_CLOSED_GLOBAL_CROSSES_MONTH_BOUNDARY");
+        array(Arrays.copyOf(family.lexFirst(), firstRoute.stepsCompleted()),
+            firstRoute.fixedPrefixCopy(),
+            "E_CLOSED_GLOBAL_FIRST_PREFIX_ORACLE");
+        ok(firstRoute.complete(), "E_CLOSED_GLOBAL_FIRST_ROUTE_COMPLETE");
+        array(family.lexFirst(), family.finishGlobalRankRoute(firstRoute),
+            "E_CLOSED_GLOBAL_FIRST_FULL_WEAVING");
         System.out.println("STAGE_02_CLOSED_GLOBAL_ROUTE_PASS"
             + " fixed_prefix_days=5266"
             + " closed_months=42"
