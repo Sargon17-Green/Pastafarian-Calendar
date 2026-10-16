@@ -147,7 +147,7 @@ To make the weaving state signature:
     Put the examined woven month state's next into the examined woven month state.
   Repeat.
 
-To find a cached weaving result given a string:
+To find a weave cached result given a string:
   Put the weave completion cache's first into the matched weave result.
   Loop.
     If the matched weave result is nil, break.
@@ -193,7 +193,7 @@ To resolve weaving completions into a wide quantity:
     put the short weaving suffix's completions into the wide quantity; exit.
   Make the weaving state signature.
   Put the weaving selection's state signature into a saved signature string.
-  Find a cached weaving result given the saved signature string.
+  Find a weave cached result given the saved signature string.
   If the matched weave result is not nil,
     put the matched weave result's completions into the wide quantity; exit.
   Put "0" into a sum wide quantity.
