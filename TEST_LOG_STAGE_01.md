@@ -191,3 +191,13 @@ signed-add result-length metadata, without mutation and with fail-closed
 metadata on invalid sign/negative zero. These are building blocks only;
 unbounded BigInt, complete normative calendar and verified Ge'ez catalog
 remain absent. `LAST_COMPLETED_STAGE=0`.
+
+## Bounded division-by-byte candidate — pending native verification
+
+ROM cases 123..138 cover division by one, 255, 254, two, three, four,
+high-byte boundaries, exact 4096-byte operands, quotient carries,
+remainder, source immutability, recovery after zero-divisor rejection
+and repeated invocation. A separate host reference checks multi-byte
+byte-radix division against Python arbitrary-precision math.
+No native PASS is claimed before both GitHub Actions jobs succeed;
+`LAST_COMPLETED_STAGE=0`.

@@ -66,3 +66,10 @@ two-byte canonical length field on successful signed addition, including
 carry into byte 4097. Invalid encodings zeroize the length metadata
 before returning failure. ROM cases 109..122 passed native CI in run 38794654298.
 No historical DISCOVERY/PATCH stage is started.
+
+## Stage 1: unsigned divide by byte — candidate
+
+Added fixed-capacity 4096-byte dividend / nonzero 8-bit divisor, with
+exact quotient, remainder and quotient-length metadata, plus fail-closed
+division-by-zero semantics. Native cases 123..138 remain pending.
+No code from Stage 2 or other implementation is used.

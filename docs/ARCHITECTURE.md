@@ -182,3 +182,19 @@ without changing any bank data. The selected bank is preserved.
 length and sign. Its full 4097-byte result cannot silently be described as
 4096 bytes on carry. The scanner does not allocate, own or free memory.
 Cases 109..122 passed actual SM83 execution in Actions run 38794654298. General variable-length BigInt is still absent.
+
+## Exact nonnegative /u8 division — Stage-1 candidate
+
+`BankedDivU8` reads a 4096-byte nonnegative dividend from SRAM bank 0,
+and one-byte divisor `wDivisor` in 1..255. It performs **bitwise restoring
+division entirely on SM83**, outputting a 4096-byte quotient in SRAM bank 2,
+its canonical significant-byte length in `wDivQuotLength` (0..4096),
+and remainder in `wDivRemainderLo` (0..254, high byte zero). It also
+zeros the stale signed-add carry byte at B000. Bank 0 is not modified;
+bank 2 is selected on return.
+
+Division by zero explicitly sets `wDivStatus=1`, zeroizes all 4097 bytes
+of output, and resets remainder/length, preventing stale results.
+The algorithm handles the entire 32768-bit dividend, but only a **u8**
+divisor. It is not yet a general BigInt division/quotient engine.
+Native cases 123..138 and host arithmetic verification are pending.

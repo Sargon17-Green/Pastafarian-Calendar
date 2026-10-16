@@ -81,3 +81,11 @@ records the 0..4097 canonical result length and resets that metadata on
 validation errors. This is essential metadata for future variable-length
 numbers, but is not yet a BigInt allocation or arbitrary-length operation.
 Native ROM tests 109..122 passed in run 38794654298, together with an independent Python length model (1,829 host cases). Stage 1 remains incomplete.
+
+## 4096-byte unsigned dividend / 8-bit divisor — candidate
+
+Bitwise long division (SM83 instructions) preserves a 4096-byte dividend
+and produces a full quotient plus an exact remainder, with 16-bit scratch
+for the maximum interim remainder 2*(d-1)+1 <=509. Zero divisor is
+rejected with output/metadata scrub, not silently normalized.
+Native ROM cases 123..138 and independent host byte-radix oracle pending.
