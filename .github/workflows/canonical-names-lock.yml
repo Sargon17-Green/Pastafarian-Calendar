@@ -66,3 +66,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage10_discovery05.php
       - name: Tampalan 05 — bandingkan hidden dengan oracle normatif
         run: php -d memory_limit=512M tests/stage11_patch05_tests.php
+      - name: Penemuan 06 — pastikan pembaca prior legacy buta terhadap hidden
+        run: php -d memory_limit=512M tests/verify_stage12_discovery06.php
