@@ -63,6 +63,7 @@ is(scalar(keys %vector),scalar(@sources),
 my $vec=$vector{'t/48_canonical_year_month_vector.t'};
 if ($vec) {
     for my $case (
+        ['zero-based 37',37,[83,88,40,25],236],
         ['zero-based 38',38,[88,40,25,77],230],
         ['zero-based 39',39,[40,25,77,98],240],
         ['zero-based 40',40,[25,77,98,122],322],

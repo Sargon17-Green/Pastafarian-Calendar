@@ -19,17 +19,21 @@ use Pastafari::WeavingRank qw(rankWeavingPolynomial);
 # 原生 5000 年的數個分散四月份窗口（預設末四月 402 日）。
 # 前沿獨立狀態 Oracle 只驗證總數；中位排名的雙向還原不是
 # 另一個獨立的全字典序預言機。邊界詞另有獨立貪婪構造。
-my ($seconds,$rss_kib,$requested_offset)=(185,393216,undef);
+my ($seconds,$rss_kib,$requested_offset,$second_day_partition)=(185,393216,undef,0);
 GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_kib,
-           'window-offset=i'=>\$requested_offset)
+           'window-offset=i'=>\$requested_offset,
+           'second-day-partition!'=>\$second_day_partition)
     or die "參數無效\n";
 die "seconds 必須在 1..230 範圍\n"
     if $seconds<1 || $seconds>230;
 die "rss-kib 必須在 32768..1048576 範圍\n"
     if $rss_kib<32768 || $rss_kib>1048576;
-die "指定位置只允許 10、20、28、36、41；其餘窗口不得默默通過\n"
+die "指定位置只允許 10、20、28、36、37、41；其餘窗口不得默默通過\n"
     if defined($requested_offset)
-    && !grep { $requested_offset==$_ } (10,20,28,36,41);
+    && !grep { $requested_offset==$_ } (10,20,28,36,37,41);
+die "獨立第二日分支工作必須明確選第 37 個窗口\n"
+    if $second_day_partition
+    && (!defined($requested_offset) || $requested_offset!=37);
 die "本工具需 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -85,6 +89,7 @@ if (!$pid) {
             20=>'106,115,119,39',
             28=>'55,119,97,50',
             36=>'101,83,88,40',
+            37=>'83,88,40,25',
             41=>'77,98,122,105',
         );
         my @L=@year[$window_offset .. $window_offset+3];
@@ -114,6 +119,34 @@ if (!$pid) {
             if $stream!=$oracle;
         printf "CANONICAL_WINDOW41 phase=THREE_COUNTS_PASS stream_rows=%d elapsed_sec=%.3f\n",
             $stream_stats{rows_serialized},time()-$start;
+
+        # 這不是 236 日完整逐天字序的獨立證明：
+        # 以另一個不共用多項式排序程式碼的「正向合法狀態」
+        # Oracle 獨立核對所有第二日合法分支和，
+        # 再根據大整數中位名次決定第二日月份。
+        my $independent_second;
+        if ($second_day_partition) {
+            my %a_stats;
+            my %b_stats;
+            my $p11=countWeavingsFrontier(\@L,\%a_stats,[1,1]);
+            my $p12=countWeavingsFrontier(\@L,\%b_stats,[1,2]);
+            die "兩個合法的第二日分支都必須有後續完工詞\n"
+                if $p11<1 || $p12<1;
+            my $sum=$p11->copy->badd($p12);
+            die "第二日兩個獨立前沿後綴的 BigInt 和不等於完整總數\n"
+                if $sum!=$oracle;
+            my $rank=$oracle->copy->bdiv(2)->badd(1);
+            $independent_second=$rank<=$p11 ? 1 : 2;
+            my $local=$rank->copy;
+            $local->bsub($p11) if $independent_second==2;
+            die "第二日選中分支的局部 BigInt 名次無效\n"
+                if $local<1 ||
+                $local>($independent_second==1 ? $p11 : $p12);
+            printf "CANONICAL_WINDOW41 phase=SECOND_DAY_INDEPENDENT_PARTITION_PASS offset=%d second=%d prefix11_digits=%d prefix12_digits=%d prefix11_states=%d prefix12_states=%d elapsed_sec=%.3f\n",
+                $window_offset,$independent_second,length("$p11"),
+                length("$p12"),$a_stats{states},$b_stats{states},
+                time()-$start;
+        }
 
         my @direct_first;
         for my $m (1..@L) {
@@ -157,6 +190,9 @@ if (!$pid) {
             {profile_engine=>'stream-indexed',max_temp_file_bytes=>16*1024*1024}
         );
         verify_word(\@L,$word);
+        die "中位排名的第二日與獨立前沿 BigInt 分割不符\n"
+            if defined($independent_second) &&
+            $word->[1]!=$independent_second;
         die "索引式解碼未建立實際私人索引\n"
             if ($unrank_stats{indexed_profile_builds}//0)!=1;
         my %rank_stats;

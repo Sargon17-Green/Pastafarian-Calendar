@@ -31,10 +31,10 @@ my $sum=0; $sum+=$_ for @year;
 is($sum,4244,'來源年份仍有 4244 日');
 
 my %expected;
-while ($profile=~/^\s*(10|20|28|36|41)\s*=>\s*'([\d,]+)',\s*$/mg) {
+while ($profile=~/^\s*(10|20|28|36|37|41)\s*=>\s*'([\d,]+)',\s*$/mg) {
     $expected{0+$1}=$2;
 }
-is_deeply([sort {$a<=>$b} keys %expected],[10,20,28,36,41],
+is_deeply([sort {$a<=>$b} keys %expected],[10,20,28,36,37,41],
           '只啟用明示審核的四月份窗口，不做任意靜默外推');
 for my $index (sort {$a<=>$b} keys %expected) {
     my $actual=join(',',@year[$index..$index+3]);

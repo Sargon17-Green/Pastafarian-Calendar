@@ -1078,3 +1078,20 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 36 --seconds 185 --rss-kib 393216
+
+  canonical-window37-prefix:
+    name: 真實 236 日四月份第二日獨立前沿 BigInt 分支分割
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-window37-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 正向前沿和多項式精確數目並驗證中間名的第二日分支
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_window41_count.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_window41_count.pl --window-offset 37 --second-day-partition --seconds 185 --rss-kib 393216
