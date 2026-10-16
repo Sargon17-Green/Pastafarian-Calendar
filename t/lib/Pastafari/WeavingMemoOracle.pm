@@ -11,7 +11,23 @@ use Scalar::Util qw(blessed);
 # 和位置分布多項式模型沒有共同的後綴計數器或共享快取。
 # 未全開時把 BigInt 私有答案快取；已全開可直接計算，不必存狀態。
 # 對外只交付獨立可變的 BigInt 副本。
-sub new ($class,$lengths) {
+sub new ($class,$lengths,$options=undef) {
+    # 預設完全維持既有 200000 項硬上限。
+    # 只供指定大型獨立 QA 使用的 FIFO 會在滿額時刪除
+    # 一個已完成的 BigInt 快取結果；實際遞迴計數不變。
+    die "Oracle 快取選項必須為 HASH 參照\n"
+        if defined($options) && ref($options) ne 'HASH';
+    $options //= {};
+    die "Oracle 快取選項只能包含 bounded_cache、cache_limit\n"
+        if grep {$_ ne 'bounded_cache' && $_ ne 'cache_limit'} keys %$options;
+    my $bounded=$options->{bounded_cache}//0;
+    die "bounded_cache 必須為 0 或 1\n"
+        if "$bounded" ne '0' && "$bounded" ne '1';
+    my $limit=$options->{cache_limit}//200000;
+    die "cache_limit 必須為 1..200000 的正整數\n"
+        if "$limit" !~ /\A[0-9]+\z/ || $limit<1 || $limit>200000;
+    die "修改 cache_limit 必須顯式啟用 bounded_cache\n"
+        if !$bounded && $limit!=200000;
     die "月份長度須為 ARRAY 參照\n" if ref($lengths) ne 'ARRAY';
     die "獨立記憶式 Oracle 只支援最多四個月份\n" if @$lengths>4;
     my (@sizes,$total);
@@ -29,6 +45,8 @@ sub new ($class,$lengths) {
     return bless {
         sizes=>\@sizes, months=>scalar(@sizes), total=>$total,
         counts=>{}, entries=>0, cache_hits=>0,
+        bounded_cache=>$bounded,cache_limit=>$limit,
+        cache_fifo=>[],evictions=>0,
         visits=>0, peak_depth=>0, closed_forms=>0,
         choose=>{}, choose_queue=>[], choose_limit=>8192,
     },$class;
@@ -105,9 +123,18 @@ sub _count_state ($self,$remaining,$opened,$closed,$depth) {
             ));
         }
     }
-    die "獨立驗證狀態快取超過 200000 項\n"
-        if $self->{entries}>=200000;
+    if ($self->{entries}>=$self->{cache_limit}) {
+        die "獨立驗證狀態快取超過 200000 項\n"
+            if !$self->{bounded_cache};
+        my $old=shift @{$self->{cache_fifo}};
+        die "FIFO 快取遺失待逐出的狀態\n"
+            if !defined($old) || !exists $self->{counts}{$old};
+        delete $self->{counts}{$old};
+        $self->{entries}--;
+        $self->{evictions}++;
+    }
     $self->{counts}{$key}=$answer->copy;
+    push @{$self->{cache_fifo}},$key if $self->{bounded_cache};
     $self->{entries}++;
     return $answer;
 }
@@ -145,6 +172,7 @@ sub count_prefix ($self,$prefix=undef) {
 sub diagnostics ($self) {
     return {
         entries=>$self->{entries},cache_hits=>$self->{cache_hits},
+        evictions=>$self->{evictions},cache_limit=>$self->{cache_limit},
         visits=>$self->{visits},peak_depth=>$self->{peak_depth},
         closed_forms=>$self->{closed_forms},
         binomial_entries=>scalar(@{$self->{choose_queue}}),

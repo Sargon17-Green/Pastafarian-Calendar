@@ -74,7 +74,12 @@ if (!$pid) {
             unless $days==($offset==37 ? 236 : $offset==38 ? 230 : $offset==39 ? 240 : 322);
         printf "CANONICAL_MULTI_RANK phase=WINDOW offset=%d days=%d lengths=%s\n",
             $offset,$days,join(',',@L);
-        my $counter=Pastafari::WeavingMemoOracle->new(\@L);
+        # 37 窗口可能超過 200000 個「累積」狀態；仍只保留
+        # 至多 200000 個即時 BigInt 快取項，超額時 FIFO 淘汰。
+        # 其餘 38..40 窗口完全使用原本的嚴格 hard-fail 上限。
+        my $counter=Pastafari::WeavingMemoOracle->new(
+            \@L,$offset==37 ? {bounded_cache=>1,cache_limit=>200000} : undef
+        );
         my $total=$counter->count_prefix([]);
         my $poly=countWeavingsPolynomial(\@L);
         die "記憶式和不同位置多項式算法的總數不符\n"
@@ -183,6 +188,7 @@ if (!$pid) {
         die "字典序重要排名樣本未全部執行\n"
             if $test_count!=$expected_count;
         my $diag=$counter->diagnostics;
+        printf "CANONICAL_MULTI_RANK phase=BOUNDED_MEMO entries=%d evictions=%d cache_limit=%d\n",$diag->{entries},$diag->{evictions},$diag->{cache_limit} if $offset==37;
         printf "CANONICAL_MULTI_RANK status=PASS scope=FOUR_MONTH_WINDOW_LEXICOGRAPHIC_BRANCHES filter=%s window=%d cases=%d days_per_rank=%d total_digits=%d memo_entries=%d memo_hits=%d elapsed_sec=%.3f VmHWM_KiB=%d\n",
             $case_filter,$offset,$test_count,$days,length("$total"),$diag->{entries},
             $diag->{cache_hits},time()-$start,peak_self();
