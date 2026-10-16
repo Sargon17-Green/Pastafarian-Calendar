@@ -94,7 +94,7 @@ To choose a bowl order from a wide quantity:
   Put "1" into a one wide quantity.
   Subtract the one wide quantity from the rank wide quantity.
   Put "720" into a divisor wide quantity.
-  Reduce the rank wide quantity modulo the divisor wide quantity.
+  Calculate decimal remainder given the rank wide quantity and the divisor wide quantity.
   Convert the rank wide quantity to a small rank number.
   Put the small rank number into the bowl chooser's remaining rank.
   Put 0 into the bowl chooser's first used.

@@ -57,7 +57,7 @@ To construct the first wide answer:
 To prepare the wide acceptance limit given a wide quantity:
   Put the wide option work's period into the wide option work's acceptance limit.
   Put the wide option work's period into a remaining wide quantity.
-  Reduce the remaining wide quantity modulo the wide quantity.
+  Calculate decimal remainder given the remaining wide quantity and the wide quantity.
   Subtract the remaining wide quantity from the wide option work's acceptance limit.
 
 \ The canonical correction for an initially rejected W must start at W.
@@ -81,7 +81,7 @@ To perform wide option selection given a wide quantity:
   Put the wide option work's constructed answer into a result wide quantity.
   Put "1" into a one wide quantity.
   Subtract the one wide quantity from the result wide quantity.
-  Reduce the result wide quantity modulo the wide quantity.
+  Calculate decimal remainder given the result wide quantity and the wide quantity.
   Add 1 to the result wide quantity.
   Put the result wide quantity into the seal inquiry's selected quantity.
 

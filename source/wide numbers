@@ -152,7 +152,7 @@ To remove copies of a wide quantity from another wide quantity:
 \ Long division, one decimal digit at a time. The first operand
 \ receives the remainder, in the range from zero to divisor minus one.
 \ Precondition: divisor is positive and both numbers are normalized.
-To reduce a wide quantity modulo another wide quantity:
+To calculate decimal remainder given a wide quantity and another wide quantity:
   Put the wide quantity into a source string.
   Put "0" into a remainder wide quantity.
   Slap a substring on the source string.
@@ -173,7 +173,7 @@ To reduce a wide quantity modulo another wide quantity:
 \ Signed modular subtraction is a separate future requirement.
 To keep a wide quantity for the sauce:
   Put "170141183460469231731687303715884105727" into a limit wide quantity.
-  Reduce the wide quantity modulo the limit wide quantity.
+  Calculate decimal remainder given the wide quantity and the limit wide quantity.
   If the wide quantity is "0", put the limit wide quantity into the wide quantity.
 
 

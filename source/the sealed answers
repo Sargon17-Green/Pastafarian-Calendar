@@ -83,7 +83,7 @@ To choose the sealed answer direction:
   Keep the result wide quantity for the sauce.
   Put the result wide quantity into the seal inquiry's direction answer.
   Put "2" into a two wide quantity.
-  Reduce the result wide quantity modulo the two wide quantity.
+  Calculate decimal remainder given the result wide quantity and the two wide quantity.
   Put -1 into the seal inquiry's answer direction.
   If the result wide quantity is "1", put 1 into the seal inquiry's answer direction.
 
@@ -105,7 +105,7 @@ To step the sealed answer:
 To prepare narrow choice given a wide quantity:
   Put "170141183460469231731687303715884105727" into the seal inquiry's acceptance ceiling.
   Put the seal inquiry's acceptance ceiling into a remainder wide quantity.
-  Reduce the remainder wide quantity modulo the wide quantity.
+  Calculate decimal remainder given the remainder wide quantity and the wide quantity.
   Subtract the remainder wide quantity from the seal inquiry's acceptance ceiling.
 
 \ Rejected answers are a single contiguous interval (L, M].
@@ -122,7 +122,7 @@ To choose narrow quantity values from a wide quantity:
   Put "1" into a one wide quantity.
   Put the seal inquiry's current answer into a result wide quantity.
   Subtract the one wide quantity from the result wide quantity.
-  Reduce the result wide quantity modulo the wide quantity.
+  Calculate decimal remainder given the result wide quantity and the wide quantity.
   Add 1 to the result wide quantity.
   Put the result wide quantity into the seal inquiry's selected quantity.
 

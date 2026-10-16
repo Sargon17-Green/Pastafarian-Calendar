@@ -61,15 +61,15 @@ To check wide quantity multiplication:
 To check wide quantity division:
   Put "121932631137021795226185032733622923332237463801111263526900" into a first wide quantity.
   Put "170141183460469231731687303715884105727" into a second wide quantity.
-  Reduce the first wide quantity modulo the second wide quantity.
+  Calculate decimal remainder given the first wide quantity and the second wide quantity.
   If the first wide quantity is not "144875469711726358240874201207950817872",
     put "The wide division check failed on a large remainder." into the check report; exit.
   Put "340282366920938463463374607431768211454" into the first wide quantity.
-  Reduce the first wide quantity modulo the second wide quantity.
+  Calculate decimal remainder given the first wide quantity and the second wide quantity.
   If the first wide quantity is not "0",
     put "The wide division check failed on an exact multiple." into the check report; exit.
   Put "1" into the first wide quantity.
-  Reduce the first wide quantity modulo the second wide quantity.
+  Calculate decimal remainder given the first wide quantity and the second wide quantity.
   If the first wide quantity is not "1",
     put "The wide division check failed on a small dividend." into the check report; exit.
 
