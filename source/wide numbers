@@ -37,9 +37,9 @@ To normalize a wide quantity:
 
 \ Compare two positive or zero whole numbers, not their textual spelling.
 \ A shorter normalized decimal number is always smaller.
-To decide if a wide quantity is numerically smaller than another wide quantity:
+To decide if a wide quantity is numerically smaller than another string:
   Put the wide quantity into a left string.
-  Put the other wide quantity into a right string.
+  Put the other string into a right string.
   Put the left string's length into the spanalpha.
   Put the right string's length into the spanbeta.
   If the spanalpha is less than the spanbeta, say yes.
