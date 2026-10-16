@@ -3,119 +3,119 @@
 \ The checks are not yet verified by a CAL execution.
 \ Each failure leaves a meaningful message in the check report.
 
-The first wide quantity is a wide quantity.
-The second wide quantity is a wide quantity.
-The value wide quantity is a wide quantity.
+The arithmetic left operand is a wide quantity.
+The arithmetic right operand is a wide quantity.
+The arithmetic saved operand is a wide quantity.
 
 To check wide quantity order:
-  Put "9" into the first wide quantity.
-  Put "10" into the second wide quantity.
-  If the first wide quantity is not numerically smaller than the second wide quantity,
+  Put "9" into the arithmetic left operand.
+  Put "10" into the arithmetic right operand.
+  If the arithmetic left operand is not numerically smaller than the arithmetic right operand,
     put "The wide order check failed on different lengths." into the check report; exit.
-  If the second wide quantity is numerically smaller than the first wide quantity,
+  If the arithmetic right operand is numerically smaller than the arithmetic left operand,
     put "The wide order check failed on reversed lengths." into the check report; exit.
-  Put "170141183460469231731687303715884105726" into the first wide quantity.
-  Put "170141183460469231731687303715884105727" into the second wide quantity.
-  If the first wide quantity is not numerically smaller than the second wide quantity,
+  Put "170141183460469231731687303715884105726" into the arithmetic left operand.
+  Put "170141183460469231731687303715884105727" into the arithmetic right operand.
+  If the arithmetic left operand is not numerically smaller than the arithmetic right operand,
     put "The wide order check failed on equal lengths." into the check report; exit.
-  If the second wide quantity is numerically smaller than the second wide quantity,
+  If the arithmetic right operand is numerically smaller than the arithmetic right operand,
     put "The wide order check failed on equality." into the check report; exit.
 
 To check wide quantity addition:
-  Put "999999999999999999999999999999" into the first wide quantity.
-  Put "1" into the second wide quantity.
-  Add the first wide quantity to the second wide quantity.
-  If the second wide quantity is not "1000000000000000000000000000000",
+  Put "999999999999999999999999999999" into the arithmetic left operand.
+  Put "1" into the arithmetic right operand.
+  Add the arithmetic left operand to the arithmetic right operand.
+  If the arithmetic right operand is not "1000000000000000000000000000000",
     put "The wide addition check failed on a long carry." into the check report; exit.
-  Put "170141183460469231731687303715884105727" into the first wide quantity.
-  Put "1" into the second wide quantity.
-  Add the first wide quantity to the second wide quantity.
-  If the second wide quantity is not "170141183460469231731687303715884105728",
+  Put "170141183460469231731687303715884105727" into the arithmetic left operand.
+  Put "1" into the arithmetic right operand.
+  Add the arithmetic left operand to the arithmetic right operand.
+  If the arithmetic right operand is not "170141183460469231731687303715884105728",
     put "The wide addition check failed at the sauce modulus." into the check report; exit.
 
 To check wide quantity subtraction:
-  Put "170141183460469231731687303715884105727" into the first wide quantity.
-  Put "170141183460469231731687303715884105727" into the second wide quantity.
-  Subtract the first wide quantity from the second wide quantity.
-  If the second wide quantity is not "0",
+  Put "170141183460469231731687303715884105727" into the arithmetic left operand.
+  Put "170141183460469231731687303715884105727" into the arithmetic right operand.
+  Subtract the arithmetic left operand from the arithmetic right operand.
+  If the arithmetic right operand is not "0",
     put "The wide subtraction check failed on equality." into the check report; exit.
-  Put "999999999999999999999999999999" into the first wide quantity.
-  Put "1000000000000000000000000000000" into the second wide quantity.
-  Subtract the first wide quantity from the second wide quantity.
-  If the second wide quantity is not "1",
+  Put "999999999999999999999999999999" into the arithmetic left operand.
+  Put "1000000000000000000000000000000" into the arithmetic right operand.
+  Subtract the arithmetic left operand from the arithmetic right operand.
+  If the arithmetic right operand is not "1",
     put "The wide subtraction check failed on a long borrow." into the check report; exit.
 
 To check wide quantity multiplication:
-  Put "123456789012345678901234567890" into the first wide quantity.
-  Put "987654321098765432109876543210" into the second wide quantity.
-  Multiply the first wide quantity by the second wide quantity.
-  If the second wide quantity is not "121932631137021795226185032733622923332237463801111263526900",
+  Put "123456789012345678901234567890" into the arithmetic left operand.
+  Put "987654321098765432109876543210" into the arithmetic right operand.
+  Multiply the arithmetic left operand by the arithmetic right operand.
+  If the arithmetic right operand is not "121932631137021795226185032733622923332237463801111263526900",
     put "The wide multiplication check failed." into the check report; exit.
-  Put "170141183460469231731687303715884105727" into the first wide quantity.
-  Put "2" into the second wide quantity.
-  Multiply the first wide quantity by the second wide quantity.
-  If the second wide quantity is not "340282366920938463463374607431768211454",
+  Put "170141183460469231731687303715884105727" into the arithmetic left operand.
+  Put "2" into the arithmetic right operand.
+  Multiply the arithmetic left operand by the arithmetic right operand.
+  If the arithmetic right operand is not "340282366920938463463374607431768211454",
     put "The wide multiplication check failed on the sauce modulus." into the check report; exit.
-  Put "0" into the first wide quantity.
-  Put "987654321098765432109876543210" into the second wide quantity.
-  Multiply the first wide quantity by the second wide quantity.
-  If the second wide quantity is not "0",
+  Put "0" into the arithmetic left operand.
+  Put "987654321098765432109876543210" into the arithmetic right operand.
+  Multiply the arithmetic left operand by the arithmetic right operand.
+  If the arithmetic right operand is not "0",
     put "The wide multiplication check failed on zero." into the check report; exit.
 
 To check wide quantity division:
-  Put "121932631137021795226185032733622923332237463801111263526900" into the first wide quantity.
-  Put "170141183460469231731687303715884105727" into the second wide quantity.
-  Calculate decimal remainder given the first wide quantity and the second wide quantity.
-  If the first wide quantity is not "144875469711726358240874201207950817872",
+  Put "121932631137021795226185032733622923332237463801111263526900" into the arithmetic left operand.
+  Put "170141183460469231731687303715884105727" into the arithmetic right operand.
+  Calculate decimal remainder given the arithmetic left operand and the arithmetic right operand.
+  If the arithmetic left operand is not "144875469711726358240874201207950817872",
     put "The wide division check failed on a large remainder." into the check report; exit.
-  Put "340282366920938463463374607431768211454" into the first wide quantity.
-  Calculate decimal remainder given the first wide quantity and the second wide quantity.
-  If the first wide quantity is not "0",
+  Put "340282366920938463463374607431768211454" into the arithmetic left operand.
+  Calculate decimal remainder given the arithmetic left operand and the arithmetic right operand.
+  If the arithmetic left operand is not "0",
     put "The wide division check failed on an exact multiple." into the check report; exit.
-  Put "1" into the first wide quantity.
-  Calculate decimal remainder given the first wide quantity and the second wide quantity.
-  If the first wide quantity is not "1",
+  Put "1" into the arithmetic left operand.
+  Calculate decimal remainder given the arithmetic left operand and the arithmetic right operand.
+  If the arithmetic left operand is not "1",
     put "The wide division check failed on a small dividend." into the check report; exit.
 
 
 \ These are the four boundary identities in the canonical rules.
 To check sauce saving:
-  Put "0" into the value wide quantity.
-  Keep the value wide quantity for the sauce.
-  If the value wide quantity is not "170141183460469231731687303715884105727",
+  Put "0" into the arithmetic saved operand.
+  Keep the arithmetic saved operand for the sauce.
+  If the arithmetic saved operand is not "170141183460469231731687303715884105727",
     put "The sauce SAVE check failed for zero." into the check report; exit.
-  Put "170141183460469231731687303715884105727" into the value wide quantity.
-  Keep the value wide quantity for the sauce.
-  If the value wide quantity is not "170141183460469231731687303715884105727",
+  Put "170141183460469231731687303715884105727" into the arithmetic saved operand.
+  Keep the arithmetic saved operand for the sauce.
+  If the arithmetic saved operand is not "170141183460469231731687303715884105727",
     put "The sauce SAVE check failed for M." into the check report; exit.
-  Put "170141183460469231731687303715884105728" into the value wide quantity.
-  Keep the value wide quantity for the sauce.
-  If the value wide quantity is not "1",
+  Put "170141183460469231731687303715884105728" into the arithmetic saved operand.
+  Keep the arithmetic saved operand for the sauce.
+  If the arithmetic saved operand is not "1",
     put "The sauce SAVE check failed for M plus one." into the check report; exit.
-  Put "340282366920938463463374607431768211454" into the value wide quantity.
-  Keep the value wide quantity for the sauce.
-  If the value wide quantity is not "170141183460469231731687303715884105727",
+  Put "340282366920938463463374607431768211454" into the arithmetic saved operand.
+  Keep the arithmetic saved operand for the sauce.
+  If the arithmetic saved operand is not "170141183460469231731687303715884105727",
     put "The sauce SAVE check failed for twice M." into the check report; exit.
 
 
 To check sauce subtraction:
-  Put "2" into the first wide quantity.
-  Put "1" into the second wide quantity.
-  Subtract the first wide quantity from the second wide quantity with sauce wrapping.
-  If the second wide quantity is not "170141183460469231731687303715884105726",
+  Put "2" into the arithmetic left operand.
+  Put "1" into the arithmetic right operand.
+  Subtract the arithmetic left operand from the arithmetic right operand with sauce wrapping.
+  If the arithmetic right operand is not "170141183460469231731687303715884105726",
     put "The sauce subtraction check failed for a negative difference." into the check report; exit.
-  Put "1" into the first wide quantity.
-  Put "2" into the second wide quantity.
-  Subtract the first wide quantity from the second wide quantity with sauce wrapping.
-  If the second wide quantity is not "1",
+  Put "1" into the arithmetic left operand.
+  Put "2" into the arithmetic right operand.
+  Subtract the arithmetic left operand from the arithmetic right operand with sauce wrapping.
+  If the arithmetic right operand is not "1",
     put "The sauce subtraction check failed for a positive difference." into the check report; exit.
-  Put "1" into the first wide quantity.
-  Put "1" into the second wide quantity.
-  Subtract the first wide quantity from the second wide quantity with sauce wrapping.
-  If the second wide quantity is not "170141183460469231731687303715884105727",
+  Put "1" into the arithmetic left operand.
+  Put "1" into the arithmetic right operand.
+  Subtract the arithmetic left operand from the arithmetic right operand with sauce wrapping.
+  If the arithmetic right operand is not "170141183460469231731687303715884105727",
     put "The sauce subtraction check failed for a zero difference." into the check report; exit.
-  Put "170141183460469231731687303715884105727" into the first wide quantity.
-  Put "1" into the second wide quantity.
-  Subtract the first wide quantity from the second wide quantity with sauce wrapping.
-  If the second wide quantity is not "1",
+  Put "170141183460469231731687303715884105727" into the arithmetic left operand.
+  Put "1" into the arithmetic right operand.
+  Subtract the arithmetic left operand from the arithmetic right operand with sauce wrapping.
+  If the arithmetic right operand is not "1",
     put "The sauce subtraction check failed for the largest negative difference." into the check report; exit.
