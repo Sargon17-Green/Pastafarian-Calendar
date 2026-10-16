@@ -1,0 +1,130 @@
+name: Collatio directa C++ Latina et Celeritas — Gradus 56
+
+on:
+  push:
+    branches:
+      - 'C\+\+&Latina'
+    paths:
+      - '.github/workflows/cpp-latina-cross-implementation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpp-latina-cross-implementation-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PINNED_CELERITAS: '775e4c52bc4e21e63e03e53a09bdbc7993a18a32'
+  PAIRS_PER_SHARD: '6'
+
+jobs:
+  comparatio:
+    name: Comparatio trans ramos — shard ${{ matrix.shard }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 44, 83, 99]
+    steps:
+      - name: Excerpere C++ Latina ad SHA huius cursus
+        uses: actions/checkout@v5
+        with:
+          path: current
+          persist-credentials: false
+
+      - name: Excerpere Celeritas ad SHA fixum iam probatum
+        uses: actions/checkout@v5
+        with:
+          ref: '775e4c52bc4e21e63e03e53a09bdbc7993a18a32'
+          path: celeritas
+          persist-credentials: false
+
+      - name: Custodire duas provenientias et instrumentum commune
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C current rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C celeritas rev-parse HEAD)" = "$PINNED_CELERITAS"
+          test -r celeritas/tools/branch_vector_runner.cpp
+          test -r current/src/monster.cpp
+          test -r celeritas/src/monster.cpp
+          mkdir -p cross-logs
+          {
+            echo "CURRENT_BRANCH=C++&Latina"
+            echo "CURRENT_SHA=$GITHUB_SHA"
+            echo "CELERITAS_SHA=$PINNED_CELERITAS"
+            echo "VECTOR_RUNNER_SHA256=$(sha256sum celeritas/tools/branch_vector_runner.cpp | cut -d' ' -f1)"
+            echo "CALCULATION_CONTEXTS=FOUNDATION_AND_NON_FOUNDATION"
+            echo "SHARD=${{ matrix.shard }}"
+            echo "PAIRS=$PAIRS_PER_SHARD"
+          } | tee cross-logs/provenance.txt
+
+      - name: Compilare utrumque C++20 per Clang
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p bin cross-logs
+          clang++ -std=c++20 -O2 -Wall -Wextra -Wpedantic \
+            -Icurrent/include -Icurrent/tests -Icurrent \
+            celeritas/tools/branch_vector_runner.cpp current/src/monster.cpp \
+            -o bin/latina \
+            2>&1 | tee cross-logs/build-latina.log
+          clang++ -std=c++20 -O2 -Wall -Wextra -Wpedantic \
+            -Iceleritas/include -Iceleritas/tests -Iceleritas \
+            celeritas/tools/branch_vector_runner.cpp celeritas/src/monster.cpp \
+            -o bin/celeritas \
+            2>&1 | tee cross-logs/build-celeritas.log
+          clang++ --version | head -1 | tee cross-logs/compiler.txt
+
+      - name: Confrontare octo campos pro singulo pari
+        shell: bash
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          # Unus runner generat eadem (c,t), idem ordo, et omnes quinque
+          # campos calendarii. Comparantur bytes integrorum TSV, non
+          # sola numeri annorum neque fictae expectationes.
+          timeout 40m bin/latina "$SHARD" "$PAIRS_PER_SHARD" \
+            cross-logs/latina.tsv cross-logs/latina.time \
+            2>&1 | tee cross-logs/latina.stdout
+          timeout 15m bin/celeritas "$SHARD" "$PAIRS_PER_SHARD" \
+            cross-logs/celeritas.tsv cross-logs/celeritas.time \
+            2>&1 | tee cross-logs/celeritas.stdout
+          test "$(wc -l < cross-logs/latina.tsv)" -eq "$PAIRS_PER_SHARD"
+          test "$(wc -l < cross-logs/celeritas.tsv)" -eq "$PAIRS_PER_SHARD"
+          if ! cmp -s cross-logs/latina.tsv cross-logs/celeritas.tsv; then
+            echo "CROSS_CPP_CELERITAS=FAIL SHARD=$SHARD"
+            diff -u cross-logs/celeritas.tsv cross-logs/latina.tsv \
+              | head -100 | tee cross-logs/first-difference.diff || true
+            exit 1
+          fi
+          echo "CROSS_CPP_CELERITAS_SHARD=6/6_PASS SHARD=$SHARD" \
+            | tee cross-logs/verdict.txt
+
+      - name: Servare utraque testimonia etiam in casu defectus
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cpp-latina-pinned-celeritas-shard-${{ matrix.shard }}
+          path: cross-logs/
+          if-no-files-found: warn
+          retention-days: 30
+
+  sententia:
+    name: Sententia collatio quinque shardorum
+    needs: comparatio
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Requirere omnes quinque successus
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "MATRIX_RESULT=${{ needs.comparatio.result }}"
+          test '${{ needs.comparatio.result }}' = 'success'
+          echo 'CROSS_CPP_CELERITAS_ALL=30/30_PASS SHARDS=5'

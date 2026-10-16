@@ -431,3 +431,29 @@ antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
   pertinet, non SHA documentorum nondum exsecuto. Status temporales
   `PENDING` in sectionibus antiquioribus solum ad tempora
   earum inscriptionis pertinent; praesens certificatio recentior est.
+
+## Pinnta comparatio Celeritatis ad SHA probatum — novus testis CI, PENDENS
+
+- Cursus Celeritatis [37150649777](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37150649777)
+  antea `102/102 success` et `CANONICAL_SAVED_SUM=10000/10000_PASS`
+  in SHA `775e4c52bc4e21e63e03e53a09bdbc7993a18a32` demonstravit. Illud testimonium historicum
+  non sufficit ad certificationem recentioris C++ et Latinae.
+- Nova vigilia independens `.github/workflows/cpp-latina-cross-implementation.yml` in ramo
+  `C++&Latina` compilat `src/monster.cpp` ex SHA ipsius cursus, et
+  alterum `src/monster.cpp` ex `775e4c52bc4e21e63e03e53a09bdbc7993a18a32`.
+  Instrumentum commune `tools/branch_vector_runner.cpp` ex
+  Celeritate pinnta pro utrisque binariis usurpatur.
+- Shards `0, 1, 44, 83, 99`, sex paria per shard, diversis
+  calculationis contextibus. In omnibus `30` paribus octo columnae TSV
+  includuntur (index, c, t et quinque campi calendarii), comparatio
+  byte-accurata `cmp` et extrema logi duo.
+- CI exigit `CROSS_CPP_CELERITAS_SHARD=6/6_PASS` per shard et
+  `CROSS_CPP_CELERITAS_ALL=30/30_PASS SHARDS=5` in finali.
+  Ambobus checkout SHA verificatur. Logi et diffs etiam in casu defectus
+  servantur. Workflow currit in novo commit (aut manualiter), non
+  mutatione codicis productionis.
+- Status hic **PENDENS CI**; non deducitur successus ex veteribus
+  vigiliis, nec novus Gradus 57 aperitur. Alius ramus
+  `qa/cpp-latina-celeritas-integration-20261013` intactus manet;
+  cursus `38373685584` et `38374026572` prius defecerunt
+  propter linkage, respective auditum staticum cicatricis.
