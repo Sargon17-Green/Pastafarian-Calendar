@@ -20,14 +20,15 @@ use Pastafari::WeavingSuffixFactor qw(countWeavingSuffixFactored);
 # 原生 5000 年的數個分散四月份窗口（預設末四月 402 日）。
 # 前沿獨立狀態 Oracle 只驗證總數；中位排名的雙向還原不是
 # 另一個獨立的全字典序預言機。邊界詞另有獨立貪婪構造。
-my ($seconds,$rss_kib,$requested_offset,$second_day_partition,$third_day_partition,$third_day_target,$fourth_day_target,$fifth_day_target)=(185,393216,undef,0,0,undef,undef,undef);
+my ($seconds,$rss_kib,$requested_offset,$second_day_partition,$third_day_partition,$third_day_target,$fourth_day_target,$fifth_day_target,$sixth_day_target)=(185,393216,undef,0,0,undef,undef,undef,undef);
 GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_kib,
            'window-offset=i'=>\$requested_offset,
            'second-day-partition!'=>\$second_day_partition,
            'third-day-partition!'=>\$third_day_partition,
            'third-day-target=s'=>\$third_day_target,
            'fourth-day-target=s'=>\$fourth_day_target,
-           'fifth-day-target=s'=>\$fifth_day_target)
+           'fifth-day-target=s'=>\$fifth_day_target,
+           'sixth-day-target=s'=>\$sixth_day_target)
     or die "參數無效\n";
 die "seconds 必須在 1..230 範圍\n"
     if $seconds<1 || $seconds>230;
@@ -66,6 +67,15 @@ die "第五日分片只可在第 37 四月窗口獨立執行\n"
     && (!defined($requested_offset) || $requested_offset!=37
         || $second_day_partition || $third_day_partition
         || defined($third_day_target) || defined($fourth_day_target));
+die "第六日分片只准 parent、1、2、3、4、assembly\n"
+    if defined($sixth_day_target)
+    && $sixth_day_target !~ /\A(?:parent|[1234]|assembly)\z/;
+die "第六日分片只能在 37 四月窗口單獨執行\n"
+    if defined($sixth_day_target)
+    && (!defined($requested_offset) || $requested_offset!=37
+        || $second_day_partition || $third_day_partition
+        || defined($third_day_target) || defined($fourth_day_target)
+        || defined($fifth_day_target));
 die "本工具需 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -440,6 +450,98 @@ if (!$pid) {
             }
         }
 
+        # 第 50 輪五個有界工作將真實中位排名的
+        # 前五個符號獨立核對為 [1,2,1,2,3]。
+        # 目前共有三個已首次出現月份，故第六日候選
+        # 恰為 1、2、3、4；四個分支與母前綴分別核算。
+        my $split_sixth;
+        if (defined($sixth_day_target)) {
+            my $options={
+                profile_engine=>'stream-indexed',
+                max_temp_file_bytes=>16*1024*1024
+            };
+            if ($sixth_day_target ne 'assembly') {
+                my @prefix=$sixth_day_target eq 'parent'
+                    ? (1,2,1,2,3) : (1,2,1,2,3,0+$sixth_day_target);
+                my %sixth_stats;
+                my $n=countWeavingsFrontier(\@L,\%sixth_stats,\@prefix);
+                my $factor=countWeavingSuffixFactored(
+                    \@L,\@prefix,undef,undef,$options
+                );
+                die "第六日獨立前沿和因子式 BigInt 完工數不同\n"
+                    if $n<1 || $n!=$factor;
+                printf "CANONICAL_WINDOW41 phase=SIXTH_PIECE_PASS target=%s prefix=%s digits=%d states=%d elapsed_sec=%.3f\n",
+                    $sixth_day_target,join(',',@prefix),
+                    length("$n"),$sixth_stats{states},time()-$start;
+            } else {
+                my $p12=countWeavingSuffixFactored(
+                    \@L,[1,2],undef,undef,$options
+                );
+                my $p121=countWeavingSuffixFactored(
+                    \@L,[1,2,1],undef,undef,$options
+                );
+                my $p1211=countWeavingSuffixFactored(
+                    \@L,[1,2,1,1],undef,undef,$options
+                );
+                my $p1212=countWeavingSuffixFactored(
+                    \@L,[1,2,1,2],undef,undef,$options
+                );
+                my $p12121=countWeavingSuffixFactored(
+                    \@L,[1,2,1,2,1],undef,undef,$options
+                );
+                my $p12122=countWeavingSuffixFactored(
+                    \@L,[1,2,1,2,2],undef,undef,$options
+                );
+                my $parent=countWeavingSuffixFactored(
+                    \@L,[1,2,1,2,3],undef,undef,$options
+                );
+                die "已驗證的第五日母前綴不在正確 BigInt 範圍內\n"
+                    if $p12<1 || $p12>=$oracle
+                    || $p121<1 || $p121>$p12
+                    || $p1211<1 || $p1212<1
+                    || $p1211->copy->badd($p1212)>$p121
+                    || $p12121<1 || $p12122<1 || $parent<1
+                    || $p12121->copy->badd($p12122)->badd($parent)!=$p1212;
+                my $middle=$oracle->copy->bdiv(2)->badd(1);
+                my $local=$middle->copy->bsub(
+                    $oracle->copy->bsub($p12)
+                );
+                die "第六日排名計算前先前第三日 BigInt 不合法\n"
+                    if $local<1 || $local>$p121;
+                $local->bsub($p1211);
+                die "第六日排名計算前先前第四日 BigInt 不合法\n"
+                    if $local<1 || $local>$p1212;
+                $local->bsub($p12121)->bsub($p12122);
+                die "第六日排名計算前先前第五日 BigInt 不合法\n"
+                    if $local<1 || $local>$parent;
+                my $sum=Math::BigInt->bzero;
+                my $choice;
+                for my $j (1,2,3,4) {
+                    my @prefix=(1,2,1,2,3,$j);
+                    my $ways=countWeavingSuffixFactored(
+                        \@L,\@prefix,undef,undef,$options
+                    );
+                    die "第六日合法子分支的完工詞不能是零\n"
+                        if $ways<1;
+                    $sum->badd($ways);
+                    if (!defined $choice) {
+                        if ($local<=$ways) {
+                            $choice=$j;
+                        } else {
+                            $local->bsub($ways);
+                        }
+                    }
+                }
+                die "第六日四個完整 BigInt 子分支和不等於父前綴\n"
+                    if $sum!=$parent;
+                die "第六日獨立字序找不到唯一一基局部排名\n"
+                    if !defined($choice) || $local<1;
+                $split_sixth=$choice;
+                printf "CANONICAL_WINDOW41 phase=SIXTH_ASSEMBLY_PASS prefix=1,2,1,2,3 sixth=%d branches=4 parent_digits=%d elapsed_sec=%.3f\n",
+                    $split_sixth,length("$parent"),time()-$start;
+            }
+        }
+
         my @direct_first;
         for my $m (1..@L) {
             push @direct_first,(($m)x$L[$m-1]);
@@ -501,6 +603,11 @@ if (!$pid) {
             && ($word->[0]!=1 || $word->[1]!=2
                 || $word->[2]!=1 || $word->[3]!=2
                 || $word->[4]!=$split_fifth);
+        die "第六日獨立 BigInt 子分支與索引反排名不符\n"
+            if defined($split_sixth)
+            && ($word->[0]!=1 || $word->[1]!=2
+                || $word->[2]!=1 || $word->[3]!=2
+                || $word->[4]!=3 || $word->[5]!=$split_sixth);
         die "索引式解碼未建立實際私人索引\n"
             if ($unrank_stats{indexed_profile_builds}//0)!=1;
         my %rank_stats;
