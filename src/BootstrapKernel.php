@@ -299,7 +299,7 @@ final class BootstrapKernel
     }
 
     /**
-     * Pintu masuk sah membalut legacyPrior dan hiddenByNearness.
+     * Pintu masuk sah membalut pembaca sejarah dan pembetul hidden tahap 05.
      * Stor terlihat dan hidden ialah parameter per-panggilan, bukan global.
      *
      * @param array<int,BigInt> $dropStore
