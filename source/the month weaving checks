@@ -47,14 +47,14 @@ To check two-month weaving:
     put "Four-and-four months should admit 20 eligible weavings." into the check report; exit.
   Put 5 into the weaving selection's target position.
   Put "1" into a weaving rank wide quantity.
-  Select a month weaving from the weaving rank wide quantity.
+  Select a weaving selection from the weaving rank wide quantity.
   If the weaving selection's selection success is not 1,
     put "The first two-month weaving was rejected." into the check report; exit.
   Write the selected weaving as test text.
   If the woven test text is not "11112222",
     put "The first two-month weaving differs from its reference." into the check report; exit.
   Put "10" into the weaving rank wide quantity.
-  Select a month weaving from the weaving rank wide quantity.
+  Select a weaving selection from the weaving rank wide quantity.
   Write the selected weaving as test text.
   If the woven test text is not "11222112",
     put "The middle two-month weaving differs from its reference." into the check report; exit.
@@ -63,7 +63,7 @@ To check two-month weaving:
   If the woven requested month day is not 3,
     put "The middle weave selected the wrong day within its month." into the check report; exit.
   Put "20" into the weaving rank wide quantity.
-  Select a month weaving from the weaving rank wide quantity.
+  Select a weaving selection from the weaving rank wide quantity.
   Write the selected weaving as test text.
   If the woven test text is not "12221112",
     put "The final two-month weaving differs from its reference." into the check report; exit.
@@ -75,12 +75,12 @@ To check three-month weaving:
     put "Four-four-four weaving has the wrong total." into the check report; exit.
   Put 7 into the weaving selection's target position.
   Put "1" into a weaving rank wide quantity.
-  Select a month weaving from the weaving rank wide quantity.
+  Select a weaving selection from the weaving rank wide quantity.
   Write the selected weaving as test text.
   If the woven test text is not "111122223333",
     put "The first three-month weaving differs from its reference." into the check report; exit.
   Put "651" into the weaving rank wide quantity.
-  Select a month weaving from the weaving rank wide quantity.
+  Select a weaving selection from the weaving rank wide quantity.
   Write the selected weaving as test text.
   If the woven test text is not "121232131323",
     put "The middle three-month weaving differs from its reference." into the check report; exit.
@@ -89,16 +89,16 @@ To check three-month weaving:
   If the woven requested month day is not 3,
     put "The middle three-month weaving has the wrong intra-month day." into the check report; exit.
   Put "1301" into the weaving rank wide quantity.
-  Select a month weaving from the weaving rank wide quantity.
+  Select a weaving selection from the weaving rank wide quantity.
   Write the selected weaving as test text.
   If the woven test text is not "123332211123",
     put "The last three-month weaving differs from its reference." into the check report; exit.
   Put "1302" into the weaving rank wide quantity.
-  Select a month weaving from the weaving rank wide quantity.
+  Select a weaving selection from the weaving rank wide quantity.
   If the weaving selection's selection success is not 0,
     put "An out-of-range month weaving rank was accepted." into the check report; exit.
   Put "0" into the weaving rank wide quantity.
-  Select a month weaving from the weaving rank wide quantity.
+  Select a weaving selection from the weaving rank wide quantity.
   If the weaving selection's selection success is not 0,
     put "Month weaving rank zero was accepted." into the check report; exit.
 
