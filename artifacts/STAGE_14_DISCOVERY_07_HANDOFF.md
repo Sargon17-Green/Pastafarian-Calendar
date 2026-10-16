@@ -17,10 +17,26 @@ php -d memory_limit=512M tests/stage14_discovery07_tests.php
 php -d memory_limit=512M tests/verify_stage14_discovery07.php
 ```
 
-Ujian sejarah terus mesti keluar kod 1 dengan `divergence=138 kes=3 julat=138 lain=0`, tanpa ralat tidak dijangka. Pengesah mesti keluar kod 0. Semua ujian Stage01–Stage13, kunci nama, fixture dan PHP syntax mesti hijau. CI pada HEAD semasa diperlukan sebelum menandakan tahap ini disahkan.
+Ujian sejarah terus mesti keluar kod 1 dengan `divergence=138 kes=3 julat=138 lain=0`, tanpa ralat tidak dijangka. Pengesah mesti keluar kod 0. Semua ujian Stage01–Stage13, kunci nama, fixture dan PHP syntax mesti hijau. Run 38915860291 telah mengesahkan EXPECTED_RED yang tepat; boleh memulakan Stage15 pada pusingan seterusnya.
 
 ## Larangan tampalan awal
 
 Jangan tambahkan baris sentinel yang membetulkan jadual pada Stage14; ia diperkenalkan hanya pada Stage15 — PATCH07. Jangan hapuskan pembaca legacy atau alihkan peraturan indeks. Jangan mulakan Stage16 atau sebarang peringkat kemudian. Jangan kemas kini `main`, oracle, nama bahasa dan fixture.
 
 **Commit:** `stage14(php-ms): dedahkan indeks grind sejarah tersasar satu baris`
+
+
+### Keputusan GitHub Actions yang disahkan
+
+**Run:** `38915860291`  
+**Commit diuji:** `324b0e90ed6e923c08ebc3b19aadf1ec1aad8d8e`  
+**Kerja:** `verify=success`, `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+LULUS Stage 13 PATCH 06 positif=762 hidden=66 oracle_hidden=42 sintetik=2688 ralat=7
+KEPUTUSAN MERAH_DIJANGKA divergence=138 kes=3 julat=138 lain=0
+LULUS kontrak merah 07; indeks grind legacy salah, sentinel belum ditambah
+```
+
+Keadaan `EXPECTED_RED` adalah benar-benar terbukti: hanya ujian sejarah langsung keluar dengan kod 1; pembalut khas keluar dengan kod 0. Tiada ralat luar jangka dan semua ujian Stage 1–13 termasuk kunci nama serta fixture telah lulus. Stage15 — PATCH07 belum dimulakan.

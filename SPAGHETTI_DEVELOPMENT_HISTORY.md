@@ -291,3 +291,19 @@ Ujian khas membandingkan 3 pasangan hari dan seluruh 46 titisan terhadap `Normat
 ### Had PATCH07
 
 Penyelesaian yang dibenarkan pada Stage 15 sahaja: masukkan sentinel di indeks 0 dan jadikan sebelas baris pengisaran nyata tersedia pada indeks 1..11, tanpa membuang `legacyRowAt`, tanpa mengubah rumus dan tanpa memadam sejarah yang salah. Tiada permutasi mangkuk atau pemindahan lain dicipta.
+
+
+### Keputusan GitHub Actions yang disahkan
+
+**Run:** `38915860291`  
+**Commit diuji:** `324b0e90ed6e923c08ebc3b19aadf1ec1aad8d8e`  
+**Kerja:** `verify=success`, `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+LULUS Stage 13 PATCH 06 positif=762 hidden=66 oracle_hidden=42 sintetik=2688 ralat=7
+KEPUTUSAN MERAH_DIJANGKA divergence=138 kes=3 julat=138 lain=0
+LULUS kontrak merah 07; indeks grind legacy salah, sentinel belum ditambah
+```
+
+Keadaan `EXPECTED_RED` adalah benar-benar terbukti: hanya ujian sejarah langsung keluar dengan kod 1; pembalut khas keluar dengan kod 0. Tiada ralat luar jangka dan semua ujian Stage 1–13 termasuk kunci nama serta fixture telah lulus. Stage15 — PATCH07 belum dimulakan.
