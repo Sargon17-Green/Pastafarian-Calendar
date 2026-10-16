@@ -25,6 +25,7 @@ public final class Stage02IncrementalRouteTests {
         siblingAllOpenedClosedFormOracleDifferential();
         allOpenedFullYearExactPartitionProbe();
         allOpenedFullYear512SuffixRoundTrip();
+        closedMonthsGlobalBlockRouteProof();
         siblingBackwardFunctionalFullYearProbe();
         normalizedBackwardTailAcrossAdjacentParents();
         normalizedTailDepthGrowthAndConcurrentParents();
@@ -300,6 +301,66 @@ public final class Stage02IncrementalRouteTests {
             + " exact_fast_counts="
             + family.allOpenedSuffixClosedFormComputationCount()
             + " elapsed_ms=" + (System.nanoTime() - started) / 1000000);
+    }
+
+    private static void closedMonthsGlobalBlockRouteProof() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        int[] prefix = Arrays.copyOf(family.lexFirst(), 5266);
+        int[] seen = new int[lengths.length];
+        for (int id : prefix) seen[id - 1]++;
+        int closed = 0;
+        while (closed < lengths.length
+                && seen[closed] == lengths[closed]) closed++;
+        eq(42, closed, "E_CLOSED_GLOBAL_PREFIX_42_MONTHS");
+        MonsterWeavingLinearCounter.BoundaryBlock block =
+            family.globalBlockForPrefix(prefix);
+        ok(block.size().compareTo(BigInteger.ONE) > 0,
+            "E_CLOSED_GLOBAL_BLOCK_NONTRIVIAL");
+        BigInteger globalRank = block.lowerRank().add(
+            block.size().subtract(BigInteger.ONE).divide(BigInteger.TWO));
+        BigInteger localRank =
+            globalRank.subtract(block.lowerRank()).add(BigInteger.ONE);
+        MonsterWeavingLinearCounter.RankRoute route =
+            family.beginGlobalRankRouteWithinPrefix(prefix, globalRank, 448);
+        long started = System.nanoTime();
+        for (int call = 1; call <= 4; call++) {
+            MonsterWeavingLinearCounter.RankRoute previous = route;
+            route = family.advanceGlobalRankRouteShared(route, 16, 16);
+            eq(5266 + 16 * call, route.stepsCompleted(),
+                "E_CLOSED_GLOBAL_STEPS");
+            ok(route.lowerRank().compareTo(previous.lowerRank()) >= 0
+                    && route.upperRank().compareTo(previous.upperRank()) <= 0,
+                "E_CLOSED_GLOBAL_NESTED_INTERVALS");
+            ok(route.lowerRank().compareTo(globalRank) <= 0
+                    && route.upperRank().compareTo(globalRank) >= 0,
+                "E_CLOSED_GLOBAL_RANK_CONTAINED");
+            eq(route.remainingChoices(),
+                family.countAfterPrefix(route.fixedPrefixCopy()),
+                "E_CLOSED_GLOBAL_SUFFIX_INDEPENDENT");
+        }
+        ok(route.complete(), "E_CLOSED_GLOBAL_ROUTE_COMPLETE");
+        eq(448, route.remainingDays(), "E_CLOSED_GLOBAL_REMAINDER");
+        int[] weaving = family.finishGlobalRankRoute(route);
+        eq(5778, weaving.length, "E_CLOSED_GLOBAL_FULL_LENGTH");
+        array(prefix, Arrays.copyOf(weaving, prefix.length),
+            "E_CLOSED_GLOBAL_PREFIX_PRESERVED");
+        eq(globalRank, family.rankGlobalWithinPrefix(prefix, weaving),
+            "E_CLOSED_GLOBAL_GLOBAL_RANK_ROUNDTRIP");
+        eq(localRank, new MonsterWeavingLinearCounter(lengths)
+            .rankAfterPrefix(prefix, weaving),
+            "E_CLOSED_GLOBAL_INDEPENDENT_LOCAL_RANK");
+        array(family.unrankAfterPrefix(prefix, localRank), weaving,
+            "E_CLOSED_GLOBAL_DIRECT_UNRANK_EQUIVALENCE");
+        System.out.println("STAGE_02_CLOSED_GLOBAL_ROUTE_PASS"
+            + " fixed_prefix_days=5266"
+            + " closed_months=42"
+            + " routed_days=64"
+            + " suffix_days=448"
+            + " route_ms=" + (System.nanoTime() - started) / 1000000);
     }
 
     private static void allOpenedFullYearExactPartitionProbe() {
