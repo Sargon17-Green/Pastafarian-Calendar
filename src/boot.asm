@@ -37,6 +37,9 @@ wDivRemainderHi:: ds 1
 wDivQuotLength:: ds 2
 wDivQuotByte:: ds 1
 wDivStatus:: ds 1
+wSignedDivStatus:: ds 1
+wSignedDivQuotSign:: ds 1
+wSignedDivRemainder:: ds 1
 wLeaseTable:: ds 16
 wLeaseIter:: ds 1
 wLeaseBank:: ds 1
@@ -121,6 +124,10 @@ Bootstrap:
     cp $a5
     jr nz, .done
     call RunDivisionTests
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .done
+    call RunSignedDivisionTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -133,6 +140,7 @@ INCLUDE "src/runtime/mbc5.asm"
 INCLUDE "src/runtime/sram_lease.asm"
 INCLUDE "src/runtime/magnitude_length.asm"
 INCLUDE "src/runtime/divide_u8.asm"
+INCLUDE "src/runtime/signed_divide_u8.asm"
 INCLUDE "src/runtime/day_count32.asm"
 INCLUDE "src/runtime/work_counts32.asm"
 INCLUDE "src/runtime/banked_add.asm"
@@ -155,3 +163,4 @@ INCLUDE "src/tests/day_count32_test.asm"
 INCLUDE "src/tests/work_counts32_test.asm"
 INCLUDE "src/tests/magnitude_length_test.asm"
 INCLUDE "src/tests/divide_u8_test.asm"
+INCLUDE "src/tests/signed_divide_u8_test.asm"

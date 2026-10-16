@@ -40,6 +40,7 @@ jobs:
           python3 tests/test_work_counts32_reference.py
           python3 tests/test_bank_length_reference.py
           python3 tests/test_divide_u8_reference.py
+          python3 tests/test_signed_divide_u8_reference.py
       - name: Build DMG ROM using RGBDS v1.0.4
         run: |
           docker run --rm --mount type=bind,src="$PWD",dst=/work \
