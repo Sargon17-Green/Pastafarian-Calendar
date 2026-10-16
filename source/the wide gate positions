@@ -38,7 +38,7 @@ To initialize extended gate traversal:
   Begin bounded gate walking.
 
 \ No costly sauce work is performed when preparing a move.
-To prepare a wide forward gate movement:
+To prepare forward extended gate movement:
   Put 1 into the wide gate movement's direction.
   Put the current extended gate's index into the wide gate movement's old index.
   Put the wide gate movement's old index into the wide gate movement's next index.
@@ -49,7 +49,7 @@ To prepare a wide forward gate movement:
   If the wide gate movement's old index's polarity is less than 0,
     put the wide gate movement's old index into the wide gate movement's gap index.
 
-To prepare a wide backward gate movement:
+To prepare backward extended gate movement:
   Put -1 into the wide gate movement's direction.
   Put the current extended gate's index into the wide gate movement's old index.
   Put the wide gate movement's old index into the wide gate movement's next index.
@@ -62,17 +62,17 @@ To prepare a wide backward gate movement:
 
 \ The interval source must have a canonical gap, not index zero.
 \ A blocked movement leaves BOTH index and coordinate unchanged.
-To commit the prepared wide gate movement:
+To commit prepared extended gate movement:
   Put 0 into the wide gate movement's succeeded.
   Request another bounded gate step.
   If the gate step budget's exhausted is 1, exit.
   Calculate extended gate spacing for the wide gate movement's gap index.
-  Apply a measured wide gate gap given the gate inquiry's interval length.
+  Apply measured extended gate gap given the gate inquiry's interval length.
 
 \ This pure movement commit helper is separately testable with known
 \ canonical gaps, without recalculating the costly 46-drop sauce.
 \ Reject a malformed length before changing either public coordinate.
-To apply a measured wide gate gap given a number:
+To apply measured extended gate gap given a number:
   Put 0 into the wide gate movement's succeeded.
   If the number is less than 42, exit.
   If the number is greater than 963, exit.
@@ -83,17 +83,17 @@ To apply a measured wide gate gap given a number:
   Put the wide gate movement's next index into the current extended gate's index.
   Put 1 into the wide gate movement's succeeded.
 
-To move to the next positive wide gate:
-  Prepare a wide forward gate movement.
-  Commit the prepared wide gate movement.
+To advance extended gate forward:
+  Prepare forward extended gate movement.
+  Commit prepared extended gate movement.
 
-To move to the next negative wide gate:
-  Prepare a wide backward gate movement.
-  Commit the prepared wide gate movement.
+To advance extended gate backward:
+  Prepare backward extended gate movement.
+  Commit prepared extended gate movement.
 
 \ A caller that requests more than 1024 gaps fails immediately.
 \ For a reachable index, every intermediate position remains wide.
-To locate a wide gate given a wide signed day:
+To locate extended gate index given a wide signed day:
   Initialize extended gate traversal.
   Put 0 into the current extended gate's reached.
   Put "1024" into a maximum wide gate steps.
@@ -103,8 +103,8 @@ To locate a wide gate given a wide signed day:
       if the current extended gate's index's absolute quantity is the wide signed day's absolute quantity,
         put 1 into the current extended gate's reached; break.
     Compare the current extended gate's index with the wide signed day.
-    If the signed day precedence result is 1, move to the next positive wide gate.
+    If the signed day precedence result is 1, advance extended gate forward.
     Compare the wide signed day with the current extended gate's index.
-    If the signed day precedence result is 1, move to the next negative wide gate.
+    If the signed day precedence result is 1, advance extended gate backward.
     If the wide gate movement's succeeded is not 1, break.
   Repeat.
