@@ -33,7 +33,7 @@ public final class Stage02IncrementalRouteTests {
         sharedGlobalRankRouteFullYearInterior();
         sharedGlobalRankRouteExtendedResourceProfile();
         sharedGlobalRankRoute96PrefixProof();
-        sharedGlobalRankRoute2048PrefixProof();
+        sharedGlobalRankRoute5266PrefixProof();
         sharedGlobalRankRouteInteroperabilityAndBudgets();
         persistSkippedBranchesAcrossCalls();
         progressInFullYearInterior();
@@ -853,7 +853,7 @@ public final class Stage02IncrementalRouteTests {
     }
 
 
-    private static void sharedGlobalRankRoute2048PrefixProof() {
+    private static void sharedGlobalRankRoute5266PrefixProof() {
         int[] lengths = new int[47];
         Arrays.fill(lengths, 123);
         lengths[46] = 120;
@@ -868,7 +868,7 @@ public final class Stage02IncrementalRouteTests {
         long scalarBatchBaseline = family.siblingScalarBatchBuildCount();
         int lastOpened = 0;
         int lastClosed = 0;
-        for (int call = 1; call <= 1024; call++) {
+        for (int call = 1; call <= 2633; call++) {
             MonsterWeavingLinearCounter.RankRoute prior = route;
             route = family.advanceGlobalRankRouteShared(route, 16, 2);
             eq(2, route.lastSharedBatchCalls(),
@@ -888,7 +888,9 @@ public final class Stage02IncrementalRouteTests {
                     || call == 144 || call == 160
                     || call == 192 || call == 224 || call == 256
                     || call == 320 || call == 384 || call == 512
-                    || call == 768 || call == 1024) {
+                    || call == 768 || call == 1024
+                    || call == 1536 || call == 2048
+                    || call == 2304 || call == 2560 || call == 2633) {
                 int[] prefix = route.fixedPrefixCopy();
                 int[] seen = new int[lengths.length];
                 int opened = 0;
@@ -909,31 +911,8 @@ public final class Stage02IncrementalRouteTests {
                 eq(route.remainingChoices(),
                     family.countAfterPrefix(prefix),
                     "E_SHARED_192_CHECKPOINT_SUFFIX_DIFFERENTIAL");
-                System.out.println((call <= 96
-                    ? "STAGE_02_SHARED_192_PREFIX_CHECKPOINT_PASS"
-                    : call == 112
-                        ? "STAGE_02_SHARED_224_PREFIX_CHECKPOINT_PASS"
-                        : call == 128
-                            ? "STAGE_02_SHARED_256_PREFIX_CHECKPOINT_PASS"
-                            : call == 144
-                                ? "STAGE_02_SHARED_288_PREFIX_CHECKPOINT_PASS"
-                                : call == 160
-                                    ? "STAGE_02_SHARED_320_PREFIX_CHECKPOINT_PASS"
-                                    : call == 192
-                                        ? "STAGE_02_SHARED_384_PREFIX_CHECKPOINT_PASS"
-                                        : call == 224
-                                            ? "STAGE_02_SHARED_448_PREFIX_CHECKPOINT_PASS"
-                                            : call == 256
-                                                ? "STAGE_02_SHARED_512_PREFIX_CHECKPOINT_PASS"
-                                                : call == 320
-                                                    ? "STAGE_02_SHARED_640_PREFIX_CHECKPOINT_PASS"
-                                                    : call == 384
-                                                        ? "STAGE_02_SHARED_768_PREFIX_CHECKPOINT_PASS"
-                                                        : call == 512
-                                                            ? "STAGE_02_SHARED_1024_PREFIX_CHECKPOINT_PASS"
-                                                            : call == 768
-                                                                ? "STAGE_02_SHARED_1536_PREFIX_CHECKPOINT_PASS"
-                                                                : "STAGE_02_SHARED_2048_PREFIX_CHECKPOINT_PASS")
+                System.out.println("STAGE_02_SHARED_"
+                    + prefix.length + "_PREFIX_CHECKPOINT_PASS"
                     + " calls=" + call
                     + " prefix_days=" + prefix.length
                     + " opened_months=" + opened
@@ -948,13 +927,40 @@ public final class Stage02IncrementalRouteTests {
                     + (System.nanoTime() - started) / 1000000);
             }
         }
-        eq(2048, route.stepsCompleted(),
-            "E_SHARED_2048_TOTAL_PREFIX_DAYS");
+        eq(5266, route.stepsCompleted(),
+            "E_SHARED_5266_TOTAL_PREFIX_DAYS");
         ok(family.siblingScalarBatchBuildCount() > scalarBatchBaseline,
             "E_SHARED_192_SCALAR_BATCH_USED");
         ok(family.siblingPrefixSharedWeightHitCount() > sharedBaseline,
             "E_SHARED_192_SCALAR_REUSE_USED");
-        ok(!route.complete(), "E_SHARED_192_NOT_FALSE_COMPLETE");
+        ok(route.complete(), "E_SHARED_5266_ROUTE_COMPLETE");
+        eq(512, route.remainingDays(), "E_SHARED_5266_SUFFIX_DAYS");
+        int[] fixedPrefix = route.fixedPrefixCopy();
+        BigInteger localRank = route.localRank();
+        int[] weaving = family.finishGlobalRankRoute(route);
+        eq(5778, weaving.length, "E_SHARED_5266_FULL_YEAR_LENGTH");
+        array(fixedPrefix, Arrays.copyOf(weaving, fixedPrefix.length),
+            "E_SHARED_5266_FULL_YEAR_PREFIX");
+        MonsterWeavingLinearCounter independent =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger independentLocalRank =
+            independent.rankAfterPrefix(fixedPrefix, weaving);
+        eq(localRank, independentLocalRank,
+            "E_SHARED_5266_INDEPENDENT_LOCAL_RANK");
+        eq(rank, route.lowerRank().add(independentLocalRank)
+            .subtract(BigInteger.ONE),
+            "E_SHARED_5266_GLOBAL_RANK_RECONSTRUCTED");
+        eq(route.remainingChoices(), independent.countAfterPrefix(fixedPrefix),
+            "E_SHARED_5266_INDEPENDENT_SUFFIX_COUNT");
+        array(weaving, independent.unrankAfterPrefix(
+            fixedPrefix, localRank),
+            "E_SHARED_5266_INDEPENDENT_SUFFIX_UNRANK");
+        System.out.println("STAGE_02_SHARED_5266_FULL_YEAR_MIDDLE_PASS"
+            + " total_days=5778 prefix_days=" + fixedPrefix.length
+            + " suffix_days=" + route.remainingDays()
+            + " global_rank_digits=" + rank.toString().length()
+            + " local_rank_digits=" + localRank.toString().length()
+            + " route_ms=" + (System.nanoTime() - started) / 1000000);
     }
 
     private static void sharedGlobalRankRoute96PrefixProof() {
