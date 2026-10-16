@@ -6,6 +6,10 @@
 
 A wide quantity is a string.
 
+\ Compare lengths as named numbers, not as nested possessive expressions.
+The spanalpha is a number.
+The spanbeta is a number.
+
 \ Taking the final digit also removes it from the given text.
 \ An empty string supplies a zero digit, useful when adding numbers.
 To take the last decimal digit from a string into a number:
@@ -34,8 +38,10 @@ To normalize a wide quantity:
 \ Compare two positive or zero whole numbers, not their textual spelling.
 \ A shorter normalized decimal number is always smaller.
 To decide if a wide quantity is numerically smaller than another wide quantity:
-  If the wide quantity's length is less than the other wide quantity's length, say yes.
-  If the wide quantity's length is greater than the other wide quantity's length, say no.
+  Put the wide quantity's length into the spanalpha.
+  Put the other wide quantity's length into the spanbeta.
+  If the spanalpha is less than the spanbeta, say yes.
+  If the spanalpha is greater than the spanbeta, say no.
   Put the wide quantity into a left string.
   Put the other wide quantity into a right string.
   Slap a substring on the left string.
