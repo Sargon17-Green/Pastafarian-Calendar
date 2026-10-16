@@ -922,3 +922,14 @@ soumèt pou verifye etap la; poko gen rezilta.
 yon vyolasyon lòd gate(2) apre gate(1), epi
 endepandans rezilta legacy kont tout gaps anvan
 dènye a. Konparezon kòrèk yo sèlman nan test.
+
+### Fèmti DISCOVERY 17 — Stage 34
+
+CI run `38596684180`: **59/59 tès-jobs pozitif PASS**;
+se sèlman etap final volontè
+`EXPECTED_RED Stage 34 DISCOVERY 17 witness 1: positive gate forgot prior gaps`
+ki fè job `lua_stage34_discovery` wouj. Lòd pozitif
+istorik la pa akimile espas yo; 96 chèn ak
+92 divèjans, 18 pàn/18 rekiperasyon, 2 nested
+ak 3 sauce otantik verifye. `LAST_COMPLETED_STAGE=34` /
+`EXPECTED_RED_VERIFIED`. Pa gen PATCH 17 nan etap sa a.

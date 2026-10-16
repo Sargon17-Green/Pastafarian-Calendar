@@ -1260,7 +1260,7 @@ istorik; `legacyPositiveGateProbe` retounen tras la.
 
 Limit Stage 34 se 1..32 etap pozitif ak sous ki bay
 deja. Li pa fè rechèch pòtay negatif, pa gen PATCH 17,
-ni `postStir12`. Tès ak CI natif poko verifye.
+ni `postStir12`. Tès ak CI natif konfime sou run `38596684180`.
 
 ### Tès Stage 34 — DISCOVERY 17
 
@@ -1275,7 +1275,7 @@ pwouve ke `F+gap(n)` pa egale `G(n)` pou n>=2.
 Gen kat jobs CI, twa pozitif ak youn ki dwe echwe
 sèlman nan dènye etap `EXPECTED_RED`. Kadna SHA
 sou PATCH 16 ak DISCOVERY 16 rete. Rezilta CI
-natif poko verifye.
+natif verifye: 59 travay pozitif PASS, yon sèl EXPECTED_RED volontè.
 
 ### Pwopriyete anplis — pòtay pozitif
 
@@ -1284,3 +1284,16 @@ korekisyon kumilatif, plis ka kote gate(2) legacy
 vin avan gate(1), ansanm ak prèv ke chanje premye
 gap la pa chanje `G_legacy(2)` si dènye gap la
 rete menm. Oracle pozitif la sèlman nan `test/`.
+
+### Fèmti natif Stage 34 — DISCOVERY 17
+
+GitHub Actions run `38596684180`: **59 travay pozitif PASS**,
+`lua_stage34_discovery` echwe sèlman nan dènye etap
+`EXPECTED_RED Stage 34 DISCOVERY 17 witness 1: positive gate forgot prior gaps`.
+Suite Stage 1–34 pase; 24 chèn oracle (21 erè),
+96 chèn pwopriyete (92 erè), 32 sous BigInt,
+18 pàn/18 rekiperasyon, de nested contexts ak twa
+kouran sauce kanonik pase. Twa witness wouj yo
+toujou verifye nan audit. Pa gen PATCH 17 ni
+`postStir12` nan production. `LAST_COMPLETED_STAGE=34`;
+`EXPECTED_REPOSITORY_STATE=EXPECTED_RED_VERIFIED`.
