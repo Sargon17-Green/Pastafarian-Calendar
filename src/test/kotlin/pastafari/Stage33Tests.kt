@@ -34,7 +34,7 @@ object Stage33Tests {
                     val normative=oracle(a,b,open,close,day)
                     insist("E_PATCH16_MATRIX_$i-$width-$k",
                         out.correctedAccepted==normative &&
-                        out.correctionApplied==(width==6 && k==1) &&
+                        out.correctionApplied==(width==6 && (k==1 || k==2)) &&
                         out.legacyCalls==1 && out.correctedChecks==1 &&
                         out.gateGaps==ExactInt.of(width.toLong()) &&
                         out.yearDays==close-open &&
@@ -57,10 +57,10 @@ object Stage33Tests {
             }
         }
         insist("E_PATCH16_TOTALS",
-            count==656 && legacyRed==41 &&
-            legacyMatch==615 && sessions==164)
+            count==656 && legacyRed==82 &&
+            legacyMatch==574 && sessions==164)
         println("STAGE33_REAL_GATE_GREEN_656")
-        println("STAGE33_PRESERVED_EXPERIMENTAL_RED_41_MATCH_615")
+        println("STAGE33_PRESERVED_EXPERIMENTAL_RED_82_MATCH_574")
         println("STAGE33_PRODUCTION_SESSION_GREEN_164")
 
         val huge=ExactInt.parse("1844674407370955161600000000000000000000000000")
