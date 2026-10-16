@@ -1,0 +1,40 @@
+name: PowerShell Tagalog Stage 23 native verification
+on:
+  push:
+    branches:
+      - 'PowerShell+Tagalog'
+    paths:
+      - '.github/workflows/powershell-tagalog-stage23-native.yml'
+      - 'src/**'
+      - 'tests/**'
+      - 'oracle/**'
+      - 'Run-Stage23.ps1'
+      - 'DEVELOPMENT_STAGE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-powershell-51:
+    name: Stage 23 native Windows PowerShell 5.1
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@v4
+      - name: Verify native runtime and patch with Stage 1 regression
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) {
+              throw ('Requires Windows PowerShell 5.1, found ' + $PSVersionTable.PSVersion.ToString())
+          }
+          Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
+          & .\Run-Stage23.ps1
+          if (-not $?) { throw 'Stage 23 native script failed' }
+      - name: Preserve native stage metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage23-ci-evidence
+          path: DEVELOPMENT_STAGE.md
+          if-no-files-found: error

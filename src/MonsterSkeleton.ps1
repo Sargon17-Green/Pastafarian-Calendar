@@ -22,6 +22,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Discovery10.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch10.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery11.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Patch11.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -192,6 +193,13 @@ function New-BaseMonsterContext {
         legacyQueriedOrder = $null
         discovery11Status = 'HISTORICAL_SCAR_PRESENT'
         discovery11InvocationCount = 0
+        orderAt46Latch = $null
+        patch11CapturedAtWrite = 0
+        patch11LegacyQueriedOrder = $null
+        patch11CorrectedOrder = $null
+        patch11Applied = $false
+        patch11Status = 'NOT_RUN'
+        patch11InvocationCount = 0
     }
 }
 
@@ -327,7 +335,7 @@ function Invoke-CalendarDateSpaghettiBootstrap {
     Add-BaseMetric -Context $ctx -Name 'bootstrap.calls'
     Add-BaseLog -Context $ctx -Code 'bootstrap-enter'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
-    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 22.'
+    throw 'Ang bootstrap entrypoint ay hindi calendar result path sa Stage 23.'
 }
 
 function Invoke-CalendarDateSpaghetti {
@@ -338,11 +346,11 @@ function Invoke-CalendarDateSpaghetti {
     )
 
     $ctx = New-BaseMonsterContext -CalculationDay $CalculationDay -TargetDay $TargetDay
-    $ctx.phase = 'DISCOVERY11'
+    $ctx.phase = 'PATCH11'
     $ctx.status = 'RUNNING'
 
     $dispatcher = New-BaseDispatcher
-    Register-BaseHandler -Dispatcher $dispatcher -Phase 'DISCOVERY11' -Handler {
+    Register-BaseHandler -Dispatcher $dispatcher -Phase 'PATCH11' -Handler {
         param($Context)
         $withPatch01 = Invoke-Patch01SaveAdapter -Context $Context -Value $Context.calculationDay
         $withPatch02 = Invoke-Patch02DayTagAdapter -Context $withPatch01
@@ -466,6 +474,8 @@ function Invoke-CalendarDateSpaghetti {
         $withDiscovery05.legacyQueriedOrder = Get-Discovery11LegacyQueriedOrder `
             -Context $withDiscovery05
 
+        $withDiscovery05.patch11CorrectedOrder = Get-Patch11OrderAt46 -Context $withDiscovery05
+
         Add-BaseMetric -Context $withDiscovery05 -Name 'discovery11.orderMemory.queries'
         Add-BaseLog -Context $withDiscovery05 -Code 'monster.discovery11.productionQuery' -Data ([pscustomobject]@{
             writes = $withDiscovery05.legacyOrderMemoryWriteCount
@@ -475,14 +485,19 @@ function Invoke-CalendarDateSpaghetti {
             expectedDrop46Order = $withDiscovery05.patch08OrderTable[46]
         })
 
+        Add-BaseLog -Context $withDiscovery05 -Code 'monster.patch11.productionQuery' -Data ([pscustomobject]@{
+            capturedAtWrite = $withDiscovery05.patch11CapturedAtWrite
+            legacyQueriedOrder = $withDiscovery05.patch11LegacyQueriedOrder
+            correctedOrder = $withDiscovery05.patch11CorrectedOrder
+        })
         return $withDiscovery05
     }
 
     Add-BaseMetric -Context $ctx -Name 'calendarDateSpaghetti.calls'
-    Add-BaseLog -Context $ctx -Code 'monster.discovery11.dispatch'
+    Add-BaseLog -Context $ctx -Code 'monster.patch11.dispatch'
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'DISCOVERY11_COMPLETE'
+    $result.status = 'PATCH11_COMPLETE'
     return $result
 }

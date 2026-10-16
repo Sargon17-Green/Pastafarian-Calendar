@@ -126,6 +126,10 @@ function Invoke-Discovery11OverwritableOrderMemory {
         }
     }
 
+    # Patch 11 latches the *physical* drop-46 order at the last drop write,
+    # before any of the 12 post-stirs overwrite the historical shared memory.
+    Invoke-Patch11OrderAt46Latch -Context $Context -DropIndex 46 -Order $Context.legacyOverwritableOrderMemory
+
     $Context.legacyBowlsAfter46Drops = $bowls
 
     for ($stir = 1; $stir -le 12; $stir++) {

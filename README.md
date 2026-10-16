@@ -1,11 +1,9 @@
 # Kalendaryong Pastafarian — PowerShell + Filipino
 
-## Stage 22 — Discovery 11
+## Stage 23 — Patch 11 (Native verification pending)
 
-Pinapalawak ng Stage 22 ang tunay na bowl path sa lahat ng 46 visible drops at sa 12 exact post-stir rounds.
+Sa ika-46 na drop write, kinokopya ang tamang bowl order sa hiwalay na `orderAt46Latch` bago magsimula ang 12 post-stir rounds. Hindi binabago ang historical `legacyOverwritableOrderMemory`: 46 drop writes at 12 post-stir writes pa rin, at ang lumang query ay patuloy na nagbabalik ng stir-12 order.
 
-Ang bawat drop order at bawat post-stir order ay isinusulat sa iisang `legacyOverwritableOrderMemory`. Dahil walang hiwalay na drop-46 latch, ang tamang drop-46 order ay napapalitan ng stir 1 hanggang 12. Ang semantic query ay nagbabasa pa rin ng huling overwritten memory.
+Ang bagong `Get-Patch11OrderAt46` ay nagpapatakbo muna ng preserved wrong query at saka nagbabalik ng hiwalay na kopya ng drop-46 latch. Ang independent normative oracle at Windows PowerShell 5.1 CI ay kailangang maging GREEN bago i-seal ang Stage 23.
 
-Ang 46-drop bowl result at 12-post-stir bowl result ay dapat eksakto. Ang sadyang depekto sa yugtong ito ay order memory lamang: positions 1,2,6 ng queried order ay EXPECTED_RED laban sa tunay na drop-46 order.
-
-Wala pang `orderAt46Latch` at wala pang Patch 12 next-bowl logic.
+Wala pang Patch 12 next-bowl logic.

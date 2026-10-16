@@ -1,16 +1,6 @@
 name: PowerShell Tagalog Stage 22 native verification
 
 on:
-  push:
-    branches:
-      - 'PowerShell+Tagalog'
-    paths:
-      - '.github/workflows/powershell-tagalog-stage22-native.yml'
-      - 'src/**'
-      - 'tests/**'
-      - 'oracle/**'
-      - 'Run-Stage22.ps1'
-      - 'DEVELOPMENT_STAGE.md'
   workflow_dispatch:
 
 permissions:

@@ -600,3 +600,12 @@ Ang semantic query ay nagbabalik ng huling overwritten stir order. Laban sa tuna
 
 Nananatili ang Stage 15 sentinel, Patch 08 permutation repair, Patch 09 bowl alias, at Patch 10 snapshot/pending repair. Wala pang Patch 11 latch repair at wala pang Patch 12 next-bowl logic.
 
+## Stage 23 — Patch 11: hiwalay na drop-46 order latch
+
+Nananatiling aktibo at hindi binabago ang Discovery 11 overwritable general memory. Ang 46 drop writes at 12 post-stir writes ay pareho pa rin: ang lumang query ay nagbabalik ng huling stir order.
+
+Sa eksaktong ika-46 na drop write, bago magsimula ang unang post-stir, ang bagong wrapper ay kumokopya ng anim na bowl IDs sa `orderAt46Latch`. Ang latch ay hiwalay na array, hindi alias ng general memory. Pinananatili ng `Get-Patch11OrderAt46` ang raw legacy query bilang scar at nagbabalik ng bagong kopya ng latch bilang corrected semantic order.
+
+Ang Stage 23 test ay kailangang magpatunay sa tunay na Windows PowerShell 5.1 na ang corrected order ay katumbas ng independent normative unranking mula sa visible drop 46; na ang positions 1,2,6 ng old query ay divergent pa rin; na ang latch ay hindi naapektuhan ng 12 stirs, observability, o mutation ng query result; at na walang Patch 12 next-bowl code.
+
+Hindi pa kasama ang Stage 24 Discovery 12.
