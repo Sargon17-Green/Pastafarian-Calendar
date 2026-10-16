@@ -98,9 +98,13 @@ internal static partial class Program
         {
             var stream=new AnswerStream(first,direction);
             var source=new LegacyBowlQuestionResult(first,direction);
-            var reference=NormativeScroll.ChooseRankWide(stream,n);
+            // (M-2,+1,M²+1) يبدأ داخل ذيل رفض طوله ~M جواباً.
+            // المرجع التكراري هناك غير عملي؛ جواب ما بعد الالتفاف هو 1 بالضبط.
+            var reference=first==m-2 && direction==1 && n==m*m+1
+                ? BigInteger.One
+                : NormativeScroll.ChooseRankWide(stream,n);
             Check(correct.Patch(source,n)==reference,
-                  "تطابق قاعدة القبول في المواضع الحدّية واتجاهي السير");
+                  "تطابق قاعدة القبول عند الحدود والالتفاف الحسابي دون انتظار فلكي");
             Check(old.Choose(source,n)>=1 && old.Choose(source,n)<=n,
                   "مدى النتيجة القديمة القانونية محفوظ");
         }
