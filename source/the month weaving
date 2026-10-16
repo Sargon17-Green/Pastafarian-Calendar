@@ -284,7 +284,7 @@ To choose the next woven day:
 \ original month lengths BEFORE every requested rank, even after
 \ a previous full or streaming selection. The exact memo cache may
 \ remain because the original month lengths have not changed.
-To select a month weaving from a wide quantity:
+To select a weaving selection from a wide quantity:
   Put 0 into the weaving selection's selection success.
   Destroy the chosen woven days.
   Put 0 into the woven requested month ordinal.
