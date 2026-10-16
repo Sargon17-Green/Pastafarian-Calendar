@@ -15,7 +15,7 @@ To check zero option count refusal:
   If the seal inquiry's selected quantity is not "0",
     put "The narrow chooser accepted zero options." into the check report; exit.
   Put "100" into the seal inquiry's selected quantity.
-  Choose a wide option given the invalid options wide quantity.
+  Perform wide option selection given the invalid options wide quantity.
   If the seal inquiry's selected quantity is not "0",
     put "The wide chooser accepted zero options." into the check report; exit.
   Put "" into the invalid options wide quantity.
