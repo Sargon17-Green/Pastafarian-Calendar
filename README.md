@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 11 (PATCH 05)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 12 (DISCOVERY 06)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -158,3 +158,17 @@ php -d memory_limit=512M tests/stage11_patch05_tests.php
 ```
 
 Ujian penemuan Stage 10 dijalankan terus terhadap legacy dan kekal merah dengan 72 perbezaan, 12 padanan, manakala pembalut pengesahnya hijau. Ujian Stage 11 memeriksa kesetaraan 37 pasangan × tujuh titisan, 128 set slot sintetik, hasil berulang/per-instance, ralat indeks dan regresi penuh Stage 1–9. Tiada tampalan 06 atau perubahan oracle.
+
+
+## Stage 12 — DISCOVERY 06: Sejarah prior buta terhadap titisan tersembunyi
+
+Fungsi `LegacyVisiblePrior::legacyPrior(dropStore,i,back)` menggunakan `dropStore[i-back]` secara langsung. Ia berjaya membaca titisan terlihat apabila `i-back >= 1`, tetapi bagi slot sifar atau negatif ia memulangkan `null` dan gagal menjangkau hidden1 hingga hidden7. Kecacatan sejarah ini mesti dikekalkan untuk dibetulkan oleh PATCH 06 pada Stage 13.
+
+`BootstrapKernel::priorLegacy` menyediakan penghala `VISIBLE_PRIOR_LEGACY` dan konteks milik setiap panggilan. Bukti Stage 12 menggunakan stor terlihat sintetik yang deterministik kerana penjanaan 46 titisan terlihat yang sebenar belum bermula, sambil menguji hidden sebenar daripada PATCH 05 menggunakan oracle PHP tempatan.
+
+```text
+php -d memory_limit=512M tests/stage12_discovery06_tests.php
+php -d memory_limit=512M tests/verify_stage12_discovery06.php
+```
+
+Ujian pertama dijangka keluar kod 1 dengan tepat 44 kehilangan slot hidden, 508 bacaan terlihat yang betul, 28 nilai hidden yang sepadan dan sifar ralat tidak dijangka. Pembalut kedua menerima RED yang tepat dengan kod 0. GitHub Actions run `38894141862` bagi commit `255fc02e37a8071bc7ab98948a91df4abcef1c34` telah **lulus kedua-dua kerja**, termasuk pembalut baharu dan semua ujian Stage 1–11. Stage 13 belum bermula.

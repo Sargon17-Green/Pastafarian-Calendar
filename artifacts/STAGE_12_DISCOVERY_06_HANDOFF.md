@@ -21,4 +21,17 @@ php -d memory_limit=512M tests/verify_stage12_discovery06.php
 
 Ujian langsung patut keluar kod 1 dengan 44 slot negatif atau sifar, 508 slot terlihat yang betul, 28 padanan hidden dan tiada ralat lain. Pengesah patut keluar kod 0. Semua regresi Stage 1–11 mesti kekal hijau.
 
-**Status sebelum CI:** kod disediakan, pengesahan penuh belum dilakukan. Jangan mulakan Stage 13 sebelum bukti penerimaan Stage12 tersedia.
+**Status selepas CI:** penemuan Stage 12 diterima sebagai EXPECTED_RED yang terkawal. Stage 13 boleh dimulakan pada pusingan berikutnya.
+
+## Penerimaan CI sebenar
+
+**Run:** `38894141862`; **SHA:** `255fc02e37a8071bc7ab98948a91df4abcef1c34`.
+
+**Keputusan:** `verify=success`, `audit_php_bahasa_melayu=success`. Log PHP membuktikan:
+
+```text
+KEPUTUSAN MERAH_DIJANGKA missing=44 found=508 hidden=28 lain=0
+LULUS kontrak merah 06; prior legacy buta terhadap hidden
+```
+
+Semua langkah Stage 1–11 lulus, termasuk `LULUS Stage 11 PATCH 05 pasangan=37 komponen=259 parut=222 sepadan_legacy=37 slot_sintetik=896 ralat=5`. Oleh itu `EXPECTED_RED` adalah merah yang disengajakan dan disahkan, bukannya kegagalan CI. Stage 13 belum dimulakan.

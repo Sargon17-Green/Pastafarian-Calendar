@@ -236,3 +236,20 @@ Regresi Stage 10 kekal merah secara langsung pada legacy, dengan 72 ketakpadanan
 ### Had
 
 Stage 12 (DISCOVERY 06 — penggunaan sejarah yang tidak mengenali slot hidden bagi indeks tidak positif) belum ditambah. Tidak berlaku bacaan oracle dalam kod produksi.
+
+
+## Stage 12 — DISCOVERY 06: Pembaca prior sejarah tiada laluan ke hidden
+
+### Kecacatan asal yang dibuktikan
+
+Pembaca `LegacyVisiblePrior::legacyPrior` mencari `dropStore[i-back]` sahaja. Bagi slot 0 hingga -6, tujuh titisan hidden yang sudah dikira oleh PATCH 05 tidak disentuh. Pembaca memulangkan `null` apabila nilai tidak ditemui; laluan sejarah ini tidak diubah dan tidak diisi fallback palsu.
+
+### Pertambahan seni bina
+
+`VISIBLE_PRIOR_LEGACY` didaftarkan dalam `BootstrapDispatcher`. `BootstrapKernel::priorLegacy` menyerahkan stor, indeks dan jarak-undur dalam konteks semantik baharu bagi setiap panggilan; status pemerhatian membezakan `VISIBLE_PRIOR_RETURNED` daripada `VISIBLE_PRIOR_MISSING`. Semua akses positif masih menghala melalui legacy, bukan oracle.
+
+### Bukti yang dikunci dan had tahap
+
+Empat pasangan tarikh × 46 indeks terlihat × tiga jarak-undur (1,3,7) menghasilkan tepat 44 kekosongan hidden yang dijangka, 508 bacaan terlihat yang betul, dan 28 nilai hidden setara oracle. Pembalut menerima hanya RED terkawal, tanpa ralat tambahan. Run GitHub Actions `38894141862` pada SHA `255fc02e37a8071bc7ab98948a91df4abcef1c34` menghasilkan `KEPUTUSAN MERAH_DIJANGKA missing=44 found=508 hidden=28 lain=0` dan `LULUS kontrak merah 06; prior legacy buta terhadap hidden`. Kedua-dua kerja CI hijau. Kunci nama, fixture dan regresi Stage 1–11 kekal lulus.
+
+`priorPatch` dan pembacaan slot tidak positif melalui `hiddenByNearness` tidak ditambah pada Stage 12. Tugasnya ialah Stage 13 — PATCH 06. Fungsi penjanaan titisan terlihat dan oracle tidak disentuh.
