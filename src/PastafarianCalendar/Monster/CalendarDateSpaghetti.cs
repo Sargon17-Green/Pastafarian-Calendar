@@ -247,6 +247,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateWideFamilyRank(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الاكتشاف السابع عشر: رفض المساواة عند حد قبول الأسرة الواسعة.
+    public static BigInteger EvaluateLegacyInclusiveWideLimit(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateLegacyInclusiveWideLimit(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

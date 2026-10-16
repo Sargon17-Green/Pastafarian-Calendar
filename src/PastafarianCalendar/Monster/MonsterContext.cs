@@ -146,6 +146,9 @@ public sealed class MonsterContext
     // الرقعة السادسة عشرة: رتبة الأرقام من الموضع الأقل وزناً مع بقاء القديم.
     public BigInteger? PatchedWideRankResult { get; set; }
 
+    // الندبة السابعة عشرة: يُرفض الحدّ المسموح نفسه في العائلة الواسعة.
+    public BigInteger? LegacyInclusiveWideLimitRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

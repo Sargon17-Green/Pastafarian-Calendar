@@ -215,3 +215,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage32Tests/PastafarianCalendar.Stage32Tests.csproj --configuration Release -- --verify-expected-red
       - name: تحقق رقعة ترتيب أرقام الأسرة الواسعة السادسة عشرة مع المرجع
         run: dotnet run --project tests/PastafarianCalendar.Stage33Tests/PastafarianCalendar.Stage33Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لرفض الجواب المساوي لحد الأسرة الواسعة
+        id: discovery_inclusive_wide_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage34Tests/PastafarianCalendar.Stage34Tests.csproj --configuration Release
+      - name: إثبات توقيع خطأ رفض المساواة دون رقعة مبكرة
+        if: always()
+        run: |
+          test "${{ steps.discovery_inclusive_wide_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage34Tests/PastafarianCalendar.Stage34Tests.csproj --configuration Release -- --verify-expected-red
