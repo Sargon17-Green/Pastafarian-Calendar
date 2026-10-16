@@ -20,13 +20,14 @@ use Pastafari::WeavingSuffixFactor qw(countWeavingSuffixFactored);
 # 原生 5000 年的數個分散四月份窗口（預設末四月 402 日）。
 # 前沿獨立狀態 Oracle 只驗證總數；中位排名的雙向還原不是
 # 另一個獨立的全字典序預言機。邊界詞另有獨立貪婪構造。
-my ($seconds,$rss_kib,$requested_offset,$second_day_partition,$third_day_partition,$third_day_target,$fourth_day_target)=(185,393216,undef,0,0,undef,undef);
+my ($seconds,$rss_kib,$requested_offset,$second_day_partition,$third_day_partition,$third_day_target,$fourth_day_target,$fifth_day_target)=(185,393216,undef,0,0,undef,undef,undef);
 GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_kib,
            'window-offset=i'=>\$requested_offset,
            'second-day-partition!'=>\$second_day_partition,
            'third-day-partition!'=>\$third_day_partition,
            'third-day-target=s'=>\$third_day_target,
-           'fourth-day-target=s'=>\$fourth_day_target)
+           'fourth-day-target=s'=>\$fourth_day_target,
+           'fifth-day-target=s'=>\$fifth_day_target)
     or die "參數無效\n";
 die "seconds 必須在 1..230 範圍\n"
     if $seconds<1 || $seconds>230;
@@ -57,6 +58,14 @@ die "第四日分片必須單獨啟動、使用指定 37 窗口\n"
     && (!defined($requested_offset) || $requested_offset!=37
         || $second_day_partition || $third_day_partition
         || defined($third_day_target));
+die "第五日分片只准 parent、1、2、3、assembly\n"
+    if defined($fifth_day_target)
+    && $fifth_day_target !~ /\A(?:parent|[123]|assembly)\z/;
+die "第五日分片只可在第 37 四月窗口獨立執行\n"
+    if defined($fifth_day_target)
+    && (!defined($requested_offset) || $requested_offset!=37
+        || $second_day_partition || $third_day_partition
+        || defined($third_day_target) || defined($fourth_day_target));
 die "本工具需 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -351,6 +360,86 @@ if (!$pid) {
             }
         }
 
+        # 第 49 輪五份受控工作已獨立證實中位前四字元
+        # [1,2,1,2]。在這一前綴下，尚未開啟第 3、4 月，
+        # 第五日合法標籤僅為 1、2、3。
+        my $split_fifth;
+        if (defined($fifth_day_target)) {
+            my $options={
+                profile_engine=>'stream-indexed',
+                max_temp_file_bytes=>16*1024*1024
+            };
+            if ($fifth_day_target ne 'assembly') {
+                my @prefix=$fifth_day_target eq 'parent'
+                    ? (1,2,1,2) : (1,2,1,2,0+$fifth_day_target);
+                my %fifth_stats;
+                my $forward=countWeavingsFrontier(
+                    \@L,\%fifth_stats,\@prefix
+                );
+                my $factor=countWeavingSuffixFactored(
+                    \@L,\@prefix,undef,undef,$options
+                );
+                die "第五日獨立正向前沿與因子後綴 BigInt 不同\n"
+                    if $forward<1 || $forward!=$factor;
+                printf "CANONICAL_WINDOW41 phase=FIFTH_PIECE_PASS target=%s prefix=%s digits=%d states=%d elapsed_sec=%.3f\n",
+                    $fifth_day_target,join(',',@prefix),
+                    length("$forward"),$fifth_stats{states},
+                    time()-$start;
+            } else {
+                my $p12=countWeavingSuffixFactored(
+                    \@L,[1,2],undef,undef,$options
+                );
+                my $p121=countWeavingSuffixFactored(
+                    \@L,[1,2,1],undef,undef,$options
+                );
+                my $smaller_fourth=countWeavingSuffixFactored(
+                    \@L,[1,2,1,1],undef,undef,$options
+                );
+                my $parent=countWeavingSuffixFactored(
+                    \@L,[1,2,1,2],undef,undef,$options
+                );
+                die "第四日父前綴沒有合法的 BigInt 名次\n"
+                    if $p12<1 || $p12>=$oracle
+                    || $p121<1 || $p121>$p12
+                    || $smaller_fourth<1 || $parent<1
+                    || $smaller_fourth->copy->badd($parent)>$p121;
+                my $middle=$oracle->copy->bdiv(2)->badd(1);
+                my $local=$middle->copy->bsub(
+                    $oracle->copy->bsub($p12)
+                );
+                die "中位排名並非第三日選 1 的區段\n"
+                    if $local<1 || $local>$p121;
+                $local->bsub($smaller_fourth);
+                die "中位排名並非第四日選 2 的區段\n"
+                    if $local<1 || $local>$parent;
+                my $sum=Math::BigInt->bzero;
+                my $choice;
+                for my $j (1,2,3) {
+                    my @prefix=(1,2,1,2,$j);
+                    my $ways=countWeavingSuffixFactored(
+                        \@L,\@prefix,undef,undef,$options
+                    );
+                    die "第五日合法分支的精確數量為零\n"
+                        if $ways<1;
+                    $sum->badd($ways);
+                    if (!defined $choice) {
+                        if ($local<=$ways) {
+                            $choice=$j;
+                        } else {
+                            $local->bsub($ways);
+                        }
+                    }
+                }
+                die "第五日三個 BigInt 互斥子分支之和不等於父前綴\n"
+                    if $sum!=$parent;
+                die "第五日字典序找不到局部一基 BigInt 名次\n"
+                    if !defined($choice) || $local<1;
+                $split_fifth=$choice;
+                printf "CANONICAL_WINDOW41 phase=FIFTH_ASSEMBLY_PASS prefix=1,2,1,2 fifth=%d branches=3 parent_digits=%d elapsed_sec=%.3f\n",
+                    $split_fifth,length("$parent"),time()-$start;
+            }
+        }
+
         my @direct_first;
         for my $m (1..@L) {
             push @direct_first,(($m)x$L[$m-1]);
@@ -407,6 +496,11 @@ if (!$pid) {
             if defined($split_fourth)
             && ($word->[1]!=2 || $word->[2]!=1
                 || $word->[3]!=$split_fourth);
+        die "第五日分片彙總與索引反排名不符\n"
+            if defined($split_fifth)
+            && ($word->[0]!=1 || $word->[1]!=2
+                || $word->[2]!=1 || $word->[3]!=2
+                || $word->[4]!=$split_fifth);
         die "索引式解碼未建立實際私人索引\n"
             if ($unrank_stats{indexed_profile_builds}//0)!=1;
         my %rank_stats;
