@@ -326,3 +326,20 @@ Ujian Stage 14 masih mesti mengembalikan kod 1 dengan 138 perbezaan berbanding o
 ### Had tahap
 
 Tampalan ini tidak mengubah fungsi SAVE, susunan batu, rumus visible, keturunan hidden, atau pemilihan permutasi. Stage 16 (DISCOVERY 08) ditangguhkan sehingga PATCH 07 hijau di GitHub Actions.
+
+
+### Bukti GitHub Actions Stage 15 — disahkan
+
+**Run:** `38923823861`  
+**SHA diperiksa:** `8fc05d7687acf128026dfdc3a61bb851f9b32adf`  
+**Pekerjaan:** `verify=success`; `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+LULUS Stage 13 PATCH 06 positif=762 hidden=66 oracle_hidden=42 sintetik=2688 ralat=7
+KEPUTUSAN MERAH_DIJANGKA divergence=138 kes=3 julat=138 lain=0
+LULUS kontrak merah 07; legacy kekal salah dan sentinel hanya dalam tampalan
+LULUS Stage 15 PATCH 07 kes=8 komponen=368 parut=138 ulang=46 baris_sintetik=1408
+```
+
+Semua ujian Stage 1–14, pemeriksaan nama kanonik dan fixture turut lulus. Stage 15 ialah PATCH GREEN yang diterima; Stage 16 belum bermula. Tidak terdapat handoff PHP aktif dalam `Pending_User_Execution`.
