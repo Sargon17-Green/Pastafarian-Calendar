@@ -126,10 +126,10 @@ To inspect candidate woven months given a number:
   Add 1 to the allowed first number.
   If the number is greater than the allowed first number, exit.
   If the examined woven month state's remaining days is 1,
-    check the candidate's final occurrence given the number; exit.
+    check eligible candidate final occurrence given the number; exit.
   Put 1 into the weaving selection's candidate legal.
 
-To check the candidate's final occurrence given a number:
+To check eligible candidate final occurrence given a number:
   Put the weaving selection's already finished into an allowed last number.
   Add 1 to the allowed last number.
   If the number is the allowed last number,
@@ -200,7 +200,7 @@ To resolve weaving completions into a wide quantity:
   Put 1 into a candidate month number.
   Loop.
     If the candidate month number is greater than the selected month count, break.
-    Count the eligible candidate's weaving suffix given the candidate month number into a child wide quantity.
+    Count eligible candidate weaving suffix given the candidate month number into a child wide quantity.
     Add the child wide quantity to the sum wide quantity.
     Add 1 to the candidate month number.
   Repeat.
@@ -214,7 +214,7 @@ To resolve weaving completions into a wide quantity:
 \ Decrease the candidate's count, ask recursively, then restore both
 \ its remaining count and the total. Never use a pointer retained from
 \ the recursive call, because its lookup state may have changed.
-To count the eligible candidate's weaving suffix given a number into a wide quantity:
+To count eligible candidate weaving suffix given a number into a wide quantity:
   Put "0" into the wide quantity.
   Inspect candidate woven months given the number.
   If the weaving selection's candidate legal is not 1, exit.
@@ -259,9 +259,9 @@ To consider the next woven candidate given a number and a wide quantity:
   Add 1 to the weaving selection's position.
   Store the accepted woven day.
   If the weaving selection's position is the weaving selection's target position,
-    remember the target's woven month and day.
+    remember requested woven position.
   
-To remember the target's woven month and day:
+To remember requested woven position:
   Put the weaving selection's selected ordinal into the woven requested month ordinal.
   Find the woven month state given the woven requested month ordinal.
   Put the examined woven month state's total days into the woven requested month day.
@@ -273,7 +273,7 @@ To choose the next woven day:
   Put 1 into a candidate ordinal number.
   Loop.
     If the candidate ordinal number is greater than the selected month count, break.
-    Count the eligible candidate's weaving suffix given the candidate ordinal number into a block wide quantity.
+    Count eligible candidate weaving suffix given the candidate ordinal number into a block wide quantity.
     Consider the next woven candidate given the candidate ordinal number and the block wide quantity.
     If the weaving selection's selected ordinal is greater than 0, break.
     Add 1 to the candidate ordinal number.
