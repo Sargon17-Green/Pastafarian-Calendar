@@ -96,10 +96,12 @@ internal static partial class Program
         // أرقام بعرض كبير حتى مع عدم وجود مصفوفة أوعية مشتركة.
         var huge=BigInteger.One<<8192;
         var wanted=huge+(m*m)+1;
-        var normalStream=new AnswerStream(m-1,-1);
-        var wide=patch.Patch(new LegacyBowlQuestionResult(m-1,-1),wanted);
+        // لا نختار بدايةً داخل منطقة رفض طولها أرقام فلكية؛
+        // مرجع الاختبار يمشي فيها خطوة خطوة. هنا تقع البداية قطعاً تحت الحد.
+        var normalStream=new AnswerStream(BigInteger.One,1);
+        var wide=patch.Patch(new LegacyBowlQuestionResult(BigInteger.One,1),wanted);
         Check(wide==NormativeScroll.ChooseRankWide(normalStream,wanted),
-              "حجم أسرة عريض للغاية ومواضع عديدة");
+              "حجم أسرة عريض للغاية ومواضع عديدة دون اجتياز رفض هائل");
     }
 
     private static void Production(BigInteger c,BigInteger t,int sample)
