@@ -139,6 +139,10 @@ public sealed class MonsterContext
     // الرقعة الخامسة عشرة: مرتبة الأسرة المصححة مستقلة عن شاهد باقي x.
     public BigInteger? PatchedShortFamilyRankResult { get; set; }
 
+    // الاكتشاف السادس عشر: شاهد تعبئة أرقام الأسرة الواسعة بترتيب معكوس.
+    public BigInteger? LegacyWideFamilySize { get; set; }
+    public BigInteger? LegacyReversedWideRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

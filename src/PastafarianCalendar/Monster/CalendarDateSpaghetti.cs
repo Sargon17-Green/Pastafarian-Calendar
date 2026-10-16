@@ -233,6 +233,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateShortFamilyRank(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الاكتشاف السادس عشر: خطأ وزن أرقام الأسرة الواسعة في مسار مستقل.
+    public static BigInteger EvaluateLegacyReversedWideRank(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateLegacyReversedWideRank(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
