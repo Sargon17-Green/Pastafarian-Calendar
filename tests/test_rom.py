@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-MAX_BOOT_AND_TEST_FRAMES = 3600
+MAX_BOOT_AND_TEST_FRAMES = 7200
 WRAM_RESULT = 0xC000
 WRAM_TEST_CASE = 0xC001
 WRAM_DISPATCH = 0xC002

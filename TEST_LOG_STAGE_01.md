@@ -192,12 +192,35 @@ metadata on invalid sign/negative zero. These are building blocks only;
 unbounded BigInt, complete normative calendar and verified Ge'ez catalog
 remain absent. `LAST_COMPLETED_STAGE=0`.
 
-## Bounded division-by-byte candidate — pending native verification
+## Exact bounded division-by-byte — native CI PASS
 
 ROM cases 123..138 cover division by one, 255, 254, two, three, four,
 high-byte boundaries, exact 4096-byte operands, quotient carries,
 remainder, source immutability, recovery after zero-divisor rejection
 and repeated invocation. A separate host reference checks multi-byte
 byte-radix division against Python arbitrary-precision math.
-No native PASS is claimed before both GitHub Actions jobs succeed;
+Native verification passed at commit
+`a58a13563b8f356772b99339234714c488cfc561`,
+[Actions run 38875948284](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38875948284).
+Both `verify` and `dmg-native-smoke` jobs concluded SUCCESS.
+RGBDS 1.0.4 built the DMG ROM; PyBoy executed all 138 ROM cases:
+
+```text
+HOST_DIVIDE_U8_REFERENCE=PASS cases=602 width_bytes=4096
+ROM_HEADER=PASS DMG=YES MBC=MBC5_RAM_128K
+ROM_PROGRESS_FRAME=3098 CASE=138
+ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=138 DISPATCH_STATUS=40 FRAMES=3223
+STAGE1_ARITHMETIC_SMOKE=PASS
+```
+
+Initial implementation run 38875884673 failed before native compilation.
+The independent Python quotient-length fixture accidentally trimmed
+literal backslash characters instead of null bytes
+(`b"\\\\x00"` versus `bytes([0])`). Correcting the host
+test yielded a successful native ROM run. No SM83 arithmetic failure was
+observed.
+
+The smoke suite verifies exact 4096-byte dividend /u8 arithmetic and
+division-by-zero rejection, not general BigInt, normative sauce,
+combinatorial selection, gates, cutlets, months or final dates.
 `LAST_COMPLETED_STAGE=0`.

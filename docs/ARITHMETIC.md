@@ -27,7 +27,7 @@ ROM tests 1..10 check the original 128-bit SAVE and Add16 cases.
 Tests 11..16 cover wider SAVE values including 2^255 and 2^256-1.
 Tests 17..22 cover exact full-width products and their reduced values.
 
-NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_122_CASES_RUN_38794654298. This is a self-contained arithmetic subset,
+NATIVE_STATUS=BOOTSTRAP_SMOKE_VERIFIED_138_CASES_RUN_38875948284. This is a self-contained arithmetic subset,
 not a completed normative oracle or calendar implementation.
 Remaining work includes signed date counters, more than 256-bit math
 for combinatorial counts, Year 5000, full source catalog and native QA.
@@ -82,10 +82,10 @@ validation errors. This is essential metadata for future variable-length
 numbers, but is not yet a BigInt allocation or arbitrary-length operation.
 Native ROM tests 109..122 passed in run 38794654298, together with an independent Python length model (1,829 host cases). Stage 1 remains incomplete.
 
-## 4096-byte unsigned dividend / 8-bit divisor — candidate
+## 4096-byte unsigned dividend / 8-bit divisor — native verified
 
 Bitwise long division (SM83 instructions) preserves a 4096-byte dividend
 and produces a full quotient plus an exact remainder, with 16-bit scratch
 for the maximum interim remainder 2*(d-1)+1 <=509. Zero divisor is
 rejected with output/metadata scrub, not silently normalized.
-Native ROM cases 123..138 and independent host byte-radix oracle pending.
+Native ROM cases 123..138 passed in GitHub Actions run 38875948284, alongside 602 independent host reference cases. The full Stage-1 oracle remains missing.

@@ -58,7 +58,7 @@ See [Pan Docs MBC5](https://gbdev.io/pandocs/MBC5.html) and
 * Complete independent normative oracle and full golden fixtures.
 * Canonical Ge'ez name catalog with canonicalIndex and native language QA.
 * Real calendar invocation path, ancient/negative and far-date conversion.
-* Full Stage-1 native verification beyond the successful 122-case arithmetic/SRAM ROM smoke suite.
+* Full Stage-1 native verification beyond the successful 138-case arithmetic/SRAM ROM smoke suite.
 
 The cartridge self-tests do not imply Stage 1 PASS. The historical
 DISCOVERY/PATCH stages may begin only after a complete and verified Stage 1.
@@ -183,7 +183,7 @@ length and sign. Its full 4097-byte result cannot silently be described as
 4096 bytes on carry. The scanner does not allocate, own or free memory.
 Cases 109..122 passed actual SM83 execution in Actions run 38794654298. General variable-length BigInt is still absent.
 
-## Exact nonnegative /u8 division — Stage-1 candidate
+## Exact nonnegative /u8 division — native smoke verified
 
 `BankedDivU8` reads a 4096-byte nonnegative dividend from SRAM bank 0,
 and one-byte divisor `wDivisor` in 1..255. It performs **bitwise restoring
@@ -197,4 +197,4 @@ Division by zero explicitly sets `wDivStatus=1`, zeroizes all 4097 bytes
 of output, and resets remainder/length, preventing stale results.
 The algorithm handles the entire 32768-bit dividend, but only a **u8**
 divisor. It is not yet a general BigInt division/quotient engine.
-Native cases 123..138 and host arithmetic verification are pending.
+Native cases 123..138 passed with RGBDS v1.0.4 and PyBoy 2.x in run 38875948284; the independent host model passed 602 cases. General BigInt remains absent.

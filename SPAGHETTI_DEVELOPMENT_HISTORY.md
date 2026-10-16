@@ -2,7 +2,7 @@
 
 | Stage | Kind | Status | Note |
 |---|---|---|---|
-| 1 | BOOTSTRAP | IN_PROGRESS | SM83 exact primitives, 122 native ROM smoke cases, scratch leases, bounded work counters and length normalization; full calendar absent |
+| 1 | BOOTSTRAP | IN_PROGRESS | SM83 exact primitives, 138 native ROM smoke cases, scratch leases, bounded work counters, length normalization and divide-by-u8; full calendar absent |
 | 2 | DISCOVERY_01 | NOT_STARTED | Must preserve intentional historical wrong behavior |
 | 3 | PATCH_01 | NOT_STARTED | Must retain Stage 2 scar as diagnostic copy |
 | 4..53 | DISCOVERY/PATCH | NOT_STARTED | 25 further discovery/patch pairs |
@@ -71,5 +71,5 @@ No historical DISCOVERY/PATCH stage is started.
 
 Added fixed-capacity 4096-byte dividend / nonzero 8-bit divisor, with
 exact quotient, remainder and quotient-length metadata, plus fail-closed
-division-by-zero semantics. Native cases 123..138 remain pending.
+division-by-zero semantics. Native cases 123..138 passed in GitHub Actions run 38875948284; this is still Stage-1 bootstrap.
 No code from Stage 2 or other implementation is used.
