@@ -27,6 +27,7 @@ public final class Stage02IncrementalRouteTests {
         allOpenedFullYear512SuffixRoundTrip();
         closedMonthsGlobalBlockRouteProof();
         globalViaSharedRouteSmallAnd513Oracle();
+        globalViaSharedRouteFullYearThirdRankProof();
         siblingBackwardFunctionalFullYearProbe();
         normalizedBackwardTailAcrossAdjacentParents();
         normalizedTailDepthGrowthAndConcurrentParents();
@@ -455,6 +456,47 @@ public final class Stage02IncrementalRouteTests {
         System.out.println("STAGE_02_SHARED_AUTO_UNRANK_513_PASS"
             + " days=513 tested_ranks=3"
             + " normative_small_families=2");
+    }
+
+    private static void globalViaSharedRouteFullYearThirdRankProof() {
+        int[] lengths = new int[47];
+        Arrays.fill(lengths, 123);
+        lengths[46] = 120;
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger total = family.count();
+        BigInteger rank = total.divide(BigInteger.valueOf(3))
+            .add(BigInteger.ONE);
+        long start = System.nanoTime();
+        int[] weaving = family.unrankGlobalViaSharedRoute(rank);
+        eq(5778, weaving.length, "E_SHARED_AUTO_THIRD_YEAR_DAYS");
+        int[] seen = new int[lengths.length];
+        for (int id : weaving) {
+            ok(id > 0 && id <= lengths.length,
+                "E_SHARED_AUTO_THIRD_MONTH_DOMAIN");
+            seen[id - 1]++;
+        }
+        array(lengths, seen, "E_SHARED_AUTO_THIRD_MONTH_COUNTS");
+        MonsterWeavingLinearCounter cold =
+            new MonsterWeavingLinearCounter(lengths);
+        eq(rank, cold.rankGlobalViaSharedRoute(weaving),
+            "E_SHARED_AUTO_THIRD_INDEPENDENT_GLOBAL_RANK");
+        int[] prefix = Arrays.copyOf(weaving, 5266);
+        BigInteger localRank = cold.rankAfterPrefix(prefix, weaving);
+        BigInteger suffixCount = cold.countAfterPrefix(prefix);
+        ok(localRank.signum() > 0
+                && localRank.compareTo(suffixCount) <= 0,
+            "E_SHARED_AUTO_THIRD_LOCAL_RANK_RANGE");
+        array(weaving, cold.unrankAfterPrefix(prefix, localRank),
+            "E_SHARED_AUTO_THIRD_INDEPENDENT_SUFFIX_UNRANK");
+        eq(rank, family.rankGlobalViaSharedRoute(weaving),
+            "E_SHARED_AUTO_THIRD_WARM_RANK");
+        System.out.println("STAGE_02_SHARED_AUTO_5778_THIRD_PASS"
+            + " days=5778"
+            + " rank_digits=" + rank.toString().length()
+            + " suffix_days=512"
+            + " local_rank_digits=" + localRank.toString().length()
+            + " elapsed_ms=" + (System.nanoTime() - start) / 1000000);
     }
 
     private static void allOpenedFullYearExactPartitionProbe() {
