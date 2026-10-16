@@ -77,7 +77,7 @@ To select the adjacent year:
   Begin a seal inquiry.
   Convert the eligible year count to a string.
   Put the string into a transition count wide quantity.
-  Choose an equal option given the transition count wide quantity.
+  Determine canonical equal selection given the transition count wide quantity.
   Convert the seal inquiry's selected quantity to the selected year rank.
   Read the selected year candidate.
 

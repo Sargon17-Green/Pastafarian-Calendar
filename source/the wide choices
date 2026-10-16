@@ -87,11 +87,11 @@ To perform wide option selection given a wide quantity:
 
 \ One public entrypoint covers both canonical regimes, with no
 \ loss of accuracy and no conversion of large N into a machine integer.
-To choose an equal option given a wide quantity:
+To determine canonical equal selection given a wide quantity:
   Put "0" into the seal inquiry's selected quantity.
   If the wide quantity is blank, exit.
   If the wide quantity is "0", exit.
   Put "170141183460469231731687303715884105727" into a base wide quantity.
   If the base wide quantity is numerically smaller than the wide quantity,
     perform wide option selection given the wide quantity; exit.
-  Choose a narrow quantity from the wide quantity.
+  Choose narrow quantity values from the wide quantity.

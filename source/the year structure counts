@@ -62,7 +62,7 @@ To choose the cutlet count:
   Begin a seal inquiry.
   Convert the cutlet count range's option count to a string.
   Put the string into a structural options wide quantity.
-  Choose an equal option given the structural options wide quantity.
+  Determine canonical equal selection given the structural options wide quantity.
   Convert the seal inquiry's selected quantity to the selected cutlet count.
   Add the cutlet count range's first option to the selected cutlet count.
   Subtract 1 from the selected cutlet count.
@@ -75,7 +75,7 @@ To choose the month count:
   Begin a seal inquiry.
   Convert the month count range's option count to a string.
   Put the string into a structural options wide quantity.
-  Choose an equal option given the structural options wide quantity.
+  Determine canonical equal selection given the structural options wide quantity.
   Convert the seal inquiry's selected quantity to the selected month count.
   Add the month count range's first option to the selected month count.
   Subtract 1 from the selected month count.

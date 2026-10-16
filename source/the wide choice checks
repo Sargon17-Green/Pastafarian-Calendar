@@ -7,7 +7,7 @@ To check the two digit forward choice:
   Put "170141183460469231731687303715884105727" into the seal inquiry's starting answer.
   Put 1 into the seal inquiry's answer direction.
   Put "170141183460469231731687303715884105728" into a requested options wide quantity.
-  Choose an equal option given the requested options wide quantity.
+  Determine canonical equal selection given the requested options wide quantity.
   If the wide option work's digit count is not 2,
     put "The two digit forward choice used the wrong digit count." into the check report; exit.
   If the wide option work's period is not "28948022309329048855892746252171976962977213799489202546401021394546514198529",
@@ -25,7 +25,7 @@ To check the two digit backward choice:
   Put "1" into the seal inquiry's starting answer.
   Put -1 into the seal inquiry's answer direction.
   Put "170141183460469231731687303715884105728" into a requested options wide quantity.
-  Choose an equal option given the requested options wide quantity.
+  Determine canonical equal selection given the requested options wide quantity.
   If the wide option work's digit count is not 2,
     put "The two digit backward choice used the wrong digit count." into the check report; exit.
   If the wide option work's period is not "28948022309329048855892746252171976962977213799489202546401021394546514198529",
@@ -43,7 +43,7 @@ To check the forward rejected wide choice:
   Put "170141183460469231731687303715884105726" into the seal inquiry's starting answer.
   Put 1 into the seal inquiry's answer direction.
   Put "170141183460469231731687303715884105729" into a requested options wide quantity.
-  Choose an equal option given the requested options wide quantity.
+  Determine canonical equal selection given the requested options wide quantity.
   If the wide option work's digit count is not 2,
     put "The forward rejected wide choice used the wrong digit count." into the check report; exit.
   If the wide option work's period is not "28948022309329048855892746252171976962977213799489202546401021394546514198529",
@@ -61,7 +61,7 @@ To check the backward rejected wide choice:
   Put "170141183460469231731687303715884105727" into the seal inquiry's starting answer.
   Put -1 into the seal inquiry's answer direction.
   Put "14474011154664524427946373126085988481488606899744601273200510697273257099265" into a requested options wide quantity.
-  Choose an equal option given the requested options wide quantity.
+  Determine canonical equal selection given the requested options wide quantity.
   If the wide option work's digit count is not 2,
     put "The backward rejected wide choice used the wrong digit count." into the check report; exit.
   If the wide option work's period is not "28948022309329048855892746252171976962977213799489202546401021394546514198529",
@@ -79,7 +79,7 @@ To check the three digit wide choice:
   Put "1" into the seal inquiry's starting answer.
   Put 1 into the seal inquiry's answer direction.
   Put "28948022309329048855892746252171976962977213799489202546401021394546514198530" into a requested options wide quantity.
-  Choose an equal option given the requested options wide quantity.
+  Determine canonical equal selection given the requested options wide quantity.
   If the wide option work's digit count is not 3,
     put "The three digit wide choice used the wrong digit count." into the check report; exit.
   If the wide option work's period is not "4925250774549309901534880012517951725548123341880193686925858436774199290547709261477934266526216329006041303875583",
@@ -97,6 +97,6 @@ To check the narrow and wide selection boundary:
   Put "170141183460469231731687303715884105727" into a requested options wide quantity.
   Put "170141183460469231731687303715884105727" into the seal inquiry's current answer.
   Put 1 into the seal inquiry's answer direction.
-  Choose an equal option given the requested options wide quantity.
+  Determine canonical equal selection given the requested options wide quantity.
   If the seal inquiry's selected quantity is not "170141183460469231731687303715884105727",
     put "The N=M choice boundary failed." into the check report; exit.
