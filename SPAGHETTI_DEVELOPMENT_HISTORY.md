@@ -944,3 +944,11 @@ Setyèm commit repare akimilasyon depi Fondasyon epi
 konsève `legacyPositiveSemanticState` kòm prèv.
 Limit 1..32, san negative gates, san `postStir12`.
 CI poko verifye.
+
+### Tès PATCH 17 ki soumèt nan CI
+
+32 chèn endepandan, 96 chèn pwopriyete, 32 gwo
+SAVE, 20 defayans/20 rekiperasyon, de nested
+contexts ak twa sauce kanonik. Audit Stage 34
+verifye erè `F+gap(n)` toujou prezan nan legacy.
+Kat jobs Stage 35 te ajoute; CI ap tann rezilta.

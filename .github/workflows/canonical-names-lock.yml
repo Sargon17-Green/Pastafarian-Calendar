@@ -1370,7 +1370,81 @@ jobs:
           find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
           test "$(git hash-object src/gate_gap_patch.lua)" = 0e8e059462c95c850d70570b118d851a47173525
           lua5.3 test/stage34_tests.lua .
-      - name: Stage 34 intentional historical positive-gate cumulative EXPECTED_RED
+      - name: Audit preserved Stage 34 historical cumulative expected-red after PATCH 17
         run: |
           set -euo pipefail
-          lua5.3 test/stage34_expected_red_1.lua .
+          lua5.3 test/stage34_expected_red_audit.lua .
+
+  lua_stage35_smoke:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Syntax, frozen Stage 34 and Stage 33, 128 independent canonical chains
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_positive_gate_position.lua)" = f04c246bb6b169a49407fe49b1618f95de3f574a
+          test "$(git hash-object src/gate_gap_patch.lua)" = 0e8e059462c95c850d70570b118d851a47173525
+          lua5.3 test/stage35_scope_tests.lua .
+          lua5.3 test/stage35_positive_tests.lua .
+          lua5.3 test/stage35_properties_tests.lua .
+          lua5.3 test/stage34_expected_red_audit.lua .
+
+  lua_stage35_resilience:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: 32 giant-save selections, invalid core rejection, 20 injected faults, nested ownership
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage35_bigint_tests.lua .
+          lua5.3 test/stage35_fault_tests.lua .
+          lua5.3 test/stage35_reentrancy_tests.lua .
+
+  lua_stage35_real:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Three canonical Foundation-side sauce gaps, exact G(3)
+        run: |
+          set -euo pipefail
+          lua5.3 test/stage35_real_tests.lua .
+
+  lua_stage35_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Full native Stage 1–35 plus historic Stage 34 red audit
+        run: |
+          set -euo pipefail
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          test "$(git hash-object src/legacy_positive_gate_position.lua)" = f04c246bb6b169a49407fe49b1618f95de3f574a
+          lua5.3 test/stage35_tests.lua .

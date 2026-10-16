@@ -1312,3 +1312,15 @@ nan production, pa gen chèn negatif, ni `postStir12`.
 `legacyPositiveGateProbe` rete defo istorik la;
 `positiveGateDaySpaghetti` pran PATCH 17.
 QA natif Stage 35 poko verifye.
+
+### QA Stage 35 — PATCH 17
+
+`lua5.3 test/stage35_tests.lua .` kouvri tout Stage 1–35.
+Nou ajoute 32 chèn rank oracle egzak (28 koreksyon),
+96 chèn pwopriyete ki retabli lòd pòtay pozitif,
+32 gwo sous SAVE avèk total 16,080 jou, 20 enjeksyon
+erè/20 rekiperasyon, de reentrances ak twa sauce kanonik.
+Twa `EXPECTED_RED` Stage 34 rete audit istorik.
+Kat jobs natif Stage 35 ajoute; job Stage 34 vin audit
+vèt apre PATCH 17. Kadna SHA sou modil DISCOVERY 17
+ak PATCH 16. CI poko konfime.
