@@ -403,9 +403,11 @@ public final class Stage02IncrementalRouteTests {
             int n = oracle.count().intValueExact();
             for (int index = 1; index <= n; index++) {
                 BigInteger rank = BigInteger.valueOf(index);
-                array(oracle.unrank1(rank),
-                    family.unrankGlobalViaSharedRoute(rank),
+                int[] actual = family.unrankGlobalViaSharedRoute(rank);
+                array(oracle.unrank1(rank), actual,
                     "E_SHARED_AUTO_SMALL_NORMATIVE_ORACLE");
+                eq(rank, family.rankGlobalViaSharedRoute(actual),
+                    "E_SHARED_AUTO_SMALL_GLOBAL_RANK");
             }
         }
         int[] lengths = {257, 256};
@@ -429,6 +431,26 @@ public final class Stage02IncrementalRouteTests {
                 "E_SHARED_AUTO_513_COLD_RANK_ROUNDTRIP");
             array(independent.unrankAfterPrefix(new int[] {1}, rank),
                 result, "E_SHARED_AUTO_513_COLD_UNRANK_MATCH");
+            eq(rank, independent.rankGlobalViaSharedRoute(result),
+                "E_SHARED_AUTO_513_GLOBAL_RANK");
+            eq(rank, family.rankGlobalViaSharedRoute(result),
+                "E_SHARED_AUTO_513_WARM_GLOBAL_RANK");
+        }
+        int[] invalid = family.lexFirst();
+        invalid[0] = 2;
+        try {
+            family.rankGlobalViaSharedRoute(invalid);
+            throw new AssertionError("E_SHARED_AUTO_INVALID_ACCEPTED");
+        } catch (IllegalArgumentException expected) {
+            eq("E_WEAVE_SEQUENCE", expected.getMessage(),
+                "E_SHARED_AUTO_INVALID_CODE");
+        }
+        try {
+            family.rankGlobalViaSharedRoute(new int[512]);
+            throw new AssertionError("E_SHARED_AUTO_SHORT_ACCEPTED");
+        } catch (IllegalArgumentException expected) {
+            eq("E_WEAVE_SEQUENCE", expected.getMessage(),
+                "E_SHARED_AUTO_SHORT_CODE");
         }
         System.out.println("STAGE_02_SHARED_AUTO_UNRANK_513_PASS"
             + " days=513 tested_ranks=3"
