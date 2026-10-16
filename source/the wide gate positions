@@ -29,7 +29,7 @@ A wide gate movement has
 The current extended gate is a wide gate position.
 The wide gate movement is a wide gate movement.
 
-To begin a wide gate traversal:
+To initialize extended gate traversal:
   Put "0" into a wide zero magnitude.
   Set the current extended gate's index from the wide zero magnitude given 0.
   Put "15055671" into a wide foundation magnitude.
@@ -94,7 +94,7 @@ To move to the next negative wide gate:
 \ A caller that requests more than 1024 gaps fails immediately.
 \ For a reachable index, every intermediate position remains wide.
 To locate a wide gate given a wide signed day:
-  Begin a wide gate traversal.
+  Initialize extended gate traversal.
   Put 0 into the current extended gate's reached.
   Put "1024" into a maximum wide gate steps.
   If the maximum wide gate steps is numerically smaller than the wide signed day's absolute quantity, exit.
