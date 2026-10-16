@@ -807,3 +807,223 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset 42 --rank-set neighbors --seconds 185 --rss-kib 393216
+
+  canonical-triple-neighbor-batch-0:
+    name: 真實三月補充名次 0..3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 0 1 2 3; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=0 count=4 last=3"
+
+  canonical-triple-neighbor-batch-4:
+    name: 真實三月補充名次 4..7
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 4 5 6 7; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=4 count=4 last=7"
+
+  canonical-triple-neighbor-batch-8:
+    name: 真實三月補充名次 8..11
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 8 9 10 11; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=8 count=4 last=11"
+
+  canonical-triple-neighbor-batch-12:
+    name: 真實三月補充名次 12..15
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 12 13 14 15; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=12 count=4 last=15"
+
+  canonical-triple-neighbor-batch-16:
+    name: 真實三月補充名次 16..19
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 16 17 18 19; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=16 count=4 last=19"
+
+  canonical-triple-neighbor-batch-20:
+    name: 真實三月補充名次 20..23
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 20 21 22 23; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=20 count=4 last=23"
+
+  canonical-triple-neighbor-batch-24:
+    name: 真實三月補充名次 24..27
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 24 25 26 27; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=24 count=4 last=27"
+
+  canonical-triple-neighbor-batch-28:
+    name: 真實三月補充名次 28..31
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 28 29 30 31; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=28 count=4 last=31"
+
+  canonical-triple-neighbor-batch-32:
+    name: 真實三月補充名次 32..35
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 32 33 34 35; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=32 count=4 last=35"
+
+  canonical-triple-neighbor-batch-36:
+    name: 真實三月補充名次 36..39
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 36 37 38 39; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=36 count=4 last=39"
+
+  canonical-triple-neighbor-batch-40:
+    name: 真實三月補充名次 40..42
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-all-triple-neighbor-ranks]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 逐窗口驗證 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_triple_rank_paths.pl
+          for offset in 40 41 42; do
+            timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_triple_rank_paths.pl --window-offset "$offset" --rank-set neighbors --seconds 185 --rss-kib 393216
+          done
+          echo "CANONICAL_TRIPLE_NEIGHBOR_BATCH status=PASS start=40 count=3 last=42"
