@@ -19,10 +19,11 @@ use Pastafari::WeavingRank qw(rankWeavingPolynomial);
 # 原生 5000 年的數個分散四月份窗口（預設末四月 402 日）。
 # 前沿獨立狀態 Oracle 只驗證總數；中位排名的雙向還原不是
 # 另一個獨立的全字典序預言機。邊界詞另有獨立貪婪構造。
-my ($seconds,$rss_kib,$requested_offset,$second_day_partition)=(185,393216,undef,0);
+my ($seconds,$rss_kib,$requested_offset,$second_day_partition,$third_day_partition)=(185,393216,undef,0,0);
 GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_kib,
            'window-offset=i'=>\$requested_offset,
-           'second-day-partition!'=>\$second_day_partition)
+           'second-day-partition!'=>\$second_day_partition,
+           'third-day-partition!'=>\$third_day_partition)
     or die "參數無效\n";
 die "seconds 必須在 1..230 範圍\n"
     if $seconds<1 || $seconds>230;
@@ -34,6 +35,10 @@ die "指定位置只允許 10、20、28、36、37、41；其餘窗口不得默�
 die "獨立第二日分支工作必須明確選第 37 個窗口\n"
     if $second_day_partition
     && (!defined($requested_offset) || $requested_offset!=37);
+die "第三日實驗只能在第 37 個窗口單獨啟用\n"
+    if $third_day_partition
+    && ($second_day_partition || !defined($requested_offset)
+        || $requested_offset!=37);
 die "本工具需 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -125,6 +130,7 @@ if (!$pid) {
         # Oracle 獨立核對所有第二日合法分支和，
         # 再根據大整數中位名次決定第二日月份。
         my $independent_second;
+        my $independent_third;
         if ($second_day_partition) {
             my %a_stats;
             my %b_stats;
@@ -146,6 +152,53 @@ if (!$pid) {
                 $window_offset,$independent_second,length("$p11"),
                 length("$p12"),$a_stats{states},$b_stats{states},
                 time()-$start;
+        }
+
+        # 在第 46 輪已證明中位名次第二日選「2」之上，
+        # 用三條全新的獨立前沿將該分支的第三日完全分割。
+        # 此工作不重算上一輪的 [1,1] 以控制 185 秒限制；
+        # N-B 由同一精確全局計數及獨立 B 計算得出。
+        if ($third_day_partition) {
+            my %p12_stats;
+            my $p12=countWeavingsFrontier(\@L,\%p12_stats,[1,2]);
+            die "第三日驗證前，[1,2] 分支沒有完工詞\n"
+                if $p12<1 || $p12>=$oracle;
+            my $smaller=$oracle->copy->bsub($p12);
+            my $global=$oracle->copy->bdiv(2)->badd(1);
+            die "第 37 窗的中位名次不落在第二日選 2 的區段\n"
+                if $global<=$smaller;
+            my $local=$global->copy->bsub($smaller);
+            die "第二日選 2 的局部名次超出精確計數\n"
+                if $local<1 || $local>$p12;
+            my $partition=Math::BigInt->bzero;
+            my $selected;
+            my $highest=0;
+            for my $candidate (1,2,3) {
+                my @prefix=(1,2,$candidate);
+                my %stats;
+                my $ways=countWeavingsFrontier(\@L,\%stats,\@prefix);
+                die "第三日合法候選竟沒有完整的後續字序\n"
+                    if $ways<1;
+                $partition->badd($ways);
+                if (!defined $selected) {
+                    if ($local<=$ways) {
+                        $selected=$candidate;
+                    } else {
+                        $local->bsub($ways);
+                    }
+                }
+                my $peak=$stats{frontier_peak}//0;
+                $highest=$peak if $peak>$highest;
+            }
+            die "第三日三個精確獨立前沿分支和不等於 [1,2] 的完工數\n"
+                if $partition!=$p12;
+            die "第三日 BigInt 局部名次無法定位分支\n"
+                if !defined $selected || $local<1;
+            $independent_second=2;
+            $independent_third=$selected;
+            printf "CANONICAL_WINDOW41 phase=THIRD_DAY_INDEPENDENT_PARTITION_PASS offset=%d second=%d third=%d branch_count=3 parent_digits=%d max_frontier=%d elapsed_sec=%.3f\n",
+                $window_offset,$independent_second,$independent_third,
+                length("$p12"),$highest,time()-$start;
         }
 
         my @direct_first;
@@ -193,6 +246,9 @@ if (!$pid) {
         die "中位排名的第二日與獨立前沿 BigInt 分割不符\n"
             if defined($independent_second) &&
             $word->[1]!=$independent_second;
+        die "第三日的獨立前沿 BigInt 分割與索引反排名不相符\n"
+            if defined($independent_third)
+            && $word->[2]!=$independent_third;
         die "索引式解碼未建立實際私人索引\n"
             if ($unrank_stats{indexed_profile_builds}//0)!=1;
         my %rank_stats;
