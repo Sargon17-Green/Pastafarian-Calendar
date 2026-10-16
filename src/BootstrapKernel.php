@@ -161,6 +161,20 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'hidden.patch05.reveals');
             return $revealed;
         });
+        $this->dispatcher->register('VISIBLE_PRIOR_LEGACY', function(BootstrapContext $context): ?BigInt {
+            $visible = $context->semanticState['visibleDropStore'] ?? null;
+            $i = $context->semanticState['dropIndex'] ?? null;
+            $back = $context->semanticState['lookback'] ?? null;
+            if (!is_array($visible) || !is_int($i) || !is_int($back)) {
+                throw new \InvalidArgumentException('LEGACY_PRIOR_ARGUMENTS');
+            }
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyVisiblePrior();
+            $value = $legacy->legacyPrior($visible, $i, $back);
+            $context->semanticState['legacyPriorResult'] = $value;
+            $context->status = $value === null ? 'VISIBLE_PRIOR_MISSING' : 'VISIBLE_PRIOR_RETURNED';
+            $this->metrics->bump($context, $value === null ? 'visible.prior.missing' : 'visible.prior.found');
+            return $value;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -243,6 +257,22 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('HIDDEN_PATCH_05', $context)
+        );
+    }
+
+    /** Pembaca sejarah; pembetulan slot hidden hanya pada Stage 13.
+     * @param array<int,BigInt> $dropStore
+     */
+    public function priorLegacy(array $dropStore, int $i, int $back): ?BigInt
+    {
+        $context = new BootstrapContext(0, 0);
+        $context->phase = 'VISIBLE_PRIOR_LEGACY';
+        $context->semanticState['visibleDropStore'] = $dropStore;
+        $context->semanticState['dropIndex'] = $i;
+        $context->semanticState['lookback'] = $back;
+        return $this->boundary->run(
+            $context,
+            fn(): ?BigInt => $this->dispatcher->dispatch('VISIBLE_PRIOR_LEGACY', $context)
         );
     }
 
