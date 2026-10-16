@@ -112,6 +112,9 @@ defmodule PastafariCalendarElixirVietnamese do
   def next_year_spaghetti(calculation_day), do: Dispatcher.next_year(calculation_day)
   def next_year_diagnostic_spaghetti(calculation_day), do: Dispatcher.next_year_diagnostic(calculation_day)
 
+  def previous_year_spaghetti(day), do: Dispatcher.previous_year(day)
+  def previous_year_diagnostic_spaghetti(day), do: Dispatcher.previous_year_diagnostic(day)
+
   def calendar_date_spaghetti(calculation_day, target_day) do
     _context = Dispatcher.bootstrap(calculation_day, target_day)
     raise StageNotIntegratedError
