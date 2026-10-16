@@ -1277,6 +1277,33 @@ public final class MonsterWeavingLinearCounter {
             previous.suffixTargetDays, countCalls, probed, skipped);
     }
 
+    public BigInteger rankGlobalViaSharedRoute(int[] weaving) {
+        if (totalDays <= MAX_UNRANK_DAYS) {
+            return rank1(weaving);
+        }
+        if (weaving == null || weaving.length != totalDays) {
+            throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+        }
+        State state = new State(lengths);
+        BigInteger rank = ONE;
+        for (int id : weaving) {
+            int chosen = id - 1;
+            if (chosen < 0 || chosen >= lengths.length
+                    || !state.canTake(chosen, lengths)) {
+                throw new IllegalArgumentException("E_WEAVE_SEQUENCE");
+            }
+            if (chosen > state.closed) {
+                BigInteger[] branches = countSiblingBranchSizes(state);
+                for (int candidate = state.closed; candidate < chosen;
+                        candidate++) {
+                    rank = rank.add(branches[candidate]);
+                }
+            }
+            state.take(chosen, lengths);
+        }
+        return rank;
+    }
+
     public int[] unrankGlobalViaSharedRoute(BigInteger globalRank) {
         if (totalDays <= MAX_UNRANK_DAYS) {
             return unrank1(globalRank);
