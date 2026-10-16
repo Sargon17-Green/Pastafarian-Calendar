@@ -90,7 +90,37 @@ Assert-StageEqual ([System.Numerics.BigInteger]9) $ctx1.semanticCommitted['x'] '
 
 $monsterText = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkeleton.ps1')
 Assert-StageTrue -Condition ($monsterText -notmatch 'Invoke-NormSauce|Get-NormCalendarDate') -Name 'Hindi tumatawag sa oracle ang production skeleton'
-$futureNames = @('oldRemainder','oldDayTag','oldDistance','orderAt46Latch','biasedLegacyPick','LEGACY_YEAR_MAX','VirtualLegacyList','oldContiguousMonthDayGuess')
+$futureNames = @('oldRemainder','oldDayTag','oldDistance','biasedLegacyPick','LEGACY_YEAR_MAX','VirtualLegacyList','oldContiguousMonthDayGuess')
+$stageMetadata = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
+$stageMatch = [regex]::Match($stageMetadata, '(?m)^CURRENT_STAGE=([0-9]+)\s*
+foreach ($name in $futureNames) {
+    Assert-StageTrue -Condition ($monsterText -notmatch [regex]::Escape($name)) -Name "Walang future patch code: $name"
+}
+
+$projectTextFiles = Get-ChildItem -Path $root -Recurse -File | Where-Object { $_.Extension -in @('.ps1','.psd1','.md') }
+$hasHebrew = $false
+foreach ($file in $projectTextFiles) {
+    $textForLanguageAudit = Get-Content -Raw -Encoding UTF8 $file.FullName
+    if ($file.Name -eq 'DEVELOPMENT_STAGE.md') { $textForLanguageAudit = $textForLanguageAudit -replace '(?m)^NATURAL_LANGUAGE=.*$', 'NATURAL_LANGUAGE=MACHINE_METADATA' }
+    if ($textForLanguageAudit -match '[\u0590-\u05FF]') { $hasHebrew = $true; break }
+}
+Assert-StageTrue -Condition (-not $hasHebrew) -Name 'Walang Hebrew prose sa human-authored project files'
+
+# Malalim ngunit hindi end-to-end na smoke test ng sauce upang patunayan ang determinismo ng core oracle.
+$sauce1 = Invoke-NormSauce $f $f
+$sauce2 = Invoke-NormSauce $f $f
+Assert-StageSequenceEqual ([int[]]$sauce1.OrderAtDrop46) ([int[]]$sauce2.OrderAtDrop46) 'Deterministic ang order sa ika-46 na patak'
+for ($id = 1; $id -le 6; $id++) {
+    Assert-StageEqual $sauce1.Bowls[$id] $sauce2.Bowls[$id] "Deterministic ang final bowl $id"
+    Assert-StageTrue -Condition ($sauce1.Bowls[$id] -ge 1 -and $sauce1.Bowls[$id] -le (Get-NormM)) -Name "Nasa 1..M ang final bowl $id"
+}
+
+$ok = Complete-StageTestRun
+if (-not $ok) { exit 1 }
+exit 0
+)
+if (-not $stageMatch.Success) { throw 'Missing CURRENT_STAGE metadata' }
+if ([int]$stageMatch.Groups[1].Value -lt 23) { $futureNames += 'orderAt46Latch' }
 foreach ($name in $futureNames) {
     Assert-StageTrue -Condition ($monsterText -notmatch [regex]::Escape($name)) -Name "Walang future patch code: $name"
 }
