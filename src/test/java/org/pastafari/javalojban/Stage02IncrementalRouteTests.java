@@ -1512,16 +1512,17 @@ public final class Stage02IncrementalRouteTests {
         Arrays.fill(lengths, 48);
         MonsterWeavingLinearCounter family =
             new MonsterWeavingLinearCounter(lengths);
-        for (int opened = 8; opened <= 12; opened++) {
+        // All twelve months opened now use an independent exact fast path.
+        // Exercise five different partial states to force a real 4-entry
+        // partial-DP eviction instead of relying on that bypassed state.
+        for (int opened = 7; opened <= 11; opened++) {
             int[] prefix = new int[opened];
             for (int i = 0; i < opened; i++) prefix[i] = i + 1;
             long priorHits = family.partialDpReuseHitCount();
             BigInteger value = family.countAfterPrefix(prefix);
-            if (opened == 8 || opened == 9) {
-                eq(new MonsterWeavingLinearCounter(lengths)
-                    .countAfterPrefix(prefix), value,
-                    "E_PARTIAL_DP_OPENED_REFERENCE");
-            }
+            eq(new MonsterWeavingLinearCounter(lengths)
+                .countAfterPrefix(prefix), value,
+                "E_PARTIAL_DP_OPENED_REFERENCE");
             eq(priorHits, family.partialDpReuseHitCount(),
                 "E_PARTIAL_DP_OPENED_MUST_NOT_REUSE");
             ok(family.partialDpCacheEntryCount() <= 4,
@@ -1531,6 +1532,22 @@ public final class Stage02IncrementalRouteTests {
             "E_PARTIAL_DP_EVICTION_OBSERVED");
         eq(4, family.partialDpCacheEntryCount(),
             "E_PARTIAL_DP_CACHE_BOUND_AFTER_EVICTION");
+        int[] allOpened = new int[lengths.length];
+        for (int i = 0; i < lengths.length; i++) {
+            allOpened[i] = i + 1;
+        }
+        int entries = family.partialDpCacheEntryCount();
+        long evictions = family.partialDpEvictionCount();
+        eq(new MonsterWeavingLinearCounter(lengths)
+            .countAfterPrefix(allOpened),
+            family.countAfterPrefix(allOpened),
+            "E_PARTIAL_DP_ALL_OPENED_REFERENCE");
+        eq(entries, family.partialDpCacheEntryCount(),
+            "E_PARTIAL_DP_ALL_OPENED_NO_SNAPSHOT");
+        eq(evictions, family.partialDpEvictionCount(),
+            "E_PARTIAL_DP_ALL_OPENED_NO_EVICTION");
+        ok(family.allOpenedSuffixClosedFormComputationCount() > 0,
+            "E_PARTIAL_DP_ALL_OPENED_FASTPATH");
     }
 
     private static void partialDpClosedGuardRejectsCrossBoundary() {
