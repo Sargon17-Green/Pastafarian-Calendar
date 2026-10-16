@@ -943,7 +943,7 @@ verifye eta sous, rank, provenance, ak tout sis commits.
 Setyèm commit repare akimilasyon depi Fondasyon epi
 konsève `legacyPositiveSemanticState` kòm prèv.
 Limit 1..32, san negative gates, san `postStir12`.
-CI poko verifye.
+CI 38890588880 verifye: 64/64 jobs PASS; tout chèn Stage 1–35 pase. Setyèm commit repare pòtay pozitif la, san modifye kouch istorik yo.
 
 ### Tès PATCH 17 ki soumèt nan CI
 
@@ -951,4 +951,8 @@ CI poko verifye.
 SAVE, 20 defayans/20 rekiperasyon, de nested
 contexts ak twa sauce kanonik. Audit Stage 34
 verifye erè `F+gap(n)` toujou prezan nan legacy.
-Kat jobs Stage 35 te ajoute; CI ap tann rezilta.
+Kat jobs Stage 35 pase nan CI 38890588880 (smoke, resilience, patch, real). 32 chèn oracle, 96 pwopriyete, 32 BigInt, 20 pàn/20 rekiperasyon, 2 nested ak 3 sauce verifye.
+
+### Fèmti PATCH 17 — Stage 35
+
+Nan commit sous `57269dd8e1fbdc4639bdfdf783b42c21092d26ff`, CI run `38890588880` te fini `GREEN` avèk **64/64 jobs PASS**. Tout Stage 1–35 pase; audit twa temwen wouj Stage 34 rete pase san rekri eritaj la. Pwodiksyon an ajoute setyèm commit kumilatif apre sis commits ansyen yo, pou `G(n)=F+sum(gap(1)..gap(n))` sou endis 1..32. Oracle kanonik, 96 pwopriyete, sou BigInt, enjeksyon defayans ak reentrancy verifye. `LAST_COMPLETED_STAGE=35` / `GREEN`. Pa gen pòtay negatif ni `postStir12`; Stage 36 pa kòmanse.

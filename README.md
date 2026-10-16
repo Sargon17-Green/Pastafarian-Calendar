@@ -1311,7 +1311,7 @@ epi n=2..32 retounen nan lòd normatif. Pa gen oracle
 nan production, pa gen chèn negatif, ni `postStir12`.
 `legacyPositiveGateProbe` rete defo istorik la;
 `positiveGateDaySpaghetti` pran PATCH 17.
-QA natif Stage 35 poko verifye.
+QA natif Stage 35 verifye: CI 38890588880, 64/64 jobs PASS; `LAST_COMPLETED_STAGE=35`, `EXPECTED_REPOSITORY_STATE=GREEN`.
 
 ### QA Stage 35 — PATCH 17
 
@@ -1323,4 +1323,4 @@ erè/20 rekiperasyon, de reentrances ak twa sauce kanonik.
 Twa `EXPECTED_RED` Stage 34 rete audit istorik.
 Kat jobs natif Stage 35 ajoute; job Stage 34 vin audit
 vèt apre PATCH 17. Kadna SHA sou modil DISCOVERY 17
-ak PATCH 16. CI poko konfime.
+ak PATCH 16. CI 38890588880 konfime tout 64/64 jobs vèt; tout tès Stage 1–35 pase, 3 temwen istorik Stage34 toujou prezève. Stage36 poko louvri.
