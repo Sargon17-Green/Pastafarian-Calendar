@@ -26,6 +26,7 @@ public final class Stage02IncrementalRouteTests {
         allOpenedFullYearExactPartitionProbe();
         allOpenedFullYear512SuffixRoundTrip();
         closedMonthsGlobalBlockRouteProof();
+        globalViaSharedRouteSmallAnd513Oracle();
         siblingBackwardFunctionalFullYearProbe();
         normalizedBackwardTailAcrossAdjacentParents();
         normalizedTailDepthGrowthAndConcurrentParents();
@@ -389,6 +390,49 @@ public final class Stage02IncrementalRouteTests {
             + " routed_days=64"
             + " suffix_days=448"
             + " route_ms=" + (System.nanoTime() - started) / 1000000);
+    }
+
+    private static void globalViaSharedRouteSmallAnd513Oracle() {
+        for (int[] lengths : new int[][] {
+                {2, 2, 2}, {2, 3, 2, 2}
+        }) {
+            MonsterWeavingLinearCounter family =
+                new MonsterWeavingLinearCounter(lengths);
+            NormativeOracle.WeavingFamily oracle =
+                new NormativeOracle.WeavingFamily(lengths);
+            int n = oracle.count().intValueExact();
+            for (int index = 1; index <= n; index++) {
+                BigInteger rank = BigInteger.valueOf(index);
+                array(oracle.unrank1(rank),
+                    family.unrankGlobalViaSharedRoute(rank),
+                    "E_SHARED_AUTO_SMALL_NORMATIVE_ORACLE");
+            }
+        }
+        int[] lengths = {257, 256};
+        MonsterWeavingLinearCounter family =
+            new MonsterWeavingLinearCounter(lengths);
+        BigInteger total = family.count();
+        BigInteger[] ranks = {
+            BigInteger.ONE,
+            total.add(BigInteger.ONE).divide(BigInteger.TWO),
+            total
+        };
+        for (BigInteger rank : ranks) {
+            int[] result = family.unrankGlobalViaSharedRoute(rank);
+            eq(513, result.length, "E_SHARED_AUTO_513_FULL_LENGTH");
+            eq(1, result[0], "E_SHARED_AUTO_513_FIRST_MONTH");
+            eq(BigInteger.ONE, family.countAfterPrefix(result),
+                "E_SHARED_AUTO_513_FULL_WEAVING_VALID");
+            MonsterWeavingLinearCounter independent =
+                new MonsterWeavingLinearCounter(lengths);
+            eq(rank, independent.rankAfterPrefix(new int[] {1}, result),
+                "E_SHARED_AUTO_513_COLD_RANK_ROUNDTRIP");
+            array(independent.unrankAfterPrefix(new int[] {1}, rank),
+                result, "E_SHARED_AUTO_513_COLD_UNRANK_MATCH");
+        }
+        System.out.println("STAGE_02_SHARED_AUTO_UNRANK_513_PASS"
+            + " days=513 tested_ranks=3"
+            + " normative_small_families=2");
     }
 
     private static void allOpenedFullYearExactPartitionProbe() {
