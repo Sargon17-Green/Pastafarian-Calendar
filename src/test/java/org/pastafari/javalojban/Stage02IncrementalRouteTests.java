@@ -1512,9 +1512,6 @@ public final class Stage02IncrementalRouteTests {
         Arrays.fill(lengths, 48);
         MonsterWeavingLinearCounter family =
             new MonsterWeavingLinearCounter(lengths);
-        // All twelve months opened now use an independent exact fast path.
-        // Exercise five different partial states to force a real 4-entry
-        // partial-DP eviction instead of relying on that bypassed state.
         for (int opened = 7; opened <= 11; opened++) {
             int[] prefix = new int[opened];
             for (int i = 0; i < opened; i++) prefix[i] = i + 1;
