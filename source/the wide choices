@@ -21,7 +21,7 @@ A wide option work has
 The wide option work is a wide option work.
 
 \ At the end period=M^k and k is minimal for the requested N.
-To prepare a wide option given a wide quantity:
+To calculate wide option capacity given a wide quantity:
   Put "170141183460469231731687303715884105727" into the wide option work's period.
   Put 1 into the wide option work's digit count.
   Loop.
@@ -69,11 +69,11 @@ To skip rejected wide answers:
   Put the wide option work's acceptance limit into the wide option work's constructed answer.
 
 \ Output 1+((W-1) mod N) after any required directional rejection.
-To choose a wide option given a wide quantity:
+To perform wide option selection given a wide quantity:
   Put "0" into the seal inquiry's selected quantity.
   If the wide quantity is blank, exit.
   If the wide quantity is "0", exit.
-  Prepare a wide option given the wide quantity.
+  Calculate wide option capacity given the wide quantity.
   Construct the first wide answer.
   Prepare the wide acceptance limit given the wide quantity.
   If the wide option work's acceptance limit is numerically smaller than the wide option work's constructed answer,
@@ -93,5 +93,5 @@ To choose an equal option given a wide quantity:
   If the wide quantity is "0", exit.
   Put "170141183460469231731687303715884105727" into a base wide quantity.
   If the base wide quantity is numerically smaller than the wide quantity,
-    choose a wide option given the wide quantity; exit.
+    perform wide option selection given the wide quantity; exit.
   Choose a narrow quantity from the wide quantity.
