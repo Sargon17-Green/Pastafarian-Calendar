@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  windows-native-stage22:
-    name: Native Windows PowerShell 5.1 stage gate
+  windows-native-stage-current:
+    name: Native Windows PowerShell 5.1 stage 22/23 gate
     runs-on: windows-latest
     timeout-minutes: 120
     steps:
@@ -40,7 +40,15 @@ jobs:
           }
           Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
           $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
-          if (($stageLines -contains 'CURRENT_STAGE=22') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=21')) {
+          if (($stageLines -contains 'CURRENT_STAGE=23') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=22') -and ($stageLines -contains 'STAGE23_RUNTIME_VERIFICATION=AWAITING')) {
+            & .\Run-Stage23.ps1
+            if (-not $?) { throw 'Stage 23 native verification failed' }
+            Write-Host 'STAGE23_NATIVE_PATCH11=GREEN'
+          } elseif (($stageLines -contains 'CURRENT_STAGE=23') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=23') -and ($stageLines -contains 'STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED')) {
+            & .\tests\Stage01.Tests.ps1
+            if (-not $?) { throw 'Stage 1 regression failed after Stage 23 seal' }
+            Write-Host 'STAGE23_POST_SEAL_BASELINE=PASS'
+          } elseif (($stageLines -contains 'CURRENT_STAGE=22') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=21')) {
             & .\Run-Stage22.ps1
             if (-not $?) { throw 'Stage 22 verification failed' }
           } elseif ($stageLines -contains 'STAGE22_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED') {
