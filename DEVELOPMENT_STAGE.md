@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=34
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=35
+CURRENT_KIND=PATCH
 CURRENT_PATCH=17
 LAST_COMPLETED_STAGE=34
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..16; Stage34 thêm NextYearCandidateManager đúng và LegacyCurrentDayNextYearSeed sai nguồn ngày, nối vào NextYearManager. Năm 5000 và gate vẫn chuẩn; năm sau chọn sai sauce(c,c) thay vì sauce(c,open_day).
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..16 và legacy DISCOVERY17. Stage35 thêm NextYearSeedPatch gọi legacy trước, rồi chọn rank trên Dispatcher.answer_stream(c,open_day,1,11) chuẩn; NextYearManager sử dụng corrected_rank.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_34_DISCOVERY_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_35_PATCH_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=491
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -824,3 +824,10 @@ thay vì c,open_day; candidate set, gate và năm 5000 không đổi.
 Cảnh báo checkout@v4 về Node.js 20 không phải warning Elixir.
 Stage34 đóng EXPECTED_RED; Stage35 PATCH 17 chưa bắt đầu.
 Không đổi main, không đổi oracle test-only hoặc các patch cũ.
+
+Giai đoạn 35 PATCH 17: thêm NextYearSeedPatch giữ thực thi LegacyCurrentDayNextYearSeed,
+đọc corrected rank bằng sauce(c,open_day) và bát 1/chốt 11.
+Mọi ứng viên, gate, Year5000 và hạt di sản được bảo toàn.
+Bốn hồi quy chuẩn Stage34 giữ expected và phải chuyển xanh.
+Bổ sung 20 kiểm thử mới, dự kiến 511 bài GREEN và khóa tên PASS;
+chưa nâng LAST_COMPLETED_STAGE trước xác minh CI.

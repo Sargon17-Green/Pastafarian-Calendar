@@ -112,7 +112,9 @@ defmodule PastafariCalendarElixirVietnamese.Stage34Discovery17Test do
     assert report.historical_source_day == c
     assert report.normative_source_day == report.year.open_gate_day
     assert report.normative_source_day != c
-    assert report.rank == LegacyCurrentDayNextYearSeed.choose_rank(c, report.candidate_count)
+    assert report.historical_rank ==
+      LegacyCurrentDayNextYearSeed.choose_rank(c, report.candidate_count)
+    assert report.rank in 1..report.candidate_count
   end
 
   test "seal của năm kế tiếp là 11 và bát là 1" do
@@ -122,7 +124,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage34Discovery17Test do
     assert report.rank in 1..report.candidate_count
   end
 
-  test "đường production lấy ứng viên theo rank sai của legacy" do
+  test "đường production lấy ứng viên theo rank chuẩn, vẫn lưu legacy" do
     report = NextYearManager.diagnose(@foundation)
     selected = Enum.at(report.candidates, report.rank - 1)
     assert selected == report.year.close_gate_index
@@ -161,15 +163,15 @@ defmodule PastafariCalendarElixirVietnamese.Stage34Discovery17Test do
     end
   end
 
-  test "kiểm toán nguồn và không có patch 17 trước Stage35" do
+  test "kiểm toán nguồn Stage35: legacy còn sai và production gọi PATCH 17" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = File.read!(Path.join(root, "legacy_current_day_next_year_seed.ex"))
     manager = File.read!(Path.join(root, "next_year_manager.ex"))
     candidates = File.read!(Path.join(root, "next_year_candidate_manager.ex"))
     assert legacy =~ "Dispatcher.answer_stream(calculation_day, calculation_day, 1, 11)"
-    assert manager =~ "LegacyCurrentDayNextYearSeed.choose_rank(calculation_day, length(candidates))"
+    assert manager =~ "NextYearSeedPatch.diagnose(calculation_day, open_day, length(candidates))"
     assert candidates =~ "Enum.sort_by"
-    refute File.exists?(Path.join(root, "next_year_seed_patch.ex"))
+    assert File.exists?(Path.join(root, "next_year_seed_patch.ex"))
     refute manager =~ "NormativeReference"
   end
 

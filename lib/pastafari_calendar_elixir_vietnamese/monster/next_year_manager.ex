@@ -1,12 +1,12 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.NextYearManager do
   @moduledoc """
   Tìm năm kế sau năm đã biết mà không thay đổi gate, SAVE hay
-  nguyên tắc chọn tập ứng viên. Stage34 cố ý nhận rank từ
-  LegacyCurrentDayNextYearSeed, không dùng open_day chuẩn.
+  nguyên tắc chọn tập ứng viên. Stage35 đi qua NextYearSeedPatch,
+  vẫn gọi legacy ngày hỏi sai, rồi chọn hạng từ open_day chuẩn.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
-    LegacyCurrentDayNextYearSeed,
+    NextYearSeedPatch,
     NextYearCandidateManager,
     Year,
     Year5000Manager
@@ -28,7 +28,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.NextYearManager do
 
     open_index = known.close_gate_index
     open_day = Map.fetch!(next_state.gate, open_index)
-    rank = LegacyCurrentDayNextYearSeed.choose_rank(calculation_day, length(candidates))
+    seed_report = NextYearSeedPatch.diagnose(calculation_day, open_day, length(candidates))
+    rank = seed_report.corrected_rank
     close_index = Enum.at(candidates, rank - 1)
 
     year = %Year{
@@ -42,7 +43,9 @@ defmodule PastafariCalendarElixirVietnamese.Monster.NextYearManager do
     %{year: year, known_year: known, gate_state: next_state,
       candidates: candidates, candidate_count: length(candidates),
       calculation_day: calculation_day, historical_source_day: calculation_day,
-      normative_source_day: open_day, rank: rank, bowl: 1, seal: 11}
+      normative_source_day: open_day, rank: rank,
+      historical_rank: seed_report.legacy_rank,
+      rank_was_corrected: seed_report.changed, bowl: 1, seal: 11}
   end
 
   def next_year_from(_c, _known, _state) do
