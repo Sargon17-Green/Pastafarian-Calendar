@@ -30,3 +30,15 @@ The first method MUST physically run in **Stage40 DISCOVERY20** while the second
 `test/discovery20Red.ts` is the **20th intentionally failing** standalone test on the complete real Stage39+old-sauce route; it throws the exact expected historical RED marker if real original-target sauce differs from the independent correct first-day Sauce. `test/verifyDiscovery20ExpectedRed.mjs` confirms this nonzero error. The previous 19 historical intentionally-red proof scripts are left unchanged and continue to be verified by full `npm test`.
 
 Only after BOTH GitHub Actions jobs pass native TypeScript, entire Stage1–40 regression and frozen source catalog/hash may LAST_COMPLETED_STAGE become 40. Stage41 correction and full Stage54 route are **not** implemented.
+
+## Native CI verification — 16 October 2026
+
+[Implementation commit 2ebde236](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/2ebde236aebf48df8d97f8ecdae8479683523719); [Actions 38893268444](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38893268444). Both jobs SUCCESS: native TypeScript typecheck/full Stage1–40 suite including 20 expected nonzero historical witnesses, and frozen SourceLanguageCatalog/hash verification.
+
+```text
+STAGE_40_DISCOVERY_20_GUARDS_PASS realYears=2 oldSauceCalls=2 actualWrongTarget=2 originalWrongCacheHitPreserved=1 firstDayCoincidence=1 deepFaults=2 outerRollback=2 separateRealSaucePaths=2 structureSharedWrites=116 correctedStructureSauceInvoked=0
+STAGE_40_DISCOVERY_20_PROPERTIES_PASS directSauces=128 directDifferent=85 equalTarget=43 giantCalculationDays=64 directWrites=7424 drop46Variations=720 uniqueOrder=720 syntheticWrong=0 syntheticWrites=41760 enormousSources=8 enormousWrites=464 realYear5000Cases=2 historicalWrong=2 realFullPredecessors=68 realFullWrites=3944 actualOldBowlChainSpy=1 nextStageCorrectedSauceCalls=0
+STAGE_40_DISCOVERY_20_EXPECTED_RED_VERIFIED nonzero=1 wrongSauce=1 correctedCalls=0
+```
+
+LAST_COMPLETED_STAGE=40. True Stage39 Year5000/cDay predecessor runs physically. The original oldStructureSauce takes ORIGINAL target and really produces 58 writes. The first-day correct Sauce is test-only oracle comparison; Stage41 PATCH20 not implemented.
