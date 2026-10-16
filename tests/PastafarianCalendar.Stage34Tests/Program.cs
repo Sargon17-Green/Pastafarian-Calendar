@@ -173,7 +173,7 @@ internal static partial class Program
               "واجهة عامة تعبر السلسلة التاريخية "+index);
     }
 
-    private static void VerifyContext(MonsterContext ctx,SauceScroll sauce,int id,int seal,BigInteger n,int marker)
+    private static void VerifyContext(MonsterContext ctx,SauceResult sauce,int id,int seal,BigInteger n,int marker)
     {
         var next=NormativeScroll.NextBowlInDrop46Order(sauce,id);
         Check(ctx.Status=="LEGACY_INCLUSIVE_WIDE_LIMIT_COMPLETE" &&
