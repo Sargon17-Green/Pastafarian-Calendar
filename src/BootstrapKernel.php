@@ -197,6 +197,35 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'prior.patch06.calls');
             return $value;
         });
+        $this->dispatcher->register('VISIBLE_GRIND_LEGACY', function(BootstrapContext $context): array {
+            $c = $context->calculationDay;
+            $t = $context->targetDay;
+            $action = $this->dayCount($c);
+            $target = $this->dayCount($t);
+            $counts = [
+                'action' => $action,
+                'target' => $target,
+                'distance' => $this->distance($c, $t),
+                'connection' => $action->add($target),
+                'direction' => $t < $c ? 1 : ($t === $c ? 2 : 3),
+            ];
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $hiddenOld = new \Pastafari\Stage01\Legacy\LegacyHiddenBackward($save);
+            $prior = new \Pastafari\Stage01\Patches\PriorAccessPatch06(
+                new \Pastafari\Stage01\Legacy\LegacyVisiblePrior(),
+                new \Pastafari\Stage01\Patches\HiddenNearnessPatch05($hiddenOld)
+            );
+            $stones = $this->stones();
+            $stored = $hiddenOld->buildStoredBackward($counts, $stones);
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyVisibleGrind($save, $prior);
+            $visible = $legacy->buildVisibleWrong($counts, $stones, $stored);
+            $context->semanticState['legacyVisibleTable'] = $visible;
+            $context->status = 'VISIBLE_GRIND_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.visible.grinds');
+            return $visible;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -316,6 +345,22 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): BigInt => $this->dispatcher->dispatch('PRIOR_PATCH_06', $context)
+        );
+    }
+
+    /**
+     * Pengeluaran titisan terlihat sejarah dengan indeks jadual salah.
+     * Fungsi ini belum menerima sentinel pembetul Stage 15.
+     *
+     * @return array<int,BigInt>
+     */
+    public function visibleDrops(int $calculationDay, int $targetDay): array
+    {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'VISIBLE_GRIND_LEGACY';
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('VISIBLE_GRIND_LEGACY', $context)
         );
     }
 

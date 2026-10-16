@@ -272,3 +272,22 @@ Penguji membaca enam pasangan tarikh daripada oracle PHP tempatan untuk nilai hi
 ### Perkara yang belum dibina
 
 Tahap ini tidak membina 46 titisan visible, kerana kerja itu bermula pada Stage 14. Tiada oracle dalam kod produksi, tiada pembetulan sejarah terus, tiada perubahan nama kanonik, fixture atau main.
+
+
+## Stage 14 — DISCOVERY 07: Baris pengisaran bergeser satu slot
+
+### Kecacatan sejarah yang aktif
+
+`LegacyVisibleGrind::legacyGrindRows` menyimpan 11 baris normatif pada indeks 0..10. Fungsi sejarah `legacyRowAt(g)` terus membaca `rows[g]` bagi `g=1..11`; apabila tiada baris ke-11, ia menggunakan fallback salah ke baris 0. Oleh itu ia menggunakan baris ke-2 hingga ke-11 sebelum mengulangi baris pertama. Kerosakan berlaku dalam pilihan baris, bukan dalam pengiraan integer, SAVE, akses hidden atau formula asas titisan.
+
+### Rantaian pengiraan yang ditambah
+
+`BootstrapKernel::visibleDrops(c,t)` membuka konteks dan penghala `VISIBLE_GRIND_LEGACY`, memperoleh kiraan PATCH01–03, batu PATCH04, stor hidden backward daripada legacy yang dikekalkan, serta prior PATCH06. `LegacyVisibleGrind::buildVisibleWrong` menghasilkan 46 titisan satu demi satu dengan 11 pengisaran untuk setiap titisan, memanggil `legacyRowAt` yang salah tanpa normalisasi tersembunyi. Keadaan titisan tidak dikongsi antara panggilan. Semua matematik menggunakan `BigInt`, tiada oracle dalam sumber produksi.
+
+### Bukti merah
+
+Ujian khas membandingkan 3 pasangan hari dan seluruh 46 titisan terhadap `NormativeSauce::buildVisibleDrops` daripada direktori ujian. Dijangka 138 penyimpangan, sifar padanan luar jangka dan semua 138 nilai dalam julat SAVE. Jadual indeks lama 0..10, keluaran `legacyRowAt(1), (10), (11)` dan dua indeks tidak sah diperiksa sendiri. Laluan produksi dan panggilan langsung kepada kelas legacy dibandingkan, sambil mengekalkan ujian prior, hidden, batu, jarak dan SAVE terdahulu. Pembalut mengiktiraf hanya merah yang tepat.
+
+### Had PATCH07
+
+Penyelesaian yang dibenarkan pada Stage 15 sahaja: masukkan sentinel di indeks 0 dan jadikan sebelas baris pengisaran nyata tersedia pada indeks 1..11, tanpa membuang `legacyRowAt`, tanpa mengubah rumus dan tanpa memadam sejarah yang salah. Tiada permutasi mangkuk atau pemindahan lain dicipta.

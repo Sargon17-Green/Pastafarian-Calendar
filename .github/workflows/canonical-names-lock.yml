@@ -70,3 +70,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage12_discovery06.php
       - name: Tampalan 06 — akses prior positif dan hidden
         run: php -d memory_limit=512M tests/stage13_patch06_tests.php
+      - name: Penemuan 07 — pastikan jadual grind legacy salah
+        run: php -d memory_limit=512M tests/verify_stage14_discovery07.php

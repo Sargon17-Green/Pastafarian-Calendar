@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 13 (PATCH 06)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 14 (DISCOVERY 07)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -186,3 +186,19 @@ php -d memory_limit=512M tests/stage13_patch06_tests.php
 ```
 
 Ujian Stage 13 meliputi 6 pasangan hari, 762 akses visible, 66 akses hidden dan 42 nilai hidden yang dibandingkan dengan oracle PHP, disertai 2,688 kes stor sintetik, 7 penolakan input serta regresi lama. Bukti sejarah Stage 12 masih merah secara langsung (44 missing/508 found/28 hidden pada 4 pasangan), tetapi pembalutnya hijau. Pengesahan CI hanya diiktiraf selepas hasil run sebenar diperiksa. Stage 14 tidak dimulakan.
+
+
+## Stage 14 — DISCOVERY 07: Indeks jadual pengisaran salah
+
+`LegacyVisibleGrind` mengandungi 11 baris pengisaran sah dengan indeks array sejarah `0..10`, tetapi `legacyRowAt(g)` membaca indeks `1..11`. Akibatnya pengisaran pertama memakai baris kedua, pengisaran kesepuluh memakai baris kesebelas, manakala pengisaran kesebelas menggunakan fallback baris sifar. Ini ialah kecacatan sejarah yang disengajakan, **bukan pembetulan**.
+
+Pembina `buildVisibleWrong` menggunakan formula titisan lengkap dan 46 batu yang sudah dibetulkan. Setiap bacaan titisan terdahulu melalui `PriorAccessPatch06` dan setiap hidden daripada stor backward `LegacyHiddenBackward` melalui PATCH05. Penghala `VISIBLE_GRIND_LEGACY` berada dalam `BootstrapKernel::visibleDrops`, dengan konteks per panggilan dan tanpa oracle produksi.
+
+```text
+php -d memory_limit=512M tests/stage14_discovery07_tests.php
+php -d memory_limit=512M tests/verify_stage14_discovery07.php
+```
+
+Ujian pertama mesti merah secara terkawal dengan tepat 138 ketakpadanan (3 pasangan hari × 46 titisan), ketiga-tiga jadual berbentuk betul dan nilai modulo dalam julat. Pengesah kedua mesti hijau hanya bagi bukti merah itu. Semua regresi Stage 1–13, termasuk bukti sejarah Stage 12, kekal diwajibkan.
+
+Stage 15 (PATCH 07) kelak akan menambah **baris sentinel di indeks 0** dan mengalihkan 11 baris nyata ke `1..11` tanpa membuang pembaca sejarah `legacyRowAt`. Jangan tambah sentinel pada Stage 14. Jangan bina permutasi Stage 16 lebih awal.
