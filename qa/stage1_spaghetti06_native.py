@@ -32,7 +32,7 @@ MUTANTS = [
     ("lower_history_corrupted","zero_equal",343,9,"3"),
     ("historical_gate1_read_removed","foundation_cross",299,7,"z"),
     ("historical_gate2_read_removed","zero_equal",291,7,"z"),
-    ("historical_gate3_read_removed","mixed_small",283,7,"z"),
+    ("historical_gate3_read_replaced_with_zero","mixed_small",283,7,"0"),
     ("first_emitter_disabled","zero_equal",265,7,"z"),
     ("second_emitter_disabled","foundation_cross",240,7,"z"),
     ("third_emitter_disabled","zero_equal",217,7,"z"),

@@ -85,3 +85,18 @@ without changing the numeric output. The revised test now traces these
 cases, compares the actual three emitted instruction bytes, and separately
 reports a bytecode change and any output or termination change. The
 original failed run is retained and is NOT called PASS.
+
+## Second falsification: require a genuinely discriminating gate-3 mutant
+
+Native run 39033263017 on `03420cd9` showed both possible emitted
+bytecode dialects and confirmed that removing the third `g` with a
+no-op `z` was not a discriminating perturbation for its chosen input.
+That proposed mutant was inert: no changed output or emitted opcode.
+The QA harness correctly rejected the unsupported causality claim.
+
+The third-gate mutant is now `g → 0` in the assembler at (283,7),
+a mutation which injects a concrete zero instead of reading the historic
+opcode byte. Independent local stack-microanalysis for the first input
+predicts a change from A=58 to A=48; Native still must witness this.
+The earlier failed workflow is preserved. Neither source candidate nor
+production code changed during this test refinement.
