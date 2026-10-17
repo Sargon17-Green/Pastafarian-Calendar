@@ -1,0 +1,32 @@
+name: Befunge QA09 Native Fork Forensics
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-qa09-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Verify specimen and compile pinned interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq)" = "0bedcd5a7ed1207a836850fdcd91faeeae0ee901"
+          make -C third_party/funge-plus-plus funge
+      - name: Compare actual Native flag-sensitive execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_spaghetti09_fork_diagnostics.py
