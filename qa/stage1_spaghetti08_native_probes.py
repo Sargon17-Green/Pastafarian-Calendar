@@ -22,6 +22,8 @@ def execute(code,title):
       cp=subprocess.run(cmd,input=b"1\n",capture_output=True,timeout=4)
       print("NATIVE_QA08_FORENSIC",title,"rc",cp.returncode,
         "stdout",repr(cp.stdout[:150]),"stderr",repr(cp.stderr[-250:]),flush=True)
+      logs=[line for line in cp.stderr.decode("utf-8","replace").splitlines() if "FUNGEPLUS_NATIVE_" in line]
+      for z in logs[-16:]: print("NATIVE_QA08_POINTER_PROBE",title,z,flush=True)
     except subprocess.TimeoutExpired as ex:
       print("NATIVE_QA08_FORENSIC",title,"TIMEOUT stdout",
         repr((ex.stdout or b"")[:150]),"stderr",repr((ex.stderr or b"")[-200:]),flush=True)

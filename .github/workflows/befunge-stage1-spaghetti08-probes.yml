@@ -19,28 +19,24 @@ jobs:
           path: third_party/funge-plus-plus
           submodules: recursive
           persist-credentials: false
-      - name: Build pinned native engine and validate source pin
+      - name: Build pinned native engine with temporary debug logging
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "0b49d3b4175055d365a089267cfc2450ea6d83aa"
+          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "3f0d621e51f00d7bef236cec4dae020a89d543a4"
           python3 - <<'PY'
           from pathlib import Path
-          path=Path("third_party/funge-plus-plus/src/Unefunge93Strategy.cpp")
-          s=path.read_text()
-          a="stack.top().push(static_cast<stack_t>(field.get(v+storage)));"
-          b="""auto actual = field.get(v+storage);
-        if (v[0]>=10000 && v[0]<=10001) { std::cerr << "FUNGEPLUS_NATIVE_G xy=" << v << " storage=" << storage << " value=" << actual << std::endl; }
-        stack.top().push(static_cast<stack_t>(actual));"""
-          c="field.put(v+storage, stack.top().pop());"
-          d="""auto actual=stack.top().pop();
-        if (v[0]>=10000 && v[0]<=10001) { std::cerr << "FUNGEPLUS_NATIVE_P xy=" << v << " storage=" << storage << " value=" << actual << std::endl; }
-        field.put(v+storage, actual);"""
+          path = Path("third_party/funge-plus-plus/src/Unefunge93Strategy.cpp")
+          s = path.read_text()
+          a = "stack.top().push(static_cast<stack_t>(field.get(v+storage)));"
+          b = 'auto observed=field.get(v+storage); if (v[0]>=10000 && v[0]<=10001) { std::cerr << "FUNGEPLUS_NATIVE_G xy=" << v << " storage=" << storage << " value=" << observed << std::endl; } stack.top().push(static_cast<stack_t>(observed));'
+          c = "field.put(v+storage, stack.top().pop());"
+          d = 'auto emitted=stack.top().pop(); if (v[0]>=10000 && v[0]<=10001) { std::cerr << "FUNGEPLUS_NATIVE_P xy=" << v << " storage=" << storage << " value=" << emitted << std::endl; } field.put(v+storage, emitted);'
           assert s.count(a)==1 and s.count(c)==1
           path.write_text(s.replace(a,b).replace(c,d))
           PY
           make -C third_party/funge-plus-plus funge
-      - name: Diagnose native worker, genuine split, and poll independently
+      - name: Diagnose native worker, split, polling and physical reads
         shell: bash
         run: |
           set -euo pipefail
