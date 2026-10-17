@@ -5,16 +5,24 @@
 \ No native CAL execution has occurred.
 
 The reference sauce input is a sauce question.
+The wscimmensedigits is a wide quantity.
+The wscfoundationdigits is a wide quantity.
 
-To compare a native sauce input with the wide sauce input:
+To compare native and wide sauce inputs:
   Answer the example.
   Copy the example into the sauce input.
-  Put the sauce input into the reference sauce input.
-  Convert the example's calculation day into a wide signed day.
+  \ Copy the five sauce inputs field by field. CAL does not provide
+  \ a built-in record-to-record Put for the sauce question type.
+  Put the sauce input's calculation count into the reference sauce input's calculation count.
+  Put the sauce input's requested count into the reference sauce input's requested count.
+  Put the sauce input's distance count into the reference sauce input's distance count.
+  Put the sauce input's sum count into the reference sauce input's sum count.
+  Put the sauce input's direction count into the reference sauce input's direction count.
+  Convert the example's calculation day into the converted signed day result.
   If the native widening succeeded is not 1,
     put "Failed to widen the native calculation day." into the check report; exit.
   Put the converted signed day result into the wide calendar example's calculation day.
-  Convert the example's requested day into a wide signed day.
+  Convert the example's requested day into the converted signed day result.
   If the native widening succeeded is not 1,
     put "Failed to widen the native requested day." into the check report; exit.
   Put the converted signed day result into the wide calendar example's requested day.
@@ -34,35 +42,35 @@ To compare a native sauce input with the wide sauce input:
 To check the native and wide sauce input bridge:
   Put -15055671 into the example's calculation day.
   Put -15055671 into the example's requested day.
-  Compare a native sauce input with the wide sauce input.
+  Compare native and wide sauce inputs.
   If the check report is not "The checks agree with the examples.", exit.
   Put -15055671 into the example's calculation day.
   Put -15055672 into the example's requested day.
-  Compare a native sauce input with the wide sauce input.
+  Compare native and wide sauce inputs.
   If the check report is not "The checks agree with the examples.", exit.
   Put -15055671 into the example's calculation day.
   Put -15055670 into the example's requested day.
-  Compare a native sauce input with the wide sauce input.
+  Compare native and wide sauce inputs.
   If the check report is not "The checks agree with the examples.", exit.
   Put -15055674 into the example's calculation day.
   Put -15055668 into the example's requested day.
-  Compare a native sauce input with the wide sauce input.
+  Compare native and wide sauce inputs.
   If the check report is not "The checks agree with the examples.", exit.
   Put -15055668 into the example's calculation day.
   Put -15055674 into the example's requested day.
-  Compare a native sauce input with the wide sauce input.
+  Compare native and wide sauce inputs.
   If the check report is not "The checks agree with the examples.", exit.
   Put -15055661 into the example's calculation day.
   Put -15055661 into the example's requested day.
-  Compare a native sauce input with the wide sauce input.
+  Compare native and wide sauce inputs.
   If the check report is not "The checks agree with the examples.", exit.
 
 \ This check also exercises the exact unsigned sauce-input bridge
 \ on coordinates that are completely outside any native CAL day type.
 To check immense wide sauce inputs:
-  Put "1000000000000000000000000000000000000000000000000" into an immense day magnitude wide quantity.
-  Set the wide calendar example's calculation day from the immense day magnitude wide quantity given -1.
-  Set the wide calendar example's requested day from the immense day magnitude wide quantity given 1.
+  Put "1000000000000000000000000000000000000000000000000" into the wscimmensedigits.
+  Set the wide calendar example's calculation day from the wscimmensedigits given -1.
+  Set the wide calendar example's requested day from the wscimmensedigits given 1.
   Answer the wide calendar example.
   Copy the wide calendar example into the sauce input.
   If the sauce input's calculation count is not "1999999999999999999999999999999999999999969888658",
@@ -79,9 +87,9 @@ To check immense wide sauce inputs:
 \ Slow integration oracle, deliberately not in the default quick suite.
 \ The six canonical reference bowls are from the authoritative README.
 To check the complete wide Foundation sauce:
-  Put "15055671" into a foundation magnitude wide quantity.
-  Set the wide calendar example's calculation day from the foundation magnitude wide quantity given -1.
-  Set the wide calendar example's requested day from the foundation magnitude wide quantity given -1.
+  Put "15055671" into the wscfoundationdigits.
+  Set the wide calendar example's calculation day from the wscfoundationdigits given -1.
+  Set the wide calendar example's requested day from the wscfoundationdigits given -1.
   Make the complete sauce for the wide calendar example.
   If the current bowls' first bowl is not "65286679584284972964194865805379907599",
     put "Wide Foundation sauce bowl one failed." into the check report; exit.
