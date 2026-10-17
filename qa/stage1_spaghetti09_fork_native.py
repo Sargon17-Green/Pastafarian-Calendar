@@ -3,7 +3,7 @@
 import hashlib,json,subprocess,tempfile
 from pathlib import Path
 SOURCE=Path("qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq")
-PIN="0bedcd5a7ed1207a836850fdcd91faeeae0ee901"
+PIN="e22a8b706fb84e3356db6c70aac29b9145642201"
 def run(data,seed):
     with tempfile.TemporaryDirectory(prefix="qa09fork_") as tmp:
         file=Path(tmp)/"native.beq";file.write_bytes(data)

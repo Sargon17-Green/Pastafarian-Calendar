@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq)" = "0bedcd5a7ed1207a836850fdcd91faeeae0ee901"
+          test "$(git hash-object qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq)" = "e22a8b706fb84e3356db6c70aac29b9145642201"
           make -C third_party/funge-plus-plus funge
       - name: Compare actual Native flag-sensitive execution
         shell: bash
