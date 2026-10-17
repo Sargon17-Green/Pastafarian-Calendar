@@ -23,7 +23,7 @@ def execute(code,title):
       print("NATIVE_QA08_FORENSIC",title,"rc",cp.returncode,
         "stdout",repr(cp.stdout[:150]),"stderr",repr(cp.stderr[-250:]),flush=True)
       logs=[line for line in cp.stderr.decode("utf-8","replace").splitlines() if "FUNGEPLUS_NATIVE_" in line]
-      for z in logs[-16:]: print("NATIVE_QA08_POINTER_PROBE",title,z,flush=True)
+      for z in logs[:16]: print("NATIVE_QA08_POINTER_PROBE",title,z,flush=True)
     except subprocess.TimeoutExpired as ex:
       print("NATIVE_QA08_FORENSIC",title,"TIMEOUT stdout",
         repr((ex.stdout or b"")[:150]),"stderr",repr((ex.stderr or b"")[-200:]),flush=True)
@@ -89,5 +89,11 @@ execute(with_allocation(fmt([(0,simpletrace)])),"standalone_dump_before_and_afte
 # Native field probe at small yet *unallocated* x for comparison.
 near=dec(31)+"1"+"0"*16+"p"+"1"+"0"*16+"g.@"
 execute(fmt([(0,near)]),"small_address_17d_put_get")
+
+
+execute(fmt([(0,dec(10000)+".@")]),"arithmetic_literal_10000")
+execute(fmt([(0,dec(10001)+".@")]),"arithmetic_literal_10001")
+execute(fmt([(0,dec(31)+".@")]),"arithmetic_literal_31")
+execute(fmt([(0,dec(31)+":"+addr(10001)+"p.@")]),"source_value_retained_after_p")
 
 print("NATIVE_QA08_FORENSIC_PROBES_COMPLETE",flush=True)

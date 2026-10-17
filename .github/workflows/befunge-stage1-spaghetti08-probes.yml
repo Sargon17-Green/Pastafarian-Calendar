@@ -29,9 +29,9 @@ jobs:
           path = Path("third_party/funge-plus-plus/src/Unefunge93Strategy.cpp")
           s = path.read_text()
           a = "stack.top().push(static_cast<stack_t>(field.get(v+storage)));"
-          b = 'auto observed=field.get(v+storage); if (v[0]>=10000 && v[0]<=10001) { std::cerr << "FUNGEPLUS_NATIVE_G xy=" << v << " storage=" << storage << " value=" << observed << std::endl; } stack.top().push(static_cast<stack_t>(observed));'
+          b = 'auto observed=field.get(v+storage); if ([](){static unsigned n=0;return n++<40;}()) { std::cerr << "FUNGEPLUS_NATIVE_G xy=" << v << " storage=" << storage << " value=" << observed << std::endl; } stack.top().push(static_cast<stack_t>(observed));'
           c = "field.put(v+storage, stack.top().pop());"
-          d = 'auto emitted=stack.top().pop(); if (v[0]>=10000 && v[0]<=10001) { std::cerr << "FUNGEPLUS_NATIVE_P xy=" << v << " storage=" << storage << " value=" << emitted << std::endl; } field.put(v+storage, emitted);'
+          d = 'auto emitted=stack.top().pop(); if ([](){static unsigned n=0;return n++<40;}()) { std::cerr << "FUNGEPLUS_NATIVE_P xy=" << v << " storage=" << storage << " value=" << emitted << std::endl; } field.put(v+storage, emitted);'
           assert s.count(a)==1 and s.count(c)==1
           path.write_text(s.replace(a,b).replace(c,d))
           PY
