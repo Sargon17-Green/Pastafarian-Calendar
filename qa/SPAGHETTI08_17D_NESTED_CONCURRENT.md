@@ -88,3 +88,14 @@ important boundary of the experiment.
 This remains a reproducible **17-dimensional QA sidecar**, not a full
 port of the canonical Pastafarian calendar to BeQunge. Round 8 of 12
 does not certify Stage 1 or constitute the project's final release.
+
+## Native forensic failure 1 (retained)
+
+Native workflow 39037198820 for candidate HEAD 4c7e0702 reproduces QA06
+and QA07 PASS; QA08 seed1 times out with no output in 20s. No PASS.
+A follow-up native forensic workflow 39037581878 isolates: an original
+standalone worker returns `0 0` rather than expected `31 62`, while
+both full concurrent handshake probes time out. Thus the original
+stack/worker calculation or memory offset handling is broken; it is
+not legitimate to claim that the fork and nested stacks have passed.
+The original workflow, failure and forensic probes are retained.

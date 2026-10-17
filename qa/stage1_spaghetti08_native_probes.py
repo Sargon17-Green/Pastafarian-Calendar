@@ -51,4 +51,25 @@ probe[wi]=ws
 execute("\n".join(probe)+"\n","concurrent_nested_worker_gate")
 # A direct parent waiting for a fixed residue written by the worker,
 # but with the first compiler field truncated, isolates poll/lane routing.
+
+# Control: independent native 17D p/g with no nested stack frames.
+plain=dec(31)+addr(10001)+"p"+dec(62)+addr(10000)+"p"+addr(10001)+"g."+addr(10000)+"g.@"
+execute(fmt([(0,plain)]),"standalone_simple_17d_writes_31_62")
+# Control: count the number produced after the two nested braces, before p.
+idx=original.index(":2/")
+assert idx>0
+execute(fmt([(0,original[:idx]+".@")]),"standalone_nested_stacks_result_before_writes")
+# Control: a single nested stack with a result returned through 1}.
+oneframe="0{"+dec(31)+dec(31)+"+1}.@"
+execute(fmt([(0,oneframe)]),"standalone_one_stack_frame_62")
+# Control: Funge++ genuine t creates two separately terminating IPs.
+twoip="Version 1,Dimensions 17\\n"
+twoip+="Lines 1,Origin 0:0,Coord "+":".join(["0"]*15)+":\\nt8.@\\n"
+twoip+="Lines 1,Origin -3:0,Coord "+":".join(["0"]*15)+":\\n@.9\\n"
+execute(twoip,"bare_two_ip_fork_8_and_9")
+# Enter success branch with a prewritten flag independently of child.
+seeded=probe[:]
+seeded.append("Lines 1,Origin 10000:0,Coord "+":".join(["0"]*15)+":")
+seeded.append(">")
+execute("\\n".join(seeded)+"\\n","preseeded_flag_parent_join")
 print("NATIVE_QA08_FORENSIC_PROBES_COMPLETE",flush=True)
