@@ -13,15 +13,27 @@ To render the complete date in English:
   Read the English month name given the complete date answer's month name index.
   If the English cutlet name is blank, exit.
   If the English month name is blank, exit.
-  Convert the complete date answer's year number to a string.
-  Put the string into the complete English date text.
+  Render the English date year number.
   Append ", " to the complete English date text.
   Append the English cutlet name to the complete English date text.
   Append ", " to the complete English date text.
-  Convert the complete date answer's cutlet day to a string.
-  Append the string to the complete English date text.
+  Render the English cutlet day number.
   Append ", " to the complete English date text.
   Append the English month name to the complete English date text.
   Append ", " to the complete English date text.
+  Render the English month day number.
+
+\ CAL implicitly declares a routine-local "string" for each conversion.
+\ Keep conversions isolated so a second conversion cannot shadow that local.
+\ Only the conversion's lifetime changes: field values and separators do not.
+To render the English date year number:
+  Convert the complete date answer's year number to a string.
+  Put the string into the complete English date text.
+
+To render the English cutlet day number:
+  Convert the complete date answer's cutlet day to a string.
+  Append the string to the complete English date text.
+
+To render the English month day number:
   Convert the complete date answer's month day to a string.
   Append the string to the complete English date text.
