@@ -63,13 +63,13 @@ execute(fmt([(0,original[:idx]+".@")]),"standalone_nested_stacks_result_before_w
 oneframe="0{"+dec(31)+dec(31)+"+1}.@"
 execute(fmt([(0,oneframe)]),"standalone_one_stack_frame_62")
 # Control: Funge++ genuine t creates two separately terminating IPs.
-twoip="Version 1,Dimensions 17\\n"
-twoip+="Lines 1,Origin 0:0,Coord "+":".join(["0"]*15)+":\\nt8.@\\n"
-twoip+="Lines 1,Origin -3:0,Coord "+":".join(["0"]*15)+":\\n@.9\\n"
+twoip="Version 1,Dimensions 17\n"
+twoip+="Lines 1,Origin 0:0,Coord "+":".join(["0"]*15)+":\nt8.@\n"
+twoip+="Lines 1,Origin -3:0,Coord "+":".join(["0"]*15)+":\n@.9\n"
 execute(twoip,"bare_two_ip_fork_8_and_9")
 # Enter success branch with a prewritten flag independently of child.
 seeded=probe[:]
 seeded.append("Lines 1,Origin 10000:0,Coord "+":".join(["0"]*15)+":")
 seeded.append(">")
-execute("\\n".join(seeded)+"\\n","preseeded_flag_parent_join")
+execute("\n".join(seeded)+"\n","preseeded_flag_parent_join")
 print("NATIVE_QA08_FORENSIC_PROBES_COMPLETE",flush=True)
