@@ -50,3 +50,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 qa/stage1_spaghetti08_native_probes.py
+
+      - name: QA09 native directional check
+        shell: bash
+        run: python3 qa/stage1_spaghetti09_fork_diagnostics.py

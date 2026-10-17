@@ -14,6 +14,9 @@ def run(name,src):
    print("QA09_NATIVE_DIAGNOSTIC",name,"rc",x.returncode,"out",repr(x.stdout[:250]),"err",repr(x.stderr[-250:]),flush=True)
   except subprocess.TimeoutExpired as e:
    print("QA09_NATIVE_DIAGNOSTIC",name,"TIMEOUT","out",repr((e.stdout or b"")[:250]),flush=True)
+   detail=(e.stderr or b"").decode("utf-8","replace").splitlines()
+   for x in detail[:140]:
+    if "FUNGEPLUS" in x:print("QA09_TRACE",name,x,flush=True)
 run("original",base)
 run("ready_flags_preseeded",base.replace("#&#&",">&B&"))
 run("zero_flags_preseeded",base.replace("#&#&","0&0&"))
