@@ -29,33 +29,42 @@ The second extended candidate is a wide year candidate.
 The extended year containment result is a number.
 The extended year ordering result is a number.
 
+\ Explicit CAL types for scratch signed records and exact-wide year bounds.
+The wycdaydelta is a wide signed day.
+The wycindexdelta is a wide signed day.
+The wycminspans is a wide quantity.
+The wycmindays is a wide quantity.
+The wycmaxdays is a wide quantity.
+The wycshortdays is a wide quantity.
+The wyclongdays is a wide quantity.
+
 To measure a wide year candidate:
   Put 0 into the wide year candidate's valid.
   Put "0" into the wide year candidate's year length.
   Put "0" into the wide year candidate's span count.
-  Put the wide year candidate's closing day into a wide day difference.
-  Subtract the wide year candidate's opening day from the wide day difference.
-  If the wide day difference's polarity is not 1, exit.
-  Put the wide day difference's absolute quantity into the wide year candidate's year length.
-  Put the wide year candidate's closing index into a wide index difference.
-  Subtract the wide year candidate's opening index from the wide index difference.
-  If the wide index difference's polarity is not 1, exit.
-  Put the wide index difference's absolute quantity into the wide year candidate's span count.
+  Put the wide year candidate's closing day into the wycdaydelta.
+  Subtract the wide year candidate's opening day from the wycdaydelta.
+  If the wycdaydelta's polarity is not 1, exit.
+  Put the wycdaydelta's absolute quantity into the wide year candidate's year length.
+  Put the wide year candidate's closing index into the wycindexdelta.
+  Subtract the wide year candidate's opening index from the wycindexdelta.
+  If the wycindexdelta's polarity is not 1, exit.
+  Put the wycindexdelta's absolute quantity into the wide year candidate's span count.
   Verify a wide year length and span count for the wide year candidate.
 
 To verify a wide year length and span count for a wide year candidate:
-  Put "6" into a minimum wide spans.
-  If the wide year candidate's span count is numerically smaller than the minimum wide spans, exit.
-  Put "252" into a minimum wide year days.
-  If the wide year candidate's year length is numerically smaller than the minimum wide year days, exit.
-  Put "5778" into a maximum wide year days.
-  If the maximum wide year days is numerically smaller than the wide year candidate's year length, exit.
-  Put the wide year candidate's span count into a shortest legal wide days.
-  Multiply the shortest legal wide days by 42.
-  If the wide year candidate's year length is numerically smaller than the shortest legal wide days, exit.
-  Put the wide year candidate's span count into a longest legal wide days.
-  Multiply the longest legal wide days by 963.
-  If the longest legal wide days is numerically smaller than the wide year candidate's year length, exit.
+  Put "6" into the wycminspans.
+  If the wide year candidate's span count is numerically smaller than the wycminspans, exit.
+  Put "252" into the wycmindays.
+  If the wide year candidate's year length is numerically smaller than the wycmindays, exit.
+  Put "5778" into the wycmaxdays.
+  If the wycmaxdays is numerically smaller than the wide year candidate's year length, exit.
+  Put the wide year candidate's span count into the wycshortdays.
+  Multiply the wycshortdays by 42.
+  If the wide year candidate's year length is numerically smaller than the wycshortdays, exit.
+  Put the wide year candidate's span count into the wyclongdays.
+  Multiply the wyclongdays by 963.
+  If the wyclongdays is numerically smaller than the wide year candidate's year length, exit.
   Put 1 into the wide year candidate's valid.
 
 To evaluate extended year containment given a wide year candidate and a wide signed day:
