@@ -42,6 +42,8 @@ jobs:
                   errors.append(f"{path}: empty prose file")
               for index, char in enumerate(content):
                   point = ord(char)
+                  if 0x10916 <= point <= 0x1091E:
+                      errors.append(f"{path}: Phoenician numeral or non-letter U+{point:04X} at index {index}; prose permits letters and U+1091F word dividers only")
                   if point == 0xFFFD:
                       errors.append(f"{path}: replacement character U+FFFD at index {index}")
                   elif 0xD800 <= point <= 0xDFFF:
