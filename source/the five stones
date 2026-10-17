@@ -89,7 +89,7 @@ To reach the stones for a number:
   Begin the stone sequence.
   Put 2 into a position number.
   Loop.
-    If the position number is greater than the visible drop number, break.
+    If the position number is greater than the number, break.
     If the position number is greater than 46, break.
     Advance the stones given the position number.
     Add 1 to the position number.
