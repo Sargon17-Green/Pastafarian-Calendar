@@ -2,9 +2,12 @@
 \ D=1 gives the first, D=720 gives the last, D=721 wraps.
 \ The last Foundation visible drop must select [4,5,2,3,6,1].
 
+\ The test drop is declared explicitly to avoid CAL's compound type parsing.
+The bowltestdrop is a wide quantity.
+
 To check the first bowl arrangement:
-  Put "1" into a drop value wide quantity.
-  Choose a bowl order from the drop value wide quantity.
+  Put "1" into the bowltestdrop.
+  Choose a bowl order from the bowltestdrop.
   If the chosen bowl order's first identity is not 1,
     put "The bowl order check failed for the first bowl arrangement, position 1." into the check report; exit.
   If the chosen bowl order's second identity is not 2,
@@ -19,8 +22,8 @@ To check the first bowl arrangement:
     put "The bowl order check failed for the first bowl arrangement, position 6." into the check report; exit.
 
 To check the last bowl arrangement:
-  Put "720" into a drop value wide quantity.
-  Choose a bowl order from the drop value wide quantity.
+  Put "720" into the bowltestdrop.
+  Choose a bowl order from the bowltestdrop.
   If the chosen bowl order's first identity is not 6,
     put "The bowl order check failed for the last bowl arrangement, position 1." into the check report; exit.
   If the chosen bowl order's second identity is not 5,
@@ -35,8 +38,8 @@ To check the last bowl arrangement:
     put "The bowl order check failed for the last bowl arrangement, position 6." into the check report; exit.
 
 To check the wrapped bowl arrangement:
-  Put "721" into a drop value wide quantity.
-  Choose a bowl order from the drop value wide quantity.
+  Put "721" into the bowltestdrop.
+  Choose a bowl order from the bowltestdrop.
   If the chosen bowl order's first identity is not 1,
     put "The bowl order check failed for the wrapped bowl arrangement, position 1." into the check report; exit.
   If the chosen bowl order's second identity is not 2,
@@ -51,8 +54,8 @@ To check the wrapped bowl arrangement:
     put "The bowl order check failed for the wrapped bowl arrangement, position 6." into the check report; exit.
 
 To check the canonical final-drop bowl arrangement:
-  Put "141872771689426650819909896585756512282" into a drop value wide quantity.
-  Choose a bowl order from the drop value wide quantity.
+  Put "141872771689426650819909896585756512282" into the bowltestdrop.
+  Choose a bowl order from the bowltestdrop.
   If the chosen bowl order's first identity is not 4,
     put "The bowl order check failed for the canonical final-drop bowl arrangement, position 1." into the check report; exit.
   If the chosen bowl order's second identity is not 5,

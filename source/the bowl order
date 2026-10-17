@@ -30,6 +30,12 @@ A bowl chooser has
 The chosen bowl order is a bowl order.
 The bowl chooser is a bowl chooser.
 
+\ Named numeric scratch values are explicitly declared for CAL.
+The bowlrank is a wide quantity.
+The bowlone is a wide quantity.
+The bowldivisor is a wide quantity.
+The bowlranknumber is a number.
+
 \ The factorials for the six successive positions are 120, 24,
 \ 6, 2, 1, and 1. The last position has no choice left.
 To choose the next factorial:
@@ -90,13 +96,13 @@ To choose one position of the bowl order:
 \ D is positive and already in the saved sauce range 1..M.
 \ Its remainder is at most 719, and therefore fits in a CAL number.
 To choose a bowl order from a wide quantity:
-  Put the wide quantity into a rank wide quantity.
-  Put "1" into a one wide quantity.
-  Subtract the one wide quantity from the rank wide quantity.
-  Put "720" into a divisor wide quantity.
-  Calculate decimal remainder given the rank wide quantity and the divisor wide quantity.
-  Convert the rank wide quantity to a small rank number.
-  Put the small rank number into the bowl chooser's remaining rank.
+  Put the wide quantity into the bowlrank.
+  Put "1" into the bowlone.
+  Subtract the bowlone from the bowlrank.
+  Put "720" into the bowldivisor.
+  Calculate decimal remainder given the bowlrank and the bowldivisor.
+  Convert the bowlrank to the bowlranknumber.
+  Put the bowlranknumber into the bowl chooser's remaining rank.
   Put 0 into the bowl chooser's first used.
   Put 0 into the bowl chooser's second used.
   Put 0 into the bowl chooser's third used.
