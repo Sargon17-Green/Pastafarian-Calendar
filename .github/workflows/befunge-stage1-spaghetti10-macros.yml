@@ -1,0 +1,103 @@
+name: Befunge QA10 Native 17D 208 Generated Macro Code
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa09-80-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Pin production, Native QA08, QA09A fixture and 80-bytecode candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "4ba6902de08cf9483374f43a33f1d4ae7a14e3f6"
+          test "$(git hash-object qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq)" = "e22a8b706fb84e3356db6c70aac29b9145642201"
+          test "$(git hash-object qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq)" = "275cec0add8705565d27da4233860bf42d134a27"
+          test "$(git hash-object qa/spaghetti10_17d_dual_worker_macro_candidate.beq)" = "010efd012ae52a60740aa97750b5a02519912e92"
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+          echo "QA09_NATIVE_EIGHTY_EXACT_HEAD $(git rev-parse HEAD)"
+      - name: Build exact 17-dimensional Funge++ Native interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C third_party/funge-plus-plus funge
+          test "$(timeout 12 third_party/funge-plus-plus/bin/funge third_party/funge-plus-plus/test/example5d.beq)" = "Hello World"
+      - name: Rebuild actual 2D Native QA06 branch history
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -v "$GITHUB_WORKSPACE:/work:rw" -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" -w /work python:2.7-slim sh -ceu '
+            pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+            python qa/stage1_spaghetti06_native.py
+          '
+      - name: Native 17D QA07 and QA08 parent regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_spaghetti07_nd17_native.py --engine third_party/funge-plus-plus/bin/funge
+          python3 qa/stage1_spaghetti08_nd17_native.py --engine third_party/funge-plus-plus/bin/funge
+      - name: Native proven dual worker rendezvous QA09A
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_spaghetti09_fork_native.py
+      - name: Patch ONLY pinned CI engine checkout lifecycle signaling
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path("third_party/funge-plus-plus/src/FungeUniverse.cpp")
+          source=path.read_text()
+          tab=chr(9)
+          before="\n".join([tab*4+"threads.pop();",tab*4+"delete thread;",
+                            tab*3+"}",tab*3+"mutex.unlock();",tab*2+"}else{"])
+          after=before.replace(tab*3+"mutex.unlock();",
+              tab*3+"cv.notify_all(); // qa09 ephemeral native scheduler drain notification\n"+tab*3+"mutex.unlock();")
+          assert source.count(before)==1, "Pinned Funge++ native shutdown structure changed"
+          path.write_text(source.replace(before,after))
+          PY
+          make -C third_party/funge-plus-plus funge
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+          echo "QA09_PATCHED_ENGINE_CI_ONLY: upstream original source is known RED in THREAD_NATIVE"
+      - name: Native QA09 80 newly executable bytes in 17D, two thread modes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti09_eighty_native.py
+          python3 qa/stage1_spaghetti09_eighty_native.py
+      - name: Native QA10 208 generated macro instructions and 24 causal controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti10_macro_native.py
+          python3 qa/stage1_spaghetti10_macro_native.py
+      - name: Preserve evidence from all provenance chains
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti10-patched-native-208-macro-evidence
+          path: |
+            spaghetti06_native_receipt.json
+            spaghetti07_nd17_native_receipt.json
+            spaghetti08_nd17_native_receipt.json
+            spaghetti09_fork_native_receipt.json
+            spaghetti09_nd17_native_receipt.json
+            spaghetti10_native_macro_receipt.json
+          if-no-files-found: warn
