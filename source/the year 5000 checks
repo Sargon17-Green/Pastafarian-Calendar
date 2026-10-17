@@ -11,7 +11,7 @@
 To append synthetic gate fixture given a number and a calendar day:
   Put the number into the gate walk's current index.
   Put the calendar day into the gate walk's current position.
-  Record a positive gate mark.
+  Record positive gate marks.
 
 To make synthetic year gates:
   Destroy the nearby gate ledger.
