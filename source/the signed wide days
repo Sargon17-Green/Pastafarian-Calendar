@@ -25,6 +25,12 @@ The signed day second polarity is a number.
 The signed day magnitude difference is a wide quantity.
 The signed day temporary value is a wide signed day.
 
+\ CAL's single-argument record accessor avoids a second-argument
+\ nested-field expression that CAL-4018 mis-parses in the caller.
+\ The scratch field is fully overwritten before each call; no formula changes.
+To read the second signed day polarity given a wide signed day:
+  Put the wide signed day's polarity into the signed day second polarity.
+
 \ Make zero canonical and make nonzero polarity exactly +1 or -1.
 To normalize a wide signed day:
   Normalize the wide signed day's absolute quantity.
@@ -62,7 +68,7 @@ To add a wide signed day to another wide signed day:
   \ CAL can misparse direct zero equality on the second structured
   \ argument as an undeclared decider. Check the normalized sign's range.
   \ With polarity restricted to -1, 0, +1, both bounds hold only for 0.
-  Put the other wide signed day's polarity into the signed day second polarity.
+  Read the second signed day polarity given the other wide signed day.
   If the signed day second polarity is greater than -1,
     if the signed day second polarity is less than 1,
       put the wide signed day into the other wide signed day; exit.
