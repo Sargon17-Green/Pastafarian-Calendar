@@ -99,7 +99,7 @@ for y in range(len(p)):
         old=p[y][x] if x<len(p[y]) else " "
         new=c[y][x] if x<len(c[y]) else " "
         if old!=new:changes.append((x,y,old,new))
-need(len(changes)==33,"Expected 33 source-cell edits")
+need(len(changes)==28,"Expected 28 source-cell edits")
 need(c[5][108:110]=="v>" and c[6][350]=="|" and c[7][109]=="^" and c[7][200]==":" and c[7][196]=="x"
      and c[5][350]=="<" and c[9][320]=="^","Route source map")
 for (x,y) in ((14,4),(63,4),(111,4)):

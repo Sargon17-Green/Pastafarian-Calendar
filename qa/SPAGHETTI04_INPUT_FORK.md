@@ -22,7 +22,7 @@ been rearranged to compute its final zero using live instructions
 Both ordinary arms still produce the initial scanner byte followed by
 two zeros and should rejoin their original execution path.
 
-Compared with Stage03 there are exactly 33 modified Funge-space source cells.
+Compared with Stage03 there are exactly 28 modified Funge-space source cells.
 The exact-head Native test now demands separate actual upper/lower route
 witnesses, production/parent/candidate parity, three independent Befunge
 reference programs for four valid cases, invalid token parity for two,
