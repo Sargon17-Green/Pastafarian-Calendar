@@ -55,9 +55,9 @@ To decide if a wide quantity is numerically smaller than another string:
   Repeat.
 
 \ Add the first value into the second; the first is not changed.
-To add a wide quantity to another wide quantity:
+To add a wide quantity to another string:
   Put the wide quantity into a left string.
-  Put the other wide quantity into a right string.
+  Put the other string into a right string.
   Put "" into a combined string.
   Put 0 into a carry number.
   Put the left string's length into a remaining number.
@@ -74,14 +74,14 @@ To add a wide quantity to another wide quantity:
     Subtract 1 from the remaining number.
   Repeat.
   If the carry number is not 0, prepend the carry number to the combined string.
-  Put the combined string into the other wide quantity.
-  Normalize the other wide quantity.
+  Put the combined string into the other string.
+  Normalize the other string.
 
 \ Subtract the first from the second. Precondition: second >= first.
 \ Callers of this routine must check the order before subtracting.
-To subtract a wide quantity from another wide quantity:
+To subtract a wide quantity from another string:
   Put the wide quantity into a smaller string.
-  Put the other wide quantity into a larger string.
+  Put the other string into a larger string.
   Put "" into a difference string.
   Put 0 into a borrow number.
   Put the larger string's length into a remaining number.
@@ -96,8 +96,8 @@ To subtract a wide quantity from another wide quantity:
     Prepend the difference digit number to the difference string.
     Subtract 1 from the remaining number.
   Repeat.
-  Put the difference string into the other wide quantity.
-  Normalize the other wide quantity.
+  Put the difference string into the other string.
+  Normalize the other string.
 
 \ Multiplication by one decimal digit never needs a large intermediate.
 \ The number parameter must be from 0 to 9; other multipliers use Multiply.
@@ -130,9 +130,9 @@ To append decimal zeroes to a wide quantity given a number:
 \ Schoolbook multiplication; the second operand receives the result.
 \ A separate helper performs the inner digit multiplication, so the
 \ compiler never needs to handle a loop inside another loop.
-To multiply a wide quantity by another wide quantity:
+To multiply a wide quantity by another string:
   Put the wide quantity into a multiplicand wide quantity.
-  Put the other wide quantity into a remaining string.
+  Put the other string into a remaining string.
   Put "0" into a product wide quantity.
   Put 0 into a position number.
   Loop.
@@ -144,21 +144,21 @@ To multiply a wide quantity by another wide quantity:
     Add the partial wide quantity to the product wide quantity.
     Add 1 to the position number.
   Repeat.
-  Put the product wide quantity into the other wide quantity.
-  Normalize the other wide quantity.
+  Put the product wide quantity into the other string.
+  Normalize the other string.
 
 \ Keep subtracting a divisor while a partial remainder is large enough.
 \ The long-division caller guarantees that this takes no more than 9 steps.
-To remove copies of a wide quantity from another wide quantity:
+To remove copies of a wide quantity from another string:
   Loop.
-    If the other wide quantity is numerically smaller than the wide quantity, break.
-    Subtract the wide quantity from the other wide quantity.
+    If the other string is numerically smaller than the wide quantity, break.
+    Subtract the wide quantity from the other string.
   Repeat.
 
 \ Long division, one decimal digit at a time. The first operand
 \ receives the remainder, in the range from zero to divisor minus one.
 \ Precondition: divisor is positive and both numbers are normalized.
-To calculate decimal remainder given a wide quantity and another wide quantity:
+To calculate decimal remainder given a wide quantity and another string:
   Put the wide quantity into a source string.
   Put "0" into a remainder wide quantity.
   Slap a substring on the source string.
@@ -166,7 +166,7 @@ To calculate decimal remainder given a wide quantity and another wide quantity:
     If the substring is blank, break.
     Append the substring's first's target to the remainder wide quantity.
     Normalize the remainder wide quantity.
-    Remove copies of the other wide quantity from the remainder wide quantity.
+    Remove copies of the other string from the remainder wide quantity.
     Add 1 to the substring's first.
   Repeat.
   Put the remainder wide quantity into the wide quantity.
@@ -187,20 +187,20 @@ To keep a wide quantity for the sauce:
 \ These two routines implement SAVE(a-b), including negative differences,
 \ without ever storing a negative decimal string.
 \ The first is the number being subtracted; the second receives the answer.
-To subtract a wide quantity from another wide quantity with sauce wrapping:
-  If the other wide quantity is numerically smaller than the wide quantity,
-    wrap the sauce difference given the wide quantity and the other wide quantity; exit.
-  Subtract the wide quantity from the other wide quantity.
-  Keep the other wide quantity for the sauce.
+To subtract a wide quantity from another string with sauce wrapping:
+  If the other string is numerically smaller than the wide quantity,
+    wrap the sauce difference given the wide quantity and the other string; exit.
+  Subtract the wide quantity from the other string.
+  Keep the other string for the sauce.
 
 \ If the second operand b is smaller than the first operand a,
 \ then SAVE(b-a) is M-(a-b), since both operands are in 1..M.
-To wrap the sauce difference given a wide quantity and another wide quantity:
+To wrap the sauce difference given a wide quantity and another string:
   Put the wide quantity into a difference wide quantity.
-  Subtract the other wide quantity from the difference wide quantity.
+  Subtract the other string from the difference wide quantity.
   Put "170141183460469231731687303715884105727" into a wrapped wide quantity.
   Subtract the difference wide quantity from the wrapped wide quantity.
-  Put the wrapped wide quantity into the other wide quantity.
+  Put the wrapped wide quantity into the other string.
 
 
 \ These helpers accept ordinary nonnegative CAL numbers as multipliers.
@@ -216,7 +216,7 @@ To add a number to a wide quantity:
   Add the added wide quantity to the wide quantity.
 
 \ Add factor times first value to the second value.
-To add a wide quantity to another wide quantity given a number:
+To add a wide quantity to another string given a number:
   Put the wide quantity into a weighted wide quantity.
   Multiply the weighted wide quantity by the number.
-  Add the weighted wide quantity to the other wide quantity.
+  Add the weighted wide quantity to the other string.
