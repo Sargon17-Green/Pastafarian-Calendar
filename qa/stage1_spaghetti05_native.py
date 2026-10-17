@@ -113,7 +113,7 @@ def shared_memory_witness(path, arm):
     need(ft<w[0]<jt<r[0]<dt,"Native fork/write/join/read/x event order")
     need(dyn+1<len(steps),"Missing post-polynomial Native successor")
     step=steps[dyn+1]
-    need(step[2:6]==(189,7,-1,0),
+    need(step[2:6]==(109,7,-1,0),
          "Incorrect Native computed post-x vector "+repr(step[2:6]))
     return {"stamp":stamp,"write_tick":w[0],"read_tick":r[0],
        "join_tick":jt,"computed_x_tick":dt,

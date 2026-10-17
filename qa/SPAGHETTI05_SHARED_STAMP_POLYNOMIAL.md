@@ -34,3 +34,13 @@ Stage 1 remains OPEN, LAST_COMPLETED_STAGE=0. No candidate promotion to
 src/ and no Stage 2. Native verification must not be reported as PASS
 unless GitHub Actions concludes successfully on an exact source-pinned
 HEAD. Historical QA03/QA04 and failure specimens stay in the repository.
+
+## First native iteration — preserved failure evidence
+
+Run 39031159000 on HEAD 6182fea3 failed in the QA trace checker, not
+in production/native output parity. PyFunge's STEP hook visits *executed*
+nonblank instructions: following x at (190,7) with direction (-1,0),
+the next recorded executed instruction is the scanner return arrow at
+(109,7), not the adjacent empty space (189,7). The initial checker
+incorrectly expected (189,7,-1,0); corrected expectation now verifies
+(109,7,-1,0). The original failed workflow and its artifact remain.
