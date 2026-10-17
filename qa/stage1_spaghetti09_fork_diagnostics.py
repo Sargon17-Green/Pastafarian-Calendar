@@ -18,4 +18,14 @@ run("original",base)
 run("ready_flags_preseeded",base.replace("#&#&",">&B&"))
 run("zero_flags_preseeded",base.replace("#&#&","0&0&"))
 run("empty_flag_B",base.replace("#&#&",">&&&"))
+lines=base.splitlines(True)
+ix=next(i for i in range(1,len(lines)-1,2) if lines[i].startswith("Lines 1,Origin 1:0,"))
+row=lines[ix+1]
+assert row[13]=="j" and row[129]=="t"
+def swap(name,at,ch):
+ copy=lines[:]
+ arr=list(row);arr[at]=ch;copy[ix+1]="".join(arr)
+ run(name,"".join(copy).replace("#&#&",">&B&"))
+swap("second_fork_to_output",129,".")
+swap("jump_to_output",13,".")
 print("QA09_NATIVE_DIAGNOSTIC_FINISHED",flush=True)
