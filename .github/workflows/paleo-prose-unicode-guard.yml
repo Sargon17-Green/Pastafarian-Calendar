@@ -1,0 +1,61 @@
+name: Paleo Prose Unicode Guard
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify prose Unicode without touching Codesh sources
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+
+          required = [
+              Path("LICENSE"),
+              Path("README.md"),
+              Path("SPAGHETTI_DEVELOPMENT_HISTORY.md"),
+              Path("docs/ARCHITECTURE.md"),
+              Path("docs/TESTING.md"),
+              Path("docs/SOURCE_LANGUAGE_CATALOG.md"),
+          ]
+          files = required + sorted(Path(".").glob("TEST_LOG_STAGE_*.md"))
+          errors = []
+          for path in files:
+              if not path.is_file():
+                  errors.append(f"{path}: required prose file is missing")
+                  continue
+              try:
+                  content = path.read_text(encoding="utf-8", errors="strict")
+              except UnicodeError as exc:
+                  errors.append(f"{path}: invalid UTF-8: {exc}")
+                  continue
+              if not content:
+                  errors.append(f"{path}: empty prose file")
+              for index, char in enumerate(content):
+                  point = ord(char)
+                  if point == 0xFFFD:
+                      errors.append(f"{path}: replacement character U+FFFD at index {index}")
+                  elif 0xD800 <= point <= 0xDFFF:
+                      errors.append(f"{path}: unpaired surrogate at index {index}")
+                  elif 0x0590 <= point <= 0x05FF:
+                      errors.append(f"{path}: square Hebrew character at index {index}")
+              if "\U0001091f\U0001091f" in content:
+                  errors.append(f"{path}: consecutive Phoenician word dividers")
+
+          if not list(Path(".").glob("TEST_LOG_STAGE_*.md")):
+              errors.append("No TEST_LOG_STAGE_*.md files found")
+          if errors:
+              for message in errors:
+                  print(f"::error::{message}")
+              sys.exit(1)
+          print(f"PASS: {len(files)} prose files; Codesh source files were not read")
+          PY
