@@ -31,7 +31,7 @@ jobs:
           p=Path("third_party/funge-plus-plus/src/FungeRunner.cpp")
           s=p.read_text()
           old="inst_t i = ip.get();"
-          new='inst_t i = ip.get(); static unsigned long long qa10_ticks=0; static unsigned qa10_events=0; ++qa10_ticks; if ((i==\'Z\' || i==\'@\') && qa10_events++<80 || qa10_ticks%200000==0) { std::cerr << "QA10_ENGINE_TRACE steps=" << qa10_ticks << " id=" << id << " pos=" << ip.getPos() << " delta=" << ip.getDelta() << " opcode=" << (int)i << std::endl; }'
+          new='inst_t i = ip.get(); static unsigned long long qa10_ticks=0; static unsigned qa10_events=0; ++qa10_ticks; if (((i==\'Z\' || i==\'@\') && qa10_events++<80) || (qa10_ticks%200000==0)) { std::cerr << "QA10_ENGINE_TRACE steps=" << qa10_ticks << " id=" << id << " pos=" << ip.getPos() << " delta=" << ip.getDelta() << " opcode=" << (int)i << std::endl; }'
           assert s.count(old)==1
           p.write_text(s.replace(old,new))
           PY
