@@ -1,0 +1,67 @@
+name: Befunge QA11B Full Native Three-IP 17D Acceptance
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+    paths:
+      - 'qa/stage1_spaghetti11b_full_native.py'
+      - '.github/workflows/befunge-stage1-spaghetti11b-full-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa11b-full-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 85
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [baseline, axes-low, axes-high, roles, third]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Lock accepted ancestors and QA11B candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/spaghetti10_17d_dual_worker_macro_candidate.beq)" = "010efd012ae52a60740aa97750b5a02519912e92"
+          test "$(git hash-object qa/spaghetti11_17d_three_worker_cascade.beq)" = "990d8fb2b84c7ee728634bb93a8e7baaef992c40"
+          test "$(git hash-object qa/spaghetti11_17d_cascade_208_generated_candidate.beq)" = "afa261c6eab74d69b6c3afbe6c641fc130d627c0"
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+          git rev-parse HEAD
+      - name: Repair only disposable engine's known native-thread shutdown defect
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('third_party/funge-plus-plus/src/FungeUniverse.cpp')
+          s=p.read_text(); t=chr(9)
+          old='\n'.join([t*4+'threads.pop();',t*4+'delete thread;',
+                         t*3+'}',t*3+'mutex.unlock();',t*2+'}else{'])
+          new=old.replace(t*3+'mutex.unlock();',
+              t*3+'cv.notify_all(); // qa11b disposable scheduler fix\n'+t*3+'mutex.unlock();')
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new))
+          PY
+          make -C third_party/funge-plus-plus funge
+      - name: Native proof for ${{ matrix.group }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti11b_full_native.py
+          python3 qa/stage1_spaghetti11b_full_native.py --group '${{ matrix.group }}'
+      - name: Preserve PASS or RED native proof receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti11b-full-native-${{ matrix.group }}
+          path: spaghetti11b_full_*_receipt.json
+          if-no-files-found: warn
