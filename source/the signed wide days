@@ -18,6 +18,12 @@ A wide signed day has
 
 The signed day precedence result is a number.
 
+\ Explicitly typed scratch values avoid CAL inferring an undeclared
+\ decider/type from structured-field equality or descriptive noun phrases.
+The signed day polarity difference is a number.
+The signed day magnitude difference is a wide quantity.
+The signed day temporary value is a wide signed day.
+
 \ Make zero canonical and make nonzero polarity exactly +1 or -1.
 To normalize a wide signed day:
   Normalize the wide signed day's absolute quantity.
@@ -58,7 +64,9 @@ To add a wide signed day to another wide signed day:
   If the other wide signed day's polarity is greater than -1,
     if the other wide signed day's polarity is less than 1,
       put the wide signed day into the other wide signed day; exit.
-  If the wide signed day's polarity is the other wide signed day's polarity,
+  Put the wide signed day's polarity into the signed day polarity difference.
+  Subtract the other wide signed day's polarity from the signed day polarity difference.
+  If the signed day polarity difference is 0,
     add like-signed day magnitudes given the wide signed day and the other wide signed day; exit.
   Add opposite-signed day magnitudes given the wide signed day and the other wide signed day.
 
@@ -67,21 +75,22 @@ To add like-signed day magnitudes given a wide signed day and another wide signe
 
 \ Opposite signs: the larger magnitude determines the resulting sign.
 To add opposite-signed day magnitudes given a wide signed day and another wide signed day:
-  If the wide signed day's absolute quantity is the other wide signed day's absolute quantity,
-    put "0" into the other wide signed day's absolute quantity;
-    put 0 into the other wide signed day's polarity; exit.
   If the wide signed day's absolute quantity is numerically smaller than the other wide signed day's absolute quantity,
     subtract the wide signed day's absolute quantity from the other wide signed day's absolute quantity; exit.
-  Put the wide signed day's absolute quantity into a difference wide quantity.
-  Subtract the other wide signed day's absolute quantity from the difference wide quantity.
-  Put the difference wide quantity into the other wide signed day's absolute quantity.
-  Put the wide signed day's polarity into the other wide signed day's polarity.
+  If the other wide signed day's absolute quantity is numerically smaller than the wide signed day's absolute quantity,
+    put the wide signed day's absolute quantity into the signed day magnitude difference;
+    subtract the other wide signed day's absolute quantity from the signed day magnitude difference;
+    put the signed day magnitude difference into the other wide signed day's absolute quantity;
+    put the wide signed day's polarity into the other wide signed day's polarity; exit.
+  \ Neither unsigned magnitude is smaller: both are equal, so the sum is zero.
+  Put "0" into the other wide signed day's absolute quantity.
+  Put 0 into the other wide signed day's polarity.
 
 \ Subtracting x from y is adding -x to y without modifying x.
 To subtract a wide signed day from another wide signed day:
-  Put the wide signed day into a temporary wide signed day.
-  Multiply -1 by the temporary wide signed day's polarity.
-  Add the temporary wide signed day to the other wide signed day.
+  Put the wide signed day into the signed day temporary value.
+  Multiply -1 by the signed day temporary value's polarity.
+  Add the signed day temporary value to the other wide signed day.
 
 \ Convert the signed day into plain decimal text for display/logging.
 \ The string parameter is the target; the signed day is unchanged.
