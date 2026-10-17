@@ -20,14 +20,22 @@ A wide option work has
 
 The wide option work is a wide option work.
 
+\ CAL requires explicit type declarations for scratch values.
+\ All scratch variables are overwritten before they are read.
+The wcbase is a wide quantity.
+The wcdigit is a wide quantity.
+The wcone is a wide quantity.
+The wcremaining is a wide quantity.
+The wcresult is a wide quantity.
+
 \ At the end period=M^k and k is minimal for the requested N.
 To calculate wide option capacity given a wide quantity:
   Put "170141183460469231731687303715884105727" into the wide option work's period.
   Put 1 into the wide option work's digit count.
   Loop.
     If the wide option work's period is not numerically smaller than the wide quantity, break.
-    Put "170141183460469231731687303715884105727" into a base wide quantity.
-    Multiply the base wide quantity by the wide option work's period.
+    Put "170141183460469231731687303715884105727" into the wcbase.
+    Multiply the wcbase by the wide option work's period.
     Add 1 to the wide option work's digit count.
   Repeat.
 
@@ -41,13 +49,13 @@ To construct the first wide answer:
   Put the seal inquiry's starting answer into the seal inquiry's current answer.
   Loop.
     If the wide option work's digit index is greater than the wide option work's digit count, break.
-    Put the seal inquiry's current answer into a digit wide quantity.
-    Put "1" into a one wide quantity.
-    Subtract the one wide quantity from the digit wide quantity.
-    Multiply the wide option work's place value by the digit wide quantity.
-    Add the digit wide quantity to the wide option work's constructed answer.
-    Put "170141183460469231731687303715884105727" into a base wide quantity.
-    Multiply the base wide quantity by the wide option work's place value.
+    Put the seal inquiry's current answer into the wcdigit.
+    Put "1" into the wcone.
+    Subtract the wcone from the wcdigit.
+    Multiply the wide option work's place value by the wcdigit.
+    Add the wcdigit to the wide option work's constructed answer.
+    Put "170141183460469231731687303715884105727" into the wcbase.
+    Multiply the wcbase by the wide option work's place value.
     Step the sealed answer.
     Add 1 to the wide option work's digit index.
   Repeat.
@@ -56,9 +64,9 @@ To construct the first wide answer:
 \ L=M^k-(M^k mod N), which never exceeds the period.
 To prepare the wide acceptance limit given a wide quantity:
   Put the wide option work's period into the wide option work's acceptance limit.
-  Put the wide option work's period into a remaining wide quantity.
-  Calculate decimal remainder given the remaining wide quantity and the wide quantity.
-  Subtract the remaining wide quantity from the wide option work's acceptance limit.
+  Put the wide option work's period into the wcremaining.
+  Calculate decimal remainder given the wcremaining and the wide quantity.
+  Subtract the wcremaining from the wide option work's acceptance limit.
 
 \ The canonical correction for an initially rejected W must start at W.
 \ The first accepted value is exactly 1 (forward) or L (backwards),
@@ -78,12 +86,12 @@ To perform wide option selection given a wide quantity:
   Prepare the wide acceptance limit given the wide quantity.
   If the wide option work's acceptance limit is numerically smaller than the wide option work's constructed answer,
     skip rejected wide answers.
-  Put the wide option work's constructed answer into a result wide quantity.
-  Put "1" into a one wide quantity.
-  Subtract the one wide quantity from the result wide quantity.
-  Calculate decimal remainder given the result wide quantity and the wide quantity.
-  Add 1 to the result wide quantity.
-  Put the result wide quantity into the seal inquiry's selected quantity.
+  Put the wide option work's constructed answer into the wcresult.
+  Put "1" into the wcone.
+  Subtract the wcone from the wcresult.
+  Calculate decimal remainder given the wcresult and the wide quantity.
+  Add 1 to the wcresult.
+  Put the wcresult into the seal inquiry's selected quantity.
 
 \ One public entrypoint covers both canonical regimes, with no
 \ loss of accuracy and no conversion of large N into a machine integer.
@@ -91,7 +99,7 @@ To determine canonical equal selection given a wide quantity:
   Put "0" into the seal inquiry's selected quantity.
   If the wide quantity is blank, exit.
   If the wide quantity is "0", exit.
-  Put "170141183460469231731687303715884105727" into a base wide quantity.
-  If the base wide quantity is numerically smaller than the wide quantity,
+  Put "170141183460469231731687303715884105727" into the wcbase.
+  If the wcbase is numerically smaller than the wide quantity,
     perform wide option selection given the wide quantity; exit.
   Choose narrow quantity values from the wide quantity.
