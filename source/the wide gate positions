@@ -73,7 +73,7 @@ To prepare backward extended gate movement:
 \ A blocked movement leaves BOTH index and coordinate unchanged.
 To commit prepared extended gate movement:
   Put 0 into the wide gate movement's succeeded.
-  Request another bounded gate step.
+  Consume the next gate budget step.
   If the gate step budget's exhausted is 1, exit.
   Calculate extended gate spacing for the wide gate movement's gap index.
   Apply measured extended gate gap given the gate inquiry's interval length.
