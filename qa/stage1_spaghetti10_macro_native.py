@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Native QA10 17D macro compiler: 208 genuine future instructions, two residue workers."""
 from __future__ import annotations
-import hashlib,json,subprocess,tempfile
+import hashlib,json,subprocess,tempfile,time,re
 from pathlib import Path
 
 SOURCE=Path("qa/spaghetti10_17d_dual_worker_macro_candidate.beq")
@@ -40,22 +40,25 @@ def expected(seed):
                     m,42,m,47,58,36,58,36,62,axis])
     return out+[136*seed]
 
-def native(data,seed,mode,timeout=20):
+def native(data,seed,mode,timeout=75):
     with tempfile.TemporaryDirectory(prefix="qa10_native_") as p:
         spec=Path(p)/"native.beq";spec.write_bytes(data)
         args=[ENGINE,"-fconcurrent","-fthreads="+mode,
               "-fno-filesystem","-fno-execute",str(spec)]
+        clock=time.monotonic()
         try:
             cp=subprocess.run(args,input=(str(seed)+"\n").encode("ascii"),
                   capture_output=True,timeout=timeout)
         except subprocess.TimeoutExpired as ex:
             return {"rc":124,"output":[],"timeout":True,
+                    "elapsed_s":round(time.monotonic()-clock,3),
                     "stdout_len":len(ex.stdout or b""),"stderr":"bounded timeout"}
         try:
             values=[int(t) for t in cp.stdout.decode("utf-8","replace").split()]
         except ValueError:
             values=[]
         return {"rc":cp.returncode,"output":values,"timeout":False,
+                "elapsed_s":round(time.monotonic()-clock,3),
                 "stdout_len":len(cp.stdout),
                 "stderr":cp.stderr.decode("utf-8","replace")[-300:]}
 
@@ -86,7 +89,7 @@ def stage_mutant(data,step):
     lines[index+1]=src[:off]+new+src[off+len(old):]+"\n"
     return "".join(lines).encode("ascii")
 
-def role_mutant(original,step,from_c,to_c):
+def role_mutant(original,step,from_c,to_c,occurrence=1):
     tri=step["axis"]*(step["axis"]+1)//2
     # Change exactly ONE compiler formula for one opcode role.
     shared=addr(10001)+"g"+integer_literal(31)+"-"+addr(10003)+"g"+integer_literal(33)+"-+"
@@ -98,8 +101,10 @@ def role_mutant(original,step,from_c,to_c):
              and len(s)>900]
     check(len(matches)==1,"Role mutation stage missing")
     i,s=matches[0]
-    check(s.count(old)>=1 and len(old)==len(new),"Role expression missing or width drift")
-    ls[i+1]=s.replace(old,new,1)+"\n"
+    hits=[m.start() for m in re.finditer(re.escape(old),s)]
+    check(len(hits)>=occurrence and len(old)==len(new),"Role expression or width absent")
+    at=hits[occurrence-1]
+    ls[i+1]=s[:at]+new+s[at+len(old):]+"\n"
     return "".join(ls).encode("ascii")
 
 def main():
@@ -134,16 +139,20 @@ def main():
              "source_blob":SOURCE_BLOB,"parent_blob":PARENT,
              "patched_upstream_engine":True,
              "native":True,"generated_instruction_count":208,
-             "healthy_runs":[],"masking":[],"mutants":[]}
+             "healthy_runs":[],"masking":[],"mutants":[],
+             "timing_calibration":{}}
+    healthy_elapsed=[]
     for mode in ("funge","native"):
         for seed in (1,2):
             for repetition in range(2):
-                got=native(original,seed,mode,25)
+                got=native(original,seed,mode,75)
                 good=expected(seed)
                 check(got["rc"]==0 and got["output"]==good,
                       "Native QA10 208 instruction mismatch "+repr((mode,seed,repetition,got)))
+                healthy_elapsed.append(got["elapsed_s"])
                 receipt["healthy_runs"].append({
                     "mode":mode,"seed":seed,"repeat":repetition,
+                    "elapsed_s":got["elapsed_s"],
                     "numeric_count":len(good),
                     "output_sha256":hashlib.sha256(str(good).encode()).hexdigest()})
                 print("QA10_NATIVE_208_OPCODE_PASS",mode,seed,repetition,
@@ -153,11 +162,29 @@ def main():
     for index,head,body in traps:masked[index+1]="q\n"
     masked_data="".join(masked).encode("ascii")
     for seed in (1,2):
-        got=native(masked_data,seed,"funge",25)
+        got=native(masked_data,seed,"funge",75)
         check(got["rc"]==0 and got["output"]==expected(seed),
               "QA10 future 208 source cells executed before generated overwrite "+str(seed))
         receipt["masking"].append({"seed":seed,"masked_bytes":208})
         print("QA10_NATIVE_208_TRAP_MASK_PASS",seed,flush=True)
+
+    # A mutant's short timeout is not causal evidence if healthy runs also exceed it.
+    # Give all mutant cases the same generous wallclock limit, calibrated on healthy.
+    mutant_timeout=max(20,int(max(healthy_elapsed)*1.5)+5)
+    receipt["timing_calibration"]={"max_healthy_seconds":max(healthy_elapsed),
+        "mutant_seconds":mutant_timeout}
+    print("QA10_NATIVE_COMPARABLE_TIMEOUTS",max(healthy_elapsed),
+          mutant_timeout,flush=True)
+    # A deliberately inert edit in an unreachable source sentinel must finish
+    # under exactly the same bound, ruling out trivial false-positive timeouts.
+    neutral=replace_one_panel(original,
+        lambda h,s:h.startswith("Lines 1,Origin 10005:0,") and s=="z",
+        "z","q")
+    witness=native(neutral,1,"funge",mutant_timeout)
+    check(witness["rc"]==0 and witness["output"]==expected(1),
+          "Inert mutation timed out: calibration/causality is invalid")
+    receipt["timing_calibration"]["inert_source_witness_elapsed_s"]=witness["elapsed_s"]
+    print("QA10_NATIVE_INERT_MUTANT_CONTROL_PASS",witness["elapsed_s"],flush=True)
 
     mutations=[
         ("fork_A",lambda h,s:h.startswith("Lines 1,Origin 0:0,"),"t","z"),
@@ -169,14 +196,14 @@ def main():
     ]
     for name,pred,a,b in mutations:
         corrupt=replace_one_panel(original,pred,a,b)
-        got=native(corrupt,1,"funge",3)
+        got=native(corrupt,1,"funge",mutant_timeout)
         check(got["rc"]!=0 or got["output"]!=expected(1),"Inert worker mutation "+name)
         receipt["mutants"].append({"name":name,"rc":got["rc"],"timed_out":got["timeout"]})
         print("QA10_NATIVE_WORKER_MUTANT_RED",name,got["rc"],flush=True)
     for step in meta["stages"]:
         corrupt=stage_mutant(original,step)
         seed=1 if step["axis"]%2 else 2
-        got=native(corrupt,seed,"funge",3)
+        got=native(corrupt,seed,"funge",mutant_timeout)
         check(got["rc"]!=0 or got["output"]!=expected(seed),
               "Inert dimension contribution "+str(step["axis"]))
         receipt["mutants"].append({"axis":step["axis"],"rc":got["rc"],
@@ -188,8 +215,8 @@ def main():
       ("destroy_stack_drop",meta["stages"][7],36,35),
       ("destroy_direction",meta["stages"][7],62,61),
     ]:
-        corrupt=role_mutant(original,step,c,d)
-        got=native(corrupt,1,"funge",3)
+        corrupt=role_mutant(original,step,c,d,3 if title=="destroy_stack_drop" else 1)
+        got=native(corrupt,1,"funge",mutant_timeout)
         check(got["rc"]!=0 or got["output"]!=expected(1),
               "Inert generated-instruction role mutation "+title)
         receipt["mutants"].append({"generated_role":title,"rc":got["rc"],

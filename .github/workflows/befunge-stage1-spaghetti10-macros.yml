@@ -9,7 +9,7 @@ permissions:
 jobs:
   qa09-80-native:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -86,6 +86,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 qa/stage1_spaghetti10_build.py
           python3 -m py_compile qa/stage1_spaghetti10_macro_native.py
           python3 qa/stage1_spaghetti10_macro_native.py
       - name: Preserve evidence from all provenance chains

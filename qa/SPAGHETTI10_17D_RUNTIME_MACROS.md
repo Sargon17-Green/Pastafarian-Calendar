@@ -104,3 +104,28 @@ differentiates source arithmetic errors, control-flow mistakes and
 large-performance costs. Diagnostic engine instrumentation is not
 a modification to the Pastafarian Calendar production source and
 does not count toward QA10 acceptance.
+
+## Negative-control soundness upgrade (pending new Native rerun)
+
+A second methodological audit found that a mutant timeout of 3 seconds
+would be meaningless for a healthy QA10 source whose full execution
+already exceeds 25 seconds. That earlier, uncalibrated test script
+**must not** be used to claim causal nontermination. The repaired
+harness measures all healthy source runs, sets a shared mutant budget to
+`max(20, floor(1.5 * slowest_healthy_seconds)+5)` and executes a
+physically **inert control mutation** at the unreachable 17th-dimensional
+sentinel under the same bound. Any inert-control failure blocks all
+causality claims. The third `$` opcode occurrence in a stage, rather
+than the original QA09 prefix, is now chosen for the generated-macro
+stack-drop negative control. All mutation results distinguish changed
+output from a bounded nontermination event; no mutant timer shorter
+than a healthy execution is accepted.
+
+The SHA-pinned source reconstruction is also checked directly in the
+full QA10 gate before the real Native interpreter starts QA10. The
+historical first Native RED 39065096851, which timed out at 25 seconds
+for seed 1 in `-fthreads=funge`, remains preserved; it is not evidence
+of behavioral divergence by itself. The separate stage-bounded Native
+forensic workflow checks whether the larger source merely needs more
+time or has an actual wrong IP route. Until both the new timed gate
+and independent forensic results support it, QA10 is **OPEN**.
