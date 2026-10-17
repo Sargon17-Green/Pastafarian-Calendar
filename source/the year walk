@@ -38,7 +38,7 @@ To gather following year candidates:
 
 To add one following candidate:
   Create a year option.
-  Put the working year candidate into the year option's year candidate.
+  Copy the working year candidate into the year option's year candidate.
   Append the year option to the eligible year ledger.
   Add 1 to the eligible year count.
 
