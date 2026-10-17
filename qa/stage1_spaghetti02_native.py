@@ -19,7 +19,7 @@ with open(PARENT,"rb") as f:parent=f.read()
 with open(CHILD,"rb") as f:child=f.read()
 assert git_blob(parent)=="948cb9332332f6abf35274ecc4be69bbc8c79115"
 assert git_blob(child)=="471e45cfec818d432cbb8e810204a865f8f04a97"
-pr=parent.splitlines(True); cr=child.splitlines(True)
+pr=parent.splitlines(); cr=child.splitlines(); crraw=child.splitlines(True)
 assert len(pr)==len(cr)==2015
 assert (cr[2][59:61],cr[3][63:87],cr[4][63])==("v>","e4gf4*3+4pf4*3+4g4c*-:1x"," ")
 assert cr[4][14]==" " and cr[4][86]=="<" and cr[4][60]=="^"
@@ -33,7 +33,7 @@ assert len(changes)==29,repr(changes)
 mutants=[]
 for name,x,y,replacement in MUTATIONS:
     assert cr[y][x] in "pg",("wrong mutator",name,cr[y][x])
-    cloned=list(cr)
+    cloned=list(crraw)
     row=bytearray(cloned[y])
     row[x]=ord(replacement)
     cloned[y]=bytes(row)
