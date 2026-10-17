@@ -33,3 +33,17 @@ a changed IP is causality, not a normally terminating numeric answer.
 Stage1 OPEN; Last completed stage 0; Stage2 NOT STARTED.
 No production promotion or PR merge; final state/reentrancy acceptance
 and full Native legacy regression are still separately pending.
+
+## Native causality test refinement
+
+The second source-stable Native run 39028391894 proved 2/2 natural upper
+routes and 2/2 natural lower routes with independent BF98 oracle parity,
+and showed the lower-arm second zero is dynamically causal to termination.
+The north computed-zero perturbation can nevertheless terminate with the
+same numeric answer after taking a different route around Funge-space.
+Consequently, the Native acceptance test MUST distinguish output/termination
+causality from a directly witnessed changed IP successor/velocity after the
+computed x at (196,7). Both are legitimate execution dependence, but only
+the first demonstrates final-output/termination dependence. The independent
+Native STEP traces for each mutant are preserved in the CI evidence artifact.
+No production promotion follows from these bounded observations.

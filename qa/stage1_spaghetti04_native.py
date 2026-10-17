@@ -126,6 +126,21 @@ for name,fields,valid,sign in CASES:
     byname[name]=c_out
     print("NATIVE_SPAGHETTI04_REFERENCE_PASS",name)
 
+def actual_vector_after_x(path):
+    """Observe actual Native post-x velocity and next executed cell."""
+    previous=False
+    with open(path,"r") as fp:
+        for line in fp:
+            parts=line.rstrip("\n").split("\t")
+            if parts[0]!="STEP":continue
+            if len(parts)!=9:raise AssertionError("Malformed PyFunge STEP in mutant")
+            x,y,dx,dy,opcode=map(int,(parts[3],parts[4],parts[5],parts[6],parts[7]))
+            if previous:
+                return {"next_cell":[x,y],"velocity":[dx,dy]}
+            if (x,y)==(196,7) and opcode==ord("x"):
+                previous=True
+    raise AssertionError("No observed Native post-x motion witness: "+path)
+
 mutations=[]
 for label,case,x,y,replacement in MUTATIONS:
     raw=candidate.splitlines(True)
@@ -138,17 +153,30 @@ for label,case,x,y,replacement in MUTATIONS:
     file.close()
     try:
         inp=next(fields for n,fields,valid,sign in CASES if n==case)
-        rc,result,err=run(path,inp,limit=12)
+        trace="/work/spaghetti04_native_mut_"+label+".tsv"
+        rc,result,err=run(path,inp,trace=trace,limit=12)
         changed=bool(rc!=0 or result!=byname[case])
+        control_velocity=None
+        altered_velocity=None
+        route_causal=False
+        if not changed:
+            control_trace="/work/spaghetti04_native_"+case+".tsv"
+            control_velocity=actual_vector_after_x(control_trace)
+            altered_velocity=actual_vector_after_x(trace)
+            route_causal=control_velocity!=altered_velocity
         mutations.append({"label":label,"case":case,
               "coordinate":[x,y],"source_opcode":original,"replacement":replacement,
-              "exit_code":rc,"changed_outcome":changed})
-        need(changed,"The Native mutation was numerically/execution-inert: "+label)
-        print("NATIVE_SPAGHETTI04_ARM_MUTATION_CAUSAL",label,rc)
+              "exit_code":rc,"changed_final_or_termination":changed,
+              "changed_native_motion":route_causal,
+              "control_motion":control_velocity,"mutant_motion":altered_velocity})
+        need(changed or route_causal,
+             "Native mutation changed neither final outcome nor IP motion: "+label)
+        print("NATIVE_SPAGHETTI04_ARM_MUTATION_CAUSAL",label,rc,
+              "final",changed,"route",route_causal)
     finally:os.unlink(path)
 
 with open("/work/spaghetti04_native_receipt.json","w") as outfile:
-    json.dump({"schema":"befunge-spaghetti04-real-native-input-fork-v1",
+    json.dump({"schema":"befunge-spaghetti04-real-native-input-fork-v2",
         "production_modified":False,"candidate_promoted":False,
         "stage1_complete":False,"new_source_cells":len(changes),
         "observations":rows,"negative_controls":mutations},
