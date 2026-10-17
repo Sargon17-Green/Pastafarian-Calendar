@@ -65,16 +65,16 @@ To check invalid zero gate indices:
   Put "0" into the sample gate magnitude.
   Set the sample gate index from the sample gate magnitude given -1.
   Put 999 into the gate inquiry's interval length.
-  Calculate a gate interval for the sample gate index.
+  Calculate extended gate spacing for the sample gate index.
   If the gate inquiry's interval length is not 0,
     put "A signed-wide gate index zero was treated as a gap." into the check report; exit.
-  Calculate a gate interval given 0.
+  Calculate native gate spacing given 0.
   If the gate inquiry's interval length is not 0,
     put "A native gate index zero was treated as a gap." into the check report; exit.
-  Calculate a gate interval given 400000001.
+  Calculate native gate spacing given 400000001.
   If the gate inquiry's interval length is not 0,
     put "An unsafe positive native gate index was accepted." into the check report; exit.
-  Calculate a gate interval given -400000001.
+  Calculate native gate spacing given -400000001.
   If the gate inquiry's interval length is not 0,
     put "An unsafe negative native gate index was accepted." into the check report; exit.
 
@@ -83,13 +83,13 @@ To check invalid zero gate indices:
 To check wide gate interval positive one:
   Put "1" into the sample gate magnitude.
   Set the sample gate index from the sample gate magnitude given 1.
-  Calculate a gate interval for the sample gate index.
+  Calculate extended gate spacing for the sample gate index.
   If the gate inquiry's interval length is not 345,
     put "The complete wide positive gate interval should be 345." into the check report; exit.
 
 To check wide gate interval negative one:
   Put "1" into the sample gate magnitude.
   Set the sample gate index from the sample gate magnitude given -1.
-  Calculate a gate interval for the sample gate index.
+  Calculate extended gate spacing for the sample gate index.
   If the gate inquiry's interval length is not 503,
     put "The complete wide negative gate interval should be 503." into the check report; exit.
