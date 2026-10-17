@@ -40,32 +40,32 @@ The hiddenTriple is a wide quantity.
 \ Each CAL conversion to a string defines an implicit local named "string".
 \ Keep exactly one conversion per routine to prevent local-name collisions.
 \ The five assignments remain in their original order with unchanged values.
-To copy the calculation count into the sauce input:
+To copy the calculation count into the sauce input given a calendar question:
   Convert the calendar question's calculation count to a string.
   Put the string into the sauce input's calculation count.
 
-To copy the requested count into the sauce input:
+To copy the requested count into the sauce input given a calendar question:
   Convert the calendar question's requested count to a string.
   Put the string into the sauce input's requested count.
 
-To copy the distance count into the sauce input:
+To copy the distance count into the sauce input given a calendar question:
   Convert the calendar question's day distance to a string.
   Put the string into the sauce input's distance count.
 
-To copy the sum count into the sauce input:
+To copy the sum count into the sauce input given a calendar question:
   Convert the calendar question's day sum to a string.
   Put the string into the sauce input's sum count.
 
-To copy the direction count into the sauce input:
+To copy the direction count into the sauce input given a calendar question:
   Convert the calendar question's day direction to a string.
   Put the string into the sauce input's direction count.
 
 To copy a calendar question into the sauce input:
-  Copy the calculation count into the sauce input.
-  Copy the requested count into the sauce input.
-  Copy the distance count into the sauce input.
-  Copy the sum count into the sauce input.
-  Copy the direction count into the sauce input.
+  Copy the calculation count into the sauce input given the calendar question.
+  Copy the requested count into the sauce input given the calendar question.
+  Copy the distance count into the sauce input given the calendar question.
+  Copy the sum count into the sauce input given the calendar question.
+  Copy the direction count into the sauce input given the calendar question.
 
 \ Before the grinding, take the five stones at the same index k.
 \ The four coefficients are 2k+1, 3k+1, 4k+2, and 4k+4.
