@@ -39,7 +39,7 @@ To calculate native gate spacing given a number:
 To select the sealed gate interval:
   Put 1 into the seal inquiry's bowl identity.
   Put 1 into the seal inquiry's seal number.
-  Begin a seal inquiry.
+  Begin the seal inquiry.
   Put "922" into the gateoptions.
   Determine canonical equal selection given the gateoptions.
   Convert the seal inquiry's selected quantity to a chosen interval number.
