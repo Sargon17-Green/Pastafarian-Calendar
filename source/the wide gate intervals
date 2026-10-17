@@ -17,7 +17,7 @@
 \ decimal text, never a native calendar-day number.
 The wgfoundationdigits is a wide quantity.
 
-To prepare a wide gate sauce question given a wide signed day:
+To prepare wide gate sauce counters given a wide signed day:
   Put "15055671" into the wgfoundationdigits.
   Set the wide calendar example's calculation day from the wgfoundationdigits given -1.
   Put the wide calendar example's calculation day into the wide calendar example's requested day.
@@ -31,7 +31,7 @@ To calculate extended gate spacing for a wide signed day:
   Put 0 into the gate inquiry's signed index.
   Put 0 into the gate inquiry's interval length.
   If the wide signed day's polarity is 0, exit.
-  Prepare a wide gate sauce question given the wide signed day.
+  Prepare wide gate sauce counters given the wide signed day.
   Copy the wide calendar example into the sauce input.
   Make the complete sauce.
   Select the sealed gate interval.
