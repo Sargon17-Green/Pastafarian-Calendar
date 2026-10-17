@@ -64,9 +64,9 @@ try:
                 causal[name]+=int(changed)
                 negatives[name]={"changed_final_or_termination":changed,"rc":mrc}
         evidence.append({"input":inp,"valid":inp in VALID,"output":out,"negative_controls":negatives})
-        print("NATIVE_SPAGHETTI02_SAMPLE",inp,negatives,flush=True)
+        print("NATIVE_SPAGHETTI02_SAMPLE",inp,negatives)
     assert all(count>=2 for count in causal.values()),"INSUFFICIENT_NATIVE_CAUSALITY "+repr(causal)
-    print("NATIVE_SPAGHETTI02_CASCADE_PASS",causal,flush=True)
+    print("NATIVE_SPAGHETTI02_CASCADE_PASS",causal)
 finally:
     with open("/work/spaghetti02_native_receipt.json","w") as f:
         json.dump({"schema":"spaghetti02-cascade-native-v1",
