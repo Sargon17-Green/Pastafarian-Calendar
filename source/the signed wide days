@@ -65,10 +65,14 @@ To compare a wide signed day with another wide signed day:
     put 1 into the signed day precedence result; exit.
   If the wide signed day's polarity is greater than the other's polarity, exit.
   If the wide signed day's polarity is 0, exit.
-  If the wide signed day's polarity is 1,
-    if the wide signed day's absolute quantity is numerically smaller than the other's absolute quantity,
-      put 1 into the signed day precedence result;
-    exit.
+  \ The smaller magnitude precedes for positive signed days, and the
+  \ larger magnitude precedes for negative signed days. CAL-4018 forbids
+  \ nested If statements, so do the positive comparison before the sign
+  \ guard, then replace its result with the negative ordering when needed.
+  If the wide signed day's absolute quantity is numerically smaller than the other's absolute quantity,
+    put 1 into the signed day precedence result.
+  If the wide signed day's polarity is 1, exit.
+  Put 0 into the signed day precedence result.
   If the other's absolute quantity is numerically smaller than the wide signed day's absolute quantity,
     put 1 into the signed day precedence result.
 
