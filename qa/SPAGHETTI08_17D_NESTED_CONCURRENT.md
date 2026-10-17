@@ -123,3 +123,54 @@ worker stack code, QA07 source and 2D production source are unchanged.
 A dedicated `poll_east_return_suppressed` mutant restores `0` to
 require RED under native Funge++; no PASS is claimed pending exact-head
 verification. All original failed attempts remain retained.
+
+## Final QA08 Native acceptance — 17 October 2026
+
+**Accepted source SHA:** `4ba6902de08cf9483374f43a33f1d4ae7a14e3f6`
+(`qa/spaghetti08_17d_concurrent_stack_residue.beq`).
+**Code-and-harness HEAD:** `2c721032f99e30375b2cb10506502abeed15ff3e`.
+**Authoritative green workflow:** [Native run 39040932851](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39040932851);
+Native job 117420124892, artifact
+[12103649404](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39040932851/artifacts/12103649404).
+The exact pinned Funge++ commit, fresh QA06 and QA07 Native receipts and final
+QA08 Native test all passed in one job. Other Native regression workflows
+are tracked separately; green QA08 is not a Stage 1 completion claim.
+
+The original semaphore bug was **parent control-flow**, not shared-memory
+writes. The worker successfully wrote physical (10001,0,...,0)=31 then
+(10000,0,...,0)=62. Initially the parent saw the stale value 35, traveled
+west on its y=1 retry lane, and returned north to (1,0). The original
+instruction there was `0`, which left the IP heading north and thus
+prevented it from rereading the flag. The one-byte `0 → >` patch at (1,0)
+restored eastward travel on every retry. The subsequent `a*` multiplication
+uses Befunge's defined empty-stack pop of zero, preserving the decimal
+address computation.
+
+Native green receipts establish **both** seeds 1 and 2; in each case the
+worker-generated residue is 31, all 16 axis numbers 1..16 are output,
+all 48 dynamically emitted opcode bytes agree with the expected dialect,
+and the seed-dependent final checksum matches. Both independent masking
+runs successfully replace every one of the 48 source `@` cells with
+`q`, without changing the result, because native `p` overwrites them
+before native execution.
+
+All **23 counterfactual mutants** succeeded as negative controls:
+7 fork/poll/stack/`u`/worker causality probes and 16 independent
+dimension-contribution probes. Of these, 22 encountered bounded
+3-second nontermination (rc=124); the dimension-4 mutant exited normally
+with incorrect output. They demonstrate a changed termination or output
+in the tested cases, not that every mutant terminates differently.
+
+Historical RED workflows
+[39037198820](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39037198820)
+and [39038284468](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39038284468)
+remain preserved. Isolated forensics
+[39040932810](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39040932810)
+also reproduce a successful full worker/parent rendezvous, with real
+physical g observations 35 → 35 → 62 and readback 31/62.
+
+**Scope boundary:** this is a 17-dimensional, cooperative-scheduler
+Funge++ QA sidecar. It does not test every possible OS-thread scheduling,
+does not implement the calendar's entire canonical 2D arithmetic in 17D,
+does not promote QA code into production, and does not close Stage 1.
+Only QA08/12 has passed here; QA09/12 through QA12/12 remain open.
