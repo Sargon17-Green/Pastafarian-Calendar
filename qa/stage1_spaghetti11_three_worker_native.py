@@ -4,7 +4,7 @@ import hashlib,json,subprocess,tempfile
 from pathlib import Path
 SRC=Path("qa/spaghetti11_17d_three_worker_cascade.beq")
 MANIFEST=Path("qa/SPAGHETTI11_THREE_WORKER_MANIFEST.json")
-SOURCE_SHA="64a8cc2c4dcb0c150e970f9f84a6cc715e10614c"
+SOURCE_SHA="990d8fb2b84c7ee728634bb93a8e7baaef992c40"
 ENGINE="third_party/funge-plus-plus/bin/funge"
 def gitblob(data):
     return hashlib.sha1(("blob %d\0"%len(data)).encode()+data).hexdigest()
@@ -44,9 +44,9 @@ def main():
                 receipts["positive"].append({"mode":mode,"seed":seed,"repeat":trial,"out":[31,33,32]})
                 print("QA11_NATIVE_THIRD_WORKER_CROSS_SHARD_PASS",mode,seed,trial,flush=True)
     # Physical fork suppression, no third flag can be produced.
-    absent=patch(data,"Lines 1,Origin 232:-2,","t",">")
+    absent=patch(data,"Lines 1,Origin 233:-2,","t",">")
     # Directly damage the actual third worker's 17D g from worker B.
-    c_header="Lines 1,Origin %d:-2,"%m["workerC_start_x"]
+    c_header="Lines 1,Origin %d:-2,"%m["third_worker_start_x"]
     broken_read=patch(data,c_header,"/2+g","/2+z")
     # Wrong physical flag/ready marker, coordinator cannot pass gate.
     poll_header="Lines 1,Origin 233:-2,"

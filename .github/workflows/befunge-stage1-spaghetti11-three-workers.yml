@@ -25,7 +25,7 @@ jobs:
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
           test "$(git hash-object qa/spaghetti10_17d_dual_worker_macro_candidate.beq)" = "010efd012ae52a60740aa97750b5a02519912e92"
-          test "$(git hash-object qa/spaghetti11_17d_three_worker_cascade.beq)" = "64a8cc2c4dcb0c150e970f9f84a6cc715e10614c"
+          test "$(git hash-object qa/spaghetti11_17d_three_worker_cascade.beq)" = "990d8fb2b84c7ee728634bb93a8e7baaef992c40"
           test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
       - name: Build pinned Funge++ engine with temporary Native scheduler fix
         shell: bash

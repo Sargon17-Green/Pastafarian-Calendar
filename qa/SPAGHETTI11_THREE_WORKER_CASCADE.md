@@ -50,3 +50,11 @@ Never mark QA11/12 overall PASS on QA11A alone.
 
 Historical QA10 successful receipt: [39069333028](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39069333028).
 QA10 remains immutable and Stage1 OPEN; Stage2 not started.
+
+## Second candidate: actual directional fork and self-skip trampoline
+
+The first Native QA11A candidate (source blob `64a8cc2c4dcb0c150e970f9f84a6cc715e10614c`) **failed** its first healthy cooperative run at [39076167637](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39076167637) with rc124. The defect is geometrical: replacing the original `>` at (232,-2) directly with `t` forked while the parent IP was still moving **south**, not east. The new child did not enter its intended third-worker code. Historical RED is preserved.
+
+The revised BeQunge source is `990d8fb2b84c7ee728634bb93a8e7baaef992c40`. It preserves the existing physical `>` at (232,-2), so the main IP first turns east. At x233 it dynamically computes the number 11 on the stack; at x242 it executes a genuine Befunge trampoline `#` that skips the `j` cell at x243; at x244 it executes **the actual `t` fork**. Parent C's own stack is explicitly popped with `$` at x245 before the coordinator polls readiness from x246.
+
+The cloned child goes west from x244 into x243, where `j` **is** executed, popping 11 and jumping from x243 to x231. This skips both its spawn setup and the original `>` at x232 and enters its independent physical third-worker program stored backward across x67–x231 at y=-2. Worker C must still read the physically written residues of both historical workers A and B, produce residue 32, write flag70 only afterward, and permit the coordinator's new third semaphore to turn north into the dedicated output lane. The 17D geometry is exact and collision-free. This route is not a mere static output trick: a parent and child execute different instruction histories despite sharing their initial stack content. Nevertheless, full Native validation must pass before a PASS label is assigned.
