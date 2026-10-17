@@ -76,11 +76,14 @@ To evaluate extended year containment given a wide year candidate and a wide sig
   If the signed day precedence result is 1,
     put 1 into the extended year containment result.
 
+\ CAL-4018 maps the second 'another wide year candidate' formal to
+\ the nickname 'other'; use 'the other's fields in conditions so the
+\ type words are not parsed as an additional operand.
 To evaluate extended year ordering given a wide year candidate and another wide year candidate:
   Put 0 into the extended year ordering result.
-  If the wide year candidate's year length is numerically smaller than the other wide year candidate's year length,
+  If the wide year candidate's year length is numerically smaller than the other's year length,
     put 1 into the extended year ordering result; exit.
-  If the other wide year candidate's year length is numerically smaller than the wide year candidate's year length, exit.
-  Compare the wide year candidate's opening day with the other wide year candidate's opening day.
+  If the other's year length is numerically smaller than the wide year candidate's year length, exit.
+  Compare the wide year candidate's opening day with the other's opening day.
   If the signed day precedence result is 1,
     put 1 into the extended year ordering result.
