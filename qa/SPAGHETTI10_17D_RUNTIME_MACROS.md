@@ -85,3 +85,22 @@ maximal complexity. This round demonstrably increases causal and
 physical self-modification, but is still a QA sidecar and not a full
 seventeen-dimensional implementation of the canonical Pastafarian
 calendar algorithm.
+
+## Historical first Native RED and reason for separate motion forensics
+
+The first exact-head [Native QA10 run 39065096851](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39065096851) passed the QA06→QA09 Native parent chain, including both worker shards, before QA10 seed1 exceeded its first 25-second bound (`rc=124`). Its captured stdout had zero **flushed** bytes, which does not distinguish slow runtime from invalid IP travel. It therefore remains a **historical RED**, not a QA10 pass.
+
+The additional independent source generator `qa/stage1_spaghetti10_build.py`
+verifies bit-for-bit reproducibility of the full 17D specimen SHA and
+every 13-cell hyperplane target from the SHA-pinned QA09A fixture.
+This rules out nonreproducible geometry, but does not execute Funge.
+
+The minimal isolated Native IP-motion forensics source is
+`qa/stage1_spaghetti10_ip_forensics.py`, run under an instrumented
+**disposable copy** of the pinned Funge++ engine. It executes six
+physical stage-stop fixtures as well as the complete program with a
+longer bound, records `Z`, `@` and periodic IP positions, and
+differentiates source arithmetic errors, control-flow mistakes and
+large-performance costs. Diagnostic engine instrumentation is not
+a modification to the Pastafarian Calendar production source and
+does not count toward QA10 acceptance.

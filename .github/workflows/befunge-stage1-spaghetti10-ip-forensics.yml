@@ -1,0 +1,51 @@
+name: Befunge QA10 Native 17D IP Motion Forensics
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa10-native-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Pin native original source and trace runner motion (no QA source editing)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/spaghetti10_17d_dual_worker_macro_candidate.beq)" = "010efd012ae52a60740aa97750b5a02519912e92"
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("third_party/funge-plus-plus/src/FungeRunner.cpp")
+          s=p.read_text()
+          old="inst_t i = ip.get();"
+          new='inst_t i = ip.get(); static unsigned long long qa10_ticks=0; static unsigned qa10_events=0; ++qa10_ticks; if ((i==\'Z\' || i==\'@\') && qa10_events++<80 || qa10_ticks%200000==0) { std::cerr << "QA10_ENGINE_TRACE steps=" << qa10_ticks << " id=" << id << " pos=" << ip.getPos() << " delta=" << ip.getDelta() << " opcode=" << (int)i << std::endl; }'
+          assert s.count(old)==1
+          p.write_text(s.replace(old,new))
+          PY
+          make -C third_party/funge-plus-plus funge
+      - name: Native bounded stage-boundary and full-program motion probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti10_ip_forensics.py
+          python3 qa/stage1_spaghetti10_ip_forensics.py
+      - name: Retain original and mutated runner evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti10-native-first-red-ip-evidence
+          path: spaghetti10_native_ip_forensics.json
+          if-no-files-found: warn
