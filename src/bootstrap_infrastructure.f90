@@ -77,6 +77,7 @@ contains
     class(BaseErrorWrapper), intent(in) :: self
     type(BaseMonsterContext), intent(inout) :: ctx
     character(len=*), intent(in) :: text
+    if (ctx%diagnosticCount < 0) error stop 'bootstrap diagnostic count is invalid'
     if (ctx%diagnosticCount >= MAX_DIAGNOSTICS) error stop 'bootstrap diagnostic capacity exceeded'
     ctx%diagnosticCount = ctx%diagnosticCount + 1
     ctx%diagnostics(ctx%diagnosticCount) = text
