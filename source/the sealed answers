@@ -17,6 +17,17 @@ A seal inquiry has
 
 The seal inquiry is a seal inquiry.
 
+\ Unambiguous scratch operands are declared once and shared by CAL procedures.
+The sealposition is a number.
+The sealidentity is a number.
+The sealsum is a wide quantity.
+The sealresult is a wide quantity.
+The sealfollowing is a wide quantity.
+The sealweighted is a wide quantity.
+The sealtwo is a wide quantity.
+The sealone is a wide quantity.
+The sealremainder is a wide quantity.
+
 \ Read the completed bowl Q[B] by its fixed identity.
 To read the finished bowl given a number into a wide quantity:
   If the number is 1, put the current bowls' first bowl into the wide quantity; exit.
@@ -38,54 +49,54 @@ To read the remembered identity given a number into another number:
 \ Find the bowl immediately after B in the original circular order.
 \ This routine never reads the current working mixing order.
 To find the following fixed bowl:
-  Put 1 into an order position number.
+  Put 1 into the sealposition.
   Loop.
-    If the order position number is greater than 6, break.
-    Read the remembered identity given the order position number into an identity number.
-    If the identity number is the seal inquiry's bowl identity, break.
-    Add 1 to the order position number.
+    If the sealposition is greater than 6, break.
+    Read the remembered identity given the sealposition into the sealidentity.
+    If the sealidentity is the seal inquiry's bowl identity, break.
+    Add 1 to the sealposition.
   Repeat.
-  Add 1 to the order position number.
-  If the order position number is greater than 6, put 1 into the order position number.
-  Read the remembered identity given the order position number into an identity number.
-  Put the identity number into the seal inquiry's following identity.
+  Add 1 to the sealposition.
+  If the sealposition is greater than 6, put 1 into the sealposition.
+  Read the remembered identity given the sealposition into the sealidentity.
+  Put the sealidentity into the seal inquiry's following identity.
 
 \ A0=SAVE((Q[B]+z+181)^2+179*Q[next]+z).
 To calculate the first sealed answer:
   Find the following fixed bowl.
-  Read the finished bowl given the seal inquiry's bowl identity into a sum wide quantity.
-  Add the seal inquiry's seal number to the sum wide quantity.
-  Add 181 to the sum wide quantity.
-  Put the sum wide quantity into a result wide quantity.
-  Multiply the sum wide quantity by the result wide quantity.
-  Read the finished bowl given the seal inquiry's following identity into a following wide quantity.
-  Multiply the following wide quantity by 179.
-  Add the following wide quantity to the result wide quantity.
-  Add the seal inquiry's seal number to the result wide quantity.
-  Keep the result wide quantity for the sauce.
-  Put the result wide quantity into the seal inquiry's starting answer.
-  Put the result wide quantity into the seal inquiry's current answer.
+  Read the finished bowl given the seal inquiry's bowl identity into the sealsum.
+  Add the seal inquiry's seal number to the sealsum.
+  Add 181 to the sealsum.
+  Put the sealsum into the sealresult.
+  Multiply the sealsum by the sealresult.
+  Read the finished bowl given the seal inquiry's following identity into the sealfollowing.
+  Multiply the sealfollowing by 179.
+  Add the sealfollowing to the sealresult.
+  Add the seal inquiry's seal number to the sealresult.
+  Keep the sealresult for the sauce.
+  Put the sealresult into the seal inquiry's starting answer.
+  Put the sealresult into the seal inquiry's current answer.
 
 \ D=SAVE((A0+z+194)^2+193*A0+197*Q[6]).
 \ An odd D moves forwards; an even D moves backwards.
 To choose the sealed answer direction:
-  Put the seal inquiry's starting answer into a sum wide quantity.
-  Add the seal inquiry's seal number to the sum wide quantity.
-  Add 194 to the sum wide quantity.
-  Put the sum wide quantity into a result wide quantity.
-  Multiply the sum wide quantity by the result wide quantity.
-  Put the seal inquiry's starting answer into a weighted wide quantity.
-  Multiply the weighted wide quantity by 193.
-  Add the weighted wide quantity to the result wide quantity.
-  Put the current bowls' sixth bowl into the weighted wide quantity.
-  Multiply the weighted wide quantity by 197.
-  Add the weighted wide quantity to the result wide quantity.
-  Keep the result wide quantity for the sauce.
-  Put the result wide quantity into the seal inquiry's direction answer.
-  Put "2" into a two wide quantity.
-  Calculate decimal remainder given the result wide quantity and the two wide quantity.
+  Put the seal inquiry's starting answer into the sealsum.
+  Add the seal inquiry's seal number to the sealsum.
+  Add 194 to the sealsum.
+  Put the sealsum into the sealresult.
+  Multiply the sealsum by the sealresult.
+  Put the seal inquiry's starting answer into the sealweighted.
+  Multiply the sealweighted by 193.
+  Add the sealweighted to the sealresult.
+  Put the current bowls' sixth bowl into the sealweighted.
+  Multiply the sealweighted by 197.
+  Add the sealweighted to the sealresult.
+  Keep the sealresult for the sauce.
+  Put the sealresult into the seal inquiry's direction answer.
+  Put "2" into the sealtwo.
+  Calculate decimal remainder given the sealresult and the sealtwo.
   Put -1 into the seal inquiry's answer direction.
-  If the result wide quantity is "1", put 1 into the seal inquiry's answer direction.
+  If the sealresult is "1", put 1 into the seal inquiry's answer direction.
 
 \ Set a bowl identity from 1 to 6 and a nonnegative seal number first.
 To begin a seal inquiry:
@@ -97,16 +108,16 @@ To begin a seal inquiry:
 To step the sealed answer:
   If the seal inquiry's answer direction is 1,
     add 1 to the seal inquiry's current answer; keep the seal inquiry's current answer for the sauce; exit.
-  Put "1" into a one wide quantity.
-  Subtract the one wide quantity from the seal inquiry's current answer with sauce wrapping.
+  Put "1" into the sealone.
+  Subtract the sealone from the seal inquiry's current answer with sauce wrapping.
 
 \ A narrow choice has N in the inclusive interval 1..M.
 \ The acceptance ceiling is L=M-(M mod N).
 To prepare narrow choice given a wide quantity:
   Put "170141183460469231731687303715884105727" into the seal inquiry's acceptance ceiling.
-  Put the seal inquiry's acceptance ceiling into a remainder wide quantity.
-  Calculate decimal remainder given the remainder wide quantity and the wide quantity.
-  Subtract the remainder wide quantity from the seal inquiry's acceptance ceiling.
+  Put the seal inquiry's acceptance ceiling into the sealremainder.
+  Calculate decimal remainder given the sealremainder and the wide quantity.
+  Subtract the sealremainder from the seal inquiry's acceptance ceiling.
 
 \ Rejected answers are a single contiguous interval (L, M].
 \ If A0 falls there, a forward walk first accepts at 1, while a
@@ -119,12 +130,12 @@ To choose narrow quantity values from a wide quantity:
   Prepare narrow choice given the wide quantity.
   If the seal inquiry's acceptance ceiling is numerically smaller than the seal inquiry's current answer,
     skip the rejected sealed answers.
-  Put "1" into a one wide quantity.
-  Put the seal inquiry's current answer into a result wide quantity.
-  Subtract the one wide quantity from the result wide quantity.
-  Calculate decimal remainder given the result wide quantity and the wide quantity.
-  Add 1 to the result wide quantity.
-  Put the result wide quantity into the seal inquiry's selected quantity.
+  Put "1" into the sealone.
+  Put the seal inquiry's current answer into the sealresult.
+  Subtract the sealone from the sealresult.
+  Calculate decimal remainder given the sealresult and the wide quantity.
+  Add 1 to the sealresult.
+  Put the sealresult into the seal inquiry's selected quantity.
 
 To skip the rejected sealed answers:
   If the seal inquiry's answer direction is 1,
