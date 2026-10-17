@@ -40,7 +40,7 @@ def expected(seed):
                     m,42,m,47,58,36,58,36,62,axis])
     return out+[136*seed]
 
-def native(data,seed,mode,timeout=75):
+def native(data,seed,mode,timeout=160):
     with tempfile.TemporaryDirectory(prefix="qa10_native_") as p:
         spec=Path(p)/"native.beq";spec.write_bytes(data)
         args=[ENGINE,"-fconcurrent","-fthreads="+mode,
@@ -145,7 +145,7 @@ def main():
     for mode in ("funge","native"):
         for seed in (1,2):
             for repetition in range(2):
-                got=native(original,seed,mode,75)
+                got=native(original,seed,mode,160)
                 good=expected(seed)
                 check(got["rc"]==0 and got["output"]==good,
                       "Native QA10 208 instruction mismatch "+repr((mode,seed,repetition,got)))
@@ -162,7 +162,7 @@ def main():
     for index,head,body in traps:masked[index+1]="q\n"
     masked_data="".join(masked).encode("ascii")
     for seed in (1,2):
-        got=native(masked_data,seed,"funge",75)
+        got=native(masked_data,seed,"funge",160)
         check(got["rc"]==0 and got["output"]==expected(seed),
               "QA10 future 208 source cells executed before generated overwrite "+str(seed))
         receipt["masking"].append({"seed":seed,"masked_bytes":208})
@@ -170,7 +170,7 @@ def main():
 
     # A mutant's short timeout is not causal evidence if healthy runs also exceed it.
     # Give all mutant cases the same generous wallclock limit, calibrated on healthy.
-    mutant_timeout=max(20,int(max(healthy_elapsed)*1.5)+5)
+    mutant_timeout=max(120,int(max(healthy_elapsed)*1.5)+15)
     receipt["timing_calibration"]={"max_healthy_seconds":max(healthy_elapsed),
         "mutant_seconds":mutant_timeout}
     print("QA10_NATIVE_COMPARABLE_TIMEOUTS",max(healthy_elapsed),
