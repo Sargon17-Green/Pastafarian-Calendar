@@ -71,3 +71,17 @@ executable content**, not cryptographic uncomputability.
 
 No Native PASS is asserted until the exact-head workflow succeeds.
 Historical red attempts are retained for diagnosis.
+
+## Native investigation: first-stage falsification (preserved)
+
+Exact-head run 39033038919 (`f0717684`) proved four complete native
+program constructions, two dialects (48,36,60) and (58,36,60), and
+independent numeric parity across four valid and two invalid inputs.
+Two branch-history corruption mutants caused bounded timeouts. The run
+then failed on the `historical_gate1_read_removed` mutant because the old
+acceptance rule expected altered final output or timeout. That is logically
+insufficient: the runtime assembler can emit the *other equivalent dialect*
+without changing the numeric output. The revised test now traces these
+cases, compares the actual three emitted instruction bytes, and separately
+reports a bytecode change and any output or termination change. The
+original failed run is retained and is NOT called PASS.
