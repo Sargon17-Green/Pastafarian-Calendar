@@ -1,0 +1,48 @@
+name: Befunge QA09 Native Two Worker Fork Rendezvous
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa09-fork-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Pin QA08, Native two-worker specimen and Funge++ engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "4ba6902de08cf9483374f43a33f1d4ae7a14e3f6"
+          test "$(git hash-object qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq)" = "0bedcd5a7ed1207a836850fdcd91faeeae0ee901"
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+      - name: Build Native 17D Funge++ engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C third_party/funge-plus-plus funge
+          test "$(timeout 12 third_party/funge-plus-plus/bin/funge third_party/funge-plus-plus/test/example5d.beq)" = "Hello World"
+      - name: Native repeated fork and disjoint worker sabotage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti09_fork_native.py
+          python3 qa/stage1_spaghetti09_fork_native.py
+      - name: Preserve native evidence on PASS and FAIL
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti09-native-two-fork-smoke-evidence
+          path: spaghetti09_fork_native_receipt.json
+          if-no-files-found: warn
