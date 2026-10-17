@@ -26,7 +26,7 @@ To check the two-month closed weaving counts:
   Find the woven month state given 1.
   Put 3 into the examined woven month state's remaining days.
   Put 7 into the weaving selection's days remaining.
-  Count weaving completions into a weaveshortcheck.
+  Count weaving completions into the weaveshortcheck.
   If the weaveshortcheck is not "20",
     put "The first started month has an incorrect closed count." into the check report; exit.
   Find the woven month state given 2.
@@ -53,7 +53,7 @@ To check the two-month closed weaving counts:
     put "Closed two-month cases used the sparse memo unnecessarily." into the check report; exit.
 
 To set the first three woven remaining counts to two:
-  Put 1 into a weavecheckedordinal.
+  Put 1 into the weavecheckedordinal.
   Loop.
     If the weavecheckedordinal is greater than 3, break.
     Find the woven month state given the weavecheckedordinal.
@@ -66,7 +66,7 @@ To check the all-started weaving product:
   Count all possible month weavings.
   Set the first three woven remaining counts to two.
   Put 6 into the weaving selection's days remaining.
-  Count weaving completions into a weavestartedcheck.
+  Count weaving completions into the weavestartedcheck.
   If the weavestartedcheck is not "15",
     put "Three started months with two days each have an incorrect product." into the check report; exit.
   Find the woven month state given 3.
@@ -94,14 +94,14 @@ To check the all-started weaving product:
 To check forty seven month started suffixes:
   Destroy the chosen month lengths.
   Put 47 into the selected month count.
-  Put 1 into a weavesyntheticnumber.
+  Put 1 into the weavesyntheticnumber.
   Loop.
     If the weavesyntheticnumber is greater than 47, break.
     Add a synthetic month with 4.
     Add 1 to the weavesyntheticnumber.
   Repeat.
   Prepare the woven month states.
-  Put the woven month states' first into a weavestressstate.
+  Put the woven month states' first into the weavestressstate.
   Loop.
     If the weavestressstate is nil, break.
     Put 2 into the weavestressstate's remaining days.
@@ -109,7 +109,7 @@ To check forty seven month started suffixes:
   Repeat.
   Put 94 into the weaving selection's days remaining.
   Put 0 into the weaving selection's resource limit reached.
-  Count weaving completions into a weavestresscheck.
+  Count weaving completions into the weavestresscheck.
   If the weavestresscheck is not "2987435000850314871976096554696085799164511452611632783323554397412109375",
     put "Forty seven started months lost precision in their final-order count." into the check report; exit.
   If the weaving selection's resource limit reached is not 0,
@@ -122,7 +122,7 @@ To check the weaving recursion depth limit:
   Prepare three synthetic months.
   Count all possible month weavings.
   Put 256 into the weaving selection's recursion depth.
-  Count weaving completions into a weaveguardedcheck.
+  Count weaving completions into the weaveguardedcheck.
   If the weaving selection's resource limit reached is not 1,
     put "Weaving depth 256 did not trigger the resource limit." into the check report; exit.
   If the weaveguardedcheck is not "0",
@@ -142,7 +142,7 @@ To check the weaving recursion depth limit:
 To check eight four-day months:
   Destroy the chosen month lengths.
   Put 8 into the selected month count.
-  Put 1 into a weavesyntheticnumber.
+  Put 1 into the weavesyntheticnumber.
   Loop.
     If the weavesyntheticnumber is greater than 8, break.
     Add a synthetic month with 4.
