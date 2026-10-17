@@ -72,4 +72,20 @@ seeded=probe[:]
 seeded.append("Lines 1,Origin 10000:0,Coord "+":".join(["0"]*15)+":")
 seeded.append(">")
 execute("\n".join(seeded)+"\n","preseeded_flag_parent_join")
+
+# Exact preallocation controls to distinguish a sparse-Funge-space error
+# from an instruction stack effect.
+allocated="Version 1,Dimensions 17\\n"
+allocated+="Lines 1,Origin 10000:0,Coord "+":".join(["0"]*15)+":\\n#&\\n"
+def with_allocation(main):
+  return main + allocated.split("\\n",1)[1]
+execute(with_allocation(fmt([(0,plain)])),"standalone_simple_with_preallocated_35_38")
+execute(with_allocation(fmt([(0,standalone)])),"standalone_nested_with_preallocated_35_38")
+execute(with_allocation(fmt([(0,addr(10001)+"g."+addr(10000)+"g.@")])),"standalone_read_preallocated_only")
+simpletrace=dec(31)+":" + addr(10001)+"p."+dec(62)+":" + addr(10000)+"p."+addr(10001)+"g."+addr(10000)+"g.@"
+execute(with_allocation(fmt([(0,simpletrace)])),"standalone_dump_before_and_after_p")
+# Native field probe at small yet *unallocated* x for comparison.
+near=dec(31)+"1"+"0"*16+"p"+"1"+"0"*16+"g.@"
+execute(fmt([(0,near)]),"small_address_17d_put_get")
+
 print("NATIVE_QA08_FORENSIC_PROBES_COMPLETE",flush=True)
