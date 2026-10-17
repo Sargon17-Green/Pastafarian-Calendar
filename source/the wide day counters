@@ -24,11 +24,18 @@ A wide calendar question has
 
 The wide calendar example is a wide calendar question.
 
+\ CAL requires the scratch values to be declared as actual types. The
+\ descriptive labels are variable names, not CAL type names.
+The foundation magnitude wide quantity is a wide quantity.
+The foundation wide signed day is a wide signed day.
+The difference wide signed day is a wide signed day.
+The relative wide signed day is a wide signed day.
+
 \ The second parameter receives the exact positive day count.
 To number a wide signed day into a wide quantity:
-  Put "15055671" into a foundation magnitude wide quantity.
-  Set a foundation wide signed day from the foundation magnitude wide quantity given -1.
-  Put the wide signed day into a difference wide signed day.
+  Put "15055671" into the foundation magnitude wide quantity.
+  Set the foundation wide signed day from the foundation magnitude wide quantity given -1.
+  Put the wide signed day into the difference wide signed day.
   Subtract the foundation wide signed day from the difference wide signed day.
   If the difference wide signed day's polarity is 0,
     put "1" into the wide quantity; exit.
@@ -42,7 +49,7 @@ To answer a wide calendar question:
   Number the wide calendar question's requested day into the wide calendar question's requested count.
   Put the wide calendar question's calculation count into the wide calendar question's day sum.
   Add the wide calendar question's requested count to the wide calendar question's day sum.
-  Put the wide calendar question's requested day into a relative wide signed day.
+  Put the wide calendar question's requested day into the relative wide signed day.
   Subtract the wide calendar question's calculation day from the relative wide signed day.
   Put the relative wide signed day's absolute quantity into the wide calendar question's day distance.
   Add 1 to the wide calendar question's day distance.
