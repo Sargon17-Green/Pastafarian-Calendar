@@ -75,10 +75,10 @@ execute("\n".join(seeded)+"\n","preseeded_flag_parent_join")
 
 # Exact preallocation controls to distinguish a sparse-Funge-space error
 # from an instruction stack effect.
-allocated="Version 1,Dimensions 17\\n"
-allocated+="Lines 1,Origin 10000:0,Coord "+":".join(["0"]*15)+":\\n#&\\n"
+allocated="Version 1,Dimensions 17\n"
+allocated+="Lines 1,Origin 10000:0,Coord "+":".join(["0"]*15)+":\n#&\n"
 def with_allocation(main):
-  return main + allocated.split("\\n",1)[1]
+  return main + allocated.split("\n",1)[1]
 execute(with_allocation(fmt([(0,plain)])),"standalone_simple_with_preallocated_35_38")
 execute(with_allocation(fmt([(0,standalone)])),"standalone_nested_with_preallocated_35_38")
 execute(with_allocation(fmt([(0,addr(10001)+"g."+addr(10000)+"g.@")])),"standalone_read_preallocated_only")
