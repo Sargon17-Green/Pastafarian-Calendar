@@ -6,6 +6,18 @@
 
 A wide quantity is a string.
 
+\ Explicitly named working values avoid ambiguity in CAL's article/type parser.
+The wqmultiplicand is a wide quantity.
+The wqproduct is a wide quantity.
+The wqpartial is a wide quantity.
+The wqremainder is a wide quantity.
+The wqlimit is a wide quantity.
+The wqdifference is a wide quantity.
+The wqwrapped is a wide quantity.
+The wqfactor is a wide quantity.
+The wqadded is a wide quantity.
+The wqweighted is a wide quantity.
+
 \ Compare lengths as named numbers, not as nested possessive expressions.
 The spanalpha is a number.
 The spanbeta is a number.
@@ -131,20 +143,20 @@ To append decimal zeroes to a wide quantity given a number:
 \ A separate helper performs the inner digit multiplication, so the
 \ compiler never needs to handle a loop inside another loop.
 To multiply a wide quantity by another string:
-  Put the wide quantity into a multiplicand wide quantity.
+  Put the wide quantity into the wqmultiplicand.
   Put the other string into a remaining string.
-  Put "0" into a product wide quantity.
+  Put "0" into the wqproduct.
   Put 0 into a position number.
   Loop.
     If the remaining string is blank, break.
     Take the last decimal digit from the remaining string into a digit number.
-    Put the multiplicand wide quantity into a partial wide quantity.
-    Scale the partial wide quantity by the digit number.
-    Append decimal zeroes to the partial wide quantity given the position number.
-    Add the partial wide quantity to the product wide quantity.
+    Put the wqmultiplicand into the wqpartial.
+    Scale the wqpartial by the digit number.
+    Append decimal zeroes to the wqpartial given the position number.
+    Add the wqpartial to the wqproduct.
     Add 1 to the position number.
   Repeat.
-  Put the product wide quantity into the other string.
+  Put the wqproduct into the other string.
   Normalize the other string.
 
 \ Keep subtracting a divisor while a partial remainder is large enough.
@@ -160,16 +172,16 @@ To remove copies of a wide quantity from another string:
 \ Precondition: divisor is positive and both numbers are normalized.
 To calculate decimal remainder given a wide quantity and another string:
   Put the wide quantity into a source string.
-  Put "0" into a remainder wide quantity.
+  Put "0" into the wqremainder.
   Slap a substring on the source string.
   Loop.
     If the substring is blank, break.
-    Append the substring's first's target to the remainder wide quantity.
-    Normalize the remainder wide quantity.
-    Remove copies of the other string from the remainder wide quantity.
+    Append the substring's first's target to the wqremainder.
+    Normalize the wqremainder.
+    Remove copies of the other string from the wqremainder.
     Add 1 to the substring's first.
   Repeat.
-  Put the remainder wide quantity into the wide quantity.
+  Put the wqremainder into the wide quantity.
   Normalize the wide quantity.
 
 
@@ -178,9 +190,9 @@ To calculate decimal remainder given a wide quantity and another string:
 \ For nonnegative input: reduce modulo M, then replace zero with M.
 \ Signed modular subtraction is a separate future requirement.
 To keep a wide quantity for the sauce:
-  Put "170141183460469231731687303715884105727" into a limit wide quantity.
-  Calculate decimal remainder given the wide quantity and the limit wide quantity.
-  If the wide quantity is "0", put the limit wide quantity into the wide quantity.
+  Put "170141183460469231731687303715884105727" into the wqlimit.
+  Calculate decimal remainder given the wide quantity and the wqlimit.
+  If the wide quantity is "0", put the wqlimit into the wide quantity.
 
 
 \ Both operands here must already be in the saved range 1..M.
@@ -196,27 +208,27 @@ To subtract a wide quantity from another string with sauce wrapping:
 \ If the second operand b is smaller than the first operand a,
 \ then SAVE(b-a) is M-(a-b), since both operands are in 1..M.
 To wrap the sauce difference given a wide quantity and another string:
-  Put the wide quantity into a difference wide quantity.
-  Subtract the other string from the difference wide quantity.
-  Put "170141183460469231731687303715884105727" into a wrapped wide quantity.
-  Subtract the difference wide quantity from the wrapped wide quantity.
-  Put the wrapped wide quantity into the other string.
+  Put the wide quantity into the wqdifference.
+  Subtract the other string from the wqdifference.
+  Put "170141183460469231731687303715884105727" into the wqwrapped.
+  Subtract the wqdifference from the wqwrapped.
+  Put the wqwrapped into the other string.
 
 
 \ These helpers accept ordinary nonnegative CAL numbers as multipliers.
 \ A wide quantity is never converted to a CAL number.
 To multiply a wide quantity by a number:
   Convert the number to a string.
-  Put the string into a factor wide quantity.
-  Multiply the factor wide quantity by the wide quantity.
+  Put the string into the wqfactor.
+  Multiply the wqfactor by the wide quantity.
 
 To add a number to a wide quantity:
   Convert the number to a string.
-  Put the string into an added wide quantity.
-  Add the added wide quantity to the wide quantity.
+  Put the string into the wqadded.
+  Add the wqadded to the wide quantity.
 
 \ Add factor times first value to the second value.
 To add a wide quantity to another string given a number:
-  Put the wide quantity into a weighted wide quantity.
-  Multiply the weighted wide quantity by the number.
-  Add the weighted wide quantity to the other string.
+  Put the wide quantity into the wqweighted.
+  Multiply the wqweighted by the number.
+  Add the wqweighted to the other string.
