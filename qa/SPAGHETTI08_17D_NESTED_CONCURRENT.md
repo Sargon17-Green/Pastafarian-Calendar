@@ -99,3 +99,6 @@ both full concurrent handshake probes time out. Thus the original
 stack/worker calculation or memory offset handling is broken; it is
 not legitimate to claim that the fork and nested stacks have passed.
 The original workflow, failure and forensic probes are retained.
+
+## Native forensic physical allocation fix
+The Native forensics run 39037831108 confirmed the worker's nested stack result 62 and actual split-IP execution, while unallocated far-address p/g readbacks failed. Preseeding the flag enabled successful parent joining and a 31/62 memory readback. This experimental iteration explicitly places two mutable source bytes at x10000 and x10001, initially # (35, not ready) and & (38, untrusted), so the child must overwrite them using p before the parent can observe ready 62. Earlier RED workflows remain. A new exact-head Native check is required before PASS.

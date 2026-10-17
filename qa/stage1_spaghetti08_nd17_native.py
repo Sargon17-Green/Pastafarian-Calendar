@@ -6,7 +6,7 @@ from pathlib import Path
 SOURCE=Path("qa/spaghetti08_17d_concurrent_stack_residue.beq")
 MANIFEST=Path("qa/SPAGHETTI08_17D_MANIFEST.json")
 PARENT_SHA="4c9bff056cb61004d37dd2d949fccf171b4ddf0f"
-SOURCE_SHA="0b49d3b4175055d365a089267cfc2450ea6d83aa"
+SOURCE_SHA="3f0d621e51f00d7bef236cec4dae020a89d543a4"
 ENGINE_SHA="cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
 RECEIPT=Path("spaghetti08_nd17_native_receipt.json")
 DIM=17
@@ -126,7 +126,7 @@ def main():
          and manifest["beq_size"]==len(raw),
          "Inconsistent 17D fork source manifest")
     _,blocks=parse_blocks(raw)
-    need(len(blocks)==71,"Expected 23 source panels and 48 source-trap sites")
+    need(len(blocks)==72,"Expected 24 source panels and 48 source-trap sites")
     seeds=prior_seeds(args.qa07_receipt)
     receipt={"schema":"qa08-native-17d-fork-nested-stacks-v1",
        "source_sha":SOURCE_SHA,"engine_sha":ENGINE_SHA,

@@ -1,7 +1,7 @@
 {
   "schema": "qa08-nd17-fork-stack-debris",
   "dimensions": 17,
-  "source_panels": 23,
+  "source_panels": 24,
   "generated_instruction_traps": 48,
   "worker_source": "0{0{0a*2+a*0+b+01-u1u1}0a*3+a*1++1}:2/0a*1+a*0+a*0+a*0+a*1+0000000000000000p0a*1+a*0+a*0+a*0+a*0+0000000000000000p@",
   "worker_len": 115,
@@ -1076,5 +1076,9 @@
   ],
   "parent07_blob": "4c9bff056cb61004d37dd2d949fccf171b4ddf0f",
   "engine": "cwesson/funge-plus-plus@cd6d7f005b4fc33b486fcc2380b35406f6125ca4",
-  "beq_size": 11295
+  "beq_size": 11358,
+  "sync_cells_preallocated": true,
+  "initial_flag": 35,
+  "initial_residue": 38,
+  "revised_from_blob": "0b49d3b4175055d365a089267cfc2450ea6d83aa"
 }

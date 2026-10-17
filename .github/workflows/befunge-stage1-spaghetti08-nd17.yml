@@ -26,7 +26,7 @@ jobs:
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
           test "$(git hash-object qa/spaghetti06_residue_compiler_candidate.b98)" = "d89c0499f9e006eb62cd5876bd297085265435d6"
           test "$(git hash-object qa/spaghetti07_17d_residue_mesh.beq)" = "4c9bff056cb61004d37dd2d949fccf171b4ddf0f"
-          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "0b49d3b4175055d365a089267cfc2450ea6d83aa"
+          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "3f0d621e51f00d7bef236cec4dae020a89d543a4"
           test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
           echo "QA08_SOURCE_HEAD $(git rev-parse HEAD)"
       - name: Build exact native Funge++ with thread/stack-of-stacks support
