@@ -70,6 +70,13 @@ The weaving selection is a weaving selection.
 The woven requested month ordinal is a number.
 The woven requested month day is a number.
 
+\ Dedicated scalar aliases preserve per-call local storage in the
+\ recursive completion accumulator. Do not replace with global scratch:
+\ nested recursion must not overwrite the caller's running sum.
+A weavesum is a wide quantity.
+A weavechild is a wide quantity.
+A weaveindex is a number.
+
 \ Read month lengths into independent state records without modifying
 \ the selected year lengths. Each list has month indices 1..m.
 To prepare the woven month states:
@@ -196,20 +203,20 @@ To resolve weaving completions into a wide quantity:
   Find a weave cached result given the saved signature string.
   If the matched weave result is not nil,
     put the matched weave result's completions into the wide quantity; exit.
-  Put "0" into a sum wide quantity.
-  Put 1 into a candidate month number.
+  Put "0" into a weavesum.
+  Put 1 into a weaveindex.
   Loop.
-    If the candidate month number is greater than the selected month count, break.
-    Count eligible candidate weaving suffix given the candidate month number into a child wide quantity.
-    Add the child wide quantity to the sum wide quantity.
-    Add 1 to the candidate month number.
+    If the weaveindex is greater than the selected month count, break.
+    Count eligible candidate weaving suffix given the weaveindex into a weavechild.
+    Add the weavechild to the weavesum.
+    Add 1 to the weaveindex.
   Repeat.
   If the weaving selection's resource limit reached is 1,
     put "0" into the wide quantity; exit.
-  Save weaving completions given the saved signature string and the sum wide quantity.
+  Save weaving completions given the saved signature string and the weavesum.
   If the weaving selection's resource limit reached is 1,
     put "0" into the wide quantity; exit.
-  Put the sum wide quantity into the wide quantity.
+  Put the weavesum into the wide quantity.
 
 \ Decrease the candidate's count, ask recursively, then restore both
 \ its remaining count and the total. Never use a pointer retained from
