@@ -50,7 +50,7 @@ def main():
     broken_read=patch(data,c_header,"/2+g","/2+z")
     # Wrong physical flag/ready marker, coordinator cannot pass gate.
     poll_header="Lines 1,Origin 233:-2,"
-    broken_flag=patch(data,poll_header,"-!|","-z|")
+    broken_flag=patch(data,poll_header,"-!|","-0|")
     for label,mut in [("no_third_fork",absent),("worker_B_dependency_broken",broken_read),
                       ("third_completion_predicate_broken",broken_flag)]:
         q=run(mut,"funge",1,8)
