@@ -18,6 +18,14 @@ A wide signed day has
 
 The signed day precedence result is a number.
 
+\ CAL-4018 normalizes the second formal parameter of every
+\ 'another wide signed day' routine to the nickname 'other'.
+\ The full phrase 'the other wide signed day' is misparsed as an
+\ [wide signed day] variable plus trailing 'wide signed day' words.
+\ All uses below therefore reference 'the other' and 'the other's fields.
+
+
+
 \ Explicitly typed scratch values avoid CAL inferring an undeclared
 \ decider/type from structured-field equality or descriptive noun phrases.
 The signed day magnitude difference is a wide quantity.
@@ -28,8 +36,8 @@ The signed day temporary value is a wide signed day.
 \ 'to put a pair into another pair' operation. Polarity is a CAL number;
 \ absolute quantity is a wide decimal string.
 To put a wide signed day into another wide signed day:
-  Put the wide signed day's polarity into the other wide signed day's polarity.
-  Put the wide signed day's absolute quantity into the other wide signed day's absolute quantity.
+  Put the wide signed day's polarity into the other's polarity.
+  Put the wide signed day's absolute quantity into the other's absolute quantity.
 
 
 The signed day comparison snapshot is a wide signed day.
@@ -53,15 +61,15 @@ To set a wide signed day from a wide quantity given a number:
 \ Within negatives the larger magnitude precedes the smaller one.
 To compare a wide signed day with another wide signed day:
   Put 0 into the signed day precedence result.
-  If the wide signed day's polarity is less than the other wide signed day's polarity,
+  If the wide signed day's polarity is less than the other's polarity,
     put 1 into the signed day precedence result; exit.
-  If the wide signed day's polarity is greater than the other wide signed day's polarity, exit.
+  If the wide signed day's polarity is greater than the other's polarity, exit.
   If the wide signed day's polarity is 0, exit.
   If the wide signed day's polarity is 1,
-    if the wide signed day's absolute quantity is numerically smaller than the other wide signed day's absolute quantity,
+    if the wide signed day's absolute quantity is numerically smaller than the other's absolute quantity,
       put 1 into the signed day precedence result;
     exit.
-  If the other wide signed day's absolute quantity is numerically smaller than the wide signed day's absolute quantity,
+  If the other's absolute quantity is numerically smaller than the wide signed day's absolute quantity,
     put 1 into the signed day precedence result.
 
 \ Compare signs before comparing magnitudes to avoid a signed overflow.
@@ -72,34 +80,34 @@ To add a wide signed day to another wide signed day:
   \ mis-parses nested fields of its 'other' parameter in an If comparison.
   \ The snapshot is not passed to mutating arithmetic and is overwritten on
   \ every call, preserving the caller-owned second operand.
-  Put the other wide signed day into the signed day comparison snapshot.
+  Put the other into the signed day comparison snapshot.
   If the wide signed day's polarity is less than the signed day comparison snapshot's polarity,
-    add opposite-signed day magnitudes given the wide signed day and the other wide signed day; exit.
+    add opposite-signed day magnitudes given the wide signed day and the other; exit.
   If the wide signed day's polarity is greater than the signed day comparison snapshot's polarity,
-    add opposite-signed day magnitudes given the wide signed day and the other wide signed day; exit.
-  Add like-signed day magnitudes given the wide signed day and the other wide signed day.
+    add opposite-signed day magnitudes given the wide signed day and the other; exit.
+  Add like-signed day magnitudes given the wide signed day and the other.
 
 To add like-signed day magnitudes given a wide signed day and another wide signed day:
-  Add the wide signed day's absolute quantity to the other wide signed day's absolute quantity.
+  Add the wide signed day's absolute quantity to the other's absolute quantity.
 
 \ Opposite signs: the larger magnitude determines the resulting sign.
 To add opposite-signed day magnitudes given a wide signed day and another wide signed day:
-  If the wide signed day's absolute quantity is numerically smaller than the other wide signed day's absolute quantity,
-    subtract the wide signed day's absolute quantity from the other wide signed day's absolute quantity; exit.
-  If the other wide signed day's absolute quantity is numerically smaller than the wide signed day's absolute quantity,
+  If the wide signed day's absolute quantity is numerically smaller than the other's absolute quantity,
+    subtract the wide signed day's absolute quantity from the other's absolute quantity; exit.
+  If the other's absolute quantity is numerically smaller than the wide signed day's absolute quantity,
     put the wide signed day's absolute quantity into the signed day magnitude difference;
-    subtract the other wide signed day's absolute quantity from the signed day magnitude difference;
-    put the signed day magnitude difference into the other wide signed day's absolute quantity;
-    put the wide signed day's polarity into the other wide signed day's polarity; exit.
+    subtract the other's absolute quantity from the signed day magnitude difference;
+    put the signed day magnitude difference into the other's absolute quantity;
+    put the wide signed day's polarity into the other's polarity; exit.
   \ Neither unsigned magnitude is smaller: both are equal, so the sum is zero.
-  Put "0" into the other wide signed day's absolute quantity.
-  Put 0 into the other wide signed day's polarity.
+  Put "0" into the other's absolute quantity.
+  Put 0 into the other's polarity.
 
 \ Subtracting x from y is adding -x to y without modifying x.
 To subtract a wide signed day from another wide signed day:
   Put the wide signed day into the signed day temporary value.
   Multiply -1 by the signed day temporary value's polarity.
-  Add the signed day temporary value to the other wide signed day.
+  Add the signed day temporary value to the other.
 
 \ Convert the signed day into plain decimal text for display/logging.
 \ The string parameter is the target; the signed day is unchanged.
