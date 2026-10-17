@@ -16,7 +16,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
-          test "$(git hash-object qa/spaghetti01_interleaved_work_counts_candidate.b98)" = "0aa8220be14be54f2580bf3d6abb3b6ea73d32c2"
+          test "$(git hash-object qa/spaghetti01_interleaved_work_counts_candidate.b98)" = "948cb9332332f6abf35274ecc4be69bbc8c79115"
           echo "SPAGHETTI01_PINNED $(git rev-parse HEAD)"
       - name: Native PyFunge independent oracle and three causal mutants
         shell: bash

@@ -1,20 +1,25 @@
-# Stage 1 spaghetti 01: unpromoted QA candidate
+# Stage 1 Spaghetti 01, Native revision 2 (QA only)
 
-Baseline source Git blob: 560d6aa5807a7f766213a33835cce85eab0fa40c
-Candidate source Git blob: 0aa8220be14be54f2580bf3d6abb3b6ea73d32c2
+Source Git blob unchanged: 560d6aa5807a7f766213a33835cce85eab0fa40c
+Candidate revision 2: 948cb9332332f6abf35274ecc4be69bbc8c79115
+Rejected revision 1, retained: 0aa8220be14be54f2580bf3d6abb3b6ea73d32c2
 
-A locked 19-cell experimental change to the lexical scanner at x11-12,y2
-replaces two source zero literals with two causally linked runtime values.
-The first is computed via Funge-space p -> g -> subtraction, the second
-via execution of an instruction written by p at (14,4) in the return lane.
-The ^ -> > path restores the original eastward direction. The original
-production src/interleaved_work_counts.b98 is unchanged.
+Why revision 1 was rejected:
+Native run 39022876561 showed exact output parity for seven inputs and
+the independent reference oracle for valid inputs, but NO effect on final
+outcome when g was suppressed or a literal was corrupted (0/5), although
+suppressing p caused bounded noncompletion (3/5). The original two-channel
+numeric-causality claim failed. Historical evidence remains unchanged.
 
-Purely bounded local micro-replay across seven initial stack configurations,
-with three targeted causal disruptions each, passed in normal and optimized
-Python. No PyFunge Native execution or whole-program oracle result has yet
-been verified for this candidate. Candidate MUST NOT be promoted on the
-strength of that small interpreter; it may collide with other scanner paths.
+Revision 2 uses the g-read value, minus ASCII48, *twice*: the original
+numeric zero remains on the stack, while ':' duplicates this quantity and
+'1x' consumes that duplicate as the horizontal velocity component with
+vertical velocity 1. The legitimate read selects vector (0,1). A wrong g
+read, missing g, or modified 48 producer produces a different vector and
+must be caught by Native route/output/termination tests. The returning west
+lane executes an opcode '0' written by p, producing the second original
+numeric zero. Source changes: 21 explicit coordinates, source map unchanged.
 
-CURRENT_STAGE=1; LAST_COMPLETED_STAGE=0;
-GEOMETRIC_SPAGHETTI_QA_PASS=NO; STAGE2_STARTED=NO.
+Native revision 2 acceptance is PENDING and must satisfy both exact output
+parity and three *causal* mutant tests. No production source promotion,
+no Stage2, no Stage1 completion and no PR merge are permitted on this note.
