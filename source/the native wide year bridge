@@ -7,20 +7,24 @@
 \ A failed field conversion leaves the adapter's success flag zero.
 \ This is not yet a wide year-discovery algorithm.
 
+\ CAL-4018 treats repeated 'a wide signed day' phrases as repeated
+\ local declarations. The adapter already publishes its output in
+\ 'the converted signed day result', so reuse that typed destination.
+
 The widened year conversion succeeded is a number.
 
 To copy a year candidate into a wide year candidate:
   Put 0 into the widened year conversion succeeded.
-  Convert the year candidate's opening day into a wide signed day.
+  Convert the year candidate's opening day into the converted signed day result.
   If the native widening succeeded is not 1, exit.
   Put the converted signed day result into the wide year candidate's opening day.
-  Convert the year candidate's closing day into a wide signed day.
+  Convert the year candidate's closing day into the converted signed day result.
   If the native widening succeeded is not 1, exit.
   Put the converted signed day result into the wide year candidate's closing day.
-  Convert the year candidate's opening index into a wide signed day.
+  Convert the year candidate's opening index into the converted signed day result.
   If the native widening succeeded is not 1, exit.
   Put the converted signed day result into the wide year candidate's opening index.
-  Convert the year candidate's closing index into a wide signed day.
+  Convert the year candidate's closing index into the converted signed day result.
   If the native widening succeeded is not 1, exit.
   Put the converted signed day result into the wide year candidate's closing index.
   Measure the wide year candidate.
