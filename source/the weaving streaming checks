@@ -46,7 +46,7 @@ To check streamed and complete weaving equality:
   Write the selected weaving as test text.
   If the woven test text is not "11112222",
     put "Alternating ranks reused stale days from a previous weaving." into the check report; exit.
-  Put "10" into the streaming test rank wide quantity.
+  Put "10" into the streamingtestrank.
   Unrank month sequence given the streamingtestrank.
   Write the selected weaving as test text.
   If the woven test text is not "11222112",
