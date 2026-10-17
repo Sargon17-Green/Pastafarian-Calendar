@@ -20,7 +20,7 @@ jobs:
           test "$(git hash-object qa/spaghetti01_interleaved_work_counts_candidate.b98)" = "948cb9332332f6abf35274ecc4be69bbc8c79115"
           test "$(git hash-object qa/spaghetti02_cascade_candidate.b98)" = "471e45cfec818d432cbb8e810204a865f8f04a97"
           test "$(git hash-object qa/spaghetti03_arithmetic_braid_candidate.b98)" = "2baa1795a9a5802f58ecbd87ac8f138a1e811066"
-          test "$(git hash-object qa/spaghetti04_input_parity_bifurcation_candidate.b98)" = "e2eb7eec5503c22c6e73fb66aa7f8b9b072c4667"
+          test "$(git hash-object qa/spaghetti04_input_parity_bifurcation_candidate.b98)" = "2120c61485ae196dc387e617d3cff69a272bc413"
           echo "SPAGHETTI04_SOURCES_PINNED $(git rev-parse HEAD)"
       - name: Native input parity, actual upper/lower routes, independent references, and arm mutations
         shell: bash

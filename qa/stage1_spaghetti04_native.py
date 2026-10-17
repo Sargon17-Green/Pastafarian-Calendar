@@ -10,7 +10,7 @@ PRODUCTION="src/interleaved_work_counts.b98"
 PARENT="qa/spaghetti03_arithmetic_braid_candidate.b98"
 CANDIDATE="qa/spaghetti04_input_parity_bifurcation_candidate.b98"
 PARENT_SHA="2baa1795a9a5802f58ecbd87ac8f138a1e811066"
-CANDIDATE_SHA="e2eb7eec5503c22c6e73fb66aa7f8b9b072c4667"
+CANDIDATE_SHA="2120c61485ae196dc387e617d3cff69a272bc413"
 COMMAND=["pyfunge","--disable-fprint","--no-concurrent","--no-filesystem","-v98","-d2"]
 CASES=[
     ("zero_equal","0 0 0 0",True,0),
@@ -21,10 +21,10 @@ CASES=[
     ("invalid_lexeme","-0 1 0 1",False,None)
 ]
 MUTATIONS=[
-    ("south_literal","zero_equal",350,8,"1"),
-    ("north_arithmetic","foundation_cross",335,5,"z"),
-    ("north_literal","foundation_cross",334,5,"1"),
-    ("south_literal_other","forward_short",350,7,"1")
+    ("south_live_vector","zero_equal",350,8,"1"),
+    ("north_computed_vector","foundation_cross",334,5,"z"),
+    ("north_input_to_vector","mixed_small",338,5,"1"),
+    ("common_velocity","forward_short",198,7,"+")
 ]
 def gitblob(data):
     return hashlib.sha1("blob %d\0%s"%(len(data),data)).hexdigest()
@@ -99,8 +99,8 @@ for y in range(len(p)):
         old=p[y][x] if x<len(p[y]) else " "
         new=c[y][x] if x<len(c[y]) else " "
         if old!=new:changes.append((x,y,old,new))
-need(len(changes)==23,"Expected 23 source-cell edits")
-need(c[5][108:110]=="v>" and c[6][350]=="|" and c[7][109]=="^"
+need(len(changes)==33,"Expected 33 source-cell edits")
+need(c[5][108:110]=="v>" and c[6][350]=="|" and c[7][109]=="^" and c[7][200]==":" and c[7][196]=="x"
      and c[5][350]=="<" and c[9][320]=="^","Route source map")
 for (x,y) in ((14,4),(63,4),(111,4)):
     need(c[y][x]==" ","Historical runtime gate source unexpectedly modified")
