@@ -22,6 +22,13 @@ The current stones are a stone row.
 The next stones are a stone row.
 The working stone formula is a stone formula.
 
+\ Scratch values have unique declared CAL names, avoiding compound variable/type ambiguity.
+The stonescale is a wide quantity.
+The stonefactortext is a string.
+The stonefactor is a wide quantity.
+The stoneindex is a string.
+The stoneposition is a number.
+
 To begin the stone sequence:
   Put "17" into the current stones' wheat.
   Put "29" into the current stones' barley.
@@ -34,11 +41,11 @@ To begin the stone sequence:
 To calculate a stone formula:
   Put the stone formula's base into the stone formula's result.
   Multiply the stone formula's base by the stone formula's result.
-  Put the stone formula's neighbor into a scaled wide quantity.
-  Convert the stone formula's factor to a factor string.
-  Put the factor string into a factor wide quantity.
-  Multiply the scaled wide quantity by the factor wide quantity.
-  Add the scaled wide quantity to the stone formula's result.
+  Put the stone formula's neighbor into the stonescale.
+  Convert the stone formula's factor to the stonefactortext.
+  Put the stonefactortext into the stonefactor.
+  Multiply the stonescale by the stonefactor.
+  Add the stonescale to the stone formula's result.
   Add the stone formula's extra to the stone formula's result.
   Keep the stone formula's result for the sauce.
 
@@ -47,10 +54,10 @@ To calculate a stone formula:
 To advance the stones given a number:
   If the number is less than 2, exit.
   If the number is greater than 46, exit.
-  Convert the number to an index string.
+  Convert the number to the stoneindex.
   Put the current stones' wheat into the working stone formula's base.
   Put the current stones' barley into the working stone formula's neighbor.
-  Put the index string into the working stone formula's extra.
+  Put the stoneindex into the working stone formula's extra.
   Put 3 into the working stone formula's factor.
   Calculate the working stone formula.
   Put the working stone formula's result into the next stones' wheat.
@@ -87,10 +94,10 @@ To advance the stones given a number:
 \ Each step uses one stone advancement, so CAL has no nested loops.
 To reach the stones for a number:
   Begin the stone sequence.
-  Put 2 into a position number.
+  Put 2 into the stoneposition.
   Loop.
-    If the position number is greater than the number, break.
-    If the position number is greater than 46, break.
-    Advance the stones given the position number.
-    Add 1 to the position number.
+    If the stoneposition is greater than the number, break.
+    If the stoneposition is greater than 46, break.
+    Advance the stones given the stoneposition.
+    Add 1 to the stoneposition.
   Repeat.
