@@ -1,0 +1,32 @@
+name: Befunge QA08 Native Concurrency Forensics
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Build pinned native engine and validate source pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "0b49d3b4175055d365a089267cfc2450ea6d83aa"
+          make -C third_party/funge-plus-plus funge
+      - name: Diagnose native worker, genuine split, and poll independently
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_spaghetti08_native_probes.py
