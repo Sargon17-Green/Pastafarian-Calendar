@@ -293,7 +293,7 @@ To choose the next woven day:
 \ original month lengths BEFORE every requested rank, even after
 \ a previous full or streaming selection. The exact memo cache may
 \ remain because the original month lengths have not changed.
-To select a weaving selection from a wide quantity:
+To unrank month sequence given a wide quantity:
   Put 0 into the weaving selection's selection success.
   Destroy the chosen woven days.
   Put 0 into the woven requested month ordinal.
@@ -322,4 +322,4 @@ To choose the canonical month weaving:
   Put 32 into the seal inquiry's seal number.
   Begin a seal inquiry.
   Determine canonical equal selection given the weaving selection's total completions.
-  Select a weaving selection from the seal inquiry's selected quantity.
+  Unrank month sequence given the seal inquiry's selected quantity.
