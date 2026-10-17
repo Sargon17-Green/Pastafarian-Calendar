@@ -29,8 +29,12 @@ A short weaving suffix has
 The short weaving suffix is a short weaving suffix.
 The short month state is a woven month state.
 
+\ Typed small binomial operands avoid CAL treating descriptive locals as types.
+The shortbinomialtop is a number.
+The shortbinomialbottom is a number.
+
 \ Record at most two positive remaining counts in ascending month order.
-To inspect a short weaving suffix:
+To inspect unfinished short months:
   Put 0 into the short weaving suffix's unfinished.
   Put 1 into the short weaving suffix's completed.
   Put the woven month states' first into the short month state.
@@ -65,16 +69,16 @@ To remember the second short month:
 \ If one or no months remain, the only legal continuation repeats
 \ the sole remaining month until all its days have been consumed.
 To count a short weaving suffix:
-  Inspect a short weaving suffix.
+  Inspect unfinished short months.
   If the short weaving suffix's completed is 0, exit.
   Put "1" into the short weaving suffix's completions.
   If the short weaving suffix's unfinished is less than 2, exit.
   If the short weaving suffix's first started is 0,
     count unstarted first month completions; exit.
-  Put the short weaving suffix's first remaining into a binomial top number.
-  Add the short weaving suffix's second remaining to the binomial top number.
-  Subtract 1 from the binomial top number.
-  Calculate binomial coefficients given the binomial top number and the short weaving suffix's first remaining.
+  Put the short weaving suffix's first remaining into the shortbinomialtop.
+  Add the short weaving suffix's second remaining to the shortbinomialtop.
+  Subtract 1 from the shortbinomialtop.
+  Calculate binomial coefficients given the shortbinomialtop and the short weaving suffix's first remaining.
   Put the binomial result into the short weaving suffix's completions.
 
 \ The lower-index month has not started. The higher-index month must
@@ -82,10 +86,10 @@ To count a short weaving suffix:
 To count unstarted first month completions:
   Put "0" into the short weaving suffix's completions.
   If the short weaving suffix's second started is 1, exit.
-  Put the short weaving suffix's first remaining into a binomial top number.
-  Add the short weaving suffix's second remaining to the binomial top number.
-  Subtract 2 from the binomial top number.
-  Put the short weaving suffix's first remaining into a binomial bottom number.
-  Subtract 1 from the binomial bottom number.
-  Calculate binomial coefficients given the binomial top number and the binomial bottom number.
+  Put the short weaving suffix's first remaining into the shortbinomialtop.
+  Add the short weaving suffix's second remaining to the shortbinomialtop.
+  Subtract 2 from the shortbinomialtop.
+  Put the short weaving suffix's first remaining into the shortbinomialbottom.
+  Subtract 1 from the shortbinomialbottom.
+  Calculate binomial coefficients given the shortbinomialtop and the shortbinomialbottom.
   Put the binomial result into the short weaving suffix's completions.
