@@ -18,7 +18,7 @@ jobs:
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
           test "$(git hash-object qa/spaghetti01_interleaved_work_counts_candidate.b98)" = "948cb9332332f6abf35274ecc4be69bbc8c79115"
-          test "$(git hash-object qa/spaghetti03_cascade_candidate.b98)" = "471e45cfec818d432cbb8e810204a865f8f04a97"
+          test "$(git hash-object qa/spaghetti02_cascade_candidate.b98)" = "471e45cfec818d432cbb8e810204a865f8f04a97"
           test "$(git hash-object qa/spaghetti03_arithmetic_braid_candidate.b98)" = "2baa1795a9a5802f58ecbd87ac8f138a1e811066"
           echo "SPAGHETTI03_SOURCES_PINNED $(git rev-parse HEAD)"
       - name: Native PyFunge parity, independent references and seven causal mutations

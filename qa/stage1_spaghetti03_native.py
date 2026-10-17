@@ -2,7 +2,7 @@ from __future__ import print_function
 import json,os,subprocess,tempfile,hashlib
 
 PROD="src/interleaved_work_counts.b98"
-PARENT="qa/spaghetti03_cascade_candidate.b98"
+PARENT="qa/spaghetti02_cascade_candidate.b98"
 CHILD="qa/spaghetti03_arithmetic_braid_candidate.b98"
 CMD=["pyfunge","--disable-fprint","--no-concurrent","--no-filesystem","-v98","-d2"]
 VALID=["1 15055672 1 15055670","0 0 0 0","0 1 0 2","1 987654321 0 123456789"]
