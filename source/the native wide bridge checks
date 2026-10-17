@@ -21,13 +21,13 @@ To compare a native calendar question with wide counters:
   Convert the example's calculation count to a string.
   If the wide calendar example's calculation count is not the string,
     put "Wide and native calculation counts disagree." into the check report; exit.
-  Convert the example's requested count to a string.
+  Convert the example's requested count to the string.
   If the wide calendar example's requested count is not the string,
     put "Wide and native requested counts disagree." into the check report; exit.
-  Convert the example's day distance to a string.
+  Convert the example's day distance to the string.
   If the wide calendar example's day distance is not the string,
     put "Wide and native inclusive day distances disagree." into the check report; exit.
-  Convert the example's day sum to a string.
+  Convert the example's day sum to the string.
   If the wide calendar example's day sum is not the string,
     put "Wide and native counter sums disagree." into the check report; exit.
   If the wide calendar example's day direction is not the example's day direction,
