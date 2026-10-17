@@ -75,6 +75,8 @@ The woven requested month day is a number.
 \ nested recursion must not overwrite the caller's running sum.
 A weavesum is a wide quantity.
 A weavechild is a wide quantity.
+\ The candidate's counted suffix is used sequentially by the unranking loop.
+The weaveblockcount is a wide quantity.
 A weaveindex is a number.
 
 \ Read month lengths into independent state records without modifying
@@ -280,8 +282,8 @@ To choose the next woven day:
   Put 1 into a candidate ordinal number.
   Loop.
     If the candidate ordinal number is greater than the selected month count, break.
-    Count eligible candidate weaving suffix given the candidate ordinal number into a block wide quantity.
-    Consider the next woven candidate given the candidate ordinal number and the block wide quantity.
+    Count eligible candidate weaving suffix given the candidate ordinal number into the weaveblockcount.
+    Consider the next woven candidate given the candidate ordinal number and the weaveblockcount.
     If the weaving selection's selected ordinal is greater than 0, break.
     Add 1 to the candidate ordinal number.
   Repeat.
