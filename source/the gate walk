@@ -11,6 +11,13 @@ A gate walk has
 
 The gate walk is a gate walk.
 
+\ The measured gate candidate positions have the same native day type
+\ as the published position. Explicit names avoid CAL treating their
+\ descriptive labels as undeclared types; neither is published before
+\ its measured gap has passed the bounds check.
+The prospective positive day is a calendar day.
+The prospective negative day is a calendar day.
+
 \ Budget full conversion by number of exact gate gaps requested.
 \ Every gap requires a complete separate sauce. A distant target must
 \ never launch an effectively endless calculation from Foundation.
@@ -97,7 +104,7 @@ To publish the measured positive gate gap given a number and another number:
     put 1 into the gate step budget's exhausted; exit.
   If the other number is greater than 963,
     put 1 into the gate step budget's exhausted; exit.
-  Put the gate walk's current position into a prospective positive day.
+  Put the gate walk's current position into the prospective positive day.
   Add the other number to the prospective positive day.
   Put the number into the gate walk's current index.
   Put the prospective positive day into the gate walk's current position.
@@ -107,7 +114,7 @@ To publish the measured negative gate gap given a number and another number:
     put 1 into the gate step budget's exhausted; exit.
   If the other number is greater than 963,
     put 1 into the gate step budget's exhausted; exit.
-  Put the gate walk's current position into a prospective negative day.
+  Put the gate walk's current position into the prospective negative day.
   Subtract the other number from the prospective negative day.
   Put the number into the gate walk's current index.
   Put the prospective negative day into the gate walk's current position.
