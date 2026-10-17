@@ -21,6 +21,7 @@ The signed day precedence result is a number.
 \ Explicitly typed scratch values avoid CAL inferring an undeclared
 \ decider/type from structured-field equality or descriptive noun phrases.
 The signed day polarity difference is a number.
+The signed day second polarity is a number.
 The signed day magnitude difference is a wide quantity.
 The signed day temporary value is a wide signed day.
 
@@ -61,8 +62,9 @@ To add a wide signed day to another wide signed day:
   \ CAL can misparse direct zero equality on the second structured
   \ argument as an undeclared decider. Check the normalized sign's range.
   \ With polarity restricted to -1, 0, +1, both bounds hold only for 0.
-  If the other wide signed day's polarity is greater than -1,
-    if the other wide signed day's polarity is less than 1,
+  Put the other wide signed day's polarity into the signed day second polarity.
+  If the signed day second polarity is greater than -1,
+    if the signed day second polarity is less than 1,
       put the wide signed day into the other wide signed day; exit.
   Put the wide signed day's polarity into the signed day polarity difference.
   Subtract the other wide signed day's polarity from the signed day polarity difference.
