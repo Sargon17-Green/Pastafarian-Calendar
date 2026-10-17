@@ -64,19 +64,11 @@ jobs:
           from pathlib import Path
           path=Path("third_party/funge-plus-plus/src/FungeUniverse.cpp")
           source=path.read_text()
-          before="""\
-				threads.pop();
-				delete thread;
-			}
-			mutex.unlock();
-		}else{"""
-          after="""\
-				threads.pop();
-				delete thread;
-			}
-			cv.notify_all(); // qa09 ephemeral native scheduler drain notification
-			mutex.unlock();
-		}else{"""
+          tab=chr(9)
+          before="\n".join([tab*4+"threads.pop();",tab*4+"delete thread;",
+                            tab*3+"}",tab*3+"mutex.unlock();",tab*2+"}else{"])
+          after=before.replace(tab*3+"mutex.unlock();",
+              tab*3+"cv.notify_all(); // qa09 ephemeral native scheduler drain notification\n"+tab*3+"mutex.unlock();")
           assert source.count(before)==1, "Pinned Funge++ native shutdown structure changed"
           path.write_text(source.replace(before,after))
           PY
