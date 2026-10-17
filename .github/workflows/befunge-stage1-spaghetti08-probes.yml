@@ -40,7 +40,7 @@ jobs:
           f=Path("third_party/funge-plus-plus/src/FungeRunner.cpp")
           c=f.read_text()
           before="inst_t i = ip.get();"
-          after='inst_t i = ip.get(); static int forensic_ticks=0; if (forensic_ticks++<350) { std::cerr << "FUNGEPLUS_IP_TRACE id=" << id << " pos=" << ip.getPos() << " delta=" << ip.getDelta() << " op=" << (int)i << std::endl; }'
+          after='inst_t i = ip.get(); static int forensic_ticks=0; if (forensic_ticks++<1500) { std::cerr << "FUNGEPLUS_IP_TRACE id=" << id << " pos=" << ip.getPos() << " delta=" << ip.getDelta() << " op=" << (int)i << std::endl; }'
           assert c.count(before)==1
           f.write_text(c.replace(before,after))
           PY
