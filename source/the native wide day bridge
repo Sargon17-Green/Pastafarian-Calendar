@@ -8,15 +8,21 @@
 The converted signed day result is a wide signed day.
 The native widening succeeded is a number.
 
+\ One-token scratch names avoid CAL-4018 treating an embedded type name
+\ as an undeclared type (as confirmed by the v080 native diagnostic).
+The bridgeabsolute is a calendar day.
+The bridgepolarity is a number.
+The bridgemagnitude is a wide quantity.
+
 To convert a calendar day into a wide signed day:
   Put 0 into the native widening succeeded.
   If the calendar day is less than -2147483647, exit.
-  Put the calendar day into an absolute calendar day.
-  Put 1 into a native day polarity number.
-  If the absolute calendar day is less than 0,
-    multiply -1 by the absolute calendar day;
-    put -1 into the native day polarity number.
-  Convert the absolute calendar day to a string.
-  Put the string into a native day magnitude wide quantity.
-  Set the converted signed day result from the native day magnitude wide quantity given the native day polarity number.
+  Put the calendar day into the bridgeabsolute.
+  Put 1 into the bridgepolarity.
+  If the bridgeabsolute is less than 0,
+    multiply -1 by the bridgeabsolute;
+    put -1 into the bridgepolarity.
+  Convert the bridgeabsolute to a string.
+  Put the string into the bridgemagnitude.
+  Set the converted signed day result from the bridgemagnitude given the bridgepolarity.
   Put 1 into the native widening succeeded.
