@@ -34,6 +34,13 @@ The dough work is a dough ingredient.
 The visible work is a visible calculation.
 The last visible drop is a wide quantity.
 
+\ Numeric and decimal scratch variables are explicitly declared for CAL.
+The visthird is a wide quantity.
+The visseventh is a wide quantity.
+The visresult is a wide quantity.
+The visweighted is a wide quantity.
+The visposition is a number.
+
 \ In the first visible drop, position 0 is hidden drop 1.
 \ Position -2 is hidden drop 3, and position -6 is hidden drop 7.
 To prepare the previous drops:
@@ -72,12 +79,12 @@ To make the visible dough:
   Put the sauce input's direction count into the dough work's count.
   Collect the dough contribution.
   Add the previous drops' first previous to the visible work's value.
-  Put the previous drops' third previous into a third term wide quantity.
-  Multiply the third term wide quantity by 3.
-  Add the third term wide quantity to the visible work's value.
-  Put the previous drops' seventh previous into a seventh term wide quantity.
-  Multiply the seventh term wide quantity by 5.
-  Add the seventh term wide quantity to the visible work's value.
+  Put the previous drops' third previous into the visthird.
+  Multiply the visthird by 3.
+  Add the visthird to the visible work's value.
+  Put the previous drops' seventh previous into the visseventh.
+  Multiply the visseventh by 5.
+  Add the visseventh to the visible work's value.
   Add the visible work's index to the visible work's value.
   Keep the visible work's value for the sauce.
 
@@ -156,23 +163,23 @@ To choose the visible grinding recipe:
 \ d*drop[i-7] + the selected stone).
 To perform visible drop grinding:
   Choose the visible grinding recipe.
-  Put the visible work's value into a result wide quantity.
-  Multiply the visible work's value by the result wide quantity.
-  Put the visible work's value into a weighted wide quantity.
-  Multiply the weighted wide quantity by the visible work's value factor.
-  Add the weighted wide quantity to the result wide quantity.
-  Put the previous drops' first previous into the weighted wide quantity.
-  Multiply the weighted wide quantity by the visible work's first previous factor.
-  Add the weighted wide quantity to the result wide quantity.
-  Put the previous drops' third previous into the weighted wide quantity.
-  Multiply the weighted wide quantity by the visible work's third previous factor.
-  Add the weighted wide quantity to the result wide quantity.
-  Put the previous drops' seventh previous into the weighted wide quantity.
-  Multiply the weighted wide quantity by the visible work's seventh previous factor.
-  Add the weighted wide quantity to the result wide quantity.
-  Add the visible work's grinding stone to the result wide quantity.
-  Keep the result wide quantity for the sauce.
-  Put the result wide quantity into the visible work's value.
+  Put the visible work's value into the visresult.
+  Multiply the visible work's value by the visresult.
+  Put the visible work's value into the visweighted.
+  Multiply the visweighted by the visible work's value factor.
+  Add the visweighted to the visresult.
+  Put the previous drops' first previous into the visweighted.
+  Multiply the visweighted by the visible work's first previous factor.
+  Add the visweighted to the visresult.
+  Put the previous drops' third previous into the visweighted.
+  Multiply the visweighted by the visible work's third previous factor.
+  Add the visweighted to the visresult.
+  Put the previous drops' seventh previous into the visweighted.
+  Multiply the visweighted by the visible work's seventh previous factor.
+  Add the visweighted to the visresult.
+  Add the visible work's grinding stone to the visresult.
+  Keep the visresult for the sauce.
+  Put the visresult into the visible work's value.
 
 \ Insert a finished drop in front of the last seven previous values.
 \ Shift from oldest to newest so nothing is overwritten too early.
@@ -204,10 +211,10 @@ To calculate visible drop given a number:
 To make visible drops through a number:
   Make all seven hidden drops.
   Prepare the previous drops.
-  Put 1 into a visible position number.
+  Put 1 into the visposition.
   Loop.
-    If the visible position number is greater than the number, break.
-    If the visible position number is greater than 46, break.
-    Calculate visible drop given the visible position number.
-    Add 1 to the visible position number.
+    If the visposition is greater than the number, break.
+    If the visposition is greater than 46, break.
+    Calculate visible drop given the visposition.
+    Add 1 to the visposition.
   Repeat.
