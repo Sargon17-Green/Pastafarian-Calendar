@@ -14,6 +14,9 @@ A gate inquiry has
 
 The gate inquiry is a gate inquiry.
 
+\ The wide scratch input has one unambiguous declaration for CAL.
+The gateoptions is a wide quantity.
+
 \ The signed index must not be zero. Zero is Foundation itself.
 \ Converting day positions to full wide counters is a future requirement.
 To calculate native gate spacing given a number:
@@ -37,8 +40,8 @@ To select the sealed gate interval:
   Put 1 into the seal inquiry's bowl identity.
   Put 1 into the seal inquiry's seal number.
   Begin a seal inquiry.
-  Put "922" into an interval options wide quantity.
-  Determine canonical equal selection given the interval options wide quantity.
+  Put "922" into the gateoptions.
+  Determine canonical equal selection given the gateoptions.
   Convert the seal inquiry's selected quantity to a chosen interval number.
   Add 41 to the chosen interval number.
   Put the chosen interval number into the gate inquiry's interval length.

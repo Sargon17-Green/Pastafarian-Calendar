@@ -4,6 +4,9 @@
 \ The expected values were independently calculated from sections M and N.
 \ There has been no CAL compiler run.
 
+\ The wide scratch input has one unambiguous declaration for CAL.
+The sealcheckwidth is a wide quantity.
+
 To check the Foundation sealed answers:
   Put 1 into the seal inquiry's bowl identity.
   Put 1 into the seal inquiry's seal number.
@@ -16,8 +19,8 @@ To check the Foundation sealed answers:
     put "The seal 1 query of bowl 1 has the wrong D." into the check report; exit.
   If the seal inquiry's answer direction is not -1,
     put "The seal 1 query of bowl 1 has the wrong direction." into the check report; exit.
-  Put "922" into a choice width wide quantity.
-  Choose a narrow quantity from the choice width wide quantity.
+  Put "922" into the sealcheckwidth.
+  Choose a narrow quantity from the sealcheckwidth.
   If the seal inquiry's selected quantity is not "189",
     put "The seal 1 query of bowl 1 chose the wrong number." into the check report; exit.
   Put 2 into the seal inquiry's bowl identity.
@@ -31,8 +34,8 @@ To check the Foundation sealed answers:
     put "The seal 1 query of bowl 2 has the wrong D." into the check report; exit.
   If the seal inquiry's answer direction is not 1,
     put "The seal 1 query of bowl 2 has the wrong direction." into the check report; exit.
-  Put "922" into a choice width wide quantity.
-  Choose a narrow quantity from the choice width wide quantity.
+  Put "922" into the sealcheckwidth.
+  Choose a narrow quantity from the sealcheckwidth.
   If the seal inquiry's selected quantity is not "146",
     put "The seal 1 query of bowl 2 chose the wrong number." into the check report; exit.
   Put 6 into the seal inquiry's bowl identity.
@@ -46,8 +49,8 @@ To check the Foundation sealed answers:
     put "The seal 1 query of bowl 6 has the wrong D." into the check report; exit.
   If the seal inquiry's answer direction is not -1,
     put "The seal 1 query of bowl 6 has the wrong direction." into the check report; exit.
-  Put "922" into a choice width wide quantity.
-  Choose a narrow quantity from the choice width wide quantity.
+  Put "922" into the sealcheckwidth.
+  Choose a narrow quantity from the sealcheckwidth.
   If the seal inquiry's selected quantity is not "216",
     put "The seal 1 query of bowl 6 chose the wrong number." into the check report; exit.
   Put 1 into the seal inquiry's bowl identity.
@@ -61,8 +64,8 @@ To check the Foundation sealed answers:
     put "The seal 10 query of bowl 1 has the wrong D." into the check report; exit.
   If the seal inquiry's answer direction is not 1,
     put "The seal 10 query of bowl 1 has the wrong direction." into the check report; exit.
-  Put "200" into a choice width wide quantity.
-  Choose a narrow quantity from the choice width wide quantity.
+  Put "200" into the sealcheckwidth.
+  Choose a narrow quantity from the sealcheckwidth.
   If the seal inquiry's selected quantity is not "180",
     put "The seal 10 query of bowl 1 chose the wrong number." into the check report; exit.
 
@@ -83,10 +86,10 @@ To check the sealed answer wraparound:
 \ If N=922, L is an exact multiple of N. Rejection of a value
 \ above L walks forwards to 1 or backwards to L.
 To check the narrow choice rejection:
-  Put "922" into a choice width wide quantity.
+  Put "922" into the sealcheckwidth.
   Put "170141183460469231731687303715884105727" into the seal inquiry's current answer.
   Put 1 into the seal inquiry's answer direction.
-  Choose a narrow quantity from the choice width wide quantity.
+  Choose a narrow quantity from the sealcheckwidth.
   If the seal inquiry's acceptance ceiling is not "170141183460469231731687303715884105506",
     put "The narrow choice ceiling is wrong." into the check report; exit.
   If the seal inquiry's current answer is not "1",
@@ -95,7 +98,7 @@ To check the narrow choice rejection:
     put "Forward short rejection selected the wrong option." into the check report; exit.
   Put "170141183460469231731687303715884105727" into the seal inquiry's current answer.
   Put -1 into the seal inquiry's answer direction.
-  Choose a narrow quantity from the choice width wide quantity.
+  Choose a narrow quantity from the sealcheckwidth.
   If the seal inquiry's current answer is not "170141183460469231731687303715884105506",
     put "Backward short rejection did not reach the acceptance ceiling." into the check report; exit.
   If the seal inquiry's selected quantity is not "922",

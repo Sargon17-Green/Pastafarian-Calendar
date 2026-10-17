@@ -34,6 +34,9 @@ The selected year rank is a number.
 The year selection success is a number.
 The selected year available is a number.
 
+\ The wide scratch input has one unambiguous declaration for CAL.
+The yearoptionwidth is a wide quantity.
+
 \ Copy the current gate-walk position into a new linked mark.
 To create a gate mark:
   Allocate memory for the gate mark.
@@ -180,8 +183,8 @@ To choose year five thousand for the calculation day:
   Put 10 into the seal inquiry's seal number.
   Begin a seal inquiry.
   Convert the eligible year count to a string.
-  Put the string into a year option count wide quantity.
-  Determine canonical equal selection given the year option count wide quantity.
+  Put the string into the yearoptionwidth.
+  Determine canonical equal selection given the yearoptionwidth.
   Convert the seal inquiry's selected quantity to the selected year rank.
   Read the selected year candidate.
 
