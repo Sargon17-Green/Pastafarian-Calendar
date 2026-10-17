@@ -3,13 +3,13 @@
 \ using values already established independently by the original
 \ short source-level examples.
 
-To compare a native calendar question with wide counters:
+\ Pass the already-declared signed result record to CAL's conversion.\n\ Using 'a wide signed day' twice in one routine declares the same local\n\ name twice, which CAL-4018 rejects. The conversion also publishes its\n\ result in 'the converted signed day result', used immediately below.\nTo compare a native calendar question with wide counters:
   Answer the example.
-  Convert the example's calculation day into a wide signed day.
+  Convert the example's calculation day into the converted signed day result.
   If the native widening succeeded is not 1,
     put "Conversion of the native calculation day failed." into the check report; exit.
   Put the converted signed day result into the wide calendar example's calculation day.
-  Convert the example's requested day into a wide signed day.
+  Convert the example's requested day into the converted signed day result.
   If the native widening succeeded is not 1,
     put "Conversion of the native requested day failed." into the check report; exit.
   Put the converted signed day result into the wide calendar example's requested day.
