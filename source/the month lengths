@@ -41,6 +41,21 @@ A month length work has
 
 The month length work is a month length work.
 
+\ CAL compiler requires explicitly declared work quantities, not multiword pseudo-types.
+The monthinclusionterm is a wide quantity.
+The monthminimumdays is a number.
+The monthmaximumextra is a number.
+The monthexcludeddays is a number.
+The monthadjustedexcess is a number.
+The monthremainingslots is a number.
+The monthparity is a number.
+The monthquotient is a number.
+The monthremainder is a number.
+The monthsuffixdays is a number.
+The monthsuffixmonths is a number.
+The monthothermonths is a number.
+The monthwholeyeardays is a number.
+
 \ The count result is exact, or zero if no composition is feasible.
 To count month lengths given a number and another number:
   Put "0" into the month length work's count result.
@@ -48,20 +63,20 @@ To count month lengths given a number and another number:
     count the empty month suffix given the number; exit.
   If the other number is less than 0, exit.
   Put the number into the month length work's extra days.
-  Put the other number into a minimum month days number.
-  Multiply the minimum month days number by 4.
-  Subtract the minimum month days number from the month length work's extra days.
+  Put the other number into the monthminimumdays.
+  Multiply the monthminimumdays by 4.
+  Subtract the monthminimumdays from the month length work's extra days.
   If the month length work's extra days is less than 0, exit.
-  Put the other number into a maximum extra days number.
-  Multiply the maximum extra days number by 119.
-  If the month length work's extra days is greater than the maximum extra days number, exit.
+  Put the other number into the monthmaximumextra.
+  Multiply the monthmaximumextra by 119.
+  If the month length work's extra days is greater than the monthmaximumextra, exit.
   Put "0" into the month length work's positive terms.
   Put "0" into the month length work's negative terms.
   Put 0 into the month length work's excluded blocks.
   Loop.
-    Put the month length work's excluded blocks into an excluded days number.
-    Multiply the excluded days number by 120.
-    If the excluded days number is greater than the month length work's extra days, break.
+    Put the month length work's excluded blocks into the monthexcludeddays.
+    Multiply the monthexcludeddays by 120.
+    If the monthexcludeddays is greater than the month length work's extra days, break.
     If the month length work's excluded blocks is greater than the other number, break.
     Add the next month counting term given the other number.
     Add 1 to the month length work's excluded blocks.
@@ -76,30 +91,30 @@ To count the empty month suffix given a number:
 \ C(P,j) * C(S-120j+P-1,P-1).
 To add the next month counting term given a number:
   Calculate binomial coefficients given the number and the month length work's excluded blocks.
-  Put the binomial result into an inclusion term wide quantity.
-  Put the month length work's extra days into a adjusted excess number.
-  Put the month length work's excluded blocks into an excluded days number.
-  Multiply the excluded days number by 120.
-  Subtract the excluded days number from the adjusted excess number.
-  Add the number to the adjusted excess number.
-  Subtract 1 from the adjusted excess number.
-  Put the number into a remaining slots number.
-  Subtract 1 from the remaining slots number.
-  Calculate binomial coefficients given the adjusted excess number and the remaining slots number.
-  Multiply the binomial result by the inclusion term wide quantity.
-  Put the month length work's excluded blocks into a parity number.
-  Divide the parity number by 2 giving a quotient number and a remainder number.
-  If the remainder number is 0,
-    add the inclusion term wide quantity to the month length work's positive terms; exit.
-  Add the inclusion term wide quantity to the month length work's negative terms.
+  Put the binomial result into the monthinclusionterm.
+  Put the month length work's extra days into the monthadjustedexcess.
+  Put the month length work's excluded blocks into the monthexcludeddays.
+  Multiply the monthexcludeddays by 120.
+  Subtract the monthexcludeddays from the monthadjustedexcess.
+  Add the number to the monthadjustedexcess.
+  Subtract 1 from the monthadjustedexcess.
+  Put the number into the monthremainingslots.
+  Subtract 1 from the monthremainingslots.
+  Calculate binomial coefficients given the monthadjustedexcess and the monthremainingslots.
+  Multiply the binomial result by the monthinclusionterm.
+  Put the month length work's excluded blocks into the monthparity.
+  Divide the monthparity by 2 giving the monthquotient and the monthremainder.
+  If the monthremainder is 0,
+    add the monthinclusionterm to the month length work's positive terms; exit.
+  Add the monthinclusionterm to the month length work's negative terms.
 
 \ Count suffixes with the candidate first month fixed.
 To count the current month suffix:
-  Put the month length work's remaining days into a suffix days number.
-  Subtract the month length work's candidate days from the suffix days number.
-  Put the month length work's remaining months into a suffix months number.
-  Subtract 1 from the suffix months number.
-  Count month lengths given the suffix days number and the suffix months number.
+  Put the month length work's remaining days into the monthsuffixdays.
+  Subtract the month length work's candidate days from the monthsuffixdays.
+  Put the month length work's remaining months into the monthsuffixmonths.
+  Subtract 1 from the monthsuffixmonths.
+  Count month lengths given the monthsuffixdays and the monthsuffixmonths.
   Put the month length work's count result into the month length work's suffix possibilities.
 
 To remember the selected month length:
@@ -120,11 +135,11 @@ To consider the current month length:
 To choose the next month length:
   Put 0 into the month length work's part selected.
   Put 4 into the month length work's candidate days.
-  Put the month length work's remaining months into a other months number.
-  Subtract 1 from the other months number.
-  Multiply the other months number by 4.
+  Put the month length work's remaining months into the monthothermonths.
+  Subtract 1 from the monthothermonths.
+  Multiply the monthothermonths by 4.
   Put the month length work's remaining days into the month length work's maximum candidate days.
-  Subtract the other months number from the month length work's maximum candidate days.
+  Subtract the monthothermonths from the month length work's maximum candidate days.
   If the month length work's maximum candidate days is greater than 123,
     put 123 into the month length work's maximum candidate days.
   Loop.
@@ -160,8 +175,8 @@ To select month lengths from a wide quantity:
 \ Bowl 3 / seal 31 chooses an index among all bounded compositions.
 To choose the canonical month lengths:
   Prepare the year structure sauce.
-  Put the chosen year's year length into a whole year days number.
-  Count month lengths given the whole year days number and the selected month count.
+  Put the chosen year's year length into the monthwholeyeardays.
+  Count month lengths given the monthwholeyeardays and the selected month count.
   Put the month length work's count result into the month length work's total possibilities.
   If the month length work's total possibilities is "0", exit.
   Put 3 into the seal inquiry's bowl identity.
