@@ -14,27 +14,32 @@ A bowl state has
 
 The current bowls are a bowl state.
 
+\ Named temporary values avoid CAL's ambiguous compound type parsing.
+The sixinitial is a wide quantity.
+The sixweighted is a wide quantity.
+The sixsquare is a wide quantity.
+
 \ The first small number is bowl identity b. The second is p squared.
 \ All intermediate sums and products are arbitrary-precision decimals.
 To initialize bowl values given a number and another number:
-  Put the sauce input's calculation count into an initial wide quantity.
-  Put the sauce input's requested count into a weighted wide quantity.
-  Multiply the weighted wide quantity by the number.
-  Add the weighted wide quantity to the initial wide quantity.
-  Add the sauce input's distance count to the initial wide quantity.
-  Add the sauce input's sum count to the initial wide quantity.
-  Add the sauce input's direction count to the initial wide quantity.
-  Add the other number to the initial wide quantity.
-  Put the initial wide quantity into a squared wide quantity.
-  Multiply the initial wide quantity by the squared wide quantity.
-  Add the number to the squared wide quantity.
-  Keep the squared wide quantity for the sauce.
-  If the number is 1, put the squared wide quantity into the current bowls' first bowl.
-  If the number is 2, put the squared wide quantity into the current bowls' second bowl.
-  If the number is 3, put the squared wide quantity into the current bowls' third bowl.
-  If the number is 4, put the squared wide quantity into the current bowls' fourth bowl.
-  If the number is 5, put the squared wide quantity into the current bowls' fifth bowl.
-  If the number is 6, put the squared wide quantity into the current bowls' sixth bowl.
+  Put the sauce input's calculation count into the sixinitial.
+  Put the sauce input's requested count into the sixweighted.
+  Multiply the sixweighted by the number.
+  Add the sixweighted to the sixinitial.
+  Add the sauce input's distance count to the sixinitial.
+  Add the sauce input's sum count to the sixinitial.
+  Add the sauce input's direction count to the sixinitial.
+  Add the other number to the sixinitial.
+  Put the sixinitial into the sixsquare.
+  Multiply the sixinitial by the sixsquare.
+  Add the number to the sixsquare.
+  Keep the sixsquare for the sauce.
+  If the number is 1, put the sixsquare into the current bowls' first bowl.
+  If the number is 2, put the sixsquare into the current bowls' second bowl.
+  If the number is 3, put the sixsquare into the current bowls' third bowl.
+  If the number is 4, put the sixsquare into the current bowls' fourth bowl.
+  If the number is 5, put the sixsquare into the current bowls' fifth bowl.
+  If the number is 6, put the sixsquare into the current bowls' sixth bowl.
 
 \ The squared constants are 17^2, 19^2, 23^2, 29^2, 31^2, 37^2.
 To initialize the six bowls:

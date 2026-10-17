@@ -24,6 +24,24 @@ The old bowls are a bowl state.
 The new bowls are a bowl state.
 The last visible bowl order is a bowl order.
 
+\ Named temporary values avoid CAL's ambiguous compound type parsing.
+The mixposition is a number.
+The mixidentity is a number.
+The mixprevpos is a number.
+The mixnextpos is a number.
+The mixpour is a wide quantity.
+The mixstoneprod is a wide quantity.
+The mixfactor is a number.
+The mixprevweighted is a wide quantity.
+The mixnextweighted is a wide quantity.
+The mixresult is a wide quantity.
+The mixneighborprod is a wide quantity.
+The mixterm is a number.
+The mixsquarepos is a number.
+The mixroundweight is a number.
+The mixfinalround is a number.
+The mixvisposition is a number.
+
 \ Taking a snapshot first is vital: no new bowl enters another calculation
 \ until the whole round has been completed.
 To remember the old bowls:
@@ -82,19 +100,19 @@ To store the mixed bowl:
 \ Find current, previous and next bowls in the circular chosen order.
 \ Position 1 follows position 6. Position 6 precedes position 1.
 To find the three neighboring bowls:
-  Put the mixing task's position into a position number.
-  Read the ordered identity given the position number into an identity number.
-  Put the identity number into the mixing task's chosen identity.
-  Put the position number into a previous position number.
-  If the previous position number is 1, put 7 into the previous position number.
-  Subtract 1 from the previous position number.
-  Read the ordered identity given the previous position number into the identity number.
-  Put the identity number into the mixing task's previous identity.
-  Put the position number into a following position number.
-  Add 1 to the following position number.
-  If the following position number is greater than 6, put 1 into the following position number.
-  Read the ordered identity given the following position number into the identity number.
-  Put the identity number into the mixing task's following identity.
+  Put the mixing task's position into the mixposition.
+  Read the ordered identity given the mixposition into the mixidentity.
+  Put the mixidentity into the mixing task's chosen identity.
+  Put the mixposition into the mixprevpos.
+  If the mixprevpos is 1, put 7 into the mixprevpos.
+  Subtract 1 from the mixprevpos.
+  Read the ordered identity given the mixprevpos into the mixidentity.
+  Put the mixidentity into the mixing task's previous identity.
+  Put the mixposition into the mixnextpos.
+  Add 1 to the mixnextpos.
+  If the mixnextpos is greater than 6, put 1 into the mixnextpos.
+  Read the ordered identity given the mixnextpos into the mixidentity.
+  Put the mixidentity into the mixing task's following identity.
   Read the old bowl given the mixing task's chosen identity into the mixing task's chosen old.
   Read the old bowl given the mixing task's previous identity into the mixing task's previous old.
   Read the old bowl given the mixing task's following identity into the mixing task's following old.
@@ -114,18 +132,18 @@ To select the stone in a mixing position:
 To calculate the direct visible pour:
   Put "0" into the mixing task's direct pour.
   If the mixing task's position is greater than 3, exit.
-  Put the last visible drop into a poured wide quantity.
-  Multiply the last visible drop by the poured wide quantity.
-  Put the mixing task's chosen stone into a multiplied stone wide quantity.
-  Multiply the mixing task's chosen old by the multiplied stone wide quantity.
-  Add the multiplied stone wide quantity to the poured wide quantity.
-  Put the mixing task's position into a factor number.
-  Multiply the factor number by 2.
-  Add 1 to the factor number.
-  Multiply the factor number by the visible work's index.
-  Add the factor number to the poured wide quantity.
-  Keep the poured wide quantity for the sauce.
-  Put the poured wide quantity into the mixing task's direct pour.
+  Put the last visible drop into the mixpour.
+  Multiply the last visible drop by the mixpour.
+  Put the mixing task's chosen stone into the mixstoneprod.
+  Multiply the mixing task's chosen old by the mixstoneprod.
+  Add the mixstoneprod to the mixpour.
+  Put the mixing task's position into the mixfactor.
+  Multiply the mixfactor by 2.
+  Add 1 to the mixfactor.
+  Multiply the mixfactor by the visible work's index.
+  Add the mixfactor to the mixpour.
+  Keep the mixpour for the sauce.
+  Put the mixpour into the mixing task's direct pour.
 
 \ Visible mixing: u=old(B)+2*old(P)+3*old(N)+directPour+D+stone(q).
 \ new(B)=SAVE(u*u+5*old(P)*old(N)+i*q).
@@ -134,26 +152,26 @@ To perform visible bowl mixing:
   Select the stone in a mixing position.
   Calculate the direct visible pour.
   Put the mixing task's chosen old into the mixing task's fresh value.
-  Put the mixing task's previous old into a weighted previous wide quantity.
-  Multiply the weighted previous wide quantity by 2.
-  Add the weighted previous wide quantity to the mixing task's fresh value.
-  Put the mixing task's following old into a weighted following wide quantity.
-  Multiply the weighted following wide quantity by 3.
-  Add the weighted following wide quantity to the mixing task's fresh value.
+  Put the mixing task's previous old into the mixprevweighted.
+  Multiply the mixprevweighted by 2.
+  Add the mixprevweighted to the mixing task's fresh value.
+  Put the mixing task's following old into the mixnextweighted.
+  Multiply the mixnextweighted by 3.
+  Add the mixnextweighted to the mixing task's fresh value.
   Add the mixing task's direct pour to the mixing task's fresh value.
   Add the last visible drop to the mixing task's fresh value.
   Add the mixing task's chosen stone to the mixing task's fresh value.
-  Put the mixing task's fresh value into a result wide quantity.
-  Multiply the mixing task's fresh value by the result wide quantity.
-  Put the mixing task's previous old into a neighbor product wide quantity.
-  Multiply the mixing task's following old by the neighbor product wide quantity.
-  Multiply the neighbor product wide quantity by 5.
-  Add the neighbor product wide quantity to the result wide quantity.
-  Put the visible work's index into a term number.
-  Multiply the term number by the mixing task's position.
-  Add the term number to the result wide quantity.
-  Keep the result wide quantity for the sauce.
-  Put the result wide quantity into the mixing task's fresh value.
+  Put the mixing task's fresh value into the mixresult.
+  Multiply the mixing task's fresh value by the mixresult.
+  Put the mixing task's previous old into the mixneighborprod.
+  Multiply the mixing task's following old by the mixneighborprod.
+  Multiply the mixneighborprod by 5.
+  Add the mixneighborprod to the mixresult.
+  Put the visible work's index into the mixterm.
+  Multiply the mixterm by the mixing task's position.
+  Add the mixterm to the mixresult.
+  Keep the mixresult for the sauce.
+  Put the mixresult into the mixing task's fresh value.
   Store the mixed bowl.
 
 \ A final mixing round must use SAVED S_r both to choose the order and in u.
@@ -162,25 +180,25 @@ To perform visible bowl mixing:
 To perform final bowl mixing:
   Find the three neighboring bowls.
   Put the mixing task's chosen old into the mixing task's fresh value.
-  Put the mixing task's previous old into a weighted previous wide quantity.
-  Multiply the weighted previous wide quantity by 3.
-  Add the weighted previous wide quantity to the mixing task's fresh value.
-  Put the mixing task's following old into a weighted following wide quantity.
-  Multiply the weighted following wide quantity by 5.
-  Add the weighted following wide quantity to the mixing task's fresh value.
+  Put the mixing task's previous old into the mixprevweighted.
+  Multiply the mixprevweighted by 3.
+  Add the mixprevweighted to the mixing task's fresh value.
+  Put the mixing task's following old into the mixnextweighted.
+  Multiply the mixnextweighted by 5.
+  Add the mixnextweighted to the mixing task's fresh value.
   Add the mixing task's shared sauce value to the mixing task's fresh value.
   Add the mixing task's round index to the mixing task's fresh value.
-  Put the mixing task's position into a squared position number.
-  Multiply the squared position number by the mixing task's position.
-  Add the squared position number to the mixing task's fresh value.
-  Put the mixing task's fresh value into a result wide quantity.
-  Multiply the mixing task's fresh value by the result wide quantity.
-  Put the mixing task's previous old into a neighbor product wide quantity.
-  Multiply the mixing task's following old by the neighbor product wide quantity.
-  Multiply the neighbor product wide quantity by 7.
-  Add the neighbor product wide quantity to the result wide quantity.
-  Keep the result wide quantity for the sauce.
-  Put the result wide quantity into the mixing task's fresh value.
+  Put the mixing task's position into the mixsquarepos.
+  Multiply the mixsquarepos by the mixing task's position.
+  Add the mixsquarepos to the mixing task's fresh value.
+  Put the mixing task's fresh value into the mixresult.
+  Multiply the mixing task's fresh value by the mixresult.
+  Put the mixing task's previous old into the mixneighborprod.
+  Multiply the mixing task's following old by the mixneighborprod.
+  Multiply the mixneighborprod by 7.
+  Add the mixneighborprod to the mixresult.
+  Keep the mixresult for the sauce.
+  Put the mixresult into the mixing task's fresh value.
   Store the mixed bowl.
 
 \ Six results are computed from the SAME old snapshot, never in place.
@@ -214,9 +232,9 @@ To prepare the final round given a number:
   Add the old bowls' fourth bowl to the mixing task's shared sauce value.
   Add the old bowls' fifth bowl to the mixing task's shared sauce value.
   Add the old bowls' sixth bowl to the mixing task's shared sauce value.
-  Put the mixing task's round index into a weighted round number.
-  Multiply the weighted round number by 149.
-  Add the weighted round number to the mixing task's shared sauce value.
+  Put the mixing task's round index into the mixroundweight.
+  Multiply the mixroundweight by 149.
+  Add the mixroundweight to the mixing task's shared sauce value.
   Keep the mixing task's shared sauce value for the sauce.
   Choose a bowl order from the mixing task's shared sauce value.
   Put 2 into the mixing task's phase.
@@ -226,11 +244,11 @@ To finish one final round given a number:
   Finish one mixing round.
 
 To finish twelve final rounds:
-  Put 1 into a final round number.
+  Put 1 into the mixfinalround.
   Loop.
-    If the final round number is greater than 12, break.
-    Finish one final round given the final round number.
-    Add 1 to the final round number.
+    If the mixfinalround is greater than 12, break.
+    Finish one final round given the mixfinalround.
+    Add 1 to the mixfinalround.
   Repeat.
 
 \ Prepare the sauce input first. This routine is shared by the regression
@@ -239,12 +257,12 @@ To make the sauce through the visible drops:
   Make all seven hidden drops.
   Prepare the previous drops.
   Initialize the six bowls.
-  Put 1 into a visible position number.
+  Put 1 into the mixvisposition.
   Loop.
-    If the visible position number is greater than 46, break.
-    Calculate visible drop given the visible position number.
+    If the mixvisposition is greater than 46, break.
+    Calculate visible drop given the mixvisposition.
     Mix bowls for the visible drop.
-    Add 1 to the visible position number.
+    Add 1 to the mixvisposition.
   Repeat.
 
 To make the complete sauce:
