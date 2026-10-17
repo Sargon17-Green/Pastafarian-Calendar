@@ -3,26 +3,28 @@
 \ The public, narrow and wide entrypoints all fail closed by placing
 \ zero in the selected quantity (zero is never a valid option index).
 
+The invalidoptions is a wide quantity.
+
 To check zero option count refusal:
   Put "1" into the seal inquiry's current answer.
   Put "100" into the seal inquiry's selected quantity.
-  Put "0" into an invalid options wide quantity.
-  Determine canonical equal selection given the invalid options wide quantity.
+  Put "0" into the invalidoptions.
+  Determine canonical equal selection given the invalidoptions.
   If the seal inquiry's selected quantity is not "0",
     put "The public chooser accepted zero options." into the check report; exit.
   Put "100" into the seal inquiry's selected quantity.
-  Choose narrow quantity values from the invalid options wide quantity.
+  Choose narrow quantity values from the invalidoptions.
   If the seal inquiry's selected quantity is not "0",
     put "The narrow chooser accepted zero options." into the check report; exit.
   Put "100" into the seal inquiry's selected quantity.
-  Perform wide option selection given the invalid options wide quantity.
+  Perform wide option selection given the invalidoptions.
   If the seal inquiry's selected quantity is not "0",
     put "The wide chooser accepted zero options." into the check report; exit.
-  Put "" into the invalid options wide quantity.
-  Determine canonical equal selection given the invalid options wide quantity.
+  Put "" into the invalidoptions.
+  Determine canonical equal selection given the invalidoptions.
   If the seal inquiry's selected quantity is not "0",
     put "The public chooser accepted a blank option count." into the check report; exit.
-  Put "1" into the invalid options wide quantity.
-  Determine canonical equal selection given the invalid options wide quantity.
+  Put "1" into the invalidoptions.
+  Determine canonical equal selection given the invalidoptions.
   If the seal inquiry's selected quantity is not "1",
     put "Rejecting zero poisoned a later valid choice." into the check report; exit.
