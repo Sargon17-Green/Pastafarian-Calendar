@@ -97,7 +97,7 @@ To check forty seven month started suffixes:
   Put 1 into the weavesyntheticnumber.
   Loop.
     If the weavesyntheticnumber is greater than 47, break.
-    Add a synthetic month with 4.
+    Append synthetic month fixture with 4.
     Add 1 to the weavesyntheticnumber.
   Repeat.
   Prepare the woven month states.
@@ -145,7 +145,7 @@ To check eight four-day months:
   Put 1 into the weavesyntheticnumber.
   Loop.
     If the weavesyntheticnumber is greater than 8, break.
-    Add a synthetic month with 4.
+    Append synthetic month fixture with 4.
     Add 1 to the weavesyntheticnumber.
   Repeat.
   Count all possible month weavings.
