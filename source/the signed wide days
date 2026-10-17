@@ -57,15 +57,14 @@ To compare a wide signed day with another wide signed day:
 \ The second operand is the output, matching the existing wide library.
 To add a wide signed day to another wide signed day:
   If the wide signed day's polarity is 0, exit.
-  \ For normalized polarities (-1, 0, +1), compare the first sign
-  \ against the second. The previously special-cased second-operand zero
-  \ follows the opposite-sign magnitude path with identical output.
-  \ This avoids a record-valued helper argument that CAL-4018 rejected.
-  If the wide signed day's polarity is greater than 0,
-    if the wide signed day's polarity is greater than the other wide signed day's polarity,
-      add opposite-signed day magnitudes given the wide signed day and the other wide signed day; exit.
-    Add like-signed day magnitudes given the wide signed day and the other wide signed day; exit.
+  \ On normalized polarities (-1, 0, +1), equality means like signs.
+  \ For a nonzero first operand, either strict ordering means opposite
+  \ signs or a zero second operand. In both cases the opposite-magnitude
+  \ routine computes the exact sum, including a nonzero value plus zero.
+  \ This flat ordering avoids nested If statements, forbidden by CAL-4018.
   If the wide signed day's polarity is less than the other wide signed day's polarity,
+    add opposite-signed day magnitudes given the wide signed day and the other wide signed day; exit.
+  If the wide signed day's polarity is greater than the other wide signed day's polarity,
     add opposite-signed day magnitudes given the wide signed day and the other wide signed day; exit.
   Add like-signed day magnitudes given the wide signed day and the other wide signed day.
 
