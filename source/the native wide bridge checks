@@ -3,7 +3,11 @@
 \ using values already established independently by the original
 \ short source-level examples.
 
-\ Pass the already-declared signed result record to CAL's conversion.\n\ Using 'a wide signed day' twice in one routine declares the same local\n\ name twice, which CAL-4018 rejects. The conversion also publishes its\n\ result in 'the converted signed day result', used immediately below.\nTo compare a native calendar question with wide counters:
+\ Pass the already-declared signed result record to CAL's conversion.
+\ Using 'a wide signed day' twice in one routine declares the same local
+\ name twice, which CAL-4018 rejects. The conversion also publishes its
+\ result in 'the converted signed day result', used immediately below.
+To compare a native calendar question with wide counters:
   Answer the example.
   Convert the example's calculation day into the converted signed day result.
   If the native widening succeeded is not 1,
