@@ -13,9 +13,13 @@
 \ Large inputs may require substantial exact-decimal computation.
 \ No CAL compiler run has validated this module yet.
 
+\ Typed, unambiguous scratch name: the Foundation magnitude is wide
+\ decimal text, never a native calendar-day number.
+The wgfoundationdigits is a wide quantity.
+
 To prepare a wide gate sauce question given a wide signed day:
-  Put "15055671" into a foundation magnitude wide quantity.
-  Set the wide calendar example's calculation day from the foundation magnitude wide quantity given -1.
+  Put "15055671" into the wgfoundationdigits.
+  Set the wide calendar example's calculation day from the wgfoundationdigits given -1.
   Put the wide calendar example's calculation day into the wide calendar example's requested day.
   Add the wide signed day to the wide calendar example's requested day.
   Answer the wide calendar example.
