@@ -20,16 +20,8 @@ The signed day precedence result is a number.
 
 \ Explicitly typed scratch values avoid CAL inferring an undeclared
 \ decider/type from structured-field equality or descriptive noun phrases.
-The signed day polarity difference is a number.
-The signed day second polarity is a number.
 The signed day magnitude difference is a wide quantity.
 The signed day temporary value is a wide signed day.
-
-\ CAL's single-argument record accessor avoids a second-argument
-\ nested-field expression that CAL-4018 mis-parses in the caller.
-\ The scratch field is fully overwritten before each call; no formula changes.
-To read the second signed day polarity given a wide signed day:
-  Put the wide signed day's polarity into the signed day second polarity.
 
 \ Make zero canonical and make nonzero polarity exactly +1 or -1.
 To normalize a wide signed day:
@@ -65,18 +57,17 @@ To compare a wide signed day with another wide signed day:
 \ The second operand is the output, matching the existing wide library.
 To add a wide signed day to another wide signed day:
   If the wide signed day's polarity is 0, exit.
-  \ CAL can misparse direct zero equality on the second structured
-  \ argument as an undeclared decider. Check the normalized sign's range.
-  \ With polarity restricted to -1, 0, +1, both bounds hold only for 0.
-  Read the second signed day polarity given the other wide signed day.
-  If the signed day second polarity is greater than -1,
-    if the signed day second polarity is less than 1,
-      put the wide signed day into the other wide signed day; exit.
-  Put the wide signed day's polarity into the signed day polarity difference.
-  Subtract the other wide signed day's polarity from the signed day polarity difference.
-  If the signed day polarity difference is 0,
-    add like-signed day magnitudes given the wide signed day and the other wide signed day; exit.
-  Add opposite-signed day magnitudes given the wide signed day and the other wide signed day.
+  \ For normalized polarities (-1, 0, +1), compare the first sign
+  \ against the second. The previously special-cased second-operand zero
+  \ follows the opposite-sign magnitude path with identical output.
+  \ This avoids a record-valued helper argument that CAL-4018 rejected.
+  If the wide signed day's polarity is greater than 0,
+    if the wide signed day's polarity is greater than the other wide signed day's polarity,
+      add opposite-signed day magnitudes given the wide signed day and the other wide signed day; exit.
+    Add like-signed day magnitudes given the wide signed day and the other wide signed day; exit.
+  If the wide signed day's polarity is less than the other wide signed day's polarity,
+    add opposite-signed day magnitudes given the wide signed day and the other wide signed day; exit.
+  Add like-signed day magnitudes given the wide signed day and the other wide signed day.
 
 To add like-signed day magnitudes given a wide signed day and another wide signed day:
   Add the wide signed day's absolute quantity to the other wide signed day's absolute quantity.
