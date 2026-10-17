@@ -80,12 +80,16 @@ def expected(seed):
 
 def native(engine,path,seed,timeout=8):
     try:
-        cp=subprocess.run([str(engine),str(path)],input=str(seed)+"\n",
-              text=True,capture_output=True,timeout=timeout)
-        try: numbers=[int(s) for s in cp.stdout.split()]
+        cp=subprocess.run([str(engine),str(path)],input=(str(seed)+"\n").encode("ascii"),
+              capture_output=True,timeout=timeout)
+        # A deliberately corrupted Funge program can emit *arbitrary* bytes.
+        # Preserve them without pretending they are valid UTF-8 text.
+        stdout=cp.stdout.decode("utf-8","replace")
+        stderr=cp.stderr.decode("utf-8","replace")
+        try: numbers=[int(s) for s in stdout.split()]
         except ValueError:numbers=[]
         return {"exit":cp.returncode,"numbers":numbers,
-                "stderr":cp.stderr[-500:],"timeout":False}
+                "stderr":stderr[-500:],"timeout":False}
     except subprocess.TimeoutExpired:
         return {"exit":124,"numbers":[],"stderr":"timeout","timeout":True}
 

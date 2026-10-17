@@ -44,13 +44,13 @@ survives on the stack. At each of the sixteen subsequent axes:
    The third emitted instruction turns the IP back into the x direction
    on a higher-dimensional hyperplane.
 
-For axis `i`, cumulative residue `T_i = i(i+1)/2`, and inherited QA06
+For axis `i`, cumulative runtime accumulator `H_i` (normally `i(i+1)/2`), and inherited QA06
 branch seed `s`, the new instruction triplet is:
 
 ```
-A_i = 48 + 10*((T_i + s) mod 2)        # 0 or :
-B_i = 36 + (T_i - i(i+1)/2)^2           # $
-C_i = 62 + (T_i - i(i+1)/2)^2           # >
+A_i = 48 + 10*((H_i + s) mod 2)        # 0 or :
+B_i = 36 + (H_i - i(i+1)/2)^2           # $
+C_i = 62 + (H_i - i(i+1)/2)^2           # >
 ```
 
 The second and third instructions are live, self-diagnostic equations:
@@ -96,3 +96,18 @@ replace the 2D canonical arithmetic or constitute Stage 1 completion.
 No claim of winning a subjective 'most monstrous code' contest is made:
 this establishes independently testable complexity, not a numerical
 award or absolute maximum.
+
+## Preserved first failing Native revision
+
+Run 39035126181 on commit c87b2818 reached Funge++ Native execution with
+both seeds; 16 axis markers and all 48 dynamically compiled opcodes
+matched independently computed expectations. Both 48-cell source-trap
+masking experiments passed. The first three axis contribution mutants
+also changed termination under the bounded limit.
+The fourth deliberately corrupted program wrote non-UTF-8 stdout/stderr,
+which the Python QA wrapper decoded in strict UTF-8 mode, raising
+UnicodeDecodeError before finishing the remaining mutants. The revision
+changes *only* QA subprocess evidence decoding to binary-safe
+`decode(..., "replace")`. This is neither a production-code fix nor
+an interpreter change. Run 39035126181 must remain RED; re-run all
+negative controls on the new HEAD.
