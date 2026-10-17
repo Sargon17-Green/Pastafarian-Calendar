@@ -1080,5 +1080,27 @@
   "sync_cells_preallocated": true,
   "initial_flag": 35,
   "initial_residue": 38,
-  "revised_from_blob": "0b49d3b4175055d365a089267cfc2450ea6d83aa"
+  "revised_from_blob": "0b49d3b4175055d365a089267cfc2450ea6d83aa",
+  "native_poll_return_direction_fixed": true,
+  "resumption_cell": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "preexisting_poll_regression_blob": "3f0d621e51f00d7bef236cec4dae020a89d543a4",
+  "new_poll_instruction": ">"
 }

@@ -6,7 +6,7 @@ from pathlib import Path
 SOURCE=Path("qa/spaghetti08_17d_concurrent_stack_residue.beq")
 MANIFEST=Path("qa/SPAGHETTI08_17D_MANIFEST.json")
 PARENT_SHA="4c9bff056cb61004d37dd2d949fccf171b4ddf0f"
-SOURCE_SHA="3f0d621e51f00d7bef236cec4dae020a89d543a4"
+SOURCE_SHA="4ba6902de08cf9483374f43a33f1d4ae7a14e3f6"
 ENGINE_SHA="cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
 RECEIPT=Path("spaghetti08_nd17_native_receipt.json")
 DIM=17
@@ -156,6 +156,7 @@ def main():
     # must cause a detectable output/termination difference if sabotaged.
     worker_mutations=[
        ("fork_suppressed","fork","t","z"),
+       ("poll_east_return_suppressed","poll",">","0"),
        ("outer_stack_begin_suppressed","worker","0{0{","0z0{"),
        ("inner_stack_begin_suppressed","worker","0{0{","0{0z"),
        ("understack_transfer_suppressed","worker","01-u1u","01-zu1"),
@@ -165,6 +166,9 @@ def main():
     for label,which,old,new in worker_mutations:
         if which=="fork":
             bad=patch_one(raw,lambda b:b["header"].startswith("Lines 1,Origin 0:0,"),
+                          old,new)
+        elif which=="poll":
+            bad=patch_one(raw,lambda b:b["header"].startswith("Lines 1,Origin 1:0,"),
                           old,new)
         else:
             bad=mutate_worker(raw,old,new)

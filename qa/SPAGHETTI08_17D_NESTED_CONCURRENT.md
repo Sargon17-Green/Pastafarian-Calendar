@@ -102,3 +102,24 @@ The original workflow, failure and forensic probes are retained.
 
 ## Native forensic physical allocation fix
 The Native forensics run 39037831108 confirmed the worker's nested stack result 62 and actual split-IP execution, while unallocated far-address p/g readbacks failed. Preseeding the flag enabled successful parent joining and a 31/62 memory readback. This experimental iteration explicitly places two mutable source bytes at x10000 and x10001, initially # (35, not ready) and & (38, untrusted), so the child must overwrite them using p before the parent can observe ready 62. Earlier RED workflows remain. A new exact-head Native check is required before PASS.
+
+## Forensic fix to true parent re-poll geometry
+
+The instrumented Funge++ run 39040416313 isolated the failure in Native
+pointer movement: when a non-ready flag sends the parent from `|` down
+into the y=1 westbound back-lane, the `^` at (1,1) resumes northward at
+(1,0). The old (1,0) ASCII `0` did not reset the IP direction, so it
+continued north and never re-read the flag, even though the worker had
+correctly emitted p(10001)=31 followed by p(10000)=62. Source content,
+real physical addresses and engine worker history are therefore valid.
+
+**One-cell native source fix:** (1,0) changes from `0` to `>`.
+An initial eastbound execution now executes `>a*` instead of `0a*`:
+Funge's defined empty-stack-pop value is zero, so the address-building
+arithmetic still starts at zero; when the IP returns from (1,1), `>`
+restores eastward motion and retries physical 17D `g` correctly.
+Source dimensions, all 48 future traps, dynamic target coordinates,
+worker stack code, QA07 source and 2D production source are unchanged.
+A dedicated `poll_east_return_suppressed` mutant restores `0` to
+require RED under native Funge++; no PASS is claimed pending exact-head
+verification. All original failed attempts remain retained.

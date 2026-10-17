@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "3f0d621e51f00d7bef236cec4dae020a89d543a4"
+          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "4ba6902de08cf9483374f43a33f1d4ae7a14e3f6"
           python3 - <<'PY'
           from pathlib import Path
           path = Path("third_party/funge-plus-plus/src/Unefunge93Strategy.cpp")
