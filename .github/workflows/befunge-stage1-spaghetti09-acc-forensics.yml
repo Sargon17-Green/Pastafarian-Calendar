@@ -1,8 +1,5 @@
 name: Befunge QA09 Native Accumulator Forensics
 on:
-  push:
-    branches:
-      - 'qa-befunge98-stage1-order-isolation-20261008'
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,7 +20,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq)" = "29b2a0c4ead0c7d102ee9c2680a3491d5bc89932"
+          test "$(git hash-object qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq)" = "275cec0add8705565d27da4233860bf42d134a27"
           test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
           make -C third_party/funge-plus-plus funge
       - name: Read live stack accumulators at precise future-code stage boundaries

@@ -26,7 +26,7 @@ jobs:
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
           test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "4ba6902de08cf9483374f43a33f1d4ae7a14e3f6"
           test "$(git hash-object qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq)" = "e22a8b706fb84e3356db6c70aac29b9145642201"
-          test "$(git hash-object qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq)" = "29b2a0c4ead0c7d102ee9c2680a3491d5bc89932"
+          test "$(git hash-object qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq)" = "275cec0add8705565d27da4233860bf42d134a27"
           test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
           echo "QA09_NATIVE_EIGHTY_EXACT_HEAD $(git rev-parse HEAD)"
       - name: Build exact 17-dimensional Funge++ Native interpreter

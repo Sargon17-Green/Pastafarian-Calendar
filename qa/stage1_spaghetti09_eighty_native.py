@@ -5,7 +5,7 @@ from pathlib import Path
 
 SOURCE=Path("qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq")
 MANIFEST=Path("qa/SPAGHETTI09_17D_EIGHTY_OPCODE_MANIFEST.json")
-SOURCE_SHA="29b2a0c4ead0c7d102ee9c2680a3491d5bc89932"
+SOURCE_SHA="275cec0add8705565d27da4233860bf42d134a27"
 FIXTURE_SHA="e22a8b706fb84e3356db6c70aac29b9145642201"
 QA08_SHA="4ba6902de08cf9483374f43a33f1d4ae7a14e3f6"
 ENG="third_party/funge-plus-plus/bin/funge"
@@ -88,6 +88,18 @@ def main():
     _,ps=parts(data)
     traps=[x for x in ps if x[2]=="@"]
     check(len(traps)==80 and len(ps)==108,"Original future source cells missing")
+    # All five emitters on every axis must combine BOTH independent worker
+    # residuals into the preceding accumulator expression, not just onto the
+    # stack. Missing this + leaves five leaked operands per dimension.
+    dec=lambda n:"0"+"".join("a*"+c+"+" for c in str(n))
+    addr=lambda n:dec(n)+"0"*16
+    shared=addr(10001)+"g"+lit(31)+"-"+addr(10003)+"g"+lit(33)+"-+"
+    for entry in meta["stages"]:
+        p=[s for _,h,s in ps if h.startswith("Lines 1,Origin %d:"%entry["source_x"])
+           and len(s)>700]
+        check(len(p)==1 and p[0].count(shared+"+")==5,
+              "Stage %s leaks residual operands during future-code synthesis"%entry["axis"])
+
     check(any("Origin 10005:0" in h and h.endswith(":0:1:\n") for i,h,s in ps),
           "No nonzero 17th-dimensional sentinel")
     qa08=json.loads(Path("spaghetti08_nd17_native_receipt.json").read_text())

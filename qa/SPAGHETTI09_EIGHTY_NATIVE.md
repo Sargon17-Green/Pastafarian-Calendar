@@ -8,7 +8,7 @@ and QA09A accepted two-worker fixture blob
 `e22a8b706fb84e3356db6c70aac29b9145642201` are immutable parents.
 
 Source Git blob:
-`29b2a0c4ead0c7d102ee9c2680a3491d5bc89932`.
+`275cec0add8705565d27da4233860bf42d134a27`.
 Engine:
 `cwesson/funge-plus-plus@cd6d7f005b4fc33b486fcc2380b35406f6125ca4`.
 Physical source contains 108 one-line BeQunge panels and **80 single-cell
@@ -85,3 +85,13 @@ No Native PASS, release claim, PR merge, Stage1 completion, or
 Stage2 transition is made until these checks actually pass. The
 candidate is more complex than QA08 but is not a proof of a
 hypothetical global maximum in code complexity.
+
+## QA09B first Native RED and five-share-operand repair
+
+The exact-HEAD Native workflow [39054655883](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39054655883) verified its QA08/QA09A parents, then **failed** the first 80-opcode numerical parity check. The actual real-Funge++ run terminated with all 80 opcodes present but emitted the repeated block [48,36,58,36,62] on every axis and checksum **4,888,320** instead of 136 (seed 1). This historical RED remains a valid fixture and must not be erased.
+
+The first fully deterministic reconstruction of the *actual on-disk Funge opcode sequence*, with 17D p/g stack behavior, independently reproduced the failed Native output exactly. Its stack snapshots showed five unconsumed values per dimensional stage. The source expression for the cross-worker residual was `(workerA - 31) + (workerB - 33)`; each of five opcode emitter bodies incorrectly pushed this sum **without adding it to the current accumulated arithmetic operand**. Thus following `2%`, `:`, and `*` operations acted on an isolated zero, leaving the true accumulator stranded deeper on the stack.
+
+**Candidate repair:** insert a second `+` immediately after the residual expression in each of five emitters on each of 16 axes (**80 actual instruction insertions**). Rebuild all native 17-component p/g coordinates and source-panel positions instead of shifting cells blindly. The repaired BeQ source blob is `275cec0add8705565d27da4233860bf42d134a27`, with 108 source sections, 80 passive `@` traps and the original 17th-dimensional NFUN discovery sentinel. All 2D production, QA06, QA07, QA08 and proven QA09A source blobs are unchanged.
+
+A deterministic evaluator of the repaired Funge stack operations predicts proper axis accumulators 1,3,6,...,136, genuinely alternating generated code dialects, and final checksums 136/272. This is **not sufficient** for native acceptance: the new SHA-pinned CI must pass 12 real Funge++ runs across both cooperative/native threading modes, both 80-trap masking runs and all sabotage mutants. RED tests and diagnostics are retained. No Stage 1 closure, PR merge or Stage 2 launch is authorized here.
