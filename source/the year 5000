@@ -110,9 +110,19 @@ To measure gate pairs for candidate selection:
 
 \ The first eligible year is placed before the next longer candidate.
 \ Equal lengths are sorted by earlier opening gate.
+\ CAL does not allow direct aggregate Put of a complete year candidate.
+\ Copy scalar fields explicitly, retaining the original candidate value.
+To copy a year candidate into another year candidate:
+  Put the year candidate's opening day into the other year candidate's opening day.
+  Put the year candidate's closing day into the other year candidate's closing day.
+  Put the year candidate's opening index into the other year candidate's opening index.
+  Put the year candidate's closing index into the other year candidate's closing index.
+  Put the year candidate's span count into the other year candidate's span count.
+  Put the year candidate's year length into the other year candidate's year length.
+
 To insert a sorted year candidate:
   Create a year option.
-  Put the working year candidate into the year option's year candidate.
+  Copy the working year candidate into the year option's year candidate.
   Put the eligible year ledger's first into the examined year option.
   Loop.
     If the examined year option is nil, break.
@@ -168,7 +178,7 @@ To read the selected year candidate:
     Add 1 to the current rank number.
   Repeat.
   If the selected year option is nil, exit.
-  Put the selected year option's year candidate into the chosen year.
+  Copy the selected year option's year candidate into the chosen year.
   Put 1 into the selected year available.
 
 \ The year-5000 choice uses the sauce for (c,c), not the last gate
