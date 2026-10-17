@@ -31,6 +31,10 @@ The sauce input is a sauce question.
 The hidden work is a hidden calculation.
 The hidden drops are a hidden drop shelf.
 
+\ Wide intermediate operands are explicitly named for the CAL compiler.
+The hiddenSquare is a wide quantity.
+The hiddenTriple is a wide quantity.
+
 \ The main calendar currently uses small day counts. Copy them as decimal
 \ strings without converting any wide values back into 32-bit numbers.
 To copy a calendar question into the sauce input:
@@ -95,15 +99,15 @@ To select the hidden grinding stone:
 \ The rule for step r is SAVE(x squared + 3 times old x + stone + r).
 To perform hidden drop grinding:
   Select the hidden grinding stone.
-  Put the hidden work's value into a squared wide quantity.
-  Multiply the hidden work's value by the squared wide quantity.
-  Put the hidden work's value into a tripled wide quantity.
-  Multiply the tripled wide quantity by 3.
-  Add the tripled wide quantity to the squared wide quantity.
-  Add the hidden work's grinding stone to the squared wide quantity.
-  Add the hidden work's grinding step to the squared wide quantity.
-  Keep the squared wide quantity for the sauce.
-  Put the squared wide quantity into the hidden work's value.
+  Put the hidden work's value into the hiddenSquare.
+  Multiply the hidden work's value by the hiddenSquare.
+  Put the hidden work's value into the hiddenTriple.
+  Multiply the hiddenTriple by 3.
+  Add the hiddenTriple to the hiddenSquare.
+  Add the hidden work's grinding stone to the hiddenSquare.
+  Add the hidden work's grinding step to the hiddenSquare.
+  Keep the hiddenSquare for the sauce.
+  Put the hiddenSquare into the hidden work's value.
 
 To record hidden drop result:
   If the hidden work's index is 1,
