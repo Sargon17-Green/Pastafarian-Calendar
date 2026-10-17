@@ -324,18 +324,24 @@ def gate_anchor_regression():
         raise AssertionError("forged westward successor to prefork > was accepted")
     print("GATE_ANCHOR_PREFORK_FIXED_TURN_FORGERY_REJECT_PASS")
 
-    def shift_first_x(r):
+    def shift_first_x(r, src):
         r["complete_postfork_trace"][0][1]=952
         r["complete_postfork_trace"][0][5]=ord(">")
-    def flip_first_delta(r):
+    def flip_first_delta(r, src):
         r["complete_postfork_trace"][0][4]=1
-    def flip_gate_operand(r):
+    def flip_gate_operand(r, src):
         r["gate"]["executed"]=0
-    def shift_gate_coordinate(r):
+    def shift_gate_coordinate(r, src):
         r["complete_prefork_trace"][-1][1]=952
-    def skip_first_cell(r):
-        r["complete_postfork_trace"][0][2]=1333
-        r["complete_postfork_trace"][0][5]=ord(">")
+    def skip_first_cell(r, src):
+        # Place an internally collinear, source-consistent full route one row
+        # above the genuine physical first cell. The independent postfork
+        # verifier must accept its own geometry and physical code bytes.
+        # But the actual gate MUST land at (951,1334) first, because that
+        # cell already contains a >. The gate-anchor verifier must reject.
+        src[1333]=src[1334]
+        for event in r["complete_postfork_trace"]:
+            event[2]-=1
     for name,mutate in (
         ("wrong_postfork_x",shift_first_x),
         ("wrong_postfork_delta",flip_first_delta),
@@ -343,13 +349,15 @@ def gate_anchor_regression():
         ("wrong_prefork_gate_x",shift_gate_coordinate),
         ("skipped_physical_first_cell",skip_first_cell)):
         bad=copy.deepcopy(run)
-        mutate(bad)
-        bad["first_512_motion"][0]=bad["complete_postfork_trace"][0][1:5]
-        # Prove rejection comes from the new physical gate invariant.
-        audit.verify_run(bad,source,require_prefork=True,
+        altered_source=copy.deepcopy(source)
+        mutate(bad,altered_source)
+        bad["first_512_motion"]=[event[1:5] for event in bad["complete_postfork_trace"][:512]]
+        # First prove the full forged route is internally consistent and
+        # passes all non-anchor checks, including exact source-byte replay.
+        audit.verify_run(bad,altered_source,require_prefork=True,
                          require_gate_anchor=False)
         try:
-            audit.verify_run(bad,source,require_prefork=True,
+            audit.verify_run(bad,altered_source,require_prefork=True,
                              require_gate_anchor=True)
         except AssertionError:
             print("GATE_ANCHOR_EXPECTED_REJECTION",name)
