@@ -26,7 +26,7 @@ To divide a wide quantity by a number and retain the remainder:
     Append the byte to the quotient string.
     Add 1 to the substring's first.
   Repeat.
-  Put quotient string into the wide quantity.
+  Put the quotient string into the wide quantity.
   Normalize the wide quantity.
   Put the current remainder number into the small division remainder.
 
