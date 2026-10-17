@@ -35,6 +35,15 @@ jobs:
           assert s.count(a)==1 and s.count(c)==1
           path.write_text(s.replace(a,b).replace(c,d))
           PY
+          python3 - <<'PY'
+          from pathlib import Path
+          f=Path("third_party/funge-plus-plus/src/FungeRunner.cpp")
+          c=f.read_text()
+          before="inst_t i = ip.get();"
+          after='inst_t i = ip.get(); static int forensic_ticks=0; if (forensic_ticks++<350) { std::cerr << "FUNGEPLUS_IP_TRACE id=" << id << " pos=" << ip.getPos() << " delta=" << ip.getDelta() << " op=" << (int)i << std::endl; }'
+          assert c.count(before)==1
+          f.write_text(c.replace(before,after))
+          PY
           make -C third_party/funge-plus-plus funge
       - name: Diagnose native worker, split, polling and physical reads
         shell: bash

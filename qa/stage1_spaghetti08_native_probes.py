@@ -24,6 +24,9 @@ def execute(code,title):
         "stdout",repr(cp.stdout[:150]),"stderr",repr(cp.stderr[-250:]),flush=True)
       logs=[line for line in cp.stderr.decode("utf-8","replace").splitlines() if "FUNGEPLUS_NATIVE_" in line]
       for z in logs[:16]: print("NATIVE_QA08_POINTER_PROBE",title,z,flush=True)
+      if title in ('concurrent_simple_worker_gate','concurrent_nested_worker_gate'):
+        trace=[line for line in cp.stderr.decode('utf-8','replace').splitlines() if 'FUNGEPLUS_IP_TRACE' in line]
+        for row in trace[-120:]:print('NATIVE_QA08_MOTION_PROBE',title,row,flush=True)
     except subprocess.TimeoutExpired as ex:
       print("NATIVE_QA08_FORENSIC",title,"TIMEOUT stdout",
         repr((ex.stdout or b"")[:150]),"stderr",repr((ex.stderr or b"")[-200:]),flush=True)
