@@ -2,6 +2,12 @@
 \ These are short synthetic tests. They do not need the full sauce.
 \ A failed conversion must not leak fields from an earlier answer.
 
+\ Dedicated QA variables have explicit CAL types and cannot be parsed as new types.
+The structuretestrank is a wide quantity.
+The structurecheckcutletname is a cutlet name assignment.
+The structurecheckmonthlength is a month length record.
+The structurecheckmonthname is a month name assignment.
+
 To check complete date clearing:
   Put 1 into the complete date status.
   Put 5000 into the complete date answer's year number.
@@ -31,8 +37,8 @@ To check cutlet structure invariants:
   Put 10 into the cutlet partition's total spans.
   Put 3 into the cutlet partition's part count.
   Put 0 into the cutlet partition's required boundary.
-  Put "1" into a structural test rank wide quantity.
-  Select a cutlet partition from the structural test rank wide quantity.
+  Put "1" into the structuretestrank.
+  Select a cutlet partition from the structuretestrank.
   Verify the selected cutlet partition.
   If the structure audit's passed is not 1,
     put "An ordinary cutlet partition failed the structural audit." into the check report; exit.
@@ -46,20 +52,20 @@ To check cutlet structure invariants:
   If the structure audit's passed is not 0,
     put "An incorrect cutlet count passed the audit." into the check report; exit.
   Put 3 into the selected cutlet count.
-  Select cutlet names from the structural test rank wide quantity.
+  Select cutlet names from the structuretestrank.
   Verify the selected cutlet names.
   If the structure audit's passed is not 1,
     put "Valid distinct cutlet names failed the audit." into the check report; exit.
-  Put the chosen cutlet names' first into an inspected cutlet name assignment.
-  Put 18 into the inspected cutlet name assignment's name index.
+  Put the chosen cutlet names' first into the structurecheckcutletname.
+  Put 18 into the structurecheckcutletname's name index.
   Verify the selected cutlet names.
   If the structure audit's passed is not 0,
     put "Out-of-range cutlet name passed the audit." into the check report; exit.
-  Put 2 into the inspected cutlet name assignment's name index.
+  Put 2 into the structurecheckcutletname's name index.
   Verify the selected cutlet names.
   If the structure audit's passed is not 0,
     put "A repeated cutlet name passed the audit." into the check report; exit.
-  Put 1 into the inspected cutlet name assignment's name index.
+  Put 1 into the structurecheckcutletname's name index.
   Put 4 into the selected cutlet count.
   Verify the selected cutlet names.
   If the structure audit's passed is not 0,
@@ -68,8 +74,8 @@ To check cutlet structure invariants:
 To check month structure invariants:
   Put 128 into the chosen year's year length.
   Put 2 into the selected month count.
-  Put "1" into a structural test rank wide quantity.
-  Select month lengths from the structural test rank wide quantity.
+  Put "1" into the structuretestrank.
+  Select month lengths from the structuretestrank.
   Verify the selected month lengths.
   If the structure audit's passed is not 1,
     put "Valid bounded month lengths failed the audit." into the check report; exit.
@@ -78,26 +84,26 @@ To check month structure invariants:
   If the structure audit's passed is not 0,
     put "Inexact year length passed the month audit." into the check report; exit.
   Put 128 into the chosen year's year length.
-  Put the chosen month lengths' first into an inspected month length record.
-  Put 3 into the inspected month length record's month length days.
+  Put the chosen month lengths' first into the structurecheckmonthlength.
+  Put 3 into the structurecheckmonthlength's month length days.
   Verify the selected month lengths.
   If the structure audit's passed is not 0,
     put "Month with fewer than four days passed the audit." into the check report; exit.
   Put 3 into the selected month count.
-  Select month names from the structural test rank wide quantity.
+  Select month names from the structuretestrank.
   Verify the selected month names.
   If the structure audit's passed is not 1,
     put "Valid distinct month names failed the audit." into the check report; exit.
-  Put the chosen month names' first into an inspected month name assignment.
-  Put 48 into the inspected month name assignment's name index.
+  Put the chosen month names' first into the structurecheckmonthname.
+  Put 48 into the structurecheckmonthname's name index.
   Verify the selected month names.
   If the structure audit's passed is not 0,
     put "Out-of-range month name passed the audit." into the check report; exit.
-  Put 2 into the inspected month name assignment's name index.
+  Put 2 into the structurecheckmonthname's name index.
   Verify the selected month names.
   If the structure audit's passed is not 0,
     put "A repeated month name passed the audit." into the check report; exit.
-  Put 1 into the inspected month name assignment's name index.
+  Put 1 into the structurecheckmonthname's name index.
   Put 4 into the selected month count.
   Verify the selected month names.
   If the structure audit's passed is not 0,
