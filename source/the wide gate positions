@@ -29,11 +29,20 @@ A wide gate movement has
 The current extended gate is a wide gate position.
 The wide gate movement is a wide gate movement.
 
+\ Unambiguous typed scratch declarations for CAL-4018.
+The wgposzerodigits is a wide quantity.
+The wgposfoundationdigits is a wide quantity.
+The wgposstepdigits is a wide quantity.
+The wgposstepday is a wide signed day.
+The wgposgapdigits is a wide quantity.
+The wgposgapdisplacement is a wide signed day.
+The wgposmaxsteps is a wide quantity.
+
 To initialize extended gate traversal:
-  Put "0" into a wide zero magnitude.
-  Set the current extended gate's index from the wide zero magnitude given 0.
-  Put "15055671" into a wide foundation magnitude.
-  Set the current extended gate's coordinate from the wide foundation magnitude given -1.
+  Put "0" into the wgposzerodigits.
+  Set the current extended gate's index from the wgposzerodigits given 0.
+  Put "15055671" into the wgposfoundationdigits.
+  Set the current extended gate's coordinate from the wgposfoundationdigits given -1.
   Put 1 into the current extended gate's reached.
   Begin bounded gate walking.
 
@@ -42,9 +51,9 @@ To prepare forward extended gate movement:
   Put 1 into the wide gate movement's direction.
   Put the current extended gate's index into the wide gate movement's old index.
   Put the wide gate movement's old index into the wide gate movement's next index.
-  Put "1" into a wide step magnitude.
-  Set a wide step day from the wide step magnitude given 1.
-  Add the wide step day to the wide gate movement's next index.
+  Put "1" into the wgposstepdigits.
+  Set the wgposstepday from the wgposstepdigits given 1.
+  Add the wgposstepday to the wide gate movement's next index.
   Put the wide gate movement's next index into the wide gate movement's gap index.
   If the wide gate movement's old index's polarity is less than 0,
     put the wide gate movement's old index into the wide gate movement's gap index.
@@ -53,9 +62,9 @@ To prepare backward extended gate movement:
   Put -1 into the wide gate movement's direction.
   Put the current extended gate's index into the wide gate movement's old index.
   Put the wide gate movement's old index into the wide gate movement's next index.
-  Put "1" into a wide step magnitude.
-  Set a wide step day from the wide step magnitude given 1.
-  Subtract the wide step day from the wide gate movement's next index.
+  Put "1" into the wgposstepdigits.
+  Set the wgposstepday from the wgposstepdigits given 1.
+  Subtract the wgposstepday from the wide gate movement's next index.
   Put the wide gate movement's next index into the wide gate movement's gap index.
   If the wide gate movement's old index's polarity is greater than 0,
     put the wide gate movement's old index into the wide gate movement's gap index.
@@ -77,9 +86,9 @@ To apply measured extended gate gap given a number:
   If the number is less than 42, exit.
   If the number is greater than 963, exit.
   Convert the number to a string.
-  Put the string into a wide gap magnitude.
-  Set a wide gap displacement from the wide gap magnitude given the wide gate movement's direction.
-  Add the wide gap displacement to the current extended gate's coordinate.
+  Put the string into the wgposgapdigits.
+  Set the wgposgapdisplacement from the wgposgapdigits given the wide gate movement's direction.
+  Add the wgposgapdisplacement to the current extended gate's coordinate.
   Put the wide gate movement's next index into the current extended gate's index.
   Put 1 into the wide gate movement's succeeded.
 
@@ -96,12 +105,14 @@ To advance extended gate backward:
 To locate extended gate index given a wide signed day:
   Initialize extended gate traversal.
   Put 0 into the current extended gate's reached.
-  Put "1024" into a maximum wide gate steps.
-  If the maximum wide gate steps is numerically smaller than the wide signed day's absolute quantity, exit.
+  Put "1024" into the wgposmaxsteps.
+  If the wgposmaxsteps is numerically smaller than the wide signed day's absolute quantity, exit.
   Loop.
     If the current extended gate's index's polarity is the wide signed day's polarity,
-      if the current extended gate's index's absolute quantity is the wide signed day's absolute quantity,
-        put 1 into the current extended gate's reached; break.
+      put 1 into the current extended gate's reached.
+    If the current extended gate's index's absolute quantity is not the wide signed day's absolute quantity,
+      put 0 into the current extended gate's reached.
+    If the current extended gate's reached is 1, break.
     Compare the current extended gate's index with the wide signed day.
     If the signed day precedence result is 1, advance extended gate forward.
     Compare the wide signed day with the current extended gate's index.
