@@ -1,0 +1,31 @@
+name: Befunge QA09 Native Accumulator Forensics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-qa09-accumulator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Exact source and engine pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq)" = "275cec0add8705565d27da4233860bf42d134a27"
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+          make -C third_party/funge-plus-plus funge
+      - name: Read live stack accumulators at precise future-code stage boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti09_acc_diagnostics.py
+          python3 qa/stage1_spaghetti09_acc_diagnostics.py

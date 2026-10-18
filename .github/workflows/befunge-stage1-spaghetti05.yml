@@ -1,0 +1,41 @@
+name: Befunge QA Spaghetti05 Native Shared-History Polynomial
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  spaghetti05-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify production and historical candidate hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/spaghetti04_input_parity_bifurcation_candidate.b98)" = "2120c61485ae196dc387e617d3cff69a272bc413"
+          test "$(git hash-object qa/spaghetti05_shared_stamp_polynomial_candidate.b98)" = "59917c4c73be687bfe80b03818e38ad9c3a97243"
+          echo "SPAGHETTI05_SOURCE_PINNED $(git rev-parse HEAD)"
+      - name: Native PyFunge physical p-g-x causality
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -v "$GITHUB_WORKSPACE:/work:rw" -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" -w /work python:2.7-slim sh -ceu '
+            pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+            python qa/stage1_spaghetti05_native.py
+          '
+      - name: Upload even failing case evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti05-native-evidence
+          path: |
+            spaghetti05_native_receipt.json
+            spaghetti05_native_*.tsv
+          if-no-files-found: warn

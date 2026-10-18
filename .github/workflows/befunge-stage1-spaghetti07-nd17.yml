@@ -1,0 +1,65 @@
+name: Befunge QA07 Native Seventeen-Dimensional Residue Mesh
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-nd17:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out pinned QA source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check out exact N-dimensional Funge++ engine
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Pin historical source and actual 17D specimen
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/spaghetti06_residue_compiler_candidate.b98)" = "d89c0499f9e006eb62cd5876bd297085265435d6"
+          test "$(git hash-object qa/spaghetti07_17d_residue_mesh.beq)" = "4c9bff056cb61004d37dd2d949fccf171b4ddf0f"
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+          echo "NATIVE_ND17_EXACT_HEAD $(git rev-parse HEAD)"
+      - name: Build native 17-dimensional Funge++ interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C third_party/funge-plus-plus funge
+          out="$(timeout 10 third_party/funge-plus-plus/bin/funge third_party/funge-plus-plus/test/example5d.beq)"
+          test "$out" = "Hello World"
+          echo "NATIVE_FUNGEPLUSPLUS_6D_SMOKETEST_PASS"
+      - name: Create fresh Native QA06 history receipt (separate 2D interpreter)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -v "$GITHUB_WORKSPACE:/work:rw" -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" -w /work python:2.7-slim sh -ceu '
+            pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+            python qa/stage1_spaghetti06_native.py
+          '
+      - name: Native 17D geometry, residue generation, 48 dynamic opcodes, 16 counterfactuals
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti07_nd17_native.py
+          python3 qa/stage1_spaghetti07_nd17_native.py --engine third_party/funge-plus-plus/bin/funge
+      - name: Preserve QA07 evidence whether successful or failed
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti07-native-17d-evidence
+          path: |
+            spaghetti06_native_receipt.json
+            spaghetti07_nd17_native_receipt.json
+          if-no-files-found: warn

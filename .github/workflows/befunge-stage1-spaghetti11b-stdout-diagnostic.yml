@@ -1,0 +1,59 @@
+name: Befunge QA11B Native Mutant Partial Stdout Forensics
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_spaghetti11b_stdout_diagnostic.py'
+      - '.github/workflows/befunge-stage1-spaghetti11b-stdout-diagnostic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  buffered-stdout-forensics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Verify immutable parent and QA11B source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/spaghetti11_17d_three_worker_cascade.beq)" = '990d8fb2b84c7ee728634bb93a8e7baaef992c40'
+          test "$(git hash-object qa/spaghetti11_17d_cascade_208_generated_candidate.beq)" = 'afa261c6eab74d69b6c3afbe6c641fc130d627c0'
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = 'cd6d7f005b4fc33b486fcc2380b35406f6125ca4'
+      - name: Apply isolated pinned engine shutdown fix and build
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('third_party/funge-plus-plus/src/FungeUniverse.cpp')
+          s=p.read_text(); t=chr(9)
+          old='\n'.join([t*4+'threads.pop();',t*4+'delete thread;',
+                         t*3+'}',t*3+'mutex.unlock();',t*2+'}else{'])
+          assert s.count(old)==1
+          new=old.replace(t*3+'mutex.unlock();',t*3+'cv.notify_all(); // qa11b disposable stdout probe\n'+t*3+'mutex.unlock();')
+          p.write_text(s.replace(old,new))
+          PY
+          make -C third_party/funge-plus-plus funge
+      - name: Probe native partial receipts, including timeouts
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v stdbuf
+          python3 -m py_compile qa/stage1_spaghetti11b_stdout_diagnostic.py
+          python3 qa/stage1_spaghetti11b_stdout_diagnostic.py
+      - name: Keep incomplete and successful diagnostic records
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa11b-native-mutant-partial-stdout-diagnostic
+          path: spaghetti11b_partial_stdout_diagnostic.json
+          if-no-files-found: warn

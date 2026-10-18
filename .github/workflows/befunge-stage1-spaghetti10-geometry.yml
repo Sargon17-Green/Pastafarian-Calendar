@@ -1,0 +1,22 @@
+name: Befunge QA10 Source Reproducibility Geometry
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa10-rebuild-17d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Rebuild identical exact-pinned 208-opcode BeQunge geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq)" = "e22a8b706fb84e3356db6c70aac29b9145642201"
+          test "$(git hash-object qa/spaghetti10_17d_dual_worker_macro_candidate.beq)" = "010efd012ae52a60740aa97750b5a02519912e92"
+          python3 -m py_compile qa/stage1_spaghetti10_build.py
+          python3 qa/stage1_spaghetti10_build.py
