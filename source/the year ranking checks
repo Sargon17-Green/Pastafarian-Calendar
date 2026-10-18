@@ -46,6 +46,8 @@ To check invalid year candidate ranks:
 
 \ This test uses the same candidate and checks the ordinal behavior
 \ when calculation day falls exactly on the opening or closing gate.
+The boundarytestday is a calendar day.
+
 To check synthetic year boundary containment:
   Put -15055671 into the year selection day.
   Make synthetic year gates.
@@ -54,11 +56,11 @@ To check synthetic year boundary containment:
   Read the selected year candidate.
   If the selected year available is not 1,
     put "The boundary test did not select a synthetic year." into the check report; exit.
-  Put the chosen year's opening day into a boundary test day.
-  If the chosen year contains the boundary test day,
+  Put the chosen year's opening day into the boundarytestday.
+  If the chosen year contains the boundarytestday,
     put "A year incorrectly contains its own opening gate." into the check report; exit.
-  Put the chosen year's closing day into the boundary test day.
-  If the chosen year does not contain the boundary test day,
+  Put the chosen year's closing day into the boundarytestday.
+  If the chosen year does not contain the boundarytestday,
     put "A year incorrectly excludes its own closing gate." into the check report; exit.
   Destroy the eligible year ledger.
   Destroy the nearby gate ledger.
