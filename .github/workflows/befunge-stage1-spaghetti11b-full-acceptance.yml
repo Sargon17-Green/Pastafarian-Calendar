@@ -50,6 +50,17 @@ jobs:
               t*3+'cv.notify_all(); // qa11b disposable scheduler fix\n'+t*3+'mutex.unlock();')
           assert s.count(old)==1
           p.write_text(s.replace(old,new))
+          # The mutational Native proof must retain emitted code bytes even if
+          # modified executable code later loops. Force only stdout flush on
+          # this disposable CI engine; no source or runtime semantics changed.
+          entry=Path('third_party/funge-plus-plus/src/Funge.cpp')
+          body=entry.read_text()
+          anchor='int main(int argc, char **argv, char **envp){\n\treturn Funge::fungemain(argc, argv, envp);'
+          assert body.count(anchor)==1, 'Pinned Funge++ main entry changed'
+          entry.write_text(body.replace(anchor,
+              'int main(int argc, char **argv, char **envp){\n'+
+              '\tstd::cout.setf(std::ios_base::unitbuf); // QA11B ephemeral output observability\n'+
+              '\treturn Funge::fungemain(argc, argv, envp);'))
           PY
           make -C third_party/funge-plus-plus funge
       - name: Native proof for ${{ matrix.group }}

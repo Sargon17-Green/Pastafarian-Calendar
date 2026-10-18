@@ -6,7 +6,7 @@ GROUP: baseline | axes-low | axes-high | roles | third
 A passed individual group is not a claim of full QA11B acceptance.
 """
 from __future__ import annotations
-import argparse, hashlib, json, re, time, traceback
+import argparse, hashlib, json, re, time, traceback, subprocess, tempfile
 from pathlib import Path
 import stage1_spaghetti10_macro_native as q10
 import stage1_spaghetti11b_three_shard_native as q11
@@ -100,10 +100,38 @@ def role_mutation(original, st, R, from_c, to_c, occurrence=1):
     return ''.join(ls).encode('ascii')
 
 
-def run_check(receipt, name, raw, seed, mode, timeout, should_match):
-    got = q10.native(raw, seed, mode, timeout)
+
+def native_partial_stdout(raw, seed, mode, timeout):
+    """Run pinned Native Funge++ with observable partial stdout on timeout.
+
+    Unlike QA10.native, this local QA11B-only wrapper preserves TimeoutExpired
+    stdout rather than losing it. stdbuf does not alter Funge execution state.
+    A timeout by itself can NEVER satisfy a causal witness.
+    """
+    with tempfile.TemporaryDirectory(prefix='qa11b_capture_') as directory:
+        target=Path(directory)/'probe.beq'
+        target.write_bytes(raw)
+        args=['stdbuf','-o0',q10.ENGINE,'-fconcurrent',
+              '-fthreads='+mode,'-fno-execute','-fno-filesystem',str(target)]
+        started=time.monotonic()
+        try:
+            cp=subprocess.run(args,input=(str(seed)+'\n').encode('ascii'),
+                              capture_output=True,timeout=timeout)
+            raw_stdout=cp.stdout; err=cp.stderr; rc=cp.returncode; expired=False
+        except subprocess.TimeoutExpired as ex:
+            raw_stdout=ex.stdout or b'';err=ex.stderr or b'';rc=124;expired=True
+        # A number is accepted only with a delimiter; timeout can cut a token.
+        vals=[int(m.group(1)) for m in re.finditer(rb'(?<![0-9\-])(-?[0-9]+)[ \t\r\n]',raw_stdout)]
+        return {'rc':rc,'output':vals,'timeout':expired,
+                'elapsed_s':round(time.monotonic()-started,3),
+                'stdout_len':len(raw_stdout),
+                'stderr':err.decode('utf-8','replace')[-300:]}
+
+def run_check(receipt, name, raw, seed, mode, timeout, should_match, observable=False):
+    got = (native_partial_stdout(raw, seed, mode, timeout) if observable
+           else q10.native(raw, seed, mode, timeout))
     item = {'case': name, 'seed': seed, 'scheduler': mode, 'input_blob': q10.gitblob(raw),
-            'bound_seconds': timeout, **fingerprint(got)}
+            'bound_seconds': timeout, 'partial_stdout_capture': observable, **fingerprint(got)}
     healthy = got['rc'] == 0 and got['output'] == q11.expected(seed)
     item['matches_healthy_oracle'] = healthy
     receipt['runs'].append(item)
@@ -123,6 +151,7 @@ def main():
                'group': args.group, 'source_git_blob': q10.gitblob(raw),
                'manifest_sha256': hashlib.sha256(MANIFEST.read_bytes()).hexdigest(),
                'engine_requires_disposable_scheduler_shutdown_fix': True,
+               'engine_requires_disposable_stdout_unitbuf': True,
                'native_only': True, 'runs': [], 'final_status': 'INCOMPLETE'}
     path = Path('spaghetti11b_full_%s_receipt.json' % args.group.replace('-', '_'))
     try:
@@ -145,13 +174,13 @@ def main():
             # Every counterfactual group has its own matching Native baseline,
             # plus a harmless source edit under the identical calibrated deadline.
             standard = run_check(receipt, 'local-healthy-calibration', raw, 1,
-                                 'funge', 240, True)
+                                 'funge', 240, True, observable=True)
             bound = max(200, int(standard['elapsed_s']*1.7)+35)
             neutral = q10.replace_one_panel(raw,
                 lambda h, b: h.startswith('Lines 1,Origin 10005:0,') and b == 'z',
                 'z', 'q')
             run_check(receipt, 'neutral-sentinel-equal-timing', neutral,
-                      1, 'funge', bound, True)
+                      1, 'funge', bound, True, observable=True)
             receipt['calibration'] = {'baseline_seconds': standard['elapsed_s'],
                                       'counterfactual_timeout_seconds': bound,
                                       'neutral_control_completed': True}
@@ -160,7 +189,7 @@ def main():
                 for step in steps:
                     altered = axis_mutation(raw, step)
                     got = run_check(receipt, 'axis-%02d-causes-difference' % step['axis'],
-                                    altered, 1, 'funge', bound, False)
+                                    altered, 1, 'funge', bound, False, observable=True)
                     index = 3 + (step['axis']-1)*14
                     baseline_output = q11.expected(1)
                     q10.check(len(got['output']) > index and
@@ -175,7 +204,7 @@ def main():
                     ('stack-drop', 36, 35, 3), ('direction-turn', 62, 61, 1)):
                     altered = role_mutation(raw, st, R, old, new, occurrence)
                     got = run_check(receipt, 'opcode-role-'+name, altered, 1,
-                                    'funge', bound, False)
+                                    'funge', bound, False, observable=True)
                     role_index = {'multiply': 5, 'divide': 7,
                                   'stack-drop': 9, 'direction-turn': 12}[name]
                     index = 3 + (st['axis']-1)*14 + role_index
@@ -191,7 +220,7 @@ def main():
                 altered = q11.mutate_worker_divider(raw)
                 for seed in (1, 2):
                     got = run_check(receipt, 'third-worker-residue-changes-code',
-                                    altered, seed, 'funge', bound, False)
+                                    altered, seed, 'funge', bound, False, observable=True)
                     # An altered printed residue or mere timeout does NOT prove
                     # that any future opcode was changed.
                     q10.check(len(got['output']) > 3 and
