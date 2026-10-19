@@ -1,13 +1,13 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.TargetYearManager do
   @moduledoc """
   Tìm năm chứa ngày đích bằng cách đi từ năm neo 5000.
-  Stage38 chủ ý giữ lỗi di sản ở biên đóng: thay vì trả
-  năm có close_day == target, nó trả năm kế ngay lập tức.
+  Stage39 vẫn gọi bộ định tuyến legacy nhưng sửa cổng đóng
+  thành ngày cuối năm hiện tại, theo khoảng (open,close].
   Các bước tiến/lùi khác dùng đúng hai bộ chọn đã vá.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
-    LegacyUpperBoundaryBelongsToNextYear,
+    TargetYearBoundaryPatch,
     NextYearManager,
     PreviousYearManager,
     Year5000Manager
@@ -33,7 +33,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.TargetYearManager do
   end
 
   defp walk(calculation_day, target_day, year, state, trace) do
-    case LegacyUpperBoundaryBelongsToNextYear.route(target_day, year) do
+    case TargetYearBoundaryPatch.route(target_day, year) do
       :found ->
         {year, state, trace}
 
@@ -47,10 +47,6 @@ defmodule PastafariCalendarElixirVietnamese.Monster.TargetYearManager do
         walk(calculation_day, target_day, report.year, report.gate_state,
           [{:previous, year.number, report.year.number} | trace])
 
-      :next_at_upper_boundary ->
-        report = NextYearManager.next_year_from(calculation_day, year, state)
-        {report.year, report.gate_state,
-          [{:legacy_upper_boundary, year.number, year.close_gate_day} | trace]}
     end
   end
 end

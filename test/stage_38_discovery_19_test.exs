@@ -99,14 +99,16 @@ defmodule PastafariCalendarElixirVietnamese.Stage38Discovery19Test do
     assert report.steps == 2
   end
 
-  test "ngày đích bằng cổng đóng kích hoạt di sản đúng một bước" do
+  test "ngày đóng vẫn thấy lỗi legacy, production trả năm hiện tại" do
     for delta <- [-539, 0, 417] do
       c = @foundation + delta
       anchor = Calendar.year5000_spaghetti(c)
       report = TargetYearManager.diagnose(c, anchor.close_gate_day)
-      assert report.year.number == 5001
-      assert report.steps == 1
-      assert report.trace == [{:legacy_upper_boundary, 5000, anchor.close_gate_day}]
+      assert LegacyUpperBoundaryBelongsToNextYear.route(anchor.close_gate_day, anchor) ==
+        :next_at_upper_boundary
+      assert report.year.number == 5000
+      assert report.steps == 0
+      assert report.trace == []
     end
   end
 
@@ -178,11 +180,13 @@ defmodule PastafariCalendarElixirVietnamese.Stage38Discovery19Test do
     legacy = File.read!(Path.join(root, "legacy_upper_boundary_belongs_to_next_year.ex"))
     manager = File.read!(Path.join(root, "target_year_manager.ex"))
     assert legacy =~ "target_day == year.close_gate_day -> :next_at_upper_boundary"
-    assert manager =~ "LegacyUpperBoundaryBelongsToNextYear.route(target_day, year)"
+    patch = File.read!(Path.join(root, "target_year_boundary_patch.ex"))
+    assert patch =~ "LegacyUpperBoundaryBelongsToNextYear.route(target_day, year)"
+    assert manager =~ "TargetYearBoundaryPatch.route(target_day, year)"
     assert manager =~ "NextYearManager.next_year_from"
     assert manager =~ "PreviousYearManager.previous_year_from"
     refute manager =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "target_year_boundary_patch.ex"))
+    assert File.exists?(Path.join(root, "target_year_boundary_patch.ex"))
   end
 
   test "hồi quy normative đỏ 1: cổng đóng tại Foundation" do
