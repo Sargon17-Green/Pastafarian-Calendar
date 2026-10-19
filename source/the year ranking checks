@@ -57,10 +57,12 @@ To check synthetic year boundary containment:
   If the selected year available is not 1,
     put "The boundary test did not select a synthetic year." into the check report; exit.
   Put the chosen year's opening day into the boundarytestday.
-  If the chosen year contains the boundarytestday,
+  Evaluate native year containment given the chosen year and the boundarytestday.
+  If the native year containment result is 1,
     put "A year incorrectly contains its own opening gate." into the check report; exit.
   Put the chosen year's closing day into the boundarytestday.
-  If the chosen year does not contain the boundarytestday,
+  Evaluate native year containment given the chosen year and the boundarytestday.
+  If the native year containment result is not 1,
     put "A year incorrectly excludes its own closing gate." into the check report; exit.
   Destroy the eligible year ledger.
   Destroy the nearby gate ledger.
