@@ -1226,3 +1226,22 @@ không thay bốn expected normative.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39220862708
 Stage38 đóng EXPECTED_RED; Stage39 PATCH19 chưa bắt đầu.
 Không đổi main, oracle hoặc những bản vá cũ.
+
+## Giai đoạn 39/55 — PATCH 19: khôi phục cổng đóng năm đích
+
+TargetYearBoundaryPatch gọi LegacyUpperBoundaryBelongsToNextYear
+trước khi chuyển :next_at_upper_boundary sang :found; mọi tuyến
+khác giữ nguyên. Bước tìm năm quá khứ/tương lai đúng theo
+khoảng (open,close]. Bốn hồi quy Stage38 trở lại xanh.
+
+Stage39 PATCH19 đã qua kiểm chứng trên Elixir 1.18.5 / OTP 27:
+biên dịch 66 tệp .ex, **593/593 bài PASS, 0 lỗi**, không
+warning biên dịch Elixir. Canonical Names Lock độc lập PASS.
+Bốn hồi quy normative Stage38 giữ nguyên expected và đều xanh;
+20 bài Stage39 mới, 573 bài cũ đều xanh.
+Giữ legacy blob SHA `0ccb0a91f828d97b319ddcdd9f06561815ee2ff6`;
+oracle test-only SHA `be1638f46b2190d617af0378a61b077bda10bf32`.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39222112909
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39222112844
+Stage39 đóng GREEN. Stage40 DISCOVERY20 chưa bắt đầu;
+chưa tích hợp lịch cuối, không thay main.
