@@ -6,6 +6,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage36Discovery18ControlsTest do
     LegacyNextYearSealForPreviousSeed,
     PreviousYearCandidateManager,
     PreviousYearManager,
+    PreviousYearSealPatch,
     Year5000Manager,
     Year
   }
@@ -78,12 +79,15 @@ defmodule PastafariCalendarElixirVietnamese.Stage36Discovery18ControlsTest do
     assert r.normative_seal == 12
   end
 
-  test "rank legacy đến từ bát 1 chốt 11" do
+  test "rank legacy chốt 11 vẫn được giữ, production dùng chốt 12" do
     c = @foundation - 37
     r = PreviousYearManager.diagnose(c)
-    stream = Calendar.answer_stream_spaghetti(c, r.source_day, 1, 11)
-    assert r.rank == AnswerStreamManager.choose_rank(stream, r.candidate_count)
-    assert r.rank == LegacyNextYearSealForPreviousSeed.choose_rank(c, r.source_day, r.candidate_count)
+    old_stream = Calendar.answer_stream_spaghetti(c, r.source_day, 1, 11)
+    corrected_stream = Calendar.answer_stream_spaghetti(c, r.source_day, 1, 12)
+    assert r.historical_rank == AnswerStreamManager.choose_rank(old_stream, r.candidate_count)
+    assert r.historical_rank == LegacyNextYearSealForPreviousSeed.choose_rank(c, r.source_day, r.candidate_count)
+    assert r.rank == AnswerStreamManager.choose_rank(corrected_stream, r.candidate_count)
+    assert r.rank == PreviousYearSealPatch.choose_rank(c, r.source_day, r.candidate_count)
   end
 
   test "chọn năm sản xuất từ vị trí rank one-based" do
@@ -130,13 +134,13 @@ defmodule PastafariCalendarElixirVietnamese.Stage36Discovery18ControlsTest do
     end
   end
 
-  test "kiểm toán source: legacy chốt 11, chưa có PATCH 18" do
+  test "kiểm toán source: legacy chốt 11, PATCH 18 chọn chốt 12" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = File.read!(Path.join(root, "legacy_next_year_seal_for_previous_seed.ex"))
     manager = File.read!(Path.join(root, "previous_year_manager.ex"))
     assert legacy =~ "Dispatcher.answer_stream(calculation_day, close_day, 1, 11)"
-    assert manager =~ "LegacyNextYearSealForPreviousSeed.choose_rank("
-    refute File.exists?(Path.join(root, "previous_year_seal_patch.ex"))
+    assert manager =~ "PreviousYearSealPatch.diagnose("
+    assert File.exists?(Path.join(root, "previous_year_seal_patch.ex"))
     refute manager =~ "NormativeReference"
   end
 end
