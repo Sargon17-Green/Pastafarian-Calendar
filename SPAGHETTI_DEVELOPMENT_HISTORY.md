@@ -1245,3 +1245,18 @@ oracle test-only SHA `be1638f46b2190d617af0378a61b077bda10bf32`.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39222112844
 Stage39 đóng GREEN. Stage40 DISCOVERY20 chưa bắt đầu;
 chưa tích hợp lịch cuối, không thay main.
+
+
+## Giai đoạn 40/55 — DISCOVERY20: đảo thứ tự số cốt-lết
+
+CutletCountManager chọn năm đích đã vá và số cốt-lết từ
+6..min(17,gate_gaps); hạt đúng sauce(c,year.open_day+1),
+bát 2/chốt 20, rank một-based. LegacyDescendingCutletCount
+cố tình đảo thứ tự ứng viên nhưng không mất giá trị nào.
+20 bài mới: 16 kiểm soát và 4 nhóm hồi quy normative RED.
+
+Elixir 1.18.5 / OTP27: 613 bài, 609 PASS và đúng bốn RED;
+Canonical Names Lock PASS, không compiler warnings.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39297740064
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39297739893
+Stage40 đóng EXPECTED_RED; Stage41 PATCH20 chưa bắt đầu.

@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=40
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=20
-LAST_COMPLETED_STAGE=39
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=40
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..19; Stage40 thêm CutletCountManager và LegacyDescendingCutletCount. Tập 6..min(17,gate_gaps) và rank từ sauce(c,year.open+1), bowl2/seal20 đều đúng, production cố ý đảo thứ tự chọn.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_40_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_40_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=613
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -923,3 +923,12 @@ cố tình sắp danh sách giảm dần trước khi lấy ứng viên.
 16 điều khiển và 4 nhóm hồi quy normative RED; dự kiến 613 bài,
 đúng bốn sai lệch. Không nâng LAST_COMPLETED_STAGE trước CI.
 Không tích hợp phân hoạch, không thay oracle/PATCH01..19/main.
+
+Stage40 DISCOVERY20 đã xác minh trên Elixir 1.18.5 / OTP27:
+biên dịch 68 tệp, **613 bài, 609 PASS và đúng 4 hồi quy normative RED**.
+16 kiểm soát Stage40, 593 bài cũ đều PASS. Bốn sai lệch
+production/oracle: 9/6, 6/9, 7/9, 6/8. Canonical Names Lock PASS.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39297740064
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39297739893
+Đóng Stage40 EXPECTED_RED; Stage41 PATCH20 chưa bắt đầu.
+Không sửa main, oracle, legacy hoặc các PATCH01..19.
