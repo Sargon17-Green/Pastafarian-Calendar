@@ -2,16 +2,18 @@
 \ Small intermediate divisions never discard fractions: each step
 \ of the multiplicative binomial identity is already an integer.
 
+The dividedtest is a wide quantity.
+
 To check the long small division:
-  Put "121515484051014339000" into a divided wide quantity.
-  Divide the divided wide quantity by 17 and retain the remainder.
-  If the divided wide quantity is not "7147969650059667000",
+  Put "121515484051014339000" into the dividedtest.
+  Divide the dividedtest by 17 and retain the remainder.
+  If the dividedtest is not "7147969650059667000",
     put "Long division by seventeen has the wrong quotient." into the check report; exit.
   If the small division remainder is not 0,
     put "Long division of an exact multiple returned a remainder." into the check report; exit.
-  Put "170141183460469231731687303715884105727" into the divided wide quantity.
-  Divide the divided wide quantity by 10 and retain the remainder.
-  If the divided wide quantity is not "17014118346046923173168730371588410572",
+  Put "170141183460469231731687303715884105727" into the dividedtest.
+  Divide the dividedtest by 10 and retain the remainder.
+  If the dividedtest is not "17014118346046923173168730371588410572",
     put "Long division by ten has the wrong quotient." into the check report; exit.
   If the small division remainder is not 7,
     put "Long division by ten returned the wrong remainder." into the check report; exit.
