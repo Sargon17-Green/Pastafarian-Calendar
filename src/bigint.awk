@@ -131,18 +131,26 @@ function bi_mul_small(a,n,    neg,i,carry,d,v,out) {
     return neg ? "-" out : out
 }
 
-function bi_divmod_abs(a,b,    i,d,rem,q,qdig,k,prod) {
+function bi_divmod_abs(a,b,    i,d,rem,q,qdig,k,prod,P,lo,hi,mid) {
     a=bi_abs(a); b=bi_abs(b)
     if (b=="0") { BI_ERROR="deling på null"; BI_DIV_Q=""; BI_DIV_R=""; return 0 }
+    # Multiples depend only on the divisor, not on the dividend digit.
+    # Keep the table invocation-local: no shared cache or state leakage.
+    delete P
+    for (k=1;k<=9;k++) P[k]=bi_mul_small(b,k)
     rem="0"; q=""
     for (i=1; i<=length(a); i++) {
         d=substr(a,i,1)
         rem=bi_strip((rem=="0" ? "" : rem) d)
-        qdig=0
-        for (k=9; k>=1; k--) {
-            prod=bi_mul_small(b,k)
-            if (bi_cmp_abs(prod,rem)<=0) { qdig=k; rem=bi_sub_abs(rem,prod); break }
+        # Find the largest decimal quotient digit with at most four comparisons.
+        lo=0; hi=9
+        while (lo<hi) {
+            mid=int((lo+hi+1)/2)
+            if (bi_cmp_abs(P[mid],rem)<=0) lo=mid
+            else hi=mid-1
         }
+        qdig=lo
+        if (qdig>0) rem=bi_sub_abs(rem,P[qdig])
         q=q qdig
     }
     BI_DIV_Q=bi_strip(q); BI_DIV_R=bi_strip(rem); return 1
