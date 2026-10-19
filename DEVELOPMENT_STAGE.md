@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=38
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=39
+CURRENT_KIND=PATCH
 CURRENT_PATCH=19
 LAST_COMPLETED_STAGE=38
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..18. Stage38 mở tìm năm mục tiêu bằng TargetYearManager; LegacyUpperBoundaryBelongsToNextYear cố ý trả năm sau nếu ngày mục tiêu đúng cổng đóng, trái khoảng (open,close].
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..18. Stage39 thêm TargetYearBoundaryPatch gọi legacy trước, đổi :next_at_upper_boundary thành :found, giữ các nhánh next/previous và state bất biến.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_38_DISCOVERY_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_39_PATCH_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=573
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -901,3 +901,5 @@ không thay bốn expected normative.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39220862708
 Stage38 đóng EXPECTED_RED; Stage39 PATCH19 chưa bắt đầu.
 Không đổi main, oracle hoặc những bản vá cũ.
+
+Giai đoạn 39 PATCH19 đã thêm TargetYearBoundaryPatch gọi LegacyUpperBoundaryBelongsToNextYear thật rồi sửa tuyến upper-boundary thành :found theo (open,close]. Giữ bốn hồi quy normative Stage38, cập nhật điều khiển Stage38 cho production mới và thêm 20 bài Stage39. Dự kiến 593 bài GREEN, không warning. Chưa nâng LAST_COMPLETED_STAGE trước xác minh CI và khóa tên. Không sửa main hoặc oracle.
