@@ -1180,3 +1180,25 @@ Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/
 Stage35 đóng GREEN. Stage36 DISCOVERY 18 chưa bắt đầu.
 Không sửa main, không nhập oracle vào production, chưa hoàn thiện lịch cuối.
 
+## Giai đoạn 37/55 — PATCH 18: chốt 12 cho năm trước
+
+PreviousYearSealPatch gọi LegacyNextYearSealForPreviousSeed
+để lưu hạng lịch sử từ chốt 11; sau đó chọn đúng hạng
+từ Dispatcher.answer_stream(c,close_day,1,12).
+PreviousYearManager dùng corrected_rank; ứng viên, cổng,
+năm 5000, năm 5001 và oracle không thay đổi.
+20 kiểm thử Stage37 mới, bốn hồi quy Stage36 được giữ nguyên.
+
+Giai đoạn 37 PATCH 18 được xác minh trên GitHub Actions
+với Elixir 1.18.5 / OTP 27, biên dịch 63 tệp .ex,
+**551/551 kiểm thử PASS, 0 lỗi, không compiler warnings**.
+Canonical Names Lock độc lập PASS.
+Bốn hồi quy normative Stage36 không đổi expected và đều xanh.
+LegacyNextYearSealForPreviousSeed giữ blob SHA
+`b1ab864a1a92a8899615e3e7649bdbdebd5e4ca7`;
+oracle test-only giữ blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39219614083
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39219614067
+Đóng Stage37 GREEN; Stage38/55 DISCOVERY19 chưa bắt đầu.
+Không sửa main hoặc tích hợp toàn bộ lịch.

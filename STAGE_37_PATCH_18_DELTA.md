@@ -20,3 +20,19 @@ tính tương tranh, di sản và tính toàn vẹn nguồn. Mục tiêu
 551 kiểm thử GREEN, 0 compiler warnings và Canonical Names Lock PASS.
 
 Không chỉnh main, oracle, hoặc chuyển tài liệu HANDOFF_ lên GitHub.
+
+## Kết quả xác minh Native CI
+
+Giai đoạn 37 PATCH 18 được xác minh trên GitHub Actions
+với Elixir 1.18.5 / OTP 27, biên dịch 63 tệp .ex,
+**551/551 kiểm thử PASS, 0 lỗi, không compiler warnings**.
+Canonical Names Lock độc lập PASS.
+Bốn hồi quy normative Stage36 không đổi expected và đều xanh.
+LegacyNextYearSealForPreviousSeed giữ blob SHA
+`b1ab864a1a92a8899615e3e7649bdbdebd5e4ca7`;
+oracle test-only giữ blob SHA
+`be1638f46b2190d617af0378a61b077bda10bf32`.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39219614083
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39219614067
+Đóng Stage37 GREEN; Stage38/55 DISCOVERY19 chưa bắt đầu.
+Không sửa main hoặc tích hợp toàn bộ lịch.
