@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=39
-CURRENT_KIND=PATCH
-CURRENT_PATCH=19
+CURRENT_STAGE=40
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=20
 LAST_COMPLETED_STAGE=39
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..18. Stage39 thêm TargetYearBoundaryPatch gọi legacy trước, đổi :next_at_upper_boundary thành :found, giữ các nhánh next/previous và state bất biến.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..19; Stage40 thêm CutletCountManager và LegacyDescendingCutletCount. Tập 6..min(17,gate_gaps) và rank từ sauce(c,year.open+1), bowl2/seal20 đều đúng, production cố ý đảo thứ tự chọn.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_39_PATCH_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_40_DISCOVERY_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=593
-CI_FAILURES=0
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -915,3 +915,11 @@ oracle test-only SHA `be1638f46b2190d617af0378a61b077bda10bf32`.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39222112844
 Stage39 đóng GREEN. Stage40 DISCOVERY20 chưa bắt đầu;
 chưa tích hợp lịch cuối, không thay main.
+
+Giai đoạn 40 DISCOVERY20: mở lựa chọn số cốt-lết của năm đích.
+Tập ứng viên 6..min(17,gate_gaps), hạt sauce(c,open_day+1),
+bát 2/chốt 20 và rank đều chuẩn. LegacyDescendingCutletCount
+cố tình sắp danh sách giảm dần trước khi lấy ứng viên.
+16 điều khiển và 4 nhóm hồi quy normative RED; dự kiến 613 bài,
+đúng bốn sai lệch. Không nâng LAST_COMPLETED_STAGE trước CI.
+Không tích hợp phân hoạch, không thay oracle/PATCH01..19/main.

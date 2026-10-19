@@ -9,6 +9,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   production; PATCH 15 sửa nguồn ngày cổng âm và giữ legacy.
   Stage33 đã vá thứ tự năm 5000. Stage34 mở tìm năm tiếp
   theo, nhưng legacy dùng ngày tính thay cho ngày mở năm.
+  DISCOVERY20 mở số cốt-lết nhưng di sản đảo thứ tự ứng viên.
   Chưa tích hợp lịch hoàn chỉnh.
   """
 
@@ -18,6 +19,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     BowlDropCalculator,
     AnswerStreamManager,
     Context,
+    CutletCountManager,
     DayCountManager,
     DistanceManager,
     GateGapManager,
@@ -219,6 +221,12 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def next_year_diagnostic(calculation_day), do: NextYearManager.diagnose(calculation_day)
   def previous_year(day), do: PreviousYearManager.previous_year(day)
   def previous_year_diagnostic(day), do: PreviousYearManager.diagnose(day)
+
+  def cutlet_count(calculation_day, target_day),
+    do: CutletCountManager.cutlet_count(calculation_day, target_day)
+
+  def cutlet_count_diagnostic(calculation_day, target_day),
+    do: CutletCountManager.diagnose(calculation_day, target_day)
 
   def find_target_year(calculation_day, target_day),
     do: TargetYearManager.find(calculation_day, target_day)
