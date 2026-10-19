@@ -7,6 +7,9 @@
 \ [4,1,5], [4,2,4], [4,3,3], [4,4,2], [4,5,1].
 \ The source is awaiting CAL execution.
 
+The samplecutletrank is a wide quantity.
+The examinedcutletpiece is a cutlet piece.
+
 To check cutlet partition counts:
   Put 10 into the cutlet partition's total spans.
   Put 3 into the cutlet partition's part count.
@@ -36,35 +39,35 @@ To check cutlet partition counts:
 \ Verify three positive selected lengths and make sure no extra part
 \ is silently attached to the linked result.
 To verify three selected cutlet spans given a number and another number and a third number:
-  Put the chosen cutlet pieces' first into an examined cutlet piece.
-  If the examined cutlet piece is nil,
+  Put the chosen cutlet pieces' first into the examinedcutletpiece.
+  If the examinedcutletpiece is nil,
     put "A cutlet partition was unexpectedly empty." into the check report; exit.
-  If the examined cutlet piece's span length is not the number,
+  If the examinedcutletpiece's span length is not the number,
     put "The first cutlet span differed from the reference." into the check report; exit.
-  Put the examined cutlet piece's next into the examined cutlet piece.
-  If the examined cutlet piece is nil,
+  Put the examinedcutletpiece's next into the examinedcutletpiece.
+  If the examinedcutletpiece is nil,
     put "A cutlet partition ended after one part." into the check report; exit.
-  If the examined cutlet piece's span length is not the other number,
+  If the examinedcutletpiece's span length is not the other number,
     put "The second cutlet span differed from the reference." into the check report; exit.
-  Put the examined cutlet piece's next into the examined cutlet piece.
-  If the examined cutlet piece is nil,
+  Put the examinedcutletpiece's next into the examinedcutletpiece.
+  If the examinedcutletpiece is nil,
     put "A cutlet partition ended after two parts." into the check report; exit.
-  If the examined cutlet piece's span length is not the third number,
+  If the examinedcutletpiece's span length is not the third number,
     put "The third cutlet span differed from the reference." into the check report; exit.
-  If the examined cutlet piece's next is not nil,
+  If the examinedcutletpiece's next is not nil,
     put "The selected cutlet partition has too many parts." into the check report; exit.
 
 To check unrestricted cutlet ranking:
   Put 10 into the cutlet partition's total spans.
   Put 3 into the cutlet partition's part count.
   Put 0 into the cutlet partition's required boundary.
-  Put "1" into a sample rank wide quantity.
-  Select a cutlet partition from the sample rank wide quantity.
+  Put "1" into the samplecutletrank.
+  Select a cutlet partition from the samplecutletrank.
   If the cutlet partition's valid selection is not 1,
     put "First unrestricted composition was not accepted." into the check report; exit.
   Verify three selected cutlet spans given 1 and 1 and 8.
-  Put "36" into the sample rank wide quantity.
-  Select a cutlet partition from the sample rank wide quantity.
+  Put "36" into the samplecutletrank.
+  Select a cutlet partition from the samplecutletrank.
   If the cutlet partition's valid selection is not 1,
     put "Last unrestricted composition was not accepted." into the check report; exit.
   Verify three selected cutlet spans given 8 and 1 and 1.
@@ -73,22 +76,22 @@ To check pinned cutlet ranking:
   Put 10 into the cutlet partition's total spans.
   Put 3 into the cutlet partition's part count.
   Put 4 into the cutlet partition's required boundary.
-  Put "1" into a sample rank wide quantity.
-  Select a cutlet partition from the sample rank wide quantity.
+  Put "1" into the samplecutletrank.
+  Select a cutlet partition from the samplecutletrank.
   If the cutlet partition's valid selection is not 1,
     put "First pinned composition was not accepted." into the check report; exit.
   Verify three selected cutlet spans given 1 and 3 and 6.
-  Put "5" into the sample rank wide quantity.
-  Select a cutlet partition from the sample rank wide quantity.
+  Put "5" into the samplecutletrank.
+  Select a cutlet partition from the samplecutletrank.
   Verify three selected cutlet spans given 4 and 2 and 4.
-  Put "8" into the sample rank wide quantity.
-  Select a cutlet partition from the sample rank wide quantity.
+  Put "8" into the samplecutletrank.
+  Select a cutlet partition from the samplecutletrank.
   Verify three selected cutlet spans given 4 and 5 and 1.
-  Put "9" into the sample rank wide quantity.
-  Select a cutlet partition from the sample rank wide quantity.
+  Put "9" into the samplecutletrank.
+  Select a cutlet partition from the samplecutletrank.
   If the cutlet partition's valid selection is not 0,
     put "Out-of-range cutlet rank was accepted." into the check report; exit.
-  Put "0" into the sample rank wide quantity.
-  Select a cutlet partition from the sample rank wide quantity.
+  Put "0" into the samplecutletrank.
+  Select a cutlet partition from the samplecutletrank.
   If the cutlet partition's valid selection is not 0,
     put "Zero was accepted as a one-based cutlet rank." into the check report; exit.
