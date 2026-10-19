@@ -67,19 +67,22 @@ function save_big(x,    r) {
     return bi_add(r,"1")
 }
 
-function day_count(day) {
-    if (day==FOUNDATION_DAY) return "1"
-    if (day>FOUNDATION_DAY) return (2*(day-FOUNDATION_DAY)+1) ""
-    return (2*(FOUNDATION_DAY-day)) ""
+function day_count(day,    cmp,delta) {
+    day=bi_strip(day "")
+    cmp=bi_cmp(day,FOUNDATION_DAY "")
+    if (cmp==0) return "1"
+    if (cmp>0) { delta=bi_sub(day,FOUNDATION_DAY ""); return bi_add(bi_mul_small(delta,2),"1") }
+    delta=bi_sub(FOUNDATION_DAY "",day)
+    return bi_mul_small(delta,2)
 }
-
-function work_counts(cday,tday) {
+function work_counts(cday,tday,    cmp) {
+    cday=bi_strip(cday ""); tday=bi_strip(tday "")
     COUNT_ACTION=day_count(cday)
     COUNT_TARGET=day_count(tday)
-    COUNT_DISTANCE=(tday>=cday ? tday-cday : cday-tday)+1
-    COUNT_DISTANCE=COUNT_DISTANCE ""
+    COUNT_DISTANCE=bi_add(bi_abs_diff(cday,tday),"1")
     COUNT_CONNECTION=bi_add(COUNT_ACTION,COUNT_TARGET)
-    COUNT_DIRECTION=(tday<cday?1:(tday==cday?2:3))
+    cmp=bi_cmp(tday,cday)
+    COUNT_DIRECTION=(cmp<0?1:(cmp==0?2:3))
 }
 
 function stone_get(i,k) { return STONE[i SUBSEP k] }
@@ -241,12 +244,10 @@ function ask_bowl(bowlid,seal,    p,nextid,first,direction) {
 function answer_at(k) { return bi_add(bi_mod_euclid(bi_add(bi_sub(STREAM_FIRST,"1"),(STREAM_STEP*k) ""),M),"1") }
 
 function choose_rank_short(N,    limit,k,x,q) {
-    q=bi_div_floor(M,N); limit=bi_mul(q,N); k=0
-    while (1) {
-        x=answer_at(k)
-        if (bi_cmp(x,limit)<=0) { CHOSEN_RANK=bi_add(bi_mod_euclid(bi_sub(x,"1"),N),"1"); return }
-        k++
-    }
+    q=bi_div_floor(M,N); limit=bi_mul(q,N)
+    x=answer_at(0)
+    if (bi_cmp(x,limit)>0) x=(STREAM_STEP==1 ? "1" : limit)
+    CHOSEN_RANK=bi_add(bi_mod_euclid(bi_sub(x,"1"),N),"1")
 }
 
 function choose_rank_wide(N,    places,space,j,wide,weight,digit,limit,q) {
@@ -258,7 +259,7 @@ function choose_rank_wide(N,    places,space,j,wide,weight,digit,limit,q) {
         wide=bi_add(wide,bi_mul(digit,weight)); weight=bi_mul(weight,M)
     }
     q=bi_div_floor(space,N); limit=bi_mul(q,N)
-    while (bi_cmp(wide,limit)>0) wide=bi_add(bi_mod_euclid(bi_add(bi_sub(wide,"1"),STREAM_STEP ""),space),"1")
+    if (bi_cmp(wide,limit)>0) wide=(STREAM_STEP==1 ? "1" : limit)
     CHOSEN_RANK=bi_add(bi_mod_euclid(bi_sub(wide,"1"),N),"1")
 }
 
