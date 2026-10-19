@@ -23,3 +23,13 @@ bảng gate, đồng thời, thứ tự, bất biến, tham chiếu test-only
 và kiểm toán các thành phần lịch sử.
 Mục tiêu 633/633 bài GREEN, Canonical Names Lock PASS.
 Không sửa main, không tích hợp lịch hoàn chỉnh.
+
+## Kết quả xác minh
+
+Elixir 1.18.5 / OTP27: biên dịch 69 tệp .ex,
+**633/633 kiểm thử PASS, 0 lỗi, không compiler warnings**.
+Bốn hồi quy normative Stage40 giữ expected, tất cả xanh.
+Canonical Names Lock PASS. Di sản và oracle test-only không đổi.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39298935288
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39298935385
+Stage41 đóng GREEN, Stage42 DISCOVERY21 chưa bắt đầu.

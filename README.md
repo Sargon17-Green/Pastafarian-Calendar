@@ -1448,3 +1448,18 @@ Canonical Names Lock PASS, không compiler warnings.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39297740064
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39297739893
 Stage40 đóng EXPECTED_RED; Stage41 PATCH20 chưa bắt đầu.
+
+
+## Giai đoạn 41/55 — PATCH20: sửa thứ tự số cốt-lết
+
+AscendingCutletCountPatch gọi thật LegacyDescendingCutletCount
+để lưu thứ tự cũ, sau đó sắp tăng dần và trả corrected_order.
+CutletCountManager giữ nguồn sauce(c,open_day+1), bát 2/chốt 20,
+rank, tập ứng viên và bảng cổng. Bốn nhóm hồi quy Stage40
+trở lại xanh mà không thay expected. Thêm 20 bài Stage41.
+
+CI Elixir 1.18.5 / OTP27: **633/633 PASS, 0 lỗi**, không warning.
+Canonical Names Lock PASS, legacy và oracle test-only không đổi.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39298935288
+Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39298935385
+Stage41 đóng GREEN. Stage42/55 DISCOVERY21 chưa bắt đầu.
