@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=40
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=41
+CURRENT_KIND=PATCH
 CURRENT_PATCH=20
 LAST_COMPLETED_STAGE=40
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..19; Stage40 thêm CutletCountManager và LegacyDescendingCutletCount. Tập 6..min(17,gate_gaps) và rank từ sauce(c,year.open+1), bowl2/seal20 đều đúng, production cố ý đảo thứ tự chọn.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..19; Stage41 thêm AscendingCutletCountPatch gọi thật legacy giảm dần rồi sắp tăng dần. CutletCountManager giữ hạng, năm, gate, sauce, bowl2/seal20; production chọn corrected_order.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_40_DISCOVERY_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_41_PATCH_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=613
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -932,3 +932,11 @@ production/oracle: 9/6, 6/9, 7/9, 6/8. Canonical Names Lock PASS.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39297739893
 Đóng Stage40 EXPECTED_RED; Stage41 PATCH20 chưa bắt đầu.
 Không sửa main, oracle, legacy hoặc các PATCH01..19.
+
+Giai đoạn 41 PATCH20: thêm AscendingCutletCountPatch gọi thật
+LegacyDescendingCutletCount.sort rồi Enum.sort tăng dần.
+Giữ toàn bộ bốn nhóm expected normative Stage40. Sửa hai
+kiểm soát Stage40 để kiểm toán production mới và giữ legacy.
+20 bài Stage41 mới, dự kiến 633 bài GREEN, 0 warnings;
+chỉ đóng sau mix test và Canonical Names Lock PASS.
+Không tích hợp phân hoạch cốt-lết hoặc lịch hoàn chỉnh.

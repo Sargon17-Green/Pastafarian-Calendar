@@ -65,11 +65,12 @@ defmodule PastafariCalendarElixirVietnamese.Stage40Discovery20Test do
     assert r.bowl == 2 and r.seal == 20
   end
 
-  test "production thực chọn từ thứ tự legacy" do
+  test "production chọn từ thứ tự đã sửa, vẫn lưu legacy" do
     for delta <- [-59, 0, 59] do
       c = @foundation + delta
       r = CutletCountManager.diagnose(c, c)
-      assert r.cutlet_count == Enum.at(r.historical_order, r.rank - 1)
+      assert r.historical_order == LegacyDescendingCutletCount.sort(r.candidates)
+      assert r.cutlet_count == Enum.at(r.corrected_order, r.rank - 1)
       assert Calendar.cutlet_count_spaghetti(c, c) == r.cutlet_count
     end
   end
@@ -128,11 +129,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage40Discovery20Test do
     legacy = File.read!(Path.join(root, "legacy_descending_cutlet_count.ex"))
     manager = File.read!(Path.join(root, "cutlet_count_manager.ex"))
     assert legacy =~ "Enum.sort(candidates, :desc)"
-    assert manager =~ "LegacyDescendingCutletCount.sort(candidates)"
+    assert manager =~ "AscendingCutletCountPatch.diagnose(candidates)"
     assert manager =~ "Dispatcher.answer_stream(c, first_day, @bowl, @seal)"
-    assert manager =~ "Enum.at(historical_order, rank - 1)"
+    assert manager =~ "Enum.at(corrected_order, rank - 1)"
     refute manager =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "ascending_cutlet_count_patch.ex"))
+    assert File.exists?(Path.join(root, "ascending_cutlet_count_patch.ex"))
   end
 
   test "normative đỏ 1: quanh ngày Foundation" do
