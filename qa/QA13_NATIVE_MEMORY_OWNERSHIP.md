@@ -1,0 +1,7 @@
+# QA13 — actual Native 2D physical-memory provenance (not Stage 1 completion)
+
+**Status: Native CI pending.** Pin previous successful real PyFunge execution run 39108506703, original artifact 12129457903, tested SHA 76e09db067c1a044763d23e5f219b3fe8bac32cc. Full archive contains 17 original raw STEP/p/g traces and independent fresh-process Native replay. Production Git blob 560d6aa5807a7f766213a33835cce85eab0fa40c must never change.
+
+This independent forensic auditor fixes all 17 raw trace SHA-256 digests, binds memory events to actual executed `p`/`g` instructions, verifies ordered before/after values, and confirms execution of the current written instruction bytes. The runtime-written gate at (1500,1860) must actually execute as 118 for 14 valid cases, or 62 for three invalid cases. The previously observed corpus has 2,919 physical writes, 5,585 reads, 136 executions of prior written cells, and 17 distinct arithmetic write histories. The pinned CI must independently verify all numbers.
+
+**Important limitations:** QA13 does not start 17 *new* Native runs: it independently checks original preserved Native traces. Its finite evidence is not a universal ownership proof, nor proof of unrestricted object reuse, global spaghetti geometry, full functional Stage 1, or final release. Preserve historical red evidence and prior QA11B/QA12 accepted specimens. No production merge or Stage2.
