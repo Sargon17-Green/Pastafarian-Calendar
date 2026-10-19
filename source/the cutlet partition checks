@@ -57,17 +57,22 @@ To verify three selected cutlet spans given a number and another number and a th
   If the examinedcutletpiece's next is not nil,
     put "The selected cutlet partition has too many parts." into the check report; exit.
 
+\ CAL 4018 treats repeated indefinite-article selector calls within one
+\ check as repeated local declarations. Isolate this call in one procedure.
+To invoke the sample cutlet selector:
+  Select a cutlet partition from the samplecutletrank.
+
 To check unrestricted cutlet ranking:
   Put 10 into the cutlet partition's total spans.
   Put 3 into the cutlet partition's part count.
   Put 0 into the cutlet partition's required boundary.
   Put "1" into the samplecutletrank.
-  Select a cutlet partition from the samplecutletrank.
+  Invoke the sample cutlet selector.
   If the cutlet partition's valid selection is not 1,
     put "First unrestricted composition was not accepted." into the check report; exit.
   Verify three selected cutlet spans given 1 and 1 and 8.
   Put "36" into the samplecutletrank.
-  Select a cutlet partition from the samplecutletrank.
+  Invoke the sample cutlet selector.
   If the cutlet partition's valid selection is not 1,
     put "Last unrestricted composition was not accepted." into the check report; exit.
   Verify three selected cutlet spans given 8 and 1 and 1.
@@ -77,21 +82,21 @@ To check pinned cutlet ranking:
   Put 3 into the cutlet partition's part count.
   Put 4 into the cutlet partition's required boundary.
   Put "1" into the samplecutletrank.
-  Select a cutlet partition from the samplecutletrank.
+  Invoke the sample cutlet selector.
   If the cutlet partition's valid selection is not 1,
     put "First pinned composition was not accepted." into the check report; exit.
   Verify three selected cutlet spans given 1 and 3 and 6.
   Put "5" into the samplecutletrank.
-  Select a cutlet partition from the samplecutletrank.
+  Invoke the sample cutlet selector.
   Verify three selected cutlet spans given 4 and 2 and 4.
   Put "8" into the samplecutletrank.
-  Select a cutlet partition from the samplecutletrank.
+  Invoke the sample cutlet selector.
   Verify three selected cutlet spans given 4 and 5 and 1.
   Put "9" into the samplecutletrank.
-  Select a cutlet partition from the samplecutletrank.
+  Invoke the sample cutlet selector.
   If the cutlet partition's valid selection is not 0,
     put "Out-of-range cutlet rank was accepted." into the check report; exit.
   Put "0" into the samplecutletrank.
-  Select a cutlet partition from the samplecutletrank.
+  Invoke the sample cutlet selector.
   If the cutlet partition's valid selection is not 0,
     put "Zero was accepted as a one-based cutlet rank." into the check report; exit.
