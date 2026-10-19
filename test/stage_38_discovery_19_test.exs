@@ -5,8 +5,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage38Discovery19Test do
   alias PastafariCalendarElixirVietnamese.Monster.{
     LegacyUpperBoundaryBelongsToNextYear,
     TargetYearManager,
-    Year5000Manager,
-    Year
+    Year5000Manager
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
@@ -24,12 +23,13 @@ defmodule PastafariCalendarElixirVietnamese.Stage38Discovery19Test do
     end
   end
 
-  test "cổng mở của năm 5000 thuộc năm trước" do
+  test "cổng mở là cổng đóng của năm trước, lỗi lịch sử còn thấy" do
     for delta <- [-17, 0, 17] do
       c = @foundation + delta
       anchor = Calendar.year5000_spaghetti(c)
-      assert got_year(c, anchor.open_gate_day) == ref_year(c, anchor.open_gate_day)
-      assert Calendar.find_target_year_spaghetti(c, anchor.open_gate_day).number == 4999
+      assert LegacyUpperBoundaryBelongsToNextYear.route(anchor.open_gate_day, anchor) == :previous
+      assert ref_year(c, anchor.open_gate_day).number == 4999
+      assert got_year(c, anchor.open_gate_day - 1) == ref_year(c, anchor.open_gate_day - 1)
     end
   end
 
@@ -67,11 +67,12 @@ defmodule PastafariCalendarElixirVietnamese.Stage38Discovery19Test do
 
   test "lối đi tới năm 4999 có bước lùi duy nhất" do
     anchor = Calendar.year5000_spaghetti(@foundation)
-    report = TargetYearManager.diagnose(@foundation, anchor.open_gate_day)
+    target = anchor.open_gate_day - 1
+    report = TargetYearManager.diagnose(@foundation, target)
     assert report.year.number == 4999
     assert report.steps == 1
     assert report.trace == [{:previous, 5000, 4999}]
-    assert Map.from_struct(report.year) == ref_year(@foundation, anchor.open_gate_day)
+    assert Map.from_struct(report.year) == ref_year(@foundation, target)
   end
 
   test "hai bước sang tương lai không mất thứ tự năm" do
