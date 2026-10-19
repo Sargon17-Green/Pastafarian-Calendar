@@ -33,6 +33,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     StoneManager,
     Validator,
     VisibleDropManager,
+    TargetYearManager,
     Year5000Manager
   }
 
@@ -218,4 +219,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def next_year_diagnostic(calculation_day), do: NextYearManager.diagnose(calculation_day)
   def previous_year(day), do: PreviousYearManager.previous_year(day)
   def previous_year_diagnostic(day), do: PreviousYearManager.diagnose(day)
+
+  def find_target_year(calculation_day, target_day),
+    do: TargetYearManager.find(calculation_day, target_day)
+
+  def find_target_year_diagnostic(calculation_day, target_day),
+    do: TargetYearManager.diagnose(calculation_day, target_day)
 end

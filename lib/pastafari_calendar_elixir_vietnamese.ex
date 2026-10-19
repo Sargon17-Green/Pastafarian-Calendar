@@ -3,8 +3,9 @@ defmodule PastafariCalendarElixirVietnamese do
   Điểm vào sản xuất Elixir với tiếng Việt là ngôn ngữ nguồn.
 
   Giai đoạn 33 đã vá thứ tự năm 5000.
-  Stage34 mở năm tiếp theo, cố ý hỏi sai ngày từ legacy.
-  Chưa tích hợp lịch đầy đủ.
+  PATCH 17 và PATCH 18 đã sửa năm kế và năm trước.
+  Stage38 mở tìm năm đích nhưng để lộ lỗi biên đóng
+  của năm. Chưa tích hợp lịch đầy đủ.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}
@@ -114,6 +115,12 @@ defmodule PastafariCalendarElixirVietnamese do
 
   def previous_year_spaghetti(day), do: Dispatcher.previous_year(day)
   def previous_year_diagnostic_spaghetti(day), do: Dispatcher.previous_year_diagnostic(day)
+
+  def find_target_year_spaghetti(calculation_day, target_day),
+    do: Dispatcher.find_target_year(calculation_day, target_day)
+
+  def find_target_year_diagnostic_spaghetti(calculation_day, target_day),
+    do: Dispatcher.find_target_year_diagnostic(calculation_day, target_day)
 
   def calendar_date_spaghetti(calculation_day, target_day) do
     _context = Dispatcher.bootstrap(calculation_day, target_day)
