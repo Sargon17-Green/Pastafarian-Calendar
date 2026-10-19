@@ -1202,3 +1202,27 @@ oracle test-only giữ blob SHA
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39219614067
 Đóng Stage37 GREEN; Stage38/55 DISCOVERY19 chưa bắt đầu.
 Không sửa main hoặc tích hợp toàn bộ lịch.
+
+## Giai đoạn 38/55 — DISCOVERY 19: cổng đóng năm đích
+
+TargetYearManager đi từ năm 5000 về trước/sau bằng các
+bản vá đã hoàn tất. LegacyUpperBoundaryBelongsToNextYear
+cố ý đặt ngày bằng cổng đóng vào năm sau, ngược với
+khoảng (open, close] của chuẩn. Lỗi chỉ ở tuyến biên;
+không sửa thuật toán chọn năm, ứng viên, oracle hoặc cổng.
+
+Stage38 DISCOVERY19 đã xác minh trên Elixir 1.18.5 / OTP 27:
+biên dịch 65 tệp .ex, **573 bài, 569 PASS, đúng 4 hồi quy
+normative đỏ**, không có warning trình biên dịch Elixir.
+Canonical Names Lock độc lập PASS. Bốn sai lệch đều ở ngày
+đúng cổng đóng năm 5000 tại c=FOUNDATION, +1, +417, -539.
+18 kiểm soát Stage38 và toàn bộ 551 bài cũ đạt.
+LegacyUpperBoundaryBelongsToNextYear trả :next_at_upper_boundary
+khi target==close; không có TargetYearBoundaryPatch.
+Lần CI ban đầu có hai lỗi điều khiển biên kép và một cảnh báo
+alias, đã sửa riêng trong commit f5f20fcbe0e6731f2ddaf70637dc64ce672d5ba7,
+không thay bốn expected normative.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39220862669
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39220862708
+Stage38 đóng EXPECTED_RED; Stage39 PATCH19 chưa bắt đầu.
+Không đổi main, oracle hoặc những bản vá cũ.

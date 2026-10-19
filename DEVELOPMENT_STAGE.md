@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=38
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=19
-LAST_COMPLETED_STAGE=37
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=38
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH 01..18. Stage38 mở tìm năm mục tiêu bằng TargetYearManager; LegacyUpperBoundaryBelongsToNextYear cố ý trả năm sau nếu ngày mục tiêu đúng cổng đóng, trái khoảng (open,close].
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_38_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_38_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=573
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -885,3 +885,19 @@ và trả luôn, thay vì thuộc năm hiện tại.
 thứ tự state và 4 hồi quy normative đỏ ở bốn mốc tính.
 Dự kiến 573 kiểm thử, đúng 4 sai lệch và khóa tên PASS.
 Không tích hợp toàn bộ lịch, không sửa oracle hoặc các patch cũ.
+
+Stage38 DISCOVERY19 đã xác minh trên Elixir 1.18.5 / OTP 27:
+biên dịch 65 tệp .ex, **573 bài, 569 PASS, đúng 4 hồi quy
+normative đỏ**, không có warning trình biên dịch Elixir.
+Canonical Names Lock độc lập PASS. Bốn sai lệch đều ở ngày
+đúng cổng đóng năm 5000 tại c=FOUNDATION, +1, +417, -539.
+18 kiểm soát Stage38 và toàn bộ 551 bài cũ đạt.
+LegacyUpperBoundaryBelongsToNextYear trả :next_at_upper_boundary
+khi target==close; không có TargetYearBoundaryPatch.
+Lần CI ban đầu có hai lỗi điều khiển biên kép và một cảnh báo
+alias, đã sửa riêng trong commit f5f20fcbe0e6731f2ddaf70637dc64ce672d5ba7,
+không thay bốn expected normative.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39220862669
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39220862708
+Stage38 đóng EXPECTED_RED; Stage39 PATCH19 chưa bắt đầu.
+Không đổi main, oracle hoặc những bản vá cũ.
