@@ -2,6 +2,8 @@
 \ The names are distinct and chosen without replacement from 1..17.
 \ These tests use exact ranks rather than the slow Foundation sauce.
 
+The namecheckrank is a wide quantity.
+
 To check the count of cutlet name sequences:
   Put 1 into the selected cutlet count.
   Count all cutlet name sequences.
@@ -37,25 +39,25 @@ To verify three cutlet name indices given a number and another number and a thir
 
 To check lexicographic cutlet names:
   Put 3 into the selected cutlet count.
-  Put "1" into a name rank wide quantity.
-  Select cutlet names from the name rank wide quantity.
+  Put "1" into the namecheckrank.
+  Select cutlet names from the namecheckrank.
   If the cutlet name choice's selection success is not 1,
     put "First name sequence was not selected." into the check report; exit.
   Verify three cutlet name indices given 1 and 2 and 3.
-  Put "15" into the name rank wide quantity.
-  Select cutlet names from the name rank wide quantity.
+  Put "15" into the namecheckrank.
+  Select cutlet names from the namecheckrank.
   Verify three cutlet name indices given 1 and 2 and 17.
-  Put "16" into the name rank wide quantity.
-  Select cutlet names from the name rank wide quantity.
+  Put "16" into the namecheckrank.
+  Select cutlet names from the namecheckrank.
   Verify three cutlet name indices given 1 and 3 and 2.
-  Put "4080" into the name rank wide quantity.
-  Select cutlet names from the name rank wide quantity.
+  Put "4080" into the namecheckrank.
+  Select cutlet names from the namecheckrank.
   Verify three cutlet name indices given 17 and 16 and 15.
-  Put "4081" into the name rank wide quantity.
-  Select cutlet names from the name rank wide quantity.
+  Put "4081" into the namecheckrank.
+  Select cutlet names from the namecheckrank.
   If the cutlet name choice's selection success is not 0,
     put "An out-of-range name-sequence rank was accepted." into the check report; exit.
-  Put "0" into the name rank wide quantity.
-  Select cutlet names from the name rank wide quantity.
+  Put "0" into the namecheckrank.
+  Select cutlet names from the namecheckrank.
   If the cutlet name choice's selection success is not 0,
     put "Rank zero was accepted for a name sequence." into the check report; exit.
