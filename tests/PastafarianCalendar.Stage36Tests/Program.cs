@@ -120,8 +120,8 @@ internal static partial class Program
             var seal=sealIndex==0?21:31;
             var question=NormativeScroll.AskBowl(sauce,id,seal);
             var wide=TwoDigitWide(question);
-            // لا נוליך את האורקל לתוך איזור דחייה עצום:
-            // בחירת n=wide-1 נעשית רק כשהשאלה יורדת, ואז צעד אחד מספיק.
+            // لا يُدفَع المرجع إلى ذيل رفض هائل: نختار n=wide-1 فقط
+            // في الاتجاه النازل، حيث يكفي انتقال واحد إلى أول قيمة مقبولة.
             var mustReject=question.DirectionStep==-1 &&
                 wide>m*m/2+BigInteger.One && wide<m*m;
             var n=mustReject?wide-BigInteger.One:m+BigInteger.One;
