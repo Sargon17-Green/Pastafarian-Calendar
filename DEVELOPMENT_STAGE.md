@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=42
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=43
+CURRENT_KIND=PATCH
 CURRENT_PATCH=21
 LAST_COMPLETED_STAGE=42
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..20. Stage42 thêm CutletPartitionCombinatorics đếm DP và mở hạng từ điển, CutletPartitionManager và LegacyCutletPartitionCountSeal cố tình dùng chốt 20 thay vì 21.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..20. Stage43 thêm CutletPartitionSealPatch gọi thật legacy chốt20 rồi chọn hạng mới bằng chốt21. CutletPartitionManager giữ đếm, mở hạng từ điển, cổng bắt buộc và năm.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_42_DISCOVERY_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_43_PATCH_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=653
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -967,3 +967,10 @@ Canonical Names Lock PASS.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39411372181
 Đóng Stage42 EXPECTED_RED; Stage43 PATCH21 chưa bắt đầu.
 Không thay main hoặc các PATCH trước, chưa tích hợp lịch cuối.
+
+Giai đoạn 43 PATCH21: CutletPartitionSealPatch chụp legacy_rank
+chốt20 và lấy corrected_rank từ chốt21 bằng chính source_day
+và bowl2. Không sửa legacy/oracle/DP/ứng viên/cổng hoặc expected
+của bốn nhóm normative Stage42. Thêm 20 bài Stage43;
+mục tiêu 673 bài GREEN và Canonical Names Lock PASS.
+Không nâng LAST_COMPLETED_STAGE trước xác minh CI.

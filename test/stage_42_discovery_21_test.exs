@@ -6,6 +6,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage42Discovery21Test do
     CutletPartitionCombinatorics,
     CutletPartitionManager,
     LegacyCutletPartitionCountSeal,
+    CutletPartitionSealPatch,
     StageNotIntegratedError
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
@@ -77,10 +78,12 @@ defmodule PastafariCalendarElixirVietnamese.Stage42Discovery21Test do
     assert r.target_day == c
   end
 
-  test "hạng di sản dùng bowl 2 seal 20, không dùng oracle" do
+  test "di sản giữ bowl 2 seal 20, production lấy seal 21 chuẩn" do
     c = @foundation + 17
     r = CutletPartitionManager.diagnose(c, c)
-    assert r.rank == LegacyCutletPartitionCountSeal.choose_rank(
+    assert r.historical_rank == LegacyCutletPartitionCountSeal.choose_rank(
+      c, r.structure_source_day, r.candidate_count)
+    assert r.rank == CutletPartitionSealPatch.choose_rank(
       c, r.structure_source_day, r.candidate_count)
     assert r.bowl == 2 and r.historical_seal == 20
     assert r.normative_seal == 21
@@ -149,16 +152,16 @@ defmodule PastafariCalendarElixirVietnamese.Stage42Discovery21Test do
       CutletPartitionManager.diagnose(c, c)
   end
 
-  test "source kiểm tra chưa có bản vá, không dùng tham chiếu production" do
+  test "source xác nhận PATCH21 gọi legacy và không dùng oracle" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     legacy = File.read!(Path.join(root, "legacy_cutlet_partition_count_seal.ex"))
     manager = File.read!(Path.join(root, "cutlet_partition_manager.ex"))
     combinatorics = File.read!(Path.join(root, "cutlet_partition_combinatorics.ex"))
     assert legacy =~ "Dispatcher.answer_stream(c, first_day, 2, 20)"
-    assert manager =~ "LegacyCutletPartitionCountSeal.choose_rank"
+    assert manager =~ "CutletPartitionSealPatch.diagnose"
     assert combinatorics =~ "count_state("
     refute manager =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "cutlet_partition_seal_patch.ex"))
+    assert File.exists?(Path.join(root, "cutlet_partition_seal_patch.ex"))
     assert_raise StageNotIntegratedError, fn ->
       Calendar.calendar_date_spaghetti(@foundation, @foundation)
     end

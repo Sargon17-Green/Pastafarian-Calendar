@@ -2,12 +2,12 @@ defmodule PastafariCalendarElixirVietnamese.Monster.CutletPartitionManager do
   @moduledoc """
   DISCOVERY21 tạo phân hoạch cốt-lết theo thứ tự từ điển,
   giữ cổng tính bắt buộc nếu nằm đúng trong năm. Production
-  vẫn dùng hạng legacy chốt 20 thay vì chốt 21 chuẩn.
+  dùng PATCH21 gọi legacy chốt 20 rồi lấy hạng chuẩn chốt 21.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     CutletCountManager, CutletPartitionCombinatorics,
-    LegacyCutletPartitionCountSeal
+    CutletPartitionSealPatch
   }
 
   def partition(c, t), do: diagnose(c, t).partition
@@ -26,8 +26,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.CutletPartitionManager do
     gaps = parent.gate_gaps
     slots = parent.cutlet_count
     count = CutletPartitionCombinatorics.count(gaps, slots, required)
-    rank = LegacyCutletPartitionCountSeal.choose_rank(c,
-      parent.structure_source_day, count)
+    seed = CutletPartitionSealPatch.diagnose(c, parent.structure_source_day, count)
+    rank = seed.corrected_rank
     partition = CutletPartitionCombinatorics.unrank(gaps, slots, required, rank)
 
     %{year: year, gate_state: parent.gate_state,
@@ -35,7 +35,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.CutletPartitionManager do
       structure_source_day: parent.structure_source_day,
       cutlet_count: slots, gate_gaps: gaps,
       required_boundary: required, calculation_gate_index: internal_index,
-      candidate_count: count, rank: rank, partition: partition,
+      candidate_count: count, rank: rank, historical_rank: seed.legacy_rank,
+      seal_was_corrected: seed.changed, partition: partition,
       bowl: 2, historical_seal: 20, normative_seal: 21}
   end
 
