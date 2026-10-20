@@ -26,7 +26,7 @@ assert(!oldHasPrefixBoundary([2n,2n,2n],3n)&&
  oldHasPrefixBoundary([1n,2n,3n],3n),
  "historical positive family does not force an internal gate boundary");
 for(const bad of [[4n,6],[6n,0],[1n,18]] as const)
- assert(rejected(()=>old.oldCount(...bad),MonsterValidationError),
+ assert(rejected(()=>old.oldCount(bad[0],bad[1]),MonsterValidationError),
   "invalid number of gate gaps or cutlets rejected");
 assert(rejected(()=>old.oldUnrank(6n,3,11n),MonsterValidationError),
  "old rank outside exact lex family rejected");

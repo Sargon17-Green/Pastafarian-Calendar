@@ -184,8 +184,8 @@ export class Discovery21LegacyCutletHandler {
   ctx.branchTrace.push("DISCOVERY_21_ACTUAL_LEGACY_POSITIVE_COMPOSITIONS_NO_GATE_FILTER");
   ctx.branchTrace.push("DISCOVERY_21_REAL_SEAL21_UNFILTERED_PARTITION_SELECTION");
   this.metrics.bump(ctx,"discovery21.calls");
-  this.metrics.set("discovery21.old_generator_calls",1n);
-  this.metrics.set("discovery21.missed_required_gate",misses?1n:0n);
+  ctx.metrics.set("discovery21.old_generator_calls",1n);
+  ctx.metrics.set("discovery21.missed_required_gate",misses?1n:0n);
   ctx.metrics.set("discovery21.predecessor_58_write_sequences",BigInt(calls));
   ctx.status="DISCOVERY_21_RECORDED";
   return out;
