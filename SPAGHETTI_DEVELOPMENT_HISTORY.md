@@ -399,3 +399,20 @@ Ujian Stage 17 melintasi semua pangkat 1..720: hasil susunan produksi mesti seta
 ### Sempadan peringkat
 
 Stage17 membetulkan pemilihan permutasi sahaja; tidak melaksanakan aplikasi tempias/tuangan mangkuk, pemilihan mangkuk terakhir, atau perubahan kepada katalog sumber, fixture, struktur tahun, ataupun `main`. Stage18 — DISCOVERY09 hanya selepas CI hijau.
+
+
+### Keputusan GitHub Actions Stage 17 — disahkan
+
+**Run:** `39495731241`  
+**SHA diperiksa:** `59583089c1ad2a843935d4753689001c2d1f60d7`  
+**Pekerjaan:** `verify=success` dan `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+LULUS Stage 15 PATCH 07 kes=8 komponen=368 parut=138 ulang=46 baris_sintetik=1408
+KEPUTUSAN MERAH_DIJANGKA salah=719 luar=1 jumlah=720 fungsi_sifar=720 titisan=46 lain=0
+LULUS kontrak merah 08; pangkat satu dihantar ke fungsi pangkat sifar
+LULUS Stage 17 PATCH 08 pangkat=720 unik=720 parut=719 pengecualian=1 integer_besar=14 visible=138 legacy_visible=138 legacy_exception=0
+```
+
+Kesimpulan: PATCH 08 GREEN sebenar; bukti sejarah DISCOVERY 08 kekal merah yang disengajakan dan penerimaannya hijau. Semua gerbang CI Stage 1–17 lulus dan tiada kod Stage 18 diperkenalkan.
