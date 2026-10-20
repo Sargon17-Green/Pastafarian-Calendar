@@ -25,8 +25,15 @@ if exist(logDir, 'dir') ~= 7
 end
 logPath = fullfile(logDir, 'STAGE_55_MATLAB_RUN.log');
 
-stage54Output = '';
-auditOutput = '';
+% Every stage prints immediately. evalc previously held 49 minutes of output
+% in memory; a runner shutdown discarded the test history entirely.
+% diary additionally records the same output for artifacts, if available.
+if exist(logPath, 'file') == 2
+    delete(logPath);
+end
+diary(logPath);
+diary('on');
+diaryCleanup = onCleanup(@() diary('off')); %#ok<NASGU>
 
 try
     header = sprintf([ ...
@@ -38,38 +45,38 @@ try
     fprintf('%s', header);
 
     % 0. Szybki preflight: brak starych oczekiwań NotImplementedYet.
-    auditOutput = [auditOutput, verifyPublicEntryRegressions(root)]; %#ok<AGROW>
+    fprintf('%s', verifyPublicEntryRegressions(root));
 
     % 0a. MATLAB parses all src/tests before the recursive heavy run.
-    auditOutput = [auditOutput, run_stage55_code_analysis(root)]; %#ok<AGROW>
+    fprintf('%s', run_stage55_code_analysis(root));
 
     % 1. Pełna ścieżka regresji 1..54 + ciężki production/oracle differential.
-    stage54Output = evalc('run_stage54_tests();');
-    fprintf('%s', stage54Output);
+    fprintf('STAGE_55_RECURSIVE_REGRESSIONS_BEGIN\n');
+    run_stage54_tests();
+    fprintf('STAGE_55_RECURSIVE_REGRESSIONS_PASS\n');
 
     % 2. Końcowa kontrola kompletności plików etapów.
-    auditOutput = [auditOutput, verifyStageInventory(root)]; %#ok<AGROW>
+    fprintf('%s', verifyStageInventory(root));
 
     % 3. Produkcja nie może zależeć od testowego oracle.
-    auditOutput = [auditOutput, verifyProductionIsolation(root)]; %#ok<AGROW>
+    fprintf('%s', verifyProductionIsolation(root));
 
     % 4. Reprezentatywny artefakt każdego PATCH 01..26 musi fizycznie istnieć.
-    auditOutput = [auditOutput, verifyPatchInventory(root)]; %#ok<AGROW>
+    fprintf('%s', verifyPatchInventory(root));
 
     % 5. Stage 55 jest kandydatem do zamknięcia, nie fałszywym wcześniejszym PASS.
-    auditOutput = [auditOutput, verifyStage55Metadata(root)]; %#ok<AGROW>
+    fprintf('%s', verifyStage55Metadata(root));
 
     % 6. README nie może nadal twierdzić, że bieżący stan to Stage 1.
-    auditOutput = [auditOutput, verifyReadme(root)]; %#ok<AGROW>
+    fprintf('%s', verifyReadme(root));
 
-    fprintf('%s', auditOutput);
     footer = sprintf([ ...
         'STAGE_55_REPOSITORY_AUDIT_PASS\n', ...
         'STAGE_55_NATIVE_VERIFICATION_PASS\n', ...
         'STAGE_55_FINAL_AUDIT_PASS\n']);
     fprintf('%s', footer);
 
-    writeLog(logPath, [header, stage54Output, auditOutput, footer]);
+    % The diary has already recorded header, stages and audit verdict.
 catch err
     report = getReport(err, 'extended', 'hyperlinks', 'off');
     failure = sprintf([ ...
@@ -77,10 +84,7 @@ catch err
         'ERROR_IDENTIFIER=%s\n', ...
         '%s\n'], err.identifier, report);
     fprintf('%s', failure);
-    writeLog(logPath, [ ...
-        sprintf('STAGE_55_FINAL_AUDIT_BEGIN\nMATLAB_VERSION=%s\nMATLAB_RELEASE=%s\n', ...
-            version, version('-release')), ...
-        stage54Output, auditOutput, failure]);
+    % Failure evidence is streamed to stdout and captured by the diary.
     rethrow(err)
 end
 end
@@ -221,16 +225,6 @@ assert(contains(txt, 'finalMonsterIntegration'), ...
     'README nie dokumentuje finalnej integracji Stage 54.');
 
 out = sprintf('STAGE_55_README_STATE_PASS\n');
-end
-
-function writeLog(path, text)
-fid = fopen(path, 'w', 'n', 'UTF-8');
-if fid < 0
-    error('Pastafari:Stage55:LogOpen', ...
-        'Nie można otworzyć końcowego logu: %s', path);
-end
-cleanup = onCleanup(@() fclose(fid)); %#ok<NASGU>
-fprintf(fid, '%s', text);
 end
 
 function cleanupPaths(root, here)
