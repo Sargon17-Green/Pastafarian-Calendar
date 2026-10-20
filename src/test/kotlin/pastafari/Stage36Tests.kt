@@ -1,6 +1,6 @@
 package pastafari
 
-/** Cam 36: darganfod gwaharddiad anghywir ar flwyddyn o 5778 diwrnod. */
+/** Cam 36: darganfod gwaharddiad anghywir ar flwyddyn o 252 diwrnod. */
 object Stage36Tests {
     private fun must(id: String, ok: Boolean) { check(ok) { id } }
     private fun rejects(body: () -> Unit) {
@@ -24,7 +24,7 @@ object Stage36Tests {
         val f = NormativeCore.FOUNDATION_DAY
         var real = 0
         var realDiff = 0
-        var maxWitnesses = 0
+        var minWitnesses = 0
         for (i in -12..12) {
             val a = ExactInt.of(i.toLong())
             val open = oracle.gates.get(a)
@@ -39,12 +39,12 @@ object Stage36Tests {
                     must("E_DISCOVERY18_REAL_$i-$width",
                         (wrong != correct) == witness &&
                         (!wrong || correct))
-                    if (witness) { maxWitnesses++;realDiff++ }
+                    if (witness) { minWitnesses++;realDiff++ }
                     real++
                 }
             }
         }
-        must("E_DISCOVERY18_REAL_TOTAL",real == 450 && realDiff==maxWitnesses)
+        must("E_DISCOVERY18_REAL_TOTAL",real == 450 && realDiff==minWitnesses)
         println("STAGE36_REAL_GATE_PROBES_450_PASS")
 
         var count = 0; var red = 0; var match = 0

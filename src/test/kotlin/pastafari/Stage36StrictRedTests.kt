@@ -1,6 +1,6 @@
 package pastafari
 
-/** Cam 36: rhaid i'r hen honiad fod yn goch ar y terfyn 5778. */
+/** Cam 36: rhaid i'r hen honiad fod yn goch ar y terfyn 252. */
 object Stage36StrictRedTests {
     @JvmStatic fun main(args: Array<String>) {
         require(args.isEmpty())

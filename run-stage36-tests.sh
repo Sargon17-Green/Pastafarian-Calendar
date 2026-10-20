@@ -11,7 +11,7 @@ cat "$work/prior.log"
 grep -Fxq STAGE35_FULL_NATIVE_GREEN "$work/prior.log"
 kotlinc src/main/kotlin/pastafari/ExactInt.kt \
   src/main/kotlin/pastafari/SourceLanguageCatalog.kt \
-  src/main/kotlin/pastafari/LegacyYear5000MaxExclusiveAdapter.kt \
+  src/main/kotlin/pastafari/LegacyYear5000MinExclusiveAdapter.kt \
   src/test/kotlin/pastafari/NormativeCore.kt \
   src/test/kotlin/pastafari/NormativeCalendar.kt \
   src/test/kotlin/pastafari/Stage36Tests.kt \
