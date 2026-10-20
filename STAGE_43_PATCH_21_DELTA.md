@@ -25,3 +25,14 @@ tính bất biến, chạy song song và kiểm toán nguồn.
 Dự kiến 673 bài GREEN, 0 compiler warnings và Canonical Names
 Lock PASS. Không sửa main, oracle, các PATCH01..20 hoặc
 tích hợp ngày lịch cuối; không commit HANDOFF_*.
+
+## Kết quả xác minh
+
+Stage43 PATCH21 được xác minh trong GitHub Actions Elixir 1.18.5 / OTP27:
+biên dịch 73 tệp, **673/673 bài PASS, 0 lỗi**, không compiler warnings.
+Canonical Names Lock PASS. Bốn nhóm normative của Stage42 đều trở lại xanh,
+không sửa expected. Legacy giữ blob `c9ad12e3159ef2ef24e8a7a39a459bc60448ec97`,
+oracle giữ blob `be1638f46b2190d617af0378a61b077bda10bf32`.
+CI https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39412803872
+Khóa tên https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39412801670
+Đóng Stage43 GREEN; Stage44 DISCOVERY22 chưa bắt đầu.
