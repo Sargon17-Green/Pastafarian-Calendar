@@ -511,7 +511,10 @@ object Stage37Tests {
         .get.split("=",2)(1).toInt
       truth(current>=37,"Stage")
       if(current==37)truth(st.contains("CURRENT_KIND=PATCH"),"Patch")
-      truth(st.contains("CURRENT_PATCH=18"),"Patch 18")
+      if(current==37)truth(st.contains("CURRENT_PATCH=18"),"Patch 18")
+      else truth(st.contains(
+        "STAGE_37_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_63_PASS_0_FAIL"),
+        "PATCH18 storica certificata")
       truth(st.contains("STAGE_36_NATIVE_VERIFICATION=PASS_EXPECTED_RED_59_PASS_3_FAIL"),
         "Discovery18 storica")
       truth(st.contains("STAGE_35_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_71_PASS_0_FAIL"),

@@ -1,0 +1,16 @@
+STATO_ESECUZIONE=PENDING_NATIVE_CI
+STADIO=39
+TIPO=PATCH_19
+RISULTATO_ATTESO=GREEN
+LAST_COMPLETED_STAGE=38
+PATCH_WRAPPER=Patch19DayIndexedMonthNameWrapper.dayIndexedNamePatch
+DISCOVERY19_LEGACY_PRESERVED=YES
+SOURCE_LANGUAGE_CATALOG_FROZEN=YES
+VALIDATOR_INDEPENDENT=IMPLEMENTED_AWAITING_CI
+GITHUB_ACTIONS_CONCLUSION=PENDING
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage39Tests'
+
+Il wrapper seleziona il mese dall'elemento annualWeaving(dayOffset)
+e risolve l'ID canonico dei nomi al posto dayOffset%n.
+Conserva il report storico e richiede la fase DISCOVERY19.
+Nessun PASS del nuovo stage è dichiarato prima di CI.
