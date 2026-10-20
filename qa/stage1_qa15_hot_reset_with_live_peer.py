@@ -38,14 +38,14 @@ def run(src,case,refs):
         puts[cur[0]]+=1
         written[cur[0]].add(tuple(map(int,args[0])))
         return answer
-    def putspace(self,*args,**kw):
+    def wrapped_putspace(self,*args,**kw):
         cur=live[0]
         need(cur is not None and self is cur[1]["program"].space,
              "QA15 putspace escaped active Program")
         putspace[cur[0]]+=1
         return putspace0(self,*args,**kw)
     def activate():
-        cls.get,cls.put,cls.putspace=get,put,putspace
+        cls.get,cls.put,cls.putspace=get,put,wrapped_putspace
     def deactivate():
         live[0]=None
         cls.get,cls.put,cls.putspace=get0,put0,putspace0
