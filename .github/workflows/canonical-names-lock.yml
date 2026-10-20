@@ -387,3 +387,40 @@ jobs:
           grep -Fx 'STAGE34_STRICT_RED_CONFIRMED' "$RUNNER_TEMP/stage35-native.log"
           grep -Fx 'STAGE34_DISCOVERY_NATIVE_PASS' "$RUNNER_TEMP/stage35-native.log"
           grep -Fx 'STAGE35_FULL_NATIVE_GREEN' "$RUNNER_TEMP/stage35-native.log"
+
+  native-stage36-kotlin-cymraeg:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Kotlin+Cymraeg'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Welsh Kotlin branch
+        uses: actions/checkout@v4
+        with:
+          ref: 'Kotlin+Cymraeg'
+          persist-credentials: false
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Kotlin 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin-compiler-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-compiler-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/kotlinc/bin/kotlinc" -version
+      - name: Verify Stage 01 through Stage 36 with original oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git symbolic-ref --short HEAD)" = 'Kotlin+Cymraeg'
+          sh run-stage36-tests.sh 2>&1 | tee "$RUNNER_TEMP/stage36-native.log"
+          grep -Fx 'STAGE33_FULL_NATIVE_GREEN' "$RUNNER_TEMP/stage36-native.log"
+          grep -Fx 'STAGE34_STRICT_RED_CONFIRMED' "$RUNNER_TEMP/stage36-native.log"
+          grep -Fx 'STAGE34_DISCOVERY_NATIVE_PASS' "$RUNNER_TEMP/stage36-native.log"
+          grep -Fx 'STAGE36_STRICT_RED_CONFIRMED' "$RUNNER_TEMP/stage36-native.log"
+          grep -Fx 'STAGE36_DISCOVERY_NATIVE_PASS' "$RUNNER_TEMP/stage36-native.log"
