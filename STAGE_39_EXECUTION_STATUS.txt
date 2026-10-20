@@ -1,16 +1,39 @@
-STATO_ESECUZIONE=PENDING_NATIVE_CI
+STATO_ESECUZIONE=PASS_NATIVE_SCALA
 STADIO=39
 TIPO=PATCH_19
 RISULTATO_ATTESO=GREEN
-LAST_COMPLETED_STAGE=38
+RISULTATO_REALE=52_PASS_0_FAIL
+ULTIMO_STADIO_CERTIFICATO=39
 PATCH_WRAPPER=Patch19DayIndexedMonthNameWrapper.dayIndexedNamePatch
 DISCOVERY19_LEGACY_PRESERVED=YES
+DISCOVERY18_LEGACY_PRESERVED=YES
+PREVIOUS_PATCHES_PRESERVED=YES
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-VALIDATOR_INDEPENDENT=IMPLEMENTED_AWAITING_CI
-GITHUB_ACTIONS_CONCLUSION=PENDING
+VALIDATOR_INDEPENDENT=PASS
+INPUT_SNAPSHOT=PASS
+ORACOLO_SOLO_TEST=YES
+RANDOMIZED_CASES=4096
+GITHUB_ACTIONS_RUN=39433159932
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39433159932
+GITHUB_ACTIONS_HEAD_SHA=b1f7acfa7b25dfec348e9fa967da508ad209d92a
+GITHUB_ACTIONS_JOBS=40
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
+VERIFIED_ON=2026-10-20
 COMANDO=sbt -batch 'Test / runMain pastafari.Stage39Tests'
+REGRESSION_STAGE36=59_PASS_3_FAIL_INTENTIONAL
+REGRESSION_STAGE37=63_PASS_0_FAIL
+REGRESSION_STAGE38=45_PASS_3_FAIL_INTENTIONAL
+REGRESSION_STAGE39=52_PASS_0_FAIL
 
-Il wrapper seleziona il mese dall'elemento annualWeaving(dayOffset)
-e risolve l'ID canonico dei nomi al posto dayOffset%n.
-Conserva il report storico e richiede la fase DISCOVERY19.
-Nessun PASS del nuovo stage è dichiarato prima di CI.
+La PATCH19 associa il nome del mese a weaving(dayOffset),
+non alla posizione dayOffset % numeroMesi. In ogni richiesta
+il manager esegue DISCOVERY19, preserva il nome errato e
+pubblica il nome canonico corretto solo dopo i controlli.
+Il validator ricostruisce i due percorsi autonomamente.
+L'input e' una tessitura annuale sintetica gia' selezionata:
+nessuna salsa o conversione completa viene anticipata.
+
+La run sul commit di implementazione ha superato 40/40 job
+e Stage39 52 PASS, 0 FAIL. Il commit documentale seguente
+richiede ancora una propria verifica CI prima di confermare
+il sigillo conclusivo della documentazione.

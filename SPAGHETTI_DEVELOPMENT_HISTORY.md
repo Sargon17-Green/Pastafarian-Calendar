@@ -1593,3 +1593,26 @@ Nessuna PATCH19 e' inclusa.
 ### Stage38 — DISCOVERY19 certificata
 
 La selezione storica del nome del mese usa `dayOffset % monthCount` anziché l'identità del mese ricavata dalla tessitura annuale. Dopo il rerun dell'unico job bloccato dal download sbt, il commit `3b0db6bcf204bc6fdc4ef9ce739e75553ff4da37` ha 39/39 job riusciti (GitHub Actions run 38596971778, attempt 2); 45 PASS/3 FAIL intenzionali. Il catalogo congelato, PATCH18 e tutte le firme storiche sono preservati. Prossimo stage: 39 PATCH19.
+
+
+## Stage39 — PATCH19: associare il nome al mese tessuto
+
+La DISCOVERY19 sceglieva intenzionalmente il nome dalla
+posizione dayOffset % numeroMesi, anziché dall'identità
+1-based del mese restituita dalla tessitura. Il wrapper
+Patch19DayIndexedMonthNameWrapper.dayIndexedNamePatch
+invoca l'adapter storico, ne conserva tutti i campi e
+ricava il nome corretto da
+SourceLanguageCatalog.month(canonicalMonthNameIndices(annualWeaving(dayOffset)-1)).
+La validazione indipendente scansiona i 47 ID congelati
+senza chiamare l'oracolo dei test o il wrapper della patch.
+La pubblicazione avviene dopo verifica dello snapshot.
+
+Il commit b1f7acfa7b25dfec348e9fa967da508ad209d92a
+ha ottenuto run 39433159932: **40/40 job SUCCESS** e
+**52 PASS/0 FAIL** Stage39. Le firme storiche Stage38
+45 PASS/3 FAIL intenzionali, Stage37 63 PASS/0 FAIL e
+Stage36 59 PASS/3 FAIL intenzionali rimangono valide.
+Il nuovo commit documentale richiede un secondo CI.
+Non è stata introdotta Stage40; non si rivendica ancora
+il calcolo dalla salsa annuale completa.

@@ -706,3 +706,32 @@ in `src/test/scala/pastafari/Stage38Tests.scala`.
 Questa fase non implementa la salsa o la selezione normativa
 della tessitura; i vettori annuali sintetici rispettano l'ordine
 di apertura/chiusura e le durate dei mesi. Stage39 non introdotto.
+
+
+## PATCH19 — relazione fra mese del giorno e nome canonico
+
+Per una tessitura annuale w già determinata, l'indice
+zero-based del giorno d e l'elenco dei nomi canonici
+distinti ids, sia m = w(d) l'identità 1-based del mese.
+La risoluzione normativa italiana è:
+
+nome(d) = SourceLanguageCatalog.month(ids(m - 1)).italian
+
+La precedente DISCOVERY19 conserva invece come cicatrice
+SourceLanguageCatalog.month(ids(d % ids.size)).italian.
+La correzione non modifica w, ids, il catalogo congelato
+né la versione della fonte. Il wrapper restituisce tanto
+il risultato corretto quanto l'intero risultato storico.
+Il manager esegue discovery e patch nella stessa richiesta;
+il validator indipendente ricostruisce i due nomi mediante
+una ricerca per canonicalIndex nei 47 elementi, controllando
+snapshot, trace, versioni e stato.
+
+La prova Stage39 include tutte le cardinalità da 3 a 47 mesi,
+weaving intercalati, 4096 casi deterministici, ID ai confini,
+rifiuto di dati malformati e isolamento delle istanze. La run
+39433159932 sul commit b1f7acfa7b25dfec348e9fa967da508ad209d92a
+ha superato 40/40 job e Stage39 52 PASS/0 FAIL.
+Questa è una mappatura di input già selezionati; salsa
+completa, scelta delle tessiture e conversione generale
+restano fuori dal perimetro di Stage39.

@@ -1523,3 +1523,41 @@ fino all'esito del CI nativo Stage38.
 
 Il commit `3b0db6bcf204bc6fdc4ef9ce739e75553ff4da37`
 è stato verificato su GitHub Actions [run 38596971778](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38596971778), tentativo 2: **39/39 job SUCCESS**. La suite Scala Stage38 ha registrato **45 PASS/3 FAIL intenzionali**, riconducibili a `DAY1_MONTH1`, `INTERLEAVED_DAY2_MONTH2` e `MONTH47_DAY46`. Le regressioni dei 37 stadi precedenti restano verdi nei rispettivi criteri storici. Il singolo job Stage30 inizialmente FALLITO per download sbt è stato rieseguito con successo senza alcun cambio algoritmico. PATCH19 non è stata anticipata.
+
+
+## Stadio 39 — PATCH19: nome del mese scelto dalla tessitura
+
+PATCH19 corregge il collegamento fra identità del mese e nome
+italiano. Per un giorno dayOffset la tessitura annuale fissata
+stabilisce l'ID 1-based del mese annualWeaving(dayOffset).
+La lista degli ID di nome, già scelta senza ripetizioni da
+PATCH17, viene indicizzata dal mese (monthId-1); il nome
+italiano è risolto tramite SourceLanguageCatalog.month(nameId).
+
+La cicatrice DISCOVERY19 continua a selezionare dayOffset % n
+e il suo risultato viene preservato insieme al nome corretto
+nel report. Il manager attraversa BOOT, DISCOVERY19 e PATCH19
+con snapshot e validator indipendente, senza importare
+l'oracolo dei test nel codice di produzione.
+
+La suite Stage39 verifica 52 casi, inclusi 4096 input
+pseudo-casuali deterministici, 3..47 mesi, giorni intrecciati,
+input illeciti, manomissioni di output/stato, isolamento dei
+manager, tutti i nomi congelati e regressioni precedenti.
+
+### Certificazione nativa Stage39 — PATCH19
+
+Sul commit di implementazione
+b1f7acfa7b25dfec348e9fa967da508ad209d92a,
+la run GitHub Actions 39433159932
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39433159932
+ha concluso **40/40 job SUCCESS**. Stage39 ha prodotto
+**52 PASS/0 FAIL**; Stage38 conserva **45 PASS/3 FAIL
+intenzionali**, Stage37 **63 PASS/0 FAIL** e Stage36
+**59 PASS/3 FAIL intenzionali**. I nomi canonici sono
+rimasti congelati. Resta da verificare nuovamente il
+commit di questa documentazione prima della chiusura finale.
+
+Questa patch interpreta tessiture e indici di nome
+già selezionati. Non realizza ancora la salsa annuale
+integrale, la conversione completa né un soak comparativo.
