@@ -120,15 +120,9 @@ fprintf(['STAGE50 DISCOVERY25 POSITION=9 MONTH=1 FIRST=1 ', ...
 % 5. Public route nadal kończy się na kontrolowanej granicy.
 pastafari.LegacyYearNumberStructureCache.clear();
 foundation = pastafari.BigInt('-15055671');
-caught = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caught = strcmp(err.identifier, ...
-        'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 50.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation, foundation);
 
 if rawPattern
     fprintf('STAGE_50_DISCOVERY_25_EXPECTED_RED\n');

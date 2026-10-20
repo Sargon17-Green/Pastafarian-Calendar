@@ -56,13 +56,9 @@ catch err
 end
 assert(caught, 'Walidator zaakceptował zmiennoprzecinkowe wejście większe niż flintmax.');
 
-caught = false;
-try
-    calendarDateSpaghetti(uBeyond, uBeyond);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, 'Pełna ścieżka wejścia odrzuciła dokładny uint64 powyżej flintmax.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(uBeyond, uBeyond);
 
 assert(strcmp(char(normative_oracle('SAVE', 0)), f.saveZero), 'SAVE(0) jest niepoprawne.');
 assert(strcmp(char(normative_oracle('SAVE', M)), f.saveM), 'SAVE(M) jest niepoprawne.');
@@ -110,13 +106,9 @@ for k = 1:6
 end
 assert(isequal(s1.orderAtDrop46, s2.orderAtDrop46), 'Porządek kropli 46 nie jest deterministyczny.');
 
-caught = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, 'Neutralny szkielet produkcyjny nie zatrzymał się na granicy etapu 1.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation, foundation);
 
 fprintf('STAGE_01_TESTS_PASS\n');
 end

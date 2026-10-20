@@ -55,16 +55,9 @@ if any(divergent)
          'oczekiwano rozbieżności tylko dla M, 2M i 3M.']);
 end
 
-% Publiczna trasa produkcyjna nadal kończy się na kontrolowanej granicy
-% niezaimplementowanego kalendarza, ale przechodzi już przez Discovery 01.
-caught = false;
-try
-    calendarDateSpaghetti(M, M);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa produkcyjna nie zachowała kontrolowanej granicy etapu 2.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(M, M);
 
 if any(divergent)
     fprintf('STAGE_02_DISCOVERY_01_EXPECTED_RED\n');

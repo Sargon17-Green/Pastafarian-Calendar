@@ -128,14 +128,9 @@ metricKey = matlab.lang.makeValidName( ...
 assert(isfield(ctx.metrics, metricKey) && ctx.metrics.(metricKey) == 1, ...
     'Licznik in-place bowl contamination jest niepoprawny.');
 
-caught = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 20.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation, foundation);
 
 if any(publishedFirstDivergence)
     assert(isequal(publishedFirstDivergence, ...

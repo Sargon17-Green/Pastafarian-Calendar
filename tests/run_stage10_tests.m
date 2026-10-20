@@ -74,14 +74,9 @@ for caseIndex = 1:size(cases, 1)
     anyDivergence = anyDivergence || any(divergent);
 end
 
-caught = false;
-try
-    calendarDateSpaghetti(foundation - 3, foundation + 4);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 10.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation - 3, foundation + 4);
 
 if anyDivergence
     fprintf('STAGE_10_DISCOVERY_05_EXPECTED_RED\n');

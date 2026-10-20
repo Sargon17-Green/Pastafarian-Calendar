@@ -53,16 +53,9 @@ if any(divergent)
          'ma być zgodnie, a Foundation i strona późniejsza mają się rozchodzić.']);
 end
 
-% Publiczna ścieżka nadal dochodzi do kontrolowanej granicy po przejściu
-% przez wszystkie dotychczasowe warstwy produkcyjne.
-caught = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 4.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation, foundation);
 
 if any(divergent)
     fprintf('STAGE_04_DISCOVERY_02_EXPECTED_RED\n');

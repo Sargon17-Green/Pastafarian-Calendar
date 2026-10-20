@@ -76,14 +76,9 @@ fprintf(['STAGE22 DISCOVERY11 DROP46=[%s] QUERY=[%s] ', ...
     ctx.legacyOrderMemoryLastSource, ctx.legacyOrderMemoryWriteCount, ...
     classification(divergent));
 
-caught = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 22.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation, foundation);
 
 if divergent
     assert(isequal(queriedOrder, expectedPostStir12), ...

@@ -70,13 +70,9 @@ if any(divergent)
         'Produkcyjny wzorzec rozbieżności wiersza 2 jest nieoczekiwany.');
 end
 
-caught = false;
-try
-    calendarDateSpaghetti(pastafari.BigInt(0), pastafari.BigInt(0));
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, 'Publiczna trasa nie zachowała kontrolowanej granicy etapu 8.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(pastafari.BigInt(0), pastafari.BigInt(0));
 
 if any(divergent)
     fprintf('STAGE_08_DISCOVERY_04_EXPECTED_RED\n');

@@ -69,14 +69,9 @@ fprintf(['STAGE32 DISCOVERY16 RAW=[%s] ACTUAL=[%s] ', ...
     rowText(normativeValues), classification(rawPattern));
 
 foundation = pastafari.BigInt('-15055671');
-caught = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 32.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation, foundation);
 
 if rawPattern
     fprintf('STAGE_32_DISCOVERY_16_EXPECTED_RED\n');

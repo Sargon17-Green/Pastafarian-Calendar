@@ -167,15 +167,9 @@ end
 
 pastafari.LegacyYearNumberStructureCache.clear();
 foundation = pastafari.BigInt('-15055671');
-caughtBootstrap = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caughtBootstrap = strcmp(err.identifier, ...
-        'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caughtBootstrap, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 46.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation, foundation);
 
 if redPattern
     fprintf('STAGE_46_DISCOVERY_23_EXPECTED_RED\n');

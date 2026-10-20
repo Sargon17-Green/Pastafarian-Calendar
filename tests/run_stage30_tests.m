@@ -87,14 +87,9 @@ assert(all(negativeDivergent) || ~any(negativeDivergent), ...
      'albo GREEN dla wszystkich po signed question.']);
 
 foundationDay = pastafari.BigInt('-15055671');
-caught = false;
-try
-    calendarDateSpaghetti(foundationDay, foundationDay);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 30.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundationDay, foundationDay);
 
 if any(negativeDivergent)
     assert(all(negativeDivergent), ...

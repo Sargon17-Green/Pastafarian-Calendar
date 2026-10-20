@@ -56,3 +56,13 @@ MATLAB_RERUN_REQUIRED=YES
 ```
 
 Jest to stan celowy. Nie należy zmieniać go na ukończony na podstawie samego audytu statycznego.
+
+## Zgodność regresji historycznych z wejściem końcowym
+
+Przed końcową weryfikacją poprawiono **28 przestarzałych asercji** w 27 plikach testów: Etap 1 (dwa przypadki) oraz parzyste Etapy 2–52 (po jednym przypadku). Dawniej wymagały błędu `Pastafari:Bootstrap:NotImplementedYet`, mimo że po Etapie 54 publiczne `calendarDateSpaghetti` ma zwracać datę, a nie zatrzymywać się na szkielecie.
+
+Każdy z tych przypadków wywołuje teraz testowy `assert_public_calendar_entry_contract`. Sprawdza on walidację dokładnych wejść, zachowanie liczb w kontekście i faktyczne odrzucenie `NaN` przez publiczną funkcję. Ponadto kontroluje podłączenie produkcyjnego `finalMonsterIntegration` i brak starego wyjątku. Nie symuluje wyniku kalendarza i nie przechwytuje jego prawdziwego ciężkiego testu.
+
+`run_stage55_final_audit` wykonuje wstępny przegląd tych 28 miejsc i emituje `STAGE_55_PUBLIC_ENTRY_REGRESSION_AUDIT_PASS`. To tylko bramka statyczna. **Rzeczywisty wynik całego kalendarza** nadal musi zostać obliczony natywnie i porównany z niezależnym oracle w ciężkim `run_stage54_tests`.
+
+Nie wykonano nowej natywnej próby MATLAB tylko przez przygotowanie tej poprawki. Metadane Etapu 55 pozostają w stanie `NO_AWAITING_NATIVE_FINAL_AUDIT` aż do rzeczywistego PASS.

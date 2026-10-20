@@ -113,14 +113,9 @@ fprintf(['STAGE24 DISCOVERY12 ORDER=[%s] QUERY_ID=%d RAW=%d ', ...
     publicCtx.legacyFixedNameSuccessor, publicSuccessor, expectedPublic, ...
     classification(divergent));
 
-caught = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 24.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation, foundation);
 
 if divergent
     assert(publicSuccessor == 4, ...

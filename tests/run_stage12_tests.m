@@ -90,14 +90,9 @@ metricKey = matlab.lang.makeValidName('discovery06.legacyPrior.calls');
 assert(isfield(ctx.metrics, metricKey) && ctx.metrics.(metricKey) == 1, ...
     'Licznik legacyPrior jest niepoprawny.');
 
-caught = false;
-try
-    calendarDateSpaghetti(foundation, foundation);
-catch err
-    caught = strcmp(err.identifier, 'Pastafari:Bootstrap:NotImplementedYet');
-end
-assert(caught, ...
-    'Publiczna trasa nie zachowała kontrolowanej granicy etapu 12.');
+% Historyczny bootstrap został zastąpiony przez integrację produkcyjną.
+% Sprawdzamy aktualny kontrakt wejścia bez kosztownego obliczenia daty.
+assert_public_calendar_entry_contract(foundation, foundation);
 
 if any(divergent)
     assert(all(divergent(1:7)), ...

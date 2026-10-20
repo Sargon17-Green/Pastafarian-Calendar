@@ -37,6 +37,9 @@ try
         version, version('-release'));
     fprintf('%s', header);
 
+    % 0. Szybki preflight: brak starych oczekiwań NotImplementedYet.
+    auditOutput = [auditOutput, verifyPublicEntryRegressions(root)]; %#ok<AGROW>
+
     % 1. Pełna ścieżka regresji 1..54 + ciężki production/oracle differential.
     stage54Output = evalc('run_stage54_tests();');
     fprintf('%s', stage54Output);
@@ -145,6 +148,38 @@ for k = 1:numel(patchFiles)
 end
 
 out = sprintf('STAGE_55_PATCH_01_26_INVENTORY_PASS\n');
+end
+
+function out = verifyPublicEntryRegressions(root)
+% Stage 54 retired the public bootstrap error. The historical Discovery
+% tests still exercise their raw legacy paths, but the public entry
+% checks must now use the modern, lightweight contract assertion.
+helper = fullfile(root, 'tests', 'assert_public_calendar_entry_contract.m');
+assert(exist(helper, 'file') == 2, ...
+    'Brakuje testowego kontraktu publicznego wejścia.');
+
+stages = [1, 2:2:52];
+totalChecks = 0;
+for k = 1:numel(stages)
+    stage = stages(k);
+    path = fullfile(root, 'tests', sprintf('run_stage%02d_tests.m', stage));
+    txt = fileread(path);
+    assert(~contains(txt, 'Pastafari:Bootstrap:NotImplementedYet'), ...
+        'Historyczny błąd bootstrapu pozostaje w teście %s.', path);
+
+    checks = count(txt, 'assert_public_calendar_entry_contract(');
+    expected = 1;
+    if stage == 1
+        expected = 2;
+    end
+    assert(checks == expected, ...
+        'Nieprawidłowa liczba kontroli publicznego wejścia w %s.', path);
+    totalChecks = totalChecks + checks;
+end
+
+assert(totalChecks == 28, ...
+    'Oczekiwano dokładnie 28 odnowionych kontroli publicznego wejścia.');
+out = sprintf('STAGE_55_PUBLIC_ENTRY_REGRESSION_AUDIT_PASS\n');
 end
 
 function out = verifyStage55Metadata(root)
