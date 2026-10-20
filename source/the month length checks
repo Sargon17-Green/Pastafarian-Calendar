@@ -3,6 +3,9 @@
 \ checked by an independent inclusion/exclusion computation.
 \ These tests do not claim a successful CAL compiler execution.
 
+The testmonthrank is a wide quantity.
+The examinedmonthrecord is a month length record.
+
 To check bounded month length counts:
   Count month lengths given 12 and 3.
   If the month length work's count result is not "1",
@@ -33,39 +36,39 @@ To check bounded month length counts:
     put "Three months in a 252-day year have the wrong count." into the check report; exit.
 
 To verify two month lengths given a number and another number:
-  Put the chosen month lengths' first into an examined month length record.
-  If the examined month length record is nil,
+  Put the chosen month lengths' first into the examinedmonthrecord.
+  If the examinedmonthrecord is nil,
     put "Month length one is missing." into the check report; exit.
-  If the examined month length record's month length days is not the number,
+  If the examinedmonthrecord's month length days is not the number,
     put "Month length one differs from its reference." into the check report; exit.
-  Put the examined month length record's next into the examined month length record.
-  If the examined month length record is nil,
+  Put the examinedmonthrecord's next into the examinedmonthrecord.
+  If the examinedmonthrecord is nil,
     put "Month length two is missing." into the check report; exit.
-  If the examined month length record's month length days is not the other number,
+  If the examinedmonthrecord's month length days is not the other number,
     put "Month length two differs from its reference." into the check report; exit.
-  If the examined month length record's next is not nil,
+  If the examinedmonthrecord's next is not nil,
     put "A two-month partition has an unwanted third month." into the check report; exit.
 
 To check month length lexical ranking:
   Put 128 into the chosen year's year length.
   Put 2 into the selected month count.
-  Put "1" into a test month rank wide quantity.
-  Select month lengths from the test month rank wide quantity.
+  Put "1" into the testmonthrank.
+  Select month lengths from the testmonthrank.
   If the month length work's valid selection is not 1,
     put "The first two-month length sequence was rejected." into the check report; exit.
   Verify two month lengths given 5 and 123.
-  Put "60" into the test month rank wide quantity.
-  Select month lengths from the test month rank wide quantity.
+  Put "60" into the testmonthrank.
+  Select month lengths from the testmonthrank.
   Verify two month lengths given 64 and 64.
-  Put "119" into the test month rank wide quantity.
-  Select month lengths from the test month rank wide quantity.
+  Put "119" into the testmonthrank.
+  Select month lengths from the testmonthrank.
   Verify two month lengths given 123 and 5.
-  Put "120" into the test month rank wide quantity.
-  Select month lengths from the test month rank wide quantity.
+  Put "120" into the testmonthrank.
+  Select month lengths from the testmonthrank.
   If the month length work's valid selection is not 0,
     put "An out-of-range month-length rank was accepted." into the check report; exit.
-  Put "0" into the test month rank wide quantity.
-  Select month lengths from the test month rank wide quantity.
+  Put "0" into the testmonthrank.
+  Select month lengths from the testmonthrank.
   If the month length work's valid selection is not 0,
     put "A zero month-length rank was accepted." into the check report; exit.
 
