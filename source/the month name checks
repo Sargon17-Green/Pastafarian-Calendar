@@ -3,6 +3,8 @@
 \ The last three-name sequence is 47,46,45.
 \ For 47 names the total is 47 factorial and exceeds sauce modulus M.
 
+The monthnamerank is a wide quantity.
+
 To check the month name sequence counts:
   Put 3 into the selected month count.
   Count all month name sequences.
@@ -34,21 +36,21 @@ To verify three month name indices given a number and another number and a third
 
 To check the month name lexical ranking:
   Put 3 into the selected month count.
-  Put "1" into a month name rank wide quantity.
-  Select month names from the month name rank wide quantity.
+  Put "1" into the monthnamerank.
+  Select month names from the monthnamerank.
   If the month name choice's selection success is not 1,
     put "The first month-name sequence was rejected." into the check report; exit.
   Verify three month name indices given 1 and 2 and 3.
-  Put "45" into the month name rank wide quantity.
-  Select month names from the month name rank wide quantity.
+  Put "45" into the monthnamerank.
+  Select month names from the monthnamerank.
   Verify three month name indices given 1 and 2 and 47.
-  Put "46" into the month name rank wide quantity.
-  Select month names from the month name rank wide quantity.
+  Put "46" into the monthnamerank.
+  Select month names from the monthnamerank.
   Verify three month name indices given 1 and 3 and 2.
-  Put "97290" into the month name rank wide quantity.
-  Select month names from the month name rank wide quantity.
+  Put "97290" into the monthnamerank.
+  Select month names from the monthnamerank.
   Verify three month name indices given 47 and 46 and 45.
-  Put "97291" into the month name rank wide quantity.
-  Select month names from the month name rank wide quantity.
+  Put "97291" into the monthnamerank.
+  Select month names from the monthnamerank.
   If the month name choice's selection success is not 0,
     put "The month name chooser accepted an out-of-range rank." into the check report; exit.
