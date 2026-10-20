@@ -74,3 +74,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage14_discovery07.php
       - name: Tampalan 07 — sahkan sentinel dan sebelas pengisaran
         run: php -d memory_limit=512M tests/stage15_patch07_tests.php
+      - name: Penemuan 08 — bukti ordinal satu pada penyahpangkat sifar
+        run: php -d memory_limit=512M tests/verify_stage16_discovery08.php

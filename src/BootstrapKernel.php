@@ -255,6 +255,22 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'visible.grind.patch07');
             return $visible;
         });
+        $this->dispatcher->register('BOWL_PERMUTATION_LEGACY', function(BootstrapContext $context): array {
+            $drop = $context->semanticState['dropValue'] ?? null;
+            if (!$drop instanceof BigInt) {
+                throw new \InvalidArgumentException('BOWL_PERMUTATION_DROP');
+            }
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyBowlPermutation(
+                new \Pastafari\Stage01\Legacy\LegacyPermutationUnrank0()
+            );
+            $rank1 = $legacy->oneBasedRank($drop);
+            $context->semanticState['legacyPermutationRank1'] = $rank1;
+            $result = $legacy->legacyBowlOrderFromDrop($drop);
+            $context->semanticState['legacyBowlOrder'] = $result;
+            $context->status = 'BOWL_PERMUTATION_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.bowl.permutation.calls');
+            return $result;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -405,6 +421,23 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('VISIBLE_GRIND_PATCH_07', $context)
+        );
+    }
+
+    /**
+     * Pintu masuk sejarah bagi pembacaan permutasi mangkuk yang salah.
+     * Pembetulan pangkat satu kepada pangkat sifar hanya pada Stage 17.
+     *
+     * @return list<int>
+     */
+    public function legacyBowlOrder(BigInt $drop): array
+    {
+        $context = new BootstrapContext(0, 0);
+        $context->phase = 'BOWL_PERMUTATION_LEGACY';
+        $context->semanticState['dropValue'] = $drop;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('BOWL_PERMUTATION_LEGACY', $context)
         );
     }
 

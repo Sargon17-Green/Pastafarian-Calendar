@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 15 (PATCH 07)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 16 (DISCOVERY 08)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -218,3 +218,17 @@ php -d memory_limit=512M tests/stage15_patch07_tests.php
 Ujian PATCH 07 mesti memeriksa setiap 46 titisan bagi lapan pasangan tarikh, menghasilkan 368 perbandingan terhadap oracle tempatan, tiga jadual sejarah merah yang masing-masing berbeza pada 46 titisan (138 parut) dan pemilikan konteks. Ia juga menguji setiap baris sentinel dan indeks 1..11, 1,408 pemeriksaan baris, serta input indeks salah. Ujian sejarah Stage 14 tetap merah secara langsung dan pengesahnya hijau. Semua ujian Stage 1–13 masih wajib lulus.
 
 Stage 16 — DISCOVERY 08 belum dimulakan; jangan cipta penilaian permutasi lebih awal.
+
+
+## Stage 16 — DISCOVERY 08: Pangkat satu dihantar ke fungsi pangkat sifar
+
+`LegacyPermutationUnrank0::oldPermutationUnrank0` mengira permutasi enam mangkuk secara leksikografik dengan domain tepat **0..719**. Pembaca sejarah `LegacyBowlPermutation::legacyBowlOrderFromDrop` mengira pangkat satu `1+((drop-1) mod 720)`, kemudian dengan salah terus menyerahkan pangkat **1..720** kepada fungsi pangkat sifar. Hasilnya pangkat 1..719 memilih permutasi berikutnya, sementara pangkat 720 ditolak dengan `PERMUTATION_RANK_ZERO_RANGE`. Tiada pembetulan pangkat dibuat pada Stage ini.
+
+Penghala `BOWL_PERMUTATION_LEGACY` serta `BootstrapKernel::legacyBowlOrder` membuka laluan per-panggilan untuk memeriksa kerosakan dengan `BigInt` termasuk nilai negatif dan amat besar. Penilaian mangkuk belum dipasang dalam produksi; fasa itu datang kemudian dan tidak boleh dicipta sebelum masa.
+
+```text
+php -d memory_limit=512M tests/stage16_discovery08_tests.php
+php -d memory_limit=512M tests/verify_stage16_discovery08.php
+```
+
+Ujian langsung sejarah mesti RED terkawal dengan 719 pangkat tersasar dan satu pangkat di luar julat, manakala pengesah hijau hanya bagi corak tepat itu. Fungsi sifar diuji sendiri terhadap semua 720 permutasi normatif; 46 titisan visible Stage 15 juga diuji. Semua regresi Stage 1–15 kekal hijau. **PATCH 08 Stage 17 belum diperkenalkan.**

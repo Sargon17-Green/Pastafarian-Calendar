@@ -343,3 +343,22 @@ LULUS Stage 15 PATCH 07 kes=8 komponen=368 parut=138 ulang=46 baris_sintetik=140
 ```
 
 Semua ujian Stage 1–14, pemeriksaan nama kanonik dan fixture turut lulus. Stage 15 ialah PATCH GREEN yang diterima; Stage 16 belum bermula. Tidak terdapat handoff PHP aktif dalam `Pending_User_Execution`.
+
+
+## Stage 16 — DISCOVERY 08: Keliru ordinal bagi permutasi mangkuk
+
+### Bukti punca sejarah
+
+`LegacyPermutationUnrank0` melaksanakan penyahpangkat leksikografik enam elemen mengikut baki faktorial dengan pangkat sifar 0..719. Setiap hasil itu sendiri sah, lengkap dan dibandingkan dengan oracle ujian `NormativeSauce::permutationUnrank1(rank0+1)`. Kesalahan berlaku di pembaca `LegacyBowlPermutation` yang mendapat pangkat satu daripada titisan dan menghantarnya tanpa menolak satu. Panggilan sejarah ini wajib kekal dapat dicapai.
+
+### Lapisan tambahan
+
+Penghala `BOWL_PERMUTATION_LEGACY` dalam `BootstrapKernel` membina objek pembaca setiap panggilan, menyimpan nilai pemerhatian dalam `BootstrapContext`, merekod metrik, kemudian benar-benar memanggil pembaca legacy yang salah. Tiada oracle ujian atau jadual permutasi salinan dalam produksi. Rangka kerja SAVE, 46 titisan visible, prior, hidden dan batu tidak diubah.
+
+### Penemuan merah yang diminta
+
+Bagi input rank1 1..719, keluaran pangkat sifar salah satu langkah berbanding hasil normatif. Pada rank1 720, pengecualian julat sengaja berlaku. Ujian mengesahkan semua 720 pangkat sifar tulen benar, kemudian menilai 720 input pangkat satu, nilai negatif, `BigInt` lebih daripada 256 bit dan 46 titisan visible sebenar. Pengesah menerima hanya corak `salah=719 luar=1 jumlah=720 fungsi_sifar=720 titisan=46 lain=0` dan keluar 0, walaupun ujian langsung keluar 1.
+
+### Batas Stage 16
+
+Tiada `permutationPatch` atau pengurangan pangkat satu kepada sifar dalam pembaca sejarah. Pembaikan ini ialah Stage 17 — PATCH 08. Belum dibuat tuangan mangkuk, pemilihan selepas 46 titisan, atau perubahan katalog, fixture ataupun `main`.
