@@ -486,14 +486,13 @@ jobs:
           unzip -q "$RUNNER_TEMP/kotlin-compiler-1.9.0.zip" -d "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/kotlinc/bin/kotlinc" -version
-      - name: Verify Stage 01 through Stage 36 with original oracle
+      - name: Verify Stage 01 through Stage 37 with original oracle
         shell: bash
         run: |
           set -euo pipefail
           test "$(git symbolic-ref --short HEAD)" = 'Kotlin+Cymraeg'
-          sh run-stage36-tests.sh 2>&1 | tee "$RUNNER_TEMP/stage36-native.log"
-          grep -Fx 'STAGE35_FULL_NATIVE_GREEN' "$RUNNER_TEMP/stage36-native.log"
-          grep -Fx 'STAGE36_STRICT_RED_CONFIRMED' "$RUNNER_TEMP/stage36-native.log"
-          grep -Fx 'STAGE36_DISCOVERY_NATIVE_PASS' "$RUNNER_TEMP/stage36-native.log"
-          grep -Fx 'STAGE36_STRICT_RED_CONFIRMED' "$RUNNER_TEMP/stage36-native.log"
-          grep -Fx 'STAGE36_DISCOVERY_NATIVE_PASS' "$RUNNER_TEMP/stage36-native.log"
+          sh run-stage37-tests.sh 2>&1 | tee "$RUNNER_TEMP/stage37-native.log"
+          grep -Fx 'STAGE35_FULL_NATIVE_GREEN' "$RUNNER_TEMP/stage37-native.log"
+          grep -Fx 'STAGE36_STRICT_RED_CONFIRMED' "$RUNNER_TEMP/stage37-native.log"
+          grep -Fx 'STAGE36_DISCOVERY_NATIVE_PASS' "$RUNNER_TEMP/stage37-native.log"
+          grep -Fx 'STAGE37_FULL_NATIVE_GREEN' "$RUNNER_TEMP/stage37-native.log"
