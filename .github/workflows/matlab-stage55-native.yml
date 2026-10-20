@@ -3,7 +3,7 @@ name: MATLAB Stage 55 Native Audit
 on:
   push:
     branches:
-      - 'MATLAB+Polski'
+      - 'MATLAB\+Polski'
     paths:
       - 'src/**'
       - 'tests/**'
