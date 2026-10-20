@@ -194,8 +194,8 @@ end
 
 function value = saveReference(x)
 M = pastafari.BigInt('170141183460469231731687303715884105727');
-value = pastafari.BigInt(1) + ...
-    (pastafari.BigInt.coerce(x) - pastafari.BigInt(1)).regularMod(M);
+offset = pastafari.BigInt.coerce(x) - pastafari.BigInt(1);
+value = pastafari.BigInt(1) + offset.regularMod(M);
 end
 
 function text = classification(isDivergent)
