@@ -2,7 +2,7 @@
 \ The default entrypoint runs short arithmetic and structural checks.
 \ The full five-part conversion lives in the separate complete-date module.
 \ Read the README before using it.
-\ This text has not yet been tested with the CAL compiler.
+\ The native CAL compile passed at v121; runtime report-path QA is pending.
 
 A calendar day is a number.
 A day count is a number.
@@ -27,7 +27,7 @@ To run:
   Put "The checks agree with the examples." into the check report.
   Run all the checks.
   Put the check report into a buffer.
-  Put the module's directory then "calendar-checks.txt" into the check report path.
+  Put ".\\calendar-checks.txt" into the check report path.
   Write the buffer to the check report path.
 
 \ Stop at the first failed check, but always write the report in To run.
