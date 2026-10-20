@@ -20,6 +20,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     AnswerStreamManager,
     Context,
     CutletCountManager,
+    CutletPartitionManager,
     DayCountManager,
     DistanceManager,
     GateGapManager,
@@ -227,6 +228,12 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
 
   def cutlet_count_diagnostic(calculation_day, target_day),
     do: CutletCountManager.diagnose(calculation_day, target_day)
+
+  def cutlet_partition(calculation_day, target_day),
+    do: CutletPartitionManager.partition(calculation_day, target_day)
+
+  def cutlet_partition_diagnostic(calculation_day, target_day),
+    do: CutletPartitionManager.diagnose(calculation_day, target_day)
 
   def find_target_year(calculation_day, target_day),
     do: TargetYearManager.find(calculation_day, target_day)
