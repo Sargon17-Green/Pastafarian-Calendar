@@ -66,3 +66,11 @@ Każdy z tych przypadków wywołuje teraz testowy `assert_public_calendar_entry_
 `run_stage55_final_audit` wykonuje wstępny przegląd tych 28 miejsc i emituje `STAGE_55_PUBLIC_ENTRY_REGRESSION_AUDIT_PASS`. To tylko bramka statyczna. **Rzeczywisty wynik całego kalendarza** nadal musi zostać obliczony natywnie i porównany z niezależnym oracle w ciężkim `run_stage54_tests`.
 
 Nie wykonano nowej natywnej próby MATLAB tylko przez przygotowanie tej poprawki. Metadane Etapu 55 pozostają w stanie `NO_AWAITING_NATIVE_FINAL_AUDIT` aż do rzeczywistego PASS.
+
+## Automatyczna natywna próba na GitHub Actions
+
+Workflow `.github/workflows/matlab-stage55-native.yml` uruchamia natywne MATLAB R2026a na hostowanym przez GitHub systemie Ubuntu dla gałęzi `MATLAB+Polski`. Repozytorium jest publiczne: akcje MathWorks `setup-matlab@v3` i `run-command@v3` obsługują w tym trybie automatyczne licencjonowanie MATLAB-a, bez dodawania prywatnych kluczy do repozytorium.
+
+Zmiana testów, kodu lub pliku workflow uruchamia pełny audyt Stage 55. Zadanie ma ograniczenie 180 minut. Krok `upload-artifact@v4` zachowuje `logs/STAGE_55_MATLAB_RUN.log` również po niepowodzeniu testu, jeśli plik powstał. Weryfikacja wykonuje oryginalne `run_stage55_final_audit` i **nie używa zastępczego oracle**.
+
+Sukces workflow nie aktualizuje automatycznie `LAST_COMPLETED_STAGE`. Zamknięcie wymaga sprawdzenia, że log dotyczy właściwego commit SHA, zawiera wszystkie wymagane markery PASS, a różnice semantyczne i regresje zostały faktycznie zweryfikowane. Przed uzyskaniem takiego wyniku Stage 55 pozostaje otwarty.

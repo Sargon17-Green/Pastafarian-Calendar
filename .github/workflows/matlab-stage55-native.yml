@@ -1,0 +1,48 @@
+name: MATLAB Stage 55 Native Audit
+
+on:
+  push:
+    branches:
+      - 'MATLAB+Polski'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'DEVELOPMENT_STAGE.md'
+      - 'docs/STAGE_55_FINAL_AUDIT.md'
+      - '.github/workflows/matlab-stage55-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matlab-stage55-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native-stage55:
+    name: MATLAB R2026a / complete Stage 55 audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Check out exact branch commit
+        uses: actions/checkout@v4
+
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+
+      - name: Execute native final audit including heavy oracle
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_final_audit
+
+      - name: Preserve PASS or FAIL audit log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matlab-stage55-audit-${{ github.run_id }}
+          path: logs/STAGE_55_MATLAB_RUN.log
+          if-no-files-found: warn
+          retention-days: 30
