@@ -268,6 +268,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyWideRejectionDirection(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة الثامنة عشرة: اختيار رتبة العودة وفق إشارة التيار.
+    public static BigInteger EvaluateRejectionDirection(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateRejectionDirection(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

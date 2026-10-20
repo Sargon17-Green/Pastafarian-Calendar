@@ -154,6 +154,8 @@ public sealed class MonsterContext
 
     // الندبة الثامنة عشرة: رفض قيمة عالية في الاتجاه النازل يُعيد الرتبة الأولى.
     public BigInteger? LegacyRejectionDirectionRankResult { get; set; }
+    // الرقعة الثامنة عشرة؛ نتيجة مستقلة عن الشاهد التاريخي.
+    public BigInteger? PatchedRejectionDirectionRankResult { get; set; }
 
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {

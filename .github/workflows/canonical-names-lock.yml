@@ -235,3 +235,5 @@ jobs:
         run: |
           test "${{ steps.discovery_wide_rejection_direction_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage36Tests/PastafarianCalendar.Stage36Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تحقق رقعة اتجاه الرفض الواسع الثامنة عشرة وحفظ الشاهد التاريخي
+        run: dotnet run --project tests/PastafarianCalendar.Stage37Tests/PastafarianCalendar.Stage37Tests.csproj --configuration Release
