@@ -146,9 +146,10 @@ end
 function values = candidateLengths(candidates)
 values = zeros(1, numel(candidates));
 for k = 1:numel(candidates)
-    values(k) = ( ...
+    lengthExact = ...
         pastafari.BigInt.coerce(candidates{k}.closeGateDay) - ...
-        pastafari.BigInt.coerce(candidates{k}.openGateDay)).toDoubleExact();
+        pastafari.BigInt.coerce(candidates{k}.openGateDay);
+    values(k) = lengthExact.toDoubleExact();
 end
 end
 
