@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 16 (DISCOVERY 08)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 17 (PATCH 08)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -232,3 +232,19 @@ php -d memory_limit=512M tests/verify_stage16_discovery08.php
 ```
 
 Ujian langsung sejarah mesti RED terkawal dengan 719 pangkat tersasar dan satu pangkat di luar julat, manakala pengesah hijau hanya bagi corak tepat itu. Fungsi sifar diuji sendiri terhadap semua 720 permutasi normatif; 46 titisan visible Stage 15 juga diuji. Semua regresi Stage 1–15 kekal hijau. **PATCH 08 Stage 17 belum diperkenalkan.**
+
+
+## Stage 17 — PATCH 08: Pembetulan pangkat satu kepada pangkat sifar
+
+`PermutationPatch08::permutationPatch` menerima titisan BigInt, menggunakan `LegacyBowlPermutation::oneBasedRank` bagi pangkat satu 1..720, lalu **memanggil `legacyBowlOrderFromDrop` secara sebenar** untuk mengekalkan jejak kecacatan sejarah. Apabila pangkat satu 720, kelas legacy masih melemparkan `PERMUTATION_RANK_ZERO_RANGE`; pembetul memeriksa kes khusus itu sebelum mengembalikan hasil yang sah.
+
+Untuk semua input, pangkat satu ditukar kepada pangkat sifar menggunakan `rank0=rank1-1` dan fungsi `LegacyPermutationUnrank0::oldPermutationUnrank0(rank0)` yang sah. Oleh itu rank1 720 menghasilkan permutasi terakhir dan tidak lagi gagal dalam laluan produksi.
+
+`BootstrapKernel::bowlOrder` menggunakan `BOWL_PERMUTATION_PATCH_08` dalam konteks per panggilan. `legacyBowlOrder` dan `BOWL_PERMUTATION_LEGACY` kekal terdedah untuk menguji secara langsung 719 perbezaan dan satu pengecualian Stage 16. Tiada aplikasi campuran enam mangkuk ke 46 titisan yang sebenar lagi, kerana peringkat tersebut datang kemudian.
+
+```text
+php -d memory_limit=512M tests/verify_stage16_discovery08.php
+php -d memory_limit=512M tests/stage17_patch08_tests.php
+```
+
+Ujian hijau Stage 17 membandingkan **semua 720 permutasi** dengan oracle tempatan, memastikan 720 susunan unik, 719 hasil legacy salah yang dikekalkan, satu pengecualian legacy, 14 integer besar/negatif, serta 138 permutasi daripada tiga set 46 titisan visible. Semua ujian Stage 1–16 kekal wajib dan Stage 18 belum dimulakan.

@@ -33,7 +33,8 @@ $valid = $valid
     && str_contains($raw, 'function oldPermutationUnrank0(')
     && str_contains($kernel, "dispatch('BOWL_PERMUTATION_LEGACY', " . '$context)')
     && !str_contains($kernel, 'oldPermutationUnrank0')
-    && !str_contains($caller, '$oneBased - 1');
+    && !str_contains($caller, '$oneBased - 1')
+    && str_contains($kernel, "dispatch('BOWL_PERMUTATION_PATCH_08', " . '$context)');
 $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS)
 );
@@ -41,8 +42,11 @@ foreach ($iterator as $file) {
     if (strtolower($file->getExtension()) !== 'php') continue;
     $body = (string)file_get_contents($file->getPathname());
     if (str_contains($body, 'NormativeMath')
-        || str_contains($body, 'NormativeSauce')
-        || str_contains($body, 'function permutationPatch(')) {
+        || str_contains($body, 'NormativeSauce')) {
+        $valid = false;
+    }
+    if (str_contains($body, 'function permutationPatch(')
+        && $file->getFilename() !== 'PermutationPatch08.php') {
         $valid = false;
     }
 }

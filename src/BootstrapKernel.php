@@ -271,6 +271,20 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'legacy.bowl.permutation.calls');
             return $result;
         });
+        $this->dispatcher->register('BOWL_PERMUTATION_PATCH_08', function(BootstrapContext $context): array {
+            $drop = $context->semanticState['dropValue'] ?? null;
+            if (!$drop instanceof BigInt) {
+                throw new \InvalidArgumentException('BOWL_PERMUTATION_DROP');
+            }
+            $unrank = new \Pastafari\Stage01\Legacy\LegacyPermutationUnrank0();
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyBowlPermutation($unrank);
+            $patch = new \Pastafari\Stage01\Patches\PermutationPatch08($legacy, $unrank);
+            $order = $patch->permutationPatch($drop);
+            $context->semanticState['patchedBowlOrder'] = $order;
+            $context->status = 'BOWL_PERMUTATION_PATCH_08_RETURNED';
+            $this->metrics->bump($context, 'bowl.permutation.patch08');
+            return $order;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -438,6 +452,23 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('BOWL_PERMUTATION_LEGACY', $context)
+        );
+    }
+
+    /**
+     * Susunan mangkuk yang sah dengan pemetaan ordinal 1..720 ke 0..719.
+     * Laluan legacy masih wujud bagi bukti Stage 16.
+     *
+     * @return list<int>
+     */
+    public function bowlOrder(BigInt $drop): array
+    {
+        $context = new BootstrapContext(0, 0);
+        $context->phase = 'BOWL_PERMUTATION_PATCH_08';
+        $context->semanticState['dropValue'] = $drop;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('BOWL_PERMUTATION_PATCH_08', $context)
         );
     }
 

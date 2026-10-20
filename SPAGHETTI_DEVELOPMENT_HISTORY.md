@@ -380,3 +380,22 @@ LULUS kontrak merah 08; pangkat satu dihantar ke fungsi pangkat sifar
 ```
 
 Oleh itu Stage 16 ialah `EXPECTED_RED` yang benar-benar diperakui, bukan kegagalan CI. Semua ujian sebelumnya lulus. Stage 17 — PATCH 08 belum dimulakan.
+
+
+## Stage 17 — PATCH 08: Susunan mangkuk sah daripada pembaca sifar lama
+
+### Pembaikan yang tidak memadam sejarah
+
+`LegacyBowlPermutation` dan `LegacyPermutationUnrank0` langsung tidak disentuh. Kerosakan ordinal Stage 16 masih dapat diperhatikan melalui `legacyBowlOrder`: 719 pangkat beralih kepada susunan lain dan satu pangkat melemparkan pengecualian pada 720. `PermutationPatch08` menerima dependency legacy yang sama, melaksanakan panggilan sejarah yang sebenar, menerima hanya pengecualian `PERMUTATION_RANK_ZERO_RANGE` pada rank1=720, kemudian meminta pembaca sifar yang betul dengan rank1-1.
+
+### Pertumbuhan lapisan monsternya
+
+Penghala produksi `BOWL_PERMUTATION_PATCH_08` mencipta pembaca sifar, pembaca legacy, dan adapter Stage 17 pada konteks permintaan itu sahaja. Laluan `BOWL_PERMUTATION_LEGACY` masih wujud dengan kontrak lama. Metrik dan keadaan semantik tidak mengawal keputusan matematik. Tiada oracle atau jadual 720 permutasi disalin ke sumber produksi.
+
+### Pemeriksaan normatif dan regresi
+
+Ujian Stage 17 melintasi semua pangkat 1..720: hasil susunan produksi mesti setara tepat dengan `NormativeSauce::permutationUnrank1`, semua susunan unik, dan setiap hasil daripada enam nombor 1..6 sekali sahaja. Penguji membuktikan pangkat1=1/720, determinisme antara panggilan dan instance, 719 hasil legacy tersasar, pengecualian legacy pada 720, 14 input negatif/BigInt melebihi 256 bit dan 138 hasil susunan daripada tiga pasangan tarikh menggunakan 46 titisan visible Stage15. Pengesah sejarah Stage16 mesti kekal `EXPECTED_RED` yang terkawal dan CI meluluskan seluruh Stage1–17. Keputusan runner dicatat selepas pengesahan sebenar.
+
+### Sempadan peringkat
+
+Stage17 membetulkan pemilihan permutasi sahaja; tidak melaksanakan aplikasi tempias/tuangan mangkuk, pemilihan mangkuk terakhir, atau perubahan kepada katalog sumber, fixture, struktur tahun, ataupun `main`. Stage18 — DISCOVERY09 hanya selepas CI hijau.
