@@ -1518,3 +1518,8 @@ sintetiche valide e ID gia' selezionati; nessun calcolo della salsa
 annuale o dell'anno completo viene rivendicato. Stage39 / PATCH19
 non sono introdotti. Stage37 resta l'ultima fase certificata
 fino all'esito del CI nativo Stage38.
+
+### Certificazione nativa Stage38 — DISCOVERY19
+
+Il commit `3b0db6bcf204bc6fdc4ef9ce739e75553ff4da37`
+è stato verificato su GitHub Actions [run 38596971778](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38596971778), tentativo 2: **39/39 job SUCCESS**. La suite Scala Stage38 ha registrato **45 PASS/3 FAIL intenzionali**, riconducibili a `DAY1_MONTH1`, `INTERLEAVED_DAY2_MONTH2` e `MONTH47_DAY46`. Le regressioni dei 37 stadi precedenti restano verdi nei rispettivi criteri storici. Il singolo job Stage30 inizialmente FALLITO per download sbt è stato rieseguito con successo senza alcun cambio algoritmico. PATCH19 non è stata anticipata.

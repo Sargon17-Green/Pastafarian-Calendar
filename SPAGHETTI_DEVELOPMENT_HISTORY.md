@@ -1589,3 +1589,7 @@ EXPECTED_RED a firma stretta (45 PASS e 3 FAIL previsti).
 Lo stato resta PENDING_NATIVE_SCALA: non e' certificato
 finche' non viene eseguita e confermata una run sul commit finale.
 Nessuna PATCH19 e' inclusa.
+
+### Stage38 — DISCOVERY19 certificata
+
+La selezione storica del nome del mese usa `dayOffset % monthCount` anziché l'identità del mese ricavata dalla tessitura annuale. Dopo il rerun dell'unico job bloccato dal download sbt, il commit `3b0db6bcf204bc6fdc4ef9ce739e75553ff4da37` ha 39/39 job riusciti (GitHub Actions run 38596971778, attempt 2); 45 PASS/3 FAIL intenzionali. Il catalogo congelato, PATCH18 e tutte le firme storiche sono preservati. Prossimo stage: 39 PATCH19.
