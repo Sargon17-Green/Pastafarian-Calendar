@@ -12,6 +12,8 @@ if count < pastafari.BigInt(1)
         'monthCount musi być dodatni.');
 end
 
-zeroBased = (id - pastafari.BigInt(1)).regularMod(count);
-wrapped = (zeroBased + pastafari.BigInt(1)).toDoubleExact();
+offset = id - pastafari.BigInt(1);
+zeroBased = offset.regularMod(count);
+wrappedExact = zeroBased + pastafari.BigInt(1);
+wrapped = wrappedExact.toDoubleExact();
 end

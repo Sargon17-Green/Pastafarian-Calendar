@@ -410,8 +410,8 @@ ctx.diagnostics{end + 1} = ...
         lo = minKnownGate;
         hi = maxKnownGate;
         while lo < hi
-            mid = lo + (hi - lo + pastafari.BigInt(1)).floorDiv( ...
-                pastafari.BigInt(2));
+            span = hi - lo + pastafari.BigInt(1);
+            mid = lo + span.floorDiv(pastafari.BigInt(2));
             if gateDay(mid) <= dayValue
                 lo = mid;
             else
@@ -512,6 +512,7 @@ ctx.diagnostics{end + 1} = ...
             error('Pastafari:Integration:CeilDivDomain', ...
                 'ceilDivNonnegative wymaga a>=0 i b>0.');
         end
-        q = (a + b - pastafari.BigInt(1)).floorDiv(b);
+        numerator = a + b - pastafari.BigInt(1);
+        q = numerator.floorDiv(b);
     end
 end

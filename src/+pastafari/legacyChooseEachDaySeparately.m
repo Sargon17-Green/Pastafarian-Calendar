@@ -25,8 +25,8 @@ remaining = lengths;
 for dayIndex = 0:(totalDays - 1)
     answer = pastafari.AnswerRingStreamFactory.answerAt( ...
         stream, pastafari.BigInt(dayIndex));
-    zeroBased = (answer - pastafari.BigInt(1)).regularMod( ...
-        pastafari.BigInt(monthCount));
+    answerOffset = answer - pastafari.BigInt(1);
+    zeroBased = answerOffset.regularMod(pastafari.BigInt(monthCount));
     proposed = zeroBased.toDoubleExact() + 1;
     proposals(dayIndex + 1) = proposed;
 

@@ -40,15 +40,15 @@ classdef WideSelectionDetourPatch
 
             while true
                 if acceptedWide <= acceptanceLimit
-                    rank = ...
-                        (acceptedWide - pastafari.BigInt(1)).regularMod(N) + ...
-                        pastafari.BigInt(1);
+                    acceptedOffset = acceptedWide - pastafari.BigInt(1);
+                    rank = acceptedOffset.regularMod(N) + pastafari.BigInt(1);
                     return
                 end
 
+                nextOffset = acceptedWide - pastafari.BigInt(1) + ...
+                    pastafari.BigInt(stream.directionStep);
                 acceptedWide = pastafari.BigInt(1) + ...
-                    (acceptedWide - pastafari.BigInt(1) + ...
-                     pastafari.BigInt(stream.directionStep)).regularMod(space);
+                    nextOffset.regularMod(space);
                 rejectionSteps = rejectionSteps + pastafari.BigInt(1);
             end
         end

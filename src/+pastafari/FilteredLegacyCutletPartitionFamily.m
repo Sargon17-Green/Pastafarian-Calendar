@@ -187,8 +187,8 @@ classdef FilteredLegacyCutletPartitionFamily
             value = pastafari.BigInt(1);
 
             for i = 1:k
-                value = (value * pastafari.BigInt(n - k + i)).floorDiv( ...
-                    pastafari.BigInt(i));
+                numerator = value * pastafari.BigInt(n - k + i);
+                value = numerator.floorDiv(pastafari.BigInt(i));
             end
         end
     end

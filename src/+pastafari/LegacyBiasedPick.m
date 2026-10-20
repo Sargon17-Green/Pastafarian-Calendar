@@ -13,8 +13,8 @@ classdef LegacyBiasedPick
                     'Historyczny wybór modulo wymaga dodatniego N.');
             end
 
-            rank = (x - pastafari.BigInt(1)).regularMod(N) + ...
-                pastafari.BigInt(1);
+            offset = x - pastafari.BigInt(1);
+            rank = offset.regularMod(N) + pastafari.BigInt(1);
         end
     end
 end

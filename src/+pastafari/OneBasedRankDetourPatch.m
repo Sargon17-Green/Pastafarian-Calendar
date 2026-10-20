@@ -8,8 +8,8 @@ classdef OneBasedRankDetourPatch
             v = pastafari.BigInt.coerce(value);
             modulus = pastafari.BigInt(720);
 
-            rank1 = (v - pastafari.BigInt(1)).regularMod(modulus) + ...
-                pastafari.BigInt(1);
+            offset = v - pastafari.BigInt(1);
+            rank1 = offset.regularMod(modulus) + pastafari.BigInt(1);
             rank0 = rank1 - pastafari.BigInt(1);
         end
     end
