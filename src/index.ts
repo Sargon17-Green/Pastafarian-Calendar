@@ -58,3 +58,5 @@ export * from "./patch19GuardedYearCache.ts";
 export * from "./discovery20LegacyStructureSauce.ts";
 
 export * from "./patch20StructureSauce.ts";
+
+export * from "./discovery21LegacyCutletCompositions.ts";
