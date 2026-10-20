@@ -954,5 +954,5 @@ jobs:
           test "$(grep -Fc 'PASS — ' stage40.log)" -eq 44
           test "$(grep -Fc 'FAIL — ' stage40.log)" -eq 3
           for label in CUTLET2_START CUTLET3_START CUTLET17_START; do
-            grep -Fq "FAIL — equivalenza normativa confine \${label} —" stage40.log
+            grep -Fq "FAIL — equivalenza normativa confine ${label} —" stage40.log
           done
