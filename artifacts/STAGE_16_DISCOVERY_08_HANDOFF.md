@@ -29,6 +29,24 @@ Pengesah `verify_stage16_discovery08.php` mesti keluar **kod 0** tanpa ralat. Se
 
 ## Keadaan bukti
 
-Belum diterima sebelum CI menjalankan SHA tepat bagi perubahan tahap ini. Catat run ID, SHA dan hasil setiap kerja sebaik disahkan. Tiada handoff untuk dijalankan pengguna selagi semua kerja dapat diselesaikan di GitHub.
+CI run 39413144285 telah menerima penemuan ini sebagai EXPECTED_RED tepat; kedua-dua kerja berjaya. Stage 17 boleh dimulakan pada pusingan berikutnya. Tiada handoff untuk dijalankan pengguna selagi semua kerja dapat diselesaikan di GitHub.
 
 **Commit dicadangkan:** `stage16(php-ms): dedahkan kekeliruan pangkat permutasi satu dan sifar`
+
+
+### Bukti penerimaan GitHub Actions
+
+**Run:** `39413144285`  
+**SHA yang diuji:** `afd8456b0914e88c5ee5240880cc40db9e914a78`  
+**Kerja:** `verify=success`; `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+LULUS Stage 15 PATCH 07 kes=8 komponen=368 parut=138 ulang=46 baris_sintetik=1408
+ORDINAL1_MISALIGNED rank=1
+RANK720_REJECTED rank=720
+KEPUTUSAN MERAH_DIJANGKA salah=719 luar=1 jumlah=720 fungsi_sifar=720 titisan=46 lain=0
+LULUS kontrak merah 08; pangkat satu dihantar ke fungsi pangkat sifar
+```
+
+Oleh itu Stage 16 ialah `EXPECTED_RED` yang benar-benar diperakui, bukan kegagalan CI. Semua ujian sebelumnya lulus. Stage 17 — PATCH 08 belum dimulakan.

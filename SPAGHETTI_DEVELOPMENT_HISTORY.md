@@ -362,3 +362,21 @@ Bagi input rank1 1..719, keluaran pangkat sifar salah satu langkah berbanding ha
 ### Batas Stage 16
 
 Tiada `permutationPatch` atau pengurangan pangkat satu kepada sifar dalam pembaca sejarah. Pembaikan ini ialah Stage 17 — PATCH 08. Belum dibuat tuangan mangkuk, pemilihan selepas 46 titisan, atau perubahan katalog, fixture ataupun `main`.
+
+
+### Bukti penerimaan GitHub Actions
+
+**Run:** `39413144285`  
+**SHA yang diuji:** `afd8456b0914e88c5ee5240880cc40db9e914a78`  
+**Kerja:** `verify=success`; `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+LULUS Stage 15 PATCH 07 kes=8 komponen=368 parut=138 ulang=46 baris_sintetik=1408
+ORDINAL1_MISALIGNED rank=1
+RANK720_REJECTED rank=720
+KEPUTUSAN MERAH_DIJANGKA salah=719 luar=1 jumlah=720 fungsi_sifar=720 titisan=46 lain=0
+LULUS kontrak merah 08; pangkat satu dihantar ke fungsi pangkat sifar
+```
+
+Oleh itu Stage 16 ialah `EXPECTED_RED` yang benar-benar diperakui, bukan kegagalan CI. Semua ujian sebelumnya lulus. Stage 17 — PATCH 08 belum dimulakan.
