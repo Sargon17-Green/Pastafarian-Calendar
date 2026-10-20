@@ -484,3 +484,35 @@ antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
   ipsum SHA documentorum mutabit; `30/30` ad SHA probatum supra
   spectat. Soak C++ ad SHA novum seorsum probandus.
   `main` et Gradus 57 intacti manent.
+
+## Certificatio finalis Gradus 56 — SHA 0ae15315, XVI Octobris MMXXVI
+
+- Exactus commit productionis, tests, CI: [`0ae153157052ac221a718fcc15a19a6b0697b7c1`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/0ae153157052ac221a718fcc15a19a6b0697b7c1).
+  [Vigilia 38897361036](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38897361036):
+  `completed/success`, **20/20 jobs**. Vigil `116976409948`
+  prius `SOAK_REPETITUM=8/8_PASS`; in hoc SHA job
+  `116976409948` non pertinet — est testimonium alterius revisionis.
+  Vera job repetita huius cursus in ipsa tabula Actions
+  `SOAK_REPETITUM=8/8_PASS`, et job
+  `116988798049` ad aliam vigiliam pertinet.
+- Documentatio haec **solam probationem exactam per workflow et status**
+  confirmat; ad vitandum misattributionem, numeri job singulorum
+  ex hoc cursu non huc transferuntur nisi separatim denuo inspecti sint.
+- Testes annorum remotiorum `-1,0,1` singuli
+  `GRADUS56_ANNUS_REMOTUS_REDITUS=2/2_PASS` et
+  `GRADUS56_ANNUS_REMOTUS_NOVEM=9/9_PASS`;
+  27 visitationes incl. sex reditus post transitus.
+- [Collatio pinnta 38897361174](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38897361174)
+  hoc ipso SHA `0ae153157052ac221a718fcc15a19a6b0697b7c1` habet `completed/success`
+  **6/6 jobs** et `CROSS_CPP_CELERITAS_ALL=30/30_PASS SHARDS=5`
+  contra Celeritatem pinnatam `775e4c52bc4e21e63e03e53a09bdbc7993a18a32`.
+  Custodia [38897360901](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38897360901)
+  quoque `completed/success` est.
+- Non aequatur haec comparatio triginta parium cum
+  plena comparatione historiæ decem milium in codice hodierno;
+  illud testimonium prioris Celeritatis tantum fuit.
+  Hoc SHA tamen novum auditum inter duas implementationes habet.
+- Praesens editio documentaria SHA novum creabit; **20/20**
+  et **30/30** referuntur ad SHA exactum `0ae153157052ac221a718fcc15a19a6b0697b7c1`.
+  `main` in statu `56bc4173aae4975ded019ef5ab5a36249f1424df`
+  immutatum, Gradus 57 non apertus.
