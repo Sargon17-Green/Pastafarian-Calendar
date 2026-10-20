@@ -1561,3 +1561,31 @@ commit di questa documentazione prima della chiusura finale.
 Questa patch interpreta tessiture e indici di nome
 già selezionati. Non realizza ancora la salsa annuale
 integrale, la conversione completa né un soak comparativo.
+
+
+## Stage40 — DISCOVERY20: primo giorno della cotoletta
+
+Una partizione di 6..17 cotolette raggruppa intervalli
+di porte di 42..963 giorni, per una durata annuale
+di 252..5778 giorni. Il primo giorno dopo la porta di
+apertura appartiene alla nuova cotoletta.
+
+L'adapter storico oldCutletOpenBoundary usa il confronto
+strettamente maggiore dayOffset > startOffset. Sul primo
+giorno della nuova cotoletta restituisce invece ancora
+la cotoletta precedente e un numero di giorno eccessivo.
+Il validator indipendente preserva questa cicatrice;
+l'oracolo normativo è esclusivamente nella suite di test.
+La PATCH20 non è stata anticipata.
+
+GitHub Actions run 39496540116 sul commit
+1a0ecac2752647c1796e13b4d76e7c909c2172c8:
+41/41 job SUCCESS, Stage40 44 PASS e 3 FAIL
+intenzionali (CUTLET2_START, CUTLET3_START,
+CUTLET17_START). I risultati Stage01..39 rimangono
+compatibili con le firme di regressione storiche.
+Il primo tentativo 39495601439 fallì per un problema
+di verifica delle etichette Bash e per il rate limit
+HTTP 429 durante il download sbt in Stage32.
+Questo commit documentale richiede un proprio CI.
+Non si implementa ancora la salsa annuale completa.

@@ -735,3 +735,25 @@ ha superato 40/40 job e Stage39 52 PASS/0 FAIL.
 Questa è una mappatura di input già selezionati; salsa
 completa, scelta delle tessiture e conversione generale
 restano fuori dal perimetro di Stage39.
+
+
+## DISCOVERY20 — intervallo semiaperto delle cotolette
+
+Sia d un offset del giorno nell'anno e starts(k) il
+primo offset zero-based della cotoletta k. Il criterio
+normativo di appartenenza è inclusivo all'inizio:
+starts(k) <= d < starts(k+1). I gruppi derivano da
+durate dei gap delle porte; ogni gap vale 42..963
+giorni, e la partizione positiva comprende 6..17
+cotolette su 252..5778 giorni annuali.
+
+La cicatrice del percorso legacy passa al gruppo
+successivo solo con d > starts(k), e quindi sul
+confine esatto attribuisce il giorno alla cotoletta
+precedente. Per sei intervalli di 42 giorni, l'offset
+42 restituisce (1,43) invece di (2,1).
+Il validator autonomo ricostruisce il percorso errato;
+l'oracolo normativo rimane solo nel test Stage40.
+La run 39496540116 ha ottenuto 41/41 job SUCCESS,
+Stage40 44 PASS/3 FAIL intenzionali, senza introdurre
+la PATCH20 o la salsa integrale.

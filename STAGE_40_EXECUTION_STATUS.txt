@@ -1,16 +1,36 @@
-STATO_ESECUZIONE=PENDING_NATIVE_CI
+STATO_ESECUZIONE=PASS_EXPECTED_RED_NATIVE_SCALA
 STADIO=40
 TIPO=DISCOVERY_20
-ULTIMO_STADIO_CERTIFICATO=39
+ULTIMO_STADIO_CERTIFICATO=40
 RISULTATO_ATTESO=EXPECTED_RED
-FIRMA_ATTESA=44_PASS_3_FAIL_INTENTIONAL
+RISULTATO_REALE=44_PASS_3_FAIL_INTENTIONAL
 DIVERGENZE=CUTLET2_START,CUTLET3_START,CUTLET17_START
 LEGACY_ADAPTER=LegacyCutletOpenBoundaryAdapter.oldCutletOpenBoundary
 DIFETTO=STRICT_GREATER_THAN_AT_NEW_CUTLET_START
+CUTLET_COUNT_RANGE=6_TO_17
+GATE_GAP_RANGE=42_TO_963
+YEAR_LENGTH_RANGE=252_TO_5778
 PATCH20_INTRODUCED=NO
-GITHUB_ACTIONS_CONCLUSION=PENDING
+SOURCE_LANGUAGE_CATALOG_FROZEN=YES
+VALIDATOR_INDEPENDENT=PASS
+INPUT_SNAPSHOT=PASS
+RANDOMIZED_CASES=1024
+GITHUB_ACTIONS_RUN=39496540116
+GITHUB_ACTIONS_URL=https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39496540116
+GITHUB_ACTIONS_HEAD_SHA=1a0ecac2752647c1796e13b4d76e7c909c2172c8
+GITHUB_ACTIONS_JOBS=41
+GITHUB_ACTIONS_CONCLUSION=SUCCESS
 COMANDO=sbt -batch 'Test / runMain pastafari.Stage40Tests'
+VERIFIED_ON=2026-10-21
+REGRESSION_STAGE39=52_PASS_0_FAIL
+REGRESSION_STAGE38=45_PASS_3_FAIL_INTENTIONAL
+NEXT_STAGE=41_PATCH20
 
-La fase storica assegna il primo giorno della nuova cotoletta
-alla cotoletta precedente. Input sintetici sono distanze fra
-porte e partizioni positive. Nessun PASS dichiarato senza CI.
+La DISCOVERY20 usa intervalli delle porte già forniti e
+partizioni valide delle cotolette. Il confronto errato >
+lascia il primo giorno nella cotoletta precedente. Il
+validator indipendente, la snapshot e il catalogo congelato
+sono preservati. Il primo CI 39495601439 è fallito per
+interpolazione Bash ed errore HTTP 429 esterno su sbt.
+La run corretta 39496540116 ha 41/41 job SUCCESS e 44/3.
+Il commit documentale necessita di CI nuovo per la firma.

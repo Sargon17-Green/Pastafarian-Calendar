@@ -1616,3 +1616,24 @@ Stage36 59 PASS/3 FAIL intenzionali rimangono valide.
 Il nuovo commit documentale richiede un secondo CI.
 Non è stata introdotta Stage40; non si rivendica ancora
 il calcolo dalla salsa annuale completa.
+
+
+## Stage40 DISCOVERY20 — confine di apertura delle cotolette
+
+Il percorso diagnostico considera intervalli di porte e
+una partizione già scelta, senza generarli dalla salsa.
+Il bug storico conta il giorno iniziale della nuova
+cotoletta come ultimo giorno esteso della precedente:
+usa la disuguaglianza > invece di >=. Test con sei e
+diciassette cotolette e 1024 campioni deterministici
+verificano le caratteristiche della cicatrice; i casi
+normativi sui confini 2,3,17 falliscono intenzionalmente.
+Il vecchio risultato resta separato dalla futura PATCH20.
+
+La run 39496540116 (HEAD
+1a0ecac2752647c1796e13b4d76e7c909c2172c8)
+ha concluso 41/41 job SUCCESS e 44 PASS/3 FAIL
+intenzionali su Stage40. La run precedente 39495601439
+era fallita soltanto in Stage40 a causa del controllo
+Bash non interpolato e in Stage32 per HTTP 429 di
+Maven Central. Nessun lavoro sulla main.
