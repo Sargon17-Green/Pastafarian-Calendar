@@ -95,3 +95,50 @@ export function findTrueHistoricalBoundaryMiss():Fixture {
  }
  throw Error("NO_TRUE_INTERNAL_ACTION_GATE_WITH_UNFILTERED_LEGACY_MISS_IN_16_SIGNED_WITNESSES");
 }
+
+export function buildStage41CompatibleLegacyFixture():Readonly<{
+ request:Patch20StructureRequest;
+ cDay:bigint;
+ oracleYear:ReturnType<NormativeOracle["year5000"]>;
+}> {
+ const oracle=new NormativeOracle();
+ const anchor=oracle.gateDay(1n);
+ const c=anchor+1n,year=oracle.year5000(c);
+ const target=year.closeGateDay;
+ const low=c-5779n,high=c+5779n;
+ let positiveCount=1,negativeCount=1;
+ while(oracle.gateDay(BigInt(positiveCount))<=high){
+  positiveCount++;assert(positiveCount<=100,"positive bounds");
+ }
+ while(oracle.gateDay(-BigInt(negativeCount))>=low){
+  negativeCount++;assert(negativeCount<=100,"negative bounds");
+ }
+ const request:Patch20StructureRequest={
+  historical:{
+    yearQuestion:{
+      calculationDay:c,targetDay:target,anchorGateIndex:1n,
+      historicalPositive:[question(F,F+1n)],
+      signedQuestions:[question(F,F+1n)],
+      oldYearQuestion:question(c,c),
+      oldAnchorCandidates:[{
+        openGateIndex:1n,closeGateIndex:7n,
+        openGateDay:anchor,closeGateDay:anchor+800n
+      }],
+      oldMultiCandidates:[{
+        openGateIndex:1n,closeGateIndex:7n,
+        openGateDay:anchor,closeGateDay:anchor+1000n
+      },{
+        openGateIndex:0n,closeGateIndex:6n,
+        openGateDay:anchor-100n,closeGateDay:anchor+900n
+      }],
+      positive:Array.from({length:positiveCount},(_,j)=>question(F,F+BigInt(j+1))),
+      negative:Array.from({length:negativeCount},(_,j)=>question(F,F-BigInt(j+1))),
+      trueYearQuestion:question(c,c),
+      transitionQuestion:(cc,tt,_seal)=>question(cc,tt),maximumSteps:0
+    },
+    originalSauceQuestion:question(c,target)
+  },
+  firstDaySauceQuestion:question(c,year.openGateDay+1n)
+ };
+ return Object.freeze({request,cDay:c,oracleYear:year});
+}

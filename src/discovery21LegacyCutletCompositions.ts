@@ -3,7 +3,9 @@ import type {MonsterContext} from "./monsterBase.ts";
 import {patch20StructureSauce} from "./patch20StructureSauce.ts";
 import type {Patch20StructureRequest,Patch20StructureObservation} from "./patch20StructureSauce.ts";
 import {Patch20StructureSauceHandler} from "./patch20StructureSauce.ts";
-import {Patch18VerifiedGateWindowBuilder} from "./patch18YearWalk.ts";
+import {Patch18VerifiedGateWindowBuilder,Patch18OneYearWalker} from "./patch18YearWalk.ts";
+import type {Patch18Question} from "./patch18YearWalk.ts";
+import {patch11OrderLatch} from "./patch11OrderLatch.ts";
 import {patch14WideChoice} from "./patch14WideChoice.ts";
 import type {Patch14WideChoiceObservation} from "./patch14WideChoice.ts";
 
@@ -198,4 +200,85 @@ export function discoverLegacyCutletPartition(
   throw new MonsterValidationError("DISCOVERY21 handler आणि प्रश्न आवश्यक");
  const req=q.historical.yearQuestion;
  return handler.run(bootstrapMonster(req.calculationDay,req.targetDay),q);
+}
+
+// Stage17 चा archive route cDay=gate+1 मागतो. खरा gate-day cDay
+// वेगळ्या Stage37 authoritative native route ने तपासला पाहिजे;
+// Stage41 चा पुरावा खोटा दाखवू नका किंवा जुना प्रतिबंध बदलू नका.
+export type Discovery21ExactGateProbe=Readonly<{
+ calculationDay:bigint;actionGateIndex:bigint;
+ genuineYearNumber:bigint;
+ trueYearOpenGateIndex:bigint;trueYearCloseGateIndex:bigint;
+ G:bigint;K:number;requiredBoundary:bigint;
+ oldUnfilteredFamilySize:bigint;oldRank:bigint;
+ oldPartition:readonly bigint[];
+ actuallyMissedRequiredGate:boolean;
+ fullNativeGateQuestions:number;
+ realNativeSauceCalls:number;
+ nativeSharedWrites:bigint;
+ source:"PHYSICALLY_RECOMPUTED_SIGNED_GATES_AND_FIRST_DAY_NATIVE_SAUCE";
+ historicalPrefixConstraintApplied:false;
+}>;
+export class Discovery21ExactGateProbeHandler {
+ private readonly walker=new Patch18OneYearWalker();
+ private readonly windows=new Patch18VerifiedGateWindowBuilder();
+ private readonly old=new LegacyPositiveCompositions();
+ run(c:bigint,actionGateIndex:bigint,
+   positive:readonly Patch18Question[],
+   negative:readonly Patch18Question[],
+   yearQuestion:Patch18Question,
+   firstDayQuestion:Patch18Question
+ ):Discovery21ExactGateProbe {
+  if(typeof c!=="bigint"||typeof actionGateIndex!=="bigint"||
+     !yearQuestion||yearQuestion.targetDay!==c)
+    throw new MonsterValidationError("खरा gate-day c आणि Seal10 source अनिवार्य");
+  const yearResult=this.walker.walk(c,c,positive,negative,yearQuestion,
+    ()=>{throw new MonsterStageError("zero-step Year5000 seed अपेक्षित");},0);
+  const year=yearResult.selected;
+  const gateWindow=this.windows.build(positive,negative);
+  if(gateWindow.byIndex.get(actionGateIndex)!==c||
+     !(year.openGateIndex<actionGateIndex&&actionGateIndex<year.closeGateIndex))
+    throw new MonsterValidationError("कृती-दिवस स्वतः वर्षातील खरा आतील gate हवा");
+  const first=year.openGateDay+1n;
+  if(!firstDayQuestion||firstDayQuestion.targetDay!==first)
+    throw new MonsterValidationError("खरा first-year-day Sauce source अनिवार्य");
+  const native=patch11OrderLatch(c,first,
+    firstDayQuestion.visible,firstDayQuestion.stones,firstDayQuestion.startBowls);
+  if(native.sharedMemoryWrites!==58)
+    throw new MonsterStageError("पूर्ण native structural Sauce आवश्यक");
+  const G=year.closeGateIndex-year.openGateIndex;
+  const eligible=Array.from({length:12},(_,i)=>i+6).filter(k=>BigInt(k)<=G);
+  if(!eligible.length)throw new MonsterStageError("कोणतेही cutlets नाहीत");
+  const chosen=patch14WideChoice(c,first,firstDayQuestion.visible,
+    firstDayQuestion.stones,firstDayQuestion.startBowls,2,20n,BigInt(eligible.length));
+  const K=eligible[Number(chosen.correctedRank-1n)]!;
+  const N=this.old.oldCount(G,K);
+  const selection=patch14WideChoice(c,first,firstDayQuestion.visible,
+    firstDayQuestion.stones,firstDayQuestion.startBowls,2,21n,N);
+  const partition=this.old.oldUnrank(G,K,selection.correctedRank);
+  const required=actionGateIndex-year.openGateIndex;
+  const miss=!oldHasPrefixBoundary(partition,required);
+  if(partition.reduce((a,b)=>a+b,0n)!==G||
+     native.sharedMemoryWrites!==58||
+     chosen.predecessorSharedWrites!==58||
+     selection.predecessorSharedWrites!==58)
+    throw new MonsterStageError("जुन्या रचनेत वास्तविक 58-write Source आवश्यक");
+  const nativeCount=yearResult.realPredecessorCount+
+    gateWindow.realGapQuestions+3;
+  return Object.freeze({
+    calculationDay:c,actionGateIndex,
+    genuineYearNumber:year.number,
+    trueYearOpenGateIndex:year.openGateIndex,
+    trueYearCloseGateIndex:year.closeGateIndex,
+    G,K,requiredBoundary:required,
+    oldUnfilteredFamilySize:N,oldRank:selection.correctedRank,
+    oldPartition:partition,actuallyMissedRequiredGate:miss,
+    fullNativeGateQuestions:yearResult.realGateQuestionCalls+
+      gateWindow.realGapQuestions,
+    realNativeSauceCalls:nativeCount,
+    nativeSharedWrites:BigInt(nativeCount)*58n,
+    source:"PHYSICALLY_RECOMPUTED_SIGNED_GATES_AND_FIRST_DAY_NATIVE_SAUCE" as const,
+    historicalPrefixConstraintApplied:false as const
+  });
+ }
 }
