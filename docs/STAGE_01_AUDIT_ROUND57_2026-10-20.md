@@ -49,3 +49,21 @@ BigInt 總數 N 取餘，再加一得到一基字序排名。
 兩個真實 322 日 Native opt-in 工作全部 SUCCESS。
 此為 Stage 1 的第 57 輪獨立稽核，不是 Stage 57；
 不聲稱完整 45 月／4244 日全局字序或跨語言 soak。
+
+
+## 同輪原生 QA 修復記錄（不能改寫舊失敗）
+
+初次 R57 Native run：
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39495721341
+其中 322 日 hash40-a、hash40-b 各六個完整 BigInt 排名
+皆 PASS（322×12=3864 次獨立字元比對），verify PASS；
+但普通 Perl 75 檔 88619 斷言含 t/73 的兩項合約舊假設
+FAIL：該舊測試直接比對 hash(38|39) 的文字表達式，
+以及寫死 R56 的 ASCII 種子格式，而新工具合法增加
+hash40 並以 R57 種子域與 R56 分離。不是算法不相符。
+修復只更新 t/73 的結構性期望：允許 38、39、40，
+明確強制舊 38、39 仍使用 R56、40 使用 R57；
+固定 SHA 已知摘要和舊四個 job 仍逐項驗證，
+任何其他 FAIL 繼續不可記為 PASS。
+必須由新 HEAD 再得到完整 Native Perl、verify 與
+兩個 opt-in 322 日工作全部 SUCCESS 才能關閉此輪。

@@ -26,12 +26,14 @@ for my $p (@known) {
     ),0,20),$digest_prefix,
        "第 $offset 窗樣本 $index 的 SHA-512 摘要與獨立已知值一致");
 }
-like($src,qr/\$case_filter\s*=~\s*\/\\Ahash\(38\|39\)-\(\[ab\]\)\\z\//,
-     '只有窗口 38 或 39 的兩個半組可以啟動');
+like($src,qr/\$case_filter\s*=~\s*\/\\Ahash\(38\|39\|40\)-\(\[ab\]\)\\z\//,
+     '窗口 38／39 的原生半組仍合法，擴充新窗口 40 不得破壞原契約');
 like($src,qr/\$specified_offset\s*!=\s*\$offset/,
      '不能將真實 38 月份排名誤套到 39 或相反');
-like($src,qr/PASTAFARIAN-5000-FOURMONTH-\$offset-R56:\$index/,
-     'R56 與既有 R55 SHA-512 種子域確實分離');
+like($src,qr/\$round=\$offset==40 \? 57 : 56;/,
+     '保持窗口 38、39 使用 R56 的種子，只有 40 使用 R57');
+like($src,qr/PASTAFARIAN-5000-FOURMONTH-\$offset-R\$round:\$index/,
+     '域分離的 R56、R57 SHA-512 名次仍按已確認輪次取得');
 like($src,qr/\$seen\{"\$rank"\}\+\+/,
      '每窗口十二個完整 BigInt 位置均強制不同');
 like($src,qr/\$sum\s*!=\s*\$parent/,
