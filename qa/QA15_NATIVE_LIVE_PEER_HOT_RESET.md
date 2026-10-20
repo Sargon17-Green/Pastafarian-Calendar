@@ -13,3 +13,15 @@ Sources: `qa/stage1_qa15_hot_reset_with_live_peer.py`; auditor `qa/stage1_qa15_h
 This test does **not** assert that unreset reuse is supported or safe, nor prove general concurrency or calendar semantics. If GitHub CI fails, retain RED as diagnosis and repair the test or source only after evidence; do not lower the contractual requirements. Do not modify `main`, `Befunge+Кыргызча`, accepted QA10–QA14 originals, or start Stage 2.
 
 `CURRENT_STAGE=1`, `LAST_COMPLETED_STAGE=0`; functional and geometric final gates remain OPEN.
+
+## QA15 Native CI final acceptance — 20 October 2026
+
+The earlier **CI PENDING** header above is superseded for the following *bounded scope only*. The final corrected [GitHub Actions run 39381505937](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39381505937) at exact tested commit `7be63aff4dd51f74bc6571423eb1d4b7bc34085e` completed **SUCCESS**; independent acceptance artifact `12245524436` exists and was downloaded and inspected. Archive contains `native_live_peer_hot_reset.json`, `qa15_hot_reset_independent_audit.json` and `auditor.log`.
+
+- **4 real Native BF98 live-peer hot-reset scenarios, 12 Native Program executions, 18 independent Befunge reference invocations**; same original object reinitialized while a second owner remained active.
+- Peer pre-reset overlap rounds: **944**, post-reset overlap rounds: **645**; **3,905** checks of preserved live-peer state and prior-written coordinates.
+- Each scenario uses **1,500 actual peer warmup steps** and independent seven-field reference output. Valid/invalid transitions in both directions, old actor Funge-space no-stale-write assertion, and new private semantics, IP, I/O assertions passed.
+- Independent auditor produced `qa15_hot_reset_independent_audit.json` SHA-256 `2bf117883638371eb5211ce66e62d665187b4b8bf65437e4e94ab59c225da21b` and rejected **9/9 fabricated reports**. Raw actual Native receipt `native_live_peer_hot_reset.json` SHA-256 `d8737b3e8d2789e120fcfc3a130d010905b5a2c6d927fc08d8fddecc2031c3b3`. Exact source Git blob remains `560d6aa5807a7f766213a33835cce85eab0fa40c`.
+- Preserve failed earlier QA15 workflow attempts separately as historical RED; final GREEN claim is specifically based on successful `39381505937` and the downloaded artifact, not a CI status indicator alone.
+
+**Strict limitation:** QA15 proves only four finite traces with explicit `Program.__init__` hot reset and a single non-resetting live peer. It does **not** certify implicit in-place reuse, arbitrary interleavings, general semantic state ownership, production geometry, global Stage 1 or release readiness. Keep `CURRENT_STAGE=1`, `LAST_COMPLETED_STAGE=0`, `FULL_FUNCTIONAL_QA_PASS=NO`, `GEOMETRIC_SPAGHETTI_QA_PASS=NO`, no Stage2 or canonical branch merges.
