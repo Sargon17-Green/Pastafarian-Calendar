@@ -28,10 +28,12 @@ die "rss-kib 必須在 32768..1048576\n"
     if $rss_limit<32768 || $rss_limit>1048576;
 die "window-offset 只支援 37、38、39 或 40\n"
     if $offset!=37 && $offset!=38 && $offset!=39 && $offset!=40;
-die "case-filter 只支援 all、middle、first-half、last-half、hash-a、hash-b\n"
+die "case-filter 只支援 all、middle、first-half、last-half、hash-a、hash-b、hash38-a/b、hash39-a/b\n"
     if $case_filter ne 'all' && $case_filter ne 'middle'
     && $case_filter ne 'first-half' && $case_filter ne 'last-half'
-    && $case_filter ne 'hash-a' && $case_filter ne 'hash-b';
+    && $case_filter ne 'hash-a' && $case_filter ne 'hash-b'
+    && $case_filter ne 'hash38-a' && $case_filter ne 'hash38-b'
+    && $case_filter ne 'hash39-a' && $case_filter ne 'hash39-b';
 die "需要 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -140,6 +142,33 @@ if (!$pid) {
                 ? @hash_samples[0..5] : @hash_samples[6..11];
             die "SHA-512 六名次分組失敗\n" if @named!=6;
         }
+        # R56：新 SHA-512 名次與 R55 完全不同的固定 ASCII
+        # 域分離種子，分別跨真實月窗 38（230 日）、39（240 日）。
+        # 全部位次只依賴已獨立計得的完整 BigInt 完工數 N。
+        if ($case_filter =~ /\Ahash(38|39)-([ab])\z/) {
+            my ($specified_offset,$half)=(0+$1,$2);
+            die "指定 SHA-512 名次集合與實際窗口不符\n"
+                if $specified_offset!=$offset;
+            my @hash_samples;
+            my %seen;
+            for my $index (0..11) {
+                my $seed="PASTAFARIAN-5000-FOURMONTH-$offset-R56:$index";
+                my $digest=sha512_hex($seed);
+                my $rank=Math::BigInt->from_hex("0x$digest")
+                    ->bmod($total)->badd(1);
+                die "新 SHA-512 樣本 BigInt 位置無效\n"
+                    if $rank<1 || $rank>$total;
+                die "新 SHA-512 樣本發生重複，拒絕靜默漏驗\n"
+                    if $seen{"$rank"}++;
+                push @hash_samples,[
+                    sprintf('hash%02d',$index),$rank
+                ];
+            }
+            @named=$half eq 'a'
+                ? @hash_samples[0..5] : @hash_samples[6..11];
+            die "每份跨月窗 SHA-512 必須恰好含六個排名\n"
+                if @named!=6;
+        }
         for my $case (@named) {
             my ($label,$rank)=@$case;
             my $rank_text="$rank";
@@ -211,7 +240,7 @@ if (!$pid) {
         }
         my $expected_count=$case_filter eq 'all' ? 14
                           : $case_filter eq 'middle' ? 1
-                          : ($case_filter eq 'hash-a' || $case_filter eq 'hash-b') ? 6 : 7;
+                          : ($case_filter eq 'hash-a' || $case_filter eq 'hash-b' || $case_filter =~ /\Ahash(?:38|39)-[ab]\z/) ? 6 : 7;
         die "字典序重要排名樣本未全部執行\n"
             if $test_count!=$expected_count;
         my $diag=$counter->diagnostics;
