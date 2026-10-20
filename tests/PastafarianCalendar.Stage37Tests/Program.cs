@@ -66,17 +66,17 @@ internal static partial class Program
             Check(n>m*m/2 && n<m*m,
                   "حالة الرفض الاصطناعية تقبل موضعين");
             var actual=correct.Patch(source,n);
-            var historic=old.Choose(source,n);
+            var historicalWitness=old.Choose(source,n);
             var expected=direction==1?BigInteger.One:
                          NormativeScroll.ChooseRankWide(witness,n);
             if(actual==expected)_rejectedCorrect++;
-            if(historic!=expected)_rejectedHistoricalWrong++;
-            if(direction==1 && historic==expected)_ascendingHistoricalMatches++;
-            if(direction==-1 && historic!=expected)_descendingHistoricalWrong++;
+            if(historicalWitness!=expected)_rejectedHistoricalWrong++;
+            if(direction==1 && historicalWitness==expected)_ascendingHistoricalMatches++;
+            if(direction==-1 && historicalWitness!=expected)_descendingHistoricalWrong++;
             Check(actual==expected && expected==(direction==1?BigInteger.One:n),
                   "المرجع المستقل يثبت اختيار أول أو آخر رتبة حسب الإشارة");
-            Check(historic==BigInteger.One &&
-                  (direction==1?historic==actual:historic!=actual),
+            Check(historicalWitness==BigInteger.One &&
+                  (direction==1?historicalWitness==actual:historicalWitness!=actual),
                   "الشاهد القديم باق على الرتبة الأولى بغض النظر عن الاتجاه");
         }
         Check(_controls==34560 && _controlCorrect==34560 &&
