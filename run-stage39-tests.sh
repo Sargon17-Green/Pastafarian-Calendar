@@ -22,7 +22,7 @@ if ! kotlin -classpath "$work/stage39.jar" pastafari.Stage39Tests > "$work/resul
 fi
 cat "$work/result.log"
 for marker in STAGE39_REAL_GATE_GREEN_450_SESSIONS_150 \
-  STAGE39_REAL_LEGACY_EXPECTED_RED_150 \
+  STAGE39_REAL_BOUNDARY_ELIGIBILITY_FILTER_GREEN \
   STAGE39_SYNTHETIC_GREEN_150_LEGACY_RED_18_MATCH_132 \
   STAGE39_BIGINT_GREEN_1024_LEGACY_RED_256 \
   STAGE39_YEAR5000_BOUNDS_AND_ORACLE_GREEN \
@@ -31,4 +31,5 @@ for marker in STAGE39_REAL_GATE_GREEN_450_SESSIONS_150 \
 do
   grep -Fxq "$marker" "$work/result.log"
 done
+grep -Eq "^STAGE39_REAL_LEGACY_EXPECTED_RED_[0-9]+$" "$work/result.log"
 printf '%s\n' STAGE39_FULL_NATIVE_GREEN

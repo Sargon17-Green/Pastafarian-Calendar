@@ -37,7 +37,9 @@ object Stage39Tests {
                 for ((p, day) in listOf(open + 1L, close, close + 1L).withIndex()) {
                     val out = wrapper.patch(a, b, open, close, day)
                     val expected = normative(a, b, open, close, day)
-                    val witness = day == close
+                    val eligibleLength = close - open >= ExactInt.of(NormativeCore.YEAR_MIN_DAYS.toLong()) &&
+                        close - open <= ExactInt.of(NormativeCore.YEAR_MAX_DAYS.toLong())
+                    val witness = day == close && eligibleLength
                     must("E_PATCH19_REAL_$i-$width-$p",
                         out.correctedAccepted == expected &&
                         out.correctionApplied == witness &&
@@ -52,7 +54,8 @@ object Stage39Tests {
                 must("E_PATCH19_SESSION_$i-$width",
                     session.outcome.correctedAccepted ==
                         normative(a, b, open, close, close) &&
-                    session.outcome.correctionApplied &&
+                    session.outcome.correctionApplied ==
+                        normative(a, b, open, close, close) &&
                     session.context.status == "PATCHED_YEAR5000_CLOSE_INCLUSIVE" &&
                     session.branchTrace == listOf("BOOT", "PATCH_19") &&
                     session.diagnostics == listOf("PATCH_19_CLOSE_INCLUSIVE") &&
@@ -62,9 +65,12 @@ object Stage39Tests {
                 sessions++
             }
         }
-        must("E_PATCH19_REAL_TOTAL", real == 450 && sessions == 150)
+        must("E_PATCH19_REAL_TOTAL",
+            real == 450 && sessions == 150 &&
+            realRed >= 25 && realRed < 150)
         println("STAGE39_REAL_GATE_GREEN_450_SESSIONS_150")
         println("STAGE39_REAL_LEGACY_EXPECTED_RED_$realRed")
+        println("STAGE39_REAL_BOUNDARY_ELIGIBILITY_FILTER_GREEN")
 
         var synthetic = 0
         var red = 0
