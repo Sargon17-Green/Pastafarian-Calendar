@@ -172,7 +172,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage42Discovery21Test do
   end
 
   test "normative đỏ 2: ngày phía trước" do
-    for delta <- [17, 71, 101, 417] do
+    for delta <- [17, 71, 101, 417, 721, 1031, 1337, 2003, 2711, 3333, 4096, 5000] do
       c = @foundation + delta
       assert Calendar.cutlet_partition_spaghetti(c, c) == oracle(c, c)
     end
