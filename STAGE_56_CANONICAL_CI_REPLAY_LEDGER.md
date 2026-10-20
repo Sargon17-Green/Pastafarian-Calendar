@@ -489,15 +489,11 @@ antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
 
 - Exactus commit productionis, tests, CI: [`0ae153157052ac221a718fcc15a19a6b0697b7c1`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/0ae153157052ac221a718fcc15a19a6b0697b7c1).
   [Vigilia 38897361036](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38897361036):
-  `completed/success`, **20/20 jobs**. Vigil `116976409948`
-  prius `SOAK_REPETITUM=8/8_PASS`; in hoc SHA job
-  `116976409948` non pertinet — est testimonium alterius revisionis.
-  Vera job repetita huius cursus in ipsa tabula Actions
-  `SOAK_REPETITUM=8/8_PASS`, et job
-  `116988798049` ad aliam vigiliam pertinet.
-- Documentatio haec **solam probationem exactam per workflow et status**
-  confirmat; ad vitandum misattributionem, numeri job singulorum
-  ex hoc cursu non huc transferuntur nisi separatim denuo inspecti sint.
+  `completed/success`, **20/20 jobs**. Job `116976409948`
+  `SOAK_REPETITUM=8/8_PASS`; job finalis `116988798049`
+  `VIGILIA_SOAK=PASS` et `STATUS_POST_RUN=SOAK_GREEN`.
+  Numeri job hi ipsi ad cursum `38897361036` pertinent,
+  atque per album job et logum exactum denuo confirmati sunt.
 - Testes annorum remotiorum `-1,0,1` singuli
   `GRADUS56_ANNUS_REMOTUS_REDITUS=2/2_PASS` et
   `GRADUS56_ANNUS_REMOTUS_NOVEM=9/9_PASS`;
