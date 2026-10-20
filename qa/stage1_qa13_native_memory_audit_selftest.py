@@ -34,7 +34,7 @@ def main():
     try:
         result(BASE)
     except AssertionError as exc:
-        require('missing physical write-then-execute gate' in str(exc),
+        require('incomplete native trace' in str(exc),
                 'legal mock rejected too early: ' + str(exc))
     else:
         raise AssertionError('incomplete mock falsely passed')
@@ -54,7 +54,7 @@ def main():
         try:
             auditor.scan(forged.encode('ascii'), 'forged-' + name)
         except AssertionError as exc:
-            require('missing physical write-then-execute gate' not in str(exc),
+            require('incomplete native trace' not in str(exc),
                     'forgery reached only cosmetic gate check: ' + name)
         else:
             raise AssertionError('forged event accepted: ' + name)
