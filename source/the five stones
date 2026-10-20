@@ -44,7 +44,7 @@ To calculate a stone formula:
   Put the stone formula's neighbor into the stonescale.
   Convert the stone formula's factor to the stonefactortext.
   Put the stonefactortext into the stonefactor.
-  Multiply the stonescale by the stonefactor.
+  Multiply the stonefactor by the stonescale.
   Add the stonescale to the stone formula's result.
   Add the stone formula's extra to the stone formula's result.
   Keep the stone formula's result for the sauce.
