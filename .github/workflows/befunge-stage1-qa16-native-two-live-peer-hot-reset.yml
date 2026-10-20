@@ -1,0 +1,61 @@
+name: Befunge QA16 Native Hot Reset While TWO Peers Live
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa16_hot_reset_two_live_peers.py'
+      - 'qa/stage1_qa16_hot_reset_two_live_peers_audit.py'
+      - '.github/workflows/befunge-stage1-qa16-native-two-live-peer-hot-reset.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-hot-reset-two-live-peers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Validate frozen original Native Befunge sources and adversarial verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
+          test "$(git hash-object reference/work_counts.b98)" = 'f941efc793c9eee4accf5d03873f8ed029b16725'
+          test "$(git hash-object reference/save.b98)" = '7b5e79aa6e2bfb636717cb018a3db6a13fb2bb44'
+          python3 -m py_compile qa/stage1_qa16_hot_reset_two_live_peers.py qa/stage1_qa16_hot_reset_two_live_peers_audit.py
+          python3 qa/stage1_qa16_hot_reset_two_live_peers_audit.py --selftest
+      - name: Get pinned real PyFunge native interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo 'e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  '"$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute FOUR new native hot resets with two other continuously live Programs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qa16-two-live-peers"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/qa16-two-live-peers:/multihotreset" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1300s python -u qa/stage1_qa16_hot_reset_two_live_peers.py
+            '
+      - name: Independent fail-closed Native receipt audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$RUNNER_TEMP/qa16-two-live-peers/qa16_native_two_live_peers.json"
+          python3 qa/stage1_qa16_hot_reset_two_live_peers_audit.py "$RUNNER_TEMP/qa16-two-live-peers/qa16_native_two_live_peers.json" | tee "$RUNNER_TEMP/qa16-two-live-peers/auditor.log"
+          grep -q 'QA16_NATIVE_TWO_PEERS_INDEPENDENT_AUDIT_PASS' "$RUNNER_TEMP/qa16-two-live-peers/auditor.log"
+          grep -q 'QA16_TWELVE_FORGED_REPORTS_REJECTED' "$RUNNER_TEMP/qa16-two-live-peers/auditor.log"
+          grep -q 'STAGE1_STILL_OPEN' "$RUNNER_TEMP/qa16-two-live-peers/auditor.log"
+      - name: Preserve original Native reports even if RED; fail on absent archive
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa16-native-two-live-peers-hot-reset-receipt
+          path: ${{ runner.temp }}/qa16-two-live-peers/
+          if-no-files-found: error
