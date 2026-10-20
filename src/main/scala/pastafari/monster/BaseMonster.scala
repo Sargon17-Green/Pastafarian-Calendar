@@ -151,7 +151,14 @@ final case class BaseMonsterContext(
   var dayNameLegacyItalian: Option[String] = None,
   var dayNameFrozenVersion: Option[String] = None,
   var dayNamePatchedItalian: Option[String] = None,
-  var patch19Applied: Boolean = false
+  var patch19Applied: Boolean = false,
+  var cutletGateGaps: Option[Vector[Int]] = None,
+  var cutletGatePartition: Option[Vector[Int]] = None,
+  var cutletDayOffset: Option[Int] = None,
+  var cutletBoundarySnapshot: Option[(Vector[Int],Vector[Int],Int)] = None,
+  var legacyCutletStartOffsets: Option[Vector[Int]] = None,
+  var legacyCutletId: Option[Int] = None,
+  var legacyDayInCutlet: Option[Int] = None
 )
 
 final class BaseMetricsShell {
@@ -259,6 +266,46 @@ final class BaseValidationManager {
    * PATCH19: verifica indipendente della mappatura nome/mese.
    * Non richiama né l'adapter storico né il wrapper della patch.
    */
+
+  /** DISCOVERY20: conferma indipendente del confine storico ">".
+    * La regola normativa ">=" resta riservata ai soli test.
+    */
+  def requireDiscovery20Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="DISCOVERY_20_CUTLET_OPEN_BOUNDARY" ||
+       ctx.status!="LEGACY_CUTLET_BOUNDARY_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_20_CUTLET_OPEN_BOUNDARY") ||
+       ctx.cutletGateGaps.isEmpty || ctx.cutletGatePartition.isEmpty ||
+       ctx.cutletDayOffset.isEmpty || ctx.cutletBoundarySnapshot.isEmpty ||
+       ctx.legacyCutletStartOffsets.isEmpty ||
+       ctx.legacyCutletId.isEmpty || ctx.legacyDayInCutlet.isEmpty)
+      throw new IllegalStateException("DISCOVERY20 non completa.")
+    val gaps=ctx.cutletGateGaps.get
+    val parts=ctx.cutletGatePartition.get
+    val day=ctx.cutletDayOffset.get
+    if(ctx.cutletBoundarySnapshot.get!=(gaps,parts,day))
+      throw new IllegalStateException("Snapshot DISCOVERY20 alterata.")
+    if(parts.length<6 || parts.length>17 || parts.exists(_<1) ||
+       parts.sum!=gaps.length || gaps.exists(g=>g<42 || g>963) ||
+       gaps.sum<252 || gaps.sum>5778 || day<0 || day>=gaps.sum)
+      throw new IllegalStateException("Input DISCOVERY20 non valido.")
+    val starts=parts.scanLeft(0)(_+_).init
+      .map(k=>gaps.take(k).sum)
+    // Ricalcolo indipendente: si chiude la cotoletta soltanto
+    // quando il giorno supera strettamente il nuovo inizio.
+    var oldId=1
+    var i=1
+    while(i<starts.length) {
+      if(day>starts(i)) oldId+=1
+      i+=1
+    }
+    val oldDay=day-starts(oldId-1)+1
+    if(ctx.legacyCutletStartOffsets.get!=starts ||
+       ctx.legacyCutletId.get!=oldId ||
+       ctx.legacyDayInCutlet.get!=oldDay)
+      throw new IllegalStateException("Cicatrice DISCOVERY20 alterata.")
+  }
+
   def requirePatch19Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_19_DAY_INDEXED_MONTH_NAME" ||
        ctx.status!="PATCH_19_READY" || !ctx.patch19Applied ||
@@ -1702,7 +1749,8 @@ final class BaseMonsterManager {
     new Discovery18SourceCatalogMismatchHandler(metrics),
     new Patch18SourceCatalogHandler(metrics),
     new Discovery19DayIndexedMonthNameHandler(metrics),
-    new Patch19DayIndexedMonthNameHandler(metrics)
+    new Patch19DayIndexedMonthNameHandler(metrics),
+    new Discovery20CutletOpenBoundaryHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -2715,6 +2763,34 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("patch19",error)
+    }
+  }
+
+
+  def discover20CutletOpenBoundary(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    gateGaps: Vector[Int],
+    cutletPartition: Vector[Int],
+    dayOffset: Int
+  ): Discovery20CutletOpenBoundaryReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.cutletGateGaps=Some(gateGaps)
+    ctx.cutletGatePartition=Some(cutletPartition)
+    ctx.cutletDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_20_CUTLET_OPEN_BOUNDARY"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery20Ready(ctx)
+      Discovery20CutletOpenBoundaryReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.cutletGateGaps.get,ctx.cutletGatePartition.get,
+        ctx.cutletDayOffset.get,ctx.legacyCutletStartOffsets.get,
+        ctx.legacyCutletId.get,ctx.legacyDayInCutlet.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("discovery20",error)
     }
   }
 

@@ -1,0 +1,16 @@
+STATO_ESECUZIONE=PENDING_NATIVE_CI
+STADIO=40
+TIPO=DISCOVERY_20
+ULTIMO_STADIO_CERTIFICATO=39
+RISULTATO_ATTESO=EXPECTED_RED
+FIRMA_ATTESA=44_PASS_3_FAIL_INTENTIONAL
+DIVERGENZE=CUTLET2_START,CUTLET3_START,CUTLET17_START
+LEGACY_ADAPTER=LegacyCutletOpenBoundaryAdapter.oldCutletOpenBoundary
+DIFETTO=STRICT_GREATER_THAN_AT_NEW_CUTLET_START
+PATCH20_INTRODUCED=NO
+GITHUB_ACTIONS_CONCLUSION=PENDING
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage40Tests'
+
+La fase storica assegna il primo giorno della nuova cotoletta
+alla cotoletta precedente. Input sintetici sono distanze fra
+porte e partizioni positive. Nessun PASS dichiarato senza CI.

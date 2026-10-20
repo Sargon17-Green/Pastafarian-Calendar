@@ -929,3 +929,30 @@ jobs:
           sbt -batch 'Test / runMain pastafari.Stage39Tests' 2>&1 | tee stage39.log
           grep -Eq 'RISULTATO STADIO 39: [1-9][0-9]* PASS, 0 FAIL' stage39.log
           test "$(grep -Fc 'FAIL — ' stage39.log)" -eq 0
+
+  native-stage40-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage40 expected-RED cutlet boundary signature
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage40Tests' > stage40.log 2>&1
+          rc=$?
+          set -e
+          cat stage40.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 40: 44 PASS, 3 FAIL' stage40.log
+          test "$(grep -Fc 'PASS — ' stage40.log)" -eq 44
+          test "$(grep -Fc 'FAIL — ' stage40.log)" -eq 3
+          for label in CUTLET2_START CUTLET3_START CUTLET17_START; do
+            grep -Fq "FAIL — equivalenza normativa confine \${label} —" stage40.log
+          done
