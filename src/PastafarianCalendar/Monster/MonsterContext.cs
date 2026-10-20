@@ -152,6 +152,9 @@ public sealed class MonsterContext
     // الرقعة السابعة عشرة: يظل شاهد رفض الحدّ منفصلاً عن المرتبة المقبولة.
     public BigInteger? PatchedInclusiveWideLimitRankResult { get; set; }
 
+    // الندبة الثامنة عشرة: رفض قيمة عالية في الاتجاه النازل يُعيد الرتبة الأولى.
+    public BigInteger? LegacyRejectionDirectionRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

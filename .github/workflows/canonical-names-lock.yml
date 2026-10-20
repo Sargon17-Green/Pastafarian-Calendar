@@ -226,3 +226,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage34Tests/PastafarianCalendar.Stage34Tests.csproj --configuration Release -- --verify-expected-red
       - name: تكافؤ رقعة حدّ قبول الأسرة الواسعة السابعة عشرة وحفظ رفض المساواة التاريخي
         run: dotnet run --project tests/PastafarianCalendar.Stage35Tests/PastafarianCalendar.Stage35Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لاتجاه رفض الأسرة الواسعة
+        id: discovery_wide_rejection_direction_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage36Tests/PastafarianCalendar.Stage36Tests.csproj --configuration Release
+      - name: إثبات توقيع التفاف الرفض النازل دون إضافة الرقعة مبكراً
+        if: always()
+        run: |
+          test "${{ steps.discovery_wide_rejection_direction_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage36Tests/PastafarianCalendar.Stage36Tests.csproj --configuration Release -- --verify-expected-red

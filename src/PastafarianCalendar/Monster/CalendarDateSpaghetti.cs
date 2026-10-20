@@ -261,6 +261,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateInclusiveWideLimit(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الاكتشاف الثامن عشر: العيب في الاتجاه النازل بعد رفض الجواب الواسع.
+    public static BigInteger EvaluateLegacyWideRejectionDirection(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateLegacyWideRejectionDirection(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
