@@ -8,9 +8,12 @@ pastafari.ValidationManager.requireExactIntegerInput(outputCount);
 master = pastafari.BigInt.coerce(masterCount);
 outputs = pastafari.BigInt.coerce(outputCount);
 
-if master < pastafari.BigInt(1) || outputs < pastafari.BigInt(0)
+% Dla pustego alfabetu i pustego wiersza istnieje dokładnie jedna
+% permutacja: pusty wiersz. 0P0 = 1 (iloczyn pusty).
+% Jest to wymagane także dla ostatniego bloku przy unrankingu NPN.
+if master < pastafari.BigInt(0) || outputs < pastafari.BigInt(0)
     error('Pastafari:Names:PartialPermutationShape', ...
-        'masterCount musi być dodatni, a outputCount nieujemny.');
+        'masterCount i outputCount muszą być nieujemne.');
 end
 
 if outputs > master
