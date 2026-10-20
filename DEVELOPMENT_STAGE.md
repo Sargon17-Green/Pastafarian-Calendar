@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=44
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=22
-LAST_COMPLETED_STAGE=43
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=44
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..21. Stage44 mở DistinctCutletNameIndices, LegacyRotatedCutletNameRank và CutletNameIndexManager; count P(17,k), sauce(c,year.first_day), bowl5/seal22 đều chuẩn nhưng rank bị quay +1.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_44_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_44_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=693
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -993,3 +993,17 @@ rank cuối về đầu; production áp rank sai vào cùng tập tên.
 20 bài Stage44 (16 kiểm soát và 4 nhóm normative dự kiến RED),
 mục tiêu 693 bài, đúng bốn lỗi và Canonical Names Lock PASS.
 Không sửa oracle, PATCH01..21, main; chưa tích hợp lịch cuối.
+
+Stage44 DISCOVERY22 được xác minh trên GitHub Actions:
+Elixir 1.18.5 / OTP 27, biên dịch 76 tệp .ex,
+**693 bài, 689 PASS, đúng bốn hồi quy normative RED**.
+16 kiểm soát Stage44 và 673 bài cũ đều xanh,
+không compiler warnings; Canonical Names Lock PASS.
+Bốn nhóm sai lệch chỉ xuất hiện ở bước chọn chỉ số tên
+vì rank được xoay tiến một trong LegacyRotatedCutletNameRank.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39495814532
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39495814488
+Legacy blob 4b7f677ec376060c21724157fac704b2cc497fce;
+oracle test-only blob be1638f46b2190d617af0378a61b077bda10bf32.
+Stage44 đóng EXPECTED_RED; Stage45 PATCH22 chưa bắt đầu.
+Không sửa main, oracle hoặc PATCH01..21.

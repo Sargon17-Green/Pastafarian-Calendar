@@ -1292,3 +1292,20 @@ không cảnh báo biên dịch. Canonical Names Lock PASS.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39411372181
 
 Stage42 đóng EXPECTED_RED; Stage43 PATCH21 chưa bắt đầu.
+
+
+## Giai đoạn 44/55 — DISCOVERY22: lệch rank tên cốt-lết
+
+CutletNameIndexManager chọn dãy tên phân biệt từ 1..17,
+đếm chỉnh hợp P(17,k), mở hạng từ điển mà không tạo toàn bộ
+ứng viên. Nguồn sauce (c,year.open_day+1), bowl5/seal22 và
+tất cả các tầng chọn năm, phân hoạch đã qua PATCH21.
+LegacyRotatedCutletNameRank cố ý xoay rank đúng lên một,
+vòng rank cuối về đầu; production thật dùng rank legacy.
+
+GitHub Actions Elixir 1.18.5 / OTP27: **693 bài, 689 PASS,
+đúng bốn hồi quy normative RED**, không cảnh báo biên dịch.
+Canonical Names Lock PASS. Stage44 đóng EXPECTED_RED;
+Stage45 PATCH22 chưa bắt đầu. Không sửa main hoặc oracle.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39495814532
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39495814488
