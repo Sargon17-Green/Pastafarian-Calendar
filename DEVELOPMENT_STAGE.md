@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=43
-CURRENT_KIND=PATCH
-CURRENT_PATCH=21
+CURRENT_STAGE=44
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=22
 LAST_COMPLETED_STAGE=43
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..20. Stage43 thêm CutletPartitionSealPatch gọi thật legacy chốt20 rồi chọn hạng mới bằng chốt21. CutletPartitionManager giữ đếm, mở hạng từ điển, cổng bắt buộc và năm.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..21. Stage44 mở DistinctCutletNameIndices, LegacyRotatedCutletNameRank và CutletNameIndexManager; count P(17,k), sauce(c,year.first_day), bowl5/seal22 đều chuẩn nhưng rank bị quay +1.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_43_PATCH_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_44_DISCOVERY_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=673
-CI_FAILURES=0
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -984,3 +984,12 @@ oracle SHA be1638f46b2190d617af0378a61b077bda10bf32.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39412801670
 Đóng Stage43 GREEN; Stage44/55 DISCOVERY22 chưa bắt đầu.
 Không thay main, legacy, oracle hoặc các PATCH trước.
+
+Giai đoạn 44 DISCOVERY22 mở chọn chỉ số tên cốt-lết phân biệt.
+Đếm P(17,k), mở hạng từ điển một-based bằng khối tổ hợp,
+bát 5/chốt 22, source_day=year.open_gate_day+1 đều chuẩn.
+LegacyRotatedCutletNameRank cố ý dịch rank lên một và quay
+rank cuối về đầu; production áp rank sai vào cùng tập tên.
+20 bài Stage44 (16 kiểm soát và 4 nhóm normative dự kiến RED),
+mục tiêu 693 bài, đúng bốn lỗi và Canonical Names Lock PASS.
+Không sửa oracle, PATCH01..21, main; chưa tích hợp lịch cuối.
