@@ -40,6 +40,9 @@ try
     % 0. Szybki preflight: brak starych oczekiwań NotImplementedYet.
     auditOutput = [auditOutput, verifyPublicEntryRegressions(root)]; %#ok<AGROW>
 
+    % 0a. MATLAB parses all src/tests before the recursive heavy run.
+    auditOutput = [auditOutput, run_stage55_code_analysis(root)]; %#ok<AGROW>
+
     % 1. Pełna ścieżka regresji 1..54 + ciężki production/oracle differential.
     stage54Output = evalc('run_stage54_tests();');
     fprintf('%s', stage54Output);

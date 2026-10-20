@@ -40,12 +40,14 @@ end
 
 function out = saveValue(x)
 M = mConst();
-out = bi(1) + (bi(x) - bi(1)).regularMod(M);
+offset = bi(x) - bi(1);
+out = bi(1) + offset.regularMod(M);
 end
 
 function out = ceilDivNonnegative(a, b)
 a = bi(a); b = bi(b);
-out = (a + b - bi(1)).floorDiv(b);
+dividend = a + b - bi(1);
+out = dividend.floorDiv(b);
 end
 
 function counts = workCounts(calculationDay, targetDay)
@@ -181,7 +183,8 @@ order = permutationUnrank1(orderNumber, 1:6);
 end
 
 function order = bowlOrderFromDrop(dropValue)
-number = (bi(dropValue) - bi(1)).regularMod(bi(720)) + bi(1);
+offset = bi(dropValue) - bi(1);
+number = offset.regularMod(bi(720)) + bi(1);
 order = bowlOrderFromNumber(number);
 end
 
@@ -230,7 +233,8 @@ for stir = 1:12
         savedStirSum = savedStirSum + old{id};
     end
     savedStirSum = saveValue(savedStirSum + bi(149 * stir));
-    orderNumber = (savedStirSum - bi(1)).regularMod(bi(720)) + bi(1);
+    stirOffset = savedStirSum - bi(1);
+    orderNumber = stirOffset.regularMod(bi(720)) + bi(1);
     order = bowlOrderFromNumber(orderNumber);
     nextBowls = cell(1, 6);
     for position = 1:6
@@ -271,9 +275,11 @@ end
 
 function stream = askBowl(sauceResult, queriedBowlId, seal)
 nextId = nextBowlInDrop46Order(sauceResult, queriedBowlId);
-first = saveValue((sauceResult.bowls{queriedBowlId} + bi(seal) + bi(181)).square() + ...
+firstBase = sauceResult.bowls{queriedBowlId} + bi(seal) + bi(181);
+first = saveValue(firstBase.square() + ...
     bi(179) * sauceResult.bowls{nextId} + bi(seal));
-directionNumber = saveValue((first + bi(seal) + bi(1) + bi(193)).square() + ...
+directionBase = first + bi(seal) + bi(1) + bi(193);
+directionNumber = saveValue(directionBase.square() + ...
     bi(193) * first + bi(197) * sauceResult.bowls{6});
 if directionNumber.regularMod(bi(2)) == bi(1)
     step = 1;
@@ -284,7 +290,8 @@ stream = struct('first', first, 'directionStep', step);
 end
 
 function answer = answerAt(stream, k)
-answer = bi(1) + (stream.first - bi(1) + bi(stream.directionStep) * bi(k)).regularMod(mConst());
+answerOffset = stream.first - bi(1) + bi(stream.directionStep) * bi(k);
+answer = bi(1) + answerOffset.regularMod(mConst());
 end
 
 function rank = chooseRankShort(stream, N)
@@ -298,7 +305,8 @@ k = bi(0);
 while true
     x = answerAt(stream, k);
     if x <= acceptanceLimit
-        rank = (x - bi(1)).regularMod(N) + bi(1);
+        xOffset = x - bi(1);
+        rank = xOffset.regularMod(N) + bi(1);
         return
     end
     k = k + bi(1);
@@ -328,10 +336,12 @@ acceptanceLimit = space.floorDiv(N) * N;
 w = wide;
 while true
     if w <= acceptanceLimit
-        rank = (w - bi(1)).regularMod(N) + bi(1);
+        wOffset = w - bi(1);
+        rank = wOffset.regularMod(N) + bi(1);
         return
     end
-    w = bi(1) + (w - bi(1) + bi(stream.directionStep)).regularMod(space);
+    wOffset = w - bi(1) + bi(stream.directionStep);
+    w = bi(1) + wOffset.regularMod(space);
 end
 end
 
@@ -463,7 +473,8 @@ day = bi(day);
 ensureGatesCover(day, day);
 [lo, hi] = gateStore('bounds');
 while lo < hi
-    mid = lo + (hi - lo + bi(1)).floorDiv(bi(2));
+    halfSpan = hi - lo + bi(1);
+    mid = lo + halfSpan.floorDiv(bi(2));
     if gateStore('get', mid) <= day
         lo = mid;
     else
@@ -543,7 +554,8 @@ end
 candidates = sortYearCandidates(candidates, true);
 r = sauce(c, c);
 stream = askBowl(r, 1, 10);
-rank = chooseRank(stream, numel(candidates)).toDoubleExact();
+rankExact = chooseRank(stream, numel(candidates));
+rank = rankExact.toDoubleExact();
 chosen = candidates{rank};
 year = makeYear(5000, chosen.open, chosen.close);
 end
@@ -575,7 +587,8 @@ end
 candidates = sortYearCandidates(candidates, false);
 r = sauce(calculationDay, gateStore('get', openIndex));
 stream = askBowl(r, 1, 11);
-rank = chooseRank(stream, numel(candidates)).toDoubleExact();
+rankExact = chooseRank(stream, numel(candidates));
+rank = rankExact.toDoubleExact();
 chosen = candidates{rank};
 year = makeYear(knownYear.number + bi(1), chosen.open, chosen.close);
 end
@@ -601,7 +614,8 @@ end
 candidates = sortYearCandidates(candidates, false);
 r = sauce(calculationDay, gateStore('get', closeIndex));
 stream = askBowl(r, 1, 12);
-rank = chooseRank(stream, numel(candidates)).toDoubleExact();
+rankExact = chooseRank(stream, numel(candidates));
+rank = rankExact.toDoubleExact();
 chosen = candidates{rank};
 year = makeYear(knownYear.number - bi(1), chosen.open, chosen.close);
 end
@@ -632,7 +646,8 @@ if isempty(candidates)
     error('Pastafari:Oracle:CutletCountCandidates', 'Brak dopuszczalnej liczby kotletów.');
 end
 stream = askBowl(structureSauce, 2, 20);
-rank = chooseRank(stream, numel(candidates)).toDoubleExact();
+rankExact = chooseRank(stream, numel(candidates));
+rank = rankExact.toDoubleExact();
 cutletCount = candidates(rank);
 end
 
@@ -742,7 +757,8 @@ G = Gbi.toDoubleExact();
 g = exactGateIndex(calculationDay);
 required = [];
 if ~isempty(g) && year.openGateIndex < g && g < year.closeGateIndex
-    required = (g - year.openGateIndex).toDoubleExact();
+    gateOffset = g - year.openGateIndex;
+    required = gateOffset.toDoubleExact();
 end
 family = makeCutletPartitionFamily(G, cutletCount, required);
 count = family.count();
@@ -779,14 +795,17 @@ end
 
 function monthCount = chooseMonthCount(structureSauce, year)
 L = year.closeGateDay - year.openGateDay;
-minMonths = ceilDivNonnegative(L, 123).toDoubleExact();
-maxMonths = min(47, L.floorDiv(bi(4)).toDoubleExact());
+minMonthsExact = ceilDivNonnegative(L, 123);
+minMonths = minMonthsExact.toDoubleExact();
+maxMonthsExact = L.floorDiv(bi(4));
+maxMonths = min(47, maxMonthsExact.toDoubleExact());
 if minMonths < 3 || minMonths > maxMonths || maxMonths > 47
     error('Pastafari:Oracle:MonthCountBounds', 'Granice liczby miesięcy naruszają specyfikację.');
 end
 candidates = minMonths:maxMonths;
 stream = askBowl(structureSauce, 3, 30);
-rank = chooseRank(stream, numel(candidates)).toDoubleExact();
+rankExact = chooseRank(stream, numel(candidates));
+rank = rankExact.toDoubleExact();
 monthCount = candidates(rank);
 end
 

@@ -74,3 +74,7 @@ Workflow `.github/workflows/matlab-stage55-native.yml` uruchamia natywne MATLAB 
 Zmiana testów, kodu lub pliku workflow uruchamia pełny audyt Stage 55. Zadanie ma ograniczenie 180 minut. Krok `upload-artifact@v4` zachowuje `logs/STAGE_55_MATLAB_RUN.log` również po niepowodzeniu testu, jeśli plik powstał. Weryfikacja wykonuje oryginalne `run_stage55_final_audit` i **nie używa zastępczego oracle**.
 
 Sukces workflow nie aktualizuje automatycznie `LAST_COMPLETED_STAGE`. Zamknięcie wymaga sprawdzenia, że log dotyczy właściwego commit SHA, zawiera wszystkie wymagane markery PASS, a różnice semantyczne i regresje zostały faktycznie zweryfikowane. Przed uzyskaniem takiego wyniku Stage 55 pozostaje otwarty.
+
+## Code Analyzer preflight (MATLAB native)
+
+Before Stage 54 heavy tests, Stage 55 runs `run_stage55_code_analysis` over all `src/` and `tests/` MATLAB files (including `tests/oracle/`). It uses MathWorks `codeIssues` with factory settings, requires at least 150 analyzed files, and fails on any `Severity=error` diagnostic. All reported diagnostics are included in the Stage 55 failure report and the artifact log, up to the first 100 errors. This is a syntax/static-analysis gate, not a substitute for native semantic and differential verification.

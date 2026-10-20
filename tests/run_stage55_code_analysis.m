@@ -1,0 +1,33 @@
+function out = run_stage55_code_analysis(root)
+% Early, release-native Code Analyzer gate for the entire MATLAB tree.
+% This catches parser errors in not-yet-executed legacy and oracle paths,
+% before expensive Stage 54 differential computation begins.
+
+issues = codeIssues( ...
+    [string(fullfile(root, 'src')), string(fullfile(root, 'tests'))], ...
+    IncludeSubfolders=true, CodeAnalyzerConfiguration="factory");
+allIssues = issues.Issues;
+fatal = allIssues(strcmp(string(allIssues.Severity), "error"), :);
+
+if numel(issues.Files) < 150
+    error('Pastafari:Stage55:IncompleteCodeAnalysis', ...
+        'Analiza obejmuje tylko %d plików MATLAB; oczekiwano >=150.', ...
+        numel(issues.Files));
+end
+
+if ~isempty(fatal)
+    messages = strings(min(height(fatal), 100), 1);
+    for k = 1:numel(messages)
+        messages(k) = sprintf('%s:%d [%s] %s', ...
+            char(string(fatal.FullFilename(k))), ...
+            fatal.LineStart(k), ...
+            char(string(fatal.CheckID(k))), ...
+            char(string(fatal.Description(k))));
+    end
+    error('Pastafari:Stage55:CodeAnalyzerErrors', ...
+        'MATLAB Code Analyzer found %d errors in %d files:\n%s', ...
+        height(fatal), numel(issues.Files), strjoin(messages, newline));
+end
+
+out = sprintf('STAGE_55_CODE_ANALYZER_PASS FILES=%d\n', numel(issues.Files));
+end
