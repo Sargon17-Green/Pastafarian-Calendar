@@ -5,7 +5,7 @@ use open qw(:std :encoding(UTF-8));
 use strict;
 use warnings;
 use Math::BigInt;
-use Digest::SHA qw(sha256_hex);
+use Digest::SHA qw(sha256_hex sha512_hex);
 use Time::HiRes qw(time sleep);
 use POSIX qw(WNOHANG);
 use Getopt::Long qw(GetOptions);
@@ -28,9 +28,10 @@ die "rss-kib 必須在 32768..1048576\n"
     if $rss_limit<32768 || $rss_limit>1048576;
 die "window-offset 只支援 37、38、39 或 40\n"
     if $offset!=37 && $offset!=38 && $offset!=39 && $offset!=40;
-die "case-filter 只支援 all、middle、first-half、last-half\n"
+die "case-filter 只支援 all、middle、first-half、last-half、hash-a、hash-b\n"
     if $case_filter ne 'all' && $case_filter ne 'middle'
-    && $case_filter ne 'first-half' && $case_filter ne 'last-half';
+    && $case_filter ne 'first-half' && $case_filter ne 'last-half'
+    && $case_filter ne 'hash-a' && $case_filter ne 'hash-b';
 die "需要 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -114,6 +115,31 @@ if (!$pid) {
         die "分片樣本並非七個完整、互不重複的固定排名\n"
             if defined($expected_labels)
             && join(',',map {$_->[0]} @named) ne $expected_labels;
+        # R55：SHA-512 的 512 位十六進位作獨立確定性檢測名次，
+        # modulo 完整 BigInt N，均勻跨越 N 的 125 位十進位範圍。
+        # 先完全固定 12 個名次再分組，每次測試仍是完整 236 日。
+        if ($case_filter eq 'hash-a' || $case_filter eq 'hash-b') {
+            die "SHA-512 補充名次僅可套用已核對的真實 37 窗口\n"
+                if $offset!=37;
+            my @hash_samples;
+            my %observed;
+            for my $index (0..11) {
+                my $seed="PASTAFARIAN-5000-FOURMONTH-37-R55:$index";
+                my $digest=sha512_hex($seed);
+                my $rank=Math::BigInt->from_hex("0x$digest")
+                    ->bmod($total)->badd(1);
+                die "SHA-512 固定名次必須在 1..N 之內\n"
+                    if $rank<1 || $rank>$total;
+                die "SHA-512 固定名次發生重複，不能悄悄少驗\n"
+                    if $observed{"$rank"}++;
+                push @hash_samples,[
+                    sprintf('hash%02d',$index),$rank
+                ];
+            }
+            @named=$case_filter eq 'hash-a'
+                ? @hash_samples[0..5] : @hash_samples[6..11];
+            die "SHA-512 六名次分組失敗\n" if @named!=6;
+        }
         for my $case (@named) {
             my ($label,$rank)=@$case;
             my $rank_text="$rank";
@@ -184,7 +210,8 @@ if (!$pid) {
                 $diag->{entries},$diag->{cache_hits},time()-$start;
         }
         my $expected_count=$case_filter eq 'all' ? 14
-                          : $case_filter eq 'middle' ? 1 : 7;
+                          : $case_filter eq 'middle' ? 1
+                          : ($case_filter eq 'hash-a' || $case_filter eq 'hash-b') ? 6 : 7;
         die "字典序重要排名樣本未全部執行\n"
             if $test_count!=$expected_count;
         my $diag=$counter->diagnostics;
