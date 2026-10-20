@@ -1,6 +1,6 @@
 \ Known five-stone results derived from section E of the canonical README.
 \ The rows are checked independently against the arithmetic definition.
-\ These are source-level checks, not claims of a CAL run.
+\ Native CAL v123 reached the second wheat assertion; this diagnostic records observed and isolated values.
 
 To check the seed stones:
   Reach the stones for 1.
@@ -18,7 +18,16 @@ To check the seed stones:
 To check the second stone row:
   Reach the stones for 2.
   If the current stones' wheat is not "378",
-    put "The stone check failed at drop 2, wheat." into the check report; exit.
+    put "The stone check failed at drop 2, wheat; observed=" into the check report;
+    Append the current stones' wheat to the check report.
+    Put "17" into the working stone formula's base.
+    Put "29" into the working stone formula's neighbor.
+    Put "2" into the working stone formula's extra.
+    Put 3 into the working stone formula's factor.
+    Calculate the working stone formula.
+    Append "; isolated=" to the check report.
+    Append the working stone formula's result to the check report.
+    Exit.
   If the current stones' barley is not "1073",
     put "The stone check failed at drop 2, barley." into the check report; exit.
   If the current stones' salt is not "2375",
