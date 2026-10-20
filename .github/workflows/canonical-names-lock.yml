@@ -1622,3 +1622,37 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 39 --case-filter hash39-b --seconds 185 --rss-kib 393216
+
+  canonical-fourmonth-r57-40-a:
+    name: 真實 322 日四月份第 40 窗 SHA-512 六個 BigInt 完整排名 a
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth40-hash12]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 第 40 窗口完整 322 日每一合法下一月份的 BigInt 核對
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 40 --case-filter hash40-a --seconds 185 --rss-kib 393216
+
+  canonical-fourmonth-r57-40-b:
+    name: 真實 322 日四月份第 40 窗 SHA-512 六個 BigInt 完整排名 b
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth40-hash12]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 第 40 窗口完整 322 日每一合法下一月份的 BigInt 核對
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 40 --case-filter hash40-b --seconds 185 --rss-kib 393216
