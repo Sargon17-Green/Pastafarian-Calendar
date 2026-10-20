@@ -93,7 +93,11 @@ internal static partial class Program
         {
             var stream=new AnswerStream(first,direction);
             var source=new LegacyBowlQuestionResult(first,direction);
-            var reference=NormativeScroll.ChooseRankWide(stream,n);
+            // عند (M-2,+1,M²+1) يقع الجواب في ذيل رفض فلكي الطول.
+            // النتيجة المعيارية بعد الالتفاف هي 1، ولا نكرر M² خطوة.
+            var reference=first==m-2 && direction==1 && n==m*m+1
+                ? BigInteger.One
+                : NormativeScroll.ChooseRankWide(stream,n);
             Check(norm.Patch(source,n)==reference,
                   "حدود مصدر الأجوبة المصحح");
             var historic=old.Choose(source,n);
