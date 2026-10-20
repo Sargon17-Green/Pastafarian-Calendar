@@ -22,3 +22,14 @@ normative cố ý RED. Mục tiêu 653 bài, đúng bốn RED,
 Canonical Names Lock PASS và không compiler warnings.
 Không sửa main/oracle/PATCH01..20, không tích hợp tên
 cốt-lết hoặc lịch cuối; không lưu HANDOFF_* trong repo.
+
+## Kết quả CI
+
+Elixir 1.18.5 / OTP 27: biên dịch 72 tệp, **653 bài, 649 PASS,
+đúng bốn normative RED**, không compiler warnings; 633 bài
+trước cùng 16 điều khiển Stage42 đều xanh. Lần đầu chỉ 3 RED,
+đã mở rộng riêng nhóm fixture ngày phía trước mà không sửa
+production/oracle; xác nhận đúng 4 RED trong CI cuối.
+- CI https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39411372185
+- Names https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39411372181
+Stage42 đóng EXPECTED_RED. Stage43 PATCH21 chưa bắt đầu.

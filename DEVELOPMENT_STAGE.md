@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=42
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=21
-LAST_COMPLETED_STAGE=41
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=42
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..20. Stage42 thêm CutletPartitionCombinatorics đếm DP và mở hạng từ điển, CutletPartitionManager và LegacyCutletPartitionCountSeal cố tình dùng chốt 20 thay vì 21.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_42_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_42_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=653
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -956,3 +956,14 @@ bắt buộc và đếm/mở hạng thứ tự từ điển đúng chuẩn, như
 lấy rank từ Dispatcher.answer_stream(c,first_day,2,20) thay chốt 21.
 20 bài Stage42: 16 kiểm soát và 4 nhóm normative dự kiến RED;
 tổng dự kiến 653 bài. Chờ CI và khóa tên; chưa mở PATCH21.
+
+Giai đoạn 42 DISCOVERY21 đã xác minh trên CI Elixir 1.18.5 / OTP27:
+biên dịch 72 tệp, **653 bài, 649 PASS, đúng bốn hồi quy normative RED**.
+16 kiểm soát Stage42 và 633 bài trước đều PASS, không compiler warning.
+Lần đầu chạy có 3 RED vì nhóm ngày phía trước không phát hiện sai lệch;
+đã mở rộng riêng fixture, không sửa production hoặc oracle.
+Canonical Names Lock PASS.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39411372185
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39411372181
+Đóng Stage42 EXPECTED_RED; Stage43 PATCH21 chưa bắt đầu.
+Không thay main hoặc các PATCH trước, chưa tích hợp lịch cuối.

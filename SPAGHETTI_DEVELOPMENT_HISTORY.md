@@ -1275,3 +1275,20 @@ Canonical Names Lock PASS, legacy và oracle test-only không đổi.
 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39298935288
 Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39298935385
 Stage41 đóng GREEN. Stage42/55 DISCOVERY21 chưa bắt đầu.
+
+
+## Giai đoạn 42/55 — DISCOVERY21: nhầm chốt phân hoạch cốt-lết
+
+CutletPartitionCombinatorics đếm và mở hạng từ điển của
+các phân hoạch dương với cổng tính bắt buộc ở nội bộ.
+LegacyCutletPartitionCountSeal lấy rank bằng bowl 2, chốt 20
+thay vì chốt 21 chuẩn. Đường production thực sự dùng rank
+legacy, trong khi năm đích, số cốt-lết và phân hoạch đều đúng.
+
+CI Elixir 1.18.5 / OTP27: **653 bài, 649 PASS, đúng bốn RED**
+ở normative, 16 điều khiển và 633 bài cũ PASS;
+không cảnh báo biên dịch. Canonical Names Lock PASS.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39411372185
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39411372181
+
+Stage42 đóng EXPECTED_RED; Stage43 PATCH21 chưa bắt đầu.
