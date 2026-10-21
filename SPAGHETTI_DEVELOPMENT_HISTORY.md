@@ -471,3 +471,19 @@ Untuk semua 720 order leksikografik, ketiga-tiga tuangan mesti mematuhi rumus no
 ### Sempadan tahap
 
 Tiada in-place bowl mutation atau snapshot pending dilakukan di sini. Stage20 — DISCOVERY10 akan memperkenalkan masalah itu, dan Stage21 — PATCH10 akan memperkenalkan vaultOld dan pending. Tiada perubahan pada main, nilai rujukan, katalog nama atau fixture.
+
+
+### Bukti GitHub Actions Stage 19 — hijau disahkan
+
+**Run penerimaan:** `39612888306`  
+**SHA diuji:** `1e6d29a094c35c779d16770192f74fada3c14450`  
+**Kerja:** `verify=success`, `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+KEPUTUSAN MERAH_DIJANGKA salah=1800 sepadan=360 pangkat=720 real=4 lain=0
+LULUS kontrak merah 09; tuangan menggunakan identiti tetap bukan posisi
+LULUS Stage 19 PATCH 09 pangkat=720 tuangan=2160 legacy_salah=1800 legacy_sepadan=360 alias=4320 real=4 real_tuangan=24 ralat=6
+```
+
+Run calon awal `39612576553` gagal pada ujian Stage01 `FUTURE_TOKEN_bowlAlias`, kerana nama medan pemerhatian dalam `BootstrapKernel`. Ia dibaiki di commit `1e6d29a0` dengan menamakan medan itu `positionAliases`, tanpa mengubah sebarang formula atau melonggarkan ujian. Run kedua menerima semua gerbang termasuk Stage01 dan Stage19. Stage20 belum bermula.
