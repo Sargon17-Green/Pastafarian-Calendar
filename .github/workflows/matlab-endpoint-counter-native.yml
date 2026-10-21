@@ -8,6 +8,7 @@ on:
       - 'src/+pastafari/countWholeWeavingSuffixByEndpoints.m'
       - 'tests/run_stage55_endpoint_counter_tests.m'
       - 'src/+pastafari/unrankWholeWeavingByEndpoints.m'
+      - 'src/+pastafari/allOpenedWholeWeaveChildCounts.m'
       - 'tests/run_stage55_endpoint_unrank_tests.m'
       - '.github/workflows/matlab-endpoint-counter-native.yml'
   workflow_dispatch:
