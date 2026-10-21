@@ -1,0 +1,76 @@
+name: Native soak vector adapter — C++ Latina
+
+on:
+  push:
+    branches:
+      - 'C\+\+&Latina'
+    paths:
+      - 'tools/soak_vector_adapter.cpp'
+      - '.github/workflows/cpp-latina-soak-adapter.yml'
+      - 'docs/STAGE_56_SOAK_ADAPTER.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: Native GCC and Clang TSV adapter
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Install native compiler dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          timeout 10m sudo apt-get update -qq
+          timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
+          test -r /usr/include/boost/multiprecision/cpp_int.hpp
+      - name: Compile both independent native executables
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p soak-output
+          for compiler in g++ clang++; do
+            "$compiler" -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror \
+              -Iinclude -Itests -I. tools/soak_vector_adapter.cpp src/monster.cpp \
+              -o "soak-output/adapter-$compiler"
+            "soak-output/adapter-$compiler" --schema | grep -q '^PASTAFARI_SOAK_TSV_V1'
+          done
+      - name: Verify arbitrary-stream protocol and rejection semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'a01\t-15055671\t-15055671\nb02\t-15055671\t-15055670\nc03\t-15055671\t-15055671\n' > soak-output/input.tsv
+          for compiler in g++ clang++; do
+            timeout 35m "soak-output/adapter-$compiler" --timing-ns < soak-output/input.tsv \
+              > "soak-output/output-$compiler.tsv" \
+              2> "soak-output/timing-$compiler.log"
+            test "$(wc -l < "soak-output/output-$compiler.tsv")" -eq 3
+            test "$(grep -c '^SOAK_TIMING_NS' "soak-output/timing-$compiler.log")" -eq 3
+            awk -F '\t' 'NF!=8 {exit 1} END {if(NR!=3)exit 1}' "soak-output/output-$compiler.tsv"
+            sed -n '1p' "soak-output/output-$compiler.tsv" | cut -f2- > "soak-output/first-$compiler.tsv"
+            sed -n '3p' "soak-output/output-$compiler.tsv" | cut -f2- > "soak-output/third-$compiler.tsv"
+            cmp "soak-output/first-$compiler.tsv" "soak-output/third-$compiler.tsv"
+            if printf 'bad\tABC\t0\n' | "soak-output/adapter-$compiler" > "soak-output/invalid-$compiler.stdout" 2> "soak-output/invalid-$compiler.stderr"; then
+              echo 'SOAK_BAD_INPUT_ACCEPTED=FAIL'
+              exit 1
+            fi
+            test ! -s "soak-output/invalid-$compiler.stdout"
+            grep -q '^SOAK_ADAPTER_ERROR' "soak-output/invalid-$compiler.stderr"
+            echo "SOAK_ADAPTER_V1=3/3_PASS COMPILER=$compiler"
+          done
+          cmp soak-output/output-g++.tsv soak-output/output-clang++.tsv
+          echo 'SOAK_ADAPTER_CROSS_COMPILER=PASS'
+      - name: Save evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cpp-latina-native-soak-adapter
+          path: soak-output/
+          if-no-files-found: warn
+          retention-days: 30

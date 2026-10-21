@@ -1,0 +1,19 @@
+# C++&Latina: native adapter for a future global soak
+
+Status: Stage 56 integration helper. Not a new calendar implementation or approval of Stage 57.
+
+Build: g++ -std=c++20 -O2 -Iinclude -Itests -I. tools/soak_vector_adapter.cpp src/monster.cpp -o soak-vector-adapter
+
+Contract PASTAFARI_SOAK_TSV_V1: send request_id, calculation_day_c, target_day_t as three TAB-separated ASCII columns per line on stdin. c and t are signed unbounded decimal integers (boost::multiprecision::cpp_int); request IDs use [A-Za-z0-9_.:-]+.
+
+Each successful input yields one stdout TSV row, in the exact original order: request_id, c, t, year_number, C++ std::quoted(cutlet_name), day_in_cutlet, C++ std::quoted(month_name), day_in_month. All eight columns are retained; five are the public date tuple.
+
+Command --schema emits a deterministic version banner. Optional --timing-ns writes per-request elapsed nanoseconds as SOAK_TIMING_NS TAB id TAB value to stderr; stdout remains the canonical result stream.
+
+Fail-closed: malformed lines, invalid integers, missing input, and calendar exceptions cause a nonzero process exit and a SOAK_ADAPTER_ERROR diagnostic on stderr. Previously emitted rows are diagnostic only: a failed shard is never certified. No heavy computation is omitted. Timeouts and performance-based scheduling belong to the central harness.
+
+Native GCC and Clang workflow compiles the branch's public calendarDateSpaghetti API, tests three requests, compares repeated output for identical c,t, rejects malformed input, and compares outputs across compilers.
+
+Baseline before adapter: aa129c8076b82361ae8107603ba6c9c6c97ebc18, complete 20/20 SOAK_GREEN (run 39411197744); native code is identical to code commit 0ae153157052ac221a718fcc15a19a6b0697b7c1; pinned Celeritas 30/30 pass (run 38897361174). None constitutes the future global multi-implementation soak.
+
+The adapter is not certified until its own exact-commit CI completes. It does not alter src/monster.cpp, main, the normative Oracle or Stage 57.
