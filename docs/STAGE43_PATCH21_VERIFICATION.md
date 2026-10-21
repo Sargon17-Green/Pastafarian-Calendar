@@ -13,3 +13,14 @@ The authoritative `06-implementation-prompt.md` Patch21 says: preserve ALL origi
 `test/patch21.ts` exhaustive independent lex filtering on many feasible G,K,required (all legal ranks), true signed gate production witness, no-gate full Stage41 compatibility and Stage54 barrier. `test/patch21Properties.ts` independently exhausts additional cases, exercises exact 1024-bit G/ranks, and checks each of 720 distinct DROP46 orders via actual production 58-write seal21 rank compared to test-only independent bowl-memory/post-stir replay. All 21 standalone historical intentionally RED tests are retained untouched and must be verified in the existing Stage1–42 full suite. Freeze SourceLanguageCatalog and immutable name-lock, no edits to main or other branches, no Stage44 patch anticipated.
 
 **Acceptance:** native TypeScript typecheck, complete full regression suite Stage1–43, all 21 previously intentionally failing historical witnesses and independent names lock must PASS in GitHub Actions; separate CI success for final administrative commit before setting LAST_COMPLETED_STAGE=43. Update canonical `/Pastafarian_Calendar_Project/BRANCH_REGISTRY.xlsx` row/journal transactionally under the latest central workflow.
+
+## Native GitHub Actions verification — 21 October 2026
+
+[Implementation commit c92271a](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/c92271a1e6c53017fc581951b4e062e3ef43de5d) and [CI run 39608347642](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39608347642): both independent `verify` and historical-label `stage27-typescript-marathi` jobs SUCCESS. Native TypeScript typecheck passed. Every prior Stage1–42 native test and all **21 intentionally failing archived historical RED witnesses** remain verified. Frozen SourceLanguageCatalog/name hash lock is unchanged.
+
+```text
+STAGE_43_PATCH_21_GUARDS_PASS exhaustiveFamilies=751 exhaustiveRetained=211907 exhaustiveRejected=381951 exactRealGateCases=1 legacyGateMisses=1 correctedWrong=0 realSeal20=1 realSeal21Old=1 realSeal21Corrected=1 fullStage41NoGateCases=1 noGateExtraSeal21=0 exactNativePredecessors=51 fullStage41Predecessors=55 fullSharedWrites=6148
+STAGE_43_PATCH_21_PROPERTIES_PASS exhaustiveFamilies=961 exhaustiveMembers=498188 filteredWrong=0 giant1024BitFamilies=4 nativeSeal21Cases=720 uniqueDrop46Orders=720 independentRankWrong=0 mandatoryBoundaryWrong=0 sharedWrites=41760
+```
+
+The genuine action-day exact-gate case from the full Stage37-native route selects the independently normative filtered partition, whereas the Stage42 old unfiltered rank misses the required prefix gate. The full Stage41/Stage17 `cDay=anchorGateDay+1` route truthfully has `requiredBoundary=null` and reuses the prior real selection without extra 58-write calls. The exact 1024-bit and 720 DROP46 families avoid whole-family materialization. LAST_COMPLETED_STAGE=43. Stage44 not started.
