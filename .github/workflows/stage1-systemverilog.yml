@@ -25,6 +25,15 @@ jobs:
             rtl/pcal_stage1_bootstrap.sv tests/tb_stage1.sv
       - name: Simulate bootstrap
         run: vvp build/stage1.vvp
+      - name: Compile Foundation sauce oracle checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -s tb_sauce_foundation -Wall -o build/sauce.vvp \
+            tests/pcal_stage1_oracle_pkg.sv \
+            tests/tb_sauce_foundation.sv
+      - name: Simulate Foundation sauce checkpoint
+        run: vvp build/sauce.vvp
       - name: Verify production/oracle isolation
         run: |
           set -euo pipefail
