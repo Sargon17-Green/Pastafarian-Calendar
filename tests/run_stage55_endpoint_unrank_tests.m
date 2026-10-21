@@ -6,19 +6,16 @@ addpath(fullfile(root, 'src'));
 cleanup = onCleanup(@() rmpath(fullfile(root, 'src'))); %#ok<NASGU>
 
 cases = {[1], [4], [1 1], [2 2], [2 2 2], ...
-    [2 3 2], [3 2 3], [3 3 3], [4 4 4]};
+    [2 3 2], [3 2 3], [3 3 3], [4 4 4], ...
+    [2 2 2 2], [3 2 3 2], [2 2 2 2 2]};
 checked = 0;
 for c = 1:numel(cases)
     lengths = cases{c};
     reference = enumerateBrute(lengths);
     count = size(reference, 1);
-    % Every rank for families with at most 71 rows; edge/mid/witness
-    % ranks for [4 4 4], which has exactly 1301 rows.
-    if count <= 100
-        ranks = 1:count;
-    else
-        ranks = unique([1 2 3 23 259 396 1129 count-1 count]);
-    end
+    % Check EVERY lexicographic rank for each small family, including
+    % all 1301 legal rows of [4 4 4], never sampling its ranks.
+    ranks = 1:count;
     for rank = ranks
         got = pastafari.unrankWholeWeavingByEndpoints( ...
             lengths, pastafari.BigInt(rank));
@@ -36,7 +33,7 @@ for c = 1:numel(cases)
     lengths = cases{c};
     family = pastafari.WholeMonthWeavingFamily(lengths);
     last = family.count().toDoubleExact();
-    ranks = unique([1 ceil(last / 2) last]);
+    ranks = 1:last; % exhaustive native cross-implementation comparison
     for rank = ranks
         actual = pastafari.unrankWholeWeavingByEndpoints( ...
             lengths, pastafari.BigInt(rank));

@@ -6,10 +6,13 @@ on:
       - 'MATLAB\+Polski'
     paths:
       - 'src/**'
+      - '!src/+pastafari/countWholeWeavingSuffixByEndpoints.m'
+      - '!src/+pastafari/unrankWholeWeavingByEndpoints.m'
       - 'tests/**'
+      - '!tests/run_stage55_endpoint_counter_tests.m'
+      - '!tests/run_stage55_endpoint_unrank_tests.m'
       - 'DEVELOPMENT_STAGE.md'
       - 'docs/STAGE_55_FINAL_AUDIT.md'
-      - '.github/workflows/matlab-stage55-native.yml'
   workflow_dispatch:
 
 permissions:
