@@ -24,3 +24,21 @@ tính duy nhất, song song, bất biến và kiểm toán source.
 Mục tiêu 713 bài, không lỗi, không compiler warnings, cùng
 Canonical Names Lock PASS. Không sửa main và không thêm
 HANDOFF_* vào repo. Chưa tích hợp lịch hoàn chỉnh.
+
+## Bằng chứng kiểm chứng CI
+
+Stage45 PATCH22 đã được xác minh với GitHub Actions
+trên Elixir 1.18.5 / OTP27: biên dịch 77 tệp .ex,
+**713/713 kiểm thử PASS, 0 lỗi**, không cảnh báo biên dịch.
+Canonical Names Lock độc lập PASS. Bốn nhóm normative
+Stage44 giữ nguyên expected và đã chuyển lại xanh.
+CutletNameRankPatch gọi thật LegacyRotatedCutletNameRank,
+giữ historical_rank rồi lấy corrected_rank từ
+Dispatcher.answer_stream(c,first_day,5,22). Tập P(17,k),
+phân hoạch, oracle và di sản đều không đổi.
+Legacy SHA `4b7f677ec376060c21724157fac704b2cc497fce`;
+oracle SHA `be1638f46b2190d617af0378a61b077bda10bf32`.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39606883502
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39606883324
+Đóng Stage45 GREEN. Stage46/55 DISCOVERY23 chưa bắt đầu.
+Không sửa main hoặc tích hợp lịch cuối.
