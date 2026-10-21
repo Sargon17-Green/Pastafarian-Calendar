@@ -8,6 +8,7 @@ on:
       - 'src/**'
       - '!src/\+pastafari/countWholeWeavingSuffixByEndpoints.m'
       - '!src/\+pastafari/unrankWholeWeavingByEndpoints.m'
+      - '!src/\+pastafari/allOpenedWholeWeaveChildCounts.m'
       - 'tests/**'
       - '!tests/run_stage55_endpoint_counter_tests.m'
       - '!tests/run_stage55_endpoint_unrank_tests.m'
