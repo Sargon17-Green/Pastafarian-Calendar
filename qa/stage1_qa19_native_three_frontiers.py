@@ -60,7 +60,7 @@ def to_candidate(source,raw,entry):
                  tuple(map(int,ip.delta))==tuple(c['delta']) and
                  int(p.space.get(ip.position))==c['source_byte'],
                  'native source trace witness cannot replay exactly at tick %d'%next_tick)
-            if not ip.stringmode and len(ip.stack[0])>=2:
+            if not ip.stringmode:
                 need(abs(int(ip.position[0])-int(entry['target'][0]))+
                      abs(int(ip.position[1])-int(entry['target'][1]))==1,
                      'claimed forced displacement not exactly one cell')
@@ -78,7 +78,7 @@ def to_tick(source,raw,c):
     need(tuple(map(int,ip.position))==tuple(c['neighbor']) and
          tuple(map(int,ip.delta))==tuple(c['delta']) and
          int(item['program'].space.get(ip.position))==c['source_byte'] and
-         not ip.stringmode and len(ip.stack[0])>=2,
+         not ip.stringmode,
          'Native prefix diverged for controlled experiment')
     return item
 def run_mode(source,raw,c,target,mode):
@@ -136,6 +136,8 @@ def main(witnessfile,outdir):
                         'original_trace_sha256':e['trace_sha256'],
                         'selected_tick':c['tick'],'original_neighbor':c['neighbor'],
                         'displacement_l1':1,'source_byte':120,
+                        'native_prefix_stack_depth':c['depth'],
+                        'implicit_zero_operand_underflow':(c['depth']<2),
                         'unmodified_baseline':actual,
                         'counterfactual_executed_x':intervention,
                         'counterfactual_executed_z':inert,
