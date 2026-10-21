@@ -1766,3 +1766,54 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 36 --case-filter hash36-${{ matrix.index }} --seconds 185 --rss-kib 393216
+
+  canonical-fourmonth-r60-clock-08:
+    name: R60 真實 312 日固定 SHA-512 名次 08 Clock 有界 BigInt Oracle
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r60-clock]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 保留 200000 個 BigInt 上限的 clock 失效替代 FIFO
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 36 --case-filter hash36-08 --seconds 185 --rss-kib 393216
+
+  canonical-fourmonth-r60-clock-09:
+    name: R60 真實 312 日固定 SHA-512 名次 09 Clock 有界 BigInt Oracle
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r60-clock]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 保留 200000 個 BigInt 上限的 clock 失效替代 FIFO
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 36 --case-filter hash36-09 --seconds 185 --rss-kib 393216
+
+  canonical-fourmonth-r60-clock-10:
+    name: R60 真實 312 日固定 SHA-512 名次 10 Clock 有界 BigInt Oracle
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r60-clock]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 保留 200000 個 BigInt 上限的 clock 失效替代 FIFO
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 36 --case-filter hash36-10 --seconds 185 --rss-kib 393216

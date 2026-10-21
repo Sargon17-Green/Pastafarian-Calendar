@@ -87,10 +87,19 @@ if (!$pid) {
         # 37 窗口可能超過 200000 個「累積」狀態；仍只保留
         # 至多 200000 個即時 BigInt 快取項，超額時 FIFO 淘汰。
         # 其餘 38..40 窗口完全使用原本的嚴格 hard-fail 上限。
+        my $cache_options=$offset==37
+            ? {bounded_cache=>1,cache_limit=>200000}
+            : (($offset==34 || $offset==36)
+               ? {bounded_cache=>1,cache_limit=>200000} : undef);
+        # R59 有三個較深的第 36 窗排名，在 FIFO 下
+        # 185 秒 TIME_LIMIT；改用同樣 200000 上限的
+        # clock second-chance，保留較常用的合法狀態。
+        # 其餘分支及歷史 R53–R59 選項不變。
+        $cache_options->{cache_policy}='clock'
+            if $offset==36
+            && $case_filter =~ /\Ahash36-(?:08|09|10)\z/;
         my $counter=Pastafari::WeavingMemoOracle->new(
-            \@L,$offset==37 ? {bounded_cache=>1,cache_limit=>200000}
-                    : (($offset==34 || $offset==36)
-                        ? {bounded_cache=>1,cache_limit=>200000} : undef)
+            \@L,$cache_options
         );
         my $total=$counter->count_prefix([]);
         my $poly=countWeavingsPolynomial(\@L);

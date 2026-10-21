@@ -19,8 +19,13 @@ sub new ($class,$lengths,$options=undef) {
         if defined($options) && ref($options) ne 'HASH';
     $options //= {};
     die "Oracle 快取選項只能包含 bounded_cache、cache_limit\n"
-        if grep {$_ ne 'bounded_cache' && $_ ne 'cache_limit'} keys %$options;
+        if grep {$_ ne 'bounded_cache' && $_ ne 'cache_limit' && $_ ne 'cache_policy'} keys %$options;
     my $bounded=$options->{bounded_cache}//0;
+    my $policy=$options->{cache_policy}//'fifo';
+    die "快取策略只允許 fifo 或 clock\n"
+        if $policy ne 'fifo' && $policy ne 'clock';
+    die "clock 只能用於顯式有界測試快取\n"
+        if $policy eq 'clock' && !$bounded;
     die "bounded_cache 必須為 0 或 1\n"
         if "$bounded" ne '0' && "$bounded" ne '1';
     my $limit=$options->{cache_limit}//200000;
@@ -47,6 +52,7 @@ sub new ($class,$lengths,$options=undef) {
         counts=>{}, entries=>0, cache_hits=>0,
         bounded_cache=>$bounded,cache_limit=>$limit,
         cache_fifo=>[],evictions=>0,
+        cache_policy=>$policy,cache_recent=>{},second_chances=>0,
         visits=>0, peak_depth=>0, closed_forms=>0,
         choose=>{}, choose_queue=>[], choose_limit=>8192,
     },$class;
@@ -103,6 +109,9 @@ sub _count_state ($self,$remaining,$opened,$closed,$depth) {
     my $key=pack('C*',@$remaining,$opened,$closed);
     if (exists $self->{counts}{$key}) {
         $self->{cache_hits}++;
+        # second-chance 僅對 opt-in clock 生效；既有 FIFO 仍不變。
+        $self->{cache_recent}{$key}=1
+            if $self->{cache_policy} eq 'clock';
         return $self->{counts}{$key}->copy;
     }
     my $answer;
@@ -126,9 +135,19 @@ sub _count_state ($self,$remaining,$opened,$closed,$depth) {
     if ($self->{entries}>=$self->{cache_limit}) {
         die "獨立驗證狀態快取超過 200000 項\n"
             if !$self->{bounded_cache};
-        my $old=shift @{$self->{cache_fifo}};
-        die "FIFO 快取遺失待逐出的狀態\n"
-            if !defined($old) || !exists $self->{counts}{$old};
+        my $old;
+        while (1) {
+            $old=shift @{$self->{cache_fifo}};
+            die "有界快取遺失待逐出的狀態\n"
+                if !defined($old) || !exists $self->{counts}{$old};
+            if ($self->{cache_policy} eq 'clock'
+                && delete $self->{cache_recent}{$old}) {
+                push @{$self->{cache_fifo}},$old;
+                $self->{second_chances}++;
+                next;
+            }
+            last;
+        }
         delete $self->{counts}{$old};
         $self->{entries}--;
         $self->{evictions}++;
@@ -173,6 +192,7 @@ sub diagnostics ($self) {
     return {
         entries=>$self->{entries},cache_hits=>$self->{cache_hits},
         evictions=>$self->{evictions},cache_limit=>$self->{cache_limit},
+        cache_policy=>$self->{cache_policy},second_chances=>$self->{second_chances},
         visits=>$self->{visits},peak_depth=>$self->{peak_depth},
         closed_forms=>$self->{closed_forms},
         binomial_entries=>scalar(@{$self->{choose_queue}}),
