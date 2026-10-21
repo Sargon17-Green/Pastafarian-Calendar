@@ -95,7 +95,7 @@ fprintf('STAGE_55_ENDPOINT_FACTORIZATION_EXHAUSTIVE_PASS CASES=%d\n', ...
 % counted exactly without materializing an exponential DAG. Only the
 % closed-form all-open frontier is being benchmarked; this is NOT a
 % claim that the unsolved 4244-day full-year initial state is fast.
-for m = [4 8]
+for m = [4 8 94]
     suffix = repmat(m,1,45);
     elapsed = tic;
     value = pastafari.countWholeWeavingSuffixByEndpoints( ...

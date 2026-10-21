@@ -130,3 +130,27 @@ an unintegrated experiment. The complete native Stage 55 workflow still
 runs for production and full-stage test modifications and remains
 manually dispatchable; the heavy test has not been skipped or
 weakened.
+
+## Native factorized fast path — verified
+
+Commit `3275776b2c6025f1b8d46c62dd89593806e96477`, native MATLAB R2026a
+[run 39613757474](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39613757474)
+**PASS**:
+
+- `STAGE_55_ENDPOINT_FACTORIZATION_EXHAUSTIVE_PASS CASES=7`: legal suffix
+  completions compared with a separate recursive brute oracle.
+- `STAGE_55_ENDPOINT_ALL_OPEN_BENCH MONTHS=45 DAYS=180 SECONDS=0.024 DIGITS=212`.
+- `STAGE_55_ENDPOINT_ALL_OPEN_BENCH MONTHS=45 DAYS=360 SECONDS=0.062 DIGITS=503`.
+- The earlier 41 reachable-state exhaustive comparisons and 1555
+  lexicographic-rank checks remained PASS.
+
+Both speed measurements concern **already-opened** 45-month suffixes, not
+full-year year-structure selection, or the full heavy differential. No
+production replacement or Stage55 completion is implied.
+
+The next *experimental* benchmark now also runs the factorized all-open
+frontier on **45 months x 94 remaining days = 4,230 remaining days** (similar
+in size to the 4,244-day blocked year, but a different state frontier).
+Record actual native timing and output digits; do not infer its result from
+small-case benchmarks. All months were opened before the suffix in this
+test, and nothing is omitted from the resulting exact count.
