@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=44
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=45
+CURRENT_KIND=PATCH
 CURRENT_PATCH=22
 LAST_COMPLETED_STAGE=44
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..21. Stage44 mở DistinctCutletNameIndices, LegacyRotatedCutletNameRank và CutletNameIndexManager; count P(17,k), sauce(c,year.first_day), bowl5/seal22 đều chuẩn nhưng rank bị quay +1.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..21; Stage45 thêm CutletNameRankPatch gọi di sản xoay rank thật trước khi lấy rank chuẩn từ bowl5/seal22. CutletNameIndexManager mở hạng đúng và giữ historical_rank để kiểm toán.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_44_DISCOVERY_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_45_PATCH_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=693
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -1007,3 +1007,10 @@ Legacy blob 4b7f677ec376060c21724157fac704b2cc497fce;
 oracle test-only blob be1638f46b2190d617af0378a61b077bda10bf32.
 Stage44 đóng EXPECTED_RED; Stage45 PATCH22 chưa bắt đầu.
 Không sửa main, oracle hoặc PATCH01..21.
+
+Giai đoạn 45 PATCH22 giữ nguyên LegacyRotatedCutletNameRank nhưng
+thêm CutletNameRankPatch hỏi hạng chuẩn từ cùng bát 5/chốt 22;
+đường production lấy corrected_rank còn historical_rank được lưu.
+Không sửa oracle, các kỳ vọng normative Stage44, phép đếm P(17,k),
+thuật toán mở hạng từ điển hoặc nguồn ngày. Thêm 20 bài Stage45,
+mục tiêu 713 bài GREEN và khóa tên chuẩn PASS. Chỉ đóng sau CI.

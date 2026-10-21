@@ -8,6 +8,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage44Discovery22Test do
     CutletPartitionManager,
     DistinctCutletNameIndices,
     LegacyRotatedCutletNameRank,
+    CutletNameRankPatch,
     StageNotIntegratedError
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
@@ -74,13 +75,16 @@ defmodule PastafariCalendarElixirVietnamese.Stage44Discovery22Test do
     end
   end
 
-  test "rank sai lệch đúng một sau câu trả lời bát 5 chốt 22" do
+  test "production dùng rank chuẩn và giữ rank sai lệch lịch sử" do
     for delta <- [-19, 0, 19] do
       c = @foundation + delta
       report = CutletNameIndexManager.diagnose(c, c)
       stream = Calendar.answer_stream_spaghetti(c, report.structure_source_day, 5, 22)
       correct = AnswerStreamManager.choose_rank(stream, report.candidate_count)
-      assert report.rank == rem(correct, report.candidate_count) + 1
+      assert report.historical_rank == rem(correct, report.candidate_count) + 1
+      assert report.rank == correct
+      assert report.rank == CutletNameRankPatch.choose_rank(
+        c, report.structure_source_day, report.candidate_count)
       assert report.bowl == 5 and report.seal == 22
     end
   end
@@ -91,7 +95,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage44Discovery22Test do
     assert report.rank in 1..report.candidate_count
   end
 
-  test "mã production lấy trực tiếp mở hạng ở rank di sản" do
+  test "mã production mở hạng chuẩn và giữ di sản riêng" do
     c = @foundation + 31
     report = CutletNameIndexManager.diagnose(c, c)
     assert report.name_indices == DistinctCutletNameIndices.unrank(
@@ -143,10 +147,10 @@ defmodule PastafariCalendarElixirVietnamese.Stage44Discovery22Test do
     manager = File.read!(Path.join(dir, "cutlet_name_index_manager.ex"))
     assert legacy =~ "rem(chosen_rank, count) + 1"
     assert legacy =~ "Dispatcher.answer_stream(c, first_day, 5, 22)"
-    assert manager =~ "LegacyRotatedCutletNameRank.choose_rank("
+    assert manager =~ "CutletNameRankPatch.diagnose("
     assert manager =~ "DistinctCutletNameIndices.unrank("
     refute manager =~ "NormativeReference"
-    refute File.exists?(Path.join(dir, "cutlet_name_rank_patch.ex"))
+    assert File.exists?(Path.join(dir, "cutlet_name_rank_patch.ex"))
     assert_raise StageNotIntegratedError, fn ->
       Calendar.calendar_date_spaghetti(@foundation, @foundation)
     end

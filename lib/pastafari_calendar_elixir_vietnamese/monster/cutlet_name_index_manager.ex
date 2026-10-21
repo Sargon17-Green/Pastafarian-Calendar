@@ -1,13 +1,13 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.CutletNameIndexManager do
   @moduledoc """
-  DISCOVERY22 chọn dãy tên riêng cho các cốt-lết của năm.
-  Count P(17,k), nguồn ngày đầu năm, bát 5 và chốt 22 đúng;
-  di sản làm lệch hạng một bước trước khi mở hạng từ điển.
+  PATCH22 chọn đúng rank từ bát 5/chốt 22 sau khi gọi
+  thật di sản đã xoay rank một bước để ghi nhận lịch sử.
+  Count P(17,k), mở hạng từ điển và nguồn ngày không đổi.
   Chưa vật chất hóa cốt-lết hoặc kết quả lịch cuối.
   """
   alias PastafariCalendarElixirVietnamese.Monster.{
     CutletPartitionManager, DistinctCutletNameIndices,
-    LegacyRotatedCutletNameRank
+    CutletNameRankPatch
   }
 
   @names 17
@@ -17,15 +17,17 @@ defmodule PastafariCalendarElixirVietnamese.Monster.CutletNameIndexManager do
     parent = CutletPartitionManager.diagnose(c, t)
     k = parent.cutlet_count
     total = DistinctCutletNameIndices.count(@names, k)
-    rank = LegacyRotatedCutletNameRank.choose_rank(
-      c, parent.structure_source_day, total)
+    seed = CutletNameRankPatch.diagnose(c, parent.structure_source_day, total)
+    rank = seed.corrected_rank
     names = DistinctCutletNameIndices.unrank(@names, k, rank)
     %{year: parent.year, gate_state: parent.gate_state,
       calculation_day: c, target_day: t,
       structure_source_day: parent.structure_source_day,
       cutlet_partition: parent.partition, cutlet_count: k,
-      candidate_count: total, rank: rank, name_indices: names,
-      name_capacity: @names, bowl: 5, seal: 22}
+      candidate_count: total, rank: rank,
+      historical_rank: seed.historical_rank,
+      rank_was_corrected: seed.changed,
+      name_indices: names, name_capacity: @names, bowl: 5, seal: 22}
   end
 
   def diagnose(_, _),
