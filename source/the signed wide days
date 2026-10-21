@@ -99,13 +99,18 @@ To add opposite-signed day magnitudes given a wide signed day and another wide s
   If the wide signed day's absolute quantity is numerically smaller than the other's absolute quantity,
     subtract the wide signed day's absolute quantity from the other's absolute quantity; exit.
   If the other's absolute quantity is numerically smaller than the wide signed day's absolute quantity,
-    put the wide signed day's absolute quantity into the signed day magnitude difference;
-    subtract the other's absolute quantity from the signed day magnitude difference;
-    put the signed day magnitude difference into the other's absolute quantity;
-    put the wide signed day's polarity into the other's polarity; exit.
+    take the larger first signed magnitude given the wide signed day and the other; exit.
   \ Neither unsigned magnitude is smaller: both are equal, so the sum is zero.
   Put "0" into the other's absolute quantity.
   Put 0 into the other's polarity.
+
+\ For CAL-4018, only the first statement after a multiline If is guarded.
+\ Perform the four-step magnitude/sign update in a separate procedure.
+To take the larger first signed magnitude given a wide signed day and another wide signed day:
+  Put the wide signed day's absolute quantity into the signed day magnitude difference.
+  Subtract the other's absolute quantity from the signed day magnitude difference.
+  Put the signed day magnitude difference into the other's absolute quantity.
+  Put the wide signed day's polarity into the other's polarity.
 
 \ Subtracting x from y is adding -x to y without modifying x.
 To subtract a wide signed day from another wide signed day:
