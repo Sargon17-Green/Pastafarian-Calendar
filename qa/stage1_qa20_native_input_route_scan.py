@@ -4,7 +4,10 @@
 Never redirects an IP, edits Funge-space, or computes an expected calendar result in Python.
 """
 from __future__ import print_function
-import gzip, hashlib, json, os, subprocess, sys
+import gzip, hashlib, json, os, subprocess, sys, StringIO
+from funge.program import Program
+from funge.languages.funge98 import Befunge98
+from funge.platform import BufferedPlatform
 import stage1_native_live_pair_matrix as native
 
 SOURCE='src/interleaved_work_counts.b98'
@@ -77,8 +80,19 @@ def targets_from_qa18(path,source):
     need(len(set((x,y) for x,y,_ in keys))==21,'duplicate candidate')
     return keys
 
+def create_program(source, raw, label):
+    sin=StringIO.StringIO(raw)
+    sout=StringIO.StringIO()
+    platform=BufferedPlatform([],{},stdin=sin,stdout=sout)
+    program=Program(Befunge98,platform=platform)
+    program.load_code(source)
+    program.create_ip()
+    need(len(program.ips)==1,'Native source requires one original IP')
+    return {'program':program,'stdin':sin,'stdout':sout,
+            'point':program.ips[0].position.__class__, 'steps':0, 'label':label}
+
 def sample(source,label,raw,valid,targets,folder):
-    p=native.make(source,raw)
+    p=create_program(source,raw,label)
     nearest={str(x)+','+str(y):[10**10,None] for x,y,_ in targets}
     actual={str(x)+','+str(y):[] for x,y,_ in targets}
     fpath=os.path.join(folder,label+'.steps.gz')
