@@ -3,7 +3,7 @@ module tb_stage1;
     import pcal_stage1_oracle_pkg::*;
     logic clk = 1'b0;
     always #5 clk = ~clk;
-    logic reset_n = 1'b0;
+    logic reset_n = 1'b1;
     logic req_valid = 1'b0;
     logic req_ready;
     logic signed [63:0] calculation_day = '0, target_day = '0;
@@ -67,6 +67,7 @@ module tb_stage1;
 
     initial begin
         #1;
+        reset_n = 1'b0;
         if (ORACLE_M !== ((256'sd1 << 127) - 256'sd1))
             $fatal(1, "ORACLE_MODULUS");
         if (oracle_save(256'sd0) !== ORACLE_M)
