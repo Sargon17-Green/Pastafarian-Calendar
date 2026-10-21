@@ -7,6 +7,8 @@ on:
     paths:
       - 'src/+pastafari/countWholeWeavingSuffixByEndpoints.m'
       - 'tests/run_stage55_endpoint_counter_tests.m'
+      - 'src/+pastafari/unrankWholeWeavingByEndpoints.m'
+      - 'tests/run_stage55_endpoint_unrank_tests.m'
       - '.github/workflows/matlab-endpoint-counter-native.yml'
   workflow_dispatch:
 
@@ -17,7 +19,7 @@ jobs:
   exact-endpoint-experiment:
     name: MATLAB R2026a / exhaustive suffix oracle
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - name: Checkout exact commit
         uses: actions/checkout@v4
@@ -28,4 +30,4 @@ jobs:
       - name: Compare every reachable small suffix
         uses: matlab-actions/run-command@v3
         with:
-          command: addpath('tests'); run_stage55_endpoint_counter_tests
+          command: addpath('tests'); run_stage55_endpoint_counter_tests; run_stage55_endpoint_unrank_tests
