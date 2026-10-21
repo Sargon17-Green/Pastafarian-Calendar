@@ -61,6 +61,15 @@ To report signed subtraction diagnostics:
   Append the string to the check report.
   Append "; magnitude=" to the check report.
   Append the second signed day fixture's absolute quantity to the check report.
+  Append "; input_polarity=" to the check report.
+  Convert the first signed day fixture's polarity to a string.
+  Append the string to the check report.
+  Append "; negated_polarity=" to the check report.
+  Convert the signed day temporary value's polarity to a string.
+  Append the string to the check report.
+  Append "; comparison_polarity=" to the check report.
+  Convert the signed day comparison snapshot's polarity to a string.
+  Append the string to the check report.
 
 To check signed wide day subtractions:
   Put "1000000000000000000000000000000000000000000000000" into the sample signed magnitude.
