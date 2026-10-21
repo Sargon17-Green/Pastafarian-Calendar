@@ -62,12 +62,23 @@ To report signed subtraction diagnostics:
   Append "; magnitude=" to the check report.
   Append the second signed day fixture's absolute quantity to the check report.
   Append "; input_polarity=" to the check report.
+  Report subtraction input polarity.
+  Append "; negated_polarity=" to the check report.
+  Report subtraction temporary polarity.
+  Append "; comparison_polarity=" to the check report.
+  Report subtraction comparison polarity.
+
+\ CAL-4018 declares one implicit local 'string' for each Convert.
+\ One conversion per procedure avoids duplicate local declarations.
+To report subtraction input polarity:
   Convert the first signed day fixture's polarity to a string.
   Append the string to the check report.
-  Append "; negated_polarity=" to the check report.
+
+To report subtraction temporary polarity:
   Convert the signed day temporary value's polarity to a string.
   Append the string to the check report.
-  Append "; comparison_polarity=" to the check report.
+
+To report subtraction comparison polarity:
   Convert the signed day comparison snapshot's polarity to a string.
   Append the string to the check report.
 
