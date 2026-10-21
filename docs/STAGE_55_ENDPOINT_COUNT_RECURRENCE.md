@@ -57,13 +57,22 @@ on each of 4244 positions is a separate optimization problem.
   states for every length vector with 1..3 months and each length 1..3:
   PASS. Python is a design check, **not** MATLAB native evidence.
 - MATLAB experimental implementation:
-  \`src/+pastafari/countWholeWeavingSuffixByEndpoints.m\`.
+  `src/+pastafari/countWholeWeavingSuffixByEndpoints.m`.
 - MATLAB tests:
-  \`tests/run_stage55_endpoint_counter_tests.m\`, checking exact totals,
+  `tests/run_stage55_endpoint_counter_tests.m`, checking exact totals,
   invalid input, and reachable suffixes against a separate exhaustive
-  recursive test oracle. A quick native CI job must pass before using
-  this to change production.
-- Existing \`WholeMonthWeavingFamily\` remains unchanged and continues
+  recursive test oracle. Native MATLAB R2026a Update 5 CI run
+  [39603046056](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39603046056)
+  **PASS** at commit `801bc516dc517724fb912405e7e610b304a234a6`.
+  Verified exact totals in 7 cases, **all 41 reachable small suffix states**
+  in three additional families, and strict invalid-input handling.
+  Observed markers: `STAGE_55_ENDPOINT_TOTALS_PASS CASES=7`,
+  `STAGE_55_ENDPOINT_SUFFIX_EXHAUSTIVE_PASS STATES=41`,
+  `STAGE_55_ENDPOINT_VALIDATION_PASS`,
+  `STAGE_55_ENDPOINT_EXPERIMENTAL_PASS`.
+  These are genuine native PASS results for the experimental *counter*,
+  not for big-input runtime or production rank/unrank.
+- Existing `WholeMonthWeavingFamily` remains unchanged and continues
   to define the published semantics.
 
 Do not mark Stage 55 or the heavy differential PASS until both the
