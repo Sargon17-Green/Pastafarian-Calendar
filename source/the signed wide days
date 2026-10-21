@@ -113,9 +113,17 @@ To take the larger first signed magnitude given a wide signed day and another wi
   Put the wide signed day's polarity into the other's polarity.
 
 \ Subtracting x from y is adding -x to y without modifying x.
+\ Explicit polarity assignments avoid relying on a signed multiplication
+\ that v128's native trace did not demonstrate was applied to this field.
+To reverse temporary signed polarity:
+  If the signed day temporary value's polarity is greater than 0,
+    put -1 into the signed day temporary value's polarity; exit.
+  If the signed day temporary value's polarity is less than 0,
+    put 1 into the signed day temporary value's polarity.
+
 To subtract a wide signed day from another wide signed day:
   Put the wide signed day into the signed day temporary value.
-  Multiply -1 by the signed day temporary value's polarity.
+  Reverse temporary signed polarity.
   Add the signed day temporary value to the other.
 
 \ Convert the signed day into plain decimal text for display/logging.
