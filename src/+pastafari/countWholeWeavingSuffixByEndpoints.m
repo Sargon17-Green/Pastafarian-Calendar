@@ -50,6 +50,37 @@ if isempty(suffix)
     return
 end
 
+% Exact factorization whenever ALL remaining months have already opened.
+% Only last occurrences still need ordering. Insert each new largest
+% month's copies into a shorter legal suffix; its final copy must be
+% last, and its other m-1 copies can occupy any m-1 of the preceding
+% (N+m-1) positions. This yields C(N+m-1,m-1) independent choices.
+% No possible weaving is skipped or approximated.
+if openedUpTo == K
+    total = pastafari.BigInt(1);
+    consumed = suffix(1);
+    for j = 2:numel(suffix)
+        m = suffix(j);
+        total = total * exactBinomial(consumed+m-1, m-1);
+        consumed = consumed + m;
+    end
+    return
+end
+
+% For exactly two remaining months the endpoint recurrence collapses
+% to a binomial count. If both are unopened, first A and last B are
+% forced. If B has already opened, only last B is forced.
+if numel(suffix) == 2
+    a = suffix(1);
+    b = suffix(2);
+    if openedUpTo == closedUpTo
+        total = exactBinomial(a+b-2, a-1);
+    else
+        total = exactBinomial(a+b-1, a);
+    end
+    return
+end
+
 % The first remaining month has exactly one suffix word, consisting only
 % of its own copies. Its first/last positions are 1 and m.
 N = suffix(1);
@@ -136,6 +167,25 @@ for p = 1:N
         if ~isempty(dp{p,q})
             total = total + dp{p,q};
         end
+    end
+end
+end
+
+function value = exactBinomial(n, k)
+% Exact integer C(n,k) using integer-only binomial recurrences.
+% Never convert intermediate counts to double.
+if k < 0 || k > n || n < 0 || n > flintmax
+    error('Pastafari:EndpointCount:BinomialDomain', ...
+        'Invalid exact binomial parameters.');
+end
+k = min(k,n-k);
+value = pastafari.BigInt(1);
+for i = 1:k
+    numerator = value * pastafari.BigInt(n-k+i);
+    [value, remainder] = numerator.floorDivMod(pastafari.BigInt(i));
+    if ~remainder.iszero()
+        error('Pastafari:EndpointCount:BinomialNonintegral', ...
+            'Exact binomial recurrence had nonzero remainder.');
     end
 end
 end
