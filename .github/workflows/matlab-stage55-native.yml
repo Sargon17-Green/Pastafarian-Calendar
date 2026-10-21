@@ -24,6 +24,8 @@ jobs:
     name: MATLAB R2026a / complete Stage 55 audit
     runs-on: ubuntu-24.04
     timeout-minutes: 180
+    env:
+      PASTAFARI_STAGE54_DIAGNOSTICS: '1'
     steps:
       - name: Check out exact branch commit
         uses: actions/checkout@v4

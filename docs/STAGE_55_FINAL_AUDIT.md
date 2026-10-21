@@ -78,3 +78,9 @@ Sukces workflow nie aktualizuje automatycznie `LAST_COMPLETED_STAGE`. Zamknięci
 ## Code Analyzer preflight (MATLAB native)
 
 Before Stage 54 heavy tests, Stage 55 runs `run_stage55_code_analysis` over all `src/` and `tests/` MATLAB files (including `tests/oracle/`). It uses MathWorks `codeIssues` with factory settings, requires at least 150 analyzed files, and fails on any `Severity=error` diagnostic. All reported diagnostics are included in the Stage 55 failure report and the artifact log, up to the first 100 errors. This is a syntax/static-analysis gate, not a substitute for native semantic and differential verification.
+
+## Diagnostyka czasu wykonania (bez pomijania obliczeń)
+
+Native run `39494750458` wykonał pełne regresje 1–53 i statyczny test Etapu 54, po czym hostowany runner otrzymał sygnał shutdown podczas ciężkiej produkcyjno-oracle'owej kontroli. Nie ma w tym wyniku PASS dla differential ani potwierdzonego błędu obliczeń.
+
+Kolejne przebiegi pod `PASTAFARI_STAGE54_DIAGNOSTICS=1` emitują znaczniki przed i po wywołaniu produkcji i testowego oracle, a produkcja raportuje liczbę rzeczywiście obliczonych odstępów bram co 64 kroki i upływ czasu. Licznik jest tylko obserwacyjny. Nie zmieniono źródeł danych, formuł, kolejności ani zakresu testów. Jeżeli bieg zostanie przerwany, log GitHub Actions pokaże ostatni ukończony fragment bez fałszywego PASS.

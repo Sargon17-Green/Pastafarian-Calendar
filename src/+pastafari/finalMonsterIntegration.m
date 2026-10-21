@@ -36,11 +36,24 @@ ctx.branchTrace{end + 1} = 'STAGE_54_FINAL_MONSTER_INTEGRATION_BEGIN';
 ctx.metrics = pastafari.MetricsShell.bump( ...
     ctx.metrics, 'stage54.finalMonsterIntegration.calls');
 
+% Test-only telemetry. This never changes dates, candidate selection,
+% branchTrace, ctx fields or gate formulas.
+traceEnabled = strcmp(getenv('PASTAFARI_STAGE54_DIAGNOSTICS'), '1');
+traceGateCount = 0;
+traceClock = tic;
+if traceEnabled
+    fprintf('STAGE_54_INTEGRATION_ENTRY\n');
+end
+
 % PATCH 01 nie jest osobną częścią sauce API, dlatego wykonujemy jego
 % fizyczną bliznę jawnie również na finalnej trasie.
 [ctx, ~] = pastafari.SaveCompatibilityRoute.call(ctx, cDay); %#ok<ASGLU>
 
 [anchorYear, years] = buildYearChainContainingTarget();
+if traceEnabled
+    fprintf('STAGE_54_YEAR_CHAIN_READY GATES=%d SECONDS=%.3f\n', ...
+        traceGateCount, toc(traceClock));
+end
 
 % Zachowaj obie historyczne warstwy przypisania targetu do roku.
 [ctx, walkedYear] = pastafari.TargetYearCompatibilityRoute.call( ...
@@ -62,6 +75,9 @@ end
 producer = @() buildYearStructure(year);
 [ctx, structure] = pastafari.YearStructureCacheCompatibilityRoute.call( ...
     ctx, year, cDay, producer);
+if traceEnabled
+    fprintf('STAGE_54_YEAR_STRUCTURE_READY SECONDS=%.3f\n', toc(traceClock));
+end
 
 [cutlet, cutletId] = cutletAtTarget(structure.cutlets, tDay);
 dayInCutlet = tDay - cutlet.firstDay + pastafari.BigInt(1);
@@ -88,6 +104,10 @@ ctx.status = 'GREEN_CANDIDATE_NATIVE_RERUN_DEFERRED';
 ctx.branchTrace{end + 1} = 'STAGE_54_FINAL_MONSTER_INTEGRATION_END';
 ctx.metrics = pastafari.MetricsShell.bump( ...
     ctx.metrics, 'stage54.finalMonsterIntegration.completed');
+if traceEnabled
+    fprintf('STAGE_54_INTEGRATION_RESULT_READY GATES=%d SECONDS=%.3f\n', ...
+        traceGateCount, toc(traceClock));
+end
 ctx.diagnostics{end + 1} = ...
     ['Etap 54 połączył wszystkie 26 par defect/patch w jedną ', ...
      'trasę zwracającą rok, kotlet, dzień kotleta, miesiąc i dzień miesiąca.'];
@@ -382,6 +402,11 @@ ctx.diagnostics{end + 1} = ...
                 [ctx, gap] = pastafari.GateGapCompatibilityRoute.call(ctx, n);
                 gateMap(char(n)) = gateDay(n - pastafari.BigInt(1)) + gap;
                 maxKnownGate = n;
+                traceGateCount = traceGateCount + 1;
+                if traceEnabled && mod(traceGateCount, 64) == 0
+                    fprintf('STAGE_54_GATE_PROGRESS COUNT=%d INDEX=%s SECONDS=%.3f\n', ...
+                        traceGateCount, char(n), toc(traceClock));
+                end
                 n = n + pastafari.BigInt(1);
             end
         elseif index < minKnownGate
@@ -390,6 +415,11 @@ ctx.diagnostics{end + 1} = ...
                 [ctx, gap] = pastafari.GateGapCompatibilityRoute.call(ctx, n);
                 gateMap(char(n)) = gateDay(n + pastafari.BigInt(1)) - gap;
                 minKnownGate = n;
+                traceGateCount = traceGateCount + 1;
+                if traceEnabled && mod(traceGateCount, 64) == 0
+                    fprintf('STAGE_54_GATE_PROGRESS COUNT=%d INDEX=%s SECONDS=%.3f\n', ...
+                        traceGateCount, char(n), toc(traceClock));
+                end
                 n = n - pastafari.BigInt(1);
             end
         end

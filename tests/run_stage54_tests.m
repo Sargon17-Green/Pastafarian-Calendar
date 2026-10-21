@@ -46,9 +46,14 @@ normative_oracle('resetGates');
 c = pastafari.BigInt('-15055671');
 t = c;
 ctx = pastafari.MonsterContext(c, t);
+fprintf('STAGE_54_PRODUCTION_DIFFERENTIAL_BEGIN\n');
 [ctx, actual] = pastafari.finalMonsterIntegration(ctx, c, t);
+fprintf('STAGE_54_PRODUCTION_DIFFERENTIAL_RETURNED\n');
+fprintf('STAGE_54_ORACLE_DIFFERENTIAL_BEGIN\n');
 expected = normative_oracle('calendar', c, t);
+fprintf('STAGE_54_ORACLE_DIFFERENTIAL_RETURNED\n');
 assertCalendarEqual(actual, expected);
+fprintf('STAGE_54_ORACLE_DIFFERENTIAL_EQUAL\n');
 
 for defect = 1:26
     discoveryPrefix = sprintf('DISCOVERY_%02d_', defect);
