@@ -73,7 +73,8 @@ for i = m:-1:1
             numerator = tailNum * pastafari.BigInt(r(i)-1);
             denominator = tailDen * pastafari.BigInt(S(i)-1);
         end
-        [block,rem] = (F*numerator).floorDivMod(denominator);
+        weighted = F*numerator;
+        [block,rem] = weighted.floorDivMod(denominator);
         if ~rem.iszero() || block < pastafari.BigInt(1)
             error('Pastafari:AllOpen:Fraction', ...
                 'The exact child count was not a positive integer.');
