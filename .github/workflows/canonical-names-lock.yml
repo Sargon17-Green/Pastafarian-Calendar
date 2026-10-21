@@ -80,3 +80,5 @@ jobs:
         run: php -d memory_limit=512M tests/stage17_patch08_tests.php
       - name: Penemuan 09 — tuangan tersalah baca ID tetap
         run: php -d memory_limit=512M tests/verify_stage18_discovery09.php
+      - name: Tampalan 09 — alias posisi dan bukti legacy 720 susunan
+        run: php -d memory_limit=512M tests/stage19_patch09_tests.php

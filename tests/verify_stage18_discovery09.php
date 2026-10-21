@@ -25,14 +25,18 @@ $valid=$valid
     &&str_contains($legacy,'$oldBowls[3]')
     &&str_contains($factory,'function initialBowls(')
     &&str_contains($kernel,"dispatch('FIXED_POSITION_POURS_LEGACY', ".'$context)')
-    &&str_contains($kernel,"dispatch('BOWL_PERMUTATION_PATCH_08', ".'$context)');
+    &&str_contains($kernel,"dispatch('BOWL_PERMUTATION_PATCH_08', ".'$context)')
+    &&str_contains($kernel,"dispatch('POURS_ALIAS_PATCH_09', ".'$context)');
 foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS)) as $file){
     if(strtolower($file->getExtension())!=='php')continue;
     $body=(string)file_get_contents($file->getPathname());
     if(str_contains($body,'NormativeMath')
-       ||str_contains($body,'NormativeSauce')
-       ||str_contains($body,'function patchedPours(')
-       ||str_contains($body,'function installOrderAliases(')){
+       ||str_contains($body,'NormativeSauce')){
+        $valid=false;
+    }
+    if ((str_contains($body,'function patchedPours(')
+       || str_contains($body,'function installOrderAliases('))
+       && $file->getFilename() !== 'PoursAliasPatch09.php') {
         $valid=false;
     }
 }

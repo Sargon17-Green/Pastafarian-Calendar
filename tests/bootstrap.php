@@ -24,6 +24,7 @@ require_once $root . '/src/Patches/HiddenNearnessPatch05.php';
 require_once $root . '/src/Patches/PriorAccessPatch06.php';
 require_once $root . '/src/Patches/GrindTablePatch07.php';
 require_once $root . '/src/Patches/PermutationPatch08.php';
+require_once $root . '/src/Patches/PoursAliasPatch09.php';
 require_once $root . '/src/BootstrapKernel.php';
 require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';

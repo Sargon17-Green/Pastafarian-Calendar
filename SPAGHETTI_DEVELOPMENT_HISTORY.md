@@ -452,3 +452,22 @@ LULUS kontrak merah 09; tuangan menggunakan identiti tetap bukan posisi
 ```
 
 Tahap ini diterima sebagai `EXPECTED_RED` yang disahkan, bukan kegagalan CI; seluruh ujian Stage1–17 dan ujian nama, sintaks, serta fixture lulus. Stage19 belum dimulakan.
+
+
+## Stage 19 — PATCH 09: Alias posisi bagi mangkuk yang diterima oleh legacy
+
+### Rawatan tanpa memadam fungsi salah
+
+Pada Stage18, `LegacyFixedPositionPours::legacyPours` membaca `oldBowls[1]`, `oldBowls[2]`, `oldBowls[3]` untuk tiga tuangan pertama, walaupun permutasi `order` mungkin meletakkan identiti berbeza di ketiga-tiga posisi. Stage19 tidak mengubah fungsi salah itu. `PoursAliasPatch09` membina enam alias 1..6 daripada `order[position-1]`, menyediakan paparan `view[position]=oldBowls[bowlAlias[position]]` dengan `bowlByLegacyPosition`, dan menyerahkan paparan itu kepada fungsi legacy asal.
+
+### Pertumbuhan penghala dan konteks
+
+`BootstrapKernel::poursAt` mendaftarkan `POURS_ALIAS_PATCH_09` yang membina titisan visible, permutasi PATCH08, mangkuk asal `LegacyBowlFactory` dan batu PATCH04 dalam satu konteks. `legacyPoursAt` masih menghala ke `FIXED_POSITION_POURS_LEGACY`, dan keputusan itu kekal salah apabila posisi berbeza daripada ID. Tiada oracle dalam produksi, tiada penulisan semula nilai mangkuk, tiada cache berkongsi.
+
+### Gerbang pengesahan Stage19
+
+Untuk semua 720 order leksikografik, ketiga-tiga tuangan mesti mematuhi rumus normatif tepat; alias dikira juga bagi posisi ke-4 hingga ke-6 tetapi tuangan pada posisi tersebut kekal sifar. Oleh itu pemeriksaan menghasilkan 2,160 tuangan dan 4,320 lookup alias, sambil membuktikan 1,800 kes legacy salah dan 360 padanan apabila ID sama dengan posisi. Empat kes produksi sebenar disemak, dengan 24 nilai tuangan dan kesetaraan oracle, 6 input tidak sah ditolak. Pengesah `EXPECTED_RED` Stage18 masih mesti hijau, setelah membuktikan kegagalan sejarah langsung. Seluruh regresi Stage1–18 masih diwajibkan.
+
+### Sempadan tahap
+
+Tiada in-place bowl mutation atau snapshot pending dilakukan di sini. Stage20 — DISCOVERY10 akan memperkenalkan masalah itu, dan Stage21 — PATCH10 akan memperkenalkan vaultOld dan pending. Tiada perubahan pada main, nilai rujukan, katalog nama atau fixture.

@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 18 (DISCOVERY 09)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 19 (PATCH 09)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -266,3 +266,19 @@ php -d memory_limit=512M tests/verify_stage18_discovery09.php
 Ujian sejarah terus keluar `EXPECTED_RED`, berdasarkan semua 720 permutasi: tepat 1,800 perbandingan salah dan 360 padanan bagi tiga posisi tuangan, ditambah empat kes keluaran sebenar dan pemeriksaan mangkuk asas. Pengesah khas hanya hijau apabila seluruh corak itu terbukti tanpa ralat tambahan. Semua regresi Stage1–17 kekal hijau.
 
 Pemetaan `bowlAlias[position] = order[position]` ialah tugas Stage19 PATCH09; tiada alias ditambah awal atau tuangan kemas kini mangkuk dilaksanakan pada Stage18.
+
+
+## Stage 19 — PATCH 09: Alias posisi bagi tiga tuangan mangkuk
+
+`PoursAliasPatch09::installOrderAliases` menghasilkan pemetaan `bowlAlias[position]=order[position]` (posisi 1..6, senarai PHP order berindeks 0..5), tanpa menukar identiti atau nilai mangkuk yang sebenar. `bowlByLegacyPosition` membaca `oldBowls[bowlAlias[position]]`; ketiga-tiga bacaan tuangan melalui paparan posisi sementara yang dibina daripada enam identiti sebenar.
+
+`patchedPours` kemudian **memanggil `LegacyFixedPositionPours::legacyPours` secara langsung** pada paparan ini. Oleh itu kaedah legacy yang masih membaca posisi tetap 1,2,3 tidak dibuang dan tidak diubah; pembetulan berlaku sepenuhnya pada alias. `BootstrapKernel::poursAt(c,t,i)` menggunakan penghala `POURS_ALIAS_PATCH_09`, sedangkan `legacyPoursAt` dan `FIXED_POSITION_POURS_LEGACY` kekal membuktikan penemuan Stage18.
+
+```text
+php -d memory_limit=512M tests/verify_stage18_discovery09.php
+php -d memory_limit=512M tests/stage19_patch09_tests.php
+```
+
+Ujian Stage19 mengesahkan semua 720 permutasi dan ketiga-tiga posisi tuangan (2,160 hasil normatif), 4,320 bacaan alias, 1,800 kes legacy yang salah dan 360 padanan legacy yang dijangka. Empat tuangan produksi sebenar diperiksa terhadap oracle PHP dan determinisme instance. Enam input tidak sah ditolak. Semua regresi Stage1–18 kekal diwajibkan.
+
+Stage20 ialah DISCOVERY10 mengenai pencemaran mangkuk akibat penulisan in-place. **Tiada vaultOld/pending atau mutasi mangkuk dilakukan pada Stage19.**

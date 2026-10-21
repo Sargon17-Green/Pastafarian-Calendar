@@ -316,6 +316,42 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'legacy.fixed.pours');
             return ['drop' => $drop, 'order' => $order, 'oldBowls' => $bowls, 'pours' => $pours];
         });
+        $this->dispatcher->register('POURS_ALIAS_PATCH_09', function(BootstrapContext $context): array {
+            $c = $context->calculationDay;
+            $t = $context->targetDay;
+            $i = $context->semanticState['visibleIndex'] ?? null;
+            if (!is_int($i) || $i < 1 || $i > 46) {
+                throw new \InvalidArgumentException('PATCHED_POUR_INDEX_RANGE');
+            }
+            $visible = $this->visibleDrops($c, $t);
+            $drop = $visible[$i];
+            $order = $this->bowlOrder($drop);
+            $action = $this->dayCount($c);
+            $target = $this->dayCount($t);
+            $counts = [
+                'action' => $action,
+                'target' => $target,
+                'distance' => $this->distance($c, $t),
+                'connection' => $action->add($target),
+                'direction' => $t < $c ? 1 : ($t === $c ? 2 : 3),
+            ];
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $factory = new \Pastafari\Stage01\Legacy\LegacyBowlFactory($save);
+            $oldBowls = $factory->initialBowls($counts);
+            $patch = new \Pastafari\Stage01\Patches\PoursAliasPatch09(
+                new \Pastafari\Stage01\Legacy\LegacyFixedPositionPours($save)
+            );
+            $aliases = $patch->installOrderAliases($order);
+            $pours = $patch->patchedPours($i, $drop, $this->stones()[$i], $oldBowls, $order);
+            $context->semanticState['bowlAliases'] = $aliases;
+            $context->semanticState['patchedPours'] = $pours;
+            $context->status = 'POURS_ALIAS_PATCH_09_RETURNED';
+            $this->metrics->bump($context, 'pours.alias.patch09');
+            return ['drop' => $drop, 'order' => $order, 'oldBowls' => $oldBowls,
+                'aliases' => $aliases, 'pours' => $pours];
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -517,6 +553,23 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('FIXED_POSITION_POURS_LEGACY', $context)
+        );
+    }
+
+    /**
+     * Tuangan tiga posisi yang benar melalui alias, sementara pembaca
+     * fixed-ID asal kekal tersedia sebagai legacyPoursAt.
+     *
+     * @return array{drop:BigInt,order:list<int>,oldBowls:array<int,BigInt>,aliases:array<int,int>,pours:array<int,BigInt>}
+     */
+    public function poursAt(int $calculationDay, int $targetDay, int $i): array
+    {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'POURS_ALIAS_PATCH_09';
+        $context->semanticState['visibleIndex'] = $i;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('POURS_ALIAS_PATCH_09', $context)
         );
     }
 
