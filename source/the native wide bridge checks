@@ -10,6 +10,36 @@
 \ The comparison uses the global example and wide calendar example;
 \ its old 'a native calendar question' parameter was never referenced.
 \ Calling it repeatedly declared the same unused local six times.
+\ Diagnostic-only failure witness for the first native/wide count mismatch.
+\ This does not alter expected counts, arithmetic, or the passing path.
+\ The CAL-4018 implicit local 'string' is used at most once per routine.
+The comparison wide day text is a string.
+
+To report native and wide calculation count discrepancy:
+  Put "Native/wide calculation count discrepancy; native_count=" into the check report.
+  Convert the example's calculation count to a string.
+  Append the string to the check report.
+  Append "; wide_count=" to the check report.
+  Append the wide calendar example's calculation count to the check report.
+  Append "; native_c=" to the check report.
+  Report native calculation coordinate.
+  Append "; wide_c=" to the check report.
+  Spell the wide calendar example's calculation day into the comparison wide day text.
+  Append the comparison wide day text to the check report.
+  Append "; native_t=" to the check report.
+  Report native requested coordinate.
+  Append "; wide_t=" to the check report.
+  Spell the wide calendar example's requested day into the comparison wide day text.
+  Append the comparison wide day text to the check report.
+
+To report native calculation coordinate:
+  Convert the example's calculation day to a string.
+  Append the string to the check report.
+
+To report native requested coordinate:
+  Convert the example's requested day to a string.
+  Append the string to the check report.
+
 To compare native and wide counters:
   Answer the example.
   Convert the example's calculation day into the converted signed day result.
@@ -23,7 +53,7 @@ To compare native and wide counters:
   Answer the wide calendar example.
   Convert the example's calculation count to a string.
   If the wide calendar example's calculation count is not the string,
-    put "Wide and native calculation counts disagree." into the check report; exit.
+    report native and wide calculation count discrepancy; exit.
   Convert the example's requested count to the string.
   If the wide calendar example's requested count is not the string,
     put "Wide and native requested counts disagree." into the check report; exit.
