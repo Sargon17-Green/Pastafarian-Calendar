@@ -207,9 +207,29 @@ their exact sum and reporting real duration.
 The first native attempt, run `39622067568`, was blocked by a MATLAB
 parser error at the parenthesized expression method call, not a proven
 counterexample to the identity. The source was fixed to assign the
-weighted numerator before invoking `floorDivMod`. **Do not treat
-this correction as native PASS** until its separate CI run reaches the
-corresponding exact-block and large-frontier PASS markers.
+weighted numerator before invoking `floorDivMod`. The repaired
+experimental code subsequently **PASSED** on MATLAB R2026a in
+[run 39622404296](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39622404296)
+at commit `ebe1d9a9f7e1b6dd16788e7c071cafa8a1aee6c8`.
+
+Native evidence:
+- `STAGE_55_ALL_OPEN_CHILD_BLOCKS_EXACT_PASS CASES=360 CHILDREN=972`;
+  every legal next-letter block compared against independent exact
+  suffix-count computations on all small frontiers.
+- `STAGE_55_ALL_OPEN_CHILD_BLOCKS_BENCH MONTHS=45 DAYS=4230 SECONDS=2.150 DIGITS=6877`.
+  The **entire next-choice block partition** of the 4,230-day all-open
+  frontier was calculated in 2.150 seconds in this particular runner.
+  The exact block sum was checked against the parent count.
+- `STAGE_55_ALL_OPEN_CHILD_BLOCKS_PASS`,
+  `STAGE_55_ENDPOINT_UNRANK_BRUTE_PASS CASES=12 RANKS=1555`,
+  `STAGE_55_ENDPOINT_UNRANK_OLD_DAG_DIFFERENTIAL_PASS`,
+  `STAGE_55_ENDPOINT_UNRANK_EXPERIMENTAL_PASS`.
+
+The 4,230-day count itself took 1.529 seconds in that run, with
+6,877 exact decimal digits. These results cover a **specific
+already-opened frontier**. They do not demonstrate efficiency for
+the original 4,244-day all-unopened state, and do not establish
+production-oracle equivalence for the entire calendar.
 
 The target gates are:
 
