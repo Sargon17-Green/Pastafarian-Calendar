@@ -506,3 +506,20 @@ Untuk semua 720 susunan leksikografik pada stor mangkuk berbeza yang tetap, band
 ### Had tahap yang wajib
 
 Pembaikan `vaultOld=clone(B)`, penulisan ke `pending`, dan commit enam mangkuk sekaligus tidak diwujudkan sebelum PATCH10 Stage21. Keseluruhan rantaian SAVE, hidden, visible, permutasi, alias, oracle dan fixture tidak diubah; jangan buka Stage21 selagi penemuan merah ini belum disahkan.
+
+
+### Bukti GitHub Actions — Stage 20
+
+**Run penerimaan:** `39622805001`  
+**HEAD diuji:** `27f7a87cc88159df4ad45d281313e9c06def1d9b`  
+**Keputusan:** kedua-dua pekerjaan `verify` dan `audit_php_bahasa_melayu` berjaya.
+
+```text
+LULUS Stage 19 PATCH 09 pangkat=720 tuangan=2160 legacy_salah=1800 legacy_sepadan=360 alias=4320 real=4 real_tuangan=24 ralat=6
+POSISI_PERTAMA_SEPADAN pangkat=720
+POSISI_BERIKUT_TERCEMAR pangkat=720 kedudukan=2..6
+KEPUTUSAN MERAH_DIJANGKA salah=3600 sepadan=720 pangkat=720 real=4 real_salah=20 ralat=4 lain=0
+LULUS kontrak merah 10; mangkuk legacy tercemar tanpa snapshot
+```
+
+Ini ialah `EXPECTED_RED` yang disahkan, bukan kegagalan CI. Semua regresi Stage 1–19, kunci nama kanonik dan sintaks PHP telah lulus. Stage 21 — PATCH10 belum dimulakan.
