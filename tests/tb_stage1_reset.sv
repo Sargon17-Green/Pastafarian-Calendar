@@ -3,7 +3,7 @@
 module tb_stage1_reset;
     logic clk = 1'b0;
     always #5 clk = ~clk;
-    logic reset_n = 1'b0;
+    logic reset_n = 1'b1;
     logic req_valid = 1'b0;
     logic req_ready, done, date_valid;
     logic signed [63:0] calculation_day = 64'sd0;
@@ -43,6 +43,8 @@ module tb_stage1_reset;
     endtask
 
     initial begin
+        #1;
+        reset_n = 1'b0;
         verify_reset();
         repeat (3) @(negedge clk);
         reset_n = 1'b1;
