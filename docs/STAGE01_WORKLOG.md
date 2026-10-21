@@ -24,7 +24,7 @@ STAGE1_PASS=NO
 - `tests/pcal_stage1_oracle_pkg.sv`: test-only SAVE/dayCount/distance/sum/direction, SystemVerilog-imi allataq.
 - `tests/tb_stage1.sv`: initial testbench; actual PASS aatsaat simulator-imi uppernarsarneqarsinnaavoq.
 - `tests/tb_sauce_foundation.sv`: test-only 7 hidden / 46 visible / 6 bowls / 12 saved-sum rounds and normative intermediate witnesses; not yet executed.
-- `catalog/catalog_review_queue.csv`: 64 empty candidates awaiting native QA.
+- `catalog/catalog_review_queue.csv`: 64 canonical slots: 3 sourced lexical research candidates, 61 empty, 0 native approvals.
 - `.github/workflows/stage1-systemverilog.yml`: GitHub Actions iverilog + vvp simulation.
 - `SOURCE_LANGUAGE_CATALOG.md`: 17 + 47 atit suli amigaataapput.
 
@@ -36,3 +36,11 @@ STAGE1_PASS=NO
 - Stage 1 completion certificate only after all above evidence exists.
 
 No stage 2 discovery or patch was opened.
+
+## 2026-10-21 — Suliniutip ingerlaqqinnera
+
+- `tests/tb_stage1_reset.sv`: request interrupted by asynchronous reset and another reset during completion; code written, not simulated.
+- `scripts/check_catalog_structure.sh`: 17 cutlet + 47 month contiguous index check; data structure separately checked in the connected GitHub record (64 rows, 8 columns each).
+- Three sourced proposals (not native-approved): `terianniaq`, `kuuk`, `ulloriaq`.
+- Temporary mathematical inspection of the published Foundation sauce checkpoint reproduced all seven hidden drops' boundary witnesses, drops 1 and 46, orderAt46 and six final bowls. It did **not** execute the SystemVerilog source.
+- CI: no branch workflow runs observed at this checkpoint. Stage 1 remains open; Stage 2 remains closed.
