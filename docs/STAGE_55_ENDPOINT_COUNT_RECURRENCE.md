@@ -100,9 +100,28 @@ is likely too expensive for the largest full-year input. A future
 incremental/rank-oriented method must be demonstrated separately before
 production integration.
 
-Next experiment expands to **every rank** of multiple small families,
-including all 1301 ranks of [4,4,4] and four-/five-month cases. Its
-PASS must be verified independently before marking that work complete.
+The expanded native test **PASSED** at commit
+`f957d17bafac3ff7c11a32679318d3d4d3628f64`:
+[GitHub Actions run 39610273306](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39610273306).
+
+- `STAGE_55_ENDPOINT_UNRANK_BRUTE_PASS CASES=12 RANKS=1555`;
+  **every** rank checked against independently generated lexicographic
+  brute rows, including every rank of the 1301-row [4,4,4] family,
+  plus additional 4-/5-month input families.
+- `STAGE_55_ENDPOINT_UNRANK_OLD_DAG_DIFFERENTIAL_PASS`;
+  each rank checked against the previously implemented production
+  exact-DAG family for those small inputs.
+- `STAGE_55_ENDPOINT_UNRANK_VALIDATION_PASS` and
+  `STAGE_55_ENDPOINT_UNRANK_EXPERIMENTAL_PASS`.
+- Bounded benchmark on this later runner:
+  `DAYS=60 MONTHS=6 SECONDS=0.410 DIGITS=37` and
+  `DAYS=160 MONTHS=8 SECONDS=4.639 DIGITS=129`.
+  Execution time differs from the prior runner (0.214 and 2.344s);
+  neither result is a promise about 4244-day performance.
+
+These checks establish native correctness on the tested exhaustive
+small cases, **not** proof of completeness or adequate runtime for the
+large year. The original production route has not been replaced.
 
 GitHub native Stage 55 push triggering intentionally excludes only
 the two experimental source files and their dedicated unit tests, to
