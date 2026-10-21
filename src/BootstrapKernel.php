@@ -345,7 +345,7 @@ final class BootstrapKernel
             );
             $aliases = $patch->installOrderAliases($order);
             $pours = $patch->patchedPours($i, $drop, $this->stones()[$i], $oldBowls, $order);
-            $context->semanticState['bowlAliases'] = $aliases;
+            $context->semanticState['positionAliases'] = $aliases;
             $context->semanticState['patchedPours'] = $pours;
             $context->status = 'POURS_ALIAS_PATCH_09_RETURNED';
             $this->metrics->bump($context, 'pours.alias.patch09');
