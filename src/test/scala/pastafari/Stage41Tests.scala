@@ -166,7 +166,7 @@ object Stage41Tests {
         oracle(Nine,NineParts,Nine.sum-1),"Gruppo")
     }
     check("tutti i 252 giorni minimi concordano con l'oracolo"){
-      for(day<-Six.indices.flatMap(i=>0 until Six(i))){
+      for(day<-0 until Six.sum){
         val actual=patched(Six,SixParts,day)
         eqv((actual.correctedCutletId,actual.correctedDayInCutlet),
           oracle(Six,SixParts,day),"Giorno "+day)
@@ -382,14 +382,21 @@ object Stage41Tests {
       truth(c.patchedCutletId.isEmpty,"Pubblicazione atomica")
     }
     check("handler non pubblica output dopo manomissione"){
-      val c=ready()
+      val c=BaseMonsterContext(1,2)
+      c.status="BOOTSTRAPPED"
+      c.branchTrace.append("BOOT")
       c.phase="DISCOVERY_20_CUTLET_OPEN_BOUNDARY"
-      c.status="LEGACY_CUTLET_BOUNDARY_READY"
-      c.branchTrace.remove(2)
+      c.cutletGateGaps=Some(Six)
+      c.cutletGatePartition=Some(SixParts)
+      c.cutletDayOffset=Some(42)
+      new Discovery20CutletOpenBoundaryHandler(
+        new BaseMetricsShell).handle(c)
+      c.phase="PATCH_20_CUTLET_OPEN_BOUNDARY"
       c.cutletDayOffset=Some(43)
       rejectState("Snapshot"){new Patch20CutletOpenBoundaryHandler(
         new BaseMetricsShell).handle(c)}
-      truth(c.patchedCutletId.nonEmpty,"Report iniziale preservato")
+      truth(c.patchedCutletId.isEmpty,"Nessuna pubblicazione")
+      truth(!c.patch20Applied,"Flag non impostato")
     }
     check("la vecchia discovery rimane osservabile in isolamento"){
       val r=new BaseMonsterManager().discover20CutletOpenBoundary(
