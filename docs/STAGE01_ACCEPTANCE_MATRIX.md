@@ -31,3 +31,7 @@ reproduced the published Foundation witnesses for 7 hidden drops,
 visible drops 1 and 46, orderAt46 and all six final bowls. This is
 **not** a SystemVerilog simulation, not the branch's normative oracle
 and not evidence of a hardware PASS.
+
+## Additional progress — exact rejection shortcut
+
+The short/wide circular rejection rule has a closed form in [the mathematical proof](SELECTION_REJECTION_CLOSED_FORM_PROOF.md). A new independent SystemVerilog testbench, `tests/tb_selection_rejection_equivalence.sv`, exhaustively compares direct and iterative selection for all small states and tests 127-bit, two-digit, and three-digit arithmetic. The shell runner now compiles and invokes it. **No SystemVerilog simulator execution has been confirmed.** Stage 1 remains open and the later DISCOVERY/PATCH stages are not preempted.
