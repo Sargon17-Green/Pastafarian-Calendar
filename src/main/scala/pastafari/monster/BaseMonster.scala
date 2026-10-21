@@ -158,7 +158,10 @@ final case class BaseMonsterContext(
   var cutletBoundarySnapshot: Option[(Vector[Int],Vector[Int],Int)] = None,
   var legacyCutletStartOffsets: Option[Vector[Int]] = None,
   var legacyCutletId: Option[Int] = None,
-  var legacyDayInCutlet: Option[Int] = None
+  var legacyDayInCutlet: Option[Int] = None,
+  var patchedCutletId: Option[Int] = None,
+  var patchedDayInCutlet: Option[Int] = None,
+  var patch20Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -270,6 +273,68 @@ final class BaseValidationManager {
   /** DISCOVERY20: conferma indipendente del confine storico ">".
     * La regola normativa ">=" resta riservata ai soli test.
     */
+
+  /**
+   * PATCH20: valica autonomamente le soglie cumulative inclusive.
+   * Non chiama il wrapper, l'adapter storico o l'oracolo dei test.
+   */
+  def requirePatch20Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_20_CUTLET_OPEN_BOUNDARY" ||
+       ctx.status!="PATCH_20_READY" || !ctx.patch20Applied ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_20_CUTLET_OPEN_BOUNDARY",
+         "PATCH_20_CUTLET_OPEN_BOUNDARY") ||
+       ctx.cutletGateGaps.isEmpty || ctx.cutletGatePartition.isEmpty ||
+       ctx.cutletDayOffset.isEmpty || ctx.cutletBoundarySnapshot.isEmpty ||
+       ctx.legacyCutletStartOffsets.isEmpty || ctx.legacyCutletId.isEmpty ||
+       ctx.legacyDayInCutlet.isEmpty || ctx.patchedCutletId.isEmpty ||
+       ctx.patchedDayInCutlet.isEmpty)
+      throw new IllegalStateException("PATCH20 non completa.")
+
+    val gaps=ctx.cutletGateGaps.get
+    val parts=ctx.cutletGatePartition.get
+    val day=ctx.cutletDayOffset.get
+    if(ctx.cutletBoundarySnapshot.get!=(gaps,parts,day) ||
+       parts.length<6 || parts.length>17 || parts.exists(_<1) ||
+       parts.sum!=gaps.length || gaps.exists(g=>g<42 || g>963) ||
+       gaps.sum<252 || gaps.sum>5778 || day<0 || day>=gaps.sum)
+      throw new IllegalStateException("Input o snapshot PATCH20 invalida.")
+
+    // Ricostruzione dalla durata di ogni segmento, indipendente
+    // dai valori di inizio del wrapper.
+    var gate=0
+    var start=0
+    var correctId=0
+    var correctDay=0
+    val starts=scala.collection.mutable.ArrayBuffer.empty[Int]
+    for((intervals,index)<-parts.zipWithIndex) {
+      starts+=start
+      var duration=0
+      var k=0
+      while(k<intervals) {
+        duration+=gaps(gate)
+        gate+=1
+        k+=1
+      }
+      if(day>=start && day<start+duration) {
+        correctId=index+1
+        correctDay=day-start+1
+      }
+      start+=duration
+    }
+    if(gate!=gaps.length || start!=gaps.sum || correctId==0)
+      throw new IllegalStateException("Partizione PATCH20 non valida.")
+
+    val legacy=1+starts.drop(1).count(_<day)
+    val oldDay=day-starts(legacy-1)+1
+    if(ctx.legacyCutletStartOffsets.get!=starts.toVector ||
+       ctx.legacyCutletId.get!=legacy ||
+       ctx.legacyDayInCutlet.get!=oldDay ||
+       ctx.patchedCutletId.get!=correctId ||
+       ctx.patchedDayInCutlet.get!=correctDay)
+      throw new IllegalStateException("Risultato PATCH20 manomesso.")
+  }
+
   def requireDiscovery20Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="DISCOVERY_20_CUTLET_OPEN_BOUNDARY" ||
        ctx.status!="LEGACY_CUTLET_BOUNDARY_READY" ||
@@ -1750,7 +1815,8 @@ final class BaseMonsterManager {
     new Patch18SourceCatalogHandler(metrics),
     new Discovery19DayIndexedMonthNameHandler(metrics),
     new Patch19DayIndexedMonthNameHandler(metrics),
-    new Discovery20CutletOpenBoundaryHandler(metrics)
+    new Discovery20CutletOpenBoundaryHandler(metrics),
+    new Patch20CutletOpenBoundaryHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -2791,6 +2857,38 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("discovery20",error)
+    }
+  }
+
+
+  def patch20CutletOpenBoundary(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    gateGaps: Vector[Int],
+    cutletPartition: Vector[Int],
+    dayOffset: Int
+  ): Patch20CutletOpenBoundaryReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.cutletGateGaps=Some(gateGaps)
+    ctx.cutletGatePartition=Some(cutletPartition)
+    ctx.cutletDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_20_CUTLET_OPEN_BOUNDARY"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery20Ready(ctx)
+      ctx.phase="PATCH_20_CUTLET_OPEN_BOUNDARY"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch20Ready(ctx)
+      Patch20CutletOpenBoundaryReport(
+        ctx.calculationDay,ctx.targetDay,ctx.cutletGateGaps.get,
+        ctx.cutletGatePartition.get,ctx.cutletDayOffset.get,
+        ctx.legacyCutletStartOffsets.get,ctx.legacyCutletId.get,
+        ctx.legacyDayInCutlet.get,ctx.patchedCutletId.get,
+        ctx.patchedDayInCutlet.get,ctx.patch20Applied,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("patch20",error)
     }
   }
 

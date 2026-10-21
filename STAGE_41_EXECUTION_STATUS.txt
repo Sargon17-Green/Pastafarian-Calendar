@@ -1,0 +1,17 @@
+STATO_ESECUZIONE=PENDING_NATIVE_CI
+STADIO=41
+TIPO=PATCH_20
+RISULTATO_ATTESO=GREEN
+RISULTATO_ATTESO_FIRMA=56_PASS_0_FAIL
+ULTIMO_STADIO_CERTIFICATO=40
+PATCH_WRAPPER=Patch20CutletOpenBoundaryWrapper.cutletBoundaryPatch
+LEGACY_DISCOVERY20_PRESERVED=YES
+SOURCE_LANGUAGE_CATALOG_FROZEN=YES
+VALIDATOR_INDEPENDENT=IMPLEMENTED
+TEST_ONLY_ORACLE=YES
+GITHUB_ACTIONS_CONCLUSION=PENDING
+COMANDO=sbt -batch 'Test / runMain pastafari.Stage41Tests'
+
+La nuova cotoletta contiene il suo primo giorno. Il vecchio
+adattatore resta invocato nello stesso percorso con un report
+storico immutabile; la patch non calcola ancora la salsa annuale.
