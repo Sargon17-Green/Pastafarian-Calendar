@@ -11,6 +11,7 @@ module tb_sauce_foundation;
     logic signed [383:0] bowls [1:6];
     logic signed [383:0] old_bowls [1:6];
     logic signed [383:0] new_bowls [1:6];
+    logic signed [383:0] start_post_stir_bowls [1:6];
     logic signed [383:0] pour [1:3];
     logic signed [383:0] cnt_c,cnt_t,dist,sum_days,direction;
     logic signed [383:0] x,sr,u,sum_bowls,d;
@@ -91,8 +92,13 @@ module tb_sauce_foundation;
         end
         if(hidden[1]!=384'sd119390830530032782664128530203002080344)
             $fatal(1,"HIDDEN_1");
-        if(hidden[7]!=384'sd6164285870955721082771365327359496898)
-            $fatal(1,"HIDDEN_7");
+        if(hidden[1]!=384'sd119390830530032782664128530203002080344) $fatal(1,"HIDDEN_1");
+        if(hidden[2]!=384'sd11877236279154673426874867061566696749) $fatal(1,"HIDDEN_2");
+        if(hidden[3]!=384'sd24217814924229232987463457533828175476) $fatal(1,"HIDDEN_3");
+        if(hidden[4]!=384'sd166629231917547214614573522551290204247) $fatal(1,"HIDDEN_4");
+        if(hidden[5]!=384'sd81202913407267092008896220686064041568) $fatal(1,"HIDDEN_5");
+        if(hidden[6]!=384'sd73551520026920072430116213847585486272) $fatal(1,"HIDDEN_6");
+        if(hidden[7]!=384'sd6164285870955721082771365327359496898) $fatal(1,"HIDDEN_7");
 
         a[1]=3; a[2]=5; a[3]=7; a[4]=11; a[5]=13;
         a[6]=17; a[7]=19; a[8]=23; a[9]=29; a[10]=31;a[11]=37;
@@ -157,6 +163,7 @@ module tb_sauce_foundation;
            order_at46[4]!=6 || order_at46[5]!=1)
             $fatal(1,"ORDER_AT46");
 
+        for(b=1;b<=6;b=b+1) start_post_stir_bowls[b]=bowls[b];
         for(r=1;r<=12;r=r+1) begin
             sum_bowls=384'sd0;
             for(b=1;b<=6;b=b+1) begin
@@ -184,6 +191,40 @@ module tb_sauce_foundation;
            || bowls[5]!=384'sd54867842942953573450868747713087920246
            || bowls[6]!=384'sd111207247632761530752404582123499651367)
             $fatal(1,"CANONICAL_SAVED_SUM_BOWLS");
+
+        // Negative-control mutant: the historically incorrect raw bowl
+        // sum inside u. It must NEVER determine the normative output.
+        for(b=1;b<=6;b=b+1) bowls[b]=start_post_stir_bowls[b];
+        for(r=1;r<=12;r=r+1) begin
+            sum_bowls=384'sd0;
+            for(b=1;b<=6;b=b+1) begin
+                old_bowls[b]=bowls[b];
+                sum_bowls=sum_bowls+old_bowls[b];
+            end
+            sr=saved(sum_bowls+149*r);
+            rank=1+int'((sr-384'sd1)%384'sd720);
+            lex_order(rank);
+            for(q=1;q<=6;q=q+1) begin
+                b=order[q-1];
+                p=order[(q+4)%6];
+                n=order[q%6];
+                // Deliberate mutant: raw sum instead of saved sr.
+                u=old_bowls[b]+384'sd3*old_bowls[p]
+                  +384'sd5*old_bowls[n]+sum_bowls+r+q*q;
+                new_bowls[b]=saved(u*u+384'sd7*old_bowls[p]
+                                   *old_bowls[n]);
+            end
+            for(b=1;b<=6;b=b+1) bowls[b]=new_bowls[b];
+        end
+        if(bowls[1]!=384'sd67068226522203060890658143482200172502) $fatal(1,"RAW_SUM_MUTANT_1");
+        if(bowls[2]!=384'sd156830781782038036265833091137164500083) $fatal(1,"RAW_SUM_MUTANT_2");
+        if(bowls[3]!=384'sd27860245395513113590943202859639481773) $fatal(1,"RAW_SUM_MUTANT_3");
+        if(bowls[4]!=384'sd154958270957687565769906933601352753179) $fatal(1,"RAW_SUM_MUTANT_4");
+        if(bowls[5]!=384'sd83762519477527209919484977230999195024) $fatal(1,"RAW_SUM_MUTANT_5");
+        if(bowls[6]!=384'sd154633989471499313687998830839607736513) $fatal(1,"RAW_SUM_MUTANT_6");
+        if(bowls[1]==384'sd65286679584284972964194865805379907599)
+            $fatal(1, "MUTANT_NOT_DISCRIMINATED");
+
         $display("STAGE1_TEST_ONLY_SAUCE_FOUNDATION_PASS");
         $finish;
     end
