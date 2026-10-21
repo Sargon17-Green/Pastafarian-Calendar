@@ -96,6 +96,14 @@ classdef WholeMonthWeavingFamily < handle
 
     methods (Access = private)
         function [layers, counts, initialKey] = buildExactStateDP(obj)
+            % Native test-only diagnostics for a potentially huge exact DAG.
+            % Never truncate states or reduce the number of computed days.
+            traceDP = strcmp(getenv('PASTAFARI_STAGE54_DIAGNOSTICS'), '1');
+            traceClock = tic;
+            if traceDP
+                fprintf('STAGE_54_WEAVE_DP_BEGIN DAYS=%d MONTHS=%d\n', ...
+                    obj.totalDays, obj.monthCount);
+            end
             layers = cell(1, obj.totalDays + 1);
 
             initial = struct( ...
@@ -135,6 +143,10 @@ classdef WholeMonthWeavingFamily < handle
                 end
 
                 layers{day + 2} = next;
+                if traceDP && (day < 4 || mod(day + 1, 8) == 0)
+                    fprintf('STAGE_54_WEAVE_DP_FORWARD DAY=%d STATES=%d SECONDS=%.3f\n', ...
+                        day + 1, next.Count, toc(traceClock));
+                end
             end
 
             counts = containers.Map('KeyType', 'char', 'ValueType', 'any');
@@ -180,6 +192,13 @@ classdef WholeMonthWeavingFamily < handle
 
                     counts(currentKeys{i}) = total;
                 end
+                if traceDP && (day < 4 || mod(day + 1, 8) == 0)
+                    fprintf('STAGE_54_WEAVE_DP_REVERSE DAY=%d STATES=%d SECONDS=%.3f\n', ...
+                        day, numel(currentKeys), toc(traceClock));
+                end
+            end
+            if traceDP
+                fprintf('STAGE_54_WEAVE_DP_FINISHED SECONDS=%.3f\n', toc(traceClock));
             end
         end
 

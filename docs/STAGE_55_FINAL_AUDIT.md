@@ -84,3 +84,7 @@ Before Stage 54 heavy tests, Stage 55 runs `run_stage55_code_analysis` over all 
 Native run `39494750458` wykonał pełne regresje 1–53 i statyczny test Etapu 54, po czym hostowany runner otrzymał sygnał shutdown podczas ciężkiej produkcyjno-oracle'owej kontroli. Nie ma w tym wyniku PASS dla differential ani potwierdzonego błędu obliczeń.
 
 Kolejne przebiegi pod `PASTAFARI_STAGE54_DIAGNOSTICS=1` emitują znaczniki przed i po wywołaniu produkcji i testowego oracle, a produkcja raportuje liczbę rzeczywiście obliczonych odstępów bram co 64 kroki i upływ czasu. Licznik jest tylko obserwacyjny. Nie zmieniono źródeł danych, formuł, kolejności ani zakresu testów. Jeżeli bieg zostanie przerwany, log GitHub Actions pokaże ostatni ukończony fragment bez fałszywego PASS.
+
+## Dalsza diagnostyka (runda 39545208545)
+
+Natywne regresje 1–53 przeszły. Ostatnie znaczniki: `STAGE_54_YEAR_CHAIN_READY GATES=22 SECONDS=386.572`; następnie hostowany runner został wyłączony bez błędu MATLAB podczas tworzenia struktury roku. Instrumentacja diagnostyczna wewnątrz `buildYearStructure` odróżnia teraz etapy sauce, partition, month lengths i whole-month weaving. `WholeMonthWeavingFamily` raportuje też liczbę stanów DAG w przebiegu w przód i w tył. Warunek środowiska `PASTAFARI_STAGE54_DIAGNOSTICS=1` zachowuje całą pracę, bez limitowania stanów czy zmiany wyniku.
