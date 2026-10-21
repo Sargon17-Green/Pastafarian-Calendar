@@ -65,6 +65,32 @@ jobs:
             echo "SOAK_ADAPTER_V1=3/3_PASS COMPILER=$compiler"
           done
           cmp soak-output/output-g++.tsv soak-output/output-clang++.tsv
+          # Explicit base-ten regression: Boost's cpp_int{string} treats
+          # leading zeros as octal and may reject digits 8/9.
+          printf 'd04\t-015055671\t-015055671\ne05\t-15055671\t-15055671\nf06\t-15055671\t-015055678\ng07\t-15055671\t-15055678\n' \
+            > soak-output/decimal-regression.tsv
+          for compiler in g++ clang++; do
+            timeout 35m "soak-output/adapter-$compiler" \
+              < soak-output/decimal-regression.tsv \
+              > "soak-output/decimal-$compiler.tsv" \
+              2> "soak-output/decimal-$compiler.stderr"
+            test "$(wc -l < "soak-output/decimal-$compiler.tsv")" -eq 4
+            sed -n '1p' "soak-output/decimal-$compiler.tsv" | cut -f2- \
+              > "soak-output/decimal-pair-1a-$compiler.tsv"
+            sed -n '2p' "soak-output/decimal-$compiler.tsv" | cut -f2- \
+              > "soak-output/decimal-pair-1b-$compiler.tsv"
+            cmp "soak-output/decimal-pair-1a-$compiler.tsv" \
+              "soak-output/decimal-pair-1b-$compiler.tsv"
+            sed -n '3p' "soak-output/decimal-$compiler.tsv" | cut -f2- \
+              > "soak-output/decimal-pair-2a-$compiler.tsv"
+            sed -n '4p' "soak-output/decimal-$compiler.tsv" | cut -f2- \
+              > "soak-output/decimal-pair-2b-$compiler.tsv"
+            cmp "soak-output/decimal-pair-2a-$compiler.tsv" \
+              "soak-output/decimal-pair-2b-$compiler.tsv"
+            echo "SOAK_ADAPTER_DECIMAL=4/4_PASS COMPILER=$compiler"
+          done
+          cmp soak-output/decimal-g++.tsv soak-output/decimal-clang++.tsv
+          echo 'SOAK_ADAPTER_DECIMAL_CROSS_COMPILER=PASS'
           echo 'SOAK_ADAPTER_CROSS_COMPILER=PASS'
       - name: Save evidence even on failure
         if: always()

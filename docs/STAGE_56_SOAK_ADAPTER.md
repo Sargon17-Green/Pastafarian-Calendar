@@ -16,4 +16,21 @@ Native GCC and Clang workflow compiles the branch's public calendarDateSpaghetti
 
 Baseline before adapter: aa129c8076b82361ae8107603ba6c9c6c97ebc18, complete 20/20 SOAK_GREEN (run 39411197744); native code is identical to code commit 0ae153157052ac221a718fcc15a19a6b0697b7c1; pinned Celeritas 30/30 pass (run 38897361174). None constitutes the future global multi-implementation soak.
 
-The adapter is not certified until its own exact-commit CI completes. It does not alter src/monster.cpp, main, the normative Oracle or Stage 57.
+The original adapter at SHA `2c314114063807057d0e469352ffa824650ae10e` passed
+[39545723842](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39545723842):
+GCC and Clang native stream tests; the same SHA passed the full Stage 56
+[39545723761](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39545723761):
+20/20 GREEN, 8/8 repeated soak, SOAK_GREEN.
+
+**Post-certification defect (fixed here; new exact-SHA CI pending):**
+Boost's `cpp_int{decimal_string}` constructor uses octal for some
+leading-zero strings (`010` becomes 8; `0008` throws), despite the
+adapter's input validation accepting decimal digits. The adapter now
+accumulates every digit in radix ten using multiprecision arithmetic.
+The native workflow exercises both positive digit 8 and negative
+leading-zero representations, comparing equivalent pairs with
+canonical decimal spellings on GCC and Clang. This is a transport fix,
+not a change to the calendar engine. Do not claim its success before
+new CI passes.
+
+It does not alter `src/monster.cpp`, `main`, the normative Oracle or Stage 57.

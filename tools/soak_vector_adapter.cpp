@@ -16,7 +16,15 @@ bool decimal(const std::string& x) {
 }
 Integer parse(const std::string& x) {
     if (!decimal(x)) throw std::runtime_error("invalid decimal integer");
-    return Integer{x};
+    // cpp_int's string constructor autodetects octal after leading zero.
+    // TSV_V1 promises base ten only, so accumulate decimal digits ourselves.
+    const bool negative = x[0] == '-';
+    Integer result = 0;
+    for (std::size_t i = negative ? 1U : 0U; i < x.size(); ++i) {
+        result *= 10;
+        result += static_cast<unsigned>(x[i] - '0');
+    }
+    return negative ? -result : result;
 }
 bool validId(const std::string& x) {
     if (x.empty()) return false;

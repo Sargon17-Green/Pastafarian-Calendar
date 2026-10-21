@@ -512,3 +512,28 @@ antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
   et **30/30** referuntur ad SHA exactum `0ae153157052ac221a718fcc15a19a6b0697b7c1`.
   `main` in statu `56bc4173aae4975ded019ef5ab5a36249f1424df`
   immutatum, Gradus 57 non apertus.
+
+## Gradus 56 — native adaptor exact-SHA audit, 21 October 2026
+
+- SHA `2c314114063807057d0e469352ffa824650ae10e`, full CI
+  [39545723761](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39545723761):
+  **20/20 success**. Job `119055951895`:
+  `SOAK_REPETITUM=8/8_PASS`. Final job `119061329080`:
+  `VIGILIA_SOAK=PASS`, `STATUS_POST_RUN=SOAK_GREEN`.
+- Native adaptor
+  [39545723842](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39545723842):
+  `completed/success`, exact same SHA, GCC and Clang
+  `SOAK_ADAPTER_V1=3/3_PASS` and
+  `SOAK_ADAPTER_CROSS_COMPILER=PASS`.
+- Independent C++20 control discovered a new **transport-only fault**
+  in the adapter's parser: Boost `cpp_int{"010"}` produces
+  `8` (implicit octal), and `cpp_int{"0008"}` raises an exception.
+  But `PASTAFARI_SOAK_TSV_V1` promises radix ten, including leading zeros.
+  The native source now accumulates digits via `*10` and digit addition.
+  The workflow adds canonicalized equivalence tests
+  `-015055671` versus `-15055671` and `-015055678` versus
+  `-15055678` (contains 8).
+- This next commit's parser and regression checks are **PENDING NEW CI**;
+  historical 20/20 must not be attributed to the new exact SHA.
+  Production C++ calendar, independent Oracle, main, and Stage 57
+  remain untouched.
