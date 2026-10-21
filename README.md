@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 17 (PATCH 08)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 18 (DISCOVERY 09)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -248,3 +248,21 @@ php -d memory_limit=512M tests/stage17_patch08_tests.php
 ```
 
 Ujian hijau Stage 17 membandingkan **semua 720 permutasi** dengan oracle tempatan, memastikan 720 susunan unik, 719 hasil legacy salah yang dikekalkan, satu pengecualian legacy, 14 integer besar/negatif, serta 138 permutasi daripada tiga set 46 titisan visible. Semua ujian Stage 1–16 kekal wajib dan Stage 18 belum dimulakan.
+
+
+## Stage 18 — DISCOVERY 09: Tuangan membaca ID mangkuk tetap
+
+`LegacyBowlFactory` menghitung nilai enam mangkuk asal bagi kiraan tindakan, sasaran, jarak, sambungan dan arah menggunakan `SavePatch01` serta nombor perdana 17,19,23,29,31,37. Kilang ini dibandingkan dengan oracle ujian sahaja.
+
+`LegacyFixedPositionPours::legacyPours` menerima order enam mangkuk yang sah daripada PATCH08 Stage17, tetapi pembaca sejarah masih menganggap posisi 1,2,3 ialah **ID mangkuk 1,2,3**. Oleh itu tuangan pertama menggunakan `oldBowls[1]`, kedua `oldBowls[2]`, ketiga `oldBowls[3]` dan bukannya `oldBowls[order[position]]`. Enam posisi dikekalkan, dengan posisi 4,5,6 bernilai sifar. Kecacatan itu tidak diperbaiki pada tahap ini.
+
+`BootstrapKernel::legacyPoursAt(c,t,i)` menggabungkan 46 titisan terlihat Stage15, susunan normatif Stage17, mangkuk asal legacy dan batu yang betul di bawah penghala `FIXED_POSITION_POURS_LEGACY`. Kaedah ini memulangkan jejak `drop`, `order`, `oldBowls` dan `pours` dalam satu konteks milik panggilan itu.
+
+```text
+php -d memory_limit=512M tests/stage18_discovery09_tests.php
+php -d memory_limit=512M tests/verify_stage18_discovery09.php
+```
+
+Ujian sejarah terus keluar `EXPECTED_RED`, berdasarkan semua 720 permutasi: tepat 1,800 perbandingan salah dan 360 padanan bagi tiga posisi tuangan, ditambah empat kes keluaran sebenar dan pemeriksaan mangkuk asas. Pengesah khas hanya hijau apabila seluruh corak itu terbukti tanpa ralat tambahan. Semua regresi Stage1–17 kekal hijau.
+
+Pemetaan `bowlAlias[position] = order[position]` ialah tugas Stage19 PATCH09; tiada alias ditambah awal atau tuangan kemas kini mangkuk dilaksanakan pada Stage18.

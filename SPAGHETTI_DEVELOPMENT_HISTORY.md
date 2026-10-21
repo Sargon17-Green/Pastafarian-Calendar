@@ -416,3 +416,22 @@ LULUS Stage 17 PATCH 08 pangkat=720 unik=720 parut=719 pengecualian=1 integer_be
 ```
 
 Kesimpulan: PATCH 08 GREEN sebenar; bukti sejarah DISCOVERY 08 kekal merah yang disengajakan dan penerimaannya hijau. Semua gerbang CI Stage 1–17 lulus dan tiada kod Stage 18 diperkenalkan.
+
+
+## Stage 18 — DISCOVERY 09: Pembaca tuangan mengelirukan posisi dengan identiti
+
+### Punca sejarah dan kebolehcerapan
+
+`LegacyBowlFactory` menyediakan enam nilai mangkuk asas sah melalui formula asal dan SAVE. Pembaca `LegacyFixedPositionPours` menerima susunan leksikografik yang telah dibetulkan oleh PATCH08. Namun pembaca lama masih menganggap posisi pertama bermaksud mangkuk ID1, posisi kedua ID2 dan posisi ketiga ID3, walaupun susunan boleh menjadi mana-mana permutasi. Nilai tuangan yang dikira adalah konsisten dengan kecacatan itu dan tidak membaca oracle.
+
+### Pemasangan seni bina tambahan
+
+`BootstrapKernel::legacyPoursAt` membuka `BootstrapContext` sendiri lalu mendaftar dengan `FIXED_POSITION_POURS_LEGACY`. Aliran mengira 46 titisan daripada PATCH07, susunan daripada PATCH08, batu PATCH04 dan mangkuk asas daripada kilang legacy. Pada akhirnya, pembaca legacy memulangkan jejak empat komponen supaya perbezaan posisi/ID disahkan daripada nilai sebenar. Tiada hasil dituangkan semula ke dalam mangkuk kerana pembetulan snapshot dan pending ialah peringkat lain.
+
+### Ujian merah yang terhad dan tepat
+
+Bagi enam mangkuk sintetik berbeza dan semua 720 susunan, setiap posisi 1,2,3 berada pada ID sendiri bagi 120 permutasi sahaja. Oleh itu terdapat 360 padanan dan 1,800 bacaan salah daripada 2,160 pemeriksaan kedudukan. Ujian membandingkan pengiraan sejarah langsung dan rumus normatif melalui oracle PHP ujian, memastikan posisi 4..6 kekal sifar, memeriksa input tidak sah, serta menjalankan `legacyPoursAt` pada empat keadaan titisan sebenar daripada dua pasangan hari. Pembalut pengesah menerima hanya merah tepat; ujian Stage1–17 kekal wajib.
+
+### Batas tahap
+
+Jangan menambah alias posisi pada Stage18, jangan mengubah legacy fixed IDs, jangan menjalankan update mangkuk in-place atau pending shadow, jangan mewujudkan oracle dalam `src`. Stage19 memperkenalkan alias sambil mengekalkan semua fungsi sejarah.

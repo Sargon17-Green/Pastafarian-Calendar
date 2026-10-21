@@ -78,3 +78,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage16_discovery08.php
       - name: Tampalan 08 — semua 720 permutasi dan bukti legacy
         run: php -d memory_limit=512M tests/stage17_patch08_tests.php
+      - name: Penemuan 09 — tuangan tersalah baca ID tetap
+        run: php -d memory_limit=512M tests/verify_stage18_discovery09.php

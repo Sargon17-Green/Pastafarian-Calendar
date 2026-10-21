@@ -285,6 +285,37 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'bowl.permutation.patch08');
             return $order;
         });
+        $this->dispatcher->register('FIXED_POSITION_POURS_LEGACY', function(BootstrapContext $context): array {
+            $c = $context->calculationDay;
+            $t = $context->targetDay;
+            $i = $context->semanticState['visibleIndex'] ?? null;
+            if (!is_int($i) || $i < 1 || $i > 46) {
+                throw new \InvalidArgumentException('LEGACY_POUR_INDEX_RANGE');
+            }
+            $visible = $this->visibleDrops($c, $t);
+            $drop = $visible[$i];
+            $order = $this->bowlOrder($drop);
+            $action = $this->dayCount($c);
+            $target = $this->dayCount($t);
+            $counts = [
+                'action' => $action,
+                'target' => $target,
+                'distance' => $this->distance($c, $t),
+                'connection' => $action->add($target),
+                'direction' => $t < $c ? 1 : ($t === $c ? 2 : 3),
+            ];
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $factory = new \Pastafari\Stage01\Legacy\LegacyBowlFactory($save);
+            $bowls = $factory->initialBowls($counts);
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyFixedPositionPours($save);
+            $pours = $legacy->legacyPours($i, $drop, $this->stones()[$i], $bowls, $order);
+            $context->semanticState['legacyPours'] = $pours;
+            $context->status = 'FIXED_POSITION_POURS_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.fixed.pours');
+            return ['drop' => $drop, 'order' => $order, 'oldBowls' => $bowls, 'pours' => $pours];
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -469,6 +500,23 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('BOWL_PERMUTATION_PATCH_08', $context)
+        );
+    }
+
+    /**
+     * Mendedahkan tiga tuangan sejarah yang salah untuk titisan terlihat.
+     * Pembaca kekal mengenali ID tetap 1, 2 dan 3, bukan posisi dalam order.
+     *
+     * @return array{drop:BigInt,order:list<int>,oldBowls:array<int,BigInt>,pours:array<int,BigInt>}
+     */
+    public function legacyPoursAt(int $calculationDay, int $targetDay, int $i): array
+    {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'FIXED_POSITION_POURS_LEGACY';
+        $context->semanticState['visibleIndex'] = $i;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('FIXED_POSITION_POURS_LEGACY', $context)
         );
     }
 
