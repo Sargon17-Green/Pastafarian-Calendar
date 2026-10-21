@@ -89,8 +89,8 @@ module tb_stage1;
             !== (256'sd1 << 64))
             $fatal(1, "DISTANCE_FULL_SIGNED_RANGE");
         if (oracle_sum(64'sh8000000000000000,
-                       64'sh7fffffffffffffff) !== -256'sd1)
-            $fatal(1, "SUM_SIGNED_EXTREMES");
+                       64'sh7fffffffffffffff) !== ((256'sd1 << 65) - 256'sd1))
+            $fatal(1, "DAY_COUNT_SUM_SIGNED_EXTREMES");
         if (oracle_direction(64'sd3, 64'sd2) !== 2'd1 ||
             oracle_direction(64'sd3, 64'sd3) !== 2'd2 ||
             oracle_direction(64'sd3, 64'sd4) !== 2'd3)

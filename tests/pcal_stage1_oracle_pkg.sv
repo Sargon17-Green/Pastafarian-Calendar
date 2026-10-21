@@ -48,11 +48,8 @@ package pcal_stage1_oracle_pkg;
         input logic signed [63:0] c,
         input logic signed [63:0] t
     );
-        logic signed [255:0] a, b;
         begin
-            a = c;
-            b = t;
-            oracle_sum = a + b;
+            oracle_sum = oracle_day_count(c) + oracle_day_count(t);
         end
     endfunction
 

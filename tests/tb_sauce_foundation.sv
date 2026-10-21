@@ -57,7 +57,7 @@ module tb_sauce_foundation;
         sum_days = oracle_sum(-64'sd15055671,-64'sd15055671);
         direction = oracle_direction(-64'sd15055671,-64'sd15055671);
         if(cnt_c!=384'sd1 || cnt_t!=384'sd1 ||
-           dist!=384'sd1 || sum_days!=-384'sd30111342 ||
+           dist!=384'sd1 || sum_days!=384'sd2 ||
            direction!=384'sd2) $fatal(1,"FOUNDATION_WORK_COUNTS");
 
         // The stone snapshot is immutable for each new row.
