@@ -275,6 +275,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateRejectionDirection(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الاكتشاف التاسع عشر: يضيف المخرج التاريخي وحدة ثانية إلى مرتبة الأسرة الواسعة.
+    public static BigInteger EvaluateLegacyDoubleOffsetWideRank(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateLegacyDoubleOffsetWideRank(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

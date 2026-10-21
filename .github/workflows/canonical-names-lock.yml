@@ -237,3 +237,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage36Tests/PastafarianCalendar.Stage36Tests.csproj --configuration Release -- --verify-expected-red
       - name: تحقق رقعة اتجاه الرفض الواسع الثامنة عشرة وحفظ الشاهد التاريخي
         run: dotnet run --project tests/PastafarianCalendar.Stage37Tests/PastafarianCalendar.Stage37Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لإزاحة الخرج الواسع مرة ثانية
+        id: discovery_double_offset_wide_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage38Tests/PastafarianCalendar.Stage38Tests.csproj --configuration Release
+      - name: إثبات توقيع الإزاحة الثانية وحفظ رقعة الاتجاه الثامنة عشرة
+        if: always()
+        run: |
+          test "${{ steps.discovery_double_offset_wide_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage38Tests/PastafarianCalendar.Stage38Tests.csproj --configuration Release -- --verify-expected-red

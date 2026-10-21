@@ -157,6 +157,9 @@ public sealed class MonsterContext
     // الرقعة الثامنة عشرة؛ نتيجة مستقلة عن الشاهد التاريخي.
     public BigInteger? PatchedRejectionDirectionRankResult { get; set; }
 
+    // الندبة التاسعة عشرة: تضاف وحدة ثانية عند إخراج مرتبة الأسرة الواسعة.
+    public BigInteger? LegacyDoubleOffsetWideRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
