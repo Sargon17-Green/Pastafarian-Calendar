@@ -44,3 +44,25 @@ No stage 2 discovery or patch was opened.
 - Three sourced proposals (not native-approved): `terianniaq`, `kuuk`, `ulloriaq`.
 - Temporary mathematical inspection of the published Foundation sauce checkpoint reproduced all seven hidden drops' boundary witnesses, drops 1 and 46, orderAt46 and six final bowls. It did **not** execute the SystemVerilog source.
 - CI: no branch workflow runs observed at this checkpoint. Stage 1 remains open; Stage 2 remains closed.
+
+## 2026-10-21 — research and test-only discrimination
+
+- The exact rejection walk has a closed-form first accepted answer and
+  reject count. This holds for the short domain `S=M` and for the wide
+  post-construction domain `S=M^k` without altering wide digits.
+- A separately executed scratch comparison covered 2,272,548 cases,
+  every domain `S=2..150`, all admissible `N,A`, both directions:
+  0 mismatches. This is not SystemVerilog execution.
+- `tests/tb_selection_rejection_equivalence.sv` checks a separate
+  small-domain comparison and large arithmetic boundaries, but has
+  not run in a simulator.
+- `tests/tb_sauce_foundation.sv` now has 7 published hidden drop
+  witnesses, and an intentionally wrong raw bowl-sum mutant with
+  6 published superseded bowl values as negative controls.
+- A scratch math reproduction confirmed the canonical and mutant
+  6-bowl outputs independently, without running the RTL.
+- Stage-1 completion remains blocked by SV simulator + CI evidence,
+  full-calendar oracle and reviewed Kalaallisut 64-name catalog.
+- Engineering documentation and comments still require independent
+  Kalaallisut language QA; current English technical research notes
+  must not be treated as linguistically certified source documentation.

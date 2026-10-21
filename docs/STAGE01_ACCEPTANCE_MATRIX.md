@@ -35,3 +35,15 @@ and not evidence of a hardware PASS.
 ## Additional progress — exact rejection shortcut
 
 The short/wide circular rejection rule has a closed form in [the mathematical proof](SELECTION_REJECTION_CLOSED_FORM_PROOF.md). A new independent SystemVerilog testbench, `tests/tb_selection_rejection_equivalence.sv`, exhaustively compares direct and iterative selection for all small states and tests 127-bit, two-digit, and three-digit arithmetic. The shell runner now compiles and invokes it. **No SystemVerilog simulator execution has been confirmed.** Stage 1 remains open and the later DISCOVERY/PATCH stages are not preempted.
+
+## Additional negative controls
+
+The test-only sauce regression now asserts *all* seven published hidden
+drops, both reported visible drop checkpoints, orderAt46, the six
+canonical final bowls, and six historically superseded raw-sum-mutant
+bowls. The mutant is a test negative control only and is not reachable
+from production RTL.
+
+**Statuses:** source written; scratch mathematics checked; native SV
+simulation NOT EXECUTED. Green stage-1 signoff is forbidden until
+actual simulator results and catalog review are recorded.
