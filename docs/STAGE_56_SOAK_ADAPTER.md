@@ -34,3 +34,7 @@ not a change to the calendar engine. Do not claim its success before
 new CI passes.
 
 It does not alter `src/monster.cpp`, `main`, the normative Oracle or Stage 57.
+
+## Independent streaming comparison against pinned Celeritas
+
+A candidate machine-readable descriptor is available at `integrations/cpp-latina-soak.json`. The cross-implementation workflow now compiles the branch's independently authored `tools/soak_vector_adapter.cpp`, extracts identical `(id,c,t)` tuples from pinned Celeritas reference output, submits them through the actual stdin/stdout streaming protocol, and compares **all eight fields byte-for-byte** in five shards (30 pairs total). Timing logs and mismatch diffs are saved as artifacts. This does not run or replace the central all-implementation soak. This new workflow requires a fresh, exact-SHA CI result before claiming its new gate as PASS.

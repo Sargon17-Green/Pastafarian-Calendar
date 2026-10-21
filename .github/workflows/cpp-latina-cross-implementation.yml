@@ -6,6 +6,9 @@ on:
       - 'C\+\+&Latina'
     paths:
       - '.github/workflows/cpp-latina-cross-implementation.yml'
+      - 'tools/soak_vector_adapter.cpp'
+      - 'integrations/cpp-latina-soak.json'
+      - 'docs/STAGE_56_SOAK_ADAPTER.md'
       - 'src/**'
       - 'include/**'
   workflow_dispatch:
@@ -51,6 +54,9 @@ jobs:
           test "$(git -C current rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(git -C celeritas rev-parse HEAD)" = "$PINNED_CELERITAS"
           test -r celeritas/tools/branch_vector_runner.cpp
+          test -r current/tools/soak_vector_adapter.cpp
+          test -r current/integrations/cpp-latina-soak.json
+          jq -e '.protocol == "PASTAFARI_SOAK_TSV_V1" and .branch == "C++&Latina" and .engine_verified_commit == "888b54fc5a136144b565c39f09b8f9106a91e2bd"' current/integrations/cpp-latina-soak.json >/dev/null
           test -r current/src/monster.cpp
           test -r celeritas/src/monster.cpp
           mkdir -p cross-logs
@@ -60,6 +66,8 @@ jobs:
             echo "CELERITAS_SHA=$PINNED_CELERITAS"
             echo "VECTOR_RUNNER_SHA256=$(sha256sum celeritas/tools/branch_vector_runner.cpp | cut -d' ' -f1)"
             echo "CALCULATION_CONTEXTS=FOUNDATION_AND_NON_FOUNDATION"
+            echo "ADAPTER_SHA256=$(sha256sum current/tools/soak_vector_adapter.cpp | cut -d' ' -f1)"
+            echo "SOAK_MANIFEST_SHA256=$(sha256sum current/integrations/cpp-latina-soak.json | cut -d' ' -f1)"
             echo "SHARD=${{ matrix.shard }}"
             echo "PAIRS=$PAIRS_PER_SHARD"
           } | tee cross-logs/provenance.txt
@@ -88,6 +96,12 @@ jobs:
             celeritas/tools/branch_vector_runner.cpp celeritas/src/monster.cpp \
             -o bin/celeritas \
             2>&1 | tee cross-logs/build-celeritas.log
+          clang++ -std=c++20 -O2 -Wall -Wextra -Wpedantic \
+            -Icurrent/include -Icurrent/tests -Icurrent \
+            current/tools/soak_vector_adapter.cpp current/src/monster.cpp \
+            -o bin/stream-adapter \
+            2>&1 | tee cross-logs/build-adapter.log
+          bin/stream-adapter --schema | grep -q '^PASTAFARI_SOAK_TSV_V1'
           clang++ --version | head -1 | tee cross-logs/compiler.txt
 
       - name: Confrontare octo campos pro singulo pari
@@ -115,6 +129,25 @@ jobs:
           fi
           echo "CROSS_CPP_CELERITAS_SHARD=6/6_PASS SHARD=$SHARD" \
             | tee cross-logs/verdict.txt
+          # Exercise the independent native TSV transport against Celeritas.
+          # Reuse the reference's exact (id,c,t) pairs: no skipped cases.
+          awk -F '\t' 'NF != 8 {exit 2} {printf "%s\t%s\t%s\n",$1,$2,$3}' \
+            cross-logs/celeritas.tsv > cross-logs/adapter-input.tsv
+          test "$(wc -l < cross-logs/adapter-input.tsv)" -eq "$PAIRS_PER_SHARD"
+          timeout 40m bin/stream-adapter --timing-ns \
+            < cross-logs/adapter-input.tsv \
+            > cross-logs/adapter.tsv \
+            2> cross-logs/adapter-timing.log
+          test "$(wc -l < cross-logs/adapter.tsv)" -eq "$PAIRS_PER_SHARD"
+          test "$(grep -c '^SOAK_TIMING_NS' cross-logs/adapter-timing.log)" -eq "$PAIRS_PER_SHARD"
+          if ! cmp -s cross-logs/adapter.tsv cross-logs/celeritas.tsv; then
+            echo "SOAK_ADAPTER_CELERITAS=FAIL SHARD=$SHARD"
+            diff -u cross-logs/celeritas.tsv cross-logs/adapter.tsv \
+              | head -100 | tee cross-logs/adapter-first-difference.diff || true
+            exit 1
+          fi
+          echo "SOAK_ADAPTER_CELERITAS_SHARD=6/6_PASS SHARD=$SHARD" \
+            | tee -a cross-logs/verdict.txt
 
       - name: Servare utraque testimonia etiam in casu defectus
         if: always()
@@ -139,3 +172,4 @@ jobs:
           echo "MATRIX_RESULT=${{ needs.comparatio.result }}"
           test '${{ needs.comparatio.result }}' = 'success'
           echo 'CROSS_CPP_CELERITAS_ALL=30/30_PASS SHARDS=5'
+          echo 'SOAK_ADAPTER_CELERITAS_ALL=30/30_PASS SHARDS=5'

@@ -1,0 +1,76 @@
+{
+  "manifest_version": 1,
+  "implementation_id": "pastafarian-calendar-cpp-latina",
+  "repository": "Sargon17-Green/Pastafarian-Calendar",
+  "branch": "C++&Latina",
+  "engine_verified_commit": "888b54fc5a136144b565c39f09b8f9106a91e2bd",
+  "engine_verification": {
+    "full_ci_run": 39552851947,
+    "adapter_ci_run": 39552852053,
+    "names_lock_run": 39552852051
+  },
+  "entrypoint": "tools/soak_vector_adapter.cpp",
+  "sources": [
+    "tools/soak_vector_adapter.cpp",
+    "src/monster.cpp"
+  ],
+  "language": "C++20",
+  "build": {
+    "compiler": "clang++",
+    "arguments": [
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Wpedantic",
+      "-Iinclude",
+      "-Itests",
+      "-I.",
+      "tools/soak_vector_adapter.cpp",
+      "src/monster.cpp",
+      "-o",
+      "soak-vector-adapter"
+    ],
+    "dependency": "libboost-dev"
+  },
+  "protocol": "PASTAFARI_SOAK_TSV_V1",
+  "transport": "stdin_stdout_tsv",
+  "request_fields": [
+    "request_id",
+    "calculation_day",
+    "target_day"
+  ],
+  "response_fields": [
+    "request_id",
+    "calculation_day",
+    "target_day",
+    "year_number",
+    "cutlet_name",
+    "day_in_cutlet",
+    "month_name",
+    "day_in_month"
+  ],
+  "numeric_representation": "base10 signed arbitrary-precision integers",
+  "catalog_encoding": "C++ std::quoted UTF-8 names",
+  "run_arguments": [
+    "--timing-ns"
+  ],
+  "time_series": {
+    "stream": "stderr",
+    "prefix": "SOAK_TIMING_NS",
+    "unit": "ns"
+  },
+  "integrity": {
+    "compare_all_fields": true,
+    "nonzero_exit_invalidates_entire_shard": true,
+    "keep_partial_output_as_evidence_only": true,
+    "never_silently_skip_hard_cases": true
+  },
+  "resource_policy": {
+    "timeout_and_retry_owner": "central scheduler",
+    "backpressure_owner": "central scheduler",
+    "slow_case_queue_owner": "central scheduler"
+  },
+  "status": "candidate_after_end_to_end_ci",
+  "note": "This is an adapter declaration; no global multi-implementation soak has been run."
+}
