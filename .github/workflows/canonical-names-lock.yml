@@ -1724,3 +1724,45 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 36 --case-filter hash36-b --seconds 185 --rss-kib 393216
+
+  canonical-fourmonth-r59-shard-34:
+    name: R59 真實四月窗口 34 SHA-512 一基名次 ${{ matrix.index }}
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r59-shards]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        index: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 同一 SHA-512 BigInt 精確排名完整日序獨立 Oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 34 --case-filter hash34-${{ matrix.index }} --seconds 185 --rss-kib 393216
+
+  canonical-fourmonth-r59-shard-36:
+    name: R59 真實四月窗口 36 SHA-512 一基名次 ${{ matrix.index }}
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r59-shards]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        index: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 同一 SHA-512 BigInt 精確排名完整日序獨立 Oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_canonical_memo_multi_ranks.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_canonical_memo_multi_ranks.pl --window-offset 36 --case-filter hash36-${{ matrix.index }} --seconds 185 --rss-kib 393216

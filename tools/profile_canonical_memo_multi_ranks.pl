@@ -36,7 +36,8 @@ die "case-filter 只支援 all、middle、first-half、last-half、hash-a/b、ha
     && $case_filter ne 'hash39-a' && $case_filter ne 'hash39-b'
     && $case_filter ne 'hash40-a' && $case_filter ne 'hash40-b'
     && $case_filter ne 'hash34-a' && $case_filter ne 'hash34-b'
-    && $case_filter ne 'hash36-a' && $case_filter ne 'hash36-b';
+    && $case_filter ne 'hash36-a' && $case_filter ne 'hash36-b'
+    && $case_filter !~ /\Ahash(?:34|36)-(?:0[0-9]|1[01])\z/;
 die "需要 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -203,6 +204,28 @@ if (!$pid) {
             die "R58 每個固定子工作必須有六個名次\n"
                 if @named!=6;
         }
+        # R59: R58 六排名原生 jobs 在 185 秒時限 BLOCKED，
+        # 改為各自一個完整 BigInt 排名 job，沒有放寬資源界線。
+        if ($case_filter =~ /\Ahash(34|36)-(0[0-9]|1[01])\z/) {
+            my ($selected_offset,$selected_index)=(0+$1,0+$2);
+            die "R59 分片和真實月份窗口不符合\n"
+                if $selected_offset!=$offset;
+            my (@samples,%seen);
+            for my $i (0..11) {
+                my $seed="PASTAFARIAN-5000-FOURMONTH-$offset-R58:$i";
+                my $hex=sha512_hex($seed);
+                my $rank=Math::BigInt->from_hex("0x$hex")
+                    ->bmod($total)->badd(1);
+                die "R59 BigInt 排名越界\n"
+                    if $rank<1 || $rank>$total;
+                die "R59 固定 SHA-512 名次碰撞\n"
+                    if $seen{"$rank"}++;
+                push @samples,[sprintf('r58hash%02d',$i),$rank];
+            }
+            @named=($samples[$selected_index]);
+            die "R59 單一作業必須恰好一個排名\n"
+                if @named!=1;
+        }
         for my $case (@named) {
             my ($label,$rank)=@$case;
             my $rank_text="$rank";
@@ -272,7 +295,8 @@ if (!$pid) {
                 $offset,$label,$test_count,length($rank_text),$days,
                 $diag->{entries},$diag->{cache_hits},time()-$start;
         }
-        my $expected_count=$case_filter eq 'all' ? 14
+        my $expected_count=$case_filter =~ /\Ahash(?:34|36)-(?:0[0-9]|1[01])\z/ ? 1
+                          : $case_filter eq 'all' ? 14
                           : $case_filter eq 'middle' ? 1
                           : ($case_filter eq 'hash-a' || $case_filter eq 'hash-b' || $case_filter =~ /\Ahash(?:34|36|38|39|40)-[ab]\z/) ? 6 : 7;
         die "字典序重要排名樣本未全部執行\n"
