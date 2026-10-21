@@ -26,15 +26,17 @@ GetOptions('seconds=i'=>\$seconds,'rss-kib=i'=>\$rss_limit,
 die "second 必須在 1..230\n" if $seconds<1 || $seconds>230;
 die "rss-kib 必須在 32768..1048576\n"
     if $rss_limit<32768 || $rss_limit>1048576;
-die "window-offset 只支援 37、38、39 或 40\n"
-    if $offset!=37 && $offset!=38 && $offset!=39 && $offset!=40;
-die "case-filter 只支援 all、middle、first-half、last-half、hash-a、hash-b、hash38-a/b、hash39-a/b、hash40-a/b\n"
+die "window-offset 只支援 34、36、37、38、39 或 40\n"
+    if $offset!=34 && $offset!=36 && $offset!=37 && $offset!=38 && $offset!=39 && $offset!=40;
+die "case-filter 只支援 all、middle、first-half、last-half、hash-a/b、hash34-a/b、hash36-a/b、hash38-a/b、hash39-a/b、hash40-a/b\n"
     if $case_filter ne 'all' && $case_filter ne 'middle'
     && $case_filter ne 'first-half' && $case_filter ne 'last-half'
     && $case_filter ne 'hash-a' && $case_filter ne 'hash-b'
     && $case_filter ne 'hash38-a' && $case_filter ne 'hash38-b'
     && $case_filter ne 'hash39-a' && $case_filter ne 'hash39-b'
-    && $case_filter ne 'hash40-a' && $case_filter ne 'hash40-b';
+    && $case_filter ne 'hash40-a' && $case_filter ne 'hash40-b'
+    && $case_filter ne 'hash34-a' && $case_filter ne 'hash34-b'
+    && $case_filter ne 'hash36-a' && $case_filter ne 'hash36-b';
 die "需要 Linux /proc\n" if !-r '/proc/self/status';
 $|=1;
 
@@ -66,7 +68,9 @@ if (!$pid) {
             if sha256_hex(join(',',@year)) ne
                 '6d64022344c04935e6423aa6f96b285098d35b9b5ecb4b8c57a4c7149773a134';
         my @L=@year[$offset .. $offset+3];
-        my $expected=$offset==37 ? '83,88,40,25'
+        my $expected=$offset==34 ? '81,54,101,83'
+                    : $offset==36 ? '101,83,88,40'
+                    : $offset==37 ? '83,88,40,25'
                     : $offset==38 ? '88,40,25,77'
                     : $offset==39 ? '40,25,77,98'
                     : '25,77,98,122';
@@ -75,14 +79,17 @@ if (!$pid) {
         my $days=0;
         $days+=$_ for @L;
         die "真實視窗合計日數不符\n"
-            unless $days==($offset==37 ? 236 : $offset==38 ? 230 : $offset==39 ? 240 : 322);
+            unless $days==($offset==34 ? 319 : $offset==36 ? 312
+                    : $offset==37 ? 236 : $offset==38 ? 230 : $offset==39 ? 240 : 322);
         printf "CANONICAL_MULTI_RANK phase=WINDOW offset=%d days=%d lengths=%s\n",
             $offset,$days,join(',',@L);
         # 37 窗口可能超過 200000 個「累積」狀態；仍只保留
         # 至多 200000 個即時 BigInt 快取項，超額時 FIFO 淘汰。
         # 其餘 38..40 窗口完全使用原本的嚴格 hard-fail 上限。
         my $counter=Pastafari::WeavingMemoOracle->new(
-            \@L,$offset==37 ? {bounded_cache=>1,cache_limit=>200000} : undef
+            \@L,$offset==37 ? {bounded_cache=>1,cache_limit=>200000}
+                    : (($offset==34 || $offset==36)
+                        ? {bounded_cache=>1,cache_limit=>200000} : undef)
         );
         my $total=$counter->count_prefix([]);
         my $poly=countWeavingsPolynomial(\@L);
@@ -171,6 +178,31 @@ if (!$pid) {
             die "每份跨月窗 SHA-512 必須恰好含六個排名\n"
                 if @named!=6;
         }
+        # R58 新增較早的真實窗口 34 (319 日)、36 (312 日)，
+        # 不與此前 R55/R56/R57 的固定種子、case filter 混用。
+        # 每個獨立窗口恰好 12 個 512-bit SHA-512 BigInt 樣本。
+        if ($case_filter =~ /\Ahash(34|36)-([ab])\z/) {
+            my ($selected_offset,$half)=(0+$1,$2);
+            die "R58 SHA-512 排名集合和真實月份窗口不符\n"
+                if $selected_offset!=$offset;
+            my @generated;
+            my %seen;
+            for my $index (0..11) {
+                my $seed="PASTAFARIAN-5000-FOURMONTH-$offset-R58:$index";
+                my $hex=sha512_hex($seed);
+                my $rank=Math::BigInt->from_hex("0x$hex")
+                    ->bmod($total)->badd(1);
+                die "R58 一基 BigInt 名次超出 1..N 範圍\n"
+                    if $rank<1 || $rank>$total;
+                die "R58 12 個 SHA-512 名次發生重複\n"
+                    if $seen{"$rank"}++;
+                push @generated,[sprintf('r58hash%02d',$index),$rank];
+            }
+            @named=$half eq 'a'
+                ? @generated[0..5] : @generated[6..11];
+            die "R58 每個固定子工作必須有六個名次\n"
+                if @named!=6;
+        }
         for my $case (@named) {
             my ($label,$rank)=@$case;
             my $rank_text="$rank";
@@ -242,7 +274,7 @@ if (!$pid) {
         }
         my $expected_count=$case_filter eq 'all' ? 14
                           : $case_filter eq 'middle' ? 1
-                          : ($case_filter eq 'hash-a' || $case_filter eq 'hash-b' || $case_filter =~ /\Ahash(?:38|39|40)-[ab]\z/) ? 6 : 7;
+                          : ($case_filter eq 'hash-a' || $case_filter eq 'hash-b' || $case_filter =~ /\Ahash(?:34|36|38|39|40)-[ab]\z/) ? 6 : 7;
         die "字典序重要排名樣本未全部執行\n"
             if $test_count!=$expected_count;
         my $diag=$counter->diagnostics;
