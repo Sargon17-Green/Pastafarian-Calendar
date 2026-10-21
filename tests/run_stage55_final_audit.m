@@ -50,6 +50,10 @@ try
     % 0a. MATLAB parses all src/tests before the recursive heavy run.
     fprintf('%s', run_stage55_code_analysis(root));
 
+    % Independent exact endpoint recurrence: exhaustive small frontiers.
+    % This is experimental and does not replace production weaving.
+    run_stage55_endpoint_counter_tests();
+
     % 1. Pełna ścieżka regresji 1..54 + ciężki production/oracle differential.
     fprintf('STAGE_55_RECURSIVE_REGRESSIONS_BEGIN\n');
     run_stage54_tests();

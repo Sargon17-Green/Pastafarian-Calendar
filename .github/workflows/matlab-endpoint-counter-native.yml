@@ -1,0 +1,31 @@
+name: MATLAB Exact Endpoint Counter (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/+pastafari/countWholeWeavingSuffixByEndpoints.m'
+      - 'tests/run_stage55_endpoint_counter_tests.m'
+      - '.github/workflows/matlab-endpoint-counter-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-endpoint-experiment:
+    name: MATLAB R2026a / exhaustive suffix oracle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Compare every reachable small suffix
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_endpoint_counter_tests
