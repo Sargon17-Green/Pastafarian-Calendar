@@ -24,10 +24,27 @@ Ujian langsung harus keluar **kod 1** dengan mesej:
 KEPUTUSAN MERAH_DIJANGKA salah=1800 sepadan=360 pangkat=720 real=4 lain=0
 ```
 
-Gagal jika ada ralat selain RED yang dijangka. Pengesah keluar kod 0 bagi corak tepat sahaja. Semua gerbang Stage1–17, nama kanonik, fixture dan lint PHP harus kekal hijau. Bukti CI pada HEAD tertentu wajib sebelum menandakan Stage18 selesai.
+Gagal jika ada ralat selain RED yang dijangka. Pengesah keluar kod 0 bagi corak tepat sahaja. Semua gerbang Stage1–17, nama kanonik, fixture dan lint PHP harus kekal hijau. Run CI 39610007279 telah mengesahkan Stage18 EXPECTED_RED dengan dua kerja SUCCESS. Stage19 boleh dimulakan pada pusingan berikutnya.
 
 ## Had
 
 Jangan sentuh `main`, jangan hapus fungsi legacy, jangan ubah Oracle, jangan melaksanakan alias Stage19 atau snapshot Stage20, jangan menjalankan Stage19 sebelum CI sah.
 
 **Cadangan commit:** `stage18(php-ms): dedahkan tuangan yang menyalahbaca posisi mangkuk`
+
+
+### Bukti penerimaan GitHub Actions Stage 18
+
+**Run:** `39610007279`  
+**Commit sumber:** `5e58dd85f32ef76e969b157201f74b5b0da6d0a8`  
+**Pekerjaan:** `verify=success` dan `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+KEPUTUSAN MERAH_DIJANGKA salah=719 luar=1 jumlah=720 fungsi_sifar=720 titisan=46 lain=0
+LULUS Stage 17 PATCH 08 pangkat=720 unik=720 parut=719 pengecualian=1 integer_besar=14 visible=138 legacy_visible=138 legacy_exception=0
+KEPUTUSAN MERAH_DIJANGKA salah=1800 sepadan=360 pangkat=720 real=4 lain=0
+LULUS kontrak merah 09; tuangan menggunakan identiti tetap bukan posisi
+```
+
+Tahap ini diterima sebagai `EXPECTED_RED` yang disahkan, bukan kegagalan CI; seluruh ujian Stage1–17 dan ujian nama, sintaks, serta fixture lulus. Stage19 belum dimulakan.

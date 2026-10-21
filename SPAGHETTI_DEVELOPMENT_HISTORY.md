@@ -435,3 +435,20 @@ Bagi enam mangkuk sintetik berbeza dan semua 720 susunan, setiap posisi 1,2,3 be
 ### Batas tahap
 
 Jangan menambah alias posisi pada Stage18, jangan mengubah legacy fixed IDs, jangan menjalankan update mangkuk in-place atau pending shadow, jangan mewujudkan oracle dalam `src`. Stage19 memperkenalkan alias sambil mengekalkan semua fungsi sejarah.
+
+
+### Bukti penerimaan GitHub Actions Stage 18
+
+**Run:** `39610007279`  
+**Commit sumber:** `5e58dd85f32ef76e969b157201f74b5b0da6d0a8`  
+**Pekerjaan:** `verify=success` dan `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+KEPUTUSAN MERAH_DIJANGKA salah=719 luar=1 jumlah=720 fungsi_sifar=720 titisan=46 lain=0
+LULUS Stage 17 PATCH 08 pangkat=720 unik=720 parut=719 pengecualian=1 integer_besar=14 visible=138 legacy_visible=138 legacy_exception=0
+KEPUTUSAN MERAH_DIJANGKA salah=1800 sepadan=360 pangkat=720 real=4 lain=0
+LULUS kontrak merah 09; tuangan menggunakan identiti tetap bukan posisi
+```
+
+Tahap ini diterima sebagai `EXPECTED_RED` yang disahkan, bukan kegagalan CI; seluruh ujian Stage1–17 dan ujian nama, sintaks, serta fixture lulus. Stage19 belum dimulakan.
