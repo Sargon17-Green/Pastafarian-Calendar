@@ -11,33 +11,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Install simulator
+      - name: Install Icarus Verilog
         run: |
           sudo apt-get update
           sudo apt-get install -y iverilog
-      - name: Compile independent oracle primitives and bootstrap
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p build
-          iverilog -g2012 -s tb_stage1 -Wall -o build/stage1.vvp \
-            tests/pcal_stage1_oracle_pkg.sv \
-            rtl/pcal_stage1_bootstrap.sv tests/tb_stage1.sv
-      - name: Simulate bootstrap
-        run: vvp build/stage1.vvp
-      - name: Compile Foundation sauce oracle checkpoint
-        shell: bash
-        run: |
-          set -euo pipefail
-          iverilog -g2012 -s tb_sauce_foundation -Wall -o build/sauce.vvp \
-            tests/pcal_stage1_oracle_pkg.sv \
-            tests/tb_sauce_foundation.sv
-      - name: Simulate Foundation sauce checkpoint
-        run: vvp build/sauce.vvp
-      - name: Verify production/oracle isolation
-        run: |
-          set -euo pipefail
-          if grep -R -n -Ei 'oracle_|pcal_stage1_oracle_pkg' rtl; then
-            echo 'Production RTL may not import an oracle' >&2
-            exit 1
-          fi
+      - name: Simulate Stage 1 and test-only Foundation oracle
+        run: bash scripts/verify_stage1.sh

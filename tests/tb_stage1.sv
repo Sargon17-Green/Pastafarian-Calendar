@@ -37,7 +37,7 @@ module tb_stage1;
             target_day = t;
             req_valid = 1'b1;
             @(negedge clk);
-            req_valid = 1'b0;
+            req_valid = 1'b1; // must be ignored while not ready
             calculation_day = 64'sd12345;
             target_day = -64'sd98765;
             if (req_ready) $fatal(1, "BUSY_READY_CONTRACT");
@@ -46,6 +46,10 @@ module tb_stage1;
                 $fatal(1, "CONTEXT_OWNERSHIP");
             if (accepted_count !== expected_count)
                 $fatal(1, "ACCEPTED_TRANSACTION_COUNT");
+            @(negedge clk);
+            req_valid = 1'b0;
+            if (accepted_count !== expected_count)
+                $fatal(1, "BUSY_REQUEST_NOT_IGNORED");
             ticks = 0;
             while (!done && ticks < 6) begin
                 @(negedge clk);
