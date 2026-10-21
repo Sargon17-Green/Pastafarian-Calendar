@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 19 (PATCH 09)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 20 (DISCOVERY 10)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -282,3 +282,19 @@ php -d memory_limit=512M tests/stage19_patch09_tests.php
 Ujian Stage19 mengesahkan semua 720 permutasi dan ketiga-tiga posisi tuangan (2,160 hasil normatif), 4,320 bacaan alias, 1,800 kes legacy yang salah dan 360 padanan legacy yang dijangka. Empat tuangan produksi sebenar diperiksa terhadap oracle PHP dan determinisme instance. Enam input tidak sah ditolak. Semua regresi Stage1–18 kekal diwajibkan.
 
 Stage20 ialah DISCOVERY10 mengenai pencemaran mangkuk akibat penulisan in-place. **Tiada vaultOld/pending atau mutasi mangkuk dilakukan pada Stage19.**
+
+
+## Stage 20 — DISCOVERY 10: Pencemaran mangkuk akibat perubahan in-place
+
+`LegacyInPlaceBowlStir::stirOneDropWrong` meniru kecacatan sejarah: bagi setiap posisi 1..6, nilai mangkuk dikira dengan rumus normatif daripada ID, jiran sebelum/selepas, tuangan, titisan dan batu; tetapi ia menulis hasilnya terus ke `bowls[id]`. Akibatnya, posisi berikutnya membaca sekurang-kurangnya satu mangkuk yang **telah berubah**. Ini bukan kesalahan rumus SAVE atau alias posisi, tetapi kesalahan sempadan snapshot.
+
+`BootstrapKernel::legacyStirAt(c,t,i)` membuka penghala `IN_PLACE_BOWL_STIR_LEGACY`, memanggil `poursAt` daripada PATCH09, menggunakan satu titisan visible daripada PATCH07, permutasi PATCH08 dan jadual batu PATCH04, kemudian menjalankan kaedah in-place sebenar. Ia mendedahkan `oldBowls`, `pours`, `order` dan `wrongBowls` bagi pengesahan. Tiada pengubahan mangkuk jangka panjang antara titisan diperkenalkan pada Stage20.
+
+```text
+php -d memory_limit=512M tests/stage20_discovery10_tests.php
+php -d memory_limit=512M tests/verify_stage20_discovery10.php
+```
+
+Penguji sejarah memeriksa semua 720 permutasi. Pada stor sintetik tetap, posisi pertama setara dengan oracle satu titisan; posisi 2..6 tersasar dengan tepat **3,600 perbezaan dan 720 padanan**. Empat jejak sebenar juga diperiksa terhadap rumus dari salinan input awal. Pembalut hijau menerima hanya kegagalan sejarah yang tepat. Semua gerbang Stage1–19 kekal hijau.
+
+**Stage21 — PATCH10 belum bermula.** Di tahap itu sahaja `vaultOld` dan `pending` akan diperkenalkan, semua bacaan akan menggunakan salinan lama dan commit akan berlaku selepas keenam-enam posisi. Tiada kod tersebut ditambah pada Stage20.

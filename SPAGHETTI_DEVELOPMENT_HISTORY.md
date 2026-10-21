@@ -487,3 +487,22 @@ LULUS Stage 19 PATCH 09 pangkat=720 tuangan=2160 legacy_salah=1800 legacy_sepada
 ```
 
 Run calon awal `39612576553` gagal pada ujian Stage01 `FUTURE_TOKEN_bowlAlias`, kerana nama medan pemerhatian dalam `BootstrapKernel`. Ia dibaiki di commit `1e6d29a0` dengan menamakan medan itu `positionAliases`, tanpa mengubah sebarang formula atau melonggarkan ujian. Run kedua menerima semua gerbang termasuk Stage01 dan Stage19. Stage20 belum bermula.
+
+
+## Stage 20 — DISCOVERY 10: Pencemaran nilai mangkuk di tengah satu titisan
+
+### Cacat asal: penulisan terlalu awal
+
+Fungsi sejarah `LegacyInPlaceBowlStir::stirOneDropWrong` mengekalkan pengiraan enam mangkuk mengikut `order` yang sah. Setiap posisi menggunakan formula tepat bagi ID dan kedua-dua jiran lingkaran, tiga tuangan atau sifar, titisan, jenis batu dan nilai SAVE. Masalahnya ialah hasilnya segera disimpan dalam `bowls[id]` sebelum posisi seterusnya bermula. Oleh itu bacaan `bowls[prev]` atau `bowls[next]` boleh merujuk nilai selepas mutasi, bukannya keadaan pada permulaan titisan.
+
+### Lapisan observable yang ditambah
+
+`IN_PLACE_BOWL_STIR_LEGACY` menjemput penghala `POURS_ALIAS_PATCH_09` untuk jejak tuangan sah, kemudian menyerahkan salinan stor mangkuk kepada `LegacyInPlaceBowlStir` yang mutasinya sebenar. `BootstrapKernel::legacyStirAt` memulangkan mangkuk asal dan mangkuk salah bersama input lain. Metrik serta konteks semantik milik panggilan tidak menjadi input formula. Tiada oracle normatif digunakan dalam sumber `src`.
+
+### Kaedah pembuktian
+
+Untuk semua 720 susunan leksikografik pada stor mangkuk berbeza yang tetap, bandingkan penulisan in-place dengan pengiraan rujukan dalam `tests` yang membaca hanya stor asal. Tepat satu padanan bagi setiap susunan, pada posisi pertama (720 keseluruhan), dan lima perbezaan pada posisi seterusnya (3,600 keseluruhan). Bagi empat set tarikh/indeks visible sebenar, jejak produksi dibandingkan dengan pembinaan langsung legacy dan perbandingan snapshot. Kes tidak sah dan bentuk stor diuji; ujian sejarah keluar 1 untuk penemuan terkawal, manakala pembalut pengesah keluar 0 jika tiada ralat lain.
+
+### Had tahap yang wajib
+
+Pembaikan `vaultOld=clone(B)`, penulisan ke `pending`, dan commit enam mangkuk sekaligus tidak diwujudkan sebelum PATCH10 Stage21. Keseluruhan rantaian SAVE, hidden, visible, permutasi, alias, oracle dan fixture tidak diubah; jangan buka Stage21 selagi penemuan merah ini belum disahkan.

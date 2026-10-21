@@ -352,6 +352,32 @@ final class BootstrapKernel
             return ['drop' => $drop, 'order' => $order, 'oldBowls' => $oldBowls,
                 'aliases' => $aliases, 'pours' => $pours];
         });
+        $this->dispatcher->register('IN_PLACE_BOWL_STIR_LEGACY', function(BootstrapContext $context): array {
+            $i = $context->semanticState['visibleIndex'] ?? null;
+            if (!is_int($i) || $i < 1 || $i > 46) {
+                throw new \InvalidArgumentException('LEGACY_STIR_INDEX_RANGE');
+            }
+            $trace = $this->poursAt($context->calculationDay, $context->targetDay, $i);
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyInPlaceBowlStir($save);
+            $oldBowls = $trace['oldBowls'];
+            $workingBowls = $oldBowls;
+            $wrong = $legacy->stirOneDropWrong(
+                $workingBowls, $i, $trace['drop'], $this->stones()[$i],
+                $trace['order'], $trace['pours']
+            );
+            $context->semanticState['legacyStirBefore'] = $oldBowls;
+            $context->semanticState['legacyStirAfter'] = $wrong;
+            $context->status = 'IN_PLACE_BOWL_STIR_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.bowls.in_place_stirs');
+            return [
+                'drop' => $trace['drop'], 'order' => $trace['order'],
+                'oldBowls' => $oldBowls, 'pours' => $trace['pours'],
+                'wrongBowls' => $wrong,
+            ];
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -570,6 +596,23 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('POURS_ALIAS_PATCH_09', $context)
+        );
+    }
+
+    /**
+     * Jejak sejarah satu titisan: penulisan mangkuk dibuat sejurus selepas
+     * kiraan setiap posisi. Pemisahan salinan dibenarkan hanya pada Stage21.
+     *
+     * @return array{drop:BigInt,order:list<int>,oldBowls:array<int,BigInt>,pours:array<int,BigInt>,wrongBowls:array<int,BigInt>}
+     */
+    public function legacyStirAt(int $calculationDay, int $targetDay, int $i): array
+    {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'IN_PLACE_BOWL_STIR_LEGACY';
+        $context->semanticState['visibleIndex'] = $i;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('IN_PLACE_BOWL_STIR_LEGACY', $context)
         );
     }
 

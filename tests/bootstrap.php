@@ -16,6 +16,7 @@ require_once $root . '/src/Legacy/LegacyPermutationUnrank0.php';
 require_once $root . '/src/Legacy/LegacyBowlPermutation.php';
 require_once $root . '/src/Legacy/LegacyBowlFactory.php';
 require_once $root . '/src/Legacy/LegacyFixedPositionPours.php';
+require_once $root . '/src/Legacy/LegacyInPlaceBowlStir.php';
 require_once $root . '/src/Patches/SavePatch01.php';
 require_once $root . '/src/Patches/FoundationScarPatch02.php';
 require_once $root . '/src/Patches/DistanceCountPatch03.php';
