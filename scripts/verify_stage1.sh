@@ -14,12 +14,16 @@ iverilog -g2012 -s tb_stage1 -Wall -o build/stage1.vvp \
   tests/pcal_stage1_oracle_pkg.sv \
   rtl/pcal_stage1_bootstrap.sv tests/tb_stage1.sv
 vvp build/stage1.vvp
+iverilog -g2012 -s tb_stage1_reset -Wall -o build/reset.vvp \
+  rtl/pcal_stage1_bootstrap.sv tests/tb_stage1_reset.sv
+vvp build/reset.vvp
 iverilog -g2012 -s tb_sauce_foundation -Wall -o build/sauce.vvp \
   tests/pcal_stage1_oracle_pkg.sv tests/tb_sauce_foundation.sv
 vvp build/sauce.vvp
+bash scripts/check_catalog_structure.sh
 if grep -R -n -Ei 'oracle_|pcal_stage1_oracle_pkg' rtl; then
   echo "PRODUCTION_ORACLE_ISOLATION_FAILED" >&2
   exit 1
 fi
-echo "STAGE1_SIMULATION_PRIMITIVES_AND_FOUNDATION_PASS_ONLY"
+echo "STAGE1_SIMULATION_BOOTSTRAP_RESET_FOUNDATION_AND_CATALOG_STRUCTURE_PASS_ONLY"
 echo "STAGE1_FULL_ORACLE_AND_CATALOG_QA_STILL_PENDING"
