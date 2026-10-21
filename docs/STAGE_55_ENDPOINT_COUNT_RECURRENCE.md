@@ -154,3 +154,71 @@ in size to the 4,244-day blocked year, but a different state frontier).
 Record actual native timing and output digits; do not infer its result from
 small-case benchmarks. All months were opened before the suffix in this
 test, and nothing is omitted from the resulting exact count.
+
+
+## Exact all-open child block recurrence (unranking optimization)
+
+This section documents the experimental implementation
+`src/+pastafari/allOpenedWholeWeaveChildCounts.m`, introduced by
+commit `08f3138e7037f11d2c19542ff1c6e6383b6626d2`.
+It is **not** an approved production replacement. A source-only parser
+fix followed in commit `61359b7fbd8d610e10118464146750d8bb917483`.
+
+For an all-open frontier with closed prefix `c`, let
+`r=(r_1,...,r_m)` be the positive counts for unclosed months, and
+`S_i=r_1+...+r_i`. Every legal suffix closes the remaining months in
+ascending ID order. The exact suffix count is:
+
+```text
+F(r) = product(i=2..m) C(S_i-1, r_i-1).
+```
+
+For the lexicographic next choice, an already-open month `i>1`
+cannot close before month 1, so `i>1` is legal precisely when
+`r_i>1`. Month 1 is always legal. Partitioning the parent suffixes
+by their first letter gives exact **child completion counts**:
+
+```text
+B_1 = F(r) * product(j=2..m) S_(j-1)/(S_j-1)
+
+B_i = F(r) * (r_i-1)/(S_i-1) *
+      product(j=i+1..m) S_(j-1)/(S_j-1), for i>1 and r_i>1
+
+B_i = 0, for i>1 and r_i=1
+sum(i=1..m) B_i = F(r).
+```
+
+These are integer identities because each `B_i` counts an exact
+combinatorial block. The implementation performs only BigInt products
+and checks exact division remainders, as well as the parent-partition
+identity. Right-to-left cumulative rational products compute all
+blocks without separate DP for each child.
+
+The unranking experiment keeps the selected child count `B_i` as its
+new parent count, avoiding repeat counts after the full set of months
+has opened. Before that point it still uses the endpoint recurrence;
+**this optimization alone does not solve the entire 4,244-day initial
+frontier**. The associated native checks enumerate every legal child
+of all small all-open frontiers, including closed prefixes, and compare
+them to independent exact suffix counts. Another benchmark requests all
+45 first-step child blocks for an all-open 4,230-day suffix, checking
+their exact sum and reporting real duration.
+
+The first native attempt, run `39622067568`, was blocked by a MATLAB
+parser error at the parenthesized expression method call, not a proven
+counterexample to the identity. The source was fixed to assign the
+weighted numerator before invoking `floorDivMod`. **Do not treat
+this correction as native PASS** until its separate CI run reaches the
+corresponding exact-block and large-frontier PASS markers.
+
+The target gates are:
+
+```text
+STAGE_55_ALL_OPEN_CHILD_BLOCKS_EXACT_PASS
+STAGE_55_ALL_OPEN_CHILD_BLOCKS_BENCH
+STAGE_55_ALL_OPEN_CHILD_BLOCKS_PASS
+STAGE_55_ENDPOINT_UNRANK_EXPERIMENTAL_PASS
+```
+
+No Stage 54 heavy differential or Stage 55 signoff follows merely
+from these experimental markers.
