@@ -1,0 +1,31 @@
+name: MATLAB Joint Next-Month Exact Blocks (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/countWholeWeavingNextLetterBlocksOnePass.m'
+      - 'tests/run_stage55_joint_next_blocks_tests.m'
+      - '.github/workflows/matlab-stage55-joint-next.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  joint-next:
+    name: MATLAB R2026a / 6651 states and independent child oracle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out exact branch commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Check exact lexical next-month distribution
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_joint_next_blocks_tests
