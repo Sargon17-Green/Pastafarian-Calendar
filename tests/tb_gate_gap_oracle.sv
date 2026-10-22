@@ -211,6 +211,52 @@ module tb_gate_gap_oracle;
         end
     endtask
 
+    // Stage-1 cutlet validation for c=t=Foundation, year-5000 gates.
+    integer cutlet_count, cutlet_choice, comp_count, comp_choice;
+    integer piece_parts [0:127][0:7];
+    integer cutlet_gaps [1:8];
+    integer permutation_count, names_choice, remaining_rank;
+    integer name_values [0:7], available_names [0:16];
+    integer gap_pos, mask, popcount, last_break, piece_no, mask_bit;
+    integer compare_state, swapping, slot, candidate, product, choose_slot;
+    integer name_i, name_j, chosen_cutlet_pos, chosen_day;
+    integer gate_covered, start_gap, selected_piece_length;
+
+    // Bowl query per normative sections M/N, with the immutable
+    // orderAt46. Used only for small-domain test-only selections.
+    task automatic query_short(
+        input integer bowl_id,
+        input integer seal_value,
+        input integer choice_total,
+        output integer answer_index
+    );
+        integer next_id, qpos;
+        logic signed [383:0] answer_zero, flow_dir, accept_bound, picked;
+        begin
+            if(choice_total < 1 || choice_total > 980179200)
+                $fatal(1,"SHORT_QUERY_UNSUPPORTED_CHOICE_COUNT");
+            next_id=0;
+            for(qpos=0;qpos<6;qpos=qpos+1)
+                if(order_at46[qpos]==bowl_id)
+                    next_id=order_at46[(qpos+1)%6];
+            if(next_id<1 || next_id>6) $fatal(1,"QUERY_NEXT_BOWL");
+
+            answer_zero=saved((bowls[bowl_id]+seal_value+384'sd181)
+                               *(bowls[bowl_id]+seal_value+384'sd181)
+                               +384'sd179*bowls[next_id]+seal_value);
+            flow_dir=saved((answer_zero+seal_value+384'sd1+384'sd193)
+                            *(answer_zero+seal_value+384'sd1+384'sd193)
+                            +384'sd193*answer_zero+384'sd197*bowls[6]);
+            accept_bound=(MODULUS/choice_total)*choice_total;
+            if(answer_zero<=accept_bound) picked=answer_zero;
+            else if((flow_dir%384'sd2)==384'sd1) picked=384'sd1;
+            else picked=accept_bound;
+            answer_index=1+int'((picked-384'sd1)%choice_total);
+            if(answer_index<1 || answer_index>choice_total)
+                $fatal(1,"QUERY_SHORT_RANGE");
+        end
+    endtask
+
     initial begin
         positive_expected[1]=345;
         positive_expected[2]=818;
@@ -314,6 +360,128 @@ module tb_gate_gap_oracle;
            cand_open[year_ordinal-1]!=-15057703 ||
            cand_close[year_ordinal-1]!=-15053459)
             $fatal(1,"YEAR5000_CANONICAL_SELECTION");
+
+        // Stage 1 oracle cutlet component: Q-S-T for c=t=Foundation.
+        // YEAR 5000 open=-15057703, firstDay=-15057702. The 8 gaps
+        // in chronological order are negative #4..#1, then positive #1..#4.
+        cutlet_gaps[1]=negative_expected[4];
+        cutlet_gaps[2]=negative_expected[3];
+        cutlet_gaps[3]=negative_expected[2];
+        cutlet_gaps[4]=negative_expected[1];
+        for(gap_pos=5;gap_pos<=8;gap_pos=gap_pos+1)
+            cutlet_gaps[gap_pos]=positive_expected[gap_pos-4];
+
+        run_gate(-64'sd15055671,-64'sd15057702,gap_value);
+        query_short(2,20,3,cutlet_choice);
+        cutlet_count=5+cutlet_choice;  // 6..min(17,G=8)
+        if(cutlet_count<6 || cutlet_count>8)
+            $fatal(1,"FOUNDATION_CUTLET_COUNT_RANGE");
+
+        // Enumerate all positive compositions of G=8 with K parts;
+        // require a breakpoint at internal gate #4, namely c=Foundation.
+        comp_count=0;
+        for(mask=0;mask<128;mask=mask+1) begin
+            popcount=0;
+            for(gap_pos=1;gap_pos<=7;gap_pos=gap_pos+1)
+                if((mask & (1 << (gap_pos-1)))!=0)
+                    popcount=popcount+1;
+            if(popcount==(cutlet_count-1) && (mask & 8)!=0) begin
+                piece_no=0;
+                last_break=0;
+                for(gap_pos=1;gap_pos<=7;gap_pos=gap_pos+1)
+                    if((mask & (1 << (gap_pos-1)))!=0) begin
+                        piece_parts[comp_count][piece_no]=gap_pos-last_break;
+                        last_break=gap_pos;
+                        piece_no=piece_no+1;
+                    end
+                piece_parts[comp_count][piece_no]=8-last_break;
+                if(piece_no+1!=cutlet_count)
+                    $fatal(1,"COMPOSITION_PIECE_COUNT");
+                comp_count=comp_count+1;
+            end
+        end
+        if(comp_count<1 || comp_count>15)
+            $fatal(1,"ELIGIBLE_COMPOSITION_COUNT_RANGE");
+
+        // Explicit lexicographic sort of composition tuples.
+        for(aa=0;aa<comp_count;aa=aa+1) begin
+            for(bb=aa+1;bb<comp_count;bb=bb+1) begin
+                compare_state=0;
+                for(slot=0;slot<cutlet_count;slot=slot+1) begin
+                    if(compare_state==0 &&
+                       piece_parts[aa][slot]!=piece_parts[bb][slot]) begin
+                        if(piece_parts[bb][slot]<piece_parts[aa][slot])
+                            compare_state=-1;
+                        else compare_state=1;
+                    end
+                end
+                if(compare_state==-1) begin
+                    for(slot=0;slot<cutlet_count;slot=slot+1) begin
+                        swapping=piece_parts[aa][slot];
+                        piece_parts[aa][slot]=piece_parts[bb][slot];
+                        piece_parts[bb][slot]=swapping;
+                    end
+                end
+            end
+        end
+        query_short(2,21,comp_count,comp_choice);
+
+        // At c=Foundation: the fourth chronological gate is c itself.
+        // Locate its cutlet, and measure the number of days from
+        // that cutlet's first day to c inclusive.
+        gate_covered=0;
+        chosen_cutlet_pos=0;
+        chosen_day=0;
+        for(slot=0;slot<cutlet_count;slot=slot+1) begin
+            selected_piece_length=0;
+            for(name_i=0;name_i<piece_parts[comp_choice-1][slot];name_i=name_i+1)
+                selected_piece_length=selected_piece_length+
+                    cutlet_gaps[gate_covered+name_i+1];
+            gate_covered=gate_covered+piece_parts[comp_choice-1][slot];
+            if(gate_covered==4) begin
+                chosen_cutlet_pos=slot+1;
+                chosen_day=selected_piece_length;
+            end
+        end
+        if(gate_covered!=8 || chosen_cutlet_pos==0)
+            $fatal(1,"FOUNDATION_CUTLET_BOUNDARY");
+
+        // Assign K distinct canonical indices by lexical unranking of
+        // 17Pk sequences, bowl 5 seal 22, not string alphabetization.
+        permutation_count=1;
+        for(slot=0;slot<cutlet_count;slot=slot+1)
+            permutation_count=permutation_count*(17-slot);
+        if(permutation_count<=0 || permutation_count>980179200)
+            $fatal(1,"CUTLET_NAMES_CHOICE_RANGE");
+        query_short(5,22,permutation_count,names_choice);
+        remaining_rank=names_choice-1;
+        for(name_i=0;name_i<17;name_i=name_i+1)
+            available_names[name_i]=name_i+1;
+        for(slot=0;slot<cutlet_count;slot=slot+1) begin
+            product=1;
+            for(name_i=0;name_i<cutlet_count-slot-1;name_i=name_i+1)
+                product=product*(16-slot-name_i);
+            choose_slot=remaining_rank/product;
+            remaining_rank=remaining_rank%product;
+            if(choose_slot<0 || choose_slot>16-slot)
+                $fatal(1,"CUTLET_NAME_UNRANK_DIGIT");
+            name_values[slot]=available_names[choose_slot];
+            for(name_i=choose_slot;name_i<16-slot;name_i=name_i+1)
+                available_names[name_i]=available_names[name_i+1];
+        end
+        for(name_i=0;name_i<cutlet_count;name_i=name_i+1) begin
+            if(name_values[name_i]<1 || name_values[name_i]>17)
+                $fatal(1,"CUTLET_NAME_INDEX_RANGE");
+            for(name_j=name_i+1;name_j<cutlet_count;name_j=name_j+1)
+                if(name_values[name_i]==name_values[name_j])
+                    $fatal(1,"CUTLET_NAME_COLLISION");
+        end
+        $display("STAGE1_FOUNDATION_CUTLET_DETAIL K=%0d compositions=%0d comp_rank=%0d names_rank=%0d ordinal=%0d index=%0d day=%0d",
+                 cutlet_count,comp_count,comp_choice,names_choice,
+                 chosen_cutlet_pos,name_values[chosen_cutlet_pos-1],chosen_day);
+        if(name_values[chosen_cutlet_pos-1]!=10 || chosen_day!=503)
+            $fatal(1,"FOUNDATION_CANONICAL_CUTLET_10_DAY_503");
+        $display("STAGE1_FOUNDATION_CUTLET_REFERENCE_PASS index=10 day=503");
 
         $display("STAGE1_TEST_ONLY_GATE_GAPS_PASS cases=%0d",case_count);
         $display("STAGE1_YEAR5000_REFERENCE_PASS candidates=%0d rank=%0d",
