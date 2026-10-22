@@ -36,8 +36,11 @@ vvp build/sauce.vvp
 iverilog -g2012 -s tb_gate_gap_oracle -Wall -o build/gate.vvp \
   tests/pcal_stage1_oracle_pkg.sv tests/tb_gate_gap_oracle.sv
 vvp build/gate.vvp
+iverilog -g2012 -s tb_wide_division_golden -Wall -o build/longdiv.vvp \
+  tests/pcal_exact_division_pkg.sv tests/tb_wide_division_golden.sv
+vvp build/longdiv.vvp
 iverilog -g2012 -s tb_selection_rejection_equivalence -Wall -o build/selection.vvp \
-  tests/tb_selection_rejection_equivalence.sv
+  tests/pcal_exact_division_pkg.sv tests/tb_selection_rejection_equivalence.sv
 vvp build/selection.vvp
 echo "STAGE1_SIMULATION_BOOTSTRAP_RESET_FOUNDATION_AND_CATALOG_STRUCTURE_PASS_ONLY"
 echo "STAGE1_FULL_ORACLE_AND_CATALOG_QA_STILL_PENDING"
