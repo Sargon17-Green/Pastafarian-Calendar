@@ -52,6 +52,9 @@ jobs:
                       errors.append(f"{path}: square Hebrew character at index {index}")
               if "\U0001091f\U0001091f" in content:
                   errors.append(f"{path}: consecutive Phoenician word dividers")
+              compact_letters = content.translate(str.maketrans("", "", " \t\r\n"))
+              if "𐤀𐤐𐤎" in compact_letters:
+                  errors.append(f"{path}: anachronistic zero term in Phoenician prose (including across scribal line breaks)")
 
           if not list(Path(".").glob("TEST_LOG_STAGE_*.md")):
               errors.append("No TEST_LOG_STAGE_*.md files found")
