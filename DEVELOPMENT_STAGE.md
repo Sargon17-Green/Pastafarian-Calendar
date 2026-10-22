@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=46
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=23
-LAST_COMPLETED_STAGE=45
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=46
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..22. Stage46 thêm Cutlet, LegacyInclusiveCutletFirstDay và CutletMaterializationManager: ghép phần/tên/cổng chính xác nhưng cố tình lấy first_day=ngày cổng mở thay vì +1.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_46_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_46_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=733
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -1039,3 +1039,14 @@ trái với cốt-lết chuẩn (open,close] có first_day=gate(open)+1.
 16 kiểm soát cùng 4 nhóm normative RED, tổng dự kiến
 733 bài; đóng chỉ sau xác minh đúng 4 lỗi và khóa tên PASS.
 Không tích hợp tháng hay ngày lịch cuối; không sửa main/oracle.
+
+Stage46 DISCOVERY23 đã xác minh bằng GitHub Actions,
+Elixir 1.18.5 / OTP27, biên dịch 80 tệp:
+**733 bài, 729 PASS, đúng bốn nhóm normative RED**, không warning.
+16 điều khiển Stage46, 713 bài Stage01..45 đều PASS.
+Khác biệt nằm ở first_day=gate(open) thay vì gate(open)+1;
+tên, chỉ số cổng và last_day giữ nguyên theo oracle.
+Canonical Names Lock PASS.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762310217
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762310564
+Đóng Stage46 EXPECTED_RED; Stage47 PATCH23 chưa bắt đầu.

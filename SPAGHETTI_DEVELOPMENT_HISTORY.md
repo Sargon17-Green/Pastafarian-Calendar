@@ -1335,3 +1335,21 @@ oracle SHA `be1638f46b2190d617af0378a61b077bda10bf32`.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39606883324
 Đóng Stage45 GREEN. Stage46/55 DISCOVERY23 chưa bắt đầu.
 Không sửa main hoặc tích hợp lịch cuối.
+
+## Stage46/55 — DISCOVERY23: cốt-lết bắt đầu sai tại ngày cổng mở
+
+CutletMaterializationManager gọi thật LegacyInclusiveCutletFirstDay
+để ghép các phần và tên chính xác thành Cutlet, nhưng di sản
+đặt first_day=gate(open), thay vì +1 theo khoảng (open,close].
+Năm, bảng cổng, tên và last_day không đổi.
+
+Stage46 DISCOVERY23 đã xác minh bằng GitHub Actions,
+Elixir 1.18.5 / OTP27, biên dịch 80 tệp:
+**733 bài, 729 PASS, đúng bốn nhóm normative RED**, không warning.
+16 điều khiển Stage46, 713 bài Stage01..45 đều PASS.
+Khác biệt nằm ở first_day=gate(open) thay vì gate(open)+1;
+tên, chỉ số cổng và last_day giữ nguyên theo oracle.
+Canonical Names Lock PASS.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762310217
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762310564
+Đóng Stage46 EXPECTED_RED; Stage47 PATCH23 chưa bắt đầu.

@@ -28,3 +28,16 @@ test-only dự kiến đỏ. Mục tiêu 733 bài, đúng 4 RED,
 Canonical Names Lock PASS, không cảnh báo biên dịch.
 Không thay main, oracle hoặc PATCH01..22; chưa tích hợp
 tháng hoặc kết quả lịch cuối. HANDOFF_* không lên GitHub.
+
+## Kết quả CI
+
+Stage46 DISCOVERY23 đã xác minh bằng GitHub Actions,
+Elixir 1.18.5 / OTP27, biên dịch 80 tệp:
+**733 bài, 729 PASS, đúng bốn nhóm normative RED**, không warning.
+16 điều khiển Stage46, 713 bài Stage01..45 đều PASS.
+Khác biệt nằm ở first_day=gate(open) thay vì gate(open)+1;
+tên, chỉ số cổng và last_day giữ nguyên theo oracle.
+Canonical Names Lock PASS.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762310217
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762310564
+Đóng Stage46 EXPECTED_RED; Stage47 PATCH23 chưa bắt đầu.
