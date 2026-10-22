@@ -120,3 +120,31 @@ No stage 2 discovery or patch was opened.
   references in `catalog/KALAALLISUT_LEXICAL_QA_DOSSIER.md`.
   All six remain PENDING native review and **0/64** are approved.
 - No Stage 2, no main change, and no release claim.
+
+## 2026-10-22 — first actual Icarus simulation evidence
+
+The isolated push run 39763869338 and isolated PR run 39763937760
+both **completed FAILURE**. This is not a blocked runner anymore.
+Their logs were read and the failure was localized.
+
+- **PASS on both actual Icarus 12.0 runs:** bootstrap request/response
+  primitive and reset/recovery testbenches.
+- **PASS on PR run:** 4103 deterministic arithmetic property cases.
+- **FAIL in both:** Icarus compilation of
+  `tests/tb_sauce_foundation.sv`: SV syntax error on line 16
+  (`logic ... dist`) and dependent expressions. The token `dist`
+  is a reserved SystemVerilog keyword. This is a compilation failure,
+  not an arithmetic assertion failure.
+- Fixed all eleven `dist` declarations/references in
+  `tests/tb_sauce_foundation.sv` and
+  `tests/tb_gate_gap_oracle.sv` in commit
+  `a450565858acc58d91588ac0800cfe03815fd811`.
+- Strengthened `scripts/check_sv_declarations.sh` to reject the
+  reserved keyword and duplicate module-level `logic` declarations
+  in addition to `integer`; source fixes in
+  `2bc45cb3b8db0fdbd2d5c4889638b6d5e36aa33e`.
+- A fourth synthetic adversarial source case demonstrates the reserved
+  identifier rejection in the local preflight. Actual Icarus rerun
+  **has not returned** a conclusion on the current HEAD.
+- A separate 4096-cycle backpressure scoreboard is written, pending
+  execution. The QA still is NOT Stage-1 PASS.
