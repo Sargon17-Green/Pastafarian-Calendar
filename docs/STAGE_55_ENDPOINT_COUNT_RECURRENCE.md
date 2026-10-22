@@ -242,3 +242,52 @@ STAGE_55_ENDPOINT_UNRANK_EXPERIMENTAL_PASS
 
 No Stage 54 heavy differential or Stage 55 signoff follows merely
 from these experimental markers.
+
+
+## Odtwarzanie fragmentów i porównanie dróg licznikowych (2026-10-22)
+
+Natywny MATLAB R2026a run
+[39731783177](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39731783177)
+zakończył się **PASS** na commit
+`10c07638b8481c8034f750ed84472a0f1b895587`:
+
+- `STAGE_55_ALL_OPEN_CHUNK_BRUTE_PASS FAMILIES=9 RANK_CHECKS=800 SEGMENTS=3098`.
+  Fragmenty składane po wznowieniu dawały dokładnie te same leksykograficzne
+  słowa co niezależny enumerator.
+- `STAGE_55_ALL_OPEN_CHUNK_VALIDATION_PASS`.
+- `STAGE_55_ALL_OPEN_CHUNK_BENCH MONTHS=45 DAYS=4230 STEPS=12 SECONDS=29.471 COUNT_DIGITS=6858 DONE=0`.
+  To **tylko 12** z 4230 dni stanu z już otwartymi miesiącami.
+
+Dalsza próba liczenia wszystkich wag przez osobne iloczyny współczynników
+dwumianowych była **semantycznie poprawna** w natywnym run
+[39761082346](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39761082346),
+commit `15d236e2c9ab06983d24986d06715b2e1d09772f`:
+
+- `STAGE_55_ALL_OPEN_FACTOR_DIFFERENTIAL_PASS FRONTIERS=1089 CHILDREN=3645`;
+- `STAGE_55_ALL_OPEN_FACTOR_BENCH MONTHS=45 DAYS=4230 OLD_SECONDS=1.643 FACTOR_SECONDS=3.641 DIGITS=6877`;
+- `STAGE_55_ALL_OPEN_FACTOR_EXPERIMENTAL_PASS`.
+
+**Wniosek wydajnościowy:** metoda osobnych współczynników była w tym
+konkretnym biegu wolniejsza i nie zastąpiła metody historycznie
+zweryfikowanej. Nie należy mylić PASS semantycznego z polepszeniem czasu.
+
+Nowa niezależna próba `allOpenedWholeWeaveChildCountsCommonDenominator`
+w commit `35f42e7d6ff42a748d2b97f97b0f771c693355e1` korzysta z jednego
+wspólnego mianownika \(D\) i dokładnego \(g=\gcd(F,D)\).
+Każda liczba bloków ma postać \(B_i=F\,N_i/D\).
+Ponieważ \(B_i\) jest liczbą całkowitą i
+\(\gcd(F/g,D/g)=1\), również \(D/g\) dzieli \(N_i\).
+Można obliczyć \(F/g\) **raz**, a dla każdego dziecka wykonać podział
+\(\left(N_i/(D/g)\right)\) na liczbach znacznie krótszych niż \(F\).
+Testy obejmują różnicę z dwiema niezależnymi zatwierdzonymi formułami,
+1089 małych frontów oraz pełne 45 miesięcy / 4230 dni.
+
+Run [39761828541](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39761828541)
+był jeszcze w toku przy tworzeniu tego wpisu; **brak uprawnienia
+do ogłoszenia PASS tego nowego wariantu przed odczytaniem logu**.
+
+Wszystkie trzy liczniki nadal dotyczą stanu, w którym miesiące już
+otwarto. Ani ich zgodność, ani wyniki wydajnościowe nie stanowią
+ukończonego całorocznego przebiegu od pustego prefiksu, porównania
+z niezależnym `normative_oracle`, ani bramki
+`STAGE_55_FINAL_AUDIT_PASS`.
