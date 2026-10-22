@@ -14,6 +14,8 @@ on:
       - 'tests/run_stage55_all_open_chunk_tests.m'
       - 'src/\+pastafari/allOpenedWholeWeaveChildCountsByFactors.m'
       - 'tests/run_stage55_all_open_factor_tests.m'
+      - 'src/\+pastafari/allOpenedWholeWeaveChildCountsCommonDenominator.m'
+      - 'tests/run_stage55_all_open_common_denominator_tests.m'
       - '.github/workflows/matlab-endpoint-counter-native.yml'
   workflow_dispatch:
 
@@ -35,4 +37,4 @@ jobs:
       - name: Compare every reachable small suffix
         uses: matlab-actions/run-command@v3
         with:
-          command: addpath('tests'); run_stage55_endpoint_counter_tests; run_stage55_endpoint_unrank_tests; run_stage55_all_open_chunk_tests; run_stage55_all_open_factor_tests
+          command: addpath('tests'); run_stage55_endpoint_counter_tests; run_stage55_endpoint_unrank_tests; run_stage55_all_open_chunk_tests; run_stage55_all_open_factor_tests; run_stage55_all_open_common_denominator_tests
