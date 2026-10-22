@@ -18,8 +18,9 @@ sub new ($class,$lengths,$options=undef) {
     die "Oracle 快取選項必須為 HASH 參照\n"
         if defined($options) && ref($options) ne 'HASH';
     $options //= {};
-    die "Oracle 快取選項只能包含 bounded_cache、cache_limit\n"
-        if grep {$_ ne 'bounded_cache' && $_ ne 'cache_limit' && $_ ne 'cache_policy'} keys %$options;
+    die "Oracle 快取選項只能包含合法的 QA 快取設定\n"
+        if grep {$_ ne 'bounded_cache' && $_ ne 'cache_limit'
+            && $_ ne 'cache_policy' && $_ ne 'early_final_closed_form'} keys %$options;
     my $bounded=$options->{bounded_cache}//0;
     my $policy=$options->{cache_policy}//'fifo';
     die "快取策略只允許 fifo 或 clock\n"
@@ -33,7 +34,14 @@ sub new ($class,$lengths,$options=undef) {
         if "$limit" !~ /\A[0-9]+\z/ || $limit<1 || $limit>200000;
     die "修改 cache_limit 必須顯式啟用 bounded_cache\n"
         if !$bounded && $limit!=200000;
+    my $early_final=$options->{early_final_closed_form}//0;
+    die "early_final_closed_form 必須是 0 或 1\n"
+        if "$early_final" ne '0' && "$early_final" ne '1';
+    die "提前末次序閉式只允許明確啟動的 bounded QA\n"
+        if $early_final && !$bounded;
     die "月份長度須為 ARRAY 參照\n" if ref($lengths) ne 'ARRAY';
+    die "提前末次序閉式僅對四月份合法\n"
+        if $early_final && @$lengths!=4;
     die "獨立記憶式 Oracle 只支援最多四個月份\n" if @$lengths>4;
     my (@sizes,$total);
     $total=0;
@@ -53,6 +61,7 @@ sub new ($class,$lengths,$options=undef) {
         bounded_cache=>$bounded,cache_limit=>$limit,
         cache_fifo=>[],evictions=>0,
         cache_policy=>$policy,cache_recent=>{},second_chances=>0,
+        early_final_closed_form=>$early_final,early_closed_forms=>0,
         visits=>0, peak_depth=>0, closed_forms=>0,
         choose=>{}, choose_queue=>[], choose_limit=>8192,
     },$class;
@@ -103,6 +112,16 @@ sub _count_state ($self,$remaining,$opened,$closed,$depth) {
     # 不必為每一種末月已開的狀態配置長期 BigInt 快取項。
     # 仍保留 0/1 月極小退化向量的既有查詢診斷契約。
     my $m=$self->{months};
+    # 只對四月份明確 opt-in：前三月都已首次出現，
+    # 月份 4 的首次出現必然只能在本後綴內；任何合法
+    # 後綴均滿足最後消失 1<2<3<4，反之亦然。
+    # 因而無須再枚舉月份 4 的第一次出現位置，可直接
+    # 以不同的精確組合閉式計算全部完工詞數。
+    # 其餘所有原本的遞迴和有界快取行為完全不變。
+    if ($m==4 && $opened==3 && $self->{early_final_closed_form}) {
+        $self->{early_closed_forms}++;
+        return $self->_last_order($remaining,$closed);
+    }
     if ($m>=2 && $opened==$m) {
         return $self->_last_order($remaining,$closed);
     }
@@ -193,6 +212,8 @@ sub diagnostics ($self) {
         entries=>$self->{entries},cache_hits=>$self->{cache_hits},
         evictions=>$self->{evictions},cache_limit=>$self->{cache_limit},
         cache_policy=>$self->{cache_policy},second_chances=>$self->{second_chances},
+        early_final_closed_form=>$self->{early_final_closed_form},
+        early_closed_forms=>$self->{early_closed_forms},
         visits=>$self->{visits},peak_depth=>$self->{peak_depth},
         closed_forms=>$self->{closed_forms},
         binomial_entries=>scalar(@{$self->{choose_queue}}),

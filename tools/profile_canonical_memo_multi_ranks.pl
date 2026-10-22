@@ -98,10 +98,26 @@ if (!$pid) {
         $cache_options->{cache_policy}='clock'
             if $offset==36
             && $case_filter =~ /\Ahash36-(?:08|09|10)\z/;
+        # R61: 對 R60 唯二仍 TIME_LIMIT 的 08/09，在最後一月
+        # 尚未首次出現而前 3 月已開時，改用獨立閉式數末次序。
+        # 200000 快取上限、clock、185 秒及其他排名不變。
+        $cache_options->{early_final_closed_form}=1
+            if $offset==36
+            && $case_filter =~ /\Ahash36-(?:08|09)\z/;
         my $counter=Pastafari::WeavingMemoOracle->new(
             \@L,$cache_options
         );
         my $total=$counter->count_prefix([]);
+        if ($offset==36
+            && $case_filter =~ /\Ahash36-(?:08|09)\z/) {
+            my $diag=$counter->diagnostics;
+            die "R61 提前閉式未在四月有效狀態啟動\n"
+                if !$diag->{early_final_closed_form}
+                || $diag->{early_closed_forms}<1;
+            printf "CANONICAL_MULTI_RANK phase=R61_EARLY_LAST_ORDER_PASS offset=%d filter=%s calls=%d entries=%d cache_limit=%d\n",
+                $offset,$case_filter,$diag->{early_closed_forms},
+                $diag->{entries},$diag->{cache_limit};
+        }
         my $poly=countWeavingsPolynomial(\@L);
         die "記憶式和不同位置多項式算法的總數不符\n"
             if $total!=$poly;
