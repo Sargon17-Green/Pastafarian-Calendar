@@ -1,19 +1,23 @@
-name: SystemVerilog Stage 1 Bootstrap
+name: SystemVerilog Stage 1 Isolated QA
 on:
   push:
-    branches: ['SystemVerilog+Kalaallisut']
+    branches:
+      - qa-systemverilog-kalaallisut-stage1-20261022
+  pull_request:
+    branches:
+      - qa-systemverilog-kalaallisut-stage1-20261022
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   simulation:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - name: Install Icarus Verilog
         run: |
           sudo apt-get update
           sudo apt-get install -y iverilog
-      - name: Simulate Stage 1 and test-only Foundation oracle
+      - name: Execute self-contained test-only suite
         run: bash scripts/verify_stage1.sh
