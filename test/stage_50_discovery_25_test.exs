@@ -110,10 +110,12 @@ defmodule PastafariCalendarElixirVietnamese.Stage50Discovery25Test do
     assert r.historical_rank in 1..r.candidate_count
   end
 
-  test "production thực sự mở hạng legacy" do
+  test "production mở hạng đã sửa nhưng giữ hạng lịch sử" do
     r = MonthLengthsManager.diagnose(@foundation, @foundation)
-    assert r.month_lengths ==
+    assert r.historical_month_lengths ==
       BoundedMonthCompositions.unrank(r.year_length, r.month_count, r.historical_rank)
+    assert r.month_lengths ==
+      BoundedMonthCompositions.unrank(r.year_length, r.month_count, r.corrected_rank)
     assert r.month_lengths == Calendar.month_lengths_spaghetti(@foundation, @foundation)
   end
 
@@ -142,15 +144,15 @@ defmodule PastafariCalendarElixirVietnamese.Stage50Discovery25Test do
     end
   end
 
-  test "production không gọi oracle và chưa có PATCH25" do
+  test "production không gọi oracle và dùng PATCH25 thật" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     manager = File.read!(Path.join(root, "month_lengths_manager.ex"))
     legacy = File.read!(Path.join(root, "legacy_mirrored_month_lengths_rank.ex"))
-    assert manager =~ "LegacyMirroredMonthLengthsRank.transform(normative_rank, candidate_count)"
-    assert manager =~ "BoundedMonthCompositions.unrank(total, slots, legacy_rank)"
+    assert manager =~ "MonthLengthsRankPatch.diagnose(normative_rank, candidate_count)"
+    assert manager =~ "BoundedMonthCompositions.unrank(total, slots, patch.corrected_rank)"
     assert legacy =~ "count - rank + 1"
     refute manager =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "month_lengths_rank_patch.ex"))
+    assert File.exists?(Path.join(root, "month_lengths_rank_patch.ex"))
     assert_raise StageNotIntegratedError, fn ->
       Calendar.calendar_date_spaghetti(@foundation, @foundation)
     end

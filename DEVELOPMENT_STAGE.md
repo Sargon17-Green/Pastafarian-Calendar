@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=50
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=51
+CURRENT_KIND=PATCH
 CURRENT_PATCH=25
 LAST_COMPLETED_STAGE=50
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..24; Stage50 thêm BoundedMonthCompositions đếm/mở hạng độ dài 4..123, MonthLengthsManager và LegacyMirroredMonthLengthsRank; bát3/chốt31 đúng nhưng hạng bị phản chiếu.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..24; Stage51 thêm MonthLengthsRankPatch gọi thật LegacyMirroredMonthLengthsRank rồi khôi phục hạng và độ dài tháng chuẩn, giữ lịch sử.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_50_DISCOVERY_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_51_PATCH_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=813
-CI_FAILURES=4_EXPECTED_ONLY
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -1105,3 +1105,9 @@ RED dự kiến, tổng 813 bài. Không sửa main/legacy cũ.
 Stage50 xác minh: 813 bài, 809 PASS, đúng 4 normative RED, không warning. Canonical Names Lock PASS.
 CI https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39818815753
 Tên chuẩn https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39818815885
+
+Stage51 PATCH25: gọi thật di sản phản chiếu rank, lưu hạng
+và độ dài tháng lịch sử, phản chiếu lần hai để khôi phục
+rank chuẩn. Giữ 4 nhóm normative Stage50 không đổi và
+thêm 20 bài Stage51. Mục tiêu 833 bài GREEN, Names PASS.
+Không sửa main, oracle, di sản hoặc PATCH trước.
