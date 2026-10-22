@@ -442,6 +442,48 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'legacy.order46.overwritten');
             return $result;
         });
+        $this->dispatcher->register('ORDER_LATCH_PATCH_11', function(BootstrapContext $context): array {
+            $c = $context->calculationDay;
+            $t = $context->targetDay;
+            $action = $this->dayCount($c);
+            $target = $this->dayCount($t);
+            $counts = [
+                'action' => $action,
+                'target' => $target,
+                'distance' => $this->distance($c, $t),
+                'connection' => $action->add($target),
+                'direction' => $t < $c ? 1 : ($t === $c ? 2 : 3),
+            ];
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $unrank = new \Pastafari\Stage01\Legacy\LegacyPermutationUnrank0();
+            $permutation = new \Pastafari\Stage01\Patches\PermutationPatch08(
+                new \Pastafari\Stage01\Legacy\LegacyBowlPermutation($unrank), $unrank
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyOverwrittenOrder11(
+                $save,
+                new \Pastafari\Stage01\Legacy\LegacyBowlFactory($save),
+                $permutation,
+                new \Pastafari\Stage01\Patches\PoursAliasPatch09(
+                    new \Pastafari\Stage01\Legacy\LegacyFixedPositionPours($save)
+                ),
+                new \Pastafari\Stage01\Patches\BowlShadowPatch10(
+                    new \Pastafari\Stage01\Legacy\LegacyInPlaceBowlStir($save), $save
+                )
+            );
+            $patch = new \Pastafari\Stage01\Patches\OrderLatchPatch11(
+                $legacy, $permutation
+            );
+            $result = $patch->sauceWithOrderLatch(
+                $counts, $this->stones(), $this->visibleDrops($c, $t)
+            );
+            $context->semanticState['orderAtDrop46Latch'] = $result['orderAtDrop46'];
+            $context->semanticState['postStirsCompleted'] = $result['postStirs'];
+            $context->status = 'ORDER_LATCH_PATCH_11_RETURNED';
+            $this->metrics->bump($context, 'order46.patch11.calls');
+            return $result;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -710,6 +752,17 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('OVERWRITTEN_ORDER_46_LEGACY', $context)
+        );
+    }
+
+    /** @return array{bowls:array<int,BigInt>,orderAtDrop46:list<int>,postStirs:int,dropCount:int} */
+    public function sauceOrder(int $calculationDay, int $targetDay): array
+    {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'ORDER_LATCH_PATCH_11';
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('ORDER_LATCH_PATCH_11', $context)
         );
     }
 

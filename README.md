@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 22 (DISCOVERY 11)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 23 (PATCH 11)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -330,3 +330,10 @@ php -d memory_limit=512M tests/verify_stage22_discovery11.php
 ```
 
 Ujian langsung sejarah sengaja keluar dengan kod 1: tiga pasangan hari, tiga susunan terpadam yang dijangka, 18 nilai mangkuk akhir yang tepat, dan 36 kacauan pasca-titisan, tanpa ralat lain. Pengesah keluar 0 hanya jika RED ini terasing dan tepat. Semua ujian Stage 1–21 mesti kekal hijau. **Stage 23 — PATCH 11 tidak dimulakan.**
+
+
+## Stage 23 — PATCH 11: Kunci susunan titisan 46
+
+OrderLatchPatch11 menyimpan permutasi titisan ke-46, memanggil LegacyOverwrittenOrder11::sauceWrong secara sebenar dan menukar hanya medan orderAtDrop46. Enam mangkuk dan 12 kacauan tetap diperoleh daripada pengiraan sejarah. Legacy, oracle, katalog dan fixture tidak diubah.
+
+Ujian: php -d memory_limit=512M tests/verify_stage22_discovery11.php dan php -d memory_limit=512M tests/stage23_patch11_tests.php. Enam pasangan hari dibandingkan dengan oracle PHP tempatan, 36 komponen mangkuk dan 72 kacauan, serta dua input tidak lengkap. Jangan mulakan Stage24 sebelum CI Native untuk HEAD tepat Stage23 hijau.

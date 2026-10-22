@@ -88,3 +88,5 @@ jobs:
         run: php -d memory_limit=512M tests/stage21_patch10_tests.php
       - name: Penemuan 11 — susunan titisan 46 ditindih kacauan akhir
         run: php -d memory_limit=512M tests/verify_stage22_discovery11.php
+      - name: Tampalan 11 — kunci susunan titisan 46
+        run: php -d memory_limit=512M tests/stage23_patch11_tests.php
