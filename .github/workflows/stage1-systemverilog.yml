@@ -6,7 +6,17 @@ on:
   pull_request:
     branches:
       - qa-systemverilog-kalaallisut-stage1-20261022
+    paths:
+      - 'rtl/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - 'catalog/**'
+      - '.github/workflows/stage1-systemverilog.yml'
   workflow_dispatch:
+# Keep only the latest candidate verification active within each PR/ref.
+concurrency:
+  group: stage1-qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
