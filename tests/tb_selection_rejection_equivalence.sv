@@ -104,6 +104,26 @@ module tb_selection_rejection_equivalence;
         big_space = M * M * M;
         big_n = M * M + 384'sd1;
         big_l = (big_space / big_n) * big_n;
+        // Diagnose the individual conditions before changing arithmetic.
+        if (big_l > big_space)
+            $display("DIAG_WIDE3: limit_gt_space; S=%h N=%h L=%h",
+                     big_space,big_n,big_l);
+        if ((big_space - big_l) >= big_n)
+            $display("DIAG_WIDE3: remainder_ge_N; rem=%h N=%h quotient=%h",
+                     big_space-big_l,big_n,big_space/big_n);
+        if (big_space <= M * M)
+            $display("DIAG_WIDE3: space_le_M2; S=%h M2=%h",
+                     big_space,M*M);
+        if (big_l <= 384'sd0)
+            $display("DIAG_WIDE3: limit_nonpositive; L=%h",big_l);
+        if (big_space !== M*M*M)
+            $display("DIAG_WIDE3: failed_cube_identity");
+        if ((big_space/big_n) !== (M - 384'sd1))
+            $display("DIAG_WIDE3: quotient_not_M_minus_1; quotient=%h expected=%h",
+                     big_space/big_n,M-384'sd1);
+        if ((big_space-big_l) !== (M*M - M + 384'sd1))
+            $display("DIAG_WIDE3: remainder_not_expected; remainder=%h expected=%h",
+                     big_space-big_l,M*M-M+384'sd1);
         if (big_l > big_space || (big_space - big_l) >= big_n ||
             big_space <= M * M || big_l <= 384'sd0)
             $fatal(1, "WIDE_THREE_DIGITS_ARITHMETIC");
