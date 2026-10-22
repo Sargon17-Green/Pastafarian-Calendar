@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=47
-CURRENT_KIND=PATCH
-CURRENT_PATCH=23
+CURRENT_STAGE=48
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=24
 LAST_COMPLETED_STAGE=47
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..22; Stage47 thêm CutletFirstDayPatch gọi thật LegacyInclusiveCutletFirstDay và chỉnh first_day=gate(open)+1, giữ các chỉ số tên, cổng và last_day.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..23; Stage48 mở MonthCountManager và LegacyDescendingMonthCount, với tập số tháng khả thi theo độ dài năm, bát3/chốt30 chuẩn nhưng cố ý đảo thứ tự ứng viên.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_47_PATCH_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_48_DISCOVERY_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=753
-CI_FAILURES=0
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -1068,3 +1068,11 @@ Canonical Names Lock PASS.
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39772388280
 Không sửa di sản, oracle, thuật toán gốc hoặc main.
 Đóng Stage47 GREEN. Stage48/55 DISCOVERY24 chưa bắt đầu.
+
+Giai đoạn 48 DISCOVERY24 mở chọn số tháng theo độ dài năm.
+Ứng viên chuẩn từ ceil(year_length/123) đến
+min(47,floor(year_length/4)), hỏi sauce(c,year.open+1),
+bát 3/chốt 30 và hạng một-based. Di sản đảo thứ tự chọn,
+còn ngày/cổng/cốt-lết chuẩn không đổi. Thêm 20 bài Stage48,
+16 kiểm soát và 4 nhóm normative RED dự kiến, tổng 773 bài.
+Chờ CI/Names trước khi đóng. Không sửa oracle/main.
