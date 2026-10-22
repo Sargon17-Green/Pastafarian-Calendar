@@ -1,8 +1,8 @@
 # Registrum canonicum CI — C++ et Latina Nova — Gradus 56
 
-**Ultima certificatio codicis:** [`b69fdb8534a7787a5eeb9fb6f31eaf5d11ecc6da`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/b69fdb8534a7787a5eeb9fb6f31eaf5d11ecc6da),
-[vigilia 38278361432](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38278361432),
-`completed/success` **20/20 officia**, `SOAK_GREEN` die XII Octobris MMXXVI.
+**Ultima certificatio codicis:** [`5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8),
+[vigilia 39762381184](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762381184),
+`completed/success` **20/20 officia**, `SOAK_GREEN` die XXII Octobris MMXXVI.
 Pars infra ante hanc notitiam alios status historicos, etiam `PENDING`,
 memoravit ad tempus quo scriptae sunt; notitia probata in sectione ultima
 omnem statum veterem superat. Hoc editum solam documentationem mutat;
@@ -537,3 +537,38 @@ antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
   historical 20/20 must not be attributed to the new exact SHA.
   Production C++ calendar, independent Oracle, main, and Stage 57
   remain untouched.
+
+## Gradus 56 — contractus numericus V2 comprobatus, 22 October 2026
+
+- Reparatio numerorum decimalium ad SHA `888b54fc5a136144b565c39f09b8f9106a91e2bd`: cursus native
+  [39552852053](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39552852053)
+  `completed/success`; vigilia integra
+  [39552851947](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39552851947)
+  `20/20 success`. Significatio radicis decimae iam non pendet.
+- Code SHA exacte probatus: `5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8`.
+  Vigilia [39762381184](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762381184):
+  `20/20 success`, officium `119793505019`:
+  `SOAK_REPETITUM=8/8_PASS`, officium `119808657582`:
+  `VIGILIA_SOAK=PASS`, `STATUS_POST_RUN=SOAK_GREEN`.
+- Adaptor nativus
+  [39762381242](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762381242),
+  officium `119769456766`: `completed/success`; GCC et Clang:
+  `SOAK_ADAPTER_V1=3/3_PASS`,
+  `SOAK_ADAPTER_DECIMAL=4/4_PASS`,
+  `SOAK_CANONICAL_NUMERIC=3/3_PASS` et `4/4_PASS`;
+  `SOAK_CANONICAL_CROSS_COMPILER=PASS`.
+- Collatio cum Celeritate pinnta:
+  [39762381145](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762381145),
+  `6/6 jobs success`; officium `119771055936`:
+  `CROSS_CPP_CELERITAS_ALL=30/30_PASS SHARDS=5`,
+  `SOAK_ADAPTER_CELERITAS_ALL=30/30_PASS SHARDS=5`,
+  `SOAK_CANONICAL_V2_ALL=30/30_PASS SHARDS=5`.
+- Custodia nominum
+  [39762381178](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762381178):
+  `success`. V1 immobilis est; V2 indices canonicos `1..17` et
+  `1..47` per tabulam fontis immobilem reddit.
+- Haec testimonia tantum ad SHA exactum `5d33499c` referuntur.
+  Haec emendatio registri et descriptoris SHA alterum creat, sine
+  mutatione motoris, adaptorii aut probatorum. `main` non mutatur;
+  Gradus 57 non aperitur. Comparatio universalis omnium
+  implementationum (global soak) **nondum** facta est.

@@ -3,11 +3,12 @@
   "implementation_id": "pastafarian-calendar-cpp-latina",
   "repository": "Sargon17-Green/Pastafarian-Calendar",
   "branch": "C++&Latina",
-  "engine_verified_commit": "888b54fc5a136144b565c39f09b8f9106a91e2bd",
+  "engine_verified_commit": "5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8",
   "engine_verification": {
-    "full_ci_run": 39552851947,
-    "adapter_ci_run": 39552852053,
-    "names_lock_run": 39552852051
+    "full_ci_run": 39762381184,
+    "adapter_ci_run": 39762381242,
+    "names_lock_run": 39762381178,
+    "cross_implementation_ci_run": 39762381145
   },
   "entrypoint": "tools/soak_vector_adapter.cpp",
   "sources": [
@@ -71,8 +72,8 @@
     "backpressure_owner": "central scheduler",
     "slow_case_queue_owner": "central scheduler"
   },
-  "status": "canonical_numeric_v2_pending_exact_sha_ci",
-  "note": "V1 remains byte-for-byte compatible for historical comparison; use canonical_numeric V2 for cross-language comparison. Global multi-implementation soak has not been run.",
+  "status": "canonical_numeric_v2_exact_sha_ci_pass_global_soak_pending",
+  "note": "V1 remains byte-for-byte compatible. Canonical numeric V2 is verified on tested code SHA 5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8. This descriptor may be committed later at a documentation-only SHA. Global multi-implementation soak has not run.",
   "canonical_numeric": {
     "protocol": "PASTAFARI_SOAK_CANONICAL_V2",
     "schema_arg": "--schema-canonical",
@@ -103,6 +104,6 @@
     "catalog": "include/pastafari/source_language_catalog.hpp",
     "label_mapping": "exact text to unique frozen canonicalIndex; unknown or ambiguous names invalidate shard",
     "numeric_format": "ASCII decimal integers",
-    "status": "pending new exact SHA CI"
+    "status": "verified exact commit 5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8; GCC/Clang and 30/30 pinned Celeritas"
   }
 }
