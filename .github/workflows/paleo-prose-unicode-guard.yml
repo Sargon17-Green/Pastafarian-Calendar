@@ -58,6 +58,22 @@ jobs:
 
           if not list(Path(".").glob("TEST_LOG_STAGE_*.md")):
               errors.append("No TEST_LOG_STAGE_*.md files found")
+          # The stage 41-45 history tail must match the test logs verbatim.
+          # This guards transcription consistency, not philological accuracy.
+          history_path = Path("SPAGHETTI_DEVELOPMENT_HISTORY.md")
+          mirrors = [Path(f"TEST_LOG_STAGE_{n:02d}.md") for n in range(41, 46)]
+          if history_path.is_file() and all(path.is_file() for path in mirrors):
+              try:
+                  history = history_path.read_text(encoding="utf-8", errors="strict")
+                  mirrored_tail = "".join(
+                      path.read_text(encoding="utf-8", errors="strict").rstrip("\n") + "\n"
+                      for path in mirrors
+                  )
+                  if not history.endswith(mirrored_tail):
+                      errors.append("Stage 41-45 history tail differs from its test logs")
+              except UnicodeError as exc:
+                  errors.append(f"Stage 41-45 history parity could not be checked: {exc}")
+
           if errors:
               for message in errors:
                   print(f"::error::{message}")
