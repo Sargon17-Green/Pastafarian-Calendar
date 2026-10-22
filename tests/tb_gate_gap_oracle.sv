@@ -384,6 +384,29 @@ module tb_gate_gap_oracle;
             cutlet_gaps[gap_pos]=positive_expected[gap_pos-4];
 
         run_gate(-64'sd15055671,-64'sd15057702,gap_value);
+        // Canonical bowl-4/seal-32 inputs for the full weave choice.
+        // Independent exact arithmetic reference derives these
+        // constants from c=Foundation, t=firstDayOfYear.
+        if(bowls[4]!=384'sd68405753691768034022026521715063004414 ||
+           bowls[3]!=384'sd120242669391032623778229844410337772153 ||
+           order_at46[0]!=2 || order_at46[1]!=5 ||
+           order_at46[2]!=6 || order_at46[3]!=4 ||
+           order_at46[4]!=3 || order_at46[5]!=1)
+            $fatal(1,"FOUNDATION_WEAVE_SAUCE_SOURCE_MISMATCH");
+        if(saved((bowls[4]+384'sd32+384'sd181)*
+                 (bowls[4]+384'sd32+384'sd181)+
+                 384'sd179*bowls[3]+384'sd32)
+              !=384'sd106458209471735273212934705135928382248)
+            $fatal(1,"FOUNDATION_WEAVE_BOWL4_A0_MISMATCH");
+        if(saved((384'sd106458209471735273212934705135928382248+
+                  384'sd32+384'sd1+384'sd193)*
+                 (384'sd106458209471735273212934705135928382248+
+                  384'sd32+384'sd1+384'sd193)+
+                 384'sd193*384'sd106458209471735273212934705135928382248+
+                 384'sd197*bowls[6])
+              !=384'sd158023501449213800568736474174904318352)
+            $fatal(1,"FOUNDATION_WEAVE_BOWL4_DIRECTION_MISMATCH");
+        $display("STAGE1_FOUNDATION_WEAVE_BOWL4_INPUT_PASS seal=32 step=-1 digits=177");
         query_short(2,20,3,cutlet_choice);
         cutlet_count=5+cutlet_choice;  // 6..min(17,G=8)
         if(cutlet_count<6 || cutlet_count>8)
