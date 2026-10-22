@@ -282,6 +282,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyDoubleOffsetWideRank(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة التاسعة عشرة: إزالة زيادة واحد ثانية مع حفظ الشاهد القديم.
+    public static BigInteger EvaluateDoubleOffsetWideRank(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateDoubleOffsetWideRank(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

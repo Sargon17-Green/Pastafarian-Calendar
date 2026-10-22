@@ -246,3 +246,5 @@ jobs:
         run: |
           test "${{ steps.discovery_double_offset_wide_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage38Tests/PastafarianCalendar.Stage38Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ رقعة الإزاحة الثانية التاسعة عشرة وحفظ شاهد الخرج التاريخي
+        run: dotnet run --project tests/PastafarianCalendar.Stage39Tests/PastafarianCalendar.Stage39Tests.csproj --configuration Release

@@ -160,6 +160,9 @@ public sealed class MonsterContext
     // الندبة التاسعة عشرة: تضاف وحدة ثانية عند إخراج مرتبة الأسرة الواسعة.
     public BigInteger? LegacyDoubleOffsetWideRankResult { get; set; }
 
+    // الرقعة التاسعة عشرة: الرتبة الصحيحة محفوظة عن شاهد الزيادة الثانية.
+    public BigInteger? PatchedDoubleOffsetWideRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
