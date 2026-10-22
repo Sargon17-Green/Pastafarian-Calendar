@@ -49,7 +49,7 @@ simulation NOT EXECUTED. Green stage-1 signoff is forbidden until
 actual simulator results and catalog review are recorded.
 ## Independent signed gate tests
 
-New `tests/tb_gate_gap_oracle.sv`: 16 test-only gate checks for
+New `tests/tb_gate_gap_oracle.sv`: 22 test-only gate checks for
 `(Foundation,Foundation±n)`, n=1..8, with separately derived
 arithmetic expected values. It enforces direction semantics,
 exact soup/sauce construction, final bowl querying, and the
@@ -73,3 +73,26 @@ cross-index invariants.
 
 Review status remains 0/64 approved. The presence of a lexical
 candidate does not constitute qualified Kalaallisut validation.
+
+## Canonical Year 5000 reference checkpoint
+
+The gate fixture is now extended to 22 computed signed gap witnesses
+(positive n=1..10 and negative n=1..12). It computes the first four
+cumulative sums in both directions and verifies the canonical year-5000
+open gate -15057703 and close gate -15053459.
+
+It then enumerates all eligible candidate years containing Foundation,
+requiring at least six gap intervals, length 252..5778, and interval
+(open,close]. The independent mathematical scratch returned **43**
+candidates, sorted by length and then opening gate. Bowl 1 with seal 10
+selected candidate **15**, length 4244, open -15057703, close -15053459,
+matching the normative canonical checkpoint.
+
+The complete reference candidate ordering is stored in
+`docs/FOUNDATION_YEAR5000_43_CANDIDATES.csv`; the 22 gate gaps and
+cumulative endpoints in `docs/FOUNDATION_22_SIGNED_GATE_GAPS.csv`.
+
+This is a new **test-only** independent SystemVerilog oracle segment,
+not a production calculation module. CI iverilog / vvp is still
+UNEXECUTED. No full five-field calendar oracle or Kalaallisut source
+catalog acceptance is claimed.

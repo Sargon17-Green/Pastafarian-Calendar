@@ -66,3 +66,21 @@ No stage 2 discovery or patch was opened.
 - Engineering documentation and comments still require independent
   Kalaallisut language QA; current English technical research notes
   must not be treated as linguistically certified source documentation.
+
+## 2026-10-22 — Foundation gates and Year 5000 reference
+
+- Mathematical scratch executed for positive gates n=1..10 and
+  negative gates n=1..12, exact soup/sauce and bowl query per input.
+- 22 gap values independently recorded as derived vectors.
+- The first four positive and negative gap sums reproduce the two
+  canonical Year 5000 boundaries, length 4244.
+- Exactly 43 candidate years satisfy the normative eligibility rules
+  for c=Foundation. Sorting by length then opening gate yields
+  canonical chosen rank 15.
+- `tests/tb_gate_gap_oracle.sv` extended accordingly, using the
+  independent SystemVerilog sauce engine and an independent candidate
+  enumeration / sorting implementation; **not yet simulated**.
+- Added complete candidate and signed gap CSV ledgers. They contain
+  research-derived values, not hardware-run evidence.
+- Native Kalaallisut review remains 0/64 approved; full calendar
+  oracle unfinished, Stage 1 stays IN_PROGRESS.
