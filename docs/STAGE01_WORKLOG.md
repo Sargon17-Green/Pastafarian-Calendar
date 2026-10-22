@@ -148,3 +148,20 @@ Their logs were read and the failure was localized.
   **has not returned** a conclusion on the current HEAD.
 - A separate 4096-cycle backpressure scoreboard is written, pending
   execution. The QA still is NOT Stage-1 PASS.
+
+## 2026-10-22 — high-width division root-cause analysis
+
+1. Read current real CI logs, including run 39767130720:
+   all seven fixture groups preceding wide selection succeeded.
+2. Isolated the wide3 failure with run 39772016684. Icarus 12 native
+   quotient is incorrect for M³/(M²+1); documented expected q and r.
+3. Implemented `pcal_exact_division_pkg.sv` (test-only binary long
+   division, unsigned width 384, internal remainder width 385).
+4. Added 36 externally calculated golden vectors including full-width
+   384-bit and canonical three-digit edge cases.
+5. Integrated exact divider into selection equivalence suite, keeping
+   native divide mismatch as an explicit diagnostic only.
+6. Expanded CI runner to execute 36 golden vectors before selection
+   equivalence. No PASS is claimed until current-head run completes.
+7. Stage 1 still lacks the complete five-field calendar oracle and
+   64 native Kalaallisut approvals; no further contract stage opened.

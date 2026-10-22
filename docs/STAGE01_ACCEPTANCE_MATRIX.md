@@ -136,3 +136,33 @@ these checks remain unexecuted and the 64-name catalog unapproved.
 Beware: shell AWK scope lint is not an HDL parser. A future Icarus
 pass cannot substitute for independent native-language catalog QA,
 and an external mathematical reference is not a silicon signoff.
+
+## Real Icarus 12 regression progress — 2026-10-22
+
+[Run 39767130720](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39767130720)
+provided actual PASS evidence for bootstrap, 4103 arithmetic property pairs,
+reset/recovery, 4096-cycle backpressure (773 accepted handshakes; 20
+resets), Foundation canonical-and-mutant sauce tests, all 22 signed
+gate gaps, and the 43-candidate Year-5000 rank-15 checkpoint.
+The run **failed** at `WIDE_THREE_DIGITS_ARITHMETIC`, so Stage 1 did
+not PASS.
+
+[Diagnostic run 39772016684](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39772016684)
+proved that for S=M^3, N=M^2+1 (M=2^127-1), Icarus 12 native
+384-bit `/` returned an incorrect quotient. The Euclidean division
+must have q=M-1, r=M²-M+1. Independent numeric proof and exact
+hexadecimal reproduction are in
+[`WIDE3_ICARUS12_DIVISION_REPRO.md`](WIDE3_ICARUS12_DIVISION_REPRO.md).
+
+The new test-only helper
+`tests/pcal_exact_division_pkg.sv` implements explicit unsigned
+385-bit-remainder long division over 384-bit operands.
+`tests/tb_wide_division_golden.sv` asserts 36 independent quotient
+and remainder goldens and the reconstruction identity; both the
+testbench and integration into the selection equivalence fixture
+have been written, but a successful CI verdict is **not yet observed**.
+
+Native Icarus division is preserved as a *diagnostic only* and cannot
+affect any expected canonical output or acceptance calculation.
+This does not authorize a production division architecture.
+64-name native Kalaallisut QA remains at 0/64.
