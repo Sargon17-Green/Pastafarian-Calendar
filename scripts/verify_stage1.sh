@@ -42,6 +42,9 @@ vvp build/monthlength.vvp
 iverilog -g2012 -s tb_weave_small_exhaustive -Wall -o build/weave_toy.vvp \
   tests/tb_weave_small_exhaustive.sv
 vvp build/weave_toy.vvp
+iverilog -g2012 -s tb_weave_medium_root -Wall -o build/weave_medium.vvp \
+  tests/tb_weave_medium_root.sv
+vvp build/weave_medium.vvp
 iverilog -g2012 -s tb_wide_division_golden -Wall -o build/longdiv.vvp \
   tests/pcal_exact_division_pkg.sv tests/tb_wide_division_golden.sv
 vvp build/longdiv.vvp
