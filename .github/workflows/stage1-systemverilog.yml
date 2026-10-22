@@ -15,9 +15,36 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-      - name: Install Icarus Verilog
+      - name: Capture immutable source provenance
+        shell: bash
         run: |
+          set -euo pipefail
+          mkdir -p build
+          git rev-parse HEAD | tee build/ci_checked_sha.txt
+          git status --porcelain=v1 | tee build/ci_worktree_status.txt
+      - name: Install Icarus Verilog
+        shell: bash
+        run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y iverilog
+          iverilog -V 2>&1 | tee build/simulator_version.txt
+          vvp -V 2>&1 | tee build/runtime_version.txt
       - name: Execute self-contained test-only suite
-        run: bash scripts/verify_stage1.sh
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/verify_stage1.sh 2>&1 | tee build/stage1_simulation.log
+      - name: Persist logs on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sv-stage1-qa-evidence
+          path: |
+            build/ci_checked_sha.txt
+            build/ci_worktree_status.txt
+            build/simulator_version.txt
+            build/runtime_version.txt
+            build/stage1_simulation.log
+          retention-days: 90
+          if-no-files-found: error
