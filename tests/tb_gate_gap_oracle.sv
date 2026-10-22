@@ -54,9 +54,15 @@ module tb_gate_gap_oracle;
 
     logic signed [383:0] a0, flow, acceptance_limit, accepted;
     integer successor_bowl, qnext, step, gap_value, ordinal, rejects;
-    integer positive_expected [1:8];
-    integer negative_expected [1:8];
+    integer positive_expected [1:10];
+    integer negative_expected [1:12];
     integer case_count, input_n;
+    integer positive_sum, negative_sum;
+    integer pos_prefix [0:10], neg_prefix [0:12];
+    integer cand_length [0:127], cand_open [0:127], cand_close [0:127];
+    integer cand_count, ii, jj, aa, bb, tmp;
+    integer year_ordinal, year_next;
+    logic signed [383:0] year_a0, year_flow, year_limit, year_accepted;
     integer positive_sum, negative_sum;
     task automatic run_gate(input logic signed [63:0] c,
                             input logic signed [63:0] t,
@@ -215,6 +221,8 @@ module tb_gate_gap_oracle;
         positive_expected[6]=136;
         positive_expected[7]=674;
         positive_expected[8]=649;
+        positive_expected[9]=617;
+        positive_expected[10]=763;
         negative_expected[1]=503;
         negative_expected[2]=441;
         negative_expected[3]=329;
@@ -223,28 +231,94 @@ module tb_gate_gap_oracle;
         negative_expected[6]=890;
         negative_expected[7]=558;
         negative_expected[8]=414;
+        negative_expected[9]=488;
+        negative_expected[10]=51;
+        negative_expected[11]=546;
+        negative_expected[12]=746;
         case_count=0;
-        positive_sum=0;
-        negative_sum=0;
-        for(input_n=1;input_n<=8;input_n=input_n+1) begin
-            run_gate(-64'sd15055671,-64'sd15055671+input_n,gap_value);
-            if(gap_value!=positive_expected[input_n])
-                $fatal(1,"POSITIVE_GATE_GAP_VECTOR");
-            if(input_n<=4) positive_sum=positive_sum+gap_value;
-            case_count=case_count+1;
+        pos_prefix[0]=0;
+        neg_prefix[0]=0;
+        for(input_n=1;input_n<=12;input_n=input_n+1) begin
             run_gate(-64'sd15055671,-64'sd15055671-input_n,gap_value);
             if(gap_value!=negative_expected[input_n])
                 $fatal(1,"NEGATIVE_GATE_GAP_VECTOR");
-            if(input_n<=4) negative_sum=negative_sum+gap_value;
+            neg_prefix[input_n]=neg_prefix[input_n-1]+gap_value;
             case_count=case_count+1;
+            if(input_n<=10) begin
+                run_gate(-64'sd15055671,-64'sd15055671+input_n,gap_value);
+                if(gap_value!=positive_expected[input_n])
+                    $fatal(1,"POSITIVE_GATE_GAP_VECTOR");
+                pos_prefix[input_n]=pos_prefix[input_n-1]+gap_value;
+                case_count=case_count+1;
+            end
         end
-        // Cross-layer normative witness: Year 5000 open/close gates.
-        if(positive_sum!=2212 || negative_sum!=2032)
-            $fatal(1,"YEAR5000_GATE_GAP_ACCUMULATION");
-        if((-64'sd15055671+positive_sum)!=-64'sd15053459 ||
-           (-64'sd15055671-negative_sum)!=-64'sd15057703)
+
+        if(pos_prefix[4]!=2212 || neg_prefix[4]!=2032 ||
+           -64'sd15055671+pos_prefix[4]!=-64'sd15053459 ||
+           -64'sd15055671-neg_prefix[4]!=-64'sd15057703)
             $fatal(1,"YEAR5000_CANONICAL_GATE_BOUNDS");
-        $display("STAGE1_TEST_ONLY_GATE_GAP_VECTORS_PASS cases=%0d",case_count);
+
+        // Enumerate candidate (open,close] containing Foundation.
+        cand_count=0;
+        for(ii=1;ii<=12;ii=ii+1) begin
+            for(jj=0;jj<=10;jj=jj+1) begin
+                tmp=neg_prefix[ii]+pos_prefix[jj];
+                if(ii+jj>=6 && tmp>=252 && tmp<=5778) begin
+                    if(cand_count>=128) $fatal(1,"CANDIDATE_CAPACITY");
+                    cand_length[cand_count]=tmp;
+                    cand_open[cand_count]=-15055671-neg_prefix[ii];
+                    cand_close[cand_count]=-15055671+pos_prefix[jj];
+                    cand_count=cand_count+1;
+                end
+            end
+        end
+        if(cand_count!=43) $fatal(1,"YEAR5000_CANDIDATE_COUNT");
+
+        // Canonical ordering is by length and then opening gate.
+        for(aa=0;aa<cand_count;aa=aa+1) begin
+            for(bb=aa+1;bb<cand_count;bb=bb+1) begin
+                if(cand_length[bb]<cand_length[aa] ||
+                   (cand_length[bb]==cand_length[aa] &&
+                    cand_open[bb]<cand_open[aa])) begin
+                    tmp=cand_length[bb];
+                    cand_length[bb]=cand_length[aa];
+                    cand_length[aa]=tmp;
+                    tmp=cand_open[bb];
+                    cand_open[bb]=cand_open[aa];
+                    cand_open[aa]=tmp;
+                    tmp=cand_close[bb];
+                    cand_close[bb]=cand_close[aa];
+                    cand_close[aa]=tmp;
+                end
+            end
+        end
+
+        // Query (c,c) sauce bowl 1 with seal 10 for Year 5000.
+        run_gate(-64'sd15055671,-64'sd15055671,gap_value);
+        year_next=0;
+        for(ii=0;ii<6;ii=ii+1)
+            if(order_at46[ii]==1) year_next=order_at46[(ii+1)%6];
+        if(year_next<1 || year_next>6) $fatal(1,"YEAR_NEXT_BOWL");
+        year_a0=saved((bowls[1]+384'sd10+384'sd181)
+                      *(bowls[1]+384'sd10+384'sd181)
+                      +384'sd179*bowls[year_next]+384'sd10);
+        year_flow=saved((year_a0+384'sd10+384'sd1+384'sd193)
+                        *(year_a0+384'sd10+384'sd1+384'sd193)
+                        +384'sd193*year_a0+384'sd197*bowls[6]);
+        year_limit=(MODULUS/cand_count)*cand_count;
+        if(year_a0<=year_limit) year_accepted=year_a0;
+        else if(year_flow%384'sd2==384'sd1) year_accepted=384'sd1;
+        else year_accepted=year_limit;
+        year_ordinal=1+int'((year_accepted-384'sd1)%cand_count);
+        if(year_ordinal!=15 ||
+           cand_length[year_ordinal-1]!=4244 ||
+           cand_open[year_ordinal-1]!=-15057703 ||
+           cand_close[year_ordinal-1]!=-15053459)
+            $fatal(1,"YEAR5000_CANONICAL_SELECTION");
+
+        $display("STAGE1_TEST_ONLY_GATE_GAPS_PASS cases=%0d",case_count);
+        $display("STAGE1_YEAR5000_REFERENCE_PASS candidates=%0d rank=%0d",
+                 cand_count,year_ordinal);
         $finish;
     end
 endmodule
