@@ -349,3 +349,9 @@ direction = (targetDay < calculationDay ? 1 : targetDay > calculationDay ? 3 : 2
 يحمل `LegacyDoubleOffsetWideRankCandidate` المرشح السابق بكامل شواهده. يتحقق `MonsterValidationManager.ValidateLegacyDoubleOffsetWideRank` من المرشح ومن اختلاف الخرج المحسوب دون استيراد المرجع إلى الإنتاج. يثبّت `MonsterDispatcher.DispatchLegacyDoubleOffsetWideRank` الحالة بعد جميع المدققات، ويُبقي النتيجة الصحيحة والنتيجة التاريخية في حقلين مختلفين في سياق مستقل لكل سؤال.
 
 تشغيل `39607428406` على الالتزام `7163c90d36cb163494759894c6d4ca24de6c3236` أثبت `43200/43200` اختلافاً متوقعاً، موزّعة على `34560` حالة تحكم و`8640` حالة رفض، منها `4320` في كل اتجاه. ظهرت `96` مخالفة في `96` سؤال إنتاج، مع `28` حالة رفض حقيقية. نجح `86822` تأكيداً دون إخفاق غير متوقع، واجتازت مراحل `1..37` وقفل الأسماء. لا توجد رقعة حتى `39_PATCH_19`.
+
+## الرقعة التاسعة عشرة — إزالة الإزاحة الثانية من مخرج الرتبة
+
+يستدعي `PatchedDoubleOffsetWideRankPhaseHandler` المسار التاريخي `LegacyDoubleOffsetWideRankPhaseHandler` فعلياً؛ يترك `DoubleOffsetWideRankPatchWrapper` الرتبة الصحيحة من `PatchedRejectionDirectionRankResult` كما هي بدلاً من `1+(r%n)` التاريخية. تتحقق جميع مدققات المصدر والصلصة والسؤال والقبول والرفض قبل تثبيت `PatchedDoubleOffsetWideRankResult` و`LegacyDoubleOffsetWideRankResult` في سياق واحد، مع حقول منفصلة وعدم مشاركة مصفوفات متغيرة.
+
+في CI `39763220983` على الالتزام `fbb788d86cf3c9004ffb28c3ea18c6e52e9bf24f` نجحت `43200` مقارنة تركيبية مصححة مع `43200` اختلافاً تاريخياً محفوظاً، و`96` إجابة إنتاجية صحيحة مع `96` شاهداً تاريخياً مخالفاً. اجتازت `86823` تأكيداً بلا إخفاق غير متوقع، وأُعيد إثبات جميع مراحل `1..38` وقفل الأسماء. لا تبدأ المرحلة `40_DISCOVERY_20` حتى إغلاق هذه الرقعة.
