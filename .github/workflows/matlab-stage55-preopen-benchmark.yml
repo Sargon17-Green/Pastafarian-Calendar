@@ -1,0 +1,30 @@
+name: MATLAB Stage 55 Pre-open Exact Scaling (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_preopen_scaling_bench.m'
+      - '.github/workflows/matlab-stage55-preopen-benchmark.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preopen-scaling:
+    name: MATLAB R2026a / exact fully-unopened 160-320 day counts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out exact commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Measure complete exact unopened-frontier counts
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_preopen_scaling_bench
