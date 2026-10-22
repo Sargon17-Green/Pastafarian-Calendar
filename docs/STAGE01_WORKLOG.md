@@ -249,3 +249,25 @@ The canonical target remains month-name index 20, occurrence day 56.
   A scalable exact counting/unranking design is a required
   next gate, without using 384-bit arithmetic or pretending
   nominal months are contiguous.
+
+## 2026-10-22 — compressed month-weave suffix count breakthrough
+
+- Derived exact O(m*L) **root** count recurrence from legal
+  insertion of each new largest month label, tracking the first
+  occurrence of the newest label.
+- Generalized to exact completion count of *any legal prefix*:
+  first process already-started active labels under last-order
+  restriction, then insert first fresh label and subsequent
+  fresh labels using a first-position transfer.
+- Independent exhaustive enumeration agrees on eight small
+  instances and 258 valid prefixes. Extended
+  `tb_weave_small_exhaustive.sv` with this comparison; awaiting
+  actual SystemVerilog runner verdict.
+- Calculated exact 45-month root weave count by two arithmetic
+  recurrences: 22470 bits, 703 uint32 limbs, exactly 177
+  consecutive base-M digits. Minimal big-endian SHA256:
+  `925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da`.
+- This turns the previous naive exponential dense DP into a
+  polynomial exact counting *kernel*, but the complete
+  lexicographic unranking, production bigint design, and
+  45-month full weave CI evidence remain unimplemented.

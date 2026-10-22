@@ -236,3 +236,18 @@ permutation remain UNIMPLEMENTED. Stage 1 is NOT SIGNED.
 - The toy SV fixture is **WRITTEN_NOT_SIMULATED** as of this
   checkpoint. Stage 1 remains open regardless of prior green
   Icarus runs of other test slices.
+
+## Exact compressed completion counting — research only
+
+Eight small instances and 258 legal-prefix queries were checked
+by independent exhaustive reference enumeration against a
+first/last order transfer. The complete Foundation root weave
+count is a 22470-bit nonnegative integer, requiring 703 uint32
+limbs and exactly 177 base-(2^127−1) answer digits for choice.
+Full derivation and hash are in
+`docs/FOUNDATION_WEAVE_TRANSFER_EXACT.md`.
+
+SV fixture for tiny cases has been extended, but cannot be
+marked PASS until a matched GitHub Actions run completes.
+The large 45-month unrank and the two month fields
+of the canonical 5-tuple remain OPEN.
