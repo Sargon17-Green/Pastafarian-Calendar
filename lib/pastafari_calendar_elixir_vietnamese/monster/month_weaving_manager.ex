@@ -39,7 +39,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.MonthWeavingManager do
     stream = Dispatcher.answer_stream(c, source_day, @bowl, @seal)
     rank = AnswerStreamManager.choose_rank(stream, count)
     order = LegacyDescendingWeavingOrder.labels(length(lengths))
-    historical = WeavingCombinatorics.unrank(lengths, rank, :descending)
+    historical = WeavingCombinatorics.unrank(lengths, rank, order)
 
     %{month_lengths: lengths, month_weaving: historical,
       weaving_count: count, weaving_rank: rank,

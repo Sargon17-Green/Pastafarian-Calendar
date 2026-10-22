@@ -15,8 +15,24 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
 
   def unrank(lengths, rank), do: unrank(lengths, rank, :ascending)
 
-  def unrank(lengths, rank, direction) when direction in [:ascending, :descending] do
+  def unrank(lengths, rank, strategy) do
     original = validate_lengths!(lengths)
+    labels = Enum.to_list(1..tuple_size(original))
+
+    order =
+      case strategy do
+        :ascending -> labels
+        :descending -> Enum.reverse(labels)
+        supplied when is_list(supplied) ->
+          if Enum.sort(supplied) == labels do
+            supplied
+          else
+            raise ArgumentError, "thứ tự nhãn không phải hoán vị đầy đủ"
+          end
+
+        _ -> raise ArgumentError, "thứ tự mở hạng không hợp lệ"
+      end
+
     first = {original, 0, 0}
     {total, memory} = count_state(first, original, %{})
 
@@ -24,13 +40,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
       raise ArgumentError, "hạng đan tháng nằm ngoài miền hợp lệ"
     end
 
-    labels = Enum.to_list(1..tuple_size(original))
-    order = if direction == :ascending, do: labels, else: Enum.reverse(labels)
     unrank_state(first, original, order, rank, memory, Enum.sum(lengths), [])
   end
-
-  def unrank(_lengths, _rank, _direction),
-    do: raise(ArgumentError, "thứ tự mở hạng không hợp lệ")
 
   defp validate_lengths!(lengths) when is_list(lengths) and lengths != [] do
     if length(lengths) <= 47 and Enum.all?(lengths, &(is_integer(&1) and &1 in 4..123)) do

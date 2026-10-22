@@ -65,6 +65,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage52Discovery26Test do
     descending = Enum.map(1..total, &WeavingCombinatorics.unrank(lengths, &1, :descending))
     assert MapSet.new(ascending) == MapSet.new(descending)
     assert ascending != descending
+    assert WeavingCombinatorics.unrank(lengths, 1, LegacyDescendingWeavingOrder.labels(2)) ==
+      WeavingCombinatorics.unrank(lengths, 1, :descending)
   end
 
   test "các nhãn xuất hiện đúng số lần đã định" do
@@ -140,7 +142,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage52Discovery26Test do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     manager = File.read!(Path.join(root, "month_weaving_manager.ex"))
     assert manager =~ "LegacyDescendingWeavingOrder.labels(length(lengths))"
-    assert manager =~ "WeavingCombinatorics.unrank(lengths, rank, :descending)"
+    assert manager =~ "WeavingCombinatorics.unrank(lengths, rank, order)"
     refute manager =~ "NormativeReference"
     assert_raise StageNotIntegratedError, fn ->
       Calendar.calendar_date_spaghetti(@foundation, @foundation)

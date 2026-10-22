@@ -27,3 +27,8 @@ khôi phục thứ tự tăng rồi kiểm chứng cả trường hợp lớn.
 ## Giới hạn
 Không sửa main, normative_reference.ex, mã PATCH01..25,
 hoặc bộ tên. Mọi tài liệu do nhánh tạo dùng tiếng Việt.
+
+Lượt rà soát độc lập: production truyền trực tiếp danh sách
+nhãn giảm do LegacyDescendingWeavingOrder.labels tạo ra cho
+WeavingCombinatorics.unrank. Như vậy lỗi di sản nằm thực sự
+trên đường tính, không chỉ được lưu trong chẩn đoán.
