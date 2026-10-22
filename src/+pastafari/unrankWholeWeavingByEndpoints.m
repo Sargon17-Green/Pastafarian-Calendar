@@ -34,10 +34,11 @@ weaving = zeros(1, N);
 for position = 1:N
     found = false;
     % Iterate month IDs in increasing order: lexicographic block order.
-    % If every month has already opened, use one exact algebraic set
-    % of child blocks, instead of recomputing an endpoint-DP for every
-    % legal next letter. This covers a difficult large-suffix frontier.
-    if opened == numel(lengths)
+    % With at most one unopened month, no future first-occurrence
+    % restriction remains. The same exact all-open child partition
+    % applies (and opening the final month remains legal only in order).
+    % Avoid recomputing the endpoint-DP for each lexicographic child.
+    if opened >= numel(lengths)-1
         allOpenBlocks = pastafari.allOpenedWholeWeaveChildCounts( ...
             remaining, closed, total);
     else
@@ -55,7 +56,7 @@ for position = 1:N
         childOpened = opened + ...
             double(remaining(monthId) == lengths(monthId));
         childClosed = closed + double(remaining(monthId) == 1);
-        if opened == numel(lengths)
+        if opened >= numel(lengths)-1
             block = allOpenBlocks{monthId};
         else
             block = pastafari.countWholeWeavingSuffixByEndpoints( ...

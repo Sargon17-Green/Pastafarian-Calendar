@@ -50,13 +50,18 @@ if isempty(suffix)
     return
 end
 
-% Exact factorization whenever ALL remaining months have already opened.
-% Only last occurrences still need ordering. Insert each new largest
+% Exact factorization with at most ONE unopened month.
+% If month K is not yet open, all earlier months have already opened;
+% the first occurrence of K is automatically legal as the next opening.
+% Consequently no remaining first-occurrence ordering constraint exists
+% and only last-occurrence order is relevant. The suffix language is
+% identical, letter for letter, to the "all already opened" language.
+% Insert each new largest
 % month's copies into a shorter legal suffix; its final copy must be
 % last, and its other m-1 copies can occupy any m-1 of the preceding
 % (N+m-1) positions. This yields C(N+m-1,m-1) independent choices.
 % No possible weaving is skipped or approximated.
-if openedUpTo == K
+if openedUpTo >= K-1
     total = pastafari.BigInt(1);
     consumed = suffix(1);
     for j = 2:numel(suffix)

@@ -106,6 +106,58 @@ for m = [4 8 94]
         'DAYS=%d SECONDS=%.3f DIGITS=%d\n'], ...
         sum(suffix), toc(elapsed), numel(char(value)));
 end
+% Exact ONE-unopened suffix lemma. Exhaustively verify every small
+% positive remainder vector and every valid closed prefix against an
+% independent state-machine recurrence with memoization. The earlier
+% months have opened (their original lengths are larger than their
+% remaining copies); only month K has not opened yet.
+oneUnopenedCases = 0;
+for monthCount = 1:5
+    for encoded = 0:(3^monthCount-1)
+        active = zeros(1,monthCount);
+        tmp = encoded;
+        for j = 1:monthCount
+            active(j) = mod(tmp,3)+1;
+            tmp = floor(tmp/3);
+        end
+        for closed = 0:monthCount-1
+            remaining = [zeros(1,closed),active(closed+1:end)];
+            sourceLengths = remaining+1;
+            sourceLengths(end) = remaining(end);
+            memo = containers.Map('KeyType','char','ValueType','double');
+            expected = memoBruteSuffix(remaining,sourceLengths, ...
+                monthCount-1,closed,memo);
+            actual = pastafari.countWholeWeavingSuffixByEndpoints( ...
+                remaining,monthCount-1,closed);
+            allOpen = pastafari.countWholeWeavingSuffixByEndpoints( ...
+                remaining,monthCount,closed);
+            assert(actual == pastafari.BigInt(expected) && ...
+                actual == allOpen, ...
+                'One-unopened suffix must exactly equal all-open count.');
+            oneUnopenedCases = oneUnopenedCases+1;
+        end
+    end
+end
+fprintf('STAGE_55_ONE_UNOPENED_FACTORIZATION_EXHAUSTIVE_PASS CASES=%d\n', ...
+    oneUnopenedCases);
+
+% Large native performance witness: same 45-month, 4230-day remainder,
+% but month 45 is still genuinely unopened. No first-order constraint
+% remains because it is the last possible opening. This is NOT an
+% initial-state count with all 45 unopened.
+witness = repmat(94,1,45);
+mark = tic;
+candidate = pastafari.countWholeWeavingSuffixByEndpoints( ...
+    witness,44,0);
+seconds = toc(mark);
+reference = pastafari.countWholeWeavingSuffixByEndpoints( ...
+    witness,45,0);
+assert(candidate == reference, ...
+    'Large one-unopened suffix differs from exact all-open family.');
+fprintf(['STAGE_55_ONE_UNOPENED_BENCH MONTHS=45 DAYS=4230 ', ...
+    'SECONDS=%.3f DIGITS=%d\n'],seconds,numel(char(candidate)));
+fprintf('STAGE_55_ONE_UNOPENED_FACTORIZATION_PASS\n');
+
 fprintf('STAGE_55_ENDPOINT_FACTORIZATION_PASS\n');
 
 fprintf('STAGE_55_ENDPOINT_VALIDATION_PASS\n');
@@ -147,4 +199,34 @@ catch err
     caught = strcmp(err.identifier, identifier);
 end
 assert(caught, 'Expected strict rejection for %s.', identifier);
+end
+
+function count = memoBruteSuffix(remaining,lengths,opened,closed,memo)
+% Separate legal-next-letter recursion, with cached suffix counts.
+% Does not use the endpoint formula or combinatorial factorization.
+if all(remaining==0)
+    assert(opened==numel(lengths) && closed==numel(lengths), ...
+        'Invalid terminal frontier in independent state machine.');
+    count=1;
+    return
+end
+key=sprintf('%d,',[remaining opened closed]);
+if isKey(memo,key)
+    count=memo(key);
+    return
+end
+count=0;
+for i=1:numel(remaining)
+    if remaining(i)==0 || ...
+            (remaining(i)==lengths(i) && i~=opened+1) || ...
+            (remaining(i)==1 && i~=closed+1)
+        continue
+    end
+    child=remaining;
+    child(i)=child(i)-1;
+    nextOpened=opened+double(remaining(i)==lengths(i));
+    nextClosed=closed+double(remaining(i)==1);
+    count=count+memoBruteSuffix(child,lengths,nextOpened,nextClosed,memo);
+end
+memo(key)=count;
 end
