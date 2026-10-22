@@ -57,6 +57,7 @@ module tb_gate_gap_oracle;
     integer positive_expected [1:8];
     integer negative_expected [1:8];
     integer case_count, input_n;
+    integer positive_sum, negative_sum;
     task automatic run_gate(input logic signed [63:0] c,
                             input logic signed [63:0] t,
                             output integer gap);
@@ -223,16 +224,26 @@ module tb_gate_gap_oracle;
         negative_expected[7]=558;
         negative_expected[8]=414;
         case_count=0;
+        positive_sum=0;
+        negative_sum=0;
         for(input_n=1;input_n<=8;input_n=input_n+1) begin
             run_gate(-64'sd15055671,-64'sd15055671+input_n,gap_value);
             if(gap_value!=positive_expected[input_n])
                 $fatal(1,"POSITIVE_GATE_GAP_VECTOR");
+            if(input_n<=4) positive_sum=positive_sum+gap_value;
             case_count=case_count+1;
             run_gate(-64'sd15055671,-64'sd15055671-input_n,gap_value);
             if(gap_value!=negative_expected[input_n])
                 $fatal(1,"NEGATIVE_GATE_GAP_VECTOR");
+            if(input_n<=4) negative_sum=negative_sum+gap_value;
             case_count=case_count+1;
         end
+        // Cross-layer normative witness: Year 5000 open/close gates.
+        if(positive_sum!=2212 || negative_sum!=2032)
+            $fatal(1,"YEAR5000_GATE_GAP_ACCUMULATION");
+        if((-64'sd15055671+positive_sum)!=-64'sd15053459 ||
+           (-64'sd15055671-negative_sum)!=-64'sd15057703)
+            $fatal(1,"YEAR5000_CANONICAL_GATE_BOUNDS");
         $display("STAGE1_TEST_ONLY_GATE_GAP_VECTORS_PASS cases=%0d",case_count);
         $finish;
     end
