@@ -224,8 +224,10 @@ object Stage44Tests {
       rejectArg("Apertura"){old(Interleaved.updated(0,2),1)}
     }
     check("rifiuta chiusura dei mesi fuori ordine"){
-      val w=Vector.fill(83)(1)++Vector.fill(85)(2)++
-        Vector.fill(84)(3)
+      // Tutti i mesi durano 84 giorni e sono aperti 1,2,3,
+      // ma la chiusura avviene 1,3,2: test esclusivo d'ordine.
+      val w=Vector(1,2,3)++Vector.fill(83)(1)++
+        Vector.fill(83)(3)++Vector.fill(83)(2)
       rejectArg("Chiusura"){old(w,1)}
     }
     check("rifiuta offset negativo"){
