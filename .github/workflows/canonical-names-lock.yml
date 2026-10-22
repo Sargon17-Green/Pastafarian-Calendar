@@ -1901,3 +1901,88 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_r64_exhaustive_early_last.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r64_exhaustive_early_last.pl --seconds 185 --rss-kib 393216
+
+  canonical-r65-early-last-1-2:
+    name: R65 四月份長度 1..9 獨立精確閉式狀態 1..2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r65-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 四月逐前綴合法字序獨立 DFS 與原始 DFS FIFO CLOCK 核對
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r65_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r65_exhaustive_early_last.pl --a-min 1 --a-max 2 --seconds 185 --rss-kib 393216
+
+  canonical-r65-early-last-3-4:
+    name: R65 四月份長度 1..9 獨立精確閉式狀態 3..4
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r65-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 四月逐前綴合法字序獨立 DFS 與原始 DFS FIFO CLOCK 核對
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r65_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r65_exhaustive_early_last.pl --a-min 3 --a-max 4 --seconds 185 --rss-kib 393216
+
+  canonical-r65-early-last-5-6:
+    name: R65 四月份長度 1..9 獨立精確閉式狀態 5..6
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r65-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 四月逐前綴合法字序獨立 DFS 與原始 DFS FIFO CLOCK 核對
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r65_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r65_exhaustive_early_last.pl --a-min 5 --a-max 6 --seconds 185 --rss-kib 393216
+
+  canonical-r65-early-last-7-8:
+    name: R65 四月份長度 1..9 獨立精確閉式狀態 7..8
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r65-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 四月逐前綴合法字序獨立 DFS 與原始 DFS FIFO CLOCK 核對
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r65_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r65_exhaustive_early_last.pl --a-min 7 --a-max 8 --seconds 185 --rss-kib 393216
+
+  canonical-r65-early-last-9-9:
+    name: R65 四月份長度 1..9 獨立精確閉式狀態 9..9
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r65-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 四月逐前綴合法字序獨立 DFS 與原始 DFS FIFO CLOCK 核對
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r65_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r65_exhaustive_early_last.pl --a-min 9 --a-max 9 --seconds 185 --rss-kib 393216
