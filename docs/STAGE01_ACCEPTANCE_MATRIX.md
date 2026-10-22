@@ -193,3 +193,26 @@ be misreported as passing this new test.
 
 The full 5-field oracle and 64 qualified Kalaallisut approvals
 remain open. `STAGE1_PASS=NO`.
+
+## CI gate — Foundation cutlet structure certified
+
+[Run 39816637847](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39816637847)
+ended SUCCESS. It executed the cutlet count, interior gate constraint,
+15 eligible lexicographically ordered compositions, composition rank 9,
+6-name permutation rank 7,851,263, and output canonical index 10/day 503.
+No different source language string was assumed.
+
+## New source-only month sublayer
+
+Independent computations established 45 calendar months for the
+Foundation year's 4244 days. A 45-part bounded-composition count was
+cross-checked via a second inclusion-exclusion algorithm:
+a 274-bit value. A 3-digit wide selection and 45-length lexical
+unrank fixture was written. The selected lengths appear in
+`docs/FOUNDATION_MONTH45_LENGTHS_REFERENCE.csv` but its
+nominal running totals **do not** specify physical day order,
+because actual months are interwoven (Scroll V).
+
+**Current status:** month-length DP and 45-length unrank source
+are WRITTEN_NOT_CI_VERIFIED. Woven month count/rank and month-name
+permutation remain UNIMPLEMENTED. Stage 1 is NOT SIGNED.

@@ -194,3 +194,36 @@ Their logs were read and the failure was localized.
   and cannot yet count as a PASS.
 - Remaining gates: full 5-component independent oracle,
   qualified review/freeze of all 64 Kalaallisut names, Stage-1 audit.
+
+## 2026-10-22 — accepted cutlet and month-length oracle extension
+
+**Native CI PASS**: run 39816637847, Icarus 12.0, after the
+cutlet-reference fixture. Its log attested the following exact
+intermediates at c=t=Foundation:
+K=6, 15 allowed gap compositions, chosen composition #9,
+six distinct cutlet indices [15,17,10,14,8,13], selected
+third cutlet = canonical index 10, day 503. All pre-existing
+Stage-1 testbench groups continued to pass.
+
+**New month sublayer, not yet CI-certified**: c=Foundation,
+firstDayOfYear=-15057702, year length 4244. The independent
+reconstruction selected 45 months out of allowable 35..47,
+using bowl 3 seal 30 (rank #11 of 13).
+
+The count of all valid lex-ordered length sequences for m=45,
+each 4..123 and total 4244, is a 274-bit integer:
+28267369127220710176329716843724118975520840014877906533654334421021017631241800900.
+Two independent methods (sliding-window DP and inclusion-exclusion)
+produced exactly that value. Because the count exceeds M² (where
+M=2^127-1), selection with bowl 3 seal 31 uses **three consecutive
+base-M digits**, not one or two. The independent unranked vector has
+45 entries and sum 4244 in
+`docs/FOUNDATION_MONTH45_LENGTHS_REFERENCE.csv`.
+
+Added `tests/tb_foundation_month_length_count.sv` as an independent
+count regression and extended `tests/tb_gate_gap_oracle.sv` to use
+a 384-bit exact test-only division and DP suffix-block unranking.
+Source is committed; the latest full fixture has **not yet earned CI
+PASS**. The month weave and the 47P45 month-name selection are not
+implemented and cannot be inferred from nominal length prefixes.
+The canonical target remains month-name index 20, occurrence day 56.
