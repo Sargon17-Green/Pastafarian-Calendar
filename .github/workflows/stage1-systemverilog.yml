@@ -87,5 +87,7 @@ jobs:
             build/weave_fullroot_probe.log
             build/weave_fullroot_run.log
             build/foundation_weave_root.bin
+            build/weave_fullrank_run.log
+            build/foundation_weave_rank.bin
           retention-days: 90
           if-no-files-found: warn
