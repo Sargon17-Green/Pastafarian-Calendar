@@ -33,3 +33,15 @@ These **15 source byte cells**, and only these 15, were not naturally executed i
 5. Certify only *finite natural reachability* of any newly observed cell and scoped execution results; retain each still-unseen source cell as **unresolved**, never dead. This is not the full geometric or state-ownership acceptance criterion.
 
 **Other active work:** QA23B original Native run `39838384673` must finish and have its downloadable original artifact audited independently; do not prematurely sign QA23B. Stage 1 remains open: `CURRENT_STAGE=1`, `LAST_COMPLETED_STAGE=0`, `FULL_FUNCTIONAL_QA_PASS=NO`, `GEOMETRIC_SPAGHETTI_QA_PASS=NO`. No Stage 2, canonical source, main or PR #17 merge.
+
+## QA24 execution gate submitted — 22 October 2026 (no Native PASS yet)
+
+Source-locked GitHub workflow `.github/workflows/befunge-stage1-qa24-native-unseen-source-frontier.yml` was submitted at exact tested commit `68bfc0d8118a6705d0a0af318f4a48a38e3a159f`, and the initial GitHub Actions run `39841651046` was **queued at last verification**.
+
+- 24 new frozen and QA20-disjoint input strings: 16 valid, 8 malformed.
+- Four original PyFunge-98 Native shards, six fresh original programs each, plus independent full source-coordinate STEP trace replay and aggregate (five jobs). Native reference oracle is another executable Befunge, not Python calendar code.
+- Immutable QA18 source roles and accepted 48-case QA20 aggregate must be fetched and validated by their exact SHA-256 digests; each actual physical Native route is retained as compressed raw STEPs and attached to GitHub artifact on success or failure.
+- A separate Python 3 verifier requires all exact 24 cases and original 21-source candidates, reproducible trace SHA-256, real opcode and stringmode at every STEP, precise per-cell minimum distances, and 13 negative forged-report controls.
+- **Important scope boundary:** QA24's STEP-only trace cannot prove absence of prior `p` overwrites or identify an original static byte as the unique owner of a later matching runtime opcode. Any newly matching-source-byte hit is a *Native input-origin coordinate/opcode observation*, not full state lineage or global geometry ownership. A subsequent `p/g` history audit is still required.
+
+Native run acceptance, any change to the 15 not-yet-reached count, and source-byte ownership claims are explicitly **PENDING**. No Stage 2 and no canonical or production-source modifications.
