@@ -84,3 +84,19 @@ No stage 2 discovery or patch was opened.
   research-derived values, not hardware-run evidence.
 - Native Kalaallisut review remains 0/64 approved; full calendar
   oracle unfinished, Stage 1 stays IN_PROGRESS.
+## 2026-10-22 — preflight compilation blocker remediation
+
+- Found and removed duplicate global `integer positive_sum,negative_sum`
+  in `tb_gate_gap_oracle.sv`.
+- Inspected eight SystemVerilog source files for module-level integer
+  duplicate declarations. None remain under this static check.
+- Scoped test-only duplicate declarations in separate `task`
+  bodies are permitted.
+- Added a standalone AWK preflight with positive/negative local
+  fixture evidence: duplicate globals are rejected; task locals do not
+  produce false positives.
+- Moved static source, catalog and oracle-isolation checks to run
+  before simulator availability check.
+- `iverilog`, `vvp` and `verilator` are still unavailable locally;
+  apt cannot resolve its package server. The two isolated CI jobs
+  remain queued, not failed and not passed.
