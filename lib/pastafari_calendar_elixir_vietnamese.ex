@@ -137,6 +137,12 @@ defmodule PastafariCalendarElixirVietnamese do
   def cutlet_name_indices_spaghetti(c, t), do: Dispatcher.cutlet_name_indices(c, t)
   def cutlet_name_indices_diagnostic_spaghetti(c, t), do: Dispatcher.cutlet_name_indices_diagnostic(c, t)
 
+  def materialized_cutlets_spaghetti(c, t),
+    do: Dispatcher.materialized_cutlets(c, t)
+
+  def materialized_cutlets_diagnostic_spaghetti(c, t),
+    do: Dispatcher.materialized_cutlets_diagnostic(c, t)
+
   def calendar_date_spaghetti(calculation_day, target_day) do
     _context = Dispatcher.bootstrap(calculation_day, target_day)
     raise StageNotIntegratedError
