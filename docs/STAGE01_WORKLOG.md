@@ -227,3 +227,25 @@ Source is committed; the latest full fixture has **not yet earned CI
 PASS**. The month weave and the 47P45 month-name selection are not
 implemented and cannot be inferred from nominal length prefixes.
 The canonical target remains month-name index 20, occurrence day 56.
+
+## 2026-10-22 — exact weave semantics and unavoidable width
+
+- Added `tests/tb_weave_small_exhaustive.sv`, checking eight
+  tiny cases with both brute-force word enumeration and state-vector
+  dynamic programming, including exhaustive lexical unrank ranks.
+  Source written; first CI result not yet confirmed.
+- Replayed the 45-month length-rank unranking independently in
+  a separate Python arithmetic implementation. All 45 lengths,
+  total 4244, and final rank zero agree with the committed
+  test-only vector. This is not SystemVerilog run evidence.
+- Established exact lower and upper bounds on the Foundation
+  weave count by multinomial construction, checked using
+  independent factorial and successive-binomial arithmetic.
+  Count requires between 22350 and 22851 bits, i.e. 699..715
+  32-bit limbs, and a base-M digit stream of 176..180 digits.
+  See `docs/FOUNDATION_WEAVE_SIZE_AND_DP.md`.
+- Dense suffix count DP for 45 month lengths would require
+  about 2^292.57 possible used-count states and cannot be used.
+  A scalable exact counting/unranking design is a required
+  next gate, without using 384-bit arithmetic or pretending
+  nominal months are contiguous.

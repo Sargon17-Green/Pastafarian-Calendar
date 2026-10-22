@@ -216,3 +216,23 @@ because actual months are interwoven (Scroll V).
 **Current status:** month-length DP and 45-length unrank source
 are WRITTEN_NOT_CI_VERIFIED. Woven month count/rank and month-name
 permutation remain UNIMPLEMENTED. Stage 1 is NOT SIGNED.
+
+## Exact weave work (small oracle; large engine still open)
+
+- Eight independent toy test cases enumerate **every** word,
+  filter by first/last appearance order, and verify the count
+  and complete lexicographic `unrank` against a separate
+  DP suffix-count oracle. Expected toy counts:
+  `2,5,9,14,4,1,1,20`. Source has been written and wired to CI.
+- A constructive rigorous lower bound for the 45-month root weave
+  count has 22350 bits; an unrestricted-multiset upper bound has
+  22851 bits. Therefore the production full-rank engine needs
+  699..715 uint32 limbs (for this vector), with 176..180 base-M
+  answer digits. The 384-bit oracle is insufficient.
+- **Blocked**: an exact compressed 45-month weave count/unrank
+  algorithm with demonstrable feasible resource limits, a full
+  woven-word computation, 47P45 month-name choice, and day 56
+  / canonical month index 20 checkpoint.
+- The toy SV fixture is **WRITTEN_NOT_SIMULATED** as of this
+  checkpoint. Stage 1 remains open regardless of prior green
+  Icarus runs of other test slices.
