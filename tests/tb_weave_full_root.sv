@@ -2,7 +2,8 @@
 // Test-only 22528-bit exact Foundation root count: NO date/weave chosen.
 // The entire 45-month count is verified by external SHA256.
 module tb_weave_full_root;
-    localparam integer WIDTH=22528, CWIDTH=864;
+    parameter integer WIDTH=22528;
+    localparam integer CWIDTH=864;
     localparam integer LENGTH=4244, MONTHS=45, CLIMBS=CWIDTH/32;
     logic [WIDTH-1:0] prior [0:LENGTH], nextrow [0:LENGTH];
     logic [CWIDTH-1:0] comb [0:LENGTH], numerator;
