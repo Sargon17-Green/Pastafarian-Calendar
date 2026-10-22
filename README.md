@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 21 (PATCH 10)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 22 (DISCOVERY 11)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -316,3 +316,17 @@ php -d memory_limit=512M tests/stage21_patch10_tests.php
 Ujian baru menguji 720 susunan × enam posisi = 4,320 komponen, kesetaraan dengan oracle snapshot yang berdikari, 3,600 parut yang dijangka, 720 padanan posisi pertama, empat jejak tarikh sebenar × enam mangkuk, determinisme, pemilikan state serta lima input salah. Stage 20 mesti terus merah secara langsung dan lulus dalam pembalut pengesahan. Semua regresi 1–20 diwajibkan hijau dalam CI.
 
 Stage 22 — DISCOVERY 11 tidak diperkenalkan sehingga SHA Stage 21 disahkan.
+
+
+## Stage 22 — DISCOVERY 11: Susunan titisan 46 ditindih
+
+`LegacyOverwrittenOrder11::sauceWrong` menggabungkan secara sebenar pembetul terdahulu: 46 titisan visible, kilang enam mangkuk, `PermutationPatch08`, `PoursAliasPatch09` dan `BowlShadowPatch10`. Setiap titisan mengemas kini mangkuk melalui snapshot dan pending yang sah. Selepas titisan 46, laluan sejarah menjalankan dua belas kacauan akhir dengan snapshot dan pending, namun menggunakan semula pemboleh ubah `order` yang menyimpan permutasi titisan ke-46. Setiap post-stir menimpanya, sehingga hasil yang salah memegang susunan post-stir ke-12.
+
+Kesilapan ini **hanya** menjejaskan `orderAtDrop46`, bukan nilai enam mangkuk. Tiada latch atau snapshot susunan khusus diperkenalkan pada Stage 22. Penghala `OVERWRITTEN_ORDER_46_LEGACY` dalam `BootstrapKernel::legacySauceOrder` menyediakan laluan boleh diuji tanpa berkongsi state semantik antara panggilan.
+
+```text
+php -d memory_limit=512M tests/stage22_discovery11_tests.php
+php -d memory_limit=512M tests/verify_stage22_discovery11.php
+```
+
+Ujian langsung sejarah sengaja keluar dengan kod 1: tiga pasangan hari, tiga susunan terpadam yang dijangka, 18 nilai mangkuk akhir yang tepat, dan 36 kacauan pasca-titisan, tanpa ralat lain. Pengesah keluar 0 hanya jika RED ini terasing dan tepat. Semua ujian Stage 1–21 mesti kekal hijau. **Stage 23 — PATCH 11 tidak dimulakan.**

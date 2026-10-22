@@ -405,6 +405,43 @@ final class BootstrapKernel
                 'bowls' => $fixed,
             ];
         });
+        $this->dispatcher->register('OVERWRITTEN_ORDER_46_LEGACY', function(BootstrapContext $context): array {
+            $c = $context->calculationDay;
+            $t = $context->targetDay;
+            $action = $this->dayCount($c);
+            $target = $this->dayCount($t);
+            $counts = [
+                'action' => $action,
+                'target' => $target,
+                'distance' => $this->distance($c, $t),
+                'connection' => $action->add($target),
+                'direction' => $t < $c ? 1 : ($t === $c ? 2 : 3),
+            ];
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $unrank = new \Pastafari\Stage01\Legacy\LegacyPermutationUnrank0();
+            $permutation = new \Pastafari\Stage01\Patches\PermutationPatch08(
+                new \Pastafari\Stage01\Legacy\LegacyBowlPermutation($unrank), $unrank
+            );
+            $pours = new \Pastafari\Stage01\Patches\PoursAliasPatch09(
+                new \Pastafari\Stage01\Legacy\LegacyFixedPositionPours($save)
+            );
+            $shadow = new \Pastafari\Stage01\Patches\BowlShadowPatch10(
+                new \Pastafari\Stage01\Legacy\LegacyInPlaceBowlStir($save), $save
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyOverwrittenOrder11(
+                $save,
+                new \Pastafari\Stage01\Legacy\LegacyBowlFactory($save),
+                $permutation, $pours, $shadow
+            );
+            $result = $legacy->sauceWrong($counts, $this->stones(), $this->visibleDrops($c, $t));
+            $context->semanticState['overwrittenOrder'] = $result['orderAtDrop46'];
+            $context->semanticState['postStirsCompleted'] = $result['postStirs'];
+            $context->status = 'OVERWRITTEN_ORDER_46_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.order46.overwritten');
+            return $result;
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -657,6 +694,22 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('BOWL_SHADOW_PATCH_10', $context)
+        );
+    }
+
+    /**
+     * Laluan sejarah mengira semua mangkuk dengan betul, tetapi susunan
+     * pada titisan 46 ditindih dua belas kali ketika kacauan terakhir.
+     *
+     * @return array{bowls:array<int,BigInt>,orderAtDrop46:list<int>,postStirs:int,dropCount:int}
+     */
+    public function legacySauceOrder(int $calculationDay, int $targetDay): array
+    {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'OVERWRITTEN_ORDER_46_LEGACY';
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('OVERWRITTEN_ORDER_46_LEGACY', $context)
         );
     }
 

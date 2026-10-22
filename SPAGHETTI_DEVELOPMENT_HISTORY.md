@@ -558,3 +558,22 @@ LULUS Stage 21 PATCH 10 pangkat=720 komponen=4320 parut=3600 sepadan_legacy=720 
 ```
 
 CI lengkap sah dan semua gerbang Stage1–20 lulus. Stage21 diterima sebagai `GREEN` dengan pembetul snapshot sah, sejarah salah masih terbukti. Stage22 belum dimulakan.
+
+
+## Stage 22 — DISCOVERY 11: Pemboleh ubah order titisan 46 ditindih
+
+### Apa yang dipercayai oleh kod lama
+
+Selepas titisan visible ke-46, pemboleh ubah `order` memang mengandungi permutasi mangkuk untuk titisan itu. Pelaksana lama menganggap nilai ini akan terus tersedia setelah dua belas kacauan terakhir. Sebenarnya setiap kacauan pasca-titisan menggunakan nama `order` yang sama bagi permutasinya sendiri; susunan titisan 46 hilang dan bacaan akhir menerima permutasi kacauan terakhir.
+
+### Kod baharu yang tidak membaiki kecacatan
+
+`LegacyOverwrittenOrder11` memanggil kilang mangkuk, pembetul pangkat, alias tuangan, dan shadow snapshot Stage21 bagi 46 titisan sebenar dalam urutan. Selepas itu ia melaksanakan 12 post-stir dengan bacaan hanya daripada snapshot `old` dan semua tulisan kepada `pending`. Rumus mangkuk masih tepat. Hanya `orderAtDrop46` terakhir salah kerana 12 kali ditulis semula. Tiada latch berasingan disediakan.
+
+Penghala `OVERWRITTEN_ORDER_46_LEGACY` menghasilkan konteks baharu bagi setiap permintaan, merekod metrik dan status, tanpa menjadikan metrik sebahagian daripada formula. Oracle normatif hanya digunakan dalam ujian. Katalog nama, fixture dan formula Stage 1–21 kekal tanpa perubahan.
+
+### Bukti dan had peringkat
+
+Ujian Stage22 membandingkan tiga tarikh meliputi 46 titisan dan 12 post-stir setiap satu terhadap oracle tempatan yang dibina dalam PHP. Keenam-enam mangkuk terakhir mesti tepat bagi setiap tarikh (18 komponen); sebaliknya susunan yang terdedah berbeza daripada `orderAtDrop46` normatif kerana ia sama dengan permutasi post-stir terakhir. Tiga RED yang terkawal dan sifar ralat tidak dijangka diperlukan. Pemeriksa memperakui kod keluar 1 hanya untuk corak ini dan keluar 0 apabila berjaya.
+
+Penyelesaian Stage23 mesti menyimpan salinan susunan tepat selepas titisan 46 dan sebelum post-stirs, tidak menulis latch itu lagi, sambil meninggalkan pemboleh ubah legacy salah sebagai bukti. Tidak diperkenalkan pada Stage22.

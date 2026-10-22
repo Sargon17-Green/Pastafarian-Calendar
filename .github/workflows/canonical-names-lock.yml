@@ -86,3 +86,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage20_discovery10.php
       - name: Tampalan 10 — snapshot enam mangkuk dan parut sejarah
         run: php -d memory_limit=512M tests/stage21_patch10_tests.php
+      - name: Penemuan 11 — susunan titisan 46 ditindih kacauan akhir
+        run: php -d memory_limit=512M tests/verify_stage22_discovery11.php
