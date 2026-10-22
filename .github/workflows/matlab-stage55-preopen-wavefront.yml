@@ -1,0 +1,31 @@
+name: MATLAB Pre-open Wavefront Exact Counter (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/countWholeWeavingAllUnopenedWavefront.m'
+      - 'tests/run_stage55_preopen_wavefront_tests.m'
+      - '.github/workflows/matlab-stage55-preopen-wavefront.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-wavefront:
+    name: MATLAB R2026a / exact linear-memory pre-open wavefront
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Verify wavefront and benchmark exact counts
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_preopen_wavefront_tests

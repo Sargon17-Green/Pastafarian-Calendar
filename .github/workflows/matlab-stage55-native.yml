@@ -19,6 +19,8 @@ on:
       - '!tests/run_stage55_all_open_factor_tests.m'
       - '!tests/run_stage55_all_open_common_denominator_tests.m'
       - '!tests/run_stage55_preopen_scaling_bench.m'
+      - '!src/\+pastafari/countWholeWeavingAllUnopenedWavefront.m'
+      - '!tests/run_stage55_preopen_wavefront_tests.m'
       - 'DEVELOPMENT_STAGE.md'
       - 'docs/STAGE_55_FINAL_AUDIT.md'
   workflow_dispatch:
