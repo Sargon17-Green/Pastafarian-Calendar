@@ -175,3 +175,22 @@ Their logs were read and the failure was localized.
   be frozen, shown as complete, or used in canonical rankings.
 - Wide3 test-only long divider awaits current-head Icarus simulation;
   this log does not claim new PASS.
+
+## 2026-10-22 — actual CI success and next independent oracle layer
+
+- The CI run on implementation HEAD `3d3b6ce...` completed SUCCESS:
+  https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39773684223.
+- Read job log from GitHub; baseline operations and all existing
+  test-only vectors passed on actual Icarus Verilog 12.
+- Verified 36/36 exact wide division goldens and
+  178878/178878 bounded rejection equivalence cases.
+- CI native division discrepancy remains as nonfatal diagnostic;
+  exact independent test-only divider is canonical in the fixture.
+- Began the next isolated calendar-oracle slice within Stage 1:
+  cutlet count, eligible gap partition, lexicographic composition
+  selection, and 17Pk distinct name-index assignment for
+  P(Foundation,Foundation), with normative expected (10,503).
+- That new cutlet fixture is WRITTEN_NOT_SIMULATED as of this note,
+  and cannot yet count as a PASS.
+- Remaining gates: full 5-component independent oracle,
+  qualified review/freeze of all 64 Kalaallisut names, Stage-1 audit.

@@ -166,3 +166,30 @@ Native Icarus division is preserved as a *diagnostic only* and cannot
 affect any expected canonical output or acceptance calculation.
 This does not authorize a production division architecture.
 64-name native Kalaallisut QA remains at 0/64.
+
+## 2026-10-22 — green actual CI for existing Stage-1 test suite
+
+Run [39773684223](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39773684223)
+completed **SUCCESS** (Icarus Verilog 12.0). Logs independently checked:
+four static declaration fixtures; 64/64 canonical-index witnesses;
+bootstrap; 4,103 arithmetic cases; reset; 4,096-cycle scoreboard with
+773 accepted and 20 resets; Foundation sauce and historical raw-sum
+mutant; 22 signed gate vectors; 43 eligible candidate years and rank-15
+Year-5000 selection; 36 exact unsigned 384-bit long-division goldens;
+and 178,878 selection-rejection small-domain comparisons.
+
+The log intentionally prints `ICARUS_NATIVE_WIDE3_DIVISION_UNSAFE`.
+That diagnostic identifies a simulator-native wide division defect,
+not a failure of the test-only exact divider, and does not constitute
+any license to accept incorrect native quotient as normative.
+
+**New oracle scope opened within Stage 1, not a new 55-stage milestone:**
+`tb_gate_gap_oracle.sv` now checks the canonical cutlet fields of
+`P(Foundation,Foundation)` by implementing sections S and T
+(physical gate composition with forced interior boundary, and 17Pk
+distinct canonical name-index unranking). Its latest test has not
+yet returned an Icarus verdict. Success of the old suite must not
+be misreported as passing this new test.
+
+The full 5-field oracle and 64 qualified Kalaallisut approvals
+remain open. `STAGE1_PASS=NO`.
