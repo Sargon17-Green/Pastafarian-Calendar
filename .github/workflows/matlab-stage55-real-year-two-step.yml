@@ -1,0 +1,30 @@
+name: MATLAB Real Year-5000 Two-Step Joint Rank (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_5000_two_step_joint.m'
+      - '.github/workflows/matlab-stage55-real-year-two-step.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  two-step-real-year:
+    name: MATLAB R2026a / actual 4244-day second branching letter
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out exact branch commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Select exact midpoint-rank day one and day two
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_real_year_5000_two_step_joint
