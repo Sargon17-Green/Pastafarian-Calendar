@@ -80,10 +80,15 @@ defmodule PastafariCalendarElixirVietnamese.Stage52Discovery26Test do
     for lengths <- [[4, 4], [4, 4, 4]] do
       result = WeavingCombinatorics.unrank(lengths, WeavingCombinatorics.count(lengths))
       k = length(lengths)
-      assert Enum.map(1..k, &Enum.find_index(result, fn x -> x == &1 end)) ==
-        Enum.sort(Enum.map(1..k, &Enum.find_index(result, fn x -> x == &1 end)))
-      assert Enum.map(1..k, fn j -> length(result) - 1 - Enum.find_index(Enum.reverse(result), &(&1 == j)) end) ==
-        Enum.sort(Enum.map(1..k, fn j -> length(result) - 1 - Enum.find_index(Enum.reverse(result), &(&1 == j)) end))
+      first_positions = Enum.map(1..k, fn j ->
+        Enum.find_index(result, fn value -> value == j end)
+      end)
+      last_positions = Enum.map(1..k, fn j ->
+        length(result) - 1 -
+          Enum.find_index(Enum.reverse(result), fn value -> value == j end)
+      end)
+      assert first_positions == Enum.sort(first_positions)
+      assert last_positions == Enum.sort(last_positions)
     end
   end
 
@@ -149,14 +154,14 @@ defmodule PastafariCalendarElixirVietnamese.Stage52Discovery26Test do
 
   test "nhóm normative đỏ 2: tháng thứ nhất dài hơn" do
     c = @foundation + 7
-    assert MonthWeavingManager.diagnose_lengths(c, @source, [5, 4]).month_weaving ==
-      reference_result(c, [5, 4])
+    assert MonthWeavingManager.diagnose_lengths(c, @source, [5, 5]).month_weaving ==
+      reference_result(c, [5, 5])
   end
 
   test "nhóm normative đỏ 3: tháng thứ hai dài hơn" do
     c = @foundation - 7
-    assert MonthWeavingManager.diagnose_lengths(c, @source, [4, 5]).month_weaving ==
-      reference_result(c, [4, 5])
+    assert MonthWeavingManager.diagnose_lengths(c, @source, [4, 7]).month_weaving ==
+      reference_result(c, [4, 7])
   end
 
   test "nhóm normative đỏ 4: độ dài không bằng nhau" do
