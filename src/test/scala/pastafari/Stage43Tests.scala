@@ -235,7 +235,11 @@ object Stage43Tests {
     }
     check("il primo giorno della diciassettesima resta storico"){
       val r=patch(G17,P17,I17,672)
-      eqv(r.historical.legacyCanonicalNameId,9,"Storico")
+      // L'indice storico e' zero-based: 672 % 17 = 9,
+      // quindi il decimo nome canonico ha ID 10.
+      eqv(672%17,9,"Slot storico zero-based")
+      eqv(r.historical.legacyNameSlot,9,"Slot storico")
+      eqv(r.historical.legacyCanonicalNameId,10,"Storico")
       eqv(r.correctedCanonicalNameId,17,"Corretto")
     }
     check("il wrapper chiama il vero adapter storico"){
