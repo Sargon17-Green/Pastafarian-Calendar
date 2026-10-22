@@ -163,6 +163,9 @@ public sealed class MonsterContext
     // الرقعة التاسعة عشرة: الرتبة الصحيحة محفوظة عن شاهد الزيادة الثانية.
     public BigInteger? PatchedDoubleOffsetWideRankResult { get; set; }
 
+    // الندبة العشرون: زيادة وزن أعلى خانة بعد اعتماد المرتبة الواسعة.
+    public BigInteger? LegacyUpperPlaceBiasRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

@@ -248,3 +248,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage38Tests/PastafarianCalendar.Stage38Tests.csproj --configuration Release -- --verify-expected-red
       - name: تكافؤ رقعة الإزاحة الثانية التاسعة عشرة وحفظ شاهد الخرج التاريخي
         run: dotnet run --project tests/PastafarianCalendar.Stage39Tests/PastafarianCalendar.Stage39Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لزيادة وزن الخانة العليا للمرة الثانية
+        id: discovery_upper_place_bias_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage40Tests/PastafarianCalendar.Stage40Tests.csproj --configuration Release
+      - name: إثبات توقيع انحياز الخانة العليا مع حفظ جميع الرقع السابقة
+        if: always()
+        run: |
+          test "${{ steps.discovery_upper_place_bias_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage40Tests/PastafarianCalendar.Stage40Tests.csproj --configuration Release -- --verify-expected-red

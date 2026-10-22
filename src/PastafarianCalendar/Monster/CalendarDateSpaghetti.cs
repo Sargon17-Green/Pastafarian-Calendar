@@ -289,6 +289,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateDoubleOffsetWideRank(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الاكتشاف العشرون: وزن الخانة العليا مضاف ثانيةً إلى رتبة صحيحة.
+    public static BigInteger EvaluateLegacyUpperPlaceBias(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateLegacyUpperPlaceBias(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

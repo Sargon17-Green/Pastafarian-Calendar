@@ -856,6 +856,27 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("تزييف رتبة الخرج المصحّحة.");
     }
 
+
+    // يفحص جميع المرشحات السابقة قبل تأكيد انحياز أعلى خانة التاريخي.
+    public void ValidateLegacyUpperPlaceBias(
+        MonsterContext context,LegacyUpperPlaceBiasCandidate candidate)
+    {
+        if(context is null ||
+           context.LegacyWideFamilySize is not BigInteger n ||
+           n<=((BigInteger.One<<127)-BigInteger.One) ||
+           context.LegacyAnswerStepIndex is not BigInteger k || !k.IsZero ||
+           context.LegacyUpperPlaceBiasRankResult.HasValue ||
+           context.PatchedDoubleOffsetWideRankResult.HasValue ||
+           context.PatchedSauceFinalBowls is not null ||
+           context.PatchedVisibleDrops is not null ||
+           candidate is null || candidate.Previous is null)
+            throw new MonsterValidationException("مرشح انحياز الخانة العليا ناقص أو السياق مستعمل.");
+        ValidatePatchedDoubleOffsetWideRank(context,candidate.Previous);
+        var expected=new LegacyUpperPlaceBias().Shift(candidate.Previous.Rank,n);
+        if(candidate.Rank!=expected || candidate.Rank<1 || candidate.Rank>n)
+            throw new MonsterValidationException("تغيّر شاهد انحياز الخانة العليا.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -975,6 +996,7 @@ public sealed class MonsterDispatcher
     private readonly PatchedRejectionDirectionPhaseHandler _patchedRejectionDirection;
     private readonly LegacyDoubleOffsetWideRankPhaseHandler _doubleOffsetWideRank;
     private readonly PatchedDoubleOffsetWideRankPhaseHandler _patchedDoubleOffsetWideRank;
+    private readonly LegacyUpperPlaceBiasPhaseHandler _legacyUpperPlaceBias;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -1017,6 +1039,7 @@ public sealed class MonsterDispatcher
         _patchedRejectionDirection = new PatchedRejectionDirectionPhaseHandler();
         _doubleOffsetWideRank = new LegacyDoubleOffsetWideRankPhaseHandler();
         _patchedDoubleOffsetWideRank = new PatchedDoubleOffsetWideRankPhaseHandler();
+        _legacyUpperPlaceBias = new LegacyUpperPlaceBiasPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -2938,6 +2961,130 @@ public sealed class MonsterDispatcher
         context.Phase=context.Status;
     }
 
+    public void DispatchLegacyUpperPlaceBias(MonsterContext context)
+    {
+        if(context is null ||
+           !string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("تتطلب رقعة الحدّ سياقاً مؤسساً.");
+        if(context.LegacyQueriedBowlId is not int id || id is < 1 or > 6 ||
+           context.LegacyBowlQuestionSeal is not int seal || seal is not (21 or 31) ||
+           context.LegacyWideFamilySize is not BigInteger n ||
+           n<=((BigInteger.One<<127)-BigInteger.One) ||
+           context.LegacyAnswerStepIndex is not BigInteger k || !k.IsZero ||
+           context.LegacyInclusiveWideLimitRankResult.HasValue ||
+           context.PatchedInclusiveWideLimitRankResult.HasValue ||
+           context.LegacyRejectionDirectionRankResult.HasValue ||
+           context.PatchedRejectionDirectionRankResult.HasValue ||
+           context.LegacyDoubleOffsetWideRankResult.HasValue ||
+           context.PatchedDoubleOffsetWideRankResult.HasValue ||
+           context.LegacyUpperPlaceBiasRankResult.HasValue ||
+           context.PatchedWideRankResult.HasValue ||
+           context.LegacyReversedWideRankResult.HasValue ||
+           context.PatchedAnswerAtResult.HasValue ||
+           context.LegacyOneBasedAnswerAtResult.HasValue ||
+           context.PatchedBowlQuestionResult is not null ||
+           context.LegacyUnsealedBowlQuestionResult is not null ||
+           context.PatchedNextBowlResult.HasValue ||
+           context.LegacySauceFinalBowls is not null ||
+           context.PatchedSauceFinalBowls is not null ||
+           context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("حالة شاهد الحدّ مكررة أو ناقصة.");
+
+        var stage40=_legacyUpperPlaceBias.Handle(context);
+        var candidate39=stage40.Previous;
+        var output=candidate39.Historical;
+        var patched=output.Previous;
+        var rejected=patched.Historical;
+        var candidate=rejected.Previous;
+        var oldCandidate=candidate.Historical;
+        var wide=oldCandidate.Previous;
+        var oldWide=wide.Historical;
+        var step=oldWide.Step;
+        var oneBased=step.Historical;
+        var sealedQuestion=oneBased.Question;
+        var oldQuestion=sealedQuestion.Historical;
+        var correctedNext=oldQuestion.Historical;
+        var oldNext=correctedNext.Historical;
+        var source=oldNext.Sauce.Historical.Source;
+        var sauceOld=oldNext.Sauce.Historical;
+        var sauceCorrect=oldNext.Sauce.Patched;
+
+        _validation.ValidateVisibleDropPatch(context,source);
+        _validation.ValidateLegacyOverwrittenSauce(context,sauceOld);
+        _validation.ValidateProtectedDrop46Sauce(context,oldNext.Sauce);
+        _validation.ValidateLegacyFixedNextBowl(context,oldNext);
+        _validation.ValidatePatchedNextBowl(context,correctedNext);
+        _validation.ValidateLegacyUnsealedBowlQuestion(context,oldQuestion);
+        _validation.ValidatePatchedBowlQuestion(context,sealedQuestion);
+        _validation.ValidateLegacyOneBasedAnswerStep(context,oneBased);
+        _validation.ValidatePatchedAnswerStep(context,step);
+        _validation.ValidateLegacyReversedWideRank(context,oldWide);
+        _validation.ValidatePatchedWideRank(context,wide);
+        _validation.ValidateLegacyInclusiveWideLimit(context,oldCandidate);
+        _validation.ValidatePatchedInclusiveWideLimit(context,candidate);
+        _validation.ValidateLegacyWideRejectionDirection(context,rejected);
+        _validation.ValidatePatchedRejectionDirection(context,patched);
+        _validation.ValidateLegacyDoubleOffsetWideRank(context,output);
+        _validation.ValidatePatchedDoubleOffsetWideRank(context,candidate39);
+        _validation.ValidateLegacyUpperPlaceBias(context,stage40);
+
+        context.PatchedCountsResult=source.Counts;
+        context.PatchedStoneRows=source.Stones;
+        context.LegacyHiddenReversed=source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess=source.HiddenAccessor;
+        context.PatchedVisibleDrops=source.Visible;
+        context.LegacyDiagnosticDrop46Order=sauceOld.DiagnosticDrop46Order;
+        context.LegacyOverwrittenQueryOrder=sauceOld.OverwrittenQueryOrder;
+        context.LegacyPostStirOrders=sauceOld.PostStirOrders;
+        context.LegacySauceBowlsAfterDrops=sauceOld.BowlsAfterDrops;
+        context.LegacySauceFinalBowls=sauceOld.FinalBowls;
+        context.PatchedOrderAt46Latch=sauceCorrect.OrderAt46Latch;
+        context.PatchedSauceBowlsAfterDrops=sauceCorrect.BowlsAfterDrops;
+        context.PatchedSauceFinalBowls=sauceCorrect.FinalBowls;
+        context.PatchedPostStirOrders=sauceCorrect.PostStirOrders;
+        context.LegacyFixedNextBowlResult=oldNext.LegacyNextBowlId;
+        context.PatchedNextBowlResult=correctedNext.NextBowlId;
+        context.LegacyUnsealedBowlQuestionResult=oldQuestion.Answer;
+        context.PatchedBowlQuestionResult=sealedQuestion.Answer;
+        context.LegacyOneBasedAnswerAtResult=oneBased.Value;
+        context.PatchedAnswerAtResult=step.Value;
+        context.LegacyReversedWideRankResult=oldWide.Rank;
+        context.PatchedWideRankResult=wide.Rank;
+        context.LegacyInclusiveWideLimitRankResult=oldCandidate.Rank;
+        context.PatchedInclusiveWideLimitRankResult=candidate.Rank;
+        context.LegacyRejectionDirectionRankResult=rejected.Rank;
+        context.PatchedRejectionDirectionRankResult=patched.Rank;
+        context.LegacyDoubleOffsetWideRankResult=output.Rank;
+        context.PatchedDoubleOffsetWideRankResult=candidate39.Rank;
+        context.LegacyUpperPlaceBiasRankResult=stage40.Rank;
+
+        context.BranchTrace.Add("LEGACY_OVERWRITTEN_DROP46_ORDER_WITNESS");
+        context.BranchTrace.Add("PROTECTED_DROP46_ORDER_LATCH_WITNESS");
+        context.BranchTrace.Add("LEGACY_FIXED_NEXT_BOWL_WITNESS");
+        context.BranchTrace.Add("PATCHED_NEXT_BOWL_ORDER_WITNESS");
+        context.BranchTrace.Add("LEGACY_UNSEALED_BOWL_QUESTION_WITNESS");
+        context.BranchTrace.Add("PATCHED_SEALED_BOWL_QUESTION_WITNESS");
+        context.BranchTrace.Add("LEGACY_ONE_BASED_ANSWER_STEP_WITNESS");
+        context.BranchTrace.Add("PATCHED_ZERO_BASED_ANSWER_STEP_WITNESS");
+        context.BranchTrace.Add("LEGACY_REVERSED_WIDE_DIGITS_WITNESS");
+        context.BranchTrace.Add("PATCHED_WIDE_DIGIT_ORDER_WITNESS");
+        context.BranchTrace.Add("LEGACY_INCLUSIVE_WIDE_LIMIT_WITNESS");
+        context.BranchTrace.Add("PATCHED_INCLUSIVE_WIDE_LIMIT_WITNESS");
+        context.BranchTrace.Add("LEGACY_WIDE_REJECTION_DIRECTION_WITNESS");
+        context.BranchTrace.Add("PATCHED_REJECTION_DIRECTION_WITNESS");
+        context.BranchTrace.Add("LEGACY_DOUBLE_OFFSET_WIDE_RANK_WITNESS");
+        context.BranchTrace.Add("PATCHED_DOUBLE_OFFSET_WIDE_RANK_WITNESS");
+        context.BranchTrace.Add("LEGACY_UPPER_PLACE_BIAS");
+        _metrics.Bump(context,"legacy.wide.rejection.direction.witness");
+        _metrics.Bump(context,"patched.rejection.direction.witness");
+        _metrics.Bump(context,"patched.inclusive.wide.limit.witness");
+        _metrics.Bump(context,"legacy.double.offset.wide.rank.witness");
+        _metrics.Bump(context,"patched.double.offset.wide.rank.dispatch");
+        _metrics.Bump(context,"legacy.upper.place.bias.dispatch");
+        context.Status="LEGACY_UPPER_PLACE_BIAS_COMPLETE";
+        context.Phase=context.Status;
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -3752,6 +3899,29 @@ public sealed class MonsterManager
         int queriedBowlId,int seal,BigInteger familySize)
         => ExecutePatchedDoubleOffsetWideRank(calculationDay,targetDay,queriedBowlId,seal,familySize)
            .PatchedDoubleOffsetWideRankResult ??
+           throw new MonsterValidationException("لم تصدر الرتبة الواسعة المصححة.");
+
+    public MonsterContext ExecuteLegacyUpperPlaceBias(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+    {
+        if(queriedBowlId is < 1 or > 6 || seal is not (21 or 31) ||
+           familySize<=((BigInteger.One<<127)-BigInteger.One))
+            throw new MonsterValidationException("مدخلات الأسرة الواسعة غير صالحة.");
+        var context=Prepare(calculationDay,targetDay);
+        context.LegacyQueriedBowlId=queriedBowlId;
+        context.LegacyBowlQuestionSeal=seal;
+        context.LegacyAnswerStepIndex=BigInteger.Zero;
+        context.LegacyWideFamilySize=familySize;
+        _dispatcher.DispatchLegacyUpperPlaceBias(context);
+        return context;
+    }
+
+    public BigInteger EvaluateLegacyUpperPlaceBias(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => ExecuteLegacyUpperPlaceBias(calculationDay,targetDay,queriedBowlId,seal,familySize)
+           .LegacyUpperPlaceBiasRankResult ??
            throw new MonsterValidationException("لم تصدر الرتبة الواسعة المصححة.");
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
