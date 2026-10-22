@@ -221,6 +221,7 @@ module tb_gate_gap_oracle;
     integer compare_state, swapping, slot, candidate, product, choose_slot;
     integer name_i, name_j, chosen_cutlet_pos, chosen_day;
     integer gate_covered, start_gap, selected_piece_length;
+    integer month_min, month_max, month_choice, month_count;
 
     // Bowl query per normative sections M/N, with the immutable
     // orderAt46. Used only for small-domain test-only selections.
@@ -476,12 +477,41 @@ module tb_gate_gap_oracle;
                 if(name_values[name_i]==name_values[name_j])
                     $fatal(1,"CUTLET_NAME_COLLISION");
         end
+        // External normative checkpoint for the full cutlet construction.
+        // This is intentionally stronger than the final (10,503) check:
+        // a wrong composition order could coincidentally retain that pair.
+        if(cutlet_count!=6 || comp_count!=15 || comp_choice!=9 ||
+           names_choice!=7851263 || chosen_cutlet_pos!=3)
+            $fatal(1,"FOUNDATION_CUTLET_CANONICAL_INTERMEDIATE");
+        if(piece_parts[comp_choice-1][0]!=1 ||
+           piece_parts[comp_choice-1][1]!=2 ||
+           piece_parts[comp_choice-1][2]!=1 ||
+           piece_parts[comp_choice-1][3]!=2 ||
+           piece_parts[comp_choice-1][4]!=1 ||
+           piece_parts[comp_choice-1][5]!=1)
+            $fatal(1,"FOUNDATION_CUTLET_COMPOSITION_VECTOR");
+        if(name_values[0]!=15 || name_values[1]!=17 ||
+           name_values[2]!=10 || name_values[3]!=14 ||
+           name_values[4]!=8 || name_values[5]!=13)
+            $fatal(1,"FOUNDATION_CUTLET_NAMES_VECTOR");
         $display("STAGE1_FOUNDATION_CUTLET_DETAIL K=%0d compositions=%0d comp_rank=%0d names_rank=%0d ordinal=%0d index=%0d day=%0d",
                  cutlet_count,comp_count,comp_choice,names_choice,
                  chosen_cutlet_pos,name_values[chosen_cutlet_pos-1],chosen_day);
         if(name_values[chosen_cutlet_pos-1]!=10 || chosen_day!=503)
             $fatal(1,"FOUNDATION_CANONICAL_CUTLET_10_DAY_503");
         $display("STAGE1_FOUNDATION_CUTLET_REFERENCE_PASS index=10 day=503");
+        // Next independent oracle layer (U): the *number* of months.
+        // Length composition, weave, name assignment are not yet implemented.
+        month_min=(4244+122)/123;
+        month_max=(4244/4 < 47) ? 4244/4 : 47;
+        if(month_min!=35 || month_max!=47)
+            $fatal(1,"FOUNDATION_MONTH_COUNT_BOUNDS");
+        query_short(3,30,month_max-month_min+1,month_choice);
+        month_count=month_min+month_choice-1;
+        if(month_choice!=11 || month_count!=45)
+            $fatal(1,"FOUNDATION_MONTH_COUNT_45");
+        $display("STAGE1_FOUNDATION_MONTH_CARDINALITY_PASS min=%0d max=%0d choice=%0d count=%0d",
+                 month_min,month_max,month_choice,month_count);
 
         $display("STAGE1_TEST_ONLY_GATE_GAPS_PASS cases=%0d",case_count);
         $display("STAGE1_YEAR5000_REFERENCE_PASS candidates=%0d rank=%0d",
