@@ -1,4 +1,4 @@
-month_ordinal,month_length,physical_length_prefix_sum,normative_status
+month_ordinal,month_length,nominal_sum_of_month_lengths_not_calendar_position,normative_status
 1,115,115,TEST_ONLY_INDEPENDENT_CANDIDATE
 2,108,223,TEST_ONLY_INDEPENDENT_CANDIDATE
 3,119,342,TEST_ONLY_INDEPENDENT_CANDIDATE
