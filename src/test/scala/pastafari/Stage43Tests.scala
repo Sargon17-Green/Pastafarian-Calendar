@@ -20,6 +20,26 @@ object Stage43Tests {
   private val Nine=Vector(42,43,44,45,46,47,48,49,50)
   private val NineParts=Vector(2,1,1,1,1,3)
   private val N6=Vector(17,9,1,7,6,13)
+  // Fixture italiana test-only, non consultata dal codice di produzione.
+  private val FrozenCutletNames=Vector(
+    "bronzo",
+    "volpe",
+    "rene",
+    "Lagash",
+    "pensiero",
+    "quattro parti di nove",
+    "Palgurash",
+    "cipero",
+    "grappolo",
+    "scorpione",
+    "cenere",
+    "frumento",
+    "fiume",
+    "risata",
+    "Akkad",
+    "corno",
+    "il vaso vuoto"
+  )
   private val Huge=(BigInt(1)<<16384)+43
 
   private def check(label:String)(run: => Unit):Unit={
@@ -68,8 +88,7 @@ object Stage43Tests {
       }
       if(d>=day && d<day+length) {
         val id=ids(i)
-        val name=SourceLanguageCatalog.Cutlets.find(
-          _.canonicalIndex==id).get.italian
+        val name=FrozenCutletNames(id-1)
         return (id,name)
       }
       day+=length
@@ -107,6 +126,8 @@ object Stage43Tests {
     check("il catalogo congela 17 nomi canonici"){
       eqv(SourceLanguageCatalog.Cutlets.map(_.canonicalIndex),
         I17,"Catalogo")
+      eqv(SourceLanguageCatalog.Cutlets.map(_.italian),
+        FrozenCutletNames,"Testi italiani congelati")
     }
     check("giorno zero nomina la prima cotoletta"){
       val r=patch(d=0)
@@ -230,8 +251,10 @@ object Stage43Tests {
       val rng=new Random(43102026L)
       for(i<-1 to 4096){
         val n=6+rng.nextInt(12)
-        val g=Vector.fill(n)(42+rng.nextInt(180))
-        val p=Vector.fill(n)(1)
+        val extras=rng.nextInt(11)
+        val focus=rng.nextInt(n)
+        val p=Vector.tabulate(n)(i=>if(i==focus)1+extras else 1)
+        val g=Vector.fill(n+extras)(42+rng.nextInt(120))
         val ids=rng.shuffle(I17).take(n).toVector
         val d=rng.nextInt(g.sum)
         val actual=patch(g,p,ids,d)
