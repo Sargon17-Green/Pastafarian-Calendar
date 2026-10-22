@@ -22,6 +22,8 @@ on:
       - '!src/\+pastafari/countWholeWeavingAllUnopenedWavefront.m'
       - '!tests/run_stage55_preopen_wavefront_tests.m'
       - '!tests/run_stage55_preopen_full_year_bench.m'
+      - '!src/\+pastafari/countWholeWeavingSuffixByFirstEndpoint.m'
+      - '!tests/run_stage55_first_endpoint_tests.m'
       - 'DEVELOPMENT_STAGE.md'
       - 'docs/STAGE_55_FINAL_AUDIT.md'
   workflow_dispatch:

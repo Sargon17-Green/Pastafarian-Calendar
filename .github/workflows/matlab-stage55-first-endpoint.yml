@@ -1,0 +1,31 @@
+name: MATLAB First-Endpoint Exact Suffix Counting (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/countWholeWeavingSuffixByFirstEndpoint.m'
+      - 'tests/run_stage55_first_endpoint_tests.m'
+      - '.github/workflows/matlab-stage55-first-endpoint.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-one-endpoint:
+    name: MATLAB R2026a / 6651 exact suffix states + full-sized count
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Verify every small legal state and full-sized exact count
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_first_endpoint_tests
