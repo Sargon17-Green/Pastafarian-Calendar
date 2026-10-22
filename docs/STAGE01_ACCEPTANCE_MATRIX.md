@@ -96,3 +96,27 @@ This is a new **test-only** independent SystemVerilog oracle segment,
 not a production calculation module. CI iverilog / vvp is still
 UNEXECUTED. No full five-field calendar oracle or Kalaallisut source
 catalog acceptance is claimed.
+## 2026-10-22 — targeted pre-simulation remediation
+
+A manual static audit found a duplicate module-scope declaration of
+`positive_sum,negative_sum` in `tests/tb_gate_gap_oracle.sv`.
+The duplicate has been removed in commit
+`5a38eb4389f875880f70e83de64aa2aa22aed433`.
+A module-scope integer declaration inspection of all eight current
+SystemVerilog source files found no other module-scope integer
+duplicates; repeated task-local variable names are not duplicates.
+
+The new `scripts/check_sv_declarations.sh` was executed on
+synthetic positive and intentionally invalid fixtures in the
+scratch environment. Correct declaration scopes passed; duplicated
+module-scope declarations failed. It has **not** been run through an
+HDL parser and does not replace Icarus/Verilator compilation.
+
+`scripts/verify_stage1.sh` now runs source-declaration preflight,
+64-name catalog structure and production/oracle isolation **before**
+testing whether `iverilog` and `vvp` are installed.
+
+CI evidence: isolated QA push run 39763869338 and non-main PR run
+39763937760 were queued on last observation, with no job logs.
+The draft PR #20 must never be merged. Stage 1 cannot PASS while
+these checks remain unexecuted and the 64-name catalog unapproved.
