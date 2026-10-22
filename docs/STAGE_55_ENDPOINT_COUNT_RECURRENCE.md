@@ -283,11 +283,38 @@ Testy obejmują różnicę z dwiema niezależnymi zatwierdzonymi formułami,
 1089 małych frontów oraz pełne 45 miesięcy / 4230 dni.
 
 Run [39761828541](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39761828541)
-był jeszcze w toku przy tworzeniu tego wpisu; **brak uprawnienia
-do ogłoszenia PASS tego nowego wariantu przed odczytaniem logu**.
+zakończył się **PASS** na commit
+`35f42e7d6ff42a748d2b97f97b0f771c693355e1`. Potwierdzono:
+- `STAGE_55_ALL_OPEN_COMMON_DIFFERENTIAL_PASS FRONTIERS=1089 CHILDREN=3645`;
+- `STAGE_55_ALL_OPEN_COMMON_VALIDATION_PASS`;
+- `STAGE_55_ALL_OPEN_COMMON_BENCH MONTHS=45 DAYS=4230 OLD_SECONDS=2.368 FACTOR_SECONDS=6.410 COMMON_SECONDS=0.276 DIGITS=6877`;
+- `STAGE_55_ALL_OPEN_COMMON_EXPERIMENTAL_PASS`.
+
+W tym samym biegu dla pojedynczego zestawu 45 bloków nastąpiło
+**około 8,6-krotne** przyspieszenie względem uprzednio zweryfikowanej
+metody. Nie jest to jeszcze miara pełnego unrank 4230 dni.
+Nowy eksperyment w commit `51ac233bec03c901803f1cd52790b48770d7a63f`
+porównuje kompletną procedurę wznawianych 12 kroków z oboma
+licznikami; jej wyniku nie wolno domniemywać z tej liczby.
 
 Wszystkie trzy liczniki nadal dotyczą stanu, w którym miesiące już
 otwarto. Ani ich zgodność, ani wyniki wydajnościowe nie stanowią
 ukończonego całorocznego przebiegu od pustego prefiksu, porównania
 z niezależnym `normative_oracle`, ani bramki
+`STAGE_55_FINAL_AUDIT_PASS`.
+
+## Oddzielny pomiar trudnego stanu początkowego
+
+Commit `b79fb107e3ed35d9818313d7bdbbc2366790225c` dodaje
+`run_stage55_preopen_scaling_bench` z niezależnym workflow
+[39762862661](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762862661).
+W przeciwieństwie do frontów z otwartymi już wszystkimi miesiącami,
+sprawdza on **całe dokładne liczby legalnych przeplotów przy zerowym
+prefiksie**, z 8, 12 i 16 nieotwartymi miesiącami po 20 dni
+(160, 240, 320 dni). Każdy przypadek musi obliczyć pełną wartość
+`BigInt`, opublikować czas i liczbę cyfr, bez zawężania stanów.
+Run był w kolejce przy opracowaniu dokumentu; żaden wynik
+`STAGE_55_PREOPEN_SCALING_PASS` nie został tu ogłoszony.
+Dane posłużą do wyboru rozwiązania właściwego problemu roku 4244 dni.
+Nie zastępują ani porównania z `normative_oracle`, ani
 `STAGE_55_FINAL_AUDIT_PASS`.
