@@ -542,3 +542,19 @@ Ini ialah `EXPECTED_RED` yang disahkan, bukan kegagalan CI. Semua regresi Stage 
 ### Had perkembangan
 
 Stage21 hanya membaiki satu titisan. Ia tidak menjalankan 46 titisan sebagai state machine, tidak menghasilkan `orderAt46Latch` sebelum Stage23, dan tidak mencipta sebarang peraturan bowl-next. Stage22 ialah DISCOVERY11 yang berikutnya. Terima hanya apabila CI sebenar hijau dan `EXPECTED_RED` Stage20 terpelihara.
+
+
+### Bukti GitHub Actions bagi Stage 21 — diterima
+
+**Run:** `39732200876`  
+**SHA diuji:** `1929bb3ba57d3371f4b927d552e71930e5f7ad8a`  
+**Pekerjaan:** `verify=success`; `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+KEPUTUSAN MERAH_DIJANGKA salah=3600 sepadan=720 pangkat=720 real=4 real_salah=20 ralat=4 lain=0
+LULUS kontrak merah 10; mangkuk legacy tercemar tanpa snapshot
+LULUS Stage 21 PATCH 10 pangkat=720 komponen=4320 parut=3600 sepadan_legacy=720 real=4 real_komponen=24 real_parut=20 real_sepadan=4 ralat=5
+```
+
+CI lengkap sah dan semua gerbang Stage1–20 lulus. Stage21 diterima sebagai `GREEN` dengan pembetul snapshot sah, sejarah salah masih terbukti. Stage22 belum dimulakan.

@@ -26,3 +26,19 @@ Seluruh Stage1–20, fixture, syntax dan kunci nama kanonik mesti hijau. CI yang
 Jangan ubah `main`, fungsi legacy lama, oracle, katalog, fixture atau cabang lain. Jangan mula Stage22 sebelum semua CI hijau. Tiada `orderAt46Latch` atau keseluruhan 46 stirs di sini.
 
 **Commit:** `stage21(php-ms): vault dan pending enam mangkuk tanpa memadam legacy`
+
+
+### Bukti GitHub Actions bagi Stage 21 — diterima
+
+**Run:** `39732200876`  
+**SHA diuji:** `1929bb3ba57d3371f4b927d552e71930e5f7ad8a`  
+**Pekerjaan:** `verify=success`; `audit_php_bahasa_melayu=success`.
+
+```text
+RINGKASAN lulus=15 gagal=0
+KEPUTUSAN MERAH_DIJANGKA salah=3600 sepadan=720 pangkat=720 real=4 real_salah=20 ralat=4 lain=0
+LULUS kontrak merah 10; mangkuk legacy tercemar tanpa snapshot
+LULUS Stage 21 PATCH 10 pangkat=720 komponen=4320 parut=3600 sepadan_legacy=720 real=4 real_komponen=24 real_parut=20 real_sepadan=4 ralat=5
+```
+
+CI lengkap sah dan semua gerbang Stage1–20 lulus. Stage21 diterima sebagai `GREEN` dengan pembetul snapshot sah, sejarah salah masih terbukti. Stage22 belum dimulakan.
