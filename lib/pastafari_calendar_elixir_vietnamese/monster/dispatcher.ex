@@ -30,6 +30,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
     HiddenDropManager,
     Metrics,
     MonthCountManager,
+    MonthLengthsManager,
     NextBowlPatchWrapper,
     NextYearManager,
     PreviousYearManager,
@@ -225,6 +226,12 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def next_year_diagnostic(calculation_day), do: NextYearManager.diagnose(calculation_day)
   def previous_year(day), do: PreviousYearManager.previous_year(day)
   def previous_year_diagnostic(day), do: PreviousYearManager.diagnose(day)
+
+  def month_lengths(calculation_day, target_day),
+    do: MonthLengthsManager.lengths(calculation_day, target_day)
+
+  def month_lengths_diagnostic(calculation_day, target_day),
+    do: MonthLengthsManager.diagnose(calculation_day, target_day)
 
   def month_count(calculation_day, target_day),
     do: MonthCountManager.month_count(calculation_day, target_day)

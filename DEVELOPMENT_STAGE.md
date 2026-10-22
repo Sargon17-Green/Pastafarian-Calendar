@@ -1,11 +1,11 @@
 # Trạng thái phát triển
 
 TOTAL_STAGES=55
-CURRENT_STAGE=49
-CURRENT_KIND=PATCH
-CURRENT_PATCH=24
+CURRENT_STAGE=50
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=25
 LAST_COMPLETED_STAGE=49
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=PENDING_CI
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -14,18 +14,18 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..23; Stage49 thêm AscendingMonthCountPatch gọi thật LegacyDescendingMonthCount rồi chọn từ thứ tự tăng dần theo cùng rank bát3/chốt30.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..24; Stage50 thêm BoundedMonthCompositions đếm/mở hạng độ dài 4..123, MonthLengthsManager và LegacyMirroredMonthLengthsRank; bát3/chốt31 đúng nhưng hạng bị phản chiếu.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_49_PATCH_CLOSURE_COMMIT
+GIT_HISTORY_MUTATED=STAGE_50_DISCOVERY_IMPLEMENTATION
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=793
-CI_FAILURES=0
+CI_TESTS=NOT_VERIFIED
+CI_FAILURES=NOT_VERIFIED
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=NO
+CLOSURE_VERIFICATION_PENDING=YES
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -1094,3 +1094,10 @@ Canonical Names Lock: bước kiểm tra verify đã hoàn tất SUCCESS
 - CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39816182764
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39816182935
 Stage49 GREEN; chưa sửa main hoặc oracle. Kế tiếp Stage50 DISCOVERY25.
+
+Stage50 DISCOVERY25 mở độ dài tháng (4..123) theo tổng
+độ dài năm, số tháng PATCH24 và thứ tự từ điển tăng.
+Bộ đếm dùng bù trừ trên số nguyên lớn, không gọi oracle.
+Dòng đáp án bát 3/chốt31 chọn hạng chuẩn một-based;
+di sản cố tình lấy N-rank+1. 16 kiểm soát, 4 normative
+RED dự kiến, tổng 813 bài. Không sửa main/legacy cũ.
