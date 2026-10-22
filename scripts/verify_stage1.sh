@@ -27,6 +27,9 @@ vvp build/arithmetic.vvp
 iverilog -g2012 -s tb_stage1_reset -Wall -o build/reset.vvp \
   rtl/pcal_stage1_bootstrap.sv tests/tb_stage1_reset.sv
 vvp build/reset.vvp
+iverilog -g2012 -s tb_stage1_backpressure -Wall -o build/backpressure.vvp \
+  rtl/pcal_stage1_bootstrap.sv tests/tb_stage1_backpressure.sv
+vvp build/backpressure.vvp
 iverilog -g2012 -s tb_sauce_foundation -Wall -o build/sauce.vvp \
   tests/pcal_stage1_oracle_pkg.sv tests/tb_sauce_foundation.sv
 vvp build/sauce.vvp
