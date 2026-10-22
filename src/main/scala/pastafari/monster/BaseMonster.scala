@@ -170,7 +170,10 @@ final case class BaseMonsterContext(
   var legacyCutletNameSlot: Option[Int] = None,
   var legacyCutletNameCanonicalId: Option[Int] = None,
   var legacyCutletNameItalian: Option[String] = None,
-  var legacyCutletNameCatalogVersion: Option[String] = None
+  var legacyCutletNameCatalogVersion: Option[String] = None,
+  var patchedCutletNameId: Option[Int] = None,
+  var patchedCutletNameItalian: Option[String] = None,
+  var patch21Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -291,6 +294,78 @@ final class BaseValidationManager {
   /** DISCOVERY21: verifica indipendente il difetto giorno modulo n.
     * Non utilizza il vecchio adapter e non importa l'oracolo dei test.
     */
+
+  /** PATCH21: il validator usa i gruppi di porte, non l'algoritmo
+    * del wrapper. Conserva anche la cicatrice storica indipendente.
+    */
+  def requirePatch21Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_21_DAY_INDEXED_CUTLET_NAME" ||
+       ctx.status!="PATCH_21_READY" || !ctx.patch21Applied ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_21_DAY_INDEXED_CUTLET_NAME",
+         "PATCH_21_DAY_INDEXED_CUTLET_NAME") ||
+       ctx.cutletNameGateGaps.isEmpty || ctx.cutletNamePartition.isEmpty ||
+       ctx.cutletCanonicalNameIndices.isEmpty ||
+       ctx.cutletNameDayOffset.isEmpty ||
+       ctx.cutletNameInputSnapshot.isEmpty ||
+       ctx.legacyCutletNameSlot.isEmpty ||
+       ctx.legacyCutletNameCanonicalId.isEmpty ||
+       ctx.legacyCutletNameItalian.isEmpty ||
+       ctx.legacyCutletNameCatalogVersion.isEmpty ||
+       ctx.patchedCutletNameId.isEmpty ||
+       ctx.patchedCutletNameItalian.isEmpty)
+      throw new IllegalStateException("PATCH21 non pronta.")
+
+    val g=ctx.cutletNameGateGaps.get
+    val p=ctx.cutletNamePartition.get
+    val ids=ctx.cutletCanonicalNameIndices.get
+    val d=ctx.cutletNameDayOffset.get
+    if(ctx.cutletNameInputSnapshot.get!=(g,p,ids,d) ||
+       p.size<6 || p.size>17 || p.exists(_<1) ||
+       p.sum!=g.size || g.exists(x=>x<42 || x>963) ||
+       g.sum<252 || g.sum>5778 || d<0 || d>=g.sum ||
+       ids.size!=p.size || ids.distinct.size!=ids.size ||
+       ids.exists(id=>id<1 || id>17))
+      throw new IllegalStateException("Input o snapshot PATCH21 non validi.")
+
+    val cat=pastafari.catalog.SourceLanguageCatalog.Cutlets
+    if(cat.size!=17 || cat.indices.exists(i=>cat(i).canonicalIndex!=i+1) ||
+       ctx.legacyCutletNameCatalogVersion.get!=
+         pastafari.catalog.SourceLanguageCatalog.Version)
+      throw new IllegalStateException("Catalogo PATCH21 non valido.")
+
+    // Calcolo indipendente dell'ID selezionato: segmenti cumulati,
+    // un intervallo per volta, con entrambi i limiti espliciti.
+    var nextGate=0
+    var start=0
+    var actualNameId=0
+    for((n,i)<-p.zipWithIndex) {
+      var duration=0
+      var j=0
+      while(j<n) {
+        duration+=g(nextGate)
+        nextGate+=1
+        j+=1
+      }
+      if(d>=start && d<start+duration) actualNameId=ids(i)
+      start+=duration
+    }
+    if(actualNameId==0 || nextGate!=g.size || start!=g.sum)
+      throw new IllegalStateException("Segmentazione PATCH21 incompleta.")
+    val legacySlot=d%p.size
+    val historicalId=ids(legacySlot)
+    val canonical=cat.find(_.canonicalIndex==actualNameId)
+      .getOrElse(throw new IllegalStateException("Nome canonico assente."))
+    val historical=cat.find(_.canonicalIndex==historicalId)
+      .getOrElse(throw new IllegalStateException("Nome storico assente."))
+    if(ctx.legacyCutletNameSlot.get!=legacySlot ||
+       ctx.legacyCutletNameCanonicalId.get!=historicalId ||
+       ctx.legacyCutletNameItalian.get!=historical.italian ||
+       ctx.patchedCutletNameId.get!=actualNameId ||
+       ctx.patchedCutletNameItalian.get!=canonical.italian)
+      throw new IllegalStateException("Risultato PATCH21 manomesso.")
+  }
+
   def requireDiscovery21Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="DISCOVERY_21_DAY_INDEXED_CUTLET_NAME" ||
        ctx.status!="LEGACY_DAY_INDEXED_CUTLET_NAME_READY" ||
@@ -1872,7 +1947,8 @@ final class BaseMonsterManager {
     new Patch19DayIndexedMonthNameHandler(metrics),
     new Discovery20CutletOpenBoundaryHandler(metrics),
     new Patch20CutletOpenBoundaryHandler(metrics),
-    new Discovery21DayIndexedCutletNameHandler(metrics)
+    new Discovery21DayIndexedCutletNameHandler(metrics),
+    new Patch21DayIndexedCutletNameHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -2977,6 +3053,42 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("discovery21",error)
+    }
+  }
+
+
+  def patch21DayIndexedCutletName(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    gateGaps: Vector[Int],
+    cutletPartition: Vector[Int],
+    canonicalCutletNameIndices: Vector[Int],
+    dayOffset: Int
+  ): Patch21DayIndexedCutletNameReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.cutletNameGateGaps=Some(gateGaps)
+    ctx.cutletNamePartition=Some(cutletPartition)
+    ctx.cutletCanonicalNameIndices=Some(canonicalCutletNameIndices)
+    ctx.cutletNameDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_21_DAY_INDEXED_CUTLET_NAME"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery21Ready(ctx)
+      ctx.phase="PATCH_21_DAY_INDEXED_CUTLET_NAME"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch21Ready(ctx)
+      Patch21DayIndexedCutletNameReport(
+        ctx.calculationDay,ctx.targetDay,ctx.cutletNameGateGaps.get,
+        ctx.cutletNamePartition.get,ctx.cutletCanonicalNameIndices.get,
+        ctx.cutletNameDayOffset.get,ctx.legacyCutletNameSlot.get,
+        ctx.legacyCutletNameCanonicalId.get,
+        ctx.legacyCutletNameItalian.get,
+        ctx.legacyCutletNameCatalogVersion.get,
+        ctx.patchedCutletNameId.get,ctx.patchedCutletNameItalian.get,
+        ctx.patch21Applied,ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("patch21",error)
     }
   }
 

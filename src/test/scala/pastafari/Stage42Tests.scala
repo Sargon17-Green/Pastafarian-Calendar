@@ -294,15 +294,23 @@ object Stage42Tests {
       truth(st.contains(
         "STAGE_41_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_56_PASS_0_FAIL"),
         "Stage41")
-      truth(st.contains("CURRENT_STAGE=42"),"Stage42")
-      truth(st.contains("LAST_COMPLETED_STAGE=41"),"Ultimo")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      val completed=st.linesIterator.find(
+        _.startsWith("LAST_COMPLETED_STAGE="))
+        .get.split("=",2)(1).toInt
+      truth(current>=42 && completed>=42 && completed<=current,
+        "Firma Stage42 conservata")
       val walk=Files.walk(root().resolve("src/main/scala"))
       val source=try walk.iterator().asScala
         .filter(p=>Files.isRegularFile(p)&&p.toString.endsWith(".scala"))
         .map(p=>new String(Files.readAllBytes(p),StandardCharsets.UTF_8))
         .mkString("\n")
       finally walk.close()
-      truth(!source.contains("def cutletNamePatch("),"PATCH21 prematura")
+      if(current==42)
+        truth(!source.contains("def cutletNamePatch("),"PATCH21 prematura")
+      else
+        truth(source.contains("def cutletNamePatch("),"PATCH21 successiva")
     }
     // Le tre divergenze di equivalenza sono DELIBERATE.
     Vector(

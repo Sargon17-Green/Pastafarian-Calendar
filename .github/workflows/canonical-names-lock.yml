@@ -1003,3 +1003,22 @@ jobs:
           for label in DAY1_CUTLET1 DAY42_CUTLET2 DAY672_CUTLET17; do
             grep -Fq "FAIL — equivalenza normativa nome ${label} — Nome da giorno anziché cotoletta: ${label}" stage42.log
           done
+  native-stage43-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage43 cutlet-name PATCH21
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage43Tests' 2>&1 | tee stage43.log
+          grep -Fq 'RISULTATO STADIO 43: 55 PASS, 0 FAIL' stage43.log
+          test "$(grep -Fc 'PASS — ' stage43.log)" -eq 55
+          test "$(grep -Fc 'FAIL — ' stage43.log)" -eq 0
