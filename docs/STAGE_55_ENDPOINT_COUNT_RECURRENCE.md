@@ -318,3 +318,58 @@ Run był w kolejce przy opracowaniu dokumentu; żaden wynik
 Dane posłużą do wyboru rozwiązania właściwego problemu roku 4244 dni.
 Nie zastępują ani porównania z `normative_oracle`, ani
 `STAGE_55_FINAL_AUDIT_PASS`.
+
+
+## Dokładne domknięcie ostatniego nieotwartego miesiąca
+
+Nowy eksperyment na commit
+`ea928af209a137cc1b1fc2bdac036a58a71692ad` rozszerza
+wielomianowe liczenie i leksykograficzny unrank na front
+`openedUpTo >= K-1`, tj. pozostał **co najwyżej jeden** miesiąc,
+którego pierwsze wystąpienie dopiero nastąpi. Jest to twierdzenie
+o języku legalnych słów, a nie heurystyka ograniczająca obliczenie.
+
+Niech miesiące `1..K-1` zostały już otwarte i jedynie `K`
+pozostał nieotwarty. Każde legalne dalsze otwarcie `K` następuje
+we właściwej kolejności, ponieważ nie istnieje większy indeks do
+wcześniejszego otwarcia. Zatem żadne **dalsze** ograniczenie kolejności
+pierwszych wystąpień nie pozostaje. Jedynymi ograniczeniami na suffix
+są dodatnie liczności i kolejność ostatnich wystąpień. Te same
+dokładnie słowa liczy już wzór stanu `openedUpTo == K`:
+
+`F(r)=PROD_{j=2..m} C(S(j)-1,r(j)-1)`.
+
+Ta równość dotyczy również każdego legalnego dziecka: po wybraniu
+miesiąca jego licznik i liczniki pozostałych miesięcy tworzą
+dokładnie jeden spójny przedział leksykograficzny. Dzięki temu
+`unrankWholeWeavingByEndpoints` używa sprawdzonej rodziny
+`allOpenedWholeWeaveChildCounts` także od `K-1`, bez zmiany
+kolejności rang i bez uznawania nieotwartego miesiąca za
+rzeczywiście otwarty w stanie wynikowym.
+
+Dodatkowy natywny test
+`STAGE_55_ONE_UNOPENED_FACTORIZATION_EXHAUSTIVE_PASS` porównuje
+wszystkie małe dodatnie wektory do 5 miesięcy, każdy dopuszczalny
+zamknięty prefiks i każdy odpowiadający mu stan z **dokładnie jednym
+nieotwartym miesiącem**, z niezależną zapamiętującą rekurencją
+legalnych przejść. Drugi test
+`STAGE_55_ONE_UNOPENED_BENCH` porównuje dokładnie
+`openedUpTo=44` i `openedUpTo=45` na 45 miesiącach i
+4230 dniach. Lokalne niezależne sprawdzenie rekurencyjne w JS
+potwierdziło 1641 małych stanów, ale **nie zastępuje natywnego
+MATLAB PASS**.
+
+W chwili zapisu workflow
+[39763835823](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39763835823)
+pozostaje w kolejce. Dopóki brak natywnych markerów PASS, jest to
+niezamknięty kandydat. Również osobne testy skali w pełni nieotwartego
+frontu [39762862661](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762862661)
+i przyspieszonego unrank w chunkach
+[39763097159](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39763097159)
+były w kolejce. Nie przyspieszamy ich przez pomijanie wejść.
+
+Granica znanego postępu: przypadek, w którym **dwa lub więcej**
+miesięcy nie zostało jeszcze otwartych, nadal wymaga dokładnej
+rekurencji endpoint, a przypadek 45 nieotwartych miesięcy / 4244 dni
+nadal nie został policzony i porównany z oracle. Warunek zamknięcia
+`STAGE_55_FINAL_AUDIT_PASS` pozostaje niespełniony.
