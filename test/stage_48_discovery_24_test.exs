@@ -6,6 +6,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage48Discovery24Test do
     AnswerStreamManager,
     CutletMaterializationManager,
     LegacyDescendingMonthCount,
+    AscendingMonthCountPatch,
     MonthCountManager,
     StageNotIntegratedError
   }
@@ -86,11 +87,13 @@ defmodule PastafariCalendarElixirVietnamese.Stage48Discovery24Test do
     end
   end
 
-  test "production chọn từ thứ tự legacy giảm dần" do
+  test "production dùng thứ tự tăng dần sau khi gọi legacy" do
     for delta <- [-539, 0, 417] do
       c = @foundation + delta
       r = MonthCountManager.diagnose(c, c)
-      assert r.month_count == Enum.at(r.historical_order, r.rank - 1)
+      assert r.historical_month_count == Enum.at(r.historical_order, r.rank - 1)
+      assert r.month_count == Enum.at(r.corrected_order, r.rank - 1)
+      assert r.month_count == AscendingMonthCountPatch.diagnose(r.candidates, r.rank).corrected_count
       assert Calendar.month_count_spaghetti(c, c) == r.month_count
     end
   end
@@ -154,11 +157,11 @@ defmodule PastafariCalendarElixirVietnamese.Stage48Discovery24Test do
     legacy = File.read!(Path.join(root, "legacy_descending_month_count.ex"))
     manager = File.read!(Path.join(root, "month_count_manager.ex"))
     assert legacy =~ "Enum.sort(candidates, :desc)"
-    assert manager =~ "LegacyDescendingMonthCount.sort(candidates)"
+    assert manager =~ "AscendingMonthCountPatch.diagnose(candidates, rank)"
     assert manager =~ "Dispatcher.answer_stream(c, source_day, @bowl, @seal)"
-    assert manager =~ "Enum.at(historical_order, rank - 1)"
+    assert manager =~ "chosen = patch.corrected_count"
     refute manager =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "ascending_month_count_patch.ex"))
+    assert File.exists?(Path.join(root, "ascending_month_count_patch.ex"))
     assert_raise StageNotIntegratedError, fn ->
       Calendar.calendar_date_spaghetti(@foundation, @foundation)
     end

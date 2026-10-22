@@ -1,16 +1,16 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.MonthCountManager do
   @moduledoc """
-  DISCOVERY24 chọn số tháng của năm chứa ngày đích.
+  PATCH24 chọn số tháng từ thứ tự chuẩn sau khi thực thi di sản.
   Cận dưới ceil(year_length/123), cận trên
   min(47,floor(year_length/4)), chọn từ bát 3 chốt 30
   theo hạng một-based. Production cố ý dùng ứng viên
-  theo thứ tự di sản giảm dần thay vì thứ tự chuẩn tăng.
+  từ thứ tự tăng dần, giữ thứ tự lịch sử để kiểm toán.
   Chưa tính chiều dài hoặc tên tháng.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     AnswerStreamManager, CutletMaterializationManager,
-    Dispatcher, LegacyDescendingMonthCount
+    Dispatcher, AscendingMonthCountPatch
   }
 
   @bowl 3
@@ -36,18 +36,20 @@ defmodule PastafariCalendarElixirVietnamese.Monster.MonthCountManager do
     year = parent.year
     year_length = year.close_gate_day - year.open_gate_day
     candidates = candidates_for_length(year_length)
-    historical_order = LegacyDescendingMonthCount.sort(candidates)
     source_day = year.open_gate_day + 1
 
     stream = Dispatcher.answer_stream(c, source_day, @bowl, @seal)
     rank = AnswerStreamManager.choose_rank(stream, length(candidates))
-    chosen = Enum.at(historical_order, rank - 1)
+    patch = AscendingMonthCountPatch.diagnose(candidates, rank)
+    chosen = patch.corrected_count
 
     %{year: year, gate_state: parent.gate_state,
       calculation_day: c, target_day: t, year_length: year_length,
       structure_source_day: source_day,
       cutlets: parent.cutlets, cutlet_count: parent.cutlet_count,
-      candidates: candidates, historical_order: historical_order,
+      candidates: candidates, historical_order: patch.historical_order,
+      corrected_order: patch.corrected_order,
+      historical_month_count: patch.historical_count,
       candidate_count: length(candidates), rank: rank,
       month_count: chosen, bowl: @bowl, seal: @seal}
   end
