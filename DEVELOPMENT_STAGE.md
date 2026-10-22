@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=50
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=25
-LAST_COMPLETED_STAGE=49
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=50
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..24; Stage50 thêm BoundedMonthCompositions đếm/mở hạng độ dài 4..123, MonthLengthsManager và LegacyMirroredMonthLengthsRank; bát3/chốt31 đúng nhưng hạng bị phản chiếu.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_50_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_50_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=813
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -1101,3 +1101,7 @@ Bộ đếm dùng bù trừ trên số nguyên lớn, không gọi oracle.
 Dòng đáp án bát 3/chốt31 chọn hạng chuẩn một-based;
 di sản cố tình lấy N-rank+1. 16 kiểm soát, 4 normative
 RED dự kiến, tổng 813 bài. Không sửa main/legacy cũ.
+
+Stage50 xác minh: 813 bài, 809 PASS, đúng 4 normative RED, không warning. Canonical Names Lock PASS.
+CI https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39818815753
+Tên chuẩn https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39818815885

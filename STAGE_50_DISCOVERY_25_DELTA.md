@@ -30,3 +30,9 @@ phản chiếu, bảo toàn dữ liệu, API/kiểm toán mã và
 Mục tiêu 813 bài: đúng 4 RED, Canonical Names Lock PASS,
 không warning biên dịch. Không sửa main, oracle hoặc
 các PATCH trước; chưa đan tháng/tên tháng/lịch cuối.
+
+## Chứng cứ hoàn thành
+813 bài: 809 PASS và đúng bốn normative RED, không compiler warning.
+Canonical Names Lock PASS.
+CI https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39818815753
+Khóa https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39818815885
