@@ -1867,3 +1867,20 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_r62_exhaustive_early_last.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r62_exhaustive_early_last.pl --seconds 185 --rss-kib 393216
+
+  canonical-r63-early-last-exhaustive:
+    name: R63 2401 個四月向量 96040 個提前末次狀態完整獨立窮舉
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r63-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 純合法後繼 DFS 核對提前末次序 FIFO CLOCK 全域小空間
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r63_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r63_exhaustive_early_last.pl --seconds 185 --rss-kib 393216
