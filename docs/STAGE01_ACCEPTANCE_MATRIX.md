@@ -120,3 +120,19 @@ CI evidence: isolated QA push run 39763869338 and non-main PR run
 39763937760 were queued on last observation, with no job logs.
 The draft PR #20 must never be merged. Stage 1 cannot PASS while
 these checks remain unexecuted and the 64-name catalog unapproved.
+
+## Current additional QA, 2026-10-22
+
+| Gate | Actual evidence | Status |
+|---|---|---|
+| Module-level integer duplicate preflight | 3 positive/adversarial locally executed cases | LOCAL_PREFLIGHT_PASS |
+| Stage-1 preflight integrated before Icarus detection | Bash runner source inspected | WRITTEN_NOT_CI_EXECUTED |
+| 4096-cycle ready/valid/reset/backpressure scoreboard | Independent `tb_stage1_backpressure.sv` | WRITTEN_NOT_SIMULATED |
+| Six Kalaallisut lexical sources and semantic caveats | `catalog/KALAALLISUT_LEXICAL_QA_DOSSIER.md` | 6_RESEARCH_CANDIDATES_0_APPROVED |
+| HDL simulator job status | No runner logs yet | QUEUED |
+| Full calendar five-field oracle | Not yet present | OPEN |
+| 55-stage advancement authorization | Stages 1 and 2 not approved | BLOCKED |
+
+Beware: shell AWK scope lint is not an HDL parser. A future Icarus
+pass cannot substitute for independent native-language catalog QA,
+and an external mathematical reference is not a silicon signoff.

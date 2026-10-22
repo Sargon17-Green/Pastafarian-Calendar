@@ -66,3 +66,18 @@ bash scripts/verify_stage1.sh
 
 `docs/STAGE01_ACCEPTANCE_MATRIX.md` naapertorlugu Stage 1
 naammassineqanngilaq. `main` allanngortinneqassanngilaq.
+
+## Source-language approval and Stage-1 QA
+
+`catalog/KALAALLISUT_LEXICAL_QA_DOSSIER.md` contains six researched
+candidate strings. All are `PENDING`; none has yet passed independent
+Kalaallisut semantic/orthographic approval. The 64-index catalog
+cannot be frozen until all entries are reviewed and hashed.
+
+`scripts/test_sv_preflight.sh` checks declaration scope with
+adversarial fixtures. `tests/tb_stage1_backpressure.sv` requires a
+real SystemVerilog simulator and tests 4096 deterministic cycles
+with transaction handshakes and repeated reset interruptions.
+
+The isolated CI is currently queued. No full P(c,t) result is produced
+by this stage-1 bootstrap, and no stage-1 PASS is claimed.

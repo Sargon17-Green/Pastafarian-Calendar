@@ -100,3 +100,23 @@ No stage 2 discovery or patch was opened.
 - `iverilog`, `vvp` and `verilator` are still unavailable locally;
   apt cannot resolve its package server. The two isolated CI jobs
   remain queued, not failed and not passed.
+
+## 2026-10-22 — renewed quality gates
+
+- CI jobs: implementation branch pull-request and isolated QA push
+  runs remain queued; no HDL run logs have been returned.
+- The current execution environment has no iverilog, vvp or verilator.
+  Direct GitHub raw download and apt Debian mirror fail DNS resolution.
+- Added `scripts/test_sv_preflight.sh` to run **three** adversarial
+  source lint fixtures before checking for a simulator.
+  A separate local reproduction actually executed all three and
+  confirmed: good module accepted; duplicate module-level integer
+  rejected; missing `endtask` rejected. This verifies only the
+  shell/AWK preflight behavior, **not** HDL syntax or RTL correctness.
+- Added deterministic 4096-cycle `tb_stage1_backpressure.sv`
+  with scoreboard for accept/hold/backpressure/reset and explicit
+  `date_valid=0` guarantee. Test code written, not simulated.
+- Source-language research expanded to six proposed words with
+  references in `catalog/KALAALLISUT_LEXICAL_QA_DOSSIER.md`.
+  All six remain PENDING native review and **0/64** are approved.
+- No Stage 2, no main change, and no release claim.
