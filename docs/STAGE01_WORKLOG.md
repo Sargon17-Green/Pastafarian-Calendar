@@ -271,3 +271,27 @@ The canonical target remains month-name index 20, occurrence day 56.
   polynomial exact counting *kernel*, but the complete
   lexicographic unranking, production bigint design, and
   45-month full weave CI evidence remain unimplemented.
+
+## 2026-10-22 — final observed green evidence this turn
+
+- Identified initial blocking lint error in run 39823278850
+  as a module-scope `logic` declaration split over multiple
+  lines, not a simulator/algorithm failure.
+- Replaced line-oriented source preflight with semicolon-delimited
+  declaration parsing and verified legitimate 2-D unpacked
+  arrays versus reserved-name and duplicate-declaration
+  negative controls.
+- Actual CI 39836691095: full 45-month composition counting
+  and lexical unrank PASS; eight toy weave cases PASS;
+  465 prefix completion crosschecks PASS.
+- Actual CI 39837437421: five additional 2048-bit exact
+  medium weave root golden checkpoints PASS, for the
+  actual Foundation first 2 through 6 months.
+- Independent big-integer replay reconfirmed the Foundation
+  full 45-month root bit length 22470 and SHA256
+  `925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da`.
+  This is **not** a full SystemVerilog root PASS.
+- Next work: decide and implement bounded 22528-bit
+  limb arithmetic, full-root exact checkpoint, and then
+  streaming lex unrank of all 4244 woven days with
+  candidate-resource safeguards.

@@ -251,3 +251,36 @@ SV fixture for tiny cases has been extended, but cannot be
 marked PASS until a matched GitHub Actions run completes.
 The large 45-month unrank and the two month fields
 of the canonical 5-tuple remain OPEN.
+
+## 2026-10-22 — exact 45-month lengths and medium weave CI PASS
+
+[CI run 39836691095](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39836691095)
+completed SUCCESS, with independently reviewed Icarus 12 logs:
+- all five source declaration preflight fixtures;
+- Foundation month count `45` for year length `4244`;
+- exact 274-bit month-length composition total and full
+  **45-element lexical unrank**, including rank conservation;
+- 8/8 independent small weave cases and 465 prefix-block
+  checks (brute force versus count/unrank);
+- all previous Stage-1 basic tests.
+
+[CI run 39837437421](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39837437421)
+completed SUCCESS. The new **test-only 2,048-bit exact
+first-position-transfer oracle** matched *five independent
+golden roots* for actual first 2..6 month lengths of Foundation:
+217, 528, 880, 1262 and 1602 bits, respectively.
+All earlier tests continued to pass.
+
+This explicitly lifts arithmetic testing beyond the earlier
+384-bit helper. It does **not** prove the full 45-month
+22,470-bit root and does not derive the canonical weave rank or
+the final month index/occurrence.
+
+The static linter failure in run 39823278850 arose from
+a multiline `logic` declaration; corrected by parsing the
+complete declaration through its semicolon, with a separate
+packed/unpacked array fixture. Actual CI pass now exists.
+
+Stage 1 remains OPEN: production RTL cannot yet output
+the canonical five-field tuple, and **0/64 Kalaallisut**
+names have been natively approved. No Stage 2 authorized.
