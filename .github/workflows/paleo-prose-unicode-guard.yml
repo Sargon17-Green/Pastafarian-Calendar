@@ -62,7 +62,9 @@ jobs:
           # This guards transcription consistency, not philological accuracy.
           history_path = Path("SPAGHETTI_DEVELOPMENT_HISTORY.md")
           mirrors = [Path(f"TEST_LOG_STAGE_{n:02d}.md") for n in range(41, 46)]
-          if history_path.is_file() and all(path.is_file() for path in mirrors):
+          if not all(path.is_file() for path in mirrors):
+              errors.append("Stage 41-45 log file is missing; history parity cannot be checked")
+          elif history_path.is_file():
               try:
                   history = history_path.read_text(encoding="utf-8", errors="strict")
                   mirrored_tail = "".join(
