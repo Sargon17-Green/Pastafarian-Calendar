@@ -84,3 +84,5 @@ jobs:
         run: php -d memory_limit=512M tests/stage19_patch09_tests.php
       - name: Penemuan 10 — mangkuk legacy dicemari bacaan in-place
         run: php -d memory_limit=512M tests/verify_stage20_discovery10.php
+      - name: Tampalan 10 — snapshot enam mangkuk dan parut sejarah
+        run: php -d memory_limit=512M tests/stage21_patch10_tests.php

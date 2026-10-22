@@ -378,6 +378,33 @@ final class BootstrapKernel
                 'wrongBowls' => $wrong,
             ];
         });
+        $this->dispatcher->register('BOWL_SHADOW_PATCH_10', function(BootstrapContext $context): array {
+            $i = $context->semanticState['visibleIndex'] ?? null;
+            if (!is_int($i) || $i < 1 || $i > 46) {
+                throw new \InvalidArgumentException('SHADOW_STIR_INDEX_RANGE');
+            }
+            $trace = $this->poursAt($context->calculationDay, $context->targetDay, $i);
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyInPlaceBowlStir($save);
+            $patch = new \Pastafari\Stage01\Patches\BowlShadowPatch10($legacy, $save);
+            $before = $trace['oldBowls'];
+            $working = $before;
+            $fixed = $patch->stirOneDropViaShadow(
+                $working, $i, $trace['drop'], $this->stones()[$i],
+                $trace['order'], $trace['pours']
+            );
+            $context->semanticState['shadowBowlsBefore'] = $before;
+            $context->semanticState['shadowBowlsAfter'] = $fixed;
+            $context->status = 'BOWL_SHADOW_PATCH_10_RETURNED';
+            $this->metrics->bump($context, 'bowls.shadow.patch10.stirs');
+            return [
+                'drop' => $trace['drop'], 'order' => $trace['order'],
+                'oldBowls' => $before, 'pours' => $trace['pours'],
+                'bowls' => $fixed,
+            ];
+        });
     }
 
     public function probe(int $calculationDay, int $targetDay): array
@@ -613,6 +640,23 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('IN_PLACE_BOWL_STIR_LEGACY', $context)
+        );
+    }
+
+    /**
+     * Enam mangkuk diperbetulkan daripada snapshot satu titisan.
+     * Laluan pencemaran legacy masih tersedia sebagai legacyStirAt.
+     *
+     * @return array{drop:BigInt,order:list<int>,oldBowls:array<int,BigInt>,pours:array<int,BigInt>,bowls:array<int,BigInt>}
+     */
+    public function stirAt(int $calculationDay, int $targetDay, int $i): array
+    {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'BOWL_SHADOW_PATCH_10';
+        $context->semanticState['visibleIndex'] = $i;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('BOWL_SHADOW_PATCH_10', $context)
         );
     }
 

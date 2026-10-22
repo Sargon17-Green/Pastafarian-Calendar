@@ -523,3 +523,22 @@ LULUS kontrak merah 10; mangkuk legacy tercemar tanpa snapshot
 ```
 
 Ini ialah `EXPECTED_RED` yang disahkan, bukan kegagalan CI. Semua regresi Stage 1–19, kunci nama kanonik dan sintaks PHP telah lulus. Stage 21 — PATCH10 belum dimulakan.
+
+
+## Stage 21 — PATCH 10: Vault lama dan pending enam mangkuk
+
+### Kesilapan lama tetap hidup
+
+`LegacyInPlaceBowlStir::stirOneDropWrong` kekal tidak diubah: ia membaca mangkuk terkini dan segera menulis setiap hasil. Ini mengubah bacaan jiran bagi posisi 2..6. Ujian Stage 20 masih melihat tepat 3,600 perbezaan dan 720 padanan daripada 720 permutasi, serta empat jejak sejarah sebenar.
+
+### Pembaikan yang menjaga jejak asal
+
+`BowlShadowPatch10::stirOneDropViaShadow` memanggil fungsi legacy secara sebenar pada `garbage` yang merupakan salinan mangkuk. Ini juga mengesahkan input sebelum pembetul menyentuh stor pemanggil. Kemudian `vaultOld` dibina daripada keadaan asal dan `pending` daripada salinan berasingan. Keenam-enam rumus menggunakan mangkuk `vaultOld[id]`, `vaultOld[prev]` dan `vaultOld[next]` semata-mata, dengan tuangan, batu dan tetapan SAVE yang sama. Hasil disimpan dalam `pending[id]`, tanpa membacanya sehingga semua enam siap, kemudian satu commit `bowls=pending`.
+
+### Penghala dan bukti ujian
+
+`BOWL_SHADOW_PATCH_10` dalam `BootstrapKernel` menerima jejak `poursAt` yang sudah dibetulkan pada Stage19, lalu membuat pembaca legacy dan pembetul bagi konteks itu sahaja. `stirAt(c,t,i)` memulangkan jejak sah; `legacyStirAt(c,t,i)` terus memulangkan jejak salah secara berasingan. Ujian Stage 21 meliputi 720 susunan, 4,320 hasil, 3,600 perbezaan legacy, 720 padanan, empat tarikh/indeks sebenar, 24 hasil serta lima kegagalan input tanpa commit. Formula rujukan dibina secara bebas dalam direktori `tests`. Tiada oracle dimasukkan ke `src`.
+
+### Had perkembangan
+
+Stage21 hanya membaiki satu titisan. Ia tidak menjalankan 46 titisan sebagai state machine, tidak menghasilkan `orderAt46Latch` sebelum Stage23, dan tidak mencipta sebarang peraturan bowl-next. Stage22 ialah DISCOVERY11 yang berikutnya. Terima hanya apabila CI sebenar hijau dan `EXPECTED_RED` Stage20 terpelihara.

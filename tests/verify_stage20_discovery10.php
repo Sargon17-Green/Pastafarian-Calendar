@@ -21,7 +21,10 @@ $valid = $exit === 1 && $err === ''
 $root=dirname(__DIR__).'/src';
 $legacy=(string)file_get_contents($root.'/Legacy/LegacyInPlaceBowlStir.php');
 $kernel=(string)file_get_contents($root.'/BootstrapKernel.php');
+$patch=(string)file_get_contents($root.'/Patches/BowlShadowPatch10.php');
 $valid = $valid
+    && str_contains($patch,'function stirOneDropViaShadow(')
+    && str_contains($kernel,"dispatch('BOWL_SHADOW_PATCH_10', ".'$context)')
     && str_contains($legacy,'function stirOneDropWrong(')
     && str_contains($legacy,'$bowls[$id] = $this->save->savePatch(')
     && str_contains($kernel,"dispatch('IN_PLACE_BOWL_STIR_LEGACY', ".'$context)')

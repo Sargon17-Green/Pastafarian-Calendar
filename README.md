@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 20 (DISCOVERY 10)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 21 (PATCH 10)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -298,3 +298,21 @@ php -d memory_limit=512M tests/verify_stage20_discovery10.php
 Penguji sejarah memeriksa semua 720 permutasi. Pada stor sintetik tetap, posisi pertama setara dengan oracle satu titisan; posisi 2..6 tersasar dengan tepat **3,600 perbezaan dan 720 padanan**. Empat jejak sebenar juga diperiksa terhadap rumus dari salinan input awal. Pembalut hijau menerima hanya kegagalan sejarah yang tepat. Semua gerbang Stage1–19 kekal hijau.
 
 **Stage21 — PATCH10 belum bermula.** Di tahap itu sahaja `vaultOld` dan `pending` akan diperkenalkan, semua bacaan akan menggunakan salinan lama dan commit akan berlaku selepas keenam-enam posisi. Tiada kod tersebut ditambah pada Stage20.
+
+
+## Stage 21 — PATCH 10: Simpan mangkuk lama, tulis keenam-enam sekali
+
+`BowlShadowPatch10::stirOneDropViaShadow` menerima mangkuk, batu, titisan, susunan dan tuangan yang sama dengan `LegacyInPlaceBowlStir::stirOneDropWrong`. Panggilan sejarah masih benar-benar dilaksanakan pada salinan kerja tersendiri supaya parut in-place tidak dibuang, tetapi keluarannya tidak diterima sebagai jawapan.
+
+Pembetul mencipta `vaultOld` daripada mangkuk asal, dan `pending` untuk keenam-enam hasil. **Setiap bacaan** daripada mangkuk bagi formula keenam-enam posisi datang hanya dari `vaultOld`; semua penulisan pergi ke `pending`. Selepas enam posisi, `bowls=pending` ialah satu-satunya commit kepada stor pemanggil. Dengan BigInt tidak boleh diubah serta PHP copy-on-write, snapshot kekal bersih selama satu titisan.
+
+`BootstrapKernel::stirAt` melalui dispatcher `BOWL_SHADOW_PATCH_10`. Jalan sejarah `legacyStirAt` dan dispatcher `IN_PLACE_BOWL_STIR_LEGACY` masih mengekalkan pengiraan kotor dengan kemas kini selepas setiap posisi.
+
+```text
+php -d memory_limit=512M tests/verify_stage20_discovery10.php
+php -d memory_limit=512M tests/stage21_patch10_tests.php
+```
+
+Ujian baru menguji 720 susunan × enam posisi = 4,320 komponen, kesetaraan dengan oracle snapshot yang berdikari, 3,600 parut yang dijangka, 720 padanan posisi pertama, empat jejak tarikh sebenar × enam mangkuk, determinisme, pemilikan state serta lima input salah. Stage 20 mesti terus merah secara langsung dan lulus dalam pembalut pengesahan. Semua regresi 1–20 diwajibkan hijau dalam CI.
+
+Stage 22 — DISCOVERY 11 tidak diperkenalkan sehingga SHA Stage 21 disahkan.
