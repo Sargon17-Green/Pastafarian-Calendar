@@ -1,5 +1,5 @@
 function [piece, cursor] = unrankGeneralWeaveSuffixChunk( ...
-        originalLengths, remaining, openedUpTo, closedUpTo, rank1, maxSteps)
+        originalLengths, remaining, openedUpTo, closedUpTo, rank1, maxSteps, method)
 % EXPERIMENTAL: exact lexicographic chunk unranking for EVERY legal
 % opening/closing frontier. Does not alter the production DAG or oracle.
 % Computes ALL legally allowed child block sizes with an independently
@@ -15,6 +15,17 @@ function [piece, cursor] = unrankGeneralWeaveSuffixChunk( ...
 % returned remaining/openedUpTo/closedUpTo/rank. A partial cursor cannot
 % be confused with a completed weaving; no proof of durable persistence
 % or an authenticated checkpoint is implied.
+
+% Optional independently validated experimental one-pass joint letter
+% weights. 'reference' preserves all previous behavior and test evidence.
+if nargin<7
+    method='reference';
+end
+if ~(ischar(method) && isrow(method) && ...
+        (strcmp(method,'reference') || strcmp(method,'joint')))
+    error('Pastafari:GeneralChunk:Method', ...
+        'Choose reference or exact experimental joint counting.');
+end
 
 if ~(isnumeric(originalLengths) && isvector(originalLengths) && ...
         ~isempty(originalLengths) && all(isfinite(originalLengths)) && ...
@@ -98,13 +109,25 @@ for position=1:steps
         error('Pastafari:GeneralChunk:NoLegalNext', ...
             'Nonterminal suffix has no legal next month.');
     end
+    jointActive=false;
     if legalChoices==1
         blocks={};
     elseif openedUpTo==K
-        % Every already-open month may be chosen unless this would
-        % close it out of the required order. One exact block partition.
+        % Native-verified exact all-open algebra is faster than joint DP.
         blocks=pastafari.allOpenedWholeWeaveChildCountsCommonDenominator( ...
             R,closedUpTo,parent);
+    elseif strcmp(method,'joint') && openedUpTo<K-1
+        % Count every possible FIRST letter in a single shared exact
+        % first-endpoint insertion DP. Independently reconcile its full
+        % BigInt total with the existing parent counter before unrank.
+        [blocks,jointTotal]= ...
+            pastafari.countWholeWeavingNextLetterBlocksOnePass( ...
+                R,openedUpTo,closedUpTo);
+        if jointTotal~=parent
+            error('Pastafari:GeneralChunk:JointMismatch', ...
+                'Joint child partition differs from exact parent count.');
+        end
+        jointActive=true;
     else
         blocks={};
     end
@@ -128,7 +151,7 @@ for position=1:steps
         childClosed=closedUpTo+double(n==1);
         if legalChoices==1
             block=parent;
-        elseif openedUpTo==K
+        elseif openedUpTo==K || jointActive
             block=blocks{i};
         elseif considered==legalChoices
             % Sum of all legal children is exactly the parent BigInt.

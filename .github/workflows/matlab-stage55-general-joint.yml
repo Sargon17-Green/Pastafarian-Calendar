@@ -1,0 +1,32 @@
+name: MATLAB Joint General Lexical Unrank (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/unrankGeneralWeaveSuffixChunk.m'
+      - 'src/\+pastafari/countWholeWeavingNextLetterBlocksOnePass.m'
+      - 'tests/run_stage55_general_joint_tests.m'
+      - '.github/workflows/matlab-stage55-general-joint.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-general-joint:
+    name: MATLAB R2026a / joint versus reference chunk unrank
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Verify every chosen rank and all segment boundaries
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_general_joint_tests

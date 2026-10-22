@@ -20,6 +20,7 @@ on:
       - '!tests/run_stage55_all_open_chunk_tests.m'
       - '!tests/run_stage55_general_chunk_tests.m'
       - '!tests/run_stage55_joint_next_blocks_tests.m'
+      - '!tests/run_stage55_general_joint_tests.m'
       - '!tests/run_stage55_general_chunk_fullscale.m'
       - '!tests/run_stage55_general_chunk_all_open_4230.m'
       - '!tests/run_stage55_all_open_factor_tests.m'
