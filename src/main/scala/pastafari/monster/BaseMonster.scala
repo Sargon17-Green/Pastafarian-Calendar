@@ -161,7 +161,16 @@ final case class BaseMonsterContext(
   var legacyDayInCutlet: Option[Int] = None,
   var patchedCutletId: Option[Int] = None,
   var patchedDayInCutlet: Option[Int] = None,
-  var patch20Applied: Boolean = false
+  var patch20Applied: Boolean = false,
+  var cutletNameGateGaps: Option[Vector[Int]] = None,
+  var cutletNamePartition: Option[Vector[Int]] = None,
+  var cutletCanonicalNameIndices: Option[Vector[Int]] = None,
+  var cutletNameDayOffset: Option[Int] = None,
+  var cutletNameInputSnapshot: Option[(Vector[Int],Vector[Int],Vector[Int],Int)] = None,
+  var legacyCutletNameSlot: Option[Int] = None,
+  var legacyCutletNameCanonicalId: Option[Int] = None,
+  var legacyCutletNameItalian: Option[String] = None,
+  var legacyCutletNameCatalogVersion: Option[String] = None
 )
 
 final class BaseMetricsShell {
@@ -278,6 +287,52 @@ final class BaseValidationManager {
    * PATCH20: valica autonomamente le soglie cumulative inclusive.
    * Non chiama il wrapper, l'adapter storico o l'oracolo dei test.
    */
+
+  /** DISCOVERY21: verifica indipendente il difetto giorno modulo n.
+    * Non utilizza il vecchio adapter e non importa l'oracolo dei test.
+    */
+  def requireDiscovery21Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="DISCOVERY_21_DAY_INDEXED_CUTLET_NAME" ||
+       ctx.status!="LEGACY_DAY_INDEXED_CUTLET_NAME_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_21_DAY_INDEXED_CUTLET_NAME") ||
+       ctx.cutletNameGateGaps.isEmpty ||
+       ctx.cutletNamePartition.isEmpty ||
+       ctx.cutletCanonicalNameIndices.isEmpty ||
+       ctx.cutletNameDayOffset.isEmpty ||
+       ctx.cutletNameInputSnapshot.isEmpty ||
+       ctx.legacyCutletNameSlot.isEmpty ||
+       ctx.legacyCutletNameCanonicalId.isEmpty ||
+       ctx.legacyCutletNameItalian.isEmpty ||
+       ctx.legacyCutletNameCatalogVersion.isEmpty)
+      throw new IllegalStateException("DISCOVERY21 non pronta.")
+    val g=ctx.cutletNameGateGaps.get
+    val p=ctx.cutletNamePartition.get
+    val ids=ctx.cutletCanonicalNameIndices.get
+    val d=ctx.cutletNameDayOffset.get
+    if(ctx.cutletNameInputSnapshot.get!=(g,p,ids,d) ||
+       p.size<6 || p.size>17 || p.exists(_<1) ||
+       p.sum!=g.size || g.exists(x=>x<42 || x>963) ||
+       g.sum<252 || g.sum>5778 ||
+       d<0 || d>=g.sum || ids.size!=p.size ||
+       ids.distinct.size!=ids.size || ids.exists(i=>i<1 || i>17))
+      throw new IllegalStateException("Input o snapshot DISCOVERY21 invalida.")
+    val cat=pastafari.catalog.SourceLanguageCatalog.Cutlets
+    if(cat.size!=17 ||
+       cat.indices.exists(i=>cat(i).canonicalIndex!=i+1) ||
+       ctx.legacyCutletNameCatalogVersion.get!=
+       pastafari.catalog.SourceLanguageCatalog.Version)
+      throw new IllegalStateException("Catalogo DISCOVERY21 alterato.")
+    val slot=d%p.size
+    val id=ids(slot)
+    val matching=cat.filter(_.canonicalIndex==id)
+    if(matching.size!=1 ||
+       ctx.legacyCutletNameSlot.get!=slot ||
+       ctx.legacyCutletNameCanonicalId.get!=id ||
+       ctx.legacyCutletNameItalian.get!=matching.head.italian)
+      throw new IllegalStateException("Cicatrice DISCOVERY21 falsificata.")
+  }
+
   def requirePatch20Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_20_CUTLET_OPEN_BOUNDARY" ||
        ctx.status!="PATCH_20_READY" || !ctx.patch20Applied ||
@@ -1816,7 +1871,8 @@ final class BaseMonsterManager {
     new Discovery19DayIndexedMonthNameHandler(metrics),
     new Patch19DayIndexedMonthNameHandler(metrics),
     new Discovery20CutletOpenBoundaryHandler(metrics),
-    new Patch20CutletOpenBoundaryHandler(metrics)
+    new Patch20CutletOpenBoundaryHandler(metrics),
+    new Discovery21DayIndexedCutletNameHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -2889,6 +2945,38 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("patch20",error)
+    }
+  }
+
+
+  def discover21DayIndexedCutletName(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    gateGaps: Vector[Int],
+    cutletPartition: Vector[Int],
+    canonicalCutletNameIndices: Vector[Int],
+    dayOffset: Int
+  ): Discovery21DayIndexedCutletNameReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.cutletNameGateGaps=Some(gateGaps)
+    ctx.cutletNamePartition=Some(cutletPartition)
+    ctx.cutletCanonicalNameIndices=Some(canonicalCutletNameIndices)
+    ctx.cutletNameDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_21_DAY_INDEXED_CUTLET_NAME"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery21Ready(ctx)
+      Discovery21DayIndexedCutletNameReport(
+        ctx.calculationDay,ctx.targetDay,ctx.cutletNameGateGaps.get,
+        ctx.cutletNamePartition.get,ctx.cutletCanonicalNameIndices.get,
+        ctx.cutletNameDayOffset.get,ctx.legacyCutletNameSlot.get,
+        ctx.legacyCutletNameCanonicalId.get,
+        ctx.legacyCutletNameItalian.get,
+        ctx.legacyCutletNameCatalogVersion.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("discovery21",error)
     }
   }
 

@@ -976,3 +976,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 41: 56 PASS, 0 FAIL' stage41.log
           test "$(grep -Fc 'PASS — ' stage41.log)" -eq 56
           test "$(grep -Fc 'FAIL — ' stage41.log)" -eq 0
+
+  native-stage42-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage42 cutlet-name expected-RED signature
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage42Tests' > stage42.log 2>&1
+          rc=$?
+          set -e
+          cat stage42.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 42: 43 PASS, 3 FAIL' stage42.log
+          test "$(grep -Fc 'PASS — ' stage42.log)" -eq 43
+          test "$(grep -Fc 'FAIL — ' stage42.log)" -eq 3
+          for label in DAY1_CUTLET1 DAY42_CUTLET2 DAY672_CUTLET17; do
+            grep -Fq "FAIL — equivalenza normativa nome ${label} — Nome da giorno anziché cotoletta: ${label}" stage42.log
+          done
