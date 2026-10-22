@@ -13,7 +13,7 @@ module tb_gate_gap_oracle;
     logic signed [383:0] new_bowls [1:6];
     logic signed [383:0] start_post_stir_bowls [1:6];
     logic signed [383:0] pour [1:3];
-    logic signed [383:0] cnt_c,cnt_t,dist,sum_days,direction;
+    logic signed [383:0] cnt_c,cnt_t,distance_count,sum_days,direction;
     logic signed [383:0] x,sr,u,sum_bowls,d;
     integer order [0:5];
     integer order_at46 [0:5];
@@ -69,7 +69,7 @@ module tb_gate_gap_oracle;
         begin
             cnt_c=oracle_day_count(c);
             cnt_t=oracle_day_count(t);
-            dist=oracle_distance(c,t);
+            distance_count=oracle_distance(c,t);
             sum_days=oracle_sum(c,t);
             direction=oracle_direction(c,t);
         // The stone snapshot is immutable for each new row.
@@ -90,7 +90,7 @@ module tb_gate_gap_oracle;
         end
 
         for(k=1;k<=7;k=k+1) begin
-            x=cnt_c+(2*k+1)*cnt_t+(3*k+1)*dist
+            x=cnt_c+(2*k+1)*cnt_t+(3*k+1)*distance_count
                 +(4*k+2)*sum_days+(4*k+4)*direction;
             for(j=0;j<5;j=j+1) x=x+stones[k][j];
             x=saved(x);
@@ -116,14 +116,14 @@ module tb_gate_gap_oracle;
         prime_bowl[1]=17;prime_bowl[2]=19;prime_bowl[3]=23;
         prime_bowl[4]=29;prime_bowl[5]=31;prime_bowl[6]=37;
         for(b=1;b<=6;b=b+1) begin
-            x=cnt_c+b*cnt_t+dist+sum_days+direction
+            x=cnt_c+b*cnt_t+distance_count+sum_days+direction
                +prime_bowl[b]*prime_bowl[b];
             bowls[b]=saved(x*x+b);
         end
 
         for(i=1;i<=46;i=i+1) begin
             d=saved(stones[i][0]*cnt_c+stones[i][1]*cnt_t
-               +stones[i][2]*dist+stones[i][3]*sum_days
+               +stones[i][2]*distance_count+stones[i][3]*sum_days
                +stones[i][4]*direction+drops[i-1]
                +384'sd3*drops[i-3]+384'sd5*drops[i-7]+i);
             x=d;
