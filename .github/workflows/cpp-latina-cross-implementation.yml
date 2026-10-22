@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/cpp-latina-cross-implementation.yml'
       - 'tools/soak_vector_adapter.cpp'
+      - 'tools/validate_soak_index_modes.py'
       - 'integrations/cpp-latina-soak.json'
       - 'docs/STAGE_56_SOAK_ADAPTER.md'
       - 'src/**'
@@ -148,6 +149,18 @@ jobs:
           fi
           echo "SOAK_ADAPTER_CELERITAS_SHARD=6/6_PASS SHARD=$SHARD" \
             | tee -a cross-logs/verdict.txt
+          # Preserve V1's byte-accurate agreement, then independently
+          # cross-check the language-neutral numeric tuple.
+          timeout 40m bin/stream-adapter --canonical-indices --timing-ns \
+            < cross-logs/adapter-input.tsv \
+            > cross-logs/adapter-canonical.tsv \
+            2> cross-logs/canonical-timing.log
+          test "$(grep -c '^SOAK_TIMING_NS' cross-logs/canonical-timing.log)" -eq "$PAIRS_PER_SHARD"
+          python3 current/tools/validate_soak_index_modes.py \
+            current/include/pastafari/source_language_catalog.hpp \
+            cross-logs/celeritas.tsv cross-logs/adapter-canonical.tsv "$PAIRS_PER_SHARD"
+          echo "SOAK_CANONICAL_V2_SHARD=6/6_PASS SHARD=$SHARD" \
+            | tee -a cross-logs/verdict.txt
 
       - name: Servare utraque testimonia etiam in casu defectus
         if: always()
@@ -173,3 +186,4 @@ jobs:
           test '${{ needs.comparatio.result }}' = 'success'
           echo 'CROSS_CPP_CELERITAS_ALL=30/30_PASS SHARDS=5'
           echo 'SOAK_ADAPTER_CELERITAS_ALL=30/30_PASS SHARDS=5'
+          echo 'SOAK_CANONICAL_V2_ALL=30/30_PASS SHARDS=5'

@@ -6,6 +6,8 @@ on:
       - 'C\+\+&Latina'
     paths:
       - 'tools/soak_vector_adapter.cpp'
+      - 'tools/validate_soak_index_modes.py'
+      - 'include/pastafari/source_language_catalog.hpp'
       - '.github/workflows/cpp-latina-soak-adapter.yml'
       - 'docs/STAGE_56_SOAK_ADAPTER.md'
   workflow_dispatch:
@@ -40,6 +42,7 @@ jobs:
               -Iinclude -Itests -I. tools/soak_vector_adapter.cpp src/monster.cpp \
               -o "soak-output/adapter-$compiler"
             "soak-output/adapter-$compiler" --schema | grep -q '^PASTAFARI_SOAK_TSV_V1'
+            "soak-output/adapter-$compiler" --schema-canonical | grep -q '^PASTAFARI_SOAK_CANONICAL_V2'
           done
       - name: Verify arbitrary-stream protocol and rejection semantics
         shell: bash
@@ -90,6 +93,30 @@ jobs:
             echo "SOAK_ADAPTER_DECIMAL=4/4_PASS COMPILER=$compiler"
           done
           cmp soak-output/decimal-g++.tsv soak-output/decimal-clang++.tsv
+          # Independently check the two protocols against the frozen 17+47
+          # canonical source names. The legacy V1 output must not change.
+          for compiler in g++ clang++; do
+            timeout 35m "soak-output/adapter-$compiler" --canonical-indices --timing-ns \
+              < soak-output/input.tsv \
+              > "soak-output/numeric-$compiler.tsv" \
+              2> "soak-output/numeric-timing-$compiler.log"
+            test "$(grep -c '^SOAK_TIMING_NS' "soak-output/numeric-timing-$compiler.log")" -eq 3
+            python3 tools/validate_soak_index_modes.py \
+              include/pastafari/source_language_catalog.hpp \
+              "soak-output/output-$compiler.tsv" \
+              "soak-output/numeric-$compiler.tsv" 3
+            timeout 35m "soak-output/adapter-$compiler" --canonical-indices \
+              < soak-output/decimal-regression.tsv \
+              > "soak-output/decimal-numeric-$compiler.tsv"
+            python3 tools/validate_soak_index_modes.py \
+              include/pastafari/source_language_catalog.hpp \
+              "soak-output/decimal-$compiler.tsv" \
+              "soak-output/decimal-numeric-$compiler.tsv" 4
+            echo "SOAK_CANONICAL_NUMERIC_COMPILER=PASS $compiler"
+          done
+          cmp soak-output/numeric-g++.tsv soak-output/numeric-clang++.tsv
+          cmp soak-output/decimal-numeric-g++.tsv soak-output/decimal-numeric-clang++.tsv
+          echo 'SOAK_CANONICAL_CROSS_COMPILER=PASS'
           echo 'SOAK_ADAPTER_DECIMAL_CROSS_COMPILER=PASS'
           echo 'SOAK_ADAPTER_CROSS_COMPILER=PASS'
       - name: Save evidence even on failure

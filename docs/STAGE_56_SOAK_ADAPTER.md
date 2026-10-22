@@ -38,3 +38,10 @@ It does not alter `src/monster.cpp`, `main`, the normative Oracle or Stage 57.
 ## Independent streaming comparison against pinned Celeritas
 
 A candidate machine-readable descriptor is available at `integrations/cpp-latina-soak.json`. The cross-implementation workflow now compiles the branch's independently authored `tools/soak_vector_adapter.cpp`, extracts identical `(id,c,t)` tuples from pinned Celeritas reference output, submits them through the actual stdin/stdout streaming protocol, and compares **all eight fields byte-for-byte** in five shards (30 pairs total). Timing logs and mismatch diffs are saved as artifacts. This does not run or replace the central all-implementation soak. This new workflow requires a fresh, exact-SHA CI result before claiming its new gate as PASS.
+
+
+## Language-neutral canonical numeric protocol (V2)
+
+V1 is retained unchanged for compatibility. Use `--schema-canonical` to print `PASTAFARI_SOAK_CANONICAL_V2`; run with `--canonical-indices` (optionally `--timing-ns`). Each input `request_id<TAB>c<TAB>t` produces eight TSV columns: request ID, c, t, year, **canonical cutlet index (1..17)**, day in cutlet, **canonical month index (1..47)**, day in month. Unlike V1, the two name columns become pure decimal integers. This is the recommended transport for the central cross-language comparison.
+
+The adapter resolves each name returned by the existing public calendar API against unique, frozen `canonicalIndex` entries in `include/pastafari/source_language_catalog.hpp`. A missing or ambiguous match is an explicit nonzero failure; fuzzy name matching is forbidden. The calendar engine remains unchanged. `tools/validate_soak_index_modes.py` checks all eight V2 columns against V1 and the 17+47 frozen source names; GCC, Clang and the pinned Celeritas comparison use this check. **V2 is pending fresh exact-commit CI**; do not mark it as certified before that run completes.

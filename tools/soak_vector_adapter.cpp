@@ -1,4 +1,5 @@
 #include "pastafari/monster.hpp"
+#include "pastafari/source_language_catalog.hpp"
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -35,7 +36,23 @@ bool validId(const std::string& x) {
     }
     return true;
 }
-void calculate(const std::string& line, bool timing) {
+template <std::size_t N>
+std::size_t indexOf(const std::string& label,
+                    const std::array<pastafari::CatalogEntry, N>& catalog) {
+    std::size_t found = 0;
+    for (const auto& entry : catalog) {
+        if (entry.text == std::string_view(label)) {
+            if (found != 0 || entry.canonicalIndex < 1 ||
+                entry.canonicalIndex > N) {
+                throw std::runtime_error("ambiguous canonical catalog entry");
+            }
+            found = entry.canonicalIndex;
+        }
+    }
+    if (!found) throw std::runtime_error("unknown canonical catalog label");
+    return found;
+}
+void calculate(const std::string& line, bool timing, bool canonical) {
     const auto a = line.find('\t');
     const auto b = a == std::string::npos ? a : line.find('\t', a + 1);
     if (a == std::string::npos || b == std::string::npos ||
@@ -52,10 +69,21 @@ void calculate(const std::string& line, bool timing) {
         result.monthName.find_first_of("\r\n\t") != std::string::npos)
         throw std::runtime_error("invalid catalog name");
     std::cout << id << '\t' << c << '\t' << t << '\t'
-              << result.yearNumber << '\t' << std::quoted(result.cutletName)
-              << '\t' << result.dayInCutlet << '\t'
-              << std::quoted(result.monthName) << '\t'
-              << result.dayInMonth << '\n' << std::flush;
+              << result.yearNumber << '\t';
+    if (canonical) {
+        const auto cutletIndex = indexOf(
+            result.cutletName, pastafari::CUTLET_SOURCE_CATALOG);
+        const auto monthIndex = indexOf(
+            result.monthName, pastafari::MONTH_SOURCE_CATALOG);
+        std::cout << cutletIndex << '\t' << result.dayInCutlet
+                  << '\t' << monthIndex << '\t' << result.dayInMonth;
+    } else {
+        std::cout << std::quoted(result.cutletName) << '\t'
+                  << result.dayInCutlet << '\t'
+                  << std::quoted(result.monthName) << '\t'
+                  << result.dayInMonth;
+    }
+    std::cout << '\n' << std::flush;
     if (!std::cout) throw std::runtime_error("output stream failed");
     if (timing) {
         const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -70,16 +98,25 @@ int main(int argc, char** argv) {
             std::cout << "PASTAFARI_SOAK_TSV_V1\tid,c,t,year,cutlet,day_cutlet,month,day_month\n";
             return 0;
         }
-        const bool timing = argc == 2 && std::string(argv[1]) == "--timing-ns";
-        if (argc != 1 && !timing)
-            throw std::runtime_error("usage: soak_vector_adapter [--schema|--timing-ns]");
+        if (argc == 2 && std::string(argv[1]) == "--schema-canonical") {
+            std::cout << "PASTAFARI_SOAK_CANONICAL_V2\tid,c,t,year,cutlet_index,day_cutlet,month_index,day_month\n";
+            return 0;
+        }
+        bool timing = false;
+        bool canonical = false;
+        for (int i = 1; i < argc; ++i) {
+            const std::string arg(argv[i]);
+            if (arg == "--timing-ns" && !timing) timing = true;
+            else if (arg == "--canonical-indices" && !canonical) canonical = true;
+            else throw std::runtime_error("usage: soak_vector_adapter [--schema|--schema-canonical|--canonical-indices] [--timing-ns]");
+        }
         std::ios::sync_with_stdio(false);
         std::cin.tie(nullptr);
         std::string line;
         std::size_t n = 0;
         while (std::getline(std::cin, line)) {
             ++n;
-            try { calculate(line, timing); }
+            try { calculate(line, timing, canonical); }
             catch (const std::exception& e) {
                 throw std::runtime_error("line " + std::to_string(n) + ": " + e.what());
             }

@@ -71,6 +71,38 @@
     "backpressure_owner": "central scheduler",
     "slow_case_queue_owner": "central scheduler"
   },
-  "status": "candidate_after_end_to_end_ci",
-  "note": "This is an adapter declaration; no global multi-implementation soak has been run."
+  "status": "canonical_numeric_v2_pending_exact_sha_ci",
+  "note": "V1 remains byte-for-byte compatible for historical comparison; use canonical_numeric V2 for cross-language comparison. Global multi-implementation soak has not been run.",
+  "canonical_numeric": {
+    "protocol": "PASTAFARI_SOAK_CANONICAL_V2",
+    "schema_arg": "--schema-canonical",
+    "run_arguments": [
+      "--canonical-indices",
+      "--timing-ns"
+    ],
+    "response_fields": [
+      "request_id",
+      "calculation_day",
+      "target_day",
+      "year_number",
+      "cutlet_index",
+      "day_in_cutlet",
+      "month_index",
+      "day_in_month"
+    ],
+    "index_ranges": {
+      "cutlet": [
+        1,
+        17
+      ],
+      "month": [
+        1,
+        47
+      ]
+    },
+    "catalog": "include/pastafari/source_language_catalog.hpp",
+    "label_mapping": "exact text to unique frozen canonicalIndex; unknown or ambiguous names invalidate shard",
+    "numeric_format": "ASCII decimal integers",
+    "status": "pending new exact SHA CI"
+  }
 }
