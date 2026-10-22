@@ -1,5 +1,6 @@
 use v5.40;
 use utf8;
+use open qw(:std :encoding(UTF-8));
 use strict;
 use warnings;
 use Test::More;
@@ -27,7 +28,8 @@ sub brute_suffix ($r,$opened,$closed) {
     return $ways;
 }
 my @vectors=(
-    [2,2,2,2],[3,2,3,2],[2,3,2,3],[3,3,2,2],[2,2,3,3]
+    [2,2,2,2],[3,2,3,2],[2,3,2,3],[3,3,2,2],[2,2,3,3],
+    [4,3,3,2],[3,4,3,3]
 );
 my $total_states=0;
 for my $lengths (@vectors) {
@@ -80,6 +82,8 @@ for my $lengths (@vectors) {
 }
 cmp_ok($total_states,'>',40,
        '跨多組獨立小空間的提前閉式可到達狀態足夠多');
+is($total_states,74,
+   '七組小向量具有恰好 74 種已開三月而第四月未開的不同狀態');
 for my $bad (
     {early_final_closed_form=>1},
     {bounded_cache=>1,early_final_closed_form=>2},
