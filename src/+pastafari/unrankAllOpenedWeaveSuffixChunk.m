@@ -1,5 +1,5 @@
 function [piece, cursor] = unrankAllOpenedWeaveSuffixChunk( ...
-        remaining, closedUpTo, rank1, maxSteps)
+        remaining, closedUpTo, rank1, maxSteps, method)
 % EXPERIMENTAL, exact and resumable all-open MONTH suffix unranking.
 %
 % All months (even those already closed) were opened before this suffix.
@@ -16,6 +16,16 @@ function [piece, cursor] = unrankAllOpenedWeaveSuffixChunk( ...
 % the exact parent count, so it does not trust any earlier count. This
 % is not yet a persistent/checksummed checkpoint file format.
 
+% Default uses the previously verified rational method. The alternate
+% common-denominator method must pass the same independent brute tests.
+if nargin < 5
+    method = 'rational';
+end
+if ~(ischar(method) && isrow(method) && ...
+        (strcmp(method,'rational') || strcmp(method,'common')))
+    error('Pastafari:AllOpenChunk:Method', ...
+        'Choose rational or common as an exact child-block algorithm.');
+end
 pastafari.ValidationManager.requireExactIntegerInput(rank1);
 if ~(isnumeric(maxSteps) && isscalar(maxSteps) && ...
         isreal(maxSteps) && isfinite(maxSteps) && ...
@@ -64,8 +74,13 @@ end
 steps = min(maxSteps, totalDays);
 piece = zeros(1, steps);
 for position = 1:steps
-    blocks = pastafari.allOpenedWholeWeaveChildCounts( ...
-        remaining, closedUpTo, parent);
+    if strcmp(method,'common')
+        blocks = pastafari.allOpenedWholeWeaveChildCountsCommonDenominator( ...
+            remaining, closedUpTo, parent);
+    else
+        blocks = pastafari.allOpenedWholeWeaveChildCounts( ...
+            remaining, closedUpTo, parent);
+    end
     selected = false;
     for monthId = closedUpTo+1:K
         block = blocks{monthId};

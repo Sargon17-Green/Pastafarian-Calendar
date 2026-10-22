@@ -18,13 +18,14 @@ for f = 1:numel(families)
         'Brute all-open count does not agree with exact algebraic family.');
     for r = 1:size(oracle,1)
         for chunkLength = [1 2 3 7]
+          for mode = {'rational','common'}
             rest = lengths;
             closed = 0;
             rank = pastafari.BigInt(r);
             built = zeros(1,0);
             while true
                 [part,state] = pastafari.unrankAllOpenedWeaveSuffixChunk( ...
-                    rest,closed,rank,chunkLength);
+                    rest,closed,rank,chunkLength,mode{1});
                 assert(numel(part) == min(chunkLength,sum(rest)), ...
                     'A chunk skipped or invented days.');
                 built = [built part]; %#ok<AGROW>
@@ -48,6 +49,7 @@ for f = 1:numel(families)
             assert(isequal(built,oracle(r,:)), ...
                 'Chunked lexicographic rank output does not match brute.');
             checked = checked+1;
+          end
         end
     end
 end
@@ -68,6 +70,7 @@ expectReject([2 2],0,0,1,'Pastafari:AllOpenChunk:Rank');
 expectReject([2 2],0,0.5,1,'Pastafari:Validation:IntegerInput');
 expectReject([2 0],0,1,1,'Pastafari:AllOpenChunk:Frontier');
 expectReject([2 2],0,1,NaN,'Pastafari:AllOpenChunk:StepLimit');
+expectRejectMethod([2 2],0,1,1,'approximate');
 fprintf('STAGE_55_ALL_OPEN_CHUNK_VALIDATION_PASS\n');
 
 % Native *real* large partial progress, not a claim of full 4230-day
@@ -78,8 +81,23 @@ whole = pastafari.countWholeWeavingSuffixByEndpoints(lengths,45,0);
 rank = whole.floorDiv(pastafari.BigInt(2))+pastafari.BigInt(1);
 elapsed = tic;
 [part,state] = pastafari.unrankAllOpenedWeaveSuffixChunk( ...
-    lengths,0,rank,12);
+    lengths,0,rank,12,'rational');
 seconds = toc(elapsed);
+fastStart=tic;
+[fastPart,fastState] = pastafari.unrankAllOpenedWeaveSuffixChunk( ...
+    lengths,0,rank,12,'common');
+fastSeconds=toc(fastStart);
+assert(isequal(fastPart,part) && ...
+    isequal(fastState.remaining,state.remaining) && ...
+    fastState.closedUpTo==state.closedUpTo && ...
+    fastState.rank==state.rank && fastState.count==state.count && ...
+    fastState.done==state.done && ...
+    fastState.stepsComputed==state.stepsComputed, ...
+    '4230-day 12-step common mode must match rational state exactly.');
+fprintf(['STAGE_55_ALL_OPEN_CHUNK_COMMON_BENCH MONTHS=45 DAYS=4230 ', ...
+    'STEPS=12 RATIONAL_SECONDS=%.3f COMMON_SECONDS=%.3f ', ...
+    'COUNT_DIGITS=%d\n'],seconds,fastSeconds,numel(char(state.count)));
+fprintf('STAGE_55_ALL_OPEN_CHUNK_COMMON_DIFFERENTIAL_PASS\n');
 assert(numel(part)==12 && state.stepsComputed==12 && ...
     sum(lengths)-sum(state.remaining)==12 && ...
     state.count >= state.rank && state.rank >= pastafari.BigInt(1), ...
@@ -125,4 +143,15 @@ catch err
     matched=strcmp(err.identifier,id);
 end
 assert(matched,'Expected strict input rejection: %s.',id);
+end
+
+function expectRejectMethod(remaining,closed,rank,steps,method)
+caught=false;
+try
+    pastafari.unrankAllOpenedWeaveSuffixChunk( ...
+        remaining,closed,rank,steps,method);
+catch err
+    caught=strcmp(err.identifier,'Pastafari:AllOpenChunk:Method');
+end
+assert(caught,'An unrecognized child counter must be rejected.');
 end
