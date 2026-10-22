@@ -1,0 +1,31 @@
+name: MATLAB General Frontier First 4244-Day Step (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/unrankGeneralWeaveSuffixChunk.m'
+      - 'tests/run_stage55_general_chunk_fullscale.m'
+      - '.github/workflows/matlab-stage55-general-chunk-fullscale.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-one-step:
+    name: MATLAB R2026a / full-sized 4244-day one-step exact rank
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Preserve 6844-digit family rank across first forced day
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_general_chunk_fullscale

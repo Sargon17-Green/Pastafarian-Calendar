@@ -67,9 +67,29 @@ end
 steps=min(maxSteps,days);
 piece=zeros(1,steps);
 for position=1:steps
-    if openedUpTo==K
-        % The separate all-open algebra has already passed exact native
-        % differential; avoid 45 independent endpoint DP counts.
+    % When precisely one legal next letter exists, prepend it to EVERY
+    % completion: the child language is in exact bijection with the
+    % parent language. Reuse the already verified parent BigInt count,
+    % rather than running another exact suffix DP. This is a semantic
+    % identity, not a cap, approximation, or case omission.
+    legalChoices=0;
+    for probe=closedUpTo+1:K
+        n=R(probe);
+        if n~=0 && ...
+                ~(n==L(probe) && probe~=openedUpTo+1) && ...
+                ~(n==1 && probe~=closedUpTo+1)
+            legalChoices=legalChoices+1;
+        end
+    end
+    if legalChoices<1
+        error('Pastafari:GeneralChunk:NoLegalNext', ...
+            'Nonterminal suffix has no legal next month.');
+    end
+    if legalChoices==1
+        blocks={};
+    elseif openedUpTo==K
+        % Every already-open month may be chosen unless this would
+        % close it out of the required order. One exact block partition.
         blocks=pastafari.allOpenedWholeWeaveChildCountsCommonDenominator( ...
             R,closedUpTo,parent);
     else
@@ -86,7 +106,9 @@ for position=1:steps
         childR(i)=n-1;
         childOpened=openedUpTo+double(n==L(i));
         childClosed=closedUpTo+double(n==1);
-        if openedUpTo==K
+        if legalChoices==1
+            block=parent;
+        elseif openedUpTo==K
             block=blocks{i};
         else
             block=pastafari.countWholeWeavingSuffixByFirstEndpoint( ...
