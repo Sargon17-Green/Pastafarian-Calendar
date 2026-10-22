@@ -50,5 +50,17 @@ if bash scripts/check_sv_declarations.sh "$temp_dir/unbalanced.sv" > "$temp_dir/
 fi
 grep -q 'UNBALANCED_SUBPROGRAM_SCOPES' "$temp_dir/unbalanced.log"
 
+cat > "$temp_dir/reserved.sv" <<'SV'
+module preflight_reserved;
+  logic signed [383:0] count, dist;
+endmodule
+SV
+
+if bash scripts/check_sv_declarations.sh "$temp_dir/reserved.sv" > "$temp_dir/reserved.log" 2>&1; then
+  echo 'RESERVED_SYSTEMVERILOG_IDENTIFIER_NOT_DETECTED' >&2
+  exit 1
+fi
+grep -q 'RESERVED_IDENTIFIER:dist' "$temp_dir/reserved.log"
+
 bash scripts/check_sv_declarations.sh rtl/*.sv tests/*.sv
-echo 'SV_PREFLIGHT_POSITIVE_NEGATIVE_FIXTURES_PASS'
+echo 'SV_PREFLIGHT_FOUR_FIXTURES_PASS'
