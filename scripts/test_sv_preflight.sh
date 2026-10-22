@@ -62,5 +62,15 @@ if bash scripts/check_sv_declarations.sh "$temp_dir/reserved.sv" > "$temp_dir/re
 fi
 grep -q 'RESERVED_IDENTIFIER:dist' "$temp_dir/reserved.log"
 
+cat > "$temp_dir/arrays.sv" <<'SV'
+module preflight_legal_arrays;
+  logic [383:0] month_dp [0:45][0:4244];
+  logic signed [383:0] q, rem_value;
+  integer month_lengths [0:44], ordinals [0:16];
+endmodule
+SV
+bash scripts/check_sv_declarations.sh "$temp_dir/arrays.sv" > "$temp_dir/arrays.log"
+grep -q 'SV_MODULE_DECLARATION_PREFLIGHT_PASS' "$temp_dir/arrays.log"
+
 bash scripts/check_sv_declarations.sh rtl/*.sv tests/*.sv
-echo 'SV_PREFLIGHT_FOUR_FIXTURES_PASS'
+echo 'SV_PREFLIGHT_FIVE_FIXTURES_PASS'
