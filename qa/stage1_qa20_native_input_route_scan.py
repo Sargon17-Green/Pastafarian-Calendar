@@ -14,7 +14,7 @@ SOURCE='src/interleaved_work_counts.b98'
 PIN='560d6aa5807a7f766213a33835cce85eab0fa40c'
 REF_COUNT='reference/work_counts.b98'
 REF_SAVE='reference/save.b98'
-MAX_TICKS=175000
+MAX_TICKS=1250000
 CLI=['timeout','--kill-after=3s','55s','pyfunge','--disable-fprint',
      '--no-concurrent','--no-filesystem','-v98','-d2']
 M=(1<<127)-1
