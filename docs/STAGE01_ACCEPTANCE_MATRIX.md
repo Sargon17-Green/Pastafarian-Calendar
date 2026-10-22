@@ -47,3 +47,29 @@ from production RTL.
 **Statuses:** source written; scratch mathematics checked; native SV
 simulation NOT EXECUTED. Green stage-1 signoff is forbidden until
 actual simulator results and catalog review are recorded.
+## Independent signed gate tests
+
+New `tests/tb_gate_gap_oracle.sv`: 16 test-only gate checks for
+`(Foundation,Foundation±n)`, n=1..8, with separately derived
+arithmetic expected values. It enforces direction semantics,
+exact soup/sauce construction, final bowl querying, and the
+short equal-selection rule for 1..922 with a 41-day offset.
+
+The fixture is **unexecuted** under a real SystemVerilog simulator.
+The scratch independently computed positive gaps
+`[345,818,831,218,854,136,674,649]` and negative
+`[503,441,329,759,433,890,558,414]`.
+Do not use the gap vectors as proof of full five-field calendar output.
+
+## Normative name witness
+
+`catalog/NORMATIVE_NAME_WITNESS.csv` holds exactly 17+47 Maltese
+original labels from the pinned normative sections T and W,
+with semantics classifications and strict index joins to the
+Kalaallisut catalog. These Maltese labels are **review-only
+provenance**, never output locale strings or a fallback source language.
+An additional validator guards the fraction, invented-name, and
+cross-index invariants.
+
+Review status remains 0/64 approved. The presence of a lexical
+candidate does not constitute qualified Kalaallisut validation.

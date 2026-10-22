@@ -36,3 +36,53 @@ END {
  }
  print "CATALOG_STRUCTURE_17_47_PASS"
 }' catalog/catalog_review_queue.csv
+
+# Check the 64-index immutable *concept* witness from the normative
+# Scroll independently of the provisional Kalaallisut strings.
+test -f catalog/NORMATIVE_NAME_WITNESS.csv
+awk -F',' '
+FNR == NR {
+ if (FNR == 1) {
+   if ($1!="kind" || $2!="canonical_index" ||
+       $3!="normative_maltese_witness") {
+      print "BAD_NORMATIVE_WITNESS_HEADER" > "/dev/stderr"
+      exit 1
+   }
+ } else {
+   witness_count++
+   key=$1 ":" $2
+   if (seen[key]++ || $3=="" || $5!="T" && $5!="W") {
+      print "BAD_NORMATIVE_WITNESS",FNR > "/dev/stderr"
+      exit 1
+   }
+   witness[key]=$3
+   if ($1=="cutlet" && $5!="T" || $1=="month" && $5!="W") {
+      print "BAD_NORMATIVE_SECTION",FNR > "/dev/stderr"
+      exit 1
+   }
+   if ($1=="cutlet" && $2==6 && $4!="fraction" ||
+       $1=="month" && $2==7 && $4!="fraction" ||
+       $1=="cutlet" && $2==7 && $4!="invented" ||
+       $1=="month" && $2==8 && $4!="invented") {
+      print "BAD_SEMANTIC_CLASSIFICATION",FNR > "/dev/stderr"
+      exit 1
+   }
+ }
+ next
+}
+FNR==1 {next}
+{
+ key=$1 ":" $2
+ if (!(key in witness)) {
+   print "UNMATCHED_SOURCE_LANGUAGE_SLOT",FNR,key > "/dev/stderr"
+   exit 1
+ }
+ rows++
+}
+END {
+ if (witness_count != 64 || rows != 64) {
+   print "NORMATIVE_WITNESS_CARDINALITY_FAIL" > "/dev/stderr"
+   exit 1
+ }
+ print "NORMATIVE_INDEX_AND_MEANING_WITNESS_64_PASS"
+}' catalog/NORMATIVE_NAME_WITNESS.csv catalog/catalog_review_queue.csv

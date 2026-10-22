@@ -20,6 +20,9 @@ vvp build/reset.vvp
 iverilog -g2012 -s tb_sauce_foundation -Wall -o build/sauce.vvp \
   tests/pcal_stage1_oracle_pkg.sv tests/tb_sauce_foundation.sv
 vvp build/sauce.vvp
+iverilog -g2012 -s tb_gate_gap_oracle -Wall -o build/gate.vvp \
+  tests/pcal_stage1_oracle_pkg.sv tests/tb_gate_gap_oracle.sv
+vvp build/gate.vvp
 iverilog -g2012 -s tb_selection_rejection_equivalence -Wall -o build/selection.vvp \
   tests/tb_selection_rejection_equivalence.sv
 vvp build/selection.vvp
