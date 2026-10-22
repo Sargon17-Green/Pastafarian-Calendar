@@ -337,3 +337,9 @@ Ujian langsung sejarah sengaja keluar dengan kod 1: tiga pasangan hari, tiga sus
 OrderLatchPatch11 menyimpan permutasi titisan ke-46, memanggil LegacyOverwrittenOrder11::sauceWrong secara sebenar dan menukar hanya medan orderAtDrop46. Enam mangkuk dan 12 kacauan tetap diperoleh daripada pengiraan sejarah. Legacy, oracle, katalog dan fixture tidak diubah.
 
 Ujian: php -d memory_limit=512M tests/verify_stage22_discovery11.php dan php -d memory_limit=512M tests/stage23_patch11_tests.php. Enam pasangan hari dibandingkan dengan oracle PHP tempatan, 36 komponen mangkuk dan 72 kacauan, serta dua input tidak lengkap. Jangan mulakan Stage24 sebelum CI Native untuk HEAD tepat Stage23 hijau.
+
+## Stage 24 — DISCOVERY 12: Jiran susunan bukan jiran nombor
+
+Selepas Stage23 PATCH11, susunan orderAtDrop46 disimpan dengan betul. LegacyNumericSuccessor12 masih menganggap jiran setiap mangkuk ialah (id % 6)+1; ini boleh berbeza daripada ID mangkuk berikutnya dalam permutasi titisan 46. Formula SAVE first dan step kekal, tetapi input mangkuk jiran tersalah pilih. Kod legacy belum dibaiki.
+
+Ujian: php -d memory_limit=512M tests/stage24_discovery12_tests.php (exit 1 dijangka), dan php -d memory_limit=512M tests/verify_stage24_discovery12.php (exit 0 jika merah tepat). Pemeriksaan menyeluruh 720 permutasi × 6 pertanyaan: 3456 jiran berbeza, 864 sepadan; tiga pasangan tarikh sebenar, tiga input tidak sah, dan penghala produksi berasingan. Stage23 disahkan oleh run 39818136362. Jangan tambah PATCH12 atau Stage25 sebelum CI Stage24 disahkan.

@@ -6,4 +6,4 @@ PATCH11 menyimpan order daripada visible[46] sebelum menjalankan LegacyOverwritt
 
 Penerimaan: verify_stage22_discovery11.php mesti membuktikan tiga parut sejarah yang sama; stage23_patch11_tests.php mesti lulus kesetaraan enam pasangan, 36 mangkuk, 72 kacauan, dua input tidak sah, panggilan legacy sebenar. Semua regresi Stage1–21, sintaks PHP, fixture dan kunci nama mesti hijau. Semak Native GitHub Actions pada SHA tepat sebelum menandakan GREEN.
 
-Status: AWAITING_CI.
+Status: GREEN DISAHKAN. Native GitHub Actions 39818136362 pada commit da93ec7b1dc7bae9146c4818f4182bff7cfc87e7: verify=success dan audit_php_bahasa_melayu=success. Semua ujian Stage1–23, lint, fixture serta kunci nama lulus. Stage24 hanya dimulakan selepas pengesahan ini.

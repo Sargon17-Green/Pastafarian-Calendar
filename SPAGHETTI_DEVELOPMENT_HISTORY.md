@@ -577,3 +577,11 @@ Penghala `OVERWRITTEN_ORDER_46_LEGACY` menghasilkan konteks baharu bagi setiap p
 Ujian Stage22 membandingkan tiga tarikh meliputi 46 titisan dan 12 post-stir setiap satu terhadap oracle tempatan yang dibina dalam PHP. Keenam-enam mangkuk terakhir mesti tepat bagi setiap tarikh (18 komponen); sebaliknya susunan yang terdedah berbeza daripada `orderAtDrop46` normatif kerana ia sama dengan permutasi post-stir terakhir. Tiga RED yang terkawal dan sifar ralat tidak dijangka diperlukan. Pemeriksa memperakui kod keluar 1 hanya untuk corak ini dan keluar 0 apabila berjaya.
 
 Penyelesaian Stage23 mesti menyimpan salinan susunan tepat selepas titisan 46 dan sebelum post-stirs, tidak menulis latch itu lagi, sambil meninggalkan pemboleh ubah legacy salah sebagai bukti. Tidak diperkenalkan pada Stage22.
+
+## Stage 23 — PATCH 11: Bukti Native
+
+Run GitHub Actions 39818136362 pada commit da93ec7b1dc7bae9146c4818f4182bff7cfc87e7 selesai SUCCESS. Kedua-dua pekerjaan verify serta audit_php_bahasa_melayu hijau, termasuk ujian Stage23, sejarah Stage22, semua regresi lebih awal, sintaks PHP, nama dan fixture. Stage23 diterima GREEN dengan latch susunan titisan 46 tanpa memadam parut sejarah. Main tidak diubah.
+
+## Stage 24 — DISCOVERY 12: Andaian jiran nombor
+
+LegacyNumericSuccessor12::askWrong menerima mangkuk akhir dan orderAtDrop46 yang telah dibetulkan melalui Stage23. Namun kaedah sejarah menggunakan nextBowlId=(queriedBowlId % 6)+1, bukannya jiran daripada susunan tersebut. BootstrapKernel menyediakan NUMERIC_NEXT_BOWL_LEGACY serta konteks milik panggilan. 720 permutasi × enam pertanyaan mesti mendedahkan 3456 penyimpangan jiran dan 864 padanan; tiga pasangan tarikh sebenar dan penolakan input juga diuji. Oracle hanya dalam direktori tests. Status Stage24 ialah AWAITING_CI hingga bukti Native SHA baharu diperiksa; tiada PATCH12 atau perubahan main.
