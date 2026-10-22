@@ -1,0 +1,31 @@
+name: MATLAB General Frontier Exact Chunk (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/unrankGeneralWeaveSuffixChunk.m'
+      - 'tests/run_stage55_general_chunk_tests.m'
+      - '.github/workflows/matlab-stage55-general-chunk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  general-chunk:
+    name: MATLAB R2026a / exact arbitrary-frontier rank chunks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out exact experiment
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Verify all legal small chunks and bounded pre-open pilot
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_general_chunk_tests
