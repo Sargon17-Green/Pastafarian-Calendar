@@ -155,6 +155,11 @@ defmodule PastafariCalendarElixirVietnamese do
   def month_lengths_diagnostic_spaghetti(c, t),
     do: Dispatcher.month_lengths_diagnostic(c, t)
 
+  def month_weaving_spaghetti(c, t), do: Dispatcher.month_weaving(c, t)
+
+  def month_weaving_diagnostic_spaghetti(c, t),
+    do: Dispatcher.month_weaving_diagnostic(c, t)
+
   def calendar_date_spaghetti(calculation_day, target_day) do
     _context = Dispatcher.bootstrap(calculation_day, target_day)
     raise StageNotIntegratedError
