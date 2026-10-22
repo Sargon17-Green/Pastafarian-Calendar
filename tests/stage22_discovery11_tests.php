@@ -141,7 +141,7 @@ $legacyFile = (string)file_get_contents(
 );
 $kernelFile = (string)file_get_contents(dirname(__DIR__) . '/src/BootstrapKernel.php');
 if (!str_contains($legacyFile, '$order = $this->permutation->permutationPatch($saved);')
-    || !str_contains($legacyFile, "'orderAtDrop46' => $order")
+    || !str_contains($legacyFile, "'orderAtDrop46' => \$order")
     || !str_contains($kernelFile, "dispatch('OVERWRITTEN_ORDER_46_LEGACY', " . '$context)')
     || str_contains($legacyFile, 'orderAt46Latch')) {
     echo "RALAT_KONTRAK_LEGACY\n";

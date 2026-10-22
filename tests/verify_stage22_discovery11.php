@@ -31,7 +31,7 @@ $kernel = (string)file_get_contents($root . '/BootstrapKernel.php');
 $valid = $valid
     && str_contains($code, 'function sauceWrong(')
     && str_contains($code, '$order = $this->permutation->permutationPatch($saved);')
-    && str_contains($code, "'orderAtDrop46' => $order")
+    && str_contains($code, "'orderAtDrop46' => \$order")
     && str_contains($kernel, "dispatch('OVERWRITTEN_ORDER_46_LEGACY', " . '$context)')
     && !str_contains($code, 'orderAt46Latch');
 foreach (new RecursiveIteratorIterator(
