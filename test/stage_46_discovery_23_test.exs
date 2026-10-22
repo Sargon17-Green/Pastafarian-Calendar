@@ -5,6 +5,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage46Discovery23Test do
   alias PastafariCalendarElixirVietnamese.Monster.{
     Cutlet,
     CutletMaterializationManager,
+    CutletFirstDayPatch,
     CutletNameIndexManager,
     LegacyInclusiveCutletFirstDay,
     StageNotIntegratedError
@@ -63,7 +64,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage46Discovery23Test do
     r = CutletMaterializationManager.diagnose(@foundation, @foundation)
     assert hd(r.cutlets).open_gate_index == r.year.open_gate_index
     assert List.last(r.cutlets).close_gate_index == r.year.close_gate_index
-    assert hd(r.cutlets).first_day == r.year.open_gate_day
+    assert hd(r.cutlets).first_day == r.year.open_gate_day + 1
     assert List.last(r.cutlets).last_day == r.year.close_gate_day
   end
 
@@ -71,7 +72,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage46Discovery23Test do
     r = CutletMaterializationManager.diagnose(@foundation, @foundation)
     for [left, right] <- Enum.chunk_every(r.cutlets, 2, 1, :discard) do
       assert left.close_gate_index == right.open_gate_index
-      assert left.last_day == right.first_day
+      assert left.last_day + 1 == right.first_day
     end
   end
 
@@ -94,13 +95,16 @@ defmodule PastafariCalendarElixirVietnamese.Stage46Discovery23Test do
     end
   end
 
-  test "di sản lấy ngày cổng mở làm ngày đầu ở tất cả phần" do
+  test "production bắt đầu sau ngày cổng mở, vẫn giữ chứng cứ legacy" do
     for delta <- [-3, 0, 3] do
       c = @foundation + delta
       r = CutletMaterializationManager.diagnose(c, c)
       for piece <- r.cutlets do
-        assert piece.first_day == Map.fetch!(r.gate_state.gate, piece.open_gate_index)
+        assert piece.first_day == Map.fetch!(r.gate_state.gate, piece.open_gate_index) + 1
       end
+      assert Enum.all?(r.historical_cutlets, fn piece ->
+        piece.first_day == Map.fetch!(r.gate_state.gate, piece.open_gate_index)
+      end)
     end
   end
 
@@ -108,7 +112,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage46Discovery23Test do
     r = CutletMaterializationManager.diagnose(@foundation, @foundation)
     assert Enum.sum(Enum.map(r.cutlets, fn piece ->
       piece.last_day - piece.first_day
-    end)) == r.year.close_gate_day - r.year.open_gate_day
+    end)) == r.year.close_gate_day - r.year.open_gate_day - r.cutlet_count
   end
 
   test "không sửa năm, bảng gate hoặc tập tên từ tầng trước" do
@@ -160,16 +164,16 @@ defmodule PastafariCalendarElixirVietnamese.Stage46Discovery23Test do
     end
   end
 
-  test "kiểm toán source không dùng oracle và chưa có PATCH23" do
+  test "kiểm toán source xác nhận PATCH23 gọi legacy thật" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     source = File.read!(Path.join(root, "legacy_inclusive_cutlet_first_day.ex"))
     manager = File.read!(Path.join(root, "cutlet_materialization_manager.ex"))
     assert source =~ "first_day: Map.fetch!(state.gate, cursor)"
     assert source =~ "last_day: Map.fetch!(state.gate, close)"
-    assert manager =~ "LegacyInclusiveCutletFirstDay.materialize("
+    assert manager =~ "CutletFirstDayPatch.diagnose("
     refute source =~ "NormativeReference"
     refute manager =~ "NormativeReference"
-    refute File.exists?(Path.join(root, "cutlet_first_day_patch.ex"))
+    assert File.exists?(Path.join(root, "cutlet_first_day_patch.ex"))
     assert_raise StageNotIntegratedError, fn ->
       Calendar.calendar_date_spaghetti(@foundation, @foundation)
     end
