@@ -63,7 +63,6 @@ module tb_gate_gap_oracle;
     integer cand_count, ii, jj, aa, bb, tmp;
     integer year_ordinal, year_next;
     logic signed [383:0] year_a0, year_flow, year_limit, year_accepted;
-    integer positive_sum, negative_sum;
     task automatic run_gate(input logic signed [63:0] c,
                             input logic signed [63:0] t,
                             output integer gap);
