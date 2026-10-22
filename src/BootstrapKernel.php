@@ -484,6 +484,41 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'order46.patch11.calls');
             return $result;
         });
+
+        $this->dispatcher->register('NUMERIC_NEXT_BOWL_LEGACY', function(BootstrapContext $context): array {
+            $id = $context->semanticState['queriedBowlId'] ?? null;
+            $seal = $context->semanticState['seal'] ?? null;
+            if (!is_int($id) || !is_int($seal)) {
+                throw new \InvalidArgumentException('NUMERIC_NEXT_BOWL_ARGS');
+            }
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyNumericSuccessor12($save);
+            $sauce = $this->sauceOrder($context->calculationDay, $context->targetDay);
+            $stream = $legacy->askWrong($sauce, $id, $seal);
+            $context->semanticState['numericNeighbor'] = $stream['nextBowlId'];
+            $context->status = 'NUMERIC_NEXT_BOWL_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.numeric_neighbor.requests');
+            return $stream;
+        });
+    }
+
+    /**
+     * Laluan sejarah yang memilih jiran nombor, bukan jiran permutasi.
+     * @return array{first:BigInt,step:int,nextBowlId:int}
+     */
+    public function legacyAskBowl(
+        int $calculationDay, int $targetDay, int $queriedBowlId, int $seal
+    ): array {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'NUMERIC_NEXT_BOWL_LEGACY';
+        $context->semanticState['queriedBowlId'] = $queriedBowlId;
+        $context->semanticState['seal'] = $seal;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('NUMERIC_NEXT_BOWL_LEGACY', $context)
+        );
     }
 
     public function probe(int $calculationDay, int $targetDay): array
