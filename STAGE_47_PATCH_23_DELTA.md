@@ -23,3 +23,15 @@ các cổng nối tiếp, kiểm tra song song, dữ liệu bất biến,
 biên cuối năm và lỗi đầu vào. Dự kiến 753 bài GREEN,
 không compiler warnings, Canonical Names Lock PASS.
 Không sửa main, oracle, di sản hoặc PATCH01..22.
+
+## Xác minh CI
+
+Stage47 PATCH23 đã được kiểm chứng thành công bằng Elixir 1.18.5 / OTP27:
+**753/753 bài PASS, không compiler warnings** sau khi bỏ alias
+không dùng trong bài kiểm tra Stage46. Bốn hồi quy normative
+Stage46 vẫn giữ expected gốc và đều xanh.
+Canonical Names Lock PASS.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39772388102
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39772388280
+Không sửa di sản, oracle, thuật toán gốc hoặc main.
+Đóng Stage47 GREEN. Stage48/55 DISCOVERY24 chưa bắt đầu.

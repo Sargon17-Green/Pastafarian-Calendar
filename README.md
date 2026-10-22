@@ -1541,3 +1541,20 @@ Canonical Names Lock PASS.
 - CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762310217
 - Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762310564
 Đóng Stage46 EXPECTED_RED; Stage47 PATCH23 chưa bắt đầu.
+
+## Giai đoạn 47/55 — PATCH23: ngày đầu của cốt-lết
+
+CutletFirstDayPatch gọi hàm LegacyInclusiveCutletFirstDay thật để
+giữ dữ liệu lịch sử, sau đó đổi đúng một trường first_day sang
+gate(open_gate_index)+1. Cổng, tên, phân hoạch, last_day, oracle
+và các PATCH cũ không đổi.
+
+Stage47 PATCH23 đã được kiểm chứng thành công bằng Elixir 1.18.5 / OTP27:
+**753/753 bài PASS, không compiler warnings** sau khi bỏ alias
+không dùng trong bài kiểm tra Stage46. Bốn hồi quy normative
+Stage46 vẫn giữ expected gốc và đều xanh.
+Canonical Names Lock PASS.
+- CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39772388102
+- Khóa tên: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39772388280
+Không sửa di sản, oracle, thuật toán gốc hoặc main.
+Đóng Stage47 GREEN. Stage48/55 DISCOVERY24 chưa bắt đầu.
