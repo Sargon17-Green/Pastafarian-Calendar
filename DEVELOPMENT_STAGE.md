@@ -4,8 +4,8 @@ TOTAL_STAGES=55
 CURRENT_STAGE=48
 CURRENT_KIND=DISCOVERY
 CURRENT_PATCH=24
-LAST_COMPLETED_STAGE=47
-EXPECTED_REPOSITORY_STATE=PENDING_CI
+LAST_COMPLETED_STAGE=48
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -17,15 +17,15 @@ SOURCE_LANGUAGE_CATALOG_FROZEN=YES
 MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..23; Stage48 mở MonthCountManager và LegacyDescendingMonthCount, với tập số tháng khả thi theo độ dài năm, bát3/chốt30 chuẩn nhưng cố ý đảo thứ tự ứng viên.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
-GIT_HISTORY_MUTATED=STAGE_48_DISCOVERY_IMPLEMENTATION
+GIT_HISTORY_MUTATED=STAGE_48_DISCOVERY_CLOSURE_COMMIT
 HANDOFF_PACKAGE_PREPARED=NO
 LOCAL_VERIFICATION=NOT_RUN_ELIXIR_UNAVAILABLE
 CI_ELIXIR_VERSION=1.18.5
 CI_OTP_RELEASE=27
-CI_TESTS=NOT_VERIFIED
-CI_FAILURES=NOT_VERIFIED
+CI_TESTS=773
+CI_FAILURES=4_EXPECTED_ONLY
 HUMAN_AUTHORED_TEXT_LANGUAGE_AUDIT=PASS_EXISTING_TESTS
-CLOSURE_VERIFICATION_PENDING=YES
+CLOSURE_VERIFICATION_PENDING=NO
 
 Giai đoạn 1 đã được xác minh độc lập với 16 kiểm thử đạt và không có lỗi.
 Giai đoạn 2 cố ý để lộ lỗi của phép dư lịch sử: M, 2M và 3M phải
@@ -1076,3 +1076,8 @@ bát 3/chốt 30 và hạng một-based. Di sản đảo thứ tự chọn,
 còn ngày/cổng/cốt-lết chuẩn không đổi. Thêm 20 bài Stage48,
 16 kiểm soát và 4 nhóm normative RED dự kiến, tổng 773 bài.
 Chờ CI/Names trước khi đóng. Không sửa oracle/main.
+
+Stage48 DISCOVERY24: GitHub CI Elixir 1.18.5/OTP27 biên dịch 83 tệp; **773 bài, 769 PASS, đúng 4 hồi quy normative RED**; không warnings. Canonical Names Lock PASS.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39773289301
+Names: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39773289313
+Stage48 đóng EXPECTED_RED; Stage49 PATCH24 chưa bắt đầu.

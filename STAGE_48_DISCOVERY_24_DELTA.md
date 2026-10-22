@@ -27,3 +27,10 @@ nguồn sauce, năm, cổng, cốt-lết, miền đối số và API;
 Mục tiêu 773 bài, đúng 4 RED, Canonical Names Lock PASS,
 không cảnh báo compiler. Chưa chọn độ dài/tên tháng hoặc
 tích hợp lịch cuối. Không sửa main/PATCH01..23.
+
+## Xác minh
+
+Stage48 DISCOVERY24: GitHub CI Elixir 1.18.5/OTP27 biên dịch 83 tệp; **773 bài, 769 PASS, đúng 4 hồi quy normative RED**; không warnings. Canonical Names Lock PASS.
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39773289301
+Names: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39773289313
+Stage48 đóng EXPECTED_RED; Stage49 PATCH24 chưa bắt đầu.
