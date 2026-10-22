@@ -94,6 +94,39 @@ assert(isequal(forced,1) && forcedState.openedUpTo==1 && ...
     forcedState.rank==count && forcedState.count==count, ...
     'The forced first month must preserve exact all-words rank/count.');
 fprintf('STAGE_55_GENERAL_CHUNK_FORCED_PREFIX_PASS\n');
+% For a genuine branching pre-open frontier, the final child is
+% computed by the exact parent-minus-prior-block identity.
+L=[4 4 4];
+R=[3 4 4]; % month 1 opened; month 2 still unopened
+p=pastafari.countWholeWeavingSuffixByFirstEndpoint(R,1,0);
+firstR=[2 4 4];
+firstBlock=pastafari.countWholeWeavingSuffixByFirstEndpoint(firstR,1,0);
+lastR=[3 3 4];
+lastBlock=pastafari.countWholeWeavingSuffixByFirstEndpoint(lastR,2,0);
+assert(firstBlock+lastBlock==p, ...
+    'Two legal lexicographic child languages must exactly partition parent.');
+[choice,lastState]=pastafari.unrankGeneralWeaveSuffixChunk( ...
+    L,R,1,0,firstBlock+pastafari.BigInt(1),1);
+assert(isequal(choice,2) && isequal(lastState.remaining,lastR) && ...
+    lastState.rank==pastafari.BigInt(1) && lastState.count==lastBlock, ...
+    'Last-child subtraction must preserve exact rank and count.');
+fprintf('STAGE_55_GENERAL_CHUNK_LAST_CHILD_PARTITION_PASS\n');
+
+% A 4-month frontier with precisely one month unopened uses exact
+% binomial factorization and must match the independent DP.
+L=[3 3 3 3];
+R=[2 2 2 3];
+fast=pastafari.countWholeWeavingSuffixByEndpoints(R,3,0);
+reference=pastafari.countWholeWeavingSuffixByFirstEndpoint(R,3,0);
+assert(fast==reference, ...
+    'One unopened month exact factorization disagrees with DP.');
+[choice,c]=pastafari.unrankGeneralWeaveSuffixChunk( ...
+    L,R,3,0,fast,1);
+assert(choice>=1 && choice<=4 && ...
+    c.rank>=pastafari.BigInt(1) && c.rank<=c.count, ...
+    'One-unopened factorized branch lost its exact lexicographic rank.');
+fprintf('STAGE_55_GENERAL_CHUNK_ONE_UNOPENED_FACTOR_PASS\n');
+
 
 fprintf('STAGE_55_GENERAL_CHUNK_VALIDATION_PASS\n');
 

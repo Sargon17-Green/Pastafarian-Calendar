@@ -91,3 +91,35 @@ pełną równoważność z enumeracją małych rodzin i niezależnym oracle.
 Dopóki brak natywnego porównania kompletnej daty i
 \`STAGE_54_HEAVY_DIFFERENTIAL_PASS\`,
 \`STAGE_55_FINAL_AUDIT_PASS\` pozostaje nieosiągnięty.
+
+## Native result for forced first day (2026-10-22)
+
+At commit `5257fe1101ea646528f8ef0613a95e57f1c6010a`, full native
+MATLAB [run 39785576435](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39785576435)
+**PASS**: `STAGE_55_GENERAL_CHUNK_4244_FORCED_PASS MONTHS=45 DAYS=4244 STEPS=1 SECONDS=261.494 DIGITS=6844 EXACT_RANK_KEPT=1`.
+Small native regression [39785576314](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39785576314)
+**PASS**: 640 rank checks / 2832 segments and a forced-prefix exact-rank assertion.
+
+## Exact last-child partition and near-final opening frontier
+
+For a partially opened prefix, let `B_i` be the count of all legal
+continuations whose first next letter is month `i`. The legal child
+languages are disjoint and cover the parent language. Therefore
+`F_parent=SUM_i B_i`. With children visited in strictly lexical order,
+after computing all but the last block exactly, the last remaining
+block is the positive BigInt `F_parent-SUM_earlier B_i`. This
+eliminates **one** independent suffix-DP count at every branching
+position, without sampling or ignoring any rank. Every computed block
+is checked not to exceed the unallocated exact count.
+
+For prefixes with at most one unopened month, the earlier proven
+binomial factorization supplies an exact parent count; earlier
+opening-order constraints have become vacuous. The implementation
+falls back to the independent first-endpoint count whenever two or
+more unopened months remain. The production DAG is still unchanged.
+
+A new native full-sized but *all-open* frontier comparison computes
+12 exact letters at first/middle/last rank for 45 months with 4,230
+remaining days, and compares every resulting state with the separate
+`unrankAllOpenedWeaveSuffixChunk` implementation. Results must be
+read from CI; no full-year final oracle PASS is implied.

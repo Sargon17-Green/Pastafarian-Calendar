@@ -5,6 +5,11 @@ function [piece, cursor] = unrankGeneralWeaveSuffixChunk( ...
 % Computes ALL legally allowed child block sizes with an independently
 % native-tested first-endpoint BigInt suffix counter.
 % This reference route is NOT yet efficient for a 4244-day initial state.
+% For general states, exact child blocks form an exhaustive
+% partition of the parent. The final child's count is the full exact
+% unallocated remainder, eliminating one redundant BigInt DP call.
+% With <=1 unopened month, a separately verified binomial factorization
+% gives the exact parent/child count without a large DP.
 %
 % A cursor is resumed by passing the SAME originalLengths and the
 % returned remaining/openedUpTo/closedUpTo/rank. A partial cursor cannot
@@ -53,8 +58,16 @@ if ~(isnumeric(maxSteps) && isscalar(maxSteps) && ...
         'The chunk limit must be a nonnegative exact integer.');
 end
 
-parent=pastafari.countWholeWeavingSuffixByFirstEndpoint( ...
-    R,openedUpTo,closedUpTo);
+% With zero or one unopened months, the exact suffix language
+% has only the last-occurrence constraint. Reuse the native-verified
+% binomial factorization instead of a multi-thousand-digit DP.
+if openedUpTo>=K-1
+    parent=pastafari.countWholeWeavingSuffixByEndpoints( ...
+        R,openedUpTo,closedUpTo);
+else
+    parent=pastafari.countWholeWeavingSuffixByFirstEndpoint( ...
+        R,openedUpTo,closedUpTo);
+end
 if rank<pastafari.BigInt(1) || rank>parent
     error('Pastafari:GeneralChunk:Rank', ...
         'Rank lies outside the full exact legal suffix family.');
@@ -96,12 +109,19 @@ for position=1:steps
         blocks={};
     end
     found=false;
+    % Exact partition invariant: the disjoint legal child languages
+    % sum to parent. The LAST child's block is the full exact
+    % remainder after preceding children, avoiding one costly DP.
+    % This saves a full count without skipping any legal word.
+    considered=0;
+    unallocated=parent;
     for i=closedUpTo+1:K
         n=R(i);
         if n==0 || (n==L(i) && i~=openedUpTo+1) || ...
                 (n==1 && i~=closedUpTo+1)
             continue
         end
+        considered=considered+1;
         childR=R;
         childR(i)=n-1;
         childOpened=openedUpTo+double(n==L(i));
@@ -110,14 +130,22 @@ for position=1:steps
             block=parent;
         elseif openedUpTo==K
             block=blocks{i};
+        elseif considered==legalChoices
+            % Sum of all legal children is exactly the parent BigInt.
+            block=unallocated;
+        elseif childOpened>=K-1
+            block=pastafari.countWholeWeavingSuffixByEndpoints( ...
+                childR,childOpened,childClosed);
         else
             block=pastafari.countWholeWeavingSuffixByFirstEndpoint( ...
                 childR,childOpened,childClosed);
         end
-        if isempty(block) || block<pastafari.BigInt(1)
+        if isempty(block) || block<pastafari.BigInt(1) || ...
+                block>unallocated
             error('Pastafari:GeneralChunk:ZeroBlock', ...
-                'Every legal child must admit a positive exact count.');
+                'Illegal or inconsistent exact child block partition.');
         end
+        unallocated=unallocated-block;
         if rank>block
             rank=rank-block;
             continue
