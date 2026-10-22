@@ -1,0 +1,30 @@
+name: MATLAB Stage 55 Exact 4244-Day Wavefront (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_preopen_full_year_bench.m'
+      - '.github/workflows/matlab-stage55-preopen-fullscale.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-full-scale:
+    name: MATLAB R2026a / exact fully-unopened 4244-day wavefront
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Compute complete 45-month, 4244-day exact count
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_preopen_full_year_bench

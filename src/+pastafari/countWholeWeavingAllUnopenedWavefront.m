@@ -77,6 +77,12 @@ for i=1:K
 end
 
 pMax=N(K-1)+1;
+traceEnabled=strcmp(getenv('PASTAFARI_PREOPEN_WAVEFRONT_TRACE'),'1');
+if traceEnabled
+    traceClock=tic;
+    fprintf('STAGE_55_PREOPEN_WAVEFRONT_TRACE_BEGIN MONTHS=%d DAYS=%d ROWS=%d\n', ...
+        K,N(end),pMax);
+end
 for p=1:pMax
     old=rows;
     current=rows;
@@ -130,6 +136,15 @@ for p=1:pMax
         current{i}=newOwn;
     end
     rows=current;
+    if traceEnabled && (p==1 || mod(p,128)==0 || p==pMax)
+        filled=0;
+        for i=1:K
+            filled=filled+nnz(~cellfun(@isempty,rows{i}));
+        end
+        fprintf(['STAGE_55_PREOPEN_WAVEFRONT_TRACE_ROW ', ...
+            'P=%d OF=%d STORED_NONZERO=%d SECONDS=%.3f\n'], ...
+            p,pMax,filled,toc(traceClock));
+    end
 end
 
 total=rows{K}{N(K)+1};
