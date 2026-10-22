@@ -7,6 +7,7 @@ module tb_weave_small_exhaustive;
     integer lengths[0:3],powers[0:3],ways[0:624];
     integer place[0:7], words[0:30];
     integer tests=0, total_words_checked=0;
+    integer prefix_witnesses_checked=0;
 
     // Can next month j (zero based) appear from this used-count state?
     function automatic integer valid_move(input integer state,
@@ -33,6 +34,90 @@ module tb_weave_small_exhaustive;
         end
     endfunction
 
+
+    function automatic integer exact_binomial(input integer nn, input integer kk);
+        integer i, acc;
+        begin
+            if(kk<0 || nn<0 || kk>nn) exact_binomial=0;
+            else begin
+                acc=1;
+                for(i=1;i<=kk;i=i+1)
+                    acc=(acc*(nn-i+1))/i;
+                exact_binomial=acc;
+            end
+        end
+    endfunction
+
+    // Polynomial-sized transfer for a legal prefix, not a dense
+    // tensor over (length_1+1)*...*(length_m+1) count states.
+    // s = highest month seen so far. Remaining copies of months
+    // <=s have no further first-appearance constraints; after
+    // they finish, fresh months s+1..m must start and finish in order.
+    task automatic count_prefix_fast(
+        input integer m,
+        input integer prefix_value,
+        input integer prefix_length,
+        output integer answer
+    );
+        integer remaining[0:3], fresh_dp[0:9], next_dp[0:9];
+        integer i,j,k,month_label,x,s,oldN,mul,pre,ans,coefficient;
+        begin
+            for(i=0;i<4;i=i+1) remaining[i]=lengths[i];
+            x=prefix_value;
+            s=0;
+            for(i=prefix_length-1;i>=0;i=i-1) begin
+                month_label=x%10;
+                x=x/10;
+                if(month_label<1 || month_label>m)
+                    $fatal(1,"FAST_PREFIX_INVALID_LABEL");
+                remaining[month_label-1]=remaining[month_label-1]-1;
+                if(month_label>s) s=month_label;
+            end
+
+            // Active labels already started in the prefix:
+            // insert increasing labels, requiring only that the
+            // last new occurrence follow the last old occurrence.
+            oldN=0;mul=1;
+            for(j=0;j<s;j=j+1)
+                if(remaining[j]>0) begin
+                    if(oldN>0)
+                        mul=mul*exact_binomial(oldN+remaining[j]-1,oldN);
+                    oldN=oldN+remaining[j];
+                end
+
+            if(s==m) answer=mul;
+            else begin
+                for(i=0;i<10;i=i+1) fresh_dp[i]=0;
+                // First previously unseen label: its first suffix
+                // appearance may occur after any old letter.
+                if(oldN==0) fresh_dp[1]=mul;
+                else for(k=0;k<=oldN;k=k+1) begin
+                    coefficient=(k==oldN)?1:
+                        exact_binomial(remaining[s]+oldN-k-2,oldN-k);
+                    fresh_dp[k+1]=mul*coefficient;
+                end
+                oldN=oldN+remaining[s];
+                // Every subsequent *fresh* label must appear first
+                // after the first occurrence of its predecessor.
+                for(j=s+1;j<m;j=j+1) begin
+                    for(i=0;i<10;i=i+1) next_dp[i]=0;
+                    pre=0;
+                    for(k=1;k<=oldN;k=k+1) begin
+                        pre=pre+fresh_dp[k];
+                        coefficient=(k==oldN)?1:
+                            exact_binomial(remaining[j]+oldN-k-2,oldN-k);
+                        next_dp[k+1]=pre*coefficient;
+                    end
+                    oldN=oldN+remaining[j];
+                    for(i=0;i<10;i=i+1) fresh_dp[i]=next_dp[i];
+                end
+                ans=0;
+                for(k=1;k<=oldN;k=k+1) ans=ans+fresh_dp[k];
+                answer=ans;
+            end
+        end
+    endtask
+
     task automatic run_toy(input integer id, input integer months,
                            input integer a, input integer b,
                            input integer c, input integer d,
@@ -41,6 +126,7 @@ module tb_weave_small_exhaustive;
         integer total,limit,raw,pos,which,first_index,last_index;
         integer code,count,accept,new_count,rank,chosen,unrank_code;
         integer next_state,seen[0:3];
+        integer prefix_len,prefix_value,reference_count,fast_count,other_rank,power_ten;
         begin
             lengths[0]=a;lengths[1]=b;lengths[2]=c;lengths[3]=d;
             powers[0]=1; powers[1]=5; powers[2]=25; powers[3]=125;
@@ -135,6 +221,26 @@ module tb_weave_small_exhaustive;
                     $fatal(1,"TOY_WEAVE_UNRANK_MISMATCH id=%0d rank=%0d got=%0d expected=%0d",
                            id,rank+1,unrank_code,words[rank]);
             end
+
+            // For every legal prefix of every valid word, compare
+            // exact count of remaining legal lexical completions
+            // against an independently enumerated reference set.
+            for(rank=0;rank<count;rank=rank+1) begin
+                power_ten=1;
+                for(prefix_len=total;prefix_len>=0;prefix_len=prefix_len-1) begin
+                    prefix_value=words[rank]/power_ten;
+                    reference_count=0;
+                    for(other_rank=0;other_rank<count;other_rank=other_rank+1)
+                        if(words[other_rank]/power_ten==prefix_value)
+                            reference_count=reference_count+1;
+                    count_prefix_fast(months,prefix_value,prefix_len,fast_count);
+                    if(fast_count!=reference_count)
+                        $fatal(1,"TOY_WEAVE_PREFIX_FAST_COUNT id=%0d prefix=%0d got=%0d expected=%0d",
+                               id,prefix_value,fast_count,reference_count);
+                    prefix_witnesses_checked=prefix_witnesses_checked+1;
+                    power_ten=power_ten*10;
+                end
+            end
             tests=tests+1;
             $display("STAGE1_TOY_WEAVE_CASE_PASS id=%0d months=%0d length=%0d weaves=%0d",
                      id,months,total,count);
@@ -150,10 +256,10 @@ module tb_weave_small_exhaustive;
         run_toy(6,4,1,1,1,1,1);
         run_toy(7,3,1,2,1,0,1);
         run_toy(8,2,4,4,0,0,20);
-        if(tests!=8 || total_words_checked<60000)
+        if(tests!=8 || total_words_checked<60000 || prefix_witnesses_checked<200)
             $fatal(1,"TOY_WEAVE_COVERAGE");
-        $display("STAGE1_WEAVE_EXHAUSTIVE_AND_LEX_UNRANK_PASS cases=%0d words=%0d",
-                 tests,total_words_checked);
+        $display("STAGE1_WEAVE_EXHAUSTIVE_AND_LEX_UNRANK_PASS cases=%0d words=%0d prefixes=%0d",
+                 tests,total_words_checked,prefix_witnesses_checked);
         $finish;
     end
 endmodule
