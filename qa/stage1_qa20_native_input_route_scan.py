@@ -9,6 +9,7 @@ from funge.program import Program
 from funge.languages.funge98 import Befunge98
 from funge.platform import BufferedPlatform
 import stage1_native_live_pair_matrix as native
+from funge.exception import IPStopped, IPQuitted
 
 SOURCE='src/interleaved_work_counts.b98'
 PIN='560d6aa5807a7f766213a33835cce85eab0fa40c'
@@ -91,6 +92,27 @@ def create_program(source, raw, label):
     return {'program':program,'stdin':sin,'stdout':sout,
             'point':program.ips[0].position.__class__, 'steps':0, 'label':label}
 
+def tick_qa20(item):
+    """Execute one actual Native PyFunge step; apply only QA20's own budget.
+
+    The older shared live-pair helper imposes a 250000-step test-specific
+    budget. Do not use that helper for the 81-digit QA20 paths: it silently
+    overrides the larger per-case MAX_TICKS bound.
+    """
+    p=item['program']
+    if not p.ips:return
+    need(len(p.ips)==1,'QA20 source unexpectedly changed to multi-IP execution')
+    ip=p.ips[0]
+    try:
+        p.execute_step()
+    except IPStopped:
+        p.remove_ip(ip)
+    except IPQuitted:
+        for current in list(p.ips):
+            p.remove_ip(current)
+    item['steps']+=1
+    need(item['steps']<=MAX_TICKS,'QA20 bound exhausted without completion')
+
 def sample(source,label,raw,valid,targets,folder):
     p=create_program(source,raw,label)
     nearest={str(x)+','+str(y):[10**10,None] for x,y,_ in targets}
@@ -108,7 +130,7 @@ def sample(source,label,raw,valid,targets,folder):
                 d=abs(x-tx)+abs(y-ty); k='%d,%d'%(tx,ty)
                 if d<nearest[k][0]:nearest[k]=[d,[tick,x,y,dx,dy,opcode,int(string)]]
                 if d==0:actual[k].append([tick,opcode,int(string)])
-            native.tick(p)
+            tick_qa20(p)
             need(p['steps']<=MAX_TICKS,'bounded Native route did not terminate '+label)
     finally:
         out.close()
