@@ -295,3 +295,31 @@ The canonical target remains month-name index 20, occurrence day 56.
   limb arithmetic, full-root exact checkpoint, and then
   streaming lex unrank of all 4244 woven days with
   candidate-resource safeguards.
+
+## 2026-10-22 — exact full root and wide selection candidate
+
+- Source implementation `tb_weave_full_root.sv` computes 45 actual
+  month lengths in 22528-bit integers, using 864-bit exact
+  binomial coefficients and guarded finite 4245-entry row arrays.
+- Bounded runner: 6144-bit 12-month probe / 300 seconds,
+  22528-bit full 45-month root / 2100 seconds; QA job has a
+  43-minute timeout and 4 GiB virtual memory ceiling.
+- Independent Python arbitrary-precision replay in this session
+  confirmed the **22470-bit** root and its previously locked
+  SHA256 `925c8a37...` from the actual committed 45-length vector.
+- Reconstructed the full sauce for `(Foundation,firstDay)`:
+  `Q4=68405753691768034022026521715063004414`,
+  next bowl Q3, `A0=106458209471735273212934705135928382248`;
+  reverse step (-1). Added these to the separate SV sauce test.
+- Derived the 177-digit initial wide answer and its first-choice
+  accepted rank in independent arithmetic: ring quotient 555,
+  no rejection, 22469-bit ordinal,
+  SHA256 `2c447438a567fbc40a79c68fb8b3f27f308cb89a2f59aaba1d2275dd3acf1a06`.
+- Added `tb_weave_full_rank.sv` exact wide selection, reading
+  the root **only after** its SHA is confirmed; its own SHA is
+  checked in the full-root runner. Both are TEST_ONLY.
+- Isolated QA PR-only full_weave_root job is present. Run
+  39839764359 was queued, and superseding commits cancelled
+  obsolete CI; newest conclusion not yet available.
+- No full 4244-day weave unrank nor 47P45 names; no qualified
+  Kalaallisut source-catalog approval; Stage 1 cannot close.

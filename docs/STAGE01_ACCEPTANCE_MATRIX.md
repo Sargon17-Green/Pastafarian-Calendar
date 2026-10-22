@@ -284,3 +284,21 @@ packed/unpacked array fixture. Actual CI pass now exists.
 Stage 1 remains OPEN: production RTL cannot yet output
 the canonical five-field tuple, and **0/64 Kalaallisut**
 names have been natively approved. No Stage 2 authorized.
+
+## 2026-10-22 — Full Foundation weave root and wide selection gate
+
+| Item | Independently executed | Native SV CI |
+|---|---|---|
+| Root count of 45-month weave | 22470-bit result and SHA256 MATCH | New 22528-bit test-only source; not yet PASS |
+| Sauce at (Foundation,firstDay) | Q4, Q3, orderAt46, A0 and D reproduced | Added witness assertions; not yet PASS |
+| Base-M wide selection | 177 digits, reverse stream, domain quotient 555, no rejection; 22469-bit rank and SHA256 MATCH | New exact 22528-bit rank oracle; not yet PASS |
+| Bound execution | finite 6144-bit probe, timeouts and 4-GiB cap | CI registered; job result not verified |
+| Final day/month | no 4244-symbol word | OPEN |
+
+See `docs/FOUNDATION_WEAVE_WIDE_RANK_REFERENCE.md`. A green
+CI for earlier smaller cases does not validate the new full
+root/rank source. Both the root and rank SHA256 comparisons
+must PASS in the **same isolated QA workflow run**.
+
+The project is Stage 1 IN_PROGRESS, 0/55 stages fully closed;
+8 lexical Kalaallisut candidates and 0/64 approvals.
