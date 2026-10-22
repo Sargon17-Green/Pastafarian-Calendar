@@ -18,7 +18,8 @@ for K=1:5
         fromWavefront=pastafari.countWholeWeavingAllUnopenedWavefront(lengths);
         fromEndpoints=pastafari.countWholeWeavingSuffixByEndpoints( ...
             lengths,0,0);
-        fromOracle=independentBrute(lengths,lengths,0,0);
+        memo=containers.Map('KeyType','char','ValueType','double');
+        fromOracle=independentBrute(lengths,lengths,0,0,memo);
         assert(fromWavefront==fromEndpoints && ...
             fromWavefront==pastafari.BigInt(fromOracle), ...
             'Fully unopened wavefront differs from exact reference.');
@@ -45,10 +46,17 @@ end
 fprintf('STAGE_55_PREOPEN_WAVEFRONT_EXPERIMENTAL_PASS\n');
 end
 
-function count=independentBrute(remaining,lengths,opened,closed)
+function count=independentBrute(remaining,lengths,opened,closed,memo)
+% Independent legal-transition oracle with memoized STATE counts.
+% Memoization merges identical subtrees without skipping any legal word.
 if all(remaining==0)
     assert(opened==numel(lengths) && closed==numel(lengths));
     count=1;
+    return
+end
+key=sprintf('%d,',[remaining opened closed]);
+if isKey(memo,key)
+    count=memo(key);
     return
 end
 count=0;
@@ -62,6 +70,9 @@ for month=1:numel(lengths)
     child(month)=copies-1;
     count=count+independentBrute(child,lengths, ...
         opened+double(copies==lengths(month)), ...
-        closed+double(copies==1));
+        closed+double(copies==1),memo);
 end
+assert(count<=flintmax, ...
+    'Independent small-case counter exceeded exact double capacity.');
+memo(key)=count;
 end
