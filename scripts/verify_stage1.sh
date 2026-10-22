@@ -14,6 +14,9 @@ iverilog -g2012 -s tb_stage1 -Wall -o build/stage1.vvp \
   tests/pcal_stage1_oracle_pkg.sv \
   rtl/pcal_stage1_bootstrap.sv tests/tb_stage1.sv
 vvp build/stage1.vvp
+iverilog -g2012 -s tb_stage1_arithmetic_properties -Wall -o build/arithmetic.vvp \
+  tests/pcal_stage1_oracle_pkg.sv tests/tb_stage1_arithmetic_properties.sv
+vvp build/arithmetic.vvp
 iverilog -g2012 -s tb_stage1_reset -Wall -o build/reset.vvp \
   rtl/pcal_stage1_bootstrap.sv tests/tb_stage1_reset.sv
 vvp build/reset.vvp
