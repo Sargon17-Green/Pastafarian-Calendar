@@ -1022,3 +1022,29 @@ jobs:
           grep -Fq 'RISULTATO STADIO 43: 55 PASS, 0 FAIL' stage43.log
           test "$(grep -Fc 'PASS — ' stage43.log)" -eq 55
           test "$(grep -Fc 'FAIL — ' stage43.log)" -eq 0
+  native-stage44-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage44 month-ordinal expected-RED signature
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage44Tests' > stage44.log 2>&1
+          rc=$?
+          set -e
+          cat stage44.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 44: 42 PASS, 3 FAIL' stage44.log
+          test "$(grep -Fc 'PASS — ' stage44.log)" -eq 42
+          test "$(grep -Fc 'FAIL — ' stage44.log)" -eq 3
+          for label in SECOND_MONTH_START INTERLEAVED_MONTH2_SECOND_OCCURRENCE FINAL_MONTH_YEAR_END; do
+            grep -Fq "FAIL — equivalenza normativa giorno ${label} — Giorno assoluto invece dell'occorrenza: ${label}" stage44.log
+          done

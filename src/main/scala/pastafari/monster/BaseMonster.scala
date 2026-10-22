@@ -173,7 +173,12 @@ final case class BaseMonsterContext(
   var legacyCutletNameCatalogVersion: Option[String] = None,
   var patchedCutletNameId: Option[Int] = None,
   var patchedCutletNameItalian: Option[String] = None,
-  var patch21Applied: Boolean = false
+  var patch21Applied: Boolean = false,
+  var monthOrdinalWeaving: Option[Vector[Int]] = None,
+  var monthOrdinalDayOffset: Option[Int] = None,
+  var monthOrdinalSnapshot: Option[(Vector[Int],Int)] = None,
+  var legacyMonthOrdinalMonthId: Option[Int] = None,
+  var legacyDayInMonth: Option[Int] = None
 )
 
 final class BaseMetricsShell {
@@ -298,6 +303,36 @@ final class BaseValidationManager {
   /** PATCH21: il validator usa i gruppi di porte, non l'algoritmo
     * del wrapper. Conserva anche la cicatrice storica indipendente.
     */
+
+  /** DISCOVERY22: verifica la cicatrice giorno assoluto+1.
+    * Nessun riferimento all'adapter e nessun oracolo nei sorgenti.
+    */
+  def requireDiscovery22Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="DISCOVERY_22_MONTH_ORDINAL_GLOBAL_DAY" ||
+       ctx.status!="LEGACY_MONTH_ORDINAL_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_22_MONTH_ORDINAL_GLOBAL_DAY") ||
+       ctx.monthOrdinalWeaving.isEmpty ||
+       ctx.monthOrdinalDayOffset.isEmpty ||
+       ctx.monthOrdinalSnapshot.isEmpty ||
+       ctx.legacyMonthOrdinalMonthId.isEmpty ||
+       ctx.legacyDayInMonth.isEmpty)
+      throw new IllegalStateException("DISCOVERY22 non completa.")
+    val w=ctx.monthOrdinalWeaving.get
+    val d=ctx.monthOrdinalDayOffset.get
+    if(ctx.monthOrdinalSnapshot.get!=(w,d))
+      throw new IllegalStateException("Snapshot DISCOVERY22 modificata.")
+    // Lo stato storico puo' accettare soltanto una tessitura
+    // annuale gia' scelta che rispetta le durate e l'apertura
+    // e chiusura ordinata di ogni mese.
+    LegacyDaywiseWeavingAdapter.validateCandidates(Vector(w))
+    if(d<0 || d>=w.size)
+      throw new IllegalStateException("Giorno DISCOVERY22 non valido.")
+    if(ctx.legacyMonthOrdinalMonthId.get!=w(d) ||
+       ctx.legacyDayInMonth.get!=d+1)
+      throw new IllegalStateException("Cicatrice DISCOVERY22 falsificata.")
+  }
+
   def requirePatch21Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_21_DAY_INDEXED_CUTLET_NAME" ||
        ctx.status!="PATCH_21_READY" || !ctx.patch21Applied ||
@@ -1948,7 +1983,8 @@ final class BaseMonsterManager {
     new Discovery20CutletOpenBoundaryHandler(metrics),
     new Patch20CutletOpenBoundaryHandler(metrics),
     new Discovery21DayIndexedCutletNameHandler(metrics),
-    new Patch21DayIndexedCutletNameHandler(metrics)
+    new Patch21DayIndexedCutletNameHandler(metrics),
+    new Discovery22MonthOrdinalGlobalDayHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -3089,6 +3125,31 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("patch21",error)
+    }
+  }
+
+
+  def discover22MonthOrdinalGlobalDay(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    annualWeaving: Vector[Int],
+    dayOffset: Int
+  ): Discovery22MonthOrdinalGlobalDayReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.monthOrdinalWeaving=Some(annualWeaving)
+    ctx.monthOrdinalDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_22_MONTH_ORDINAL_GLOBAL_DAY"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery22Ready(ctx)
+      Discovery22MonthOrdinalGlobalDayReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.monthOrdinalWeaving.get,ctx.monthOrdinalDayOffset.get,
+        ctx.legacyMonthOrdinalMonthId.get,ctx.legacyDayInMonth.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("discovery22",error)
     }
   }
 
