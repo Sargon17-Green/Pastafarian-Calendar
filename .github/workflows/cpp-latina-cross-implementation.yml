@@ -23,6 +23,9 @@ concurrency:
 
 env:
   PINNED_CELERITAS: '775e4c52bc4e21e63e03e53a09bdbc7993a18a32'
+  # Last exact code commit whose native, full, and cross gates all passed.
+  # Manifest and tested code must agree; documentation-only commits are allowed.
+  VERIFIED_CPP_COMMIT: '5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8'
   PAIRS_PER_SHARD: '6'
 
 jobs:
@@ -57,7 +60,6 @@ jobs:
           test -r celeritas/tools/branch_vector_runner.cpp
           test -r current/tools/soak_vector_adapter.cpp
           test -r current/integrations/cpp-latina-soak.json
-          jq -e '.protocol == "PASTAFARI_SOAK_TSV_V1" and .branch == "C++&Latina" and .engine_verified_commit == "888b54fc5a136144b565c39f09b8f9106a91e2bd"' current/integrations/cpp-latina-soak.json >/dev/null
           test -r current/src/monster.cpp
           test -r celeritas/src/monster.cpp
           mkdir -p cross-logs
@@ -65,6 +67,7 @@ jobs:
             echo "CURRENT_BRANCH=C++&Latina"
             echo "CURRENT_SHA=$GITHUB_SHA"
             echo "CELERITAS_SHA=$PINNED_CELERITAS"
+            echo "VERIFIED_CPP_COMMIT=$VERIFIED_CPP_COMMIT"
             echo "VECTOR_RUNNER_SHA256=$(sha256sum celeritas/tools/branch_vector_runner.cpp | cut -d' ' -f1)"
             echo "CALCULATION_CONTEXTS=FOUNDATION_AND_NON_FOUNDATION"
             echo "ADAPTER_SHA256=$(sha256sum current/tools/soak_vector_adapter.cpp | cut -d' ' -f1)"
@@ -72,6 +75,38 @@ jobs:
             echo "SHARD=${{ matrix.shard }}"
             echo "PAIRS=$PAIRS_PER_SHARD"
           } | tee cross-logs/provenance.txt
+          # The former check used a stale hardcoded SHA (888b54fc) and
+          # rejected all shards before building after metadata refresh.
+          # Pin to the latest independently certified *code* snapshot.
+          if ! jq -e --arg expected "$VERIFIED_CPP_COMMIT" '
+            .manifest_version == 1
+            and .protocol == "PASTAFARI_SOAK_TSV_V1"
+            and .branch == "C++&Latina"
+            and .engine_verified_commit == $expected
+            and .engine_verification.full_ci_run == 39762381184
+            and .engine_verification.adapter_ci_run == 39762381242
+            and .engine_verification.cross_implementation_ci_run == 39762381145
+            and .canonical_numeric.protocol == "PASTAFARI_SOAK_CANONICAL_V2"
+          ' current/integrations/cpp-latina-soak.json > /dev/null; then
+            echo "PROVENANCE_MANIFEST=FAIL" | tee -a cross-logs/provenance.txt
+            exit 1
+          fi
+          # Fetch the tested code tree separately (the normal checkout
+          # is shallow), then reject any unverified executable delta.
+          if ! git -C current fetch --quiet --no-tags --depth=1 origin "$VERIFIED_CPP_COMMIT"; then
+            echo "PROVENANCE_BASE_FETCH=FAIL" | tee -a cross-logs/provenance.txt
+            exit 1
+          fi
+          if ! git -C current diff --quiet "$VERIFIED_CPP_COMMIT" "$GITHUB_SHA" -- \
+            src/ include/ tools/soak_vector_adapter.cpp tools/validate_soak_index_modes.py; then
+            echo "PROVENANCE_EXECUTABLE_DELTA=FAIL" | tee -a cross-logs/provenance.txt
+            git -C current diff --name-only "$VERIFIED_CPP_COMMIT" "$GITHUB_SHA" -- \
+              src/ include/ tools/soak_vector_adapter.cpp tools/validate_soak_index_modes.py \
+              | tee -a cross-logs/provenance.txt
+            exit 1
+          fi
+          echo "PROVENANCE_VERIFIED_CODE_TREE=PASS" | tee -a cross-logs/provenance.txt
+          echo "PROVENANCE_MANIFEST=PASS" | tee -a cross-logs/provenance.txt
 
       - name: Praeparare Boost
         shell: bash
