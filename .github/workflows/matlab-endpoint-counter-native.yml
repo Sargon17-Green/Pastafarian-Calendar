@@ -10,6 +10,8 @@ on:
       - 'src/\+pastafari/unrankWholeWeavingByEndpoints.m'
       - 'src/\+pastafari/allOpenedWholeWeaveChildCounts.m'
       - 'tests/run_stage55_endpoint_unrank_tests.m'
+      - 'src/\+pastafari/unrankAllOpenedWeaveSuffixChunk.m'
+      - 'tests/run_stage55_all_open_chunk_tests.m'
       - '.github/workflows/matlab-endpoint-counter-native.yml'
   workflow_dispatch:
 
@@ -31,4 +33,4 @@ jobs:
       - name: Compare every reachable small suffix
         uses: matlab-actions/run-command@v3
         with:
-          command: addpath('tests'); run_stage55_endpoint_counter_tests; run_stage55_endpoint_unrank_tests
+          command: addpath('tests'); run_stage55_endpoint_counter_tests; run_stage55_endpoint_unrank_tests; run_stage55_all_open_chunk_tests

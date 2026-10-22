@@ -9,9 +9,11 @@ on:
       - '!src/\+pastafari/countWholeWeavingSuffixByEndpoints.m'
       - '!src/\+pastafari/unrankWholeWeavingByEndpoints.m'
       - '!src/\+pastafari/allOpenedWholeWeaveChildCounts.m'
+      - '!src/\+pastafari/unrankAllOpenedWeaveSuffixChunk.m'
       - 'tests/**'
       - '!tests/run_stage55_endpoint_counter_tests.m'
       - '!tests/run_stage55_endpoint_unrank_tests.m'
+      - '!tests/run_stage55_all_open_chunk_tests.m'
       - 'DEVELOPMENT_STAGE.md'
       - 'docs/STAGE_55_FINAL_AUDIT.md'
   workflow_dispatch:
