@@ -1,0 +1,30 @@
+name: MATLAB Real Year-5000 Month Weave Exact Count (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_5000_lengths_tests.m'
+      - '.github/workflows/matlab-stage55-real-year-count.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-year-exact-count:
+    name: MATLAB R2026a / actual year-5000 4244-day BigInt differential
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Compare actual year 5000 with two exact full-length counters
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_real_year_5000_lengths_tests
