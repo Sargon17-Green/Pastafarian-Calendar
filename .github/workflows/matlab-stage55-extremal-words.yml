@@ -1,0 +1,31 @@
+name: MATLAB Real Year-5000 Lexical Extremes (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/extremalWholeMonthWeavings.m'
+      - 'tests/run_stage55_extremal_weave_tests.m'
+      - '.github/workflows/matlab-stage55-extremal-words.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-extremes:
+    name: MATLAB R2026a / small brute and actual-year full words
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Verify exact lexicographic first and last full year
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_extremal_weave_tests
