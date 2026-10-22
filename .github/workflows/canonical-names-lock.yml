@@ -90,3 +90,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage22_discovery11.php
       - name: Tampalan 11 — kunci susunan titisan 46
         run: php -d memory_limit=512M tests/stage23_patch11_tests.php
+      - name: Penemuan 12 — jiran mangkuk bukan ID berturutan
+        run: php -d memory_limit=512M tests/verify_stage24_discovery12.php
