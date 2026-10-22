@@ -165,3 +165,13 @@ Their logs were read and the failure was localized.
    equivalence. No PASS is claimed until current-head run completes.
 7. Stage 1 still lacks the complete five-field calendar oracle and
    64 native Kalaallisut approvals; no further contract stage opened.
+
+## 2026-10-22 — source-language semantic review queue
+
+- Proposals now include `bronze` (cutlet index 1) and `qajuusat`
+  (month index 39), with dictionary references.
+- Research total: 8/64 candidate words; still 0/64 native-approved.
+  The candidate set is not a source-language catalog and MUST NOT
+  be frozen, shown as complete, or used in canonical rankings.
+- Wide3 test-only long divider awaits current-head Icarus simulation;
+  this log does not claim new PASS.

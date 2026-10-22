@@ -16,6 +16,8 @@ locked. A dictionary entry alone is not sufficient.
 
 | Index | Canonical meaning | Proposed Kalaallisut | Source | Needed review |
 |---|---|---|---|---|
+| cutlet 1 | Bronze | `bronze` | [Greenlandic noun entry](https://kaikki.org/dictionary/All%20languages%20combined/meaning/b/br/bronze.html) | Borrowed from Danish; verify register, natural use as metal rather than color, and Greenlandic orthography |
+| month 39 | Flour | `qajuusat` | [English–Greenlandic dictionary translation](https://kaikki.org/dictionary/English/meaning/f/fl/flour.html) | Verify flour as ingredient and the native plural/mass-noun use |
 | cutlet 2 | Fox | `terianniaq` | [Wiktionary](https://en.wiktionary.org/wiki/terianniaq) | Has Arctic-fox specificity; is this the natural unqualified general name in Kalaallisut? |
 | cutlet 13 | River | `kuuk` | [Greenlandic dictionary extraction](https://kaikki.org/dictionary/All%20languages%20combined/meaning/k/ku/kuuk.html) | Confirm native standalone nominative usage |
 | cutlet 16 | Horn | `nassuk` | [Greenlandic noun senses](https://kaikki.org/dictionary/Greenlandic/pos-noun/nasaq--nittaalaq.html) | Includes antler; confirm whether canonical horn broadly includes other kinds |
@@ -47,6 +49,6 @@ locked. A dictionary entry alone is not sufficient.
    indexed strings. Presentation locales may subsequently vary,
    but algorithmic ranks must never depend on text.
 
-**Current state:** 6 proposed strings; 0/64 approved; no catalog freeze;
+**Current state:** 8 proposed strings; 0/64 approved; no catalog freeze;
 Stage 1 remains IN_PROGRESS. The present dossier has not undergone
 native-language quality assurance.
