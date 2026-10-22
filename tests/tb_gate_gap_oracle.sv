@@ -3,6 +3,7 @@
 // No production module is imported, no calendar date is claimed.
 module tb_gate_gap_oracle;
     import pcal_stage1_oracle_pkg::*;
+    import pcal_exact_division_pkg::*;
     localparam logic signed [383:0] MODULUS =
         (384'sd1 << 127) - 384'sd1;
     logic signed [383:0] stones [1:46][0:4];
@@ -222,6 +223,16 @@ module tb_gate_gap_oracle;
     integer name_i, name_j, chosen_cutlet_pos, chosen_day;
     integer gate_covered, start_gap, selected_piece_length;
     integer month_min, month_max, month_choice, month_count;
+    logic [383:0] month_dp [0:45][0:4244];
+    logic [383:0] month_running, month_total, month_wide,
+                  month_bound, month_accepted, month_zero_rank,
+                  month_rank, month_block;
+    logic signed [383:0] month_A0, month_flow, month_digit;
+    integer expected_month_lengths [0:44];
+    integer selected_month_lengths [0:44];
+    integer dp_month_i, dp_sum_i, unrank_month_i, trial_month_length;
+    integer remaining_month_days, assigned_length, month_direction;
+    integer month_next_bowl, month_query_i;
 
     // Bowl query per normative sections M/N, with the immutable
     // orderAt46. Used only for small-domain test-only selections.
@@ -512,6 +523,141 @@ module tb_gate_gap_oracle;
             $fatal(1,"FOUNDATION_MONTH_COUNT_45");
         $display("STAGE1_FOUNDATION_MONTH_CARDINALITY_PASS min=%0d max=%0d choice=%0d count=%0d",
                  month_min,month_max,month_choice,month_count);
+        // Exact number of lexical length vectors:
+        // for m=45, sum=4244, each length in the closed range 4..123.
+        // Test-only 384-bit unsigned DP, retaining every subproblem.
+        for(dp_sum_i=0;dp_sum_i<=4244;dp_sum_i=dp_sum_i+1)
+            month_dp[0][dp_sum_i]=(dp_sum_i==0) ? 384'd1 : 384'd0;
+        for(dp_month_i=1;dp_month_i<=45;dp_month_i=dp_month_i+1) begin
+            month_running=384'd0;
+            for(dp_sum_i=0;dp_sum_i<=4244;dp_sum_i=dp_sum_i+1) begin
+                if(dp_sum_i>=4)
+                    month_running=month_running+month_dp[dp_month_i-1][dp_sum_i-4];
+                if(dp_sum_i>=124)
+                    month_running=month_running-month_dp[dp_month_i-1][dp_sum_i-124];
+                month_dp[dp_month_i][dp_sum_i]=month_running;
+            end
+        end
+        month_total=month_dp[45][4244];
+        if(month_total!==384'h3b999c3af2d83d8b41d8b6b0aa25e5fc7a260dcb4a823403855975a8c46102e640cc4)
+            $fatal(1,"MONTH45_COMPOSITION_TOTAL");
+
+        // Canonical wide answer, bowl 3, seal 31, three base-M digits
+        // taken from consecutive flow positions. Division uses the
+        // independent *test-only* 384-bit exact long divider.
+        month_next_bowl=0;
+        for(month_query_i=0;month_query_i<6;month_query_i=month_query_i+1)
+            if(order_at46[month_query_i]==3)
+                month_next_bowl=order_at46[(month_query_i+1)%6];
+        if(month_next_bowl<1 || month_next_bowl>6)
+            $fatal(1,"MONTH_NEXT_BOWL");
+        month_A0=saved((bowls[3]+384'sd31+384'sd181)
+                        *(bowls[3]+384'sd31+384'sd181)
+                        +384'sd179*bowls[month_next_bowl]+384'sd31);
+        month_flow=saved((month_A0+384'sd31+384'sd1+384'sd193)
+                          *(month_A0+384'sd31+384'sd1+384'sd193)
+                          +384'sd193*month_A0+384'sd197*bowls[6]);
+        month_direction=(month_flow%384'sd2==384'sd1) ? 1 : -1;
+        month_wide=384'd1;
+        for(month_query_i=0;month_query_i<3;month_query_i=month_query_i+1) begin
+            month_digit=384'sd1+((month_A0-384'sd1+month_direction*month_query_i+MODULUS)%MODULUS);
+            if(month_query_i==0)
+                month_wide=month_wide+(month_digit-384'sd1);
+            else if(month_query_i==1)
+                month_wide=month_wide+(month_digit-384'sd1)*MODULUS;
+            else
+                month_wide=month_wide+(month_digit-384'sd1)*MODULUS*MODULUS;
+        end
+        month_bound=exact_quotient_384(MODULUS*MODULUS*MODULUS,month_total)*month_total;
+        if(month_wide<=month_bound)
+            month_accepted=month_wide;
+        else if(month_direction==1)
+            month_accepted=384'd1;
+        else
+            month_accepted=month_bound;
+        month_zero_rank=exact_remainder_384(month_accepted-384'd1,month_total);
+        month_rank=month_zero_rank+384'd1;
+        if(month_rank!==384'h2dc4103440a9bb51a98553c5d90d5b6b1e2b77cd88cf16203b5f39498173def210a65)
+            $fatal(1,"MONTH45_CANONICAL_WIDE_SELECTION");
+        if(month_total <= MODULUS*MODULUS ||
+           month_total > MODULUS*MODULUS*MODULUS)
+            $fatal(1,"MONTH45_MUST_REQUIRE_THREE_DIGITS");
+
+        // Lexicographic unranking of the *entire* length composition.
+        // For each candidate length, the DP value counts exactly the
+        // remaining suffix block; never approximate the giant rank.
+        expected_month_lengths[0]=115;
+        expected_month_lengths[1]=108;
+        expected_month_lengths[2]=119;
+        expected_month_lengths[3]=109;
+        expected_month_lengths[4]=106;
+        expected_month_lengths[5]=81;
+        expected_month_lengths[6]=115;
+        expected_month_lengths[7]=114;
+        expected_month_lengths[8]=117;
+        expected_month_lengths[9]=120;
+        expected_month_lengths[10]=98;
+        expected_month_lengths[11]=52;
+        expected_month_lengths[12]=81;
+        expected_month_lengths[13]=97;
+        expected_month_lengths[14]=121;
+        expected_month_lengths[15]=97;
+        expected_month_lengths[16]=115;
+        expected_month_lengths[17]=96;
+        expected_month_lengths[18]=107;
+        expected_month_lengths[19]=61;
+        expected_month_lengths[20]=106;
+        expected_month_lengths[21]=115;
+        expected_month_lengths[22]=119;
+        expected_month_lengths[23]=39;
+        expected_month_lengths[24]=84;
+        expected_month_lengths[25]=103;
+        expected_month_lengths[26]=115;
+        expected_month_lengths[27]=107;
+        expected_month_lengths[28]=55;
+        expected_month_lengths[29]=119;
+        expected_month_lengths[30]=97;
+        expected_month_lengths[31]=50;
+        expected_month_lengths[32]=122;
+        expected_month_lengths[33]=110;
+        expected_month_lengths[34]=81;
+        expected_month_lengths[35]=54;
+        expected_month_lengths[36]=101;
+        expected_month_lengths[37]=83;
+        expected_month_lengths[38]=88;
+        expected_month_lengths[39]=40;
+        expected_month_lengths[40]=25;
+        expected_month_lengths[41]=77;
+        expected_month_lengths[42]=98;
+        expected_month_lengths[43]=122;
+        expected_month_lengths[44]=105;
+        remaining_month_days=4244;
+        for(unrank_month_i=0;unrank_month_i<45;unrank_month_i=unrank_month_i+1) begin
+            assigned_length=0;
+            for(trial_month_length=4;trial_month_length<=123;trial_month_length=trial_month_length+1) begin
+                month_block=384'd0;
+                if(remaining_month_days>=trial_month_length &&
+                   remaining_month_days-trial_month_length<=4244)
+                    month_block=month_dp[44-unrank_month_i][remaining_month_days-trial_month_length];
+                if(assigned_length==0) begin
+                    if(month_zero_rank<month_block) begin
+                        assigned_length=trial_month_length;
+                        remaining_month_days=remaining_month_days-trial_month_length;
+                    end else
+                        month_zero_rank=month_zero_rank-month_block;
+                end
+            end
+            if(assigned_length<4 || assigned_length>123 ||
+               assigned_length!=expected_month_lengths[unrank_month_i])
+                $fatal(1,"MONTH45_LENGTH_LEX_UNRANK i=%0d got=%0d expected=%0d",
+                       unrank_month_i,assigned_length,expected_month_lengths[unrank_month_i]);
+            selected_month_lengths[unrank_month_i]=assigned_length;
+        end
+        if(remaining_month_days!=0 || month_zero_rank!==384'd0)
+            $fatal(1,"MONTH45_UNRANK_CONSERVATION");
+        $display("STAGE1_FOUNDATION_MONTH_LENGTH_UNRANK_PASS months=45 year_days=4244");
+
+
 
         $display("STAGE1_TEST_ONLY_GATE_GAPS_PASS cases=%0d",case_count);
         $display("STAGE1_YEAR5000_REFERENCE_PASS candidates=%0d rank=%0d",
