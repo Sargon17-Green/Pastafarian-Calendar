@@ -5,7 +5,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage46Discovery23Test do
   alias PastafariCalendarElixirVietnamese.Monster.{
     Cutlet,
     CutletMaterializationManager,
-    CutletFirstDayPatch,
     CutletNameIndexManager,
     LegacyInclusiveCutletFirstDay,
     StageNotIntegratedError
