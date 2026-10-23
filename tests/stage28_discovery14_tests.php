@@ -48,7 +48,7 @@ foreach ($witnesses as $w) {
 // Matriks tambahan: M+1, 2M+1, M^2-1, M^2; kedua-dua arah.
 $matrix=0;
 $matrixDifferent=0;
-$sizes=[$m->add(BigInt::one()),$m->mulSmall(2)->add(BigInt::one()),
+$sizes=[$m->add(BigInt::one()),$m->add(BigInt::fromInt(2)),
     $m->square()->sub(BigInt::one()),$m->square()];
 foreach ($sizes as $space) {
     foreach ([BigInt::one(), BigInt::fromInt(2), BigInt::fromInt(3),
