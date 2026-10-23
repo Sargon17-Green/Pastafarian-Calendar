@@ -12,7 +12,7 @@ object Stage48Tests {
         val historical=LegacyYear5000FirstAnswerModuloAdapter()
         val modulus=NormativeCore.M
         must("E_DISCOVERY24_MODULUS_LOCK",
-            historical.ANSWER_MODULUS==modulus)
+            LegacyYear5000FirstAnswerModuloAdapter.ANSWER_MODULUS==modulus)
         val calendar=NormativeCalendar()
         val day=NormativeCore.FOUNDATION_DAY
         val real=mutableListOf<Year5000TieCandidate>()
@@ -69,7 +69,7 @@ object Stage48Tests {
         }
         // Os oes rhannwr damweiniol yn yr ystod, cyfrif y achosion dilys yn unig.
         must("E_DISCOVERY24_SYNTHETIC_COUNTS",
-            forcedRed>=56 && acceptedMatch==forcedRed)
+            forcedRed==64 && acceptedMatch==64)
         println("STAGE48_SYNTHETIC_REJECT_DIFFERENTIALS_GREEN")
 
         var cases=0
@@ -86,7 +86,7 @@ object Stage48Tests {
                 historical.shouldRejectFirstAnswer(modulus,n))
             cases++
         }
-        must("E_DISCOVERY24_BIGINT_COUNTS",cases>=120)
+        must("E_DISCOVERY24_BIGINT_COUNTS",cases==128)
         println("STAGE48_BIGINT_MODULUS_EDGE_DIFFERENTIALS_GREEN")
 
         val one=NormativeCore.AnswerStream(modulus,-1)
