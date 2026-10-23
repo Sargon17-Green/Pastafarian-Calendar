@@ -122,14 +122,14 @@ def main(folder,qa28_path):
             if event is not None:
                 need([tick]+state==event['anchor'],
                      "live Native anchor state not equal to signed QA28")
-                prior=[int(space.get(current['point'](*xy))) for xy in event['cells']]
+                prior=[int(space.get(current['point'](xy))) for xy in event['cells']]
                 need(all(v==32 for v in prior),
                      "runtime seven skipped FungeSpace values are NOT blanks before '-'")
                 writes_before=len(writes)
             inside_step[0]=tick
             q20.tick_qa20(current)
             if event is not None:
-                posterior=[int(space.get(current['point'](*xy))) for xy in event['cells']]
+                posterior=[int(space.get(current['point'](xy))) for xy in event['cells']]
                 need(all(v==32 for v in posterior),
                      "runtime skipped FungeSpace changed during Native '-'")
                 need(len(writes)==writes_before,
