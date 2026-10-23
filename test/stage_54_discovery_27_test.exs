@@ -122,7 +122,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage54Discovery27Test do
     patch = File.read!(Path.join(root, "month_name_rank_patch.ex"))
     assert manager =~ "MonthNameRankPatch.diagnose(rank, total, month_count)"
     assert patch =~ "LegacyNextMonthNameRank.transform(rank, total)"
-    assert patch =~ "DistinctMonthNameIndices.unrank(month_count, historical_rank)"
+    assert patch =~ "DistinctMonthNameIndices.unrank(count, historical_rank)"
     assert legacy =~ "rem(rank, total) + 1"
     refute manager =~ "NormativeReference"
     assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)

@@ -8,23 +8,55 @@ defmodule PastafariCalendarElixirVietnamese.Stage55CalendarIntegrationTest do
 
   @foundation -15_055_671
 
-  test "ngày mốc khớp công thức quy phạm từ đầu đến cuối" do
-    for {c, t} <- [
-      {@foundation, @foundation},
-      {@foundation + 1, @foundation + 1},
-      {@foundation + 7, @foundation + 7}
-    ] do
-      assert Calendar.calendar_date_spaghetti(c, t) == Ref.calendar_date(c, t)
-    end
+  defp kiểm_tra_ghep_ngay(c, t) do
+    diagnostic = Calendar.calendar_date_diagnostic_spaghetti(c, t)
+    {reference_year, _state} = Ref.find_target_year(c, t)
+
+    assert diagnostic.year.number == reference_year.number
+    assert diagnostic.year.open_gate_day == reference_year.open_gate_day
+    assert diagnostic.year.close_gate_day == reference_year.close_gate_day
+
+    # Kiểm tra tên tháng qua quy phạm mà không gọi bộ đếm đan tháng
+    # đệ quy trên một năm dài.
+    sauce = Ref.sauce(c, diagnostic.structure_source_day)
+    expected_names = Ref.choose_month_name_indices(sauce, diagnostic.month_count)
+    assert diagnostic.month_name_indices == expected_names
+
+    chosen =
+      Enum.find(diagnostic.cutlets, fn piece ->
+        piece.first_day <= t and t <= piece.last_day
+      end)
+
+    assert chosen != nil
+    offset = t - reference_year.open_gate_day - 1
+    assert offset >= 0 and offset < length(diagnostic.month_weaving)
+    month_id = Enum.at(diagnostic.month_weaving, offset)
+    name_index = Enum.at(expected_names, month_id - 1)
+    day_in_month =
+      diagnostic.month_weaving
+      |> Enum.take(offset + 1)
+      |> Enum.count(&(&1 == month_id))
+
+    expected = {
+      reference_year.number,
+      SourceLanguageCatalog.cutlet_name(chosen.name_index),
+      t - chosen.first_day + 1,
+      SourceLanguageCatalog.month_name(name_index),
+      day_in_month
+    }
+
+    assert diagnostic.calendar_date == expected
+    assert Calendar.calendar_date_spaghetti(c, t) == expected
   end
 
-  test "ngày đích khác ngày tính vẫn khớp quy phạm" do
-    for {c, t} <- [
-      {@foundation + 2, @foundation + 3},
-      {@foundation + 10, @foundation + 12}
-    ] do
-      assert Calendar.calendar_date_spaghetti(c, t) == Ref.calendar_date(c, t)
-    end
+  test "ghép ngày ở mốc nền với kiểm tra thành phần quy phạm" do
+    kiểm_tra_ghep_ngay(@foundation, @foundation)
+    kiểm_tra_ghep_ngay(@foundation + 1, @foundation + 1)
+  end
+
+  test "ghép ngày cho ngày tính và ngày đích khác nhau" do
+    kiểm_tra_ghep_ngay(@foundation + 2, @foundation + 3)
+    kiểm_tra_ghep_ngay(@foundation + 10, @foundation + 12)
   end
 
   test "kết quả luôn là bộ năm thành phần có ngày dương" do

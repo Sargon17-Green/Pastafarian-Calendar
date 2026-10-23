@@ -227,7 +227,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
       LegacyPourPositions.pour(old, 7, 11, 0, 1)
     end
 
-    f = Ref.foundation_day()
     assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 

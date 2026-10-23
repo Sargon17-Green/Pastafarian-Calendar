@@ -1157,3 +1157,10 @@ Các kiểm thử lịch sử chỉ kiểm tra trạng thái trước tích hợ
 được chuyển thành kiểm tra lối vào, không bỏ kiểm thử cũ.
 Bảy kiểm thử tích hợp mới đối chiếu oracle gốc, không sửa oracle.
 Tổng dự kiến 903 bài; xác nhận bằng Native CI trước khi đóng.
+
+Stage55: Native CI 39965564069 báo 903 bài, 900 PASS,
+1 lỗi đường kiểm toán tên biến, 2 timeout của oracle đệ quy.
+Đã sửa nguồn kiểm toán, bỏ biến thừa và thay kiểm thử
+full-oracle tốn thời gian bằng kiểm tra tầng quy phạm
+và phép ghép ngày độc lập. Chưa tuyên bố tương đương toàn
+miền hoặc hoàn tất soak; chờ CI mới.

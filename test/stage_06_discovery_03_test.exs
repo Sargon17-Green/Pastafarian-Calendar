@@ -129,7 +129,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage06Discovery03Test do
     refute distance_source =~ "chronological"
     refute manager_source =~ "chronological"
 
-    f = Ref.foundation_day()
     assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 

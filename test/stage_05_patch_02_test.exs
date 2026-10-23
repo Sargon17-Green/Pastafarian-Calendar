@@ -137,7 +137,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage05Patch02Test do
   end
 
   test "bản vá SAVE đầu tiên vẫn đúng và ngày lịch đầy đủ chưa tích hợp" do
-    f = Ref.foundation_day()
     m = Ref.m()
 
     for value <- [-2 * m, -m, -1, 0, 1, m, 2 * m, 3 * m, m + 1] do
