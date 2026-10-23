@@ -70,7 +70,8 @@ def fixture():
             lines = v.MARKERS.get(task, ()) if stream == use else ()
             records[f"LOGS/{task}.{stream}.log"] = "\n".join(lines).encode("utf-8")
     return records, {"CANDIDATE":v.digest(source),
-                     "ORACLE":v.digest(oracle), "MANIFEST":v.digest(manifest)}
+                     "ORACLE":v.digest(oracle), "MANIFEST":v.digest(manifest),
+                     "RUNNER_SHA":v.digest(runner)}
 
 class Stage46ReceiptTests(unittest.TestCase):
     def setUp(self):
@@ -130,6 +131,12 @@ class Stage46ReceiptTests(unittest.TestCase):
 
     def test_runner_extra_exit_rejected(self):
         self.records["LOGS/runner.log"] += b"\nCHILD_EXIT FORGED 0"
+        with mock.patch.object(v, "RUNNER_SHA", v.digest(self.records["LOGS/runner.log"])):
+            self.attempt(False)
+
+    def test_rewritten_runner_with_same_events_rejected(self):
+        # Recomputed ZIP checksums cannot authenticate the original runner log.
+        self.records["LOGS/runner.log"] += b"\nFORGED_EXTRA_RUN_METADATA"
         self.attempt(False)
 
     def test_runner_reordered_children_rejected(self):
@@ -137,14 +144,18 @@ class Stage46ReceiptTests(unittest.TestCase):
         # Swap the first two complete children: counts and exit codes stay valid.
         lines[3:7] = lines[5:7] + lines[3:5]
         self.records["LOGS/runner.log"] = "\n".join(lines).encode("utf-8")
-        self.attempt(False)
+        # Repin synthetic runner to ensure chronology check is reached.
+        with mock.patch.object(v, "RUNNER_SHA", v.digest(self.records["LOGS/runner.log"])):
+            self.attempt(False)
 
     def test_runner_overlapping_children_rejected(self):
         lines = self.records["LOGS/runner.log"].decode("utf-8").splitlines()
         # Next child starts before the preceding child has exited.
         lines[4], lines[5] = lines[5], lines[4]
         self.records["LOGS/runner.log"] = "\n".join(lines).encode("utf-8")
-        self.attempt(False)
+        # Repin synthetic runner to ensure chronology check is reached.
+        with mock.patch.object(v, "RUNNER_SHA", v.digest(self.records["LOGS/runner.log"])):
+            self.attempt(False)
 
     def test_checksum_mismatch_rejected(self):
         self.attempt(False, use_old_sums=True)

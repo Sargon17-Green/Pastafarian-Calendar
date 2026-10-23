@@ -20,6 +20,8 @@ BASE = "f35a6efd79b830810c8a33140ce8eb949b2c8671"
 CANDIDATE = "98fc6f964f7f986fb672bb94fae96c0ffbff46f5aa119bc2cc4abd727846ef5c"
 ORACLE = "8d75a665925d2b88aa2bbb82fb71157c515b24babd5db7889a14c508eb7911ee"
 MANIFEST = "871ca2ee3aa4ebaf7686334aaba7a641831cf18663f01d58afbd6f5983a734f4"
+# Independently pinned by v002 producer as ORIG_RUNNER_SHA, though not enforced there.
+RUNNER_SHA = "e8b318f1a6e5bc8b056461947f91cddc503a771b5a1ae2473c92be0be99f7b09"
 EXITS = {"CODESH_NATIVE_COMPILE": 0, "JAVAC_PROBES": 0,
          "STAGE46_CLOSING_GATE_EXPECTED_RED": 0, "STAGE46_ORACLE_TAMPER": 1}
 for number in range(29, 46):
@@ -147,7 +149,9 @@ def verify(path):
         ensure({gate["name"]: gate["exit_code"] for gate in gates} == EXITS, "gate exits")
         ensure(all(gate["outcome"] == ("EXPECTED_FAILURE" if gate["name"] == "STAGE46_ORACLE_TAMPER" else "PASS")
                    for gate in gates), "gate outcomes")
-        runner = archive.read("LOGS/runner.log").decode("utf-8", "replace")
+        runner_bytes = archive.read("LOGS/runner.log")
+        ensure(digest(runner_bytes) == RUNNER_SHA, "original Native runner SHA-256 mismatch")
+        runner = runner_bytes.decode("utf-8", "replace")
         ensure("ENGINE_ENTERED v001" in runner and RUN_ID in runner and
                "PACKAGE_SHA_AND_40_SIGNED_BASELINE_SOURCE_PASS" in runner and
                "JDK_VERSION_VERIFIED" in runner and "CODESH_COMPILER_SELECTED" in runner, "runner provenance")
