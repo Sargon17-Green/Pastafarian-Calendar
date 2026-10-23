@@ -228,6 +228,31 @@ class Stage46ReceiptTests(unittest.TestCase):
             task, data.replace(b"ORACLE_FAIL idx=0", b"ORACLE_FAIL idx=01"))
         self.attempt(False)
 
+    def test_stage46_contradictory_numeric_line_rejected(self):
+        task = "STAGE46_CLOSING_GATE_EXPECTED_RED"
+        name = f"LOGS/{task}.stdout.log"
+        data = self.records[name]
+        self.rewrite_probe_with_reconciled_receipt(
+            task, data + b"\nCANONICAL_CLOSE_GATE_MATCHES=0")
+        self.attempt(False)
+
+    def test_stage46_duplicate_success_line_rejected(self):
+        task = "STAGE46_CLOSING_GATE_EXPECTED_RED"
+        name = f"LOGS/{task}.stdout.log"
+        data = self.records[name]
+        self.rewrite_probe_with_reconciled_receipt(
+            task, data + b"\nCODESH_STAGE46_DISCOVERY23_EXPECTED_RED_CONFIRMED")
+        self.attempt(False)
+
+    def test_stage46_result_line_reordering_rejected(self):
+        task = "STAGE46_CLOSING_GATE_EXPECTED_RED"
+        name = f"LOGS/{task}.stdout.log"
+        lines = self.records[name].decode("utf-8").splitlines()
+        lines[1], lines[2] = lines[2], lines[1]
+        self.rewrite_probe_with_reconciled_receipt(
+            task, "\n".join(lines).encode("utf-8"))
+        self.attempt(False)
+
     def test_zip_traversal_rejected(self):
         self.records["../outside.txt"] = b"invalid"
         self.attempt(False)

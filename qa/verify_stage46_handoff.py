@@ -220,6 +220,12 @@ def verify(path):
             ensure(all(re.search(r"(?<![A-Za-z0-9_])" + re.escape(marker) +
                                  r"(?![A-Za-z0-9_])", content) for marker in markers),
                    "semantic marker boundary/value: " + task)
+            if task == "STAGE46_CLOSING_GATE_EXPECTED_RED":
+                # Original Stage46AdjacentClosingGateDiscoveryProbe.java emits
+                # exactly 15 stdout lines (129-143), in this order, once each.
+                # Mere membership lets contradicting/doubled numeric counters pass.
+                ensure(content.splitlines() == list(markers),
+                       "Stage46 Native probe stdout lines/order/count differ from Java source")
         meta = receipt.get("provenance", {})
         ensure(meta.get("signed_baseline_count") == 40 and
                meta.get("run_count") == 21 and
