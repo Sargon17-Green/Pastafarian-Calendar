@@ -137,6 +137,19 @@ jobs:
               "soak-output/adapter-$compiler" "$compiler" \
               | tee "soak-output/interactive-$compiler.log"
           done
+      - name: Validate machine-readable global-soak preflight handshake
+        shell: bash
+        run: |
+          set -euo pipefail
+          for compiler in g++ clang++; do
+            timeout 35m python3 tools/soak_global_preflight.py \
+              --manifest integrations/cpp-latina-soak.json \
+              --adapter "soak-output/adapter-$compiler" \
+              > "soak-output/preflight-$compiler.json"
+            python3 -c 'import json,sys; d=json.load(open(sys.argv[1], encoding="utf-8")); assert d["ready"] is True and d["global_soak_executed"] is False' \
+              "soak-output/preflight-$compiler.json"
+            echo "SOAK_GLOBAL_PREFLIGHT=PASS COMPILER=$compiler"
+          done
       - name: Save evidence even on failure
         if: always()
         uses: actions/upload-artifact@v6

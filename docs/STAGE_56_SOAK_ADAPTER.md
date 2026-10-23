@@ -45,3 +45,24 @@ A candidate machine-readable descriptor is available at `integrations/cpp-latina
 V1 is retained unchanged for compatibility. Use `--schema-canonical` to print `PASTAFARI_SOAK_CANONICAL_V2`; run with `--canonical-indices` (optionally `--timing-ns`). Each input `request_id<TAB>c<TAB>t` produces eight TSV columns: request ID, c, t, year, **canonical cutlet index (1..17)**, day in cutlet, **canonical month index (1..47)**, day in month. Unlike V1, the two name columns become pure decimal integers. This is the recommended transport for the central cross-language comparison.
 
 The adapter resolves each name returned by the existing public calendar API against unique, frozen `canonicalIndex` entries in `include/pastafari/source_language_catalog.hpp`. A missing or ambiguous match is an explicit nonzero failure; fuzzy name matching is forbidden. The calendar engine remains unchanged. `tools/validate_soak_index_modes.py` checks all eight V2 columns against V1 and the 17+47 frozen source names; GCC, Clang and the pinned Celeritas comparison use this check. **V2 is certified at exact tested commit `5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8`**: native adapter workflow `39762381242` (GCC/Clang, canonical numeric 3/3 and 4/4 each, cross-compiler pass), cross-implementation workflow `39762381145` (V2 30/30 PASS), and full Stage 56 workflow `39762381184` (20/20 success, 8/8 repeated soak, SOAK_GREEN). This documents a tested snapshot, not a claim that the future global multi-implementation soak has run.
+
+## Scheduler-facing machine-readable preflight
+
+After building the native adapter, a central scheduler can run:
+
+```sh
+python3 tools/soak_global_preflight.py \
+  --manifest integrations/cpp-latina-soak.json \
+  --adapter ./soak-vector-adapter
+```
+
+The preflight prints exactly one JSON object on stdout and exits nonzero if
+`ready` is false. It checks both schema declarations, the V2 manifest fields
+and invariants, two equivalent signed decimal requests including leading
+zeros, output row ordering and numeric bounds, stderr per-row nanosecond
+records, and fail-closed rejection of a malformed request. It does not certify
+that the checked binary came from the manifest's verified commit, compare
+against another calendar implementation, or run the global soak. These are
+separate duties of the central scheduler; the `engine_verified_commit` field
+is an anchor, not a runtime attestation. Do not treat a successful preflight
+as evidence of full cross-implementation equivalence.

@@ -105,5 +105,20 @@
     "label_mapping": "exact text to unique frozen canonicalIndex; unknown or ambiguous names invalidate shard",
     "numeric_format": "ASCII decimal integers",
     "status": "verified exact commit 5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8; GCC/Clang and 30/30 pinned Celeritas"
+  },
+  "preflight": {
+    "contract": "PASTAFARI_SOAK_PREFLIGHT_V1",
+    "command": [
+      "python3",
+      "tools/soak_global_preflight.py",
+      "--manifest",
+      "integrations/cpp-latina-soak.json",
+      "--adapter",
+      "soak-vector-adapter"
+    ],
+    "ready_field": "ready",
+    "invalid_shard_exit": "nonzero",
+    "format": "one JSON line on stdout",
+    "status": "pending exact-SHA CI; operational handshake only, not global soak"
   }
 }
