@@ -24,6 +24,14 @@ EXITS = {"CODESH_NATIVE_COMPILE": 0, "JAVAC_PROBES": 0,
          "STAGE46_CLOSING_GATE_EXPECTED_RED": 0, "STAGE46_ORACLE_TAMPER": 1}
 for number in range(29, 46):
     EXITS[f"STAGE{number}_{'PATCH' if number % 2 else 'OLD'}_REGRESSION"] = 0
+# Execution order is grounded in RUN_STAGE46_NATIVE_v001.py: each child exits
+# before the next child starts, and the regressions run 45 down through 29.
+RUN_ORDER = (
+    ["CODESH_NATIVE_COMPILE", "JAVAC_PROBES",
+     "STAGE46_CLOSING_GATE_EXPECTED_RED", "STAGE46_ORACLE_TAMPER"]
+    + [f"STAGE{n}_{'PATCH' if n % 2 else 'OLD'}_REGRESSION"
+       for n in range(45, 28, -1)]
+)
 MARKERS = {
     "STAGE46_CLOSING_GATE_EXPECTED_RED": (
         "CODESH_STAGE46_DISCOVERY23_EXPECTED_RED_CONFIRMED",
@@ -150,6 +158,13 @@ def verify(path):
                "runner task set")
         ensure(len({name for name, _ in exits}) == len(EXITS) and
                {name: int(value) for name, value in exits} == EXITS, "runner task exits")
+        # Reject impossible/forged chronologies even when the multiset of
+        # tasks, individual exit codes and all semantic markers agree.
+        observed_events = re.findall(r"\bCHILD_(START|EXIT)\s+([A-Z0-9_]+)\b", runner)
+        expected_events = [
+            (kind, name) for name in RUN_ORDER for kind in ("START", "EXIT")
+        ]
+        ensure(observed_events == expected_events, "runner event order/overlap")
         for task, markers in MARKERS.items():
             suffix = "stderr" if task == "STAGE46_ORACLE_TAMPER" else "stdout"
             content = archive.read(f"LOGS/{task}.{suffix}.log").decode("utf-8", "replace")

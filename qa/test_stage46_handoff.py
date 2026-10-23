@@ -34,7 +34,7 @@ def fixture():
         "ENGINE_ENTERED v001 " + v.RUN_ID,
         "PACKAGE_SHA_AND_40_SIGNED_BASELINE_SOURCE_PASS",
         "JDK_VERSION_VERIFIED CODESH_COMPILER_SELECTED",
-    ] + [f"CHILD_START {name}\nCHILD_EXIT {name} {code}" for name,code in v.EXITS.items()]).encode("utf-8")
+    ] + [f"CHILD_START {name}\nCHILD_EXIT {name} {v.EXITS[name]}" for name in v.RUN_ORDER]).encode("utf-8")
     receipt = {
         "schema_version":"WINDOWS-EXEC-PACK/2.1", "family_id":v.FAMILY,
         "package_version":"v002", "native_run_id":v.RUN_ID, "stage":46,
@@ -130,6 +130,20 @@ class Stage46ReceiptTests(unittest.TestCase):
 
     def test_runner_extra_exit_rejected(self):
         self.records["LOGS/runner.log"] += b"\nCHILD_EXIT FORGED 0"
+        self.attempt(False)
+
+    def test_runner_reordered_children_rejected(self):
+        lines = self.records["LOGS/runner.log"].decode("utf-8").splitlines()
+        # Swap the first two complete children: counts and exit codes stay valid.
+        lines[3:7] = lines[5:7] + lines[3:5]
+        self.records["LOGS/runner.log"] = "\n".join(lines).encode("utf-8")
+        self.attempt(False)
+
+    def test_runner_overlapping_children_rejected(self):
+        lines = self.records["LOGS/runner.log"].decode("utf-8").splitlines()
+        # Next child starts before the preceding child has exited.
+        lines[4], lines[5] = lines[5], lines[4]
+        self.records["LOGS/runner.log"] = "\n".join(lines).encode("utf-8")
         self.attempt(False)
 
     def test_checksum_mismatch_rejected(self):
