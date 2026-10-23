@@ -77,7 +77,7 @@ jobs:
                   if not (
                       0x10900 <= point <= 0x10915
                       or point == 0x1091F
-                      or char in " \\t\\r\\n"
+                      or point in (0x20, 0x09, 0x0A, 0x0D)
                   ):
                       errors.append(f"{path}: unexpected prose character U+{point:04X} at index {index}")
                   if 0x10916 <= point <= 0x1091E:
