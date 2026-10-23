@@ -31,3 +31,19 @@ printf '%s  %s\n' \
   2c447438a567fbc40a79c68fb8b3f27f308cb89a2f59aaba1d2275dd3acf1a06 \
   build/foundation_weave_rank.bin | sha256sum -c -
 echo "STAGE1_FOUNDATION_FULL_WEAVE_RANK_SHA256_PASS"
+# After hashes for the root and canonical 177-digit rank have passed,
+# independently count completions after woven prefix 1,1.
+# This count needs the same full precision, so it has a separate
+# bounded execution log. CI whole-job budget remains 43 minutes.
+timeout 1100s vvp build/weave_fullroot.vvp +stop_after=45 +prefix11 \
+  2>&1 | tee build/weave_prefix11_run.log
+test "$(wc -c < build/foundation_weave_prefix11.bin)" -eq 2809
+printf '%s  %s\n' \
+  642e6ddd164593dd415bc78ea87142e949a1cc4728accff2c8693a9120f81cac \
+  build/foundation_weave_prefix11.bin | sha256sum -c -
+echo "STAGE1_FOUNDATION_WEAVE_PREFIX11_SHA256_PASS"
+
+iverilog -g2012 -Wall -s tb_weave_prefix2 \
+  -o build/weave_prefix2.vvp tests/tb_weave_prefix2.sv
+timeout 60s vvp build/weave_prefix2.vvp \
+  2>&1 | tee build/weave_prefix2_run.log

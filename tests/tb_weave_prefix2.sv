@@ -49,8 +49,7 @@ module tb_weave_prefix2;
         if(ordinal!=2 || remaining_rank==0 ||
            remaining_rank>prefix12_count)
             $fatal(1,"FOUNDATION_WEAVE_FIRST_TWO_GOLDEN");
-        $display("STAGE1_FOUNDATION_WEAVE_LEX_PREFIX_PASS first=1 second=2 prefix11bits=22465 remainingbits=%0d",
-                 WIDTH);
+        $display("STAGE1_FOUNDATION_WEAVE_LEX_PREFIX_PASS first=1 second=2 prefix11bits=22465");
         $finish;
     end
 endmodule

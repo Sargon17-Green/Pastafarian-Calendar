@@ -323,3 +323,33 @@ The canonical target remains month-name index 20, occurrence day 56.
   obsolete CI; newest conclusion not yet available.
 - No full 4244-day weave unrank nor 47P45 names; no qualified
   Kalaallisut source-catalog approval; Stage 1 cannot close.
+
+## 2026-10-23 — fully green 22528-bit root and 177-digit rank, then bounded prefix
+
+- Verified the actual logs for run [39842311226](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39842311226), HEAD `02aeccd0a4e5b793f7c753a4e14cbcd2221f9422`: **both jobs completed SUCCESS**.
+- 45-month full root computed 22470 bits, 2809-byte SHA256 matched
+  `925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da`.
+  From CI job timestamps, the 45-month kernel took approximately 8m28s.
+- Exact 177-digit wide choice passed rank SHA256
+  `2c447438a567fbc40a79c68fb8b3f27f308cb89a2f59aaba1d2275dd3acf1a06`.
+  The residue quotient printed by the rank fixture was 347.
+  Do not confuse this with the *domain* quotient 555.
+- The same run's baseline job passed all earlier properties, sauce,
+  gates, 45-month length selection, toy weave and medium-root tests.
+- Added an independent 47P45 month name-index lexical-unrank test
+  (bowl5 seal33), expected vector in
+  `docs/FOUNDATION_MONTH_NAME_45_INDICES.csv`, still pending CI.
+- Separately, exact Python reference completion-count replay
+  after legal prefix [1,1] yields 22465 bits and SHA256
+  `642e6ddd164593dd415bc78ea87142e949a1cc4728accff2c8693a9120f81cac`.
+  Its block is strictly smaller than the selected root rank, hence
+  the first two physical month ordinals should be [1,2].
+- Added a bounded `+prefix11` path to the full-width test-only
+  SystemVerilog oracle; it will emit the full block and check SHA256,
+  then `tb_weave_prefix2.sv` checks the first two ordinals against
+  verified root, rank, and prefix count. This new test has NOT YET
+  passed native CI and is not a full 4244-symbol unrank.
+- A full prefix unrank attempted in independent arithmetic grows
+  computationally very expensive even within the first 11 symbols;
+  no unbounded long-running CI job was added. Profiling and a
+  resource-bounded algorithm are required before expanding.
