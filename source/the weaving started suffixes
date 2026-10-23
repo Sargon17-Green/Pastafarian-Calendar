@@ -53,11 +53,11 @@ To inspect the woven start prefix:
     If the wscheckmonth's remaining days is the wscheckmonth's total days,
       put 1 into the wsseenunstarted.
     If the wscheckmonth's remaining days is less than the wscheckmonth's total days,
-      detect a started month after an unstarted month.
+      flag weaving start inversion.
     Put the wscheckmonth's next into the wscheckmonth.
   Repeat.
 
-To detect a started month after an unstarted month:
+To flag weaving start inversion:
   If the wsseenunstarted is 1,
     put 1 into the wsinvalidprefix.
 
