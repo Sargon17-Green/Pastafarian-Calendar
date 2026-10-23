@@ -1,0 +1,31 @@
+name: MATLAB Exact Lexical Neighbor (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/adjacentWholeMonthWeaving.m'
+      - 'tests/run_stage55_adjacent_weave_tests.m'
+      - '.github/workflows/matlab-stage55-adjacent.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-adjacent:
+    name: MATLAB R2026a / all 1301 adjacent ranks and full-year edges
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+      - name: Setup MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Validate lexical neighbor and actual 4244-day edges
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_adjacent_weave_tests
