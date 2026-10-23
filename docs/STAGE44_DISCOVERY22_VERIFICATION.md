@@ -23,3 +23,19 @@
 `test/discovery22Red.ts` आणि `test/verifyDiscovery22ExpectedRed.mjs`: 22वा जाणीवपूर्वक अयशस्वी होणारा मूळ दोषाचा पुरावा; यशस्वी पडताळणीसाठी फक्त अपेक्षित विशिष्ट nonzero अपयश स्वीकारले जाते. सर्व 21 आधीच्या RED चाचण्या राखल्या आहेत.
 
 केवळ दोन GitHub Actions कामे PASS झाल्यावर Stage44 पूर्ण म्हणून नोंदवायचा. Stage45 PATCH22 लवकर उघडायचा नाही. `main`, इतर भाषा-शाखा, frozen names lock आणि खासगी `HANDOFF_*` मध्ये बदल नाही. केंद्रीय `PROJECT_WORKFLOW.md` नुसार `BRANCH_REGISTRY.xlsx` ची संबंधित पंक्ती व जर्नल इतर पंक्तींना न छेडता अद्ययावत करायची.
+
+## Native GitHub Actions पुरावे — 23 ऑक्टोबर 2026
+
+मूळ implementation commit [908b9674](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/908b96743ebee502aaddfed4e8ba2bf813e53edd) च्या [रन 39987043398](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39987043398) मध्ये frozen names lock PASS होता, पण स्वतंत्र test-only normative reference मधील `source.stones` चा सामान्य `readonly bigint[]` प्रकार `Stone` च्या नेमक्या पाच घटकांशी जुळला नाही (TS2345, `test/discovery22Properties.ts:54`). Source fixture मध्ये असलेलाच स्वतंत्र मानक `STONES` tuple वापरणारा केवळ त्या test expression चा बदल [b7a7d302](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/b7a7d302026693d0afa01eb85c7bd4b784d4b5c0) मध्ये केला. उत्पादन स्रोत किंवा मूळ इतिहास बदलला नाही.
+
+सुधारित commit चा [Native CI 39996594404](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39996594404) — `verify` आणि `stage27-typescript-marathi` **दोन्ही SUCCESS**. TypeScript typecheck, Stage1–44 पूर्ण regression, frozen name lock, पहिल्या 21 ऐतिहासिक अपेक्षित RED आणि 22वा स्वतंत्र अपेक्षित RED सर्व पडताळले.
+
+```text
+STAGE_44_DISCOVERY_22_GUARDS_PASS oldLexRows=289 oldRepeatedRows=1 genuineExactGate=1 nativeSeal22=1 actualRepeated=1 independentReferenceDistinct=1 fullStage43=1 fullSelectorSpy=1 exactNativeCalls=52 exactNativeWrites=3016 fullPredecessors=56 fullWrites=3248 faultCases=1 earlyPatchApplied=0
+STAGE_44_DISCOVERY_22_PROPERTIES_PASS exhaustiveRows=5219 lexWrong=0 duplicateRows=850 giantRankSamples=98 giantDigits=1029 canonicalNamesDistinct=1 nativeSeal22Variations=720 distinctDrop46Orders=720 rankWrong=0 namesWrong=0 repeatedOutputs=449 uniqueOutputs=271 realSharedWrites=41760
+STAGE_44_DISCOVERY_22_EXPECTED_RED_VERIFIED nonzero=1 naturalNativeWitness=1 duplicateNames=1
+```
+
+720 DROP46 vectors हे नियंत्रित बदललेले test inputs आहेत, 720 स्वतंत्र ऐतिहासिक वर्ष-प्रश्न नाहीत. जुन्या `17^K` generator ने प्रत्यक्ष 449 repeated-name outputs दिले; normative `17!/(17-K)!` family चा Stage45 उपाय Stage44 मध्ये अजिबात लावलेला नाही. Stage54 पूर्ण calendar tuple अजून बंद आहे.
+
+ही नोंद implementation CI स्वीकारते; प्रशासकीय final commit व त्याचा स्वतंत्र CI यशस्वी झाल्यावरच `LAST_COMPLETED_STAGE=44` नोंदवायचा.
