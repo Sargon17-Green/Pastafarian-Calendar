@@ -655,3 +655,19 @@ php -d memory_limit=512M tests/stage29_patch14_tests.php
 ```
 
 **Status:** `AWAITING_CI`. Tidak memulakan Stage30, tidak mengubah `main`, kod legacy, katalog atau fixture.
+
+
+## Stage 30 — DISCOVERY 15: Digit ketiga tidak dibaca
+
+Stage29 PATCH14 disahkan GREEN pada commit \`aae1c106706bf571adbb94282f8a96e80698df91\`, Native CI run \`39985192899\` (verify dan audit_php_bahasa_melayu SUCCESS).
+
+Stage30 menguji ruang \`M²<n<=M³\`. Formula normatif membaca tiga sampel SAVE dari strim PATCH12, dengan pemberat 1, M dan M². \`LegacyMissingThirdDigit15::chooseWrong\` sengaja mengira dua digit yang pertama sahaja, menolak digit ketiga pada pemberat M². Ia tetap memakai cutoff \`floor(M³/n)*n\` serta domain sampel penuh M³ supaya ketidaksetaraan tertumpu pada digit yang tertinggal. Kod legasi sedia ada tidak diubah; \`BootstrapKernel::legacyChooseTripleRank\` memilih laluan \`MISSING_THIRD_DIGIT_LEGACY\` dalam konteks baharu.
+
+Empat saksi matematik menggunakan n=M³: tiada rejection, jadi beza yang dijangka tepat \`(digit3-1)*M²\`; 40 sampel matriks pada n=M²+1, M²+2, M³-1, M³ memberi 36 perbezaan; tiga jejak hari sebenar dan lima kes input tidak sah. Ujian langsung \`stage30_discovery15_tests.php\` sengaja exit 1, manakala pembalut \`verify_stage30_discovery15.php\` exit 0 **hanya** jika empat RED tepat, 36/40 matriks dan tiada kegagalan lain.
+
+\`\`\`text
+php -d memory_limit=512M tests/stage30_discovery15_tests.php  # exit 1 yang disengajakan
+php -d memory_limit=512M tests/verify_stage30_discovery15.php # exit 0 jika merah tepat
+\`\`\`
+
+Semua regresi Stage1–29, lint PHP, fixture deterministik, dan Canonical Names Lock mesti kekal hijau. **Status: AWAITING_CI. Jangan tambah ThirdDigitPatch15 atau mulakan Stage31 sebelum GitHub Actions Native disahkan pada SHA tepat.** Tiada perubahan main, katalog, fixture atau import oracle ke dalam \`src\`.

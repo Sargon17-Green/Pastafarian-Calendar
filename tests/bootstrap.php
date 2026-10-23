@@ -35,6 +35,7 @@ require_once $root . '/src/Legacy/LegacyNoRejection13.php';
 require_once $root . '/src/Patches/RejectionSamplingPatch13.php';
 require_once $root . '/src/Legacy/LegacyBigEndianDigits14.php';
 require_once $root . '/src/Patches/BigEndianDigitsPatch14.php';
+require_once $root . '/src/Legacy/LegacyMissingThirdDigit15.php';
 require_once $root . '/src/BootstrapKernel.php';
 require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';

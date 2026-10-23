@@ -102,3 +102,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage28_discovery14.php
       - name: Tampalan 14 — digit pertama berat satu dan kedua berat M
         run: php -d memory_limit=512M tests/stage29_patch14_tests.php
+      - name: Penemuan 15 — digit ketiga tidak dibaca bagi pilihan tiga digit
+        run: php -d memory_limit=512M tests/verify_stage30_discovery15.php
