@@ -94,7 +94,19 @@ Testy MATLAB wymagają:
 
 Commit \`822342096ece59e7a91c2c05ab547e56de68efee\`;
 [natywny GitHub Actions 39931324481](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39931324481).
-**Nie oznaczać natywnego PASS bez końcowego znacznika z logu.**
+**Natywny MATLAB R2026a — PASS**, z końcowych logów
+run 39931324481, commit 822342096ece59e7a91c2c05ab547e56de68efee:
+
+\`\`\`text
+STAGE_55_ADJACENT_SMALL_DAG_PASS FAMILIES=120
+STAGE_55_ADJACENT_ALL_1301_RANKS_PASS TRANSITIONS=1300
+STAGE_55_REAL_YEAR_5000_ADJACENT_FULL_WORDS_PASS MONTHS=45 DAYS=4244 EXACT_EDGE_RANKS=6 SECONDS=0.016
+STAGE_55_ADJACENT_EXPERIMENTAL_PASS
+\`\`\`
+
+Test rzeczywistych 4244-dniowych słów obejmuje dokładnie rangi
+\`1, 2, 3, count-2, count-1, count\`; nie stanowi testu
+wszystkich rang pośrednich ani pełnego normative oracle.
 
 Nie wolno wyciągać wniosku o praktycznym obliczeniu
 arbitralnej wewnętrznej rangi 6765-cyfrowej ani o
