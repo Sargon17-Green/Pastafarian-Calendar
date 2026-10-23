@@ -140,47 +140,47 @@ To report forty seven weaving difference:
   Append the weavestresscheck to the check report.
   Append "; expected=2987435000850314871976096554696085799164511452611632783323554397412109375" to the check report.
   Append "; record_count=" to the check report.
-  Append stress record count.
+  Report stress record count.
   Append "; configured_months=" to the check report.
-  Append stress configured months.
+  Report stress configured months.
   Append "; already_started=" to the check report.
-  Append stress started months.
+  Report stress started months.
   Append "; shortcut_available=" to the check report.
-  Append stress shortcut availability.
+  Report stress shortcut availability.
   Append "; shortcut_completions=" to the check report.
   Append the started weaving suffix's completions to the check report.
   Append "; days_remaining=" to the check report.
-  Append stress remaining days.
+  Report stress remaining days.
   Append "; memo_entries=" to the check report.
-  Append stress memo entries.
+  Report stress memo entries.
   Append "; resource_limited=" to the check report.
-  Append stress resource flag.
+  Report stress resource flag.
 
-To append stress record count:
+To report stress record count:
   Convert the wsprobeentries to a string.
   Append the string to the check report.
 
-To append stress configured months:
+To report stress configured months:
   Convert the selected month count to a string.
   Append the string to the check report.
 
-To append stress started months:
+To report stress started months:
   Convert the weaving selection's already started to a string.
   Append the string to the check report.
 
-To append stress shortcut availability:
+To report stress shortcut availability:
   Convert the started weaving suffix's available to a string.
   Append the string to the check report.
 
-To append stress remaining days:
+To report stress remaining days:
   Convert the weaving selection's days remaining to a string.
   Append the string to the check report.
 
-To append stress memo entries:
+To report stress memo entries:
   Convert the weaving selection's memo entry count to a string.
   Append the string to the check report.
 
-To append stress resource flag:
+To report stress resource flag:
   Convert the weaving selection's resource limit reached to a string.
   Append the string to the check report.
 
