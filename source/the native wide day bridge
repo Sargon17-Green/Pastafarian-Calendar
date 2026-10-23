@@ -20,7 +20,7 @@ To convert a calendar day into a wide signed day:
   Put the calendar day into the bridgeabsolute.
   Put 1 into the bridgepolarity.
   If the bridgeabsolute is less than 0,
-    multiply -1 by the bridgeabsolute;
+    multiply the bridgeabsolute by -1;
     put -1 into the bridgepolarity.
   Convert the bridgeabsolute to a string.
   Put the string into the bridgemagnitude.
