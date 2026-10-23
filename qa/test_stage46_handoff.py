@@ -43,11 +43,12 @@ def fixture():
         "run_id":"20261023T000000Z_cafefeed",
         "reason_code":"RECOVERED_NATIVE_CODESH_EXPECTED_RED_48_NEXT_GATE_ERRORS_STAGE45_GREEN",
         "previous_windows_assertion_counter":777277,
+        "recovery_cause":"STAGE46_v001 finalizer erroneously opened PINNED_INPUTS/PATCH22_CANDIDATE instead of DISCOVERY23_CANDIDATE",
         "status":"PASS", "work_status":"PASS", "process_exit_code":0,
         "expected_repository_state":"EXPECTED_RED", "last_completed_stage":45,
         "stage46_discovery_committed":False, "credited_new_windows_assertions":0,
         "recovered_without_reexecution":True, "native_processes_reexecuted":0,
-        "source":{"pinned_branch_head":v.BASE,
+        "source":{"branch":"Codesh+𐤉𐤄𐤅𐤃𐤉𐤕", "pinned_branch_head":v.BASE,
                   "candidate_discovery_source_sha256":v.digest(source), "git_writes":False},
         "gates":[{"name":name, "outcome":"EXPECTED_FAILURE" if code else "PASS",
                   "exit_code":code} for name,code in v.EXITS.items()],
@@ -75,6 +76,22 @@ def fixture():
         "EVIDENCE/FROZEN_ORACLE.tsv":oracle,
         "EVIDENCE/native-stage46-candidate.jar":jar.getvalue(),
         "LOGS/runner.log":runner,
+        "LOGS/bootstrap.log":b"SYNTHETIC_ORIGINAL_BOOTSTRAP",
+        "LOGS/recovery_bootstrap.log":b"SYNTHETIC_RECOVERY_BOOTSTRAP",
+        "RESULT.txt":(
+            "WORK=PASS\n"
+            "REASON=RECOVERED_NATIVE_CODESH_EXPECTED_RED_48_NEXT_GATE_ERRORS_STAGE45_GREEN\n"
+            "STAGE46=NOT_COMMITTED\nRECOVERY_ONLY=YES\n"
+        ).encode("utf-8"),
+        "00_START_HERE_HE.md":(
+            "# Stage46 DISCOVERY23 recovery: PASS\n\n"
+            "Original native run: " + v.RUN_ID +
+            "; reason=RECOVERED_NATIVE_CODESH_EXPECTED_RED_48_NEXT_GATE_ERRORS_STAGE45_GREEN.\n"
+        ).encode("utf-8"),
+        "01_CONTINUE_PROMPT_HE.md":(
+            "Validate Stage46 DISCOVERY23 recovered native HANDOFF v002. "
+            "Do not open Stage47 or modify main.\n"
+        ).encode("utf-8"),
     }
     for task in v.EXITS:
         for stream in ("stdout", "stderr"):
@@ -250,6 +267,44 @@ class Stage46ReceiptTests(unittest.TestCase):
     def test_wrong_original_package_version_rejected(self):
         receipt = json.loads(self.records["RESULT.json"])
         receipt["original_package_version"] = "v003"
+        self.records["RESULT.json"] = json_bytes(receipt)
+        self.attempt(False)
+
+    def test_original_bootstrap_missing_rejected(self):
+        del self.records["LOGS/bootstrap.log"]
+        self.attempt(False)
+
+    def test_recovery_bootstrap_missing_rejected(self):
+        del self.records["LOGS/recovery_bootstrap.log"]
+        self.attempt(False)
+
+    def test_contradictory_plain_result_rejected(self):
+        self.records["RESULT.txt"] = self.records["RESULT.txt"].replace(b"WORK=PASS", b"WORK=BLOCKED")
+        self.attempt(False)
+
+    def test_plain_result_reason_conflict_rejected(self):
+        self.records["RESULT.txt"] = self.records["RESULT.txt"].replace(
+            b"REASON=RECOVERED_NATIVE_CODESH", b"REASON=SYNTHETIC_CODESH")
+        self.attempt(False)
+
+    def test_handoff_guide_run_id_conflict_rejected(self):
+        self.records["00_START_HERE_HE.md"] = self.records["00_START_HERE_HE.md"].replace(
+            v.RUN_ID.encode("ascii"), b"20261021T000000Z_deadbeef")
+        self.attempt(False)
+
+    def test_continuation_guide_missing_rejected(self):
+        del self.records["01_CONTINUE_PROMPT_HE.md"]
+        self.attempt(False)
+
+    def test_wrong_branch_identity_rejected(self):
+        receipt = json.loads(self.records["RESULT.json"])
+        receipt["source"]["branch"] = "Codesh+different"
+        self.records["RESULT.json"] = json_bytes(receipt)
+        self.attempt(False)
+
+    def test_wrong_recovery_cause_rejected(self):
+        receipt = json.loads(self.records["RESULT.json"])
+        receipt["recovery_cause"] = "Invented successful run"
         self.records["RESULT.json"] = json_bytes(receipt)
         self.attempt(False)
 

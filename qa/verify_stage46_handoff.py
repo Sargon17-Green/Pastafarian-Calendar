@@ -86,7 +86,10 @@ def verify(path):
         ensure(archive.testzip() is None, "ZIP CRC mismatch")
         members = set(names)
         required = {
-            "RESULT.json", "MANIFEST.json", "SHA256SUMS.txt", "PROVENANCE/RECOVERY_RECEIPT.json",
+            "RESULT.json", "RESULT.txt", "MANIFEST.json", "SHA256SUMS.txt",
+            "00_START_HERE_HE.md", "01_CONTINUE_PROMPT_HE.md",
+            "PROVENANCE/RECOVERY_RECEIPT.json",
+            "LOGS/bootstrap.log", "LOGS/recovery_bootstrap.log",
             "EVIDENCE/native-stage46-candidate.jar", "EVIDENCE/DISCOVERY23_CANDIDATE.אמן",
             "EVIDENCE/FROZEN_ORACLE.tsv", "PINNED_INPUTS/PACKAGE_MANIFEST.json",
             "PINNED_INPUTS/DISCOVERY23_CANDIDATE.אמן",
@@ -123,6 +126,11 @@ def verify(path):
         ensure(receipt.get("recovered_without_reexecution") is True and
                receipt.get("native_processes_reexecuted") == 0 and
                receipt.get("native_run_id") == RUN_ID, "not original Native run")
+        ensure(receipt.get("source", {}).get("branch") == "Codesh+𐤉𐤄𐤅𐤃𐤉𐤕",
+               "wrong Codesh branch identity")
+        ensure(receipt.get("recovery_cause") ==
+               "STAGE46_v001 finalizer erroneously opened PINNED_INPUTS/PATCH22_CANDIDATE instead of DISCOVERY23_CANDIDATE",
+               "recovery cause changed")
         ensure(receipt.get("original_package_version") == "v001" and
                receipt.get("previous_windows_assertion_counter") == 777277 and
                receipt.get("reason_code") ==
@@ -143,6 +151,22 @@ def verify(path):
                header.get("recovery") is True and
                header.get("native_run_id") == RUN_ID and
                header.get("work_status") == "PASS", "MANIFEST.json inconsistency")
+        # The v002 packager generates a plaintext receipt and two handoff guides
+        # in addition to the JSON records. Do not accept contradictory summaries.
+        plain = archive.read("RESULT.txt").decode("utf-8")
+        ensure(plain == (
+            "WORK=PASS\n"
+            "REASON=" + receipt["reason_code"] + "\n"
+            "STAGE46=NOT_COMMITTED\nRECOVERY_ONLY=YES\n"
+        ), "plaintext result contradicts signed receipt")
+        guide = archive.read("00_START_HERE_HE.md").decode("utf-8")
+        ensure(guide.startswith("# Stage46 DISCOVERY23 recovery: PASS\n") and
+               "Original native run: " + RUN_ID + "; reason=" + receipt["reason_code"] in guide,
+               "handoff guide does not match original run")
+        continuation = archive.read("01_CONTINUE_PROMPT_HE.md").decode("utf-8")
+        ensure("Validate Stage46 DISCOVERY23 recovered native HANDOFF v002" in continuation and
+               "Do not open Stage47 or modify main." in continuation,
+               "continuation instructions missing")
         ensure(provenance.get("source_run_id") == RUN_ID and
                provenance.get("source_family") == FAMILY and
                provenance.get("failure") ==
