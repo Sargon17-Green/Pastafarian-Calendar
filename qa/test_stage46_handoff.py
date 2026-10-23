@@ -39,6 +39,10 @@ def fixture():
     receipt = {
         "schema_version":"WINDOWS-EXEC-PACK/2.1", "family_id":v.FAMILY,
         "package_version":"v002", "native_run_id":v.RUN_ID, "stage":46,
+        "original_package_version":"v001",
+        "run_id":"20261023T000000Z_cafefeed",
+        "reason_code":"RECOVERED_NATIVE_CODESH_EXPECTED_RED_48_NEXT_GATE_ERRORS_STAGE45_GREEN",
+        "previous_windows_assertion_counter":777277,
         "status":"PASS", "work_status":"PASS", "process_exit_code":0,
         "expected_repository_state":"EXPECTED_RED", "last_completed_stage":45,
         "stage46_discovery_committed":False, "credited_new_windows_assertions":0,
@@ -51,10 +55,17 @@ def fixture():
     }
     records = {
         "RESULT.json": json_bytes(receipt),
-        "MANIFEST.json": json_bytes({"family_id":v.FAMILY, "recovery":True,
-                                    "native_run_id":v.RUN_ID, "work_status":"PASS"}),
+        "MANIFEST.json": json_bytes({"contract":"WINDOWS-EXEC-PACK/2.1",
+                                    "family_id":v.FAMILY, "package_version":"v002",
+                                    "run_id":"20261023T000000Z_cafefeed",
+                                    "recovery":True, "native_run_id":v.RUN_ID,
+                                    "work_status":"PASS"}),
         "PROVENANCE/RECOVERY_RECEIPT.json":json_bytes({
             "source_run_id":v.RUN_ID,
+            "source_family":v.FAMILY,
+            "failure":"native HANDOFF finalizer used wrong PINNED_INPUTS/PATCH22_CANDIDATE filename",
+            "repair":"recovered original logs/compiled JAR/manifest/pinned inputs without rerunning",
+            "validated":[],
             "candidate_source_sha256":v.digest(source),
             "oracle_sha256":v.digest(oracle)}),
         "PINNED_INPUTS/PACKAGE_MANIFEST.json":manifest,
@@ -94,6 +105,9 @@ def fixture():
         "root_manifest_sha256": v.digest(manifest),
     })
     records["RESULT.json"] = json_bytes(receipt)
+    signed = json.loads(records["PROVENANCE/RECOVERY_RECEIPT.json"])
+    signed["validated"] = validations
+    records["PROVENANCE/RECOVERY_RECEIPT.json"] = json_bytes(signed)
     return records, {"CANDIDATE":v.digest(source),
                      "ORACLE":v.digest(oracle), "MANIFEST":v.digest(manifest),
                      "RUNNER_SHA":v.digest(runner)}
@@ -207,6 +221,36 @@ class Stage46ReceiptTests(unittest.TestCase):
         with zipfile.ZipFile(small, "w") as archive:
             archive.writestr("Only.class", b"synthetic" * 2500)
         self.records["EVIDENCE/native-stage46-candidate.jar"] = small.getvalue()
+        self.attempt(False)
+
+    def test_recovery_run_id_mismatch_rejected(self):
+        metadata = json.loads(self.records["MANIFEST.json"])
+        metadata["run_id"] = "20261023T000001Z_cafefeed"
+        self.records["MANIFEST.json"] = json_bytes(metadata)
+        self.attempt(False)
+
+    def test_provenance_validation_copy_mismatch_rejected(self):
+        metadata = json.loads(self.records["PROVENANCE/RECOVERY_RECEIPT.json"])
+        metadata["validated"][0]["sha256"] = "0" * 64
+        self.records["PROVENANCE/RECOVERY_RECEIPT.json"] = json_bytes(metadata)
+        self.attempt(False)
+
+    def test_missing_provenance_validation_copy_rejected(self):
+        metadata = json.loads(self.records["PROVENANCE/RECOVERY_RECEIPT.json"])
+        del metadata["validated"]
+        self.records["PROVENANCE/RECOVERY_RECEIPT.json"] = json_bytes(metadata)
+        self.attempt(False)
+
+    def test_wrong_native_recovery_reason_rejected(self):
+        receipt = json.loads(self.records["RESULT.json"])
+        receipt["reason_code"] = "SYNTHETIC_REPLACEMENT"
+        self.records["RESULT.json"] = json_bytes(receipt)
+        self.attempt(False)
+
+    def test_wrong_original_package_version_rejected(self):
+        receipt = json.loads(self.records["RESULT.json"])
+        receipt["original_package_version"] = "v003"
+        self.records["RESULT.json"] = json_bytes(receipt)
         self.attempt(False)
 
     def test_checksum_mismatch_rejected(self):

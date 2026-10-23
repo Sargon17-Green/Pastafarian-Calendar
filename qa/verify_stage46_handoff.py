@@ -123,14 +123,32 @@ def verify(path):
         ensure(receipt.get("recovered_without_reexecution") is True and
                receipt.get("native_processes_reexecuted") == 0 and
                receipt.get("native_run_id") == RUN_ID, "not original Native run")
+        ensure(receipt.get("original_package_version") == "v001" and
+               receipt.get("previous_windows_assertion_counter") == 777277 and
+               receipt.get("reason_code") ==
+               "RECOVERED_NATIVE_CODESH_EXPECTED_RED_48_NEXT_GATE_ERRORS_STAGE45_GREEN",
+               "recovery identity/credit fields mismatch")
+        run_id = receipt.get("run_id")
+        ensure(isinstance(run_id, str) and
+               re.fullmatch(r"[0-9]{8}T[0-9]{6}Z_[0-9a-f]{8}", run_id) is not None,
+               "malformed recovery run id")
         source = receipt.get("source", {})
         ensure(source.get("pinned_branch_head") == BASE and
                source.get("candidate_discovery_source_sha256") == CANDIDATE and
                source.get("git_writes") is False, "source provenance conflict")
-        ensure(header.get("family_id") == FAMILY and header.get("recovery") is True and
-               header.get("native_run_id") == RUN_ID and header.get("work_status") == "PASS",
-               "MANIFEST.json inconsistency")
+        ensure(header.get("contract") == "WINDOWS-EXEC-PACK/2.1" and
+               header.get("family_id") == FAMILY and
+               header.get("package_version") == "v002" and
+               header.get("run_id") == run_id and
+               header.get("recovery") is True and
+               header.get("native_run_id") == RUN_ID and
+               header.get("work_status") == "PASS", "MANIFEST.json inconsistency")
         ensure(provenance.get("source_run_id") == RUN_ID and
+               provenance.get("source_family") == FAMILY and
+               provenance.get("failure") ==
+               "native HANDOFF finalizer used wrong PINNED_INPUTS/PATCH22_CANDIDATE filename" and
+               provenance.get("repair") ==
+               "recovered original logs/compiled JAR/manifest/pinned inputs without rerunning" and
                provenance.get("candidate_source_sha256") == CANDIDATE and
                provenance.get("oracle_sha256") == ORACLE, "recovery provenance inconsistency")
         ensure(digest(archive.read("PINNED_INPUTS/PACKAGE_MANIFEST.json")) == MANIFEST, "original manifest SHA")
@@ -188,6 +206,8 @@ def verify(path):
         records = receipt.get("validation_records", [])
         ensure(isinstance(records, list) and len(records) == 7 + len(MARKERS),
                "missing or surplus validation records")
+        ensure(provenance.get("validated") == records,
+               "RESULT and PROVENANCE validation records disagree")
         ensure(all(isinstance(row, dict) and isinstance(row.get("name"), str)
                    for row in records), "malformed validation record")
         by_name = {row["name"]: row for row in records}
