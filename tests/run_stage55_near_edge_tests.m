@@ -63,6 +63,15 @@ L=[115 108 119 109 106 81 115 114 117 120 98 52 81 97 121 ...
    97 50 122 110 81 54 101 83 88 40 25 77 98 122 105];
 assert(numel(L)==45 && sum(L)==4244);
 offsets=[0 1 2 7 31 127];
+% Independently computed in a separate JS reference using direct
+% smallest/greatest admissible-letter walks and predecessor/successor.
+% Native MATLAB checks BOTH exact weighted moments for every whole
+% 4244-day word, not merely a 48-character prefix. These are
+% deterministic cross-implementation witnesses, NOT cryptographic hashes.
+goldenFirstWeighted=[264303486 264303485 264303484 264303479 264303455 264303462];
+goldenLastWeighted =[131812552 131812553 131812554 131812559 131812583 131812566];
+goldenFirstSquares=[8847605690 8847605601 8847605512 8847605067 8847602931 8847603554];
+goldenLastSquares =[2927435644 2927435647 2927435650 2927435665 2927435737 2927435686];
 timer=tic;
 for d=offsets
     [a,ra]=pastafari.unrankWholeWeavingNearEdge(L,d,'first');
@@ -72,6 +81,13 @@ for d=offsets
         ra.allStepsCompleted && rb.allStepsCompleted);
     checkLegal(a,L);
     checkLegal(b,L);
+    idx=find(offsets==d);
+    p=1:numel(a);
+    assert(sum(a.*p)==goldenFirstWeighted(idx) && ...
+        sum(b.*p)==goldenLastWeighted(idx) && ...
+        sum(a.*a.*p)==goldenFirstSquares(idx) && ...
+        sum(b.*b.*p)==goldenLastSquares(idx), ...
+        '4244-day word differs from independent golden full-word moments.');
     if d>0
         [prev,existsPrev]=pastafari.adjacentWholeMonthWeaving( ...
             a,L,'previous');

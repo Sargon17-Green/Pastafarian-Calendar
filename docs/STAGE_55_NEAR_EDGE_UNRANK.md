@@ -88,3 +88,24 @@ nie wolno oznaczać tego testu jako natywny PASS.
 \`STAGE_55_COMPLETE=NO\`, dopóki całe 4244-dniowe
 wewnętrzne unrank i pełne sprawdzenie pięcioskładnikowej
 daty nie przejdą niezależnego oracle.
+
+## Niezależne deterministyczne świadectwa całych słów
+
+Dodatkowy test porównuje dwa ważone momenty `sum(i*w(i))`
+i `sum(i*w(i)^2)` **całego** 4244-dniowego słowa z
+niezależnym modelem JS (sprawdzonym wcześniej przez
+enumerację 3940 małych legalnych słów). Dla odległości
+`[0 1 2 7 31 127]` wartości są:
+
+```text
+first weighted = [264303486 264303485 264303484 264303479 264303455 264303462]
+first squared  = [8847605690 8847605601 8847605512 8847605067 8847602931 8847603554]
+last  weighted = [131812552 131812553 131812554 131812559 131812583 131812566]
+last  squared  = [2927435644 2927435647 2927435650 2927435665 2927435737 2927435686]
+```
+
+Uwaga: to są **sumy kontrolne do regresji**, nie
+kryptograficzny dowód unikalności słowa. Pozostałe
+warunki testu (multiset, legalność pierwszych/ostatnich
+wystąpień i natywne DAG na małych rodzinach)
+są niezależnie wymagane.
