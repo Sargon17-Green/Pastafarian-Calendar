@@ -2264,3 +2264,75 @@ jobs:
           perl -Ilib -It/lib -c tools/audit_r69_bigint_neighbors.pl
           perl -Ilib -It/lib -c tools/profile_r69_bigint_neighbors.pl
           timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r69_bigint_neighbors.pl --profile c --seconds 185 --rss-kib 393216
+
+  canonical-r70-permutation-shard-0:
+    name: R70 全 24 順序與逆序雙射的原生分片 0
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r70-mirror-permutations]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 六個排列、BigInt 精確數及合法反轉詞的獨立驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r70_permutation_mirror.pl
+          perl -Ilib -It/lib -c tools/profile_r70_permutation_mirror.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r70_permutation_mirror.pl --shard 0 --seconds 185 --rss-kib 393216
+
+  canonical-r70-permutation-shard-1:
+    name: R70 全 24 順序與逆序雙射的原生分片 1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r70-mirror-permutations]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 六個排列、BigInt 精確數及合法反轉詞的獨立驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r70_permutation_mirror.pl
+          perl -Ilib -It/lib -c tools/profile_r70_permutation_mirror.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r70_permutation_mirror.pl --shard 1 --seconds 185 --rss-kib 393216
+
+  canonical-r70-permutation-shard-2:
+    name: R70 全 24 順序與逆序雙射的原生分片 2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r70-mirror-permutations]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 六個排列、BigInt 精確數及合法反轉詞的獨立驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r70_permutation_mirror.pl
+          perl -Ilib -It/lib -c tools/profile_r70_permutation_mirror.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r70_permutation_mirror.pl --shard 2 --seconds 185 --rss-kib 393216
+
+  canonical-r70-permutation-shard-3:
+    name: R70 全 24 順序與逆序雙射的原生分片 3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r70-mirror-permutations]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 六個排列、BigInt 精確數及合法反轉詞的獨立驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r70_permutation_mirror.pl
+          perl -Ilib -It/lib -c tools/profile_r70_permutation_mirror.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r70_permutation_mirror.pl --shard 3 --seconds 185 --rss-kib 393216
