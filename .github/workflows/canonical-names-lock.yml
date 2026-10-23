@@ -1048,3 +1048,22 @@ jobs:
           for label in SECOND_MONTH_START INTERLEAVED_MONTH2_SECOND_OCCURRENCE FINAL_MONTH_YEAR_END; do
             grep -Fq "FAIL — equivalenza normativa giorno ${label} — Giorno assoluto invece dell'occorrenza: ${label}" stage44.log
           done
+  native-stage45-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage45 month ordinal PATCH22
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage45Tests' 2>&1 | tee stage45.log
+          grep -Fq 'RISULTATO STADIO 45: 44 PASS, 0 FAIL' stage45.log
+          test "$(grep -Fc 'PASS — ' stage45.log)" -eq 44
+          test "$(grep -Fc 'FAIL — ' stage45.log)" -eq 0

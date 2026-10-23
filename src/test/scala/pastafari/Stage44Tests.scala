@@ -293,8 +293,12 @@ object Stage44Tests {
       truth(st.contains(
         "STAGE_43_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_55_PASS_0_FAIL"),
         "Firma Stage43")
-      truth(st.contains("CURRENT_STAGE=44"),"Stage44 corrente")
-      truth(st.contains("LAST_COMPLETED_STAGE=43"),"Ultimo")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      val done=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
+        .get.split("=",2)(1).toInt
+      truth(current>=44 && done>=44 && done<=current,
+        "Stadio 44 certificato")
     }
     check("nessuna PATCH22 è stata anticipata"){
       val walk=Files.walk(root().resolve("src/main/scala"))
@@ -303,7 +307,14 @@ object Stage44Tests {
         .map(p=>new String(Files.readAllBytes(p),StandardCharsets.UTF_8))
         .mkString("\n")
       finally walk.close()
-      truth(!code.contains("def monthOrdinalPatch("),"PATCH22 assente")
+      val st=new String(Files.readAllBytes(root().resolve(
+        "DEVELOPMENT_STAGE.md")),StandardCharsets.UTF_8)
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      if(current==44)
+        truth(!code.contains("def monthOrdinalPatch("),"PATCH22 assente")
+      else
+        truth(code.contains("def monthOrdinalPatch("),"PATCH22 successiva")
     }
     // Solo queste tre equivalenze normative falliscono volutamente.
     Vector(
