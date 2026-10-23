@@ -1,0 +1,60 @@
+{
+  "schema_version": "codesh-stage48-native-evidence-receipt/1",
+  "stage": 48,
+  "last_completed_stage": 48,
+  "status": "EXPECTED_RED_CONFIRMED",
+  "stage48_sealed": true,
+  "stage49_started": false,
+  "signed_stage47_head": "11de380cbdcee6e5d7d97425918dec1e30fafed6",
+  "baseline_signed_source_count": 42,
+  "native_compiled_source_count": 43,
+  "source": {
+    "path": "מקור/מסלול־יום־ראשון־שנה־סמוכה־ישן.אמן",
+    "sha256": "d3a31278fd4ad363e4884a49512870ce7f8bad7fba12a1b4be0d0c3ff3ef6cb9",
+    "git_blob_sha1": "a9a8c8d34b29e73f69734d331b66d49a57940091"
+  },
+  "native_run": {
+    "family": "CODESH_STAGE48_DISCOVERY24",
+    "package": "v001",
+    "run_id": "20261023T150350Z_b6c5ba90",
+    "os": "Windows-11-10.0.26300-SP0",
+    "compiler": "Codesh-v1.3",
+    "source_inputs_pinned": true
+  },
+  "frozen_oracle_sha256": "8d75a665925d2b88aa2bbb82fb71157c515b24babd5db7889a14c508eb7911ee",
+  "stage47_signed_handoff_sha256": "d05f49f0150778cb7b385e94a01f1b41fd2380ae096b94cf913037be4951edb6",
+  "native_jar_sha256": "e86ec168ab5dcee9f3c5317243736d6204ca2337b4fa68f2a8ce51b6cd42f06b",
+  "handoff": {
+    "name": "CODESH_STAGE48_DISCOVERY24_HANDOFF_v001_20261023T150350Z_b6c5ba90_PASS.zip",
+    "sha256": "e92b34b4b8c96366347bc33aba9992be01ccc3c8ee02a36e3b0450c86ad7ed7c",
+    "library_path": "/Codesh_Checkpoints/CODESH_STAGE48_DISCOVERY24_HANDOFF_v001_20261023T150350Z_b6c5ba90_PASS.zip",
+    "zip_crc": "PASS",
+    "sha256_entries_verified": 63
+  },
+  "checks": {
+    "native_processes": 23,
+    "expected_exit_zero": 22,
+    "expected_oracle_tamper_exit_one": 1,
+    "regressions_stage29_to_stage47": 19,
+    "frozen_selected_year_matches": 48,
+    "canonical_first_day_matches": 48,
+    "old_second_day_as_first_mismatches": 48,
+    "old_objects_detached": 48,
+    "repeated_and_order_stable": 48,
+    "caller_and_selected_unchanged": 48,
+    "first_last_day_matches": 48,
+    "signed_gate_spans_matches": 48,
+    "stage47_patch_closing_gate_matches": 48,
+    "stage46_old_closing_gate_mismatches": 48,
+    "stage45_patch_open_gate_matches": 48,
+    "next_cases": 24,
+    "previous_cases": 24
+  },
+  "provenance": {
+    "git_writes_during_windows_test": false,
+    "baseline_compared_against_pinned_git_head": true,
+    "previous_42_codesh_sources_unchanged": true
+  },
+  "credit_new_windows_assertions": 0,
+  "preservation": "The HANDOFF is kept only in the ChatGPT library, not committed into GitHub"
+}

@@ -63,16 +63,29 @@ jobs:
                   and fields.get('STAGE47_STARTED') == 'NO'
               )
 
-          stage47_completed = stage.get('CURRENT_STAGE') == '47'
-          if stage47_completed:
-              assert stage['CURRENT_KIND'] == 'PATCH'
-              assert stage['CURRENT_DISCOVERY'] == '23'
+          stage48_completed = stage.get('CURRENT_STAGE') == '48'
+          stage47_completed = stage.get('CURRENT_STAGE') in ('47', '48')
+          if stage48_completed:
+              assert stage['CURRENT_KIND'] == 'DISCOVERY'
+              assert stage['CURRENT_DISCOVERY'] == '24'
               assert stage['CURRENT_PATCH'] == '23'
-              assert stage['LAST_COMPLETED_STAGE'] == '47'
-              assert stage['EXPECTED_REPOSITORY_STATE'] == 'GREEN'
-              assert stage['STAGE47_STARTED'] == 'YES'
-              assert stage['STAGE48_STARTED'] == 'NO'
-              assert stage['STAGE47_EVIDENCE_RECEIPT'] == 'qa/Stage47_Native_Evidence_Receipt.json'
+              assert stage['LAST_COMPLETED_STAGE'] == '48'
+              assert stage['EXPECTED_REPOSITORY_STATE'] == 'EXPECTED_RED'
+              assert stage['STAGE48_STARTED'] == 'YES'
+              assert stage['STAGE49_STARTED'] == 'NO'
+              assert stage['STAGE48_EVIDENCE_RECEIPT'] == 'qa/Stage48_Native_Evidence_Receipt.json'
+          previous47 = ({**stage, 'CURRENT_STAGE': '47', 'CURRENT_KIND': 'PATCH',
+              'LAST_COMPLETED_STAGE': '47', 'EXPECTED_REPOSITORY_STATE': 'GREEN',
+              'STAGE48_STARTED': 'NO'} if stage48_completed else stage)
+          if stage47_completed:
+              assert previous47['CURRENT_KIND'] == 'PATCH'
+              assert previous47['CURRENT_DISCOVERY'] == '23'
+              assert previous47['CURRENT_PATCH'] == '23'
+              assert previous47['LAST_COMPLETED_STAGE'] == '47'
+              assert previous47['EXPECTED_REPOSITORY_STATE'] == 'GREEN'
+              assert previous47['STAGE47_STARTED'] == 'YES'
+              assert previous47['STAGE48_STARTED'] == 'NO'
+              assert previous47['STAGE47_EVIDENCE_RECEIPT'] == 'qa/Stage47_Native_Evidence_Receipt.json'
           historic_stage = ({**stage, 'CURRENT_STAGE': '46', 'CURRENT_KIND': 'DISCOVERY',
               'LAST_COMPLETED_STAGE': '46', 'EXPECTED_REPOSITORY_STATE': 'EXPECTED_RED',
               'STAGE47_STARTED': 'NO'} if stage47_completed else stage)
@@ -146,8 +159,53 @@ jobs:
               assert git_blob(patch47) == stage47_receipt['source']['git_blob_sha1']
               assert patch47.count('ל־קח־שער־סוגר'.encode('utf-8')) == 2
               assert patch47.count('ויתקדם שער־ישן:'.encode('utf-8')) == 0
+          if stage48_completed:
+              receipt48 = json.loads(Path('qa/Stage48_Native_Evidence_Receipt.json').read_text(encoding='utf-8'))
+              def verified48(rcpt, fields):
+                  return (
+                      rcpt.get('schema_version') == 'codesh-stage48-native-evidence-receipt/1'
+                      and rcpt.get('stage') == 48
+                      and rcpt.get('last_completed_stage') == 48
+                      and rcpt.get('status') == 'EXPECTED_RED_CONFIRMED'
+                      and rcpt.get('stage48_sealed') is True
+                      and rcpt.get('stage49_started') is False
+                      and rcpt.get('baseline_signed_source_count') == 42
+                      and rcpt.get('native_compiled_source_count') == 43
+                      and rcpt.get('native_run', {}).get('run_id') == '20261023T150350Z_b6c5ba90'
+                      and rcpt.get('native_run', {}).get('package') == 'v001'
+                      and rcpt.get('checks', {}).get('native_processes') == 23
+                      and rcpt.get('checks', {}).get('expected_exit_zero') == 22
+                      and rcpt.get('checks', {}).get('expected_oracle_tamper_exit_one') == 1
+                      and rcpt.get('checks', {}).get('regressions_stage29_to_stage47') == 19
+                      and rcpt.get('checks', {}).get('old_second_day_as_first_mismatches') == 48
+                      and rcpt.get('checks', {}).get('next_cases') == 24
+                      and rcpt.get('checks', {}).get('previous_cases') == 24
+                      and rcpt.get('handoff', {}).get('sha256_entries_verified') == 63
+                      and fields.get('LAST_COMPLETED_STAGE') == '48'
+                      and fields.get('STAGE49_STARTED') == 'NO'
+                  )
+              assert verified48(receipt48, stage), 'Stage48 receipt or development state not verified'
+              assert receipt48['signed_stage47_head'] == '11de380cbdcee6e5d7d97425918dec1e30fafed6'
+              assert receipt48['stage47_signed_handoff_sha256'] == stage['STAGE47_WINDOWS_PASS_HANDOFF_SHA256']
+              assert receipt48['source']['path'] == 'מקור/מסלול־יום־ראשון־שנה־סמוכה־ישן.אמן'
+              assert receipt48['source']['sha256'] == stage['STAGE48_OLD_SOURCE_SHA256']
+              assert receipt48['source']['git_blob_sha1'] == stage['STAGE48_OLD_SOURCE_GIT_BLOB_SHA1']
+              assert receipt48['native_jar_sha256'] == stage['STAGE48_NATIVE_JAR_SHA256']
+              assert receipt48['frozen_oracle_sha256'] == stage['STAGE48_FROZEN_ORACLE_SHA256']
+              assert receipt48['handoff']['sha256'] == stage['STAGE48_WINDOWS_PASS_HANDOFF_SHA256']
+              assert receipt48['source']['path'] not in expected_sources
+              expected_sources.add(receipt48['source']['path'])
+              newsource = Path(receipt48['source']['path']).read_bytes()
+              assert hashlib.sha256(newsource).hexdigest() == receipt48['source']['sha256']
+              assert git_blob(newsource) == receipt48['source']['git_blob_sha1']
+              assert newsource.count('ל־קח־יום־ראשון'.encode('utf-8')) == 2
+              assert newsource.count('ל־חבר'.encode('utf-8')) == 2
+              assert not verified48({**receipt48, 'stage48_sealed': False}, stage)
+              assert not verified48({**receipt48, 'checks': {**receipt48['checks'], 'native_processes': 22}}, stage)
+              assert not verified48({**receipt48, 'checks': {**receipt48['checks'], 'regressions_stage29_to_stage47': 18}}, stage)
+              assert not verified48(receipt48, {**stage, 'LAST_COMPLETED_STAGE': '47'})
           actual_sources = {x.as_posix() for x in Path('מקור').glob('*.אמן')}
-          assert actual_sources == expected_sources, 'Exactly one new Codesh source is allowed'
+          assert actual_sources == expected_sources, 'Only sources proven by signed stage receipts may exist'
           for filename, sha1 in baseline.items():
               assert git_blob(Path(filename).read_bytes()) == sha1, 'Signed source mutated'
           candidate_raw = Path(candidate_path).read_bytes()
@@ -165,7 +223,7 @@ jobs:
           assert not sealed(receipt, {**historic_stage, 'LAST_COMPLETED_STAGE': '45'})
           assert not sealed(receipt, {**historic_stage, 'STAGE47_STARTED': 'YES'})
           assert git_blob(candidate_raw + b'X') != receipt['new_old_source']['git_blob_sha1']
-          print('PASS: immutable Stage45 sources, signed Stage46 OLD and conditional Stage47 PATCH; eight negative controls')
+          print('PASS: 40 immutable Stage45 sources plus signed Stage46, Stage47 and Stage48; negative controls retained')
           PY
       - name: Exercise recovered HANDOFF verifier on synthetic fixtures only
         shell: bash
