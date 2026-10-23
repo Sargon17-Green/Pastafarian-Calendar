@@ -1,0 +1,30 @@
+name: MATLAB Real Year-5000 Exact Three-Day Rank (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_lazy_joint_three_step.m'
+      - '.github/workflows/matlab-stage55-real-year-three-step.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-three-step:
+    name: MATLAB R2026a / 4244-day interior rank third child differential
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - name: Checkout experiment commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Compare interior 3-day rank with independent 4241-day suffix
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_real_year_lazy_joint_three_step
