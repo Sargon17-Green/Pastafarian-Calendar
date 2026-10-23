@@ -8,6 +8,11 @@ mkdir -p build
 # older 34-minute fullroot/prefix verification when verifying one
 # more prefix. SHA-256 checks below are the actual data boundary.
 test -s build/fullroot_head.txt
+# The exact merge SHA printed in the successful GitHub Actions
+# full_weave_root job 120389878594 of run 39946357557.
+# Reject any other artifact provenance before trusting its hashes.
+grep -Fxq 'b980ec973041194f7827d0bced43411fd637f668' build/fullroot_head.txt
+echo "STAGE1_PREFIX5_SOURCE_MERGE_SHA_VERIFIED"
 sha256sum -c <<'CHECKED'
 925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da  build/foundation_weave_root.bin
 2c447438a567fbc40a79c68fb8b3f27f308cb89a2f59aaba1d2275dd3acf1a06  build/foundation_weave_rank.bin
