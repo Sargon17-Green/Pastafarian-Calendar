@@ -120,4 +120,23 @@ defmodule PastafariCalendarElixirVietnamese.Stage53Patch26Test do
       Calendar.calendar_date_spaghetti(@foundation, @foundation)
     end
   end
+  test "đếm và mở hạng 47 tháng có độ dài tối thiểu" do
+    lengths = List.duplicate(4, 47)
+    possibilities = WeavingCombinatorics.count(lengths)
+    assert possibilities > 1
+    first = WeavingCombinatorics.unrank(lengths, 1)
+    assert length(first) == 188
+    for label <- 1..47 do
+      assert Enum.count(first, &(&1 == label)) == 4
+    end
+  end
+
+  @tag timeout: 180_000
+  test "đếm chính xác năm tối đa 5778 ngày không duyệt mọi trạng thái" do
+    lengths = List.duplicate(123, 46) ++ [120]
+    count = WeavingCombinatorics.count(lengths)
+    assert is_integer(count)
+    assert count > Integer.pow(2, 127)
+  end
+
 end

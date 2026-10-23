@@ -14,7 +14,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Elixir
 NATURAL_LANGUAGE=Tiếng Việt
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..25; Stage53 thêm MonthWeavingOrderPatch gọi thật legacy và giữ chuỗi lịch sử trước khi đảo thứ tự nhãn.
+MONSTER_ARCHITECTURE_GROWTH=Giữ PATCH01..25; Stage53 giữ legacy thật và thay WeavingCombinatorics bằng bảng đuôi tổ hợp để tránh nổ không gian trạng thái.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=STAGE_53_PATCH_IMPLEMENTATION
@@ -1129,3 +1129,7 @@ Tên chuẩn: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/run
 Giai đoạn kế: 53 PATCH26.
 
 Stage53 PATCH26 đã triển khai, chờ kiểm chứng CI native và Canonical Names Lock.
+
+Cải tiến trước khi đóng Stage53: bảng đuôi tổ hợp và đếm
+bằng số nguyên lớn; có kiểm thử 47 tháng, 5.778 ngày.
+CI vẫn chưa xác nhận, không khẳng định hoàn tất soak.
