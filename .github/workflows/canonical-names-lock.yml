@@ -2210,3 +2210,57 @@ jobs:
           perl -Ilib -It/lib -c tools/audit_r68_bigint_rank.pl
           perl -Ilib -It/lib -c tools/profile_r68_bigint_rank.pl
           timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r68_bigint_rank.pl --profile b --seconds 185 --rss-kib 393216
+
+  canonical-r69-lex-neighbor-a:
+    name: R69 BigInt 獨立詞典相鄰者 a
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r69-lex-neighbors]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 確認 native 鄰詞 rank/unrank 和真實左右相鄰次序
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r69_bigint_neighbors.pl
+          perl -Ilib -It/lib -c tools/profile_r69_bigint_neighbors.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r69_bigint_neighbors.pl --profile a --seconds 185 --rss-kib 393216
+
+  canonical-r69-lex-neighbor-b:
+    name: R69 BigInt 獨立詞典相鄰者 b
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r69-lex-neighbors]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 確認 native 鄰詞 rank/unrank 和真實左右相鄰次序
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r69_bigint_neighbors.pl
+          perl -Ilib -It/lib -c tools/profile_r69_bigint_neighbors.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r69_bigint_neighbors.pl --profile b --seconds 185 --rss-kib 393216
+
+  canonical-r69-lex-neighbor-c:
+    name: R69 BigInt 獨立詞典相鄰者 c
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r69-lex-neighbors]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 確認 native 鄰詞 rank/unrank 和真實左右相鄰次序
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r69_bigint_neighbors.pl
+          perl -Ilib -It/lib -c tools/profile_r69_bigint_neighbors.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r69_bigint_neighbors.pl --profile c --seconds 185 --rss-kib 393216

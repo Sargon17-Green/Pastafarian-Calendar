@@ -37,3 +37,8 @@ Linux 父進程監督，GitHub 每份 5 分鐘，外層 timeout 195 秒。
 全部 SUCCESS 才可封存；失敗、超時、超 RSS 另行保留。
 此為四月份局部字序證據，不代表全 45 月／4244 日
 完整全球字序或多語言 cross-implementation soak。
+
+
+## R68 最終驗收（2026-10-23）
+
+GitHub Actions 39964785361 對 HEAD be7aac4274cb71a7a21ec3cda6acf677d7c4d46b 的 verify、perl-stage01、R68 a、R68 b 四項工作均 SUCCESS，且兩份父程序監督回報 passed=1 blocked=0 failed=0。第六十八輪封存 PASS；後續的 R69 不應倒寫本輪歷史結果。
