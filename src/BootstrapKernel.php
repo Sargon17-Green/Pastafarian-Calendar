@@ -525,6 +525,27 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'rank.rejection.patch13.calls');
             return $rank;
         });
+        $this->dispatcher->register('BIG_ENDIAN_DIGITS_LEGACY', function(BootstrapContext $context): BigInt {
+            $bowlId=$context->semanticState['queriedBowlId'] ?? null;
+            $seal=$context->semanticState['seal'] ?? null;
+            $space=$context->semanticState['choiceSpace'] ?? null;
+            if (!is_int($bowlId)||!is_int($seal)||!$space instanceof BigInt) {
+                throw new \InvalidArgumentException('BIG_ENDIAN_LEGACY_ARGS');
+            }
+            $stream=$this->askBowl(
+                $context->calculationDay,$context->targetDay,$bowlId,$seal
+            );
+            $legacy=new \Pastafari\Stage01\Legacy\LegacyBigEndianDigits14(
+                new \Pastafari\Stage01\Patches\SavePatch01(
+                    new \Pastafari\Stage01\Legacy\LegacyRemainder()
+                )
+            );
+            $rank=$legacy->chooseWrong($stream,$space);
+            $context->semanticState['bigEndianRank']=$rank;
+            $context->status='BIG_ENDIAN_DIGITS_LEGACY_RETURNED';
+            $this->metrics->bump($context,'legacy.big_endian_choice.requests');
+            return $rank;
+        });
         $this->dispatcher->register('NO_REJECTION_CHOICE_LEGACY', function(BootstrapContext $context): BigInt {
             $bowlId = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -603,6 +624,25 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): BigInt => $this->dispatcher->dispatch('REJECTION_SAMPLING_PATCH_13', $context)
+        );
+    }
+
+    /**
+     * DISCOVERY14: pilihan besar menggunakan digit dengan berat yang salah.
+     * @return BigInt Pangkat sejarah yang tersasar untuk M < n <= M*M.
+     */
+    public function legacyChooseWideRank(
+        int $calculationDay,int $targetDay,int $queriedBowlId,
+        int $seal,BigInt $space
+    ): BigInt {
+        $context=new BootstrapContext($calculationDay,$targetDay);
+        $context->phase='BIG_ENDIAN_DIGITS_LEGACY';
+        $context->semanticState['queriedBowlId']=$queriedBowlId;
+        $context->semanticState['seal']=$seal;
+        $context->semanticState['choiceSpace']=$space;
+        return $this->boundary->run(
+            $context,
+            fn(): BigInt => $this->dispatcher->dispatch('BIG_ENDIAN_DIGITS_LEGACY', $context)
         );
     }
 

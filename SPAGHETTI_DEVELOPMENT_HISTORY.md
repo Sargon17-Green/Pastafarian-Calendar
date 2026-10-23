@@ -621,3 +621,19 @@ php -d memory_limit=512M tests/stage27_patch13_tests.php
 \`\`\`
 
 **Status: AWAITING_CI.** Stage28 belum dimulakan; tiada oracle dalam kod produksi, tiada perubahan pada \`main\`, katalog atau fixture.
+
+
+## Stage 28 — DISCOVERY 14: Berat digit pilihan besar diterbalikkan
+
+Stage27 PATCH13 disahkan GREEN pada SHA `21288f66b97a713ed99b5513f0017c20f1ef82cf`, Native GitHub Actions run `39945378948`, kedua-dua pekerjaan SUCCESS. Stage28 meninjau ruang pilihan lebih besar daripada `M = 2^127-1` tetapi tidak melebihi `M*M`: tepat dua digit SAVE diperlukan.
+
+`LegacyBigEndianDigits14::chooseWrong` menganggap sampel pertama sebagai digit **paling penting** (`M`) dan sampel kedua sebagai digit **kurang penting** (1). Oracle PHP tempatan menafsir sampel pertama sebagai digit kurang penting, lalu digit kedua pada pemberat `M`. Kecacatan ini tidak mengubah formula SAVE atau had penerimaan `floor(M*M/n)*n`; hanya pemberat kedudukan digit tersalah. `BootstrapKernel::legacyChooseWideRank` mendedahkan penghala `BIG_ENDIAN_DIGITS_LEGACY`, menggunakan strim asal daripada PATCH12, dengan konteks sendiri.
+
+Empat saksi tetap diuji pada `n=M+1`: sampel pertama 1 dan langkah +1, sampel pertama 2 langkah +1, sampel pertama 2 langkah -1, sampel pertama M langkah +1 yang juga menguji lilitan. Empat keputusan salah ialah `EXPECTED_RED`, di samping matriks 48 kes (empat ruang, enam titik mula dan dua arah), tiga jejak tarikh sebenar dan lima penolakan input.
+
+```text
+php -d memory_limit=512M tests/stage28_discovery14_tests.php  # exit 1 tepat
+php -d memory_limit=512M tests/verify_stage28_discovery14.php # exit 0 jika RED terkawal
+```
+
+Semua Stage1–27, pemeriksaan sintaks, fixture dan kunci nama kanonik wajib kekal hijau. **Jangan tambah `BigEndianDigitsPatch14` atau Stage29 sebelum Native CI Stage28 pada SHA tepat disahkan.** Tiada perubahan `main`, oracle produksi, katalog atau fixture.
