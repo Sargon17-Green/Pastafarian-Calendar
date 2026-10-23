@@ -273,15 +273,25 @@ object Stage46Tests {
         "DEVELOPMENT_STAGE.md")),StandardCharsets.UTF_8)
       truth(st.contains("STAGE_45_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_44_PASS_0_FAIL"),
         "Firma Stage45")
-      truth(st.contains("CURRENT_STAGE=46"),"Stage46")
-      truth(st.contains("LAST_COMPLETED_STAGE=45"),"Ultimo")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      val completed=st.linesIterator.find(
+        _.startsWith("LAST_COMPLETED_STAGE="))
+        .get.split("=",2)(1).toInt
+      truth(current>=46 && completed>=46 && completed<=current,
+        "Stage46 certificato")
+      truth(st.contains("STAGE_46_NATIVE_VERIFICATION=PASS_EXPECTED_RED_40_PASS_3_FAIL"),
+        "Firma Stage46")
       val walk=Files.walk(root().resolve("src/main/scala"))
       val code=try walk.iterator().asScala
         .filter(p=>Files.isRegularFile(p)&&p.toString.endsWith(".scala"))
         .map(p=>new String(Files.readAllBytes(p),StandardCharsets.UTF_8))
         .mkString("\n")
       finally walk.close()
-      truth(!code.contains("def contiguousMonthPatch("),"PATCH23 assente")
+      if(current==46)
+        truth(!code.contains("def contiguousMonthPatch("),"PATCH23 assente")
+      else
+        truth(code.contains("def contiguousMonthPatch("),"PATCH23 successiva")
     }
     // Solo queste tre equivalenze normative sono EXPECTED_RED.
     Vector(

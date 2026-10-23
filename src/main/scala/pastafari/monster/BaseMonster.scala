@@ -186,7 +186,9 @@ final case class BaseMonsterContext(
   var monthBlockSnapshot: Option[(Vector[Int],Int)] = None,
   var legacyMonthBlockLengths: Option[Vector[Int]] = None,
   var legacyMonthBlockMonthId: Option[Int] = None,
-  var legacyMonthBlockOrdinal: Option[Int] = None
+  var legacyMonthBlockOrdinal: Option[Int] = None,
+  var patch23CorrectedDayInMonth: Option[Int] = None,
+  var patch23Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -323,6 +325,54 @@ final class BaseValidationManager {
   /** DISCOVERY23: convalida la cicatrice del mese assunto contiguo,
     * ricalcolando durate e prefissi senza invocare l'adapter storico.
     */
+
+  /** PATCH23: ricostruisce l'ordinale normative dal solo prefisso
+    * tessuto, senza invocare il wrapper PATCH23 o l'oracolo test.
+    * Verifica anche integralmente la cicatrice DISCOVERY23.
+    */
+  def requirePatch23Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_23_CONTIGUOUS_MONTH_ASSUMPTION" ||
+       ctx.status!="PATCH_23_READY" || !ctx.patch23Applied ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_23_CONTIGUOUS_MONTH_ASSUMPTION",
+         "PATCH_23_CONTIGUOUS_MONTH_ASSUMPTION") ||
+       ctx.monthBlockWeaving.isEmpty || ctx.monthBlockDayOffset.isEmpty ||
+       ctx.monthBlockSnapshot.isEmpty ||
+       ctx.legacyMonthBlockLengths.isEmpty ||
+       ctx.legacyMonthBlockMonthId.isEmpty ||
+       ctx.legacyMonthBlockOrdinal.isEmpty ||
+       ctx.patch23CorrectedDayInMonth.isEmpty)
+      throw new IllegalStateException("PATCH23 non completa.")
+    val weave=ctx.monthBlockWeaving.get
+    val offset=ctx.monthBlockDayOffset.get
+    if(ctx.monthBlockSnapshot.get!=(weave,offset))
+      throw new IllegalStateException("Snapshot PATCH23 manomessa.")
+    LegacyDaywiseWeavingAdapter.validateCandidates(Vector(weave))
+    if(offset<0 || offset>=weave.length)
+      throw new IllegalStateException("Offset PATCH23 non valido.")
+    val n=weave.max
+    val lengths=Array.fill(n)(0)
+    var correctOrdinal=0
+    var i=0
+    val target=weave(offset)
+    while(i<weave.length) {
+      lengths(weave(i)-1)+=1
+      if(i<=offset && weave(i)==target) correctOrdinal+=1
+      i+=1
+    }
+    var presumedStart=0
+    var j=0
+    while(j<target-1) {
+      presumedStart+=lengths(j)
+      j+=1
+    }
+    if(ctx.legacyMonthBlockLengths.get!=lengths.toVector ||
+       ctx.legacyMonthBlockMonthId.get!=target ||
+       ctx.legacyMonthBlockOrdinal.get!=offset-presumedStart+1 ||
+       ctx.patch23CorrectedDayInMonth.get!=correctOrdinal)
+      throw new IllegalStateException("PATCH23 risultato manomesso.")
+  }
+
   def requireDiscovery23Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="DISCOVERY_23_CONTIGUOUS_MONTH_ASSUMPTION" ||
        ctx.status!="LEGACY_CONTIGUOUS_MONTH_READY" ||
@@ -2069,7 +2119,8 @@ final class BaseMonsterManager {
     new Patch21DayIndexedCutletNameHandler(metrics),
     new Discovery22MonthOrdinalGlobalDayHandler(metrics),
     new Patch22MonthOrdinalGlobalDayHandler(metrics),
-    new Discovery23ContiguousMonthHandler(metrics)
+    new Discovery23ContiguousMonthHandler(metrics),
+    new Patch23ContiguousMonthHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -3291,6 +3342,36 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("discovery23",error)
+    }
+  }
+
+
+  def patch23ContiguousMonthAssumption(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    annualWeaving: Vector[Int],
+    dayOffset: Int
+  ): Patch23ContiguousMonthReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.monthBlockWeaving=Some(annualWeaving)
+    ctx.monthBlockDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_23_CONTIGUOUS_MONTH_ASSUMPTION"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery23Ready(ctx)
+      ctx.phase="PATCH_23_CONTIGUOUS_MONTH_ASSUMPTION"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch23Ready(ctx)
+      Patch23ContiguousMonthReport(
+        ctx.calculationDay,ctx.targetDay,ctx.monthBlockWeaving.get,
+        ctx.monthBlockDayOffset.get,ctx.legacyMonthBlockLengths.get,
+        ctx.legacyMonthBlockMonthId.get,
+        ctx.legacyMonthBlockOrdinal.get,
+        ctx.patch23CorrectedDayInMonth.get,ctx.patch23Applied,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("patch23",error)
     }
   }
 

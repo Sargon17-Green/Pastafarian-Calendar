@@ -1094,3 +1094,22 @@ jobs:
           for label in WOVEN_MONTH2_FIRST WOVEN_MONTH3_SECOND WOVEN_MONTH1_LAST; do
             grep -Fq "FAIL — equivalenza normativa ${label} — Assunzione di contiguità: ${label}" stage46.log
           done
+  native-stage47-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage47 PATCH23 mixed-month ordinal
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage47Tests' 2>&1 | tee stage47.log
+          grep -Fq 'RISULTATO STADIO 47: 54 PASS, 0 FAIL' stage47.log
+          test "$(grep -Fc 'PASS — ' stage47.log)" -eq 54
+          test "$(grep -Fc 'FAIL — ' stage47.log)" -eq 0
