@@ -85,6 +85,8 @@ def fixture():
     validations = [{"name": name, "sha256": v.digest(records[p]), "bytes": len(records[p])}
                    for name, p in paths.items()]
     validations.insert(4, {"name":"SIGNED_SOURCES_40_PLUS_ISOLATED_OLD", "count":40, "status":"PASS"})
+    with zipfile.ZipFile(io.BytesIO(records["EVIDENCE/native-stage46-candidate.jar"])) as compiled:
+        next(x for x in validations if x["name"] == "NATIVE_JAR")["member_count"] = len(compiled.infolist())
     receipt["validation_records"] = validations
     receipt["provenance"].update({
         "jar_sha256": v.digest(records["EVIDENCE/native-stage46-candidate.jar"]),
