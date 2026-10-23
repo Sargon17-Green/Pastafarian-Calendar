@@ -1,0 +1,51 @@
+{
+  "schema_version": "codesh-stage47-native-evidence-receipt/1",
+  "stage": 47,
+  "last_completed_stage": 47,
+  "status": "GREEN_CONFIRMED",
+  "stage47_sealed": true,
+  "stage48_started": false,
+  "baseline_stage46_head": "63f91958028ae49b11e59ed63705b0ec552302c3",
+  "stage46_signed_source_count": 41,
+  "native_compiled_source_count": 42,
+  "source": {
+    "path": "מקור/מסלול־שער־סוגר־שנה־סמוכה־מתוקן.אמן",
+    "sha256": "10379b1fa343afb56133cf06ac4aa2f79aea25183491e901d27b94ed88a709a4",
+    "git_blob_sha1": "9aa9a84c95d3d8d5b57608c7f92e4daf437457d2"
+  },
+  "native_run": {
+    "family": "CODESH_STAGE47_PATCH23",
+    "package": "v002",
+    "run_id": "20261023T105519Z_fc06fe6a",
+    "system": "Windows-11-10.0.26300-SP0",
+    "compiler": "Codesh-v1.3",
+    "source_inputs_pinned": true
+  },
+  "frozen_oracle_sha256": "8d75a665925d2b88aa2bbb82fb71157c515b24babd5db7889a14c508eb7911ee",
+  "stage46_signed_handoff_sha256": "d1b876c46f25c082bfb13312080b72c75dceafff0efb109ce47c327af1925b51",
+  "native_jar_sha256": "c4de4c943a17ad8cdb6a7449ee865125dab573c7c5e8c2723e14d8f3c9f46220",
+  "handoff": {
+    "name": "CODESH_STAGE47_PATCH23_HANDOFF_v002_20261023T105519Z_fc06fe6a_PASS.zip",
+    "sha256": "d05f49f0150778cb7b385e94a01f1b41fd2380ae096b94cf913037be4951edb6",
+    "library_path": "/Codesh_Checkpoints/CODESH_STAGE47_PATCH23_HANDOFF_v002_20261023T105519Z_fc06fe6a_PASS.zip",
+    "zip_crc": "PASS",
+    "sha256_entries_verified": 61
+  },
+  "checks": {
+    "native_processes": 22,
+    "expected_exit_zero": 21,
+    "expected_oracle_tamper_exit_one": 1,
+    "regressions_stage29_to_stage46": 18,
+    "frozen_selected_year_matches": 48,
+    "canonical_closing_gate_matches": 48,
+    "patch_closing_gate_matches": 48,
+    "old_stage46_mismatches_preserved": 48,
+    "patch_instances_detached": 48,
+    "repeat_call_order_stable": 48,
+    "caller_unchanged": 48,
+    "next_cases": 24,
+    "previous_cases": 24
+  },
+  "source_contract": "No signed previous Codesh source changed; no user HANDOFF archived inside the Git repository",
+  "credit_new_assertions": 0
+}

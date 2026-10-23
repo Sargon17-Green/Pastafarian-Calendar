@@ -63,13 +63,27 @@ jobs:
                   and fields.get('STAGE47_STARTED') == 'NO'
               )
 
+          stage47_completed = stage.get('CURRENT_STAGE') == '47'
+          if stage47_completed:
+              assert stage['CURRENT_KIND'] == 'PATCH'
+              assert stage['CURRENT_DISCOVERY'] == '23'
+              assert stage['CURRENT_PATCH'] == '23'
+              assert stage['LAST_COMPLETED_STAGE'] == '47'
+              assert stage['EXPECTED_REPOSITORY_STATE'] == 'GREEN'
+              assert stage['STAGE47_STARTED'] == 'YES'
+              assert stage['STAGE48_STARTED'] == 'NO'
+              assert stage['STAGE47_EVIDENCE_RECEIPT'] == 'qa/Stage47_Native_Evidence_Receipt.json'
+          historic_stage = ({**stage, 'CURRENT_STAGE': '46', 'CURRENT_KIND': 'DISCOVERY',
+              'LAST_COMPLETED_STAGE': '46', 'EXPECTED_REPOSITORY_STATE': 'EXPECTED_RED',
+              'STAGE47_STARTED': 'NO'} if stage47_completed else stage)
+
           assert pins['pinned_head'] == 'f35a6efd79b830810c8a33140ce8eb949b2c8671'
           assert pins['mode'] == 'FAIL_CLOSED_WHILE_STAGE46_UNSEALED', 'Historic lock must remain unaltered'
           assert preflight['original_v001']['pinned_head'] == pins['pinned_head']
           assert preflight['native_evidence_status'] == 'BLOCKED_ORIGINAL_WINDOWS_OUTPUTS_NOT_ACCESSIBLE'
           assert preflight['stage46_sealed'] is False, 'Preserve historical preflight truth'
           assert preflight['recovery_v002']['qa_fixture'] == 'SYNTHETIC_NOT_NATIVE'
-          assert sealed(receipt, stage), 'Stage46 not sealed with native evidence receipt'
+          assert sealed(receipt, historic_stage), 'Stage46 historical evidence must stay sealed'
           assert receipt['provenance']['pinned_signed_stage45_head'] == pins['pinned_head']
           assert receipt['provenance']['original_manifest_sha256'] == preflight['original_v001']['manifest_sha256']
           assert receipt['provenance']['original_native_run_id'] == preflight['original_native_run_id']
@@ -96,6 +110,42 @@ jobs:
           assert baseline == pins['git_blobs'], 'Baseline lock does not match immutable parent'
           candidate_path = receipt['new_old_source']['path']
           expected_sources = set(baseline) | {candidate_path}
+          if stage47_completed:
+              stage47_receipt = json.loads(Path('qa/Stage47_Native_Evidence_Receipt.json').read_text(encoding='utf-8'))
+              assert stage47_receipt['schema_version'] == 'codesh-stage47-native-evidence-receipt/1'
+              assert stage47_receipt['stage'] == 47
+              assert stage47_receipt['last_completed_stage'] == 47
+              assert stage47_receipt['status'] == 'GREEN_CONFIRMED'
+              assert stage47_receipt['stage47_sealed'] is True
+              assert stage47_receipt['stage48_started'] is False
+              assert stage47_receipt['stage46_signed_source_count'] == 41
+              assert stage47_receipt['native_compiled_source_count'] == 42
+              assert stage47_receipt['baseline_stage46_head'] == '63f91958028ae49b11e59ed63705b0ec552302c3'
+              assert stage47_receipt['native_run']['run_id'] == '20261023T105519Z_fc06fe6a'
+              assert stage47_receipt['native_run']['package'] == 'v002'
+              assert stage47_receipt['source']['path'] == 'מקור/מסלול־שער־סוגר־שנה־סמוכה־מתוקן.אמן'
+              assert stage47_receipt['source']['sha256'] == stage['STAGE47_PATCH_SOURCE_SHA256']
+              assert stage47_receipt['source']['git_blob_sha1'] == stage['STAGE47_PATCH_SOURCE_GIT_BLOB_SHA1']
+              assert stage47_receipt['native_jar_sha256'] == stage['STAGE47_NATIVE_JAR_SHA256']
+              assert stage47_receipt['frozen_oracle_sha256'] == stage['STAGE47_FROZEN_ORACLE_SHA256']
+              assert stage47_receipt['handoff']['sha256'] == stage['STAGE47_WINDOWS_PASS_HANDOFF_SHA256']
+              assert stage47_receipt['handoff']['sha256_entries_verified'] == 61
+              assert stage47_receipt['checks']['native_processes'] == 22
+              assert stage47_receipt['checks']['expected_exit_zero'] == 21
+              assert stage47_receipt['checks']['expected_oracle_tamper_exit_one'] == 1
+              assert stage47_receipt['checks']['regressions_stage29_to_stage46'] == 18
+              assert stage47_receipt['checks']['patch_closing_gate_matches'] == 48
+              assert stage47_receipt['checks']['old_stage46_mismatches_preserved'] == 48
+              assert stage47_receipt['checks']['next_cases'] == 24
+              assert stage47_receipt['checks']['previous_cases'] == 24
+              assert stage47_receipt['stage46_signed_handoff_sha256'] == stage['STAGE46_WINDOWS_PASS_HANDOFF_SHA256']
+              assert stage47_receipt['source']['path'] not in expected_sources
+              expected_sources.add(stage47_receipt['source']['path'])
+              patch47 = Path(stage47_receipt['source']['path']).read_bytes()
+              assert hashlib.sha256(patch47).hexdigest() == stage47_receipt['source']['sha256']
+              assert git_blob(patch47) == stage47_receipt['source']['git_blob_sha1']
+              assert patch47.count('ל־קח־שער־סוגר'.encode('utf-8')) == 2
+              assert patch47.count('ויתקדם שער־ישן:'.encode('utf-8')) == 0
           actual_sources = {x.as_posix() for x in Path('מקור').glob('*.אמן')}
           assert actual_sources == expected_sources, 'Exactly one new Codesh source is allowed'
           for filename, sha1 in baseline.items():
@@ -107,15 +157,15 @@ jobs:
           assert candidate_raw.count('ל־קח־שער־סוגר'.encode('utf-8')) == 2
 
           # Fail-closed negative controls, independent of the audit receipt.
-          assert not sealed({**receipt, 'stage46_sealed': False}, stage)
-          assert not sealed({**receipt, 'native_results_claimed': False}, stage)
-          assert not sealed({**receipt, 'stage47_started': True}, stage)
-          assert not sealed({**receipt, 'gate_count': 20}, stage)
-          assert not sealed({**receipt, 'regressions_stage29_to_stage45': 16}, stage)
-          assert not sealed(receipt, {**stage, 'LAST_COMPLETED_STAGE': '45'})
-          assert not sealed(receipt, {**stage, 'STAGE47_STARTED': 'YES'})
+          assert not sealed({**receipt, 'stage46_sealed': False}, historic_stage)
+          assert not sealed({**receipt, 'native_results_claimed': False}, historic_stage)
+          assert not sealed({**receipt, 'stage47_started': True}, historic_stage)
+          assert not sealed({**receipt, 'gate_count': 20}, historic_stage)
+          assert not sealed({**receipt, 'regressions_stage29_to_stage45': 16}, historic_stage)
+          assert not sealed(receipt, {**historic_stage, 'LAST_COMPLETED_STAGE': '45'})
+          assert not sealed(receipt, {**historic_stage, 'STAGE47_STARTED': 'YES'})
           assert git_blob(candidate_raw + b'X') != receipt['new_old_source']['git_blob_sha1']
-          print('PASS: 40 immutable signed sources + isolated Stage46 OLD; receipt sealed; eight negative controls')
+          print('PASS: immutable Stage45 sources, signed Stage46 OLD and conditional Stage47 PATCH; eight negative controls')
           PY
       - name: Exercise recovered HANDOFF verifier on synthetic fixtures only
         shell: bash
