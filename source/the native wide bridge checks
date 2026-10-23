@@ -13,7 +13,7 @@
 \ Diagnostic-only failure witness for the first native/wide count mismatch.
 \ This does not alter expected counts, arithmetic, or the passing path.
 \ The CAL-4018 implicit local 'string' is used at most once per routine.
-The comparison wide day text is a string.
+The bridgedaytext is a string.
 
 To report native and wide calculation count discrepancy:
   Put "Native/wide calculation count discrepancy; native_count=" into the check report.
@@ -24,13 +24,13 @@ To report native and wide calculation count discrepancy:
   Append "; native_c=" to the check report.
   Report native calculation coordinate.
   Append "; wide_c=" to the check report.
-  Spell the wide calendar example's calculation day into the comparison wide day text.
-  Append the comparison wide day text to the check report.
+  Spell the wide calendar example's calculation day into the bridgedaytext.
+  Append the bridgedaytext to the check report.
   Append "; native_t=" to the check report.
   Report native requested coordinate.
   Append "; wide_t=" to the check report.
-  Spell the wide calendar example's requested day into the comparison wide day text.
-  Append the comparison wide day text to the check report.
+  Spell the wide calendar example's requested day into the bridgedaytext.
+  Append the bridgedaytext to the check report.
 
 To report native calculation coordinate:
   Convert the example's calculation day to a string.
