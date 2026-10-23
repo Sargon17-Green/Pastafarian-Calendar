@@ -119,6 +119,15 @@ jobs:
           echo 'SOAK_CANONICAL_CROSS_COMPILER=PASS'
           echo 'SOAK_ADAPTER_DECIMAL_CROSS_COMPILER=PASS'
           echo 'SOAK_ADAPTER_CROSS_COMPILER=PASS'
+      - name: Verify fail-closed TSV transport and partial-shard invalidation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for compiler in g++ clang++; do
+            timeout 40m python3 tools/test_soak_adapter_rejections.py \
+              "soak-output/adapter-$compiler" "$compiler" \
+              | tee "soak-output/transport-rejections-$compiler.log"
+          done
       - name: Save evidence even on failure
         if: always()
         uses: actions/upload-artifact@v6
