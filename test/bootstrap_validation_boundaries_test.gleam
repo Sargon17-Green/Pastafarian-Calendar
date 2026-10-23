@@ -56,8 +56,7 @@ pub fn successful_validation_preserves_nontransition_fields_test() {
     branch_trace: ["BOOTSTRAP_VALIDATE", "CUSTOM"],
   )
 
-  bootstrap.validate_context(context)
-  |> should.equal(Ok(expected))
+  bootstrap.validate_context(context) |> should.equal(Ok(expected))
 }
 
 pub fn successful_dispatch_has_exact_transition_trace_test() {
@@ -84,6 +83,5 @@ pub fn successful_dispatch_has_exact_transition_trace_test() {
     ],
   )
 
-  bootstrap.dispatch_context(context)
-  |> should.equal(Ok(expected))
+  bootstrap.dispatch_context(context) |> should.equal(Ok(expected))
 }
