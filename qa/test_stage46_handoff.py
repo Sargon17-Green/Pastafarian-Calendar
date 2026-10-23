@@ -25,7 +25,31 @@ def make_zip(records, existing_sums=None):
 def fixture():
     source = b"SYNTHETIC_NOT_NATIVE_SOURCE"
     oracle = b"SYNTHETIC_NOT_NATIVE_ORACLE"
-    manifest = b"SYNTHETIC_NOT_NATIVE_MANIFEST"
+    manifest_files = {
+        f"payload/BASELINE_SOURCE/מקור/fixture{i:02d}.אמן":
+        v.digest(f"SYNTHETIC_BASELINE_{i}".encode("ascii")) for i in range(40)
+    }
+    manifest_files.update({
+        f"payload/SyntheticProbe{i:02d}.java":
+        v.digest(f"SYNTHETIC_JAVA_{i}".encode("ascii")) for i in range(17)
+    })
+    manifest_files.update({
+        "README_FIRST.txt": v.digest(b"SYNTHETIC_README"),
+        "payload/RUN_STAGE46_NATIVE_v001.py": v.RUNNER_SCRIPT_SHA,
+        "payload/ORACLE/Stage16AdjacentSelectedVectors.tsv": v.digest(oracle),
+        "payload/PROVENANCE/STAGE45_WINDOWS_SIGNED_PASS.zip": v.STAGE45_HANDOFF_SHA,
+        v.OLD_CANDIDATE_MANIFEST_PATH: v.digest(source),
+    })
+    assert len(manifest_files) == 62
+    manifest = json_bytes({
+        "schema": "codesh-stage46-adjacent-closing-gate-discovery-v1",
+        "family_id": v.FAMILY, "package_version": "v001",
+        "pinned_branch_head": v.BASE,
+        "candidate_source_sha256": v.digest(source),
+        "oracle_sha256": v.digest(oracle),
+        "signed_stage45_handoff_sha256": v.STAGE45_HANDOFF_SHA,
+        "files": manifest_files,
+    })
     classbytes = hashlib.shake_256(b"synthetic-only").digest(20000)
     jar = io.BytesIO()
     with zipfile.ZipFile(jar, "w") as archive:
@@ -127,7 +151,7 @@ def fixture():
     records["PROVENANCE/RECOVERY_RECEIPT.json"] = json_bytes(signed)
     return records, {"CANDIDATE":v.digest(source),
                      "ORACLE":v.digest(oracle), "MANIFEST":v.digest(manifest),
-                     "RUNNER_SHA":v.digest(runner)}
+                     "RUNNER_SCRIPT_SHA":v.RUNNER_SCRIPT_SHA}
 
 class Stage46ReceiptTests(unittest.TestCase):
     def setUp(self):
@@ -259,13 +283,43 @@ class Stage46ReceiptTests(unittest.TestCase):
 
     def test_runner_extra_exit_rejected(self):
         self.records["LOGS/runner.log"] += b"\nCHILD_EXIT FORGED 0"
-        with mock.patch.object(v, "RUNNER_SHA", v.digest(self.records["LOGS/runner.log"])):
-            self.attempt(False)
-
-    def test_rewritten_runner_with_same_events_rejected(self):
-        # Recomputed ZIP checksums cannot authenticate the original runner log.
-        self.records["LOGS/runner.log"] += b"\nFORGED_EXTRA_RUN_METADATA"
         self.attempt(False)
+
+    def test_missing_runner_provenance_marker_rejected(self):
+        # Dynamically generated run log: verify its required semantics, not
+        # an impossible SHA equality to the original source script.
+        self.records["LOGS/runner.log"] = self.records["LOGS/runner.log"].replace(
+            b"ENGINE_ENTERED v001", b"ENGINE_NOT_ENTERED v001")
+        self.attempt(False)
+
+    def test_valid_runner_log_metadata_variation_accepted(self):
+        # A log may have additional harmless diagnostic content, with
+        # its own validated digest, without equaling the producer script.
+        path = "LOGS/runner.log"
+        self.records[path] += b"\nEXTRA_AUTHENTIC_DIAGNOSTIC_LINE"
+        new_bytes = self.records[path]
+        for docpath, field in (
+            ("RESULT.json", "validation_records"),
+            ("PROVENANCE/RECOVERY_RECEIPT.json", "validated"),
+        ):
+            data = json.loads(self.records[docpath])
+            row = next(item for item in data[field]
+                       if item["name"] == "ORIGINAL_NATIVE_RUNNER_LOG")
+            row["sha256"] = v.digest(new_bytes)
+            row["bytes"] = len(new_bytes)
+            self.records[docpath] = json_bytes(data)
+        self.attempt(True)
+
+    def test_wrong_pinned_runner_script_digest_rejected(self):
+        path = "PINNED_INPUTS/PACKAGE_MANIFEST.json"
+        data = json.loads(self.records[path])
+        data["files"]["payload/RUN_STAGE46_NATIVE_v001.py"] = "0" * 64
+        modified = json_bytes(data)
+        self.records[path] = modified
+        # Update the synthetic manifest pin to test the specific v001 runner
+        # script identity, not merely the earlier package checksum gate.
+        with mock.patch.object(v, "MANIFEST", v.digest(modified)):
+            self.attempt(False)
 
     def test_runner_reordered_children_rejected(self):
         lines = self.records["LOGS/runner.log"].decode("utf-8").splitlines()
@@ -273,8 +327,7 @@ class Stage46ReceiptTests(unittest.TestCase):
         lines[3:7] = lines[5:7] + lines[3:5]
         self.records["LOGS/runner.log"] = "\n".join(lines).encode("utf-8")
         # Repin synthetic runner to ensure chronology check is reached.
-        with mock.patch.object(v, "RUNNER_SHA", v.digest(self.records["LOGS/runner.log"])):
-            self.attempt(False)
+        self.attempt(False)
 
     def test_runner_overlapping_children_rejected(self):
         lines = self.records["LOGS/runner.log"].decode("utf-8").splitlines()
@@ -282,8 +335,7 @@ class Stage46ReceiptTests(unittest.TestCase):
         lines[4], lines[5] = lines[5], lines[4]
         self.records["LOGS/runner.log"] = "\n".join(lines).encode("utf-8")
         # Repin synthetic runner to ensure chronology check is reached.
-        with mock.patch.object(v, "RUNNER_SHA", v.digest(self.records["LOGS/runner.log"])):
-            self.attempt(False)
+        self.attempt(False)
 
     def test_changed_jar_provenance_rejected(self):
         receipt = json.loads(self.records["RESULT.json"])

@@ -20,8 +20,13 @@ BASE = "f35a6efd79b830810c8a33140ce8eb949b2c8671"
 CANDIDATE = "98fc6f964f7f986fb672bb94fae96c0ffbff46f5aa119bc2cc4abd727846ef5c"
 ORACLE = "8d75a665925d2b88aa2bbb82fb71157c515b24babd5db7889a14c508eb7911ee"
 MANIFEST = "871ca2ee3aa4ebaf7686334aaba7a641831cf18663f01d58afbd6f5983a734f4"
-# Independently pinned by v002 producer as ORIG_RUNNER_SHA, though not enforced there.
-RUNNER_SHA = "e8b318f1a6e5bc8b056461947f91cddc503a771b5a1ae2473c92be0be99f7b09"
+# Pinned to the source script within the *original v001 package manifest*.
+# This is NOT the hash of the dynamically generated LOGS/runner.log.
+RUNNER_SCRIPT_SHA = "e8b318f1a6e5bc8b056461947f91cddc503a771b5a1ae2473c92be0be99f7b09"
+STAGE45_HANDOFF_SHA = "e61649df2ad6b91f61be201fd26f5d943ee7b86032d15edb37cf265e5c175289"
+OLD_CANDIDATE_MANIFEST_PATH = (
+    "payload/CANDIDATE_SOURCE/מקור/מסלול־שער־סוגר־שנה־סמוכה־ישן.אמן"
+)
 MAX_JAR_UNCOMPRESSED = 200_000_000
 MAX_JAR_MEMBER_UNCOMPRESSED = 50_000_000
 MAX_JAR_ENTRIES = 4096
@@ -204,6 +209,31 @@ def verify(path):
                provenance.get("candidate_source_sha256") == CANDIDATE and
                provenance.get("oracle_sha256") == ORACLE, "recovery provenance inconsistency")
         ensure(digest(archive.read("PINNED_INPUTS/PACKAGE_MANIFEST.json")) == MANIFEST, "original manifest SHA")
+        original = load_json("PINNED_INPUTS/PACKAGE_MANIFEST.json")
+        assert_orig_fields = (
+            original.get("schema") == "codesh-stage46-adjacent-closing-gate-discovery-v1"
+            and original.get("family_id") == FAMILY
+            and original.get("package_version") == "v001"
+            and original.get("pinned_branch_head") == BASE
+            and original.get("candidate_source_sha256") == CANDIDATE
+            and original.get("oracle_sha256") == ORACLE
+            and original.get("signed_stage45_handoff_sha256") == STAGE45_HANDOFF_SHA
+        )
+        ensure(assert_orig_fields, "original v001 manifest identity differs from pinned inputs")
+        original_files = original.get("files")
+        ensure(isinstance(original_files, dict) and len(original_files) == 62,
+               "original v001 manifest member count mismatch")
+        baseline_files = {name: value for name, value in original_files.items()
+                          if name.startswith("payload/BASELINE_SOURCE/")}
+        ensure(len(baseline_files) == 40 and
+               all(re.fullmatch(r"[0-9a-f]{64}", value) for value in baseline_files.values()),
+               "original v001 manifest signed source count/digest invalid")
+        ensure(original_files.get("payload/RUN_STAGE46_NATIVE_v001.py") == RUNNER_SCRIPT_SHA,
+               "original v001 Native runner script digest mismatch")
+        ensure(original_files.get(OLD_CANDIDATE_MANIFEST_PATH) == CANDIDATE and
+               original_files.get("payload/ORACLE/Stage16AdjacentSelectedVectors.tsv") == ORACLE and
+               original_files.get("payload/PROVENANCE/STAGE45_WINDOWS_SIGNED_PASS.zip")
+               == STAGE45_HANDOFF_SHA, "v001 manifest candidate/oracle/previous handoff inconsistent")
         for filename in ("EVIDENCE/DISCOVERY23_CANDIDATE.אמן", "PINNED_INPUTS/DISCOVERY23_CANDIDATE.אמן"):
             ensure(digest(archive.read(filename)) == CANDIDATE, "candidate SHA: " + filename)
         for filename in ("EVIDENCE/FROZEN_ORACLE.tsv", "PINNED_INPUTS/Stage16AdjacentSelectedVectors.tsv"):
@@ -232,8 +262,9 @@ def verify(path):
         ensure({gate["name"]: gate["exit_code"] for gate in gates} == EXITS, "gate exits")
         ensure(all(gate["outcome"] == ("EXPECTED_FAILURE" if gate["name"] == "STAGE46_ORACLE_TAMPER" else "PASS")
                    for gate in gates), "gate outcomes")
+        # The recovered log has no separately pinned original SHA-256;
+        # the known RUNNER_SCRIPT_SHA applies only to the v001 Python source.
         runner_bytes = archive.read("LOGS/runner.log")
-        ensure(digest(runner_bytes) == RUNNER_SHA, "original Native runner SHA-256 mismatch")
         runner = runner_bytes.decode("utf-8", "replace")
         ensure("ENGINE_ENTERED v001" in runner and RUN_ID in runner and
                "PACKAGE_SHA_AND_40_SIGNED_BASELINE_SOURCE_PASS" in runner and
