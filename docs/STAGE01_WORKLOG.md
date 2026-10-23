@@ -353,3 +353,26 @@ The canonical target remains month-name index 20, occurrence day 56.
   computationally very expensive even within the first 11 symbols;
   no unbounded long-running CI job was added. Profiling and a
   resource-bounded algorithm are required before expanding.
+
+## 2026-10-23 — SHA-bound prefix and 47P45-name QA work
+
+- `tests/tb_foundation_month_names.sv`: exact name-index selection,
+  seal 33, 45 distinct indices among 47 and 0 remaining rank,
+  linked into the baseline Icarus runner. Its result is PENDING.
+- `tests/tb_weave_full_root.sv` now has a distinct
+  `+prefix11` option: 113 remaining month-1 copies and an
+  unconstrained *first* insertion of month2; later months are
+  handled by the existing exact transfer. It checks 22465 bits
+  and emits `foundation_weave_prefix11.bin`.
+- `scripts/verify_weave_fullroot.sh` verifies the entire root
+  and selected-rank hashes before running the bounded prefix
+  counter, verifying SHA256
+  `642e6ddd164593dd415bc78ea87142e949a1cc4728accff2c8693a9120f81cac`,
+  then checks `tb_weave_prefix2.sv` for prefix `[1,2]`.
+- Artifacts for the prefix count and prefix verdict added to
+  isolated QA workflow; no merge and no main changes.
+- A preliminary independent full-precision unrank calculated
+  eleven symbols of the selected word, but its follow-on
+  computation exceeded a bounded runtime. See prefix reference;
+  do not mark full word unrank accepted.
+- At this checkpoint newer CI run 39915693359 was QUEUED.

@@ -302,3 +302,27 @@ must PASS in the **same isolated QA workflow run**.
 
 The project is Stage 1 IN_PROGRESS, 0/55 stages fully closed;
 8 lexical Kalaallisut candidates and 0/64 approvals.
+
+## 2026-10-23 — full 45-month root/rank CI PASS; bounded prefix started
+
+**Supersedes the previous pending-status row:** [run 39842311226]
+(https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39842311226)
+completed SUCCESS on `02aeccd0a4e5b793f7c753a4e14cbcd2221f9422`.
+Both jobs passed: full **22,470-bit** root hash and exact
+**177-digit** selected rank hash. The residual selected-rank
+quotient in the job log was 347; the domain quotient was 555.
+The full month-word unranking is still NOT IMPLEMENTED.
+
+New tests, awaiting separate verdict:
+- 45 canonical month-name indices: bowl 5 / seal 33,
+  47P45 exact lexical unrank, independent golden vector.
+- Prefix `[1,1]` completion count as a bounded additional
+  22,528-bit SystemVerilog run with SHA256 validation.
+- Derivation of first two woven ordinals `[1,2]` from the
+  fully verified selected rank and the validated prefix block.
+
+The independent reference for the first eleven woven ordinals
+is documented in `FOUNDATION_WEAVE_PREFIX_REFERENCE.md`
+without an SV PASS claim.
+
+Final five-field output still OPEN. Stage 1 NOT ACCEPTED.
