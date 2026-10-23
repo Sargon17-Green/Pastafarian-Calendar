@@ -351,3 +351,21 @@ Outstanding: all 4,241 remaining woven positions after the
 third symbol; final month ordinal at target and occurrence;
 full five-field algorithm; native 64-name Kalaallisut review.
 The current branch is not ready for Stage 1 signoff.
+
+## Verified fifth / candidate sixth ordinal — 2026-10-23
+
+- [39981519434](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39981519434)
+  is actual SUCCESS (3/3 jobs) on implementation commit
+  `4f7b877ea2703d340884a4ac965d24e9b315c7ff`.
+  Prefix `[1,2,3,4,5]` is therefore native-Icarus PASS.
+- Sixth symbol source is **WRITTEN_NOT_CI_VERIFIED**:
+  exact 22528-bit `[1,2,3,4,5,1]` completion reference,
+  then 53/57, 330/323, 306020/328491 and
+  132658240/146835477 ratio blocks. Every binary gets a
+  predetermined independent SHA check. Expected choice 6.
+- The sixth QA job is isolated from existing stages and uses
+  pinned, fully hash-checked previous artifacts, never
+  an unverified artifact or a previous red-job output.
+- 4244-symbol full unranking, 5-field multi-vector oracle,
+  production ASIC RTL, 64 qualified Kalaallisut labels
+  remain unresolved. Stage 1 OPEN; Stage 2 NOT AUTHORIZED.

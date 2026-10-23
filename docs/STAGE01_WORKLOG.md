@@ -426,3 +426,39 @@ binary counts before reporting the third woven symbol.
 
 **New CI verification still pending.** Current run 39931331917
 was queued at last observation. No full unrank or stage PASS.
+
+## 2026-10-23 — five woven ordinals CI PASS, exact sixth probe queued
+
+- Read actual Icarus logs for [run 39981519434](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39981519434):
+  all THREE jobs SUCCESS. In `fifth_weave_symbol`, pinning to
+  completed 20-file root artifact from the previously partial-red
+  run 39965349618 was confirmed. Prefix `[1,2,3,4,1]` and
+  all four other fifth-choice blocks passed independent SHA256
+  tests. Selected first FIVE canonical month ordinals
+  `[1,2,3,4,5]` PASS in native SystemVerilog.
+- Verified new independent exact completion reference after
+  `[1,2,3,4,5,1]`: 22465 bits, SHA256
+  `d8e4482e4011c525254fc9fbf7ff8c0b38d8f03debda9dc3db43c1058fc3cdf7`.
+  Four other already-started suffix blocks are in the precise
+  ratios 53/57, 330/323, 306020/328491, 132658240/146835477
+  to the block ending with old month #1. The sixth possible
+  branch is selected by difference from the parent.
+- Independent arithmetic computed all six candidate suffix
+  counts and selected month ordinal 6, giving research prefix
+  `[1,2,3,4,5,6]`. Each candidate has a separate SHA.
+  This is NOT yet an Icarus result.
+- Added SystemVerilog `+prefix123451` test-only full-width
+  suffix count to `tb_weave_full_root.sv`, and
+  `tb_weave_prefix6.sv` verifies exact 32-bit denominators,
+  reconstruction, six-block partition, one-based rank and
+  the selected sixth ordinal.
+- Added `scripts/verify_weave_prefix6.sh`, pinning two
+  independent CI artifact sources by their merge SHAs,
+  requiring all 15 input binaries and validating every SHA.
+- Added independent QA-only `sixth_weave_symbol` job on branch
+  `qa-systemverilog-kalaallisut-stage1-20261022` at
+  `71e6cbd7a176e536ad01103ddcde842eb5496880`,
+  budgeted to 22 minutes with 4-GiB VM limit and evidence ZIP.
+  New full-width 6th-symbol source has NOT yet earned CI PASS.
+- No changes to main, no opening Stage 2, no native Kalaallisut
+  approval (0/64), and no complete 4244-symbol SV unrank.
