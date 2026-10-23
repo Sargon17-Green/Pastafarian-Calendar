@@ -1,0 +1,32 @@
+name: MATLAB Portable Exact Weave Checkpoint JSON (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/serializeExactWeaveCursorJson.m'
+      - 'src/\+pastafari/restoreExactWeaveCursorJson.m'
+      - 'tests/run_stage55_checkpoint_json_tests.m'
+      - '.github/workflows/matlab-stage55-checkpoint-json.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checkpoint:
+    name: MATLAB R2026a / strict decimal checkpoint resume and tamper tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact branch candidate
+        uses: actions/checkout@v4
+      - name: Setup MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Verify exact portable resume and tamper rejection
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_checkpoint_json_tests
