@@ -40,3 +40,11 @@ Hai bài thử mới bao phủ 47 tháng ngắn và phép đếm năm dài
 CI 39917199959 đạt 868/868 nhưng có ba cảnh báo Elixir:
 biến không dùng và hai dải giảm không khai báo bước.
 Xóa biến thừa và thêm bước âm rõ ràng; kiểm thử lại trước khi đóng.
+
+## Chứng cứ đóng
+Trên HEAD 232512f36742b398df39284d9f49dea6c0130dfe:
+868/868 PASS; biên dịch 92 tệp, không có cảnh báo Elixir;
+Canonical Names Lock PASS.
+Native https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39930785628
+Names https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39930783967
+Cảnh báo duy nhất còn lại thuộc actions/checkout@v4 của CI, không phải Elixir.
