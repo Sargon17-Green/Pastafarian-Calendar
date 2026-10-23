@@ -105,3 +105,49 @@ jobs:
             build/foundation_weave_prefix1234.bin
           retention-days: 90
           if-no-files-found: warn
+
+  fifth_weave_symbol:
+    # Separate budget. Reuse ONLY the immutable verified artifact
+    # from run 39946357557, then SHA-verify every required binary.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 23
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download prior independently verified root/rank/prefix blocks
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-full-weave-root-qa
+          run-id: 39946357557
+          github-token: ${{ github.token }}
+          path: build
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Verify immutable input hashes and fifth ordinal
+        run: |
+          set -euo pipefail
+          ulimit -v 4194304
+          git rev-parse HEAD | tee build/prefix5_checked_sha.txt
+          bash scripts/verify_weave_prefix5.sh
+      - name: Preserve SHA evidence, count and chosen block
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-prefix5-evidence
+          path: |
+            build/prefix5_checked_sha.txt
+            build/fullroot_head.txt
+            build/weave_prefix12341_run.log
+            build/foundation_weave_prefix12341.bin
+            build/weave_prefix5_run.log
+            build/foundation_weave_prefix12342.bin
+            build/foundation_weave_prefix12343.bin
+            build/foundation_weave_prefix12344.bin
+            build/foundation_weave_prefix12345.bin
+          retention-days: 90
+          if-no-files-found: warn
