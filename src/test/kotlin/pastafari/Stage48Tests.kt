@@ -57,7 +57,7 @@ object Stage48Tests {
             val naive=historical.rankFromFirstAnswer(modulus,n)
             must("E_DISCOVERY24_FORCED_REJECT_$i",
                 historical.shouldRejectFirstAnswer(modulus,n) &&
-                canonical==divisor && naive!=canonical &&
+                canonical==divisor && naive!=canonical.toIntExact() &&
                 naive in 1..n)
             forcedRed++
             val accepted=NormativeCore.AnswerStream(limit,-1)
