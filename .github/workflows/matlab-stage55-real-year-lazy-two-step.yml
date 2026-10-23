@@ -1,0 +1,30 @@
+name: MATLAB Real Year-5000 Lazy Joint Two-Step (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_lazy_joint_two_step.m'
+      - '.github/workflows/matlab-stage55-real-year-lazy-two-step.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-year-lazy:
+    name: MATLAB R2026a / actual 4244-day one-pass branching
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Audit actual year-5000 lazy joint first branching
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_real_year_lazy_joint_two_step

@@ -25,6 +25,7 @@ on:
       - '!tests/run_stage55_extremal_weave_tests.m'
       - '!tests/run_stage55_general_joint_tests.m'
       - '!tests/run_stage55_lazy_joint_tests.m'
+      - '!tests/run_stage55_real_year_lazy_joint_two_step.m'
       - '!tests/run_stage55_real_year_5000_lengths_tests.m'
       - '!tests/run_stage55_real_year_5000_two_step_joint.m'
       - '!tests/run_stage55_general_chunk_fullscale.m'

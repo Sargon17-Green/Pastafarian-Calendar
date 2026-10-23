@@ -66,6 +66,8 @@ steps=min(N,maxSteps);
 piece=zeros(1,steps);
 known=false;
 count=pastafari.BigInt(0);
+initialCount=pastafari.BigInt(0);
+initialKnown=false;
 one=pastafari.BigInt(1);
 
 for position=1:steps
@@ -136,6 +138,12 @@ for position=1:steps
             error('Pastafari:LazyJoint:CountMismatch', ...
                 'Wspólny licznik przeczy zachowanemu licznikowi.');
         end
+        if ~initialKnown
+            % Wymuszony prefiks jest bijekcją: to dokładna liczność
+            % PIERWOTNEGO wejściowego stanu przed tym fragmentem.
+            initialCount=actual;
+            initialKnown=true;
+        end
         count=actual;
         known=true;
         if rank<one || rank>count
@@ -184,6 +192,12 @@ if ~known
             R,openedUpTo,closedUpTo);
     end
 end
+if ~initialKnown
+    % Gdy nie było rozgałęzienia, cały fragment był wymuszony.
+    % Liczność po nim jest identyczna z wejściową licznością.
+    initialCount=count;
+    initialKnown=true;
+end
 if rank<one || rank>count
     error('Pastafari:LazyJoint:Rank', ...
         'Ranga poza przedziałem liczby wszystkich słów.');
@@ -196,6 +210,6 @@ if done && (openedUpTo~=K || closedUpTo~=K || ...
 end
 cursor=struct('remaining',R, ...
     'openedUpTo',openedUpTo,'closedUpTo',closedUpTo, ...
-    'rank',rank,'count',count,'done',done, ...
-    'stepsComputed',steps);
+    'rank',rank,'count',count,'initialCount',initialCount, ...
+    'done',done,'stepsComputed',steps);
 end
