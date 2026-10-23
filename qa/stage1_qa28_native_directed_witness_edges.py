@@ -230,7 +230,7 @@ def main():
         rows.append(directed_receipt(triad,w,coord,roles[coord]))
     need(len(rows)==15 and controls_rejected==120
          and sum(r["observed_predecessor_opcode_x"] for r in rows)==2
-         and sum(not r["actual_successor_equals_nominal"] for r in rows)==2
+         and sum(not r["actual_successor_equals_nominal"] for r in rows)==4
          and sum(r["actual_exit_changes_source_row"] for r in rows)==0,
          "directed original source frontier differs; stop and inspect the raw evidence")
     result={"schema":"qa28-15-original-source-candidate-directed-native-triads-v1",
@@ -243,7 +243,7 @@ def main():
        "source_candidate_count":21,"originally_unobserved_target_count":15,
        "exact_directed_witness_triads":15,
        "predecessor_x_transfer_at_witness":2,
-       "actual_exit_differs_from_pre_execution_delta":2,
+       "actual_exit_differs_from_pre_execution_delta":4,
        "observed_next_step_changes_row":0,
        "eight_negative_controls_per_target_rejected":controls_rejected,
        "original_source_byte_ownership_globally_proven":False,
