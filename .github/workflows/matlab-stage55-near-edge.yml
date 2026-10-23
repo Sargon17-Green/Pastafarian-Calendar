@@ -1,0 +1,31 @@
+name: MATLAB Real-Year Exact Near-Edge Rank (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/unrankWholeWeavingNearEdge.m'
+      - 'tests/run_stage55_near_edge_tests.m'
+      - '.github/workflows/matlab-stage55-near-edge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-near-edge:
+    name: MATLAB R2026a / exact rank offsets through 4244-day words
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Compare bounded exact ranks with original DAG
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_near_edge_tests
