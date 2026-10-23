@@ -179,7 +179,7 @@ final case class BaseMonsterContext(
   var monthOrdinalSnapshot: Option[(Vector[Int],Int)] = None,
   var legacyMonthOrdinalMonthId: Option[Int] = None,
   var legacyDayInMonth: Option[Int] = None,
-  var patchedDayInMonth: Option[Int] = None,
+  var monthOrdinalPatchedDayInMonth: Option[Int] = None,
   var patch22Applied: Boolean = false
 )
 
@@ -324,7 +324,7 @@ final class BaseValidationManager {
        ctx.monthOrdinalSnapshot.isEmpty ||
        ctx.legacyMonthOrdinalMonthId.isEmpty ||
        ctx.legacyDayInMonth.isEmpty ||
-       ctx.patchedDayInMonth.isEmpty)
+       ctx.monthOrdinalPatchedDayInMonth.isEmpty)
       throw new IllegalStateException("PATCH22 non pronta.")
     val weave=ctx.monthOrdinalWeaving.get
     val day=ctx.monthOrdinalDayOffset.get
@@ -342,7 +342,7 @@ final class BaseValidationManager {
     }
     if(ctx.legacyMonthOrdinalMonthId.get!=month ||
        ctx.legacyDayInMonth.get!=day+1 ||
-       ctx.patchedDayInMonth.get!=seen)
+       ctx.monthOrdinalPatchedDayInMonth.get!=seen)
       throw new IllegalStateException("Risultato PATCH22 manomesso.")
   }
 
@@ -3214,7 +3214,7 @@ final class BaseMonsterManager {
         ctx.calculationDay,ctx.targetDay,
         ctx.monthOrdinalWeaving.get,ctx.monthOrdinalDayOffset.get,
         ctx.legacyMonthOrdinalMonthId.get,ctx.legacyDayInMonth.get,
-        ctx.patchedDayInMonth.get,ctx.patch22Applied,
+        ctx.monthOrdinalPatchedDayInMonth.get,ctx.patch22Applied,
         ctx.phase,ctx.status,ctx.branchTrace.toVector)
     } catch {
       case error:Throwable =>

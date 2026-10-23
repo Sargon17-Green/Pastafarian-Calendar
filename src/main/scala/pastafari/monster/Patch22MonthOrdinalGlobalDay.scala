@@ -48,7 +48,7 @@ final class Patch22MonthOrdinalGlobalDayHandler(metrics: BaseMetricsShell)
        ctx.monthOrdinalSnapshot.isEmpty ||
        ctx.legacyMonthOrdinalMonthId.isEmpty ||
        ctx.legacyDayInMonth.isEmpty ||
-       ctx.patchedDayInMonth.nonEmpty || ctx.patch22Applied)
+       ctx.monthOrdinalPatchedDayInMonth.nonEmpty || ctx.patch22Applied)
       throw new IllegalStateException(
         "PATCH22 richiede DISCOVERY22 integra.")
     val w=ctx.monthOrdinalWeaving.get
@@ -63,7 +63,7 @@ final class Patch22MonthOrdinalGlobalDayHandler(metrics: BaseMetricsShell)
          ctx.legacyMonthOrdinalMonthId.get ||
        result.historical.legacyDayInMonth!=ctx.legacyDayInMonth.get)
       throw new IllegalStateException("Cicatrice DISCOVERY22 manomessa.")
-    ctx.patchedDayInMonth=Some(result.correctedDayInMonth)
+    ctx.monthOrdinalPatchedDayInMonth=Some(result.correctedDayInMonth)
     ctx.patch22Applied=true
     ctx.branchTrace.append(phase)
     metrics.bump("patch22.month.ordinal.calls")
