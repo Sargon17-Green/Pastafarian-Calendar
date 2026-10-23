@@ -51,7 +51,7 @@ const source=witness.request.firstDaySauceQuestion!;
 const expectedFull=new NormativeOracle().chooseCutletNames(
  {bowls:postStir12([...applyVisibleDropsToBowls(
  [...source.startBowls] as [bigint,bigint,bigint,bigint,bigint,bigint],
- source.visible,source.stones).bowls] as
+ source.visible,STONES).bowls] as
  [bigint,bigint,bigint,bigint,bigint,bigint]),
  orderAtDrop46:bowlOrderFromDrop(source.visible[46]!)},
  witness.K);
