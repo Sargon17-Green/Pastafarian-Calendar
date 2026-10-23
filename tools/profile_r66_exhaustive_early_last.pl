@@ -213,7 +213,7 @@ if (!$pid) {
         1;
     };
     if (!$ok) {
-        print STDERR "R65_EARLY_LAST_SHARD status=FAIL reason=$@\n";
+        print STDERR "R66_EARLY_LAST_SHARD status=FAIL reason=$@\n";
         exit 2;
     }
     exit 0;
@@ -227,7 +227,7 @@ while (1) {
             print "R66_EARLY_LAST_SHARD_COMPLETE passed=0 blocked=0 failed=1\n";
             exit 2;
         }
-        print "R65_EARLY_LAST_SHARD_COMPLETE passed=1 blocked=0 failed=0\n";
+        print "R66_EARLY_LAST_SHARD_COMPLETE passed=1 blocked=0 failed=0\n";
         exit 0;
     }
     die "waitpid 失敗\n" if $done<0;
@@ -237,9 +237,9 @@ while (1) {
         my $reason=$rss>$rss_limit?'RSS_LIMIT':'TIME_LIMIT';
         kill 'KILL',$pid;
         waitpid($pid,0);
-        printf "R65_EARLY_LAST_SHARD status=BLOCKED reason=%s elapsed_sec=%.3f observed_RSS_KiB=%d\n",
+        printf "R66_EARLY_LAST_SHARD status=BLOCKED reason=%s elapsed_sec=%.3f observed_RSS_KiB=%d\n",
             $reason,time()-$begin,$max_seen;
-        print "R65_EARLY_LAST_SHARD_COMPLETE passed=0 blocked=1 failed=0\n";
+        print "R66_EARLY_LAST_SHARD_COMPLETE passed=0 blocked=1 failed=0\n";
         exit 3;
     }
     sleep(0.05);

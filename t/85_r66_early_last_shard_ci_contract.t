@@ -61,4 +61,17 @@ like($src,qr/\$full>=9223372036854775807/,
 like($src,qr/\$reference_states!=\$reachable_states/,
     '每個可達狀態都應在獨立遞迴中出現');
 like($src,qr/cache_limit=>16/,'FIFO/CLOCK 仍然只有十六個私有狀態');
+# R66 執行結果識別不得沿用 R65，尤其是錯誤與資源限制分支。
+unlike($src,qr/\bR65_EARLY_LAST_SHARD(?:_COMPLETE)?\b/,
+    'R66 日誌不得誤用 R65 狀態識別');
+like($src,qr/R66_EARLY_LAST_SHARD status=FAIL reason=/,
+    'R66 失敗紀錄須可被正確歸屬');
+like($src,qr/R66_EARLY_LAST_SHARD status=BLOCKED reason=/,
+    'R66 時間或記憶體上限須可被正確歸屬');
+like($src,qr/R66_EARLY_LAST_SHARD_COMPLETE passed=1 blocked=0 failed=0/,
+    'R66 成功終態須有正確識別');
+like($src,qr/R66_EARLY_LAST_SHARD_COMPLETE passed=0 blocked=0 failed=1/,
+    'R66 失敗終態須有正確識別');
+like($src,qr/R66_EARLY_LAST_SHARD_COMPLETE passed=0 blocked=1 failed=0/,
+    'R66 阻擋終態須有正確識別');
 done_testing;
