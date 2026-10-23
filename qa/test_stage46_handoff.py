@@ -435,6 +435,26 @@ class Stage46ReceiptTests(unittest.TestCase):
         self.records["RESULT.json"] = json_bytes(result)
         self.attempt(False)
 
+    def test_unlisted_zip_member_rejected_despite_valid_sha256sums(self):
+        self.records["EXTRA/forged-native-assertions.json"] = b'{"native_status":"PASS"}'
+        self.attempt(False)
+
+    def test_unexpected_native_log_rejected_despite_valid_sha256sums(self):
+        self.records["LOGS/STAGE47_FORGED_REGRESSION.stdout.log"] = b"PASS"
+        self.attempt(False)
+
+    def test_nested_jar_total_uncompressed_limit_rejected(self):
+        with mock.patch.object(v, "MAX_JAR_UNCOMPRESSED", 128):
+            self.attempt(False)
+
+    def test_nested_jar_individual_member_limit_rejected(self):
+        with mock.patch.object(v, "MAX_JAR_MEMBER_UNCOMPRESSED", 128):
+            self.attempt(False)
+
+    def test_nested_jar_entry_count_limit_rejected(self):
+        with mock.patch.object(v, "MAX_JAR_ENTRIES", 11):
+            self.attempt(False)
+
     def test_checksum_mismatch_rejected(self):
         self.attempt(False, use_old_sums=True)
 

@@ -22,6 +22,9 @@ ORACLE = "8d75a665925d2b88aa2bbb82fb71157c515b24babd5db7889a14c508eb7911ee"
 MANIFEST = "871ca2ee3aa4ebaf7686334aaba7a641831cf18663f01d58afbd6f5983a734f4"
 # Independently pinned by v002 producer as ORIG_RUNNER_SHA, though not enforced there.
 RUNNER_SHA = "e8b318f1a6e5bc8b056461947f91cddc503a771b5a1ae2473c92be0be99f7b09"
+MAX_JAR_UNCOMPRESSED = 200_000_000
+MAX_JAR_MEMBER_UNCOMPRESSED = 50_000_000
+MAX_JAR_ENTRIES = 4096
 EXITS = {"CODESH_NATIVE_COMPILE": 0, "JAVAC_PROBES": 0,
          "STAGE46_CLOSING_GATE_EXPECTED_RED": 0, "STAGE46_ORACLE_TAMPER": 1}
 for number in range(29, 46):
@@ -97,7 +100,11 @@ def verify(path):
         }
         for task in EXITS:
             required.update({f"LOGS/{task}.stdout.log", f"LOGS/{task}.stderr.log"})
-        ensure(required <= members, "missing evidence: " + ",".join(sorted(required - members)))
+        ensure(members == required,
+               "HANDOFF member set differs from v002 producer: missing=" +
+               ",".join(sorted(required - members)) + " extra=" +
+               ",".join(sorted(members - required)))
+        ensure(len(members) == 58, "v002 PASS HANDOFF must contain exactly 58 members")
         lines = archive.read("SHA256SUMS.txt").decode("utf-8").splitlines()
         checks = {}
         for line in lines:
@@ -204,9 +211,19 @@ def verify(path):
         jar_bytes = archive.read("EVIDENCE/native-stage46-candidate.jar")
         ensure(len(jar_bytes) > 10000, "Native JAR too small")
         with zipfile.ZipFile(io.BytesIO(jar_bytes)) as jar:
-            jar_count = len(jar.infolist())
-            ensure(jar.testzip() is None and jar_count > 10 and
-                   any(n.endswith(".class") for n in jar.namelist()), "Native JAR invalid")
+            jar_entries = jar.infolist()
+            jar_count = len(jar_entries)
+            jar_names = [entry.filename for entry in jar_entries]
+            ensure(10 < jar_count <= MAX_JAR_ENTRIES and
+                   len(jar_names) == len(set(jar_names)),
+                   "Native JAR member count or duplicate name invalid")
+            ensure(sum(entry.file_size for entry in jar_entries) <= MAX_JAR_UNCOMPRESSED and
+                   all(entry.file_size <= MAX_JAR_MEMBER_UNCOMPRESSED for entry in jar_entries),
+                   "Native JAR uncompressed size limit exceeded")
+            ensure(all((entry.external_attr >> 16) & 0o170000 != 0o120000
+                       for entry in jar_entries), "Native JAR must not contain symlinks")
+            ensure(jar.testzip() is None and
+                   any(name.endswith(".class") for name in jar_names), "Native JAR invalid")
         gates = receipt.get("gates", [])
         ensure(len(gates) == len(EXITS) and len({gate["name"] for gate in gates}) == len(gates),
                "gate count/identity")
