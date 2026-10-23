@@ -357,3 +357,19 @@ php -d memory_limit=512M tests/stage25_patch12_tests.php
 ```
 
 Stage25 menguji 720 × 6 = 4,320 pertanyaan terhadap oracle tempatan, termasuk 3,456 parut berbeza dan 864 padanan; 72 ujian meterai tambahan; 18 pertanyaan sebenar daripada tiga pasangan hari; kesetaraan panggilan langsung/per-instance; dan empat penolakan input. **Stage26 belum dimulakan.** Stage25 ditanda AWAITING_CI sehingga GitHub Actions Native lulus pada SHA tepat.
+
+
+## Stage 26 — DISCOVERY 13: Pemilihan modulo tanpa rejection sampling
+
+Stage25 PATCH12 disahkan GREEN pada SHA \`fd2f82a965d5f4c42e513409e1e8c7e656f39647\`, GitHub Actions run \`39915193046\`, kedua-dua pekerjaan SUCCESS. Laluan pertanyaan mangkuk sudah betul.
+
+\`LegacyNoRejection13::chooseWrong\` menerima strim \`first,step\` sah (nilai dalam \`1..M\` dan langkah ±1), serta saiz ruang \`n\` dari 1 hingga \`M=2^127-1\`. Kecacatan yang sengaja dicipta: ia memulangkan \`1+((first-1) mod n)\` segera, tanpa menolak sampel yang melebihi \`L=floor(M/n)*n\`. Oracle PHP tempatan sebaliknya menolak semua \`x>L\`, bergerak dalam strim dengan SAVE dan hanya kemudian mengira modulo. Kes \`n>M\` **bukan** dalam skop penemuan ini.
+
+Untuk \`n=3,10,97,720\`, saksi \`first=L+1, step=-1\` menghasilkan legacy rank 1 dan oracle rank \`n\`; empat penyimpangan RED. Tambahan 13 padanan kawalan di bawah had, tiga jejak strim tarikh sebenar melalui \`BootstrapKernel::legacyChooseRank\` dan empat penolakan input. Penghala \`NO_REJECTION_CHOICE_LEGACY\` memanggil \`BootstrapKernel::askBowl\` (PATCH12) yang sah; kecacatan hanya pada pemilihan rank.
+
+\`\`\`text
+php -d memory_limit=512M tests/stage26_discovery13_tests.php  # keluar 1, empat RED sahaja
+php -d memory_limit=512M tests/verify_stage26_discovery13.php # keluar 0 jika RED tepat
+\`\`\`
+
+Semua regresi Stage1–25, fixture deterministik, lint dan kunci nama mesti kekal hijau. Tiada oracle dalam \`src\`; kod legacy lama tidak diubah; main, nama dan fixture tidak diubah. **Jangan tambah RejectionSamplingPatch13 atau mulakan Stage27 sebelum Native CI Stage26 disahkan.**

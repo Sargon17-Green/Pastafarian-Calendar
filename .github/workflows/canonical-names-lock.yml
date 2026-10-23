@@ -94,3 +94,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage24_discovery12.php
       - name: Tampalan 12 — jiran benar menurut susunan 46
         run: php -d memory_limit=512M tests/stage25_patch12_tests.php
+      - name: Penemuan 13 — pemilihan modulo tanpa rejection sampling
+        run: php -d memory_limit=512M tests/verify_stage26_discovery13.php

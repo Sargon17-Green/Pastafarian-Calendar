@@ -503,6 +503,24 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'order.neighbor.patch12.requests');
             return $stream;
         });
+        $this->dispatcher->register('NO_REJECTION_CHOICE_LEGACY', function(BootstrapContext $context): BigInt {
+            $bowlId = $context->semanticState['queriedBowlId'] ?? null;
+            $seal = $context->semanticState['seal'] ?? null;
+            $space = $context->semanticState['choiceSpace'] ?? null;
+            if (!is_int($bowlId) || !is_int($seal) || !$space instanceof BigInt) {
+                throw new \InvalidArgumentException('NO_REJECTION_ARGS');
+            }
+            // Semua pembetulan sehingga PATCH12 digunakan pada strim sebenar.
+            $stream = $this->askBowl(
+                $context->calculationDay, $context->targetDay, $bowlId, $seal
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyNoRejection13();
+            $rank = $legacy->chooseWrong($stream, $space);
+            $context->semanticState['legacyChosenRank'] = $rank;
+            $context->status = 'NO_REJECTION_CHOICE_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.choice.without_rejection');
+            return $rank;
+        });
         $this->dispatcher->register('NUMERIC_NEXT_BOWL_LEGACY', function(BootstrapContext $context): array {
             $id = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -540,6 +558,25 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('ORDER_NEIGHBOR_PATCH_12', $context)
+        );
+    }
+
+    /**
+     * DISCOVERY13: penghala sejarah membuang penolakan sampel di atas cutoff.
+     * @return BigInt Pangkat tidak seragam untuk ruang 1..M.
+     */
+    public function legacyChooseRank(
+        int $calculationDay, int $targetDay, int $queriedBowlId,
+        int $seal, BigInt $space
+    ): BigInt {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'NO_REJECTION_CHOICE_LEGACY';
+        $context->semanticState['queriedBowlId'] = $queriedBowlId;
+        $context->semanticState['seal'] = $seal;
+        $context->semanticState['choiceSpace'] = $space;
+        return $this->boundary->run(
+            $context,
+            fn(): BigInt => $this->dispatcher->dispatch('NO_REJECTION_CHOICE_LEGACY', $context)
         );
     }
 
