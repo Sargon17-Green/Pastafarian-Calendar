@@ -121,8 +121,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: qa26-24-original-native-route-aggregate
+          name: qa26-64-original-native-route-aggregate
           path: |
-            qa26_native_24_aggregate.json
+            qa26_native_64_aggregate.json
             qa26_aggregate_console.log
           if-no-files-found: warn
