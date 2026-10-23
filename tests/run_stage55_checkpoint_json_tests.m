@@ -43,6 +43,21 @@ for f=1:numel(families)
         roundtrips=roundtrips+1;
     end
 end
+% JSON arrays may decode as columns, whereas fresh MATLAB cursor
+% arrays are rows. Both orientations must round-trip identically.
+L=[3 2 2 2];
+[~,c]=pastafari.unrankGeneralWeaveSuffixChunkLazyJoint( ...
+    L,L,0,0,pastafari.BigInt(1),3);
+columnCursor=c;
+columnCursor.remaining=c.remaining(:);
+json=pastafari.serializeExactWeaveCursorJson(L(:),columnCursor);
+[restoredL,restored]=pastafari.restoreExactWeaveCursorJson(json);
+assert(isequal(restoredL,L) && ...
+    isequal(restored.remaining,c.remaining) && ...
+    restored.count==c.count && restored.rank==c.rank, ...
+    'Column-vector JSON cursor changed exact BigInt or shape.');
+fprintf('STAGE_55_CHECKPOINT_JSON_COLUMN_ORIENTATION_PASS\n');
+
 fprintf(['STAGE_55_CHECKPOINT_JSON_RESUME_PASS ', ...
     'FAMILIES=%d ROUNDS=%d\n'],numel(families),roundtrips);
 

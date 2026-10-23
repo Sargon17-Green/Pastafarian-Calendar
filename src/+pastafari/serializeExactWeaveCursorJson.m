@@ -29,13 +29,21 @@ if ~(isstruct(cursor) && isscalar(cursor) && ...
         'Cursor does not contain all required scalar fields.');
 end
 R=cursor.remaining;
+% JSON decoding may return a column vector even when the original
+% MATLAB cursor used a row. Normalize orientation BEFORE comparing
+% R to the row-shaped original lengths; implicit expansion would
+% otherwise produce a K-by-K matrix and invalidate short-circuit logic.
 if ~(isnumeric(R) && isvector(R) && isreal(R) && ...
-        numel(R)==K && all(isfinite(R)) && ...
-        all(fix(R)==R) && all(R>=0) && all(R<=L))
+        numel(R)==K && all(isfinite(R(:))) && ...
+        all(fix(R(:))==R(:)) && all(R(:)>=0))
     error('Pastafari:WeaveCheckpoint:Remaining', ...
-        'Remaining month multiplicities must match original lengths.');
+        'Remaining month multiplicities must be exact nonnegative integers.');
 end
 R=double(R(:).');
+if any(R>L)
+    error('Pastafari:WeaveCheckpoint:Remaining', ...
+        'Remaining month multiplicities exceed original lengths.');
+end
 o=cursor.openedUpTo;
 c=cursor.closedUpTo;
 if ~(isnumeric(o) && isscalar(o) && isreal(o) && ...
