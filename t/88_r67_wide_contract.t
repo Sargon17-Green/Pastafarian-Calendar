@@ -25,7 +25,7 @@ like($src,qr/\$total->badd\(\$walk->\(/,'每條合法後繼以 BigInt 無損相�
 like($src,qr/countWeavingsPolynomial\(\$sizes\)/,'不同演算法之精確多項式');
 like($src,qr/early_final_closed_form=>1/,'有界 FIFO 和 CLOCK 均使用候選閉式');
 like($src,qr/cache_limit=>16/,'私有快取硬上限十六項');
-like($src,qr/independent_prefix\(\$sizes,\\@prefix,\$walk\)/,
+ok(index($src, 'independent_prefix($sizes,\\@prefix,$walk)')>=0,
      '完整詞真實前綴必須重算獨立參考值');
 my @job=($wf =~ /^  canonical-r67-wide-boundary:[^\n]*\n(.*?)(?=^  [A-Za-z][\w-]*:|\z)/msg);
 is(scalar(@job),1,'R67 專用驗證恰有一個 opt-in CI 工作');
