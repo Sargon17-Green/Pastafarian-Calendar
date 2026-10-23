@@ -405,3 +405,21 @@ php -d memory_limit=512M tests/verify_stage28_discovery14.php # exit 0 jika RED 
 ```
 
 Semua Stage1–27, pemeriksaan sintaks, fixture dan kunci nama kanonik wajib kekal hijau. **Jangan tambah `BigEndianDigitsPatch14` atau Stage29 sebelum Native CI Stage28 pada SHA tepat disahkan.** Tiada perubahan `main`, oracle produksi, katalog atau fixture.
+
+
+## Stage 29 — PATCH 14: Dua digit dengan pemberat benar
+
+Stage28 `DISCOVERY14` disahkan `EXPECTED_RED` di HEAD `7814d28ca9f9f489aa6ce3210a955e48a0c52477` oleh Native GitHub Actions run `39981352293`, kedua-dua pekerjaan SUCCESS.
+
+`BigEndianDigitsPatch14::choosePatched` memanggil `LegacyBigEndianDigits14::chooseWrong` secara sebenar dan mengekalkan kelas sejarah tanpa sebarang perubahan. Pembaikan hanya berat kedudukan digit dalam bilangan 1..M² bagi ruang pilihan `M<n<=M²`: sampel pertama berat **1**, sampel kedua berat **M**. Kedua-dua sampel dijana melalui SAVE yang sama, disusuli rejection sampling pada cutoff `floor(M²/n)*n` dan pengeluaran rank `1+((wide-1) mod n)`.
+
+`BootstrapKernel::chooseWideRank` menggunakan penghala `TWO_DIGIT_WEIGHTS_PATCH_14` dengan konteks sendiri. `legacyChooseWideRank` dan `BIG_ENDIAN_DIGITS_LEGACY` terus mempamerkan susunan salah yang boleh diuji. Domain untuk `n<=M` kekal ditangani oleh `chooseRank` daripada Stage27.
+
+Ujian Stage29 membandingkan empat saksi matematik Stage28, 720 pertanyaan sintetik (90 nilai permulaan × dua arah × empat saiz ruang), 18 pertanyaan produksi dari tiga pasangan tarikh, enam input salah dan pemilikan state terhadap oracle PHP setempat. Pengesah Stage28 mesti terus memerlukan empat parut RED tepat; semua regresi Stage1–28, lint, fixture dan nama kanonik mesti lulus.
+
+```text
+php -d memory_limit=512M tests/verify_stage28_discovery14.php
+php -d memory_limit=512M tests/stage29_patch14_tests.php
+```
+
+**Status:** `AWAITING_CI`. Tidak memulakan Stage30, tidak mengubah `main`, kod legacy, katalog atau fixture.

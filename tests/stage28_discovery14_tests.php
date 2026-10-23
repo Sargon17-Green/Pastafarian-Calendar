@@ -118,7 +118,12 @@ $kernelCode=(string)file_get_contents($src.'/BootstrapKernel.php');
 if (!str_contains($legacyCode,'$digitWeights = [$this->modulus, BigInt::one()];')
     || !str_contains($kernelCode,
         "dispatch('BIG_ENDIAN_DIGITS_LEGACY', " . '$context)')
-    || is_file($src.'/Patches/BigEndianDigitsPatch14.php')) {
+    || (is_file($src.'/Patches/BigEndianDigitsPatch14.php')
+        && !(str_contains($kernelCode,
+                "dispatch('TWO_DIGIT_WEIGHTS_PATCH_14', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $src.'/Patches/BigEndianDigitsPatch14.php'),
+                '$this->legacy->chooseWrong($stream, $n)')))) {
     echo "RALAT_KONTRAK14\n";
     $unexpected++;
 }

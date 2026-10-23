@@ -100,3 +100,5 @@ jobs:
         run: php -d memory_limit=512M tests/stage27_patch13_tests.php
       - name: Penemuan 14 — berat digit pilihan besar salah
         run: php -d memory_limit=512M tests/verify_stage28_discovery14.php
+      - name: Tampalan 14 — digit pertama berat satu dan kedua berat M
+        run: php -d memory_limit=512M tests/stage29_patch14_tests.php

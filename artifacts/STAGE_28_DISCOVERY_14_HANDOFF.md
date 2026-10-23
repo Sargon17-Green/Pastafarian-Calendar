@@ -16,3 +16,7 @@ Untuk `M<n<=M*M`, dua sampel SAVE membentuk bilangan lebar. Kedudukan yang benar
 - Jangan tambah PATCH14, jangan mulakan Stage29, jangan ubah main, katalog, fixture atau kod legacy sedia ada.
 
 **Status**: AWAITING_CI sehingga Native GitHub Actions pada HEAD tepat diterima.
+
+## Native CI VERIFIED
+
+Stage28 EXPECTED_RED disahkan pada HEAD `7814d28ca9f9f489aa6ce3210a955e48a0c52477`, run `39981352293`, kedua-dua pekerjaan SUCCESS. Stage29 PATCH14 boleh dimulakan; parut Stage28 kekal wajib.

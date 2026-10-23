@@ -35,7 +35,12 @@ $kernel=(string)file_get_contents($src.'/BootstrapKernel.php');
 $valid=$valid
     && str_contains($legacy,'$digitWeights = [$this->modulus, BigInt::one()];')
     && str_contains($kernel,"dispatch('BIG_ENDIAN_DIGITS_LEGACY', " . '$context)')
-    && !is_file($src.'/Patches/BigEndianDigitsPatch14.php');
+    && (!is_file($src.'/Patches/BigEndianDigitsPatch14.php')
+        || (str_contains($kernel,
+                "dispatch('TWO_DIGIT_WEIGHTS_PATCH_14', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $src.'/Patches/BigEndianDigitsPatch14.php'),
+                '$this->legacy->chooseWrong($stream, $n)')));
 foreach (new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($src,FilesystemIterator::SKIP_DOTS)
 ) as $file) {
