@@ -166,6 +166,9 @@ public sealed class MonsterContext
     // الندبة العشرون: زيادة وزن أعلى خانة بعد اعتماد المرتبة الواسعة.
     public BigInteger? LegacyUpperPlaceBiasRankResult { get; set; }
 
+    // الرقعة العشرون: حفظ النتيجة المصححة بعيداً عن الشاهد التاريخي.
+    public BigInteger? PatchedUpperPlaceBiasRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

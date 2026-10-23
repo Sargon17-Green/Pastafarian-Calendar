@@ -257,3 +257,5 @@ jobs:
         run: |
           test "${{ steps.discovery_upper_place_bias_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage40Tests/PastafarianCalendar.Stage40Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ الرقعة العشرين وحفظ شاهد انحياز الخانة العليا
+        run: dotnet run --project tests/PastafarianCalendar.Stage41Tests/PastafarianCalendar.Stage41Tests.csproj --configuration Release

@@ -296,6 +296,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyUpperPlaceBias(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة العشرون: ناتج صحيح مع الاحتفاظ بالشاهد التاريخي المستقل.
+    public static BigInteger EvaluateUpperPlaceBias(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateUpperPlaceBias(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {
