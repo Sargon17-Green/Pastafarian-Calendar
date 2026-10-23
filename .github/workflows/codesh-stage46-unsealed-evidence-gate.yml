@@ -1,4 +1,4 @@
-name: Codesh Stage46 Unsealed Evidence Gate
+name: Codesh Stage46 Signed Evidence Gate
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # The signed Stage45 parent must be independently accessible
-      - name: Freeze Stage45 sources and reject synthetic Stage46 acceptance
+      - name: Freeze Stage45 sources and validate signed Stage46 receipt
         shell: bash
         run: |
           python3 - <<'PY'
@@ -25,42 +25,62 @@ jobs:
           import subprocess
 
           pins = json.loads(Path('qa/Stage46_Signed_Source_Blob_Lock.json').read_text(encoding='utf-8'))
-          audit = json.loads(Path('qa/Stage46_Recovery_Preflight_UNSEALED.json').read_text(encoding='utf-8'))
-          fields = {}
+          preflight = json.loads(Path('qa/Stage46_Recovery_Preflight_UNSEALED.json').read_text(encoding='utf-8'))
+          receipt = json.loads(Path('qa/Stage46_Native_Evidence_Receipt.json').read_text(encoding='utf-8'))
+          stage = {}
           for line in Path('DEVELOPMENT_STAGE.md').read_text(encoding='utf-8').splitlines():
               if '=' in line:
-                  k, v = line.split('=', 1)
-                  if k in fields:
-                      raise AssertionError(f'Duplicate stage field: {k}')
-                  fields[k] = v.strip()
+                  key, val = line.split('=', 1)
+                  assert key not in stage, f'Duplicate stage field: {key}'
+                  stage[key] = val.strip()
 
-          def git_blob(data):
-              return hashlib.sha1(b'blob ' + str(len(data)).encode('ascii') + b'\0' + data).hexdigest()
+          def git_blob(raw):
+              return hashlib.sha1(b'blob ' + str(len(raw)).encode('ascii') + b'\0' + raw).hexdigest()
 
-          def statuses_are_unsealed(doc, stage):
+          def sealed(rcpt, fields):
               return (
-                  doc.get('stage') == 46
-                  and doc.get('last_completed_stage') == 45
-                  and doc.get('native_evidence_status') == 'BLOCKED_ORIGINAL_WINDOWS_OUTPUTS_NOT_ACCESSIBLE'
-                  and doc.get('stage46_sealed') is False
-                  and doc.get('stage47_started') is False
-                  and doc.get('native_results_claimed') is False
-                  and doc.get('recovery_v002', {}).get('qa_fixture') == 'SYNTHETIC_NOT_NATIVE'
-                  and doc.get('recovery_v002', {}).get('no_native_reexecution') is True
-                  and stage.get('CURRENT_STAGE') == '45'
-                  and stage.get('LAST_COMPLETED_STAGE') == '45'
-                  and stage.get('STAGE46_STARTED') == 'NO'
+                  rcpt.get('schema_version') == 'codesh-stage46-native-evidence-receipt/1'
+                  and rcpt.get('stage') == 46
+                  and rcpt.get('last_completed_stage') == 46
+                  and rcpt.get('status') == 'EXPECTED_RED_CONFIRMED'
+                  and rcpt.get('stage46_sealed') is True
+                  and rcpt.get('stage47_started') is False
+                  and rcpt.get('native_results_claimed') is True
+                  and rcpt.get('signed_baseline_source_count') == 40
+                  and rcpt.get('source_count_compiled') == 41
+                  and rcpt.get('gate_count') == 21
+                  and rcpt.get('regressions_stage29_to_stage45') == 17
+                  and rcpt.get('expected_old_next_gate_as_closing_mismatches') == 48
+                  and rcpt.get('archive_sha256_entries_verified') == 57
+                  and rcpt.get('provenance', {}).get('recovery_without_reexecution') is True
+                  and rcpt.get('provenance', {}).get('native_processes_reexecuted') == 0
+                  and fields.get('CURRENT_STAGE') == '46'
+                  and fields.get('CURRENT_KIND') == 'DISCOVERY'
+                  and fields.get('CURRENT_DISCOVERY') == '23'
+                  and fields.get('LAST_COMPLETED_STAGE') == '46'
+                  and fields.get('EXPECTED_REPOSITORY_STATE') == 'EXPECTED_RED'
+                  and fields.get('STAGE46_STARTED') == 'YES'
+                  and fields.get('STAGE47_STARTED') == 'NO'
               )
 
-          assert pins['schema_version'] == 'codesh-stage46-source-blob-lock/1'
           assert pins['pinned_head'] == 'f35a6efd79b830810c8a33140ce8eb949b2c8671'
-          assert pins['mode'] == 'FAIL_CLOSED_WHILE_STAGE46_UNSEALED'
-          assert audit['original_v001']['pinned_head'] == pins['pinned_head']
-          assert audit['original_v001']['baseline_sources'] == 40
-          assert statuses_are_unsealed(audit, fields), 'Stage46 is unsealed: do not claim Native PASS or open Stage47'
-          assert len(pins['git_blobs']) == 40, 'Signed source count changed'
-          # The lock manifest is editable; validate it against the immutable
-          # Stage45 commit tree so modifying both the lock and sources cannot pass.
+          assert pins['mode'] == 'FAIL_CLOSED_WHILE_STAGE46_UNSEALED', 'Historic lock must remain unaltered'
+          assert preflight['original_v001']['pinned_head'] == pins['pinned_head']
+          assert preflight['native_evidence_status'] == 'BLOCKED_ORIGINAL_WINDOWS_OUTPUTS_NOT_ACCESSIBLE'
+          assert preflight['stage46_sealed'] is False, 'Preserve historical preflight truth'
+          assert preflight['recovery_v002']['qa_fixture'] == 'SYNTHETIC_NOT_NATIVE'
+          assert sealed(receipt, stage), 'Stage46 not sealed with native evidence receipt'
+          assert receipt['provenance']['pinned_signed_stage45_head'] == pins['pinned_head']
+          assert receipt['provenance']['original_manifest_sha256'] == preflight['original_v001']['manifest_sha256']
+          assert receipt['provenance']['original_native_run_id'] == preflight['original_native_run_id']
+          assert receipt['new_old_source']['sha256'] == preflight['original_v001']['isolated_candidate_sha256']
+          assert receipt['frozen_oracle_sha256'] == preflight['original_v001']['frozen_oracle_sha256']
+          assert receipt['provenance']['recovered_handoff_sha256'] == stage['STAGE46_WINDOWS_PASS_HANDOFF_SHA256']
+          assert receipt['native_jar_sha256'] == stage['STAGE46_NATIVE_JAR_SHA256']
+          assert receipt['new_old_source']['git_blob_sha1'] == stage['STAGE46_OLD_SOURCE_GIT_BLOB_SHA1']
+          assert stage['STAGE46_OLD_SOURCE_SHA256'] == receipt['new_old_source']['sha256']
+
+          # Reject modified signed sources, even if the editable lock is modified too.
           tree = subprocess.check_output([
               'git', 'ls-tree', '-r', '-z', pins['pinned_head'], '--', 'מקור/'
           ])
@@ -68,31 +88,34 @@ jobs:
           for item in tree.split(b'\0'):
               if not item:
                   continue
-              metadata, filename = item.split(b'\t', 1)
-              mode, objtype, oid = metadata.split(b' ')
-              assert mode == b'100644' and objtype == b'blob', 'Unexpected signed source kind'
+              meta, filename = item.split(b'\t', 1)
+              mode, objtype, oid = meta.split(b' ')
+              assert mode == b'100644' and objtype == b'blob'
               baseline[filename.decode('utf-8')] = oid.decode('ascii')
-          assert len(baseline) == 40, 'Stage45 parent must have exactly 40 signed sources'
-          assert baseline == pins['git_blobs'], 'Lock manifest differs from signed Stage45 Git tree'
-          found = {p.as_posix() for p in Path('מקור').glob('*.אמן')}
-          assert found == set(pins['git_blobs']), 'Signed source set changed'
-          for filename, expected_sha1 in sorted(pins['git_blobs'].items()):
-              assert re.fullmatch(r'[0-9a-f]{40}', expected_sha1), f'Invalid blob SHA: {filename}'
-              raw = Path(filename).read_bytes()
-              assert git_blob(raw) == expected_sha1, f'Signed source modified: {filename}'
+          assert len(baseline) == 40
+          assert baseline == pins['git_blobs'], 'Baseline lock does not match immutable parent'
+          candidate_path = receipt['new_old_source']['path']
+          expected_sources = set(baseline) | {candidate_path}
+          actual_sources = {x.as_posix() for x in Path('מקור').glob('*.אמן')}
+          assert actual_sources == expected_sources, 'Exactly one new Codesh source is allowed'
+          for filename, sha1 in baseline.items():
+              assert git_blob(Path(filename).read_bytes()) == sha1, 'Signed source mutated'
+          candidate_raw = Path(candidate_path).read_bytes()
+          assert hashlib.sha256(candidate_raw).hexdigest() == receipt['new_old_source']['sha256']
+          assert git_blob(candidate_raw) == receipt['new_old_source']['git_blob_sha1']
+          assert candidate_raw.count('ויתקדם שער־ישן:'.encode('utf-8')) == 2
+          assert candidate_raw.count('ל־קח־שער־סוגר'.encode('utf-8')) == 2
 
-          # Negative controls must be rejected. These checks do not supply Native evidence.
-          sample, sha = next(iter(sorted(pins['git_blobs'].items())))
-          assert git_blob(Path(sample).read_bytes() + b'X') != sha
-          manipulated = dict(pins['git_blobs'])
-          manipulated[sample] = git_blob(Path(sample).read_bytes() + b'X')
-          assert manipulated != baseline, 'Forged source + lock must be rejected'
-          assert not statuses_are_unsealed({**audit, 'stage46_sealed': True}, fields)
-          assert not statuses_are_unsealed({**audit, 'native_results_claimed': True}, fields)
-          assert not statuses_are_unsealed({**audit, 'stage47_started': True}, fields)
-          assert not statuses_are_unsealed({**audit, 'recovery_v002': {**audit['recovery_v002'], 'qa_fixture': 'NATIVE_CONFIRMED'}}, fields)
-          assert not statuses_are_unsealed(audit, {**fields, 'LAST_COMPLETED_STAGE': '46'})
-          print('PASS: 40 Git blobs match immutable Stage45 parent; Stage46 UNSEALED; 7 negative controls rejected')
+          # Fail-closed negative controls, independent of the audit receipt.
+          assert not sealed({**receipt, 'stage46_sealed': False}, stage)
+          assert not sealed({**receipt, 'native_results_claimed': False}, stage)
+          assert not sealed({**receipt, 'stage47_started': True}, stage)
+          assert not sealed({**receipt, 'gate_count': 20}, stage)
+          assert not sealed({**receipt, 'regressions_stage29_to_stage45': 16}, stage)
+          assert not sealed(receipt, {**stage, 'LAST_COMPLETED_STAGE': '45'})
+          assert not sealed(receipt, {**stage, 'STAGE47_STARTED': 'YES'})
+          assert git_blob(candidate_raw + b'X') != receipt['new_old_source']['git_blob_sha1']
+          print('PASS: 40 immutable signed sources + isolated Stage46 OLD; receipt sealed; eight negative controls')
           PY
       - name: Exercise recovered HANDOFF verifier on synthetic fixtures only
         shell: bash
