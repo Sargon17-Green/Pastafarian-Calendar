@@ -38,4 +38,4 @@ STAGE_44_DISCOVERY_22_EXPECTED_RED_VERIFIED nonzero=1 naturalNativeWitness=1 dup
 
 720 DROP46 vectors हे नियंत्रित बदललेले test inputs आहेत, 720 स्वतंत्र ऐतिहासिक वर्ष-प्रश्न नाहीत. जुन्या `17^K` generator ने प्रत्यक्ष 449 repeated-name outputs दिले; normative `17!/(17-K)!` family चा Stage45 उपाय Stage44 मध्ये अजिबात लावलेला नाही. Stage54 पूर्ण calendar tuple अजून बंद आहे.
 
-ही नोंद implementation CI स्वीकारते; प्रशासकीय final commit व त्याचा स्वतंत्र CI यशस्वी झाल्यावरच `LAST_COMPLETED_STAGE=44` नोंदवायचा.
+या implementation CI नंतर documentation commit [c921cc09](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/c921cc096f219342dfbac91995b594a10d653b79) ची [CI 39997539874](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39997539874) दोन्ही jobs SUCCESS झाली. अंतिम closure commit मध्ये `LAST_COMPLETED_STAGE=44` व `NEXT_STAGE=45` निश्चित; Stage45 उघडण्याआधी त्या अंतिम HEAD च्या दोन jobs ची स्वतंत्र SUCCESS पडताळणी अनिवार्य.
