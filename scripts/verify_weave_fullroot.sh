@@ -47,3 +47,26 @@ iverilog -g2012 -Wall -s tb_weave_prefix2 \
   -o build/weave_prefix2.vvp tests/tb_weave_prefix2.sv
 timeout 60s vvp build/weave_prefix2.vvp \
   2>&1 | tee build/weave_prefix2_run.log
+# One further full-width suffix run covers [1,2,1].
+# The [1,2,2] block then follows via an exact rational relation,
+# rather than running the expensive 4241-day suffix kernel twice.
+timeout 1100s vvp build/weave_fullroot.vvp +stop_after=45 +prefix121 \
+  2>&1 | tee build/weave_prefix121_run.log
+test "$(wc -c < build/foundation_weave_prefix121.bin)" -eq 2809
+printf '%s  %s\n' \
+  0a29d31d02e980a1ae807575c85a908bd31a05eb73b521a80f7ee3f2e925f1a7 \
+  build/foundation_weave_prefix121.bin | sha256sum -c -
+echo "STAGE1_FOUNDATION_WEAVE_PREFIX121_SHA256_PASS"
+iverilog -g2012 -Wall -s tb_weave_prefix3 \
+  -o build/weave_prefix3.vvp tests/tb_weave_prefix3.sv
+timeout 60s vvp build/weave_prefix3.vvp \
+  2>&1 | tee build/weave_prefix3_run.log
+test "$(wc -c < build/foundation_weave_prefix122.bin)" -eq 2809
+test "$(wc -c < build/foundation_weave_prefix123.bin)" -eq 2809
+printf '%s  %s\n' \
+  50064b46e82a20681a0e100e8a1516e0b4c151398231dd2f898be22f07bb9866 \
+  build/foundation_weave_prefix122.bin | sha256sum -c -
+printf '%s  %s\n' \
+  a89a9799db0649b78a5b24bf150f57dc11e549ce2d0d42088929974237762dde \
+  build/foundation_weave_prefix123.bin | sha256sum -c -
+echo "STAGE1_FOUNDATION_WEAVE_PREFIX3_SHA256_PASS"
