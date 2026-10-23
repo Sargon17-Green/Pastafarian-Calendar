@@ -10,7 +10,7 @@ module tb_weave_full_root;
     logic [WIDTH-1:0] prefix_count, root_count;
     integer month_lengths[0:MONTHS-1];
     integer first_count, new_count, month_index, k, t, i;
-    integer stop_after, root_file;
+    integer stop_after, root_file, start_month, prefix11;
     logic [WIDTH-1:0] all_zeroes;
 
     function automatic logic [CWIDTH-1:0] exact_small_div(
@@ -102,9 +102,36 @@ module tb_weave_full_root;
         for(i=0;i<=LENGTH;i=i+1) begin
             prior[i]='0;nextrow[i]='0;comb[i]='0;
         end
-        prior[1]=WIDTH'(1);
-        first_count=month_lengths[0];
-        for(month_index=2;month_index<=stop_after;month_index=month_index+1) begin
+        prefix11=$test$plusargs("prefix11");
+        if(prefix11!=0) begin
+            if(stop_after!=45) $fatal(1,"PREFIX11_REQUIRES_FULL_MONTH_COUNT");
+            // Independent suffix completion oracle after the FIRST TWO
+            // woven symbols are (1,1). The first month has 113 copies
+            // left, while months 2..45 have not yet begun.
+            //
+            // Insert all occurrences of the first fresh month (#2)
+            // among the remaining 113 old letters, with the last new
+            // copy following the last old letter. With k old letters
+            // before the first new copy, the exact block size is
+            // C(l2 + N-k-2,N-k) when k<N and one when k=N.
+            // No artificial "month 1 must appear first" constraint is
+            // re-applied after a valid prefix has already started it.
+            first_count=month_lengths[0]-2;
+            comb[0]=CWIDTH'(1);
+            for(t=1;t<=first_count;t=t+1) begin
+                numerator=comb[t-1]*$unsigned(month_lengths[1]+t-2);
+                comb[t]=exact_small_div(numerator,t);
+            end
+            for(k=0;k<=first_count;k=k+1)
+                prior[k+1]=WIDTH'(comb[first_count-k]);
+            first_count=first_count+month_lengths[1];
+            start_month=3;
+        end else begin
+            prior[1]=WIDTH'(1);
+            first_count=month_lengths[0];
+            start_month=2;
+        end
+        for(month_index=start_month;month_index<=stop_after;month_index=month_index+1) begin
             new_count=first_count+month_lengths[month_index-1];
             for(k=0;k<=new_count;k=k+1) nextrow[k]='0;
             comb[0]=CWIDTH'(1);
@@ -126,7 +153,7 @@ module tb_weave_full_root;
             if(root_count=='0 || bits(root_count)>WIDTH-48)
                 $fatal(1,"WIDTH_GUARD_OR_ZERO_COUNT");
             first_count=new_count;
-            case(month_index)
+            if(prefix11==0) case(month_index)
                 2: if(bits(root_count)!=217) $fatal(1,"MEDIUM_ROOT_2");
                 3: if(bits(root_count)!=528) $fatal(1,"MEDIUM_ROOT_3");
                 4: if(bits(root_count)!=880) $fatal(1,"MEDIUM_ROOT_4");
@@ -137,7 +164,16 @@ module tb_weave_full_root;
                      month_index,new_count,bits(root_count));
             $fflush();
         end
-        if(stop_after==45) begin
+        if(prefix11!=0) begin
+            if(first_count!=4242 || bits(root_count)!=22465)
+                $fatal(1,"PREFIX11_COUNT_WIDTH");
+            root_file=$fopen("build/foundation_weave_prefix11.bin","wb");
+            if(root_file==0) $fatal(1,"PREFIX11_FILE_OPEN_FAILED");
+            for(i=2808;i>=0;i=i-1)
+                $fwrite(root_file,"%c",root_count[i*8+:8]);
+            $fclose(root_file);
+            $display("STAGE1_FOUNDATION_WEAVE_PREFIX11_WRITTEN bits=22465 bytes=2809");
+        end else if(stop_after==45) begin
             if(first_count!=4244 || bits(root_count)!=22470)
                 $fatal(1,"ROOT_WIDTH_CHECKPOINT");
             if(root_count[479:0]!==480'h9ee02ae1d19ddbd2b9d29efcd0c9bbcddae2a4bcd271d0f85ce66a191c7130d0297ed5918ba7eb26aed483715a31dcc6ad4761227200307294007f78)
