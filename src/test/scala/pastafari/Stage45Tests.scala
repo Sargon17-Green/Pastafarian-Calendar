@@ -227,7 +227,7 @@ object Stage45Tests {
       new BaseValidationManager().requirePatch22Ready(ready())
     }
     check("validator rifiuta giorno corretto falsificato"){
-      val c=ready();c.patchedDayInMonth=Some(2)
+      val c=ready();c.monthOrdinalPatchedDayInMonth=Some(2)
       rejectState("Corretto"){new BaseValidationManager()
         .requirePatch22Ready(c)}
     }
