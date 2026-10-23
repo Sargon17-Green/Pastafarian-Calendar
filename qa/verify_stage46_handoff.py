@@ -141,8 +141,9 @@ def verify(path):
         jar_bytes = archive.read("EVIDENCE/native-stage46-candidate.jar")
         ensure(len(jar_bytes) > 10000, "Native JAR too small")
         with zipfile.ZipFile(io.BytesIO(jar_bytes)) as jar:
-            ensure(jar.testzip() is None and any(n.endswith(".class") for n in jar.namelist()),
-                   "Native JAR invalid")
+            jar_count = len(jar.infolist())
+            ensure(jar.testzip() is None and jar_count > 10 and
+                   any(n.endswith(".class") for n in jar.namelist()), "Native JAR invalid")
         gates = receipt.get("gates", [])
         ensure(len(gates) == len(EXITS) and len({gate["name"] for gate in gates}) == len(gates),
                "gate count/identity")
@@ -173,8 +174,47 @@ def verify(path):
             suffix = "stderr" if task == "STAGE46_ORACLE_TAMPER" else "stdout"
             content = archive.read(f"LOGS/{task}.{suffix}.log").decode("utf-8", "replace")
             ensure(all(marker in content for marker in markers), "semantic marker: " + task)
-        ensure(receipt.get("provenance", {}).get("signed_baseline_count") == 40 and
-               receipt.get("provenance", {}).get("run_count") == 21, "source/task count provenance")
+        meta = receipt.get("provenance", {})
+        ensure(meta.get("signed_baseline_count") == 40 and
+               meta.get("run_count") == 21 and
+               meta.get("expected_semantic_probes") == len(MARKERS) and
+               meta.get("root_manifest_sha256") == MANIFEST and
+               meta.get("jar_sha256") == digest(jar_bytes),
+               "Native provenance fields differ from recovered artifacts")
+
+        # The original recovery producer emits 26 independently computed
+        # validation records: 4 pinned inputs, 40-source count, JAR, runner,
+        # and 19 semantic probe logs. Verify the records, not just their presence.
+        records = receipt.get("validation_records", [])
+        ensure(isinstance(records, list) and len(records) == 7 + len(MARKERS),
+               "missing or surplus validation records")
+        ensure(all(isinstance(row, dict) and isinstance(row.get("name"), str)
+                   for row in records), "malformed validation record")
+        by_name = {row["name"]: row for row in records}
+        ensure(len(by_name) == len(records), "duplicate validation record names")
+        expected_inputs = {
+            "STAGE46_ORIGINAL_MANIFEST": "PINNED_INPUTS/PACKAGE_MANIFEST.json",
+            "PINNED_DISCOVERY23_CANDIDATE": "PINNED_INPUTS/DISCOVERY23_CANDIDATE.אמן",
+            "COMPILED_CANDIDATE_SOURCE": "EVIDENCE/DISCOVERY23_CANDIDATE.אמן",
+            "FROZEN_ORACLE": "PINNED_INPUTS/Stage16AdjacentSelectedVectors.tsv",
+            "NATIVE_JAR": "EVIDENCE/native-stage46-candidate.jar",
+            "ORIGINAL_NATIVE_RUNNER_LOG": "LOGS/runner.log",
+        }
+        for task in MARKERS:
+            suffix = "stderr" if task == "STAGE46_ORACLE_TAMPER" else "stdout"
+            expected_inputs["PROBE_LOG_" + task] = f"LOGS/{task}.{suffix}.log"
+        ensure(set(by_name) == set(expected_inputs) | {"SIGNED_SOURCES_40_PLUS_ISOLATED_OLD"},
+               "unexpected validation record identity")
+        ensure(by_name["SIGNED_SOURCES_40_PLUS_ISOLATED_OLD"].get("count") == 40 and
+               by_name["SIGNED_SOURCES_40_PLUS_ISOLATED_OLD"].get("status") == "PASS",
+               "signed baseline record mismatch")
+        for label, filename in expected_inputs.items():
+            actual = archive.read(filename)
+            row = by_name[label]
+            ensure(row.get("sha256") == digest(actual) and row.get("bytes") == len(actual),
+                   "validation record mismatch: " + label)
+        ensure(by_name["NATIVE_JAR"].get("member_count") == jar_count,
+               "Native JAR validation record member count mismatch")
     return {"status": "STRUCTURE_PASS_NOT_NATIVE_ATTESTATION", "gates": len(EXITS)}
 
 def main():

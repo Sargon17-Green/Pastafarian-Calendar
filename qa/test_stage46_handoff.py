@@ -29,7 +29,8 @@ def fixture():
     classbytes = hashlib.shake_256(b"synthetic-only").digest(20000)
     jar = io.BytesIO()
     with zipfile.ZipFile(jar, "w") as archive:
-        archive.writestr("Fixture.class", classbytes)
+        for i in range(12):
+            archive.writestr(f"Fixture{i:02d}.class", classbytes)
     runner = "\n".join([
         "ENGINE_ENTERED v001 " + v.RUN_ID,
         "PACKAGE_SHA_AND_40_SIGNED_BASELINE_SOURCE_PASS",
@@ -69,6 +70,28 @@ def fixture():
             use = ("stderr" if task == "STAGE46_ORACLE_TAMPER" else "stdout")
             lines = v.MARKERS.get(task, ()) if stream == use else ()
             records[f"LOGS/{task}.{stream}.log"] = "\n".join(lines).encode("utf-8")
+    # Mirror all 26 record identities emitted by the actual v002 recovery producer.
+    paths = {
+        "STAGE46_ORIGINAL_MANIFEST": "PINNED_INPUTS/PACKAGE_MANIFEST.json",
+        "PINNED_DISCOVERY23_CANDIDATE": "PINNED_INPUTS/DISCOVERY23_CANDIDATE.אמן",
+        "COMPILED_CANDIDATE_SOURCE": "EVIDENCE/DISCOVERY23_CANDIDATE.אמן",
+        "FROZEN_ORACLE": "PINNED_INPUTS/Stage16AdjacentSelectedVectors.tsv",
+        "NATIVE_JAR": "EVIDENCE/native-stage46-candidate.jar",
+        "ORIGINAL_NATIVE_RUNNER_LOG": "LOGS/runner.log",
+    }
+    for task in v.MARKERS:
+        suffix = "stderr" if task == "STAGE46_ORACLE_TAMPER" else "stdout"
+        paths["PROBE_LOG_" + task] = f"LOGS/{task}.{suffix}.log"
+    validations = [{"name": name, "sha256": v.digest(records[p]), "bytes": len(records[p])}
+                   for name, p in paths.items()]
+    validations.insert(4, {"name":"SIGNED_SOURCES_40_PLUS_ISOLATED_OLD", "count":40, "status":"PASS"})
+    receipt["validation_records"] = validations
+    receipt["provenance"].update({
+        "jar_sha256": v.digest(records["EVIDENCE/native-stage46-candidate.jar"]),
+        "expected_semantic_probes": len(v.MARKERS),
+        "root_manifest_sha256": v.digest(manifest),
+    })
+    records["RESULT.json"] = json_bytes(receipt)
     return records, {"CANDIDATE":v.digest(source),
                      "ORACLE":v.digest(oracle), "MANIFEST":v.digest(manifest),
                      "RUNNER_SHA":v.digest(runner)}
@@ -156,6 +179,33 @@ class Stage46ReceiptTests(unittest.TestCase):
         # Repin synthetic runner to ensure chronology check is reached.
         with mock.patch.object(v, "RUNNER_SHA", v.digest(self.records["LOGS/runner.log"])):
             self.attempt(False)
+
+    def test_changed_jar_provenance_rejected(self):
+        receipt = json.loads(self.records["RESULT.json"])
+        receipt["provenance"]["jar_sha256"] = "0" * 64
+        self.records["RESULT.json"] = json_bytes(receipt)
+        self.attempt(False)
+
+    def test_changed_probe_validation_sha_rejected(self):
+        receipt = json.loads(self.records["RESULT.json"])
+        item = next(x for x in receipt["validation_records"]
+                    if x["name"] == "PROBE_LOG_STAGE45_PATCH_REGRESSION")
+        item["sha256"] = "0" * 64
+        self.records["RESULT.json"] = json_bytes(receipt)
+        self.attempt(False)
+
+    def test_missing_validation_record_rejected(self):
+        receipt = json.loads(self.records["RESULT.json"])
+        receipt["validation_records"].pop()
+        self.records["RESULT.json"] = json_bytes(receipt)
+        self.attempt(False)
+
+    def test_jar_too_few_members_rejected(self):
+        small = io.BytesIO()
+        with zipfile.ZipFile(small, "w") as archive:
+            archive.writestr("Only.class", b"synthetic" * 2500)
+        self.records["EVIDENCE/native-stage46-candidate.jar"] = small.getvalue()
+        self.attempt(False)
 
     def test_checksum_mismatch_rejected(self):
         self.attempt(False, use_old_sums=True)
