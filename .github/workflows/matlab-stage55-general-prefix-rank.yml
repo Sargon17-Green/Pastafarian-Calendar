@@ -1,0 +1,31 @@
+name: MATLAB General Prefix Rank Oracle (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/rankGeneralWeavePrefix.m'
+      - 'tests/run_stage55_general_prefix_rank_tests.m'
+      - '.github/workflows/matlab-stage55-general-prefix-rank.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  general-prefix-small:
+    name: MATLAB R2026a / independent all-opening-frontier rank oracle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v4
+      - name: Setup MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Exhaustively compare legal prefix rank intervals
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_general_prefix_rank_tests
