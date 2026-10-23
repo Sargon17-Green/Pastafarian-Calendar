@@ -80,8 +80,9 @@ defmodule PastafariCalendarElixirVietnamese.Stage54Discovery27Test do
     r = MonthNameIndexManager.diagnose_count(@foundation, @source, 3)
     assert r.historical_month_name_rank ==
       LegacyNextMonthNameRank.transform(r.month_name_rank, r.month_name_candidate_count)
-    assert r.month_name_indices ==
+    assert r.historical_month_name_indices ==
       DistinctMonthNameIndices.unrank(3, r.historical_month_name_rank)
+    assert r.month_name_indices == DistinctMonthNameIndices.unrank(3, r.month_name_rank)
   end
 
   test "bát 5 và chốt 33 lấy hạng một-based" do
@@ -119,8 +120,10 @@ defmodule PastafariCalendarElixirVietnamese.Stage54Discovery27Test do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     manager = File.read!(Path.join(root, "month_name_index_manager.ex"))
     legacy = File.read!(Path.join(root, "legacy_next_month_name_rank.ex"))
-    assert manager =~ "LegacyNextMonthNameRank.transform(rank, total)"
-    assert manager =~ "DistinctMonthNameIndices.unrank(month_count, historical_rank)"
+    patch = File.read!(Path.join(root, "month_name_rank_patch.ex"))
+    assert manager =~ "MonthNameRankPatch.diagnose(rank, total, month_count)"
+    assert patch =~ "LegacyNextMonthNameRank.transform(rank, total)"
+    assert patch =~ "DistinctMonthNameIndices.unrank(month_count, historical_rank)"
     assert legacy =~ "rem(rank, total) + 1"
     refute manager =~ "NormativeReference"
     assert_raise StageNotIntegratedError, fn ->

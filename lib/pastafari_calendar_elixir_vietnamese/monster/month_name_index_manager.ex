@@ -1,15 +1,13 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.MonthNameIndexManager do
   @moduledoc """
-  DISCOVERY27 chọn tên khác nhau từ 47 tên theo bowl 5,
-  seal 33 và nguồn là ngày đầu của năm đích.
-  Lỗi di sản cố ý tăng hạng thêm một, còn dòng đáp án
-  và độ dài tháng, cách đan, năm, cốt-lết giữ nguyên.
-  Chưa tích hợp ngày lịch cuối cùng.
+  PATCH27 khôi phục hạng chọn tên tháng, giữ kết quả cũ.
+  Gọi di sản dịch hạng thật trước khi đảo về hạng chuẩn.
+  Chưa tích hợp bộ năm thành phần của ngày lịch.
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
     AnswerStreamManager, Dispatcher, DistinctMonthNameIndices,
-    LegacyNextMonthNameRank, MonthWeavingManager
+    MonthNameRankPatch, MonthWeavingManager
   }
 
   @bowl 5
@@ -27,6 +25,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.MonthNameIndexManager do
       month_name_candidate_count: child.month_name_candidate_count,
       month_name_rank: child.month_name_rank,
       historical_month_name_rank: child.historical_month_name_rank,
+      corrected_month_name_rank: child.corrected_month_name_rank,
       month_name_bowl: child.month_name_bowl,
       month_name_seal: child.month_name_seal
     })
@@ -40,14 +39,14 @@ defmodule PastafariCalendarElixirVietnamese.Monster.MonthNameIndexManager do
     total = DistinctMonthNameIndices.count(month_count)
     stream = Dispatcher.answer_stream(c, source_day, @bowl, @seal)
     rank = AnswerStreamManager.choose_rank(stream, total)
-    historical_rank = LegacyNextMonthNameRank.transform(rank, total)
-    historical = DistinctMonthNameIndices.unrank(month_count, historical_rank)
+    patch = MonthNameRankPatch.diagnose(rank, total, month_count)
 
-    %{month_name_indices: historical,
-      historical_month_name_indices: historical,
+    %{month_name_indices: patch.corrected_names,
+      historical_month_name_indices: patch.historical_names,
       month_name_candidate_count: total,
       month_name_rank: rank,
-      historical_month_name_rank: historical_rank,
+      historical_month_name_rank: patch.historical_rank,
+      corrected_month_name_rank: patch.corrected_rank,
       month_name_bowl: @bowl, month_name_seal: @seal}
   end
 
