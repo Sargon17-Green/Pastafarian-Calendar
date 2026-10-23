@@ -62,3 +62,5 @@ export * from "./patch20StructureSauce.ts";
 export * from "./discovery21LegacyCutletCompositions.ts";
 
 export * from "./patch21FilteredCutletCompositions.ts";
+
+export * from "./discovery22LegacyCutletNames.ts";
