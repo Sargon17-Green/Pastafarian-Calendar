@@ -32,8 +32,19 @@ is(scalar(@job),1,'R67 專用驗證恰有一個 opt-in CI 工作');
 if (@job==1) {
     like($job[0],qr/\[weaving-r67-wide-boundary\]/,'工作只由專用提交啟動');
     like($job[0],qr/timeout-minutes:\s*5\b/,'GitHub 工作五分鐘上限');
-    like($job[0],qr/timeout --signal=TERM --kill-after=5s 190s/,
-         '子測試有 190 秒受控時限');
+    like($job[0],qr/timeout --signal=TERM --kill-after=5s 195s/,
+         '外層仍有 195 秒子程序清理上限');
+    like($job[0],qr/--seconds 185 --rss-kib 393216/,
+         '內層監督守衛 185 秒和 393216 KiB');
     like($job[0],qr/set -euo pipefail/,'失敗結果不可靜默忽略');
 }
+my $supervisor=readfile('tools/profile_r67_wide_bigint_prefix.pl');
+like($supervisor,qr/waitpid\(\$child,WNOHANG\)/,
+     '監督父程序會檢查真正執行中的子程序');
+like($supervisor,qr/\$rss>\$rss_limit/,
+     '超過 RSS 硬限額不得算 PASS');
+like($supervisor,qr/\$elapsed>\$seconds/,
+     '超過時間硬限額不得算 PASS');
+like($supervisor,qr/exit 3;/,
+     '資源阻擋以不同於正常完成的狀態回傳');
 done_testing;

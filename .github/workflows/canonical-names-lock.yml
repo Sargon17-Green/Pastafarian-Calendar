@@ -2172,4 +2172,5 @@ jobs:
         run: |
           set -euo pipefail
           perl -Ilib -It/lib -c t/87_r67_wide_bigint_prefix.t
-          timeout --signal=TERM --kill-after=5s 190s perl -Ilib -It/lib t/87_r67_wide_bigint_prefix.t
+          perl -Ilib -It/lib -c tools/profile_r67_wide_bigint_prefix.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r67_wide_bigint_prefix.pl --seconds 185 --rss-kib 393216

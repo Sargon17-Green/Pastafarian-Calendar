@@ -48,3 +48,16 @@ t/88_r67_wide_contract.t 檢查證據配置和 opt-in 工作。
 才可封存 Round 67。超大 BigInt 局部四月份測試
 不推論 45 個月／4244 日全球名次全域同構，
 也不推論多語言全部實作互相等價。
+
+
+## Round 67 監督器補強
+
+在提交的第一版 opt-in 工作中，只有 timeout，未由父程序
+直接監測 VmRSS；故必須補上獨立 fork/exec 父程序。
+tools/profile_r67_wide_bigint_prefix.pl 每 50ms 檢查子
+Perl 的 /proc/PID/status VmRSS，185 秒或 393216 KiB
+先達上限即將子程序 kill 並以 BLOCKED/exit 3 回傳。
+測試非零結束則 FAIL/exit 2；正常完成才 PASS/exit 0。
+195 秒的外部 timeout 僅為父程序失效的第二防護。
+舊版 CI run 的結果仍保留；必須以監督器合併後的
+完整 native 與全套 Perl 成功來驗收 R67。
