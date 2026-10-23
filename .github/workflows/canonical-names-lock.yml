@@ -2174,3 +2174,39 @@ jobs:
           perl -Ilib -It/lib -c t/87_r67_wide_bigint_prefix.t
           perl -Ilib -It/lib -c tools/profile_r67_wide_bigint_prefix.pl
           timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r67_wide_bigint_prefix.pl --seconds 185 --rss-kib 393216
+
+  canonical-r68-int64-rank-a:
+    name: R68 超越 int64 全長 BigInt 精確排名 a
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r68-int64-rank]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 原生 BigInt 字序 ranking/unranking 與獨立逐枝劃分
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r68_bigint_rank.pl
+          perl -Ilib -It/lib -c tools/profile_r68_bigint_rank.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r68_bigint_rank.pl --profile a --seconds 185 --rss-kib 393216
+
+  canonical-r68-int64-rank-b:
+    name: R68 超越 int64 全長 BigInt 精確排名 b
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r68-int64-rank]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 原生 BigInt 字序 ranking/unranking 與獨立逐枝劃分
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r68_bigint_rank.pl
+          perl -Ilib -It/lib -c tools/profile_r68_bigint_rank.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r68_bigint_rank.pl --profile b --seconds 185 --rss-kib 393216
