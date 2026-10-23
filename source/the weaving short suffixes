@@ -68,7 +68,7 @@ To remember the second short month:
 
 \ If one or no months remain, the only legal continuation repeats
 \ the sole remaining month until all its days have been consumed.
-To count a short weaving suffix:
+To resolve short suffix completions:
   Inspect unfinished short months.
   If the short weaving suffix's completed is 0, exit.
   Put "1" into the short weaving suffix's completions.
