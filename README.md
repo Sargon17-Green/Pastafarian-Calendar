@@ -343,3 +343,17 @@ Ujian: php -d memory_limit=512M tests/verify_stage22_discovery11.php dan php -d 
 Selepas Stage23 PATCH11, susunan orderAtDrop46 disimpan dengan betul. LegacyNumericSuccessor12 masih menganggap jiran setiap mangkuk ialah (id % 6)+1; ini boleh berbeza daripada ID mangkuk berikutnya dalam permutasi titisan 46. Formula SAVE first dan step kekal, tetapi input mangkuk jiran tersalah pilih. Kod legacy belum dibaiki.
 
 Ujian: php -d memory_limit=512M tests/stage24_discovery12_tests.php (exit 1 dijangka), dan php -d memory_limit=512M tests/verify_stage24_discovery12.php (exit 0 jika merah tepat). Pemeriksaan menyeluruh 720 permutasi × 6 pertanyaan: 3456 jiran berbeza, 864 sepadan; tiga pasangan tarikh sebenar, tiga input tidak sah, dan penghala produksi berasingan. Stage23 disahkan oleh run 39818136362. Jangan tambah PATCH12 atau Stage25 sebelum CI Stage24 disahkan.
+
+
+## Stage 25 — PATCH 12: Jiran mengikut susunan titisan 46
+
+Selepas Stage24 membuktikan jiran angka salah bagi 3,456 daripada 4,320 pertanyaan enam ID pada semua 720 permutasi, `NextBowlOrderPatch12::askPatched` memanggil `LegacyNumericSuccessor12::askWrong` secara sebenar sebagai parut sejarah dan validasi, kemudian membaca `orderAtDrop46` untuk menentukan jiran yang mengikuti ID pertanyaan (termasuk lilitan). Formula `first`, `step` dan SAVE tidak berubah. Tidak ada import oracle dalam `src`.
+
+`BootstrapKernel::askBowl` membuka konteks baharu dan menghala ke `ORDER_NEIGHBOR_PATCH_12`. `legacyAskBowl` serta `NUMERIC_NEXT_BOWL_LEGACY` tidak diubah. Pengesah Stage24 masih memerlukan kegagalan sejarah yang tepat dan ujian langsung masih mengembalikan exit 1. Semua ujian Stage1–24, fixture, sintaks dan kunci nama mesti lulus.
+
+```text
+php -d memory_limit=512M tests/verify_stage24_discovery12.php
+php -d memory_limit=512M tests/stage25_patch12_tests.php
+```
+
+Stage25 menguji 720 × 6 = 4,320 pertanyaan terhadap oracle tempatan, termasuk 3,456 parut berbeza dan 864 padanan; 72 ujian meterai tambahan; 18 pertanyaan sebenar daripada tiga pasangan hari; kesetaraan panggilan langsung/per-instance; dan empat penolakan input. **Stage26 belum dimulakan.** Stage25 ditanda AWAITING_CI sehingga GitHub Actions Native lulus pada SHA tepat.

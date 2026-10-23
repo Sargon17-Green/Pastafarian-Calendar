@@ -585,3 +585,7 @@ Run GitHub Actions 39818136362 pada commit da93ec7b1dc7bae9146c4818f4182bff7cfc8
 ## Stage 24 — DISCOVERY 12: Andaian jiran nombor
 
 LegacyNumericSuccessor12::askWrong menerima mangkuk akhir dan orderAtDrop46 yang telah dibetulkan melalui Stage23. Namun kaedah sejarah menggunakan nextBowlId=(queriedBowlId % 6)+1, bukannya jiran daripada susunan tersebut. BootstrapKernel menyediakan NUMERIC_NEXT_BOWL_LEGACY serta konteks milik panggilan. 720 permutasi × enam pertanyaan mesti mendedahkan 3456 penyimpangan jiran dan 864 padanan; tiga pasangan tarikh sebenar dan penolakan input juga diuji. Oracle hanya dalam direktori tests. Status Stage24 ialah AWAITING_CI hingga bukti Native SHA baharu diperiksa; tiada PATCH12 atau perubahan main.
+
+## Stage 25 — PATCH 12: Jiran bukan nombor berturutan
+
+Stage24 membuktikan 3,456 jiran legacy yang salah dan 864 yang sepadan dalam seluruh 720 susunan enam mangkuk. Penampal `NextBowlOrderPatch12` mengekalkan panggilan sebenar kepada `LegacyNumericSuccessor12::askWrong` lalu memilih ID jiran berdasarkan posisi dalam orderAtDrop46, bukan pada nilai angka ID. Formula first/step dan SAVE kekal, nombor asal tidak diubah. Dispatcher `ORDER_NEIGHBOR_PATCH_12` menjadi laluan produksi di samping `NUMERIC_NEXT_BOWL_LEGACY`; konteks baharu setiap panggilan. Ujian 720×6, meterai tambahan, tiga pasangan sebenar, penolakan input, ujian legacy dan keseluruhan CI diperlukan sebelum GREEN. Stage26 belum dimulakan.

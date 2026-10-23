@@ -485,6 +485,24 @@ final class BootstrapKernel
             return $result;
         });
 
+        $this->dispatcher->register('ORDER_NEIGHBOR_PATCH_12', function(BootstrapContext $context): array {
+            $id = $context->semanticState['queriedBowlId'] ?? null;
+            $seal = $context->semanticState['seal'] ?? null;
+            if (!is_int($id) || !is_int($seal)) {
+                throw new \InvalidArgumentException('ORDER_NEIGHBOR_PATCH_12_ARGS');
+            }
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyNumericSuccessor12($save);
+            $patch = new \Pastafari\Stage01\Patches\NextBowlOrderPatch12($legacy, $save);
+            $sauce = $this->sauceOrder($context->calculationDay, $context->targetDay);
+            $stream = $patch->askPatched($sauce, $id, $seal);
+            $context->semanticState['correctOrderNeighbor'] = $stream['nextBowlId'];
+            $context->status = 'ORDER_NEIGHBOR_PATCH_12_RETURNED';
+            $this->metrics->bump($context, 'order.neighbor.patch12.requests');
+            return $stream;
+        });
         $this->dispatcher->register('NUMERIC_NEXT_BOWL_LEGACY', function(BootstrapContext $context): array {
             $id = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -508,6 +526,23 @@ final class BootstrapKernel
      * Laluan sejarah yang memilih jiran nombor, bukan jiran permutasi.
      * @return array{first:BigInt,step:int,nextBowlId:int}
      */
+    /**
+     * Laluan produksi: jiran diambil daripada permutasi titisan 46.
+     * @return array{first:BigInt,step:int,nextBowlId:int}
+     */
+    public function askBowl(
+        int $calculationDay, int $targetDay, int $queriedBowlId, int $seal
+    ): array {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'ORDER_NEIGHBOR_PATCH_12';
+        $context->semanticState['queriedBowlId'] = $queriedBowlId;
+        $context->semanticState['seal'] = $seal;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('ORDER_NEIGHBOR_PATCH_12', $context)
+        );
+    }
+
     public function legacyAskBowl(
         int $calculationDay, int $targetDay, int $queriedBowlId, int $seal
     ): array {

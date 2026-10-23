@@ -32,7 +32,10 @@ $kernel = (string)file_get_contents($root . '/src/BootstrapKernel.php');
 $valid = $valid
     && str_contains($code, '$nextId = ($queriedBowlId % 6) + 1;')
     && str_contains($kernel, "dispatch('NUMERIC_NEXT_BOWL_LEGACY', " . '$context)')
-    && !is_file($root . '/src/Patches/NextBowlOrderPatch12.php');
+    && (!is_file($root . '/src/Patches/NextBowlOrderPatch12.php')
+        || (str_contains($kernel, "dispatch('ORDER_NEIGHBOR_PATCH_12', " . '$context)')
+            && str_contains((string)file_get_contents($root . '/src/Patches/NextBowlOrderPatch12.php'),
+                '$this->legacy->askWrong($sauce, $queriedBowlId, $seal)')));
 foreach (new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($root . '/src', FilesystemIterator::SKIP_DOTS)
 ) as $file) {
