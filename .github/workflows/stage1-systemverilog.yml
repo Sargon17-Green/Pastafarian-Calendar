@@ -108,7 +108,7 @@ jobs:
 
   fifth_weave_symbol:
     # Separate budget. Reuse ONLY the immutable verified artifact
-    # from run 39946357557, then SHA-verify every required binary.
+    # from run 39965349618, then SHA-verify every required binary.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 23
@@ -121,7 +121,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: stage1-full-weave-root-qa
-          run-id: 39946357557
+          run-id: 39965349618
           github-token: ${{ github.token }}
           path: build
       - name: Install Icarus Verilog
