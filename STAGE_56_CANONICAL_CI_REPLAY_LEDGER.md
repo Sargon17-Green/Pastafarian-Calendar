@@ -1,7 +1,7 @@
 # Registrum canonicum CI — C++ et Latina Nova — Gradus 56
 
-**Ultima certificatio codicis:** [`5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8),
-[vigilia 39762381184](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39762381184),
+**Ultima certificatio SHA exacti:** [`5e4daa6a812c5621802e8c0104acd5f185d76405`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/5e4daa6a812c5621802e8c0104acd5f185d76405),
+[vigilia 39838564205](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39838564205),
 `completed/success` **20/20 officia**, `SOAK_GREEN` die XXII Octobris MMXXVI.
 Pars infra ante hanc notitiam alios status historicos, etiam `PENDING`,
 memoravit ad tempus quo scriptae sunt; notitia probata in sectione ultima
@@ -572,3 +572,42 @@ antecedente codice certificato. Gradus 57 non apertus; `main` inalteratum.
   mutatione motoris, adaptorii aut probatorum. `main` non mutatur;
   Gradus 57 non aperitur. Comparatio universalis omnium
   implementationum (global soak) **nondum** facta est.
+
+## Gradus 56 — SIGILLUM SHA exacte probatum, 22 October 2026
+
+- Origo: `5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8`:
+  codice et adaptoribus probatis; `de17c574eef61fb9b4e5b0846cc322a9de54d38f`
+  chartas tantum mutavit. Unum vitium infrastructurae inde detectum:
+  workflow collationis manifestum cum vetere SHA
+  `888b54fc5a136144b565c39f09b8f9106a91e2bd`
+  pro novo `5d33499c` postulabat, et quinque shards ante calculum
+  deficiebant ([39819294051](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39819294051)).
+  Non erat differentia numerorum calendarii.
+- Reparatio in
+  [`5e4daa6a812c5621802e8c0104acd5f185d76405`](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/5e4daa6a812c5621802e8c0104acd5f185d76405):
+  workflow `.github/workflows/cpp-latina-cross-implementation.yml`
+  verificat manifestum, documenta cursuum praecedentium et fontes
+  ex arbore codicis `5d33499c` exacte et stricte; 
+  nullus fons `src/`, `include/` vel adaptor mutatus est.
+  `PROVENANCE_VERIFIED_CODE_TREE=PASS` et
+  `PROVENANCE_MANIFEST=PASS` in quinque shards.
+- Collatio nova [39838559839](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39838559839):
+  `completed/success` 6/6 jobs, sententia `120038853574`;
+  `CROSS_CPP_CELERITAS_ALL=30/30_PASS SHARDS=5`,
+  `SOAK_ADAPTER_CELERITAS_ALL=30/30_PASS SHARDS=5`,
+  `SOAK_CANONICAL_V2_ALL=30/30_PASS SHARDS=5`.
+- Vigilia plena [39838564205](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39838564205):
+  `completed/success` 20/20 jobs, officium `120059763724`
+  `SOAK_REPETITUM=8/8_PASS` et officium `120075587421`
+  `VIGILIA_SOAK=PASS`, `STATUS_POST_RUN=SOAK_GREEN`.
+  Custodia nominum
+  [39838559851](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39838559851)
+  `success`.
+- Haec certificatio spectat solum ad SHA exacte probatum `5e4daa6a`.
+  Scriptio documentaria subsequens (hic) novum SHA habebit nec eadem
+  asseretur probatio nisi suum CI transeat. Descriptor
+  `integrations/cpp-latina-soak.json` retinet intentione
+  `engine_verified_commit=5d33499c`, quia arbor codicis illius
+  probationibus codicis et V2 priori exacte respondet.
+  `main` non mutatum; Gradus 57 non apertus.
+  Vigilia universalis omnium implementationum adhuc non peracta est.
