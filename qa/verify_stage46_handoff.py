@@ -215,7 +215,11 @@ def verify(path):
         for task, markers in MARKERS.items():
             suffix = "stderr" if task == "STAGE46_ORACLE_TAMPER" else "stdout"
             content = archive.read(f"LOGS/{task}.{suffix}.log").decode("utf-8", "replace")
-            ensure(all(marker in content for marker in markers), "semantic marker: " + task)
+            # The native Java probes print scalar fields. A value such as
+            # MATCHES=480 must not satisfy the expected MATCHES=48.
+            ensure(all(re.search(r"(?<![A-Za-z0-9_])" + re.escape(marker) +
+                                 r"(?![A-Za-z0-9_])", content) for marker in markers),
+                   "semantic marker boundary/value: " + task)
         meta = receipt.get("provenance", {})
         ensure(meta.get("signed_baseline_count") == 40 and
                meta.get("run_count") == 21 and

@@ -177,8 +177,55 @@ class Stage46ReceiptTests(unittest.TestCase):
         self.records["EVIDENCE/DISCOVERY23_CANDIDATE.אמן"] = b"modified"
         self.attempt(False)
 
+    def rewrite_probe_with_reconciled_receipt(self, task, new_content):
+        # Adversarial logs that *also* have internally consistent ZIP hashes
+        # and matching validation records must still fail semantic checks.
+        suffix = "stderr" if task == "STAGE46_ORACLE_TAMPER" else "stdout"
+        name = f"LOGS/{task}.{suffix}.log"
+        self.records[name] = new_content
+        label = "PROBE_LOG_" + task
+        for receipt_path, field in (
+            ("RESULT.json", "validation_records"),
+            ("PROVENANCE/RECOVERY_RECEIPT.json", "validated"),
+        ):
+            document = json.loads(self.records[receipt_path])
+            record = next(x for x in document[field] if x["name"] == label)
+            record["sha256"] = v.digest(new_content)
+            record["bytes"] = len(new_content)
+            self.records[receipt_path] = json_bytes(document)
+
     def test_semantic_marker_removed_rejected(self):
-        self.records["LOGS/STAGE46_CLOSING_GATE_EXPECTED_RED.stdout.log"] = b"FORGED_SUCCESS"
+        self.rewrite_probe_with_reconciled_receipt(
+            "STAGE46_CLOSING_GATE_EXPECTED_RED", b"FORGED_SUCCESS")
+        self.attempt(False)
+
+    def test_semantic_counter_suffix_overflow_rejected(self):
+        task = "STAGE46_CLOSING_GATE_EXPECTED_RED"
+        name = f"LOGS/{task}.stdout.log"
+        data = self.records[name]
+        self.assertIn(b"FROZEN_SELECTED_YEAR_MATCHES=48", data)
+        self.rewrite_probe_with_reconciled_receipt(
+            task, data.replace(b"FROZEN_SELECTED_YEAR_MATCHES=48",
+                               b"FROZEN_SELECTED_YEAR_MATCHES=480"))
+        self.attempt(False)
+
+    def test_semantic_field_prefix_spoof_rejected(self):
+        task = "STAGE46_CLOSING_GATE_EXPECTED_RED"
+        name = f"LOGS/{task}.stdout.log"
+        data = self.records[name]
+        self.assertIn(b"CANONICAL_CLOSE_GATE_MATCHES=48", data)
+        self.rewrite_probe_with_reconciled_receipt(
+            task, data.replace(b"CANONICAL_CLOSE_GATE_MATCHES=48",
+                               b"FAKE_CANONICAL_CLOSE_GATE_MATCHES=48"))
+        self.attempt(False)
+
+    def test_negative_oracle_index_suffix_spoof_rejected(self):
+        task = "STAGE46_ORACLE_TAMPER"
+        name = f"LOGS/{task}.stderr.log"
+        data = self.records[name]
+        self.assertIn(b"FROZEN_SELECTED_CLOSE_GATE_ORACLE_FAIL idx=0", data)
+        self.rewrite_probe_with_reconciled_receipt(
+            task, data.replace(b"ORACLE_FAIL idx=0", b"ORACLE_FAIL idx=01"))
         self.attempt(False)
 
     def test_zip_traversal_rejected(self):
