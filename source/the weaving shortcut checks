@@ -118,10 +118,71 @@ To check forty seven month started suffixes:
 
 \ Failure-only capture of the actual exact decimal result. No oracle changes.
 \ CAL-4018 does not guard several statements on a single If line.
+\ Failure-only inspection of the 47-month synthetic fixture.
+\ The expected 93 double-factorial value is not modified.
+\ Each native-to-string conversion is in a separate CAL procedure.
+The wsprobepointer is a woven month state.
+The wsprobeentries is a number.
+
+To inspect stress fixture entries:
+  Put 0 into the wsprobeentries.
+  Put the woven month states' first into the wsprobepointer.
+  Loop.
+    If the wsprobepointer is nil, break.
+    Add 1 to the wsprobeentries.
+    Put the wsprobepointer's next into the wsprobepointer.
+  Repeat.
+
 To report forty seven weaving difference:
+  Inspect stress fixture entries.
+  Inspect the woven month status.
   Put "Forty seven started months lost precision in their final-order count; actual=" into the check report.
   Append the weavestresscheck to the check report.
   Append "; expected=2987435000850314871976096554696085799164511452611632783323554397412109375" to the check report.
+  Append "; record_count=" to the check report.
+  Append stress record count.
+  Append "; configured_months=" to the check report.
+  Append stress configured months.
+  Append "; already_started=" to the check report.
+  Append stress started months.
+  Append "; shortcut_available=" to the check report.
+  Append stress shortcut availability.
+  Append "; shortcut_completions=" to the check report.
+  Append the started weaving suffix's completions to the check report.
+  Append "; days_remaining=" to the check report.
+  Append stress remaining days.
+  Append "; memo_entries=" to the check report.
+  Append stress memo entries.
+  Append "; resource_limited=" to the check report.
+  Append stress resource flag.
+
+To append stress record count:
+  Convert the wsprobeentries to a string.
+  Append the string to the check report.
+
+To append stress configured months:
+  Convert the selected month count to a string.
+  Append the string to the check report.
+
+To append stress started months:
+  Convert the weaving selection's already started to a string.
+  Append the string to the check report.
+
+To append stress shortcut availability:
+  Convert the started weaving suffix's available to a string.
+  Append the string to the check report.
+
+To append stress remaining days:
+  Convert the weaving selection's days remaining to a string.
+  Append the string to the check report.
+
+To append stress memo entries:
+  Convert the weaving selection's memo entry count to a string.
+  Append the string to the check report.
+
+To append stress resource flag:
+  Convert the weaving selection's resource limit reached to a string.
+  Append the string to the check report.
 
 \ Fail immediately at recursion depth 256, then confirm the failure
 \ has not damaged the cache or permanently poisoned the next query.
