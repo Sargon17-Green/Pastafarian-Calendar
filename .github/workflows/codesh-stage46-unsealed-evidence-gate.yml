@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # The signed Stage45 parent must be independently accessible
       - name: Freeze Stage45 sources and reject synthetic Stage46 acceptance
         shell: bash
         run: |
@@ -20,6 +22,7 @@ jobs:
           import hashlib
           import json
           import re
+          import subprocess
 
           pins = json.loads(Path('qa/Stage46_Signed_Source_Blob_Lock.json').read_text(encoding='utf-8'))
           audit = json.loads(Path('qa/Stage46_Recovery_Preflight_UNSEALED.json').read_text(encoding='utf-8'))
@@ -56,6 +59,21 @@ jobs:
           assert audit['original_v001']['baseline_sources'] == 40
           assert statuses_are_unsealed(audit, fields), 'Stage46 is unsealed: do not claim Native PASS or open Stage47'
           assert len(pins['git_blobs']) == 40, 'Signed source count changed'
+          # The lock manifest is editable; validate it against the immutable
+          # Stage45 commit tree so modifying both the lock and sources cannot pass.
+          tree = subprocess.check_output([
+              'git', 'ls-tree', '-r', '-z', pins['pinned_head'], '--', 'מקור/'
+          ])
+          baseline = {}
+          for item in tree.split(b'\0'):
+              if not item:
+                  continue
+              metadata, filename = item.split(b'\t', 1)
+              mode, objtype, oid = metadata.split(b' ')
+              assert mode == b'100644' and objtype == b'blob', 'Unexpected signed source kind'
+              baseline[filename.decode('utf-8')] = oid.decode('ascii')
+          assert len(baseline) == 40, 'Stage45 parent must have exactly 40 signed sources'
+          assert baseline == pins['git_blobs'], 'Lock manifest differs from signed Stage45 Git tree'
           found = {p.as_posix() for p in Path('מקור').glob('*.אמן')}
           assert found == set(pins['git_blobs']), 'Signed source set changed'
           for filename, expected_sha1 in sorted(pins['git_blobs'].items()):
@@ -66,8 +84,13 @@ jobs:
           # Negative controls must be rejected. These checks do not supply Native evidence.
           sample, sha = next(iter(sorted(pins['git_blobs'].items())))
           assert git_blob(Path(sample).read_bytes() + b'X') != sha
+          manipulated = dict(pins['git_blobs'])
+          manipulated[sample] = git_blob(Path(sample).read_bytes() + b'X')
+          assert manipulated != baseline, 'Forged source + lock must be rejected'
           assert not statuses_are_unsealed({**audit, 'stage46_sealed': True}, fields)
           assert not statuses_are_unsealed({**audit, 'native_results_claimed': True}, fields)
+          assert not statuses_are_unsealed({**audit, 'stage47_started': True}, fields)
+          assert not statuses_are_unsealed({**audit, 'recovery_v002': {**audit['recovery_v002'], 'qa_fixture': 'NATIVE_CONFIRMED'}}, fields)
           assert not statuses_are_unsealed(audit, {**fields, 'LAST_COMPLETED_STAGE': '46'})
-          print('PASS: 40 signed Codesh Git blobs identical; Stage46 UNSEALED; 4 negative controls rejected')
+          print('PASS: 40 Git blobs match immutable Stage45 parent; Stage46 UNSEALED; 7 negative controls rejected')
           PY
