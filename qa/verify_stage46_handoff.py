@@ -109,14 +109,35 @@ def verify(path):
         ensure(set(checks) == members - {"SHA256SUMS.txt"}, "checksums not exhaustive")
         for filename, value in checks.items():
             ensure(digest(archive.read(filename)) == value, "checksum mismatch: " + filename)
+        def unique_json_fields(pairs):
+            data = {}
+            for key, value in pairs:
+                ensure(key not in data, "ambiguous duplicate JSON key: " + key)
+                data[key] = value
+            return data
+
+        def reject_json_nonfinite(token):
+            raise InvalidReceipt("nonfinite JSON number: " + token)
+
         def load_json(filename):
-            return json.loads(archive.read(filename).decode("utf-8-sig"))
+            data = json.loads(
+                archive.read(filename).decode("utf-8-sig"),
+                object_pairs_hook=unique_json_fields,
+                parse_constant=reject_json_nonfinite,
+            )
+            ensure(isinstance(data, dict), "JSON must be an object: " + filename)
+            return data
         receipt = load_json("RESULT.json")
         header = load_json("MANIFEST.json")
         provenance = load_json("PROVENANCE/RECOVERY_RECEIPT.json")
         ensure(receipt.get("schema_version") == "WINDOWS-EXEC-PACK/2.1" and
                receipt.get("family_id") == FAMILY and receipt.get("package_version") == "v002",
                "wrong HANDOFF contract")
+        for key in ("stage", "last_completed_stage", "process_exit_code",
+                    "native_processes_reexecuted", "credited_new_windows_assertions",
+                    "previous_windows_assertion_counter"):
+            ensure(type(receipt.get(key)) is int,
+                   "non-integer numeric receipt field: " + key)
         ensure(receipt.get("status") == receipt.get("work_status") == "PASS" and
                receipt.get("process_exit_code") == 0 and
                receipt.get("expected_repository_state") == "EXPECTED_RED", "not successful recovery")
@@ -189,6 +210,8 @@ def verify(path):
         gates = receipt.get("gates", [])
         ensure(len(gates) == len(EXITS) and len({gate["name"] for gate in gates}) == len(gates),
                "gate count/identity")
+        ensure(all(type(gate.get("exit_code")) is int for gate in gates),
+               "gate exit code must be an integer, not a boolean")
         ensure({gate["name"]: gate["exit_code"] for gate in gates} == EXITS, "gate exits")
         ensure(all(gate["outcome"] == ("EXPECTED_FAILURE" if gate["name"] == "STAGE46_ORACLE_TAMPER" else "PASS")
                    for gate in gates), "gate outcomes")

@@ -380,6 +380,61 @@ class Stage46ReceiptTests(unittest.TestCase):
         self.records["RESULT.json"] = json_bytes(receipt)
         self.attempt(False)
 
+    def test_duplicate_json_status_rejected_even_if_last_wins(self):
+        text = self.records["RESULT.json"].decode("utf-8")
+        self.assertIn('"status": "PASS"', text)
+        self.records["RESULT.json"] = text.replace(
+            '"status": "PASS"', '"status": "BLOCKED", "status": "PASS"', 1).encode("utf-8")
+        self.attempt(False)
+
+    def test_nested_duplicate_json_source_key_rejected(self):
+        text = self.records["RESULT.json"].decode("utf-8")
+        needle = '"pinned_branch_head": "' + v.BASE + '"'
+        self.assertIn(needle, text)
+        self.records["RESULT.json"] = text.replace(
+            needle, '"pinned_branch_head": "forged", ' + needle, 1).encode("utf-8")
+        self.attempt(False)
+
+    def test_duplicate_manifest_run_id_rejected(self):
+        text = self.records["MANIFEST.json"].decode("utf-8")
+        needle = '"run_id": "20261023T000000Z_cafefeed"'
+        self.assertIn(needle, text)
+        self.records["MANIFEST.json"] = text.replace(
+            needle, '"run_id": "forged", ' + needle, 1).encode("utf-8")
+        self.attempt(False)
+
+    def test_duplicate_provenance_source_run_rejected(self):
+        text = self.records["PROVENANCE/RECOVERY_RECEIPT.json"].decode("utf-8")
+        needle = '"source_run_id": "' + v.RUN_ID + '"'
+        self.assertIn(needle, text)
+        self.records["PROVENANCE/RECOVERY_RECEIPT.json"] = text.replace(
+            needle, '"source_run_id": "forged", ' + needle, 1).encode("utf-8")
+        self.attempt(False)
+
+    def test_nonfinite_json_number_rejected(self):
+        text = self.records["RESULT.json"].decode("utf-8")
+        self.records["RESULT.json"] = text.replace(
+            '"family_id": ', '"nonfinite": NaN, "family_id": ', 1).encode("utf-8")
+        self.attempt(False)
+
+    def test_boolean_exit_code_cannot_impersonate_zero(self):
+        result = json.loads(self.records["RESULT.json"])
+        result["gates"][0]["exit_code"] = False
+        self.records["RESULT.json"] = json_bytes(result)
+        self.attempt(False)
+
+    def test_boolean_process_exit_cannot_impersonate_zero(self):
+        result = json.loads(self.records["RESULT.json"])
+        result["process_exit_code"] = False
+        self.records["RESULT.json"] = json_bytes(result)
+        self.attempt(False)
+
+    def test_boolean_native_reexecution_cannot_impersonate_zero(self):
+        result = json.loads(self.records["RESULT.json"])
+        result["native_processes_reexecuted"] = False
+        self.records["RESULT.json"] = json_bytes(result)
+        self.attempt(False)
+
     def test_checksum_mismatch_rejected(self):
         self.attempt(False, use_old_sums=True)
 
