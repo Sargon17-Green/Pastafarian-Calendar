@@ -1,0 +1,55 @@
+{
+  "schema_version": "codesh-stage46-static-recovery-preflight/1",
+  "audit_date": "2026-10-23",
+  "workstream": "Codesh+𐤉𐤄𐤅𐤃𐤉𐤕",
+  "stage": 46,
+  "last_completed_stage": 45,
+  "native_evidence_status": "BLOCKED_ORIGINAL_WINDOWS_OUTPUTS_NOT_ACCESSIBLE",
+  "stage46_sealed": false,
+  "stage47_started": false,
+  "native_results_claimed": false,
+  "branch_parent_audited": "7fe98f189f8d78e41fab012e2ea986559f4eda28",
+  "original_native_run_id": "20261021T155519Z_c4c6ea55",
+  "original_v001": {
+    "launcher_filename": "RUN_CODESH_STAGE46_DISCOVERY23_v001.cmd",
+    "launcher_sha256": "b889347268d75b1178f8471f2aec32a03de7a158473afc52cd5a534de685514b",
+    "embedded_archive_sha256": "86e3a4e803db91ba58b6a249487ddd71938ab97865d327dc13af38aa0a41e951",
+    "manifest_sha256": "871ca2ee3aa4ebaf7686334aaba7a641831cf18663f01d58afbd6f5983a734f4",
+    "manifest_members_verified": 62,
+    "manifest_members_total": 62,
+    "baseline_sources": 40,
+    "pinned_head": "f35a6efd79b830810c8a33140ce8eb949b2c8671",
+    "isolated_candidate_sha256": "98fc6f964f7f986fb672bb94fae96c0ffbff46f5aa119bc2cc4abd727846ef5c",
+    "frozen_oracle_sha256": "8d75a665925d2b88aa2bbb82fb71157c515b24babd5db7889a14c508eb7911ee",
+    "stage45_signed_handoff_sha256": "e61649df2ad6b91f61be201fd26f5d943ee7b86032d15edb37cf265e5c175289",
+    "undeclared_archive_member": {
+      "path": "payload/__pycache__/RUN_STAGE46_NATIVE_v001.cpython-313.pyc",
+      "classification": "DERIVED_PYTHON_3_13_BYTECODE_OF_DECLARED_SOURCE",
+      "byte_for_byte_marshal_payload_reproducible": true,
+      "verification": "Python 3.13 compile(source, stored co_filename, exec) marshal.dumps result matched .pyc bytes after its 16-byte header",
+      "disposition": "Not an independently signed manifest member; keep this exception explicit."
+    }
+  },
+  "recovery_v002": {
+    "launcher_filename": "RUN_CODESH_STAGE46_DISCOVERY23_v002.cmd",
+    "launcher_sha256": "cae491ad7b118f87a57f5a8042f3408e5fff281d0c49eaa04e6fe9dee4a43c91",
+    "embedded_archive_sha256": "270376a4ac705bf2fa41ad5c4fbb846b4fded5a7e115d81754ebff778e2f73dc",
+    "runner_sha256": "96a6ad34013f6e0598b7b742c161d7b8dca1a96c6c804bb483573d5b1da0d8b9",
+    "qa_fixture": "SYNTHETIC_NOT_NATIVE",
+    "synthetic_acceptance": {
+      "recovery_expected_task_gates": 21,
+      "validated_artifacts": 50,
+      "validation_records": 26,
+      "packaged_checksum_entries": 57,
+      "all_packaged_sha256_matched": true,
+      "positive_collector": "PASS_ON_SYNTHETIC_FIXTURE",
+      "semantic_marker_negative": "EXPECTED_BLOCKED",
+      "pinned_candidate_sha_negative": "EXPECTED_BLOCKED",
+      "input_immutability": true
+    },
+    "no_native_reexecution": true
+  },
+  "protected_content_change": "NO_CODESH_SOURCE_FILE_CHANGED_IN_THIS_AUDIT",
+  "release_gate": "Do not mark Stage46 EXPECTED_RED, begin Stage47, or credit new assertions until original native logs/JAR and signed handoff are independently verified.",
+  "note": "This is a static supply-chain and synthetic control audit, not evidence that a Windows native run passed."
+}
