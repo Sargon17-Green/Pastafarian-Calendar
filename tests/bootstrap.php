@@ -32,6 +32,7 @@ require_once $root . '/src/Legacy/LegacyNumericSuccessor12.php';
 require_once $root . '/src/Patches/OrderLatchPatch11.php';
 require_once $root . '/src/Patches/NextBowlOrderPatch12.php';
 require_once $root . '/src/Legacy/LegacyNoRejection13.php';
+require_once $root . '/src/Patches/RejectionSamplingPatch13.php';
 require_once $root . '/src/BootstrapKernel.php';
 require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';

@@ -108,7 +108,12 @@ if (!str_contains($legacyText,
         'return $first->sub(BigInt::one())->mod($n)->add(BigInt::one());')
     || !str_contains($kernelText,
         "dispatch('NO_REJECTION_CHOICE_LEGACY', " . '$context)')
-    || is_file($src . '/Patches/RejectionSamplingPatch13.php')) {
+    || (is_file($src . '/Patches/RejectionSamplingPatch13.php')
+        && !(str_contains($kernelText,
+                "dispatch('REJECTION_SAMPLING_PATCH_13', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $src . '/Patches/RejectionSamplingPatch13.php'),
+                '$this->legacy->chooseWrong($stream, $n)')))) {
     echo "RALAT_KONTRAK_DISCOVERY13\n";
     $unexpected++;
 }

@@ -503,6 +503,28 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'order.neighbor.patch12.requests');
             return $stream;
         });
+        $this->dispatcher->register('REJECTION_SAMPLING_PATCH_13', function(BootstrapContext $context): BigInt {
+            $id = $context->semanticState['queriedBowlId'] ?? null;
+            $seal = $context->semanticState['seal'] ?? null;
+            $space = $context->semanticState['choiceSpace'] ?? null;
+            if (!is_int($id) || !is_int($seal) || !$space instanceof BigInt) {
+                throw new \InvalidArgumentException('REJECTION_SAMPLING_ARGS');
+            }
+            $stream = $this->askBowl(
+                $context->calculationDay, $context->targetDay, $id, $seal
+            );
+            $patch = new \Pastafari\Stage01\Patches\RejectionSamplingPatch13(
+                new \Pastafari\Stage01\Legacy\LegacyNoRejection13(),
+                new \Pastafari\Stage01\Patches\SavePatch01(
+                    new \Pastafari\Stage01\Legacy\LegacyRemainder()
+                )
+            );
+            $rank = $patch->choosePatched($stream, $space);
+            $context->semanticState['unbiasedRank'] = $rank;
+            $context->status = 'REJECTION_SAMPLING_PATCH_13_RETURNED';
+            $this->metrics->bump($context, 'rank.rejection.patch13.calls');
+            return $rank;
+        });
         $this->dispatcher->register('NO_REJECTION_CHOICE_LEGACY', function(BootstrapContext $context): BigInt {
             $bowlId = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -565,6 +587,25 @@ final class BootstrapKernel
      * DISCOVERY13: penghala sejarah membuang penolakan sampel di atas cutoff.
      * @return BigInt Pangkat tidak seragam untuk ruang 1..M.
      */
+    /**
+     * Laluan produksi: penolakan sampel yang melepasi cutoff.
+     * @return BigInt Pangkat tepat dalam ruang 1..M.
+     */
+    public function chooseRank(
+        int $calculationDay, int $targetDay, int $queriedBowlId,
+        int $seal, BigInt $space
+    ): BigInt {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'REJECTION_SAMPLING_PATCH_13';
+        $context->semanticState['queriedBowlId'] = $queriedBowlId;
+        $context->semanticState['seal'] = $seal;
+        $context->semanticState['choiceSpace'] = $space;
+        return $this->boundary->run(
+            $context,
+            fn(): BigInt => $this->dispatcher->dispatch('REJECTION_SAMPLING_PATCH_13', $context)
+        );
+    }
+
     public function legacyChooseRank(
         int $calculationDay, int $targetDay, int $queriedBowlId,
         int $seal, BigInt $space

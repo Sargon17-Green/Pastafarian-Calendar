@@ -605,3 +605,19 @@ php -d memory_limit=512M tests/verify_stage26_discovery13.php # keluar 0 jika RE
 \`\`\`
 
 Semua regresi Stage1–25, fixture deterministik, lint dan kunci nama mesti kekal hijau. Tiada oracle dalam \`src\`; kod legacy lama tidak diubah; main, nama dan fixture tidak diubah. **Jangan tambah RejectionSamplingPatch13 atau mulakan Stage27 sebelum Native CI Stage26 disahkan.**
+
+
+## Stage 27 — PATCH 13: Penolakan sampel supaya pemilihan pangkat tidak berat sebelah
+
+Stage26 \`DISCOVERY13\` disahkan \`EXPECTED_RED\` oleh Native GitHub Actions run \`39931454215\` pada SHA \`3a51e44e35f9692884d0a5050884b53d336d7aad\`; \`verify\` dan \`audit_php_bahasa_melayu\` kedua-duanya SUCCESS.
+
+\`RejectionSamplingPatch13::choosePatched\` memanggil \`LegacyNoRejection13::chooseWrong\` secara sebenar sebelum membetulkan ralat. Bagi \`1<=n<=M\`, ia mengira \`cutoff=floor(M/n)*n\`; jika first berada di bawah atau sama cutoff, jawapan legacy sudah benar dan dipulangkan. Jika first melepasi cutoff, tampalan berjalan mengikut step ±1, menggunakan \`SavePatch01\` bagi mengitar nilai antara 1 dan M, sehingga menemui sampel pertama yang tidak melepasi cutoff. Pangkat ialah \`1+((accepted-1) mod n)\`.
+
+\`BootstrapKernel::chooseRank\` membuka konteks panggilan baharu melalui dispatcher \`REJECTION_SAMPLING_PATCH_13\`; \`legacyChooseRank\` kekal mempamerkan kegagalan lama. Ujian Stage27 membandingkan sekurang-kurangnya 1,500 kes sintetik pada pelbagai \`n\`, sempadan, arah aliran, pelbagai penolakan dan kitaran M-ke-1 terhadap oracle PHP bebas. Empat parut Stage26 dipastikan diperbetulkan, 18 pertanyaan produksi daripada tiga pasangan tarikh, serta enam input salah. Semua ujian Stage1–26 dan pengesah RED sejarah mesti kekal lulus.
+
+\`\`\`text
+php -d memory_limit=512M tests/verify_stage26_discovery13.php
+php -d memory_limit=512M tests/stage27_patch13_tests.php
+\`\`\`
+
+**Status: AWAITING_CI.** Stage28 belum dimulakan; tiada oracle dalam kod produksi, tiada perubahan pada \`main\`, katalog atau fixture.

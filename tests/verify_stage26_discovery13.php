@@ -38,7 +38,12 @@ $valid = $valid
         'return $first->sub(BigInt::one())->mod($n)->add(BigInt::one());')
     && str_contains($kernel,
         "dispatch('NO_REJECTION_CHOICE_LEGACY', " . '$context)')
-    && !is_file($src . '/Patches/RejectionSamplingPatch13.php');
+    && (!is_file($src . '/Patches/RejectionSamplingPatch13.php')
+        || (str_contains($kernel,
+                "dispatch('REJECTION_SAMPLING_PATCH_13', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $src . '/Patches/RejectionSamplingPatch13.php'),
+                '$this->legacy->chooseWrong($stream, $n)')));
 foreach (new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($src, FilesystemIterator::SKIP_DOTS)
 ) as $file) {
