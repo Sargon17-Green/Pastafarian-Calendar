@@ -94,3 +94,6 @@ jobs:
           assert not statuses_are_unsealed(audit, {**fields, 'LAST_COMPLETED_STAGE': '46'})
           print('PASS: 40 Git blobs match immutable Stage45 parent; Stage46 UNSEALED; 7 negative controls rejected')
           PY
+      - name: Exercise recovered HANDOFF verifier on synthetic fixtures only
+        shell: bash
+        run: python3 -m unittest discover -s qa -p 'test_stage46_handoff.py' -v

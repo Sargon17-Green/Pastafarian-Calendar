@@ -85,7 +85,7 @@ def verify(path):
         for task in EXITS:
             required.update({f"LOGS/{task}.stdout.log", f"LOGS/{task}.stderr.log"})
         ensure(required <= members, "missing evidence: " + ",".join(sorted(required - members)))
-        lines = archive.read("SHA256SUMS.txt").decode("ascii").splitlines()
+        lines = archive.read("SHA256SUMS.txt").decode("utf-8").splitlines()
         checks = {}
         for line in lines:
             match = re.fullmatch(r"([0-9a-f]{64})  (.+)", line)
@@ -154,8 +154,8 @@ def verify(path):
             suffix = "stderr" if task == "STAGE46_ORACLE_TAMPER" else "stdout"
             content = archive.read(f"LOGS/{task}.{suffix}.log").decode("utf-8", "replace")
             ensure(all(marker in content for marker in markers), "semantic marker: " + task)
-        assert receipt.get("provenance", {}).get("signed_baseline_count") == 40
-        assert receipt.get("provenance", {}).get("run_count") == 21
+        ensure(receipt.get("provenance", {}).get("signed_baseline_count") == 40 and
+               receipt.get("provenance", {}).get("run_count") == 21, "source/task count provenance")
     return {"status": "STRUCTURE_PASS_NOT_NATIVE_ATTESTATION", "gates": len(EXITS)}
 
 def main():
