@@ -111,10 +111,17 @@ To check forty seven month started suffixes:
   Put 0 into the weaving selection's resource limit reached.
   Count weaving completions into the weavestresscheck.
   If the weavestresscheck is not "2987435000850314871976096554696085799164511452611632783323554397412109375",
-    put "Forty seven started months lost precision in their final-order count." into the check report; exit.
+    report forty seven weaving difference; exit.
   If the weaving selection's resource limit reached is not 0,
     put "The direct forty seven month calculation reached the resource limit." into the check report; exit.
 
+
+\ Failure-only capture of the actual exact decimal result. No oracle changes.
+\ CAL-4018 does not guard several statements on a single If line.
+To report forty seven weaving difference:
+  Put "Forty seven started months lost precision in their final-order count; actual=" into the check report.
+  Append the weavestresscheck to the check report.
+  Append "; expected=2987435000850314871976096554696085799164511452611632783323554397412109375" to the check report.
 
 \ Fail immediately at recursion depth 256, then confirm the failure
 \ has not damaged the cache or permanently poisoned the next query.
