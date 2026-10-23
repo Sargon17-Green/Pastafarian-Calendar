@@ -13,7 +13,8 @@ sub slurp ($f) {
 }
 my $src=slurp('tools/profile_r66_exhaustive_early_last.pl');
 my $wf=slurp('.github/workflows/canonical-names-lock.yml');
-my (@seen,$n_vec,$n_early,$n_states)=((),0,0,0);
+my @seen;
+my ($n_vec,$n_early,$n_states)=(0,0,0);
 my @expected=(
  [1,1000,25750,150125],[2,1000,46000,267000],
  [3,1000,66250,383875],[4,1000,86500,500750],

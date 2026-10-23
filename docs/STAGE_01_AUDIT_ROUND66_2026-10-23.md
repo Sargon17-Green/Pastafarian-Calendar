@@ -91,3 +91,21 @@ t/86_r66_independent_bigint_overflow.t
 opt-in 標記，避免在原來十個 shard 排隊時重複啟動。
 本修正須另行觀察 verify 與 Perl CI 的結果，
 完整 R66 原生驗收仍以所有必需工作成功為前提。
+
+
+## R66 原生十片成功後之 Perl 測試補正
+
+GitHub Run 39915881899：十個 R66 原生 a=1..10 工作全部 SUCCESS，
+verify SUCCESS，但 perl-stage01 FAIL。
+Run 39918945917：verify SUCCESS，但 perl-stage01 同樣 FAIL。
+根因由完整 TAP 精確定位為
+`t/85_r66_early_last_shard_ci_contract.t` 第 61 項測試。
+舊寫法 `my (@seen,$n_vec,$n_early,$n_states)=((),0,0,0);`
+使第一個陣列吞下三個 0，致最終樣本表為
+`[0,0,0,1..10]`，與要求 `[1..10]` 不同。
+此為測試 fixture 初始化錯誤，不是十份原生四月檢驗
+或 BigInt 演算法失敗。僅將陣列與三個數值計數器分開初始化；
+不得回寫、抹除前兩次失敗證據。此提交沿用小型
+`[weaving-r66-testfix]` 標籤，不觸發大型 R66 十片。
+本輪須以新 HEAD 的 verify 與完整 perl-stage01 綠燈驗收；
+仍不作全年度 45 月／4244 日與跨語言等價宣告。
