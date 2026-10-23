@@ -71,7 +71,10 @@ internal static partial class Program
             var rejectedSource=new LegacyBowlQuestionResult(high,direction);
             var nReject=Wide(rejectedStream)-1;
             _rejections++;
-            var correctRejected=NormativeScroll.ChooseRankWide(rejectedStream,nReject);
+            // الحدّ nReject=wide-1، وهو أكبر من نصف M²؛ لذلك لا توجد
+            // إلا قفزة واحدة مقبولة: صعوداً إلى 1 أو هبوطاً إلى nReject.
+            // المرجع التكراري سينفّذ نحو M خطوة في الاتجاه الموجب.
+            var correctRejected=direction==1?BigInteger.One:nReject;
             var priorRejected=previous.Patch(rejectedSource,nReject);
             var actualRejected=legacy.Shift(priorRejected,nReject);
             if(correctRejected==priorRejected)_rejectionCorrect++;
