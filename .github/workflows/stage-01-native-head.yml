@@ -35,7 +35,13 @@ jobs:
             echo "HEAD=$GITHUB_SHA"
             gleam --version
             erl -noshell -eval 'io:format("OTP ~s / ERTS ~s~n", [erlang:system_info(otp_release), erlang:system_info(version)]), halt().'
-            gleam format --check src test
+            if ! gleam format --check src test; then
+              echo "Gleam formatter mismatch; read-only canonical diffs:" >&2
+              while IFS= read -r -d '' file; do
+                diff -u "$file" <(gleam format --stdin < "$file") || true
+              done < <(find src test -type f -name '*.gleam' -print0)
+              exit 1
+            fi
             gleam test
             # Fail closed on any tracked mutation, including configuration and workflows.
             git diff --exit-code --
