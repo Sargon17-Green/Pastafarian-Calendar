@@ -155,6 +155,12 @@ defmodule PastafariCalendarElixirVietnamese do
   def month_lengths_diagnostic_spaghetti(c, t),
     do: Dispatcher.month_lengths_diagnostic(c, t)
 
+  def month_name_indices_spaghetti(c, t),
+    do: Dispatcher.month_name_indices(c, t)
+
+  def month_name_indices_diagnostic_spaghetti(c, t),
+    do: Dispatcher.month_name_indices_diagnostic(c, t)
+
   def month_weaving_spaghetti(c, t), do: Dispatcher.month_weaving(c, t)
 
   def month_weaving_diagnostic_spaghetti(c, t),
