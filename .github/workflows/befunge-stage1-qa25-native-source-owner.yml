@@ -1,0 +1,122 @@
+name: Befunge QA25 Actual Native Source Byte Ownership and Historical STEP Replay
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa25_native_original_source_byte_ownership.py'
+      - 'qa/stage1_qa25_independent_source_ownership_audit.py'
+      - '.github/workflows/befunge-stage1-qa25-native-source-owner.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-source-physical-byte-shard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Lock production bytes, live native reference programs and Python audit syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          test "$(git hash-object reference/work_counts.b98)" = f941efc793c9eee4accf5d03873f8ed029b16725
+          test "$(git hash-object reference/save.b98)" = 7b5e79aa6e2bfb636717cb018a3db6a13fb2bb44
+          python3 -m py_compile qa/stage1_qa25_native_original_source_byte_ownership.py qa/stage1_qa25_independent_source_ownership_audit.py
+      - name: Rehydrate exact original accepted QA24 source-route artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh run view 39841651046 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:68bfc0d8118a6705d0a0af318f4a48a38e3a159f'
+          mkdir -p "$RUNNER_TEMP/qa25"
+          gh run download 39841651046 --repo "$GITHUB_REPOSITORY" --name "qa24-original-native-shard-${{ matrix.shard }}" --dir "$RUNNER_TEMP/qa25"
+          test -s "$RUNNER_TEMP/qa25/qa24_manifest.json"
+          test -s "$RUNNER_TEMP/qa25/qa18_glyph_roles.json"
+          test -s "$RUNNER_TEMP/qa25/qa20_native_48_aggregate.json"
+          echo "263a73a40afa17a8a9b1c831a01239be671d9ea0a9c331fd3f725f83cf1cfea7  $RUNNER_TEMP/qa25/qa18_glyph_roles.json" | sha256sum -c -
+          echo "75d2ee07eaf998fcb69bcb238d5fcb2163ab8305efe4abe4378af95f41385117  $RUNNER_TEMP/qa25/qa20_native_48_aggregate.json" | sha256sum -c -
+      - name: Fetch exact native interpreter SHA-256 pinned
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay exact six natural-input Native programs and capture physical source-cell puts
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/qa25:/qa25" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1300s python -u \
+                qa/stage1_qa25_native_original_source_byte_ownership.py \
+                ${{ matrix.shard }} /qa25
+            ' | tee "$RUNNER_TEMP/qa25/qa25_native_console.log"
+          grep -q QA25_ALL_SIX_ORIGINAL_NATIVE_OWNERSHIP_RUNS_COMPLETE "$RUNNER_TEMP/qa25/qa25_native_console.log"
+          test -s "$RUNNER_TEMP/qa25/qa25_native_owner_receipts.json"
+      - name: Independently verify raw STEP and physical mutation lineage, reject forgeries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_qa25_independent_source_ownership_audit.py \
+            --shard ${{ matrix.shard }} --directory "$RUNNER_TEMP/qa25" \
+            --output "$RUNNER_TEMP/qa25/qa25_shard_audit.json" | tee "$RUNNER_TEMP/qa25/qa25_independent_console.log"
+          grep -q QA25_SIX_FRESH_REAL_NATIVE_BYTE_OWNER_REPLAYS_AUDITED "$RUNNER_TEMP/qa25/qa25_independent_console.log"
+          grep -q QA25_EIGHT_FORGED_SOURCE_OWNERSHIP_RECEIPTS_REJECTED_PER_SHARD "$RUNNER_TEMP/qa25/qa25_independent_console.log"
+      - name: Preserve untouched original inputs, real Native route/memory receipts on success or RED
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa25-original-native-source-ownership-shard-${{ matrix.shard }}
+          path: ${{ runner.temp }}/qa25/
+          if-no-files-found: warn
+  physical-byte-ownership-full-audit:
+    needs: [original-source-physical-byte-shard]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Download all original Native evidence shards from this exact run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qa25-merged"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --pattern 'qa25-original-native-source-ownership-shard-*' --dir "$RUNNER_TEMP/qa25-merged"
+          for i in 0 1 2 3; do
+            test -s "$RUNNER_TEMP/qa25-merged/qa25-original-native-source-ownership-shard-$i/qa25_shard_audit.json"
+            test -s "$RUNNER_TEMP/qa25-merged/qa25-original-native-source-ownership-shard-$i/qa25_native_owner_receipts.json"
+          done
+      - name: Independently reconstruct 24 original Native executions and all candidate prior write owners
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_qa25_independent_source_ownership_audit.py \
+            --aggregate \
+              "$RUNNER_TEMP/qa25-merged/qa25-original-native-source-ownership-shard-0" \
+              "$RUNNER_TEMP/qa25-merged/qa25-original-native-source-ownership-shard-1" \
+              "$RUNNER_TEMP/qa25-merged/qa25-original-native-source-ownership-shard-2" \
+              "$RUNNER_TEMP/qa25-merged/qa25-original-native-source-ownership-shard-3" \
+            --output qa25_native_24_owner_aggregate.json | tee qa25_aggregate_console.log
+          grep -q QA25_TWENTY_FOUR_ORIGINAL_NATIVE_BYTE_OWNERSHIP_RUNS_AUDITED qa25_aggregate_console.log
+          grep -q QA25_NO_DEAD_CODE_OR_GLOBAL_STAGE1_OWNERSHIP_ACCEPTANCE qa25_aggregate_console.log
+      - name: Retain complete independently verified finite byte ownership audit on green or RED
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa25-24-input-native-source-ownership-aggregate
+          path: |
+            qa25_native_24_owner_aggregate.json
+            qa25_aggregate_console.log
+          if-no-files-found: warn
