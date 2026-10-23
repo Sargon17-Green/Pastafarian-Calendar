@@ -97,5 +97,11 @@ jobs:
             build/weave_prefix3_run.log
             build/foundation_weave_prefix122.bin
             build/foundation_weave_prefix123.bin
+            build/weave_prefix1231_run.log
+            build/foundation_weave_prefix1231.bin
+            build/weave_prefix4_run.log
+            build/foundation_weave_prefix1232.bin
+            build/foundation_weave_prefix1233.bin
+            build/foundation_weave_prefix1234.bin
           retention-days: 90
           if-no-files-found: warn
