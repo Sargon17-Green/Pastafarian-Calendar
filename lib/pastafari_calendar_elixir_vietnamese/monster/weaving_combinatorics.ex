@@ -74,7 +74,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
     prefixes = [0 | Enum.scan(lengths, 0, fn days, sum -> sum + days end)]
     initial = %{month_count + 1 => List.to_tuple(List.duplicate(1, total_days + 1))}
 
-    Enum.reduce(month_count..1, initial, fn month, table ->
+    Enum.reduce(month_count..1//-1, initial, fn month, table ->
       days = Enum.at(lengths, month - 1)
       maximum_suffix = Enum.at(prefixes, month - 1)
       next_table = Map.fetch!(table, month + 1)
@@ -106,7 +106,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
     else
       prefixes = Enum.scan(active, 0, fn days, sum -> sum + days end)
 
-      Enum.reduce(count..2, %{count + 1 => {1, 1}}, fn index, ratios ->
+      Enum.reduce(count..2//-1, %{count + 1 => {1, 1}}, fn index, ratios ->
         {numerator, denominator} = Map.fetch!(ratios, index + 1)
         prefix = Enum.at(prefixes, index - 1)
         Map.put(ratios, index,
@@ -120,7 +120,6 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
 
   defp unrank_loop(remaining, original, opened, closed, rank,
        order, table, days_left, collected) do
-    month_count = tuple_size(original)
     active =
       if opened > closed do
         Enum.map((closed + 1)..opened, fn label -> elem(remaining, label - 1) end)

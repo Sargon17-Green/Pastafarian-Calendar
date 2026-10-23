@@ -35,3 +35,8 @@ tháng đang hoạt động và bảng phần đuôi. Bảo toàn quy tắc
 thứ tự lần xuất hiện đầu và cuối, thứ tự từ điển và hạng.
 Hai bài thử mới bao phủ 47 tháng ngắn và phép đếm năm dài
 5.778 ngày. Soak thực tế và đo thời gian vẫn còn chờ CI.
+
+## Khắc phục cảnh báo
+CI 39917199959 đạt 868/868 nhưng có ba cảnh báo Elixir:
+biến không dùng và hai dải giảm không khai báo bước.
+Xóa biến thừa và thêm bước âm rõ ràng; kiểm thử lại trước khi đóng.
