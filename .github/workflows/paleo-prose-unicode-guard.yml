@@ -27,8 +27,37 @@ jobs:
               Path("docs/TESTING.md"),
               Path("docs/SOURCE_LANGUAGE_CATALOG.md"),
           ]
-          files = required + sorted(Path(".").glob("TEST_LOG_STAGE_*.md"))
+          stage_logs = sorted(Path(".").glob("TEST_LOG_STAGE_*.md"))
+          files = required + stage_logs
           errors = []
+          stage_state = Path("DEVELOPMENT_STAGE.md")
+          if not stage_state.is_file():
+              errors.append("DEVELOPMENT_STAGE.md missing; log completeness cannot be checked")
+          else:
+              try:
+                  fields = [
+                      line.partition("=")[2].strip()
+                      for line in stage_state.read_text(encoding="utf-8", errors="strict").splitlines()
+                      if line.startswith("LAST_COMPLETED_STAGE=")
+                  ]
+                  if len(fields) != 1 or not fields[0].isdigit():
+                      errors.append("LAST_COMPLETED_STAGE must occur exactly once and be an integer")
+                  else:
+                      completed = int(fields[0])
+                      if not 1 <= completed <= 55:
+                          errors.append(f"LAST_COMPLETED_STAGE outside the 1..55 contract: {completed}")
+                      else:
+                          expected_logs = {
+                              Path(f"TEST_LOG_STAGE_{i:02d}.md") for i in range(1, completed + 1)
+                          }
+                          missing = sorted(expected_logs - set(stage_logs))
+                          unexpected = sorted(set(stage_logs) - expected_logs)
+                          for path in missing:
+                              errors.append(f"{path}: completed stage has no prose log")
+                          for path in unexpected:
+                              errors.append(f"{path}: unexpected or prematurely published stage log")
+              except UnicodeError as exc:
+                  errors.append(f"DEVELOPMENT_STAGE.md: invalid UTF-8: {exc}")
           for path in files:
               if not path.is_file():
                   errors.append(f"{path}: required prose file is missing")
@@ -40,8 +69,17 @@ jobs:
                   continue
               if not content:
                   errors.append(f"{path}: empty prose file")
-              for index, char in enumerate(content):
+              # README is allowed to spell the actual language name "Codesh".
+              # Replace its exact spelling with spaces of equal length for offset stability.
+              prose = content.replace("Codesh", "      ") if path == Path("README.md") else content
+              for index, char in enumerate(prose):
                   point = ord(char)
+                  if not (
+                      0x10900 <= point <= 0x10915
+                      or point == 0x1091F
+                      or char in " \\t\\r\\n"
+                  ):
+                      errors.append(f"{path}: unexpected prose character U+{point:04X} at index {index}")
                   if 0x10916 <= point <= 0x1091E:
                       errors.append(f"{path}: Phoenician numeral or non-letter U+{point:04X} at index {index}; prose permits letters and U+1091F word dividers only")
                   if point == 0xFFFD:
