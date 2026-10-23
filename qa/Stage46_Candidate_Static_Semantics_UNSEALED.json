@@ -1,0 +1,54 @@
+{
+  "schema_version": "codesh-stage46-candidate-static-semantics/1",
+  "status": "UNSEALED_STATIC_REVIEW_ONLY",
+  "stage": 46,
+  "last_completed_stage": 45,
+  "source_package": "RUN_CODESH_STAGE46_DISCOVERY23_v001.cmd",
+  "source_package_sha256": "b889347268d75b1178f8471f2aec32a03de7a158473afc52cd5a534de685514b",
+  "candidate_path": "payload/CANDIDATE_SOURCE/מקור/מסלול־שער־סוגר־שנה־סמוכה־ישן.אמן",
+  "candidate_sha256": "98fc6f964f7f986fb672bb94fae96c0ffbff46f5aa119bc2cc4abd727846ef5c",
+  "source_line_count": 24,
+  "methods": [
+    {
+      "name": "שער־סוגר־שנה־הבאה־ישן",
+      "declaration_line": 11,
+      "select_year_line": 12,
+      "read_selected_closing_gate_line": 13,
+      "increment_closing_gate_line": 14,
+      "return_line": 15
+    },
+    {
+      "name": "שער־סוגר־שנה־קודמת־ישן",
+      "declaration_line": 18,
+      "select_year_line": 19,
+      "read_selected_closing_gate_line": 20,
+      "increment_closing_gate_line": 21,
+      "return_line": 22
+    }
+  ],
+  "verified_source_call_counts": {
+    "ל־שנה־הבאה": 1,
+    "ל־שנה־קודמת": 1,
+    "ל־קח־שער־סוגר": 2,
+    "ויתקדם שער־ישן": 2,
+    "וישב שער־ישן": 2
+  },
+  "manual_static_finding": "Both OLD routes select the correct adjacent-year direction, read that selected year's closing gate, then increment it before returning. Their observable returned gate is therefore selected_year.closing_gate + 1, not the selected year's closing gate itself.",
+  "canonical_reference": "The selected year's קח־שער־סוגר accessor returns its closing gate without incrementing. Native vector mismatches cannot be credited until original Windows evidence is recovered.",
+  "negative_control": "Removing either increment statement breaks the strict two-route structural count, as expected.",
+  "oracle_case_expectation_not_native_evidence": {
+    "total_selected_year_vectors": 48,
+    "next_cases": 24,
+    "previous_cases": 24,
+    "expected_old_mismatch_count": 48,
+    "observed_native_mismatch_count": null
+  },
+  "review_constraints": {
+    "original_candidate_unchanged": true,
+    "original_signatures_unchanged": true,
+    "native_code_executed": false,
+    "stage46_sealed": false,
+    "stage47_started": false
+  },
+  "required_next_evidence": "Recover independently verifiable original Stage46 Windows log/JAR evidence and signed handoff; static review alone is not grounds for EXPECTED_RED acceptance."
+}
