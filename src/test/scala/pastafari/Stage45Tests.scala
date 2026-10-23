@@ -202,8 +202,13 @@ object Stage45Tests {
         BigInt(1),"B")
     }
     check("rifiuta mese di soli tre giorni"){
-      val w=Vector(1,2,3)++Vector.fill(3)(1)++
-        Vector.fill(123)(2)++Vector.fill(123)(3)
+      // Quattro mesi: 3+83+83+83=252. Tutti gli altri
+      // vincoli sono leciti; fallisce solo il limite minimo 4.
+      val w=Vector.fill(3)(1)++Vector.fill(83)(2)++
+        Vector.fill(83)(3)++Vector.fill(83)(4)
+      eqv(w.size,252,"Durata annuale")
+      eqv((2 to 4).map(id=>w.count(_==id)).toVector,
+        Vector(83,83,83),"Altri mesi")
       rejectArg("Mese"){patched(w,1)}
     }
     check("rifiuta un anno corto"){
