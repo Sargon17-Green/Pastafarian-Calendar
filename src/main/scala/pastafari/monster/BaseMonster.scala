@@ -180,7 +180,13 @@ final case class BaseMonsterContext(
   var legacyMonthOrdinalMonthId: Option[Int] = None,
   var legacyDayInMonth: Option[Int] = None,
   var monthOrdinalPatchedDayInMonth: Option[Int] = None,
-  var patch22Applied: Boolean = false
+  var patch22Applied: Boolean = false,
+  var monthBlockWeaving: Option[Vector[Int]] = None,
+  var monthBlockDayOffset: Option[Int] = None,
+  var monthBlockSnapshot: Option[(Vector[Int],Int)] = None,
+  var legacyMonthBlockLengths: Option[Vector[Int]] = None,
+  var legacyMonthBlockMonthId: Option[Int] = None,
+  var legacyMonthBlockOrdinal: Option[Int] = None
 )
 
 final class BaseMetricsShell {
@@ -313,6 +319,44 @@ final class BaseValidationManager {
   /** PATCH22: il validator percorre la tessitura, senza chiamare
     * il wrapper di produzione; preserva anche la cicatrice vecchia.
     */
+
+  /** DISCOVERY23: convalida la cicatrice del mese assunto contiguo,
+    * ricalcolando durate e prefissi senza invocare l'adapter storico.
+    */
+  def requireDiscovery23Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="DISCOVERY_23_CONTIGUOUS_MONTH_ASSUMPTION" ||
+       ctx.status!="LEGACY_CONTIGUOUS_MONTH_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_23_CONTIGUOUS_MONTH_ASSUMPTION") ||
+       ctx.monthBlockWeaving.isEmpty || ctx.monthBlockDayOffset.isEmpty ||
+       ctx.monthBlockSnapshot.isEmpty ||
+       ctx.legacyMonthBlockLengths.isEmpty ||
+       ctx.legacyMonthBlockMonthId.isEmpty ||
+       ctx.legacyMonthBlockOrdinal.isEmpty)
+      throw new IllegalStateException("DISCOVERY23 non completa.")
+    val weave=ctx.monthBlockWeaving.get
+    val day=ctx.monthBlockDayOffset.get
+    if(ctx.monthBlockSnapshot.get!=(weave,day))
+      throw new IllegalStateException("Snapshot DISCOVERY23 alterata.")
+    LegacyDaywiseWeavingAdapter.validateCandidates(Vector(weave))
+    if(day<0 || day>=weave.size)
+      throw new IllegalStateException("Offset DISCOVERY23 non valido.")
+    val months=weave.max
+    val lengths=Array.fill(months)(0)
+    weave.foreach(k=>lengths(k-1)+=1)
+    val id=weave(day)
+    var before=0
+    var j=0
+    while(j<id-1) {
+      before+=lengths(j)
+      j+=1
+    }
+    if(ctx.legacyMonthBlockLengths.get!=lengths.toVector ||
+       ctx.legacyMonthBlockMonthId.get!=id ||
+       ctx.legacyMonthBlockOrdinal.get!=day-before+1)
+      throw new IllegalStateException("Cicatrice DISCOVERY23 falsificata.")
+  }
+
   def requirePatch22Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_22_MONTH_ORDINAL_GLOBAL_DAY" ||
        ctx.status!="PATCH_22_READY" || !ctx.patch22Applied ||
@@ -2024,7 +2068,8 @@ final class BaseMonsterManager {
     new Discovery21DayIndexedCutletNameHandler(metrics),
     new Patch21DayIndexedCutletNameHandler(metrics),
     new Discovery22MonthOrdinalGlobalDayHandler(metrics),
-    new Patch22MonthOrdinalGlobalDayHandler(metrics)
+    new Patch22MonthOrdinalGlobalDayHandler(metrics),
+    new Discovery23ContiguousMonthHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -3219,6 +3264,33 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("patch22",error)
+    }
+  }
+
+
+  def discover23ContiguousMonthAssumption(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    annualWeaving: Vector[Int],
+    dayOffset: Int
+  ): Discovery23ContiguousMonthReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.monthBlockWeaving=Some(annualWeaving)
+    ctx.monthBlockDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_23_CONTIGUOUS_MONTH_ASSUMPTION"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery23Ready(ctx)
+      Discovery23ContiguousMonthReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.monthBlockWeaving.get,ctx.monthBlockDayOffset.get,
+        ctx.legacyMonthBlockLengths.get,
+        ctx.legacyMonthBlockMonthId.get,
+        ctx.legacyMonthBlockOrdinal.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("discovery23",error)
     }
   }
 
