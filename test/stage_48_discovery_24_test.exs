@@ -7,8 +7,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage48Discovery24Test do
     CutletMaterializationManager,
     LegacyDescendingMonthCount,
     AscendingMonthCountPatch,
-    MonthCountManager,
-    StageNotIntegratedError
+    MonthCountManager
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
@@ -162,9 +161,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage48Discovery24Test do
     assert manager =~ "chosen = patch.corrected_count"
     refute manager =~ "NormativeReference"
     assert File.exists?(Path.join(root, "ascending_month_count_patch.ex"))
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "normative đỏ 1: số tháng quanh Ngày Nền" do

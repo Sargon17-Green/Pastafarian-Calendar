@@ -133,9 +133,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage01Test do
   end
 
   test "đường sản xuất không trả kết quả trước giai đoạn tích hợp" do
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      PastafariCalendarElixirVietnamese.calendar_date_spaghetti(1, 1)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "mã sản xuất không tham chiếu bộ tham chiếu kiểm thử hay sẹo tương lai" do

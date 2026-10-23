@@ -7,8 +7,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage50Discovery25Test do
     BoundedMonthCompositions,
     LegacyMirroredMonthLengthsRank,
     MonthLengthsManager,
-    MonthCountManager,
-    StageNotIntegratedError
+    MonthCountManager
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
@@ -153,9 +152,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage50Discovery25Test do
     assert legacy =~ "count - rank + 1"
     refute manager =~ "NormativeReference"
     assert File.exists?(Path.join(root, "month_lengths_rank_patch.ex"))
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "normative đỏ 1: độ dài tháng ở Ngày Nền" do

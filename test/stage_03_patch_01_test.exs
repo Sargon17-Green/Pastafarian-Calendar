@@ -90,8 +90,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage03Patch01Test do
   end
 
   test "hàm ngày lịch chưa được tích hợp không trở thành đường dự phòng" do
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(17, 31)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 end

@@ -4,7 +4,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage52Discovery26Test do
   alias PastafariCalendarElixirVietnamese, as: Calendar
   alias PastafariCalendarElixirVietnamese.Monster.{
     LegacyDescendingWeavingOrder, MonthWeavingManager,
-    WeavingCombinatorics, StageNotIntegratedError
+    WeavingCombinatorics
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
@@ -150,9 +150,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage52Discovery26Test do
     assert patch =~ "Enum.reverse(historical_order)"
     refute manager =~ "NormativeReference"
     refute patch =~ "NormativeReference"
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "nhóm normative đỏ 1: hai tháng cân bằng" do

@@ -247,8 +247,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage25Patch12Test do
     assert Calendar.next_bowl_spaghetti(f, f, 3) ==
              Ref.next_bowl_in_drop_46_order(Ref.sauce(f, f), 3)
 
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(f, f)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 end

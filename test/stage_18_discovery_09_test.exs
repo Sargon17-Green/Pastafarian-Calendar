@@ -228,9 +228,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage18Discovery09Test do
     end
 
     f = Ref.foundation_day()
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(f, f)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "mã nguồn giữ alias rót và chuyển khuấy qua legacy in-place" do

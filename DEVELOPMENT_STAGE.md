@@ -1151,3 +1151,9 @@ hạng +1 và lưu vết. Chờ Native CI xác nhận đúng 4 RED.
 Stage54 DISCOVERY27 xác nhận: 886 bài, 882 PASS, 4 lỗi chuẩn có chủ đích.
 Native CI 39931575073, khóa tên 39931575070 đều đúng hợp đồng.
 Stage55 PATCH27 mở, cần xác minh Native và tích hợp lịch đầy đủ.
+
+Stage55 tích hợp bộ năm phần qua CalendarDateManager.
+Các kiểm thử lịch sử chỉ kiểm tra trạng thái trước tích hợp
+được chuyển thành kiểm tra lối vào, không bỏ kiểm thử cũ.
+Bảy kiểm thử tích hợp mới đối chiếu oracle gốc, không sửa oracle.
+Tổng dự kiến 903 bài; xác nhận bằng Native CI trước khi đóng.

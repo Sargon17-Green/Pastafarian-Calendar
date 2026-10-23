@@ -7,3 +7,12 @@ Mọi bình, niêm, nguồn năm và thứ tự từ điển giữ nguyên.
 Giai đoạn đầu sửa lớp tên và các nhóm RED; tích hợp
 ngày lịch năm thành phần và kiểm thử lịch sử là phần tiếp.
 Không sửa main hoặc normative_reference.ex.
+
+## Tích hợp ngày lịch
+CalendarDateManager nối tháng đã đan, tên tháng chuẩn,
+tên cốt-lết và ngày một-based thành bộ năm thành phần.
+API calendar_date_spaghetti gọi production thật, giữ đầy đủ
+đường chẩn đoán. Các kiểm thử hồi quy có tiền đề API
+chưa tích hợp được cập nhật để kiểm tra lối vào mới.
+Thêm bảy kiểm thử tích hợp, gồm so sánh oracle toàn bộ ngày.
+Tình trạng: chờ CI, chưa công bố GREEN hoặc soak.

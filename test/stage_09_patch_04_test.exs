@@ -173,8 +173,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage09Patch04Test do
       assert Calendar.distance_spaghetti(c, t) == Ref.work_counts(c, t).distance
     end
 
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(f, f)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 end

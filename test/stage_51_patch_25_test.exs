@@ -3,8 +3,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage51Patch25Test do
   alias PastafariCalendarElixirVietnamese, as: Calendar
   alias PastafariCalendarElixirVietnamese.Monster.{
     BoundedMonthCompositions, LegacyMirroredMonthLengthsRank,
-    MonthLengthsManager, MonthLengthsRankPatch, MonthCountManager,
-    StageNotIntegratedError
+    MonthLengthsManager, MonthLengthsRankPatch, MonthCountManager
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
@@ -165,8 +164,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage51Patch25Test do
     assert manager =~ "MonthLengthsRankPatch.diagnose(normative_rank, candidate_count)"
     refute patch =~ "NormativeReference"
     refute manager =~ "NormativeReference"
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 end

@@ -8,7 +8,7 @@ defmodule PastafariCalendarElixirVietnamese do
   của năm. Chưa tích hợp lịch đầy đủ.
   """
 
-  alias PastafariCalendarElixirVietnamese.Monster.{Dispatcher, StageNotIntegratedError}
+  alias PastafariCalendarElixirVietnamese.Monster.Dispatcher
 
   def bootstrap_context(calculation_day, target_day) do
     Dispatcher.bootstrap(calculation_day, target_day)
@@ -166,8 +166,9 @@ defmodule PastafariCalendarElixirVietnamese do
   def month_weaving_diagnostic_spaghetti(c, t),
     do: Dispatcher.month_weaving_diagnostic(c, t)
 
-  def calendar_date_spaghetti(calculation_day, target_day) do
-    _context = Dispatcher.bootstrap(calculation_day, target_day)
-    raise StageNotIntegratedError
-  end
+  def calendar_date_spaghetti(calculation_day, target_day),
+    do: Dispatcher.calendar_date(calculation_day, target_day)
+
+  def calendar_date_diagnostic_spaghetti(calculation_day, target_day),
+    do: Dispatcher.calendar_date_diagnostic(calculation_day, target_day)
 end

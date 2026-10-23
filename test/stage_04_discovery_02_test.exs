@@ -54,9 +54,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage04Discovery02Test do
       assert Calendar.save_value_spaghetti(value) == Ref.save(value)
     end
 
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(Ref.foundation_day(), Ref.foundation_day())
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "hồi quy chuẩn tại Ngày Nền: cố ý đỏ ở giai đoạn khám phá 02" do

@@ -243,8 +243,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage19Patch09Test do
     assert ctx.phase == :bootstrap
     assert map_size(ctx.bowls_after_drops) == 6
 
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(f, f)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 end

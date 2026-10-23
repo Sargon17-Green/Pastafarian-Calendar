@@ -4,8 +4,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage54Discovery27Test do
   alias PastafariCalendarElixirVietnamese, as: Calendar
   alias PastafariCalendarElixirVietnamese.Monster.{
     AnswerStreamManager, DistinctMonthNameIndices,
-    LegacyNextMonthNameRank, MonthNameIndexManager,
-    StageNotIntegratedError
+    LegacyNextMonthNameRank, MonthNameIndexManager
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
@@ -126,9 +125,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage54Discovery27Test do
     assert patch =~ "DistinctMonthNameIndices.unrank(month_count, historical_rank)"
     assert legacy =~ "rem(rank, total) + 1"
     refute manager =~ "NormativeReference"
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "normative đỏ 1: một tên tháng" do

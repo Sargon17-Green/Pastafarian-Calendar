@@ -4,8 +4,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage53Patch26Test do
   alias PastafariCalendarElixirVietnamese, as: Calendar
   alias PastafariCalendarElixirVietnamese.Monster.{
     AnswerStreamManager, LegacyDescendingWeavingOrder,
-    MonthWeavingManager, MonthWeavingOrderPatch,
-    StageNotIntegratedError, WeavingCombinatorics
+    MonthWeavingManager, MonthWeavingOrderPatch, WeavingCombinatorics
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
@@ -116,9 +115,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage53Patch26Test do
     assert legacy =~ "Enum.reverse(Enum.to_list(1..count))"
     refute manager =~ "NormativeReference"
     refute patch =~ "NormativeReference"
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
   test "đếm và mở hạng 47 tháng có độ dài tối thiểu" do
     lengths = List.duplicate(4, 47)

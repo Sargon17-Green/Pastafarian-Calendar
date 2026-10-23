@@ -6,8 +6,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage46Discovery23Test do
     Cutlet,
     CutletMaterializationManager,
     CutletNameIndexManager,
-    LegacyInclusiveCutletFirstDay,
-    StageNotIntegratedError
+    LegacyInclusiveCutletFirstDay
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
@@ -173,9 +172,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage46Discovery23Test do
     refute source =~ "NormativeReference"
     refute manager =~ "NormativeReference"
     assert File.exists?(Path.join(root, "cutlet_first_day_patch.ex"))
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "normative đỏ 1: cốt-lết ở Ngày Nền và lân cận" do

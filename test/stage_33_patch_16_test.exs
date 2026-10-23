@@ -190,9 +190,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage33Patch16Test do
   end
 
   test "không tích hợp lịch cuối trước các bước tiếp theo" do
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "kiểm toán mã nguồn bảo vệ legacy, oracle và tuyến lựa chọn" do

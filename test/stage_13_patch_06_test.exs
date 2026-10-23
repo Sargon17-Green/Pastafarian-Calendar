@@ -251,9 +251,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage13Patch06Test do
       PriorPatch.read(%{}, {}, 1, 1)
     end
 
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(f, f)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "mã nguồn giữ nguyên legacy và chỉ phân nhánh tại bản vá 06" do

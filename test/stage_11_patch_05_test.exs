@@ -196,8 +196,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage11Patch05Test do
 
     assert Calendar.stones_table_spaghetti() == Ref.build_stones()
 
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(f, f)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 end

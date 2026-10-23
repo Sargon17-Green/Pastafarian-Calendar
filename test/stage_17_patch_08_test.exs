@@ -232,9 +232,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage17Patch08Test do
     assert context.phase == :bootstrap
     assert map_size(context.bowl_orders) == 46
 
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(f, f)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
 
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     refute File.exists?(Path.join(root, "permutation_rank_patch.ex"))

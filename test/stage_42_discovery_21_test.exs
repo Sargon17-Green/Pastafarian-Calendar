@@ -6,8 +6,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage42Discovery21Test do
     CutletPartitionCombinatorics,
     CutletPartitionManager,
     LegacyCutletPartitionCountSeal,
-    CutletPartitionSealPatch,
-    StageNotIntegratedError
+    CutletPartitionSealPatch
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
   @foundation -15_055_671
@@ -162,9 +161,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage42Discovery21Test do
     assert combinatorics =~ "count_state("
     refute manager =~ "NormativeReference"
     assert File.exists?(Path.join(root, "cutlet_partition_seal_patch.ex"))
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "normative đỏ 1: ngày Foundation và lân cận" do

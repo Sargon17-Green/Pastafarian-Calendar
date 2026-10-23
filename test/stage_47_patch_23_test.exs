@@ -4,8 +4,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage47Patch23Test do
   alias PastafariCalendarElixirVietnamese, as: Calendar
   alias PastafariCalendarElixirVietnamese.Monster.{
     Cutlet, CutletFirstDayPatch, CutletMaterializationManager,
-    CutletNameIndexManager, LegacyInclusiveCutletFirstDay,
-    StageNotIntegratedError
+    CutletNameIndexManager, LegacyInclusiveCutletFirstDay
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
 
@@ -212,8 +211,6 @@ defmodule PastafariCalendarElixirVietnamese.Stage47Patch23Test do
     assert manager =~ "CutletFirstDayPatch.diagnose("
     refute patch =~ "NormativeReference"
     refute manager =~ "NormativeReference"
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 end

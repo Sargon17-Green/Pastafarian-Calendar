@@ -8,8 +8,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage44Discovery22Test do
     CutletPartitionManager,
     DistinctCutletNameIndices,
     LegacyRotatedCutletNameRank,
-    CutletNameRankPatch,
-    StageNotIntegratedError
+    CutletNameRankPatch
   }
   alias PastafariCalendarElixirVietnamese.TestOnly.NormativeReference, as: Ref
   @foundation -15_055_671
@@ -151,9 +150,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage44Discovery22Test do
     assert manager =~ "DistinctCutletNameIndices.unrank("
     refute manager =~ "NormativeReference"
     assert File.exists?(Path.join(dir, "cutlet_name_rank_patch.ex"))
-    assert_raise StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(@foundation, @foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
   end
 
   test "hồi quy normative đỏ 1: quanh Ngày Nền" do

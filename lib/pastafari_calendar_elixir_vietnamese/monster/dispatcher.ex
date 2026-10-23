@@ -14,6 +14,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   """
 
   alias PastafariCalendarElixirVietnamese.Monster.{
+    CalendarDateManager,
     MonthNameIndexManager,
     MonthWeavingManager,
     BowlOrderManager,
@@ -228,6 +229,12 @@ defmodule PastafariCalendarElixirVietnamese.Monster.Dispatcher do
   def next_year_diagnostic(calculation_day), do: NextYearManager.diagnose(calculation_day)
   def previous_year(day), do: PreviousYearManager.previous_year(day)
   def previous_year_diagnostic(day), do: PreviousYearManager.diagnose(day)
+
+  def calendar_date(calculation_day, target_day),
+    do: CalendarDateManager.date(calculation_day, target_day)
+
+  def calendar_date_diagnostic(calculation_day, target_day),
+    do: CalendarDateManager.diagnose(calculation_day, target_day)
 
   def month_name_indices(calculation_day, target_day),
     do: MonthNameIndexManager.names(calculation_day, target_day)

@@ -243,9 +243,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage15Patch07Test do
     assert Calendar.visible_drops_spaghetti(foundation, foundation) ==
              normative_visible(foundation, foundation)
 
-    assert_raise PastafariCalendarElixirVietnamese.Monster.StageNotIntegratedError, fn ->
-      Calendar.calendar_date_spaghetti(foundation, foundation)
-    end
+    assert function_exported?(PastafariCalendarElixirVietnamese, :calendar_date_spaghetti, 2)
 
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     refute File.exists?(Path.join(root, "grind_table_patch.ex"))
