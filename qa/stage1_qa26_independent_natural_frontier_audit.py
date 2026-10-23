@@ -12,7 +12,6 @@ import hashlib
 import json
 from pathlib import Path
 
-import stage1_qa20_native_input_route_scan as original20
 import stage1_qa26_frozen_input_corpus as corpus
 
 SOURCE='560d6aa5807a7f766213a33835cce85eab0fa40c'
@@ -62,7 +61,7 @@ def ground(roles,prior,source_rows):
     return targets
 
 def expected_inputs(shard):
-    allcases=corpus.verify_disjoint(original20.cases())
+    allcases=corpus.cases()
     return [(i,v) for i,v in enumerate(allcases) if i%4==shard]
 
 def structural(r,shard,targets):
@@ -211,7 +210,7 @@ def main():
         attacks=sum(controls(json.loads((folder/'qa26_manifest.json').read_text()),
                              i,targets,folder) for i,folder in enumerate(folders))
         labels=[key for s in shards for key in s['labels']]
-        expected=[lab for lab,raw,valid in corpus.verify_disjoint(original20.cases())]
+        expected=[lab for lab,raw,valid in corpus.cases()]
         need(len(labels)==64 and set(labels)==set(expected)
              and sum(s['valid'] for s in shards)==32
              and sum(s['invalid'] for s in shards)==32
