@@ -1,0 +1,31 @@
+name: MATLAB Exact All-Open Prefix Rank Inversion (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/rankAllOpenedWeavePrefix.m'
+      - 'tests/run_stage55_all_open_prefix_rank_tests.m'
+      - '.github/workflows/matlab-stage55-all-open-prefix-rank.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prefix-rank:
+    name: MATLAB R2026a / full lexical prefix interval and 4199-day inverse
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+      - name: Setup MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Compare inverse rank intervals against independent enumeration
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_all_open_prefix_rank_tests
