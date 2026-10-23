@@ -376,3 +376,53 @@ The canonical target remains month-name index 20, occurrence day 56.
   computation exceeded a bounded runtime. See prefix reference;
   do not mark full word unrank accepted.
 - At this checkpoint newer CI run 39915693359 was QUEUED.
+
+## 2026-10-23 — verified CI green for month names and first 2 woven symbols
+
+GitHub Actions run 39915988093 completed SUCCESS for both simulation
+and `full_weave_root` on `3617858e4e3af8b8be8b9e4464b3cf3dd93ba62c`.
+Actual job logs confirm:
+- `STAGE1_FOUNDATION_47P45_MONTH_NAME_UNRANK_PASS`;
+  all 45 canonical name indexes match the golden CSV, unused
+  indexes exactly 21 and 47.
+- Root and selected-rank SHA256 checks PASS again.
+- 22,465-bit exact completion after prefix `[1,1]`,
+  `foundation_weave_prefix11.bin` SHA256 PASS.
+- `STAGE1_FOUNDATION_WEAVE_LEX_PREFIX_PASS first=1 second=2`.
+  The selected woven sequence begins `[1,2]`.
+
+The verified source does not produce the remaining 4,242
+woven ordinals or final canonical month/day pair.
+
+## 2026-10-23 — single extra full-root suffix to establish third symbol
+
+Researched exact three-way lexical blocks after prefix `[1,2]`:
+- `C([1,2,1])`: 22,465 bits; SHA256
+  `0a29d31d02e980a1ae807575c85a908bd31a05eb73b521a80f7ee3f2e925f1a7`.
+- `C([1,2,2])`: 22,465 bits; SHA256
+  `50064b46e82a20681a0e100e8a1516e0b4c151398231dd2f898be22f07bb9866`.
+- `C([1,2,3])`: 22,470 bits; SHA256
+  `a89a9799db0649b78a5b24bf150f57dc11e549ce2d0d42088929974237762dde`.
+
+Independent research arithmetic reproduced all three from
+the full 45-month lengths and selected rank and verified
+`C([1,2,1])+C([1,2,2])+C([1,2,3])=C([1,2])`.
+Because remaining rank after `[1,2]` exceeds the sum of
+the first two blocks, the third chosen symbol should be 3.
+
+Optimization: both active months #1 and #2 have already
+started. The active-subword count after prefix `[1,2,1]`
+is `C(219,113)`; after `[1,2,2]` it is `C(219,114)`.
+All fresh-month suffixes have the same 220 active
+positions in both states, so
+`C([1,2,2]) = C([1,2,1]) * 53 / 57`.
+
+Added `+prefix121` exact 22,528-bit count to
+`tb_weave_full_root.sv`; added
+`tb_weave_prefix3.sv` to calculate the other two
+blocks with 32-bit-limb exact small division.
+The runner will independently hash-check all three
+binary counts before reporting the third woven symbol.
+
+**New CI verification still pending.** Current run 39931331917
+was queued at last observation. No full unrank or stage PASS.

@@ -326,3 +326,28 @@ is documented in `FOUNDATION_WEAVE_PREFIX_REFERENCE.md`
 without an SV PASS claim.
 
 Final five-field output still OPEN. Stage 1 NOT ACCEPTED.
+
+## 2026-10-23 — observed native Icarus CI success, Stage 1 still open
+
+[Run 39915988093](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39915988093)
+completed SUCCESS in BOTH jobs on implementation HEAD
+`3617858e4e3af8b8be8b9e4464b3cf3dd93ba62c`.
+The verified evidence now includes:
+- 45 distinct canonical month-name indices, via exact 47P45
+  name sequence `unrank`, excluding only 21 and 47;
+- 45-month 22,470-bit full root, and 177-digit selected rank;
+- 22,465-bit exact suffix count for prefix `[1,1]` with
+  independent SHA256, proving the first two woven ordinals
+  are `[1,2]`;
+- all earlier test-only regressions.
+
+New work written on top of the green SHA:
+- test-only exact `C([1,2,1])` via one bounded full-precision
+  run; derived exact `53/57` ratio for `C([1,2,2])`;
+- independent third block via conservation and three SHA checks;
+- assert woven prefix `[1,2,3]`, still **NOT CI VERIFIED**.
+
+Outstanding: all 4,241 remaining woven positions after the
+third symbol; final month ordinal at target and occurrence;
+full five-field algorithm; native 64-name Kalaallisut review.
+The current branch is not ready for Stage 1 signoff.

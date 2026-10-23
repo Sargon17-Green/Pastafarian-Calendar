@@ -81,3 +81,26 @@ the woven ordinal at the target day is known.
 **Stage 1 stays OPEN**, the full 4244-step word and the
 canonical month index 20 / occurrence 56 remain unverified,
 and qualified Kalaallisut approvals remain **0/64**.
+
+## Follow-up research witness: prefix [1,2,3]
+
+An independent Python arbitrary-precision calculation (using the
+same normative last/first-occurrence transfer, without HDL) gives:
+
+| Fixed prefix | bit length | SHA256 of 2809-byte big-endian integer |
+|---|---:|---|
+| `[1,2,1]` | 22465 | `0a29d31d02e980a1ae807575c85a908bd31a05eb73b521a80f7ee3f2e925f1a7` |
+| `[1,2,2]` | 22465 | `50064b46e82a20681a0e100e8a1516e0b4c151398231dd2f898be22f07bb9866` |
+| `[1,2,3]` | 22470 | `a89a9799db0649b78a5b24bf150f57dc11e549ce2d0d42088929974237762dde` |
+
+A simple exact identity reduces compute:
+`C([1,2,2])/C([1,2,1])=C(219,114)/C(219,113)=53/57`.
+The first two prefix blocks together are strictly below the
+remaining selected rank after `[1,2]`, so the next ordinal is
+**3**. The third-block remainder lies inside the selected
+block, not at a boundary.
+
+These figures are **research witnesses**, not native CI PASS.
+`tests/tb_weave_full_root.sv +prefix121` and the companion
+`tests/tb_weave_prefix3.sv` now implement an executable
+check requiring all three binary SHA256 matches.
