@@ -70,3 +70,31 @@ printf '%s  %s\n' \
   a89a9799db0649b78a5b24bf150f57dc11e549ce2d0d42088929974237762dde \
   build/foundation_weave_prefix123.bin | sha256sum -c -
 echo "STAGE1_FOUNDATION_WEAVE_PREFIX3_SHA256_PASS"
+# One bounded full-width transfer obtains the [1,2,3,1] block;
+# [1,2,3,2] and [1,2,3,3] follow by proven exact active-factor
+# ratios, and [1,2,3,4] by lexical partition conservation.
+timeout 1100s vvp build/weave_fullroot.vvp +stop_after=45 +prefix1231 \
+  2>&1 | tee build/weave_prefix1231_run.log
+test "$(wc -c < build/foundation_weave_prefix1231.bin)" -eq 2809
+printf '%s  %s\n' \
+  b66cf4cc1afb8b2b604e574ff0ba1d788b0eb83bb7dbfc67a103a08ef220d340 \
+  build/foundation_weave_prefix1231.bin | sha256sum -c -
+echo "STAGE1_FOUNDATION_WEAVE_PREFIX1231_SHA256_PASS"
+
+iverilog -g2012 -Wall -s tb_weave_prefix4 \
+  -o build/weave_prefix4.vvp tests/tb_weave_prefix4.sv
+timeout 60s vvp build/weave_prefix4.vvp \
+  2>&1 | tee build/weave_prefix4_run.log
+test "$(wc -c < build/foundation_weave_prefix1232.bin)" -eq 2809
+test "$(wc -c < build/foundation_weave_prefix1233.bin)" -eq 2809
+test "$(wc -c < build/foundation_weave_prefix1234.bin)" -eq 2809
+printf '%s  %s\n' \
+  47a2f7fa694e5bd1d85307df85ad5067c7f7aee18c441ec7c47b38a6a66c5531 \
+  build/foundation_weave_prefix1232.bin | sha256sum -c -
+printf '%s  %s\n' \
+  8f680a1e1ee8f272f8ec2b243f2b9a5d4c63c7aa73e6866ba4dc610353440b1a \
+  build/foundation_weave_prefix1233.bin | sha256sum -c -
+printf '%s  %s\n' \
+  cbc01e54edc50fc880531214fc5fe5aa6c72252483a4b70a58458711570f37f5 \
+  build/foundation_weave_prefix1234.bin | sha256sum -c -
+echo "STAGE1_FOUNDATION_WEAVE_PREFIX4_SHA256_PASS"

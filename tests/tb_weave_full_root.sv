@@ -10,7 +10,7 @@ module tb_weave_full_root;
     logic [WIDTH-1:0] prefix_count, root_count;
     integer month_lengths[0:MONTHS-1];
     integer first_count, new_count, month_index, k, t, i;
-    integer stop_after, root_file, start_month, prefix11, prefix121;
+    integer stop_after, root_file, start_month, prefix11, prefix121, prefix1231;
     logic [CWIDTH-1:0] active_factor;
     logic [WIDTH-1:0] all_zeroes;
 
@@ -105,9 +105,44 @@ module tb_weave_full_root;
         end
         prefix11=$test$plusargs("prefix11");
         prefix121=$test$plusargs("prefix121");
-        if(prefix11!=0 && prefix121!=0)
+        prefix1231=$test$plusargs("prefix1231");
+        if(prefix11+prefix121+prefix1231>1)
             $fatal(1,"ONLY_ONE_PREFIX_MODE");
-        if(prefix121!=0) begin
+        if(prefix1231!=0) begin
+            if(stop_after!=45)
+                $fatal(1,"PREFIX1231_REQUIRES_ALL_MONTHS");
+            // Prefix [1,2,3,1] has remaining active lengths
+            // [113,107,118]. All three FIRST appearances occurred.
+            // Their LAST appearances are strictly ordered 1,2,3.
+            // Exact word factor:
+            // C(113+107-1,113) * C(113+107+118-1,113+107)
+            // = C(219,113) * C(337,220).
+            comb[0]=CWIDTH'(1);
+            for(t=1;t<=113;t=t+1) begin
+                numerator=comb[t-1]*$unsigned(220-t);
+                comb[t]=exact_small_div(numerator,t);
+            end
+            active_factor=comb[113];
+            comb[0]=CWIDTH'(1);
+            for(t=1;t<=220;t=t+1) begin
+                numerator=comb[t-1]*$unsigned(338-t);
+                comb[t]=exact_small_div(numerator,t);
+            end
+            active_factor=active_factor*comb[220];
+            first_count=338;
+            // Month 4 is the FIRST fresh label. It may be inserted
+            // anywhere after the fixed prefix; only its LAST
+            // occurrence must follow all remaining old letters.
+            comb[0]=CWIDTH'(1);
+            for(t=1;t<=first_count;t=t+1) begin
+                numerator=comb[t-1]*$unsigned(month_lengths[3]+t-2);
+                comb[t]=exact_small_div(numerator,t);
+            end
+            for(k=0;k<=first_count;k=k+1)
+                prior[k+1]=WIDTH'(active_factor)*comb[first_count-k];
+            first_count=first_count+month_lengths[3];
+            start_month=5;
+        end else if(prefix121!=0) begin
             if(stop_after!=45)
                 $fatal(1,"PREFIX121_REQUIRES_ALL_MONTHS");
             // The fixed prefix [1,2,1] has 113 month-1 and
@@ -184,7 +219,7 @@ module tb_weave_full_root;
             if(root_count=='0 || bits(root_count)>WIDTH-48)
                 $fatal(1,"WIDTH_GUARD_OR_ZERO_COUNT");
             first_count=new_count;
-            if(prefix11==0 && prefix121==0) case(month_index)
+            if(prefix11==0 && prefix121==0 && prefix1231==0) case(month_index)
                 2: if(bits(root_count)!=217) $fatal(1,"MEDIUM_ROOT_2");
                 3: if(bits(root_count)!=528) $fatal(1,"MEDIUM_ROOT_3");
                 4: if(bits(root_count)!=880) $fatal(1,"MEDIUM_ROOT_4");
@@ -195,7 +230,16 @@ module tb_weave_full_root;
                      month_index,new_count,bits(root_count));
             $fflush();
         end
-        if(prefix121!=0) begin
+        if(prefix1231!=0) begin
+            if(first_count!=4240 || bits(root_count)!=22465)
+                $fatal(1,"PREFIX1231_COUNT_WIDTH");
+            root_file=$fopen("build/foundation_weave_prefix1231.bin","wb");
+            if(root_file==0) $fatal(1,"PREFIX1231_FILE_OPEN");
+            for(i=2808;i>=0;i=i-1)
+                $fwrite(root_file,"%c",root_count[i*8+:8]);
+            $fclose(root_file);
+            $display("STAGE1_FOUNDATION_WEAVE_PREFIX1231_WRITTEN bits=22465 bytes=2809");
+        end else if(prefix121!=0) begin
             if(first_count!=4241 || bits(root_count)!=22465)
                 $fatal(1,"PREFIX121_COUNT_WIDTH");
             root_file=$fopen("build/foundation_weave_prefix121.bin","wb");
