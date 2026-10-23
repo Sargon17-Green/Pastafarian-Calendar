@@ -4,15 +4,24 @@ cd "$(dirname "$0")/.."
 mkdir -p build
 
 # The CI job must download artifact "stage1-full-weave-root-qa"
-# from the pinned, known-good run 39946357557. Avoid recomputing
+# from the pinned, complete 20-file fullroot job in run 39965349618. Avoid recomputing
 # older 34-minute fullroot/prefix verification when verifying one
 # more prefix. SHA-256 checks below are the actual data boundary.
 test -s build/fullroot_head.txt
 # The exact merge SHA printed in the successful GitHub Actions
-# full_weave_root job 120389878594 of run 39946357557.
+# full_weave_root job 120389878594 of run 39965349618.
 # Reject any other artifact provenance before trusting its hashes.
-grep -Fxq 'b980ec973041194f7827d0bced43411fd637f668' build/fullroot_head.txt
+grep -Fxq 'b41d09d58c02adbbbf05c931e447f584d6a1cbef' build/fullroot_head.txt
 echo "STAGE1_PREFIX5_SOURCE_MERGE_SHA_VERIFIED"
+# Fail with one explicit error if the selected artifact is incomplete,
+# before invoking sha256sum. All files are nevertheless independently
+# SHA-validated by the existing manifest below.
+for name in root rank prefix11 prefix121 prefix122 prefix123 prefix1231 prefix1232 prefix1233 prefix1234; do
+  if [[ ! -f "build/foundation_weave_${name}.bin" ]]; then
+    echo "PREFIX5_SOURCE_ARTIFACT_INCOMPLETE: ${name}" >&2
+    exit 1
+  fi
+done
 sha256sum -c <<'CHECKED'
 925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da  build/foundation_weave_root.bin
 2c447438a567fbc40a79c68fb8b3f27f308cb89a2f59aaba1d2275dd3acf1a06  build/foundation_weave_rank.bin
@@ -28,7 +37,7 @@ CHECKED
 for file in build/foundation_weave_{root,rank,prefix11,prefix121,prefix122,prefix123,prefix1231,prefix1232,prefix1233,prefix1234}.bin; do
   test "$(wc -c < "$file")" -eq 2809
 done
-echo "STAGE1_REUSED_PRIOR_VERIFIED_SHA_ARTIFACT_PASS source_run=39946357557"
+echo "STAGE1_REUSED_PRIOR_VERIFIED_SHA_ARTIFACT_PASS source_run=39965349618"
 iverilog -g2012 -Wall -s tb_weave_full_root \
   -Ptb_weave_full_root.WIDTH=22528 \
   -o build/weave_fullroot.vvp tests/tb_weave_full_root.sv
