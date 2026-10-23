@@ -1986,3 +1986,173 @@ jobs:
           set -euo pipefail
           perl -Ilib -It/lib -c tools/profile_r65_exhaustive_early_last.pl
           timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r65_exhaustive_early_last.pl --a-min 9 --a-max 9 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-1:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 1 --a-max 1 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-2:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 2 --a-max 2 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-3:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 3 --a-max 3 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-4:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=4
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 4 --a-max 4 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-5:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=5
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 5 --a-max 5 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-6:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=6
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 6 --a-max 6 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-7:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=7
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 7 --a-max 7 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-8:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=8
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 8 --a-max 8 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-9:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=9
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 9 --a-max 9 --seconds 185 --rss-kib 393216
+
+  canonical-r66-early-last-10:
+    name: R66 四月份長度 1..10 獨立 64-bit BigInt 狀態向量 a=10
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-fourmonth-r66-exhaustive]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 1000 個真實合法四月向量之獨立 DFS 和 64-bit 邊界
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/profile_r66_exhaustive_early_last.pl
+          timeout --signal=TERM --kill-after=5s 260s perl -Ilib -It/lib tools/profile_r66_exhaustive_early_last.pl --a-min 10 --a-max 10 --seconds 185 --rss-kib 393216
