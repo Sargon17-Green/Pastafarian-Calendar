@@ -93,7 +93,20 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/qa25-merged"
-          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --pattern 'qa25-original-native-source-ownership-shard-*' --dir "$RUNNER_TEMP/qa25-merged"
+          for i in 0 1 2 3; do
+            destination="$RUNNER_TEMP/qa25-merged/qa25-original-native-source-ownership-shard-$i"
+            mkdir -p "$destination"
+            recovered=0
+            for attempt in 1 2 3 4 5 6; do
+              if gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "qa25-original-native-source-ownership-shard-$i" --dir "$destination"; then
+                recovered=1
+                break
+              fi
+              echo "::warning::QA25 shard $i transfer attempt $attempt failed; retrying without altering original evidence"
+              sleep $((attempt * 12))
+            done
+            test "$recovered" -eq 1 || { echo "::error::QA25 original Native shard $i could not be downloaded"; exit 1; }
+          done
           for i in 0 1 2 3; do
             test -s "$RUNNER_TEMP/qa25-merged/qa25-original-native-source-ownership-shard-$i/qa25_shard_audit.json"
             test -s "$RUNNER_TEMP/qa25-merged/qa25-original-native-source-ownership-shard-$i/qa25_native_owner_receipts.json"
