@@ -1,0 +1,73 @@
+name: Codesh Stage46 Unsealed Evidence Gate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Freeze Stage45 sources and reject synthetic Stage46 acceptance
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import json
+          import re
+
+          pins = json.loads(Path('qa/Stage46_Signed_Source_Blob_Lock.json').read_text(encoding='utf-8'))
+          audit = json.loads(Path('qa/Stage46_Recovery_Preflight_UNSEALED.json').read_text(encoding='utf-8'))
+          fields = {}
+          for line in Path('DEVELOPMENT_STAGE.md').read_text(encoding='utf-8').splitlines():
+              if '=' in line:
+                  k, v = line.split('=', 1)
+                  if k in fields:
+                      raise AssertionError(f'Duplicate stage field: {k}')
+                  fields[k] = v.strip()
+
+          def git_blob(data):
+              return hashlib.sha1(b'blob ' + str(len(data)).encode('ascii') + b'\0' + data).hexdigest()
+
+          def statuses_are_unsealed(doc, stage):
+              return (
+                  doc.get('stage') == 46
+                  and doc.get('last_completed_stage') == 45
+                  and doc.get('native_evidence_status') == 'BLOCKED_ORIGINAL_WINDOWS_OUTPUTS_NOT_ACCESSIBLE'
+                  and doc.get('stage46_sealed') is False
+                  and doc.get('stage47_started') is False
+                  and doc.get('native_results_claimed') is False
+                  and doc.get('recovery_v002', {}).get('qa_fixture') == 'SYNTHETIC_NOT_NATIVE'
+                  and doc.get('recovery_v002', {}).get('no_native_reexecution') is True
+                  and stage.get('CURRENT_STAGE') == '45'
+                  and stage.get('LAST_COMPLETED_STAGE') == '45'
+                  and stage.get('STAGE46_STARTED') == 'NO'
+              )
+
+          assert pins['schema_version'] == 'codesh-stage46-source-blob-lock/1'
+          assert pins['pinned_head'] == 'f35a6efd79b830810c8a33140ce8eb949b2c8671'
+          assert pins['mode'] == 'FAIL_CLOSED_WHILE_STAGE46_UNSEALED'
+          assert audit['original_v001']['pinned_head'] == pins['pinned_head']
+          assert audit['original_v001']['baseline_sources'] == 40
+          assert statuses_are_unsealed(audit, fields), 'Stage46 is unsealed: do not claim Native PASS or open Stage47'
+          assert len(pins['git_blobs']) == 40, 'Signed source count changed'
+          found = {p.as_posix() for p in Path('מקור').glob('*.אמן')}
+          assert found == set(pins['git_blobs']), 'Signed source set changed'
+          for filename, expected_sha1 in sorted(pins['git_blobs'].items()):
+              assert re.fullmatch(r'[0-9a-f]{40}', expected_sha1), f'Invalid blob SHA: {filename}'
+              raw = Path(filename).read_bytes()
+              assert git_blob(raw) == expected_sha1, f'Signed source modified: {filename}'
+
+          # Negative controls must be rejected. These checks do not supply Native evidence.
+          sample, sha = next(iter(sorted(pins['git_blobs'].items())))
+          assert git_blob(Path(sample).read_bytes() + b'X') != sha
+          assert not statuses_are_unsealed({**audit, 'stage46_sealed': True}, fields)
+          assert not statuses_are_unsealed({**audit, 'native_results_claimed': True}, fields)
+          assert not statuses_are_unsealed(audit, {**fields, 'LAST_COMPLETED_STAGE': '46'})
+          print('PASS: 40 signed Codesh Git blobs identical; Stage46 UNSEALED; 4 negative controls rejected')
+          PY
