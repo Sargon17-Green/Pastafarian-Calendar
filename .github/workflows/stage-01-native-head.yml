@@ -1,0 +1,54 @@
+name: Gleam Stage01 Native HEAD verification
+
+on:
+  push:
+    branches:
+      - 'Gleam\+Esperanto'
+
+permissions:
+  contents: read
+
+jobs:
+  stage01-native:
+    name: Gleam 1.18.1 / OTP 28 / Stage01
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact commit without write credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Install genuine Gleam and Erlang/OTP
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
+        with:
+          otp-version: '28'
+          gleam-version: '1.18.1'
+
+      - name: Verify native tests on the checked-out HEAD without rewriting sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/stage-01
+          {
+            test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+            echo "HEAD=$GITHUB_SHA"
+            gleam --version
+            erl -noshell -eval 'io:format("OTP ~s / ERTS ~s~n", [erlang:system_info(otp_release), erlang:system_info(version)]), halt().'
+            gleam format --check src test
+            gleam test
+            # Fail closed on any tracked mutation, including configuration and workflows.
+            git diff --exit-code --
+            git diff --cached --exit-code --
+            # A test must not introduce untracked source or test modules unnoticed.
+            test -z "$(git ls-files --others --exclude-standard -- src test)"
+            test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          } 2>&1 | tee artifacts/stage-01/verification.log
+
+      - name: Preserve evidence on success and failure
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: gleam-stage01-native-head
+          path: artifacts/stage-01/verification.log
+          if-no-files-found: error
