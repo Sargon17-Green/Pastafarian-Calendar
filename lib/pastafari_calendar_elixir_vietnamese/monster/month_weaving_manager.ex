@@ -1,14 +1,12 @@
 defmodule PastafariCalendarElixirVietnamese.Monster.MonthWeavingManager do
   @moduledoc """
-  DISCOVERY26 dùng bowl 4, seal 32 và độ dài tháng từ PATCH25.
-  Cố ý mở hạng theo thứ tự nhãn giảm của di sản; giữ thứ tự
-  và hạng trong chẩn đoán để PATCH26 sửa sau khi RED được xác nhận.
-  Không tích hợp tên tháng hoặc ngày lịch hoàn chỉnh.
+  PATCH26 nối độ dài tháng từ PATCH25 với bowl 4, seal 32.
+  Bộ vá gọi thứ tự di sản thực và giữ cả hai chuỗi để kiểm toán.
+  Chưa tích hợp tên tháng hoặc ngày lịch cuối cùng.
   """
-
   alias PastafariCalendarElixirVietnamese.Monster.{
-    AnswerStreamManager, Dispatcher, LegacyDescendingWeavingOrder,
-    MonthLengthsManager, WeavingCombinatorics
+    AnswerStreamManager, Dispatcher, MonthLengthsManager,
+    MonthWeavingOrderPatch, WeavingCombinatorics
   }
 
   @bowl 4
@@ -19,12 +17,13 @@ defmodule PastafariCalendarElixirVietnamese.Monster.MonthWeavingManager do
   def diagnose(c, t) when is_integer(c) and is_integer(t) do
     parent = MonthLengthsManager.diagnose(c, t)
     child = diagnose_lengths(c, parent.structure_source_day, parent.month_lengths)
-
     Map.merge(parent, %{
       month_weaving: child.month_weaving,
+      historical_month_weaving: child.historical_month_weaving,
       weaving_count: child.weaving_count,
       weaving_rank: child.weaving_rank,
       weaving_historical_order: child.weaving_historical_order,
+      weaving_corrected_order: child.weaving_corrected_order,
       weaving_bowl: child.weaving_bowl,
       weaving_seal: child.weaving_seal
     })
@@ -38,12 +37,14 @@ defmodule PastafariCalendarElixirVietnamese.Monster.MonthWeavingManager do
     count = WeavingCombinatorics.count(lengths)
     stream = Dispatcher.answer_stream(c, source_day, @bowl, @seal)
     rank = AnswerStreamManager.choose_rank(stream, count)
-    order = LegacyDescendingWeavingOrder.labels(length(lengths))
-    historical = WeavingCombinatorics.unrank(lengths, rank, order)
+    patch = MonthWeavingOrderPatch.diagnose(lengths, rank)
 
-    %{month_lengths: lengths, month_weaving: historical,
+    %{month_lengths: lengths,
+      month_weaving: patch.corrected_weaving,
+      historical_month_weaving: patch.historical_weaving,
       weaving_count: count, weaving_rank: rank,
-      weaving_historical_order: order,
+      weaving_historical_order: patch.historical_order,
+      weaving_corrected_order: patch.corrected_order,
       weaving_bowl: @bowl, weaving_seal: @seal}
   end
 

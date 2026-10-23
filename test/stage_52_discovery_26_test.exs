@@ -111,8 +111,10 @@ defmodule PastafariCalendarElixirVietnamese.Stage52Discovery26Test do
   test "production lịch sử dùng thứ tự giảm" do
     result = MonthWeavingManager.diagnose_lengths(@foundation, @source, [4, 4])
     assert result.weaving_historical_order == [2, 1]
-    assert result.month_weaving ==
+    assert result.historical_month_weaving ==
       WeavingCombinatorics.unrank([4, 4], result.weaving_rank, :descending)
+    assert result.month_weaving ==
+      WeavingCombinatorics.unrank([4, 4], result.weaving_rank)
   end
 
   test "giá trị lịch sử vẫn đúng số lần xuất hiện" do
@@ -141,9 +143,13 @@ defmodule PastafariCalendarElixirVietnamese.Stage52Discovery26Test do
   test "mã nguồn dùng di sản thực, không gọi oracle trong production" do
     root = Path.expand("../lib/pastafari_calendar_elixir_vietnamese/monster", __DIR__)
     manager = File.read!(Path.join(root, "month_weaving_manager.ex"))
-    assert manager =~ "LegacyDescendingWeavingOrder.labels(length(lengths))"
-    assert manager =~ "WeavingCombinatorics.unrank(lengths, rank, order)"
+    patch = File.read!(Path.join(root, "month_weaving_order_patch.ex"))
+    assert manager =~ "MonthWeavingOrderPatch.diagnose(lengths, rank)"
+    assert patch =~ "LegacyDescendingWeavingOrder.labels(length(lengths))"
+    assert patch =~ "WeavingCombinatorics.unrank(lengths, rank, historical_order)"
+    assert patch =~ "Enum.reverse(historical_order)"
     refute manager =~ "NormativeReference"
+    refute patch =~ "NormativeReference"
     assert_raise StageNotIntegratedError, fn ->
       Calendar.calendar_date_spaghetti(@foundation, @foundation)
     end
