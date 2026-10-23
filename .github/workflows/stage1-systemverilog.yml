@@ -151,3 +151,66 @@ jobs:
             build/foundation_weave_prefix12345.bin
           retention-days: 90
           if-no-files-found: warn
+
+  sixth_weave_symbol:
+    # Reuse immutable successful root and fifth-prefix artifacts.
+    # This avoids recomputing the previous 35-minute root chain.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download complete historical root and first-four blocks
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-full-weave-root-qa
+          run-id: 39965349618
+          github-token: ${{ github.token }}
+          path: build/root_source
+      - name: Download successful fifth-symbol blocks
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-prefix5-evidence
+          run-id: 39981519434
+          github-token: ${{ github.token }}
+          path: build/fifth_source
+      - name: Copy fixed source files without trusting them implicitly
+        run: |
+          set -euo pipefail
+          cp build/root_source/foundation_weave_*.bin build/
+          cp build/fifth_source/foundation_weave_*.bin build/
+          cp build/root_source/fullroot_head.txt build/
+          cp build/fifth_source/prefix5_checked_sha.txt build/
+          echo "STAGE1_SIXTH_PRIOR_ARTIFACTS_STAGED"
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Exact sixth-prefix completion and rank checks
+        run: |
+          set -euo pipefail
+          ulimit -v 4194304
+          git rev-parse HEAD | tee build/prefix6_checked_sha.txt
+          bash scripts/verify_weave_prefix6.sh
+      - name: Save sixth-symbol provenance and witness binaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-prefix6-evidence
+          path: |
+            build/prefix6_checked_sha.txt
+            build/fullroot_head.txt
+            build/prefix5_checked_sha.txt
+            build/weave_prefix123451_run.log
+            build/foundation_weave_prefix123451.bin
+            build/weave_prefix6_run.log
+            build/foundation_weave_prefix123452.bin
+            build/foundation_weave_prefix123453.bin
+            build/foundation_weave_prefix123454.bin
+            build/foundation_weave_prefix123455.bin
+            build/foundation_weave_prefix123456.bin
+          retention-days: 90
+          if-no-files-found: warn
