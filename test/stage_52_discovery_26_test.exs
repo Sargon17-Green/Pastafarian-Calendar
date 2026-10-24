@@ -146,7 +146,8 @@ defmodule PastafariCalendarElixirVietnamese.Stage52Discovery26Test do
     patch = File.read!(Path.join(root, "month_weaving_order_patch.ex"))
     assert manager =~ "MonthWeavingOrderPatch.diagnose(lengths, rank)"
     assert patch =~ "LegacyDescendingWeavingOrder.labels(length(lengths))"
-    assert patch =~ "WeavingCombinatorics.unrank(lengths, rank, historical_order)"
+    assert patch =~ "WeavingCombinatorics.unrank_in_orders(lengths, rank,"
+    assert patch =~ "[historical_order, corrected_order]"
     assert patch =~ "Enum.reverse(historical_order)"
     refute manager =~ "NormativeReference"
     refute patch =~ "NormativeReference"

@@ -23,3 +23,11 @@ hệ thức C(s+days-1, days-2) = C(s+days-2, days-2)
 Hàm unrank_in_orders dùng chung một bảng đuôi cho
 thứ tự di sản và thứ tự chuẩn; không bỏ gọi di sản thật.
 Không thay đổi ngữ nghĩa, cần xác nhận Native CI và soak.
+
+## Khép kiểm toán hồi quy và kích hoạt soak
+Native 40125840583 trên 326d38df: 903 bài, 902 PASS,
+1 lỗi tìm chuỗi gọi cũ; không timeout, khóa tên PASS.
+Đổi kiểm toán sang unrank_in_orders, thêm 4 kiểm thử mới
+so sánh cả hai thứ tự với phép mở hạng độc lập và oracle.
+Đưa job soak vào workflow native hiện có, chỉ chạy trên
+nhánh Elixir+tiếng-Việt, giới hạn 30 phút và giữ log kể cả lỗi.

@@ -18,3 +18,28 @@ jobs:
           elixir-version: '1.18'
       - name: Chạy kiểm thử phát triển
         run: mix test
+
+  soak_stage55:
+    if: github.ref == 'refs/heads/Elixir+tiếng-Việt'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Lấy mã Stage55
+        uses: actions/checkout@v4
+      - name: Cài Erlang và Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27'
+          elixir-version: '1.18'
+      - name: Kiểm tra chịu tải 47 tháng và 5778 ngày
+        shell: bash
+        run: |
+          set -o pipefail
+          mix test qa/elixir_vietnamese_soak.exs --timeout 240000 --max-cases 1 2>&1 | tee elixir_vietnamese_soak.log
+      - name: Lưu log kể cả khi lỗi
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-soak-native-${{ github.sha }}
+          path: elixir_vietnamese_soak.log
+          retention-days: 30
