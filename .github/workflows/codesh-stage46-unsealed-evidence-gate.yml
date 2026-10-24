@@ -86,7 +86,7 @@ jobs:
               assert previous47['STAGE47_STARTED'] == 'YES'
               assert previous47['STAGE48_STARTED'] == 'NO'
               assert previous47['STAGE47_EVIDENCE_RECEIPT'] == 'qa/Stage47_Native_Evidence_Receipt.json'
-          historic_stage = ({**stage, 'CURRENT_STAGE': '46', 'CURRENT_KIND': 'DISCOVERY',
+          historic_stage = ({**stage, 'CURRENT_STAGE': '46', 'CURRENT_KIND': 'DISCOVERY', 'CURRENT_DISCOVERY': '23',
               'LAST_COMPLETED_STAGE': '46', 'EXPECTED_REPOSITORY_STATE': 'EXPECTED_RED',
               'STAGE47_STARTED': 'NO'} if stage47_completed else stage)
 
