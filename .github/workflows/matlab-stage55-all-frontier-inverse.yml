@@ -1,0 +1,31 @@
+name: MATLAB Exhaustive All-Frontier Rank Inverse (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_all_frontier_inverse_tests.m'
+      - 'src/\+pastafari/unrankGeneralWeaveSuffixChunk.m'
+      - '.github/workflows/matlab-stage55-all-frontier-inverse.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  all-frontier-inverse:
+    name: MATLAB R2026a / exhaustive reachable frontier rank and unrank
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v4
+      - name: Setup MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Exhaustive independent suffix rank/inverse and column-orientation regression
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_all_frontier_inverse_tests
