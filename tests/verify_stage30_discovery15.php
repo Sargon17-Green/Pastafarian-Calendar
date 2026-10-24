@@ -29,7 +29,12 @@ $legacy=(string)file_get_contents($src.'/Legacy/LegacyMissingThirdDigit15.php');
 $kernel=(string)file_get_contents($src.'/BootstrapKernel.php');
 $valid=$valid && str_contains($legacy,'for ($j = 0; $j < 2; $j++)')
     && str_contains($kernel,"dispatch('MISSING_THIRD_DIGIT_LEGACY', " . '$context)')
-    && !is_file($src.'/Patches/ThirdDigitPatch15.php');
+    && (!is_file($src.'/Patches/ThirdDigitPatch15.php')
+        || (str_contains($kernel,
+                "dispatch('THIRD_DIGIT_PATCH_15', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $src.'/Patches/ThirdDigitPatch15.php'),
+                '$this->legacy->chooseWrong($stream, $n)')));
 foreach(new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($src,FilesystemIterator::SKIP_DOTS)
 ) as $file) {

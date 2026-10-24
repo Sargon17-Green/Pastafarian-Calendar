@@ -104,3 +104,5 @@ jobs:
         run: php -d memory_limit=512M tests/stage29_patch14_tests.php
       - name: Penemuan 15 — digit ketiga tidak dibaca bagi pilihan tiga digit
         run: php -d memory_limit=512M tests/verify_stage30_discovery15.php
+      - name: Tampalan 15 — bacaan tiga digit dengan pemberat yang betul
+        run: php -d memory_limit=512M tests/stage31_patch15_tests.php

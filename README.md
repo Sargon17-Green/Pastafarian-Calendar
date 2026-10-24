@@ -439,3 +439,19 @@ php -d memory_limit=512M tests/verify_stage30_discovery15.php # exit 0 jika mera
 \`\`\`
 
 Semua regresi Stage1–29, lint PHP, fixture deterministik, dan Canonical Names Lock mesti kekal hijau. **Status: AWAITING_CI. Jangan tambah ThirdDigitPatch15 atau mulakan Stage31 sebelum GitHub Actions Native disahkan pada SHA tepat.** Tiada perubahan main, katalog, fixture atau import oracle ke dalam \`src\`.
+
+
+## Stage 31 — PATCH 15: Pulihkan digit ketiga pilihan luas
+
+Stage30 DISCOVERY15 menerima EXPECTED_RED melalui Native CI `39999379403` pada SHA `b1723bfc35cd6a48a9ea70cf32b5852eef8aeb0d` (verify dan audit kedua-duanya SUCCESS). Kecacatan bersejarah `LegacyMissingThirdDigit15` dibiarkan utuh.
+
+`ThirdDigitPatch15::choosePatched` memanggil `LegacyMissingThirdDigit15::chooseWrong` secara sebenar untuk mengekalkan laluan sejarah dan validasi, kemudian membaca tiga sampel SAVE pada pemberat `1`, `M`, dan `M²`. Nilai ruang ialah `M²<n<=M³`, cutoff ialah `floor(M³/n)*n`; sampel melebihi cutoff ditolak dengan langkah ±1 dalam domain `1..M³`. Penghala produksi baharu `THIRD_DIGIT_PATCH_15` dan API `BootstrapKernel::chooseTripleRank` mempunyai konteks per-panggilan tersendiri; `legacyChooseTripleRank` kekal salah.
+
+Ujian `stage31_patch15_tests.php` membandingkan 400 input sintetik dengan oracle PHP tempatan yang bebas, termasuk keempat-empat saksi Stage30, 18 pertanyaan sebenar melalui dua instance kernel, enam input salah, serta semakan tanpa oracle di `src`. Pembalut `verify_stage30_discovery15.php` terus mesti menerima tepat empat kegagalan RED lama (exit 0), sementara ujian terus Stage30 kekal exit 1.
+
+```text
+php -d memory_limit=512M tests/verify_stage30_discovery15.php
+php -d memory_limit=512M tests/stage31_patch15_tests.php
+```
+
+Semua regresi Stage1–30, lint PHP, fixture dan kunci nama kanonik mesti lulus Native GitHub Actions pada SHA tepat. **Status: AWAITING_CI. Stage32 tidak boleh dimulakan sebelum SUCCESS kedua-dua pekerjaan pada HEAD baharu.** Tiada perubahan pada `main`.

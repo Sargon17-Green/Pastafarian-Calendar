@@ -121,7 +121,12 @@ $kernelText=(string)file_get_contents($src.'/BootstrapKernel.php');
 if (!str_contains($legacyText,'for ($j = 0; $j < 2; $j++)')
     || !str_contains($kernelText,
         "dispatch('MISSING_THIRD_DIGIT_LEGACY', " . '$context)')
-    || is_file($src.'/Patches/ThirdDigitPatch15.php')) {
+    || (is_file($src.'/Patches/ThirdDigitPatch15.php')
+        && !(str_contains($kernelText,
+                "dispatch('THIRD_DIGIT_PATCH_15', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $src.'/Patches/ThirdDigitPatch15.php'),
+                '$this->legacy->chooseWrong($stream, $n)')))) {
     echo "RALAT_KONTRAK15\n";
     $unexpected++;
 }
