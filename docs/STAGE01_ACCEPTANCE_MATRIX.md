@@ -369,3 +369,20 @@ The current branch is not ready for Stage 1 signoff.
 - 4244-symbol full unranking, 5-field multi-vector oracle,
   production ASIC RTL, 64 qualified Kalaallisut labels
   remain unresolved. Stage 1 OPEN; Stage 2 NOT AUTHORIZED.
+
+## 2026-10-24 — Sixth pass, seventh not yet validated
+
+- **CI PASS:** [run 40001527283](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40001527283),
+  four successful jobs. Verified native logs include the exact
+  22528-bit `prefix123451` SHA and 5 old-label block hashes,
+  followed by `STAGE1_FOUNDATION_WEAVE_LEX_PREFIX6_PASS`.
+- **CI pending:** new `+prefix1234561` 22528-bit completion
+  counter, seven independently hashed seventh-symbol blocks,
+  rank and partition checks, a SHA-pinned 21-binary input
+  manifest and a separately time/memory-bounded QA job.
+- Reusable ordered-last multinomial ratio identity and its
+  edge-condition restrictions recorded in
+  `FOUNDATION_WEAVE_ACTIVE_RATIO_THEOREM.md`.
+- Still incomplete: full 4244-symbol SV lexical unrank,
+  production RTL 5-field calendar contract, qualified
+  Kalaallisut name approval (0/64). Stage 2 closed.

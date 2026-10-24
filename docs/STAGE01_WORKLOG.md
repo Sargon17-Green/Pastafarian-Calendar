@@ -462,3 +462,26 @@ was queued at last observation. No full unrank or stage PASS.
   New full-width 6th-symbol source has NOT yet earned CI PASS.
 - No changes to main, no opening Stage 2, no native Kalaallisut
   approval (0/64), and no complete 4244-symbol SV unrank.
+
+## 2026-10-24 — actual sixth CI and seventh preparation
+
+- Read `sixth_weave_symbol` job 120578557551 in successful
+  [run 40001527283](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40001527283):
+  source merge SHA pins PASS, all 15 input SHA256 PASS,
+  prefix123451 exact completion SHA PASS, six selected
+  ordinals `[1,2,3,4,5,6]` PASS.
+- Derived seven independent completion SHA witnesses and
+  ordinal 7 for the selected year by exact arithmetic.
+  Checks include sum of seven blocks equals parent.
+- Added `tests/tb_weave_full_root.sv +prefix1234561`,
+  `tests/tb_weave_prefix7.sv`, and
+  `scripts/verify_weave_prefix7.sh`. All run **test-only**
+  and do not modify production ASIC logic.
+- Seventh QA job added to isolated QA workflow at commit
+  `95386321d664918170b4ea800585063980848180`,
+  with three immutable prior evidence downloads, 22-minute
+  timeout and 4-GiB VM bound.
+- Latest available seventh candidate CI still unconfirmed;
+  status remains `WRITTEN_NOT_CI_PASSED`.
+- Proof for active last-appearance ratios and related
+  limits added as `FOUNDATION_WEAVE_ACTIVE_RATIO_THEOREM.md`.
