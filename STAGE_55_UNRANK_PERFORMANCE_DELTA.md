@@ -15,3 +15,11 @@ kiểm tra độc lập với 11.200 bộ trạng thái sinh ngẫu nhiên.
 Không đổi quy tắc đan, hạng một-based, di sản thứ tự giảm,
 bộ tham chiếu hoặc main. Chờ kiểm thử native và soak mới;
 không đánh dấu Stage55 GREEN trước khi xác nhận.
+
+## Tăng tốc bổ sung
+Bảng đuôi thay việc gọi nhị thức đầy đủ tại từng ô bằng
+hệ thức C(s+days-1, days-2) = C(s+days-2, days-2)
+* (s+days-1)/(s+1), tính chính xác bằng số nguyên.
+Hàm unrank_in_orders dùng chung một bảng đuôi cho
+thứ tự di sản và thứ tự chuẩn; không bỏ gọi di sản thật.
+Không thay đổi ngữ nghĩa, cần xác nhận Native CI và soak.

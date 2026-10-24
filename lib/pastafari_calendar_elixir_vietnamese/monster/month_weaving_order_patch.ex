@@ -10,9 +10,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.MonthWeavingOrderPatch do
 
   def diagnose(lengths, rank) when is_list(lengths) do
     historical_order = LegacyDescendingWeavingOrder.labels(length(lengths))
-    historical_weaving = WeavingCombinatorics.unrank(lengths, rank, historical_order)
     corrected_order = Enum.reverse(historical_order)
-    corrected_weaving = WeavingCombinatorics.unrank(lengths, rank, corrected_order)
+    [historical_weaving, corrected_weaving] =
+      WeavingCombinatorics.unrank_in_orders(lengths, rank,
+        [historical_order, corrected_order])
 
     %{historical_order: historical_order, historical_weaving: historical_weaving,
       corrected_order: corrected_order, corrected_weaving: corrected_weaving,

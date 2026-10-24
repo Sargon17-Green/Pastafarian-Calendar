@@ -33,6 +33,29 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
         _ -> raise ArgumentError, "thứ tự mở hạng không hợp lệ"
       end
 
+    run_unrank(lengths, rank, [order]) |> hd()
+  end
+
+  # Tính bảng đuôi một lần cho các thứ tự nhãn khác nhau
+  # cùng chọn từ một hạng; giữ nguyên từng chứng cứ di sản.
+  def unrank_in_orders(lengths, rank, orders) when is_list(orders) and orders != [] do
+    lengths = validate_lengths!(lengths)
+    month_count = length(lengths)
+    labels = Enum.to_list(1..month_count)
+
+    unless Enum.all?(orders, fn order ->
+      is_list(order) and Enum.sort(order) == labels
+    end) do
+      raise ArgumentError, "thứ tự nhãn không phải hoán vị đầy đủ"
+    end
+
+    run_unrank(lengths, rank, orders)
+  end
+
+  def unrank_in_orders(_, _, _),
+    do: raise(ArgumentError, "danh sách thứ tự nhãn không hợp lệ")
+
+  defp run_unrank(lengths, rank, orders) do
     table = tail_table(lengths)
     total = elem(Map.fetch!(table, 1), 0)
 
@@ -41,7 +64,11 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
     end
 
     original = List.to_tuple(lengths)
-    unrank_loop(original, original, 0, 0, 1, rank, order, table, Enum.sum(lengths), [])
+    days = Enum.sum(lengths)
+
+    Enum.map(orders, fn order ->
+      unrank_loop(original, original, 0, 0, 1, rank, order, table, days, [])
+    end)
   end
 
   defp validate_lengths!(lengths) when is_list(lengths) and lengths != [] do
@@ -79,11 +106,13 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
       maximum_suffix = Enum.at(prefixes, month - 1)
       next_table = Map.fetch!(table, month + 1)
 
-      {_sum, reversed} =
-        Enum.reduce(0..maximum_suffix, {0, []}, fn suffix, {sum, values} ->
-          coefficient = binomial(suffix + days - 2, days - 2)
+      {_sum, reversed, _next_coefficient} =
+        Enum.reduce(0..maximum_suffix, {0, [], 1}, fn suffix, {sum, values, coefficient} ->
           value = sum + coefficient * elem(next_table, suffix + days - 1)
-          {value, [value | values]}
+          # C(s+days-1,days-2) / C(s+days-2,days-2)
+          # = (s+days-1)/(s+1), chỉ chia sau khi nhân.
+          following = div(coefficient * (suffix + days - 1), suffix + 1)
+          {value, [value | values], following}
         end)
 
       Map.put(table, month, reversed |> Enum.reverse() |> List.to_tuple())

@@ -1169,3 +1169,7 @@ Stage55 tối ưu WeavingCombinatorics.unrank_loop: truyền số cách
 qua trạng thái, tỉ số hậu tố một lượt, đóng tháng từ tích
 chính xác. Timeout trước đó: 903 bài, 900 PASS, 3 timeout
 ở production; chưa có Native CI mới, chưa đóng Stage55.
+
+Stage55 hiệu suất: tính nhị thức từng ô bảng đuôi bằng
+hệ thức tuyến tính; chia sẻ bảng giữa hai thứ tự di sản
+và chuẩn. Chờ kiểm thử Native đầy đủ và soak.
