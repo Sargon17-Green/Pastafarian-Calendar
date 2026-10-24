@@ -455,3 +455,19 @@ php -d memory_limit=512M tests/stage31_patch15_tests.php
 ```
 
 Semua regresi Stage1–30, lint PHP, fixture dan kunci nama kanonik mesti lulus Native GitHub Actions pada SHA tepat. **Status: AWAITING_CI. Stage32 tidak boleh dimulakan sebelum SUCCESS kedua-dua pekerjaan pada HEAD baharu.** Tiada perubahan pada `main`.
+
+
+## Stage 32 — DISCOVERY 16: Digit keempat hilang daripada pilihan luas
+
+Stage31 PATCH15 disahkan GREEN pada SHA `405c4f94eb7a774c9a1fd757b2045624920bffe9`, Native GitHub Actions run `40125767529`, kedua-dua tugas SUCCESS.
+
+Bagi ruang `M³<n<=M⁴`, oracle PHP normatif membaca empat sampel daripada strim `askBowl` PATCH12, dengan berat `1`, `M`, `M²`, `M³`. `LegacyMissingFourthDigit16` dengan sengaja membaca hanya tiga sampel pertama, tidak membaca digit keempat pada berat `M³`. Cutoff dikira dalam ruang `M⁴` yang sebenar; kecacatan terkawal hanya pada ketiadaan digit. `BootstrapKernel::legacyChooseQuadRank` melalui penghala `MISSING_FOURTH_DIGIT_LEGACY` dengan konteks per panggilan; kod legacy Stage1–30 dan PATCH15 tidak diubah.
+
+Empat saksi tetap pada `n=M⁴`, tanpa rejection, menunjukkan beza tepat `(digit4-1)*M³`; 56 kes sempadan daripada empat ruang, tujuh titik mula, dua arah menghasilkan tepat 52 mismatch, empat kebetulan, tanpa penolakan astronomi. Tiga pertanyaan sebenar melalui dispatcher, lima input tidak sah. Ujian terus `stage32_discovery16_tests.php` keluar dengan kod 1 **yang disengajakan**; pembalut `verify_stage32_discovery16.php` keluar kod 0 hanya jika tepat empat RED dan tiada kegagalan lain.
+
+```text
+php -d memory_limit=512M tests/stage32_discovery16_tests.php # keluar 1, empat RED disengajakan
+php -d memory_limit=512M tests/verify_stage32_discovery16.php # keluar 0 apabila RED tepat
+```
+
+Semua ujian Stage1–31, PHP lint, fixture dan kunci nama kanonik wajib lulus Native GitHub Actions pada SHA tepat. **Status: AWAITING_CI. Jangan tambah FourthDigitPatch16, jangan mulakan Stage33, jangan ubah main.**

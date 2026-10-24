@@ -37,6 +37,7 @@ require_once $root . '/src/Legacy/LegacyBigEndianDigits14.php';
 require_once $root . '/src/Patches/BigEndianDigitsPatch14.php';
 require_once $root . '/src/Legacy/LegacyMissingThirdDigit15.php';
 require_once $root . '/src/Patches/ThirdDigitPatch15.php';
+require_once $root . '/src/Legacy/LegacyMissingFourthDigit16.php';
 require_once $root . '/src/BootstrapKernel.php';
 require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';

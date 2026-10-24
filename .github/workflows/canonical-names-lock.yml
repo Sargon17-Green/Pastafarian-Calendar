@@ -106,3 +106,5 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage30_discovery15.php
       - name: Tampalan 15 — bacaan tiga digit dengan pemberat yang betul
         run: php -d memory_limit=512M tests/stage31_patch15_tests.php
+      - name: Penemuan 16 — digit keempat tertinggal daripada pilihan besar
+        run: php -d memory_limit=512M tests/verify_stage32_discovery16.php
