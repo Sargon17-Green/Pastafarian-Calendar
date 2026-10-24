@@ -371,10 +371,21 @@ dotnet run --project tests/PastafarianCalendar.Stage39Tests/PastafarianCalendar.
 
 ## الطور الحادي والأربعون — الرقعة العشرون لوزن الخانة العليا
 
-تُشغّل `PatchedUpperPlaceBiasPhaseHandler` سلسلة `LegacyUpperPlaceBiasPhaseHandler` التاريخية أولاً، ولا تستبدل أي تنفيذ سابق. تحفظ `LegacyUpperPlaceBiasRankResult` و`PatchedUpperPlaceBiasRankResult` في حقلي سياق مستقلين. عندما تكون الرتبة التاريخية `h` وحجم الأسرة `n`، تُحسب الخانة العليا `W=M^(places-1)` ثم تُسترجع الرتبة `1+((h-1-W) mod n)` بباقي לא שלילי; المدقق يثبت كذلك أنها שווה לתוצאת الرقعة التاسعة عشرة ושالانحياز القديم נשמר. אין לייבא את المرجع النظري من الاختبارات إلى الإنتاج.
+تُشغّل `PatchedUpperPlaceBiasPhaseHandler` سلسلة `LegacyUpperPlaceBiasPhaseHandler` التاريخية أولاً، ولا تستبدل أي تنفيذ سابق. تحفظ `LegacyUpperPlaceBiasRankResult` و`PatchedUpperPlaceBiasRankResult` في حقلي سياق مستقلين. عندما تكون الرتبة التاريخية `h` وحجم الأسرة `n`، تُحسب الخانة العليا `W=M^(places-1)` ثم تُسترجع الرتبة `1+((h-1-W) mod n)` بباقٍ غير سالب؛ ويدقّق مطابقة نتيجة الرقعة التاسعة عشرة وبقاء الشاهد القديم. لا يُستدعى المرجع النظري للاختبارات في الإنتاج.
 
 ```text
 dotnet run --project tests/PastafarianCalendar.Stage41Tests/PastafarianCalendar.Stage41Tests.csproj -c Release
 ```
 
-تغطي اختبارات الطور حالات الضبط والرفض والحدود بعرض 8192 بت ومسار الإنتاج وملكية الحالة ورفض إعادة الالتزام ورفض المرشحين المزورين. لا يُعتمد `41_PATCH_20` أخضر حتى تنجح GitHub Actions لهذه النسخة؛ لا يبدأ `42_DISCOVERY_21` قبل الاعتماد.
+تغطي اختبارات الطور حالات الضبط والرفض والحدود بعرض 8192 بت ومسار الإنتاج وملكية الحالة ورفض إعادة الالتزام ورفض المرشحين المزورين. أثبتت GitHub Actions رقم 39998722151 نجاح الرقعة العشرين وجميع اختبارات الأطوار السابقة وقفل الأسماء. أُغلق الطور 41 GREEN؛ التالي 42_DISCOVERY_21.
+
+
+## الطور الثاني والأربعون — اكتشاف قطع الرتبة الواسعة عند التخزين
+
+بعد اكتمال الرقعة العشرين، يُنتج LegacyWideSlotTruncation شاهداً تاريخياً معيباً من الرتبة الصحيحة r، إذ يحفظ خانة واحدة فقط في الأساس M=2^127-1: old=1+((r-1) mod M). تتطابق الرتب التي لا تتجاوز M، وتضيع الخانات العليا للرتب الأكبر. لا تتغير سلسلة الصلصة ولا السؤال ولا اتجاه الرفض ولا أي رقعة سابقة.
+
+تستدعي الواجهة CalendarDateSpaghetti.EvaluateLegacyWideSlotTruncation سلسلة المدير والموزع ومعالج PatchedUpperPlaceBiasPhaseHandler كاملاً، ثم تحفظ الشاهد منفصلاً عن PatchedUpperPlaceBiasRankResult. يجري التحقق من كل المرشحين قبل الالتزام، مع اختبارات رفض إعادة الاستخدام والتزوير والملكية.
+
+الاختبار: dotnet run --project tests/PastafarianCalendar.Stage42Tests/PastafarianCalendar.Stage42Tests.csproj -c Release -- --verify-expected-red
+
+يتوقع الاختبار 34560 حالة تحكم، منها 25920 انحرافاً و8640 مطابقة سليمة؛ و8640 حالة رفض منها 4320 انحرافاً في الاتجاه النازل. تشمل فحوص الإنتاج 96 استعلاماً وثماني صلصات وحدوداً حتى 8192 بت. يجب أن يفشل التشغيل المباشر EXPECTED_RED وأن ينجح مدقق التوقيع المستقل؛ الرقعة الحادية والعشرون مؤجلة إلى 43_PATCH_21.

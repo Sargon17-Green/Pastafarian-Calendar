@@ -169,6 +169,9 @@ public sealed class MonsterContext
     // الرقعة العشرون: حفظ النتيجة المصححة بعيداً عن الشاهد التاريخي.
     public BigInteger? PatchedUpperPlaceBiasRankResult { get; set; }
 
+    // الندبة الحادية والعشرون: القطع التاريخي للمرتبة الواسعة.
+    public BigInteger? LegacyWideSlotTruncationRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

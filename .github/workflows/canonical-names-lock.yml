@@ -259,3 +259,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage40Tests/PastafarianCalendar.Stage40Tests.csproj --configuration Release -- --verify-expected-red
       - name: تكافؤ الرقعة العشرين وحفظ شاهد انحياز الخانة العليا
         run: dotnet run --project tests/PastafarianCalendar.Stage41Tests/PastafarianCalendar.Stage41Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لقطع المرتبة الواسعة
+        id: discovery_wide_slot_truncation_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage42Tests/PastafarianCalendar.Stage42Tests.csproj --configuration Release
+      - name: إثبات توقيع قطع الخانات مع حفظ الرقعة العشرين
+        if: always()
+        run: |
+          test "${{ steps.discovery_wide_slot_truncation_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage42Tests/PastafarianCalendar.Stage42Tests.csproj --configuration Release -- --verify-expected-red
