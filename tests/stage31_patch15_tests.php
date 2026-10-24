@@ -24,7 +24,7 @@ $sizes = [$m->square()->add(BigInt::one()),
     $m->square()->add(BigInt::fromInt(2)), $m3->sub(BigInt::one()), $m3];
 foreach ($sizes as $sizeNo => $n) {
     for ($i = 1; $i <= 25; $i++) {
-        foreach ([BigInt::fromInt($i), $m->sub(BigInt::fromInt($i-1))] as $first) {
+        foreach ([BigInt::fromInt($i), $m->sub(BigInt::fromInt($i === 3 ? 26 : $i - 1))] as $first) {
             foreach ([-1, 1] as $step) {
                 $stream = ['first'=>$first, 'step'=>$step];
                 $correct = $oracle->chooseRank($stream, $n);
