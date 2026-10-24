@@ -17,3 +17,19 @@ Stage45 पूर्ण आणि [final CI 40124962660](https://github.com/Sarg
 `test/discovery23Red.ts`: स्वतंत्र 23वा हेतुपुरस्सर RED पुरावा; पहिली 22 ऐतिहासिक RED अपरिवर्तित.
 
 CI 2/2 PASS आणि पूर्ण TypeScript typecheck / Stage1–46 regression / source names lock झाल्यावरच Stage46 बंद. Stage47 PATCH23 सुरू नाही; main अपरिवर्तित.
+
+## Native CI निकाल — २५ ऑक्टोबर २०२६
+
+मूळ commit [cc794630](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/cc7946306989c9f89ee5ba7bdb1b6adffa0fd7be) च्या [CI 40125753511](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40125753511) मध्ये `verify` PASS पण test-only handler construction मधील एक बंद कंस नसल्याने `test/discovery23.ts:45` वर TS1005 अपयश आले. जुन्या production algorithm ला न स्पर्श करता फक्त ती चाचणी ओळ [54833c8c](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/54833c8c6e22609373d8278763e30da4c7536055) मध्ये सुधारली.
+
+दुरुस्त [GitHub Actions 40134684657](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40134684657) मध्ये TypeScript typecheck, जुना संपूर्ण Stage1–46 regression, canonical names lock आणि 23 ऐतिहासिक अपेक्षित-RED साक्षी **दोन्ही jobs SUCCESS**.
+
+```text
+STAGE_46_DISCOVERY_23_GUARDS_PASS smallLexRows=10 syntheticHugeLowerBound=177147 preflightBlocked=1 nativeFullStage45=1 yearLength=5349 monthCount=44 oldCountFromTestOracle=956989856157389440798554542400 realOldListBlocked=1 lateFaults=1 stage47VirtualFixApplied=0
+STAGE_46_DISCOVERY_23_PROPERTIES_PASS distinctDrop46=720 nativeSeal30=720 nativeSeal31=0 blockedLists=720 smallCompleteLists=0 countWrong=0 smallListSelectionWrong=0 realSharedWrites=41760
+STAGE_46_DISCOVERY_23_EXPECTED_RED_VERIFIED nonzero=1 hugeFamily=1
+```
+
+पूर्ण ऐतिहासिक वर्षाच्या ५३४९ दिवसांमध्ये ४४ महिने असताना कुटुंब प्रचंड आहे. ७२० बदललेल्या DROP46 inputs वर प्रत्येक जुन्या यादीला सुरक्षित resource barrier लागू झाला; त्यामुळे `nativeSeal31=0` योग्यच आहे, काल्पनिक निवड नव्हे. वेगळ्या छोट्या उदाहरणात दहा जुन्या lex rows पूर्ण तयार होतात आणि independent reference शी तंतोतंत जुळतात. ७२० DROP46 inputs हे ७२० भिन्न नैसर्गिक वर्षे नाहीत. Stage47 मधील `VirtualLegacyList` दुरुस्ती अजून उत्पादनात नाही.
+
+**Stage46 ची Native पडताळणी पूर्ण.** अंतिम प्रशासकीय commit च्या दोन्ही jobs PASS झाल्यावरच Stage47 उघडण्यास परवानगी.
