@@ -1164,3 +1164,8 @@ Stage55: Native CI 39965564069 báo 903 bài, 900 PASS,
 full-oracle tốn thời gian bằng kiểm tra tầng quy phạm
 và phép ghép ngày độc lập. Chưa tuyên bố tương đương toàn
 miền hoặc hoàn tất soak; chờ CI mới.
+
+Stage55 tối ưu WeavingCombinatorics.unrank_loop: truyền số cách
+qua trạng thái, tỉ số hậu tố một lượt, đóng tháng từ tích
+chính xác. Timeout trước đó: 903 bài, 900 PASS, 3 timeout
+ở production; chưa có Native CI mới, chưa đóng Stage55.

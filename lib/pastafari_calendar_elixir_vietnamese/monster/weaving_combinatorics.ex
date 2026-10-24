@@ -41,7 +41,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
     end
 
     original = List.to_tuple(lengths)
-    unrank_loop(original, original, 0, 0, rank, order, table, Enum.sum(lengths), [])
+    unrank_loop(original, original, 0, 0, 1, rank, order, table, Enum.sum(lengths), [])
   end
 
   defp validate_lengths!(lengths) when is_list(lengths) and lengths != [] do
@@ -90,14 +90,8 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
     end)
   end
 
-  defp last_order_count(active) do
-    {_days, count} =
-      Enum.reduce(active, {0, 1}, fn days, {prefix, product} ->
-        {prefix + days, product * binomial(prefix + days - 1, days - 1)}
-      end)
-    count
-  end
-
+  # Tỉ số số cách khi một ngày ở tháng đang mở được lấy.
+  # Duyệt hậu tố một lần thay vì đọc vị trí danh sách nhiều lần.
   defp suffix_ratios(active) do
     count = length(active)
 
@@ -106,19 +100,39 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
     else
       prefixes = Enum.scan(active, 0, fn days, sum -> sum + days end)
 
-      Enum.reduce(count..2//-1, %{count + 1 => {1, 1}}, fn index, ratios ->
-        {numerator, denominator} = Map.fetch!(ratios, index + 1)
-        prefix = Enum.at(prefixes, index - 1)
-        Map.put(ratios, index,
-          {numerator * prefix, denominator * (prefix - 1)})
-      end)
+      {result, _fraction} =
+        prefixes
+        |> Enum.with_index(1)
+        |> Enum.reverse()
+        |> Enum.reduce({%{count + 1 => {1, 1}}, {1, 1}}, fn
+          {_prefix, 1}, acc -> acc
+          {prefix, index}, {ratios, {numerator, denominator}} ->
+            current = {numerator * prefix, denominator * (prefix - 1)}
+            {Map.put(ratios, index, current), current}
+        end)
+
+      result
     end
   end
 
-  defp unrank_loop(_remaining, _original, _opened, _closed,
-       _rank, _order, _table, 0, collected), do: Enum.reverse(collected)
+  # Bỏ tháng vừa đóng, với số ngày còn lại bằng một.
+  # Mỗi thừa số so với cách đếm cũ có dạng
+  # tổng tiền tố trước / (tổng tiền tố sau - 1).
+  defp close_base(base, [_one]), do: base
 
-  defp unrank_loop(remaining, original, opened, closed, rank,
+  defp close_base(base, [1 | later]) do
+    {numerator, denominator, _prefix} =
+      Enum.reduce(later, {1, 1, 1}, fn days, {num, den, prefix} ->
+        {num * prefix, den * (prefix + days - 1), prefix + days}
+      end)
+
+    div(base * numerator, denominator)
+  end
+
+  defp unrank_loop(_remaining, _original, _opened, _closed,
+       _base, _rank, _order, _table, 0, collected), do: Enum.reverse(collected)
+
+  defp unrank_loop(remaining, original, opened, closed, base, rank,
        order, table, days_left, collected) do
     active =
       if opened > closed do
@@ -128,7 +142,6 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
       end
 
     available_days = Enum.sum(active)
-    base = last_order_count(active)
     ratios = suffix_ratios(active)
 
     selection =
@@ -149,7 +162,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
                 {updated_base, label, closed, available_days + left - 1}
 
               left == 1 ->
-                {last_order_count(tl(active)), opened, label, available_days - 1}
+                {close_base(base, active), opened, label, available_days - 1}
 
               true ->
                 local_index = label - closed
@@ -165,7 +178,7 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
           if current_rank > completions do
             {:cont, current_rank - completions}
           else
-            {:halt, {:chosen, label, current_rank, new_opened, new_closed}}
+            {:halt, {:chosen, label, current_rank, new_opened, new_closed, new_base}}
           end
         else
           {:cont, current_rank}
@@ -173,10 +186,10 @@ defmodule PastafariCalendarElixirVietnamese.Monster.WeavingCombinatorics do
       end)
 
     case selection do
-      {:chosen, label, next_rank, new_opened, new_closed} ->
+      {:chosen, label, next_rank, new_opened, new_closed, next_base} ->
         new_remaining = put_elem(remaining, label - 1, elem(remaining, label - 1) - 1)
         unrank_loop(new_remaining, original, new_opened, new_closed,
-          next_rank, order, table, days_left - 1, [label | collected])
+          next_base, next_rank, order, table, days_left - 1, [label | collected])
       _ ->
         raise ArgumentError, "không tìm thấy nhánh đan tháng ở hạng yêu cầu"
     end
