@@ -1,0 +1,415 @@
+#!/usr/bin/env python3
+"""Independent complete post-| BF98 Native route + mutable byte verifier.
+
+Four independent valid inputs, both Native branch directions, every IP step
+from executed | to actual halt. Source-byte lifecycle is reconstructed from
+the pinned BF98 candidate and chronologically preceding Native p writes.
+No Python calendar arithmetic, no universal acceptance or production update.
+"""
+import copy,hashlib,json,sys
+from collections import Counter,defaultdict
+from pathlib import Path
+
+SCHEMA="befunge-stage1-four-cell-native-full-postfork-trace-v1"
+SCHEMA_V2="befunge-stage1-four-cell-native-full-postfork-trace-v2"
+SOURCE="560d6aa5807a7f766213a33835cce85eab0fa40c"
+CANDIDATE="d965ce4bdfa282f2d3b82690808def5a2dde10a8"
+CASES=("zero_equal","foundation_cross","forward_short","mixed_small")
+PHYSICAL_FORK_GATE=(951,1335)
+OPS=("|","_","[","]","r","w","k","j","{","}","u","p","g","x")
+# Conservative set of BF98 operations that cannot change IP direction.
+# & and ~ are deliberately EXCLUDED: on input exhaustion, PyFunge 0.5-rc2
+# reflects the IP, as observed in 49 native receipts at ~ (13,5), tick 9340.
+# Without a captured input-consumption witness, do not assume they move straight.
+# Include quoted character pushes; omit turns, skips and flow controls.
+STRAIGHT_BYTES=frozenset(map(ord, ' 0123456789abcdef+-*/%!`:$.,pg')) | frozenset((92,))
+# Deterministic Befunge-98 direction setters; unlike arbitrary turns,
+# these instructions have a uniquely prescribed resulting velocity.
+FIXED_TURNS={ord(">"):(1,0),ord("<"):(-1,0),
+             ord("^"):(0,-1),ord("v"):(0,1)}
+def straight_instruction(byte,stringmode):
+    return stringmode==1 or byte==ord('"') or byte in STRAIGHT_BYTES
+
+def need(ok,msg):
+    if not ok:raise AssertionError(msg)
+def gitblob(data):
+    return hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
+def integer(s):
+    return type(s) is str and (s=="0" or
+        (bool(s) and s[0] in "123456789" and s.isdigit()) or
+        (len(s)>1 and s[0]=="-" and s[1] in "123456789" and s[1:].isdigit()))
+
+def verify_run(run,source,require_prefork=False,require_gate_anchor=False):
+    need(type(run) is dict and run.get("status")=="normal"
+         and run.get("remaining_ips")==0
+         and type(run.get("steps")) is int and 0<run["steps"]<=750000,
+         "Native full-route execution/termination invalid")
+    gate=run.get("gate")
+    need(type(gate) is dict and type(gate.get("step")) is int
+         and 0<gate["step"]<run["steps"]
+         and type(gate.get("original")) is int and gate["original"] in (0,1)
+         and type(gate.get("executed")) is int and gate["executed"] in (0,1),
+         "Native fork operand/step witness invalid")
+    trace=run.get("complete_postfork_trace")
+    prefix=run.get("first_512_motion")
+    need(type(trace) is list and len(trace)==run["steps"]-gate["step"]
+         and len(trace)>512 and type(prefix) is list and len(prefix)==512,
+         "complete post-fork Native trace truncated or inflated")
+    writes=run.get("native_p_history")
+    reads=run.get("native_g_history")
+    need(type(writes) is list and type(reads) is list
+         and type(run.get("total_p_writes")) is int
+         and type(run.get("total_g_reads")) is int
+         and len(writes)==run["total_p_writes"]
+         and len(reads)==run["total_g_reads"],
+         "Native p/g chronology counts missing")
+    def source_byte(coord):
+        x,y=coord
+        if 0<=y<len(source) and 0<=x<len(source[y]):return source[y][x]
+        return 32
+    def events_of(seq,kind):
+        last=0;events=[]
+        for entry in seq:
+            need(type(entry) is dict and type(entry.get("tick")) is int
+                 and 1<=entry["tick"]<=run["steps"]
+                 and entry["tick"]>last
+                 and type(entry.get("coordinate")) is list
+                 and len(entry["coordinate"])==2
+                 and all(type(v) is int for v in entry["coordinate"]),
+                 "Native "+kind+" coordinate/tick invalid")
+            tick=entry["tick"]
+            last=tick
+            if kind=="p":
+                need(integer(entry.get("value")),
+                     "Native p-written value malformed")
+            else:
+                need(integer(entry.get("read_before"))
+                     and integer(entry.get("returned"))
+                     and entry["read_before"]==entry["returned"],
+                     "Native g returned incorrect claimed read-before")
+            events.append((tick,kind,tuple(entry["coordinate"]),entry))
+        return events
+    events=sorted(events_of(writes,"p")+events_of(reads,"g"))
+    need(len({event[0] for event in events})==len(events),
+         "one Native step cannot execute p and g simultaneously")
+    # Independent complete p/g read-after-write reconstruction, including
+    # all event ticks before the conditional fork.
+    current={}
+    for tick,kind,coord,entry in events:
+        if kind=="p":current[coord]=int(entry["value"])
+        else:
+            need(int(entry["returned"])==current.get(coord,source_byte(coord)),
+                 "Native g violates independent mutable-space write chronology")
+    events_by_tick={e[0]:e for e in events}
+    # v2: replay the *executed* instruction at every tick through the fork.
+    # A claimed pre-fork p/g event is no longer accepted on chronology alone:
+    # it must match the opcode physically executed in mutable Funge-space.
+    # Legacy v1 post-fork evidence remains readable, but cannot make that claim.
+    pretrace=run.get("complete_prefork_trace")
+    if pretrace is None:
+        need(not require_prefork,
+             "Native full pre-fork instruction trajectory missing")
+    else:
+        need(type(pretrace) is list and len(pretrace)==gate["step"],
+             "Native complete pre-fork trajectory truncated or inflated")
+        pre_memory={}
+        last_pg=None
+        last_straight_delta=None
+        last_fixed_turn_delta=None
+        last_fixed_turn_position=None
+        expected_prefork_stringmode=0
+        for index,entry in enumerate(pretrace):
+            need(type(entry) is list and len(entry)==7 and
+                 all(type(value) is int for value in entry),
+                 "Native pre-fork instruction witness malformed")
+            tick,x,y,dx,dy,byte,stringmode=entry
+            need(tick==index+1 and (dx!=0 or dy!=0) and
+                 stringmode in (0,1),
+                 "Native pre-fork tick, vector or mode invalid")
+            need(stringmode==expected_prefork_stringmode,
+                 "Native pre-fork stringmode not caused by physical quote opcode")
+            if byte==ord('"'):
+                expected_prefork_stringmode=1-expected_prefork_stringmode
+            if last_straight_delta is not None:
+                px,py,pdx,pdy=last_straight_delta
+                need((dx,dy)==(pdx,pdy),
+                     "Native pre-fork nonturning opcode changed IP direction")
+                # The wrapped BF98 coordinate may change along its travel axis,
+                # but a cardinal move cannot jump to a perpendicular row/column.
+                need((pdy!=0 or y==py) and (pdx!=0 or x==px),
+                     "Native pre-fork nonturning opcode left cardinal travel axis")
+            if last_fixed_turn_delta is not None:
+                need((dx,dy)==last_fixed_turn_delta,
+                     "Native pre-fork fixed turn opcode did not set required direction")
+                px,py=last_fixed_turn_position
+                need((x-px)*dy==(y-py)*dx,
+                     "Native pre-fork fixed turn successor left directed axis")
+            if last_pg is not None:
+                px,py,pdx,pdy=last_pg
+                need((dx,dy)==(pdx,pdy) and
+                     (x-px)*pdy==(y-py)*pdx,
+                     "Native pre-fork p/g successor trajectory forged")
+                last_pg=None
+            xy=(x,y)
+            need(byte==pre_memory.get(xy,source_byte(xy)),
+                 "Native pre-fork opcode not supported by mutable source bytes")
+            event=events_by_tick.get(tick)
+            if stringmode==0 and byte in (ord("p"),ord("g")):
+                need(event is not None and event[1]==chr(byte),
+                     "Executed pre-fork p/g missing its Native receipt")
+                last_pg=(x,y,dx,dy)
+            last_straight_delta=(x,y,dx,dy) if straight_instruction(byte,stringmode) else None
+            last_fixed_turn_delta=FIXED_TURNS.get(byte) if stringmode==0 else None
+            last_fixed_turn_position=(x,y) if last_fixed_turn_delta is not None else None
+            if event is not None:
+                need(stringmode==0 and byte==ord(event[1]),
+                     "Forged Native pre-fork p/g event on wrong opcode")
+                if event[1]=="p":pre_memory[event[2]]=int(event[3]["value"])
+        need(last_pg is None and pretrace[-1][5]==ord("|") and
+             pretrace[-1][6]==0,
+             "Native final pre-fork instruction must be real conditional gate")
+    if require_gate_anchor:
+        # The test-only pinned four-cell candidate has a physical | at this
+        # coordinate. This is not a generic Befunge interpreter invariant.
+        gx,gy=PHYSICAL_FORK_GATE
+        need(source_byte((gx,gy))==ord("|"),
+             "Native candidate physical fork source byte drifted")
+        live_gate=source_byte((gx,gy))
+        for tick,kind,coord,entry in events:
+            if tick>=gate["step"]:break
+            if kind=="p" and coord==(gx,gy):
+                live_gate=int(entry["value"])
+        need(live_gate==ord("|"),
+             "Native physical | overwritten before the claimed fork")
+        if pretrace is not None:
+            final_pre=pretrace[-1]
+            need(final_pre[1:3]==[gx,gy] and final_pre[5]==ord("|")
+                 and final_pre[6]==0,
+                 "Native pre-fork trace not anchored to physical | cell")
+        step_direction=1 if gate["executed"]==0 else -1
+        first=trace[0]
+        need(first[:5]==[gate["step"]+1,gx,gy+step_direction,0,step_direction]
+             and first[6]==0,
+             "Native IP did not leave physical | in claimed gate direction")
+        next_coord=(gx,gy+step_direction)
+        live_next=source_byte(next_coord)
+        for tick,kind,coord,entry in events:
+            if tick>=first[0]:break
+            if kind=="p" and coord==next_coord:
+                live_next=int(entry["value"])
+        need(first[5]==live_next,
+             "Native first post-fork opcode differs from physical Funge-space")
+    first_tick=gate["step"]+1
+    current={}
+    for tick,kind,coord,entry in events:
+        if tick>=first_tick:break
+        if kind=="p":current[coord]=int(entry["value"])
+    nodes=set();edges=defaultdict(set);vectors=defaultdict(set)
+    prior=None
+    beyond512=set()
+    executed_modified=0;ops=Counter()
+    pending_pg_motion=None
+    pending_straight_delta=None
+    pending_fixed_turn_delta=None
+    pending_fixed_turn_position=None
+    expected_postfork_stringmode=0
+    for i,datum in enumerate(trace):
+        need(type(datum) is list and len(datum)==7
+             and all(type(value) is int for value in datum),
+             "Native full execution event has invalid type or shape")
+        tick,x,y,dx,dy,byte,stringmode=datum
+        need(tick==first_tick+i and (dx!=0 or dy!=0)
+             and stringmode in (0,1),
+             "Native exact IP execution chronology or vector malformed")
+        need(stringmode==expected_postfork_stringmode,
+             "Native post-fork stringmode not caused by physical quote opcode")
+        if byte==ord('"'):
+            expected_postfork_stringmode=1-expected_postfork_stringmode
+        if pending_straight_delta is not None:
+            px,py,pdx,pdy=pending_straight_delta
+            need((dx,dy)==(pdx,pdy),
+                 "Native post-fork nonturning opcode changed IP direction")
+            need((pdy!=0 or y==py) and (pdx!=0 or x==px),
+                 "Native post-fork nonturning opcode left cardinal travel axis")
+        if pending_fixed_turn_delta is not None:
+            need((dx,dy)==pending_fixed_turn_delta,
+                 "Native post-fork fixed turn opcode did not set required direction")
+            px,py=pending_fixed_turn_position
+            need((x-px)*dy==(y-py)*dx,
+                 "Native post-fork fixed turn successor left directed axis")
+        # Native p/g changes Funge-space but not IP direction. Walking
+        # may skip spaces or normalize across Funge-space bounds; check
+        # the directed axis, not a one-cell step distance.
+        if pending_pg_motion is not None:
+            px,py,pdx,pdy=pending_pg_motion
+            need((dx,dy)==(pdx,pdy) and
+                 (x-px)*pdy==(y-py)*pdx,
+                 "Native p/g successor changed delta or left the directed travel axis")
+            pending_pg_motion=None
+        xy=(x,y)
+        original=source_byte(xy)
+        need(byte==current.get(xy,original),
+             "Native executed instruction does not match chronological p-mutated Funge-space")
+        if byte!=original:executed_modified+=1
+        if i<512:
+            need(datum[1:5]==prefix[i],
+                 "complete Native trace contradicts independent bounded observer")
+        node=(x,y,dx,dy)
+        nodes.add(node)
+        vectors[xy].add((dx,dy))
+        if i>=512:beyond512.add(node)
+        if prior is not None:edges[prior].add(node)
+        prior=node
+        if stringmode==0 and byte in map(ord,OPS):
+            ops[chr(byte)]+=1
+        event=events_by_tick.get(tick)
+        if stringmode==0 and byte in (ord("p"),ord("g")):
+            need(event is not None and event[1]==chr(byte),
+                 "Native executed p/g opcode missing its physical event receipt")
+            pending_pg_motion=(x,y,dx,dy)
+        pending_straight_delta=(x,y,dx,dy) if straight_instruction(byte,stringmode) else None
+        pending_fixed_turn_delta=FIXED_TURNS.get(byte) if stringmode==0 else None
+        pending_fixed_turn_position=(x,y) if pending_fixed_turn_delta is not None else None
+        if event is not None:
+            kind=event[1]
+            need(stringmode==0 and byte==ord(kind),
+                 "Native claimed p/g event does not match executed opcode/mode")
+            if kind=="p":current[event[2]]=int(event[3]["value"])
+    # This pinned single-IP four-cell candidate terminates by executing @.
+    # A forged trace ending after '.', a digit, etc. must not be accepted
+    # merely because its untrusted metadata claims zero remaining IPs.
+    # The byte was independently replayed from mutable Funge-space above.
+    need(trace[-1][5]==ord("@") and trace[-1][6]==0,
+         "Native complete route ended without executed terminating @")
+    need(pending_pg_motion is None,
+         "Native supposedly terminated directly after nonterminating p/g instruction")
+    need(len(beyond512)>0,"full Native run added no states outside the prior window")
+    return {
+       "complete_postfork_events":len(trace),
+       "verified_prefork_executed_steps":len(pretrace) if pretrace is not None else 0,
+       "unique_directed_nodes":len(nodes),
+       "unique_edges":sum(len(v) for v in edges.values()),
+       "fork_nodes":sum(len(v)>1 for v in edges.values()),
+       "coordinates_with_multiple_directions":sum(
+           len(v)>1 for v in vectors.values()),
+       "states_visited_after_step_512":len(beyond512),
+       "verified_p_writes":len(writes),
+       "verified_g_reads":len(reads),
+       "executed_modified_code_byte_events":executed_modified,
+       "observed_native_control_opcode_counts":{op:ops[op] for op in OPS},
+       "complete_trace_sha256":hashlib.sha256(
+           json.dumps(trace,separators=(",",":")).encode("ascii")).hexdigest()
+    }
+
+def verify(doc,source):
+    need(type(doc) is dict and doc.get("schema") in (SCHEMA,SCHEMA_V2)
+         and doc.get("status")=="QA_ONLY_COMPLETE_POSTFORK_FOUR_INPUT_PAIRS_STAGE1_OPEN"
+         and doc.get("source_git_blob")==SOURCE
+         and doc.get("candidate_git_blob")==CANDIDATE
+         and doc.get("selected_cases")==list(CASES)
+         and doc.get("native_executions")==8
+         and type(doc.get("last_completed_stage")) is int
+         and doc["last_completed_stage"]==0
+         and doc.get("stage1_complete") is False
+         and doc.get("full_functional_acceptance") is False
+         and doc.get("geometric_acceptance") is False
+         and doc.get("automatic_promotion") is False,
+         "Native execution report source or acceptance scope forged")
+    rows=doc.get("records")
+    need(type(rows) is list and len(rows)==4
+         and [r.get("label") for r in rows]==list(CASES),
+         "four distinct selected Native input pairs missing")
+    result=[]
+    for row in rows:
+        ref=row.get("reference_7")
+        a=row.get("control");b=row.get("forced")
+        need(type(ref) is list and len(ref)==7
+             and all(integer(v) for v in ref)
+             and type(a) is dict and type(b) is dict
+             and a.get("output")==ref
+             and type(row.get("changed_final_output")) is bool
+             and row["changed_final_output"]==(b.get("output")!=ref),
+             "Native original seven-field oracle or causal outcome altered")
+        ga=a.get("gate");gb=b.get("gate")
+        need(type(ga) is dict and type(gb) is dict
+             and ga.get("step")==gb.get("step")
+             and ga.get("original")==ga.get("executed")==gb.get("original")
+             and gb.get("executed")==1-ga.get("executed"),
+             "Native original and forced opposite physical gate disagree")
+        result.append({"label":row["label"],
+                       "control":verify_run(a,source,require_prefork=doc["schema"]==SCHEMA_V2,require_gate_anchor=True),
+                       "forced":verify_run(b,source,require_prefork=doc["schema"]==SCHEMA_V2,require_gate_anchor=True),
+                       "changed_final_output":row["changed_final_output"]})
+    need(sum(int(x["changed_final_output"]) for x in result)==2,
+         "2 expected output-causal genuine fork interventions not reproduced")
+    return result
+
+def main(folder):
+    root=Path(folder)
+    src=(root/"four_cell_candidate.b98").read_bytes()
+    need(gitblob(src)==CANDIDATE,"BF98 test-only candidate blob mismatch")
+    source=src.split(b"\n")
+    data=json.loads((root/"native_full_postfork_four_pairs.json").read_text("utf-8"))
+    measured=verify(data,source)
+    tamper=[
+        ("source",lambda d:d.__setitem__("source_git_blob","0"*40)),
+        ("stage",lambda d:d.__setitem__("stage1_complete",True)),
+        ("case",lambda d:d["records"].pop()),
+        ("gate",lambda d:d["records"][0]["forced"]["gate"].__setitem__(
+            "executed",d["records"][0]["control"]["gate"]["executed"])),
+        ("step",lambda d:d["records"][0]["control"][
+            "complete_postfork_trace"][100].__setitem__(0,0)),
+        ("opcode",lambda d:d["records"][0]["control"][
+            "complete_postfork_trace"][100].__setitem__(5,255)),
+        ("direction",lambda d:d["records"][0]["control"][
+            "complete_postfork_trace"][100].__setitem__(3,0)),
+        ("direction_stopped",lambda d:d["records"][0]["control"][
+            "complete_postfork_trace"][100].__setitem__(4,0)),
+        ("prefix",lambda d:d["records"][0]["control"][
+            "first_512_motion"][100].__setitem__(0,999999)),
+        ("p",lambda d:d["records"][0]["control"][
+            "native_p_history"][0].__setitem__("value","BOGUS")),
+        ("g",lambda d:d["records"][0]["control"][
+            "native_g_history"][0].__setitem__("returned","BOGUS")),
+        ("truncated",lambda d:d["records"][0]["forced"][
+            "complete_postfork_trace"].pop())
+    ]
+    # Both direction mutations may target a vector whose other component is
+    # nonzero. Force the whole delta to zero for the direction forgery.
+    def bad_dir(d):
+        p=d["records"][0]["control"]["complete_postfork_trace"][100]
+        p[3]=0;p[4]=0
+    tamper[6]=("forged_zero_vector",bad_dir)
+    tamper.pop(7)
+    rejected=[]
+    for name,mutation in tamper:
+        false=copy.deepcopy(data)
+        mutation(false)
+        try:verify(false,source)
+        except (AssertionError,KeyError,IndexError,TypeError):
+            rejected.append(name)
+        else:raise AssertionError("accepted falsified complete Native trajectory: "+name)
+    need(len(rejected)==11,"full Native post-fork tamper suite incomplete")
+    summary={
+      "schema":"befunge-stage1-four-pair-complete-native-postfork-audit-v1",
+      "scope":"FOUR_VALID_INPUT_PAIRS_COMPLETE_POSTFORK_UNTIL_HALT",
+      "not_all_possible_inputs":True,
+      "pre_fork_trajectory_not_included":data["schema"]!=SCHEMA_V2,
+      "stage1_complete":False,
+      "full_functional_acceptance":False,
+      "geometric_acceptance":False,
+      "automatic_promotion":False,
+      "runs":measured,"falsifications_rejected":rejected}
+    (root/"full_postfork_independent_audit.json").write_text(
+        json.dumps(summary,sort_keys=True,indent=2)+"\n",encoding="utf-8")
+    print("NATIVE_EIGHT_COMPLETE_POSTFORK_TRAJECTORIES_SOURCE_BYTE_REPLAY_PASS",
+          json.dumps([{"case":r["label"],
+                       "control":r["control"]["complete_postfork_events"],
+                       "forced":r["forced"]["complete_postfork_events"]}
+                      for r in measured],sort_keys=True))
+    print("NATIVE_FULL_POSTFORK_ELEVEN_FALSIFICATIONS_REJECT_PASS")
+    print("CURRENT_STAGE=1 LAST_COMPLETED_STAGE=0 GEOMETRIC_SPAGHETTI_QA_PASS=NO")
+
+if __name__=="__main__":
+    need(len(sys.argv)==2,"complete native postfork artifact folder required")
+    main(sys.argv[1])

@@ -1,0 +1,84 @@
+name: Befunge QA12 Native Stage1 Boundary Grid
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa12_native_boundary_grid.py'
+      - 'qa/stage1_qa12_native_boundary_grid_audit.py'
+      - '.github/workflows/befunge-stage1-qa12-native-boundary-grid.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  boundary-pairs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fail closed on exact Befunge production and independent native references
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object reference/work_counts.b98)" = "f941efc793c9eee4accf5d03873f8ed029b16725"
+          test "$(git hash-object reference/save.b98)" = "7b5e79aa6e2bfb636717cb018a3db6a13fb2bb44"
+          python3 -m py_compile qa/stage1_qa12_native_boundary_grid_audit.py
+          python3 qa/stage1_qa12_native_boundary_grid_audit.py --selftest
+          python3 -m py_compile qa/stage1_qa12_native_boundary_grid.py
+          python3 qa/stage1_qa12_native_boundary_grid.py --selftest
+          mkdir -p "$RUNNER_TEMP/qa12-receipts"
+      - name: Download and verify pinned Python2 PyFunge-98 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Actually execute Native Befunge independent differential and source matrix
+        shell: bash
+        env:
+          QA12_SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -e PYFUNGE_NO_PSYCO=1 -e QA12_RECEIPT_DIR=/qa12-receipts \
+            -e QA12_SHARD="$QA12_SHARD" \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/qa12-receipts:/qa12-receipts" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              pyfunge --version
+              python qa/stage1_qa12_native_boundary_grid.py --shard "$QA12_SHARD"
+            '
+      - name: Preserve completed or partial receipt and failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa12-native-shard-${{ matrix.shard }}
+          path: ${{ runner.temp }}/qa12-receipts/*.json
+          if-no-files-found: warn
+  full-coverage-receipt-audit:
+    needs: boundary-pairs
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: qa12-native-shard-*
+          path: qa12-receipts
+          merge-multiple: true
+      - name: Independent four-shard adversarial native receipt audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_qa12_native_boundary_grid_audit.py --selftest
+          python3 qa/stage1_qa12_native_boundary_grid_audit.py \
+            qa12-receipts/qa12_shard_0.json \
+            qa12-receipts/qa12_shard_1.json \
+            qa12-receipts/qa12_shard_2.json \
+            qa12-receipts/qa12_shard_3.json
