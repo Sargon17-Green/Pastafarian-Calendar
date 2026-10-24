@@ -310,6 +310,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyWideSlotTruncation(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة الحادية والعشرون: حفظ جميع خانات المرتبة مع شاهد القطع.
+    public static BigInteger EvaluateWideSlotTruncation(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateWideSlotTruncation(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

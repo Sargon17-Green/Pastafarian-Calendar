@@ -268,3 +268,5 @@ jobs:
         run: |
           test "${{ steps.discovery_wide_slot_truncation_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage42Tests/PastafarianCalendar.Stage42Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ إصلاح قطع المرتبة الواسعة مع المرجع والشاهد التاريخي
+        run: dotnet run --project tests/PastafarianCalendar.Stage43Tests/PastafarianCalendar.Stage43Tests.csproj --configuration Release

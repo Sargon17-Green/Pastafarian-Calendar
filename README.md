@@ -388,4 +388,16 @@ dotnet run --project tests/PastafarianCalendar.Stage41Tests/PastafarianCalendar.
 
 الاختبار: dotnet run --project tests/PastafarianCalendar.Stage42Tests/PastafarianCalendar.Stage42Tests.csproj -c Release -- --verify-expected-red
 
-يتوقع الاختبار 34560 حالة تحكم، منها 25920 انحرافاً و8640 مطابقة سليمة؛ و8640 حالة رفض منها 4320 انحرافاً في الاتجاه النازل. تشمل فحوص الإنتاج 96 استعلاماً وثماني صلصات وحدوداً حتى 8192 بت. يجب أن يفشل التشغيل المباشر EXPECTED_RED وأن ينجح مدقق التوقيع المستقل؛ الرقعة الحادية والعشرون مؤجلة إلى 43_PATCH_21.
+يتوقع الاختبار 34560 حالة تحكم، منها 25920 انحرافاً و8640 مطابقة سليمة؛ و8640 حالة رفض منها 4320 انحرافاً في الاتجاه النازل. تشمل فحوص الإنتاج 96 استعلاماً وثماني صلصات وحدوداً حتى 8192 بت. أثبتت GitHub Actions 40125527288 نجاح الأحمر المقصود ومدقق التوقيع في 43450 تأكيداً بلا إخفاق مفاجئ، مع 78 مخالفة و18 مطابقة قديمة في 96 حالة إنتاج؛ مرّت جميع الانحدارات 1..41 وقفل الأسماء. أُغلق الطور 42 EXPECTED_RED.
+
+## الطور الثالث والأربعون — الرقعة الحادية والعشرون للمرتبة الواسعة الكاملة
+
+تستدعي `PatchedWideSlotTruncationPhaseHandler` المعالج التاريخي `LegacyWideSlotTruncationPhaseHandler` أولاً. يحتفظ السياق بنتيجته المقطوعة في `LegacyWideSlotTruncationRankResult`، ويضع الناتج الصحيح منفصلاً في `PatchedWideSlotTruncationRankResult`. لا يُمكن استعادة الخانات العليا من الباقي المقطوع وحده؛ لذلك يفحص `WideSlotTruncationPatchWrapper` أن القطع التاريخي للرتبة المعتمدة في الرقعة العشرين يساوي الشاهد القديم، ثم يُعيد الرتبة الكاملة السابقة دون تحويلها.
+
+تعمل `CalendarDateSpaghetti.EvaluateWideSlotTruncation(c,t,id,seal,n)` عبر المدير والموزع وكل المدققات قبل تثبيت الحالة، ويظل المرجع المستقل في الاختبارات فقط. تُغطى 34560 حالة تحكم و8640 حالة رفض و96 استعلام إنتاج، وحالات حتى 8192 بت، وتصادمات القيم المقطوعة، ورفض المرشحات المزورة وتكرار الالتزام، وحماية ملكية السياقات.
+
+```text
+dotnet run --project tests/PastafarianCalendar.Stage43Tests/PastafarianCalendar.Stage43Tests.csproj -c Release
+```
+
+لا يُغلق الطور 43 GREEN ولا يبدأ 44_DISCOVERY_22 حتى تثبت GitHub Actions نجاح الاختبار والانحدار الكامل للأطوار 1..42 وقفل الأسماء.

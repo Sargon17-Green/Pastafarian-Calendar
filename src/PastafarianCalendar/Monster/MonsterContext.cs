@@ -172,6 +172,9 @@ public sealed class MonsterContext
     // الندبة الحادية والعشرون: القطع التاريخي للمرتبة الواسعة.
     public BigInteger? LegacyWideSlotTruncationRankResult { get; set; }
 
+    // الرقعة الحادية والعشرون تحفظ المرتبة الكاملة منفصلةً عن الشاهد.
+    public BigInteger? PatchedWideSlotTruncationRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
