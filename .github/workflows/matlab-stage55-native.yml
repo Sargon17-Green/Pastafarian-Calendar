@@ -27,6 +27,7 @@ on:
       - '!tests/run_stage55_endpoint_unrank_tests.m'
       - '!tests/run_stage55_all_open_chunk_tests.m'
       - '!tests/run_stage55_all_open_prefix_rank_tests.m'
+      - '!tests/run_stage55_real_year_1024_inverse_checkpoint.m'
       - '!tests/run_stage55_general_prefix_rank_tests.m'
       - '!tests/run_stage55_real_year_5000_three_day_inverse.m'
       - '!tests/run_stage55_general_chunk_tests.m'

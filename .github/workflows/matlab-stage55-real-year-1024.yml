@@ -1,0 +1,30 @@
+name: MATLAB Real Year-5000 1024-Day Interior Rank (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_1024_inverse_checkpoint.m'
+      - '.github/workflows/matlab-stage55-real-year-1024.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-1024:
+    name: MATLAB R2026a / 1024-day inverse + independent blocks + JSON
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - name: Check out exact experiment commit
+        uses: actions/checkout@v4
+      - name: Setup MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Verify year-5000 1024-day BigInt rank inverse and resume
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_real_year_1024_inverse_checkpoint
