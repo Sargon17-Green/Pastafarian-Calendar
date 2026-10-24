@@ -70,8 +70,13 @@ i \`tests/run_stage55_all_open_prefix_rank_tests.m\`.
 
 [MATLAB R2026a: native CI 39982128692](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39982128692),
 commit \`e16bbc9d0afaf244ae561f7015cc8f81ced02529\`.
-Do momentu odczytania koncowych markerow MATLAB
-**nie uznawac wynikow za PASS**.
+Natywny MATLAB R2026a **PASS**, potwierdzony w logach
+[run 39982128692](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39982128692):
+
+- `STAGE_55_ALL_OPEN_PREFIX_RANK_BRUTE_PASS FAMILIES=9 INTERVAL_CHECKS=3322`
+- `STAGE_55_ALL_OPEN_PREFIX_RANK_VALIDATION_PASS`
+- `STAGE_55_REAL_YEAR_ALL_OPEN_PREFIX_INVERSE_PASS MONTHS=45 DAYS=4199 STEPS=96 DIGITS=6745 UNRANK_SECONDS=27.403 INVERSE_SECONDS=217.798`
+- `STAGE_55_ALL_OPEN_PREFIX_RANK_EXPERIMENTAL_PASS`.
 
 ## Ograniczenia
 

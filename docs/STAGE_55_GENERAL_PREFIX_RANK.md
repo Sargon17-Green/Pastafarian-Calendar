@@ -69,10 +69,15 @@ to prevent one large 4244-day check from delaying all small tests.
    days; full 6765-digit original count witness from independent
    production-length dual-counter PASS.
 
-The small test's comparison set contains **1552 candidate interval
-checks** based on its nine families, selected ranks and two methods.
-Only final native MATLAB markers may be used to certify actual PASS;
-this count is an expected test coverage figure, not an outcome.
+The corrected small native test was independently completed in
+[MATLAB R2026a run 40124989834](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40124989834),
+commit `e58088b13e8d7abbf4847d8d28bb53c45264a3d0`: **PASS**.
+Its actual log confirms **9 families, 1546 exact prefix rank interval
+checks**, input validation PASS, and separately a reachable
+partially-open mid-frontier differential PASS. The initial native
+run 39999374686 failed before evaluating the algorithm because the
+test indexed a non-existent second day in a one-day family; the
+probe depths were clipped to the actual family day count.
 
 ## Limitations
 
