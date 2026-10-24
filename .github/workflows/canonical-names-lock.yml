@@ -2390,3 +2390,75 @@ jobs:
           perl -Ilib -It/lib -c tools/audit_r71_exhaustive_mirror.pl
           perl -Ilib -It/lib -c tools/profile_r71_exhaustive_mirror.pl
           timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r71_exhaustive_mirror.pl --shard 3 --seconds 185 --rss-kib 393216
+
+  canonical-r72-prefix-interval-1:
+    name: R72 全部 256 小四月份前綴區間原生分片 1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r72-prefix-intervals]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 真正一基詞典序區間連續性及候選完工數原生驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r72_prefix_intervals.pl
+          perl -Ilib -It/lib -c tools/profile_r72_prefix_intervals.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r72_prefix_intervals.pl --shard 1 --seconds 185 --rss-kib 393216
+
+  canonical-r72-prefix-interval-2:
+    name: R72 全部 256 小四月份前綴區間原生分片 2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r72-prefix-intervals]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 真正一基詞典序區間連續性及候選完工數原生驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r72_prefix_intervals.pl
+          perl -Ilib -It/lib -c tools/profile_r72_prefix_intervals.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r72_prefix_intervals.pl --shard 2 --seconds 185 --rss-kib 393216
+
+  canonical-r72-prefix-interval-3:
+    name: R72 全部 256 小四月份前綴區間原生分片 3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r72-prefix-intervals]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 真正一基詞典序區間連續性及候選完工數原生驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r72_prefix_intervals.pl
+          perl -Ilib -It/lib -c tools/profile_r72_prefix_intervals.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r72_prefix_intervals.pl --shard 3 --seconds 185 --rss-kib 393216
+
+  canonical-r72-prefix-interval-4:
+    name: R72 全部 256 小四月份前綴區間原生分片 4
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r72-prefix-intervals]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 真正一基詞典序區間連續性及候選完工數原生驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r72_prefix_intervals.pl
+          perl -Ilib -It/lib -c tools/profile_r72_prefix_intervals.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r72_prefix_intervals.pl --shard 4 --seconds 185 --rss-kib 393216

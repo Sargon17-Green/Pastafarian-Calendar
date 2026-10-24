@@ -48,3 +48,8 @@ GitHub 5 分鐘、Perl 子程序 185 秒／RSS 393216 KiB
 都 SUCCESS 才可封存 Round 71。
 此有限四月份窮舉不代表跨語言比較或完整
 45 月／4244 日全年度排名驗證。
+
+
+## R71 Native 已確認 PASS（2026-10-25 核對）
+
+GitHub Actions 40125160119 的 verify、perl-stage01、R71 shard 1/2/3 均 SUCCESS。獨立子程序守衛輸出：215+892+2596=3703 條完整合法詞，14812 次 rank/unrank，全部 passed=1 blocked=0 failed=0。封存 R71，進入 R72 的新前綴區間驗證；不更寫之前的失敗歷史。
