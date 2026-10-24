@@ -386,3 +386,20 @@ The current branch is not ready for Stage 1 signoff.
 - Still incomplete: full 4244-symbol SV lexical unrank,
   production RTL 5-field calendar contract, qualified
   Kalaallisut name approval (0/64). Stage 2 closed.
+
+## 2026-10-24 — Seventh accepted, eighth pending
+
+**Seventh PASS:** CI 40125682591 completed SUCCESS in all five jobs;
+SHA-pinned root, rank, old-label ratios, seven block hashes and
+prefix `[1,2,3,4,5,6,7]` passed native Icarus.
+
+**Eighth test written, NOT PASSED:** new 22528-bit independent
+`[1,2,3,4,5,6,7,1]` block, 64-bit ratio
+`2917684055/2982394728`, all eight child hashes and
+one-based rank selecting ordinal 4. Four prior source jobs are
+pinned and 28 input SHA256 are mandatory before simulator runs.
+See `FOUNDATION_WEAVE_EIGHTH_REFERENCE.md`.
+
+**Not approved:** full 4244-symbol SV word, production RTL
+calendar converter, source-language expert approval 64/64
+(currently 0 approved), and Stage-1 acceptance.

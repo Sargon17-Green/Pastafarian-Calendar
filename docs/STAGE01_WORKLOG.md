@@ -485,3 +485,28 @@ was queued at last observation. No full unrank or stage PASS.
   status remains `WRITTEN_NOT_CI_PASSED`.
 - Proof for active last-appearance ratios and related
   limits added as `FOUNDATION_WEAVE_ACTIVE_RATIO_THEOREM.md`.
+
+## 2026-10-24 — seventh CI accepted; eighth exact test case
+
+- Retrieved job `120966467980` and Icarus logs from completed
+  [run 40125682591](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40125682591).
+  Full 22528-bit `prefix1234561` root, 21 historical input SHA256,
+  all seven output blocks and selected ordinal 7 PASS.
+  All five jobs were green.
+- Independent Python big-int recurrence replayed the Foundation
+  root/rank hashes, the seven-symbol parent, and all eight
+  child blocks. First 8th choice is **4**.
+- First ratio exceeding signed-int max is
+  2917684055/2982394728. New `tb_weave_prefix8.sv`
+  uses 64-bit unsigned ratio arguments, 22528-bit operands,
+  limb-serial exact division, exact conservation and rank checks.
+- Added `+prefix12345671` in `tb_weave_full_root.sv`
+  to compute the 22464-bit independent 8th-choice block
+  under existing 1100-second full-width test bound.
+- `scripts/verify_weave_prefix8.sh` pins FOUR earlier CI
+  merge SHAs, all 28 input binary hashes, and all eight
+  new 2809-byte block witnesses.
+- Isolated QA job `eighth_weave_symbol` added to
+  `qa-systemverilog-kalaallisut-stage1-20261022` at
+  `7b17e99c1281f6b94b954db9bda0e615a2e6476b`.
+  CI outcome **PENDING**, no eighth-symbol SV PASS claimed.
