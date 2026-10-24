@@ -1,6 +1,6 @@
 # Stage 55 — complete rank/unrank from every small reachable frontier
 
-**Branch:** `MATLAB+Polski`. **Status:** native CI pending (experimental).
+**Branch:** `MATLAB+Polski`. **Status:** native CI **PASS** (experimental).
 No change to `main`, canonical calendar engine, or `normative_oracle`.
 
 ## Independently enumerated oracle
@@ -31,13 +31,13 @@ to legal weaving, ranking formulas, or production engine.
 
 ## Acceptance
 
-The dedicated native MATLAB R2026a GitHub Actions job must emit:
+Native MATLAB R2026a [run 40126272380](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40126272380) finished success and its log contains:
 
 - `STAGE_55_ALL_FRONTIER_INVERSE_BRUTE_PASS`
 - `STAGE_55_ALL_FRONTIER_PARTIAL_JSON_PASS`
 - `STAGE_55_ALL_FRONTIER_INVERSE_EXPERIMENTAL_PASS`
 
-The presence of source files/workflow does **not** constitute PASS.
+Native log evidence: four families, **53 reachable frontiers**, **208 complete inversions**, **1582 exact prefix intervals**, and **53 column orientation checks**. Every listed marker is present.
 The separate 1024-day all-open suffix test, initial unopened 4244-day
 arbitrary-rank decoding, and five-field production/`normative_oracle`
 differential remain distinct requirements. Preserve

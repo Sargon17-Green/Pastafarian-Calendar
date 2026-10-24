@@ -1,0 +1,30 @@
+name: MATLAB Genuine Year-5000 First Eight Interior-Rank Days (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_8_day_unopened.m'
+      - '.github/workflows/matlab-stage55-real-year-unopened-eight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unopened-eight:
+    name: MATLAB R2026a / exact eight-day initial-year rank and independent inverse
+    runs-on: ubuntu-24.04
+    timeout-minutes: 130
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+      - name: Setup MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Verify independent full-year opening chunks and checkpoints
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_real_year_8_day_unopened

@@ -1,7 +1,7 @@
 # Stage 55 — 1024 real-year post-opening days: exact inverse checkpoint
 
-**Branch:** \`MATLAB+Polski\`. **Status:** experimental native test
-pending; no change to \`main\`, canonical engine, or normative oracle.
+**Branch:** \`MATLAB+Polski\`. **Status:** **MATLAB R2026a native PASS** in run 40125274755;
+no change to \`main\`, canonical engine, or normative oracle.
 
 ## Native test
 
@@ -33,8 +33,17 @@ production DAG and has an explicit 55-minute job timeout.
 
 [Native CI run 40125274755](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40125274755)
 on commit \`c3d6aee46b4c96afc399a22744d96d58e8dfb1ba\`.
-Do not report **PASS** until all expected \`STAGE_55_REAL_YEAR_1024_*\`
-markers are present in the actual MATLAB logs.
+Native log **verified**, with all five expected \`STAGE_55_REAL_YEAR_1024_*\`
+PASS markers. The experiment is PASS; the full-year Stage 55 audit is not.
+
+## Exact observed native evidence
+
+`STAGE_55_REAL_YEAR_1024_UNRANK_PASS`: 1024 steps, 3175 remaining,
+178.585 seconds. `STAGE_55_REAL_YEAR_1024_INVERSE_PASS`: 177.241 seconds,
+rank has 6745 digits. `STAGE_55_REAL_YEAR_1024_INDEPENDENT_BLOCKS_PASS`:
+96 steps, 168.157 seconds. `STAGE_55_REAL_YEAR_1024_CHECKPOINT_RESUME_PASS`:
+32 resumed, 3143 remaining. Final experiment marker:
+`STAGE_55_REAL_YEAR_1024_EXPERIMENTAL_PASS`.
 
 ## Scope restriction
 
