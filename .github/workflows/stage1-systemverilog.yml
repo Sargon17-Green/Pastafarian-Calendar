@@ -288,3 +288,88 @@ jobs:
             build/foundation_weave_prefix1234567.bin
           retention-days: 90
           if-no-files-found: warn
+
+  eighth_weave_symbol:
+    # Four immutable succeeded source jobs; independently pin
+    # source merge SHA + SHA256 of every 2809-byte binary.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read prior fullroot evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-full-weave-root-qa
+          run-id: 39965349618
+          github-token: ${{ github.token }}
+          path: build/source_root
+      - name: Read prior fifth-symbol evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-prefix5-evidence
+          run-id: 39981519434
+          github-token: ${{ github.token }}
+          path: build/source_fifth
+      - name: Read prior sixth-symbol evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-prefix6-evidence
+          run-id: 40001527283
+          github-token: ${{ github.token }}
+          path: build/source_sixth
+      - name: Read prior seventh-symbol evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-prefix7-evidence
+          run-id: 40125682591
+          github-token: ${{ github.token }}
+          path: build/source_seventh
+      - name: Stage all fixed prior proof inputs
+        run: |
+          set -euo pipefail
+          cp build/source_root/foundation_weave_*.bin build/
+          cp build/source_fifth/foundation_weave_*.bin build/
+          cp build/source_sixth/foundation_weave_*.bin build/
+          cp build/source_seventh/foundation_weave_*.bin build/
+          cp build/source_root/fullroot_head.txt build/
+          cp build/source_fifth/prefix5_checked_sha.txt build/
+          cp build/source_sixth/prefix6_checked_sha.txt build/
+          cp build/source_seventh/prefix7_checked_sha.txt build/
+          echo "STAGE1_EIGHTH_PRIOR_EVIDENCE_STAGED"
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Verify 64-bit ratio and exact eighth ordinal
+        run: |
+          set -euo pipefail
+          ulimit -v 4194304
+          git rev-parse HEAD | tee build/prefix8_checked_sha.txt
+          bash scripts/verify_weave_prefix8.sh
+      - name: Preserve eighth-symbol audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-prefix8-evidence
+          path: |
+            build/prefix8_checked_sha.txt
+            build/fullroot_head.txt
+            build/prefix5_checked_sha.txt
+            build/prefix6_checked_sha.txt
+            build/prefix7_checked_sha.txt
+            build/weave_prefix12345671_run.log
+            build/foundation_weave_prefix12345671.bin
+            build/weave_prefix8_run.log
+            build/foundation_weave_prefix12345672.bin
+            build/foundation_weave_prefix12345673.bin
+            build/foundation_weave_prefix12345674.bin
+            build/foundation_weave_prefix12345675.bin
+            build/foundation_weave_prefix12345676.bin
+            build/foundation_weave_prefix12345677.bin
+            build/foundation_weave_prefix12345678.bin
+          retention-days: 90
+          if-no-files-found: warn
