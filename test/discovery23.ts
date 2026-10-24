@@ -42,7 +42,7 @@ const f=buildStage41CompatibleLegacyFixture();
 const maker=()=>new Discovery23FullHandler(new Patch22FullHandler(
  new Discovery22FullHandler(new Patch21CutletHandler(
  new Discovery21LegacyCutletHandler(new Patch20StructureSauceHandler(
- new Discovery20StructureSauceHandler(new Patch19YearCacheHandler()))))));
+ new Discovery20StructureSauceHandler(new Patch19YearCacheHandler())))))));
 const full=discoverLegacyMonthLengthList(maker(),f.request);
 const c=f.cDay;
 const L=f.oracleYear.closeGateDay-f.oracleYear.openGateDay;
