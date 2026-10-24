@@ -150,6 +150,17 @@ jobs:
               "soak-output/preflight-$compiler.json"
             echo "SOAK_GLOBAL_PREFLIGHT=PASS COMPILER=$compiler"
           done
+      - name: Prove preflight fail-closed with malformed manifests and impostor runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for compiler in g++ clang++; do
+            timeout 5m python3 tools/test_soak_global_preflight_negative.py \
+              tools/soak_global_preflight.py \
+              integrations/cpp-latina-soak.json \
+              "soak-output/adapter-$compiler" "$compiler" \
+              | tee "soak-output/preflight-negative-$compiler.log"
+          done
       - name: Save evidence even on failure
         if: always()
         uses: actions/upload-artifact@v6
