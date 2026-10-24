@@ -214,3 +214,77 @@ jobs:
             build/foundation_weave_prefix123456.bin
           retention-days: 90
           if-no-files-found: warn
+
+  seventh_weave_symbol:
+    # Three immutable earlier SUCCEEDED jobs, each with SHA-pinned
+    # source and binary evidence. No dependency on running parallel jobs.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download fullroot and first-four proven binary blocks
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-full-weave-root-qa
+          run-id: 39965349618
+          github-token: ${{ github.token }}
+          path: build/root_source
+      - name: Download fifth-symbol binary blocks
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-prefix5-evidence
+          run-id: 39981519434
+          github-token: ${{ github.token }}
+          path: build/fifth_source
+      - name: Download sixth-symbol binary blocks
+        uses: actions/download-artifact@v4
+        with:
+          name: stage1-prefix6-evidence
+          run-id: 40001527283
+          github-token: ${{ github.token }}
+          path: build/sixth_source
+      - name: Stage only the prior outputs, preserving origin proofs
+        run: |
+          set -euo pipefail
+          cp build/root_source/foundation_weave_*.bin build/
+          cp build/fifth_source/foundation_weave_*.bin build/
+          cp build/sixth_source/foundation_weave_*.bin build/
+          cp build/root_source/fullroot_head.txt build/
+          cp build/fifth_source/prefix5_checked_sha.txt build/
+          cp build/sixth_source/prefix6_checked_sha.txt build/
+          echo "STAGE1_SEVENTH_PREVIOUS_ARTIFACTS_STAGED"
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Bound and verify seventh canonical month ordinal
+        run: |
+          set -euo pipefail
+          ulimit -v 4194304
+          git rev-parse HEAD | tee build/prefix7_checked_sha.txt
+          bash scripts/verify_weave_prefix7.sh
+      - name: Preserve seventh-symbol audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-prefix7-evidence
+          path: |
+            build/prefix7_checked_sha.txt
+            build/fullroot_head.txt
+            build/prefix5_checked_sha.txt
+            build/prefix6_checked_sha.txt
+            build/weave_prefix1234561_run.log
+            build/foundation_weave_prefix1234561.bin
+            build/weave_prefix7_run.log
+            build/foundation_weave_prefix1234562.bin
+            build/foundation_weave_prefix1234563.bin
+            build/foundation_weave_prefix1234564.bin
+            build/foundation_weave_prefix1234565.bin
+            build/foundation_weave_prefix1234566.bin
+            build/foundation_weave_prefix1234567.bin
+          retention-days: 90
+          if-no-files-found: warn
