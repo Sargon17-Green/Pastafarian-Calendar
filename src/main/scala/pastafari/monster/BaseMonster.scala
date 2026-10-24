@@ -188,7 +188,16 @@ final case class BaseMonsterContext(
   var legacyMonthBlockMonthId: Option[Int] = None,
   var legacyMonthBlockOrdinal: Option[Int] = None,
   var patch23CorrectedDayInMonth: Option[Int] = None,
-  var patch23Applied: Boolean = false
+  var patch23Applied: Boolean = false,
+  var crossGateGaps: Option[Vector[Int]] = None,
+  var crossCutletPartition: Option[Vector[Int]] = None,
+  var crossAnnualWeaving: Option[Vector[Int]] = None,
+  var crossYearDayOffset: Option[Int] = None,
+  var crossInputSnapshot: Option[(Vector[Int],Vector[Int],Vector[Int],Int)] = None,
+  var crossLegacyCutletId: Option[Int] = None,
+  var crossLegacyLocalOffset: Option[Int] = None,
+  var crossLegacyMonthId: Option[Int] = None,
+  var crossLegacyMonthOrdinal: Option[Int] = None
 )
 
 final class BaseMetricsShell {
@@ -330,6 +339,70 @@ final class BaseValidationManager {
     * tessuto, senza invocare il wrapper PATCH23 o l'oracolo test.
     * Verifica anche integralmente la cicatrice DISCOVERY23.
     */
+
+  /** DISCOVERY24: validator indipendente di una coordinata erronea.
+    * Ricostruisce i confini direttamente dai gap delle porte
+    * e ricalcola il mese dal giorno locale della cotoletta.
+    */
+  def requireDiscovery24Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="DISCOVERY_24_CUTLET_LOCAL_MONTH_LOOKUP" ||
+       ctx.status!="LEGACY_CUTLET_LOCAL_MONTH_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_24_CUTLET_LOCAL_MONTH_LOOKUP") ||
+       ctx.crossGateGaps.isEmpty || ctx.crossCutletPartition.isEmpty ||
+       ctx.crossAnnualWeaving.isEmpty || ctx.crossYearDayOffset.isEmpty ||
+       ctx.crossInputSnapshot.isEmpty || ctx.crossLegacyCutletId.isEmpty ||
+       ctx.crossLegacyLocalOffset.isEmpty ||
+       ctx.crossLegacyMonthId.isEmpty ||
+       ctx.crossLegacyMonthOrdinal.isEmpty)
+      throw new IllegalStateException("DISCOVERY24 non completa.")
+    val gaps=ctx.crossGateGaps.get
+    val part=ctx.crossCutletPartition.get
+    val woven=ctx.crossAnnualWeaving.get
+    val day=ctx.crossYearDayOffset.get
+    if(ctx.crossInputSnapshot.get!=(gaps,part,woven,day) ||
+       part.length<6 || part.length>17 || part.exists(_<1) ||
+       part.sum!=gaps.length || gaps.exists(g=>g<42 || g>963) ||
+       gaps.sum<252 || gaps.sum>5778 || woven.length!=gaps.sum ||
+       day<0 || day>=woven.length)
+      throw new IllegalStateException("Input DISCOVERY24 alterati.")
+    LegacyDaywiseWeavingAdapter.validateCandidates(Vector(woven))
+
+    var gateIndex=0
+    var start=0
+    var expectedCutlet=0
+    var local=0
+    for((segments,id)<-part.zipWithIndex) {
+      var duration=0
+      var k=0
+      while(k<segments) {
+        duration+=gaps(gateIndex)
+        gateIndex+=1
+        k+=1
+      }
+      if(day>=start && day<start+duration) {
+        expectedCutlet=id+1
+        local=day-start
+      }
+      start+=duration
+    }
+    if(expectedCutlet==0 || gateIndex!=gaps.length ||
+       start!=woven.length)
+      throw new IllegalStateException("Partizione DISCOVERY24 incoerente.")
+    val id=woven(local)
+    var ordinal=0
+    var i=0
+    while(i<=local) {
+      if(woven(i)==id) ordinal+=1
+      i+=1
+    }
+    if(ctx.crossLegacyCutletId.get!=expectedCutlet ||
+       ctx.crossLegacyLocalOffset.get!=local ||
+       ctx.crossLegacyMonthId.get!=id ||
+       ctx.crossLegacyMonthOrdinal.get!=ordinal)
+      throw new IllegalStateException("Cicatrice DISCOVERY24 falsificata.")
+  }
+
   def requirePatch23Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_23_CONTIGUOUS_MONTH_ASSUMPTION" ||
        ctx.status!="PATCH_23_READY" || !ctx.patch23Applied ||
@@ -2120,7 +2193,8 @@ final class BaseMonsterManager {
     new Discovery22MonthOrdinalGlobalDayHandler(metrics),
     new Patch22MonthOrdinalGlobalDayHandler(metrics),
     new Discovery23ContiguousMonthHandler(metrics),
-    new Patch23ContiguousMonthHandler(metrics)
+    new Patch23ContiguousMonthHandler(metrics),
+    new Discovery24CutletLocalMonthHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -3372,6 +3446,37 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("patch23",error)
+    }
+  }
+
+
+  def discover24CutletLocalMonthLookup(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    gateGaps: Vector[Int],
+    cutletPartition: Vector[Int],
+    annualWeaving: Vector[Int],
+    yearDayOffset: Int
+  ): Discovery24CutletLocalMonthReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.crossGateGaps=Some(gateGaps)
+    ctx.crossCutletPartition=Some(cutletPartition)
+    ctx.crossAnnualWeaving=Some(annualWeaving)
+    ctx.crossYearDayOffset=Some(yearDayOffset)
+    ctx.phase="DISCOVERY_24_CUTLET_LOCAL_MONTH_LOOKUP"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery24Ready(ctx)
+      Discovery24CutletLocalMonthReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.crossGateGaps.get,ctx.crossCutletPartition.get,
+        ctx.crossAnnualWeaving.get,ctx.crossYearDayOffset.get,
+        ctx.crossLegacyCutletId.get,ctx.crossLegacyLocalOffset.get,
+        ctx.crossLegacyMonthId.get,ctx.crossLegacyMonthOrdinal.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("discovery24",error)
     }
   }
 
