@@ -96,3 +96,293 @@ This is a new **test-only** independent SystemVerilog oracle segment,
 not a production calculation module. CI iverilog / vvp is still
 UNEXECUTED. No full five-field calendar oracle or Kalaallisut source
 catalog acceptance is claimed.
+## 2026-10-22 — targeted pre-simulation remediation
+
+A manual static audit found a duplicate module-scope declaration of
+`positive_sum,negative_sum` in `tests/tb_gate_gap_oracle.sv`.
+The duplicate has been removed in commit
+`5a38eb4389f875880f70e83de64aa2aa22aed433`.
+A module-scope integer declaration inspection of all eight current
+SystemVerilog source files found no other module-scope integer
+duplicates; repeated task-local variable names are not duplicates.
+
+The new `scripts/check_sv_declarations.sh` was executed on
+synthetic positive and intentionally invalid fixtures in the
+scratch environment. Correct declaration scopes passed; duplicated
+module-scope declarations failed. It has **not** been run through an
+HDL parser and does not replace Icarus/Verilator compilation.
+
+`scripts/verify_stage1.sh` now runs source-declaration preflight,
+64-name catalog structure and production/oracle isolation **before**
+testing whether `iverilog` and `vvp` are installed.
+
+CI evidence: isolated QA push run 39763869338 and non-main PR run
+39763937760 were queued on last observation, with no job logs.
+The draft PR #20 must never be merged. Stage 1 cannot PASS while
+these checks remain unexecuted and the 64-name catalog unapproved.
+
+## Current additional QA, 2026-10-22
+
+| Gate | Actual evidence | Status |
+|---|---|---|
+| Module-level integer duplicate preflight | 3 positive/adversarial locally executed cases | LOCAL_PREFLIGHT_PASS |
+| Stage-1 preflight integrated before Icarus detection | Bash runner source inspected | WRITTEN_NOT_CI_EXECUTED |
+| 4096-cycle ready/valid/reset/backpressure scoreboard | Independent `tb_stage1_backpressure.sv` | WRITTEN_NOT_SIMULATED |
+| Six Kalaallisut lexical sources and semantic caveats | `catalog/KALAALLISUT_LEXICAL_QA_DOSSIER.md` | 6_RESEARCH_CANDIDATES_0_APPROVED |
+| HDL simulator job status | No runner logs yet | QUEUED |
+| Full calendar five-field oracle | Not yet present | OPEN |
+| 55-stage advancement authorization | Stages 1 and 2 not approved | BLOCKED |
+
+Beware: shell AWK scope lint is not an HDL parser. A future Icarus
+pass cannot substitute for independent native-language catalog QA,
+and an external mathematical reference is not a silicon signoff.
+
+## Real Icarus 12 regression progress — 2026-10-22
+
+[Run 39767130720](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39767130720)
+provided actual PASS evidence for bootstrap, 4103 arithmetic property pairs,
+reset/recovery, 4096-cycle backpressure (773 accepted handshakes; 20
+resets), Foundation canonical-and-mutant sauce tests, all 22 signed
+gate gaps, and the 43-candidate Year-5000 rank-15 checkpoint.
+The run **failed** at `WIDE_THREE_DIGITS_ARITHMETIC`, so Stage 1 did
+not PASS.
+
+[Diagnostic run 39772016684](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39772016684)
+proved that for S=M^3, N=M^2+1 (M=2^127-1), Icarus 12 native
+384-bit `/` returned an incorrect quotient. The Euclidean division
+must have q=M-1, r=M²-M+1. Independent numeric proof and exact
+hexadecimal reproduction are in
+[`WIDE3_ICARUS12_DIVISION_REPRO.md`](WIDE3_ICARUS12_DIVISION_REPRO.md).
+
+The new test-only helper
+`tests/pcal_exact_division_pkg.sv` implements explicit unsigned
+385-bit-remainder long division over 384-bit operands.
+`tests/tb_wide_division_golden.sv` asserts 36 independent quotient
+and remainder goldens and the reconstruction identity; both the
+testbench and integration into the selection equivalence fixture
+have been written, but a successful CI verdict is **not yet observed**.
+
+Native Icarus division is preserved as a *diagnostic only* and cannot
+affect any expected canonical output or acceptance calculation.
+This does not authorize a production division architecture.
+64-name native Kalaallisut QA remains at 0/64.
+
+## 2026-10-22 — green actual CI for existing Stage-1 test suite
+
+Run [39773684223](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39773684223)
+completed **SUCCESS** (Icarus Verilog 12.0). Logs independently checked:
+four static declaration fixtures; 64/64 canonical-index witnesses;
+bootstrap; 4,103 arithmetic cases; reset; 4,096-cycle scoreboard with
+773 accepted and 20 resets; Foundation sauce and historical raw-sum
+mutant; 22 signed gate vectors; 43 eligible candidate years and rank-15
+Year-5000 selection; 36 exact unsigned 384-bit long-division goldens;
+and 178,878 selection-rejection small-domain comparisons.
+
+The log intentionally prints `ICARUS_NATIVE_WIDE3_DIVISION_UNSAFE`.
+That diagnostic identifies a simulator-native wide division defect,
+not a failure of the test-only exact divider, and does not constitute
+any license to accept incorrect native quotient as normative.
+
+**New oracle scope opened within Stage 1, not a new 55-stage milestone:**
+`tb_gate_gap_oracle.sv` now checks the canonical cutlet fields of
+`P(Foundation,Foundation)` by implementing sections S and T
+(physical gate composition with forced interior boundary, and 17Pk
+distinct canonical name-index unranking). Its latest test has not
+yet returned an Icarus verdict. Success of the old suite must not
+be misreported as passing this new test.
+
+The full 5-field oracle and 64 qualified Kalaallisut approvals
+remain open. `STAGE1_PASS=NO`.
+
+## CI gate — Foundation cutlet structure certified
+
+[Run 39816637847](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39816637847)
+ended SUCCESS. It executed the cutlet count, interior gate constraint,
+15 eligible lexicographically ordered compositions, composition rank 9,
+6-name permutation rank 7,851,263, and output canonical index 10/day 503.
+No different source language string was assumed.
+
+## New source-only month sublayer
+
+Independent computations established 45 calendar months for the
+Foundation year's 4244 days. A 45-part bounded-composition count was
+cross-checked via a second inclusion-exclusion algorithm:
+a 274-bit value. A 3-digit wide selection and 45-length lexical
+unrank fixture was written. The selected lengths appear in
+`docs/FOUNDATION_MONTH45_LENGTHS_REFERENCE.csv` but its
+nominal running totals **do not** specify physical day order,
+because actual months are interwoven (Scroll V).
+
+**Current status:** month-length DP and 45-length unrank source
+are WRITTEN_NOT_CI_VERIFIED. Woven month count/rank and month-name
+permutation remain UNIMPLEMENTED. Stage 1 is NOT SIGNED.
+
+## Exact weave work (small oracle; large engine still open)
+
+- Eight independent toy test cases enumerate **every** word,
+  filter by first/last appearance order, and verify the count
+  and complete lexicographic `unrank` against a separate
+  DP suffix-count oracle. Expected toy counts:
+  `2,5,9,14,4,1,1,20`. Source has been written and wired to CI.
+- A constructive rigorous lower bound for the 45-month root weave
+  count has 22350 bits; an unrestricted-multiset upper bound has
+  22851 bits. Therefore the production full-rank engine needs
+  699..715 uint32 limbs (for this vector), with 176..180 base-M
+  answer digits. The 384-bit oracle is insufficient.
+- **Blocked**: an exact compressed 45-month weave count/unrank
+  algorithm with demonstrable feasible resource limits, a full
+  woven-word computation, 47P45 month-name choice, and day 56
+  / canonical month index 20 checkpoint.
+- The toy SV fixture is **WRITTEN_NOT_SIMULATED** as of this
+  checkpoint. Stage 1 remains open regardless of prior green
+  Icarus runs of other test slices.
+
+## Exact compressed completion counting — research only
+
+Eight small instances and 258 legal-prefix queries were checked
+by independent exhaustive reference enumeration against a
+first/last order transfer. The complete Foundation root weave
+count is a 22470-bit nonnegative integer, requiring 703 uint32
+limbs and exactly 177 base-(2^127−1) answer digits for choice.
+Full derivation and hash are in
+`docs/FOUNDATION_WEAVE_TRANSFER_EXACT.md`.
+
+SV fixture for tiny cases has been extended, but cannot be
+marked PASS until a matched GitHub Actions run completes.
+The large 45-month unrank and the two month fields
+of the canonical 5-tuple remain OPEN.
+
+## 2026-10-22 — exact 45-month lengths and medium weave CI PASS
+
+[CI run 39836691095](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39836691095)
+completed SUCCESS, with independently reviewed Icarus 12 logs:
+- all five source declaration preflight fixtures;
+- Foundation month count `45` for year length `4244`;
+- exact 274-bit month-length composition total and full
+  **45-element lexical unrank**, including rank conservation;
+- 8/8 independent small weave cases and 465 prefix-block
+  checks (brute force versus count/unrank);
+- all previous Stage-1 basic tests.
+
+[CI run 39837437421](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39837437421)
+completed SUCCESS. The new **test-only 2,048-bit exact
+first-position-transfer oracle** matched *five independent
+golden roots* for actual first 2..6 month lengths of Foundation:
+217, 528, 880, 1262 and 1602 bits, respectively.
+All earlier tests continued to pass.
+
+This explicitly lifts arithmetic testing beyond the earlier
+384-bit helper. It does **not** prove the full 45-month
+22,470-bit root and does not derive the canonical weave rank or
+the final month index/occurrence.
+
+The static linter failure in run 39823278850 arose from
+a multiline `logic` declaration; corrected by parsing the
+complete declaration through its semicolon, with a separate
+packed/unpacked array fixture. Actual CI pass now exists.
+
+Stage 1 remains OPEN: production RTL cannot yet output
+the canonical five-field tuple, and **0/64 Kalaallisut**
+names have been natively approved. No Stage 2 authorized.
+
+## 2026-10-22 — Full Foundation weave root and wide selection gate
+
+| Item | Independently executed | Native SV CI |
+|---|---|---|
+| Root count of 45-month weave | 22470-bit result and SHA256 MATCH | New 22528-bit test-only source; not yet PASS |
+| Sauce at (Foundation,firstDay) | Q4, Q3, orderAt46, A0 and D reproduced | Added witness assertions; not yet PASS |
+| Base-M wide selection | 177 digits, reverse stream, domain quotient 555, no rejection; 22469-bit rank and SHA256 MATCH | New exact 22528-bit rank oracle; not yet PASS |
+| Bound execution | finite 6144-bit probe, timeouts and 4-GiB cap | CI registered; job result not verified |
+| Final day/month | no 4244-symbol word | OPEN |
+
+See `docs/FOUNDATION_WEAVE_WIDE_RANK_REFERENCE.md`. A green
+CI for earlier smaller cases does not validate the new full
+root/rank source. Both the root and rank SHA256 comparisons
+must PASS in the **same isolated QA workflow run**.
+
+The project is Stage 1 IN_PROGRESS, 0/55 stages fully closed;
+8 lexical Kalaallisut candidates and 0/64 approvals.
+
+## 2026-10-23 — full 45-month root/rank CI PASS; bounded prefix started
+
+**Supersedes the previous pending-status row:** [run 39842311226]
+(https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39842311226)
+completed SUCCESS on `02aeccd0a4e5b793f7c753a4e14cbcd2221f9422`.
+Both jobs passed: full **22,470-bit** root hash and exact
+**177-digit** selected rank hash. The residual selected-rank
+quotient in the job log was 347; the domain quotient was 555.
+The full month-word unranking is still NOT IMPLEMENTED.
+
+New tests, awaiting separate verdict:
+- 45 canonical month-name indices: bowl 5 / seal 33,
+  47P45 exact lexical unrank, independent golden vector.
+- Prefix `[1,1]` completion count as a bounded additional
+  22,528-bit SystemVerilog run with SHA256 validation.
+- Derivation of first two woven ordinals `[1,2]` from the
+  fully verified selected rank and the validated prefix block.
+
+The independent reference for the first eleven woven ordinals
+is documented in `FOUNDATION_WEAVE_PREFIX_REFERENCE.md`
+without an SV PASS claim.
+
+Final five-field output still OPEN. Stage 1 NOT ACCEPTED.
+
+## 2026-10-23 — observed native Icarus CI success, Stage 1 still open
+
+[Run 39915988093](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39915988093)
+completed SUCCESS in BOTH jobs on implementation HEAD
+`3617858e4e3af8b8be8b9e4464b3cf3dd93ba62c`.
+The verified evidence now includes:
+- 45 distinct canonical month-name indices, via exact 47P45
+  name sequence `unrank`, excluding only 21 and 47;
+- 45-month 22,470-bit full root, and 177-digit selected rank;
+- 22,465-bit exact suffix count for prefix `[1,1]` with
+  independent SHA256, proving the first two woven ordinals
+  are `[1,2]`;
+- all earlier test-only regressions.
+
+New work written on top of the green SHA:
+- test-only exact `C([1,2,1])` via one bounded full-precision
+  run; derived exact `53/57` ratio for `C([1,2,2])`;
+- independent third block via conservation and three SHA checks;
+- assert woven prefix `[1,2,3]`, still **NOT CI VERIFIED**.
+
+Outstanding: all 4,241 remaining woven positions after the
+third symbol; final month ordinal at target and occurrence;
+full five-field algorithm; native 64-name Kalaallisut review.
+The current branch is not ready for Stage 1 signoff.
+
+## Verified fifth / candidate sixth ordinal — 2026-10-23
+
+- [39981519434](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/39981519434)
+  is actual SUCCESS (3/3 jobs) on implementation commit
+  `4f7b877ea2703d340884a4ac965d24e9b315c7ff`.
+  Prefix `[1,2,3,4,5]` is therefore native-Icarus PASS.
+- Sixth symbol source is **WRITTEN_NOT_CI_VERIFIED**:
+  exact 22528-bit `[1,2,3,4,5,1]` completion reference,
+  then 53/57, 330/323, 306020/328491 and
+  132658240/146835477 ratio blocks. Every binary gets a
+  predetermined independent SHA check. Expected choice 6.
+- The sixth QA job is isolated from existing stages and uses
+  pinned, fully hash-checked previous artifacts, never
+  an unverified artifact or a previous red-job output.
+- 4244-symbol full unranking, 5-field multi-vector oracle,
+  production ASIC RTL, 64 qualified Kalaallisut labels
+  remain unresolved. Stage 1 OPEN; Stage 2 NOT AUTHORIZED.
+
+## 2026-10-24 — Sixth pass, seventh not yet validated
+
+- **CI PASS:** [run 40001527283](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40001527283),
+  four successful jobs. Verified native logs include the exact
+  22528-bit `prefix123451` SHA and 5 old-label block hashes,
+  followed by `STAGE1_FOUNDATION_WEAVE_LEX_PREFIX6_PASS`.
+- **CI pending:** new `+prefix1234561` 22528-bit completion
+  counter, seven independently hashed seventh-symbol blocks,
+  rank and partition checks, a SHA-pinned 21-binary input
+  manifest and a separately time/memory-bounded QA job.
+- Reusable ordered-last multinomial ratio identity and its
+  edge-condition restrictions recorded in
+  `FOUNDATION_WEAVE_ACTIVE_RATIO_THEOREM.md`.
+- Still incomplete: full 4244-symbol SV lexical unrank,
+  production RTL 5-field calendar contract, qualified
+  Kalaallisut name approval (0/64). Stage 2 closed.

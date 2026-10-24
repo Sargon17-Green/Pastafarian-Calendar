@@ -2,12 +2,14 @@
 // Stage-1 test-only selection semantics. This is not production RTL.
 // Exhaustively compares an independent loop against an O(1) shortcut.
 module tb_selection_rejection_equivalence;
+    import pcal_exact_division_pkg::*;
     localparam logic signed [383:0] M = (384'sd1 << 127) - 384'sd1;
     integer space, n, first, direction;
     integer picked_loop, rejects_loop, accepted_loop;
     integer picked_direct, rejects_direct, accepted_direct;
     integer cases = 0;
     logic signed [383:0] big_space, big_n, big_l, big_first;
+    logic [383:0] wide3_exact_q, wide3_native_q, wide3_exact_r;
 
     task automatic iterative_pick(
         input integer a,
@@ -103,11 +105,23 @@ module tb_selection_rejection_equivalence;
 
         big_space = M * M * M;
         big_n = M * M + 384'sd1;
-        big_l = (big_space / big_n) * big_n;
-        if (big_l > big_space || (big_space - big_l) >= big_n ||
-            big_space <= M * M || big_l <= 384'sd0)
-            $fatal(1, "WIDE_THREE_DIGITS_ARITHMETIC");
-
+        // Exact test-only shift/subtract, not simulator builtin division.
+        wide3_exact_q = exact_quotient_384(big_space,big_n);
+        wide3_exact_r = exact_remainder_384(big_space,big_n);
+        wide3_native_q = big_space / big_n;
+        big_l = wide3_exact_q * big_n;
+        if (wide3_exact_q !== (M - 384'sd1) ||
+            wide3_exact_r !== (M*M - M + 384'sd1))
+            $fatal(1, "WIDE_THREE_DIGITS_KNOWN_QUOTIENT_REMAINDER");
+        if (wide3_exact_q * big_n + wide3_exact_r !== big_space ||
+            wide3_exact_r >= big_n ||
+            big_l > big_space || big_l <= 384'sd0 ||
+            big_space <= M*M)
+            $fatal(1, "WIDE_THREE_DIGITS_EXACT_DIVISION");
+        if (wide3_native_q !== wide3_exact_q)
+            $display("ICARUS_NATIVE_WIDE3_DIVISION_UNSAFE native=%h exact=%h",
+                     wide3_native_q,wide3_exact_q);
+        $display("STAGE1_WIDE3_EXACT_DIVISION_PASS");
         $display("STAGE1_SELECTION_REJECTION_EQUIVALENCE_PASS cases=%0d", cases);
         $finish;
     end
