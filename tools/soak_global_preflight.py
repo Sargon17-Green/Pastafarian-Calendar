@@ -17,6 +17,10 @@ FIELDS = [
     "request_id", "calculation_day", "target_day", "year_number",
     "cutlet_index", "day_in_cutlet", "month_index", "day_in_month",
 ]
+V1_FIELDS = [
+    "request_id", "calculation_day", "target_day", "year_number",
+    "cutlet_name", "day_in_cutlet", "month_name", "day_in_month",
+]
 DECIMAL = re.compile(rb"-?(?:0|[1-9][0-9]*)\Z")
 TEST_INPUT = (
     b"probe_1\t-15055671\t-15055671\n"
@@ -45,10 +49,14 @@ def manifest_contract(path):
     require(isinstance(canonical, dict), "missing canonical_numeric")
     require(raw.get("manifest_version") == 1, "unsupported manifest_version")
     require(raw.get("branch") == "C++&Latina", "wrong implementation branch")
+    require(raw.get("repository") == "Sargon17-Green/Pastafarian-Calendar",
+            "wrong implementation repository")
+    require(raw.get("implementation_id") == "pastafarian-calendar-cpp-latina",
+            "wrong implementation ID")
     require(raw.get("transport") == "stdin_stdout_tsv", "unsupported transport")
     require(raw.get("protocol") == "PASTAFARI_SOAK_TSV_V1", "V1 contract missing")
     require(raw.get("request_fields") == FIELDS[:3], "request fields do not match")
-    require(raw.get("response_fields", [])[:4] == FIELDS[:4], "V1 prefix changed")
+    require(raw.get("response_fields") == V1_FIELDS, "V1 response fields differ")
     require(raw.get("integrity", {}).get("nonzero_exit_invalidates_entire_shard") is True,
             "shard invalidation must be mandatory")
     require(raw.get("integrity", {}).get("never_silently_skip_hard_cases") is True,
@@ -63,13 +71,15 @@ def manifest_contract(path):
     require(canonical.get("run_arguments") == ["--canonical-indices", "--timing-ns"],
             "canonical run arguments differ")
     require(canonical.get("response_fields") == FIELDS, "V2 fields differ")
+    require(canonical.get("catalog") == "include/pastafari/source_language_catalog.hpp",
+            "wrong canonical catalog source")
+    require(canonical.get("numeric_format") == "ASCII decimal integers",
+            "wrong canonical numeric representation")
     require(canonical.get("index_ranges") == {"cutlet": [1, 17], "month": [1, 47]},
             "canonical index bounds differ")
     commit = raw.get("engine_verified_commit", "")
     require(isinstance(commit, str) and re.fullmatch(r"[a-f0-9]{40}", commit),
             "missing/invalid verified engine commit")
-    require(isinstance(raw.get("implementation_id"), str) and raw["implementation_id"],
-            "missing implementation ID")
     return raw
 
 

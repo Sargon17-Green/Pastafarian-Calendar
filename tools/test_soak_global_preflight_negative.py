@@ -95,8 +95,13 @@ def main():
     count = 0
     modifications = (
         ("wrong-branch", ("branch",), "other-branch"),
+        ("wrong-repository", ("repository",), "other-owner/other-repo"),
+        ("wrong-implementation-id", ("implementation_id",), "other-implementation"),
         ("wrong-transport", ("transport",), "argv_json"),
         ("wrong-input-fields", ("request_fields",), ["request_id"]),
+        ("wrong-v1-suffix", ("response_fields",),
+         original["response_fields"][:4] + ["incorrect_cutlet", "day_in_cutlet",
+                                            "month_name", "day_in_month"]),
         ("shard-invalidation-disabled",
          ("integrity", "nonzero_exit_invalidates_entire_shard"), False),
         ("hard-cases-skipped",
@@ -105,6 +110,8 @@ def main():
         ("missing-canonical-schema",
          ("canonical_numeric", "schema_arg"), "--schema"),
         ("wrong-v2-fields", ("canonical_numeric", "response_fields"), []),
+        ("wrong-catalog-source", ("canonical_numeric", "catalog"), "other/catalog.hpp"),
+        ("wrong-numeric-format", ("canonical_numeric", "numeric_format"), "hexadecimal"),
         ("wrong-v2-indices",
          ("canonical_numeric", "index_ranges",), {"cutlet": [0, 17], "month": [1, 47]}),
         ("wrong-v2-options",

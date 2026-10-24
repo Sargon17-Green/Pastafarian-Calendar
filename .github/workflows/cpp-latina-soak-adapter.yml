@@ -7,6 +7,10 @@ on:
     paths:
       - 'tools/soak_vector_adapter.cpp'
       - 'tools/validate_soak_index_modes.py'
+      - 'tools/soak_global_preflight.py'
+      - 'tools/test_soak_global_preflight_negative.py'
+      - 'tools/test_soak_adapter_rejections.py'
+      - 'tools/test_soak_adapter_interactive.py'
       - 'include/pastafari/source_language_catalog.hpp'
       - '.github/workflows/cpp-latina-soak-adapter.yml'
       - 'docs/STAGE_56_SOAK_ADAPTER.md'
