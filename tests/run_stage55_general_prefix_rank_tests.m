@@ -25,6 +25,9 @@ for f=1:numel(families)
     end
     N=sum(L);
     positions=unique([0 1 2 3 floor(N/2) N]);
+    % Small families may contain only one or two days. Never probe a
+    % prefix longer than the exact complete word under test.
+    positions=positions(positions<=N);
     for r=ranks
         assert(isequal(words(r,:),legacy.itemAt1(pastafari.BigInt(r))), ...
             'Independent lexicographic order and DAG rank disagree.');
