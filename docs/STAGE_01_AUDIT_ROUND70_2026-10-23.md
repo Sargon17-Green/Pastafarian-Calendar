@@ -51,3 +51,8 @@ R70 必須四份 Native、verify、完整 perl-stage01 全部
 SUCCESS 才能封存；任何 TIME_LIMIT/RSS_LIMIT 為 BLOCKED，
 不能作 PASS。僅限 Stage 1 四月份 QA；未證明 45 月
 或 4244 日的全球同構，也沒有跨語言 soak 結論。
+
+
+## R70 最終 CI 驗收（2026-10-24 確認）
+
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40000207480 在 `cdc9b27d30ecdbf697818e68ec6cc0b38333bae3` 的 verify、perl-stage01、四個 R70 0..3 Native sharded 工作全部 SUCCESS。Round 70 封存 PASS；此前 RED 歷史不改寫。

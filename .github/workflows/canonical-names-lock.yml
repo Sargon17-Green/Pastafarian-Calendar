@@ -2336,3 +2336,57 @@ jobs:
           perl -Ilib -It/lib -c tools/audit_r70_permutation_mirror.pl
           perl -Ilib -It/lib -c tools/profile_r70_permutation_mirror.pl
           timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r70_permutation_mirror.pl --shard 3 --seconds 185 --rss-kib 393216
+
+  canonical-r71-exhaustive-mirror-1:
+    name: R71 四月份 1..3 全部合法字序與鏡射分片 1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r71-exhaustive-mirror]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 原生完整字典序、鏡射雙射和雙向 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r71_exhaustive_mirror.pl
+          perl -Ilib -It/lib -c tools/profile_r71_exhaustive_mirror.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r71_exhaustive_mirror.pl --shard 1 --seconds 185 --rss-kib 393216
+
+  canonical-r71-exhaustive-mirror-2:
+    name: R71 四月份 1..3 全部合法字序與鏡射分片 2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r71-exhaustive-mirror]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 原生完整字典序、鏡射雙射和雙向 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r71_exhaustive_mirror.pl
+          perl -Ilib -It/lib -c tools/profile_r71_exhaustive_mirror.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r71_exhaustive_mirror.pl --shard 2 --seconds 185 --rss-kib 393216
+
+  canonical-r71-exhaustive-mirror-3:
+    name: R71 四月份 1..3 全部合法字序與鏡射分片 3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r71-exhaustive-mirror]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 原生完整字典序、鏡射雙射和雙向 BigInt 排名
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r71_exhaustive_mirror.pl
+          perl -Ilib -It/lib -c tools/profile_r71_exhaustive_mirror.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r71_exhaustive_mirror.pl --shard 3 --seconds 185 --rss-kib 393216
