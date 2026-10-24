@@ -77,7 +77,7 @@ def main(folder,qa28_path):
              and b[1:3]==[x+8,y] and b[5]==ord('0'),
              "signed QA28 blank-skip Native transition altered")
         cells=tuple((i,y) for i in range(x+1,x+8))
-        need(len(cells)==7 and all(original_rows[yy][xx]==ord(' ')
+        need(len(cells)==7 and all(ord(original_rows[yy][xx])==32
                                    for xx,yy in cells),
              "original static source no longer has the seven blanks")
         all_corridor.update(cells)
