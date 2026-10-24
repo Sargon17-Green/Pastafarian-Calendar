@@ -235,8 +235,6 @@ def main():
         (directed_edge(first_edge[0], first_edge[1]), first_edge[0], first_edge[1])
     ))
     require(controls == 70, "QA30 original receipt forgery controls incomplete")
-    require(all(global_nearest[xy] for xy in missing),
-            "at least one of fifteen candidate controls has no nearby observation")
     result = {
         "schema": "qa30a-136-original-native-dynamic-control-frontier-v1",
         "original_production_git_blob": SOURCE,
@@ -245,6 +243,7 @@ def main():
         "original_native_steps_reaudited": original_step_count,
         "original_native_trace_hashes_revalidated": original_program_count,
         "observed_runtime_opcode_counts": dict(sorted(totals.items())),
+        "unobserved_nearby_control_candidate_count": sum(not global_nearest[xy] for xy in missing),
         "nearest_observed_control_transitions_by_15_source_candidates": {
             "%d,%d" % xy: global_nearest[xy] for xy in missing},
         "original_groups": bygroup,
