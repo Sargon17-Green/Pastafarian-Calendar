@@ -197,7 +197,10 @@ final case class BaseMonsterContext(
   var crossLegacyCutletId: Option[Int] = None,
   var crossLegacyLocalOffset: Option[Int] = None,
   var crossLegacyMonthId: Option[Int] = None,
-  var crossLegacyMonthOrdinal: Option[Int] = None
+  var crossLegacyMonthOrdinal: Option[Int] = None,
+  var patch24MonthId: Option[Int] = None,
+  var patch24DayInMonth: Option[Int] = None,
+  var patch24Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -344,6 +347,77 @@ final class BaseValidationManager {
     * Ricostruisce i confini direttamente dai gap delle porte
     * e ricalcola il mese dal giorno locale della cotoletta.
     */
+
+  /** PATCH24: controlla la coordinata ANNUALE del mese con un
+    * ricalcolo indipendente; conserva la cicatrice della cotoletta.
+    */
+  def requirePatch24Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="PATCH_24_CUTLET_LOCAL_MONTH_LOOKUP" ||
+       ctx.status!="PATCH_24_READY" || !ctx.patch24Applied ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_24_CUTLET_LOCAL_MONTH_LOOKUP",
+         "PATCH_24_CUTLET_LOCAL_MONTH_LOOKUP") ||
+       ctx.crossGateGaps.isEmpty || ctx.crossCutletPartition.isEmpty ||
+       ctx.crossAnnualWeaving.isEmpty || ctx.crossYearDayOffset.isEmpty ||
+       ctx.crossInputSnapshot.isEmpty || ctx.crossLegacyCutletId.isEmpty ||
+       ctx.crossLegacyLocalOffset.isEmpty ||
+       ctx.crossLegacyMonthId.isEmpty ||
+       ctx.crossLegacyMonthOrdinal.isEmpty ||
+       ctx.patch24MonthId.isEmpty || ctx.patch24DayInMonth.isEmpty)
+      throw new IllegalStateException("PATCH24 non completa.")
+
+    val gaps=ctx.crossGateGaps.get
+    val partition=ctx.crossCutletPartition.get
+    val weave=ctx.crossAnnualWeaving.get
+    val day=ctx.crossYearDayOffset.get
+    if(ctx.crossInputSnapshot.get!=(gaps,partition,weave,day) ||
+       partition.length<6 || partition.length>17 ||
+       partition.exists(_<1) || partition.sum!=gaps.length ||
+       gaps.exists(g=>g<42 || g>963) || gaps.sum<252 ||
+       gaps.sum>5778 || weave.length!=gaps.sum ||
+       day<0 || day>=weave.length)
+      throw new IllegalStateException("Input PATCH24 invalidi.")
+    LegacyDaywiseWeavingAdapter.validateCandidates(Vector(weave))
+
+    var cutlet=0
+    var local=0
+    var start=0
+    var gate=0
+    for((segments,j)<-partition.zipWithIndex) {
+      var duration=0
+      var k=0
+      while(k<segments) {
+        duration+=gaps(gate)
+        gate+=1
+        k+=1
+      }
+      if(day>=start && day<start+duration) {
+        cutlet=j+1
+        local=day-start
+      }
+      start+=duration
+    }
+    if(cutlet==0 || start!=gaps.sum || gate!=gaps.length)
+      throw new IllegalStateException("Intervalli PATCH24 incoerenti.")
+    val oldMonth=weave(local)
+    val realMonth=weave(day)
+    var oldOrdinal=0
+    var correctOrdinal=0
+    var i=0
+    while(i<=day) {
+      if(i<=local && weave(i)==oldMonth)oldOrdinal+=1
+      if(weave(i)==realMonth)correctOrdinal+=1
+      i+=1
+    }
+    if(ctx.crossLegacyCutletId.get!=cutlet ||
+       ctx.crossLegacyLocalOffset.get!=local ||
+       ctx.crossLegacyMonthId.get!=oldMonth ||
+       ctx.crossLegacyMonthOrdinal.get!=oldOrdinal ||
+       ctx.patch24MonthId.get!=realMonth ||
+       ctx.patch24DayInMonth.get!=correctOrdinal)
+      throw new IllegalStateException("Risultato PATCH24 manomesso.")
+  }
+
   def requireDiscovery24Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="DISCOVERY_24_CUTLET_LOCAL_MONTH_LOOKUP" ||
        ctx.status!="LEGACY_CUTLET_LOCAL_MONTH_READY" ||
@@ -2194,7 +2268,8 @@ final class BaseMonsterManager {
     new Patch22MonthOrdinalGlobalDayHandler(metrics),
     new Discovery23ContiguousMonthHandler(metrics),
     new Patch23ContiguousMonthHandler(metrics),
-    new Discovery24CutletLocalMonthHandler(metrics)
+    new Discovery24CutletLocalMonthHandler(metrics),
+    new Patch24CutletLocalMonthHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -3477,6 +3552,44 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("discovery24",error)
+    }
+  }
+
+
+  def patch24CutletLocalMonthLookup(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    gateGaps: Vector[Int],
+    cutletPartition: Vector[Int],
+    annualWeaving: Vector[Int],
+    yearDayOffset: Int
+  ): Patch24CutletLocalMonthReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.crossGateGaps=Some(gateGaps)
+    ctx.crossCutletPartition=Some(cutletPartition)
+    ctx.crossAnnualWeaving=Some(annualWeaving)
+    ctx.crossYearDayOffset=Some(yearDayOffset)
+    ctx.phase="DISCOVERY_24_CUTLET_LOCAL_MONTH_LOOKUP"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery24Ready(ctx)
+      ctx.phase="PATCH_24_CUTLET_LOCAL_MONTH_LOOKUP"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch24Ready(ctx)
+      Patch24CutletLocalMonthReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.crossGateGaps.get,ctx.crossCutletPartition.get,
+        ctx.crossAnnualWeaving.get,ctx.crossYearDayOffset.get,
+        ctx.crossLegacyCutletId.get,
+        ctx.crossLegacyLocalOffset.get,
+        ctx.crossLegacyMonthId.get,
+        ctx.crossLegacyMonthOrdinal.get,
+        ctx.patch24MonthId.get,ctx.patch24DayInMonth.get,
+        ctx.patch24Applied,ctx.phase,ctx.status,
+        ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("patch24",error)
     }
   }
 

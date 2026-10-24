@@ -330,15 +330,25 @@ object Stage48Tests {
       truth(st.contains(
         "STAGE_47_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_54_PASS_0_FAIL"),
         "Stage47")
-      truth(st.contains("CURRENT_STAGE=48"),"Stage48")
-      truth(st.contains("LAST_COMPLETED_STAGE=47"),"Ultimo")
+      val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      val done=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE="))
+        .get.split("=",2)(1).toInt
+      truth(current>=48 && done>=48 && done<=current,
+        "Firma Stage48 conservata")
+      truth(st.contains(
+        "STAGE_48_NATIVE_VERIFICATION=PASS_EXPECTED_RED_44_PASS_3_FAIL"),
+        "Stage48 intenzionale")
       val walk=Files.walk(root().resolve("src/main/scala"))
       val source=try walk.iterator().asScala
         .filter(p=>Files.isRegularFile(p)&&p.toString.endsWith(".scala"))
         .map(p=>new String(Files.readAllBytes(p),StandardCharsets.UTF_8))
         .mkString("\n")
       finally walk.close()
-      truth(!source.contains("def cutletLocalMonthPatch("),"PATCH24 assente")
+      if(current==48)
+        truth(!source.contains("def cutletLocalMonthPatch("),"PATCH24 assente")
+      else
+        truth(source.contains("def cutletLocalMonthPatch("),"PATCH24 successiva")
     }
     // SOLO queste tre equivalenze normative falliscono intenzionalmente.
     Vector(

@@ -1139,3 +1139,22 @@ jobs:
           for label in CUTLET3_MONTH2_NAME CUTLET4_MONTH2_ORDINAL CUTLET6_YEAR_END; do
             grep -Fq "FAIL — equivalenza normativa ${label} — Coordinate anno/cotoletta: ${label}" stage48.log
           done
+  native-stage49-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage49 PATCH24 year-coordinate month lookup
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage49Tests' 2>&1 | tee stage49.log
+          grep -Fq 'RISULTATO STADIO 49: 55 PASS, 0 FAIL' stage49.log
+          test "$(grep -Fc 'PASS — ' stage49.log)" -eq 55
+          test "$(grep -Fc 'FAIL — ' stage49.log)" -eq 0
