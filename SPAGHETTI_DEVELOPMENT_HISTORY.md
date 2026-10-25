@@ -265,3 +265,7 @@ Stage46 पूर्ण historical महिन्यांच्या या�
 ## Stage48 DISCOVERY24 — जुना प्रत्येक-दिवस स्वतंत्र महिना, Expected RED 24
 
 Stage47 पूर्ण Native predecessor chain प्रत्यक्ष चालवून, `legacyChooseEachDaySeparately` ने L दिवसांचे वेगळे month-ID ghosts तयार झाले. वास्तविक Bowl4 Seal32 ला 58 shared writes, पण L ghosts हे एका Native प्रश्नावरून आलेले स्वतंत्र चुकीचे दिवस-निर्णय. जुने quota/first/last weaving constraints लागू केलेले नाहीत. [CI 40185059418](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40185059418) मधील TypeScript typecheck व names verify दोन्ही PASS: लहान legal weaving 3101 rows, वास्तविक 5349-दिवस वर्ष, 720 DROP46 बदल, 720/720 wrong ghost, 720 native Seal30, Seal31 व Seal32 प्रत्येकी, 125280 memory writes, 3851280 historical day decisions, 24वा expected-red PASS आणि आधीचे 23 archival RED सुरक्षित. Stage49 योग्य DP weaving correction अजून लागू नाही; Stage54 बंद. अंतिम Stage48 closure commit च्या CI 2/2 यशानंतरच Stage49 पुढे.
+
+## Stage49 PATCH24 — bounded exact algorithm feasibility investigation
+
+Stage48 final 40191782358 2/2 SUCCESS. Historical per-day illegal ghost remains actually executed. A separate iterative-state exact BigInt memoized weaving count/unrank and second actual Bowl4 Seal32 exists for small legal families; the genuine 5349-day/44-month Year5000 full path is explicitly subject to a measured bounded-state capacity error and cannot claim authoritative completion. Do not advance to Stage50; investigate scalable exact representation without removing any historical scars.

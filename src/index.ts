@@ -68,3 +68,4 @@ export * from "./patch22DistinctCutletNames.ts";
 export * from "./discovery23LegacyMonthLengthList.ts";
 export * from "./patch23VirtualMonthLengths.ts";
 export * from "./discovery24LegacyDailyMonths.ts";
+export * from "./patch24BoundedLegalWeaving.ts";

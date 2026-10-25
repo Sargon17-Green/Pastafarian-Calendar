@@ -346,3 +346,7 @@ Stage46 अंतिम [CI 40135075855](https://github.com/Sargon17-Green/Pasta
 ## Stage48 — DISCOVERY24: स्वतंत्र दिवसनिहाय चुकीचा महिना (Native CI PASS)
 
 Stage47 final [CI 40181446496](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40181446496) 2/2 SUCCESS नंतरच Stage48 सुरू झाला. `LegacyIndependentDailyMonthChooser` दर दिवसाचे month-ID स्वतंत्रपणे निवडतो, त्यामुळे अपेक्षित counts आणि first/last order चा नियम पाळत नाही. Full Stage47 predecessor, खरा first-day Sauce व Bowl4/Seal32 58-write Native chain actual चालतो; corrected DP weaving हा Stage49 साठी राखीव. [CI 40185059418](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40185059418) 2/2 PASS: 3101 legal small reference rows, 3 synthetic wrong ghosts, 720 altered DROP46 वर प्रत्येक 720 actual Bowl3 Seal30, Seal31, Bowl4 Seal32, 720 invalid historical ghosts, 125280 real shared writes, 3851280 old daily decisions आणि 24वा expected RED. Stage48 administrative closure CI यशस्वी झाल्यावरच Stage49 सुरू होईल; Stage54 अद्याप बंद.
+
+## Stage49 PATCH24 — मर्यादित exact weaving backend (प्रोटोटाइप)
+
+Stage48 closure CI 40191782358 दोन्ही jobs SUCCESS. जुना independent daily month ghost आणि २४ archived intentionally-red tests न बदलता, `DPUnrankLegalWeaving` वर BigInt memoized legal-weaving count व lex `itemAt1` चे लहान कुटुंबांसाठी अचूक Native सुधार सुरू आहे. वास्तविक ५३४९ दिवस/४४ महिने संसाधनमर्यादेवर स्पष्ट थांबतात; पूर्ण वर्षाचे exact selection अजून नाही. Stage49 GREEN घोषित नाही, Stage50 सुरू नाही; main अपरिवर्तित.
