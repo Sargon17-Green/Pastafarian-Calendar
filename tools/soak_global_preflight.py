@@ -7,9 +7,11 @@ tested source SHA and invalidate all outputs after any nonzero shard exit.
 """
 import argparse
 import json
+import queue
 import re
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 CONTRACT = "PASTAFARI_SOAK_PREFLIGHT_V1"
@@ -121,6 +123,66 @@ def verify_result(result):
             "timing record ID/order differs")
         require(re.fullmatch(rb"[0-9]+", cols[2]) is not None,
                 "invalid nanosecond timing")
+    return parsed[0][3:]
+
+
+def verify_incremental_stream(binary, options, timeout, expected_date):
+    """Require a real response while stdin is still open (not after EOF)."""
+    process = subprocess.Popen(
+        [binary, *options],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        bufsize=0,
+    )
+    output = queue.Queue()
+
+    def read_one_response():
+        output.put(process.stdout.readline())
+
+    reader = threading.Thread(target=read_one_response, daemon=True)
+    reader.start()
+    try:
+        process.stdin.write(b"probe_live\t-15055671\t-15055671\n")
+        process.stdin.flush()
+        try:
+            response = output.get(timeout=timeout)
+        except queue.Empty as exc:
+            raise ValueError("adapter buffered stdout until stdin EOF") from exc
+        require(response.endswith(b"\n"), "missing live response before EOF")
+        fields = response.rstrip(b"\n").split(b"\t")
+        require(len(fields) == 8, "live response has wrong column count")
+        require(fields[0] == b"probe_live", "missing/reordered live request ID")
+        require(fields[1:3] == [b"-15055671", b"-15055671"],
+                "live decimal fields differ")
+        require(fields[3:] == expected_date,
+                "live canonical date differs from the batch probe")
+        require(process.poll() is None, "adapter exited before second request")
+        process.stdin.write(b"probe_bad\t0x10\t0\n")
+        process.stdin.flush()
+        try:
+            exit_code = process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired as exc:
+            raise ValueError("adapter waited for EOF before rejecting invalid row") from exc
+        require(exit_code != 0, "invalid live row accepted")
+        require(not process.stdout.read(), "unexpected extra stdout after failure")
+        stderr = process.stderr.read().splitlines()
+        require(len(stderr) == 2, "missing or extra live stderr diagnostics")
+        timing = stderr[0].split(b"\t")
+        require(len(timing) == 3 and timing[:2] == [
+            b"SOAK_TIMING_NS", b"probe_live"
+        ] and re.fullmatch(rb"[0-9]+", timing[2]) is not None,
+                "live timing record missing, reordered or malformed")
+        require(stderr[1].startswith(b"SOAK_ADAPTER_ERROR\tline 2:"),
+                "missing line-specific rejection while stdin open")
+    finally:
+        if process.poll() is None:
+            process.kill()
+        process.wait()
+        process.stdin.close()
+        process.stdout.close()
+        process.stderr.close()
+        reader.join(timeout=1)
 
 
 def verify_rejection(binary, options, timeout):
@@ -152,7 +214,10 @@ def main():
             args.timeout_seconds,
         )
         options = manifest["canonical_numeric"]["run_arguments"]
-        verify_result(run(binary, options, TEST_INPUT, args.timeout_seconds))
+        expected_date = verify_result(
+            run(binary, options, TEST_INPUT, args.timeout_seconds)
+        )
+        verify_incremental_stream(binary, options, args.timeout_seconds, expected_date)
         verify_rejection(binary, options, args.timeout_seconds)
         output = {
             "contract": CONTRACT,
@@ -162,6 +227,8 @@ def main():
             "runtime_protocol": manifest["canonical_numeric"]["protocol"],
             "verified_rows": 2,
             "invalid_input_rejected": True,
+            "live_stream_before_eof": True,
+            "live_rejection_before_eof": True,
             "global_soak_executed": False,
         }
     except (OSError, UnicodeError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:

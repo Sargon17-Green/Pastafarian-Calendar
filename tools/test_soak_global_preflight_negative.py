@@ -37,6 +37,26 @@ for ident in ("probe_1", "probe_2"):
     if mode != "omit-timing":
         print(f"SOAK_TIMING_NS\t{ident}\t37", file=sys.stderr, flush=True)
 '''
+BATCH_ONLY_FAKE = r'''#!/usr/bin/env python3
+import sys
+args = sys.argv[1:]
+if args == ["--schema"]:
+    print("PASTAFARI_SOAK_TSV_V1\tid,c,t,year,cutlet,day_cutlet,month,day_month")
+    sys.exit(0)
+if args == ["--schema-canonical"]:
+    print("PASTAFARI_SOAK_CANONICAL_V2\tid,c,t,year,cutlet_index,day_cutlet,month_index,day_month")
+    sys.exit(0)
+# This intentionally buffers the entire request stream until stdin closes.
+# A batch-only handshake would falsely admit this executable.
+rows = sys.stdin.buffer.read().splitlines()
+for index, row in enumerate(rows, 1):
+    if b"0x10" in row:
+        print(f"SOAK_ADAPTER_ERROR\tline {index}: invalid decimal integer", file=sys.stderr)
+        sys.exit(1)
+    ident = row.split(b"\t", 1)[0].decode("ascii")
+    print(f"{ident}\t-15055671\t-15055671\t5000\t10\t503\t20\t56", flush=True)
+    print(f"SOAK_TIMING_NS\t{ident}\t37", file=sys.stderr, flush=True)
+'''
 
 
 def run_probe(program, manifest, adapter, timeout_seconds=5):
@@ -150,6 +170,14 @@ def main():
                 variant,
             )
             count += 1
+        batch_only = root / "fake-batch-only"
+        batch_only.write_text(BATCH_ONLY_FAKE, encoding="utf-8")
+        batch_only.chmod(0o700)
+        insist_rejection(
+            run_probe(preflight, manifest, batch_only, timeout_seconds=1),
+            "batch-only-buffered-until-eof",
+        )
+        count += 1
     print(f"SOAK_GLOBAL_PREFLIGHT_NEGATIVE={count}/{count}_PASS COMPILER={args.compiler}")
     print("SOAK_GLOBAL_PREFLIGHT_FAIL_CLOSED_JSON=PASS")
 

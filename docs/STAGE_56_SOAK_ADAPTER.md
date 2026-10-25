@@ -66,3 +66,18 @@ against another calendar implementation, or run the global soak. These are
 separate duties of the central scheduler; the `engine_verified_commit` field
 is an anchor, not a runtime attestation. Do not treat a successful preflight
 as evidence of full cross-implementation equivalence.
+
+## Incremental preflight gate (fail closed)
+
+The scheduler-facing `PASTAFARI_SOAK_PREFLIGHT_V1` check must reject a
+batch-only adapter even if that adapter returns correct TSV for requests
+sent before EOF. In addition to checking two equivalent decimal requests
+and their timing records, the preflight now keeps stdin open, sends one
+request, demands a complete canonical response **before EOF**, and then
+sends a malformed second request. The program must exit nonzero without
+waiting for EOF, and stderr must contain the first request's nanosecond
+timing and the second line's error. The positive readiness JSON records
+`live_stream_before_eof=true` and `live_rejection_before_eof=true`.
+A deliberately batch-buffered substitute serves as a fail-closed
+regression test. Passing this readiness gate is not a global soak run
+and is not cryptographic provenance attestation.
