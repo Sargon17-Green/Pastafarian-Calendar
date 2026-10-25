@@ -10,7 +10,7 @@ defmodule PastafariCalendarElixirVietnamese.Stage55SharedWeavingTableTest do
       labels = Enum.to_list(1..length(lengths))
       orders = [Enum.reverse(labels), labels]
 
-      for rank <- Enum.uniq([1, 2, div(count + 1, 2), count]) do
+      for rank <- Enum.uniq([1, 2, div(count + 1, 2), count]) |> Enum.filter(&(&1 <= count)) do
         [historical, corrected] = Weave.unrank_in_orders(lengths, rank, orders)
         assert historical == Weave.unrank(lengths, rank, :descending)
         assert corrected == Weave.unrank(lengths, rank)
