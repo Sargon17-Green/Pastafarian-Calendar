@@ -643,3 +643,25 @@ PASS is claimed until the new GitHub Actions job finishes.
   branch `qa-systemverilog-kalaallisut-stage1-20261022`
   now retains probe/negative logs and compact outputs.
   **These new archive/lookup tests have not passed CI yet.**
+
+## 2026-10-25 — indexed H regression repaired; native A(r) block computation
+
+- [CI 40204884990](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40204884990)
+  was 7/8 jobs SUCCESS. Native_H job computed and indexed
+  all 101594 full-width counts; root and four prefix hashes
+  and **16 indexed sample SHA256** all PASS. Only the
+  intentional seek mutation yielded FALSE PASS because
+  shifting one *hex character* could preserve a leading-zero-
+  padded number's numeric value.
+- Fixed seek-mutation to read the adjacent *record*,
+  `H_1(113)` instead of `H_1(114)`, guaranteed unequal.
+- Wrote `tests/tb_weave_native_H_children7.sv`, computing
+  genuine old-month factor `A(r)` and all eight legal
+  branches after prefix `[1,2,3,4,5,6,7]` using only two
+  values loaded from the **native-SV H archive**.
+- Integrated parent + eight 2809-byte child outputs in
+  `verify_native_H_indexed.sh` with nine independent
+  predetermined SHA256 goldens, verified separately
+  with Python exact arithmetic in local research.
+- The isolated QA workflow archives native children7 logs
+  and nine compact witnesses. New CI is **PENDING**.

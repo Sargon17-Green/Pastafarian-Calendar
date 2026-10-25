@@ -470,3 +470,17 @@ lexical approvals, stage acceptance, and 55-stage rollout.
 - **NOT COMPLETE:** native 4244-symbol combinatorial
   unrank; production RTL five-field calendar query;
   64 native-approved Kalaallisut labels (0).
+
+## Indexed H / A(r) exact branch acceptance — 2026-10-25
+
+- 40204884990 native H positive output: root and four
+  prefix goldens **PASS**, full archive geometry **PASS**,
+  16 indexed SHA256 samples **PASS**.
+- Negative H-index seek **NOT ACCEPTED** (one-character
+  shift into leading zeros did not change the number);
+  repaired by record-boundary seek, CI pending.
+- New native SV old-month factor `A(r)` with seven
+  started month labels and all eight child blocks:
+  source and nine-golden checks **WRITTEN, NOT CI PASS**.
+- Still no native all-year unranking, production ASIC
+  five-tuple RTL or Kalaallisut native-source approvals.
