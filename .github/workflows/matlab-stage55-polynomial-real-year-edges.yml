@@ -1,0 +1,28 @@
+name: MATLAB Polynomial Family Full Real-Year Edge Ranks (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/WholeMonthWeavingFamilyPolynomial.m'
+      - 'tests/run_stage55_polynomial_full_year_edges.m'
+      - '.github/workflows/matlab-stage55-polynomial-real-year-edges.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-year-edges:
+    name: MATLAB R2026a / complete 4244-day four exact edge ranks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_polynomial_full_year_edges

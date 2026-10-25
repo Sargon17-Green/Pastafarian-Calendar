@@ -58,7 +58,39 @@ classdef WholeMonthWeavingFamilyPolynomial < handle
         end
 
         function weaving=itemAt1(obj,rank1)
-            [weaving,cursor]=obj.prefixAt1(rank1,obj.totalDays);
+            pastafari.ValidationManager.requireExactIntegerInput(rank1);
+            rank=pastafari.BigInt.coerce(rank1);
+            one=pastafari.BigInt(1);
+            if rank<one || rank>obj.exactCount
+                error('Pastafari:PolynomialFamily:Rank', ...
+                    'Rank must be in exact one-based family cardinality.');
+            end
+            % Exact legal near-edge ranks admit a strictly bounded
+            % complete-word algorithm. Unlike the generic interior rank,
+            % it never constructs the exponential remaining-vector DAG
+            % and never recounts any 4244-day suffix.
+            if rank==one
+                [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
+                    obj.monthLengths,0,'first');
+                obj.verifyWord(weaving);
+                return
+            elseif rank==obj.exactCount
+                [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
+                    obj.monthLengths,0,'last');
+                obj.verifyWord(weaving);
+                return
+            elseif rank==one+one
+                [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
+                    obj.monthLengths,1,'first');
+                obj.verifyWord(weaving);
+                return
+            elseif rank==obj.exactCount-one
+                [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
+                    obj.monthLengths,1,'last');
+                obj.verifyWord(weaving);
+                return
+            end
+            [weaving,cursor]=obj.prefixAt1(rank,obj.totalDays);
             if ~cursor.done || numel(weaving)~=obj.totalDays || ...
                     cursor.rank~=pastafari.BigInt(1) || ...
                     cursor.count~=pastafari.BigInt(1) || ...
@@ -67,6 +99,33 @@ classdef WholeMonthWeavingFamilyPolynomial < handle
                     cursor.closedUpTo~=obj.monthCount
                 error('Pastafari:PolynomialFamily:Terminal', ...
                     'Lexical unrank must terminate at one exact word.');
+            end
+        end
+
+        function verifyWord(obj,word)
+            % Independent linear terminal invariant guard even for
+            % accelerated extremal and nearest-extremal rank routes.
+            if ~(isnumeric(word) && isrow(word) && ...
+                    numel(word)==obj.totalDays && ...
+                    all(isfinite(word)) && all(fix(word)==word) && ...
+                    all(word>=1) && all(word<=obj.monthCount))
+                error('Pastafari:PolynomialFamily:Terminal', ...
+                    'Near-edge result must be a complete exact month word.');
+            end
+            first=zeros(1,obj.monthCount);
+            last=zeros(1,obj.monthCount);
+            for month=1:obj.monthCount
+                positions=find(word==month);
+                if numel(positions)~=obj.monthLengths(month)
+                    error('Pastafari:PolynomialFamily:Terminal', ...
+                        'Month occurrence multiplicity is incorrect.');
+                end
+                first(month)=positions(1);
+                last(month)=positions(end);
+            end
+            if any(diff(first)<=0) || any(diff(last)<=0)
+                error('Pastafari:PolynomialFamily:Terminal', ...
+                    'Month opening or closure order is invalid.');
             end
         end
     end
