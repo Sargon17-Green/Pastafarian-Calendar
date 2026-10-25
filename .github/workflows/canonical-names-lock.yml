@@ -1266,6 +1266,22 @@ jobs:
             -include-runtime -d "$RUNNER_TEMP/post55-production-rank.jar"
           test -s "$RUNNER_TEMP/post55-production-rank.jar"
           echo STAGE55_COMPONENT_KOTLIN_PRODUCTION_BUILT
+      - name: Verify bounded production gate/year integration against original test oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc kotlin/src/main/kotlin/pastafari/*.kt \
+            kotlin/src/test/kotlin/pastafari/NormativeCore.kt \
+            kotlin/src/test/kotlin/pastafari/NormativeCalendar.kt \
+            kotlin/soak/Post55GateYearIntegrationTests.kt \
+            -include-runtime -d "$RUNNER_TEMP/post55-gate-year.jar"
+          java -Xmx1024m -Xss8m -cp "$RUNNER_TEMP/post55-gate-year.jar" \
+            pastafari.Post55GateYearIntegrationTests \
+            2>&1 | tee "$RUNNER_TEMP/post55-gate-year.log"
+          grep -Fx 'POST55_PRODUCTION_GATE_97_REAL_ORACLE_GREEN' "$RUNNER_TEMP/post55-gate-year.log"
+          grep -Fx 'POST55_PRODUCTION_YEAR5000_FIVE_REAL_DAYS_GREEN' "$RUNNER_TEMP/post55-gate-year.log"
+          grep -Fx 'POST55_PRODUCTION_GATE_RESOURCE_GUARDS_GREEN' "$RUNNER_TEMP/post55-gate-year.log"
+          grep -Fx 'POST55_GATE_YEAR_COMPONENT_NATIVE_GREEN' "$RUNNER_TEMP/post55-gate-year.log"
       - name: Run independent Kotlin/Python rank component differential
         shell: bash
         env:

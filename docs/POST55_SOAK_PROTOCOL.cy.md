@@ -94,3 +94,23 @@ mae'r ddiagnosteg ar yr oracl llawn wedi methu ar
 Nid yw'r methiant yma yn profi anghydweddiad cynhyrchu.
 Mae'r gwaith diagnostig hwn bellach yn `workflow_dispatch`
 yn unig i osgoi ailadrodd yr un prawf resource-unbounded ar bob push.
+
+## Integreiddio rhannol injan Kotlin cynhyrchu (gate a blwyddyn 5000)
+
+Yn `ProductionGateYear5000Engine.kt` ychwanegwyd tabl gate cadarn
+gyda threfn gadarnhaol/negyddol, cap 8192 gate rhagosodedig, rheol
+bwlch 42..963, cache per-ymholiad, a llwybr dewis ymgeiswyr 5000:
+(hyd 252..5778; chwech gate o leiaf; (open,close]; trefnu ar hyd ac
+agoriad), ac yna `PATCH_26` a `PATCH_27` gyda'r hen graith yn fyw.
+
+Y bwlch pwysig: mae'r cyfrifiannell hon yn mynnu
+`ProductionGateAnswerProvider` ar gyfer stream sauce seal 1
+a `ProductionAnswerStream` ar gyfer seal 10. Nid oes
+adeiladwr sauce/bowls cynhyrchu cyffredinol eto; felly nid yw'r
+jigsaw blwyddyn 5000 yn ddigon ar gyfer galwad `c,t` i'r
+calendr llawn.
+
+Mae prawf Kotlin CI ar wahân yn rhoi'r stream a ddaw
+o'r oracl **test-only** ac yn cymharu'r gate a'r canlyniad
+blwyddyn 5000. Dim ond gwirio **cydrannau Kotlin** mae'r prawf
+hwn; nid oes hawl i'w alw'n soak dau beiriant.
