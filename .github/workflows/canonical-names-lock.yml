@@ -1118,3 +1118,87 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest discover -s soak -p 'test_post55_differential.py' -q
+
+  post55-diagnostic-not-certification:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Kotlin+Cymraeg'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact Kotlin event revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          path: kotlin
+      - name: Checkout independently developed Python engine at pinned SHA
+        uses: actions/checkout@v4
+        with:
+          repository: Sargon17-Green/Pastafarian-Calendar
+          ref: b3501b4296403bc33cb36f81a763269e5af97523
+          persist-credentials: false
+          path: python-turkce
+      - name: Verify both sources are immutable and distinct
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C kotlin rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C python-turkce rev-parse HEAD)" = 'b3501b4296403bc33cb36f81a763269e5af97523'
+          test "$GITHUB_SHA" != 'b3501b4296403bc33cb36f81a763269e5af97523'
+          echo SOAK_DIAGNOSTIC_PINNED_INDEPENDENT_SOURCE_PASS
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Kotlin 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin-compiler-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-compiler-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Unit tests for diagnostic safety and false-certification guards
+        shell: bash
+        run: python3 -m unittest discover -s kotlin/soak -p 'test_post55_differential.py' -q
+      - name: Build test-only Kotlin oracle (never production)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd kotlin
+          kotlinc src/main/kotlin/pastafari/ExactInt.kt \
+            src/main/kotlin/pastafari/SourceLanguageCatalog.kt \
+            src/test/kotlin/pastafari/NormativeCore.kt \
+            src/test/kotlin/pastafari/NormativeCalendar.kt \
+            src/test/kotlin/pastafari/Post55OracleSoakBridge.kt \
+            -include-runtime -d "$RUNNER_TEMP/post55-oracle-bridge.jar"
+          test -s "$RUNNER_TEMP/post55-oracle-bridge.jar"
+      - name: Diagnostic comparison — Kotlin test oracle versus Python production
+        shell: bash
+        env:
+          PASTAFARIAN_PYTHON_SRC: python-turkce/src
+          KOTLIN_SHA: ${{ github.sha }}
+          PYTHON_SHA: b3501b4296403bc33cb36f81a763269e5af97523
+        run: |
+          set -euo pipefail
+          mkdir -p kotlin/post55-diagnostic
+          python3 kotlin/soak/post55_differential.py \
+            --kotlin-command "java -cp $RUNNER_TEMP/post55-oracle-bridge.jar pastafari.Post55OracleSoakBridge" \
+            --python-command "python3 kotlin/soak/python_turkce_bridge.py" \
+            --cases 8 --seed 55 --batch 2 --timeout-seconds 240 \
+            --kotlin-mode oracle \
+            --kotlin-revision "$KOTLIN_SHA" --python-revision "$PYTHON_SHA" \
+            --evidence kotlin/post55-diagnostic/evidence.json
+      - name: Preserve diagnostic evidence even on mismatch or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-cymraeg-post55-diagnostic-${{ github.run_id }}
+          path: kotlin/post55-diagnostic/
+          if-no-files-found: warn
+          retention-days: 14

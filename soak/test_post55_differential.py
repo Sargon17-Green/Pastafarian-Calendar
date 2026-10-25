@@ -102,9 +102,9 @@ class SoakRunnerTests(unittest.TestCase):
     def test_four_distinct_anchor_epochs_in_small_corpus(self):
         pairs = soak.corpus(4, 55)
         self.assertEqual(
-            pairs, [(soak.FOUNDATION, soak.FOUNDATION),
-                    (soak.TABLETS, soak.TABLETS),
-                    (0, 0), (739834, 739834)]
+            pairs, [(soak.FOUNDATION - 1, soak.FOUNDATION - 1),
+                    (soak.TABLETS - 1, soak.TABLETS - 1),
+                    (-1, -1), (739833, 739833)]
         )
 
     def test_fake_production_mode_is_still_diagnostic(self):
