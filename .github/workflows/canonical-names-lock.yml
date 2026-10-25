@@ -1299,6 +1299,21 @@ jobs:
           grep -Fx 'POST55_SAUCE_SELF_HOSTED_57_GATES_GREEN' "$RUNNER_TEMP/post55-sauce.log"
           grep -Fx 'POST55_SAUCE_SELF_HOSTED_3_YEAR5000_CHOICES_GREEN' "$RUNNER_TEMP/post55-sauce.log"
           grep -Fx 'POST55_PRODUCTION_SAUCE_NATIVE_GREEN' "$RUNNER_TEMP/post55-sauce.log"
+      - name: Verify production year navigation (oracle-only, not independent soak)
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc kotlin/src/main/kotlin/pastafari/*.kt \
+            kotlin/src/test/kotlin/pastafari/NormativeCore.kt \
+            kotlin/src/test/kotlin/pastafari/NormativeCalendar.kt \
+            kotlin/soak/Post55ProductionYearNavigationTests.kt \
+            -include-runtime -d "$RUNNER_TEMP/post55-year-navigation.jar"
+          java -Xmx1024m -Xss8m -cp "$RUNNER_TEMP/post55-year-navigation.jar" \
+            pastafari.Post55ProductionYearNavigationTests \
+            2>&1 | tee "$RUNNER_TEMP/post55-year-navigation.log"
+          grep -Fx 'POST55_PRODUCTION_YEAR_ADJACENT_6_ORACLE_GREEN' "$RUNNER_TEMP/post55-year-navigation.log"
+          grep -Fx 'POST55_PRODUCTION_YEAR_TARGET_21_ORACLE_GREEN' "$RUNNER_TEMP/post55-year-navigation.log"
+          grep -Fx 'POST55_PRODUCTION_YEAR_NAVIGATION_TEST_ONLY_GREEN' "$RUNNER_TEMP/post55-year-navigation.log"
       - name: Run independent Kotlin/Python rank component differential
         shell: bash
         env:
