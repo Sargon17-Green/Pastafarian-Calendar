@@ -546,3 +546,29 @@ was queued at last observation. No full unrank or stage PASS.
 - Native 4244-symbol SV unrank, synthesis RTL calendar
   five-tuple and qualified Kalaallisut names 64/64 remain
   unimplemented/unapproved. Stage 1 open, no main change.
+
+## 2026-10-25 — full-year CI PASS, native exact rank replay prepared
+
+- Verified run [40170380568](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40170380568)
+  SUCCESS in all **seven** jobs. Read `full_year_reference`
+  job 121099834522 log: Python exact root/rank SHA PASS,
+  4244-byte full year SHA PASS, month 8/day 56 on Foundation
+  day 2032 PASS, reference computation 15.34s, native
+  SystemVerilog structural full-year PASS.
+- New `scripts/test_foundation_weave_full.py` ledger mode
+  writes 4243 pairs of exactly 2809-byte big-endian
+  `skipped` and `selected` blocks (23,837,174 bytes),
+  computed from the same complete exact partition over
+  **all** candidate branches at every day.
+- New native `tb_weave_full_rank_replay.sv` consumes these
+  pairs, independently updates the 22528-bit one-based
+  rank and parent count at ALL positions, checks fresh-label
+  rightmost-block equality, 45 copy counters and terminal
+  rank exactly 1. It deliberately does **not** generate
+  the block sizes; the true SV count-transfer is still open.
+- A mutation negative control requires native FATAL on an
+  invalid first rank interval; runner compares exact
+  root/rank SHA, ledger byte count and word hash first.
+- Added full-year native rank replay and tamper logs plus
+  raw ledger to QA evidence bundle. CI result for the new
+  rank replay is **PENDING**.

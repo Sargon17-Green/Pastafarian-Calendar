@@ -425,3 +425,19 @@ full-year lexical unranking has been ported to HDL.
 full-word lexical algorithm, production synthesis RTL
 five-field calendar output, 0/64 qualified Kalaallisut
 lexical approvals, stage acceptance, and 55-stage rollout.
+
+## 2026-10-25 — Full-year reference CI GREEN; native rank replay OPEN
+
+- Native run 40170380568: **7/7 jobs green**, 4244-day
+  independent reference exact SHA and structural SV PASS.
+- New SV source `tb_weave_full_rank_replay.sv` will replay
+  4243 exact 22528-bit one-based rank transitions from an
+  independently generated 23,837,174-byte ledger. The
+  negative tamper test must fail intentionally. **Not yet
+  green in CI**.
+- Distinguish this ledger-assisted native rank-arithmetic
+  check from a fully native suffix-count/unrank engine,
+  which remains NOT IMPLEMENTED.
+- Production RTL five-field output, 64 qualified
+  Kalaallisut name approvals, and Stage-1 signoff remain
+  missing. Stage 2 CLOSED. No main merge.
