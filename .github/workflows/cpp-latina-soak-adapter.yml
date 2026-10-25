@@ -44,6 +44,9 @@ jobs:
           TRUSTED_ENGINE_COMMIT: '5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8'
         run: |
           set -euo pipefail
+          # Provenance runs before the compile step that normally creates this dir.
+          mkdir -p soak-output
+          test -d soak-output
           python3 tools/test_soak_source_provenance.py tools/soak_source_provenance.py \
             | tee soak-output/source-provenance-regressions.log
           timeout 2m git fetch --quiet --no-tags --depth=1 origin "$TRUSTED_ENGINE_COMMIT"
