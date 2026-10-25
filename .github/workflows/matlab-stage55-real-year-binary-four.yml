@@ -1,0 +1,30 @@
+name: MATLAB Real-Year First Four Binary Cumulative Rank (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/countWholeWeavingFirstLetterUpTo.m'
+      - 'src/\+pastafari/unrankGeneralWeaveSuffixChunkBinary.m'
+      - 'tests/run_stage55_real_year_binary_four.m'
+      - '.github/workflows/matlab-stage55-real-year-binary-four.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-year-binary:
+    name: MATLAB R2026a / full-year four-day binary cumulative rank pilot
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native full-scale binary rank and independent child recount
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_real_year_binary_four

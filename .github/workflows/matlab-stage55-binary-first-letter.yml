@@ -1,0 +1,30 @@
+name: MATLAB Binary Cumulative First-Letter Rank (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/countWholeWeavingFirstLetterUpTo.m'
+      - 'src/\+pastafari/unrankGeneralWeaveSuffixChunkBinary.m'
+      - 'tests/run_stage55_binary_first_letter_tests.m'
+      - '.github/workflows/matlab-stage55-binary-first-letter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-small:
+    name: MATLAB R2026a / exhaustive binary cumulative rank oracle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Verify all frontier ranks against independent enumeration
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_binary_first_letter_tests
