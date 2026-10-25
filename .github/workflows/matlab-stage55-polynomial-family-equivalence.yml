@@ -1,0 +1,28 @@
+name: MATLAB Polynomial Family vs Historic DAG (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/WholeMonthWeavingFamilyPolynomial.m'
+      - 'tests/run_stage55_polynomial_family_equivalence_tests.m'
+      - '.github/workflows/matlab-stage55-polynomial-family-equivalence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  small-exact:
+    name: MATLAB R2026a / exhaustive original-DAG versus polynomial family
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_polynomial_family_equivalence_tests
