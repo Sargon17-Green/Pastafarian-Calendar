@@ -97,6 +97,51 @@ object Stage53Tests {
         must("E_PATCH26_BIG_TOTAL", giants == 128)
         println("STAGE53_BIGINT_128_BOUNDARIES_CORRECTED_128_CONTROLS_GREEN")
 
+        // Cymesuredd y ffin: prawf annibynnol i'r ddau gyfeiriad,
+        // gan gynnwys rejection hyd at lapio'r modwlws a'r hen gyllideb.
+        var forwardBoundaries = 0
+        var forwardRejections = 0
+        var backwardRejections = 0
+        for (n in 2..65) {
+            val divisor = ExactInt.of(n.toLong())
+            val limit = (m / divisor) * divisor
+            val tail = (m - limit).toIntExact()
+            must("E_PATCH26_TAIL_RANGE_$n", tail in 1 until n)
+            val forward = patch.patch(limit, 1, n)
+            val oracleForward = NormativeCore.chooseRankShort(
+                NormativeCore.AnswerStream(limit, 1), divisor
+            ).toIntExact()
+            must("E_PATCH26_FORWARD_BOUNDARY_$n",
+                forward.correctedRank == n && oracleForward == n &&
+                forward.rejectedAnswers == 0 &&
+                forward.legacyRank != n && forward.correctionApplied)
+            forwardBoundaries++
+
+            val after = limit + ExactInt.ONE
+            val plus = patch.patch(after, 1, n)
+            val minus = patch.patch(after, -1, n)
+            val oraclePlus = NormativeCore.chooseRankShort(
+                NormativeCore.AnswerStream(after, 1), divisor
+            ).toIntExact()
+            val oracleMinus = NormativeCore.chooseRankShort(
+                NormativeCore.AnswerStream(after, -1), divisor
+            ).toIntExact()
+            must("E_PATCH26_FORWARD_REJECTION_$n",
+                plus.correctedRank == 1 && oraclePlus == 1 &&
+                plus.rejectedAnswers == tail &&
+                plus.legacyRank == 1 && !plus.correctionApplied)
+            must("E_PATCH26_BACKWARD_REJECTION_$n",
+                minus.correctedRank == n && oracleMinus == n &&
+                minus.rejectedAnswers == 1 &&
+                minus.legacyRank != n && minus.correctionApplied)
+            forwardRejections++
+            backwardRejections++
+        }
+        must("E_PATCH26_SYMMETRY_TOTALS",
+            forwardBoundaries == 64 && forwardRejections == 64 &&
+            backwardRejections == 64)
+        println("STAGE53_FORWARD_64_BOUNDARIES_AND_128_DIRECTIONAL_REJECTIONS_GREEN")
+
         val three = ExactInt.of(3)
         val boundary = (m / three) * three
         val forward = patch.patch(boundary, 1, 3)
