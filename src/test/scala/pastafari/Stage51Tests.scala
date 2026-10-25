@@ -419,10 +419,23 @@ object Stage51Tests {
         1,2,Gaps,Blocks,43)
       eqv((r.legacyMonthId,r.legacyDayInMonth),(1,43),"Cicatrice")
     }
-    check("PATCH24 conserva il calcolo annuale corretto"){
-      val r=new BaseMonsterManager().patch24CutletLocalMonthLookup(
-        1,2,Gaps,Vector.fill(6)(1),Blocks,85)
-      eqv((r.correctedMonthId,r.correctedDayInMonth),(2,2),"PATCH24")
+    check("PATCH24 e PATCH25 concordano su tutti i giorni dell'anno"){
+      // Stesso calendario sintetico, due percorsi indipendenti
+      // di correzione dell'offset locale e della cache del varco.
+      val previous=new BaseMonsterManager
+      val current=new BaseMonsterManager
+      for(w<-Vector(Blocks,Woven);d<-0 until 252){
+        val r24=previous.patch24CutletLocalMonthLookup(
+          1,2,Gaps,Vector.fill(6)(1),w,d)
+        val r25=current.patch25GateStartMonthCache(
+          3,4,Gaps,w,d)
+        val expected=oracle(w,d)
+        eqv((r24.correctedMonthId,r24.correctedDayInMonth),
+          expected,"PATCH24 "+d)
+        eqv((r25.correctedMonthId,r25.correctedDayInMonth),
+          (r24.correctedMonthId,r24.correctedDayInMonth),
+          "PATCH25 contro PATCH24 "+d)
+      }
     }
     check("oracolo normativo esclusivamente nei test"){
       val walk=Files.walk(root().resolve("src/main/scala"))
