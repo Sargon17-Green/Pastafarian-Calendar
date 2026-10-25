@@ -137,6 +137,11 @@ def main():
         ("wrong-v2-options",
          ("canonical_numeric", "run_arguments"), ["--timing-ns"]),
         ("unverifiable-commit", ("engine_verified_commit",), "not-a-commit"),
+        ("null-integrity-object", ("integrity",), None),
+        ("array-integrity-object", ("integrity",), []),
+        ("string-integrity-object", ("integrity",), "ignore"),
+        ("bool-manifest-version", ("manifest_version",), True),
+        ("float-manifest-version", ("manifest_version",), 1.0),
     )
     with tempfile.TemporaryDirectory(prefix="cpp-latina-preflight-neg-") as folder:
         root = Path(folder)
@@ -151,6 +156,30 @@ def main():
         manifest.write_text('{"manifest_version":', encoding="utf-8")
         insist_rejection(run_probe(preflight, manifest, adapter), "invalid-json")
         count += 1
+        for label, payload in (
+            ("null-root", "null"),
+            ("array-root", "[]"),
+            ("string-root", '"not-an-object"'),
+            ("numeric-root", "1"),
+        ):
+            manifest.write_text(payload, encoding="utf-8")
+            insist_rejection(run_probe(preflight, manifest, adapter), label)
+            count += 1
+        valid_json = json.dumps(original)
+        for label, payload in (
+            ("duplicate-root-member", '{"branch":"incorrect",' + valid_json[1:]),
+            ("duplicate-nested-member",
+             valid_json.replace(
+                 '"integrity": {',
+                 '"integrity": {"nonzero_exit_invalidates_entire_shard": false, ',
+                 1,
+             )),
+            ("nonfinite-extension-member",
+             valid_json[:-1] + ', "unused_math": NaN}'),
+        ):
+            manifest.write_text(payload, encoding="utf-8")
+            insist_rejection(run_probe(preflight, manifest, adapter), label)
+            count += 1
         manifest.write_text(json.dumps(original), encoding="utf-8")
         insist_rejection(
             run_probe(preflight, manifest, root / "nonexistent-binary"),

@@ -45,11 +45,31 @@ def run(binary, args, input_bytes, timeout):
         raise ValueError("probe timed out; reject implementation until investigated") from exc
 
 
+def reject_duplicate_members(pairs):
+    """Never silently pick the first/last duplicate JSON key across runtimes."""
+    document = {}
+    for key, value in pairs:
+        if key in document:
+            raise ValueError(f"duplicate JSON member: {key}")
+        document[key] = value
+    return document
+
+
+def reject_nonfinite_constant(token):
+    raise ValueError(f"nonstandard JSON numeric constant: {token}")
+
+
 def manifest_contract(path):
-    raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    raw = json.loads(
+        Path(path).read_text(encoding="utf-8"),
+        object_pairs_hook=reject_duplicate_members,
+        parse_constant=reject_nonfinite_constant,
+    )
+    require(isinstance(raw, dict), "manifest root must be a JSON object")
     canonical = raw.get("canonical_numeric")
     require(isinstance(canonical, dict), "missing canonical_numeric")
-    require(raw.get("manifest_version") == 1, "unsupported manifest_version")
+    require(type(raw.get("manifest_version")) is int and
+            raw["manifest_version"] == 1, "unsupported manifest_version")
     require(raw.get("branch") == "C++&Latina", "wrong implementation branch")
     require(raw.get("repository") == "Sargon17-Green/Pastafarian-Calendar",
             "wrong implementation repository")
@@ -59,9 +79,11 @@ def manifest_contract(path):
     require(raw.get("protocol") == "PASTAFARI_SOAK_TSV_V1", "V1 contract missing")
     require(raw.get("request_fields") == FIELDS[:3], "request fields do not match")
     require(raw.get("response_fields") == V1_FIELDS, "V1 response fields differ")
-    require(raw.get("integrity", {}).get("nonzero_exit_invalidates_entire_shard") is True,
+    integrity = raw.get("integrity")
+    require(isinstance(integrity, dict), "integrity must be a JSON object")
+    require(integrity.get("nonzero_exit_invalidates_entire_shard") is True,
             "shard invalidation must be mandatory")
-    require(raw.get("integrity", {}).get("never_silently_skip_hard_cases") is True,
+    require(integrity.get("never_silently_skip_hard_cases") is True,
             "silent skipping must be forbidden")
     require(raw.get("time_series") == {
         "stream": "stderr", "prefix": "SOAK_TIMING_NS", "unit": "ns",

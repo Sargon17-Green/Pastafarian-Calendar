@@ -81,3 +81,14 @@ timing and the second line's error. The positive readiness JSON records
 A deliberately batch-buffered substitute serves as a fail-closed
 regression test. Passing this readiness gate is not a global soak run
 and is not cryptographic provenance attestation.
+
+## Strict JSON envelope for scheduler readiness
+
+The preflight requires the manifest root and nested `integrity` section
+to be JSON objects and `manifest_version` to be an integer (not a
+boolean or a floating-point number). Duplicate JSON members at **any**
+nesting level and nonstandard `NaN`/`Infinity` values are rejected,
+including in optional extensions. Rejection always returns a single
+machine-readable JSON line with `ready=false`; schema errors must not
+escape as Python tracebacks. These constraints avoid inconsistent
+first-key/last-key parsing between potential language runtimes.
