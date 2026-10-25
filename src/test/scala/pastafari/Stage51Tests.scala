@@ -460,6 +460,10 @@ object Stage51Tests {
         .get.split("=",2)(1).toInt
       truth(current>=51 && completed>=50 && completed<=current,
         "Stage51 corrente")
+      if(completed>=51 || current>51)
+        truth(text.contains(
+          "STAGE_51_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_64_PASS_0_FAIL"),
+          "Firma storica PATCH25 certificata")
     }
     println("\nRISULTATO STADIO 51: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)
