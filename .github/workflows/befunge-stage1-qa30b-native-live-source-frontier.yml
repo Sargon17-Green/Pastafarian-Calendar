@@ -73,7 +73,7 @@ jobs:
           grep -q QA30B_SIGNED_DYNAMIC_CONTROL_MEMORY_SNAPSHOTS_CAPTURED "$RUNNER_TEMP/qa30b/qa30b_native_console.log"
           grep -q QA30B_NO_GLOBAL_DEAD_CODE_OR_STAGE1_ACCEPTANCE "$RUNNER_TEMP/qa30b/qa30b_native_console.log"
           test -s "$RUNNER_TEMP/qa30b/qa30b_live_source_frontier.json"
-      - name: Independently audit both live state receipts, all original STEP hashes and 32 negative controls
+      - name: Independently audit both live state receipts, all original STEP hashes and 34 negative controls
         shell: bash
         run: |
           set -euo pipefail
@@ -85,7 +85,7 @@ jobs:
             --output "$RUNNER_TEMP/qa30b/qa30b_independent_audit.json" \
             | tee "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
           grep -q QA30B_INDEPENDENT_TWO_INPUT_LIVE_NATIVE_SOURCE_PARITY_PASS "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
-          grep -q QA30B_THIRTY_TWO_ADVERSARIAL_SOURCE_RECEIPTS_REJECTED "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
+          grep -q QA30B_THIRTY_FOUR_ADVERSARIAL_SOURCE_RECEIPTS_REJECTED "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
           grep -q QA30B_GLOBAL_REACHABILITY_AND_STAGE1_REMAIN_OPEN "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
       - name: Keep real Native live memory evidence and failure diagnostics
         if: always()

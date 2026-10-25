@@ -105,8 +105,8 @@ def verify_record(record,label,original,trace,qa30a,source):
     # The signed unmodified Native STEP trace independently fixes how many
     # actual p instructions executed. A forged count must not pass just
     # because it exceeds the number of reported candidate-cell writes.
-    traced_p=sum(1 for step in trace if step[5]==ord("p") and step[6]==0)
-    need(p==traced_p,
+    traced_p_ticks={step[0] for step in trace if step[5]==ord("p") and step[6]==0}
+    need(p==len(traced_p_ticks),
          "QA30B Native put count differs from signed executed p opcodes")
     targets=candidates(qa30a)
     originals={(x,y):source[y][x] for x,y in targets}
@@ -118,6 +118,8 @@ def verify_record(record,label,original,trace,qa30a,source):
              and type(w["after"]) is int,
              "QA30B physical candidate mutation metadata malformed")
         if i:need(writes[i-1]["tick"]<=w["tick"],"candidate puts unordered")
+        need(w["tick"] in traced_p_ticks,
+             "reported candidate FungeSpace put did not execute at a signed Native p STEP")
         need(w["before"]==current[xy],
              "candidate physical put previous byte contradicts original source history")
         current[xy]=w["after"]
@@ -152,6 +154,10 @@ def verify_record(record,label,original,trace,qa30a,source):
     return len(snapshots)
 
 def test_forgery(report,label,original,trace,qa30a,source):
+    need(trace[-1][5]!=ord("p") and
+         max(s["tick"] for s in report["live_state_snapshots"])<len(trace),
+         "forged tail-put challenge requires a real non-p terminal STEP after all control witnesses")
+    tail_source=report["live_state_snapshots"][0]["fetched_source_candidate_live_values"][0]
     attacks=[
       ("label",lambda a:a.__setitem__("label","forged")),
       ("input",lambda a:a.__setitem__("original_input","0 0 0 0\n")),
@@ -168,7 +174,11 @@ def test_forgery(report,label,original,trace,qa30a,source):
       ("fake-live-byte",lambda a:a["live_state_snapshots"][0]["fetched_source_candidate_live_values"][0].__setitem__("runtime_value",-999)),
       ("delete-source-cell",lambda a:a["live_state_snapshots"][0]["fetched_source_candidate_live_values"].pop()),
       ("fake-prior-ticks",lambda a:a["live_state_snapshots"][0]["fetched_source_candidate_live_values"][0]["actual_prior_put_ticks"].append(-1)),
-      ("inflate-native-put-count",lambda a:a.__setitem__("real_native_put_calls",report["real_native_put_calls"]+1))
+      ("inflate-native-put-count",lambda a:a.__setitem__("real_native_put_calls",report["real_native_put_calls"]+1)),
+      ("fake-post-witness-non-p-put",lambda a:a["writes_to_original_15_cells"].append({
+          "tick":len(trace),"coordinate":list(tail_source["coordinate"]),
+          "before":tail_source["static_original_value"],
+          "after":tail_source["static_original_value"]+1}))
     ]
     for name,edit in attacks:
         mutated=copy.deepcopy(report)
@@ -223,7 +233,7 @@ def main():
                        "real_put_calls":rec["real_native_put_calls"],
                        "candidate_puts":len(rec["writes_to_original_15_cells"]),
                        "audited_actual_native_control_witnesses":samples})
-    need(controls==32 and sum(x["steps"] for x in result)==18859,
+    need(controls==34 and sum(x["steps"] for x in result)==18859,
          "QA30B must reject exactly 32 adversarial Native records")
     report={"schema":"qa30b-independent-live-original-control-source-audit-v1",
             "actual_native_programs":2,"original_steps_replayed":18859,
@@ -235,7 +245,7 @@ def main():
             "stage1_complete":False,"original_programs":result}
     Path(a.output).write_text(json.dumps(report,sort_keys=True,indent=2)+"\n")
     print("QA30B_INDEPENDENT_TWO_INPUT_LIVE_NATIVE_SOURCE_PARITY_PASS",18859)
-    print("QA30B_THIRTY_TWO_ADVERSARIAL_SOURCE_RECEIPTS_REJECTED",controls)
+    print("QA30B_THIRTY_FOUR_ADVERSARIAL_SOURCE_RECEIPTS_REJECTED",controls)
     print("QA30B_GLOBAL_REACHABILITY_AND_STAGE1_REMAIN_OPEN")
 
 if __name__=="__main__":
