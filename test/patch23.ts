@@ -83,9 +83,26 @@ assert(full.source==="FULL_STAGE46_PATCH23_VIRTUAL_MONTH_LENGTHS"&&
  full.actualPredecessorCalls===full.historical.realPredecessorCalls+1&&
  full.actualSharedWrites===BigInt(full.actualPredecessorCalls)*58n,
  "Full Stage46 old path आणि खरा normative Seal31 correct");
-const tinyLegacy=new Discovery23MonthLengthSelector().select(c,s,5778n);
-const tinyPatched=new Patch23MonthLengthSelector().select(c,s,tinyLegacy);
-assert(tinyLegacy.selectedMonthCount===47&&
+// 5658 = 46*123: 46 महिन्यांच्या कुटुंबात फक्त एक वैध क्रम.
+// 720 नियंत्रित DROP46 स्रोतांमधून खरा Seal30 rank=1 शोधतो.
+const safeLegacy=new Discovery23MonthLengthSelector();
+const safePatch=new Patch23MonthLengthSelector();
+let tinyLegacy:ReturnType<Discovery23MonthLengthSelector["select"]>|null=null;
+let tinyPatched:ReturnType<Patch23MonthLengthSelector["select"]>|null=null;
+let nativeSmallSource=0n;
+for(let i=1n;i<=720n;i++){
+ const altered={targetDay:s.targetDay,visible:[...s.visible],
+  stones:s.stones,startBowls:s.startBowls};
+ altered.visible[46]=i;
+ const candidate=safeLegacy.select(c,altered,5658n);
+ if(candidate.selectedMonthCount!==46)continue;
+ tinyLegacy=candidate;
+ tinyPatched=safePatch.select(c,altered,candidate);
+ nativeSmallSource=i;
+ break;
+}
+assert(tinyLegacy!==null&&tinyPatched!==null&&nativeSmallSource>0n&&
+ tinyLegacy.selectedMonthCount===46&&
  !tinyLegacy.listBlocked&&tinyLegacy.originalRows?.length===1&&
  tinyLegacy.oldSeal31ActualCalls===1&&
  tinyPatched.correctFamilySize===1n&&
