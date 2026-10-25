@@ -65,6 +65,7 @@ on:
       - '!tests/run_stage55_adjoint_next_letter_tests.m'
       - '!tests/run_stage55_real_year_adjoint_four.m'
       - '!tests/run_stage55_polynomial_family_equivalence_tests.m'
+      - '!tests/run_stage55_polynomial_full_year_edges.m'
       - '!tests/run_stage55_real_year_8_day_unopened.m'
       - '!tests/run_stage55_all_frontier_inverse_tests.m'
       - 'DEVELOPMENT_STAGE.md'
