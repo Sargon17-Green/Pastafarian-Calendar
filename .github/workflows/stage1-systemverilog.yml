@@ -20,6 +20,33 @@ concurrency:
 permissions:
   contents: read
 jobs:
+  native_lex_factor_unit:
+    # Standalone arithmetic QA, no 572MB native H table needed.
+    # A QA-branch push checks this independently of the queued PR run.
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Exhaustive three-label and seeded 45-label arithmetic
+        run: |
+          set -euo pipefail
+          ulimit -v 1572864
+          bash scripts/verify_native_lex_factor_unit.sh
+      - name: Keep positive and deliberate mutation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-lex-factor-unit
+          path: |
+            build/native_lex_factor_unit.log
+            build/native_lex_factor_unit_mutant.log
+          retention-days: 90
+          if-no-files-found: warn
+
   simulation:
     runs-on: ubuntu-latest
     timeout-minutes: 25
