@@ -8,7 +8,6 @@ use Math::BigInt;
 use Digest::SHA qw(sha256_hex);
 use Getopt::Long qw(GetOptions);
 use lib 'lib','t/lib';
-use Pastafari::WeavingMemoOracle;
 use Pastafari::WeavingPolynomial qw(countWeavingsPolynomial);
 use Pastafari::WeavingRank qw(rankWeavingPolynomial);
 use Pastafari::WeavingUnrank qw(unrankWeavingPolynomial);
@@ -125,14 +124,30 @@ sub independent_prefix ($lengths,$counter,$prefix) {
 }
 sub key ($word) {return join(',',@$word);}
 
+# 不使用僅支援四月份的 MemoOracle；五月份前綴真值
+# 由另一套直接逐字枚舉所得的前綴頻率字典擔任參考。
+sub exhaustively_count_prefixes ($words) {
+    my %frequencies;
+    for my $word (@$words) {
+        $frequencies{''}++;
+        my $prefix='';
+        for my $part (split /,/, $word) {
+            $prefix=length($prefix) ? "$prefix,$part" : "$part";
+            $frequencies{$prefix}++;
+        }
+    }
+    return \%frequencies;
+}
+
+
 my ($profiles,$ranks,$prefixes,$mirrors)=(0,0,0,0);
 my $total_all=Math::BigInt->bzero;
 my @entries;
-for my $b (1..3) {
+for my $month_b (1..3) {
  for my $c (1..3) {
   for my $d (1..3) {
    for my $e (1..3) {
-    my @L=($shard,$b,$c,$d,$e);
+    my @L=($shard,$month_b,$c,$d,$e);
     my @original=@L;
     my @rev=reverse @L;
     my ($count,$memo)=independently_count(\@L);
@@ -142,11 +157,12 @@ for my $b (1..3) {
     die "R74 五個月字序反轉雙射總數不同\n" if $N!=$N_reversed;
     die "R74 五個月位置多項式總數不同\n"
         if countWeavingsPolynomial(\@L)!=$N;
-    my $clock=Pastafari::WeavingMemoOracle->new(
-        \@L,{bounded_cache=>1,cache_limit=>16,cache_policy=>'clock',
-             early_final_closed_form=>1});
-    die "R74 有界 clock 總數和獨立 DFS 不同\n"
-        if $clock->count_prefix([])!=$N;
+    my $complete_words=enumerate_legal_words(\@L);
+    die "R74 獨立全集枚舉總數與 DFS BigInt 不一致\n"
+        if "$N" ne scalar(@$complete_words);
+    my $observed_prefixes=exhaustively_count_prefixes($complete_words);
+    die "R74 全集空前綴數不同\n"
+        if $observed_prefixes->{''}!=$N;
     my $days=0;$days+=$_ for @L;
     my @samples=(
        Math::BigInt->bone,Math::BigInt->new(2),
@@ -180,15 +196,16 @@ for my $b (1..3) {
         for my $cut (sort {$a<=>$b} keys %cuts) {
             my @prefix=$cut?@$word[0..$cut-1]:();
             my $correct=independent_prefix(\@L,$count,\@prefix);
-            die "R74 五個月 prefix 時計數失真\n"
-                if $clock->count_prefix(\@prefix)!=$correct;
+            my $observed=$observed_prefixes->{key(\@prefix)}//0;
+            die "R74 真正全集前綴頻率與獨立 DFS 不一致\n"
+                if "$observed" ne "$correct";
             $prefixes++;
         }
         $ranks++;
         $mirrors++;
     }
-    my $diag=$clock->diagnostics;
-    die "R74 clock 16 BigInt 項上限被突破\n" if $diag->{entries}>16;
+    die "R74 全集頻率表非正整數\n"
+        if grep {$_<1} values %$observed_prefixes;
     die "R74 修改了原始月份長度\n"
         if join(',',@L) ne join(',',@original);
     my $full="$N";
@@ -246,11 +263,11 @@ my %expected_exhaustive_sha=(
 );
 my $mapping_rows='';
 my ($enumerated_profiles,$exhaustive_words)=(0,0);
-for my $b (1..3) {
+for my $month_b (1..3) {
  for my $c (1..3) {
   for my $d (1..3) {
    for my $e (1..3) {
-    my @L=($shard,$b,$c,$d,$e);
+    my @L=($shard,$month_b,$c,$d,$e);
     my @reversed=reverse @L;
     my $words=enumerate_legal_words(\@L);
     my $reverse_words=enumerate_legal_words(\@reversed);

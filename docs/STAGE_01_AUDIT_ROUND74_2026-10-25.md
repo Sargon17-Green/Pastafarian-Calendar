@@ -34,8 +34,8 @@ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40181557502
 
 合計跨 243 向量的合法字序數為 **86543**，
 不是說在單一向量內有這麼多詞。每個向量額外檢查
-不同位置分布的插入多項式、獨立 16 項 CLOCK 有界
-Memo Oracle、根及選中真實前綴的完工數。
+不同位置分布的插入多項式、獨立 DFS 計數，
+以及真正完整詞全集導出的前綴頻率表。
 
 每個配置確定性地選 rank 1、2、floor(N/2)+1、N−1、N
 中存在且互異的名次，用自身 DFS 子樹 BigInt 計算真正完整
@@ -68,3 +68,21 @@ a=3 `fff46731a29d59f5f1b1fedfbd0a875963c0ab877f3c89fe2c6001e23a54b356`。
 新的 Native 全集檢驗仍由既有 185 秒／393216 KiB 父程序監督，
 不擴大資源上限。早先提交與原生 CI QUEUED 不得被改寫為 PASS；
 以增加全集檢驗的新提交完整 CI 為該輪最終驗收依據。
+
+
+## 兩次 Native RED 與根因修復（2026-10-25）
+
+Actions 40192049029（commit fc326609569a05e0fe46c8508221a5ef8d7e3b5b）及
+Actions 40192779969（commit 143645a32839f51c664cde475cc8983a0938cb3a）
+均為整體 FAILURE：verify 與完整 perl-stage01 均 SUCCESS，
+三份 R74 Native 皆在原生執行開頭失敗。日誌指出兩個問題：
+首先，早期末次序閉式及整個 `WeavingMemoOracle` 契約只支援
+最多四個月份，不可被五個月測試呼叫；其次，循環的局部
+`$b` 與 Perl 排序比較器的特殊 `$b` 名稱互相遮蔽。
+新修補**不擴大原有四月 Oracle 的契約**，而是逐字枚舉
+五個月合法全集，形成真正獨立的前綴頻率表，與 DFS 每個樣本
+的前綴完工數比較。局部月份變數改為 `$month_b`。
+同時在 t/95 中新增防回歸測試，嚴禁對五個月援引四月 Oracle，
+以及遮蔽 sort 比較器。兩次 FAILURE 均保留。
+修補後仍須 verify、完整 perl-stage01、三個 Native 同一 HEAD
+全部成功，不能將提交本身當作 PASS。

@@ -31,8 +31,14 @@ like($audit,qr/\$N!=\$N_reversed/,
      '反轉後月份長度精確總數須保持不變');
 like($audit,qr/countWeavingsPolynomial\(\\\@L\)/,
      '五個月 BigInt 總數對照異構位置多項式');
-like($audit,qr/\$clock->count_prefix\(\\\@prefix\)!=\$correct/,
-     '每條五個月測試詞須檢查真實前綴計數');
+like($audit,qr/\$observed_prefixes->\{key\(\\\@prefix\)\}/,
+     '每條五個月測試詞須與獨立全集字詞前綴頻率比較');
+unlike($audit,qr/WeavingMemoOracle/,
+     '五個月稽核不能使用僅支援四月份的 Memo Oracle');
+unlike($audit,qr/for my \$b \(1\.\.3\)/,
+     '月份長度變數不可遮蔽 sort 比較器的特殊 \$b');
+like($audit,qr/exhaustively_count_prefixes/,
+     '真正全集字序提供獨立前綴頻率表');
 like($audit,qr/\$ranks!=\$mirrors/,
      '每條原始樣本必須完成雙射鏡射檢驗');
 for my $shard (1..3) {
