@@ -463,6 +463,10 @@ jobs:
             build/native_lex_prefix.log
             build/native_lex_prefix_negative.log
             build/native_lex_prefix.bin
+            build/native_lex_fast64.log
+            build/native_lex_fast256.log
+            build/native_lex_fast_negative.log
+            build/native_lex_fast_prefix.bin
             build/native_lex_rank.bin
             build/native_H_read_*.bin
             build/native_H_root.bin
