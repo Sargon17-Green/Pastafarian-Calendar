@@ -373,3 +373,44 @@ jobs:
             build/foundation_weave_prefix12345678.bin
           retention-days: 90
           if-no-files-found: warn
+
+  full_year_reference:
+    # Full 4244-day test-only Python exact unrank with an independent
+    # SystemVerilog structural check. Not the production ASIC converter.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record exact source SHA and runtime
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          git rev-parse HEAD | tee build/full_year_reference_checked_sha.txt
+          python3 --version | tee build/full_year_reference_python_version.txt
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Run exact 4244-day reference and separate SV structure witness
+        run: |
+          set -euo pipefail
+          ulimit -v 3145728
+          bash scripts/verify_foundation_full_year_reference.sh
+      - name: Preserve full year witness for independent inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-full-year-reference-qa
+          path: |
+            build/full_year_reference_checked_sha.txt
+            build/full_year_reference_python_version.txt
+            build/foundation_full_year_reference.log
+            build/foundation_full_year_sv_structure.log
+            build/foundation_weave_all4244.bin
+            build/foundation_weave_all4244.hex
+            build/foundation_weave_reference_metrics.txt
+          retention-days: 90
+          if-no-files-found: warn
