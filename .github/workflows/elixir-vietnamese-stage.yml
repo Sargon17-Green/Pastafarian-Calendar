@@ -43,3 +43,37 @@ jobs:
           name: stage55-soak-native-${{ github.sha }}
           path: elixir_vietnamese_soak.log
           retention-days: 30
+
+  differential_python_turkce:
+    if: github.ref == 'refs/heads/Elixir+tiếng-Việt'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Lấy Elixir tiếng Việt theo HEAD được kiểm tra
+        uses: actions/checkout@v4
+        with:
+          path: .
+      - name: Lấy Python độc lập tại SHA đã khóa
+        uses: actions/checkout@v4
+        with:
+          ref: 'b3501b4296403bc33cb36f81a763269e5af97523'
+          path: python-peer
+          persist-credentials: false
+      - name: Cài Elixir và Erlang
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27'
+          elixir-version: '1.18'
+      - name: Cài Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: So sánh năm thành phần chuẩn từ hai chương trình độc lập
+        run: python3 qa/compare_elixir_python.py
+      - name: Lưu chứng cứ hai nhánh dù có sai lệch
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: elixir-python-differential-${{ github.sha }}
+          path: differential-evidence/
+          retention-days: 30
