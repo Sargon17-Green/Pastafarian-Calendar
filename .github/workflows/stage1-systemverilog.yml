@@ -460,6 +460,10 @@ jobs:
             build/native_H_lookup_negative.log
             build/native_H_children7.log
             build/native_H_children7_*.bin
+            build/native_lex_prefix.log
+            build/native_lex_prefix_negative.log
+            build/native_lex_prefix.bin
+            build/native_lex_rank.bin
             build/native_H_read_*.bin
             build/native_H_root.bin
             build/native_H_prefix11.bin
