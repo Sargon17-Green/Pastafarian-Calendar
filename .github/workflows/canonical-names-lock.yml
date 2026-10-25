@@ -3,6 +3,7 @@ name: Canonical Names Lock
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -1119,8 +1120,10 @@ jobs:
           set -euo pipefail
           python3 -m unittest discover -s soak -p 'test_post55_differential.py' -q
 
+  # Manual-only: the Kotlin test oracle full-date weaving recursion is currently
+  # resource-unbounded. This remains a diagnostic, not a production soak.
   post55-diagnostic-not-certification:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Kotlin+Cymraeg'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/Kotlin+Cymraeg'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -1200,5 +1203,92 @@ jobs:
         with:
           name: kotlin-cymraeg-post55-diagnostic-${{ github.run_id }}
           path: kotlin/post55-diagnostic/
+          if-no-files-found: warn
+          retention-days: 14
+
+  # Actual independent production components, NOT a full-date certification.
+  post55-rank-component-differential:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Kotlin+Cymraeg'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout pinned Welsh Kotlin source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          path: kotlin
+      - name: Checkout independently developed Turkish Python source
+        uses: actions/checkout@v4
+        with:
+          repository: Sargon17-Green/Pastafarian-Calendar
+          ref: b3501b4296403bc33cb36f81a763269e5af97523
+          persist-credentials: false
+          path: python-turkce
+      - name: Verify immutable distinct source revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C kotlin rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C python-turkce rev-parse HEAD)" = 'b3501b4296403bc33cb36f81a763269e5af97523'
+          test "$GITHUB_SHA" != 'b3501b4296403bc33cb36f81a763269e5af97523'
+          echo STAGE55_COMPONENT_PINNED_SOURCES_CONFIRMED
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Kotlin 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin-compiler-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-compiler-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Verify component protocol and corpus self-tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s kotlin/soak \
+            -p 'test_post55_rank_component_differential.py' -q
+      - name: Build actual Kotlin production rank selectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc kotlin/src/main/kotlin/pastafari/*.kt \
+            kotlin/soak/Post55ProductionRankBridge.kt \
+            -include-runtime -d "$RUNNER_TEMP/post55-production-rank.jar"
+          test -s "$RUNNER_TEMP/post55-production-rank.jar"
+          echo STAGE55_COMPONENT_KOTLIN_PRODUCTION_BUILT
+      - name: Run independent Kotlin/Python rank component differential
+        shell: bash
+        env:
+          PASTAFARIAN_PYTHON_SRC: python-turkce/src
+          KOTLIN_SHA: ${{ github.sha }}
+          PYTHON_SHA: b3501b4296403bc33cb36f81a763269e5af97523
+        run: |
+          set -euo pipefail
+          mkdir -p kotlin/post55-component
+          python3 kotlin/soak/post55_rank_component_differential.py \
+            --kotlin-command "java -Xmx512m -cp $RUNNER_TEMP/post55-production-rank.jar pastafari.Post55ProductionRankBridge" \
+            --python-command "python3 kotlin/soak/python_turkce_rank_bridge.py" \
+            --seed 55 --timeout-seconds 180 \
+            --kotlin-revision "$KOTLIN_SHA" --python-revision "$PYTHON_SHA" \
+            --evidence kotlin/post55-component/evidence.json \
+            2>&1 | tee "$RUNNER_TEMP/component-soak.log"
+          grep -E '^STAGE55_COMPONENT_DIFFERENTIAL_GREEN_[0-9]+$' "$RUNNER_TEMP/component-soak.log"
+          grep -Fx 'STAGE55_COMPONENT_NOT_FULL_DATE_SOAK' "$RUNNER_TEMP/component-soak.log"
+      - name: Preserve component comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-cymraeg-post55-production-component-${{ github.run_id }}
+          path: kotlin/post55-component/
           if-no-files-found: warn
           retention-days: 14

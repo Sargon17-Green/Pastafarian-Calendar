@@ -67,3 +67,30 @@ neu timeout, ac **nid yw'n ardystio** Kotlin cynhyrchu. Mae hyd yn oed
 `--kotlin-mode production --certify` yn cael ei wrthod tan archwiliad
 ffynhonnell ac adeiladwaith Kotlin cynhyrchu gwirioneddol: nid yw baner
 CLI yn brawf o annibyniaeth gweithrediad. Cedwir `main` heb newid.
+
+## Soak cydran cynhyrchu ar wahân (rheng/gap yn unig)
+
+Mae `soak/Post55ProductionRankBridge.kt` yn rhedeg cod **cynhyrchu**
+`GateGapRankPatchWrapper` a `Year5000InclusiveAcceptancePatchWrapper`.
+Mae `soak/python_turkce_rank_bridge.py` yn rhedeg y cod cynhyrchu
+`LegacyBiasedSelectionAdapter` a `SelectionRejectionPatchWrapper`
+o'r gangen Python+Türkçe wedi'i phinio. Nid yw'r naill
+bont yn mewnforio'r oracl Kotlin.
+
+Ar gyfer mewnbynnau `G|Y<TAB>gateIndex|n<TAB>first<TAB>step`,
+cymharir yn union `rank1`, `gap` a nifer yr atebion a wrthodwyd.
+Mae'r corpus yn cynnwys cyfeiriadau -1/+1, union ffin derbyn,
+ffiniad+1, `M`, teuluoedd 1..64 a 1001..1128, a samplau
+canolog â had pendant. Mae'r prawf yn stopio ar y gwahaniaeth cyntaf,
+yn cofnodi SHA256 a hunaniaethau'r ddau commit, ac yn defnyddio terfyn
+amser/memori. Disgwylir marciau
+`STAGE55_COMPONENT_DIFFERENTIAL_GREEN_...` a
+`STAGE55_COMPONENT_NOT_FULL_DATE_SOAK`.
+
+**NID YW** llwyddiant y cydran hon yn profi bod y fersiwn Kotlin
+yn gallu cynhyrchu'r calendr cyfan. Mae'r soak pum maes yn dal ar agor;
+mae'r ddiagnosteg ar yr oracl llawn wedi methu ar
+`NormativeCore.WeavingFamily.count` oherwydd dyfnder recursion.
+Nid yw'r methiant yma yn profi anghydweddiad cynhyrchu.
+Mae'r gwaith diagnostig hwn bellach yn `workflow_dispatch`
+yn unig i osgoi ailadrodd yr un prawf resource-unbounded ar bob push.
