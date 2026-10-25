@@ -114,3 +114,24 @@ Mae prawf Kotlin CI ar wahân yn rhoi'r stream a ddaw
 o'r oracl **test-only** ac yn cymharu'r gate a'r canlyniad
 blwyddyn 5000. Dim ond gwirio **cydrannau Kotlin** mae'r prawf
 hwn; nid oes hawl i'w alw'n soak dau beiriant.
+
+## Injan saws cynhyrchu annibynnol — cam gwirio newydd
+
+Ychwanegwyd `ProductionSauceEngine.kt` (dan `src/main`) i gyfrifo'r
+algorhythm saws o fewn Kotlin yn hytrach na mewnforio'r oracl:
+cyfrifon gweithredu, cerrig 46 rhes, 7 diferion cudd, 46 diferion
+gweladwy ac 11 grind ym mhob un, tywalltiadau snapshot,
+12 post-stir a chwestiynau bowl wedi'u selio. Mae'r rhaglen
+yn dychwelyd yr union `firstAnswer,directionStep`.
+
+Mae `Post55ProductionSauceTests.kt` yn mynnu 12 pâr o ddyddiau,
+144 stream bowl, 57 gate wedi'u cynhyrchu gan saws Kotlin ei hun,
+a thri dewis blwyddyn 5000, yn erbyn yr oracl **prawf yn unig**.
+Nid yw'r profion hyn yn ardystiad cross-implementation eto; dim ond
+gwiriad semantig mewnol ydynt.
+
+Mae'r injan wedi ennill lleoliad ffynhonnell cynhyrchu ond nid
+trosiad `c,t` pum maes: mae'r dewis blwyddyn 5000 yn gweithio
+yn egwyddorol trwy'r saws, ond nid yw next/previous year, adeiladu
+cytled/mis, hyd mis, gwead a dydd-mewn-mis yn y
+llwybr cynhyrchu integredig eto. Mae'r soak llawn yn agored.
