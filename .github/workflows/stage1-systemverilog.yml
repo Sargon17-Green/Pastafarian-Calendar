@@ -426,7 +426,7 @@ jobs:
     # Separate from already-green QA, bounded resource budget.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 31
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
@@ -467,6 +467,9 @@ jobs:
             build/native_lex_fast256.log
             build/native_lex_fast_negative.log
             build/native_lex_fast_prefix.bin
+            build/native_lex_full.log
+            build/native_lex_full.bin
+            build/native_lex_full_structural.log
             build/native_lex_rank.bin
             build/native_H_read_*.bin
             build/native_H_root.bin
