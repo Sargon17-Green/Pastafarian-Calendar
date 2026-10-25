@@ -170,12 +170,19 @@ object Stage50Tests {
         eqv(r.gateStartDayOffset,(d/963)*963,"Start "+d)
       }
     }
-    check("tutti i 47 varchi minimi sono verificabili"){
-      val gaps=Vector.fill(47)(42)
-      val w=robin(17,gaps.sum)
-      for(d<-Vector(0,41,42,1000,1973)) {
-        val r=old(gaps,w,d)
-        eqv(r.gateId,d/42+1,"Gate "+d)
+    check("tutte le 42 cardinalità di varchi da 6 a 47 sono valide"){
+      // Ogni cardinalità ammessa, inclusi i confini e l'ultimo giorno.
+      for(n<-6 to 47) {
+        val gaps=Vector.fill(n)(42)
+        val w=robin(math.max(3,(gaps.sum+122)/123),gaps.sum)
+        for(d<-Vector(0,41,42,gaps.sum-1).distinct) {
+          val r=old(gaps,w,d)
+          val start=(d/42)*42
+          eqv(r.gateId,d/42+1,"Gate "+n+"/"+d)
+          eqv(r.gateStartDayOffset,start,"Start "+n+"/"+d)
+          eqv((r.legacyMonthId,r.legacyDayInMonth),
+            normative(w,start),"Cache "+n+"/"+d)
+        }
       }
     }
     check("1024 ingressi deterministici su 6..17 porte"){
@@ -320,15 +327,31 @@ object Stage50Tests {
       truth(s.contains(
         "STAGE_49_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_55_PASS_0_FAIL"),
         "Stage49")
-      truth(s.contains("LAST_COMPLETED_STAGE=49"),"Completed")
-      truth(s.contains("CURRENT_STAGE=50"),"Current")
+      val current=s.linesIterator.find(_.startsWith("CURRENT_STAGE="))
+        .get.split("=",2)(1).toInt
+      val completed=s.linesIterator.find(
+        _.startsWith("LAST_COMPLETED_STAGE="))
+        .get.split("=",2)(1).toInt
+      truth(current>=50 && completed>=49 && completed<=current,
+        "Sequenza storica")
+      if(current==50)
+        eqv(completed,49,"Stage49 certificato, Stage50 aperto")
+      else
+        truth(s.contains(
+          "STAGE_50_NATIVE_VERIFICATION=PASS_EXPECTED_RED_44_PASS_3_FAIL"),
+          "Firma storica DISCOVERY25 certificata")
       val walk=Files.walk(root().resolve("src/main/scala"))
       val src=try walk.iterator().asScala
         .filter(p=>Files.isRegularFile(p)&&p.toString.endsWith(".scala"))
         .map(p=>new String(Files.readAllBytes(p),StandardCharsets.UTF_8))
         .mkString("\n")
       finally walk.close()
-      truth(!src.contains("def gateCacheMonthPatch("),"PATCH25 assente")
+      if(current==50)
+        truth(!src.contains("def gateCacheMonthPatch("),
+          "PATCH25 non anticipata")
+      else
+        truth(src.contains("def gateCacheMonthPatch("),
+          "PATCH25 futura disponibile")
     }
     // Tre fallimenti intenzionali, soltanto questi.
     Vector(
