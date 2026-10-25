@@ -210,9 +210,9 @@ def main():
     result=[];controls=0
     for rec in rows:
         label=rec["label"]
-        original,trace=original(label,a.root)
-        samples=verify_record(rec,label,original,trace,qa30a,source)
-        controls+=test_forgery(rec,label,original,trace,qa30a,source)
+        signed_case,trace=original(label,a.root)
+        samples=verify_record(rec,label,signed_case,trace,qa30a,source)
+        controls+=test_forgery(rec,label,signed_case,trace,qa30a,source)
         result.append({"input_label":label,"steps":len(trace),
                        "real_put_calls":rec["real_native_put_calls"],
                        "candidate_puts":len(rec["writes_to_original_15_cells"]),
