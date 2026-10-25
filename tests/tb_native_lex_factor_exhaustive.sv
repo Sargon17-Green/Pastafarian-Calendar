@@ -131,7 +131,9 @@ module tb_native_lex_factor_exhaustive;
           tmp=candidate;
           for(sym=1;sym<=3;sym=sym+1) begin
             counter[sym]=0;
-            last[sym]=-1;
+            // Absent labels have already completed in increasing
+            // label order. Give them DISTINCT ordered sentinels.
+            last[sym]=sym-4;
           end
           for(slot=0;slot<total;slot=slot+1) begin
             ordinal=(tmp%3)+1;
