@@ -2,19 +2,23 @@
 alias PastafariCalendarElixirVietnamese, as: Calendar
 alias PastafariCalendarElixirVietnamese.SourceLanguageCatalog, as: Catalog
 
+selected_group = System.get_env("DIFF_GROUP") || "all"
 pairs =
   Path.join(__DIR__, "differential_cases.tsv")
   |> File.stream!()
   |> Enum.reject(fn line -> String.trim(line) == "" or String.starts_with?(line, "#") end)
   |> Enum.map(fn line ->
     case String.trim(line) |> String.split("\t") do
-      [label, c, t] -> {label, String.to_integer(c), String.to_integer(t)}
+      [label, c, t, group] -> {label, String.to_integer(c), String.to_integer(t), group}
       _ -> raise("dòng kiểm tra vi sai không hợp lệ")
     end
   end)
+  |> Enum.filter(fn {_label, _c, _t, group} ->
+    selected_group == "all" or selected_group == group
+  end)
+if pairs == [], do: raise("không có trường hợp vi sai cho nhóm #{selected_group}")
 
-
-for {label, c, t} <- pairs do
+for {label, c, t, _group} <- pairs do
   IO.puts(:stderr, "ELIXIR_CASE_BEGIN #{label} #{c} #{t}")
   {year, cutlet, cutlet_day, month, month_day} = Calendar.calendar_date_spaghetti(c, t)
   {cutlet_index, ^cutlet} =

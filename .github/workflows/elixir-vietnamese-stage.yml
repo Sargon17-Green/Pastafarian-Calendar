@@ -48,6 +48,11 @@ jobs:
     if: github.ref == 'refs/heads/Elixir+tiếng-Việt'
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        group: [foundation, modern_base, modern_moves, year_max]
     steps:
       - name: Lấy Elixir tiếng Việt theo HEAD được kiểm tra
         uses: actions/checkout@v4
@@ -69,11 +74,13 @@ jobs:
         with:
           python-version: '3.12'
       - name: So sánh năm thành phần chuẩn từ hai chương trình độc lập
-        run: python3 qa/compare_elixir_python.py
+        env:
+          DIFF_GROUP: ${{ matrix.group }}
+        run: python3 -u qa/compare_elixir_python.py
       - name: Lưu chứng cứ hai nhánh dù có sai lệch
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: elixir-python-differential-${{ github.sha }}
+          name: elixir-python-differential-${{ github.sha }}-${{ matrix.group }}
           path: differential-evidence/
           retention-days: 30

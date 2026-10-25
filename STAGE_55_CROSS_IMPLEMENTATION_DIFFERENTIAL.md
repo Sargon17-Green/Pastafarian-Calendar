@@ -35,3 +35,12 @@ Các giá trị bằng chữ không được so sánh; chỉ chỉ số chuẩn
 và số ngày. Trình Python xác nhận SHA của peer trước khi
 thực thi. Chứng cứ TSV được ghi từng bước để hỗ trợ
 chẩn đoán khi vượt timeout. Không diễn giải PASS trước CI.
+
+## Khôi phục sau CI 40204144312
+Native 909/909 GREEN, soak 4/4 GREEN, khóa tên GREEN;
+differential thất bại do runner nhận shutdown signal
+(exit 143) khi Elixir còn đang chạy, không có bằng chứng
+khác biệt kết quả. Chia 9 ca thành 4 nhóm riêng biệt
+để giảm tải mỗi job, stream log Elixir đến GitHub và
+lưu TSV tuần tự; nhóm fail không chặn nhóm khác chạy.
+Chưa chứng nhận 9/9; đợi CI mới.
