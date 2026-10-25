@@ -102,6 +102,12 @@ def verify_record(record,label,original,trace,qa30a,source):
     need(type(p) is int and p>=0 and type(writes) is list and len(writes)<=p
          and type(snapshots) is list,
          "QA30B actual Native state and physical put events missing")
+    # The signed unmodified Native STEP trace independently fixes how many
+    # actual p instructions executed. A forged count must not pass just
+    # because it exceeds the number of reported candidate-cell writes.
+    traced_p=sum(1 for step in trace if step[5]==ord("p") and step[6]==0)
+    need(p==traced_p,
+         "QA30B Native put count differs from signed executed p opcodes")
     targets=candidates(qa30a)
     originals={(x,y):source[y][x] for x,y in targets}
     current=dict(originals)
@@ -162,7 +168,7 @@ def test_forgery(report,label,original,trace,qa30a,source):
       ("fake-live-byte",lambda a:a["live_state_snapshots"][0]["fetched_source_candidate_live_values"][0].__setitem__("runtime_value",-999)),
       ("delete-source-cell",lambda a:a["live_state_snapshots"][0]["fetched_source_candidate_live_values"].pop()),
       ("fake-prior-ticks",lambda a:a["live_state_snapshots"][0]["fetched_source_candidate_live_values"][0]["actual_prior_put_ticks"].append(-1)),
-      ("forge-writes",lambda a:a.__setitem__("real_native_put_calls",-1))
+      ("inflate-native-put-count",lambda a:a.__setitem__("real_native_put_calls",report["real_native_put_calls"]+1))
     ]
     for name,edit in attacks:
         mutated=copy.deepcopy(report)
