@@ -1113,3 +1113,8 @@ jobs:
           grep -Fx 'STAGE54_DISCOVERY_NATIVE_PASS' "$RUNNER_TEMP/stage55-native.log"
           grep -Fx 'STAGE55_REAL_231_PAIRS_43_CORRECTED_GREEN_43_LEGACY_RED' "$RUNNER_TEMP/stage55-native.log"
           grep -Fx 'STAGE55_FULL_NATIVE_GREEN' "$RUNNER_TEMP/stage55-native.log"
+      - name: Verify post-55 soak harness safety checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s soak -p 'test_post55_differential.py' -q

@@ -35,11 +35,11 @@ class SoakRunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "LINE_COUNT"):
             soak.normalized("", pair, "TEST")
         with self.assertRaisesRegex(ValueError, "FORMAT"):
-            soak.normalized("1\\t2\\t5000\\t1\\t1\\t1\\t01", pair, "TEST")
+            soak.normalized("1\t2\t5000\t1\t1\t1\t01", pair, "TEST")
         with self.assertRaisesRegex(ValueError, "PAIR"):
-            soak.normalized("1\\t3\\t5000\\t1\\t1\\t1\\t1", pair, "TEST")
+            soak.normalized("1\t3\t5000\t1\t1\t1\t1", pair, "TEST")
         with self.assertRaisesRegex(ValueError, "CANONICAL_RANGE"):
-            soak.normalized("1\\t2\\t5000\\t18\\t1\\t1\\t1", pair, "TEST")
+            soak.normalized("1\t2\t5000\t18\t1\t1\t1", pair, "TEST")
 
     def test_external_program_protocol(self):
         self.assertEqual(
