@@ -90,6 +90,16 @@ jobs:
         run: php -d memory_limit=512M tests/verify_stage22_discovery11.php
       - name: Tampalan 11 — kunci susunan titisan 46
         run: php -d memory_limit=512M tests/stage23_patch11_tests.php
+  audit_php_bahasa_melayu_stages24_32:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semak runtime PHP 64-bit pada regresi lanjut
+        shell: bash
+        run: |
+          php -r 'if (PHP_INT_SIZE !== 8) { fwrite(STDERR, "PHP 64-bit diperlukan\n"); exit(1); }'
       - name: Penemuan 12 — jiran mangkuk bukan ID berturutan
         run: php -d memory_limit=512M tests/verify_stage24_discovery12.php
       - name: Tampalan 12 — jiran benar menurut susunan 46
