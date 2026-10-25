@@ -53,8 +53,11 @@ module tb_weave_native_H_lookup;
                 cell_offset=cell_offset+caps[q]+1;
             cell_offset=cell_offset+n;
             position=cell_offset*REC_BYTES;
+            // A one-hex-character shift can be invisible when the
+            // fixed-width number has leading zeros. Seek to the
+            // DIFFERENT, valid H_1(cap_1-1) record instead.
             if(mutate!=0 && s==1 && n==caps[1])
-                position=position+1;
+                position=position-REC_BYTES;
             if($fseek(fd,position,0)!=0)
                 $fatal(1,"NATIVE_H_INDEXED_SEEK_FAILURE");
             scan_result=$fscanf(fd,"%h",found);
