@@ -60,16 +60,18 @@ let exactBlock:LegalWeavingCapacityError|null=null;
 try{new Patch24FullHandler(preceding(),
  new Patch24WeavingSelector(6000)).run(ctx,fixture.request);}
 catch(e){if(e instanceof LegalWeavingCapacityError)exactBlock=e;else throw e;}
-assert(exactBlock!==null&&
- exactBlock.yearDays===5349&&exactBlock.monthCount===44&&
- exactBlock.exploredStates>=6000&&
+if(exactBlock===null)throw Error("EXPECTED_REAL_YEAR_CAPACITY_ERROR_ABSENT");
+const verifiedBlock:LegalWeavingCapacityError=exactBlock;
+assert(verifiedBlock!==null&&
+ verifiedBlock.yearDays===5349&&verifiedBlock.monthCount===44&&
+ verifiedBlock.exploredStates>=6000&&
  ctx.status==="VALIDATED"&&
  ctx.branchTrace.join(",")==="BOOTSTRAP_VALIDATE"&&ctx.metrics.size===1,
  "वास्तविक Year5000 वर bounded DP खुल्या अपयशासह; caller rollback");
 console.log("STAGE_49_PATCH_24_BOUNDED_PROTOTYPE_PASS"+
  " exhaustiveSmallRows="+rows+" smallFamilies="+families+
  " correctSmallNativeSeal32=1 archivedGhostExecuted=1"+
- " realYearDays="+exactBlock.yearDays+" realMonthCount="+exactBlock.monthCount+
- " measuredCapacityStates="+exactBlock.exploredStates+
- " stateLimit="+exactBlock.stateLimit+
+ " realYearDays="+verifiedBlock.yearDays+" realMonthCount="+verifiedBlock.monthCount+
+ " measuredCapacityStates="+verifiedBlock.exploredStates+
+ " stateLimit="+verifiedBlock.stateLimit+
  " honestUnresolvedRealYear=1 stage49NotClosed=1");
