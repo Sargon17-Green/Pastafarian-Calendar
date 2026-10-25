@@ -2552,3 +2552,57 @@ jobs:
           perl -Ilib -It/lib -c tools/audit_r73_prefix_partition.pl
           perl -Ilib -It/lib -c tools/profile_r73_prefix_partition.pl
           timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r73_prefix_partition.pl --shard 5 --seconds 185 --rss-kib 393216
+
+  canonical-r74-fivemonth-1:
+    name: R74 五月份 243 個向量 BigInt 原生分片 1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r74-fivemonth]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月字序、原生正反排名與反向補標籤雙射
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r74_fivemonth_order.pl
+          perl -Ilib -It/lib -c tools/profile_r74_fivemonth_order.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r74_fivemonth_order.pl --shard 1 --seconds 185 --rss-kib 393216
+
+  canonical-r74-fivemonth-2:
+    name: R74 五月份 243 個向量 BigInt 原生分片 2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r74-fivemonth]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月字序、原生正反排名與反向補標籤雙射
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r74_fivemonth_order.pl
+          perl -Ilib -It/lib -c tools/profile_r74_fivemonth_order.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r74_fivemonth_order.pl --shard 2 --seconds 185 --rss-kib 393216
+
+  canonical-r74-fivemonth-3:
+    name: R74 五月份 243 個向量 BigInt 原生分片 3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r74-fivemonth]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月字序、原生正反排名與反向補標籤雙射
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r74_fivemonth_order.pl
+          perl -Ilib -It/lib -c tools/profile_r74_fivemonth_order.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r74_fivemonth_order.pl --shard 3 --seconds 185 --rss-kib 393216

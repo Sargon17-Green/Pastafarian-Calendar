@@ -50,3 +50,8 @@ SHA256 固定在 QA 腳本中。分片基線：
 ## 首次 CI 失敗與保留證據
 
 首次提交 6a6efbd64ff11d74cf64bab2d560f60a5f827200 的 Actions 40169835668：verify 及五份 Native 均 SUCCESS，但 perl-stage01 在 t/05_language_and_isolation_audit.t 第一項失敗，因本文件尾段誤混入不屬於本分支的自然語言。完整工作流判定為 FAILURE。本次將尾段改回繁體中文；必須以修正後的整套原生 CI 成功驗收，不能抹除原始紅燈。
+
+
+## 第二次 CI 完整成功（2026-10-25）
+
+修正後提交 `d25127ef3e3ff2449a9b8f54bc032f52764dd777` 的 GitHub Actions 40181557502 中，verify、perl-stage01、R73 五個原生分片全部 SUCCESS。保留首次提交 6a6efbd64ff11d74cf64bab2d560f60a5f827200 的 FAILURE 歷史，不能把首次整體 CI 改稱 PASS。Round 73 於第二次原生全套驗收後封存。
