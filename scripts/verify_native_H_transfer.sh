@@ -43,3 +43,8 @@ echo "STAGE1_NATIVE_H_45_MONTH_ROOT_AND_FOUR_PREFIX_COUNTS_SHA256_PASS"
 bash scripts/verify_native_H_indexed.sh
 echo "STAGE1_NATIVE_H_INDEXED_GENERATION_AND_LOOKUP_PASS_ONLY"
 echo "STAGE1_NATIVE_H_FULL_YEAR_LEX_UNRANK_AND_PRODUCTION_RTL_PENDING"
+
+# NEW: rank-driven native SystemVerilog lexical decoder, 64 positions.
+# This source computes ALL child sizes; no Python word/ledger is consumed.
+bash scripts/verify_native_lex_prefix.sh
+echo "STAGE1_NATIVE_LEX_PREFIX64_CI_PASS_ONLY_IF_VERIFIED"

@@ -484,3 +484,11 @@ lexical approvals, stage acceptance, and 55-stage rollout.
   source and nine-golden checks **WRITTEN, NOT CI PASS**.
 - Still no native all-year unranking, production ASIC
   five-tuple RTL or Kalaallisut native-source approvals.
+
+## Native indexed H / lexical unrank evidence — 2026-10-26
+
+- PASS: run 40235388927 8/8, native H 101594 values, 16 sampled SHA256, repaired full-record negative seek rejection.
+- PASS: native seven-active-month A(r) parent and eight child values with nine SHA256 values.
+- PENDING: brand-new generic native SV lexical selection test for 64 ordinals; immutable reference 64-byte SHA256 `c799e928b30deb45924e8aa9f11be013b5a5f205190788e01dc99508793447dc` and H-mutation negative case.
+- BLOCKED: native full 4244-symbol output, all five production ASIC calendar fields and independent qualified Kalaallisut 64/64 approvals.
+- Stage 1=OPEN; LAST_COMPLETED_STAGE=0; Stage 2 NOT OPEN; PR #20 DO NOT MERGE.

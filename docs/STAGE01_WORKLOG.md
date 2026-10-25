@@ -665,3 +665,11 @@ PASS is claimed until the new GitHub Actions job finishes.
   with Python exact arithmetic in local research.
 - The isolated QA workflow archives native children7 logs
   and nine compact witnesses. New CI is **PENDING**.
+
+## 2026-10-26 — indexed archive and seven-month native child blocks GREEN; generic decoder experiment
+
+- Inspected actual [CI run 40235388927](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40235388927) and native_H_transfer job 121295736630: all **8/8** jobs succeeded; log contains `STAGE1_NATIVE_H_INDEXED_TAMPER_REJECTED_PASS`, `STAGE1_NATIVE_H_CHILDREN7_COUNT_PASS` and `STAGE1_NATIVE_H_CHILDREN7_NINE_FULLWIDTH_GOLDENS_PASS`.
+- The prior SHA 4819352 run was cancelled as newer commits superseded it; its seek repair was verified in this later successful HEAD.
+- Added independent test-only native SV generic lexical decoder `tb_weave_native_lex_prefix.sv`, using the native H archive, dynamic A(r) including exhausted-month handling, ALL old child blocks, independent fresh child validation and exact one-based rank selection.
+- Added bounded 64-symbol native CI runner with pinned 64-byte SHA256, independent initial-rank SHA and forced H corruption rejection. The math fixture was independently recomputed locally. This NEW experiment is **NOT YET CI VERIFIED**.
+- Documentation and acceptance ledger updated, with Stage 1 still IN_PROGRESS; zero accepted stages; 0/64 name approvals, production RTL incomplete; PR #20 Draft and no main merge.
