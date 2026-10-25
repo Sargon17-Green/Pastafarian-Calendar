@@ -200,7 +200,15 @@ final case class BaseMonsterContext(
   var crossLegacyMonthOrdinal: Option[Int] = None,
   var patch24MonthId: Option[Int] = None,
   var patch24DayInMonth: Option[Int] = None,
-  var patch24Applied: Boolean = false
+  var patch24Applied: Boolean = false,
+  var gateCacheGaps: Option[Vector[Int]] = None,
+  var gateCacheAnnualWeaving: Option[Vector[Int]] = None,
+  var gateCacheDayOffset: Option[Int] = None,
+  var gateCacheInputSnapshot: Option[(Vector[Int],Vector[Int],Int)] = None,
+  var legacyGateCacheGateId: Option[Int] = None,
+  var legacyGateCacheStart: Option[Int] = None,
+  var legacyGateCacheMonthId: Option[Int] = None,
+  var legacyGateCacheOrdinal: Option[Int] = None
 )
 
 final class BaseMetricsShell {
@@ -351,6 +359,62 @@ final class BaseValidationManager {
   /** PATCH24: controlla la coordinata ANNUALE del mese con un
     * ricalcolo indipendente; conserva la cicatrice della cotoletta.
     */
+
+  /** DISCOVERY25: calcola indipendentemente il mese fotografato
+    * al primo giorno del varco, NON il giorno richiesto. Il
+    * validatore non chiama l'adapter legacy o l'oracolo test-only.
+    */
+  def requireDiscovery25Ready(ctx: BaseMonsterContext): Unit = {
+    if(ctx.phase!="DISCOVERY_25_GATE_START_MONTH_CACHE" ||
+       ctx.status!="LEGACY_GATE_START_CACHE_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_25_GATE_START_MONTH_CACHE") ||
+       ctx.gateCacheGaps.isEmpty ||
+       ctx.gateCacheAnnualWeaving.isEmpty ||
+       ctx.gateCacheDayOffset.isEmpty ||
+       ctx.gateCacheInputSnapshot.isEmpty ||
+       ctx.legacyGateCacheGateId.isEmpty ||
+       ctx.legacyGateCacheStart.isEmpty ||
+       ctx.legacyGateCacheMonthId.isEmpty ||
+       ctx.legacyGateCacheOrdinal.isEmpty)
+      throw new IllegalStateException("DISCOVERY25 non completa.")
+    val gaps=ctx.gateCacheGaps.get
+    val weave=ctx.gateCacheAnnualWeaving.get
+    val day=ctx.gateCacheDayOffset.get
+    if(ctx.gateCacheInputSnapshot.get!=(gaps,weave,day) ||
+       gaps.length<6 || gaps.length>47 ||
+       gaps.exists(g=>g<42 || g>963) ||
+       gaps.sum<252 || gaps.sum>5778 ||
+       weave.length!=gaps.sum ||
+       day<0 || day>=weave.length)
+      throw new IllegalStateException("Input DISCOVERY25 non validi.")
+    LegacyDaywiseWeavingAdapter.validateCandidates(Vector(weave))
+    var start=0
+    var gateId=0
+    var selectedStart = -1
+    for((g,i)<-gaps.zipWithIndex) {
+      if(day>=start && day<start+g) {
+        gateId=i+1
+        selectedStart=start
+      }
+      start+=g
+    }
+    if(start!=weave.length || gateId==0 || selectedStart<0)
+      throw new IllegalStateException("Confini gate incompleti.")
+    val month=weave(selectedStart)
+    var ordinal=0
+    var k=0
+    while(k<=selectedStart) {
+      if(weave(k)==month)ordinal+=1
+      k+=1
+    }
+    if(ctx.legacyGateCacheGateId.get!=gateId ||
+       ctx.legacyGateCacheStart.get!=selectedStart ||
+       ctx.legacyGateCacheMonthId.get!=month ||
+       ctx.legacyGateCacheOrdinal.get!=ordinal)
+      throw new IllegalStateException("Cicatrice DISCOVERY25 falsificata.")
+  }
+
   def requirePatch24Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_24_CUTLET_LOCAL_MONTH_LOOKUP" ||
        ctx.status!="PATCH_24_READY" || !ctx.patch24Applied ||
@@ -2269,7 +2333,8 @@ final class BaseMonsterManager {
     new Discovery23ContiguousMonthHandler(metrics),
     new Patch23ContiguousMonthHandler(metrics),
     new Discovery24CutletLocalMonthHandler(metrics),
-    new Patch24CutletLocalMonthHandler(metrics)
+    new Patch24CutletLocalMonthHandler(metrics),
+    new Discovery25GateStartMonthCacheHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -3590,6 +3655,36 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("patch24",error)
+    }
+  }
+
+
+  def discover25GateStartMonthCache(
+    calculationDay: BigInt,
+    targetDay: BigInt,
+    gateGaps: Vector[Int],
+    annualWeaving: Vector[Int],
+    dayOffset: Int
+  ): Discovery25GateStartMonthCacheReport = {
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.gateCacheGaps=Some(gateGaps)
+    ctx.gateCacheAnnualWeaving=Some(annualWeaving)
+    ctx.gateCacheDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_25_GATE_START_MONTH_CACHE"
+    try {
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery25Ready(ctx)
+      Discovery25GateStartMonthCacheReport(
+        ctx.calculationDay,ctx.targetDay,ctx.gateCacheGaps.get,
+        ctx.gateCacheAnnualWeaving.get,ctx.gateCacheDayOffset.get,
+        ctx.legacyGateCacheGateId.get,
+        ctx.legacyGateCacheStart.get,
+        ctx.legacyGateCacheMonthId.get,
+        ctx.legacyGateCacheOrdinal.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    } catch {
+      case error:Throwable =>
+        throw BaseErrorWrapper.wrap("discovery25",error)
     }
   }
 
