@@ -403,3 +403,25 @@ See `FOUNDATION_WEAVE_EIGHTH_REFERENCE.md`.
 **Not approved:** full 4244-symbol SV word, production RTL
 calendar converter, source-language expert approval 64/64
 (currently 0 approved), and Stage-1 acceptance.
+
+## 2026-10-25 — Eighth accepted; full-year reference source written
+
+**Native CI PASS:** run 40135285639, 6 of 6 jobs; accepted
+physical weave prefix `[1,2,3,4,5,6,7,4]`. All source
+hashes and exact wide arithmetic goldens verified.
+
+**NEW independent full-year mathematical oracle:** exact
+101594-cell cached transfer, 4244 lexical choices, local
+runtime approx. 19 sec; word hash matches independently
+locked full-year witness. Python source is new, CI PENDING.
+
+**NEW separate native SV structural test:** checks 4244
+generated symbols for all 45 lengths, first/last appearance
+ordering, 2032nd day and first 11 ordinals. Its source
+is written but not yet CI PASSED; this does NOT mean
+full-year lexical unranking has been ported to HDL.
+
+**Still blocking Stage 1:** native SystemVerilog exact
+full-word lexical algorithm, production synthesis RTL
+five-field calendar output, 0/64 qualified Kalaallisut
+lexical approvals, stage acceptance, and 55-stage rollout.

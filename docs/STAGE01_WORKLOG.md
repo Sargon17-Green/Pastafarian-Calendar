@@ -510,3 +510,39 @@ was queued at last observation. No full unrank or stage PASS.
   `qa-systemverilog-kalaallisut-stage1-20261022` at
   `7b17e99c1281f6b94b954db9bda0e615a2e6476b`.
   CI outcome **PENDING**, no eighth-symbol SV PASS claimed.
+
+## 2026-10-25 — eighth CI fully green; exact full-year transfer discovery
+
+- Read actual job `120995403643` from [run
+  40135285639](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40135285639):
+  **all six jobs SUCCESS**. Seventh and eighth jobs, root,
+  sixth, fifth and baseline succeeded. Eighth exact count,
+  four pinned merge SHAs, 28 input hashes, 8 output hashes
+  and selected prefix `[1,2,3,4,5,6,7,4]` all PASS.
+- Derived and executed a different exact recurrence over
+  `H_s(N)`, with **101594** cached (s,N) values. It reduces
+  independent reference unranking from repeated expensive
+  45-month root counts to a one-time table plus lexical
+  block transitions.
+- Local Python proof decoded all **4244** woven symbols
+  while enumerating every possible child block at every
+  position, and checked exact parent partition sums.
+  End-to-end local time measured **18.75 seconds**,
+  root 22470-bit SHA and rank 22469-bit SHA both
+  matched native locked goldens; the full 4244-byte
+  word matched SHA `e1a291eafc34153031a0fba5e8ae0bc99a06cf0c59f4a65665c5b027b56c3a29`.
+- Foundation day2032 is physical ordinal 8, day occurrence
+  56, mapped independently by month-name index file to
+  canonical index 20. No claim of native SV full unrank.
+- Added `scripts/test_foundation_weave_full.py` exact
+  Python reference, `tests/tb_weave_reference_structure.sv`
+  HDL structural verifier, and bounded verification runner.
+  Added an isolated QA `full_year_reference` job to
+  QA branch at `7c37ea098b5334d70e0299b3217bee787c99f502`.
+  This *new* job's CI verdict is PENDING.
+- Full mathematical proof and distinctions between Python
+  oracle, SV structural check and RTL pending in
+  `FOUNDATION_WEAVE_FULL_YEAR_TRANSFER.md`.
+- Native 4244-symbol SV unrank, synthesis RTL calendar
+  five-tuple and qualified Kalaallisut names 64/64 remain
+  unimplemented/unapproved. Stage 1 open, no main change.
