@@ -77,7 +77,7 @@ export class Patch24ScalableFullHandler{
    historical.weaving.actualNativeSeal32Calls!==1||
    historical.historical.corrected.correctedNativeSeal31.predecessorSharedWrites!==58)
    throw new MonsterStageError("पूर्ण Stage48 historical predecessor नाही");
-  const first=historical.historical.historical.historical.historical.historical.preceding.trueYearFirstDay;
+  const first=historical.historical.historical.historical.historical.historical.historical.preceding.trueYearFirstDay;
   const src=q.firstDaySauceQuestion??
    (first===ctx.targetDay?q.historical.originalSauceQuestion:undefined);
   if(!src||src.targetDay!==first)
