@@ -592,6 +592,27 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'quad.rank.patch16.requests');
             return $rank;
         });
+        $this->dispatcher->register('MISSING_FIFTH_DIGIT_LEGACY', function(BootstrapContext $context): BigInt {
+            $id = $context->semanticState['queriedBowlId'] ?? null;
+            $seal = $context->semanticState['seal'] ?? null;
+            $space = $context->semanticState['choiceSpace'] ?? null;
+            if (!is_int($id) || !is_int($seal) || !$space instanceof BigInt) {
+                throw new \InvalidArgumentException('FIFTH_DIGIT_LEGACY_ARGS');
+            }
+            $stream = $this->askBowl(
+                $context->calculationDay, $context->targetDay, $id, $seal
+            );
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyMissingFifthDigit17(
+                new \Pastafari\Stage01\Patches\SavePatch01(
+                    new \Pastafari\Stage01\Legacy\LegacyRemainder()
+                )
+            );
+            $rank = $legacy->chooseWrong($stream, $space);
+            $context->semanticState['missingFifthDigitRank'] = $rank;
+            $context->status = 'MISSING_FIFTH_DIGIT_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'legacy.quint.missing_fifth_digit');
+            return $rank;
+        });
         $this->dispatcher->register('MISSING_FOURTH_DIGIT_LEGACY', function(BootstrapContext $context): BigInt {
             $id = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -801,6 +822,25 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): BigInt => $this->dispatcher->dispatch('FOUR_DIGIT_PATCH_16', $context)
+        );
+    }
+
+    /**
+     * DISCOVERY17: laluan sejarah bagi M^4 < n <= M^5.
+     * @return BigInt Pangkat lama tanpa digit kelima.
+     */
+    public function legacyChooseQuintRank(
+        int $calculationDay, int $targetDay, int $queriedBowlId,
+        int $seal, BigInt $space
+    ): BigInt {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'MISSING_FIFTH_DIGIT_LEGACY';
+        $context->semanticState['queriedBowlId'] = $queriedBowlId;
+        $context->semanticState['seal'] = $seal;
+        $context->semanticState['choiceSpace'] = $space;
+        return $this->boundary->run(
+            $context,
+            fn(): BigInt => $this->dispatcher->dispatch('MISSING_FIFTH_DIGIT_LEGACY', $context)
         );
     }
 

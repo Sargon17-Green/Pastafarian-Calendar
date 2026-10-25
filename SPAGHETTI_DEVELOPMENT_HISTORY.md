@@ -721,3 +721,19 @@ php -d memory_limit=512M tests/stage33_patch16_tests.php
 ```
 
 **Status:** `AWAITING_CI`. Jangan mulakan Stage34 sehingga empat pekerjaan Native CI berjaya. Jangan ubah `main`, katalog atau fixture.
+
+
+## Stage 34 — DISCOVERY 17: Digit kelima dibuang daripada pilihan lima digit
+
+Stage33 PATCH16 telah disahkan GREEN oleh Native GitHub Actions `40192008267` pada SHA `6ed4efbe2e60a3d910f9e6277a4dbe7494333fa9`: empat pekerjaan SUCCESS. Fail legacy `LegacyMissingFourthDigit16.php` telah dipulihkan dalam commit asas itu dan mesti kekal tidak diubah.
+
+Untuk `M⁴<n<=M⁵`, pemilih normatif membaca lima sampel SAVE daripada `askBowl` PATCH12 dengan pemberat `1`, `M`, `M²`, `M³` dan `M⁴`. `LegacyMissingFifthDigit17::chooseWrong` sengaja membaca empat digit pertama sahaja, tidak membaca sampel kelima pada pemberat M⁴. Had rejection `floor(M⁵/n)*n` dan domain M⁵ yang sebenar **tetap digunakan**, supaya kesalahan tunggal ialah digit terakhir yang hilang. Laluan `BootstrapKernel::legacyChooseQuintRank` memanggil kod Legacy sebenar melalui dispatcher `MISSING_FIFTH_DIGIT_LEGACY` dan konteks per panggilan.
+
+Empat saksi tetap pada `n=M⁵` menunjukkan perbezaan tepat `(digit5−1)*M⁴`; 56 ujian sempadan (empat ruang, tujuh nilai first, dua arah) menunjukkan tepat 52 mismatch sejarah dan empat padanan. Semakan aritmetik bebas sebelum implementasi mendapati **sifar langkah rejection** bagi matriks ini, jadi ia tidak mewujudkan gelung yang tidak terhad. Tambahan: tiga pertanyaan Native sebenar melalui PATCH12, lima input tidak sah, larangan import oracle ke `src` dan larangan munculnya `FifthDigitPatch17` sebelum Stage35.
+
+```text
+php -d memory_limit=512M tests/stage34_discovery17_tests.php   # keluar 1: RED sengaja
+php -d memory_limit=512M tests/verify_stage34_discovery17.php  # keluar 0: empat RED terkawal
+```
+
+Kerja `audit_php_bahasa_melayu_stage34` mengasingkan ujian baharu. Semua empat pekerjaan terdahulu (`verify`, regresi awal, regresi 24–32, Stage33), beserta pekerjaan Stage34 yang kelima, mesti lulus Native GitHub Actions pada SHA tepat. **Status: AWAITING_CI**; jangan mulakan Stage35 atau mengubah `main`, fixture, katalog atau kod sejarah.
