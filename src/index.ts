@@ -71,3 +71,4 @@ export * from "./discovery24LegacyDailyMonths.ts";
 export * from "./patch24BoundedLegalWeaving.ts";
 export * from "./patch24ScalableLegalCount.ts";
 export * from "./patch24ScalableUnrank.ts";
+export * from "./patch24ScalableNativeWeaving.ts";

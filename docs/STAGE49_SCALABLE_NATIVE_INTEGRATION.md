@@ -1,0 +1,5 @@
+# Stage49 PATCH24 — native scalable legal weaving (implementation; not yet closed)
+
+`Patch24ScalableFullHandler` invokes the entire original Stage48 historical day-by-day ghost and the real first-day Sauce. `Patch24ScalableSelector` verifies that ghost, computes exact legal weaving count and one-based lex unrank through the independent reduced suffix-state backend, then invokes **another genuine full Bowl4 Seal32 Native 58-write question** over the exact family size. Old illegal ghosts cannot be reused. The capped full-state Stage49 research prototype and 24 archived deliberate REDs remain intact.
+
+`test/patch24ScalableNative.ts` compares small native ranks with the independent normative oracle and on the real 5349-day/44-month Year5000 checks an independently calculated giant legal family size, corrected Bowl4 Seal32 rank, multiplicities, first/last ordering, full predecessor calls and shared writes. Late fault injected on the **second real Seal32** must leave caller unchanged; retry and Stage54 barrier remain. Stage49 closure requires both CI jobs and final administrative closure CI SUCCESS. Stage50 not opened.
