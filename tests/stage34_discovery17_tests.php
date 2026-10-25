@@ -24,7 +24,7 @@ $real = 0; $invalid = 0;
 $witnesses = [
     ['name'=>'asas', 'first'=>BigInt::one(), 'step'=>1],
     ['name'=>'menaik', 'first'=>BigInt::fromInt(2), 'step'=>1],
-    ['name'=>'menurun', 'first'=>BigInt::fromInt(5), 'step'=>-1],
+    ['name'=>'menurun', 'first'=>BigInt::fromInt(6), 'step'=>-1],
     ['name'=>'lilitan', 'first'=>$m, 'step'=>1],
 ];
 foreach ($witnesses as $item) {
