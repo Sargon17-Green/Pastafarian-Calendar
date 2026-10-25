@@ -38,3 +38,23 @@ Cam 55 — PATCH 27 yn gwneud y cywiriad heb ddileu'r graith.
 **Rheol cwblhau:** nid yw hyd yn oed Cam 55 yn ddigon:
 rhaid cynnal soak sylweddol yn erbyn gweithrediad annibynnol arall
 a datrys pob anghysondeb cyn datgan bod y gangen wedi'i chwblhau.
+
+## Ardystiad brodorol — COMPLETE
+
+Ar commit ffynhonnell `1e014d0293328b802d004519c0ab2555f14f3119`,
+llwyddodd [GitHub Actions 40181666063](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40181666063).
+Roedd pob un o'r 29 swydd yn SUCCESS, gan gynnwys swydd Kotlin
+`121133834105` a'r gwiriad cloi enwau.
+
+Gwiriwyd marciau o **log gwirioneddol y swydd Kotlin**:
+`STAGE53_FULL_NATIVE_GREEN`,
+`STAGE54_REAL_DIFFERENTIAL_COUNT_43`,
+`STAGE54_SYNTHETIC_128_EXPECTED_RED_64_SINGLETON_MATCH`,
+`STAGE54_MANAGER_128_SESSIONS_GREEN`,
+`STAGE54_BIGINT_128_TRIPLES_384_EXPECTED_RED_128_WRAPS`,
+`STAGE54_GUARDS_REPLAY_METRICS_GREEN`,
+`STAGE54_STRICT_RED_CONFIRMED`,
+`STAGE54_DISCOVERY_NATIVE_PASS`.
+
+**`LAST_COMPLETED_STAGE=54`.** Gellir dechrau Cam 55 PATCH 27;
+ni chaniateir datgan cwblhau'r prosiect cyn soak yn erbyn gweithrediad annibynnol.
