@@ -324,6 +324,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyDescendingRankMirror(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة الثانية والعشرون: إزالة مرآة الاتجاه النازل مع حفظ الشاهد.
+    public static BigInteger EvaluateDescendingRankMirror(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateDescendingRankMirror(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

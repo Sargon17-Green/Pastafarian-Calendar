@@ -178,6 +178,9 @@ public sealed class MonsterContext
     // الندبة الثانية والعشرون: انعكاس رتبة الإخراج عند اتجاه السؤال السالب.
     public BigInteger? LegacyDescendingRankMirrorResult { get; set; }
 
+    // الرقعة الثانية والعشرون: المرتبة الصحيحة تبقى مستقلة عن شاهد المرآة.
+    public BigInteger? PatchedDescendingRankMirrorResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

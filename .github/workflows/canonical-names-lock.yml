@@ -279,3 +279,5 @@ jobs:
         run: |
           test "${{ steps.discovery_descending_rank_mirror_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage44Tests/PastafarianCalendar.Stage44Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ الرقعة الثانية والعشرين وإبقاء شاهد مرآة السؤال النازل
+        run: dotnet run --project tests/PastafarianCalendar.Stage45Tests/PastafarianCalendar.Stage45Tests.csproj --configuration Release
