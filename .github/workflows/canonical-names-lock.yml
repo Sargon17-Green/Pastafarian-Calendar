@@ -2462,3 +2462,93 @@ jobs:
           perl -Ilib -It/lib -c tools/audit_r72_prefix_intervals.pl
           perl -Ilib -It/lib -c tools/profile_r72_prefix_intervals.pl
           timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r72_prefix_intervals.pl --shard 4 --seconds 185 --rss-kib 393216
+
+  canonical-r73-prefix-partition-1:
+    name: R73 四月份 1..5 完整深度前綴樹原生分片 1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r73-prefix-partitions]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 125 個向量深度 0..4 子區間連續精確數與端點原生驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r73_prefix_partition.pl
+          perl -Ilib -It/lib -c tools/profile_r73_prefix_partition.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r73_prefix_partition.pl --shard 1 --seconds 185 --rss-kib 393216
+
+  canonical-r73-prefix-partition-2:
+    name: R73 四月份 1..5 完整深度前綴樹原生分片 2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r73-prefix-partitions]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 125 個向量深度 0..4 子區間連續精確數與端點原生驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r73_prefix_partition.pl
+          perl -Ilib -It/lib -c tools/profile_r73_prefix_partition.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r73_prefix_partition.pl --shard 2 --seconds 185 --rss-kib 393216
+
+  canonical-r73-prefix-partition-3:
+    name: R73 四月份 1..5 完整深度前綴樹原生分片 3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r73-prefix-partitions]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 125 個向量深度 0..4 子區間連續精確數與端點原生驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r73_prefix_partition.pl
+          perl -Ilib -It/lib -c tools/profile_r73_prefix_partition.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r73_prefix_partition.pl --shard 3 --seconds 185 --rss-kib 393216
+
+  canonical-r73-prefix-partition-4:
+    name: R73 四月份 1..5 完整深度前綴樹原生分片 4
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r73-prefix-partitions]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 125 個向量深度 0..4 子區間連續精確數與端點原生驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r73_prefix_partition.pl
+          perl -Ilib -It/lib -c tools/profile_r73_prefix_partition.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r73_prefix_partition.pl --shard 4 --seconds 185 --rss-kib 393216
+
+  canonical-r73-prefix-partition-5:
+    name: R73 四月份 1..5 完整深度前綴樹原生分片 5
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r73-prefix-partitions]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 全部 125 個向量深度 0..4 子區間連續精確數與端點原生驗證
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r73_prefix_partition.pl
+          perl -Ilib -It/lib -c tools/profile_r73_prefix_partition.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r73_prefix_partition.pl --shard 5 --seconds 185 --rss-kib 393216

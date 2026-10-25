@@ -45,3 +45,8 @@ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40125160119
 只有 verify、perl-stage01、R72 四片 Native
 全部 SUCCESS 才能宣布 R72 閉環；Stage 1 仍開啟，
 沒有 45 月、4244 日或多語言通用證明。
+
+
+## R72 Native 最終驗收（2026-10-25 核對）
+
+GitHub Actions 40135103290 的 verify、perl-stage01 和 R72 四份分片均 SUCCESS，合計 2883 個 prefix 區間、11532 次 rank/unrank 端點比對及 724 個區間外相鄰詞驗證，無 BLOCKED。第七十二輪封存 PASS，歷史失敗不得刪除。
