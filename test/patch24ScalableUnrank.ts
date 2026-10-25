@@ -23,7 +23,7 @@ const f=buildStage41CompatibleLegacyFixture();
 const mk=()=>new Patch23FullHandler(new Discovery23FullHandler(
  new Patch22FullHandler(new Discovery22FullHandler(new Patch21CutletHandler(
  new Discovery21LegacyCutletHandler(new Patch20StructureSauceHandler(
- new Discovery20StructureSauceHandler(new Patch19YearCacheHandler())))))));
+ new Discovery20StructureSauceHandler(new Patch19YearCacheHandler()))))))) );
 const full=patch23MonthLengths(mk(),f.request);
 const ls=full.corrected.correctedLengths;
 const fast=new ScalableLegalWeavingUnrank(ls),N=fast.count();
