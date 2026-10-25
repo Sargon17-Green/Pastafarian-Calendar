@@ -104,8 +104,15 @@ def selected_rank(root: int) -> int:
     assert digest(minimal_be(rank)) == EXPECTED_RANK_SHA
     return rank
 
-def full_unrank(table: list[list[int] | None], rank: int) -> bytes:
-    """Unrank every symbol; assert exact partition at EVERY position."""
+def full_unrank(
+    table: list[list[int] | None], rank: int,
+    ledger: bytearray | None = None
+) -> bytes:
+    """Unrank; emit optional exact skipped and chosen block intervals.
+
+    Ledger entries are Python-generated mathematical witnesses, not
+    a native SystemVerilog suffix-count computation.
+    """
     active_counts = [LENGTHS[0] - 1]
     started = 1
     old_total = LENGTHS[0] - 1
@@ -141,17 +148,23 @@ def full_unrank(table: list[list[int] | None], rank: int) -> bytes:
             assert fresh_count == 0
 
         ordinal = 0
+        initial_rank = rank
+        skipped = 0
+        selected_count = 0
         for idx, size in enumerate(blocks):
             if rank <= size:
+                selected_count = size
                 active_counts[idx] -= 1
                 old_words = children[idx]
                 old_total -= 1
                 ordinal = idx + 1
                 break
+            skipped += size
             rank -= size
 
         if ordinal == 0:
             assert started < MONTHS and 0 < rank <= fresh_count
+            selected_count = fresh_count
             active_counts.append(LENGTHS[started] - 1)
             old_total += LENGTHS[started] - 1
             started += 1
@@ -160,7 +173,13 @@ def full_unrank(table: list[list[int] | None], rank: int) -> bytes:
             assert next_row is not None
             assert fresh_count == old_words * next_row[old_total]
             ordinal = started
-        assert ordinal > 0
+        assert ordinal > 0 and selected_count > 0
+        assert initial_rank == skipped + rank
+        assert skipped + selected_count <= parent
+        assert 1 <= rank <= selected_count
+        if ledger is not None:
+            ledger.extend(skipped.to_bytes(BE_BYTES, "big"))
+            ledger.extend(selected_count.to_bytes(BE_BYTES, "big"))
         result.append(ordinal)
         if position in (8, 11, 100, 1000, 2032, DAYS):
             print(f"WEAVE_REFERENCE_PROGRESS position={position} started={started} ordinal={ordinal}", flush=True)
@@ -181,7 +200,9 @@ def main() -> None:
     print("STAGE1_FULL_YEAR_TRANSFER_ROOT_SHA256_PASS", flush=True)
     rank = selected_rank(root)
     print("STAGE1_FULL_YEAR_TRANSFER_RANK_SHA256_PASS", flush=True)
-    word = full_unrank(table, rank)
+    ledger = bytearray()
+    word = full_unrank(table, rank, ledger)
+    assert len(ledger) == (DAYS - 1) * 2 * BE_BYTES
 
     # Independent structural conservation and order checks.
     assert len(word) == DAYS and all(1 <= x <= MONTHS for x in word)
@@ -204,6 +225,9 @@ def main() -> None:
     out = Path("build")
     out.mkdir(parents=True, exist_ok=True)
     (out / "foundation_weave_all4244.bin").write_bytes(word)
+    (out / "foundation_weave_root.bin").write_bytes(root.to_bytes(BE_BYTES, "big"))
+    (out / "foundation_weave_rank.bin").write_bytes(rank.to_bytes(BE_BYTES, "big"))
+    (out / "foundation_weave_rank_intervals.bin").write_bytes(ledger)
     (out / "foundation_weave_all4244.hex").write_text(
         "".join(f"{x:02x}\n" for x in word), encoding="ascii"
     )
@@ -211,12 +235,15 @@ def main() -> None:
         f"ROOT_BITS={root.bit_length()}\nROOT_SHA256={EXPECTED_ROOT_SHA}\n"
         f"RANK_BITS={rank.bit_length()}\nRANK_SHA256={EXPECTED_RANK_SHA}\n"
         f"YEAR_DAYS={DAYS}\nWORD_SHA256={digest(word)}\n"
+        f"RANK_INTERVAL_BYTES={len(ledger)}\n"
+        f"RANK_INTERVAL_SHA256={digest(ledger)}\n"
         f"FOUNDATION_DAY=2032\nMONTH_ORDINAL={day2032}\n"
         f"MONTH_CANONICAL_INDEX={name_indices[day2032 - 1]}\n"
         f"DAY_IN_MONTH={occurrence}\n",
         encoding="utf-8"
     )
     print(f"STAGE1_FULL_YEAR_REFERENCE_SHA256_PASS days={DAYS} digest={digest(word)}", flush=True)
+    print(f"STAGE1_FULL_YEAR_RANK_INTERVAL_LEDGER_WRITTEN entries={DAYS - 1} bytes={len(ledger)} sha256={digest(ledger)}", flush=True)
     print("STAGE1_FULL_YEAR_FOUNDATION_MONTH_PASS ordinal=8 canonicalIndex=20 day=56", flush=True)
     print(f"STAGE1_FULL_YEAR_REFERENCE_RUNTIME_SECONDS={perf_counter()-t:.2f}", flush=True)
 
