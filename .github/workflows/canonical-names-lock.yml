@@ -1076,8 +1076,16 @@ jobs:
       - name: Checkout Welsh Kotlin branch
         uses: actions/checkout@v4
         with:
-          ref: 'Kotlin+Cymraeg'
+          ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Keep branch name and pin exact event commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout -B 'Kotlin+Cymraeg' "$GITHUB_SHA"
+          test "$(git symbolic-ref --short HEAD)" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo STAGE55_CI_SOURCE_SHA_PIN_CONFIRMED
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
