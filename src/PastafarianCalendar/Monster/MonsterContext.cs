@@ -175,6 +175,9 @@ public sealed class MonsterContext
     // الرقعة الحادية والعشرون تحفظ المرتبة الكاملة منفصلةً عن الشاهد.
     public BigInteger? PatchedWideSlotTruncationRankResult { get; set; }
 
+    // الندبة الثانية والعشرون: انعكاس رتبة الإخراج عند اتجاه السؤال السالب.
+    public BigInteger? LegacyDescendingRankMirrorResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

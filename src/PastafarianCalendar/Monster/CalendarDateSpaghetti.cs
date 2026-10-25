@@ -317,6 +317,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateWideSlotTruncation(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الاكتشاف الثاني والعشرون: شاهد مرآة الخرج في اتجاه السؤال النازل.
+    public static BigInteger EvaluateLegacyDescendingRankMirror(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateLegacyDescendingRankMirror(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

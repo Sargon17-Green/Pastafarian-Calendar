@@ -270,3 +270,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage42Tests/PastafarianCalendar.Stage42Tests.csproj --configuration Release -- --verify-expected-red
       - name: تكافؤ إصلاح قطع المرتبة الواسعة مع المرجع والشاهد التاريخي
         run: dotnet run --project tests/PastafarianCalendar.Stage43Tests/PastafarianCalendar.Stage43Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لمرآة السؤال النازل
+        id: discovery_descending_rank_mirror_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage44Tests/PastafarianCalendar.Stage44Tests.csproj --configuration Release
+      - name: إثبات التوقيع التاريخي للمرآة النازلة مع حفظ الرقعة الحادية والعشرين
+        if: always()
+        run: |
+          test "${{ steps.discovery_descending_rank_mirror_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage44Tests/PastafarianCalendar.Stage44Tests.csproj --configuration Release -- --verify-expected-red

@@ -400,4 +400,17 @@ dotnet run --project tests/PastafarianCalendar.Stage41Tests/PastafarianCalendar.
 dotnet run --project tests/PastafarianCalendar.Stage43Tests/PastafarianCalendar.Stage43Tests.csproj -c Release
 ```
 
-لا يُغلق الطور 43 GREEN ولا يبدأ 44_DISCOVERY_22 حتى تثبت GitHub Actions نجاح الاختبار والانحدار الكامل للأطوار 1..42 وقفل الأسماء.
+أثبتت GitHub Actions 40135089232 نجاح الرقعة الحادية والعشرين و43454 تأكيداً دون إخفاق مفاجئ، و34560 حالة تحكم و8640 رفضاً و96 نتيجة إنتاج مصححة مع 78 مخالفة تاريخية محفوظة؛ أُغلق الطور 43 GREEN واجتازت الانحدارات 1..42 وقفل الأسماء.
+
+
+## الطور الرابع والأربعون — اكتشاف قلب رتبة الخرج في اتجاه السؤال النازل
+
+بعد استكمال الرقعة الحادية والعشرين وعودة جميع خانات المرتبة الواسعة، يفسّر `LegacyDescendingRankMirror` رتبة اختيار السؤال النازل على أنها مرتبة من نهاية الأسرة لا من بدايتها. عند `direction=-1` تكون النتيجة التاريخية `n+1-r` بدلاً من `r` الصحيحة، وعند الاتجاه الصاعد لا تتغير الرتبة. يظهر الخلل في الخرج حتى عندما تُقبل الإجابة الأولى، ويختلف بذلك عن عيب الرفض في الطور السادس والثلاثين. لا تُعدّل أي رقعة سابقة ولا سياسة القبول أو الصلصة.
+
+يستدعي `LegacyDescendingRankMirrorPhaseHandler` المسار المصحح `PatchedWideSlotTruncationPhaseHandler` فعلياً ثم يُنتج الشاهد القديم المستقل. يقرأ `DescendingRankDirectionWitness` اتجاه السؤال المختوم الحقيقي من مرشحه المتسلسل، ويتثبت `MonsterValidationManager` من هذا الشاهد وكل المرشحين السابقين قبل كتابة `LegacyDescendingRankMirrorResult`. تبقى `PatchedWideSlotTruncationRankResult` صحيحة ومنفصلة، ولا يُستورد المرجع المستقل إلى الإنتاج.
+
+```text
+dotnet run --project tests/PastafarianCalendar.Stage44Tests/PastafarianCalendar.Stage44Tests.csproj -c Release -- --verify-expected-red
+```
+
+تغطي الاختبارات 34560 حالة ضبط مع 17280 اختلافاً نازلاً و17280 مطابقة صاعدة، و8640 حالة رفض مع 4320 اختلافاً نازلاً، و96 سؤال إنتاج من ثماني صلصات، وحدوداً حتى 8192 بت، وتحقق الملكية ورفض الالتزام المكرر والمرشحات المزورة. يجب أن يفشل الاختبار المباشر `EXPECTED_RED` ويجتاز مدقق التوقيع المستقل وجميع انحدارات الأطوار 1..43 وقفل الأسماء. إصلاح الخلل مؤجل إلى `45_PATCH_22`.
