@@ -471,3 +471,21 @@ php -d memory_limit=512M tests/verify_stage32_discovery16.php # keluar 0 apabila
 ```
 
 Semua ujian Stage1–31, PHP lint, fixture dan kunci nama kanonik wajib lulus Native GitHub Actions pada SHA tepat. **Status: AWAITING_CI. Jangan tambah FourthDigitPatch16, jangan mulakan Stage33, jangan ubah main.**
+
+
+## Stage 33 — PATCH 16: Pulihkan digit keempat pada berat M³
+
+Stage32 DISCOVERY16 telah disahkan EXPECTED_RED oleh Native GitHub Actions `40169711719` pada SHA `748966fd7d2030c1199b30c1127508ee40ab10df`: tiga pekerjaan SUCCESS, termasuk kedua-dua kumpulan regresi PHP.
+
+`FourthDigitPatch16::choosePatched` menjalankan `LegacyMissingFourthDigit16::chooseWrong` secara sebenar untuk semakan domain dan pemeliharaan parut; kelas lama itu **tidak diubah**. Jawapan normatif membaca empat sampel SAVE daripada strim PATCH12 dengan pemberat `1`, `M`, `M²` dan `M³`. Had penerimaan `floor(M⁴/n)*n`, pergerakan rejection ±1 dan lilitan pada domain `M⁴` digunakan untuk ruang `M³<n<=M⁴`. Laluan produksi `BootstrapKernel::chooseQuadRank` memakai dispatcher `FOUR_DIGIT_PATCH_16` dalam konteks tersendiri; `legacyChooseQuadRank` kekal membuang digit keempat.
+
+Ujian Stage33 merangkumi 400 perbandingan matriks dengan oracle PHP bebas (empat ruang, 50 nilai awal, dua arah), 392 mismatch sejarah dan lapan persamaan sejarah, empat saksi Stage32 dengan beza tepat `(digit4−1)*M³`, 18 panggilan produksi merentas dua kernel, enam penolakan input dan imbasan tanpa oracle dalam kod produksi. Titik mula kritikal telah diselaraskan agar penolakan tidak mengambil tempoh astronomi; semakan aritmetik persendirian mendapati paling banyak empat langkah rejection pada 400 kes ini. Saksi dan verifier Stage32 terus menuntut empat kegagalan `EXPECTED_RED` yang sama.
+
+Semua ujian Stage1–32, PHP lint, fixture dan canonical names lock perlu lulus. Suite dipecahkan kepada tiga pekerjaan PHP bagi mengelakkan timeout: regresi awal Stage1–23, regresi Stage24–32, dan Stage33 sendiri. Pekerjaan `verify` juga wajib SUCCESS, semuanya terhadap SHA HEAD yang tepat.
+
+```text
+php -d memory_limit=512M tests/verify_stage32_discovery16.php
+php -d memory_limit=512M tests/stage33_patch16_tests.php
+```
+
+**Status:** `AWAITING_CI`. Jangan mulakan Stage34 sehingga empat pekerjaan Native CI berjaya. Jangan ubah `main`, katalog atau fixture.

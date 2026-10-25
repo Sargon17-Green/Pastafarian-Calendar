@@ -107,7 +107,12 @@ $legacyCode=(string)file_get_contents($root.'/src/Legacy/LegacyMissingFourthDigi
 $kernelCode=(string)file_get_contents($root.'/src/BootstrapKernel.php');
 if (!str_contains($legacyCode,'for ($j = 0; $j < 3; $j++)')
     || !str_contains($kernelCode, "dispatch('MISSING_FOURTH_DIGIT_LEGACY', " . '$context)')
-    || is_file($root.'/src/Patches/FourthDigitPatch16.php')) {
+    || (is_file($root.'/src/Patches/FourthDigitPatch16.php')
+        && !(str_contains($kernelCode,
+                "dispatch('FOUR_DIGIT_PATCH_16', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $root.'/src/Patches/FourthDigitPatch16.php'),
+                '$this->legacy->chooseWrong($stream, $n)')))) {
     echo "RALAT_KONTRAK16\n";
     $other++;
 }

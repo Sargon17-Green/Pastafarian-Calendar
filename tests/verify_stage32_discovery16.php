@@ -26,7 +26,12 @@ $kernel=(string)file_get_contents($root.'/BootstrapKernel.php');
 $valid=$valid
     && str_contains($legacy,'for ($j = 0; $j < 3; $j++)')
     && str_contains($kernel,"dispatch('MISSING_FOURTH_DIGIT_LEGACY', " . '$context)')
-    && !is_file($root.'/Patches/FourthDigitPatch16.php');
+    && (!is_file($root.'/Patches/FourthDigitPatch16.php')
+        || (str_contains($kernel,
+                "dispatch('FOUR_DIGIT_PATCH_16', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $root.'/Patches/FourthDigitPatch16.php'),
+                '$this->legacy->chooseWrong($stream, $n)')));
 foreach(new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS)) as $file) {
     if(strtolower($file->getExtension())!=='php')continue;

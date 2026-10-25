@@ -569,6 +569,29 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'triple.rank.patch15.calls');
             return $rank;
         });
+        $this->dispatcher->register('FOUR_DIGIT_PATCH_16', function(BootstrapContext $context): BigInt {
+            $id = $context->semanticState['queriedBowlId'] ?? null;
+            $seal = $context->semanticState['seal'] ?? null;
+            $space = $context->semanticState['choiceSpace'] ?? null;
+            if (!is_int($id) || !is_int($seal) || !$space instanceof BigInt) {
+                throw new \InvalidArgumentException('FOUR_DIGIT_PATCH_16_ARGS');
+            }
+            $stream = $this->askBowl(
+                $context->calculationDay, $context->targetDay, $id, $seal
+            );
+            $save = new \Pastafari\Stage01\Patches\SavePatch01(
+                new \Pastafari\Stage01\Legacy\LegacyRemainder()
+            );
+            $patch = new \Pastafari\Stage01\Patches\FourthDigitPatch16(
+                new \Pastafari\Stage01\Legacy\LegacyMissingFourthDigit16($save),
+                $save
+            );
+            $rank = $patch->choosePatched($stream, $space);
+            $context->semanticState['fourDigitRank'] = $rank;
+            $context->status = 'FOUR_DIGIT_PATCH_16_RETURNED';
+            $this->metrics->bump($context, 'quad.rank.patch16.requests');
+            return $rank;
+        });
         $this->dispatcher->register('MISSING_FOURTH_DIGIT_LEGACY', function(BootstrapContext $context): BigInt {
             $id = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -762,6 +785,25 @@ final class BootstrapKernel
      * DISCOVERY16: laluan sejarah salah bagi M^3 < n <= M^4.
      * @return BigInt Pangkat dengan digit keempat yang tercicir.
      */
+    /**
+     * Laluan produksi empat digit bagi M^3 < n <= M^4.
+     * @return BigInt Pangkat normatif.
+     */
+    public function chooseQuadRank(
+        int $calculationDay, int $targetDay, int $queriedBowlId,
+        int $seal, BigInt $space
+    ): BigInt {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'FOUR_DIGIT_PATCH_16';
+        $context->semanticState['queriedBowlId'] = $queriedBowlId;
+        $context->semanticState['seal'] = $seal;
+        $context->semanticState['choiceSpace'] = $space;
+        return $this->boundary->run(
+            $context,
+            fn(): BigInt => $this->dispatcher->dispatch('FOUR_DIGIT_PATCH_16', $context)
+        );
+    }
+
     public function legacyChooseQuadRank(
         int $calculationDay, int $targetDay, int $queriedBowlId,
         int $seal, BigInt $space

@@ -118,3 +118,14 @@ jobs:
         run: php -d memory_limit=512M tests/stage31_patch15_tests.php
       - name: Penemuan 16 — digit keempat tertinggal daripada pilihan besar
         run: php -d memory_limit=512M tests/verify_stage32_discovery16.php
+
+  audit_php_bahasa_melayu_stage33:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semak runtime PHP 64-bit bagi Stage33
+        run: php -r 'if (PHP_INT_SIZE !== 8) { fwrite(STDERR, "PHP 64-bit diperlukan\n"); exit(1); }'
+      - name: Tampalan 16 — digit keempat pada berat M kuasa tiga
+        run: php -d memory_limit=512M tests/stage33_patch16_tests.php
