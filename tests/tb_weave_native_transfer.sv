@@ -8,7 +8,7 @@ module tb_weave_native_transfer;
     localparam integer CWIDTH=864, CLIMBS=CWIDTH/32;
     localparam integer MAXDAYS=4244, FULL_BYTES=2809;
     integer month_length[1:45], cap[1:45], s,n,j,v,save_f;
-    integer total_days, prefix_sum, bit_count;
+    integer total_days, prefix_sum, bit_count, dump_mode,record_count;
     logic [WIDTH-1:0] next_row[0:MAXDAYS], row[0:MAXDAYS];
     logic [CWIDTH-1:0] coefficient,small_numerator;
     logic [WIDTH-1:0] term,prev_value,sum_check_root;
@@ -154,6 +154,14 @@ module tb_weave_native_transfer;
             cap[j]=prefix_sum-j;
         end
         total_days=prefix_sum;
+        dump_mode=$test$plusargs("dump_H");
+        record_count=0;
+        if(dump_mode!=0) begin
+            if(NMONTHS!=45 || WIDTH!=22528)
+                $fatal(1,"NATIVE_H_DUMP_REQUIRES_FULL_45");
+            save_f=$fopen("build/native_H_table.hex","w");
+            if(save_f==0) $fatal(1,"NATIVE_H_TABLE_OPEN");
+        end
         if(NMONTHS==45 && total_days!=4244)
             $fatal(1,"NATIVE_H_FOUNDATION_LENGTH_NOT_4244");
 
@@ -163,6 +171,15 @@ module tb_weave_native_transfer;
         for(n=0;n<=MAXDAYS;n=n+1) begin
             next_row[n]=WIDTH'(1);
             row[n]='0;
+        end
+        if(dump_mode!=0) begin
+            // Rows saved descending s=45..1; within row ascending n.
+            // WIDTH=22528 -> exactly 5632 lowercase/uppercase
+            // hex digits plus LF per record on POSIX GitHub runner.
+            for(n=0;n<=cap[NMONTHS];n=n+1) begin
+                $fwrite(save_f,"%h\n",next_row[n]);
+                record_count=record_count+1;
+            end
         end
         for(s=NMONTHS-1;s>=1;s=s-1) begin
             v=month_length[s+1];
@@ -198,11 +215,23 @@ module tb_weave_native_transfer;
                 end
             end
 
+            if(dump_mode!=0) begin
+                for(n=0;n<=cap[s];n=n+1) begin
+                    $fwrite(save_f,"%h\n",row[n]);
+                    record_count=record_count+1;
+                end
+            end
             for(n=0;n<=cap[s];n=n+1)
                 next_row[n]=row[n];
             $display("NATIVE_H_TRANSFER_PROGRESS started=%0d maxN=%0d bits=%0d",
                      s,cap[s],bit_length(next_row[cap[s]]));
             $fflush();
+        end
+        if(dump_mode!=0) begin
+            $fclose(save_f);
+            if(record_count!=101594)
+                $fatal(1,"NATIVE_H_TABLE_BAD_RECORD_COUNT");
+            $display("STAGE1_NATIVE_H_TABLE_WRITTEN records=101594 hexchars_per_row=5632");
         end
         sum_check_root=next_row[month_length[1]-1];
         if(NMONTHS==6) begin
