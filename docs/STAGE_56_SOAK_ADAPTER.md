@@ -92,3 +92,32 @@ including in optional extensions. Rejection always returns a single
 machine-readable JSON line with `ready=false`; schema errors must not
 escape as Python tracebacks. These constraints avoid inconsistent
 first-key/last-key parsing between potential language runtimes.
+
+
+## Pinned Git source-tree provenance
+
+An external scheduler must not trust the manifest's
+`engine_verified_commit` field by itself. Before building, it can invoke:
+
+```sh
+python3 tools/soak_source_provenance.py \
+  --repository . \
+  --manifest integrations/cpp-latina-soak.json \
+  --expected-engine-commit 5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8 \
+  --expected-head "$(git rev-parse HEAD)"
+```
+
+The baseline SHA **must** come from the scheduler's independently trusted
+configuration, not from the manifest. The baseline commit object must be
+available in the local Git repository (fetch it from the approved remote if
+needed). This fail-closed gate compares the exact Git trees for `src/`,
+`include/`, the C++ streaming adapter, and canonical-index validator;
+checks protected worktree modifications, staged changes, and untracked
+files; and requires the expected exact HEAD. It returns one JSON status
+with `source_verified`, a nonzero failure code, and no binary attestation.
+The native CI tests this gate against synthetic tampered repositories,
+then against the real current branch and pinned engine commit.
+
+This verifies frozen *source bytes*, not the built executable, its linked
+dependencies, or the correctness of all other implementations. The global
+multi-implementation soak remains a separate prerequisite.

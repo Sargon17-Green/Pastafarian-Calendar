@@ -8,6 +8,8 @@ on:
       - 'tools/soak_vector_adapter.cpp'
       - 'tools/validate_soak_index_modes.py'
       - 'tools/soak_global_preflight.py'
+      - 'tools/soak_source_provenance.py'
+      - 'tools/test_soak_source_provenance.py'
       - 'tools/test_soak_global_preflight_negative.py'
       - 'tools/test_soak_adapter_rejections.py'
       - 'tools/test_soak_adapter_interactive.py'
@@ -36,6 +38,22 @@ jobs:
           timeout 10m sudo apt-get update -qq
           timeout 10m sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libboost-dev
           test -r /usr/include/boost/multiprecision/cpp_int.hpp
+      - name: Validate trusted source-tree provenance and synthetic tamper rejection
+        shell: bash
+        env:
+          TRUSTED_ENGINE_COMMIT: '5d33499c9a89e3ddb8c5b1470e91eb8dc5f0cae8'
+        run: |
+          set -euo pipefail
+          python3 tools/test_soak_source_provenance.py tools/soak_source_provenance.py \
+            | tee soak-output/source-provenance-regressions.log
+          timeout 2m git fetch --quiet --no-tags --depth=1 origin "$TRUSTED_ENGINE_COMMIT"
+          python3 tools/soak_source_provenance.py \
+            --repository . --manifest integrations/cpp-latina-soak.json \
+            --expected-engine-commit "$TRUSTED_ENGINE_COMMIT" \
+            --expected-head "$GITHUB_SHA" \
+            > soak-output/source-provenance.json
+          python3 -c 'import json; d=json.load(open("soak-output/source-provenance.json")); assert d["source_verified"] is True and d["binary_attested"] is False'
+          echo 'SOAK_SOURCE_PROVENANCE=PASS'
       - name: Compile both independent native executables
         shell: bash
         run: |
