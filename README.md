@@ -350,3 +350,9 @@ Stage47 final [CI 40181446496](https://github.com/Sargon17-Green/Pastafarian-Cal
 ## Stage49 PATCH24 — मर्यादित exact weaving backend (प्रोटोटाइप)
 
 Stage48 closure CI 40191782358 दोन्ही jobs SUCCESS. जुना independent daily month ghost आणि २४ archived intentionally-red tests न बदलता, `DPUnrankLegalWeaving` वर BigInt memoized legal-weaving count व lex `itemAt1` चे लहान कुटुंबांसाठी अचूक Native सुधार सुरू आहे. वास्तविक ५३४९ दिवस/४४ महिने संसाधनमर्यादेवर स्पष्ट थांबतात; पूर्ण वर्षाचे exact selection अजून नाही. Stage49 GREEN घोषित नाही, Stage50 सुरू नाही; main अपरिवर्तित.
+
+## Stage49 — PATCH24: scalable exact legal month weaving (Native CI PASS)
+
+Stage48 final [CI 40191782358](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40191782358) 2/2 PASS नंतर historical daily ghost कायम प्रत्यक्ष चालवून, नवीन production `ScalableLegalWeavingCounter` (BigInt 1D first-appearance distribution) व `ScalableLegalWeavingUnrank` (prefix-valid legal lex suffix blocks) जोडले. `Patch24ScalableFullHandler` पूर्ण Stage48 predecessor खरोखर चालवतो; corrective Bowl4 Seal32 स्वतंत्रपणे खरी 58-write Native निवड आहे. Ghost योग्य ranked weaving शी **पूर्ण समान** असेल तेव्हाच पुनर्वापर. Stage49 जुन्या full-state bounded experiment ची actual capacity-block test जतन, production मध्ये वापरलेला नाही.
+
+[Native CI 40235282722](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40235282722) दोन्ही jobs SUCCESS: ५३४९ दिवस/४४ महिने वास्तविक वर्ष, २८६३८-बिट exact family count, ११,००२ exhaustive small ranks, ३ true-year giant ranks, २१ metamorphic families/२४१ rank checks, ७२० DROP46 old+corrected Seal32 pairs, ८३५२० shared writes, ० rank/weaving/archive चुका, २४ deliberately RED पुरावे, fault rollback आणि Stage54 barrier सर्व PASS. अंतिम Stage49 administrative closure HEAD च्या CI मध्येही 2/2 SUCCESS नंतरच Stage50 सुरू करावा; `main` अपरिवर्तित.

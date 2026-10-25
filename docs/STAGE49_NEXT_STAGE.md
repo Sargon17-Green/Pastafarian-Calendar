@@ -1,0 +1,11 @@
+# Stage49 PATCH24 Native PASS — Stage50 DISCOVERY25 ची पुढील अट
+
+Only `TypeScript+मराठी` branch. Stage49 full production Stage48 predecessor, exact BigInt legal month weaving count/one-based lex unrank and independent full 58-write Bowl4 Seal32 selection are verified by [Native CI 40235282722](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40235282722), both jobs SUCCESS. **Wait until this Stage49 administrative closure commit itself passes both CI jobs before implementing Stage50.** Keep `main`, other branches, frozen Marathi `SourceLanguageCatalog`, all 24 deliberate RED histories unchanged.
+
+## Stage50 DISCOVERY25 — month day falsely assumed contiguous
+
+Central development contract Patch25 historical defect: `oldContiguousMonthDayGuess` guesses day-in-month by treating occurrences of a selected month as a single continuous span. Real Stage49 month weaving may place a month ID on noncontiguous year days. The correct day-in-month is the **occurrence count** of that chosen month ID from the first year day through target day, inclusive; the correct counting/replacement is RESERVED for **Stage51 PATCH25**, not Stage50.
+
+Stage50 must add and really invoke the old guessed day-in-month algorithm only after full Stage49 historical chain: actual Stage48 day-by-day ghost (plus all Stage47/46 predecessors), corrected scalable exact weaving, native Bowl4 Seal32, correct first-day structure Sauce. Produce an independent test-only normative actual occurrence-count oracle, a concrete witnessed difference and 25th standalone intentional EXPECTED_RED (nonzero); keep all earlier 24 deliberate RED untouched. Do not invent a fake year, fake Sauce, or mark an old guess authoritative. When target lies on an actual selected month occurrence, compare exact old guess with normative count, including dispersed occurrence and boundaries. Enforce owner isolation, fault rollback/retry, no silent reuse, bounded resources, and Stage54 full-date integration still blocked.
+
+`npm run typecheck`, full `npm test`, archived RED 1..25, frozen names lock and both GitHub Actions jobs SUCCESS are mandatory before Stage50 closure, and final closure CI before Stage51. Update Library canonical `/Pastafarian_Calendar_Project/BRANCH_REGISTRY.xlsx` using the live version every round. No other branch or `main` writes.
