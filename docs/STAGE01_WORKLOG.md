@@ -572,3 +572,21 @@ was queued at last observation. No full unrank or stage PASS.
 - Added full-year native rank replay and tamper logs plus
   raw ledger to QA evidence bundle. CI result for the new
   rank replay is **PENDING**.
+
+### Independent rank-ledger witness (2026-10-25)
+
+A second exact-bigint recurrence replay, implemented separately
+from the GitHub ledger emitter, recomputed **all 4,243**
+skipped/selected interval pairs and the complete 4244-byte word.
+It independently matched the prior word SHA and established:
+
+```text
+ledger byte length = 23,837,174
+SHA256(foundation_weave_rank_intervals.bin) =
+2e46a3081ebbcf866ec5182b45c91f6695abbc83c1e3afec17cf678434749afb
+```
+
+The CI runner now checks **both** this independent ledger hash
+and the earlier native-derived root/rank hashes before executing
+the native 22,528-bit SystemVerilog rank replay. No native replay
+PASS is claimed until the new GitHub Actions job finishes.
