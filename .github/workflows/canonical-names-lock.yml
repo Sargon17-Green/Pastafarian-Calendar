@@ -1184,3 +1184,22 @@ jobs:
           for label in GATE1_DAY1_MONTH GATE2_DAY43_ORDINAL GATE6_YEAR_END_ORDINAL; do
             grep -Fq "FAIL — equivalenza normativa ${label} — Cache di varco: ${label}" stage50.log
           done
+  native-stage51-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage51 PATCH25 current-day gate cache correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage51Tests' 2>&1 | tee stage51.log
+          grep -Fq 'RISULTATO STADIO 51: 64 PASS, 0 FAIL' stage51.log
+          test "$(grep -Fc 'PASS — ' stage51.log)" -eq 64
+          test "$(grep -Fc 'FAIL — ' stage51.log)" -eq 0
