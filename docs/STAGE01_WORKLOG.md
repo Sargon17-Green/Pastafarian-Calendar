@@ -673,3 +673,5 @@ PASS is claimed until the new GitHub Actions job finishes.
 - Added independent test-only native SV generic lexical decoder `tb_weave_native_lex_prefix.sv`, using the native H archive, dynamic A(r) including exhausted-month handling, ALL old child blocks, independent fresh child validation and exact one-based rank selection.
 - Added bounded 64-symbol native CI runner with pinned 64-byte SHA256, independent initial-rank SHA and forced H corruption rejection. The math fixture was independently recomputed locally. This NEW experiment is **NOT YET CI VERIFIED**.
 - Documentation and acceptance ledger updated, with Stage 1 still IN_PROGRESS; zero accepted stages; 0/64 name approvals, production RTL incomplete; PR #20 Draft and no main merge.
+
+- Added six native exact ordered-LAST A(r) exhaustion edge cases (including interior/trailing-zero rejection and terminal all-zero state). They run before H access, and the 64-symbol runner requires their PASS marker. CI pending.

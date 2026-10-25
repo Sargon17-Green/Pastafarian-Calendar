@@ -42,3 +42,13 @@ experiment is 240 seconds following the pre-existing H construction.
 Full-year count generation, production five-field ASIC RTL and 0/64
 Kalaallisut approvals remain separate Stage 1 blockers.
 PR #20 remains Draft/DO NOT MERGE. No main or Stage 2 changes.
+
+## Exhausted-month corner cases
+
+The native bench now computes six self-contained 3-started-month A(r)
+regressions before reading the H archive: a leading completed month,
+an illegal interior completed month, an illegal trailing completed month,
+only the last month active, all months exhausted, and all three active.
+Expected exact factors are respectively 2, 0, 0, 1, 1, and 4. This
+is a native arithmetic unit fixture, NOT a proof of all full-year
+exhaustion transitions. New CI verdict is pending.

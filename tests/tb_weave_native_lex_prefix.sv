@@ -160,6 +160,23 @@ initial begin
     end
     if(prev_max!=DAYS || caps[45]!=4199)
         $fatal(1,"NATIVE_LEX_INVALID_DIMENSIONS");
+    // Exhaustion-order corner cases, independent of the H archive.
+    started=3;
+    remaining[1]=0;remaining[2]=1;remaining[3]=2;
+    if(factor_A()!==WIDTH'(2)) $fatal(1,"NATIVE_LEX_EDGE_LEADING_ZERO");
+    remaining[1]=1;remaining[2]=0;remaining[3]=2;
+    if(factor_A()!==WIDTH'(0)) $fatal(1,"NATIVE_LEX_EDGE_INTERIOR_ZERO");
+    remaining[1]=1;remaining[2]=2;remaining[3]=0;
+    if(factor_A()!==WIDTH'(0)) $fatal(1,"NATIVE_LEX_EDGE_TRAILING_ZERO");
+    remaining[1]=0;remaining[2]=0;remaining[3]=2;
+    if(factor_A()!==WIDTH'(1)) $fatal(1,"NATIVE_LEX_EDGE_ONLY_LAST_ACTIVE");
+    remaining[1]=0;remaining[2]=0;remaining[3]=0;
+    if(factor_A()!==WIDTH'(1)) $fatal(1,"NATIVE_LEX_EDGE_ALL_EXHAUSTED");
+    remaining[1]=2;remaining[2]=1;remaining[3]=2;
+    if(factor_A()!==WIDTH'(4)) $fatal(1,"NATIVE_LEX_EDGE_FULL_ACTIVE");
+    for(k=1;k<=MONTHS;k=k+1) remaining[k]=0;
+    $display("STAGE1_NATIVE_LEX_EXHAUSTED_MONTH_CASES_PASS cases=6");
+
     if(!$value$plusargs("max_positions=%d",max_positions))
         max_positions=64;
     if(max_positions<2 || max_positions>DAYS)

@@ -28,6 +28,7 @@ iverilog -g2012 -Wall -s tb_weave_native_lex_prefix \
     -o build/native_lex_prefix.vvp tests/tb_weave_native_lex_prefix.sv
 timeout 240s vvp build/native_lex_prefix.vvp +max_positions=64 \
     2>&1 | tee build/native_lex_prefix.log
+grep -Fq 'STAGE1_NATIVE_LEX_EXHAUSTED_MONTH_CASES_PASS cases=6' build/native_lex_prefix.log
 grep -Fq 'STAGE1_NATIVE_LEX_PREFIX_SV_PASS positions=64' build/native_lex_prefix.log
 test "$(wc -c < build/native_lex_prefix.bin)" -eq 64
 printf '%s\n' 'c799e928b30deb45924e8aa9f11be013b5a5f205190788e01dc99508793447dc  build/native_lex_prefix.bin' | sha256sum -c
