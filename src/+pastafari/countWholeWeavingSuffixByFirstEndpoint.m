@@ -1,4 +1,4 @@
-function total = countWholeWeavingSuffixByFirstEndpoint( ...
+function [total, monthTotals] = countWholeWeavingSuffixByFirstEndpoint( ...
         remaining, openedUpTo, closedUpTo)
 % EXPERIMENTAL: exact ONE-ENDPOINT streaming counter for ALL legal suffix
 % frontiers (fully unopened, partially opened, or all opened).
@@ -32,6 +32,7 @@ if ~(isnumeric(remaining) && isvector(remaining) && ...
 end
 remaining=double(remaining(:).');
 K=numel(remaining);
+monthTotals=cell(1,K); % Optional exact totals at each inserted month.
 if ~(isnumeric(openedUpTo) && isscalar(openedUpTo) && ...
         isfinite(openedUpTo) && fix(openedUpTo)==openedUpTo && ...
         isnumeric(closedUpTo) && isscalar(closedUpTo) && ...
@@ -63,6 +64,7 @@ one=pastafari.BigInt(1);
 prefix=cell(1,N(1)+1);
 prefix(2:end)=repmat({one},1,N(1));
 total=one;
+monthTotals{closedUpTo+1}=one;
 
 trace=strcmp(getenv('PASTAFARI_FIRST_ENDPOINT_TRACE'),'1');
 if trace
@@ -125,6 +127,7 @@ for j=2:numel(r)
             'Every legal nonempty suffix has an exact positive count.');
     end
     prefix=nextPrefix;
+    monthTotals{monthId}=total;
 
     if trace && (j==2 || mod(j,5)==0 || j==numel(r))
         fprintf(['STAGE_55_FIRST_ENDPOINT_PROGRESS MONTH=%d OF=%d ', ...

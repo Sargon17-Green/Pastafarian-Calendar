@@ -1,0 +1,29 @@
+name: MATLAB Exact Adjoint First-Letter Blocks (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/countWholeWeavingSuffixByFirstEndpoint.m'
+      - 'src/\+pastafari/countWholeWeavingNextLetterBlocksAdjoint.m'
+      - 'src/\+pastafari/unrankGeneralWeaveSuffixChunkAdjoint.m'
+      - 'tests/run_stage55_adjoint_next_letter_tests.m'
+      - '.github/workflows/matlab-stage55-adjoint-next-letter-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matlab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_adjoint_next_letter_tests

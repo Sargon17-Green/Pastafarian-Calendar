@@ -1,0 +1,29 @@
+name: MATLAB Real-Year First Four Adjoint Rank (Experiment)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'src/\+pastafari/countWholeWeavingSuffixByFirstEndpoint.m'
+      - 'src/\+pastafari/countWholeWeavingNextLetterBlocksAdjoint.m'
+      - 'src/\+pastafari/unrankGeneralWeaveSuffixChunkAdjoint.m'
+      - 'tests/run_stage55_real_year_adjoint_four.m'
+      - '.github/workflows/matlab-stage55-real-year-adjoint-four.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matlab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_real_year_adjoint_four
