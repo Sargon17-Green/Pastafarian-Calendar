@@ -86,3 +86,12 @@ Actions 40192779969（commit 143645a32839f51c664cde475cc8983a0938cb3a）
 以及遮蔽 sort 比較器。兩次 FAILURE 均保留。
 修補後仍須 verify、完整 perl-stage01、三個 Native 同一 HEAD
 全部成功，不能將提交本身當作 PASS。
+
+## 第七十四輪最終原生驗收（2026-10-25）
+
+提交 `22be9017d332128cf9097a36222b7acdea8c0454`：
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40204037949
+的 verify、完整 perl-stage01 及全部三個 R74 Native 分片均 SUCCESS。
+原生逐條枚舉 3703、18719、64121 個完整合法字序的鏡射雙射
+及 SHA256 基線全部 PASS，三份資源守衛均為 passed=1、blocked=0、
+failed=0。先前兩次整體 FAILURE 保留為歷史。R74 確認關閉。

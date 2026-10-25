@@ -2606,3 +2606,165 @@ jobs:
           perl -Ilib -It/lib -c tools/audit_r74_fivemonth_order.pl
           perl -Ilib -It/lib -c tools/profile_r74_fivemonth_order.pl
           timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r74_fivemonth_order.pl --shard 3 --seconds 185 --rss-kib 393216
+
+  canonical-r75-fivemonth-prefix-1-1:
+    name: R75 五個月全深度前綴 1-1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r75-fivemonth-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月深度 0..4 全部前綴真實 BigInt 字典序分割
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 1 --second 1 --seconds 185 --rss-kib 393216
+
+  canonical-r75-fivemonth-prefix-1-2:
+    name: R75 五個月全深度前綴 1-2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r75-fivemonth-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月深度 0..4 全部前綴真實 BigInt 字典序分割
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 1 --second 2 --seconds 185 --rss-kib 393216
+
+  canonical-r75-fivemonth-prefix-1-3:
+    name: R75 五個月全深度前綴 1-3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r75-fivemonth-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月深度 0..4 全部前綴真實 BigInt 字典序分割
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 1 --second 3 --seconds 185 --rss-kib 393216
+
+  canonical-r75-fivemonth-prefix-2-1:
+    name: R75 五個月全深度前綴 2-1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r75-fivemonth-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月深度 0..4 全部前綴真實 BigInt 字典序分割
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 2 --second 1 --seconds 185 --rss-kib 393216
+
+  canonical-r75-fivemonth-prefix-2-2:
+    name: R75 五個月全深度前綴 2-2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r75-fivemonth-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月深度 0..4 全部前綴真實 BigInt 字典序分割
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 2 --second 2 --seconds 185 --rss-kib 393216
+
+  canonical-r75-fivemonth-prefix-2-3:
+    name: R75 五個月全深度前綴 2-3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r75-fivemonth-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月深度 0..4 全部前綴真實 BigInt 字典序分割
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 2 --second 3 --seconds 185 --rss-kib 393216
+
+  canonical-r75-fivemonth-prefix-3-1:
+    name: R75 五個月全深度前綴 3-1
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r75-fivemonth-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月深度 0..4 全部前綴真實 BigInt 字典序分割
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 3 --second 1 --seconds 185 --rss-kib 393216
+
+  canonical-r75-fivemonth-prefix-3-2:
+    name: R75 五個月全深度前綴 3-2
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r75-fivemonth-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月深度 0..4 全部前綴真實 BigInt 字典序分割
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 3 --second 2 --seconds 185 --rss-kib 393216
+
+  canonical-r75-fivemonth-prefix-3-3:
+    name: R75 五個月全深度前綴 3-3
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[weaving-r75-fivemonth-prefix]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: 五個月深度 0..4 全部前綴真實 BigInt 字典序分割
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+          timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 3 --second 3 --seconds 185 --rss-kib 393216
