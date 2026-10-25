@@ -47,3 +47,28 @@ if timeout 30s vvp build/native_H_lookup.vvp +mutate_address \
 fi
 grep -Fq 'NATIVE_H_INDEXED_ROOT_MISMATCH' build/native_H_lookup_negative.log
 echo 'STAGE1_NATIVE_H_INDEXED_TAMPER_REJECTED_PASS'
+
+# Full native SystemVerilog A(r) combinatorial factor and
+# lex branch counts for the first seven selected month labels.
+# No Python block counts are loaded: all 9 values are computed
+# from the native H(7,746)/H(7,745) indexed table values.
+iverilog -g2012 -Wall -s tb_weave_native_H_children7 \
+  -o build/native_H_children7.vvp tests/tb_weave_native_H_children7.sv
+timeout 180s vvp build/native_H_children7.vvp \
+  2>&1 | tee build/native_H_children7.log
+for item in parent 1 2 3 4 5 6 7 8; do
+  test "$(wc -c < "build/native_H_children7_$item.bin")" -eq 2809
+done
+sha256sum -c <<'NATIVE_CHILDREN7_GOLDENS'
+c89443f21642a9cbacbc12f4e6d970ab4815806d3b1b6dc836f247c1a4cc8849  build/native_H_children7_parent.bin
+0b72169fe3c363a5a56b37f225bc1b45ec78793a430eca85419a3700a576f727  build/native_H_children7_1.bin
+0f23e693e34c220dcc004ff9c7b02bfd421c957bd4f8a273f3e1e5663b81db17  build/native_H_children7_2.bin
+9616b8efa8fadbecc7edf35a9577807f96f46311840a46dac3127a2d9a71fba1  build/native_H_children7_3.bin
+d38ddf106d30d6cdf6be7cd24015d2ee499dcf149e3d83004c1c6eafe5b1f074  build/native_H_children7_4.bin
+66c270cb320cf87e59e93216273279c2eba4a8509c71b3028897c793610671ef  build/native_H_children7_5.bin
+d563dfc476051de9f88006796f71cb4fe5614a546f77da485912ff3ec427cfaf  build/native_H_children7_6.bin
+bbdfde541270cc68fe80e726546e220c34c0e5dfe918f5a5d2f5e4ec3b8dd2c7  build/native_H_children7_7.bin
+002b3835ca88649360d71268823385c79d12d5ff1f9950e2bd4fd77eb3e2b1fb  build/native_H_children7_8.bin
+NATIVE_CHILDREN7_GOLDENS
+echo 'STAGE1_NATIVE_H_CHILDREN7_NINE_FULLWIDTH_GOLDENS_PASS'
+
