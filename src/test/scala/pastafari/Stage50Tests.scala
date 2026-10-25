@@ -335,8 +335,9 @@ object Stage50Tests {
       truth(current>=50 && completed>=49 && completed<=current,
         "Sequenza storica")
       if(current==50)
-        eqv(completed,49,"Stage49 certificato, Stage50 aperto")
-      else
+        truth(completed==49 || completed==50,
+          "Stage50 aperto o certificato")
+      if(completed>=50 || current>50)
         truth(s.contains(
           "STAGE_50_NATIVE_VERIFICATION=PASS_EXPECTED_RED_44_PASS_3_FAIL"),
           "Firma storica DISCOVERY25 certificata")
