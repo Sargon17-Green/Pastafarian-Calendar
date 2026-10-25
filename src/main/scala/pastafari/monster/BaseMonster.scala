@@ -211,7 +211,15 @@ final case class BaseMonsterContext(
   var legacyGateCacheOrdinal: Option[Int] = None,
   var patch25CurrentMonthId: Option[Int] = None,
   var patch25CurrentDayInMonth: Option[Int] = None,
-  var patch25Applied: Boolean = false
+  var patch25Applied: Boolean = false,
+  var gateProjectionGaps: Option[Vector[Int]] = None,
+  var gateProjectionPartition: Option[Vector[Int]] = None,
+  var gateProjectionDayOffset: Option[Int] = None,
+  var gateProjectionSnapshot: Option[(Vector[Int],Vector[Int],Int)] = None,
+  var gateProjectionLegacyGateId: Option[Int] = None,
+  var gateProjectionLegacyGateStart: Option[Int] = None,
+  var gateProjectionLegacyCutletId: Option[Int] = None,
+  var gateProjectionLegacyOrdinal: Option[Int] = None
 )
 
 final class BaseMetricsShell {
@@ -372,6 +380,50 @@ final class BaseValidationManager {
     * Non invoca wrapper o adapter legacy ed esamina separatamente
     * la cicatrice immutata della cache all'inizio del varco.
     */
+  /** Ricalcolo autonomo della cicatrice gateId != cutletId. */
+  def requireDiscovery26Ready(ctx:BaseMonsterContext):Unit={
+    if(ctx.phase!="DISCOVERY_26_GATE_TO_CUTLET_PROJECTION" ||
+       ctx.status!="LEGACY_GATE_CUTLET_PROJECTION_READY" ||
+       ctx.branchTrace.toVector!=Vector(
+         "BOOT","DISCOVERY_26_GATE_TO_CUTLET_PROJECTION") ||
+       ctx.gateProjectionGaps.isEmpty ||
+       ctx.gateProjectionPartition.isEmpty ||
+       ctx.gateProjectionDayOffset.isEmpty ||
+       ctx.gateProjectionSnapshot.isEmpty ||
+       ctx.gateProjectionLegacyGateId.isEmpty ||
+       ctx.gateProjectionLegacyGateStart.isEmpty ||
+       ctx.gateProjectionLegacyCutletId.isEmpty ||
+       ctx.gateProjectionLegacyOrdinal.isEmpty)
+      throw new IllegalStateException("DISCOVERY26 non completa.")
+    val gaps=ctx.gateProjectionGaps.get
+    val part=ctx.gateProjectionPartition.get
+    val day=ctx.gateProjectionDayOffset.get
+    if(ctx.gateProjectionSnapshot.get!=(gaps,part,day) ||
+       part.length<6 || part.length>17 ||
+       gaps.length<6 || gaps.length>47 ||
+       part.exists(_<1) || part.sum!=gaps.length ||
+       gaps.exists(g=>g<42 || g>963) ||
+       gaps.sum<252 || gaps.sum>5778 ||
+       day<0 || day>=gaps.sum)
+      throw new IllegalStateException("Input DISCOVERY26 alterati.")
+    var cursor=0
+    var gate=0
+    var start=0
+    for((size,index)<-gaps.zipWithIndex){
+      if(day>=cursor && day<cursor+size){
+        gate=index+1
+        start=cursor
+      }
+      cursor+=size
+    }
+    if(cursor!=gaps.sum || gate==0 ||
+       ctx.gateProjectionLegacyGateId.get!=gate ||
+       ctx.gateProjectionLegacyGateStart.get!=start ||
+       ctx.gateProjectionLegacyCutletId.get!=gate ||
+       ctx.gateProjectionLegacyOrdinal.get!=day-start+1)
+      throw new IllegalStateException("Cicatrice DISCOVERY26 falsificata.")
+  }
+
   def requirePatch25Ready(ctx: BaseMonsterContext): Unit = {
     if(ctx.phase!="PATCH_25_GATE_START_MONTH_CACHE" ||
        ctx.status!="PATCH_25_READY" || !ctx.patch25Applied ||
@@ -2400,7 +2452,8 @@ final class BaseMonsterManager {
     new Discovery24CutletLocalMonthHandler(metrics),
     new Patch24CutletLocalMonthHandler(metrics),
     new Discovery25GateStartMonthCacheHandler(metrics),
-    new Patch25GateStartMonthCacheHandler(metrics)
+    new Patch25GateStartMonthCacheHandler(metrics),
+    new Discovery26GateToCutletProjectionHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -3787,6 +3840,32 @@ final class BaseMonsterManager {
     } catch {
       case error:Throwable =>
         throw BaseErrorWrapper.wrap("patch25",error)
+    }
+  }
+
+  def discover26GateToCutletProjection(
+    calculationDay:BigInt,targetDay:BigInt,
+    gateGaps:Vector[Int],cutletPartition:Vector[Int],dayOffset:Int
+  ):Discovery26GateToCutletProjectionReport={
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.gateProjectionGaps=Some(gateGaps)
+    ctx.gateProjectionPartition=Some(cutletPartition)
+    ctx.gateProjectionDayOffset=Some(dayOffset)
+    ctx.phase="DISCOVERY_26_GATE_TO_CUTLET_PROJECTION"
+    try{
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery26Ready(ctx)
+      Discovery26GateToCutletProjectionReport(
+        ctx.calculationDay,ctx.targetDay,
+        ctx.gateProjectionGaps.get,ctx.gateProjectionPartition.get,
+        ctx.gateProjectionDayOffset.get,
+        ctx.gateProjectionLegacyGateId.get,
+        ctx.gateProjectionLegacyGateStart.get,
+        ctx.gateProjectionLegacyCutletId.get,
+        ctx.gateProjectionLegacyOrdinal.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    }catch{
+      case e:Throwable=>throw BaseErrorWrapper.wrap("discovery26",e)
     }
   }
 

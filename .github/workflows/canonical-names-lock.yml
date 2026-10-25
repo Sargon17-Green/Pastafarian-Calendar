@@ -1203,3 +1203,30 @@ jobs:
           grep -Fq 'RISULTATO STADIO 51: 64 PASS, 0 FAIL' stage51.log
           test "$(grep -Fc 'PASS — ' stage51.log)" -eq 64
           test "$(grep -Fc 'FAIL — ' stage51.log)" -eq 0
+
+  native-stage52-discovery:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage52 gate-to-cutlet expected-RED scar
+        shell: bash
+        run: |
+          set +e
+          sbt -batch 'Test / runMain pastafari.Stage52Tests' > stage52.log 2>&1
+          rc=$?
+          set -e
+          cat stage52.log
+          test "$rc" -ne 0
+          grep -Fq 'RISULTATO STADIO 52: 44 PASS, 3 FAIL' stage52.log
+          test "$(grep -Fc 'PASS — ' stage52.log)" -eq 44
+          test "$(grep -Fc 'FAIL — ' stage52.log)" -eq 3
+          for label in GATE2_IN_CUTLET1 GATE5_IN_CUTLET3 GATE9_IN_CUTLET6; do
+            grep -Fq "FAIL — equivalenza normativa ${label} — Gate usato come cotoletta: ${label}" stage52.log
+          done
