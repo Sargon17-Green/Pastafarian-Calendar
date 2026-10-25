@@ -5,6 +5,9 @@ on:
     branches:
       - 'MATLAB\+Polski'
     paths:
+      # Experimental-only helpers have dedicated native CI, and must not
+      # queue the 180-minute heavy production/oracle audit on each push.
+      # Production sources and Stage 54/55 acceptance sources still do.
       - 'src/**'
       - '!src/\+pastafari/countWholeWeavingSuffixByEndpoints.m'
       - '!src/\+pastafari/unrankWholeWeavingByEndpoints.m'
@@ -52,6 +55,18 @@ on:
       - '!tests/run_stage55_preopen_full_year_bench.m'
       - '!src/\+pastafari/countWholeWeavingSuffixByFirstEndpoint.m'
       - '!tests/run_stage55_first_endpoint_tests.m'
+      - '!src/\+pastafari/countWholeWeavingFirstLetterUpTo.m'
+      - '!src/\+pastafari/unrankGeneralWeaveSuffixChunkBinary.m'
+      - '!src/\+pastafari/countWholeWeavingNextLetterBlocksAdjoint.m'
+      - '!src/\+pastafari/unrankGeneralWeaveSuffixChunkAdjoint.m'
+      - '!src/\+pastafari/WholeMonthWeavingFamilyPolynomial.m'
+      - '!tests/run_stage55_binary_first_letter_tests.m'
+      - '!tests/run_stage55_real_year_binary_four.m'
+      - '!tests/run_stage55_adjoint_next_letter_tests.m'
+      - '!tests/run_stage55_real_year_adjoint_four.m'
+      - '!tests/run_stage55_polynomial_family_equivalence_tests.m'
+      - '!tests/run_stage55_real_year_8_day_unopened.m'
+      - '!tests/run_stage55_all_frontier_inverse_tests.m'
       - 'DEVELOPMENT_STAGE.md'
       - 'docs/STAGE_55_FINAL_AUDIT.md'
   workflow_dispatch:
