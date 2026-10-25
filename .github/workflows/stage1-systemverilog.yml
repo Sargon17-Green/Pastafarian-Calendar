@@ -419,3 +419,47 @@ jobs:
             build/foundation_weave_reference_metrics.txt
           retention-days: 90
           if-no-files-found: warn
+
+  native_H_transfer:
+    # Independently native SV computes H_s(N) by its own exact
+    # 22528-bit arithmetic, NOT by loading Python witness blocks.
+    # Separate from already-green QA, bounded resource budget.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 31
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record exact source revision and simulator version
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          git rev-parse HEAD | tee build/native_H_source_sha.txt
+          python3 --version | tee build/native_H_python_version.txt
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Six-month golden then full 45-month native count transfer
+        run: |
+          set -euo pipefail
+          ulimit -v 3145728
+          bash scripts/verify_native_H_transfer.sh
+      - name: Preserve exact full native H transfer evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-native-H-transfer
+          path: |
+            build/native_H_source_sha.txt
+            build/native_H_python_version.txt
+            build/native_H_six.log
+            build/native_H_full.log
+            build/native_H_root.bin
+            build/native_H_prefix11.bin
+            build/native_H_prefix121.bin
+            build/native_H_prefix1231.bin
+            build/native_H_prefix12345671.bin
+          retention-days: 90
+          if-no-files-found: warn
