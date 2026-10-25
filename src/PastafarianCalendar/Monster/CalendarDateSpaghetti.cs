@@ -345,6 +345,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateWideTerminalSentinel(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الاكتشاف الرابع والعشرون: إرسال المرتبة قبل الأخيرة كأنها الأخيرة.
+    public static BigInteger EvaluateLegacyPenultimateWideCarry(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateLegacyPenultimateWideCarry(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

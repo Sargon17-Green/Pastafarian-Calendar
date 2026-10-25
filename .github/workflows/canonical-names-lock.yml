@@ -292,3 +292,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage46Tests/PastafarianCalendar.Stage46Tests.csproj --configuration Release -- --verify-expected-red
       - name: تكافؤ الرقعة الثالثة والعشرين وحفظ شاهد حارس النهاية
         run: dotnet run --project tests/PastafarianCalendar.Stage47Tests/PastafarianCalendar.Stage47Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لحمل المرتبة قبل الأخيرة
+        id: discovery_penultimate_wide_carry_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage48Tests/PastafarianCalendar.Stage48Tests.csproj --configuration Release
+      - name: إثبات توقيع حمل المرتبة قبل الأخيرة دون إتلاف الرقعة الثالثة والعشرين
+        if: always()
+        run: |
+          test "${{ steps.discovery_penultimate_wide_carry_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage48Tests/PastafarianCalendar.Stage48Tests.csproj --configuration Release -- --verify-expected-red

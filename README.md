@@ -450,4 +450,15 @@ dotnet run --project tests/PastafarianCalendar.Stage46Tests/PastafarianCalendar.
 
 اختبار: dotnet run --project tests/PastafarianCalendar.Stage47Tests/PastafarianCalendar.Stage47Tests.csproj -c Release
 
-لا يُغلق 47_PATCH_23 حتى نجاح GitHub Actions لكل الاختبارات والانحدارات 1..46 وقفل الأسماء؛ ويُفتح 48_DISCOVERY_24 فقط بعد النجاح.
+أثبتت GitHub Actions `40204581556` نجاح الرقعة الثالثة والعشرين بـ`52090` تأكيداً دون إخفاق غير متوقع: `34560` ضبطاً صحيحاً و`8640` حداً مقبولاً و`8640` رفضاً و`96` سؤال إنتاج صحيحاً، مع `78` مخالفة تاريخية محفوظة. اجتازت انحدارات المراحل `1..46` وقفل الأسماء؛ أُغلق الطور `47_PATCH_23` GREEN.
+
+
+## الطور الثامن والأربعون — اكتشاف الحمل المبكر للمرتبة قبل الأخيرة
+
+بعد اكتمال الرقعة الثالثة والعشرين، يستعمل مُسلسِل الإخراج القديم `LegacyPenultimateWideCarry` علامة نهاية مبكرة: يحفظ المرتبة `n` عندما تكون الرتبة الصحيحة `n-1` في الأسرة الواسعة. لا تتغير المرتبة `n` نفسها ولا بقية المراتب؛ وهو خلل منفصل عن شاهد حارس المرتبة `n` الذي أصلحته الرقعة السابقة. يمكن بناء شاهد قبول بلا رفض باختيار `n=wide(stream)+1` مع جواب أول ذي مرتبة `n-1`.
+
+يستدعي `LegacyPenultimateWideCarryPhaseHandler` سلسلة `PatchedWideTerminalSentinelPhaseHandler` كاملة، ثم يحفظ الخطأ في `LegacyPenultimateWideCarryRankResult` دون محو `PatchedWideTerminalSentinelRankResult`. يفحص `MonsterValidationManager` سلسلة المرشحين كلها قبل الالتزام. يوفر `CalendarDateSpaghetti.EvaluateLegacyPenultimateWideCarry` وصولاً للشاهد عبر المدير والموزع؛ ويبقى المرجع النظري داخل الاختبارات فقط.
+
+الأمر: `dotnet run --project tests/PastafarianCalendar.Stage48Tests/PastafarianCalendar.Stage48Tests.csproj -c Release -- --verify-expected-red`
+
+تغطي الاختبارات 34560 ضبطاً، و8640 حالة قبول للمرتبة قبل الأخيرة دون رفض، و8640 حالة رفض منفصلة و96 سؤال إنتاج، وحدوداً حتى 8192 بت، وتحقق الملكية والتزوير وعدم تكرار الالتزام. التشغيل المباشر يجب أن يفشل `EXPECTED_RED`، وأن ينجح مدقق التوقيع وانحدارات الأطوار 1..47 وقفل الأسماء. لا يجوز فتح `49_PATCH_24` قبل اعتماد الأحمر المقصود.

@@ -187,6 +187,9 @@ public sealed class MonsterContext
     // الرقعة الثالثة والعشرون: تُحفظ المرتبة الصحيحة منفصلة عن شاهد الحارس.
     public BigInteger? PatchedWideTerminalSentinelRankResult { get; set; }
 
+    // الندبة الرابعة والعشرون: يرفع الكاتب المرتبة قبل الأخيرة إلى الأخيرة.
+    public BigInteger? LegacyPenultimateWideCarryRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
