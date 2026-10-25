@@ -675,3 +675,11 @@ PASS is claimed until the new GitHub Actions job finishes.
 - Documentation and acceptance ledger updated, with Stage 1 still IN_PROGRESS; zero accepted stages; 0/64 name approvals, production RTL incomplete; PR #20 Draft and no main merge.
 
 - Added six native exact ordered-LAST A(r) exhaustion edge cases (including interior/trailing-zero rejection and terminal all-zero state). They run before H access, and the 64-symbol runner requires their PASS marker. CI pending.
+
+## 2026-10-26 — exact O(s) native branch-factor engine, 256-symbol gate (CI PENDING)
+
+- Independent Python full-year exact audit reproduced 22470-bit root, the 177-digit rank SHA and the original 4244-word SHA; all 45 labels have started by **position 255**; first real month exhaustion occurs at **position 4138**.
+- Derived ordered-LAST prefix/suffix factorization for all old-month `A(r-e_i)` blocks using O(s) binomial evaluations, including legal leading zeros and illegal internal zero factors. 9,000 seeded synthetic states independently matched direct `A` (each parent and child).
+- Created separate `tests/tb_weave_native_lex_fast.sv` with exact native old blocks and independently generated fresh count; direct A(r) crosschecks for first 64 and terminal 106 positions; 64-byte equality against the existing direct native decoder and pinned independent 256-byte SHA. A forced H mutation MUST be rejected.
+- Added `scripts/verify_native_lex_fast.sh` to the existing bounded native_H CI runner, and documentation `docs/FOUNDATION_NATIVE_LEX_FAST_FACTORS.md`. **SV CI result is PENDING**, so no native 64/256 acceptance claim is made.
+- No changes to main; Stage 1 remains OPEN, no Stage 2, 0/64 native-approved Kalaallisut names, PR #20 stays Draft.

@@ -492,3 +492,9 @@ lexical approvals, stage acceptance, and 55-stage rollout.
 - PENDING: brand-new generic native SV lexical selection test for 64 ordinals; immutable reference 64-byte SHA256 `c799e928b30deb45924e8aa9f11be013b5a5f205190788e01dc99508793447dc` and H-mutation negative case.
 - BLOCKED: native full 4244-symbol output, all five production ASIC calendar fields and independent qualified Kalaallisut 64/64 approvals.
 - Stage 1=OPEN; LAST_COMPLETED_STAGE=0; Stage 2 NOT OPEN; PR #20 DO NOT MERGE.
+
+## Optimized native A(r) partition, 2026-10-26
+
+- Mathematical-only PASS: 9,000 seeded synthetic A(r) states (full parent and legal children) with O(s) exact prefix/suffix factors; Foundation full-year reference independently pins 256-byte SHA256 `f85aafeaa582a87bbc66c43a752a40fe3a2a88ad7d47b8e43500a2306f69c45b`.
+- **Native CI PENDING**: 64-byte fast/direct SV comparison, 256-byte native fast SV word and all 45 starts, negative H mutation; see `FOUNDATION_NATIVE_LEX_FAST_FACTORS.md`.
+- Full 4244 native ordinal unrank, ASIC five-field RTL and Kalaallisut native approvals remain outstanding; Stage 1 IN_PROGRESS.
