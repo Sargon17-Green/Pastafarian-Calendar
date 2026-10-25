@@ -619,3 +619,27 @@ PASS is claimed until the new GitHub Actions job finishes.
 - This is a substantial test-only SV arithmetic primitive;
   not a full native SV unrank, production RTL, or full
   language signoff.
+
+## 2026-10-25 — native completion H(s,N) transfer CI GREEN; indexed archive work
+
+- Verified real [run 40192285282](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40192285282),
+  8/8 CI jobs SUCCESS. Native `native_H_transfer` job
+  `121165675248` logged 1602-bit six-month root PASS,
+  full 45-month 22470-bit root and FOUR full-width prefix
+  SHA256 goldens PASS, without external Python ledger.
+- Added opt-in `+dump_H` in `tb_weave_native_transfer.sv`
+  to serialize all 101594 states as fixed 5632-hex+LF
+  records descending s/ascending n. Expected transient
+  scratch output is 572279002 bytes, not uploaded.
+- Added independent native SV archive reader
+  `tb_weave_native_H_lookup.sv` with exact fixed-record
+  seek formula, 16 exported values from s=1/2/3/7/8/15/44/45
+  and comparison to the original native root.
+- Added SHA-pinned validation of all 16 samples and a
+  seek-offset tamper negative regression in
+  `scripts/verify_native_H_indexed.sh`.
+- Integrated archive and lookup into the existing bounded
+  `verify_native_H_transfer.sh` run. The isolated QA
+  branch `qa-systemverilog-kalaallisut-stage1-20261022`
+  now retains probe/negative logs and compact outputs.
+  **These new archive/lookup tests have not passed CI yet.**

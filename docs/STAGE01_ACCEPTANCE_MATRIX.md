@@ -457,3 +457,16 @@ lexical approvals, stage acceptance, and 55-stage rollout.
 - Production date_valid and all five fields, 64
   approved Kalaallisut names, and Stage 1 signoff
   remain OPEN. Stage 2 CLOSED.
+
+## 2026-10-25 — indexed native H table acceptance gate
+
+- **PASS** from CI 40192285282: independently native
+  101594-state H(s,N) transfer, 45-month root and four
+  selected suffix counts, all SHA256.
+- **PENDING**: `+dump_H` fixed record archive
+  (101594 * 5633 = 572279002 bytes), independent SV
+  random-access lookups, 16 golden SHA256 and tampered
+  seek rejection. Only compact probes are archived.
+- **NOT COMPLETE:** native 4244-symbol combinatorial
+  unrank; production RTL five-field calendar query;
+  64 native-approved Kalaallisut labels (0).
