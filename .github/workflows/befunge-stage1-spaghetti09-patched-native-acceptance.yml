@@ -28,6 +28,7 @@ jobs:
           test "$(git hash-object qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq)" = "e22a8b706fb84e3356db6c70aac29b9145642201"
           test "$(git hash-object qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq)" = "275cec0add8705565d27da4233860bf42d134a27"
           test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+          test "$(git hash-object qa/stage1_spaghetti09_independent_receipt_audit.py)" = "699be2d5c0123ffbf5112a1e19de181ec95566e2"
           echo "QA09_NATIVE_EIGHTY_EXACT_HEAD $(git rev-parse HEAD)"
       - name: Build exact 17-dimensional Funge++ Native interpreter
         shell: bash
@@ -81,6 +82,20 @@ jobs:
           set -euo pipefail
           python3 -m py_compile qa/stage1_spaghetti09_eighty_native.py
           python3 qa/stage1_spaghetti09_eighty_native.py
+      - name: Independently audit all 12 Native receipts and 16 forged adversarial records
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti09_independent_receipt_audit.py
+          python3 qa/stage1_spaghetti09_independent_receipt_audit.py \
+            --receipt spaghetti09_nd17_native_receipt.json \
+            --output spaghetti09_independent_audit.json \
+            | tee spaghetti09_independent_audit_console.log
+          grep -q QA09B_INDEPENDENT_12_NATIVE_CASE_DIGESTS_MATCH_INT_ORACLE spaghetti09_independent_audit_console.log
+          grep -q QA09B_INDEPENDENT_20_DISTINCT_NONZERO_MUTANT_OUTCOMES spaghetti09_independent_audit_console.log
+          grep -q QA09B_INDEPENDENT_16_FORGED_RECEIPTS_REJECTED spaghetti09_independent_audit_console.log
+          grep -q QA09B_HISTORICAL_UPSTREAM_NATIVE_RED_NOT_WAIVED_STAGE1_OPEN spaghetti09_independent_audit_console.log
+          test -s spaghetti09_independent_audit.json
       - name: Preserve evidence from all provenance chains
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -92,4 +107,6 @@ jobs:
             spaghetti08_nd17_native_receipt.json
             spaghetti09_fork_native_receipt.json
             spaghetti09_nd17_native_receipt.json
+            spaghetti09_independent_audit.json
+            spaghetti09_independent_audit_console.log
           if-no-files-found: warn
