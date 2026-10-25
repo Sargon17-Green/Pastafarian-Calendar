@@ -13,19 +13,44 @@ sys.path.insert(0, str(PEER))
 
 from pastafari_calendar import calendar_date_spaghetti, SOURCE_LANGUAGE_CATALOG  # noqa: E402
 
-CASES = (
-    ("foundation_same", -15_055_671, -15_055_671),
-    ("foundation_next", -15_055_671, -15_055_670),
-    ("foundation_previous", -15_055_671, -15_055_672),
-    ("foundation_plus_seven", -15_055_664, -15_055_664),
-    ("foundation_mixed", -15_055_669, -15_055_668),
-)
+PEER_SHA = "b3501b4296403bc33cb36f81a763269e5af97523"
+CASE_FILE = ROOT / "qa" / "differential_cases.tsv"
+
+def load_cases():
+    seen = set()
+    pairs = []
+    for raw in CASE_FILE.read_text(encoding="utf-8").splitlines():
+        if not raw.strip() or raw.startswith("#"):
+            continue
+        parts = raw.split("\t")
+        if len(parts) != 3:
+            raise ValueError(f"Malformed differential case: {raw!r}")
+        label, c, t = parts
+        if label in seen:
+            raise ValueError(f"Duplicate case identifier: {label!r}")
+        seen.add(label)
+        pairs.append((label, int(c), int(t)))
+    if not pairs:
+        raise ValueError("No differential cases")
+    return tuple(pairs)
+
+def verify_peer_revision():
+    actual = subprocess.check_output(
+        ["git", "-C", str(ROOT / "python-peer"), "rev-parse", "HEAD"],
+        text=True, timeout=30,
+    ).strip()
+    if actual != PEER_SHA:
+        raise AssertionError(f"Python peer moved: {actual} != {PEER_SHA}")
+    print(f"PEER_REVISION_LOCKED {actual}", flush=True)
+
+CASES = load_cases()
 
 def expected_rows():
     cutlet_ids = {item.text: item.canonical_index for item in SOURCE_LANGUAGE_CATALOG.cutlets}
     month_ids = {item.text: item.canonical_index for item in SOURCE_LANGUAGE_CATALOG.months}
     rows = {}
     for label, c, t in CASES:
+        print("PYTHON_PEER_BEGIN", label, c, t, flush=True)
         start = time.monotonic()
         output = calendar_date_spaghetti(c, t)
         row = (label, c, t, output.year_number,
@@ -33,13 +58,16 @@ def expected_rows():
                month_ids[output.month_name], output.day_in_month)
         print("PYTHON_PEER", label, "seconds", round(time.monotonic() - start, 3), flush=True)
         rows[label] = row
+        (OUT / "python.tsv").write_text(
+            "\n".join(row_line(item) for item in rows.values()) + "\n", encoding="utf-8"
+        )
     return rows
 
 def row_line(row):
     return "\t".join(str(v) for v in row)
 
 def main():
-    print("Python peer pinned to b3501b4296403bc33cb36f81a763269e5af97523", flush=True)
+    verify_peer_revision()
     python_rows = expected_rows()
     (OUT / "python.tsv").write_text(
         "\n".join(row_line(row) for row in python_rows.values()) + "\n", encoding="utf-8"

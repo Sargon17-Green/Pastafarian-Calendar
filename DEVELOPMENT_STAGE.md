@@ -1213,3 +1213,9 @@ job differential_python_turkce PASS 5/5 trên chỉ số chuẩn;
 Native 909/909 PASS và soak 4/4 PASS cùng run;
 Canonical Names Lock 40192624818 PASS.
 Đây là bộ nhân chứng hữu hạn, chưa chứng minh toàn miền.
+
+Stage55 mở rộng differential từ 5 thành 9 cặp trong
+qa/differential_cases.tsv; bốn ca mới gồm hiện đại,
+chuyển +/- ngày, và năm ràng buộc 5778 ngày. Hai
+mã chạy đọc một danh sách, khóa SHA Python và giữ TSV
+được ghi dần. Chưa được CI xác minh tại HEAD này.

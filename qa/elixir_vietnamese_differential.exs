@@ -2,15 +2,20 @@
 alias PastafariCalendarElixirVietnamese, as: Calendar
 alias PastafariCalendarElixirVietnamese.SourceLanguageCatalog, as: Catalog
 
-pairs = [
-  {"foundation_same", -15_055_671, -15_055_671},
-  {"foundation_next", -15_055_671, -15_055_670},
-  {"foundation_previous", -15_055_671, -15_055_672},
-  {"foundation_plus_seven", -15_055_664, -15_055_664},
-  {"foundation_mixed", -15_055_669, -15_055_668}
-]
+pairs =
+  Path.join(__DIR__, "differential_cases.tsv")
+  |> File.stream!()
+  |> Enum.reject(fn line -> String.trim(line) == "" or String.starts_with?(line, "#") end)
+  |> Enum.map(fn line ->
+    case String.trim(line) |> String.split("\t") do
+      [label, c, t] -> {label, String.to_integer(c), String.to_integer(t)}
+      _ -> raise("dòng kiểm tra vi sai không hợp lệ")
+    end
+  end)
+
 
 for {label, c, t} <- pairs do
+  IO.puts(:stderr, "ELIXIR_CASE_BEGIN #{label} #{c} #{t}")
   {year, cutlet, cutlet_day, month, month_day} = Calendar.calendar_date_spaghetti(c, t)
   {cutlet_index, ^cutlet} =
     Enum.find(Catalog.cutlets(), fn {_index, name} -> name == cutlet end) ||
