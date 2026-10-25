@@ -1188,7 +1188,7 @@ jobs:
           set -euo pipefail
           mkdir -p kotlin/post55-diagnostic
           python3 kotlin/soak/post55_differential.py \
-            --kotlin-command "java -cp $RUNNER_TEMP/post55-oracle-bridge.jar pastafari.Post55OracleSoakBridge" \
+            --kotlin-command "java -Xss32m -Xmx1536m -cp $RUNNER_TEMP/post55-oracle-bridge.jar pastafari.Post55OracleSoakBridge" \
             --python-command "python3 kotlin/soak/python_turkce_bridge.py" \
             --cases 8 --seed 55 --batch 2 --timeout-seconds 240 \
             --kotlin-mode oracle \
