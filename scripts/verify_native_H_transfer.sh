@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+mkdir -p build
+command -v iverilog >/dev/null
+command -v vvp >/dev/null
+command -v sha256sum >/dev/null
+
+# A small independently pinned native golden catches indexing and
+# coefficient errors before engaging the huge 45-month arithmetic.
+iverilog -g2012 -Wall -s tb_weave_native_transfer \
+  -Ptb_weave_native_transfer.WIDTH=2048 \
+  -Ptb_weave_native_transfer.NMONTHS=6 \
+  -o build/native_H_six.vvp tests/tb_weave_native_transfer.sv
+timeout 240s vvp build/native_H_six.vvp \
+  2>&1 | tee build/native_H_six.log
+grep -Fq "STAGE1_NATIVE_H_TRANSFER_SIX_MONTH_ROOT_PASS" build/native_H_six.log
+
+# The full 45-month counter computes 101594 table entries natively,
+# using two rolling rows, NOT a Python-created block-count ledger.
+iverilog -g2012 -Wall -s tb_weave_native_transfer \
+  -Ptb_weave_native_transfer.WIDTH=22528 \
+  -Ptb_weave_native_transfer.NMONTHS=45 \
+  -o build/native_H_full.vvp tests/tb_weave_native_transfer.sv
+timeout 1450s vvp build/native_H_full.vvp \
+  2>&1 | tee build/native_H_full.log
+
+for name in root prefix11 prefix121 prefix1231 prefix12345671; do
+  test -f "build/native_H_$name.bin"
+  test "$(wc -c < "build/native_H_$name.bin")" -eq 2809
+done
+sha256sum -c <<'NATIVE_H_HASH_WITNESSES'
+925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da  build/native_H_root.bin
+642e6ddd164593dd415bc78ea87142e949a1cc4728accff2c8693a9120f81cac  build/native_H_prefix11.bin
+0a29d31d02e980a1ae807575c85a908bd31a05eb73b521a80f7ee3f2e925f1a7  build/native_H_prefix121.bin
+b66cf4cc1afb8b2b604e574ff0ba1d788b0eb83bb7dbfc67a103a08ef220d340  build/native_H_prefix1231.bin
+0b72169fe3c363a5a56b37f225bc1b45ec78793a430eca85419a3700a576f727  build/native_H_prefix12345671.bin
+NATIVE_H_HASH_WITNESSES
+echo "STAGE1_NATIVE_H_45_MONTH_ROOT_AND_FOUR_PREFIX_COUNTS_SHA256_PASS"
+echo "STAGE1_NATIVE_H_FULL_YEAR_LEX_UNRANK_AND_PRODUCTION_RTL_PENDING"
