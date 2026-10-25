@@ -290,3 +290,5 @@ jobs:
         run: |
           test "${{ steps.discovery_terminal_sentinel_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage46Tests/PastafarianCalendar.Stage46Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ الرقعة الثالثة والعشرين وحفظ شاهد حارس النهاية
+        run: dotnet run --project tests/PastafarianCalendar.Stage47Tests/PastafarianCalendar.Stage47Tests.csproj --configuration Release

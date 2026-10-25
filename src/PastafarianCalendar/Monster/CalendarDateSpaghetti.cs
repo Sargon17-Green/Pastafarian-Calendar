@@ -338,6 +338,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyWideTerminalSentinel(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة الثالثة والعشرون: استرداد مرتبة الحد النهائي مع بقاء الحارس القديم.
+    public static BigInteger EvaluateWideTerminalSentinel(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateWideTerminalSentinel(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

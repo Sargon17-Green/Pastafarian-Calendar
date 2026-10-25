@@ -439,4 +439,15 @@ dotnet run --project tests/PastafarianCalendar.Stage45Tests/PastafarianCalendar.
 dotnet run --project tests/PastafarianCalendar.Stage46Tests/PastafarianCalendar.Stage46Tests.csproj -c Release -- --verify-expected-red
 ```
 
-تعزل الاختبارات عطب النهاية عند الرتب `n` بحالات مقبولة ودون رفض، مع ضبط الرتب `1` و`n-1`، ورفض التيار في الاتجاهين، و96 سؤال إنتاج من ثماني صلصات، وقيم `8192` بت، ومنع التزوير وإعادة الالتزام وتلوث السياقات. يجب أن يفشل التشغيل المباشر `EXPECTED_RED`، ويجب أن يجتاز مدقق التوقيع وجميع انحدارات الأطوار `1..45` وقفل الأسماء. لا يبدأ `47_PATCH_23` قبل اعتماد الاكتشاف.
+تعزل الاختبارات عطب النهاية عند الرتب `n` بحالات مقبولة ودون رفض، مع ضبط الرتب `1` و`n-1`، ورفض التيار في الاتجاهين، و96 سؤال إنتاج من ثماني صلصات، وقيم `8192` بت، ومنع التزوير وإعادة الالتزام وتلوث السياقات. أثبتت GitHub Actions 40192140091 نجاح الأحمر المقصود ومدقق توقيعه بنتيجة SUCCESS: 52087 تأكيداً دون إخفاق مفاجئ، و4320 انحرافاً في الضبط و8640 عند الحد المقبول و4320 في الرفض، مع 78 انحرافاً تاريخياً في 96 سؤال إنتاج. مرّت انحدارات الأطوار 1..45 وقفل الأسماء؛ أُغلق 46_DISCOVERY_23 EXPECTED_RED.
+
+
+## الطور السابع والأربعون — الرقعة الثالثة والعشرون لإصلاح حارس المرتبة النهائية
+
+تستدعي PatchedWideTerminalSentinelPhaseHandler السلسلة القديمة LegacyWideTerminalSentinelPhaseHandler كاملةً قبل الإصلاح، وتحفظ أثرها في LegacyWideTerminalSentinelRankResult. لا يمكن عكس الشاهد 1 منفرداً لأنه قد يعني المرتبة الأولى أو الأخيرة. يتحقق WideTerminalSentinelPatchWrapper من أن Collapse(previous,n) يعيد الشاهد التاريخي نفسه، ثم يحتفظ بالمرتبة الأصلية السابقة القادمة من الرقعة الثانية والعشرين. لا يُعاد تشغيل المرجع النظري للاختبارات في الإنتاج.
+
+تُحفظ المرتبة الصحيحة مستقلةً في PatchedWideTerminalSentinelRankResult، ويقدم CalendarDateSpaghetti.EvaluateWideTerminalSentinel(c,t,id,seal,n) النتيجة الصحيحة عبر المدير والموزع. تشمل اختبارات الرقعة 34560 ضبطاً و8640 حالة حد مقبول بلا رفض و8640 رفضاً، مع 96 سؤال إنتاج وثماني صلصات، وحدود 8192 بت وملكية السياقات ورفض الالتزام المتكرر وتزوير المرشحين قبل الكتابة.
+
+اختبار: dotnet run --project tests/PastafarianCalendar.Stage47Tests/PastafarianCalendar.Stage47Tests.csproj -c Release
+
+لا يُغلق 47_PATCH_23 حتى نجاح GitHub Actions لكل الاختبارات والانحدارات 1..46 وقفل الأسماء؛ ويُفتح 48_DISCOVERY_24 فقط بعد النجاح.

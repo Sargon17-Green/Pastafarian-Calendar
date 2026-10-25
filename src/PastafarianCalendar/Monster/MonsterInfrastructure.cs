@@ -1009,6 +1009,28 @@ public sealed class MonsterValidationManager
             throw new MonsterValidationException("تغيّر شاهد حارس المرتبة النهائية.");
     }
 
+    // التحقق من الرقعة الثالثة والعشرين يتم قبل الالتزام ويحفظ الشاهد القديم.
+    public void ValidatePatchedWideTerminalSentinel(
+        MonsterContext context,PatchedWideTerminalSentinelCandidate candidate)
+    {
+        if(context is null ||
+           context.LegacyWideFamilySize is not BigInteger n ||
+           n<=((BigInteger.One<<127)-BigInteger.One) ||
+           context.LegacyAnswerStepIndex is not BigInteger k || !k.IsZero ||
+           context.PatchedWideTerminalSentinelRankResult.HasValue ||
+           context.LegacyWideTerminalSentinelRankResult.HasValue ||
+           context.PatchedDescendingRankMirrorResult.HasValue ||
+           context.LegacyDescendingRankMirrorResult.HasValue ||
+           context.PatchedSauceFinalBowls is not null ||
+           context.PatchedVisibleDrops is not null ||
+           candidate is null || candidate.Historical is null)
+            throw new MonsterValidationException("مرشح الرقعة الثالثة والعشرين ناقص أو السياق مستعمل.");
+        ValidateLegacyWideTerminalSentinel(context,candidate.Historical);
+        var expected=new WideTerminalSentinelPatchWrapper().Patch(candidate.Historical,n);
+        if(candidate.Rank!=expected || candidate.Rank<1 || candidate.Rank>n)
+            throw new MonsterValidationException("الرتبة المستعادة من الحارس التاريخي مزوّرة.");
+    }
+
     // لا يُستخدم المرجع الاختباري في فحص المدى والملكية وإضافة الحارس.
     public void ValidateVisibleDropPatch(MonsterContext context, VisibleDropsPatchCandidate candidate)
     {
@@ -1135,6 +1157,7 @@ public sealed class MonsterDispatcher
     private readonly LegacyDescendingRankMirrorPhaseHandler _legacyDescendingRankMirror;
     private readonly PatchedDescendingRankMirrorPhaseHandler _patchedDescendingRankMirror;
     private readonly LegacyWideTerminalSentinelPhaseHandler _legacyWideTerminalSentinel;
+    private readonly PatchedWideTerminalSentinelPhaseHandler _patchedWideTerminalSentinel;
 
     public MonsterDispatcher(MonsterValidationManager validation, MonsterMetricsManager metrics)
     {
@@ -1184,6 +1207,7 @@ public sealed class MonsterDispatcher
         _legacyDescendingRankMirror = new LegacyDescendingRankMirrorPhaseHandler();
         _patchedDescendingRankMirror = new PatchedDescendingRankMirrorPhaseHandler();
         _legacyWideTerminalSentinel = new LegacyWideTerminalSentinelPhaseHandler();
+        _patchedWideTerminalSentinel = new PatchedWideTerminalSentinelPhaseHandler();
     }
 
     public void DispatchBootstrap(MonsterContext context)
@@ -4099,6 +4123,172 @@ public sealed class MonsterDispatcher
         context.Phase=context.Status;
     }
 
+    public void DispatchPatchedWideTerminalSentinel(MonsterContext context)
+    {
+        if(context is null ||
+           !string.Equals(context.Status,"BOOTSTRAP_READY",StringComparison.Ordinal))
+            throw new MonsterValidationException("تتطلب رقعة الحدّ سياقاً مؤسساً.");
+        if(context.LegacyQueriedBowlId is not int id || id is < 1 or > 6 ||
+           context.LegacyBowlQuestionSeal is not int seal || seal is not (21 or 31) ||
+           context.LegacyWideFamilySize is not BigInteger n ||
+           n<=((BigInteger.One<<127)-BigInteger.One) ||
+           context.LegacyAnswerStepIndex is not BigInteger k || !k.IsZero ||
+           context.LegacyInclusiveWideLimitRankResult.HasValue ||
+           context.PatchedInclusiveWideLimitRankResult.HasValue ||
+           context.LegacyRejectionDirectionRankResult.HasValue ||
+           context.PatchedRejectionDirectionRankResult.HasValue ||
+           context.LegacyDoubleOffsetWideRankResult.HasValue ||
+           context.PatchedDoubleOffsetWideRankResult.HasValue ||
+           context.LegacyUpperPlaceBiasRankResult.HasValue ||
+           context.PatchedUpperPlaceBiasRankResult.HasValue ||
+           context.LegacyWideSlotTruncationRankResult.HasValue ||
+           context.PatchedWideSlotTruncationRankResult.HasValue ||
+           context.LegacyDescendingRankMirrorResult.HasValue ||
+           context.PatchedDescendingRankMirrorResult.HasValue ||
+           context.LegacyWideTerminalSentinelRankResult.HasValue ||
+           context.PatchedWideTerminalSentinelRankResult.HasValue ||
+           context.PatchedWideRankResult.HasValue ||
+           context.LegacyReversedWideRankResult.HasValue ||
+           context.PatchedAnswerAtResult.HasValue ||
+           context.LegacyOneBasedAnswerAtResult.HasValue ||
+           context.PatchedBowlQuestionResult is not null ||
+           context.LegacyUnsealedBowlQuestionResult is not null ||
+           context.PatchedNextBowlResult.HasValue ||
+           context.LegacySauceFinalBowls is not null ||
+           context.PatchedSauceFinalBowls is not null ||
+           context.PatchedVisibleDrops is not null)
+            throw new MonsterValidationException("حالة شاهد الحدّ مكررة أو ناقصة.");
+
+        var stage47=_patchedWideTerminalSentinel.Handle(context);
+        var stage46=stage47.Historical;
+        var stage45=stage46.Previous;
+        var stage44=stage45.Historical;
+        var stage43=stage44.Previous;
+        var stage42=stage43.Historical;
+        var stage41=stage42.Previous;
+        var stage40=stage41.Historical;
+        var candidate39=stage40.Previous;
+        var output=candidate39.Historical;
+        var patched=output.Previous;
+        var rejected=patched.Historical;
+        var candidate=rejected.Previous;
+        var oldCandidate=candidate.Historical;
+        var wide=oldCandidate.Previous;
+        var oldWide=wide.Historical;
+        var step=oldWide.Step;
+        var oneBased=step.Historical;
+        var sealedQuestion=oneBased.Question;
+        var oldQuestion=sealedQuestion.Historical;
+        var correctedNext=oldQuestion.Historical;
+        var oldNext=correctedNext.Historical;
+        var source=oldNext.Sauce.Historical.Source;
+        var sauceOld=oldNext.Sauce.Historical;
+        var sauceCorrect=oldNext.Sauce.Patched;
+
+        _validation.ValidateVisibleDropPatch(context,source);
+        _validation.ValidateLegacyOverwrittenSauce(context,sauceOld);
+        _validation.ValidateProtectedDrop46Sauce(context,oldNext.Sauce);
+        _validation.ValidateLegacyFixedNextBowl(context,oldNext);
+        _validation.ValidatePatchedNextBowl(context,correctedNext);
+        _validation.ValidateLegacyUnsealedBowlQuestion(context,oldQuestion);
+        _validation.ValidatePatchedBowlQuestion(context,sealedQuestion);
+        _validation.ValidateLegacyOneBasedAnswerStep(context,oneBased);
+        _validation.ValidatePatchedAnswerStep(context,step);
+        _validation.ValidateLegacyReversedWideRank(context,oldWide);
+        _validation.ValidatePatchedWideRank(context,wide);
+        _validation.ValidateLegacyInclusiveWideLimit(context,oldCandidate);
+        _validation.ValidatePatchedInclusiveWideLimit(context,candidate);
+        _validation.ValidateLegacyWideRejectionDirection(context,rejected);
+        _validation.ValidatePatchedRejectionDirection(context,patched);
+        _validation.ValidateLegacyDoubleOffsetWideRank(context,output);
+        _validation.ValidatePatchedDoubleOffsetWideRank(context,candidate39);
+        _validation.ValidateLegacyUpperPlaceBias(context,stage40);
+        _validation.ValidatePatchedUpperPlaceBias(context,stage41);
+        _validation.ValidateLegacyWideSlotTruncation(context,stage42);
+        _validation.ValidatePatchedWideSlotTruncation(context,stage43);
+        _validation.ValidateLegacyDescendingRankMirror(context,stage44);
+        _validation.ValidatePatchedDescendingRankMirror(context,stage45);
+        _validation.ValidateLegacyWideTerminalSentinel(context,stage46);
+        _validation.ValidatePatchedWideTerminalSentinel(context,stage47);
+
+        context.PatchedCountsResult=source.Counts;
+        context.PatchedStoneRows=source.Stones;
+        context.LegacyHiddenReversed=source.ReversedHiddenStorage;
+        context.PatchedHiddenAccess=source.HiddenAccessor;
+        context.PatchedVisibleDrops=source.Visible;
+        context.LegacyDiagnosticDrop46Order=sauceOld.DiagnosticDrop46Order;
+        context.LegacyOverwrittenQueryOrder=sauceOld.OverwrittenQueryOrder;
+        context.LegacyPostStirOrders=sauceOld.PostStirOrders;
+        context.LegacySauceBowlsAfterDrops=sauceOld.BowlsAfterDrops;
+        context.LegacySauceFinalBowls=sauceOld.FinalBowls;
+        context.PatchedOrderAt46Latch=sauceCorrect.OrderAt46Latch;
+        context.PatchedSauceBowlsAfterDrops=sauceCorrect.BowlsAfterDrops;
+        context.PatchedSauceFinalBowls=sauceCorrect.FinalBowls;
+        context.PatchedPostStirOrders=sauceCorrect.PostStirOrders;
+        context.LegacyFixedNextBowlResult=oldNext.LegacyNextBowlId;
+        context.PatchedNextBowlResult=correctedNext.NextBowlId;
+        context.LegacyUnsealedBowlQuestionResult=oldQuestion.Answer;
+        context.PatchedBowlQuestionResult=sealedQuestion.Answer;
+        context.LegacyOneBasedAnswerAtResult=oneBased.Value;
+        context.PatchedAnswerAtResult=step.Value;
+        context.LegacyReversedWideRankResult=oldWide.Rank;
+        context.PatchedWideRankResult=wide.Rank;
+        context.LegacyInclusiveWideLimitRankResult=oldCandidate.Rank;
+        context.PatchedInclusiveWideLimitRankResult=candidate.Rank;
+        context.LegacyRejectionDirectionRankResult=rejected.Rank;
+        context.PatchedRejectionDirectionRankResult=patched.Rank;
+        context.LegacyDoubleOffsetWideRankResult=output.Rank;
+        context.PatchedDoubleOffsetWideRankResult=candidate39.Rank;
+        context.LegacyUpperPlaceBiasRankResult=stage40.Rank;
+        context.PatchedUpperPlaceBiasRankResult=stage41.Rank;
+        context.LegacyWideSlotTruncationRankResult=stage42.Rank;
+        context.PatchedWideSlotTruncationRankResult=stage43.Rank;
+        context.LegacyDescendingRankMirrorResult=stage44.Rank;
+        context.PatchedDescendingRankMirrorResult=stage45.Rank;
+        context.LegacyWideTerminalSentinelRankResult=stage46.Rank;
+        context.PatchedWideTerminalSentinelRankResult=stage47.Rank;
+
+        context.BranchTrace.Add("LEGACY_OVERWRITTEN_DROP46_ORDER_WITNESS");
+        context.BranchTrace.Add("PROTECTED_DROP46_ORDER_LATCH_WITNESS");
+        context.BranchTrace.Add("LEGACY_FIXED_NEXT_BOWL_WITNESS");
+        context.BranchTrace.Add("PATCHED_NEXT_BOWL_ORDER_WITNESS");
+        context.BranchTrace.Add("LEGACY_UNSEALED_BOWL_QUESTION_WITNESS");
+        context.BranchTrace.Add("PATCHED_SEALED_BOWL_QUESTION_WITNESS");
+        context.BranchTrace.Add("LEGACY_ONE_BASED_ANSWER_STEP_WITNESS");
+        context.BranchTrace.Add("PATCHED_ZERO_BASED_ANSWER_STEP_WITNESS");
+        context.BranchTrace.Add("LEGACY_REVERSED_WIDE_DIGITS_WITNESS");
+        context.BranchTrace.Add("PATCHED_WIDE_DIGIT_ORDER_WITNESS");
+        context.BranchTrace.Add("LEGACY_INCLUSIVE_WIDE_LIMIT_WITNESS");
+        context.BranchTrace.Add("PATCHED_INCLUSIVE_WIDE_LIMIT_WITNESS");
+        context.BranchTrace.Add("LEGACY_WIDE_REJECTION_DIRECTION_WITNESS");
+        context.BranchTrace.Add("PATCHED_REJECTION_DIRECTION_WITNESS");
+        context.BranchTrace.Add("LEGACY_DOUBLE_OFFSET_WIDE_RANK_WITNESS");
+        context.BranchTrace.Add("PATCHED_DOUBLE_OFFSET_WIDE_RANK_WITNESS");
+        context.BranchTrace.Add("LEGACY_UPPER_PLACE_BIAS");
+        context.BranchTrace.Add("PATCHED_UPPER_PLACE_BIAS");
+        context.BranchTrace.Add("LEGACY_WIDE_SLOT_TRUNCATION");
+        context.BranchTrace.Add("PATCHED_WIDE_SLOT_TRUNCATION");
+        context.BranchTrace.Add("LEGACY_DESCENDING_RANK_MIRROR");
+        context.BranchTrace.Add("PATCHED_DESCENDING_RANK_MIRROR");
+        context.BranchTrace.Add("LEGACY_WIDE_TERMINAL_SENTINEL");
+        context.BranchTrace.Add("PATCHED_WIDE_TERMINAL_SENTINEL");
+        _metrics.Bump(context,"legacy.wide.rejection.direction.witness");
+        _metrics.Bump(context,"patched.rejection.direction.witness");
+        _metrics.Bump(context,"patched.inclusive.wide.limit.witness");
+        _metrics.Bump(context,"legacy.double.offset.wide.rank.witness");
+        _metrics.Bump(context,"patched.double.offset.wide.rank.dispatch");
+        _metrics.Bump(context,"legacy.upper.place.bias.dispatch");
+        _metrics.Bump(context,"patched.upper.place.bias.dispatch");
+        _metrics.Bump(context,"legacy.wide.slot.truncation.dispatch");
+        _metrics.Bump(context,"patched.wide.slot.truncation.dispatch");
+        _metrics.Bump(context,"legacy.descending.rank.mirror.dispatch");
+        _metrics.Bump(context,"patched.descending.rank.mirror.dispatch");
+        _metrics.Bump(context,"legacy.wide.terminal.sentinel.dispatch");
+        _metrics.Bump(context,"patched.wide.terminal.sentinel.dispatch");
+        context.Status="PATCHED_WIDE_TERMINAL_SENTINEL_COMPLETE";
+        context.Phase=context.Status;
+    }
+
     public void DispatchSavePatched(MonsterContext context)
     {
         if (!string.Equals(context.Status, "BOOTSTRAP_READY", StringComparison.Ordinal))
@@ -5080,6 +5270,30 @@ public sealed class MonsterManager
             calculationDay,targetDay,queriedBowlId,seal,familySize)
            .LegacyWideTerminalSentinelRankResult ??
            throw new MonsterValidationException("لم يصدر شاهد حارس الرتبة الواسعة.");
+
+    public MonsterContext ExecutePatchedWideTerminalSentinel(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+    {
+        if(queriedBowlId is <1 or >6 || seal is not (21 or 31) ||
+           familySize<=((BigInteger.One<<127)-BigInteger.One))
+            throw new MonsterValidationException("مدخلات الأسرة الواسعة غير صالحة.");
+        var context=Prepare(calculationDay,targetDay);
+        context.LegacyQueriedBowlId=queriedBowlId;
+        context.LegacyBowlQuestionSeal=seal;
+        context.LegacyAnswerStepIndex=BigInteger.Zero;
+        context.LegacyWideFamilySize=familySize;
+        _dispatcher.DispatchPatchedWideTerminalSentinel(context);
+        return context;
+    }
+
+    public BigInteger EvaluateWideTerminalSentinel(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => ExecutePatchedWideTerminalSentinel(
+            calculationDay,targetDay,queriedBowlId,seal,familySize)
+           .PatchedWideTerminalSentinelRankResult ??
+           throw new MonsterValidationException("لم تصدر رتبة الحارس النهائية المصححة.");
 
     public BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

@@ -184,6 +184,9 @@ public sealed class MonsterContext
     // الندبة الثالثة والعشرون: انهيار رتبة الحد الأعلى إلى الحارس الأول.
     public BigInteger? LegacyWideTerminalSentinelRankResult { get; set; }
 
+    // الرقعة الثالثة والعشرون: تُحفظ المرتبة الصحيحة منفصلة عن شاهد الحارس.
+    public BigInteger? PatchedWideTerminalSentinelRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;
