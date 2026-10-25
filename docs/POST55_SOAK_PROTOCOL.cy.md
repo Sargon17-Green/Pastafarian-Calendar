@@ -57,3 +57,13 @@ enw/rif y ddau fersiwn. Ceir yr un samplau wrth ailredeg yr un seed.
 
 **Ni ddylid camddehongli CI llwyddiannus Cam 55 na phrawf
 Kotlin-oracl yn lle soak y ddau beiriant cynhyrchu.**
+
+## Diagnosteg eilaidd heb ardystio
+
+Mae gwaith GitHub Actions ar wahân yn croeswirio allbwn pum maes
+oracl prawf Kotlin yn erbyn API cynhyrchu annibynnol Python+Türkçe ar
+SHA penodol. Mae'n cyhoeddi adroddiad JSON, yn methu ar unrhyw wahaniaeth
+neu timeout, ac **nid yw'n ardystio** Kotlin cynhyrchu. Mae hyd yn oed
+`--kotlin-mode production --certify` yn cael ei wrthod tan archwiliad
+ffynhonnell ac adeiladwaith Kotlin cynhyrchu gwirioneddol: nid yw baner
+CLI yn brawf o annibyniaeth gweithrediad. Cedwir `main` heb newid.

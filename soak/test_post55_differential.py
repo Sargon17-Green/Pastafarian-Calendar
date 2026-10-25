@@ -82,18 +82,47 @@ class SoakRunnerTests(unittest.TestCase):
             self.assertEqual(data["mismatch"]["index"], 0)
             self.assertNotEqual(data["mismatch"]["kotlin"], data["mismatch"]["python"])
 
-    def test_oracle_cannot_be_certified(self):
+    def test_no_unverified_engine_can_self_certify(self):
+        # Mode alone cannot prove the executable is an independent Kotlin
+        # production engine. Both modes must fail closed for certification.
+        for mode in ("oracle", "production"):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as td:
+                with self.assertRaises(SystemExit) as caught:
+                    soak.main([
+                        "--kotlin-command", bridge_command(1),
+                        "--python-command", bridge_command(1),
+                        "--certify", "--kotlin-mode", mode,
+                        "--kotlin-revision", "a" * 40,
+                        "--python-revision", "b" * 40,
+                        "--evidence", str(Path(td) / "evidence.json"),
+                    ])
+                self.assertEqual(caught.exception.code, 2)
+                self.assertFalse((Path(td) / "evidence.json").exists())
+
+    def test_four_distinct_anchor_epochs_in_small_corpus(self):
+        pairs = soak.corpus(4, 55)
+        self.assertEqual(
+            pairs, [(soak.FOUNDATION, soak.FOUNDATION),
+                    (soak.TABLETS, soak.TABLETS),
+                    (0, 0), (739834, 739834)]
+        )
+
+    def test_fake_production_mode_is_still_diagnostic(self):
         with tempfile.TemporaryDirectory() as td:
-            with self.assertRaises(SystemExit) as caught:
-                soak.main([
-                    "--kotlin-command", bridge_command(1),
-                    "--python-command", bridge_command(1),
-                    "--certify", "--kotlin-mode", "oracle",
-                    "--kotlin-revision", "a" * 40,
-                    "--python-revision", "b" * 40,
-                    "--evidence", str(Path(td) / "evidence.json"),
-                ])
-            self.assertEqual(caught.exception.code, 2)
+            output = Path(td) / "evidence.json"
+            code = soak.main([
+                "--kotlin-command", bridge_command(1),
+                "--python-command", bridge_command(1),
+                "--kotlin-mode", "production",
+                "--cases", "4",
+                "--kotlin-revision", "a" * 40,
+                "--python-revision", "b" * 40,
+                "--evidence", str(output),
+            ])
+            self.assertEqual(code, 0)
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(report["status"], "PASS_DIAGNOSTIC_NOT_CERTIFIED")
+            self.assertFalse(report["certifiable"])
 
 
 if __name__ == "__main__":

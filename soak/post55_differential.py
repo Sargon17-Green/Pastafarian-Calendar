@@ -39,8 +39,9 @@ def corpus(count, seed):
             seen.add(pair)
             cases.append(pair)
 
-    for base in anchors:
-        for dx, dy in offsets:
+    # Interleave all anchors so even a small smoke run covers every epoch.
+    for dx, dy in offsets:
+        for base in anchors:
             add(base + dx, base + dy)
     while len(cases) < count:
         base = anchors[randomizer.randrange(len(anchors))]
@@ -125,8 +126,13 @@ def main(argv=None):
         parser.error("--batch must be between 1 and 64")
     if not 1 <= args.timeout_seconds <= 3600:
         parser.error("--timeout-seconds must be between 1 and 3600")
-    if args.certify and args.kotlin_mode != "production":
-        parser.error("E_SOAK_ORACLE_NOT_CERTIFIABLE: use a real Kotlin production converter")
+    # A mode string is not provenance. Until an independently audited
+    # production bridge exists, --certify must fail even if the caller says
+    # --kotlin-mode production. Otherwise a fake/oracle CLI can self-certify.
+    if args.certify:
+        parser.error(
+            "E_SOAK_CERTIFICATION_REQUIRES_AUDITED_KOTLIN_PRODUCTION_BRIDGE"
+        )
     if not (re.fullmatch(r"[0-9a-f]{40}", args.kotlin_revision) and
             re.fullmatch(r"[0-9a-f]{40}", args.python_revision)):
         parser.error("both revisions must be pinned full 40-digit Git commit SHAs")
@@ -139,7 +145,7 @@ def main(argv=None):
         "python_revision": args.python_revision,
         "kotlin_mode": args.kotlin_mode,
         "certification_requested": args.certify,
-        "certifiable": args.kotlin_mode == "production",
+        "certifiable": False,  # A CLI flag cannot establish provenance.
         "seed": args.seed,
         "cases": len(cases),
         "batch_size": args.batch,
@@ -178,8 +184,7 @@ def main(argv=None):
         print(str(exc), file=sys.stderr)
         return 3
 
-    evidence["status"] = ("PASS_PRODUCTION_DIFFERENTIAL" if args.certify
-                          else "PASS_DIAGNOSTIC_NOT_CERTIFIED")
+    evidence["status"] = "PASS_DIAGNOSTIC_NOT_CERTIFIED"
     write_evidence(args.evidence, evidence)
     print(f"{evidence['status']}: {len(cases)} cases, zero mismatches")
     return 0
