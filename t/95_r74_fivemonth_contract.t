@@ -49,4 +49,11 @@ like($guard,qr/waitpid\(\$pid,WNOHANG\)/,'原生父進程持續監督');
 like($guard,qr/\$rss>\$rss_limit/,'RSS 超限不能 PASS');
 like($guard,qr/\$elapsed>\$seconds/,'執行超時不能 PASS');
 like($guard,qr/exit 3;/,'資源阻擋採非零退出碼');
+my $exhaustive_sha=source('tools/audit_r74_fivemonth_order.pl');
+like($exhaustive_sha,qr/sub enumerate_legal_words/,'R74 真正列舉全部完整五個月字詞');
+like($exhaustive_sha,qr/\$seen_mirrors\{\$mirror\}\+\+/,'R74 全集反轉映射要求單射');
+like($exhaustive_sha,qr/keys\(%seen_mirrors\)!=scalar\(\@\$reverse_words\)/,
+     'R74 全集反轉映射要求滿射');
+like($exhaustive_sha,qr/\$mapping_sha ne \$expected_exhaustive_sha/,
+     'R74 每份鏡射位置表須比對獨立 SHA256');
 done_testing;

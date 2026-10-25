@@ -210,5 +210,91 @@ die "R74 81 個五個月精確總數的 SHA-256 基線錯誤\n"
 die "R74 每條排名必須檢查合法鏡射\n"
     if $ranks!=$mirrors || $ranks<81;
 die "R74 沒有檢查實際五個月前綴完工數\n" if $prefixes<$ranks*4;
+# R74 補強：真正枚舉所有五個月短向量的 86543 個合法完整字序。
+# 與抽樣排名路徑分離：僅以月份首次／末次次序擴充各完整詞，
+# 對每個向量將鏡射後的全部字詞與倒序向量的獨立全集一一配對。
+sub enumerate_legal_words ($lengths) {
+    my @remaining=@$lengths;
+    my $months=scalar(@remaining);
+    my $days=0;$days+=$_ for @remaining;
+    my (@prefix,@words);
+    my $visit;
+    $visit=sub ($opened,$closed) {
+        if (@prefix==$days) {
+            die "R74 枚舉葉節點含有未完成月份\n" if grep {$_} @remaining;
+            push @words,join(',',@prefix);
+            return;
+        }
+        for my $j (1..($opened<$months?$opened+1:$months)) {
+            next if !$remaining[$j-1];
+            next if $remaining[$j-1]==1 && $j!=$closed+1;
+            --$remaining[$j-1];
+            push @prefix,$j;
+            $visit->($j>$opened?$j:$opened,
+                     !$remaining[$j-1]?$j:$closed);
+            pop @prefix;
+            ++$remaining[$j-1];
+        }
+    };
+    $visit->(0,0);
+    return \@words;
+}
+my %expected_exhaustive_sha=(
+    1=>'394febf74d55580707217dd411c720747fce913b147401b6c6dba67d728cbc83',
+    2=>'ec13377dccf131fc8e6388012b36b413f058dc6832abfaa5ab245e15a522fc5f',
+    3=>'fff46731a29d59f5f1b1fedfbd0a875963c0ab877f3c89fe2c6001e23a54b356'
+);
+my $mapping_rows='';
+my ($enumerated_profiles,$exhaustive_words)=(0,0);
+for my $b (1..3) {
+ for my $c (1..3) {
+  for my $d (1..3) {
+   for my $e (1..3) {
+    my @L=($shard,$b,$c,$d,$e);
+    my @reversed=reverse @L;
+    my $words=enumerate_legal_words(\@L);
+    my $reverse_words=enumerate_legal_words(\@reversed);
+    die "R74 真正五個月前後順序字序數量不同\n"
+        unless @$words==@$reverse_words;
+    my %reverse_rank;
+    for my $i (0..$#$reverse_words) {
+        my $word=$reverse_words->[$i];
+        die "R74 目標全集含重複的完整詞\n"
+            if exists $reverse_rank{$word};
+        $reverse_rank{$word}=$i+1;
+    }
+    my %seen_mirrors;
+    for my $i (0..$#$words) {
+        my $source_word=$words->[$i];
+        my @labels=split /,/, $source_word;
+        my $mirror=join(',',map {6-$_} reverse @labels);
+        my $mirror_rank=$reverse_rank{$mirror};
+        die "R74 全集鏡射不屬於倒序五個月合法字序\n"
+            unless defined $mirror_rank;
+        die "R74 兩個不同原詞映入相同的鏡射詞\n"
+            if $seen_mirrors{$mirror}++;
+        my $restored=join(',',map {6-$_} reverse split(/,/,$mirror));
+        die "R74 鏡射兩次不是原始合法完整詞\n"
+            if $restored ne $source_word;
+        $mapping_rows.=join(',',@L).':'.($i+1).':'.$mirror_rank."\n";
+        $exhaustive_words++;
+    }
+    die "R74 鏡射未覆蓋全部倒序詞集合\n"
+        if keys(%seen_mirrors)!=scalar(@$reverse_words);
+    $enumerated_profiles++;
+   }
+  }
+ }
+}
+die "R74 沒有逐一枚舉完整 81 個五個月向量\n"
+    if $enumerated_profiles!=81;
+die "R74 全集枚舉詞數不等於獨立 BigInt 固定總數\n"
+    if "$exhaustive_words" ne $fixed_sum{$shard};
+my $mapping_sha=sha256_hex($mapping_rows);
+die "R74 全集鏡射位置表不是獨立 Python 字序基線\n"
+    if $mapping_sha ne $expected_exhaustive_sha{$shard};
+printf "R74_EXHAUSTIVE_MIRROR_COMPLETE passed=1 blocked=0 failed=0 shard=%d vectors=%d legal_words=%d rank_pairs_sha256=%s\n",
+       $shard,$enumerated_profiles,$exhaustive_words,$mapping_sha;
+
 printf "R74_COMPLETE passed=1 blocked=0 failed=0 shard=%d profiles=%d total_words=%s rank_and_mirrors=%d prefixes=%d fixture_sha256=%s\n",
        $shard,$profiles,$total_all,$ranks,$prefixes,$hash;
