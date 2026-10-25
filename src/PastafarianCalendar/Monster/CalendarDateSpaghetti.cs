@@ -331,6 +331,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateDescendingRankMirror(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الاكتشاف الثالث والعشرون: تخزين الرتبة الأخيرة كقيمة حارس أولى.
+    public static BigInteger EvaluateLegacyWideTerminalSentinel(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluateLegacyWideTerminalSentinel(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

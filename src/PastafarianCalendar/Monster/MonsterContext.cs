@@ -181,6 +181,9 @@ public sealed class MonsterContext
     // الرقعة الثانية والعشرون: المرتبة الصحيحة تبقى مستقلة عن شاهد المرآة.
     public BigInteger? PatchedDescendingRankMirrorResult { get; set; }
 
+    // الندبة الثالثة والعشرون: انهيار رتبة الحد الأعلى إلى الحارس الأول.
+    public BigInteger? LegacyWideTerminalSentinelRankResult { get; set; }
+
     public MonsterContext(BigInteger calculationDay, BigInteger targetDay)
     {
         CalculationDay = calculationDay;

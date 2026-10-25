@@ -281,3 +281,12 @@ jobs:
           dotnet run --project tests/PastafarianCalendar.Stage44Tests/PastafarianCalendar.Stage44Tests.csproj --configuration Release -- --verify-expected-red
       - name: تكافؤ الرقعة الثانية والعشرين وإبقاء شاهد مرآة السؤال النازل
         run: dotnet run --project tests/PastafarianCalendar.Stage45Tests/PastafarianCalendar.Stage45Tests.csproj --configuration Release
+      - name: تشغيل الأحمر التاريخي لحارس الرتبة النهائية
+        id: discovery_terminal_sentinel_red
+        continue-on-error: true
+        run: dotnet run --project tests/PastafarianCalendar.Stage46Tests/PastafarianCalendar.Stage46Tests.csproj --configuration Release
+      - name: إثبات توقيع الحارس النهائي بعد حفظ جميع الرقع
+        if: always()
+        run: |
+          test "${{ steps.discovery_terminal_sentinel_red.outcome }}" = "failure"
+          dotnet run --project tests/PastafarianCalendar.Stage46Tests/PastafarianCalendar.Stage46Tests.csproj --configuration Release -- --verify-expected-red

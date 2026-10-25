@@ -426,4 +426,17 @@ dotnet run --project tests/PastafarianCalendar.Stage44Tests/PastafarianCalendar.
 dotnet run --project tests/PastafarianCalendar.Stage45Tests/PastafarianCalendar.Stage45Tests.csproj -c Release
 ```
 
-لا يُغلق الطور `45_PATCH_22` كـ`GREEN` حتى تنجح GitHub Actions واختبارات الانحدار كاملةً للأطوار `1..44` وقفل الأسماء؛ لا يُفتح `46_DISCOVERY_23` قبل ذلك.
+أثبتت GitHub Actions `40181605125` نجاح الرقعة الثانية والعشرين بـ`43471` تأكيداً دون إخفاق غير متوقع، ونجاح `34560` حالة تحكم و`8640` رفضاً و`96` سؤال إنتاج، مع بقاء `46` مخالفة تاريخية محفوظة. مرّت جميع انحدارات المراحل `1..44` وقفل الأسماء. أُغلق الطور `45_PATCH_22` `GREEN`.
+
+
+## الطور السادس والأربعون — اكتشاف حارس رتبة النهاية في الأسرة الواسعة
+
+يبقى اختيار الرتبة صحيحاً بالكامل بعد الرقعة الثانية والعشرين، لكن مُسلسِل الإخراج التاريخي `LegacyWideTerminalSentinel` يفسّر المرتبة النهائية `r=n` خطأً على أنها علامة حارس، فيحفظ `1` بدلاً من `n`. لا يغيّر ذلك الرتب الأصغر من `n`. يظهر العيب حتى عندما تُقبل الإجابة الأولى وكان ترتيبها `n`، لذلك فهو مستقل عن خطأ حد القبول التاريخي وعن اتجاه الرفض؛ ويظل التاريخي مفصولاً عن الناتج الصحيح.
+
+يشغّل `LegacyWideTerminalSentinelPhaseHandler` المعالج المصحح `PatchedDescendingRankMirrorPhaseHandler` كاملاً، ويقرأ `n` من سياق التنفيذ نفسه. يسجّل `LegacyWideTerminalSentinelRankResult` الشاهد القديم فقط، ويُبقي `PatchedDescendingRankMirrorResult` سليمة. تتصل واجهة `CalendarDateSpaghetti.EvaluateLegacyWideTerminalSentinel` بالمدير والموزع وفاحص المرشحين الكامل، دون استخدام المرجع الاختباري في الإنتاج.
+
+```text
+dotnet run --project tests/PastafarianCalendar.Stage46Tests/PastafarianCalendar.Stage46Tests.csproj -c Release -- --verify-expected-red
+```
+
+تعزل الاختبارات عطب النهاية عند الرتب `n` بحالات مقبولة ودون رفض، مع ضبط الرتب `1` و`n-1`، ورفض التيار في الاتجاهين، و96 سؤال إنتاج من ثماني صلصات، وقيم `8192` بت، ومنع التزوير وإعادة الالتزام وتلوث السياقات. يجب أن يفشل التشغيل المباشر `EXPECTED_RED`، ويجب أن يجتاز مدقق التوقيع وجميع انحدارات الأطوار `1..45` وقفل الأسماء. لا يبدأ `47_PATCH_23` قبل اعتماد الاكتشاف.
