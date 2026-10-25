@@ -27,8 +27,8 @@ export class ScalableLegalWeavingCounter {
    throw new MonsterValidationError("मर्यादित ३..४७ महिने, ४..१२३ दिवस आवश्यक");
   this.lengths=Object.freeze(monthLengths.map(x=>Number(x)));
   this.totalDays=this.lengths.reduce((a,b)=>a+b,0);
-  if(this.totalDays<252||this.totalDays>5778)
-   throw new MonsterValidationError("पूर्ण वर्षाचे दिवस २५२..५७७८ आवश्यक");
+  if(this.totalDays<12||this.totalDays>5778)
+   throw new MonsterValidationError("कुटुंबाचे दिवस १२..५७७८ आवश्यक");
  }
  count():bigint{
   if(this.computed!==null)return this.computed;
