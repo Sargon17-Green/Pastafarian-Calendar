@@ -31,7 +31,7 @@ for(let i=1n;i<=720n;i++){
  const m=min+Number(chooseRank(askBowl({bowls,orderAtDrop46:order},
   3,30n),BigInt(max-min+1))-1n);
  assert(hist.selectedMonthCount===m&&hist.monthCountChoice.seal===30n,
-  "native old count選");
+  "मूळ Seal30 महिन्यांची निवड");
  let ref=cache.get(m);
  if(!ref){ref=boundedCompositionFamily(L,m,4n,123n);cache.set(m,ref);}
  const N=ref.count();

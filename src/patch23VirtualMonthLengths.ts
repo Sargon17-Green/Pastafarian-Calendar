@@ -111,11 +111,18 @@ export class Patch23MonthLengthSelector{
      old.monthCountChoice.context.targetDay!==source.targetDay)
    throw new MonsterValidationError("खरी Stage46 ऐतिहासिक month-count व यादीची नोंद आवश्यक");
   if(old.listBlocked!==(old.originalRows===null)||
-     (old.listBlocked&&old.historicalMonthLengthChoice!==null)||
-     (!old.listBlocked&&old.historicalMonthLengthChoice===null))
+     (old.listBlocked&&(old.historicalMonthLengthChoice!==null||
+       old.historicalChosenLengths!==null||old.oldSeal31ActualCalls!==0||
+       old.blockReason===null))||
+     (!old.listBlocked&&(old.historicalMonthLengthChoice===null||
+       old.historicalChosenLengths===null||old.oldSeal31ActualCalls!==1||
+       old.blockReason!==null||
+       old.historicalMonthLengthChoice.predecessorSharedWrites!==58)))
    throw new MonsterStageError("Stage46 जुना materialization पुरावा विसंगत");
   const virtual=this.getFamily(old.L,old.selectedMonthCount);
   const N=virtual.count();
+  if(old.originalRows&&BigInt(old.originalRows.length)!==N)
+   throw new MonsterStageError("भौतिक जुनी यादी व अचूक virtual family चे माप भिन्न");
   const selected=patch14WideChoice(c,source.targetDay,
    source.visible,source.stones,source.startBowls,3,31n,N);
   if(selected.predecessorSharedWrites!==58||

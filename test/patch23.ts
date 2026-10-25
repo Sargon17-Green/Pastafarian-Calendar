@@ -1,6 +1,6 @@
 import {
  VirtualLegacyList,Patch23MonthLengthSelector,Patch23FullHandler,
- Discovery23FullHandler,LegacyAllMonthLengthWays,
+ Discovery23FullHandler,Discovery23MonthLengthSelector,LegacyAllMonthLengthWays,
  Patch22FullHandler,Discovery22FullHandler,Patch21CutletHandler,
  Discovery21LegacyCutletHandler,Patch20StructureSauceHandler,
  Discovery20StructureSauceHandler,Patch19YearCacheHandler,
@@ -83,6 +83,16 @@ assert(full.source==="FULL_STAGE46_PATCH23_VIRTUAL_MONTH_LENGTHS"&&
  full.actualPredecessorCalls===full.historical.realPredecessorCalls+1&&
  full.actualSharedWrites===BigInt(full.actualPredecessorCalls)*58n,
  "Full Stage46 old path आणि खरा normative Seal31 correct");
+const tinyLegacy=new Discovery23MonthLengthSelector().select(c,s,5778n);
+const tinyPatched=new Patch23MonthLengthSelector().select(c,s,tinyLegacy);
+assert(tinyLegacy.selectedMonthCount===47&&
+ !tinyLegacy.listBlocked&&tinyLegacy.originalRows?.length===1&&
+ tinyLegacy.oldSeal31ActualCalls===1&&
+ tinyPatched.correctFamilySize===1n&&
+ tinyPatched.legacyEqualsCorrect&&tinyPatched.historicalResultReused&&
+ tinyPatched.correctedLengths===tinyLegacy.historicalChosenLengths&&
+ tinyPatched.correctedNativeSeal31.predecessorSharedWrites===58,
+ "खरी जुनी एकच lex रांग आणि तंतोतंत समानतेवर reuse");
 const smallL=252n,smallM=3;
 const smallFamily=new VirtualLegacyList(smallL,smallM);
 assert(smallFamily.count()>0n,"वैध 252-day परिवार");
