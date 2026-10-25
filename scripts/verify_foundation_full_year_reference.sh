@@ -22,6 +22,12 @@ timeout 30s vvp build/full_year_structural.vvp \
 # Python-produced skipped/selected block witness pairs.
 # This is NOT native generation of the combinatorial block counts.
 test "$(wc -c < build/foundation_weave_rank_intervals.bin)" -eq 23837174
+# Independent second exact-bigint reconstruction (not the producer)
+# fixed this 23.8 MiB byte stream hash; do not only trust its length.
+printf '%s  %s\n' \
+  2e46a3081ebbcf866ec5182b45c91f6695abbc83c1e3afec17cf678434749afb \
+  build/foundation_weave_rank_intervals.bin | sha256sum -c -
+echo "STAGE1_FULL_YEAR_RANK_LEDGER_INDEPENDENT_SHA256_PASS"
 test "$(wc -c < build/foundation_weave_root.bin)" -eq 2809
 test "$(wc -c < build/foundation_weave_rank.bin)" -eq 2809
 printf '%s  %s\n' \
