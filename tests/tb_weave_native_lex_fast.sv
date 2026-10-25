@@ -230,6 +230,16 @@ initial begin
            position>=DAYS-105)
             if(factor!==factor_A())
                 $fatal(1,"NATIVE_LEX_FAST_PARENT_REFERENCE_MISMATCH at=%0d",position);
+        if(position==4138) begin
+            if(first_active!=2 || remaining[1]!=0)
+                $fatal(1,"NATIVE_LEX_FIRST_COMPLETED_MONTH_NOT_SKIPPED");
+            $display("STAGE1_NATIVE_LEX_EXHAUSTED_MONTH1_GATE_PASS position=4138");
+        end
+        if(position==4149) begin
+            if(first_active!=3 || remaining[2]!=0)
+                $fatal(1,"NATIVE_LEX_SECOND_COMPLETED_MONTH_NOT_SKIPPED");
+            $display("STAGE1_NATIVE_LEX_EXHAUSTED_MONTH2_GATE_PASS position=4149");
+        end
         if(factor==0) $fatal(1,"NATIVE_LEX_ILLEGAL_PARENT_ORDER");
         h_lookup(started,n,h_parent);
         calculated_parent=factor*h_parent;
@@ -296,9 +306,20 @@ initial begin
             $fatal(1,"NATIVE_LEX_FAST_MONTH45_START_BOUNDARY");
         if(position==256 && started!=45)
             $fatal(1,"NATIVE_LEX_FAST_ALL_45_STARTED_BOUNDARY");
+        if(position==4137) begin
+            if(choice!=1 || remaining[1]!=0)
+                $fatal(1,"NATIVE_LEX_MONTH1_FINAL_OCCURRENCE_WRONG");
+            $display("STAGE1_NATIVE_LEX_MONTH1_FINISH_PASS position=4137");
+        end
+        if(position==4148) begin
+            if(choice!=2 || remaining[2]!=0)
+                $fatal(1,"NATIVE_LEX_MONTH2_FINAL_OCCURRENCE_WRONG");
+            $display("STAGE1_NATIVE_LEX_MONTH2_FINISH_PASS position=4148");
+        end
         $fwrite(out,"%c",choice);
         if(position==8 || position==11 || position==32 ||
-           position==64 || position==255 || position==256 || position==2032 || position==DAYS) begin
+           position==64 || position==255 || position==256 || position==2032 ||
+           position==4137 || position==4138 || position==4148 || position==DAYS) begin
             $display("NATIVE_LEX_PREFIX_PROGRESS position=%0d ordinal=%0d started=%0d",
                      position,choice,started);
             $fflush();
@@ -311,6 +332,7 @@ initial begin
         for(k=1;k<=MONTHS;k=k+1)
             if(remaining[k]!=0)
                 $fatal(1,"NATIVE_LEX_REMAINING_COPIES at=%0d",k);
+        $display("STAGE1_NATIVE_LEX_ALL4244_TERMINAL_RANK_ONE_PASS days=4244");
     end
     $display("STAGE1_NATIVE_LEX_FAST_SV_PASS positions=%0d archive=native_H blocks=native_SV",
              max_positions);

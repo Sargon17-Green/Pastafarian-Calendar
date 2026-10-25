@@ -498,3 +498,10 @@ lexical approvals, stage acceptance, and 55-stage rollout.
 - Mathematical-only PASS: 9,000 seeded synthetic A(r) states (full parent and legal children) with O(s) exact prefix/suffix factors; Foundation full-year reference independently pins 256-byte SHA256 `f85aafeaa582a87bbc66c43a752a40fe3a2a88ad7d47b8e43500a2306f69c45b`.
 - **Native CI PENDING**: 64-byte fast/direct SV comparison, 256-byte native fast SV word and all 45 starts, negative H mutation; see `FOUNDATION_NATIVE_LEX_FAST_FACTORS.md`.
 - Full 4244 native ordinal unrank, ASIC five-field RTL and Kalaallisut native approvals remain outstanding; Stage 1 IN_PROGRESS.
+
+## Full native lexical year CI acceptance candidate — 2026-10-26
+
+- Python exact arithmetic executed: 4,244 Foundation ordinals, 187,246 independent full-year legal child-factor comparisons and 9,900 seeded legal synthetic states all PASS. These are oracle results only.
+- **NATIVE CI PENDING:** `tests/tb_weave_native_lex_fast.sv` now provides 4,244-symbol terminal/first-exhaustion checks. `scripts/verify_native_lex_full.sh` enforces 850s, SHA256 of the native SV output `e1a291eafc34153031a0fba5e8ae0bc99a06cf0c59f4a65665c5b027b56c3a29`, all 45 exact lengths, first/last appearance order, first two exhaustion boundaries, day2032 month ordinal8 day56, and terminal rank=1.
+- Bounded native H CI job is now 45 minutes maximum and 3-GiB VM, with its original 101,594 H table still ephemeral. The full 4,244-word output and logs are archived.
+- **DO NOT SIGN OFF Stage1:** no native 4,244-symbol PASS until CI concludes, no synthesizable five-component ASIC RTL, 0/64 Kalaallisut language approvals.

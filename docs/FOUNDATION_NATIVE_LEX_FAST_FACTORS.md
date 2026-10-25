@@ -71,3 +71,20 @@ synthesizable 5-component calendar output, and 64/64 independent
 Kalaallisut name approvals remain OPEN.
 
 No Stage 2, no main merge, PR #20 DO NOT MERGE.
+
+## Full-year native CI gate added (2026-10-26)
+
+The same native SV fast decoder now runs a separately time-bounded
+`+max_positions=4244` after the previous 64- and 256-byte gates.
+It must prove the exact full-word SHA256
+`e1a291eafc34153031a0fba5e8ae0bc99a06cf0c59f4a65665c5b027b56c3a29`,
+terminal rank 1, zero remainder and 45 months in correct appearance order.
+SV checkpoints enforce first month final physical position 4137, its
+exclusion at 4138, second month final position 4148, its exclusion
+at 4149, and the day2032 month-8 selection. A separate Python step
+verifies only the SV-produced output structure; it is not an input oracle.
+
+The CI job budget is 45 minutes, including native H precomputation,
+with 3 GiB VM limit; the full decode has its own 850-second timeout.
+The complete year decoder remains **test-only** and is not ASIC RTL.
+This is SOURCE WRITTEN, NATIVE CI PENDING, not a claim of PASS.

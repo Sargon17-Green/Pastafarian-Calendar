@@ -51,3 +51,7 @@ echo "STAGE1_NATIVE_LEX_PREFIX64_CI_PASS_ONLY_IF_VERIFIED"
 
 # Independent O(s) native A(r-e_i) generation, full 45 labels by day 255.
 bash scripts/verify_native_lex_fast.sh
+
+# Only after the already-pinned 64- and 256-byte checks pass:
+# decode all 4244 Foundation ordinals in native SV with a 850s cap.
+bash scripts/verify_native_lex_full.sh

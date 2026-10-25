@@ -683,3 +683,12 @@ PASS is claimed until the new GitHub Actions job finishes.
 - Created separate `tests/tb_weave_native_lex_fast.sv` with exact native old blocks and independently generated fresh count; direct A(r) crosschecks for first 64 and terminal 106 positions; 64-byte equality against the existing direct native decoder and pinned independent 256-byte SHA. A forced H mutation MUST be rejected.
 - Added `scripts/verify_native_lex_fast.sh` to the existing bounded native_H CI runner, and documentation `docs/FOUNDATION_NATIVE_LEX_FAST_FACTORS.md`. **SV CI result is PENDING**, so no native 64/256 acceptance claim is made.
 - No changes to main; Stage 1 remains OPEN, no Stage 2, 0/64 native-approved Kalaallisut names, PR #20 stays Draft.
+
+## 2026-10-26 — full 4244-ordinal native SystemVerilog CI test enabled (PENDING)
+
+- Recomputed the entire Foundation 4244-word in exact Python arithmetic in this continuation, matching root SHA `925c8a37...`, rank SHA `2c447438...`, and final word SHA `e1a291eafc34153031a0fba5e8ae0bc99a06cf0c59f4a65665c5b027b56c3a29`.
+- Exhaustively compared O(s) prefix/suffix factors with the independent direct ordered-last A(r) at **187,246 legal child blocks** in the full year, and on **9,900 seeded artificial states**; all agreed. This is real executed Python reference evidence, not native SV CI acceptance.
+- Added native SV checkpoints: first month's **last symbol 4137** and first subsequent excluded branch **4138**, second month's last symbol **4148** and excluded branch **4149**, Foundation day 2032 ordinal 8, and exact terminal rank=parent=1 with all 45 remaining counts zero.
+- New runner `scripts/verify_native_lex_full.sh` consumes the native-created H table and pinned rank, generates the complete 4244-byte word **in native SV**, SHA-locks the word, checks month lengths and first/last ordering, and enforces an **850-second timeout**. The Python stage only checks properties of the independently SV-produced output, never supplies the word or branch counts.
+- Chained after the 64- and 256-symbol gates in the existing native H CI job, so no second 572-MB table is produced. Increased isolated QA job timeout to 45 minutes; original 3-GiB virtual memory limit unchanged. Only compact 4244-byte output and logs are retained as CI artifact.
+- New FULL-YEAR NATIVE CI verdict **NOT YET OBSERVED**. These additions do not imply completed full five-component date RTL, language name approvals or Stage 1 signoff. 0/55 stages accepted; 0/64 Kalaallisut names; PR#20 Draft; do not merge or modify main.
