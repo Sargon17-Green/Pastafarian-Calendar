@@ -409,6 +409,11 @@ jobs:
             build/full_year_reference_python_version.txt
             build/foundation_full_year_reference.log
             build/foundation_full_year_sv_structure.log
+            build/foundation_full_year_rank_replay.log
+            build/foundation_full_year_rank_replay_negative.log
+            build/foundation_weave_rank_intervals.bin
+            build/foundation_weave_root.bin
+            build/foundation_weave_rank.bin
             build/foundation_weave_all4244.bin
             build/foundation_weave_all4244.hex
             build/foundation_weave_reference_metrics.txt
