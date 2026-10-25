@@ -20,9 +20,14 @@ for(const lengths of [
  const reference=weavingFamily(lengths);
  const n=reference.count();
  assert(virtual.count()===n&&n>0n,"लहान family exact legal weaving count");
- for(let rank=1n;rank<=n;rank++){
+ // तीन-महिन्यांची कुटुंबे पूर्ण तपासा; चार महिन्यांत 177260
+ // रांगा आहेत: मोठ्या family साठी कडा + मधले ठराविक ranks.
+ const exhaustive=lengths.length===3;
+ const sampled=exhaustive?null:[1n,2n,3n,31n,n/2n,(n+1n)/2n,n-2n,n-1n,n];
+ const ranks=sampled??Array.from({length:Number(n)},(_,i)=>BigInt(i+1));
+ for(const rank of ranks){
   assert(virtual.itemAt1(rank).join(",")===reference.unrank1(rank).join(","),
-   "सर्व लहान rank वर अचूक स्वतंत्र normative lex");
+   "सर्व 3-month ranks आणि 4-month deterministic sampled lex");
   rows++;
  }
  families++;
