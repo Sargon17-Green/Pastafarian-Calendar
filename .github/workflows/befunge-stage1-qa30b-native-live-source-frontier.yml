@@ -1,0 +1,100 @@
+name: Befunge QA30B Native Live Source Ownership at Original Control Witnesses
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa30b_native_live_source_frontier.py'
+      - 'qa/stage1_qa30b_independent_live_source_audit.py'
+      - '.github/workflows/befunge-stage1-qa30b-native-live-source-frontier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa30b-actual-original-input-physical-owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin original two-dimensional production source and both verifiers
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa30b_native_live_source_frontier.py qa/stage1_qa30b_independent_live_source_audit.py
+      - name: Download original QA20 Native and QA30A independent audit receipts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh run view 39761821210 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:d0a1c686c4f9244121246aa5b70266c072c3ddce'
+          test "$(gh run view 40125781530 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:1e13b9c5579c05af0013e7ab089f2abee4782748'
+          get_original() {
+            local run="$1" name="$2" destination="$3" attempt
+            mkdir -p "$destination"
+            for attempt in 1 2 3 4 5; do
+              if gh run download "$run" --repo "$GITHUB_REPOSITORY" --name "$name" --dir "$destination"; then
+                return 0
+              fi
+              echo "::warning::Original accepted Native artifact transport failure, attempt $attempt for $name"
+              sleep $((attempt * 12))
+            done
+            echo "::error::Original signed artifact unavailable: $name"
+            return 1
+          }
+          get_original 39761821210 qa20-shard-3 "$RUNNER_TEMP/qa30b/invalid00"
+          get_original 39761821210 qa20-shard-1 "$RUNNER_TEMP/qa30b/invalid18"
+          get_original 40125781530 qa30a-136-original-native-control-frontiers "$RUNNER_TEMP/qa30b/qa30a"
+          echo "3f2e81afb325a4f1e8bfee3910be6d92d2bef23145ba39a33fc355ea23a5454b  $RUNNER_TEMP/qa30b/invalid00/qa20_manifest.json" | sha256sum -c -
+          echo "9c5af6212cfd7c1ab58e9603f385767e64b10799c90be416a86c4f09d613bfdd  $RUNNER_TEMP/qa30b/invalid18/qa20_manifest.json" | sha256sum -c -
+          echo "7c3ba01dc00a4f67fc30cc52e594b1cd6a2adee597a21939dbe0176ac2be2d4e  $RUNNER_TEMP/qa30b/qa30a/qa30a_native_control_frontier.json" | sha256sum -c -
+      - name: Fetch original frozen PyFunge-98 native interpreter executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay two actual full input-origin Native routes and read live memory near fifteen cells
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/qa30b:/qa30b" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1300s python -u \
+                qa/stage1_qa30b_native_live_source_frontier.py \
+                /qa30b /qa30b/qa30a/qa30a_native_control_frontier.json
+            ' | tee "$RUNNER_TEMP/qa30b/qa30b_native_console.log"
+          grep -q QA30B_TWO_REAL_NATIVE_ORIGINAL_INPUT_REPLAYS_PASS "$RUNNER_TEMP/qa30b/qa30b_native_console.log"
+          grep -q QA30B_SIGNED_DYNAMIC_CONTROL_MEMORY_SNAPSHOTS_CAPTURED "$RUNNER_TEMP/qa30b/qa30b_native_console.log"
+          grep -q QA30B_NO_GLOBAL_DEAD_CODE_OR_STAGE1_ACCEPTANCE "$RUNNER_TEMP/qa30b/qa30b_native_console.log"
+          test -s "$RUNNER_TEMP/qa30b/qa30b_live_source_frontier.json"
+      - name: Independently audit both live state receipts, all original STEP hashes and 32 negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa30b_independent_live_source_audit.py \
+            --source src/interleaved_work_counts.b98 \
+            --qa30a "$RUNNER_TEMP/qa30b/qa30a/qa30a_native_control_frontier.json" \
+            --root "$RUNNER_TEMP/qa30b" \
+            --native "$RUNNER_TEMP/qa30b/qa30b_live_source_frontier.json" \
+            --output "$RUNNER_TEMP/qa30b/qa30b_independent_audit.json" \
+            | tee "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
+          grep -q QA30B_INDEPENDENT_TWO_INPUT_LIVE_NATIVE_SOURCE_PARITY_PASS "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
+          grep -q QA30B_THIRTY_TWO_ADVERSARIAL_SOURCE_RECEIPTS_REJECTED "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
+          grep -q QA30B_GLOBAL_REACHABILITY_AND_STAGE1_REMAIN_OPEN "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
+      - name: Keep real Native live memory evidence and failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa30b-two-original-native-live-source-ownership
+          path: |
+            ${{ runner.temp }}/qa30b/qa30b_live_source_frontier.json
+            ${{ runner.temp }}/qa30b/qa30b_independent_audit.json
+            ${{ runner.temp }}/qa30b/qa30b_native_console.log
+            ${{ runner.temp }}/qa30b/qa30b_independent_console.log
+          if-no-files-found: warn
