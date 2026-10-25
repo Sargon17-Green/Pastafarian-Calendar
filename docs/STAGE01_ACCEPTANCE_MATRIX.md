@@ -441,3 +441,19 @@ lexical approvals, stage acceptance, and 55-stage rollout.
 - Production RTL five-field output, 64 qualified
   Kalaallisut name approvals, and Stage-1 signoff remain
   missing. Stage 2 CLOSED. No main merge.
+
+## 2026-10-25 — native count transfer begins
+
+- Prior `40182131358` actual **7/7 SUCCESS**:
+  exact all-year Python SHA, SV full-year structure,
+  4243 exact SV rank replays and negative corruption detection.
+- Native `H_s(N)` rolling-row arithmetic implemented in
+  `tb_weave_native_transfer.sv`. Small 6-month and
+  full 45-month standalone independent native arithmetic
+  CI are **PENDING** (not approved).
+- If native 45-month root and four prefix hashes pass,
+  next work is the 4244-step SV branch count/unrank
+  with a robust bigint implementation of `A(r)`.
+- Production date_valid and all five fields, 64
+  approved Kalaallisut names, and Stage 1 signoff
+  remain OPEN. Stage 2 CLOSED.

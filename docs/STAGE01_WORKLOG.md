@@ -590,3 +590,32 @@ The CI runner now checks **both** this independent ledger hash
 and the earlier native-derived root/rank hashes before executing
 the native 22,528-bit SystemVerilog rank replay. No native replay
 PASS is claimed until the new GitHub Actions job finishes.
+
+## 2026-10-25 — green 4243-step SV replay; native H(s,N) arithmetic added
+
+- Verified native job 121135205860 from
+  [run 40182131358](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40182131358)
+  completed SUCCESS with all seven workflow jobs green.
+  The job confirmed the independent 23,837,174-byte ledger
+  SHA, all 4,243 SV exact rank transitions, terminal rank1,
+  and deliberate corruption fatal test.
+- New `tests/tb_weave_native_transfer.sv` implements the
+  101,594-cell Foundation H(s,N) recurrence **inside SV**,
+  using two exact 22528-bit rolling rows, 864-bit binomials,
+  exact limb-wise small division and overflow checks.
+- Small 2048-bit mode independently matches the pinned
+  first-six-month root; full 45-month mode must match
+  five SHA256 witnesses: the root and [1,1], [1,2,1],
+  [1,2,3,1] and [1,2,3,4,5,6,7,1] blocks.
+- New `scripts/verify_native_H_transfer.sh` compiles and
+  executes both modes under caps, with external sha256sum.
+- Isolated `native_H_transfer` QA job added to
+  `qa-systemverilog-kalaallisut-stage1-20261022`
+  (workflow commit `9ebf4c56b88719150e9670ae7d34a08a1142a3a7`).
+  Resource envelope 31 minutes, 3 GiB VM; artifact upload
+  retained. **No CI PASS yet for native H.**
+- Source root and prefix witnesses checked in an additional
+  independent exact-Python local recurrence; hashes match.
+- This is a substantial test-only SV arithmetic primitive;
+  not a full native SV unrank, production RTL, or full
+  language signoff.
