@@ -1,0 +1,43 @@
+name: Isolated Stage 1 Full Weave Count
+on:
+  push:
+    branches:
+      - 'SystemVerilog+Kalaallisut'
+    paths:
+      - 'tests/tb_weave_full_root.sv'
+      - 'scripts/verify_weave_fullroot.sh'
+      - '.github/workflows/stage1-weave-fullroot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fullroot-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  fullroot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 43
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Record checked SHA
+        run: |
+          mkdir -p build
+          git rev-parse HEAD | tee build/fullroot_head.txt
+      - name: Bounded exact 45-month count
+        run: bash scripts/verify_weave_fullroot.sh
+      - name: Preserve independent verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-full-weave-root
+          path: |
+            build/fullroot_head.txt
+            build/weave_fullroot_probe.log
+            build/weave_fullroot_run.log
+            build/foundation_weave_root.bin
+          retention-days: 90
+          if-no-files-found: warn
