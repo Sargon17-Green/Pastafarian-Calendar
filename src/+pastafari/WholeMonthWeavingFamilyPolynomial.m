@@ -69,24 +69,17 @@ classdef WholeMonthWeavingFamilyPolynomial < handle
             % complete-word algorithm. Unlike the generic interior rank,
             % it never constructs the exponential remaining-vector DAG
             % and never recounts any 4244-day suffix.
-            if rank==one
+            nearLimit=pastafari.BigInt(128);
+            if rank<=nearLimit
+                distance=(rank-one).toDoubleExact();
                 [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
-                    obj.monthLengths,0,'first');
+                    obj.monthLengths,distance,'first');
                 obj.verifyWord(weaving);
                 return
-            elseif rank==obj.exactCount
+            elseif obj.exactCount-rank<nearLimit
+                distance=(obj.exactCount-rank).toDoubleExact();
                 [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
-                    obj.monthLengths,0,'last');
-                obj.verifyWord(weaving);
-                return
-            elseif rank==one+one
-                [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
-                    obj.monthLengths,1,'first');
-                obj.verifyWord(weaving);
-                return
-            elseif rank==obj.exactCount-one
-                [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
-                    obj.monthLengths,1,'last');
+                    obj.monthLengths,distance,'last');
                 obj.verifyWord(weaving);
                 return
             end
@@ -99,6 +92,50 @@ classdef WholeMonthWeavingFamilyPolynomial < handle
                     cursor.closedUpTo~=obj.monthCount
                 error('Pastafari:PolynomialFamily:Terminal', ...
                     'Lexical unrank must terminate at one exact word.');
+            end
+        end
+
+        function words=edgeWindowAt1(obj,maxOffset,edge)
+            % EXPERIMENTAL: emit all complete legal edge ranks 0..d
+            % in ONE traversal. Rows: first -> ranks 1..d+1;
+            % last -> ranks F..F-d, where F=obj.count().
+            % No truncated BigInt ranks, partial words, or DP DAG.
+            if ~(isnumeric(maxOffset) && isscalar(maxOffset) && ...
+                    isreal(maxOffset) && isfinite(maxOffset) && ...
+                    fix(maxOffset)==maxOffset && ...
+                    maxOffset>=0 && maxOffset<=127)
+                error('Pastafari:PolynomialFamily:EdgeWindowLimit', ...
+                    'The exact edge-window offset must be in 0..127.');
+            end
+            if ~(ischar(edge) && isrow(edge) && ...
+                    (strcmp(edge,'first') || strcmp(edge,'last')))
+                error('Pastafari:PolynomialFamily:EdgeWindowSide', ...
+                    'Edge must be first or last.');
+            end
+            if pastafari.BigInt(maxOffset)>=obj.exactCount
+                error('Pastafari:PolynomialFamily:EdgeWindowRange', ...
+                    'The requested window exceeds the exact rank count.');
+            end
+            words=zeros(maxOffset+1,obj.totalDays);
+            [current,~]=pastafari.unrankWholeWeavingNearEdge( ...
+                obj.monthLengths,0,edge);
+            obj.verifyWord(current);
+            words(1,:)=current;
+            if strcmp(edge,'first')
+                direction='next';
+            else
+                direction='previous';
+            end
+            for offset=1:maxOffset
+                [next,exists]=pastafari.adjacentWholeMonthWeaving( ...
+                    current,obj.monthLengths,direction);
+                if ~exists
+                    error('Pastafari:PolynomialFamily:EdgeWindowPremature', ...
+                        'Exact rank count contradicts lexical neighbor.');
+                end
+                obj.verifyWord(next);
+                words(offset+1,:)=next;
+                current=next;
             end
         end
 
