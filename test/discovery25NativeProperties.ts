@@ -47,7 +47,6 @@ for(let d=1n;d<=720n;d++){
   if(result.guessedDayInMonth<trueOrdinal)smaller++;
   if(result.guessedDayInMonth===trueOrdinal)exact++;
   else oldWrong++;
-  if(result.monthFirstYearOrdinal===undefined){} // placeholder
   fullDays++;
  }
  assert(counts.join(",")==="4,4,5","legal length conservation");
