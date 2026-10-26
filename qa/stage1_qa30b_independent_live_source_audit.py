@@ -151,6 +151,9 @@ def verify_record(record,label,original,trace,qa30a,source):
                  "QA30B physical live FungeSpace cell not explained by witnessed puts")
             observed[xy]=True
         need(len(observed)==15,"signed complete 15-cell source snapshot not provided")
+    # Frozen original Native paths had zero physical puts to these 15 cells.
+    # A forged put *after* the final sampled memory snapshot is not evidence.
+    need(writes == [], "QA30B frozen original inputs require zero candidate source writes")
     return len(snapshots)
 
 def test_forgery(report,label,original,trace,qa30a,source):
@@ -180,6 +183,19 @@ def test_forgery(report,label,original,trace,qa30a,source):
           "before":tail_source["static_original_value"],
           "after":tail_source["static_original_value"]+1}))
     ]
+    # A real signed p instruction at tick 9926 occurs AFTER the last
+    # control witness of original invalid00. Reject fake receipts that
+    # attach a candidate-cell write to this genuine but unrelated opcode.
+    if label == "invalid00":
+        last_control=max(s["tick"] for s in report["live_state_snapshots"])
+        late=sorted(t[0] for t in trace if t[5]==ord("p") and t[6]==0
+                    and t[0]>last_control)
+        need(late and late[0]==9926, "frozen signed post-witness p tick changed")
+        attacks.append(("fake-real-p-after-final-control-witness", lambda a:
+            a["writes_to_original_15_cells"].append({
+                "tick":late[0], "coordinate":list(tail_source["coordinate"]),
+                "before":tail_source["static_original_value"],
+                "after":tail_source["static_original_value"]+1})))
     for name,edit in attacks:
         mutated=copy.deepcopy(report)
         edit(mutated)
@@ -233,8 +249,8 @@ def main():
                        "real_put_calls":rec["real_native_put_calls"],
                        "candidate_puts":len(rec["writes_to_original_15_cells"]),
                        "audited_actual_native_control_witnesses":samples})
-    need(controls==34 and sum(x["steps"] for x in result)==18859,
-         "QA30B must reject exactly 32 adversarial Native records")
+    need(controls==35 and sum(x["steps"] for x in result)==18859,
+         "QA30B must reject exactly 35 adversarial Native records")
     report={"schema":"qa30b-independent-live-original-control-source-audit-v1",
             "actual_native_programs":2,"original_steps_replayed":18859,
             "live_witness_snapshots":sum(x["audited_actual_native_control_witnesses"] for x in result),
@@ -245,7 +261,7 @@ def main():
             "stage1_complete":False,"original_programs":result}
     Path(a.output).write_text(json.dumps(report,sort_keys=True,indent=2)+"\n")
     print("QA30B_INDEPENDENT_TWO_INPUT_LIVE_NATIVE_SOURCE_PARITY_PASS",18859)
-    print("QA30B_THIRTY_FOUR_ADVERSARIAL_SOURCE_RECEIPTS_REJECTED",controls)
+    print("QA30B_THIRTY_FIVE_ADVERSARIAL_SOURCE_RECEIPTS_REJECTED",controls)
     print("QA30B_GLOBAL_REACHABILITY_AND_STAGE1_REMAIN_OPEN")
 
 if __name__=="__main__":
