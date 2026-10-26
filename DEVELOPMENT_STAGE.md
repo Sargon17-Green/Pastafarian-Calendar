@@ -1227,3 +1227,8 @@ Hạ rủi ro bằng matrix 4 nhóm (Foundation, hiện đại,
 chuyển ngày hiện đại, năm 5778), giữ đủ 9 ca và hash khóa
 Python, stream từng dòng tiến độ từ Elixir vào log lưu
 artifact. Không suy diễn lỗi ngữ nghĩa từ code 143.
+
+Differential 40235037598: 3/4 nhóm PASS (Foundation,
+modern_base, year_max), modern_moves runner shutdown exit 143.
+Native 909/909, soak 4/4, Names PASS. Tách chuyển ngày thành
+hai job riêng, max-parallel=1; không đổi cặp ngày.

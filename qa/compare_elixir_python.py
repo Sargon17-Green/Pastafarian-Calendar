@@ -18,7 +18,7 @@ CASE_FILE = ROOT / "qa" / "differential_cases.tsv"
 
 def load_cases():
     group_requested = os.environ.get("DIFF_GROUP", "all")
-    allowed = {"all", "foundation", "modern_base", "modern_moves", "year_max"}
+    allowed = {"all", "foundation", "modern_base", "modern_forward", "modern_previous", "year_max"}
     if group_requested not in allowed:
         raise ValueError(f"Unrecognized differential group: {group_requested!r}")
     seen = set()
