@@ -71,13 +71,15 @@ classdef WholeMonthWeavingFamilyPolynomial < handle
             % and never recounts any 4244-day suffix.
             nearLimit=pastafari.BigInt(128);
             if rank<=nearLimit
-                distance=(rank-one).toDoubleExact();
+                distanceBig=rank-one;
+                distance=distanceBig.toDoubleExact();
                 [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
                     obj.monthLengths,distance,'first');
                 obj.verifyWord(weaving);
                 return
             elseif obj.exactCount-rank<nearLimit
-                distance=(obj.exactCount-rank).toDoubleExact();
+                distanceBig=obj.exactCount-rank;
+                distance=distanceBig.toDoubleExact();
                 [weaving,~]=pastafari.unrankWholeWeavingNearEdge( ...
                     obj.monthLengths,distance,'last');
                 obj.verifyWord(weaving);
