@@ -104,9 +104,24 @@ module tb_selection_rejection_equivalence;
         big_space = M * M * M;
         big_n = M * M + 384'sd1;
         big_l = (big_space / big_n) * big_n;
+        // Diagnostics are only printed on genuine failure. Preserve
+        // the same acceptance predicate until we know why Icarus failed.
         if (big_l > big_space || (big_space - big_l) >= big_n ||
-            big_space <= M * M || big_l <= 384'sd0)
+            big_space <= M * M || big_l <= 384'sd0) begin
+            $display("WIDE3_DIAG space=%h",big_space);
+            $display("WIDE3_DIAG n=%h",big_n);
+            $display("WIDE3_DIAG quotient=%h",big_space/big_n);
+            $display("WIDE3_DIAG l=%h",big_l);
+            $display("WIDE3_DIAG remainder=%h",big_space-big_l);
+            $display("WIDE3_DIAG expected_q=%h",M-384'sd1);
+            $display("WIDE3_DIAG expected_r=%h",M*M-M+384'sd1);
+            $display("WIDE3_DIAG predicates=%b %b %b %b",
+                big_l>big_space,
+                (big_space-big_l)>=big_n,
+                big_space<=M*M,
+                big_l<=384'sd0);
             $fatal(1, "WIDE_THREE_DIGITS_ARITHMETIC");
+        end
 
         $display("STAGE1_SELECTION_REJECTION_EQUIVALENCE_PASS cases=%0d", cases);
         $finish;
