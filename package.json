@@ -85,7 +85,7 @@
     "test:patch24:scalable-native": "node --experimental-strip-types test/patch24ScalableNative.ts",
     "test:patch24:metamorphic": "node --experimental-strip-types test/patch24ScalableMetamorphic.ts",
     "test:patch24:drop46": "node --experimental-strip-types test/patch24ScalableDrop46.ts",
-    "test:discovery25": "node --experimental-strip-types test/discovery25.ts && node --experimental-strip-types test/discovery25Properties.ts && node test/verifyDiscovery25ExpectedRed.mjs",
+    "test:discovery25": "node --experimental-strip-types test/discovery25.ts && node --experimental-strip-types test/discovery25Properties.ts && node --experimental-strip-types test/discovery25NativeProperties.ts && node test/verifyDiscovery25ExpectedRed.mjs",
     "test:discovery25:red": "node --experimental-strip-types test/discovery25Red.ts"
   },
   "devDependencies": {

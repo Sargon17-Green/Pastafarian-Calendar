@@ -4,7 +4,7 @@ import {
  Discovery23FullHandler,Patch22FullHandler,Discovery22FullHandler,
  Patch21CutletHandler,Discovery21LegacyCutletHandler,
  Patch20StructureSauceHandler,Discovery20StructureSauceHandler,
- Patch19YearCacheHandler,bootstrapMonster,
+ Patch19YearCacheHandler,Patch14WideChoiceHandler,bootstrapMonster,
  MonsterStageError,MonsterValidationError,
  calendarDateSpaghetti,discoverLegacyContiguousMonthDay
 } from "../src/index.ts";
@@ -90,6 +90,30 @@ try{maker().run(badReady,fixture.request);}
 catch(e){invalidOwner=e instanceof MonsterStageError;}
 let notIntegrated=false;
 try{calendarDateSpaghetti(F,F);}catch(e){notIntegrated=e instanceof MonsterStageError;}
+const ready=bootstrapMonster(fixture.cDay,
+ fixture.request.historical.yearQuestion.targetDay);
+const realSeal32=Patch14WideChoiceHandler.prototype.run;
+let sealCalls=0,lateFaults=0;
+try{
+ Patch14WideChoiceHandler.prototype.run=function(...args){
+  if(args[5]===32n&&++sealCalls===2)
+   throw Error("DISCOVERY25_DEEP_SECOND_SEAL32_FAILURE");
+  return realSeal32.apply(this,args);
+ };
+ try{maker().run(ready,fixture.request);throw Error("not injected");}
+ catch(e){assert(e instanceof Error&&
+  e.message==="DISCOVERY25_DEEP_SECOND_SEAL32_FAILURE",
+  "full Stage49 second corrected seal32 fault actually propagated");}
+ assert(sealCalls===2&&ready.status==="VALIDATED"&&
+  ready.branchTrace.join(",")==="BOOTSTRAP_VALIDATE"&&
+  ready.metrics.size===1,
+  "deep native failure keeps outer semantic owner clean");
+ lateFaults++;
+}finally{Patch14WideChoiceHandler.prototype.run=realSeal32;}
+assert(maker().run(ready,fixture.request).context===ready&&
+ (()=>{try{maker().run(ready,fixture.request);return false;}
+  catch(e){return e instanceof MonsterStageError;}})(),
+ "retry succeeds exactly once and duplicate run is rejected");
 assert(invalidOwner&&badReady.status==="VALIDATED"&&
  badReady.branchTrace.join(",")==="BOOTSTRAP_VALIDATE"&&
  notIntegrated,"invalid owner rejection without mutation; stage54 blocked");
@@ -102,4 +126,4 @@ console.log("STAGE_50_DISCOVERY_25_GUARDS_PASS"+
  " actualPredecessorCalls="+full.actualPredecessorCalls+
  " realSharedWrites="+full.actualSharedWrites+
  " previousStage49=1 additionalSauceCalls=0"+
- " patch25Applied=0 archivedExpectedReds=24 stage54Blocked=1");
+ " patch25Applied=0 archivedExpectedReds=24 stage54Blocked=1 deepFaults="+lateFaults);
