@@ -85,7 +85,7 @@ jobs:
             --output "$RUNNER_TEMP/qa30b/qa30b_independent_audit.json" \
             | tee "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
           grep -q QA30B_INDEPENDENT_TWO_INPUT_LIVE_NATIVE_SOURCE_PARITY_PASS "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
-          grep -q QA30B_THIRTY_FOUR_ADVERSARIAL_SOURCE_RECEIPTS_REJECTED "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
+          grep -q QA30B_THIRTY_FIVE_ADVERSARIAL_SOURCE_RECEIPTS_REJECTED "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
           grep -q QA30B_GLOBAL_REACHABILITY_AND_STAGE1_REMAIN_OPEN "$RUNNER_TEMP/qa30b/qa30b_independent_console.log"
       - name: Keep real Native live memory evidence and failure diagnostics
         if: always()
