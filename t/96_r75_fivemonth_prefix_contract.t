@@ -39,4 +39,10 @@ like($guard,qr/waitpid\(\$pid,WNOHANG\)/,'獨立父程序監督');
 like($guard,qr/\$rss>\$limit/,'真正 RSS 上限');
 like($guard,qr/\$elapsed>\$seconds/,'真正 walltime 上限');
 like($guard,qr/exit 3;/,'BLOCKED 不等於 PASS');
+like($code,qr/my \%outside_fixture=/,'九個分片外部相鄰詞計數基線存在');
+like($code,qr/\$outside!=\$outside_fixture\{\$shard\}/,
+ '退化的真正零計數和正常分片皆用外部基線檢驗');
+unlike($code,qr/\$outside==0/,'不得無條件要求非零相鄰詞');
+like($guard,qr/\$missing_rss<3/,'短暫消失的 proc 必須先確認子程序退出狀態');
+like($guard,qr/sleep\(0\.05\);next;/,'RSS 首次讀取失敗讓 waitpid 再次處理');
 done_testing;

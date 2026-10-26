@@ -35,6 +35,14 @@ my %digests=(
  '3,2'=>'ee23c98e54a853343740ccbcdcd2b2f0bfc33724440182ab3dd86fc946f639da',
  '3,3'=>'f577b9edfe3ddbf0f1bdff1ec06e57eb204c85a2f95d245cd64b43558c5f9a32'
 );
+# 每片區間外鄰詞數來自另一份 Python 全前綴 DFS。
+# 部分月份組合在深度 0..4 只有唯一可達前綴，
+# 故 0 是真實的「不適用」，不得誤當未執行稽核。
+my %outside_fixture=(
+ '1,1'=>24,'1,2'=>114,'1,3'=>150,
+ '2,1'=>0,'2,2'=>348,'2,3'=>528,
+ '3,1'=>0,'3,2'=>456,'3,3'=>744
+);
 my %nodes=(
  '1,1'=>[27,27,27,27,39],'1,2'=>[27,27,27,45,66],
  '1,3'=>[27,27,27,45,84],'2,1'=>[27,27,27,27,27],
@@ -146,6 +154,7 @@ for my $i (0..4) {
 my $n=0;$n+=$_ for @counts;
 die "R75 未全部執行原生排名檢查\n" if $checks!=$n*4;
 die "R75 未完全核對各內部前綴分割\n" if $partitions!=$n-$counts[4];
-die "R75 缺少區間外相鄰詞核對\n" if $outside==0;
+die "R75 區間外鄰接排名數與獨立合法樹基線不同\n"
+ if $outside!=$outside_fixture{$shard};
 printf "R75_COMPLETE passed=1 blocked=0 failed=0 first=%d second=%d vectors=27 words=%s nodes=%s endpoints=%d partitions=%d outside=%d sha256=%s\n",
  $first,$second,$all,join(',',@counts),$checks,$partitions,$outside,$sha;
