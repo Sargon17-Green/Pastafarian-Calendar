@@ -1329,6 +1329,22 @@ jobs:
           grep -Fx 'POST55_PRODUCTION_RANK_SHORT_WIDE_20_ORACLE_GREEN' "$RUNNER_TEMP/post55-cutlets.log"
           grep -Fx 'POST55_PRODUCTION_CUTLET_9_STRUCTURES_ORACLE_GREEN' "$RUNNER_TEMP/post55-cutlets.log"
           grep -Fx 'POST55_CUTLET_COMPONENT_NOT_FULL_DATE_SOAK' "$RUNNER_TEMP/post55-cutlets.log"
+      - name: Verify production month counts, exact compositions and names (oracle only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc kotlin/src/main/kotlin/pastafari/*.kt \
+            kotlin/src/test/kotlin/pastafari/NormativeCore.kt \
+            kotlin/src/test/kotlin/pastafari/NormativeCalendar.kt \
+            kotlin/soak/Post55ProductionMonthTests.kt \
+            -include-runtime -d "$RUNNER_TEMP/post55-months.jar"
+          java -Xmx1280m -Xss8m -cp "$RUNNER_TEMP/post55-months.jar" \
+            pastafari.Post55ProductionMonthTests \
+            2>&1 | tee "$RUNNER_TEMP/post55-months.log"
+          grep -Fx 'POST55_PRODUCTION_MONTH_20_FAMILY_MATRIX_GREEN' "$RUNNER_TEMP/post55-months.log"
+          grep -Fx 'POST55_PRODUCTION_MONTH_2_REAL_YEARS_ORACLE_GREEN' "$RUNNER_TEMP/post55-months.log"
+          grep -Fx 'POST55_PRODUCTION_MONTH_LENGTHS_AND_NAMES_NATIVE_GREEN' "$RUNNER_TEMP/post55-months.log"
+          grep -Fx 'POST55_MONTH_COMPONENT_NOT_FULL_DATE_SOAK' "$RUNNER_TEMP/post55-months.log"
       - name: Run independent Kotlin/Python rank component differential
         shell: bash
         env:
