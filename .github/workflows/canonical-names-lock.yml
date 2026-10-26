@@ -1314,6 +1314,21 @@ jobs:
           grep -Fx 'POST55_PRODUCTION_YEAR_ADJACENT_6_ORACLE_GREEN' "$RUNNER_TEMP/post55-year-navigation.log"
           grep -Fx 'POST55_PRODUCTION_YEAR_TARGET_21_ORACLE_GREEN' "$RUNNER_TEMP/post55-year-navigation.log"
           grep -Fx 'POST55_PRODUCTION_YEAR_NAVIGATION_TEST_ONLY_GREEN' "$RUNNER_TEMP/post55-year-navigation.log"
+      - name: Verify production cutlet structure against native test oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc kotlin/src/main/kotlin/pastafari/*.kt \
+            kotlin/src/test/kotlin/pastafari/NormativeCore.kt \
+            kotlin/src/test/kotlin/pastafari/NormativeCalendar.kt \
+            kotlin/soak/Post55ProductionCutletTests.kt \
+            -include-runtime -d "$RUNNER_TEMP/post55-cutlets.jar"
+          java -Xmx1024m -Xss8m -cp "$RUNNER_TEMP/post55-cutlets.jar" \
+            pastafari.Post55ProductionCutletTests \
+            2>&1 | tee "$RUNNER_TEMP/post55-cutlets.log"
+          grep -Fx 'POST55_PRODUCTION_RANK_SHORT_WIDE_20_ORACLE_GREEN' "$RUNNER_TEMP/post55-cutlets.log"
+          grep -Fx 'POST55_PRODUCTION_CUTLET_9_STRUCTURES_ORACLE_GREEN' "$RUNNER_TEMP/post55-cutlets.log"
+          grep -Fx 'POST55_CUTLET_COMPONENT_NOT_FULL_DATE_SOAK' "$RUNNER_TEMP/post55-cutlets.log"
       - name: Run independent Kotlin/Python rank component differential
         shell: bash
         env:

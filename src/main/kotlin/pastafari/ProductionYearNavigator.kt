@@ -30,6 +30,20 @@ class ProductionYearNavigator(
 
     val expandedGateCount: Int get() = gateTable.expandedGateCount
 
+    fun gateDay(index:ExactInt):ExactInt=gateTable.getGate(index)
+
+    fun exactGateIndex(day:ExactInt):ExactInt? {
+        gateTable.coverDays(day,day)
+        var lo=gateTable.lowestIndex
+        var hi=gateTable.highestIndex
+        val two=ExactInt.of(2L)
+        while(lo<hi) {
+            val mid=lo+(hi-lo+1L)/two
+            if(gateTable.getGate(mid)<=day) lo=mid else hi=mid-1L
+        }
+        return if(gateTable.getGate(lo)==day) lo else null
+    }
+
     fun year5000(calculationDay: ExactInt): ProductionYearInterval {
         val stream = sauce.answer(calculationDay, calculationDay, 1, 10)
         val selected = gateTable.chooseYear5000(calculationDay, stream).candidate
