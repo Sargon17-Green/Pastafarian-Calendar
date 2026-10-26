@@ -76,7 +76,7 @@ jobs:
           set -euo pipefail
           test "$(gh run view 40125781530 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:1e13b9c5579c05af0013e7ab089f2abee4782748'
           mkdir -p "$RUNNER_TEMP/qa31a/sources"
-          gh run download 40125781530 --repo "$GITHUB_REPOSITORY" --name qa31a-136-original-native-outcome-variation --dir "$RUNNER_TEMP/qa31a/sources"
+          gh run download 40125781530 --repo "$GITHUB_REPOSITORY" --name qa30a-136-original-native-control-frontiers --dir "$RUNNER_TEMP/qa31a/sources"
           echo "7c3ba01dc00a4f67fc30cc52e594b1cd6a2adee597a21939dbe0176ac2be2d4e  $RUNNER_TEMP/qa31a/sources/qa30a_native_control_frontier.json" | sha256sum -c -
       - name: Reconstruct distinct natural-input successors at unchanged native source states
         shell: bash
@@ -98,7 +98,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: qa30a-136-original-native-control-frontiers
+          name: qa31a-136-original-native-outcome-variation
           path: |
             ${{ runner.temp }}/qa31a/qa31a_native_outcome_variation.json
             ${{ runner.temp }}/qa31a/qa31a_original_audit.log
