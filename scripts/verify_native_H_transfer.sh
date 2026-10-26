@@ -6,6 +6,9 @@ command -v iverilog >/dev/null
 command -v vvp >/dev/null
 command -v sha256sum >/dev/null
 
+# Fail fast on syntax before expensive H generation.
+bash scripts/verify_native_lex_compile.sh
+
 # A small independently pinned native golden catches indexing and
 # coefficient errors before engaging the huge 45-month arithmetic.
 iverilog -g2012 -Wall -s tb_weave_native_transfer \

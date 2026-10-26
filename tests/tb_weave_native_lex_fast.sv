@@ -37,15 +37,15 @@ endfunction
 
 function automatic logic [CWIDTH-1:0] choose_exact(
     input integer top,input integer bottom);
-    integer j,small;
+    integer j,binomial_take;
     logic [CWIDTH-1:0] value,product;
     begin
         if(top<0 || top>DAYS || bottom<0 || bottom>top)
             $fatal(1,"NATIVE_LEX_INVALID_BINOMIAL");
-        small=(bottom<top-bottom)?bottom:top-bottom;
+        binomial_take=(bottom<top-bottom)?bottom:top-bottom;
         value=CWIDTH'(1);
-        for(j=1;j<=small;j=j+1) begin
-            product=value*$unsigned(top-small+j);
+        for(j=1;j<=binomial_take;j=j+1) begin
+            product=value*$unsigned(top-binomial_take+j);
             value=exact_div_small(product,j);
         end
         choose_exact=value;
@@ -94,15 +94,15 @@ endtask
 
 task automatic h_lookup(input integer month_count,input integer copies,
                         output logic [WIDTH-1:0] value);
-    integer j,cell,at,read_n;
+    integer j,row_index,at,read_n;
     begin
         if(month_count<1 || month_count>MONTHS ||
            copies<0 || copies>caps[month_count])
             $fatal(1,"NATIVE_LEX_H_INDEX_RANGE");
-        cell=copies;
+        row_index=copies;
         for(j=MONTHS;j>month_count;j=j-1)
-            cell=cell+caps[j]+1;
-        at=cell*REC_BYTES;
+            row_index=row_index+caps[j]+1;
+        at=row_index*REC_BYTES;
         if($fseek(fd,at,0)!=0) $fatal(1,"NATIVE_LEX_H_SEEK_FAILURE");
         read_n=$fscanf(fd,"%h",value);
         if(read_n!=1) $fatal(1,"NATIVE_LEX_H_READ_FAILURE");
