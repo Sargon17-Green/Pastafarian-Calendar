@@ -121,3 +121,19 @@ then against the real current branch and pinned engine commit.
 This verifies frozen *source bytes*, not the built executable, its linked
 dependencies, or the correctness of all other implementations. The global
 multi-implementation soak remains a separate prerequisite.
+
+## Worktree byte-integrity hardening
+
+The pinned-source gate compares **every tracked protected file's raw
+worktree bytes** with the corresponding `HEAD` blob. This is independent
+of Git's index stat optimizations: a modified file marked
+`assume-unchanged` or `skip-worktree` must still fail. Ignored
+additional files in protected source directories, and protected source
+paths replaced with symlinks, also invalidate the gate. The synthetic
+Git test suite covers all four cases.
+
+This is intentionally a fail-closed exact-byte check; checkouts that
+rewrite protected source bytes (for example through CRLF conversion)
+must normalize them to the verified Git blob representation before
+building. Source verification still does **not** attest the compiled
+binary, external libraries, or a global cross-implementation soak.

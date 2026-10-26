@@ -7,6 +7,7 @@ a manifest's self-declared SHA is never sufficient proof.
 """
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -48,6 +49,22 @@ def git(root, *args):
     return result.stdout.strip()
 
 
+def git_bytes(root, *args):
+    """Read raw Git output without text conversion or silent decode loss."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), *args],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            timeout=30, check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise ValueError("git source-byte command timed out") from exc
+    require(result.returncode == 0, "git source-byte command failed: " +
+            " ".join(args[:3]) + ": " +
+            result.stderr.decode("utf-8", "replace")[:250])
+    return result.stdout
+
+
 def inspect(manifest_path, root, trusted_base, expected_head):
     require(SHA.fullmatch(trusted_base) is not None,
             "trusted baseline must be an exact 40-character Git SHA")
@@ -75,11 +92,29 @@ def inspect(manifest_path, root, trusted_base, expected_head):
             changed[:400])
     unstaged = git(root, "diff", "--name-only", "--", *PROTECTED)
     staged = git(root, "diff", "--cached", "--name-only", "--", *PROTECTED)
-    untracked = git(root, "ls-files", "--others", "--exclude-standard",
-                    "--", *PROTECTED)
+    # Deliberately omit --exclude-standard: ignored source files can still
+    # affect a compiler via local include paths or source discovery.
+    untracked = git(root, "ls-files", "--others", "--", *PROTECTED)
     require(not unstaged, "uncommitted protected source changes: " + unstaged[:400])
     require(not staged, "staged protected source changes: " + staged[:400])
-    require(not untracked, "untracked protected source files: " + untracked[:400])
+    require(not untracked, "untracked or ignored protected source files: " +
+            untracked[:400])
+    # Git diff trusts index flags such as assume-unchanged/skip-worktree.
+    # Compare raw worktree bytes with the committed blobs, never index stat
+    # information. This also rejects symlinks and missing source files.
+    paths = [
+        os.fsdecode(item)
+        for item in git_bytes(root, "ls-files", "-z", "--", *PROTECTED).split(b"\x00")
+        if item
+    ]
+    require(bool(paths), "no tracked protected sources found")
+    for relative in paths:
+        disk_file = root / relative
+        require(disk_file.is_file() and not disk_file.is_symlink(),
+                "protected source missing or symlinked: " + relative)
+        committed = git_bytes(root, "show", "HEAD:" + relative)
+        require(disk_file.read_bytes() == committed,
+                "protected source bytes differ from HEAD: " + relative)
     return {
         "contract": CONTRACT,
         "source_verified": True,

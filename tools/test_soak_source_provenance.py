@@ -100,6 +100,42 @@ def main():
         probe(tool, root, manifest, base, docs, False)
         count += 1
         foreign.unlink()
+        # Git's index can hide these modified files from ordinary git diff.
+        run_git(root, "update-index", "--assume-unchanged", "src/monster.cpp")
+        (root / "src/monster.cpp").write_text(
+            "modified behind assume-unchanged", encoding="utf-8"
+        )
+        probe(tool, root, manifest, base, docs, False)
+        count += 1
+        run_git(root, "update-index", "--no-assume-unchanged", "src/monster.cpp")
+        run_git(root, "reset", "--hard", docs)
+        run_git(root, "update-index", "--skip-worktree", "src/monster.cpp")
+        (root / "src/monster.cpp").write_text(
+            "modified behind skip-worktree", encoding="utf-8"
+        )
+        probe(tool, root, manifest, base, docs, False)
+        count += 1
+        run_git(root, "update-index", "--no-skip-worktree", "src/monster.cpp")
+        run_git(root, "reset", "--hard", docs)
+        # A compiler may still use sources ignored by Git's status filters.
+        (root / ".git/info/exclude").write_text(
+            "src/ignored_shadow.hpp\n", encoding="utf-8"
+        )
+        ignored = root / "src/ignored_shadow.hpp"
+        ignored.write_text("shadow source", encoding="utf-8")
+        probe(tool, root, manifest, base, docs, False)
+        count += 1
+        ignored.unlink()
+        # Even byte-identical symlink aliases are not pinned source bytes.
+        original = root / "src/monster.cpp"
+        original.unlink()
+        original.symlink_to("monster_alias.cpp")
+        (root / "src/monster_alias.cpp").write_text("cpp calendar", encoding="utf-8")
+        probe(tool, root, manifest, base, docs, False)
+        count += 1
+        original.unlink()
+        (root / "src/monster_alias.cpp").unlink()
+        run_git(root, "reset", "--hard", docs)
         (root / "include/pastafari/monster.hpp").write_text("changed code", encoding="utf-8")
         changed_head = commit(root, "changed-engine")
         probe(tool, root, manifest, base, changed_head, False)
