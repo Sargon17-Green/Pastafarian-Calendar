@@ -505,3 +505,19 @@ php -d memory_limit=512M tests/verify_stage34_discovery17.php  # keluar 0: empat
 ```
 
 Kerja `audit_php_bahasa_melayu_stage34` mengasingkan ujian baharu. Semua empat pekerjaan terdahulu (`verify`, regresi awal, regresi 24–32, Stage33), beserta pekerjaan Stage34 yang kelima, mesti lulus Native GitHub Actions pada SHA tepat. **Status: AWAITING_CI**; jangan mulakan Stage35 atau mengubah `main`, fixture, katalog atau kod sejarah.
+
+
+## Stage 35 — PATCH 17: Pulihkan digit kelima pada pemberat M⁴
+
+Stage34 DISCOVERY17 telah disahkan `EXPECTED_RED` oleh Native GitHub Actions run `40234787662`, HEAD `c9ff4ec6ecdf73b5a11fcc38060fbd84f32ab9f2`, lima pekerjaan SUCCESS. Saksi `menurun` kini bermula pada 6, arah -1, sehingga digit kelima bernilai 2 dan benar-benar mendedahkan kecacatan.
+
+`FifthDigitPatch17::choosePatched` memanggil kelas Legacy `LegacyMissingFifthDigit17::chooseWrong` secara sebenar, tanpa mengubah kodnya, bagi mengekalkan semakan input dan parut sejarah. Formula pengganti membaca lima digit SAVE daripada strim `askBowl` PATCH12, dengan pemberat `1, M, M², M³, M⁴`. Domain `M⁴<n<=M⁵`; cutoff `floor(M⁵/n)*n`, rejection ±1 dan lilitan dalam `1..M⁵`. Penghala produksi `BootstrapKernel::chooseQuintRank` melalui dispatcher `FIFTH_DIGIT_PATCH_17` dan konteks milik panggilan; `legacyChooseQuintRank` serta `MISSING_FIFTH_DIGIT_LEGACY` terus menunjukkan cacat sejarah.
+
+Ujian `tests/stage35_patch17_tests.php` membandingkan 400 kes sintetik (empat saiz, 50 nilai first, dua arah) terhadap oracle PHP tempatan yang bebas. Terdapat **392 mismatch Legacy dan lapan padanan**, dengan sifar langkah rejection pada matriks ini menurut semakan integer tepat bebas; dua titik mula berbahaya diganti dengan jiran selamat, jumlah dan liputan sempadan dikekalkan. Empat saksi Stage34 menguji beza tepat `(digit5-1)*M⁴`; 18 pertanyaan Native (tiga pasangan hari × enam mangkuk), enam input invalid, tiada oracle dalam produksi, dan kelas Legacy asal kekal.
+
+```text
+php -d memory_limit=512M tests/verify_stage34_discovery17.php
+php -d memory_limit=512M tests/stage35_patch17_tests.php
+```
+
+Semua Stage1–34, fixture, lint PHP dan kunci nama kanonik mesti lulus Native CI. Stage35 mempunyai pekerjaan khusus `audit_php_bahasa_melayu_stage35`; semua **enam pekerjaan** pada SHA HEAD yang sama wajib SUCCESS. **Status: AWAITING_CI** sehingga pengesahan Native penuh. Jangan mulakan Stage36, ubah `main`, fixture atau katalog.

@@ -140,3 +140,14 @@ jobs:
         run: php -r 'if (PHP_INT_SIZE !== 8) { fwrite(STDERR, "PHP 64-bit diperlukan\n"); exit(1); }'
       - name: Penemuan 17 — digit kelima tiada pada pilihan lima digit
         run: php -d memory_limit=512M tests/verify_stage34_discovery17.php
+
+  audit_php_bahasa_melayu_stage35:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semak runtime PHP 64-bit bagi Stage35
+        run: php -r 'if (PHP_INT_SIZE !== 8) { fwrite(STDERR, "PHP 64-bit diperlukan\n"); exit(1); }'
+      - name: Tampalan 17 — pulihkan digit kelima pada berat M kuasa empat
+        run: php -d memory_limit=512M tests/stage35_patch17_tests.php

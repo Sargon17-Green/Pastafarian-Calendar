@@ -16,3 +16,7 @@
 - Semua Stage1–33, PHP lint, fixture, canonical names lock. Ujian Stage34 dalam pekerjaan CI khusus. Lima pekerjaan mesti SUCCESS terhadap HEAD yang sama.
 
 **Status:** AWAITING_CI. Jangan buka Stage35/PATCH17 atau ubah `main`.
+
+## Native CI VERIFIED
+
+Stage34 EXPECTED_RED disahkan SHA `c9ff4ec6ecdf73b5a11fcc38060fbd84f32ab9f2` run `40234787662` lima pekerjaan SUCCESS. Stage35 PATCH17 dibenarkan; parut RED Stage34 kekal wajib.

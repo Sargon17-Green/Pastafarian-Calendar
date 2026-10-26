@@ -111,7 +111,12 @@ $kernelCode=(string)file_get_contents($src.'/BootstrapKernel.php');
 if (!str_contains($legacyCode,'for ($j = 0; $j < 4; $j++)')
     || !str_contains($kernelCode,
         "dispatch('MISSING_FIFTH_DIGIT_LEGACY', " . '$context)')
-    || is_file($src.'/Patches/FifthDigitPatch17.php')) {
+    || (is_file($src.'/Patches/FifthDigitPatch17.php')
+        && !(str_contains($kernelCode,
+                "dispatch('FIFTH_DIGIT_PATCH_17', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $src.'/Patches/FifthDigitPatch17.php'),
+                '$this->legacy->chooseWrong($stream, $n)')))) {
     echo "RALAT_KONTRAK17\n";
     $unexpected++;
 }

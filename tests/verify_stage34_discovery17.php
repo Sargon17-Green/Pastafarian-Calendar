@@ -27,7 +27,12 @@ $valid=$valid
     && str_contains($legacy,'for ($j = 0; $j < 4; $j++)')
     && str_contains($kernel,
         "dispatch('MISSING_FIFTH_DIGIT_LEGACY', " . '$context)')
-    && !is_file($src.'/Patches/FifthDigitPatch17.php');
+    && (!is_file($src.'/Patches/FifthDigitPatch17.php')
+        || (str_contains($kernel,
+                "dispatch('FIFTH_DIGIT_PATCH_17', " . '$context)')
+            && str_contains((string)file_get_contents(
+                    $src.'/Patches/FifthDigitPatch17.php'),
+                '$this->legacy->chooseWrong($stream, $n)')));
 foreach (new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($src,FilesystemIterator::SKIP_DOTS)) as $file) {
     if (strtolower($file->getExtension())!=='php') continue;
