@@ -258,7 +258,7 @@ object Stage52Tests {
       val current=st.linesIterator.find(_.startsWith("CURRENT_STAGE=")).get.split("=",2)(1).toInt
       val completed=st.linesIterator.find(_.startsWith("LAST_COMPLETED_STAGE=")).get.split("=",2)(1).toInt
       truth(current>=52 && completed>=51 && completed<=current,"Stadi")
-      if(current>52)
+      if(completed>=52 || current>52)
        truth(st.contains("STAGE_52_NATIVE_VERIFICATION=PASS_EXPECTED_RED_44_PASS_3_FAIL"),"Certificato")
       val walk=Files.walk(root().resolve("src/main/scala"))
       val source=try walk.iterator().asScala.filter(p=>Files.isRegularFile(p)&&p.toString.endsWith(".scala"))
