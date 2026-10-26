@@ -352,6 +352,13 @@ public static class CalendarDateSpaghetti
         => new MonsterManager().EvaluateLegacyPenultimateWideCarry(
             calculationDay,targetDay,queriedBowlId,seal,familySize);
 
+    // الرقعة الرابعة والعشرون: حفظ الرتبة قبل الأخيرة من دون حمل مبكر.
+    public static BigInteger EvaluatePenultimateWideCarry(
+        BigInteger calculationDay,BigInteger targetDay,
+        int queriedBowlId,int seal,BigInteger familySize)
+        => new MonsterManager().EvaluatePenultimateWideCarry(
+            calculationDay,targetDay,queriedBowlId,seal,familySize);
+
     // مسار الحفظ المعتمد منذ الرقعة الأولى؛ لا يستدعي المرجع الاختباري.
     public static BigInteger EvaluateSave(BigInteger calculationDay, BigInteger targetDay, BigInteger value)
     {

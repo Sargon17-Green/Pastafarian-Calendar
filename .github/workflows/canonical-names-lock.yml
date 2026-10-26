@@ -301,3 +301,5 @@ jobs:
         run: |
           test "${{ steps.discovery_penultimate_wide_carry_red.outcome }}" = "failure"
           dotnet run --project tests/PastafarianCalendar.Stage48Tests/PastafarianCalendar.Stage48Tests.csproj --configuration Release -- --verify-expected-red
+      - name: تكافؤ الرقعة الرابعة والعشرين مع المرجع وحفظ شاهد الحمل
+        run: dotnet run --project tests/PastafarianCalendar.Stage49Tests/PastafarianCalendar.Stage49Tests.csproj --configuration Release

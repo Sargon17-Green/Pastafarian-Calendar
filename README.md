@@ -461,4 +461,17 @@ dotnet run --project tests/PastafarianCalendar.Stage46Tests/PastafarianCalendar.
 
 الأمر: `dotnet run --project tests/PastafarianCalendar.Stage48Tests/PastafarianCalendar.Stage48Tests.csproj -c Release -- --verify-expected-red`
 
-تغطي الاختبارات 34560 ضبطاً، و8640 حالة قبول للمرتبة قبل الأخيرة دون رفض، و8640 حالة رفض منفصلة و96 سؤال إنتاج، وحدوداً حتى 8192 بت، وتحقق الملكية والتزوير وعدم تكرار الالتزام. التشغيل المباشر يجب أن يفشل `EXPECTED_RED`، وأن ينجح مدقق التوقيع وانحدارات الأطوار 1..47 وقفل الأسماء. لا يجوز فتح `49_PATCH_24` قبل اعتماد الأحمر المقصود.
+تغطي الاختبارات 34560 ضبطاً، و8640 حالة قبول للمرتبة قبل الأخيرة دون رفض، و8640 حالة رفض منفصلة و96 سؤال إنتاج، وحدوداً حتى 8192 بت، وتحقق الملكية والتزوير وعدم تكرار الالتزام. أثبتت GitHub Actions `40235148494` إتمام `48_DISCOVERY_24` بدرجة `EXPECTED_RED` موثقة: `52092` تأكيداً ناجحاً دون إخفاق غير متوقع، و`8640` مخالفة في القبول دون رفض، و`34` مخالفة إنتاجية من `96` سؤالاً. مرّت جميع انحدارات الأطوار `1..47` وقفل الأسماء.
+
+
+## الطور التاسع والأربعون — الرقعة الرابعة والعشرون للحمل قبل الأخير
+
+تنفّذ `PatchedPenultimateWideCarryPhaseHandler` السلسلة التاريخية `LegacyPenultimateWideCarryPhaseHandler` أولاً. تستحيل إعادة بناء `n-1` من شاهد `n` وحده؛ فقد يكون الأصل `n` نفسه. يتحقق `PenultimateWideCarryPatchWrapper` من تطابق `Carry(previous,n)` مع الشاهد التاريخي ثم يحفظ `previous` التي ثبتت صحتها بالرقعة الثالثة والعشرين. لا يمحو هذا الشاهد القديم `LegacyPenultimateWideCarryRankResult`.
+
+تظهر المرتبة الصحيحة في `PatchedPenultimateWideCarryRankResult` منفصلةً، وتكشف واجهة `CalendarDateSpaghetti.EvaluatePenultimateWideCarry` النتيجة الجديدة عبر المدير والموزع بعد تحقق كامل لسلسلة المرشحين. يبقى المرجع المستقل في الاختبارات فقط، وتحمي اختبارات الملكية السياقات من التسرب وتمنع التزوير والالتزام المكرر.
+
+```text
+dotnet run --project tests/PastafarianCalendar.Stage49Tests/PastafarianCalendar.Stage49Tests.csproj -c Release
+```
+
+تغطي فحوص الرقعة `34560` حالة ضبط و`8640` حالة قبول للمرتبة `n-1` دون رفض و`8640` رفضاً بلا فساد تاريخي جديد، و`96` سؤال إنتاج وثماني صلصات وحدوداً حتى `8192` بت. يجب أن تنجح GitHub Actions في اختبارات الإصلاح وانحدارات الأطوار `1..48` وقفل الأسماء قبل إغلاق `49_PATCH_24` كـ`GREEN`؛ لا يُفتح `50_DISCOVERY_25` قبل النجاح.
