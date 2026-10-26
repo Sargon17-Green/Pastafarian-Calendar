@@ -1,4 +1,4 @@
- \`timescale 1ns/1ps
+`timescale 1ns/1ps
 // QA-only arithmetic gate for the Stage 1 native lexical block factors.
 // Independent of the 572MB H archive and Python rank-ledger witnesses.
 // Three-label exhaustive permutation enumeration (r_i = 0..3) plus
