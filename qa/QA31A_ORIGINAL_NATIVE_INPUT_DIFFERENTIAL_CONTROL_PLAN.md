@@ -31,3 +31,7 @@ This is complementary to concurrent QA09C native-mutant calibration. Its files a
 ## Governance
 
 `CURRENT_STAGE=1`; `LAST_COMPLETED_STAGE=0`; `FULL_FUNCTIONAL_QA_PASS=NO`; `GEOMETRIC_SPAGHETTI_QA_PASS=NO`. Do not change `main`, canonical `Befunge+Кыргызча`, the signed production source, QA10–QA30 accepted historical artifacts, merge PR #17 or open Stage 2.
+
+## QA30A top-four baseline comparison (not the QA31A result)
+
+A separate read-only local comparison of the already SHA-pinned QA30A aggregate `7c3ba01dc00a4f67fc30cc52e594b1cd6a2adee597a21939dbe0176ac2be2d4e` regrouped its stored four nearest control edges per candidate by `(x,y, pre_dx, pre_dy, fetched_op)`, then compared recorded successor displacement, next vector and next stringmode. Among **48 saved nearest-edge records** for the 12 cells having near-control observations, **zero distinct successor-outcome pairs** under the same pre-signature were found. For the other 3 targets QA30A stored zero near-control edges. This is an independent cross-check of the earlier **capped/nearest** report, not full 136-trace coverage; it cannot establish absence of differential outcomes. QA31A must reexamine every genuine original physical Native control-edge record before any finite result is signed.
