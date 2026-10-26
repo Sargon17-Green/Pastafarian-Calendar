@@ -47,10 +47,10 @@ bash scripts/verify_native_H_indexed.sh
 echo "STAGE1_NATIVE_H_INDEXED_GENERATION_AND_LOOKUP_PASS_ONLY"
 echo "STAGE1_NATIVE_H_FULL_YEAR_LEX_UNRANK_AND_PRODUCTION_RTL_PENDING"
 
-# NEW: rank-driven native SystemVerilog lexical decoder, 64 positions.
+# Independent direct rank-driven decoder: first 16 positions; full fast prefix64 SHA still required.
 # This source computes ALL child sizes; no Python word/ledger is consumed.
 bash scripts/verify_native_lex_prefix.sh
-echo "STAGE1_NATIVE_LEX_PREFIX64_CI_PASS_ONLY_IF_VERIFIED"
+echo "STAGE1_NATIVE_LEX_DIRECT16_GATE_PASS_ONLY_IF_VERIFIED"
 
 # Independent O(s) native A(r-e_i) generation, full 45 labels by day 255.
 bash scripts/verify_native_lex_fast.sh

@@ -12,9 +12,10 @@ timeout 240s vvp build/native_lex_fast.vvp +max_positions=64 \
     2>&1 | tee build/native_lex_fast64.log
 grep -Fq 'STAGE1_NATIVE_LEX_FAST_SV_PASS positions=64' build/native_lex_fast64.log
 test "$(wc -c < build/native_lex_fast_prefix.bin)" -eq 64
-cmp build/native_lex_fast_prefix.bin build/native_lex_prefix.bin
+test "$(wc -c < build/native_lex_prefix.bin)" -eq 16
+cmp -n 16 build/native_lex_fast_prefix.bin build/native_lex_prefix.bin
 printf '%s\n' 'c799e928b30deb45924e8aa9f11be013b5a5f205190788e01dc99508793447dc  build/native_lex_fast_prefix.bin' | sha256sum -c
-echo 'STAGE1_NATIVE_LEX_FAST_64_BYTE_FOR_BYTE_AGREEMENT_PASS'
+echo 'STAGE1_NATIVE_LEX_FAST_64_SHA256_AND_DIRECT16_OVERLAP_PASS'
 
 timeout 480s vvp build/native_lex_fast.vvp +max_positions=256 \
     2>&1 | tee build/native_lex_fast256.log

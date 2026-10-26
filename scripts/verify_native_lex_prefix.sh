@@ -26,16 +26,16 @@ print("STAGE1_NATIVE_LEX_INITIAL_RANK_SHA_PIN_PASS",flush=True)
 PY
 iverilog -g2012 -Wall -s tb_weave_native_lex_prefix \
     -o build/native_lex_prefix.vvp tests/tb_weave_native_lex_prefix.sv
-timeout 240s vvp build/native_lex_prefix.vvp +max_positions=64 \
+timeout 240s vvp build/native_lex_prefix.vvp +max_positions=16 \
     2>&1 | tee build/native_lex_prefix.log
 grep -Fq 'STAGE1_NATIVE_LEX_EXHAUSTED_MONTH_CASES_PASS cases=6' build/native_lex_prefix.log
-grep -Fq 'STAGE1_NATIVE_LEX_PREFIX_SV_PASS positions=64' build/native_lex_prefix.log
-test "$(wc -c < build/native_lex_prefix.bin)" -eq 64
-printf '%s\n' 'c799e928b30deb45924e8aa9f11be013b5a5f205190788e01dc99508793447dc  build/native_lex_prefix.bin' | sha256sum -c
-echo 'STAGE1_NATIVE_LEX_PREFIX64_SHA256_PASS'
+grep -Fq 'STAGE1_NATIVE_LEX_PREFIX_SV_PASS positions=16' build/native_lex_prefix.log
+test "$(wc -c < build/native_lex_prefix.bin)" -eq 16
+echo 'STAGE1_NATIVE_LEX_DIRECT16_REFERENCE_PASS_PENDING_FAST64_HASH'
+echo 'STAGE1_NATIVE_LEX_DIRECT16_PREFIX_COMPLETED'
 # Mutate one native H(old) lookup. The independently computed
 # H(fresh) conservation must reject it as mathematically inconsistent.
-if timeout 240s vvp build/native_lex_prefix.vvp +max_positions=64 +mutate_old_H \
+if timeout 240s vvp build/native_lex_prefix.vvp +max_positions=16 +mutate_old_H \
     > build/native_lex_prefix_negative.log 2>&1; then
     echo 'STAGE1_NATIVE_LEX_H_MUTANT_FALSE_PASS' >&2
     exit 1

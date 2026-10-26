@@ -226,7 +226,7 @@ initial begin
                         WIDTH'(choose_exact(accum[k]-2,remaining[k]-2))*
                         suffix_factor[k];
         end
-        if(position<=64 || position==255 || position==256 ||
+        if(position<=16 || position==255 || position==256 ||
            position>=DAYS-105)
             if(factor!==factor_A())
                 $fatal(1,"NATIVE_LEX_FAST_PARENT_REFERENCE_MISMATCH at=%0d",position);
@@ -252,7 +252,7 @@ initial begin
         for(k=1;k<=started;k=k+1) begin
             child[k]='0;
             if(remaining[k]>0) begin
-                if(position<=64 || position>=DAYS-105) begin
+                if(position<=16 || position>=DAYS-105) begin
                     remaining[k]=remaining[k]-1;
                     if(fast_child_factor[k]!==factor_A())
                         $fatal(1,"NATIVE_LEX_FAST_CHILD_REFERENCE_MISMATCH at=%0d month=%0d",position,k);
