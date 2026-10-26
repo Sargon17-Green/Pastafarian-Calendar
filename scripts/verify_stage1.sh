@@ -26,6 +26,13 @@ vvp build/gate.vvp
 iverilog -g2012 -s tb_selection_rejection_equivalence -Wall -o build/selection.vvp \
   tests/tb_selection_rejection_equivalence.sv
 vvp build/selection.vvp
+# The isolated wide3 quotient identity MUST detect deliberate corruption.
+if vvp build/selection.vvp +mutate_wide3 > build/selection_wide3_mutant.log 2>&1; then
+  echo 'WIDE3_IDENTITY_MUTANT_UNEXPECTED_PASS' >&2
+  exit 1
+fi
+grep -Fq 'WIDE_THREE_DIGITS_EUCLIDEAN_IDENTITY' build/selection_wide3_mutant.log
+echo 'STAGE1_WIDE3_EUCLIDEAN_IDENTITY_MUTANT_REJECTED_PASS'
 bash scripts/check_catalog_structure.sh
 if grep -R -n -Ei 'oracle_|pcal_stage1_oracle_pkg' rtl; then
   echo "PRODUCTION_ORACLE_ISOLATION_FAILED" >&2

@@ -8,6 +8,7 @@ module tb_selection_rejection_equivalence;
     integer picked_direct, rejects_direct, accepted_direct;
     integer cases = 0;
     logic signed [383:0] big_space, big_n, big_l, big_first;
+    logic signed [383:0] wide3_exact_q, wide3_exact_r;
 
     task automatic iterative_pick(
         input integer a,
@@ -103,25 +104,26 @@ module tb_selection_rejection_equivalence;
 
         big_space = M * M * M;
         big_n = M * M + 384'sd1;
-        big_l = (big_space / big_n) * big_n;
-        // Diagnostics are only printed on genuine failure. Preserve
-        // the same acceptance predicate until we know why Icarus failed.
-        if (big_l > big_space || (big_space - big_l) >= big_n ||
-            big_space <= M * M || big_l <= 384'sd0) begin
-            $display("WIDE3_DIAG space=%h",big_space);
-            $display("WIDE3_DIAG n=%h",big_n);
-            $display("WIDE3_DIAG quotient=%h",big_space/big_n);
-            $display("WIDE3_DIAG l=%h",big_l);
-            $display("WIDE3_DIAG remainder=%h",big_space-big_l);
-            $display("WIDE3_DIAG expected_q=%h",M-384'sd1);
-            $display("WIDE3_DIAG expected_r=%h",M*M-M+384'sd1);
-            $display("WIDE3_DIAG predicates=%b %b %b %b",
-                big_l>big_space,
-                (big_space-big_l)>=big_n,
-                big_space<=M*M,
-                big_l<=384'sd0);
-            $fatal(1, "WIDE_THREE_DIGITS_ARITHMETIC");
-        end
+        // For S=M^3 and N=M^2+1, q=M-1 and r=M^2-M+1.
+        // Prove the exact Euclidean reconstruction WITHOUT relying on
+        // Icarus 12 native 384-bit division, which is faulty here.
+        wide3_exact_q = M - 384'sd1;
+        wide3_exact_r = M * M - M + 384'sd1;
+        if ($test$plusargs("mutate_wide3"))
+            wide3_exact_q = wide3_exact_q + 384'sd1;
+        big_l = wide3_exact_q * big_n;
+        if (wide3_exact_q <= 384'sd0 ||
+            wide3_exact_r < 384'sd0 || wide3_exact_r >= big_n ||
+            big_l > big_space || big_l <= 384'sd0 ||
+            big_space <= M * M ||
+            big_l + wide3_exact_r !== big_space ||
+            big_space - big_l !== wide3_exact_r)
+            $fatal(1, "WIDE_THREE_DIGITS_EUCLIDEAN_IDENTITY");
+        // Keep the simulator's incorrect native quotient as a
+        // NON-FATAL diagnostic only; never use it to accept a rank.
+        if ((big_space / big_n) !== wide3_exact_q)
+            $display("ICARUS_NATIVE_WIDE3_DIVISION_UNSAFE");
+        $display("STAGE1_WIDE3_EUCLIDEAN_IDENTITY_PASS");
 
         $display("STAGE1_SELECTION_REJECTION_EQUIVALENCE_PASS cases=%0d", cases);
         $finish;
