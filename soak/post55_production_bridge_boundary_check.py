@@ -82,6 +82,9 @@ def check(jar, evidence):
     malformed = [
         "1\n", "1\t\n", "1\t2\t3\n",
         "01\t2\n", "-0\t1\n", "1\t+2\n", "hello\t1\n",
+        "-00\t1\n", "-01\t1\n", "1\t02\n",
+        "1\t--2\n", "1\t2 \n", "1 \t2\n",
+        "\t2\n", "1\t2\t\n",
     ]
     for index, value in enumerate(malformed):
         try:
