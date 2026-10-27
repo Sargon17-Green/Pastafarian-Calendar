@@ -20,9 +20,26 @@ object Post55ProductionCutletTests {
             ExactInt.ONE,ExactInt.of(922L),ExactInt.of(355687428096000L),
             m+7L,m*m-1L
         )) {
-            check(sampler.choose(s,n)==NormativeCore.chooseRank(
-                NormativeCore.AnswerStream(s.firstAnswer,s.directionStep),n)) {
-                "E_CUTLET_RANK_SAMPLER"
+            val actual=sampler.choose(s,n)
+            // The reverse stream starting at M rejects M mod n values.
+            // For this witness that is 141,533,465,673,727 steps; the
+            // sequential test oracle is impractical and its Int counter
+            // is not valid for so many steps. The first accepted value
+            // is exactly (M / n) * n, whose one-based rank is n.
+            val pathological=(s.firstAnswer==m && s.directionStep==-1 &&
+                n==ExactInt.of(355687428096000L))
+            val expected=if(pathological) {
+                val limit=(m/n)*n
+                check(m>limit && m-limit>ExactInt.of(100000L)) {
+                    "E_CUTLET_RANK_WITNESS_SETUP"
+                }
+                n
+            } else {
+                NormativeCore.chooseRank(
+                    NormativeCore.AnswerStream(s.firstAnswer,s.directionStep),n)
+            }
+            check(actual==expected) {
+                "E_CUTLET_RANK_SAMPLER first=${s.firstAnswer} step=${s.directionStep} choices=${n} actual=${actual} expected=${expected}"
             }
             rankChecks++
         }
