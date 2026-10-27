@@ -173,6 +173,20 @@ def main():
             count += 1
             run_git(root, "update-index", "--no-assume-unchanged", "--", name)
             run_git(root, "reset", "--hard", docs)
+        # The same unusual tracked paths must remain byte-pinned even when
+        # skip-worktree makes index-based diffs omit worktree changes.
+        for name in special_tracked:
+            run_git(root, "update-index", "--skip-worktree", "--", name)
+            if not run_git(root, "ls-files", "-v", "--", name).startswith("S "):
+                raise AssertionError(f"skip-worktree flag not set: {name!r}")
+            (root / name).write_text("tampered behind skip-worktree", encoding="utf-8")
+            probe(tool, root, manifest, base, docs, False,
+                  "protected source bytes differ from HEAD:")
+            count += 1
+            run_git(root, "update-index", "--no-skip-worktree", "--", name)
+            run_git(root, "reset", "--hard", docs)
+        probe(tool, root, manifest, base, docs, True)
+        count += 1
         # Odd untracked names, including ignored files, must fail closed.
         special_untracked = (
             "src/untracked with spaces.cpp",
