@@ -162,6 +162,16 @@ object Stage52Tests {
       }
       truth(mismatches>0,"Campione senza divergenze legacy")
       truth(matches>0,"Campione senza casi coincidenti")
+      // Metamorphic control: a different valid partition changes the normative
+      // cutlet, but must not accidentally change the historical gate-only scar.
+      val alternatePartition=Vector(1,1,1,1,1,4)
+      val legacyA=old(Nine,Part,168)
+      val legacyB=old(Nine,alternatePartition,168)
+      eqv((legacyA.gateId,legacyA.gateStartOffset,legacyA.legacyCutletId,legacyA.legacyDayInCutlet),
+        (legacyB.gateId,legacyB.gateStartOffset,legacyB.legacyCutletId,legacyB.legacyDayInCutlet),
+        "Legacy indipendente dalla partizione")
+      truth(normative(Nine,Part,168)!=normative(Nine,alternatePartition,168),
+        "L'oracolo normativo deve dipendere dalla partizione")
     }
     check("due manager contano indipendentemente"){
       val a=new BaseMonsterManager
