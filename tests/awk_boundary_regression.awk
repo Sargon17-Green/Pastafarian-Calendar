@@ -54,6 +54,25 @@ BEGIN {
     choose_rank_wide("180")
     expect_exact("wide backward acceptance", CHOSEN_RANK, "180")
 
+    # At N=M+1=18, M^2 mod N = 1: limit=288.
+    # With a legal unit-step stream the largest wide value is 288,
+    # so the upper boundary is accepted. Rejection first appears at N=M+2.
+    STREAM_FIRST="16"; STREAM_STEP=1
+    choose_rank_wide("18")
+    expect_exact("wide M+1 upper accepted boundary", CHOSEN_RANK, "18")
+    STREAM_FIRST="17"; STREAM_STEP=1
+    choose_rank_wide("18")
+    expect_exact("wide M+1 forward digit wrap", CHOSEN_RANK, "17")
+    STREAM_FIRST="1"; STREAM_STEP=-1
+    choose_rank_wide("18")
+    expect_exact("wide M+1 backward digit wrap", CHOSEN_RANK, "3")
+    STREAM_FIRST="17"; STREAM_STEP=-1
+    choose_rank_wide("18")
+    expect_exact("wide M+1 backward nonwrap", CHOSEN_RANK, "2")
+    STREAM_FIRST="16"; STREAM_STEP=1
+    choose_rank_wide("19")
+    expect_exact("wide M+2 first reachable rejection", CHOSEN_RANK, "1")
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
