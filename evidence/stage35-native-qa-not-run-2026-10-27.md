@@ -36,3 +36,11 @@ lua test/stage35_tests.lua .
 Capture stdout, stderr, exit status, interpreter version and the tested SHA in a persistent evidence file. Examine n=1 and n=32 boundaries, BigInt, fault injection, reentrancy, and the frontier path. Only a reproduced Native failure permits a targeted fix. Stage 36 remains **DEFERRED pending explicit authorization**; do not touch main, merge, or trigger new CI for this check.
 
 This file records the environment limitation and verified preconditions. It does not alter the Stage 35 program or authorize a new stage.
+
+## 2026-10-27 follow-up: environment and branch-status verification
+
+- Verified the live branch head through the GitHub branch API: `ad3e51521b80fcc9be930750aa63041effdfd4ce`. Its parent is the designated test-source checkpoint `febdf75f3af310d5cfcdc91098fb7bcf6ddc7b38`; the current head is the earlier documentation-only change.
+- Confirmed this evidence file remains accessible at the branch path, without replacing or duplicating it.
+- Rechecked authorized remote-device **availability only**: `אליעזר_גרין2024` and `Eliezer-Green-2021` both remain **Offline**. No remote execution was attempted.
+- Per the existing failed-attempt record, did not retry container Lua probing, DNS checkout, or archive download without a new relevant fact. No new Native tests ran, no new PASS/FAIL is claimed, and Stage 36 remains DEFERRED.
+- Release condition and single NEXT are unchanged: an authorized online Native runner with Lua CLI and the full repository at the designated source SHA; then run the documented local command and retain actual execution evidence. The existing evidence file stays the sole artifact for this blocked recheck.
