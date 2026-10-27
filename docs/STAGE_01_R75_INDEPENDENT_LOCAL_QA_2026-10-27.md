@@ -42,3 +42,14 @@ Original native R75 CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/a
 **Gap:** The specific requested two-seed **local rerun of the repository's original nine Perl Native R75 shards**, including original rank/unrank modules, has **not** been completed. Network DNS from the isolated local container cannot reach github.com; both authorized Desktop Commander machines were offline at the time. Original native module files were inspected through GitHub; no claim that their full dependency tree was executed.
 
 **NEXT:** On a machine with the branch checkout, run the original `tools/profile_r75_fivemonth_prefix_tree.pl` for the nine pairs twice (`PERL_HASH_SEED=11,97; LC_ALL=C.UTF-8; --seconds 185 --rss-kib 393216`), preserve complete original `R75_COMPLETE` and `R75_WATCH` logs, compare SHA/counts/endpoints/partitions/outside/exit and RSS per shard, then fix only an evidenced Stage1 regression. No Stage2, merge or main changes.
+
+
+## Runtime readiness recheck (2026-10-27; no original native rerun)
+
+- Before this documentation update the branch HEAD was `431b8421ef08530645f318136835286348d5bab9`, matching the canonical checkpoint. The prior R75 CI and independent 18/18 test evidence above are unchanged.
+- The current isolated execution environment provides Perl **5.40.1**, `LC_ALL=C.UTF-8` with UTF-8 charmap, and Linux `/proc/self/status` including `VmRSS`.
+- **No complete repository checkout** was found at the inspected local locations `/mnt/data/Pastafarian-Calendar`, `/home/oai/share/Pastafarian-Calendar`, or `/tmp/Pastafarian-Calendar`. This scoped local inspection does not assert that no checkout exists on any other computer.
+- The GitHub connector could verify the branch HEAD and read this report and `tools/profile_r75_fivemonth_prefix_tree.pl`. This does **not** establish Git transport availability or provide the complete `lib` and `t/lib` dependency tree required by that native runner.
+- Per the recorded no-repeat rule, **no repeat** of the earlier failed `git ls-remote` DNS attempt or offline Remote Desktop paths was made; no new evidence of their connectivity has been obtained.
+- **Blocked category: missing complete Native checkout**, not missing Perl or Linux `/proc`. The original 9 × 2 native run was **not executed** here. No new `R75_COMPLETE`, `R75_WATCH`, native RSS maxima, or native PASS can be claimed. No code regression has been established and no Stage2/main/merge action is authorized.
+- **Single NEXT remains unchanged:** once a complete `Perl+國語` checkout on an authorized connected runner is available, execute the original `tools/profile_r75_fivemonth_prefix_tree.pl` for all 9 first/second pairs with seeds 11 and 97, `LC_ALL=C.UTF-8`, limits 185 s / 393216 KiB, archive complete exit/log/hash/count/endpoint/partition/outside/RSS evidence, and fix only a reproduced Stage1 regression.
