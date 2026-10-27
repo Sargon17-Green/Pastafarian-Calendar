@@ -1,0 +1,80 @@
+name: Befunge Stage1 QA31C Original Native Input Splice Diagnostic
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31c_native_read_probe.py'
+      - 'qa/stage1_qa31c_independent_read_audit.py'
+      - '.github/workflows/befunge-stage1-qa31c-native-input-splice.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-native-controlled-read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Freeze original source and compile QA Python
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31c_native_read_probe.py qa/stage1_qa31c_independent_read_audit.py
+      - name: Retrieve only pinned signed original Native QA20 routes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh run view 39761821210 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:d0a1c686c4f9244121246aa5b70266c072c3ddce'
+          mkdir -p "$RUNNER_TEMP/qa31c/valid00" "$RUNNER_TEMP/qa31c/invalid18" "$RUNNER_TEMP/qa31c/output"
+          gh run download 39761821210 --repo "$GITHUB_REPOSITORY" --name qa20-shard-0 --dir "$RUNNER_TEMP/qa31c/valid00"
+          gh run download 39761821210 --repo "$GITHUB_REPOSITORY" --name qa20-shard-1 --dir "$RUNNER_TEMP/qa31c/invalid18"
+          echo "782fb868a11a105550ef5af6f8f7cd39e4ba9de77d9565f7549e310549b0073a  $RUNNER_TEMP/qa31c/valid00/qa20_manifest.json" | sha256sum -c -
+          echo "9c5af6212cfd7c1ab58e9603f385767e64b10799c90be416a86c4f09d613bfdd  $RUNNER_TEMP/qa31c/invalid18/qa20_manifest.json" | sha256sum -c -
+      - name: Download SHA256-pinned PyFunge 0.5 rc2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute original IP, complete Native steps, stdin sham and controlled read splice
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/qa31c:/qa31c" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1300s python -u qa/stage1_qa31c_native_read_probe.py /qa31c /qa31c/output
+            ' | tee "$RUNNER_TEMP/qa31c/output/native.log"
+          grep -q QA31C_DIAGNOSTIC_NATIVE_ORIGINAL_FULL_STEPS "$RUNNER_TEMP/qa31c/output/native.log"
+          grep -q QA31C_REAL_STDIN_READ_INTERVENTION "$RUNNER_TEMP/qa31c/output/native.log"
+          grep -q QA31C_NOT_ACCEPTED_STAGE1_OPEN "$RUNNER_TEMP/qa31c/output/native.log"
+      - name: Independent signed-step and 12 hostile receipt rejections
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31c_independent_read_audit.py \
+            src/interleaved_work_counts.b98 "$RUNNER_TEMP/qa31c" "$RUNNER_TEMP/qa31c/output" \
+            | tee "$RUNNER_TEMP/qa31c/output/audit.log"
+          grep -q QA31C_INDEPENDENT_19059_FULL_NATIVE_STEPS "$RUNNER_TEMP/qa31c/output/audit.log"
+          grep -q QA31C_INDEPENDENT_FORGERIES_REJECTED "$RUNNER_TEMP/qa31c/output/audit.log"
+          grep -q QA31C_STAGE1_REMAINS_OPEN_PENDING_REVIEW "$RUNNER_TEMP/qa31c/output/audit.log"
+      - name: Preserve full physical Native traces and diagnostics including RED logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31c-original-native-stdin-splice-diagnostic
+          path: |
+            ${{ runner.temp }}/qa31c/output/qa31c_sham.steps.gz
+            ${{ runner.temp }}/qa31c/output/qa31c_splice.steps.gz
+            ${{ runner.temp }}/qa31c/output/qa31c_read_probe.json
+            ${{ runner.temp }}/qa31c/output/qa31c_independent.json
+            ${{ runner.temp }}/qa31c/output/native.log
+            ${{ runner.temp }}/qa31c/output/audit.log
+          if-no-files-found: warn
