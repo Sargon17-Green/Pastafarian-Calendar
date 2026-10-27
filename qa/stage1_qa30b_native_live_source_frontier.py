@@ -89,7 +89,7 @@ def start(label,root,qa30a):
          'original 15 unresolved cells changed')
     initial={(x,y):ord(original_rows[y][x]) for x,y in targets}
     cls=type(space);original_put=cls.put
-    writes=[];put_count=[0];tick_holder=[0];snapshots=[]
+    writes=[];put_events=[];put_count=[0];tick_holder=[0];snapshots=[]
     def capture_put(self,*args,**kwargs):
         need(self is space and len(args)>=2,'unexpected foreign physical Native put')
         pos=tuple(map(int,args[0]))
@@ -97,6 +97,8 @@ def start(label,root,qa30a):
         rv=original_put(self,*args,**kwargs)
         actual=int(self.get(args[0]))
         put_count[0]+=1
+        put_events.append({'tick':tick_holder[0], 'coordinate':list(pos),
+                           'before':oldvalue,'after':actual})
         if pos in initial:
             writes.append({'tick':tick_holder[0],'coordinate':list(pos),
                            'before':oldvalue,'after':actual})
@@ -140,11 +142,15 @@ def start(label,root,qa30a):
              'not all original Native instructions or witness checkpoints replayed')
     finally:
         cls.put=original_put
+    need(len(put_events)==put_count[0],
+         'real Native FungeSpace.put provenance count incomplete')
     need(program['stdout'].getvalue().split()==rec['output'],
          'actual Native program output is not original signed QA20 result')
     return {'label':label,'original_shard':shard,'original_input':rec['raw_input'],
             'original_signed_steps':len(signed),'qa20_original_gzip_sha256':sha(zipped),
-            'real_native_put_calls':put_count[0],'writes_to_original_15_cells':writes,
+            'real_native_put_calls':put_count[0],
+            'all_real_native_put_events':put_events,
+            'writes_to_original_15_cells':writes,
             'signed_witness_tick_count':len(witnesses),
             'signed_target_witness_pairs':sum(len(x) for x in witnesses.values()),
             'live_state_snapshots':snapshots,
