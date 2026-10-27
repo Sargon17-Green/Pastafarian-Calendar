@@ -8,6 +8,11 @@ import tempfile
 
 FIXTURES = {
     "src/monster.cpp": "cpp calendar",
+    "src/engine with spaces.cpp": "spaced source",
+    "src/שפה Δ.cpp": "unicode source",
+    "src/back\\slash.cpp": "backslash source",
+    "include/pastafari/odd [x] ; #$.hpp": "metachar source",
+    "include/pastafari/line\nbreak.hpp": "newline source",
     "include/pastafari/monster.hpp": "header",
     "include/pastafari/source_language_catalog.hpp": "source names",
     "tools/soak_vector_adapter.cpp": "stream adapter",
@@ -29,7 +34,7 @@ def commit(root, message):
     return run_git(root, "rev-parse", "HEAD")
 
 
-def probe(tool, repo, manifest, base, head, expected):
+def probe(tool, repo, manifest, base, head, expected, reason_contains=None):
     result = subprocess.run(
         [sys.executable, str(tool), "--repository", str(repo),
          "--manifest", str(manifest), "--expected-engine-commit", base,
@@ -47,6 +52,8 @@ def probe(tool, repo, manifest, base, head, expected):
         raise AssertionError(f"wrong provenance verdict: {parsed!r}")
     if not expected and not parsed.get("reason"):
         raise AssertionError("missing fail-closed reason")
+    if reason_contains and reason_contains not in parsed.get("reason", ""):
+        raise AssertionError(f"unexpected fail-closed reason: {parsed!r}")
 
 
 def main():
@@ -145,6 +152,40 @@ def main():
         probe(tool, root, manifest, base, docs, False)
         count += 1
         manifest.write_text(json.dumps(metadata), encoding="utf-8")
+        probe(tool, root, manifest, base, docs, True)
+        count += 1
+        # Filenames with whitespace, Unicode, Git-quotable metacharacters,
+        # a literal backslash, or an embedded newline must be byte-pinned.
+        special_tracked = (
+            "src/engine with spaces.cpp",
+            "src/שפה Δ.cpp",
+            "src/back\\slash.cpp",
+            "include/pastafari/odd [x] ; #$.hpp",
+            "include/pastafari/line\nbreak.hpp",
+        )
+        for name in special_tracked:
+            # Hide this mutation from index-based git diff, forcing the raw
+            # NUL-separated tracked-path and worktree-byte check to detect it.
+            run_git(root, "update-index", "--assume-unchanged", "--", name)
+            (root / name).write_text("tampered protected source", encoding="utf-8")
+            probe(tool, root, manifest, base, docs, False,
+                  "protected source bytes differ from HEAD:")
+            count += 1
+            run_git(root, "update-index", "--no-assume-unchanged", "--", name)
+            run_git(root, "reset", "--hard", docs)
+        # Odd untracked names, including ignored files, must fail closed.
+        special_untracked = (
+            "src/untracked with spaces.cpp",
+            "src/לא במעקב.hpp",
+            "include/pastafari/new\nline.hpp",
+        )
+        for name in special_untracked:
+            path = root / name
+            path.write_text("unexpected source", encoding="utf-8")
+            probe(tool, root, manifest, base, docs, False,
+                  "untracked or ignored protected source files:")
+            count += 1
+            path.unlink()
         probe(tool, root, manifest, base, docs, True)
         count += 1
     print(f"SOAK_SOURCE_PROVENANCE_TESTS={count}/{count}_PASS")
