@@ -36,3 +36,12 @@ A Linux runtime has LibreOffice 25.2.3.2 and Python UNO, but the isolated runtim
 **Release condition:** provide a runner with the existing branch checked out and working LibreOffice StarBasic, or make the seven `basic/Standard/*.xba` modules available to an executable LibreOffice runtime. Then run the existing `Tests.Main` and attach the complete raw output to this branch or Google Drive; report failures without calling the run PASS.
 
 **Single NEXT:** execute existing `Tests.Main` at the verified branch HEAD in a source-accessible LibreOffice/StarBasic runtime, preserve its raw output, and verify both required lines. Do not open stage 2 without authorization.
+
+## 2026-10-27 targeted independent re-verification
+
+- Branch HEAD independently read back as `fee09b9799b2bd36db809cd7733506c09e50ad30` before this note update.
+- Exact inspected blob identities were unchanged: correction note `c8b81038c2789902da2e0d93c07ebc299f2ecfe4`, `Catalog.xba` `d211dd28ab4a4bf4da5f9b16c35942aef4b6eb24`, and `Tests.xba` `3782a00085bb1489faf310272a99892eb2c625a2`.
+- Direct static re-check confirms `cutletNames(8) = "ਮੋਥਾ"` and the sole `CATALOG_CUTLET_8` assertion expects `"ਮੋਥਾ"`; month literals at canonical indices 8, 31 and 36 match both catalog and tests. All four inspected Punjabi target strings are NFC.
+- The prior adjudication `ਪੈਪੀਰਸ ਸੇਜ → ਮੋਥਾ` is retained in the source note. The test writes to `/tmp/pastafari_basic_stage1_test_results.txt` and contains an `OVERALL=PASS` code branch, **which is not execution evidence**.
+- A separate local runtime confirms LibreOffice 25.2.3.2 and system-Python UNO are installed, but no `Tests.xba`/`Catalog.xba` source checkout is available in its mounted working directory. Existing failed Git DNS and offline remote-desktop paths were **not retried**. No native `Tests.Main` output was generated.
+- **Still blocked:** run `Tests.Main` in a source-accessible LibreOffice/StarBasic runtime; save the entire raw output in GitHub or Google Drive and inspect actual `CATALOG_CUTLET_8=PASS` and `OVERALL=PASS`. No stage 2 authorization.
