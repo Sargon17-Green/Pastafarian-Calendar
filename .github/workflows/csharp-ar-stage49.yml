@@ -82,3 +82,5 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: sha256sum -c CANONICAL_NAMES_LOCK.sha256
+
+# Retrigger Stage49 on the authorized feature branch; no change to test semantics.
