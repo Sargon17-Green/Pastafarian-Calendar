@@ -84,6 +84,14 @@ BEGIN {
     choose_rank_wide(WIDE_N)
     expect_exact("wide original M+1 backward rank two", CHOSEN_RANK, "2")
 
+    # For N=M+2 at the original 127-bit modulus, M^2 mod N=4.
+    # The stream (M-1,M) yields wide=M^2-1, three above limit=M^2-4.
+    # A forward rejected rank must restart at 1, not reduce modulo N.
+    WIDE_N=bi_add(M,"2")
+    STREAM_FIRST=bi_sub(M,"1"); STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original M+2 forward rejection", CHOSEN_RANK, "1")
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
