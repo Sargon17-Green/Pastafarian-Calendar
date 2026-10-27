@@ -202,6 +202,24 @@ def main():
             path.unlink()
         probe(tool, root, manifest, base, docs, True)
         count += 1
+        # A tracked source deleted behind skip-worktree is not an authorized
+        # sparse omission: protected source bytes must actually be present.
+        # Check both Unicode and literal-newline filenames, and recover using
+        # a forced worktree restore after clearing the index bit.
+        for name in ("src/שפה Δ.cpp", "include/pastafari/line\nbreak.hpp"):
+            run_git(root, "update-index", "--skip-worktree", "--", name)
+            if not run_git(root, "ls-files", "-v", "--", name).startswith("S "):
+                raise AssertionError(f"skip-worktree flag not set: {name!r}")
+            (root / name).unlink()
+            probe(tool, root, manifest, base, docs, False,
+                  "protected source missing or symlinked:")
+            count += 1
+            run_git(root, "update-index", "--no-skip-worktree", "--", name)
+            run_git(root, "restore", "--source=HEAD", "--worktree", "--", name)
+            if not (root / name).is_file():
+                raise AssertionError(f"protected source not restored: {name!r}")
+            probe(tool, root, manifest, base, docs, True)
+            count += 1
     print(f"SOAK_SOURCE_PROVENANCE_TESTS={count}/{count}_PASS")
 
 
