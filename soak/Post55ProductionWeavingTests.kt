@@ -27,7 +27,8 @@ object Post55ProductionWeavingTests {
         require(args.isEmpty())
         var checks = 0
         for (lengths in listOf(intArrayOf(1), intArrayOf(2, 2),
-                intArrayOf(3, 2, 2), intArrayOf(3, 3, 2), intArrayOf(2, 2, 2, 2))) {
+                intArrayOf(3, 2, 2), intArrayOf(3, 3, 2), intArrayOf(2, 2, 2, 2),
+                intArrayOf(1, 2, 2, 1), intArrayOf(3, 2, 1, 2))) {
             val expected = enumerate(lengths)
             val engine = ProductionMonthWeavingEngine(lengths)
             check(engine.countAll() == BigInteger.valueOf(expected.size.toLong())) {
@@ -43,11 +44,23 @@ object Post55ProductionWeavingTests {
                 }
             }
         }
+        // This previously hit E_WEAVING_STATE_BUDGET in exponential state DP.
+        val longMonths = ProductionMonthWeavingEngine(intArrayOf(84, 84, 84))
+        val longCount = longMonths.countAll()
+        check(longCount == BigInteger("158063663512248978447072073974970820833141159939389396411423173194948556031015074605057077627643664734253125219849301")) {
+            "E_WEAVING_LONG_EXACT_COUNT"
+        }
+        check(longMonths.dayAt(BigInteger.ONE, 251) ==
+            ProductionMonthWeavingEngine.Day(3, 84)) { "E_WEAVING_LONG_FIRST_RANK" }
+        check(longMonths.dayAt(longCount, 251) ==
+            ProductionMonthWeavingEngine.Day(3, 84)) { "E_WEAVING_LONG_LAST_RANK" }
+
         var blocked = false
         try { ProductionMonthWeavingEngine(intArrayOf(4, 4, 4), maxStates = 1).countAll() }
         catch (error: IllegalStateException) { blocked = error.message == "E_WEAVING_STATE_BUDGET" }
         check(blocked) { "E_WEAVING_BUDGET_FAIL_CLOSED" }
         println("POST55_PRODUCTION_WEAVING_SYNTHETIC_" + checks + "_GREEN")
+        println("POST55_WEAVING_LONG_252_DAYS_EXACT_GREEN")
         println("POST55_WEAVING_COMPONENT_NOT_FULL_DATE_CERTIFICATION")
     }
 }
