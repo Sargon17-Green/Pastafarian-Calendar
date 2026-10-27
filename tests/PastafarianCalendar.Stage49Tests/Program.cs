@@ -289,6 +289,53 @@ internal static class Program
         }
     }
 
+    // حراسة نصوص التشخيص العربية من التلف والترميز والتحكم الخفي بالاتجاه.
+    private static void UnicodeRtlDiagnostics()
+    {
+        static bool ValidArabicDiagnostic(string? message)
+        {
+            if(message is null || !message.IsNormalized(System.Text.NormalizationForm.FormC) ||
+               message.Contains('\uFFFD'))
+                return false;
+            foreach(var symbol in message)
+            {
+                if(char.IsSurrogate(symbol) ||
+                   symbol is '\u061C' or '\u200E' or '\u200F' or '\uFEFF' ||
+                   (symbol>='\u202A' && symbol<='\u202E') ||
+                   (symbol>='\u2066' && symbol<='\u2069'))
+                    return false;
+            }
+            return System.Text.Encoding.UTF8.GetString(
+                System.Text.Encoding.UTF8.GetBytes(message))==message;
+        }
+
+        var wrapper=new PenultimateWideCarryPatchWrapper();
+        string? invalidRange=null;
+        try{wrapper.Restore(BigInteger.Zero,BigInteger.One,M+1);}
+        catch(MonsterValidationException ex){invalidRange=ex.Message;}
+        Check(invalidRange=="معطيات تصحيح الحمل قبل الأخير غير صالحة." &&
+              ValidArabicDiagnostic(invalidRange),
+              "سلامة Unicode وRTL في رسالة رفض المرتبة خارج المجال");
+
+        string? forgedWitness=null;
+        try{wrapper.Restore(BigInteger.One,new BigInteger(2),M+1);}
+        catch(MonsterValidationException ex){forgedWitness=ex.Message;}
+        Check(forgedWitness=="شاهد الحمل لا يطابق مرتبة الرقعة الثالثة والعشرين." &&
+              ValidArabicDiagnostic(forgedWitness),
+              "سلامة Unicode وRTL في رسالة رفض شاهد الحمل المزوّر");
+
+        string? invalidFamily=null;
+        try{new MonsterManager().ExecutePatchedPenultimateWideCarry(
+            NormativeScroll.FoundationDay,NormativeScroll.FoundationDay,1,21,M);}
+        catch(MonsterValidationException ex){invalidFamily=ex.Message;}
+        Check(invalidFamily=="مدخلات الأسرة الواسعة غير صالحة." &&
+              ValidArabicDiagnostic(invalidFamily),
+              "سلامة Unicode وRTL في رسالة رفض الأسرة غير الواسعة");
+
+        Check(Console.OutputEncoding.WebName=="utf-8",
+              "إخراج نتائج الاختبار بترميز UTF-8");
+    }
+
     public static int Main()
     {
         Console.OutputEncoding=System.Text.Encoding.UTF8;
@@ -304,6 +351,7 @@ internal static class Program
         };
         for(var i=0;i<dates.Length;i++)Production(dates[i].C,dates[i].T,i+1);
         ValidationAndOwnership();
+        UnicodeRtlDiagnostics();
         Console.WriteLine("حالات الضبط: "+controls);
         Console.WriteLine("نتائج الضبط المصححة: "+controlGood);
         Console.WriteLine("فروق الضبط التاريخية: "+controlOldDifferent);
