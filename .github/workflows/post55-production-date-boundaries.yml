@@ -2,7 +2,7 @@ name: Post55 Kotlin real-production date boundary checks
 
 on:
   push:
-    branches: ['Kotlin+Cymraeg']
+    branches: ['Kotlin\+Cymraeg']
     paths:
       - 'src/main/kotlin/pastafari/ProductionMonthWeavingEngine.kt'
       - 'soak/Post55ProductionDateBridge.kt'
