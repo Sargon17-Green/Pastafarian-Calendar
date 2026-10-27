@@ -52,6 +52,27 @@ foreach ($spaces as $ni=>$n) {
 }
 semak35($matrix===400 && $scars===392 && $matched===8,'MATRIX_COUNTS');
 
+// Regresi rejection sebenar: tepat satu sampel di atas cutoff lima digit.
+// Pilih n=wide-1 dengan n>M^5/2, jadi cutoff=n; langkah -1 diterima.
+$rejectStream=['first'=>$m,'step'=>-1];
+$rejectWide=BigInt::one();
+$rejectWeight=BigInt::one();
+for ($j=0;$j<5;$j++) {
+    $digit=NormativeMath::save($m->sub(BigInt::fromInt($j)));
+    $rejectWide=$rejectWide->add($digit->sub(BigInt::one())->mul($rejectWeight));
+    $rejectWeight=$rejectWeight->mul($m);
+}
+$rejectN=$rejectWide->sub(BigInt::one());
+semak35($rejectN->compare($m4)>0
+    && $m5->floorDiv($rejectN)->equals(BigInt::one()),
+    'REJECTION_CUTOFF');
+$rejectExpected=$oracle->chooseRank($rejectStream,$rejectN);
+$rejectActual=$patch->choosePatched($rejectStream,$rejectN);
+semak35($rejectActual->equals($rejectExpected)
+    && $rejectActual->equals($rejectN)
+    && !$legacy->chooseWrong($rejectStream,$rejectN)->equals($rejectN),
+    'REJECTION_ONE_STEP');
+
 // Empat parut Stage34 mesti kekal salah; pembaikan mesti setara oracle.
 $witnesses=[[BigInt::one(),1],[BigInt::fromInt(2),1],
     [BigInt::fromInt(6),-1],[$m,1]];
