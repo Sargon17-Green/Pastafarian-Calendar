@@ -15,13 +15,10 @@ class ProductionRankSampler(private val maxRejections: Int = 100000) {
         if(n<=m) {
             val limit=(m/n)*n
             var x=stream.firstAnswer
-            var rejects=0
-            while(x>limit) {
-                check(rejects<maxRejections) { "E_RANK_REJECTION_BUDGET" }
-                rejects++
-                x=ExactInt.ONE+(x-ExactInt.ONE+
-                    stream.directionStep.toLong()).euclideanMod(m)
-            }
+            // With a unit-step stream, jump exactly to the first accepted answer.
+            // A reverse scan reaches limit; a forward scan wraps to 1.
+            // This avoids potentially astronomical rejection loops.
+            if(x>limit) x=if(stream.directionStep==-1) limit else ExactInt.ONE
             return (x-ExactInt.ONE).euclideanMod(n)+ExactInt.ONE
         }
         var places=1
@@ -38,13 +35,8 @@ class ProductionRankSampler(private val maxRejections: Int = 100000) {
             weight*=m
         }
         val limit=(space/n)*n
-        var rejects=0
-        while(x>limit) {
-            check(rejects<maxRejections) { "E_RANK_WIDE_REJECTION_BUDGET" }
-            rejects++
-            x=ExactInt.ONE+(x-ExactInt.ONE+
-                stream.directionStep.toLong()).euclideanMod(space)
-        }
+        // The same exact jump applies to the widened answer ring.
+        if(x>limit) x=if(stream.directionStep==-1) limit else ExactInt.ONE
         return (x-ExactInt.ONE).euclideanMod(n)+ExactInt.ONE
     }
 }
