@@ -73,6 +73,20 @@ BEGIN {
     choose_rank_wide("19")
     expect_exact("wide M+2 first reachable rejection", CHOSEN_RANK, "1")
 
+    # The exact 2-digit to 3-digit transition is N=M^2+1.
+    # With M=17, N=289 uses two digits, N=290 uses three.
+    STREAM_FIRST="15"; STREAM_STEP=1
+    choose_rank_wide("289")
+    expect_exact("wide square two-digit boundary", CHOSEN_RANK, "270")
+    choose_rank_wide("290")
+    expect_exact("wide square+1 three-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST="17"; STREAM_STEP=-1
+    choose_rank_wide("290")
+    expect_exact("wide square+1 three-digit backward acceptance", CHOSEN_RANK, "258")
+    STREAM_STEP=1
+    choose_rank_wide("290")
+    expect_exact("wide square+1 three-digit forward wrap", CHOSEN_RANK, "16")
+
     # Original M=2^127-1, N=M+1. Both wide samples are accepted
     # under limit=M^2-1; these check full-width integer rank arithmetic.
     M="170141183460469231731687303715884105727"
@@ -91,6 +105,23 @@ BEGIN {
     STREAM_FIRST=bi_sub(M,"1"); STREAM_STEP=1
     choose_rank_wide(WIDE_N)
     expect_exact("wide original M+2 forward rejection", CHOSEN_RANK, "1")
+
+    # The same digit-count boundary at the original 127-bit modulus.
+    WIDE_SQUARE=bi_square(M)
+    STREAM_FIRST=bi_sub(M,"1"); STREAM_STEP=1
+    choose_rank_wide(WIDE_SQUARE)
+    expect_exact("wide original square two-digit boundary", CHOSEN_RANK, bi_sub(WIDE_SQUARE,"1"))
+
+    WIDE_N=bi_add(WIDE_SQUARE,"1")
+    STREAM_FIRST=bi_sub(M,"2"); STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original square+1 three-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original square+1 three-digit backward acceptance", CHOSEN_RANK, bi_add(bi_sub(WIDE_SQUARE,bi_mul_small(M,2)),"3"))
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original square+1 three-digit forward wrap", CHOSEN_RANK, bi_sub(M,"1"))
 
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
