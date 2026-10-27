@@ -1,26 +1,19 @@
-# QA31C — Native stdin read intervention, deliberately unaccepted (2026-10-27)
+# QA31C — corrected equal-length Native stdin intervention (2026-10-27)
 
-## Authorized boundary
-- Branch: `qa-befunge98-stage1-order-isolation-20261008`; Stage 1 only, `CURRENT_STAGE=1`, `LAST_COMPLETED_STAGE=0`.
-- Unchanged source blob: `560d6aa5807a7f766213a33835cce85eab0fa40c`.
-- Native runtime: PyFunge 0.5-rc2, archive SHA256 `e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac`.
-- Previously accepted finite QA31B: [original Native evidence](https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/1b01d9030bf408429dae6f9dce099d500b287837/qa/QA31B_NATIVE_ACCEPTANCE_2026-10-27.md), [run 40495897566](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40495897566). Pre-j operands: valid00 tick 9607 = 61; invalid18 tick 1455 = 0.
-- Signed original QA20 shard0 manifest SHA256 `782fb868a11a105550ef5af6f8f7cd39e4ba9de77d9565f7549e310549b0073a`; shard1 manifest SHA256 `9c5af6212cfd7c1ab58e9603f385767e64b10799c90be416a86c4f09d613bfdd`.
+## Evidence-first failure
+- The previous exact-head run https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40555795791 completed **failure** at 6b4601c93aeacd743176731ec167900aaafd8ec6. Job 122371402162, step 6, failed at pre-execution assertion "not same-size intervention". No physical Native STEP trace nor independent QA31C audit ran; diagnostic artifact 12757122076 held only native.log.
+- The signed original valid00 raw input is "0 0 0 0\n" (8 bytes), while original invalid18 is "\n" (1 byte). The originally specified equal-size/equal-newline-offset splice is impossible for that pair; do not rerun the broken workflow.
 
-## Exact new acceptance gap
-QA20 physical seven-column STEP traces contain no stdin read-event receipts. QA31B measures the stack before `j`, but does not show that altering bytes delivered by a real native input operation modifies the operand. The older between-input difference is **correlation, not intervention**.
+## Targeted correction, still Stage 1 QA only
+- Keep signed valid00 in QA20 shard 0, and replace the experimental arm with signed invalid16 in shard 3, raw "0 1 0 x\n" (8 bytes). It shares the terminal newline offset 7, first changed byte offset 2; both were generated with the original Native IP and source Git blob 560d6aa5807a7f766213a33835cce85eab0fa40c.
+- Previously verified shard-0 manifest SHA256: 782fb868a11a105550ef5af6f8f7cd39e4ba9de77d9565f7549e310549b0073a. The newly inspected original QA20 shard-3 ZIP artifact 12417633980 has ZIP SHA256 d792e4ce459769124d9055f47dc2773a44a487f260ff2302ada8371ed4450c07 and ZIP CRC PASS; manifest SHA256 3f2e81afb325a4f1e8bfee3910be6d92d2bef23145ba39a33fc355ea23a5454b.
+- The complete SHA-bound Native originals are 17,387 valid00 STEP lines and 8,021 invalid16 STEP lines, total 25,408. Original invalid16's terminal output is seven "-1" values; its physical route does not reach the targeted j at (114,38).
 
-## Controlled diagnostic added in this commit
-The new Python 2 `qa/stage1_qa31c_native_read_probe.py` uses **the original PyFunge Program**, exact production Funge-space bytes and natural initial IP. A `StringIO` subclass initializes its backing buffer with the **original valid00 input in both arms**; it records the actual `read`/`readline` call, active physical tick, real IP state, TOSS fingerprint and cursor bounds. In sham, it returns unchanged bytes. In the experimental arm, only at a real stdin read return does it replace bytes at the same cursor offsets with the equal-length, equal-newline-offset suffix from the signed invalid18 input. No source mutation, IP move, stack edits, PyFunge modifications or arbitrary post-read changes are permitted.
+## Preserved strict contract and limited claim
+1. PyFunge 0.5-rc2 archive SHA256 e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac. Original Funge-space bytes, natural IP, stacks, and implementation must not be mutated.
+2. The sham and experiment use the *same underlying signed valid00 buffer*. Only real Native read/readline return bytes are replaced at matching cursor offsets in the experiment by equal-length signed invalid16 bytes; no newline displacement or arbitrary runtime modifications. Record physical tick, pre-read IP, cursor and TOSS hash; verify first changed read and identical prior read events.
+3. Replay all 25,408 physical STEP records against both original SHA-pinned traces, including original terminal outputs; store unsampled gzip traces and logs, including RED logs. Independently reject all 12/12 forged receipts; compare complete source/manifest/trace digests and read-event signatures.
+4. This redesigned test is **only** a candidate for finite controlled *stdin → terminal-output* dependence. It does NOT demonstrate altered pre-j stack operand: invalid16 does not execute the target j. Keep that previous causal gap OPEN. No global source/ownership proof, no Stage1 final acceptance, no Stage2, no merge, no main changes.
 
-The first changed IO receipt must have the identical pre-read IP, tick, cursor, method and TOSS fingerprint in both arms; every earlier IO receipt must match exactly. The changed bytes must be inside the actual read interval, not a fabricated input label. All **17,387 sham + 1,672 spliced = 19,059 physical Native STEP records** must reproduce the corresponding independently SHA-pinned original QA20 route, including output and real pre-`j` operand/pop and physical successor. Full raw physical-step history is preserved in two gzip files, not sampled.
-
-The separate Python 3 `qa/stage1_qa31c_independent_read_audit.py` checks both original QA20 manifests, both full SHA-bound original STEP traces and their new complete reproductions, all structured read receipts, the source blob, stack and geometric consistency, the pre-intervention sham parity, and **12 intentionally forged reports** that must all be rejected. The workflow always uploads original evidence/RED diagnostics, and pins checkout, Python 2 runtime and QA20 artifacts.
-
-## Strict conclusions
-- This is **a candidate experiment, not a QA31C PASS**. It can fail if PyFunge bypasses the instrumented stream API, changes the read/cursor semantics, or if any independently signed physical-step, output, pre-read-state or stack observation diverges. These are real falsifiers; do not relax them merely to obtain GREEN.
-- Even successful full-step native replay and the suffix intervention would establish at most a **finite causal dependency of this selected stdin suffix on this selected pre-j operand**, after exact-head CI success, artifact verification and independent review. It would not establish which individual byte is necessary, universal input/state ownership, or reachability/deadness of the remaining control glyphs.
-- `qa31c_accepted=false`, `stage1_complete=false`; no Stage 2, no merge/main, no relaxation of the full Native requirement.
-
-## NEXT after code delivery
-Inspect **the exact GitHub Actions run triggered by the QA31C commit**; if completed/success, download that run's one QA31C artifact, validate ZIP SHA256/CRC and every full STEP/read/independent receipt, then document finite acceptance or a precise remaining gap. If failure, use the specific failing job/log as evidence and correct only the demonstrated QA bug. Do not report PASS from code presence or CI initiation alone.
+## NEXT
+Inspect only the new exact-head GitHub Actions run emitted from the corrected QA31C commit. If queued/in_progress, do not rerun. If failure, inspect its specific job/log and fix only the proven defect. If completed/success, download its sole QA31C artifact and independently verify ZIP SHA256/CRC, complete 25,408 Native STEP records, IO intervention and 12 hostile rejections; report only the finite output-dependence claim warranted by the evidence.

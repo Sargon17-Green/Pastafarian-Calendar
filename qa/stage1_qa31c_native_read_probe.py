@@ -10,7 +10,7 @@ import stage1_qa20_native_input_route_scan as qa20
 SOURCE = "560d6aa5807a7f766213a33835cce85eab0fa40c"
 CASES = {
     "valid00": (0, "782fb868a11a105550ef5af6f8f7cd39e4ba9de77d9565f7549e310549b0073a", 9607, 17387, 61, 176),
-    "invalid18": (1, "9c5af6212cfd7c1ab58e9603f385767e64b10799c90be416a86c4f09d613bfdd", 1455, 1672, 0, 115)
+    "invalid16": (3, "3f2e81afb325a4f1e8bfee3910be6d92d2bef23145ba39a33fc355ea23a5454b", None, 8021, None, None)
 }
 def need(ok, msg):
     if not ok: raise AssertionError(msg)
@@ -92,14 +92,14 @@ def execute(source, root, mode, baseline, delivered, orig_label, output_dir):
         need(raw == signed_steps[tick-1], "signed physical STEP changed %s:%d" % (mode,tick))
         raw_trace.append(raw + "\n")
         stream.tick, stream.ip = tick, ip
-        if tick == jt:
+        if jt is not None and tick == jt:
             stack = ip.stack
             need(len(stack) > 0 and not stack.queuemode and not stack.invertmode, "j stack mode")
             pre = list(stack[-1])
             measured = int(pre[-1] if pre else 0)
             need(measured == op, "pre-j operand changed " + mode)
         qa20.tick_qa20(item)
-        if tick == jt:
+        if jt is not None and tick == jt:
             need(len(program.ips) == 1 and program.ips[0] is ip, "original Native IP changed")
             post = list(ip.stack[-1])
             need(post == (pre[:-1] if pre else []), "j operand not popped once")
@@ -110,7 +110,7 @@ def execute(source, root, mode, baseline, delivered, orig_label, output_dir):
                  "signed j successor changed")
             witness = {"tick": jt, "operand": measured, "pre_toss": pre,
                        "post_toss": post, "successor_x": succ[1]}
-    need(item["steps"] == stepcount and witness is not None, "incomplete physical Native replay")
+    need(item["steps"] == stepcount and (witness is not None if jt is not None else witness is None), "incomplete physical Native replay")
     need(stdout.getvalue().split() == original["output"], "Native final output differs signed route")
     raw = "".join(raw_trace)
     path = "qa31c_" + mode + ".steps.gz"
@@ -128,13 +128,13 @@ def main(root, output):
     source = open(qa20.SOURCE, "rb").read()
     need(qa20.pin(source) == SOURCE == qa20.PIN, "original production Git blob changed")
     valid, _ = signed(root, "valid00")
-    invalid, _ = signed(root, "invalid18")
+    invalid, _ = signed(root, "invalid16")
     baseline, alternative = valid["raw_input"], invalid["raw_input"]
     need(len(baseline) == len(alternative) and baseline != alternative, "not same-size intervention")
     first_diff = next(i for i in xrange(len(baseline)) if baseline[i] != alternative[i])
     need(first_diff >= 1, "no shared genuine input prefix")
     sham = execute(source, root, "sham", baseline, baseline, "valid00", output)
-    altered = execute(source, root, "splice", baseline, alternative, "invalid18", output)
+    altered = execute(source, root, "splice", baseline, alternative, "invalid16", output)
     a, b = sham["read_events"], altered["read_events"]
     changes = [i for i,e in enumerate(b) if e["baseline_hex"] != e["delivered_hex"]]
     need(len(a) > 0 and len(b) > 0 and changes, "no instrumented changed Native input read")
@@ -146,20 +146,21 @@ def main(root, output):
     need(b[idx]["start"] <= first_diff < b[idx]["end"] or
          any(baseline[i] != alternative[i] for i in xrange(b[idx]["start"],b[idx]["end"])),
          "first mutated read does not include changed bytes")
-    need(sham["j"]["operand"] == 61 and altered["j"]["operand"] == 0,
-         "input suffix failed to control measured j operand")
+    need(sham["j"]["operand"] == 61 and altered["j"] is None and sham["output"] != altered["output"],
+         "finite input/output result did not diverge or invalid route reached j")
     report = {"schema":"qa31c-original-native-stdin-splice-diagnostic-v1",
               "source_git_blob":SOURCE,"source_modified":False,"ip_relocated":False,
               "baseline_input_sha256":sha(baseline),"alternative_input_sha256":sha(alternative),
               "shared_prefix_bytes":first_diff,"first_changed_read_index":idx,
               "first_changed_tick":b[idx]["tick"],"sham":sham,"splice":altered,
               "qa31c_accepted":False,"stage1_complete":False,
-              "global_input_ownership_proven":False}
+              "causality_scope":"finite-stdin-to-final-output-only",
+              "pre_j_causality_proven":False,"global_input_ownership_proven":False}
     with open(os.path.join(output,"qa31c_read_probe.json"),"wb") as f:
         f.write(json.dumps(report,sort_keys=True,indent=2)+"\n")
     print("QA31C_DIAGNOSTIC_NATIVE_ORIGINAL_FULL_STEPS", sham["step_count"]+altered["step_count"])
     print("QA31C_REAL_STDIN_READ_INTERVENTION",idx,b[idx]["tick"],first_diff)
-    print("QA31C_PRE_J_OPERANDS",sham["j"]["operand"],altered["j"]["operand"])
+    print("QA31C_FINITE_INPUT_OUTPUT_DIVERGENCE",sham["output"],altered["output"])
     print("QA31C_NOT_ACCEPTED_STAGE1_OPEN")
 if __name__=="__main__":
     need(len(sys.argv)==3, "usage: QA31C QA20_ROOT OUTDIR")

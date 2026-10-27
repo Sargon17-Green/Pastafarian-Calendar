@@ -29,11 +29,11 @@ jobs:
         run: |
           set -euo pipefail
           test "$(gh run view 39761821210 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:d0a1c686c4f9244121246aa5b70266c072c3ddce'
-          mkdir -p "$RUNNER_TEMP/qa31c/valid00" "$RUNNER_TEMP/qa31c/invalid18" "$RUNNER_TEMP/qa31c/output"
+          mkdir -p "$RUNNER_TEMP/qa31c/valid00" "$RUNNER_TEMP/qa31c/invalid16" "$RUNNER_TEMP/qa31c/output"
           gh run download 39761821210 --repo "$GITHUB_REPOSITORY" --name qa20-shard-0 --dir "$RUNNER_TEMP/qa31c/valid00"
-          gh run download 39761821210 --repo "$GITHUB_REPOSITORY" --name qa20-shard-1 --dir "$RUNNER_TEMP/qa31c/invalid18"
+          gh run download 39761821210 --repo "$GITHUB_REPOSITORY" --name qa20-shard-3 --dir "$RUNNER_TEMP/qa31c/invalid16"
           echo "782fb868a11a105550ef5af6f8f7cd39e4ba9de77d9565f7549e310549b0073a  $RUNNER_TEMP/qa31c/valid00/qa20_manifest.json" | sha256sum -c -
-          echo "9c5af6212cfd7c1ab58e9603f385767e64b10799c90be416a86c4f09d613bfdd  $RUNNER_TEMP/qa31c/invalid18/qa20_manifest.json" | sha256sum -c -
+          echo "3f2e81afb325a4f1e8bfee3910be6d92d2bef23145ba39a33fc355ea23a5454b  $RUNNER_TEMP/qa31c/invalid16/qa20_manifest.json" | sha256sum -c -
       - name: Download SHA256-pinned PyFunge 0.5 rc2
         shell: bash
         run: |
@@ -62,7 +62,7 @@ jobs:
           python3 -u qa/stage1_qa31c_independent_read_audit.py \
             src/interleaved_work_counts.b98 "$RUNNER_TEMP/qa31c" "$RUNNER_TEMP/qa31c/output" \
             | tee "$RUNNER_TEMP/qa31c/output/audit.log"
-          grep -q QA31C_INDEPENDENT_19059_FULL_NATIVE_STEPS "$RUNNER_TEMP/qa31c/output/audit.log"
+          grep -q QA31C_INDEPENDENT_25408_FULL_NATIVE_STEPS "$RUNNER_TEMP/qa31c/output/audit.log"
           grep -q QA31C_INDEPENDENT_FORGERIES_REJECTED "$RUNNER_TEMP/qa31c/output/audit.log"
           grep -q QA31C_STAGE1_REMAINS_OPEN_PENDING_REVIEW "$RUNNER_TEMP/qa31c/output/audit.log"
       - name: Preserve full physical Native traces and diagnostics including RED logs
