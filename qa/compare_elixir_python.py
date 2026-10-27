@@ -1,8 +1,10 @@
 """So sánh hai trình thực thi độc lập; không dùng dữ liệu peer cho production."""
 import os
 import pathlib
+import queue
 import subprocess
 import sys
+import threading
 import time
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -74,6 +76,35 @@ def expected_rows():
 def row_line(row):
     return "\t".join(str(v) for v in row)
 
+def read_lines_with_timeout(stream, timeout_seconds):
+    """Stream child output with a hard wall-clock deadline, even during silence."""
+    messages = queue.Queue(maxsize=128)
+
+    def pump():
+        try:
+            for line in stream:
+                messages.put(("line", line))
+        except Exception as exc:
+            messages.put(("error", exc))
+        finally:
+            messages.put(("end", None))
+
+    threading.Thread(target=pump, daemon=True).start()
+    deadline = time.monotonic() + timeout_seconds
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError(f"Elixir child exceeded {timeout_seconds}s wall-clock limit")
+        try:
+            kind, payload = messages.get(timeout=remaining)
+        except queue.Empty as exc:
+            raise TimeoutError(f"Elixir child exceeded {timeout_seconds}s wall-clock limit") from exc
+        if kind == "end":
+            return
+        if kind == "error":
+            raise payload
+        yield payload
+
 def main():
     verify_peer_revision()
     python_rows = expected_rows()
@@ -91,7 +122,7 @@ def main():
             env={**os.environ, "MIX_ENV": "dev"},
         )
         try:
-            for line in run.stdout:
+            for line in read_lines_with_timeout(run.stdout, timeout_seconds=600):
                 print("ELIXIR_OUTPUT", line.rstrip("\n"), flush=True)
                 log.write(line)
                 log.flush()
@@ -109,6 +140,11 @@ def main():
                     encoding="utf-8",
                 )
             exit_code = run.wait(timeout=45)
+        except TimeoutError as exc:
+            print("ELIXIR_WATCHDOG_TIMEOUT", str(exc), flush=True)
+            log.write(f"ELIXIR_WATCHDOG_TIMEOUT {exc}\n")
+            log.flush()
+            raise
         finally:
             if run.poll() is None:
                 run.kill()
