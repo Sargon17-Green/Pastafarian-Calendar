@@ -24,3 +24,9 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+      - name: Native AWK boundary regression (AWK+nynorsk only)
+        if: github.ref == 'refs/heads/AWK+nynorsk'
+        shell: bash
+        run: |
+          set -euo pipefail
+          awk -f src/bigint.awk -f src/normative_oracle.awk -f tests/awk_boundary_regression.awk
