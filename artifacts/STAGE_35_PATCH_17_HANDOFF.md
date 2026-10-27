@@ -14,4 +14,4 @@
 - Semua ujian Stage1–34, fixture, syntax PHP dan Canonical Names Lock PASS.
 - Enam pekerjaan Native CI SUCCESS pada SHA tepat: `verify`, audit awal, audit 24–32, Stage33, Stage34 dan Stage35.
 
-**Status:** AWAITING_CI. Tidak memulakan Stage36, tidak mengubah main.
+**Status:** GREEN disahkan selepas Native CI run `40404749682` selesai `SUCCESS` dengan 6/6 pekerjaan pada HEAD `0d16b132015b04406792964e7bab68ab179b38c9` (2026-10-26). Wrapper Stage34 tetap `EXPECTED_RED` dan tidak bermakna Legacy dibaiki. Stage36 belum dimulakan kerana kontrak/pelan Stage36 yang sah belum disahkan; `main` tidak diubah.

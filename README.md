@@ -520,4 +520,4 @@ php -d memory_limit=512M tests/verify_stage34_discovery17.php
 php -d memory_limit=512M tests/stage35_patch17_tests.php
 ```
 
-Semua Stage1–34, fixture, lint PHP dan kunci nama kanonik mesti lulus Native CI. Stage35 mempunyai pekerjaan khusus `audit_php_bahasa_melayu_stage35`; semua **enam pekerjaan** pada SHA HEAD yang sama wajib SUCCESS. **Status: AWAITING_CI** sehingga pengesahan Native penuh. Jangan mulakan Stage36, ubah `main`, fixture atau katalog.
+Semua Stage1–34, fixture, lint PHP dan kunci nama kanonik mesti lulus Native CI. Stage35 mempunyai pekerjaan khusus `audit_php_bahasa_melayu_stage35`; semua **enam pekerjaan** pada SHA HEAD yang sama wajib SUCCESS. **Status: GREEN** selepas Native GitHub Actions run `40404749682` pada HEAD `0d16b132015b04406792964e7bab68ab179b38c9`: keenam-enam pekerjaan (`verify`, audit asas, Stage24–32, Stage33, Stage34 EXPECTED_RED wrapper, Stage35 PATCH17) tamat `SUCCESS`. Stage34 kekal dengan kegagalan sejarah yang disengajakan; jangan mulakan Stage36 tanpa kontrak dan pelan yang disahkan. Jangan ubah `main`, fixture atau katalog.
