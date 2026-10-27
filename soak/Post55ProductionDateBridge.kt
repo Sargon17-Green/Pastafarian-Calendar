@@ -9,9 +9,18 @@ import java.math.BigInteger
  * Output: c, t, year, cutlet index, day-in-cutlet, month index, day-in-month.
  */
 object Post55ProductionDateBridge {
-    private val canonicalDecimal = Regex("-?(?:0|[1-9][0-9]*)")
+    private val canonicalDecimal = Regex("(?:0|-?[1-9][0-9]*)")
+    // This bridge's production navigator is capped at 8192 gate indices, each
+    // separated by at most 963 days. Its Year-5000 candidate search requires
+    // a 5778-day window on either side of calculationDay. Reject impossible
+    // locations BEFORE thousands of costly sauce evaluations.
+    private val foundation = ExactInt.of(-15055671L)
+    private val conservativeMaxDistance = ExactInt.of(8192L * 963L - 5778L)
 
     fun convert(calculationDay: ExactInt, targetDay: ExactInt): List<String> {
+        require((calculationDay - foundation).abs() <= conservativeMaxDistance) {
+            "E_POST55_GATE_GEOMETRIC_LIMIT"
+        }
         val navigator = ProductionYearNavigator()
         val year = navigator.findTargetYear(calculationDay, targetDay)
         val cutlets = ProductionCutletStructureEngine(navigator).build(calculationDay, year)

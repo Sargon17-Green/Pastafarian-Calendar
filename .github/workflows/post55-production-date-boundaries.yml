@@ -1,0 +1,69 @@
+name: Post55 Kotlin real-production date boundary checks
+
+on:
+  push:
+    branches: ['Kotlin+Cymraeg']
+    paths:
+      - 'src/main/kotlin/pastafari/ProductionMonthWeavingEngine.kt'
+      - 'soak/Post55ProductionDateBridge.kt'
+      - 'soak/Post55ProductionWeavingTests.kt'
+      - 'soak/post55_production_bridge_boundary_check.py'
+      - '.github/workflows/post55-production-date-boundaries.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  production-date-boundaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Install pinned Kotlin 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin.zip"
+          unzip -q "$RUNNER_TEMP/kotlin.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile actual production Kotlin + bridge + weaving regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc src/main/kotlin/pastafari/*.kt \
+            soak/Post55ProductionDateBridge.kt \
+            soak/Post55ProductionWeavingTests.kt \
+            -include-runtime -d "$RUNNER_TEMP/production-date.jar"
+          test -s "$RUNNER_TEMP/production-date.jar"
+          echo "POST55_REAL_PRODUCTION_COMPILATION_GREEN"
+      - name: Existing synthetic weaving regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          java -Xmx1200m -Xss8m -cp "$RUNNER_TEMP/production-date.jar" \
+            pastafari.Post55ProductionWeavingTests \
+            | tee "$RUNNER_TEMP/weaving-regression.log"
+      - name: Bounded seven-field and malformed-input boundary check
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/post55_production_bridge_boundary_check.py \
+            --jar "$RUNNER_TEMP/production-date.jar" \
+            --evidence "$RUNNER_TEMP/post55-production-date-boundary.json" \
+            | tee "$RUNNER_TEMP/post55-production-date-boundary.log"
+      - name: Upload reproducible test logs (even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post55-production-date-boundary-evidence
+          path: |
+            ${{ runner.temp }}/post55-production-date-boundary.json
+            ${{ runner.temp }}/post55-production-date-boundary.log
+            ${{ runner.temp }}/weaving-regression.log
+          if-no-files-found: warn
+          retention-days: 30
