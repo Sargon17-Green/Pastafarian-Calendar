@@ -1,0 +1,84 @@
+name: C# العربية الفصحى — Stage49 verification
+
+on:
+  push:
+    branches:
+      - 'C#+العربية-الفصحى'
+    paths:
+      - 'src/PastafarianCalendar/**'
+      - 'tests/PastafarianCalendar.Stage*Tests/**'
+      - 'CANONICAL_NAMES_LOCK.sha256'
+      - '.github/workflows/csharp-ar-stage49.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: csharp-ar-stage49-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stage49:
+    name: Stage49 — early penultimate-wide carry + Unicode/RTL
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Execute Stage49 production and diagnostics tests
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+          DOTNET_NOLOGO: '1'
+        run: dotnet run --project tests/PastafarianCalendar.Stage49Tests/PastafarianCalendar.Stage49Tests.csproj -c Release
+
+  regressions:
+    name: Regression stages ${{ matrix.first }}–${{ matrix.last }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - first: 1
+            last: 12
+          - first: 13
+            last: 24
+          - first: 25
+            last: 36
+          - first: 37
+            last: 48
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Run approved historical tests (even stages verify intended RED)
+        shell: bash
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+          DOTNET_NOLOGO: '1'
+          FIRST: ${{ matrix.first }}
+          LAST: ${{ matrix.last }}
+        run: |
+          set -euo pipefail
+          for n in $(seq -w "$FIRST" "$LAST"); do
+            project="tests/PastafarianCalendar.Stage${n}Tests/PastafarianCalendar.Stage${n}Tests.csproj"
+            echo "::group::Stage ${n}"
+            if (( 10#$n % 2 == 0 )); then
+              dotnet run --project "$project" -c Release -- --verify-expected-red
+            else
+              dotnet run --project "$project" -c Release
+            fi
+            echo "::endgroup::"
+          done
+
+  canonical_names:
+    name: Canonical names lock
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - run: sha256sum -c CANONICAL_NAMES_LOCK.sha256
