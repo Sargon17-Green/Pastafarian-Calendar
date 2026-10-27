@@ -123,7 +123,10 @@ object Stage52Tests {
     check("quarantasette porte"){
       val g=Vector.fill(47)(42)
       val p=Vector(8,8,8,8,8,7)
-      eqv(old(g,p,1973).gateId,47,"Gate47")
+      val r=old(g,p,1973)
+      eqv(r.gateId,47,"Gate47")
+      eqv((r.legacyCutletId,r.legacyDayInCutlet),(47,42),"Identita legacy al limite")
+      eqv(normative(g,p,1973),(6,294),"Cotoletta e giorno locale al limite")
     }
     check("numero cotolette da 6 a 17"){
       for(n<-6 to 17){
@@ -135,6 +138,8 @@ object Stage52Tests {
     }
     check("2048 ingressi casuali deterministici"){
       val rng=new Random(52202026L)
+      var mismatches=0
+      var matches=0
       for(i<-1 to 2048){
        val n=6+rng.nextInt(12)
        val extra=rng.nextInt(48-n)
@@ -147,8 +152,16 @@ object Stage52Tests {
        eqv((r.gateStartOffset,r.legacyCutletId,r.legacyDayInCutlet),
          (start,r.gateId,d-start+1),"Input "+i)
        val norm=normative(g,p,d)
-       truth(norm._1>=1 && norm._1<=n,"Norma "+i)
+       val cutletStarts=p.scanLeft(0)(_+_)
+       val cutletId=cutletStarts.indexWhere(_ >= r.gateId)
+       truth(cutletId>=1 && cutletId<=n,"Gruppo "+i)
+       val cutletDay=d-g.take(cutletStarts(cutletId-1)).sum+1
+       eqv(norm,(cutletId,cutletDay),"Proiezione indipendente "+i)
+       if((r.legacyCutletId,r.legacyDayInCutlet)==norm)matches+=1
+       else mismatches+=1
       }
+      truth(mismatches>0,"Campione senza divergenze legacy")
+      truth(matches>0,"Campione senza casi coincidenti")
     }
     check("due manager contano indipendentemente"){
       val a=new BaseMonsterManager
