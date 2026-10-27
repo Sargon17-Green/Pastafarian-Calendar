@@ -45,6 +45,32 @@ object Post55ProductionCutletTests {
         }
         check(rankChecks==20)
         println("POST55_PRODUCTION_RANK_SHORT_WIDE_20_ORACLE_GREEN")
+        // M = 2^127-1, so this n = 2^126 and the rejection region
+        // has 2^126-1 answers. A sequential oracle would not terminate
+        // within a feasible test budget (nor fit an Int counter).
+        val edgeChoices=m/ExactInt.of(2L)+ExactInt.ONE
+        check(m/edgeChoices==ExactInt.ONE &&
+            m-edgeChoices>ExactInt.of(Int.MAX_VALUE.toLong())) {
+            "E_CUTLET_RANK_EDGE_SETUP"
+        }
+        val immediatelyRejected=edgeChoices+ExactInt.ONE
+        val rankEdgeCases=listOf(
+            ProductionAnswerStream(m,-1) to edgeChoices,
+            ProductionAnswerStream(m,1) to ExactInt.ONE,
+            ProductionAnswerStream(edgeChoices,-1) to edgeChoices,
+            ProductionAnswerStream(edgeChoices,1) to edgeChoices,
+            ProductionAnswerStream(immediatelyRejected,-1) to edgeChoices,
+            ProductionAnswerStream(immediatelyRejected,1) to ExactInt.ONE
+        )
+        for((stream,expected) in rankEdgeCases) {
+            val actual=sampler.choose(stream,edgeChoices)
+            check(actual==expected) {
+                "E_CUTLET_RANK_EDGE first=${stream.firstAnswer} step=${stream.directionStep} " +
+                    "choices=${edgeChoices} actual=${actual} expected=${expected}"
+            }
+        }
+        check(rankEdgeCases.size==6)
+        println("POST55_PRODUCTION_RANK_SHORT_EDGE_6_GREEN")
         var structures=0
         for(offset in listOf(-1L,0L,1L)) {
             val c=f+offset
