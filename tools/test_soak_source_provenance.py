@@ -220,6 +220,24 @@ def main():
                 raise AssertionError(f"protected source not restored: {name!r}")
             probe(tool, root, manifest, base, docs, True)
             count += 1
+        # Exercise Git sparse-checkout itself rather than manually unlinking
+        # a skip-worktree file. Git must actually omit a tracked protected path
+        # and mark its index entry S; provenance must still fail closed.
+        for name in ("src/monster.cpp", "include/pastafari/monster.hpp"):
+            run_git(root, "sparse-checkout", "set", "--no-cone",
+                    "/*", "!/" + name)
+            if (root / name).exists():
+                raise AssertionError(f"sparse-checkout did not omit: {name!r}")
+            if not run_git(root, "ls-files", "-v", "--", name).startswith("S "):
+                raise AssertionError(f"sparse omission lacks skip-worktree: {name!r}")
+            probe(tool, root, manifest, base, docs, False,
+                  "protected source missing or symlinked:")
+            count += 1
+            run_git(root, "sparse-checkout", "disable")
+            if not (root / name).is_file():
+                raise AssertionError(f"sparse-checkout failed to restore: {name!r}")
+            probe(tool, root, manifest, base, docs, True)
+            count += 1
     print(f"SOAK_SOURCE_PROVENANCE_TESTS={count}/{count}_PASS")
 
 
