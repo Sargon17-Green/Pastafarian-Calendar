@@ -73,6 +73,17 @@ BEGIN {
     choose_rank_wide("19")
     expect_exact("wide M+2 first reachable rejection", CHOSEN_RANK, "1")
 
+    # Original M=2^127-1, N=M+1. Both wide samples are accepted
+    # under limit=M^2-1; these check full-width integer rank arithmetic.
+    M="170141183460469231731687303715884105727"
+    WIDE_N=bi_add(M,"1")
+    STREAM_FIRST=bi_sub(M,"1"); STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original M+1 forward max rank", CHOSEN_RANK, WIDE_N)
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original M+1 backward rank two", CHOSEN_RANK, "2")
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
