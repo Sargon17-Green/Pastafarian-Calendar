@@ -73,6 +73,19 @@ semak35($rejectActual->equals($rejectExpected)
     && !$legacy->chooseWrong($rejectStream,$rejectN)->equals($rejectN),
     'REJECTION_ONE_STEP');
 
+// Regresi tambahan: dua rejection berturutan, bukan hanya satu.
+// Dengan cutoff=n=wide-2 dan step=-1, sampel ketiga barulah diterima.
+$rejectTwiceN=$rejectWide->sub(BigInt::fromInt(2));
+semak35($rejectTwiceN->compare($m4)>0
+    && $m5->floorDiv($rejectTwiceN)->equals(BigInt::one())
+    && $rejectWide->sub($rejectTwiceN)->equals(BigInt::fromInt(2)),
+    'REJECTION_TWO_STEP_CUTOFF');
+$rejectTwiceExpected=$oracle->chooseRank($rejectStream,$rejectTwiceN);
+$rejectTwiceActual=$patch->choosePatched($rejectStream,$rejectTwiceN);
+semak35($rejectTwiceActual->equals($rejectTwiceExpected)
+    && $rejectTwiceActual->equals($rejectTwiceN),
+    'REJECTION_TWO_STEP');
+
 // Empat parut Stage34 mesti kekal salah; pembaikan mesti setara oracle.
 $witnesses=[[BigInt::one(),1],[BigInt::fromInt(2),1],
     [BigInt::fromInt(6),-1],[$m,1]];
