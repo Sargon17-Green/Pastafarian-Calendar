@@ -123,6 +123,24 @@ BEGIN {
     choose_rank_wide(WIDE_N)
     expect_exact("wide original square+1 three-digit forward wrap", CHOSEN_RANK, bi_sub(M,"1"))
 
+
+    # The three-digit to four-digit boundary at original M=2^127-1.
+    # N=M^3 is within three digits, while N=M^3+1 requires four.
+    WIDE_CUBE=bi_mul(WIDE_SQUARE,M)
+    STREAM_FIRST=bi_sub(M,"3"); STREAM_STEP=1
+    choose_rank_wide(WIDE_CUBE)
+    expect_exact("wide original cube three-digit boundary", CHOSEN_RANK, bi_sub(bi_sub(bi_sub(WIDE_CUBE,WIDE_SQUARE),bi_mul_small(M,2)),"3"))
+
+    WIDE_N=bi_add(WIDE_CUBE,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original cube+1 four-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original cube+1 four-digit backward acceptance", CHOSEN_RANK, bi_add(bi_sub(bi_sub(WIDE_CUBE,bi_mul_small(WIDE_SQUARE,2)),bi_mul_small(M,2)),"4"))
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original cube+1 four-digit forward wrap", CHOSEN_RANK, bi_sub(bi_add(WIDE_SQUARE,M),"2"))
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
