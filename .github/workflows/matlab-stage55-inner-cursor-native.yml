@@ -1,0 +1,60 @@
+name: MATLAB Stage 55 Bounded Year-5000 Interior Cursor Probe
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_inner_cursor_probe.m'
+      - '.github/workflows/matlab-stage55-inner-cursor-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matlab-stage55-inner-cursor-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  four-day-native-probe:
+    name: MATLAB R2026a / interior rank / 2+2 cursor with restore
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact branch commit
+        uses: actions/checkout@v4
+
+      - name: Set up native MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+
+      - name: Run bounded native cursor diagnostic
+        uses: matlab-actions/run-command@v3
+        with:
+          command: >-
+            addpath('tests');
+            if ~exist('logs','dir'), mkdir('logs'); end;
+            diary('logs/STAGE55_REAL_YEAR_INNER_CURSOR_NATIVE.log');
+            try;
+              fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
+              run_stage55_real_year_inner_cursor_probe();
+              diary off;
+            catch ME;
+              disp(getReport(ME,'extended','hyperlinks','off'));
+              fprintf('STAGE55_REAL_YEAR_INNER_CURSOR_PROBE_FAIL\n');
+              diary off;
+              rethrow(ME);
+            end
+
+      - name: Preserve log and cursor on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-inner-cursor-native-${{ github.run_id }}
+          path: |
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_NATIVE.log
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_2.json
+          if-no-files-found: warn
+          retention-days: 30
