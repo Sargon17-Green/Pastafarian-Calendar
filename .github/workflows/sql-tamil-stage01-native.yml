@@ -3,7 +3,7 @@ name: SQL Tamil Stage 1 Native PostgreSQL
 on:
   push:
     branches:
-      - 'SQL+தமிழ்'
+      - 'SQL\+தமிழ்'
   workflow_dispatch:
 
 permissions:
