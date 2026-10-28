@@ -141,6 +141,23 @@ BEGIN {
     choose_rank_wide(WIDE_N)
     expect_exact("wide original cube+1 four-digit forward wrap", CHOSEN_RANK, bi_sub(bi_add(WIDE_SQUARE,M),"2"))
 
+    # Four-digit to five-digit transition at the original M=2^127-1.
+    # N=M^4 uses four digits; N=M^4+1 requires five.
+    WIDE_FOURTH=bi_square(WIDE_SQUARE)
+    STREAM_FIRST=bi_sub(M,"4"); STREAM_STEP=1
+    choose_rank_wide(WIDE_FOURTH)
+    expect_exact("wide original fourth four-digit boundary", CHOSEN_RANK, bi_sub(bi_sub(bi_sub(bi_sub(WIDE_FOURTH,WIDE_CUBE),bi_mul_small(WIDE_SQUARE,2)),bi_mul_small(M,3)),"4"))
+
+    WIDE_N=bi_add(WIDE_FOURTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original fourth+1 five-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original fourth+1 five-digit backward acceptance", CHOSEN_RANK, bi_add(bi_sub(bi_sub(bi_sub(WIDE_FOURTH,bi_mul_small(WIDE_CUBE,3)),bi_mul_small(WIDE_SQUARE,2)),bi_mul_small(M,2)),"5"))
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original fourth+1 five-digit forward wrap", CHOSEN_RANK, bi_sub(bi_add(bi_add(bi_mul_small(WIDE_CUBE,2),WIDE_SQUARE),M),"3"))
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
