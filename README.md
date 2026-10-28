@@ -33,7 +33,7 @@ gleam test
 
 Neniu alia programlingvo estas parto de la kalkula aŭ testa vojo.
 
-## Stadio 2 — DISCOVERY 01 (preparita, ankoraŭ sen Native-kontrolo)
+## Stadio 2 — DISCOVERY 01 (Native-kontrolita EXPECTED_RED)
 
 La antaŭe aprobita DISCOVERY 01 enkondukas intence malnovan modulusan
 operacion `old_remainder` tra la vera `dispatch_discovery_01`
@@ -52,7 +52,13 @@ La kvar testaj kazoj en `test/discovery_01_test.gleam` devas montri:
 | 3M | 0 | M | EXPECTED_RED |
 | M+1 | 1 | 1 | PASS |
 
-La antaŭaj 17 testoj devas pasi. La sumo atendata por `gleam test`
-estas 18 sukcesoj kaj precize 3 intencaj malsukcesoj, sed tio ne estas
-observita rezulto ĝis Native-kontrolo en GitHub Actions. Ne interpretu
-la intencon kiel efektivan CI-rezulton.
+La antaŭaj 17 testoj pasis. La Native-rulo ĉe commit
+`81548f336d286573f90196bd83731c86767429bd`, Gleam 1.18.1 / OTP 28,
+raportis **18 passed, 3 failures**. La tri malsukcesoj estis nur la
+intencitaj normigaj malkongruoj ĉe M, 2M kaj 3M; M+1 pasis. La ordinara
+Stage01-laborfluo do finiĝis kun `failure` pro la laŭdezire ruĝaj testoj,
+ne pro kompila aŭ formata eraro. Rulo:
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40718515839
+
+Stadio 2 estas kompletigita kiel EXPECTED_RED; Stadio 3 / PATCH 01 restas
+nekomencita kaj postulas apartan rajtigon.

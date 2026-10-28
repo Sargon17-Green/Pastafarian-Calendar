@@ -26,3 +26,16 @@ kazo. Ĉi tiu preparo ne estas PATCH 01 kaj ne estas Stage-3-kodo.
 La akcepta kondiĉo estas Native-testado montranta precize la tri
 intencajn diverĝojn kaj nul regresojn de Stadio 1. Ankoraŭ ne aprobita
 kiel finita Stadio 2.
+
+### Native-atesto por DISCOVERY 01 — 2026-10-28
+
+La ekzakte testita commit `81548f336d286573f90196bd83731c86767429bd`
+pasis la kanonan formatkontrolon kaj kompiladon per Gleam 1.18.1 / OTP 28.
+`gleam test` raportis 18 sukcesojn kaj precize 3 intencajn malsukcesojn:
+`discovery_01_m_expected_red_test`, `discovery_01_2m_expected_red_test`,
+`discovery_01_3m_expected_red_test` (0 kontraŭ M). La M+1-testo kaj la
+17 antaŭaj testoj pasis. La workflow-konkludo `failure` estas la laŭkontrakta
+EXPECTED_RED, ne CI-PASS. Stadio 2 povas fermiĝi kiel EXPECTED_RED; ne malfermu
+Stadion 3 sen aprobo.
+
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40718515839
