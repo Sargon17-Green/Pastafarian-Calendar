@@ -10,7 +10,6 @@ on:
       - 'test/**'
       - 'deps.edn'
       - 'run_stage01.sh'
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -35,5 +34,7 @@ jobs:
         uses: DeLaGuardo/setup-clojure@13.7.0
         with:
           cli: 1.12.5.1664
+      - name: Verify native toolchain
+        run: clojure -Sdescribe
       - name: Native Stage 1 tests
         run: clojure -M:test
