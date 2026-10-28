@@ -55,6 +55,7 @@ jobs:
           name: stage55-inner-cursor-native-${{ github.run_id }}
           path: |
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_NATIVE.log
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_1.json
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_2.json
           if-no-files-found: warn
           retention-days: 30
