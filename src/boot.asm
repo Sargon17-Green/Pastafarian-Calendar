@@ -53,6 +53,12 @@ wLeaseTable:: ds 16
 wLeaseIter:: ds 1
 wLeaseBank:: ds 1
 wLeaseStatus:: ds 1
+wOwnerRequest:: ds 1
+wOwnerCount:: ds 1
+wOwnerTag:: ds 1
+wOwnerStatus:: ds 1
+wOwnerAllocated:: ds 1
+wOwnerBanks:: ds 13
 wLeaseTestNext:: ds 1
 wDayOffset:: ds 4
 wDayCount:: ds 5
@@ -141,6 +147,10 @@ Bootstrap:
     cp $a5
     jp nz, .done
     call RunVariableAdditionTests
+    ld a, [wTestResult]
+    cp $a5
+    jp nz, .done
+    call RunOwnerLeaseTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -151,6 +161,7 @@ INCLUDE "src/runtime/savewide256.asm"
 INCLUDE "src/runtime/mul128.asm"
 INCLUDE "src/runtime/mbc5.asm"
 INCLUDE "src/runtime/sram_lease.asm"
+INCLUDE "src/runtime/sram_owner.asm"
 INCLUDE "src/runtime/magnitude_length.asm"
 INCLUDE "src/runtime/divide_u8.asm"
 INCLUDE "src/runtime/signed_divide_u8.asm"
@@ -179,3 +190,4 @@ INCLUDE "src/tests/magnitude_length_test.asm"
 INCLUDE "src/tests/divide_u8_test.asm"
 INCLUDE "src/tests/signed_divide_u8_test.asm"
 INCLUDE "src/tests/variable_add_test.asm"
+INCLUDE "src/tests/sram_owner_test.asm"
