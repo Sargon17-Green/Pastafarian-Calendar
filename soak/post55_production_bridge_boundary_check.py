@@ -64,12 +64,12 @@ def check(jar, evidence):
     # must not erase the evidence for other independent boundary inputs.
     for index, (c, t) in enumerate(valid):
         try:
-            process = invoke(jar, f"{c}\\t{t}\\n", timeout=60)
+            process = invoke(jar, f"{c}\t{t}\n", timeout=60)
             rows = process.stdout.splitlines()
             process_ok = process.returncode == 0 and len(rows) == 1
             record(f"foundation_process_{index}", process_ok,
                    f"exit={process.returncode}, rows={len(rows)}, stderr_tail={process.stderr[-500:]}")
-            columns = rows[0].split("\\t") if len(rows) == 1 else []
+            columns = rows[0].split("\t") if len(rows) == 1 else []
             fields_ok = (len(columns) == 7 and
                          all(s.lstrip("-").isdigit() for s in columns) and
                          columns[:2] == [str(c), str(t)] and
