@@ -210,6 +210,49 @@ BEGIN {
     choose_rank_wide(WIDE_N)
     expect_exact("wide original seventh+1 eight-digit forward wrap", CHOSEN_RANK, bi_sub(bi_add(bi_add(bi_add(bi_add(bi_add(bi_mul_small(WIDE_SIXTH,5),bi_mul_small(WIDE_FIFTH,4)),bi_mul_small(WIDE_FOURTH,3)),bi_mul_small(WIDE_CUBE,2)),WIDE_SQUARE),M),"6"))
 
+
+    # Eight-digit to nine-digit transition at original M=2^127-1.
+    # N=M^8 uses eight digits; N=M^8+1 requires nine.
+    # Expected ranks were checked independently with Python arbitrary integers.
+    WIDE_EIGHTH=bi_square(WIDE_FOURTH)
+    STREAM_FIRST=bi_sub(M,"8"); STREAM_STEP=1
+    choose_rank_wide(WIDE_EIGHTH)
+    EXPECTED_EIGHTH=bi_sub(WIDE_EIGHTH,WIDE_SEVENTH)
+    EXPECTED_EIGHTH=bi_sub(EXPECTED_EIGHTH,bi_mul_small(WIDE_SIXTH,2))
+    EXPECTED_EIGHTH=bi_sub(EXPECTED_EIGHTH,bi_mul_small(WIDE_FIFTH,3))
+    EXPECTED_EIGHTH=bi_sub(EXPECTED_EIGHTH,bi_mul_small(WIDE_FOURTH,4))
+    EXPECTED_EIGHTH=bi_sub(EXPECTED_EIGHTH,bi_mul_small(WIDE_CUBE,5))
+    EXPECTED_EIGHTH=bi_sub(EXPECTED_EIGHTH,bi_mul_small(WIDE_SQUARE,6))
+    EXPECTED_EIGHTH=bi_sub(EXPECTED_EIGHTH,bi_mul_small(M,7))
+    EXPECTED_EIGHTH=bi_sub(EXPECTED_EIGHTH,"8")
+    expect_exact("wide original eighth eight-digit boundary", CHOSEN_RANK, EXPECTED_EIGHTH)
+
+    WIDE_N=bi_add(WIDE_EIGHTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original eighth+1 nine-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=bi_sub(WIDE_EIGHTH,bi_mul_small(WIDE_SEVENTH,7))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SIXTH,6))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_FIFTH,5))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_FOURTH,4))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_CUBE,3))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SQUARE,2))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(M,2))
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"9")
+    expect_exact("wide original eighth+1 nine-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_mul_small(WIDE_SEVENTH,6)
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_SIXTH,5))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_FIFTH,4))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_FOURTH,3))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_CUBE,2))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,WIDE_SQUARE)
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,M)
+    EXPECTED_WRAP=bi_sub(EXPECTED_WRAP,"7")
+    expect_exact("wide original eighth+1 nine-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
