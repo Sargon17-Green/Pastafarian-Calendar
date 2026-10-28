@@ -52,3 +52,11 @@ jobs:
             build/normative_oracle_calendar.o \
             -o build/stage01_tests
           test -x build/stage01_tests
+      - name: Run bounded Stage 1 BigInt safe-boundary checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none \
+            -J build -I build test/stage01_bigint_boundaries.f90 build/big_integer.o \
+            -o build/stage01_bigint_boundaries
+          timeout --signal=TERM --kill-after=5s 30s build/stage01_bigint_boundaries
