@@ -42,11 +42,15 @@ The started weaving month is a woven month state.
 \ The last-occurrence closed formula applies only to a legal prefix.
 The wsseenunstarted is a number.
 The wsinvalidprefix is a number.
+The wsseenunfinished is a number.
+The wsinvalidfinish is a number.
 The wscheckmonth is a woven month state.
 
 To inspect the woven start prefix:
   Put 0 into the wsseenunstarted.
   Put 0 into the wsinvalidprefix.
+  Put 0 into the wsseenunfinished.
+  Put 0 into the wsinvalidfinish.
   Put the woven month states' first into the wscheckmonth.
   Loop.
     If the wscheckmonth is nil, break.
@@ -54,6 +58,10 @@ To inspect the woven start prefix:
       put 1 into the wsseenunstarted.
     If the wscheckmonth's remaining days is less than the wscheckmonth's total days,
       flag weaving start inversion.
+    If the wscheckmonth's remaining days is greater than 0,
+      put 1 into the wsseenunfinished.
+    If the wscheckmonth's remaining days is 0,
+      flag weaving finish inversion.
     Put the wscheckmonth's next into the wscheckmonth.
   Repeat.
 
@@ -61,11 +69,16 @@ To flag weaving start inversion:
   If the wsseenunstarted is 1,
     put 1 into the wsinvalidprefix.
 
+To flag weaving finish inversion:
+  If the wsseenunfinished is 1,
+    put 1 into the wsinvalidfinish.
+
 To count ordered last weaving suffix completions:
   Put 0 into the started weaving suffix's available.
   Inspect the woven month status.
   Inspect the woven start prefix.
   If the wsinvalidprefix is 1, exit.
+  If the wsinvalidfinish is 1, exit.
   Put the selected month count into a required started number.
   Subtract 1 from the required started number.
   If the weaving selection's already started is less than the required started number, exit.
