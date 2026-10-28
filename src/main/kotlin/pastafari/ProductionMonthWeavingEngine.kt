@@ -1,22 +1,16 @@
 package pastafari
 
 import java.math.BigInteger
-import java.util.LinkedHashMap
 
 /**
  * Independent, exact and resource-bounded production month weaving.
  * First occurrences and last occurrences are both ordered by month ordinal.
  * A completed prefix may have opened some months without closing them.
  *
- * Count the legal suffixes by inserting each next month into the already
- * counted lower-ordinal words. In every valid word of months <= j, the last
- * occurrence of month j is the last symbol. If j has not yet opened, its
- * first occurrence must follow the first occurrence of j-1 (unless j-1
- * opened before the prefix). This gives a one-dimensional exact DP.
- *
- * maxStates limits coefficient evaluations in ONE count; maxWorkUnits limits
- * cumulative evaluations in the engine, including unranking. Both budgets
- * fail closed; no oracle, approximation, or partial rank is ever returned.
+ * Count suffixes once with a bounded exact combinatorial table.
+ * Lexicographic unranking uses conditional ratios of opened months and
+ * the suffix counts; no repeated whole-suffix DP per day.
+ * Budgets fail closed; no oracle, approximation, or partial rank is returned.
  */
 class ProductionMonthWeavingEngine(
     inputLengths: IntArray,
@@ -29,10 +23,7 @@ class ProductionMonthWeavingEngine(
     private val totalDays = lengths.sum()
     private var workUnits = 0L
 
-    private val memo = object : LinkedHashMap<String, BigInteger>(512, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, BigInteger>?): Boolean =
-            size > 4096
-    }
+    private var suffixCounts: Array<Array<BigInteger>>? = null
 
     init {
         require(lengths.size in 1..47 && lengths.all { it in 1..123 } &&
@@ -40,14 +31,6 @@ class ProductionMonthWeavingEngine(
         require(maxStates in 1..250000 && maxWorkUnits in 1L..50_000_000L) {
             "E_WEAVING_STATE_LIMIT"
         }
-    }
-
-    private fun key(remaining: IntArray, opened: Int, closed: Int): String {
-        val chars = CharArray(remaining.size + 2)
-        chars[0] = opened.toChar()
-        chars[1] = closed.toChar()
-        for (i in remaining.indices) chars[i + 2] = remaining[i].toChar()
-        return String(chars)
     }
 
     private fun options(remaining: IntArray, opened: Int, closed: Int): IntArray {
@@ -69,85 +52,59 @@ class ProductionMonthWeavingEngine(
             if (result[i] == 0) i + 1 else closed)
     }
 
-    private fun choose(n: Int, k: Int, spend: () -> Unit): BigInteger {
-        val smaller = minOf(k, n - k)
-        var value = BigInteger.ONE
-        for (i in 1..smaller) {
-            spend()
-            value = value.multiply(BigInteger.valueOf((n - smaller + i).toLong()))
-                .divide(BigInteger.valueOf(i.toLong()))
-        }
-        return value
+    private fun spend() {
+        workUnits++
+        check(workUnits <= maxWorkUnits) { "E_WEAVING_STATE_BUDGET" }
     }
 
-    private fun count(remaining: IntArray, opened: Int, closed: Int): BigInteger {
-        val root = key(remaining, opened, closed)
-        memo[root]?.let { return it }
-        if (remaining.all { it == 0 }) return BigInteger.ONE
+    /**
+     * F[j][s] counts completions of unopened months j..last relative
+     * to an ordered-endings word of s already-opened remaining tokens.
+     * The total does not depend on the distribution of those s tokens.
+     *
+     * Choose one previously opened token: F[j][s-1], or open month j.
+     * When L>1, its remaining L-1 tokens must end after the old s tokens,
+     * yielding C(s+L-2,L-2) interleavings times F[j+1][s+L-1].
+     * When L=1, the new month can open only after s reaches zero.
+     * Reachable s <= sum(lengths[0 until j]); no unbounded table.
+     */
+    private fun suffix(): Array<Array<BigInteger>> {
+        suffixCounts?.let { return it }
+        val prefix = IntArray(lengths.size + 1)
+        for (i in lengths.indices) prefix[i + 1] = prefix[i] + lengths[i]
+        val table = Array(lengths.size + 1) { emptyArray<BigInteger>() }
+        table[lengths.size] = Array(totalDays + 1) { BigInteger.ONE }
+        var states = totalDays + 1
+        check(states <= maxStates) { "E_WEAVING_STATE_BUDGET" }
 
-        var localStates = 0
-        fun spend() {
-            localStates++
-            workUnits++
-            check(localStates <= maxStates && workUnits <= maxWorkUnits) {
-                "E_WEAVING_STATE_BUDGET"
-            }
-        }
-
-        val maxDay = remaining.sum()
-        var distribution = Array(maxDay + 1) { BigInteger.ZERO }
-        var countSoFar = 0
-
-        for (month in closed until remaining.size) {
-            val size = remaining[month]
-            check(size > 0) { "E_WEAVING_STATE_INVALID" }
-            if (month == closed) {
-                // A month opened before the given prefix has first-position 0.
-                // Otherwise its first occurrence in the residual word is 1.
-                distribution[if (month < opened) 0 else 1] = BigInteger.ONE
-                countSoFar = size
+        for (j in lengths.lastIndex downTo 0) {
+            val length = lengths[j]
+            val row = Array(prefix[j] + 1) { BigInteger.ZERO }
+            var coefficient = BigInteger.ONE
+            for (s in row.indices) {
+                states++
                 spend()
-                continue
-            }
-            val successor = Array(maxDay + 1) { BigInteger.ZERO }
-            if (month < opened) {
-                // This month's first occurrence is already in the fixed prefix.
-                // Insert size-1 indistinguishable symbols before the final symbol.
-                successor[0] = distribution[0].multiply(
-                    choose(countSoFar + size - 1, size - 1, ::spend))
-                spend()
-            } else if (size == 1) {
-                // The sole occurrence must be last, after the preceding month.
-                successor[countSoFar + 1] = distribution.fold(BigInteger.ZERO, BigInteger::add)
-                spend()
-            } else {
-                // distribution[p]: words whose preceding month's first
-                // residual occurrence is at position p (p=0 if pre-opened).
-                // Place first current symbol after t parent symbols (t>=p),
-                // then insert the remaining size-2 symbols before its final
-                // occurrence in C(countSoFar-t+size-2, size-2) ways.
-                var prefix = distribution.fold(BigInteger.ZERO, BigInteger::add)
-                var coefficient = BigInteger.ONE // t=countSoFar
-                for (t in countSoFar downTo 0) {
-                    spend()
-                    successor[t + 1] = prefix.multiply(coefficient)
-                    prefix = prefix.subtract(distribution[t])
-                    if (t > 0) {
-                        coefficient = coefficient
-                            .multiply(BigInteger.valueOf((countSoFar - t + size - 1).toLong()))
-                            .divide(BigInteger.valueOf((countSoFar - t + 1).toLong()))
-                    }
+                check(states <= maxStates) { "E_WEAVING_STATE_BUDGET" }
+                row[s] = if (length == 1) {
+                    if (s == 0) table[j + 1][0] else row[s - 1]
+                } else {
+                    val opened = coefficient.multiply(table[j + 1][s + length - 1])
+                    (if (s == 0) BigInteger.ZERO else row[s - 1]).add(opened)
+                }
+                if (length > 1 && s < prefix[j]) {
+                    coefficient = exactQuotient(
+                        coefficient.multiply(BigInteger.valueOf((s + length - 1).toLong())),
+                        BigInteger.valueOf((s + 1).toLong())
+                    )
                 }
             }
-            distribution = successor
-            countSoFar += size
+            table[j] = row
         }
-        val answer = distribution.fold(BigInteger.ZERO, BigInteger::add)
-        memo[root] = answer
-        return answer
+        suffixCounts = table
+        return table
     }
 
-    fun countAll(): BigInteger = count(lengths, 0, 0)
+    fun countAll(): BigInteger = suffix()[0][0]
 
     /**
      * For already-opened months, ordered last occurrences give an exact
@@ -197,54 +154,45 @@ class ProductionMonthWeavingEngine(
         return result
     }
 
-    /** Return only the required day; do not materialize the full year. */
+    /** Return only the requested day; do not materialize the full year. */
     fun dayAt(rank1: BigInteger, targetOffset0: Int): Day {
         require(targetOffset0 in 0 until totalDays) { "E_WEAVING_OFFSET" }
-        require(rank1 >= BigInteger.ONE && rank1 <= countAll()) { "E_WEAVING_RANK" }
+        val table = suffix()
+        val total = table[0][0]
+        require(rank1 >= BigInteger.ONE && rank1 <= total) { "E_WEAVING_RANK" }
         var remaining = lengths.copyOf()
         var opened = 0
         var closed = 0
         var rank = rank1
+        var parentCount = total
         var selected = -1
-        // The count of the previously selected child is the next parent count.
-        // Reusing it is especially important after every month has opened.
-        var parentCount: BigInteger? = null
+
         for (position in 0..targetOffset0) {
-            var found = false
+            val openedSum = (closed until opened).sumOf { remaining[it] }
+            val currentFactor = table[opened][openedSum]
+            val openedChildFactor = if (openedSum == 0) BigInteger.ZERO else
+                table[opened][openedSum - 1]
             val ratios = openedBranchRatios(remaining, opened, closed)
-            var representativeCount: BigInteger? = null
-            var representativeRatio: BranchRatio? = null
+            var consumedOpenedCount = BigInteger.ZERO
+            var found = false
             for (ordinal in options(remaining, opened, closed)) {
-                val (child, nextOpened, nextClosed) = next(remaining, opened, closed, ordinal)
-                val possibilities = if (ordinal >= opened) {
-                    // At most one unopened month is eligible to open.
-                    count(child, nextOpened, nextClosed)
-                } else {
+                spend()
+                val possibilities = if (ordinal < opened) {
                     val ratio = ratios[ordinal] ?: error("E_WEAVING_RATIO_STATE")
-                    if (opened == remaining.size) {
-                        // No unopened tail: branch counts follow from the
-                        // current total by exact conditional ratios, O(months).
-                        val current = parentCount ?: count(remaining, opened, closed)
-                        exactQuotient(current.multiply(ratio.numerator), ratio.denominator)
-                    } else if (representativeCount == null) {
-                        // One costly completion count for ALL opened choices,
-                        // not a new dynamic program for each month.
-                        count(child, nextOpened, nextClosed).also {
-                            representativeCount = it
-                            representativeRatio = ratio
-                        }
-                    } else {
-                        val reference = representativeRatio ?: error("E_WEAVING_RATIO_REFERENCE")
-                        val baseline = representativeCount ?: error("E_WEAVING_RATIO_BASELINE")
-                        exactQuotient(
-                            baseline.multiply(ratio.numerator)
-                                .multiply(reference.denominator),
-                            ratio.denominator.multiply(reference.numerator))
-                    }
+                    exactQuotient(parentCount.multiply(ratio.numerator)
+                        .multiply(openedChildFactor), ratio.denominator.multiply(currentFactor))
+                } else {
+                    // Every opened choice precedes the single eligible new month.
+                    parentCount.subtract(consumedOpenedCount)
                 }
+                check(possibilities.signum() > 0) { "E_WEAVING_ZERO_BRANCH" }
                 if (rank > possibilities) {
                     rank = rank.subtract(possibilities)
+                    if (ordinal < opened)
+                        consumedOpenedCount = consumedOpenedCount.add(possibilities)
                 } else {
+                    val (child, nextOpened, nextClosed) =
+                        next(remaining, opened, closed, ordinal)
                     remaining = child
                     opened = nextOpened
                     closed = nextClosed
@@ -258,4 +206,5 @@ class ProductionMonthWeavingEngine(
         }
         return Day(selected + 1, lengths[selected] - remaining[selected])
     }
+
 }
