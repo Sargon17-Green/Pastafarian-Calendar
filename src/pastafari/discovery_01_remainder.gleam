@@ -23,11 +23,9 @@ pub fn dispatch_discovery_01(
   case bootstrap.dispatch_context(context) {
     Error(error) -> Error(error)
     Ok(completed) ->
-      Ok(
-        Discovery01Output(
-          context: completed,
-          legacy_remainder: old_remainder(value),
-        ),
-      )
+      Ok(Discovery01Output(
+        context: completed,
+        legacy_remainder: old_remainder(value),
+      ))
   }
 }
