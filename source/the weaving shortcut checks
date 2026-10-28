@@ -140,6 +140,13 @@ To check forty seven month started suffixes:
     put "The forty seven month fixture has incorrect started count." into the check report; exit.
   If the weaving selection's already finished is not 0,
     put "The forty seven month fixture has an unexpectedly finished month." into the check report; exit.
+  \ Test the exact direct suffix in isolation before the general count.
+  \ If CAL cannot reach its shortcut, do not enter the costly recursion.
+  Count ordered last weaving suffix completions.
+  If the started weaving suffix's available is not 1,
+    put "The forty seven month direct shortcut was not available." into the check report; exit.
+  If the started weaving suffix's completions is not "2987435000850314871976096554696085799164511452611632783323554397412109375",
+    report forty seven direct suffix difference; exit.
   Count weaving completions into the weavestresscheck.
   If the weavestresscheck is not "2987435000850314871976096554696085799164511452611632783323554397412109375",
     report forty seven weaving difference; exit.
@@ -167,6 +174,20 @@ To inspect stress fixture entries:
       add 1 to the wsprobeinvalid.
     Put the wsprobepointer's next into the wsprobepointer.
   Repeat.
+
+\ A direct-shortcut mismatch is different from the general-count mismatch.
+\ Include the actual decimal value and fixture metadata for diagnosis.
+To report forty seven direct suffix difference:
+  Inspect stress fixture entries.
+  Put "Forty seven direct suffix mismatch; actual=" into the check report.
+  Append the started weaving suffix's completions to the check report.
+  Append "; expected=2987435000850314871976096554696085799164511452611632783323554397412109375" to the check report.
+  Append "; record_count=" to the check report.
+  Report stress record count.
+  Append "; configured_months=" to the check report.
+  Report stress configured months.
+  Append "; already_started=" to the check report.
+  Report stress started months.
 
 To report forty seven weaving difference:
   Inspect stress fixture entries.
