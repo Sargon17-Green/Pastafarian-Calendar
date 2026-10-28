@@ -73,10 +73,10 @@ try {
         $stderr = Join-Path $evidence ("run" + $iteration + "-stderr.txt")
         $process = Start-Process -FilePath $shell -ArgumentList $arguments -WorkingDirectory $root -Wait -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
         $output = Get-Content -LiteralPath $stdout -Raw -Encoding UTF8
-        $errors = [string](Get-Content -LiteralPath $stderr -Raw -Encoding UTF8)
         Write-Evidence ("RUN_" + $iteration + "_EXIT_CODE=" + $process.ExitCode)
         Write-Evidence ("RUN_" + $iteration + "_ALREADY_FINALIZED=" + [bool]($output -match '(?m)^STAGE23_ALREADY_FINALIZED=YES\s*$'))
-        Write-Evidence ("RUN_" + $iteration + "_STDERR_LENGTH=" + $errors.Length)
+        $stderrFileLength = (Get-Item -LiteralPath $stderr).Length
+        Write-Evidence ("RUN_" + $iteration + "_STDERR_LENGTH=" + $stderrFileLength)
         $nowHash = (Get-FileHash -LiteralPath $stageFile -Algorithm SHA256).Hash
         Write-Evidence ("RUN_" + $iteration + "_SHA256_AFTER=" + $nowHash)
         $diff = @(Invoke-GitSafe -GitArguments @('diff','--binary','HEAD','--','DEVELOPMENT_STAGE.md'))
