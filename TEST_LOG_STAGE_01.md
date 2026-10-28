@@ -256,7 +256,7 @@ All output magnitudes remain fixed to 4096 bytes. This does *not*
 complete variable-length BigInt, normative sauce or selection, calendar
 dates, the Ge'ez catalog, or Stage 1. `LAST_COMPLETED_STAGE=0`.
 
-## Bounded variable-length addition candidate — awaiting native CI
+## Bounded variable-length addition — native CI PASS (2026-10-28)
 
 Within Stage 1, `VarAdd8192` introduces two declared canonical lengths
 (0..8192), per-byte zero-extension, exact unsigned addition in SRAM bank 2,
@@ -266,6 +266,19 @@ byte carry, 8192-byte upper boundary, 8193-byte overflow rejection,
 noncanonical/invalid inputs, recovery and operand preservation.
 An independent host contract reference is included in CI.
 
-**Verification remains pending** until the new commit's RGBDS + PyBoy
-run and both CI jobs have actually succeeded; no Native PASS is asserted.
+**Verified:** commit `b54ac22a79b1f6125df228c1b6cefa69890aba1d`,
+[Actions run 40718906064](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40718906064),
+both `verify` and `dmg-native-smoke` SUCCESS. Host independent arithmetic
+reference: `HOST_VARIABLE_ADD_REFERENCE=PASS cases=263 capacity=8192`.
+Native RGBDS v1.0.4 ROM under PyBoy 2.x:
+
+```text
+ROM_HEADER=PASS DMG=YES MBC=MBC5_RAM_128K
+ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=159 DISPATCH_STATUS=40 FRAMES=4624
+STAGE1_ARITHMETIC_SMOKE=PASS
+```
+
+This verifies only the bounded unsigned variable-length addition contract.
+Unrestricted BigInt, multi-bank output and semantic ownership, signed
+arithmetic and complete calendar oracle are pending.
 `LAST_COMPLETED_STAGE=0`; no Stage 2 authorized.

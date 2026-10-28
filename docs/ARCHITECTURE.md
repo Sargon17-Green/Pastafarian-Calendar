@@ -214,6 +214,8 @@ output bank and result length. Both inputs are preserved.
 The routine has no multi-bank result allocation or semantic-state owner,
 and intentionally does not claim arbitrary precision, signed operands or
 reentrancy. The old fixed 4096+4096 -> 4097 routine remains intact.
-ROM cases 151..159 and a separate host arithmetic reference were added
-as a *candidate*; only a successful actual RGBDS/PyBoy run on this commit
-can promote native verification. Stage 1 remains open.
+ROM cases 151..159 and the independent 263-case host reference passed in
+GitHub Actions run 40718906064 at commit b54ac22a79b1f6125df228c1b6cefa69890aba1d.
+RGBDS 1.0.4 built an original-DMG-compatible ROM; PyBoy returned
+ROM_NATIVE_STATUS=A5, LAST_TEST_CASE=159, DISPATCH_STATUS=40, FRAMES=4624.
+Both workflow jobs completed successfully. Stage 1 remains open.
