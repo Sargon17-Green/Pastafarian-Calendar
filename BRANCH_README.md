@@ -26,3 +26,7 @@ Reference: https://www.cambridge.org/core/journals/journal-of-the-international-
 The independent, **unverified-in-native-Word** `RakinVisibleArithmetic` command in `src/RakinDigitArithmetic.bas` prompts for two decimal integers (up to 256 digits each), performs exact schoolbook addition and multiplication using integer arrays, and inserts colour-coded tables with exactly **one digit per cell**. A complete algebraic proof is in `docs/RAKIN_DECIMAL_ALGEBRA.md` and the macro comments. `RakinArithmeticSelfTest` contains five fixtures that must be run inside Word before acceptance.
 
 **No calendar date calculation is implied;** this is an exact arithmetic component only. No main branch merge is authorized.
+
+## New Stage 1 arithmetic: signed subtraction and SAVE
+
+The additional macro `RakinSignedAndSaveReport` in `src/RakinSaveAndSubtract.bas` accepts two unsigned decimals (1..256 digits), inserts a colour-coded signed difference and both canonical SAVE residues with one decimal digit per table cell. The sign is outside the cells. See `docs/RAKIN_SAVE_LONG_DIVISION.md` for the exact long-division proof and `RakinModularSelfTest` for eight native acceptance assertions. Word-native execution is **still pending**. This is a mathematical primitive, not F(c,t) or a final calendar implementation.
