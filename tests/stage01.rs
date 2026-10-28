@@ -3,7 +3,7 @@ mod support;
 use num_bigint::{BigInt, BigUint};
 use num_traits::One;
 use pastafarian_calendar_rust_az::source_language_catalog::{
-    cutlet_name, month_name, CUTLET_NAMES, MONTH_NAMES,
+    cutlet_name, month_name, CATALOG_VERSION, CUTLET_NAMES, MONTH_NAMES,
 };
 use pastafarian_calendar_rust_az::{
     MonsterContext, MonsterError, MonsterErrorCode, MonsterManager, MonsterPhase, MonsterStatus,

@@ -1,0 +1,29 @@
+name: Rust Azerbaijani Stage 1 Native
+
+on:
+  push:
+    branches:
+      - 'Rust+Azərbaycan-dili'
+    paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/rust-az-stage01-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-stage01:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select stable Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+      - name: Compile and run native Rust tests
+        run: cargo test --all-targets
