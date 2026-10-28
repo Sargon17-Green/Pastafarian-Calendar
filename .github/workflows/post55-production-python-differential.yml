@@ -1,0 +1,82 @@
+name: Post55 Kotlin-Python bounded five-field diagnostic
+
+on:
+  push:
+    branches: ['Kotlin\\+Cymraeg']
+    paths:
+      - '.github/workflows/post55-production-python-differential.yml'
+      - 'soak/post55_differential.py'
+      - 'soak/python_turkce_bridge.py'
+      - 'soak/Post55ProductionDateBridge.kt'
+      - 'src/main/kotlin/pastafari/**'
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-five-field-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PASTAFARIAN_PYTHON_SRC: ${{ github.workspace }}/python-source/src
+    steps:
+      - name: Checkout pinned Kotlin production
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Checkout independent pinned Python+Turkce implementation
+        uses: actions/checkout@v4
+        with:
+          repository: Sargon17-Green/Pastafarian-Calendar
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: python-source
+          persist-credentials: false
+      - name: Install pinned Kotlin 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin.zip"
+          unzip -q "$RUNNER_TEMP/kotlin.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile actual Kotlin production and bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc src/main/kotlin/pastafari/*.kt \
+            soak/Post55ProductionDateBridge.kt \
+            -include-runtime -d "$RUNNER_TEMP/production-date.jar"
+          test -s "$RUNNER_TEMP/production-date.jar"
+      - name: Validate fail-closed differential harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s soak -p test_post55_differential.py -v
+      - name: Compare five full-date components at one bounded FOUNDATION witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/post55_differential.py \
+            --kotlin-command "java -XX:ActiveProcessorCount=1 -Xmx1200m -Xss8m -cp $RUNNER_TEMP/production-date.jar pastafari.Post55ProductionDateBridge" \
+            --python-command "python3 soak/python_turkce_bridge.py" \
+            --cases 1 --batch 1 --seed 55 --timeout-seconds 150 \
+            --kotlin-mode production \
+            --kotlin-revision "$GITHUB_SHA" \
+            --python-revision 7cb12bf355461e5a179e0deadb7365689288bf29 \
+            --evidence "$RUNNER_TEMP/post55-production-python-differential.json" \
+            | tee "$RUNNER_TEMP/post55-production-python-differential.log"
+      - name: Preserve diagnostic evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post55-production-python-differential-evidence
+          path: |
+            ${{ runner.temp }}/post55-production-python-differential.json
+            ${{ runner.temp }}/post55-production-python-differential.log
+          if-no-files-found: warn
+          retention-days: 30
