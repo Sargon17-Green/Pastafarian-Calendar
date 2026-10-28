@@ -27,6 +27,15 @@ void _expectListEqual(List<Object?> actual, List<Object?> expected, String name)
   }
 }
 
+void _expectStateError(void Function() action, String name) {
+  try {
+    action();
+  } on StateError {
+    return;
+  }
+  _fail(name);
+}
+
 List<String> _countsAsStrings(WorkCounts counts) => <String>[
       counts.action.toString(),
       counts.target.toString(),
@@ -162,15 +171,10 @@ void main() {
     _fail('MonsterContext דלף בין הפעלות.');
   }
 
-  var productionRejected = false;
-  try {
-    calendarDateSpaghetti(f, f);
-  } on StateError {
-    productionRejected = true;
-  }
-  if (!productionRejected) {
-    _fail('שלד production של שלב 1 לא עצר לפני מסלול עתידי.');
-  }
+  _expectStateError(
+    () => calendarDateSpaghetti(f, f),
+    'שלד production של שלב 1 לא עצר לפני מסלול עתידי.',
+  );
 
   stdout.writeln('כל בדיקות שלב 1 עברו.');
 }
