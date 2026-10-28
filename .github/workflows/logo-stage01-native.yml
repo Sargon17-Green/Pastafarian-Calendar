@@ -19,12 +19,12 @@ jobs:
       - name: Check out this branch
         uses: actions/checkout@v4
 
-      - name: Install Berkeley Logo
+      - name: Install Berkeley Logo and virtual display
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends ucblogo
+          sudo apt-get install -y --no-install-recommends ucblogo xvfb xauth
           version="$(dpkg-query -W -f='${Version}' ucblogo)"
           echo "UCBLogo package version: $version"
           case "$version" in
@@ -40,7 +40,10 @@ jobs:
         run: |
           set -euo pipefail
           log="$RUNNER_TEMP/logo-stage01.log"
-          if timeout --signal=TERM --kill-after=5s 300s \
+          # UCBLogo 6.2.5 initializes GTK+ even for non-graphical Stage 1 tests.
+          # Use a private, ephemeral X server instead of requiring a runner DISPLAY.
+          if xvfb-run -a -s '-screen 0 1024x768x24' \
+              timeout --signal=TERM --kill-after=5s 300s \
               logo test/stage01_tests.logo </dev/null >"$log" 2>&1; then
             cat "$log"
           else
