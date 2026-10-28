@@ -31,12 +31,27 @@ jobs:
         with:
           release: R2026a
 
-      - name: Run only the focused BigInt difference regression
-        shell: bash
-        run: |
-          set -o pipefail
-          mkdir -p logs
-          matlab -batch "addpath('src'); fprintf('MATLAB_NATIVE_VERSION=%s\\n',version); r=runtests('tests/test_stage55_bigint_difference.m'); disp(r); assert(~isempty(r) && all([r.Passed]),'Stage55:BigIntDifferenceFailed'); disp('STAGE55_BIGINT_DIFFERENCE_NATIVE_PASS');" 2>&1 | tee logs/STAGE_55_BIGINT_DIFFERENCE_NATIVE.log
+      # MATLAB CLI on hosted runners has no standalone license. The
+      # MathWorks action provisions the runner-compatible license context.
+      - name: Run focused MATLAB regression with original native log
+        uses: matlab-actions/run-command@v3
+        with:
+          command: >-
+            addpath('src');
+            if ~exist('logs','dir'), mkdir('logs'); end;
+            diary('logs/STAGE_55_BIGINT_DIFFERENCE_NATIVE.log');
+            try;
+              fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
+              r=runtests('tests/test_stage55_bigint_difference.m');
+              disp(r);
+              assert(~isempty(r) && all([r.Passed]),'Stage55:BigIntDifferenceFailed');
+              disp('STAGE55_BIGINT_DIFFERENCE_NATIVE_PASS');
+              diary off;
+            catch ME;
+              disp(getReport(ME,'extended'));
+              diary off;
+              rethrow(ME);
+            end
 
       - name: Preserve native output on success or failure
         if: always()
