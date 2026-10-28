@@ -30,6 +30,39 @@ class SoakRunnerTests(unittest.TestCase):
         self.assertTrue(any(c < 0 for c, _ in a))
         self.assertTrue(any(c > 0 for c, _ in a))
 
+    def test_foundation_scope_is_bounded_and_preserves_default_corpus(self):
+        foundation = soak.FOUNDATION
+        self.assertEqual(
+            soak.corpus(5, 55, "foundation"),
+            [(foundation - 1, foundation - 1),
+             (foundation, foundation),
+             (foundation + 1, foundation + 1),
+             (foundation, foundation + 1),
+             (foundation + 1, foundation)],
+        )
+        self.assertEqual(soak.corpus(4, 55), soak.corpus(4, 55, "all"))
+        with self.assertRaisesRegex(ValueError, "E_SOAK_ANCHOR_SCOPE"):
+            soak.corpus(1, 55, "unsupported")
+
+    def test_foundation_scope_evidence_not_certified(self):
+        with tempfile.TemporaryDirectory() as td:
+            output = Path(td) / "bounded.json"
+            code = soak.main([
+                "--kotlin-command", bridge_command(1),
+                "--python-command", bridge_command(1),
+                "--anchor-scope", "foundation", "--cases", "3", "--batch", "1",
+                "--kotlin-mode", "production",
+                "--kotlin-revision", "a" * 40,
+                "--python-revision", "b" * 40,
+                "--evidence", str(output),
+            ])
+            self.assertEqual(code, 0)
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(report["anchor_scope"], "foundation")
+            self.assertEqual(report["completed"], 3)
+            self.assertEqual(report["status"], "PASS_DIAGNOSTIC_NOT_CERTIFIED")
+            self.assertFalse(report["certifiable"])
+
     def test_bad_protocol_is_rejected(self):
         pair = [(1, 2)]
         with self.assertRaisesRegex(ValueError, "LINE_COUNT"):

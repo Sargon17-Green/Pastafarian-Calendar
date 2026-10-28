@@ -22,9 +22,14 @@ DECIMAL = re.compile(r"^-?(?:0|[1-9][0-9]*)$")
 FIELDS = ("year_number", "cutlet_index", "day_in_cutlet", "month_index", "day_in_month")
 
 
-def corpus(count, seed):
+def corpus(count, seed, anchor_scope="all"):
     randomizer = random.Random(seed)
-    anchors = (FOUNDATION, TABLETS, 0, 739834)
+    if anchor_scope == "all":
+        anchors = (FOUNDATION, TABLETS, 0, 739834)
+    elif anchor_scope == "foundation":
+        anchors = (FOUNDATION,)
+    else:
+        raise ValueError("E_SOAK_ANCHOR_SCOPE")
     offsets = (
         (-1, -1), (0, 0), (1, 1), (0, 1), (1, 0),
         (-100, 100), (100, -100), (0, 251), (0, 252),
@@ -111,6 +116,7 @@ def main(argv=None):
     parser.add_argument("--python-command", required=True)
     parser.add_argument("--cases", type=int, default=96)
     parser.add_argument("--seed", type=int, default=55)
+    parser.add_argument("--anchor-scope", choices=("all", "foundation"), default="all")
     parser.add_argument("--batch", type=int, default=8)
     parser.add_argument("--timeout-seconds", type=int, default=180)
     parser.add_argument("--kotlin-mode", choices=("oracle", "production"), default="oracle")
@@ -137,7 +143,7 @@ def main(argv=None):
             re.fullmatch(r"[0-9a-f]{40}", args.python_revision)):
         parser.error("both revisions must be pinned full 40-digit Git commit SHAs")
 
-    cases = corpus(args.cases, args.seed)
+    cases = corpus(args.cases, args.seed, args.anchor_scope)
     canonical_input = "".join(f"{c}\t{t}\n" for c, t in cases)
     evidence = {
         "schema": "pastafarian-cross-soak-v1",
@@ -147,6 +153,7 @@ def main(argv=None):
         "certification_requested": args.certify,
         "certifiable": False,  # A CLI flag cannot establish provenance.
         "seed": args.seed,
+        "anchor_scope": args.anchor_scope,
         "cases": len(cases),
         "batch_size": args.batch,
         "case_sha256": hashlib.sha256(canonical_input.encode("ascii")).hexdigest(),
