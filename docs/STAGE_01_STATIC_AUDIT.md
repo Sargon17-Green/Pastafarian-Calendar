@@ -1,5 +1,15 @@
 # 第 1 阶段静态审查
 
+## 2026-10-28 补充：历史静态审查与最终验收
+
+**阅读须知：**本文件下文以“当前树”“尚未经过真实编译”“不得更新 LAST_COMPLETED_STAGE=1”等措辞记录了 2026 年 8 月的修正候选和逐次探针状态。这些是当时的历史快照，不能再当作 2026-10-28 的当前阻塞。旧记录保留原貌，以保留缺陷发现和修复链条。
+
+现行验收状态以 `DEVELOPMENT_STAGE.md`、`STAGE_01_EXECUTION_STATUS.txt` 和 `docs/STAGE_01_COMPLETION_AUDIT.md` 为准：Stage 1 已在 Windows / GnuCOBOL 3.2+svn.5686 下严格编译并通过 181/181 bootstrap，`LAST_COMPLETED_STAGE=1`，`STAGE2_STARTED=NO`。此前额外设置的完整 Year-5000 连续 20 次 stress 是可选诊断，不是 Stage 1 关闭门。
+
+2026-10-28 的 Linux GitHub Actions 在分支 `COBOL+简体中文`、提交 `4c1c53abf3162c9fd1c4e9ce38273d4dd5f0a5e3` 上又通过 native Stage 1（181/181，失败 0，`RESULT=PASS_STAGE1_NATIVE_LINUX`）与 Canonical Names Lock。运行证据：<https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40718743783>；`stage1-native-evidence` artifact #12828922761。编译日志出现 `_FORTIFY_SOURCE redefined` 工具链警告；它们未造成编译或测试失败，不能从这一结果推断所有 GCC 诊断均按 COBOL `-Werror` 处理。
+
+本补充仅纠正文档的时间有效性；不修改 COBOL 计算、测试、名称锁或阶段授权。历史 `FOREIGN_LANGUAGE_USAGE` 违规标记仍须保留，未获准启动 Stage 2。
+
 ## 状态
 
 当前树是 COBOL + 简体中文第 1 阶段 Bootstrap 的修正候选。它已经接受过 Windows 上 GnuCOBOL 3.2+svn.5686 的真实 discovery 编译；最近一次用户执行日志仍停在编译阶段，因此本次内存有界重构尚未经过真实编译/运行。
