@@ -50,8 +50,8 @@ def check(jar, evidence):
             errors.append(name)
 
     # Three independent calculation days, spanning FOUNDATION±1, and
-    # two additional target-day boundary crossings. Production invocation
-    # is one bounded process to avoid uncontrolled JVM concurrency.
+    # two additional target-day boundary crossings. Run them sequentially
+    # with individual time bounds to preserve per-case failure evidence.
     valid = [
         (FOUNDATION - 1, FOUNDATION - 1),
         (FOUNDATION, FOUNDATION),
@@ -60,23 +60,26 @@ def check(jar, evidence):
         (FOUNDATION, FOUNDATION + 1),
     ]
     start = time.monotonic()
-    try:
-        process = invoke(jar, "".join(f"{c}\t{t}\n" for c, t in valid))
-        rows = process.stdout.splitlines()
-        ok_count = (process.returncode == 0 and len(rows) == len(valid))
-        record("foundation_process_and_five_rows", ok_count,
-               f"exit={process.returncode}, rows={len(rows)}, stderr_tail={process.stderr[-500:]}")
-        for index, (c, t) in enumerate(valid):
-            columns = rows[index].split("\t") if index < len(rows) else []
-            ok = (len(columns) == 7 and
-                  all(s.lstrip("-").isdigit() for s in columns) and
-                  columns[:2] == [str(c), str(t)] and
-                  1 <= int(columns[3]) <= 17 and int(columns[4]) >= 1 and
-                  1 <= int(columns[5]) <= 47 and int(columns[6]) >= 1
-                  ) if len(columns) == 7 else False
-            record(f"foundation_7_fields_{index}", ok, columns)
-    except subprocess.TimeoutExpired:
-        record("foundation_bounded_execution", False, "360-second timeout")
+    # Isolate each boundary conversion: a fail-closed exception for one input
+    # must not erase the evidence for other independent boundary inputs.
+    for index, (c, t) in enumerate(valid):
+        try:
+            process = invoke(jar, f"{c}\\t{t}\\n", timeout=60)
+            rows = process.stdout.splitlines()
+            process_ok = process.returncode == 0 and len(rows) == 1
+            record(f"foundation_process_{index}", process_ok,
+                   f"exit={process.returncode}, rows={len(rows)}, stderr_tail={process.stderr[-500:]}")
+            columns = rows[0].split("\\t") if len(rows) == 1 else []
+            fields_ok = (len(columns) == 7 and
+                         all(s.lstrip("-").isdigit() for s in columns) and
+                         columns[:2] == [str(c), str(t)] and
+                         1 <= int(columns[3]) <= 17 and int(columns[4]) >= 1 and
+                         1 <= int(columns[5]) <= 47 and int(columns[6]) >= 1
+                         ) if len(columns) == 7 else False
+            record(f"foundation_7_fields_{index}", process_ok and fields_ok, columns)
+        except subprocess.TimeoutExpired:
+            record(f"foundation_process_{index}", False, "60-second timeout")
+            record(f"foundation_7_fields_{index}", False, "process timed out")
 
     # Each malformed input must be rejected without a single data row.
     malformed = [
