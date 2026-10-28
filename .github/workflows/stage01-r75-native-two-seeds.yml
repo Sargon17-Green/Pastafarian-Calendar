@@ -1,12 +1,7 @@
 name: Stage 1 R75 original native - two hash seeds
 
 on:
-  push:
-    branches:
-      - 'Perl+國語'
-    paths:
-      - '.github/workflows/stage01-r75-native-two-seeds.yml'
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
