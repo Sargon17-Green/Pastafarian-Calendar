@@ -290,7 +290,7 @@ internal static class Program
     }
 
     // حراسة نصوص التشخيص العربية من التلف والترميز والتحكم الخفي بالاتجاه.
-    private static void UnicodeRtlDiagnostics()
+    private static void UnicodeRtlDiagnostics(bool emitVisualQa)
     {
         static bool ValidArabicDiagnostic(string? message)
         {
@@ -334,9 +334,20 @@ internal static class Program
 
         Check(Console.OutputEncoding.WebName=="utf-8",
               "إخراج نتائج الاختبار بترميز UTF-8");
+
+        // Manual terminal/screen-reader probe, never an automated RTL PASS.
+        // Arabic payloads are the actual caught exception messages.
+        if (emitVisualQa)
+        {
+            Console.WriteLine("=== STAGE49_ARABIC_TERMINAL_QA_BEGIN (manual review required) ===");
+            Console.WriteLine("١ | " + invalidRange + " | 123 / ١٢٣ | [A-1], (B:2).");
+            Console.WriteLine("٢ | " + forgedWitness + " | 456 / ٤٥٦ | [C-3], (D:4).");
+            Console.WriteLine("٣ | " + invalidFamily + " | 789 / ٧٨٩ | [E-5], (F:6).");
+            Console.WriteLine("=== STAGE49_ARABIC_TERMINAL_QA_END ===");
+        }
     }
 
-    public static int Main()
+    public static int Main(string[] args)
     {
         Console.OutputEncoding=System.Text.Encoding.UTF8;
         Synthetic();
@@ -351,7 +362,7 @@ internal static class Program
         };
         for(var i=0;i<dates.Length;i++)Production(dates[i].C,dates[i].T,i+1);
         ValidationAndOwnership();
-        UnicodeRtlDiagnostics();
+        UnicodeRtlDiagnostics(args.Contains("--visual-rtl", StringComparer.Ordinal));
         Console.WriteLine("حالات الضبط: "+controls);
         Console.WriteLine("نتائج الضبط المصححة: "+controlGood);
         Console.WriteLine("فروق الضبط التاريخية: "+controlOldDifferent);
