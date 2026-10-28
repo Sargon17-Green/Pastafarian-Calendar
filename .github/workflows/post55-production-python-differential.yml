@@ -2,7 +2,7 @@ name: Post55 Kotlin-Python bounded five-field diagnostic
 
 on:
   push:
-    branches: ['Kotlin\\+Cymraeg']
+    branches: ['Kotlin\+Cymraeg']
     paths:
       - '.github/workflows/post55-production-python-differential.yml'
       - 'soak/post55_differential.py'
