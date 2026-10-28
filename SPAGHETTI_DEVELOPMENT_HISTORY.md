@@ -19,3 +19,11 @@ De observatievelden worden niet teruggelezen voor normatieve beslissingen. De co
 ### Historische patches
 
 Nog geen. Geen van de zesentwintig legacyfouten of patches is in fase 1 aanwezig.
+
+### Native afsluiting (28 oktober 2026)
+
+De bestaande Stage-1-testset is zonder wijziging van het productiemechanisme uitgevoerd met Clojure CLI 1.12.5.1664 en Temurin Java 21: 8 tests, 46 assertions, 0 failures, 0 errors. De Canonical Names Lock-controle bleef groen.
+
+Bewijs: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40720041331 (native job 122928124133; checkout 2483d0967013fff62cd6ed7e6663fb44b14d9fa6).
+
+Fase 1 is hiermee voltooid. Er is geen toestemming gegeven om fase 2 te openen; het productiepad voor een volledige datum is nog niet opgebouwd.

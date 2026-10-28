@@ -34,4 +34,4 @@ of:
 ./run_stage01.sh
 ```
 
-De verwachte toestand van fase 1 is volledig groen. In de huidige overdrachtsomgeving kon de testuitvoering niet worden voltooid omdat daar geen Clojure-runtime beschikbaar was en externe pakketdownload niet beschikbaar was. Daarom wordt fase 1 in deze overdracht nog niet als voltooid gemarkeerd.
+Fase 1 is op 28 oktober 2026 als Native GREEN bevestigd. GitHub Actions voerde `clojure -M:test` uit op commit `2483d0967013fff62cd6ed7e6663fb44b14d9fa6`: 8 tests, 46 assertions, 0 failures, 0 errors. Het bewijs staat in [run 40720041331](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40720041331). De historische productielijn voor een volledige kalenderdatum wordt pas in een later, apart goed te keuren fase gebouwd.

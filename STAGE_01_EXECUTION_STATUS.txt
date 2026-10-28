@@ -1,20 +1,13 @@
-Fase 1 is inhoudelijk opgebouwd maar nog niet als voltooid gemarkeerd.
+Fase 1: VOLTOOID — NATIVE GREEN (28 oktober 2026).
 
-Verwacht testresultaat: GREEN.
-Werkelijk testresultaat in deze overdrachtsomgeving: NIET UITGEVOERD IN CLOJURE.
+De oorspronkelijke opdracht `clojure -M:test` is daadwerkelijk op GitHub Actions uitgevoerd, op commit 2483d0967013fff62cd6ed7e6663fb44b14d9fa6 van de branch Clojure+Nederlands.
+Run: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40720041331
+Native job: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40720041331/job/122928124133
 
-De toegestane testopdracht is aangeroepen via `./run_stage01.sh`. Het werkelijke resultaat was:
+Omgeving: Ubuntu GitHub-hosted, Temurin Java 21, Clojure CLI 1.12.5.1664, projectdependency org.clojure/clojure 1.11.1.
+Resultaat: Ran 8 tests containing 46 assertions. 0 failures, 0 errors.
+Canonical Names Lock: SUCCESS. clojure-native-stage01: SUCCESS.
 
-./run_stage01.sh: 2: exec: clojure: not found
+De productiecode levert in fase 1 opzettelijk nog geen kalenderdatum op; code :production-path-not-yet-built blijft de verwachte uitkomst. Het normatieve testorakel wordt niet als productieterugval gebruikt.
 
-Processtatus: 127.
-
-De omgeving bevat geen Clojure-runtime. Een poging om een Clojure-runtimepakket beschikbaar te maken kon niet worden voltooid doordat externe pakketdownload vanuit de uitvoercontainer niet beschikbaar was.
-
-Er is geen andere programmeertaal gebruikt als vervangend orakel, testprogramma of fixturegenerator. Er is geen andere implementatielijn geraadpleegd of uitgevoerd.
-
-Om fase 1 geldig af te sluiten moet op een omgeving met Clojure worden uitgevoerd:
-
-clojure -M:test
-
-Pas wanneer die opdracht groen eindigt, mogen LAST_COMPLETED_STAGE en de eindstatus van fase 1 naar voltooid worden gezet.
+LAST_COMPLETED_STAGE=1. Stage 2 is NIET gestart of goedgekeurd.
