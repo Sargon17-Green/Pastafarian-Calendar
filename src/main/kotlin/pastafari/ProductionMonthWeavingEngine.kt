@@ -235,8 +235,9 @@ class ProductionMonthWeavingEngine(
                         }
                     } else {
                         val reference = representativeRatio ?: error("E_WEAVING_RATIO_REFERENCE")
+                        val baseline = representativeCount ?: error("E_WEAVING_RATIO_BASELINE")
                         exactQuotient(
-                            representativeCount.multiply(ratio.numerator)
+                            baseline.multiply(ratio.numerator)
                                 .multiply(reference.denominator),
                             ratio.denominator.multiply(reference.numerator))
                     }
