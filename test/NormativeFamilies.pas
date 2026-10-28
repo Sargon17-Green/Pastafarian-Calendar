@@ -79,6 +79,8 @@ begin
 end;
 
 constructor TBoundedCompositionFamily.Create(Total, Slots, LoValue, HiValue: Integer);
+var
+  Size: Int64;
 begin
   inherited Create;
   if (Total < 0) or (Slots < 0) or (LoValue < 0) or (HiValue < LoValue) then
@@ -87,8 +89,12 @@ begin
   FSlots := Slots;
   FLo := LoValue;
   FHi := HiValue;
-  SetLength(FKnown, (FTotal + 1) * (FSlots + 1));
-  SetLength(FMemo, Length(FKnown));
+  { Reject size overflow before allocating either memo table. }
+  if (Int64(FTotal) + 1) > High(Integer) div (Int64(FSlots) + 1) then
+    raise ERangeError.Create('Tabela de memoização de composições demasiado grande.');
+  Size := (Int64(FTotal) + 1) * (Int64(FSlots) + 1);
+  SetLength(FKnown, Integer(Size));
+  SetLength(FMemo, Integer(Size));
 end;
 
 function TBoundedCompositionFamily.MemoIndex(Remaining, Slots: Integer): Integer;
@@ -99,18 +105,27 @@ end;
 function TBoundedCompositionFamily.CountSuffix(Remaining, Slots: Integer): TBigInt;
 var
   Idx, X: Integer;
+  LowerChoice, UpperChoice: Int64;
 begin
+  if (Remaining < 0) or (Remaining > FTotal) or
+     (Slots < 0) or (Slots > FSlots) then Exit(BigZero);
   if Slots = 0 then
   begin
     if Remaining = 0 then Exit(BigOne) else Exit(BigZero);
   end;
-  if (Remaining < Slots * FLo) or (Remaining > Slots * FHi) then Exit(BigZero);
-  if (Remaining < 0) or (Remaining > FTotal) then Exit(BigZero);
+  { Int64 products are required even when all public inputs fit Integer. }
+  if (Int64(Remaining) < Int64(Slots) * FLo) or
+     (Int64(Remaining) > Int64(Slots) * FHi) then Exit(BigZero);
   Idx := MemoIndex(Remaining, Slots);
   if FKnown[Idx] then Exit(BigClone(FMemo[Idx]));
+  LowerChoice := Int64(Remaining) - Int64(Slots - 1) * FHi;
+  if LowerChoice < FLo then LowerChoice := FLo;
+  UpperChoice := Int64(Remaining) - Int64(Slots - 1) * FLo;
+  if UpperChoice > FHi then UpperChoice := FHi;
   Result := BigZero;
-  for X := FLo to FHi do
-    Result := BigAdd(Result, CountSuffix(Remaining - X, Slots - 1));
+  if LowerChoice <= UpperChoice then
+    for X := Integer(LowerChoice) to Integer(UpperChoice) do
+      Result := BigAdd(Result, CountSuffix(Remaining - X, Slots - 1));
   FKnown[Idx] := True;
   FMemo[Idx] := BigClone(Result);
 end;
@@ -124,6 +139,7 @@ function TBoundedCompositionFamily.Unrank1(const Rank1: TBigInt): TIntArray;
 var
   R, Count: TBigInt;
   Remaining, Slots, Position, X: Integer;
+  LowerChoice, UpperChoice: Int64;
   Chosen: Boolean;
 begin
   Count := CountAll;
@@ -137,21 +153,26 @@ begin
   while Slots > 0 do
   begin
     Chosen := False;
-    for X := FLo to FHi do
-    begin
-      Count := CountSuffix(Remaining - X, Slots - 1);
-      if BigCompare(R, Count) > 0 then
-        R := BigSubtract(R, Count)
-      else
+    LowerChoice := Int64(Remaining) - Int64(Slots - 1) * FHi;
+    if LowerChoice < FLo then LowerChoice := FLo;
+    UpperChoice := Int64(Remaining) - Int64(Slots - 1) * FLo;
+    if UpperChoice > FHi then UpperChoice := FHi;
+    if LowerChoice <= UpperChoice then
+      for X := Integer(LowerChoice) to Integer(UpperChoice) do
       begin
-        Result[Position] := X;
-        Remaining := Remaining - X;
-        Dec(Slots);
-        Inc(Position);
-        Chosen := True;
-        Break;
+        Count := CountSuffix(Remaining - X, Slots - 1);
+        if BigCompare(R, Count) > 0 then
+          R := BigSubtract(R, Count)
+        else
+        begin
+          Result[Position] := X;
+          Remaining := Remaining - X;
+          Dec(Slots);
+          Inc(Position);
+          Chosen := True;
+          Break;
+        end;
       end;
-    end;
     if not Chosen then
       raise Exception.Create('Falha interna no unrank da composição limitada.');
   end;
