@@ -3,7 +3,7 @@ name: Stage 1 Native Object Pascal
 on:
   push:
     branches:
-      - 'Object-Pascal+Português'
+      - 'Object-Pascal\+Português'
     paths:
       - '.github/workflows/stage01-native-object-pascal.yml'
       - 'src/**'
