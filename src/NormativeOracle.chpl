@@ -646,7 +646,7 @@ module NormativeOracle {
       if rem < slots then return new bigint(0);
 
       const k = key(rem, slots, cumulative, hitBoundary);
-      if memo.contains(k) then return memo[k];
+      if memo.contains(k) then return try! memo[k];
 
       var total = new bigint(0);
       const maxX = rem - (slots - 1);
@@ -728,7 +728,7 @@ module NormativeOracle {
       }
       if rem < slots * lo || rem > slots * hi then return new bigint(0);
       const k = key(rem, slots);
-      if memo.contains(k) then return memo[k];
+      if memo.contains(k) then return try! memo[k];
       var total = new bigint(0);
       for x in lo..hi do total += countState(rem - x, slots - 1);
       memo.add(k, total);
@@ -908,7 +908,7 @@ module NormativeOracle {
       if allZero then return new bigint(1);
 
       const key = stateKey(remaining, openedUpTo, closedUpTo);
-      if memo.contains(key) then return memo[key];
+      if memo.contains(key) then return try! memo[key];
       var total = new bigint(0);
       const m = lengths.size;
       for monthId in 1..m {

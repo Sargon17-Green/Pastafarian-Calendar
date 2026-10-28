@@ -38,10 +38,7 @@ module MonsterBootstrap {
 
   record BaseMetricsManager {
     proc ref bump(ref ctx: MonsterContext, key: string) {
-      if ctx.metrics.contains(key) then
-        ctx.metrics[key] += 1;
-      else
-        ctx.metrics.add(key, 1);
+      ctx.metrics.addOrReplace(key, ctx.metrics.get(key, 0) + 1);
     }
   }
 

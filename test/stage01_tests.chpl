@@ -185,7 +185,7 @@ proc testNeutralMonsterBootstrap() {
         "виробничий каркас зупиняється на межі Bootstrap");
   check(ctx.phase == MonsterPhase.stoppedAtBootstrapBoundary,
         "виробничий каркас не переходить у майбутню історичну фазу");
-  check(ctx.metrics.contains("bootstrap.calls") && ctx.metrics["bootstrap.calls"] == 1,
+  check(ctx.metrics.contains("bootstrap.calls") && ctx.metrics.get("bootstrap.calls", 0) == 1,
         "метрика початкового виклику є лише спостережуваністю");
   check(ctx.branchTrace.size == 1,
         "нейтральний диспетчер залишає один детермінований слід");
