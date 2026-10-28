@@ -31,6 +31,18 @@ jobs:
           Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
           & .\Run-Stage23.ps1
           if (-not $?) { throw 'Stage 23 native script failed' }
+      - name: Verify sealed Stage 23 finalizer idempotency on native PowerShell 5.1
+        shell: powershell
+        run: |
+          & .\tests\VerifyFinalizeStage23Idempotency.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Stage 23 finalizer idempotency verification failed.' }
+      - name: Preserve both finalizer runs and hash evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage23-finalizer-idempotency
+          path: ~/Downloads/Stage23-Finalize-Idempotency-*/
+          if-no-files-found: error
       - name: Preserve native stage metadata
         if: always()
         uses: actions/upload-artifact@v4
