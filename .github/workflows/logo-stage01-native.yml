@@ -3,10 +3,10 @@ name: Logo Stage 1 Native Regression
 on:
   push:
     branches:
-      - "Logo+Ido"
+      - 'Logo\\+Ido'
   pull_request:
     branches:
-      - "Logo+Ido"
+      - 'Logo\\+Ido'
 
 permissions:
   contents: read
