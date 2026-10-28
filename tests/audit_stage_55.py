@@ -70,6 +70,8 @@ from normative_reference import (
     AnswerStream,
     BoundedCompositionFamily,
     FOUNDATION_DAY,
+    FROZEN_CUTLET_NAMES,
+    FROZEN_MONTH_NAMES,
     GateTable,
     MonthWeavingFamily,
     NormativeCalendar,
@@ -1023,6 +1025,10 @@ class Stage55FinalAuditTests(unittest.TestCase):
                 )
             ),
         )
+        # Check all 64 literal names against a test-owned, production-independent fixture.
+        self.assertEqual(cutlet_texts, FROZEN_CUTLET_NAMES)
+        self.assertEqual(month_texts, FROZEN_MONTH_NAMES)
+
         self.assertEqual(
             len(
                 set(
