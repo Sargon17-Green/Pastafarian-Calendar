@@ -11,6 +11,7 @@ This is an independently inspectable *worksheet formula* implementation of posit
 | 10 | ᓈᓴᐅᑏᑦ × | 64×64 multiplication matrix |
 | 11 | ᓈᓴᐅᑏᑦ Σ | Anti-diagonal reduction and carry |
 | 12 | ᖃᐅᔨᓴᕐᓂᖅ | Example checks, limits and status |
+| 13 | ᓈᓴᐅᑏᑦ ▦ | 4-by-16 visual tile boards for A and B; 5-by-16 for A+B; 8-by-16 for A×B |
 
 Use base B=10,000: one 4-digit **integer** per cell. The least significant block is at row 8 and higher powers occupy rows 9..71. Every chunk is 0..9999. This prevents the user's decimal numbers from being rounded to 15 significant digits.
 
@@ -35,7 +36,7 @@ This is exactly the familiar paper-and-pencil algorithm. It produces up to 128 b
 
 Each `P[i,j] ≤ 99,980,001`; each diagonal sums at most 64 such entries. With the bounded incoming carry, raw diagonal sums remain below 6.4×10^9, far below 2^53, so all numeric cell operations remain exact in Excel's binary floating-point representation. Increasing N requires revisiting this bound and workbook performance. The current demonstrator supports nonnegative integers only.
 
-The native `.xlsx` is formula-driven and runs without enabling VBA. If formulas are damaged, an optional module can rebuild them in a saved `.xlsm` copy. The workbook and its optional macro source are distributed separately as conversation attachments; this repository file gives the same equation/coordinate contract without silently substituting another language implementation.
+The visual board uses four-digit text, suppresses only leading zero blocks in operand display and preserves internal 0000 blocks. The native `.xlsx` is formula-driven and runs without enabling VBA. If formulas are damaged, an optional module can rebuild them in a saved `.xlsm` copy. The workbook and its optional macro source are distributed separately as conversation attachments; this repository file gives the same equation/coordinate contract without silently substituting another language implementation.
 
 Demo independently checked: reconstructed every product tile and addition tile, compared with Python arbitrary-precision `int`, and passed 13 workbook fixture checks. This is **not** Excel/Office native certification.
 
