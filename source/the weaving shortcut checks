@@ -127,6 +127,19 @@ To check forty seven month started suffixes:
   Repeat.
   Put 94 into the weaving selection's days remaining.
   Put 0 into the weaving selection's resource limit reached.
+  \ Validate the complete synthetic fixture before calling the expensive
+  \ recursive fallback. All 47 records must have exactly two days left.
+  \ This cannot replace native execution or the 93-double-factorial oracle.
+  Inspect stress fixture entries.
+  If the wsprobeentries is not 47,
+    put "The forty seven month fixture has the wrong record count." into the check report; exit.
+  If the wsprobeinvalid is not 0,
+    put "The forty seven month fixture has incorrect remaining days." into the check report; exit.
+  Inspect the woven month status.
+  If the weaving selection's already started is not 47,
+    put "The forty seven month fixture has incorrect started count." into the check report; exit.
+  If the weaving selection's already finished is not 0,
+    put "The forty seven month fixture has an unexpectedly finished month." into the check report; exit.
   Count weaving completions into the weavestresscheck.
   If the weavestresscheck is not "2987435000850314871976096554696085799164511452611632783323554397412109375",
     report forty seven weaving difference; exit.
@@ -141,13 +154,17 @@ To check forty seven month started suffixes:
 \ Each native-to-string conversion is in a separate CAL procedure.
 The wsprobepointer is a woven month state.
 The wsprobeentries is a number.
+The wsprobeinvalid is a number.
 
 To inspect stress fixture entries:
   Put 0 into the wsprobeentries.
+  Put 0 into the wsprobeinvalid.
   Put the woven month states' first into the wsprobepointer.
   Loop.
     If the wsprobepointer is nil, break.
     Add 1 to the wsprobeentries.
+    If the wsprobepointer's remaining days is not 2,
+      add 1 to the wsprobeinvalid.
     Put the wsprobepointer's next into the wsprobepointer.
   Repeat.
 
