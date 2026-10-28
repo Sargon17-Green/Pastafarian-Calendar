@@ -2768,3 +2768,8 @@ jobs:
           perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
           perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
           timeout --signal=TERM --kill-after=5s 195s perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl --first 3 --second 3 --seconds 185 --rss-kib 393216
+
+  stage01-r75-original-native-two-seeds:
+    name: Stage 1 R75 original Native in two hash seeds
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[r75-native-two-seeds]')
+    uses: ./.github/workflows/stage01-r75-native-two-seeds.yml
