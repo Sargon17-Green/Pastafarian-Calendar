@@ -32,3 +32,27 @@ gleam test
 ```
 
 Neniu alia programlingvo estas parto de la kalkula aŭ testa vojo.
+
+## Stadio 2 — DISCOVERY 01 (preparita, ankoraŭ sen Native-kontrolo)
+
+La antaŭe aprobita DISCOVERY 01 enkondukas intence malnovan modulusan
+operacion `old_remainder` tra la vera `dispatch_discovery_01`
+vojo, kiu unue validigas kaj dissendas la bazan `MonsterContext`.
+Ĝi ne enkondukas `savePatch`, nulan restaĵon al `M` konvertantan
+korekton, aŭ kodon de Stadio 3.
+
+La normiga `SAVE(x) = 1 + regular_mod(x - 1, M)`, kie
+`M = 2^127 - 1`, restas en `test/reference/core.gleam`.
+La kvar testaj kazoj en `test/discovery_01_test.gleam` devas montri:
+
+| Enigo | Legacy | SAVE | Postulo |
+| --- | ---: | ---: | --- |
+| M | 0 | M | EXPECTED_RED |
+| 2M | 0 | M | EXPECTED_RED |
+| 3M | 0 | M | EXPECTED_RED |
+| M+1 | 1 | 1 | PASS |
+
+La antaŭaj 17 testoj devas pasi. La sumo atendata por `gleam test`
+estas 18 sukcesoj kaj precize 3 intencaj malsukcesoj, sed tio ne estas
+observita rezulto ĝis Native-kontrolo en GitHub Actions. Ne interpretu
+la intencon kiel efektivan CI-rezulton.

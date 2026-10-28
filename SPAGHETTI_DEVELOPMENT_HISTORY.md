@@ -15,3 +15,14 @@ Stadio 1 poste estis kontrolita per GitHub Actions sur Ubuntu 24.04.4 LTS kun Gl
 Ĉiu trovita problemo estis riparita sen aldoni Stadio-2-kodon aŭ estontajn flikaĵajn mekanismojn. La fina kontrolrulo `33114635728` ĉe commit `8e6dee70e7ab6cfa27f1c1d2b571eb3d5754ce54` pasis: la origina `gleam format --check src test` redonis 0, `gleam test` raportis `9 passed, no failures`, kaj la laborfluo finis per `STADIO_01_REZULTO=PASS`.
 
 Per tiu rezulto Stadio 1 estas GREEN kaj `LAST_COMPLETED_STAGE` fariĝas 1.
+
+## Stadio 2 — DISCOVERY 01 (preparo)
+
+La aprobita DISCOVERY 01 nun havas propran produktan enirejon por la
+malnova restaĵo: `dispatch_discovery_01` trapasas la ekzistantan
+Bootstrap-kuntekston kaj poste kalkulas `old_remainder`. Tio intence
+restas malsama ol kanona SAVE ĉe M, 2M kaj 3M; M+1 estas kontrola
+kazo. Ĉi tiu preparo ne estas PATCH 01 kaj ne estas Stage-3-kodo.
+La akcepta kondiĉo estas Native-testado montranta precize la tri
+intencajn diverĝojn kaj nul regresojn de Stadio 1. Ankoraŭ ne aprobita
+kiel finita Stadio 2.
