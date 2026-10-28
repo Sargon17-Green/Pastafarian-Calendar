@@ -6,7 +6,7 @@ This is a Stage 1 arithmetic worksheet extension. Not a Pastafarian calendar F(c
 
 - `08_−`: 128 rows, digit A_i, digit B_i, A−B borrow, raw, output, next borrow, an algebraic identity check; a second B−A borrow chain; a sign gate; final |A−B| digit.
 - `09_▦−`: horizontal 8×16 grid of magnitude digits, sign in a separate highlighted cell. All numeric tiles are one decimal digit 0..9.
-- `10_∑−`: formal proof and four live tests. The proof is also attached as a native Excel cell note to `B7`.
+- `10_∑−`: formal proof and four live tests. The proof is presented as **visible explanatory cells** beginning at `B7`. An attempted native note was not preserved by the XLSX exporter, so this artifact does not claim to contain a pop-up cell comment.
 
 For i starting at the units column, compute
 ```
