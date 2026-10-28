@@ -113,3 +113,28 @@ Work remains SECURITY_BLOCKED_CONFIRMED. Do not resume Native execution using
 the quarantined compiler or bypass Defender. After obtaining a separately
 validated compiler, verify syntax of the added preflight, run the original 99
 QA groups, and investigate the first real observed mismatch before full/soak.
+
+## Additional source-only development: isolate the 47-month shortcut
+
+The 47-month case now has three separate checkpoints **within the existing
+quick QA group**, leaving the group count at 99:
+
+1. Check the linked fixture: exactly 47 month records, each with two days
+   remaining, all 47 already started, and none finished.
+2. Invoke `Count ordered last weaving suffix completions` directly. Require
+   `available = 1` and exact `93!!`; if not, report the direct-count
+   failure with actual decimal value and fixture metadata, rather than
+   entering the expensive recursive fallback.
+3. Only after the direct count passes, invoke `Count weaving completions`
+   through the general entrypoint. A mismatch at this point now separates
+   entrypoint/call-state problems from a direct binomial-product problem.
+
+**None of these checkpoints has yet been run in CAL.** They do not establish
+the cause of the old `1260` result, and they do not constitute a Native QA
+pass. In particular, an assembly listing proving the presence of a call is
+not runtime evidence that all 47 records were allocated or that a parameter
+was populated. Continue to preserve the Defender quarantine and the
+`SECURITY_BLOCKED_CONFIRMED` acceptance state.
+
+The final source-only commit for this probe is
+`26f6d5be51df657af219be33312047590911e809`.
