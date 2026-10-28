@@ -385,7 +385,7 @@ end;
 procedure BigDivModPositive(const A, B: TBigInt; out Q, R: TBigInt);
 var
   I: Integer;
-  Low, High, Mid, Best: UInt32;
+  LowerBound, UpperBound, Mid, Best: UInt32;
   Probe: TBigInt;
 begin
   if (B.Sign <= 0) or BigIsZero(B) then
@@ -405,23 +405,23 @@ begin
   for I := High(A.Digits) downto 0 do
   begin
     R := ShiftBaseAdd(R, A.Digits[I]);
-    Low := 0;
-    High := UInt32(BIG_BASE - 1);
+    LowerBound := 0;
+    UpperBound := UInt32(BIG_BASE - 1);
     Best := 0;
-    while Low <= High do
+    while LowerBound <= UpperBound do
     begin
-      Mid := Low + (High - Low) div 2;
+      Mid := LowerBound + (UpperBound - LowerBound) div 2;
       Probe := BigMultiplyUInt32(B, Mid);
       if BigCompareAbs(Probe, R) <= 0 then
       begin
         Best := Mid;
         if Mid = UInt32(BIG_BASE - 1) then Break;
-        Low := Mid + 1;
+        LowerBound := Mid + 1;
       end
       else
       begin
         if Mid = 0 then Break;
-        High := Mid - 1;
+        UpperBound := Mid - 1;
       end;
     end;
     Q.Digits[I] := Best;
