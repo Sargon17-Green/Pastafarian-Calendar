@@ -255,3 +255,17 @@ For all nonzero positive byte divisors, the new signed operation exposes
 All output magnitudes remain fixed to 4096 bytes. This does *not*
 complete variable-length BigInt, normative sauce or selection, calendar
 dates, the Ge'ez catalog, or Stage 1. `LAST_COMPLETED_STAGE=0`.
+
+## Bounded variable-length addition candidate — awaiting native CI
+
+Within Stage 1, `VarAdd8192` introduces two declared canonical lengths
+(0..8192), per-byte zero-extension, exact unsigned addition in SRAM bank 2,
+result length and separate invalid/overflow statuses, with full output
+scrub on failure. ROM cases 151..159 cover empty values, short additions,
+byte carry, 8192-byte upper boundary, 8193-byte overflow rejection,
+noncanonical/invalid inputs, recovery and operand preservation.
+An independent host contract reference is included in CI.
+
+**Verification remains pending** until the new commit's RGBDS + PyBoy
+run and both CI jobs have actually succeeded; no Native PASS is asserted.
+`LAST_COMPLETED_STAGE=0`; no Stage 2 authorized.

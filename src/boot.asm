@@ -40,6 +40,15 @@ wDivStatus:: ds 1
 wSignedDivStatus:: ds 1
 wSignedDivQuotSign:: ds 1
 wSignedDivRemainder:: ds 1
+wVarALength:: ds 2
+wVarBLength:: ds 2
+wVarResultLength:: ds 2
+wVarMaxLength:: ds 2
+wVarIndex:: ds 2
+wVarCarry:: ds 1
+wVarStatus:: ds 1
+wVarByteA:: ds 1
+wVarByteB:: ds 1
 wLeaseTable:: ds 16
 wLeaseIter:: ds 1
 wLeaseBank:: ds 1
@@ -128,6 +137,10 @@ Bootstrap:
     cp $a5
     jp nz, .done
     call RunSignedDivisionTests
+    ld a, [wTestResult]
+    cp $a5
+    jp nz, .done
+    call RunVariableAdditionTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -141,6 +154,7 @@ INCLUDE "src/runtime/sram_lease.asm"
 INCLUDE "src/runtime/magnitude_length.asm"
 INCLUDE "src/runtime/divide_u8.asm"
 INCLUDE "src/runtime/signed_divide_u8.asm"
+INCLUDE "src/runtime/variable_add.asm"
 INCLUDE "src/runtime/day_count32.asm"
 INCLUDE "src/runtime/work_counts32.asm"
 INCLUDE "src/runtime/banked_add.asm"
@@ -164,3 +178,4 @@ INCLUDE "src/tests/work_counts32_test.asm"
 INCLUDE "src/tests/magnitude_length_test.asm"
 INCLUDE "src/tests/divide_u8_test.asm"
 INCLUDE "src/tests/signed_divide_u8_test.asm"
+INCLUDE "src/tests/variable_add_test.asm"

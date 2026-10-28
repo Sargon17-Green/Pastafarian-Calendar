@@ -198,3 +198,22 @@ of output, and resets remainder/length, preventing stale results.
 The algorithm handles the entire 32768-bit dividend, but only a **u8**
 divisor. It is not yet a general BigInt division/quotient engine.
 Native cases 123..138 passed with RGBDS v1.0.4 and PyBoy 2.x in run 38875948284; the independent host model passed 602 cases. General BigInt remains absent.
+
+## Unsigned bounded variable-length addition candidate (native verification pending)
+
+`VarAdd8192` consumes explicitly declared little-endian byte lengths
+(0..8192) in WRAM, with operands in initialized portions of SRAM banks 0
+and 1. Zero is represented by an empty magnitude; a nonempty operand must
+have a nonzero most-significant declared byte. Bytes above the declared
+length are not operands and are never read for the sum. It writes the exact
+sum into reserved bank 2 if it fits in 8192 bytes, along with canonical
+result length. Invalid lengths, noncanonical top bytes and exact
+8193-byte overflow return distinct nonzero status and scrub the entire
+output bank and result length. Both inputs are preserved.
+
+The routine has no multi-bank result allocation or semantic-state owner,
+and intentionally does not claim arbitrary precision, signed operands or
+reentrancy. The old fixed 4096+4096 -> 4097 routine remains intact.
+ROM cases 151..159 and a separate host arithmetic reference were added
+as a *candidate*; only a successful actual RGBDS/PyBoy run on this commit
+can promote native verification. Stage 1 remains open.
