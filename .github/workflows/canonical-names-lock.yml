@@ -56,7 +56,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          prove -Ilib -It/lib -lr t
+          # Some Chinese TAP descriptions trigger Test2 'Wide character in print'
+          # on an unencoded STDOUT/STDERR. Run only test child interpreters with
+          # UTF-8 stdio; -e overrides prove's -I forwarding, so supply paths here.
+          prove -e 'perl -CS -Ilib -It/lib' -lr t
       - name: 量測交織演算法資源
         shell: bash
         run: |
