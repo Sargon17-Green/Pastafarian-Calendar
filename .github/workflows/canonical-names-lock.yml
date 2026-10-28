@@ -39,12 +39,12 @@ jobs:
           set -euo pipefail
           mkdir -p build
           flags=(-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build)
-          gfortran "${flags[@]}" -c src/big_integer.f90 -o build/big_integer.o
-          gfortran "${flags[@]}" -c src/source_language_catalog.f90 -o build/source_language_catalog.o
-          gfortran "${flags[@]}" -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
-          gfortran "${flags[@]}" -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
-          gfortran "${flags[@]}" -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
-          gfortran "${flags[@]}" test/stage01_tests.f90 \
+          gfortran "\${flags[@]}" -c src/big_integer.f90 -o build/big_integer.o
+          gfortran "\${flags[@]}" -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran "\${flags[@]}" -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran "\${flags[@]}" -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran "\${flags[@]}" -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran "\${flags[@]}" test/stage01_tests.f90 \
             build/big_integer.o \
             build/source_language_catalog.o \
             build/bootstrap_infrastructure.o \
@@ -60,3 +60,33 @@ jobs:
             -J build -I build test/stage01_bigint_boundaries.f90 build/big_integer.o \
             -o build/stage01_bigint_boundaries
           timeout --signal=TERM --kill-after=5s 30s build/stage01_bigint_boundaries
+      - name: Diagnose unintegrated INT64_MIN and wide multiplication edges (non-gating)
+        shell: bash
+        run: |
+          set -euo pipefail
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none \
+            -J build -I build test/stage01_bigint_extreme_probe.f90 build/big_integer.o \
+            -o build/stage01_bigint_extreme_probe
+          gap_count=0
+          pass_count=0
+          for probe in from-int64-min to-int64-min multiply-int64-max multiply-wide-limb; do
+            set +e
+            result="$(timeout --signal=TERM --kill-after=2s 10s build/stage01_bigint_extreme_probe "$probe" 2>&1)"
+            exit_code=$?
+            set -e
+            printf 'PROBE=%s EXIT=%s\n%s\n' "$probe" "$exit_code" "$result"
+            if [[ "$exit_code" -eq 0 && "$result" == *"PROBE_RESULT=PASS MODE=$probe"* ]]; then
+              pass_count=$((pass_count + 1))
+              echo "PROBE_VERDICT=PASS MODE=$probe"
+            else
+              gap_count=$((gap_count + 1))
+              echo "::warning::Unresolved Stage 1 BigInt boundary: $probe (exit $exit_code)"
+              echo "PROBE_VERDICT=UNRESOLVED MODE=$probe"
+            fi
+          done
+          echo "STAGE01_EXTREME_DIAGNOSTIC_PASS=$pass_count UNRESOLVED=$gap_count (non-gating, NOT Stage 1 acceptance)"
+          {
+            echo "## Fortran Stage 1 extreme BigInt diagnostics (non-gating)"
+            echo "Passing probes: $pass_count; unresolved probes: $gap_count."
+            echo "An unresolved probe is NOT a passing test; Stage 1 full acceptance is not asserted."
+          } >> "$GITHUB_STEP_SUMMARY"
