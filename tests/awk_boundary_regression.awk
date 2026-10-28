@@ -158,6 +158,23 @@ BEGIN {
     choose_rank_wide(WIDE_N)
     expect_exact("wide original fourth+1 five-digit forward wrap", CHOSEN_RANK, bi_sub(bi_add(bi_add(bi_mul_small(WIDE_CUBE,2),WIDE_SQUARE),M),"3"))
 
+    # Five-digit to six-digit transition at the original M=2^127-1.
+    # N=M^5 uses five digits; N=M^5+1 requires six.
+    WIDE_FIFTH=bi_mul(WIDE_FOURTH,M)
+    STREAM_FIRST=bi_sub(M,"5"); STREAM_STEP=1
+    choose_rank_wide(WIDE_FIFTH)
+    expect_exact("wide original fifth five-digit boundary", CHOSEN_RANK, bi_sub(bi_sub(bi_sub(bi_sub(bi_sub(WIDE_FIFTH,WIDE_FOURTH),bi_mul_small(WIDE_CUBE,2)),bi_mul_small(WIDE_SQUARE,3)),bi_mul_small(M,4)),"5"))
+
+    WIDE_N=bi_add(WIDE_FIFTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original fifth+1 six-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original fifth+1 six-digit backward acceptance", CHOSEN_RANK, bi_add(bi_sub(bi_sub(bi_sub(bi_sub(WIDE_FIFTH,bi_mul_small(WIDE_FOURTH,4)),bi_mul_small(WIDE_CUBE,3)),bi_mul_small(WIDE_SQUARE,2)),bi_mul_small(M,2)),"6"))
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original fifth+1 six-digit forward wrap", CHOSEN_RANK, bi_sub(bi_add(bi_add(bi_add(bi_mul_small(WIDE_FOURTH,3),bi_mul_small(WIDE_CUBE,2)),WIDE_SQUARE),M),"4"))
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
