@@ -259,6 +259,27 @@ def main():
             raise AssertionError("cone sparse-checkout did not restore src/")
         probe(tool, root, manifest, base, docs, True)
         count += 1
+        # The reverse cone sparse-index case must fail closed as well:
+        # include/ is omitted while protected src/ and tools/ remain on disk.
+        run_git(root, "sparse-checkout", "set", "--cone", "--sparse-index",
+                "src", "tools")
+        sparse_stage = run_git(root, "ls-files", "--sparse", "--stage", "--", "include")
+        sparse_flags = run_git(root, "ls-files", "--sparse", "-v", "--", "include")
+        if not (sparse_stage.startswith("040000 ") and
+                sparse_stage.endswith("\tinclude/") and sparse_flags == "S include/"):
+            raise AssertionError("include/ was not represented by a sparse-index directory")
+        if ((root / "include/pastafari/monster.hpp").exists() or
+                not (root / "src/monster.cpp").is_file() or
+                not (root / "tools/soak_vector_adapter.cpp").is_file()):
+            raise AssertionError("cone sparse-checkout did not selectively omit include/")
+        probe(tool, root, manifest, base, docs, False,
+              "protected source missing or symlinked:")
+        count += 1
+        run_git(root, "sparse-checkout", "disable")
+        if not (root / "include/pastafari/monster.hpp").is_file():
+            raise AssertionError("cone sparse-checkout did not restore include/")
+        probe(tool, root, manifest, base, docs, True)
+        count += 1
     print(f"SOAK_SOURCE_PROVENANCE_TESTS={count}/{count}_PASS")
 
 
