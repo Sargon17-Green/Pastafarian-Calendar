@@ -80,3 +80,36 @@ evidence SHA-256 is
    Native verification.
 4. Only after all 99 quick groups pass should full and soak testing resume,
    with bounded execution and preservation of failures.
+
+## Follow-up: bounded 47-month fixture preflight and extended audit
+
+A further source-only change has been made to `source/the weaving shortcut checks`.
+Immediately before the potentially expensive 47-month counting call, the
+existing QA group now inspects the actual linked records and refuses to enter
+the count unless all four fixture properties hold: exactly 47 records, two
+remaining days in every record, 47 months already started, and no month
+finished. Failure generates a distinct test-report message; no reference
+count, calendar rule, or resource ceiling was relaxed. This may prevent a
+runaway recursive fallback when a faulty setup is responsible, but is not a
+confirmed fix for the previously observed `1260` result. It has **not** been
+compiled or run with CAL following the quarantined-compiler event.
+
+A new safe, independent Python arithmetic audit extended exhaustive tests to
+**19,525** remainder vectors across 2–6 synthetic four-day months. The
+prefix-checked direct/short-cut models were applicable in **19,269** cases;
+all matched an independently cached legal-next-occurrence recurrence.
+A further five independent-model tests checked the new 47-record preflight,
+including wrong list length, wrong remaining count, unstarted and finished
+months; all passed. The 73-digit `93!!` oracle was reverified by two exact
+formulas. These results validate the *mathematical model only* and do not
+prove the CAL parser/compiler or runtime behavior.
+
+External audit files, kept outside the Plain English Programming branch:
+`PEP_WEAVING_SAFE_STATIC_AUDIT_v140.py` and
+`PEP_WEAVING_SAFE_STATIC_AUDIT_v140.json`. JSON evidence SHA-256:
+`2e26e1c1c3202248c21304b3a3b3d6779607afe5b156d0cd50ed92287eaf897a`.
+
+Work remains SECURITY_BLOCKED_CONFIRMED. Do not resume Native execution using
+the quarantined compiler or bypass Defender. After obtaining a separately
+validated compiler, verify syntax of the added preflight, run the original 99
+QA groups, and investigate the first real observed mismatch before full/soak.
