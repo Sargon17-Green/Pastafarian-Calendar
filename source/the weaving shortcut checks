@@ -51,6 +51,24 @@ To check the two-month closed weaving counts:
     put "A single unfinished month does not have one continuation." into the check report; exit.
   If the weaving selection's memo entry count is not 0,
     put "Closed two-month cases used the sparse memo unnecessarily." into the check report; exit.
+  Check reversed finished month order.
+
+\ Impossible completion order: month two has finished while month one
+\ still has two days left. Neither shortcut may return a completion.
+\ This checks the existing shortcut QA group without changing its count.
+To check reversed finished month order:
+  Prepare two synthetic months.
+  Count all possible month weavings.
+  Find the woven month state given 1.
+  Put 2 into the examined woven month state's remaining days.
+  Find the woven month state given 2.
+  Put 0 into the examined woven month state's remaining days.
+  Put 2 into the weaving selection's days remaining.
+  Count weaving completions into the weaveshortcheck.
+  If the weaveshortcheck is not "0",
+    put "A later month finished before an earlier month." into the check report; exit.
+  If the weaving selection's memo entry count is not 0,
+    put "Forbidden finish order created memo records." into the check report; exit.
 
 To set the first three woven remaining counts to two:
   Put 1 into the weavecheckedordinal.
