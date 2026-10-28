@@ -159,7 +159,7 @@ end;
 
 constructor TCutletPartitionFamily.Create(G, K, RequiredBoundaryOrMinusOne: Integer);
 var
-  Size: Int64;
+  Size, GDimension, KDimension: Int64;
 begin
   inherited Create;
   if (G < 1) or (K < 1) or (K > G) then
@@ -170,9 +170,20 @@ begin
   FG := G;
   FK := K;
   FRequired := RequiredBoundaryOrMinusOne;
-  Size := Int64(FG + 1) * Int64(FK + 1) * Int64(FG + 1) * 2;
-  if Size > High(Integer) then
+  { Compute 2*(G+1)*(K+1)*(G+1) with bounded intermediates.
+    In particular, Int64(FG + 1) evaluates FG + 1 as Integer first. }
+  GDimension := Int64(FG) + 1;
+  KDimension := Int64(FK) + 1;
+  Size := 2;
+  if GDimension > High(Integer) div Size then
     raise ERangeError.Create('Tabela de memoização de partições demasiado grande.');
+  Size := Size * GDimension;
+  if KDimension > High(Integer) div Size then
+    raise ERangeError.Create('Tabela de memoização de partições demasiado grande.');
+  Size := Size * KDimension;
+  if GDimension > High(Integer) div Size then
+    raise ERangeError.Create('Tabela de memoização de partições demasiado grande.');
+  Size := Size * GDimension;
   SetLength(FKnown, Integer(Size));
   SetLength(FMemo, Integer(Size));
 end;

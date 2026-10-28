@@ -39,7 +39,16 @@ jobs:
             echo "COMPILER=$(command -v fpc)"
             fpc -iV
             cd test
+            set +e
             sh build_and_run_stage01.sh
+            stage01_status=$?
+            sh build_and_run_cutlet_bounds.sh
+            cutlet_status=$?
+            echo "STAGE01_EXIT=$stage01_status"
+            echo "CUTLET_BOUNDS_EXIT=$cutlet_status"
+            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ]; then
+              exit 1
+            fi
           } 2>&1 | tee evidence/stage01-native-fpc.log
 
       - name: Preserve native execution log
