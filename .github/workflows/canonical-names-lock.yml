@@ -59,6 +59,20 @@ jobs:
           } else {
             throw 'Stage 22 has neither an awaiting native test nor a verified seal'
           }
+      - name: Verify sealed Stage 23 finalizer idempotency twice
+        if: github.ref == 'refs/heads/PowerShell+Tagalog'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & .\tests\VerifyFinalizeStage23Idempotency.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Stage 23 finalizer idempotency failed.' }
+      - name: Retain Stage 23 finalizer idempotency evidence
+        if: always() && github.ref == 'refs/heads/PowerShell+Tagalog'
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-powershell-tagalog-stage23-finalizer-idempotency
+          path: ~/Downloads/Stage23-Finalize-Idempotency-*/
+          if-no-files-found: error
       - name: Retain runner-side stage metadata
         if: always()
         uses: actions/upload-artifact@v4
