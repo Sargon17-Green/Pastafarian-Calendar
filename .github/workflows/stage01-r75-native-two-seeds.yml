@@ -1,0 +1,113 @@
+name: Stage 1 R75 original native - two hash seeds
+
+on:
+  push:
+    branches:
+      - 'Perl+國語'
+    paths:
+      - '.github/workflows/stage01-r75-native-two-seeds.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-r75-two-seeds:
+    if: github.ref_name == 'Perl+國語'
+    name: R75 native first=${{ matrix.first }} second=${{ matrix.second }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        first: [1, 2, 3]
+        second: [1, 2, 3]
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PERL_PERTURB_KEYS: '2'
+    steps:
+      - name: Checkout original Stage 1 source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Verify original runner and audit syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -e 'die "Perl 5.40 required\n" if $] < 5.040'
+          test -r /proc/self/status
+          perl -Ilib -It/lib -c tools/audit_r75_fivemonth_prefix_tree.pl
+          perl -Ilib -It/lib -c tools/profile_r75_fivemonth_prefix_tree.pl
+      - name: Execute both seeds and compare complete original native evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-PERL-GUOYU\nHEAD=%s\nfirst=%s\nsecond=%s\n' \
+            "$GITHUB_SHA" "${{ matrix.first }}" "${{ matrix.second }}" > evidence/source.txt
+          for seed in 11 97; do
+            echo "Executing original R75 Native: first=${{ matrix.first }} second=${{ matrix.second }} PERL_HASH_SEED=$seed"
+            set +e
+            PERL_HASH_SEED="$seed" timeout --signal=TERM --kill-after=5s 195s \
+              perl -Ilib -It/lib tools/profile_r75_fivemonth_prefix_tree.pl \
+              --first ${{ matrix.first }} --second ${{ matrix.second }} \
+              --seconds 185 --rss-kib 393216 \
+              > "evidence/seed_${seed}.stdout" 2> "evidence/seed_${seed}.stderr"
+            code=$?
+            set -e
+            printf '%s\n' "$code" > "evidence/seed_${seed}.exit"
+            cat "evidence/seed_${seed}.stdout"
+            cat "evidence/seed_${seed}.stderr" >&2
+            if [ "$code" -ne 0 ]; then
+              echo "::error::Original R75 Native seed $seed exited $code"
+              exit 1
+            fi
+            if [ -s "evidence/seed_${seed}.stderr" ]; then
+              echo "::error::Original R75 Native seed $seed produced stderr"
+              exit 1
+            fi
+            grep '^R75_COMPLETE passed=1 blocked=0 failed=0 ' \
+              "evidence/seed_${seed}.stdout" > "evidence/seed_${seed}.complete"
+            grep '^R75_WATCH passed=1 blocked=0 failed=0 ' \
+              "evidence/seed_${seed}.stdout" > "evidence/seed_${seed}.watch"
+            test "$(wc -l < "evidence/seed_${seed}.complete")" -eq 1
+            test "$(wc -l < "evidence/seed_${seed}.watch")" -eq 1
+            grep -q "first=${{ matrix.first }} second=${{ matrix.second }} vectors=27 " \
+              "evidence/seed_${seed}.complete"
+            grep -q "first=${{ matrix.first }} second=${{ matrix.second }} " \
+              "evidence/seed_${seed}.watch"
+            awk '{
+              ok=0;
+              for (i=1; i<=NF; i++) {
+                if ($i ~ /^max_RSS_KiB=[0-9]+$/) {
+                  split($i,kv,"=");
+                  if (kv[2]+0 <= 393216) ok=1;
+                }
+              }
+              exit !ok
+            }' "evidence/seed_${seed}.watch"
+          done
+          cmp evidence/seed_11.complete evidence/seed_97.complete
+          sha256sum evidence/seed_11.complete evidence/seed_97.complete \
+            | tee evidence/complete_line_sha256.txt
+          echo 'R75_TWO_SEEDS result=PASS first=${{ matrix.first }} second=${{ matrix.second }} seeds=11,97' \
+            | tee evidence/result.txt
+          cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+          cat evidence/seed_11.complete >> "$GITHUB_STEP_SUMMARY"
+          cat evidence/seed_11.watch >> "$GITHUB_STEP_SUMMARY"
+          cat evidence/seed_97.watch >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve exact stdout stderr exit and comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r75-native-${{ matrix.first }}-${{ matrix.second }}-two-seeds
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
