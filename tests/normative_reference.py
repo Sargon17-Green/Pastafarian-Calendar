@@ -6,6 +6,78 @@ from math import comb, factorial
 from pathlib import Path
 from typing import Iterable
 
+# Fixed v1.3.2 name witnesses, independently audited against the canonical name list.
+# Test reference code must not read presentation names from the production package.
+FROZEN_CUTLET_NAMES = (
+    "Tunç",
+    "Tilki",
+    "Böbrek",
+    "Lagaş",
+    "Düşünce",
+    "Dokuz parçadan dördü",
+    "Palguraş",
+    "topalak",
+    "Salkım",
+    "Akrep",
+    "Kül",
+    "Buğday",
+    "Nehir",
+    "Kahkaha",
+    "Akad",
+    "Boynuz",
+    "Boş kavanoz",
+)
+
+FROZEN_MONTH_NAMES = (
+    "Kil",
+    "Nar",
+    "Dirsek",
+    "Kıskançlık",
+    "Eridu",
+    "Diş macunu",
+    "Beş parçadan üçü",
+    "Karşumav",
+    "Leopar",
+    "Kalay",
+    "Pus",
+    "Akgünlük",
+    "İğ",
+    "Kaburga",
+    "Keçiboynuzu",
+    "Uruk",
+    "Utanç",
+    "Deve",
+    "Bakır",
+    "Kuyu",
+    "Yumurta sarısı",
+    "Yıldız",
+    "Bal",
+    "Dalak",
+    "Kireçtaşı",
+    "Sevinç",
+    "İncir",
+    "Ninova",
+    "Kurbağa",
+    "Zift",
+    "Lamba",
+    "Kapalı kapı",
+    "Susam",
+    "Ense",
+    "Gümüş",
+    "Susa",
+    "Fırtına",
+    "Eşek",
+    "Un",
+    "Pişmanlık",
+    "Babil",
+    "Dil",
+    "Keten",
+    "Tuz",
+    "Armut",
+    "Yay",
+    "Kum",
+)
+
 M = 2**127 - 1
 TABLETS_DAY = -278522
 FOUNDATION_DAY = -15055671
@@ -1131,14 +1203,12 @@ class NormativeCalendar:
         )
 
     def calendar_date(self, calculation_day: int, target_day: int) -> DateResult:
-        from pastafari_calendar.source_language_catalog import SOURCE_LANGUAGE_CATALOG
-
         ids = self.calendar_date_ids(calculation_day, target_day)
         return DateResult(
             ids.year_number,
-            SOURCE_LANGUAGE_CATALOG.cutlet_text(ids.cutlet_name_index),
+            FROZEN_CUTLET_NAMES[ids.cutlet_name_index - 1],
             ids.day_in_cutlet,
-            SOURCE_LANGUAGE_CATALOG.month_text(ids.month_name_index),
+            FROZEN_MONTH_NAMES[ids.month_name_index - 1],
             ids.day_in_month,
         )
 
