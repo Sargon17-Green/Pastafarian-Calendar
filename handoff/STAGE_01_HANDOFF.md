@@ -1,6 +1,6 @@
 > **维护勘误（2026-10-28；不启动新阶段）**：以下正文是第 1 阶段尚未通过实际编译时的**历史交接记录**，为保留故障及来源证据而原样保留；不应把其中的“尚未 GREEN”当作当前状态。正式当前状态见 [DEVELOPMENT_STAGE.md](../DEVELOPMENT_STAGE.md)、[STAGE_01_EXECUTION_STATUS.txt](../STAGE_01_EXECUTION_STATUS.txt) 和 [docs/STAGE_01_COMPLETION_AUDIT.md](../docs/STAGE_01_COMPLETION_AUDIT.md)：Windows / GnuCOBOL 3.2 严格编译与 bootstrap 181/181 的历史执行证据已记录为 PASS，LAST_COMPLETED_STAGE=1，第 2 阶段未开始。
 >
-> **当前复验入口**：Windows 使用 [RUN_THIS_STAGE1_VERIFY.cmd](../RUN_THIS_STAGE1_VERIFY.cmd)。下文的 `handoff/build_and_test.sh` 是早期探索性脚本，未使用 `-Werror` 且缺少 `test/ownership_error_tests.cob`，不能充当现行完整验收。新加入的 [Linux Native CI](../.github/workflows/stage1-native-regression.yml) 只是增量回归检查，只有实际执行日志才能证明其是否通过。历史 `FOREIGN_LANGUAGE_USAGE` 违规记录仍然保留。
+> **当前复验入口**：Windows 使用 [RUN_THIS_STAGE1_VERIFY.cmd](../RUN_THIS_STAGE1_VERIFY.cmd)。下文的 `handoff/build_and_test.sh` 是早期探索性脚本，未使用 `-Werror` 且缺少 `test/ownership_error_tests.cob`，不能充当现行完整验收。新加入的 [Linux Native CI](../.github/workflows/canonical-names-lock.yml) 只是增量回归检查，只有实际执行日志才能证明其是否通过。历史 `FOREIGN_LANGUAGE_USAGE` 违规记录仍然保留。
 
 ---
 
