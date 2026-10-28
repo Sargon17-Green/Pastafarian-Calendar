@@ -238,6 +238,27 @@ def main():
                 raise AssertionError(f"sparse-checkout failed to restore: {name!r}")
             probe(tool, root, manifest, base, docs, True)
             count += 1
+        # Cone sparse-index may collapse src/ to one tree entry while keeping
+        # include/ materialized. The absence of protected source bytes must
+        # fail closed even when Git's index represents a sparse directory.
+        run_git(root, "sparse-checkout", "set", "--cone", "--sparse-index",
+                "include", "tools")
+        sparse_stage = run_git(root, "ls-files", "--sparse", "--stage", "--", "src")
+        sparse_flags = run_git(root, "ls-files", "--sparse", "-v", "--", "src")
+        if not (sparse_stage.startswith("040000 ") and
+                sparse_stage.endswith("\tsrc/") and sparse_flags == "S src/"):
+            raise AssertionError("src/ was not represented by a sparse-index directory")
+        if ((root / "src/monster.cpp").exists() or
+                not (root / "include/pastafari/monster.hpp").is_file()):
+            raise AssertionError("cone sparse-checkout did not selectively omit src/")
+        probe(tool, root, manifest, base, docs, False,
+              "protected source missing or symlinked:")
+        count += 1
+        run_git(root, "sparse-checkout", "disable")
+        if not (root / "src/monster.cpp").is_file():
+            raise AssertionError("cone sparse-checkout did not restore src/")
+        probe(tool, root, manifest, base, docs, True)
+        count += 1
     print(f"SOAK_SOURCE_PROVENANCE_TESTS={count}/{count}_PASS")
 
 
