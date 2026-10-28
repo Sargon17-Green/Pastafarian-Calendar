@@ -1,4 +1,4 @@
-# Pelaksanaan PHP + Bahasa Melayu — Stage 23 (PATCH 11)
+# Pelaksanaan PHP + Bahasa Melayu — Stage 35 (PATCH 17)
 
 Projek ini ialah bootstrap bebas untuk garis pelaksanaan PHP dengan Bahasa Melayu sebagai bahasa sumber manusia. Ia dibina daripada kosong berdasarkan rujukan normatif terbenam dalam arahan Stage 1. Tiada kod, ujian, fixture, output, hash atau artifak daripada pelaksanaan lain digunakan.
 
@@ -521,3 +521,8 @@ php -d memory_limit=512M tests/stage35_patch17_tests.php
 ```
 
 Semua Stage1–34, fixture, lint PHP dan kunci nama kanonik mesti lulus Native CI. Stage35 mempunyai pekerjaan khusus `audit_php_bahasa_melayu_stage35`; semua **enam pekerjaan** pada SHA HEAD yang sama wajib SUCCESS. **Status: GREEN** selepas Native GitHub Actions run `40404749682` pada HEAD `0d16b132015b04406792964e7bab68ab179b38c9`: keenam-enam pekerjaan (`verify`, audit asas, Stage24–32, Stage33, Stage34 EXPECTED_RED wrapper, Stage35 PATCH17) tamat `SUCCESS`. Stage34 kekal dengan kegagalan sejarah yang disengajakan; jangan mulakan Stage36 tanpa kontrak dan pelan yang disahkan. Jangan ubah `main`, fixture atau katalog.
+
+
+## Pengesahan regresi Stage35 terkini (2026-10-27)
+
+Perlindungan dua penolakan berturut-turut (`REJECTION_TWO_STEP_CUTOFF`, `REJECTION_TWO_STEP`) ditambah dalam [`stage35_patch17_tests.php`](tests/stage35_patch17_tests.php) pada commit `751eaf47d1099a4fc465cad0d5142d72661c02da`. Native GitHub Actions [`40554857029`](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40554857029) pada commit `e958da7c01fc2e1bad9e13cfacf720cf699a8b32` selesai `success` dengan keenam-enam pekerjaan berjaya, termasuk audit Stage35. Bukti terperinci berada dalam [`STAGE_35_PATCH_17_HANDOFF.md`](artifacts/STAGE_35_PATCH_17_HANDOFF.md). Ini tidak membenarkan Stage36; kontrak/pelan yang disahkan dan kebenaran pengguna yang jelas masih diperlukan.
