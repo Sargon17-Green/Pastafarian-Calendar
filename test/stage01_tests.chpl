@@ -95,7 +95,7 @@ proc testPermutationsAndSelectors() {
 }
 
 proc testOrderedFamilies() {
-  check(fallingFactorialBig(17, 17) > M,
+  check(fallingFactorialBig(47, 47) > M,
         "комбінаторний простір може бути більшим за M без переповнення");
 
   const firstNames = unrankDistinctNameIndices(3, 2, new bigint(1));
