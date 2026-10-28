@@ -71,6 +71,11 @@ To remember the second short month:
 To resolve short suffix completions:
   Inspect unfinished short months.
   If the short weaving suffix's completed is 0, exit.
+  Inspect the woven start prefix.
+  If the wsinvalidprefix is 1,
+    put "0" into the short weaving suffix's completions; exit.
+  If the wsinvalidfinish is 1,
+    put "0" into the short weaving suffix's completions; exit.
   Put "1" into the short weaving suffix's completions.
   If the short weaving suffix's unfinished is less than 2, exit.
   If the short weaving suffix's first started is 0,
