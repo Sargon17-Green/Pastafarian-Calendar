@@ -1,0 +1,87 @@
+name: Dart Hebrew Stage 1 Native Verification
+
+on:
+  push:
+    branches:
+      - 'Dart+עברית'
+    paths:
+      - '.github/workflows/dart-hebrew-stage1-native.yml'
+      - 'pubspec.yaml'
+      - 'lib/**'
+      - 'bin/**'
+      - 'fixtures/**'
+      - 'test_support/**'
+      - 'tool/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dart-hebrew-stage1-native-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native-stage1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout branch under test
+        uses: actions/checkout@v4
+
+      - name: Install Dart SDK 3.13.2
+        id: sdk
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+
+      - name: Dart version
+        run: dart --version
+
+      - name: Resolve packages
+        id: dependencies
+        run: dart pub get
+
+      - name: Check formatting without modifying files
+        id: format
+        continue-on-error: true
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Static analysis
+        id: analyze
+        continue-on-error: true
+        run: dart analyze
+
+      - name: Functional Stage 1 tests
+        id: tests
+        continue-on-error: true
+        run: dart run bin/stage1_tests.dart
+
+      - name: Summarize independent results and enforce all gates
+        if: always()
+        env:
+          SDK: ${{ steps.sdk.outcome }}
+          DEPENDENCIES: ${{ steps.dependencies.outcome }}
+          FORMAT: ${{ steps.format.outcome }}
+          ANALYZE: ${{ steps.analyze.outcome }}
+          TESTS: ${{ steps.tests.outcome }}
+        shell: bash
+        run: |
+          {
+            echo '## Dart+עברית — Stage 1 Native Verification'
+            echo ''
+            echo "Commit: \\`${GITHUB_SHA}\\`"
+            echo ''
+            echo '| Gate | Outcome |'
+            echo '| --- | --- |'
+            for gate in SDK DEPENDENCIES FORMAT ANALYZE TESTS; do
+              echo "| ${gate} | ${!gate} |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+          for gate in SDK DEPENDENCIES FORMAT ANALYZE TESTS; do
+            if [[ "${!gate}" != success ]]; then
+              echo "::error::${gate} outcome is ${!gate}; Stage 1 not verified"
+              exit 1
+            fi
+          done
+          echo 'Stage 1 native verification: all gates passed.'
