@@ -1,0 +1,52 @@
+name: Stage 1 Native Object Pascal
+
+on:
+  push:
+    branches:
+      - 'Object-Pascal+Português'
+    paths:
+      - '.github/workflows/stage01-native-object-pascal.yml'
+      - 'src/**'
+      - 'test/**'
+      - 'DEVELOPMENT_STAGE.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage01-native-fpc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout this commit
+        uses: actions/checkout@v4
+
+      - name: Install Free Pascal compiler
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fp-compiler
+
+      - name: Compile and execute Stage 1 test suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          {
+            echo "UTC_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "HEAD=$(git rev-parse HEAD)"
+            echo "COMPILER=$(command -v fpc)"
+            fpc -iV
+            cd test
+            sh build_and_run_stage01.sh
+          } 2>&1 | tee evidence/stage01-native-fpc.log
+
+      - name: Preserve native execution log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage01-native-fpc-log
+          path: evidence/stage01-native-fpc.log
+          if-no-files-found: warn
+          retention-days: 30
