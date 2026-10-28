@@ -31,7 +31,7 @@ Public Sub RebuildVisibleArithmetic()
     Const RADIX As Long = 10000
     Dim inp As Worksheet, add As Worksheet, p As Worksheet, d As Worksheet
     Dim i As Long, j As Long, k As Long, r As Long, c As Long
-    Dim terms As String, qi As String, qp As String, message As String
+    Dim terms As String, qi As String, qp As String, message As String, zeroTile As String
     Dim calcMode As XlCalculation, screenWasOn As Boolean, stateSaved As Boolean
     On Error GoTo Failed
 
@@ -56,8 +56,13 @@ Public Sub RebuildVisibleArithmetic()
         r = 8 + i
         inp.Cells(r, 5).Formula = "=TEXT(C" & r & ",""0000"")"
         inp.Cells(r, 6).Formula = "=TEXT(D" & r & ",""0000"")"
-        inp.Cells(r, 7).Formula = "=INDEX($E$8:$E$71,$F$5-A" & r & ")"
-        inp.Cells(r, 8).Formula = "=INDEX($F$8:$F$71,$F$5-A" & r & ")"
+        If i = N - 1 Then
+            zeroTile = """0000"""
+        Else
+            zeroTile = """"""
+        End If
+        inp.Cells(r, 7).Formula = "=IF(SUM($C$" & (71 - i) & ":$C$71)=0," & zeroTile & ",TEXT(C" & (71 - i) & ",""0000""))"
+        inp.Cells(r, 8).Formula = "=IF(SUM($D$" & (71 - i) & ":$D$71)=0," & zeroTile & ",TEXT(D" & (71 - i) & ",""0000""))"
 
         add.Cells(r, 1).Formula = "=" & i
         add.Cells(r, 2).Formula = "=" & qi & "!C" & r
