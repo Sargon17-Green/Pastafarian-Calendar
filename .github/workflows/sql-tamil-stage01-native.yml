@@ -1,0 +1,103 @@
+name: SQL Tamil Stage 1 Native PostgreSQL
+
+on:
+  push:
+    branches:
+      - 'SQL+தமிழ்'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sql-tamil-stage01-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native-stage01:
+    name: PostgreSQL 17 — Stage 1 and saved-sum
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PG_CONTAINER: sql-tamil-stage01-postgres
+    steps:
+      - name: Check out exact triggering commit
+        uses: actions/checkout@v4
+
+      - name: Start isolated native PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name "$PG_CONTAINER" --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres "$PG_CONTAINER" pg_isready -q -U postgres; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            docker logs "$PG_CONTAINER"
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/sql-tamil-stage01-logs"
+          docker exec -u postgres "$PG_CONTAINER" postgres --version \
+            | tee "$RUNNER_TEMP/sql-tamil-stage01-logs/versions.txt"
+          docker exec -u postgres "$PG_CONTAINER" psql --version \
+            | tee -a "$RUNNER_TEMP/sql-tamil-stage01-logs/versions.txt"
+          printf 'Git SHA: %s\n' "$GITHUB_SHA" \
+            | tee -a "$RUNNER_TEMP/sql-tamil-stage01-logs/versions.txt"
+
+      - name: Test normative reference and new saved-sum discriminator
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres "$PG_CONTAINER" \
+            psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'CREATE DATABASE sql_tamil_reference'
+          docker exec -u postgres "$PG_CONTAINER" \
+            psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_reference \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql/test/20_stage01_tests.sql \
+            -c 'SELECT 1 / ((count(*) = 52 AND bool_and(ok))::integer) AS ordinary_52_of_52 FROM stage01_assertions' \
+            -f /work/sql/test/25_saved_sum_discriminator.sql \
+            -c 'SELECT 1 / ((count(*) = 7 AND bool_and(ok))::integer) AS saved_sum_7_of_7 FROM saved_sum_discriminator_assertions' \
+            -f /work/sql/test/30_stage01_heavy_reference.sql \
+            2>&1 | tee "$RUNNER_TEMP/sql-tamil-stage01-logs/reference.txt"
+
+      - name: Test production isolation in a separate clean database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres "$PG_CONTAINER" \
+            psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'CREATE DATABASE sql_tamil_production'
+          docker exec -u postgres "$PG_CONTAINER" \
+            psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_production \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/test/40_production_isolation.sql \
+            -c 'SELECT 1 / ((count(*) = 4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM stage01_production_isolation_assertions' \
+            2>&1 | tee "$RUNNER_TEMP/sql-tamil-stage01-logs/isolation.txt"
+
+      - name: Preserve native execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-stage01-native-${{ github.run_id }}
+          path: ${{ runner.temp }}/sql-tamil-stage01-logs/
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Stop test database container
+        if: always()
+        shell: bash
+        run: |
+          docker rm --force "$PG_CONTAINER" 2>/dev/null || true
