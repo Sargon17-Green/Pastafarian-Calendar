@@ -1,0 +1,39 @@
+name: Clojure Stage 01 Native Tests
+
+on:
+  push:
+    branches:
+      - 'Clojure+Nederlands'
+    paths:
+      - '.github/workflows/clojure-stage01-native.yml'
+      - 'src/**'
+      - 'test/**'
+      - 'deps.edn'
+      - 'run_stage01.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clojure-stage01-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Clojure CLI
+        uses: DeLaGuardo/setup-clojure@13.7.0
+        with:
+          cli: 1.12.5.1664
+      - name: Native Stage 1 tests
+        run: clojure -M:test
