@@ -138,3 +138,33 @@ was populated. Continue to preserve the Defender quarantine and the
 
 The final source-only commit for this probe is
 `26f6d5be51df657af219be33312047590911e809`.
+
+## 2026-10-29: CAL-4700 staged on the user's Windows host; security review pending
+
+The user's `CAL4700_INSTALL_RESULT(2).txt` records that installer v5
+successfully placed `cal-4700.exe` at:
+`%LOCALAPPDATA%\\Programs\\PlainEnglishCAL4700\\CAL4700_2d44defd\\cal-4700.exe`.
+The source archive was pinned to `elenderg/PAL-1000` commit
+`2d44defdedf24519bba754114ee66e6d1defff1e`, with ZIP SHA-256
+`A1E7B9D96373562AEE7E1CBC8EBB5FCC237C46EB6D621FCF69D532FB8DE14165`.
+The install report asserts that the binary was **not run**, no Defender
+exceptions were added, and execution policy was unchanged. A completed
+Defender scan does **not** prove executable safety.
+
+A separate single-file, read-only Windows audit was prepared outside the
+repository in the ChatGPT Library folder `/Pending_User_Execution/`:
+`CAL4700_SECURITY_AUDIT_v1.cmd`. It performs **no compiler execution and
+no downloads**; it records the installed executable's SHA-256, PE header
+and expected size, compares the SHA-256 with the installer's evidence file,
+checks Authenticode status and Defender health, and reports matching Defender
+detections/events. It explicitly marks the compiler *not approved*, even if
+the local file-integrity checks agree. The package has static checks only
+and has not itself been executed on Windows.
+
+**Current acceptance:** CAL-4700 INSTALLED / NOT EXECUTED / NOT
+INDEPENDENTLY SECURITY APPROVED. CAL-4018 remains quarantined; the
+47-month result of 1260 remains unresolved; 99 Native QA groups, full
+and soak are **not verified**. Next gather the read-only audit report,
+review any security signals, and only if independently cleared consider
+an isolated, minimal compile smoke test. No bypass of security protection
+and no premature Native PASS.
