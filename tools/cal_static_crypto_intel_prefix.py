@@ -188,6 +188,7 @@ def audit(read_source, *, strict: bool = True) -> dict:
         "intel_prefix_categories": counts_with_zeros,
         "intel_invalid_literals": len(malformed),
         "lexical_gate_pass": not violations,
+        "violations": violations,
         "limitations": (
             "Sequential source statements and first x86 opcode prefixes only; "
             "not a complete call graph, instruction decoder or runtime proof."
