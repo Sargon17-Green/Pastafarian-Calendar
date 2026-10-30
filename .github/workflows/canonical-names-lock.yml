@@ -25,7 +25,7 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  clojure-native-stage02-discovery02:
+  clojure-native-stage02-discovery03:
     if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands'
     runs-on: ubuntu-latest
     timeout-minutes: 20
