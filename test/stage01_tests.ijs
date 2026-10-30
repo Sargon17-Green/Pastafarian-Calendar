@@ -12,7 +12,23 @@ check=: 4 : 0
   1
 )
 
+NB. Verificările negative trebuie să eșueze în validator fără a opri suita.
+rejectsDiscreteDay=: 3 : 0
+  try.
+    monsterValidateDiscreteDay y
+    0
+  catch.
+    1
+  end.
+)
+
 echo 'Stage 1 — pornire suită J + română'
+(monsterValidateDiscreteDay 0x) check 'validatorul acceptă o zi scalară extinsă zero'
+(monsterValidateDiscreteDay _1x) check 'validatorul acceptă o zi scalară extinsă negativă'
+(rejectsDiscreteDay 1 2) check 'validatorul respinge vectorul cu două zile'
+(rejectsDiscreteDay 2 2 $ 1 2 3 4) check 'validatorul respinge matricea de zile'
+(rejectsDiscreteDay 3r2) check 'validatorul respinge ziua rațională fracționară'
+
 
 (validateSourceLanguageCatalog '') check 'catalogul românesc are 17 + 47 intrări unice'
 (CUTLET_CANONICAL_INDEX -: 1+i.17) check 'indicii canonici ai chiftelelor sunt fixați'
@@ -93,7 +109,7 @@ visibleFoundation=. nr_buildVisibleDrops countsFoundation
 sauceFoundation=. FOUNDATION_DAY nr_sauce FOUNDATION_DAY
 (6 = # >0{sauceFoundation) check 'sosul are exact șase boluri finale'
 (6 = # ~. >1{sauceFoundation) check 'latch-ul ordinii picăturii 46 este o permutare de șase boluri'
-( (/: >1{sauceFoundation) -: 1+i.6 ) check 'ordinea picăturii 46 conține exact ID-urile 1..6'
+( (/:~ >1{sauceFoundation) -: 1+i.6 ) check 'ordinea picăturii 46 conține exact ID-urile 1..6'
 
 ctx=. FOUNDATION_DAY calendarDateSpaghettiBootstrap FOUNDATION_DAY
 (MONSTER_STATUS_NOT_INTEGRATED -: monsterContextStatus ctx) check 'scheletul de producție validează intrarea fără a pretinde integrarea viitoare'
