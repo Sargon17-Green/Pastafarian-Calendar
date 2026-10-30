@@ -560,11 +560,16 @@ final class NormativeReference {
     ];
     for (var i = 2; i <= 46; i++) {
       final old = result[i - 2];
-      final nextWheat = save(square(old.wheat) + BigInt.from(3) * old.barley + BigInt.from(i));
-      final nextBarley = save(square(old.barley) + BigInt.from(5) * old.salt + old.wheat);
-      final nextSalt = save(square(old.salt) + BigInt.from(7) * old.bitter + old.barley);
-      final nextBitter = save(square(old.bitter) + BigInt.from(11) * old.red + old.salt);
-      final nextRed = save(square(old.red) + BigInt.from(13) * old.wheat + old.bitter);
+      final nextWheat = save(
+          square(old.wheat) + BigInt.from(3) * old.barley + BigInt.from(i));
+      final nextBarley =
+          save(square(old.barley) + BigInt.from(5) * old.salt + old.wheat);
+      final nextSalt =
+          save(square(old.salt) + BigInt.from(7) * old.bitter + old.barley);
+      final nextBitter =
+          save(square(old.bitter) + BigInt.from(11) * old.red + old.salt);
+      final nextRed =
+          save(square(old.red) + BigInt.from(13) * old.wheat + old.bitter);
       result.add(Stone(nextWheat, nextBarley, nextSalt, nextBitter, nextRed));
     }
     return List<Stone>.unmodifiable(result);
@@ -573,7 +578,8 @@ final class NormativeReference {
   static Stone _stoneAt(List<Stone> stoneTable, int oneBasedIndex) =>
       stoneTable[oneBasedIndex - 1];
 
-  static List<BigInt> buildHiddenDrops(WorkCounts counts, List<Stone> stoneTable) {
+  static List<BigInt> buildHiddenDrops(
+      WorkCounts counts, List<Stone> stoneTable) {
     final coeff = <List<int>>[
       <int>[3, 4, 6, 8],
       <int>[5, 7, 10, 12],
@@ -614,17 +620,28 @@ final class NormativeReference {
   }
 
   static final List<_VisibleGrindRow> _visibleGrinds = <_VisibleGrindRow>[
-    _VisibleGrindRow(BigInt.from(3), BigInt.from(5), BigInt.from(7), BigInt.from(11), wheat),
-    _VisibleGrindRow(BigInt.from(5), BigInt.from(7), BigInt.from(11), BigInt.from(13), barley),
-    _VisibleGrindRow(BigInt.from(7), BigInt.from(11), BigInt.from(13), BigInt.from(17), salt),
-    _VisibleGrindRow(BigInt.from(11), BigInt.from(13), BigInt.from(17), BigInt.from(19), bitter),
-    _VisibleGrindRow(BigInt.from(13), BigInt.from(17), BigInt.from(19), BigInt.from(23), red),
-    _VisibleGrindRow(BigInt.from(17), BigInt.from(19), BigInt.from(23), BigInt.from(29), wheat),
-    _VisibleGrindRow(BigInt.from(19), BigInt.from(23), BigInt.from(29), BigInt.from(31), barley),
-    _VisibleGrindRow(BigInt.from(23), BigInt.from(29), BigInt.from(31), BigInt.from(37), salt),
-    _VisibleGrindRow(BigInt.from(29), BigInt.from(31), BigInt.from(37), BigInt.from(41), bitter),
-    _VisibleGrindRow(BigInt.from(31), BigInt.from(37), BigInt.from(41), BigInt.from(43), red),
-    _VisibleGrindRow(BigInt.from(37), BigInt.from(41), BigInt.from(43), BigInt.from(47), wheat),
+    _VisibleGrindRow(
+        BigInt.from(3), BigInt.from(5), BigInt.from(7), BigInt.from(11), wheat),
+    _VisibleGrindRow(BigInt.from(5), BigInt.from(7), BigInt.from(11),
+        BigInt.from(13), barley),
+    _VisibleGrindRow(BigInt.from(7), BigInt.from(11), BigInt.from(13),
+        BigInt.from(17), salt),
+    _VisibleGrindRow(BigInt.from(11), BigInt.from(13), BigInt.from(17),
+        BigInt.from(19), bitter),
+    _VisibleGrindRow(BigInt.from(13), BigInt.from(17), BigInt.from(19),
+        BigInt.from(23), red),
+    _VisibleGrindRow(BigInt.from(17), BigInt.from(19), BigInt.from(23),
+        BigInt.from(29), wheat),
+    _VisibleGrindRow(BigInt.from(19), BigInt.from(23), BigInt.from(29),
+        BigInt.from(31), barley),
+    _VisibleGrindRow(BigInt.from(23), BigInt.from(29), BigInt.from(31),
+        BigInt.from(37), salt),
+    _VisibleGrindRow(BigInt.from(29), BigInt.from(31), BigInt.from(37),
+        BigInt.from(41), bitter),
+    _VisibleGrindRow(BigInt.from(31), BigInt.from(37), BigInt.from(41),
+        BigInt.from(43), red),
+    _VisibleGrindRow(BigInt.from(37), BigInt.from(41), BigInt.from(43),
+        BigInt.from(47), wheat),
   ];
 
   static List<BigInt> buildVisibleDrops(
@@ -710,7 +727,8 @@ final class NormativeReference {
   }
 
   static List<int> bowlOrderFromDrop(BigInt dropValue) {
-    final orderNumber = regularMod(dropValue - BigInt.one, BigInt.from(720)) + BigInt.one;
+    final orderNumber =
+        regularMod(dropValue - BigInt.one, BigInt.from(720)) + BigInt.one;
     return bowlOrderFromNumber(orderNumber.toInt());
   }
 
@@ -743,9 +761,12 @@ final class NormativeReference {
       final old = List<BigInt>.from(bowls);
       final pour = List<BigInt>.filled(7, BigInt.zero);
       final stone = _stoneAt(stoneTable, i);
-      pour[1] = save(square(drop) + stone.wheat * old[order[0]] + BigInt.from(3 * i));
-      pour[2] = save(square(drop) + stone.barley * old[order[1]] + BigInt.from(5 * i));
-      pour[3] = save(square(drop) + stone.salt * old[order[2]] + BigInt.from(7 * i));
+      pour[1] =
+          save(square(drop) + stone.wheat * old[order[0]] + BigInt.from(3 * i));
+      pour[2] = save(
+          square(drop) + stone.barley * old[order[1]] + BigInt.from(5 * i));
+      pour[3] =
+          save(square(drop) + stone.salt * old[order[2]] + BigInt.from(7 * i));
       final nextBowls = List<BigInt>.filled(7, BigInt.zero);
       for (var position = 1; position <= 6; position++) {
         final bowlId = order[position - 1];
@@ -780,7 +801,8 @@ final class NormativeReference {
         rawSum += old[bowlId];
       }
       final savedBowlSum = save(rawSum + BigInt.from(149 * stir));
-      final orderNumber = regularMod(savedBowlSum - BigInt.one, BigInt.from(720)) + BigInt.one;
+      final orderNumber =
+          regularMod(savedBowlSum - BigInt.one, BigInt.from(720)) + BigInt.one;
       final order = bowlOrderFromNumber(orderNumber.toInt());
       final nextBowls = List<BigInt>.filled(7, BigInt.zero);
       for (var position = 1; position <= 6; position++) {
@@ -832,15 +854,17 @@ final class NormativeReference {
           BigInt.from(193) * first +
           BigInt.from(197) * result.bowls[6],
     );
-    final step = regularMod(directionNumber, BigInt.from(2)) == BigInt.one ? 1 : -1;
+    final step =
+        regularMod(directionNumber, BigInt.from(2)) == BigInt.one ? 1 : -1;
     return AnswerStream(first, step);
   }
 
   static BigInt answerAt(AnswerStream stream, BigInt k) {
-    return BigInt.one + regularMod(
-      stream.first - BigInt.one + BigInt.from(stream.directionStep) * k,
-      m,
-    );
+    return BigInt.one +
+        regularMod(
+          stream.first - BigInt.one + BigInt.from(stream.directionStep) * k,
+          m,
+        );
   }
 
   static BigInt chooseRankShort(AnswerStream stream, BigInt n) {
@@ -888,10 +912,11 @@ final class NormativeReference {
       if (w <= acceptanceLimit) {
         return regularMod(w - BigInt.one, n) + BigInt.one;
       }
-      w = BigInt.one + regularMod(
-        w - BigInt.one + BigInt.from(stream.directionStep),
-        space,
-      );
+      w = BigInt.one +
+          regularMod(
+            w - BigInt.one + BigInt.from(stream.directionStep),
+            space,
+          );
     }
   }
 
@@ -913,7 +938,8 @@ final class NormativeReference {
     return result;
   }
 
-  static List<int> unrankDistinctNameIndices(int masterLength, int k, BigInt rank1) {
+  static List<int> unrankDistinctNameIndices(
+      int masterLength, int k, BigInt rank1) {
     final total = fallingFactorial(masterLength, k);
     if (rank1 < BigInt.one || rank1 > total) {
       throw RangeError('דרגת השמות מחוץ לטווח.');
@@ -1098,11 +1124,13 @@ final class NormativeReference {
       }
       closeIndex += BigInt.one;
     }
-    candidates.sort((a, b) => _yearLength(openIndex, a).compareTo(_yearLength(openIndex, b)));
+    candidates.sort((a, b) =>
+        _yearLength(openIndex, a).compareTo(_yearLength(openIndex, b)));
     final result = sauce(calculationDay, _gates[openIndex]!);
     final stream = askBowl(result, 1, sealNextYear);
     final rank = chooseRank(stream, BigInt.from(candidates.length)).toInt();
-    return _makeYear(knownYear.number + BigInt.one, openIndex, candidates[rank - 1]);
+    return _makeYear(
+        knownYear.number + BigInt.one, openIndex, candidates[rank - 1]);
   }
 
   Year previousYear(BigInt calculationDay, Year knownYear) {
@@ -1121,11 +1149,13 @@ final class NormativeReference {
       }
       openIndex -= BigInt.one;
     }
-    candidates.sort((a, b) => _yearLength(a, closeIndex).compareTo(_yearLength(b, closeIndex)));
+    candidates.sort((a, b) =>
+        _yearLength(a, closeIndex).compareTo(_yearLength(b, closeIndex)));
     final result = sauce(calculationDay, _gates[closeIndex]!);
     final stream = askBowl(result, 1, sealPreviousYear);
     final rank = chooseRank(stream, BigInt.from(candidates.length)).toInt();
-    return _makeYear(knownYear.number - BigInt.one, candidates[rank - 1], closeIndex);
+    return _makeYear(
+        knownYear.number - BigInt.one, candidates[rank - 1], closeIndex);
   }
 
   Year findTargetYear(BigInt calculationDay, BigInt targetDay) {
@@ -1212,7 +1242,8 @@ final class NormativeReference {
       throw StateError('גבולות מספר החודשים אינם חוקיים.');
     }
     final stream = askBowl(structureSauce, 3, sealMonthCount);
-    final rank = chooseRank(stream, BigInt.from(maxMonths - minMonths + 1)).toInt();
+    final rank =
+        chooseRank(stream, BigInt.from(maxMonths - minMonths + 1)).toInt();
     return minMonths + rank - 1;
   }
 
@@ -1299,7 +1330,8 @@ final class NormativeReference {
     }
     final offset = yearOffset0.toInt();
     final monthId = structure.monthWeaving[offset];
-    final monthCanonicalIndex = structure.monthNameCanonicalIndices[monthId - 1];
+    final monthCanonicalIndex =
+        structure.monthNameCanonicalIndices[monthId - 1];
     var dayInMonth = BigInt.zero;
     for (var p = 0; p <= offset; p++) {
       if (structure.monthWeaving[p] == monthId) {
@@ -1308,7 +1340,8 @@ final class NormativeReference {
     }
     return CalendarTuple(
       yearNumber: year.number,
-      cutletName: SourceLanguageCatalog.cutletText(chosenCutlet.nameCanonicalIndex),
+      cutletName:
+          SourceLanguageCatalog.cutletText(chosenCutlet.nameCanonicalIndex),
       dayInCutlet: dayInCutlet,
       monthName: SourceLanguageCatalog.monthText(monthCanonicalIndex),
       dayInMonth: dayInMonth,

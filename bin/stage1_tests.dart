@@ -16,7 +16,8 @@ void _expectEqual(Object? actual, Object? expected, String name) {
   }
 }
 
-void _expectListEqual(List<Object?> actual, List<Object?> expected, String name) {
+void _expectListEqual(
+    List<Object?> actual, List<Object?> expected, String name) {
   if (actual.length != expected.length) {
     _fail('$name — אורך הרשימה שונה.');
   }
@@ -75,12 +76,17 @@ void main() {
   );
 
   final save = fixture['save'] as Map<String, dynamic>;
-  _expectEqual(NormativeReference.save(BigInt.zero).toString(), save['zero'], 'SAVE של אפס');
-  _expectEqual(NormativeReference.save(BigInt.one).toString(), save['one'], 'SAVE של אחד');
-  _expectEqual(NormativeReference.save(m - BigInt.one).toString(), save['mMinusOne'], 'SAVE של M פחות אחד');
+  _expectEqual(NormativeReference.save(BigInt.zero).toString(), save['zero'],
+      'SAVE של אפס');
+  _expectEqual(NormativeReference.save(BigInt.one).toString(), save['one'],
+      'SAVE של אחד');
+  _expectEqual(NormativeReference.save(m - BigInt.one).toString(),
+      save['mMinusOne'], 'SAVE של M פחות אחד');
   _expectEqual(NormativeReference.save(m).toString(), save['m'], 'SAVE של M');
-  _expectEqual(NormativeReference.save(m + BigInt.one).toString(), save['mPlusOne'], 'SAVE של M ועוד אחד');
-  _expectEqual(NormativeReference.save(BigInt.from(2) * m).toString(), save['twoM'], 'SAVE של פעמיים M');
+  _expectEqual(NormativeReference.save(m + BigInt.one).toString(),
+      save['mPlusOne'], 'SAVE של M ועוד אחד');
+  _expectEqual(NormativeReference.save(BigInt.from(2) * m).toString(),
+      save['twoM'], 'SAVE של פעמיים M');
 
   final work = fixture['workCounts'] as Map<String, dynamic>;
   _expectListEqual(
@@ -129,14 +135,18 @@ void main() {
     'תמורה בדרגה 720',
   );
 
-  _expectEqual(SourceLanguageCatalog.cutletNames.length, fixture['cutletCount'], 'מספר שמות הקציצות');
-  _expectEqual(SourceLanguageCatalog.monthNames.length, fixture['monthCount'], 'מספר שמות החודשים');
+  _expectEqual(SourceLanguageCatalog.cutletNames.length, fixture['cutletCount'],
+      'מספר שמות הקציצות');
+  _expectEqual(SourceLanguageCatalog.monthNames.length, fixture['monthCount'],
+      'מספר שמות החודשים');
 
   for (var i = 0; i < SourceLanguageCatalog.cutletNames.length; i++) {
-    _expectEqual(SourceLanguageCatalog.cutletNames[i].canonicalIndex, i + 1, 'אינדקס קציצה ${i + 1}');
+    _expectEqual(SourceLanguageCatalog.cutletNames[i].canonicalIndex, i + 1,
+        'אינדקס קציצה ${i + 1}');
   }
   for (var i = 0; i < SourceLanguageCatalog.monthNames.length; i++) {
-    _expectEqual(SourceLanguageCatalog.monthNames[i].canonicalIndex, i + 1, 'אינדקס חודש ${i + 1}');
+    _expectEqual(SourceLanguageCatalog.monthNames[i].canonicalIndex, i + 1,
+        'אינדקס חודש ${i + 1}');
   }
 
   _expectEqual(

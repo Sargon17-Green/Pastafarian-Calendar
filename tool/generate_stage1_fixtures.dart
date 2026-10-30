@@ -15,11 +15,14 @@ void main() {
   final data = <String, Object>{
     'm': m.toString(),
     'tabletsMinusFoundation':
-        (NormativeReference.tabletsDay - NormativeReference.foundationDay).toString(),
+        (NormativeReference.tabletsDay - NormativeReference.foundationDay)
+            .toString(),
     'dayCount': <String, String>{
-      'foundationMinusOne': NormativeReference.dayCount(f - BigInt.one).toString(),
+      'foundationMinusOne':
+          NormativeReference.dayCount(f - BigInt.one).toString(),
       'foundation': NormativeReference.dayCount(f).toString(),
-      'foundationPlusOne': NormativeReference.dayCount(f + BigInt.one).toString(),
+      'foundationPlusOne':
+          NormativeReference.dayCount(f + BigInt.one).toString(),
     },
     'save': <String, String>{
       'zero': NormativeReference.save(BigInt.zero).toString(),
@@ -72,6 +75,7 @@ void main() {
   };
 
   final encoder = const JsonEncoder.withIndent('  ');
-  File('fixtures/stage1_expected.json').writeAsStringSync('${encoder.convert(data)}\n');
+  File('fixtures/stage1_expected.json')
+      .writeAsStringSync('${encoder.convert(data)}\n');
   stdout.writeln('נוצר קובץ fixtures של שלב 1 מתוך ה־oracle המקומי בלבד.');
 }

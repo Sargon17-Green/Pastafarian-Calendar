@@ -81,14 +81,16 @@ final class SourceLanguageCatalog {
 
   static String cutletText(int canonicalIndex) {
     if (canonicalIndex < 1 || canonicalIndex > cutletNames.length) {
-      throw RangeError.range(canonicalIndex, 1, cutletNames.length, 'canonicalIndex');
+      throw RangeError.range(
+          canonicalIndex, 1, cutletNames.length, 'canonicalIndex');
     }
     return cutletNames[canonicalIndex - 1].text;
   }
 
   static String monthText(int canonicalIndex) {
     if (canonicalIndex < 1 || canonicalIndex > monthNames.length) {
-      throw RangeError.range(canonicalIndex, 1, monthNames.length, 'canonicalIndex');
+      throw RangeError.range(
+          canonicalIndex, 1, monthNames.length, 'canonicalIndex');
     }
     return monthNames[canonicalIndex - 1].text;
   }
