@@ -1,4 +1,4 @@
-# BASIC + ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ) — ਪੜਾਅ 1
+# BASIC + ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ) — ਪੜਾਅ 2 / DISCOVERY 01
 
 ਇਹ implementation ਲਾਈਨ ਸਿਫ਼ਰ ਤੋਂ ਬਣਾਈ ਗਈ ਹੈ। ਇਸ ਨੇ ਕਿਸੇ ਹੋਰ programming language ਜਾਂ ਕਿਸੇ ਹੋਰ ਮਨੁੱਖੀ source-language implementation ਦਾ code, test, fixture, output, hash, snapshot ਜਾਂ oracle ਨਹੀਂ ਵਰਤਿਆ। ਇਸ ਪੜਾਅ ਦਾ ਇਕੱਲਾ semantic ਆਧਾਰ embedded normative reference ਹੈ।
 
@@ -39,4 +39,4 @@ OVERALL=PASS
 
 ## ਪੜਾਅ ਦੀ ਹੱਦ
 
-ਇਹ ਸਿਰਫ਼ `Stage 1 / 55 — BOOTSTRAP` ਹੈ। ਪੜਾਅ 2 ਦਾ `DISCOVERY 01` ਇਸ package ਵਿੱਚ ਮੌਜੂਦ ਨਹੀਂ ਹੈ ਅਤੇ ਕਿਸੇ ਵੀ future patch ਦਾ code ਪਹਿਲਾਂ ਨਹੀਂ ਜੋੜਿਆ ਗਿਆ।
+Stage 1 / 55 BOOTSTRAP ਪੂਰਾ ਹੋਇਆ। Stage 2 / 55 ਵਿੱਚ intentional `oldRemainder(x)=BI_RegularMod(x,BI_M)` defect ਹੈ: M, 2M ਅਤੇ 3M ਲਈ zero ਆਉਂਦਾ ਹੈ, normative SAVE ਵਿੱਚ M; M+1 ਲਈ 1 ਹੈ। ਤਿੰਨ expected FAIL ਅਤੇ ਇੱਕ PASS control ਹਨ। ਪੂਰੇ ਪੰਜ calendar components ਅਜੇ ਨਹੀਂ ਬਣੇ; Stage 3 PATCH 01 ਅਜੇ ਨਹੀਂ ਆਇਆ।

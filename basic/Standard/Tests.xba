@@ -62,7 +62,7 @@ Sub Main
 
     testFailures = 0
     testFile = FreeFile
-    Open "/tmp/pastafari_basic_stage1_test_results.txt" For Output As #testFile
+    Open "/tmp/pastafari_basic_stage2_discovery01_test_results.txt" For Output As #testFile
 
     CheckString "BIGINT_NORMALIZE", BI_Normalize("-00000123"), "-123"
     CheckString "BIGINT_ADD", BI_Add("999999999999999999999999", "1"), "1000000000000000000000000"
@@ -159,7 +159,13 @@ Sub Main
     CheckBoolean "CTX_VALIDATE_B", BootstrapValidateContext(ctxB)
     CheckString "BOOTSTRAP_NEUTRAL", BootstrapNeutralRun(ORACLE_FOUNDATION_DAY_TEXT, ORACLE_FOUNDATION_DAY_TEXT), "BOOTSTRAP_OK"
     CheckBoolean "PRODUCTION_SKELETON_READY", CalendarSpaghettiSkeletonReady()
-    CheckLong "PRODUCTION_STAGE", CalendarSpaghettiStage(), 1
+    CheckLong "PRODUCTION_STAGE", CalendarSpaghettiStage(), 2
+
+    ' DISCOVERY 01: ਇਹ ਤਿੰਨ expected FAIL ਹਨ ਅਤੇ ਇੱਕ PASS control ਹੈ।
+    CheckString "DISCOVERY_01_M", CalendarSpaghettiDiscovery01Remainder(BI_M), BI_M
+    CheckString "DISCOVERY_01_2M", CalendarSpaghettiDiscovery01Remainder(BI_MulSmall(BI_M, 2)), BI_M
+    CheckString "DISCOVERY_01_3M", CalendarSpaghettiDiscovery01Remainder(BI_MulSmall(BI_M, 3)), BI_M
+    CheckString "DISCOVERY_01_M_PLUS_1", CalendarSpaghettiDiscovery01Remainder(BI_AddSmall(BI_M, 1)), "1"
 
     If testFailures = 0 Then
         Print #testFile, "OVERALL=PASS"

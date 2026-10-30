@@ -8,4 +8,4 @@ Arbitrary-precision day values, answer offsets ਅਤੇ logical gate indices de
 
 Production path ਇਸ ਪੜਾਅ ਵਿੱਚ ਸਿਰਫ਼ neutral skeleton ਹੈ; ਕੋਈ future defect ਜਾਂ patch ਪਹਿਲਾਂ ਨਹੀਂ ਆਇਆ। Local test result: `OVERALL=PASS`।
 
-ਅਗਲਾ ਵੱਖਰਾ commit Stage 2 — DISCOVERY 01 ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।
+Stage 2 — DISCOVERY 01 ਦਾ ਵੱਖਰਾ commit legacy remainder defect ਅਤੇ exact expected-RED test pattern ਰੱਖਦਾ ਹੈ। Stage 1 ਦੀ ਪੁਰਾਣੀ native PASS ਰਿਪੋਰਟ ਬਦਲੀ ਨਹੀਂ; Stage 2 native CI ਅਜੇ verify ਕਰਨੀ ਹੈ।

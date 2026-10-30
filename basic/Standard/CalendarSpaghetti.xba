@@ -4,7 +4,7 @@
 Option Explicit
 
 Public Function CalendarSpaghettiStage() As Long
-    CalendarSpaghettiStage = 1
+    CalendarSpaghettiStage = 2
 End Function
 
 Public Function CalendarSpaghettiSkeletonReady() As Boolean
@@ -14,12 +14,28 @@ Public Function CalendarSpaghettiSkeletonReady() As Boolean
     CalendarSpaghettiSkeletonReady = BootstrapValidateContext(ctx)
 End Function
 
+' ਜਾਣ-ਬੁੱਝ ਕੇ ਪੁਰਾਣੀ remainder ਖਰਾਬੀ; ਇੱਥੇ patch ਨਾ ਲਗਾਓ।
+Public Function oldRemainder(ByVal x As String) As String
+    oldRemainder = BI_RegularMod(x, BI_M)
+End Function
+
+' ਇਹ diagnostic production route ਹੈ, ਪੰਜ-date result ਨਹੀਂ।
+Public Function CalendarSpaghettiDiscovery01Remainder(ByVal x As String) As String
+    Dim ctx As Variant
+    ctx = BootstrapNewContext(x, x)
+    BootstrapDispatch ctx, "DISCOVERY_01_OLD_REMAINDER"
+    If Not BootstrapValidateContext(ctx) Then Err.Raise 9301, "CalendarSpaghettiDiscovery01Remainder", "E_DISCOVERY_01_CONTEXT"
+    CalendarSpaghettiDiscovery01Remainder = oldRemainder(CStr(ctx(CTX_TARGET_DAY)))
+End Function
+
 Public Function calendarDateSpaghetti(ByVal calculationDay As String, ByVal targetDay As String) As Variant
     Dim ctx As Variant
+    Dim legacyValue As String
     ctx = BootstrapNewContext(calculationDay, targetDay)
-    BootstrapDispatch ctx, "PRODUCTION_SKELETON"
+    BootstrapDispatch ctx, "DISCOVERY_01"
+    legacyValue = oldRemainder(CStr(ctx(CTX_TARGET_DAY)))
     If Not BootstrapValidateContext(ctx) Then Err.Raise 9301, "calendarDateSpaghetti", "E_BOOTSTRAP_CONTEXT"
-    ' Stage 1 ਵਿੱਚ production ਦਾ ਸਿਰਫ਼ ਨਿਰਪੱਖ ਢਾਂਚਾ ਮੌਜੂਦ ਹੈ; ਕੋਈ legacy defect ਜਾਂ ਭਵਿੱਖਲਾ patch ਪਹਿਲਾਂ ਨਹੀਂ ਜੋੜਿਆ ਜਾਂਦਾ।
-    Err.Raise 9302, "calendarDateSpaghetti", "E_STAGE_01_ONLY"
+    ' ਪੰਜ canonical date components ਅਜੇ ਅਧੂਰੇ ਹਨ; ਇਹ error ਜਾਣ-ਬੁੱਝ ਕੇ ਹੈ।
+    Err.Raise 9302, "calendarDateSpaghetti", "E_STAGE_02_DISCOVERY_ONLY"
 End Function
 ]]></script:module>

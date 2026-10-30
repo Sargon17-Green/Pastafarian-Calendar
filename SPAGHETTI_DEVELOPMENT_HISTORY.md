@@ -17,3 +17,6 @@ BASIC + ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ) implementation ਲਾਈਨ �
 ### Semantic ਸੁਰੱਖਿਆ
 
 Production path oracle ਨੂੰ ਨਹੀਂ call ਕਰਦਾ। Observability state normative decision ਵਿੱਚ ਨਹੀਂ ਜਾਂਦੀ। Context invocation-local ਹੈ। Future patch code ਪਹਿਲਾਂ ਮੌਜੂਦ ਨਹੀਂ ਹੈ।
+
+## ਪੜਾਅ 2 — DISCOVERY 01 (2026-10-30)
+ਜਾਣ-ਬੁੱਝ ਕੇ legacy `oldRemainder` ਰਾਹੀਂ M, 2M, 3M ਉੱਤੇ zero defect; M+1 control PASS। Normative `BI_Save` ਤੇ Oracle ਨਹੀਂ ਬਦਲੇ। `savePatch` ਜਾਂ Stage 3 corrective code ਹਾਲੇ ਨਹੀਂ ਆਇਆ। CI expected-RED verification ਬਾਕੀ ਹੈ।

@@ -1,0 +1,48 @@
+name: BASIC Punjabi Stage2 Discovery01 Native
+on:
+  push:
+    branches:
+      - 'BASIC+ਪੰਜਾਬੀ'
+    paths:
+      - 'basic/**'
+      - 'DEVELOPMENT_STAGE.md'
+      - '.github/workflows/basic-stage2-discovery01.yml'
+jobs:
+  expected-red:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LibreOffice
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-core libreoffice-common
+          libreoffice --version
+      - name: Execute StarBasic Tests.Main
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/lo-profile/user"
+          cp -R basic "$RUNNER_TEMP/lo-profile/user/basic"
+          libreoffice -env:UserInstallation="file://$RUNNER_TEMP/lo-profile" --headless 'macro:///Standard.Tests.Main'
+          test -f /tmp/pastafari_basic_stage2_discovery01_test_results.txt
+      - name: Verify intentional RED
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          lines=Path('/tmp/pastafari_basic_stage2_discovery01_test_results.txt').read_text(encoding='utf-8').splitlines()
+          passed=[s[:-5] for s in lines if s.endswith('=PASS') and not s.startswith('OVERALL=')]
+          failed=[s[:-5] for s in lines if s.endswith('=FAIL') and not s.startswith('OVERALL=')]
+          assert set(failed)=={'DISCOVERY_01_M','DISCOVERY_01_2M','DISCOVERY_01_3M'} and len(failed)==3,failed
+          assert len(passed)==145 and len(set(passed))==145,len(passed)
+          assert 'DISCOVERY_01_M_PLUS_1' in passed and 'CATALOG_CUTLET_8' in passed
+          assert 'OVERALL=FAIL' in lines and 'FAILURES=3' in lines
+          assert len(passed)+len(failed)==148
+          print('EXPECTED_RED_CONTRACT=PASS; BASELINE_144=PASS; EXPECTED_FAILS=3')
+          PY
+      - name: Upload native log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basic-punjabi-stage2-native-raw
+          path: /tmp/pastafari_basic_stage2_discovery01_test_results.txt
+          if-no-files-found: warn
