@@ -59,7 +59,7 @@ cmp_ok($cases,'>=',100,'已核對至少一百個獨立窮舉案例');
 is_deeply(unrank_weaving([2,2],2),[1,2,1,2],'明確的規範二日示例');
 is(''.rank_weaving([2,2],[1,1,2,2]),'1','第一個序列排名為一');
 
-for my $invalid ([],[0],[13],[1,1,1,1,1],[1,'2x'],undef) {
+for my $invalid ([],[0],[25],[1,1,1,1,1,1,1],[1,'2x'],undef) {
     my $ok = eval { count_weavings($invalid); 1 };
     ok(!$ok,'不合法月份長度遭拒');
 }

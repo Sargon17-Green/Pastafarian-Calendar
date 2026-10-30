@@ -10,11 +10,11 @@ use Scalar::Util qw(blessed);
 our @EXPORT_OK = qw(count_weavings rank_weaving unrank_weaving);
 
 # 第一個生產排名原語：先首次出現、再依序末次出現。
-# 限定小型設定檔；不得將其宣稱為完整曆法或大型年份的實作。
+# 第三階段有界擴展：最多六個月／二十四天；仍不是完整曆法或全年實作。
 sub _counts ($profile) {
     die "月份長度須為陣列參照\n" if ref($profile) ne 'ARRAY';
     my $m = scalar @$profile;
-    die "月份數超出本階段範圍\n" if $m < 1 || $m > 4;
+    die "月份數超出本階段範圍\n" if $m < 1 || $m > 6;
     my @lengths;
     my $days = 0;
     for my $v (@$profile) {
@@ -22,7 +22,7 @@ sub _counts ($profile) {
         die "總日數超出本階段範圍\n" if length("$v") > 2;
         my $length = int($v);
         $days += $length;
-        die "總日數超出本階段範圍\n" if $days > 12;
+        die "總日數超出本階段範圍\n" if $days > 24;
         push @lengths, $length;
     }
     return (\@lengths, $days);
