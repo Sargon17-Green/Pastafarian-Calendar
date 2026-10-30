@@ -26,7 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   windows-native-stage-current:
-    name: Native Windows PowerShell 5.1 stage 22/23 gate
+    name: Native Windows PowerShell 5.1 stage 22-24 gate
     runs-on: windows-latest
     timeout-minutes: 120
     steps:
@@ -48,6 +48,17 @@ jobs:
             & .\tests\Stage01.Tests.ps1
             if (-not $?) { throw 'Stage 1 regression failed after Stage 23 seal' }
             Write-Host 'STAGE23_POST_SEAL_BASELINE=PASS'
+          } elseif (($stageLines -contains 'CURRENT_STAGE=24') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=23') -and ($stageLines -contains 'STAGE24_RUNTIME_VERIFICATION=AWAITING')) {
+            & .\tests\Stage01.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage01 regression failed for Stage24' }
+            & .\tests\Stage23.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage23 regression failed for Stage24' }
+            & .\tests\Stage24.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage24 native historical RED verification failed' }
+            Write-Host ('STAGE24_NATIVE_SHA=' + $env:GITHUB_SHA)
+            Write-Host 'STAGE24_EXPECTED_RED=3456'
+            Write-Host 'STAGE24_INCIDENTAL_MATCHES=864'
+            Write-Host 'STAGE24_NATIVE_DISCOVERY12=PASS'
           } elseif (($stageLines -contains 'CURRENT_STAGE=22') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=21')) {
             & .\Run-Stage22.ps1
             if (-not $?) { throw 'Stage 22 verification failed' }
