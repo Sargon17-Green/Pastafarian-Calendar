@@ -1,0 +1,43 @@
+name: Stage55 MATLAB Polish Independent Year-5000 Month-Length Certificate
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/stage55_polish_month_length_rank_certificate.py'
+      - '.github/workflows/matlab-stage55-python-month-length-certificate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage55-python-month-length-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  independent-composition-certificate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+      - name: Verify independently ranked bounded composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          python3 -m py_compile tools/stage55_polish_month_length_rank_certificate.py
+          python3 tools/stage55_polish_month_length_rank_certificate.py 2>&1 | tee logs/STAGE55_MONTH_LENGTH_COMPOSITION_RANK.log
+          grep -q '^STAGE55_YEAR5000_MONTH_LENGTH_COMPOSITION_RANK_PASS ' logs/STAGE55_MONTH_LENGTH_COMPOSITION_RANK.log
+          grep -q '^STAGE55_MONTH_LENGTH_CHOSEN_STREAM_RANK_NOT_VERIFIED$' logs/STAGE55_MONTH_LENGTH_COMPOSITION_RANK.log
+          grep -q '^STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED$' logs/STAGE55_MONTH_LENGTH_COMPOSITION_RANK.log
+      - name: Preserve original log on PASS or FAIL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-month-length-composition-rank
+          path: logs/STAGE55_MONTH_LENGTH_COMPOSITION_RANK.log
+          if-no-files-found: warn
+          retention-days: 30
