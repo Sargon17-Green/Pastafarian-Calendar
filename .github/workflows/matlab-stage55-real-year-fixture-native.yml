@@ -1,0 +1,42 @@
+name: Stage 55 MATLAB Native Real-Year Fixture Projection
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/run_stage55_real_year_fixture_native.m'
+      - '.github/workflows/matlab-stage55-real-year-fixture-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage55-real-year-fixture-native-MATLAB-Polski
+  cancel-in-progress: false
+
+jobs:
+  matlab-fixture-projection:
+    name: MATLAB R2026a / bounded 48-case real-year projection
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact branch SHA
+        uses: actions/checkout@v4
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Run bounded five-field projections
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tools'); run_stage55_real_year_fixture_native
+      - name: Preserve Native log even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-real-year-fixture-native
+          path: logs/STAGE55_REAL_YEAR_FIXTURE_NATIVE.log
+          if-no-files-found: warn
+          retention-days: 30
