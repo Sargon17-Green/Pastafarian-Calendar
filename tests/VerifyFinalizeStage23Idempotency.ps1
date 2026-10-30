@@ -59,7 +59,7 @@ try {
     $lines = @(Get-Content -LiteralPath $stageFile -Encoding UTF8)
     # A sealed Stage23 remains sealed through later stages, including Stage25.
     # Never accept awaiting Stage23 or a predecessor LAST_COMPLETED_STAGE.
-    if (-not ((($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24') -or ($lines -contains 'LAST_COMPLETED_STAGE=25')) -and
+    if (-not ((($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24') -or ($lines -contains 'LAST_COMPLETED_STAGE=25') -or ($lines -contains 'LAST_COMPLETED_STAGE=26')) -and
               ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED') -and
               (($lines -contains 'CURRENT_STAGE=23') -or ($lines -contains 'CURRENT_STAGE=24') -or ($lines -contains 'CURRENT_STAGE=25') -or ($lines -contains 'CURRENT_STAGE=26')))) {
         throw 'Stage23 is not in the expected sealed state.'
