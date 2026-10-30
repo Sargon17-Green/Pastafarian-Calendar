@@ -36,7 +36,7 @@ are object IDs for immutable source retrieval, **not malware clearance**.
 | --- | --- | --- |
 | the compiler | `810bdc58ba41e611fc0ba0b53f467d842dcb1bb1` | `d8da5ace27c8131fa152312b4262e5792d0d4898` |
 | the desktop | `15090a299ff82572f9a5e95af2c95a054edb0139` | `357091dfdbf125222e218b8e5aeb90dc19275ca5` |
-| the editor | `25df723faf8e65e78b0c212f2d1ae25e104cc515d9f14` | `25df723faf8e65e78b0c212f2d1ae25e104cc515d9f14` |
+| the editor | `25df723faf8e65e78b0c8a5bdd28330720907dbd` | `25df723faf8e65e78b0c8a5bdd28330720907dbd` |
 | the finder | `660357bcec832f28059a950b264e20381dc997d6` | `660357bcec832f28059a950b264e20381dc997d6` |
 | the noodle | `571e3624d83fe531e15b76be6e1168d64a06f71f` | `336046e46f11bb8fde696d54588071bf86e994a5` |
 | the writer | `460c77888767a49ef6f73f611e82101c04ba09e1` | `460c77888767a49ef6f73f611e82101c04ba09e1` |
