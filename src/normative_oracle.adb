@@ -414,16 +414,20 @@ package body Normative_Oracle is
      (Stream : Answer_Stream; N : Big_Integer) return Big_Integer
    is
       Acceptance_Limit : constant Big_Integer := Floor_Div (M, N) * N;
-      K : Big_Integer := B (0);
-      X : Big_Integer;
+      X : Big_Integer := Answer_At (Stream, B (0));
    begin
-      loop
-         X := Answer_At (Stream, K);
-         if X <= Acceptance_Limit then
-            return Regular_Mod (X - B (1), N) + B (1);
-         end if;
-         K := K + B (1);
-      end loop;
+      --  Exact first accepted endpoint of the historical cyclic walk.
+      if X > Acceptance_Limit then
+         case Stream.Direction_Step is
+            when -1 => X := Acceptance_Limit;
+            when 1  => X := B (1);
+            when 0  =>
+               raise Constraint_Error with
+                 Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode
+                   ("స్థిరమైన తిరస్కరించిన చిన్న సమాధాన ప్రవాహం");
+         end case;
+      end if;
+      return Regular_Mod (X - B (1), N) + B (1);
    end Choose_Rank_Short;
 
    function Choose_Rank_Wide
