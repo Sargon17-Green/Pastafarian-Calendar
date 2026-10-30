@@ -34,7 +34,7 @@ contains
   function bi_from_int64(v) result(x)
     integer(int64), intent(in) :: v
     type(BigInt) :: x
-    integer(int64) :: mag, q
+    integer(int64) :: q
     integer :: n, i
 
     if (v == 0_int64) then
@@ -42,28 +42,24 @@ contains
        return
     end if
 
+    ! Decompose signed values without ever negating INT64_MIN.
     if (v < 0_int64) then
        x%sign = -1
-       if (v == -huge(v)-1_int64) then
-          ! The bootstrap never needs INT64_MIN as a direct literal conversion.
-          error stop 'bi_from_int64 does not accept INT64_MIN'
-       end if
-       mag = -v
     else
        x%sign = 1
-       mag = v
     end if
 
-    q = mag
+    q = v
     n = 0
-    do while (q > 0_int64)
+    do while (q /= 0_int64)
        n = n + 1
        q = q / BASE
     end do
     allocate(x%limb(n))
-    q = mag
+    q = v
     do i = 1, n
-       x%limb(i) = modulo(q, BASE)
+       ! The remainder magnitude is strictly smaller than BASE.
+       x%limb(i) = abs(mod(q, BASE))
        q = q / BASE
     end do
     call normalize(x)
@@ -253,6 +249,12 @@ contains
        c = bi_zero()
        return
     end if
+    ! The one-limb fast path is safe only for multipliers of at most BASE.
+    ! Larger int64 multipliers use full BigInt multiplication to avoid overflow.
+    if (small < -BASE .or. small > BASE) then
+       c = bi_mul(a, bi_from_int64(small))
+       return
+    end if
     if (small < 0_int64) then
        m = -small
        sgn = -a%sign
@@ -344,12 +346,20 @@ contains
     integer(int64) :: limit
 
     v = 0_int64
-    limit = huge(v)
-    do i = size(x%limb), 1, -1
-       if (v > (limit - x%limb(i)) / BASE) error stop 'BigInt does not fit int64'
-       v = v * BASE + x%limb(i)
-    end do
-    if (x%sign < 0) v = -v
+    if (x%sign < 0) then
+       ! Accumulate negatively: -2**63 is representable, +2**63 is not.
+       limit = -huge(v) - 1_int64
+       do i = size(x%limb), 1, -1
+          if (v < (limit + x%limb(i)) / BASE) error stop 'BigInt does not fit int64'
+          v = v * BASE - x%limb(i)
+       end do
+    else
+       limit = huge(v)
+       do i = size(x%limb), 1, -1
+          if (v > (limit - x%limb(i)) / BASE) error stop 'BigInt does not fit int64'
+          v = v * BASE + x%limb(i)
+       end do
+    end if
   end function bi_to_int64
 
   function abs_add(a, b) result(c)
