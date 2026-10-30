@@ -3,7 +3,7 @@ name: SQL Tamil Stage 2 Core Native PostgreSQL
 on:
   push:
     branches:
-      - 'SQL\\+தமிழ்'
+      - 'SQL\+தமிழ்'
     paths:
       - 'sql/03_stage02_production_core.sql'
       - 'sql/test/50_stage02_production_core_tests.sql'
