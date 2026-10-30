@@ -61,7 +61,7 @@ pub fn (_ BaseDispatcher) dispatch_legacy_wide_order(stream AnswerStream, n BigI
 	return LegacyWideOrderAdapter{}.pick(stream, n)
 }
 
-// n<=M የPATCH 13 መንገድ አይቀየርም፤ n>M ለጊዜው የlegacy መንገድ ነው።
+// PATCH 14፦ n<=M የPATCH 13 መንገድ አይቀየርም፤ n>M little-first ይጠቀማል።
 pub fn calendar_choose_rank_spaghetti(stream AnswerStream, n BigInt) !BigInt {
 	if big_cmp(n, big_one()) < 0 {
 		return error('ምርጫ n አዎንታዊ መሆን አለበት')
@@ -69,7 +69,7 @@ pub fn calendar_choose_rank_spaghetti(stream AnswerStream, n BigInt) !BigInt {
 	if big_cmp(n, legacy_m_old()) <= 0 {
 		return calendar_choose_rank_short_spaghetti(stream, n)
 	}
-	trace := new_base_dispatcher().dispatch_legacy_wide_order(stream, n)!
+	trace := new_base_dispatcher().dispatch_patch14_wide_order(stream, n)!
 	return trace.rank
 }
 

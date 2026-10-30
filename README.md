@@ -170,3 +170,6 @@ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38286516480
 በcommit c8b3e7f1ad86d19b38a9b86e6f3042c230bb6ce4።
 v fmt -verify ያለ fmt -w PASS፣ 41 GREEN test
 ፋይሎች PASS፣ 4 intentional RED ተረጋግጠዋል።
+
+
+ደረጃ 29 PATCH 14፦ wide little-first እና BigInt analytical rejection፣ legacy high-first እንደ ማስረጃ ተጠብቋል። Native CI ማረጋገጫ ገና በመጠባበቅ ላይ ነው። የቅድመ-እቅድ እና የtest ዝርዝር `docs/STAGE29_PATCH14.md` ውስጥ አለ።

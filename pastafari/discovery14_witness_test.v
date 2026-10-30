@@ -21,7 +21,7 @@ fn test_discovery14_two_digits_first_one_forward_is_reversed() {
 	assert big_eq(old.space, n)
 	assert old.raw_wide.str() == '2'
 	assert old.rank.str() == '2'
-	assert big_eq(calendar_choose_rank_spaghetti(s, n) or { big_zero() }, old.rank)
+	assert big_eq(calendar_choose_rank_spaghetti(s, n) or { big_zero() }, big_add(m, big_one()))
 	assert !big_eq(old.rank, big_add(m, big_one()))
 }
 
@@ -101,7 +101,8 @@ fn test_discovery14_legacy_adapter_dispatcher_public_call_agree() {
 	dispatch := new_base_dispatcher().dispatch_legacy_wide_order(s, n) or { panic(err.msg()) }
 	assert big_eq(old.rank, adapt.rank)
 	assert big_eq(adapt.rank, dispatch.rank)
-	assert big_eq(calendar_choose_rank_spaghetti(s, n) or { big_zero() }, dispatch.rank)
+	assert big_eq(calendar_choose_rank_spaghetti(s, n) or { big_zero() }, big_add(big_mul_small(m, 17),
+		big_from_int(17)))
 	assert s.first.str() == '17'
 	assert s.step == 1
 }
@@ -155,8 +156,9 @@ fn test_discovery14_interleaving_does_not_mutate_streams() {
 	a := discovery14_stream(big_one(), 1)
 	b := discovery14_stream(big_one(), -1)
 	for repeat in 0 .. 7 {
-		assert (calendar_choose_rank_spaghetti(a, n) or { big_zero() }).str() == '2'
-		assert big_eq(calendar_choose_rank_spaghetti(b, n) or { big_zero() }, m)
+		assert big_eq(calendar_choose_rank_spaghetti(a, n) or { big_zero() }, big_add(m, big_one()))
+		assert big_eq(calendar_choose_rank_spaghetti(b, n) or { big_zero() }, big_add(big_sub(n,
+			m), big_one()))
 	}
 	assert a.first.str() == '1'
 	assert b.first.str() == '1'
