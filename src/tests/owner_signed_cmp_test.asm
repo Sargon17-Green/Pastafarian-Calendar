@@ -624,6 +624,30 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckBytes
     jp nc, .fail
 
+    ; 217: two canonical zeros compare equal even though both owners retain
+    ; nonzero payload at offset 0 (owner 42: 1, owner 46: $7f).
+    ; Zero-length descriptors must ignore residual SRAM and remain read-only.
+    ld a, 217
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenB+1], a
+    ld [wOwnerCmpLenB+2], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    or a
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease

@@ -2,7 +2,7 @@
 """Independent Python integer oracle for owner-scoped signed magnitudes.
 
 This is a HOST reference contract, not execution of SM83 machine code.
-The ROM exercise covers cases 191..216.
+The ROM exercise covers cases 191..217.
 """
 from random import Random
 from test_sram_owner_model import OwnedBanks, SIZE
@@ -119,11 +119,15 @@ def main():
     assert m.read_byte(42, 0) == (0, 1), "expected a nonzero stale byte for zero-length operand"
     assert compare_read_only(m, (46, 0, 1), (42, 0, 0)) == 1, "positive A must exceed zero B"
     assert compare_read_only(m, (42, 0, 0), (46, 1, 1)) == 1, "zero A must exceed negative B"
+    # Case 217: both canonical zero descriptors ignore stale nonzero SRAM.
+    assert m.read_byte(46, 0) == (0, 0x7F), "A stale zero-length payload missing"
+    assert m.read_byte(42, 0) == (0, 1), "B stale zero-length payload missing"
+    assert compare_read_only(m, (42, 0, 0), (46, 0, 0)) == 0, "two canonical zeros must compare equal"
     # Bank-edge read-only sentinels mirrored from ROM cases 203..210.
     assert m.read_byte(46, 8191) == (0, 0x33), "A bank-end sentinel changed"
     assert m.read_byte(42, 8191) == (0, 0x00), "B bank-end sentinel changed"
     assert m.read_byte(46, 8192) == (0, 0x01), "A next-bank sentinel changed"
-    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 payload_and_tags=IMMUTABLE")
+    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 
