@@ -5,6 +5,7 @@ on:
       - qa-befunge98-stage1-order-isolation-20261008
     paths:
       - qa/stage1_qa31f_x2865_prefix_probe.py
+      - qa/stage1_qa31f_x23523_incoming_edge.py
       - .github/workflows/befunge-qa31f-x2865-prefix.yml
   workflow_dispatch:
 permissions:
@@ -19,3 +20,7 @@ jobs:
         run: |
           python -m py_compile qa/stage1_qa31f_x2865_prefix_probe.py
           python qa/stage1_qa31f_x2865_prefix_probe.py
+      - name: Verify original row20-row23 two-gate route and three hostile guards
+        run: |
+          python -m py_compile qa/stage1_qa31f_x23523_incoming_edge.py
+          python qa/stage1_qa31f_x23523_incoming_edge.py
