@@ -12,8 +12,8 @@ function Get-Stage23Signature {
 }
 
 $metadata = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_STAGE=(23|24|25)\s*$') -Name 'Stage 23 regression under Stage24'
-Assert-StageTrue -Condition (($metadata -match '(?m)^CURRENT_STAGE=24\s*$') -or ($metadata -match '(?m)^CURRENT_KIND=PATCH\s*$')) -Name 'Patch11 sealed baseline'
+Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_STAGE=(23|24|25|26)\s*$') -Name 'Stage 23 regression under Stage24'
+Assert-StageTrue -Condition (($metadata -match '(?m)^CURRENT_STAGE=(24|26)\s*$') -or ($metadata -match '(?m)^CURRENT_KIND=PATCH\s*$')) -Name 'Patch11 sealed baseline'
 $preSeal = ($metadata -match '(?m)^LAST_COMPLETED_STAGE=22\s*$') -and ($metadata -match '(?m)^STAGE23_RUNTIME_VERIFICATION=AWAITING\s*$')
 $postSeal = ($metadata -match '(?m)^LAST_COMPLETED_STAGE=(23|24|25)\s*$') -and ($metadata -match '(?m)^STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$')
 Assert-StageTrue -Condition ($preSeal -or $postSeal) -Name 'Stage 23 metadata must be a consistent awaiting or sealed pair'
@@ -27,7 +27,7 @@ $expectedSignature = Get-Stage23Signature $expected
 $corrected = Get-Patch11OrderAt46 -Context $ctx
 $legacy = Get-Discovery11LegacyQueriedOrder -Context $ctx
 
-if ($metadata -match '(?m)^CURRENT_STAGE=25\s*$') {
+if ($metadata -match '(?m)^CURRENT_STAGE=(25|26)\s*$') {
     Assert-StageEqual 'PATCH12_COMPLETE' $ctx.status 'Stage25 production preserves Patch11'
 } elseif ($metadata -match '(?m)^CURRENT_STAGE=24\s*$') {
     Assert-StageEqual 'DISCOVERY12_EXPECTED_RED' $ctx.status 'Stage24 production preserves Patch11'

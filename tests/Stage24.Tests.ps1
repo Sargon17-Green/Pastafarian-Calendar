@@ -10,7 +10,7 @@ function Get-Signature24 {
     return (($Values | ForEach-Object { [string]$_ }) -join ',')
 }
 $meta = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($meta -match '(?m)^CURRENT_STAGE=(24|25)\s*$') -Name 'Stage24 opened'
+Assert-StageTrue -Condition ($meta -match '(?m)^CURRENT_STAGE=(24|25|26)\s*$') -Name 'Stage24 opened'
 $preSeal = ($meta -match '(?m)^LAST_COMPLETED_STAGE=23\s*$') -and ($meta -match '(?m)^STAGE24_RUNTIME_VERIFICATION=AWAITING\s*$')
 $postSeal = ($meta -match '(?m)^LAST_COMPLETED_STAGE=(24|25)\s*$') -and ($meta -match '(?m)^STAGE24_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$')
 Assert-StageTrue -Condition ($preSeal -or $postSeal) -Name 'Stage24 metadata has an awaiting or a Native-sealed pair'
@@ -47,7 +47,7 @@ foreach($bad in $invalid) { try {[void](oldNextBowlFixedName -QueriedBowlId $bad
 Assert-StageEqual -Expected $invalid.Count -Actual $reject -Name 'All invalid IDs rejected'
 $f=Get-NormFoundationDay
 $ctx=Invoke-CalendarDateSpaghetti -CalculationDay $f -TargetDay ($f+3)
-$expectedStatus = if ($meta -match '(?m)^CURRENT_STAGE=25\s*$') { 'PATCH12_COMPLETE' } else { 'DISCOVERY12_EXPECTED_RED' }
+$expectedStatus = if ($meta -match '(?m)^CURRENT_STAGE=(25|26)\s*$') { 'PATCH12_COMPLETE' } else { 'DISCOVERY12_EXPECTED_RED' }
 Assert-StageEqual -Expected $expectedStatus -Actual $ctx.status -Name 'Real production route'
 Assert-StageEqual -Expected 58 -Actual $ctx.legacyOrderMemoryWriteCount -Name '46+12 memory writes'
 Assert-StageEqual -Expected 46 -Actual $ctx.patch11CapturedAtWrite -Name 'Correct latch capture'
@@ -81,7 +81,7 @@ Assert-StageEqual -Expected 58 -Actual $again.legacyOrderMemoryWriteCount -Name 
 $monsterText=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkeleton.ps1')
 $d12Text=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Discovery12.ps1')
 $patch12Text=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Patch12.ps1')
-if ($meta -match '(?m)^CURRENT_STAGE=25\s*$') {
+if ($meta -match '(?m)^CURRENT_STAGE=(25|26)\s*$') {
     Assert-StageTrue -Condition (($monsterText -match 'Invoke-Discovery11OverwritableOrderMemory[\s\S]*Invoke-Patch12PositionalSuccessor') -and ($patch12Text -match 'Invoke-Discovery12NumericSuccessor')) -Name 'Stage25 production delegates numeric scar via Patch12'
 } else {
     Assert-StageTrue -Condition ($monsterText -match 'Invoke-Discovery11OverwritableOrderMemory[\s\S]*Invoke-Discovery12NumericSuccessor') -Name 'Stage24 production direct numeric scar'

@@ -61,7 +61,7 @@ try {
     # Never accept awaiting Stage23 or a predecessor LAST_COMPLETED_STAGE.
     if (-not ((($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24') -or ($lines -contains 'LAST_COMPLETED_STAGE=25')) -and
               ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED') -and
-              (($lines -contains 'CURRENT_STAGE=23') -or ($lines -contains 'CURRENT_STAGE=24') -or ($lines -contains 'CURRENT_STAGE=25')))) {
+              (($lines -contains 'CURRENT_STAGE=23') -or ($lines -contains 'CURRENT_STAGE=24') -or ($lines -contains 'CURRENT_STAGE=25') -or ($lines -contains 'CURRENT_STAGE=26')))) {
         throw 'Stage23 is not in the expected sealed state.'
     }
     $originalHash = (Get-FileHash -LiteralPath $stageFile -Algorithm SHA256).Hash
