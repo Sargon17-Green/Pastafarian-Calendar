@@ -210,7 +210,7 @@ object Stage54Tests {
         StandardCharsets.UTF_8)
       truth(st.contains("STAGE_53_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_42_PASS_0_FAIL"),"53")
       truth(st.contains("STAGE_52_NATIVE_VERIFICATION=PASS_EXPECTED_RED_44_PASS_3_FAIL"),"52")
-      truth(st.contains("CURRENT_STAGE=54") && st.contains("CURRENT_PATCH=26") &&
+      truth(st.contains("STAGE_54_NATIVE_VERIFICATION=PASS_EXPECTED_RED_29_PASS_3_FAIL") &&
         st.contains("STAGE_54_PATCH_27_INTRODUCED=NO"),"54")
     }
     println("\nRISULTATO STADIO 54: "+passed+" PASS, "+failed+" FAIL")

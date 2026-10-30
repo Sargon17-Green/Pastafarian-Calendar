@@ -227,7 +227,9 @@ final case class BaseMonsterContext(
   var cutletSpanPartition: Option[Vector[Int]] = None,
   var cutletSpanIndex: Option[Int] = None,
   var cutletSpanSnapshot: Option[(Vector[Int],Vector[Int],Int)] = None,
-  var cutletSpanLegacyLength: Option[Int] = None
+  var cutletSpanLegacyLength: Option[Int] = None,
+  var patch27CorrectedLength: Option[Int] = None,
+  var patch27Applied: Boolean = false
 )
 
 final class BaseMetricsShell {
@@ -526,6 +528,50 @@ final class BaseValidationManager {
        ctx.cutletSpanSnapshot.get!=(gaps,part,c) ||
        ctx.cutletSpanLegacyLength.get!=gaps(c-1))
       throw new IllegalStateException("Cicatrice DISCOVERY27 falsificata.")
+  }
+
+
+  /** PATCH27: convalida ricostruendo tutti i gruppi, senza richiamare
+    * wrapper, adapter o oracle test-only. Mantiene la cicatrice legacy.
+    */
+  def requirePatch27Ready(ctx:BaseMonsterContext):Unit={
+    if(ctx.phase!="PATCH_27_CUTLET_SPAN" ||
+       ctx.status!="PATCH_27_READY" || !ctx.patch27Applied ||
+       ctx.branchTrace.toVector!=Vector("BOOT","DISCOVERY_27_CUTLET_SPAN",
+         "PATCH_27_CUTLET_SPAN") ||
+       ctx.cutletSpanGaps.isEmpty || ctx.cutletSpanPartition.isEmpty ||
+       ctx.cutletSpanIndex.isEmpty || ctx.cutletSpanSnapshot.isEmpty ||
+       ctx.cutletSpanLegacyLength.isEmpty ||
+       ctx.patch27CorrectedLength.isEmpty)
+      throw new IllegalStateException("PATCH27 non completa.")
+    val gaps=ctx.cutletSpanGaps.get
+    val part=ctx.cutletSpanPartition.get
+    val index=ctx.cutletSpanIndex.get
+    if(part.length<6 || part.length>17 || part.exists(_<1) ||
+       gaps.length<6 || gaps.length>47 || part.sum!=gaps.length ||
+       gaps.exists(x=>x<42 || x>963) ||
+       gaps.sum<252 || gaps.sum>5778 ||
+       index<1 || index>part.length ||
+       ctx.cutletSpanSnapshot.get!=(gaps,part,index) ||
+       ctx.cutletSpanLegacyLength.get!=gaps(index-1))
+      throw new IllegalStateException("Input o cicatrice PATCH27 falsificati.")
+    var gate=0
+    var targetSpan=0
+    var group=0
+    while(group<part.length){
+      var span=0
+      var count=0
+      while(count<part(group)){
+        span+=gaps(gate)
+        gate+=1
+        count+=1
+      }
+      if(group+1==index)targetSpan=span
+      group+=1
+    }
+    if(gate!=gaps.length ||
+       ctx.patch27CorrectedLength.get!=targetSpan)
+      throw new IllegalStateException("Risultato PATCH27 falsificato.")
   }
 
   def requirePatch25Ready(ctx: BaseMonsterContext): Unit = {
@@ -2559,7 +2605,8 @@ final class BaseMonsterManager {
     new Patch25GateStartMonthCacheHandler(metrics),
     new Discovery26GateToCutletProjectionHandler(metrics),
     new Patch26GateToCutletProjectionHandler(metrics),
-    new Discovery27CutletSpanHandler(metrics)
+    new Discovery27CutletSpanHandler(metrics),
+    new Patch27CutletSpanHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -4024,6 +4071,31 @@ final class BaseMonsterManager {
         ctx.cutletSpanIndex.get,ctx.cutletSpanLegacyLength.get,
         ctx.phase,ctx.status,ctx.branchTrace.toVector)
     }catch{case e:Throwable=>throw BaseErrorWrapper.wrap("discovery27",e)}
+  }
+
+
+  /** PATCH27: i dati annuali sono preesistenti; non ricalcola il calendario. */
+  def patch27CutletSpan(
+    calculationDay:BigInt,targetDay:BigInt,
+    gateGaps:Vector[Int],cutletPartition:Vector[Int],cutletIndex:Int
+  ):Patch27CutletSpanReport={
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.cutletSpanGaps=Some(gateGaps)
+    ctx.cutletSpanPartition=Some(cutletPartition)
+    ctx.cutletSpanIndex=Some(cutletIndex)
+    ctx.phase="DISCOVERY_27_CUTLET_SPAN"
+    try{
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery27Ready(ctx)
+      ctx.phase="PATCH_27_CUTLET_SPAN"
+      dispatcher.dispatch(ctx)
+      validation.requirePatch27Ready(ctx)
+      Patch27CutletSpanReport(ctx.calculationDay,ctx.targetDay,
+        ctx.cutletSpanGaps.get,ctx.cutletSpanPartition.get,
+        ctx.cutletSpanIndex.get,ctx.cutletSpanLegacyLength.get,
+        ctx.patch27CorrectedLength.get,ctx.patch27Applied,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    }catch{case e:Throwable=>throw BaseErrorWrapper.wrap("patch27",e)}
   }
 
   def metricsSnapshot: Map[String, BigInt] = metrics.snapshot

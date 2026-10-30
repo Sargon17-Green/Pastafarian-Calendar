@@ -1276,3 +1276,23 @@ jobs:
           for label in CUTLET1 CUTLET3 CUTLET6; do
             grep -Fq "FAIL — equivalenza normativa $label — Assunzione gate singolo: $label" stage54.log
           done
+
+  native-stage55-patch:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Scala+Italiano'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: sbt/setup-sbt@v1
+      - name: Verify Stage55 PATCH27 aggregate cutlet span
+        shell: bash
+        run: |
+          set -euo pipefail
+          sbt -batch 'Test / runMain pastafari.Stage55Tests' 2>&1 | tee stage55.log
+          grep -Fq 'RISULTATO STADIO 55: 34 PASS, 0 FAIL' stage55.log
+          test "$(grep -Fc 'PASS — ' stage55.log)" -eq 34
+          test "$(grep -Fc 'FAIL — ' stage55.log)" -eq 0

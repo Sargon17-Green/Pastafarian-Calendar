@@ -251,8 +251,8 @@ object Stage53Tests {
       val st=new String(Files.readAllBytes(root.resolve("DEVELOPMENT_STAGE.md")),
         StandardCharsets.UTF_8)
       truth(st.contains("STAGE_52_NATIVE_VERIFICATION=PASS_EXPECTED_RED_44_PASS_3_FAIL"),"Stage52")
-      truth(st.contains("LAST_COMPLETED_STAGE=53"),"Stage53")
-      truth(st.contains("CURRENT_PATCH=26"),"PATCH26")
+      truth(st.contains("STAGE_53_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_42_PASS_0_FAIL"),"Stage53")
+      truth(st.contains("STAGE_53_KIND=PATCH_26"),"PATCH26")
     }
     println("\nRISULTATO STADIO 53: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)
