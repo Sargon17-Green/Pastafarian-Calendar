@@ -2776,3 +2776,72 @@ jobs:
     name: Stage 1 R75 original Native in two hash seeds
     if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[r75-native-two-seeds]')
     uses: ./.github/workflows/stage01-r75-native-two-seeds.yml
+
+  # Stage2 gate is included in the established push workflow because the
+  # standalone Stage2 workflow has no observed run on this feature branch.
+  stage02-weaving-native:
+    if: github.ref_name == 'Perl+國語'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - name: Checkout current source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Check isolated producer and test syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f lib/Pastafari/Monster/WeavingPrimitive.pm
+          test -f t/lib/Pastafari/NormativeScroll.pm
+          perl -Ilib -c lib/Pastafari/Monster/WeavingPrimitive.pm
+          perl -Ilib -It/lib -c t/47_stage02_weaving_primitive.t
+          if grep -nE 'use[[:space:]]+Pastafari::(NormativeScroll|Weaving)' lib/Pastafari/Monster/WeavingPrimitive.pm; then
+            echo '::error::Production module imports a test-only normative Oracle'
+            exit 1
+          fi
+      - name: Native exhaustive and differential verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-PERL-GUOYU\nSHA=%s\n' "$GITHUB_SHA" > evidence/source.txt
+          perl -v > evidence/perl-version.txt
+          ulimit -v 393216
+          ulimit -c 0
+          set +e
+          timeout --signal=TERM --kill-after=5s 120s \
+            prove -e 'perl -CS -Ilib -It/lib' -v t/47_stage02_weaving_primitive.t \
+            > evidence/test.stdout 2> evidence/test.stderr
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/test.exit
+          cat evidence/test.stdout
+          cat evidence/test.stderr >&2
+          if [ "$code" -ne 0 ]; then
+            echo "::error::Stage 2 Perl native returned $code"
+            exit 1
+          fi
+          if [ -s evidence/test.stderr ]; then
+            echo '::error::Stage 2 Perl native emitted stderr'
+            exit 1
+          fi
+          grep -q '^All tests successful\.$' evidence/test.stdout
+          grep -Eq 'Tests=[2-9][0-9][0-9]' evidence/test.stdout
+          echo 'STAGE02_PRIMITIVE_NATIVE_PASS=1 DIFFERENTIAL=1' | tee evidence/result.txt
+          cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve source revision and exact test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perl-stage02-weaving-native
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
