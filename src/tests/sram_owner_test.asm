@@ -396,9 +396,24 @@ RunOwnerLeaseTests::
     ld a, [$a000]
     cp $a7
     jp nz, .fail
+    ; Preserve a sentinel in reserved bank 0. After release it must
+    ; be the mapped bank, not a freed scratch bank.
+    xor a
+    call SRAMSelectBank
+    ld a, $6d
+    ld [$a000], a
+    ld a, 1
+    ld [wOwnerSelectIndex], a
+    call OwnerLeaseSelectBank
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
     call OwnerLeaseRelease
     ld a, [wOwnerStatus]
     or a
+    jp nz, .fail
+    ld a, [$a000]
+    cp $6d
     jp nz, .fail
     ld a, [wOwnerAllocated]
     cp 2
