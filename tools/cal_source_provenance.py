@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""Verify only six pinned CAL plain-text source files; never execute a compiler.
+
+This tool is a provenance aid, NOT an antivirus scan or executable approval.
+It deliberately does not request ZIP archives or executable paths.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+from urllib.error import URLError
+from urllib.parse import quote
+from urllib.request import urlopen
+
+COMMIT = "2d44defdedf24519bba754114ee66e6d1defff1e"
+HOST = "https://raw.githubusercontent.com/elenderg/PAL-1000/"
+SOURCES = {
+    "release": "recursos/CAL-4700",
+    "tutorial_step08": "Documentação/Passo-a-Passo para Compilação/cal-4700 passo08",
+}
+FILES = ("the compiler", "the desktop", "the editor", "the finder", "the noodle", "the writer")
+# SHA-1 of canonical Git blob objects, as reported by the pinned Git tree.
+EXPECTED = {
+    "release": {
+        "the compiler": ("810bdc58ba41e611fc0ba0b53f467d842dcb1bb1", 198054),
+        "the desktop": ("15090a299ff82572f9a5e95af2c95a054edb0139", 84112),
+        "the editor": ("25df723faf8e65e78b0c8a5bdd28330720907dbd", 31924),
+        "the finder": ("660357bcec832f28059a950b264e20381dc997d6", 45063),
+        "the noodle": ("571e3624d83fe531e15b76be6e1168d64a06f71f", 598660),
+        "the writer": ("460c77888767a49ef6f73f611e82101c04ba09e1", 161468),
+    },
+    "tutorial_step08": {
+        "the compiler": ("d8da5ace27c8131fa152312b4262e5792d0d4898", 199997),
+        "the desktop": ("357091dfdbf125222e218b8e5aeb90dc19275ca5", 84111),
+        "the editor": ("25df723faf8e65e78b0c8a5bdd28330720907dbd", 31924),
+        "the finder": ("660357bcec832f28059a950b264e20381dc997d6", 45063),
+        "the noodle": ("336046e46f11bb8fde696d54588071bf86e994a5", 591052),
+        "the writer": ("460c77888767a49ef6f73f611e82101c04ba09e1", 161468),
+    },
+}
+MAX_BYTES = 800_000
+ACTIVE_ROUTINE = re.compile(r"^\s*To\s+[^\r\n:]+:\s*$", re.IGNORECASE)
+COMMENTED_ROUTINE = re.compile(r"^\s*\\+\s*To\s+[^\r\n:]+:\s*$", re.IGNORECASE)
+
+
+def git_blob_sha1(data: bytes) -> str:
+    """Compute Git blob hash, including the blob-length header."""
+    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
+
+
+def approved_source_url(group: str, name: str) -> str:
+    if group not in SOURCES or name not in FILES:
+        raise ValueError("Only the 12 pinned text-source paths are permitted")
+    path = "/".join(quote(part, safe="") for part in (SOURCES[group] + "/" + name).split("/"))
+    return HOST + COMMIT + "/" + path
+
+
+def download_source(group: str, name: str) -> bytes:
+    with urlopen(approved_source_url(group, name), timeout=15) as r:
+        if r.geturl() != approved_source_url(group, name):
+            raise ValueError("Unapproved redirect")
+        data = r.read(MAX_BYTES + 1)
+    if len(data) > MAX_BYTES:
+        raise ValueError("Source file exceeds allowed size")
+    return data
+
+
+def inspect(data: bytes, group: str, name: str) -> dict:
+    expected_sha, expected_size = EXPECTED[group][name]
+    actual_sha = git_blob_sha1(data)
+    executable_magic = data.startswith((b"MZ", b"PK\x03\x04"))
+    valid = len(data) == expected_size and actual_sha == expected_sha and not executable_magic
+    lines = data.decode("utf-8", errors="replace").splitlines()
+    return {
+        "sha1_git_blob": actual_sha,
+        "sha1_expected": expected_sha,
+        "bytes": len(data),
+        "expected_bytes": expected_size,
+        "ok": valid,
+        "active_routines": sum(bool(ACTIVE_ROUTINE.fullmatch(x)) for x in lines),
+        "commented_routines": sum(bool(COMMENTED_ROUTINE.fullmatch(x)) for x in lines),
+    }
+
+
+def audit(read_source) -> dict:
+    result = {
+        "kind": "SOURCE_PROVENANCE_ONLY_NOT_A_COMPILER_SECURITY_APPROVAL",
+        "pinned_repository": "elenderg/PAL-1000",
+        "pinned_commit": COMMIT,
+        "groups": {},
+    }
+    for group in SOURCES:
+        result["groups"][group] = {}
+        for name in FILES:
+            item = inspect(read_source(group, name), group, name)
+            result["groups"][group][name] = item
+            if not item["ok"]:
+                raise ValueError(f"Pinned text-source integrity failure: {group}/{name}")
+    release = result["groups"]["release"]["the compiler"]
+    tutorial = result["groups"]["tutorial_step08"]["the compiler"]
+    result["compiler_procedure_difference"] = {
+        "release_active": release["active_routines"],
+        "tutorial_active": tutorial["active_routines"],
+        "tutorial_commented": tutorial["commented_routines"],
+    }
+    result["all_12_text_sources_verified"] = True
+    result["compiler_executed"] = False
+    result["native_qa_99_pass"] = False
+    return result
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    choice = parser.add_mutually_exclusive_group(required=True)
+    choice.add_argument("--fetch", action="store_true", help="Fetch 12 pinned GitHub TEXT sources only")
+    choice.add_argument("--directory", type=Path, help="Read locally mirrored text sources: <dir>/<group>/<name>")
+    parser.add_argument("--output", type=Path, help="Write verification report as JSON")
+    args = parser.parse_args(argv)
+    if args.fetch:
+        reader = download_source
+    else:
+        def reader(group, name):
+            path = args.directory / group / name
+            if path.is_symlink() or not path.is_file():
+                raise ValueError(f"Refusing missing/symlinked source: {path}")
+            with path.open("rb") as f:
+                b = f.read(MAX_BYTES + 1)
+            if len(b) > MAX_BYTES:
+                raise ValueError("Source file exceeds allowed size")
+            return b
+    try:
+        result = audit(reader)
+        if args.output:
+            args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+    except (OSError, URLError, ValueError) as exc:
+        print("SOURCE_AUDIT_FAILED: " + str(exc), file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
