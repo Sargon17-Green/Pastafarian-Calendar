@@ -1,0 +1,55 @@
+name: PowerShell Tagalog Stage 25 native Patch 12
+on:
+  push:
+    branches: ['PowerShell+Tagalog']
+    paths:
+      - '.github/workflows/powershell-tagalog-stage25-native.yml'
+      - 'src/Patch12.ps1'
+      - 'src/MonsterSkeleton.ps1'
+      - 'tests/Stage23.Tests.ps1'
+      - 'tests/Stage24.Tests.ps1'
+      - 'tests/Stage25.Tests.ps1'
+      - 'DEVELOPMENT_STAGE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage25-windows-powershell-51:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Native Windows PowerShell 5.1 and stage regressions
+        shell: powershell
+        run: |
+          $ErrorActionPreference='Stop'
+          if($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1){throw 'Windows PowerShell 5.1 required'}
+          Write-Host ('HEAD_SHA=' + $env:GITHUB_SHA)
+          Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
+          & ./tests/Stage01.Tests.ps1
+          if($LASTEXITCODE -ne 0){throw 'Stage01 failed'}
+          & ./tests/Stage23.Tests.ps1
+          if($LASTEXITCODE -ne 0){throw 'Stage23 failed'}
+          & ./tests/Stage24.Tests.ps1
+          if($LASTEXITCODE -ne 0){throw 'Stage24 RED regression failed'}
+          & ./tests/Stage25.Tests.ps1
+          if($LASTEXITCODE -ne 0){throw 'Stage25 GREEN failed'}
+          Write-Host 'STAGE25_NATIVE_RESULT=PASS'
+          @(
+            ('HEAD_SHA=' + $env:GITHUB_SHA),
+            ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE01_REGRESSION=PASS','STAGE23_REGRESSION=PASS',
+            'STAGE24_HISTORICAL_RED=3456','STAGE24_MATCHES=864',
+            'STAGE25_CASES=4320','STAGE25_CORRECT=4320',
+            'STAGE25_HISTORICAL_RED=3456','STAGE25_WRAPAROUNDS=720',
+            'STAGE25_NATIVE_RESULT=PASS'
+          ) | Set-Content stage25-native-evidence.txt -Encoding UTF8
+      - name: Retain SHA and Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage25-native-evidence
+          path: |
+            stage25-native-evidence.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn

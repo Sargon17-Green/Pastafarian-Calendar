@@ -24,6 +24,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Discovery11.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch11.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery12.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Patch12.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]
@@ -207,6 +208,14 @@ function New-BaseMonsterContext {
         discovery12ProductionResult = $null
         discovery12Status = 'NOT_RUN'
         discovery12InvocationCount = 0
+        patch12QueriedBowlId = $null
+        patch12LegacyNumericNext = $null
+        patch12OrderSnapshot = $null
+        patch12Position0 = $null
+        patch12CorrectedNext = $null
+        patch12ProductionResult = $null
+        patch12Status = 'NOT_RUN'
+        patch12InvocationCount = 0
     }
 }
 
@@ -498,7 +507,8 @@ function Invoke-CalendarDateSpaghetti {
             correctedOrder = $withDiscovery05.patch11CorrectedOrder
         })
         # Stage24: historical successor after all 58 writes and Patch11 latch.
-        $withDiscovery05.discovery12ProductionResult = Invoke-Discovery12NumericSuccessor -Context $withDiscovery05 -QueriedBowlId 1
+        $withDiscovery05.patch12ProductionResult = Invoke-Patch12PositionalSuccessor -Context $withDiscovery05 -QueriedBowlId 1
+        $withDiscovery05.discovery12ProductionResult = $withDiscovery05.discovery12OldNumericNext
         return $withDiscovery05
     }
 
@@ -507,6 +517,6 @@ function Invoke-CalendarDateSpaghetti {
     Assert-BaseContextOwnership -Context $ctx | Out-Null
 
     $result = Invoke-BaseDispatch -Dispatcher $dispatcher -Context $ctx
-    $result.status = 'DISCOVERY12_EXPECTED_RED'
+    $result.status = 'PATCH12_COMPLETE'
     return $result
 }
