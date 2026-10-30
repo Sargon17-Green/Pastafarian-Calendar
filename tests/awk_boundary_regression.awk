@@ -348,6 +348,58 @@ BEGIN {
     EXPECTED_WRAP=bi_sub(EXPECTED_WRAP,"9")
     expect_exact("wide original tenth+1 eleven-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
 
+
+    # Eleven-digit to twelve-digit transition at original M=2^127-1.
+    # N=M^11 fits eleven base-M digits; N=M^11+1 requires twelve.
+    # Four expected ranks independently checked with arbitrary-size integers.
+    WIDE_ELEVENTH=bi_mul(WIDE_TENTH,M)
+    STREAM_FIRST=bi_sub(M,"11"); STREAM_STEP=1
+    choose_rank_wide(WIDE_ELEVENTH)
+    EXPECTED_ELEVENTH=bi_sub(WIDE_ELEVENTH,WIDE_TENTH)
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,bi_mul_small(WIDE_NINTH,2))
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,bi_mul_small(WIDE_EIGHTH,3))
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,bi_mul_small(WIDE_SEVENTH,4))
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,bi_mul_small(WIDE_SIXTH,5))
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,bi_mul_small(WIDE_FIFTH,6))
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,bi_mul_small(WIDE_FOURTH,7))
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,bi_mul_small(WIDE_CUBE,8))
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,bi_mul_small(WIDE_SQUARE,9))
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,bi_mul_small(M,10))
+    EXPECTED_ELEVENTH=bi_sub(EXPECTED_ELEVENTH,"11")
+    expect_exact("wide original eleventh eleven-digit boundary", CHOSEN_RANK, EXPECTED_ELEVENTH)
+
+    WIDE_N=bi_add(WIDE_ELEVENTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original eleventh+1 twelve-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=bi_sub(WIDE_ELEVENTH,bi_mul_small(WIDE_TENTH,10))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_NINTH,9))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_EIGHTH,8))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SEVENTH,7))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SIXTH,6))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_FIFTH,5))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_FOURTH,4))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_CUBE,3))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SQUARE,2))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(M,2))
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"12")
+    expect_exact("wide original eleventh+1 twelve-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_mul_small(WIDE_TENTH,9)
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_NINTH,8))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_EIGHTH,7))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_SEVENTH,6))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_SIXTH,5))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_FIFTH,4))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_FOURTH,3))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_CUBE,2))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,WIDE_SQUARE)
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,M)
+    EXPECTED_WRAP=bi_sub(EXPECTED_WRAP,"10")
+    expect_exact("wide original eleventh+1 twelve-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
