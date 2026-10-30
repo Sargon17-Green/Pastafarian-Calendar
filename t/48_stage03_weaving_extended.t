@@ -68,9 +68,11 @@ for my $p ([(4) x 6],[24]) {
     my $total = count_weavings($p);
     isa_ok($total,'Math::BigInt');
     ok($total >= 1, '二十四日計數正值');
-    my @ranks = (Math::BigInt->bone,
-                 $total->copy->badd(1)->bdiv(2),
-                 $total->copy);
+    # bdiv 在陣列列表上下文中會同時傳回商和餘數；
+    # 先在純量上下文計算，避免多出非法 rank=0。
+    my $middle = $total->copy->badd(1);
+    $middle->bdiv(2);
+    my @ranks = (Math::BigInt->bone, $middle, $total->copy);
     for my $rank (@ranks) {
         my $unchanged = "$rank";
         my $word = unrank_weaving($p,$rank);
