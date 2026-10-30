@@ -199,3 +199,44 @@ No workflow or compiler code was merged into `main`; no untrusted CAL
 binary was executed. Git provenance does not constitute malware
 clearance. The stage-zero compiler and Native 99-group QA gates remain
 blocked.
+
+
+## 2026-10-30: dual-hash verification of actual GitHub source bytes
+
+A separate byte-oriented inspection of all twelve source files from
+`elenderg/PAL-1000` at pinned commit
+`2d44defdedf24519bba754114ee66e6d1defff1e`
+recomputed Git's `blob <length>\\0<content>` SHA-1 over the original
+byte values. **12/12 matched the expected Git blob IDs.**
+
+The same inspection independently computed source-byte SHA-256 for each
+file; those twelve digest constants are now explicitly pinned in
+`tools/cal_source_provenance.py` under `EXPECTED_SHA256`.
+For a source to be accepted the verifier now requires all three checks:
+**exact byte length + Git blob SHA-1 + source SHA-256**. Its lexical
+analysis uses a reversible ISO-8859-1 mapping, avoiding replacement of
+legacy 8-bit characters during text inspection. Hashes always operate
+on the original bytes, not a newly UTF-8-encoded string.
+
+`tools/test_cal_source_provenance.py` now has **14 offline unit
+tests**, including a test in which byte length and Git blob hash agree
+but the pinned SHA-256 is deliberately wrong. The local Python suite
+completed **14/14 PASS** using the updated implementation. The source
+retrieval/hash comparison was performed through the GitHub connector
+and an independent JavaScript SHA-1/SHA-256 implementation with
+known-answer self-tests; this **does not constitute a GitHub Actions
+job result**.
+
+Actions API still reported **zero** runs for the feature branch at
+`4299ceb952b0011c03afcdce68cac90a86e3d0be`.
+GitHub's documentation confirms that `push` workflows may trigger on
+branches even before merge to the default branch, whereas manual
+`workflow_dispatch` requires presence of the workflow file on the
+default branch. Therefore the branch-only workflow location is **not**
+a sufficient explanation of zero `push` runs. The actual reason has
+not been verified and no CI PASS is claimed.
+
+No CAL executables were run, and the 82 existing calendar source
+files were not modified. Neither the CAL-4700 binary that mismatches
+its ZIP manifest nor the quarantined CAL-4018 is approved to run.
+The 99 Native QA groups remain unexecuted.
