@@ -3,7 +3,7 @@ name: CAL source provenance (no executable)
 on:
   push:
     branches:
-      - "Plain-English-Programming+English"
+      - 'Plain-English-Programming\+English'
     paths:
       - "tools/cal_source_provenance.py"
       - "tools/test_cal_source_provenance.py"
