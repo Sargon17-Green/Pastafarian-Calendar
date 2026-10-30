@@ -454,6 +454,63 @@ BEGIN {
     EXPECTED_WRAP=bi_sub(EXPECTED_WRAP,"11")
     expect_exact("wide original twelfth+1 thirteen-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
 
+    # Thirteen-digit to fourteen-digit transition at original M=2^127-1.
+    # N=M^13 fits thirteen base-M digits; N=M^13+1 needs fourteen.
+    # Four expected ranks independently checked with arbitrary-precision integers.
+    WIDE_THIRTEENTH=bi_mul(WIDE_TWELFTH,M)
+    STREAM_FIRST=bi_sub(M,"13"); STREAM_STEP=1
+    choose_rank_wide(WIDE_THIRTEENTH)
+    EXPECTED_THIRTEENTH=bi_sub(WIDE_THIRTEENTH,WIDE_TWELFTH)
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_ELEVENTH,2))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_TENTH,3))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_NINTH,4))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_EIGHTH,5))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_SEVENTH,6))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_SIXTH,7))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_FIFTH,8))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_FOURTH,9))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_CUBE,10))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(WIDE_SQUARE,11))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,bi_mul_small(M,12))
+    EXPECTED_THIRTEENTH=bi_sub(EXPECTED_THIRTEENTH,"13")
+    expect_exact("wide original thirteenth thirteen-digit boundary", CHOSEN_RANK, EXPECTED_THIRTEENTH)
+
+    WIDE_N=bi_add(WIDE_THIRTEENTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original thirteenth+1 fourteen-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=bi_sub(WIDE_THIRTEENTH,bi_mul_small(WIDE_TWELFTH,12))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_ELEVENTH,11))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_TENTH,10))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_NINTH,9))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_EIGHTH,8))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SEVENTH,7))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SIXTH,6))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_FIFTH,5))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_FOURTH,4))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_CUBE,3))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SQUARE,2))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(M,2))
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"14")
+    expect_exact("wide original thirteenth+1 fourteen-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_mul_small(WIDE_TWELFTH,11)
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_ELEVENTH,10))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_TENTH,9))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_NINTH,8))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_EIGHTH,7))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_SEVENTH,6))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_SIXTH,5))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_FIFTH,4))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_FOURTH,3))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_CUBE,2))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,WIDE_SQUARE)
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,M)
+    EXPECTED_WRAP=bi_sub(EXPECTED_WRAP,"12")
+    expect_exact("wide original thirteenth+1 fourteen-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
