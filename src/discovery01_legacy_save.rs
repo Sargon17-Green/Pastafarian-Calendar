@@ -29,7 +29,9 @@ impl PhaseHandler for LegacySaveDiscovery01 {
         let old = legacy_remainder(&context.calculation_day);
         context.legacy_save_observation = Some(old);
         context.metrics.bump("discovery01.legacy_save.calls");
-        context.logs.push("DISCOVERY01: köhnə SAVE qalığı qaytarıldı.");
+        context
+            .logs
+            .push("DISCOVERY01: köhnə SAVE qalığı qaytarıldı.");
         Ok(())
     }
 }
@@ -39,10 +41,13 @@ pub fn observe_legacy_save(input: BigInt) -> Result<LegacySaveObservation, Monst
     let mut manager = MonsterManager::default();
     manager.dispatcher_mut().register(LegacySaveDiscovery01);
     let context = manager.execute_bootstrap_shell(input.clone(), input.clone())?;
-    let legacy_value = context.legacy_save_observation.clone().ok_or_else(|| MonsterError {
-        code: MonsterErrorCode::InvalidState,
-        message: "DISCOVERY01: köhnə SAVE müşahidəsi yoxdur.".to_owned(),
-    })?;
+    let legacy_value = context
+        .legacy_save_observation
+        .clone()
+        .ok_or_else(|| MonsterError {
+            code: MonsterErrorCode::InvalidState,
+            message: "DISCOVERY01: köhnə SAVE müşahidəsi yoxdur.".to_owned(),
+        })?;
     Ok(LegacySaveObservation {
         input,
         legacy_value,

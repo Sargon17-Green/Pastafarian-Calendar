@@ -1,4 +1,5 @@
 //! Mərhələ 2 — 3 tarixi EXPECTED_RED, 1 CONTROL; düzəliş Stage3-dədir.
+#[rustfmt::skip]
 mod support;
 
 use num_bigint::BigInt;
@@ -30,14 +31,27 @@ fn exact_historical_red_signature_through_real_dispatcher() {
         assert_eq!(second.legacy_value, first.legacy_value);
         assert_eq!(first.context.calculation_day, input);
         assert_eq!(first.context.target_day, input);
-        assert_eq!(first.context.metrics.get("discovery01.legacy_save.calls"), 1);
+        assert_eq!(
+            first.context.metrics.get("discovery01.legacy_save.calls"),
+            1
+        );
         assert_eq!(first.context.metrics.get("dispatcher.handler.completed"), 1);
         assert_eq!(first.context.phase, MonsterPhase::Complete);
         assert_eq!(first.context.status, MonsterStatus::Complete);
         assert_eq!(first.context.branch_trace, vec!["DISCOVERY01:LEGACY-SAVE"]);
-        assert_eq!(first.context.legacy_save_observation, Some(first.legacy_value.clone()));
-        assert_eq!(first.context, second.context, "no state carried between calls");
-        if actual_red { red += 1; } else { match_count += 1; }
+        assert_eq!(
+            first.context.legacy_save_observation,
+            Some(first.legacy_value.clone())
+        );
+        assert_eq!(
+            first.context, second.context,
+            "no state carried between calls"
+        );
+        if actual_red {
+            red += 1;
+        } else {
+            match_count += 1;
+        }
     }
     assert_eq!((red, match_count), (3, 1));
     println!("STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0");
@@ -74,6 +88,10 @@ fn canonical_five_fields_still_refuse_to_claim_full_calendar() {
     let error = pastafarian_calendar_rust_az::calendar_date_spaghetti(
         BigInt::from(-15055671i64),
         BigInt::from(-15055670i64),
-    ).expect_err("Stage2 does not synthesize five fields");
-    assert_eq!(error.code, pastafarian_calendar_rust_az::MonsterErrorCode::BootstrapOnly);
+    )
+    .expect_err("Stage2 does not synthesize five fields");
+    assert_eq!(
+        error.code,
+        pastafarian_calendar_rust_az::MonsterErrorCode::BootstrapOnly
+    );
 }

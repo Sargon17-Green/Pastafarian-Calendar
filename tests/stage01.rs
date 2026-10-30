@@ -1,3 +1,4 @@
+#[rustfmt::skip]
 mod support;
 
 use num_bigint::{BigInt, BigUint};
@@ -249,7 +250,10 @@ fn sauce_is_deterministic_for_bootstrap_fixture() {
 fn base_monster_shell_is_semantically_neutral() {
     let manager = MonsterManager::default();
     let context = manager
-        .execute_bootstrap_shell(BigInt::from(oracle::FOUNDATION_DAY_I64), BigInt::from(oracle::FOUNDATION_DAY_I64))
+        .execute_bootstrap_shell(
+            BigInt::from(oracle::FOUNDATION_DAY_I64),
+            BigInt::from(oracle::FOUNDATION_DAY_I64),
+        )
         .expect("İlkin quruluş qabığı uğurla işləməlidir.");
     assert_eq!(context.phase, MonsterPhase::Complete);
     assert_eq!(context.status, MonsterStatus::Complete);
@@ -302,6 +306,9 @@ fn future_patch_scar_names_are_absent_from_production_stage01() {
         "oldContiguousMonthDayGuess",
     ];
     for name in forbidden {
-        assert!(!production.contains(name), "Gələcək mərhələ izi tapıldı: {name}");
+        assert!(
+            !production.contains(name),
+            "Gələcək mərhələ izi tapıldı: {name}"
+        );
     }
 }

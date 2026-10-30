@@ -1,8 +1,9 @@
 use num_bigint::BigInt;
 use std::collections::BTreeMap;
 
-pub mod source_language_catalog;
 pub mod discovery01_legacy_save;
+#[rustfmt::skip]
+pub mod source_language_catalog;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MonsterPhase {
