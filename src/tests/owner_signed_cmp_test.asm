@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..198: signed owner-scoped comparison.
+; Stage 1 native regression 191..202: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -238,6 +238,77 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 3
     jp nz, .fail
+    ; 199: canonical +0 is smaller than a nonzero positive magnitude.
+    ; Owner 42 is a live, zero-initialized bank; owner 46 has 8193 bytes.
+    ld a, 199
+    ld [wTestCase], a
+    ld a, 42
+    ld [wOwnerCmpOwnerA], a
+    ld a, 46
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpLenB], a
+    ld a, $20
+    ld [wOwnerCmpLenB+1], a
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
+    jp nz, .fail
+
+    ; 200: a nonzero negative magnitude is smaller than canonical +0.
+    ld a, 200
+    ld [wTestCase], a
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld a, 42
+    ld [wOwnerCmpOwnerB], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenA], a
+    ld a, $20
+    ld [wOwnerCmpLenA+1], a
+    xor a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenB+1], a
+    ld [wOwnerCmpLenB+2], a
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
+    jp nz, .fail
+
+    ; 201: sign outside {0,1} must fail closed, even for a valid owner.
+    ld a, 201
+    ld [wTestCase], a
+    ld a, 2
+    ld [wOwnerCmpSignA], a
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+
+    ; 202: owner ID zero must fail closed even when length is zero.
+    ld a, 202
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
