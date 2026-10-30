@@ -103,3 +103,38 @@ partly disabled and should **not** be substituted for the full compiler
 source or mixed with `recursos/CAL-4700` runtime components. No claim is
 made that the standalone source is independently audited or that it can be
 bootstrapped without a trustworthy seed.
+
+## 2026-10-30: executable-free source provenance gate implemented
+
+New project-owned, Python-standard-library-only files on this branch:
+
+- `tools/cal_source_provenance.py`: fetches **only** the six exact text files in
+  each of the `release` and `tutorial_step08` source sets from pinned
+  `elenderg/PAL-1000` commit `2d44defdedf24519bba754114ee66e6d1defff1e`.
+  It validates Git blob SHA-1 and file byte length against a fixed 12-file
+  manifest. It rejects wrong source paths, executable/ZIP magic, oversize
+  files, mismatched hashes, symlinks in offline-directory mode, and redirects.
+  It generates JSON but **does not compile anything or run any executable**.
+- `tools/test_cal_source_provenance.py`: seven isolated unit tests.
+- `.github/workflows/cal-source-provenance.yml`: narrowly scoped
+  `contents: read` CI for unit tests and the pinned-source audit. It invokes
+  only Python; it never invokes or downloads any CAL binary.
+
+Observed evidence **in this development session**: seven tests passed on
+the locally authored Python implementation; GitHub's file-content API
+returned all 12 pinned text files at their expected Git blob SHA-1 IDs;
+the branch contains all three added files. A completed GitHub Actions
+job and its exit status have **not** yet been independently observed.
+The two source sets are distinct and must not be mixed.
+
+To run the harmless offline unit tests from the branch:
+`python3 -m unittest discover -s tools -p 'test_cal_source_provenance.py' -v`
+
+To retrieve and verify only pinned text sources:
+`python3 tools/cal_source_provenance.py --fetch --output cal-source-provenance.json`
+
+Passing source provenance establishes **byte identity only**. It neither
+approves an unknown compiler executable nor supplies a trusted stage-zero
+bootstrap. CAL-4700 and the quarantined CAL-4018 remain blocked, the
+47-month discrepancy remains unresolved, and the 99 Native QA groups
+remain unverified.
