@@ -105,6 +105,19 @@ def main():
     assert model.release(24) == (0, 1)
     assert model.tags == [2] * 3 + [0] * 13
 
+    # Failed release is atomic for another owner's live mapped bank.
+    model.data[0][0] = 0x4D
+    assert model.alloc(26, 1) == (0, (3,))
+    assert model.select(26, 0) == (0, 3)
+    model.data[3][0] = 0x9C
+    assert model.release(27) == (3, 0)
+    assert (model.mapped, model.selected) == (3, -1)
+    assert model.tags[3] == 28 and model.data[3][0] == 0x9C
+    assert model.release(26) == (0, 1)
+    assert (model.mapped, model.selected) == (0, -1)
+    assert model.data[0][0] == 0x4D and model.data[3][0] == 0
+    assert model.tags == [2] * 3 + [0] * 13
+
     rng = Random(0x83A110C)
     checks = 0
     for _ in range(1000):
@@ -123,7 +136,7 @@ def main():
         assert model.tags[:3] == [2] * 3
         assert all(x == 0 or 3 <= x <= 255 for x in model.tags[3:])
         checks += 1
-    print(f"HOST_SRAM_OWNER_MODEL=PASS randomized_transitions={checks} slots=13 logical_index=PASS release_unmap=PASS stale_handle=REVOKED")
+    print(f"HOST_SRAM_OWNER_MODEL=PASS randomized_transitions={checks} slots=13 logical_index=PASS release_unmap=PASS stale_handle=REVOKED absent_release=ATOMIC")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 
 

@@ -474,6 +474,69 @@ RunOwnerLeaseTests::
     ld a, [wLeaseTable+7]
     or a
     jp nz, .fail
+    ; 184 — an absent owner's release must neither scrub nor remap
+    ; a live bank; failed release revokes the cached handle only.
+    ld a, 184
+    ld [wTestCase], a
+    xor a
+    call SRAMSelectBank
+    ld a, $4d
+    ld [$a000], a
+    ld a, 26
+    ld [wOwnerRequest], a
+    ld a, 1
+    ld [wOwnerCount], a
+    call OwnerLeaseAlloc
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+    ld a, [wOwnerBanks]
+    cp 3
+    jp nz, .fail
+    xor a
+    ld [wOwnerSelectIndex], a
+    call OwnerLeaseSelectBank
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+    ld a, [wOwnerSelectedBank]
+    cp 3
+    jp nz, .fail
+    ld a, $9c
+    ld [$a000], a
+    ld a, 27
+    ld [wOwnerRequest], a
+    call OwnerLeaseRelease
+    ld a, [wOwnerStatus]
+    cp 3
+    jp nz, .fail
+    ld a, [wOwnerSelectedBank]
+    cp $ff
+    jp nz, .fail
+    ld a, [$a000]                     ; still mapped to live bank 3
+    cp $9c
+    jp nz, .fail
+    ld a, [wLeaseTable+3]
+    cp 28                             ; owner 26 + tag offset 2
+    jp nz, .fail
+    ld a, 26
+    ld [wOwnerRequest], a
+    call OwnerLeaseRelease
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+    ld a, [$a000]                     ; successful release remaps bank 0
+    cp $4d
+    jp nz, .fail
+    ld a, [wLeaseTable+3]
+    or a
+    jp nz, .fail
+    ld a, 3                           ; test-only direct inspection
+    call SRAMSelectBank
+    ld a, [$a000]                     ; released bank fully scrubbed
+    or a
+    jp nz, .fail
+
     call SRAMDisable
     ld a, $a5
     ld [wTestResult], a
