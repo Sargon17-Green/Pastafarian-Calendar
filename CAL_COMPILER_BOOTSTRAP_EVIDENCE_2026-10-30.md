@@ -138,3 +138,34 @@ approves an unknown compiler executable nor supplies a trusted stage-zero
 bootstrap. CAL-4700 and the quarantined CAL-4018 remain blocked, the
 47-month discrepancy remains unresolved, and the 99 Native QA groups
 remain unverified.
+
+
+## 2026-10-30: offline verifier hardening and CI visibility
+
+Follow-up code on the same branch:
+- \`tools/cal_source_provenance.py\` now checks each source-path
+  component for symlinks (including the source-set directory),
+  rather than checking only the final file.
+- After any source audit failure, a requested JSON report is replaced
+  with \`all_12_text_sources_verified: false\`; a stale previous
+  successful report must not masquerade as new evidence.
+- \`tools/test_cal_source_provenance.py\` now contains **ten** offline
+  tests, including an actual 12-file end-to-end directory-mode
+  integration test and explicit symlink/failure-report regression tests.
+
+**Measured locally**: \`python -m unittest discover -s
+/mnt/data/cal_bootstrap_tools -p 'test_cal_source_provenance.py' -v\`
+finished with 10/10 tests passing, using equivalent code under review.
+This is a local Python test, not proof that GitHub Actions ran.
+
+**GitHub Actions visibility**: the GitHub API reported zero workflow
+runs for this feature branch and zero combined commit statuses for
+\`618cac5e5190042c9c37089e9a109b8ef8c0a6dc\` at time of
+inspection. The source-only CI workflow exists but **must not be marked
+PASS** without a job/run log. The reason the push did not yield a
+visible run is not verified. The workflow is explicitly restricted
+to fetching Plain English **text**, not downloading/executing CAL.
+
+No change to the project's 82 source files. Security gates remain:
+CAL-4018 quarantined, CAL-4700 ZIP-integrity mismatch unresolved,
+no Native QA PASS and no compiler execution authorization.
