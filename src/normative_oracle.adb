@@ -447,10 +447,24 @@ package body Normative_Oracle is
       declare
          Acceptance_Limit : constant Big_Integer := Floor_Div (Space, N) * N;
       begin
-         while Wide > Acceptance_Limit loop
-            Wide := B (1) + Regular_Mod
-              (Wide - B (1) + B (Stream.Direction_Step), Space);
-         end loop;
+         --  The historical loop walked a unit step around [1, Space].
+         --  A rejected -1 stream first reaches Acceptance_Limit.
+         --  A rejected +1 stream first reaches 1 after wrapping.
+         --  This oracle-only correction avoids astronomical retry counts.
+         if Wide > Acceptance_Limit then
+            case Stream.Direction_Step is
+               when -1 =>
+                  Wide := Acceptance_Limit;
+               when 1 =>
+                  Wide := B (1);
+               when 0 =>
+                  --  A stationary rejected stream never terminated before.
+                  --  Ask_Bowl emits only -1/+1; fail explicitly for 0.
+                  raise Constraint_Error with
+                    Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode
+                      ("స్థిరమైన తిరస్కరించిన సమాధాన ప్రవాహం");
+            end case;
+         end if;
       end;
       return Regular_Mod (Wide - B (1), N) + B (1);
    end Choose_Rank_Wide;
