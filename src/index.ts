@@ -75,3 +75,5 @@ export * from "./patch24ScalableNativeWeaving.ts";
 
 export * from "./discovery25LegacyContiguousMonthDay.ts";
 export * from "./patch25MonthDay.ts";
+
+export * from "./discovery26LegacyMonthEnd.ts";
