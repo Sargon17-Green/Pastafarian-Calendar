@@ -73,6 +73,27 @@ jobs:
             echo "::error::Stage 1 bounded Oracle assertion count mismatch"
             exit 1
           fi
+      - name: Run bounded Stage 1 gate-gap and sauce smoke (3 assertions; not full acceptance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          output="$(timeout --signal=TERM --kill-after=5s 30s build/stage01_tests gate-sauce-smoke 2>&1)"
+          exit_code=$?
+          set -e
+          printf '%s\\n' "$output"
+          if [[ "$exit_code" -ne 0 ]]; then
+            echo "::error::Bounded Stage 1 gate/sauce smoke failed or timed out (exit $exit_code)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE01_GATE_SAUCE_SMOKE_PASS' <<< "$output"
+          actual="$(grep -c '^PASS: ' <<< "$output")"
+          echo "STAGE01_GATE_SAUCE_SMOKE_ASSERTIONS=$actual EXPECTED=3 (NOT full Stage 1 acceptance)"
+          echo "Fortran Stage 1 gate/sauce smoke: $actual/3 assertions (not full acceptance)." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$actual" -ne 3 ]]; then
+            echo "::error::Stage 1 gate/sauce smoke assertion count mismatch"
+            exit 1
+          fi
       - name: Run bounded Stage 1 BigInt safe-boundary checks
         shell: bash
         run: |

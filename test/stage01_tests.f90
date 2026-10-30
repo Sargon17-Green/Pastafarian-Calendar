@@ -9,30 +9,42 @@ program stage01_tests
 
   integer :: failures,arg_status
   character(len=32) :: mode
-  logical :: bounded_smoke
+  logical :: bounded_smoke,gate_sauce_smoke
 
   failures=0
   bounded_smoke=.false.
+  gate_sauce_smoke=.false.
   if (command_argument_count()>0) then
      if (command_argument_count()/=1) error stop 'unsupported Stage 1 test mode'
      call get_command_argument(1,mode,status=arg_status)
      if (arg_status/=0) error stop 'unsupported Stage 1 test mode'
-     if (trim(mode)/='bounded-smoke') error stop 'unsupported Stage 1 test mode'
-     bounded_smoke=.true.
+     select case(trim(mode))
+     case('bounded-smoke')
+        bounded_smoke=.true.
+     case('gate-sauce-smoke')
+        gate_sauce_smoke=.true.
+     case default
+        error stop 'unsupported Stage 1 test mode'
+     end select
   end if
 
-  call test_bigint(failures)
-  call test_catalog(failures)
-  call test_bootstrap_infrastructure(failures)
-  call test_normative_arithmetic(failures)
-  call test_normative_stones(failures)
-  call test_permutations(failures)
-  call test_ordered_families(failures)
-  call test_human_authored_text_language(failures)
-  call test_selection_edges(failures)
-  if (.not. bounded_smoke) then
+  if (gate_sauce_smoke) then
      call test_gate_gap_smoke(failures)
      call test_sauce_smoke(failures)
+  else
+     call test_bigint(failures)
+     call test_catalog(failures)
+     call test_bootstrap_infrastructure(failures)
+     call test_normative_arithmetic(failures)
+     call test_normative_stones(failures)
+     call test_permutations(failures)
+     call test_ordered_families(failures)
+     call test_human_authored_text_language(failures)
+     call test_selection_edges(failures)
+     if (.not. bounded_smoke) then
+        call test_gate_gap_smoke(failures)
+        call test_sauce_smoke(failures)
+     end if
   end if
 
   if (failures/=0) then
@@ -41,6 +53,8 @@ program stage01_tests
   end if
   if (bounded_smoke) then
      write(*,'(A)') 'STAGE01_BOUNDED_ORACLE_PASS'
+  else if (gate_sauce_smoke) then
+     write(*,'(A)') 'STAGE01_GATE_SAUCE_SMOKE_PASS'
   else
      write(*,'(A)') 'STAGE01 PASS'
   end if
