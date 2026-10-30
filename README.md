@@ -50,3 +50,11 @@ production 不调用 oracle，不读取 oracle 结果作为 fallback。没有提
 - `SPAGHETTI_DEVELOPMENT_HISTORY.md` — 保留此前性能/内存调查的历史，不把历史诊断门误当成现行验收条件。
 
 早期工作序列曾调用非 COBOL runtime，因此 `FOREIGN_LANGUAGE_USAGE=VIOLATION_NON_COBOL_RUNTIME_USED_DURING_STAGE_1_WORK` 必须继续保留；本次关闭不会改写该历史事实。
+
+## Stage 4 — DISCOVERY02 legacy day tag（待真实 Native 验证）
+
+由 [跨分支合同](docs/STAGE_04_DISCOVERY_02_CROSS_BRANCH_CONTRACT_2026-10-30.md) 确定第二个历史缺陷。在 `src/legacy_day_tag.cob` 中，真实 `BIG-INTEGER-SERVICE` 计算 `2*abs(D−F)`，`MONSTER-BOOTSTRAP` 的 `DAY-TAG-LEGACY` 分发路径返回此错误原值，不调用测试 Oracle，不做 Stage5/PATCH02 的 `+1`。
+
+`test/stage04_discovery_tests.cob` 逐一请求 F±64 的 129 个日期，检查旧值和独立数学规范；要求 **65 个 EXPECTED_RED、64 个控制正确、5 个基础见证中精确 3 红 2 绿**，以及路由与全局堆归零。新工作流 `.github/workflows/cobol-chinese-stage04-discovery02.yml` 用真实 GnuCOBOL 严格编译并保存日志；既有 Stage1–3 回归仍由 `.github/workflows/canonical-names-lock.yml` 测试。
+
+截至此提交：`CURRENT_STAGE=4`、`LAST_COMPLETED_STAGE=3`、`STAGE4_NATIVE=AWAITING_CI`。没有看到本次新增 Stage4 的真实 Native 完成结果；不因此阻断下一次会话开始验收，不把源码提交等同于 PASS。未经验证不开放 Stage5，不合并 `main`，不宣称五字段日期算法已完成。
