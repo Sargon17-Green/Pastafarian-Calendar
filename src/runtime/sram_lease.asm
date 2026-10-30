@@ -58,6 +58,8 @@ LeaseResetAll::
     ld [wLeaseStatus], a
     ld a, $ff
     ld [wLeaseBank], a
+    ; A destructive reset invalidates every previously selected owner handle.
+    ld [wOwnerSelectedBank], a
     ret
 
 LeaseAlloc::
