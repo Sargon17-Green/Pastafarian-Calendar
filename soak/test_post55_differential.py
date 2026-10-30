@@ -132,6 +132,46 @@ class SoakRunnerTests(unittest.TestCase):
                 self.assertEqual(caught.exception.code, 2)
                 self.assertFalse((Path(td) / "evidence.json").exists())
 
+
+    def test_tablets_geometric_exclusion_is_bound_to_production_sources(self):
+        """Bounded static geometry guard, not a full-date certification.
+
+        The Year-5000 candidate search needs 5778 days around the
+        calculation date; no gate can jump more than 963 days, and the
+        current production index budget is 8192 on either side.
+        This test intentionally fails if those source assumptions drift.
+        """
+        root = Path(__file__).resolve().parents[1]
+        gate = (root / "src/main/kotlin/pastafari/ProductionGateYear5000Engine.kt").read_text(
+            encoding="utf-8"
+        )
+        navigator = (root / "src/main/kotlin/pastafari/ProductionYearNavigator.kt").read_text(
+            encoding="utf-8"
+        )
+        bridge = (root / "soak/Post55ProductionDateBridge.kt").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("private val maxGateAbsIndex: Int = 8192", gate)
+        self.assertIn("check(chosen in 42..963)", gate)
+        self.assertIn(
+            "coverDays(calculationDay - 5778L, calculationDay + 5778L)", gate
+        )
+        self.assertIn("maxGateAbsIndex: Int = 8192", navigator)
+        self.assertIn("8192L * 963L - 5778L", bridge)
+        self.assertIn("E_POST55_GATE_GEOMETRIC_LIMIT", bridge)
+
+        max_gate_index = 8192
+        max_gap = 963
+        candidate_half_window = 5778
+        conservative_limit = max_gate_index * max_gap - candidate_half_window
+        self.assertEqual(conservative_limit, 7883118)
+        for tablets_day in (soak.TABLETS - 1, soak.TABLETS, soak.TABLETS + 1):
+            with self.subTest(tablets_day=tablets_day):
+                distance = abs(tablets_day - soak.FOUNDATION)
+                minimum_gate_steps = (distance + max_gap - 1) // max_gap
+                self.assertGreater(minimum_gate_steps, max_gate_index)
+                self.assertGreater(distance, conservative_limit)
+
     def test_four_distinct_anchor_epochs_in_small_corpus(self):
         pairs = soak.corpus(4, 55)
         self.assertEqual(
