@@ -7,8 +7,19 @@ program stage01_tests
   use normative_oracle_calendar
   implicit none
 
-  integer :: failures
+  integer :: failures,arg_status
+  character(len=32) :: mode
+  logical :: bounded_smoke
+
   failures=0
+  bounded_smoke=.false.
+  if (command_argument_count()>0) then
+     if (command_argument_count()/=1) error stop 'unsupported Stage 1 test mode'
+     call get_command_argument(1,mode,status=arg_status)
+     if (arg_status/=0) error stop 'unsupported Stage 1 test mode'
+     if (trim(mode)/='bounded-smoke') error stop 'unsupported Stage 1 test mode'
+     bounded_smoke=.true.
+  end if
 
   call test_bigint(failures)
   call test_catalog(failures)
@@ -17,16 +28,22 @@ program stage01_tests
   call test_normative_stones(failures)
   call test_permutations(failures)
   call test_ordered_families(failures)
-  call test_selection_edges(failures)
-  call test_gate_gap_smoke(failures)
-  call test_sauce_smoke(failures)
-  call test_human_authored_text_language(failures)
+  if (.not. bounded_smoke) then
+     call test_selection_edges(failures)
+     call test_gate_gap_smoke(failures)
+     call test_sauce_smoke(failures)
+     call test_human_authored_text_language(failures)
+  end if
 
   if (failures/=0) then
      write(*,'(A,I0)') 'STAGE01 FAILURES: ',failures
      error stop 1
   end if
-  write(*,'(A)') 'STAGE01 PASS'
+  if (bounded_smoke) then
+     write(*,'(A)') 'STAGE01_BOUNDED_ORACLE_PASS'
+  else
+     write(*,'(A)') 'STAGE01 PASS'
+  end if
 
 contains
 
