@@ -3,7 +3,7 @@ name: Rust Azerbaijani Stage 1 Native
 on:
   push:
     branches:
-      - 'Rust+Azərbaycan-dili'
+      - 'Rust\+Azərbaycan-dili'
     paths:
       - 'Cargo.toml'
       - 'Cargo.lock'
