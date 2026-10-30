@@ -1,0 +1,45 @@
+name: MATLAB Polish Stage55 Independent Real-Year Edge Gate
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/stage55_polish_real_year_extremal_five_field_gate.py'
+      - '.github/workflows/matlab-stage55-python-real-year-extremal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matlab-stage55-python-real-year-extremal-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  real-year-extremal-certificate:
+    name: Python / independent 4244-day four-edge certificate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+      - name: Run standalone bounded Appendix-A edge checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          python3 tools/stage55_polish_real_year_extremal_five_field_gate.py \
+            2>&1 | tee logs/STAGE55_REAL_YEAR_EXTREMAL_GATE.log
+          grep -q '^STAGE55_REAL_YEAR_EXTREMAL_INDEPENDENT_PASS ' \
+            logs/STAGE55_REAL_YEAR_EXTREMAL_GATE.log
+          grep -q '^STAGE55_FULL_YEAR_FIVE_FIELD_DIFFERENTIAL_NOT_VERIFIED$' \
+            logs/STAGE55_REAL_YEAR_EXTREMAL_GATE.log
+      - name: Preserve exact original PASS or FAIL log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-real-year-extremal-${{ github.run_id }}
+          path: logs/STAGE55_REAL_YEAR_EXTREMAL_GATE.log
+          if-no-files-found: warn
+          retention-days: 30
