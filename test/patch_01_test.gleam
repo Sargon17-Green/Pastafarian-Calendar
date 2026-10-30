@@ -17,11 +17,13 @@ pub fn patch_01_m_test() {
 }
 
 pub fn patch_01_2m_test() {
-  patched_from_production_path(2 * core.m) |> should.equal(core.save(2 * core.m))
+  patched_from_production_path(2 * core.m)
+  |> should.equal(core.save(2 * core.m))
 }
 
 pub fn patch_01_3m_test() {
-  patched_from_production_path(3 * core.m) |> should.equal(core.save(3 * core.m))
+  patched_from_production_path(3 * core.m)
+  |> should.equal(core.save(3 * core.m))
 }
 
 pub fn patch_01_m_plus_1_test() {
