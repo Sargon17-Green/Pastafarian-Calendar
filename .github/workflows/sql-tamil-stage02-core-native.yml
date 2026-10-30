@@ -1,0 +1,96 @@
+name: SQL Tamil Stage 2 Core Native PostgreSQL
+
+on:
+  push:
+    branches:
+      - 'SQL\\+தமிழ்'
+    paths:
+      - 'sql/03_stage02_production_core.sql'
+      - 'sql/test/50_stage02_production_core_tests.sql'
+      - '.github/workflows/sql-tamil-stage02-core-native.yml'
+      - 'sql/00_schema.sql'
+      - 'sql/01_source_language_catalog.sql'
+      - 'sql/02_monster_bootstrap.sql'
+      - 'sql/test/40_production_isolation.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sql-tamil-stage02-core-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  production-core:
+    name: PostgreSQL 17 — Stage 2 production core and isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PG_CONTAINER: sql-tamil-stage02-postgres
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+
+      - name: Start isolated PostgreSQL 17 production database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name "$PG_CONTAINER" --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres "$PG_CONTAINER" pg_isready -q -U postgres; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            docker logs "$PG_CONTAINER"
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/sql-tamil-stage02-core-logs"
+          docker exec -u postgres "$PG_CONTAINER" postgres --version | tee "$RUNNER_TEMP/sql-tamil-stage02-core-logs/versions.txt"
+          docker exec -u postgres "$PG_CONTAINER" psql --version | tee -a "$RUNNER_TEMP/sql-tamil-stage02-core-logs/versions.txt"
+          printf 'Git SHA: %s\n' "$GITHUB_SHA" | tee -a "$RUNNER_TEMP/sql-tamil-stage02-core-logs/versions.txt"
+
+      - name: Assert exact production computations in clean database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres "$PG_CONTAINER" \
+            psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/test/50_stage02_production_core_tests.sql \
+            -c 'SELECT 1 / ((count(*) = 37 AND bool_and(ok))::integer) AS production_core_37_of_37 FROM stage02_core_assertions' \
+            2>&1 | tee "$RUNNER_TEMP/sql-tamil-stage02-core-logs/core.txt"
+
+      - name: Assert unchanged production-reference isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres "$PG_CONTAINER" \
+            psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/test/40_production_isolation.sql \
+            -c 'SELECT 1 / ((count(*) = 4 AND bool_and(ok))::integer) AS production_isolation_4_of_4 FROM stage01_production_isolation_assertions' \
+            2>&1 | tee "$RUNNER_TEMP/sql-tamil-stage02-core-logs/isolation.txt"
+
+      - name: Preserve native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-stage02-core-native-${{ github.run_id }}
+          path: ${{ runner.temp }}/sql-tamil-stage02-core-logs/
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Stop isolated database
+        if: always()
+        shell: bash
+        run: |
+          docker rm --force "$PG_CONTAINER" 2>/dev/null || true
