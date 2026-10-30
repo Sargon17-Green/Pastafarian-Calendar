@@ -40,12 +40,29 @@ Stadion 3 sen aprobo.
 
 https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40718515839
 
-## Stadio 3 — PATCH 01 (2026-10-30; Native-konfirmo atendata)
+## Stadio 3 — PATCH 01 (2026-10-30; Native GREEN)
 
 La aprobita PATCH 01 aldonas `save_patch` en la ekzistantan produktan
 vojon sen perdi la malnovan diagnozan valoron. La korekto konvertas
 nur nulan restaĵon al M. La kvar DISCOVERY 01-testoj fariĝas pozitivaj
 atestoj pri la historia konduto; ok novaj testoj konfirmas normigan SAVE
 ankaŭ por negativaj kaj nulaj enigoj. Planita suma kontrolado:
-17 antaŭaj + 4 historiaj + 8 PATCH 01 = 29 testoj. Native-testado sur
-la preciza Stage 3 HEAD ankoraŭ estas postulata antaŭ ol fermi la stadion.
+17 antaŭaj + 4 historiaj + 8 PATCH 01 = 29 testoj. Native-testado konfirmis ĉe commit `e135560968512cc83d2b8ea81529dc0e653f1724` la 29 sukcesojn,
+nul malsukcesojn kaj sukcesan formatkontrolon per Gleam 1.18.1 / OTP 28.
+La aparta Canonical Names Lock ankaŭ sukcesis ĉe la sama commit.
+Stadio 3 fermiĝas kiel GREEN por PATCH 01, ne por plena kalendaro.
+
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040314622
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040314623
+
+## Stadio 4 — DISCOVERY 02 (2026-10-30; Native-kontrolo atendata)
+
+La dua historia difekto estas la tagmarka funkcio
+`old_day_tag(day) = 2 * abs(day - F)`. Ĝi kongruas kun la normiga
+`day_count` nur antaŭ F, sed donas 0, 2 kaj 4 ĉe F, F+1 kaj F+2
+anstataŭ 1, 3 kaj 5. La du kontroloj F−2 kaj F−1 devas pasi.
+Kvin novaj normigaj testoj uzas la veran produkta-disendan vojon kaj
+la ekzistantan testan referencon. Atendu 29 regresajn sukcesojn,
+2 novajn sukcesojn kaj ĝuste 3 intencajn normigajn malsukcesojn.
+PATCH 02 estas eksplicite ekskludita. Native/CI devas ankoraŭ pruvi
+la atendatan nombron de sukcesoj kaj malsukcesoj ĉe la nova HEAD.

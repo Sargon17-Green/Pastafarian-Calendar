@@ -63,7 +63,7 @@ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40718515839
 Stadio 2 estas fermita kiel EXPECTED_RED; la malnova rezulto restas
 havebla per la diagnoza kampo `legacy_remainder`.
 
-## Stadio 3 — PATCH 01 (efektivigita; Native atendo)
+## Stadio 3 — PATCH 01 (Native-konfirmita GREEN)
 
 `save_patch` nun mapigas nulan restaĵon al `M`, lasante ĉiujn aliajn
 restaĵojn senŝanĝaj. La valida-disenda produkta vojo redonas kaj la
@@ -73,5 +73,32 @@ sed ne plu postulas malsukcesan CI. La ok apartaj PATCH 01-testoj
 komparas la produktan rezulton kun la aparta testa `SAVE`-referenco ĉe
 M, 2M, 3M, M+1, 0, -M, -1 kaj 1. Kun la 17 antaŭaj kaj kvar diagnozaj
 testoj, la akcepta celo estas 29 sukcesoj, neniu malsukceso, kaj pura
-`gleam format --check src test` ĉe la preciza nova HEAD. Tio restas
-nepruvita ĝis nova Native-rulo.
+`gleam format --check src test` ĉe la preciza nova HEAD. Tio estis pruvita ĉe la preciza commit `e135560968512cc83d2b8ea81529dc0e653f1724`:
+`gleam format --check src test` sukcesis, `gleam test` raportis
+**29 passed, no failures**, kaj la aparta Canonical Names Lock sukcesis.
+Native: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040314622
+Names Lock: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040314623
+
+## Stadio 4 — DISCOVERY 02 (intenca EXPECTED_RED; Native atendo)
+
+La dua historia eraro estas `old_day_tag(day) = 2 * abs(day - F)`,
+kie `F = -15_055_671` estas la fonda tago. La vera produkta vojo
+`dispatch_discovery_02` validigas kaj dissendas la ekzistantan
+`MonsterContext` antaŭ ol liveri la malnovan tagmarkon. La normiga
+`day_count` estas nur en la sendependa testa referenco.
+
+| Enigo | Malnova tagmarko | Normiga tagnumero | Atendata |
+| --- | ---: | ---: | --- |
+| F−2 | 4 | 4 | PASS |
+| F−1 | 2 | 2 | PASS |
+| F | 0 | 1 | EXPECTED_RED |
+| F+1 | 2 | 3 | EXPECTED_RED |
+| F+2 | 4 | 5 | EXPECTED_RED |
+
+La 29 antaŭaj testoj de Stadio 3 devas resti verdaj. Kun ĉi tiuj kvin
+novaj testoj la intencita Native-rezulto estas **31 passed, 3 failures**,
+kaj la tri malsukcesoj devas esti nur la supraj normigaj diferencoj.
+`gleam format --check src test` devas sukcesi. La ordinara laborfluo
+povas finiĝi per `failure` laŭ la intenca EXPECTED_RED-kontrakto;
+tio ne egalas plenan CI-PASS. Neniu PATCH 02 estas efektivigita.
+Ne fermu Stadion 4 sen la preciza HEAD-atesto.
