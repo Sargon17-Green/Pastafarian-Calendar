@@ -107,6 +107,19 @@ MAIN.
                     MOVE "历史日编号计算失败；输出槽必须为空。" TO CTX-LAST-ERROR
                 END-IF
             END-IF
+        WHEN "DAY-TAG-PATCH"
+            *> Stage5 PATCH02: corrected day count, legacy route preserved.
+            MOVE "Patch02" TO CTX-CURRENT-HANDLER
+            PERFORM VALIDATE-BASE-CONTEXT
+            IF WS-STATUS = 0
+                CALL "PATCHED-DAY-TAG" USING
+                    LK-CALCULATION-DAY LK-TARGET-DAY WS-STATUS
+                IF WS-STATUS = 0
+                    MOVE "PATCH02:DAY-TAG-PATCH" TO LK-MESSAGE
+                ELSE
+                    MOVE "日编号修补失败；输出槽必须为空。" TO CTX-LAST-ERROR
+                END-IF
+            END-IF
         WHEN OTHER
             MOVE 20 TO WS-STATUS
             MOVE "基础调度器收到未知操作。" TO CTX-LAST-ERROR
