@@ -1,0 +1,42 @@
+name: PowerShell Tagalog Stage 28 Discovery14 wide sampling
+on:
+  push:
+    branches: ['PowerShell+Tagalog']
+    paths:
+      - '.github/workflows/powershell-tagalog-stage28-discovery.yml'
+      - 'docs/STAGE28_DISCOVERY14_CONTRACT_20261031.md'
+      - 'tests/Stage28.Tests.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage28-windows-powershell-51:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bounded discovery probe (not Stage28 seal)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          Write-Host ('HEAD_SHA=' + $env:GITHUB_SHA)
+          Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
+          & ./tests/Stage28.Tests.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Stage28 discovery probe failed' }
+          @(
+            ('HEAD_SHA=' + $env:GITHUB_SHA),
+            ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE28_STATUS=DISCOVERY_EVIDENCE_ONLY',
+            'STAGE28_NATIVE_SEAL=NOT_CLAIMED',
+            'STAGE27_NATIVE_REGRESSION=PREVIOUSLY_SEALED'
+          ) | Set-Content stage28-discovery-evidence.txt -Encoding UTF8
+      - name: Preserve SHA-bound discovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage28-discovery-evidence
+          path: |
+            stage28-discovery-evidence.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
