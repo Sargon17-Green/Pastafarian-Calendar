@@ -4,7 +4,7 @@ Project: \`PC-BRANCH-BEFUNGE98-KYRGYZ\`; Stage 1 only. The original production s
 
 ## Gate confirmation
 The prior \`f7da1a333aa6fa2c72f6cfadbb44e9f34e6a8bd8\` exact-head CI gates are **completed/success**:
-- Native Regression: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41086624267 — 29 completed successful jobs, including Native regression; **not** a specific QA31F x2865 experiment.
+- Native Regression: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41086624267 — 30 completed successful jobs, including Native regression; **not** a specific QA31F x2865 experiment.
 - Canonical Names Lock: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41086637049 — one completed successful job.
 The QA31F five-signed-ZIP local CLI result at the parent report remains finite historical evidence; these workflows do not turn the offline CLI into Native testing.
 
