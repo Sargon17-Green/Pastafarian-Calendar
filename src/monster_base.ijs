@@ -42,6 +42,7 @@ monsterContextSetStatus=: 4 : 0
 
 monsterValidateDiscreteDay=: 3 : 0
   NB. Zilele normative trebuie să fie întregi exacți, nu valori cu fracție.
+  assert. 0 = # $ y
   nounType=. 3!:0 y
   assert. nounType e. 1 4 64 128
   assert. y -: <. y
