@@ -12,23 +12,18 @@ check=: 4 : 0
   1
 )
 
-NB. Verificările negative trebuie să eșueze în validator fără a opri suita.
-rejectsDiscreteDay=: 3 : 0
+NB. Testele negative verifică respingerea formei nescalare, fără a ascunde alte rezultate.
+expectMonsterDiscreteDayReject=: 3 : 0
+  rejected=. 0
   try.
     monsterValidateDiscreteDay y
-    0
   catch.
-    1
+    rejected=. 1
   end.
+  rejected
 )
 
 echo 'Stage 1 — pornire suită J + română'
-(monsterValidateDiscreteDay 0x) check 'validatorul acceptă o zi scalară extinsă zero'
-(monsterValidateDiscreteDay _1x) check 'validatorul acceptă o zi scalară extinsă negativă'
-(rejectsDiscreteDay 1 2) check 'validatorul respinge vectorul cu două zile'
-(rejectsDiscreteDay 2 2 $ 1 2 3 4) check 'validatorul respinge matricea de zile'
-(rejectsDiscreteDay 3r2) check 'validatorul respinge ziua rațională fracționară'
-
 
 (validateSourceLanguageCatalog '') check 'catalogul românesc are 17 + 47 intrări unice'
 (CUTLET_CANONICAL_INDEX -: 1+i.17) check 'indicii canonici ai chiftelelor sunt fixați'
@@ -110,6 +105,12 @@ sauceFoundation=. FOUNDATION_DAY nr_sauce FOUNDATION_DAY
 (6 = # >0{sauceFoundation) check 'sosul are exact șase boluri finale'
 (6 = # ~. >1{sauceFoundation) check 'latch-ul ordinii picăturii 46 este o permutare de șase boluri'
 ( (/:~ >1{sauceFoundation) -: 1+i.6 ) check 'ordinea picăturii 46 conține exact ID-urile 1..6'
+
+(1 = monsterValidateDiscreteDay FOUNDATION_DAY) check 'zi scalară întreagă validă acceptată'
+(1 = expectMonsterDiscreteDayReject (, FOUNDATION_DAY)) check 'vectorul de un singur element este respins'
+(1 = expectMonsterDiscreteDayReject (2 $ FOUNDATION_DAY)) check 'vectorul de două elemente este respins'
+(1 = expectMonsterDiscreteDayReject (2 2 $ FOUNDATION_DAY)) check 'matricea 2x2 este respinsă'
+(1 = expectMonsterDiscreteDayReject (0 $ FOUNDATION_DAY)) check 'vectorul gol este respins'
 
 ctx=. FOUNDATION_DAY calendarDateSpaghettiBootstrap FOUNDATION_DAY
 (MONSTER_STATUS_NOT_INTEGRATED -: monsterContextStatus ctx) check 'scheletul de producție validează intrarea fără a pretinde integrarea viitoare'
