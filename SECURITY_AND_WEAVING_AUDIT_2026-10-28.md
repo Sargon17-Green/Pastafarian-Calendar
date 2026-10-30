@@ -203,3 +203,44 @@ been established and no fix for the historical 47-month `1260` result is
 claimed. Determine whether the ZIP itself is damaged or the installer
 altered the program before considering a new trusted source or an isolated
 compilation test.
+
+## 2026-10-30: independent source payload differential -- confirmed
+
+The user's original-host, read-only audit report
+`CAL4700_SOURCE_INTEGRITY_RESULT.txt` records a successful download
+of the SHA-256-pinned 936,482-byte GitHub archive, followed by independent
+raw-DEFLATE extraction of the compiler's first ZIP member. Results:
+
+| Datum | Value |
+| --- | --- |
+| ZIP manifest uncompressed executable size | 831,488 bytes |
+| ZIP manifest CRC32 | `065DDF49` |
+| Independently inflated executable size | 831,515 bytes |
+| Independently inflated executable CRC32 | `7515BE6E` |
+| Independently inflated executable SHA-256 | `D5D15179E7A07D7A8194C72B60473F28C1610CFAAEB6CC37BE9FAF3D43288614` |
+| Installed executable SHA-256 | same, byte-identical |
+| ZIP directory offset discrepancy | -16 bytes |
+| EXE compressed physical span / declared length | 253,669 / 253,675 bytes |
+| Native execution | NONE |
+| QA acceptance | BLOCKED |
+
+Interpretation: the v5 installer preserved the independently inflated
+executable, but the compressed archive's actual decoded payload is
+inconsistent with its recorded expected size and CRC. Merely repairing ZIP
+directory metadata was insufficient. This confirms a **source archive
+integrity mismatch**, not that the downloaded executable is malicious.
+The unsigned CAL-4700 executable remains **not approved for execution**.
+
+A check for other available provenance (original Osmosian distribution,
+GitHub mirrors, authorized Folds repos) did **not** produce an independently
+verifiable clean CAL-4700 executable in this review. The original
+`https://www.osmosian.com/cal-4700.zip` is historically referenced but
+could not be fetched and verified from the current environment. Alternatives
+such as CAL-3040 and the Folds dynamic fork have not been independently
+security approved either. No source binary should be silently swapped in.
+
+**Next real gate:** obtain an independently authentic, integrity-consistent
+compiler release or a reproducible, scrutinized build from source, then
+conduct an isolated minimal compile before full 99-group QA. Do not execute
+the installed CAL-4700, run the quarantined CAL-4018, bypass Defender, or
+claim the 47-month issue or Native QA resolved.
