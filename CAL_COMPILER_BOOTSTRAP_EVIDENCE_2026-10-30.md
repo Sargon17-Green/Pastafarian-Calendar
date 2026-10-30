@@ -296,3 +296,34 @@ preserve the literal backslash.
 The source provenance job is Python-only and does not download or execute
 CAL binaries. The 99 Native QA groups and 47-month case remain blocked
 independently of this CI trigger correction.
+
+## 2026-10-30: first independently observed source-only CI PASS
+
+GitHub Actions run **41046088626** (`CAL source provenance (no executable)`)
+completed with **conclusion: success** against code/workflow commit
+`f74b57100c51bc78843d985cee7ad66900246a9f`.
+Job **124030420545** (`source-only`) completed successfully.
+
+The actual job logs, not just the workflow configuration, show:
+
+- `Ran 15 tests in 0.009s`, followed by `OK`.
+- The regression `test_refuse_symlinked_ancestor_above_source_root`
+  explicitly passed.
+- The pinned-source retrieval/verification step completed successfully.
+  Each of the 12 inspected source-file reports included `"ok": true`;
+  the summary explicitly said
+  `"all_12_text_sources_verified": true`.
+- The machine-generated report explicitly recorded
+  `"compiler_executed": false` and `"native_qa_99_pass": false`.
+- GitHub also reported successful completion of the checkout,
+  offline unit-test, text-source audit and summary steps.
+
+Run URL:
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41046088626
+
+**Scope:** This PASS is for a Python source-provenance test and the
+twelve fixed text files only, on the recorded code/workflow commit.
+It is not permission to run CAL-4700 or CAL-4018, a clean compiler
+bootstrap, completion of 99 Native QA groups, or a result for the
+47-month differentiation case. Subsequent documentation-only commits
+do not modify the source verifier or this workflow.
