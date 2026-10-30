@@ -104,6 +104,23 @@ jobs:
           bash test/run_stage05_tests.sh 2>&1 | tee -a chapel-stage05-native.log
           grep -Fxq 'STAGE_05_PATCH_02_RESULT=PASS' chapel-stage05-native.log
 
+      - name: Bounded independent Discovery 03 research probe (not Stage 6 acceptance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'SOURCE_HEAD=%s\n' "$(git rev-parse HEAD)" | tee chapel-discovery03-probe-native.log
+          bash test/run_discovery03_probe.sh 2>&1 | tee -a chapel-discovery03-probe-native.log
+          grep -Fxq 'DISCOVERY03_PROBE_RESULT=NO_WITNESS_IN_TESTED_FAMILIES' chapel-discovery03-probe-native.log
+
+      - name: Retain Discovery 03 research evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-discovery03-research-evidence
+          path: chapel-discovery03-probe-native.log
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Retain Stage 5 evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
