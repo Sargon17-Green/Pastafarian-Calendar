@@ -1,0 +1,65 @@
+{
+  "schema_version": "codesh-stage53-native-evidence-receipt/1",
+  "stage": 53,
+  "last_completed_stage": 53,
+  "status": "GREEN_CONFIRMED",
+  "branch": "Codesh+𐤉𐤄𐤅𐤃𐤉𐤕",
+  "pinned_parent_commit": "d8e8345346ac70fb8ca9bd7c8011247a3288d746",
+  "stage53_sealed": true,
+  "stage54_started": false,
+  "sources": [
+    {
+      "path": "מקור/מסלול־יום־אמצע־שנה־סמוכה־ישן.אמן",
+      "role": "stage52_old",
+      "sha256": "de6312359cee575306de9ed1973d93472a960564acb393310bd8c5a5c671dac4",
+      "git_blob_sha1": "4dab0a449be7b68404aed2ff512818dcdc3b5e19"
+    },
+    {
+      "path": "מקור/מסלול־יום־אמצע־שנה־סמוכה־מתוקן.אמן",
+      "role": "stage53_patch",
+      "sha256": "47ec901dddcc8c2cde7ad1282d6c87e5373f068e2f5b9a953b8bc7bdcb3e8340",
+      "git_blob_sha1": "49ea2f70227f0f436fa40ec4cc4e0887a9368b72"
+    }
+  ],
+  "native_run": {
+    "family": "CODESH_STAGE53_PATCH26",
+    "package": "v001",
+    "run_id": "20261030T161912Z_31e1b8b4",
+    "os": "Windows-11-10.0.26300-SP0",
+    "compiler": "Codesh-v1.3",
+    "source_inputs_pinned": true,
+    "compiled_source_count": 48
+  },
+  "checks": {
+    "gates": 30,
+    "regressions_stage29_to_stage52": 24,
+    "patch_lower_midpoint_matches": 48,
+    "old_upper_midpoint_as_lower_mismatches": 48,
+    "patch_objects_detached": 48,
+    "patch_repeated_order_stable": 48,
+    "patch_within_selected_year": 48,
+    "stage51_last_day_matches": 48,
+    "caller_selected_unchanged": 48,
+    "even_year_cases": 20,
+    "odd_year_cases": 28,
+    "next_cases": 24,
+    "previous_cases": 24,
+    "oracle_tamper": "EXPECTED_FAILURE"
+  },
+  "frozen_oracle_sha256": "8d75a665925d2b88aa2bbb82fb71157c515b24babd5db7889a14c508eb7911ee",
+  "native_jar_sha256": "631be55c4f45a31dc3cf43ed1e2bc4ba9951476b4aad0bb8132b9c4fad4fed75",
+  "handoff": {
+    "name": "CODESH_STAGE53_PATCH26_HANDOFF_v001_20261030T161912Z_31e1b8b4_PASS.zip",
+    "sha256": "7d7da9e6d5fa43a42488e0386e90146928181dbf9d8ad79dbcc66611e6e05cb7",
+    "library_path": "/Codesh_Checkpoints/CODESH_STAGE53_PATCH26_HANDOFF_v001_20261030T161912Z_31e1b8b4_PASS.zip",
+    "zip_crc": "PASS",
+    "sha256_entries_verified": 75
+  },
+  "provenance": {
+    "git_writes_during_windows_test": false,
+    "source_baseline_pinned_to_branch_head": true,
+    "prior_46_codesh_sources_unchanged": true
+  },
+  "credit_new_windows_assertions": 0,
+  "preservation": "Original signed Handoff archived to Library; binary archive not committed"
+}
