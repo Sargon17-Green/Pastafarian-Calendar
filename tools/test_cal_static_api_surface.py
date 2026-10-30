@@ -60,6 +60,24 @@ class StaticApiAuditTests(TestCase):
         self.assertFalse(report["malware_clearance"])
         self.assertFalse(report["execution_reachability_proven"])
 
+    def test_unrecognized_sensitive_api_is_not_silently_accepted(self):
+        data = {name: b'To count:\\n' for name in p.FILES}
+        data["the noodle"] = (
+            b'Call "winhttp.dll" "WinHttpUnlisted" with a handle.\\n'
+            b'[calg_md5] [calg_rc4 stream cipher]\\n'
+            b'To send an email:\\n'
+            b"Create a socket given the email's smtp server and 25.\\n"
+        )
+        expected = {name: (p.git_blob_sha1(blob), len(blob))
+                    for name, blob in data.items()}
+        hashes = {name: hashlib.sha256(blob).hexdigest()
+                  for name, blob in data.items()}
+        with patch.object(p, "EXPECTED", {"release": expected}):
+            with patch.object(p, "EXPECTED_SHA256", {"release": hashes}):
+                with patch.object(a, "REQUIRED", set()):
+                    with self.assertRaisesRegex(ValueError, "WinHttpUnlisted"):
+                        a.audit(lambda group, name: data[name])
+
     def test_missing_expected_api_blocks_strict_audit(self):
         data = {name: b'To count:\n' for name in p.FILES}
         expected = {name: (p.git_blob_sha1(blob), len(blob))
