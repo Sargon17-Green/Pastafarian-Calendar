@@ -41,20 +41,47 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(git -C python-source rev-parse HEAD)" = 7cb12bf355461e5a179e0deadb7365689288bf29
           python3 -m unittest discover -s soak -p test_verify_pinned_gate_checkpoints.py -v
-      - name: Replay from foundation with bounded work (not full-date certification)
+      - name: Independently replay every positive gate from 0 to checkpoint 28672
         shell: bash
         run: |
           set -euo pipefail
           python3 soak/verify_pinned_gate_checkpoints.py \
-            --target-index 1024 --max-steps 1024 --chunk-size 64 \
+            --target-index 28672 --max-steps 28672 --chunk-size 512 \
             --timeout-seconds 300 \
             --source-sha 7cb12bf355461e5a179e0deadb7365689288bf29 \
-            --evidence "$RUNNER_TEMP/python-gate-checkpoint-provenance.json"
+            --evidence "$RUNNER_TEMP/python-gate-checkpoint-28672.json"
+          python3 - "$RUNNER_TEMP/python-gate-checkpoint-28672.json" <<'PY'
+          import json, sys
+          d = json.load(open(sys.argv[1], encoding="utf-8"))
+          assert d["status"] == "PASS_GATE_CHECKPOINT_REPLAY_NOT_CERTIFIED", d
+          assert d["reached_index"] == 28672 and d["reached_day"] == -674161, d
+          assert d["steps"] == 28672 and len(d["verified_checkpoint_indices"]) >= 28, d
+          assert not d["certifiable"] and not d["full_date_verified"], d
+          print("CHECKPOINT_28672_REPLAY_VERIFIED")
+          PY
+      - name: Replay negative-index checkpoints from foundation without reanchoring
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/verify_pinned_gate_checkpoints.py \
+            --target-index -1024 --max-steps 1024 --chunk-size 128 \
+            --timeout-seconds 60 \
+            --source-sha 7cb12bf355461e5a179e0deadb7365689288bf29 \
+            --evidence "$RUNNER_TEMP/python-gate-checkpoint-negative-1024.json"
+          python3 - "$RUNNER_TEMP/python-gate-checkpoint-negative-1024.json" <<'PY'
+          import json, sys
+          d = json.load(open(sys.argv[1], encoding="utf-8"))
+          assert d["status"] == "PASS_GATE_CHECKPOINT_REPLAY_NOT_CERTIFIED", d
+          assert d["reached_index"] == -1024 and d["reached_day"] == -15566968, d
+          assert d["steps"] == 1024 and d["verified_checkpoint_indices"] == [0, -1024], d
+          assert not d["certifiable"] and not d["full_date_verified"], d
+          print("CHECKPOINT_MINUS_1024_REPLAY_VERIFIED")
+          PY
       - name: Preserve bounded replay evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: post55-python-gate-checkpoint-provenance
-          path: ${{ runner.temp }}/python-gate-checkpoint-provenance.json
+          path: ${{ runner.temp }}/python-gate-checkpoint-*.json
           if-no-files-found: warn
           retention-days: 30
