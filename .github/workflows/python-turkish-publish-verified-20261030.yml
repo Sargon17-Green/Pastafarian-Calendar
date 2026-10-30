@@ -1,0 +1,54 @@
+name: One-off Python Turkish verified release (2026-10-30)
+on:
+  push:
+    branches:
+      - 'release-control/python-turkish-20261030'
+    paths:
+      - '.github/workflows/python-turkish-publish-verified-20261030.yml'
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: github.repository == 'Sargon17-Green/Pastafarian-Calendar'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET: '0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4'
+      TAG: 'python-turkish-v1.0.0-verified-20261030'
+      ASSET_NAME: 'python-turkce-1.0.0-release-assets-0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4'
+      ASSET_RUN: '41040177293'
+      ASSET_ID: '12970964348'
+    steps:
+      - name: Verify original commit, four successful workflows and artifact provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/release-control/python-turkish-20261030'
+          for run in 41040177361 41040177568 41040177354 41040177293; do
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" | jq -e --arg target "$TARGET" '.head_sha == $target and .status == "completed" and .conclusion == "success"' >/dev/null
+          done
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ASSET_ID" | jq -e --arg name "$ASSET_NAME" --arg target "$TARGET" '.name == $name and .expired == false and .workflow_run.head_sha == $target' >/dev/null
+          if gh release view "$TAG" >/dev/null 2>&1; then echo 'RELEASE_EXISTS: no overwrite'; exit 1; fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" >/dev/null 2>&1; then echo 'TAG_EXISTS: no overwrite'; exit 1; fi
+      - name: Download and independently verify exact candidate assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          gh run download "$ASSET_RUN" --repo "$GITHUB_REPOSITORY" --name "$ASSET_NAME" --dir assets
+          shopt -s nullglob
+          files=(assets/*)
+          manifests=(assets/*_RELEASE_ASSET_SHA256.txt)
+          test "${#files[@]}" -eq 9
+          test "${#manifests[@]}" -eq 1
+          test "$(grep -Ec '^[a-f0-9]{64}  ' "${manifests[0]}")" -eq 8
+          (cd assets && sha256sum --check "$(basename "${manifests[0]}")")
+          echo 'RELEASE_ASSET_SHA256_VERIFY=PASS assets=8 checksum_file=1'
+      - name: Create new release without touching original tag or main
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" assets/* --repo "$GITHUB_REPOSITORY" --target "$TARGET" --title 'Python + Türkçe 1.0.0 — verified 2026-10-30' --notes 'Verified candidate pinned to 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4. Independent compatibility comparisons: 96 on Python 3.11 and 96 on Python 3.13; final validation, canonical names and release assets SUCCESS. This tag is new and does not change python-turkish-v1.0.0 or main.' --latest=false
+          gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" | jq -e --arg target "$TARGET" '.object.sha == $target' >/dev/null
+          echo 'NEW_RELEASE_VERIFIED=PASS'
