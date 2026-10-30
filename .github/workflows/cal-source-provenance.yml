@@ -12,6 +12,8 @@ on:
       - "tools/test_cal_bootstrap_stages.py"
       - "tools/cal_static_api_surface.py"
       - "tools/test_cal_static_api_surface.py"
+      - "tools/cal_static_callsite_intel.py"
+      - "tools/test_cal_static_callsite_intel.py"
       - ".github/workflows/cal-source-provenance.yml"
   workflow_dispatch:
 
@@ -35,6 +37,8 @@ jobs:
         run: python3 tools/cal_source_provenance.py --fetch --output "$RUNNER_TEMP/cal-source-provenance.json"
       - name: Audit Windows API capabilities in pinned text sources only
         run: python3 tools/cal_static_api_surface.py --fetch --output "$RUNNER_TEMP/cal-api-surface.json"
+      - name: Map direct calls and Intel hex literals from pinned text only
+        run: python3 tools/cal_static_callsite_intel.py --fetch --output "$RUNNER_TEMP/cal-callsite-intel.json"
       - name: Summarize non-execution gate
         run: |
           echo "Only textual provenance was checked." >> "$GITHUB_STEP_SUMMARY"
