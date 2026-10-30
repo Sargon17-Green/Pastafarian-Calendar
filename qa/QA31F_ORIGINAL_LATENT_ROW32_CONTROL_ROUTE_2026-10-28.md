@@ -38,6 +38,30 @@ All 36 observed \`j\` sites had a preceding original \`g(57,29)\` and all 36 too
 
 The original source has \`p(344,26)\` with a literal zero/value-address suffix writing \`(3,49)\` during the known row-26 route. Whether a different natural route, runtime write, storage-offset change, or valid input can make the gate's \`m\` equal one at the relevant time **remains unproven**.
 
+## QA31F continuation — signed upstream zero-put ownership, finite 48-case audit (2026-10-30)
+
+This is a **read-only analysis of existing Native evidence**, not a new Native run. The four original QA20 ZIPs were re-read locally, pinned to the **four SHA-256 values already recorded above**, with ZIP CRC, original source blob ID, per-case compressed STEP SHA-256 and signed STEP sequence checks. The independent scoped extraction examined all 48 cases and all 36 physical executions of `j(89,29)`. The immutable original Git blob was separately read from GitHub and checked for the static operands described below. This is **not a full post-change acceptance run of the five-input QA31F CLI**, nor a new CI PASS.
+
+**Pinned original-source literal operands, with storage offset assumed unchanged:**
+- `p(202,2)`: literal suffix `(value=0,x=3,y=49)` — startup initialization of the cell subsequently read by `g(57,29)`.
+- `p(344,26)`: the same literal `(0,3,49)` — a later reset on the observed row-26 route.
+- `p(60,5)`: input-dependent value but literal destination `(x=0,y=49)`, **not** the gate's `(3,49)`.
+
+| Actual QA20 signed STEP outcome before `j(89,29)` | Valid | Invalid | Total |
+| --- | ---: | ---: | ---: |
+| Startup `p(202,2)` followed by later `p(344,26)` | 27 | 7 | **34** |
+| Startup `p(202,2)` with no `p(344,26)`; 1 or 2 intervening `p(60,5)` | 0 | 2 | **2** |
+| Reached `j(89,29)` without `p(202,2)` | 0 | 0 | **0** |
+| All `j(89,29)` witnesses | **27** | **9** | **36** |
+
+For the 34 routes with later `p(344,26)`, the final zero-put occurs exactly **172 signed STEP ticks** before `j(89,29)`; **no subsequent `p`** occurs between that put and the gate. In the two exceptional invalid cases `invalid18` and `invalid19`, the only subsequent put locations are `p(60,5)`, executed once and twice respectively, targeting `(0,49)`. All **36** routes have no recorded `{`, `}` or `u` instruction between startup `p(202,2)` and the gate; no observed relative storage-offset rebase is needed to explain this bounded provenance.
+
+Thus **each of the 36 observed zero-branch successors now has a concrete preceding original-source zero-write witness**, in addition to the previously established `g`/`j` geometric inference. The evidence supports the observed `m=0` finite routes but **does not prove `m=1` impossible** for another naturally accepted input, nor exclude uninstrumented memory mutation APIs, changed runtime opcodes in hypothetical paths, or a different earlier control route.
+
+The existing checker [`stage1_qa31f_original_latent_row32_audit.py`](stage1_qa31f_original_latent_row32_audit.py) was **extended in place**, not duplicated: source-literal checks, original signed zero-put ancestry, intervening put-site restriction and offset-control guard, plus expected 34/2 partition and explicit bounded counters. The four-ZIP focused checks above ran locally; the complete QA31F CLI with its separate QA31A ZIP and source file still requires a fresh independent end-to-end execution before claiming that *revised CLI* PASS.
+
+**NEXT refinement:** No grounded naturally valid `m=1` pre-gate route was identified in the signed 48-case sample. Check other already accepted original Native memory-event receipts for a later write targeting physical `(3,49)` or a reachable storage-offset rebase **before** `g(57,29)`, without starting a random-input run. If none exists, retain this finite-boundary finding and continue a distinct original-source candidate among the other fourteen. Stage 1 remains OPEN.
+
 ## NEXT — no ungrounded Native rerun
 
 Audit the **actual upstream writes and state ownership for \`FungeSpace(3,49)\` before \`g(57,29)\`** in original source/previous Native events, including \`p(344,26)\` and other put sites, and establish whether a valid natural input can reach \`j(89,29)\` with \`m=1\`. A further original-Native test is justified **only** after such a valid input candidate is grounded, with full signed physical STEP capture, exact-source pin and independent adversarial audit. Otherwise explicitly close the finite-search boundary and continue the other 14 original candidate cells; do not force an IP or fake reachability.
