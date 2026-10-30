@@ -753,3 +753,14 @@ php -d memory_limit=512M tests/stage35_patch17_tests.php
 ```
 
 Semua Stage1–34, fixture, lint PHP dan kunci nama kanonik mesti lulus Native CI. Stage35 mempunyai pekerjaan khusus `audit_php_bahasa_melayu_stage35`; semua **enam pekerjaan** pada SHA HEAD yang sama wajib SUCCESS. **Status: AWAITING_CI** sehingga pengesahan Native penuh. Jangan mulakan Stage36, ubah `main`, fixture atau katalog.
+
+
+## Stage 36 — DISCOVERY 18: Teka tahun /365 berbanding sempadan tahun sebenar
+
+**Keputusan 2026-10-30:** Pengguna menyerahkan pemilihan skop teknikal tanpa persetujuan tambahan. Perbandingan cabang TypeScript+मराठी, C++&Latina dan MATLAB+Polski menetapkan pilihan PHP Stage36 sebagai `oldYearGuess=5000+floor((targetDay-anchor.openGateDay)/365)`, bukan kesalahan indeks bulan Scala atau rejection arah C#. Lihat [kontrak Stage36](docs/STAGE36_DISCOVERY18_YEAR_JUMP_CONTRACT_2026-10-30.md).
+
+`LegacyYearJumpGuess18` menggunakan `BigInt::floorDiv` untuk perbezaan bertanda dan rekod anchor `{number:5000,openGateDay,closeGateDay}`. `BootstrapKernel::legacyGuessTargetYear365` benar-benar memanggil legacy melalui dispatcher `YEAR_JUMP_365_LEGACY` dengan konteks per panggilan dan mengembalikan raw guess, bukannya tahun sebenar. Year5000 masih mesti dibekalkan sebagai anchor; pembina Tahun5000 tidak diseludup masuk daripada oracle dan hasil penuh lima komponen belum didakwa. Semua Stage1–35, data sejarah dan Patch17 kekal.
+
+Ujian Stage36 menggunakan `NormativeOracle::year5000(FOUNDATION_DAY)` khusus di sisi ujian, kemudian menunjukkan bahawa `open+1` mengekalkan nombor tahun 5000 sementara `open+365` dan `close` memberi **dua EXPECTED_RED** apabila tahun sebenar lebih 365 hari. Ujian tambahan meliputi signed floor, dua kernel independen, input anchor salah, pemeliharaan data dan larangan import Oracle ke produksi. Pembalut `verify_stage36_discovery18.php` hanya berjaya jika proses langsung keluar 1 dengan dua label RED yang tepat, ringkasan tepat dan stderr kosong.
+
+Gerbang Native: `php-malay-stage36-discovery18.yml`, PHP lint dan semua regresi Stage1–35 yang berkaitan pada SHA yang sama, termasuk `verify`/names lock dan artifact exit/stdout/stderr. **`CURRENT_STAGE=36`, `LAST_COMPLETED_STAGE=35`, `STAGE36_RUNTIME_VERIFICATION=AWAITING_CI`** sehingga bukti GitHub Actions benar-benar diperiksa. Stage37 PATCH18 hanya kemudian membetulkan traversal berturutan dengan membiarkan legacy ghost hidup. Jangan ubah `main`, fixture, katalog atau tingkah laku `Stage35`.
