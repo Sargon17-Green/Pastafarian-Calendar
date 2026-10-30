@@ -1,0 +1,47 @@
+name: MATLAB Stage55 Independent AFTER4 Interval Python
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/stage55_after4_interval_witness.py'
+      - '.github/workflows/matlab-stage55-after4-interval-python.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: stage55-after4-interval-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  python-independent-after4:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout pinned source
+        uses: actions/checkout@v4
+      - name: Download exact native AFTER4 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-middle-fourth-day-native
+          run-id: 41126428239
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Check exact source checkpoints
+        run: |
+          echo 'ace93f07ba132027edb6c2eb750b1c6e509efb2ead7839b560c94139f4f96504  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_3.json' | sha256sum -c -
+          echo '27103195cc127f81cbed994085ac3e1d2417f91600c083006327be6e61db83e4  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_4.json' | sha256sum -c -
+      - name: Repackage pinned files and run separate integer witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd logs && zip -q ../stage55-after4-pinned.zip STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_3.json STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_4.json)
+          python3 tools/stage55_after4_interval_witness.py stage55-after4-pinned.zip | tee logs/STAGE55_AFTER4_INDEPENDENT_INTERVAL.log
+      - name: Preserve independent evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-after4-independent-interval-python
+          path: logs/STAGE55_AFTER4_INDEPENDENT_INTERVAL.log
+          if-no-files-found: warn
+          retention-days: 30
