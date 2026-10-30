@@ -378,8 +378,8 @@ RunOwnerLeaseTests::
     ld a, $3c
     ld [$a000], a
 
-    ; 182 — noncontiguous signed-buffer access can safely revisit both
-    ; physical banks; release scrubs and revokes all group handles.
+    ; 182 — fragmented owner-scoped access can revisit both physical
+    ; banks; release scrubs and revokes all group handles.
     ld a, 182
     ld [wTestCase], a
     ld a, 25
