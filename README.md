@@ -15,4 +15,10 @@ Ang `Get-Patch11OrderAt46` ay nagpapatakbo muna ng preserved wrong query at saka
 
 ### Hangganan ng natapos na gawain
 
-Wala pang Patch 12 next-bowl logic. Hindi pa binubuksan ang Stage 24 / Discovery 12; kailangan muna ng pagpapatunay sa canonical development contract at stage plan, pagsusuri na walang magkasabay na gawa sa branch, at tahasang pahintulot na magbukas ng Stage 24.
+Wala pang Patch 12 next-bowl logic; nananatiling sealed ang Stage 23.
+
+### Stage 24 / Discovery 12 — napatunayan na ang magkakaparehong kontrata
+
+Ang resulta ng paghahambing sa TypeScript, C++, Kotlin, MATLAB at PHP ay pareho: ang lumang consumer ay pumipili ng numeric na kasunod na bowl `(id % 6) + 1` sa halip na kasunod na element sa hiwalay na `orderAt46Latch`. Ang depektong overwritten order ay Stage 22/23; ang `biasedLegacyPick` ng rank modulo ay Stage 26, hindi Stage 24.
+
+Kontrata at eksaktong test signature: [STAGE24_DISCOVERY12_CROSS_BRANCH_CONTRACT_2026-10-30.md](docs/STAGE24_DISCOVERY12_CROSS_BRANCH_CONTRACT_2026-10-30.md). Natapos ang specification gap; Stage 24 ay **hindi pa implemented/native-verified**. Maaaring simulan ang Stage 24 nang walang dagdag na pormal na pag-apruba, pagkatapos ng HEAD at concurrency preflight. Panatilihing `LAST_COMPLETED_STAGE=23` hanggang sa native PowerShell 5.1 CI. Huwag baguhin ang main o mag-apply ng Patch 12 nang maaga.
