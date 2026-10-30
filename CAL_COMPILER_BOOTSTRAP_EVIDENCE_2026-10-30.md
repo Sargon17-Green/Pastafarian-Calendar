@@ -719,3 +719,32 @@ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41130526550
 
 No CAL executable was downloaded or executed. The stage-zero
 trust gate and all 99 Native QA groups remain unverified.
+
+### Static CreateProcessA parameter and lifetime notes
+
+At the same pinned source revision, the noodle routine at lines
+12714–12724 calls CreateProcessA with an explicit application-name
+path pointer (its first argument) and a null command-line pointer
+(the second argument). The process creation flags integer
+**67108904 = 0x04000028** matches the source comments:
+CREATE_DEFAULT_ERROR_MODE (0x04000000),
+NORMAL_PRIORITY_CLASS (0x00000020), and
+DETACHED_PROCESS (0x00000008).
+Handle inheritance is disabled by the fifth argument (0);
+the current directory is supplied explicitly from the source path.
+This is a direct Windows process-creation API, not a ShellExecute
+command string. These are static call arguments, not observed runtime
+values or proof that the chosen EXE is trustworthy.
+
+The source retains the returned process handle and creates a
+separate waiting thread. The wait routine uses WaitForSingleObject
+with INFINITE and then closes that process handle, while the
+Stop command calls TerminateProcess. A full lifetime/thread-safety
+proof would require additional work; no claim of race-free behavior
+or successful native execution is made.
+
+The separate desktop To run routine (lines 1861–1866) is the
+application event-loop entry and is not the same routine as
+To handle run at lines 1687–1699. Their distinct purposes explain
+why searching only for an exact function declaration previously
+missed the two explicit UI-driven process launch sites.
