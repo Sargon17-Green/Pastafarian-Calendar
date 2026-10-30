@@ -17,6 +17,10 @@ def fake_source_set():
     files["the noodle"] += (
         "\n".join(tool.KDF_PINS) + "\n"
     ).encode("latin-1")
+    for operation, phrases in tool.MENU_ROUTE_PINS.items():
+        files["the desktop"] += ("\n".join(phrases) + "\n").encode("latin-1")
+    for stage, phrases in tool.DYNAMIC_RESOLVER_PINS.items():
+        files["the noodle"] += ("\n".join(phrases) + "\n").encode("latin-1")
     return files
 
 
@@ -91,6 +95,42 @@ class StaticCryptoIntelTests(unittest.TestCase):
         self.assertFalse(result["lexical_gate_pass"])
         for flag, value in tool.FLAG_FIELDS.items():
             self.assertEqual(result[flag], value)
+
+    def test_menu_and_dynamic_dns_routes_are_reported_from_source(self):
+        originals = fake_source_set()
+        a, b = mock_pins(originals)
+        with a, b:
+            report = tool.audit(lambda group, name: originals[name],
+                                strict=False)
+        for operation in ("encrypt", "decrypt"):
+            lines = report["menu_route_evidence"][operation]
+            self.assertEqual(len(lines), 4)
+            self.assertEqual(lines, sorted(lines))
+        self.assertEqual(
+            len(report["dynamic_resolver_evidence"]["function_pointer_registration"]), 6)
+        self.assertEqual(
+            len(report["dynamic_resolver_evidence"]["function_pointer_dispatch"]), 4)
+        self.assertFalse(report["runtime_reachability_proven"])
+
+    def test_missing_menu_command_dispatch_fails_closed(self):
+        originals = fake_source_set()
+        originals["the desktop"] = originals["the desktop"].replace(
+            b'If the command\'s handler is "handle encrypt", handle encrypt; exit.',
+            b'If the command\'s handler is "handle encrypt", do nothing; exit.')
+        a, b = mock_pins(originals)
+        with a, b:
+            with self.assertRaisesRegex(ValueError, "handle encrypt; exit"):
+                tool.audit(lambda group, name: originals[name], strict=False)
+
+    def test_missing_indirect_getaddrinfo_dispatch_fails_closed(self):
+        originals = fake_source_set()
+        originals["the noodle"] = originals["the noodle"].replace(
+            b"Call the addrinfo routines' getaddrinfo with",
+            b"Do not call the addrinfo routines' getaddrinfo with")
+        a, b = mock_pins(originals)
+        with a, b:
+            with self.assertRaisesRegex(ValueError, "Call the addrinfo routines"):
+                tool.audit(lambda group, name: originals[name], strict=False)
 
     def test_mismatched_source_rejected_before_analysis(self):
         with self.assertRaisesRegex(ValueError, "Pinned release source hash"):
