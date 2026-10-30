@@ -1,0 +1,41 @@
+name: Stage 55 Independent Normative Five-Field Micro Oracle
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/stage55_polish_normative_micro_five_fields.py'
+      - '.github/workflows/matlab-stage55-normative-micro-five-fields.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage55-normative-micro-five-fields-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  independent-python-five-fields:
+    name: Bounded exhaustive micro-family / all five fields
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact branch SHA
+        uses: actions/checkout@v4
+      - name: Independent brute-force micro oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          python3 tools/stage55_polish_normative_micro_five_fields.py \
+            2>&1 | tee logs/STAGE55_NORMATIVE_MICRO_FIVE_FIELDS.log
+      - name: Preserve original QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-normative-micro-five-fields-${{ github.run_id }}
+          path: logs/STAGE55_NORMATIVE_MICRO_FIVE_FIELDS.log
+          if-no-files-found: warn
+          retention-days: 30
