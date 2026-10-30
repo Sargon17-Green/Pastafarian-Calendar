@@ -1,0 +1,101 @@
+name: SQL Tamil Stage 2 Slice 8 Sauce Composition Native
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'sql/10_stage02_sauce.sql'
+      - 'sql/test/96_stage02_sauce_native.sql'
+      - 'sql/test/97_stage02_sauce_differential.sql'
+      - '.github/workflows/sql-tamil-stage02-sauce-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sauce-slice8:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-sauce-logs
+          docker run --detach --name sql-tamil-sauce-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-sauce-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-sauce-pg postgres --version | tee sql-tamil-sauce-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-sauce-logs/versions.txt
+      - name: Native integration checks (34)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-sauce-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/test/96_stage02_sauce_native.sql \
+            -c 'SELECT 1/((count(*)=34 AND bool_and(ok))::integer) AS native_34_of_34 FROM stage02_sauce_native' \
+            2>&1 | tee sql-tamil-sauce-logs/native.txt
+      - name: Production isolation (4)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-sauce-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/test/40_production_isolation.sql \
+            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM stage01_production_isolation_assertions' \
+            2>&1 | tee sql-tamil-sauce-logs/isolation.txt
+      - name: Create distinct reference comparison database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-sauce-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'CREATE DATABASE sql_tamil_sauce_differential'
+      - name: Differential integration checks (42)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-sauce-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_sauce_differential \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql/test/97_stage02_sauce_differential.sql \
+            -c 'SELECT 1/((count(*)=42 AND bool_and(ok))::integer) AS differential_42_of_42 FROM stage02_sauce_differential' \
+            2>&1 | tee sql-tamil-sauce-logs/differential.txt
+      - name: Preserve bounded logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice8-sauce
+          path: sql-tamil-sauce-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-sauce-pg 2>/dev/null || true
