@@ -1,0 +1,67 @@
+name: MATLAB Stage 55 Middle-Rank Three-Day Inverse Witness
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_middle_rank_inverse.m'
+      - '.github/workflows/matlab-stage55-middle-rank-inverse.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: matlab-stage55-middle-inverse-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  third-day-exact-inverse:
+    name: MATLAB R2026a / independent rank interval / saved day-3 cursor
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+      - name: Download verified day-3 cursor
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-middle-rank-resume-41028866638
+          run-id: 41028866638
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Pin checkpoint digest
+        run: |
+          echo 'ace93f07ba132027edb6c2eb750b1c6e509efb2ead7839b560c94139f4f96504  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_3.json' | sha256sum -c -
+      - name: Setup native MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Independently rank actual three-day middle prefix
+        uses: matlab-actions/run-command@v3
+        with:
+          command: >-
+            addpath('tests');
+            diary('logs/STAGE55_REAL_YEAR_MIDDLE_RANK_INVERSE_NATIVE.log');
+            try;
+              fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
+              run_stage55_real_year_middle_rank_inverse();
+              diary off;
+            catch ME;
+              disp(getReport(ME,'extended','hyperlinks','off'));
+              fprintf('STAGE55_REAL_YEAR_MIDDLE_RANK_INVERSE_FAIL\n');
+              diary off;
+              rethrow(ME);
+            end
+      - name: Keep original evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-middle-rank-inverse-${{ github.run_id }}
+          path: |
+            logs/STAGE55_REAL_YEAR_MIDDLE_RANK_INVERSE_NATIVE.log
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_3.json
+          if-no-files-found: warn
+          retention-days: 30

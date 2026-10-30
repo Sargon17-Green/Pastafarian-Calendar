@@ -55,6 +55,7 @@ on:
       - '!tests/run_stage55_preopen_full_year_bench.m'
       - '!tests/run_stage55_real_year_inner_cursor_probe.m'
       - '!tests/run_stage55_real_year_inner_cursor_resume.m'
+      - '!tests/run_stage55_real_year_middle_rank_inverse.m'
       - '!src/\+pastafari/countWholeWeavingSuffixByFirstEndpoint.m'
       - '!tests/run_stage55_first_endpoint_tests.m'
       - '!src/\+pastafari/countWholeWeavingFirstLetterUpTo.m'
