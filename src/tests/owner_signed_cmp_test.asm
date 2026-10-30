@@ -497,6 +497,43 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckBytes
     jp nc, .fail
 
+
+    ; 211: negative nonzero A is below positive nonzero B.
+    ; Preserve both operand descriptors, all lease tags and edge sentinels.
+    ld a, 211
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpSignA], a
+    xor a
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 212: positive nonzero A is above negative nonzero B.
+    ld a, 212
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld a, 1
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
