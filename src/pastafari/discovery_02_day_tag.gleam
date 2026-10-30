@@ -1,11 +1,15 @@
-// Stadio 4 / DISCOVERY 02: intence historia tagmarka eraro.
-// Neniu korekto de PATCH 02 estas efektivigita ĉi tie.
+// Stadio 5 / PATCH 02: konservu la historian tagmarkon por diagnozo.
+// La korekto aldonas 1 ekde la fonda tago, konservante antaŭajn tagojn.
 import pastafari/bootstrap
 
 pub const old_foundation_day = -15_055_671
 
 pub type Discovery02Output {
-  Discovery02Output(context: bootstrap.MonsterContext, legacy_day_tag: Int)
+  Discovery02Output(
+    context: bootstrap.MonsterContext,
+    legacy_day_tag: Int,
+    patched_day_tag: Int,
+  )
 }
 
 pub fn old_day_tag(day: Int) -> Int {
@@ -16,6 +20,14 @@ pub fn old_day_tag(day: Int) -> Int {
   }
 }
 
+pub fn day_tag_patch(day: Int) -> Int {
+  let legacy = old_day_tag(day)
+  case day < old_foundation_day {
+    True -> legacy
+    False -> legacy + 1
+  }
+}
+
 pub fn dispatch_discovery_02(
   context: bootstrap.MonsterContext,
   day: Int,
@@ -23,6 +35,10 @@ pub fn dispatch_discovery_02(
   case bootstrap.dispatch_context(context) {
     Error(error) -> Error(error)
     Ok(completed) ->
-      Ok(Discovery02Output(context: completed, legacy_day_tag: old_day_tag(day)))
+      Ok(Discovery02Output(
+        context: completed,
+        legacy_day_tag: old_day_tag(day),
+        patched_day_tag: day_tag_patch(day),
+      ))
   }
 }

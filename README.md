@@ -79,7 +79,7 @@ testoj, la akcepta celo estas 29 sukcesoj, neniu malsukceso, kaj pura
 Native: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040314622
 Names Lock: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040314623
 
-## Stadio 4 — DISCOVERY 02 (intenca EXPECTED_RED; Native atendo)
+## Stadio 4 — DISCOVERY 02 (Native-konfirmita EXPECTED_RED)
 
 La dua historia eraro estas `old_day_tag(day) = 2 * abs(day - F)`,
 kie `F = -15_055_671` estas la fonda tago. La vera produkta vojo
@@ -101,4 +101,29 @@ kaj la tri malsukcesoj devas esti nur la supraj normigaj diferencoj.
 `gleam format --check src test` devas sukcesi. La ordinara laborfluo
 povas finiĝi per `failure` laŭ la intenca EXPECTED_RED-kontrakto;
 tio ne egalas plenan CI-PASS. Neniu PATCH 02 estas efektivigita.
-Ne fermu Stadion 4 sen la preciza HEAD-atesto.
+La Native-rulo ĉe commit `d6998dc37bb72f5856eb154f708529378f45de93` konfirmis formaton kaj
+**31 passed, 3 failures**: nur la tri intencaj malkongruoj ĉe F, F+1,
+F+2. La Canonical Names Lock sukcesis ĉe la sama commit. La ordinara
+Native-laborfluo havas konkludon `failure` laŭ la EXPECTED_RED-kontrakto;
+tio ne estas plena CI-PASS. Stadio 4 estas fermita nur por DISCOVERY 02.
+
+Native: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091174767
+Names Lock: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091174839
+
+## Stadio 5 — PATCH 02 (efektivigita; Native atendo)
+
+La malnova `old_day_tag(day) = 2 * abs(day - F)` restas diagnoze havebla
+per `legacy_day_tag`. La produkta `day_tag_patch(day)` uzas la saman
+malnovan valoron, aldonante unu nur por `day >= F`. Tiel ĝi donas
+`2 * (F - day)` antaŭ F kaj `2 * (day - F) + 1` ekde F.
+La valide dissendita `Discovery02Output` enhavas apartan
+`patched_day_tag`. Produktado ne importas la testan `reference/core`.
+
+La kvin historiaj DISCOVERY 02-testoj restas kiel pozitivaj atestoj
+pri la antaŭa eraro. Naŭ apartaj PATCH 02-testoj komparas la produktan
+vojon kun la sendependa testa `day_count`, ĉe F−10 000, F−1000,
+F−2, F−1, F, F+1, F+2, F+1000 kaj F+10 000.
+Kun 29 antaŭaj testoj kaj 5 historiaj atestoj, la Native-akcepta celo
+estas **43 passed, no failures**, pura `gleam format --check src test`
+kaj Canonical Names Lock je la sama commit. Tiu celo ne estas ankoraŭ
+Native-pruvita. Neniu plena kalendara dato estas aprobita.

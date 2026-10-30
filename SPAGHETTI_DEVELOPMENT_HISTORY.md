@@ -55,7 +55,7 @@ Stadio 3 fermiĝas kiel GREEN por PATCH 01, ne por plena kalendaro.
 https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040314622
 https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040314623
 
-## Stadio 4 — DISCOVERY 02 (2026-10-30; Native-kontrolo atendata)
+## Stadio 4 — DISCOVERY 02 (2026-10-30; Native EXPECTED_RED)
 
 La dua historia difekto estas la tagmarka funkcio
 `old_day_tag(day) = 2 * abs(day - F)`. Ĝi kongruas kun la normiga
@@ -66,3 +66,21 @@ la ekzistantan testan referencon. Atendu 29 regresajn sukcesojn,
 2 novajn sukcesojn kaj ĝuste 3 intencajn normigajn malsukcesojn.
 PATCH 02 estas eksplicite ekskludita. Native/CI devas ankoraŭ pruvi
 la atendatan nombron de sukcesoj kaj malsukcesoj ĉe la nova HEAD.
+
+La vera Gleam 1.18.1 / OTP 28 Native-rulo ĉe commit d6998dc37bb72f5856eb154f708529378f45de93
+konfirmis 31 sukcesojn kaj precize tri intencajn normigajn fiaskojn
+ĉe F, F+1 kaj F+2. La formatkontrolo kaj Canonical Names Lock sukcesis.
+La ordinara workflow-konkludo restis failure laŭ la kontrakto;
+Stadio 4 fermiĝis kiel EXPECTED_RED, ne kiel CI GREEN.
+
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091174767
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091174839
+
+## Stadio 5 — PATCH 02 (2026-10-30; Native atendo)
+
+La korekto aldonas unu al la historia tagmarko ekde la fonda tago,
+sen ŝanĝi antaŭajn tagojn. La historia kampo restas por diagnozo kaj la
+valida-disenda produkto redonas la novan patched_day_tag.
+Kvin historiaj testoj nun estas pozitivaj, kaj naŭ novaj testoj kovras
+la du flankojn de la fonda limo. Akceptocelo: 43 pasintaj, 0 fiaskoj
+kaj sukcesa formato plus Names Lock sur la preciza nova HEAD.
