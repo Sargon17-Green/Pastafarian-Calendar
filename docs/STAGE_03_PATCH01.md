@@ -42,11 +42,18 @@ commit 1bc99774bdc118b19683dabd7a6052c767a808e5, run 41086786610
 (4/4 jobs successful). This update adds two explicit three-position
 radix-M rejection cases, one per direction. An independent BigInt
 preflight confirmed that both synthetic candidates exceed their
-acceptance limit for N=floor(M**3/2)+1. The new expected assertion count
-is **1,471**, requiring a fresh native CI result for this new SHA. Compilation and all actual Ada
-assertions must be confirmed by the stage03 native GitHub Actions job.
-No intentional huge loop is executed.
+acceptance limit for N=floor(M**3/2)+1. The expected assertion count is **1,471**. On 2026-10-30, GitHub Actions
+run [41091304089](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091304089)
+completed **4/4 SUCCESS** against commit
+`a5f26ad413a3c18bc506ef5ed4b4956a454ca44e` on branch `Ada+తెలుగు`.
+GNAT 13 compiled, bound, linked, and ran the stage03 test executable; its
+log reports `STAGE03_PATCH01_ASSERTIONS= 1471`. The test-only PATCH01 is
+therefore accepted in its bounded scope. No intentional huge loop was executed.
 
 This is not a completed Calendar_Date verification, nor proof that the
-Stage 2 hostile synthetic stream is reachable from Ask_Bowl. Stage 3 acceptance remains pending until native, verify, and other
-required jobs finish on the exact new branch HEAD. No main merge.
+Stage 2 hostile synthetic stream is reachable from Ask_Bowl. Stage 3 PATCH01 acceptance is complete for the bounded test-only oracle fix
+on the verified commit. This does **not** prove complete Calendar_Date
+correctness, production-oracle integration, or that the hostile synthetic
+Stage 2 stream is reachable from Ask_Bowl. A Stage 4 execution contract
+has not been verified in the current stage status, Stage 3 notes, or
+architecture notes. Stage 4 is not opened. No main merge.
