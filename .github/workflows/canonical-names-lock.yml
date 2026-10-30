@@ -100,3 +100,27 @@ jobs:
           done
           echo 'Stage 1 native verification: all gates passed.'
 
+  dart-hebrew-stage2-discovery01:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+
+      - name: Resolve packages
+        run: dart pub get
+
+      - name: Verify discovery harness formatting
+        run: dart format --output=none --set-exit-if-changed bin/stage2_discovery01.dart
+
+      - name: Analyze branch
+        run: dart analyze
+
+      - name: Run bounded Discovery 01 baseline
+        run: dart run bin/stage2_discovery01.dart
