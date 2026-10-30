@@ -1,0 +1,64 @@
+name: COBOL Chinese Stage04 DISCOVERY02 Native
+on:
+  push:
+    branches:
+      - 'COBOL+简体中文'
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - '.github/workflows/cobol-chinese-stage04-discovery02.yml'
+      - 'docs/STAGE_04_DISCOVERY_02_CROSS_BRANCH_CONTRACT_2026-10-30.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage04-discovery-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Strict native compile and expected-red signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE\nHEAD=%s\n' "$GITHUB_SHA" >build/stage04-native.log
+          timeout --signal=TERM --kill-after=10s 300s \
+            cobc -std=default -free \
+            -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror \
+            -x -o build/stage04-discovery \
+            test/stage04_discovery_tests.cob \
+            src/big_integer.cob \
+            src/monster_bootstrap.cob \
+            src/legacy_day_tag.cob \
+            2>&1 | tee -a build/stage04-native.log
+          timeout --signal=TERM --kill-after=10s 120s \
+            ./build/stage04-discovery 2>&1 | tee -a build/stage04-native.log
+          grep -Eq '^STAGE4_EXPECTED_RED=[[:space:]]*0*65[[:space:]]*$' build/stage04-native.log
+          grep -Eq '^STAGE4_CONTROL_PASS=[[:space:]]*0*64[[:space:]]*$' build/stage04-native.log
+          grep -Eq '^STAGE4_WITNESS_RED=[[:space:]]*0*3[[:space:]]*$' build/stage04-native.log
+          grep -Eq '^STAGE4_WITNESS_CONTROL=[[:space:]]*0*2[[:space:]]*$' build/stage04-native.log
+          grep -Eq '^STAGE4_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage04-native.log
+          grep -Fxq 'RESULT=PASS_STAGE4_EXPECTED_RED_NATIVE' build/stage04-native.log
+          test -f docs/STAGE_04_DISCOVERY_02_CROSS_BRANCH_CONTRACT_2026-10-30.md
+          ! grep -E 'PATCH02|DAY-TAG-PATCH' src/legacy_day_tag.cob
+          echo 'STAGE4_DISCOVERY02_NATIVE_RESULT=PASS' | tee -a build/stage04-native.log
+      - name: Preserve evidence on success and failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage04-expected-red
+          path: build/stage04-native.log
+          if-no-files-found: warn
+          retention-days: 30
