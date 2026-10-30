@@ -7,6 +7,9 @@ on:
     paths:
       - "tools/cal_source_provenance.py"
       - "tools/test_cal_source_provenance.py"
+      - "tools/cal_bootstrap_stage_manifest.json"
+      - "tools/cal_bootstrap_stage_inventory.py"
+      - "tools/test_cal_bootstrap_stages.py"
       - ".github/workflows/cal-source-provenance.yml"
   workflow_dispatch:
 
@@ -23,7 +26,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Run offline source-verifier tests
-        run: python3 -m unittest discover -s tools -p "test_cal_source_provenance.py" -v
+        run: python3 -m unittest discover -s tools -p "test_cal_*.py" -v
+      - name: Validate pinned eight-stage tree metadata offline (no binaries)
+        run: python3 tools/cal_bootstrap_stage_inventory.py
       - name: Verify twelve pinned text sources; do not fetch ZIP or EXE
         run: python3 tools/cal_source_provenance.py --fetch --output "$RUNNER_TEMP/cal-source-provenance.json"
       - name: Summarize non-execution gate
