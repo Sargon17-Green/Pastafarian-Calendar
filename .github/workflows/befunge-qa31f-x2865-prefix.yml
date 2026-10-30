@@ -6,6 +6,7 @@ on:
     paths:
       - qa/stage1_qa31f_x2865_prefix_probe.py
       - qa/stage1_qa31f_x23523_incoming_edge.py
+      - qa/stage1_qa31f_q149_writer_gate.py
       - .github/workflows/befunge-qa31f-x2865-prefix.yml
   workflow_dispatch:
 permissions:
@@ -24,3 +25,7 @@ jobs:
         run: |
           python -m py_compile qa/stage1_qa31f_x23523_incoming_edge.py
           python qa/stage1_qa31f_x23523_incoming_edge.py
+      - name: Verify original q149 writers and row11 diversion
+        run: |
+          python -m py_compile qa/stage1_qa31f_q149_writer_gate.py
+          python qa/stage1_qa31f_q149_writer_gate.py
