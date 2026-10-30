@@ -30,3 +30,19 @@ The independent, **unverified-in-native-Word** `RakinVisibleArithmetic` command 
 ## New Stage 1 arithmetic: signed subtraction and SAVE
 
 The additional macro `RakinSignedAndSaveReport` in `src/RakinSaveAndSubtract.bas` accepts two unsigned decimals (1..256 digits), inserts a colour-coded signed difference and both canonical SAVE residues with one decimal digit per table cell. The sign is outside the cells. See `docs/RAKIN_SAVE_LONG_DIVISION.md` for the exact long-division proof and `RakinModularSelfTest` for eight native acceptance assertions. Word-native execution is **still pending**. This is a mathematical primitive, not F(c,t) or a final calendar implementation.
+
+## Stage 1: exact five-field selection input (Word-native validation pending)
+
+`InsertPastafarianDate` now rejects a 254-character InputBox return, because VBA InputBox can silently truncate longer strings. For arbitrary-length fields, import `src/PastafarianWord.bas` and use `InsertPastafarianDateFromSelection`.
+
+Select exactly five Word paragraphs with these labels in order (example placeholder values, **not** a canonical date):
+
+```text
+year=123
+cutletName=EXTERNAL_CUTLET
+dayInCutlet=1
+monthName=EXTERNAL_MONTH
+dayInMonth=1
+```
+
+The new command preserves the selected source and inserts a separate five-field display after it. It checks field order, ASCII integer syntax and nonzero day fields, but **does not** verify source authenticity, 17/47 canonical name indices, Unicode NFC, Mapudungun linguistic review or calendar calculations. No `F(c,t)` exists. A new local VBA smoke test `PastafarianInputContractSelfTest` is written but not executed in Word. See `docs/STAGE1_WORD_FIVE_FIELD_SELECTION_CONTRACT_20261030.md` for non-native regression and acceptance steps.
