@@ -36,6 +36,28 @@ jobs:
           ref: 7cb12bf355461e5a179e0deadb7365689288bf29
           path: python-source
           persist-credentials: false
+      - name: Verify pinned source provenance (diagnostic only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlin_source_sha="$(git rev-parse HEAD)"
+          python_source_sha="$(git -C python-source rev-parse HEAD)"
+          test "$kotlin_source_sha" = "$GITHUB_SHA" || { echo 'E_SOAK_KOTLIN_CHECKOUT_REVISION'; exit 1; }
+          test "$python_source_sha" = "7cb12bf355461e5a179e0deadb7365689288bf29" || { echo 'E_SOAK_PYTHON_CHECKOUT_REVISION'; exit 1; }
+          python3 - <<'PY'
+          import importlib
+          import os
+          from pathlib import Path
+          import sys
+          source = Path(os.environ["PASTAFARIAN_PYTHON_SRC"]).resolve()
+          sys.path.insert(0, str(source))
+          module = importlib.import_module("pastafari_calendar")
+          path = Path(module.__file__).resolve()
+          if not path.is_relative_to(source):
+              raise SystemExit("E_SOAK_PYTHON_MODULE_OUTSIDE_PINNED_TREE")
+          print("PINNED_PYTHON_MODULE=" + str(path.relative_to(source)))
+          PY
+          printf 'PINNED_KOTLIN_SHA=%s\nPINNED_PYTHON_SHA=%s\n' "$kotlin_source_sha" "$python_source_sha"
       - name: Install pinned Kotlin 1.9.0
         shell: bash
         run: |
