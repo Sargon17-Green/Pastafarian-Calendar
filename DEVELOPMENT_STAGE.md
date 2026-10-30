@@ -67,9 +67,15 @@ STAGE_04_NATIVE_CI_RUN=https://github.com/Sargon17-Green/Pastafarian-Calendar/ac
 STAGE_04_CANONICAL_NAMES_LOCK=PASS
 STAGE_05_AUTHORIZED=YES
 STAGE_05_PATCH=02
-STAGE_05_STATE=OPEN_PLAN_DEFINED
+STAGE_05_STATE=OPEN_IMPLEMENTED_AWAITING_NATIVE
 STAGE_05_LEGACY_SCAR_PRESERVED=YES
 STAGE_05_REQUIRED_CORRECTION=Odd day-tag parity for d>=FOUNDATION_DAY, while preserving oldDayTag and all previous routes
 STAGE_05_PLANNED_ROUTE=makePatch02Context
-STAGE_05_FIX_APPLIED=NO
+STAGE_05_FIX_APPLIED=CODE_AWAITING_NATIVE
 STAGE_05_ACCEPTANCE=Adapter fixes F,F+1,F+2 without changing F-2,F-1; huge positive/negative day values >256 bits; original discovery remains demonstrably defective; independent route isolation and native Stage01-04 regressions plus verify
+
+STAGE_05_PRODUCTION_ROUTE=makePatch02Context
+STAGE_05_IMPLEMENTATION=Patch02Adapter adds 1 only from FOUNDATION_DAY onward; LegacyDayTag and previous routes unchanged
+STAGE_05_TEST_SCRIPT=bash test/run_stage05_tests.sh
+STAGE_05_NATIVE_RESULT=PENDING
+STAGE_05_CLOSURE=NOT_YET_CLAIMED

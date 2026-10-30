@@ -5,6 +5,7 @@ module MonsterBootstrap {
   use LegacyRemainder;
   use Patch01Adapter;
   use LegacyDayTag;
+  use Patch02Adapter;
 
   enum MonsterPhase {
     boot,
@@ -16,7 +17,9 @@ module MonsterBootstrap {
     patch01CorrectLegacyRemainder,
     stoppedAtPatch01Boundary,
     discovery02LegacyDayTag,
-    stoppedAtDiscovery02Boundary
+    stoppedAtDiscovery02Boundary,
+    patch02CorrectLegacyDayTag,
+    stoppedAtPatch02Boundary
   }
 
   enum MonsterStatus {
@@ -26,7 +29,8 @@ module MonsterBootstrap {
     failed,
     discoveryOnly,
     patch01Only,
-    discovery02Only
+    discovery02Only,
+    patch02Only
   }
 
   record MonsterContext {
@@ -45,6 +49,7 @@ module MonsterBootstrap {
     var patch01CorrectedOutput: bigint;
     var discovery02Input: bigint;
     var discovery02LegacyOutput: bigint;
+    var patch02CorrectedOutput: bigint;
   }
 
   record BaseValidationManager {
@@ -170,6 +175,32 @@ module MonsterBootstrap {
     var dispatcher: Discovery02Dispatcher;
     metrics.bump(ctx, "discovery02.calls");
     dispatcher.dispatch(ctx, candidateDay);
+    return ctx;
+  }
+
+  // Етап 5, латка 02: історичний Discovery 02 залишається недоторканим.
+  // Обхідна латка не створює п’яти нормативних складників дати.
+  record Patch02Dispatcher {
+    proc ref dispatch(ref ctx: MonsterContext) {
+      ctx.phase = MonsterPhase.patch02CorrectLegacyDayTag;
+      ctx.patch02CorrectedOutput =
+        applyPatch02(ctx.discovery02LegacyOutput, ctx.discovery02Input);
+      ctx.branchTrace.pushBack("PATCH_02_RESTORE_ODD_DAY_TAG");
+      ctx.status = MonsterStatus.patch02Only;
+      ctx.phase = MonsterPhase.stoppedAtPatch02Boundary;
+    }
+  }
+
+  proc makePatch02Context(const ref calculationDay: bigint,
+                          const ref targetDay: bigint,
+                          const ref candidateDay: bigint): MonsterContext {
+    var ctx = makeDiscovery02Context(calculationDay, targetDay, candidateDay);
+    if ctx.status != MonsterStatus.discovery02Only then return ctx;
+
+    var metrics: BaseMetricsManager;
+    var dispatcher: Patch02Dispatcher;
+    metrics.bump(ctx, "patch02.calls");
+    dispatcher.dispatch(ctx);
     return ctx;
   }
 }
