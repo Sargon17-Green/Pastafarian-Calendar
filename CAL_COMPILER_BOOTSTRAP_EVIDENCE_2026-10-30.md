@@ -420,3 +420,82 @@ machine-code build, or execute the 99 Native QA groups.
 The metadata snapshot was collected earlier through the GitHub
 connector from the fixed upstream commit. The stage-zero trust gate
 remains CLOSED and there is no Native QA PASS.
+
+## 2026-10-30: pinned source-only Windows API capability audit — 31/31 PASS
+
+The six `release` Plain English source files in pinned upstream
+`elenderg/PAL-1000` commit `2d44defdedf24519bba754114ee66e6d1defff1e`
+were examined as **text only**. Each was checked against the existing
+byte-length, Git blob SHA-1 and SHA-256 manifest before lexical
+inspection. No EXE or ZIP content was downloaded or run.
+
+The verifier is `tools/cal_static_api_surface.py`, with seven offline
+regression tests in `tools/test_cal_static_api_surface.py`. It parses
+quoted `Call "DLL" "function"` expressions without executing the
+language. Its report is a **potential API capability inventory**, not
+call-graph analysis or a security clearance.
+
+Actual CI run **41088273325** (job **124175085612**), code commit
+`679d528a43302eb29d3625c2b1b424b5b890d9db`, completed
+`success`. The job log explicitly reads `Ran 31 tests in 0.014s`
+and `OK`. All source-verification and static API steps also succeeded.
+
+The source-only scan produced:
+
+| Measurement | Observed |
+| --- | ---: |
+| DLL API reference occurrences | 346 |
+| Distinct referenced DLL functions | 206 |
+| References in the selected sensitive-capability categories | 58 |
+| Verified release source files | 6/6 |
+| All text sources verified by existing two-set verifier | 12/12 |
+
+Selected source-location evidence from upstream
+`recursos/CAL-4700/the noodle` (Git blob
+`571e3624d83fe531e15b76be6e1168d64a06f71f`):
+
+| Capability | Source line(s) | Direct textual evidence |
+| --- | --- | --- |
+| Process launch | 12711–12724 | `CreateProcessA`, `CreateThread`; starts a process given a path |
+| Process termination | 12831–12834 | `TerminateProcess` |
+| Dynamic library and function lookup | 5691–5700 | `LoadLibraryA`, `GetProcAddress` to access `ws2_32.dll` routines |
+| File deletion and modification | 3880–3886, 4780–4788, 1945–1949 | `DeleteFileA`, `CopyFileA`, `CreateFileA` |
+| HTTP GET-like retrieval | 10894–10915 | `InternetOpenUrlA`, `InternetReadFile` |
+| HTTP POST | 9709–9720, 11874–11885 | `WinHttpSendRequest` |
+| Direct sockets | 2018–2035, 11862–11872 | Winsock `socket`, `connect`, `send` |
+| SMTP mail | 11887–11927 | Socket connection to a configured SMTP server on port 25, `HELO`, `MAIL FROM`, `RCPT TO`, `DATA`, `QUIT` |
+| Legacy cryptography | 1763–1778, 3781–3791, 4815–4826 | `CALG_MD5`, `CALG_RC4`, `CryptDeriveKey`, `CryptDecrypt`, `CryptEncrypt` |
+
+The specific SMTP routine inspected does not show STARTTLS or SMTP
+authentication in the `To send an email` body. This is a security
+design concern if used for sensitive messages, but it does not prove
+that the compiler sends unsolicited mail. Similarly, MD5-to-RC4 is
+not an appropriate modern cryptographic protection scheme, but is not
+by itself evidence of malware.
+
+An additional negative regression test confirmed that an unknown
+WinHTTP API name cannot be waved through just for starting with
+`WinHttp`. The selected sensitive-DLL API inventory has an explicit
+set of known functions, not a prefix-based blanket allowance.
+
+**Limits of this audit:** raw `Intel` machine-code generation, dynamic
+function lookup, transitive calls, runtime reachability, target hosts
+and actual process behavior are *not* determined by lexical matching.
+Therefore the observed code capabilities **cannot** be translated
+into a malware verdict, proof of safe execution, or trusted stage-zero
+bootstrap. Report flags explicitly remain
+`binary_downloaded=false`,
+`compiler_executed=false`,
+`malware_clearance=false`,
+`stage_zero_verified=false`,
+`native_qa_99_pass=false`.
+
+Run URL:
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41088273325
+
+Next safe analysis step: trace direct Plain English call sites for
+process/network/crypto routines and inspect generated `Intel` blocks
+without compiling or executing code. The quarantined CAL-4018 and
+unverified CAL-4700 executables remain blocked; 99 Native QA groups
+and the 47-month differentiation case remain unexecuted. No changes
+to `main` or the 82 calendar source files.
