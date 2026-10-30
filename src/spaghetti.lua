@@ -34,6 +34,7 @@ local LegacyGateGap = require("legacy_gate_gap")
 local GateGapPatch = require("gate_gap_patch")
 local LegacyPositiveGate = require("legacy_positive_gate_position")
 local PositiveGatePatch = require("positive_gate_patch")
+local LegacyNegativeGate = require("legacy_negative_gate_position")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -534,6 +535,15 @@ end
 
 function S.positiveGateCoreProbe(index,gaps,historicalDay)
     return PositiveGatePatch.correctPositiveDay(index,gaps,historicalDay)
+end
+
+-- DISCOVERY 18: rann vizib defo negatifsèlman; PATCH18 poko egziste.
+function S.legacyNegativeGateProbe(index,streams)
+    return LegacyNegativeGate.execute(index,streams)
+end
+
+function S.oldNegativeGateFromLastGapProbe(gap)
+    return LegacyNegativeGate.oldNegativePosition(gap)
 end
 
 function S.calendarDateSpaghetti()

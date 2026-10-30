@@ -3,7 +3,7 @@
 **Pwojè:** PC-BRANCH-LUA-HAITIAN  
 **Branch:** Lua+Kreyòl-ayisyen  
 **Desizyon pwopriyetè:** 2026-10-30: ajan an gen otorizasyon pou defini kontni, kontra ak tès Stage 36 dapre orak kanonik la, san okenn demann apwobasyon seremonyèl ankò.  
-**Estati:** CONTRACT_DEFINED_ONLY — **STAGE 36 PA LOUVRI** jouk QA Native Stage35 sou branch kòd ki koresponn lan verifye.
+**Estati:** STAGE36_OPEN_DISCOVERY18_NATIVE_CI_PENDING. Stage35 Native gate verifye nan run 41097206080 (64/64 jobs success, full-suite stdout, empty stderr/exit=0 guard, artifact 12996209980). Kontra orijinal anba a konsève règ ki te aplike anvan ouvèti sa a.
 
 ## Poukisa chwazi pòtay negatif anvan postStir12
 
