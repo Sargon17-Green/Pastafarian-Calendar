@@ -27,6 +27,16 @@ class OwnedBanks:
             self.data[bank][:] = bytes(SIZE)
         return 0, group
 
+    def select(self, owner, logical_index):
+        """Resolve a current owner's physical bank by sorted logical index."""
+        if not (1 <= owner <= 253 and 0 <= logical_index <= 12):
+            return 2, -1
+        matches = [i for i in range(RESERVED, BANKS)
+                   if self.tags[i] == owner + 2]
+        if logical_index >= len(matches):
+            return 3, -1
+        return 0, matches[logical_index]
+
     def release(self, owner):
         if not 1 <= owner <= 253:
             return 2, 0
@@ -59,6 +69,28 @@ def main():
     assert model.tags == [2] * 3 + [0] * 13
     assert model.data[0][0] == 0x66
 
+    # Logical indexing is owner-scoped even after physical fragmentation.
+    assert model.select(0, 0) == (2, -1)
+    assert model.select(21, 13) == (2, -1)
+    assert model.select(21, 0) == (3, -1)
+    assert model.alloc(21, 3) == (0, (3, 4, 5))
+    assert model.alloc(22, 1) == (0, (6,))
+    assert model.release(21) == (0, 3)
+    assert model.alloc(23, 1) == (0, (3,))
+    assert model.alloc(24, 1) == (0, (4,))
+    assert model.alloc(25, 2) == (0, (5, 7))
+    assert model.select(25, 0) == (0, 5)
+    assert model.select(25, 1) == (0, 7)
+    assert model.select(25, 2) == (3, -1)
+    assert model.select(23, 1) == (3, -1)
+    assert model.select(23, 0) == (0, 3)
+    assert model.release(25) == (0, 2)
+    assert model.select(25, 0) == (3, -1)
+    assert model.release(22) == (0, 1)
+    assert model.release(23) == (0, 1)
+    assert model.release(24) == (0, 1)
+    assert model.tags == [2] * 3 + [0] * 13
+
     rng = Random(0x83A110C)
     checks = 0
     for _ in range(1000):
@@ -77,7 +109,7 @@ def main():
         assert model.tags[:3] == [2] * 3
         assert all(x == 0 or 3 <= x <= 255 for x in model.tags[3:])
         checks += 1
-    print(f"HOST_SRAM_OWNER_MODEL=PASS randomized_transitions={checks} slots=13")
+    print(f"HOST_SRAM_OWNER_MODEL=PASS randomized_transitions={checks} slots=13 logical_index=PASS")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 
 
