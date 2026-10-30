@@ -1,0 +1,95 @@
+name: SQL Tamil Stage 2 Slice 7 Post Stir Native
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'sql/09_stage02_post_stir_round.sql'
+      - 'sql/test/94_stage02_post_stir_native.sql'
+      - 'sql/test/95_stage02_post_stir_differential.sql'
+      - '.github/workflows/sql-tamil-stage02-post-stir-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  post-stir-slice7:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout current SHA
+        uses: actions/checkout@v4
+      - name: Start offline PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-stir-logs
+          docker run --detach --name sql-tamil-stir-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-stir-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-stir-pg postgres --version | tee sql-tamil-stir-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-stir-logs/versions.txt
+      - name: Native fixtures and edge cases (62)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-stir-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/test/94_stage02_post_stir_native.sql \
+            -c 'SELECT 1/((count(*)=62 AND bool_and(ok))::integer) AS native_62_of_62 FROM stage02_stir_assertions' \
+            2>&1 | tee sql-tamil-stir-logs/native.txt
+      - name: Production isolation (4)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-stir-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/test/40_production_isolation.sql \
+            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM stage01_production_isolation_assertions' \
+            2>&1 | tee sql-tamil-stir-logs/isolation.txt
+      - name: Create separate differential database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-stir-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'CREATE DATABASE sql_tamil_stir_differential'
+      - name: Differential vs normative reference (306)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-stir-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_stir_differential \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql/test/95_stage02_post_stir_differential.sql \
+            -c 'SELECT 1/((count(*)=306 AND bool_and(ok))::integer) AS differential_306_of_306 FROM stage02_stir_differential' \
+            2>&1 | tee sql-tamil-stir-logs/differential.txt
+      - name: Preserve bounded evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice7-post-stir
+          path: sql-tamil-stir-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-stir-pg 2>/dev/null || true
