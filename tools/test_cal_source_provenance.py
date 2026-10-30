@@ -60,7 +60,49 @@ class SourceAuditTests(unittest.TestCase):
             (d / "release").mkdir()
             (d / "file").write_text("demo")
             (d / "release" / "the compiler").symlink_to(d / "file")
-            self.assertTrue((d / "release" / "the compiler").is_symlink())
+            with self.assertRaisesRegex(ValueError, "symlink"):
+                c.read_directory_source(d, "release", "the compiler")
+
+    def test_refuse_symlinked_group_directory(self):
+        with tempfile.TemporaryDirectory() as td:
+            d = Path(td)
+            (d / "actual").mkdir()
+            (d / "actual" / "the compiler").write_text("demo")
+            (d / "release").symlink_to(d / "actual", target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlink"):
+                c.read_directory_source(d, "release", "the compiler")
+
+    def test_offline_full_audit_and_json_output(self):
+        with tempfile.TemporaryDirectory() as td:
+            d = Path(td)
+            expected = {}
+            for group in c.SOURCES:
+                (d / group).mkdir()
+                expected[group] = {}
+                for name in c.FILES:
+                    payload = ("To count " + group + " " + name + ":\n").encode()
+                    (d / group / name).write_bytes(payload)
+                    expected[group][name] = (c.git_blob_sha1(payload), len(payload))
+            output = d / "out.json"
+            with patch.object(c, "EXPECTED", expected):
+                with patch("builtins.print"):
+                    rc = c.main(["--directory", str(d), "--output", str(output)])
+            self.assertEqual(rc, 0)
+            import json
+            self.assertTrue(json.loads(output.read_text())["all_12_text_sources_verified"])
+
+    def test_failed_audit_overwrites_stale_pass_report(self):
+        with tempfile.TemporaryDirectory() as td:
+            d = Path(td)
+            output = d / "out.json"
+            output.write_text('{"all_12_text_sources_verified": true}')
+            with patch("builtins.print"):
+                rc = c.main(["--directory", str(d), "--output", str(output)])
+            import json
+            self.assertEqual(rc, 2)
+            data = json.loads(output.read_text())
+            self.assertFalse(data["all_12_text_sources_verified"])
+            self.assertFalse(data["compiler_executed"])
 
 
 if __name__ == "__main__":
