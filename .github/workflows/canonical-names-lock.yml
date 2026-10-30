@@ -60,6 +60,14 @@ jobs:
             -o build/stage01_year5000_probe
           test -x build/stage01_tests
           test -x build/stage01_year5000_probe
+          gfortran "${flags[@]}" test/stage01_year_boundary_probe.f90 \
+            build/big_integer.o \
+            build/source_language_catalog.o \
+            build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o \
+            build/normative_oracle_calendar.o \
+            -o build/stage01_year_boundary_probe
+          test -x build/stage01_year_boundary_probe
       - name: Run bounded Stage 1 Oracle smoke (55 selected assertions; not full acceptance)
         shell: bash
         run: |
@@ -145,6 +153,30 @@ jobs:
           echo "Fortran Stage 1 year5000 interval probe: $actual/8 invariants, ${elapsed}s. Not full Stage 1 acceptance." >> "$GITHUB_STEP_SUMMARY"
           if [[ "$actual" -ne 8 ]]; then
             echo "::error::Year5000 interval probe assertion count mismatch"
+            exit 1
+          fi
+      - name: Run bounded Stage 1 adjacent-year endpoint smoke (14 assertions; not full acceptance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          started=$SECONDS
+          set +e
+          output="$(timeout --signal=TERM --kill-after=5s 45s build/stage01_year_boundary_probe 2>&1)"
+          exit_code=$?
+          set -e
+          elapsed=$((SECONDS-started))
+          printf '%s\n' "$output"
+          echo "STAGE01_YEAR_BOUNDARY_RUNTIME_SECONDS=$elapsed LIMIT=45"
+          if [[ "$exit_code" -ne 0 ]]; then
+            echo "::error::Adjacent-year boundary probe failed or exceeded 45s limit (exit $exit_code)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE01_YEAR_BOUNDARY_SMOKE_PASS' <<< "$output"
+          actual="$(grep -c '^PASS: ' <<< "$output")"
+          echo "STAGE01_YEAR_BOUNDARY_ASSERTIONS=$actual EXPECTED=14 (NOT independent year oracle)"
+          echo "Fortran Stage 1 adjacent-year endpoints: $actual/14 assertions, ${elapsed}s. Not full Stage 1 acceptance." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$actual" -ne 14 ]]; then
+            echo "::error::Adjacent-year boundary assertion count mismatch"
             exit 1
           fi
       - name: Run bounded Stage 1 BigInt safe-boundary checks
