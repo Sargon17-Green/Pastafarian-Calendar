@@ -57,9 +57,11 @@ try {
     Test-CleanCheckout
 
     $lines = @(Get-Content -LiteralPath $stageFile -Encoding UTF8)
-    if (-not ((($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24')) -and
+    # A sealed Stage23 remains sealed through later stages, including Stage25.
+    # Never accept awaiting Stage23 or a predecessor LAST_COMPLETED_STAGE.
+    if (-not ((($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24') -or ($lines -contains 'LAST_COMPLETED_STAGE=25')) -and
               ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED') -and
-              (($lines -contains 'CURRENT_STAGE=23') -or ($lines -contains 'CURRENT_STAGE=24')))) {
+              (($lines -contains 'CURRENT_STAGE=23') -or ($lines -contains 'CURRENT_STAGE=24') -or ($lines -contains 'CURRENT_STAGE=25')))) {
         throw 'Stage23 is not in the expected sealed state.'
     }
     $originalHash = (Get-FileHash -LiteralPath $stageFile -Algorithm SHA256).Hash
