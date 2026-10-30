@@ -1,0 +1,80 @@
+name: Rust Azerbaijani Stage03 PATCH01 Native
+
+on:
+  push:
+    branches:
+      - 'Rust\+Azərbaycan-dili'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'audit/STAGE_03_PATCH01_SAVE_CONTRACT_2026-10-30.md'
+      - '.github/workflows/rust-az-stage03-patch01.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-stage03-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Rust stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Verify format and stage contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo fmt --all -- --check
+          test -f audit/STAGE_03_PATCH01_SAVE_CONTRACT_2026-10-30.md
+          grep -Fq 'pub mod patch01_save;' src/lib.rs
+          grep -Fq 'STAGE03_PATCH01_BOUNDARY_OK=8' tests/stage03_patch01.rs
+          grep -Fq 'LAST_COMPLETED_STAGE=2' DEVELOPMENT_STAGE.md
+      - name: Native Stage1 Stage2 Stage3 and independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\nSHA=%s\n' "$GITHUB_SHA" > evidence/sha.txt
+          rustc --version > evidence/toolchain.txt
+          cargo --version >> evidence/toolchain.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s \
+            cargo test --all-targets -- --nocapture > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/exit.txt
+          cat evidence/stdout.txt
+          if [ "$code" -ne 0 ]; then
+            cat evidence/stderr.txt >&2
+            echo "::error::Rust Stage03 native failed with code $code"
+            exit 1
+          fi
+          grep -Fq 'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' evidence/stdout.txt
+          grep -Fq 'STAGE03_PATCH01_BOUNDARY_OK=8' evidence/stdout.txt
+          grep -Fq 'STAGE03_PATCH01_LEGACY_RED=3 CONTROL=1 UNEXPECTED=0' evidence/stdout.txt
+          grep -Eq 'test result: ok\. 16 passed; 0 failed' evidence/stdout.txt
+          grep -Eq 'test result: ok\. 3 passed; 0 failed' evidence/stdout.txt
+          grep -Eq 'test result: ok\. 4 passed; 0 failed' evidence/stdout.txt
+          if grep -E 'test result: FAILED|test.*FAILED|panic' evidence/stdout.txt evidence/stderr.txt; then
+            echo "::error::Unexpected failure in Rust tests"
+            exit 1
+          fi
+          printf 'STAGE03_PATCH01_NATIVE=PASS\n' > evidence/result.txt
+          cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-az-stage03-native
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30

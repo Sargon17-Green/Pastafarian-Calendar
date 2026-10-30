@@ -2,6 +2,7 @@ use num_bigint::BigInt;
 use std::collections::BTreeMap;
 
 pub mod discovery01_legacy_save;
+pub mod patch01_save;
 #[rustfmt::skip]
 pub mod source_language_catalog;
 
@@ -72,6 +73,8 @@ pub struct MonsterContext {
     pub validation_failures: Vec<String>,
     // Stage2: məhz bu invocation-a aid, xam və qəsdən səhv SAVE qalığı.
     pub legacy_save_observation: Option<BigInt>,
+    // Stage3: düzgün SAVE yalnız bu çağırışın kontekstində saxlanır.
+    pub save_observation: Option<BigInt>,
 }
 
 impl MonsterContext {
@@ -92,6 +95,7 @@ impl MonsterContext {
             warnings: Vec::new(),
             validation_failures: Vec::new(),
             legacy_save_observation: None,
+            save_observation: None,
         }
     }
 }
