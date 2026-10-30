@@ -1,10 +1,15 @@
-// Stadio 6 / DISCOVERY 03: diagnoza, intence ekskluziva distanco.
+// Stadio 6 DISCOVERY 03 / Stadio 7 PATCH 03: konservu la malnovan diagnozon.
 // La inkluziva orakolo ekzistas nur en la testa referenco.
-// Tiu ĉi nova esplora legacy-modelo ne atestas antaŭan produktan eraron.
+// La ekskluziva modelo estas diagnoza; la inkluziva rezulto estas aktiva.
+// La esploro ne atestas antaŭan produktan eraron.
 import pastafari/bootstrap
 
 pub type Discovery03Output {
-  Discovery03Output(context: bootstrap.MonsterContext, legacy_distance: Int)
+  Discovery03Output(
+    context: bootstrap.MonsterContext,
+    legacy_distance: Int,
+    inclusive_distance: Int,
+  )
 }
 
 pub fn old_distance(calculation_day: Int, target_day: Int) -> Int {
@@ -27,6 +32,10 @@ pub fn dispatch_discovery_03(
           completed.calculation_day,
           completed.target_day,
         ),
+        inclusive_distance: old_distance(
+          completed.calculation_day,
+          completed.target_day,
+        ) + 1,
       ))
   }
 }

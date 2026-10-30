@@ -1,6 +1,6 @@
-// Stadio 6 / DISCOVERY 03: tri atendataj normigaj malsukcesoj.
+// Stadio 7 / PATCH 03: tri antaŭaj normigaj atestoj nun verdaj.
 // La kanona inkluziva distanco estas prenata nur el test/reference/core.gleam.
-// La historia ekskluziva distanco estas intence diagnoza, ne flikita.
+// La ekskluziva historia diagnozo restas por regreso kaj spurebleco.
 import gleeunit/should
 import pastafari/bootstrap
 import pastafari/discovery_03_distance
@@ -12,23 +12,29 @@ fn legacy(calculation_day: Int, target_day: Int) -> Int {
   output.legacy_distance
 }
 
+fn inclusive(calculation_day: Int, target_day: Int) -> Int {
+  let context = bootstrap.new_context(calculation_day, target_day)
+  let assert Ok(output) = discovery_03_distance.dispatch_discovery_03(context)
+  output.inclusive_distance
+}
+
 fn canonical(calculation_day: Int, target_day: Int) -> Int {
   core.work_counts(calculation_day, target_day).distance
 }
 
-pub fn discovery_03_same_day_expected_red_test() {
+pub fn discovery_03_same_day_patch_03_green_test() {
   let f = core.foundation_day
-  legacy(f, f) |> should.equal(canonical(f, f))
+  inclusive(f, f) |> should.equal(canonical(f, f))
 }
 
-pub fn discovery_03_forward_expected_red_test() {
+pub fn discovery_03_forward_patch_03_green_test() {
   let f = core.foundation_day
-  legacy(f, f + 1) |> should.equal(canonical(f, f + 1))
+  inclusive(f, f + 1) |> should.equal(canonical(f, f + 1))
 }
 
-pub fn discovery_03_reverse_expected_red_test() {
+pub fn discovery_03_reverse_patch_03_green_test() {
   let f = core.foundation_day
-  legacy(f + 1, f) |> should.equal(canonical(f + 1, f))
+  inclusive(f + 1, f) |> should.equal(canonical(f + 1, f))
 }
 
 pub fn discovery_03_symmetry_large_integers_test() {
@@ -80,4 +86,20 @@ pub fn discovery_03_invalid_recovery_depth_test() {
   let invalid = bootstrap.MonsterContext(..base, recovery_depth: -1)
   discovery_03_distance.dispatch_discovery_03(invalid)
   |> should.equal(Error(bootstrap.InvalidRecoveryDepth))
+}
+
+pub fn patch_03_historical_diagnostic_preserved_test() {
+  let f = core.foundation_day
+  legacy(f, f) |> should.equal(0)
+  legacy(f, f + 1) |> should.equal(1)
+  legacy(f + 1, f) |> should.equal(1)
+}
+
+pub fn patch_03_wide_inclusive_symmetry_test() {
+  let earlier = -123_456_789_012_345_678_901_234_567_890
+  let later = 987_654_321_098_765_432_109_876_543_210
+  inclusive(earlier, later) |> should.equal(canonical(earlier, later))
+  inclusive(later, earlier) |> should.equal(canonical(later, earlier))
+  inclusive(earlier, earlier) |> should.equal(1)
+  inclusive(later, later) |> should.equal(1)
 }
