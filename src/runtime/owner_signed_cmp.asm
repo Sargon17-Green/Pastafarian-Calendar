@@ -119,20 +119,20 @@ OwnerSignedCmp::
     ld b, a
     ld a, [wOwnerCmpLenB+2]
     cp b
-    jr c, .greater
-    jr nz, .less
+    jp c, .greater
+    jp nz, .less
     ld a, [wOwnerCmpLenA+1]
     ld b, a
     ld a, [wOwnerCmpLenB+1]
     cp b
-    jr c, .greater
-    jr nz, .less
+    jp c, .greater
+    jp nz, .less
     ld a, [wOwnerCmpLenA]
     ld b, a
     ld a, [wOwnerCmpLenB]
     cp b
-    jr c, .greater
-    jr nz, .less
+    jp c, .greater
+    jp nz, .less
 
     ld a, [wOwnerCmpLenA]
     ld [wOwnerCmpCursor], a
@@ -175,9 +175,9 @@ OwnerSignedCmp::
     ld b, a
     ld a, [wOwnerByteValue]
     cp b
-    jr c, .greater
-    jr nz, .less
-    jr .loop
+    jp c, .greater
+    jp nz, .less
+    jp .loop
 .equal:
     xor a
     jr .store
