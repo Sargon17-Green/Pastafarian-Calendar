@@ -54,6 +54,41 @@ CRYPTO_PATHS = {
         ),
     },
 }
+# Explicit menu command labels, dispatch and forwarding into editor mode.
+# These are pinned *textual links*, not a runtime execution proof.
+MENU_ROUTE_PINS = {
+    "encrypt": (
+        'If the command\'s handler is "handle encrypt", handle encrypt; exit.',
+        'If the current tab\'s mode is "editor", add "Encrypt..." and "handle encrypt" to the submenu.',
+        "To handle encrypt:",
+        'If the current tab\'s mode is "editor", handle encrypt given the current tab\'s node\'s source; exit.',
+    ),
+    "decrypt": (
+        'If the command\'s handler is "handle decrypt", handle decrypt; exit.',
+        'If the current tab\'s mode is "editor", add "Decrypt..." and "handle decrypt" to the submenu.',
+        "To handle decrypt:",
+        'If the current tab\'s mode is "editor", handle decrypt given the current tab\'s node\'s source; exit.',
+    ),
+}
+# These two groups identify the explicit WinSock dynamic function lookup
+# and later pointer dispatch. The grouping is *not* a control-flow proof.
+DYNAMIC_RESOLVER_PINS = {
+    "function_pointer_registration": (
+        "To get some addrinfo routines:",
+        'Call "kernel32.dll" "LoadLibraryA" with "ws2_32.dll"',
+        'Call "kernel32.dll" "GetProcAddress" with the handle and "getaddrinfo"',
+        "Put the pointer into the addrinfo routines' getaddrinfo pointer.",
+        'Call "kernel32.dll" "GetProcAddress" with the handle and "freeaddrinfo"',
+        "Put the pointer into the addrinfo routines' freeaddrinfo pointer.",
+    ),
+    "function_pointer_dispatch": (
+        "To get a sockaddr given a host string:",
+        "Get some addrinfo routines.",
+        "Call the addrinfo routines' getaddrinfo with",
+        "Call the addrinfo routines' freeaddrinfo with",
+    ),
+}
+
 KDF_PINS = (
     'To create a crypt session with a passphrase string:',
     'Call "advapi32.dll" "CryptCreateHash"',
@@ -158,6 +193,14 @@ def audit(read_source, *, strict: bool = True) -> dict:
             path_evidence[operation][filename] = sequential_evidence(
                 active_lines(blobs[filename]), phrases)
     kdf_lines = sequential_evidence(active_lines(blobs["the noodle"]), KDF_PINS)
+    menu_route_evidence = {
+        operation: sequential_evidence(active_lines(blobs["the desktop"]), pins)
+        for operation, pins in MENU_ROUTE_PINS.items()
+    }
+    resolver_route_evidence = {
+        stage: sequential_evidence(active_lines(blobs["the noodle"]), pins)
+        for stage, pins in DYNAMIC_RESOLVER_PINS.items()
+    }
 
     all_intel = []
     malformed = []
@@ -184,6 +227,8 @@ def audit(read_source, *, strict: bool = True) -> dict:
         "verified_text_modules": len(blobs),
         "crypto_path_evidence": path_evidence,
         "crypto_kdf_evidence_lines": kdf_lines,
+        "menu_route_evidence": menu_route_evidence,
+        "dynamic_resolver_evidence": resolver_route_evidence,
         "intel_directives": len(all_intel),
         "intel_prefix_categories": counts_with_zeros,
         "intel_invalid_literals": len(malformed),
