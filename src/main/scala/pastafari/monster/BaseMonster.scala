@@ -222,7 +222,12 @@ final case class BaseMonsterContext(
   var gateProjectionLegacyOrdinal: Option[Int] = None,
   var patch26CutletId: Option[Int] = None,
   var patch26DayInCutlet: Option[Int] = None,
-  var patch26Applied: Boolean = false
+  var patch26Applied: Boolean = false,
+  var cutletSpanGaps: Option[Vector[Int]] = None,
+  var cutletSpanPartition: Option[Vector[Int]] = None,
+  var cutletSpanIndex: Option[Int] = None,
+  var cutletSpanSnapshot: Option[(Vector[Int],Vector[Int],Int)] = None,
+  var cutletSpanLegacyLength: Option[Int] = None
 )
 
 final class BaseMetricsShell {
@@ -500,6 +505,27 @@ final class BaseValidationManager {
        correctId==0 || ctx.patch26CutletId.get!=correctId ||
        ctx.patch26DayInCutlet.get!=correctDay)
       throw new IllegalStateException("Proiezione PATCH26 falsificata.")
+  }
+
+  /** DISCOVERY27: validazione senza adapter e senza oracle di test. */
+  def requireDiscovery27Ready(ctx:BaseMonsterContext):Unit={
+    if(ctx.phase!="DISCOVERY_27_CUTLET_SPAN" ||
+       ctx.status!="LEGACY_CUTLET_SPAN_READY" ||
+       ctx.branchTrace.toVector!=Vector("BOOT","DISCOVERY_27_CUTLET_SPAN") ||
+       ctx.cutletSpanGaps.isEmpty || ctx.cutletSpanPartition.isEmpty ||
+       ctx.cutletSpanIndex.isEmpty || ctx.cutletSpanSnapshot.isEmpty ||
+       ctx.cutletSpanLegacyLength.isEmpty)
+      throw new IllegalStateException("DISCOVERY27 non completa.")
+    val gaps=ctx.cutletSpanGaps.get
+    val part=ctx.cutletSpanPartition.get
+    val c=ctx.cutletSpanIndex.get
+    if(part.length<6 || part.length>17 || part.exists(_<1) ||
+       gaps.length<6 || gaps.length>47 || part.sum!=gaps.length ||
+       gaps.exists(x=>x<42 || x>963) || gaps.sum<252 || gaps.sum>5778 ||
+       c<1 || c>part.length ||
+       ctx.cutletSpanSnapshot.get!=(gaps,part,c) ||
+       ctx.cutletSpanLegacyLength.get!=gaps(c-1))
+      throw new IllegalStateException("Cicatrice DISCOVERY27 falsificata.")
   }
 
   def requirePatch25Ready(ctx: BaseMonsterContext): Unit = {
@@ -2532,7 +2558,8 @@ final class BaseMonsterManager {
     new Discovery25GateStartMonthCacheHandler(metrics),
     new Patch25GateStartMonthCacheHandler(metrics),
     new Discovery26GateToCutletProjectionHandler(metrics),
-    new Patch26GateToCutletProjectionHandler(metrics)
+    new Patch26GateToCutletProjectionHandler(metrics),
+    new Discovery27CutletSpanHandler(metrics)
   ))
 
   def bootstrap(calculationDay: BigInt, targetDay: BigInt): BaseMonsterContext = {
@@ -3977,6 +4004,26 @@ final class BaseMonsterManager {
     }catch{
       case e:Throwable=>throw BaseErrorWrapper.wrap("patch26",e)
     }
+  }
+
+  /** Flusso isolato: input già selezionati; nessuna PATCH27. */
+  def discover27CutletSpan(
+    calculationDay:BigInt,targetDay:BigInt,
+    gateGaps:Vector[Int],cutletPartition:Vector[Int],cutletIndex:Int
+  ):Discovery27CutletSpanReport={
+    val ctx=bootstrap(calculationDay,targetDay)
+    ctx.cutletSpanGaps=Some(gateGaps)
+    ctx.cutletSpanPartition=Some(cutletPartition)
+    ctx.cutletSpanIndex=Some(cutletIndex)
+    ctx.phase="DISCOVERY_27_CUTLET_SPAN"
+    try{
+      dispatcher.dispatch(ctx)
+      validation.requireDiscovery27Ready(ctx)
+      Discovery27CutletSpanReport(ctx.calculationDay,ctx.targetDay,
+        ctx.cutletSpanGaps.get,ctx.cutletSpanPartition.get,
+        ctx.cutletSpanIndex.get,ctx.cutletSpanLegacyLength.get,
+        ctx.phase,ctx.status,ctx.branchTrace.toVector)
+    }catch{case e:Throwable=>throw BaseErrorWrapper.wrap("discovery27",e)}
   }
 
   def metricsSnapshot: Map[String, BigInt] = metrics.snapshot
