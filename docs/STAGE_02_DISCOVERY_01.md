@@ -42,7 +42,7 @@ CI 必须使用 GnuCOBOL 严格编译，且 Stage 1 回归独立保持绿色。
 
 ## 核验
 
-GitHub Actions: `.github/workflows/cobol-stage2-discovery.yml`
+GitHub Actions: `.github/workflows/canonical-names-lock.yml` (stage2-discovery-native job)
 - JOB: `stage2-discovery-native`
 - 标记: `RESULT=PASS_STAGE2_DISCOVERY_NATIVE`
 - 初始状态: PENDING（禁止把静态设计或 commit 误称为原生 PASS）。

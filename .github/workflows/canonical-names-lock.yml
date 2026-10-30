@@ -96,3 +96,53 @@ jobs:
           path: build/stage1-native.log
           if-no-files-found: warn
           retention-days: 30
+
+  stage2-discovery-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout production discovery
+        uses: actions/checkout@v4
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Strict compile and execute expected-red cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf 'STAGE=2\nHEAD=%s\n' "$GITHUB_SHA" | tee build/stage2-discovery.log
+          timeout --signal=TERM --kill-after=10s 300s \
+            cobc -std=default -free \
+            -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror \
+            -x -o build/stage02-discovery \
+            test/stage02_discovery_tests.cob \
+            src/big_integer.cob \
+            src/monster_bootstrap.cob \
+            src/legacy_old_remainder.cob \
+            2>&1 | tee -a build/stage2-discovery.log
+          timeout --signal=TERM --kill-after=10s 120s \
+            ./build/stage02-discovery 2>&1 | tee -a build/stage2-discovery.log
+          grep -Eq '^STAGE2_EXPECTED_RED=[[:space:]]*0*3[[:space:]]*$' build/stage2-discovery.log
+          grep -Eq '^STAGE2_CONTROL_PASS=[[:space:]]*0*1[[:space:]]*$' build/stage2-discovery.log
+          grep -Eq '^STAGE2_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage2-discovery.log
+          grep -Fxq 'RESULT=PASS_STAGE2_DISCOVERY_NATIVE' build/stage2-discovery.log
+          test "$(grep -c '^RAW_REMAINDER=0$' build/stage2-discovery.log)" -eq 3
+          if grep -iRE 'savepatch|save-patch|patch-save' src/; then
+            echo 'FORBIDDEN_FUTURE_PATCH_FOUND=YES' | tee -a build/stage2-discovery.log
+            exit 1
+          fi
+          echo 'FUTURE_PATCH_FOUND=NO' | tee -a build/stage2-discovery.log
+      - name: Persist stage2 native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage2-discovery-native-evidence
+          path: build/stage2-discovery.log
+          if-no-files-found: warn
+          retention-days: 30
