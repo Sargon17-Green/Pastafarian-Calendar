@@ -3,7 +3,7 @@ name: Rust Azerbaijani Stage02 DISCOVERY01 Native
 on:
   push:
     branches:
-      - 'Rust+Azərbaycan-dili'
+      - 'Rust\+Azərbaycan-dili'
     paths:
       - 'src/**'
       - 'tests/**'
