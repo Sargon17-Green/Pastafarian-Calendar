@@ -11,8 +11,11 @@ class OwnedBanks:
     def __init__(self):
         self.tags = [2] * RESERVED + [0] * (BANKS - RESERVED)
         self.data = [bytearray(SIZE) for _ in range(BANKS)]
+        self.mapped = 0  # MBC5 RAM bank, not an ownership capability
+        self.selected = -1  # cached physical handle or revoked sentinel
 
     def alloc(self, owner, count):
+        self.selected = -1  # allocation invalidates an earlier selection
         if not (1 <= owner <= 253 and 1 <= count <= 13):
             return 2, ()
         tag = owner + 2
@@ -25,19 +28,24 @@ class OwnedBanks:
         for bank in group:
             self.tags[bank] = tag
             self.data[bank][:] = bytes(SIZE)
+        self.mapped = group[-1]  # the native zeroizer leaves this bank mapped
         return 0, group
 
     def select(self, owner, logical_index):
         """Resolve a current owner's physical bank by sorted logical index."""
+        self.selected = -1  # invalid selection revokes the cached handle
         if not (1 <= owner <= 253 and 0 <= logical_index <= 12):
             return 2, -1
         matches = [i for i in range(RESERVED, BANKS)
                    if self.tags[i] == owner + 2]
         if logical_index >= len(matches):
             return 3, -1
-        return 0, matches[logical_index]
+        self.mapped = matches[logical_index]
+        self.selected = self.mapped
+        return 0, self.mapped
 
     def release(self, owner):
+        self.selected = -1
         if not 1 <= owner <= 253:
             return 2, 0
         tag = owner + 2
@@ -47,6 +55,7 @@ class OwnedBanks:
         for bank in group:
             self.data[bank][:] = bytes(SIZE)
             self.tags[bank] = 0
+        self.mapped = 0  # successful release selects reserved bank 0
         return 0, len(group)
 
 
@@ -80,12 +89,17 @@ def main():
     assert model.alloc(24, 1) == (0, (4,))
     assert model.alloc(25, 2) == (0, (5, 7))
     assert model.select(25, 0) == (0, 5)
+    assert (model.mapped, model.selected) == (5, 5)
     assert model.select(25, 1) == (0, 7)
+    assert (model.mapped, model.selected) == (7, 7)
     assert model.select(25, 2) == (3, -1)
+    assert (model.mapped, model.selected) == (7, -1)
     assert model.select(23, 1) == (3, -1)
     assert model.select(23, 0) == (0, 3)
     assert model.release(25) == (0, 2)
+    assert (model.mapped, model.selected) == (0, -1)
     assert model.select(25, 0) == (3, -1)
+    assert (model.mapped, model.selected) == (0, -1)
     assert model.release(22) == (0, 1)
     assert model.release(23) == (0, 1)
     assert model.release(24) == (0, 1)
@@ -109,7 +123,7 @@ def main():
         assert model.tags[:3] == [2] * 3
         assert all(x == 0 or 3 <= x <= 255 for x in model.tags[3:])
         checks += 1
-    print(f"HOST_SRAM_OWNER_MODEL=PASS randomized_transitions={checks} slots=13 logical_index=PASS")
+    print(f"HOST_SRAM_OWNER_MODEL=PASS randomized_transitions={checks} slots=13 logical_index=PASS release_unmap=PASS stale_handle=REVOKED")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 
 
