@@ -1,0 +1,21 @@
+name: QA31F exact-source prefix frontier
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - qa/stage1_qa31f_x2865_prefix_probe.py
+      - .github/workflows/befunge-qa31f-x2865-prefix.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-pinned-prefix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify static-source pin and 257 bounded route probes
+        run: |
+          python -m py_compile qa/stage1_qa31f_x2865_prefix_probe.py
+          python qa/stage1_qa31f_x2865_prefix_probe.py
