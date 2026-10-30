@@ -26,6 +26,8 @@ on:
       - '!src/\+pastafari/allOpenedWholeWeaveChildCountsByFactors.m'
       - '!src/\+pastafari/allOpenedWholeWeaveChildCountsCommonDenominator.m'
       - 'tests/**'
+      # Independent source fixtures are verified by bounded workflows only.
+      - '!tests/fixtures/**'
       - '!tests/run_stage55_endpoint_counter_tests.m'
       - '!tests/run_stage55_endpoint_unrank_tests.m'
       - '!tests/run_stage55_all_open_chunk_tests.m'
