@@ -46,7 +46,7 @@
              (dagen/dagtelling groot)))
       (is (= (*' 2N (-' f (-' groot)))
              (dagen/dagtelling (-' groot))))
-      (is (= (+' 1N (*' 2N groot))
+      (is (= (+' groot 2N)
              (:distance (dagen/werk-tellingen (-' groot) 1N)))))))
 
 (deftest differentieel-kleine-matrix
