@@ -29,6 +29,13 @@
 
 Етап 3 закрито на основі Native CI 115/115, регресій 27/27 і 51/51 та `verify`: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41055649858.
 
-## Етап 4 — Discovery 02 (відкрито)
+## Етап 4 — Discovery 02 (завершено)
 
 Модуль `LegacyDayTag` навмисно обчислює парний тег `2·abs(d−F)` без виправлення непарності для d≥F. `Discovery02Dispatcher` додає шар після Patch 01, зберігає окремі `discovery02Input` та `discovery02LegacyOutput` і завершує роботу в `stoppedAtDiscovery02Boundary`. Лічильник `discovery02.calls` тільки спостерігає, а старі маршрути не викликають нового коду. Нормативний еталон парності існує тільки в тестах; жодного виправлення (Patch 02) або підрахунку п'яти компонентів на цьому етапі немає.
+
+
+Етап 4 закрито на підставі Native CI 48/48, регресій 115/115, 27/27, 51/51 та `verify`: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41092317475.
+
+## Етап 5 — Patch 02 (план)
+
+Майбутній `Patch02Adapter` має залишити історичний `LegacyDayTag.oldDayTag` незмінним, але додати непарну одиницю до його результату для днів від F включно. Новий маршрут буде після `makeDiscovery02Context`, з окремими полями та слідом. У цьому коміті немає коду Patch 02; це план розширення, а не оголошення його успіху.
