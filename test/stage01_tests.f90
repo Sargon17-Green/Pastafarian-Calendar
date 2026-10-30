@@ -29,8 +29,8 @@ program stage01_tests
   call test_permutations(failures)
   call test_ordered_families(failures)
   call test_human_authored_text_language(failures)
+  call test_selection_edges(failures)
   if (.not. bounded_smoke) then
-     call test_selection_edges(failures)
      call test_gate_gap_smoke(failures)
      call test_sauce_smoke(failures)
   end if
@@ -202,6 +202,15 @@ contains
     n=bi_add_small(m,1_int64)
     rank=choose_rank(stream,n)
     call require(bi_equal(rank,n),'Wide selection builds one wide value and accepts its exact rank',failures)
+
+    stream%first=m; stream%directionStep=-1
+    rank=choose_rank(stream,bi_from_int64(2_int64))
+    call require_bigint_text(rank,'2','Reverse short rejection advances around the same ring',failures)
+
+    stream%first=bi_one()
+    n=bi_add_small(m,1_int64)
+    rank=choose_rank(stream,n)
+    call require_bigint_text(rank,'3','Reverse wide selection preserves rank at M plus one',failures)
   end subroutine test_selection_edges
 
   subroutine test_gate_gap_smoke(failures)
