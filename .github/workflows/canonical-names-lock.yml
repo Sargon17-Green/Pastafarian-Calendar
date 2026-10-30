@@ -81,7 +81,7 @@ jobs:
           output="$(timeout --signal=TERM --kill-after=5s 30s build/stage01_tests gate-sauce-smoke 2>&1)"
           exit_code=$?
           set -e
-          printf '%s\\n' "$output"
+          printf '%s\n' "$output"
           if [[ "$exit_code" -ne 0 ]]; then
             echo "::error::Bounded Stage 1 gate/sauce smoke failed or timed out (exit $exit_code)"
             exit 1
