@@ -1,0 +1,56 @@
+name: Stage 1 Native Unicon (Kannada)
+
+on:
+  push:
+    branches:
+      - 'Unicon+ಕನ್ನಡ'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unicon-kn-stage01-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  stage01-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+
+      - name: Install native compiler prerequisites
+        run: sudo apt-get update && sudo apt-get install -y build-essential git
+
+      - name: Build genuine Unicon compiler (not Debian input method)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p native-logs
+          git clone --depth 1 https://github.com/uniconproject/unicon.git "$RUNNER_TEMP/unicon-src" > native-logs/clone.log 2>&1
+          (
+            cd "$RUNNER_TEMP/unicon-src"
+            ./configure --disable-graphics
+          ) > native-logs/configure.log 2>&1
+          make -C "$RUNNER_TEMP/unicon-src" -j2 > native-logs/make.log 2>&1
+          test -x "$RUNNER_TEMP/unicon-src/bin/unicon"
+
+      - name: Run Stage 1 Native suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/unicon-src/bin:$PATH"
+          command -v unicon | tee native-logs/compiler-path.txt
+          sh ./run_stage01.sh > native-logs/stage01.log 2>&1
+          cat native-logs/stage01.log
+          grep -Fxq PASS native-logs/stage01.log
+
+      - name: Preserve build and test logs on all outcomes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unicon-kn-stage01-native-logs
+          path: native-logs/
+          if-no-files-found: warn

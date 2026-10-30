@@ -227,6 +227,23 @@ procedure testBootstrapMonsterOwnership(testState)
     if \ctxB.semanticSnapshot then testFail(testState, "BASE_CONTEXT_SEMANTIC_SHARED")
 end
 
+procedure testCutletBoundary(testState)
+    local n
+    assertNumericEqual(testState, oracleCountCutletPartitions(4, 2, &null), 3, "CUTLET_UNCONSTRAINED_COUNT")
+    assertNumericEqual(testState, oracleCountCutletPartitions(4, 2, 4), 0, "CUTLET_TERMINAL_NOT_INTERIOR")
+    assertNumericEqual(testState, oracleCountCutletPartitions(7, 3, 7), 0, "CUTLET_TERMINAL_THREE_PARTS")
+    assertNumericEqual(testState, oracleCountCutletPartitions(1, 1, 1), 0, "CUTLET_SINGLE_PIECE_TERMINAL")
+    assertNumericEqual(testState, oracleCountCutletPartitions(1, 1, &null), 1, "CUTLET_SINGLE_PIECE_UNCONSTRAINED")
+    n := 1
+    while n <= 3 do {
+        assertNumericEqual(testState, oracleCountCutletPartitions(4, 2, n), 1, "CUTLET_INTERIOR_COUNT")
+        n := n + 1
+    }
+    assertListNumericEqual(testState, oracleUnrankCutletPartition(4, 2, 1, 1), [1,3], "CUTLET_INTERIOR_UNRANK_1")
+    assertListNumericEqual(testState, oracleUnrankCutletPartition(4, 2, 2, 1), [2,2], "CUTLET_INTERIOR_UNRANK_2")
+    assertListNumericEqual(testState, oracleUnrankCutletPartition(4, 2, 3, 1), [3,1], "CUTLET_INTERIOR_UNRANK_3")
+end
+
 procedure main()
     local testState, catalog
     testState := newTestState()
@@ -235,6 +252,7 @@ procedure main()
     testCatalog(testState, catalog)
     testArithmetic(testState)
     testCombinatorics(testState)
+    testCutletBoundary(testState)
     testSauceCore(testState)
     testOracleStateOwnership(testState)
     testBootstrapMonsterOwnership(testState)

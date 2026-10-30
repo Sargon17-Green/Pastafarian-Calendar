@@ -775,7 +775,7 @@ procedure oracleCutletPartitionCountRec(rem, slots, cumulative, hit, required, m
         nextCumulative := cumulative + x
         nextHit := hit
         if \required & hit = 0 then {
-            if nextCumulative = required then nextHit := 1
+            if nextCumulative = required & slots > 1 then nextHit := 1
             else if nextCumulative > required then {
                 x := x + 1
                 next
@@ -810,7 +810,7 @@ procedure oracleUnrankCutletPartition(gaps, k, required, rank1)
             nextCumulative := cumulative + x
             nextHit := hit
             if \required & hit = 0 then {
-                if nextCumulative = required then nextHit := 1
+                if nextCumulative = required & slots > 1 then nextHit := 1
                 else if nextCumulative > required then {
                     x := x + 1
                     next
