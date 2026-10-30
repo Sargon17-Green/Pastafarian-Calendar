@@ -8,6 +8,8 @@ on:
       - 'test/**'
       - '.github/workflows/cobol-chinese-stage04-discovery02.yml'
       - 'docs/STAGE_04_DISCOVERY_02_CROSS_BRANCH_CONTRACT_2026-10-30.md'
+      - 'DEVELOPMENT_STAGE.md'
+      - 'README.md'
   workflow_dispatch:
 
 permissions:
