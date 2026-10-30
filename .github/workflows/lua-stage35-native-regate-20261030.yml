@@ -1,0 +1,86 @@
+name: Lua Stage35 Native recheck before Stage36
+
+on:
+  push:
+    branches:
+      - 'Lua+Kreyòl-ayisyen'
+    paths:
+      - '.github/workflows/lua-stage35-native-regate-20261030.yml'
+      - 'docs/STAGE36_NEGATIVE_GATE_CHAIN_CONTRACT_2026-10-30.md'
+      - 'src/**'
+      - 'test/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage35-full-native-before-stage36:
+    if: github.ref_name == 'Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+    steps:
+      - name: Checkout exact branch commit, with history for source lock
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify preserved production and test source since historical Stage35 native
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          git cat-file -e 57269dd8e1fbdc4639bdfdf783b42c21092d26ff^{commit}
+          git diff --exit-code 57269dd8e1fbdc4639bdfdf783b42c21092d26ff HEAD -- src/ test/
+          test -f test/stage35_tests.lua
+          test -f test/normative_oracle.lua
+          test -f src/positive_gate_patch.lua
+          test -f docs/STAGE36_NEGATIVE_GATE_CHAIN_CONTRACT_2026-10-30.md
+      - name: Install native Lua 5.3 on Ubuntu
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+          command -v lua5.3
+          command -v luac5.3
+      - name: Stage35 native full suite and immutable evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage35-evidence
+          {
+            printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\n'
+            printf 'TESTED_SHA=%s\n' "$GITHUB_SHA"
+            printf 'SOURCE_BASELINE_SHA=57269dd8e1fbdc4639bdfdf783b42c21092d26ff\n'
+            printf 'STAGE36_OPENED=NO\n'
+          } > stage35-evidence/source.txt
+          lua5.3 -v >stage35-evidence/lua-version.txt 2>&1
+          luac5.3 -p test/stage35_tests.lua
+          set +e
+          timeout --signal=TERM --kill-after=10s 3600s \
+            lua5.3 test/stage35_tests.lua . \
+            >stage35-evidence/stdout.txt 2>stage35-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > stage35-evidence/exit-code.txt
+          tail -n 80 stage35-evidence/stdout.txt
+          cat stage35-evidence/stderr.txt >&2
+          if [ "$code" -ne 0 ] || [ -s stage35-evidence/stderr.txt ]; then
+            echo "::error::Stage35 Native failed (exit=$code or stderr nonempty)"
+            exit 1
+          fi
+          grep -Fxq 'PASS Stage 35 PATCH 17 full native Stage 1–35 suite' stage35-evidence/stdout.txt
+          printf '%s\n' 'STAGE35_FULL_NATIVE_RECHECK=PASS' >stage35-evidence/result.txt
+          cat stage35-evidence/result.txt >>"$GITHUB_STEP_SUMMARY"
+      - name: Save verified source and test logs for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-stage35-native-regate
+          path: stage35-evidence/
+          if-no-files-found: warn
+          retention-days: 30
