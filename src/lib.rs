@@ -2,6 +2,7 @@ use num_bigint::BigInt;
 use std::collections::BTreeMap;
 
 pub mod source_language_catalog;
+pub mod discovery01_legacy_save;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MonsterPhase {
@@ -68,6 +69,8 @@ pub struct MonsterContext {
     pub diagnostics: Vec<String>,
     pub warnings: Vec<String>,
     pub validation_failures: Vec<String>,
+    // Stage2: məhz bu invocation-a aid, xam və qəsdən səhv SAVE qalığı.
+    pub legacy_save_observation: Option<BigInt>,
 }
 
 impl MonsterContext {
@@ -87,6 +90,7 @@ impl MonsterContext {
             diagnostics: Vec::new(),
             warnings: Vec::new(),
             validation_failures: Vec::new(),
+            legacy_save_observation: None,
         }
     }
 }
