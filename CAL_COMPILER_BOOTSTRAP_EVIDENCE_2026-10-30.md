@@ -273,3 +273,26 @@ time-of-check/time-of-use modifications. CAL-4018 and CAL-4700 remain
 unapproved for execution; no compiler was run. The 99 Native QA groups
 and the 47-month test remain blocked. No changes were made to the 82
 calendar source files or to `main`.
+
+## 2026-10-30: source-only CI trigger root cause repaired
+
+The missing workflow run was traced to the `push.branches` pattern in
+`.github/workflows/cal-source-provenance.yml`. The literal feature branch
+name contains `+`, which is a special character in GitHub Actions glob
+patterns; the old pattern had been written without an escape. The workflow
+filter was changed from `"Plain-English-Programming+English"` to
+`'Plain-English-Programming\\+English'`, using YAML single quotes to
+preserve the literal backslash.
+
+- Fix commit: `f74b57100c51bc78843d985cee7ad66900246a9f`.
+- The GitHub Actions API **immediately reported a new push-triggered run**:
+  `41046088626` (`CAL source provenance (no executable)`), with the
+  expected fix commit as its `head_sha`.
+- At first observation the run and its `source-only` job were **queued**,
+  not completed. No result is claimed until job steps and conclusion
+  are inspected.
+- The original `paths` filter remains unchanged; no change to `main`.
+
+The source provenance job is Python-only and does not download or execute
+CAL binaries. The 99 Native QA groups and 47-month case remain blocked
+independently of this CI trigger correction.
