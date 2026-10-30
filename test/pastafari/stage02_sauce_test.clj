@@ -69,6 +69,31 @@
       (is (not= (bereken (-' stichting 2N) (+' stichting 3N))
                 (bereken (+' stichting 3N) (-' stichting 2N)))))))
 
+(deftest metamorfische-save-periodiciteit
+  (testing "Exacte SAUS-residuen blijven gelijk bij M-veelvouden in invoertellingen."
+    (let [stichting dagen/stichtingsdag
+          tellingen (dagen/werk-tellingen (-' stichting 2N)
+                                           (+' stichting 3N))
+          verborgen-waarden (verborgen/verborgen-druppels tellingen)
+          druppels (zichtbaar/zichtbare-druppels tellingen verborgen-waarden)
+          verwacht (saus/saus tellingen druppels)
+          veelvoud (reduce *' 1N (repeat 90 10N))
+          sprong (*' veelvoud stenen/modulus)]
+      ;; Dezelfde 46 druppelresiduen zijn bewust vastgezet:
+      ;; dit test uitsluitend de modulaire grens van de sauslaag.
+      (doseq [sleutel [:action :target :distance :connection]]
+        (is (= verwacht
+               (saus/saus (update tellingen sleutel +' sprong) druppels))
+            (str "Modulaire invariantie: " (name sleutel))))
+      (is (= verwacht
+             (saus/saus (-> tellingen
+                            (update :action +' sprong)
+                            (update :target +' (*' 7N sprong))
+                            (update :distance +' sprong)
+                            (update :connection +' (*' 11N sprong)))
+                       druppels))
+          "Gelijktijdige grote M-veelvouden moeten dezelfde zes kommen geven."))))
+
 (deftest ongeldige-invoer
   (let [werk (dagen/werk-tellingen dagen/stichtingsdag dagen/stichtingsdag)
         verborgen-waarden (verborgen/verborgen-druppels werk)
