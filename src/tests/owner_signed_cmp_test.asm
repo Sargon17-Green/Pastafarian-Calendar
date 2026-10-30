@@ -184,8 +184,16 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB+1], a
 
     ; 197: equal high bytes force comparison of bytes at bank boundary.
+    ; The previous invalid-length case leaves wOwnerOffset at $4000.
+    ; Select the valid high byte (logical offset $2000) explicitly,
+    ; rather than relying on stale scratch state across test cases.
     ld a, 197
     ld [wTestCase], a
+    xor a
+    ld [wOwnerOffset], a
+    ld [wOwnerOffset+2], a
+    ld a, $20
+    ld [wOwnerOffset+1], a
     ld a, 46
     ld [wOwnerRequest], a
     ld a, 1
