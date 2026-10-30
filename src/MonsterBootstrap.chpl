@@ -85,8 +85,8 @@ module MonsterBootstrap {
     dispatcher.dispatch(ctx);
     return ctx;
   }
-  // Stage 2, discovery 01: the historical defect is intentionally retained.
-  // This path does not compute or substitute a canonical calendar result.
+  // Етап 2, відкриття 01: історичний дефект навмисно збережено.
+  // Цей маршрут не обчислює й не підміняє канонічну календарну дату.
   record Discovery01Dispatcher {
     proc ref dispatch(ref ctx: MonsterContext, const ref candidateValue: bigint) {
       ctx.phase = MonsterPhase.discovery01LegacyRemainder;
