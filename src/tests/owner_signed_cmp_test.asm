@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..216: signed owner-scoped comparison.
+; Stage 1 native regression 191..218: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -642,6 +642,34 @@ RunOwnerSignedCmpTests::
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
     or a
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 218: positive and negative descriptors may alias the same live owner.
+    ; Signed ordering must use each descriptor's sign independently, without
+    ; mutating shared SRAM, either descriptor, or the 16 lease tags.
+    ld a, 218
+    ld [wTestCase], a
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+1], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
