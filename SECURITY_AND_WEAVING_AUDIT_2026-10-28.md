@@ -168,3 +168,38 @@ and soak are **not verified**. Next gather the read-only audit report,
 review any security signals, and only if independently cleared consider
 an isolated, minimal compile smoke test. No bypass of security protection
 and no premature Native PASS.
+
+## 2026-10-30: source-vs-installed differential needed before CAL execution
+
+Read-only audit evidence from `ELIEZER-GREEN-2` reported:
+
+- Installed CAL-4700 executable: 831,515 bytes, SHA-256
+  `D5D15179E7A07D7A8194C72B60473F28C1610CFAAEB6CC37BE9FAF3D43288614`.
+- ZIP central manifest: executable **831,488 bytes**, CRC32 `065DDF49`.
+- Executable is unsigned (Authenticode `NotSigned`), PE machine x86; the
+  local Defender scan found no matching detections but cannot establish safety.
+- Local installer evidence hash equals installed hash; this confirms only
+  installer-to-current-file stability, not correspondence to the ZIP manifest.
+- Original pinned ZIP is 936,482 bytes, SHA-256
+  `A1E7B9D96373562AEE7E1CBC8EBB5FCC237C46EB6D621FCF69D532FB8DE14165`.
+  Inspection of its raw ZIP directory reveals a 16-byte central-directory
+  offset mismatch and a 6-byte discrepancy between the first executable's
+  declared compressed size and the physical span to the next local header.
+
+The metadata inconsistency alone is **not** proof of malware and does not
+identify which version of the executable is correct. A separate read-only
+Windows diagnostic `CAL4700_SOURCE_INTEGRITY_AUDIT_v2.cmd` has been placed
+in the ChatGPT Library's `/Pending_User_Execution/` folder. It downloads
+only the pinned original ZIP to a temporary folder, verifies its SHA-256,
+tries direct raw DEFLATE extraction of the first entry, computes its CRC32,
+and compares the independently inflated bytes with the installed executable.
+It does not execute any EXE, install files, or change Defender settings.
+This new diagnostic is **not yet executed on Windows**; its source was
+reviewed statically and the archive-handling approach was exercised against
+an independently generated benign test ZIP.
+
+**Gate unchanged:** do not run CAL-4700 or CAL-4018. No Native QA PASS has
+been established and no fix for the historical 47-month `1260` result is
+claimed. Determine whether the ZIP itself is damaged or the installer
+altered the program before considering a new trusted source or an isolated
+compilation test.
