@@ -105,5 +105,58 @@ class SourceAuditTests(unittest.TestCase):
             self.assertFalse(data["compiler_executed"])
 
 
+    def test_fetch_uses_only_pinned_source_url(self):
+        class Response:
+            def __init__(self, url):
+                self.url = url
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                return False
+            def geturl(self):
+                return self.url
+            def read(self, n):
+                self.read_limit = n
+                return b"source only"
+        url = c.approved_source_url("release", "the compiler")
+        response = Response(url)
+        with patch.object(c, "urlopen", return_value=response) as mock_urlopen:
+            result = c.download_source("release", "the compiler")
+        mock_urlopen.assert_called_once_with(url, timeout=15)
+        self.assertEqual(response.read_limit, c.MAX_BYTES + 1)
+        self.assertEqual(result, b"source only")
+
+    def test_fetch_rejects_redirect(self):
+        class Redirect:
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                return False
+            def geturl(self):
+                return "https://not-approved.example/anything"
+            def read(self, n):
+                raise AssertionError("Redirected content must never be read")
+        with patch.object(c, "urlopen", return_value=Redirect()):
+            with self.assertRaisesRegex(ValueError, "Unapproved redirect"):
+                c.download_source("release", "the compiler")
+
+    def test_fetch_rejects_oversized_source(self):
+        class Large:
+            def __init__(self, url):
+                self.url = url
+            def __enter__(self):
+                return self
+            def __exit__(self, *args):
+                return False
+            def geturl(self):
+                return self.url
+            def read(self, n):
+                return b"x" * n
+        url = c.approved_source_url("release", "the compiler")
+        with patch.object(c, "urlopen", return_value=Large(url)):
+            with self.assertRaisesRegex(ValueError, "exceeds allowed size"):
+                c.download_source("release", "the compiler")
+
+
 if __name__ == "__main__":
     unittest.main()
