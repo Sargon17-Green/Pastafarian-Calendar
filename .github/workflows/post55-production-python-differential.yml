@@ -1,4 +1,4 @@
-name: Post55 Kotlin-Python bounded five-field diagnostic
+name: Post55 Kotlin-Python bounded six-witness five-field diagnostic
 
 on:
   push:
@@ -58,14 +58,14 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest discover -s soak -p test_post55_differential.py -v
-      - name: Compare five full-date components at five bounded FOUNDATION witnesses
+      - name: Compare five full-date components at six bounded FOUNDATION witnesses
         shell: bash
         run: |
           set -euo pipefail
           python3 soak/post55_differential.py \
             --kotlin-command "java -XX:ActiveProcessorCount=1 -Xmx1200m -Xss8m -cp $RUNNER_TEMP/production-date.jar pastafari.Post55ProductionDateBridge" \
             --python-command "python3 soak/python_turkce_bridge.py" \
-            --cases 5 --batch 1 --seed 55 --anchor-scope foundation --timeout-seconds 150 \
+            --cases 6 --batch 1 --seed 55 --anchor-scope foundation --timeout-seconds 150 \
             --kotlin-mode production \
             --kotlin-revision "$GITHUB_SHA" \
             --python-revision 7cb12bf355461e5a179e0deadb7365689288bf29 \
