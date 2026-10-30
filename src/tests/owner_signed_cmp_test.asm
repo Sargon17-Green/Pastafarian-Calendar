@@ -309,6 +309,109 @@ RunOwnerSignedCmpTests::
     cp 3
     jp nz, .fail
 
+
+    ; 203-206: compare must never modify operand metadata, bank ownership
+    ; tags, or bytes, including validation failures. Scratch and MBC5
+    ; mapping changes are intentionally not part of this invariant.
+    ; Establish two canonical one-byte operands in live, separate owners.
+    ld a, 203
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerOffset], a
+    ld [wOwnerOffset+1], a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    ld a, $7f
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+    ld a, 42
+    ld [wOwnerRequest], a
+    ld a, 1
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld a, 42
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+1], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 204: invalid sign must fail without changing any input/state.
+    ld a, 204
+    ld [wTestCase], a
+    ld a, 2
+    ld [wOwnerCmpSignA], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 205: invalid owner must fail without changing any input/state.
+    ld a, 205
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpSignA], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 206: length 16385 exceeds owner 46's two 8-KiB banks.
+    ; Validation may change its offset scratch, never operand length.
+    ld a, 206
+    ld [wTestCase], a
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    ld a, $40
+    ld [wOwnerCmpLenA+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
@@ -329,4 +432,88 @@ RunOwnerSignedCmpTests::
     call SRAMDisable
     ld a, $e0
     ld [wTestResult], a
+    ret
+
+
+; Snapshot exactly the 10 immutable operand bytes and all 16 lease tags.
+; The shared test buffers are not used by OwnerSignedCmp or its callees.
+OwnerCmpTestSnapshot:
+    ld hl, wOwnerCmpOwnerA
+    ld de, wExpected
+    ld b, 10
+.copyOperands:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .copyOperands
+    ld hl, wLeaseTable
+    ld de, wValue
+    ld b, 16
+.copyTags:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .copyTags
+    ret
+
+; Carry set = unchanged, carry clear = mutation detected.
+OwnerCmpTestCheckSnapshot:
+    ld hl, wOwnerCmpOwnerA
+    ld de, wExpected
+    ld b, 10
+.checkOperands:
+    ld a, [de]
+    cp [hl]
+    jr nz, .bad
+    inc hl
+    inc de
+    dec b
+    jr nz, .checkOperands
+    ld hl, wLeaseTable
+    ld de, wValue
+    ld b, 16
+.checkTags:
+    ld a, [de]
+    cp [hl]
+    jr nz, .bad
+    inc hl
+    inc de
+    dec b
+    jr nz, .checkTags
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Independently read both payload bytes after each valid/invalid compare.
+OwnerCmpTestCheckBytes:
+    xor a
+    ld [wOwnerOffset], a
+    ld [wOwnerOffset+1], a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $7f
+    jr nz, .bad
+    ld a, 42
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    cp 1
+    jr nz, .bad
+    scf
+    ret
+.bad:
+    and a
     ret
