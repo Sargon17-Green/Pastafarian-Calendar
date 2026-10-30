@@ -511,6 +511,66 @@ BEGIN {
     EXPECTED_WRAP=bi_sub(EXPECTED_WRAP,"12")
     expect_exact("wide original thirteenth+1 fourteen-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
 
+    # Fourteen-digit to fifteen-digit transition at original M=2^127-1.
+    # N=M^14 fits fourteen base-M digits; N=M^14+1 needs fifteen.
+    # Four ranks cross-checked with independent BigInt arithmetic.
+    WIDE_FOURTEENTH=bi_mul(WIDE_THIRTEENTH,M)
+    STREAM_FIRST=bi_sub(M,"14"); STREAM_STEP=1
+    choose_rank_wide(WIDE_FOURTEENTH)
+    EXPECTED_FOURTEENTH=bi_sub(WIDE_FOURTEENTH,WIDE_THIRTEENTH)
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_TWELFTH,2))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_ELEVENTH,3))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_TENTH,4))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_NINTH,5))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_EIGHTH,6))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_SEVENTH,7))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_SIXTH,8))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_FIFTH,9))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_FOURTH,10))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_CUBE,11))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(WIDE_SQUARE,12))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,bi_mul_small(M,13))
+    EXPECTED_FOURTEENTH=bi_sub(EXPECTED_FOURTEENTH,"14")
+    expect_exact("wide original fourteenth fourteen-digit boundary", CHOSEN_RANK, EXPECTED_FOURTEENTH)
+
+    WIDE_N=bi_add(WIDE_FOURTEENTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original fourteenth+1 fifteen-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=bi_sub(WIDE_FOURTEENTH,bi_mul_small(WIDE_THIRTEENTH,13))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_TWELFTH,12))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_ELEVENTH,11))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_TENTH,10))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_NINTH,9))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_EIGHTH,8))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SEVENTH,7))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SIXTH,6))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_FIFTH,5))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_FOURTH,4))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_CUBE,3))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(WIDE_SQUARE,2))
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(M,2))
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"15")
+    expect_exact("wide original fourteenth+1 fifteen-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_mul_small(WIDE_THIRTEENTH,12)
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_TWELFTH,11))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_ELEVENTH,10))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_TENTH,9))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_NINTH,8))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_EIGHTH,7))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_SEVENTH,6))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_SIXTH,5))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_FIFTH,4))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_FOURTH,3))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_CUBE,2))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(WIDE_SQUARE,1))
+    EXPECTED_WRAP=bi_add(EXPECTED_WRAP,M)
+    EXPECTED_WRAP=bi_sub(EXPECTED_WRAP,"13")
+    expect_exact("wide original fourteenth+1 fifteen-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
