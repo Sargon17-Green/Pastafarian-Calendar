@@ -584,19 +584,19 @@ OwnerCmpTestCheckBytes:
     call OwnerByteRead
     ld a, [wOwnerStatus]
     or a
-    jr nz, .bad
+    jp nz, .bad
     ld a, [wOwnerByteValue]
     cp $7f
-    jr nz, .bad
+    jp nz, .bad
     ld a, 42
     ld [wOwnerRequest], a
     call OwnerByteRead
     ld a, [wOwnerStatus]
     or a
-    jr nz, .bad
+    jp nz, .bad
     ld a, [wOwnerByteValue]
     cp 1
-    jr nz, .bad
+    jp nz, .bad
     ; Check the next payload byte in BOTH live operands too:
     ; this catches mutation of B's zero high byte in case 210.
     ld a, 1
@@ -609,19 +609,59 @@ OwnerCmpTestCheckBytes:
     call OwnerByteRead
     ld a, [wOwnerStatus]
     or a
-    jr nz, .bad
+    jp nz, .bad
     ld a, [wOwnerByteValue]
     or a
-    jr nz, .bad
+    jp nz, .bad
     ld a, 42
     ld [wOwnerRequest], a
     call OwnerByteRead
     ld a, [wOwnerStatus]
     or a
-    jr nz, .bad
+    jp nz, .bad
     ld a, [wOwnerByteValue]
     or a
-    jr nz, .bad
+    jp nz, .bad
+    ; Non-adjacent sentinels at the 8-KiB bank edge.
+    ; A owner 46: [8191]=$33, [8192]=$01; B owner 42: [8191]=$00.
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $1f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $33
+    jp nz, .bad
+    ld a, 42
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .bad
+    ld a, [wOwnerByteValue]
+    or a
+    jp nz, .bad
+    xor a
+    ld [wOwnerOffset], a
+    ld [wOwnerOffset+2], a
+    ld a, $20
+    ld [wOwnerOffset+1], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .bad
+    ld a, [wOwnerByteValue]
+    cp 1
+    jp nz, .bad
     scf
     ret
 .bad:

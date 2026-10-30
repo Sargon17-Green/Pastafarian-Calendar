@@ -109,7 +109,11 @@ def main():
     assert m.read_byte(42, 1) == (0, 0), "B high byte must be zero"
     assert compare_read_only(m, (46, 0, 1), (42, 0, 2)) == 3
     assert m.read_byte(42, 1) == (0, 0), "B high byte changed"
-    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=4 payload_and_tags=IMMUTABLE")
+    # Bank-edge read-only sentinels mirrored from ROM cases 203..210.
+    assert m.read_byte(46, 8191) == (0, 0x33), "A bank-end sentinel changed"
+    assert m.read_byte(42, 8191) == (0, 0x00), "B bank-end sentinel changed"
+    assert m.read_byte(46, 8192) == (0, 0x01), "A next-bank sentinel changed"
+    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=4 boundary_sentinels=3 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 
