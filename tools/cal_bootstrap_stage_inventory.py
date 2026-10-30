@@ -24,6 +24,33 @@ SOURCE_NAMES = frozenset((
 ))
 BINARY_NAMES = tuple("cal-4700's son.exe" + str(i) for i in range(2, 6))
 SHA = re.compile(r"[0-9a-f]{40}\Z")
+PINNED_STAGE_TREES = (
+    "79eda0a2b7a1e8861cfae4a49680819079c23a3c",
+    "cc6ff6f4e9b0f17b2495e3822ada180af98bc1b6",
+    "3abe2a4ea0ec0f8cf43898193771d712ba995882",
+    "c6fc6adadc1b6324bd484a433e1279db5c14ac23",
+    "77e0ec276db7fbcb8b1d6315b4e26d08081f8057",
+    "33a2a2a974f80525fe8518c8028fc7dd1195f781",
+    "06cc5724cf2efd9b16b78bdf05e32d6e952768a5",
+    "9e97ceaae1cd92d385c10f5c03ee2d55b5b90e1a",
+)
+PINNED_COMPILER_BLOBS = (
+    "1cdc47a3ad273e66a76d4a451bc9e79f1237bd4d",
+    "f454af1822f57a1fbc743cc80128c5aea578ac4f",
+    "0781c345751fa6728ddb8a870a15c187e0097ab6",
+    "0c4820c4c93d55326c953de3a82c09902949c3da",
+    "b032d0cc2d3ad85ce9ab309866b0ecde43a60c7a",
+    "2fefa2df621f2bccacc95ecdaf91d2e95a461d8e",
+    "4aa0a6e7a692c306b574d05e8f5cf0045d74cca4",
+    "d8da5ace27c8131fa152312b4262e5792d0d4898",
+)
+PINNED_BINARY_BLOBS = (
+    "6de1969837d67fa54ede65b73d356628bd0b18cb",
+    "d90c5c4a0ac852e2543c1e514c3bd6decdf58a49",
+    "d4d0578fc81bbfe86a4b22ef2c86ff7e3d67e290",
+    "3ae3311a2326e8f4a446f62a53fa09d7dcbfca3f",
+)
+
 
 
 class ManifestError(ValueError):
@@ -79,6 +106,8 @@ def validate(manifest: dict) -> dict:
         tree = stage["tree_sha"]
         insist(isinstance(tree, str) and SHA.fullmatch(tree),
                "invalid tree SHA at " + label)
+        insist(tree == PINNED_STAGE_TREES[number - 1],
+               "upstream stage tree changed at " + label)
         insist(tree not in trees, "duplicate stage tree at " + label)
         trees.add(tree)
         insist(stage["lexicon_tree"] == LEXICON_TREE, "lexicon drift at " + label)
@@ -91,6 +120,8 @@ def validate(manifest: dict) -> dict:
         for filename, obj in sources.items():
             check_object(obj, label + "/" + filename)
         compiler_sha = sources["the compiler"]["sha"]
+        insist(compiler_sha == PINNED_COMPILER_BLOBS[number - 1],
+               "compiler blob replaced at " + label)
         insist(compiler_sha not in compilers, "compiler stage reused at " + label)
         compilers.add(compiler_sha)
         stable_sources = {k: v for k, v in sources.items()
@@ -115,6 +146,8 @@ def validate(manifest: dict) -> dict:
                "stage binary list mismatch at " + label)
         for filename, obj in binaries.items():
             check_object(obj, label + "/" + filename)
+            insist(obj["sha"] == PINNED_BINARY_BLOBS[BINARY_NAMES.index(filename)],
+                   "binary blob replaced at " + label + "/" + filename)
             if filename in previous_binaries:
                 insist(obj == previous_binaries[filename],
                        "previous binary changed at " + label + "/" + filename)
