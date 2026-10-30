@@ -84,6 +84,17 @@ class SourceAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "symlink"):
                 c.read_directory_source(d, "release", "the compiler")
 
+    def test_refuse_symlinked_ancestor_above_source_root(self):
+        # The root itself is a normal directory, but a parent component
+        # is a symlink. Refusing only root/group/file would miss this.
+        with tempfile.TemporaryDirectory() as td:
+            d = Path(td)
+            (d / "real" / "sources" / "release").mkdir(parents=True)
+            (d / "real" / "sources" / "release" / "the compiler").write_text("demo")
+            (d / "alias").symlink_to(d / "real", target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlink"):
+                c.read_directory_source(d / "alias" / "sources", "release", "the compiler")
+
     def test_offline_full_audit_and_json_output(self):
         with tempfile.TemporaryDirectory() as td:
             d = Path(td)
