@@ -1,0 +1,91 @@
+name: SQL Tamil Stage 2 Stone States Native PostgreSQL
+
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'sql/04_stage02_stone_states.sql'
+      - 'sql/test/60_stage02_stone_states_tests.sql'
+      - '.github/workflows/sql-tamil-stage02-stones-native.yml'
+      - 'sql/03_stage02_production_core.sql'
+      - 'sql/00_schema.sql'
+      - 'sql/01_source_language_catalog.sql'
+      - 'sql/02_monster_bootstrap.sql'
+      - 'sql/test/40_production_isolation.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sql-tamil-stage02-stones-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  stone-states:
+    name: PostgreSQL 17 - 46 exact stone states
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PG_CONTAINER: sql-tamil-stones-postgres
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+
+      - name: Start isolated PostgreSQL 17 database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name "$PG_CONTAINER" --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres "$PG_CONTAINER" pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then docker logs "$PG_CONTAINER"; exit 1; fi
+          mkdir -p "$RUNNER_TEMP/sql-tamil-stones-logs"
+          docker exec -u postgres "$PG_CONTAINER" postgres --version | tee "$RUNNER_TEMP/sql-tamil-stones-logs/versions.txt"
+          printf 'Git SHA: %s\n' "$GITHUB_SHA" | tee -a "$RUNNER_TEMP/sql-tamil-stones-logs/versions.txt"
+
+      - name: Verify stone recurrence and boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres "$PG_CONTAINER" \
+            psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/test/60_stage02_stone_states_tests.sql \
+            -c 'SELECT 1 / ((count(*) = 23 AND bool_and(ok))::integer) AS stone_23_of_23 FROM stage02_stone_assertions' \
+            2>&1 | tee "$RUNNER_TEMP/sql-tamil-stones-logs/stones.txt"
+
+      - name: Verify production isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres "$PG_CONTAINER" \
+            psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/test/40_production_isolation.sql \
+            -c 'SELECT 1 / ((count(*) = 4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM stage01_production_isolation_assertions' \
+            2>&1 | tee "$RUNNER_TEMP/sql-tamil-stones-logs/isolation.txt"
+
+      - name: Preserve native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-stage02-stones-native-${{ github.run_id }}
+          path: ${{ runner.temp }}/sql-tamil-stones-logs/
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Stop isolated database
+        if: always()
+        shell: bash
+        run: |
+          docker rm --force "$PG_CONTAINER" 2>/dev/null || true

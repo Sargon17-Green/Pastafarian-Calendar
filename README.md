@@ -66,3 +66,7 @@ PostgreSQL 17.6-இல் புதிய தரவுத்தளங்கள�
 6. `sql/test/40_production_isolation.sql`
 
 ஒவ்வொரு `psql` அழைப்பும் `-X -v ON_ERROR_STOP=1` பயன்படுத்த வேண்டும். புதிய கோப்பில் **37** அடிப்படை கணக்குச் சோதனைகள் உள்ளன; தனிமைப்படுத்தலுக்கான முந்தைய **4** சோதனைகளும் சோதிக்கப்பட வேண்டும். `.github/workflows/sql-tamil-stage02-core-native.yml` மூலம் அந்த புதிய தொகுப்பு PostgreSQL 17-இல் இயக்கப்படும்படி அமைக்கப்பட்டுள்ளது. **Stage 2 Core Native PostgreSQL 17.11: 37/37 primary computations and 4/4 isolation checks PASS**, run [41032411855](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41032411855), checked source SHA `8dbe132b175a5d464ee64612d550a11d23177404`. நிலையான சான்று: [`artifacts/stage-02/POSTGRESQL_NATIVE_CI_41032411855.md`](artifacts/stage-02/POSTGRESQL_NATIVE_CI_41032411855.md). இது முழு நாள்காட்டி வெளியீடு PASS என்பதைச் சுட்டவில்லை.
+
+## இரண்டாம் கட்டத்தின் அடுத்த முதன்மை துணைப்பணி: 46 கல் நிலைகள்
+
+`sql/04_stage02_stone_states.sql` இப்போது முதன்மை `stone_state`, `stone_value` செயற்கூறுகள் மூலம் ஐந்து விதைகள் கொண்ட 46 நிலைகளை தூய PostgreSQL `numeric` கணக்கில் உருவாக்குகிறது. சோதனை ஒப்புநிலை பெயர்வெளி இதில் ஏற்றப்படவோ அழைக்கப்படவோ இல்லை. அடுத்த Native சரிபார்ப்பு `.github/workflows/sql-tamil-stage02-stones-native.yml`: **23** நிலை/எல்லை சோதனைகளும் **4** தனிமை சோதனைகளும். இந்தப் புதிய ரன் முடிவை ஆய்வு செய்யும்வரை PASS எனக் குறிக்க வேண்டாம்; முழு 5-கூறு நாள்காட்டி இன்னும் முடிக்கப்படவில்லை.
