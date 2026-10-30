@@ -412,6 +412,91 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckBytes
     jp nc, .fail
 
+
+    ; 207-210: malformed SECOND operand must not mutate either operand,
+    ; any of the 16 lease tags, or SRAM payload. A stays canonical 0x7f.
+    ; Re-establish A after case 206's intentionally invalid length.
+    ld a, 207
+    ld [wTestCase], a
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld a, 42
+    ld [wOwnerCmpOwnerB], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+1], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 2
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 208: B owner 45 was released in case 198; A remains live.
+    ld a, 208
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignB], a
+    ld a, 45
+    ld [wOwnerCmpOwnerB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 209: B owner 42 has one 8192-byte bank, not 8193 bytes.
+    ld a, 209
+    ld [wTestCase], a
+    ld a, 42
+    ld [wOwnerCmpOwnerB], a
+    ld a, 1
+    ld [wOwnerCmpLenB], a
+    ld a, $20
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 210: B length=2 with zero high byte is noncanonical.
+    ; B[0]=1 and B[1]=0; readback checks both bytes.
+    ld a, 210
+    ld [wTestCase], a
+    ld a, 2
+    ld [wOwnerCmpLenB], a
+    xor a
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
@@ -511,6 +596,31 @@ OwnerCmpTestCheckBytes:
     jr nz, .bad
     ld a, [wOwnerByteValue]
     cp 1
+    jr nz, .bad
+    ; Check the next payload byte in BOTH live operands too:
+    ; this catches mutation of B's zero high byte in case 210.
+    ld a, 1
+    ld [wOwnerOffset], a
+    xor a
+    ld [wOwnerOffset+1], a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    or a
+    jr nz, .bad
+    ld a, 42
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    or a
     jr nz, .bad
     scf
     ret
