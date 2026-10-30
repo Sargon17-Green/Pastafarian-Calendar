@@ -59,6 +59,8 @@ wOwnerTag:: ds 1
 wOwnerStatus:: ds 1
 wOwnerAllocated:: ds 1
 wOwnerBanks:: ds 13
+wOwnerSelectIndex:: ds 1
+wOwnerSelectedBank:: ds 1
 wLeaseTestNext:: ds 1
 wDayOffset:: ds 4
 wDayCount:: ds 5
