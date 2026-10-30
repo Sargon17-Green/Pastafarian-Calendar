@@ -1,14 +1,5 @@
-name: COBOL Chinese Stage06 DISCOVERY03 Native
+name: COBOL Chinese Stage06 DISCOVERY03 Manual Diagnostic
 on:
-  push:
-    branches:
-      - 'COBOL+简体中文'
-    paths:
-      - 'src/**'
-      - 'test/**'
-      - '.github/workflows/cobol-chinese-stage06-discovery03.yml'
-      - 'docs/STAGE_06_DISCOVERY_03_CONTRACT_2026-10-31.md'
-      - 'DEVELOPMENT_STAGE.md'
   workflow_dispatch:
 
 permissions:
