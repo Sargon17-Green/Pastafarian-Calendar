@@ -27,7 +27,11 @@ object Stage54Tests {
   }
   private def rejectArg(label:String)(body: => Unit):Unit={
     var caught=false
-    try body catch{case _:IllegalArgumentException=>caught=true}
+    try body catch{
+      case _:IllegalArgumentException=>caught=true
+      case e:WrappedMonsterError if e.getCause.isInstanceOf[IllegalArgumentException] =>
+        caught=true
+    }
     truth(caught,label)
   }
   private def rejectState(label:String)(body: => Unit):Unit={
