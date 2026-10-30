@@ -81,17 +81,7 @@ Assert-StageEqual -Expected 58 -Actual $again.legacyOrderMemoryWriteCount -Name 
 $monsterText=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkeleton.ps1')
 $d12Text=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Discovery12.ps1')
 $patch12Text=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Patch12.ps1')
-if ($meta -match '(?m)^CURRENT_STAGE=25\s*
-Assert-StageTrue -Condition (($monsterText+$d12Text) -notmatch 'Invoke-NormSauce|Get-NormNextBowlInDrop46Order|biasedLegacyPick') -Name 'No oracle or later patch in production'
-Write-Host 'STAGE24_CASES=4320'
-Write-Host "STAGE24_EXPECTED_RED=$red"
-Write-Host "STAGE24_MATCHES=$match"
-Write-Host "STAGE24_WRAP_RED=$wrapRed"
-$ok=Complete-StageTestRun
-if (-not $ok) {exit 1}
-Write-Host 'STAGE24_RESULT=PASS'
-exit 0
-) {
+if ($meta -match '(?m)^CURRENT_STAGE=25\s*$') {
     Assert-StageTrue -Condition (($monsterText -match 'Invoke-Discovery11OverwritableOrderMemory[\s\S]*Invoke-Patch12PositionalSuccessor') -and ($patch12Text -match 'Invoke-Discovery12NumericSuccessor')) -Name 'Stage25 production delegates numeric scar via Patch12'
 } else {
     Assert-StageTrue -Condition ($monsterText -match 'Invoke-Discovery11OverwritableOrderMemory[\s\S]*Invoke-Discovery12NumericSuccessor') -Name 'Stage24 production direct numeric scar'
