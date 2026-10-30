@@ -39,10 +39,13 @@ pub fn calculate_save(input: BigInt) -> Result<SavePatchObservation, MonsterErro
     let mut manager = MonsterManager::default();
     manager.dispatcher_mut().register(SavePatch01);
     let context = manager.execute_bootstrap_shell(input.clone(), input.clone())?;
-    let save_value = context.save_observation.clone().ok_or_else(|| MonsterError {
-        code: MonsterErrorCode::InvalidState,
-        message: "PATCH01: SAVE müşahidəsi yoxdur.".to_owned(),
-    })?;
+    let save_value = context
+        .save_observation
+        .clone()
+        .ok_or_else(|| MonsterError {
+            code: MonsterErrorCode::InvalidState,
+            message: "PATCH01: SAVE müşahidəsi yoxdur.".to_owned(),
+        })?;
     Ok(SavePatchObservation {
         input,
         save_value,

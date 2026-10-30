@@ -33,10 +33,16 @@ fn exact_save_boundaries_through_production_dispatcher() {
         assert_eq!(observed.context.save_observation, Some(expected));
         assert_eq!(observed.context.legacy_save_observation, None);
         assert_eq!(observed.context.metrics.get("patch01.save.calls"), 1);
-        assert_eq!(observed.context.metrics.get("dispatcher.handler.completed"), 1);
+        assert_eq!(
+            observed.context.metrics.get("dispatcher.handler.completed"),
+            1
+        );
         assert_eq!(observed.context.phase, MonsterPhase::Complete);
         assert_eq!(observed.context.status, MonsterStatus::Complete);
-        assert_eq!(observed.context.branch_trace, vec!["PATCH01:NORMATIVE-SAVE"]);
+        assert_eq!(
+            observed.context.branch_trace,
+            vec!["PATCH01:NORMATIVE-SAVE"]
+        );
     }
     println!("STAGE03_PATCH01_BOUNDARY_OK=8");
 }
