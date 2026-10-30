@@ -1,8 +1,4 @@
-> **当前状态（2026-10-30）**：Stage 2 / DISCOVERY 01 的低层生产分发发现已通过 Native EXPECTED_RED 验收；状态与运行证据见
-> [DEVELOPMENT_STAGE.md](DEVELOPMENT_STAGE.md)、
-> [docs/STAGE_02_DISCOVERY_01.md](docs/STAGE_02_DISCOVERY_01.md)、
-> [STAGE_02_EXECUTION_STATUS.txt](STAGE_02_EXECUTION_STATUS.txt)。
-> Native 验收：<https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41032602303>；完整五字段计算管线尚未覆盖。下文仅叙述 Stage 1。
+> **当前状态（2026-10-30）**：Stage 3 / PATCH 01 的低层 SAVE-PATCH 已按 8 个 Native 边界/对照案例验收（6 PATCH PASS、2 CONTROL PASS、0 unexpected failures），Stage1 与 Stage2 回归成功。正式状态见 [DEVELOPMENT_STAGE.md](DEVELOPMENT_STAGE.md) 和 [docs/STAGE_03_PATCH_01.md](docs/STAGE_03_PATCH_01.md)。证据：<https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040504858>。完整五字段计算尚未实现；Stage4/DISCOVERY02 的具体目标尚待权威契约定义。下文为 Stage1 历史说明。
 
 # 第 1 阶段 — 已完成
 

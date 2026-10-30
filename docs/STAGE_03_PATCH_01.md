@@ -19,5 +19,14 @@ M、2M、3M、M+1、0、-M、-1、M-1。
 Stage1 181/181 和 Stage2 EXPECTED_RED 回归同时保持通过。
 
 ## 当前状态
-代码已准备；Native CI 结果尚待确认，不能提前宣称 Stage 3 GREEN。
+代码与验证已经按本阶段规定验收；这仅证明低层生产分发器 SAVE-PATCH 路径，不能冒称完整五字段日期计算。
 既存 FOREIGN_LANGUAGE_USAGE 违规没有消除。
+
+## 2026-10-30 Stage 3 Native 验收证据
+- 来源 HEAD：`37c08546036a81177d3860c8560e2def4d7441dc`；独立 GitHub Actions：<https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040504858>，4/4 jobs completed/success（verify、Stage1 Native、Stage2 Discovery Native、Stage3 PATCH Native）。
+- Stage3 GnuCOBOL 严格编译成功；8 个实际 production 路由均为 `PATCH01:SAVE-PATCH`，涵盖 M、2M、3M、M+1、0、-M、-1、M-1。
+- `STAGE3_PATCH_PASS=00006`；`STAGE3_CONTROL_PASS=00002`；`STAGE3_UNEXPECTED_FAILURES=00000`；`RESULT=PASS_STAGE3_PATCH_NATIVE`。
+- 测试代码在全部释放后调用 `BIG-INTEGER-SERVICE/HEAP-LIVE`，仅当返回状态为零且 live allocations 为零时允许通过；该防漏断言已包含在零意外失败结果中。
+- Native log artifact：<https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040504858/artifacts/12969864067>。
+- Stage2 老路径的 EXPECTED_RED 仍保留；Stage1 Native 同次回归通过。既有 `FOREIGN_LANGUAGE_USAGE` 历史违规保持不变；GCC `_FORTIFY_SOURCE` 提示未被掩盖。
+- Stage 3 本范围验收完成，`LAST_COMPLETED_STAGE=3`。Stage4/DISCOVERY02 的具体缺陷、预期红灯及对照场景未在此分支阶段契约中明确；不凭空开工或称 Stage4 GREEN。
