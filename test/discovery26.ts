@@ -58,6 +58,7 @@ const maker=()=>new Discovery26FullHandler(
  new Patch25FullHandler(new Discovery25FullHandler(chain())));
 const full=discoverLegacyMonthEnd(maker(),fixture.request);
 const legal=full.historical.historical.historical.corrected.legalWeaving;
+const actualLastMonthOccurrences=legal.filter(month=>month===full.guessed.monthId).length;
 assert(full.context.status==="DISCOVERY_26_RECORDED"&&
  full.historical.context.status==="PATCH_25_APPLIED"&&
  full.historical.historical.context.status==="DISCOVERY_25_RECORDED"&&
@@ -66,7 +67,8 @@ assert(full.context.status==="DISCOVERY_26_RECORDED"&&
  legal.length===5349&&
  full.guessed.targetYearDay===5349&&full.guessed.monthId===44&&
  full.guessed.guessedLastMonthOccurrence&&suffixOracle(legal,5349)&&
- full.historical.corrected.correctedDayInMonth===5&&
+ actualLastMonthOccurrences===123&&
+ full.historical.corrected.correctedDayInMonth===actualLastMonthOccurrences&&
  full.actualPredecessorCalls===61&&
  full.actualSharedWrites===3538n&&full.additionalNativeQueries===0&&
  full.context.metrics.get("discovery26.additional_native_queries")===0n,
