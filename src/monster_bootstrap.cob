@@ -67,6 +67,19 @@ MAIN.
                 MOVE "READY" TO CTX-STATUS
                 MOVE "基础调度器、验证器、错误包装器和指标外壳已就绪。" TO LK-MESSAGE
             END-IF
+        WHEN "OLD-REMAINDER"
+            *> 真实生产分发入口。DISCOVERY 01 只暴露旧余数，不做 SAVE 修补。
+            MOVE "Discovery01" TO CTX-CURRENT-HANDLER
+            PERFORM VALIDATE-BASE-CONTEXT
+            IF WS-STATUS = 0
+                CALL "LEGACY-OLD-REMAINDER" USING
+                    LK-CALCULATION-DAY LK-TARGET-DAY WS-STATUS
+                IF WS-STATUS = 0
+                    MOVE "DISCOVERY01:OLD-REMAINDER" TO LK-MESSAGE
+                ELSE
+                    MOVE "旧余数计算失败，输出槽必须为空。" TO CTX-LAST-ERROR
+                END-IF
+            END-IF
         WHEN OTHER
             MOVE 20 TO WS-STATUS
             MOVE "基础调度器收到未知操作。" TO CTX-LAST-ERROR

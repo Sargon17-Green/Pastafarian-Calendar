@@ -1,3 +1,9 @@
+> **当前状态（2026-10-30）**：Stage 2 / DISCOVERY 01 已创建候选实现；状态与运行证据见
+> [DEVELOPMENT_STAGE.md](DEVELOPMENT_STAGE.md)、
+> [docs/STAGE_02_DISCOVERY_01.md](docs/STAGE_02_DISCOVERY_01.md)、
+> [STAGE_02_EXECUTION_STATUS.txt](STAGE_02_EXECUTION_STATUS.txt)。
+> 下文仅叙述已经验收的 Stage 1。
+
 # 第 1 阶段 — 已完成
 
 本目录是 `COBOL + 简体中文` 实现线的第 1 阶段 Bootstrap。第 2 阶段尚未开始。

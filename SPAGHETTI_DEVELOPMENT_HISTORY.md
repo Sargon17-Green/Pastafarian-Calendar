@@ -224,3 +224,14 @@ Fix 38 只修改 guard。FULL 启动前仍要求至少 1024 MiB available RAM；
 重新按 Stage 1 约束核对后，正式验收恢复到原要求：同线 COBOL test-only oracle、exact arithmetic、fixtures、exact ordered virtual families、small-space force-brute、lexicographic unrank、production/oracle separation、state ownership 与 GREEN suite。规范允许 exact DP / memoization，并没有规定对最重真实 witness 重复 20 次。
 
 因此不删除 `oracle_stress_tests.cob`，也不伪造它已完成；它作为历史压力诊断继续存在。改变的是 **门的分类**：20× 从 completion gate 降为 optional diagnostic。现有真实证据为 GnuCOBOL 严格编译 PASS、181/181 bootstrap PASS、错误路径/cache reset/arena baseline ownership tests PASS。`LAST_COMPLETED_STAGE` 据此更新为 1，`SEMANTIC_STATE_OWNER_VALIDATED` 更新为 YES；第 2 阶段仍未开始。
+
+
+## 2026-10-30 — Stage 2 / DISCOVERY 01 候选
+
+用户批准从已接受的 Stage 1 继续。旧余数的有意历史偏差通过 MONSTER-BOOTSTRAP
+生产分发器的 OLD-REMAINDER 操作接入；计算由独立的 COBOL production
+LEGACY-OLD-REMAINDER 执行，不借用任何 test-only oracle。M、2M、3M 应返回原始 0，
+而规范 SAVE 应给 M；M+1 均为 1。这个阶段只建立缺陷，绝不增加 savePatch。
+
+原生严格编译与 EXPECTED_RED 回归尚待 GitHub Actions 证据，不以提交动作代替 PASS。
+原有 production 尚无完整五字段日历路径，因此不声称已在那里触发旧缺陷；此欠项独立可查。
