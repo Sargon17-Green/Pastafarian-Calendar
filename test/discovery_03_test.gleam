@@ -8,8 +8,7 @@ import reference/core
 
 fn legacy(calculation_day: Int, target_day: Int) -> Int {
   let context = bootstrap.new_context(calculation_day, target_day)
-  let assert Ok(output) =
-    discovery_03_distance.dispatch_discovery_03(context)
+  let assert Ok(output) = discovery_03_distance.dispatch_discovery_03(context)
   output.legacy_distance
 }
 
@@ -57,8 +56,7 @@ pub fn discovery_03_independent_contexts_test() {
     )
   let second = bootstrap.new_context(100, 99)
   let second = bootstrap.MonsterContext(..second, diagnostics: ["DUA"])
-  let assert Ok(first_out) =
-    discovery_03_distance.dispatch_discovery_03(first)
+  let assert Ok(first_out) = discovery_03_distance.dispatch_discovery_03(first)
   let assert Ok(second_out) =
     discovery_03_distance.dispatch_discovery_03(second)
 

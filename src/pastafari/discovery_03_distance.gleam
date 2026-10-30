@@ -4,10 +4,7 @@
 import pastafari/bootstrap
 
 pub type Discovery03Output {
-  Discovery03Output(
-    context: bootstrap.MonsterContext,
-    legacy_distance: Int,
-  )
+  Discovery03Output(context: bootstrap.MonsterContext, legacy_distance: Int)
 }
 
 pub fn old_distance(calculation_day: Int, target_day: Int) -> Int {
