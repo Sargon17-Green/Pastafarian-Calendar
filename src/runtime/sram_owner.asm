@@ -15,6 +15,9 @@
 SECTION "Owned groups of MBC5 SRAM bank leases", ROM0
 
 OwnerLeaseClearOutput:
+    ; Any allocation or release invalidates a previously returned bank handle.
+    ld a, $ff
+    ld [wOwnerSelectedBank], a
     xor a
     ld [wOwnerAllocated], a
     ld hl, wOwnerBanks
@@ -160,6 +163,9 @@ OwnerLeaseRelease::
     jr z, .absent
     xor a
     ld [wOwnerStatus], a
+    ; Successful release must not leave freed scratch SRAM mapped.
+    ; Switch to permanently reserved bank 0 only after every scrub.
+    call SRAMSelectBank
     ret
 .invalid:
     ld a, 2
