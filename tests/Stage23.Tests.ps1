@@ -27,10 +27,12 @@ $expectedSignature = Get-Stage23Signature $expected
 $corrected = Get-Patch11OrderAt46 -Context $ctx
 $legacy = Get-Discovery11LegacyQueriedOrder -Context $ctx
 
-if ($metadata -match '(?m)^CURRENT_STAGE=25\s*
+if ($metadata -match '(?m)^CURRENT_STAGE=25\s*$') {
+    Assert-StageEqual 'PATCH12_COMPLETE' $ctx.status 'Stage25 production preserves Patch11'
+} elseif ($metadata -match '(?m)^CURRENT_STAGE=24\s*$') {
     Assert-StageEqual 'DISCOVERY12_EXPECTED_RED' $ctx.status 'Stage24 production preserves Patch11'
 } else {
-    Assert-StageEqual 'PATCH11_COMPLETE' $ctx.status 'Patch 11 production dispatch'
+    Assert-StageEqual 'PATCH11_COMPLETE' $ctx.status 'Patch11 production dispatch'
 }
 Assert-StageEqual 'DROP46_ORDER_LATCH_ACTIVE' $ctx.patch11Status 'Patch 11 active'
 Assert-StageEqual 1 $ctx.patch11InvocationCount 'One drop-46 latch'
@@ -75,128 +77,6 @@ Assert-StageTrue -Condition ($d11Text -match 'Invoke-Patch11OrderAt46Latch') -Na
 Assert-StageTrue -Condition ($p11Text -match 'Get-Discovery11LegacyQueriedOrder') -Name 'Patch queries the old scar first'
 Assert-StageTrue -Condition ($monsterText -match 'Get-Patch11OrderAt46') -Name 'Production route queries the corrected latch'
 Assert-StageTrue -Condition (($monsterText+$d11Text+$p11Text) -notmatch 'biasedLegacyPick') -Name 'No Stage26 code'
-Assert-StageTrue -Condition (($monsterText+$d11Text+$p11Text) -notmatch 'Get-NormBowlOrderFromDrop|Get-NormCalendarDate') -Name 'Production independent from test oracle'
-
-Write-Host 'PATCH11_LATCH_WRITE_INDEX=46'
-Write-Host 'PATCH11_LEGACY_MEMORY_WRITES=58'
-Write-Host 'PATCH11_EXPECTED_RED_PRESERVED=3'
-Write-Host 'PATCH11_NORMATIVE_GREEN=6'
-Write-Host 'PATCH11_PATCH12=ABSENT'
-Write-Host 'STAGE23_REPOSITORY_STATE=GREEN'
-$ok = Complete-StageTestRun
-if (-not $ok) { exit 1 }
-Write-Host 'STAGE23_RESULT=PASS'
-exit 0
-) {
-    Assert-StageEqual 'PATCH12_COMPLETE' $ctx.status 'Stage25 production preserves Patch11'
-} elseif ($metadata -match '(?m)^CURRENT_STAGE=24\s*
-    Assert-StageEqual 'DISCOVERY12_EXPECTED_RED' $ctx.status 'Stage24 production preserves Patch11'
-} else {
-    Assert-StageEqual 'PATCH11_COMPLETE' $ctx.status 'Patch 11 production dispatch'
-}
-Assert-StageEqual 'DROP46_ORDER_LATCH_ACTIVE' $ctx.patch11Status 'Patch 11 active'
-Assert-StageEqual 1 $ctx.patch11InvocationCount 'One drop-46 latch'
-Assert-StageEqual 46 $ctx.patch11CapturedAtWrite 'Captured exactly at write 46'
-Assert-StageEqual 58 $ctx.legacyOrderMemoryWriteCount 'All historical writes retained'
-Assert-StageEqual 'stir' $ctx.legacyOrderMemoryLastSource.kind 'Historical final source remains stir'
-Assert-StageEqual 12 $ctx.legacyOrderMemoryLastSource.index 'Historical final source is stir 12'
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $ctx.orderAt46Latch) 'Latched order matches independent normative unranking'
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $corrected) 'Corrected semantic query matches normative unranking'
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $ctx.patch11CorrectedOrder) 'Production uses corrected semantic query'
-Assert-StageEqual (Get-Stage23Signature $legacy) (Get-Stage23Signature $ctx.patch11LegacyQueriedOrder) 'Old wrong query physically preserved'
-Assert-StageEqual (Get-Stage23Signature $legacy) (Get-Stage23Signature $ctx.legacyQueriedOrder) 'Historical production query still overwritten'
-$red = 0
-foreach ($pos in @(1,2,6)) {
-    if ([int]$legacy[$pos-1] -ne [int]$expected[$pos-1]) { $red++ }
-}
-Assert-StageEqual 3 $red 'Exactly three historical red positions remain'
-Assert-StageEqual 47 $ctx.patch09InvocationCount '46 bowl rounds plus preserved production probe'
-Assert-StageEqual 47 $ctx.patch10InvocationCount '46 snapshot rounds plus preserved production probe'
-Assert-StageEqual 1 $ctx.discovery11InvocationCount 'Full historical pass retained'
-Assert-StageEqual 'SNAPSHOT_BOWL_UPDATE_PATCH_ACTIVE' $ctx.patch10Status 'Predecessor Patch 10 remains active'
-Assert-StageTrue -Condition (-not [object]::ReferenceEquals($ctx.orderAt46Latch,$ctx.legacyOverwritableOrderMemory)) -Name 'Latch does not alias general memory'
-Assert-StageTrue -Condition (-not [object]::ReferenceEquals($corrected,$ctx.orderAt46Latch)) -Name 'Query result does not alias latch'
-$corrected[0] = 99
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $ctx.orderAt46Latch) 'Returned result mutation does not change latch'
-$ctx.legacyOverwritableOrderMemory[0] = 98
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $ctx.orderAt46Latch) 'Legacy memory mutation does not change latch'
-
-$clean = New-BaseMonsterContext -CalculationDay $foundation -TargetDay $target
-Assert-StageTrue -Condition ($null -eq $clean.orderAt46Latch) -Name 'No cross-invocation latch leak'
-Assert-StageEqual 0 $clean.patch11InvocationCount 'No cross-invocation latch count leak'
-Assert-StageTrue -Condition ($null -eq $clean.patch11LegacyQueriedOrder) -Name 'No cross-invocation legacy query leak'
-
-$again = Invoke-CalendarDateSpaghetti -CalculationDay $foundation -TargetDay $target
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $again.patch11CorrectedOrder) 'Deterministic second invocation'
-Assert-StageEqual 58 $again.legacyOrderMemoryWriteCount 'Deterministic historical write count'
-
-$monsterText = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkeleton.ps1')
-$d11Text = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Discovery11.ps1')
-$p11Text = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Patch11.ps1')
-Assert-StageTrue -Condition ($d11Text -match 'Invoke-Patch11OrderAt46Latch') -Name 'Latch is physically captured in drop path'
-Assert-StageTrue -Condition ($p11Text -match 'Get-Discovery11LegacyQueriedOrder') -Name 'Patch queries the old scar first'
-Assert-StageTrue -Condition ($monsterText -match 'Get-Patch11OrderAt46') -Name 'Production route queries the corrected latch'
-Assert-StageTrue -Condition (($monsterText+$d11Text+$p11Text) -notmatch 'biasedLegacyPick|Patch12|PATCH12') -Name 'No Stage25 or Stage26 code'
-Assert-StageTrue -Condition (($monsterText+$d11Text+$p11Text) -notmatch 'Get-NormBowlOrderFromDrop|Get-NormCalendarDate') -Name 'Production independent from test oracle'
-
-Write-Host 'PATCH11_LATCH_WRITE_INDEX=46'
-Write-Host 'PATCH11_LEGACY_MEMORY_WRITES=58'
-Write-Host 'PATCH11_EXPECTED_RED_PRESERVED=3'
-Write-Host 'PATCH11_NORMATIVE_GREEN=6'
-Write-Host 'PATCH11_PATCH12=ABSENT'
-Write-Host 'STAGE23_REPOSITORY_STATE=GREEN'
-$ok = Complete-StageTestRun
-if (-not $ok) { exit 1 }
-Write-Host 'STAGE23_RESULT=PASS'
-exit 0
-) {
-    Assert-StageEqual 'DISCOVERY12_EXPECTED_RED' $ctx.status 'Stage24 production preserves Patch11'
-} else {
-    Assert-StageEqual 'PATCH11_COMPLETE' $ctx.status 'Patch 11 production dispatch'
-}
-Assert-StageEqual 'DROP46_ORDER_LATCH_ACTIVE' $ctx.patch11Status 'Patch 11 active'
-Assert-StageEqual 1 $ctx.patch11InvocationCount 'One drop-46 latch'
-Assert-StageEqual 46 $ctx.patch11CapturedAtWrite 'Captured exactly at write 46'
-Assert-StageEqual 58 $ctx.legacyOrderMemoryWriteCount 'All historical writes retained'
-Assert-StageEqual 'stir' $ctx.legacyOrderMemoryLastSource.kind 'Historical final source remains stir'
-Assert-StageEqual 12 $ctx.legacyOrderMemoryLastSource.index 'Historical final source is stir 12'
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $ctx.orderAt46Latch) 'Latched order matches independent normative unranking'
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $corrected) 'Corrected semantic query matches normative unranking'
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $ctx.patch11CorrectedOrder) 'Production uses corrected semantic query'
-Assert-StageEqual (Get-Stage23Signature $legacy) (Get-Stage23Signature $ctx.patch11LegacyQueriedOrder) 'Old wrong query physically preserved'
-Assert-StageEqual (Get-Stage23Signature $legacy) (Get-Stage23Signature $ctx.legacyQueriedOrder) 'Historical production query still overwritten'
-$red = 0
-foreach ($pos in @(1,2,6)) {
-    if ([int]$legacy[$pos-1] -ne [int]$expected[$pos-1]) { $red++ }
-}
-Assert-StageEqual 3 $red 'Exactly three historical red positions remain'
-Assert-StageEqual 47 $ctx.patch09InvocationCount '46 bowl rounds plus preserved production probe'
-Assert-StageEqual 47 $ctx.patch10InvocationCount '46 snapshot rounds plus preserved production probe'
-Assert-StageEqual 1 $ctx.discovery11InvocationCount 'Full historical pass retained'
-Assert-StageEqual 'SNAPSHOT_BOWL_UPDATE_PATCH_ACTIVE' $ctx.patch10Status 'Predecessor Patch 10 remains active'
-Assert-StageTrue -Condition (-not [object]::ReferenceEquals($ctx.orderAt46Latch,$ctx.legacyOverwritableOrderMemory)) -Name 'Latch does not alias general memory'
-Assert-StageTrue -Condition (-not [object]::ReferenceEquals($corrected,$ctx.orderAt46Latch)) -Name 'Query result does not alias latch'
-$corrected[0] = 99
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $ctx.orderAt46Latch) 'Returned result mutation does not change latch'
-$ctx.legacyOverwritableOrderMemory[0] = 98
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $ctx.orderAt46Latch) 'Legacy memory mutation does not change latch'
-
-$clean = New-BaseMonsterContext -CalculationDay $foundation -TargetDay $target
-Assert-StageTrue -Condition ($null -eq $clean.orderAt46Latch) -Name 'No cross-invocation latch leak'
-Assert-StageEqual 0 $clean.patch11InvocationCount 'No cross-invocation latch count leak'
-Assert-StageTrue -Condition ($null -eq $clean.patch11LegacyQueriedOrder) -Name 'No cross-invocation legacy query leak'
-
-$again = Invoke-CalendarDateSpaghetti -CalculationDay $foundation -TargetDay $target
-Assert-StageEqual $expectedSignature (Get-Stage23Signature $again.patch11CorrectedOrder) 'Deterministic second invocation'
-Assert-StageEqual 58 $again.legacyOrderMemoryWriteCount 'Deterministic historical write count'
-
-$monsterText = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkeleton.ps1')
-$d11Text = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Discovery11.ps1')
-$p11Text = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Patch11.ps1')
-Assert-StageTrue -Condition ($d11Text -match 'Invoke-Patch11OrderAt46Latch') -Name 'Latch is physically captured in drop path'
-Assert-StageTrue -Condition ($p11Text -match 'Get-Discovery11LegacyQueriedOrder') -Name 'Patch queries the old scar first'
-Assert-StageTrue -Condition ($monsterText -match 'Get-Patch11OrderAt46') -Name 'Production route queries the corrected latch'
-Assert-StageTrue -Condition (($monsterText+$d11Text+$p11Text) -notmatch 'biasedLegacyPick|Patch12|PATCH12') -Name 'No Stage25 or Stage26 code'
 Assert-StageTrue -Condition (($monsterText+$d11Text+$p11Text) -notmatch 'Get-NormBowlOrderFromDrop|Get-NormCalendarDate') -Name 'Production independent from test oracle'
 
 Write-Host 'PATCH11_LATCH_WRITE_INDEX=46'

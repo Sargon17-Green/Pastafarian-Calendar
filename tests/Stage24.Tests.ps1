@@ -47,7 +47,8 @@ foreach($bad in $invalid) { try {[void](oldNextBowlFixedName -QueriedBowlId $bad
 Assert-StageEqual -Expected $invalid.Count -Actual $reject -Name 'All invalid IDs rejected'
 $f=Get-NormFoundationDay
 $ctx=Invoke-CalendarDateSpaghetti -CalculationDay $f -TargetDay ($f+3)
-Assert-StageEqual -Expected $(if ($meta -match '(?m)^CURRENT_STAGE=25\s*
+$expectedStatus = if ($meta -match '(?m)^CURRENT_STAGE=25\s*$') { 'PATCH12_COMPLETE' } else { 'DISCOVERY12_EXPECTED_RED' }
+Assert-StageEqual -Expected $expectedStatus -Actual $ctx.status -Name 'Real production route'
 Assert-StageEqual -Expected 58 -Actual $ctx.legacyOrderMemoryWriteCount -Name '46+12 memory writes'
 Assert-StageEqual -Expected 46 -Actual $ctx.patch11CapturedAtWrite -Name 'Correct latch capture'
 Assert-StageEqual -Expected 1 -Actual $ctx.patch11InvocationCount -Name 'Patch11 once'
@@ -81,48 +82,6 @@ $monsterText=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkelet
 $d12Text=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Discovery12.ps1')
 Assert-StageTrue -Condition ($monsterText -match 'Invoke-Discovery11OverwritableOrderMemory[\s\S]*Invoke-Discovery12NumericSuccessor') -Name 'Real production path order'
 Assert-StageTrue -Condition (($monsterText+$d12Text) -notmatch 'Invoke-NormSauce|Get-NormNextBowlInDrop46Order|biasedLegacyPick') -Name 'No oracle or later patch in production'
-Write-Host 'STAGE24_CASES=4320'
-Write-Host "STAGE24_EXPECTED_RED=$red"
-Write-Host "STAGE24_MATCHES=$match"
-Write-Host "STAGE24_WRAP_RED=$wrapRed"
-$ok=Complete-StageTestRun
-if (-not $ok) {exit 1}
-Write-Host 'STAGE24_RESULT=PASS'
-exit 0
-) {'PATCH12_COMPLETE'} else {'DISCOVERY12_EXPECTED_RED'}) -Actual $ctx.status -Name 'Real production route'
-Assert-StageEqual -Expected 58 -Actual $ctx.legacyOrderMemoryWriteCount -Name '46+12 memory writes'
-Assert-StageEqual -Expected 46 -Actual $ctx.patch11CapturedAtWrite -Name 'Correct latch capture'
-Assert-StageEqual -Expected 1 -Actual $ctx.patch11InvocationCount -Name 'Patch11 once'
-Assert-StageEqual -Expected 1 -Actual $ctx.discovery12InvocationCount -Name 'Discovery12 once'
-Assert-StageEqual -Expected 1 -Actual $ctx.discovery12QueriedBowlId -Name 'Query ID one'
-Assert-StageEqual -Expected 2 -Actual $ctx.discovery12ProductionResult -Name 'Production returns historical numeric two'
-Assert-StageEqual -Expected 2 -Actual $ctx.discovery12OldNumericNext -Name 'Wrong result logged'
-Assert-StageEqual -Expected 'HISTORICAL_NUMERIC_SUCCESSOR_EXPECTED_RED' -Actual $ctx.discovery12Status -Name 'Historical RED status'
-Assert-StageEqual -Expected (Get-Signature24 $ctx.orderAt46Latch) -Actual (Get-Signature24 $ctx.discovery12OrderAt46Snapshot) -Name 'Saved latch witness'
-Assert-StageTrue -Condition (-not [object]::ReferenceEquals($ctx.orderAt46Latch,$ctx.discovery12OrderAt46Snapshot)) -Name 'No latch alias'
-Assert-StageEqual -Expected 47 -Actual $ctx.patch09InvocationCount -Name 'Patch09 regression'
-Assert-StageEqual -Expected 47 -Actual $ctx.patch10InvocationCount -Name 'Patch10 regression'
-$normNext=Get-NormNextBowlInDrop46Order -SauceResult ([pscustomobject]@{OrderAtDrop46=$ctx.orderAt46Latch}) -QueriedBowlId 1
-Assert-StageEqual -Expected ([int]$ctx.orderAt46Latch[([Array]::IndexOf($ctx.orderAt46Latch,1)+1)%6]) -Actual $normNext -Name 'Oracle only used in test'
-$invalidCaller=0
-foreach($bad in @(0,7,'2')) {try {[void](Invoke-Discovery12NumericSuccessor -Context $ctx -QueriedBowlId $bad)} catch {$invalidCaller++}}
-Assert-StageEqual -Expected 3 -Actual $invalidCaller -Name 'Invalid caller queries fail'
-Assert-StageEqual -Expected 1 -Actual $ctx.discovery12InvocationCount -Name 'Invalid calls cannot mutate context'
-$unchanged=Get-Signature24 $ctx.orderAt46Latch
-$ctx.discovery12OrderAt46Snapshot[0]=99
-Assert-StageEqual -Expected $unchanged -Actual (Get-Signature24 $ctx.orderAt46Latch) -Name 'Snapshot isolation'
-$clean=New-BaseMonsterContext -CalculationDay $f -TargetDay ($f+3)
-Assert-StageTrue -Condition ($null -eq $clean.discovery12OrderAt46Snapshot) -Name 'No witness leak'
-Assert-StageTrue -Condition ($null -eq $clean.discovery12OldNumericNext) -Name 'No next-value leak'
-Assert-StageEqual -Expected 0 -Actual $clean.discovery12InvocationCount -Name 'No counter leak'
-$again=Invoke-CalendarDateSpaghetti -CalculationDay $f -TargetDay ($f+3)
-Assert-StageEqual -Expected 1 -Actual $again.discovery12InvocationCount -Name 'Independent second invocation'
-Assert-StageEqual -Expected $unchanged -Actual (Get-Signature24 $again.orderAt46Latch) -Name 'Deterministic latch'
-Assert-StageEqual -Expected 58 -Actual $again.legacyOrderMemoryWriteCount -Name 'Second full 58-write path'
-$monsterText=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkeleton.ps1')
-$d12Text=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Discovery12.ps1')
-Assert-StageTrue -Condition ($monsterText -match 'Invoke-Discovery11OverwritableOrderMemory[\s\S]*Invoke-Discovery12NumericSuccessor') -Name 'Real production path order'
-Assert-StageTrue -Condition (($monsterText+$d12Text) -notmatch 'Invoke-NormSauce|Get-NormNextBowlInDrop46Order|biasedLegacyPick|Patch12') -Name 'No oracle or later patch in production'
 Write-Host 'STAGE24_CASES=4320'
 Write-Host "STAGE24_EXPECTED_RED=$red"
 Write-Host "STAGE24_MATCHES=$match"
