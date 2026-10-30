@@ -1,0 +1,51 @@
+name: MATLAB Stage55 Middle Rank Fourth Day Native
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_inner_cursor_resume_fourth.m'
+      - '.github/workflows/matlab-stage55-middle-fourth-day-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: stage55-middle-fourth-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  native-middle-fourth:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout pinned branch commit
+        uses: actions/checkout@v4
+      - name: Download certified third-day cursor
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-middle-rank-resume-41028866638
+          run-id: 41028866638
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Check third-day cursor SHA256
+        run: |
+          echo 'ace93f07ba132027edb6c2eb750b1c6e509efb2ead7839b560c94139f4f96504  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_3.json' | sha256sum -c -
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Exactly unrank and recount fourth day
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tests'); run_stage55_real_year_inner_cursor_resume_fourth
+      - name: Preserve source/result checkpoint and log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-middle-fourth-day-native
+          path: |
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_FOURTH_NATIVE.log
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_3.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_4.json
+          if-no-files-found: warn
+          retention-days: 30
