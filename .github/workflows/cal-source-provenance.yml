@@ -10,6 +10,8 @@ on:
       - "tools/cal_bootstrap_stage_manifest.json"
       - "tools/cal_bootstrap_stage_inventory.py"
       - "tools/test_cal_bootstrap_stages.py"
+      - "tools/cal_static_api_surface.py"
+      - "tools/test_cal_static_api_surface.py"
       - ".github/workflows/cal-source-provenance.yml"
   workflow_dispatch:
 
@@ -31,6 +33,8 @@ jobs:
         run: python3 tools/cal_bootstrap_stage_inventory.py
       - name: Verify twelve pinned text sources; do not fetch ZIP or EXE
         run: python3 tools/cal_source_provenance.py --fetch --output "$RUNNER_TEMP/cal-source-provenance.json"
+      - name: Audit Windows API capabilities in pinned text sources only
+        run: python3 tools/cal_static_api_surface.py --fetch --output "$RUNNER_TEMP/cal-api-surface.json"
       - name: Summarize non-execution gate
         run: |
           echo "Only textual provenance was checked." >> "$GITHUB_STEP_SUMMARY"
