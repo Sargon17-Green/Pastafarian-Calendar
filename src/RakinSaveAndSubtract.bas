@@ -97,6 +97,46 @@ Public Function RakinSaveExact(ByVal signedInput As String) As String
     RakinSaveExact = remainder
 End Function
 
+' VBA InputBox returns at most 254 characters (Microsoft Learn).
+' Demand an explicit total length and use <=128 characters per prompt.
+' A canceled or shortened chunk aborts; no silent loss of high digits.
+' https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/inputbox-function
+Private Function PromptExactUnsignedOperand(ByVal operandLabel As String) As String
+    Dim rawLength As String, firstPart As String, secondPart As String
+    Dim digitsWanted As Long, firstCount As Long
+    rawLength = Trim$(InputBox("How many ASCII decimal digits in " & operandLabel & _
+        " (1..256)? Cancel to stop.", "Rakin / " & operandLabel & " / length"))
+    If rawLength = "" Then Exit Function
+    If Len(rawLength) > 3 Or Not AllDigits(rawLength) Then
+        MsgBox "Length must be an integer from 1 to 256.", vbExclamation
+        Exit Function
+    End If
+    digitsWanted = CLng(rawLength)
+    If digitsWanted < 1 Or digitsWanted > MAX_DIGITS Then
+        MsgBox "Length must be an integer from 1 to 256.", vbExclamation
+        Exit Function
+    End If
+    firstCount = digitsWanted
+    If firstCount > 128 Then firstCount = 128
+    firstPart = Trim$(InputBox("Enter the FIRST " & CStr(firstCount) & _
+        " digits of " & operandLabel & " (exactly this many).", _
+        "Rakin / " & operandLabel & " / first chunk"))
+    If Len(firstPart) <> firstCount Or Not AllDigits(firstPart) Then
+        MsgBox "First chunk is not the required length or has non-ASCII digits.", vbExclamation
+        Exit Function
+    End If
+    If digitsWanted > 128 Then
+        secondPart = Trim$(InputBox("Enter the FINAL " & CStr(digitsWanted - 128) & _
+            " digits of " & operandLabel & " (exactly this many).", _
+            "Rakin / " & operandLabel & " / final chunk"))
+        If Len(secondPart) <> digitsWanted - 128 Or Not AllDigits(secondPart) Then
+            MsgBox "Final chunk is missing, shortened or has non-ASCII digits.", vbExclamation
+            Exit Function
+        End If
+    End If
+    PromptExactUnsignedOperand = firstPart & secondPart
+End Function
+
 Private Sub WriteLabel(ByVal doc As Document, ByVal label As String)
     Dim p As Range
     Set p = doc.Range(doc.Content.End - 1, doc.Content.End - 1)
@@ -138,9 +178,9 @@ End Sub
 
 Public Sub RakinSignedAndSaveReport()
     Dim a As String, b As String, doc As Document, note As Range
-    a = Trim$(InputBox("Rakin: unsigned A (1..256 decimal digits)", "Rakin / A"))
+    a = PromptExactUnsignedOperand("A")
     If a = "" Then Exit Sub
-    b = Trim$(InputBox("Rakin: unsigned B (1..256 decimal digits)", "Rakin / B"))
+    b = PromptExactUnsignedOperand("B")
     If b = "" Then Exit Sub
     If Not AllDigits(a) Or Not AllDigits(b) Then
         MsgBox "Use only decimal digits 0..9, at most 256.", vbExclamation
