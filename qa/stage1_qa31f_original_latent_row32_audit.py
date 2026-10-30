@@ -64,6 +64,13 @@ def verified_source(path):
     need(literals(rows[29][90:150])==[-140,9]
          and literals(rows[29][151:211])==[-201,3],
          "row29 x landing vectors changed")
+    # Original source read-only static zero initializers and the input-only put.
+    need(rows[2][202] == ord("p") and rows[26][344] == ord("p")
+         and rows[5][60] == ord("p") and rows[5][13] == ord("~")
+         and literals(rows[2][155:202]) == [0, 3, 49]
+         and literals(rows[26][297:344]) == [0, 3, 49]
+         and literals(rows[5][14:60]) == [0, 49],
+         "original zero put / stdin put ownership geometry drift")
     return True
 
 def steps_at(trace, x, y, op):
@@ -88,6 +95,8 @@ def audit(shards,qa31a_path,source):
          and near["observed_differential_control_states"]==0
          and q["stage1_complete"] is False,"QA31A finite baseline drift")
     counts=collections.Counter()
+    last_zero_put=collections.Counter()
+    intervening_input_puts=collections.Counter()
     all_labels=set()
     for shard,p in enumerate(shards):
         need(digest(pathlib.Path(p).read_bytes())==SHARDS[shard],
@@ -122,12 +131,38 @@ def audit(shards,qa31a_path,source):
                          "signed original j successor not (90,29)")
                     need(len(x0)==1 and len(read)==1 and read[0][1][0]<step[0],
                          "missing original read / x150 witness")
+                    # Finite physical lineage only: genuine signed opcode coordinates.
+                    # This is not a direct memory-value measurement or an all-input proof.
+                    p202=steps_at(trace,202,2,"p")
+                    p344=steps_at(trace,344,26,"p")
+                    need(len(p202)==1 and p202[0][0]<i
+                         and all(t<i for t,_ in p344),
+                         "missing or late original startup zero put")
+                    # No recorded storage-offset/stack-stack mutation can rebase
+                    # the literal physical destinations between startup and this gate.
+                    need(not any(s[6]==0 and s[5] in (ord("{"),ord("}"),ord("u"))
+                                 for s in trace[p202[0][0]:i]),
+                         "unaccounted ownership / storage-offset instruction")
+                    origin=p344[-1] if p344 else p202[0]
+                    later_puts=[s for s in trace[origin[0]+1:i]
+                                if s[5]==ord("p") and s[6]==0]
+                    need(all(s[1:3]==(60,5) for s in later_puts),
+                         "other actual put before original row29 gate")
+                    # p(60,5) has literal target (0,49), not the gate's (3,49).
+                    need(not p344 or not later_puts,
+                         "unexpected put after row26 zero initializer")
+                    last_zero_put[(rec["valid"],origin[1][1:3])]+=1
+                    intervening_input_puts[len(later_puts)]+=1
                 else:
                     need(not read and not x0,"control observed without row29 jump")
                 counts[(rec["valid"],bool(j))]+=1
     need(len(all_labels)==48 and counts=={(True,True):27,
          (False,True):9,(False,False):12},
          "Original QA20 corpus distribution drift")
+    need(last_zero_put == {(True,(344,26)):27, (False,(344,26)):7,
+                           (False,(202,2)):2}
+         and intervening_input_puts == {0:34,1:1,2:1},
+         "QA20 original pre-j zero put lineage drift")
     return {
         "schema":"qa31f-latent-row32-original-native-offline-v1",
         "signed_original_native_qa20_cases":48,
@@ -138,6 +173,13 @@ def audit(shards,qa31a_path,source):
         "target_10_32_observed":0,"valid_j29":27,"invalid_j29":9,
         "near_l1_9_control_states":5,"near_differential_states":0,
         "conditional_m_1_route":"j89 -> x151 -> x211 -> (10,32)",
+        "qa20_pre_j_startup_zero_put_202_2":36,
+        "qa20_last_zero_put_344_26":34,
+        "qa20_last_zero_put_202_2":2,
+        "qa20_intervening_input_put_60_5_cases":2,
+        "qa20_intervening_other_puts_to_gate_after_zero":0,
+        "qa20_recorded_storage_offset_rebases_pre_j":0,
+        "qa20_ownership_scope":"finite signed STEP sites plus pinned original static operands",
         "m_equals_1_natural_input_witness_proven":False,
         "global_reachability_proven":False,"stage1_complete":False,
     }
