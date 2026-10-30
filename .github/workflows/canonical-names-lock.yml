@@ -52,7 +52,7 @@ jobs:
         run: |
           if ! dart format --output=none --set-exit-if-changed .; then
             dart format --output=write .
-            for file in bin/stage1_tests.dart lib/src/source_language_catalog.dart test_support/normative_reference.dart tool/generate_stage1_fixtures.dart; do
+            for file in bin/stage1_tests.dart lib/src/source_language_catalog.dart test_support/normative_reference.dart tool/generate_stage1_fixtures.dart bin/stage2_discovery01.dart; do
               echo "DART_CAPTURE_BEGIN:${file}"
               base64 -w0 "${file}"
               printf '\n'
