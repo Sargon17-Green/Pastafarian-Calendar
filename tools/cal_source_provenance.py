@@ -113,6 +113,28 @@ def audit(read_source) -> dict:
     return result
 
 
+def read_directory_source(root: Path, group: str, name: str) -> bytes:
+    """Read only an allowed source path and reject links at every component."""
+    if group not in SOURCES or name not in FILES:
+        raise ValueError("Only the 12 pinned text-source paths are permitted")
+    group_dir = root / group
+    path = group_dir / name
+    for part in (root, group_dir, path):
+        if part.is_symlink():
+            raise ValueError(f"Refusing symlink in source path: {part}")
+    if not path.is_file():
+        raise ValueError(f"Refusing missing/non-file source: {path}")
+    with path.open("rb") as stream:
+        data = stream.read(MAX_BYTES + 1)
+    if len(data) > MAX_BYTES:
+        raise ValueError("Source file exceeds allowed size")
+    return data
+
+
+def write_report(path: Path, result: dict) -> None:
+    path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     choice = parser.add_mutually_exclusive_group(required=True)
@@ -123,22 +145,27 @@ def main(argv=None) -> int:
     if args.fetch:
         reader = download_source
     else:
-        def reader(group, name):
-            path = args.directory / group / name
-            if path.is_symlink() or not path.is_file():
-                raise ValueError(f"Refusing missing/symlinked source: {path}")
-            with path.open("rb") as f:
-                b = f.read(MAX_BYTES + 1)
-            if len(b) > MAX_BYTES:
-                raise ValueError("Source file exceeds allowed size")
-            return b
+        reader = lambda group, name: read_directory_source(args.directory, group, name)
     try:
         result = audit(reader)
         if args.output:
-            args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            write_report(args.output, result)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except (OSError, URLError, ValueError) as exc:
+        # Overwrite any stale PASS report at the requested output path.
+        failure = {
+            "kind": "SOURCE_PROVENANCE_ONLY_NOT_A_COMPILER_SECURITY_APPROVAL",
+            "all_12_text_sources_verified": False,
+            "compiler_executed": False,
+            "native_qa_99_pass": False,
+            "error": str(exc),
+        }
+        if args.output:
+            try:
+                write_report(args.output, failure)
+            except OSError as report_error:
+                print("FAILED_TO_WRITE_REPORT: " + str(report_error), file=sys.stderr)
         print("SOURCE_AUDIT_FAILED: " + str(exc), file=sys.stderr)
         return 2
 
