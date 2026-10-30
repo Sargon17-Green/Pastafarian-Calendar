@@ -46,10 +46,13 @@ jobs:
             cutlet_status=$?
             sh build_and_run_bounded_composition_bounds.sh
             composition_status=$?
+            sh build_and_run_bigint_bounds.sh
+            bigint_status=$?
             echo "STAGE01_EXIT=$stage01_status"
             echo "CUTLET_BOUNDS_EXIT=$cutlet_status"
             echo "COMPOSITION_BOUNDS_EXIT=$composition_status"
-            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ]; then
+            echo "BIGINT_BOUNDS_EXIT=$bigint_status"
+            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ] || [ "$bigint_status" -ne 0 ]; then
               exit 1
             fi
           } 2>&1 | tee evidence/stage01-native-fpc.log
