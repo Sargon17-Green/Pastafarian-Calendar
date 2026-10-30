@@ -1,0 +1,67 @@
+name: Post55 gate/rank partial independence diagnostic
+
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - '.github/workflows/post55-gate-rank-partial-independence.yml'
+      - 'soak/audit_gate_gap_rank_independence.py'
+      - 'soak/test_audit_gate_gap_rank_independence.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-rank-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PASTAFARIAN_PYTHON_SRC: ${{ github.workspace }}/python-source/src
+    steps:
+      - name: Checkout this Kotlin branch at triggering SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Checkout pinned Python sauce source
+        uses: actions/checkout@v4
+        with:
+          repository: Sargon17-Green/Pastafarian-Calendar
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: python-source
+          persist-credentials: false
+      - name: Prove checkout IDs and run isolated synthetic tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C python-source rev-parse HEAD)" = 7cb12bf355461e5a179e0deadb7365689288bf29
+          python3 -m unittest discover -s soak -p test_audit_gate_gap_rank_independence.py -v
+      - name: Compare independent ring/rank algebra against source gate gaps
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/audit_gate_gap_rank_independence.py \
+            --source-sha 7cb12bf355461e5a179e0deadb7365689288bf29 \
+            --timeout-seconds 180 \
+            --evidence "$RUNNER_TEMP/post55-gate-rank-partial-independence.json"
+          python3 - "$RUNNER_TEMP/post55-gate-rank-partial-independence.json" <<'PY'
+          import json, sys
+          d=json.load(open(sys.argv[1], encoding='utf-8'))
+          assert d['status'] == 'PASS_PARTIAL_GATE_RANK_DIAGNOSTIC_NOT_CERTIFIED', d
+          assert d['sample_count'] >= 75 and d['positive'] >= 70 and d['negative'] >= 5, d
+          assert not d['independent_sauce'] and not d['certifiable'] and not d['full_date_verified'], d
+          print('PARTIAL_GATE_RANK_DIAGNOSTIC_ONLY')
+          PY
+      - name: Save diagnostic evidence even when mismatch
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post55-gate-rank-partial-independence
+          path: ${{ runner.temp }}/post55-gate-rank-partial-independence.json
+          if-no-files-found: warn
+          retention-days: 30
