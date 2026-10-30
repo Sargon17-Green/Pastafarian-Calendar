@@ -123,7 +123,7 @@ def active_lines(data: bytes) -> list[tuple[int, str]]:
 
 
 def sequential_evidence(lines: list[tuple[int, str]], needles: tuple[str, ...]) -> list[int]:
-    """Locate declarations and uses in increasing source order.
+    """Locate markers in non-decreasing line order (some share one line).
 
     This does not establish lexical scope or actual runtime call order.
     """
@@ -138,7 +138,7 @@ def sequential_evidence(lines: list[tuple[int, str]], needles: tuple[str, ...]) 
         if found is None:
             raise ValueError("source phrase absent or out of order: " + phrase)
         indexes.append(lines[found][0])
-        from_index = found + 1
+        from_index = found  # allow multiple pinned markers on one source line
     return indexes
 
 
