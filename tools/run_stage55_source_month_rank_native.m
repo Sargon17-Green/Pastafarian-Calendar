@@ -97,7 +97,8 @@ else
         rejectionSteps=wide-limit;
     end
 end
-rank=(accepted-one).regularMod(N)+one;
+rankOffset=accepted-one;
+rank=rankOffset.regularMod(N)+one;
 assert(rank>=one && rank<=N,'Stage55:SelectedRankOutOfRange');
 
 % Compare with production Patch14, but only on the non-reject path;
