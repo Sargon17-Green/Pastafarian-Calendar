@@ -499,3 +499,60 @@ without compiling or executing code. The quarantined CAL-4018 and
 unverified CAL-4700 executables remain blocked; 99 Native QA groups
 and the 47-month differentiation case remain unexecuted. No changes
 to `main` or the 82 calendar source files.
+
+## 2026-10-30: direct lexical call-site and inline Intel inventory — 40/40 CI PASS
+
+New branch-local files:
+- tools/cal_static_callsite_intel.py — hash-checks the exact six pinned
+  release text files, then records DLL call expressions and their nearest
+  Plain English routine headings, specific literal call statements,
+  and Intel dollar-hex directives. It neither disassembles nor executes.
+- tools/test_cal_static_callsite_intel.py — nine offline tests of routine
+  ownership, comments, invalid or odd-length Intel hex, call sites,
+  source-hash guards, and explicit non-execution claims.
+- .github/workflows/cal-source-provenance.yml — invokes the new
+  source-only call-site/Intel audit and all Python unit tests.
+
+**Observed GitHub CI**: run 41092113089, job 124188386692,
+against code/workflow commit e3f58b2178c0e9601f74d97e4fc0305d9a2f96ce.
+Result: success. The actual job log says
+"Ran 40 tests in 0.016s", then "OK".
+The source-only CLI step reports lexical_checks_pass=true and
+verified_source_files=6; the twelve-file provenance step also passed.
+
+For pinned upstream Git blob 571e3624d83fe531e15b76be6e1168d64a06f71f
+(recursos/CAL-4700/the noodle):
+- 447 source Intel dollar-hex directives;
+- 1,841 encoded byte occurrences;
+- 158 distinct hex literal sequences;
+- no odd-length or malformed Intel hex in these pinned files;
+- no such direct directives in the other five release source files.
+These are source-literal statistics, not disassembled instructions or
+evidence that the machine code executed.
+
+Direct, textual call-site observations:
+- Four wrappers call "Send the email." (lines 11946, 11953, 11961,
+  11969). The target routine starts at 11887 and contains SMTP
+  HELO, MAIL FROM, RCPT TO, DATA and QUIT operations.
+- "Get some addrinfo routines." appears once at 6090 under
+  "To get a sockaddr given a host string"; its target starts at 5691
+  and resolves Winsock library functions dynamically.
+- The email routine's direct socket setup is at line 11890.
+- kernel32.dll!CreateProcessA is in "To start a process given a path"
+  (12711–12724), winhttp.dll!WinHttpSendRequest in
+  "To send a data string to a winhttp request" (11874–11885), and
+  wininet.dll!InternetReadFile in
+  "To read a url into a buffer" (10890–10915).
+- CryptDeriveKey, CryptEncrypt and CryptDecrypt are owned by their
+  respective crypt session / encrypt / decrypt routines.
+
+**Interpretation limit**: The nearest declaration and explicit
+statement sites are lexical evidence, not a full Plain English call
+graph or proof of executable reachability. Overloads, indirect
+dispatch, cross-module calls, conditional paths and Intel code
+execution are not resolved. No binary was downloaded, no compiler
+executed, and no malware clearance, stage-zero validity, Native QA PASS
+or resolution of the 47-month case is claimed.
+
+Run URL:
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41092113089
