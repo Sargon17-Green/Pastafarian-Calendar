@@ -1,14 +1,26 @@
-Mərhələ 1 üçün Rust sınaq kodu və normativ oracle hazırlandı, lakin bu icra mühitində Rust kompilyatoru mövcud deyil.
+Mərhələ 1 — yoxlanmış yekun vəziyyət
+Tarix: 2026-10-30
+Budaq: Rust+Azərbaycan-dili
+Yoxlanmış icra SHA: 1bcd853e4a3a9a5bb3498d43c1e1728e23949274
 
-Yoxlama cəhdinin nəticəsi:
-- rustc: tapılmadı
-- cargo: tapılmadı
-- paket meneceri ilə quraşdırma: şəbəkə və DNS məhdudiyyətinə görə mümkün olmadı
-- ayrıca Rust alət zəncirinin endirilməsi: şəbəkə səviyyəsində bloklandı
-- yerli Rust sınaqları: icra olunmadı
+Əvvəlki məhdudiyyət: yerli icra mühitində rustc/cargo və şəbəkə çıxışı yox idi. Bu məhdudiyyət GitHub Actions-də Rust toolchain istifadə edilməklə Stage 1 üçün aradan qaldırılıb.
 
-İş sahəsini hazırlamaq üçün istifadə olunan xarici redaktə və avtomatlaşdırma alətləri tətbiq xəttinin proqramlaşdırma dili məhdudiyyətinə daxil deyil. Layihə ağacında icra olunan tətbiq, oracle, test, generator və hesablama kodu yalnız Rust-dur; başqa proqramlaşdırma dilində layihə kodu və ya xarici dil runtime çağırışı yoxdur.
+Normativ çərçivə:
+- Yalnız neytral bootstrap, dispetçer, validator, xəta sərhədi, metrik və jurnal qabığı.
+- 17 kotlet və 47 ay adı canonical_index əsasında dondurulub.
+- Sınaq oracle-ı tests/support/normative_oracle.rs daxilində saxlanılıb, istehsal modulu onu import etmir.
+- calendar_date_spaghetti normativ tarixi hələ hesablamır. Bu, Stage 1 üçün nəzərdə tutulan sərhəddir.
 
-Statik baxış zamanı `Cutlet` quruluşunda təkrarlanan `open_gate_index` sahəsi aşkar edildi və düzəldildi. `MonsterContext` giriş günləri də məhdud `i128` əvəzinə `BigInt` ilə saxlanılır. Mənbə dili kataloqunun bütün 17+47 mətn qiyməti ayrıca exact fixture ilə dondurulub.
+Həqiqi native sübut:
+- GitHub Actions Rust Native run 41040357894: completed/success, head SHA yuxarıdakı SHA.
+  https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040357894
+- Komanda: cargo test --all-targets.
+- tests/stage01.rs: 16 passed; 0 failed; 0 ignored; 0 filtered out.
+- src/lib.rs: 0 test, 0 failed.
+- Compiler: 37 warning (əsasən sınaq oracle-ındakı istifadə olunmayan elementlər, dead_code); xəta deyil. Onlar gizlədilmir və bütün gələcək mərhələlər üçün sıfır xəbərdarlıq zəmanəti verilmir.
+- Canonical Names Lock run 41040357441: completed/success, eyni head SHA.
+  https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040357441
 
-Faktiki `cargo test --all-targets` icrası olmadığı üçün nəticə hələ təsdiqlənmiş GREEN kimi qeyd edilmir. Kod və Stage 1 handoff tərkibi statik baxımdan hazırdır; qalan əməliyyat Rust alət zəncirində sınaqların real icrasıdır.
+Qərar: Stage 1-in məhdud BOOTSTRAP müqaviləsi sübutlarla GREEN/COMPLETE sayılır; LAST_COMPLETED_STAGE=1.
+Bu nəticə tam təqvim hesablamasına, beş komponentin doğruluğuna, diferensial sınaqlara və ya gələcək mərhələlərə PASS vermir.
+Stage 2 açılmayıb; ayrıca normativ əhatə dairəsi və qəbul meyarları dəqiqləşdirilməlidir.

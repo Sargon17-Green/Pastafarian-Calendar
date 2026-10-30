@@ -27,12 +27,14 @@ Kataloq qaydaları `docs/SOURCE_LANGUAGE_CATALOG.md` sənədində verilib.
 
 Normativ tam ədəd sahəsini məhdudlaşdırmamaq üçün skelet və sınaq oracle-ı saf Rust paketləri olan `num-bigint`, `num-integer` və `num-traits` istifadə edir. Layihə kodunda xarici dil runtime-ı, FFI və ya başqa dildə oracle yoxdur. Redaktə, arxivləmə və iş sahəsinin hazırlanması üçün istifadə olunan xarici alətlər layihə kodunun bir hissəsi sayılmır.
 
-## Sınaq əmri
+## Sınaq əmri və təsdiqlənmiş nəticə
 
-Rust alət zənciri olan mühitdə layihənin kökündən bu əmri işlətmək lazımdır:
+Rust alət zənciri olan mühitdə layihənin kökündən:
 
 ```text
 cargo test --all-targets
 ```
 
-Bu paket hazırlanarkən mövcud icra mühitində `rustc` və `cargo` tapılmadığı üçün sınaqlar faktiki icra olunmayıb. Buna görə bu handoff təsdiqlənmiş `GREEN` kimi təqdim edilmir.
+2026-10-30 tarixli GitHub Actions Native run 41040357894 (SHA `1bcd853e4a3a9a5bb3498d43c1e1728e23949274`) bu əmri tamamladı: 16 sınaq uğurlu, 0 uğursuz. Compiler 37 warning göstərdi (əsasən test oracle-ındakı istifadəsiz elementlər); bunlar error deyil. Canonical Names Lock run 41040357441 də eyni SHA üzrə SUCCESS oldu. Ətraflı sübut: `audit/STAGE_01_EXECUTION_STATUS.txt`.
+
+Stage 1 yalnız BOOTSTRAP üçün tamamlanıb. Tarix hesablamasının beş komponenti və növbəti mərhələlər hələ təsdiqlənməyib.
