@@ -60,7 +60,7 @@ jobs:
             -J build -I build test/stage01_bigint_boundaries.f90 build/big_integer.o \
             -o build/stage01_bigint_boundaries
           timeout --signal=TERM --kill-after=5s 30s build/stage01_bigint_boundaries
-      - name: Verify Stage 1 INT64_MIN and wide multiplication boundaries
+      - name: Verify Stage 1 extreme arithmetic and expected int64 overflow rejections
         shell: bash
         run: |
           set -euo pipefail
@@ -69,7 +69,8 @@ jobs:
             -o build/stage01_bigint_extreme_probe
           gap_count=0
           pass_count=0
-          for probe in from-int64-min to-int64-min multiply-int64-max multiply-wide-limb; do
+          overflow_count=0
+          for probe in from-int64-min to-int64-min multiply-int64-max multiply-wide-limb multiply-int64-min multiply-wide-negative; do
             set +e
             result="$(timeout --signal=TERM --kill-after=2s 10s build/stage01_bigint_extreme_probe "$probe" 2>&1)"
             exit_code=$?
@@ -80,17 +81,32 @@ jobs:
               echo "PROBE_VERDICT=PASS MODE=$probe"
             else
               gap_count=$((gap_count + 1))
-              echo "::error::Unresolved Stage 1 BigInt boundary: $probe (exit $exit_code)"
+              echo "::error::Unresolved Stage 1 arithmetic boundary: $probe (exit $exit_code)"
               echo "PROBE_VERDICT=UNRESOLVED MODE=$probe"
             fi
           done
-          echo "STAGE01_EXTREME_BOUNDARY_PASS=$pass_count UNRESOLVED=$gap_count (gating; NOT full Stage 1 acceptance)"
+          for probe in to-int64-overflow-positive to-int64-overflow-negative; do
+            set +e
+            result="$(timeout --signal=TERM --kill-after=2s 10s build/stage01_bigint_extreme_probe "$probe" 2>&1)"
+            exit_code=$?
+            set -e
+            printf 'PROBE=%s EXIT=%s\n%s\n' "$probe" "$exit_code" "$result"
+            if [[ "$exit_code" -gt 0 && "$exit_code" -lt 128 && "$result" == *"ERROR STOP BigInt does not fit int64"* && "$result" != *"UNEXPECTED_RETURN="* ]]; then
+              overflow_count=$((overflow_count + 1))
+              echo "PROBE_VERDICT=EXPECTED_REJECTION MODE=$probe"
+            else
+              gap_count=$((gap_count + 1))
+              echo "::error::Unresolved Stage 1 int64 overflow rejection: $probe (exit $exit_code)"
+              echo "PROBE_VERDICT=UNRESOLVED MODE=$probe"
+            fi
+          done
+          echo "STAGE01_EXTREME_BOUNDARY_PASS=$pass_count EXPECTED_OVERFLOW_REJECTIONS=$overflow_count UNRESOLVED=$gap_count (gating; NOT full Stage 1 acceptance)"
           {
-            echo "## Fortran Stage 1 extreme BigInt boundary gate"
-            echo "Passing probes: $pass_count; unresolved probes: $gap_count."
-            echo "All four probes must pass; this is NOT full Stage 1 acceptance."
+            echo "## Fortran Stage 1 bounded BigInt gate"
+            echo "Passing arithmetic probes: $pass_count/6; expected overflow rejections: $overflow_count/2; unresolved: $gap_count."
+            echo "This is NOT full Stage 1 acceptance; full interleaving oracle is not executed."
           } >> "$GITHUB_STEP_SUMMARY"
-          if [[ "$gap_count" -ne 0 ]]; then
-            echo "::error::Stage 1 extreme BigInt boundary gate failed: $gap_count unresolved"
+          if [[ "$pass_count" -ne 6 || "$overflow_count" -ne 2 || "$gap_count" -ne 0 ]]; then
+            echo "::error::Stage 1 bounded BigInt gate incomplete"
             exit 1
           fi
