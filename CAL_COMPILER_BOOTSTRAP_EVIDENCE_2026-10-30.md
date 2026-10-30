@@ -84,3 +84,22 @@ does not settle permission to redistribute or relicense them.
 
 This file is **documentation only**. No executable was downloaded,
 compiled, restored, whitelisted, or run during this source inventory.
+
+## Static comparison: why `passo08` is not a drop-in release source
+
+A direct, **text-only** examination of both pinned `the compiler` files
+yielded:
+
+| Measurement | Standalone `recursos/CAL-4700/the compiler` | Tutorial `passo08/the compiler` |
+| --- | ---: | ---: |
+| Source text lines | 4,390 | 4,391 |
+| Active top-level `To ...:` definitions | **441** | **224** |
+| Commented-out top-level `\\To ...:` definitions | **0** | **217** |
+| All comment-leading lines | 21 | 1,906 |
+
+These counts are lexical source counts (not a successful compile).
+They demonstrate that the tutorial's final `passo08` file is deliberately
+partly disabled and should **not** be substituted for the full compiler
+source or mixed with `recursos/CAL-4700` runtime components. No claim is
+made that the standalone source is independently audited or that it can be
+bootstrapped without a trustworthy seed.
