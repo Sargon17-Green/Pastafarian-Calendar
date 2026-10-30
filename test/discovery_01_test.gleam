@@ -1,5 +1,5 @@
-// EXPECTED_RED: nur tri malsukcesoj, ĉiuj ĉe pozitivaj obloj de M.
-// La bazaj testoj de Stadio 1 kaj M+1 devas plu pasi.
+// Stadio 3: la malkongruoj de DISCOVERY 01 restas observeblaj per la
+// diagnoza legacy_remainder; PATCH 01 estas kontrolata aparte.
 import gleeunit/should
 import pastafari/bootstrap
 import pastafari/discovery_01_remainder
@@ -12,21 +12,22 @@ fn legacy_from_production_path(value: Int) -> Int {
   output.legacy_remainder
 }
 
-pub fn discovery_01_m_expected_red_test() {
-  legacy_from_production_path(core.m) |> should.equal(core.save(core.m))
+pub fn discovery_01_m_legacy_witness_test() {
+  legacy_from_production_path(core.m) |> should.equal(0)
+  core.save(core.m) |> should.equal(core.m)
 }
 
-pub fn discovery_01_2m_expected_red_test() {
-  legacy_from_production_path(2 * core.m)
-  |> should.equal(core.save(2 * core.m))
+pub fn discovery_01_2m_legacy_witness_test() {
+  legacy_from_production_path(2 * core.m) |> should.equal(0)
+  core.save(2 * core.m) |> should.equal(core.m)
 }
 
-pub fn discovery_01_3m_expected_red_test() {
-  legacy_from_production_path(3 * core.m)
-  |> should.equal(core.save(3 * core.m))
+pub fn discovery_01_3m_legacy_witness_test() {
+  legacy_from_production_path(3 * core.m) |> should.equal(0)
+  core.save(3 * core.m) |> should.equal(core.m)
 }
 
-pub fn discovery_01_m_plus_1_pass_test() {
+pub fn discovery_01_m_plus_1_legacy_control_test() {
   legacy_from_production_path(core.m + 1)
   |> should.equal(core.save(core.m + 1))
 }

@@ -39,3 +39,13 @@ EXPECTED_RED, ne CI-PASS. Stadio 2 povas fermiĝi kiel EXPECTED_RED; ne malfermu
 Stadion 3 sen aprobo.
 
 https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40718515839
+
+## Stadio 3 — PATCH 01 (2026-10-30; Native-konfirmo atendata)
+
+La aprobita PATCH 01 aldonas `save_patch` en la ekzistantan produktan
+vojon sen perdi la malnovan diagnozan valoron. La korekto konvertas
+nur nulan restaĵon al M. La kvar DISCOVERY 01-testoj fariĝas pozitivaj
+atestoj pri la historia konduto; ok novaj testoj konfirmas normigan SAVE
+ankaŭ por negativaj kaj nulaj enigoj. Planita suma kontrolado:
+17 antaŭaj + 4 historiaj + 8 PATCH 01 = 29 testoj. Native-testado sur
+la preciza Stage 3 HEAD ankoraŭ estas postulata antaŭ ol fermi la stadion.

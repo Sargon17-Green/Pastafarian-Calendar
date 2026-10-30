@@ -60,5 +60,18 @@ Stage01-laborfluo do finiĝis kun `failure` pro la laŭdezire ruĝaj testoj,
 ne pro kompila aŭ formata eraro. Rulo:
 https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/40718515839
 
-Stadio 2 estas kompletigita kiel EXPECTED_RED; Stadio 3 / PATCH 01 restas
-nekomencita kaj postulas apartan rajtigon.
+Stadio 2 estas fermita kiel EXPECTED_RED; la malnova rezulto restas
+havebla per la diagnoza kampo `legacy_remainder`.
+
+## Stadio 3 — PATCH 01 (efektivigita; Native atendo)
+
+`save_patch` nun mapigas nulan restaĵon al `M`, lasante ĉiujn aliajn
+restaĵojn senŝanĝaj. La valida-disenda produkta vojo redonas kaj la
+historian `legacy_remainder` kaj la korektitan `patched_remainder`.
+La tri diagnozaj atestoj plu pruvas la antaŭan 0-kontraŭ-M-diverĝon,
+sed ne plu postulas malsukcesan CI. La ok apartaj PATCH 01-testoj
+komparas la produktan rezulton kun la aparta testa `SAVE`-referenco ĉe
+M, 2M, 3M, M+1, 0, -M, -1 kaj 1. Kun la 17 antaŭaj kaj kvar diagnozaj
+testoj, la akcepta celo estas 29 sukcesoj, neniu malsukceso, kaj pura
+`gleam format --check src test` ĉe la preciza nova HEAD. Tio restas
+nepruvita ĝis nova Native-rulo.
