@@ -36,6 +36,6 @@
 
 Етап 4 закрито на підставі Native CI 48/48, регресій 115/115, 27/27, 51/51 та `verify`: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41092317475.
 
-## Етап 5 — Patch 02 (код додано; Native очікується)
+## Етап 5 — Patch 02 (завершено)
 
-`Patch02Adapter.applyPatch02` залишає історичний `LegacyDayTag.oldDayTag` незмінним та додає непарну одиницю до результату для днів від F включно. `makePatch02Context` після `makeDiscovery02Context` записує лише `patch02CorrectedOutput`, окремий статус, фазу, лічильник і подію трасування. Попередні маршрути не викликають адаптер; нормативний оракул залишається лише в тестах. До успішного Native CI, регресій та `verify` Stage 5 не вважається закритим.
+`Patch02Adapter.applyPatch02` залишає історичний `LegacyDayTag.oldDayTag` незмінним та додає непарну одиницю до результату для днів від F включно. `makePatch02Context` після `makeDiscovery02Context` записує лише `patch02CorrectedOutput`, окремий статус, фазу, лічильник і подію трасування. Попередні маршрути не викликають адаптер; нормативний оракул залишається лише в тестах. Native Chapel 2.10.0 підтвердив 77/77 тестів Patch 02 і 241/241 регресійних тестів; незалежний `verify` завершився успішно: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41097490914. Stage 6 залишається не відкритим: визначеного контракту немає.
