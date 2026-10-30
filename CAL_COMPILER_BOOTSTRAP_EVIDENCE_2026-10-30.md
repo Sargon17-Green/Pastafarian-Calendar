@@ -556,3 +556,55 @@ or resolution of the 47-month case is claimed.
 
 Run URL:
 https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41092113089
+
+## 2026-10-30: editor command routing, legacy crypto and Intel prefixes
+
+Additional observed statements at pinned upstream commit
+2d44defdedf24519bba754114ee66e6d1defff1e:
+
+- the desktop at lines 831 and 840 inserts Decrypt... and Encrypt...
+  commands with handler names into the editor submenu.
+- the desktop at lines 692 and 695 dispatches those handler names.
+- the desktop at lines 1105–1106 and 1127–1128 invokes the corresponding
+  editor routines when the current tab is in editor mode.
+- the editor at lines 262–282 requests a passphrase, extracts selected
+  text, decrypts or encrypts it, and places output on the Windows clipboard.
+- the noodle at lines 1763–1778 establishes MD5/RC4 cryptographic
+  session state; transformation API calls appear at 3787 and 4821.
+
+This is concrete static menu-to-crypto linkage, not an observation
+that any user invoked the commands.
+
+In the 447 inline Intel source literals in the noodle:
+
+| First opcode prefix category | Count |
+| --- | ---: |
+| 0F80–0F8F, near conditional branch | 41 |
+| E9, near unconditional jump | 4 |
+| FF /0, INC according to ModR/M, not CALL | 2 |
+| Other prefixes | 400 |
+| E8/9A direct-call prefix | 0 |
+| FF /2,/3 indirect call | 0 |
+| FF /4,/5 indirect jump | 0 |
+| CD,CC,CE,F1,0F05,0F34 entry prefix | 0 |
+
+This checks only initial opcode prefixes, not the full x86 instruction
+stream, not any compiler-generated code and not runtime reachability.
+Zero in this table does not mean a corresponding operation is absent
+from a compiled program. No disassembly or binary execution occurred.
+
+Branch-only changes:
+- tools/cal_static_crypto_intel_prefix.py: validates source hashes,
+  the cross-module crypto call chain and x86 opcode-prefix/ModR/M
+  classifications without executing Plain English.
+- tools/test_cal_static_crypto_intel_prefix.py: 13 offline unit tests.
+- Source-only workflow now discovers the tests and invokes the audit.
+
+First corresponding CI run 41124765217 for code commit
+90b0c9ddcaf15bd05a7429c0e3e68411c2bc1b60 was initially
+queued. Do not assert 53/53 PASS without a completed job log.
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41124765217
+
+Stage-zero compiler trust remains unverified. No CAL binary executed.
+The 99 Native QA groups and 47-month case remain unexecuted.
+Main and the 82 canonical calendar files were not changed.
