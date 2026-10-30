@@ -49,24 +49,24 @@ proc testProductionRoute() {
     for delta in -1..1 {
       const candidate = M * k + delta;
       const ctx = makePatch01Context(FOUNDATION_DAY, FOUNDATION_DAY, candidate);
-      const label = "k=" + k:string + ", delta=" + delta:string;
+      const caseDescription = "k=" + k:string + ", delta=" + delta:string;
       check(ctx.discovery01Input == candidate &&
             ctx.discovery01LegacyOutput == regularMod(candidate, M),
-            "історичний результат: " + label);
+            "історичний результат: " + caseDescription);
       check(ctx.patch01CorrectedOutput == save(candidate),
-            "виправлена остача відповідає SAVE: " + label);
+            "виправлена остача відповідає SAVE: " + caseDescription);
       check(ctx.status == MonsterStatus.patch01Only &&
             ctx.phase == MonsterPhase.stoppedAtPatch01Boundary,
-            "зупинка на межі латки: " + label);
+            "зупинка на межі латки: " + caseDescription);
       check(ctx.metrics.get("bootstrap.calls", 0) == 1 &&
             ctx.metrics.get("discovery01.calls", 0) == 1 &&
             ctx.metrics.get("patch01.calls", 0) == 1,
-            "метрики обмежені спостереженням: " + label);
+            "метрики обмежені спостереженням: " + caseDescription);
       check(ctx.branchTrace.size == 3 &&
             ctx.branchTrace[0] == "BOOTSTRAP_DISPATCH" &&
             ctx.branchTrace[1] == "DISCOVERY_01_OLD_REMAINDER" &&
             ctx.branchTrace[2] == "PATCH_01_LIFT_ZERO",
-            "окремий історичний виклик і латка: " + label);
+            "окремий історичний виклик і латка: " + caseDescription);
     }
   }
 
