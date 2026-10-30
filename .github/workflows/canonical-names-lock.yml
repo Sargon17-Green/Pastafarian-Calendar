@@ -60,7 +60,7 @@ jobs:
             -J build -I build test/stage01_bigint_boundaries.f90 build/big_integer.o \
             -o build/stage01_bigint_boundaries
           timeout --signal=TERM --kill-after=5s 30s build/stage01_bigint_boundaries
-      - name: Diagnose unintegrated INT64_MIN and wide multiplication edges (non-gating)
+      - name: Verify Stage 1 INT64_MIN and wide multiplication boundaries
         shell: bash
         run: |
           set -euo pipefail
@@ -80,13 +80,17 @@ jobs:
               echo "PROBE_VERDICT=PASS MODE=$probe"
             else
               gap_count=$((gap_count + 1))
-              echo "::warning::Unresolved Stage 1 BigInt boundary: $probe (exit $exit_code)"
+              echo "::error::Unresolved Stage 1 BigInt boundary: $probe (exit $exit_code)"
               echo "PROBE_VERDICT=UNRESOLVED MODE=$probe"
             fi
           done
-          echo "STAGE01_EXTREME_DIAGNOSTIC_PASS=$pass_count UNRESOLVED=$gap_count (non-gating, NOT Stage 1 acceptance)"
+          echo "STAGE01_EXTREME_BOUNDARY_PASS=$pass_count UNRESOLVED=$gap_count (gating; NOT full Stage 1 acceptance)"
           {
-            echo "## Fortran Stage 1 extreme BigInt diagnostics (non-gating)"
+            echo "## Fortran Stage 1 extreme BigInt boundary gate"
             echo "Passing probes: $pass_count; unresolved probes: $gap_count."
-            echo "An unresolved probe is NOT a passing test; Stage 1 full acceptance is not asserted."
+            echo "All four probes must pass; this is NOT full Stage 1 acceptance."
           } >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$gap_count" -ne 0 ]]; then
+            echo "::error::Stage 1 extreme BigInt boundary gate failed: $gap_count unresolved"
+            exit 1
+          fi
