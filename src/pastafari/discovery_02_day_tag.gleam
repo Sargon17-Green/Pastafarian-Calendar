@@ -5,10 +5,7 @@ import pastafari/bootstrap
 pub const old_foundation_day = -15_055_671
 
 pub type Discovery02Output {
-  Discovery02Output(
-    context: bootstrap.MonsterContext,
-    legacy_day_tag: Int,
-  )
+  Discovery02Output(context: bootstrap.MonsterContext, legacy_day_tag: Int)
 }
 
 pub fn old_day_tag(day: Int) -> Int {
@@ -26,9 +23,6 @@ pub fn dispatch_discovery_02(
   case bootstrap.dispatch_context(context) {
     Error(error) -> Error(error)
     Ok(completed) ->
-      Ok(Discovery02Output(
-        context: completed,
-        legacy_day_tag: old_day_tag(day),
-      ))
+      Ok(Discovery02Output(context: completed, legacy_day_tag: old_day_tag(day)))
   }
 }
