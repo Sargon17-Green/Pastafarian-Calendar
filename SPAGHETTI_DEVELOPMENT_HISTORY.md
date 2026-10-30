@@ -235,3 +235,13 @@ LEGACY-OLD-REMAINDER 执行，不借用任何 test-only oracle。M、2M、3M 应
 
 原生严格编译与 EXPECTED_RED 回归尚待 GitHub Actions 证据，不以提交动作代替 PASS。
 原有 production 尚无完整五字段日历路径，因此不声称已在那里触发旧缺陷；此欠项独立可查。
+
+
+## 2026-10-30 — Stage 2 原生验收记录
+
+`433915bde8fdb3f43f09fc7d6cfda31aa0092119` 的 GitHub Actions 运行
+<https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41032602303> 已完成：stage1-native、stage2-discovery-native、verify 全部 success。
+真实 GnuCOBOL 3.1.2.0 对 M/2M/3M 返回旧余数 0，规范 SAVE 均为 M；
+M+1 对照为 1。EXPECTED_RED=3、CONTROL_PASS=1、UNEXPECTED_FAILURES=0，
+无未来 savePatch；故 Stage 2 低层发现验收，LAST_COMPLETED_STAGE=2。
+这不等同于完成五字段日历生产管线；历史来源违规仍按原记录保留。

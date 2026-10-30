@@ -45,6 +45,20 @@ CI 必须使用 GnuCOBOL 严格编译，且 Stage 1 回归独立保持绿色。
 GitHub Actions: `.github/workflows/canonical-names-lock.yml` (stage2-discovery-native job)
 - JOB: `stage2-discovery-native`
 - 标记: `RESULT=PASS_STAGE2_DISCOVERY_NATIVE`
-- 初始状态: PENDING（禁止把静态设计或 commit 误称为原生 PASS）。
+- 原生状态: 已验收（见下列实际日志）。
 
 Stage 3 PATCH 01 在 Stage 2 证据检查完成前不得开始。
+
+## 2026-10-30 原生验收
+
+- 验证源码 commit: `433915bde8fdb3f43f09fc7d6cfda31aa0092119`
+- Linux runner GnuCOBOL: `3.1.2.0`；严格编译 exit=0（工具链有 `_FORTIFY_SOURCE redefined` 警告，并非所有 C/GCC 诊断都由 COBOL `-Werror` 处理）。
+- `stage2-discovery-native`: PASS；`stage1-native`: PASS；`verify`: PASS。
+- 四次实际路由均输出 `DISCOVERY01:OLD-REMAINDER`。
+- M、2M、3M 的 raw 均为 0，各自规范 SAVE 应为 M：EXPECTED_RED=3。
+- M+1 raw=1，规范 SAVE=1：CONTROL_PASS=1。
+- UNEXPECTED_FAILURES=0，活动 BigInt 块归零，future patch 搜索无命中。
+- CI: <https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41032602303>；原生日志 job: <https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41032602303/job/123985679488>。
+
+Stage 2 低层发现已验收为 `ACCEPTED_EXPECTED_RED`；第 3 阶段仍未开始。
+此前写明的五字段日历全路径集成欠项没有被此测试覆盖或消除。
