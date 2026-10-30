@@ -35,6 +35,7 @@ local GateGapPatch = require("gate_gap_patch")
 local LegacyPositiveGate = require("legacy_positive_gate_position")
 local PositiveGatePatch = require("positive_gate_patch")
 local LegacyNegativeGate = require("legacy_negative_gate_position")
+local NegativeGatePatch = require("negative_gate_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -544,6 +545,20 @@ end
 
 function S.oldNegativeGateFromLastGapProbe(gap)
     return LegacyNegativeGate.oldNegativePosition(gap)
+end
+
+-- PATCH 18: retain the six negative legacy commits, append cumulative correction.
+function S.negativeGateDaySpaghetti(index,streams)
+    local corrected=NegativeGatePatch.execute(index,streams)
+    return corrected
+end
+
+function S.negativeGatePatchProbe(index,streams)
+    return NegativeGatePatch.execute(index,streams)
+end
+
+function S.negativeGateCoreProbe(index,gaps,historicalDay)
+    return NegativeGatePatch.correctNegativeDay(index,gaps,historicalDay)
 end
 
 function S.calendarDateSpaghetti()

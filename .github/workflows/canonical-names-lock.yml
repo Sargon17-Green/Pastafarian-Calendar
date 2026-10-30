@@ -1513,3 +1513,49 @@ jobs:
           test "$(git rev-parse HEAD)" = "${{ github.sha }}"
           luac5.3 -p src/legacy_negative_gate_position.lua test/stage36_tests.lua
           lua5.3 test/stage36_tests.lua .
+
+  lua_stage37_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    needs: lua_stage36_discovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Stage37 Native syntax, frozen legacy, stdout stderr exit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage37-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nTESTED_SHA=%s\n' "$GITHUB_SHA" > stage37-evidence/source.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/legacy_negative_gate_position.lua)" = cbb3c8dbf220f5fff0fd59dab06eb6d6a212cf95
+          test "$(git hash-object src/positive_gate_patch.lua)" = 090e4ade4be6d834c3fc054fbeafa4da932d8f41
+          find src test -name '*.lua' -type f -print0 | xargs -0 -n1 luac5.3 -p
+          lua5.3 -v >stage37-evidence/lua-version.txt 2>&1
+          set +e
+          timeout --signal=TERM --kill-after=10s 1200s lua5.3 test/stage37_tests.lua . \
+            >stage37-evidence/stdout.txt 2>stage37-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" >stage37-evidence/exit-code.txt
+          cat stage37-evidence/stdout.txt
+          if [ -s stage37-evidence/stderr.txt ]; then cat stage37-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 && test ! -s stage37-evidence/stderr.txt
+          grep -Fxq 'PASS Stage37 canonical: 32 negative gates, 1 MATCH + 31 PATCHED' stage37-evidence/stdout.txt
+          grep -Fxq 'PASS Stage37 synthetic: 96 chains, 92 corrections, prefix sensitivity' stage37-evidence/stdout.txt
+          grep -Fxq 'PASS Stage37 hardening: 7 rejects, two BigInt replays, independent owned state' stage37-evidence/stdout.txt
+          printf '%s\n' 'STAGE37_NATIVE=PASS' >stage37-evidence/result.txt
+      - name: Upload Stage37 evidence (including failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-stage37-patch-evidence
+          path: stage37-evidence/
+          retention-days: 30
+          if-no-files-found: warn
