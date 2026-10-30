@@ -1,0 +1,50 @@
+name: Stage 55 Python Cross-Implementation Middle Rank Certificate
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/stage55_polish_middle_rank_crosscheck.py'
+      - '.github/workflows/matlab-stage55-python-middle-crosscheck.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: matlab-stage55-python-middle-crosscheck-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  python-bigint-crosscheck:
+    name: Python exact integer crosscheck / 3-day saved cursor
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact branch SHA
+        uses: actions/checkout@v4
+      - name: Download native evidence produced by MATLAB
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-middle-rank-inverse-41032265021
+          run-id: 41032265021
+          github-token: ${{ github.token }}
+          path: evidence
+      - name: Run bounded independent-language check
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          python3 tools/stage55_polish_middle_rank_crosscheck.py \
+            evidence/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_3.json \
+            2>&1 | tee logs/STAGE55_PYTHON_MIDDLE_RANK_CROSSCHECK.log
+      - name: Preserve Python QA log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-python-middle-rank-${{ github.run_id }}
+          path: logs/STAGE55_PYTHON_MIDDLE_RANK_CROSSCHECK.log
+          if-no-files-found: warn
+          retention-days: 30
