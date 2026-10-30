@@ -42,6 +42,26 @@ EXPECTED = {
         "the writer": ("460c77888767a49ef6f73f611e82101c04ba09e1", 161468),
     },
 }
+# Independent SHA-256 digests of the original source bytes (not decoded text).
+EXPECTED_SHA256 = {
+    'release': {
+        'the compiler': '9c524096c0995bb5205b4fd059001d098f689b3bbeef61889b4e8aa4a22b273d',
+        'the desktop': '27a5fcf58116f38d5dac3cd6ca43aec073bd56b9d570e16ae6daba30d9a661a5',
+        'the editor': '571f5c3f0174efa7339d775a1e938abe6fb461afb7f1fd691a19ba4464d36c77',
+        'the finder': '3eb08dee93d71f7ad8c6146a34cbdebfdea17abf5f6b494aab5095707bbf7c1b',
+        'the noodle': '600fd8a5e710657fd44ecaa94dc51fc4314f1a4f738d335bf5bb151bbf60a09c',
+        'the writer': '877cfc1de6b159f27d8cf74acc53e28629c531886b21bf774503849470ff1660',
+    },
+    'tutorial_step08': {
+        'the compiler': '790300a2a69541beee2960b433f97e897f34b5376f172e5582e0b9b1a13eb071',
+        'the desktop': 'ab88400f69374ac4911abf9a337a9b1dd968801537eca65e6c3126b5e16037b1',
+        'the editor': '571f5c3f0174efa7339d775a1e938abe6fb461afb7f1fd691a19ba4464d36c77',
+        'the finder': '3eb08dee93d71f7ad8c6146a34cbdebfdea17abf5f6b494aab5095707bbf7c1b',
+        'the noodle': '5f5bf6c35fe4adcc5e22df1ee67c6601fe469fe1eb12def20fb13d15e3912289',
+        'the writer': '877cfc1de6b159f27d8cf74acc53e28629c531886b21bf774503849470ff1660',
+    },
+}
+
 MAX_BYTES = 800_000
 ACTIVE_ROUTINE = re.compile(r"^\s*To\s+[^\r\n:]+:\s*$", re.IGNORECASE)
 COMMENTED_ROUTINE = re.compile(r"^\s*\\+\s*To\s+[^\r\n:]+:\s*$", re.IGNORECASE)
@@ -72,12 +92,17 @@ def download_source(group: str, name: str) -> bytes:
 def inspect(data: bytes, group: str, name: str) -> dict:
     expected_sha, expected_size = EXPECTED[group][name]
     actual_sha = git_blob_sha1(data)
+    actual_sha256 = hashlib.sha256(data).hexdigest()
+    expected_sha256 = EXPECTED_SHA256[group][name]
     executable_magic = data.startswith((b"MZ", b"PK\x03\x04"))
-    valid = len(data) == expected_size and actual_sha == expected_sha and not executable_magic
-    lines = data.decode("utf-8", errors="replace").splitlines()
+    valid = (len(data) == expected_size and actual_sha == expected_sha and
+             actual_sha256 == expected_sha256 and not executable_magic)
+    lines = data.decode("latin-1").splitlines()  # Preserve original 8-bit source bytes.
     return {
         "sha1_git_blob": actual_sha,
         "sha1_expected": expected_sha,
+        "sha256": actual_sha256,
+        "sha256_expected": expected_sha256,
         "bytes": len(data),
         "expected_bytes": expected_size,
         "ok": valid,
