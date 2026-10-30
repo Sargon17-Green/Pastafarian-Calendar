@@ -708,6 +708,44 @@ BEGIN {
     }
     expect_exact("wide original seventeenth+1 eighteen-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
 
+    # Eighteen-digit to nineteen-digit transition at original M=2^127-1.
+    # Four independently verified 127-bit BigInt positional ranks:
+    # boundary, forward rejection, backward acceptance, forward wrap.
+    WIDE_EIGHTEENTH=bi_mul(WIDE_SEVENTEENTH,M)
+    STREAM_FIRST=bi_sub(M,"18"); STREAM_STEP=1
+    choose_rank_wide(WIDE_EIGHTEENTH)
+    EXPECTED_EIGHTEENTH=WIDE_EIGHTEENTH
+    QA_POWER="1"
+    for (QA_I=0;QA_I<18;QA_I++) {
+        EXPECTED_EIGHTEENTH=bi_sub(EXPECTED_EIGHTEENTH,bi_mul_small(QA_POWER,18-QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original eighteenth eighteen-digit boundary", CHOSEN_RANK, EXPECTED_EIGHTEENTH)
+
+    WIDE_N=bi_add(WIDE_EIGHTEENTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original eighteenth+1 nineteen-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=WIDE_EIGHTEENTH
+    QA_POWER=M
+    for (QA_I=1;QA_I<18;QA_I++) {
+        EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(QA_POWER,QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,M)
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"19")
+    expect_exact("wide original eighteenth+1 nineteen-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_sub(M,"17")
+    QA_POWER=bi_square(M)
+    for (QA_I=2;QA_I<18;QA_I++) {
+        EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(QA_POWER,QA_I-1))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original eighteenth+1 nineteen-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
