@@ -65,6 +65,10 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage27 short rejection repair failed' }
             Write-Host ('STAGE27_NATIVE_SHA=' + $env:GITHUB_SHA)
             Write-Host 'STAGE27_PATCH13_NATIVE=PASS'
+            # Stage28 investigation is intentionally not a seal or production patch.
+            & .\tests\Stage28.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage28 Discovery14 wide-sampling probe failed' }
+            Write-Host 'STAGE28_DISCOVERY14_NATIVE=EVIDENCE_ONLY'
           } elseif (($stageLines -contains 'CURRENT_STAGE=26') -and (
               (($stageLines -contains 'LAST_COMPLETED_STAGE=25') -and ($stageLines -contains 'STAGE26_RUNTIME_VERIFICATION=AWAITING')) -or
               (($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and ($stageLines -contains 'STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED')))) {
