@@ -26,6 +26,7 @@ $script:MonsterSourceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 . (Join-Path $script:MonsterSourceRoot 'Discovery12.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Patch12.ps1')
 . (Join-Path $script:MonsterSourceRoot 'Discovery13.ps1')
+. (Join-Path $script:MonsterSourceRoot 'Patch13.ps1')
 
 function New-BaseMonsterContext {
     [CmdletBinding()]

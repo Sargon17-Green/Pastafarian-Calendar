@@ -48,6 +48,23 @@ jobs:
             & .\tests\Stage01.Tests.ps1
             if (-not $?) { throw 'Stage 1 regression failed after Stage 23 seal' }
             Write-Host 'STAGE23_POST_SEAL_BASELINE=PASS'
+          } elseif (($stageLines -contains 'CURRENT_STAGE=27') -and
+              ($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and
+              ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=AWAITING')) {
+            & .\tests\Stage01.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage01 regression failed Stage27' }
+            & .\tests\Stage23.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage23 regression failed Stage27' }
+            & .\tests\Stage24.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage24 regression failed Stage27' }
+            & .\tests\Stage25.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage25 regression failed Stage27' }
+            & .\tests\Stage26.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage26 historical RED failed Stage27' }
+            & .\tests\Stage27.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage27 short rejection repair failed' }
+            Write-Host ('STAGE27_NATIVE_SHA=' + $env:GITHUB_SHA)
+            Write-Host 'STAGE27_PATCH13_NATIVE=PASS'
           } elseif (($stageLines -contains 'CURRENT_STAGE=26') -and (
               (($stageLines -contains 'LAST_COMPLETED_STAGE=25') -and ($stageLines -contains 'STAGE26_RUNTIME_VERIFICATION=AWAITING')) -or
               (($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and ($stageLines -contains 'STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED')))) {
