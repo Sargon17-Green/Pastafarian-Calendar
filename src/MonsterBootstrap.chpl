@@ -4,6 +4,7 @@ module MonsterBootstrap {
   use Map;
   use LegacyRemainder;
   use Patch01Adapter;
+  use LegacyDayTag;
 
   enum MonsterPhase {
     boot,
@@ -13,7 +14,9 @@ module MonsterBootstrap {
     discovery01LegacyRemainder,
     stoppedAtDiscovery01Boundary,
     patch01CorrectLegacyRemainder,
-    stoppedAtPatch01Boundary
+    stoppedAtPatch01Boundary,
+    discovery02LegacyDayTag,
+    stoppedAtDiscovery02Boundary
   }
 
   enum MonsterStatus {
@@ -22,7 +25,8 @@ module MonsterBootstrap {
     bootstrapOnly,
     failed,
     discoveryOnly,
-    patch01Only
+    patch01Only,
+    discovery02Only
   }
 
   record MonsterContext {
@@ -39,6 +43,8 @@ module MonsterBootstrap {
     var discovery01Input: bigint;
     var discovery01LegacyOutput: bigint;
     var patch01CorrectedOutput: bigint;
+    var discovery02Input: bigint;
+    var discovery02LegacyOutput: bigint;
   }
 
   record BaseValidationManager {
@@ -138,6 +144,32 @@ module MonsterBootstrap {
     var dispatcher: Patch01Dispatcher;
     metrics.bump(ctx, "patch01.calls");
     dispatcher.dispatch(ctx);
+    return ctx;
+  }
+
+  // Етап 4, відкриття 02: історична парність дня відносно дня заснування.
+  // Помилка залишається відкритою; нормативний результат тут не обчислюється.
+  record Discovery02Dispatcher {
+    proc ref dispatch(ref ctx: MonsterContext, const ref candidateDay: bigint) {
+      ctx.phase = MonsterPhase.discovery02LegacyDayTag;
+      ctx.discovery02Input = candidateDay;
+      ctx.discovery02LegacyOutput = oldDayTag(candidateDay);
+      ctx.branchTrace.pushBack("DISCOVERY_02_OLD_DAY_TAG");
+      ctx.status = MonsterStatus.discovery02Only;
+      ctx.phase = MonsterPhase.stoppedAtDiscovery02Boundary;
+    }
+  }
+
+  proc makeDiscovery02Context(const ref calculationDay: bigint,
+                              const ref targetDay: bigint,
+                              const ref candidateDay: bigint): MonsterContext {
+    var ctx = makePatch01Context(calculationDay, targetDay, candidateDay);
+    if ctx.status != MonsterStatus.patch01Only then return ctx;
+
+    var metrics: BaseMetricsManager;
+    var dispatcher: Discovery02Dispatcher;
+    metrics.bump(ctx, "discovery02.calls");
+    dispatcher.dispatch(ctx, candidateDay);
     return ctx;
   }
 }
