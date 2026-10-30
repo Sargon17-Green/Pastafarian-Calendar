@@ -169,3 +169,51 @@ OwnerLeaseRelease::
     ld a, 3
     ld [wOwnerStatus], a
     ret
+
+; Resolve a logical bank index within an owner-tagged group. Needed by
+; multi-bank semantic arithmetic: never assume owned banks are contiguous.
+; Inputs: wOwnerRequest=owner (1..253), wOwnerSelectIndex=0..12.
+; Outputs: status 0=selected, 2=invalid owner/index, 3=not owned;
+;          wOwnerSelectedBank=physical bank 3..15, or $ff on failure.
+; Failure leaves the currently selected MBC5 SRAM bank untouched.
+; Requires SRAMEnable, serialized caller, no interrupts; clobbers A/BC/D/HL.
+OwnerLeaseSelectBank::
+    ld a, $ff
+    ld [wOwnerSelectedBank], a
+    call OwnerLeaseValidate
+    jr c, .invalid
+    ld a, [wOwnerSelectIndex]
+    cp 13
+    jr nc, .invalid
+    ld c, a
+    ld b, 3
+    ld hl, wLeaseTable + 3
+.scan:
+    ld a, [hli]
+    ld d, a
+    ld a, [wOwnerTag]
+    cp d
+    jr nz, .next
+    ld a, c
+    or a
+    jr z, .found
+    dec c
+.next:
+    inc b
+    ld a, b
+    cp 16
+    jr c, .scan
+    ld a, 3
+    jr .failure
+.found:
+    ld a, b
+    ld [wOwnerSelectedBank], a
+    call SRAMSelectBank
+    xor a
+    ld [wOwnerStatus], a
+    ret
+.invalid:
+    ld a, 2
+.failure:
+    ld [wOwnerStatus], a
+    ret
