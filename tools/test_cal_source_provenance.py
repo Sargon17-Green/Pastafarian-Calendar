@@ -31,7 +31,8 @@ class SourceAuditTests(unittest.TestCase):
         source = b"To compile a thing:\n\\To compiled thing:\n\\\\To other:\nhello\n"
         new_row = (c.git_blob_sha1(source), len(source))
         with patch.dict(c.EXPECTED, {"release": {"the compiler": new_row}}, clear=False):
-            r = c.inspect(source, "release", "the compiler")
+            with patch.dict(c.EXPECTED_SHA256, {"release": {"the compiler": c.hashlib.sha256(source).hexdigest()}}, clear=False):
+                r = c.inspect(source, "release", "the compiler")
         self.assertTrue(r["ok"])
         self.assertEqual(r["active_routines"], 1)
         self.assertEqual(r["commented_routines"], 2)
@@ -44,11 +45,22 @@ class SourceAuditTests(unittest.TestCase):
             }
             for group in c.SOURCES
         }
-        with patch.object(c, "EXPECTED", expected):
+        with patch.object(c, "EXPECTED", expected), patch.object(c, "EXPECTED_SHA256", {group: {name: c.hashlib.sha256((group + name).encode()).hexdigest() for name in c.FILES} for group in c.SOURCES}):
             r = c.audit(lambda group, name: (group + name).encode())
         self.assertTrue(r["all_12_text_sources_verified"])
         self.assertFalse(r["compiler_executed"])
         self.assertFalse(r["native_qa_99_pass"])
+
+    def test_sha256_detects_source_substitution(self):
+        original = b"To count all months:\n"
+        expected = c.git_blob_sha1(original), len(original)
+        wrong_digest = "0" * 64
+        with patch.dict(c.EXPECTED, {"release": {"the compiler": expected}}, clear=False):
+            with patch.dict(c.EXPECTED_SHA256, {"release": {"the compiler": wrong_digest}}, clear=False):
+                result = c.inspect(original, "release", "the compiler")
+        self.assertEqual(result["sha1_git_blob"], expected[0])
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["sha256_expected"], wrong_digest)
 
     def test_abort_on_single_mismatch(self):
         with self.assertRaisesRegex(ValueError, "integrity failure"):
@@ -84,7 +96,7 @@ class SourceAuditTests(unittest.TestCase):
                     (d / group / name).write_bytes(payload)
                     expected[group][name] = (c.git_blob_sha1(payload), len(payload))
             output = d / "out.json"
-            with patch.object(c, "EXPECTED", expected):
+            with patch.object(c, "EXPECTED", expected), patch.object(c, "EXPECTED_SHA256", {group: {name: c.hashlib.sha256(("To count " + group + " " + name + ":\n").encode()).hexdigest() for name in c.FILES} for group in c.SOURCES}):
                 with patch("builtins.print"):
                     rc = c.main(["--directory", str(d), "--output", str(output)])
             self.assertEqual(rc, 0)
