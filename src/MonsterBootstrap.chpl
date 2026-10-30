@@ -3,6 +3,7 @@ module MonsterBootstrap {
   use List;
   use Map;
   use LegacyRemainder;
+  use Patch01Adapter;
 
   enum MonsterPhase {
     boot,
@@ -10,7 +11,9 @@ module MonsterBootstrap {
     dispatch,
     stoppedAtBootstrapBoundary,
     discovery01LegacyRemainder,
-    stoppedAtDiscovery01Boundary
+    stoppedAtDiscovery01Boundary,
+    patch01CorrectLegacyRemainder,
+    stoppedAtPatch01Boundary
   }
 
   enum MonsterStatus {
@@ -18,7 +21,8 @@ module MonsterBootstrap {
     active,
     bootstrapOnly,
     failed,
-    discoveryOnly
+    discoveryOnly,
+    patch01Only
   }
 
   record MonsterContext {
@@ -34,6 +38,7 @@ module MonsterBootstrap {
     var lastError: string;
     var discovery01Input: bigint;
     var discovery01LegacyOutput: bigint;
+    var patch01CorrectedOutput: bigint;
   }
 
   record BaseValidationManager {
@@ -108,6 +113,31 @@ module MonsterBootstrap {
     var dispatcher: Discovery01Dispatcher;
     metrics.bump(ctx, "discovery01.calls");
     dispatcher.dispatch(ctx, candidateValue);
+    return ctx;
+  }
+
+  // Етап 3, латка 01: історичний результат збережено.
+  // Цей маршрут ще не обчислює п'ять нормативних компонентів дати.
+  record Patch01Dispatcher {
+    proc ref dispatch(ref ctx: MonsterContext) {
+      ctx.phase = MonsterPhase.patch01CorrectLegacyRemainder;
+      ctx.patch01CorrectedOutput = applyPatch01(ctx.discovery01LegacyOutput);
+      ctx.branchTrace.pushBack("PATCH_01_LIFT_ZERO");
+      ctx.status = MonsterStatus.patch01Only;
+      ctx.phase = MonsterPhase.stoppedAtPatch01Boundary;
+    }
+  }
+
+  proc makePatch01Context(const ref calculationDay: bigint,
+                          const ref targetDay: bigint,
+                          const ref candidateValue: bigint): MonsterContext {
+    var ctx = makeDiscovery01Context(calculationDay, targetDay, candidateValue);
+    if ctx.status != MonsterStatus.discoveryOnly then return ctx;
+
+    var metrics: BaseMetricsManager;
+    var dispatcher: Patch01Dispatcher;
+    metrics.bump(ctx, "patch01.calls");
+    dispatcher.dispatch(ctx);
     return ctx;
   }
 }

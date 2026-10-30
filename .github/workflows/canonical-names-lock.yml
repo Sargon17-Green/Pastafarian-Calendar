@@ -80,6 +80,23 @@ jobs:
           bash test/run_stage02_tests.sh 2>&1 | tee -a chapel-stage02-native.log
           grep -Fxq 'STAGE_02_DISCOVERY_01_RESULT=PASS' chapel-stage02-native.log
 
+      - name: Execute Stage 3 patch 01 using native Chapel
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'SOURCE_HEAD=%s\n' "$(git rev-parse HEAD)" | tee chapel-stage03-native.log
+          bash test/run_stage03_tests.sh 2>&1 | tee -a chapel-stage03-native.log
+          grep -Fxq 'STAGE_03_PATCH_01_RESULT=PASS' chapel-stage03-native.log
+
+      - name: Retain Stage 3 evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-stage03-native-evidence
+          path: chapel-stage03-native.log
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Retain Stage 2 evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4

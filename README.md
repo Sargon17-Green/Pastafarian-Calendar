@@ -30,3 +30,7 @@ chpl -M src -M test test/stage01_tests.chpl -o stage01_tests
 Локальний запуск: `bash test/run_stage02_tests.sh`. Нативний CI запускає тести першого етапу, потім Discovery 01, окремо зберігаючи журнали.
 
 Підтвердження завершення: Chapel 2.10.0, нативні 27/27 перевірок Discovery 01 та регресійні 51/51 перевірок Bootstrap, обидва набори без помилок. `verify` підтвердив каталог. Доказ: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41032545295 (вихідний коміт `a7f205bcf3520226a079034ead0d9784ff83d7f6`). Етап 3 не дозволено.
+
+## Етап 3 — Patch 01 (відкрито; очікується Native CI)
+
+Виробничий `makePatch01Context` викликає історичний шлях Discovery 01 та окремий `Patch01Adapter`. Адаптер отримує звичайну остачу в [0, M), перетворює лише 0 на M та зберігає інші значення. Історичний `oldRemainder` **не змінено**; новий шлях не викликає тестовий `NormativeOracle` і не обчислює п'ять компонентів дати. Запуск: `bash test/run_stage03_tests.sh`. Закриття потребує нативних тестів Patch01, регресій етапів 1 і 2 та `verify`.
