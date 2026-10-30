@@ -36,6 +36,7 @@ local LegacyPositiveGate = require("legacy_positive_gate_position")
 local PositiveGatePatch = require("positive_gate_patch")
 local LegacyNegativeGate = require("legacy_negative_gate_position")
 local NegativeGatePatch = require("negative_gate_patch")
+local LegacyGateIndex = require("legacy_gate_index_lookup")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -559,6 +560,11 @@ end
 
 function S.negativeGateCoreProbe(index,gaps,historicalDay)
     return NegativeGatePatch.correctNegativeDay(index,gaps,historicalDay)
+end
+
+-- DISCOVERY19: strict-LT lookup on corrected gate days supplied by caller.
+function S.legacyGateIndexProbe(day,gateDays)
+    return LegacyGateIndex.execute(day,gateDays)
 end
 
 function S.calendarDateSpaghetti()

@@ -1559,3 +1559,49 @@ jobs:
           path: stage37-evidence/
           retention-days: 30
           if-no-files-found: warn
+
+  lua_stage38_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    needs: lua_stage37_patch
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Stage38 Native strict-LT discovery, provenance, exit evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage38-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nTESTED_SHA=%s\n' "$GITHUB_SHA" >stage38-evidence/source.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/positive_gate_patch.lua)" = 090e4ade4be6d834c3fc054fbeafa4da932d8f41
+          test "$(git hash-object src/negative_gate_patch.lua)" = 655f324e11954bd67d81ac80fdbcfbf75e339cd0
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          lua5.3 -v >stage38-evidence/lua-version.txt 2>&1
+          set +e
+          timeout --signal=TERM --kill-after=10s 1200s lua5.3 test/stage38_tests.lua . \
+            >stage38-evidence/stdout.txt 2>stage38-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" >stage38-evidence/exit-code.txt
+          cat stage38-evidence/stdout.txt
+          if [ -s stage38-evidence/stderr.txt ]; then cat stage38-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 && test ! -s stage38-evidence/stderr.txt
+          grep -Fxq 'PASS Stage38 canonical: 15 exact EXPECTED_RED, 14 interior MATCH, Stage37 sources unchanged' stage38-evidence/stdout.txt
+          grep -Fxq 'PASS Stage38 synthetic: 96 BigInt chains, 96 boundary RED, 96 interior MATCH' stage38-evidence/stdout.txt
+          grep -Fxq 'PASS Stage38 hardening: 9 rejects, owned snapshots, no oracle in production' stage38-evidence/stdout.txt
+          printf '%s\n' 'STAGE38_NATIVE=PASS' >stage38-evidence/result.txt
+      - name: Upload Stage38 evidence (including failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-stage38-discovery-evidence
+          path: stage38-evidence/
+          retention-days: 30
+
