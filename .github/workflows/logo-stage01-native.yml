@@ -14,7 +14,7 @@ permissions:
 jobs:
   native-stage-1:
     runs-on: ubuntu-26.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Check out this branch
         uses: actions/checkout@v4
@@ -35,32 +35,108 @@ jobs:
               ;;
           esac
 
+      - name: Smoke-check native Logo interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/logo-smoke.log"
+          if printf 'print [CI_LOGO_SMOKE_PASIS]\nbye\n' |
+              xvfb-run -a -s '-screen 0 1024x768x24' \
+                timeout --signal=TERM --kill-after=5s 25s \
+                stdbuf -oL -eL logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            result=$?
+            cat "$log"
+            echo "::error::Logo smoke failed or timed out (exit=$result)"
+            exit 1
+          fi
+          grep -Fxq 'CI_LOGO_SMOKE_PASIS' "$log" || {
+            echo '::error::Logo smoke success marker missing'
+            exit 1
+          }
+
+      - name: Diagnose individual Stage 1 test groups
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CI_DIAGNOSTIC_SCRIPT="$RUNNER_TEMP/logo-stage01-diagnostic.logo"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          source = Path("test/stage01_tests.logo").read_text(encoding="utf-8")
+          if not source.endswith("\nstage01.run\n"):
+              raise SystemExit("Stage 1 source tail changed; refuse diagnostic rewrite")
+          groups = [
+              ("t.catalog", "CATALOG"),
+              ("t.exact", "EXACT"),
+              ("t.counts", "COUNTS"),
+              ("t.permutation", "PERMUTATION"),
+              ("t.compositions", "COMPOSITIONS"),
+              ("t.weaving", "WEAVING"),
+              ("t.monster.bootstrap", "MONSTER_BOOTSTRAP"),
+          ]
+          for procedure, name in groups:
+              target = f"  {procedure}\n"
+              if source.count(target) != 1:
+                  raise SystemExit(f"Unexpected invocation count: {procedure}")
+              source = source.replace(
+                  target,
+                  f"  print [CI_ENTER_{name}]\n"
+                  + target
+                  + f"  print [CI_EXIT_{name}]\n",
+                  1,
+              )
+          # This runner-only file adds progress prints and a documented batch exit.
+          # The committed original test and all its assertions stay untouched.
+          Path(os.environ["CI_DIAGNOSTIC_SCRIPT"]).write_text(
+              source + "bye\n", encoding="utf-8"
+          )
+          PY
+          log="$RUNNER_TEMP/logo-stage01-diagnostic.log"
+          if xvfb-run -a -s '-screen 0 1024x768x24' \
+              timeout --signal=TERM --kill-after=5s 180s \
+              stdbuf -oL -eL logo "$CI_DIAGNOSTIC_SCRIPT" </dev/null >"$log" 2>&1; then
+            cat "$log"
+          else
+            result=$?
+            cat "$log"
+            echo "::error::Instrumented Stage 1 failed/timed out (exit=$result)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_1_TESTI_PASIS' "$log" || {
+            echo '::error::Diagnostic run did not reach Stage 1 PASS marker'
+            exit 1
+          }
+          if grep -Eq 'TESTO_FALIIS|STAGE_1_TESTI_FALIIS|I don.t know how to' "$log"; then
+            echo '::error::Diagnostic run contains a failure marker'
+            exit 1
+          fi
+
       - name: Run original Stage 1 tests in native UCBLogo
         shell: bash
         run: |
           set -euo pipefail
           log="$RUNNER_TEMP/logo-stage01.log"
-          # UCBLogo 6.2.5 initializes GTK+ even for non-graphical Stage 1 tests.
-          # Use a private, ephemeral X server instead of requiring a runner DISPLAY.
-          if xvfb-run -a -s '-screen 0 1024x768x24' \
-              timeout --signal=TERM --kill-after=5s 300s \
-              logo test/stage01_tests.logo </dev/null >"$log" 2>&1; then
+          # Keep the original source unchanged; send BYE only after it finishes.
+          if printf 'bye\n' |
+              xvfb-run -a -s '-screen 0 1024x768x24' \
+                timeout --signal=TERM --kill-after=5s 300s \
+                stdbuf -oL -eL logo test/stage01_tests.logo >"$log" 2>&1; then
             cat "$log"
           else
             result=$?
             cat "$log"
-            echo "::error::Native Logo test failed or timed out (exit=$result)"
+            echo "::error::Original native Logo test failed/timed out (exit=$result)"
             exit 1
           fi
-
           if ! grep -Fxq 'STAGE_1_TESTI_PASIS' "$log"; then
-            echo "::error::Native tests did not emit the required Stage 1 PASS marker"
+            echo '::error::Original Stage 1 PASS marker missing'
             exit 1
           fi
-
           if grep -Eq 'TESTO_FALIIS|STAGE_1_TESTI_FALIIS|I don.t know how to' "$log"; then
-            echo "::error::Native test log contains an error marker"
+            echo '::error::Original Stage 1 test log contains a failure marker'
             exit 1
           fi
-
           echo 'NATIVE_STAGE_1_VERIFICATION=PASS'
