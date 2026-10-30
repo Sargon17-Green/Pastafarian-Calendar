@@ -52,7 +52,7 @@ jobs:
             build/normative_oracle_calendar.o \
             -o build/stage01_tests
           test -x build/stage01_tests
-      - name: Run bounded Stage 1 Oracle smoke (50 selected assertions; not full acceptance)
+      - name: Run bounded Stage 1 Oracle smoke (51 selected assertions; not full acceptance)
         shell: bash
         run: |
           set -euo pipefail
@@ -67,9 +67,9 @@ jobs:
           fi
           grep -Fxq 'STAGE01_BOUNDED_ORACLE_PASS' <<< "$output"
           actual="$(grep -c '^PASS: ' <<< "$output")"
-          echo "STAGE01_BOUNDED_ORACLE_ASSERTIONS=$actual EXPECTED=50 (NOT full Stage 1 acceptance)"
-          echo "Fortran Stage 1 bounded Oracle smoke: $actual/50 assertions (not full acceptance)." >> "$GITHUB_STEP_SUMMARY"
-          if [[ "$actual" -ne 50 ]]; then
+          echo "STAGE01_BOUNDED_ORACLE_ASSERTIONS=$actual EXPECTED=51 (NOT full Stage 1 acceptance)"
+          echo "Fortran Stage 1 bounded Oracle smoke: $actual/51 assertions (not full acceptance)." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$actual" -ne 51 ]]; then
             echo "::error::Stage 1 bounded Oracle assertion count mismatch"
             exit 1
           fi
