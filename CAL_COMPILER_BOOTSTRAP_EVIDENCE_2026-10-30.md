@@ -748,3 +748,75 @@ application event-loop entry and is not the same routine as
 To handle run at lines 1687–1699. Their distinct purposes explain
 why searching only for an exact function declaration previously
 missed the two explicit UI-driven process launch sites.
+
+## 2026-10-30: PE32 code-section permissions and mitigation-header audit — 81/81 CI PASS
+
+**Prior completed run**: GitHub Actions 41130526550, job 124319938111,
+for process-route code commit 6f03105e204d7ca2868c3b50daf252dcea2bbf0e,
+completed SUCCESS. Its log reads "Ran 68 tests in 0.022s", then "OK".
+The pinned 12-text-source check and process-route source verifier
+completed, the latter finding exactly two explicit Run-to-launcher sites.
+
+**New static compiler-output-format evidence** at upstream
+elenderg/PAL-1000 commit 2d44defdedf24519bba754114ee66e6d1defff1e,
+file recursos/CAL-4700/the compiler:
+
+- Lines 2930–2933 initialize the DOS header with MZ signature 0x5A4D
+  and PE header offset 0x100.
+- Lines 2997–3005 initialize PE signature 0x4550, x86 machine 0x014C,
+  three sections, and optional-header size 224.
+- Lines 2973–2994 initialize PE32 optional header magic 0x010B,
+  Windows GUI subsystem 2, memory/file alignment 4096,
+  and dllcharacteristics=0.
+- Line 2950 gives the code section Characteristics=0xE0000020,
+  representing CODE, EXECUTE, READ, WRITE (RWX).
+- Lines 2958 and 2971 give the data and idata sections
+  Characteristics=0xC0000040, representing initialized data plus
+  READ and WRITE.
+- The 0 value of DllCharacteristics means DYNAMIC_BASE (0x0040),
+  NX_COMPAT (0x0100), and GUARD_CF (0x4000) are not declared in
+  these source-defined PE headers.
+- Lines 3024–3034 link imports, globals, literals and routines
+  into the in-memory EXE image. Lines 1113–1119 write this image
+  to the compiler's output EXE path.
+
+These are significant modern executable-hardening gaps **in source
+definitions**. They do not independently establish the on-disk
+contents of any generated EXE, the effective host operating-system
+policy, exploitability, or any malicious intent.
+
+Added on the existing feature branch:
+- tools/cal_static_pe_header_audit.py: six-source SHA/length/Git-blob
+  verification, exact PE/DOS scalar header initializer checks,
+  signed-32-bit-vs-hex consistency, linker statement checks, and
+  interpreted code/section/mitigation flags. It processes *text only*.
+- tools/test_cal_static_pe_header_audit.py: 13 regression tests,
+  including missing fields, RWX flag drift, different mitigation
+  flags, malformed signed/hex constants, duplicate assignments,
+  missing linker steps, and negative safety claims.
+- .github/workflows/cal-source-provenance.yml: source-only
+  CLI audit and all 81 unit tests.
+
+**Verified latest completed CI**: GitHub Actions run 41131265571,
+job 124322487219, source/workflow SHA
+2696e4d48be5900146c1254baf06bf7796ab7be9,
+completed SUCCESS. Logs show "Ran 81 tests in 0.051s", then "OK";
+all source-only steps passed, including the 12-source provenance,
+process routes and this PE32 audit. The PE audit itself reported:
+source_text_gate_pass=true, pe32_i386=true, code_rwx=true,
+data_read_write=true, imports_read_write=true,
+dynamic_base_declared=false, nx_compat_declared=false,
+control_flow_guard_declared=false, dll_characteristics_value=0,
+produced_binary_inspected=false and compiler_executed=false.
+
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41131265571
+
+PE specification used for flag interpretation:
+https://learn.microsoft.com/en-us/windows/win32/debug/pe-format
+Microsoft documented DllCharacteristics values:
+https://learn.microsoft.com/en-us/dotnet/api/system.reflection.portableexecutable.dllcharacteristics
+
+Unresolved: stage-zero compiler provenance and safety; malware
+clearance; all 99 native QA groups; 47-month native calculation.
+No CAL executable was downloaded or executed; no changes to main
+or the 82 canonical calendar source files.
