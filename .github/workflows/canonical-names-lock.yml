@@ -1437,14 +1437,58 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - name: Enstale Lua 5.3
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y lua5.3
-      - name: Full native Stage 1–35 plus historic Stage 34 red audit
+      - name: Stage35 full Native suite, source lock, and separate stdout/stderr/exit evidence
+        shell: bash
         run: |
           set -euo pipefail
+          mkdir -p stage35-evidence
+          {
+            printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\n'
+            printf 'TESTED_SHA=%s\n' "$GITHUB_SHA"
+            printf 'CHECKOUT_SHA=%s\n' "$(git rev-parse HEAD)"
+            printf 'SOURCE_BASELINE_SHA=57269dd8e1fbdc4639bdfdf783b42c21092d26ff\n'
+          } > stage35-evidence/source.txt
+          lua5.3 -v >stage35-evidence/lua-version.txt 2>&1
           find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
           test "$(git hash-object src/legacy_positive_gate_position.lua)" = f04c246bb6b169a49407fe49b1618f95de3f574a
-          lua5.3 test/stage35_tests.lua .
+          if grep -Fxq 'CURRENT_STAGE=35' DEVELOPMENT_STAGE.md; then
+            git cat-file -e '57269dd8e1fbdc4639bdfdf783b42c21092d26ff^{commit}'
+            git diff --exit-code 57269dd8e1fbdc4639bdfdf783b42c21092d26ff HEAD -- src/ test/
+            printf '%s\n' 'SOURCE_LOCK=PASS_UNCHANGED_SRC_TEST' >stage35-evidence/source-lock.txt
+          else
+            printf '%s\n' 'SOURCE_LOCK=NOT_APPLICABLE_AFTER_STAGE35' >stage35-evidence/source-lock.txt
+          fi
+          set +e
+          timeout --signal=TERM --kill-after=10s 3600s \
+            lua5.3 test/stage35_tests.lua . \
+            >stage35-evidence/stdout.txt 2>stage35-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" >stage35-evidence/exit-code.txt
+          tail -n 45 stage35-evidence/stdout.txt
+          if [ -s stage35-evidence/stderr.txt ]; then
+            cat stage35-evidence/stderr.txt >&2
+          fi
+          if [ "$code" -ne 0 ] || [ -s stage35-evidence/stderr.txt ]; then
+            echo "::error::Stage35 Native exit=$code or stderr was non-empty"
+            exit 1
+          fi
+          grep -Fxq 'PASS Stage 35 PATCH 17 full native Stage 1–35 suite' stage35-evidence/stdout.txt
+          printf '%s\n' 'STAGE35_FULL_NATIVE_REGATE=PASS' >stage35-evidence/result.txt
+          cat stage35-evidence/result.txt >>"$GITHUB_STEP_SUMMARY"
+      - name: Upload Stage35 Native evidence (even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-stage35-regate-evidence
+          path: stage35-evidence/
+          if-no-files-found: warn
+          retention-days: 30
