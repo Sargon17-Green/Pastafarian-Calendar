@@ -71,11 +71,20 @@ Public Sub CalculatePastafarianDate()
 End Sub
 
 Private Function ExactCellString(ByVal cell As Range) As String
-    If VarType(cell.Value2) <> vbString Then
+    ' Excel can return an Empty Variant for a truly cleared cell. Let the
+    ' five field-specific validators reject missing text with their own codes.
+    ' Numeric/formula/error values still fail the exact-text contract (519).
+    Dim value As Variant
+    value = cell.Value2
+    If IsEmpty(value) Then
+        ExactCellString = vbNullString
+        Exit Function
+    End If
+    If VarType(value) <> vbString Then
         Err.Raise vbObjectError + 519, , _
             "Input " & cell.Address(False, False) & " must be stored as TEXT to avoid Excel precision loss."
     End If
-    ExactCellString = Trim$(CStr(cell.Value2))
+    ExactCellString = Trim$(CStr(value))
 End Function
 
 Private Function ValidDecimal(ByVal raw As String, ByVal positive As Boolean) As Boolean
