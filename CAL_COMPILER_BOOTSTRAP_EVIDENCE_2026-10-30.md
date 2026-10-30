@@ -663,3 +663,59 @@ malware_clearance=false, native_qa_99_pass=false,
 stage_zero_verified=false. The quarantined CAL-4018 and
 unverified CAL-4700 binaries were not executed; no modifications to
 main or the canonical calendar implementation were made.
+
+## 2026-10-30: correction — explicit Run/Stop process-launch call sites
+
+A prior narrow search for an exact declaration-shaped string
+incorrectly suggested that there were no direct calls to the process
+launcher. This claim is **retracted**. The real six-file, pinned-source
+scan located these direct call sites:
+
+- the desktop lines **1687–1699**: editor Run saves the work, locates
+  the directory, compiles it, checks the compiler abort flag and then
+  invokes the common process launcher using the compiler's EXE path
+  (line **1697**).
+- the finder lines **702–710**: Finder Run checks that the selected
+  item's extension is **.exe** (line **706**) and invokes the same
+  launcher using the selected item's path (line **708**).
+- the desktop lines **1753–1757**: Stop invokes the shared process stop
+  routine (line **1756**).
+- the noodle lines **12711–12724**: the shared launcher calls Windows
+  **CreateProcessA** (line **12717**) and starts a waiting thread via
+  **CreateThread** (line **12723**). Its compile-time source includes
+  the detached-process / normal-priority / default-error flags.
+- the noodle lines **1091–1099**: the wait routine uses
+  **WaitForSingleObject** and releases the process handle.
+- the noodle lines **12831–12834**: the stop routine uses
+  **TerminateProcess**.
+- the desktop registers Run under both editor and Finder modes at
+  **982–983**, Stop at **999–1000**, dispatches the command handlers
+  at **740**, **760**, and handles the r-key shortcut at **1166–1167**.
+
+This establishes **static UI-to-process-launch paths**. It does not
+show unsolicited execution, startup auto-run, malware behavior or any
+completed execution. Other indirect or generated-code paths are not
+excluded.
+
+New source-only files:
+- tools/cal_static_process_routes.py
+- tools/test_cal_static_process_routes.py
+
+The new auditor validates direct Run/Stop routes with routine
+boundaries, editor and Finder menu/keyboard/dispatch markers,
+the .exe-extension restriction, the compiler-generated EXE path,
+Windows process/thread/wait/terminate calls, and expected counts of
+selected direct launcher statements. Each file is checked against
+its pinned source hash before inspection. Twelve new regression tests
+exercise positive and negative paths.
+
+GitHub Actions run **41130526550** against code commit
+**6f03105e204d7ca2868c3b50daf252dcea2bbf0e**
+was queued when this section was written. An expected total of
+**68 Python unit tests** is not a confirmed PASS until completed logs
+and the new process-route CLI step are checked.
+
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41130526550
+
+No CAL executable was downloaded or executed. The stage-zero
+trust gate and all 99 Native QA groups remain unverified.
