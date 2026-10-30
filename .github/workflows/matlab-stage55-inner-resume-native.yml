@@ -1,0 +1,69 @@
+name: MATLAB Stage 55 Resume Year-5000 Middle-Rank Cursor
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_real_year_inner_cursor_resume.m'
+      - '.github/workflows/matlab-stage55-inner-resume-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: matlab-stage55-middle-rank-resume-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  resume-one-day:
+    name: MATLAB R2026a / source checkpoint / third day
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact MATLAB+Polski commit
+        uses: actions/checkout@v4
+      - name: Retrieve retained two-day checkpoint from prior native run
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-inner-cursor-native-40741372213
+          run-id: 40741372213
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Verify exact checkpoint file is present
+        run: |
+          test -s logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_2.json
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_2.json
+      - name: Set up native MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Continue one day and independently recount child
+        uses: matlab-actions/run-command@v3
+        with:
+          command: >-
+            addpath('tests');
+            diary('logs/STAGE55_REAL_YEAR_INNER_CURSOR_RESUME_NATIVE.log');
+            try;
+              fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
+              run_stage55_real_year_inner_cursor_resume();
+              diary off;
+            catch ME;
+              disp(getReport(ME,'extended','hyperlinks','off'));
+              fprintf('STAGE55_REAL_YEAR_MIDDLE_RANK_RESUME_ONE_DAY_FAIL\n');
+              diary off;
+              rethrow(ME);
+            end
+      - name: Preserve log and source/result cursors even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-middle-rank-resume-${{ github.run_id }}
+          path: |
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_RESUME_NATIVE.log
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_2.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_3.json
+          if-no-files-found: warn
+          retention-days: 30
