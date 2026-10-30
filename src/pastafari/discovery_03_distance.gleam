@@ -35,7 +35,8 @@ pub fn dispatch_discovery_03(
         inclusive_distance: old_distance(
           completed.calculation_day,
           completed.target_day,
-        ) + 1,
+        )
+          + 1,
       ))
   }
 }
