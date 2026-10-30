@@ -267,21 +267,21 @@ jobs:
           timeout --signal=TERM --kill-after=10s 300s \
             cobc -std=default -free \
             -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror \
-            -x -o build/stage05-discovery \
-            test/stage05_discovery_tests.cob \
+            -x -o build/stage05-patch \
+            test/stage05_patch_tests.cob \
             src/big_integer.cob \
             src/monster_bootstrap.cob \
             src/legacy_day_tag.cob \
             src/patched_day_tag.cob \
             2>&1 | tee -a build/stage05-native.log
           timeout --signal=TERM --kill-after=10s 120s \
-            ./build/stage05-discovery 2>&1 | tee -a build/stage05-native.log
+            ./build/stage05-patch 2>&1 | tee -a build/stage05-native.log
           grep -Eq '^STAGE5_PATCH_PASS=[[:space:]]*0*65[[:space:]]*$' build/stage05-native.log
           grep -Eq '^STAGE5_CONTROL_PASS=[[:space:]]*0*64[[:space:]]*$' build/stage05-native.log
           grep -Eq '^STAGE5_WITNESS_PATCH=[[:space:]]*0*3[[:space:]]*$' build/stage05-native.log
           grep -Eq '^STAGE5_WITNESS_CONTROL=[[:space:]]*0*2[[:space:]]*$' build/stage05-native.log
           grep -Eq '^STAGE5_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage05-native.log
-          grep -Fxq 'RESULT=PASS_STAGE5_PATCH_PASS_NATIVE' build/stage05-native.log
+          grep -Fxq 'RESULT=PASS_STAGE5_PATCH02_NATIVE' build/stage05-native.log
           test -f docs/STAGE_04_DISCOVERY_02_CROSS_BRANCH_CONTRACT_2026-10-30.md
           ! grep -E 'PATCH02|DAY-TAG-PATCH' src/legacy_day_tag.cob
           echo 'STAGE5_PATCH02_NATIVE_RESULT=PASS' | tee -a build/stage05-native.log
@@ -289,7 +289,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cobol-stage05-expected-red
+          name: cobol-stage05-patch02
           path: build/stage05-native.log
           if-no-files-found: warn
           retention-days: 30
