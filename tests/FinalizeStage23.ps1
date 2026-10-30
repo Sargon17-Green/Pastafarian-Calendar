@@ -10,7 +10,7 @@ $content = Get-Content -Raw -Encoding UTF8 $stageFile
 $lines = @(Get-Content -Encoding UTF8 $stageFile)
 $preSeal = ($lines -contains 'LAST_COMPLETED_STAGE=22') -and
            ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=AWAITING')
-$postSeal = (($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24')) -and
+$postSeal = (($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24') -or ($lines -contains 'LAST_COMPLETED_STAGE=25')) -and
             ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED')
 if ($preSeal) {
     $updatedLines = foreach ($line in $lines) {

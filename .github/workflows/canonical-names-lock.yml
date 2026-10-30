@@ -48,7 +48,9 @@ jobs:
             & .\tests\Stage01.Tests.ps1
             if (-not $?) { throw 'Stage 1 regression failed after Stage 23 seal' }
             Write-Host 'STAGE23_POST_SEAL_BASELINE=PASS'
-          } elseif (($stageLines -contains 'CURRENT_STAGE=25') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=24') -and ($stageLines -contains 'STAGE25_RUNTIME_VERIFICATION=AWAITING')) {
+          } elseif (($stageLines -contains 'CURRENT_STAGE=25') -and (
+              (($stageLines -contains 'LAST_COMPLETED_STAGE=24') -and ($stageLines -contains 'STAGE25_RUNTIME_VERIFICATION=AWAITING')) -or
+              (($stageLines -contains 'LAST_COMPLETED_STAGE=25') -and ($stageLines -contains 'STAGE25_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
             & .\tests\Stage01.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage01 failed Stage25' }
             & .\tests\Stage23.Tests.ps1

@@ -15,7 +15,7 @@ $metadata = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.
 Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_STAGE=(23|24|25)\s*$') -Name 'Stage 23 regression under Stage24'
 Assert-StageTrue -Condition (($metadata -match '(?m)^CURRENT_STAGE=24\s*$') -or ($metadata -match '(?m)^CURRENT_KIND=PATCH\s*$')) -Name 'Patch11 sealed baseline'
 $preSeal = ($metadata -match '(?m)^LAST_COMPLETED_STAGE=22\s*$') -and ($metadata -match '(?m)^STAGE23_RUNTIME_VERIFICATION=AWAITING\s*$')
-$postSeal = ($metadata -match '(?m)^LAST_COMPLETED_STAGE=(23|24)\s*$') -and ($metadata -match '(?m)^STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$')
+$postSeal = ($metadata -match '(?m)^LAST_COMPLETED_STAGE=(23|24|25)\s*$') -and ($metadata -match '(?m)^STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$')
 Assert-StageTrue -Condition ($preSeal -or $postSeal) -Name 'Stage 23 metadata must be a consistent awaiting or sealed pair'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE22_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Historical Stage 22 RED preserved'
 
