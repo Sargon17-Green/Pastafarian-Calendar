@@ -80,3 +80,17 @@ CI pending is neither a blocker nor PASS. A potential later PATCH02
 must have its own separately reviewed exact-semantic equivalence,
 bounded differential tests, gates, and new stage; no production
 mutation is authorized here. Do not merge main.
+
+## Completed Stage 4 acceptance, 2026-10-31 (Asia/Jerusalem)
+
+GitHub Actions [41136407730](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41136407730)
+completed 5/5 jobs successfully at
+`43c5fc2687ecd2d711f6d5732512ebdfda0f3dc7`.
+The `native-stage04-discovery02` GNAT 13 log explicitly contains
+compilation, `gnatbind-13`, `gnatlink-13`, and
+`STAGE04_DISCOVERY02_ASSERTIONS= 18`.
+The bounded discovery and its source-level witness are ACCEPTED.
+This does not verify the hostile short stream's reachability from
+Ask_Bowl, nor any full Calendar_Date output. The old pathological
+short loop was intentionally never executed. A later patch needs
+separate acceptance gates; production and main are untouched.
