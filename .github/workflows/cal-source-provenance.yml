@@ -1,0 +1,33 @@
+name: CAL source provenance (no executable)
+
+on:
+  push:
+    branches:
+      - "Plain-English-Programming+English"
+    paths:
+      - "tools/cal_source_provenance.py"
+      - "tools/test_cal_source_provenance.py"
+      - ".github/workflows/cal-source-provenance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Check out source branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run offline source-verifier tests
+        run: python3 -m unittest discover -s tools -p "test_cal_source_provenance.py" -v
+      - name: Verify twelve pinned text sources; do not fetch ZIP or EXE
+        run: python3 tools/cal_source_provenance.py --fetch --output "$RUNNER_TEMP/cal-source-provenance.json"
+      - name: Summarize non-execution gate
+        run: |
+          echo "Only textual provenance was checked." >> "$GITHUB_STEP_SUMMARY"
+          echo "No CAL executable was downloaded or executed." >> "$GITHUB_STEP_SUMMARY"
+          echo "Native QA and malware clearance remain unverified." >> "$GITHUB_STEP_SUMMARY"
