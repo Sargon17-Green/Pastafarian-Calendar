@@ -42,3 +42,19 @@ jobs:
         run: |
           set -euo pipefail
           sh ./run_stage01.sh
+
+  native-stage02-discovery01:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ada 2022 toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gnat gprbuild
+      - name: Run bounded Stage 2 DISCOVERY01 native probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh ./run_stage02_discovery01.sh
