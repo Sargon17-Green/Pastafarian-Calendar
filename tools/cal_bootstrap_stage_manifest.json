@@ -1,0 +1,350 @@
+{
+  "kind": "PINNED_CAL_TUTORIAL_GIT_TREE_METADATA_NOT_EXECUTABLE_TRUST",
+  "repository": "elenderg/PAL-1000",
+  "commit": "2d44defdedf24519bba754114ee66e6d1defff1e",
+  "tutorial_parent_tree": "33e3765b57d1e6ce879b5c7f69f48262738cbf66",
+  "instructions_blob": "c7fe98e764fe1ff4584a93645145956f1014041e",
+  "source": "GitHub Git trees and blob metadata; no binary bytes fetched",
+  "binary_downloaded": false,
+  "compiler_executed": false,
+  "stage_zero_verified": false,
+  "native_qa_99_pass": false,
+  "stages": [
+    {
+      "stage": "passo01",
+      "tree_sha": "79eda0a2b7a1e8861cfae4a49680819079c23a3c",
+      "lexicon_tree": "9bf396bf64b1cd543e2737a0210924c0cd9d7c6e",
+      "sources": {
+        "the compiler": {
+          "sha": "1cdc47a3ad273e66a76d4a451bc9e79f1237bd4d",
+          "size": 201454
+        },
+        "the desktop": {
+          "sha": "357091dfdbf125222e218b8e5aeb90dc19275ca5",
+          "size": 84111
+        },
+        "the editor": {
+          "sha": "25df723faf8e65e78b0c8a5bdd28330720907dbd",
+          "size": 31924
+        },
+        "the finder": {
+          "sha": "660357bcec832f28059a950b264e20381dc997d6",
+          "size": 45063
+        },
+        "the writer": {
+          "sha": "460c77888767a49ef6f73f611e82101c04ba09e1",
+          "size": 161468
+        },
+        "the noodle": {
+          "sha": "9d89eea0ff6527828ffe1130224b0bbf3547c55e",
+          "size": 591050
+        }
+      },
+      "binary_objects": {}
+    },
+    {
+      "stage": "passo02",
+      "tree_sha": "cc6ff6f4e9b0f17b2495e3822ada180af98bc1b6",
+      "lexicon_tree": "9bf396bf64b1cd543e2737a0210924c0cd9d7c6e",
+      "sources": {
+        "the compiler": {
+          "sha": "f454af1822f57a1fbc743cc80128c5aea578ac4f",
+          "size": 201370
+        },
+        "the desktop": {
+          "sha": "357091dfdbf125222e218b8e5aeb90dc19275ca5",
+          "size": 84111
+        },
+        "the editor": {
+          "sha": "25df723faf8e65e78b0c8a5bdd28330720907dbd",
+          "size": 31924
+        },
+        "the finder": {
+          "sha": "660357bcec832f28059a950b264e20381dc997d6",
+          "size": 45063
+        },
+        "the writer": {
+          "sha": "460c77888767a49ef6f73f611e82101c04ba09e1",
+          "size": 161468
+        },
+        "the noodle": {
+          "sha": "9d89eea0ff6527828ffe1130224b0bbf3547c55e",
+          "size": 591050
+        }
+      },
+      "binary_objects": {}
+    },
+    {
+      "stage": "passo03",
+      "tree_sha": "3abe2a4ea0ec0f8cf43898193771d712ba995882",
+      "lexicon_tree": "9bf396bf64b1cd543e2737a0210924c0cd9d7c6e",
+      "sources": {
+        "the compiler": {
+          "sha": "0781c345751fa6728ddb8a870a15c187e0097ab6",
+          "size": 201334
+        },
+        "the desktop": {
+          "sha": "357091dfdbf125222e218b8e5aeb90dc19275ca5",
+          "size": 84111
+        },
+        "the editor": {
+          "sha": "25df723faf8e65e78b0c8a5bdd28330720907dbd",
+          "size": 31924
+        },
+        "the finder": {
+          "sha": "660357bcec832f28059a950b264e20381dc997d6",
+          "size": 45063
+        },
+        "the writer": {
+          "sha": "460c77888767a49ef6f73f611e82101c04ba09e1",
+          "size": 161468
+        },
+        "the noodle": {
+          "sha": "9d89eea0ff6527828ffe1130224b0bbf3547c55e",
+          "size": 591050
+        }
+      },
+      "binary_objects": {
+        "cal-4700's son.exe2": {
+          "sha": "6de1969837d67fa54ede65b73d356628bd0b18cb",
+          "size": 643069
+        }
+      }
+    },
+    {
+      "stage": "passo04",
+      "tree_sha": "c6fc6adadc1b6324bd484a433e1279db5c14ac23",
+      "lexicon_tree": "9bf396bf64b1cd543e2737a0210924c0cd9d7c6e",
+      "sources": {
+        "the compiler": {
+          "sha": "0c4820c4c93d55326c953de3a82c09902949c3da",
+          "size": 200611
+        },
+        "the desktop": {
+          "sha": "357091dfdbf125222e218b8e5aeb90dc19275ca5",
+          "size": 84111
+        },
+        "the editor": {
+          "sha": "25df723faf8e65e78b0c8a5bdd28330720907dbd",
+          "size": 31924
+        },
+        "the finder": {
+          "sha": "660357bcec832f28059a950b264e20381dc997d6",
+          "size": 45063
+        },
+        "the writer": {
+          "sha": "460c77888767a49ef6f73f611e82101c04ba09e1",
+          "size": 161468
+        },
+        "the noodle": {
+          "sha": "9d89eea0ff6527828ffe1130224b0bbf3547c55e",
+          "size": 591050
+        }
+      },
+      "binary_objects": {
+        "cal-4700's son.exe2": {
+          "sha": "6de1969837d67fa54ede65b73d356628bd0b18cb",
+          "size": 643069
+        },
+        "cal-4700's son.exe3": {
+          "sha": "d90c5c4a0ac852e2543c1e514c3bd6decdf58a49",
+          "size": 651262
+        },
+        "cal-4700's son.exe4": {
+          "sha": "d4d0578fc81bbfe86a4b22ef2c86ff7e3d67e290",
+          "size": 651262
+        }
+      }
+    },
+    {
+      "stage": "passo05",
+      "tree_sha": "77e0ec276db7fbcb8b1d6315b4e26d08081f8057",
+      "lexicon_tree": "9bf396bf64b1cd543e2737a0210924c0cd9d7c6e",
+      "sources": {
+        "the compiler": {
+          "sha": "b032d0cc2d3ad85ce9ab309866b0ecde43a60c7a",
+          "size": 200351
+        },
+        "the desktop": {
+          "sha": "357091dfdbf125222e218b8e5aeb90dc19275ca5",
+          "size": 84111
+        },
+        "the editor": {
+          "sha": "25df723faf8e65e78b0c8a5bdd28330720907dbd",
+          "size": 31924
+        },
+        "the finder": {
+          "sha": "660357bcec832f28059a950b264e20381dc997d6",
+          "size": 45063
+        },
+        "the writer": {
+          "sha": "460c77888767a49ef6f73f611e82101c04ba09e1",
+          "size": 161468
+        },
+        "the noodle": {
+          "sha": "9d89eea0ff6527828ffe1130224b0bbf3547c55e",
+          "size": 591050
+        }
+      },
+      "binary_objects": {
+        "cal-4700's son.exe2": {
+          "sha": "6de1969837d67fa54ede65b73d356628bd0b18cb",
+          "size": 643069
+        },
+        "cal-4700's son.exe3": {
+          "sha": "d90c5c4a0ac852e2543c1e514c3bd6decdf58a49",
+          "size": 651262
+        },
+        "cal-4700's son.exe4": {
+          "sha": "d4d0578fc81bbfe86a4b22ef2c86ff7e3d67e290",
+          "size": 651262
+        }
+      }
+    },
+    {
+      "stage": "passo06",
+      "tree_sha": "33a2a2a974f80525fe8518c8028fc7dd1195f781",
+      "lexicon_tree": "9bf396bf64b1cd543e2737a0210924c0cd9d7c6e",
+      "sources": {
+        "the compiler": {
+          "sha": "2fefa2df621f2bccacc95ecdaf91d2e95a461d8e",
+          "size": 200346
+        },
+        "the desktop": {
+          "sha": "357091dfdbf125222e218b8e5aeb90dc19275ca5",
+          "size": 84111
+        },
+        "the editor": {
+          "sha": "25df723faf8e65e78b0c8a5bdd28330720907dbd",
+          "size": 31924
+        },
+        "the finder": {
+          "sha": "660357bcec832f28059a950b264e20381dc997d6",
+          "size": 45063
+        },
+        "the writer": {
+          "sha": "460c77888767a49ef6f73f611e82101c04ba09e1",
+          "size": 161468
+        },
+        "the noodle": {
+          "sha": "9d89eea0ff6527828ffe1130224b0bbf3547c55e",
+          "size": 591050
+        }
+      },
+      "binary_objects": {
+        "cal-4700's son.exe2": {
+          "sha": "6de1969837d67fa54ede65b73d356628bd0b18cb",
+          "size": 643069
+        },
+        "cal-4700's son.exe3": {
+          "sha": "d90c5c4a0ac852e2543c1e514c3bd6decdf58a49",
+          "size": 651262
+        },
+        "cal-4700's son.exe4": {
+          "sha": "d4d0578fc81bbfe86a4b22ef2c86ff7e3d67e290",
+          "size": 651262
+        }
+      }
+    },
+    {
+      "stage": "passo07",
+      "tree_sha": "06cc5724cf2efd9b16b78bdf05e32d6e952768a5",
+      "lexicon_tree": "9bf396bf64b1cd543e2737a0210924c0cd9d7c6e",
+      "documentation_tree": "f3da442082ccf3af9801b1a24c2d38e8c5b7b3c1",
+      "sources": {
+        "the compiler": {
+          "sha": "4aa0a6e7a692c306b574d05e8f5cf0045d74cca4",
+          "size": 200211
+        },
+        "the desktop": {
+          "sha": "357091dfdbf125222e218b8e5aeb90dc19275ca5",
+          "size": 84111
+        },
+        "the editor": {
+          "sha": "25df723faf8e65e78b0c8a5bdd28330720907dbd",
+          "size": 31924
+        },
+        "the finder": {
+          "sha": "660357bcec832f28059a950b264e20381dc997d6",
+          "size": 45063
+        },
+        "the writer": {
+          "sha": "460c77888767a49ef6f73f611e82101c04ba09e1",
+          "size": 161468
+        },
+        "the noodle": {
+          "sha": "9d89eea0ff6527828ffe1130224b0bbf3547c55e",
+          "size": 591050
+        }
+      },
+      "binary_objects": {
+        "cal-4700's son.exe2": {
+          "sha": "6de1969837d67fa54ede65b73d356628bd0b18cb",
+          "size": 643069
+        },
+        "cal-4700's son.exe3": {
+          "sha": "d90c5c4a0ac852e2543c1e514c3bd6decdf58a49",
+          "size": 651262
+        },
+        "cal-4700's son.exe4": {
+          "sha": "d4d0578fc81bbfe86a4b22ef2c86ff7e3d67e290",
+          "size": 651262
+        },
+        "cal-4700's son.exe5": {
+          "sha": "3ae3311a2326e8f4a446f62a53fa09d7dcbfca3f",
+          "size": 704510
+        }
+      }
+    },
+    {
+      "stage": "passo08",
+      "tree_sha": "9e97ceaae1cd92d385c10f5c03ee2d55b5b90e1a",
+      "lexicon_tree": "9bf396bf64b1cd543e2737a0210924c0cd9d7c6e",
+      "documentation_tree": "f3da442082ccf3af9801b1a24c2d38e8c5b7b3c1",
+      "sources": {
+        "the compiler": {
+          "sha": "d8da5ace27c8131fa152312b4262e5792d0d4898",
+          "size": 199997
+        },
+        "the desktop": {
+          "sha": "357091dfdbf125222e218b8e5aeb90dc19275ca5",
+          "size": 84111
+        },
+        "the editor": {
+          "sha": "25df723faf8e65e78b0c8a5bdd28330720907dbd",
+          "size": 31924
+        },
+        "the finder": {
+          "sha": "660357bcec832f28059a950b264e20381dc997d6",
+          "size": 45063
+        },
+        "the writer": {
+          "sha": "460c77888767a49ef6f73f611e82101c04ba09e1",
+          "size": 161468
+        },
+        "the noodle": {
+          "sha": "336046e46f11bb8fde696d54588071bf86e994a5",
+          "size": 591052
+        }
+      },
+      "binary_objects": {
+        "cal-4700's son.exe2": {
+          "sha": "6de1969837d67fa54ede65b73d356628bd0b18cb",
+          "size": 643069
+        },
+        "cal-4700's son.exe3": {
+          "sha": "d90c5c4a0ac852e2543c1e514c3bd6decdf58a49",
+          "size": 651262
+        },
+        "cal-4700's son.exe4": {
+          "sha": "d4d0578fc81bbfe86a4b22ef2c86ff7e3d67e290",
+          "size": 651262
+        },
+        "cal-4700's son.exe5": {
+          "sha": "3ae3311a2326e8f4a446f62a53fa09d7dcbfca3f",
+          "size": 704510
+        }
+      }
+    }
+  ]
+}
