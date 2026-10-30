@@ -37,7 +37,7 @@ WITH cases(label,calculation_day,target_day) AS (VALUES
 ('reverse',-15055669::numeric,-15055674::numeric),
 ('large',-15055671::numeric,170141183460469231731687303715869050056::numeric),
 ('remote-past',-170141183460469231731687303715899161398::numeric,-15055671::numeric)
-), both AS MATERIALIZED (
+), pair_results AS MATERIALIZED (
   SELECT label,
     pastafari_sql_tamil.initial_bowls(
        pastafari_sql_tamil.work_counts(calculation_day,target_day)) AS actual,
@@ -47,7 +47,7 @@ WITH cases(label,calculation_day,target_day) AS (VALUES
 )
 INSERT INTO stage02_bowl_differential(test_name,ok)
 SELECT 'bowl:'||label||':'||bowl_id,actual[bowl_id]=expected[bowl_id]
-FROM both CROSS JOIN generate_series(1,6) AS g(bowl_id);
+FROM pair_results CROSS JOIN generate_series(1,6) AS g(bowl_id);
 
 SELECT 'slice5 bowl differential assertions' AS status,count(*) AS assertion_count
 FROM stage02_bowl_differential;
