@@ -40,6 +40,31 @@ FILESYSTEM_APIS = frozenset({
     "MoveFileA", "RemoveDirectoryA",
 })
 SENSITIVE_DLLS = NETWORK_DLLS | CRYPTO_DLLS
+EXPECTED_SENSITIVE_DLL_APIS = frozenset({
+    "advapi32.dll!" + name for name in (
+        "CryptAcquireContextA", "CryptCreateHash", "CryptDecrypt",
+        "CryptDeriveKey", "CryptDestroyHash", "CryptDestroyKey",
+        "CryptEncrypt", "CryptHashData", "CryptReleaseContext",
+    )
+}) | frozenset({
+    "winhttp.dll!" + name for name in (
+        "WinHttpCloseHandle", "WinHttpConnect", "WinHttpOpen",
+        "WinHttpOpenRequest", "WinHttpQueryDataAvailable",
+        "WinHttpReadData", "WinHttpReceiveResponse", "WinHttpSendRequest",
+    )
+}) | frozenset({
+    "wininet.dll!" + name for name in (
+        "InternetCloseHandle", "InternetCrackUrlA", "InternetOpenA",
+        "InternetOpenUrlA", "InternetReadFile",
+    )
+}) | frozenset({
+    "ws2_32.dll!" + name for name in (
+        "closesocket", "connect", "inet_ntoa", "recv", "send",
+        "setsockopt", "socket", "WSACleanup", "WSAGetLastError",
+        "WSAStartup",
+    )
+})
+
 SOURCE_SET = "release"
 NATIVE_TESTS_CONFIRMED = False
 
@@ -91,13 +116,7 @@ def audit(read_source, *, require_known_surface: bool = True) -> dict:
     unexpected_sensitive = sorted(
         ref for ref in by_api
         if ref.split("!", 1)[0] in SENSITIVE_DLLS
-        and ref not in REQUIRED
-        and not (
-            ref.startswith("wininet.dll!Internet")
-            or ref.startswith("winhttp.dll!WinHttp")
-            or ref.startswith("ws2_32.dll!")
-            or ref.startswith("advapi32.dll!Crypt")
-        )
+        and ref not in EXPECTED_SENSITIVE_DLL_APIS
     )
     noodle = source_bytes["the noodle"].decode("latin-1")
     features = {
