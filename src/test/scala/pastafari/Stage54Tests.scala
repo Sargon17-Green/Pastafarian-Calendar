@@ -146,37 +146,32 @@ object Stage54Tests {
       m.discover27CutletSpan(3,4,Nine,Part,6)
       eqv(r,snapshot,"Report")
     }
-    check("rifiuta cinque cotolette"){
+    check("rifiuta cotolette fuori intervallo 5 e 18"){
       rejectArg("5"){run(Vector.fill(6)(42),Vector(2,1,1,1,1),1)}
-    }
-    check("rifiuta diciotto cotolette"){
+
       rejectArg("18"){run(Vector.fill(18)(42),Vector.fill(18)(1),1)}
     }
-    check("rifiuta cinque porte"){
+    check("rifiuta porte fuori intervallo 5 e 48"){
       rejectArg("5"){run(Vector.fill(5)(42),Vector.fill(5)(1),1)}
-    }
-    check("rifiuta quarantotto porte"){
+
       rejectArg("48"){run(Vector.fill(48)(42),Vector.fill(6)(8),1)}
     }
-    check("rifiuta gap 41"){
+    check("rifiuta gap fuori intervallo 41 e 964"){
       rejectArg("41"){run(Nine.updated(0,41),Part,1)}
-    }
-    check("rifiuta gap 964"){
+
       rejectArg("964"){run(Nine.updated(0,964),Part,1)}
     }
-    check("rifiuta anno sopra 5778"){
+    check("rifiuta anno troppo lungo e partizione incompleta"){
       rejectArg("6741"){run(Vector.fill(7)(963),Vector(2,1,1,1,1,1),1)}
-    }
-    check("rifiuta partizione incompleta"){
+
       rejectArg("6"){run(Nine,Vector.fill(6)(1),1)}
     }
     check("rifiuta gruppo zero"){
       rejectArg("0"){run(Nine,Vector(3,0,1,1,2,2),1)}
     }
-    check("rifiuta indice zero"){
+    check("rifiuta indici fuori intervallo 0 e 7"){
       rejectArg("0"){run(c=0)}
-    }
-    check("rifiuta indice sette"){
+
       rejectArg("7"){run(c=7)}
     }
     check("validator accetta contesto completo"){
