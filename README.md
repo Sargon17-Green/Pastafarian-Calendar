@@ -38,3 +38,11 @@ cargo test --all-targets
 2026-10-30 tarixli GitHub Actions Native run 41040357894 (SHA `1bcd853e4a3a9a5bb3498d43c1e1728e23949274`) bu əmri tamamladı: 16 sınaq uğurlu, 0 uğursuz. Compiler 37 warning göstərdi (əsasən test oracle-ındakı istifadəsiz elementlər); bunlar error deyil. Canonical Names Lock run 41040357441 də eyni SHA üzrə SUCCESS oldu. Ətraflı sübut: `audit/STAGE_01_EXECUTION_STATUS.txt`.
 
 Stage 1 yalnız BOOTSTRAP üçün tamamlanıb. Tarix hesablamasının beş komponenti və növbəti mərhələlər hələ təsdiqlənməyib.
+
+## Mərhələ 2 — DISCOVERY 01: həqiqi Legacy SAVE yolu
+
+Kanonik Stage2 müqaviləsi artıq [sənəddə](audit/STAGE_02_DISCOVERY01_SAVE_CONTRACT_2026-10-30.md) müəyyənləşib. `M=2^127−1` üçün köhnə `regularMod(x,M)` hesabı `x=M,2M,3M` hallarında `0` verir, amma normativ `SAVE(x)=M`; `M+1` nəzarət halında hər iki yol `1` verir. Bu, 3 qəsdən yanlış tarixi nəticə və 1 uyğun nəzarətdir.
+
+`src/discovery01_legacy_save.rs` real `MonsterManager` dispatcher yolu və çağırışa məxsus `MonsterContext` ilə nəticəni dəyişdirmədən qaytarır. `tests/stage02_discovery01.rs` normativ nəticəni yalnız test oracle-dan alır, signed və böyük BigInt-i yoxlayır, tarix üçün beş sahənin uydurulmadığını təsdiqləyir. CI: `.github/workflows/rust-az-stage02-discovery01.yml`.
+
+**CURRENT_STAGE=2, LAST_COMPLETED_STAGE=1. Stage2 Native PASS hələ təsdiqlənməyib.** GitHub Actions-ın bitməsini gözləmək şaxənin `READY` olmasına mane deyil; növbəti söhbətdə nəticə artıq yoxlanıla bilər. Stage3/PATCH01, `main` və semantik `calendar_date_spaghetti` dəyişməyib.
