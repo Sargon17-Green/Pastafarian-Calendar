@@ -169,3 +169,33 @@ to fetching Plain English **text**, not downloading/executing CAL.
 No change to the project's 82 source files. Security gates remain:
 CAL-4018 quarantined, CAL-4700 ZIP-integrity mismatch unresolved,
 no Native QA PASS and no compiler execution authorization.
+
+
+## 2026-10-30: source HTTP guard tests and unresolved Actions triggering
+
+This follow-up added three further **offline** tests to
+`tools/test_cal_source_provenance.py`:
+
+1. Verify `urlopen` is called with the exact commit-pinned text-source URL
+   and a bounded read.
+2. Reject a redirect to a different URL before reading its payload.
+3. Reject an oversized source response.
+
+The local Python test suite finished **13/13 PASS** in this session
+(`python -m unittest discover -s . -p test_cal_source_provenance.py -v`).
+The branch version contains 13 tests; GitHub CI has **not** provided a PASS.
+
+GitHub repository metadata confirms the default branch is `main`, and
+`.github/workflows/cal-source-provenance.yml` is **absent** there (404).
+Per GitHub's official workflow dispatch rules, the branch-only workflow
+is not eligible for manual `workflow_dispatch`; this explains why no
+manual dispatch control can be assumed, but does not by itself explain
+why the configured `push` event produced no visible run.
+The API still reports **zero** Actions runs for this feature branch,
+including after the test-file change. Root cause of the absent push run
+is **UNCONFIRMED** (possible repository/token/event/permissions issue).
+
+No workflow or compiler code was merged into `main`; no untrusted CAL
+binary was executed. Git provenance does not constitute malware
+clearance. The stage-zero compiler and Native 99-group QA gates remain
+blocked.
