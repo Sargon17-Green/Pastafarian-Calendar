@@ -109,10 +109,10 @@ OwnerSignedCmp::
     or a
     jr z, .greaterDirect
     ld a, 2
-    jr .store
+    jp .store
 .greaterDirect:
     ld a, 1
-    jr .store
+    jp .store
 
 .sameSign:
     ld a, [wOwnerCmpLenA+2]
