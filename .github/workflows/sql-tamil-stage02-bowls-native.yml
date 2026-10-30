@@ -1,0 +1,91 @@
+name: SQL Tamil Stage 2 Bowl Order and Initial Bowls Native
+on:
+  push:
+    branches:
+      - 'SQL\\+தமிழ்'
+    paths:
+      - 'sql/07_stage02_bowls.sql'
+      - 'sql/test/90_stage02_bowls_native.sql'
+      - 'sql/test/91_stage02_bowls_differential.sql'
+      - '.github/workflows/sql-tamil-stage02-bowls-native.yml'
+      - 'sql/03_stage02_production_core.sql'
+      - 'sql/test/10_normative_reference.sql'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bowl-slice5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout current SHA
+        uses: actions/checkout@v4
+      - name: Start offline test-only PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-bowl-logs
+          docker run --detach --name sql-tamil-bowls-pg --network none \\
+            -e POSTGRES_HOST_AUTH_METHOD=trust \\
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-bowls-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-bowls-pg postgres --version | tee sql-tamil-bowl-logs/versions.txt
+          printf 'Git SHA: %s\\n' "$GITHUB_SHA" | tee -a sql-tamil-bowl-logs/versions.txt
+      - name: Native fixture assertions (61)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-bowls-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \\
+            -f /work/sql/00_schema.sql \\
+            -f /work/sql/01_source_language_catalog.sql \\
+            -f /work/sql/02_monster_bootstrap.sql \\
+            -f /work/sql/03_stage02_production_core.sql \\
+            -f /work/sql/07_stage02_bowls.sql \\
+            -f /work/sql/test/90_stage02_bowls_native.sql \\
+            -c 'SELECT 1/((count(*)=61 AND bool_and(ok))::integer) AS native_61_of_61 FROM stage02_bowl_assertions' \\
+            2>&1 | tee sql-tamil-bowl-logs/native.txt
+      - name: Production isolation (4)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-bowls-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \\
+            -f /work/sql/test/40_production_isolation.sql \\
+            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM stage01_production_isolation_assertions' \\
+            2>&1 | tee sql-tamil-bowl-logs/isolation.txt
+      - name: Create isolated differential database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-bowls-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \\
+            -c 'CREATE DATABASE sql_tamil_bowl_differential'
+      - name: Differential with normative reference (762)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-bowls-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_bowl_differential \\
+            -f /work/sql/00_schema.sql \\
+            -f /work/sql/01_source_language_catalog.sql \\
+            -f /work/sql/02_monster_bootstrap.sql \\
+            -f /work/sql/03_stage02_production_core.sql \\
+            -f /work/sql/07_stage02_bowls.sql \\
+            -f /work/sql/test/10_normative_reference.sql \\
+            -f /work/sql/test/91_stage02_bowls_differential.sql \\
+            -c 'SELECT 1/((count(*)=762 AND bool_and(ok))::integer) AS differential_762_of_762 FROM stage02_bowl_differential' \\
+            2>&1 | tee sql-tamil-bowl-logs/differential.txt
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice5-bowls
+          path: sql-tamil-bowl-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-bowls-pg 2>/dev/null || true
