@@ -385,3 +385,38 @@ At the initial evidence update, new run
 Root limitation remains unchanged: metadata consistency cannot
 establish whether the CAL stage-zero compiler is safe. Native QA
 99 groups and 47-month behavior are not verified.
+
+## 2026-10-30: eight-stage metadata CI result confirmed — 24/24 PASS
+
+GitHub Actions run **41047387234**, job **124034694109**, against code
+commit `c9ef4fb95b98c888a29bcfdeb3c60baf86561b9a`, completed with
+`conclusion: success`. Direct job-log inspection reported
+`Ran 24 tests in 0.014s` and `OK`: all nine new stage metadata tests
+and the fifteen preexisting source-provenance tests passed.
+
+The offline stage auditor printed:
+
+- `"stage_metadata_consistent": true`, with eight tutorial stages;
+- eight distinct `the compiler` blob IDs and four distinct binary
+  artifact blob metadata entries;
+- `"binary_downloaded": false`,
+  `"compiler_executed": false`,
+  `"stage_zero_verified": false`, and
+  `"native_qa_99_pass": false`.
+
+The separate upstream text-source verification printed
+`"all_12_text_sources_verified": true` and all twelve individual
+`"ok": true` results.
+
+The run is available at:
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41047387234
+
+**Conclusion is tightly scoped:** PASS establishes that the local
+stage-manifest assertions hold and that the twelve pinned text files
+match their expected source hashes. CI did **not** independently
+re-fetch/verify the eight upstream Git tree objects, compile any
+Plain English source, inspect executable contents, reproduce any
+machine-code build, or execute the 99 Native QA groups.
+The metadata snapshot was collected earlier through the GitHub
+connector from the fixed upstream commit. The stage-zero trust gate
+remains CLOSED and there is no Native QA PASS.
