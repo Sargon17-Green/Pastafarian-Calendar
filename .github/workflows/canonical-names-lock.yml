@@ -266,3 +266,48 @@ jobs:
           path: evidence-stage37/
           retention-days: 30
           if-no-files-found: warn
+
+  stage38-discovery19-probe:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Probe Stage38 - real year index continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage38
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=38\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage38/source.txt
+          php -v > evidence-stage38/php-version.txt
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l tests/stage38_discovery19_probe.php
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage38_discovery19_probe.php > evidence-stage38/stdout.txt 2> evidence-stage38/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence-stage38/exit-code.txt
+          cat evidence-stage38/stdout.txt
+          cat evidence-stage38/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage38/stderr.txt
+          test "$(grep -c '^CANDIDATE_REPRODUCED witness=' evidence-stage38/stdout.txt)" -eq 2
+          grep -q '^STAGE38_DISCOVERY19_PROBE controls=.* candidates=2 reproduced=2 rejected=0$' evidence-stage38/stdout.txt
+      - name: Preserve actual experiment output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage38-discovery19-probe
+          path: evidence-stage38/
+          retention-days: 30
+          if-no-files-found: warn
