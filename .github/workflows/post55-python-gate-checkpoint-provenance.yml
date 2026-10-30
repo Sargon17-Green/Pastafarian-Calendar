@@ -1,0 +1,60 @@
+name: Post55 Python checkpoint provenance bounded replay
+
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - '.github/workflows/post55-python-gate-checkpoint-provenance.yml'
+      - 'soak/verify_pinned_gate_checkpoints.py'
+      - 'soak/test_verify_pinned_gate_checkpoints.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-gate-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PASTAFARIAN_PYTHON_SRC: ${{ github.workspace }}/python-source/src
+    steps:
+      - name: Checkout Kotlin branch evidence runner
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Checkout pinned Python source
+        uses: actions/checkout@v4
+        with:
+          repository: Sargon17-Green/Pastafarian-Calendar
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: python-source
+          persist-credentials: false
+      - name: Verify revision and synthetic replay invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C python-source rev-parse HEAD)" = 7cb12bf355461e5a179e0deadb7365689288bf29
+          python3 -m unittest discover -s soak -p test_verify_pinned_gate_checkpoints.py -v
+      - name: Replay from foundation with bounded work (not full-date certification)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/verify_pinned_gate_checkpoints.py \
+            --target-index 1024 --max-steps 1024 --chunk-size 64 \
+            --timeout-seconds 300 \
+            --source-sha 7cb12bf355461e5a179e0deadb7365689288bf29 \
+            --evidence "$RUNNER_TEMP/python-gate-checkpoint-provenance.json"
+      - name: Preserve bounded replay evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post55-python-gate-checkpoint-provenance
+          path: ${{ runner.temp }}/python-gate-checkpoint-provenance.json
+          if-no-files-found: warn
+          retention-days: 30
