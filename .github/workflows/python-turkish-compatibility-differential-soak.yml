@@ -50,20 +50,24 @@ jobs:
           from pastafari_calendar.calendar import calendar_date_spaghetti
 
           f = FOUNDATION_DAY
-          # New witness pairs, distinct from Stage 55's five E2E pairs.
-          # Cases 0 and 2 have the same target but different calculation days.
+          # Expanded cross-foundation witnesses, distinct from Stage 55's five E2E pairs.
+          # Reused targets at indices 0/2, 1/5, 4/7 test calculation-day isolation.
           pairs = (
               (f - 3, f + 7),
               (f + 9, f - 4),
               (f + 13, f + 7),
               (f - 13, f - 19),
+              (f - 2, f + 21),
+              (f + 15, f - 4),
+              (f + 27, f + 27),
+              (f - 21, f + 21),
           )
           report = {
               'commit': os.environ.get('GITHUB_SHA'),
               'python': sys.version.split()[0],
               'oracle': 'tests/normative_reference.py, sauce_corrective56',
               'pairs': list(pairs),
-              'rounds': 8,
+              'rounds': 12,
               'checks': 0,
               'failures': [],
               'oracle_seconds': [],
@@ -81,7 +85,7 @@ jobs:
 
               reset_acceleration_scars_for_tests()
               with acceleration_mode(True):
-                  for round_index in range(8):
+                  for round_index in range(12):
                       # Rotate the order so adjacent calculation-day/target pairs differ.
                       ordered = pairs[round_index % len(pairs):] + pairs[:round_index % len(pairs)]
                       for pair in ordered:
