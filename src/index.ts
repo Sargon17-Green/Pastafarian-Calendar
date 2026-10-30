@@ -74,3 +74,4 @@ export * from "./patch24ScalableUnrank.ts";
 export * from "./patch24ScalableNativeWeaving.ts";
 
 export * from "./discovery25LegacyContiguousMonthDay.ts";
+export * from "./patch25MonthDay.ts";
