@@ -76,7 +76,7 @@ Stadio 4 fermiĝis kiel EXPECTED_RED, ne kiel CI GREEN.
 https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091174767
 https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091174839
 
-## Stadio 5 — PATCH 02 (2026-10-30; Native atendo)
+## Stadio 5 — PATCH 02 (2026-10-30; Native GREEN)
 
 La korekto aldonas unu al la historia tagmarko ekde la fonda tago,
 sen ŝanĝi antaŭajn tagojn. La historia kampo restas por diagnozo kaj la
@@ -84,3 +84,12 @@ valida-disenda produkto redonas la novan patched_day_tag.
 Kvin historiaj testoj nun estas pozitivaj, kaj naŭ novaj testoj kovras
 la du flankojn de la fonda limo. Akceptocelo: 43 pasintaj, 0 fiaskoj
 kaj sukcesa formato plus Names Lock sur la preciza nova HEAD.
+
+La ekzakt-HEAD Native-rulo ĉe `b1d87a454c89996c1a04149dbc8f82928710c9b0` uzis Gleam 1.18.1
+kaj Erlang/OTP 28: formatkontrolo sukcesis, 43 testoj pasis, neniu
+malsukcesis. La aparta Canonical Names Lock estis SUCCESS.
+Stage 5 estas GREEN nur por PATCH 02; la plena kalendara dato ne
+estas kalkulita. Stage 6 ne havas ankoraŭ difinitan kontrakton.
+
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091621544
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091621539

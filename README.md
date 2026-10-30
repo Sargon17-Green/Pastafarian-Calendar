@@ -110,7 +110,7 @@ tio ne estas plena CI-PASS. Stadio 4 estas fermita nur por DISCOVERY 02.
 Native: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091174767
 Names Lock: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091174839
 
-## Stadio 5 — PATCH 02 (efektivigita; Native atendo)
+## Stadio 5 — PATCH 02 (Native-konfirmita GREEN)
 
 La malnova `old_day_tag(day) = 2 * abs(day - F)` restas diagnoze havebla
 per `legacy_day_tag`. La produkta `day_tag_patch(day)` uzas la saman
@@ -125,5 +125,14 @@ vojon kun la sendependa testa `day_count`, ĉe F−10 000, F−1000,
 F−2, F−1, F, F+1, F+2, F+1000 kaj F+10 000.
 Kun 29 antaŭaj testoj kaj 5 historiaj atestoj, la Native-akcepta celo
 estas **43 passed, no failures**, pura `gleam format --check src test`
-kaj Canonical Names Lock je la sama commit. Tiu celo ne estas ankoraŭ
-Native-pruvita. Neniu plena kalendara dato estas aprobita.
+kaj Canonical Names Lock je la sama commit. La celo estis Native-pruvita ĉe
+`b1d87a454c89996c1a04149dbc8f82928710c9b0`: `gleam format --check src test` sukcesis,
+**43 passed, no failures**, kaj la aparta Canonical Names Lock sukcesis.
+La atesto ampleksas nur PATCH 02, ne la plenan kalendaran daton.
+
+Native: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091621544
+Names Lock: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41091621539
+
+La kontrakto por Stadio 6 ne estas difinita en la kontrolita
+`DEVELOPMENT_STAGE.md`; ne konstruu novan difekton aŭ flikaĵon sen
+sendependa, konkreta stadiokontrakto.
