@@ -327,3 +327,61 @@ It is not permission to run CAL-4700 or CAL-4018, a clean compiler
 bootstrap, completion of 99 Native QA groups, or a result for the
 47-month differentiation case. Subsequent documentation-only commits
 do not modify the source verifier or this workflow.
+
+## 2026-10-30: eight-stage tutorial tree inventory and bootstrap dependency
+
+Inspected the eight individual tutorial Git trees under the immutable
+`elenderg/PAL-1000` revision
+`2d44defdedf24519bba754114ee66e6d1defff1e`.
+The parent tutorial tree is
+`33e3765b57d1e6ce879b5c7f69f48262738cbf66`.
+Each stage `passo01` through `passo08` contains six Plain English
+source blobs (each has a distinct `the compiler` blob SHA).
+The shared `lexicon` tree is unchanged throughout.
+The `the noodle` blob changes at the final stage.
+
+Direct Git tree *metadata* inspection found accumulated binary artifacts,
+not downloaded binary content:
+
+| Stages | Extra binary object names | Meaning |
+| --- | --- | --- |
+| 01–02 | none | Source-only tree entries, not independent bootstrap proof |
+| 03 | `son.exe2` | One pre-existing binary artifact |
+| 04–06 | `son.exe2`, `son.exe3`, `son.exe4` | Three retained binary artifacts |
+| 07–08 | `son.exe2`, `son.exe3`, `son.exe4`, `son.exe5` | Four retained binary artifacts |
+
+The original names are `cal-4700's son.exe2` etc. Their Git blob
+IDs remain identical when repeated in later stage trees; **this is
+metadata continuity, not proof that the described compilation occurred**.
+The instructions explicitly begin with `Start up the CAL-4700.exe.`
+This demonstrates dependency on a prior compiler. It does **not**
+establish an independent trusted stage-zero, reproducible builds,
+malware clearance, or Native QA.
+
+Three files were added on the feature branch:
+
+- `tools/cal_bootstrap_stage_manifest.json`: eight pinned stage-tree
+  SHAs, source metadata and four named binary object SHAs/sizes,
+  transcribed from GitHub Git tree metadata; **no EXE bytes**.
+- `tools/cal_bootstrap_stage_inventory.py`: read-only offline
+  consistency checks against pinned stage/compiler/binary object IDs,
+  stage order, runtime continuity, first appearance of binary names,
+  and explicit negative trust claims.
+- `tools/test_cal_bootstrap_stages.py`: nine offline regression tests
+  including mutations of stage SHA, compiler SHA, binary SHA, binary
+  appearance, runtime drift, and unsupported safety claims.
+
+The source-only workflow now discovers `test_cal_*.py` and adds an
+offline stage-metadata check. The previously passing 15 provenance tests
+remain included, for an intended total of **24** tests. This does not
+cause any executable download or launch; the original source provenance
+network step still requests only twelve exact plain-text paths.
+
+At the initial evidence update, new run
+`41047387234` (commit
+`c9ef4fb95b98c888a29bcfdeb3c60baf86561b9a`) was queued.
+**Do not mark 24/24 PASS until GitHub's completed job logs confirm it.**
+
+Root limitation remains unchanged: metadata consistency cannot
+establish whether the CAL stage-zero compiler is safe. Native QA
+99 groups and 47-month behavior are not verified.
