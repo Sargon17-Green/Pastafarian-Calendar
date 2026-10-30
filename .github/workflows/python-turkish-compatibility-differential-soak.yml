@@ -1,0 +1,121 @@
+name: Python + Türkçe 3.11/3.13 bağımsız diferansiyel ve iç içe geçiş QA
+
+on:
+  push:
+    branches:
+      - 'Python\+Türkçe'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-differential:
+    name: Python ${{ matrix.python-version }} bağımsız oracle ve cache izolasyonu
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - name: Kaynak ağacını al
+        uses: actions/checkout@v4
+      - name: Python sürümünü seç
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Kaynakları derle ve paketi kur
+        run: |
+          python -m compileall -q src tests
+          python -m pip install --disable-pip-version-check .
+      - name: Bağımsız oracle karşılaştırması ve aralıklı cache soak
+        env:
+          EVIDENCE_JSON: ${{ runner.temp }}/python-turkce-differential-${{ matrix.python-version }}.json
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          import time
+          from dataclasses import astuple
+          from pathlib import Path
+
+          sys.path.insert(0, str(Path('tests').resolve()))
+          from normative_reference import FOUNDATION_DAY, NormativeCalendar, sauce_corrective56
+          from pastafari_calendar.acceleration_scars import (
+              acceleration_mode,
+              reset_acceleration_scars_for_tests,
+          )
+          from pastafari_calendar.calendar import calendar_date_spaghetti
+
+          f = FOUNDATION_DAY
+          # New witness pairs, distinct from Stage 55's five E2E pairs.
+          # Cases 0 and 2 have the same target but different calculation days.
+          pairs = (
+              (f - 3, f + 7),
+              (f + 9, f - 4),
+              (f + 13, f + 7),
+              (f - 13, f - 19),
+          )
+          report = {
+              'commit': os.environ.get('GITHUB_SHA'),
+              'python': sys.version.split()[0],
+              'oracle': 'tests/normative_reference.py, sauce_corrective56',
+              'pairs': list(pairs),
+              'rounds': 8,
+              'checks': 0,
+              'failures': [],
+              'oracle_seconds': [],
+              'production_seconds': [],
+          }
+          try:
+              expected = {}
+              for pair in pairs:
+                  started = time.monotonic()
+                  expected[pair] = astuple(
+                      NormativeCalendar(sauce_function=sauce_corrective56)
+                      .calendar_date(*pair)
+                  )
+                  report['oracle_seconds'].append(round(time.monotonic() - started, 4))
+
+              reset_acceleration_scars_for_tests()
+              with acceleration_mode(True):
+                  for round_index in range(8):
+                      # Rotate the order so adjacent calculation-day/target pairs differ.
+                      ordered = pairs[round_index % len(pairs):] + pairs[:round_index % len(pairs)]
+                      for pair in ordered:
+                          started = time.monotonic()
+                          result = astuple(calendar_date_spaghetti(*pair))
+                          report['production_seconds'].append(round(time.monotonic() - started, 4))
+                          report['checks'] += 1
+                          if result != expected[pair]:
+                              report['failures'].append({
+                                  'round': round_index,
+                                  'pair': pair,
+                                  'expected': expected[pair],
+                                  'actual': result,
+                              })
+          except Exception as exc:
+              report['failures'].append({'error': repr(exc)})
+          finally:
+              output = Path(os.environ['EVIDENCE_JSON'])
+              output.parent.mkdir(parents=True, exist_ok=True)
+              output.write_text(
+                  json.dumps(report, ensure_ascii=False, indent=2) + '\n',
+                  encoding='utf-8',
+              )
+              print(f"INDEPENDENT_DIFFERENTIAL_CHECKS={report['checks']}")
+              print(f"INDEPENDENT_DIFFERENTIAL_FAILURES={len(report['failures'])}")
+              print(f"EVIDENCE_JSON={output}")
+          if report['failures'] or report['checks'] != len(pairs) * report['rounds']:
+              raise SystemExit(1)
+          PY
+      - name: Çalışma kanıtını sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-turkce-independent-differential-${{ matrix.python-version }}-${{ github.sha }}
+          path: ${{ runner.temp }}/python-turkce-differential-${{ matrix.python-version }}.json
+          if-no-files-found: warn
+          retention-days: 30
