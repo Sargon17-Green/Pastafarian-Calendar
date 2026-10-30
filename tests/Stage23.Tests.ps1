@@ -12,8 +12,8 @@ function Get-Stage23Signature {
 }
 
 $metadata = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_STAGE=23\s*$') -Name 'Stage 23 metadata'
-Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_KIND=PATCH\s*$') -Name 'Patch 11 kind'
+Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_STAGE=(23|24)\s*$') -Name 'Stage 23 regression under Stage24'
+Assert-StageTrue -Condition (($metadata -match '(?m)^CURRENT_STAGE=24\s*$') -or ($metadata -match '(?m)^CURRENT_KIND=PATCH\s*$')) -Name 'Patch11 sealed baseline'
 $preSeal = ($metadata -match '(?m)^LAST_COMPLETED_STAGE=22\s*$') -and ($metadata -match '(?m)^STAGE23_RUNTIME_VERIFICATION=AWAITING\s*$')
 $postSeal = ($metadata -match '(?m)^LAST_COMPLETED_STAGE=23\s*$') -and ($metadata -match '(?m)^STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$')
 Assert-StageTrue -Condition ($preSeal -or $postSeal) -Name 'Stage 23 metadata must be a consistent awaiting or sealed pair'
@@ -27,7 +27,11 @@ $expectedSignature = Get-Stage23Signature $expected
 $corrected = Get-Patch11OrderAt46 -Context $ctx
 $legacy = Get-Discovery11LegacyQueriedOrder -Context $ctx
 
-Assert-StageEqual 'PATCH11_COMPLETE' $ctx.status 'Patch 11 production dispatch'
+if ($metadata -match '(?m)^CURRENT_STAGE=24\s*$') {
+    Assert-StageEqual 'DISCOVERY12_EXPECTED_RED' $ctx.status 'Stage24 production preserves Patch11'
+} else {
+    Assert-StageEqual 'PATCH11_COMPLETE' $ctx.status 'Patch 11 production dispatch'
+}
 Assert-StageEqual 'DROP46_ORDER_LATCH_ACTIVE' $ctx.patch11Status 'Patch 11 active'
 Assert-StageEqual 1 $ctx.patch11InvocationCount 'One drop-46 latch'
 Assert-StageEqual 46 $ctx.patch11CapturedAtWrite 'Captured exactly at write 46'
@@ -70,7 +74,7 @@ $p11Text = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Patch11.ps1')
 Assert-StageTrue -Condition ($d11Text -match 'Invoke-Patch11OrderAt46Latch') -Name 'Latch is physically captured in drop path'
 Assert-StageTrue -Condition ($p11Text -match 'Get-Discovery11LegacyQueriedOrder') -Name 'Patch queries the old scar first'
 Assert-StageTrue -Condition ($monsterText -match 'Get-Patch11OrderAt46') -Name 'Production route queries the corrected latch'
-Assert-StageTrue -Condition (($monsterText+$d11Text+$p11Text) -notmatch 'biasedLegacyPick|queriedNextBowl|Patch12|PATCH12') -Name 'Stage 24 code not introduced'
+Assert-StageTrue -Condition (($monsterText+$d11Text+$p11Text) -notmatch 'biasedLegacyPick|Patch12|PATCH12') -Name 'No Stage25 or Stage26 code'
 Assert-StageTrue -Condition (($monsterText+$d11Text+$p11Text) -notmatch 'Get-NormBowlOrderFromDrop|Get-NormCalendarDate') -Name 'Production independent from test oracle'
 
 Write-Host 'PATCH11_LATCH_WRITE_INDEX=46'

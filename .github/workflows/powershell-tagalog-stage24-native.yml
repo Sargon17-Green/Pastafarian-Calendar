@@ -1,0 +1,44 @@
+name: PowerShell Tagalog Stage 24 native Discovery 12
+on:
+  push:
+    branches: ['PowerShell+Tagalog']
+    paths:
+      - '.github/workflows/powershell-tagalog-stage24-native.yml'
+      - 'src/MonsterSkeleton.ps1'
+      - 'src/Discovery12.ps1'
+      - 'tests/Stage24.Tests.ps1'
+      - 'tests/Stage23.Tests.ps1'
+      - 'DEVELOPMENT_STAGE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage24-windows-powershell-51:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify native runtime and stages 01, 23 and 24
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'PowerShell 5.1 required' }
+          Write-Host ('HEAD_SHA=' + $env:GITHUB_SHA)
+          Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
+          & ./tests/Stage01.Tests.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Stage01 failed' }
+          & ./tests/Stage23.Tests.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Stage23 regression failed' }
+          & ./tests/Stage24.Tests.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Stage24 historical RED contract failed' }
+          Write-Host 'STAGE24_NATIVE_RESULT=PASS'
+          @('HEAD_SHA=' + $env:GITHUB_SHA,'NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString(),'STAGE01_REGRESSION=PASS','STAGE23_REGRESSION=PASS','STAGE24_EXPECTED_RED=3456','STAGE24_MATCHES=864','STAGE24_NATIVE_RESULT=PASS') | Set-Content stage24-native-evidence.txt -Encoding UTF8
+      - name: Retain SHA and native result artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage24-native-evidence
+          path: |
+            stage24-native-evidence.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
