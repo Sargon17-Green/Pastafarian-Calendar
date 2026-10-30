@@ -1,0 +1,33 @@
+# Dart+עברית — סגירת שלב 1 (עדות קבלה)
+
+PROJECT_ID: PC-BRANCH-DART-HEBREW
+BRANCH: Dart+עברית
+LAST_COMPLETED_STAGE: 1
+STAGE_1_STATUS: ACCEPTED
+ACCEPTED_TESTED_SHA: 0bab2e5b98100bdda575cebdc8cd4aedc6ea3d18
+DATE: 2026-10-30
+
+## אימות בלתי תלוי
+
+GitHub Actions run: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41087390426
+- Native job 124172028426: completed / success.
+- Canonical Names Lock verify job 124172027753: completed / success.
+- שני ה-jobs הורצו על אותו SHA, שהוא HEAD המאומת לפני כתיבת מסמך זה.
+- Dart SDK 3.13.2, pub get: success.
+- dart format --output=none --set-exit-if-changed . : success; 6 files, 0 changed.
+- dart analyze: success; No issues found.
+- dart run bin/stage1_tests.dart: success; הודעת הסיום: "כל בדיקות שלב 1 עברו."
+- Canonical source-language names lock: success, לאחר תיקון SHA256 המתועד ב-docs/DART_HEBREW_CANONICAL_NAMES_FORMAT_HASH_AUDIT_20261030.md.
+
+## היקף הכיסוי
+
+על סמך קריאה ממוקדת של bin/stage1_tests.dart ו-fixtures/stage1_expected.json, קיימים 88 מקרי בדיקה/השוואה לוגיים (כולל 17 בדיקות אינדקס קציצות ו-47 בדיקות אינדקס חודשים, ובדיקות עצירת production ובידוד הקשר). המספר 88 הוא **ספירה סטטית של מקרי בדיקה בקוד**; לוג Native מאשר הצלחה כוללת, אך אינו מדפיס ספירת assertions עצמאית. אין לבלבל בין 88 בדיקות לוגיות לבין מספר assertions פנימיים.
+
+## גבולות הקבלה
+
+הקבלה מתייחסת **לשלב האתחול בלבד**: קטלוג שמות קנוני נעול, oracle ייחוס ו-fixtures, שלד production, managers, dispatcher, validation, error/metrics, ומבחני הבסיס. בודק השלד מחייב StateError בעת ניסיון הפעלת המסלול העתידי; אין מימוש תאריך מלא.
+Stage 2 וכל שלב עתידי אינם נכללים בקבלה, ואין שינוי ב-main, מיזוג, פרסום או מתן הרשאה לשינוי מקור קנוני.
+
+## המשך
+
+לא לפתוח Stage 2 לפני אימות תכנית/חוזה שלב 2 המסוימים לענף Dart+עברית, לרבות גבולות המימוש ובדיקות הקבלה. בהרשאת המשתמש מותר להתקדם ללא אישור טקסי ברגע שהחוזה מאומת ומתווה הצעד נקבע באופן חד־משמעי.
