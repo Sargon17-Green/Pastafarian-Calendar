@@ -62,8 +62,9 @@ rejected(2,{streams[1]})
 rejected(1,{{first=1,directionStep=0}})
 rejected(1,{{first="not-an-integer",directionStep=1}})
 rejected(1,{streams[1],streams[2]})
-local huge=B.from("170141183460469231731687303715884105728")
-local hstreams={{first=huge,directionStep=1},{first=B.add(huge,999),directionStep=-1}}
+-- Limit accepted by PATCH13 is M=2^127-1; exercise large valid SAVE streams.
+local huge=B.from("170141183460469231731687303715884105727")
+local hstreams={{first=huge,directionStep=1},{first=B.sub(huge,999),directionStep=-1}}
 local bigOld,bigCtx=S.legacyNegativeGateProbe(2,hstreams)
 assert(B.compare(bigOld,F)<0 and bigCtx.semanticState.historicalDivergence==true,
  "BigInt gwo stream pa pase")
