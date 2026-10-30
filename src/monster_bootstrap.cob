@@ -93,6 +93,20 @@ MAIN.
                     MOVE "SAVE 修补失败；调用者必须检查输出。" TO CTX-LAST-ERROR
                 END-IF
             END-IF
+        WHEN "DAY-TAG-LEGACY"
+            *> Stage4 DISCOVERY02: return the original broken number.
+            *> Both day positions use separate dispatcher calls; no PATCH02.
+            MOVE "Discovery02" TO CTX-CURRENT-HANDLER
+            PERFORM VALIDATE-BASE-CONTEXT
+            IF WS-STATUS = 0
+                CALL "LEGACY-DAY-TAG" USING
+                    LK-CALCULATION-DAY LK-TARGET-DAY WS-STATUS
+                IF WS-STATUS = 0
+                    MOVE "DISCOVERY02:DAY-TAG-LEGACY" TO LK-MESSAGE
+                ELSE
+                    MOVE "历史日编号计算失败；输出槽必须为空。" TO CTX-LAST-ERROR
+                END-IF
+            END-IF
         WHEN OTHER
             MOVE 20 TO WS-STATUS
             MOVE "基础调度器收到未知操作。" TO CTX-LAST-ERROR
