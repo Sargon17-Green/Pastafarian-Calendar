@@ -151,3 +151,66 @@ jobs:
         run: php -r 'if (PHP_INT_SIZE !== 8) { fwrite(STDERR, "PHP 64-bit diperlukan\n"); exit(1); }'
       - name: Tampalan 17 — pulihkan digit kelima pada berat M kuasa empat
         run: php -d memory_limit=512M tests/stage35_patch17_tests.php
+
+  stage36-php-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup PHP native
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Syntax and predecessor artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -v
+          test -f src/Legacy/LegacyYearJumpGuess18.php
+          test -f src/Legacy/LegacyMissingFifthDigit17.php
+          test -f src/Patches/FifthDigitPatch17.php
+          test -f tests/oracle/NormativeOracle.php
+          php -l src/Legacy/LegacyYearJumpGuess18.php
+          php -l src/BootstrapKernel.php
+          php -l tests/stage36_discovery18_tests.php
+          php -l tests/verify_stage36_discovery18.php
+      - name: Run real Stage36 EXPECTED_RED verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=36\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence/source.txt
+          php -v > evidence/php-version.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s \
+            php -d memory_limit=512M tests/verify_stage36_discovery18.php \
+            > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/exit-code.txt
+          cat evidence/stdout.txt
+          cat evidence/stderr.txt >&2
+          if [ "$code" -ne 0 ] || [ -s evidence/stderr.txt ]; then
+            echo "::error::Stage36 native verification failed with code $code or non-empty stderr"
+            exit 1
+          fi
+          grep -qx 'STAGE36_DISCOVERY18_NATIVE_EXPECTED_RED_COMPLETE' evidence/stdout.txt
+          printf 'STAGE36_DISCOVERY18_NATIVE_EXPECTED_RED_COMPLETE\n' > evidence/result.txt
+          cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve native stdout stderr exit and SHA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage36-discovery18
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
