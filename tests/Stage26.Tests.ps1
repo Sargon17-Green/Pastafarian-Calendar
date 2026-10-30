@@ -55,14 +55,10 @@ foreach($delta in @(0,3,11)){
 }
 Assert-StageEqual -Expected 3 -Actual $live -Name 'Three real precursor histories'
 $invalid=0
-foreach($case in @(
-    @([System.Numerics.BigInteger]0,[System.Numerics.BigInteger]3),
-    @($m+1,[System.Numerics.BigInteger]3),
-    @([System.Numerics.BigInteger]1,[System.Numerics.BigInteger]0),
-    @([System.Numerics.BigInteger]1,$m+1)
-)){
-    try{[void](oldFirstAnswerModuloRank -First $case[0] -N $case[1])}catch{$invalid++}
-}
+try{[void](oldFirstAnswerModuloRank -First ([System.Numerics.BigInteger]0) -N ([System.Numerics.BigInteger]3))}catch{$invalid++}
+try{[void](oldFirstAnswerModuloRank -First ($m + [System.Numerics.BigInteger]1) -N ([System.Numerics.BigInteger]3))}catch{$invalid++}
+try{[void](oldFirstAnswerModuloRank -First ([System.Numerics.BigInteger]1) -N ([System.Numerics.BigInteger]0))}catch{$invalid++}
+try{[void](oldFirstAnswerModuloRank -First ([System.Numerics.BigInteger]1) -N ($m + [System.Numerics.BigInteger]1))}catch{$invalid++}
 Assert-StageEqual -Expected 4 -Actual $invalid -Name 'Four invalid domain inputs rejected'
 $source=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/Discovery13.ps1')
 Assert-StageTrue -Condition ($source -match 'Invoke-CalendarDateSpaghetti' -and $source -match 'patch12ProductionResult' -and $source -match 'oldFirstAnswerModuloRank') -Name 'Real corrected precursor then historic modulo'
