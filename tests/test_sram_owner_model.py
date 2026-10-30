@@ -44,6 +44,25 @@ class OwnedBanks:
         self.selected = self.mapped
         return 0, self.mapped
 
+    def read_byte(self, owner, offset):
+        if not 0 <= offset < 13 * SIZE:
+            self.selected = -1
+            return 2, 0
+        status, physical = self.select(owner, offset // SIZE)
+        if status:
+            return status, 0
+        return 0, self.data[physical][offset % SIZE]
+
+    def write_byte(self, owner, offset, value):
+        if not 0 <= offset < 13 * SIZE:
+            self.selected = -1
+            return 2
+        status, physical = self.select(owner, offset // SIZE)
+        if status:
+            return status
+        self.data[physical][offset % SIZE] = value
+        return 0
+
     def release(self, owner):
         self.selected = -1
         if not 1 <= owner <= 253:
@@ -118,6 +137,29 @@ def main():
     assert model.data[0][0] == 0x4D and model.data[3][0] == 0
     assert model.tags == [2] * 3 + [0] * 13
 
+    # 24-bit logical byte addressing over physically fragmented banks.
+    assert model.alloc(31, 3) == (0, (3, 4, 5))
+    assert model.alloc(32, 1) == (0, (6,))
+    assert model.release(31) == (0, 3)
+    assert model.alloc(33, 1) == (0, (3,))
+    assert model.alloc(34, 1) == (0, (4,))
+    assert model.alloc(35, 2) == (0, (5, 7))
+    assert model.write_byte(35, 8191, 0x5A) == 0
+    assert model.write_byte(35, 8192, 0xA7) == 0
+    assert model.read_byte(35, 8191) == (0, 0x5A)
+    assert model.read_byte(35, 8192) == (0, 0xA7)
+    assert model.write_byte(34, 8192, 0x66) == 3
+    assert model.read_byte(35, 8192) == (0, 0xA7)
+    assert model.read_byte(35, 13 * SIZE) == (2, 0)
+    assert model.read_byte(35, 0x20000) == (2, 0)
+    assert model.release(35) == (0, 2)
+    assert model.data[5][-1] == 0 and model.data[7][0] == 0
+    assert model.read_byte(35, 8192) == (3, 0)
+    assert model.release(32) == (0, 1)
+    assert model.release(33) == (0, 1)
+    assert model.release(34) == (0, 1)
+    assert model.tags == [2] * 3 + [0] * 13
+
     rng = Random(0x83A110C)
     checks = 0
     for _ in range(1000):
@@ -136,7 +178,7 @@ def main():
         assert model.tags[:3] == [2] * 3
         assert all(x == 0 or 3 <= x <= 255 for x in model.tags[3:])
         checks += 1
-    print(f"HOST_SRAM_OWNER_MODEL=PASS randomized_transitions={checks} slots=13 logical_index=PASS release_unmap=PASS stale_handle=REVOKED absent_release=ATOMIC")
+    print(f"HOST_SRAM_OWNER_MODEL=PASS randomized_transitions={checks} slots=13 logical_index=PASS release_unmap=PASS stale_handle=REVOKED absent_release=ATOMIC offset24=PASS fragmented_boundary=PASS")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 
 

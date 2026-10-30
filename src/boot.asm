@@ -61,6 +61,8 @@ wOwnerAllocated:: ds 1
 wOwnerBanks:: ds 13
 wOwnerSelectIndex:: ds 1
 wOwnerSelectedBank:: ds 1
+wOwnerOffset:: ds 3
+wOwnerByteValue:: ds 1
 wLeaseTestNext:: ds 1
 wDayOffset:: ds 4
 wDayCount:: ds 5
@@ -153,6 +155,10 @@ Bootstrap:
     cp $a5
     jp nz, .done
     call RunOwnerLeaseTests
+    ld a, [wTestResult]
+    cp $a5
+    jp nz, .done
+    call RunOwnerByteTests
 .done:
     call calendarDateSpaghetti
 .hold:
@@ -164,6 +170,7 @@ INCLUDE "src/runtime/mul128.asm"
 INCLUDE "src/runtime/mbc5.asm"
 INCLUDE "src/runtime/sram_lease.asm"
 INCLUDE "src/runtime/sram_owner.asm"
+INCLUDE "src/runtime/owner_byte.asm"
 INCLUDE "src/runtime/magnitude_length.asm"
 INCLUDE "src/runtime/divide_u8.asm"
 INCLUDE "src/runtime/signed_divide_u8.asm"
@@ -193,3 +200,4 @@ INCLUDE "src/tests/divide_u8_test.asm"
 INCLUDE "src/tests/signed_divide_u8_test.asm"
 INCLUDE "src/tests/variable_add_test.asm"
 INCLUDE "src/tests/sram_owner_test.asm"
+INCLUDE "src/tests/owner_byte_test.asm"
