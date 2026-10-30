@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..202: signed owner-scoped comparison.
+; Stage 1 native regression 191..214: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -528,6 +528,40 @@ RunOwnerSignedCmpTests::
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
     cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 213: B has length zero with a negative sign (negative zero).
+    ; Reject invalid B metadata without modifying descriptors, tags or payload.
+    ld a, 213
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpLenB], a
+    ld a, 1
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 214: B owner zero is invalid even when B is canonical +0.
+    ld a, 214
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpOwnerB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
