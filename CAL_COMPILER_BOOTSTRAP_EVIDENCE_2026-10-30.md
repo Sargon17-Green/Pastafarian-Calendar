@@ -608,3 +608,58 @@ https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41124765217
 Stage-zero compiler trust remains unverified. No CAL binary executed.
 The 99 Native QA groups and 47-month case remain unexecuted.
 Main and the 82 canonical calendar files were not changed.
+
+## 2026-10-30: repair of 53-test CI failure and validated indirect-route scan
+
+**Closed regression:** CI run 41124765217 (code commit
+90b0c9ddcaf15bd05a7429c0e3e68411c2bc1b60) completed FAILURE:
+53 unit tests were attempted, 52 succeeded and one errored.
+The error was KeyError: 'violations' in
+test_intel_in_unexpected_module_fails_even_non_strict.
+The non-strict audit already computed the violation list but omitted
+it from its returned report. Fix e70a9ef2e7c3071704e7af7111745a146e03a6b8
+exposes the existing list without bypassing any strict gate. CI run
+41125342750 then completed SUCCESS with 53/53 Python tests and all
+source-only workflow steps successful.
+
+**New static indirect-route checks**, still at pinned upstream revision
+2d44defdedf24519bba754114ee66e6d1defff1e:
+
+- Both desktop menu command handlers are checked against literal
+  branch-local source statements, covering command handler dispatch,
+  menu registration, and routing to an active editor tab.
+  Decrypt: desktop lines 692, 831, 1105–1106.
+  Encrypt: desktop lines 695, 840, 1127–1128.
+- The dynamic DNS/Winsock function pointer route is checked as source
+  text. In the noodle at lines 5691–5700, LoadLibraryA loads
+  ws2_32.dll, GetProcAddress resolves getaddrinfo/freeaddrinfo,
+  and their pointers are stored. The code at 6084–6100 invokes
+  the routines through those saved pointers.
+  These calls cannot be discovered by looking only for direct
+  quoted Call "dll" "function" patterns.
+- Three extra negative/positive regression tests verify the
+  expected menu and dynamic-dispatch source markers; missing or
+  altered markers cause a failure. The source SHA guards run first.
+- Explicit limitations remain: no exhaustive Plain English
+  control-flow graph, no actual dynamic dispatch observation,
+  no complete opcode decoding, no EXE fetching or execution.
+  Nothing here establishes malware clearance or stage-zero trust.
+
+**Completed GitHub Actions evidence**: run 41125544006, job
+124303007415, code/test commit
+b72c667a444cede14b7b88daf6087233120e511b:
+conclusion SUCCESS. The actual job log reports
+"Ran 56 tests in 0.018s" then "OK".
+The pinned twelve-source check says
+all_12_text_sources_verified=true; the cross-module static analysis
+reports lexical_gate_pass=true, verified_text_modules=6 and
+intel_directives=447. The stage inventory, DLL inventory and earlier
+call-site scans also completed successfully.
+
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41125544006
+
+**Closed gates remain closed:** compiler_executed=false,
+malware_clearance=false, native_qa_99_pass=false,
+stage_zero_verified=false. The quarantined CAL-4018 and
+unverified CAL-4700 binaries were not executed; no modifications to
+main or the canonical calendar implementation were made.
