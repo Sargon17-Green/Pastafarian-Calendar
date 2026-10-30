@@ -144,7 +144,9 @@ def read_directory_source(root: Path, group: str, name: str) -> bytes:
         raise ValueError("Only the 12 pinned text-source paths are permitted")
     group_dir = root / group
     path = group_dir / name
-    for part in (root, group_dir, path):
+    # A symlink may appear above root (e.g. alias/sources/release/file).
+    # Check the complete ancestor chain, not only root and its children.
+    for part in (path, *path.parents):
         if part.is_symlink():
             raise ValueError(f"Refusing symlink in source path: {part}")
     if not path.is_file():
