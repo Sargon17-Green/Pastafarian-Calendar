@@ -2845,3 +2845,71 @@ jobs:
           path: evidence/
           if-no-files-found: warn
           retention-days: 30
+
+  # Stage3 gate is integrated with the existing push workflow; feature-branch
+  # standalone workflow registration is not accepted as CI evidence alone.
+  stage03-weaving-native:
+    if: github.ref_name == 'Perl+國語'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - name: Checkout current source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Perl 5.40
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Syntax and producer independence
+        shell: bash
+        run: |
+          set -euo pipefail
+          perl -Ilib -c lib/Pastafari/Monster/WeavingPrimitive.pm
+          perl -Ilib -It/lib -c t/47_stage02_weaving_primitive.t
+          perl -Ilib -It/lib -c t/48_stage03_weaving_extended.t
+          if grep -nE 'use[[:space:]]+Pastafari::(NormativeScroll|Weaving)' lib/Pastafari/Monster/WeavingPrimitive.pm; then
+            echo '::error::Test-only normative import in producer'
+            exit 1
+          fi
+      - name: Native extended independent and boundary QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-PERL-GUOYU\nSHA=%s\n' "$GITHUB_SHA" > evidence/source.txt
+          perl -v > evidence/perl-version.txt
+          ulimit -v 393216
+          ulimit -c 0
+          set +e
+          timeout --signal=TERM --kill-after=5s 120s \
+            prove -e 'perl -CS -Ilib -It/lib' -v t/48_stage03_weaving_extended.t \
+            > evidence/test.stdout 2> evidence/test.stderr
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/test.exit
+          cat evidence/test.stdout
+          cat evidence/test.stderr >&2
+          if [ "$code" -ne 0 ]; then
+            echo "::error::Stage3 native returned $code"
+            exit 1
+          fi
+          if [ -s evidence/test.stderr ]; then
+            echo '::error::Stage3 native emitted stderr'
+            exit 1
+          fi
+          grep -q '^All tests successful\.$' evidence/test.stdout
+          grep -Eq 'Tests=[1-9][0-9][0-9]' evidence/test.stdout
+          echo 'STAGE03_EXTENSION_NATIVE_PASS=1 INDEPENDENT_SMALL=1 CATALAN=1 LARGE_ROUNDTRIP=1' | tee evidence/result.txt
+          cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perl-stage03-weaving-native
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
