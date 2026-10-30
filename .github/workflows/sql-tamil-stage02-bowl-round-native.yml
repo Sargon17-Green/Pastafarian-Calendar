@@ -1,0 +1,93 @@
+name: SQL Tamil Stage 2 Slice 6 Bowl Round Native
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'sql/08_stage02_bowl_round.sql'
+      - 'sql/test/92_stage02_bowl_round_native.sql'
+      - 'sql/test/93_stage02_bowl_round_differential.sql'
+      - '.github/workflows/sql-tamil-stage02-bowl-round-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bowl-round-slice6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout current SHA
+        uses: actions/checkout@v4
+      - name: Start offline PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-round-logs
+          docker run --detach --name sql-tamil-round-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-round-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-round-pg postgres --version | tee sql-tamil-round-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-round-logs/versions.txt
+      - name: Native fixtures and edge cases (93)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-round-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/test/92_stage02_bowl_round_native.sql \
+            -c 'SELECT 1/((count(*)=93 AND bool_and(ok))::integer) AS native_93_of_93 FROM stage02_round_assertions' \
+            2>&1 | tee sql-tamil-round-logs/native.txt
+      - name: Production isolation (4)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-round-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/test/40_production_isolation.sql \
+            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM stage01_production_isolation_assertions' \
+            2>&1 | tee sql-tamil-round-logs/isolation.txt
+      - name: Create reference-only differential database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-round-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'CREATE DATABASE sql_tamil_round_differential'
+      - name: Differential versus normative reference (432)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-round-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_round_differential \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql/test/93_stage02_bowl_round_differential.sql \
+            -c 'SELECT 1/((count(*)=432 AND bool_and(ok))::integer) AS differential_432_of_432 FROM stage02_round_differential' \
+            2>&1 | tee sql-tamil-round-logs/differential.txt
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice6-round
+          path: sql-tamil-round-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-round-pg 2>/dev/null || true
