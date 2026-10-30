@@ -615,6 +615,22 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'quint.rank.patch17.requests');
             return $rank;
         });
+        // DISCOVERY18: raw guessed year 5000 + floor((target-open)/365).
+        // The known Year5000 anchor is caller-supplied until year construction
+        // becomes a production layer; this result is intentionally incorrect.
+        $this->dispatcher->register('YEAR_JUMP_365_LEGACY', function(BootstrapContext $context): array {
+            $anchor = $context->semanticState['year5000Anchor'] ?? null;
+            if (!is_array($anchor)) {
+                throw new \InvalidArgumentException('YEAR_JUMP_365_ANCHOR');
+            }
+            $legacy = new \Pastafari\Stage01\Legacy\LegacyYearJumpGuess18();
+            $report = $legacy->guess($anchor, $context->targetDay);
+            $context->semanticState['discovery18LegacyYearGuessReport'] = $report;
+            $context->semanticState['discovery18GuessUsedAsOutput'] = true;
+            $context->status = 'DISCOVERY18_LEGACY_RETURNED';
+            $this->metrics->bump($context, 'discovery18.year365.legacy.calls');
+            return $report;
+        });
         $this->dispatcher->register('MISSING_FIFTH_DIGIT_LEGACY', function(BootstrapContext $context): BigInt {
             $id = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -868,6 +884,26 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): BigInt => $this->dispatcher->dispatch('FIFTH_DIGIT_PATCH_17', $context)
+        );
+    }
+
+    /**
+     * DISCOVERY18: direct live production route to the historical /365 guess.
+     * Anchor is an authenticated Year5000 record supplied by the caller.
+     * The returned year number is intentionally not authoritative.
+     *
+     * @param array{number:int,openGateDay:int,closeGateDay:int} $year5000Anchor
+     * @return array{anchorNumber:int,anchorOpenGateDay:int,anchorCloseGateDay:int,targetDay:int,deltaDays:string,offset365:string,guessedYearNumber:int,usedLegacyOutput:bool}
+     */
+    public function legacyGuessTargetYear365(
+        int $calculationDay, int $targetDay, array $year5000Anchor
+    ): array {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'YEAR_JUMP_365_LEGACY';
+        $context->semanticState['year5000Anchor'] = $year5000Anchor;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('YEAR_JUMP_365_LEGACY', $context)
         );
     }
 
