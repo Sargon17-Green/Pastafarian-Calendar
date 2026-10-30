@@ -631,6 +631,29 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'discovery18.year365.legacy.calls');
             return $report;
         });
+        // PATCH18: call the physical Stage36 legacy route, then true adjacent years.
+        $this->dispatcher->register('TARGET_YEAR_PATCH_18', function(BootstrapContext $context): array {
+            $anchor = $context->semanticState['year5000Anchor'] ?? null;
+            $next = $context->semanticState['nextYearProvider'] ?? null;
+            $previous = $context->semanticState['previousYearProvider'] ?? null;
+            $maxSteps = $context->semanticState['yearStepBudget'] ?? null;
+            if (!is_array($anchor) || !is_callable($next) ||
+                !is_callable($previous) || !is_int($maxSteps)) {
+                throw new \InvalidArgumentException('PATCH18_PROVIDER_ARGS');
+            }
+            $legacyReport = $this->legacyGuessTargetYear365(
+                $context->calculationDay, $context->targetDay, $anchor
+            );
+            $patch = new \Pastafari\Stage01\Patches\SequentialYearWalkPatch18();
+            $result = $patch->find(
+                $anchor, $context->targetDay, $next, $previous, $legacyReport, $maxSteps
+            );
+            $context->semanticState['stage36LegacyReport'] = $legacyReport;
+            $context->semanticState['stage37TargetYear'] = $result['targetYearCandidate'];
+            $context->status = 'TARGET_YEAR_PATCH_18_RETURNED';
+            $this->metrics->bump($context, 'year.patch18.adjacent.calls');
+            return $result;
+        });
         $this->dispatcher->register('MISSING_FIFTH_DIGIT_LEGACY', function(BootstrapContext $context): BigInt {
             $id = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -904,6 +927,33 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('YEAR_JUMP_365_LEGACY', $context)
+        );
+    }
+
+    /**
+     * PATCH18: preserve raw /365 as a ghost; select by real adjacent years.
+     * The caller must provide real year providers; Year5000 construction
+     * and a complete five-part calendar result are NOT implemented here.
+     *
+     * @param array<string,mixed> $year5000Anchor
+     * @param callable(array):array $nextYearProvider
+     * @param callable(array):array $previousYearProvider
+     * @return array<string,mixed>
+     */
+    public function targetYearSequentialPatch18(
+        int $calculationDay, int $targetDay, array $year5000Anchor,
+        callable $nextYearProvider, callable $previousYearProvider,
+        int $maxSteps = 2048
+    ): array {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'TARGET_YEAR_PATCH_18';
+        $context->semanticState['year5000Anchor'] = $year5000Anchor;
+        $context->semanticState['nextYearProvider'] = $nextYearProvider;
+        $context->semanticState['previousYearProvider'] = $previousYearProvider;
+        $context->semanticState['yearStepBudget'] = $maxSteps;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('TARGET_YEAR_PATCH_18', $context)
         );
     }
 

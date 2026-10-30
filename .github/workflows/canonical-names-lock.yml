@@ -214,3 +214,55 @@ jobs:
           path: evidence/
           retention-days: 30
           if-no-files-found: warn
+
+  stage37-php-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Verify Native PHP and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l src/Patches/SequentialYearWalkPatch18.php
+          php -l src/BootstrapKernel.php
+          php -l tests/stage37_patch18_tests.php
+          php -l tests/bootstrap.php
+      - name: Stage37 PATCH18 real year-walk and archival RED
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage37
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=37\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage37/source.txt
+          php -v > evidence-stage37/php-version.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage37_patch18_tests.php > evidence-stage37/stdout.txt 2> evidence-stage37/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence-stage37/exit-code.txt
+          cat evidence-stage37/stdout.txt
+          cat evidence-stage37/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage37/stderr.txt
+          grep -q '^LULUS Stage37 PATCH18 checks=' evidence-stage37/stdout.txt
+          grep -q 'genuine_years=3 real_targets=7 archive_red=2 invalid=6 stderr=0$' evidence-stage37/stdout.txt
+      - name: Save SHA, stdout, stderr and exit code
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage37-patch18
+          path: evidence-stage37/
+          retention-days: 30
+          if-no-files-found: warn

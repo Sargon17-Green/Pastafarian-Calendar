@@ -42,6 +42,7 @@ require_once $root . '/src/Patches/FourthDigitPatch16.php';
 require_once $root . '/src/Legacy/LegacyMissingFifthDigit17.php';
 require_once $root . '/src/Legacy/LegacyYearJumpGuess18.php';
 require_once $root . '/src/Patches/FifthDigitPatch17.php';
+require_once $root . '/src/Patches/SequentialYearWalkPatch18.php';
 require_once $root . '/src/BootstrapKernel.php';
 require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';
