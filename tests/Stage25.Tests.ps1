@@ -9,7 +9,7 @@ Assert-StageTrue -Condition ($meta -match '(?m)^CURRENT_STAGE=(25|26)\s*$') -Nam
 Assert-StageTrue -Condition ($meta -match '(?m)^LAST_COMPLETED_STAGE=(24|25|26)\s*$') -Name 'Stage24 remains sealed through Stage25'
 Assert-StageTrue -Condition ($meta -match '(?m)^STAGE24_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Stage24 RED is sealed'
 $awaiting = ($meta -match '(?m)^LAST_COMPLETED_STAGE=24\s*$') -and ($meta -match '(?m)^STAGE25_RUNTIME_VERIFICATION=AWAITING\s*$')
-$sealed = ($meta -match '(?m)^LAST_COMPLETED_STAGE=25\s*$') -and ($meta -match '(?m)^STAGE25_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$')
+$sealed = ($meta -match '(?m)^LAST_COMPLETED_STAGE=(25|26)\s*$') -and ($meta -match '(?m)^STAGE25_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$')
 Assert-StageTrue -Condition ($awaiting -or $sealed) -Name 'Stage25 metadata must be consistently awaiting or Native-sealed'
 $fixture=[int[]](4,5,2,3,6,1)
 $old=[int[]](2,3,4,5,6,1)
