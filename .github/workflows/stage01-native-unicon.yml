@@ -29,7 +29,15 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p native-logs
-          git clone --depth 1 https://github.com/uniconproject/unicon.git "$RUNNER_TEMP/unicon-src" > native-logs/clone.log 2>&1
+          # Fetch the exact compiler revision so native results are reproducible.
+          git init "$RUNNER_TEMP/unicon-src" > native-logs/clone.log 2>&1
+          git -C "$RUNNER_TEMP/unicon-src" remote add origin https://github.com/uniconproject/unicon.git
+          git -C "$RUNNER_TEMP/unicon-src" fetch --depth 1 origin fc06212d351972280a1bb6b701e79089bed08cb5 >> native-logs/clone.log 2>&1
+          git -C "$RUNNER_TEMP/unicon-src" checkout --detach FETCH_HEAD >> native-logs/clone.log 2>&1
+          git -C "$RUNNER_TEMP/unicon-src" rev-parse HEAD > native-logs/compiler-commit.txt
+          test "$(cat native-logs/compiler-commit.txt)" = "fc06212d351972280a1bb6b701e79089bed08cb5"
+          printf '%s\n' "$GITHUB_SHA" > native-logs/calendar-commit.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           (
             cd "$RUNNER_TEMP/unicon-src"
             ./configure --disable-graphics
