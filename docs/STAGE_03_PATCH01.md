@@ -37,11 +37,16 @@ historical wide-oracle paths (one and two steps), exercises both
 astronomical synthetic rejection directions, checks the M+1 boundary,
 the stationary-stream accepted/rejected behavior, and runs two real
 Sauce/Ask_Bowl streams against independent algebraic expectations.
-Expected assertion count is 1,469. Compilation and all actual Ada
+The original 1,469-assertion suite passed GNAT Native on 2026-10-30 at
+commit 1bc99774bdc118b19683dabd7a6052c767a808e5, run 41086786610
+(4/4 jobs successful). This update adds two explicit three-position
+radix-M rejection cases, one per direction. An independent BigInt
+preflight confirmed that both synthetic candidates exceed their
+acceptance limit for N=floor(M**3/2)+1. The new expected assertion count
+is **1,471**, requiring a fresh native CI result for this new SHA. Compilation and all actual Ada
 assertions must be confirmed by the stage03 native GitHub Actions job.
 No intentional huge loop is executed.
 
 This is not a completed Calendar_Date verification, nor proof that the
-Stage 2 hostile synthetic stream is reachable from Ask_Bowl. Stage 3
-remains pending until native, verify, and other required jobs finish on
-the exact new branch HEAD. No main merge.
+Stage 2 hostile synthetic stream is reachable from Ask_Bowl. Stage 3 acceptance remains pending until native, verify, and other
+required jobs finish on the exact new branch HEAD. No main merge.

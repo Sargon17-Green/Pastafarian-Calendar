@@ -83,6 +83,11 @@ procedure Stage03_Patch01_Tests is
 
    Space : constant Big_Integer := M * M;
    N_Half : constant Big_Integer := Space / B (2) + B (1);
+   --  Force three radix-M positions, not just the original two.
+   Space_Three : constant Big_Integer := Space * M;
+   N_Three : constant Big_Integer := Space_Three / B (2) + B (1);
+   Plus_Stream_Three : constant Answer_Stream :=
+     (First => M - B (3), Direction_Step => 1);
    Minus_Stream : constant Answer_Stream :=
      (First => M - B (1), Direction_Step => -1);
    Plus_Stream : constant Answer_Stream :=
@@ -126,6 +131,13 @@ begin
           "అపారమైన తిరస్కరణ నేరుగా గమ్యం చేరింది");
    Check (Choose_Rank (Plus_Stream, N_Half) = B (1),
           "ధన దిశ తిరిగి మొదటికి చేరింది");
+
+   --  Three-place wide rejection checks. Both initial candidates exceed
+   --  floor (M**3 / N_Three) * N_Three, so these exercise the fix itself.
+   Check (Choose_Rank (Minus_Stream, N_Three) = N_Three,
+          "మూడు స్థానాల ఋణ దిశ");
+   Check (Choose_Rank (Plus_Stream_Three, N_Three) = B (1),
+          "మూడు స్థానాల ధన దిశ");
 
    --  Two genuine, safely bounded historical-loop differential cases.
    Check
