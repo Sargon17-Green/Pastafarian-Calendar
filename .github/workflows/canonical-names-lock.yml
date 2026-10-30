@@ -110,3 +110,50 @@ jobs:
             echo "::error::Stage 1 bounded BigInt gate incomplete"
             exit 1
           fi
+
+      - name: Reject invalid Stage 1 BigInt and bootstrap inputs (isolated, gating)
+        shell: bash
+        run: |
+          set -euo pipefail
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none \
+            -J build -I build test/stage01_invalid_input_probe.f90 \
+            build/big_integer.o build/bootstrap_infrastructure.o \
+            -o build/stage01_invalid_input_probe
+          cases=(
+            'empty-text|empty BigInt string'
+            'plus-only|invalid BigInt string'
+            'minus-only|invalid BigInt string'
+            'invalid-digit|invalid BigInt digit'
+            'leading-space|invalid BigInt digit'
+            'internal-space|invalid BigInt digit'
+            'zero-divisor|divisor must be positive'
+            'negative-divisor|divisor must be positive'
+            'negative-retry-budget|bootstrap retry budget must be nonnegative'
+            'negative-trace-count|bootstrap trace count is invalid'
+            'excessive-trace-count|bootstrap trace count is invalid'
+            'negative-diagnostic-count|bootstrap diagnostic count is invalid'
+            'exhausted-diagnostic-capacity|bootstrap diagnostic capacity exceeded'
+          )
+          passes=0
+          failures=0
+          for entry in "${cases[@]}"; do
+            mode="${entry%%|*}"
+            expected="${entry#*|}"
+            set +e
+            output="$(timeout --signal=TERM --kill-after=2s 5s build/stage01_invalid_input_probe "$mode" 2>&1)"
+            exit_code=$?
+            set -e
+            if [[ "$exit_code" -eq 1 && "$output" == *"ERROR STOP $expected"* && "$output" != *'UNEXPECTED_RETURN='* ]]; then
+              passes=$((passes + 1))
+              echo "INVALID_INPUT_VERDICT=EXPECTED_REJECTION MODE=$mode"
+            else
+              failures=$((failures + 1))
+              printf 'INVALID_INPUT_VERDICT=FAIL MODE=%s EXIT=%s EXPECTED=%s\n%s\n' "$mode" "$exit_code" "$expected" "$output"
+            fi
+          done
+          echo "STAGE01_INVALID_INPUT_PASS=$passes TOTAL=${#cases[@]} FAILURES=$failures (gating; NOT full Stage 1 acceptance)"
+          echo "Fortran Stage 1 invalid-input gate: $passes/${#cases[@]} expected rejections, failures $failures. Not full oracle acceptance." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$failures" -ne 0 || "$passes" -ne "${#cases[@]}" ]]; then
+            echo "::error::Stage 1 invalid-input gate incomplete"
+            exit 1
+          fi
