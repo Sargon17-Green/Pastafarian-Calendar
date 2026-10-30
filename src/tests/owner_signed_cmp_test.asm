@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..214: signed owner-scoped comparison.
+; Stage 1 native regression 191..216: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -562,6 +562,62 @@ RunOwnerSignedCmpTests::
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
     cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 215: positive 0x7f > canonical +0 in B. B[0] is still 1:
+    ; a zero-length descriptor ignores residual owned SRAM payload.
+    ld a, 215
+    ld [wTestCase], a
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld a, 42
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenB+1], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 216: canonical +0 in A > negative 0x7f in B.
+    ; A[0] is still 1, confirming zero-length semantics.
+    ld a, 216
+    ld [wTestCase], a
+    ld a, 42
+    ld [wOwnerCmpOwnerA], a
+    ld a, 46
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+1], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
