@@ -32,6 +32,22 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def guard_no_offset_rebase(trace, first_put_tick, before_gate_tick):
+    """Conservatively reject offset/stack-stack controls before a signed gate read.
+
+    Ticks are 1-based inclusive for first_put and exclusive for before_gate.
+    This is a finite, opcode-only guard, not a global source-ownership proof.
+    """
+    need(1 <= first_put_tick < before_gate_tick <= len(trace),
+         "bad signed put/g tick bounds")
+    window = trace[first_put_tick - 1:before_gate_tick - 1]
+    need(all(s[0] == first_put_tick + i for i, s in enumerate(window)),
+         "nonsequential signed pre-g trace")
+    need(not any(s[6] == 0 and s[5] in (ord("{"), ord("}"), ord("u"))
+                 for s in window),
+         "storage-offset or stack-stack control before gate")
+
+
 def audit(shards, qa30b_zip):
     by_shard = {}
     for name in shards:
@@ -99,6 +115,7 @@ def audit(shards, qa30b_zip):
         need(bool(writes) and (writes[0]["tick"], writes[0]["before"],
                                writes[0]["after"]) == (242, 32, 0),
              "original memory gate initial zero put mismatch")
+        guard_no_offset_rebase(trace, writes[0]["tick"], g[0])
         previous = [e for e in writes if e["tick"] < g[0]]
         need(bool(previous) and previous[-1]["after"] == 0
              and not any(g[0] <= e["tick"] < j[0] for e in writes),
