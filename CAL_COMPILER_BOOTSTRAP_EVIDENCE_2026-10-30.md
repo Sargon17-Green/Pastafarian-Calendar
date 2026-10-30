@@ -240,3 +240,36 @@ No CAL executables were run, and the 82 existing calendar source
 files were not modified. Neither the CAL-4700 binary that mismatches
 its ZIP manifest nor the quarantined CAL-4018 is approved to run.
 The 99 Native QA groups remain unexecuted.
+
+## 2026-10-30: ancestor-symlink gap closed; CI still unverified
+
+After the 14-test snapshot, offline-directory mode was found to check
+`root`, `root/group` and the final source file for symlinks, but **not the
+parents above `root`**. A path of the form `alias/sources/release/the compiler`
+could therefore traverse a symlink at `alias` when `sources` itself was a
+normal directory. This was a concrete bypass of the documented symlink guard.
+
+- Commit `57a62eac41aa82656bef083c69681a9e9c20ddb9` updates
+  `tools/cal_source_provenance.py` to check the complete ancestor chain
+  `(path, *path.parents)` before opening the file.
+- Commit `541c571b94eac84344292d74031669548f957e66` adds
+  `test_refuse_symlinked_ancestor_above_source_root`. The suite now
+  **contains 15 tests**, but a full 15/15 execution has **not** been observed.
+- A separate focused local Python reproduction confirmed that the guard
+  rejects the `alias` symlink while accepting the normal path. This is
+  **not** a claim that GitHub Actions or all 15 tests passed.
+
+GitHub API checks at this branch HEAD returned **0 workflow runs and 0
+check runs**. The branch's source-only `push` workflow exists, has an exact
+matching branch filter, and had changes to both Python files after it was
+created. The workflow file remains absent on default branch `main`, so
+manual `workflow_dispatch` is not available there. The reason **push**
+runs do not appear remains **unverified**. Do not label this CI PASS or
+infer that the source-only workflow ran.
+
+The symlink guard is still a best-effort check of a non-adversarial,
+unchanging local filesystem, not a guarantee against concurrent
+time-of-check/time-of-use modifications. CAL-4018 and CAL-4700 remain
+unapproved for execution; no compiler was run. The 99 Native QA groups
+and the 47-month test remain blocked. No changes were made to the 82
+calendar source files or to `main`.
