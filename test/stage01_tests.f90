@@ -9,11 +9,12 @@ program stage01_tests
 
   integer :: failures,arg_status
   character(len=32) :: mode
-  logical :: bounded_smoke,gate_sauce_smoke
+  logical :: bounded_smoke,gate_sauce_smoke,gate_index_smoke
 
   failures=0
   bounded_smoke=.false.
   gate_sauce_smoke=.false.
+  gate_index_smoke=.false.
   if (command_argument_count()>0) then
      if (command_argument_count()/=1) error stop 'unsupported Stage 1 test mode'
      call get_command_argument(1,mode,status=arg_status)
@@ -23,12 +24,16 @@ program stage01_tests
         bounded_smoke=.true.
      case('gate-sauce-smoke')
         gate_sauce_smoke=.true.
+     case('gate-index-smoke')
+        gate_index_smoke=.true.
      case default
         error stop 'unsupported Stage 1 test mode'
      end select
   end if
 
-  if (gate_sauce_smoke) then
+  if (gate_index_smoke) then
+     call test_gate_index_smoke(failures)
+  else if (gate_sauce_smoke) then
      call test_gate_gap_smoke(failures)
      call test_sauce_smoke(failures)
   else
@@ -55,6 +60,8 @@ program stage01_tests
      write(*,'(A)') 'STAGE01_BOUNDED_ORACLE_PASS'
   else if (gate_sauce_smoke) then
      write(*,'(A)') 'STAGE01_GATE_SAUCE_SMOKE_PASS'
+  else if (gate_index_smoke) then
+     write(*,'(A)') 'STAGE01_GATE_INDEX_SMOKE_PASS'
   else
      write(*,'(A)') 'STAGE01 PASS'
   end if
@@ -253,6 +260,40 @@ contains
     end do
     call require(permutation,'Normative sauce Foundation smoke result has six saved bowls and a latched permutation',failures)
   end subroutine test_sauce_smoke
+
+  ! Isolated low-cost probe: gate cache/index consistency around Foundation.
+  ! Does not execute year5000, month weaving or the complete calendar oracle.
+  subroutine test_gate_index_smoke(failures)
+    integer, intent(inout) :: failures
+    type(BigInt) :: foundation,prior,following,inside
+    integer(int64) :: index,positiveGap,negativeGap
+    logical :: found
+    call reset_gate_cache()
+    foundation=foundation_day()
+    prior=gate_day(-1_int64)
+    following=gate_day(1_int64)
+
+    index=exact_gate_index(foundation,found)
+    call require(found .and. index==0_int64,'Foundation is gate zero',failures)
+    index=exact_gate_index(prior,found)
+    call require(found .and. index==-1_int64,'Previous gate round trips to index minus one',failures)
+    index=exact_gate_index(following,found)
+    call require(found .and. index==1_int64,'Next gate round trips to index one',failures)
+
+    inside=bi_add_small(following,-1_int64)
+    index=exact_gate_index(inside,found)
+    call require(.not. found .and. index==0_int64,'Day before next gate belongs after gate zero',failures)
+    inside=bi_add_small(prior,1_int64)
+    index=exact_gate_index(inside,found)
+    call require(.not. found .and. index==-1_int64,'Day after previous gate belongs after gate minus one',failures)
+
+    positiveGap=bi_to_int64(bi_sub(following,foundation))
+    negativeGap=bi_to_int64(bi_sub(foundation,prior))
+    call require(positiveGap>=int(GATE_GAP_MIN,int64) .and. positiveGap<=int(GATE_GAP_MAX,int64), &
+         'Positive neighbouring gate gap remains within bounds',failures)
+    call require(negativeGap>=int(GATE_GAP_MIN,int64) .and. negativeGap<=int(GATE_GAP_MAX,int64), &
+         'Negative neighbouring gate gap remains within bounds',failures)
+  end subroutine test_gate_index_smoke
 
   subroutine test_human_authored_text_language(failures)
     integer, intent(inout) :: failures

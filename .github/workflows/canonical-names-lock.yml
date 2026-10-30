@@ -94,6 +94,27 @@ jobs:
             echo "::error::Stage 1 gate/sauce smoke assertion count mismatch"
             exit 1
           fi
+      - name: Run bounded Stage 1 gate-index consistency smoke (7 assertions; not full acceptance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          output="$(timeout --signal=TERM --kill-after=5s 30s build/stage01_tests gate-index-smoke 2>&1)"
+          exit_code=$?
+          set -e
+          printf '%s\n' "$output"
+          if [[ "$exit_code" -ne 0 ]]; then
+            echo "::error::Bounded Stage 1 gate-index smoke failed or timed out (exit $exit_code)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE01_GATE_INDEX_SMOKE_PASS' <<< "$output"
+          actual="$(grep -c '^PASS: ' <<< "$output")"
+          echo "STAGE01_GATE_INDEX_SMOKE_ASSERTIONS=$actual EXPECTED=7 (NOT full Stage 1 acceptance)"
+          echo "Fortran Stage 1 gate-index consistency: $actual/7 assertions (not full acceptance)." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$actual" -ne 7 ]]; then
+            echo "::error::Stage 1 gate-index smoke assertion count mismatch"
+            exit 1
+          fi
       - name: Run bounded Stage 1 BigInt safe-boundary checks
         shell: bash
         run: |
