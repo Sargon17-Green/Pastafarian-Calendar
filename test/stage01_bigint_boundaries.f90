@@ -7,6 +7,7 @@ program stage01_bigint_boundaries
   implicit none
 
   integer :: failures, checks, k
+  integer, parameter :: EXPECTED_CHECKS = 313 ! Ten fixed checks + 101 * 3 loop checks.
   type(BigInt) :: a, b, q, r, scaled, product, restored
 
   failures = 0
@@ -41,6 +42,7 @@ program stage01_bigint_boundaries
   end do
 
   write(*,'(A,I0,A,I0)') 'BIGINT_SAFE_BOUNDARY_CHECKS=', checks, ' FAILURES=', failures
+  if (checks /= EXPECTED_CHECKS) error stop 'Stage 1 BigInt assertion count mismatch'
   if (failures /= 0) error stop 1
   write(*,'(A)') 'BIGINT_SAFE_BOUNDARY_PASS (NOT FULL STAGE01 PASS)'
 
