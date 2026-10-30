@@ -87,6 +87,9 @@ def main():
         poisoned = commit(root, "poisoned engine for replace-ref regression")
         run_git(root, "replace", base, poisoned)
         run_git(root, "reset", "--hard", base)
+        # The reset to the original commit removes the test-only manifest,
+        # since the malicious fixture commit captured it via git add -A.
+        manifest.write_text(json.dumps(metadata), encoding="utf-8")
         if (run_git(root, "rev-parse", "HEAD") != base or
                 (root / "src/monster.cpp").read_text(encoding="utf-8") !=
                 "poisoned engine"):
@@ -96,6 +99,7 @@ def main():
         count += 1
         run_git(root, "replace", "-d", base)
         run_git(root, "reset", "--hard", base)
+        manifest.write_text(json.dumps(metadata), encoding="utf-8")
         probe(tool, root, manifest, base, base, True)
         count += 1
         (root / "README.md").write_text("metadata-only", encoding="utf-8")
