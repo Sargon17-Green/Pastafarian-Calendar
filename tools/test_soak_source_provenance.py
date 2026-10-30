@@ -81,6 +81,23 @@ def main():
         manifest.write_text(json.dumps(metadata), encoding="utf-8")
         probe(tool, root, manifest, base, base, True)
         count += 1
+        # A local refs/replace object substitutes malicious source bytes for a
+        # trusted SHA, while rev-parse and HEAD:<path> still appear consistent.
+        (root / "src/monster.cpp").write_text("poisoned engine", encoding="utf-8")
+        poisoned = commit(root, "poisoned engine for replace-ref regression")
+        run_git(root, "replace", base, poisoned)
+        run_git(root, "reset", "--hard", base)
+        if (run_git(root, "rev-parse", "HEAD") != base or
+                (root / "src/monster.cpp").read_text(encoding="utf-8") !=
+                "poisoned engine"):
+            raise AssertionError("git replacement attack not activated")
+        probe(tool, root, manifest, base, base, False,
+              "git replace refs present")
+        count += 1
+        run_git(root, "replace", "-d", base)
+        run_git(root, "reset", "--hard", base)
+        probe(tool, root, manifest, base, base, True)
+        count += 1
         (root / "README.md").write_text("metadata-only", encoding="utf-8")
         docs = commit(root, "metadata-only")
         probe(tool, root, manifest, base, docs, True)

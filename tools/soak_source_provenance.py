@@ -79,6 +79,10 @@ def inspect(manifest_path, root, trusted_base, expected_head):
             "pastafarian-calendar-cpp-latina", "unexpected implementation ID")
     require(manifest.get("engine_verified_commit") == trusted_base,
             "manifest baseline does not match trusted pinned commit")
+    # Local replace refs can silently substitute a different commit tree while
+    # rev-parse continues to print the trusted commit's original SHA.
+    require(not git(root, "replace", "--list"),
+            "git replace refs present: local object substitution forbidden")
     actual_head = git(root, "rev-parse", "--verify", "HEAD")
     require(actual_head == expected_head, "checkout HEAD does not match expected SHA")
     baseline = git(root, "rev-parse", "--verify", trusted_base + "^{commit}")
