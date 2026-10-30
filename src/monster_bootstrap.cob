@@ -80,6 +80,19 @@ MAIN.
                     MOVE "旧余数计算失败，输出槽必须为空。" TO CTX-LAST-ERROR
                 END-IF
             END-IF
+        WHEN "SAVE-PATCH"
+            *> PATCH 01：通过生产包装修复零余数，保留旧入口。
+            MOVE "Patch01" TO CTX-CURRENT-HANDLER
+            PERFORM VALIDATE-BASE-CONTEXT
+            IF WS-STATUS = 0
+                CALL "SAVE-PATCH" USING
+                    LK-CALCULATION-DAY LK-TARGET-DAY WS-STATUS
+                IF WS-STATUS = 0
+                    MOVE "PATCH01:SAVE-PATCH" TO LK-MESSAGE
+                ELSE
+                    MOVE "SAVE 修补失败；调用者必须检查输出。" TO CTX-LAST-ERROR
+                END-IF
+            END-IF
         WHEN OTHER
             MOVE 20 TO WS-STATUS
             MOVE "基础调度器收到未知操作。" TO CTX-LAST-ERROR
