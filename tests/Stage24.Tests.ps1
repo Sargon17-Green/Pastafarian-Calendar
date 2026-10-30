@@ -11,8 +11,10 @@ function Get-Signature24 {
 }
 $meta = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
 Assert-StageTrue -Condition ($meta -match '(?m)^CURRENT_STAGE=24\s*$') -Name 'Stage24 opened'
-Assert-StageTrue -Condition ($meta -match '(?m)^LAST_COMPLETED_STAGE=23\s*$') -Name 'Stage23 sealed'
-Assert-StageTrue -Condition ($meta -match '(?m)^STAGE24_RUNTIME_VERIFICATION=AWAITING\s*$') -Name 'Native not prematurely sealed'
+$preSeal = ($meta -match '(?m)^LAST_COMPLETED_STAGE=23\s*$') -and ($meta -match '(?m)^STAGE24_RUNTIME_VERIFICATION=AWAITING\s*$')
+$postSeal = ($meta -match '(?m)^LAST_COMPLETED_STAGE=24\s*$') -and ($meta -match '(?m)^STAGE24_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$')
+Assert-StageTrue -Condition ($preSeal -or $postSeal) -Name 'Stage24 metadata has an awaiting or a Native-sealed pair'
+Assert-StageTrue -Condition ($meta -match '(?m)^STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$') -Name 'Stage23 seal still intact'
 $fixture=[int[]](4,5,2,3,6,1); $correct=[int[]](4,3,6,5,2,1); $numerical=[int[]](2,3,4,5,6,1)
 $foundationRed=0
 for ($id=1;$id -le 6;$id++) {

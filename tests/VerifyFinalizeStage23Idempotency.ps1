@@ -57,7 +57,7 @@ try {
     Test-CleanCheckout
 
     $lines = @(Get-Content -LiteralPath $stageFile -Encoding UTF8)
-    if (-not (($lines -contains 'LAST_COMPLETED_STAGE=23') -and
+    if (-not ((($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24')) -and
               ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED') -and
               (($lines -contains 'CURRENT_STAGE=23') -or ($lines -contains 'CURRENT_STAGE=24')))) {
         throw 'Stage23 is not in the expected sealed state.'
