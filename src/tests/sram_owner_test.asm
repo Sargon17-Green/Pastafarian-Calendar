@@ -403,13 +403,26 @@ RunOwnerLeaseTests::
     ld a, [wOwnerAllocated]
     cp 2
     jp nz, .fail
+    ld a, [wOwnerSelectedBank]         ; stale physical handle revoked
+    cp $ff
+    jp nz, .fail
     xor a
     ld [wOwnerSelectIndex], a
-    call OwnerLeaseSelectBank
+    call OwnerLeaseSelectBank          ; cannot regain released ownership
     ld a, [wOwnerStatus]
     cp 3
     jp nz, .fail
-    ld a, [$a000]                     ; released bank 7 was scrubbed
+    ld a, [wOwnerSelectedBank]
+    cp $ff
+    jp nz, .fail
+    ; Explicit test-only raw bank selection: successful release now
+    ; remaps SRAM to reserved bank 0, so inspect scrubbed bank 7 directly.
+    ld a, 7
+    call SRAMSelectBank
+    ld a, [$a000]
+    or a
+    jp nz, .fail
+    ld a, [$bfff]
     or a
     jp nz, .fail
 
