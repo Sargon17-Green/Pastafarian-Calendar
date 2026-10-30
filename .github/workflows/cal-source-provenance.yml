@@ -14,6 +14,8 @@ on:
       - "tools/test_cal_static_api_surface.py"
       - "tools/cal_static_callsite_intel.py"
       - "tools/test_cal_static_callsite_intel.py"
+      - "tools/cal_static_crypto_intel_prefix.py"
+      - "tools/test_cal_static_crypto_intel_prefix.py"
       - ".github/workflows/cal-source-provenance.yml"
   workflow_dispatch:
 
@@ -39,6 +41,8 @@ jobs:
         run: python3 tools/cal_static_api_surface.py --fetch --output "$RUNNER_TEMP/cal-api-surface.json"
       - name: Map direct calls and Intel hex literals from pinned text only
         run: python3 tools/cal_static_callsite_intel.py --fetch --output "$RUNNER_TEMP/cal-callsite-intel.json"
+      - name: Validate cross-module crypto path and x86 opcode prefixes without execution
+        run: python3 tools/cal_static_crypto_intel_prefix.py --fetch --output "$RUNNER_TEMP/cal-crypto-intel-prefix.json"
       - name: Summarize non-execution gate
         run: |
           echo "Only textual provenance was checked." >> "$GITHUB_STEP_SUMMARY"
