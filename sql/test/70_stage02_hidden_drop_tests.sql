@@ -1,0 +1,45 @@
+-- 28 independently computed Python integer fixture values; no reference SQL loaded.
+-- PostgreSQL CHECK fails immediately on false/NULL, and CI also checks exact count.
+BEGIN;
+CREATE TEMP TABLE stage02_hidden_assertions(test_name text PRIMARY KEY, ok boolean NOT NULL CHECK(ok));
+INSERT INTO stage02_hidden_assertions(test_name,ok) VALUES
+('அடித்தளம் சம நாள் 1', (pastafari_sql_tamil.hidden_drop(1,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()))=119390830530032782664128530203002080344::numeric)),
+('அடித்தளம் சம நாள் 2', (pastafari_sql_tamil.hidden_drop(2,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()))=11877236279154673426874867061566696749::numeric)),
+('அடித்தளம் சம நாள் 3', (pastafari_sql_tamil.hidden_drop(3,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()))=24217814924229232987463457533828175476::numeric)),
+('அடித்தளம் சம நாள் 4', (pastafari_sql_tamil.hidden_drop(4,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()))=166629231917547214614573522551290204247::numeric)),
+('அடித்தளம் சம நாள் 5', (pastafari_sql_tamil.hidden_drop(5,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()))=81202913407267092008896220686064041568::numeric)),
+('அடித்தளம் சம நாள் 6', (pastafari_sql_tamil.hidden_drop(6,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()))=73551520026920072430116213847585486272::numeric)),
+('அடித்தளம் சம நாள் 7', (pastafari_sql_tamil.hidden_drop(7,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()))=6164285870955721082771365327359496898::numeric)),
+('முன் பின் 1', (pastafari_sql_tamil.hidden_drop(1,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()-3,pastafari_sql_tamil.foundation_day()+2))=133209712098816826040958819110708844737::numeric)),
+('முன் பின் 2', (pastafari_sql_tamil.hidden_drop(2,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()-3,pastafari_sql_tamil.foundation_day()+2))=128701810865623694603909502027839517270::numeric)),
+('முன் பின் 3', (pastafari_sql_tamil.hidden_drop(3,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()-3,pastafari_sql_tamil.foundation_day()+2))=7253497332110845125787047071209633095::numeric)),
+('முன் பின் 4', (pastafari_sql_tamil.hidden_drop(4,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()-3,pastafari_sql_tamil.foundation_day()+2))=63253835348724645944067857684889595482::numeric)),
+('முன் பின் 5', (pastafari_sql_tamil.hidden_drop(5,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()-3,pastafari_sql_tamil.foundation_day()+2))=24471645987042618263298203619673971122::numeric)),
+('முன் பின் 6', (pastafari_sql_tamil.hidden_drop(6,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()-3,pastafari_sql_tamil.foundation_day()+2))=158366422269474961255805205792978082998::numeric)),
+('முன் பின் 7', (pastafari_sql_tamil.hidden_drop(7,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()-3,pastafari_sql_tamil.foundation_day()+2))=127360833810214894033108120217506653953::numeric)),
+('பின் முன் 1', (pastafari_sql_tamil.hidden_drop(1,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()+2,pastafari_sql_tamil.foundation_day()-3))=149127563153723473793199090538655502379::numeric)),
+('பின் முன் 2', (pastafari_sql_tamil.hidden_drop(2,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()+2,pastafari_sql_tamil.foundation_day()-3))=20596410337452893008613552111392543816::numeric)),
+('பின் முன் 3', (pastafari_sql_tamil.hidden_drop(3,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()+2,pastafari_sql_tamil.foundation_day()-3))=3681982673734714562821801453005141592::numeric)),
+('பின் முன் 4', (pastafari_sql_tamil.hidden_drop(4,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()+2,pastafari_sql_tamil.foundation_day()-3))=135176084834753623887583594544072341282::numeric)),
+('பின் முன் 5', (pastafari_sql_tamil.hidden_drop(5,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()+2,pastafari_sql_tamil.foundation_day()-3))=33583405021855954097457227331914565532::numeric)),
+('பின் முன் 6', (pastafari_sql_tamil.hidden_drop(6,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()+2,pastafari_sql_tamil.foundation_day()-3))=146604606135796397643272199337541168026::numeric)),
+('பின் முன் 7', (pastafari_sql_tamil.hidden_drop(7,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day()+2,pastafari_sql_tamil.foundation_day()-3))=14764030251908944013392019035817954757::numeric)),
+('பெரும் இடைவெளி 1', (pastafari_sql_tamil.hidden_drop(1,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()+pastafari_sql_tamil.save_modulus()))=117407379032579794710267776683378879807::numeric)),
+('பெரும் இடைவெளி 2', (pastafari_sql_tamil.hidden_drop(2,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()+pastafari_sql_tamil.save_modulus()))=112870489731883111663686425823870576952::numeric)),
+('பெரும் இடைவெளி 3', (pastafari_sql_tamil.hidden_drop(3,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()+pastafari_sql_tamil.save_modulus()))=84818942091170991649198448045434233372::numeric)),
+('பெரும் இடைவெளி 4', (pastafari_sql_tamil.hidden_drop(4,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()+pastafari_sql_tamil.save_modulus()))=162395670491810204274421810136530919946::numeric)),
+('பெரும் இடைவெளி 5', (pastafari_sql_tamil.hidden_drop(5,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()+pastafari_sql_tamil.save_modulus()))=17292734332111841174650282222233368296::numeric)),
+('பெரும் இடைவெளி 6', (pastafari_sql_tamil.hidden_drop(6,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()+pastafari_sql_tamil.save_modulus()))=156588983817243010582238392722891057511::numeric)),
+('பெரும் இடைவெளி 7', (pastafari_sql_tamil.hidden_drop(7,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day()+pastafari_sql_tamil.save_modulus()))=20284177841867458635585576568965109892::numeric)),
+('செல்லாத துளி 0', pastafari_sql_tamil.hidden_drop(0,pastafari_sql_tamil.work_counts(0,0)) IS NULL),
+('செல்லாத துளி -1', pastafari_sql_tamil.hidden_drop(-1,pastafari_sql_tamil.work_counts(0,0)) IS NULL),
+('செல்லாத துளி 8', pastafari_sql_tamil.hidden_drop(8,pastafari_sql_tamil.work_counts(0,0)) IS NULL),
+('NULL துளி', pastafari_sql_tamil.hidden_drop(NULL::integer,pastafari_sql_tamil.work_counts(0,0)) IS NULL),
+('NULL கணக்குகள்', pastafari_sql_tamil.hidden_drop(1,NULL::pastafari_sql_tamil.work_counts) IS NULL),
+('ஏழும் வரம்பில்', (SELECT bool_and(pastafari_sql_tamil.hidden_drop(k,pastafari_sql_tamil.work_counts(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day())) BETWEEN 1 AND pastafari_sql_tamil.save_modulus()) FROM generate_series(1,7) AS g(k))),
+('ஒப்புநிலை பெயர்வெளி சார்பின்மை', position('pastafari_sql_tamil_test' in pg_get_functiondef('pastafari_sql_tamil.hidden_drop(integer,pastafari_sql_tamil.work_counts)'::regprocedure))=0),
+('SQL செயற்கூறு', (SELECT l.lanname='sql' FROM pg_proc p JOIN pg_language l ON l.oid=p.prolang WHERE p.oid='pastafari_sql_tamil.hidden_drop(integer,pastafari_sql_tamil.work_counts)'::regprocedure)),
+('மாறாத கணக்கீடு', (SELECT p.provolatile='i' FROM pg_proc p WHERE p.oid='pastafari_sql_tamil.hidden_drop(integer,pastafari_sql_tamil.work_counts)'::regprocedure)),
+('இன்னும் முழு நாள் அல்ல', (SELECT count(*)=0 FROM pastafari_sql_tamil.calendar_date_spaghetti(pastafari_sql_tamil.foundation_day(),pastafari_sql_tamil.foundation_day())));
+SELECT 'மறைந்த துளி முதன்மைச் சோதனை' AS status, count(*) AS assertion_count FROM stage02_hidden_assertions;
+COMMIT;

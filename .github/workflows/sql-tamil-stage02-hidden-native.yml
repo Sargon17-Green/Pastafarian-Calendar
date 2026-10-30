@@ -1,0 +1,96 @@
+name: SQL Tamil Stage 2 Hidden Drop Native and Differential
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'sql/05_stage02_hidden_drop.sql'
+      - 'sql/test/70_stage02_hidden_drop_tests.sql'
+      - 'sql/test/71_stage02_hidden_differential.sql'
+      - '.github/workflows/sql-tamil-stage02-hidden-native.yml'
+      - 'sql/03_stage02_production_core.sql'
+      - 'sql/04_stage02_stone_states.sql'
+      - 'sql/test/10_normative_reference.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hidden-drop:
+    name: PostgreSQL 17 - native, isolation and differential
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-hidden-logs
+          docker run --detach --name sql-tamil-hidden-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-hidden-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-hidden-pg postgres --version | tee sql-tamil-hidden-logs/versions.txt
+          printf 'Git SHA: %s\n' "$GITHUB_SHA" | tee -a sql-tamil-hidden-logs/versions.txt
+      - name: Verify primary 38 assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-hidden-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/test/70_stage02_hidden_drop_tests.sql \
+            -c 'SELECT 1 / ((count(*) = 38 AND bool_and(ok))::integer) AS hidden_38_of_38 FROM stage02_hidden_assertions' \
+            2>&1 | tee sql-tamil-hidden-logs/native.txt
+      - name: Verify four production isolation assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-hidden-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/test/40_production_isolation.sql \
+            -c 'SELECT 1 / ((count(*) = 4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM stage01_production_isolation_assertions' \
+            2>&1 | tee sql-tamil-hidden-logs/isolation.txt
+      - name: Create isolated differential database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-hidden-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres -c 'CREATE DATABASE sql_tamil_hidden_diff'
+      - name: Verify 28 reference differential assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-hidden-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_hidden_diff \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql/test/71_stage02_hidden_differential.sql \
+            -c 'SELECT 1 / ((count(*) = 28 AND bool_and(ok))::integer) AS differential_28_of_28 FROM stage02_hidden_differential' \
+            2>&1 | tee sql-tamil-hidden-logs/differential.txt
+      - name: Preserve logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-stage02-hidden-native
+          path: sql-tamil-hidden-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop isolated database
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-hidden-pg 2>/dev/null || true
