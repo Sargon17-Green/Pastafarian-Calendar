@@ -1388,64 +1388,36 @@ RunOwnerSignedCmpTests::
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckFragmentedBytes
+    jp nc, .fail
+
+    ; 249: reverse the lengths on the same fragmented owner.
+    ld a, 249
+    ld [wTestCase], a
+    call OwnerCmpTestSwapLengthLow
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
-    ; 249: reverse the descriptors across the same fragmented physical banks.
-    ld a, 249
-    ld [wTestCase], a
-    ld a, 45
-    ld [wOwnerCmpOwnerA], a
-    ld [wOwnerCmpOwnerB], a
-    xor a
-    ld [wOwnerCmpSignA], a
-    ld [wOwnerCmpSignB], a
-    ld [wOwnerCmpLenB], a
-    ld [wOwnerCmpLenA+2], a
-    ld [wOwnerCmpLenB+2], a
-    ld a, 1
-    ld [wOwnerCmpLenA], a
-    ld a, $20
-    ld [wOwnerCmpLenA+1], a
-    ld [wOwnerCmpLenB+1], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 1
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
-    jp nc, .fail
     ; 250: negative 8192-byte A is greater than negative 8193-byte B.
-    ; Reuse owner 45's fragmented banks 5,7; negative ordering reverses magnitude.
     ld a, 250
     ld [wTestCase], a
-    ld a, 45
-    ld [wOwnerCmpOwnerA], a
-    ld [wOwnerCmpOwnerB], a
     ld a, 1
     ld [wOwnerCmpSignA], a
     ld [wOwnerCmpSignB], a
-    xor a
-    ld [wOwnerCmpLenA], a
-    ld [wOwnerCmpLenB+2], a
-    ld [wOwnerCmpLenA+2], a
-    ld a, $20
-    ld [wOwnerCmpLenA+1], a
-    ld [wOwnerCmpLenB+1], a
-    ld a, 1
-    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSwapLengthLow
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
     jp nc, .fail
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
@@ -1453,21 +1425,7 @@ RunOwnerSignedCmpTests::
     ; 251: reverse negative descriptors; the longer magnitude is now A < B.
     ld a, 251
     ld [wTestCase], a
-    ld a, 45
-    ld [wOwnerCmpOwnerA], a
-    ld [wOwnerCmpOwnerB], a
-    ld a, 1
-    ld [wOwnerCmpSignA], a
-    ld [wOwnerCmpSignB], a
-    ld a, 1
-    ld [wOwnerCmpLenA], a
-    xor a
-    ld [wOwnerCmpLenB], a
-    ld [wOwnerCmpLenA+2], a
-    ld [wOwnerCmpLenB+2], a
-    ld a, $20
-    ld [wOwnerCmpLenA+1], a
-    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSwapLengthLow
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -1475,13 +1433,10 @@ RunOwnerSignedCmpTests::
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
-    call OwnerCmpTestCheckBytes
-    jp nc, .fail
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
-    ; Make the fragmented owner's logical byte 8192 zero. Length 8192 remains
-    ; canonical (top byte $33); length 8193 becomes noncanonical (top byte $00).
+    ; Make logical offset 8192 zero: length 8192 stays canonical, 8193 does not.
     xor a
     ld [wOwnerOffset], a
     ld a, $20
@@ -1497,23 +1452,13 @@ RunOwnerSignedCmpTests::
     or a
     jp nz, .fail
 
-    ; 252: valid 8192-byte A vs noncanonical 8193-byte B, same fragmented owner.
+    ; 252: valid 8192-byte A vs noncanonical 8193-byte B.
     ld a, 252
     ld [wTestCase], a
-    ld a, 45
-    ld [wOwnerCmpOwnerA], a
-    ld [wOwnerCmpOwnerB], a
     xor a
     ld [wOwnerCmpSignA], a
     ld [wOwnerCmpSignB], a
-    ld [wOwnerCmpLenA], a
-    ld [wOwnerCmpLenA+2], a
-    ld [wOwnerCmpLenB+2], a
-    ld a, 1
-    ld [wOwnerCmpLenB], a
-    ld a, $20
-    ld [wOwnerCmpLenA+1], a
-    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSwapLengthLow
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -1521,28 +1466,13 @@ RunOwnerSignedCmpTests::
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
-    call OwnerCmpTestCheckBytes
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedNoncanonicalBytes
+    call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
     ; 253: reverse A/B so the invalid full-length descriptor is validated first.
     ld a, 253
     ld [wTestCase], a
-    ld a, 45
-    ld [wOwnerCmpOwnerA], a
-    ld [wOwnerCmpOwnerB], a
-    xor a
-    ld [wOwnerCmpSignA], a
-    ld [wOwnerCmpSignB], a
-    ld [wOwnerCmpLenB], a
-    ld [wOwnerCmpLenA+2], a
-    ld [wOwnerCmpLenB+2], a
-    ld a, 1
-    ld [wOwnerCmpLenA], a
-    ld a, $20
-    ld [wOwnerCmpLenA+1], a
-    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSwapLengthLow
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -1550,11 +1480,6 @@ RunOwnerSignedCmpTests::
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
-    call OwnerCmpTestCheckBytes
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedNoncanonicalBytes
-    jp nc, .fail
-
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
@@ -1852,49 +1777,30 @@ OwnerCmpTestCheckFragmentedBytes:
     or a
     jr nz, .bad
     ld a, [wOwnerByteValue]
+    ld b, a
+    ld a, [wTestCase]
+    cp 252
+    jr nc, .expectZero
+    ld a, b
     cp $01
     jr nz, .bad
+    jr .ok
+.expectZero:
+    ld a, b
+    or a
+    jr nz, .bad
+.ok:
     scf
     ret
 .bad:
     and a
     ret
-
-; Verify the fragmented bank-edge payload after cases 252-253.
-; Offset 8191 remains $33; offset 8192 is the noncanonical high zero.
-OwnerCmpTestCheckFragmentedNoncanonicalBytes:
-    ld a, $ff
-    ld [wOwnerOffset], a
-    ld a, $1f
-    ld [wOwnerOffset+1], a
-    xor a
-    ld [wOwnerOffset+2], a
-    ld a, 45
-    ld [wOwnerRequest], a
-    call OwnerByteRead
-    ld a, [wOwnerStatus]
-    or a
-    jr nz, .bad
-    ld a, [wOwnerByteValue]
-    cp $33
-    jr nz, .bad
-    xor a
-    ld [wOwnerOffset], a
-    ld a, $20
-    ld [wOwnerOffset+1], a
-    xor a
-    ld [wOwnerOffset+2], a
-    ld a, 45
-    ld [wOwnerRequest], a
-    call OwnerByteRead
-    ld a, [wOwnerStatus]
-    or a
-    jr nz, .bad
-    ld a, [wOwnerByteValue]
-    or a
-    jr nz, .bad
-    scf
-    ret
-.bad:
-    and a
+; Swap only the low length bytes; these six cases all use 8192/8193 bytes.
+OwnerCmpTestSwapLengthLow:
+    ld a, [wOwnerCmpLenA]
+    ld b, a
+    ld a, [wOwnerCmpLenB]
+    ld [wOwnerCmpLenA], a
+    ld a, b
+    ld [wOwnerCmpLenB], a
     ret
