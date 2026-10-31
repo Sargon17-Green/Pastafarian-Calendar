@@ -2955,3 +2955,53 @@ jobs:
           name: perl-stage04-month-occurrence-native
           path: logs/stage04
           retention-days: 30
+
+  # Stage5 native gate is part of the established feature-branch push workflow.
+  stage05-cutlet-occurrence-native:
+    if: github.ref_name == 'Perl+國語'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Stage05 cutlet projection native and independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage05
+          git rev-parse HEAD > logs/stage05/source.txt
+          perl -e 'print "$^V\n"' > logs/stage05/perl-version.txt
+          perl -Ilib -It/lib -c lib/Pastafari/Monster/CutletOccurrence.pm 2> logs/stage05/syntax.stderr
+          perl -Ilib -It/lib -c t/50_stage05_cutlet_occurrence.t 2>> logs/stage05/syntax.stderr
+          test "$(grep -c 'syntax OK' logs/stage05/syntax.stderr)" -eq 2
+          test "$(wc -l < logs/stage05/syntax.stderr)" -eq 2
+          set +e
+          (
+            ulimit -v 393216
+            ulimit -c 0
+            timeout --signal=TERM --kill-after=5s 120s prove -e 'perl -CS -Ilib -It/lib' -v t/50_stage05_cutlet_occurrence.t > logs/stage05/test.stdout 2> logs/stage05/test.stderr
+          )
+          ec=$?
+          set -e
+          printf '%s\n' "$ec" > logs/stage05/test.exit
+          cat logs/stage05/test.stdout
+          cat logs/stage05/test.stderr >&2
+          test "$ec" -eq 0
+          test ! -s logs/stage05/test.stderr
+          grep -q '^# STAGE05_INDEPENDENT_DAY_POSITIONS=6285$' logs/stage05/test.stdout
+          grep -q 'Result: PASS' logs/stage05/test.stdout
+          grep -Eq 'Tests=1[8-9][0-9][0-9][0-9]' logs/stage05/test.stdout
+          printf 'STAGE05_NATIVE_PASS=1\n' | tee logs/stage05/result.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perl-stage05-cutlet-occurrence-native
+          path: logs/stage05
+          retention-days: 30
