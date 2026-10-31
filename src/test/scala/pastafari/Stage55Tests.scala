@@ -235,7 +235,7 @@ object Stage55Tests {
       truth(st.contains("STAGE_54_NATIVE_VERIFICATION=PASS_EXPECTED_RED_29_PASS_3_FAIL"),"54")
       truth(st.contains("STAGE_53_NATIVE_VERIFICATION=PASS_NATIVE_SCALA_42_PASS_0_FAIL"),"53")
       truth(st.contains("CURRENT_STAGE=55") && st.contains("CURRENT_PATCH=27") &&
-        st.contains("LAST_COMPLETED_STAGE=54"),"55")
+        st.contains("LAST_COMPLETED_STAGE=55"),"55")
     }
     println("\nRISULTATO STADIO 55: "+passed+" PASS, "+failed+" FAIL")
     if(failed!=0)sys.exit(1)
