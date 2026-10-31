@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..237: signed owner-scoped comparison.
+; Stage 1 native regression 191..239: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1035,6 +1035,44 @@ RunOwnerSignedCmpTests::
     xor a
     ld [wOwnerCmpSignB], a
     ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 238: equal 8192-byte magnitude on owner 46, positive A > negative B.
+    ; The aliases share SRAM but not independent descriptor signs.
+    ld a, 238
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld a, 1
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 239: equal 8193-byte magnitude on owner 46, negative A < positive B.
+    ; Cross the SRAM bank edge while keeping descriptors, tags and bytes immutable.
+    ld a, 239
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    xor a
+    ld [wOwnerCmpSignB], a
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
