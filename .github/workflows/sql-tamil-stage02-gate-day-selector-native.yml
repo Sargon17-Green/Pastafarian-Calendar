@@ -1,0 +1,109 @@
+name: SQL Tamil Stage 2 Slice 12 Gate Day Selector Native
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'sql/14_stage02_gate_day_selector.sql'
+      - 'sql/test/104_stage02_gate_day_selector_native.sql'
+      - 'sql/test/105_stage02_gate_day_selector_differential.sql'
+      - '.github/workflows/sql-tamil-stage02-gate-day-selector-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gate-selector-slice12:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-selector-logs
+          docker run --detach --name sql-tamil-selector-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-selector-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-selector-pg postgres --version | tee sql-tamil-selector-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-selector-logs/versions.txt
+      - name: Native gate selector checks 26
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-selector-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/test/104_stage02_gate_day_selector_native.sql \
+            -c 'SELECT 1/((count(*)=26 AND bool_and(ok))::integer) AS native_26_of_26 FROM stage02_gate_selector_native' \
+            2>&1 | tee sql-tamil-selector-logs/native.txt
+      - name: Production-only isolation 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-selector-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c "CREATE TEMP TABLE selector_isolation AS SELECT * FROM (VALUES ('no-reference-schema',to_regnamespace('pastafari_sql_tamil_test') IS NULL), ('four-functions',(SELECT count(*)=4 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('gate_day','gate_index_at_or_before','gate_index_at_or_after','exact_gate_index'))), ('no-reference-calls',(SELECT count(*)=0 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('gate_day','gate_index_at_or_before','gate_index_at_or_after','exact_gate_index') AND position('pastafari_sql_tamil_test' IN pg_get_functiondef(p.oid))>0)), ('sql-stable',(SELECT count(*)=4 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('gate_day','gate_index_at_or_before','gate_index_at_or_after','exact_gate_index') AND l.lanname='sql' AND p.provolatile='s')) ) AS t(label,ok)" \
+            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM selector_isolation' \
+            2>&1 | tee sql-tamil-selector-logs/isolation.txt
+      - name: Create isolated reference database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-selector-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'CREATE DATABASE sql_tamil_selector_differential'
+      - name: Differential gate selector checks 14
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-selector-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_selector_differential \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql/test/105_stage02_gate_day_selector_differential.sql \
+            -c 'SELECT 1/((count(*)=14 AND bool_and(ok))::integer) AS differential_14_of_14 FROM stage02_gate_selector_differential' \
+            2>&1 | tee sql-tamil-selector-logs/differential.txt
+      - name: Preserve bounded logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice12-gate-selector
+          path: sql-tamil-selector-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-selector-pg 2>/dev/null || true
