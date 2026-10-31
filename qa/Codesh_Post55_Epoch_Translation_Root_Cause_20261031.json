@@ -1,0 +1,50 @@
+{
+  "project_id": "PC-BRANCH-CODESH-PALEOHEBREW",
+  "status": "FOUNDATION_EPOCH_SHIFT_CONFIRMED_FOR_YEAR_STRUCTURE",
+  "reference_repository": "Sargon17-Green/pastafari-calendar",
+  "reference_commit": "81af2a055bbdfdfa122fffc91c21283659df0b39",
+  "codesh_repository": "Sargon17-Green/Pastafarian-Calendar",
+  "codesh_qa_baseline_commit": "c89aaf0445603dd335ac4e555a7fa46987d254e2",
+  "native_jar_sha256": "e34360ca1928dc11758636cde1ee4afc1cbe9994e5e6fd1d1ce4660a8c70c98d",
+  "origin": {
+    "reference_jdn": -13334246,
+    "codesh_jdn": -15055671,
+    "delta_add_to_codesh_jdn_to_get_reference_jdn": 1721425
+  },
+  "day_number_at_reference_origin": {
+    "reference": 1,
+    "codesh": 3442851
+  },
+  "foundation_C01": {
+    "reference_candidate_count": 43,
+    "codesh_original_candidate_count": 70,
+    "codesh_shifted_candidate_count": 43,
+    "reference_selected_one_based": 15,
+    "codesh_original_selected_one_based": 64,
+    "codesh_shifted_selected_one_based": 15,
+    "reference_year_length": 4244,
+    "codesh_original_year_length": 5626,
+    "codesh_shifted_year_length": 4244
+  },
+  "distinct_action_days": 10,
+  "rebased_year_boundary_matches": 10,
+  "rebased_year_boundary_mismatches": 0,
+  "gate_reference_checkpoints": 7,
+  "gate_uniform_translation_matches": 7,
+  "whole_year_membership_pairs_from_prior_results": 59364,
+  "membership_mismatches_before": 31089,
+  "membership_mismatches_after_rebasing": 0,
+  "five_component_native_comparison": "NOT_PERFORMED",
+  "methodology": "Execute signed Codesh Stage55 JAR after subtracting delta from each action JDN; add delta to first and last year JDN for comparison. Whole-year membership recomputed from rebased native year bounds and prior reference per-day year statuses; not individual Codesh per-day conversions.",
+  "source_loci": [
+    "מקור/מופת־רוטב.אמן (בנה־יום־יסוד)",
+    "מקור/שערים־ושנים.אמן (טען־נקודות־עזר, מקום־שער)"
+  ],
+  "source_changes": false,
+  "main_branch_changes": false,
+  "next_steps": [
+    "Decide whether external coordinate JDN must use reference basis or Codesh alternative epoch",
+    "Implement explicit entry/exit translation adapter or controlled two-file anchor/checkpoint recalc",
+    "Verify full five fields natively and all ten selected years before considering independent pass"
+  ]
+}
