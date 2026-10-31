@@ -11,6 +11,7 @@ on:
       - 'Cargo.lock'
       - 'DEVELOPMENT_STAGE.md'
       - 'audit/STAGE_04_DISCOVERY02_BASELINE_CONTRACT_2026-10-31.md'
+      - 'audit/STAGE_04_DISCOVERY02_ARCHIVED_ROUTE_CONTRACT_2026-10-31.md'
       - '.github/workflows/rust-az-stage04-discovery02.yml'
   workflow_dispatch:
 
@@ -35,6 +36,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f audit/STAGE_04_DISCOVERY02_BASELINE_CONTRACT_2026-10-31.md
+          test -f audit/STAGE_04_DISCOVERY02_ARCHIVED_ROUTE_CONTRACT_2026-10-31.md
           grep -Fxq 'CURRENT_STAGE=4' DEVELOPMENT_STAGE.md
           grep -Fxq 'LAST_COMPLETED_STAGE=3' DEVELOPMENT_STAGE.md
           grep -Fq 'pub mod discovery02_day_tag_probe;' src/lib.rs
@@ -66,6 +68,8 @@ jobs:
           grep -Fq 'STAGE04_DISCOVERY02_WORK_COUNTS_LOCAL_PAIRS=49' evidence/stdout.txt
           grep -Fq 'STAGE04_DISCOVERY02_WORK_COUNTS_HUGE_PAIRS=8' evidence/stdout.txt
           grep -Fq 'STAGE04_DISCOVERY02_WORK_COUNTS_TRANSLATION_CASES=12' evidence/stdout.txt
+          grep -Fq 'STAGE04_DISCOVERY02_ARCHIVED_RED=8 CONTROL=7 UNEXPECTED=0' evidence/stdout.txt
+          grep -Fq 'STAGE04_DISCOVERY02_ARCHIVED_PATCH_CONTROL=15' evidence/stdout.txt
           grep -Eq 'test result: ok\. 3 passed; 0 failed' evidence/stdout.txt
           grep -Fq 'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' evidence/stdout.txt
           grep -Fq 'STAGE03_PATCH01_BOUNDARY_OK=8' evidence/stdout.txt
@@ -75,7 +79,7 @@ jobs:
           if grep -E 'test result: FAILED|test.*FAILED|panic' evidence/stdout.txt evidence/stderr.txt; then
             exit 1
           fi
-          printf 'STAGE04_DISCOVERY02_BASELINE_ONLY=PASS\nEXPECTED_RED=NOT_CLAIMED\n' > evidence/result.txt
+          printf 'STAGE04_DISCOVERY02_ARCHIVAL_WITNESS_QA=PASS\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
           cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Upload evidence on success or failure
         if: always()

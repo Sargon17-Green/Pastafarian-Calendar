@@ -129,3 +129,14 @@ Relevant source/history links:
 **Mənbə uyğunluğu:** `NO_VERIFIABLE_LEGACY_DAY_TAG_ROUTE_FOUND_IN_THESE_TWO_TARGETED_CHECKS`. Heç bir day-tag `EXPECTED_RED`, `CONTROL`, Stage4 closure, Stage5 və ya production wiring nəticəsi çıxarılmır. Əvvəlki Code SHA üzrə 32/32 Native baseline sübutu dəyişmir.
 
 **NEXT (dəyişməz qəbul şərti):** yalnız dəqiq provenance və versiyalı real tarixi day-tag source/artifact/route təqdim olunduqda onu müstəqil normativ oracle ilə çoxalt; faktiki fərq aşkar edilmədən `EXPECTED_RED` bəyan etmə.
+
+## 7. Versiyalı xarici arxiv gün-etiketi marşrutu — 2026-10-31
+
+İki əvvəlki mənfi yoxlamanı təkrarlamadan, 5 GitHub Release obyektinin metadata-sı yoxlanıldı. `python-turkish-v1.0.0-verified-20261030` tag-i commit `0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4` ünvanına bağlanır. Həmin tree-də `src/pastafari_calendar/legacy_day_counts.py` blob `405f461b2e2cdd170ded010e6f8046b78d6b4ab6` kimi mövcuddur. Bu, Rust branch tarixindəki əvvəlki day-tag implementasiyası deyil, **başqa dilin tarixi qorunmuş marşrutudur**.
+
+`oldDayTag(day)` funksiyası `2 * abs(day - F)` hesablayır (`F=-15055671`), halbuki bağımsız normativ oracle `day>=F` üçün əlavə `1` tələb edir. Arxiv mənbəyindən çıxarılan orijinal Python əsas funksiyaları lokal olaraq 15 sərhəd/BigInt girişi ilə icra edildi: `RED=8 CONTROL=7 UNEXPECTED=0`, tarixi `dayTagWithFoundationScar` üçün `PATCH_OK=15`. Burada 4 böyüklük `2^127`, `2^1025`, `2^4096`, `2^8192` hər iki işarə ilə sınandı.
+
+Rust üçün test-only, müstəqil riyazi rekonstruksiya və onun Native CI markerləri əlavə edildi; normativ oracle xarici tarixi koddan götürülməyib. Rust Native yeni SHA üzərində **hələ təsdiqlənməyib**, Stage4 ümumilikdə **OPEN** qalır, production entry `BootstrapOnly` saxlanılır.
+
+Source: https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/python-turkish-v1.0.0-verified-20261030/src/pastafari_calendar/legacy_day_counts.py
+Contract: audit/STAGE_04_DISCOVERY02_ARCHIVED_ROUTE_CONTRACT_2026-10-31.md
