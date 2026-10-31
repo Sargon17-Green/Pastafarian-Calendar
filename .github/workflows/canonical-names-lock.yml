@@ -57,11 +57,14 @@ jobs:
                ($stageLines -contains 'STAGE31_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or
               (($stageLines -contains 'CURRENT_STAGE=32') -and
                ($stageLines -contains 'LAST_COMPLETED_STAGE=32') -and
-               ($stageLines -contains 'STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
+               ($stageLines -contains 'STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or
+              (($stageLines -contains 'CURRENT_STAGE=33') -and
+               ($stageLines -contains 'LAST_COMPLETED_STAGE=33') -and
+               ($stageLines -contains 'STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
              ($stageLines -contains 'STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
              ((($stageLines -contains 'LAST_COMPLETED_STAGE=28') -and
                ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=AWAITING')) -or
-              ((($stageLines -contains 'LAST_COMPLETED_STAGE=29') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=31') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=32')) -and
+              ((($stageLines -contains 'LAST_COMPLETED_STAGE=29') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=31') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=32') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=33')) -and
                ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
             & .\tests\Stage01.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage01 regression failed Stage29' }
@@ -90,7 +93,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage30 distributional discovery probe failed' }
             Write-Host ('STAGE30_DISCOVERY15_NATIVE_SHA=' + $env:GITHUB_SHA)
             Write-Host 'STAGE30_DISCOVERY15_NATIVE=EVIDENCE_ONLY'
-            if (($stageLines -contains 'CURRENT_STAGE=30') -or ($stageLines -contains 'CURRENT_STAGE=31') -or ($stageLines -contains 'CURRENT_STAGE=32')) { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
+            if (($stageLines -contains 'CURRENT_STAGE=30') -or ($stageLines -contains 'CURRENT_STAGE=31') -or ($stageLines -contains 'CURRENT_STAGE=32') -or ($stageLines -contains 'CURRENT_STAGE=33')) { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
           } elseif (($stageLines -contains 'CURRENT_STAGE=27') -and
               ((($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=AWAITING')) -or
                (($stageLines -contains 'LAST_COMPLETED_STAGE=27') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
@@ -326,8 +329,10 @@ jobs:
             & .\tests\Stage32.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage32 canonical research failed' }
             $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
-            if (($stageLines -contains 'CURRENT_STAGE=32') -and
-                ($stageLines -contains 'LAST_COMPLETED_STAGE=32') -and
+            if (((($stageLines -contains 'CURRENT_STAGE=32') -and
+                 ($stageLines -contains 'LAST_COMPLETED_STAGE=32')) -or
+                (($stageLines -contains 'CURRENT_STAGE=33') -and
+                 ($stageLines -contains 'LAST_COMPLETED_STAGE=33'))) -and
                 ($stageLines -contains 'STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) {
               Add-Content -Path stage32-canonical-metadata.txt -Value 'STAGE32_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
               Write-Host 'STAGE32_SEAL_RECHECK=PASS'
@@ -368,13 +373,22 @@ jobs:
             ('STAGE33_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
             'STAGE33_SCOPE=16_SQUARES_64_ENDPOINTS_64_EDGES',
             'STAGE33_EXPECTED_ASSERTIONS=560',
-            'STAGE33_STAGE_SEAL=NOT_CLAIMED'
+            'STAGE33_STAGE_SEAL=CHECK_AFTER_TEST'
           ) | Set-Content stage33-grid-metadata.txt -Encoding UTF8
           Start-Transcript -Path stage33-grid-transcript.txt | Out-Null
           try {
             & .\tests\Stage33.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage33 native research failed' }
-            Write-Host 'STAGE33_DISCOVERY18_NATIVE=EVIDENCE_ONLY'
+            $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+            if (($stageLines -contains 'CURRENT_STAGE=33') -and
+                ($stageLines -contains 'LAST_COMPLETED_STAGE=33') -and
+                ($stageLines -contains 'STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) {
+              Add-Content -Path stage33-grid-metadata.txt -Value 'STAGE33_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
+              Write-Host 'STAGE33_SEAL_RECHECK=PASS'
+            } else {
+              Add-Content -Path stage33-grid-metadata.txt -Value 'STAGE33_STAGE_SEAL=NOT_CLAIMED' -Encoding UTF8
+              Write-Host 'STAGE33_DISCOVERY18_NATIVE=EVIDENCE_ONLY'
+            }
           } finally {
             Stop-Transcript | Out-Null
           }

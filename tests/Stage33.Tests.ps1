@@ -5,8 +5,9 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
 $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($md -match '(?m)^CURRENT_STAGE=32\s*$') -Name 'Stage32 current'
-Assert-StageTrue -Condition ($md -match '(?m)^LAST_COMPLETED_STAGE=32\s*$') -Name 'Stage32 completed'
+$stage33Sealed = ($md -match '(?m)^CURRENT_STAGE=33\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=33\s*$') -and ($md -match '(?m)^STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')
+Assert-StageTrue -Condition (($md -match '(?m)^CURRENT_STAGE=32\s*$') -or $stage33Sealed) -Name 'Stage32 baseline or Stage33 exact seal'
+Assert-StageTrue -Condition (($md -match '(?m)^LAST_COMPLETED_STAGE=32\s*$') -or $stage33Sealed) -Name 'Stage32 completed or Stage33 exact seal'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage32 sealed'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Stage26 historical red'
 $f=[System.Numerics.BigInteger](Get-NormFoundationDay)
