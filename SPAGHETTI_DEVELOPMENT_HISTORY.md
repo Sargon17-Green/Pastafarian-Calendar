@@ -807,3 +807,7 @@ gateDayByIndex(int), ujian tujuh target benar dan penolakan 11 input
 buruk termasuk kedua-dua saksi Stage40. PATCH18, PATCH19, legacy,
 Oracle ujian dan katalog tidak diubah. Status Stage41 masih
 AWAITING_NATIVE sehingga CI semua pekerjaan berjaya pada SHA baharu.
+
+## Stage41 Native closure; Stage42 DISCOVERY21 opened — 31 October 2026
+
+Stage41 run 41187047640 completed/success, 12/12 jobs on 63913fe8620d4fd55be66a823438373c925d98f4. Native job 124495979107: PHP 8.3.36 64-bit, 40 checks, genuine_years=3, real_targets=7, stage40_red=2, invalid=11; stdout verified, stderr empty, exit=0; artifact 13038001082. Closed Stage41 in artifacts/STAGE41_PATCH20_NATIVE_CLOSURE_2026-10-31.md. Stage42 opened as TEST-ONLY hypothesis on anchor-number provenance: forged labels on physical Year4999/5001 with real gate days. No claim of a confirmed defect until native evidence; this explicitly violates the trusted-anchor caller precondition and is an interface boundary experiment. Stage41 code/main/oracle unchanged. CI outcome of Stage42 pending.
