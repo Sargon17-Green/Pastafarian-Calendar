@@ -1,0 +1,60 @@
+{
+  "schema": "codesh-post-stage55-hybrid-five-fields-preflight/1",
+  "status": "EXPERIMENTAL_PENDING_100_NATIVE_EXECUTION",
+  "branch": "Codesh+𐤉𐤄𐤅𐤃𐤉𐤕",
+  "pinned_codesh_head": "e7ff7316197d76f9403d8140b775d728de711a45",
+  "pinned_stage55_jar_sha256": "e34360ca1928dc11758636cde1ee4afc1cbe9994e5e6fd1d1ce4660a8c70c98d",
+  "pinned_prior_reference_zip_sha256": "0de29061c7d4ceae06a38581a51ca70105f7be4e0c0a6437eb051c09a77c1cb7",
+  "artifact": "CODESH_FIVE_FIELDS_100_EXPERIMENT_v001.zip",
+  "artifact_sha256": "aab287f8e4f4818ec06a7d50ee4aac44be8792a59caa50edba9a3fccfdd78e14",
+  "artifact_library_path": "/Pending_User_Execution/CODESH_FIVE_FIELDS_100_EXPERIMENT_v001.zip",
+  "input_count": 100,
+  "distinct_action_days": 100,
+  "epoch_delta_jdn": 1721425,
+  "verification": {
+    "signed_sources_unchanged": 50,
+    "five_fields_smoke_control": {
+      "id": "foundation_same",
+      "input": {
+        "action_jdn": -13334246,
+        "target_jdn": -13334246
+      },
+      "expected": {
+        "year": "5000",
+        "cutlet_name": "עקרב",
+        "day_in_cutlet": 503,
+        "month_name": "באר",
+        "day_in_month": 56
+      },
+      "bridge_observed_indices": {
+        "year": 5000,
+        "cutlet": 10,
+        "day_in_cutlet": 503,
+        "month": 20,
+        "day_in_month": 56
+      },
+      "verdict": "MATCH"
+    },
+    "precompiled_bridge": "JAVAC_21_PASS",
+    "archive_crc": "PASS",
+    "package_sha256_entries": 10,
+    "forced_two_second_timeout": {
+      "case_id": "R001",
+      "status": "TIMEOUT",
+      "results_zip_created": true,
+      "results_zip_crc": "PASS",
+      "false_pass": false
+    },
+    "full_100_case_comparison": "NOT_RUN"
+  },
+  "trust_scope": "HYBRID_SIGNED_NATIVE_CODESH_PRIMITIVES_WITH_JAVA_DATE_ASSEMBLY",
+  "caveats": [
+    "The signed 55-stage Codesh program does not expose a public native five-field converter.",
+    "Java bridge assembles and un-ranks portions of full date calculation and is not a Codesh-language final implementation.",
+    "One smoke-control pass does not validate the other 100 cases.",
+    "Expensive Native computation can time out; resume per case and inspect failures."
+  ],
+  "source_code_modified": false,
+  "main_modified": false,
+  "not_full_native_five_field_completion": true
+}
