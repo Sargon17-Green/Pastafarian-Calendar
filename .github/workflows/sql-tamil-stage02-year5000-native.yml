@@ -31,7 +31,7 @@ on:
 permissions:
   contents: read
 jobs:
-  year5000-slice14:
+  year5000-native:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -86,13 +86,101 @@ jobs:
             -c "CREATE TEMP TABLE year5000_isolation AS SELECT * FROM (VALUES ('no-reference-schema',to_regnamespace('pastafari_sql_tamil_test') IS NULL), ('two-production-functions',(SELECT count(*)=2 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('year5000_gate_window','year5000'))), ('sql-stable',(SELECT count(*)=2 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('year5000_gate_window','year5000') AND l.lanname='sql' AND p.provolatile='s')), ('no-reference-body',(SELECT count(*)=0 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('year5000_gate_window','year5000') AND position('pastafari_sql_tamil_test' IN pg_get_functiondef(p.oid))>0))) AS t(label,ok)" \
             -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM year5000_isolation' \
             2>&1 | tee sql-tamil-year5000-integration-logs/isolation.txt
+      - name: Preserve bounded logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice14-year5000-native
+          path: sql-tamil-year5000-integration-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-year5000-integration-pg 2>/dev/null || true
+  year5000-differential:
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [lower-window-edge, one-day-before, foundation, one-day-after, upper-window-edge]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-year5000-integration-logs
+          docker run --detach --name sql-tamil-year5000-integration-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-year5000-integration-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-year5000-integration-pg postgres --version | tee sql-tamil-year5000-integration-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-year5000-integration-logs/versions.txt
       - name: Create isolated reference database
         shell: bash
         run: |
           set -euo pipefail
           docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
             -c 'CREATE DATABASE sql_tamil_year5000_differential'
-      - name: Differential year5000 checks 25
+      - name: Construct exact one-case differential SQL
+        shell: bash
+        env:
+          CASE_NAME: ${{ matrix.case }}
+        run: |
+          set -euo pipefail
+          test "$(grep -c '^  FROM cases        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_year5000_differential \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql-tamil-year5000-integration-logs/differential_case.sql \
+            -c 'SELECT 1/((count(*)=5 AND bool_and(ok))::integer) AS differential_5_of_5 FROM stage02_year5000_differential' \
+            2>&1 | tee sql-tamil-year5000-integration-logs/differential.txt
+      - name: Preserve bounded logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice14-year5000-differential-${{ matrix.case }}
+          path: sql-tamil-year5000-integration-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-year5000-integration-pg 2>/dev/null || true
+ sql/test/109_stage02_year5000_differential.sql)" -eq 1
+          sed "s/^  FROM cases$/  FROM cases WHERE label='${CASE_NAME}'/" \
+            sql/test/109_stage02_year5000_differential.sql \
+            > sql-tamil-year5000-integration-logs/differential_case.sql
+          test "$(grep -c "FROM cases WHERE label='${CASE_NAME}'" sql-tamil-year5000-integration-logs/differential_case.sql)" -eq 1
+          sha256sum sql-tamil-year5000-integration-logs/differential_case.sql \
+            | tee sql-tamil-year5000-integration-logs/case_sha256.txt
+      - name: Differential year5000 checks 5 for ${{ matrix.case }}
         shell: bash
         run: |
           set -euo pipefail
@@ -115,14 +203,14 @@ jobs:
             -f /work/sql/15_stage02_year5000_gate_candidates.sql \
             -f /work/sql/16_stage02_year5000.sql \
             -f /work/sql/test/10_normative_reference.sql \
-            -f /work/sql/test/109_stage02_year5000_differential.sql \
-            -c 'SELECT 1/((count(*)=25 AND bool_and(ok))::integer) AS differential_25_of_25 FROM stage02_year5000_differential' \
+            -f /work/sql-tamil-year5000-integration-logs/differential_case.sql \
+            -c 'SELECT 1/((count(*)=5 AND bool_and(ok))::integer) AS differential_5_of_5 FROM stage02_year5000_differential' \
             2>&1 | tee sql-tamil-year5000-integration-logs/differential.txt
       - name: Preserve bounded logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: sql-tamil-slice14-year5000-integration
+          name: sql-tamil-slice14-year5000-differential-${{ matrix.case }}
           path: sql-tamil-year5000-integration-logs/
           if-no-files-found: warn
           retention-days: 90
