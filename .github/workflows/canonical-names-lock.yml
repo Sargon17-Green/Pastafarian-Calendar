@@ -703,3 +703,47 @@ jobs:
           path: evidence-stage46/
           retention-days: 30
           if-no-files-found: warn
+
+  stage47-seam-matrix-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Stage47 seam matrix exact native runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage47
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=47\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage47/source.txt
+          php -v > evidence-stage47/php-version.txt
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l tests/stage47_year_seam_matrix.php
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage47_year_seam_matrix.php > evidence-stage47/stdout.txt 2> evidence-stage47/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence-stage47/exit-code.txt
+          cat evidence-stage47/stdout.txt
+          cat evidence-stage47/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage47/stderr.txt
+          grep -Eq '^STAGE47_SEAM_MATRIX checks=[0-9]+ years=5 targets=20 max_hops=3 budget_rejections=1$' evidence-stage47/stdout.txt
+      - name: Preserve Stage47 native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage47-seam-matrix
+          path: evidence-stage47/
+          retention-days: 30
+          if-no-files-found: warn
