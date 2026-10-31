@@ -42,6 +42,7 @@ local LegacyGateOrdinal = require("legacy_gate_ordinal")
 local GateOrdinalPatch = require("gate_ordinal_patch")
 local LegacyGateReverseOrdinal = require("legacy_gate_reverse_ordinal")
 local GateReverseOrdinalPatch = require("gate_reverse_ordinal_patch")
+local LegacyNearestBoundary = require("legacy_gate_nearest_boundary")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -610,6 +611,11 @@ end
 function S.gateReverseOrdinalSpaghetti(day,gateDays)
     local corrected=GateReverseOrdinalPatch.execute(day,gateDays)
     return corrected
+end
+
+-- DISCOVERY22: nearest gate midpoint tie, deliberately wrong one-based comparison.
+function S.legacyGateNearestBoundaryProbe(day,gateDays)
+    return LegacyNearestBoundary.execute(day,gateDays)
 end
 
 function S.calendarDateSpaghetti()
