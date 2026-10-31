@@ -292,13 +292,13 @@ jobs:
           set -euo pipefail
           output="$(timeout --signal=TERM --kill-after=3s 10s build/stage01_weaving_microprobe 2>&1)"
           printf '%s\n' "$output"
-          grep -Fxq 'STAGE01_WEAVING_MICRO_ASSERTIONS=24' <<< "$output"
+          grep -Fxq 'STAGE01_WEAVING_MICRO_ASSERTIONS=42' <<< "$output"
           grep -Fxq 'STAGE01_WEAVING_MICRO_FAILURES=0' <<< "$output"
           grep -Fxq 'STAGE01_WEAVING_MICRO_PASS (six exhaustive small fixtures; NOT full Stage 1 acceptance)' <<< "$output"
           actual="$(grep -c '^PASS: ' <<< "$output")"
-          test "$actual" -eq 24
-          echo "STAGE01_WEAVING_MICRO_NATIVE_PASS=$actual EXPECTED=24 (NOT full Stage 1 acceptance)"
-          echo "Fortran Stage 1 weaving count/unrank: $actual/24 bounded independent checks; no full acceptance." >> "$GITHUB_STEP_SUMMARY"
+          test "$actual" -eq 42
+          echo "STAGE01_WEAVING_MICRO_NATIVE_PASS=$actual EXPECTED=42 (NOT full Stage 1 acceptance)"
+          echo "Fortran Stage 1 weaving count/unrank: $actual/42 bounded independent checks; no full acceptance." >> "$GITHUB_STEP_SUMMARY"
       - name: Run bounded Stage 1 BigInt safe-boundary checks
         shell: bash
         run: |
