@@ -316,9 +316,12 @@ void main() {
       )
       .toList(growable: false);
 
-  _check(MonsterVisibleDropGenerator.visibleDropCount == 46, '46 visible drops');
-  _check(MonsterVisibleDropGenerator.hiddenFeedCount == 7, 'Seven hidden drops');
-  _check(MonsterVisibleDropGenerator.grindsPerDrop == 11, 'Eleven fixed grinds');
+  _check(
+      MonsterVisibleDropGenerator.visibleDropCount == 46, '46 visible drops');
+  _check(
+      MonsterVisibleDropGenerator.hiddenFeedCount == 7, 'Seven hidden drops');
+  _check(
+      MonsterVisibleDropGenerator.grindsPerDrop == 11, 'Eleven fixed grinds');
   _check(stones.length == 46, 'Complete 46-stone table');
 
   const offsets = <int>[-12, -2, -1, 0, 1, 2, 12];
@@ -340,7 +343,8 @@ void main() {
       final oracleFeeds = _referenceHiddenFeeds(counts, referenceStones);
       _check(feeds.length == 7, 'Seven production hidden drops');
       for (var index = 0; index < 7; index++) {
-        _check(feeds[index] == oracleFeeds[index], 'Independent hidden-drop oracle');
+        _check(feeds[index] == oracleFeeds[index],
+            'Independent hidden-drop oracle');
         _check(
           feeds[index] >= BigInt.one && feeds[index] <= _modulus,
           'Hidden-drop normalization',
@@ -422,7 +426,8 @@ void main() {
   final wideFeeds = feeder.buildHiddenFeeds(wideCounts, stones);
   final wideOracleFeeds = _referenceHiddenFeeds(wideCounts, referenceStones);
   for (var index = 0; index < 7; index++) {
-    _check(wideFeeds[index] == wideOracleFeeds[index], 'Wide hidden-drop oracle');
+    _check(
+        wideFeeds[index] == wideOracleFeeds[index], 'Wide hidden-drop oracle');
   }
   final wideActual = generator.buildVisibleDrops(
     counts: wideCounts,

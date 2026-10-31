@@ -112,7 +112,8 @@ final class MonsterVisibleDropGenerator {
       }
       final hiddenOrdinal = 1 - position;
       if (hiddenOrdinal < 1 || hiddenOrdinal > hiddenFeedCount) {
-        throw StateError('Visible-drop dependency is outside the hidden prefix.');
+        throw StateError(
+            'Visible-drop dependency is outside the hidden prefix.');
       }
       return hiddenFeeds[hiddenOrdinal - 1];
     }
