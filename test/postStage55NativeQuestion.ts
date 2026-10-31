@@ -13,7 +13,7 @@ for(const [c,t] of pairs){
  const expectedDrops=buildVisibleDrops(counts,STONES,buildHiddenDrops(counts,STONES));
  const expectedBowls=initialBowls(counts);
  requireTrue(input.targetDay===t&&input.visible.length===47&&input.stones.length===47&&input.startBowls.length===6,"question shape");
- requireTrue(Object.isFrozen(input)&&Object.isFrozen(input.visible)&&Object.isFrozen(input.stones)&&Object.isFrozen(input.startBowls)&&input.stones.slice(1).every(Object.isFrozen),"deep freeze");
+ requireTrue(Object.isFrozen(input)&&Object.isFrozen(input.visible)&&Object.isFrozen(input.stones)&&Object.isFrozen(input.startBowls)&&input.stones.every(Object.isFrozen),"deep freeze");
  for(let i=1;i<=46;i++){
   requireTrue(input.visible[i]===expectedDrops[i],"visible mismatch "+i);exactValues++;
   for(let j=0;j<5;j++){requireTrue(input.stones[i]![j]===STONES[i]![j],"stone mismatch "+i+"/"+j);exactValues++;}

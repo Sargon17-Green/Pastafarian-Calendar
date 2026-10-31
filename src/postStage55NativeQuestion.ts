@@ -31,7 +31,7 @@ function count(day: bigint): bigint {
   return day<F?2n*(F-day):2n*(day-F)+1n;
 }
 function stoneRows(): readonly (readonly bigint[])[] {
-  const rows: (readonly bigint[])[] = [[]];
+  const rows: (readonly bigint[])[] = [Object.freeze([] as bigint[])];
   let prev: readonly bigint[] = seedStones;
   rows.push(Object.freeze([...prev]));
   for(let i=2;i<=46;i++) {
