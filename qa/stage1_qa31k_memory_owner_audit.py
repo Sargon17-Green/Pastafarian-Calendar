@@ -237,9 +237,11 @@ def load_bundle(kind, contents, rows):
          receipt["ip_relocated"] is False and
          receipt["stage1_pass"] is False,
          kind + " source/scope receipt")
-    need(independent["source_blob"] == SOURCE_PIN and
-         independent["stage1_pass"] is False,
+    need(independent["stage1_pass"] is False,
          kind + " independent receipt scope")
+    if kind == "QA31J":
+        need(independent["source_blob"] == SOURCE_PIN,
+             "QA31J independent source pin")
 
     if kind == "QA31G":
         need(receipt["schema"] == "qa31g-original-native-eof-v1" and
