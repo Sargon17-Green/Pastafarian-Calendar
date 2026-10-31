@@ -51,6 +51,13 @@ def audit(folder: Path) -> dict:
           "blank cells routed to field validators before strict text guard", checks)
     check('Err.Raise vbObjectError + 519' in source_guard,
           "numeric/formula/error cell strict text guard preserved", checks)
+    check('If cell.HasFormula Then' in source_guard
+          and source_guard.index('If cell.HasFormula Then') < source_guard.index('value = cell.Value2'),
+          "formula returning text blocked before reading cached string", checks)
+    render = source.split('Public Sub RenderPastafarianDate()', 1)[1].split('End Sub', 1)[0]
+    check('sh.Range("E5").ClearContents' in render
+          and render.index('sh.Range("E5").ClearContents') < render.index('y = ExactCellString'),
+          "stale display is cleared before any input can raise", checks)
     for code, name in ((514,"year"),(515,"cutlet"),(516,"dayInCutlet"),(517,"month"),(518,"dayInMonth")):
         check(f"Err.Raise vbObjectError + {code}" in source, f"field-specific error {name} = {code}", checks)
     check('Err.Raise vbObjectError + 513' in source and 'CANONICAL ENGINE NOT IMPLEMENTED' in source,
@@ -66,14 +73,26 @@ def audit(folder: Path) -> dict:
     check(m is not None, "QA case array found", checks)
     names = re.findall(r'"([a-z][a-z0-9_]*)"', m.group(1))
     branches = re.findall(r'^\s*Case\s+"([a-z][a-z0-9_]*)"', qa, re.M)
-    check(len(names) == 29 and len(set(names)) == 29, "29 unique declared VBA QA cases", checks)
-    check(set(names) == set(branches) and len(branches) == 29, "every declared case implemented exactly once", checks)
+    check(len(names) == 35 and len(set(names)) == 35, "35 unique declared VBA QA cases", checks)
+    check(set(names) == set(branches) and len(branches) == 35, "every declared case implemented exactly once", checks)
     check('PrepareValidInputs sh' in qa and '.ClearContents' in qa and 'RunCaseAndCapture' in qa,
           "independent QA setups and true empty-cell branches", checks)
     check('String$(1024, "9")' in qa and 'ChrW$(&H1403)' in qa,
           "1024 digit and Unicode regression cases present", checks)
     check('ExpectCanonicalGuard' in qa and 'vbObjectError + 513' in qa,
           "host tests require unimplemented engine to reject calls", checks)
+    formula_names = {
+        "reject_formula_year", "reject_formula_cutlet", "reject_formula_day_cutlet",
+        "reject_formula_month", "reject_formula_day_month",
+    }
+    check(formula_names.issubset(set(names)) and 'ExpectRejectTextFormula' in qa
+          and 'target.Formula' in qa and 'target.HasFormula' in qa
+          and 'ExpectRenderError vbObjectError + 519' in qa,
+          "five text-returning formula cases require precision error 519", checks)
+    check('clear_stale_after_invalid_input' in names
+          and 'AssertExact CStr(sh.Range("E5").Value2), vbNullString, testName' in qa
+          and 'ExpectRenderError vbObjectError + 516, testName' in qa,
+          "rejected new input must erase old display", checks)
     check('On Error Resume Next' in qa and 'On Error GoTo 0' in qa,
           "VBA expected-error harness resets error handling", checks)
 
