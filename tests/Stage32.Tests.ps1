@@ -5,8 +5,10 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
 $metadata = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_STAGE=31\s*$') -Name 'Stage31 current until Stage32 seal'
-Assert-StageTrue -Condition ($metadata -match '(?m)^LAST_COMPLETED_STAGE=31\s*$') -Name 'Stage31 predecessor sealed'
+$stage32Awaiting = ($metadata -match '(?m)^CURRENT_STAGE=31\s*$') -and ($metadata -match '(?m)^LAST_COMPLETED_STAGE=31\s*$') -and ($metadata -match '(?m)^STAGE32_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$')
+$stage32Sealed = ($metadata -match '(?m)^CURRENT_STAGE=32\s*$') -and ($metadata -match '(?m)^LAST_COMPLETED_STAGE=32\s*$') -and ($metadata -match '(?m)^STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')
+Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_STAGE=(31|32)\s*$') -Name 'Stage32 current or exact-seal recheck'
+Assert-StageTrue -Condition ($stage32Awaiting -or $stage32Sealed) -Name 'Stage32 metadata is a consistent pending or sealed pair'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE31_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage31 research evidence preserved'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Historical Stage26 red preserved'
 $f = [System.Numerics.BigInteger](Get-NormFoundationDay)

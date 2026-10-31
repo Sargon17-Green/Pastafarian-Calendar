@@ -52,14 +52,17 @@ jobs:
               (($stageLines -contains 'CURRENT_STAGE=30') -and
                ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -and
                ($stageLines -contains 'STAGE30_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or
-               (($stageLines -contains 'CURRENT_STAGE=31') -and
-                ($stageLines -contains 'LAST_COMPLETED_STAGE=31') -and
-                ($stageLines -contains 'STAGE31_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
-              ($stageLines -contains 'STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
-              ((($stageLines -contains 'LAST_COMPLETED_STAGE=28') -and
-                ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=AWAITING')) -or
-               ((($stageLines -contains 'LAST_COMPLETED_STAGE=29') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=31')) -and
-                ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
+              (($stageLines -contains 'CURRENT_STAGE=31') -and
+               ($stageLines -contains 'LAST_COMPLETED_STAGE=31') -and
+               ($stageLines -contains 'STAGE31_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or
+              (($stageLines -contains 'CURRENT_STAGE=32') -and
+               ($stageLines -contains 'LAST_COMPLETED_STAGE=32') -and
+               ($stageLines -contains 'STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
+             ($stageLines -contains 'STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+             ((($stageLines -contains 'LAST_COMPLETED_STAGE=28') -and
+               ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=AWAITING')) -or
+              ((($stageLines -contains 'LAST_COMPLETED_STAGE=29') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=31') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=32')) -and
+               ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
             & .\tests\Stage01.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage01 regression failed Stage29' }
             & .\tests\Stage23.Tests.ps1
@@ -87,7 +90,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage30 distributional discovery probe failed' }
             Write-Host ('STAGE30_DISCOVERY15_NATIVE_SHA=' + $env:GITHUB_SHA)
             Write-Host 'STAGE30_DISCOVERY15_NATIVE=EVIDENCE_ONLY'
-            if (($stageLines -contains 'CURRENT_STAGE=30') -or ($stageLines -contains 'CURRENT_STAGE=31')) { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
+            if (($stageLines -contains 'CURRENT_STAGE=30') -or ($stageLines -contains 'CURRENT_STAGE=31') -or ($stageLines -contains 'CURRENT_STAGE=32')) { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
           } elseif (($stageLines -contains 'CURRENT_STAGE=27') -and
               ((($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=AWAITING')) -or
                (($stageLines -contains 'LAST_COMPLETED_STAGE=27') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
@@ -316,13 +319,22 @@ jobs:
             ('STAGE32_HEAD_SHA=' + $head),
             ('STAGE32_NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
             'STAGE32_SCOPE=16_PAIRS_32_ENDPOINTS',
-            'STAGE32_EXPECTED_ASSERTIONS=239',
-            'STAGE32_STAGE_SEAL=NOT_CLAIMED'
+            'STAGE32_EXPECTED_ASSERTIONS=239'
           ) | Set-Content stage32-canonical-metadata.txt -Encoding UTF8
           Start-Transcript -Path stage32-canonical-transcript.txt | Out-Null
           try {
             & .\tests\Stage32.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage32 canonical research failed' }
+            $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+            if (($stageLines -contains 'CURRENT_STAGE=32') -and
+                ($stageLines -contains 'LAST_COMPLETED_STAGE=32') -and
+                ($stageLines -contains 'STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) {
+              Add-Content -Path stage32-canonical-metadata.txt -Value 'STAGE32_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
+              Write-Host 'STAGE32_SEAL_RECHECK=PASS'
+            } else {
+              Add-Content -Path stage32-canonical-metadata.txt -Value 'STAGE32_STAGE_SEAL=NOT_CLAIMED' -Encoding UTF8
+              Write-Host 'STAGE32_DISCOVERY17_NATIVE=EVIDENCE_ONLY'
+            }
           } finally {
             Stop-Transcript | Out-Null
           }
@@ -336,4 +348,3 @@ jobs:
             stage32-canonical-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn
-

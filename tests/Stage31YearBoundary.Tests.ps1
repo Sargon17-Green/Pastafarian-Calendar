@@ -6,8 +6,8 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'tests/TestHarness.ps1')
 
 $metadata = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_STAGE=(30|31)\s*$') -Name 'Stage31 pending or evidence-sealed'
-Assert-StageTrue -Condition ($metadata -match '(?m)^LAST_COMPLETED_STAGE=(30|31)\s*$') -Name 'Stage30 predecessor or Stage31 evidence-sealed'
+Assert-StageTrue -Condition ($metadata -match '(?m)^CURRENT_STAGE=(30|31|32)\s*$') -Name 'Stage31 pending or evidence-sealed'
+Assert-StageTrue -Condition ($metadata -match '(?m)^LAST_COMPLETED_STAGE=(30|31|32)\s*$') -Name 'Stage30 predecessor or Stage31 evidence-sealed'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE30_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage30 evidence-only gate preserved'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Stage26 historical red preserved'
 

@@ -4,7 +4,7 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
 $metadata = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($metadata -match '(?m)^LAST_COMPLETED_STAGE=(29|30|31)\s*$') -Name 'Stage29 predecessor remains sealed'
+Assert-StageTrue -Condition ($metadata -match '(?m)^LAST_COMPLETED_STAGE=(29|30|31|32)\s*$') -Name 'Stage29 predecessor remains sealed'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE29_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$') -Name 'Stage29 native green retained'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage28 evidence-only status retained'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Stage26 scar retained'
