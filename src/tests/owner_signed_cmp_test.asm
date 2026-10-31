@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..251: signed owner-scoped comparison.
+; Stage 1 native regression 191..253: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1480,6 +1480,81 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
+    ; Make the fragmented owner's logical byte 8192 zero. Length 8192 remains
+    ; canonical (top byte $33); length 8193 becomes noncanonical (top byte $00).
+    xor a
+    ld [wOwnerOffset], a
+    ld a, $20
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 45
+    ld [wOwnerRequest], a
+    xor a
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+
+    ; 252: valid 8192-byte A vs noncanonical 8193-byte B, same fragmented owner.
+    ld a, 252
+    ld [wTestCase], a
+    ld a, 45
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpLenB], a
+    ld a, $20
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedNoncanonicalBytes
+    jp nc, .fail
+
+    ; 253: reverse A/B so the invalid full-length descriptor is validated first.
+    ld a, 253
+    ld [wTestCase], a
+    ld a, 45
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    ld a, $20
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedNoncanonicalBytes
+    jp nc, .fail
+
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
@@ -1778,6 +1853,45 @@ OwnerCmpTestCheckFragmentedBytes:
     jr nz, .bad
     ld a, [wOwnerByteValue]
     cp $01
+    jr nz, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Verify the fragmented bank-edge payload after cases 252-253.
+; Offset 8191 remains $33; offset 8192 is the noncanonical high zero.
+OwnerCmpTestCheckFragmentedNoncanonicalBytes:
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $1f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 45
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $33
+    jr nz, .bad
+    xor a
+    ld [wOwnerOffset], a
+    ld a, $20
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 45
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    or a
     jr nz, .bad
     scf
     ret

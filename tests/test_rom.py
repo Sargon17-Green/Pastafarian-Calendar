@@ -6,8 +6,8 @@ import argparse
 from pathlib import Path
 
 # Cases 242-247 cover full-capacity canonical/noncanonical boundaries; 248-251
-# compare same-owner positive and negative aliases across fragmented banks.
-# Retain the measured finite 9000-frame cap.
+# compare positive/negative aliases across fragmented banks; 252-253 reject a
+# fragmented-bank high-zero descriptor in both operand positions. Keep 9000 frames.
 MAX_BOOT_AND_TEST_FRAMES = 9000
 WRAM_RESULT = 0xC000
 WRAM_TEST_CASE = 0xC001
@@ -15,7 +15,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 251
+TOTAL_CASES = 253
 
 
 def check_header(data: bytes) -> None:
