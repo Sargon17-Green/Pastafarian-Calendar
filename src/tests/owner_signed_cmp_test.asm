@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..253: signed owner-scoped comparison.
+; Stage 1 native regression 191..257: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1474,6 +1474,59 @@ RunOwnerSignedCmpTests::
     jr .mixedSignHighZero
 .mixedSignDone:
 
+    ; Cross the 8-bit boundary without touching wRunStatus at C002.
+    ; Case 256: same owner, canonical +8192 A and noncanonical +8193 B.
+    ; Check the 00FF -> 0100 marker transition explicitly.
+    ld a, [wTestCase]
+    cp $ff
+    jp nz, .fail
+    inc a
+    ld [wTestCase], a
+    jp nz, .fail
+    ld a, [wTestCaseHi]
+    or a
+    jp nz, .fail
+    inc a
+    ld [wTestCaseHi], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSwapLength16
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedBytes
+    jp nc, .fail
+
+    ; Case 257: both canonical +8192 descriptors alias owner 45.
+    ; Low marker advances 00 -> 01 while high remains 01.
+    ld a, [wTestCase]
+    inc a
+    ld [wTestCase], a
+    cp 1
+    jp nz, .fail
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .fail
+    xor a
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    or a
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedBytes
+    jp nc, .fail
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .fail
+
     ld a, 45
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
@@ -1769,6 +1822,9 @@ OwnerCmpTestCheckFragmentedBytes:
     jr nz, .bad
     ld a, [wOwnerByteValue]
     ld b, a
+    ld a, [wTestCaseHi]
+    or a
+    jr nz, .expectZero
     ld a, [wTestCase]
     cp 252
     jr nc, .expectZero

@@ -12,7 +12,7 @@ build/calendar.o: src/boot.asm src/runtime/save127.asm src/runtime/savewide256.a
 	$(RGBASM) -Wall -o $@ src/boot.asm
 
 build/calendar.gb: build/calendar.o
-	$(RGBLINK) -o $@ $<
+	$(RGBLINK) -n build/calendar.sym -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
 
 test: build/calendar.gb

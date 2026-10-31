@@ -91,6 +91,8 @@ wWorkExpectedDistance:: ds 5
 wWorkExpectedSum:: ds 5
 wWorkExpectedDirection:: ds 1
 wWorkLeft:: ds 1
+; Stable 16-bit test case ABI extension; never move C000-C002.
+wTestCaseHi:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -99,6 +101,7 @@ Bootstrap:
     xor a
     ld [wTestResult], a
     ld [wTestCase], a
+    ld [wTestCaseHi], a
     ld [wRunStatus], a
     call RunSelfTests
     ld a, [wTestResult]
