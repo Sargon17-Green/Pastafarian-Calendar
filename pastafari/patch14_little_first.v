@@ -8,8 +8,9 @@ pub:
 }
 
 pub fn patch14_rejection_jump(raw BigInt, limit BigInt, space BigInt, step int) !Patch14RejectionResult {
-	if big_cmp(raw, big_one()) < 0 || big_cmp(raw, space) > 0 || big_cmp(limit, big_one()) < 0
-		|| big_cmp(limit, space) > 0 || (step != 1 && step != -1) {
+	if big_cmp(raw, big_one()) < 0 || big_cmp(raw, space) > 0
+		|| big_cmp(limit, big_one()) < 0 || big_cmp(limit, space) > 0
+		|| (step != 1 && step != -1) {
 		return error('PATCH 14፦ invalid rejection bounds or direction')
 	}
 	if big_cmp(raw, limit) <= 0 {

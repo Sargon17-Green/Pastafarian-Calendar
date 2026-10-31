@@ -10,8 +10,9 @@ fn test_patch14_rejection_jump_exhaustive_small_spaces() {
 			limit_i := (space_i / n) * n
 			for x in 1 .. end {
 				for step in [-1, 1] {
-					jump := patch14_rejection_jump(big_from_int(x), big_from_int(limit_i),
-						space, step) or { panic(err.msg()) }
+					jump := patch14_rejection_jump(big_from_int(x), big_from_int(limit_i), space, step) or {
+						panic(err.msg())
+					}
 					mut accepted := x
 					mut count := 0
 					for accepted > limit_i {
