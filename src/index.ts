@@ -81,3 +81,6 @@ export * from "./discovery26LegacyMonthEnd.ts";
 export * from "./patch26MonthEnd.ts";
 export * from "./discovery27LegacySpanMembership.ts";
 export * from "./patch27MonthMembership.ts";
+
+export * from "./postStage55NativeQuestion.ts";
+export * from "./postStage55SignedGatePrefix.ts";
