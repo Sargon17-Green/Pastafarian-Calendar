@@ -2,7 +2,7 @@ name: Post55 independent real gate-segment diagnostic
 
 on:
   push:
-    branches: ['Kotlin\\+Cymraeg']
+    branches: ['Kotlin\+Cymraeg']
     paths:
       - 'soak/audit_independent_gate_segment_real.py'
       - 'soak/test_audit_independent_gate_segment_real.py'
@@ -40,8 +40,8 @@ jobs:
           test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
           test "$(git -C ../pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
           python3 -m unittest discover -s soak -p test_audit_independent_gate_segment_real.py -v
-          python3 soak/audit_independent_gate_segment_real.py \\
-            --max-index 32 --segment-limit 8 --timeout-seconds 120 \\
+          python3 soak/audit_independent_gate_segment_real.py \
+            --max-index 32 --segment-limit 8 --timeout-seconds 120 \
             --evidence evidence/independent-real-segments.json
       - name: Archive bounded diagnostic evidence
         if: always()
