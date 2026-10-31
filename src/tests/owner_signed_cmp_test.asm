@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..239: signed owner-scoped comparison.
+; Stage 1 native regression 191..241: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1083,6 +1083,68 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckBytes
     jp nc, .fail
 
+    ; 240: owner 46 owns exactly two 8192-byte banks. Store a nonzero
+    ; most-significant byte at logical offset 16383, the final valid byte.
+    ; Canonical +16384-byte A must exceed -16384-byte B on the SAME owner.
+    ld a, 240
+    ld [wTestCase], a
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $3f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    ld a, $5a
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, $40
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenB+1], a
+    ld a, 1
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckCapacityByte
+    jp nc, .fail
+
+    ; 241: reverse signs without changing the full-capacity shared payload.
+    ; Canonical -16384-byte A must be less than +16384-byte B, read-only.
+    ld a, 241
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    xor a
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckCapacityByte
+    jp nc, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
@@ -1248,6 +1310,30 @@ OwnerCmpTestCheckBytes:
     ld a, [wOwnerByteValue]
     cp 1
     jp nz, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Check the highest usable offset of the two-bank live owner after 240/241.
+; Carry set = 0x5a unchanged, carry clear = corruption or access failure.
+OwnerCmpTestCheckCapacityByte:
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $3f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $5a
+    jr nz, .bad
     scf
     ret
 .bad:
