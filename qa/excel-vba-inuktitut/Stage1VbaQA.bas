@@ -38,6 +38,9 @@ Public Sub RunStage1VbaSelfTest()
         "reject_numeric_day_in_cutlet", "reject_numeric_day_in_month", _
         "reject_negative_day_in_month", "reject_nondecimal_day_in_month", _
         "reject_numeric_cutlet_name", "reject_numeric_month_name", _
+        "reject_formula_year", "reject_formula_cutlet", _
+        "reject_formula_day_cutlet", "reject_formula_month", _
+        "reject_formula_day_month", "clear_stale_after_invalid_input", _
         "canonical_engine_guard")
 
     passed = 0
@@ -145,6 +148,21 @@ Private Sub ExpectCanonicalGuard()
            "Canonical converter must reject: expected=" & _
            CStr(vbObjectError + 513) & "; observed=" & CStr(observed)
     End If
+End Sub
+
+Private Sub ExpectRejectTextFormula(ByVal sh As Worksheet, _
+                                    ByVal address As String, _
+                                    ByVal textValue As String, _
+                                    ByVal caseName As String)
+    Dim target As Range
+    Set target = sh.Range(address)
+    target.NumberFormat = "General"
+    target.Formula = "=" & Chr$(34) & textValue & Chr$(34)
+    If Not target.HasFormula Then
+        Err.Raise vbObjectError + 925, "Stage1VbaQA", _
+            caseName & ": unable to install text-returning formula"
+    End If
+    ExpectRenderError vbObjectError + 519, caseName
 End Sub
 
 Private Sub ExecuteCase(ByVal testName As String, ByVal sh As Worksheet)
@@ -262,6 +280,23 @@ Private Sub ExecuteCase(ByVal testName As String, ByVal sh As Worksheet)
             sh.Range("B14").NumberFormat = "General"
             sh.Range("B14").Value2 = CDbl(8)
             ExpectRenderError vbObjectError + 519, testName
+        Case "reject_formula_year"
+            ExpectRejectTextFormula sh, "B11", "2026", testName
+        Case "reject_formula_cutlet"
+            ExpectRejectTextFormula sh, "B12", "cutlet", testName
+        Case "reject_formula_day_cutlet"
+            ExpectRejectTextFormula sh, "B13", "3", testName
+        Case "reject_formula_month"
+            ExpectRejectTextFormula sh, "B14", "month", testName
+        Case "reject_formula_day_month"
+            ExpectRejectTextFormula sh, "B15", "5", testName
+        Case "clear_stale_after_invalid_input"
+            RenderPastafarianDate
+            AssertExact CStr(sh.Range("E5").Value2), _
+                "2026 | cutlet 3 | month 5", testName
+            sh.Range("B13").Value2 = "0"
+            ExpectRenderError vbObjectError + 516, testName
+            AssertExact CStr(sh.Range("E5").Value2), vbNullString, testName
         Case "canonical_engine_guard"
             ExpectCanonicalGuard
         Case Else
