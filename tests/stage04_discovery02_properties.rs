@@ -60,3 +60,29 @@ fn symmetric_huge_offsets_keep_adjacent_even_odd_tags() {
     }
     println!("STAGE04_DISCOVERY02_SYMMETRIC_HUGE_CASES=8");
 }
+
+#[test]
+fn positive_tag_preimages_cover_signed_bigint_boundaries() {
+    let foundation = oracle::foundation_day();
+    let mut tags = vec![BigInt::one(), BigInt::from(2u8)];
+    for bits in [0usize, 1, 127, 1025, 4096, 8192] {
+        for k in 0u32..33u32 {
+            let magnitude = (BigInt::one() << bits) + BigInt::from(11u32 * k + 1u32);
+            let even_tag: BigInt = &magnitude << 1usize;
+            tags.push(even_tag.clone());
+            tags.push(&even_tag - BigInt::one());
+        }
+    }
+    assert_eq!(tags.len(), 398);
+    for tag in &tags {
+        assert!(tag > &BigInt::zero());
+        let day = if tag.is_odd() {
+            &foundation + ((tag - BigInt::one()) / BigInt::from(2u8))
+        } else {
+            &foundation - (tag / BigInt::from(2u8))
+        };
+        assert_eq!(&candidate_day_tag(&day), tag, "tag preimage must be exact");
+        assert_eq!(&oracle::day_count(&day), tag, "independent oracle");
+    }
+    println!("STAGE04_DISCOVERY02_TAG_PREIMAGE_CASES=398");
+}
