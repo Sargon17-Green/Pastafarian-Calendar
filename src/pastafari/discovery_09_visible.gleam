@@ -37,7 +37,12 @@ fn select_at(items: List(Int), position: Int) -> Int {
   }
 }
 
-fn earlier(reversed: List(Int), hidden: List(Int), index: Int, back: Int) -> Int {
+fn earlier(
+  reversed: List(Int),
+  hidden: List(Int),
+  index: Int,
+  back: Int,
+) -> Int {
   case index > back {
     True -> select_at(reversed, back)
     False -> select_at(hidden, back - index + 1)
@@ -69,7 +74,16 @@ fn grind(
       let #(a, b, c, d, kind) = coefficient
       let next =
         save(
-          value * value + a * value + b * p1 + c * p3 + d * p7
+          value
+          * value
+          + a
+          * value
+          + b
+          * p1
+          + c
+          * p3
+          + d
+          * p7
           + stone_field(stone, kind),
         )
       grind(rest, next, p1, p3, p7, stone)
@@ -108,9 +122,22 @@ fn build_visible(
       let p7 = earlier(reversed, hidden, index, 7)
       let seed =
         save(
-          stone.wheat * work.action + stone.barley * work.target
-          + stone.salt * work.distance + stone.bitter * work.connection
-          + stone.red * work.direction + p1 + 3 * p3 + 5 * p7 + index,
+          stone.wheat
+          * work.action
+          + stone.barley
+          * work.target
+          + stone.salt
+          * work.distance
+          + stone.bitter
+          * work.connection
+          + stone.red
+          * work.direction
+          + p1
+          + 3
+          * p3
+          + 5
+          * p7
+          + index,
         )
       let value = grind(eleven_grinds(), seed, p1, p3, p7, stone)
       build_visible(index + 1, rest, hidden, work, [value, ..reversed])
@@ -128,13 +155,14 @@ pub fn visible_drops_for_days(
     discovery_03_distance.old_distance(calculation_day, target_day) + 1
   let direction =
     discovery_04_direction.direction_for_days(calculation_day, target_day)
-  let work = Work(
-    action: action,
-    target: target,
-    distance: distance,
-    connection: action + target,
-    direction: direction,
-  )
+  let work =
+    Work(
+      action: action,
+      target: target,
+      distance: distance,
+      connection: action + target,
+      direction: direction,
+    )
   let hidden =
     discovery_08_hidden.hidden_drops_for_days(calculation_day, target_day)
   build_visible(1, discovery_06_stones.build_stones(), hidden, work, [])
