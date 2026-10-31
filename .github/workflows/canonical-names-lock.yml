@@ -297,3 +297,43 @@ jobs:
             stage31-boundary-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn
+
+  stage32-adjacent-transition:
+    name: Stage32 bounded adjacent target transitions
+    if: github.ref == 'refs/heads/PowerShell+Tagalog'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage32 239-assertion independent-oracle research
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'PowerShell 5.1 required' }
+          $head = ((& git rev-parse HEAD) -join '').Trim()
+          if ($head -cne $env:GITHUB_SHA) { throw 'Stage32 canonical checkout SHA mismatch' }
+          @(
+            ('STAGE32_HEAD_SHA=' + $head),
+            ('STAGE32_NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE32_SCOPE=16_PAIRS_32_ENDPOINTS',
+            'STAGE32_EXPECTED_ASSERTIONS=239',
+            'STAGE32_STAGE_SEAL=NOT_CLAIMED'
+          ) | Set-Content stage32-canonical-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage32-canonical-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage32.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage32 canonical research failed' }
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Retain Stage32 Windows exact-SHA probe
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage32-canonical-evidence
+          path: |
+            stage32-canonical-metadata.txt
+            stage32-canonical-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
+
