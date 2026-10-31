@@ -888,3 +888,71 @@ CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41223156
 **Unresolved gates:** compiler_executed=false; output_pe_created=false;
 malware_clearance=false; stage_zero_verified=false; native_qa_99_pass=false.
 No main branch or canonical 82 calendar implementation files were changed.
+
+## 2026-10-31: pinned rel32 and PE 4096-byte section-layout model
+
+New source-only components were committed to the existing feature branch:
+- tools/cal_static_address_layout.py
+- tools/test_cal_static_address_layout.py (18 regression tests)
+- .github/workflows/cal-source-provenance.yml includes both tools, and
+  runs the new audit after the existing static audits.
+
+The model validates 11 explicit source-marker groups against the pinned
+six CAL-4700 source texts, with SHA-256, Git-blob SHA-1 and byte-count
+provenance checks before examining source.
+
+**Relative transfers:** In the compiler source, lines 663–669,
+the compiler builds a signed-offset number by subtracting fragment
+address, existing emitted bytes, opcode length and a four-byte immediate
+from target address. This matches the mathematical x86 rel32 form:
+
+  displacement = (target - (fragment_va + bytes_written + opcode_length + 4)) mod 2^32.
+
+The generated internal CALL at lines 4241–4243 uses opcode E8; the
+conditional branch template is 0F84 at line 4270. The noodle source
+at lines 1364–1367 serializes the number into a hex-string byte buffer
+by copying bytes from its in-memory representation. The independent
+model checks signed/unsigned conversions, little-endian immediates,
+forward/backward branches and 32-bit wrap-around.
+
+**Instruction sizes:** The fragment address pass at compiler lines
+415–433 allots five bytes for internal CALL (E8 + rel32), six for
+external CALL (FF15 + absolute 32-bit address), and eight for the
+indirect CALL (six-byte EDX address loading plus FF12). The address
+loading templates at lines 653–661 also support six-byte lengths
+for each covered variable kind. These observations strengthen the
+internal consistency of the source text but are not compiled-object
+proof.
+
+**Section accounting:** In the compiler source, lines 998–1015 place
+the import, data and code boroughs consecutively, starting with the
+import borough at RVA 4096 and rounding section transitions to 4096.
+Lines 3845–3851 round their sizes to that same page size. The PE
+initializer at lines 2973–2994 sets both file and memory alignment
+to 4096. Header writer lines 2944–2971 reuse borough bases as file
+and in-memory section offsets. The output-size routine at 3583–3587
+sums the 4096-byte header plus all rounded borough sizes. Fragment
+writing at lines 709–712 computes output buffer offset as
+fragment_va minus image_base. These are pinned source contracts, not
+actual output-binary bounds validation.
+
+An independent test scenario with import length 1000, data length 4097
+and code length 8193 yields import RVA 0x1000, data RVA 0x2000,
+code RVA 0x4000, and model image size 0x7000. Test coverage rejects
+out-of-code-section fragments, arithmetic outside the model's 32-bit
+address range and unexpected source-marker edits. The model does
+not prove the real compiler performs overflow checks or constrains
+fragments to actual code section lengths.
+
+New CI run 41223716741 for commit
+2eb61d1b7a75600fe85f80efbc4722b8720555c4 was **queued**
+when this note was authored. The previous completed evidence was
+97/97 PASS (run 41223156080); do not claim 115/115 PASS without the
+completed new log and all new workflow steps.
+
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41223716741
+
+No native compiler or CAL EXE was executed. No claim of stage-zero
+trust or malware clearance. All 99 Native QA groups and the 47-month
+native case remain unexecuted; main and the 82 canonical files
+remain untouched.
