@@ -138,3 +138,19 @@ jobs:
         run: |
           set -euo pipefail
           sh ./run_stage07_discovery04.sh
+
+  native-stage08-discovery05:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ada 2022 toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gnat gprbuild
+      - name: Run Stage 8 real Sauce to rank differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh ./run_stage08_discovery05.sh

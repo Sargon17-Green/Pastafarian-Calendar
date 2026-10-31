@@ -1,0 +1,12 @@
+# Stage 8 / DISCOVERY05 — నిజమైన ప్రవాహాల ర్యాంక్ పరిశీలన
+
+## Gate and source independence
+Stage7 DISCOVERY04 accepted on SHA `2fb89b8e50bd08a834211b00dab01b438e16486d`: [Actions 41184063340](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41184063340) completed/success, 8/8 jobs, GNAT 13 compile/bind/link and 738 assertions. Stage8 is a bounded, new integration/differential survey of **real** `Sauce -> Ask_Bowl -> Choose_Rank`, not a claim of a discovered bug. No production or canonical five-field date changes.
+
+## Input/output and independent model
+Use the six literal Stage7 date pairs, all six IDs and the seal set {0,1,193}: 6 × 6 × 3 = **108 actual Sauce streams**. For every stream test four rank family sizes: `922`, `floor(M/2)+1`, `M+1`, `floor(M²/2)+1`, where `M=2^127-1`. All values lie in 1..M²; the two wide sizes use exactly two digits. The differential reference directly projects `First` and its modular successor to the two-digit positional space, forms `Limit=Space-(Space mod N)`, then uses the endpoint of the accepted interval (Limit for -1, 1 for +1) if the initial point is rejected. This model never calls `Choose_Rank` or `Answer_At` to compute expected values. It does use public `Ask_Bowl` results as inputs, so it does **not** independently validate sauce algebra. Require actual rank == model rank, in [1,N] implicitly via equality. Exactly 108 × 4 = **432** independent comparisons.
+
+Four additional direct endpoint controls force rejected short/wide values in both directions, with *literal* expectations N or 1. Two invalid families N=0 and N=-1 must raise Constraint_Error. Total **438 assertions**, printed as `STAGE08_DISCOVERY05_ASSERTIONS= 438`. Controls cover rejected inputs even when the actual stream sample does not happen to reach them. The test is bounded (no rejection loops), and its output does not imply full Calendar_Date proof.
+
+## Acceptance
+Run `sh ./run_stage08_discovery05.sh` with GNAT Ada 2022, or Ubuntu 24.04 job `native-stage08-discovery05`, timeout 15 minutes. Require **both verify and native-stage08-discovery05 completed/success on the same SHA**, with compile/bind/link and exact marker 438. An active/queued job is not PASS or blocker. Any actual failure requires precise pair/bowl/seal/N, expected/observed and log evidence before calling it a defect. No main/merge. No pending user-native package: approved CI supplies native GNAT.

@@ -10,3 +10,6 @@ Per actual Sauce result, query all six bowls for seals 0, 1 and 193: 18 streams 
 
 ## Acceptance gate
 `sh ./run_stage07_discovery04.sh`, GNAT Ada 2022, GitHub Actions Ubuntu 24.04 job native-stage07-discovery04 (15 minute bound). Require *both* verify and native-stage07-discovery04 completed/success on the same HEAD, log GNAT compile/bind/link and the exact 738 assertion marker. A queued/in_progress job is neither PASS nor a blocker. An actual observed failure needs a reproducible input, expected and observed output, and log before declaring a defect or opening PATCH. No merge to main.
+
+## Native acceptance (2026-10-31)
+[GitHub Actions 41184063340](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41184063340) completed/success on `2fb89b8e50bd08a834211b00dab01b438e16486d`, all 8/8 jobs successful including verify and [native-stage07-discovery04 job 124487242878](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41184063340/job/124487242878). The native log contains GNAT 13 compile, gnatbind, gnatlink and `STAGE07_DISCOVERY04_ASSERTIONS= 738`. Stage7 accepted for actual Sauce-to-Ask_Bowl provenance and bounded stream invariants only; there is no claim of full five-field Calendar_Date correctness or independent algebraic Sauce oracle.
