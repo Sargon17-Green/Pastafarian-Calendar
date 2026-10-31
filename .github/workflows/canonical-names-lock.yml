@@ -218,3 +218,41 @@ jobs:
             stage31-probe-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn
+
+  stage31-boundary-extension:
+    name: Stage31 bounded ordinal extension
+    if: github.ref == 'refs/heads/PowerShell+Tagalog'
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe 72 additional First/Step observations
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $head = ((& git rev-parse HEAD) -join '').Trim()
+          if ($head -cne $env:GITHUB_SHA) { throw 'Stage31 extension checkout SHA mismatch' }
+          @(
+            ('STAGE31_EXT_HEAD_SHA=' + $head),
+            ('STAGE31_EXT_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE31_EXT_SCOPE=FINITE_ORDINAL_EXTENSION',
+            'STAGE31_EXT_SEAL=NOT_CLAIMED'
+          ) | Set-Content stage31-extension-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage31-extension-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage31BoundaryExtension.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage31 extension test failed' }
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Preserve Stage31 extension evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage31-extension-evidence
+          path: |
+            stage31-extension-metadata.txt
+            stage31-extension-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
