@@ -24,7 +24,8 @@ proc sameDate(const ref a: CalendarDateResult,
          a.dayInMonth == b.dayInMonth;
 }
 
-proc independentDate(const ref year: Year,
+proc independentDate(ref gates: GateOracle,
+                     const ref year: Year,
                      const ref structure: YearStructure,
                      const ref targetDay: bigint): CalendarDateResult {
   const offsetBig = targetDay - (year.openGateDay + 1);
@@ -34,15 +35,17 @@ proc independentDate(const ref year: Year,
 
   var cutletIndex = -1;
   var dayInCutlet = 0;
-  var cutletPrefix = 0;
+  var cursorGate = year.openGateIndex;
   for i in structure.cutletPartition.indices {
-    const cutletLength = structure.cutletPartition[i];
-    if offset >= cutletPrefix && offset < cutletPrefix + cutletLength {
+    const nextGate = cursorGate + structure.cutletPartition[i];
+    const firstCutletDay = gates.ensureGateIndex(cursorGate) + 1;
+    const lastCutletDay = gates.ensureGateIndex(nextGate);
+    if targetDay >= firstCutletDay && targetDay <= lastCutletDay {
       cutletIndex = i;
-      dayInCutlet = offset - cutletPrefix + 1;
+      dayInCutlet = (targetDay - firstCutletDay + 1):int;
       break;
     }
-    cutletPrefix += cutletLength;
+    cursorGate = nextGate;
   }
   if cutletIndex < 0 then halt("Independent date oracle found no cutlet.");
 
@@ -116,27 +119,35 @@ proc main() {
   check(partitionSum == gateGapCount,
         "cutlet partition sums to number of gate gaps");
 
-  var cursorDay = firstDay;
+  var cursorGate = year.openGateIndex;
+  var foundationBoundaryIndex = -1;
+  var foundationCutletOpenGate = year.openGateIndex;
+  var cumulativeGaps = 0;
+  const foundationBoundary = -year.openGateIndex;
   for i in structure.cutlets.indices {
     const c = structure.cutlets[i];
-    const expectedLastDay = cursorDay + structure.cutletPartition[i] - 1;
-    check(c.firstDay == cursorDay, "cutlet begins immediately after prior cutlet");
-    check(c.lastDay == expectedLastDay, "cutlet length equals its gate-gap partition");
+    const nextGate = cursorGate + structure.cutletPartition[i];
+    const expectedFirstDay = gates.ensureGateIndex(cursorGate) + 1;
+    const expectedLastDay = gates.ensureGateIndex(nextGate);
+    check(c.firstDay == expectedFirstDay, "cutlet begins after its opening gate");
+    check(c.lastDay == expectedLastDay, "cutlet closes on its ending gate");
+    check(c.openGateIndex == cursorGate && c.closeGateIndex == nextGate,
+          "materialized cutlet gate indices match partition");
     check(c.canonicalNameIndex == structure.cutletNameIndices[i],
           "materialized cutlet name index matches selected name index");
-    cursorDay = expectedLastDay + 1;
-  }
-  check(cursorDay == lastDay + 1, "cutlets cover the complete year without gaps");
-
-  var cumulativeGaps = 0;
-  var foundationBoundaryIndex = -1;
-  const foundationBoundary = -year.openGateIndex;
-  for i in structure.cutletPartition.indices {
     cumulativeGaps += structure.cutletPartition[i];
-    if cumulativeGaps == foundationBoundary then foundationBoundaryIndex = i;
+    if cumulativeGaps == foundationBoundary {
+      foundationBoundaryIndex = i;
+      foundationCutletOpenGate = cursorGate;
+    }
+    cursorGate = nextGate;
   }
+  check(cursorGate == year.closeGateIndex,
+        "cutlets cover all gate gaps without omission");
   check(foundationBoundaryIndex >= 0,
         "FOUNDATION_DAY is a cutlet boundary (or year close)");
+  const foundationCutletLength =
+    gates.ensureGateIndex(0) - gates.ensureGateIndex(foundationCutletOpenGate);
 
   const previousYear = gates.findTargetYear(calculationDay, year.openGateDay);
   const firstYearDay = gates.findTargetYear(calculationDay, firstDay);
@@ -167,7 +178,7 @@ proc main() {
   var calendarDateChecks = 0;
   for targetDay in sampleDays {
     const actual = calendarDate(gates, calculationDay, targetDay);
-    const expected = independentDate(year, structure, targetDay);
+    const expected = independentDate(gates, year, structure, targetDay);
     check(sameDate(actual, expected),
           "calendarDate matches independent decomposition at targetDay=" + targetDay:string);
     calendarDateChecks += 1;
@@ -176,7 +187,7 @@ proc main() {
             "first day of year starts cutlet and month at day one");
     }
     if targetDay == calculationDay {
-      check(actual.dayInCutlet == structure.cutletPartition[foundationBoundaryIndex],
+      check(actual.dayInCutlet == foundationCutletLength,
             "FOUNDATION_DAY is last day of its cutlet");
     }
     if targetDay == calculationDay + 1 && lastDay > calculationDay {

@@ -443,8 +443,13 @@ module NormativeOracle {
     }
 
     proc ref setGate(gateIndex: int, const ref day: bigint) {
-      if gates.contains(gateIndex) then gates[gateIndex] = day;
-      else gates.add(gateIndex, day);
+      gates.addOrReplace(gateIndex, day);
+    }
+
+    proc ref gateDay(gateIndex: int): bigint {
+      if !gates.contains(gateIndex) then
+        halt("Спроба прочитати неініціалізований індекс воріт: " + gateIndex:string);
+      return gates.get(gateIndex, new bigint(0));
     }
 
     proc ref positiveGateGap(n: int): int {
@@ -464,7 +469,7 @@ module NormativeOracle {
 
       if k > maxKnownGateIndex {
         for n in (maxKnownGateIndex + 1)..k {
-          const prior = gates[n - 1];
+          const prior = gateDay(n - 1);
           setGate(n, prior + positiveGateGap(n));
           maxKnownGateIndex = n;
         }
@@ -473,22 +478,22 @@ module NormativeOracle {
       if k < minKnownGateIndex {
         var n = minKnownGateIndex - 1;
         while n >= k {
-          const later = gates[n + 1];
+          const later = gateDay(n + 1);
           setGate(n, later - negativeGateGap(-n));
           minKnownGateIndex = n;
           n -= 1;
         }
       }
-      return gates[k];
+      return gateDay(k);
     }
 
     proc ref ensureGatesCover(const ref lowDay: bigint,
                               const ref highDay: bigint) {
       if lowDay > highDay then halt("Межі покриття воріт задано у зворотному порядку.");
       initialize();
-      while gates[minKnownGateIndex] > lowDay do
+      while gateDay(minKnownGateIndex) > lowDay do
         ensureGateIndex(minKnownGateIndex - 1);
-      while gates[maxKnownGateIndex] < highDay do
+      while gateDay(maxKnownGateIndex) < highDay do
         ensureGateIndex(maxKnownGateIndex + 1);
     }
 
@@ -498,7 +503,7 @@ module NormativeOracle {
       var hi = maxKnownGateIndex;
       while lo < hi {
         const mid = lo + (hi - lo + 1) / 2;
-        if gates[mid] <= day then lo = mid;
+        if gateDay(mid) <= day then lo = mid;
         else hi = mid - 1;
       }
       return lo;
@@ -506,7 +511,7 @@ module NormativeOracle {
 
     proc ref gateIndexAtOrAfter(const ref day: bigint): int {
       const i = gateIndexAtOrBefore(day);
-      if gates[i] == day then return i;
+      if gateDay(i) == day then return i;
       ensureGateIndex(i + 1);
       return i + 1;
     }
@@ -514,7 +519,7 @@ module NormativeOracle {
     proc ref exactGateIndex(const ref day: bigint, out gateIndex: int): bool {
       const i = gateIndexAtOrBefore(day);
       gateIndex = i;
-      return gates[i] == day;
+      return gateDay(i) == day;
     }
 
     proc ref validYearPair(openIndex: int, closeIndex: int): bool {
@@ -540,8 +545,8 @@ module NormativeOracle {
       for i in minKnownGateIndex..<maxKnownGateIndex {
         for j in (i + 1)..maxKnownGateIndex {
           if j - i < MIN_GATE_GAPS_PER_YEAR then continue;
-          const openDay = gates[i];
-          const closeDay = gates[j];
+          const openDay = gateDay(i);
+          const closeDay = gateDay(j);
           const length = closeDay - openDay;
           if length < YEAR_MIN_DAYS then continue;
           if length > YEAR_MAX_DAYS then break;
