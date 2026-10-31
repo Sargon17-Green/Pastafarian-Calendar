@@ -116,3 +116,16 @@ Relevant source/history links:
 - No Stage5, main update, merge, or release is authorized or performed.
 
 **NEXT:** continue only with a concrete archived day-tag implementation, artifact, or documented historical route whose provenance and version can be pinned. Reproduce that exact route against the independent normative oracle, and create RED/CONTROL only after an observed mismatch. If no such source is identified, preserve Stage4 as OPEN; do not invent a defect or close the stage from positive-only tests.
+
+## 6. Əlavə hədəfli day-tag mənbə yoxlaması — 2026-10-31
+
+Əvvəlki `src/` tarixçəsini yenidən skan etmədən, inventar jurnalında artıq istinad edilən bir konkret potensial sənəd yoxlanıldı:
+
+- Mənbə: [PC-BRANCH-RUST-AZERBAIJANI — Stage 1 Native CI patch and verified findings — 2026-10-28](https://docs.google.com/document/d/17lpWvSFP-DRQBRApCAb6ceIPkSiMyEKh6-LAFi4T8Ps/edit).
+- Sənədin müşahidə edilmiş məzmunu: `tests/stage01.rs` faylında `CATALOG_VERSION` import düzəlişi və `.github/workflows/stage-01-rust-native.yml` üçün Stage1 Native CI təklifi; Stage1-də 17 cutlet və 47 month adının statik müqayisəsi.
+- Bu konkret sənəddə day-tag üçün arxivləşdirilmiş alqoritm, ilkin giriş/çıxış marşrutu, kod reviziyası və ya müşahidə edilmiş historical RED yoxdur. Bundan əlavə, redaktə edilə bilən Google Docs URL-si təkbaşına sabit kod versiyası sayıla bilməz.
+- İkinci, yalnız repoya məhdudlaşdırılmış yoxlama: GitHub Issues üzrə dəqiq `"day-tag"` və `"DISCOVERY02"` axtarışlarının hər biri 0 nəticə qaytardı. Bu, yalnız həmin axtarışların nəticəsidir; repoda və ya xarici arxivlərdə belə mənbənin qəti yoxluğunu sübut etmir.
+
+**Mənbə uyğunluğu:** `NO_VERIFIABLE_LEGACY_DAY_TAG_ROUTE_FOUND_IN_THESE_TWO_TARGETED_CHECKS`. Heç bir day-tag `EXPECTED_RED`, `CONTROL`, Stage4 closure, Stage5 və ya production wiring nəticəsi çıxarılmır. Əvvəlki Code SHA üzrə 32/32 Native baseline sübutu dəyişmir.
+
+**NEXT (dəyişməz qəbul şərti):** yalnız dəqiq provenance və versiyalı real tarixi day-tag source/artifact/route təqdim olunduqda onu müstəqil normativ oracle ilə çoxalt; faktiki fərq aşkar edilmədən `EXPECTED_RED` bəyan etmə.
