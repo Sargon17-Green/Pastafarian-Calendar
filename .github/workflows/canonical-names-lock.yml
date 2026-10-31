@@ -58,7 +58,7 @@ jobs:
               (($stageLines -contains 'CURRENT_STAGE=32') -and
                ($stageLines -contains 'LAST_COMPLETED_STAGE=32') -and
                ($stageLines -contains 'STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or
-              (($stageLines -contains 'CURRENT_STAGE=33') -and
+              ((($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34')) -and
                ($stageLines -contains 'LAST_COMPLETED_STAGE=33') -and
                ($stageLines -contains 'STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
              ($stageLines -contains 'STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
@@ -93,7 +93,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage30 distributional discovery probe failed' }
             Write-Host ('STAGE30_DISCOVERY15_NATIVE_SHA=' + $env:GITHUB_SHA)
             Write-Host 'STAGE30_DISCOVERY15_NATIVE=EVIDENCE_ONLY'
-            if (($stageLines -contains 'CURRENT_STAGE=30') -or ($stageLines -contains 'CURRENT_STAGE=31') -or ($stageLines -contains 'CURRENT_STAGE=32') -or ($stageLines -contains 'CURRENT_STAGE=33')) { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
+            if (($stageLines -contains 'CURRENT_STAGE=30') -or ($stageLines -contains 'CURRENT_STAGE=31') -or ($stageLines -contains 'CURRENT_STAGE=32') -or (($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34'))) { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
           } elseif (($stageLines -contains 'CURRENT_STAGE=27') -and
               ((($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=AWAITING')) -or
                (($stageLines -contains 'LAST_COMPLETED_STAGE=27') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
@@ -331,7 +331,7 @@ jobs:
             $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
             if (((($stageLines -contains 'CURRENT_STAGE=32') -and
                  ($stageLines -contains 'LAST_COMPLETED_STAGE=32')) -or
-                (($stageLines -contains 'CURRENT_STAGE=33') -and
+                ((($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34')) -and
                  ($stageLines -contains 'LAST_COMPLETED_STAGE=33'))) -and
                 ($stageLines -contains 'STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) {
               Add-Content -Path stage32-canonical-metadata.txt -Value 'STAGE32_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
@@ -380,7 +380,7 @@ jobs:
             & .\tests\Stage33.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage33 native research failed' }
             $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
-            if (($stageLines -contains 'CURRENT_STAGE=33') -and
+            if ((($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34')) -and
                 ($stageLines -contains 'LAST_COMPLETED_STAGE=33') -and
                 ($stageLines -contains 'STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) {
               Add-Content -Path stage33-grid-metadata.txt -Value 'STAGE33_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
@@ -400,5 +400,46 @@ jobs:
           path: |
             stage33-grid-metadata.txt
             stage33-grid-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
+
+  stage34-seal-axis-cubes:
+    name: Stage34 bounded seal-axis cubic interaction
+    if: github.ref == 'refs/heads/PowerShell+Tagalog'
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independent-oracle 448-assertion research on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($sha -cne $env:GITHUB_SHA) { throw 'Stage34 exact checkout SHA mismatch' }
+          @(
+            ('STAGE34_HEAD_SHA=' + $sha),
+            ('STAGE34_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE34_SCOPE=8_CUBES_32_LABELED_CONTEXTS_64_ENDPOINTS_32_SEAL_EDGES_16_FACES',
+            'STAGE34_EXPECTED_ASSERTIONS=448',
+            'STAGE34_STAGE_SEAL=NOT_CLAIMED'
+          ) | Set-Content stage34-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage34-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage34.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage34 third-axis research failed' }
+            Write-Host ('STAGE34_NATIVE_SHA=' + $sha)
+            Write-Host 'STAGE34_DISCOVERY19_NATIVE=EVIDENCE_ONLY'
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Retain exact SHA, bounded transcript and metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage34-cubic-evidence
+          path: |
+            stage34-metadata.txt
+            stage34-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn

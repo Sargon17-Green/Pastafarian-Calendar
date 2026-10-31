@@ -5,7 +5,7 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
 $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-$stage33Sealed = ($md -match '(?m)^CURRENT_STAGE=33\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=33\s*$') -and ($md -match '(?m)^STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')
+$stage33Sealed = ($md -match '(?m)^CURRENT_STAGE=(33|34)\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=33\s*$') -and ($md -match '(?m)^STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')
 Assert-StageTrue -Condition (($md -match '(?m)^CURRENT_STAGE=32\s*$') -or $stage33Sealed) -Name 'Stage32 baseline or Stage33 exact seal'
 Assert-StageTrue -Condition (($md -match '(?m)^LAST_COMPLETED_STAGE=32\s*$') -or $stage33Sealed) -Name 'Stage32 completed or Stage33 exact seal'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage32 sealed'
