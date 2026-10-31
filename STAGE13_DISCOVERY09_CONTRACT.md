@@ -1,6 +1,6 @@
 # Stadio 13 — DISCOVERY 09: kvardek ses videblaj gutoj
 
-**Stato (2026-10-31):** produktkodo kaj 14 Stage13-testoj preparitaj por nova HEAD; ankoraŭ neniu Stage13 Native PASS. La dokumenta Stage12 HEAD estis verdita per 116/116 kaj Names Lock.
+**Stato (2026-10-31):** kodkapo akceptita: 130/130 Gleam Native, formato kaj kompilado PASS; Names Lock SUCCESS sur la sama SHA. La dokumenta kapo bezonos proprajn CI-pordegojn.
 
 ## Origino, celo kaj sendependeco
 
@@ -35,3 +35,9 @@ Komparoj al la referenca `sauce.build_visible_drops(core.work_counts(a,b),core.b
 ## Ekster-Gleam antaŭkalkulo
 
 Sendependa Python BigInt-kalkulo (ne Native) donis ĉe fundamento F=-15055671: `V1=56644603826892212324764499696091907135`, `V46=141872771689426650819909896585756512282`; ĉe (11,21): `V1=60158691871357745200742433447203949263`, `V46=101264927043934815149790611409871558037`. Nova kodo uzas inversan akumulilon por antaŭaj gutoj; referenco uzas antaŭenan liston. Fiksaĵoj ne anstataŭas la 130 Native testojn.
+
+## Mezuritaj Stage13-pordegoj
+
+- Origina kodkomito [82f303b83bb1ee67e2a0e2f54ed72bfcc5d56c55](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/82f303b83bb1ee67e2a0e2f54ed72bfcc5d56c55): Native [41211807756](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41211807756), job 124568188372, malsukcesis ĉe formatkontrolo de nur unu nova produktdosiero; testoj ne ekrulis. Names Lock [41211807706](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41211807706) SUCCESS.
+- Preciza nur-formata riparo: [eb843f263062adb3f61fd6b47f1fe4bf20b2c718](https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/eb843f263062adb3f61fd6b47f1fe4bf20b2c718). Native [41211914142](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41211914142), job 124568501138: Gleam 1.18.1 / OTP 28, formato kaj kompilado PASS, **130 passed / 0 failures**, HEAD/source-integrity PASS; artifact ID `13046900606`, SHA256 `65cdf9f66a82747b32e132b1a58c3726f5416a754a9718ae34ba9115c84e40a0`. Names Lock [41211914159](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41211914159), job 124568501120, completed/success sur identa SHA.
+- Stage13 amplekso: 46 videblaj gutoj; ne plena dato. Sekva kontrakto `STAGE14_DISCOVERY10_CONTRACT.md`. Dokumenta commit postulas proprajn Native kaj Names por dokumenta HEAD.
