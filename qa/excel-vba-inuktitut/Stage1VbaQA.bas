@@ -6,7 +6,7 @@ Option Explicit
 ' Run Debug > Compile VBAProject before calling this macro.
 ' Output is written to the Stage1_VBA_QA worksheet in the temporary copy.
 
-Public Sub RunStage1VbaSelfTest()
+Public Sub RunStage1VbaSelfTest(Optional ByVal headless As Boolean = False)
     Dim sh As Worksheet, report As Worksheet
     Dim cases As Variant, caseId As Variant
     Dim i As Long, passed As Long, failed As Long
@@ -69,12 +69,18 @@ Public Sub RunStage1VbaSelfTest()
     report.Columns("C").WrapText = True
     report.Activate
     Debug.Print "Stage1VbaSelfTest: PASS=" & CStr(passed) & "/" & CStr(UBound(cases) + 1) & " FAIL=" & CStr(failed)
-    MsgBox "VBA Stage 1: " & report.Range("B2").Value2 & vbCrLf & _
-           "Review Stage1_VBA_QA sheet. Canonical engine remains NOT IMPLEMENTED.", _
-           vbInformation, "Stage 1 VBA QA"
+    If Not headless Then
+        MsgBox "VBA Stage 1: " & report.Range("B2").Value2 & vbCrLf & _
+               "Review Stage1_VBA_QA sheet. Canonical engine remains NOT IMPLEMENTED.", _
+               vbInformation, "Stage 1 VBA QA"
+    End If
     Exit Sub
 FatalSetup:
-    MsgBox "Cannot run Stage 1 VBA QA. Error " & CStr(Err.Number) & ": " & Err.Description, vbCritical
+    If headless Then
+        Err.Raise Err.Number, "Stage1VbaQA", Err.Description
+    Else
+        MsgBox "Cannot run Stage 1 VBA QA. Error " & CStr(Err.Number) & ": " & Err.Description, vbCritical
+    End If
 End Sub
 
 Private Function GetOrCreateReport() As Worksheet
