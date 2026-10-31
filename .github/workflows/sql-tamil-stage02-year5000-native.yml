@@ -2,7 +2,7 @@ name: SQL Tamil Stage 2 Slice 14 Year5000 Integration Native
 on:
   push:
     branches:
-      - 'SQL+தமிழ்'
+      - 'SQL\+தமிழ்'
     paths:
       - 'sql/00_schema.sql'
       - 'sql/01_source_language_catalog.sql'
