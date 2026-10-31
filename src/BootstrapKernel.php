@@ -654,6 +654,30 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'year.patch18.adjacent.calls');
             return $result;
         });
+        // PATCH19: preserve the PATCH18 traversal and Stage36 legacy report,
+        // while enforcing gate-index continuity on every real callback.
+        $this->dispatcher->register('TARGET_YEAR_PATCH_19', function(BootstrapContext $context): array {
+            $anchor = $context->semanticState['year5000Anchor'] ?? null;
+            $next = $context->semanticState['nextYearProvider'] ?? null;
+            $previous = $context->semanticState['previousYearProvider'] ?? null;
+            $maxSteps = $context->semanticState['yearStepBudget'] ?? null;
+            if (!is_array($anchor) || !is_callable($next) ||
+                !is_callable($previous) || !is_int($maxSteps)) {
+                throw new \InvalidArgumentException('PATCH19_PROVIDER_ARGS');
+            }
+            $legacyReport = $this->legacyGuessTargetYear365(
+                $context->calculationDay, $context->targetDay, $anchor
+            );
+            $patch = new \Pastafari\Stage01\Patches\GateIndexContinuityPatch19();
+            $result = $patch->find(
+                $anchor, $context->targetDay, $next, $previous, $legacyReport, $maxSteps
+            );
+            $context->semanticState['stage36LegacyReport'] = $legacyReport;
+            $context->semanticState['stage39TargetYear'] = $result['targetYearCandidate'];
+            $context->status = 'TARGET_YEAR_PATCH_19_RETURNED';
+            $this->metrics->bump($context, 'year.patch19.gate_index.calls');
+            return $result;
+        });
         $this->dispatcher->register('MISSING_FIFTH_DIGIT_LEGACY', function(BootstrapContext $context): BigInt {
             $id = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -954,6 +978,31 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('TARGET_YEAR_PATCH_18', $context)
+        );
+    }
+
+    /**
+     * PATCH19: find a real target year and enforce index continuity across
+     * every forward/backward adjacent-year callback.
+     * @param array<string,mixed> $year5000Anchor
+     * @param callable(array):array $nextYearProvider
+     * @param callable(array):array $previousYearProvider
+     * @return array<string,mixed>
+     */
+    public function targetYearSequentialPatch19(
+        int $calculationDay, int $targetDay, array $year5000Anchor,
+        callable $nextYearProvider, callable $previousYearProvider,
+        int $maxSteps = 2048
+    ): array {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'TARGET_YEAR_PATCH_19';
+        $context->semanticState['year5000Anchor'] = $year5000Anchor;
+        $context->semanticState['nextYearProvider'] = $nextYearProvider;
+        $context->semanticState['previousYearProvider'] = $previousYearProvider;
+        $context->semanticState['yearStepBudget'] = $maxSteps;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('TARGET_YEAR_PATCH_19', $context)
         );
     }
 

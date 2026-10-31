@@ -311,3 +311,55 @@ jobs:
           path: evidence-stage38/
           retention-days: 30
           if-no-files-found: warn
+
+
+  stage39-php-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Native Stage39 PHP lint and verified source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l src/Patches/GateIndexContinuityPatch19.php
+          php -l src/BootstrapKernel.php
+          php -l tests/bootstrap.php
+          php -l tests/stage39_patch19_tests.php
+      - name: Stage39 PATCH19 independent Oracle tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage39
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=39\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage39/source.txt
+          php -v > evidence-stage39/php-version.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage39_patch19_tests.php > evidence-stage39/stdout.txt 2> evidence-stage39/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence-stage39/exit-code.txt
+          cat evidence-stage39/stdout.txt
+          cat evidence-stage39/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage39/stderr.txt
+          grep -Eq '^LULUS Stage39 PATCH19 checks=[0-9]+ genuine_years=3 real_targets=7 stage38_red=2 invalid=9 stderr=0$' evidence-stage39/stdout.txt
+      - name: Preserve Stage39 output, SHA, PHP and exit code
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage39-patch19
+          path: evidence-stage39/
+          retention-days: 30
+          if-no-files-found: warn

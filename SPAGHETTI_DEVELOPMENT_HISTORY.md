@@ -778,3 +778,11 @@ Pekerjaan [Stage37 Native](https://github.com/Sargon17-Green/Pastafarian-Calenda
 Artefak bukti [13001614356](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41108531274/artifacts/13001614356) mempunyai SHA, stdout, stderr, exit dan versi PHP (retensi Actions 30 hari). Pekerjaan Stage36 Native juga berjaya mengekalkan dua EXPECTED_RED terdahulu (disahkan oleh verifier; bukan kegagalan CI).
 
 Penerimaan ini membuktikan PATCH18 bagi pembekal adjacent-year yang diberi dan tiga tahun ujian Oracle yang khusus untuk test. Ia **tidak** membuktikan kewujudan penjana Year5000 dalam pengeluaran atau tarikh lima-komponen hujung-ke-hujung. `LAST_COMPLETED_STAGE=37`; Stage38 belum dimulakan kerana kontrak/kecacatan DISCOVERY19 belum ditetapkan. Tiada perubahan `main`, tiada merge dan tiada import oracle ke produksi.
+
+## Stage 38 — DISCOVERY19: indeks pintu terputus (Native EXPECTED_RED)
+
+Run [41136362315](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41136362315) complete/success 9/9 pada SHA 6a8090d9092adc88a075ace4620f4dba03cc5fe6. PHP 8.3 64-bit, job 124339690590: 18 checks, 2/2 witness diterima oleh PATCH18, rejected=0, stderr kosong, exit=0. Artifact 13016412413. Ini menutup penemuan; tiada patch disamakan dengan pembaikan sebenar.
+
+## Stage 39 — PATCH19: sambungan indeks gerbang pada setiap callback
+
+Ditambah GateIndexContinuityPatch19 sebagai pengesah pembekal yang menyerahkan pemilihan tahun kepada SequentialYearWalkPatch18 tanpa mengubah fail asal, bersama dispatcher TARGET_YEAR_PATCH_19, method targetYearSequentialPatch19, ujian, kontrak dan job Native. Year5000 masih anchor luaran. Dua witness Stage38 kekal dapat dihasilkan oleh laluan PATCH18 untuk audit dan mesti ditolak oleh laluan baru. Status: AWAITING_CI untuk SHA kod Stage39; belum boleh panggil GREEN/PASS tanpa log all jobs. Tiada merge/main.
