@@ -105,6 +105,11 @@ jobs:
             build/normative_oracle_core.o \
             build/stage01_weaving_polynomial.o \
             -o build/stage01_weaving_polynomial_probe
+          gfortran "${flags[@]}" test/stage01_weaving_prefix_probe.f90 \
+            build/big_integer.o \
+            build/stage01_weaving_polynomial.o \
+            -o build/stage01_weaving_prefix_probe
+          test -x build/stage01_weaving_prefix_probe
           test -x build/stage01_weaving_polynomial_probe
           test -x build/stage01_weaving_microprobe
           test -x build/stage01_normative_first_day_probe
@@ -320,6 +325,19 @@ jobs:
           grep -Fxq 'STAGE01_POLY_SMALL_PASS (independent enumeration + legacy; NOT Stage1 acceptance)' <<< "$output"
           echo 'STAGE01_POLY_NATIVE_PASS=906 EXPECTED=906 (not full Stage1 acceptance)'
           echo 'Fortran Stage1 polynomial candidate: 105 small shapes, 906 exact checks; not normative.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Gate independent Stage1 prefix completions (3455 exhaustive checks)
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(timeout --signal=TERM --kill-after=3s 20s build/stage01_weaving_prefix_probe 2>&1)"
+          printf '%s\n' "$output"
+          grep -Fxq 'STAGE01_POLY_PREFIX_CASES=105' <<< "$output"
+          grep -Fxq 'STAGE01_POLY_PREFIX_ASSERTIONS=3455' <<< "$output"
+          grep -Fxq 'STAGE01_POLY_PREFIX_FAILURES=0' <<< "$output"
+          grep -Fxq 'STAGE01_POLY_PREFIX_PASS (exhaustive independent recursion; NOT Stage1 acceptance)' <<< "$output"
+          echo 'STAGE01_POLY_PREFIX_NATIVE_PASS=3455 EXPECTED=3455 (not full Stage1 acceptance)'
+          echo 'Fortran Stage1 prefix polynomial candidate: 3455 exhaustive prefix comparisons; not normative.' >> "$GITHUB_STEP_SUMMARY"
+
       - name: Diagnose Stage1 polynomial 45-month candidate (bounded, non-gating)
         shell: bash
         run: |

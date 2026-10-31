@@ -15,7 +15,7 @@ module stage01_weaving_polynomial
   implicit none
   private
   integer(int64), parameter :: LIMB_BASE=1000000000_int64
-  public :: count_weavings_polynomial, weaving_first_positions
+  public :: count_weavings_polynomial, weaving_first_positions, count_prefix_weavings_polynomial
 contains
   function count_weavings_polynomial(lengths) result(total)
     integer, intent(in) :: lengths(:)
@@ -76,6 +76,64 @@ contains
        oldTotal=oldTotal+n
     end do
   end function weaving_first_positions
+
+
+  ! Independent candidate-only completion count for a valid legal prefix.
+  ! Opened colors may begin at any suffix position; as-yet-unopened colors
+  ! must open in ascending order. All remaining colors close in order.
+  function count_prefix_weavings_polynomial(lengths,remaining,opened,closed) result(total)
+    integer, intent(in) :: lengths(:),remaining(:),opened,closed
+    type(BigInt) :: total,running,ways
+    type(BigInt), allocatable :: positions(:),next(:),weights(:)
+    integer :: m,n,k,oldTotal
+    if (size(lengths)<1 .or. size(lengths)>47 .or. size(remaining)/=size(lengths)) &
+         error stop 'prefix candidate: invalid color count'
+    if (any(lengths<1) .or. any(lengths>123) .or. sum(lengths)>5778) &
+         error stop 'prefix candidate: invalid lengths'
+    if (closed<0 .or. opened<closed .or. opened>size(lengths)) &
+         error stop 'prefix candidate: invalid opened/closed indices'
+    if (any(remaining<0) .or. any(remaining>lengths)) &
+         error stop 'prefix candidate: invalid remaining counts'
+    if (any(remaining(1:closed)/=0)) error stop 'prefix candidate: closed colors not exhausted'
+    if (any(remaining(closed+1:opened)<1)) error stop 'prefix candidate: opened color exhausted'
+    if (any(remaining(opened+1:)/=lengths(opened+1:))) &
+         error stop 'prefix candidate: unopened color already consumed'
+    allocate(positions(0))
+    oldTotal=0
+    total=bi_one()
+    do m=closed+1,size(lengths)
+       n=remaining(m)
+       allocate(next(oldTotal+n)); next=bi_zero()
+       if (n==1) then
+          next(oldTotal+1)=total
+       else
+          allocate(weights(0:oldTotal))
+          ways=bi_one()
+          weights(oldTotal)=ways
+          do k=oldTotal-1,0,-1
+             ways=divide_exact_small( &
+                  bi_mul_small(ways,int(oldTotal-k+n-2,int64)),oldTotal-k)
+             weights(k)=ways
+          end do
+          running=bi_zero()
+          do k=0,oldTotal
+             if (m<=opened+1) then
+                running=total
+             else if (k>0) then
+                running=bi_add(running,positions(k))
+             end if
+             next(k+1)=bi_mul(running,weights(k))
+          end do
+          deallocate(weights)
+       end if
+       call move_alloc(next,positions)
+       oldTotal=oldTotal+n
+       total=bi_zero()
+       do k=1,size(positions)
+          total=bi_add(total,positions(k))
+       end do
+    end do
+  end function count_prefix_weavings_polynomial
 
   ! Exact long division in base 10^9 (nonnegative, positive integral result).
   ! Here all dividends are binomial recurrence numerators and have no remainder.
