@@ -1,0 +1,43 @@
+name: Post55 independent structural sauce diagnostic
+
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/independent_sauce_oracle.py'
+      - 'soak/test_independent_sauce_oracle.py'
+      - '.github/workflows/post55-independent-sauce-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sauce-structural-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact Kotlin branch commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: audited-kotlin
+          persist-credentials: false
+      - name: Checkout pinned Python production implementation independently
+        uses: actions/checkout@v4
+        with:
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: pinned-python
+          persist-credentials: false
+      - name: Verify source identities and compare bounded sauce derivation
+        shell: bash
+        working-directory: audited-kotlin
+        env:
+          PASTAFARIAN_PYTHON_SRC: ${{ github.workspace }}/pinned-python/src
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git -C ../pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
+          python3 -m unittest discover -s soak -p test_independent_sauce_oracle.py -v
+          echo 'PASS_STRUCTURAL_SAUCE_DIAGNOSTIC_NOT_CERTIFIED'
