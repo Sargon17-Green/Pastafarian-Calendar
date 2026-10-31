@@ -1,3 +1,5 @@
+import 'monster_work_counts.dart';
+
 final class MonsterContext {
   final BigInt calculationDay;
   final BigInt targetDay;
@@ -67,6 +69,18 @@ final class MonsterManager {
     validationManager.requireIntegerDay(context.calculationDay);
     validationManager.requireIntegerDay(context.targetDay);
     metricsManager.bump(context, 'bootstrap.calls');
+    final counts = const MonsterWorkCounter().calculate(
+      context.calculationDay,
+      context.targetDay,
+    );
+    context.metrics.addAll(<String, BigInt>{
+      'work.action': counts.action,
+      'work.target': counts.target,
+      'work.distance': counts.distance,
+      'work.connection': counts.connection,
+      'work.direction': BigInt.from(counts.direction),
+    });
+    context.branchTrace.add('WORK_COUNTS_READY');
     return dispatcher.dispatchUnbuiltStage(context);
   }
 }
