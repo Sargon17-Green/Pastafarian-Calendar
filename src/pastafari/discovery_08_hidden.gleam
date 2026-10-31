@@ -32,11 +32,7 @@ fn stone_field(stone: discovery_06_stones.Stone, kind: Int) -> Int {
   }
 }
 
-fn grind_seven(
-  step: Int,
-  value: Int,
-  stone: discovery_06_stones.Stone,
-) -> Int {
+fn grind_seven(step: Int, value: Int, stone: discovery_06_stones.Stone) -> Int {
   case step > 7 {
     True -> value
     False -> {
@@ -45,7 +41,8 @@ fn grind_seven(
         7 -> 2
         _ -> step
       }
-      let next = save(value * value + 3 * value + stone_field(stone, kind) + step)
+      let next =
+        save(value * value + 3 * value + stone_field(stone, kind) + step)
       grind_seven(step + 1, next, stone)
     }
   }
@@ -66,10 +63,23 @@ fn build_from_pairs(
     [coefficient, ..remaining_coefficients] -> {
       let #(a, b, c, d) = coefficient
       let assert [stone, ..remaining_stones] = stones
-      let seed = save(
-        action + a * target + b * distance + c * connection + d * direction
-        + stone.wheat + stone.barley + stone.salt + stone.bitter + stone.red,
-      )
+      let seed =
+        save(
+          action
+          + a
+          * target
+          + b
+          * distance
+          + c
+          * connection
+          + d
+          * direction
+          + stone.wheat
+          + stone.barley
+          + stone.salt
+          + stone.bitter
+          + stone.red,
+        )
       let value = grind_seven(1, seed, stone)
       build_from_pairs(
         remaining_coefficients,
@@ -85,12 +95,17 @@ fn build_from_pairs(
   }
 }
 
-pub fn hidden_drops_for_days(calculation_day: Int, target_day: Int) -> List(Int) {
+pub fn hidden_drops_for_days(
+  calculation_day: Int,
+  target_day: Int,
+) -> List(Int) {
   let action = discovery_02_day_tag.day_tag_patch(calculation_day)
   let target = discovery_02_day_tag.day_tag_patch(target_day)
-  let distance = discovery_03_distance.old_distance(calculation_day, target_day) + 1
+  let distance =
+    discovery_03_distance.old_distance(calculation_day, target_day) + 1
   let connection = action + target
-  let direction = discovery_04_direction.direction_for_days(calculation_day, target_day)
+  let direction =
+    discovery_04_direction.direction_for_days(calculation_day, target_day)
   build_from_pairs(
     [
       #(3, 4, 6, 8),
@@ -119,7 +134,10 @@ pub fn dispatch_discovery_08(
     Ok(completed) ->
       Ok(Discovery08Output(
         context: completed,
-        hidden: hidden_drops_for_days(completed.calculation_day, completed.target_day),
+        hidden: hidden_drops_for_days(
+          completed.calculation_day,
+          completed.target_day,
+        ),
       ))
   }
 }

@@ -24,7 +24,8 @@ pub fn discovery_08_foundation_first_fixture_test() {
 }
 
 pub fn discovery_08_foundation_last_fixture_test() {
-  let assert [last, ..] = list.reverse(observed(core.foundation_day, core.foundation_day))
+  let assert [last, ..] =
+    list.reverse(observed(core.foundation_day, core.foundation_day))
   last |> should.equal(6_164_285_870_955_721_082_771_365_327_359_496_898)
 }
 
