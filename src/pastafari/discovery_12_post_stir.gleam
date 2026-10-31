@@ -78,10 +78,7 @@ fn stir_by_identifier(
         + position
         * position
       let updated = save(s * s + 7 * previous * following)
-      stir_by_identifier(remaining, old, order, q, stir, [
-        updated,
-        ..reversed
-      ])
+      stir_by_identifier(remaining, old, order, q, stir, [updated, ..reversed])
     }
   }
 }
@@ -120,10 +117,7 @@ pub fn dispatch_discovery_12(
     Error(error) -> Error(error)
     Ok(completed) -> {
       let #(bowls, order_at_drop_46) =
-        post_stir_for_days(
-          completed.calculation_day,
-          completed.target_day,
-        )
+        post_stir_for_days(completed.calculation_day, completed.target_day)
       Ok(Discovery12Output(
         context: completed,
         bowls: bowls,
