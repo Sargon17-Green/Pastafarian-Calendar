@@ -925,6 +925,77 @@ proc probeFiveMiddleUnequalMonthWeavings() {
   }
 }
 
+
+// Independent five-month family with the three-day month in position 3:
+// lengths 2+2+3+2+2 (11 positions). Generate every complete multiset word
+// lexicographically, then filter by first/last occurrence order. The oracle
+// never consults production DP transitions, cached counts, or unrank calls.
+proc enumerateFiveInnerUnequalMonthWeavings(ref positions: [0..10] int,
+                                            step: int,
+                                            ref used: [1..5] int,
+                                            ref candidateCount: int,
+                                            ref oracle: list(string)) {
+  if step == 11 {
+    candidateCount += 1;
+    var first: [1..5] int;
+    var last: [1..5] int;
+    for p in 0..10 {
+      const monthId = positions[p];
+      if first[monthId] == 0 then first[monthId] = p + 1;
+      last[monthId] = p + 1;
+    }
+    var legal = true;
+    for monthId in 1..4 {
+      if first[monthId] >= first[monthId + 1] ||
+         last[monthId] >= last[monthId + 1] then legal = false;
+    }
+    if legal {
+      var key = "";
+      for monthId in positions do key += monthId:string;
+      oracle.pushBack(key);
+    }
+    return;
+  }
+  for monthId in 1..5 {
+    const limit = if monthId == 3 then 3 else 2;
+    if used[monthId] >= limit then continue;
+    positions[step] = monthId;
+    used[monthId] += 1;
+    enumerateFiveInnerUnequalMonthWeavings(positions, step + 1, used,
+                                           candidateCount, oracle);
+    used[monthId] -= 1;
+  }
+}
+
+proc probeFiveInnerUnequalMonthWeavings() {
+  var lengths = new list(int);
+  for monthId in 1..5 do lengths.pushBack(if monthId == 3 then 3 else 2);
+  var tested: WeavingCounter;
+  tested.lengths = lengths;
+
+  var positions: [0..10] int;
+  var used: [1..5] int;
+  var independentOracle = new list(string);
+  var candidates = 0;
+  enumerateFiveInnerUnequalMonthWeavings(positions, 0, used,
+                                         candidates, independentOracle);
+
+  check(candidates == 415800,
+        "П'ять місяців 2+2+3+2+2: усі 415800 повних слів");
+  check(independentOracle.size == 134,
+        "П'ять місяців 2+2+3+2+2: 134 допустимі слова");
+  check(tested.countAll() == independentOracle.size,
+        "П'ять місяців 2+2+3+2+2: DP проти незалежного переліку");
+  for index0 in independentOracle.indices {
+    const rank = index0 + 1;
+    const actual = tested.unrank1(new bigint(rank));
+    var key = "";
+    for monthId in actual do key += monthId:string;
+    check(actual.size == 11 && key == independentOracle[index0],
+          "П'ять місяців 2+2+3+2+2: лексикографічний ранг=" + rank:string);
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -942,6 +1013,7 @@ proc main() {
   probeFiveShortMonthWeavings();
   probeFiveUnequalMonthWeavings();
   probeFiveMiddleUnequalMonthWeavings();
+  probeFiveInnerUnequalMonthWeavings();
   probeHistoricalControls();
   writeln("DISCOVERY03_PROBE_CHECKS=", checks);
   writeln("DISCOVERY03_PROBE_FAILURES=", failures);
