@@ -57,7 +57,7 @@ def check(report,folder,rows):
             elif op==ord('j') and (x,y) in ((89,29),(113,32)):
                 v=pre[-1] if pre else 0
                 need(post==(pre[:-1] if pre else []),'j pop')
-                (j29 if y==29 else j32).append((i+1,v,overlay.get((3,49),rows[49][3])))
+                (j29 if y==29 else j32).append((i+1,v,overlay.get((3,49), (rows[49][3] if len(rows)>49 and len(rows[49])>3 else 32))))
             for e in s['reads']:
                 a,b=e['start'],e['end']
                 need(e['t']==i+1 and e['ip']==s['ip'] and e['stack']==pre
