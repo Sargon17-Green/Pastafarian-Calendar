@@ -10,7 +10,8 @@
             [pastafari.stage02-gate-positions-test]
             [pastafari.stage02-gate-windows-test]
             [pastafari.stage02-year-boundaries-test]
-            [pastafari.stage02-target-year-test]))
+            [pastafari.stage02-target-year-test]
+            [pastafari.stage02-cutlet-count-test]))
 
 (defn -main [& _]
   (let [result (test/run-tests 'pastafari.stage01-test
@@ -23,7 +24,8 @@
                                'pastafari.stage02-gate-positions-test
                                'pastafari.stage02-gate-windows-test
                                'pastafari.stage02-year-boundaries-test
-                               'pastafari.stage02-target-year-test)
+                               'pastafari.stage02-target-year-test
+                               'pastafari.stage02-cutlet-count-test)
         failures (+ (:fail result) (:error result))]
     (println (if (zero? failures)
                "Alle Stage-1- en Stage-2-discoverytests zijn geslaagd."
