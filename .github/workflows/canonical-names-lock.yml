@@ -291,8 +291,18 @@ jobs:
       - name: Resolve packages
         run: dart pub get
 
-      - name: Verify meatball gate formatting
-        run: dart format --output=none --set-exit-if-changed lib/src/monster_meatball_gates.dart bin/stage2_production07_tests.dart
+      - name: Verify meatball gate formatting with exact formatted-source capture
+        run: |
+          if ! dart format --output=none --set-exit-if-changed lib/src/monster_meatball_gates.dart bin/stage2_production07_tests.dart; then
+            dart format --output=write lib/src/monster_meatball_gates.dart bin/stage2_production07_tests.dart
+            for file in lib/src/monster_meatball_gates.dart bin/stage2_production07_tests.dart; do
+              echo "DART_CAPTURE_BEGIN:${file}"
+              base64 -w0 "${file}"
+              printf '\n'
+              echo "DART_CAPTURE_END:${file}"
+            done
+            exit 1
+          fi
 
       - name: Analyze branch
         run: dart analyze
