@@ -1,0 +1,79 @@
+name: Codesh native 5-field compilation and smoke
+on:
+  push:
+    branches:
+      - 'Codesh+𐤉𐤄𐤅𐤃𐤉𐤕'
+    paths:
+      - 'מקור/דרוג־שזירה־טהור.אמן'
+      - 'מקור/תאריך־שלם־טהור.אמן'
+      - 'qa/native-e2e/**'
+      - '.github/workflows/codesh-native-e2e.yml'
+  workflow_dispatch:
+jobs:
+  native-compile-and-five-fields:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Download and SHA-256 verify upstream Codesh 1.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p toolchain
+          curl -fL --retry 3 --max-time 240 \
+            'https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/releases/download/v1.3/codeshc-unix-v1.3-portable.tar.gz' \
+            -o toolchain/codeshc-unix-v1.3-portable.tar.gz
+          echo '66f84eb52b74f91d5beea61d1af889cf6d2d5ae742c4ac64ebfe604eb5e26e0c  toolchain/codeshc-unix-v1.3-portable.tar.gz' | sha256sum -c -
+          tar -xzf toolchain/codeshc-unix-v1.3-portable.tar.gz -C toolchain
+          find toolchain -type f -name 'codeshc' -exec chmod +x {} \;
+      - name: Compile 52 native Codesh files with official compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/tmp
+          codeshc=$(find toolchain -type f -name codeshc | head -1)
+          talmud=$(find toolchain -type f -name 'תלמוד־קודש.jar' | head -1)
+          test -n "$codeshc" && test -n "$talmud"
+          test "$(find מקור -name '*.אמן' | wc -l)" -eq 52
+          export TMP="$PWD/build/tmp" TEMP="$PWD/build/tmp" TMPDIR="$PWD/build/tmp"
+          export JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=$PWD/build/tmp"
+          "$codeshc" --src מקור --dest "$PWD/build/codesh-native-five-fields.jar" \
+            --jre-path "$JAVA_HOME" --talmud-codesh-path "$PWD/$talmud" \
+            --main-class 'מקור/בחינת־מופת' \
+            > build/CODESH_COMPILER.stdout.log 2> build/CODESH_COMPILER.stderr.log || {
+              cat build/CODESH_COMPILER.stderr.log; cat build/CODESH_COMPILER.stdout.log; exit 1;
+            }
+          sha256sum build/codesh-native-five-fields.jar
+      - name: Compile transport only and invoke Codesh foundation test
+        shell: bash
+        run: |
+          set -euo pipefail
+          javac -encoding UTF-8 -d build qa/native-e2e/NativePairTransport.java
+          java -cp "build:build/codesh-native-five-fields.jar" NativePairTransport FOUNDATION -13334246 -13334246 > build/foundation.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('build/foundation.json',encoding='utf-8'))
+          expected={'year':5000,'cutletIndex':10,'dayInCutlet':503,'monthIndex':20,'dayInMonth':56}
+          got=x['native']
+          for k,v in expected.items():
+              assert got.get(k)==v, (k,got.get(k),v)
+          for k in ('codeshCutletName','codeshMonthName'):
+              assert any(0x10900<=ord(c)<=0x1091f for c in got[k]), (k,got[k])
+          print('CODESh_NATIVE_FOUNDATION_5_FIELDS_PASS',got)
+          PY
+      - name: Upload QA logs on any outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codesh-native-five-fields-smoke-evidence
+          path: |
+            build/CODESH_COMPILER.stdout.log
+            build/CODESH_COMPILER.stderr.log
+            build/foundation.json
+          if-no-files-found: ignore
