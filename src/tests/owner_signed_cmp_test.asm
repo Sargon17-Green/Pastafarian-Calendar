@@ -1436,8 +1436,11 @@ RunOwnerSignedCmpTests::
     or a
     jp nz, .fail
 
-    ; 252: positive canonical A vs negative noncanonical B.
-    ; Fail closed before any opposite-sign ordering can short-circuit validation.
+    ; Cases 252-255: all opposite-sign orientations with one noncanonical
+    ; 8193-byte high-zero descriptor. Both sign orientations and both length
+    ; orders must fail closed (3) before sign-only ordering. The common loop
+    ; saves ROM0 space; every case still checks descriptor/tag immutability
+    ; and the fragmented SRAM sentinels independently.
     ld a, 252
     ld [wTestCase], a
     xor a
@@ -1445,6 +1448,7 @@ RunOwnerSignedCmpTests::
     inc a
     ld [wOwnerCmpSignB], a
     call OwnerCmpTestSwapLength16
+.mixedSignHighZero:
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -1454,52 +1458,21 @@ RunOwnerSignedCmpTests::
     jp nc, .fail
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
-
-    ; 253: reverse lengths: positive noncanonical A vs negative canonical B.
-    ld a, 253
+    ld a, [wTestCase]
+    cp 255
+    jr z, .mixedSignDone
+    inc a
     ld [wTestCase], a
     call OwnerCmpTestSwapLength16
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
-    jp nc, .fail
-
-    ; 254: negative noncanonical A (8193 bytes) vs positive canonical B (8192).
-    ; Both operands must validate before opposite-sign ordering.
-    ld a, 254
-    ld [wTestCase], a
+    ld a, [wTestCase]
+    cp 254
+    jr nz, .mixedSignHighZero
     ld a, 1
     ld [wOwnerCmpSignA], a
     xor a
     ld [wOwnerCmpSignB], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
-    jp nc, .fail
-
-    ; 255: negative canonical A (8192 bytes) vs positive noncanonical B (8193).
-    ld a, 255
-    ld [wTestCase], a
-    call OwnerCmpTestSwapLength16
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
-    jp nc, .fail
+    jr .mixedSignHighZero
+.mixedSignDone:
 
     ld a, 45
     ld [wOwnerRequest], a
