@@ -1,0 +1,52 @@
+name: Post55 independent TABLETS unseeded bracket diagnostic
+
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/audit_independent_tablets_brackets.py'
+      - 'soak/test_audit_independent_tablets_brackets.py'
+      - '.github/workflows/post55-independent-tablets-brackets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tablets-unseeded-independent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - name: Checkout audited Kotlin branch SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: audited-kotlin
+          persist-credentials: false
+      - name: Checkout separately pinned Python SHA
+        uses: actions/checkout@v4
+        with:
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: pinned-python
+          persist-credentials: false
+      - name: Verify checkout and run bounded TABLETS audit
+        working-directory: audited-kotlin
+        shell: bash
+        env:
+          PASTAFARIAN_PYTHON_SRC: ${{ github.workspace }}/pinned-python/src
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git -C ../pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
+          python3 -m unittest discover -s soak -p test_audit_independent_tablets_brackets.py -v
+          python3 soak/audit_independent_tablets_brackets.py \
+            --max-questions 32768 --segment-limit 4096 --timeout-seconds 480 \
+            --evidence evidence/independent-tablets-brackets.json
+      - name: Archive strict diagnostic JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post55-independent-tablets-brackets
+          path: audited-kotlin/evidence/independent-tablets-brackets.json
+          if-no-files-found: warn
