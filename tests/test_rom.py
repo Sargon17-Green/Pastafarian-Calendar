@@ -5,8 +5,10 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-# Cases 242-247 cover positive full-capacity boundaries; 248-253 cover
-# fragmented-owner aliases and high-zero rejection. Keep the measured 9000-frame cap.
+# Cases 242-247 cover positive full-capacity boundaries; 248-255 cover
+# fragmented-owner aliases and both mixed-sign high-zero invalid orientations.
+# The 8-bit case marker now reaches 255; further cases need a new ID scheme.
+# Keep the measured 9000-frame cap.
 MAX_BOOT_AND_TEST_FRAMES = 9000
 WRAM_RESULT = 0xC000
 WRAM_TEST_CASE = 0xC001
@@ -14,7 +16,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 253
+TOTAL_CASES = 255
 
 
 def check_header(data: bytes) -> None:

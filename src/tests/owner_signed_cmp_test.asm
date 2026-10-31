@@ -1469,6 +1469,38 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
+    ; 254: negative noncanonical A (8193 bytes) vs positive canonical B (8192).
+    ; Both operands must validate before opposite-sign ordering.
+    ld a, 254
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    xor a
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedBytes
+    jp nc, .fail
+
+    ; 255: negative canonical A (8192 bytes) vs positive noncanonical B (8193).
+    ld a, 255
+    ld [wTestCase], a
+    call OwnerCmpTestSwapLength16
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedBytes
+    jp nc, .fail
+
     ld a, 45
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
