@@ -1,6 +1,6 @@
 # Stadio 10 — DISCOVERY 06: la kanona ĉeno de 46 ŝtonoj
 
-**Stato (2026-10-31):** CONTRACT_ONLY; neniu produktkodo aŭ Native-testo por Stadio 10 ankoraŭ ekzistas. Stage09 code-HEAD estas verda; ĉi tiu dokumenta HEAD bezonas propran CI-pordegon.
+**Stato (2026-10-31):** la Stage09 dokumenta HEAD `54ed71a95cbb0a60ec6b4b59b953a4458f368f9e` pasis Native 78/78 kaj Names Lock. Stadio 10 havas produktkodon kaj 12 novajn testojn sendotajn al CI; **ne** marku ilin PASS antaŭ novaj completed/log-atelieroj.
 
 ## Deveno kaj nura amplekso
 
@@ -36,3 +36,7 @@ Sendependa Python-BigInt-kontrolkalkulo (nur matematika antaŭkontrolo, **ne** G
 3. `gleam format --check src test`, `gleam test`, kaj Canonical Names Lock sur la **sama nova SHA**, kun fakte kontrolitaj job-logoj.
 4. Testu la kompletan 46×5-ŝtonan tabelon kontraŭ la aparta orakolo; raportu nombrojn, SHA, run/job ID kaj artifact SHA256. Neniam asertu `STAGE10_COMPLETED_GREEN` antaŭ la du efektivaj pordegoj.
 5. Sen `main`-merge, publika eldono, sesa datokomponanto, aŭ ŝanĝo de la kanona fonto.
+
+## Malfermo de la efektiva koda etapo
+
+Enmetitaj vojoj: `src/pastafari/discovery_06_stones.gleam` kaj `test/discovery_06_test.gleam`. 12 apartaj unit-testaj funkcioj planitaj/kreitaj; la totala celo de 90 estas ankoraŭ prognozo, ne mezurita Native. La rekursia produktgeneratoro uzas sian propran `Stone`-tipon kaj lokan modulon `normalized_save`; testoj komparas aparte kun `reference/core`. Nek `main` nek la kanona fonto estas ŝanĝita.
