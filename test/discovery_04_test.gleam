@@ -83,7 +83,8 @@ pub fn discovery_04_independent_contexts_test() {
   let second = bootstrap.new_context(100, 99)
   let second = bootstrap.MonsterContext(..second, diagnostics: ["DUA"])
   let assert Ok(first_out) = discovery_04_direction.dispatch_discovery_04(first)
-  let assert Ok(second_out) = discovery_04_direction.dispatch_discovery_04(second)
+  let assert Ok(second_out) =
+    discovery_04_direction.dispatch_discovery_04(second)
   first_out.direction |> should.equal(3)
   second_out.direction |> should.equal(1)
   first_out.context.diagnostics |> should.equal(["UNUA"])
@@ -110,11 +111,8 @@ pub fn discovery_04_invalid_recovery_depth_test() {
 
 pub fn discovery_04_invalid_error_precedence_test() {
   let base = bootstrap.new_context(core.foundation_day, core.foundation_day)
-  let invalid = bootstrap.MonsterContext(
-    ..base,
-    retry_budget: -1,
-    recovery_depth: -1,
-  )
+  let invalid =
+    bootstrap.MonsterContext(..base, retry_budget: -1, recovery_depth: -1)
   discovery_04_direction.dispatch_discovery_04(invalid)
   |> should.equal(Error(bootstrap.InvalidRetryBudget))
 }

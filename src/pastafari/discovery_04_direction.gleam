@@ -4,10 +4,7 @@
 import pastafari/bootstrap
 
 pub type Discovery04Output {
-  Discovery04Output(
-    context: bootstrap.MonsterContext,
-    direction: Int,
-  )
+  Discovery04Output(context: bootstrap.MonsterContext, direction: Int)
 }
 
 pub fn direction_for_days(calculation_day: Int, target_day: Int) -> Int {
