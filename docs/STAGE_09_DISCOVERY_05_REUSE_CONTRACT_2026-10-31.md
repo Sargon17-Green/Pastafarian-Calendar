@@ -23,3 +23,8 @@ Stage8/DISCOVERY04 在 GnuCOBOL 3.1.2 的 run 41187120199，原始源码 SHA `ea
 - canonical workflow 新增独立 Stage9 job，Linux GnuCOBOL 3.x，严格 `-Werror`；编译上限 300 秒、执行上限 120 秒；保存 stdout/stderr 与 SHA，失败亦保存 artifact。
 - 只有当 verify + Stage1–8 回归 jobs、Stage9 Native job `completed/success`、完整日志签名和所需内存不变量同时成立，才可关闭 Stage9。
 - 若发生实际不一致，保存最小重现对、循环序号、实际值、预期值、状态码和 call/log；在真实结果前不得命名 EXPECTED_RED 或开始 PATCH04/05。若 12 次全部正确，结论只能是 `NO_DEFECT_REPRODUCED_IN_TWELVE_CALLS`，下一候选应继续独立调查。
+
+## Stage9 acceptance (2026-10-31)
+GitHub Actions https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41193134644 completed/success for source SHA 30d02fc13d835d95eb4ac99378f32476fe061d71: 10/10 jobs. GnuCOBOL 3.1.2.0 strict -Werror, native job 124513830451: STAGE9_RUNS=12, STAGE9_PASS=12, STAGE9_UNEXPECTED_FAILURES=0, STAGE9_HEAP_LIVE_POST_RELEASE=0, STAGE9_NATIVE_GATE=PASS.
+Artifact https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41193134644/artifacts/13039082940
+Conclusion NO_DEFECT_REPRODUCED_IN_TWELVE_CALLS within these test inputs only. No PATCH04/expected-red proven and no five-field integration yet.
