@@ -80,3 +80,4 @@ export * from "./discovery26LegacyMonthEnd.ts";
 
 export * from "./patch26MonthEnd.ts";
 export * from "./discovery27LegacySpanMembership.ts";
+export * from "./patch27MonthMembership.ts";
