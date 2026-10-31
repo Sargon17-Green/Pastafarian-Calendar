@@ -8,7 +8,11 @@ import pastafari/discovery_13_next_bowl
 import reference/core
 import reference/sauce
 
-fn observed(a: Int, b: Int, id: Int) -> Result(Int, discovery_13_next_bowl.Discovery13Error) {
+fn observed(
+  a: Int,
+  b: Int,
+  id: Int,
+) -> Result(Int, discovery_13_next_bowl.Discovery13Error) {
   discovery_13_next_bowl.next_bowl_for_days(a, b, id)
 }
 
@@ -29,10 +33,11 @@ pub fn discovery_13_six_cyclic_successors_test() {
 
 pub fn discovery_13_successors_form_permutation_test() {
   let ids = [1, 2, 3, 4, 5, 6]
-  let successors = list.map(ids, fn(id) {
-    let assert Ok(next) = observed(11, 21, id)
-    next
-  })
+  let successors =
+    list.map(ids, fn(id) {
+      let assert Ok(next) = observed(11, 21, id)
+      next
+    })
   list.length(successors) |> should.equal(6)
   list.all(ids, fn(id) { list.contains(successors, id) })
   |> should.equal(True)
@@ -89,7 +94,8 @@ pub fn discovery_13_bigint_both_directions_test() {
 pub fn discovery_13_invalid_and_valid_bowl_ids_test() {
   let bad = [0, 7, -1]
   let actual = list.map(bad, fn(id) { observed(11, 21, id) })
-  actual |> should.equal([
+  actual
+  |> should.equal([
     Error(discovery_13_next_bowl.InvalidBowlId),
     Error(discovery_13_next_bowl.InvalidBowlId),
     Error(discovery_13_next_bowl.InvalidBowlId),
@@ -105,7 +111,8 @@ pub fn discovery_13_interleaved_contexts_test() {
   let second = bootstrap.MonsterContext(..second, diagnostics: ["DUA"])
   let assert Ok(a) = discovery_13_next_bowl.dispatch_discovery_13(first, 6)
   let assert Ok(b) = discovery_13_next_bowl.dispatch_discovery_13(second, 1)
-  let assert Ok(a_again) = discovery_13_next_bowl.dispatch_discovery_13(first, 6)
+  let assert Ok(a_again) =
+    discovery_13_next_bowl.dispatch_discovery_13(first, 6)
   a |> should.equal(a_again)
   a.context.diagnostics |> should.equal(["UNUA"])
   b.context.diagnostics |> should.equal(["DUA"])
@@ -133,7 +140,8 @@ pub fn discovery_13_retry_recovery_error_priority_test() {
   |> should.equal(
     Error(discovery_13_next_bowl.InvalidContext(bootstrap.InvalidRecoveryDepth)),
   )
-  let both = bootstrap.MonsterContext(..base, retry_budget: -1, recovery_depth: -1)
+  let both =
+    bootstrap.MonsterContext(..base, retry_budget: -1, recovery_depth: -1)
   discovery_13_next_bowl.dispatch_discovery_13(both, -1)
   |> should.equal(
     Error(discovery_13_next_bowl.InvalidContext(bootstrap.InvalidRetryBudget)),

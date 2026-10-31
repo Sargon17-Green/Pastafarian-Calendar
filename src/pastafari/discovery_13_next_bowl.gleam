@@ -61,10 +61,7 @@ pub fn next_bowl_for_days(
     False -> Error(InvalidBowlId)
     True -> {
       let #(_, order_at_drop_46) =
-        discovery_12_post_stir.post_stir_for_days(
-          calculation_day,
-          target_day,
-        )
+        discovery_12_post_stir.post_stir_for_days(calculation_day, target_day)
       Ok(successor(order_at_drop_46, queried_bowl_id))
     }
   }
