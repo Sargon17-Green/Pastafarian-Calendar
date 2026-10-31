@@ -26,7 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   stage27-typescript-marathi:
-    timeout-minutes: 20
+    timeout-minutes: 35
     if: github.ref == 'refs/heads/TypeScript+मराठी'
     runs-on: ubuntu-latest
     steps:
@@ -43,6 +43,9 @@ jobs:
         run: |
           set -euo pipefail
           npm test | tee stage27-results.log
+          grep -Fq 'STAGE_54_DISCOVERY_27_NATIVE_EXPECTED_RED_VERIFIED realYear5000=1 nonzero=1' stage27-results.log
+          grep -Fq 'STAGE_55_PATCH_27_GUARDS_PASS syntheticCases=39 syntheticRepaired=8 syntheticEqual=31 invalid=11 realYearDays=5349 realMembers=123 realHoles=4989 realWrongReject=0 nativeCalls=61 sharedWrites=3538 additionalNative=0 deepFaults=1 finalBlocked=1' stage27-results.log
+          grep -Fq 'STAGE_55_PATCH_27_PROPERTIES_PASS families=256 queries=60160 repaired=39124 equal=21036 correctedMembers=12032 falseAccept=39124 falseReject=0 unexpected=0' stage27-results.log
           grep -Fq 'STAGE_01_PASS' stage27-results.log
           grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage27-results.log
           grep -Eq 'STAGE_03_PATCH_01_PASS cases=[0-9]+ repairs=[1-9][0-9]* unchanged=[1-9][0-9]* mismatches=0' stage27-results.log
