@@ -93,8 +93,7 @@ void main() {
         'Direction metric',
       );
       _check(
-        context.branchTrace.join('|') ==
-            'WORK_COUNTS_READY|STAGE_NOT_BUILT',
+        context.branchTrace.join('|') == 'WORK_COUNTS_READY|STAGE_NOT_BUILT',
         'Production dispatcher trace',
       );
       productionStubCases += 1;
