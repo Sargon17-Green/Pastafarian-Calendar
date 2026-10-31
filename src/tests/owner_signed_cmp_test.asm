@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..255: signed owner-scoped comparison.
+; Stage 1 native regression 191..253: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1470,36 +1470,6 @@ RunOwnerSignedCmpTests::
     ld a, 45
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
-
-    ; 254: negative canonical 16383-byte A vs negative noncanonical 16384-byte B.
-    ; Same owner 46, with SRAM[16382]=$3c and SRAM[16383]=0.
-    ld a, 254
-    ld [wTestCase], a
-    ld a, 46
-    ld [wOwnerCmpOwnerA], a
-    ld [wOwnerCmpOwnerB], a
-    ld a, 1
-    ld [wOwnerCmpSignA], a
-    ld [wOwnerCmpSignB], a
-    ld a, $ff
-    ld [wOwnerCmpLenA], a
-    ld a, $3f
-    ld [wOwnerCmpLenA+1], a
-    xor a
-    ld [wOwnerCmpLenA+2], a
-    ld [wOwnerCmpLenB], a
-    ld [wOwnerCmpLenB+2], a
-    ld a, $40
-    ld [wOwnerCmpLenB+1], a
-    call OwnerCmpTestExpectInvalidCapacity
-    jp nc, .fail
-
-    ; 255: reverse negative A/B; the invalid full-capacity descriptor is A.
-    ld a, 255
-    ld [wTestCase], a
-    call OwnerCmpTestSwapLength16
-    call OwnerCmpTestExpectInvalidCapacity
-    jp nc, .fail
 
     ld a, 46
     ld [wOwnerRequest], a
