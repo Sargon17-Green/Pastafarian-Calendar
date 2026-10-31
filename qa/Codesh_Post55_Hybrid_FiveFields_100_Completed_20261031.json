@@ -1,0 +1,50 @@
+{
+  "schema": "codesh-hybrid-five-fields-100-independent-recheck/1",
+  "date": "2026-10-31",
+  "source_results_zip": "results(20261031-204451).zip",
+  "source_results_sha256": "327c60deed0cb1ba270dac6eac48b9572393fd91df73175a84fee5859ee76536",
+  "package_sha256": "aab287f8e4f4818ec06a7d50ee4aac44be8792a59caa50edba9a3fccfdd78e14",
+  "signed_jar_sha256": "e34360ca1928dc11758636cde1ee4afc1cbe9994e5e6fd1d1ce4660a8c70c98d",
+  "pinned_prior_results_sha256": "0de29061c7d4ceae06a38581a51ca70105f7be4e0c0a6437eb051c09a77c1cb7",
+  "reference_commit": "81af2a055bbdfdfa122fffc91c21283659df0b39",
+  "codesh_commit_used_in_prior_100_test": "e7ff7316197d76f9403d8140b775d728de711a45",
+  "case_count": 100,
+  "distinct_action_days": 100,
+  "distinct_target_days": 100,
+  "five_field_comparisons": 500,
+  "five_field_mismatches": 0,
+  "hybrid_matches": 100,
+  "hybrid_nonmatches": 0,
+  "field_mismatch_counts": {
+    "year": 0,
+    "cutletName": 0,
+    "dayInCutlet": 0,
+    "monthName": 0,
+    "dayInMonth": 0
+  },
+  "native_direct_name_strings_unreadable_cases": 100,
+  "native_codesh_output_final_five_fields_verified": false,
+  "reference_names_mapped_using_python_canonical_name_list": true,
+  "codesh_native_name_index_available": true,
+  "codesh_native_name_string_parity_verified": false,
+  "signed_jar_unchanged": true,
+  "prior_100_inputs_and_reference_fields_exactly_reused": true,
+  "reference_results_bundle_identical_to_archived_original": true,
+  "java21_detected": true,
+  "result_zip_crc_pass": true,
+  "year_range": {
+    "min": 4986,
+    "max": 5017
+  },
+  "distinct_cutlet_names": 17,
+  "distinct_month_names": 41,
+  "elapsed_seconds": {
+    "sum": 5994.781,
+    "min": 16.216,
+    "median": 58.9555,
+    "max": 118.729
+  },
+  "verdict": "HYBRID_100_5_FIELDS_MATCH__NATIVE_CODESH_5_FIELD_UNVERIFIED",
+  "next_work": "Implement complete five-field composition in the Codesh language, including correctly specified normalized name mapping, and rerun the exact 100 pinned cases. Validate actual native direct values; do not count hybrid Java as native Codesh.",
+  "no_codesh_source_change": true
+}
