@@ -293,17 +293,17 @@ tests AS (
     'both return year_rec'
   UNION ALL
   SELECT 'output:all-ten-fields-integral',
-    (actual).year_number=trunc((actual).year_number)
-      AND (actual).open_gate_index=trunc((actual).open_gate_index)
-      AND (actual).close_gate_index=trunc((actual).close_gate_index)
-      AND (actual).open_gate_day=trunc((actual).open_gate_day)
-      AND (actual).close_gate_day=trunc((actual).close_gate_day)
+    (forward_actual.actual).year_number=trunc((forward_actual.actual).year_number)
+      AND (forward_actual.actual).open_gate_index=trunc((forward_actual.actual).open_gate_index)
+      AND (forward_actual.actual).close_gate_index=trunc((forward_actual.actual).close_gate_index)
+      AND (forward_actual.actual).open_gate_day=trunc((forward_actual.actual).open_gate_day)
+      AND (forward_actual.actual).close_gate_day=trunc((forward_actual.actual).close_gate_day)
       AND (backward_actual.actual).year_number=trunc((backward_actual.actual).year_number)
       AND (backward_actual.actual).open_gate_index=trunc((backward_actual.actual).open_gate_index)
       AND (backward_actual.actual).close_gate_index=trunc((backward_actual.actual).close_gate_index)
       AND (backward_actual.actual).open_gate_day=trunc((backward_actual.actual).open_gate_day)
       AND (backward_actual.actual).close_gate_day=trunc((backward_actual.actual).close_gate_day),
-    'forward=' || actual::text || ';backward=' || backward_actual.actual::text
+    'forward=' || forward_actual.actual::text || ';backward=' || backward_actual.actual::text
   FROM forward_actual
   CROSS JOIN backward_actual
 )
