@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..241: signed owner-scoped comparison.
+; Stage 1 native regression 191..243: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1145,6 +1145,44 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
 
+    ; 242: two positive descriptors alias the same 16384-byte live owner.
+    ; Full-capacity canonical equality must be read-only, including the top byte.
+    ld a, 242
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    or a
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckCapacityByte
+    jp nc, .fail
+
+    ; 243: the same full-capacity payload aliased by two negative operands.
+    ; Equal negative magnitudes compare EQ, with lease tags/payload unchanged.
+    ld a, 243
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    or a
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckCapacityByte
+    jp nc, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
@@ -1316,7 +1354,7 @@ OwnerCmpTestCheckBytes:
     and a
     ret
 
-; Check the highest usable offset of the two-bank live owner after 240/241.
+; Check the highest usable offset of the two-bank live owner after 240..243.
 ; Carry set = 0x5a unchanged, carry clear = corruption or access failure.
 OwnerCmpTestCheckCapacityByte:
     ld a, $ff
