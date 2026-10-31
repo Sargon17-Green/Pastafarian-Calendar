@@ -20,7 +20,10 @@ fn signed_local_window_is_bijective_and_reversible() {
         assert_eq!(day, before, "day input must not be mutated");
         assert!(tag > BigInt::zero(), "tag must be positive");
         assert_eq!(tag, oracle::day_count(&day));
-        assert!(observed.insert(tag.clone()), "tag collision at offset {offset}");
+        assert!(
+            observed.insert(tag.clone()),
+            "tag collision at offset {offset}"
+        );
         let restored = if tag.is_odd() {
             &foundation + ((&tag - BigInt::one()) / BigInt::from(2u8))
         } else {
