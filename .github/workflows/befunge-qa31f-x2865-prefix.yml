@@ -8,6 +8,7 @@ on:
       - qa/stage1_qa31f_x23523_incoming_edge.py
       - qa/stage1_qa31f_q149_writer_gate.py
       - qa/stage1_qa31f_upper_ingress_graph.py
+      - qa/stage1_qa31f_ascii_prefix_lineage.py
       - .github/workflows/befunge-qa31f-x2865-prefix.yml
   workflow_dispatch:
 permissions:
@@ -34,3 +35,7 @@ jobs:
         run: |
           python -m py_compile qa/stage1_qa31f_upper_ingress_graph.py
           python qa/stage1_qa31f_upper_ingress_graph.py
+      - name: Audit 60 natural ASCII prefix models and three source mutations
+        run: |
+          python -m py_compile qa/stage1_qa31f_ascii_prefix_lineage.py
+          python qa/stage1_qa31f_ascii_prefix_lineage.py
