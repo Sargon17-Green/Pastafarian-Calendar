@@ -767,7 +767,19 @@ jobs:
           grep -Eq '^STAGE15_RUNS=[[:space:]]*0*30[[:space:]]*$' build/stage15-native.log
           grep -Eq '^STAGE15_PASS=[[:space:]]*0*30[[:space:]]*$' build/stage15-native.log
           grep -Eq '^STAGE15_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage15-native.log
-          grep -Eq '^STAGE15_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage15-native.log
+          grep -Fxq 'STAGE15_HEAP_MEASURED=YES' build/stage15-native.log
+          grep -Eq '^STAGE15_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*
+          grep -Fxq 'RESULT=PASS_STAGE15_MIXED_CHUNK_ARITHMETIC_DISCOVERY_NATIVE' build/stage15-native.log
+          echo 'STAGE15_NATIVE_GATE=PASS' | tee -a build/stage15-native.log
+      - name: Preserve Stage15 log including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage15-mixed-chunk-arithmetic-evidence
+          path: build/stage15-native.log
+          if-no-files-found: warn
+          retention-days: 30
+ build/stage15-native.log
           grep -Fxq 'RESULT=PASS_STAGE15_MIXED_CHUNK_ARITHMETIC_DISCOVERY_NATIVE' build/stage15-native.log
           echo 'STAGE15_NATIVE_GATE=PASS' | tee -a build/stage15-native.log
       - name: Preserve Stage15 log including failures
