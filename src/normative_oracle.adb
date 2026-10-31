@@ -4,6 +4,7 @@ with Ada.Containers.Ordered_Maps;
 with Ada.Containers.Vectors;
 with Ada.Numerics.Big_Numbers.Big_Integers;
 with Exact_Math;
+with Month_Weaving;
 with Ada.Environment_Variables;
 with Ada.Text_IO;
 
@@ -40,7 +41,7 @@ package body Normative_Oracle is
    Seal_Month_Weaving    : constant Natural := 32;
    Seal_Month_Names      : constant Natural := 33;
 
-   type Natural_Array is array (Positive range <>) of Natural;
+   subtype Natural_Array is Month_Weaving.Natural_Array;
 
    function Day_Count (Day : Big_Integer) return Big_Integer is
    begin
@@ -1075,124 +1076,37 @@ package body Normative_Oracle is
       Stage13_Trace ("month_lengths_done");
    end Choose_Month_Lengths;
 
-   type Remaining_47 is array (Positive range 1 .. 47) of Natural;
-   type Weave_Key is record
-      Month_Count : Natural;
-      Remaining   : Remaining_47;
-      Opened_Up_To : Natural;
-      Closed_Up_To : Natural;
-   end record;
-
-   function "<" (A, C : Weave_Key) return Boolean is
-   begin
-      if A.Month_Count /= C.Month_Count then
-         return A.Month_Count < C.Month_Count;
-      end if;
-      if A.Opened_Up_To /= C.Opened_Up_To then
-         return A.Opened_Up_To < C.Opened_Up_To;
-      end if;
-      if A.Closed_Up_To /= C.Closed_Up_To then
-         return A.Closed_Up_To < C.Closed_Up_To;
-      end if;
-      for I in 1 .. 47 loop
-         if A.Remaining (I) /= C.Remaining (I) then
-            return A.Remaining (I) < C.Remaining (I);
-         end if;
-      end loop;
-      return False;
-   end "<";
-
-   package Weave_Memo_Maps is new Ada.Containers.Ordered_Maps
-     (Key_Type => Weave_Key, Element_Type => Big_Integer);
-
+   -- Canonical two-rail family: open every month in order, rank an exact
+   -- multiset permutation of the interior days, then close every month in
+   -- order. This avoids memoizing an intractable vector of remaining counters.
    function Choose_Month_Weaving
      (Structure_R : Sauce_Result; Lengths : Natural_Array) return Natural_Array
    is
       M_Count : constant Natural := Lengths'Length;
       Total : Natural := 0;
-      Original : Remaining_47 := (others => 0);
-      Memo : Weave_Memo_Maps.Map;
-
-      function Legal (State : Weave_Key; J : Positive) return Boolean is
-         Already_Opened : Boolean;
-         Will_Close : Boolean;
-      begin
-         if J > State.Month_Count or else State.Remaining (J) = 0 then return False; end if;
-         Already_Opened := State.Remaining (J) < Original (J);
-         if not Already_Opened and then J /= State.Opened_Up_To + 1 then return False; end if;
-         Will_Close := State.Remaining (J) = 1;
-         if Will_Close and then J /= State.Closed_Up_To + 1 then return False; end if;
-         return True;
-      end Legal;
-
-      function Move (State : Weave_Key; J : Positive) return Weave_Key is
-         N : Weave_Key := State;
-      begin
-         if N.Remaining (J) = Original (J) then N.Opened_Up_To := J; end if;
-         N.Remaining (J) := N.Remaining (J) - 1;
-         if N.Remaining (J) = 0 then N.Closed_Up_To := J; end if;
-         return N;
-      end Move;
-
-      function All_Zero (State : Weave_Key) return Boolean is
-      begin
-         for J in 1 .. State.Month_Count loop
-            if State.Remaining (J) /= 0 then return False; end if;
-         end loop;
-         return True;
-      end All_Zero;
-
-      function Count (State : Weave_Key) return Big_Integer is
-         Sum : Big_Integer := B (0);
-      begin
-         if All_Zero (State) then return B (1); end if;
-         if Memo.Contains (State) then return Memo.Element (State); end if;
-         for J in 1 .. State.Month_Count loop
-            if Legal (State, J) then
-               Sum := Sum + Count (Move (State, J));
-            end if;
-         end loop;
-         Memo.Insert (State, Sum);
-         return Sum;
-      end Count;
-
-      State : Weave_Key :=
-        (Month_Count => M_Count, Remaining => (others => 0),
-         Opened_Up_To => 0, Closed_Up_To => 0);
    begin
       for J in Lengths'Range loop
-         Original (J) := Lengths (J);
-         State.Remaining (J) := Lengths (J);
          Total := Total + Lengths (J);
       end loop;
-
+      Stage13_Trace
+        ("month_weave_begin_M=" & Natural'Image (M_Count) &
+         "_T=" & Natural'Image (Total));
       Stage13_Trace ("month_weave_count_begin");
       declare
-         Rank : Big_Integer := Choose_Rank
-           (Ask_Bowl (Structure_R, 4, Seal_Month_Weaving), Count (State));
-         Result : Natural_Array (1 .. Total);
+         Ways : constant Big_Integer :=
+           Month_Weaving.Canonical_Weave_Count (Lengths);
+         Rank : constant Big_Integer := Choose_Rank
+           (Ask_Bowl (Structure_R, 4, Seal_Month_Weaving), Ways);
       begin
          Stage13_Trace ("month_weave_count_done");
-         for Position in 1 .. Total loop
-            for J in 1 .. M_Count loop
-               if Legal (State, J) then
-                  declare
-                     Next_State : constant Weave_Key := Move (State, J);
-                     Block : constant Big_Integer := Count (Next_State);
-                  begin
-                     if Rank > Block then
-                        Rank := Rank - Block;
-                     else
-                        Result (Position) := J;
-                        State := Next_State;
-                        exit;
-                     end if;
-                  end;
-               end if;
-            end loop;
-         end loop;
-         Stage13_Trace ("month_weave_done");
-         return Result;
+         Stage13_Trace ("month_weave_unrank_begin");
+         declare
+            Result : constant Natural_Array :=
+              Month_Weaving.Unrank_Canonical_Weave (Lengths, Rank);
+         begin
+            Stage13_Trace ("month_weave_unrank_done");
+            return Result;
+         end;
       end;
    end Choose_Month_Weaving;
 

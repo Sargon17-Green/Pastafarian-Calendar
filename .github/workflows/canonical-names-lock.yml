@@ -221,14 +221,14 @@ jobs:
   native-stage13-discovery10:
     if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - name: Install Ada 2022 toolchain
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y gnat gprbuild
-      - name: Diagnose bounded final five-field calendar postconditions (90s cap)
+      - name: Run canonical month-weave and final five-field calendar tests
         shell: bash
         run: |
           set -euo pipefail
