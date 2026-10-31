@@ -853,6 +853,78 @@ proc probeFiveUnequalMonthWeavings() {
   }
 }
 
+
+// Independent fifth-month probe with the three-day month in position 4:
+// lengths 2+2+2+3+2 (11 positions). The reference recursively enumerates
+// *complete* multiset words in lexicographic order, then checks the order
+// of first and last appearances. No production DP transitions, cached
+// counts, or unrank calls construct the expected oracle.
+proc enumerateFiveMiddleUnequalMonthWeavings(ref positions: [0..10] int,
+                                             step: int,
+                                             ref used: [1..5] int,
+                                             ref candidateCount: int,
+                                             ref oracle: list(string)) {
+  if step == 11 {
+    candidateCount += 1;
+    var first: [1..5] int;
+    var last: [1..5] int;
+    for p in 0..10 {
+      const monthId = positions[p];
+      if first[monthId] == 0 then first[monthId] = p + 1;
+      last[monthId] = p + 1;
+    }
+    var legal = true;
+    for monthId in 1..4 {
+      if first[monthId] >= first[monthId + 1] ||
+         last[monthId] >= last[monthId + 1] then legal = false;
+    }
+    if legal {
+      var key = "";
+      for monthId in positions do key += monthId:string;
+      oracle.pushBack(key);
+    }
+    return;
+  }
+  for monthId in 1..5 {
+    const limit = if monthId == 4 then 3 else 2;
+    if used[monthId] >= limit then continue;
+    positions[step] = monthId;
+    used[monthId] += 1;
+    enumerateFiveMiddleUnequalMonthWeavings(positions, step + 1, used,
+                                            candidateCount, oracle);
+    used[monthId] -= 1;
+  }
+}
+
+proc probeFiveMiddleUnequalMonthWeavings() {
+  var lengths = new list(int);
+  for monthId in 1..5 do lengths.pushBack(if monthId == 4 then 3 else 2);
+  var tested: WeavingCounter;
+  tested.lengths = lengths;
+
+  var positions: [0..10] int;
+  var used: [1..5] int;
+  var independentOracle = new list(string);
+  var candidates = 0;
+  enumerateFiveMiddleUnequalMonthWeavings(positions, 0, used,
+                                          candidates, independentOracle);
+
+  check(candidates == 415800,
+        "П'ять місяців 2+2+2+3+2: усі 415800 повних слів");
+  check(independentOracle.size == 124,
+        "П'ять місяців 2+2+2+3+2: 124 допустимі слова");
+  check(tested.countAll() == independentOracle.size,
+        "П'ять місяців 2+2+2+3+2: DP проти незалежного переліку");
+  for index0 in independentOracle.indices {
+    const rank = index0 + 1;
+    const actual = tested.unrank1(new bigint(rank));
+    var key = "";
+    for monthId in actual do key += monthId:string;
+    check(actual.size == 11 && key == independentOracle[index0],
+          "П'ять місяців 2+2+2+3+2: лексикографічний ранг=" + rank:string);
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -869,6 +941,7 @@ proc main() {
   probeFourExpandedMonthWeavings();
   probeFiveShortMonthWeavings();
   probeFiveUnequalMonthWeavings();
+  probeFiveMiddleUnequalMonthWeavings();
   probeHistoricalControls();
   writeln("DISCOVERY03_PROBE_CHECKS=", checks);
   writeln("DISCOVERY03_PROBE_FAILURES=", failures);
