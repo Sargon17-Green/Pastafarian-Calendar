@@ -164,3 +164,12 @@ Run `41187331821` на `ad1d994bc19ad91f0ffbc34b3e2126cc49226706` заверши
 **תיקון אבחון Native.** Run [41246639541](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41246639541) עבר את Stage 1–5 ואת 2518 בדיקות DISCOVERY03, אך שלב האבחון הנוסף נכשל בקומפילציה בלבד: `index` שימש כמזהה בלולאות Chapel החדשות (שגיאות תחביר בשורות 104–130). אין להסיק מהריצה הזו תוצאה לגבי תיקון Cutlet. המזהים הוחלפו ל-`idx0`/`idx1`, ונתיב הלוג אוחד כך ש-`SOURCE_HEAD`, פלט הבדיקות, grep והארטיפקט יישמרו באותו קובץ.
 
 **תיקון קומפילציה שני.** Run [41246887952](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41246887952) עבר Stage 1–5 ו-DISCOVERY03 2518/0, אך אבחון ה-cache נעצר לפני הרצה בגלל `List` שלא יובא בקובץ הבדיקה. נוסף `use List;`; אין עדיין תוצאת Native לתיקון Cutlet.
+
+## Незалежний аудит GateOracle та меж року (2026-10-31)
+
+**Мета.** Перевірити фактичні межі року `(openGateDay, closeGateDay]`, суму розбиття котлет на проміжки воріт, повне покриття днів, відповідність кількостей місяців довжинам та перетворення `calendarDate` для першого/останнього дня і днів навколо `FOUNDATION_DAY`. Це bounded invariant probe, а не припущення про наявність дефекту.
+
+**Незалежний розрахунок.** Очікувані cutlet/day поля обчислюються без `materializeCutlets` і без `calendarDate`: накопичення довжин розбиття визначає cutlet та день у ньому; прямий підрахунок входжень monthId у префіксі weaving визначає день місяця; canonical indices переводяться в назви через каталог. Перевіряються також попередній/поточний/наступний інтервали для точок `open`, `open+1`, `close`, `close+1`, і вимога, що `FOUNDATION_DAY` є cutlet boundary, якщо він внутрішній gate (або кінець року, якщо close gate).
+
+**Критерій.** Native Chapel 2.10.0 на точному SOURCE_HEAD; усі інваріанти та незалежні зіставлення мають пройти. Будь-який mismatch зберігається як мінімальний свідок із targetDay, year gates, cutlet partition, month weaving та actual/expected. Немає expected-red без фактичного свідка. Цей аудит не відкриває Stage 6 і не рахується третім Legacy-дефектом.
+

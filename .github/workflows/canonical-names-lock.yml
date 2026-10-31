@@ -139,6 +139,23 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Independent GateOracle year-boundary and calendarDate decomposition probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'SOURCE_HEAD=%s\n' "$(git rev-parse HEAD)" | tee chapel-year-boundary-probe.log
+          bash test/run_year_boundary_probe.sh 2>&1 | tee -a chapel-year-boundary-probe.log
+          grep -Fxq 'YEAR_BOUNDARY_PROBE_RESULT=PASS' chapel-year-boundary-probe.log
+
+      - name: Retain year-boundary research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-year-boundary-probe
+          path: chapel-year-boundary-probe.log
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Retain Stage 5 evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
