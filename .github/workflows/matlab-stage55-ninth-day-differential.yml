@@ -24,7 +24,7 @@ jobs:
       - name: Download certified AFTER8 checkpoint
         uses: actions/download-artifact@v4
         with:
-          name: stage55-seventh-day-differential
+          name: stage55-eighth-day-differential
           run-id: 41199709414
           github-token: ${{ github.token }}
           path: logs
