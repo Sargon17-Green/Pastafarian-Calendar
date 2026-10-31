@@ -2,7 +2,7 @@
 """Independent Python integer oracle for owner-scoped signed magnitudes.
 
 This is a HOST reference contract, not execution of SM83 machine code.
-The ROM exercise covers cases 191..220.
+The ROM exercise covers cases 191..222.
 """
 from random import Random
 from test_sram_owner_model import OwnedBanks, SIZE
@@ -132,11 +132,20 @@ def main():
     assert compare_read_only(m, (46, 1, 1), (46, 1, 1)) == 0, (
         "two negative descriptors sharing owner and payload must be equal"
     )
+    # Cases 221-222: same live owner, one zero-length descriptor.
+    # The same stale nonzero SRAM[0] must be ignored by a canonical zero.
+    assert m.read_byte(46, 0) == (0, 0x7F), "shared-owner zero must hide stale payload"
+    assert compare_read_only(m, (46, 0, 0), (46, 0, 1)) == 2, (
+        "same-owner canonical zero A must be below positive nonzero B"
+    )
+    assert compare_read_only(m, (46, 1, 1), (46, 0, 0)) == 2, (
+        "same-owner negative nonzero A must be below canonical zero B"
+    )
     # Bank-edge read-only sentinels mirrored from ROM cases 203..210.
     assert m.read_byte(46, 8191) == (0, 0x33), "A bank-end sentinel changed"
     assert m.read_byte(42, 8191) == (0, 0x00), "B bank-end sentinel changed"
     assert m.read_byte(46, 8192) == (0, 0x01), "A next-bank sentinel changed"
-    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=3 payload_and_tags=IMMUTABLE")
+    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=5 same_owner_zero=2 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 
