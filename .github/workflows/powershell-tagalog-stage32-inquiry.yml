@@ -1,0 +1,49 @@
+name: PowerShell Tagalog Stage32 adjacent transition research
+on:
+  push:
+    branches: ['PowerShell+Tagalog']
+    paths:
+      - '.github/workflows/powershell-tagalog-stage32-inquiry.yml'
+      - 'tests/Stage32.Tests.ps1'
+      - 'docs/STAGE32_DISCOVERY17_ADJACENT_TRANSITION_CONTRACT_20261031.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  adjacent-transitions:
+    name: Stage32 bounded adjacent transitions
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Research on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'PowerShell 5.1 required' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($sha -cne $env:GITHUB_SHA) { throw 'Wrong checkout SHA' }
+          @(
+            ('STAGE32_HEAD_SHA=' + $sha),
+            ('STAGE32_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE32_SCOPE=16_PAIRS_32_ENDPOINTS',
+            'STAGE32_PLANNED_ASSERTIONS=239',
+            'STAGE32_SEAL=NOT_CLAIMED'
+          ) | Set-Content stage32-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage32-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage32.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage32 research test failed' }
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Retain exact-SHA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage32-adjacent-evidence
+          path: |
+            stage32-metadata.txt
+            stage32-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
