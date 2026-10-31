@@ -38,3 +38,11 @@ Stage6 的八个基础见证中，前五个历史缺陷转为 PATCH 成功，后
 3. verify 和 Stage1–6 的原生回归全部 success，
    特别 Stage6 必须仍是 5 expected-red、3 control。
 4. 不以 queued/in_progress 宣布 PASS；不修改 main，不完成五字段日历集成。
+
+## 第七阶段已核实的 Native 验收（2026-10-31）
+- Run: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41180791202
+- HEAD/SHA: `357d76ce4defcef6ada1d6e4571c0117aacc56fe`；状态 completed/success；8/8 工作成功（verify 及 Stage1–7）。
+- job `stage07-patch-native` ID 124477619835，GnuCOBOL 3.1.2；日志：5 PATCH、3 CONTROL、8 output guards、4 BigInt boundaries、3 invalid rejects、0 unexpected；`RESULT=PASS_STAGE7_PATCH03_NATIVE` 及 `STAGE7_NATIVE_GATE=PASS`。
+- Artifact: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41180791202/artifacts/13035505432
+- `test/stage07_patch_tests.cob` 在统计成功前显式调用 `HEAP-LIVE` 并要求返回长度 0；失败将计入 unexpected。现有测试未单独打印堆计数，本项依据可执行断言与 0 unexpected 确认。
+- 仍未实现完整五字段日历；未修改 legacy 生产分支，也未合并 main。

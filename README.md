@@ -1,4 +1,4 @@
-> **当前状态（2026-10-30）**：Stage 3 / PATCH 01 的低层 SAVE-PATCH 已按 8 个 Native 边界/对照案例验收（6 PATCH PASS、2 CONTROL PASS、0 unexpected failures），Stage1 与 Stage2 回归成功。正式状态见 [DEVELOPMENT_STAGE.md](DEVELOPMENT_STAGE.md) 和 [docs/STAGE_03_PATCH_01.md](docs/STAGE_03_PATCH_01.md)。证据：<https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41040504858>。完整五字段计算尚未实现；Stage4/DISCOVERY02 的具体目标尚待权威契约定义。下文为 Stage1 历史说明。
+> **当前状态（2026-10-31）**：Stage7 / PATCH03 原生验收通过：GitHub Actions run 41180791202 在 SHA 357d76ce4defcef6ada1d6e4571c0117aacc56fe 上 8/8 jobs SUCCESS；Stage7 5 PATCH、3 CONTROL、8 output guards、4 BigInt boundaries、3 invalid rejects、0 unexpected，测试内检查堆基线为 0。证据：<https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41180791202/artifacts/13035505432>。Stage8 / DISCOVERY04 只开放基于真实运行复现的输入别名调查，尚无历史缺陷或 Native PASS 判定。完整五字段日历 API 仍未实现；历史章节和证据保留。正式状态见 [DEVELOPMENT_STAGE.md](DEVELOPMENT_STAGE.md)。
 
 # 第 1 阶段 — 已完成
 
