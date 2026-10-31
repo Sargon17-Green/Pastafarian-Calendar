@@ -91,12 +91,21 @@ jobs:
             build/normative_oracle_core.o \
             build/normative_oracle_calendar.o \
             -o build/stage01_normative_first_day_probe
+          gfortran "${flags[@]}" -c test/stage01_weaving_polynomial.f90 -o build/stage01_weaving_polynomial.o
           gfortran "${flags[@]}" test/stage01_weaving_microprobe.f90 \
             build/big_integer.o \
             build/source_language_catalog.o \
             build/bootstrap_infrastructure.o \
             build/normative_oracle_core.o \
             -o build/stage01_weaving_microprobe
+          gfortran "${flags[@]}" test/stage01_weaving_polynomial_probe.f90 \
+            build/big_integer.o \
+            build/source_language_catalog.o \
+            build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o \
+            build/stage01_weaving_polynomial.o \
+            -o build/stage01_weaving_polynomial_probe
+          test -x build/stage01_weaving_polynomial_probe
           test -x build/stage01_weaving_microprobe
           test -x build/stage01_normative_first_day_probe
       - name: Run bounded Stage 1 Oracle smoke (55 selected assertions; not full acceptance)
@@ -286,7 +295,7 @@ jobs:
             echo 'STAGE01_PHASE_DIAGNOSTIC_VERDICT=INCONCLUSIVE_OR_FAIL'
           fi
           echo "Fortran Stage1 first-day phase diagnosis: exit=$exit_code, ${elapsed}s, ${last_phase:-NONE}; no full acceptance." >> "$GITHUB_STEP_SUMMARY"
-      - name: Independently validate bounded weaving count/unrank (24 assertions; no full acceptance)
+      - name: Independently validate bounded weaving count/unrank (42 assertions; no full acceptance)
         shell: bash
         run: |
           set -euo pipefail
@@ -299,6 +308,41 @@ jobs:
           test "$actual" -eq 42
           echo "STAGE01_WEAVING_MICRO_NATIVE_PASS=$actual EXPECTED=42 (NOT full Stage 1 acceptance)"
           echo "Fortran Stage 1 weaving count/unrank: $actual/42 bounded independent checks; no full acceptance." >> "$GITHUB_STEP_SUMMARY"
+      - name: Gate isolated Stage1 polynomial weaving candidate (105 exhaustive shapes)
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(timeout --signal=TERM --kill-after=3s 20s build/stage01_weaving_polynomial_probe small 2>&1)"
+          printf '%s\n' "$output"
+          grep -Fxq 'STAGE01_POLY_SMALL_CASES=105' <<< "$output"
+          grep -Fxq 'STAGE01_POLY_SMALL_ASSERTIONS=906' <<< "$output"
+          grep -Fxq 'STAGE01_POLY_SMALL_FAILURES=0' <<< "$output"
+          grep -Fxq 'STAGE01_POLY_SMALL_PASS (independent enumeration + legacy; NOT Stage1 acceptance)' <<< "$output"
+          echo 'STAGE01_POLY_NATIVE_PASS=906 EXPECTED=906 (not full Stage1 acceptance)'
+          echo 'Fortran Stage1 polynomial candidate: 105 small shapes, 906 exact checks; not normative.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Diagnose Stage1 polynomial 45-month candidate (bounded, non-gating)
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 45s build/stage01_weaving_polynomial_probe target) > build/stage01_poly_target.log 2>&1
+          exit_code=$?
+          set -e
+          cat build/stage01_poly_target.log
+          if [ "$exit_code" -eq 0 ] && grep -Fxq 'STAGE01_POLY_TARGET_DIGITS=6765' build/stage01_poly_target.log; then
+            digest="$(sha256sum build/stage01_weaving_candidate_count.txt | cut -d' ' -f1)"
+            echo "STAGE01_POLY_TARGET_DIGEST=$digest"
+            if [ "$digest" = 'c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8' ]; then
+              echo 'STAGE01_POLY_TARGET_VERDICT=DIGEST_MATCH_CANDIDATE_ONLY'
+            else
+              echo '::warning::Stage1 polynomial target digest mismatch'
+              echo 'STAGE01_POLY_TARGET_VERDICT=DIGEST_MISMATCH'
+            fi
+          else
+            echo "::warning::Stage1 polynomial candidate incomplete; exit=$exit_code"
+            echo 'STAGE01_POLY_TARGET_VERDICT=INCONCLUSIVE'
+          fi
+          echo "Fortran Stage1 45-month candidate exit=$exit_code (not normative, not first-day integration)." >> "$GITHUB_STEP_SUMMARY"
       - name: Run bounded Stage 1 BigInt safe-boundary checks
         shell: bash
         run: |
