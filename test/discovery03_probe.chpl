@@ -626,6 +626,92 @@ proc probeFourInnerMonthWeavings() {
   }
 }
 
+
+
+// New asymmetrical, longer four-month family: lengths 2+3+4+2.
+// Expected ranks come from full lexicographic multiset-word enumeration;
+// each *completed* word is independently filtered by first/last occurrence
+// positions. No production WeavingCounter recurrence builds this oracle.
+proc enumerateFourExpandedMonthWeavings(ref positions: [0..10] int,
+                                        step: int,
+                                        used1: int, used2: int,
+                                        used3: int, used4: int,
+                                        ref candidateCount: int,
+                                        ref oracle: list(string)) {
+  if step == 11 {
+    candidateCount += 1;
+    var first: [1..4] int;
+    var last: [1..4] int;
+    for p in 0..10 {
+      const monthId = positions[p];
+      if first[monthId] == 0 then first[monthId] = p + 1;
+      last[monthId] = p + 1;
+    }
+    if first[1] < first[2] && first[2] < first[3] && first[3] < first[4] &&
+       last[1] < last[2] && last[2] < last[3] && last[3] < last[4] {
+      var key = "";
+      for monthId in positions do key += monthId:string;
+      oracle.pushBack(key);
+    }
+    return;
+  }
+  if used1 < 2 {
+    positions[step] = 1;
+    enumerateFourExpandedMonthWeavings(positions, step + 1,
+                                       used1 + 1, used2, used3, used4,
+                                       candidateCount, oracle);
+  }
+  if used2 < 3 {
+    positions[step] = 2;
+    enumerateFourExpandedMonthWeavings(positions, step + 1,
+                                       used1, used2 + 1, used3, used4,
+                                       candidateCount, oracle);
+  }
+  if used3 < 4 {
+    positions[step] = 3;
+    enumerateFourExpandedMonthWeavings(positions, step + 1,
+                                       used1, used2, used3 + 1, used4,
+                                       candidateCount, oracle);
+  }
+  if used4 < 2 {
+    positions[step] = 4;
+    enumerateFourExpandedMonthWeavings(positions, step + 1,
+                                       used1, used2, used3, used4 + 1,
+                                       candidateCount, oracle);
+  }
+}
+
+proc probeFourExpandedMonthWeavings() {
+  var lengths = new list(int);
+  lengths.pushBack(2);
+  lengths.pushBack(3);
+  lengths.pushBack(4);
+  lengths.pushBack(2);
+  var tested: WeavingCounter;
+  tested.lengths = lengths;
+
+  var positions: [0..10] int;
+  var independentOracle = new list(string);
+  var candidates = 0;
+  enumerateFourExpandedMonthWeavings(positions, 0, 0, 0, 0, 0,
+                                     candidates, independentOracle);
+
+  check(candidates == 69300,
+        "Чотири місяці 2+3+4+2: усі 69300 повних слів");
+  check(independentOracle.size == 305,
+        "Чотири місяці 2+3+4+2: незалежні 305 законних слів");
+  check(tested.countAll() == independentOracle.size,
+        "Чотири місяці 2+3+4+2: потужність DP проти незалежного переліку");
+  for index0 in independentOracle.indices {
+    const rank = index0 + 1;
+    const actual = tested.unrank1(new bigint(rank));
+    var key = "";
+    for monthId in actual do key += monthId:string;
+    check(actual.size == 11 && key == independentOracle[index0],
+          "Чотири місяці 2+3+4+2: незалежний ранг=" + rank:string);
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -639,6 +725,7 @@ proc main() {
   probeFourUnequalMonthWeavings();
   probeFourBridgeMonthWeavings();
   probeFourInnerMonthWeavings();
+  probeFourExpandedMonthWeavings();
   probeHistoricalControls();
   writeln("DISCOVERY03_PROBE_CHECKS=", checks);
   writeln("DISCOVERY03_PROBE_FAILURES=", failures);
