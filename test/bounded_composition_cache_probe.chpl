@@ -41,8 +41,8 @@ proc main() {
   writeln("BOUNDED_CACHE_FRESH_DP=", freshDp);
 
   if initialDp != 18 || initialOracle != 18 ||
-     reusedDp != 18 || reconfiguredOracle != 6 || freshDp != 6 then
-    halt("The bounded-composition cache-reconfiguration witness did not match its contract.");
+     reusedDp != 6 || reconfiguredOracle != 6 || freshDp != 6 then
+    halt("The bounded-composition cache-reconfiguration fix did not match its contract.");
 
-  writeln("BOUNDED_COMPOSITION_CACHE_REUSE_WITNESS=REPRODUCED");
+  writeln("BOUNDED_COMPOSITION_CACHE_REUSE_FIXED=PASS");
 }

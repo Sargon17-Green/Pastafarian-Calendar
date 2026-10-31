@@ -125,9 +125,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          printf 'SOURCE_HEAD=%s\\n' "$(git rev-parse HEAD)" | tee chapel-bounded-cache-diagnostic.log
+          printf 'SOURCE_HEAD=%s\n' "$(git rev-parse HEAD)" | tee chapel-bounded-cache-diagnostic.log
           bash test/run_bounded_composition_cache_probe.sh 2>&1 | tee -a chapel-bounded-cache-diagnostic.log
-          grep -Fxq 'BOUNDED_COMPOSITION_CACHE_REUSE_WITNESS=REPRODUCED' chapel-bounded-cache-diagnostic.log
+          grep -Fxq 'BOUNDED_COMPOSITION_CACHE_REUSE_FIXED=PASS' chapel-bounded-cache-diagnostic.log
 
       - name: Retain bounded composition cache diagnostic evidence
         if: always()
