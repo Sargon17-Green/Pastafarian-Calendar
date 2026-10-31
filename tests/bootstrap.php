@@ -46,6 +46,7 @@ require_once $root . '/src/Patches/SequentialYearWalkPatch18.php';
 require_once $root . '/src/Patches/GateIndexContinuityPatch19.php';
 require_once $root . '/src/Patches/GateDayCoherencePatch20.php';
 require_once $root . '/src/Patches/AnchorIdentityPatch21.php';
+require_once $root . '/src/Patches/CanonicalAdjacentPatch22.php';
 require_once $root . '/src/BootstrapKernel.php';
 require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';

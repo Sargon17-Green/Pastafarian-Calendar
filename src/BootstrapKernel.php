@@ -730,6 +730,36 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'year.patch21.anchor_identity.calls');
             return $result;
         });
+        // PATCH22: compare each adjacent-year callback with an independently trusted canonical one.
+        $this->dispatcher->register('TARGET_YEAR_PATCH_22', function(BootstrapContext $context): array {
+            $anchor = $context->semanticState['year5000Anchor'] ?? null;
+            $next = $context->semanticState['nextYearProvider'] ?? null;
+            $previous = $context->semanticState['previousYearProvider'] ?? null;
+            $gateDay = $context->semanticState['gateDayByIndexProvider'] ?? null;
+            $trustedAnchor = $context->semanticState['trustedYear5000Provider'] ?? null;
+            $canonicalNext = $context->semanticState['canonicalNextYearProvider'] ?? null;
+            $canonicalPrevious = $context->semanticState['canonicalPreviousYearProvider'] ?? null;
+            $budget = $context->semanticState['yearStepBudget'] ?? null;
+            if (!is_array($anchor) || !is_callable($next) || !is_callable($previous) ||
+                !is_callable($gateDay) || !is_callable($trustedAnchor) ||
+                !is_callable($canonicalNext) || !is_callable($canonicalPrevious) || !is_int($budget)) {
+                throw new \InvalidArgumentException('PATCH22_PROVIDER_ARGS');
+            }
+            $legacyReport = $this->legacyGuessTargetYear365(
+                $context->calculationDay, $context->targetDay, $anchor
+            );
+            $patch = new \Pastafari\Stage01\Patches\CanonicalAdjacentPatch22();
+            $result = $patch->find(
+                $anchor, $context->targetDay, $next, $previous,
+                $gateDay, $trustedAnchor, $canonicalNext, $canonicalPrevious,
+                $legacyReport, $budget
+            );
+            $context->semanticState['stage36LegacyReport'] = $legacyReport;
+            $context->semanticState['stage45TargetYear'] = $result['targetYearCandidate'];
+            $context->status = 'TARGET_YEAR_PATCH_22_RETURNED';
+            $this->metrics->bump($context, 'year.patch22.canonical_adjacent.calls');
+            return $result;
+        });
         $this->dispatcher->register('MISSING_FIFTH_DIGIT_LEGACY', function(BootstrapContext $context): BigInt {
             $id = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -1112,6 +1142,41 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('TARGET_YEAR_PATCH_21', $context)
+        );
+    }
+
+    /**
+     * PATCH22 opt-in: independent canonical next/previous-year verification.
+     *
+     * @param array<string,mixed> $year5000Anchor
+     * @param callable(array):array $nextYearProvider
+     * @param callable(array):array $previousYearProvider
+     * @param callable(int):int $gateDayByIndexProvider
+     * @param callable():array $trustedYear5000Provider
+     * @param callable(array):array $canonicalNextYearProvider
+     * @param callable(array):array $canonicalPreviousYearProvider
+     * @return array<string,mixed>
+     */
+    public function targetYearSequentialPatch22(
+        int $calculationDay, int $targetDay, array $year5000Anchor,
+        callable $nextYearProvider, callable $previousYearProvider,
+        callable $gateDayByIndexProvider, callable $trustedYear5000Provider,
+        callable $canonicalNextYearProvider, callable $canonicalPreviousYearProvider,
+        int $maxSteps = 2048
+    ): array {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'TARGET_YEAR_PATCH_22';
+        $context->semanticState['year5000Anchor'] = $year5000Anchor;
+        $context->semanticState['nextYearProvider'] = $nextYearProvider;
+        $context->semanticState['previousYearProvider'] = $previousYearProvider;
+        $context->semanticState['gateDayByIndexProvider'] = $gateDayByIndexProvider;
+        $context->semanticState['trustedYear5000Provider'] = $trustedYear5000Provider;
+        $context->semanticState['canonicalNextYearProvider'] = $canonicalNextYearProvider;
+        $context->semanticState['canonicalPreviousYearProvider'] = $canonicalPreviousYearProvider;
+        $context->semanticState['yearStepBudget'] = $maxSteps;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('TARGET_YEAR_PATCH_22', $context)
         );
     }
 

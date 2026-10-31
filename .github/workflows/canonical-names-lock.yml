@@ -608,3 +608,53 @@ jobs:
           path: evidence-stage44/
           retention-days: 30
           if-no-files-found: warn
+
+  stage45-php-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Stage45 native syntax and architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l src/Patches/CanonicalAdjacentPatch22.php
+          php -l src/BootstrapKernel.php
+          php -l tests/stage45_patch22_tests.php
+      - name: Stage45 independent canonical adjacent-year regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage45
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=45\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage45/source.txt
+          php -v > evidence-stage45/php-version.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage45_patch22_tests.php > evidence-stage45/stdout.txt 2> evidence-stage45/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence-stage45/exit-code.txt
+          cat evidence-stage45/stdout.txt
+          cat evidence-stage45/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage45/stderr.txt
+          grep -Eq '^LULUS Stage45 PATCH22 checks=[0-9]+ genuine_years=3 real_targets=7 stage44_red=2 invalid=12 stderr=0$' evidence-stage45/stdout.txt
+      - name: Preserve Stage45 source SHA stdout stderr exit and runtime
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage45-patch22
+          path: evidence-stage45/
+          retention-days: 30
+          if-no-files-found: warn
