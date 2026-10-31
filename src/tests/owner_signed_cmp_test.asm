@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..243: signed owner-scoped comparison.
+; Stage 1 native regression 191..245: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1183,6 +1183,72 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
 
+    ; 244: same owner 46, canonical +16383-byte A against +16384-byte B.
+    ; Write nonzero offset 16382 so both lengths are canonical; offset
+    ; 16383 retains $5a. Positive shorter < positive full capacity.
+    ld a, 244
+    ld [wTestCase], a
+    ld a, $fe
+    ld [wOwnerOffset], a
+    ld a, $3f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    ld a, $3c
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, $ff
+    ld [wOwnerCmpLenA], a
+    ld a, $3f
+    ld [wOwnerCmpLenA+1], a
+    ld a, $40
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckCapacityByte
+    jp nc, .fail
+    call OwnerCmpTestCheckPreCapacityByte
+    jp nc, .fail
+
+    ; 245: the exact same two owner aliases, both negative.
+    ; Sign reversal makes the shorter magnitude greater than full capacity.
+    ld a, 245
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckCapacityByte
+    jp nc, .fail
+    call OwnerCmpTestCheckPreCapacityByte
+    jp nc, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
@@ -1371,6 +1437,30 @@ OwnerCmpTestCheckCapacityByte:
     jr nz, .bad
     ld a, [wOwnerByteValue]
     cp $5a
+    jr nz, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Check offset 16382 on the two-bank owner after cases 244-245.
+; Carry set = 0x3c unchanged; clear = failed read or unexpected mutation.
+OwnerCmpTestCheckPreCapacityByte:
+    ld a, $fe
+    ld [wOwnerOffset], a
+    ld a, $3f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $3c
     jr nz, .bad
     scf
     ret

@@ -261,12 +261,30 @@ def main():
     assert compare_read_only(m, (46, 1, 16384), (46, 1, 16384)) == 0, (
         "full-capacity negative aliases must compare equal"
     )
+    # Cases 244-245: canonical adjacent lengths at the exact owner capacity.
+    # A shared owner still has two independently signed descriptors; decode
+    # both magnitudes from physical SRAM with the Python-integer oracle.
+    assert m.write_byte(46, 16382, 0x3C) == 0
+    assert m.read_byte(46, 16382) == (0, 0x3C)
+    pos_near = reference_integer(m, 46, 0, 16383)
+    pos_full_edge = reference_integer(m, 46, 0, 16384)
+    assert 0 < pos_near < pos_full_edge, "capacity-edge positive integer oracle"
+    assert compare_read_only(m, (46, 0, 16383), (46, 0, 16384)) == 2, (
+        "shared-owner canonical positive near-capacity must be less than full"
+    )
+    neg_near = reference_integer(m, 46, 1, 16383)
+    neg_full_edge = reference_integer(m, 46, 1, 16384)
+    assert neg_full_edge < neg_near < 0, "capacity-edge negative integer oracle"
+    assert compare_read_only(m, (46, 1, 16383), (46, 1, 16384)) == 1, (
+        "shared-owner canonical negative near-capacity must exceed full"
+    )
+    assert m.read_byte(46, 16382) == (0, 0x3C), "near-capacity byte changed"
     assert m.read_byte(46, 16383) == (0, 0x5A), "highest owner byte changed"
     # Bank-edge read-only sentinels mirrored from ROM cases 203..210.
     assert m.read_byte(46, 8191) == (0, 0x33), "A bank-end sentinel changed"
     assert m.read_byte(42, 8191) == (0, 0x00), "B bank-end sentinel changed"
     assert m.read_byte(46, 8192) == (0, 0x01), "A next-bank sentinel changed"
-    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=26 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
+    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=28 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 

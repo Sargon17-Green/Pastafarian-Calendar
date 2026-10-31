@@ -15,7 +15,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 243
+TOTAL_CASES = 245
 
 
 def check_header(data: bytes) -> None:
