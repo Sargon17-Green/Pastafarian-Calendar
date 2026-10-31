@@ -10,3 +10,6 @@ Four additional direct endpoint controls force rejected short/wide values in bot
 
 ## Acceptance
 Run `sh ./run_stage08_discovery05.sh` with GNAT Ada 2022, or Ubuntu 24.04 job `native-stage08-discovery05`, timeout 15 minutes. Require **both verify and native-stage08-discovery05 completed/success on the same SHA**, with compile/bind/link and exact marker 438. An active/queued job is not PASS or blocker. Any actual failure requires precise pair/bowl/seal/N, expected/observed and log evidence before calling it a defect. No main/merge. No pending user-native package: approved CI supplies native GNAT.
+
+## Native acceptance (2026-10-31)
+[Actions 41187141754](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41187141754) ran at b66af81b1e753ef18bed1e542d983338b937c5cc with **9/9 jobs completed/success**, including verify and [native-stage08-discovery05 job 124496252829](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41187141754/job/124496252829). The log shows GNAT 13 compile, gnatbind/gnatlink and STAGE08_DISCOVERY05_ASSERTIONS= 438. Stage8 is accepted only for bounded real-stream rank differential, not for an independent algebraic oracle of Sauce or full Calendar_Date correctness.
