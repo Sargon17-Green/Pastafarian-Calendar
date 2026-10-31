@@ -1,0 +1,205 @@
+{
+  "schema": "codesh-post-stage55-cross-repository-year-differential/1",
+  "project_id": "PC-BRANCH-CODESH-PALEOHEBREW",
+  "branch": "Codesh+𐤉𐤄𐤅𐤃𐤉𐤕",
+  "stage55_status": "COMPLETED_55_OF_55_UNCHANGED",
+  "cross_implementation_year_structure_status": "FAIL",
+  "full_five_component_status": "NOT_PERFORMED_NO_NATIVE_FIVE_FIELD_OUTPUT",
+  "reference_repository": "Sargon17-Green/pastafari-calendar",
+  "reference_commit": "81af2a055bbdfdfa122fffc91c21283659df0b39",
+  "codesh_branch_commit": "fecd1389758cdcca01fef184673d673f161640d0",
+  "codesh_jar_sha256": "e34360ca1928dc11758636cde1ee4afc1cbe9994e5e6fd1d1ce4660a8c70c98d",
+  "evidence_zip_sha256": "fd8f40cda14693abf266a41e63ca197cda6f16fe57d728737b58fd88817a66a6",
+  "evidence_library_path": "/Codesh_Checkpoints/Differential_Audits/results_20261031-110618_CODESH_DIFFERENTIAL_FAIL.zip",
+  "comparison_finished": true,
+  "test_exit_code": 2,
+  "different_action_days": 10,
+  "year_boundaries_matching_cases": 0,
+  "year_boundaries_mismatching_cases": 10,
+  "year_membership_action_target_pairs": 59364,
+  "year_membership_mismatches": 31089,
+  "year_membership_matches": 28275,
+  "native_five_field_results": 0,
+  "reference_five_field_results": 59374,
+  "methodology_note": "Native year boundaries computed once per action day; each per-day Codesh membership was derived from those boundaries, NOT from a new native per-day call.",
+  "manifest_report": {
+    "total_entries": 121,
+    "sha256_verified": 120,
+    "bad_entry_path": "results/RESULTS_MANIFEST.json",
+    "issue": "manifest self-hash and recorded size inconsistent"
+  },
+  "cases": [
+    {
+      "id": "C01",
+      "calculationJdn": -13334246,
+      "targetJdn": -13334246,
+      "referenceYear5000": [
+        -13336277,
+        -13332034,
+        4244
+      ],
+      "codeshYear5000": [
+        -13339313,
+        -13333688,
+        5626
+      ],
+      "membershipMismatches": 4690,
+      "daysCompared": 7280
+    },
+    {
+      "id": "C02",
+      "calculationJdn": -13334245,
+      "targetJdn": -13334244,
+      "referenceYear5000": [
+        -13339060,
+        -13333901,
+        5160
+      ],
+      "codeshYear5000": [
+        -13336121,
+        -13330776,
+        5346
+      ],
+      "membershipMismatches": 6064,
+      "daysCompared": 8285
+    },
+    {
+      "id": "C03",
+      "calculationJdn": -13334244,
+      "targetJdn": -13334245,
+      "referenceYear5000": [
+        -13336710,
+        -13331044,
+        5667
+      ],
+      "codeshYear5000": [
+        -13337235,
+        -13332138,
+        5098
+      ],
+      "membershipMismatches": 1619,
+      "daysCompared": 6192
+    },
+    {
+      "id": "C04",
+      "calculationJdn": -13334243,
+      "targetJdn": -13334236,
+      "referenceYear5000": [
+        -13336277,
+        -13333083,
+        3195
+      ],
+      "codeshYear5000": [
+        -13338069,
+        -13332910,
+        5160
+      ],
+      "membershipMismatches": 1965,
+      "daysCompared": 5160
+    },
+    {
+      "id": "C05",
+      "calculationJdn": -13334242,
+      "targetJdn": -13334249,
+      "referenceYear5000": [
+        -13335189,
+        -13329721,
+        5469
+      ],
+      "codeshYear5000": [
+        -13336488,
+        -13332223,
+        4266
+      ],
+      "membershipMismatches": 3801,
+      "daysCompared": 6768
+    },
+    {
+      "id": "C06",
+      "calculationJdn": -13334241,
+      "targetJdn": -13334211,
+      "referenceYear5000": [
+        -13335189,
+        -13331180,
+        4010
+      ],
+      "codeshYear5000": [
+        -13335439,
+        -13332223,
+        3217
+      ],
+      "membershipMismatches": 1293,
+      "daysCompared": 4260
+    },
+    {
+      "id": "C07",
+      "calculationJdn": -13334240,
+      "targetJdn": -13334270,
+      "referenceYear5000": [
+        -13336710,
+        -13331180,
+        5531
+      ],
+      "codeshYear5000": [
+        -13336488,
+        -13332223,
+        4266
+      ],
+      "membershipMismatches": 1265,
+      "daysCompared": 5531
+    },
+    {
+      "id": "C08",
+      "calculationJdn": -13334239,
+      "targetJdn": -13333874,
+      "referenceYear5000": [
+        -13335189,
+        -13331180,
+        4010
+      ],
+      "codeshYear5000": [
+        -13337235,
+        -13333165,
+        4071
+      ],
+      "membershipMismatches": 4031,
+      "daysCompared": 6056
+    },
+    {
+      "id": "C09",
+      "calculationJdn": -13334238,
+      "targetJdn": -13334603,
+      "referenceYear5000": [
+        -13334748,
+        -13330370,
+        4379
+      ],
+      "codeshYear5000": [
+        -13336488,
+        -13333165,
+        3324
+      ],
+      "membershipMismatches": 4535,
+      "daysCompared": 6119
+    },
+    {
+      "id": "C10",
+      "calculationJdn": -13334237,
+      "targetJdn": -13332034,
+      "referenceYear5000": [
+        -13334245,
+        -13331044,
+        3202
+      ],
+      "codeshYear5000": [
+        -13334756,
+        -13332359,
+        2398
+      ],
+      "membershipMismatches": 1826,
+      "daysCompared": 3713
+    }
+  ],
+  "source_modifications": false,
+  "no_merge_main": true
+}
