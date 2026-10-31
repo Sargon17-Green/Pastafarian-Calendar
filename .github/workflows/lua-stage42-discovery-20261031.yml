@@ -1,0 +1,61 @@
+name: Lua Stage42 reverse ordinal discovery
+on:
+  push:
+    branches:
+      - 'Lua+Kreyòl-ayisyen'
+    paths:
+      - 'src/legacy_gate_reverse_ordinal.lua'
+      - 'src/spaghetti.lua'
+      - 'test/stage42_tests.lua'
+      - 'docs/STAGE42_REVERSE_ORDINAL_DISCOVERY_CONTRACT_2026-10-31.md'
+      - 'DEVELOPMENT_STAGE.md'
+      - '.github/workflows/lua-stage42-discovery-20261031.yml'
+  workflow_dispatch:
+jobs:
+  lua_stage42_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Native Stage42 historical reverse ordinal expected-red
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage42-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nTESTED_SHA=%s\n' "$GITHUB_SHA" >stage42-evidence/source.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/legacy_gate_index_lookup.lua)" = 36d90537407ca7f95183800b3d21912081f3035e
+          test "$(git hash-object src/gate_index_patch.lua)" = f427517366aa1cdd0999d142ff31c5f26ac4c985
+          test "$(git hash-object src/legacy_gate_ordinal.lua)" = 7ad9916ae0ef7d3af13fbc7f8b98370af95cdf76
+          test "$(git hash-object src/gate_ordinal_patch.lua)" = aafd53040b7e468602b0dd81b2e97b1e310307bd
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          lua5.3 -v >stage42-evidence/lua-version.txt 2>&1
+          set +e
+          timeout --signal=TERM --kill-after=10s 1200s lua5.3 test/stage42_tests.lua . \
+            >stage42-evidence/stdout.txt 2>stage42-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" >stage42-evidence/exit-code.txt
+          cat stage42-evidence/stdout.txt
+          if [ -s stage42-evidence/stderr.txt ]; then cat stage42-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 && test ! -s stage42-evidence/stderr.txt
+          test "$(wc -l <stage42-evidence/stdout.txt)" -eq 3
+          grep -Fxq 'PASS Stage42 canonical: 15 opening + 15 closing reverse-ordinal expected-RED' stage42-evidence/stdout.txt
+          grep -Fxq 'PASS Stage42 synthetic: 96 signed BigInt reverse-ordinal expected-RED' stage42-evidence/stdout.txt
+          grep -Fxq 'PASS Stage42 hardening: 9 rejects, 2 isolated replays, no oracle in production' stage42-evidence/stdout.txt
+          printf '%s\n' 'STAGE42_NATIVE=EXPECTED_RED_VERIFIED' >stage42-evidence/result.txt
+      - name: Upload Stage42 evidence (including failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-stage42-discovery-evidence
+          path: stage42-evidence/
+          retention-days: 30
+          if-no-files-found: warn
