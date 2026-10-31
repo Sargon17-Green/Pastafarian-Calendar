@@ -29,7 +29,7 @@
 ## Oracle、資源及驗收
 
 獨立 `t/49_stage04_month_occurrence.t` 由固定長度 m 的基數枚舉生成所有 `m^D`
-完整字串，**只 אחרי**生成整串才驗證月份個數、首次及最後出現的升序。
+完整字串，**只在**生成整串才驗證月份個數、首次及最後出現的升序。
 預期索引／第幾日由獨立前綴計數產生；比對生產投影對每個合法字串的
 每個位置，至少 100 組；含大邊界 24 日、錯誤輸入、不變性。
 這個 oracle 沒有調用生產 DP 或直接借用 Stage3 反排名來產生期望值。
@@ -38,7 +38,7 @@
 Native/CI 同一個 source SHA：Perl >=5.40，UTF-8，語法、測試單獨
 `prove -e 'perl -CS -Ilib -It/lib' t/49_stage04_month_occurrence.t`，
 stderr 空、exit 0；外部 `timeout 120s` 和 `ulimit -v 393216` (384 MiB VSZ)。
-יחד עם `perl-stage01`, `verify`, Stage2/Stage3 regression 的適用閘門。
+並結合 `perl-stage01`, `verify`, Stage2/Stage3 regression 的適用閘門。
 原始 stdout/stderr/exit/source/runtime/artifact 留證據。未有 completed/log 全部通過前，
 保持 `CURRENT_STAGE=4`、`LAST_COMPLETED_STAGE=3`，禁止 Stage4 PASS。
 排除全年 47 月、完整 canonical five-component oracle、Soak；不可 merge/main。
