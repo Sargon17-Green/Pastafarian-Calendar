@@ -40,7 +40,7 @@ echo 'Stage 1 — pornire suită J + română'
 ('Susa' -: monthNameFromCanonicalIndex 36) check 'toponimul Susa este fixat'
 ('regret' -: monthNameFromCanonicalIndex 40) check 'Regret rămâne neschimbat'
 
-(TABLETS_DAY - FOUNDATION_DAY = 14777149x) check 'distanța dintre Tablete și Fundație este exactă'
+((TABLETS_DAY - FOUNDATION_DAY) = 14777149x) check 'distanța dintre Tablete și Fundație este exactă'
 (M = <:2x^127) check 'M este 2^127 - 1 în precizie extinsă'
 (M > 2x^126) check 'aritmetica extinsă depășește domeniul întregului mașină uzual'
 
