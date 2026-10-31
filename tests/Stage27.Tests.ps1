@@ -6,7 +6,7 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'tests/TestHarness.ps1')
 $meta = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
 Assert-StageTrue -Condition ($meta -match '(?m)^CURRENT_STAGE=27\s*$') -Name 'Stage27 opened'
-Assert-StageTrue -Condition ($meta -match '(?m)^LAST_COMPLETED_STAGE=(26|27)\s*$') -Name 'Stage26 sealed, Stage27 awaiting or sealed'
+Assert-StageTrue -Condition ($meta -match '(?m)^LAST_COMPLETED_STAGE=(26|27|28)\s*$') -Name 'Stage26 sealed, Stage27 awaiting or sealed'
 Assert-StageTrue -Condition ($meta -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Stage26 historical RED retained'
 $stage27Awaiting = ($meta -match '(?m)^LAST_COMPLETED_STAGE=26\s*$') -and ($meta -match '(?m)^STAGE27_RUNTIME_VERIFICATION=AWAITING\s*$')
 $stage27Sealed = ($meta -match '(?m)^LAST_COMPLETED_STAGE=27\s*$') -and ($meta -match '(?m)^STAGE27_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$')
