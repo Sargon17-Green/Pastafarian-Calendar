@@ -1,0 +1,32 @@
+name: Post55 unseeded gate-segment synthetic QA
+
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - '.github/workflows/post55-gate-segment-synthetic.yml'
+      - 'soak/audit_gate_segment_navigation.py'
+      - 'soak/test_audit_gate_segment_navigation.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-segment-navigation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Checkout exact triggering Kotlin branch SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify identity and run bounded, non-certifying independent synthetic checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git branch --show-current)" = 'Kotlin+Cymraeg' || test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          python3 -m unittest discover -s soak -p test_audit_gate_segment_navigation.py -v
+          echo 'PASS_SEGMENT_NAV_SYNTHETIC_NOT_CERTIFIED'
