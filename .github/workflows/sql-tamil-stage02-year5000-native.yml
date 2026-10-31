@@ -136,44 +136,7 @@ jobs:
           CASE_NAME: ${{ matrix.case }}
         run: |
           set -euo pipefail
-          test "$(grep -c '^  FROM cases        shell: bash
-        run: |
-          set -euo pipefail
-          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_year5000_differential \
-            -f /work/sql/00_schema.sql \
-            -f /work/sql/01_source_language_catalog.sql \
-            -f /work/sql/02_monster_bootstrap.sql \
-            -f /work/sql/03_stage02_production_core.sql \
-            -f /work/sql/04_stage02_stone_states.sql \
-            -f /work/sql/05_stage02_hidden_drop.sql \
-            -f /work/sql/06_stage02_visible_drops.sql \
-            -f /work/sql/07_stage02_bowls.sql \
-            -f /work/sql/08_stage02_bowl_round.sql \
-            -f /work/sql/09_stage02_post_stir_round.sql \
-            -f /work/sql/10_stage02_sauce.sql \
-            -f /work/sql/11_stage02_answer_stream.sql \
-            -f /work/sql/12_stage02_choose_rank.sql \
-            -f /work/sql/13_stage02_gate_gaps.sql \
-            -f /work/sql/14_stage02_gate_day_selector.sql \
-            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
-            -f /work/sql/16_stage02_year5000.sql \
-            -f /work/sql/test/10_normative_reference.sql \
-            -f /work/sql-tamil-year5000-integration-logs/differential_case.sql \
-            -c 'SELECT 1/((count(*)=5 AND bool_and(ok))::integer) AS differential_5_of_5 FROM stage02_year5000_differential' \
-            2>&1 | tee sql-tamil-year5000-integration-logs/differential.txt
-      - name: Preserve bounded logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sql-tamil-slice14-year5000-differential-${{ matrix.case }}
-          path: sql-tamil-year5000-integration-logs/
-          if-no-files-found: warn
-          retention-days: 90
-      - name: Stop PostgreSQL
-        if: always()
-        shell: bash
-        run: docker rm --force sql-tamil-year5000-integration-pg 2>/dev/null || true
- sql/test/109_stage02_year5000_differential.sql)" -eq 1
+          test "$(grep -c '^  FROM cases$' sql/test/109_stage02_year5000_differential.sql)" -eq 1
           sed "s/^  FROM cases$/  FROM cases WHERE label='${CASE_NAME}'/" \
             sql/test/109_stage02_year5000_differential.sql \
             > sql-tamil-year5000-integration-logs/differential_case.sql
