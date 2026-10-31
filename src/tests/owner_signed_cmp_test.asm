@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..231: signed owner-scoped comparison.
+; Stage 1 native regression 191..233: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -929,6 +929,45 @@ RunOwnerSignedCmpTests::
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
     cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+
+    ; 232: same owner 46, both negative. The shorter magnitude is greater.
+    ; Lengths remain 8192 vs 8193 with canonical SRAM high bytes $33/$01.
+    ld a, 232
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    xor a
+    ld [wOwnerCmpLenA], a
+    ld a, 1
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 233: reverse the negative descriptors. Longer magnitude is smaller.
+    ld a, 233
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpLenB], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
