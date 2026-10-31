@@ -68,6 +68,29 @@ class FiveComponentGateWitnessTests(unittest.TestCase):
         with self.assertRaisesRegex(WitnessError, "E_WITNESS_FIELD_COUNT_AT_0"):
             compare_five_fields(pairs, [(1,2,3,4)] * 7, [(1,2,3,4,5)] * 7)
 
+    def test_cumulative_four_signed_gate_neighbors(self):
+        queries = []
+        def independent(index):
+            queries.append(index)
+            return (50 + abs(index)) if index < 0 else (60 + abs(index))
+        def pinned(index):
+            return (50 + abs(index)) if index < 0 else (60 + abs(index))
+        pairs, gates = make_witnesses(
+            independent, pinned, foundation=1000, indices=(-4, -1, 1, 4))
+        self.assertEqual(queries, [-1, -2, -3, -4, 1, 2, 3, 4])
+        self.assertEqual([g["gate_day"] for g in gates], [790, 949, 1061, 1250])
+        self.assertEqual(len(pairs), 13)
+        self.assertEqual(len(set(pairs)), 13)
+        self.assertEqual(pairs[1:4], [(1000, 789), (1000, 790), (1000, 791)])
+        self.assertEqual(pairs[-3:], [(1000, 1249), (1000, 1250), (1000, 1251)])
+
+    def test_bad_signed_indices_fail_closed(self):
+        for indices in ((-1, 1, 1), (-1, 0, 1), (-33, 1),
+                        (1, -1), (-1,), (), [-1, 1]):
+            with self.subTest(indices=indices):
+                with self.assertRaisesRegex(WitnessError, "E_WITNESS_INDICES"):
+                    make_witnesses(gaps, gaps, indices=indices)
+
     def test_json_evidence_atomic_output(self):
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "nested" / "evidence.json"

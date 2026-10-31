@@ -34,7 +34,7 @@ jobs:
           ref: 7cb12bf355461e5a179e0deadb7365689288bf29
           path: pinned-python
           persist-credentials: false
-      - name: Verify both SHA pins and execute 8 synthetic contracts
+      - name: Verify both SHA pins and execute 10 synthetic contracts
         working-directory: audited-kotlin
         shell: bash
         run: |
@@ -61,7 +61,7 @@ jobs:
             soak/Post55ProductionDateBridge.kt \
             -include-runtime -d "$RUNNER_TEMP/production-date.jar"
           test -s "$RUNNER_TEMP/production-date.jar"
-      - name: Compare five date components at seven independent signed gate-neighbors
+      - name: Compare five date components at thirteen cumulatively reconstructed signed gate-neighbors
         working-directory: audited-kotlin
         shell: bash
         run: |

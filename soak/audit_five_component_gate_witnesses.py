@@ -26,32 +26,46 @@ class WitnessError(ValueError):
     pass
 
 
-def make_witnesses(oracle_gap, pinned_gap, *, foundation=FOUNDATION, deadline=None):
-    """Two signed global gate indices, then three days around each boundary.
+def make_witnesses(oracle_gap, pinned_gap, *, foundation=FOUNDATION,
+                   indices=(-1, 1), deadline=None):
+    """Cumulative unseeded signed gate positions, then days -1/0/+1 around samples.
 
-    Gate index is a globally signed index, never a calendar-day input to sauce.
-    Returns (pairs, metadata); checkpoints are NEVER used as navigation seeds.
+    All intervening gaps are checked against the independent oracle, not
+    inferred from a distant checkpoint or a single terminal gap.
     """
     if type(foundation) is not int:
         raise WitnessError("E_WITNESS_ORIGIN_TYPE")
+    if (type(indices) is not tuple or not indices or
+            any(type(i) is not int or i == 0 or abs(i) > 32 for i in indices) or
+            tuple(sorted(set(indices))) != indices or
+            not (indices[0] < 0 < indices[-1])):
+        raise WitnessError("E_WITNESS_INDICES")
+    days, gaps = {}, {}
+    for direction in (-1, 1):
+        farthest = max((abs(i) for i in indices if i * direction > 0), default=0)
+        day = foundation
+        for step in range(1, farthest + 1):
+            if deadline is not None and time.monotonic() >= deadline:
+                raise WitnessError("E_WITNESS_DEADLINE")
+            index = direction * step
+            independent = oracle_gap(index)
+            source = pinned_gap(index)
+            if type(independent) is not int or not MIN_GAP <= independent <= MAX_GAP:
+                raise WitnessError(f"E_WITNESS_INDEPENDENT_RANGE_AT_{index}")
+            if type(source) is not int or not MIN_GAP <= source <= MAX_GAP:
+                raise WitnessError(f"E_WITNESS_SOURCE_RANGE_AT_{index}")
+            if independent != source:
+                raise WitnessError(f"E_WITNESS_GATE_MISMATCH_AT_{index}")
+            day += direction * independent
+            days[index], gaps[index] = day, independent
     pairs = [(foundation, foundation)]
     metadata = []
-    for index in (-1, 1):
-        if deadline is not None and time.monotonic() >= deadline:
-            raise WitnessError("E_WITNESS_DEADLINE")
-        independent = oracle_gap(index)
-        source = pinned_gap(index)
-        if type(independent) is not int or not MIN_GAP <= independent <= MAX_GAP:
-            raise WitnessError(f"E_WITNESS_INDEPENDENT_RANGE_AT_{index}")
-        if type(source) is not int or not MIN_GAP <= source <= MAX_GAP:
-            raise WitnessError(f"E_WITNESS_SOURCE_RANGE_AT_{index}")
-        if independent != source:
-            raise WitnessError(f"E_WITNESS_GATE_MISMATCH_AT_{index}")
-        day = foundation + (1 if index > 0 else -1) * independent
-        metadata.append({"gate_index": index, "gap": independent, "gate_day": day})
+    for index in indices:
+        day = days[index]
+        metadata.append({"gate_index": index, "gap": gaps[index], "gate_day": day})
         for offset in (-1, 0, 1):
             pairs.append((foundation, day + offset))
-    if len(pairs) != 7 or len(set(pairs)) != 7:
+    if len(pairs) != 1 + 3 * len(indices) or len(set(pairs)) != len(pairs):
         raise WitnessError("E_WITNESS_CASE_COUNT")
     return pairs, metadata
 
@@ -111,11 +125,15 @@ def main(argv=None):
         report["source_module_sha256"] = source_digest
         def independent_gap(index):
             return gap_from_witness(evaluate(FOUNDATION, FOUNDATION + index, deadline=deadline))
-        pairs, gates = make_witnesses(independent_gap, source_gap, deadline=deadline)
-        if context.integration_gate_questions != 2:
+        indices = (-4, -1, 1, 4)
+        pairs, gates = make_witnesses(independent_gap, source_gap,
+                                      indices=indices, deadline=deadline)
+        if context.integration_gate_questions != 8:
             raise WitnessError("E_WITNESS_SOURCE_QUERY_ACCOUNTING")
         report["gates"] = gates
         report["cases"] = len(pairs)
+        report["witness_indices"] = list(indices)
+        report["gate_questions"] = context.integration_gate_questions
         report["case_sha256"] = hashlib.sha256(
             "".join(f"{c}\t{t}\n" for c,t in pairs).encode("ascii")
         ).hexdigest()
