@@ -1,0 +1,52 @@
+name: Post55 independent real gate-segment diagnostic
+
+on:
+  push:
+    branches: ['Kotlin\\+Cymraeg']
+    paths:
+      - 'soak/audit_independent_gate_segment_real.py'
+      - 'soak/test_audit_independent_gate_segment_real.py'
+      - '.github/workflows/post55-independent-real-segments.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unseeded-real-segments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout pinned audited branch HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: audited-kotlin
+          persist-credentials: false
+      - name: Independently checkout pinned Python production SHA
+        uses: actions/checkout@v4
+        with:
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: pinned-python
+          persist-credentials: false
+      - name: Verify both checkouts and run bounded signed differential
+        working-directory: audited-kotlin
+        env:
+          PASTAFARIAN_PYTHON_SRC: ${{ github.workspace }}/pinned-python/src
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git -C ../pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
+          python3 -m unittest discover -s soak -p test_audit_independent_gate_segment_real.py -v
+          python3 soak/audit_independent_gate_segment_real.py \\
+            --max-index 32 --segment-limit 8 --timeout-seconds 120 \\
+            --evidence evidence/independent-real-segments.json
+      - name: Archive bounded diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post55-independent-real-segments
+          path: audited-kotlin/evidence/independent-real-segments.json
+          if-no-files-found: warn
