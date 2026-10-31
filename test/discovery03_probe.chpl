@@ -152,6 +152,68 @@ proc probeHistoricalControls() {
   }
 }
 
+
+// A distinct family from the two-month C(6,3) fixture: three months of
+// four days. Generate every 4+4+4 word lexicographically, then filter
+// complete words by their opening and closing positions. This never invokes
+// the implementation's legalMove or dynamic-programming state.
+proc enumerateTripletWeavings(ref positions: [0..11] int,
+                              step: int, used1: int, used2: int, used3: int,
+                              ref oracle: list(string)) {
+  if step == 12 {
+    var first: [1..3] int;
+    var last: [1..3] int;
+    for p in 0..11 {
+      const monthId = positions[p];
+      if first[monthId] == 0 then first[monthId] = p + 1;
+      last[monthId] = p + 1;
+    }
+    if first[1] < first[2] && first[2] < first[3] &&
+       last[1] < last[2] && last[2] < last[3] {
+      var key = "";
+      for monthId in positions do key += monthId:string;
+      oracle.pushBack(key);
+    }
+    return;
+  }
+  if used1 < 4 {
+    positions[step] = 1;
+    enumerateTripletWeavings(positions, step + 1, used1 + 1, used2, used3, oracle);
+  }
+  if used2 < 4 {
+    positions[step] = 2;
+    enumerateTripletWeavings(positions, step + 1, used1, used2 + 1, used3, oracle);
+  }
+  if used3 < 4 {
+    positions[step] = 3;
+    enumerateTripletWeavings(positions, step + 1, used1, used2, used3 + 1, oracle);
+  }
+}
+
+proc probeThreeMonthWeaving() {
+  var lengths = new list(int);
+  for monthId in 1..3 do lengths.pushBack(4);
+  var tested: WeavingCounter;
+  tested.lengths = lengths;
+
+  var positions: [0..11] int;
+  var independentOracle = new list(string);
+  enumerateTripletWeavings(positions, 0, 0, 0, 0, independentOracle);
+
+  check(independentOracle.size == 1301,
+        "Три місяці: прямий повний перелік 4+4+4 дає 1301");
+  check(tested.countAll() == independentOracle.size,
+        "Три місяці: кількість DP збігається з прямим переліком");
+  for index0 in independentOracle.indices {
+    const rank = index0 + 1;
+    const actual = tested.unrank1(new bigint(rank));
+    var key = "";
+    for monthId in actual do key += monthId:string;
+    check(actual.size == 12 && key == independentOracle[index0],
+          "Три місяці: незалежний лексикографічний ранг=" + rank:string);
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -159,6 +221,7 @@ proc main() {
   probeCutletCompositions(9, -1);
   probeBoundedCompositions(12, 4, 8);
   probeWeaving();
+  probeThreeMonthWeaving();
   probeHistoricalControls();
   writeln("DISCOVERY03_PROBE_CHECKS=", checks);
   writeln("DISCOVERY03_PROBE_FAILURES=", failures);
