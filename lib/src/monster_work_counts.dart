@@ -32,13 +32,13 @@ final class MonsterWorkCounter {
     final actionRank = dayRank(calculationDay);
     final targetRank = dayRank(targetDay);
     final displacement = targetDay - calculationDay;
-    final comparison = targetDay.compareTo(calculationDay);
+    // BigInt.compareTo promises a sign, not necessarily -1 or 1.
     return MonsterWorkCounts(
       action: actionRank,
       target: targetRank,
       distance: displacement.abs() + BigInt.one,
       connection: actionRank + targetRank,
-      direction: comparison + 2,
+      direction: displacement.sign + 2,
     );
   }
 }
