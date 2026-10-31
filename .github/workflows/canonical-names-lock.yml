@@ -2913,3 +2913,45 @@ jobs:
           path: evidence/
           if-no-files-found: warn
           retention-days: 30
+
+  # Stage4 Native also runs on the established feature-branch push workflow.
+  # Registration of the separate Stage4 workflow alone is not acceptance evidence.
+  stage04-month-occurrence-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Stage04 bounded test and evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage04
+          git rev-parse HEAD > logs/stage04/source.txt
+          perl -e 'print "$^V\n"' > logs/stage04/perl-version.txt
+          perl -Ilib -It/lib -c lib/Pastafari/Monster/MonthOccurrence.pm 2> logs/stage04/syntax.stderr
+          perl -Ilib -It/lib -c t/49_stage04_month_occurrence.t 2>> logs/stage04/syntax.stderr
+          test "$(grep -c 'syntax OK' logs/stage04/syntax.stderr)" -eq 2
+          test "$(wc -l < logs/stage04/syntax.stderr)" -eq 2
+          set +e
+          (
+            ulimit -v 393216
+            timeout --signal=TERM --kill-after=5s 120s prove -e 'perl -CS -Ilib -It/lib' t/49_stage04_month_occurrence.t > logs/stage04/test.stdout 2> logs/stage04/test.stderr
+          )
+          ec=$?
+          set -e
+          printf '%s\n' "$ec" > logs/stage04/test.exit
+          cat logs/stage04/test.stdout
+          cat logs/stage04/test.stderr
+          test "$ec" -eq 0
+          test ! -s logs/stage04/test.stderr
+          grep -q 'Result: PASS' logs/stage04/test.stdout
+          echo STAGE04_MONTH_OCCURRENCE_NATIVE_PASS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perl-stage04-month-occurrence-native
+          path: logs/stage04
+          retention-days: 30
