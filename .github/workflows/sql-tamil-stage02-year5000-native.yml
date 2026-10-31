@@ -2,7 +2,7 @@ name: SQL Tamil Stage 2 Slice 14 Year5000 Integration Native
 on:
   push:
     branches:
-      - 'SQL\\+தமிழ்'
+      - 'SQL+தமிழ்'
     paths:
       - 'sql/00_schema.sql'
       - 'sql/01_source_language_catalog.sql'
@@ -42,8 +42,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p sql-tamil-year5000-integration-logs
-          docker run --detach --name sql-tamil-year5000-integration-pg --network none \\
-            -e POSTGRES_HOST_AUTH_METHOD=trust \\
+          docker run --detach --name sql-tamil-year5000-integration-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
             -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
           ready=0
           for attempt in $(seq 1 60); do
@@ -57,66 +57,66 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \\
-            -f /work/sql/00_schema.sql \\
-            -f /work/sql/01_source_language_catalog.sql \\
-            -f /work/sql/02_monster_bootstrap.sql \\
-            -f /work/sql/03_stage02_production_core.sql \\
-            -f /work/sql/04_stage02_stone_states.sql \\
-            -f /work/sql/05_stage02_hidden_drop.sql \\
-            -f /work/sql/06_stage02_visible_drops.sql \\
-            -f /work/sql/07_stage02_bowls.sql \\
-            -f /work/sql/08_stage02_bowl_round.sql \\
-            -f /work/sql/09_stage02_post_stir_round.sql \\
-            -f /work/sql/10_stage02_sauce.sql \\
-            -f /work/sql/11_stage02_answer_stream.sql \\
-            -f /work/sql/12_stage02_choose_rank.sql \\
-            -f /work/sql/13_stage02_gate_gaps.sql \\
-            -f /work/sql/14_stage02_gate_day_selector.sql \\
-            -f /work/sql/15_stage02_year5000_gate_candidates.sql \\
-            -f /work/sql/16_stage02_year5000.sql \\
-            -f /work/sql/test/108_stage02_year5000_native.sql \\
-            -c 'SELECT 1/((count(*)=23 AND bool_and(ok))::integer) AS native_23_of_23 FROM stage02_year5000_native' \\
+          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/test/108_stage02_year5000_native.sql \
+            -c 'SELECT 1/((count(*)=23 AND bool_and(ok))::integer) AS native_23_of_23 FROM stage02_year5000_native' \
             2>&1 | tee sql-tamil-year5000-integration-logs/native.txt
       - name: Production-only isolation 4
         shell: bash
         run: |
           set -euo pipefail
-          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \\
-            -c "CREATE TEMP TABLE year5000_isolation AS SELECT * FROM (VALUES ('no-reference-schema',to_regnamespace('pastafari_sql_tamil_test') IS NULL), ('two-production-functions',(SELECT count(*)=2 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('year5000_gate_window','year5000'))), ('sql-stable',(SELECT count(*)=2 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('year5000_gate_window','year5000') AND l.lanname='sql' AND p.provolatile='s')), ('no-reference-body',(SELECT count(*)=0 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('year5000_gate_window','year5000') AND position('pastafari_sql_tamil_test' IN pg_get_functiondef(p.oid))>0))) AS t(label,ok)" \\
-            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM year5000_isolation' \\
+          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c "CREATE TEMP TABLE year5000_isolation AS SELECT * FROM (VALUES ('no-reference-schema',to_regnamespace('pastafari_sql_tamil_test') IS NULL), ('two-production-functions',(SELECT count(*)=2 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('year5000_gate_window','year5000'))), ('sql-stable',(SELECT count(*)=2 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('year5000_gate_window','year5000') AND l.lanname='sql' AND p.provolatile='s')), ('no-reference-body',(SELECT count(*)=0 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('year5000_gate_window','year5000') AND position('pastafari_sql_tamil_test' IN pg_get_functiondef(p.oid))>0))) AS t(label,ok)" \
+            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM year5000_isolation' \
             2>&1 | tee sql-tamil-year5000-integration-logs/isolation.txt
       - name: Create isolated reference database
         shell: bash
         run: |
           set -euo pipefail
-          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \\
+          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
             -c 'CREATE DATABASE sql_tamil_year5000_differential'
       - name: Differential year5000 checks 25
         shell: bash
         run: |
           set -euo pipefail
-          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_year5000_differential \\
-            -f /work/sql/00_schema.sql \\
-            -f /work/sql/01_source_language_catalog.sql \\
-            -f /work/sql/02_monster_bootstrap.sql \\
-            -f /work/sql/03_stage02_production_core.sql \\
-            -f /work/sql/04_stage02_stone_states.sql \\
-            -f /work/sql/05_stage02_hidden_drop.sql \\
-            -f /work/sql/06_stage02_visible_drops.sql \\
-            -f /work/sql/07_stage02_bowls.sql \\
-            -f /work/sql/08_stage02_bowl_round.sql \\
-            -f /work/sql/09_stage02_post_stir_round.sql \\
-            -f /work/sql/10_stage02_sauce.sql \\
-            -f /work/sql/11_stage02_answer_stream.sql \\
-            -f /work/sql/12_stage02_choose_rank.sql \\
-            -f /work/sql/13_stage02_gate_gaps.sql \\
-            -f /work/sql/14_stage02_gate_day_selector.sql \\
-            -f /work/sql/15_stage02_year5000_gate_candidates.sql \\
-            -f /work/sql/16_stage02_year5000.sql \\
-            -f /work/sql/test/10_normative_reference.sql \\
-            -f /work/sql/test/109_stage02_year5000_differential.sql \\
-            -c 'SELECT 1/((count(*)=25 AND bool_and(ok))::integer) AS differential_25_of_25 FROM stage02_year5000_differential' \\
+          docker exec -u postgres sql-tamil-year5000-integration-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_year5000_differential \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql/test/109_stage02_year5000_differential.sql \
+            -c 'SELECT 1/((count(*)=25 AND bool_and(ok))::integer) AS differential_25_of_25 FROM stage02_year5000_differential' \
             2>&1 | tee sql-tamil-year5000-integration-logs/differential.txt
       - name: Preserve bounded logs
         if: always()
