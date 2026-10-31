@@ -1365,28 +1365,16 @@ RunOwnerSignedCmpTests::
     ld a, $20
     ld [wOwnerCmpLenA+1], a
     ld [wOwnerCmpLenB+1], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 2
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
+    ld a, 2
+    call OwnerCmpTestExpectFragmented
     jp nc, .fail
 
     ; 249: reverse the lengths on the same fragmented owner.
     ld a, 249
     ld [wTestCase], a
     call OwnerCmpTestSwapLength16
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 1
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
+    ld a, 1
+    call OwnerCmpTestExpectFragmented
     jp nc, .fail
 
     ; 250: negative 8192-byte A is greater than negative 8193-byte B.
@@ -1396,28 +1384,16 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpSignA], a
     ld [wOwnerCmpSignB], a
     call OwnerCmpTestSwapLength16
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 1
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
+    ld a, 1
+    call OwnerCmpTestExpectFragmented
     jp nc, .fail
 
     ; 251: reverse negative descriptors; the longer magnitude is now A < B.
     ld a, 251
     ld [wTestCase], a
     call OwnerCmpTestSwapLength16
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 2
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
+    ld a, 2
+    call OwnerCmpTestExpectFragmented
     jp nc, .fail
 
     ; Make logical offset 8192 zero: length 8192 stays canonical, 8193 does not.
@@ -1449,14 +1425,8 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpSignB], a
     call OwnerCmpTestSwapLength16
 .mixedSignHighZero:
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
+    ld a, 3
+    call OwnerCmpTestExpectFragmented
     jp nc, .fail
     ld a, [wTestCase]
     cp 255
@@ -1492,14 +1462,8 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpSignA], a
     ld [wOwnerCmpSignB], a
     call OwnerCmpTestSwapLength16
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
+    ld a, 3
+    call OwnerCmpTestExpectFragmented
     jp nc, .fail
 
     ; Case 257: both canonical +8192 descriptors alias owner 45.
@@ -1514,14 +1478,8 @@ RunOwnerSignedCmpTests::
     jp nz, .fail
     xor a
     ld [wOwnerCmpLenB], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    or a
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckFragmentedBytes
+    ld a, 0
+    call OwnerCmpTestExpectFragmented
     jp nc, .fail
     ld a, [wTestCaseHi]
     cp 1
@@ -1871,6 +1829,24 @@ OwnerCmpTestExpectInvalidCapacity:
     jr nc, .bad
     call OwnerCmpTestCheckNoncanonicalCapacityBytes
     ret
+.bad:
+    and a
+    ret
+
+; Shared ROM0 test assertion for fragmented-owner signed comparison.
+; A = expected result; carry set iff result, 10 operand bytes, 16 owner
+; tags, and SRAM boundary sentinels are all preserved.
+OwnerCmpTestExpectFragmented:
+    push af
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    pop bc
+    cp b
+    jr nz, .bad
+    call OwnerCmpTestCheckSnapshot
+    jr nc, .bad
+    jp OwnerCmpTestCheckFragmentedBytes
 .bad:
     and a
     ret
