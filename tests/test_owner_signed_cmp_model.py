@@ -2,7 +2,7 @@
 """Independent Python integer oracle for owner-scoped signed magnitudes.
 
 This is a HOST reference contract, not execution of SM83 machine code.
-The ROM exercise covers cases 191..229.
+The ROM exercise covers cases 191..231.
 """
 from random import Random
 from test_sram_owner_model import OwnedBanks, SIZE
@@ -170,11 +170,25 @@ def main():
     assert compare_read_only(m, (46, 0, 2), (46, 0, 1)) == 3, (
         "invalid two-byte A must be rejected even under owner aliasing"
     )
+    # Cases 230-231: independent integer oracle for same-owner, bank-edge lengths.
+    # The stored high byte is nonzero at both 8191 and 8192, so neither
+    # descriptor is an invalid leading-zero representation.
+    assert m.read_byte(46, 8191) == (0, 0x33), "8192-byte top byte must be 0x33"
+    assert m.read_byte(46, 8192) == (0, 0x01), "8193-byte top byte must be 0x01"
+    short = reference_integer(m, 46, 0, 8192)
+    long = reference_integer(m, 46, 0, 8193)
+    assert short > 0 and long > short, "bank-edge integer ordering disagrees"
+    assert compare_read_only(m, (46, 0, 8192), (46, 0, 8193)) == 2, (
+        "shared-owner shorter A must be less than longer B across bank edge"
+    )
+    assert compare_read_only(m, (46, 0, 8193), (46, 0, 8192)) == 1, (
+        "shared-owner longer A must be greater than shorter B across bank edge"
+    )
     # Bank-edge read-only sentinels mirrored from ROM cases 203..210.
     assert m.read_byte(46, 8191) == (0, 0x33), "A bank-end sentinel changed"
     assert m.read_byte(42, 8191) == (0, 0x00), "B bank-end sentinel changed"
     assert m.read_byte(46, 8192) == (0, 0x01), "A next-bank sentinel changed"
-    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=12 same_owner_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 payload_and_tags=IMMUTABLE")
+    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=14 same_owner_boundary=2 same_owner_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 

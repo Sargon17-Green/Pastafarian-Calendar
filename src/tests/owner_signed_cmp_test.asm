@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..229: signed owner-scoped comparison.
+; Stage 1 native regression 191..231: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -883,6 +883,52 @@ RunOwnerSignedCmpTests::
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
     cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 230: same owner 46, lengths 8192 versus 8193 across an 8-KiB bank.
+    ; SRAM[8191]=$33 and SRAM[8192]=$01: both lengths are canonical.
+    ; The extra nonzero high byte makes positive B greater than positive A.
+    ld a, 230
+    ld [wTestCase], a
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, $20
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenB+1], a
+    ld a, 1
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 231: reverse the aliasing descriptors; positive longer A > shorter B.
+    ld a, 231
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpLenB], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
