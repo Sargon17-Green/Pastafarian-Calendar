@@ -1282,16 +1282,7 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenA+1], a
     ld a, $40
     ld [wOwnerCmpLenB+1], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
-    jp nc, .fail
-    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    call OwnerCmpTestExpectInvalidCapacity
     jp nc, .fail
 
     ; 247: reverse A/B. The full-capacity noncanonical descriptor is now A.
@@ -1312,16 +1303,7 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB], a
     ld a, $3f
     ld [wOwnerCmpLenB+1], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
-    jp nc, .fail
-    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    call OwnerCmpTestExpectInvalidCapacity
     jp nc, .fail
     ; Recreate owner 45 after its earlier release. Banks 5 and 7 are free,
     ; while bank 6 remains owned by 42, so this is a deliberate fragmented pair.
@@ -1509,28 +1491,14 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB+2], a
     ld a, $40
     ld [wOwnerCmpLenB+1], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    call OwnerCmpTestExpectInvalidCapacity
     jp nc, .fail
 
     ; 255: reverse negative A/B; the invalid full-capacity descriptor is A.
     ld a, 255
     ld [wTestCase], a
     call OwnerCmpTestSwapLength16
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    call OwnerCmpTestExpectInvalidCapacity
     jp nc, .fail
 
     ld a, 46
@@ -1855,4 +1823,21 @@ OwnerCmpTestSwapLength16:
     ld [wOwnerCmpLenB], a
     ld a, c
     ld [wOwnerCmpLenB+1], a
+    ret
+
+; Shared fail-closed path for same-owner full-capacity high-zero descriptors.
+; Carry set means INVALID=3, the 10 operand bytes/16 tags and boundary SRAM
+; sentinels all remained unchanged.
+OwnerCmpTestExpectInvalidCapacity:
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jr nz, .bad
+    call OwnerCmpTestCheckSnapshot
+    jr nc, .bad
+    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    ret
+.bad:
+    and a
     ret
