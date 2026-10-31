@@ -686,3 +686,51 @@ jobs:
           path: build/stage13-native.log
           if-no-files-found: warn
           retention-days: 30
+
+  stage14-base-chunk-carry-discovery-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Strict compile and run bounded Stage14 base-1e9 borrow/carry cascades
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE\\nHEAD=%s\\n' "$GITHUB_SHA" >build/stage14-native.log
+          timeout --signal=TERM --kill-after=10s 300s \\
+            cobc -std=default -free \\
+            -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror \\
+            -x -o build/stage14-base-chunk \\
+            test/stage14_discovery_tests.cob \\
+            src/big_integer.cob \\
+            src/monster_distance.cob \\
+            src/legacy_distance.cob \\
+            src/patched_day_tag.cob \\
+            src/patched_distance.cob 2>&1 | tee -a build/stage14-native.log
+          timeout --signal=TERM --kill-after=10s 120s \\
+            ./build/stage14-base-chunk 2>&1 | tee -a build/stage14-native.log
+          grep -Eq '^STAGE14_RUNS=[[:space:]]*0*30[[:space:]]*$' build/stage14-native.log
+          grep -Eq '^STAGE14_PASS=[[:space:]]*0*30[[:space:]]*$' build/stage14-native.log
+          grep -Eq '^STAGE14_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage14-native.log
+          grep -Eq '^STAGE14_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage14-native.log
+          grep -Fxq 'RESULT=PASS_STAGE14_BASE_CHUNK_CARRY_DISCOVERY_NATIVE' build/stage14-native.log
+          echo 'STAGE14_NATIVE_GATE=PASS' | tee -a build/stage14-native.log
+      - name: Preserve Stage14 log including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage14-base-chunk-carry-discovery-evidence
+          path: build/stage14-native.log
+          if-no-files-found: warn
+          retention-days: 30
