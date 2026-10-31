@@ -26,7 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   windows-native-stage-current:
-    name: Native Windows PowerShell 5.1 active Stage29 and regressions
+    name: Native Windows PowerShell 5.1 Stage29+Stage30 and regressions
     runs-on: windows-latest
     timeout-minutes: 120
     steps:
@@ -48,7 +48,10 @@ jobs:
             & .\tests\Stage01.Tests.ps1
             if (-not $?) { throw 'Stage 1 regression failed after Stage 23 seal' }
             Write-Host 'STAGE23_POST_SEAL_BASELINE=PASS'
-          } elseif (($stageLines -contains 'CURRENT_STAGE=29') -and
+          } elseif ((($stageLines -contains 'CURRENT_STAGE=29') -or
+              (($stageLines -contains 'CURRENT_STAGE=30') -and
+               ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -and
+               ($stageLines -contains 'STAGE30_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
               ($stageLines -contains 'STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
               ((($stageLines -contains 'LAST_COMPLETED_STAGE=28') -and
                 ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=AWAITING')) -or
@@ -81,6 +84,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage30 distributional discovery probe failed' }
             Write-Host ('STAGE30_DISCOVERY15_NATIVE_SHA=' + $env:GITHUB_SHA)
             Write-Host 'STAGE30_DISCOVERY15_NATIVE=EVIDENCE_ONLY'
+            if ($stageLines -contains 'CURRENT_STAGE=30') { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
           } elseif (($stageLines -contains 'CURRENT_STAGE=27') -and
               ((($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=AWAITING')) -or
                (($stageLines -contains 'LAST_COMPLETED_STAGE=27') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
