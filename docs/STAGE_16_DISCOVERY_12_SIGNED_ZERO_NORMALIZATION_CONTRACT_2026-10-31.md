@@ -25,3 +25,6 @@ All 24 cases have been checked by JavaScript arbitrary-precision BigInt with an 
 
 ## Preliminary oracle cross-check
 Oracle generation (not Native tests): 24/24 independent mathematical identities agree with JavaScript BigInt |t-c|+1; no COBOL Stage16 execution was performed.
+
+## Stage16 activation — 2026-10-31
+The original draft/prerequisite statements above are historical. Stage15 acceptance has now been proven by completed run 41230511867, 16/16 jobs on 749375f41eb5be83a380306d658128984c916919, with actual HEAP-LIVE query, 30/30 arithmetic calls, zero unexpected failures and zero heap allocations after release. Canonical acceptance evidence is docs/STAGE_15_DISCOVERY_11_NATIVE_ACCEPTANCE_2026-10-31.md. Stage16 is authorized and has been implemented on this branch using original fixtures; Native acceptance remains pending. No expected-red may be asserted without reproducing a defect.
