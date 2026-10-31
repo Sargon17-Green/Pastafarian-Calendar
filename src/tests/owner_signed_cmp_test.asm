@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..249: signed owner-scoped comparison.
+; Stage 1 native regression 191..251: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1419,6 +1419,67 @@ RunOwnerSignedCmpTests::
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
+    ; 250: negative 8192-byte A is greater than negative 8193-byte B.
+    ; Reuse owner 45's fragmented banks 5,7; negative ordering reverses magnitude.
+    ld a, 250
+    ld [wTestCase], a
+    ld a, 45
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    xor a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB+2], a
+    ld [wOwnerCmpLenA+2], a
+    ld a, $20
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenB+1], a
+    ld a, 1
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedBytes
+    jp nc, .fail
+
+    ; 251: reverse negative descriptors; the longer magnitude is now A < B.
+    ld a, 251
+    ld [wTestCase], a
+    ld a, 45
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    xor a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, $20
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedBytes
+    jp nc, .fail
+
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
