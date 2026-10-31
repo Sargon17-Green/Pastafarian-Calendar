@@ -41,7 +41,9 @@ export function projectProductionCutletFromGateDays(
     throw new MonsterValidationError("Stage21/22 चे काटेकोर positive/distinct पुरावे आवश्यक");
   let length=0n;
   for(let i=0;i<G;i++){
-    const gap=measuredGateDays[i+1]!-measuredGateDays[i]!;
+    const low:bigint=measuredGateDays[i]!;
+    const high:bigint=measuredGateDays[i+1]!;
+    const gap:bigint=high-low;
     // Signed gate gaps are 41 + one exact rank in [1, 922].
     if(gap<42n||gap>963n)
       throw new MonsterValidationError("खरे सलग signed gate दिवस आवश्यक");

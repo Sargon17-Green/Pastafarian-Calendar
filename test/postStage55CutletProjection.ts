@@ -20,7 +20,7 @@ for(let t=year.openGateDay+1n;t<=year.closeGateDay;t++){
   const actual=projectProductionCutletFromGateDays(year.number,t,gates,partition,canonical);
   // Independent oracle materializes each cutlet directly from signed gate indices.
   const reference=expected.find(e=>e.firstDay<=t&&t<=e.lastDay);
-  ok(reference!==undefined,"oracle cutlet covers day");
+  if(reference===undefined)throw new Error("oracle cutlet covers day");
   ok(actual.yearNumber===year.number&&
      actual.cutletName===cutletNameByCanonicalIndex(reference.canonicalIndex)&&
      actual.canonicalIndex===reference.canonicalIndex&&
