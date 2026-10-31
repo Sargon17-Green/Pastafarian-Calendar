@@ -80,7 +80,7 @@ check(forward.authoritative.forwardSteps===2&&
   x.realSelector.predecessorSharedWrites===58)&&
  forward.authoritative.legacyGuessUsedForNavigation===false&&
  forward.authoritative.gateProvenance==="PHYSICALLY_RECOMPUTED_SIGNED_GATES"&&
- forward.legacy.guess.role==="TELEMETRY_ONLY"&&
+ forward.legacy!==null&&forward.legacy.guess.role==="TELEMETRY_ONLY"&&
  forward.realSeedGuess.role==="TELEMETRY_ONLY"&&
  forward.realSeedGuess.anchor.firstDay===seed.openGateDay+1n&&
  forward.historicalSyntheticGuess===forward.legacy.ghostYearNumber&&
@@ -104,7 +104,7 @@ check(backward.authoritative.forwardSteps===0&&
   x.seal===12n&&x.questionTargetDay===(i===0?seed.openGateDay:prev1.openGateDay)&&
   x.correctedFamilySize>0&&x.realSelector.seal===12n&&
   x.realSelector.predecessorSharedWrites===58)&&
- backward.legacy.guess.role==="TELEMETRY_ONLY"&&
+ backward.legacy!==null&&backward.legacy.guess.role==="TELEMETRY_ONLY"&&
  backward.predecessorSharedWrites===BigInt(backward.predecessorCallCount)*58n,
  "genuine two-step backward trace using same true canonical Year5000");
 
@@ -187,7 +187,7 @@ other.context.metrics.set("left",4n);
 check(other.context!==retried.context&&
  !retried.context.metrics.has("left")&&
  other.authoritative!==retried.authoritative&&
- other.legacy!==retried.legacy&&
+ other.legacy!==null&&retried.legacy!==null&&other.legacy!==retried.legacy&&
  other.authoritative.steps[0]!.after!==retried.authoritative.steps[0]!.after,
  "fresh instance owns independent mutable contexts and snapshot steps");
 check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),

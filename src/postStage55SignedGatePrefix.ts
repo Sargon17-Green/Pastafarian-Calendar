@@ -1,12 +1,10 @@
 import { MonsterStageError, MonsterValidationError } from "./monsterBase.ts";
 import { DISCOVERY15_FOUNDATION_DAY as FOUNDATION } from "./discovery15LegacyPositiveGate.ts";
-import { REAL_YEAR_MAX_PATCH } from "./patch16YearMax.ts";
+import { LEGACY_YEAR_MAX } from "./discovery16LegacyYearMax.ts";
 import { patch14WideChoice } from "./patch14WideChoice.ts";
 import { createProductionPatch18Question } from "./postStage55NativeQuestion.ts";
-import type { Patch18Question } from "./patch18YearWalk.ts";
+import type { Patch18Question,Patch18VerifiedGateWindow } from "./patch18YearWalk.ts";
 
-// This is production Native gate materialization, not a test-oracle fixture.
-// It does not yet make a full Patch20 request or enable the final date API.
 export type ProductionSignedGatePrefix = Readonly<{
   calculationDay: bigint;
   targetDay: bigint;
@@ -15,35 +13,35 @@ export type ProductionSignedGatePrefix = Readonly<{
   positiveGateDays: readonly bigint[];
   negativeGateDays: readonly bigint[];
   signedAnchorIndex: bigint | null;
+  verifiedWindow:Patch18VerifiedGateWindow;
   actualNativeCalls: number;
   actualSharedWrites: bigint;
   fullyCoversRequestedNeighbourhood: true;
   provenance: "PRODUCTION_NATIVE_SIGNED_GATE_PREFIX";
 }>;
 
-/** Build physical signed gate questions and independently execute each
- * PATCH14 Native predecessor once. The historical Stage16 path requires
- * calculationDay == gate(anchor)+1; no anchor is fabricated for other c.
- *
- * This bounded internal precursor inherits Stage37's 128/side budget.
- * Arbitrarily distant public inputs require later unbounded-window work.
+/** maxPerSide, when supplied, is an execution budget. With no budget the
+ * algorithm advances until the actual Native gate sequence covers c,t.
+ * There is no fixed 128-step restriction on the signed bigint domain.
  */
 export function createProductionSignedGatePrefix(
-  calculationDay: bigint, targetDay: bigint, maxPerSide = 128
+  calculationDay: bigint, targetDay: bigint,
+  maxPerSide?: number
 ): ProductionSignedGatePrefix {
   if (typeof calculationDay !== "bigint" || typeof targetDay !== "bigint" ||
-      !Number.isSafeInteger(maxPerSide) || maxPerSide < 1 || maxPerSide > 128)
+      (maxPerSide!==undefined&&(!Number.isSafeInteger(maxPerSide)||maxPerSide<1)))
     throw new MonsterValidationError("bigint दिवस आणि सुरक्षित gate budget आवश्यक");
 
-  const lower = (calculationDay < targetDay ? calculationDay : targetDay)
-    - REAL_YEAR_MAX_PATCH - 1n;
-  const upper = (calculationDay > targetDay ? calculationDay : targetDay)
-    + REAL_YEAR_MAX_PATCH + 1n;
+  const radius=LEGACY_YEAR_MAX+1n;
+  const lower = (calculationDay < targetDay ? calculationDay : targetDay)-radius;
+  const upper = (calculationDay > targetDay ? calculationDay : targetDay)+radius;
   const positive: Patch18Question[] = [], negative: Patch18Question[] = [];
   const positiveDays: bigint[] = [], negativeDays: bigint[] = [];
   let day = FOUNDATION;
   let anchor: bigint | null = null;
-  for (let i = 1; i <= maxPerSide; i++) {
+  for (let i = 1; ; i++) {
+    if(!Number.isSafeInteger(i)||(maxPerSide!==undefined&&i>maxPerSide))
+      throw new MonsterValidationError("positive signed gate execution budget संपला");
     const q = createProductionPatch18Question(FOUNDATION, FOUNDATION + BigInt(i));
     const choice = patch14WideChoice(FOUNDATION, q.targetDay,
       q.visible, q.stones, q.startBowls, 1, 1n, 922n);
@@ -55,11 +53,11 @@ export function createProductionSignedGatePrefix(
     if (day === calculationDay - 1n) anchor = BigInt(i);
     if (day > upper) break;
   }
-  if (day <= upper)
-    throw new MonsterValidationError("positive signed gate budget संपला");
 
   day = FOUNDATION;
-  for (let i = 1; i <= maxPerSide; i++) {
+  for (let i = 1; ; i++) {
+    if(!Number.isSafeInteger(i)||(maxPerSide!==undefined&&i>maxPerSide))
+      throw new MonsterValidationError("negative signed gate execution budget संपला");
     const q = createProductionPatch18Question(FOUNDATION, FOUNDATION - BigInt(i));
     const choice = patch14WideChoice(FOUNDATION, q.targetDay,
       q.visible, q.stones, q.startBowls, 1, 1n, 922n);
@@ -71,16 +69,35 @@ export function createProductionSignedGatePrefix(
     if (day === calculationDay - 1n) anchor = -BigInt(i);
     if (day < lower) break;
   }
-  if (day >= lower)
-    throw new MonsterValidationError("negative signed gate budget संपला");
 
   const calls = positive.length + negative.length;
+  const map=new Map<bigint,bigint>([[0n,FOUNDATION]]);
+  for(let i=0;i<positiveDays.length;i++)map.set(BigInt(i+1),positiveDays[i]!);
+  for(let i=0;i<negativeDays.length;i++)map.set(-BigInt(i+1),negativeDays[i]!);
+  const min=-BigInt(negative.length),max=BigInt(positive.length);
+  const readonlyMap:ReadonlyMap<bigint,bigint>=Object.freeze({
+    get:(k:bigint)=>map.get(k),
+    has:(k:bigint)=>map.has(k),
+    entries:()=>map.entries(),
+    keys:()=>map.keys(),
+    values:()=>map.values(),
+    forEach:(fn:(value:bigint,key:bigint,map:ReadonlyMap<bigint,bigint>)=>void)=>
+      map.forEach((v,k)=>fn(v,k,readonlyMap)),
+    [Symbol.iterator]:()=>map.entries(),
+    get size(){return map.size;}
+  });
+  const verifiedWindow:Patch18VerifiedGateWindow=Object.freeze({
+    byIndex:readonlyMap,minimumIndex:min,maximumIndex:max,
+    minimumDay:map.get(min)!,maximumDay:map.get(max)!,
+    realGapQuestions:calls,realPredecessorWrites:BigInt(calls)*58n,
+    provenance:"PHYSICALLY_RECOMPUTED_SIGNED_GATES" as const
+  });
   return Object.freeze({
     calculationDay, targetDay,
     positive: Object.freeze(positive), negative: Object.freeze(negative),
     positiveGateDays: Object.freeze(positiveDays),
     negativeGateDays: Object.freeze(negativeDays),
-    signedAnchorIndex: anchor,
+    signedAnchorIndex: anchor,verifiedWindow,
     actualNativeCalls: calls, actualSharedWrites: BigInt(calls) * 58n,
     fullyCoversRequestedNeighbourhood: true as const,
     provenance: "PRODUCTION_NATIVE_SIGNED_GATE_PREFIX" as const

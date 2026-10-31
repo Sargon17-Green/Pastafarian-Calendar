@@ -48,9 +48,8 @@ function gateDay(w:Patch18VerifiedGateWindow,index:bigint):bigint {
 export class Patch18VerifiedGateWindowBuilder {
  build(positive:readonly Patch18Question[],negative:readonly Patch18Question[]):Patch18VerifiedGateWindow {
   if(!Array.isArray(positive)||!Array.isArray(negative)||
-   !positive.length||!negative.length||
-   positive.length>128||negative.length>128)
-    throw new MonsterValidationError("दोन्ही दिशांनी मर्यादित signed gate प्रश्न आवश्यक");
+   !positive.length||!negative.length)
+    throw new MonsterValidationError("दोन्ही दिशांना nonempty signed gate प्रश्न आवश्यक");
   // Preflight the WHOLE question window before the first fallible Sauce.
   for(let i=0;i<positive.length;i++)
    assertQuestion(positive[i]!,DISCOVERY15_FOUNDATION_DAY+BigInt(i+1));
@@ -136,13 +135,46 @@ export class Patch18OneYearWalker {
  walk(c:bigint,t:bigint,
   positive:readonly Patch18Question[],negative:readonly Patch18Question[],
   yearQuestion:Patch18Question,transitionQuestion:Patch18TransitionQuestionFactory,
-  maximumSteps:number):Patch18WalkResult {
+  maximumSteps:number,verifiedWindow?:Patch18VerifiedGateWindow):Patch18WalkResult {
   if(typeof c!=="bigint"||typeof t!=="bigint"||
-     !Number.isSafeInteger(maximumSteps)||maximumSteps<0||maximumSteps>512||
+     !Number.isSafeInteger(maximumSteps)||maximumSteps<0||
      typeof transitionQuestion!=="function")
    throw new MonsterValidationError("दोन्ही दिवस bigint आणि सुरक्षित step budget आवश्यक");
   assertQuestion(yearQuestion,c);
-  const window=this.gateBuilder.build(positive,negative);
+  let window:Patch18VerifiedGateWindow;
+  if(verifiedWindow===undefined){
+   window=this.gateBuilder.build(positive,negative);
+  }else{
+   if(!Array.isArray(positive)||!Array.isArray(negative)||
+      !positive.length||!negative.length||
+      verifiedWindow.provenance!=="PHYSICALLY_RECOMPUTED_SIGNED_GATES"||
+      verifiedWindow.byIndex.get(0n)!==DISCOVERY15_FOUNDATION_DAY||
+      verifiedWindow.minimumIndex!==-BigInt(negative.length)||
+      verifiedWindow.maximumIndex!==BigInt(positive.length)||
+      verifiedWindow.realGapQuestions!==positive.length+negative.length||
+      verifiedWindow.realPredecessorWrites!==BigInt(verifiedWindow.realGapQuestions)*58n||
+      verifiedWindow.byIndex.size!==verifiedWindow.realGapQuestions+1)
+    throw new MonsterValidationError("अस्सल signed gate window आणि प्रश्न-मालिका जुळली पाहिजे");
+   for(let i=0;i<positive.length;i++)
+    assertQuestion(positive[i]!,DISCOVERY15_FOUNDATION_DAY+BigInt(i+1));
+   for(let i=0;i<negative.length;i++)
+    assertQuestion(negative[i]!,DISCOVERY15_FOUNDATION_DAY-BigInt(i+1));
+   let positiveDay=DISCOVERY15_FOUNDATION_DAY;
+   for(let i=1;i<=positive.length;i++){
+    const next=gateDay(verifiedWindow,BigInt(i)),gap=next-positiveDay;
+    if(gap<42n||gap>963n)throw new MonsterValidationError("positive verified gate gap अवैध");
+    positiveDay=next;
+   }
+   let negativeDay=DISCOVERY15_FOUNDATION_DAY;
+   for(let i=1;i<=negative.length;i++){
+    const next=gateDay(verifiedWindow,-BigInt(i)),gap=negativeDay-next;
+    if(gap<42n||gap>963n)throw new MonsterValidationError("negative verified gate gap अवैध");
+    negativeDay=next;
+   }
+   if(verifiedWindow.minimumDay!==negativeDay||verifiedWindow.maximumDay!==positiveDay)
+    throw new MonsterValidationError("verified gate window endpoints विसंगत");
+   window=verifiedWindow;
+  }
   // The complete +/-5778 neighbourhood is needed to enumerate ALL
   // genuine Year5000 candidate pairs, not merely a convenient subset.
   if(window.minimumDay>=c-REAL_YEAR_MAX_PATCH||
@@ -261,9 +293,10 @@ export class Patch18OneYearWalker {
 
 export type Patch18YearWalkObservation=Readonly<{
  calculationDay:bigint;targetDay:bigint;
- legacy:Discovery18JumpObservation;
+ legacy:Discovery18JumpObservation|null;
+ legacyDiagnostic:"EXECUTED"|"SKIPPED_NO_REAL_STAGE16_ANCHOR";
  authoritative:Patch18WalkResult;
- oldGuess:bigint;historicalSyntheticGuess:bigint;
+ oldGuess:bigint;historicalSyntheticGuess:bigint|null;
  realSeedGuess:Legacy365JumpProbe;authoritativeYear:Patch18Year;
  predecessorCallCount:number;predecessorSharedWrites:bigint;
  authoritativeSource:"RECOMPUTED_GATES_AND_SEAL10_11_12";
@@ -275,7 +308,7 @@ export class Patch18YearWalkHandler {
  private readonly ghost=new Legacy365JumpDiagnostic();
  private readonly metrics=new BaseMetricsManager();
 
- run(ctx:MonsterContext,anchorGateIndex:bigint,
+ run(ctx:MonsterContext,anchorGateIndex:bigint|null,
   historicalPositive:readonly Discovery15GateQuestion[],
   signedQuestions:readonly Patch15SignedQuestion[],
   oldYearQuestion:Discovery15GateQuestion,
@@ -284,42 +317,58 @@ export class Patch18YearWalkHandler {
   positive:readonly Patch18Question[],negative:readonly Patch18Question[],
   trueYearQuestion:Patch18Question,
   transitionQuestion:Patch18TransitionQuestionFactory,
-  maximumSteps:number):Patch18YearWalkObservation {
+  maximumSteps:number,verifiedWindow?:Patch18VerifiedGateWindow):Patch18YearWalkObservation {
   if(ctx.phase!=="READY"||ctx.status!=="VALIDATED"||
      typeof ctx.calculationDay!=="bigint"||typeof ctx.targetDay!=="bigint")
    throw new MonsterStageError("PATCH18 ready/validated संदर्भ आवश्यक");
-  // Actually run Stage36, including old /365 error and all old scars.
-  const legacy=discoverLegacyJumpGuess(
-   ctx.calculationDay,ctx.targetDay,anchorGateIndex,historicalPositive,
-   signedQuestions,oldYearQuestion,oldAnchorCandidates,oldMultiCandidates);
-  if(legacy.guess.role!=="TELEMETRY_ONLY"||
-     legacy.guess.oldJumpGuessCalls!==1||
-     legacy.preceding.realYearSelectorCalls!==3)
-   throw new MonsterStageError("जुनी 365 उडी आणि Stage35 खऱ्या पूर्ण chain आवश्यक");
+  let legacy:Discovery18JumpObservation|null=null;
+  if(anchorGateIndex===null){
+   if(historicalPositive.length!==0||signedQuestions.length!==0||
+      oldAnchorCandidates.length!==0||oldMultiCandidates.length!==0)
+    throw new MonsterValidationError("non-anchor मार्गात बनावट Stage16 candidate किंवा प्रश्न निषिद्ध");
+  }else{
+   if(typeof anchorGateIndex!=="bigint"||anchorGateIndex===0n)
+    throw new MonsterValidationError("Stage16 साठी खरा nonzero gate anchor आवश्यक");
+   // Preserve the historical Stage16/17/18 diagnostic chain only when
+   // c-1 is an actual gate. Never manufacture an anchor for non-anchor c.
+   legacy=discoverLegacyJumpGuess(
+    ctx.calculationDay,ctx.targetDay,anchorGateIndex,historicalPositive,
+    signedQuestions,oldYearQuestion,oldAnchorCandidates,oldMultiCandidates);
+   if(legacy.guess.role!=="TELEMETRY_ONLY"||
+      legacy.guess.oldJumpGuessCalls!==1||
+      legacy.preceding.realYearSelectorCalls!==3)
+    throw new MonsterStageError("जुनी 365 उडी आणि Stage35 खऱ्या पूर्ण chain आवश्यक");
+  }
   const authoritative=this.walker.walk(
    ctx.calculationDay,ctx.targetDay,positive,negative,trueYearQuestion,
-   transitionQuestion,maximumSteps);
-  // Re-ask the unmodified old /365 helper with the newly VERIFIED Year5000,
-  // never with the synthetic Stage36 anchor as the authoritative seed.
+   transitionQuestion,maximumSteps,verifiedWindow);
+  // Re-ask the old /365 helper with the verified Year5000 seed. This
+  // independent telemetry remains available even when Stage16 has no anchor.
   const realSeedGuess=this.ghost.measure(Object.freeze({
    number:authoritative.seed.number,
    firstDay:authoritative.seed.openGateDay+1n,
    lastDay:authoritative.seed.closeGateDay
   }),ctx.targetDay);
-  const predecessorCallCount=legacy.predecessorCallCount+
-    authoritative.realPredecessorCount;
+  const legacyCalls=legacy?.predecessorCallCount??0;
+  const legacyWrites=legacy?.predecessorSharedWrites??0n;
+  const predecessorCallCount=legacyCalls+authoritative.realPredecessorCount;
   const output=Object.freeze({
    calculationDay:ctx.calculationDay,targetDay:ctx.targetDay,
-   legacy,authoritative,oldGuess:realSeedGuess.estimatedYearNumber,
-   historicalSyntheticGuess:legacy.ghostYearNumber,realSeedGuess,
+   legacy,legacyDiagnostic:legacy===null?
+    "SKIPPED_NO_REAL_STAGE16_ANCHOR" as const:"EXECUTED" as const,
+   authoritative,oldGuess:realSeedGuess.estimatedYearNumber,
+   historicalSyntheticGuess:legacy?.ghostYearNumber??null,realSeedGuess,
    authoritativeYear:authoritative.selected,predecessorCallCount,
-   predecessorSharedWrites:legacy.predecessorSharedWrites+
-     authoritative.realPredecessorWrites,
+   predecessorSharedWrites:legacyWrites+authoritative.realPredecessorWrites,
    authoritativeSource:"RECOMPUTED_GATES_AND_SEAL10_11_12" as const,
    originalSyntheticYearNotUsed:true as const,context:ctx
   });
-  ctx.branchTrace.push("PATCH_18_EXECUTE_OLD_365_GHOST_AND_ALL_STAGE36_SCARS");
-  ctx.branchTrace.push("PATCH_18_PHYSICALLY_RECOMPUTE_SIGNED_GATES");
+  ctx.branchTrace.push(legacy===null?
+   "PATCH_18_SKIP_STAGE16_NO_REAL_GATE_ANCHOR":
+   "PATCH_18_EXECUTE_OLD_365_GHOST_AND_ALL_STAGE36_SCARS");
+  ctx.branchTrace.push(verifiedWindow===undefined?
+   "PATCH_18_PHYSICALLY_RECOMPUTE_SIGNED_GATES":
+   "PATCH_18_REUSE_PRODUCTION_NATIVE_SIGNED_GATE_WINDOW");
   ctx.branchTrace.push("PATCH_18_REAL_YEAR5000_FROM_ACTUAL_GATE_PAIRS");
   ctx.branchTrace.push("PATCH_18_OLD_365_TELEMETRY_REASK_TRUE_SEED");
   ctx.branchTrace.push("PATCH_18_STEP_SEAL11_12_ONE_YEAR_AT_A_TIME");
@@ -328,7 +377,8 @@ export class Patch18YearWalkHandler {
     BigInt(authoritative.realGateQuestionCalls));
   ctx.metrics.set("patch18.actual_steps",BigInt(authoritative.steps.length));
   ctx.metrics.set("patch18.old_guess",realSeedGuess.estimatedYearNumber);
-  ctx.metrics.set("patch18.synthetic_old_guess",legacy.ghostYearNumber);
+  if(legacy!==null)
+   ctx.metrics.set("patch18.synthetic_old_guess",legacy.ghostYearNumber);
   ctx.metrics.set("patch18.actual_year",authoritative.selected.number);
   ctx.metrics.set("patch18.full_predecessor_58_write_sequences",
     BigInt(predecessorCallCount));
@@ -336,7 +386,7 @@ export class Patch18YearWalkHandler {
   return output;
  }
 }
-export function patch18WalkYear(c:bigint,t:bigint,anchorGateIndex:bigint,
+export function patch18WalkYear(c:bigint,t:bigint,anchorGateIndex:bigint|null,
   historicalPositive:readonly Discovery15GateQuestion[],
   signedQuestions:readonly Patch15SignedQuestion[],
   oldYearQuestion:Discovery15GateQuestion,
@@ -345,9 +395,9 @@ export function patch18WalkYear(c:bigint,t:bigint,anchorGateIndex:bigint,
   positive:readonly Patch18Question[],negative:readonly Patch18Question[],
   trueYearQuestion:Patch18Question,
   transitionQuestion:Patch18TransitionQuestionFactory,
-  maximumSteps:number):Patch18YearWalkObservation {
+  maximumSteps:number,verifiedWindow?:Patch18VerifiedGateWindow):Patch18YearWalkObservation {
  return new Patch18YearWalkHandler().run(
   bootstrapMonster(c,t),anchorGateIndex,historicalPositive,
   signedQuestions,oldYearQuestion,oldAnchorCandidates,oldMultiCandidates,
-  positive,negative,trueYearQuestion,transitionQuestion,maximumSteps);
+  positive,negative,trueYearQuestion,transitionQuestion,maximumSteps,verifiedWindow);
 }

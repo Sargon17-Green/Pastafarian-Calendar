@@ -74,3 +74,18 @@ All of the following are required before claiming final-date integration PASS:
 **Gate C — projection:** extract from the already verified Stage55 full-chain result the corrected year, cutlet intervals and unique names, legal weaving, corrected month names and the prefix occurrence; assemble the exact tuple and replace the throw. Use checked in-year indexing and preserve the historical diagnostic objects.
 
 **Gate D — acceptance:** dedicated differential, malformed-input, boundary, Year5000 gap, rollback/retry, Native budget, previous suite and names lock; completed CI logs on the final integration SHA. Only then may the branch be marked integrated. No merge into `main`, no release and no Stage56.
+
+
+## 7. Gate B implementation decision — production Patch20 request (2026-10-31)
+
+The selected engineering path is now explicit:
+
+- `createProductionPatch20Request(c,t)` constructs the full `Discovery19Request` and `Discovery20StructureRequest` from the two signed bigint inputs. It uses production-only question generation and actual `patch14WideChoice` Native calls; no `test/` import, oracle result, fixture candidate, or mocked Sauce call is reachable from `src/`.
+- The signed gate prefix covers the full interval from `min(c,t)-5782` through `max(c,t)+5782`. The 5,782-day radius is the historical 5,781-day candidate envelope plus one day of crossing margin. The former fixed 128-gate cap is removed. An optional `maxGateSteps` is an explicit caller execution budget; with no budget, generation continues until the real gate sequence covers the requested interval.
+- The prefix publishes one immutable `Patch18VerifiedGateWindow` with its exact real call/write count. Stage37 reuses that window instead of executing the same signed gates a second time.
+- Stage16/17/18 historical diagnostics run only when `c-1` is an actual signed gate. For that case, both the anchor-only and multi-opening candidate families are derived from actual gate boundaries. If `c-1` is not a gate, the request carries `anchorGateIndex: null` and empty legacy arrays; the Stage16/17 diagnostic is explicitly recorded as `SKIPPED_NO_REAL_STAGE16_ANCHOR`. The authoritative Stage37 year selection and legal forward/backward year walk still execute. No synthetic anchor is manufactured.
+- The first-day Sauce input is supplied as a deferred production question factory. It receives the actual first day selected by the Stage19/20 chain, so the factory does not pre-run the year chain or use a guessed first day.
+- `Patch20StructureObservation` includes construction-prefix calls and writes in its end-to-end totals **once**: Stage37 consumes the verified window and its predecessor accounting already includes those calls. Patch20 validates that the measured prefix and Stage37 window counts match; it must not add the same prefix a second time. The output must reconcile `totalSharedMemoryWrites === 58n * BigInt(totalRealPredecessorCalls)`.
+- Bounded tests use two production requests: an exact-anchor case that walks one year forward, and a non-anchor case that walks one year backward. Both compare to the independent test-only oracle, execute the original-target Sauce and true first-day Sauce, reconcile Native accounting, and exercise a deep predecessor fault with an uncommitted caller context.
+
+This implements the Gate B request path only. The public `calendarDateSpaghetti(c,t)` throw remains unchanged until Gate C assembles and verifies the exact five-component projection. Gate B acceptance still requires typecheck, the full regression suite, and completed Actions logs on the exact implementation SHA.

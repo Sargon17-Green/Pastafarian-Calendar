@@ -1,9 +1,9 @@
 import { MonsterValidationError } from "./monsterBase.ts";
 import type { Patch18Question } from "./patch18YearWalk.ts";
 
-// Post-Stage55 Gate B: native Sauce question materialization from two bigints.
-// Constructs inputs only. Native calls and shared-memory writes here are zero;
-// the full Patch20 request factory and final date are not yet enabled.
+// Post-Stage55 Gate B: pure Native Sauce question materialization from c,t.
+// This function creates inputs only; the production Patch20 request factory
+// owns and counts all actual Native predecessor calls and shared-memory writes.
 const F = -15055671n;
 const M = (1n << 127n) - 1n;
 const seedStones = [17n,29n,43n,71n,101n] as const;

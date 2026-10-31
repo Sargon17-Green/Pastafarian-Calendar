@@ -15,9 +15,21 @@ import type {Patch18Question} from "./patch18YearWalk.ts";
 // PATCH20 — जुना target वरचा चुकीचा sauce प्रत्यक्ष चालूच राहतो.
 // खरे वर्ष मिळाल्यावरच त्याच्या पहिल्या दिवसावर दुसरा sauce चालवा;
 // target आधीच पहिला दिवस असल्यास पुन्हा 58 shared writes करू नका.
+export type Patch20ProductionConstruction=Readonly<{
+  source:"PRODUCTION_C_T_NATIVE_FACTORY";
+  gateNativeCalls:number;
+  gateSharedWrites:bigint;
+  signedAnchorIndex:bigint|null;
+  anchorDiagnostics:"EXECUTED"|"SKIPPED_NO_REAL_STAGE16_ANCHOR";
+  oldAnchorCandidateCount:number;
+  oldMultiCandidateCount:number;
+  firstDayQuestionDeferred:true;
+}>;
 export type Patch20StructureRequest=Readonly<{
   historical:Discovery20StructureRequest;
   firstDaySauceQuestion?:Patch18Question;
+  firstDaySauceQuestionFactory?:(calculationDay:bigint,firstDay:bigint)=>Patch18Question;
+  productionConstruction?:Patch20ProductionConstruction;
 }>;
 export type Patch20StructureObservation=Readonly<{
   calculationDay:bigint;
@@ -39,6 +51,7 @@ export type Patch20StructureObservation=Readonly<{
   realStructureSauceCalls:1|2;
   totalRealPredecessorCalls:number;
   totalSharedMemoryWrites:bigint;
+  productionConstruction:Patch20ProductionConstruction|null;
   context:MonsterContext;
 }>;
 
@@ -53,8 +66,15 @@ export class Patch20StructureSauceHandler {
       throw new MonsterStageError("PATCH20 साठी READY/VALIDATED बाहेरचा संदर्भ आवश्यक");
     if(!q||!q.historical||!q.historical.yearQuestion||
        q.historical.yearQuestion.calculationDay!==ctx.calculationDay||
-       q.historical.yearQuestion.targetDay!==ctx.targetDay)
-      throw new MonsterValidationError("Stage40 मूळ प्रश्न संदर्भाशी जुळावा");
+       q.historical.yearQuestion.targetDay!==ctx.targetDay||
+       (q.firstDaySauceQuestion!==undefined&&q.firstDaySauceQuestionFactory!==undefined))
+      throw new MonsterValidationError("Stage40 मूळ प्रश्न संदर्भाशी जुळावा; first-day source एकच असावा");
+    if(q.productionConstruction!==undefined&&
+       (q.productionConstruction.source!=="PRODUCTION_C_T_NATIVE_FACTORY"||
+        !Number.isSafeInteger(q.productionConstruction.gateNativeCalls)||
+        q.productionConstruction.gateNativeCalls<0||
+        q.productionConstruction.gateSharedWrites!==BigInt(q.productionConstruction.gateNativeCalls)*58n))
+      throw new MonsterValidationError("production request Native call/write ledger विसंगत");
     // Entire Stage40 chain is actually invoked, including original bad
     // target-day sauce and its actual 46 drops/12 post-stirs/58 writes.
     const history=discoverLegacyStructureSauce(this.preceding,q.historical);
@@ -64,6 +84,12 @@ export class Patch20StructureSauceHandler {
        history.oldSauce.sharedMemoryWrites!==58||
        history.fullStage39.context.status!=="PATCH_19_APPLIED")
       throw new MonsterStageError("संपूर्ण Stage40 जुन्या sauce ची पुरावा साखळी हवी");
+    if(q.productionConstruction){
+      const measured=history.fullStage39.originalWrongHistory.preceding.authoritative;
+      if(measured.realGateQuestionCalls!==q.productionConstruction.gateNativeCalls||
+         q.productionConstruction.gateSharedWrites!==BigInt(measured.realGateQuestionCalls)*58n)
+        throw new MonsterStageError("Stage37 ने production gate prefix एकदाच वापरला पाहिजे");
+    }
     const firstDay=history.chosenYearFirstDay;
     if(firstDay!==history.yearOpenGateDay+1n||
        !(history.yearOpenGateDay<ctx.targetDay&&
@@ -72,7 +98,8 @@ export class Patch20StructureSauceHandler {
     const needsPatch=ctx.targetDay!==firstDay;
     let corrected:Patch11OrderObservation|null=null;
     if(needsPatch){
-      const source=q.firstDaySauceQuestion;
+      const source=q.firstDaySauceQuestionFactory?
+        q.firstDaySauceQuestionFactory(ctx.calculationDay,firstDay):q.firstDaySauceQuestion;
       if(!source||typeof source!=="object"||source.targetDay!==firstDay)
         throw new MonsterValidationError("खऱ्या पहिल्या दिवसासाठी स्वतंत्र 46-drop प्रश्न आवश्यक");
       corrected=patch11OrderLatch(ctx.calculationDay,firstDay,
@@ -103,12 +130,15 @@ export class Patch20StructureSauceHandler {
       totalRealPredecessorCalls:history.totalRealPredecessorCalls+(needsPatch?1:0),
       totalSharedMemoryWrites:history.totalSharedMemoryWrites+
         (needsPatch?58n:0n),
+      productionConstruction:q.productionConstruction??null,
       context:ctx
     });
     ctx.branchTrace.push("PATCH_20_FULL_STAGE40_OLD_TARGET_SAUCE_ACTUALLY_EXECUTED");
     ctx.branchTrace.push(needsPatch?
       "PATCH_20_FIRST_DAY_CORRECTED_58_WRITE_NATIVE_SAUCE":
       "PATCH_20_FIRST_DAY_EQUALS_TARGET_REUSE_GHOST");
+    if(q.productionConstruction)
+      ctx.branchTrace.push("PATCH_20_PRODUCTION_REQUEST_GATE_PREFIX_RECONCILED");
     ctx.branchTrace.push("PATCH_20_STRUCTURE_SAUCE_AUTHORITATIVE");
     this.metrics.bump(ctx,"patch20.calls");
     this.metrics.bump(ctx,"patch20.old_structure_sauce_calls");

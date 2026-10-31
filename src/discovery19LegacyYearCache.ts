@@ -5,7 +5,7 @@ import type {MonsterContext} from "./monsterBase.ts";
 import {patch18WalkYear} from "./patch18YearWalk.ts";
 import type {
   Patch18Year,Patch18YearWalkObservation,Patch18Question,
-  Patch18TransitionQuestionFactory
+  Patch18TransitionQuestionFactory,Patch18VerifiedGateWindow
 } from "./patch18YearWalk.ts";
 import type {Discovery15GateQuestion} from "./discovery15LegacyPositiveGate.ts";
 import type {Patch15SignedQuestion} from "./patch15SignedGate.ts";
@@ -66,7 +66,7 @@ export class LegacyYearNumberOnlyCache {
 }
 
 export type Discovery19Request=Readonly<{
-  calculationDay:bigint;targetDay:bigint;anchorGateIndex:bigint;
+  calculationDay:bigint;targetDay:bigint;anchorGateIndex:bigint|null;
   historicalPositive:readonly Discovery15GateQuestion[];
   signedQuestions:readonly Patch15SignedQuestion[];
   oldYearQuestion:Discovery15GateQuestion;
@@ -77,6 +77,7 @@ export type Discovery19Request=Readonly<{
   trueYearQuestion:Patch18Question;
   transitionQuestion:Patch18TransitionQuestionFactory;
   maximumSteps:number;
+  verifiedGateWindow?:Patch18VerifiedGateWindow;
 }>;
 export type Discovery19CacheObservation=Readonly<{
   calculationDay:bigint;targetDay:bigint;yearNumber:bigint;
@@ -120,7 +121,7 @@ export class Discovery19YearNumberCacheHandler {
       q.historicalPositive,q.signedQuestions,q.oldYearQuestion,
       q.oldAnchorCandidates,q.oldMultiCandidates,
       q.positive,q.negative,q.trueYearQuestion,
-      q.transitionQuestion,q.maximumSteps);
+      q.transitionQuestion,q.maximumSteps,q.verifiedGateWindow);
     if(preceding.context.status!=="PATCH_18_APPLIED"||
        preceding.authoritative.gateProvenance!=="PHYSICALLY_RECOMPUTED_SIGNED_GATES"||
        !preceding.authoritative.targetContained||
