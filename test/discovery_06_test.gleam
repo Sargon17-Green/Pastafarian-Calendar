@@ -28,7 +28,7 @@ pub fn discovery_06_count_test() {
 }
 
 pub fn discovery_06_seed_test() {
-  let assert [first, .._] = built()
+  let assert [first, ..] = built()
   first.wheat |> should.equal(17)
   first.barley |> should.equal(29)
   first.salt |> should.equal(43)
@@ -37,30 +37,32 @@ pub fn discovery_06_seed_test() {
 }
 
 pub fn discovery_06_second_test() {
-  let assert [_, second, .._] = built()
+  let assert [_, second, ..] = built()
   second.wheat |> should.equal(378)
   second.barley |> should.equal(1073)
   second.salt |> should.equal(2375)
   second.bitter |> should.equal(6195)
-  second.red |> should.equal(10493)
+  second.red |> should.equal(10_493)
 }
 
 pub fn discovery_06_third_test() {
-  let assert [_, _, third, .._] = built()
-  third.wheat |> should.equal(146106)
-  third.barley |> should.equal(1163582)
-  third.salt |> should.equal(5685063)
-  third.bitter |> should.equal(38495823)
-  third.red |> should.equal(110114158)
+  let assert [_, _, third, ..] = built()
+  third.wheat |> should.equal(146_106)
+  third.barley |> should.equal(1_163_582)
+  third.salt |> should.equal(5_685_063)
+  third.bitter |> should.equal(38_495_823)
+  third.red |> should.equal(110_114_158)
 }
 
 pub fn discovery_06_final_stone_test() {
-  let assert [last, .._] = list.reverse(built())
-  last.wheat |> should.equal(73799454308499791987382386781055001470)
-  last.barley |> should.equal(147925408106533232424672641008220632365)
-  last.salt |> should.equal(94499522601819303005579577099149028685)
-  last.bitter |> should.equal(108473647672201258090947028490673028834)
-  last.red |> should.equal(137131922036975206684616468948804344042)
+  let assert [last, ..] = list.reverse(built())
+  last.wheat |> should.equal(73_799_454_308_499_791_987_382_386_781_055_001_470)
+  last.barley
+  |> should.equal(147_925_408_106_533_232_424_672_641_008_220_632_365)
+  last.salt |> should.equal(94_499_522_601_819_303_005_579_577_099_149_028_685)
+  last.bitter
+  |> should.equal(108_473_647_672_201_258_090_947_028_490_673_028_834)
+  last.red |> should.equal(137_131_922_036_975_206_684_616_468_948_804_344_042)
 }
 
 pub fn discovery_06_full_independent_oracle_test() {
@@ -68,9 +70,10 @@ pub fn discovery_06_full_independent_oracle_test() {
 }
 
 pub fn discovery_06_modulus_invariant_test() {
-  let valid = list.all(observed_fields(), fn(fields) {
-    list.all(fields, fn(value) { value >= 1 && value <= core.m })
-  })
+  let valid =
+    list.all(observed_fields(), fn(fields) {
+      list.all(fields, fn(value) { value >= 1 && value <= core.m })
+    })
   valid |> should.equal(True)
 }
 
