@@ -1,0 +1,105 @@
+name: SQL Tamil Stage 2 Slice 10 Choose Rank Native
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'sql/12_stage02_choose_rank.sql'
+      - 'sql/test/100_stage02_choose_rank_native.sql'
+      - 'sql/test/101_stage02_choose_rank_differential.sql'
+      - '.github/workflows/sql-tamil-stage02-choose-rank-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  choose-rank-slice10:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-rank-logs
+          docker run --detach --name sql-tamil-rank-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-rank-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-rank-pg postgres --version | tee sql-tamil-rank-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-rank-logs/versions.txt
+      - name: Native choose-rank checks (100)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-rank-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/test/100_stage02_choose_rank_native.sql \
+            -c 'SELECT 1/((count(*)=100 AND bool_and(ok))::integer) AS native_100_of_100 FROM stage02_choose_rank_native' \
+            2>&1 | tee sql-tamil-rank-logs/native.txt
+      - name: Production-only isolation (4)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-rank-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c "CREATE TEMP TABLE rank_isolation AS SELECT * FROM (VALUES ('no-reference-schema',to_regnamespace('pastafari_sql_tamil_test') IS NULL), ('three-functions',(SELECT count(*)=3 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('choose_rank_short','choose_rank_wide','choose_rank'))), ('no-reference-calls',(SELECT count(*)=0 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('choose_rank_short','choose_rank_wide','choose_rank') AND position('pastafari_sql_tamil_test' IN pg_get_functiondef(p.oid))>0)), ('sql-immutable',(SELECT count(*)=3 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('choose_rank_short','choose_rank_wide','choose_rank') AND l.lanname='sql' AND p.provolatile='i')) ) AS t(label,ok)" \
+            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM rank_isolation' \
+            2>&1 | tee sql-tamil-rank-logs/isolation.txt
+      - name: Create isolated reference database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-rank-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'CREATE DATABASE sql_tamil_rank_differential'
+      - name: Differential choose-rank checks (62)
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-rank-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_rank_differential \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql/test/101_stage02_choose_rank_differential.sql \
+            -c 'SELECT 1/((count(*)=62 AND bool_and(ok))::integer) AS differential_62_of_62 FROM stage02_choose_rank_differential' \
+            2>&1 | tee sql-tamil-rank-logs/differential.txt
+      - name: Preserve bounded logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice10-choose-rank
+          path: sql-tamil-rank-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-rank-pg 2>/dev/null || true
