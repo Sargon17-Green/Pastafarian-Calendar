@@ -63,13 +63,9 @@ pub fn discovery_10_bigint_both_directions_test() {
 
 pub fn discovery_10_modulus_range_test() {
   let huge = 1_000_000_000_000_000_000_000_000_000_000
-  list.all(observed(huge, -huge), fn(value) {
-    value >= 1 && value <= core.m
-  })
+  list.all(observed(huge, -huge), fn(value) { value >= 1 && value <= core.m })
   |> should.equal(True)
-  list.all(observed(-huge, huge), fn(value) {
-    value >= 1 && value <= core.m
-  })
+  list.all(observed(-huge, huge), fn(value) { value >= 1 && value <= core.m })
   |> should.equal(True)
 }
 
