@@ -56,8 +56,7 @@ void main() {
         (value - residue) % divisor == BigInt.zero,
         'Euclidean congruence',
       );
-      final integerWitness =
-          ((number % divisorInt) + divisorInt) % divisorInt;
+      final integerWitness = ((number % divisorInt) + divisorInt) % divisorInt;
       _check(
         residue == BigInt.from(integerWitness),
         'Independent integer witness',
