@@ -1,4 +1,4 @@
-use NormativeOracle only BoundedCompositionCounter;
+use NormativeOracle only BoundedCompositionCounter, CutletPartitionCounter;
 
 proc bruteThreeSlotCount(total: int, lo: int, hi: int): int {
   var resultValue = 0;
@@ -45,4 +45,42 @@ proc main() {
     halt("The bounded-composition cache-reconfiguration fix did not match its contract.");
 
   writeln("BOUNDED_COMPOSITION_CACHE_REUSE_FIXED=PASS");
+
+  var cutletReused: CutletPartitionCounter;
+  cutletReused.totalGaps = 5;
+  cutletReused.slotsTotal = 3;
+  cutletReused.requiredBoundary = -1;
+  const cutletInitial = cutletReused.countAll();
+  const cutletInitialOracle = bruteThreeSlotCount(5, 1, 3);
+
+  cutletReused.requiredBoundary = 2;
+  const cutletReconfigured = cutletReused.countAll();
+  var cutletFresh: CutletPartitionCounter;
+  cutletFresh.totalGaps = 5;
+  cutletFresh.slotsTotal = 3;
+  cutletFresh.requiredBoundary = 2;
+  const cutletFreshCount = cutletFresh.countAll();
+
+  var cutletBoundaryOracle = 0;
+  for a in 1..5 {
+    for b in 1..5 {
+      for c in 1..5 {
+        if a + b + c == 5 && (a == 2 || a + b == 2) then
+          cutletBoundaryOracle += 1;
+      }
+    }
+  }
+
+  writeln("CUTLET_CACHE_INITIAL_DP=", cutletInitial);
+  writeln("CUTLET_CACHE_INITIAL_ORACLE=", cutletInitialOracle);
+  writeln("CUTLET_CACHE_REUSED_DP=", cutletReconfigured);
+  writeln("CUTLET_CACHE_BOUNDARY_ORACLE=", cutletBoundaryOracle);
+  writeln("CUTLET_CACHE_FRESH_DP=", cutletFreshCount);
+
+  if cutletInitial != 6 || cutletInitialOracle != 6 ||
+     cutletReconfigured != 6 || cutletBoundaryOracle != 3 ||
+     cutletFreshCount != 3 then
+    halt("The cutlet-partition cache-reconfiguration witness did not match its contract.");
+
+  writeln("CUTLET_PARTITION_CACHE_REUSE_WITNESS=REPRODUCED");
 }
