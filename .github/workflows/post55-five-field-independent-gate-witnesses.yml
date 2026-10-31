@@ -1,0 +1,84 @@
+name: Post55 independent gate-neighbor five-field diagnostic
+
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/audit_five_component_gate_witnesses.py'
+      - 'soak/test_audit_five_component_gate_witnesses.py'
+      - '.github/workflows/post55-five-field-independent-gate-witnesses.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-gate-neighbor-five-fields:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      PASTAFARIAN_PYTHON_SRC: ${{ github.workspace }}/pinned-python/src
+    steps:
+      - name: Checkout exact Kotlin-Cymraeg branch SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: audited-kotlin
+          persist-credentials: false
+      - name: Checkout separate pinned Python source
+        uses: actions/checkout@v4
+        with:
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: pinned-python
+          persist-credentials: false
+      - name: Verify both SHA pins and execute 8 synthetic contracts
+        working-directory: audited-kotlin
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C ../pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
+          python3 -m unittest discover -s soak -p test_audit_five_component_gate_witnesses.py -v
+      - name: Install pinned Kotlin compiler 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin.zip"
+          unzip -q "$RUNNER_TEMP/kotlin.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile complete Kotlin production plus real date bridge
+        working-directory: audited-kotlin
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc src/main/kotlin/pastafari/*.kt \
+            soak/Post55ProductionDateBridge.kt \
+            -include-runtime -d "$RUNNER_TEMP/production-date.jar"
+          test -s "$RUNNER_TEMP/production-date.jar"
+      - name: Compare five date components at seven independent signed gate-neighbors
+        working-directory: audited-kotlin
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/audit_five_component_gate_witnesses.py \
+            --kotlin-command "java -XX:ActiveProcessorCount=1 -Xmx1200m -Xss8m -cp $RUNNER_TEMP/production-date.jar pastafari.Post55ProductionDateBridge" \
+            --python-command "python3 soak/python_turkce_bridge.py" \
+            --timeout-seconds 120 --total-seconds 540 \
+            --evidence "$RUNNER_TEMP/post55-independent-gate-neighbor-five-fields.json" \
+            | tee "$RUNNER_TEMP/post55-independent-gate-neighbor-five-fields.log"
+      - name: Preserve diagnostic JSON even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post55-independent-gate-neighbor-five-fields
+          path: |
+            ${{ runner.temp }}/post55-independent-gate-neighbor-five-fields.json
+            ${{ runner.temp }}/post55-independent-gate-neighbor-five-fields.log
+          if-no-files-found: warn
+          retention-days: 30
