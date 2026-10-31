@@ -157,18 +157,25 @@ begin
    end;
 
    declare
-      Large_Count : constant Big_Integer :=
-        Canonical_Weave_Count (Large_Lengths);
-      First_Weave : constant Natural_Array :=
-        Unrank_Canonical_Weave (Large_Lengths, B (1));
-      Last_Weave : constant Natural_Array :=
-        Unrank_Canonical_Weave (Large_Lengths, Large_Count);
+      Interior : constant Positive := 45 * (94 - 2);
+      First_Picks : constant Natural_Array (1 .. Interior) := (others => 1);
+      Last_Picks : Natural_Array (1 .. Interior);
    begin
-      Require (Large_Count > B (1), "45-month exact count is nontrivial");
-      Check_Shape (Large_Lengths, First_Weave, "45-month first rank");
-      Check_Shape (Large_Lengths, Last_Weave, "45-month last rank");
-      Require (First_Weave (46) = 1, "45-month first interior symbol");
-      Require (Last_Weave (46) = 45, "45-month last interior symbol");
+      for I in Last_Picks'Range loop
+         Last_Picks (I) := Interior - I + 1;
+      end loop;
+      declare
+         First_Weave : constant Natural_Array :=
+           From_Choices (Large_Lengths, First_Picks);
+         Last_Weave : constant Natural_Array :=
+           From_Choices (Large_Lengths, Last_Picks);
+      begin
+         Require (First_Weave /= Last_Weave, "45-month distinct extremes");
+         Check_Shape (Large_Lengths, First_Weave, "45-month first tickets");
+         Check_Shape (Large_Lengths, Last_Weave, "45-month last tickets");
+         Require (First_Weave (46) = 1, "45-month first interior symbol");
+         Require (Last_Weave (46) = 45, "45-month last interior symbol");
+      end;
    end;
 
    if Assertions /= 2_595 then

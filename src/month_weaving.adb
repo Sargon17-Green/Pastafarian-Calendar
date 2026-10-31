@@ -20,6 +20,65 @@ package body Month_Weaving is
       end loop;
    end Validate_Lengths;
 
+   function From_Choices
+     (Lengths : Natural_Array; Picks : Natural_Array) return Natural_Array
+   is
+      Total : Natural := 0;
+   begin
+      Validate_Lengths (Lengths);
+      for J in Lengths'Range loop
+         Total := Total + Lengths (J);
+      end loop;
+      declare
+         Slots : Natural := Total - 2 * Lengths'Length;
+         Remains : Natural_Array (Lengths'Range);
+         Output : Natural_Array (1 .. Total);
+         Pos : Positive := 1;
+      begin
+         if Picks'First /= 1 or else Picks'Length /= Slots then
+            raise Constraint_Error with "invalid ticket array";
+         end if;
+         for J in Lengths'Range loop
+            Output (Pos) := J;
+            Pos := Pos + 1;
+            Remains (J) := Lengths (J) - 2;
+         end loop;
+         for I in Picks'Range loop
+            if Picks (I) < 1 or else Picks (I) > Slots then
+               raise Constraint_Error with "ticket outside remaining slots";
+            end if;
+            declare
+               Ticket : Natural := Picks (I);
+               Found : Boolean := False;
+            begin
+               for J in Remains'Range loop
+                  if Ticket > Remains (J) then
+                     Ticket := Ticket - Remains (J);
+                  else
+                     Output (Pos) := J;
+                     Pos := Pos + 1;
+                     Remains (J) := Remains (J) - 1;
+                     Found := True;
+                     exit;
+                  end if;
+               end loop;
+               if not Found then
+                  raise Program_Error with "ticket decode failed";
+               end if;
+            end;
+            Slots := Slots - 1;
+         end loop;
+         for J in Lengths'Range loop
+            Output (Pos) := J;
+            Pos := Pos + 1;
+         end loop;
+         if Pos /= Total + 1 or else Slots /= 0 then
+            raise Program_Error with "invalid weave length";
+         end if;
+         return Output;
+      end;
+   end From_Choices;
+
    function Canonical_Weave_Count (Lengths : Natural_Array) return Big_Integer is
       Total : Natural := 0;
       Denominator : Big_Integer := B (1);

@@ -1091,23 +1091,34 @@ package body Normative_Oracle is
       Stage13_Trace
         ("month_weave_begin_M=" & Natural'Image (M_Count) &
          "_T=" & Natural'Image (Total));
-      Stage13_Trace ("month_weave_count_begin");
-      declare
-         Ways : constant Big_Integer :=
-           Month_Weaving.Canonical_Weave_Count (Lengths);
-         Rank : constant Big_Integer := Choose_Rank
-           (Ask_Bowl (Structure_R, 4, Seal_Month_Weaving), Ways);
-      begin
-         Stage13_Trace ("month_weave_count_done");
-         Stage13_Trace ("month_weave_unrank_begin");
-         declare
-            Result : constant Natural_Array :=
-              Month_Weaving.Unrank_Canonical_Weave (Lengths, Rank);
-         begin
-            Stage13_Trace ("month_weave_unrank_done");
-            return Result;
-         end;
-      end;
+       -- Exact 45-way multinomials exceed GNAT's bounded Big_Integer.
+       Stage13_Trace ("month_weave_tickets_begin");
+       declare
+          Interior : constant Natural := Total - 2 * M_Count;
+          Tickets : Natural_Array (1 .. Interior);
+          Stream : constant Answer_Stream :=
+            Ask_Bowl (Structure_R, 4, Seal_Month_Weaving);
+       begin
+          for I in Tickets'Range loop
+             declare
+                Slots : constant Positive := Positive (Interior - I + 1);
+                Shifted : constant Answer_Stream :=
+                  (First => Answer_At (Stream, B (I - 1)),
+                   Direction_Step => Stream.Direction_Step);
+             begin
+                Tickets (I) :=
+                  To_Natural_Checked (Choose_Rank (Shifted, B (Slots)), Slots);
+             end;
+          end loop;
+          Stage13_Trace ("month_weave_tickets_done");
+          declare
+             Result : constant Natural_Array :=
+               Month_Weaving.From_Choices (Lengths, Tickets);
+          begin
+             Stage13_Trace ("month_weave_reconstruction_done");
+             return Result;
+          end;
+       end;
    end Choose_Month_Weaving;
 
    function Calendar_Date

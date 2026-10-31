@@ -8,6 +8,10 @@ package Month_Weaving is
    -- Exact size of the canonical two-rail family for the supplied lengths.
    function Canonical_Weave_Count (Lengths : Natural_Array) return Big_Integer;
 
+   -- Each pick selects 1 .. remaining interior slots, avoiding giant counts.
+   function From_Choices
+     (Lengths : Natural_Array; Picks : Natural_Array) return Natural_Array;
+
    -- One-based lexicographic unranking of the canonical two-rail family.
    function Unrank_Canonical_Weave
      (Lengths : Natural_Array; Rank : Big_Integer) return Natural_Array;
