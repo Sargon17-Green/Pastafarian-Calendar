@@ -1436,11 +1436,13 @@ RunOwnerSignedCmpTests::
     or a
     jp nz, .fail
 
-    ; 252: valid 8192-byte A vs noncanonical 8193-byte B.
+    ; 252: positive canonical A vs negative noncanonical B.
+    ; Fail closed before any opposite-sign ordering can short-circuit validation.
     ld a, 252
     ld [wTestCase], a
     xor a
     ld [wOwnerCmpSignA], a
+    inc a
     ld [wOwnerCmpSignB], a
     call OwnerCmpTestSwapLength16
     call OwnerCmpTestSnapshot
@@ -1453,7 +1455,7 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
-    ; 253: reverse A/B so the invalid full-length descriptor is validated first.
+    ; 253: reverse lengths: positive noncanonical A vs negative canonical B.
     ld a, 253
     ld [wTestCase], a
     call OwnerCmpTestSwapLength16
