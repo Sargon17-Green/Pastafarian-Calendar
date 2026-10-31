@@ -60,6 +60,9 @@ jobs:
           fi
           grep -Fq 'STAGE04_DISCOVERY02_BASELINE_CASES=7' evidence/stdout.txt
           grep -Fq 'STAGE04_DISCOVERY02_HUGE_CASES=4' evidence/stdout.txt
+          grep -Fq 'STAGE04_DISCOVERY02_BIJECTION_CASES=1025' evidence/stdout.txt
+          grep -Fq 'STAGE04_DISCOVERY02_SYMMETRIC_HUGE_CASES=8' evidence/stdout.txt
+          grep -Eq 'test result: ok\. 2 passed; 0 failed' evidence/stdout.txt
           grep -Fq 'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' evidence/stdout.txt
           grep -Fq 'STAGE03_PATCH01_BOUNDARY_OK=8' evidence/stdout.txt
           grep -Eq 'test result: ok\. 16 passed; 0 failed' evidence/stdout.txt
