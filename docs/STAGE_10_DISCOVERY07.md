@@ -10,3 +10,6 @@ Expected assertion count: 46 x 5 + 8 x (5 + 7) = **326**. The marker is STAGE10_
 
 ## Gate
 Ubuntu 24.04 GNAT 13, bounded job native-stage10-discovery07 with 15-minute timeout and sh ./run_stage10_discovery07.sh. Accept only if verify and native-stage10-discovery07 both completed/success at identical HEAD with GNAT compile/bind/link and marker 326. A queued/in_progress run is neither PASS nor blocker. Log any actual mismatch before PATCH. No main/merge/publish; native CI available, so no user-run package.
+
+## Native acceptance (2026-10-31)
+[Actions 41193463674](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41193463674) completed/success on be8f4dff83f2acb4a2fc73436f2e1ec1f0477eec, 11/11 jobs, including verify and [GNAT 13 native job 124514787378](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41193463674/job/124514787378). Compile/bind/link and STAGE10_DISCOVERY07_ASSERTIONS= 326 were observed. Bounded Stage10 gate accepted; Stage11 visible drops not covered by this acceptance.
