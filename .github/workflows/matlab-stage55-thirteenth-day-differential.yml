@@ -1,0 +1,72 @@
+name: MATLAB Stage55 Thirteenth Day Native Python Differential
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/run_stage55_year5000_thirteenth_native.m'
+      - 'tools/stage55_after13_interval_five_fields.py'
+      - '.github/workflows/matlab-stage55-thirteenth-day-differential.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: stage55-thirteenth-day-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  thirteenth-day:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Download certified AFTER12 checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-twelfth-day-differential
+          run-id: 41215080520
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Verify pinned AFTER12
+        run: |
+          echo 'b63255d43acd4607652555b420f4e18729b0c871754b969d4c1cee7a0857fe07  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_12.json' | sha256sum -c -
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native thirteenth-day exact cursor and PATCH25 projection
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tools'); run_stage55_year5000_thirteenth_native
+      - name: Python independent child intervals and strict five-field diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/stage55_after13_interval_five_fields.py \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_12.json \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_13.json \
+            tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            | tee logs/STAGE55_THIRTEENTH_PYTHON.log
+          grep '^STAGE55_THIRTEENTH_ROW ' logs/STAGE55_THIRTEENTH_PYTHON.log > logs/STAGE55_THIRTEENTH_PYTHON_ROW.txt
+          grep '^STAGE55_THIRTEENTH_ROW ' logs/STAGE55_THIRTEENTH_NATIVE.log > logs/STAGE55_THIRTEENTH_NATIVE_ROW.txt
+          test "$(wc -l < logs/STAGE55_THIRTEENTH_PYTHON_ROW.txt)" -eq 1
+          test "$(wc -l < logs/STAGE55_THIRTEENTH_NATIVE_ROW.txt)" -eq 1
+          diff -u logs/STAGE55_THIRTEENTH_PYTHON_ROW.txt logs/STAGE55_THIRTEENTH_NATIVE_ROW.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_13.json | tee logs/STAGE55_THIRTEENTH_DIGEST.txt
+          echo 'STAGE55_THIRTEENTH_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
+      - name: Preserve PASS or FAIL artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-thirteenth-day-differential
+          path: |
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_12.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_13.json
+            logs/STAGE55_THIRTEENTH_NATIVE.log
+            logs/STAGE55_THIRTEENTH_PYTHON.log
+            logs/STAGE55_THIRTEENTH_PYTHON_ROW.txt
+            logs/STAGE55_THIRTEENTH_NATIVE_ROW.txt
+            logs/STAGE55_THIRTEENTH_DIGEST.txt
+          if-no-files-found: warn
+          retention-days: 30
