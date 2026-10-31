@@ -811,3 +811,16 @@ AWAITING_NATIVE sehingga CI semua pekerjaan berjaya pada SHA baharu.
 ## Stage41 Native closure; Stage42 DISCOVERY21 opened — 31 October 2026
 
 Stage41 run 41187047640 completed/success, 12/12 jobs on 63913fe8620d4fd55be66a823438373c925d98f4. Native job 124495979107: PHP 8.3.36 64-bit, 40 checks, genuine_years=3, real_targets=7, stage40_red=2, invalid=11; stdout verified, stderr empty, exit=0; artifact 13038001082. Closed Stage41 in artifacts/STAGE41_PATCH20_NATIVE_CLOSURE_2026-10-31.md. Stage42 opened as TEST-ONLY hypothesis on anchor-number provenance: forged labels on physical Year4999/5001 with real gate days. No claim of a confirmed defect until native evidence; this explicitly violates the trusted-anchor caller precondition and is an interface boundary experiment. Stage41 code/main/oracle unchanged. CI outcome of Stage42 pending.
+
+
+## 2026-10-31 — PHP+Bahasa-Melayu Stage42 Native closed; Stage43/PATCH21 open
+Stage42 on c4e14f56d9021f53be572d93761541581cf55faa run #41192299864 completed/success 13/13;
+PHP 8.3.36/64-bit job #124511375213, controls=12 candidates=2
+reproduced=2 rejected=0, exit=0, empty stderr. Two deliberately
+untrusted Year5001/4999 anchors relabelled Year5000 were accepted by
+PATCH20, violating the stated caller precondition, not proving
+bad behavior on valid trusted anchors. Evidence artifact #13039146723.
+Stage43 adds a distinct opt-in route with independent canonical Year5000
+provider, field identity verification, 7 real year targets, archived
+Stage42 witnesses, 10 negative cases and Native CI. No test Oracle in src.
+Stage43 Native result pending. No main/merge or full five-component PASS.
