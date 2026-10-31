@@ -40,7 +40,8 @@ pub fn discovery_08_nontrivial_oracle_test() {
 
 pub fn discovery_08_reverse_direction_oracle_test() {
   observed(21, 11) |> should.equal(expected(21, 11))
-  observed(21, 11) == observed(11, 21) |> should.equal(False)
+  let same = observed(21, 11) == observed(11, 21)
+  same |> should.equal(False)
 }
 
 pub fn discovery_08_foundation_crossing_oracle_test() {
