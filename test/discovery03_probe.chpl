@@ -712,6 +712,75 @@ proc probeFourExpandedMonthWeavings() {
   }
 }
 
+// Independent fifth-month dimension: five months of length two.
+// Generate complete words in lexical order from remaining multiplicities,
+// filter by increasing first/last occurrence only after completion. The
+// expected oracle never invokes production DP transitions or unrank1.
+proc enumerateFiveShortMonthWeavings(ref positions: [0..9] int,
+                                     step: int,
+                                     ref used: [1..5] int,
+                                     ref candidateCount: int,
+                                     ref oracle: list(string)) {
+  if step == 10 {
+    candidateCount += 1;
+    var first: [1..5] int;
+    var last: [1..5] int;
+    for p in 0..9 {
+      const monthId = positions[p];
+      if first[monthId] == 0 then first[monthId] = p + 1;
+      last[monthId] = p + 1;
+    }
+    var legal = true;
+    for monthId in 1..4 {
+      if first[monthId] >= first[monthId + 1] ||
+         last[monthId] >= last[monthId + 1] then legal = false;
+    }
+    if legal {
+      var key = "";
+      for monthId in positions do key += monthId:string;
+      oracle.pushBack(key);
+    }
+    return;
+  }
+  for monthId in 1..5 {
+    if used[monthId] >= 2 then continue;
+    positions[step] = monthId;
+    used[monthId] += 1;
+    enumerateFiveShortMonthWeavings(positions, step + 1, used,
+                                    candidateCount, oracle);
+    used[monthId] -= 1;
+  }
+}
+
+proc probeFiveShortMonthWeavings() {
+  var lengths = new list(int);
+  for monthId in 1..5 do lengths.pushBack(2);
+  var tested: WeavingCounter;
+  tested.lengths = lengths;
+
+  var positions: [0..9] int;
+  var used: [1..5] int;
+  var independentOracle = new list(string);
+  var candidates = 0;
+  enumerateFiveShortMonthWeavings(positions, 0, used,
+                                  candidates, independentOracle);
+
+  check(candidates == 113400,
+        "П'ять місяців 2+2+2+2+2: повний перелік 113400 слів");
+  check(independentOracle.size == 42,
+        "П'ять місяців 2+2+2+2+2: 42 законних слова, Catalan(5)");
+  check(tested.countAll() == independentOracle.size,
+        "П'ять місяців: потужність DP проти прямого переліку");
+  for index0 in independentOracle.indices {
+    const rank = index0 + 1;
+    const actual = tested.unrank1(new bigint(rank));
+    var key = "";
+    for monthId in actual do key += monthId:string;
+    check(actual.size == 10 && key == independentOracle[index0],
+          "П'ять місяців: незалежний лексикографічний ранг=" + rank:string);
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -726,6 +795,7 @@ proc main() {
   probeFourBridgeMonthWeavings();
   probeFourInnerMonthWeavings();
   probeFourExpandedMonthWeavings();
+  probeFiveShortMonthWeavings();
   probeHistoricalControls();
   writeln("DISCOVERY03_PROBE_CHECKS=", checks);
   writeln("DISCOVERY03_PROBE_FAILURES=", failures);
