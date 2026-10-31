@@ -233,3 +233,16 @@ jobs:
         run: |
           set -euo pipefail
           sh ./run_stage13_discovery10.sh
+
+  stage14-synthetic:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify independent synthetic five-field check count
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/stage14_fivefield_oracle.py | tee stage14-synthetic.log
+          grep -Fx 'STAGE14_SYNTHETIC_FIVEFIELD_ASSERTIONS=61' stage14-synthetic.log
