@@ -69,13 +69,7 @@ pub fn discovery_11_modulus_bounds_test() {
 
 pub fn discovery_11_single_drop_synchronous_sentinel_test() {
   let stone =
-    discovery_06_stones.Stone(
-      wheat: 1,
-      barley: 2,
-      salt: 3,
-      bitter: 4,
-      red: 5,
-    )
+    discovery_06_stones.Stone(wheat: 1, barley: 2, salt: 3, bitter: 4, red: 5)
   discovery_11_pouring.pour_single_drop([1, 2, 3, 4, 5, 6], 1, stone, 1)
   |> should.equal([737, 693, 1643, 979, 1494, 472])
   observed(-100, 100) |> should.equal(observed(-100, 100))

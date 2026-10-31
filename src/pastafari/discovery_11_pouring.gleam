@@ -162,13 +162,7 @@ fn run_drops(
     [drop, ..remaining_drops], [stone, ..remaining_stones] -> {
       let order = discovery_07_bowls.bowl_order_from_drop(drop)
       let next = pour_with_order(bowls, drop, stone, index, order)
-      run_drops(
-        index + 1,
-        remaining_drops,
-        remaining_stones,
-        next,
-        order,
-      )
+      run_drops(index + 1, remaining_drops, remaining_stones, next, order)
     }
     _, _ -> panic as "Malsama nombro de gutoj kaj ŝtonoj"
   }
@@ -196,7 +190,10 @@ pub fn dispatch_discovery_11(
     Error(error) -> Error(error)
     Ok(completed) -> {
       let #(bowls, order) =
-        pour_visible_drops_for_days(completed.calculation_day, completed.target_day)
+        pour_visible_drops_for_days(
+          completed.calculation_day,
+          completed.target_day,
+        )
       Ok(Discovery11Output(
         context: completed,
         bowls: bowls,
