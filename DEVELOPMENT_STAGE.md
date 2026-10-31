@@ -340,3 +340,10 @@ STAGE15_CORRECTION=EXPLICIT_BIG_INTEGER_SERVICE_HEAP_LIVE_PROBE_AND_CI_MARKER_GA
 STAGE15_NATIVE=RETEST_REQUIRED_FOR_HEAP_LIVE_VALIDATION
 STAGE16_CONTRACT=docs/STAGE_16_DISCOVERY_12_SIGNED_ZERO_NORMALIZATION_CONTRACT_2026-10-31.md
 STAGE16_STATUS=DRAFT_NOT_STARTED_PENDING_STAGE15_RETEST
+
+# CI diagnostic 2026-10-31: run 41222100281 completed/failure with 0 jobs.
+# Cause: generated replacement text interpreted "$'" shell-regex suffix as JavaScript replace substitution, truncating a YAML line and duplicating tail.
+# Fix: rebuild workflow from known-good SHA ce2caffedb0b9c994dc48211388d6c73d51cf0f9 via literal split/join; only insert measured-heap grep. No native code was executed by failed run.
+STAGE15_YAML_DIAGNOSTIC_RUN=41222100281
+STAGE15_YAML_DIAGNOSTIC_JOBS=0
+STAGE15_YAML_REPAIR=REBUILT_FROM_VERIFIED_PARENT_WITH_LITERAL_REPLACEMENT
