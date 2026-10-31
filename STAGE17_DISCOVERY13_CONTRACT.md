@@ -1,6 +1,6 @@
 # Stadio 17 — DISCOVERY 13: la sekva bovlo laŭ konservita ordo
 
-**Stato 2026-10-31:** nur kontrakto. Neniu produktkodo, Stage17-testaro aŭ Stage17 Native PASS. Stage16-kodo `30c590f13376a33c2239accd4c72fa6a3977fc51` estas GREEN: 166/166 Native, formatter/source integrity PASS, Names Lock SUCCESS; Stage16 dokumenta HEAD post ĉi tiu kontrakto postulas apartan CI-konkludon.
+**Stato 2026-10-31:** Stage17 produktkodo kaj 12 testoj konfirmitaj ĉe `26a44311c764c4b6e5d0205c93a4e92f4bf6f3d8`: Gleam 1.18.1 / OTP 28 Native run `41239196546`, job `124649317545`, 178/178 PASS, format kaj source integrity PASS, artefakto `13056792745` SHA256 `c0d9c9aa9f45ee3378730ac4d3997accad3ed8d496b9b1bade011230a7e7c5da`; Names Lock run `41239196481`, job `124649317353`, SUCCESS. Ĉi tiu posta dokumenta HEAD bezonas apartan CI-kontrolon; nenio ĉi tie pruvas ĝian rezulton.
 
 ## Motivo kaj amplekso
 
@@ -35,7 +35,7 @@ Plani 12 funkciojn en `test/discovery_13_test.gleam`:
 11. Interplektitaj validaj kuntekstoj konservas proprajn diagnozojn, staton, ordon kaj bovlojn.
 12. Retry/recovery-eraro-prioritato inkluzive de malvalida identigilo kaj du samtempaj eraroj.
 
-Konservu ĉiujn 166 Stage16-testojn; 178/178 estas prognozo, ne Native-mezuro. La testoj devas ĉefe uzi rektan referencan orakolon, sed kontroli ankaŭ la 6-ciklan strukturon sen orakola dependeco.
+Konservitaj ĉiuj 166 Stage16-testoj; la 12 novaj testoj kaj ĉiuj 166 regresiaj testoj pasis Native (178/178) ĉe la kontrolita koda SHA. La testoj devas ĉefe uzi rektan referencan orakolon, sed kontroli ankaŭ la 6-ciklan strukturon sen orakola dependeco.
 
 ## Akcepto
 
