@@ -91,6 +91,13 @@ jobs:
             build/normative_oracle_core.o \
             build/normative_oracle_calendar.o \
             -o build/stage01_normative_first_day_probe
+          gfortran "${flags[@]}" test/stage01_weaving_microprobe.f90 \
+            build/big_integer.o \
+            build/source_language_catalog.o \
+            build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o \
+            -o build/stage01_weaving_microprobe
+          test -x build/stage01_weaving_microprobe
           test -x build/stage01_normative_first_day_probe
       - name: Run bounded Stage 1 Oracle smoke (55 selected assertions; not full acceptance)
         shell: bash
@@ -279,6 +286,19 @@ jobs:
             echo 'STAGE01_PHASE_DIAGNOSTIC_VERDICT=INCONCLUSIVE_OR_FAIL'
           fi
           echo "Fortran Stage1 first-day phase diagnosis: exit=$exit_code, ${elapsed}s, ${last_phase:-NONE}; no full acceptance." >> "$GITHUB_STEP_SUMMARY"
+      - name: Independently validate bounded weaving count/unrank (24 assertions; no full acceptance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(timeout --signal=TERM --kill-after=3s 10s build/stage01_weaving_microprobe 2>&1)"
+          printf '%s\n' "$output"
+          grep -Fxq 'STAGE01_WEAVING_MICRO_ASSERTIONS=24' <<< "$output"
+          grep -Fxq 'STAGE01_WEAVING_MICRO_FAILURES=0' <<< "$output"
+          grep -Fxq 'STAGE01_WEAVING_MICRO_PASS (six exhaustive small fixtures; NOT full Stage 1 acceptance)' <<< "$output"
+          actual="$(grep -c '^PASS: ' <<< "$output")"
+          test "$actual" -eq 24
+          echo "STAGE01_WEAVING_MICRO_NATIVE_PASS=$actual EXPECTED=24 (NOT full Stage 1 acceptance)"
+          echo "Fortran Stage 1 weaving count/unrank: $actual/24 bounded independent checks; no full acceptance." >> "$GITHUB_STEP_SUMMARY"
       - name: Run bounded Stage 1 BigInt safe-boundary checks
         shell: bash
         run: |

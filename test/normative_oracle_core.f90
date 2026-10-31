@@ -67,6 +67,8 @@ module normative_oracle_core
 
   type :: WeaveMemo
      type(WeaveMemoEntry), allocatable :: entries(:)
+     integer, allocatable :: buckets(:)
+     integer :: used = 0
   end type WeaveMemo
 
   public :: normative_M, foundation_day, tablets_day
@@ -607,28 +609,89 @@ contains
     if (remaining(j)==0) closed=j
   end subroutine applyMove
 
+  ! Open-addressed memo: exact state equality is checked after each hash match.
+  ! Capacity doubles geometrically rather than copying the complete table per insert.
+  integer(int64) function weaveHash(remaining,opened,closed) result(h)
+    integer, intent(in) :: remaining(:),opened,closed
+    integer :: i
+    integer(int64), parameter :: prime=2147483629_int64
+    h=modulo(131_int64*int(opened,int64)+int(closed,int64)+17_int64,prime)
+    do i=1,size(remaining)
+       h=modulo(131_int64*h+int(remaining(i),int64)+int(i,int64),prime)
+    end do
+  end function weaveHash
+
   integer function findMemo(memo,remaining,opened,closed)
     type(WeaveMemo), intent(in) :: memo
     integer, intent(in) :: remaining(:),opened,closed
-    integer :: i
+    integer :: i,j,step,capacity
     findMemo=0
-    do i=1,size(memo%entries)
-       if (memo%entries(i)%openedUpTo/=opened .or. memo%entries(i)%closedUpTo/=closed) cycle
-       if (size(memo%entries(i)%remaining)/=size(remaining)) cycle
-       if (all(memo%entries(i)%remaining==remaining)) then; findMemo=i; return; end if
+    if (.not.allocated(memo%buckets)) return
+    capacity=size(memo%buckets)
+    i=int(modulo(weaveHash(remaining,opened,closed),int(capacity,int64)))+1
+    do step=1,capacity
+       j=memo%buckets(i)
+       if (j==0) return
+       if (memo%entries(j)%openedUpTo==opened .and. memo%entries(j)%closedUpTo==closed) then
+          if (size(memo%entries(j)%remaining)==size(remaining)) then
+             if (all(memo%entries(j)%remaining==remaining)) then
+                findMemo=j
+                return
+             end if
+          end if
+       end if
+       i=modulo(i,capacity)+1
     end do
   end function findMemo
+
+  subroutine rehashMemo(memo,newCapacity)
+    type(WeaveMemo), intent(inout) :: memo
+    integer, intent(in) :: newCapacity
+    integer, allocatable :: newBuckets(:)
+    integer :: i,j
+    allocate(newBuckets(newCapacity))
+    newBuckets=0
+    do j=1,memo%used
+       i=int(modulo(weaveHash(memo%entries(j)%remaining, &
+            memo%entries(j)%openedUpTo,memo%entries(j)%closedUpTo),int(newCapacity,int64)))+1
+       do while (newBuckets(i)/=0)
+          i=modulo(i,newCapacity)+1
+       end do
+       newBuckets(i)=j
+    end do
+    call move_alloc(newBuckets,memo%buckets)
+  end subroutine rehashMemo
 
   subroutine putMemo(memo,remaining,opened,closed,count)
     type(WeaveMemo), intent(inout) :: memo
     integer, intent(in) :: remaining(:),opened,closed
     type(BigInt), intent(in) :: count
     type(WeaveMemoEntry), allocatable :: tmp(:)
-    integer :: n
-    n=size(memo%entries); allocate(tmp(n+1))
-    if (n>0) tmp(1:n)=memo%entries
-    tmp(n+1)%remaining=remaining; tmp(n+1)%openedUpTo=opened; tmp(n+1)%closedUpTo=closed; tmp(n+1)%count=count
-    call move_alloc(tmp,memo%entries)
+    integer :: newCapacity,i
+    if (.not.allocated(memo%buckets)) then
+       allocate(memo%buckets(32))
+       memo%buckets=0
+    end if
+    if (10_int64*int(memo%used+1,int64)>7_int64*int(size(memo%buckets),int64)) then
+       call rehashMemo(memo,2*size(memo%buckets))
+    end if
+    if (.not.allocated(memo%entries)) allocate(memo%entries(0))
+    if (memo%used==size(memo%entries)) then
+       newCapacity=max(16,2*size(memo%entries))
+       allocate(tmp(newCapacity))
+       if (memo%used>0) tmp(1:memo%used)=memo%entries(1:memo%used)
+       call move_alloc(tmp,memo%entries)
+    end if
+    memo%used=memo%used+1
+    memo%entries(memo%used)%remaining=remaining
+    memo%entries(memo%used)%openedUpTo=opened
+    memo%entries(memo%used)%closedUpTo=closed
+    memo%entries(memo%used)%count=count
+    i=int(modulo(weaveHash(remaining,opened,closed),int(size(memo%buckets),int64)))+1
+    do while (memo%buckets(i)/=0)
+       i=modulo(i,size(memo%buckets))+1
+    end do
+    memo%buckets(i)=memo%used
   end subroutine putMemo
 
   integer function ceil_div_small(a,b)
