@@ -59,7 +59,7 @@ module normative_oracle_calendar
   public :: reset_gate_cache, ensure_gate_index, gate_day
   public :: positive_gate_gap, negative_gate_gap, exact_gate_index
   public :: year5000, next_year, previous_year, find_target_year
-  public :: build_year_structure, normative_calendar_date
+  public :: build_year_structure, normative_calendar_date, project_calendar_date
   public :: count_cutlet_partitions, unrank_cutlet_partition
 
 contains
@@ -518,27 +518,44 @@ contains
     type(CalendarDateResult) :: resultFive
     type(YearRecord) :: year
     type(YearStructure) :: s
-    type(BigInt) :: offsetBI,dayBI
-    integer :: i,cutletId,offset,monthId
+
     year=find_target_year(calculationDay,targetDay)
     s=build_year_structure(calculationDay,year)
+    resultFive=project_calendar_date(targetDay,year,s)
+  end function normative_calendar_date
+
+  ! Five-field projection from a materialized year. Isolating this step permits
+  ! bounded exact-output tests without evaluating the costly year construction.
+  ! This is not a second, independent calendar-generation algorithm.
+  function project_calendar_date(targetDay,year,s) result(resultFive)
+    type(BigInt), intent(in) :: targetDay
+    type(YearRecord), intent(in) :: year
+    type(YearStructure), intent(in) :: s
+    type(CalendarDateResult) :: resultFive
+    type(BigInt) :: offsetBI,dayBI
+    integer :: i,cutletId,offset,monthId
+
     cutletId=0
     do i=1,s%cutletCount
-       if (bi_compare(s%cutletFirstDays(i),targetDay)<=0 .and. bi_compare(targetDay,s%cutletLastDays(i))<=0) then
-          cutletId=i; exit
+       if (bi_compare(s%cutletFirstDays(i),targetDay)<=0 .and. &
+           bi_compare(targetDay,s%cutletLastDays(i))<=0) then
+          cutletId=i
+          exit
        end if
     end do
     if (cutletId==0) error stop 'target day is outside materialized cutlets'
     dayBI=bi_add_small(bi_sub(targetDay,s%cutletFirstDays(cutletId)),1_int64)
     resultFive%dayInCutlet=int(bi_to_int64(dayBI))
     resultFive%cutletCanonicalIndex=s%cutletNameIndices(cutletId)
-    offsetBI=bi_sub(targetDay,s%yearFirstDay); offset=int(bi_to_int64(offsetBI))
-    monthId=s%monthWeaving(offset+1); resultFive%monthCanonicalIndex=s%monthNameIndices(monthId)
+    offsetBI=bi_sub(targetDay,s%yearFirstDay)
+    offset=int(bi_to_int64(offsetBI))
+    monthId=s%monthWeaving(offset+1)
+    resultFive%monthCanonicalIndex=s%monthNameIndices(monthId)
     resultFive%dayInMonth=0
     do i=1,offset+1
        if (s%monthWeaving(i)==monthId) resultFive%dayInMonth=resultFive%dayInMonth+1
     end do
     resultFive%yearNumber=year%number
-  end function normative_calendar_date
+  end function project_calendar_date
 
 end module normative_oracle_calendar

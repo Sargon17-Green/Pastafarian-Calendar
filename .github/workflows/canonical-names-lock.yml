@@ -76,6 +76,14 @@ jobs:
             build/normative_oracle_calendar.o \
             -o build/stage01_year_choice_oracle
           test -x build/stage01_year_choice_oracle
+          gfortran "${flags[@]}" test/stage01_date_projection_probe.f90 \
+            build/big_integer.o \
+            build/source_language_catalog.o \
+            build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o \
+            build/normative_oracle_calendar.o \
+            -o build/stage01_date_projection_probe
+          test -x build/stage01_date_projection_probe
       - name: Run bounded Stage 1 Oracle smoke (55 selected assertions; not full acceptance)
         shell: bash
         run: |
@@ -213,6 +221,29 @@ jobs:
             echo "::error::Independent year5000 candidate-choice assertion mismatch"
             exit 1
           fi
+      - name: Check exact five-component date projection (25 synthetic assertions; not full acceptance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          output="$(timeout --signal=TERM --kill-after=3s 15s build/stage01_date_projection_probe 2>&1)"
+          exit_code=$?
+          set -e
+          printf '%s\n' "$output"
+          if [[ "$exit_code" -ne 0 ]]; then
+            echo "::error::Five-field date projection failed or timed out (exit $exit_code)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE01_DATE_PROJECTION_PASS (synthetic mapping only; NOT full Stage 1 acceptance)' <<< "$output"
+          grep -Fxq 'STAGE01_DATE_PROJECTION_ASSERTIONS=25' <<< "$output"
+          grep -Fxq 'STAGE01_DATE_PROJECTION_FAILURES=0' <<< "$output"
+          actual="$(grep -c '^PASS: ' <<< "$output")"
+          echo "STAGE01_DATE_PROJECTION_NATIVE_PASS=$actual EXPECTED=25 (not normative_calendar_date integration)"
+          if [[ "$actual" -ne 25 ]]; then
+            echo "::error::Date projection count mismatch"
+            exit 1
+          fi
+          echo "Stage 1 five-field synthetic projection: 25/25; full date integration NOT accepted." >> "$GITHUB_STEP_SUMMARY"
       - name: Run bounded Stage 1 BigInt safe-boundary checks
         shell: bash
         run: |
