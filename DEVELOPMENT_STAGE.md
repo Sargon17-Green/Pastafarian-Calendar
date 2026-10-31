@@ -304,3 +304,6 @@ STAGE14_IMPLEMENTATION=THIRTY_BASE_CHUNK_BORROW_CARRY_NATIVE_CALLS_AND_CI_COMMIT
 STAGE14_NATIVE=AWAITING_CI
 STAGE14_EXPECTED_RED=UNDETERMINED_UNTIL_REPRODUCTION
 STAGE14_FULL_CALENDAR_INTEGRATION=NOT_YET_AVAILABLE
+
+[2026-10-31 | STAGE14 INITIAL WORKFLOW ATTEMPT DIAGNOSED]
+Run 41207948014 on 76e2f3ef9864ed50b6ae002e691e20796feb4874 completed with 14/15 jobs success. Stage14 job 124556797105 failed before invoking cobc: timeout reported a literal backslash argument (exit 127), caused by over-escaped line continuations in the new workflow shell block. No Stage14 compile or executable ran; this is not a COBOL test result and not a production defect. Artifact 13045740924 preserves the short failure log. The Stage14 job is being corrected to use a Bash source array and single-line timeout commands, avoiding shell continuation escaping. Stage14 remains pending Native evidence.

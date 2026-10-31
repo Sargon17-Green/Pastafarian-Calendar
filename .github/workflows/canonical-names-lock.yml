@@ -707,19 +707,17 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build
-          printf 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE\\nHEAD=%s\\n' "$GITHUB_SHA" >build/stage14-native.log
-          timeout --signal=TERM --kill-after=10s 300s \\
-            cobc -std=default -free \\
-            -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror \\
-            -x -o build/stage14-base-chunk \\
-            test/stage14_discovery_tests.cob \\
-            src/big_integer.cob \\
-            src/monster_distance.cob \\
-            src/legacy_distance.cob \\
-            src/patched_day_tag.cob \\
-            src/patched_distance.cob 2>&1 | tee -a build/stage14-native.log
-          timeout --signal=TERM --kill-after=10s 120s \\
-            ./build/stage14-base-chunk 2>&1 | tee -a build/stage14-native.log
+          printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage14-native.log
+          compile_sources=(
+            test/stage14_discovery_tests.cob
+            src/big_integer.cob
+            src/monster_distance.cob
+            src/legacy_distance.cob
+            src/patched_day_tag.cob
+            src/patched_distance.cob
+          )
+          timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage14-base-chunk "${compile_sources[@]}" 2>&1 | tee -a build/stage14-native.log
+          timeout --signal=TERM --kill-after=10s 120s ./build/stage14-base-chunk 2>&1 | tee -a build/stage14-native.log
           grep -Eq '^STAGE14_RUNS=[[:space:]]*0*30[[:space:]]*$' build/stage14-native.log
           grep -Eq '^STAGE14_PASS=[[:space:]]*0*30[[:space:]]*$' build/stage14-native.log
           grep -Eq '^STAGE14_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage14-native.log
