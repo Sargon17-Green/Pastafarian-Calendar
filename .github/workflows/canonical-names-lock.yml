@@ -51,11 +51,14 @@ jobs:
           } elseif ((($stageLines -contains 'CURRENT_STAGE=29') -or
               (($stageLines -contains 'CURRENT_STAGE=30') -and
                ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -and
-               ($stageLines -contains 'STAGE30_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
+               ($stageLines -contains 'STAGE30_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or
+               (($stageLines -contains 'CURRENT_STAGE=31') -and
+                ($stageLines -contains 'LAST_COMPLETED_STAGE=31') -and
+                ($stageLines -contains 'STAGE31_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
               ($stageLines -contains 'STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
               ((($stageLines -contains 'LAST_COMPLETED_STAGE=28') -and
                 ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=AWAITING')) -or
-               ((($stageLines -contains 'LAST_COMPLETED_STAGE=29') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=30')) -and
+               ((($stageLines -contains 'LAST_COMPLETED_STAGE=29') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=31')) -and
                 ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
             & .\tests\Stage01.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage01 regression failed Stage29' }
@@ -84,7 +87,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage30 distributional discovery probe failed' }
             Write-Host ('STAGE30_DISCOVERY15_NATIVE_SHA=' + $env:GITHUB_SHA)
             Write-Host 'STAGE30_DISCOVERY15_NATIVE=EVIDENCE_ONLY'
-            if ($stageLines -contains 'CURRENT_STAGE=30') { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
+            if (($stageLines -contains 'CURRENT_STAGE=30') -or ($stageLines -contains 'CURRENT_STAGE=31')) { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
           } elseif (($stageLines -contains 'CURRENT_STAGE=27') -and
               ((($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=AWAITING')) -or
                (($stageLines -contains 'LAST_COMPLETED_STAGE=27') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {

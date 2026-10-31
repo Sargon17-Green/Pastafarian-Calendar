@@ -5,7 +5,7 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
 $meta = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($meta -match '(?m)^LAST_COMPLETED_STAGE=(27|28|29|30)\s*$') -Name 'Stage27 predecessor sealed'
+Assert-StageTrue -Condition ($meta -match '(?m)^LAST_COMPLETED_STAGE=(27|28|29|30|31)\s*$') -Name 'Stage27 predecessor sealed'
 Assert-StageTrue -Condition ($meta -match '(?m)^STAGE27_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$') -Name 'Stage27 Native seal retained'
 Assert-StageTrue -Condition ($meta -match '(?m)^STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage28 evidence-only Native seal retained'
 $m = [System.Numerics.BigInteger](Get-NormM)
