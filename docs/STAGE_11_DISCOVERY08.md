@@ -12,3 +12,6 @@ Reference reduction: R(x) = 1 + ((x - 1) mod (2^127 - 1)). All values must remai
 
 ## Acceptance / limits
 Ubuntu 24.04 / GNAT 13, 15-minute bounded job native-stage11-discovery08 running sh ./run_stage11_discovery08.sh. Require verify and native-stage11-discovery08 completed/success for the same commit, compile/bind/link and actual marker 368 in the job log before PASS. Queued/in_progress is neither PASS nor a blocker. This does not independently verify upstream Stage10 semantics, a complete Sauce result, Calendar_Date, or the five final calendar components. No production code changes, main merge or external publication. An actual mismatch must be reproduced and recorded before opening a PATCH.
+
+## Native acceptance (2026-10-31)
+[Actions 41196519882](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41196519882) completed/success on 5db0a575044254df2c3a63a50e904fe3320a8e32, 12/12 jobs including verify and [native job 124523671270](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41196519882/job/124523671270). GNAT 13 compile/bind/link and STAGE11_DISCOVERY08_ASSERTIONS= 368 observed. Scope strictly bounded as above.

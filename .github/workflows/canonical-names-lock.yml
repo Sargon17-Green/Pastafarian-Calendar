@@ -202,3 +202,19 @@ jobs:
         run: |
           set -euo pipefail
           sh ./run_stage11_discovery08.sh
+
+  native-stage12-discovery09:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ada 2022 toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gnat gprbuild
+      - name: Check actual Sauce Ask Bowl sealed numeric streams
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh ./run_stage12_discovery09.sh
