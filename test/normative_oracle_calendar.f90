@@ -460,10 +460,10 @@ contains
     type(SauceResult) :: r
     type(AnswerStream) :: a
     type(BigInt) :: rank,N
-    integer :: G,K,L,lowM,highM,required,i,monthCount
+    integer :: G,K,L,lowM,highM,required,i,monthCount,probeStates,clockBegin,clockEnd,clockRate
     integer(int64) :: kidx,cursor
     integer(int64) :: gateIdx
-    logical :: found,trace
+    logical :: found,trace,probeComplete
 
     trace=.false.
     if (present(diagnostic)) trace=diagnostic
@@ -557,6 +557,16 @@ contains
     end if
 
     if (trace) then
+       write(output_unit,'(A,I0,A,I0)') 'STAGE01_WEAVING_MONTHS=',monthCount,' DAYS=',L
+       write(output_unit,'(A,*(I0,1X))') 'STAGE01_WEAVING_LENGTHS=',s%monthLengths
+       flush(output_unit)
+       call system_clock(count=clockBegin,count_rate=clockRate)
+       call probe_weaving_states(s%monthLengths,4096,probeStates,probeComplete)
+       call system_clock(count=clockEnd)
+       write(output_unit,'(A,I0,A,L1,A,I0,A,I0)') 'STAGE01_WEAVING_STATES=',probeStates, &
+            ' COMPLETE=',probeComplete,' LIMIT=',4096,' ELAPSED_MS=', &
+            1000_int64*int(clockEnd-clockBegin,int64)/int(max(1,clockRate),int64)
+       flush(output_unit)
        write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_WEAVING_COUNT_BEGIN'
        flush(output_unit)
     end if

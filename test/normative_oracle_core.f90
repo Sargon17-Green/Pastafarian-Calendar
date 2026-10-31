@@ -79,7 +79,7 @@ module normative_oracle_core
   public :: ask_bowl, answer_at, choose_rank
   public :: falling_factorial, unrank_distinct_indices
   public :: count_bounded_compositions, unrank_bounded_composition
-  public :: count_weavings, unrank_weaving
+  public :: count_weavings, unrank_weaving, probe_weaving_states
   public :: ceil_div_small, wrap1
 
 contains
@@ -693,6 +693,44 @@ contains
     end do
     memo%buckets(i)=memo%used
   end subroutine putMemo
+
+
+  ! Bounded diagnostic traversal: count distinct reachable nonterminal states.
+  ! Deliberately does not calculate or approximate the number of valid weavings.
+  ! The limit is on memoized states; complete=.false. means no total is inferred.
+  subroutine probe_weaving_states(lengths,stateLimit,states,complete)
+    integer, intent(in) :: lengths(:),stateLimit
+    integer, intent(out) :: states
+    logical, intent(out) :: complete
+    type(WeaveMemo) :: memo
+    states=0
+    complete=.true.
+    if (stateLimit<1) error stop 'weaving diagnostic state limit must be positive'
+    allocate(memo%entries(0))
+    call walk(lengths,0,0)
+  contains
+    recursive subroutine walk(remaining,opened,closed)
+      integer, intent(in) :: remaining(:),opened,closed
+      integer, allocatable :: nxt(:)
+      integer :: j,newOpened,newClosed
+      if (.not.complete) return
+      if (sum(remaining)==0) return
+      if (findMemo(memo,remaining,opened,closed)>0) return
+      if (states>=stateLimit) then
+         complete=.false.
+         return
+      end if
+      call putMemo(memo,remaining,opened,closed,bi_zero())
+      states=states+1
+      do j=1,size(lengths)
+         if (.not.legalMove(remaining,opened,closed,j,lengths)) cycle
+         nxt=remaining; newOpened=opened; newClosed=closed
+         call applyMove(nxt,newOpened,newClosed,j,lengths)
+         call walk(nxt,newOpened,newClosed)
+         if (.not.complete) return
+      end do
+    end subroutine walk
+  end subroutine probe_weaving_states
 
   integer function ceil_div_small(a,b)
     integer, intent(in) :: a,b

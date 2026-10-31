@@ -3,7 +3,7 @@
 program stage01_weaving_microprobe
   use iso_fortran_env, only: int64
   use big_integer, only: BigInt, bi_to_int64, bi_from_int64
-  use normative_oracle_core, only: count_weavings, unrank_weaving
+  use normative_oracle_core, only: count_weavings, unrank_weaving, probe_weaving_states
   implicit none
   integer, allocatable :: lengths(:), remaining(:), word(:), expected(:,:), actual(:)
   integer :: total, monthCount, acceptedCount, assertions, failures, caseNumber
@@ -16,13 +16,14 @@ program stage01_weaving_microprobe
   call check_case([2,2,2,2])
   write(*,'(A,I0)') 'STAGE01_WEAVING_MICRO_ASSERTIONS=',assertions
   write(*,'(A,I0)') 'STAGE01_WEAVING_MICRO_FAILURES=',failures
-  if (assertions/=24 .or. failures/=0) error stop 1
+  if (assertions/=42 .or. failures/=0) error stop 1
   write(*,'(A)') 'STAGE01_WEAVING_MICRO_PASS (six exhaustive small fixtures; NOT full Stage 1 acceptance)'
 contains
   subroutine check_case(values)
     integer, intent(in) :: values(:)
     type(BigInt) :: count
-    integer :: samples(3),i
+    integer :: samples(3),i,stateCount
+    logical :: completed
     character(len=80) :: label
     caseNumber=caseNumber+1
     lengths=values; total=sum(lengths); monthCount=size(lengths)
@@ -31,6 +32,11 @@ contains
     call enumerate(1)
     if (acceptedCount==0) error stop 'weaving oracle produced no candidates'
     count=count_weavings(lengths)
+    call probe_weaving_states(lengths,10000,stateCount,completed)
+    call check(completed .and. stateCount>0,'complete bounded state traversal')
+    call probe_weaving_states(lengths,1,stateCount,completed)
+    call check(stateCount==1,'limited state count exactly one')
+    call check(completed .eqv. (monthCount==1),'limited traversal completeness flag')
     write(label,'("fixture ",I0," count")') caseNumber
     call check(bi_to_int64(count)==int(acceptedCount,int64),trim(label))
     samples=[1,max(1,(acceptedCount+1)/2),acceptedCount]
