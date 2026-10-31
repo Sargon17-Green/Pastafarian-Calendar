@@ -1,6 +1,6 @@
 # Stadio 13 — DISCOVERY 09: kvardek ses videblaj gutoj
 
-**Stato (2026-10-31):** kontrakto difinita; produktkodo kaj Stage13-testoj NE ankoraŭ efektivigitaj. Neniu Stage13 Native PASS aŭ Numbers-gate aserto.
+**Stato (2026-10-31):** produktkodo kaj 14 Stage13-testoj preparitaj por nova HEAD; ankoraŭ neniu Stage13 Native PASS. La dokumenta Stage12 HEAD estis verdita per 116/116 kaj Names Lock.
 
 ## Origino, celo kaj sendependeco
 
@@ -31,3 +31,7 @@ Komparoj al la referenca `sauce.build_visible_drops(core.work_counts(a,b),core.b
 2. Verifi aktualan `Gleam+Esperanto` HEAD kaj la test-orakolon antaŭ kreado de Stage13-modulo.
 3. `gleam format --check src test`, `gleam test` celo 130/130, source integrity kaj Names Lock `completed/success` sur identa nova SHA; registri run/job/artifact kaj SHA256. Neniu dueca rerun.
 4. Neniu `main` ŝanĝo, merge, publikigo aŭ plena data algoritmo. Suba etapo estas interne evolua, ne sesa datokomponanto.
+
+## Ekster-Gleam antaŭkalkulo
+
+Sendependa Python BigInt-kalkulo (ne Native) donis ĉe fundamento F=-15055671: `V1=56644603826892212324764499696091907135`, `V46=141872771689426650819909896585756512282`; ĉe (11,21): `V1=60158691871357745200742433447203949263`, `V46=101264927043934815149790611409871558037`. Nova kodo uzas inversan akumulilon por antaŭaj gutoj; referenco uzas antaŭenan liston. Fiksaĵoj ne anstataŭas la 130 Native testojn.
