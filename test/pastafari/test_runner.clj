@@ -6,7 +6,8 @@
             [pastafari.stage02-hidden-drops-test]
             [pastafari.stage02-visible-drops-test]
             [pastafari.stage02-sauce-test]
-            [pastafari.stage02-gate-test]))
+            [pastafari.stage02-gate-test]
+            [pastafari.stage02-gate-positions-test]))
 
 (defn -main [& _]
   (let [result (test/run-tests 'pastafari.stage01-test
@@ -15,7 +16,8 @@
                                'pastafari.stage02-hidden-drops-test
                                'pastafari.stage02-visible-drops-test
                                'pastafari.stage02-sauce-test
-                               'pastafari.stage02-gate-test)
+                               'pastafari.stage02-gate-test
+                               'pastafari.stage02-gate-positions-test)
         failures (+ (:fail result) (:error result))]
     (println (if (zero? failures)
                "Alle Stage-1- en Stage-2-discoverytests zijn geslaagd."
