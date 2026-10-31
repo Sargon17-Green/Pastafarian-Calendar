@@ -1,6 +1,6 @@
 # Stadio 8 — DISCOVERY 04: direkta klasifiko de du tagoj
 
-**Stato:** kodo kaj 12 testoj preparitaj; NATIVE/Names Lock ankoraŭ ne konfirmitaj. Ne deklaru ĉi tiun stadion finita antaŭ kompletaj CI-registroj. La antaŭa stadio 7 estas kontrolite GREEN ĉe SHA `f6c7624231ebb9e5d63063775b77bdc7e4f9ce74` (53/53 Native, Names Lock SUCCESS).
+**Stato:** Stage08-kodo konfirmita GREEN ĉe SHA `b1eb77bef3c0d105ca2365ebd107b06db8c0d79c`: Native 65/65 (neniu malsukceso), `gleam format --check` sukcesis, kaj Canonical Names Lock sukcesis sur la sama SHA. Ĉi tiu dokumenta fermo bezonas apartan CI-konfirmon de sia nova HEAD; ĝi ne ŝanĝas la programkodon. La antaŭa Stage07 estas konfirmita GREEN ĉe SHA `f6c7624231ebb9e5d63063775b77bdc7e4f9ce74` (53/53 Native, Names Lock SUCCESS).
 
 ## Izolita celo kaj datumfluoj
 
@@ -24,10 +24,18 @@ La 10 sendependaj Python-aritmetikaj antaŭkontroloj (10/10) nur konfirmas la ma
 ## Akceptokriterioj
 
 1. Antaŭa pordego: Stage07 ĉe `f6c7624231ebb9e5d63063775b77bdc7e4f9ce74`, 53 PASS/0 FAIL, Names Lock SUCCESS; jam dokumentite.
-2. Kodo: nova modula limigita produkta diagnozo; neniu kopio de alia programlingva branĉo; 12 novaj testoj kaj antaŭaj 53 regresioj konservitaj. Atendataj **65 testoj**, ne mezurita rezulto.
+2. Kodo: nova modula limigita produkta diagnozo; neniu kopio de alia programlingva branĉo; 12 novaj testoj kaj antaŭaj 53 regresioj konservitaj. **65/65 testoj mezurite pasis**, 0 malsukcesoj.
 3. `gleam format --check src test` kaj `gleam test` per Gleam 1.18.1 / Erlang OTP 28. Se malsukceso aperas, esploru realan logon; ne supozu EXPECTED_RED.
 4. Canonical Names Lock SUCCESS sur la precize sama nova HEAD. Konservu run ID, SHA, kompletan konkludon, rezultan testnombron, kaj eventualan artifakton.
 5. Nur post ambaŭ kompletaj pordegoj ĝisdatigu `LAST_COMPLETED_STAGE=8`. Neniu merge al `main`, eldonado, aŭ pretendo pri kompleta kalendara dato.
+
+## Fina akcepta indico (koda HEAD)
+
+- Kodo-SHA: `b1eb77bef3c0d105ca2365ebd107b06db8c0d79c` sur branĉo `Gleam+Esperanto`.
+- Native CI: [run 41179631892](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41179631892), job `124474192918`, completed/success. Gleam 1.18.1, Erlang/OTP 28; formato kaj kompilo sukcesis, 65/65 testoj pasis.
+- Native artefakto: [13034571469](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41179631892/artifacts/13034571469), SHA256 `272bad2bf2a45a43d994a9d162e4ec8105f1ed04eb85429957a589e929202f02`.
+- Nomŝloso: [run 41179631920](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41179631920), job `124474193042`, completed/success sur la sama kodo-SHA, sen malkongruo.
+- Limigo: dokumenta fermo en aparta Git HEAD ankoraŭ bezonas sian propran Native/Names Lock; ne konkludu pri ĝi antaŭ kompletaj registroj. Neniu kompleta datokalkulo aŭ kunfando al `main`.
 
 ## Enkonduka indico
 
