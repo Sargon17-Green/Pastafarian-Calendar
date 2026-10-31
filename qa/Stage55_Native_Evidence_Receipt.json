@@ -1,0 +1,67 @@
+{
+  "schema_version": "codesh-stage55-native-evidence-receipt/1",
+  "stage": 55,
+  "total_stages": 55,
+  "last_completed_stage": 55,
+  "status": "GREEN_CONFIRMED",
+  "stage55_sealed": true,
+  "program_complete": true,
+  "branch": "Codesh+𐤉𐤄𐤅𐤃𐤉𐤕",
+  "pinned_parent_commit": "198806931dd81e6fadd9773c8b89f8a7a90c5e25",
+  "source": {
+    "path": "מקור/מסלול־יום־שליש־שנה־סמוכה־מתוקן.אמן",
+    "sha256": "c45e00b3d54b8c5b9845d8a991d81b1c2efbe446898aad9fc35dc77f9d4bb2cc",
+    "git_blob_sha1": "5d9726d868b7ec1510841b8bf348652714f0de13",
+    "prior_signed_codesh_sources": 49,
+    "compiled_codesh_sources": 50
+  },
+  "native_run": {
+    "family": "CODESH_STAGE55_PATCH27",
+    "package": "v001",
+    "run_id": "20261031T072001Z_064f9438",
+    "os": "Windows-11-10.0.26300-SP0",
+    "compiler": "Codesh-v1.3",
+    "source_inputs_pinned": true,
+    "process_exit_code": 0,
+    "git_writes_during_windows_run": false
+  },
+  "checks": {
+    "total_gates": 32,
+    "expected_pass_gates": 31,
+    "expected_oracle_tamper_failure_gates": 1,
+    "regressions_stage29_to_stage54": 26,
+    "frozen_selected_year_matches": 48,
+    "patch_third_boundary_matches": 48,
+    "old_third_boundary_mismatches": 22,
+    "old_third_boundary_latent_matches": 26,
+    "length_mod3_zero_cases": 22,
+    "length_mod3_nonzero_cases": 26,
+    "patch_objects_detached": 48,
+    "patch_repeat_stable": 48,
+    "patch_within_selected_year": 48,
+    "old_objects_detached": 48,
+    "old_repeat_stable": 48,
+    "year_boundaries_matches": 48,
+    "caller_selected_unchanged": 48,
+    "next_cases": 24,
+    "previous_cases": 24,
+    "oracle_tamper": "EXPECTED_FAILURE_EXIT_1",
+    "handoff_sha256_entries_verified": 77
+  },
+  "oracle_sha256": "8d75a665925d2b88aa2bbb82fb71157c515b24babd5db7889a14c508eb7911ee",
+  "native_jar_sha256": "e34360ca1928dc11758636cde1ee4afc1cbe9994e5e6fd1d1ce4660a8c70c98d",
+  "handoff": {
+    "name": "CODESH_STAGE55_PATCH27_HANDOFF_v001_20261031T072001Z_064f9438_PASS.zip",
+    "sha256": "7866d5d1dbf7ac6841c1f4d908b3fd11827414af335908350a269978f5100cfc",
+    "library_path": "/Codesh_Checkpoints/CODESH_STAGE55_PATCH27_HANDOFF_v001_20261031T072001Z_064f9438_PASS.zip",
+    "zip_crc": "PASS",
+    "sha256_entries_verified": 77
+  },
+  "preservation": {
+    "previous_49_codesh_sources_unchanged": true,
+    "old_stage54_discovery_route_preserved": true,
+    "main_branch_untouched": true,
+    "binary_handoff_archived_not_committed": true
+  },
+  "credit_new_windows_assertions": 0
+}
