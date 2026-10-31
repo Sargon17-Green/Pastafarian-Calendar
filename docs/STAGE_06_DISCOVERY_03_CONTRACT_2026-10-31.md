@@ -63,3 +63,12 @@ normativeDistance(c,t) = abs(t-c)+1
 ### 2026-10-31 CI 接入核验
 新的独立 workflow 在首次添加时不保证触发；Stage6 的唯一自动触发入口是既有 `canonical-names-lock.yml`，该工作流运行全部前序回归及 Stage6 原生工作。独立 Stage6 workflow 仅供显式手工诊断，避免同一 SHA 重复自动执行。
 所有八次非覆盖测试都使用独立的非零 BigInt 哨兵；旧值为零时也能正确测试拒绝覆盖，而不是把规范零与空输出混淆。
+
+## 第六阶段原生验收（2026-10-31）
+[Run 41179473272](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41179473272)
+在 SHA `59552109347486d952d444a90b98d1c5274bf011` completed/success：
+7/7 工作成功。Stage6 job 124473740561 的真实 GnuCOBOL 3.1.2 日志给出
+5 expected-red、3 control、8 ownership guard、4 大数对称边界、
+3 invalid rejects、0 unexpected、释放后 heap live=0。
+[原生日志证据 13034775720](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41179473272/artifacts/13034775720)。
+保留历史缺陷在原始路径，Stage7 仅创建新的 PATCH03 路由。

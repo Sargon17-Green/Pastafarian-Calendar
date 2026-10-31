@@ -54,6 +54,25 @@ MAIN.
             ELSE
                 MOVE "历史距离计算失败；输出槽或输入无效。" TO LK-MESSAGE
             END-IF
+        WHEN "DISTANCE-PATCH"
+            ADD 1 TO WS-VALIDATIONS
+            IF LC-SIGN < -1 OR LC-SIGN > 1
+               OR LT-SIGN < -1 OR LT-SIGN > 1
+                MOVE 22 TO WS-STATUS
+            ELSE
+                IF LR-SIGN NOT = 0 OR LR-CHUNKS NOT = 0
+                   OR LR-HEAD NOT = NULL OR LR-TAIL NOT = NULL
+                    MOVE 175 TO WS-STATUS
+                ELSE
+                    CALL "PATCHED-DISTANCE" USING
+                        LK-C-DAY LK-T-DAY LK-RESULT WS-STATUS
+                END-IF
+            END-IF
+            IF WS-STATUS = 0
+                MOVE "PATCH03:DISTANCE-PATCH" TO LK-MESSAGE
+            ELSE
+                MOVE "修复距离计算失败；输出槽或输入无效。" TO LK-MESSAGE
+            END-IF
         WHEN OTHER
             MOVE 20 TO WS-STATUS
             MOVE "不支持的距离操作。" TO LK-MESSAGE
