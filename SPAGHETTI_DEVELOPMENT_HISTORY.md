@@ -786,3 +786,11 @@ Run [41136362315](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions
 ## Stage 39 — PATCH19: sambungan indeks gerbang pada setiap callback
 
 Ditambah GateIndexContinuityPatch19 sebagai pengesah pembekal yang menyerahkan pemilihan tahun kepada SequentialYearWalkPatch18 tanpa mengubah fail asal, bersama dispatcher TARGET_YEAR_PATCH_19, method targetYearSequentialPatch19, ujian, kontrak dan job Native. Year5000 masih anchor luaran. Dua witness Stage38 kekal dapat dihasilkan oleh laluan PATCH18 untuk audit dan mesti ditolak oleh laluan baru. Status: AWAITING_CI untuk SHA kod Stage39; belum boleh panggil GREEN/PASS tanpa log all jobs. Tiada merge/main.
+
+## Stage39 Native closure — 31 Oktober 2026
+
+Run 41179339038 completed/success 10/10 pada SHA 747430578e99c13a7984f5b2cebf275a553d9828; job 124473343534 PHP 8.3.36/64-bit, 46 checks, 7 sasaran benar, dua witness Stage38, sembilan invalid, stderr kosong dan exit 0. Artifact 13033923490. Kontrak penutupan: artifacts/STAGE39_PATCH19_NATIVE_CLOSURE_2026-10-31.md. Year5000 masih anchor luaran.
+
+## Stage40 DISCOVERY20 — hujung indeks jauh
+
+Kajian test-only berbanding Oracle normatif untuk next.closeGateIndex dan previous.openGateIndex yang rosak tanpa memutuskan seam. Kontrak docs/STAGE40_DISCOVERY20_NONSEAM_GATE_INDEX_CONTRACT_2026-10-31.md; probe tests/stage40_discovery20_probe.php. Tiada tuntutan EXPECTED_RED sebelum Native CI. Patch19, Year5000 sebenar dan main tidak diubah.
