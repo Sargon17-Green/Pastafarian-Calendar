@@ -95,6 +95,9 @@ def audit(folder: Path) -> dict:
           "rejected new input must erase old display", checks)
     check('On Error Resume Next' in qa and 'On Error GoTo 0' in qa,
           "VBA expected-error harness resets error handling", checks)
+    check('Public Sub RunStage1VbaSelfTest(Optional ByVal headless As Boolean = False)' in qa
+          and 'If Not headless Then' in qa and 'If headless Then' in qa,
+          "non-modal VBA test execution supported for unattended COM", checks)
 
     # Evaluate the independent, exact-text numeric input specification on edge fixtures.
     cases = [
