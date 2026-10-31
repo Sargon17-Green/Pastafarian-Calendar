@@ -384,6 +384,25 @@ void main() {
     'Wide backward rejection count',
   );
 
+  // Count actual exercised rejection branches, including explicit synthetic
+  // boundary fixtures; the ordinary seal matrix need not hit the short tail.
+  for (final choice in <MonsterEqualChoice>[
+    syntheticShortForward,
+    syntheticShortBackward,
+  ]) {
+    if (choice.rejected > BigInt.zero) {
+      shortRejected++;
+    }
+  }
+  for (final choice in <MonsterEqualChoice>[
+    syntheticWideForward,
+    syntheticWideBackward,
+  ]) {
+    if (choice.rejected > BigInt.zero) {
+      wideRejected++;
+    }
+  }
+
   final foundation = MonsterWorkCounter.foundationDay;
   final foundationCounts = counter.calculate(foundation, foundation);
   final foundationFeeds = feeder.buildHiddenFeeds(foundationCounts, stones);
