@@ -820,3 +820,71 @@ Unresolved: stage-zero compiler provenance and safety; malware
 clearance; all 99 native QA groups; 47-month native calculation.
 No CAL executable was downloaded or executed; no changes to main
 or the 82 canonical calendar source files.
+
+## 2026-10-31: verified Intel-to-PE source chain and compiler-generated CALL opcodes (97/97)
+
+**Completed CI:** run 41223156080, job 124601718579,
+for code/workflow commit 584ac9c75a5bdd1950fc7a24d47fe70c35a7cdba,
+completed SUCCESS. Actual job log says "Ran 97 tests in 0.028s" and
+"OK"; every source-only workflow step completed successfully.
+The new codegen audit reports source_evidence_verified=true,
+verified_text_modules=6, pinned_codegen_stages=18. No EXE or CAL
+compiler was downloaded or executed.
+
+Upstream source remains pinned at
+elenderg/PAL-1000 commit 2d44defdedf24519bba754114ee66e6d1defff1e,
+and all six release text sources are SHA-256, Git blob and size verified.
+
+**Direct evidence in the compiler text:**
+
+- Lines 1492–1499 parse source-level Intel hex literals, allocate an
+  intel-tag fragment and convert its nibble substring to fragment
+  code bytes. The dispatch to this parser occurs at line 1515.
+- Line 427 accounts for intel-tag fragment byte lengths in addressing.
+  Lines 429 and 432 allocate sizes for generated external/indirect
+  call fragments.
+- Lines 4234–4243 generate call instructions beyond explicitly
+  authored Intel literals:
+  - external call at line 4235 starts with 0xFF15, encoding the x86
+    FF /2 group using an absolute memory operand;
+  - indirect call at lines 4237–4239 first computes a variable's
+    address and appends 0xFF12, an FF /2 CALL via [EDX];
+  - internal call at lines 4241–4243 appends 0xE8 for a relative CALL.
+- Lines 4328–4347 traverse fragments and routines to generate code.
+- Lines 709–717 copy a fragment's code bytes into the image buffer
+  at its addressed position. Lines 734–741 copy compiled routine
+  fragments. Lines 3024–3034 assemble the EXE image from the
+  headers, imports, globals, literals and compiled routines.
+  Lines 1113–1119 write that image to the compiler's EXE path.
+- Lines 48–61 build the synthesized startup routine, including
+  initialization, user program Run, finalization and ExitProcess.
+  Lines 2978–2980 point the PE entry-point field to that routine.
+
+A complementary whole-file lexical inspection found **38** direct
+source statements beginning with an attached hex literal (Attach
+$HEX...), containing **31 distinct** hex literal strings; selected
+CALL and JMP-related templates occur at source lines 4232, 4235,
+4239, 4243, 4259, 4270 and 4310. The FF32 template at line 4302
+is a PUSH memory operand, not a CALL; x86 FF ModR/M group matters.
+These inventory figures are independent inspection notes, not
+exhaustive compiler-emission validation.
+
+**Important limitation and correction to previous narrow scan:**
+The 447 inline Intel directives found in the noodle are not an
+inventory of all instructions produced by the compiler. The source
+explicitly constructs separate FF15, FF12 and E8 CALL instructions.
+This still does not establish that they actually occurred in a
+compiled binary or executed; runtime reachability, any decoded
+complete opcode stream, malware clearance and stage-zero trust all
+remain unverified.
+
+New branch-local files: tools/cal_static_codegen_pipeline.py and
+tools/test_cal_static_codegen_pipeline.py (16 tests). The CI workflow
+now invokes a source-only audit with 18 pinned codegen stages.
+The real source audit was successful and never reads EXE binaries.
+
+CI: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41223156080
+
+**Unresolved gates:** compiler_executed=false; output_pe_created=false;
+malware_clearance=false; stage_zero_verified=false; native_qa_99_pass=false.
+No main branch or canonical 82 calendar implementation files were changed.
