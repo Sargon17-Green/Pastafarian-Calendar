@@ -1,6 +1,6 @@
 # Stadio 12 — DISCOVERY 08: sep kaŝitaj gutoj
 
-**Stato (2026-10-31):** produktkodo kaj 14 testoj planitaj por nova HEAD. CI ankoraŭ ne mezurita; nenia Stage12 PASS.
+**Stato (2026-10-31):** Stage12-kodkapo verifita: Native 116/116, formato PASS, kompilado PASS, kanona Names Lock SUCCESS; dokumenta kapo ankoraŭ bezonos apartan CI.
 
 ## Kontrakto kaj algoritmo
 
@@ -22,3 +22,11 @@ La referenca `reference/sauce` kodaro estas nur test-orakolo. Aparte Python-BigI
 2. Nova Stage12 commit kun unu produktmodulo, 14 testoj kaj statusa kontrakto.
 3. Nur `completed` sur tiu sama nova SHA: `gleam format --check src test`, `gleam test` celo 116/116, Names Lock SUCCESS, head-verify, artifact ID/SHA256. Se eraro, riparu nur laŭ efektiva log-diferenco; neniu supozita PASS.
 4. Neniu ŝanĝo al main, neniu full-date aŭ eldonado.
+
+## Mezurita akcepto kaj riparhistorio (2026-10-31)
+
+- Origina SHA `b102dbf535f769c573af005753d13b41f9ccb238`: Native 41203279989 / job 124543192488 `completed/failure`, nur pro du nekonformaj formatitaj dosieroj; testoj ne ekrulis. Names Lock 41203279990 / job 124543192425 `completed/success`.
+- Formata riparo `c9437da6a2c936201044d015284ab7615473eb4c`: nur la kanonaj ŝanĝoj el la Native-logoj; Native 41211277712 / job 124566621506 `completed/failure` ĉe tipo-kontrolado de unu test-esprimo (`==` kaj `|>`), post sukcesa formato. Names Lock 41211277686 SUCCESS.
+- Fina kodkapo `ff9077bb56f36f3ee92943cd5ab36ece36447e1b`: izolita test-aserta prioritat-riparo. Native run [41211388485](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41211388485), job `124566951587`, `completed/success`: Gleam 1.18.1 / OTP 28; `gleam format --check src test` PASS, kompilado PASS, **116 passed, 0 failures**, git HEAD/source-integrity PASS. Artefakto `13046555792`, SHA256 `2bc30dfa56e7b46fb556f5623c89f0a3dc52cb7745097e3d77c2d8bc16c50e1f`.
+- Names Lock run [41211388470](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41211388470), job `124566951854`, `completed/success` sur precize la sama SHA.
+- Stage12 akceptita nur por kaŝitaj gutoj (nek plena dato nek ĉefbranĉa kunfando); la nova dokumenta HEAD postulas proprajn kontrolrezultojn. La sekva contrato estas `STAGE13_DISCOVERY09_CONTRACT.md`.
