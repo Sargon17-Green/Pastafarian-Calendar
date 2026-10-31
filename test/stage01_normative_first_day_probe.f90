@@ -1,5 +1,5 @@
 ! Bounded, phase-tagged diagnostic of the first-day constituent calls.
-! It localizes slow year selection vs year construction vs projection.
+! It localizes slow year selection and each year-construction subphase vs projection.
 ! This does NOT invoke the combined normative_calendar_date entry point.
 ! No claim of full algorithmic correctness or Stage 1 acceptance.
 program stage01_normative_first_day_probe
@@ -28,7 +28,7 @@ program stage01_normative_first_day_probe
   locatedYear=find_target_year(calculationDay,targetDay)
   write(output_unit,'(A)') 'STAGE01_PHASE=TARGET_YEAR_SELECTED'
   flush(output_unit)
-  structure=build_year_structure(calculationDay,locatedYear)
+  structure=build_year_structure(calculationDay,locatedYear,diagnostic=.true.)
   write(output_unit,'(A)') 'STAGE01_PHASE=YEAR_STRUCTURE_READY'
   flush(output_unit)
   actual=project_calendar_date(targetDay,locatedYear,structure)

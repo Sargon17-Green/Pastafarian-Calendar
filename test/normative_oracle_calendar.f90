@@ -1,5 +1,5 @@
 module normative_oracle_calendar
-  use iso_fortran_env, only: int64
+  use iso_fortran_env, only: int64, output_unit
   use big_integer
   use source_language_catalog
   use normative_oracle_core
@@ -452,9 +452,10 @@ contains
     call move_alloc(tmp,memo%entries)
   end subroutine putCutletMemo
 
-  function build_year_structure(calculationDay,year) result(s)
+  function build_year_structure(calculationDay,year,diagnostic) result(s)
     type(BigInt), intent(in) :: calculationDay
     type(YearRecord), intent(in) :: year
+    logical, intent(in), optional :: diagnostic
     type(YearStructure) :: s
     type(SauceResult) :: r
     type(AnswerStream) :: a
@@ -462,10 +463,21 @@ contains
     integer :: G,K,L,lowM,highM,required,i,monthCount
     integer(int64) :: kidx,cursor
     integer(int64) :: gateIdx
-    logical :: found
+    logical :: found,trace
+
+    trace=.false.
+    if (present(diagnostic)) trace=diagnostic
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_ENTER'
+       flush(output_unit)
+    end if
 
     s%yearFirstDay=bi_add_small(year%openGateDay,1_int64)
     r=normative_sauce(calculationDay,s%yearFirstDay)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_SAUCE_READY'
+       flush(output_unit)
+    end if
     G=int(year%closeGateIndex-year%openGateIndex)
 
     a=ask_bowl(r,2,SEAL_CUTLET_COUNT)
@@ -473,17 +485,37 @@ contains
     if (K<1) error stop 'no cutlet-count candidate'
     rank=choose_rank(a,bi_from_int64(int(K,int64)))
     s%cutletCount=MIN_CUTLETS+int(bi_to_int64(rank))-1
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_CUTLET_COUNT_READY'
+       flush(output_unit)
+    end if
 
     required=-1
     gateIdx=exact_gate_index(calculationDay,found)
     if (found .and. gateIdx>year%openGateIndex .and. gateIdx<year%closeGateIndex) required=int(gateIdx-year%openGateIndex)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_CUTLET_PARTITION_COUNT_BEGIN'
+       flush(output_unit)
+    end if
     N=count_cutlet_partitions(G,s%cutletCount,required)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_CUTLET_PARTITION_COUNT_READY'
+       flush(output_unit)
+    end if
     a=ask_bowl(r,2,SEAL_CUTLET_PARTITION); rank=choose_rank(a,N)
     allocate(s%cutletPartition(s%cutletCount)); call unrank_cutlet_partition(G,s%cutletCount,required,rank,s%cutletPartition)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_CUTLET_UNRANK_READY'
+       flush(output_unit)
+    end if
 
     N=falling_factorial(CUTLET_NAME_COUNT,s%cutletCount)
     a=ask_bowl(r,5,SEAL_CUTLET_NAMES); rank=choose_rank(a,N)
     allocate(s%cutletNameIndices(s%cutletCount)); call unrank_distinct_indices(CUTLET_NAME_COUNT,s%cutletCount,rank,s%cutletNameIndices)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_CUTLET_NAMES_READY'
+       flush(output_unit)
+    end if
 
     allocate(s%cutletFirstDays(s%cutletCount),s%cutletLastDays(s%cutletCount))
     cursor=year%openGateIndex
@@ -493,24 +525,60 @@ contains
        s%cutletLastDays(i)=gate_day(kidx)
        cursor=kidx
     end do
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_CUTLET_DAYS_READY'
+       flush(output_unit)
+    end if
 
     L=year_length(year%openGateIndex,year%closeGateIndex)
     lowM=ceil_div_small(L,MAX_MONTH_DAYS); highM=min(MAX_MONTHS,L/MIN_MONTH_DAYS)
     if (lowM<MIN_MONTHS .or. lowM>highM) error stop 'month-count bounds invalid'
     a=ask_bowl(r,3,SEAL_MONTH_COUNT); rank=choose_rank(a,bi_from_int64(int(highM-lowM+1,int64)))
     monthCount=lowM+int(bi_to_int64(rank))-1; s%monthCount=monthCount
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_MONTH_COUNT_READY'
+       flush(output_unit)
+    end if
 
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_MONTH_LENGTH_COUNT_BEGIN'
+       flush(output_unit)
+    end if
     N=count_bounded_compositions(L,monthCount,MIN_MONTH_DAYS,MAX_MONTH_DAYS)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_MONTH_LENGTH_COUNT_READY'
+       flush(output_unit)
+    end if
     a=ask_bowl(r,3,SEAL_MONTH_LENGTHS); rank=choose_rank(a,N)
     allocate(s%monthLengths(monthCount)); call unrank_bounded_composition(L,monthCount,MIN_MONTH_DAYS,MAX_MONTH_DAYS,rank,s%monthLengths)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_MONTH_LENGTH_UNRANK_READY'
+       flush(output_unit)
+    end if
 
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_WEAVING_COUNT_BEGIN'
+       flush(output_unit)
+    end if
     N=count_weavings(s%monthLengths)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_WEAVING_COUNT_READY'
+       flush(output_unit)
+    end if
     a=ask_bowl(r,4,SEAL_MONTH_WEAVING); rank=choose_rank(a,N)
     allocate(s%monthWeaving(L)); call unrank_weaving(s%monthLengths,rank,s%monthWeaving)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_WEAVING_UNRANK_READY'
+       flush(output_unit)
+    end if
 
     N=falling_factorial(MONTH_NAME_COUNT,monthCount)
     a=ask_bowl(r,5,SEAL_MONTH_NAMES); rank=choose_rank(a,N)
     allocate(s%monthNameIndices(monthCount)); call unrank_distinct_indices(MONTH_NAME_COUNT,monthCount,rank,s%monthNameIndices)
+    if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_MONTH_NAMES_READY'
+       flush(output_unit)
+    end if
   end function build_year_structure
 
   function normative_calendar_date(calculationDay,targetDay) result(resultFive)
