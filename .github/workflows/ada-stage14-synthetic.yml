@@ -1,0 +1,25 @@
+name: Ada Stage14 synthetic five-field oracle
+
+on:
+  push:
+    branches:
+      - 'Ada+తెలుగు'
+    paths:
+      - 'tests/stage14_fivefield_oracle.py'
+      - '.github/workflows/ada-stage14-synthetic.yml'
+      - 'docs/STAGE_14_DISCOVERY11.md'
+      - 'DEVELOPMENT_STAGE.md'
+  workflow_dispatch:
+
+jobs:
+  stage14-synthetic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run independent synthetic five-field arithmetic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/stage14_fivefield_oracle.py | tee stage14-synthetic.log
+          grep -Fx 'STAGE14_SYNTHETIC_FIVEFIELD_ASSERTIONS=61' stage14-synthetic.log
