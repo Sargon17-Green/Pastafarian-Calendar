@@ -1,6 +1,6 @@
 # Stadio 10 — DISCOVERY 06: la kanona ĉeno de 46 ŝtonoj
 
-**Stato (2026-10-31):** la Stage09 dokumenta HEAD `54ed71a95cbb0a60ec6b4b59b953a4458f368f9e` pasis Native 78/78 kaj Names Lock. Stadio 10 havas produktkodon kaj 12 novajn testojn sendotajn al CI; **ne** marku ilin PASS antaŭ novaj completed/log-atelieroj.
+**Stato (2026-10-31):** la kodaj Stage10 CI-pordegoj finiĝis sukcese ĉe `58416104124eb0cef33876ee2b6ebcd51a8a509c`: Native 90/90, formatter PASS kaj Names Lock SUCCESS. Ĉi tiu dokumenta HEAD ankoraŭ bezonas propran CI-verifikon.
 
 ## Deveno kaj nura amplekso
 
@@ -40,3 +40,12 @@ Sendependa Python-BigInt-kontrolkalkulo (nur matematika antaŭkontrolo, **ne** G
 ## Malfermo de la efektiva koda etapo
 
 Enmetitaj vojoj: `src/pastafari/discovery_06_stones.gleam` kaj `test/discovery_06_test.gleam`. 12 apartaj unit-testaj funkcioj planitaj/kreitaj; la totala celo de 90 estas ankoraŭ prognozo, ne mezurita Native. La rekursia produktgeneratoro uzas sian propran `Stone`-tipon kaj lokan modulon `normalized_save`; testoj komparas aparte kun `reference/core`. Nek `main` nek la kanona fonto estas ŝanĝita.
+
+## Fakta Stage10 koda fermo — 2026-10-31
+
+- Unua koda SHA `eff34cf0146335739320f82bf383b59f3ca728a4`: Native 41193460881 malsukcesis **nur** en `gleam format --check` por `test/discovery_06_test.gleam`, antaŭ la testoj; Names Lock 41193460844 sukceso. Neniu funkcia malsukceso estas atribuita al tiu rulado.
+- Ekzakta formato-diferenco estis aplikita sen ŝanĝi semantikon; nova SHA `58416104124eb0cef33876ee2b6ebcd51a8a509c` (patro eff34cf...).
+- Native run 41193532282, job 124514999793: `completed/success`, Gleam 1.18.1 / OTP 28, formato PASS, **90 passed, no failures**.
+- Canonical Names Lock run 41193532343, job 124514999949: `completed/success` ĉe la sama SHA.
+- Evidenta artifact ID 13040066752, GitHub-raportita SHA256 `66501129c9fea0898b15b1891ace00da9c3bae2f797d01f63e12d6f93fc8de7f`.
+- 78 antaŭaj regresaj testoj + 12 novaj `DISCOVERY06` testoj; la kompleta 46×5-ŝtona komparo estas unu el la 12. Ĉi tio ne pruvas kompletan pastafarian datkalkulon.
