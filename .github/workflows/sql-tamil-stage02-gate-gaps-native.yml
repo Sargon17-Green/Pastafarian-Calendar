@@ -54,7 +54,7 @@ jobs:
             -f /work/sql/12_stage02_choose_rank.sql \
             -f /work/sql/13_stage02_gate_gaps.sql \
             -f /work/sql/test/102_stage02_gate_gaps_native.sql \
-            -c 'SELECT 1/((count(*)=32 AND bool_and(ok))::integer) AS native_32_of_32 FROM stage02_choose_rank_native' \
+            -c 'SELECT 1/((count(*)=32 AND bool_and(ok))::integer) AS native_32_of_32 FROM stage02_gate_gaps_native' \
             2>&1 | tee sql-tamil-gap-logs/native.txt
       - name: Production-only isolation (4)
         shell: bash
@@ -91,7 +91,7 @@ jobs:
             -f /work/sql/13_stage02_gate_gaps.sql \
             -f /work/sql/test/10_normative_reference.sql \
             -f /work/sql/test/103_stage02_gate_gaps_differential.sql \
-            -c 'SELECT 1/((count(*)=12 AND bool_and(ok))::integer) AS differential_12_of_12 FROM stage02_choose_rank_differential' \
+            -c 'SELECT 1/((count(*)=12 AND bool_and(ok))::integer) AS differential_12_of_12 FROM stage02_gate_gaps_differential' \
             2>&1 | tee sql-tamil-gap-logs/differential.txt
       - name: Preserve bounded logs
         if: always()
