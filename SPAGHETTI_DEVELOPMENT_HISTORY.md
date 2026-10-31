@@ -824,3 +824,15 @@ Stage43 adds a distinct opt-in route with independent canonical Year5000
 provider, field identity verification, 7 real year targets, archived
 Stage42 witnesses, 10 negative cases and Native CI. No test Oracle in src.
 Stage43 Native result pending. No main/merge or full five-component PASS.
+
+## 2026-10-31 — Stage47 Native GREEN; Stage48/VERIFICATION25 dibuka
+
+Stage47 di SHA d2377b801ca56e682ed192127b6157ec69e3993d:
+Actions #41239047688 completed/success 18/18. Job Native #124648877874
+PHP 8.3.36 64-bit menghasilkan checks=68, years=5, targets=20,
+max_hops=3, budget_rejections=1, stderr kosong dan exit=0.
+Artifact #13057139578. Tiada bukti kecacatan pada matriks yang diuji.
+Stage48 ialah ujian metamorfik baharu bagi hari dalaman tujuh tahun:
+21 target, 42 panggilan sah dengan belanjawan tepat/longgar, 6 penolakan
+belanjawan tidak mencukupi. Oracle hanya dalam tests, produksi PATCH22
+tidak diubah. Status Stage48 masih menunggu bukti Native pada SHA baharu.
