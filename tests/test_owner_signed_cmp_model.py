@@ -280,11 +280,35 @@ def main():
     )
     assert m.read_byte(46, 16382) == (0, 0x3C), "near-capacity byte changed"
     assert m.read_byte(46, 16383) == (0, 0x5A), "highest owner byte changed"
+    # Cases 246-247: a 16383-byte canonical descriptor beside a full-capacity
+    # 16384-byte descriptor whose most-significant SRAM byte is zero.
+    # The Python int.from_bytes oracle accepts A and independently rejects B.
+    assert m.write_byte(46, 16383, 0x00) == 0
+    assert m.read_byte(46, 16382) == (0, 0x3C), "canonical short high byte missing"
+    assert m.read_byte(46, 16383) == (0, 0x00), "full-capacity high zero missing"
+    canonical_short = reference_integer(m, 46, 0, 16383)
+    assert canonical_short > 0, "16383-byte descriptor must remain canonical"
+    try:
+        reference_integer(m, 46, 0, 16384)
+    except ValueError as exc:
+        assert str(exc) == "noncanonical leading zero", (
+            "full-capacity oracle must reject exactly the zero high byte"
+        )
+    else:
+        raise AssertionError("16384-byte high-zero descriptor was accepted")
+    assert compare_read_only(m, (46, 0, 16383), (46, 0, 16384)) == 3, (
+        "noncanonical full-capacity B must fail closed"
+    )
+    assert compare_read_only(m, (46, 0, 16384), (46, 0, 16383)) == 3, (
+        "noncanonical full-capacity A must fail closed"
+    )
+    assert m.read_byte(46, 16382) == (0, 0x3C), "canonical short high byte changed"
+    assert m.read_byte(46, 16383) == (0, 0x00), "noncanonical high zero changed"
     # Bank-edge read-only sentinels mirrored from ROM cases 203..210.
     assert m.read_byte(46, 8191) == (0, 0x33), "A bank-end sentinel changed"
     assert m.read_byte(42, 8191) == (0, 0x00), "B bank-end sentinel changed"
     assert m.read_byte(46, 8192) == (0, 0x01), "A next-bank sentinel changed"
-    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=28 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
+    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=30 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=4 same_owner_full_capacity_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 

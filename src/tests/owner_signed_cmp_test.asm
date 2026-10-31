@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..245: signed owner-scoped comparison.
+; Stage 1 native regression 191..247: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1246,6 +1246,82 @@ RunOwnerSignedCmpTests::
     jp nc, .fail
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
+    ; 246: same owner 46, A is canonical 16383 bytes; B is noncanonical 16384.
+    ; SRAM[16382]=$3c is A's nonzero high byte; SRAM[16383]=0 makes B invalid.
+    ; A-first validates the short descriptor before rejecting B's high zero.
+    ld a, 246
+    ld [wTestCase], a
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $3f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    xor a
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, $ff
+    ld [wOwnerCmpLenA], a
+    ld a, $3f
+    ld [wOwnerCmpLenA+1], a
+    ld a, $40
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    jp nc, .fail
+
+    ; 247: reverse A/B. The full-capacity noncanonical descriptor is now A.
+    ld a, 247
+    ld [wTestCase], a
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, $40
+    ld [wOwnerCmpLenA+1], a
+    ld a, $ff
+    ld [wOwnerCmpLenB], a
+    ld a, $3f
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    jp nc, .fail
+
     call OwnerCmpTestCheckPreCapacityByte
     jp nc, .fail
 
@@ -1461,6 +1537,46 @@ OwnerCmpTestCheckPreCapacityByte:
     jr nz, .bad
     ld a, [wOwnerByteValue]
     cp $3c
+    jr nz, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Verify the full-capacity noncanonical payload remains unchanged after 246-247.
+; Offset 16382 is the nonzero top byte for canonical length 16383; offset
+; 16383 is zero, making length 16384 noncanonical. Carry set = both unchanged.
+OwnerCmpTestCheckNoncanonicalCapacityBytes:
+    ld a, $fe
+    ld [wOwnerOffset], a
+    ld a, $3f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $3c
+    jr nz, .bad
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $3f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 46
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    or a
     jr nz, .bad
     scf
     ret
