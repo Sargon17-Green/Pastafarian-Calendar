@@ -1,6 +1,6 @@
 # Stadio 11 — DISCOVERY 07: malkodigo de ses-bovla permuta ordo
 
-**Stato (2026-10-31):** CONTRACT_ONLY; neniu Stage11 produktkodo, nova testkodo aŭ Native-rezulto ankoraŭ ekzistas. Stage10 code-HEAD estas verda; nova dokumenta HEAD bezonas sian propran CI.
+**Stato (2026-10-31):** Stage11 kompletiĝis verda ĉe koda HEAD 7c12a4a8eeff8f4c68371e2373a8d9ca62b92205; Stage12 estos aparta paŝo.
 
 ## Kanona celo kaj limoj
 
@@ -27,3 +27,11 @@ Planu 12 novajn unit-testojn: (1) unua rango, (2) dua rango, (3) rango 720, (4) 
 2. Aldonu unu produktmodulon, 12 testojn kaj stage-statusajn kampojn; ekzistantaj referenco, produktaj moduloj, kvin finaj datokomponantoj kaj nomlistoj restu netuŝitaj.
 3. La regresobazo estas 90 mezuritaj testoj; Stage11 celo **102 PASS / 0 FAIL (nur prognozo)**. Deviga `gleam format --check src test`, `gleam test`, kaj Canonical Names Lock ĉe identa commit SHA; logoj, labor-ID, artifact/hash estas pruvodevigaj.
 4. Neniu `main`-merge, plena datokonverto, aŭ aldona dato-komponanto.
+
+## Fakta fermo (2026-10-31)
+
+- Formatter-only korekto en test/discovery_07_test.gleam atingis HEAD 7c12a4a8eeff8f4c68371e2373a8d9ca62b92205.
+- Native run 41199740784, job 124533006663: completed/success; Gleam 1.18.1/OTP28, formato PASS, 102 passed/0 failures. HEAD-kontrolo kaj senmodifa fontkontrolo sukcesis.
+- Artifact 13042089676, SHA256 ceae21269bb7e5498b794bbee1a908716a7efd68d7c16f7786e048902444a245.
+- Names Lock run 41199740794, job 124533006857: completed/success ĉe sama SHA.
+- 90 pasintaj regresoj + 12 Discovery07 testoj. Ne plena dato.
