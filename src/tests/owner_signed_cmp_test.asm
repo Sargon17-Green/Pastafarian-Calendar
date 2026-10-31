@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..225: signed owner-scoped comparison.
+; Stage 1 native regression 191..227: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -793,6 +793,50 @@ RunOwnerSignedCmpTests::
     ld a, 1
     ld [wOwnerCmpSignB], a
     ld [wOwnerCmpLenA], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 226: same owner 46 has only two 8-KiB banks (capacity 16384).
+    ; A is valid +127, B length 16385 is invalid despite owner alias.
+    ; Reject without writing descriptors, lease tags, or payload.
+    ld a, 226
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    ld a, $40
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 227: reverse the same-owner over-capacity condition into A.
+    ; B remains a canonical valid +127 in its own descriptor.
+    ld a, 227
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpLenB+1], a
+    ld a, $40
+    ld [wOwnerCmpLenA+1], a
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
