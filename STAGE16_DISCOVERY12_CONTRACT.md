@@ -1,6 +1,6 @@
 # Stadio 16 — DISCOVERY 12: dek du postaj miksadoj
 
-**Stato 2026-10-31:** nur kontrakto. Neniu Stage16 produktkodo, testoj aŭ Native PASS.
+**Stato 2026-10-31:** koda etapo konfirmita GREEN ĉe `30c590f13376a33c2239accd4c72fa6a3977fc51`: 166/166 testoj, Gleam 1.18.1/OTP28, format kaj source integrity PASS; Native run 41222191573/job 124598906618, artefakto 13050721420 SHA256 `f99ec9c5c70d22e6dbee3a31bf2085a6774621cf54a373d5a4a53839a7fd9e4a`. Names Lock run 41222191012/job 124598905186 SUCCESS. Fina dokumenta HEAD devas esti kontrolita aparte.
 
 ## Deveno kaj pordo
 
