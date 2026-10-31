@@ -79,3 +79,4 @@ export * from "./patch25MonthDay.ts";
 export * from "./discovery26LegacyMonthEnd.ts";
 
 export * from "./patch26MonthEnd.ts";
+export * from "./discovery27LegacySpanMembership.ts";
