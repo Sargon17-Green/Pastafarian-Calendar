@@ -1,0 +1,53 @@
+{
+  "schema": "codesh-cross-repository-independent-recheck-random100/1",
+  "archived_input": "results(20261031-124512).zip",
+  "input_sha256": "0de29061c7d4ceae06a38581a51ca70105f7be4e0c0a6437eb051c09a77c1cb7",
+  "zip_crc": "PASS",
+  "manifest_entries": 213,
+  "manifest_matching_entries": 212,
+  "manifest_mismatch": [
+    {
+      "path": "results/RESULTS_MANIFEST.json",
+      "claimed_size": 35022,
+      "actual_size": 35358,
+      "claimed_sha256": "cff8055d0613ac088ce7ccb13002c35834030e1aeeb18c7eb3d7b3b46ec4f36a",
+      "actual_sha256": "c4598217d0720ad706c6ee4b4d3a66d7f47ba32b919e2438e0d7f7695c87d62c"
+    }
+  ],
+  "random_seed": "ac55fe282f7096205919da2e9228ac66",
+  "random_seed_replay": "PASS_100_UNIQUE_ACTION_DRAWS_AND_100_INDEPENDENT_TARGET_DRAWS",
+  "action_date_range": [
+    "1926-10-31",
+    "2126-10-31"
+  ],
+  "cases_completed": 100,
+  "cases_with_year5000_equal": 100,
+  "cases_with_target_year_equal": 100,
+  "cases_with_complete_year_chain_equal": 100,
+  "compared_full_year_windows": 682,
+  "fully_matched_year_windows": 682,
+  "total_year_membership_pairs": 2973452,
+  "total_year_membership_mismatch_pairs": 0,
+  "target_after_action": 56,
+  "target_before_action": 44,
+  "year_chain_min": 1,
+  "year_chain_median": 7.0,
+  "year_chain_max": 18,
+  "first_year_number": 4986,
+  "last_year_number": 5017,
+  "codesh_jar_sha256": "e34360ca1928dc11758636cde1ee4afc1cbe9994e5e6fd1d1ce4660a8c70c98d",
+  "codesh_source_commit": "fecd1389758cdcca01fef184673d673f161640d0",
+  "reference_source_commit": "81af2a055bbdfdfa122fffc91c21283659df0b39",
+  "jdn_translation_delta": 1721425,
+  "year_structure_verdict": "PASS_AFTER_JDN_EPOCH_ADAPTER",
+  "five_field_verdict": "NOT_TESTED_NO_CODESH_FIVE_FIELD_OUTPUT",
+  "reference_five_field_outputs": 100,
+  "codesh_five_field_outputs": 0,
+  "reported_run_exit_code": 1,
+  "reported_launcher_exit_code": 1,
+  "false_failure_diagnosis": "RUN_COMPARISON.py catches SystemExit(3) using except BaseException, emits FAILURE.json and returns 1; comparison_finished=true and all 100 checkpoints verified",
+  "manifest_self_hash_issue": "self-hash under files_before_manifest is an impossible stable self-reference; 212 other entries match",
+  "methodology": "Each compared year is a full closed interval. Daily membership differences derived algebraically from interval symmetric difference, not by running a separate date conversion for each day.",
+  "main_changed": false,
+  "source_changed": false
+}
