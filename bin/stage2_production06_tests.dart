@@ -2,15 +2,14 @@ import 'dart:io';
 
 import '../lib/src/monster_bowl_processor.dart';
 import '../lib/src/monster_bowl_questions.dart';
-import '../lib/src/monster_modular_math.dart';
 import '../lib/src/monster_seed_feeder.dart';
 import '../lib/src/monster_visible_droplets.dart';
 import '../lib/src/monster_work_counts.dart';
 
 var _checks = 0;
 final _modulus = (BigInt.one << 127) - BigInt.one;
-const _seals = <int>[1,10,11,12,20,21,22,30,31,32,33];
-const _offsets = <int>[-12,-2,-1,0,1,2,12];
+const _seals = <int>[1, 10, 11, 12, 20, 21, 22, 30, 31, 32, 33];
+const _offsets = <int>[-12, -2, -1, 0, 1, 2, 12];
 
 void _check(bool condition, String label) {
   _checks++;
@@ -101,9 +100,7 @@ _ReferenceSequence _referenceSequence(
   final fixedSixth = bowls.finalBowls[5];
   final z = BigInt.from(seal);
   final a0 = _referenceNormalize(
-    (current + z + BigInt.from(181)).pow(2) +
-        BigInt.from(179) * next +
-        z,
+    (current + z + BigInt.from(181)).pow(2) + BigInt.from(179) * next + z,
   );
   final directionValue = _referenceNormalize(
     (a0 + z + BigInt.from(194)).pow(2) +
@@ -209,12 +206,15 @@ void _compareChoice(MonsterEqualChoice actual, _ReferenceChoice expected) {
   _check(actual.ringSize == expected.ringSize, 'Choice ring size');
   _check(actual.limit == expected.limit, 'Choice rejection limit');
   _check(actual.initial == expected.initial, 'Choice initial candidate');
-  _check(_sameBigInts(actual.digits, expected.digits), 'Least-significant-first digits');
+  _check(_sameBigInts(actual.digits, expected.digits),
+      'Least-significant-first digits');
   _check(actual.accepted == expected.accepted, 'First accepted candidate');
   _check(actual.rejected == expected.rejected, 'Rejected candidate count');
   _check(actual.result == expected.result, 'Equal-choice result');
-  _check(actual.result >= BigInt.one && actual.result <= actual.modulus, 'Result range');
-  _check(actual.accepted >= BigInt.one && actual.accepted <= actual.limit, 'Accepted range');
+  _check(actual.result >= BigInt.one && actual.result <= actual.modulus,
+      'Result range');
+  _check(actual.accepted >= BigInt.one && actual.accepted <= actual.limit,
+      'Accepted range');
 }
 
 void main() {
@@ -224,13 +224,6 @@ void main() {
   final bowlProcessor = const MonsterBowlProcessor();
   final engine = const MonsterBowlQuestionEngine();
   final stones = feeder.buildStones();
-  final referenceStones = stones
-      .map(
-        (stone) => <BigInt>[
-          for (var lane = 0; lane < 5; lane++) stone.lane(lane),
-        ],
-      )
-      .toList(growable: false);
   final moduli = <BigInt>[
     BigInt.one,
     BigInt.from(2),
@@ -242,17 +235,18 @@ void main() {
     _modulus.pow(2) + BigInt.one,
     _modulus.pow(3) - BigInt.one,
   ];
-  const answerIndices = <int>[0,1,2,17,127];
+  const answerIndices = <int>[0, 1, 2, 17, 127];
 
   _check(
     MonsterBowlQuestionEngine.canonicalSeals.length == 11,
     'Eleven canonical seals',
   );
   _check(
-    MonsterBowlQuestionEngine.canonicalSeals.containsAll(_seals),
+    MonsterBowlQuestionEngine.canonicalSeals.toSet().containsAll(_seals),
     'Canonical seal IDs',
   );
-  _check(!MonsterBowlQuestionEngine.canonicalSeals.contains(40), 'Seal 40 remains blank');
+  _check(!MonsterBowlQuestionEngine.canonicalSeals.contains(40),
+      'Seal 40 remains blank');
 
   var sequenceCases = 0;
   var selectionCases = 0;
@@ -289,7 +283,8 @@ void main() {
           final expected = _referenceSequence(bowls, bowlId, seal);
           _check(actual.bowlId == expected.bowlId, 'Question bowl identity');
           _check(actual.seal == expected.seal, 'Question seal');
-          _check(actual.nextBowlId == expected.nextBowlId, 'Next bowl from orderAt46');
+          _check(actual.nextBowlId == expected.nextBowlId,
+              'Next bowl from orderAt46');
           _check(actual.a0 == expected.a0, 'Independent A0 oracle');
           _check(
             actual.directionValue == expected.directionValue,
@@ -348,7 +343,8 @@ void main() {
   );
   final shortLimit = (_modulus ~/ BigInt.from(17)) * BigInt.from(17);
   _check(syntheticShortForward.accepted == BigInt.one, 'Short forward wrap');
-  _check(syntheticShortForward.rejected == BigInt.one, 'Short forward rejection count');
+  _check(syntheticShortForward.rejected == BigInt.one,
+      'Short forward rejection count');
   _check(syntheticShortBackward.accepted == shortLimit, 'Short backward limit');
   _check(
     syntheticShortBackward.rejected == _modulus - shortLimit,
@@ -370,8 +366,10 @@ void main() {
     syntheticWideForward.initial > syntheticWideForward.limit,
     'Wide forward rejection branch reached',
   );
-  _check(syntheticWideForward.accepted == BigInt.one, 'Wide forward wraps to one');
-  _check(syntheticWideForward.rejected == BigInt.from(2), 'Wide forward rejection count');
+  _check(
+      syntheticWideForward.accepted == BigInt.one, 'Wide forward wraps to one');
+  _check(syntheticWideForward.rejected == BigInt.from(2),
+      'Wide forward rejection count');
   _check(syntheticWideBackward.width == 2, 'Wide backward width');
   _check(
     syntheticWideBackward.initial > syntheticWideBackward.limit,
@@ -416,7 +414,14 @@ void main() {
   _check(
     _sameBigInts(
       foundationBowls.orderAt46.map(BigInt.from).toList(),
-      <BigInt>[BigInt.from(4),BigInt.from(5),BigInt.from(2),BigInt.from(3),BigInt.from(6),BigInt.one],
+      <BigInt>[
+        BigInt.from(4),
+        BigInt.from(5),
+        BigInt.from(2),
+        BigInt.from(3),
+        BigInt.from(6),
+        BigInt.one
+      ],
     ),
     'Canonical orderAt46 retained',
   );
@@ -483,7 +488,8 @@ void main() {
 
   _check(sequenceCases == 3234, 'Exactly 3234 bowl/seal sequences');
   _check(selectionCases == 29106, 'Exactly 29106 equal-choice cases');
-  _check(positiveDirections > 0 && negativeDirections > 0, 'Both answer directions exercised');
+  _check(positiveDirections > 0 && negativeDirections > 0,
+      'Both answer directions exercised');
   _check(shortRejected > 0, 'Short rejection branch exercised');
   _check(wideRejected > 0, 'Wide rejection branch exercised');
   _check(_checks >= 100000, 'Minimum 100000 real assertions');

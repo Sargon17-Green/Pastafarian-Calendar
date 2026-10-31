@@ -23,7 +23,8 @@ final class MonsterBowlAnswerSequence {
 
   BigInt answerAt(BigInt index) {
     if (index < BigInt.zero) {
-      throw ArgumentError.value(index, 'index', 'Expected a nonnegative index.');
+      throw ArgumentError.value(
+          index, 'index', 'Expected a nonnegative index.');
     }
     return _math.save(a0 + BigInt.from(direction) * index);
   }
@@ -92,7 +93,8 @@ final class MonsterBowlQuestionEngine {
     required int seal,
   }) {
     if (bowlId < 1 || bowlId > 6) {
-      throw ArgumentError.value(bowlId, 'bowlId', 'Expected a fixed bowl ID 1..6.');
+      throw ArgumentError.value(
+          bowlId, 'bowlId', 'Expected a fixed bowl ID 1..6.');
     }
     if (!canonicalSeals.contains(seal)) {
       throw ArgumentError.value(seal, 'seal', 'Unknown canonical seal.');
@@ -103,7 +105,8 @@ final class MonsterBowlQuestionEngine {
         bowls.orderAt46.toSet().length != 6 ||
         !bowls.orderAt46.contains(bowlId) ||
         !_sameOrder(bowls.orderAt46, bowls.dropStages.last.order)) {
-      throw ArgumentError('A complete bowl result with saved orderAt46 is required.');
+      throw ArgumentError(
+          'A complete bowl result with saved orderAt46 is required.');
     }
 
     final modulus = MonsterModularMath.modulus;
@@ -120,9 +123,7 @@ final class MonsterBowlQuestionEngine {
     final fixedSixth = bowls.finalBowls[5];
     final z = BigInt.from(seal);
     final a0 = math.save(
-      math.square(current + z + BigInt.from(181)) +
-          BigInt.from(179) * next +
-          z,
+      math.square(current + z + BigInt.from(181)) + BigInt.from(179) * next + z,
     );
     final directionValue = math.save(
       math.square(a0 + z + BigInt.from(194)) +
@@ -203,7 +204,8 @@ final class MonsterBowlQuestionEngine {
       throw ArgumentError.value(modulus, 'modulus', 'N must be positive.');
     }
     if (firstAnswer < BigInt.one || firstAnswer > m) {
-      throw ArgumentError.value(firstAnswer, 'firstAnswer', 'Expected A0 in [1,M].');
+      throw ArgumentError.value(
+          firstAnswer, 'firstAnswer', 'Expected A0 in [1,M].');
     }
     if (direction != 1 && direction != -1) {
       throw ArgumentError.value(direction, 'direction', 'Expected +1 or -1.');
