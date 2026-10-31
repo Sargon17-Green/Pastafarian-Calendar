@@ -31,11 +31,11 @@ fn patch13_reference(first BigInt, step int, n BigInt) (BigInt, BigInt, BigInt) 
 fn test_patch13_four_original_expected_red_boundaries() {
 	m := patch13_m()
 	half := big_add(big_floor_div(m, big_from_int(2)), big_one())
-	near := big_sub(m, big_from_int(3))
+	near_boundary := big_sub(m, big_from_int(3))
 	firsts := [m, big_sub(m, big_one()), m, m]
 	steps := [1, 1, -1, 1]
-	ranges := [half, half, near, near]
-	expected := [big_one(), big_one(), near, big_one()]
+	ranges := [half, half, near_boundary, near_boundary]
+	expected := [big_one(), big_one(), near_boundary, big_one()]
 	for i in 0 .. 4 {
 		got := calendar_choose_rank_short_spaghetti(patch13_stream(firsts[i], steps[i]), ranges[i]) or {
 			big_zero()
@@ -47,10 +47,10 @@ fn test_patch13_four_original_expected_red_boundaries() {
 fn test_patch13_rejection_count_and_accepted_x() {
 	m := patch13_m()
 	half := big_add(big_floor_div(m, big_from_int(2)), big_one())
-	near := big_sub(m, big_from_int(3))
+	near_boundary := big_sub(m, big_from_int(3))
 	firsts := [m, big_sub(m, big_one()), m, m]
 	steps := [1, 1, -1, 1]
-	ranges := [half, half, near, near]
+	ranges := [half, half, near_boundary, near_boundary]
 	expected_rejected := [1, 2, 3, 1]
 	for i in 0 .. 4 {
 		result := ShortRejectionPatch13{}.choose(patch13_stream(firsts[i], steps[i]), ranges[i]) or {
