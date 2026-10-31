@@ -678,6 +678,32 @@ final class BootstrapKernel
             $this->metrics->bump($context, 'year.patch19.gate_index.calls');
             return $result;
         });
+        // PATCH20: verify both gate endpoints independently before PATCH19 navigation.
+        // A caller-supplied gate index -> day mapping is mandatory; no test oracle in src.
+        $this->dispatcher->register('TARGET_YEAR_PATCH_20', function(BootstrapContext $context): array {
+            $anchor = $context->semanticState['year5000Anchor'] ?? null;
+            $next = $context->semanticState['nextYearProvider'] ?? null;
+            $previous = $context->semanticState['previousYearProvider'] ?? null;
+            $gateDay = $context->semanticState['gateDayByIndexProvider'] ?? null;
+            $maxSteps = $context->semanticState['yearStepBudget'] ?? null;
+            if (!is_array($anchor) || !is_callable($next) ||
+                !is_callable($previous) || !is_callable($gateDay) || !is_int($maxSteps)) {
+                throw new \InvalidArgumentException('PATCH20_PROVIDER_ARGS');
+            }
+            $legacyReport = $this->legacyGuessTargetYear365(
+                $context->calculationDay, $context->targetDay, $anchor
+            );
+            $patch = new \Pastafari\Stage01\Patches\GateDayCoherencePatch20();
+            $result = $patch->find(
+                $anchor, $context->targetDay, $next, $previous, $gateDay,
+                $legacyReport, $maxSteps
+            );
+            $context->semanticState['stage36LegacyReport'] = $legacyReport;
+            $context->semanticState['stage41TargetYear'] = $result['targetYearCandidate'];
+            $context->status = 'TARGET_YEAR_PATCH_20_RETURNED';
+            $this->metrics->bump($context, 'year.patch20.gate_day.calls');
+            return $result;
+        });
         $this->dispatcher->register('MISSING_FIFTH_DIGIT_LEGACY', function(BootstrapContext $context): BigInt {
             $id = $context->semanticState['queriedBowlId'] ?? null;
             $seal = $context->semanticState['seal'] ?? null;
@@ -1003,6 +1029,34 @@ final class BootstrapKernel
         return $this->boundary->run(
             $context,
             fn(): array => $this->dispatcher->dispatch('TARGET_YEAR_PATCH_19', $context)
+        );
+    }
+
+    /**
+     * PATCH20: trusted independent gate-day verification for every visited year.
+     * The index-to-day provider must not reuse the callback's year records;
+     * construction of that independent production source is caller-owned.
+     * @param array<string,mixed> $year5000Anchor
+     * @param callable(array):array $nextYearProvider
+     * @param callable(array):array $previousYearProvider
+     * @param callable(int):int $gateDayByIndexProvider
+     * @return array<string,mixed>
+     */
+    public function targetYearSequentialPatch20(
+        int $calculationDay, int $targetDay, array $year5000Anchor,
+        callable $nextYearProvider, callable $previousYearProvider,
+        callable $gateDayByIndexProvider, int $maxSteps = 2048
+    ): array {
+        $context = new BootstrapContext($calculationDay, $targetDay);
+        $context->phase = 'TARGET_YEAR_PATCH_20';
+        $context->semanticState['year5000Anchor'] = $year5000Anchor;
+        $context->semanticState['nextYearProvider'] = $nextYearProvider;
+        $context->semanticState['previousYearProvider'] = $previousYearProvider;
+        $context->semanticState['gateDayByIndexProvider'] = $gateDayByIndexProvider;
+        $context->semanticState['yearStepBudget'] = $maxSteps;
+        return $this->boundary->run(
+            $context,
+            fn(): array => $this->dispatcher->dispatch('TARGET_YEAR_PATCH_20', $context)
         );
     }
 

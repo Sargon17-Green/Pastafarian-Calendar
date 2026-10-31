@@ -409,3 +409,55 @@ jobs:
           path: evidence-stage40/
           retention-days: 30
           if-no-files-found: warn
+
+
+  stage41-php-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Stage41 PHP native lint and 64-bit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l src/Patches/GateDayCoherencePatch20.php
+          php -l src/BootstrapKernel.php
+          php -l tests/bootstrap.php
+          php -l tests/stage41_patch20_tests.php
+      - name: Stage41 independent gate-day mapping regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage41
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=41\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage41/source.txt
+          php -v > evidence-stage41/php-version.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage41_patch20_tests.php > evidence-stage41/stdout.txt 2> evidence-stage41/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence-stage41/exit-code.txt
+          cat evidence-stage41/stdout.txt
+          cat evidence-stage41/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage41/stderr.txt
+          grep -Eq '^LULUS Stage41 PATCH20 checks=[0-9]+ genuine_years=3 real_targets=7 stage40_red=2 invalid=11 stderr=0$' evidence-stage41/stdout.txt
+      - name: Preserve Stage41 Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage41-patch20
+          path: evidence-stage41/
+          retention-days: 30
+          if-no-files-found: warn

@@ -794,3 +794,16 @@ Run 41179339038 completed/success 10/10 pada SHA 747430578e99c13a7984f5b2cebf275
 ## Stage40 DISCOVERY20 — hujung indeks jauh
 
 Kajian test-only berbanding Oracle normatif untuk next.closeGateIndex dan previous.openGateIndex yang rosak tanpa memutuskan seam. Kontrak docs/STAGE40_DISCOVERY20_NONSEAM_GATE_INDEX_CONTRACT_2026-10-31.md; probe tests/stage40_discovery20_probe.php. Tiada tuntutan EXPECTED_RED sebelum Native CI. Patch19, Year5000 sebenar dan main tidak diubah.
+
+## Stage40 ditutup; Stage41/PATCH20 dibuka — 31 Oktober 2026
+
+Stage40 Native run 41183979338 completed/success, 11/11 jobs pada
+5980c540a7d18f837e257d554ef19979aff73fcd. PHP 8.3.36 64-bit memaparkan 19 controls, dua saksi
+non-seam gate index drift reproduced=2, rejected=0, stderr kosong,
+exit=0 (artifact 13036560944). Ini membuktikan EXPECTED_RED, bukan
+kebenaran output cacat. Stage41 menambah GateDayCoherencePatch20,
+laluan berasingan TARGET_YEAR_PATCH_20 yang memerlukan pembekal bebas
+gateDayByIndex(int), ujian tujuh target benar dan penolakan 11 input
+buruk termasuk kedua-dua saksi Stage40. PATCH18, PATCH19, legacy,
+Oracle ujian dan katalog tidak diubah. Status Stage41 masih
+AWAITING_NATIVE sehingga CI semua pekerjaan berjaya pada SHA baharu.
