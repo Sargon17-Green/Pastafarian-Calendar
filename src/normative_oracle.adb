@@ -4,6 +4,8 @@ with Ada.Containers.Ordered_Maps;
 with Ada.Containers.Vectors;
 with Ada.Numerics.Big_Numbers.Big_Integers;
 with Exact_Math;
+with Ada.Environment_Variables;
+with Ada.Text_IO;
 
 package body Normative_Oracle is
    use Ada.Numerics.Big_Numbers.Big_Integers;
@@ -11,6 +13,15 @@ package body Normative_Oracle is
    use type Ada.Containers.Count_Type;
 
    function B (N : Integer) return Big_Integer is (To_Big_Integer (N));
+
+   -- Test-only, opt-in phase markers. Does not alter the calendar arithmetic.
+   procedure Stage13_Trace (Phase : String) is
+   begin
+      if Ada.Environment_Variables.Exists ("PC_STAGE13_DIAGNOSTIC") then
+         Ada.Text_IO.Put_Line ("STAGE13_DIAG=" & Phase);
+         Ada.Text_IO.Flush;
+      end if;
+   end Stage13_Trace;
 
    Gate_Gap_Min   : constant Big_Integer := B (42);
    Gate_Gap_Max   : constant Big_Integer := B (963);
@@ -679,8 +690,10 @@ package body Normative_Oracle is
       Candidates : Pair_Vectors.Vector;
       I, J : Big_Integer;
    begin
+      Stage13_Trace ("year5000_gate_expansion_begin");
       Ensure_Gates_Cover
         (G, Calculation_Day - Year_Max_Days, Calculation_Day + Year_Max_Days);
+      Stage13_Trace ("year5000_gate_expansion_done");
       I := G.Min_Index;
       while I < G.Max_Index loop
          J := I + B (1);
@@ -699,7 +712,9 @@ package body Normative_Oracle is
       if Candidates.Is_Empty then
          raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("5000 సంవత్సరానికి అభ్యర్థి దొరకలేదు");
       end if;
+      Stage13_Trace ("year5000_candidates_ready");
       Sort_Pairs (G, Candidates);
+      Stage13_Trace ("year5000_candidates_sorted");
       declare
          R : constant Sauce_Result := Sauce (Calculation_Day, Calculation_Day);
          Stream : constant Answer_Stream := Ask_Bowl (R, 1, Seal_Year_5000);
@@ -707,6 +722,7 @@ package body Normative_Oracle is
            (Stream, B (Integer (Candidates.Length)));
          P : constant Pair_Record := Pair_By_Rank (Candidates, Rank);
       begin
+         Stage13_Trace ("year5000_selected");
          return
            (Number => B (5_000), Open_Index => P.Open_Index,
             Close_Index => P.Close_Index, Open_Day => Gate_At (G, P.Open_Index),
@@ -920,10 +936,12 @@ package body Normative_Oracle is
       Cumulative : Natural := 0;
       Hit : Boolean := False;
    begin
+      Stage13_Trace ("cutlet_partition_begin");
       if Found and then Gate_Index > Y.Open_Index and then Gate_Index < Y.Close_Index then
          Required := To_Natural_Checked (Gate_Index - Y.Open_Index, 1_000);
       end if;
       Count_All := Count (Gaps, K, 0, False);
+      Stage13_Trace ("cutlet_partition_count_done");
       Stream := Ask_Bowl (Structure_R, 2, Seal_Cutlet_Partition);
       Rank := Choose_Rank (Stream, Count_All);
 
@@ -957,6 +975,7 @@ package body Normative_Oracle is
             end;
          end loop;
       end loop;
+      Stage13_Trace ("cutlet_partition_done");
       return Result;
    end Choose_Cutlet_Partition;
 
@@ -1034,6 +1053,7 @@ package body Normative_Oracle is
       Remaining : Natural := Total;
       K : Natural := Slots;
    begin
+      Stage13_Trace ("month_lengths_begin");
       for Position in Lengths'Range loop
          for X in 4 .. 123 loop
             if X <= Remaining then
@@ -1052,6 +1072,7 @@ package body Normative_Oracle is
             end if;
          end loop;
       end loop;
+      Stage13_Trace ("month_lengths_done");
    end Choose_Month_Lengths;
 
    type Remaining_47 is array (Positive range 1 .. 47) of Natural;
@@ -1145,11 +1166,13 @@ package body Normative_Oracle is
          Total := Total + Lengths (J);
       end loop;
 
+      Stage13_Trace ("month_weave_count_begin");
       declare
          Rank : Big_Integer := Choose_Rank
            (Ask_Bowl (Structure_R, 4, Seal_Month_Weaving), Count (State));
          Result : Natural_Array (1 .. Total);
       begin
+         Stage13_Trace ("month_weave_count_done");
          for Position in 1 .. Total loop
             for J in 1 .. M_Count loop
                if Legal (State, J) then
@@ -1168,6 +1191,7 @@ package body Normative_Oracle is
                end if;
             end loop;
          end loop;
+         Stage13_Trace ("month_weave_done");
          return Result;
       end;
    end Choose_Month_Weaving;
@@ -1177,7 +1201,9 @@ package body Normative_Oracle is
    is
       Gates : Gate_State;
    begin
+      Stage13_Trace ("calendar_begin");
       Initialize_Gates (Gates);
+      Stage13_Trace ("calendar_gates_initialized");
       declare
          Y : constant Year_Record := Find_Target_Year (Gates, Calculation_Day, Target_Day);
          First_Day : constant Big_Integer := Y.Open_Day + B (1);
@@ -1247,6 +1273,7 @@ package body Normative_Oracle is
                end if;
             end loop;
 
+            Stage13_Trace ("calendar_result_ready");
             return
               (Year_Number => Y.Number,
                Cutlet_Canonical => Positive (Cutlet_Names (Cutlet_Id)),
