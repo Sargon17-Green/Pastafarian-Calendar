@@ -81,6 +81,7 @@ Write-Host "STAGE32_STEP_SAME=$signSame"
 Write-Host ("STAGE32_DISTINCT_DELTAS=" + $distinctDeltas.Count)
 Write-Host "STAGE32_ASSERTIONS_PASSED=$script:StageTestPassed"
 Write-Host "STAGE32_ASSERTIONS_FAILED=$script:StageTestFailed"
+if ($script:StageTestPassed -ne 239) { Write-Host 'STAGE32_ASSERTION_COUNT=FAIL_EXPECTED_239'; exit 1 }
 if ($script:StageTestFailed -ne 0) { Write-Host 'STAGE32_DISCOVERY17=FAIL'; exit 1 }
 Write-Host 'STAGE32_DISCOVERY17=BOUNDED_RESEARCH_ONLY'
 exit 0
