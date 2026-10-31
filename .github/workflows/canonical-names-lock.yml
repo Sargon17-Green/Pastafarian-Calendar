@@ -252,29 +252,33 @@ jobs:
             exit 1
           fi
           echo "Stage 1 five-field synthetic projection: 25/25; full date integration NOT accepted." >> "$GITHUB_STEP_SUMMARY"
-      - name: Diagnose real first-day calendar path (75s, 1 GiB; NOT a gate)
+      - name: Localize first-day slow phase (15s, 1 GiB; NOT a gate)
         shell: bash
         run: |
           set -euo pipefail
           started=$SECONDS
           set +e
-          output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=5s 75s build/stage01_normative_first_day_probe) 2>&1)"
+          output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 15s build/stage01_normative_first_day_probe) 2>&1)"
           exit_code=$?
           set -e
           elapsed=$((SECONDS-started))
           printf '%s\n' "$output"
-          echo "STAGE01_NORMATIVE_DIAGNOSTIC_EXIT=$exit_code RUNTIME_SECONDS=$elapsed LIMIT=75 MEMORY_KIB=1048576"
+          last_phase="$(grep '^STAGE01_PHASE=' <<< "$output" | tail -n 1 || true)"
+          echo "STAGE01_PHASE_LAST=${last_phase:-NONE}"
+          echo "STAGE01_PHASE_DIAGNOSTIC_EXIT=$exit_code RUNTIME_SECONDS=$elapsed LIMIT=15 MEMORY_KIB=1048576"
           if [[ "$exit_code" -eq 0 ]] &&
-             grep -Fxq 'STAGE01_NORMATIVE_FIRST_DAY_ASSERTIONS=8' <<< "$output" &&
-             grep -Fxq 'STAGE01_NORMATIVE_FIRST_DAY_FAILURES=0' <<< "$output" &&
-             grep -Fqx 'STAGE01_NORMATIVE_FIRST_DAY_PASS (boundary invariants only; NOT full Stage 1 acceptance)' <<< "$output"; then
-            echo 'STAGE01_NORMATIVE_DIAGNOSTIC_VERDICT=PASS_8_OF_8_NOT_FULL_ORACLE'
-            echo 'Stage1 real first-day diagnostic: 8/8, bounded; not full acceptance.' >> "$GITHUB_STEP_SUMMARY"
+             grep -Fxq 'STAGE01_PHASED_FIRST_DAY_ASSERTIONS=8' <<< "$output" &&
+             grep -Fxq 'STAGE01_PHASED_FIRST_DAY_FAILURES=0' <<< "$output" &&
+             grep -Fqx 'STAGE01_PHASED_FIRST_DAY_PASS (boundary invariants only; NOT full Stage 1 acceptance)' <<< "$output"; then
+            echo 'STAGE01_PHASE_DIAGNOSTIC_VERDICT=PASS_8_OF_8_NOT_FULL_ORACLE'
+          elif [[ "$exit_code" -eq 124 ]]; then
+            echo "::warning::Stage1 phased first-day diagnostic timed out; see STAGE01_PHASE_LAST"
+            echo 'STAGE01_PHASE_DIAGNOSTIC_VERDICT=TIMEOUT_PHASE_LOCATED'
           else
-            echo "::warning::Stage1 real first-day diagnostic is inconclusive or failed (exit $exit_code); investigate performance/assertions before acceptance"
-            echo 'STAGE01_NORMATIVE_DIAGNOSTIC_VERDICT=INCONCLUSIVE_OR_FAIL'
-            echo "Stage1 real first-day diagnostic inconclusive/failed (exit $exit_code, ${elapsed}s); not a release gate." >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Stage1 phased first-day diagnostic failed or is inconclusive"
+            echo 'STAGE01_PHASE_DIAGNOSTIC_VERDICT=INCONCLUSIVE_OR_FAIL'
           fi
+          echo "Fortran Stage1 first-day phase diagnosis: exit=$exit_code, ${elapsed}s, ${last_phase:-NONE}; no full acceptance." >> "$GITHUB_STEP_SUMMARY"
       - name: Run bounded Stage 1 BigInt safe-boundary checks
         shell: bash
         run: |
