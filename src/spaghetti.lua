@@ -37,6 +37,7 @@ local PositiveGatePatch = require("positive_gate_patch")
 local LegacyNegativeGate = require("legacy_negative_gate_position")
 local NegativeGatePatch = require("negative_gate_patch")
 local LegacyGateIndex = require("legacy_gate_index_lookup")
+local GateIndexPatch = require("gate_index_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -565,6 +566,16 @@ end
 -- DISCOVERY19: strict-LT lookup on corrected gate days supplied by caller.
 function S.legacyGateIndexProbe(day,gateDays)
     return LegacyGateIndex.execute(day,gateDays)
+end
+
+-- PATCH19: legacy strict-LT result remains visible; second commit fixes equality.
+function S.gateIndexPatchProbe(day,gateDays)
+    return GateIndexPatch.execute(day,gateDays)
+end
+
+function S.gateIndexAtOrBeforeSpaghetti(day,gateDays)
+    local corrected=GateIndexPatch.execute(day,gateDays)
+    return corrected
 end
 
 function S.calendarDateSpaghetti()

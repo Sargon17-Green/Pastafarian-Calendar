@@ -1605,3 +1605,49 @@ jobs:
           path: stage38-evidence/
           retention-days: 30
 
+
+  lua_stage39_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    needs: lua_stage38_discovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Stage39 Native gate equality, frozen legacy, evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage39-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nTESTED_SHA=%s\n' "$GITHUB_SHA" >stage39-evidence/source.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/legacy_gate_index_lookup.lua)" = 36d90537407ca7f95183800b3d21912081f3035e
+          test "$(git hash-object src/positive_gate_patch.lua)" = 090e4ade4be6d834c3fc054fbeafa4da932d8f41
+          test "$(git hash-object src/negative_gate_patch.lua)" = 655f324e11954bd67d81ac80fdbcfbf75e339cd0
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          lua5.3 -v >stage39-evidence/lua-version.txt 2>&1
+          set +e
+          timeout --signal=TERM --kill-after=10s 1200s lua5.3 test/stage39_tests.lua . \
+            >stage39-evidence/stdout.txt 2>stage39-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" >stage39-evidence/exit-code.txt
+          cat stage39-evidence/stdout.txt
+          if [ -s stage39-evidence/stderr.txt ]; then cat stage39-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 && test ! -s stage39-evidence/stderr.txt
+          grep -Fxq 'PASS Stage39 canonical: 15 boundary corrections, 14 interior matches, legacy scar kept' stage39-evidence/stdout.txt
+          grep -Fxq 'PASS Stage39 synthetic: 96 BigInt chains, 96 exact corrections, 96 interior matches' stage39-evidence/stdout.txt
+          grep -Fxq 'PASS Stage39 hardening: 9 rejects, 2 owned replays, no oracle in production' stage39-evidence/stdout.txt
+          printf '%s\n' 'STAGE39_NATIVE=PASS' >stage39-evidence/result.txt
+      - name: Upload Stage39 evidence (including failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-stage39-patch-evidence
+          path: stage39-evidence/
+          retention-days: 30
