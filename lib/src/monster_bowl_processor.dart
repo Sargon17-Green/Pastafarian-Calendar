@@ -223,22 +223,17 @@ final class MonsterBowlProcessor {
     final dropStages = <MonsterBowlDropStage>[];
     List<int>? orderAt46;
 
-    for (var dropIndex = 1;
-        dropIndex <= visibleDropCount;
-        dropIndex++) {
+    for (var dropIndex = 1; dropIndex <= visibleDropCount; dropIndex++) {
       final dropValue = visibleDrops[dropIndex - 1].value;
-      final rank = ((dropValue - BigInt.one) %
-                  BigInt.from(permutationCount))
-              .toInt() +
-          1;
+      final rank =
+          ((dropValue - BigInt.one) % BigInt.from(permutationCount)).toInt() +
+              1;
       final order = _permutationAtRank(rank);
       final stone = stones[dropIndex - 1];
       final before = List<BigInt>.unmodifiable(bowls);
 
       final directPours = <BigInt>[];
-      for (var positionIndex = 0;
-          positionIndex < bowlCount;
-          positionIndex++) {
+      for (var positionIndex = 0; positionIndex < bowlCount; positionIndex++) {
         if (positionIndex >= 3) {
           directPours.add(BigInt.zero);
         } else {
@@ -247,8 +242,7 @@ final class MonsterBowlProcessor {
           final pour = math.save(
             math.square(dropValue) +
                 stone.lane(positionIndex) * oldValue +
-                BigInt.from(3 + 2 * positionIndex) *
-                    BigInt.from(dropIndex),
+                BigInt.from(3 + 2 * positionIndex) * BigInt.from(dropIndex),
           );
           directPours.add(pour);
         }
@@ -256,13 +250,11 @@ final class MonsterBowlProcessor {
 
       final next = List<BigInt>.filled(bowlCount, BigInt.zero);
       final updates = <MonsterBowlDropUpdate>[];
-      for (var positionIndex = 0;
-          positionIndex < bowlCount;
-          positionIndex++) {
+      for (var positionIndex = 0; positionIndex < bowlCount; positionIndex++) {
         final position = positionIndex + 1;
         final bowlId = order[positionIndex];
-        final previousBowlId = order[(positionIndex + bowlCount - 1) %
-            bowlCount];
+        final previousBowlId =
+            order[(positionIndex + bowlCount - 1) % bowlCount];
         final followingBowlId = order[(positionIndex + 1) % bowlCount];
         final oldValue = bowls[bowlId - 1];
         final previousValue = bowls[previousBowlId - 1];
@@ -333,21 +325,17 @@ final class MonsterBowlProcessor {
       final savedSum = math.save(
         bowlSum + BigInt.from(149) * BigInt.from(step),
       );
-      final rank = ((savedSum - BigInt.one) %
-                  BigInt.from(permutationCount))
-              .toInt() +
-          1;
+      final rank =
+          ((savedSum - BigInt.one) % BigInt.from(permutationCount)).toInt() + 1;
       final order = _permutationAtRank(rank);
       final next = List<BigInt>.filled(bowlCount, BigInt.zero);
       final updates = <MonsterBowlStirUpdate>[];
 
-      for (var positionIndex = 0;
-          positionIndex < bowlCount;
-          positionIndex++) {
+      for (var positionIndex = 0; positionIndex < bowlCount; positionIndex++) {
         final position = positionIndex + 1;
         final bowlId = order[positionIndex];
-        final previousBowlId = order[(positionIndex + bowlCount - 1) %
-            bowlCount];
+        final previousBowlId =
+            order[(positionIndex + bowlCount - 1) % bowlCount];
         final followingBowlId = order[(positionIndex + 1) % bowlCount];
         final oldValue = before[bowlId - 1];
         final previousValue = before[previousBowlId - 1];
@@ -359,8 +347,7 @@ final class MonsterBowlProcessor {
             BigInt.from(step) +
             BigInt.from(position * position);
         final value = math.save(
-          math.square(u) +
-              BigInt.from(7) * previousValue * followingValue,
+          math.square(u) + BigInt.from(7) * previousValue * followingValue,
         );
         next[bowlId - 1] = value;
         updates.add(

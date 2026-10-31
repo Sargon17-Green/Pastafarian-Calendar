@@ -413,7 +413,8 @@ void _compareBowlResult(
   _ReferenceBowlResult expected, {
   MonsterBowlResult? repeated,
 }) {
-  _check(_sameBigInts(actual.initial, expected.initial), 'Initial bowls oracle');
+  _check(
+      _sameBigInts(actual.initial, expected.initial), 'Initial bowls oracle');
   _check(actual.dropStages.length == 46, 'Exactly 46 drop stages');
   _check(expected.dropStages.length == 46, 'Oracle has 46 drop stages');
   _check(actual.postStirs.length == 12, 'Exactly twelve post-stirs');
@@ -475,14 +476,19 @@ void _compareBowlResult(
     );
     _check(_sameBigInts(stage.after, oracle.after), 'Drop after-state oracle');
     _check(stage.updates.length == 6, 'Six updates per visible drop');
-    _check(_sameInts(stage.order.toSet().toList()..sort(), <int>[1,2,3,4,5,6]), 'Drop order is a permutation');
+    _check(
+        _sameInts(
+            stage.order.toSet().toList()..sort(), <int>[1, 2, 3, 4, 5, 6]),
+        'Drop order is a permutation');
 
     for (var positionIndex = 0; positionIndex < 6; positionIndex++) {
       final update = stage.updates[positionIndex];
       final referenceUpdate = oracle.updates[positionIndex];
       _check(update.position == positionIndex + 1, 'Drop update position');
-      _check(update.position == referenceUpdate.position, 'Oracle update position');
-      _check(update.bowlId == stage.order[positionIndex], 'Fixed bowl identity');
+      _check(update.position == referenceUpdate.position,
+          'Oracle update position');
+      _check(
+          update.bowlId == stage.order[positionIndex], 'Fixed bowl identity');
       _check(update.bowlId == referenceUpdate.bowlId, 'Oracle bowl identity');
       _check(
         update.previousBowlId == referenceUpdate.previousBowlId,
@@ -497,7 +503,8 @@ void _compareBowlResult(
         update.directPour == referenceUpdate.directPour,
         'Direct-pour oracle',
       );
-      _check(update.stoneIndex == referenceUpdate.stoneIndex, 'Stone lane index');
+      _check(
+          update.stoneIndex == referenceUpdate.stoneIndex, 'Stone lane index');
       _check(update.stone == referenceUpdate.stone, 'Stone lane value');
       _check(update.u == referenceUpdate.u, 'Drop mixing intermediate');
       _check(update.value == referenceUpdate.value, 'Drop bowl value');
@@ -506,7 +513,8 @@ void _compareBowlResult(
         'Drop assignment by fixed identity',
       );
       if (positionIndex >= 3) {
-        _check(update.directPour == BigInt.zero, 'No direct pour in positions 4–6');
+        _check(update.directPour == BigInt.zero,
+            'No direct pour in positions 4–6');
       } else {
         _check(
           update.directPour >= BigInt.one && update.directPour <= _modulus,
@@ -535,18 +543,25 @@ void _compareBowlResult(
       'Post-stir permutation rank',
     );
     _check(_sameInts(stir.order, oracle.order), 'Post-stir order oracle');
-    _check(_sameBigInts(stir.before, oracle.before), 'Post-stir snapshot oracle');
-    _check(_sameBigInts(stir.after, oracle.after), 'Post-stir after-state oracle');
+    _check(
+        _sameBigInts(stir.before, oracle.before), 'Post-stir snapshot oracle');
+    _check(
+        _sameBigInts(stir.after, oracle.after), 'Post-stir after-state oracle');
     _check(stir.updates.length == 6, 'Six updates per post-stir');
-    _check(_sameInts(stir.order.toSet().toList()..sort(), <int>[1,2,3,4,5,6]), 'Post-stir order is a permutation');
+    _check(
+        _sameInts(stir.order.toSet().toList()..sort(), <int>[1, 2, 3, 4, 5, 6]),
+        'Post-stir order is a permutation');
 
     for (var positionIndex = 0; positionIndex < 6; positionIndex++) {
       final update = stir.updates[positionIndex];
       final referenceUpdate = oracle.updates[positionIndex];
       _check(update.position == positionIndex + 1, 'Post-stir position');
-      _check(update.position == referenceUpdate.position, 'Oracle stir position');
-      _check(update.bowlId == stir.order[positionIndex], 'Post-stir bowl identity');
-      _check(update.bowlId == referenceUpdate.bowlId, 'Oracle stir bowl identity');
+      _check(
+          update.position == referenceUpdate.position, 'Oracle stir position');
+      _check(update.bowlId == stir.order[positionIndex],
+          'Post-stir bowl identity');
+      _check(
+          update.bowlId == referenceUpdate.bowlId, 'Oracle stir bowl identity');
       _check(
         update.previousBowlId == referenceUpdate.previousBowlId,
         'Post-stir previous bowl',
@@ -555,7 +570,8 @@ void _compareBowlResult(
         update.followingBowlId == referenceUpdate.followingBowlId,
         'Post-stir following bowl',
       );
-      _check(update.oldValue == referenceUpdate.oldValue, 'Post-stir old value');
+      _check(
+          update.oldValue == referenceUpdate.oldValue, 'Post-stir old value');
       _check(update.u == referenceUpdate.u, 'Post-stir intermediate');
       _check(update.value == referenceUpdate.value, 'Post-stir bowl value');
       _check(
@@ -586,11 +602,11 @@ void main() {
 
   _check(_referencePermutations.length == 720, '720 reference permutations');
   _check(
-    _sameInts(_referencePermutations.first, <int>[1,2,3,4,5,6]),
+    _sameInts(_referencePermutations.first, <int>[1, 2, 3, 4, 5, 6]),
     'First lexicographic permutation',
   );
   _check(
-    _sameInts(_referencePermutations.last, <int>[6,5,4,3,2,1]),
+    _sameInts(_referencePermutations.last, <int>[6, 5, 4, 3, 2, 1]),
     'Last lexicographic permutation',
   );
   _check(MonsterBowlProcessor.bowlCount == 6, 'Six fixed bowls');
@@ -660,7 +676,7 @@ void main() {
     stones: stones,
   );
   _check(
-    _sameInts(foundationResult.orderAt46, <int>[4,5,2,3,6,1]),
+    _sameInts(foundationResult.orderAt46, <int>[4, 5, 2, 3, 6, 1]),
     'Canonical orderAt46 checkpoint',
   );
   const expectedFinalBowls = <String>[
@@ -788,7 +804,8 @@ void main() {
   );
 
   for (var index = 0; index < validDrops.length; index++) {
-    _check(validDrops[index].value == dropSnapshot[index], 'Visible-drop input preserved');
+    _check(validDrops[index].value == dropSnapshot[index],
+        'Visible-drop input preserved');
   }
   for (var stoneIndex = 0; stoneIndex < stones.length; stoneIndex++) {
     for (var lane = 0; lane < 5; lane++) {
