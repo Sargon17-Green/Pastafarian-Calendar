@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..253: signed owner-scoped comparison.
+; Stage 1 native regression 191..255: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1321,6 +1321,8 @@ RunOwnerSignedCmpTests::
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
+    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    jp nc, .fail
     ; Recreate owner 45 after its earlier release. Banks 5 and 7 are free,
     ; while bank 6 remains owned by 42, so this is a deliberate fragmented pair.
     ld a, 45
@@ -1394,7 +1396,7 @@ RunOwnerSignedCmpTests::
     ; 249: reverse the lengths on the same fragmented owner.
     ld a, 249
     ld [wTestCase], a
-    call OwnerCmpTestSwapLengthLow
+    call OwnerCmpTestSwapLength16
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -1411,7 +1413,7 @@ RunOwnerSignedCmpTests::
     ld a, 1
     ld [wOwnerCmpSignA], a
     ld [wOwnerCmpSignB], a
-    call OwnerCmpTestSwapLengthLow
+    call OwnerCmpTestSwapLength16
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -1425,7 +1427,7 @@ RunOwnerSignedCmpTests::
     ; 251: reverse negative descriptors; the longer magnitude is now A < B.
     ld a, 251
     ld [wTestCase], a
-    call OwnerCmpTestSwapLengthLow
+    call OwnerCmpTestSwapLength16
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -1458,7 +1460,7 @@ RunOwnerSignedCmpTests::
     xor a
     ld [wOwnerCmpSignA], a
     ld [wOwnerCmpSignB], a
-    call OwnerCmpTestSwapLengthLow
+    call OwnerCmpTestSwapLength16
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -1472,7 +1474,7 @@ RunOwnerSignedCmpTests::
     ; 253: reverse A/B so the invalid full-length descriptor is validated first.
     ld a, 253
     ld [wTestCase], a
-    call OwnerCmpTestSwapLengthLow
+    call OwnerCmpTestSwapLength16
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -1486,6 +1488,50 @@ RunOwnerSignedCmpTests::
     ld a, 45
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
+
+    ; 254: negative canonical 16383-byte A vs negative noncanonical 16384-byte B.
+    ; Same owner 46, with SRAM[16382]=$3c and SRAM[16383]=0.
+    ld a, 254
+    ld [wTestCase], a
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld a, $ff
+    ld [wOwnerCmpLenA], a
+    ld a, $3f
+    ld [wOwnerCmpLenA+1], a
+    xor a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, $40
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    jp nc, .fail
+
+    ; 255: reverse negative A/B; the invalid full-capacity descriptor is A.
+    ld a, 255
+    ld [wTestCase], a
+    call OwnerCmpTestSwapLength16
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    jp nc, .fail
 
     ld a, 46
     ld [wOwnerRequest], a
@@ -1796,11 +1842,17 @@ OwnerCmpTestCheckFragmentedBytes:
     and a
     ret
 ; Swap only the low length bytes; these six cases all use 8192/8193 bytes.
-OwnerCmpTestSwapLengthLow:
+OwnerCmpTestSwapLength16:
     ld a, [wOwnerCmpLenA]
     ld b, a
+    ld a, [wOwnerCmpLenA+1]
+    ld c, a
     ld a, [wOwnerCmpLenB]
     ld [wOwnerCmpLenA], a
+    ld a, [wOwnerCmpLenB+1]
+    ld [wOwnerCmpLenA+1], a
     ld a, b
     ld [wOwnerCmpLenB], a
+    ld a, c
+    ld [wOwnerCmpLenB+1], a
     ret

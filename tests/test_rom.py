@@ -5,9 +5,9 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-# Cases 242-247 cover full-capacity canonical/noncanonical boundaries; 248-251
-# compare positive/negative aliases across fragmented banks; 252-253 reject a
-# fragmented-bank high-zero descriptor in both operand positions. Keep 9000 frames.
+# Cases 242-247 cover positive full-capacity boundaries; 248-253 cover
+# fragmented-owner aliases and high-zero rejection; 254-255 verify negative
+# full-capacity high-zero rejection in both operand positions. Keep 9000 frames.
 MAX_BOOT_AND_TEST_FRAMES = 9000
 WRAM_RESULT = 0xC000
 WRAM_TEST_CASE = 0xC001
@@ -15,7 +15,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 253
+TOTAL_CASES = 255
 
 
 def check_header(data: bytes) -> None:
