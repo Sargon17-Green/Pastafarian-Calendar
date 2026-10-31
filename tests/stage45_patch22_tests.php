@@ -133,7 +133,7 @@ tolak45(static fn()=> $run22($forwardTarget,$invalidNextType,
     $canonicalPrevious,$canonicalNext,$canonicalPrevious,$trustedAnchor,$gate),
     'BAD_PROPOSED_RESULT','PATCH22_PROPOSED_TYPE_');
 $forgedAnchor=$anchor;
-$forgedAnchor['number']=4999;
+$forgedAnchor['openGateIndex'] += 1;
 tolak45(static fn()=> $kernel->targetYearSequentialPatch22($c,$forwardTarget,$forgedAnchor,
     $canonicalNext,$canonicalPrevious,$gate,$trustedAnchor,
     $canonicalNext,$canonicalPrevious,4),
