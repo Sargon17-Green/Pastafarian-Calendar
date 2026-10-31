@@ -121,6 +121,23 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: BoundedCompositionCounter cache-reconfiguration diagnostic (not a Legacy Stage 6 claim)
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'SOURCE_HEAD=%s\\n' "$(git rev-parse HEAD)" | tee chapel-bounded-cache-diagnostic.log
+          bash test/run_bounded_composition_cache_probe.sh 2>&1 | tee -a chapel-bounded-cache-diagnostic.log
+          grep -Fxq 'BOUNDED_COMPOSITION_CACHE_REUSE_WITNESS=REPRODUCED' chapel-bounded-cache-diagnostic.log
+
+      - name: Retain bounded composition cache diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-bounded-composition-cache-diagnostic
+          path: chapel-bounded-cache-diagnostic.log
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Retain Stage 5 evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
