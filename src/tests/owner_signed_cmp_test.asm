@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..222: signed owner-scoped comparison.
+; Stage 1 native regression 191..225: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -741,6 +741,62 @@ RunOwnerSignedCmpTests::
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
     cp 2
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 223: two canonical +0 descriptors alias the SAME live owner.
+    ; Nonzero SRAM[0]=$7f is stale for both zero-length descriptors.
+    ld a, 223
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    or a
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 224: A is invalid negative zero; B is +127 on that same owner.
+    ; Identical owner must never bypass canonical sign/length validation.
+    ld a, 224
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 225: reverse invalid negative zero into B, with +127 in A.
+    ; Preserve both descriptors, all 16 lease tags and edge payload.
+    ld a, 225
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenB], a
+    ld a, 1
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
