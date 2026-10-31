@@ -37,3 +37,10 @@ Stage7 / PATCH03 通过真实 GnuCOBOL Native，run 41180791202，SHA `357d76ce4
 
 ## 2026-10-31 实施记录（非验收）
 专用 COBOL 测试文件 `test/stage08_discovery_tests.cob` 增加八个别名/对照/非法状态见证；canonical workflow 增加有界、-Werror、输出持久化的 Stage8 native job。提交代码不等于完成原生测试。仅根据 completed/log 判定 Stage8 是否真的复现缺陷或通过；若失败须保留日志而非预置 expected-red。
+
+## Stage8 Native 实际结果与范围限制（2026-10-31）
+- Verified branch `COBOL+简体中文`, source SHA `eaeb149dd63aa32750098e9d333dcd12f451f57a`; GitHub Actions run [41187120199](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41187120199) `completed/success`, 9/9 jobs SUCCESS.
+- Stage8 job `124496187049` 在 GnuCOBOL 3.1.2.0 的严格 `-Werror` 下成功编译并执行；`STAGE8_CASES_RUN=8`, `STAGE8_PASS=8`, `STAGE8_REPRODUCED_FAILURES=0`, `STAGE8_UNEXPECTED_FAILURES=0`, `STAGE8_HEAP_LIVE_POST_RELEASE=0`, `STAGE8_NATIVE_GATE=PASS`.
+- 原始诊断 artifact: [13037037636](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41187120199/artifacts/13037037636).
+- 结论：`ACCEPTED_NO_DEFECT_REPRODUCED_IN_EIGHT_WITNESSES`。这不是“所有可能别名组合均安全”的证明；没有 expected-red，也没有 PATCH04 的证据。保留历史失败 run 41184236629（仅测试 harness 编译报错）和 Stage8 证据区分。
+- 未触及生产代码、main 或五字段日历集成。后续 Stage9 / DISCOVERY05 单独调查连续调用与输入复用，使用独立测试 oracle。
