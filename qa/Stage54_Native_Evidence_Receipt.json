@@ -1,0 +1,53 @@
+{
+  "schema_version": "codesh-stage54-native-evidence-receipt/1",
+  "stage": 54,
+  "last_completed_stage": 54,
+  "status": "EXPECTED_RED_CONFIRMED",
+  "stage54_sealed": true,
+  "stage55_started": false,
+  "source": {
+    "path": "מקור/מסלול־יום־שליש־שנה־סמוכה־ישן.אמן",
+    "sha256": "d7c719f9e299146d45efbf90e833c684690f5c1892e13c88935aee9c5d26e896",
+    "git_blob_sha1": "9168f3f9385417e32b1df4929181585c8af0d47d"
+  },
+  "native_run": {
+    "family": "CODESH_STAGE54_DISCOVERY27",
+    "package": "v003",
+    "run_id": "20261030T212531Z_feff4c5d",
+    "os": "Windows-11-10.0.26300-SP0",
+    "compiler": "Codesh-v1.3",
+    "native_compiled_sources": 49,
+    "source_inputs_pinned": true,
+    "pinned_git_head": "4e7c04ec14d51c613a483818c01fdedbe8486f88"
+  },
+  "checks": {
+    "total_gates": 31,
+    "regressions_stage29_to_stage53": 25,
+    "frozen_selected_year_matches": 48,
+    "old_third_boundary_mismatches": 22,
+    "old_third_boundary_latent_matches": 26,
+    "length_mod3_zero_cases": 22,
+    "length_mod3_nonzero_cases": 26,
+    "old_objects_detached": 48,
+    "old_repeat_stable": 48,
+    "frozen_year_boundaries_matches": 48,
+    "caller_and_selected_unchanged": 48,
+    "next_cases": 24,
+    "previous_cases": 24,
+    "oracle_tamper": "EXPECTED_FAILURE_EXIT_1"
+  },
+  "frozen_oracle_sha256": "8d75a665925d2b88aa2bbb82fb71157c515b24babd5db7889a14c508eb7911ee",
+  "handoff": {
+    "name": "CODESH_STAGE54_DISCOVERY27_HANDOFF_v003_20261030T212531Z_feff4c5d_PASS.zip",
+    "sha256": "f08d5fa0e9d283eaf0d4b5ec199497ae837583933b9b215f7d05dd2e61b051df",
+    "library_path": "/Codesh_Checkpoints/CODESH_STAGE54_DISCOVERY27_HANDOFF_v003_20261030T212531Z_feff4c5d_PASS.zip",
+    "zip_crc": "PASS",
+    "sha256_entries_verified": 75
+  },
+  "provenance": {
+    "native_git_writes": false,
+    "baseline_git_head": "4e7c04ec14d51c613a483818c01fdedbe8486f88",
+    "previous_48_codesh_sources_unchanged": true
+  },
+  "credit_new_windows_assertions": 0
+}
