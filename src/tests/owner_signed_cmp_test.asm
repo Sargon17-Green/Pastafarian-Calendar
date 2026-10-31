@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..233: signed owner-scoped comparison.
+; Stage 1 native regression 191..235: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -968,6 +968,40 @@ RunOwnerSignedCmpTests::
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
     cp 2
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+
+    ; 234: same live owner 46, two negative 8192-byte descriptors.
+    ; Both have the same canonical SRAM high byte $33: equality is read-only.
+    ld a, 234
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpLenA], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    or a
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 235: same negative descriptors at length 8193 across the bank edge.
+    ; Shared high byte $01 remains canonical; result must still be equality.
+    ld a, 235
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    or a
     jp nz, .fail
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
