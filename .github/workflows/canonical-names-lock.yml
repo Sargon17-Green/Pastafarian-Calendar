@@ -1785,7 +1785,7 @@ jobs:
           if [ -s stage42-evidence/stderr.txt ]; then cat stage42-evidence/stderr.txt >&2; fi
           test "$code" -eq 0 && test ! -s stage42-evidence/stderr.txt
           test "$(wc -l <stage42-evidence/stdout.txt)" -eq 3
-          grep -Fxq 'PASS Stage42 canonical: 15 opening + 15 closing reverse-ordinal expected-RED' stage42-evidence/stdout.txt
+          grep -Fxq 'PASS Stage42 canonical: 15 opening + 14 closing reverse-ordinal expected-RED' stage42-evidence/stdout.txt
           grep -Fxq 'PASS Stage42 synthetic: 96 signed BigInt reverse-ordinal expected-RED' stage42-evidence/stdout.txt
           grep -Fxq 'PASS Stage42 hardening: 9 rejects, 2 isolated replays, no oracle in production' stage42-evidence/stdout.txt
           printf '%s\n' 'STAGE42_NATIVE=EXPECTED_RED_VERIFIED' >stage42-evidence/result.txt

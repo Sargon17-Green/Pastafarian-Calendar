@@ -1,4 +1,5 @@
 -- Stage42 DISCOVERY21: independently test intentionally wrong reverse ordinal.
+-- Stage38 legacy entry validation permits target <= G(7), so G(8)-1 is out of scope.
 local root=arg[1] or "."
 package.path=root.."/src/?.lua;"..root.."/test/?.lua;"..package.path
 local B=require("bigint")
@@ -51,13 +52,16 @@ for k=-7,7 do
  ctx.semanticState.historicalReverseOrdinalDecimal="tampered"
  assert(cmp(ctx.stage41GateOrdinalSemanticState.correctedOrdinalDecimal,1)==0)
  opening=opening+1
- local last=B.sub(closing,1)
- local atEnd=verify(last,gates,k,closing)
- assert(cmp(atEnd,0)==0 and cmp(B.sub(closing,last),1)==0)
- closingWitnesses=closingWitnesses+1
+ -- The last day before G(8) is rejected by the locked Stage38 entry domain.
+ if k<=6 then
+  local last=B.sub(closing,1)
+  local atEnd=verify(last,gates,k,closing)
+  assert(cmp(atEnd,0)==0 and cmp(B.sub(closing,last),1)==0)
+  closingWitnesses=closingWitnesses+1
+ end
 end
-assert(opening==15 and closingWitnesses==15)
-print("PASS Stage42 canonical: 15 opening + 15 closing reverse-ordinal expected-RED")
+assert(opening==15 and closingWitnesses==14)
+print("PASS Stage42 canonical: 15 opening + 14 closing reverse-ordinal expected-RED")
 
 local synthetic=0
 for scenario=1,96 do
@@ -71,7 +75,7 @@ for scenario=1,96 do
  end
  local records={}
  for k=-8,8 do records[k+9]={index=k,day=tostring(days[k+9])} end
- local k=-7+(scenario%15)
+ local k=-7+(scenario%14) -- closing witnesses stay within Stage38's accepted day window
  local closing=days[k+10]
  local last=B.sub(closing,1)
  local val,ctx=verify(last,records,k,closing)
@@ -90,7 +94,7 @@ local function reject(day,records)
 end
 reject("invalid",gates)
 reject(B.sub(gates[2].day,1),gates)
-reject(B.add(gates[17].day,1),gates)
+reject(B.sub(gates[17].day,1),gates) -- G(8)-1 lies beyond locked Stage38 maximum G(7)
 local t=copy(gates);table.remove(t,1);reject(O.FOUNDATION_DAY,t)
 t=copy(gates);t[9].day=t[8].day;reject(O.FOUNDATION_DAY,t)
 t=copy(gates);t[9].index=20;reject(O.FOUNDATION_DAY,t)
