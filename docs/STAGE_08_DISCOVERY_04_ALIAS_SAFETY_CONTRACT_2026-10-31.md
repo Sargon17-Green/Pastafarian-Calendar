@@ -34,3 +34,6 @@ Stage7 / PATCH03 通过真实 GnuCOBOL Native，run 41180791202，SHA `357d76ce4
 - 逐个输出观察结果：`STAGE8_CASES_RUN`、`STAGE8_PASS`、`STAGE8_REPRODUCED_FAILURES`、`STAGE8_UNEXPECTED_FAILURES`、`STAGE8_HEAP_LIVE_POST_RELEASE`，不以 PASS 取代红灯证据。
 - 如果实际出现可复现偏差：保存最小输入、旧输出、oracle 输出、程序返回及日志，再决定是否将其归类 expected-red、给出独立 PATCH04 计划；否则记录 `NO_DEFECT_REPRODUCED` 并继续探索其他独立候选。
 - 仅当 verify、Stage1–7 回归及 Stage8 Native completed/log 全部证实，才能判定 Stage8 的验收；现在 `NOT_RUN`。不得修改 main、合并或宣称完整五字段集成。
+
+## 2026-10-31 实施记录（非验收）
+专用 COBOL 测试文件 `test/stage08_discovery_tests.cob` 增加八个别名/对照/非法状态见证；canonical workflow 增加有界、-Werror、输出持久化的 Stage8 native job。提交代码不等于完成原生测试。仅根据 completed/log 判定 Stage8 是否真的复现缺陷或通过；若失败须保留日志而非预置 expected-red。
