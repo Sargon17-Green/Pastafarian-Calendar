@@ -102,6 +102,7 @@ void main() {
   var feedCases = 0;
   var mixCases = 0;
   List<BigInt>? firstFeeds;
+  List<BigInt>? firstFeedSnapshot;
   List<BigInt>? firstVisible;
 
   for (final actionOffset in offsets) {
@@ -133,7 +134,8 @@ void main() {
         mixCases++;
       }
       if (firstFeeds == null) {
-        firstFeeds = List<BigInt>.from(feeds);
+        firstFeeds = feeds;
+        firstFeedSnapshot = List<BigInt>.from(feeds);
         firstVisible = actual;
       }
       feedCases++;
@@ -157,6 +159,7 @@ void main() {
   }
 
   final validFeeds = firstFeeds!;
+  final feedSnapshot = firstFeedSnapshot!;
   final validVisible = firstVisible!;
   final shortFeeds = validFeeds.take(6).toList();
   _expectArgumentError(
@@ -199,7 +202,7 @@ void main() {
     'Visible droplet vector immutable',
   );
   for (var index = 0; index < validFeeds.length; index++) {
-    _check(validFeeds[index] == firstFeeds![index], 'Feed input preserved');
+    _check(validFeeds[index] == feedSnapshot[index], 'Feed input preserved');
   }
   for (var stoneIndex = 0; stoneIndex < stones.length; stoneIndex++) {
     for (var lane = 0; lane < 5; lane++) {
