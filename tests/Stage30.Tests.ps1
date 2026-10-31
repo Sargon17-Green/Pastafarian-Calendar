@@ -60,7 +60,7 @@ for ($rank=1; $rank -le 8; $rank++) {
 Assert-StageEqual -Expected 136 -Actual $numerator -Name 'Mixed TVD numerator 136/224=17/28'
 
 # Non-toy implementation check against analytic formulas, not against NormativeScroll.
-$m = [System.Numerics.BigInteger](Get-NormM)
+$m = [System.Numerics.BigInteger]$script:Discovery01M
 $nWide = [System.Numerics.BigInteger]($m + 1)
 $analyticCases = 0
 foreach ($first in @([System.Numerics.BigInteger]1,[System.Numerics.BigInteger]2,($m-1),$m)) {
