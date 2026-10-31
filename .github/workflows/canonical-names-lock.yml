@@ -52,7 +52,7 @@ jobs:
         run: |
           if ! dart format --output=none --set-exit-if-changed .; then
             dart format --output=write .
-            for file in bin/stage1_tests.dart lib/src/source_language_catalog.dart test_support/normative_reference.dart tool/generate_stage1_fixtures.dart bin/stage2_discovery01.dart lib/src/monster_base.dart lib/src/monster_work_counts.dart bin/stage2_production01_tests.dart lib/src/monster_modular_math.dart bin/stage2_production02_tests.dart lib/src/monster_seed_feeder.dart bin/stage2_production03_tests.dart; do
+            for file in bin/stage1_tests.dart lib/src/source_language_catalog.dart test_support/normative_reference.dart tool/generate_stage1_fixtures.dart bin/stage2_discovery01.dart lib/src/monster_base.dart lib/src/monster_work_counts.dart bin/stage2_production01_tests.dart lib/src/monster_modular_math.dart bin/stage2_production02_tests.dart lib/src/monster_seed_feeder.dart bin/stage2_production03_tests.dart lib/src/monster_visible_droplets.dart bin/stage2_production04_tests.dart; do
               echo "DART_CAPTURE_BEGIN:${file}"
               base64 -w0 "${file}"
               printf '\n'
@@ -199,3 +199,28 @@ jobs:
 
       - name: Run bounded Production 03 tests
         run: dart run bin/stage2_production03_tests.dart
+
+  dart-hebrew-stage2-production04:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+
+      - name: Resolve packages
+        run: dart pub get
+
+      - name: Verify visible droplet formatting
+        run: dart format --output=none --set-exit-if-changed lib/src/monster_visible_droplets.dart bin/stage2_production04_tests.dart
+
+      - name: Analyze branch
+        run: dart analyze
+
+      - name: Run bounded Production 04 tests
+        run: dart run bin/stage2_production04_tests.dart
