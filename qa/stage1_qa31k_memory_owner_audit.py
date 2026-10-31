@@ -55,7 +55,7 @@ def read_source(path):
     actual = git_blob_sha(data)
     need(actual == SOURCE_PIN, "immutable production source blob mismatch: " + actual)
     rows = data.splitlines()
-    need(len(rows) > 49, "original source rows do not cover target row 49")
+    need(len(rows) == 2016, "original source line count changed")
     for x, y in TARGETS:
         need(source_cell(rows, x, y) == 32, "target FungeSpace cell is not ASCII space")
     need(len(rows[49]) == 0, "row 49 is no longer an empty source row")
