@@ -17,10 +17,7 @@ pub struct CandidateWorkCounts {
 }
 
 /// Girişlər dəyişmir. Məsafə hər iki ucu daxil edir; eyni gün üçün 1-dir.
-pub fn candidate_work_counts(
-    calculation_day: &BigInt,
-    target_day: &BigInt,
-) -> CandidateWorkCounts {
+pub fn candidate_work_counts(calculation_day: &BigInt, target_day: &BigInt) -> CandidateWorkCounts {
     let action = candidate_day_tag(calculation_day);
     let target = candidate_day_tag(target_day);
     let mut distance = target_day - calculation_day;

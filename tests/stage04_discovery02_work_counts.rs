@@ -47,10 +47,9 @@ fn huge_signed_pairs_cover_exact_distance_and_direction() {
         let delta: BigInt = BigInt::one() << bits;
         let earlier = &foundation - &delta;
         let later = &foundation + &delta;
-        for (calculation_day, target_day, direction) in [
-            (&earlier, &later, 3u8),
-            (&later, &earlier, 1u8),
-        ] {
+        for (calculation_day, target_day, direction) in
+            [(&earlier, &later, 3u8), (&later, &earlier, 1u8)]
+        {
             let actual = candidate_work_counts(calculation_day, target_day);
             let expected = oracle::work_counts(calculation_day, target_day);
             assert_eq!(actual.action, expected.action);
@@ -92,7 +91,10 @@ fn common_translation_preserves_distance_and_direction() {
             assert_eq!(translated.distance, expected.distance);
             assert_eq!(translated.connection, expected.connection);
             assert_eq!(translated.direction, expected.direction);
-            assert_eq!(translated.connection, &translated.action + &translated.target);
+            assert_eq!(
+                translated.connection,
+                &translated.action + &translated.target
+            );
             cases += 1;
         }
     }
