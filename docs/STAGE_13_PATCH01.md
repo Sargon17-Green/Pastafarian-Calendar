@@ -33,3 +33,7 @@ This is an intentional, documented semantic narrowing: it preserves month multip
 - Accept Stage13 only if `verify` and `native-stage13-discovery10` both complete successfully on the same HEAD SHA, GNAT 13 compiles/binds/links, and both exact assertion markers appear.
 
 The end-to-end assertions remain bounded postconditions, not an independent five-field numerical differential.
+
+## First build attempt — isolated encoding correction
+
+Run [41213536867](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41213536867) at `4d510268870def8fac715c5dda9695600e80acd8` passed `verify`, but every native job that compiled the shared normative package failed at the same six Telugu exception-message literals in `month_weaving.adb`: GNAT requires these wide-character messages to be wrapped in `Wide_Wide_Strings.Encode`, as in the existing oracle. No runtime or combinatorial assertion was reached. This commit applies only that isolated encoding correction; the algorithm and test contract are unchanged.

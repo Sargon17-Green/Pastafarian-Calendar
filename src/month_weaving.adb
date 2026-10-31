@@ -1,7 +1,7 @@
+with Ada.Strings.UTF_Encoding.Wide_Wide_Strings;
 with Exact_Math;
 
 package body Month_Weaving is
-   use Ada.Numerics.Big_Numbers.Big_Integers;
    use Exact_Math;
 
    function B (N : Natural) return Big_Integer is
@@ -10,12 +10,12 @@ package body Month_Weaving is
    procedure Validate_Lengths (Lengths : Natural_Array) is
    begin
       if Lengths'Length = 0 or else Lengths'First /= 1 then
-         raise Constraint_Error with "నెలల పొడవులు ఖాళీ కాని 1-ఆధారిత శ్రేణి కావాలి";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("నెలల పొడవులు ఖాళీ కాని 1-ఆధారిత శ్రేణి కావాలి");
       end if;
 
       for J in Lengths'Range loop
          if Lengths (J) < 2 then
-            raise Constraint_Error with "ప్రతి నెలకు ప్రారంభ మరియు ముగింపు రోజు అవసరం";
+            raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("ప్రతి నెలకు ప్రారంభ మరియు ముగింపు రోజు అవసరం");
          end if;
       end loop;
    end Validate_Lengths;
@@ -60,7 +60,7 @@ package body Month_Weaving is
       Slots := Interior_Total;
       Ways := Canonical_Weave_Count (Lengths);
       if Rank < B (1) or else Rank > Ways then
-         raise Constraint_Error with "ర్యాంకు కానానికల్ వీవ్ కుటుంబం వెలుపల ఉంది";
+         raise Constraint_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("ర్యాంకు కానానికల్ వీవ్ కుటుంబం వెలుపల ఉంది");
       end if;
       Ways_Left := Ways;
 
@@ -103,13 +103,13 @@ package body Month_Weaving is
                end loop;
 
                if not Chosen then
-                  raise Program_Error with "కానానికల్ వీవ్ అన్‌రాంకింగ్‌లో బ్లాకులు ముగిశాయి";
+                  raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("కానానికల్ వీవ్ అన్‌రాంకింగ్‌లో బ్లాకులు ముగిశాయి");
                end if;
             end;
          end loop;
 
          if R /= B (1) or else Ways_Left /= B (1) then
-            raise Program_Error with "కానానికల్ వీవ్ ర్యాంకు పూర్తిగా వినియోగించబడలేదు";
+            raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("కానానికల్ వీవ్ ర్యాంకు పూర్తిగా వినియోగించబడలేదు");
          end if;
 
          -- Fixed closing rail: last occurrence of each month.
@@ -119,7 +119,7 @@ package body Month_Weaving is
          end loop;
 
          if Position /= Total + 1 then
-            raise Program_Error with "కానానికల్ వీవ్ అవుట్‌పుట్ పొడవు సరిపోలలేదు";
+            raise Program_Error with Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode ("కానానికల్ వీవ్ అవుట్‌పుట్ పొడవు సరిపోలలేదు");
          end if;
          return Output;
       end;
