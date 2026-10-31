@@ -76,6 +76,11 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage29 Patch14 wide compatibility failed' }
             Write-Host ('STAGE29_NATIVE_SHA=' + $env:GITHUB_SHA)
             Write-Host 'STAGE29_PATCH14_NATIVE=PASS'
+            # Stage30 independent finite-distribution study: evidence only, no production patch.
+            & .\tests\Stage30.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage30 distributional discovery probe failed' }
+            Write-Host ('STAGE30_DISCOVERY15_NATIVE_SHA=' + $env:GITHUB_SHA)
+            Write-Host 'STAGE30_DISCOVERY15_NATIVE=EVIDENCE_ONLY'
           } elseif (($stageLines -contains 'CURRENT_STAGE=27') -and
               ((($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=AWAITING')) -or
                (($stageLines -contains 'LAST_COMPLETED_STAGE=27') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
