@@ -101,22 +101,22 @@ proc main() {
 
   const boundedWords = bruteThreeSlotKeys(8, 2, 4, -1);
   var boundedUnrankChecks = 0;
-  for index in boundedWords.indices {
-    const actual = reused.unrank1(new bigint(index + 1));
+  for idx0 in boundedWords.indices {
+    const actual = reused.unrank1(new bigint(idx0 + 1));
     var actualKey = "";
     for x in actual do actualKey += x:string;
-    if actualKey != boundedWords[index] then
+    if actualKey != boundedWords[idx0] then
       halt("BoundedCompositionCounter reconfigured unrank mismatch.");
     boundedUnrankChecks += 1;
   }
 
   const cutletWords = bruteThreeSlotKeys(5, 1, 5, 2);
   var cutletUnrankChecks = 0;
-  for index in cutletWords.indices {
-    const actual = cutletReused.unrank1(new bigint(index + 1));
+  for idx1 in cutletWords.indices {
+    const actual = cutletReused.unrank1(new bigint(idx1 + 1));
     var actualKey = "";
     for x in actual do actualKey += x:string;
-    if actualKey != cutletWords[index] then
+    if actualKey != cutletWords[idx1] then
       halt("CutletPartitionCounter reconfigured unrank mismatch.");
     cutletUnrankChecks += 1;
   }

@@ -126,16 +126,16 @@ jobs:
         run: |
           set -euo pipefail
           printf 'SOURCE_HEAD=%s\n' "$(git rev-parse HEAD)" | tee chapel-normative-counter-cache-diagnostic.log
-          bash test/run_bounded_composition_cache_probe.sh 2>&1 | tee -a chapel-bounded-cache-diagnostic.log
-          grep -Fxq 'BOUNDED_COMPOSITION_CACHE_REUSE_FIXED=PASS' chapel-bounded-cache-diagnostic.log
-          grep -Fxq 'CUTLET_PARTITION_CACHE_REUSE_FIXED=PASS' chapel-bounded-cache-diagnostic.log
+          bash test/run_bounded_composition_cache_probe.sh 2>&1 | tee -a chapel-normative-counter-cache-diagnostic.log
+          grep -Fxq 'BOUNDED_COMPOSITION_CACHE_REUSE_FIXED=PASS' chapel-normative-counter-cache-diagnostic.log
+          grep -Fxq 'CUTLET_PARTITION_CACHE_REUSE_FIXED=PASS' chapel-normative-counter-cache-diagnostic.log
 
-      - name: Retain bounded composition cache diagnostic evidence
+      - name: Retain normative counter cache diagnostic evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: chapel-normative-counter-cache-diagnostics
-          path: chapel-bounded-cache-diagnostic.log
+          path: chapel-normative-counter-cache-diagnostic.log
           if-no-files-found: warn
           retention-days: 30
 
