@@ -304,11 +304,32 @@ def main():
     )
     assert m.read_byte(46, 16382) == (0, 0x3C), "canonical short high byte changed"
     assert m.read_byte(46, 16383) == (0, 0x00), "noncanonical high zero changed"
+    # Cases 248-249: reallocate owner 45 as the fragmented physical pair (5,7);
+    # owner 42 keeps bank 6, so logical offsets 8191 and 8192 cross a bank gap.
+    assert m.alloc(45, 2) == (0, (5, 7)), "owner 45 must be fragmented across banks 5 and 7"
+    assert m.write_byte(45, 8191, 0x33) == 0
+    assert m.write_byte(45, 8192, 0x01) == 0
+    assert m.read_byte(45, 8191) == (0, 0x33)
+    assert m.read_byte(45, 8192) == (0, 0x01)
+    fragmented_short = reference_integer(m, 45, 0, 8192)
+    fragmented_long = reference_integer(m, 45, 0, 8193)
+    assert fragmented_short > 0 and fragmented_long > fragmented_short, (
+        "fragmented-owner Python integer oracle across bank gap"
+    )
+    assert compare_read_only(m, (45, 0, 8192), (45, 0, 8193)) == 2, (
+        "fragmented same-owner short A must be less than long B"
+    )
+    assert compare_read_only(m, (45, 0, 8193), (45, 0, 8192)) == 1, (
+        "fragmented same-owner long A must exceed short B"
+    )
+    assert m.read_byte(45, 8191) == (0, 0x33)
+    assert m.read_byte(45, 8192) == (0, 0x01)
+    assert m.release(45) == (0, 2), "fragmented owner cleanup"
     # Bank-edge read-only sentinels mirrored from ROM cases 203..210.
     assert m.read_byte(46, 8191) == (0, 0x33), "A bank-end sentinel changed"
     assert m.read_byte(42, 8191) == (0, 0x00), "B bank-end sentinel changed"
     assert m.read_byte(46, 8192) == (0, 0x01), "A next-bank sentinel changed"
-    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=30 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=4 same_owner_full_capacity_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
+    print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=32 same_owner_fragmented_alias=2 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=4 same_owner_full_capacity_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
 

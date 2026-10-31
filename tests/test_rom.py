@@ -5,9 +5,9 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-# Full-capacity alias cases 242-245 traverse 16-KiB magnitudes; 246-247
-# validate a noncanonical high zero at the same capacity boundary. The prior
-# 7200-frame limit expired in case 243, so retain the measured 9000-frame cap.
+# Cases 242-245 traverse 16-KiB magnitudes; 246-247 reject full-capacity
+# high-zero descriptors; 248-249 compare same-owner aliases across fragmented
+# physical banks. Retain the measured finite 9000-frame cap.
 MAX_BOOT_AND_TEST_FRAMES = 9000
 WRAM_RESULT = 0xC000
 WRAM_TEST_CASE = 0xC001
@@ -15,7 +15,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 247
+TOTAL_CASES = 249
 
 
 def check_header(data: bytes) -> None:

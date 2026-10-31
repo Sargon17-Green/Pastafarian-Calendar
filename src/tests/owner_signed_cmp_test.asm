@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..247: signed owner-scoped comparison.
+; Stage 1 native regression 191..249: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1246,6 +1246,8 @@ RunOwnerSignedCmpTests::
     jp nc, .fail
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
+    call OwnerCmpTestCheckPreCapacityByte
+    jp nc, .fail
     ; 246: same owner 46, A is canonical 16383 bytes; B is noncanonical 16384.
     ; SRAM[16382]=$3c is A's nonzero high byte; SRAM[16383]=0 makes B invalid.
     ; A-first validates the short descriptor before rejecting B's high zero.
@@ -1319,11 +1321,110 @@ RunOwnerSignedCmpTests::
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
-    call OwnerCmpTestCheckNoncanonicalCapacityBytes
+    ; Recreate owner 45 after its earlier release. Banks 5 and 7 are free,
+    ; while bank 6 remains owned by 42, so this is a deliberate fragmented pair.
+    ld a, 45
+    ld [wOwnerRequest], a
+    ld a, 2
+    ld [wOwnerCount], a
+    call OwnerLeaseAlloc
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+    ld a, [wOwnerBanks]
+    cp 5
+    jp nz, .fail
+    ld a, [wOwnerBanks+1]
+    cp 7
+    jp nz, .fail
+
+    ; Store distinct nonzero top bytes on either side of the physical bank gap.
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $1f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 45
+    ld [wOwnerRequest], a
+    ld a, $33
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+    xor a
+    ld [wOwnerOffset], a
+    ld a, $20
+    ld [wOwnerOffset+1], a
+    ld a, 1
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+
+    ; 248: same fragmented owner, canonical 8192-byte A < 8193-byte B.
+    ld a, 248
+    ld [wTestCase], a
+    ld a, 45
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpLenB], a
+    ld a, $20
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 2
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedBytes
     jp nc, .fail
 
-    call OwnerCmpTestCheckPreCapacityByte
+    ; 249: reverse the descriptors across the same fragmented physical banks.
+    ld a, 249
+    ld [wTestCase], a
+    ld a, 45
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    ld a, $20
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenB+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
     jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+    call OwnerCmpTestCheckFragmentedBytes
+    jp nc, .fail
+
+    ld a, 45
+    ld [wOwnerRequest], a
+    call OwnerLeaseRelease
 
     ld a, 46
     ld [wOwnerRequest], a
@@ -1577,6 +1678,45 @@ OwnerCmpTestCheckNoncanonicalCapacityBytes:
     jr nz, .bad
     ld a, [wOwnerByteValue]
     or a
+    jr nz, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Check logical offsets 8191 and 8192 through reallocated fragmented owner 45.
+; They reside in physical banks 5 and 7 respectively; carry set = unchanged.
+OwnerCmpTestCheckFragmentedBytes:
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $1f
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 45
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $33
+    jr nz, .bad
+    xor a
+    ld [wOwnerOffset], a
+    ld a, $20
+    ld [wOwnerOffset+1], a
+    xor a
+    ld [wOwnerOffset+2], a
+    ld a, 45
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jr nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $01
     jr nz, .bad
     scf
     ret
