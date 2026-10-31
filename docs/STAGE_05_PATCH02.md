@@ -10,3 +10,7 @@ Reconstruct a bounded historical cyclic loop for each mini M=7..13, each N=1..M,
 
 ## Native acceptance
 Runner: sh ./run_stage05_patch02.sh; GNAT Ada 2022 required. CI job native-stage05-patch02 (Ubuntu 24.04, 15-minute timeout). Require completed/success verify and stage05 native at exact HEAD, compile/bind/link evidence and log STAGE05_PATCH02_ASSERTIONS=1465. CI queued/in_progress is neither PASS nor blocker. No main merge or production-change permission inferred.
+
+## Accepted Native result (2026-10-31, Asia/Jerusalem)
+
+GitHub Actions [41137003539](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41137003539) completed with **6/6 successful jobs** on commit `8f33b8e0dc1fae6fe61e0d64f9b6c2c80431e14b`. The native-stage05-patch02 job used GNAT 13: compiler, gnatbind and gnatlink entries are in [job 124341822354](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41137003539/job/124341822354), with `STAGE05_PATCH02_ASSERTIONS= 1465`. The verify job also completed successfully. **Stage5 PATCH02 is accepted for this bounded, test-only oracle modification**. The 1,456 miniature tests and nine original-M API checks are counted within the 1,465 assertions, not added twice. This is not full Calendar_Date proof or evidence of reachable hostile streams. No main merge.
