@@ -1,0 +1,73 @@
+name: Befunge QA22 Native Counterfactual Output Followthrough
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa22_native_mutant_continuations.py'
+      - 'qa/stage1_qa22_independent_output_audit.py'
+      - '.github/workflows/befunge-stage1-qa22-native-output-followthrough.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  bounded-real-native-mutant-output:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Immutable 2D source and auditable counterfactual code
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa22_native_mutant_continuations.py qa/stage1_qa22_independent_output_audit.py
+          python3 qa/stage1_qa22_independent_output_audit.py --selftest
+      - name: Download SHA-bound accepted original QA21 Native witnesses and local causal controls
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qa22"
+          test "$(gh run view 39764495612 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:61de02da97fff5d480e266ffe97ce4981d419ff7'
+          gh run download 39764495612 --repo "$GITHUB_REPOSITORY" --name qa21-natural-input-source-opcode-causal-evidence --dir "$RUNNER_TEMP/qa22"
+          echo "aef9d33debba740f5ad24f1d272d016725aed0ee78100a55b65769ce5a68a681  $RUNNER_TEMP/qa22/qa21_original_witnesses.json" | sha256sum -c -
+          echo "b77427385d7f4012b8a601974fe8b1d293366be7dd0e2f4c07b4e6020f2f9ced  $RUNNER_TEMP/qa22/qa21_native_interventions.json" | sha256sum -c -
+      - name: Lock Native PyFunge interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Continue six naturally reached source opcode mutants with bounded real Native execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/qa22:/qa22" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1300s python -u qa/stage1_qa22_native_mutant_continuations.py /qa22/qa21_original_witnesses.json /qa22
+            ' | tee "$RUNNER_TEMP/qa22/qa22_native_console.log"
+          grep -q QA22_SIX_REAL_NATIVE_MUTANTS_CONTINUED_TO_TERMINATION_OR_EXPLICIT_CAP "$RUNNER_TEMP/qa22/qa22_native_console.log"
+          test -s "$RUNNER_TEMP/qa22/qa22_native_continuations.json"
+      - name: Independently audit Native mutant completion, outputs and eight forgery controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_qa22_independent_output_audit.py \
+            --witness "$RUNNER_TEMP/qa22/qa21_original_witnesses.json" \
+            --qa21 "$RUNNER_TEMP/qa22/qa21_native_interventions.json" \
+            --qa22 "$RUNNER_TEMP/qa22/qa22_native_continuations.json" \
+            --output "$RUNNER_TEMP/qa22/qa22_independent_audit.json" | tee "$RUNNER_TEMP/qa22/qa22_independent_audit.log"
+          grep -q QA22_EIGHT_FORGED_CONTINUATION_REPORTS_REJECTED "$RUNNER_TEMP/qa22/qa22_independent_audit.log"
+      - name: Preserve original executed Native evidence on pass or red
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa22-native-mutant-output-followthrough
+          path: ${{ runner.temp }}/qa22/
+          if-no-files-found: warn

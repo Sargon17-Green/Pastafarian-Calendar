@@ -53,3 +53,207 @@
 - Бул QA санактары этаптагы бардык функционалдык талаптар бүткөнүн же өндүрүш коду келечекте жөнөкөйлөтүлбөй турганын далилдебейт. Баштапкы 2026-10-07деги `SEMANTIC_STATE_OWNER_VALIDATED=YES` тастыктоо жаңы mutable Funge программалар үчүн жараксыз. Эки gate `FUNCTIONAL_QA_PASS` жана `GEOMETRIC_SPAGHETTI_QA_PASS` боюнча дагы толук жана өз алдынча далил талап кылынат.
 
 **CURRENT_STAGE=1; LAST_COMPLETED_STAGE=0; Stage 2 башталган жок.**
+
+## 2026-10-08 — native 7/7 далилдери жана акыркы Stage 1 gap review
+
+Бул жаңы бөлүк мурунку native-ownership `PENDING_NEW_AUDIT` статусун
+жаңылайт; жогорудагы тарыхый таблица эски чекиттин абалын билдирет.
+
+**Verified run:** [37835677064](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37835677064),
+HEAD `8002a5d959e1a4f0d0b586974ba0bdae22ad57f6`.
+Seven of seven native jobs completed successfully, including:
+421 targeted regression native calls, 123 lexical-integrated native calls,
+43+48 standalone parser checks, eight forbidden sign rejection checks,
+per-execution native `g/p`+IP parity, 24 isolated native Programs and
+two interleaved pairs, and 16 native runs that explicitly reinitialize
+**the exact same Program object**. The 16 cases include alternating
+original/new native Befunge sources, legal/illegal inputs, identity
+invariants, separate I/O and Funge-space.
+
+**Маанилүү чек:** алтоо + жетинчи PASS — Stage 1дин баары PASS
+дегенди билдирбейт. `Program` объектине **explicit reset**
+жасалганы далилденди; мурдагы өзгөртүлгөн space'ти тазалабай
+reuse кылса болот деген талап же далил жок.
+
+| Stage 1 кабыл алуу бөлүгү | Азыркы так далил / ачык маселе |
+|---|---|
+| Lexical production correction | QA source Native PASS, 8 negative-sign checks; canonical branch'ка merge жок |
+| Native source geometry and mutable trace | Native trace exactly replayed for 26,708 valid + 12,194 invalid post-handoff events; 10/4 replayed executable gate writes |
+| State-owner fresh/reentrant/exact-object reset | PASS for documented specific input families (24 fresh Programs, 2 concurrent-live pairs, 16 exact-object explicit resets); whole architecture ownership final sign-off still OPEN |
+| Weaving, combinatorics, Year 5000 native coverage | NEW `qa/stage1_native_structural_corpus.py` and `qa/stage1_native_structural_properties.py` CI gates added; final native acceptance **PENDING** |
+| Full structural geometry acceptance | **OPEN**. In measured original arithmetic path after handoff: valid 25,982 IP steps, 9,532 distinct cells, 668 non-cardinal dynamic vectors, 128 p, 235 g; invalid 11,902 steps, 9,408 cells, 308 dynamic vectors, 56 p, 90 g. Advanced opcode/crossing/lifecycle and multi-input route graph acceptance remains incomplete |
+| Complete bootstrap acceptance and handoff | **OPEN**; `FULL_FUNCTIONAL_QA_PASS` and `GEOMETRIC_SPAGHETTI_QA_PASS` not certified; `HANDOFF_PACKAGE_PREPARED=NO` |
+
+Geometry evidence report:
+`artifacts/stage-01/NATIVE_GEOMETRY_EVIDENCE_LEDGER_2026-10-08.md`.
+The two measured traces do not execute `_`, `|`, `[`, `]`,
+`r`, `w`, `k`, `j`, `{`, `}`, or `u`.
+Бул deterministic кодуңдагы башка input'тарда ушул операциялар
+колдонулбайт деген универсалдуу далил эмес, бирок финалдык geometry
+acceptance'ке бул эки trace жетишсиз.
+
+**Stage 1 OPEN; LAST_COMPLETED_STAGE=0; Stage 2 башталган жок.
+Canonical `Befunge+Кыргызча` жана main өзгөртүлгөн жок.**
+
+## 2026-10-10 — Native u аркылуу стек маалымат агымынын себептүүлүгү
+
+Бул QA текшерүүлөрүндө негизги Befunge-98 өндүрүш программасы өзгөртүлгөн
+эмес. Так бекитилген source blob:
+560d6aa5807a7f766213a33835cce85eab0fa40c.
+Сандык күтүлгөн натыйжалар өз алдынча Native Befunge reference
+программаларынан алынды.
+
+- Run 38067942170, native-real-u-stack-transfer-operand-causality:
+  чыныгы (954,1328) дарегиндеги u үч жарактуу киргизүүдө аткарылды.
+  Тогуз Native аткаруу, алты аргументтик эксперимент, 11 жасалма
+  отчет четке кагылды. Баштапкы TOSS [1,0,0], экинчи стек [3];
+  Native u аткарылгандан кийин бош TOSS жана [0,0,1] өлчөндү.
+  Акыркы аргументти +1 же -1 кылганда дароо стек өзгөрдү,
+  бирок кийинки 128 багытталган кадам, акыркы жыйынтык жана
+  аяктоо өзгөргөн жок.
+  https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38067942170
+
+- Run 38068172102, native-real-u-three-payload-slots-causality:
+  ошол эле өзгөртүлбөгөн чыныгы u алдында TOSS ичиндеги үч орун
+  өзүнчө +1 кылып сыналды. Он эки Native аткаруу, тогуз каршы
+  эксперимент, он жасалма отчет четке кагылды. Биринчи орундагы
+  1 -> 2 өзгөрүүсүндө үчөөндө тең кийинки 128 кадамдын багыты
+  өзгөрүп, аткаруу 210 000 кадамдын чегинде аяктаган жок.
+  Экинчи жана үчүнчү орундагы 0 -> 1 өзгөрүүлөр дароо стектерди
+  өзгөрткөнү менен акыркы жыйынтыкка жана кийинки 128 кадамга
+  өлчөнүүчү таасир берген жок.
+  https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38068172102
+
+Так интерпретация: жок дегенде бир TOSS мааниси u аткаруусунун
+маалымат агымына жана кийинки эсептөө маршрутуна себептүү таасир
+этет. Бирок бардык өткөрүлгөн маанилер зарыл экени, же маанинин
+өзгөрүүсү башка аяктаган сандык жоопко алып келери далилденген жок.
+Бул геометриялык жана функционалдык акыркы кабыл алуу эмес.
+
+CURRENT_STAGE=1; LAST_COMPLETED_STAGE=0;
+FULL_FUNCTIONAL_QA_PASS=NO; GEOMETRIC_SPAGHETTI_QA_PASS=NO;
+STAGE2_STARTED=NO.
+
+## 2026-10-10 — Native u -> x: эки маалымат каналынын кайра-калыбына келтирүү сынагы
+
+**Өндүрүш Befunge-98 коду өзгөртүлгөн жок.** Сыналган source Git blob:
+560d6aa5807a7f766213a33835cce85eab0fa40c.
+QA жумушу: native-real-u-to-x-vector-mediation,
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38070031084/job/114265375132
+Commit 1483a0beba16a5f600826625ae5f731d402c88e0;
+Native artifact ID 11676108088.
+
+Үч мыйзамдуу киргизүү (zero_equal, forward_short, recent_anchor_next),
+ар бирине эки u аргументтик каршы эксперимент (-1 жана -2):
+**21 чыныгы Native BF98 программа аткарылды**; жети сандык жыйынтык
+өз алдынча Befunge reference аркылуу текшерилди. 13/13 жасалма отчет
+өз алдынча аудитордо четке кагылды.
+
+- Түпкү u алдындагы TOSS [1,0,0]; кийин x алдындагы TOSS [1,-1,0].
+- u'нун биринчи маанисин 1 -> 0 кылганда x алдындагы стек [0,-2,0],
+  1 -> -1 кылганда [-1,-3,0]. Чыныгы x багытты тиешелүү -2 же -3 кылып өзгөртөт.
+- **x багыт аргументин гана -1 кылып оңдоо: 0/6 толук калыбына келүү.**
+  1 -> 0 үч киргизүүдө программа аяктаган, бирок жети маанинин
+  бардыгы -1 болуп чыккан; 1 -> -1 үч киргизүүдө 170000
+  кадамдын чегинде аткаруу бүтпөгөн.
+- **x алдындагы айырмаланган эки стек маанисин тең өз ордуна келтирүү:
+  6/6 толук калыбына келүү.** Баштапкы программадай эле жети
+  сандык талаа, ошол эле аткаруу кадамдары жана кадимки аяктоо
+  бардык алты экспериментте текшерилди.
+
+Муну u аркылуу кийинки x'ке жеткен эки стек-каналдуу маалыматтын
+эсептөө процесси үчүн чыныгы себептүү катышуусунун чектелген Native
+далили катары кабыл алуу керек. Бул үч киргизүү үй-бүлөсүнүн алты
+каршы экспериментинен тышкаркы жалпы теорема **эмес**. Бардык
+башка киргизүүлөрдүн маанилери, Funge-space жана IP ownership
+жүрүмдөрүнүн акыркы аудити, ошондой эле жалпы spaghetti geometry
+acceptance азырынча ачык.
+
+CURRENT_STAGE=1; LAST_COMPLETED_STAGE=0;
+FULL_FUNCTIONAL_QA_PASS=NO; GEOMETRIC_SPAGHETTI_QA_PASS=NO;
+SEMANTIC_STATE_OWNER_VALIDATED=NO_FINAL_AUDIT; STAGE2_STARTED=NO.
+
+## 2026-10-10 — алты кошумча мыйзамдуу Native u → x себептүүлүк үй-бүлөсү
+
+**Так Native QA эксперимент:** иш агымы 38070818575,
+native-expanded-six-valid-u-to-x-stack-causality (PASS),
+QA commit 62faee2a61898427203ad52154f75beb2a810927.
+Өндүрүштүк Befunge-98 source Git blob өзгөргөн жок:
+560d6aa5807a7f766213a33835cce85eab0fa40c.
+
+Киргизүүлөрдүн тандалышы 17 мурда сакталган толук Native маршруттан
+текшерилди: 17 маршруттун 10унда (954,1328) дарегиндеги чыныгы u
+аткарылган; алардын тогузу мыйзамдуу киргизүүгө тиешелүү.
+Алты жаңы мыйзамдуу үй-бүлө: reverse_short, epoch_forward_one,
+epoch_reverse_one, recent_anchor_equal, positive_negative, large_values.
+Тармак боюнча өткөн ар бир жаңы маршрутта төмөнкү x (950,1335)
+u көрсөтмөсүнөн так 99 физикалык Native кадам кийин аткарылган.
+Башка мыйзамдуу маршруттар ушул u дарегинен өтпөшү мүмкүн.
+
+42 жаңы чыныгы Native BF98 аткаруу, 6 өз алдынча Native сандык
+reference жана 12 каршы эксперименттеги үч режим:
+- x багыт аргументин гана калыбына келтирүү: 0/12 так сандык
+  калыбына келүү. Алтысы жети -1 чыгарып кадимкидей аяктаган,
+  калган алтысы 260000 кадамдын чегинде бүтпөгөн.
+- x алдындагы өзгөргөн эки стек уячасын чогуу калыбына келтирүү:
+  **12/12 сандык жооп, кадимки аяктоо жана так баштапкы
+  кадам саны калыбына келтирилген**.
+- Баштапкы u аргументин өзгөрткөн, бирок x оңдолбогон бардык
+  12 каршы эксперимент белгиленген кадам чегинде бүтпөгөн.
+- 13/13 жасалма аудитордук отчет четке кагылды.
+
+Мурдагы үч үй-бүлө менен бирге жыйынтык: **9 мыйзамдуу киргизүү,
+18/18 эки уячалуу калыбына келүү, багытты гана оңдогондо 0/18**.
+Бул u → x аркылуу өтүүчү эки маалымат каналынын конкреттүү
+аткарылган эсептөөгө таасири жөнүндө кеңейтилген далил гана.
+Бүтүндөй 55 стадиянын биринчи стадиясын сертификаттабайт:
+u аткарылбаган арифметикалык маршруттар, жалпы функционалдык
+семантика, Funge-space/IP менчиги, кайра колдонуу жана толук
+spaghetti geometry кабыл алуу өзүнчө текшерилиши керек.
+
+LAST_COMPLETED_STAGE=0; FULL_FUNCTIONAL_QA_PASS=NO;
+GEOMETRIC_SPAGHETTI_QA_PASS=NO; STAGE2_STARTED=NO.
+
+## 2026-10-10 — u колдонулбаган беш чыныгы маршруттун сандык себептүүлүгү
+
+Native QA текшерүүсү: [run 38072367944, job 114272552348](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/38072367944/job/114272552348).
+Текшерилген түпкү Befunge-98 Git blob:
+560d6aa5807a7f766213a33835cce85eab0fa40c.
+**Өндүрүш коду өзгөртүлгөн жок**; сандар көз карандысыз Native Befunge
+reference аткарууларында эсептелди, Python санакты жасаган жок.
+
+17 толук Native IP/p/g изи текшерилди: 14 жарактуу, 3 жараксыз киргизүү.
+Алардын ичинен беш жарактуу маршрут (954,1328) дарегиндеги u көрсөтмөсүн
+**такыр аткарган жок**: foundation_cross, mixed_small, negative_positive,
+foundation_neighbor_forward жана foundation_neighbor_reverse.
+Бешөөндө тең w жана x чыныгы Native аткарылган, (37,1700) эс уячасына
+(1249,1050) дарегиндеги p жазып, (575,1164) дарегиндеги g ошол
+жазылган маанини кайра окуган.
+
+Биринчи үч учур үчүн мурдагы өз алдынча SCC Native g-мутанттары,
+Foundation коңшу эки учур үчүн жаңы эки Native g-мутанты текшерилди.
+**5/5** учурдун бардыгында бирден гана физикалык g окуу алдындагы
+маанини +1 кылып өзгөртүү, иш жүзүндөгү g кайтарган маанини өзгөрттү.
+Бардык беш каршы программа кадимкидей аяктап, жети сандык талаанын
+натыйжасын өзгөрттү; аткарылган кадамдардын саны ар бир баштапкы
+программа менен бирдей калды. Өз алдынча аудит **13/13 жалган отчетту
+четке какты**.
+
+Баштапкы g маанилери тиешелүүлүгүнө жараша -2, -1, -1, -1, 0;
+өзгөргөн маанилер -1, 0, 0, 0, 1 болгон.
+Native кайчылаш далилдер ушул эле CI иштетүүдөн алынган үч өзүнчө
+артeфакттан текшерилген: diverse-geometry, scc-physical-g-intervention
+жана foundation-neighbor-g-causality.
+Бул u колдонулбаган маршруттар да сандык маалымат агымы үчүн
+чыныгы себептүү механизм колдонорун көрсөтөт.
+
+Бирок бул **чектелген 17 киргизүү корпусунун гана далили**.
+Муну жалпы биринчи стадиянын функциялык, ownership,
+reentrancy жана geometric spaghetti кабыл алуу шартына барабар
+деп эсептөөгө болбойт. Башка маршруттар жана бардык баштапкы
+ченемдик талаптар өз-өзүнчө текшериле берет. PR #17 Draft бойдон
+калууда, Stage 2 башталган жок.
+
+CURRENT_STAGE=1; LAST_COMPLETED_STAGE=0;
+FULL_FUNCTIONAL_QA_PASS=NO; GEOMETRIC_SPAGHETTI_QA_PASS=NO;
+STAGE2_STARTED=NO.

@@ -1,0 +1,68 @@
+name: Befunge QA08 Native 17D Split IP Nested Stacks and Debris Compiler
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-qa08-nd17:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Immutable source and native engine pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/spaghetti06_residue_compiler_candidate.b98)" = "d89c0499f9e006eb62cd5876bd297085265435d6"
+          test "$(git hash-object qa/spaghetti07_17d_residue_mesh.beq)" = "4c9bff056cb61004d37dd2d949fccf171b4ddf0f"
+          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "4ba6902de08cf9483374f43a33f1d4ae7a14e3f6"
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+          echo "QA08_SOURCE_HEAD $(git rev-parse HEAD)"
+      - name: Build exact native Funge++ with thread/stack-of-stacks support
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C third_party/funge-plus-plus funge
+          test "$(timeout 12 third_party/funge-plus-plus/bin/funge third_party/funge-plus-plus/test/example5d.beq)" = "Hello World"
+      - name: Recreate exact Native QA06 residual branch provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -v "$GITHUB_WORKSPACE:/work:rw" -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" -w /work python:2.7-slim sh -ceu '
+            pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+            python qa/stage1_spaghetti06_native.py
+          '
+      - name: Re-run previously green QA07 on pinned native 17D engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_spaghetti07_nd17_native.py --engine third_party/funge-plus-plus/bin/funge
+      - name: Native two-IP rendezvous 17D nested stack and all malicious mutants
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti08_nd17_native.py
+          python3 qa/stage1_spaghetti08_nd17_native.py --engine third_party/funge-plus-plus/bin/funge
+      - name: Persist complete histories on success or failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti08-native-funge17d-evidence
+          path: |
+            spaghetti06_native_receipt.json
+            spaghetti07_nd17_native_receipt.json
+            spaghetti08_nd17_native_receipt.json
+          if-no-files-found: warn

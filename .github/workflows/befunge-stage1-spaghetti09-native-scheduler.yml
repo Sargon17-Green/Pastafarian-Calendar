@@ -1,0 +1,49 @@
+name: Befunge QA09 Native Scheduler Lifecycle Forensics
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-scheduler-forensic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Verify original 2D production and exact QA09 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq)" = "e22a8b706fb84e3356db6c70aac29b9145642201"
+          test "$(git hash-object qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq)" = "275cec0add8705565d27da4233860bf42d134a27"
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = "cd6d7f005b4fc33b486fcc2380b35406f6125ca4"
+      - name: Compile pristine pinned Funge++
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C third_party/funge-plus-plus funge
+          test "$(timeout 12 third_party/funge-plus-plus/bin/funge third_party/funge-plus-plus/test/example5d.beq)" = "Hello World"
+      - name: Native scheduling baseline and local isolated lifecycle patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_spaghetti09_native_scheduler_forensics.py
+          python3 qa/stage1_spaghetti09_native_scheduler_forensics.py --postfix
+      - name: Save unmodified/modified engine differential receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti09-native-scheduler-lifecycle-evidence
+          path: |
+            spaghetti09_native_scheduler_receipt.json
+          if-no-files-found: warn

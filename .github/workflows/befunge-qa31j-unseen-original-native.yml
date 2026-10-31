@@ -1,0 +1,54 @@
+name: Befunge QA31J two unseen original-native input bytes
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31j_unseen_native_probe.py'
+      - 'qa/stage1_qa31j_independent_audit.py'
+      - '.github/workflows/befunge-qa31j-unseen-original-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa31j-unseen-original-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check immutable source and independent audit syntax
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31j_independent_audit.py
+          mkdir -p qa31j-output
+      - name: Fetch pinned PyFunge 0.5 rc2 source
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Two new natural-input Native observations
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$GITHUB_WORKSPACE/qa31j-output:/qa31j" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=4s 360s python -u qa/stage1_qa31j_unseen_native_probe.py /qa31j
+            ' | tee qa31j-output/native.log
+          grep -q QA31J_TWO_UNSEEN_INPUTS_TRACED qa31j-output/native.log
+      - name: Independent original-source physical audit and 8 hostile controls
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31j_independent_audit.py \
+            src/interleaved_work_counts.b98 qa31j-output | tee qa31j-output/audit.log
+          grep -q QA31J_EIGHT_MUTATIONS_REJECTED qa31j-output/audit.log
+          grep -q QA31J_NO_STAGE1_PASS qa31j-output/audit.log
+      - name: Preserve receipts and RED evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31j-two-unseen-natural-byte-native-traces
+          path: qa31j-output/
+          if-no-files-found: warn

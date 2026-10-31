@@ -1,0 +1,128 @@
+name: Befunge QA26 Native 64-Input Original Source Frontier
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa26_frozen_input_corpus.py'
+      - 'qa/stage1_qa26_native_natural_frontier.py'
+      - 'qa/stage1_qa26_independent_natural_frontier_audit.py'
+      - '.github/workflows/befunge-stage1-qa26-native-natural-frontier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa26-original-input-native-shard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify original source and all executable native reference identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          test "$(git hash-object reference/work_counts.b98)" = f941efc793c9eee4accf5d03873f8ed029b16725
+          test "$(git hash-object reference/save.b98)" = 7b5e79aa6e2bfb636717cb018a3db6a13fb2bb44
+          python3 -m py_compile qa/stage1_qa26_frozen_input_corpus.py qa/stage1_qa26_native_natural_frontier.py qa/stage1_qa26_independent_natural_frontier_audit.py
+          python3 -c 'import sys;sys.path.insert(0,"qa");import stage1_qa26_frozen_input_corpus as c; assert len(c.cases())==64'
+      - name: Recover immutable original source-cell and 48-case Native receipts
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qa26" "$RUNNER_TEMP/qa26-qa18" "$RUNNER_TEMP/qa26-qa20"
+          test "$(gh run view 39423789058 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:6fbc0828c4ef78affb3899f5924e57e0a0025ed5'
+          test "$(gh run view 39761821210 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:d0a1c686c4f9244121246aa5b70266c072c3ddce'
+          gh run download 39423789058 --repo "$GITHUB_REPOSITORY" --name qa18-native-source-glyph-physical-contact --dir "$RUNNER_TEMP/qa26-qa18"
+          gh run download 39761821210 --repo "$GITHUB_REPOSITORY" --name qa20-48-case-natural-route-aggregate --dir "$RUNNER_TEMP/qa26-qa20"
+          cp "$RUNNER_TEMP/qa26-qa18/qa18_glyph_roles.json" "$RUNNER_TEMP/qa26/qa18_glyph_roles.json"
+          cp "$RUNNER_TEMP/qa26-qa20/qa20_native_48_aggregate.json" "$RUNNER_TEMP/qa26/qa20_native_48_aggregate.json"
+          echo "263a73a40afa17a8a9b1c831a01239be671d9ea0a9c331fd3f725f83cf1cfea7  $RUNNER_TEMP/qa26/qa18_glyph_roles.json" | sha256sum -c -
+          echo "75d2ee07eaf998fcb69bcb238d5fcb2163ab8305efe4abe4378af95f41385117  $RUNNER_TEMP/qa26/qa20_native_48_aggregate.json" | sha256sum -c -
+      - name: Pin actual Native PyFunge 0.5-rc2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Record complete original PyFunge instruction routes for sixteen disjoint real input cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/qa26:/qa26" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1500s python -u qa/stage1_qa26_native_natural_frontier.py \
+                ${{ matrix.shard }} /qa26 /qa26/qa18_glyph_roles.json /qa26/qa20_native_48_aggregate.json
+            ' | tee "$RUNNER_TEMP/qa26/native_console.log"
+          grep -q QA26_SIXTEEN_NEW_REAL_NATIVE_ROUTES_CAPTURED "$RUNNER_TEMP/qa26/native_console.log"
+          test -s "$RUNNER_TEMP/qa26/qa26_manifest.json"
+      - name: Independently audit every raw recorded Native STEP and thirteen forgery controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_qa26_independent_natural_frontier_audit.py \
+            --shard ${{ matrix.shard }} --directory "$RUNNER_TEMP/qa26" \
+            --qa18 "$RUNNER_TEMP/qa26/qa18_glyph_roles.json" \
+            --qa20 "$RUNNER_TEMP/qa26/qa20_native_48_aggregate.json" \
+            --output "$RUNNER_TEMP/qa26/qa26_shard_audit.json" | tee "$RUNNER_TEMP/qa26/qa26_audit_console.log"
+          grep -q QA26_SIXTEEN_ORIGINAL_NATIVE_STEP_TRACES_AUDITED "$RUNNER_TEMP/qa26/qa26_audit_console.log"
+          grep -q QA26_THIRTEEN_FORGERIES_REJECTED "$RUNNER_TEMP/qa26/qa26_audit_console.log"
+      - name: Keep exact Native raw traces, positive and negative audit receipts on green or red
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa26-original-native-shard-${{ matrix.shard }}
+          path: ${{ runner.temp }}/qa26/
+          if-no-files-found: warn
+  qa26-independent-aggregate:
+    needs: [qa26-original-input-native-shard]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Recover all four raw Native receipts from this exact GitHub run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qa26-merged"
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --pattern 'qa26-original-native-shard-*' --dir "$RUNNER_TEMP/qa26-merged"
+          for i in 0 1 2 3; do
+            test -s "$RUNNER_TEMP/qa26-merged/qa26-original-native-shard-$i/qa26_shard_audit.json"
+            test -s "$RUNNER_TEMP/qa26-merged/qa26-original-native-shard-$i/qa26_manifest.json"
+          done
+      - name: Reaudit original 64 native executions, account for all fifteen unresolved opcodes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_qa26_independent_natural_frontier_audit.py \
+            --aggregate \
+              "$RUNNER_TEMP/qa26-merged/qa26-original-native-shard-0" \
+              "$RUNNER_TEMP/qa26-merged/qa26-original-native-shard-1" \
+              "$RUNNER_TEMP/qa26-merged/qa26-original-native-shard-2" \
+              "$RUNNER_TEMP/qa26-merged/qa26-original-native-shard-3" \
+            --qa18 "$RUNNER_TEMP/qa26-merged/qa26-original-native-shard-0/qa18_glyph_roles.json" \
+            --qa20 "$RUNNER_TEMP/qa26-merged/qa26-original-native-shard-0/qa20_native_48_aggregate.json" \
+            --output qa26_native_64_aggregate.json | tee qa26_aggregate_console.log
+          grep -q QA26_SIXTY_FOUR_NEW_REAL_NATIVE_SOURCE_TRACES_REAUDITED qa26_aggregate_console.log
+          grep -q QA26_FIFTY_TWO_FORGERIES_REJECTED qa26_aggregate_console.log
+      - name: Retain complete independent finite reachability report on success or failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa26-64-original-native-route-aggregate
+          path: |
+            qa26_native_64_aggregate.json
+            qa26_aggregate_console.log
+          if-no-files-found: warn

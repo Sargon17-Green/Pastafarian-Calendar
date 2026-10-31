@@ -1,0 +1,81 @@
+name: Befunge QA28 Signed Native Predecessor Successor Source Frontier
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa28_native_directed_witness_edges.py'
+      - '.github/workflows/befunge-stage1-qa28-native-witness-edges.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  independent-15-original-native-witness-edges:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Lock original signed production source and QA28 auditor
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa28_native_directed_witness_edges.py
+      - name: Verify original successful Native runs and fixed tested commits
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh run view 39761821210 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = "success:d0a1c686c4f9244121246aa5b70266c072c3ddce"
+          test "$(gh run view 39966335703 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = "success:368e5f09ca875c423080ba138bfc90c8bde9b1d6"
+      - name: Rehydrate exact original QA27 aggregate and two QA20 Native witness shards
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          pull_original() {
+            local run="$1" name="$2" dest="$3" attempt
+            mkdir -p "$dest"
+            for attempt in 1 2 3 4 5; do
+              if gh run download "$run" --repo "$GITHUB_REPOSITORY" --name "$name" --dir "$dest"; then return 0; fi
+              echo "::warning::Original Native evidence download retry $attempt for $name"
+              sleep $((attempt * 12))
+            done
+            echo "::error::Original signed evidence unavailable: $name"
+            return 1
+          }
+          pull_original 39966335703 qa27-original-136-native-directed-frontier "$RUNNER_TEMP/qa28/QA27"
+          pull_original 39761821210 qa20-shard-0 "$RUNNER_TEMP/qa28/QA20-0"
+          pull_original 39761821210 qa20-shard-1 "$RUNNER_TEMP/qa28/QA20-1"
+          echo "20caa24769f882e38c69eb8bb9a31567fdbd7bb52f3f885b95436c1ece2798f3  $RUNNER_TEMP/qa28/QA27/qa27_original_136_directed_frontier.json" | sha256sum -c -
+          echo "782fb868a11a105550ef5af6f8f7cd39e4ba9de77d9565f7549e310549b0073a  $RUNNER_TEMP/qa28/QA20-0/qa20_manifest.json" | sha256sum -c -
+          echo "9c5af6212cfd7c1ab58e9603f385767e64b10799c90be416a86c4f09d613bfdd  $RUNNER_TEMP/qa28/QA20-1/qa20_manifest.json" | sha256sum -c -
+          echo "263a73a40afa17a8a9b1c831a01239be671d9ea0a9c331fd3f725f83cf1cfea7  $RUNNER_TEMP/qa28/QA20-0/qa18_glyph_roles.json" | sha256sum -c -
+      - name: Independent signed predecessor and successor audit for all 15 source frontiers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa28_native_directed_witness_edges.py \
+            --source src/interleaved_work_counts.b98 \
+            --qa27 "$RUNNER_TEMP/qa28/QA27/qa27_original_136_directed_frontier.json" \
+            --qa18 "$RUNNER_TEMP/qa28/QA20-0/qa18_glyph_roles.json" \
+            --shard0 "$RUNNER_TEMP/qa28/QA20-0" \
+            --shard1 "$RUNNER_TEMP/qa28/QA20-1" \
+            --output "$RUNNER_TEMP/qa28/qa28_signed_15_directed_witnesses.json" \
+            | tee "$RUNNER_TEMP/qa28/qa28_witness_audit.log"
+          grep -q QA28_FIFTEEN_SIGNED_DIRECTED_NATIVE_SOURCE_FRONTIERS_REPRODUCED "$RUNNER_TEMP/qa28/qa28_witness_audit.log"
+          grep -q QA28_ONE_HUNDRED_TWENTY_FORGED_DIRECTED_EDGES_REJECTED "$RUNNER_TEMP/qa28/qa28_witness_audit.log"
+          grep -q QA28_NO_DEAD_CODE_OR_GLOBAL_STAGE1_ACCEPTANCE "$RUNNER_TEMP/qa28/qa28_witness_audit.log"
+          python3 -c 'import json,sys;x=json.load(open(sys.argv[1]));assert x["exact_directed_witness_triads"]==15 and x["eight_negative_controls_per_target_rejected"]==120 and x["actual_exit_differs_from_pre_execution_delta"]==4 and x["stage1_complete"]==False' \
+            "$RUNNER_TEMP/qa28/qa28_signed_15_directed_witnesses.json"
+      - name: Retain original Native witness evidence and independent audit on GREEN or RED
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa28-fifteen-original-native-directed-witnesses
+          path: |
+            ${{ runner.temp }}/qa28/qa28_signed_15_directed_witnesses.json
+            ${{ runner.temp }}/qa28/qa28_witness_audit.log
+          if-no-files-found: warn
