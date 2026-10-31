@@ -100,7 +100,7 @@
                  (:rang keuze)
                  (conj uitvoer (:lengte keuze))))))))
 
-(defn- structuur-saus [berekeningsdag jaar]
+(defn structuur-saus [berekeningsdag jaar]
   (let [structuurdag (inc (:open-gate-day jaar))
         tellingen (dagen/werk-tellingen berekeningsdag structuurdag)
         verborgen-druppels (verborgen/verborgen-druppels tellingen)

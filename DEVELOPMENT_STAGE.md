@@ -1,7 +1,7 @@
 TOTAL_STAGES=55
 CURRENT_STAGE=2
 CURRENT_KIND=DISCOVERY
-CURRENT_PATCH=12
+CURRENT_PATCH=13
 LAST_COMPLETED_STAGE=1
 EXPECTED_REPOSITORY_STATE=NATIVE_VERIFICATION_PENDING
 FOREIGN_LANGUAGE_USAGE=NONE
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Clojure
 NATURAL_LANGUAGE=הולנדית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Stage 2 DISCOVERY01 dagtellingen; DISCOVERY02 SAVE en 46 stenen; DISCOVERY03 zeven verborgen druppels; DISCOVERY04 46 zichtbare druppels; DISCOVERY05 zes sauskommen en 12 nabewerkingen; DISCOVERY06 keuzestromen en poortafstanden; DISCOVERY07 begrensde monotone poortposities en voorganger; DISCOVERY08 eindige vensterverlenging tot 128 en halfopen poortintervallen; DISCOVERY09 begrensde jaargrens-kandidaten en selectie van jaar 5000, vorig en volgend; DISCOVERY10 doeljaarzoekactie met strikt stappenbudget en onafhankelijke oraclevergelijking; DISCOVERY11 keuze van koteletaantal op bewezen doeljaar met onafhankelijke oraclevergelijking; DISCOVERY12 exacte positieve composities met verplichte interne poortgrens en onafhankelijke oraclevergelijking.
+MONSTER_ARCHITECTURE_GROWTH=Stage 2 DISCOVERY01 dagtellingen; DISCOVERY02 SAVE en 46 stenen; DISCOVERY03 zeven verborgen druppels; DISCOVERY04 46 zichtbare druppels; DISCOVERY05 zes sauskommen en 12 nabewerkingen; DISCOVERY06 keuzestromen en poortafstanden; DISCOVERY07 begrensde monotone poortposities en voorganger; DISCOVERY08 eindige vensterverlenging tot 128 en halfopen poortintervallen; DISCOVERY09 begrensde jaargrens-kandidaten en selectie van jaar 5000, vorig en volgend; DISCOVERY10 doeljaarzoekactie met strikt stappenbudget en onafhankelijke oraclevergelijking; DISCOVERY11 keuze van koteletaantal op bewezen doeljaar met onafhankelijke oraclevergelijking; DISCOVERY12 exacte positieve composities met verplichte interne poortgrens en onafhankelijke oraclevergelijking; DISCOVERY13 lexicografische unieke koteletnaamindices via kom 5/zegel 22 met onafhankelijke oraclevergelijking.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=YES
