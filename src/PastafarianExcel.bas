@@ -48,6 +48,9 @@ Public Sub RenderPastafarianDate()
 
     Dim y As String, cutlet As String, dayCutlet As String
     Dim month As String, dayMonth As String
+    ' Invalidate any earlier display BEFORE parsing/validating new inputs.
+    ' A rejected new value must never leave a stale valid-looking result.
+    sh.Range("E5").ClearContents
     y = ExactCellString(sh.Range("B11"))
     cutlet = Trim$(ExactCellString(sh.Range("B12")))
     dayCutlet = ExactCellString(sh.Range("B13"))
@@ -75,6 +78,11 @@ Private Function ExactCellString(ByVal cell As Range) As String
     ' five field-specific validators reject missing text with their own codes.
     ' Numeric/formula/error values still fail the exact-text contract (519).
     Dim value As Variant
+    ' A formula returning text is NOT an externally supplied canonical value.
+    If cell.HasFormula Then
+        Err.Raise vbObjectError + 519, , _
+            "Input " & cell.Address(False, False) & " must be literal TEXT, not a formula."
+    End If
     value = cell.Value2
     If IsEmpty(value) Then
         ExactCellString = vbNullString
