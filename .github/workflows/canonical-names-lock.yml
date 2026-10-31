@@ -68,6 +68,14 @@ jobs:
             build/normative_oracle_calendar.o \
             -o build/stage01_year_boundary_probe
           test -x build/stage01_year_boundary_probe
+          gfortran ""${flags[@]}"" test/stage01_year_choice_oracle.f90 \
+            build/big_integer.o \
+            build/source_language_catalog.o \
+            build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o \
+            build/normative_oracle_calendar.o \
+            -o build/stage01_year_choice_oracle
+          test -x build/stage01_year_choice_oracle
       - name: Run bounded Stage 1 Oracle smoke (55 selected assertions; not full acceptance)
         shell: bash
         run: |
@@ -177,6 +185,32 @@ jobs:
           echo "Fortran Stage 1 adjacent-year endpoints: $actual/14 assertions, ${elapsed}s. Not full Stage 1 acceptance." >> "$GITHUB_STEP_SUMMARY"
           if [[ "$actual" -ne 14 ]]; then
             echo "::error::Adjacent-year boundary assertion count mismatch"
+            exit 1
+          fi
+      - name: Run independent Stage 1 year5000 candidate-choice oracle (21 assertions; not full acceptance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          started=$SECONDS
+          set +e
+          output="$(timeout --signal=TERM --kill-after=5s 45s build/stage01_year_choice_oracle 2>&1)"
+          exit_code=$?
+          set -e
+          elapsed=$((SECONDS-started))
+          printf '%s\n' "$output"
+          echo "STAGE01_YEAR_CHOICE_RUNTIME_SECONDS=$elapsed LIMIT=45"
+          if [[ "$exit_code" -ne 0 ]]; then
+            echo "::error::Independent year5000 candidate-choice oracle failed or timed out (exit $exit_code)"
+            exit 1
+          fi
+          grep -Fqx 'STAGE01_YEAR_CHOICE_ORACLE_PASS (candidate choice only; NOT full Stage 1 acceptance)' <<< "$output"
+          grep -Fxq 'STAGE01_YEAR_CHOICE_ASSERTIONS=21' <<< "$output"
+          grep -Fxq 'STAGE01_YEAR_CHOICE_FAILURES=0' <<< "$output"
+          actual="$(grep -c '^PASS: ' <<< "$output")"
+          echo "STAGE01_YEAR_CHOICE_NATIVE_PASS=$actual EXPECTED=21 (NOT full Stage 1 acceptance)"
+          echo "Fortran Stage 1 independent candidate-choice oracle: $actual/21, $elapsed seconds. NOT full Stage 1 acceptance." >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$actual" -ne 21 ]]; then
+            echo "::error::Independent year5000 candidate-choice assertion mismatch"
             exit 1
           fi
       - name: Run bounded Stage 1 BigInt safe-boundary checks
