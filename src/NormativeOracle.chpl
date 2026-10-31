@@ -632,7 +632,8 @@ module NormativeOracle {
     var memo: map(string, bigint);
 
     proc key(rem: int, slots: int, cumulative: int, hit: bool): string {
-      return rem:string + ":" + slots:string + ":" + cumulative:string + ":" + hit:string;
+      return rem:string + ":" + slots:string + ":" + cumulative:string + ":" + hit:string
+           + ":" + requiredBoundary:string;
     }
 
     proc ref countState(rem: int, slots: int,

@@ -1,3 +1,4 @@
+use BigInteger;
 use NormativeOracle only BoundedCompositionCounter, CutletPartitionCounter;
 
 proc bruteThreeSlotCount(total: int, lo: int, hi: int): int {
@@ -10,6 +11,22 @@ proc bruteThreeSlotCount(total: int, lo: int, hi: int): int {
     }
   }
   return resultValue;
+}
+
+proc bruteThreeSlotKeys(total: int, lo: int, hi: int,
+                           requiredBoundary: int): list(string) {
+  var words = new list(string);
+  for a in lo..hi {
+    for b in lo..hi {
+      for c in lo..hi {
+        if a + b + c == total &&
+           (requiredBoundary < 0 || a == requiredBoundary ||
+            a + b == requiredBoundary) then
+          words.pushBack(a:string + b:string + c:string);
+      }
+    }
+  }
+  return words;
 }
 
 proc main() {
@@ -78,9 +95,36 @@ proc main() {
   writeln("CUTLET_CACHE_FRESH_DP=", cutletFreshCount);
 
   if cutletInitial != 6 || cutletInitialOracle != 6 ||
-     cutletReconfigured != 6 || cutletBoundaryOracle != 3 ||
+     cutletReconfigured != 3 || cutletBoundaryOracle != 3 ||
      cutletFreshCount != 3 then
-    halt("The cutlet-partition cache-reconfiguration witness did not match its contract.");
+    halt("The cutlet-partition cache-reconfiguration fix did not match its contract.");
 
-  writeln("CUTLET_PARTITION_CACHE_REUSE_WITNESS=REPRODUCED");
+  const boundedWords = bruteThreeSlotKeys(8, 2, 4, -1);
+  var boundedUnrankChecks = 0;
+  for index in boundedWords.indices {
+    const actual = reused.unrank1(new bigint(index + 1));
+    var actualKey = "";
+    for x in actual do actualKey += x:string;
+    if actualKey != boundedWords[index] then
+      halt("BoundedCompositionCounter reconfigured unrank mismatch.");
+    boundedUnrankChecks += 1;
+  }
+
+  const cutletWords = bruteThreeSlotKeys(5, 1, 5, 2);
+  var cutletUnrankChecks = 0;
+  for index in cutletWords.indices {
+    const actual = cutletReused.unrank1(new bigint(index + 1));
+    var actualKey = "";
+    for x in actual do actualKey += x:string;
+    if actualKey != cutletWords[index] then
+      halt("CutletPartitionCounter reconfigured unrank mismatch.");
+    cutletUnrankChecks += 1;
+  }
+
+  writeln("BOUNDED_CACHE_UNRANK_CHECKS=", boundedUnrankChecks);
+  writeln("CUTLET_CACHE_UNRANK_CHECKS=", cutletUnrankChecks);
+  if boundedUnrankChecks != 6 || cutletUnrankChecks != 3 then
+    halt("Cache-reconfiguration unrank coverage mismatch.");
+
+  writeln("CUTLET_PARTITION_CACHE_REUSE_FIXED=PASS");
 }
