@@ -59,12 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           docker exec -u postgres sql-tamil-answer-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
-            -c "CREATE TEMP TABLE answer_isolation AS SELECT * FROM (VALUES
-('no-reference-schema',to_regnamespace('pastafari_sql_tamil_test') IS NULL),
-('three-functions',(SELECT count(*)=3 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('next_bowl_in_drop46_order','ask_bowl','answer_at'))),
-('no-reference-calls',(SELECT count(*)=0 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('next_bowl_in_drop46_order','ask_bowl','answer_at') AND position('pastafari_sql_tamil_test' IN pg_get_functiondef(p.oid))>0)),
-('all-sql-immutable',(SELECT count(*)=3 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('next_bowl_in_drop46_order','ask_bowl','answer_at') AND l.lanname='sql' AND p.provolatile='i'))
-) AS t(label,ok)" \
+            -c "CREATE TEMP TABLE answer_isolation AS SELECT * FROM (VALUES ('no-reference-schema',to_regnamespace('pastafari_sql_tamil_test') IS NULL), ('three-functions',(SELECT count(*)=3 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('next_bowl_in_drop46_order','ask_bowl','answer_at'))), ('no-reference-calls',(SELECT count(*)=0 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('next_bowl_in_drop46_order','ask_bowl','answer_at') AND position('pastafari_sql_tamil_test' IN pg_get_functiondef(p.oid))>0)), ('all-sql-immutable',(SELECT count(*)=3 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='pastafari_sql_tamil' AND p.proname IN ('next_bowl_in_drop46_order','ask_bowl','answer_at') AND l.lanname='sql' AND p.provolatile='i')) ) AS t(label,ok)" \
             -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM answer_isolation' \
             2>&1 | tee sql-tamil-answer-logs/isolation.txt
       - name: Create isolated reference database
