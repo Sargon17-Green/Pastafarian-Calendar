@@ -214,6 +214,78 @@ proc probeThreeMonthWeaving() {
   }
 }
 
+
+// Separate asymmetrical month family 2+3+4: direct full-word enumeration.
+// Do not derive the oracle from WeavingCounter.legalMove/countState/unrank1.
+// The distinct first/last occurrence orders define validity.
+proc enumerateUnequalTriplets(ref positions: [0..8] int,
+                              step: int, used1: int, used2: int, used3: int,
+                              ref candidateCount: int,
+                              ref oracle: list(string)) {
+  if step == 9 {
+    candidateCount += 1;
+    var first: [1..3] int;
+    var last: [1..3] int;
+    for p in 0..8 {
+      const monthId = positions[p];
+      if first[monthId] == 0 then first[monthId] = p + 1;
+      last[monthId] = p + 1;
+    }
+    if first[1] < first[2] && first[2] < first[3] &&
+       last[1] < last[2] && last[2] < last[3] {
+      var key = "";
+      for monthId in positions do key += monthId:string;
+      oracle.pushBack(key);
+    }
+    return;
+  }
+  if used1 < 2 {
+    positions[step] = 1;
+    enumerateUnequalTriplets(positions, step + 1, used1 + 1,
+                             used2, used3, candidateCount, oracle);
+  }
+  if used2 < 3 {
+    positions[step] = 2;
+    enumerateUnequalTriplets(positions, step + 1, used1,
+                             used2 + 1, used3, candidateCount, oracle);
+  }
+  if used3 < 4 {
+    positions[step] = 3;
+    enumerateUnequalTriplets(positions, step + 1, used1,
+                             used2, used3 + 1, candidateCount, oracle);
+  }
+}
+
+proc probeUnequalThreeMonthWeaving() {
+  var lengths = new list(int);
+  lengths.pushBack(2);
+  lengths.pushBack(3);
+  lengths.pushBack(4);
+  var tested: WeavingCounter;
+  tested.lengths = lengths;
+
+  var positions: [0..8] int;
+  var independentOracle = new list(string);
+  var candidates = 0;
+  enumerateUnequalTriplets(positions, 0, 0, 0, 0,
+                           candidates, independentOracle);
+
+  check(candidates == 1260,
+        "Нерівні місяці: повний перелік 2+3+4 має 1260 слів");
+  check(independentOracle.size == 50,
+        "Нерівні місяці: 50 законних слів за порядками відкриття і закриття");
+  check(tested.countAll() == independentOracle.size,
+        "Нерівні місяці: DP потужність проти прямого переліку");
+  for index0 in independentOracle.indices {
+    const rank = index0 + 1;
+    const actual = tested.unrank1(new bigint(rank));
+    var key = "";
+    for monthId in actual do key += monthId:string;
+    check(actual.size == 9 && key == independentOracle[index0],
+          "Нерівні місяці: незалежний лексикографічний ранг=" + rank:string);
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -222,6 +294,7 @@ proc main() {
   probeBoundedCompositions(12, 4, 8);
   probeWeaving();
   probeThreeMonthWeaving();
+  probeUnequalThreeMonthWeaving();
   probeHistoricalControls();
   writeln("DISCOVERY03_PROBE_CHECKS=", checks);
   writeln("DISCOVERY03_PROBE_FAILURES=", failures);
