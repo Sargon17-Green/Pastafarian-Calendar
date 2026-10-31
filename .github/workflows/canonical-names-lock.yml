@@ -382,30 +382,8 @@ jobs:
           grep -Eq '^STAGE7_CONTROL_PASS=[[:space:]]*0*3[[:space:]]*$' build/stage07-native.log
           grep -Eq '^STAGE7_OUTPUT_GUARD=[[:space:]]*0*8[[:space:]]*$' build/stage07-native.log
           grep -Eq '^STAGE7_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage07-native.log
-          grep -Eq '^STAGE7_BOUNDARY_PASS=[[:space:]]*0*4[[:space:]]*
-          ! grep -Eq 'PATCH03|DISTANCE-PATCH' src/legacy_distance.cob
-          echo 'STAGE7_NATIVE_GATE=PASS' | tee -a build/stage07-native.log
-      - name: Persist evidence on success or failure
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage07-patch-native-evidence
-          path: build/stage07-native.log
-          if-no-files-found: warn
-          retention-days: 30
- build/stage07-native.log
-          grep -Eq '^STAGE7_INVALID_REJECT=[[:space:]]*0*3[[:space:]]*
-          ! grep -Eq 'PATCH03|DISTANCE-PATCH' src/legacy_distance.cob
-          echo 'STAGE7_NATIVE_GATE=PASS' | tee -a build/stage07-native.log
-      - name: Persist evidence on success or failure
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage07-patch-native-evidence
-          path: build/stage07-native.log
-          if-no-files-found: warn
-          retention-days: 30
- build/stage07-native.log
+          grep -Eq '^STAGE7_BOUNDARY_PASS=[[:space:]]*0*4[[:space:]]*$' build/stage07-native.log
+          grep -Eq '^STAGE7_INVALID_REJECT=[[:space:]]*0*3[[:space:]]*$' build/stage07-native.log
           grep -Fxq 'RESULT=PASS_STAGE7_PATCH03_NATIVE' build/stage07-native.log
           ! grep -Eq 'PATCH03|DISTANCE-PATCH' src/legacy_distance.cob
           echo 'STAGE7_NATIVE_GATE=PASS' | tee -a build/stage07-native.log
