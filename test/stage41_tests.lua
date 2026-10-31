@@ -82,7 +82,8 @@ for scenario=1,96 do
  local target=B.add(days[k+9],5)
  local ctx=verify(target,rs,k,B.add(B.sub(target,days[k+9]),1))
  assert(cmp(ctx.semanticState.correctedOrdinalDecimal,6)==0
-  and cmp(ctx.stage40GateOrdinalSemanticState.historicalOrdinalDecimal,"tampered")~=0,
+  and cmp(ctx.semanticState.historicalOrdinalDecimal,5)==0
+  and ctx.stage40GateOrdinalSemanticState.historicalOrdinalDecimal=="tampered",
   "Stage41 synthetic BigInt mismatch or aliased state")
  synthetic=synthetic+1
 end
