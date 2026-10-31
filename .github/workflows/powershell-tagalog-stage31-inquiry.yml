@@ -1,0 +1,48 @@
+name: PowerShell Tagalog Stage31 bounded ordinal inquiry
+on:
+  push:
+    branches: ['PowerShell+Tagalog']
+    paths:
+      - '.github/workflows/powershell-tagalog-stage31-inquiry.yml'
+      - 'docs/STAGE31_DISCOVERY16_ORDINAL_FIRST_STEP_CONTRACT_20261031.md'
+      - 'tests/Stage31.Tests.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage31-ordinal-probe:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deterministic ordinal sample on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($sha -cne $env:GITHUB_SHA) { throw 'Stage31 checkout SHA mismatch' }
+          @(
+            ('STAGE31_HEAD_SHA=' + $sha),
+            ('STAGE31_NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE31_SCOPE=FINITE_ORDINAL_SAMPLE',
+            'STAGE31_SEAL=NOT_CLAIMED'
+          ) | Set-Content stage31-probe-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage31-probe-transcript.txt | Out-Null
+          try {
+            Write-Host ('STAGE31_HEAD_SHA=' + $sha)
+            & .\tests\Stage31.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage31 bounded ordinal inquiry failed' }
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Retain deterministic sample and exact SHA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage31-ordinal-evidence
+          path: |
+            stage31-probe-metadata.txt
+            stage31-probe-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
