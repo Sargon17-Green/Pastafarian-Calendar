@@ -5,7 +5,10 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-MAX_BOOT_AND_TEST_FRAMES = 7200
+# Full-capacity alias EQ cases 242-243 each traverse a 16-KiB magnitude.
+# The prior 7200-frame limit expired in case 243 (the ROM was still running);
+# keep a finite 9000-frame ceiling instead of weakening completion checks.
+MAX_BOOT_AND_TEST_FRAMES = 9000
 WRAM_RESULT = 0xC000
 WRAM_TEST_CASE = 0xC001
 WRAM_DISPATCH = 0xC002
