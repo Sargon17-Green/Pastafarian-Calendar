@@ -44,8 +44,7 @@ void main() {
 
   for (var rank = 0; rank < orderedDays.length; rank++) {
     _expect(
-      NormativeReference.dayCount(orderedDays[rank]) ==
-          BigInt.from(rank + 1),
+      NormativeReference.dayCount(orderedDays[rank]) == BigInt.from(rank + 1),
       'Normative day count differs from independent enumeration at rank '
       '${rank + 1}',
     );
