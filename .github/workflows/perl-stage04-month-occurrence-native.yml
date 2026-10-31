@@ -31,7 +31,8 @@ jobs:
           perl -e 'print "$^V\n"' > logs/stage04/perl-version.txt
           perl -Ilib -It/lib -c lib/Pastafari/Monster/MonthOccurrence.pm 2> logs/stage04/syntax.stderr
           perl -Ilib -It/lib -c t/49_stage04_month_occurrence.t 2>> logs/stage04/syntax.stderr
-          test ! -s logs/stage04/syntax.stderr || { cat logs/stage04/syntax.stderr; exit 1; }
+          test "$(grep -c 'syntax OK' logs/stage04/syntax.stderr)" -eq 2
+          test "$(wc -l < logs/stage04/syntax.stderr)" -eq 2
           set +e
           (
             ulimit -v 393216

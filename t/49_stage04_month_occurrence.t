@@ -93,6 +93,6 @@ my $last = month_occurrence($large,1,24);
 is($last->{monthIndex},6,'完整串末個月份標籤');
 is("$last->{dayInMonth}",'4','完整串最後月份第 4 日');
 
-diag("STAGE04_MONTH_OCCURRENCE_SMALL_ORACLE_CASES=$cases");
-diag("STAGE04_FULL_CANONICAL_FIVE_FIELDS_NOT_VERIFIED");
+note("STAGE04_MONTH_OCCURRENCE_SMALL_ORACLE_CASES=$cases");
+note("STAGE04_FULL_CANONICAL_FIVE_FIELDS_NOT_VERIFIED");
 done_testing;
