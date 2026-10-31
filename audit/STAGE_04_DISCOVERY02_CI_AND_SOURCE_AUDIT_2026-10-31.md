@@ -140,3 +140,30 @@ Rust üçün test-only, müstəqil riyazi rekonstruksiya və onun Native CI mark
 
 Source: https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/python-turkish-v1.0.0-verified-20261030/src/pastafari_calendar/legacy_day_counts.py
 Contract: audit/STAGE_04_DISCOVERY02_ARCHIVED_ROUTE_CONTRACT_2026-10-31.md
+
+## 8. Arxiv şahidlərinin Rust Native CI yoxlaması və növbəti müstəqil qapı — 2026-10-31
+
+**Yoxlanmış code SHA:** \`3eebe8e11e8dac2ee281ae33c797f104b8a4a426\`, **branch:** \`Rust+Azərbaycan-dili\`.
+GitHub branch HEAD yenidən oxunub və həmin SHA ilə eynidir. Aşağıdakı beş workflow işinin hamısı \`completed/success\` idi; heç biri təkrar başladılmadı.
+
+| Qapı | Run | Job | Nəticə |
+|---|---:|---:|---|
+| Stage4 Native + arxiv şahidi | 41239239534 | 124649437996 | success |
+| Stage3 regression | 41239239536 | 124649437849 | success |
+| Stage2 regression | 41239239500 | 124649437658 | success |
+| Stage1 Native | 41239239503 | 124649437653 | success |
+| Canonical Names Lock | 41239239566 | 124649437909 | success |
+
+Stage4 Native job logunda \`cargo fmt --all -- --check\` addımı müvəffəqdir; test qruplarında **16+3+4+2+3+3+3=34 keçmiş, 0 uğursuz** nəticə var. Test-only arxiv müqayisəsi dəqiq olaraq
+\`STAGE04_DISCOVERY02_ARCHIVED_RED=8 CONTROL=7 UNEXPECTED=0\` və
+\`STAGE04_DISCOVERY02_ARCHIVED_PATCH_CONTROL=15\` yazdı.
+Stage4 baseline, huge, bijection, symmetric, preimage və work-counts markerləri, həmçinin Stage2/Stage3 regression markerləri workflow tərəfindən yoxlanıldı.
+
+Sübut ZIP-i: GitHub Actions artifact \`13057206172\` (\`rust-az-stage04-discovery02-baseline\`, 6455 bayt), SHA-256 \`8ee8f22b678130a4d565625c244b34f4133df1781f084a5ed1e8a713c84dda47\`; \`expired=false\` zamanı API metadata-sı yoxlandı. Yüklənmiş ZIP baytları ayrıca yoxlanılmadı, buna görə ZIP-in daxilindəki hər bir fayl barədə əlavə iddia edilmir.
+https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41239239534/artifacts/13057206172
+
+Arxiv mənbə faylı GitHub-da release tag ilə ayrıca oxundu: \`src/pastafari_calendar/legacy_day_counts.py\`, faktiki blob SHA \`405f461b2e2cdd170ded010e6f8046b78d6b4ab6\`; bu, əvvəlcədən qeyd edilmiş hash ilə eynidir. Python mənbəyində \`oldDayTag\` və \`dayTagWithFoundationScar\` həqiqətən mövcuddur. **Lakin** yuxarıdakı CI yalnız həmin kodun Rust test-only riyazi rekonstruksiyasını icra edir, arxivdəki Python funksiyalarının özlərini Rust ilə avtomatlaşdırılmış cross-language müqayisədə icra etmir.
+
+**Qəbul sərhədi:** \`ARCHIVAL_WITNESS_RUST_NATIVE_QA=PASS\`; \`STAGE4_CLOSURE=OPEN\`; \`CROSS_IMPLEMENTATION_RUNTIME_DIFFERENTIAL=NOT_RUN\`. Arxivləşdirilmiş Python marşrutu Rust filialının əvvəlki istehsal marşrutu deyil. Tarixi Rust day-tag nasazlığı sübut edilməyib; beş-komponentli production entry \`BootstrapOnly\` qalır; Stage5/main/merge yoxdur.
+
+**NEXT — birbaşa, hash-lə qorunan arxiv diferensialı:** Məhz release commit \`0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4\`-dəki Python faylını SHA doğrulaması ilə al; həmin orijinal \`oldDayTag\` / \`dayTagWithFoundationScar\` funksiyalarını \`F+[-3,-2,-1,0,1,2,3]\` və \`F±2^k\` (\`k=127,1025,4096,8192\`) daxil olmaqla 15 müxtəlif gün üzərində **birbaşa** icra et. Ayrı Rust test runner-i yalnız müstəqil normativ oracle və Rust candidate nəticələrini maşınla müqayisə oluna bilən fixture formasında istehsal etsin. 15-cüt doğrulamada \`RED=8, CONTROL=7, UNEXPECTED=0, PATCH_OK=15, CANDIDATE_OK=15\` tələb et; fərq varsa konkret (input, Python output, Rust output, oracle) şahidini göstər. CI \`completed/success\`, eyni code SHA, log və artifact olmadan yeni PASS iddia etmə. Bundan sonra Stage4 bağlanma şərtini ayrıca yoxla; Rust-un özündə mövcud olmayan tarixi nasazlığı uydurma.
