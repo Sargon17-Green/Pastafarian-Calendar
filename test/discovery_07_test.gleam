@@ -90,9 +90,7 @@ pub fn discovery_07_all_720_unique_permutations_test() {
   unique_orders(orders, []) |> should.equal(True)
   list.all(orders, fn(order) {
     list.length(order) == 6
-    && list.all([1, 2, 3, 4, 5, 6], fn(bowl) {
-      list.contains(order, bowl)
-    })
+    && list.all([1, 2, 3, 4, 5, 6], fn(bowl) { list.contains(order, bowl) })
   })
   |> should.equal(True)
 }
