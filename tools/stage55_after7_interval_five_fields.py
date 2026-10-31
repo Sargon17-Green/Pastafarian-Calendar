@@ -37,16 +37,16 @@ def run(before,after,fixture):
     assert p["done"] is q["done"] is False and sum(a)==4238 and sum(b)==4237
     changed=[i+1 for i,(x,y) in enumerate(zip(a,b)) if x-y==1]
     assert len(changed)==1 and sum(x-y for x,y in zip(a,b))==1
-    symbol=changed[0]; assert 1<=symbol<=6 and a[symbol-1]>1
-    assert q["openedUpTo"]==6
+    symbol=changed[0]; assert 1<=symbol<=7 and a[symbol-1]>1
+    assert q["openedUpTo"]==6+(symbol==7)
     rp,cp=int(p["rankDecimal"]),int(p["countDecimal"])
     rq,cq=int(q["rankDecimal"]),int(q["countDecimal"])
     assert 1<=rp<=cp and 1<=rq<=cq
     blocks=[]
-    for j in range(1,7):
+    for j in range(1,8):
         assert a[j-1]>1
         child=a.copy(); child[j-1]-=1
-        count=insertion_count(child,6)
+        count=insertion_count(child,6+(j==7))
         assert count>0
         blocks.append(count)
         print(f"STAGE55_SEVENTH_INDEPENDENT_BLOCK SYMBOL={j} DIGITS={len(str(count))}")
@@ -54,10 +54,10 @@ def run(before,after,fixture):
     lower=sum(blocks[:symbol-1])
     assert lower==rp-rq and lower<rp<=lower+cq
     name=f["month_name_indices"][symbol-1]
-    mday=2
-    assert b[symbol-1]==L[symbol-1]-mday
+    mday=L[symbol-1]-b[symbol-1]
+    assert mday==1+(symbol<=6) and b[symbol-1]==L[symbol-1]-mday
     print(f"STAGE55_SEVENTH_ROW POSITION=7 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=7 MONTH_INDEX={name} MONTH_DAY={mday}")
-    print(f"STAGE55_SEVENTH_INDEPENDENT_PASS SMALL={cases} BLOCKS=6 AFTER6_SHA256={h6} AFTER7_SHA256={h7} REMAINING=4237")
+    print(f"STAGE55_SEVENTH_INDEPENDENT_PASS SMALL={cases} BLOCKS=7 AFTER6_SHA256={h6} AFTER7_SHA256={h7} REMAINING=4237")
     print("STAGE55_FULL_YEAR_CANONICAL_ORACLE_NOT_VERIFIED")
     print("STAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED")
     print("STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED")
