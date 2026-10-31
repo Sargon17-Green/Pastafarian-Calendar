@@ -84,6 +84,14 @@ jobs:
             build/normative_oracle_calendar.o \
             -o build/stage01_date_projection_probe
           test -x build/stage01_date_projection_probe
+          gfortran "${flags[@]}" test/stage01_normative_first_day_probe.f90 \
+            build/big_integer.o \
+            build/source_language_catalog.o \
+            build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o \
+            build/normative_oracle_calendar.o \
+            -o build/stage01_normative_first_day_probe
+          test -x build/stage01_normative_first_day_probe
       - name: Run bounded Stage 1 Oracle smoke (55 selected assertions; not full acceptance)
         shell: bash
         run: |
@@ -244,6 +252,29 @@ jobs:
             exit 1
           fi
           echo "Stage 1 five-field synthetic projection: 25/25; full date integration NOT accepted." >> "$GITHUB_STEP_SUMMARY"
+      - name: Diagnose real first-day calendar path (75s, 1 GiB; NOT a gate)
+        shell: bash
+        run: |
+          set -euo pipefail
+          started=$SECONDS
+          set +e
+          output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=5s 75s build/stage01_normative_first_day_probe) 2>&1)"
+          exit_code=$?
+          set -e
+          elapsed=$((SECONDS-started))
+          printf '%s\n' "$output"
+          echo "STAGE01_NORMATIVE_DIAGNOSTIC_EXIT=$exit_code RUNTIME_SECONDS=$elapsed LIMIT=75 MEMORY_KIB=1048576"
+          if [[ "$exit_code" -eq 0 ]] &&
+             grep -Fxq 'STAGE01_NORMATIVE_FIRST_DAY_ASSERTIONS=8' <<< "$output" &&
+             grep -Fxq 'STAGE01_NORMATIVE_FIRST_DAY_FAILURES=0' <<< "$output" &&
+             grep -Fqx 'STAGE01_NORMATIVE_FIRST_DAY_PASS (boundary invariants only; NOT full Stage 1 acceptance)' <<< "$output"; then
+            echo 'STAGE01_NORMATIVE_DIAGNOSTIC_VERDICT=PASS_8_OF_8_NOT_FULL_ORACLE'
+            echo 'Stage1 real first-day diagnostic: 8/8, bounded; not full acceptance.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::Stage1 real first-day diagnostic is inconclusive or failed (exit $exit_code); investigate performance/assertions before acceptance"
+            echo 'STAGE01_NORMATIVE_DIAGNOSTIC_VERDICT=INCONCLUSIVE_OR_FAIL'
+            echo "Stage1 real first-day diagnostic inconclusive/failed (exit $exit_code, ${elapsed}s); not a release gate." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Run bounded Stage 1 BigInt safe-boundary checks
         shell: bash
         run: |
