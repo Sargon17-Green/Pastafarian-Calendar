@@ -23,12 +23,73 @@ on:
       - 'sql/16_stage02_year5000.sql'
       - 'sql/17_stage02_adjacent_year_navigation.sql'
       - 'sql/test/10_normative_reference.sql'
+      - 'sql/test/110_stage02_adjacent_year_native.sql'
       - 'sql/test/111_stage02_adjacent_year_differential.sql'
       - '.github/workflows/sql-tamil-stage02-adjacent-year-native.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  year-navigation-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-adjacent-year-logs
+          docker run --detach --name sql-tamil-adjacent-year-native-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-adjacent-year-native-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-adjacent-year-native-pg postgres --version | tee sql-tamil-adjacent-year-logs/native-versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-adjacent-year-logs/native-versions.txt
+      - name: Native adjacent-year checks 36
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-adjacent-year-native-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/17_stage02_adjacent_year_navigation.sql \
+            -f /work/sql/test/110_stage02_adjacent_year_native.sql \
+            2>&1 | tee sql-tamil-adjacent-year-logs/native.txt
+      - name: Preserve bounded logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice15-adjacent-year-native
+          path: sql-tamil-adjacent-year-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-adjacent-year-native-pg 2>/dev/null || true
+
   production-isolation:
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -141,7 +202,7 @@ jobs:
             *) echo "Unexpected CASE_NAME=$CASE_NAME" >&2; exit 64 ;;
           esac
           test "$(grep -c "__CASE_LABEL__" sql/test/111_stage02_adjacent_year_differential.sql)" -eq 2
-          test "$(grep -c "__DIRECTION__" sql/test/111_stage02_adjacent_year_differential.sql)" -eq 2
+          test "$(grep -c "__DIRECTION__" sql/test/111_stage02_adjacent_year_differential.sql)" -eq 3
           sed -e "s/__CASE_LABEL__/$CASE_LABEL/g" \
               -e "s/__DIRECTION__/$DIRECTION/g" \
             sql/test/111_stage02_adjacent_year_differential.sql \

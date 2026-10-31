@@ -79,7 +79,7 @@ wanted AS MATERIALIZED (
     pastafari_sql_tamil.choose_rank(
       pastafari_sql_tamil.ask_bowl(
         pastafari_sql_tamil.sauce(
-          p_calculation_day,v.known_close_day
+          p_calculation_day,max(v.known_close_day)
         ),1,11
       ),
       count(*)::numeric
@@ -178,7 +178,7 @@ wanted AS MATERIALIZED (
     pastafari_sql_tamil.choose_rank(
       pastafari_sql_tamil.ask_bowl(
         pastafari_sql_tamil.sauce(
-          p_calculation_day,v.known_open_day
+          p_calculation_day,max(v.known_open_day)
         ),1,12
       ),
       count(*)::numeric

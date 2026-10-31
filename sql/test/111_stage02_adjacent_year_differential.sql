@@ -10,23 +10,19 @@ CREATE TEMP TABLE stage02_year_navigation_differential (
 WITH base AS MATERIALIZED (
   SELECT pastafari_sql_tamil.foundation_day() AS foundation
 ),
-known AS MATERIALIZED (
-  SELECT
-    'foundation'::text AS label,
-    foundation AS calculation_day,
-    pastafari_sql_tamil.year5000(foundation) AS known_year
-  FROM base
-  UNION ALL
-  SELECT
-    'cross-zero'::text AS label,
-    foundation + 1 AS calculation_day,
-    pastafari_sql_tamil.year5000(foundation + 1) AS known_year
-  FROM base
-),
 selected AS MATERIALIZED (
-  SELECT label,calculation_day,known_year
-  FROM known
-  WHERE label='__CASE_LABEL__'
+  SELECT
+    p.label,
+    CASE p.label
+      WHEN 'foundation' THEN b.foundation
+      ELSE b.foundation + 1
+    END AS calculation_day,
+    CASE p.label
+      WHEN 'foundation' THEN pastafari_sql_tamil.year5000(b.foundation)
+      ELSE pastafari_sql_tamil.year5000(b.foundation + 1)
+    END AS known_year
+  FROM base AS b
+  CROSS JOIN (VALUES ('__CASE_LABEL__'::text)) AS p(label)
 ),
 converted AS MATERIALIZED (
   SELECT
