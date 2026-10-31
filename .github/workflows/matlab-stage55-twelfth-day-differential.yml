@@ -2,7 +2,7 @@ name: MATLAB Stage55 Twelfth Day Native Python Differential
 on:
   push:
     branches:
-      - 'MATLAB\\+Polski'
+      - 'MATLAB\+Polski'
     paths:
       - 'tools/run_stage55_year5000_twelfth_native.m'
       - 'tools/stage55_after12_interval_five_fields.py'
@@ -43,10 +43,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/stage55_after12_interval_five_fields.py \\
-            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_11.json \\
-            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_12.json \\
-            tests/fixtures/stage55_year5000_appendix_a_metadata.json \\
+          python3 tools/stage55_after12_interval_five_fields.py \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_11.json \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_12.json \
+            tests/fixtures/stage55_year5000_appendix_a_metadata.json \
             | tee logs/STAGE55_TWELFTH_PYTHON.log
           grep '^STAGE55_TWELFTH_ROW ' logs/STAGE55_TWELFTH_PYTHON.log > logs/STAGE55_TWELFTH_PYTHON_ROW.txt
           grep '^STAGE55_TWELFTH_ROW ' logs/STAGE55_TWELFTH_NATIVE.log > logs/STAGE55_TWELFTH_NATIVE_ROW.txt
