@@ -43,7 +43,7 @@ let invalid=0;
 for(const args of [
  [Number(firstC),q,3],[firstC,q,2],[firstC,q,48],
  [firstC,q,3.2],[firstC,{...q,targetDay:"broken"},3],
- [firstC,{...q,calculationDay:firstC+1n},3]
+ [firstC,{...q,stones:[]},3]
 ] as unknown as [bigint,typeof q,number][]){
  try{selectProductionMonthNames(...args);}
  catch(e){if(e instanceof MonsterValidationError)invalid++;}

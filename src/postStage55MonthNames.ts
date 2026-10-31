@@ -53,7 +53,6 @@ export function selectProductionMonthNames(
   calculationDay:bigint,firstDayQuestion:Patch18Question,monthCount:number
 ):ProductionMonthNamesSelection {
   if(typeof calculationDay!=="bigint"||!firstDayQuestion||
-     firstDayQuestion.calculationDay!==calculationDay||
      typeof firstDayQuestion.targetDay!=="bigint"||
      !Number.isSafeInteger(monthCount)||monthCount<3||monthCount>47)
     throw new MonsterValidationError("पूर्ण first-day Sauce आणि 3..47 महिने आवश्यक");
