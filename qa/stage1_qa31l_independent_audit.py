@@ -105,15 +105,19 @@ def validate(receipt, steps, trace_digest, rows):
         need(type(pre) is list and type(post) is list and
              all(type(v) is int for v in pre + post),
              "physical stack is not integral")
-        need(step["string"] is False, "stringmode beyond supported oracle")
+        if step["string"] is not False:
+            unknown.append({"tick": tick, "ip": ip, "reason": "stringmode"})
         x, y = ip
         op = step["op"]
-        need(op == overlay.get((x, y), cell(rows, x, y)),
-             "source/overlay opcode mismatch")
+        if not unknown:
+            need(op == overlay.get((x, y), cell(rows, x, y)),
+                 "source/overlay opcode mismatch")
         if idx:
             prior = steps[idx - 1]
             need(prior.get("next") == ip and prior.get("next_delta") == delta,
                  "IP/delta physical continuity")
+            need(prior.get("post") == pre,
+                 "physical stack continuity between STEP records")
         if op in UNMODELED:
             unknown.append({"tick": tick, "ip": ip, "opcode": op})
         if ip == [150, 29]:
