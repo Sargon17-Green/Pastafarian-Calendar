@@ -56,7 +56,7 @@ jobs:
             -f /work/sql/14_stage02_gate_day_selector.sql \
             -f /work/sql/15_stage02_year5000_gate_candidates.sql \
             -f /work/sql/test/106_stage02_year5000_gate_candidates_native.sql \
-            -c 'SELECT 1/((count(*)=26 AND bool_and(ok))::integer) AS native_35_of_35 FROM stage02_year5000_candidates_native' \
+            -c 'SELECT 1/((count(*)=35 AND bool_and(ok))::integer) AS native_35_of_35 FROM stage02_year5000_candidates_native' \
             2>&1 | tee sql-tamil-year5000-logs/native.txt
       - name: Production-only isolation 4
         shell: bash
