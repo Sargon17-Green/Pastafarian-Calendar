@@ -26,7 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   windows-native-stage-current:
-    name: Native Windows PowerShell 5.1 stage 22-24 gate
+    name: Native Windows PowerShell 5.1 active Stage29 and regressions
     runs-on: windows-latest
     timeout-minutes: 120
     steps:
@@ -66,6 +66,10 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage27 short patch regression failed Stage29' }
             & .\tests\Stage28.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage28 wide discovery regression failed Stage29' }
+            # Gate execution to the exact CI checkout, never to a moving branch name.
+            $checkedOutSha = ((& git rev-parse HEAD) -join '').Trim()
+            if ($checkedOutSha -cne $env:GITHUB_SHA) { throw 'Stage29 checkout SHA differs from workflow event SHA' }
+            Write-Host ('STAGE29_VERIFIED_CHECKOUT_SHA=' + $checkedOutSha)
             & .\tests\Stage29.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage29 Patch14 wide compatibility failed' }
             Write-Host ('STAGE29_NATIVE_SHA=' + $env:GITHUB_SHA)
