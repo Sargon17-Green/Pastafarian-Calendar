@@ -38,6 +38,7 @@ local LegacyNegativeGate = require("legacy_negative_gate_position")
 local NegativeGatePatch = require("negative_gate_patch")
 local LegacyGateIndex = require("legacy_gate_index_lookup")
 local GateIndexPatch = require("gate_index_patch")
+local LegacyGateOrdinal = require("legacy_gate_ordinal")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -576,6 +577,11 @@ end
 function S.gateIndexAtOrBeforeSpaghetti(day,gateDays)
     local corrected=GateIndexPatch.execute(day,gateDays)
     return corrected
+end
+
+-- DISCOVERY20: deliberate zero-based ordinal inside corrected gate interval.
+function S.legacyGateOrdinalProbe(day,gateDays)
+    return LegacyGateOrdinal.execute(day,gateDays)
 end
 
 function S.calendarDateSpaghetti()
