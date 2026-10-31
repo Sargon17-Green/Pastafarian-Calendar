@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 
 pub mod discovery01_legacy_save;
 pub mod discovery02_day_tag_probe;
+pub mod discovery02_work_counts_probe;
 pub mod patch01_save;
 #[rustfmt::skip]
 pub mod source_language_catalog;

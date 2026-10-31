@@ -63,6 +63,9 @@ jobs:
           grep -Fq 'STAGE04_DISCOVERY02_BIJECTION_CASES=1025' evidence/stdout.txt
           grep -Fq 'STAGE04_DISCOVERY02_SYMMETRIC_HUGE_CASES=8' evidence/stdout.txt
           grep -Fq 'STAGE04_DISCOVERY02_TAG_PREIMAGE_CASES=398' evidence/stdout.txt
+          grep -Fq 'STAGE04_DISCOVERY02_WORK_COUNTS_LOCAL_PAIRS=49' evidence/stdout.txt
+          grep -Fq 'STAGE04_DISCOVERY02_WORK_COUNTS_HUGE_PAIRS=8' evidence/stdout.txt
+          grep -Fq 'STAGE04_DISCOVERY02_WORK_COUNTS_TRANSLATION_CASES=12' evidence/stdout.txt
           grep -Eq 'test result: ok\. 3 passed; 0 failed' evidence/stdout.txt
           grep -Fq 'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' evidence/stdout.txt
           grep -Fq 'STAGE03_PATCH01_BOUNDARY_OK=8' evidence/stdout.txt
