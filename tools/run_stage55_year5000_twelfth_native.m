@@ -50,7 +50,7 @@ assert(numel(fields)==5 && fields{1}==pastafari.BigInt(5000) && strcmp(fields{2}
  fields{3}==pastafari.BigInt(12) && strcmp(fields{4},catalog.months(names(letter)).text) && ...
  fields{5}==pastafari.BigInt(occ) && monthId==letter && ...
  any(strcmp(ctx.branchTrace,'PATCH_25_OCCURRENCE_COUNT')),'Stage55:FiveFields');
-fprintf('STAGE55_TWELFTH_ROW POSITION=12 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=12 MONTH_INDEX=%d MONTH_DAY=%d\\n',names(letter),occ);
+fprintf('STAGE55_TWELFTH_ROW POSITION=12 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=12 MONTH_INDEX=%d MONTH_DAY=%d\n',names(letter),occ);
 for bad=[0 13]
  target=pastafari.BigInt(f.first_day+bad-1);
  invalid=pastafari.MonsterContext(pastafari.BigInt(f.calculation_day),target);
@@ -62,8 +62,8 @@ for bad=[0 13]
  end
  assert(rejected,'Stage55:InvalidPosition');
 end
-fprintf('STAGE55_TWELFTH_NATIVE_PASS STEPS=12 REMAINING=4232 LETTER=%d SELECT_SEC=%.3f RECOUNT_SEC=%.3f REJECTED=2\\n',letter,selectionSeconds,recountSeconds);
-fprintf('STAGE55_FULL_YEAR_CANONICAL_ORACLE_NOT_VERIFIED\\n');
-fprintf('STAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED\\n');
-fprintf('STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED\\n');
+fprintf('STAGE55_TWELFTH_NATIVE_PASS STEPS=12 REMAINING=4232 LETTER=%d SELECT_SEC=%.3f RECOUNT_SEC=%.3f REJECTED=2\n',letter,selectionSeconds,recountSeconds);
+fprintf('STAGE55_FULL_YEAR_CANONICAL_ORACLE_NOT_VERIFIED\n');
+fprintf('STAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED\n');
+fprintf('STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED\n');
 end
