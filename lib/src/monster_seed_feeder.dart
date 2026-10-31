@@ -6,7 +6,7 @@ final class MonsterSeedStone {
   final List<BigInt> lanes;
 
   MonsterSeedStone._(List<BigInt> values)
-    : lanes = List<BigInt>.unmodifiable(values);
+      : lanes = List<BigInt>.unmodifiable(values);
 
   BigInt lane(int index) => lanes[index];
 }
@@ -39,9 +39,8 @@ final class MonsterSeedFeeder {
       final next = <BigInt>[];
       for (var channel = 0; channel < 5; channel++) {
         final future = lanes[(channel + 1) % 5];
-        final carry = channel == 0
-            ? BigInt.from(ordinal + 1)
-            : lanes[channel - 1];
+        final carry =
+            channel == 0 ? BigInt.from(ordinal + 1) : lanes[channel - 1];
         next.add(
           math.save(
             math.square(lanes[channel]) +

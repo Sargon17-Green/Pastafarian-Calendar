@@ -169,8 +169,7 @@ void main() {
           'Feed range',
         );
         _check(
-          actual[index] ==
-              feeder.buildHiddenFeeds(counts, stones)[index],
+          actual[index] == feeder.buildHiddenFeeds(counts, stones)[index],
           'Deterministic feed replay',
         );
       }
