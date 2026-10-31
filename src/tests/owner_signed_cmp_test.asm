@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..257: signed owner-scoped comparison.
+; Stage 1 native regression 191..258: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1488,6 +1488,29 @@ RunOwnerSignedCmpTests::
     ld a, 45
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+
+    ; Case 258: after releasing the fragmented owner, both descriptors
+    ; still carry owner 45 and canonical length 8192. A stale handle must
+    ; fail closed, without modifying operands or any of the 16 lease tags.
+    ; The 16-bit case marker must remain 0102 and dispatch ABI untouched.
+    ld a, [wTestCase]
+    inc a
+    ld [wTestCase], a
+    cp 2
+    jp nz, .fail
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .fail
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
 
     ld a, 46
     ld [wOwnerRequest], a

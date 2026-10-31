@@ -62,6 +62,12 @@ def main() -> None:
             SUCCESS, 257, 0x40, 211
         )
         assert next_case.memory[0xC002] == 0x40, "dispatch ABI corrupted"
+        stale_case = SimulatedPyBoy(completion_frame=212, case=258, high_address=high_address)
+        assert wait_for_completion(stale_case, 400, high_byte_address=high_address) == (
+            SUCCESS, 258, 0x40, 212
+        )
+        assert stale_case.memory[high_address] == 1
+        assert stale_case.memory[0xC002] == 0x40
         sym.write_text(
             "00:C000 wTestResult\n00:C001 wTestCase\n"
             "00:C002 wRunStatus\n00:C002 wTestCaseHi\n", encoding="utf-8"
@@ -72,7 +78,7 @@ def main() -> None:
             pass
         else:
             raise AssertionError("high case byte collided with dispatch")
-    print("EMULATOR_WAIT_GATE_TESTS=PASS delayed_boot=YES native_fail_preserved=YES timeout=YES case16_boundary=2 sym_collision_rejected=YES")
+    print("EMULATOR_WAIT_GATE_TESTS=PASS delayed_boot=YES native_fail_preserved=YES timeout=YES case16_boundary=3 sym_collision_rejected=YES")
 
 
 if __name__ == "__main__":
