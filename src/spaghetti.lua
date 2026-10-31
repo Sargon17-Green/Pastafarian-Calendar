@@ -41,6 +41,7 @@ local GateIndexPatch = require("gate_index_patch")
 local LegacyGateOrdinal = require("legacy_gate_ordinal")
 local GateOrdinalPatch = require("gate_ordinal_patch")
 local LegacyGateReverseOrdinal = require("legacy_gate_reverse_ordinal")
+local GateReverseOrdinalPatch = require("gate_reverse_ordinal_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -599,6 +600,16 @@ end
 -- DISCOVERY21: historical reverse gate ordinal excludes the current day.
 function S.legacyGateReverseOrdinalProbe(day,gateDays)
     return LegacyGateReverseOrdinal.execute(day,gateDays)
+end
+
+-- PATCH21: sixth commit includes the current day without changing Stage42.
+function S.gateReverseOrdinalPatchProbe(day,gateDays)
+    return GateReverseOrdinalPatch.execute(day,gateDays)
+end
+
+function S.gateReverseOrdinalSpaghetti(day,gateDays)
+    local corrected=GateReverseOrdinalPatch.execute(day,gateDays)
+    return corrected
 end
 
 function S.calendarDateSpaghetti()
