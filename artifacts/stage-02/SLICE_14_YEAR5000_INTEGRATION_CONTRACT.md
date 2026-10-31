@@ -43,8 +43,8 @@ Return the unique candidate with that rank in `year_rec`. Production must not re
 - Native golden at the foundation day: `(5000,-4,4,-15057703,-15053459)`, previously fixed by the Stage 1 heavy reference gate.
 - Differential oracle: `pastafari_sql_tamil_test.year5000` from `sql/test/10_normative_reference.sql`, in a separate differential database only. That reference independently uses its gate cache and direct nested candidate enumeration; production does not call it.
 - Differential input days: foundation ±5778, foundation ±1, and foundation. Compare all five `year_rec` fields.
-- Native assertions: 21, including sentinel/window bounds, 15..280 size, adjacent-gap integrity, candidate count/order, sauce-derived rank selection, invalid inputs, and unchanged five-field output type shapes.
-- Isolation assertions: 4. Differential assertions: 25. Expected Stage 14 evidence total: 50/50 across the three gates, on one exact source SHA and completed PostgreSQL 17 run.
+- Native assertions: 23, including sentinel/window bounds, 15..280 size, adjacent-gap integrity, candidate count/order, sauce-derived rank selection, invalid inputs, and unchanged five-field output type shapes.
+- Isolation assertions: 4. Differential assertions: 25. Expected Stage 14 evidence total: 52/52 across the three gates, on one exact source SHA and completed PostgreSQL 17 run.
 
 ## Scope boundary
 
