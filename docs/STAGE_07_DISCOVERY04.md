@@ -1,0 +1,12 @@
+# Stage 7 / DISCOVERY04 — నిజమైన Sauce నుంచి Ask_Bowl అనుసంధానం
+
+## Independent stage and previous gate
+Stage 6 accepted: GitHub run 41179440429, 7/7 jobs completed/success on b957b25d2f13dcf56ad852418bbece187faa6115; GNAT 13 compile/bind/link and 39,601 assertions. Previous Stage6 fixtures fabricated Sauce_Result records. This separate Stage7 checks actual Sauce provenance, *not* a new suspected defect. No production or canonical calculation changes.
+
+## Fixed bounded input, oracle and output
+Use six literal date pairs: (Foundation,Foundation), (Foundation,Foundation+1), (Foundation,Foundation-1), (Tablets,Tablets), (Tablets-1,Tablets+31), (Foundation+400,Foundation-400). Five expected Work_Count fields per pair are precomputed integer fixtures, independent of the function under test (do not invoke Day_Count to calculate expectations). Reconstruct visible drop 46 using the exposed Build_Stones/Build_Hidden_Drops/Build_Visible_Drops functions, then check Sauce(...).Order_At_Drop_46 equals Bowl_Order_From_Drop(Visible(46)). This is independently wired public-function provenance, **not an independent algebraic implementation**. Check permutation 1..6 and each bowl in [1,M].
+
+Per actual Sauce result, query all six bowls for seals 0, 1 and 193: 18 streams per pair = **108 real streams**. Six checks per stream: First range, direction ±1, Answer_At(0)=First, Answer_At(M)=First, Answer_At(M+1)=Answer_At(1), and Answer_At(2) is a separately calculated modular one-step successor of Answer_At(1). Two domain checks per pair: Ask_Bowl on ID=7 and Answer_At(K=-1) must raise Constraint_Error. Exactly six * (5 Work_Count + 1 source-order + 1 permutation + 6 bowl-range + 18*6 stream properties + 2 domain) = **738 assertions**. Print `STAGE07_DISCOVERY04_ASSERTIONS= 738`. Stage6 already covered First/direction formulas with synthetic data; Stage7 does not claim a second independent algebraic oracle.
+
+## Acceptance gate
+`sh ./run_stage07_discovery04.sh`, GNAT Ada 2022, GitHub Actions Ubuntu 24.04 job native-stage07-discovery04 (15 minute bound). Require *both* verify and native-stage07-discovery04 completed/success on the same HEAD, log GNAT compile/bind/link and the exact 738 assertion marker. A queued/in_progress job is neither PASS nor a blocker. An actual observed failure needs a reproducible input, expected and observed output, and log before declaring a defect or opening PATCH. No merge to main.

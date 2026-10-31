@@ -22,3 +22,7 @@ The source constrains `Answer_Stream.Direction_Step` to +/-1 from `Ask_Bowl` and
 ## Reproducible acceptance gate
 
 Run `sh ./run_stage06_discovery03.sh` with GNAT Ada 2022. Job `native-stage06-discovery03` on `Ada+తెలుగు` has a 15-minute CI bound. Accept Stage6 only after **both** `verify` and the Stage6 Native job are completed/success on the same commit, including compile/bind/link, and the log contains `STAGE06_DISCOVERY03_ASSERTIONS= 39601`. Run queued/in_progress is not PASS and not a blocker. Do not modify main or production.
+
+## Native acceptance (2026-10-31)
+
+[GitHub Actions 41179440429](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41179440429) completed/success on `b957b25d2f13dcf56ad852418bbece187faa6115`: 7/7 jobs, including verify and [native job 124473646001](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41179440429/job/124473646001). GNAT 13 compiled, bound, linked, and printed `STAGE06_DISCOVERY03_ASSERTIONS= 39601`. Stage6 accepted **for bounded synthetic checks only**; no proof of Sauce reachability or five-field date correctness.
