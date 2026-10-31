@@ -274,3 +274,29 @@ jobs:
 
       - name: Run sealed-bowl and equal-choice tests
         run: dart run bin/stage2_production06_tests.dart
+
+  dart-hebrew-stage2-production07:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+
+      - name: Resolve packages
+        run: dart pub get
+
+      - name: Verify meatball gate formatting
+        run: dart format --output=none --set-exit-if-changed lib/src/monster_meatball_gates.dart bin/stage2_production07_tests.dart
+
+      - name: Analyze branch
+        run: dart analyze
+
+      - name: Run bounded Production 07 tests
+        run: dart run bin/stage2_production07_tests.dart
+
