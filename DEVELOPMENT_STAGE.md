@@ -347,3 +347,13 @@ STAGE16_STATUS=DRAFT_NOT_STARTED_PENDING_STAGE15_RETEST
 STAGE15_YAML_DIAGNOSTIC_RUN=41222100281
 STAGE15_YAML_DIAGNOSTIC_JOBS=0
 STAGE15_YAML_REPAIR=REBUILT_FROM_VERIFIED_PARENT_WITH_LITERAL_REPLACEMENT
+
+# Stage15 / DISCOVERY11 compile diagnostic 2026-10-31 (run 41222216293)
+# CI completed/failure: 15/16 jobs success. Stage15 GnuCOBOL 3.1.2.0 -Werror stopped at test/stage15_discovery_tests.cob:228 before test execution.
+# Confirmed: MOVE WS-LEN (PIC 9(18) COMP-5, real HEAP-LIVE output) TO WS-HEAP (PIC 9(4) COMP-5) raised -Werror=possible-truncate.
+# Correction changes only WS-HEAP to PIC 9(18) COMP-5; no production change, no new arithmetic defect claimed.
+# Native arithmetic/heap on corrected source remains UNDECIDED pending CI; Stage16 not started.
+STAGE15_HEAP_WIDTH_FIX=PIC_9_18_COMP5_TEST_ONLY
+STAGE15_PREVIOUS_CI_RUN=41222216293
+STAGE15_PREVIOUS_CI_RESULT=FAILED_COMPILE_STAGE15_15_OF_16_SUCCESS
+STAGE15_NATIVE=AWAITING_CORRECTED_CI
