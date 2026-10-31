@@ -162,3 +162,5 @@ Run `41187331821` на `ad1d994bc19ad91f0ffbc34b3e2126cc49226706` заверши
 **Межі.** Це локальні виправлення кешу допоміжних лічильників `NormativeOracle`. Вони не є відкриттям Stage 6, не змінюють `LegacyRemainder` або `LegacyDayTag`, і не замінюють пошук третього історичного Legacy-свідка.
 
 **תיקון אבחון Native.** Run [41246639541](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41246639541) עבר את Stage 1–5 ואת 2518 בדיקות DISCOVERY03, אך שלב האבחון הנוסף נכשל בקומפילציה בלבד: `index` שימש כמזהה בלולאות Chapel החדשות (שגיאות תחביר בשורות 104–130). אין להסיק מהריצה הזו תוצאה לגבי תיקון Cutlet. המזהים הוחלפו ל-`idx0`/`idx1`, ונתיב הלוג אוחד כך ש-`SOURCE_HEAD`, פלט הבדיקות, grep והארטיפקט יישמרו באותו קובץ.
+
+**תיקון קומפילציה שני.** Run [41246887952](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41246887952) עבר Stage 1–5 ו-DISCOVERY03 2518/0, אך אבחון ה-cache נעצר לפני הרצה בגלל `List` שלא יובא בקובץ הבדיקה. נוסף `use List;`; אין עדיין תוצאת Native לתיקון Cutlet.

@@ -1,4 +1,5 @@
 use BigInteger;
+use List;
 use NormativeOracle only BoundedCompositionCounter, CutletPartitionCounter;
 
 proc bruteThreeSlotCount(total: int, lo: int, hi: int): int {
