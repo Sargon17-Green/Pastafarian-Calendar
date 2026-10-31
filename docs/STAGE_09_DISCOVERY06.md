@@ -10,3 +10,6 @@ Inputs: eight literal date pairs, covering same day, adjacent days, reverse dire
 
 ## Acceptance
 Ubuntu 24.04, GNAT 13, sh ./run_stage09_discovery06.sh, 15-minute timeout. Require verify and native-stage09-discovery06 completed/success on same HEAD, compile/bind/link, exact 106 marker. Queued/in_progress is not PASS or blocker. For failure, capture input pair, actual/expected, compiler/runtime log before declaring a defect. No main/merge/publish; approved CI provides Native so no local user-run package.
+
+## Native acceptance (2026-10-31)
+[Actions 41193150492](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41193150492) completed/success on 247e49e957bd225c5547fc90ac7e8c3407feb6bc; 10/10 jobs succeeded, including verify and [native-stage09-discovery06 job 124513873714](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41193150492/job/124513873714). GNAT 13 compile/bind/link and STAGE09_DISCOVERY06_ASSERTIONS= 106 appear in the native job log. Stage9 accepted only as bounded independent bowl mixing/stir reconstruction using public upstream drop APIs.
