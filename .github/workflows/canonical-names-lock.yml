@@ -558,3 +558,53 @@ jobs:
           path: evidence-stage43/
           retention-days: 30
           if-no-files-found: warn
+
+  stage44-discovery22-probe:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Stage44 research PHP runtime and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l tests/stage44_discovery22_probe.php
+          php -l src/Patches/AnchorIdentityPatch21.php
+      - name: Stage44 two noncanonical adjacent-provider probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage44
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=44\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage44/source.txt
+          php -v > evidence-stage44/php-version.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage44_discovery22_probe.php > evidence-stage44/stdout.txt 2> evidence-stage44/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence-stage44/exit-code.txt
+          cat evidence-stage44/stdout.txt
+          cat evidence-stage44/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage44/stderr.txt
+          test "$(grep -Ec '^CANDIDATE_(REPRODUCED|REJECTED|NOT_REPRODUCED) direction=' evidence-stage44/stdout.txt)" -eq 2
+          grep -Eq '^STAGE44_DISCOVERY22_PROBE controls=[0-9]+ candidates=2 reproduced=[0-9]+ rejected=[0-9]+ other=[0-9]+$' evidence-stage44/stdout.txt
+      - name: Preserve Stage44 Native SHA stdout stderr exit and PHP version
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage44-discovery22-probe
+          path: evidence-stage44/
+          retention-days: 30
+          if-no-files-found: warn
