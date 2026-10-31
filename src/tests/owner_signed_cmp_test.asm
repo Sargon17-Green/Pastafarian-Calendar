@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..227: signed owner-scoped comparison.
+; Stage 1 native regression 191..229: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -837,6 +837,48 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB+1], a
     ld a, $40
     ld [wOwnerCmpLenA+1], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 228: both operands alias live owner 46; B length=2 is noncanonical.
+    ; SRAM[0]=$7f but SRAM[1]=0, so high-zero validation must still run.
+    ld a, 228
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB+1], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 1
+    ld [wOwnerCmpLenA], a
+    ld a, 2
+    ld [wOwnerCmpLenB], a
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    cp 3
+    jp nz, .fail
+    call OwnerCmpTestCheckSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckBytes
+    jp nc, .fail
+
+    ; 229: malformed same-owner descriptor in A, canonical +127 in B.
+    ld a, 229
+    ld [wTestCase], a
+    ld a, 2
+    ld [wOwnerCmpLenA], a
+    ld a, 1
+    ld [wOwnerCmpLenB], a
     call OwnerCmpTestSnapshot
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
