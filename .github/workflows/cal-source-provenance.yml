@@ -20,6 +20,8 @@ on:
       - "tools/test_cal_static_process_routes.py"
       - "tools/cal_static_pe_header_audit.py"
       - "tools/test_cal_static_pe_header_audit.py"
+      - "tools/cal_static_codegen_pipeline.py"
+      - "tools/test_cal_static_codegen_pipeline.py"
       - ".github/workflows/cal-source-provenance.yml"
   workflow_dispatch:
 
@@ -51,6 +53,8 @@ jobs:
         run: python3 tools/cal_static_process_routes.py --fetch --output "$RUNNER_TEMP/cal-process-routes.json"
       - name: Audit pinned compiler PE32 header flags and section permissions (no EXE)
         run: python3 tools/cal_static_pe_header_audit.py --fetch --output "$RUNNER_TEMP/cal-pe-header.json"
+      - name: Validate pinned Intel-to-PE codegen and generated CALL prefixes without binaries
+        run: python3 tools/cal_static_codegen_pipeline.py --fetch --output "$RUNNER_TEMP/cal-codegen-pipeline.json"
       - name: Summarize non-execution gate
         run: |
           echo "Only textual provenance was checked." >> "$GITHUB_STEP_SUMMARY"
