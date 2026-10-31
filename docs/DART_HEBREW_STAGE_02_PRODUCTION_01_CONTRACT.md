@@ -18,7 +18,7 @@ LAST_ACCEPTED_FULL_STAGE: 1
 - distance: מספר הימים הכולל את שני הקצוות, |targetDay-calculationDay|+1.
 - connection: סכום שתי הדרגות.
 - direction: 1 כאשר target מוקדם מ-calculation, 2 בשוויון, 3 כאשר target מאוחר.
-- חישוב הדרגה ב-production מבוסס על היסט חתום, ערך מוחלט והזזה ביטית. קביעת הכיוון מבוססת על compareTo. אין קריאה ל-oracle בביצוע.
+- חישוב הדרגה ב-production מבוסס על היסט חתום, ערך מוחלט והזזה ביטית. קביעת הכיוון מבוססת על סימן ההפרש (`BigInt.sign`), ולא על גודל ערך `compareTo`. אין קריאה ל-oracle בביצוע.
 
 ## אינטגרציה מבוקרת
 `MonsterManager.executeUnbuilt` מבצע את המניינים לפני דחיית התאריך; חמשת השדות נרשמים בתור מדדי context בפורמט `work.*`; direction נרשם כ-BigInt. ה-trace מסתיים ב-`WORK_COUNTS_READY|STAGE_NOT_BUILT`. שימור `bootstrap.calls` והודעת ה-throw המקורית מחייב. אין לשנות את טיפוס הפלט של `calendarDateSpaghetti` כעת.
