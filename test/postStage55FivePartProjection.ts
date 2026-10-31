@@ -1,13 +1,69 @@
 import {MonsterValidationError} from "../src/monsterBase.ts";
 import {projectProductionFivePartDate} from "../src/postStage55FivePartProjection.ts";
 import {cutletNameByCanonicalIndex,monthNameByCanonicalIndex} from "../src/sourceLanguageCatalog.ts";
-import {NormativeOracle} from "./normativeOracle.ts";
+import {NormativeOracle,sauce} from "./normativeOracle.ts";
+import {buildStage41CompatibleLegacyFixture} from "./discovery21Fixtures.ts";
+import {
+  Patch27FullHandler,Discovery27FullHandler,Patch26FullHandler,
+  Discovery26FullHandler,Patch25FullHandler,Discovery25FullHandler,
+  Patch24ScalableFullHandler,Discovery24FullHandler,
+  Patch23FullHandler,Discovery23FullHandler,
+  Patch22FullHandler,Discovery22FullHandler,
+  Patch21CutletHandler,Discovery21LegacyCutletHandler,
+  Patch20StructureSauceHandler,Discovery20StructureSauceHandler,
+  Patch19YearCacheHandler,patch27MonthMembership
+} from "../src/index.ts";
 
 function ok(p:boolean,msg:string):void{if(!p)throw Error(msg);}
 const oracle=new NormativeOracle();
 const c=oracle.gateDay(1n)+1n;
 const year=oracle.year5000(c);
-const state=oracle.buildYearStructure(c,year);
+// NormativeOracle.weavingFamily is an exhaustive recursive reference suitable
+// for small families only: its 5,349-day/44-month Map exceeds the JS Map limit.
+// For the giant Year5000 case, use an actual Stage55 Native observation of the
+// legal weaving. Independently derive all other year choices from the test-only
+// normative oracle, then independently materialize all 5,349 expected tuples.
+// The bounded exhaustive small-family oracle vs scalable weaving proof remains
+// covered by test:patch24:scalable-unrank; this is NOT a giant oracle unrank.
+const fixture=buildStage41CompatibleLegacyFixture();
+ok(fixture.cDay===c&&fixture.oracleYear.openGateDay===year.openGateDay&&
+   fixture.oracleYear.closeGateDay===year.closeGateDay,
+   "same real Year5000 signed-gate witness");
+const chain=()=>new Patch24ScalableFullHandler(new Discovery24FullHandler(
+  new Patch23FullHandler(new Discovery23FullHandler(
+  new Patch22FullHandler(new Discovery22FullHandler(
+  new Patch21CutletHandler(new Discovery21LegacyCutletHandler(
+  new Patch20StructureSauceHandler(
+  new Discovery20StructureSauceHandler(new Patch19YearCacheHandler())
+  )))))))));
+const maker=()=>new Patch27FullHandler(new Discovery27FullHandler(
+  new Patch26FullHandler(new Discovery26FullHandler(
+  new Patch25FullHandler(new Discovery25FullHandler(chain()))))));
+const native=patch27MonthMembership(maker(),fixture.request,44,239);
+const legalWeaving=
+  native.historical.historical.historical.historical.historical.historical.corrected.legalWeaving;
+ok(native.context.status==="PATCH_27_APPLIED"&&
+   native.actualPredecessorCalls===61&&native.actualSharedWrites===3538n&&
+   native.additionalNativeQueries===0&&legalWeaving[238]!==44,
+   "measured full Stage55 witness, no fabricated Year5000 weaving");
+const structureSauce=sauce(c,year.openGateDay+1n);
+const cutletCount=oracle.chooseCutletCount(structureSauce,year);
+const cutletPartition=oracle.chooseCutletPartition(c,structureSauce,year,cutletCount);
+const cutletCanonicalIndices=oracle.chooseCutletNames(structureSauce,cutletCount);
+const monthCount=oracle.chooseMonthCount(structureSauce,year);
+const monthLengths=oracle.chooseMonthLengths(structureSauce,year,monthCount);
+const monthCanonicalIndices=oracle.chooseMonthNames(structureSauce,monthCount);
+const state=Object.freeze({
+  cutletCount,cutletPartition,cutletCanonicalIndices,
+  cutlets:oracle.materializeCutlets(year,cutletPartition,cutletCanonicalIndices),
+  monthCount,monthLengths,monthWeaving:legalWeaving,monthCanonicalIndices
+});
+ok(state.monthWeaving.length===Number(year.closeGateDay-year.openGateDay)&&
+   state.monthCount===state.monthLengths.length&&
+   state.monthWeaving.every(m=>m>=1&&m<=state.monthCount)&&
+   state.monthLengths.every((n,i)=>
+     BigInt(state.monthWeaving.filter(id=>id===i+1).length)===n),
+   "Native legal weaving agrees with independently computed month lengths");
 const gates:bigint[]=[];
 for(let i=year.openGateIndex;i<=year.closeGateIndex;i++)
   gates.push(oracle.gateDay(i));
@@ -82,4 +138,6 @@ ok(retry.every((v,i)=>v===valid[i])&&Object.isFrozen(retry),
 console.log("POST_STAGE55_FIVE_PART_PURE_PROJECTION_PASS realYear="+year.number+
   " days="+checked+" cutletBoundaries="+boundaries+
   " month44Holes="+holes+" malformedRejected="+rejected+
-  " pureRetry=1 additionalNativeCalls=0 apiEnabled=0");
+  " pureRetry=1 additionalNativeCalls=0 fixtureNativeCalls="+
+  native.actualPredecessorCalls+" fixtureSharedWrites="+native.actualSharedWrites+
+  " apiEnabled=0");
