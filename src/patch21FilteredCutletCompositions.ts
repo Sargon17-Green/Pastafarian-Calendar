@@ -1,3 +1,4 @@
+import {resolvePatch20FirstDaySauceQuestion} from "./patch20StructureSauce.ts";
 import {
   BaseMetricsManager,bootstrapMonster,MonsterStageError,MonsterValidationError
 } from "./monsterBase.ts";
@@ -174,8 +175,7 @@ export class Patch21CutletHandler {
      old.historicalPrefixConstraintApplied||old.historicalActualGeneratorCalls!==1)
    throw new MonsterStageError("जुनी पूर्ण lex-positive रचना प्रत्यक्ष हवी");
   const first=old.preceding.trueYearFirstDay;
-  const source=q.firstDaySauceQuestion??
-    (first===ctx.targetDay?q.historical.originalSauceQuestion:undefined);
+  const source=resolvePatch20FirstDaySauceQuestion(q,ctx.calculationDay,first);
   if(!source||source.targetDay!==first)
    throw new MonsterValidationError("अधिकृत first-day प्रश्न आवश्यक");
   const corrected=this.choice.select(ctx.calculationDay,source,

@@ -150,6 +150,26 @@ export class Patch20StructureSauceHandler {
     return out;
   }
 }
+/** Resolve the actual Stage41 year-first-day question without re-running Native.
+ * The deferred production factory is pure: it creates the question, not a Sauce call.
+ * Legacy fixtures may continue to provide an explicit first-day question.
+ */
+export function resolvePatch20FirstDaySauceQuestion(
+  q:Patch20StructureRequest,calculationDay:bigint,firstDay:bigint
+):Patch18Question {
+  if(typeof calculationDay!=="bigint"||typeof firstDay!=="bigint"||
+     !q?.historical?.yearQuestion||
+     q.historical.yearQuestion.calculationDay!==calculationDay)
+    throw new MonsterValidationError("first-day question owner/day mismatch");
+  const source=q.firstDaySauceQuestion??
+    (firstDay===q.historical.yearQuestion.targetDay?
+      q.historical.originalSauceQuestion:
+      q.firstDaySauceQuestionFactory?.(calculationDay,firstDay));
+  if(!source||source.targetDay!==firstDay)
+    throw new MonsterValidationError("verified actual first-day Sauce question required");
+  return source;
+}
+
 export function patch20StructureSauce(
  handler:Patch20StructureSauceHandler,
  q:Patch20StructureRequest

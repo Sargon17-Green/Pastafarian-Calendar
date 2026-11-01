@@ -1,3 +1,6 @@
+import {resolvePatch20FirstDaySauceQuestion} from "../src/patch20StructureSauce.ts";
+import {Patch21CutletHandler,patch21CutletPartition} from "../src/patch21FilteredCutletCompositions.ts";
+import {Discovery21LegacyCutletHandler} from "../src/discovery21LegacyCutletCompositions.ts";
 import { MonsterValidationError,bootstrapMonster } from "../src/monsterBase.ts";
 import { Patch14WideChoiceDispatcher } from "../src/patch14WideChoice.ts";
 import { Patch19YearCacheHandler } from "../src/patch19GuardedYearCache.ts";
@@ -63,6 +66,20 @@ for(const item of cases){
      "failed deep predecessor leaves caller owner uncommitted");
  }
  const out=patch20StructureSauce(handler(),request);
+ const deferred=resolvePatch20FirstDaySauceQuestion(request,item.c,out.trueYearFirstDay);
+ ok(deferred.targetDay===out.trueYearFirstDay&&
+    request.firstDaySauceQuestion===undefined&&
+    request.firstDaySauceQuestionFactory!==undefined,
+    item.name+" deferred first-day question resolves only after authoritative year walk");
+ if(item.name==="anchor-next"){
+   const stage21=patch21CutletPartition(
+     new Patch21CutletHandler(new Discovery21LegacyCutletHandler(handler())),request);
+   ok(stage21.context.status==="PATCH_21_APPLIED"&&
+      stage21.realSharedWrites===58n*BigInt(stage21.realPredecessorCalls)&&
+      stage21.historical.preceding.trueYearNumber===out.trueYearNumber,
+      "production deferred request traverses real Stage42 Native cutlet path");
+ }
+
  const walk=out.historical.fullStage39.originalWrongHistory.preceding;
  ok(walk.legacyDiagnostic===(item.anchor===null?
     "SKIPPED_NO_REAL_STAGE16_ANCHOR":"EXECUTED")&&

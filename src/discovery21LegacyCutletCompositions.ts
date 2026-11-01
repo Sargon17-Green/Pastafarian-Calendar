@@ -1,3 +1,4 @@
+import {resolvePatch20FirstDaySauceQuestion} from "./patch20StructureSauce.ts";
 import {BaseMetricsManager,bootstrapMonster,MonsterStageError,MonsterValidationError} from "./monsterBase.ts";
 import type {MonsterContext} from "./monsterBase.ts";
 import {patch20StructureSauce} from "./patch20StructureSauce.ts";
@@ -128,8 +129,7 @@ export class Discovery21LegacyCutletHandler {
     .filter(k=>BigInt(k)<=G));
   if(!eligibleK.length)throw new MonsterStageError("cutlet-count family रिकामी");
   const firstDay=previous.trueYearFirstDay;
-  const source=q.firstDaySauceQuestion??
-    (firstDay===ctx.targetDay?q.historical.originalSauceQuestion:undefined);
+  const source=resolvePatch20FirstDaySauceQuestion(q,ctx.calculationDay,firstDay);
   if(!source||source.targetDay!==firstDay)
     throw new MonsterValidationError("native first-day structure question आवश्यक");
   // Independent real Stage29 Sauce/candidate selectors, NOT oracle shortcuts.

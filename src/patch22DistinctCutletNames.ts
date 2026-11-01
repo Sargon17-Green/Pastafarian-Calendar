@@ -1,3 +1,4 @@
+import {resolvePatch20FirstDaySauceQuestion} from "./patch20StructureSauce.ts";
 import {
  BaseMetricsManager,bootstrapMonster,MonsterStageError,MonsterValidationError
 } from "./monsterBase.ts";
@@ -143,8 +144,7 @@ export class Patch22FullHandler {
   if(previous.context.status!=="DISCOVERY_22_RECORDED")
    throw new MonsterStageError("Stage44 पूर्ण historical पूर्ववर्ती आवश्यक");
   const first=previous.historical.historical.preceding.trueYearFirstDay;
-  const source=q.firstDaySauceQuestion??
-   (first===ctx.targetDay?q.historical.originalSauceQuestion:undefined);
+  const source=resolvePatch20FirstDaySauceQuestion(q,ctx.calculationDay,first);
   if(!source||source.targetDay!==first)
    throw new MonsterValidationError("वर्षाच्या पहिल्या दिवसाचा खरा स्रोत हवा");
   const corrected=this.selector.select(ctx.calculationDay,source,previous.names);

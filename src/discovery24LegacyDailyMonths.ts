@@ -1,3 +1,4 @@
+import {resolvePatch20FirstDaySauceQuestion} from "./patch20StructureSauce.ts";
 import {BaseMetricsManager,bootstrapMonster,MonsterStageError,MonsterValidationError} from "./monsterBase.ts";
 import type {MonsterContext} from "./monsterBase.ts";
 import {Patch23FullHandler,patch23MonthLengths} from "./patch23VirtualMonthLengths.ts";
@@ -120,8 +121,7 @@ export class Discovery24FullHandler{
    throw new MonsterStageError("Stage47 पूर्ण predecessor आवश्यक");
   const stage41=previous.historical.historical.historical.historical.historical.preceding;
   const firstDay=stage41.trueYearFirstDay;
-  const source=q.firstDaySauceQuestion??
-   (firstDay===ctx.targetDay?q.historical.originalSauceQuestion:undefined);
+  const source=resolvePatch20FirstDaySauceQuestion(q,ctx.calculationDay,firstDay);
   if(!source||source.targetDay!==firstDay)
    throw new MonsterValidationError("वर्षाच्या पहिल्या दिवसाची Sauce आवश्यक");
   const weaving=this.selector.select(ctx.calculationDay,source,

@@ -1,3 +1,4 @@
+import {resolvePatch20FirstDaySauceQuestion} from "./patch20StructureSauce.ts";
 import {
  BaseMetricsManager,bootstrapMonster,MonsterStageError,MonsterValidationError
 } from "./monsterBase.ts";
@@ -120,8 +121,7 @@ export class Discovery22FullHandler {
   if(previous.context.status!=="PATCH_21_APPLIED")
    throw new MonsterStageError("Stage43 पूर्ण precursor आवश्यक");
   const first=previous.historical.preceding.trueYearFirstDay;
-  const src=q.firstDaySauceQuestion??
-   (first===ctx.targetDay?q.historical.originalSauceQuestion:undefined);
+  const src=resolvePatch20FirstDaySauceQuestion(q,ctx.calculationDay,first);
   if(!src||src.targetDay!==first)
    throw new MonsterValidationError("मूळ वर्षाच्या पहिल्या दिवसाचे उत्तर हवे");
   const names=this.selector.select(ctx.calculationDay,src,previous.corrected.K);

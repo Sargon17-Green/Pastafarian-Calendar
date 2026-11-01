@@ -1,3 +1,4 @@
+import {resolvePatch20FirstDaySauceQuestion} from "./patch20StructureSauce.ts";
 import {
  BaseMetricsManager,bootstrapMonster,MonsterStageError,MonsterValidationError
 } from "./monsterBase.ts";
@@ -179,8 +180,7 @@ export class Discovery23FullHandler {
   const year=stage41.historical;
   const L=year.yearCloseGateDay-year.yearOpenGateDay;
   const first=stage41.trueYearFirstDay;
-  const source=q.firstDaySauceQuestion??
-   (first===ctx.targetDay?q.historical.originalSauceQuestion:undefined);
+  const source=resolvePatch20FirstDaySauceQuestion(q,ctx.calculationDay,first);
   if(!source||source.targetDay!==first)
    throw new MonsterValidationError("खऱ्या वर्षाचा first-day Sauce source आवश्यक");
   const month=this.monthSelector.select(ctx.calculationDay,source,L);
