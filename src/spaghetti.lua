@@ -44,6 +44,7 @@ local LegacyGateReverseOrdinal = require("legacy_gate_reverse_ordinal")
 local GateReverseOrdinalPatch = require("gate_reverse_ordinal_patch")
 local LegacyNearestBoundary = require("legacy_gate_nearest_boundary")
 local NearestBoundaryPatch = require("gate_nearest_boundary_patch")
+local LegacySignedOffset = require("legacy_gate_signed_offset")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -627,6 +628,11 @@ end
 function S.gateNearestBoundarySpaghetti(day,gateDays)
     local corrected=NearestBoundaryPatch.execute(day,gateDays)
     return corrected
+end
+
+-- DISCOVERY23: deliberately unsigned nearest-gate displacement (signed oracle test-only).
+function S.legacyGateSignedOffsetProbe(day,gateDays)
+    return LegacySignedOffset.execute(day,gateDays)
 end
 
 function S.calendarDateSpaghetti()
