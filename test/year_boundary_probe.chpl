@@ -1,4 +1,5 @@
 use BigInteger;
+use IO;
 use List;
 use ExactMath;
 use SourceLanguageCatalog;
@@ -65,10 +66,17 @@ proc independentDate(ref gates: GateOracle,
   return resultValue;
 }
 
+proc checkpoint(label: string) {
+  writeln("YEAR_BOUNDARY_PHASE=", label);
+  try! stdout.flush();
+}
+
 proc main() {
   const calculationDay = FOUNDATION_DAY;
   var gates: GateOracle;
+  checkpoint("YEAR5000_BEGIN");
   const year = gates.year5000(calculationDay);
+  checkpoint("YEAR5000_END");
   const firstDay = year.openGateDay + 1;
   const lastDay = year.closeGateDay;
   const yearLength = (lastDay - year.openGateDay):int;
@@ -79,7 +87,9 @@ proc main() {
   check(year.openGateIndex < 0 && year.closeGateIndex >= 0,
         "FOUNDATION_DAY gate index must lie at or after open gate");
 
+  checkpoint("STRUCTURE_BEGIN");
   const structure = buildYearStructure(gates, calculationDay, year);
+  checkpoint("STRUCTURE_END");
   check(structure.cutletCount >= 6 && structure.cutletCount <= 17,
         "cutlet count range");
   check(structure.cutletPartition.size == structure.cutletCount,
@@ -149,10 +159,12 @@ proc main() {
   const foundationCutletLength =
     gates.ensureGateIndex(0) - gates.ensureGateIndex(foundationCutletOpenGate);
 
+  checkpoint("NEIGHBOR_YEARS_BEGIN");
   const previousYear = gates.findTargetYear(calculationDay, year.openGateDay);
   const firstYearDay = gates.findTargetYear(calculationDay, firstDay);
   const closeYearDay = gates.findTargetYear(calculationDay, lastDay);
   const nextYear = gates.findTargetYear(calculationDay, lastDay + 1);
+  checkpoint("NEIGHBOR_YEARS_END");
   check(previousYear.closeGateDay == year.openGateDay &&
         previousYear.number == year.number - 1,
         "open gate day belongs to previous year");
@@ -177,8 +189,12 @@ proc main() {
 
   var calendarDateChecks = 0;
   for targetDay in sampleDays {
+    checkpoint("CALENDAR_DATE_BEGIN_" + targetDay:string);
     const actual = calendarDate(gates, calculationDay, targetDay);
+    checkpoint("CALENDAR_DATE_END_" + targetDay:string);
+    checkpoint("INDEPENDENT_DATE_BEGIN_" + targetDay:string);
     const expected = independentDate(gates, year, structure, targetDay);
+    checkpoint("INDEPENDENT_DATE_END_" + targetDay:string);
     check(sameDate(actual, expected),
           "calendarDate matches independent decomposition at targetDay=" + targetDay:string);
     calendarDateChecks += 1;
