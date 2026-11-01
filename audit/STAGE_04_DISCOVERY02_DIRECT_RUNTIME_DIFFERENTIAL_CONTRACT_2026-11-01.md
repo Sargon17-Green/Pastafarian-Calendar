@@ -2,7 +2,7 @@
 
 PROJECT_ID: PC-BRANCH-RUST-AZERBAIJANI
 Branch: Rust+Azərbaycan-dili
-Status: implementation pending GitHub Actions evidence; **Stage04 OPEN**.
+Status: direct Python↔Rust execution and regression gates verified on code SHA bc537a6b92bacd3b5753a76c3a679af4a9b3a936; **Stage04 OPEN**.
 
 ## Provenance, input, and independent outputs
 
@@ -25,3 +25,11 @@ This witnesses a separate archived Python language branch, **not historical Rust
 
 Only after verified completed CI may CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS be recorded as YES in a later documentation-only update; do not infer Stage04 closure from differential PASS alone.
 
+## Execution evidence — 2026-11-01
+
+- Rust code SHA **bc537a6b92bacd3b5753a76c3a679af4a9b3a936** on branch `Rust+Azərbaycan-dili` was verified. Fix from previous failed SHA `c72ca7785ff4a7a41c2f8c30b4a49371d9bdb3af` only adds `#[rustfmt::skip]` to the external independent oracle module declaration and removes an extra EOF blank line; oracle itself is unchanged.
+- Five GitHub Actions runs on that exact code SHA completed/success: Stage04 [41349950368](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41349950368), Stage03 [41349950359](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41349950359), Stage02 [41349950367](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41349950367), Stage01 [41349950360](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41349950360), and Names Lock [41349950372](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41349950372).
+- Stage04 job **124977772981**: `cargo fmt --all -- --check` passed; **34 Rust tests passed, 0 failed** across seven counted groups (16+3+4+2+3+3+3). Markers: archived **8 RED / 7 CONTROL / 0 UNEXPECTED**, 15 patch controls; Stage02 **3 RED / 1 CONTROL / 0 UNEXPECTED**; Stage03 **BOUNDARY_OK=8**.
+- Original Python archive is fetched at pinned release and commit `0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4` with source Git blob `405f461b2e2cdd170ded010e6f8046b78d6b4ab6`; direct execution gate passed. All 15 signed BigInt TSV inputs: **STAGE04_CROSS_RUNTIME_RED=8 CONTROL=7 UNEXPECTED=0**, **PATCH_OK=15 CANDIDATE_OK=15**. Stage04 cross-runtime direct differential **PASS**, not Stage04 closure.
+- Uploaded artifact [13100771448](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41349950368/artifacts/13100771448), 17,480 bytes, SHA256 **69e8c52c4483a604a03fecd648930935aece40ae367f8f1d70578d70ffbc26b2** (GitHub artifact API digest; archive bytes were not separately rehashed).
+- **CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=YES** is justified by completed/log evidence on the above code SHA. **Stage04 remains OPEN**, Rust historical prehistory is not established by an archive from a separate language branch, production remains **BootstrapOnly**, and no Stage05/main/merge was performed. This audit/documentary update does not claim new Native execution on its own documentation-only SHA.
