@@ -66,8 +66,8 @@ proc independentDate(ref gates: GateOracle,
   return resultValue;
 }
 
-proc checkpoint(label: string) {
-  writeln("YEAR_BOUNDARY_PHASE=", label);
+proc checkpoint(phaseName: string) {
+  writeln("YEAR_BOUNDARY_PHASE=", phaseName);
   try! stdout.flush();
 }
 
