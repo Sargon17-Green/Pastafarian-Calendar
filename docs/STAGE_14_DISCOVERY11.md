@@ -15,3 +15,34 @@ tests/stage14_fivefield_oracle.py is a standalone Python 3 standard-library refe
 3. Provide native GNAT 13 compile/bind/link and completed/success GitHub CI on a single verified Stage14 HEAD, both verify and native differential job, exact oracle marker and compare counts. If independent expected values cannot be computed, record NOT_RUN rather than manufacturing goldens.
 
 Current status: DISCOVERY_OPEN; milestone A isolated synthetic oracle implemented; numerical full-calendar differential, native GNAT Stage14 and overall Stage14 PASS are NOT_RUN. No main merge or publication.
+
+
+## Milestone B — real-day independent numerical reference and Native observer (awaiting CI)
+The source-only independent reference is tests/stage14_real_oracle.py,
+reconstructed from the explicit Ada branch specification and the SHA-verified
+local draft. It uses Python big integers, enumerated six-bowl permutations,
+table-based bounded compositions, list removal for weaving and direct numerical
+counting of the five fields. It does not call Ada or read actual results when
+generating expectations. Its numeric mixing rules must match the specification;
+this is algorithmic cross-implementation testing, not a claim of formal proof.
+
+A separate Ada observer calls Calendar_Date with Calculation_Day=Foundation_Day
+and Target_Day=(Foundation_Day-1,Foundation_Day,Foundation_Day+1); outputs
+three strictly parsed numeric records, checks five domains per target, one
+year-5000 anchor, and five repeat comparisons: 21 native invariants. Python
+then computes independently expected real-day five-tuples and checks all 15
+scalar fields; any missing/duplicate target, missing marker or mismatch fails.
+The reference selftest checks all 15 provisional regression scalars, repeats,
+lexicographic small permutation unranking and small weaving multiplicities.
+Known *provisional*, NON-native goldens from the independently executed draft:
+- -15055672 -> (5000,10,502,6,58)
+- -15055671 -> (5000,10,503,30,52)
+- -15055670 -> (5000,14,1,22,33)
+
+CI uses GNAT (Ada 2022), an explicit 600-second Native timeout and independent
+60-second Python timeouts, with a 15-minute job bound. Require logs containing
+STAGE14_NATIVE_DOMAIN_REPEAT_ASSERTIONS=21 and
+STAGE14_REAL_FIVEFIELD_SCALARS=15, completed/success and verify on the **same**
+HEAD before accepting Stage14. A Python-only selftest never substitutes for
+Native. Past Stage13 acceptance and the separately verified synthetic 61/61
+remain unchanged. No production source or main change.
