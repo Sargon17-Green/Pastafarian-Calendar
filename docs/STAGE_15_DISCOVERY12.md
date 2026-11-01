@@ -1,4 +1,4 @@
-# Stage15 DISCOVERY12 — two-dimensional real input differential (open)
+# Stage15 DISCOVERY12 — two-dimensional real input differential (accepted)
 
 ## Predecessor
 Stage14 accepted on run 41283018346 / SHA 648e3e71720e39dabd3871bf5b6aa970ad210ca4 (16/16 completed/success; 436 reference selftests, 21 GNAT domain/repeat checks, 15 five-field real-date comparisons, 61 synthetic). Stage14 used only Calculation_Day=Foundation_Day.
@@ -14,3 +14,6 @@ STAGE15_INDEPENDENT_MATRIX_SELFTEST_ASSERTIONS=53
 STAGE15_NATIVE_DOMAIN_REPEAT_ASSERTIONS=51
 STAGE15_REAL_FIVEFIELD_SCALARS=45
 Missing/malformed/duplicate record, timeout, mismatch or nonzero exit means NOT ACCEPTED. Do not conflate Python selftest with GNAT; no main/merge or external publication.
+
+## Acceptance addendum — 2026-11-01
+Run 41350147495 on a1dd0cd7a6a26d704aaa9e81cb93b8b8eef81463 completed/success, 17/17 jobs including verify and native-stage15-multi-calibration. GNATMAKE 13.3.0 compile, gnatbind and gnatlink observed. Native job 124978366738 emitted exactly STAGE15_INDEPENDENT_MATRIX_SELFTEST_ASSERTIONS=53, STAGE15_NATIVE_DOMAIN_REPEAT_ASSERTIONS=51 and STAGE15_REAL_FIVEFIELD_SCALARS=45. Accepted only for the tested 3x3 real-input matrix; no universal correctness, main merge or other-branch equivalence follows.
