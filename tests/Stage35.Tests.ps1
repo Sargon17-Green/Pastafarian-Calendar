@@ -142,7 +142,7 @@ Write-Host ("STAGE35_DISTINCT_E="+$seenE.Count)
 Write-Host "STAGE35_ASSERTIONS_PASSED=$script:StageTestPassed"
 Write-Host "STAGE35_ASSERTIONS_FAILED=$script:StageTestFailed"
 if($script:StageTestPassed -ne 896 -or $script:StageTestFailed -ne 0){
-    Write-Host 'STAGE35_DISCOVERY19=FAIL';exit 1
+    Write-Host 'STAGE35_DISCOVERY20=FAIL';exit 1
 }
-Write-Host 'STAGE35_DISCOVERY19=BOUNDED_RESEARCH_ONLY'
+Write-Host 'STAGE35_DISCOVERY20=BOUNDED_RESEARCH_ONLY'
 exit 0

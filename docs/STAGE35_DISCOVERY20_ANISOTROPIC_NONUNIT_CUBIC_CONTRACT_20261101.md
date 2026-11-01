@@ -1,8 +1,8 @@
-# Stage35 / Discovery20 — anisotropic nonunit cubic contrast (contract-first, not executed)
+# Stage35 / Discovery20 — anisotropic nonunit cubic contrast (contract and bounded native test (pending execution))
 
 Project: PC-BRANCH-POWERSHELL-TAGALOG
 Branch: `PowerShell+Tagalog`
-Status: CONTRACT ONLY; `CURRENT_STAGE=34`, `LAST_COMPLETED_STAGE=34` remain unchanged. Stage35 is **not** opened as implementation, and 896 below is a planned, not executed, assertion count.
+Status: implementation committed on `PowerShell+Tagalog`; `CURRENT_STAGE=35`, `LAST_COMPLETED_STAGE=34`, `STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE`. The 896 assertions are instrumented but **not yet verified by a completed Stage35 Native run**.
 
 ## Gate and independent research question
 
@@ -29,7 +29,7 @@ Eight **labeled** target bases: `OpenGateDay-1`, `OpenGateDay`, `CloseGateDay-1`
 
 ## Measurable implementation contract
 
-Add `tests/Stage35.Tests.ps1` with Windows PowerShell 5.1, `Set-StrictMode -Version Latest`, the existing native independent oracle, exactly one new 20-minute bounded canonical CI job, exact `git rev-parse HEAD == GITHUB_SHA` gate, transcript, metadata and retained artifact. Before the test is runnable, extend Stage31–34 and predecessor metadata gates to accept **only** the precise Stage35 pending pair `CURRENT_STAGE=35; LAST_COMPLETED_STAGE=34; STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE`, preserving every historical expected-red and sealed-stage assertion. Never weaken previous gates by accepting arbitrary future stages.
+Implemented `tests/Stage35.Tests.ps1` for Windows PowerShell 5.1, `Set-StrictMode -Version Latest`, the existing native independent oracle, exactly one new 20-minute bounded canonical CI job, exact `git rev-parse HEAD == GITHUB_SHA` gate, transcript, metadata and retained artifact. The Stage31–34 and predecessor metadata gates accept **only** the precise Stage35 pending pair `CURRENT_STAGE=35; LAST_COMPLETED_STAGE=34; STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE`, preserving every historical expected-red and sealed-stage assertion. Never weaken previous gates by accepting arbitrary future stages.
 
 **Exactly 896 planned assertions**, derived without invoking Native:
 - 4 stage-metadata + 4 normative-year preflight = 8.
