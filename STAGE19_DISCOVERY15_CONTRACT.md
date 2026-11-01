@@ -1,6 +1,6 @@
 # Stadio 19 — DISCOVERY 15: unu elemento de jam konata respondfluo
 
-**Stato 2026-11-01:** kontrakto plus unua memstara produkta efektivigo kaj 12 statike kalkulitaj testfunkcioj. Stage18-koda HEAD `eeb7c5b381e83a5a5eb4fca66788787feab0d51d` kaj posta dokumenta HEAD `30b740de99d3b678332cbfbada599bd1c02d12b6` estas Native GREEN (190/190, formatter kaj fontintegreco PASS) kaj Names Lock SUCCESS ĉe respektivaj SHA. La nova Stage19-koda HEAD ankoraŭ bezonos proprajn Native kaj Names Lock-pordegojn; **202/202 estas nur prognozo**, ne mezurita rezulto.
+**Stato 2026-11-01:** Stage19-produktkodo kaj 12 novaj testfunkcioj estas Native GREEN ĉe preciza koda HEAD `cc4ac602a0a34990d356128f126c408412a72abf`: Gleam 1.18.1 / OTP 28, 202/202 pasis, nul fiaskoj, formatter kaj fontintegreco PASS, Native run `41354782312` (job `124992421845`, artifact `13102169807`), kaj Names Lock run `41354782429` (job `124992422219`) completed/success. La antaŭa koda HEAD `abd97a9b46005f1a94bbdfb6f3e7e7bcabc06a8a` malsukcesis nur ĉe la formatter (5 precizaj korektoj en 2 dosieroj; testoj tie ne estis rulitaj). La ĉi-poste kreota dokumenta HEAD postulas proprajn Native kaj Names Lock-pordegojn antaŭ plena dokumenta akcepto.
 
 ## Celo kaj strikta amplekso
 
@@ -59,3 +59,10 @@ Konservu ĉiujn **190** antaŭajn Native-verdajn testojn. Stage19 enkonduku **12
 3. Sur la nova koda SHA: `gleam format --check src test`, `gleam test` kun mezurita kalkulo, senmutacia fontkontrolo, aparta Names Lock kaj preciza HEAD. Korektu nur pruvitajn fiaskojn.
 4. Post koda GREEN, fermu Stage19-dokumentadon kaj rericevu CI por la posta dokumenta HEAD. Neniu reekzigo de jam sukcesa SHA, `main`-kunfando aŭ publikigo.
 
+
+## Mezurita fermo de la koda HEAD
+
+- Koda HEAD: `cc4ac602a0a34990d356128f126c408412a72abf` (antaŭa `abd97a9b46005f1a94bbdfb6f3e7e7bcabc06a8a`).
+- Native: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41354782312 ; job 124992421845; Gleam 1.18.1 / OTP 28; 202/202 PASS, 0 failures; format kaj fontintegreco PASS; artifact 13102169807, SHA256 e101a99aa21f811622e0f45d0e0d2c6e0177d62da9fdc6ea091a9c706e779b59.
+- Canonical Names Lock: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41354782429 ; job 124992422219, completed/success, sama HEAD.
+- Tiu rezulto konfirmas la **kodan** Stage19-pordegon, ne aŭtomate la apartan postan **dokumentan** HEAD. Nek plena datkalkulo nek main-merge estas farita.
