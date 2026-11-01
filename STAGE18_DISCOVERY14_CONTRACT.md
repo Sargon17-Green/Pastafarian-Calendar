@@ -1,6 +1,6 @@
 # Stadio 18 — DISCOVERY 14: la unua respondo kaj direkto de unu bovla demando
 
-**Stato 2026-10-31:** nur mezurebla kontrakto; neniu Stage18-produktkodo aŭ nova Stage18-testaro ankoraŭ kreita. Stage17 estas koda GREEN ĉe `26a44311c764c4b6e5d0205c93a4e92f4bf6f3d8` (178/178 Native; Names Lock SUCCESS); la dokumenta HEAD de ĉi tiu kontrakto mem bezonas apartan Native/Names-verifikon antaŭ Stage18-koda akcepto.
+**Fermo de Stage18 (2026-11-01):** la produktkodo kaj ĉiuj 12 planitaj testfunkcioj ekzistas ĉe commit `eeb7c5b381e83a5a5eb4fca66788787feab0d51d`. La preciza Native-laborlogo de [run 41283009687](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41283009687) / job `124778597882` montris Gleam 1.18.1, OTP 28, validan `gleam format --check src test`, sukcesan kompilon, **190 passed, no failures**, kaj nenian fontmutacion. [Canonical Names Lock run 41283009678](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41283009678) / job `124778597889` sukcesis sur la sama SHA. Artifakto `13074372547`, ZIP SHA256 `c9a2d5073c280188cfb424c999c5ca4027c87d63495d1148e90700eb3323cc6e`. Restas aparta dokumenta-HEAD CI post ĉi tiu fermo. Neniu plena dato, neniu `main`-kunfando.
 
 ## Motivado kaj limigita amplekso
 
