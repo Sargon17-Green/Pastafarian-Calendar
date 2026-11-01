@@ -8,6 +8,7 @@ on:
       - 'src/**'
       - 'tests/**'
       - 'tools/stage04_cross_runtime_diff.py'
+      - 'tools/tests/test_stage04_*.py'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - 'DEVELOPMENT_STAGE.md'
@@ -44,6 +45,17 @@ jobs:
           grep -Fq 'pub mod discovery02_day_tag_probe;' src/lib.rs
           test -f audit/STAGE_04_DISCOVERY02_DIRECT_RUNTIME_DIFFERENTIAL_CONTRACT_2026-11-01.md
           cargo fmt --all -- --check
+      - name: Verify exact four-column TSV protocol (6 bounded Python tests)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          timeout --signal=TERM --kill-after=5s 30s \
+            python3 -m unittest discover -s tools/tests -p 'test_stage04_*.py' -v \
+            > evidence/stage04_tsv_protocol_tests.txt 2>&1
+          cat evidence/stage04_tsv_protocol_tests.txt
+          grep -Fq 'Ran 6 tests' evidence/stage04_tsv_protocol_tests.txt
+          grep -Fxq 'OK' evidence/stage04_tsv_protocol_tests.txt
       - name: Run bounded native baseline and prior regression tests
         shell: bash
         run: |

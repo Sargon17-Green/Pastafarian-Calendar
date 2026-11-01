@@ -42,8 +42,12 @@ def load_rust_rows(path: Path) -> list[dict[str, str]]:
         if reader.fieldnames != EXPECTED_COLUMNS:
             raise ValueError(f"unexpected Rust TSV fields: {reader.fieldnames}")
         rows = list(reader)
-    if len(rows) != 15 or any(value is None for row in rows for value in row.values()):
-        raise ValueError(f"expected exactly 15 complete Rust rows; got {len(rows)}")
+    if len(rows) != 15 or any(
+        set(row) != set(EXPECTED_COLUMNS)
+        or any(not isinstance(row.get(name), str) or not row[name] for name in EXPECTED_COLUMNS)
+        for row in rows
+    ):
+        raise ValueError(f"expected exactly 15 complete four-column Rust rows; got {len(rows)}")
     return rows
 
 
