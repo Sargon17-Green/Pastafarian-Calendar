@@ -24,6 +24,7 @@ fn test_discovery15_expected_red_one_day_after_foundation() {
 
 fn test_discovery15_expected_red_distinct_calculation_day() {
 	foundation := big_from_i64(-15_055_671)
-	discovery15_assert_valid_public_date(big_add(foundation, big_from_int(3)),
-		big_add(foundation, big_from_int(2)))
+	calculation_day := big_add(foundation, big_from_int(3))
+	target_day := big_add(foundation, big_from_int(2))
+	discovery15_assert_valid_public_date(calculation_day, target_day)
 }
