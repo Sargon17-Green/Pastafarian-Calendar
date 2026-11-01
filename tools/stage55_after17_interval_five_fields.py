@@ -84,7 +84,9 @@ def run(before, after, fixture):
     month_day = lengths[symbol - 1] - b[symbol - 1]
     assert month_index == 1 and month_day == 1
     assert month_day == (list(PREFIX) + [symbol]).count(symbol)
-    print(f"STAGE55_SEVENTEENTH_ROW POSITION=16 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=16 MONTH_INDEX={month_index} MONTH_DAY={month_day}")
+    position = q["stepsComputed"]
+    assert position == 17
+    print(f"STAGE55_SEVENTEENTH_ROW POSITION={position} YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY={position} MONTH_INDEX={month_index} MONTH_DAY={month_day}")
     print(f"STAGE55_SEVENTEENTH_INDEPENDENT_PASS SMALL={cases} BLOCKS=14 AFTER16_SHA256={h15} AFTER17_SHA256={h16} REMAINING=4227")
     print("STAGE55_FULL_YEAR_CANONICAL_ORACLE_NOT_VERIFIED")
     print("STAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED")

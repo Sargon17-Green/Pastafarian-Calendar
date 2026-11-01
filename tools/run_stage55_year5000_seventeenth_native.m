@@ -50,7 +50,8 @@ assert(numel(fields)==5 && names(letter)==1 && fields{1}==pastafari.BigInt(5000)
  fields{3}==pastafari.BigInt(17) && strcmp(fields{4},catalog.months(names(letter)).text) && ...
  fields{5}==pastafari.BigInt(occ) && monthId==letter && ...
  any(strcmp(ctx.branchTrace,'PATCH_25_OCCURRENCE_COUNT')),'Stage55:FiveFields');
-fprintf('STAGE55_SEVENTEENTH_ROW POSITION=16 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=16 MONTH_INDEX=%d MONTH_DAY=%d\n',names(letter),occ);
+assert(position==after.stepsComputed && position==17,'Stage55:RowPosition');
+fprintf('STAGE55_SEVENTEENTH_ROW POSITION=%d YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=%d MONTH_INDEX=%d MONTH_DAY=%d\n',position,position,names(letter),occ);
 for bad=[0 18]
  target=pastafari.BigInt(f.first_day+bad-1);
  invalid=pastafari.MonsterContext(pastafari.BigInt(f.calculation_day),target);

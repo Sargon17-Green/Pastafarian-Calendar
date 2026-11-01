@@ -16,6 +16,7 @@ Status: AFTER16 certified by completed run 41285498541; AFTER17 candidate, NOT c
 - Independent Python: 22 brute small controls; count all 14 eligible lexical child intervals via binomial insertion DP (not adjoint unranking); exact parent partition, chosen child count and rank-offset; compare one UTF-8 row byte-for-byte to MATLAB.
 - Bounded local preflight predicted **symbol14** after testing 14 full-sized blocks whose sum exactly equals the AFTER16 parent count (expectation, NOT Native proof).
 - AFTER17 expected: stepsComputed=17, openedUpTo=14, closedUpTo=0, remaining=4227, first occurrence of month14, name index1, day1; row `POSITION=17 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=17 MONTH_INDEX=1 MONTH_DAY=1`.
+- The workflow MUST assert this exact external row, not merely compare Native and Python to each other; correction after first run 41349955735 (completed success but both logging paths hardcoded POSITION=16/CUTLET_DAY=16 while native state was at step17). The original artifact is evidence of the defect and is NOT sufficient for certification.
 - Dedicated 35-minute MATLAB R2026a workflow, using the pinned AFTER16 artifact from run 41285498541, upload original pair of JSON checkpoints, logs, two row files and digest (7 files).
 
 ## Gate
