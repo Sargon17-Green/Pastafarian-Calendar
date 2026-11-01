@@ -1343,3 +1343,28 @@ fn test_stage01_base_monster_shell_is_neutral() {
 	assert context.branch_trace == ['BOOTSTRAP_VALIDATED']
 	assert context.metrics['bootstrap.validations'] == 1
 }
+
+fn stage31_assert_production_sauce_matches_independent_oracle(calculation_day BigInt, target_day BigInt) {
+	expected := oracle_sauce(calculation_day, target_day)
+	got := calendar_patch15_sauce_chain_spaghetti(calculation_day, target_day) or {
+		panic(err.msg())
+	}
+	assert expected.bowls.len == 6
+	assert got.bowls.len == 7
+	assert got.visible_drops.len == 47
+	assert got.order_at_drop46 == expected.order_at_drop46
+	for bowl_id in 1 .. 7 {
+		assert big_eq(got.bowls[bowl_id], expected.bowls[bowl_id - 1])
+	}
+}
+
+fn test_stage31_production_46_drop_chain_matches_independent_normative_sauce() {
+	foundation := oracle_foundation_day()
+	for offset in [-1, 0, 1] {
+		target_day := big_add(foundation, big_from_int(offset))
+		stage31_assert_production_sauce_matches_independent_oracle(foundation, target_day)
+	}
+	calculation_day := big_add(foundation, big_from_int(3))
+	target_day := big_add(foundation, big_from_int(2))
+	stage31_assert_production_sauce_matches_independent_oracle(calculation_day, target_day)
+}
