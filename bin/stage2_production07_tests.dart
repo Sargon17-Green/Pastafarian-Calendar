@@ -72,9 +72,7 @@ _ReferenceGap _referenceGap(
   final next = bowls.finalBowls[nextBowl - 1];
   final sixth = bowls.finalBowls[5];
   final first = _normalize(
-    (current + BigInt.from(182)).pow(2) +
-        BigInt.from(179) * next +
-        BigInt.one,
+    (current + BigInt.from(182)).pow(2) + BigInt.from(179) * next + BigInt.one,
   );
   final directionSeed = _normalize(
     (first + BigInt.from(195)).pow(2) +
@@ -212,13 +210,10 @@ void main() {
     }
   }
 
-  _rejectArgument(() => calculator.gapFor(BigInt.zero),
-      'Gate zero has no gap');
-  _rejectArgument(
-      () => calculator.gatePosition(BigInt.from(33)),
+  _rejectArgument(() => calculator.gapFor(BigInt.zero), 'Gate zero has no gap');
+  _rejectArgument(() => calculator.gatePosition(BigInt.from(33)),
       'Reject prefix above upper bound');
-  _rejectArgument(
-      () => calculator.gatePosition(BigInt.from(-33)),
+  _rejectArgument(() => calculator.gatePosition(BigInt.from(-33)),
       'Reject prefix below lower bound');
   _check(asymmetricPairs > 0, 'Positive and negative gaps not conflated');
   _check(positiveCases == 52, 'Positive cases include wide BigInts');
