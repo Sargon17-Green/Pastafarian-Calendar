@@ -23,7 +23,7 @@ GitHub REST 分頁 `per_page=100`：155 個 jobs（第 1 頁 100、第 2 頁 55�
 | `stage07-five-field-native` | 124778259425 | success，Result: PASS |
 | `stage08-month-length-generation-native` | 124778259319 | success，7125 TAP，Result: PASS |
 
-九份 logs 已直接讀取，不以 workflow 的整體 success 取代查證工作層級。Stage8 的工作日誌直接顯示 `timeout --signal=TERM --kill-after=5s 120s` 與 `ulimit -v 393216`（384 MiB 的 **虛擬位址空間** 上限，לא peak RSS 測量）。
+九份 logs 已直接讀取，不以 workflow 的整體 success 取代查證工作層級。Stage8 的工作日誌直接顯示 `timeout --signal=TERM --kill-after=5s 120s` 與 `ulimit -v 393216`（384 MiB 的 **虛擬位址空間** 上限，並非 peak RSS 測量）。
 
 ## Stage8 工件真實檢驗
 
