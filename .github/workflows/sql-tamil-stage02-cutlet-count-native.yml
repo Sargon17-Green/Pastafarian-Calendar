@@ -1,4 +1,4 @@
-name: SQL Tamil Stage 2 Slice 16 Bounded Cutlet Count
+name: SQL Tamil Stage 2 Slice 17 Bounded Cutlet Count
 on:
   push:
     branches:
@@ -85,7 +85,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: sql-tamil-slice16-cutlet-count-native
+          name: sql-tamil-slice17-cutlet-count-native
           path: sql-tamil-cutlet-count-logs/
           if-no-files-found: warn
           retention-days: 90
@@ -153,7 +153,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: sql-tamil-slice16-cutlet-count-isolation
+          name: sql-tamil-slice17-cutlet-count-isolation
           path: sql-tamil-cutlet-count-logs/
           if-no-files-found: warn
           retention-days: 90
@@ -243,7 +243,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: sql-tamil-slice16-cutlet-count-differential-${{ matrix.case }}
+          name: sql-tamil-slice17-cutlet-count-differential-${{ matrix.case }}
           path: sql-tamil-cutlet-count-logs/
           if-no-files-found: warn
           retention-days: 90
