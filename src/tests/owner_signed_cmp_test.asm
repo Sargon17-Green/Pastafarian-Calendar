@@ -366,12 +366,8 @@ RunOwnerSignedCmpTests::
     ld [wTestCase], a
     ld a, 2
     ld [wOwnerCmpSignA], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
@@ -382,12 +378,8 @@ RunOwnerSignedCmpTests::
     xor a
     ld [wOwnerCmpOwnerA], a
     ld [wOwnerCmpSignA], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
@@ -402,12 +394,8 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenA], a
     ld a, $40
     ld [wOwnerCmpLenA+1], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
@@ -433,12 +421,8 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB+2], a
     ld a, 2
     ld [wOwnerCmpSignB], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
@@ -450,12 +434,8 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpSignB], a
     ld a, 45
     ld [wOwnerCmpOwnerB], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
@@ -469,12 +449,8 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB], a
     ld a, $20
     ld [wOwnerCmpLenB+1], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
@@ -487,12 +463,8 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB], a
     xor a
     ld [wOwnerCmpLenB+1], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
@@ -542,12 +514,8 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB], a
     ld a, 1
     ld [wOwnerCmpSignB], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
@@ -558,12 +526,8 @@ RunOwnerSignedCmpTests::
     xor a
     ld [wOwnerCmpSignB], a
     ld [wOwnerCmpOwnerB], a
-    call OwnerCmpTestSnapshot
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckBytes
     jp nc, .fail
@@ -1870,6 +1834,21 @@ OwnerCmpTestExpectFragmented:
     call OwnerCmpTestCheckSnapshot
     jr nc, .bad
     jp OwnerCmpTestCheckFragmentedBytes
+.bad:
+    and a
+    ret
+
+; Shared fail-closed result+immutability assertion for malformed descriptors 204-214.
+; Input A=expected result; carry set iff result matches and operands/tags unchanged.
+OwnerCmpTestExpectResultSnapshot:
+    push af
+    call OwnerCmpTestSnapshot
+    call OwnerSignedCmp
+    ld a, [wOwnerCmpResult]
+    pop bc
+    cp b
+    jr nz, .bad
+    jp OwnerCmpTestCheckSnapshot
 .bad:
     and a
     ret
