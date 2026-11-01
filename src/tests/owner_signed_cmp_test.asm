@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..260: signed owner-scoped comparison.
+; Stage 1 native regression 191..261: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1510,6 +1510,27 @@ RunOwnerSignedCmpTests::
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .fail
+
+    ; Case 261 (0105): both former owners independently revoked.
+    ; Case 260 left A=46, B=45. Both leases have now been released.
+    ; INVALID=3; Native checks descriptor bytes and 16 lease tags.
+    ; HOST separately checks full SRAM. Owner 46 is no longer a
+    ; valid handle for the old pre-capacity sentinel read.
+    ld a, [wTestCase]
+    inc a
+    ld [wTestCase], a
+    cp 5
+    jp nz, .fail
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .fail
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
+
     ld a, 42
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
