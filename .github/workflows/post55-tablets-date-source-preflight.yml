@@ -1,0 +1,22 @@
+name: Kotlin TABLETS date source identity preflight
+on:
+  push:
+    branches: ['Kotlin+Cymraeg']
+    paths:
+      - 'soak/tablets_date_module_provenance.py'
+      - 'soak/test_tablets_date_module_provenance.py'
+      - '.github/workflows/post55-tablets-date-source-preflight.yml'
+  workflow_dispatch:
+jobs:
+  source-identity-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile source identity preflight
+        run: python -m py_compile soak/tablets_date_module_provenance.py soak/test_tablets_date_module_provenance.py
+      - name: Git-backed identity contract tests (synthetic, not date certification)
+        run: python -m unittest discover -s soak -p test_tablets_date_module_provenance.py -v
