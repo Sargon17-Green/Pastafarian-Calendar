@@ -70,12 +70,13 @@ def run(before, after, fixture):
         assert a[j - 1] > 1
         child = a.copy()
         child[j - 1] -= 1
-        count = insertion_count(child, 13 + (j == 14))
+        child_opened = p["openedUpTo"] + (j == p["openedUpTo"] + 1)
+        count = insertion_count(child, child_opened)
         assert count > 0
         blocks.append(count)
         print(f"STAGE55_EIGHTEENTH_INDEPENDENT_BLOCK SYMBOL={j} DIGITS={len(str(count))}")
 
-    assert sum(blocks) == cp, "fourteen child blocks do not partition parent count"
+    assert sum(blocks) == cp, "fifteen child blocks do not partition parent count"
     assert blocks[symbol - 1] == cq, "native child count differs from independent count"
     lower = sum(blocks[:symbol - 1])
     assert lower == rp - rq and lower < rp <= lower + cq, "rank interval mismatch"
