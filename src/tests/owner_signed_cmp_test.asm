@@ -1476,6 +1476,25 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
 
+    ; Case 259: revoked fragmented owner A against live canonical owner 46 B.
+    ; Both operands are +8192; only A is invalid. Keep descriptors, lease
+    ; tags and the live owner's high SRAM sentinel read-only.
+    ld a, [wTestCase]
+    inc a
+    ld [wTestCase], a
+    cp 3
+    jp nz, .fail
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .fail
+    ld a, 46
+    ld [wOwnerCmpOwnerB], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckPreCapacityByte
+    jp nc, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
