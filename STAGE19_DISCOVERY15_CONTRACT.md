@@ -1,6 +1,6 @@
 # Stadio 19 — DISCOVERY 15: unu elemento de jam konata respondfluo
 
-**Stato 2026-11-01:** mezurebla kontrakto nur; Stage19-produktkodo kaj 12 novaj testfunkcioj ankoraŭ ne ekzistas. Stage18-koda HEAD `eeb7c5b381e83a5a5eb4fca66788787feab0d51d` estas Native GREEN (190/190, neniu fiasko, formatter kaj fontintegreco PASS) kaj Names Lock SUCCESS. La nova dokumenta HEAD ankoraŭ bezonos proprajn kompletajn Native + Names Lock pordegojn antaŭ koda akcepto.
+**Stato 2026-11-01:** kontrakto plus unua memstara produkta efektivigo kaj 12 statike kalkulitaj testfunkcioj. Stage18-koda HEAD `eeb7c5b381e83a5a5eb4fca66788787feab0d51d` kaj posta dokumenta HEAD `30b740de99d3b678332cbfbada599bd1c02d12b6` estas Native GREEN (190/190, formatter kaj fontintegreco PASS) kaj Names Lock SUCCESS ĉe respektivaj SHA. La nova Stage19-koda HEAD ankoraŭ bezonos proprajn Native kaj Names Lock-pordegojn; **202/202 estas nur prognozo**, ne mezurita rezulto.
 
 ## Celo kaj strikta amplekso
 
