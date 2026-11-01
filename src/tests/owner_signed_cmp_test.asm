@@ -1476,10 +1476,10 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
 
-    ; Case 259: revoked fragmented A / live canonical owner 46 B.
-    ; Case 260: live owner 46 A / revoked fragmented owner 45 B.
-    ; Share identical read-only assertions to fit ROM0, but execute the
-    ; comparison twice. wTestCase advances 0102->0103->0104.
+    ; Cases 259/260: one revoked owner against an independent live peer.
+    ; Case 261: both owners revoked after releasing peer 46 (0105).
+    ; Three iterations share the read-only snapshot assertion; the SRAM
+    ; sentinel is read only while owner 46 remains live (259/260).
     ld a, 46
     ld [wOwnerCmpOwnerB], a
 .revokedPeerLoop:
@@ -1492,44 +1492,28 @@ RunOwnerSignedCmpTests::
     ld a, 3
     call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
+    ld a, [wTestCase]
+    cp 5
+    jr z, .revokedPeerDone
     call OwnerCmpTestCheckPreCapacityByte
     jp nc, .fail
     ld a, [wTestCase]
     cp 3
-    jr nz, .revokedPeerDone
+    jr nz, .revokeLivePeer
     ld a, 46
     ld [wOwnerCmpOwnerA], a
     ld a, 45
     ld [wOwnerCmpOwnerB], a
     jr .revokedPeerLoop
-.revokedPeerDone:
-    ld a, [wTestCase]
-    cp 4
-    jp nz, .fail
-
+.revokeLivePeer:
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
     ld a, [wOwnerStatus]
     or a
     jp nz, .fail
-
-    ; Case 261 (0105): both former owners independently revoked.
-    ; Case 260 left A=46, B=45. Both leases have now been released.
-    ; INVALID=3; Native checks descriptor bytes and 16 lease tags.
-    ; HOST separately checks full SRAM. Owner 46 is no longer a
-    ; valid handle for the old pre-capacity sentinel read.
-    ld a, [wTestCase]
-    inc a
-    ld [wTestCase], a
-    cp 5
-    jp nz, .fail
-    ld a, [wTestCaseHi]
-    cp 1
-    jp nz, .fail
-    ld a, 3
-    call OwnerCmpTestExpectResultSnapshot
-    jp nc, .fail
+    jr .revokedPeerLoop
+.revokedPeerDone:
 
     ld a, 42
     ld [wOwnerRequest], a
