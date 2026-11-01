@@ -88,7 +88,35 @@ proc main() {
         "FOUNDATION_DAY gate index must lie at or after open gate");
 
   checkpoint("STRUCTURE_BEGIN");
-  const structure = buildYearStructure(gates, calculationDay, year);
+  // Exact production call order; diagnostic checkpoints do not change acceptance.
+  var structure: YearStructure;
+  checkpoint("STRUCTURE_SAUCE_BEGIN");
+  const r = sauce(calculationDay, firstDay);
+  checkpoint("STRUCTURE_SAUCE_END");
+  checkpoint("STRUCTURE_CUTLET_COUNT_BEGIN");
+  structure.cutletCount = chooseCutletCount(r, year);
+  checkpoint("STRUCTURE_CUTLET_COUNT_END");
+  checkpoint("STRUCTURE_CUTLET_PARTITION_BEGIN");
+  structure.cutletPartition = chooseCutletPartition(gates, calculationDay, r, year, structure.cutletCount);
+  checkpoint("STRUCTURE_CUTLET_PARTITION_END");
+  checkpoint("STRUCTURE_CUTLET_NAMES_BEGIN");
+  structure.cutletNameIndices = chooseCutletNameIndices(r, structure.cutletCount);
+  checkpoint("STRUCTURE_CUTLET_NAMES_END");
+  checkpoint("STRUCTURE_MATERIALIZE_CUTLETS_BEGIN");
+  structure.cutlets = materializeCutlets(gates, year, structure.cutletPartition, structure.cutletNameIndices);
+  checkpoint("STRUCTURE_MATERIALIZE_CUTLETS_END");
+  checkpoint("STRUCTURE_MONTH_COUNT_BEGIN");
+  structure.monthCount = chooseMonthCount(r, year);
+  checkpoint("STRUCTURE_MONTH_COUNT_END");
+  checkpoint("STRUCTURE_MONTH_LENGTHS_BEGIN");
+  structure.monthLengths = chooseMonthLengths(r, year, structure.monthCount);
+  checkpoint("STRUCTURE_MONTH_LENGTHS_END");
+  checkpoint("STRUCTURE_MONTH_WEAVING_BEGIN");
+  structure.monthWeaving = chooseMonthWeaving(r, structure.monthLengths);
+  checkpoint("STRUCTURE_MONTH_WEAVING_END");
+  checkpoint("STRUCTURE_MONTH_NAMES_BEGIN");
+  structure.monthNameIndices = chooseMonthNameIndices(r, structure.monthCount);
+  checkpoint("STRUCTURE_MONTH_NAMES_END");
   checkpoint("STRUCTURE_END");
   check(structure.cutletCount >= 6 && structure.cutletCount <= 17,
         "cutlet count range");
