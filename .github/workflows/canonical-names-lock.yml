@@ -344,3 +344,33 @@ jobs:
 
       - name: Run bounded Production 08 tests
         run: dart run bin/stage2_production08_tests.dart
+
+  dart-hebrew-stage2-production09-preview:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Resolve packages
+        run: dart pub get
+      - name: Verify locator and oracle harness formatting
+        run: |
+          if ! dart format --output=none --set-exit-if-changed lib/src/monster_year_locator.dart bin/stage2_production09_tests.dart; then
+            dart format --output=write lib/src/monster_year_locator.dart bin/stage2_production09_tests.dart
+            for file in lib/src/monster_year_locator.dart bin/stage2_production09_tests.dart; do
+              echo "DART_CAPTURE_BEGIN:${file}"
+              base64 -w0 "${file}"
+              printf '\\n'
+              echo "DART_CAPTURE_END:${file}"
+            done
+            exit 1
+          fi
+      - name: Analyze branch
+        run: dart analyze
+      - name: Run independent Oracle A and §Q preview tests
+        run: dart run bin/stage2_production09_tests.dart
