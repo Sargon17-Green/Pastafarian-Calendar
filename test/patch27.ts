@@ -111,12 +111,12 @@ try{
 }finally{Patch14WideChoiceHandler.prototype.run=original;}
 assert(maker().run(ready,fixture.request,44,239).context===ready&&
  ready.status==="PATCH_27_APPLIED","retry on original owner succeeds");
-let duplicate=false,finalBlocked=false;
+let duplicate=false,invalidApiRejected=false;
 try{maker().run(ready,fixture.request,44,239);}
 catch(e){duplicate=e instanceof MonsterStageError;}
-try{calendarDateSpaghetti(F,F);}
-catch(e){finalBlocked=e instanceof MonsterStageError;}
-assert(duplicate&&finalBlocked,"duplicate owner and final-date barrier");
+try{calendarDateSpaghetti(3 as unknown as bigint,F);}
+catch(e){invalidApiRejected=e instanceof MonsterValidationError;}
+assert(duplicate&&invalidApiRejected,"duplicate owner and final-date input guard");
 console.log("STAGE_55_PATCH_27_GUARDS_PASS syntheticCases="+(repaired+equal)+
  " syntheticRepaired="+repaired+" syntheticEqual="+equal+
  " invalid="+invalid+" realYearDays="+legal.length+
@@ -124,4 +124,4 @@ console.log("STAGE_55_PATCH_27_GUARDS_PASS syntheticCases="+(repaired+equal)+
  " realWrongReject="+wrongRejectReal+
  " nativeCalls="+full.actualPredecessorCalls+
  " sharedWrites="+full.actualSharedWrites+
- " additionalNative=0 deepFaults="+faults+" finalBlocked=1");
+ " additionalNative=0 deepFaults="+faults+" finalApiGuard=1");

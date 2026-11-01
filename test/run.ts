@@ -4,7 +4,7 @@ import {
   SourceLanguageCatalog,
   bootstrapMonster,
   calendarDateSpaghetti,
-  MonsterStageError
+  MonsterValidationError
 } from "../src/index.ts";
 import {
   FOUNDATION_DAY,
@@ -97,11 +97,11 @@ function testBootstrapProduction(): void {
   assert(first.status === "VALIDATED" && first.phase === "READY", "प्रारंभिक स्थिती वैध असली पाहिजे");
   let threw = false;
   try {
-    calendarDateSpaghetti(FOUNDATION_DAY, FOUNDATION_DAY);
+    calendarDateSpaghetti(0 as unknown as bigint, FOUNDATION_DAY);
   } catch (error) {
-    threw = error instanceof MonsterStageError;
+    threw = error instanceof MonsterValidationError;
   }
-  assert(threw, "टप्पा 1 मध्ये अंतिम मुख्य मार्ग जाणीवपूर्वक उपलब्ध नसला पाहिजे");
+  assert(threw, "मुख्य API अवैध non-bigint लवकर नाकारते");
 }
 
 function main(): void {

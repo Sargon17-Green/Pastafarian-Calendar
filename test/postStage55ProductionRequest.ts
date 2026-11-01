@@ -1,4 +1,5 @@
 import {projectObservedStage55Date} from "../src/postStage55ObservedDate.ts";
+import {calendarDateSpaghetti} from "../src/monsterBase.ts";
 import {cutletNameByCanonicalIndex,monthNameByCanonicalIndex} from "../src/sourceLanguageCatalog.ts";
 import {sauce} from "./normativeOracle.ts";
 import {
@@ -96,12 +97,17 @@ for(const item of cases){
     output.totalSharedWrites===58n*BigInt(output.totalNativeCalls)&&
     output.stage55AdditionalNativeQueries===0,
     "complete production Native-to-five-part differential");
+  const publicDate=calendarDateSpaghetti(item.c,item.t);
+  ok(publicDate.length===5&&Object.isFrozen(publicDate)&&
+    publicDate.every((v,i)=>v===independentTuple[i]),
+    "public two-bigint API must agree with independent five-part oracle");
+  console.log("POST_STAGE55_PUBLIC_FIVE_PART_SMOKE_PASS pairs=1 components=5 mismatches=0 frozen=1");
   console.log("POST_STAGE55_NATIVE_OBSERVATION_PROJECTION_PASS pairs=1 "+
     " independentComponents=5 stage55Calls="+output.yearNativeCalls+
     " seal33Calls="+output.monthNamesNativeCalls+
     " totalCalls="+output.totalNativeCalls+
     " totalSharedWrites="+output.totalSharedWrites+
-    " mismatches=0 apiEnabled=0");
+    " mismatches=0 apiEnabled=1");
  }
 
  if(item.anchor===null){
