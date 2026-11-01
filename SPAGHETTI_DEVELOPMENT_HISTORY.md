@@ -836,3 +836,14 @@ Stage48 ialah ujian metamorfik baharu bagi hari dalaman tujuh tahun:
 21 target, 42 panggilan sah dengan belanjawan tepat/longgar, 6 penolakan
 belanjawan tidak mencukupi. Oracle hanya dalam tests, produksi PATCH22
 tidak diubah. Status Stage48 masih menunggu bukti Native pada SHA baharu.
+
+## Stage48 GREEN / Stage49 VERIFICATION26 — 1 November 2026
+
+Run #41244373597 on 1b39faf7b2b9b6b6ebf3a91f9b658c7b8bf93abd completed/success all 19/19.
+Native Stage48 PHP8.3.36 64-bit #124664625971: 107 checks,
+7 years, 21 targets, 42 positives, 6 short-budget rejections,
+exit 0, stderr kosong; artifact #13058667511. Stage48 ditutup
+dengan artifacts/STAGE48_VERIFICATION25_NATIVE_CLOSURE_2026-11-01.md.
+Stage49 checks call-order invariance across three permutations and
+recovery after a rejected request using the independent test-only oracle.
+Tiada perubahan kod produksi atau main/merge. Native Stage49 menunggu CI.
