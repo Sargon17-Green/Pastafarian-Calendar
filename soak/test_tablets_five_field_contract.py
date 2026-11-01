@@ -166,5 +166,99 @@ class TabletsFiveFieldContracts(unittest.TestCase):
             verify_bracket_receipt(data, targets=TARGETS, origin=0)
 
 
+    def test_replayed_receipt_three_by_five_synthetic(self):
+        from audit_independent_tablets_brackets import audit_tablets
+        from tablets_five_field_contract import compare_tablets_five_fields_replayed
+        gap_a = lambda _index: 42
+        gap_b = lambda _index: 42
+        proof = audit_tablets(gap_a, gap_b, origin=ORIGIN, targets=TARGETS,
+                              max_questions=10, segment_limit=2,
+                              deadline=time.monotonic() + 5)
+        result = compare_tablets_five_fields_replayed(
+            proof, one, two, IND, SRC,
+            independent_gap=gap_a, pinned_gap=gap_b,
+            origin=ORIGIN, targets=TARGETS, max_questions=10,
+            segment_limit=2, deadline=time.monotonic() + 5)
+        self.assertTrue(result["receipt_replay_verified_here"])
+        self.assertEqual(result["replayed_gate_questions"], 3)
+        self.assertEqual(result["replay_trace_sha256"], proof["trace_sha256"])
+        self.assertEqual(len(result["rows"]), 3)
+        self.assertFalse(result["full_date_certified"])
+
+    def test_replay_rejects_fabricated_receipt_digest(self):
+        from audit_independent_tablets_brackets import audit_tablets
+        from tablets_five_field_contract import compare_tablets_five_fields_replayed
+        gap_a = lambda _index: 42
+        gap_b = lambda _index: 42
+        proof = audit_tablets(gap_a, gap_b, origin=ORIGIN, targets=TARGETS,
+                              max_questions=10, segment_limit=2)
+        proof["trace_sha256"] = "f" * 64
+        with self.assertRaisesRegex(ContractError, "E_TABLETS_REPLAY_RECEIPT_MISMATCH:trace_sha256"):
+            compare_tablets_five_fields_replayed(
+                proof, one, two, IND, SRC,
+                independent_gap=gap_a, pinned_gap=gap_b,
+                origin=ORIGIN, targets=TARGETS, max_questions=10,
+                segment_limit=2, deadline=time.monotonic() + 5)
+
+    def test_replay_rejects_fabricated_bracket_and_segment(self):
+        from audit_independent_tablets_brackets import audit_tablets
+        from tablets_five_field_contract import compare_tablets_five_fields_replayed
+        gap_a = lambda _index: 42
+        gap_b = lambda _index: 42
+        for mutate, expected in (
+            (lambda proof: proof["brackets"][0].update(bracket_low=41),
+             "E_TABLETS_REPLAY_RECEIPT_MISMATCH:brackets"),
+            (lambda proof: proof["segments"][0].update(segment_sha256="f" * 64),
+             "E_TABLETS_REPLAY_RECEIPT_MISMATCH:segments"),
+        ):
+            proof = audit_tablets(gap_a, gap_b, origin=ORIGIN, targets=TARGETS,
+                                  max_questions=10, segment_limit=2)
+            mutate(proof)
+            with self.subTest(expected=expected):
+                with self.assertRaisesRegex(ContractError, expected):
+                    compare_tablets_five_fields_replayed(
+                        proof, one, two, IND, SRC,
+                        independent_gap=gap_a, pinned_gap=gap_b,
+                        origin=ORIGIN, targets=TARGETS, max_questions=10,
+                        segment_limit=2, deadline=time.monotonic() + 5)
+
+    def test_replay_detects_actual_independent_source_gap_disagreement(self):
+        from audit_independent_tablets_brackets import audit_tablets
+        from tablets_five_field_contract import compare_tablets_five_fields_replayed
+        gap_a = lambda _index: 42
+        gap_b = lambda _index: 42
+        proof = audit_tablets(gap_a, gap_b, origin=ORIGIN, targets=TARGETS,
+                              max_questions=10, segment_limit=2)
+        faulty_gap = lambda index: 43 if index == 2 else 42
+        with self.assertRaisesRegex(ContractError, "E_TABLETS_REPLAY_FAILED:E_TABLETS_MISMATCH_AT_2"):
+            compare_tablets_five_fields_replayed(
+                proof, one, two, IND, SRC,
+                independent_gap=gap_a, pinned_gap=faulty_gap,
+                origin=ORIGIN, targets=TARGETS, max_questions=10,
+                segment_limit=2, deadline=time.monotonic() + 5)
+
+    def test_replay_rejects_deadline_budget_and_one_oracle(self):
+        from audit_independent_tablets_brackets import audit_tablets
+        from tablets_five_field_contract import compare_tablets_five_fields_replayed
+        gap_a = lambda _index: 42
+        gap_b = lambda _index: 42
+        proof = audit_tablets(gap_a, gap_b, origin=ORIGIN, targets=TARGETS,
+                              max_questions=10, segment_limit=2)
+        common = dict(receipt=proof, independent_date=one, pinned_date=two,
+                      independent_source=IND, pinned_source=SRC,
+                      independent_gap=gap_a, pinned_gap=gap_b,
+                      origin=ORIGIN, targets=TARGETS, max_questions=10,
+                      segment_limit=2, deadline=time.monotonic() + 5)
+        for overrides, code in (
+            (dict(deadline=time.monotonic() - 1), "E_TABLETS_REPLAY_DEADLINE"),
+            (dict(max_questions=0), "E_TABLETS_REPLAY_BUDGET"),
+            (dict(pinned_gap=gap_a), "E_TABLETS_REPLAY_TWO_GAP_ORACLES"),
+            (dict(segment_limit=1), "E_TABLETS_REPLAY_CONFIGURATION"),
+        ):
+            with self.subTest(code=code):
+                with self.assertRaisesRegex(ContractError, code):
+                    compare_tablets_five_fields_replayed(**(common | overrides))
+
+
 if __name__ == "__main__":
     unittest.main()

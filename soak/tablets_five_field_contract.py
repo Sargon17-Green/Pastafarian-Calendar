@@ -174,3 +174,75 @@ def compare_tablets_five_fields(
         "note": "Validates supplied outputs only; actual source/algorithm provenance,"
                 " pin and replay must be reviewed separately.",
     }
+
+
+
+def compare_tablets_five_fields_replayed(
+    receipt: Mapping,
+    independent_date: Callable[[int, int], tuple[int, ...]],
+    pinned_date: Callable[[int, int], tuple[int, ...]],
+    independent_source: DateImplementation,
+    pinned_source: DateImplementation,
+    *,
+    independent_gap: Callable[[int], int],
+    pinned_gap: Callable[[int], int],
+    targets: tuple[int, ...] = TARGETS,
+    origin: int = FOUNDATION,
+    max_questions: int = MAX_QUESTIONS,
+    segment_limit: int = 4096,
+    deadline: float,
+) -> dict:
+    """Fail closed unless the entire unseeded gate transcript is regenerated.
+
+    The recomputation begins at origin, uses global positive indices, compares
+    every gap, and rebuilds segment and trace digests. Caller-supplied receipt
+    hashes are never treated as proof. Full-date algorithmic independence and
+    pinned module provenance are still separate external review gates.
+    """
+    verify_bracket_receipt(receipt, targets=targets, origin=origin)
+    if (not callable(independent_gap) or not callable(pinned_gap)
+            or independent_gap is pinned_gap):
+        raise ContractError("E_TABLETS_REPLAY_TWO_GAP_ORACLES")
+    now = monotonic()
+    if (type(deadline) not in (int, float) or not now < deadline <= now + 600):
+        raise ContractError("E_TABLETS_REPLAY_DEADLINE")
+    if (type(max_questions) is not int or not 1 <= max_questions <= MAX_QUESTIONS
+            or type(segment_limit) is not int or not 1 <= segment_limit <= MAX_SEGMENT):
+        raise ContractError("E_TABLETS_REPLAY_BUDGET")
+    # Reject a changed replay configuration; it changes the hash-chain layout.
+    if (receipt.get("max_questions") != max_questions
+            or receipt.get("segment_limit") != segment_limit):
+        raise ContractError("E_TABLETS_REPLAY_CONFIGURATION")
+    from audit_independent_tablets_brackets import audit_tablets, TabletsAuditError
+    try:
+        actual = audit_tablets(
+            independent_gap, pinned_gap, origin=origin, targets=targets,
+            max_questions=max_questions, segment_limit=segment_limit,
+            deadline=deadline,
+        )
+    except TabletsAuditError as exc:
+        raise ContractError(f"E_TABLETS_REPLAY_FAILED:{exc}") from exc
+    for key in (
+        "status", "origin", "targets", "brackets", "questions",
+        "max_questions", "segment_limit", "segments", "segment_count",
+        "trace_sha256", "terminal_segment_sha256", "checkpoint_seed_used",
+        "production_gate_limit_unchanged", "full_date_verified",
+        "certifiable", "tablets_bracket_verified",
+        "tablets_date_components_verified",
+    ):
+        if receipt.get(key) != actual[key]:
+            raise ContractError(f"E_TABLETS_REPLAY_RECEIPT_MISMATCH:{key}")
+    result = compare_tablets_five_fields(
+        receipt, independent_date, pinned_date,
+        independent_source, pinned_source,
+        targets=targets, origin=origin, deadline=deadline,
+    )
+    result["receipt_replay_verified_here"] = True
+    result["replayed_gate_questions"] = actual["questions"]
+    result["replay_trace_sha256"] = actual["trace_sha256"]
+    # This replay does NOT prove independent full-date mathematics or that
+    # pinned source objects were loaded without an independent cache.
+    result["algorithmic_independence_certified"] = False
+    result["source_cache_independence_verified_here"] = False
+    result["full_date_certified"] = False
+    return result
