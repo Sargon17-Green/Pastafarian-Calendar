@@ -1,0 +1,249 @@
+name: SQL Tamil Stage 2 Slice 16 Bounded Target Year
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'sql/00_schema.sql'
+      - 'sql/01_source_language_catalog.sql'
+      - 'sql/02_monster_bootstrap.sql'
+      - 'sql/03_stage02_production_core.sql'
+      - 'sql/04_stage02_stone_states.sql'
+      - 'sql/05_stage02_hidden_drop.sql'
+      - 'sql/06_stage02_visible_drops.sql'
+      - 'sql/07_stage02_bowls.sql'
+      - 'sql/08_stage02_bowl_round.sql'
+      - 'sql/09_stage02_post_stir_round.sql'
+      - 'sql/10_stage02_sauce.sql'
+      - 'sql/11_stage02_answer_stream.sql'
+      - 'sql/12_stage02_choose_rank.sql'
+      - 'sql/13_stage02_gate_gaps.sql'
+      - 'sql/14_stage02_gate_day_selector.sql'
+      - 'sql/15_stage02_year5000_gate_candidates.sql'
+      - 'sql/16_stage02_year5000.sql'
+      - 'sql/17_stage02_adjacent_year_navigation.sql'
+      - 'sql/18_stage02_target_year_navigation.sql'
+      - 'sql/test/10_normative_reference.sql'
+      - 'sql/test/112_stage02_target_year_native.sql'
+      - 'sql/test/113_stage02_target_year_differential.sql'
+      - '.github/workflows/sql-tamil-stage02-target-year-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  target-year-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-target-year-logs
+          docker run --detach --name sql-tamil-target-year-native-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-target-year-native-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-target-year-native-pg postgres --version | tee sql-tamil-target-year-logs/native-versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-target-year-logs/native-versions.txt
+      - name: Native bounded target-year checks 18
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-target-year-native-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/17_stage02_adjacent_year_navigation.sql \
+            -f /work/sql/18_stage02_target_year_navigation.sql \
+            -f /work/sql/test/112_stage02_target_year_native.sql \
+            2>&1 | tee sql-tamil-target-year-logs/native.txt
+      - name: Preserve bounded logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice16-target-year-native
+          path: sql-tamil-target-year-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-target-year-native-pg 2>/dev/null || true
+
+  production-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-target-year-logs
+          docker run --detach --name sql-tamil-target-year-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-target-year-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-target-year-pg postgres --version | tee sql-tamil-target-year-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-target-year-logs/versions.txt
+      - name: Load production SQL and check isolation 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-target-year-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/17_stage02_adjacent_year_navigation.sql \
+            -f /work/sql/18_stage02_target_year_navigation.sql \
+            -c "CREATE TEMP TABLE isolation AS SELECT * FROM (VALUES
+              ('no-reference-schema',to_regnamespace('pastafari_sql_tamil_test') IS NULL),
+              ('one-target-function',(SELECT count(*)=1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname='find_target_year')),
+              ('sql-stable',(SELECT count(*)=1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='pastafari_sql_tamil' AND p.proname='find_target_year' AND l.lanname='sql' AND p.provolatile='s')),
+              ('no-reference-body',(SELECT count(*)=0 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='pastafari_sql_tamil' AND p.proname='find_target_year' AND position('pastafari_sql_tamil_test' IN pg_get_functiondef(p.oid))>0))
+            ) AS t(label,ok)" \
+            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM isolation' \
+            2>&1 | tee sql-tamil-target-year-logs/isolation.txt
+      - name: Preserve bounded logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice16-target-year-isolation
+          path: sql-tamil-target-year-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-target-year-pg 2>/dev/null || true
+
+  target-year-differential:
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [same-year, next-year, previous-year, boundary, cross-zero]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-target-year-logs
+          docker run --detach --name sql-tamil-target-year-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-target-year-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-target-year-pg postgres --version | tee sql-tamil-target-year-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-target-year-logs/versions.txt
+      - name: Create isolated differential database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-target-year-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c 'CREATE DATABASE sql_tamil_target_differential'
+      - name: Construct exact one-case differential SQL
+        shell: bash
+        env:
+          CASE_NAME: ${{ matrix.case }}
+        run: |
+          set -euo pipefail
+          case "$CASE_NAME" in
+            same-year|next-year|previous-year|boundary|cross-zero) ;;
+            *) echo "Unexpected CASE_NAME=$CASE_NAME" >&2; exit 64 ;;
+          esac
+          test "$(grep -c '__CASE_LABEL__' sql/test/113_stage02_target_year_differential.sql)" -eq 2
+          sed "s/__CASE_LABEL__/$CASE_NAME/g" \
+            sql/test/113_stage02_target_year_differential.sql \
+            > sql-tamil-target-year-logs/differential_case.sql
+          ! grep -q '__CASE_LABEL__' sql-tamil-target-year-logs/differential_case.sql
+          sha256sum sql-tamil-target-year-logs/differential_case.sql \
+            | tee sql-tamil-target-year-logs/case_sha256.txt
+      - name: Differential target-year checks 1 for ${{ matrix.case }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-target-year-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d sql_tamil_target_differential \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/17_stage02_adjacent_year_navigation.sql \
+            -f /work/sql/18_stage02_target_year_navigation.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql-tamil-target-year-logs/differential_case.sql \
+            2>&1 | tee sql-tamil-target-year-logs/differential.txt
+      - name: Preserve bounded logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice16-target-year-differential-${{ matrix.case }}
+          path: sql-tamil-target-year-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-target-year-pg 2>/dev/null || true
