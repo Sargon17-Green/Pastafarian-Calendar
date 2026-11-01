@@ -5,8 +5,7 @@ import {
  Patch27FullHandler,Discovery27FullHandler,Patch26FullHandler,Discovery26FullHandler,
  Patch25FullHandler,Discovery25FullHandler,Patch24ScalableFullHandler,
  Discovery24FullHandler,Patch23FullHandler,Discovery23FullHandler,
- Patch22FullHandler,Discovery22FullHandler,Discovery22FullHandler as Stage22Once,
- Patch21CutletHandler,Discovery21LegacyCutletHandler,patch27MonthMembership
+ Patch22FullHandler,Discovery22FullHandler,patch27MonthMembership
 } from "../src/index.ts";
 import {resolvePatch20FirstDaySauceQuestion} from "../src/patch20StructureSauce.ts";
 import {Patch21CutletHandler,patch21CutletPartition} from "../src/patch21FilteredCutletCompositions.ts";
