@@ -90,22 +90,24 @@ pub fn discovery_14_positive_negative_zero_seals_test() {
 
 pub fn discovery_14_result_bounds_test() {
   let seals = [0, 1, -1, 999, -999]
-  let actual = list.map(seals, fn(seal) {
-    let assert Ok(answer) = observed(11, 21, 5, seal)
-    answer.first >= 1
-    && answer.first <= modulus
-    && { answer.direction_step == 1 || answer.direction_step == -1 }
-  })
+  let actual =
+    list.map(seals, fn(seal) {
+      let assert Ok(answer) = observed(11, 21, 5, seal)
+      answer.first >= 1
+      && answer.first <= modulus
+      && { answer.direction_step == 1 || answer.direction_step == -1 }
+    })
   actual |> should.equal([True, True, True, True, True])
 }
 
 pub fn discovery_14_direction_parity_test() {
   let seal = -1_000_000_000_000_000_000_000_000_000_000
-  let assert Ok(output) = discovery_14_ask_bowl.dispatch_discovery_14(
-    bootstrap.new_context(11, 21),
-    2,
-    seal,
-  )
+  let assert Ok(output) =
+    discovery_14_ask_bowl.dispatch_discovery_14(
+      bootstrap.new_context(11, 21),
+      2,
+      seal,
+    )
   let first = output.answer.first
   let b6 = sauce.sauce(11, 21).bowls |> list.drop(5) |> list.first
   let assert Ok(last_bowl) = b6

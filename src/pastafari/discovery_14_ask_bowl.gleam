@@ -57,9 +57,7 @@ fn compute_answer(
   let direction_seed = first + seal + 194
   let direction_number =
     save(
-      direction_seed * direction_seed
-      + 193 * first
-      + 197 * bowl_at(bowls, 6),
+      direction_seed * direction_seed + 193 * first + 197 * bowl_at(bowls, 6),
     )
   let direction_step = case direction_number % 2 == 1 {
     True -> 1
@@ -74,11 +72,13 @@ pub fn ask_bowl_for_days(
   queried_bowl_id: Int,
   seal: Int,
 ) -> Result(Discovery14Answer, Discovery14Error) {
-  case dispatch_discovery_14(
-    bootstrap.new_context(calculation_day, target_day),
-    queried_bowl_id,
-    seal,
-  ) {
+  case
+    dispatch_discovery_14(
+      bootstrap.new_context(calculation_day, target_day),
+      queried_bowl_id,
+      seal,
+    )
+  {
     Ok(output) -> Ok(output.answer)
     Error(error) -> Error(error)
   }
