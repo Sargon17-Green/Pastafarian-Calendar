@@ -1,0 +1,70 @@
+name: Perl Stage09 Cutlet Partition Native
+
+on:
+  push:
+    branches:
+      - 'Perl+國語'
+    paths:
+      - 'lib/Pastafari/Monster/CutletPartitionGeneration.pm'
+      - 't/54_stage09_cutlet_partition_generation.t'
+      - 'docs/STAGE_09_CUTLET_PARTITION_GENERATION_CONTRACT_2026-11-01.md'
+      - '.github/workflows/perl-stage09-cutlet-partition-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stage09-cutlet-partition-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Validate independent Stage09 with bounded native evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage09
+          git rev-parse HEAD > logs/stage09/source.txt
+          perl -e 'die "Perl 5.40+ required\n" if $] < 5.040; print "$^V\n"' > logs/stage09/perl-version.txt
+          perl -Ilib -c lib/Pastafari/Monster/CutletPartitionGeneration.pm 2> logs/stage09/syntax.stderr
+          perl -Ilib -c t/54_stage09_cutlet_partition_generation.t 2>> logs/stage09/syntax.stderr
+          test "$(grep -c 'syntax OK' logs/stage09/syntax.stderr)" -eq 2
+          test "$(wc -l < logs/stage09/syntax.stderr)" -eq 2
+          set +e
+          (
+            ulimit -v 393216
+            timeout --signal=TERM --kill-after=5s 120s \
+              prove -e 'perl -CS -Ilib' -v t/54_stage09_cutlet_partition_generation.t \
+              > logs/stage09/test.stdout 2> logs/stage09/test.stderr
+          )
+          ec=$?
+          set -e
+          printf '%s\n' "$ec" > logs/stage09/test.exit
+          cat logs/stage09/test.stdout
+          cat logs/stage09/test.stderr >&2
+          test "$ec" -eq 0
+          test ! -s logs/stage09/test.stderr
+          grep -q 'Result: PASS' logs/stage09/test.stdout
+          grep -q 'Tests=15573' logs/stage09/test.stdout
+          grep -q 'STAGE09_INDEPENDENT_ENUMERATED=15048' logs/stage09/test.stdout
+          grep -q 'STAGE09_INDEPENDENT_FAMILIES=' logs/stage09/test.stdout
+          grep -q 'STAGE09_LARGE_RANK_CASES=24' logs/stage09/test.stdout
+          grep -q 'STAGE09_FULL_GENERATOR_NOT_VERIFIED' logs/stage09/test.stdout
+          echo 'STAGE09_NATIVE_PASS=1' > logs/stage09/result.txt
+          cat logs/stage09/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perl-stage09-cutlet-partition-native
+          path: logs/stage09
+          if-no-files-found: warn
+          retention-days: 30
