@@ -1,0 +1,40 @@
+name: Post55 TABLETS five-field acceptance contract synthetic
+
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/tablets_five_field_contract.py'
+      - 'soak/test_tablets_five_field_contract.py'
+      - '.github/workflows/post55-tablets-five-field-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tablets-five-field-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact Kotlin-Cymraeg branch commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Validate HEAD and execute synthetic fail-closed contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 -m unittest discover -s soak -p 'test_tablets_five_field_contract.py' -v \
+            2>&1 | tee "$RUNNER_TEMP/post55-tablets-five-field-contract.log"
+      - name: Preserve synthetic contract log even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post55-tablets-five-field-contract-synthetic
+          path: ${{ runner.temp }}/post55-tablets-five-field-contract.log
+          if-no-files-found: warn
+          retention-days: 30
