@@ -63,6 +63,10 @@ jobs:
                ($stageLines -contains 'STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or
               (($stageLines -contains 'CURRENT_STAGE=34') -and
                ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
+               ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or
+              (($stageLines -contains 'CURRENT_STAGE=35') -and
+               ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
+               ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and
                ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
              ($stageLines -contains 'STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
              ((($stageLines -contains 'LAST_COMPLETED_STAGE=28') -and
@@ -96,7 +100,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage30 distributional discovery probe failed' }
             Write-Host ('STAGE30_DISCOVERY15_NATIVE_SHA=' + $env:GITHUB_SHA)
             Write-Host 'STAGE30_DISCOVERY15_NATIVE=EVIDENCE_ONLY'
-            if (($stageLines -contains 'CURRENT_STAGE=30') -or ($stageLines -contains 'CURRENT_STAGE=31') -or ($stageLines -contains 'CURRENT_STAGE=32') -or (($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34'))) { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
+            if (($stageLines -contains 'CURRENT_STAGE=30') -or ($stageLines -contains 'CURRENT_STAGE=31') -or ($stageLines -contains 'CURRENT_STAGE=32') -or (($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34') -or ($stageLines -contains 'CURRENT_STAGE=35'))) { Write-Host 'STAGE30_SEAL_RECHECK=PASS' }
           } elseif (($stageLines -contains 'CURRENT_STAGE=27') -and
               ((($stageLines -contains 'LAST_COMPLETED_STAGE=26') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=AWAITING')) -or
                (($stageLines -contains 'LAST_COMPLETED_STAGE=27') -and ($stageLines -contains 'STAGE27_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
@@ -332,6 +336,10 @@ jobs:
             & .\tests\Stage32.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage32 canonical research failed' }
             $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+            $stage35Pending = (($stageLines -contains 'CURRENT_STAGE=35') -and
+                              ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
+                              ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and
+                              ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage32PriorSeal = (((($stageLines -contains 'CURRENT_STAGE=32') -and
                                    ($stageLines -contains 'LAST_COMPLETED_STAGE=32')) -or
                                   ((($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34')) -and
@@ -340,7 +348,7 @@ jobs:
             $stage34Seal = (($stageLines -contains 'CURRENT_STAGE=34') -and
                             ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                             ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
-            if ($stage32PriorSeal -or $stage34Seal) {
+            if ($stage32PriorSeal -or $stage34Seal -or $stage35Pending) {
               Add-Content -Path stage32-canonical-metadata.txt -Value 'STAGE32_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
               Write-Host 'STAGE32_SEAL_RECHECK=PASS'
             } else {
@@ -387,13 +395,17 @@ jobs:
             & .\tests\Stage33.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage33 native research failed' }
             $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+            $stage35Pending = (($stageLines -contains 'CURRENT_STAGE=35') -and
+                              ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
+                              ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and
+                              ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage33PriorSeal = ((($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34')) -and
                                  ($stageLines -contains 'LAST_COMPLETED_STAGE=33') -and
                                  ($stageLines -contains 'STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage34Seal = (($stageLines -contains 'CURRENT_STAGE=34') -and
                             ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                             ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
-            if ($stage33PriorSeal -or $stage34Seal) {
+            if ($stage33PriorSeal -or $stage34Seal -or $stage35Pending) {
               Add-Content -Path stage33-grid-metadata.txt -Value 'STAGE33_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
               Write-Host 'STAGE33_SEAL_RECHECK=PASS'
             } else {
@@ -444,7 +456,7 @@ jobs:
             $stage34Seal = (($stageLines -contains 'CURRENT_STAGE=34') -and
                             ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                             ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
-            if ($stage34Seal) {
+            if ($stage34Seal -or (($stageLines -contains 'CURRENT_STAGE=35') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) {
               Add-Content -Path stage34-metadata.txt -Value 'STAGE34_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
               Write-Host 'STAGE34_SEAL_RECHECK=PASS'
             } else {
@@ -462,5 +474,48 @@ jobs:
           path: |
             stage34-metadata.txt
             stage34-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
+
+  stage35-anisotropic-cubes:
+    name: Stage35 bounded anisotropic nonunit cubes
+    if: github.ref == 'refs/heads/PowerShell+Tagalog'
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test Stage35 896 bounded oracle assertions
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($sha -cne $env:GITHUB_SHA) { throw 'Stage35 checkout SHA mismatch' }
+          $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          if (-not (($stageLines -contains 'CURRENT_STAGE=35') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) { throw 'Stage35 predecessor metadata invalid' }
+          @(
+            ('STAGE35_HEAD_SHA=' + $sha),
+            ('STAGE35_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE35_SCOPE=16_CUBES_64_CONTEXTS_128_ENDPOINTS_64_SEAL_EDGES_32_FACES_8_SCALE_PAIRS',
+            'STAGE35_EXPECTED_ASSERTIONS=896',
+            'STAGE35_STAGE_SEAL=NOT_CLAIMED'
+          ) | Set-Content stage35-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage35-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage35.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage35 independent-oracle research failed' }
+            Write-Host ('STAGE35_NATIVE_SHA=' + $sha)
+            Write-Host 'STAGE35_DISCOVERY20_NATIVE=BOUNDED_RESEARCH_ONLY'
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Preserve Stage35 exact-SHA native artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage35-anisotropy-evidence
+          path: |
+            stage35-metadata.txt
+            stage35-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn
