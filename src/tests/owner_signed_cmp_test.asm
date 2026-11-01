@@ -1476,45 +1476,36 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
 
-    ; Case 259: revoked fragmented owner A against live canonical owner 46 B.
-    ; Both operands are +8192; only A is invalid. Keep descriptors, lease
-    ; tags and the live owner's high SRAM sentinel read-only.
+    ; Case 259: revoked fragmented A / live canonical owner 46 B.
+    ; Case 260: live owner 46 A / revoked fragmented owner 45 B.
+    ; Share identical read-only assertions to fit ROM0, but execute the
+    ; comparison twice. wTestCase advances 0102->0103->0104.
+    ld a, 46
+    ld [wOwnerCmpOwnerB], a
+.revokedPeerLoop:
     ld a, [wTestCase]
     inc a
     ld [wTestCase], a
-    cp 3
-    jp nz, .fail
     ld a, [wTestCaseHi]
     cp 1
     jp nz, .fail
-    ld a, 46
-    ld [wOwnerCmpOwnerB], a
     ld a, 3
     call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
     call OwnerCmpTestCheckPreCapacityByte
     jp nc, .fail
-
-    ; Case 260: live owner 46 A against revoked fragmented owner 45 B.
-    ; Mirror the operand validity orientation without altering runtime.
-    ; Validate 0104, descriptors, all lease tags and bank-edge sentinel.
     ld a, [wTestCase]
-    inc a
-    ld [wTestCase], a
-    cp 4
-    jp nz, .fail
-    ld a, [wTestCaseHi]
-    cp 1
-    jp nz, .fail
+    cp 3
+    jr nz, .revokedPeerDone
     ld a, 46
     ld [wOwnerCmpOwnerA], a
     ld a, 45
     ld [wOwnerCmpOwnerB], a
-    ld a, 3
-    call OwnerCmpTestExpectResultSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckPreCapacityByte
-    jp nc, .fail
+    jr .revokedPeerLoop
+.revokedPeerDone:
+    ld a, [wTestCase]
+    cp 4
+    jp nz, .fail
 
     ld a, 46
     ld [wOwnerRequest], a
