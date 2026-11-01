@@ -164,7 +164,7 @@ foreach ($neighbours as $direction => $year) {
         $actualError = null;
         try {
             $run($budget);
-        } catch (RuntimeException $e) {
+        } catch (\Throwable $e) {
             $actualError = $e->getMessage();
         }
         ++$faults51;
