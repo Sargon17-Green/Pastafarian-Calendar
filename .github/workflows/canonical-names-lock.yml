@@ -25,8 +25,8 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  stage29_native_v:
-    name: V 0.5.2 — PATCH 14 little-first
+  stage30_native_v:
+    name: V 0.5.2 — DISCOVERY 15 five-field witness
     if: github.event_name == 'push' && github.ref == 'refs/heads/V+አማርኛ'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -202,8 +202,42 @@ jobs:
         run: |
           set -euo pipefail
           v test ./pastafari/patch14_test.v 2>&1 | tee stage29_patch14.log
-          test "$(find ./pastafari -maxdepth 1 -name '*_test.v' | wc -l)" -eq 43
-          echo 'Stage29: 43 GREEN test files; 4 former RED assertions now GREEN'
+          test "$(find ./pastafari -maxdepth 1 -name '*_test.v' | wc -l)" -eq 45
+          echo 'Stage29: 43 previous GREEN files retained; 45 files including Stage30'
+      - name: DISCOVERY 15 — five-field structure GREEN witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          v -check ./pastafari/discovery15_witness_test.v
+          v test ./pastafari/discovery15_witness_test.v 2>&1 | tee stage30_witness_green.log
+      - name: DISCOVERY 15 — four intentional RED output witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          v -check ./pastafari/discovery15_expected_red_test.v
+          set +e
+          v test ./pastafari/discovery15_expected_red_test.v 2>&1 | tee stage30_expected_red.log
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo '::error::Stage30 unexpectedly GREEN before five-field assembly'
+            exit 1
+          fi
+          for test_name in \
+            test_discovery15_expected_red_foundation_same_day \
+            test_discovery15_expected_red_one_day_before_foundation \
+            test_discovery15_expected_red_one_day_after_foundation \
+            test_discovery15_expected_red_distinct_calculation_day; do
+            if ! grep -Fq "$test_name" stage30_expected_red.log; then
+              echo "::error::Missing intended RED assertion: $test_name"
+              exit 1
+            fi
+          done
+          if grep -Eiq '(panic:|cannot find|unknown identifier|compilation failed)' stage30_expected_red.log; then
+            echo '::error::Stage30 failed for a reason other than intended assertions'
+            exit 1
+          fi
+          echo 'Stage30: GREEN shape witnesses, four intended RED output assertions'
       - name: Preserve stage 29 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -212,4 +246,6 @@ jobs:
           path: |
             stage29_expected_green.log
             stage29_patch14.log
+            stage30_witness_green.log
+            stage30_expected_red.log
           if-no-files-found: ignore
