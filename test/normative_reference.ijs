@@ -483,6 +483,10 @@ nr_countBounded=: 3 : 0
   slots=. >1{y
   lo=. >2{y
   hi=. >3{y
+  if. slots = 0 do.
+    if. total = 0 do. 1x return. end.
+    0x return.
+  end.
   shifted=. total - slots*lo
   width=. hi - lo
   if. shifted < 0 do. 0x return. end.
