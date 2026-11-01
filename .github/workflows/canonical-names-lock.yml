@@ -1898,3 +1898,55 @@ jobs:
           path: stage44-evidence/
           retention-days: 30
           if-no-files-found: warn
+
+  lua_stage45_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    needs: lua_stage44_discovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Stage45 midpoint patch evidence and historical source locks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage45-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nTESTED_SHA=%s\n' "$GITHUB_SHA" >stage45-evidence/source.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/legacy_gate_index_lookup.lua)" = 36d90537407ca7f95183800b3d21912081f3035e
+          test "$(git hash-object src/gate_index_patch.lua)" = f427517366aa1cdd0999d142ff31c5f26ac4c985
+          test "$(git hash-object src/legacy_gate_ordinal.lua)" = 7ad9916ae0ef7d3af13fbc7f8b98370af95cdf76
+          test "$(git hash-object src/gate_ordinal_patch.lua)" = aafd53040b7e468602b0dd81b2e97b1e310307bd
+          test "$(git hash-object src/legacy_gate_reverse_ordinal.lua)" = 43375cebb0e183a35c45f4181dce822847ddf66c
+          test "$(git hash-object src/gate_reverse_ordinal_patch.lua)" = 7f1b9396394c26e22958fb1fb8661a347e688e4e
+          test "$(git hash-object src/legacy_gate_nearest_boundary.lua)" = 56fc2dc01b37d6daae6e7711b44b5d6f7788c96c
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          lua5.3 -v >stage45-evidence/lua-version.txt 2>&1
+          set +e
+          timeout --signal=TERM --kill-after=10s 1200s lua5.3 test/stage45_tests.lua . \
+            >stage45-evidence/stdout.txt 2>stage45-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" >stage45-evidence/exit-code.txt
+          cat stage45-evidence/stdout.txt
+          if [ -s stage45-evidence/stderr.txt ]; then cat stage45-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 && test ! -s stage45-evidence/stderr.txt
+          test "$(wc -l <stage45-evidence/stdout.txt)" -eq 3
+          grep -Fxq 'PASS Stage45 canonical: 15 openings, 14 midpoints, 14 final days, parity-aware tie repairs, 8 commits' stage45-evidence/stdout.txt
+          grep -Fxq 'PASS Stage45 synthetic: 96 signed BigInt even-gap midpoint corrections' stage45-evidence/stdout.txt
+          grep -Fxq 'PASS Stage45 hardening: 9 rejects, 2 isolated replays, no oracle in production' stage45-evidence/stdout.txt
+          printf '%s\n' 'STAGE45_NATIVE=PASS' >stage45-evidence/result.txt
+      - name: Upload Stage45 evidence (including failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-stage45-patch-evidence
+          path: stage45-evidence/
+          retention-days: 30
+          if-no-files-found: warn
