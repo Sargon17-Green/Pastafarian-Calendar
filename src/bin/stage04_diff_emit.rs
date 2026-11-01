@@ -6,6 +6,7 @@ use num_traits::One;
 use pastafarian_calendar_rust_az::discovery02_day_tag_probe::candidate_day_tag;
 
 #[allow(dead_code)]
+#[rustfmt::skip]
 #[path = "../../tests/support/normative_oracle.rs"]
 mod normative_oracle;
 
@@ -30,4 +31,3 @@ fn main() {
         );
     }
 }
-
