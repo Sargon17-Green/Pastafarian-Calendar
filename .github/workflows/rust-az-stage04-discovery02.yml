@@ -7,11 +7,13 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
+      - 'tools/stage04_cross_runtime_diff.py'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - 'DEVELOPMENT_STAGE.md'
       - 'audit/STAGE_04_DISCOVERY02_BASELINE_CONTRACT_2026-10-31.md'
       - 'audit/STAGE_04_DISCOVERY02_ARCHIVED_ROUTE_CONTRACT_2026-10-31.md'
+      - 'audit/STAGE_04_DISCOVERY02_DIRECT_RUNTIME_DIFFERENTIAL_CONTRACT_2026-11-01.md'
       - '.github/workflows/rust-az-stage04-discovery02.yml'
   workflow_dispatch:
 
@@ -40,6 +42,7 @@ jobs:
           grep -Fxq 'CURRENT_STAGE=4' DEVELOPMENT_STAGE.md
           grep -Fxq 'LAST_COMPLETED_STAGE=3' DEVELOPMENT_STAGE.md
           grep -Fq 'pub mod discovery02_day_tag_probe;' src/lib.rs
+          test -f audit/STAGE_04_DISCOVERY02_DIRECT_RUNTIME_DIFFERENTIAL_CONTRACT_2026-11-01.md
           cargo fmt --all -- --check
       - name: Run bounded native baseline and prior regression tests
         shell: bash
@@ -81,6 +84,34 @@ jobs:
           fi
           printf 'STAGE04_DISCOVERY02_ARCHIVAL_WITNESS_QA=PASS\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
           cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify pinned original Python and run direct Python-Rust differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive_commit='0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4'
+          archive_tag='python-turkish-v1.0.0-verified-20261030'
+          archive_path='src/pastafari_calendar/legacy_day_counts.py'
+          timeout --signal=TERM --kill-after=5s 90s \
+            git fetch --no-tags --depth=1 origin "refs/tags/$archive_tag"
+          test "$(git rev-parse 'FETCH_HEAD^{commit}')" = "$archive_commit"
+          git show "$archive_commit:$archive_path" > evidence/archived_legacy_day_counts.py
+          test "$(git hash-object evidence/archived_legacy_day_counts.py)" = \
+            '405f461b2e2cdd170ded010e6f8046b78d6b4ab6'
+          timeout --signal=TERM --kill-after=5s 180s \
+            cargo run --locked --quiet --bin stage04_diff_emit \
+            > evidence/stage04_rust_rows.tsv
+          timeout --signal=TERM --kill-after=5s 120s \
+            python3 tools/stage04_cross_runtime_diff.py \
+              --source evidence/archived_legacy_day_counts.py \
+              --rust-tsv evidence/stage04_rust_rows.tsv \
+              --report evidence/stage04_direct_runtime_report.json \
+            | tee evidence/stage04_differential_stdout.txt
+          grep -Fxq 'STAGE04_CROSS_RUNTIME_RED=8 CONTROL=7 UNEXPECTED=0' evidence/stage04_differential_stdout.txt
+          grep -Fxq 'STAGE04_CROSS_RUNTIME_PATCH_OK=15 CANDIDATE_OK=15' evidence/stage04_differential_stdout.txt
+          grep -Fxq 'STAGE04_CROSS_RUNTIME_RESULT=PASS STAGE04_CLOSURE=NOT_CLAIMED' evidence/stage04_differential_stdout.txt
+          printf 'STAGE04_DIRECT_RUNTIME_DIFFERENTIAL=PASS\nSTAGE04_CLOSURE=NOT_CLAIMED\n' \
+            >> evidence/result.txt
+          cat evidence/stage04_differential_stdout.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Upload evidence on success or failure
         if: always()
         uses: actions/upload-artifact@v4
