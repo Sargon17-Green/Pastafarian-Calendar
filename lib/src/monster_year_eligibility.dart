@@ -41,8 +41,7 @@ final class MonsterYearEligibility {
     if (openOrdinal >= closeOrdinal) {
       throw ArgumentError('Open gate ordinal must precede close ordinal.');
     }
-    if (openOrdinal.abs() > prefixLimit ||
-        closeOrdinal.abs() > prefixLimit) {
+    if (openOrdinal.abs() > prefixLimit || closeOrdinal.abs() > prefixLimit) {
       throw RangeError('Year inspection requires gate ordinals -32..32.');
     }
 
