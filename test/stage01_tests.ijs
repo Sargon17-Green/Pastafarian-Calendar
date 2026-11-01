@@ -88,7 +88,11 @@ wideN=. M+1x
 ((nr_unrankBounded 6;2;1;5;5) -: 5 1) check 'unrank limitat păstrează ultimul element lexical'
 
 ((nr_countWeavings 2 2) = 2x) check 'numărul țesăturilor pentru 2 2 este exact'
-((2 2 nr_unrankWeaving 1x) -: 1 1 2 2) check 'prima țesătură pentru 2 2 este lexicală'
+weaveRank1Diag=. 2 2 nr_unrankWeaving 1x
+echo 'DIAG_WEAVE_2_2_RANK1_VALUES=',":weaveRank1Diag
+echo 'DIAG_WEAVE_2_2_RANK1_SHAPE=',":$weaveRank1Diag
+echo 'DIAG_WEAVE_2_2_RANK1_TYPE=',":3!:0 weaveRank1Diag
+((weaveRank1Diag) -: 1 1 2 2) check 'prima țesătură pentru 2 2 este lexicală'
 ((2 2 nr_unrankWeaving 2x) -: 1 2 1 2) check 'a doua țesătură pentru 2 2 este lexicală'
 ((nr_countWeavings 1 1 1) = 1x) check 'lunile unitare au o singură țesătură legală'
 ((1 1 1 nr_unrankWeaving 1x) -: 1 2 3) check 'țesătura unitară respectă ordinea deschiderii și închiderii'
