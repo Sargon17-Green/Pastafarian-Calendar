@@ -5,7 +5,7 @@ import {
  Discovery22FullHandler,Patch21CutletHandler,Discovery21LegacyCutletHandler,
  Patch20StructureSauceHandler,Discovery20StructureSauceHandler,
  Patch19YearCacheHandler,Patch14WideChoiceHandler,
- ScalableLegalWeavingCounter,MonsterStageError,
+ ScalableLegalWeavingCounter,MonsterStageError,MonsterValidationError,
  bootstrapMonster,calendarDateSpaghetti,patch24ScalableLegalWeaving
 } from "../src/index.ts";
 import {FOUNDATION_DAY as F,sauce,askBowl,chooseRank,weavingFamily}
@@ -74,9 +74,9 @@ try{
 const recovered=maker().run(ready,f.request);
 let repeated=false,notIntegrated=false;
 try{maker().run(ready,f.request);}catch(e){repeated=e instanceof MonsterStageError;}
-try{calendarDateSpaghetti(F,F);}catch(e){notIntegrated=e instanceof MonsterStageError;}
+try{calendarDateSpaghetti(0 as unknown as bigint,F);}catch(e){notIntegrated=e instanceof MonsterValidationError;}
 assert(recovered.context===ready&&repeated&&notIntegrated,
- "recover once only; Stage54 barrier unchanged");
+ "recover once only; malformed public date input rejected");
 console.log("STAGE_49_SCALABLE_NATIVE_PASS realYearDays=5349 realMonths=44"+
  " giantCountBits="+N.toString(2).length+
  " historicalSeal32=1 correctedSeal32=1"+
