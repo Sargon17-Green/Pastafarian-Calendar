@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..258: signed owner-scoped comparison.
+; Stage 1 native regression 191..260: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1488,6 +1488,27 @@ RunOwnerSignedCmpTests::
     cp 1
     jp nz, .fail
     ld a, 46
+    ld [wOwnerCmpOwnerB], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
+    call OwnerCmpTestCheckPreCapacityByte
+    jp nc, .fail
+
+    ; Case 260: live owner 46 A against revoked fragmented owner 45 B.
+    ; Mirror the operand validity orientation without altering runtime.
+    ; Validate 0104, descriptors, all lease tags and bank-edge sentinel.
+    ld a, [wTestCase]
+    inc a
+    ld [wTestCase], a
+    cp 4
+    jp nz, .fail
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .fail
+    ld a, 46
+    ld [wOwnerCmpOwnerA], a
+    ld a, 45
     ld [wOwnerCmpOwnerB], a
     ld a, 3
     call OwnerCmpTestExpectResultSnapshot
