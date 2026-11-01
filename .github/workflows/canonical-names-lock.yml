@@ -3106,3 +3106,54 @@ jobs:
           name: perl-stage07-five-field-native
           path: logs/stage07
           retention-days: 30
+
+  # Stage8: bounded generation of monthLengths, not the complete calendar.
+  stage08-month-length-generation-native:
+    if: github.ref_name == 'Perl+國語'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Stage08 independent month-length generation oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage08
+          git rev-parse HEAD > logs/stage08/source.txt
+          perl -e 'print "$^V\n"' > logs/stage08/perl-version.txt
+          perl -Ilib -c lib/Pastafari/Monster/MonthLengthGeneration.pm 2> logs/stage08/syntax.stderr
+          perl -Ilib -c t/53_stage08_month_length_generation.t 2>> logs/stage08/syntax.stderr
+          test "$(grep -c 'syntax OK' logs/stage08/syntax.stderr)" -eq 2
+          test "$(wc -l < logs/stage08/syntax.stderr)" -eq 2
+          set +e
+          (
+            ulimit -v 393216
+            ulimit -c 0
+            timeout --signal=TERM --kill-after=5s 120s prove -e 'perl -CS -Ilib' -v t/53_stage08_month_length_generation.t > logs/stage08/test.stdout 2> logs/stage08/test.stderr
+          )
+          ec=$?
+          set -e
+          printf '%s\n' "$ec" > logs/stage08/test.exit
+          cat logs/stage08/test.stdout
+          cat logs/stage08/test.stderr >&2
+          test "$ec" -eq 0
+          test ! -s logs/stage08/test.stderr
+          grep -q 'Result: PASS' logs/stage08/test.stdout
+          grep -q '^# STAGE08_INDEPENDENT_ENUMERATED=7021$' logs/stage08/test.stdout
+          grep -q '^# STAGE08_INDEPENDENT_BIGINT_CASES=15$' logs/stage08/test.stdout
+          grep -Eq 'Tests=7[1-9][0-9]{2}' logs/stage08/test.stdout
+          printf 'STAGE08_NATIVE_PASS=1\n' | tee logs/stage08/result.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perl-stage08-month-length-generation-native
+          path: logs/stage08
+          retention-days: 30
