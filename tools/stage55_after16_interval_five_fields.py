@@ -75,7 +75,7 @@ def run(before, after, fixture):
         blocks.append(count)
         print(f"STAGE55_SIXTEENTH_INDEPENDENT_BLOCK SYMBOL={j} DIGITS={len(str(count))}")
 
-    assert sum(blocks) == cp, "twelve child blocks do not partition parent count"
+    assert sum(blocks) == cp, "thirteen child blocks do not partition parent count"
     assert blocks[symbol - 1] == cq, "native child count differs from independent count"
     lower = sum(blocks[:symbol - 1])
     assert lower == rp - rq and lower < rp <= lower + cq, "rank interval mismatch"
@@ -85,7 +85,7 @@ def run(before, after, fixture):
     assert month_index == 25 and month_day == 1
     assert month_day == (list(PREFIX) + [symbol]).count(symbol)
     print(f"STAGE55_SIXTEENTH_ROW POSITION=16 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=16 MONTH_INDEX={month_index} MONTH_DAY={month_day}")
-    print(f"STAGE55_SIXTEENTH_INDEPENDENT_PASS SMALL={cases} BLOCKS=12 AFTER15_SHA256={h15} AFTER16_SHA256={h16} REMAINING=4228")
+    print(f"STAGE55_SIXTEENTH_INDEPENDENT_PASS SMALL={cases} BLOCKS=13 AFTER15_SHA256={h15} AFTER16_SHA256={h16} REMAINING=4228")
     print("STAGE55_FULL_YEAR_CANONICAL_ORACLE_NOT_VERIFIED")
     print("STAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED")
     print("STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED")
@@ -93,8 +93,8 @@ def run(before, after, fixture):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("after14", type=Path)
     ap.add_argument("after15", type=Path)
+    ap.add_argument("after16", type=Path)
     ap.add_argument("fixture", type=Path)
     args = ap.parse_args()
-    run(args.after14, args.after15, args.fixture)
+    run(args.after15, args.after16, args.fixture)
