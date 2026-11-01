@@ -67,8 +67,7 @@ pub fn discovery_15_foundation_crossing_test() {
 pub fn discovery_15_zero_negative_and_positive_seals_test() {
   let seals = [0, 1, -1, 999, -999]
   let actual = list.map(seals, fn(seal) { observed(11, 21, 3, seal, 17) })
-  let expected =
-    list.map(seals, fn(seal) { Ok(oracle(11, 21, 3, seal, 17)) })
+  let expected = list.map(seals, fn(seal) { Ok(oracle(11, 21, 3, seal, 17)) })
   actual |> should.equal(expected)
 }
 
@@ -92,8 +91,7 @@ pub fn discovery_15_modulus_periodicity_test() {
 pub fn discovery_15_index_boundary_test() {
   let indices = [modulus - 1, modulus, modulus + 1, -modulus - 1]
   let actual = list.map(indices, fn(k) { observed(11, 21, 6, -1, k) })
-  let expected =
-    list.map(indices, fn(k) { Ok(oracle(11, 21, 6, -1, k)) })
+  let expected = list.map(indices, fn(k) { Ok(oracle(11, 21, 6, -1, k)) })
   actual |> should.equal(expected)
 }
 
@@ -123,24 +121,24 @@ pub fn discovery_15_interleaved_context_isolation_test() {
 
 pub fn discovery_15_bounds_and_one_step_invariant_test() {
   let ks = [-modulus - 1, -1, 0, 1, modulus + 1]
-  let checks = list.map(ks, fn(k) {
-    let assert Ok(output) =
-      discovery_15_answer_at.dispatch_discovery_15(
-        bootstrap.new_context(11, 21),
-        5,
-        -100,
-        k,
-      )
-    let assert Ok(next) = observed(11, 21, 5, -100, k + 1)
-    let shifted = { output.value - 1 + output.previous.answer.direction_step } % modulus
-    let expected_next = case shifted < 0 {
-      True -> shifted + modulus + 1
-      False -> shifted + 1
-    }
-    output.value >= 1
-    && output.value <= modulus
-    && next == expected_next
-  })
+  let checks =
+    list.map(ks, fn(k) {
+      let assert Ok(output) =
+        discovery_15_answer_at.dispatch_discovery_15(
+          bootstrap.new_context(11, 21),
+          5,
+          -100,
+          k,
+        )
+      let assert Ok(next) = observed(11, 21, 5, -100, k + 1)
+      let shifted =
+        { output.value - 1 + output.previous.answer.direction_step } % modulus
+      let expected_next = case shifted < 0 {
+        True -> shifted + modulus + 1
+        False -> shifted + 1
+      }
+      output.value >= 1 && output.value <= modulus && next == expected_next
+    })
   checks |> should.equal([True, True, True, True, True])
 }
 

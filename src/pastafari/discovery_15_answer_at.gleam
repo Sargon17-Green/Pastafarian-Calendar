@@ -34,12 +34,14 @@ pub fn answer_at_for_days(
   seal: Int,
   k: Int,
 ) -> Result(Int, Discovery15Error) {
-  case dispatch_discovery_15(
-    bootstrap.new_context(calculation_day, target_day),
-    queried_bowl_id,
-    seal,
-    k,
-  ) {
+  case
+    dispatch_discovery_15(
+      bootstrap.new_context(calculation_day, target_day),
+      queried_bowl_id,
+      seal,
+      k,
+    )
+  {
     Ok(output) -> Ok(output.value)
     Error(error) -> Error(error)
   }
@@ -51,11 +53,9 @@ pub fn dispatch_discovery_15(
   seal: Int,
   k: Int,
 ) -> Result(Discovery15Output, Discovery15Error) {
-  case discovery_14_ask_bowl.dispatch_discovery_14(
-    context,
-    queried_bowl_id,
-    seal,
-  ) {
+  case
+    discovery_14_ask_bowl.dispatch_discovery_14(context, queried_bowl_id, seal)
+  {
     Error(discovery_14_ask_bowl.InvalidBowlId) -> Error(InvalidBowlId)
     Error(discovery_14_ask_bowl.InvalidContext(error)) ->
       Error(InvalidContext(error))
