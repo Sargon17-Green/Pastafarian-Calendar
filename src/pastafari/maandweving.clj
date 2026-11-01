@@ -114,3 +114,64 @@
      (assoc basis
             :month-weaving (open-rang gevalideerd tabel rang)
             :month-weaving-family-count totaal))))
+
+
+;; DISCOVERY18: afzonderlijke, exact getelde grote families.
+;; Dit verandert de begrensde rang-/selectie-API van DISCOVERY17 niet.
+(def ^:private maximale-grote-maanden 47)
+(def ^:private maximale-grote-dagen 5778N)
+
+(defn- controleer-grote-lengtes [maandlengtes]
+  (when-not (and (sequential? maandlengtes)
+                 (pos? (count maandlengtes))
+                 (every? #(and (integer? %) (<= 4N % 123N)) maandlengtes))
+    (fout :invalid-weaving-family))
+  (when (or (> (count maandlengtes) maximale-grote-maanden)
+            (> (reduce +' 0N maandlengtes) maximale-grote-dagen))
+    (fout :weaving-bound-exceeded))
+  (mapv int maandlengtes))
+
+(defn- gewichten-voor-nieuwe-maand [nieuwe-dagen oude-dagen]
+  ;; w(t) = C(nieuwe-dagen+t-2,t), exact via een deelbare recurrence.
+  (loop [t 0
+         gewicht 1N
+         antwoord [1N]]
+    (if (>= t (dec oude-dagen))
+      antwoord
+      (let [volgende (quot (*' gewicht (+ (dec nieuwe-dagen) t))
+                            (inc t))]
+        (recur (inc t) volgende (conj antwoord volgende))))))
+
+(defn- voeg-maand-toe [frequenties oude-dagen nieuwe-dagen]
+  ;; Oude woorden eindigen noodzakelijk met de hoogste oude maand.
+  ;; Voor nieuwe eerste-positie u+1 zijn de bestaande u tekens ervoor
+  ;; en staan alle overige nieuwe tekens in de u..oude-dagen gaten,
+  ;; inclusief minstens één nieuwe letter in het laatste gat.
+  ;; Cumulatieve telling over oude eerste-posities <= u.
+  (let [gewichten (gewichten-voor-nieuwe-maand nieuwe-dagen oude-dagen)]
+    (loop [u 1
+           prefix 0N
+           resultaat [0N 0N]]
+      (if (> u oude-dagen)
+        resultaat
+        (let [nieuw-prefix (+' prefix (get frequenties u 0N))
+              gewicht (nth gewichten (- oude-dagen u))]
+          (recur (inc u)
+                 nieuw-prefix
+                 (conj resultaat (*' nieuw-prefix gewicht))))))))
+
+(defn aantal-wevingen-groot
+  "Exact BigInt aantal maandwoorden voor 1..47 maanden, elk 4..123 dagen,
+   totaal <= 5778. Alleen tellen; geen rang-/datumuitbreiding.
+   O(m*N) BigInt-bewerkingen en O(N) BigInt-opslag."
+  [maandlengtes]
+  (let [lengtes (controleer-grote-lengtes maandlengtes)]
+    (loop [oude-dagen (first lengtes)
+           nog (next lengtes)
+           frequenties [0N 1N]]
+      (if (nil? nog)
+        (reduce +' 0N frequenties)
+        (let [nieuwe-dagen (first nog)]
+          (recur (+ oude-dagen nieuwe-dagen)
+                 (next nog)
+                 (voeg-maand-toe frequenties oude-dagen nieuwe-dagen)))))))
