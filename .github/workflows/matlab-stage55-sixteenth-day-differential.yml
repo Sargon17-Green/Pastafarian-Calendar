@@ -5,7 +5,7 @@ on:
       - 'MATLAB\+Polski'
     paths:
       - 'tools/run_stage55_year5000_sixteenth_native.m'
-      - 'tools/stage55_after15_interval_five_fields.py'
+      - 'tools/stage55_after16_interval_five_fields.py'
       - '.github/workflows/matlab-stage55-sixteenth-day-differential.yml'
   workflow_dispatch:
 permissions:
@@ -24,7 +24,7 @@ jobs:
       - name: Download certified AFTER15 checkpoint
         uses: actions/download-artifact@v4
         with:
-          name: stage55-fourteenth-day-differential
+          name: stage55-fifteenth-day-differential
           run-id: 41244335493
           github-token: ${{ github.token }}
           path: logs
@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/stage55_after15_interval_five_fields.py \
+          python3 tools/stage55_after16_interval_five_fields.py \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_15.json \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_16.json \
             tests/fixtures/stage55_year5000_appendix_a_metadata.json \
