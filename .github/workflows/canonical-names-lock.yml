@@ -120,6 +120,12 @@ jobs:
             build/stage01_weaving_polynomial.o \
             build/stage01_weaving_polynomial_unrank.o \
             -o build/stage01_weaving_scaling_probe
+          gfortran "${flags[@]}" test/stage01_weaving_rank_probe.f90 \
+            build/big_integer.o \
+            build/stage01_weaving_polynomial.o \
+            build/stage01_weaving_polynomial_unrank.o \
+            -o build/stage01_weaving_rank_probe
+          test -x build/stage01_weaving_rank_probe
           test -x build/stage01_weaving_scaling_probe
           test -x build/stage01_weaving_unrank_probe
           test -x build/stage01_weaving_prefix_probe
@@ -386,6 +392,32 @@ jobs:
             fi
             echo "STAGE01_SCALING_VERDICT=$verdict COLORS=$colors EXIT=$exit_code"
             echo "Fortran Stage1 scaling: colors=$colors exit=$exit_code verdict=$verdict; 12s/1GiB, no date integration." >> "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Diagnose Stage1 arbitrary-rank scaling (middle and near-last; non-gating)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Each shape/rank case has a separate 12s runtime and 1GiB memory cap.
+          # Exact rank correctness comes from the separate exhaustive small-shape gate.
+          for colors in 2 4 16 45; do
+            for mode in middle near_last; do
+              set +e
+              output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 12s build/stage01_weaving_rank_probe "$colors" "$mode") 2>&1)"
+              exit_code=$?
+              set -e
+              printf '%s\n' "$output"
+              if [[ "$exit_code" -eq 0 ]] &&
+                 grep -Fxq 'STAGE01_RANK_ASSERTIONS=8' <<< "$output" &&
+                 grep -Fxq 'STAGE01_RANK_PASS (structural only; independent small oracle is separate)' <<< "$output"; then
+                verdict=PASS_STRUCTURAL_ONLY
+              elif [[ "$exit_code" -eq 124 ]]; then
+                verdict=TIMEOUT_NOT_ACCEPTED
+              else
+                verdict=INCONCLUSIVE_OR_FAIL
+              fi
+              echo "STAGE01_RANK_VERDICT=$verdict COLORS=$colors MODE=$mode EXIT=$exit_code"
+              echo "Fortran Stage1 arbitrary rank: colors=$colors mode=$mode exit=$exit_code verdict=$verdict; max 12s/1GiB per case; candidate only." >> "$GITHUB_STEP_SUMMARY"
+            done
           done
       - name: Diagnose Stage1 polynomial 45-month candidate (bounded, non-gating)
         shell: bash
