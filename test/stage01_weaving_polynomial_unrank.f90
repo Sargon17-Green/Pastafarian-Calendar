@@ -24,6 +24,18 @@ contains
     if (sum(lengths)>5778) return
     if (size(word)/=sum(lengths)) return
     if (bi_compare(rank,bi_one())<0) return
+    ! A sorted block word (all 1s, then all 2s, etc.) always obeys
+    ! ordered first and last appearances, so rank one is valid for
+    ! every validated nonempty shape. Avoid an expensive total count.
+    if (bi_compare(rank,bi_one())==0) then
+       p=0
+       do color=1,size(lengths)
+          word(p+1:p+lengths(color))=color
+          p=p+lengths(color)
+       end do
+       ok=.true.
+       return
+    end if
     total=count_weavings_polynomial(lengths)
     if (bi_compare(rank,total)>0) return
 
@@ -31,6 +43,29 @@ contains
     opened=0; closed=0; offset=rank
     do p=1,size(word)
        chosen=.false.
+       ! Any locally legal next symbol has a legal completion: finish
+       ! already-open colors in closing order, then open/finish the rest.
+       ! Once the residual rank is one, the smallest legal symbol is
+       ! therefore the lexicographically first completion. This fast
+       ! suffix is valid for arbitrary initial ranks, not just rank one.
+       if (bi_compare(offset,bi_one())==0) then
+          do color=1,size(lengths)
+             if (remaining(color)==0) cycle
+             if (remaining(color)==lengths(color) .and. color/=opened+1) cycle
+             if (remaining(color)==1 .and. color/=closed+1) cycle
+             if (remaining(color)==lengths(color)) opened=color
+             if (remaining(color)==1) closed=color
+             remaining(color)=remaining(color)-1
+             word(p)=color
+             chosen=.true.
+             exit
+          end do
+          if (.not. chosen) then
+             word=0
+             return
+          end if
+          cycle
+       end if
        do color=1,size(lengths)
           if (remaining(color)==0) cycle
           if (remaining(color)==lengths(color) .and. color/=opened+1) cycle
