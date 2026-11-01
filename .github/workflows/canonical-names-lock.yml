@@ -29,6 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - name: Audit arithmetic model independently of SM83 binaries
         run: |
           python3 tests/test_arithmetic_invariants.py
@@ -48,7 +50,20 @@ jobs:
         run: |
           docker run --rm --mount type=bind,src="$PWD",dst=/work \
             -w /work ghcr.io/gbdev/rgbds:v1.0.4 \
-            sh -c 'make build'
+            sh -c 'make build && rgblink -m build/calendar.map -o build/map_probe.gb build/calendar.o'
+      - name: Measure Stage1 ROM0 deduplication against passing predecessor
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/SM83-Assembly+ግዕዝ' && github.event.head_commit.message == 'test(sm83): deduplicate status assertions with measured ROM0 budget' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_dir="$(mktemp -d "${RUNNER_TEMP}/sm83-rom0-baseline.XXXXXX")"
+          rmdir "$base_dir"
+          trap 'git worktree remove --force "$base_dir" >/dev/null 2>&1 || true' EXIT
+          git worktree add --detach "$base_dir" HEAD^
+          docker run --rm --mount type=bind,src="$base_dir",dst=/work \
+            -w /work ghcr.io/gbdev/rgbds:v1.0.4 \
+            sh -c 'make build && rgblink -m build/calendar.map -o build/map_probe.gb build/calendar.o'
+          python3 tests/test_rom0_budget.py "$base_dir/build/calendar.map" build/calendar.map 15
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

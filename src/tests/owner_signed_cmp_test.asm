@@ -9,42 +9,36 @@ RunOwnerSignedCmpTests::
     ld a, 3
     ld [wOwnerCount], a
     call OwnerLeaseAlloc
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, 42
     ld [wOwnerRequest], a
     ld a, 1
     ld [wOwnerCount], a
     call OwnerLeaseAlloc
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, 41
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, 43
     ld [wOwnerRequest], a
     call OwnerLeaseAlloc
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, 44
     ld [wOwnerRequest], a
     call OwnerLeaseAlloc
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, 45
     ld [wOwnerRequest], a
     ld a, 2
     ld [wOwnerCount], a
     call OwnerLeaseAlloc
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, [wOwnerBanks]
     cp 5
@@ -55,8 +49,7 @@ RunOwnerSignedCmpTests::
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseAlloc
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
 
     ld a, 45
@@ -100,8 +93,7 @@ RunOwnerSignedCmpTests::
     ld a, 1
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, [wOwnerSelectedBank]
     cp 7
@@ -111,8 +103,7 @@ RunOwnerSignedCmpTests::
     ld a, 2
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     call OwnerSignedCmp
     ld a, [wOwnerCmpResult]
@@ -199,8 +190,7 @@ RunOwnerSignedCmpTests::
     ld a, 1
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, $ff
     ld [wOwnerOffset], a
@@ -325,16 +315,14 @@ RunOwnerSignedCmpTests::
     ld a, $7f
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, 42
     ld [wOwnerRequest], a
     ld a, 1
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
 
     ld a, 46
@@ -1063,8 +1051,7 @@ RunOwnerSignedCmpTests::
     ld a, $5a
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     xor a
     ld [wOwnerCmpSignA], a
@@ -1163,8 +1150,7 @@ RunOwnerSignedCmpTests::
     ld a, $3c
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     xor a
     ld [wOwnerCmpSignA], a
@@ -1228,8 +1214,7 @@ RunOwnerSignedCmpTests::
     xor a
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, 46
     ld [wOwnerCmpOwnerA], a
@@ -1276,8 +1261,7 @@ RunOwnerSignedCmpTests::
     ld a, 2
     ld [wOwnerCount], a
     call OwnerLeaseAlloc
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     ld a, [wOwnerBanks]
     cp 5
@@ -1298,8 +1282,7 @@ RunOwnerSignedCmpTests::
     ld a, $33
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
     xor a
     ld [wOwnerOffset], a
@@ -1308,8 +1291,7 @@ RunOwnerSignedCmpTests::
     ld a, 1
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
 
     ; 248: same fragmented owner, canonical 8192-byte A < 8193-byte B.
@@ -1372,8 +1354,7 @@ RunOwnerSignedCmpTests::
     xor a
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
 
     ; Cases 252-255: all opposite-sign orientations with one noncanonical
@@ -1452,8 +1433,7 @@ RunOwnerSignedCmpTests::
     ld a, 45
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
-    ld a, [wOwnerStatus]
-    or a
+    call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
 
     ; Case 258: after releasing the fragmented owner, both descriptors
@@ -1882,4 +1862,10 @@ OwnerCmpTestExpectResultSnapshot:
     jp OwnerCmpTestCheckSnapshot
 .bad:
     and a
+    ret
+
+; Test-only shared status read: A and condition flags match original code.
+OwnerCmpTestReadOwnerStatus:
+    ld a, [wOwnerStatus]
+    or a
     ret
