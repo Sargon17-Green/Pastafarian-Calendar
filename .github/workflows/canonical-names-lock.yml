@@ -115,6 +115,12 @@ jobs:
             build/stage01_weaving_polynomial.o \
             build/stage01_weaving_polynomial_unrank.o \
             -o build/stage01_weaving_unrank_probe
+          gfortran "${flags[@]}" test/stage01_weaving_scaling_probe.f90 \
+            build/big_integer.o \
+            build/stage01_weaving_polynomial.o \
+            build/stage01_weaving_polynomial_unrank.o \
+            -o build/stage01_weaving_scaling_probe
+          test -x build/stage01_weaving_scaling_probe
           test -x build/stage01_weaving_unrank_probe
           test -x build/stage01_weaving_prefix_probe
           test -x build/stage01_weaving_polynomial_probe
@@ -359,6 +365,28 @@ jobs:
           echo 'STAGE01_POLY_UNRANK_NATIVE_PASS=1118 EXPECTED=1118 (not full Stage1 acceptance)'
           echo 'Fortran Stage1 candidate lex-unrank: 105 shapes, 698 ranks, 1118 independent checks. Not normative.' >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Diagnose Stage1 candidate unrank scaling (bounded; NOT acceptance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for colors in 1 2 4 8 16 45; do
+            set +e
+            output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 12s build/stage01_weaving_scaling_probe "$colors") 2>&1)"
+            exit_code=$?
+            set -e
+            printf '%s\n' "$output"
+            if [[ "$exit_code" -eq 0 ]] &&
+               grep -Fxq 'STAGE01_SCALING_ASSERTIONS=6' <<< "$output" &&
+               grep -Fxq 'STAGE01_SCALING_PASS (candidate-only rank one; NOT normative integration)' <<< "$output"; then
+              verdict=PASS_CANDIDATE_ONLY
+            elif [[ "$exit_code" -eq 124 ]]; then
+              verdict=TIMEOUT_NOT_ACCEPTED
+            else
+              verdict=INCONCLUSIVE_OR_FAIL
+            fi
+            echo "STAGE01_SCALING_VERDICT=$verdict COLORS=$colors EXIT=$exit_code"
+            echo "Fortran Stage1 scaling: colors=$colors exit=$exit_code verdict=$verdict; 12s/1GiB, no date integration." >> "$GITHUB_STEP_SUMMARY"
+          done
       - name: Diagnose Stage1 polynomial 45-month candidate (bounded, non-gating)
         shell: bash
         run: |
