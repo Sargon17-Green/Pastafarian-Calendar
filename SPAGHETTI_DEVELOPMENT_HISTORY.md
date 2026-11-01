@@ -863,3 +863,20 @@ Nine real years 4996..5004, 9 targets, 17 successful requests,
 8 expected budget rejections; Oracle only under tests. No production
 modification, no main/merge, no predeclared expected-red.
 Stage50 Native status remains AWAITING_CI until source-matched evidence.
+
+
+## 2026-11-01 — Stage50 Native GREEN; Stage51 / VERIFICATION28 opened
+
+Stage50 on SHA 50cdaf5f52f803763bdcb0d00403d4120db79ca9:
+Actions #41350019540 completed/success, 21/21 jobs. PHP 8.3.36
+64-bit job #124977978607: checks=73, years=9, targets=9,
+successful=17, rejected=8, max_hops=4; stderr empty, exit 0.
+Artifact #13101446147 ZIP SHA256
+61cf285ff1ba786fe9a47913e31851989ebe79d61dd3fdb948c5c3b1a56012b1.
+Closure stored at artifacts/STAGE50_VERIFICATION27_NATIVE_CLOSURE_2026-11-01.md.
+Stage51 is a separate test-only verification of provider-failure trace
+prefix, hard short-circuit and immediate healthy-call recovery.
+Two genuine adjacent years, 10 fault modes in each direction, 20
+fault rejections, 20 recovery calls and two healthy baselines.
+No production edit and no expected-red historical claim. Stage51
+Native remains AWAITING_CI on the new commit, not PASS.

@@ -879,3 +879,48 @@ jobs:
           path: evidence-stage50/
           retention-days: 30
           if-no-files-found: warn
+
+
+  stage51-failure-isolation-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Stage51 failure isolation PHP Native
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage51
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=51\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage51/source.txt
+          php -v > evidence-stage51/php-version.txt
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l tests/stage51_provider_failure_isolation.php
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage51_provider_failure_isolation.php > evidence-stage51/stdout.txt 2> evidence-stage51/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence-stage51/exit-code.txt
+          cat evidence-stage51/stdout.txt
+          cat evidence-stage51/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage51/stderr.txt
+          grep -Eq '^STAGE51_FAILURE_ISOLATION checks=[0-9]+ directions=2 faults=20 recovered=20 baseline=2$' evidence-stage51/stdout.txt
+      - name: Preserve Stage51 Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage51-failure-isolation
+          path: evidence-stage51/
+          retention-days: 30
+          if-no-files-found: warn
