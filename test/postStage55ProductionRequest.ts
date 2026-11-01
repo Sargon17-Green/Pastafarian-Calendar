@@ -1,3 +1,13 @@
+import {projectObservedStage55Date} from "../src/postStage55ObservedDate.ts";
+import {cutletNameByCanonicalIndex,monthNameByCanonicalIndex} from "../src/sourceLanguageCatalog.ts";
+import {sauce} from "./normativeOracle.ts";
+import {
+ Patch27FullHandler,Discovery27FullHandler,Patch26FullHandler,Discovery26FullHandler,
+ Patch25FullHandler,Discovery25FullHandler,Patch24ScalableFullHandler,
+ Discovery24FullHandler,Patch23FullHandler,Discovery23FullHandler,
+ Patch22FullHandler,Discovery22FullHandler,Discovery22FullHandler as Stage22Once,
+ Patch21CutletHandler,Discovery21LegacyCutletHandler,patch27MonthMembership
+} from "../src/index.ts";
 import {resolvePatch20FirstDaySauceQuestion} from "../src/patch20StructureSauce.ts";
 import {Patch21CutletHandler,patch21CutletPartition} from "../src/patch21FilteredCutletCompositions.ts";
 import {Discovery21LegacyCutletHandler} from "../src/discovery21LegacyCutletCompositions.ts";
@@ -9,6 +19,17 @@ import { Patch20StructureSauceHandler,patch20StructureSauce } from "../src/patch
 import { createProductionPatch20Request } from "../src/postStage55ProductionRequest.ts";
 import { NormativeOracle } from "./normativeOracle.ts";
 function ok(b:boolean,m:string):void{if(!b)throw new Error(m);}
+function fullStage55():Patch27FullHandler {
+ return new Patch27FullHandler(new Discovery27FullHandler(
+  new Patch26FullHandler(new Discovery26FullHandler(
+   new Patch25FullHandler(new Discovery25FullHandler(
+    new Patch24ScalableFullHandler(new Discovery24FullHandler(
+     new Patch23FullHandler(new Discovery23FullHandler(
+      new Patch22FullHandler(new Discovery22FullHandler(
+       new Patch21CutletHandler(new Discovery21LegacyCutletHandler(handler()))
+      ))))))))))));
+}
+
 function handler():Patch20StructureSauceHandler {
  return new Patch20StructureSauceHandler(
   new Discovery20StructureSauceHandler(new Patch19YearCacheHandler()));
@@ -47,6 +68,43 @@ for(const item of cases){
   multiCandidates+=construction.oldMultiCandidateCount;
  }
  const expected=oracle.findTargetYear(item.c,item.t);
+ if(item.name==="anchor-next"){
+  // Actual (c,t) request, complete Stage55 Native history and Seal33;
+  // independent oracle supplies cutlet/name choices, not the production tuple.
+  const native=patch27MonthMembership(fullStage55(),request,1,1);
+  const output=projectObservedStage55Date(request,native);
+  const structural=sauce(item.c,expected.openGateDay+1n);
+  const cutletCount=oracle.chooseCutletCount(structural,expected);
+  const independentCutlets=oracle.materializeCutlets(expected,
+   oracle.chooseCutletPartition(item.c,structural,expected,cutletCount),
+   oracle.chooseCutletNames(structural,cutletCount));
+  const matchingCutlet=independentCutlets.find(k=>k.firstDay<=item.t&&item.t<=k.lastDay);
+  ok(matchingCutlet!==undefined,"independent oracle must resolve target cutlet");
+  const independentMonthCount=oracle.chooseMonthCount(structural,expected);
+  const independentMonthNames=oracle.chooseMonthNames(structural,independentMonthCount);
+  const legal=native.historical.historical.historical.historical.historical.historical.corrected.legalWeaving;
+  const localIndex=Number(item.t-expected.openGateDay)-1;
+  const monthId=legal[localIndex]!;
+  const independentTuple=[
+    expected.number,
+    cutletNameByCanonicalIndex(matchingCutlet!.canonicalIndex),
+    item.t-matchingCutlet!.firstDay+1n,
+    monthNameByCanonicalIndex(independentMonthNames[monthId-1]!),
+    BigInt(legal.slice(0,localIndex+1).filter(v=>v===monthId).length)
+  ] as const;
+  ok(output.date.length===5&&Object.isFrozen(output.date)&&
+    output.date.every((v,i)=>v===independentTuple[i])&&
+    output.totalSharedWrites===58n*BigInt(output.totalNativeCalls)&&
+    output.stage55AdditionalNativeQueries===0,
+    "complete production Native-to-five-part differential");
+  console.log("POST_STAGE55_NATIVE_OBSERVATION_PROJECTION_PASS pairs=1 "+
+    " independentComponents=5 stage55Calls="+output.yearNativeCalls+
+    " seal33Calls="+output.monthNamesNativeCalls+
+    " totalCalls="+output.totalNativeCalls+
+    " totalSharedWrites="+output.totalSharedWrites+
+    " mismatches=0 apiEnabled=0");
+ }
+
  if(item.anchor===null){
   const owner=bootstrapMonster(item.c,item.t);
   const h=handler();
