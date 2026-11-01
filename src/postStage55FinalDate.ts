@@ -2,6 +2,7 @@ import { MonsterValidationError } from "./monsterBase.ts";
 import { createProductionPatch20Request } from "./postStage55ProductionRequest.ts";
 import { projectObservedStage55Date } from "./postStage55ObservedDate.ts";
 import type { ProductionObservedDate } from "./postStage55ObservedDate.ts";
+import type { ProductionFivePartDate } from "./postStage55FivePartProjection.ts";
 import { Patch19YearCacheHandler } from "./patch19GuardedYearCache.ts";
 import { Discovery20StructureSauceHandler } from "./discovery20LegacyStructureSauce.ts";
 import { Patch20StructureSauceHandler } from "./patch20StructureSauce.ts";
@@ -60,4 +61,15 @@ export function observeProductionCalendarDate(
      result.stage55AdditionalNativeQueries!==0)
     throw new MonsterValidationError("अंतिम पाच-घटक Native परिणाम अवैध");
   return result;
+}
+
+/** Public synchronous two-bigint entry point. No foundational module imports
+ * the Stage55 chain, avoiding an ESM temporal-dead-zone initialization cycle.
+ */
+export function calendarDateSpaghetti(
+  calculationDay:bigint,targetDay:bigint
+):ProductionFivePartDate {
+  if(typeof calculationDay!=="bigint"||typeof targetDay!=="bigint")
+    throw new MonsterValidationError("दोन्ही दिवस अचूक bigint असणे आवश्यक");
+  return observeProductionCalendarDate(calculationDay,targetDay).date;
 }

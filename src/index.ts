@@ -89,3 +89,5 @@ export * from "./postStage55CutletProjection.ts";
 export * from "./postStage55FivePartProjection.ts";
 
 export * from "./postStage55ObservedDate.ts";
+
+export * from "./postStage55FinalDate.ts";
