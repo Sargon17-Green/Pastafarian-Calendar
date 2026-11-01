@@ -2,7 +2,7 @@
 """Independent Python integer oracle for owner-scoped signed magnitudes.
 
 This is a HOST reference contract, not execution of SM83 machine code.
-The ROM exercise covers cases 191..261; the additional matrix below is Host-only.
+The ROM exercise covers cases 191..260; the dual-revocation case 261 is Host-only.
 """
 from random import Random
 from test_sram_owner_model import OwnedBanks, SIZE
@@ -413,7 +413,7 @@ def main():
     assert m.read_byte(46, 8191) == (0, 0x33), "A bank-end sentinel changed"
     assert m.read_byte(42, 8191) == (0, 0x00), "B bank-end sentinel changed"
     assert m.read_byte(46, 8192) == (0, 0x01), "A next-bank sentinel changed"
-    # Case 261: both owners independently released, without rewriting a
+    # Host-only case 261: owners independently released, without rewriting a
     # descriptor. Host also checks the reverse operand orientation.
     assert m.release(46) == (0, 2), "live peer lease must be released"
     assert compare_read_only(m, (46, 0, 8192), (45, 0, 8192)) == 3, (

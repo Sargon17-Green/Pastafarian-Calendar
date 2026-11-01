@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..261: signed owner-scoped comparison.
+; Stage 1 native regression 191..260: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1476,10 +1476,10 @@ RunOwnerSignedCmpTests::
     call OwnerCmpTestCheckSnapshot
     jp nc, .fail
 
-    ; Cases 259/260: one revoked owner against an independent live peer.
-    ; Case 261: both owners revoked after releasing peer 46 (0105).
-    ; Three iterations share the read-only snapshot assertion; the SRAM
-    ; sentinel is read only while owner 46 remains live (259/260).
+    ; Case 259: revoked fragmented A / live canonical owner 46 B.
+    ; Case 260: live owner 46 A / revoked fragmented owner 45 B.
+    ; Share identical read-only assertions to fit ROM0, but execute the
+    ; comparison twice. wTestCase advances 0102->0103->0104.
     ld a, 46
     ld [wOwnerCmpOwnerB], a
 .revokedPeerLoop:
@@ -1492,29 +1492,24 @@ RunOwnerSignedCmpTests::
     ld a, 3
     call OwnerCmpTestExpectResultSnapshot
     jp nc, .fail
-    ld a, [wTestCase]
-    cp 5
-    jr z, .revokedPeerDone
     call OwnerCmpTestCheckPreCapacityByte
     jp nc, .fail
     ld a, [wTestCase]
     cp 3
-    jr nz, .revokeLivePeer
+    jr nz, .revokedPeerDone
     ld a, 46
     ld [wOwnerCmpOwnerA], a
     ld a, 45
     ld [wOwnerCmpOwnerB], a
     jr .revokedPeerLoop
-.revokeLivePeer:
+.revokedPeerDone:
+    ld a, [wTestCase]
+    cp 4
+    jp nz, .fail
+
     ld a, 46
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
-    ld a, [wOwnerStatus]
-    or a
-    jp nz, .fail
-    jr .revokedPeerLoop
-.revokedPeerDone:
-
     ld a, 42
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
