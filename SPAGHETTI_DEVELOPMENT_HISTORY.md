@@ -847,3 +847,19 @@ dengan artifacts/STAGE48_VERIFICATION25_NATIVE_CLOSURE_2026-11-01.md.
 Stage49 checks call-order invariance across three permutations and
 recovery after a rejected request using the independent test-only oracle.
 Tiada perubahan kod produksi atau main/merge. Native Stage49 menunggu CI.
+
+## 2026-11-01 — Stage49 Native GREEN; Stage50/VERIFICATION27 opened
+
+GitHub Actions run #41282845368 at efb08f2e90f55837aa95d828ecf1f3d62242b580 completed/success 20/20.
+Dedicated PHP 8.3.36/64-bit Stage49 job #124778105442: 150 checks, 7 years,
+21 targets, 3 query orders, 63 valid results, 6 expected short-budget
+rejections, empty stderr, exit 0. Artifact #13073792860 with upload
+SHA256 c403dde8dbb61ab6bff0ec9f1529557f008777a7350de64996087745faba65bc.
+Closure: artifacts/STAGE49_VERIFICATION26_NATIVE_CLOSURE_2026-11-01.md.
+Stage50 tests a distinct property: exact ordered calls to caller-owned
+trusted-anchor, gate-day, proposed and canonical adjacent-year providers,
+including no excess callbacks after step-budget exhaustion.
+Nine real years 4996..5004, 9 targets, 17 successful requests,
+8 expected budget rejections; Oracle only under tests. No production
+modification, no main/merge, no predeclared expected-red.
+Stage50 Native status remains AWAITING_CI until source-matched evidence.

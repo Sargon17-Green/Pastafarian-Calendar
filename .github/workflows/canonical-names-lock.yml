@@ -835,3 +835,47 @@ jobs:
           path: evidence-stage49/
           retention-days: 30
           if-no-files-found: warn
+
+  stage50-provider-trace-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Stage50 provider invocation trace PHP Native
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage50
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\\nSTAGE=50\\nCOMMIT_SHA=%s\\n' "$GITHUB_SHA" > evidence-stage50/source.txt
+          php -v > evidence-stage50/php-version.txt
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l tests/stage50_provider_call_trace.php
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage50_provider_call_trace.php > evidence-stage50/stdout.txt 2> evidence-stage50/stderr.txt
+          code=$?
+          set -e
+          printf '%s\\n' "$code" > evidence-stage50/exit-code.txt
+          cat evidence-stage50/stdout.txt
+          cat evidence-stage50/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage50/stderr.txt
+          grep -Eq '^STAGE50_CALLBACK_TRACE checks=[0-9]+ years=9 targets=9 successful=17 rejected=8 max_hops=4$' evidence-stage50/stdout.txt
+      - name: Preserve Stage50 Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage50-provider-trace
+          path: evidence-stage50/
+          retention-days: 30
+          if-no-files-found: warn
