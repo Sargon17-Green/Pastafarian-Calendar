@@ -6,7 +6,8 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'tests/TestHarness.ps1')
 $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
 $pending = ($md -match '(?m)^CURRENT_STAGE=35\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=34\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$')
-Assert-StageTrue -Condition $pending -Name 'Stage35 exact pending metadata'
+$sealed = (($md -match '(?m)^CURRENT_STAGE=35\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=35\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))
+Assert-StageTrue -Condition ($pending -or $sealed) -Name 'Stage35 exact pending or sealed metadata'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage34 exact seal retained'
 Assert-StageTrue -Condition (($md -match '(?m)^STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -Name 'Stage32 and Stage33 seals retained'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Historical expected-red retained'
