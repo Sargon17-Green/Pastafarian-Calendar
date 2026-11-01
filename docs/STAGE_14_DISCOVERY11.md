@@ -46,3 +46,14 @@ STAGE14_REAL_FIVEFIELD_SCALARS=15, completed/success and verify on the **same**
 HEAD before accepting Stage14. A Python-only selftest never substitutes for
 Native. Past Stage13 acceptance and the separately verified synthetic 61/61
 remain unchanged. No production source or main change.
+
+## Acceptance addendum — 2026-11-01
+Supersedes the preceding pending status. Run 41283018346 on 648e3e71720e39dabd3871bf5b6aa970ad210ca4
+completed/success, 16/16 jobs including verify, synthetic and Stage14 real.
+GNAT 13 compile/bind/link succeeded. Actual native log markers:
+STAGE14_REAL_ORACLE_SELFTEST_ASSERTIONS=436,
+STAGE14_NATIVE_DOMAIN_REPEAT_ASSERTIONS=21,
+STAGE14_REAL_FIVEFIELD_SCALARS=15,
+STAGE14_SYNTHETIC_FIVEFIELD_ASSERTIONS=61.
+ACCEPTED for the explicitly bounded three-real-day scope, not all possible dates.
+No main merge or other-branch equivalence is inferred.
