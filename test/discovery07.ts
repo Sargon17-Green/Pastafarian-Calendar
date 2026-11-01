@@ -121,5 +121,5 @@ const patchedHidden=patch05HiddenDrops(F,F,canonical);
 check(patchedHidden.correctedReads.every((x,j)=>x===canonical[j]),"PATCH 05");
 check(patch06Prior(F,F,[undefined,19n],patchedHidden.backwardStored,1,7).correctedValue===31n,
   "PATCH 06");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage 54 अजून उपलब्ध नाही");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage 54 अजून उपलब्ध नाही");
 console.log(`STAGE_14_DISCOVERY_07_GUARDS_PASS mismatches=${mismatches} matches=${matches} missing=${missing} shifted=${shifted}`);

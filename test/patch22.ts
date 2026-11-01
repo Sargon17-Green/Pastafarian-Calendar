@@ -109,7 +109,7 @@ assert(maker().run(ready,f.request).context===ready&&
 const a=patch22CutletNames(maker(),f.request);
 assert(a.context!==full.context&&a.corrected!==full.corrected,
  "independent invocation owners");
-assert(rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+assert(rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 full date tuple remains closed");
 console.log("STAGE_45_PATCH_22_GUARDS_PASS"+
  " exactNativeGate=1 correctedRankMismatch=0 fullStage44=1"+

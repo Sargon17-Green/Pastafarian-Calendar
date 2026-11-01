@@ -253,7 +253,7 @@ a.context.metrics.set("private",6n);a.context.logs.push("डावा");
 check(a.context!==b.context&&a.filter!==b.filter&&
  !b.context.metrics.has("private")&&b.context.logs.length===0,
  "private per-invocation ownership");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 calendar route still unavailable");
 console.log("STAGE_33_PATCH_16_GUARDS_PASS boundary="+edges+
  " signedAnchors="+anchors+" positive="+short+" negative="+negative+

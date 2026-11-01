@@ -169,7 +169,7 @@ a.context.metrics.set("private",23n);a.context.logs.push("डावा");
 check(a.context!==b.context&&a.gaps!==b.gaps&&
  a.gaps[0]!==b.gaps[0]&&!b.context.metrics.has("private")&&b.context.logs.length===0,
  "reentrancy isolation");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage54 calendar barrier");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage54 calendar barrier");
 console.log("STAGE_30_DISCOVERY_15_GUARDS_PASS signed="+signed+
  " positive="+positive+" negative="+negative+" oldWrong="+wrong+
  " oldMatches="+good+" actualQuestions="+questionsRun+" sharedWrites="+writes+

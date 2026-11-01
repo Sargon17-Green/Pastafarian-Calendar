@@ -241,7 +241,7 @@ check(isolatedA.context!==isolatedB.context&&
  isolatedA.preceding!==isolatedB.preceding&&
  !isolatedB.context.metrics.has("private")&&isolatedB.context.logs.length===0,
  "reentrant semantics and independent diagnostic snapshots");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 integrated calendar still blocked");
 console.log("STAGE_36_DISCOVERY_18_GUARDS_PASS boundaries="+exact.length+
  " signedAnchors="+anchors+" positive="+positive+" negative="+negative+

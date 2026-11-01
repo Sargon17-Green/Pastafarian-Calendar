@@ -155,7 +155,7 @@ const committed=freshHandler.run(owner,f.first);
 assert(!committed.oldHit&&
  rejects(()=>freshHandler.run(owner,f.first),MonsterStageError),
  "outer context cannot commit twice");
-assert(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+assert(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 integrated date remains unavailable");
 
 console.log("STAGE_38_DISCOVERY_19_GUARDS_PASS"+

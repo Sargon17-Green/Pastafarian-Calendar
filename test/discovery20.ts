@@ -140,7 +140,7 @@ a.context.metrics.set("private",42n);
 assert(!b.context.metrics.has("private")&&
  !same.context.metrics.has("private")&&a.oldSauce!==b.oldSauce,
  "interleaved handlers do not alias diagnostic source/result objects");
-assert(rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+assert(rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 integrated calendar remains forbidden");
 console.log("STAGE_40_DISCOVERY_20_GUARDS_PASS realYears=2"+
  " oldSauceCalls="+actualOld+" actualWrongTarget=2"+

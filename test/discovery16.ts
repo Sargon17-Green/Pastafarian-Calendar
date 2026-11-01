@@ -208,7 +208,7 @@ const y=discoverLegacyYearMax(args.c,-1n,args.historical,args.correct,args.year,
 x.context.metrics.set("private",1n);x.context.logs.push("x");
 check(x.context!==y.context&&!y.context.metrics.has("private")&&
  y.context.logs.length===0&&x.filter!==y.filter,"isolated reentrant owners");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage54 gate intact");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage54 gate intact");
 console.log("STAGE_32_DISCOVERY_16_GUARDS_PASS anchorSides="+signedCases+
  " actualCases="+cells+" legacyLongAccepted="+legacyLongKept+
  " selectorWrong="+yearWrong+" predicateCalls="+oldPredicateCalls+

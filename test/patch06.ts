@@ -148,6 +148,6 @@ check(patch02DayTags(F,F+1n).target.correctedTag===3n,"PATCH 02");
 check(patch03Distance(F-2n,F+2n).distance===workCounts(F-2n,F+2n).distance,"PATCH 03");
 check(patch04Stones(F,F,2n,STONES[1]!).correctedStone.every((x,j)=>x===STONES[2]![j]),"PATCH 04");
 check(patch05HiddenDrops(F,F,canonical).correctedReads.every((x,j)=>x===canonical[j]),"PATCH 05");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage 54 चे integration अजून नाही");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage 54 चे integration अजून नाही");
 
 console.log(`STAGE_13_PATCH_06_GUARDS_PASS cases=${cases} hidden=${hiddenFallbacks} visible=${visibleLegacyCalls} mismatches=${mismatches}`);

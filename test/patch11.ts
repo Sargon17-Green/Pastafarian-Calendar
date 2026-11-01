@@ -180,6 +180,6 @@ left.context.logs.push("पहिला");left.context.metrics.set("private",101
 check(left.context!==right.context&&left.orderAt46Latch!==right.orderAt46Latch&&
   left.ledger!==right.ledger&&!right.context.metrics.has("private")&&
   !right.context.logs.length,"per-call independent ownership");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
   "final calendar route still unavailable until Stage54");
 console.log(`STAGE_23_PATCH_11_GUARDS_PASS pairs=${cases} cells=${cells} mismatches=${correctedMisses} oldWrong=${oldMisses} oldMatches=${oldMatches} latchWrites=1 latchAt=46 sharedWrites=58 legacyCalls=${writeCalls} injectedFailures=${faults}`);

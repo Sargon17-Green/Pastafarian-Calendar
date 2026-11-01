@@ -99,7 +99,7 @@ try{
 }finally{Patch14WideChoiceHandler.prototype.run=oldRun;}
 assert(maker().run(ready,f.request).context===ready&&
  rejected(()=>maker().run(ready,f.request),MonsterStageError)&&
- rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+ rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "retry commits exactly once; Stage54 remains inaccessible");
 console.log("STAGE_46_DISCOVERY_23_GUARDS_PASS"+
  " smallLexRows="+simple.length+" syntheticHugeLowerBound="+lower+

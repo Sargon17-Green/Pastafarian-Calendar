@@ -120,5 +120,5 @@ check(patch02DayTags(F,F+1n).target.correctedTag===3n,"PATCH 02");
 check(patch03Distance(F-2n,F+2n).distance===workCounts(F-2n,F+2n).distance,"PATCH 03");
 const firstStones=patch04Stones(F,F,2n,STONES[1]!);
 check(firstStones.correctedStone.every((v,k)=>v===STONES[2]![k]),"PATCH 04");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage 54 लवकर चालू नये");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage 54 लवकर चालू नये");
 console.log(`STAGE_10_DISCOVERY_05_GUARDS_PASS firstMismatches=6 firstMatches=1 oracleCases=${oracleCases} oracleMismatches=${oracleMismatches} oracleMatches=${oracleMatches}`);

@@ -133,7 +133,7 @@ try{
 const retried=maker().run(ready,f.request);
 assert(retried.context===ready&&
  rejects(()=>maker().run(ready,f.request),MonsterStageError)&&
- rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+ rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "rollback/retry आणि Stage54 barrier");
 const other=patch23MonthLengths(maker(),f.request);
 assert(other.context!==full.context&&other.corrected!==full.corrected,

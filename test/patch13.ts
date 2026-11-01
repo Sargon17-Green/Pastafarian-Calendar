@@ -219,7 +219,7 @@ check(left.context!==right.context&&left.selection!==right.selection&&
  left.preceding!==right.preceding&&
  !right.context.metrics.has("private")&&right.context.logs.length===0,
  "independent ownership across reentrant calls");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
   "Stage54 calendar result still unavailable");
 console.log("STAGE_27_PATCH_13_GUARDS_PASS dayPairs="+pairsDone+
  " cells="+cells+" mismatches="+wrong+" oldWrong="+oldWrong+

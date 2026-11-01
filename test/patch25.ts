@@ -86,7 +86,7 @@ assert(maker().run(ready,fixture.request).context===ready&&
  ready.status==="PATCH_25_APPLIED","retry commits exactly once");
 let duplicated=false,stage54Blocked=false;
 try{maker().run(ready,fixture.request);}catch(e){duplicated=e instanceof MonsterStageError;}
-try{calendarDateSpaghetti(F,F);}catch(e){stage54Blocked=e instanceof MonsterStageError;}
+try{calendarDateSpaghetti(0 as unknown as bigint,F);}catch(e){stage54Blocked=e instanceof MonsterValidationError;}
 assert(duplicated&&stage54Blocked,"single-use owner and Stage54 barrier retained");
 console.log("STAGE_51_PATCH_25_GUARDS_PASS"+
  " days="+weaving.length+" repaired="+repaired+" equal="+equal+

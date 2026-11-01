@@ -270,7 +270,7 @@ a.context.metrics.set("private",24n);a.context.logs.push("डावा");
 check(a.context!==b.context&&a.preceding!==b.preceding&&
  a.sorted!==b.sorted&&!b.context.metrics.has("private")&&b.context.logs.length===0,
  "reentrant independent audit and ordered families");
-check(rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 calendar integration remains disabled");
 console.log("STAGE_35_PATCH_17_GUARDS_PASS multiRuns=2 tiedMembers=6"+
  " moved=6 oldSortSpy="+actualOldSort+" oldComparatorSpy="+actualOldComparator+

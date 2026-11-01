@@ -148,5 +148,5 @@ ensure(patch02DayTags(F,F+1n).target.correctedTag===3n,"PATCH 02");
 ensure(patch03Distance(F-2n,F+2n).distance===workCounts(F-2n,F+2n).distance,"PATCH 03");
 ensure(patch04Stones(F,F,2n,STONES[1]!).correctedStone.every((v,k)=>v===STONES[2]![k]),
   "PATCH 04");
-ensure(rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage 54 अकाली सुरू झाला");
+ensure(rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage 54 अकाली सुरू झाला");
 console.log(`STAGE_11_PATCH_05_ORACLE_PASS cases=${oracleCases} slots=${oracleSlots} legacyDifferences=${oracleMismatches} legacyMatches=${oracleMatches} mismatches=0`);

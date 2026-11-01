@@ -173,7 +173,7 @@ check(left.context!==right.context&&left.preceding!==right.preceding&&
  left.orderAt46Latch!==right.orderAt46Latch&&
  !right.context.metrics.has("private")&&!right.context.logs.length,
  "reentrant independent ownership");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 calendarDateSpaghetti barrier remains");
 console.log("STAGE_25_PATCH_12_GUARDS_PASS dayPairs="+dayPairs+" cells="+cells+
  " mismatches="+mismatches+" oldWrong="+oldWrong+" oldMatches="+oldMatches+

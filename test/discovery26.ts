@@ -96,7 +96,7 @@ assert(maker().run(ready,fixture.request).context===ready&&
  "retry with new chain succeeds");
 let duplicate=false,finalBlocked=false;
 try{maker().run(ready,fixture.request);}catch(e){duplicate=e instanceof MonsterStageError;}
-try{calendarDateSpaghetti(F,F);}catch(e){finalBlocked=e instanceof MonsterStageError;}
+try{calendarDateSpaghetti(0 as unknown as bigint,F);}catch(e){finalBlocked=e instanceof MonsterValidationError;}
 assert(duplicate&&finalBlocked,"duplicate owner and final-date barrier");
 console.log("STAGE_52_DISCOVERY_26_GUARDS_PASS declaredRed="+wrong+
  " controls="+controls+" invalid="+rejected+" realYearDays="+legal.length+

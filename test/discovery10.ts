@@ -116,5 +116,5 @@ a.context.metrics.set("private",99n);a.context.logs.push("पहिला");
 check(a.context!==c.context&&a.inputBowls!==c.inputBowls&&
  a.legacyBowls!==c.legacyBowls&&a.steps!==c.steps&&
  !c.context.metrics.has("private")&&!c.context.logs.length,"per-call ownership");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage54 route remains unavailable");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage54 route remains unavailable");
 console.log(`STAGE_20_DISCOVERY_10_GUARDS_PASS witnesses=${witnesses} positions=48 mismatches=${mismatches} matches=${matches} overwrittenReads=${overwritten} contaminatedPositions=40`);

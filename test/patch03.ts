@@ -144,7 +144,7 @@ check(patch01Save(F, F, 3n * M).savedValue === SAVE(3n * M), "PATCH 01 बिघ
 const patchedTags = patch02DayTags(F, F + 1n);
 check(patchedTags.action.correctedTag === 1n && patchedTags.target.correctedTag === 3n,
   "PATCH 02 बिघडली");
-check(rejected(() => calendarDateSpaghetti(F, F), MonsterStageError), "Stage 54 अकाली सुरू झाला");
+check(rejected(() => calendarDateSpaghetti(0 as unknown as bigint,F), MonsterValidationError), "Stage 54 अकाली सुरू झाला");
 
 check(pairs === 5 + 169 + 3 * deltas.length + 1024, "मोजलेल्या चाचणी-जोड्यांचा हिशेब");
 check(overrides > 0 && preserved > 0 && mismatches === 0,

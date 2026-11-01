@@ -117,7 +117,7 @@ const saved=patch01Save(F,F+1n,3n*M);
 check(saved.savedValue===SAVE(3n*M) && saved.savedValue===M, "PATCH 01 बिघडली");
 check(saved.context.branchTrace.join(",")==="BOOTSTRAP_VALIDATE,PATCH_01_LEGACY_REMAINDER,PATCH_01_ZERO_TO_M",
   "PATCH 01 स्वतंत्र ठेवावी");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError), "Stage 54 अकाली उपलब्ध नको");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError), "Stage 54 अकाली उपलब्ध नको");
 check(days===2*cases && increments>0 && increments<days, "सर्व साक्षी आणि दोन्ही बाजू तपासाव्यात");
 check(scars>0 && forced===0 && mismatches===0, "scar टिकावी आणि निकाल oracle शी जुळावा");
 

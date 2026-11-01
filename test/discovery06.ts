@@ -109,6 +109,6 @@ check(patch04Stones(F,F,2n,STONES[1]!).correctedStone.every((v,j)=>v===STONES[2]
 const canonicalHidden=Array.from({length:7},(_,j)=>hidden[j+1]!);
 check(patch05HiddenDrops(F,F,canonicalHidden).correctedReads.every((v,j)=>v===canonicalHidden[j]),
   "PATCH 05");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
   "Stage 54 चा दिनांक मार्ग अकाली सुरू होऊ नये");
 console.log(`STAGE_12_DISCOVERY_06_GUARDS_PASS mismatches=${mismatches} matches=${matches} hidden=${hiddenWitnesses} visible=${visibleWitnesses}`);

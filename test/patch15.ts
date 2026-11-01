@@ -217,7 +217,7 @@ check(x.context!==y.context&&x.preceding!==y.preceding&&x.gaps!==y.gaps&&
  x.gaps[0]!==y.gaps[0]&&
  !y.context.metrics.has("private")&&y.context.logs.length===0,
  "separate returned semantic state and no alias bleed");
-check(rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 calendar route still disabled");
 console.log("STAGE_31_PATCH_15_GUARDS_PASS signed="+signed+
  " positive="+positive+" negative="+negative+" correctedWrong="+correctedWrong+

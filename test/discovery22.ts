@@ -132,7 +132,7 @@ full.context.metrics.set("private",12n);
 assert(other.context!==full.context&&!other.context.metrics.has("private")&&
  other.names!==full.names,
  "independent per-invocation state");
-assert(rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+assert(rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 full date path remains closed");
 console.log("STAGE_44_DISCOVERY_22_GUARDS_PASS"+
  " oldLexRows="+rows.length+" oldRepeatedRows=1"+

@@ -191,6 +191,6 @@ check(left.context!==right.context&&
   left.correctedBowls.join(",")===right.correctedBowls.join(",")&&
   !right.context.logs.length&&!right.context.metrics.has("private"),
   "reentrant calls have isolated state");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
   "full calendar route still unavailable before Stage54");
 console.log(`STAGE_21_PATCH_10_GUARDS_PASS witnesses=${cases} cells=${cells} mismatches=${mismatches} historicWrong=${historicalWrong} historicMatches=${historicalMatches} vaultReads=6 pendingWrites=6 committedWrites=6 injectedFailures=${injected} legacyCalls=1`);

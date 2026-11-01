@@ -86,8 +86,8 @@ assert(maker().run(ready,fixture.request,44,5349).context===ready&&
 let duplicate=false,finalBlocked=false;
 try{maker().run(ready,fixture.request,44,5349);}
 catch(e){duplicate=e instanceof MonsterStageError;}
-try{calendarDateSpaghetti(F,F);}
-catch(e){finalBlocked=e instanceof MonsterStageError;}
+try{calendarDateSpaghetti(0 as unknown as bigint,F);}
+catch(e){finalBlocked=e instanceof MonsterValidationError;}
 assert(duplicate&&finalBlocked,"duplicate owner and final date remain blocked");
 console.log("STAGE_54_DISCOVERY_27_FULL_NATIVE_PASS realYearDays="+legal.length+
  " realMonth="+month+" realMembers="+members+" realInternalHoles="+realGaps+

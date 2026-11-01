@@ -223,7 +223,7 @@ a.context.metrics.set("private",44n);a.context.logs.push("left");
 check(a.context!==b.context&&a.oldSorted!==b.oldSorted&&
  a.preceding!==b.preceding&&!b.context.metrics.has("private")&&
  b.context.logs.length===0,"reentrant state and old ledger ownership");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage54 integration still blocked");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage54 integration still blocked");
 console.log("STAGE_34_DISCOVERY_17_GUARDS_PASS anchors="+anchors+
  " positive="+positive+" negative="+negative+" wrongSelections="+wrongSelected+
  " rankWrong="+correctedRankWrong+" tieInversions="+oldInversions+

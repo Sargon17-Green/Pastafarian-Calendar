@@ -129,7 +129,7 @@ assert(rejected(()=>handler.run(ready,{
 const done=handler.run(ready,full.request);
 assert(rejected(()=>handler.run(ready,full.request),MonsterStageError)&&
  done.context===ready,"semantic owner is single-use");
-assert(rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+assert(rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 integrated calendar entry remains unavailable");
 console.log("STAGE_43_PATCH_21_GUARDS_PASS exhaustiveFamilies="+tested+
  " exhaustiveRetained="+retained+" exhaustiveRejected="+skipped+

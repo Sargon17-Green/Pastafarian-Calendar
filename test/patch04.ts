@@ -149,7 +149,7 @@ check(patch01Save(F,F,3n*M).savedValue===SAVE(3n*M),"PATCH 01");
 const days=patch02DayTags(F,F+1n);
 check(days.action.correctedTag===1n && days.target.correctedTag===3n,"PATCH 02");
 check(patch03Distance(F-2n,F+2n).distance===workCounts(F-2n,F+2n).distance,"PATCH 03");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage 54 लवकर सुरू नये");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage 54 लवकर सुरू नये");
 check(cases===1+45+special.length+1024 && cells===5*cases && legacyCalls===cases &&
   mismatches===0 && overwritten>0 && differing>0,"सर्व oracle आणि जुन्या call साक्षी");
 console.log(`STAGE_09_PATCH_04_PASS cases=${cases} cells=${cells} legacyCalls=${legacyCalls} overwritten=${overwritten} mismatches=${mismatches}`);

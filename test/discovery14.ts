@@ -188,7 +188,7 @@ left.context.logs.push("पहिली");left.context.metrics.set("private",777
 check(left.context!==right.context&&left.oldResult!==right.oldResult&&
  left.preceding!==right.preceding&&!right.context.metrics.has("private")&&
  right.context.logs.length===0,"fresh owner and no cross-call mutation");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 final route remains forbidden");
 console.log("STAGE_28_DISCOVERY_14_GUARDS_PASS pairs="+pairsDone+" cells="+cells+
  " short="+short+" wide="+wide+" shortWrong="+shortWrong+" wideWrong="+wideWrong+

@@ -145,5 +145,5 @@ const canon=Object.freeze([11n,13n,17n,19n,23n,29n,31n]);
 const hidden=patch05HiddenDrops(F,F,canon);
 check(hidden.correctedReads.every((v,j)=>v===canon[j]),"PATCH 05");
 check(patch06Prior(F,F,[undefined,23n],hidden.backwardStored,1,7).correctedValue===31n,"PATCH 06");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage 54 route unavailable");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage 54 route unavailable");
 console.log(`STAGE_15_PATCH_07_GUARDS_PASS rows=${rows} shifted=${shiftedRepaired} missing=${missingRepaired} mismatches=${mismatches}`);

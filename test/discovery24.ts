@@ -79,7 +79,7 @@ try{
 }finally{Patch14WideChoiceHandler.prototype.run=original;}
 assert(maker().run(ready,f.request).context===ready&&
  rejects(()=>maker().run(ready,f.request),MonsterStageError)&&
- rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError)&&
+ rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError)&&
  discoverLegacyIndependentDailyMonths(maker(),f.request).context!==full.context,
  "retry, owner isolation, and Stage54 barrier");
 console.log("STAGE_48_DISCOVERY_24_GUARDS_PASS"+

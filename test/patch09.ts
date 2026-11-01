@@ -134,6 +134,6 @@ left.context.metrics.set("private",42n);left.context.logs.push("पहिला�
 check(left.context!==right.context&&left.legacyPositionBowlView!==right.legacyPositionBowlView&&
   left.correctedPours!==right.correctedPours&&!right.context.metrics.has("private")&&
   !right.context.logs.length,"per-call ownership and isolation");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
   "final date route must remain unavailable before Stage 54");
 console.log(`STAGE_19_PATCH_09_GUARDS_PASS witnesses=${witnesses} cells=${correctedCells} mismatches=${correctedMismatches} historicalWrong=${oldWrong} historicalMatches=${oldMatches} aliases=6 originalCalls=2`);

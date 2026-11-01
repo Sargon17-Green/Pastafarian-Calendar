@@ -116,5 +116,5 @@ const hidden=patch05HiddenDrops(F,F,[11n,13n,17n,19n,23n,29n,31n]);
 check(hidden.correctedReads[0]===11n && hidden.correctedReads[6]===31n,"PATCH 05");
 check(patch06Prior(F,F,[],hidden.backwardStored,1,7).correctedValue===31n,"PATCH 06");
 check(patch07Grind(F,F,1,17n,29n,43n,71n,[101n,103n,107n,109n,113n]).correctedValue>=1n,"PATCH 07");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage 54 सीमा");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage 54 सीमा");
 console.log(`STAGE_17_PATCH_08_GUARDS_PASS cases=${cases} shifted=${historicallyShifted} rejected=${historicallyRejected} mismatches=${mismatches}`);

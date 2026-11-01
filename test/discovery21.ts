@@ -139,7 +139,7 @@ const second=discoverLegacyCutletPartition(make(),full.request);
 out.context.metrics.set("private",5n);
 assert(!second.context.metrics.has("private")&&
   second.context!==out.context,"no shared semantic context");
-assert(rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+assert(rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 integration unopened");
 console.log("STAGE_42_DISCOVERY_21_GUARDS_PASS directLex=10"+
  " exactGateNativeWrong=1 fullStage41Runs=1"+

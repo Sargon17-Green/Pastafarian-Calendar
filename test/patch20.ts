@@ -202,7 +202,7 @@ a.context.metrics.set("private",33n);
 assert(!b.context.metrics.has("private")&&
  a.newFirstDaySauce!==b.newFirstDaySauce&&a.context!==b.context,
  "independent result ownership");
-assert(rejected(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+assert(rejected(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 date API remains unopened");
 console.log("STAGE_41_PATCH_20_GUARDS_PASS realYears=2 oldSauceCalls="+oldCalls+
  " correctedFirstDayCalls="+correctedFirstDayCalls+

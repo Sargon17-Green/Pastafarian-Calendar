@@ -182,7 +182,7 @@ const x=patch14WideChoice(F,F,visible,STONES,bowls,1,1n,M+1n),
 x.context.logs.push("पहिले");x.context.metrics.set("private",2n);
 check(x.context!==y.context&&x.preceding!==y.preceding&&x.selection!==y.selection&&
  !y.context.metrics.has("private")&&y.context.logs.length===0,"fresh ownership");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage54 barrier");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage54 barrier");
 console.log("STAGE_29_PATCH_14_GUARDS_PASS pairs="+real+" cells="+cells+
  " short="+short+" wide="+wide+" correctedWrong="+mismatches+
  " oldWrong="+oldWrong+" oldMatches="+oldSame+" boundaries="+boundaries+

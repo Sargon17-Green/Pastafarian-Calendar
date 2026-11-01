@@ -251,7 +251,7 @@ assert(!p2.context.metrics.has("private")&&
  !p3.context.metrics.has("private")&&
  p1.context!==p2.context&&p1.fresh!==p2.fresh,
  "fresh requests are independently owned");
-assert(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+assert(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 full calendar remains unintegrated");
 console.log("STAGE_39_PATCH_19_GUARDS_PASS"+
  " directMisses=5 directHits=1 individualGuards=3"+

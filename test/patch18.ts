@@ -190,7 +190,7 @@ check(other.context!==retried.context&&
  other.legacy!==null&&retried.legacy!==null&&other.legacy!==retried.legacy&&
  other.authoritative.steps[0]!.after!==retried.authoritative.steps[0]!.after,
  "fresh instance owns independent mutable contexts and snapshot steps");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 calendar route remains unopened");
 console.log("STAGE_37_PATCH_18_GUARDS_PASS positiveGates="+positiveCount+
  " negativeGates="+negativeCount+" verifiedGates="+window.realGapQuestions+

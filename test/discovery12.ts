@@ -146,6 +146,6 @@ left.context.logs.push("पहिली");left.context.metrics.set("private",31n
 check(left.context!==right.context&&left.preceding!==right.preceding&&
   left.orderAt46Latch!==right.orderAt46Latch&&!right.context.logs.length&&
   !right.context.metrics.has("private"),"independent reentrant histories");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
   "Stage54 final date route still unavailable");
 console.log(`STAGE_24_DISCOVERY_12_GUARDS_PASS dayPairs=${pairsDone} cells=${cells} mismatches=${oldWrong} matches=${oldMatches} rank2Wrong=${wrong3} actualLegacyCalls=${calls} injectedFailures=${failureCases}`);

@@ -75,5 +75,5 @@ left.context.logs.push("first");left.context.metrics.set("private",7n);
 check(left.context!==right.context&&left.inputBowls!==right.inputBowls&&
   left.legacyPours!==right.legacyPours&&!right.context.logs.length&&
   !right.context.metrics.has("private"),"ownership");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),"Stage54 boundary");
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),"Stage54 boundary");
 console.log(`STAGE_18_DISCOVERY_09_GUARDS_PASS witnesses=8 cells=24 mismatches=${mismatches} matches=${matches}`);

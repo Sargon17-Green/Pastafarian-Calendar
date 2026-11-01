@@ -174,7 +174,7 @@ check(left.context!==right.context&&left.preceding!==right.preceding&&
  left.answerStream!==right.answerStream&&
  !right.context.logs.length&&!right.context.metrics.has("private"),
  "reentrant context and stream ownership");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
  "Stage54 main calendar path remains blocked");
 console.log("STAGE_26_DISCOVERY_13_GUARDS_PASS dayPairs="+dayPairs+
  " cells="+cells+" oldWrong="+oldWrong+" oldMatches="+oldMatches+

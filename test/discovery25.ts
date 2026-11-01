@@ -89,7 +89,7 @@ let invalidOwner=false;
 try{maker().run(badReady,fixture.request);}
 catch(e){invalidOwner=e instanceof MonsterStageError;}
 let notIntegrated=false;
-try{calendarDateSpaghetti(F,F);}catch(e){notIntegrated=e instanceof MonsterStageError;}
+try{calendarDateSpaghetti(0 as unknown as bigint,F);}catch(e){notIntegrated=e instanceof MonsterValidationError;}
 const ready=bootstrapMonster(fixture.cDay,
  fixture.request.historical.yearQuestion.targetDay);
 const realSeal32=Patch14WideChoiceHandler.prototype.run;

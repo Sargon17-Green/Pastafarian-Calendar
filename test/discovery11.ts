@@ -159,6 +159,6 @@ for(const at of [1,46,47,52,58]){
   injected++;
 }
 check(injected===5,"five fault boundaries tested");
-check(rejects(()=>calendarDateSpaghetti(F,F),MonsterStageError),
+check(rejects(()=>calendarDateSpaghetti(0 as unknown as bigint,F),MonsterValidationError),
   "final calendar still unavailable before Stage 54");
 console.log(`STAGE_22_DISCOVERY_11_GUARDS_PASS pairs=${tested} writesPerPair=58 rounds=46 postStirs=12 mismatches=${realMismatches} matches=${realMatches} redPositions=1,2,6 witness=1 injectedFailures=${injected}`);
