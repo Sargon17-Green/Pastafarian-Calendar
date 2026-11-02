@@ -51,6 +51,24 @@ jobs:
           docker run --rm --mount type=bind,src="$PWD",dst=/work \
             -w /work ghcr.io/gbdev/rgbds:v1.0.4 \
             sh -c 'make build && rgblink -m build/calendar.map -o build/map_probe.gb build/calendar.o'
+      - name: Measure current ROM0 feasibility for native owner253 case262
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s build/calendar.map
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path("tests").resolve()))
+          from test_rom0_budget import ROM0_SIZE, rom0_usage
+          allocated, free, max_gap, tail_gap, sections = rom0_usage("build/calendar.map")
+          assert 0 < allocated < ROM0_SIZE
+          assert 0 <= tail_gap <= max_gap <= free
+          assert allocated + free == ROM0_SIZE
+          print(f"ROM0_CASE262_FEASIBILITY=MEASURED allocated={allocated} free={free} "
+                f"max_contiguous_gap={max_gap} tail_gap={tail_gap} sections={sections}", flush=True)
+          print("NATIVE_CASE262=NOT_IMPLEMENTED last_accepted_case=261", flush=True)
+          PY
       - name: Measure Stage1 ROM0 deduplication against passing predecessor
         if: "${{ github.event_name == 'push' && github.ref == 'refs/heads/SM83-Assembly+ግዕዝ' && github.event.head_commit.message == 'fix(sm83): repair ROM0 measurement workflow YAML' }}"
         shell: bash
