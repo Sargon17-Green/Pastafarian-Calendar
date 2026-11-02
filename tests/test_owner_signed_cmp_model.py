@@ -2,7 +2,7 @@
 """Independent Python integer oracle for owner-scoped signed magnitudes.
 
 This is a HOST reference contract, not execution of SM83 machine code.
-The ROM exercise covers cases 191..261; upper owner-ID boundary checks are Host-only.
+The ROM exercise covers cases 191..262; extra max-owner boundary checks are Host-only.
 """
 from random import Random
 from test_sram_owner_model import OwnedBanks, SIZE
@@ -190,7 +190,30 @@ def check_owner_id_fragmented_high_boundary():
     assert len(revoked) == 4
     for a, b in revoked:
         assert compare_read_only(model, a, b) == 3
-    print("HOST_OWNER_SIGNED_CMP_FRAGMENTED_MAX_OWNER=PASS cases=32 owner=253 tag=255 banks=5,7 peer_bank=6 canonical_and_revoked=YES payload_and_tags=IMMUTABLE")
+
+    # Distinct Stage 1 gap: both descriptors alias the *same revoked* max
+    # owner (253 / tag 255), rather than comparing one revoked operand to
+    # a live peer. Neither equality nor signed polarity may revive the lease.
+    revoked_aliases = (
+        ((253, 0, SIZE), (253, 0, SIZE)),
+        ((253, 1, SIZE + 1), (253, 1, SIZE + 1)),
+        ((253, 0, SIZE), (253, 1, SIZE + 1)),
+        ((253, 1, SIZE + 1), (253, 0, SIZE)),
+    )
+    assert len(revoked_aliases) == 4
+    for a, b in revoked_aliases:
+        for descriptor in (a, b):
+            try:
+                reference_integer(model, *descriptor)
+            except ValueError as exc:
+                assert str(exc) == "capacity", "revoked alias must fail lease lookup"
+            else:
+                raise AssertionError(f"revoked max-owner descriptor accepted: {descriptor}")
+        assert compare_read_only(model, a, b) == 3, (
+            f"revoked max-owner alias compared as valid: {a}, {b}"
+        )
+    assert model.tags[5] == model.tags[7] == 0 and model.tags[6] == 3
+    print("HOST_OWNER_SIGNED_CMP_FRAGMENTED_MAX_OWNER=PASS cases=36 owner=253 tag=255 banks=5,7 peer_bank=6 canonical_and_revoked=YES payload_and_tags=IMMUTABLE")
 
 def check_native_case262_oracle():
     """Independent integer oracle for ROM case 262; not a Native PASS."""
