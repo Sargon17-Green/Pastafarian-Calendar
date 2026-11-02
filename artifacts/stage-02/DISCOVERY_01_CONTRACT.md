@@ -40,3 +40,10 @@ To esas hipotezo pri perdita historiala kodo, ne verifikita defekto.
 - Sen native completed, statuso esas PENDING, ne PASS.
 
 Stage 2-DISCOVERY 01 ne esas la kompleta kvin-komponenta kalendarala produkto.
+
+## Kontrolita native evidenco
+
+- Logo Stage 2 Discovery 01 Native: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41522957906
+- Logo Stage 1 Native Regression: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41522957076
+- Canonical Names Lock / verify: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41522957044
+- Entute 44/44 asserti; omna tri CI jobi completed SUCCESS sur `f0498eeb99eea99038e080d300f26ff0615ce564`.

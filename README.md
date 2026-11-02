@@ -1,4 +1,4 @@
-# Pastafari Calendar — Logo / Ido — Stage 1
+# Pastafari Calendar — Logo / Ido — Stage 1 e Stage 2 / DISCOVERY 01
 
 Ca repository esas nova, sendependa implemento komencita de zero. Nula antea repository esas supozita. La sola programlinguo dil linio esas Logo, e la sola homala fonto-linguo esas Ido.
 
@@ -43,3 +43,12 @@ La native verification esis rulita per Berkeley Logo / UCBLogo 6.2.5. La komando
 ## Etapa limito
 
 Stage 1 esas kompletigita. Stage 2 ne esas komencita en ca transdono; la sequanta historiala etapo povas komencar nur kom separita labor-unajo.
+
+## Stage 2 / DISCOVERY 01
+
+Nova sendependa implemento, permesa da la uzanto en 2026-11-02:
+`src/stage02_boundary.logo` e `test/stage02_discovery01_tests.logo`.
+La originala Stage 2 delta-arkivo ne esas uzita ni restaurita.
+La Native verification sur commit `f0498eeb99eea99038e080d300f26ff0615ce564`
+finis SUCCESS kun 44 asserti; Stage-1 regresio e verify anke SUCCESS.
+La kompleta Stage 2 restas en developo; la produkta kvinoplo ne esas pronta.
