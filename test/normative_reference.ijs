@@ -602,7 +602,7 @@ nr_unrankWeaving=: 4 : 0
   r=. rank
   out=. 0$0
   totalDays=. +/lengths
-  while. #out < totalDays do.
+  while. (#out) < totalDays do.
     selected=. 0
     m=. #remaining
     for_j. 1 + i.m do.
