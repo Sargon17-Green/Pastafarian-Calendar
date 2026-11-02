@@ -68,4 +68,4 @@ begin
    end if;
    Ada.Text_IO.Put_Line
      ("STAGE16_NATIVE_DOMAIN_REPEAT_ASSERTIONS=" & Natural'Image (Checked));
-end Stage16_Multi_Calibration_Observer;
+end Stage16_Sparse_Window_Observer;
