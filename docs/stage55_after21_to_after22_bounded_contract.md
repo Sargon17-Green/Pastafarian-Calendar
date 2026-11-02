@@ -1,0 +1,9 @@
+# MATLAB+Polski Stage55 — AFTER21 to AFTER22 bounded contract
+
+Certified predecessor: SHA f36bf3fbe4aea89126576d2e885f07c156242129. Native/Python run 41523723603/job125545953772, Names Lock run 41523723474/job125545953381 completed success. Native STEPS21 REMAINING4223 LETTER17 REJECTED2, independent Python SMALL22 BLOCKS17, strict 5-field row POSITION=21 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=21 MONTH_INDEX=3 MONTH_DAY=1. Archived original artifact 13179827298: SHA256 842af9cc63b40f4d2ab8ffabf9a51fadbf1ddf4cf371d8c70d7fe7ac61f198c4, seven CRC-valid members, /QA_Artifacts/PC-BRANCH-MATLAB-POLSKI/Stage55_AFTER21_41523723603_original.zip. Input AFTER21 JSON SHA256 b90c7b0923bdd53ada5e3de4256fbdb37925f043ab4774bc436b8de7225f8a9f.
+
+Year5000: 45 months, 4244 days. Exact input prefix [1,2,3,4,5,6,7,4,8,9,10,9,11,6,12,13,14,15,16,16,17], steps21, openedUpTo17, closedUpTo0, remaining4223, rank in 1..count, done=false. MATLAB selects 1 lexical child using native exact BigInt adjoint selector; independent suffix recount, checkpoint JSON roundtrip and PATCH25 five fields. Reject positions 0 and 23.
+
+Independent Python: 22 exhaustive tiny brute tests and 18 binomial-insertion children, parent partition, selected child count and rank interval. Bounded local preflight on pinned original AFTER21 (NOT MATLAB Native): 18/18 blocks, symbol7, openedUpTo17, remaining4222, month index6, month day2. Predicted strict row POSITION=22 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=22 MONTH_INDEX=6 MONTH_DAY=2.
+
+Acceptance requires completed/success Native+Python and Names Lock on exact new SHA, inspected logs, ZIP SHA256 and CRC7/7, AFTER22 JSON digest, two invalid-position rejects, strict byte-identical five fields. Canonical full-year oracle, cross-engine soak and Stage55 final PASS remain unverified; LAST_COMPLETED_STAGE=54. No main/merge/publish/heavy DAG.
