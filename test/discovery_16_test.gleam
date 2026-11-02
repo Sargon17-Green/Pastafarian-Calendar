@@ -31,7 +31,10 @@ pub fn discovery_16_basic_short_oracle_test() {
   assert_oracle(11, 21, 1, 0, 7)
   let assert Ok(result) =
     discovery_16_short_rank.dispatch_discovery_16(
-      bootstrap.new_context(11, 21), 1, 0, 7,
+      bootstrap.new_context(11, 21),
+      1,
+      0,
+      7,
     )
   result.previous.index |> should.equal(0)
   result.previous.value |> should.equal(result.previous.previous.answer.first)
@@ -63,11 +66,15 @@ pub fn discovery_16_big_seals_oracle_test() {
   let huge = 1_000_000_000_000_000_000_000_000_000_000
   let seals = [0, 1, -1, huge, -huge]
   let observed = list.map(seals, fn(seal) { actual(11, 21, 3, seal, 7) })
-  let expected = list.map(seals, fn(seal) { Ok(short_oracle(11, 21, 3, seal, 7)) })
+  let expected =
+    list.map(seals, fn(seal) { Ok(short_oracle(11, 21, 3, seal, 7)) })
   observed |> should.equal(expected)
   let assert Ok(output) =
     discovery_16_short_rank.dispatch_discovery_16(
-      bootstrap.new_context(11, 21), 3, -huge, 7,
+      bootstrap.new_context(11, 21),
+      3,
+      -huge,
+      7,
     )
   output.previous.previous.seal |> should.equal(-huge)
 }
@@ -79,17 +86,19 @@ pub fn discovery_16_big_days_determinism_test() {
     actual(-huge, huge, 6, -huge, 97),
     actual(huge, huge, 3, -huge, 97),
   ]
-  choices |> should.equal([
+  choices
+  |> should.equal([
     actual(huge, -huge, 1, huge, 97),
     actual(-huge, huge, 6, -huge, 97),
     actual(huge, huge, 3, -huge, 97),
   ])
-  let checks = list.map(choices, fn(result) {
-    case result {
-      Ok(rank) -> rank >= 1 && rank <= 97
-      Error(_) -> False
-    }
-  })
+  let checks =
+    list.map(choices, fn(result) {
+      case result {
+        Ok(rank) -> rank >= 1 && rank <= 97
+        Error(_) -> False
+      }
+    })
   checks |> should.equal([True, True, True])
 }
 
@@ -137,17 +146,18 @@ pub fn discovery_16_synthetic_invariants_test() {
     #(modulus - 3, -1, 5),
     #(modulus / 3, 1, modulus),
   ]
-  let checks = list.map(cases, fn(entry) {
-    let #(first, step, n) = entry
-    let assert Ok(found) = select(first, step, n)
-    let limit_by_division = { modulus / n } * n
-    found.limit == limit_by_division
-    && found.accepted_value >= 1
-    && found.accepted_value <= limit_by_division
-    && found.rank >= 1
-    && found.rank <= n
-    && found.rank == { found.accepted_value - 1 } % n + 1
-  })
+  let checks =
+    list.map(cases, fn(entry) {
+      let #(first, step, n) = entry
+      let assert Ok(found) = select(first, step, n)
+      let limit_by_division = { modulus / n } * n
+      found.limit == limit_by_division
+      && found.accepted_value >= 1
+      && found.accepted_value <= limit_by_division
+      && found.rank >= 1
+      && found.rank <= n
+      && found.rank == { found.accepted_value - 1 } % n + 1
+    })
   checks |> should.equal([True, True, True, True, True])
 }
 
@@ -156,9 +166,12 @@ pub fn discovery_16_interleaved_contexts_unchanged_test() {
   let a = bootstrap.MonsterContext(..base_a, diagnostics: ["UNUA"])
   let base_b = bootstrap.new_context(400, -900)
   let b = bootstrap.MonsterContext(..base_b, diagnostics: ["DUA"])
-  let assert Ok(first) = discovery_16_short_rank.dispatch_discovery_16(a, 6, -7, 7)
-  let assert Ok(second) = discovery_16_short_rank.dispatch_discovery_16(b, 1, 19, 3)
-  let assert Ok(again) = discovery_16_short_rank.dispatch_discovery_16(a, 6, -7, 7)
+  let assert Ok(first) =
+    discovery_16_short_rank.dispatch_discovery_16(a, 6, -7, 7)
+  let assert Ok(second) =
+    discovery_16_short_rank.dispatch_discovery_16(b, 1, 19, 3)
+  let assert Ok(again) =
+    discovery_16_short_rank.dispatch_discovery_16(a, 6, -7, 7)
   first |> should.equal(again)
   first.previous.index |> should.equal(0)
   second.previous.index |> should.equal(0)
@@ -174,7 +187,8 @@ pub fn discovery_16_invalid_inputs_and_priority_test() {
   let n = modulus + 1
   let ranks = [0, -1, n]
   let observed = list.map(ranks, fn(rank) { actual(11, 21, 1, 0, rank) })
-  observed |> should.equal([
+  observed
+  |> should.equal([
     Error(discovery_16_short_rank.InvalidRankRange),
     Error(discovery_16_short_rank.InvalidRankRange),
     Error(discovery_16_short_rank.InvalidRankRange),
@@ -196,8 +210,12 @@ pub fn discovery_16_invalid_inputs_and_priority_test() {
   let base = bootstrap.new_context(0, 0)
   let retry = bootstrap.MonsterContext(..base, retry_budget: -1)
   discovery_16_short_rank.dispatch_discovery_16(retry, 0, 0, 0)
-  |> should.equal(Error(discovery_16_short_rank.InvalidContext(bootstrap.InvalidRetryBudget)))
+  |> should.equal(
+    Error(discovery_16_short_rank.InvalidContext(bootstrap.InvalidRetryBudget)),
+  )
   let recovery = bootstrap.MonsterContext(..base, recovery_depth: -1)
   discovery_16_short_rank.dispatch_discovery_16(recovery, 7, 0, -1)
-  |> should.equal(Error(discovery_16_short_rank.InvalidContext(bootstrap.InvalidRecoveryDepth)))
+  |> should.equal(
+    Error(discovery_16_short_rank.InvalidContext(bootstrap.InvalidRecoveryDepth)),
+  )
 }
