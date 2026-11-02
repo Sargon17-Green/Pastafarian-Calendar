@@ -1,0 +1,62 @@
+name: Befunge QA31P signed original valid-pair q owner
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31p_original_counter_owner.py'
+      - '.github/workflows/befunge-qa31p-original-counter-owner.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa31p-original-q-owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Source pin and Python syntax
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31p_original_counter_owner.py
+          mkdir -p qa31p-evidence
+      - name: Download EXISTING signed QA31D Native artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            'https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/12825616476/zip' \
+            -o qa31p-evidence/qa31d-original.zip
+          echo 'b8df61e31a3f28bfcc21bbccb4d2ee26b5ccfeca534969e87d95a211fbb40eeb  qa31p-evidence/qa31d-original.zip' | sha256sum -c -
+      - name: Source-backed signed owner / stack oracle and hostile tests
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31p_original_counter_owner.py \
+            src/interleaved_work_counts.b98 qa31p-evidence/qa31d-original.zip \
+            --out qa31p-evidence/owner.json | tee qa31p-evidence/audit.log
+          grep -q QA31P_ORIGINAL_SIGNED_19214_STEP_PREFIX_PASS qa31p-evidence/audit.log
+          grep -q QA31P_Q_0_1_2_3_4_BOTH_VALID_CASES qa31p-evidence/audit.log
+          grep -q QA31P_HOSTILE_TRACE_10_OF_10 qa31p-evidence/audit.log
+          grep -q QA31P_NO_NATIVE_NO_STAGE1_PASS qa31p-evidence/audit.log
+          python3 - <<'PY'
+          import json
+          a=json.load(open('qa31p-evidence/owner.json'))
+          assert a['source_git_blob']=='560d6aa5807a7f766213a33835cce85eab0fa40c'
+          assert a['signed_physical_steps_checked']==19214
+          assert a['target_q_writes_per_case']==5
+          assert a['last_q_read']==[9557,57,38,4,9194]
+          assert a['hostile_trace_mutations_rejected']==10
+          assert not a['stage1_pass'] and a['new_native_cases']==0
+          PY
+      - name: Preserve finite evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31p-original-source-counter-owner
+          path: |
+            qa31p-evidence/owner.json
+            qa31p-evidence/audit.log
+          if-no-files-found: warn
