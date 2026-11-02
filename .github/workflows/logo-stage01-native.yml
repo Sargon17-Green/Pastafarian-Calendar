@@ -40,7 +40,10 @@ jobs:
           fi
           cd "$source_dir"
           autoreconf -fi
-          ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" \
+          # UCBLogo 6.2.5 uses pre-C23 empty-parameter declarations (nop()).
+          # Ubuntu 26.04 compilers default to C23, which rejects legacy calls.
+          # Explicitly compile in GNU C17 mode; do not patch upstream source.
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" \
             --disable-wx --disable-x11 --disable-docs
           make -j2
           make install
