@@ -1,0 +1,73 @@
+; Stage 2 / Discovery 01. Testi nur pri modulo-limiti.
+; La proizvodura voyo ne vokas la normativa test-oracle.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "test/normative_reference.logo
+
+make "S2.FAIL "false
+make "S2.CHECKS 0
+
+to s2.require :condition :message
+  make "S2.CHECKS (:S2.CHECKS + 1)
+  if not :condition [
+    make "S2.FAIL "true
+    print sentence [STAGE_2_TESTO_FALIIS:] :message
+  ]
+end
+
+to s2.expect :value :wanted :message
+  localmake "got monster.stage02.normalize :value
+  s2.require (bi.eq :got :wanted) :message
+  ; Dua, aparta normala formula: 1 + ((x-1) mod M).
+  s2.require (bi.eq :got (nr.save :value)) :message
+end
+
+to s2.period :value :message
+  localmake "before monster.stage02.normalize :value
+  localmake "above monster.stage02.normalize (bi.add :value nr.M)
+  localmake "below monster.stage02.normalize (bi.sub :value nr.M)
+  s2.require (bi.eq :before :above) :message
+  s2.require (bi.eq :before :below) :message
+end
+
+to stage02.discovery01.run
+  localmake "m nr.M
+  localmake "one bi.small 1
+  localmake "m1 bi.sub :m :one
+  localmake "double bi.mul.small :m 2
+  localmake "triple bi.mul.small :m 3
+  localmake "negative bi.neg :m
+
+  s2.expect bi.zero :m [zero]
+  s2.expect :one :one [one]
+  s2.expect :m1 :m1 [M_minus_1]
+  s2.expect :m :m [M]
+  s2.expect (bi.add :m :one) :one [M_plus_1]
+  s2.expect (bi.sub :double :one) :m1 [2M_minus_1]
+  s2.expect :double :m [2M]
+  s2.expect (bi.add :double :one) :one [2M_plus_1]
+  s2.expect (bi.sub :triple :one) :m1 [3M_minus_1]
+  s2.expect :triple :m [3M]
+  s2.expect (bi.add :triple :one) :one [3M_plus_1]
+  s2.expect (bi.small -1) :m1 [minus_1]
+  s2.expect :negative :m [minus_M]
+  s2.expect (bi.add :negative :one) :one [minus_M_plus_1]
+  s2.expect (bi.sub :negative :one) :m1 [minus_M_minus_1]
+  s2.expect (bi.neg :double) :m [minus_2M]
+
+  s2.period bi.zero [period_zero]
+  s2.period :one [period_one]
+  s2.period :m [period_M]
+  s2.period (bi.add :m :one) [period_M_plus_1]
+  s2.period (bi.small -1) [period_minus_1]
+  s2.period (bi.add :negative :one) [period_minus_M_plus_1]
+
+  if :S2.FAIL [print [STAGE_2_DISCOVERY_01_FALIIS] stop]
+  if :S2.CHECKS <> 44 [print [STAGE_2_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_CHECKS_PASIS] :S2.CHECKS
+  print [STAGE_2_DISCOVERY_01_PASIS]
+end
+
+stage02.discovery01.run

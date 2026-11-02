@@ -1,0 +1,10 @@
+; Stage 2 / Discovery 01: normaligo dil 1-bazita modulo M.
+; Independanta production-proceduro; la normativa oracle restas test-only.
+; Ne rekonstruo dil perdita arkivo de 2026-08-29.
+
+to monster.stage02.normalize :value
+  localmake "division bi.divmod.floor :value nr.M
+  localmake "remainder last :division
+  if bi.eq :remainder bi.zero [output nr.M]
+  output :remainder
+end
