@@ -2,7 +2,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=1
 CURRENT_KIND=BOOTSTRAP
 CURRENT_PATCH=none
-LAST_COMPLETED_STAGE=0
+LAST_COMPLETED_STAGE=1
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -18,4 +18,4 @@ GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=NO
 HANDOFF_PACKAGE_PREPARED=YES
 
-Notă: LAST_COMPLETED_STAGE rămâne 0 până când suita J este executată cu succes într-un runtime J. Pachetul de predare este pregătit, dar etapa nu este declarată finalizată fără această rulare.
+Notă: Stage 1 a fost finalizat după o execuție nativă J9.7.1 pe Windows: 63/63 verificări, 17 fixture-uri, audit GREEN, exit code 0. Dovadă: results(20261102-191247).zip, SHA256=f0c43242323ce04c2734c969deb60a9461335056d63767cd7d39c4cebdbb5e2b; sursa testată este commit a836206fd842e18d60f3a5df6a07382cf81573bb, tree d00980351d0123b15fe72b7f01db5151ecce608d. Etapa următoare: Stage 2 — DISCOVERY 01; aceasta nu este încă finalizată.
