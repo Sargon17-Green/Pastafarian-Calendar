@@ -1,4 +1,4 @@
-# Stage17 DISCOVERY14 — cross-year numerical five-field differential (open)
+# Stage17 DISCOVERY14 — cross-year numerical five-field differential (accepted bounded)
 ## Predecessor
 Stage16/PATCH01 accepted at 07974c96a29b4f3af89a716b88a94b3459368558 with 18/18 jobs on run 41408897365; exact markers 135/131/125. The Stage16 window ±31 days produced only year 5000, leaving neighboring-year transitions untested.
 ## Contract
@@ -11,3 +11,6 @@ All CI jobs including verify and native-stage17-year-crossing completed/success 
 ## Stage17 PATCH01 — observed CI failure and scoped correction
 Run 41409658584, commit 3b5f71a8e5e626a70aac14fc903d44a4cb03dd70, completed/failure: 18/19 jobs success, including verify and all prior-stage jobs; only native-stage17-year-crossing (job 125159548416) failed *before GNAT compilation* in Python selftest, at `tests/stage14_real_oracle.py:date` on its legacy year guard `4999<=year<=5001`. This is a reproduced guard mismatch, not evidence of a wrong Ada date. Stage17's existing contract is 4900..5100 and uses target offsets +/-5779; its strict before/after-5000 checks remain unchanged.
 PATCH01 expands only the shared oracle's validation bound to 4900..5100; numerical date equations, offsets, comparison counts, Ada observer, and previously accepted Stage16 are unchanged. Also corrects the Stage17 runner's error-label typo from STAGE16 to STAGE17. After push, acceptance still requires completed/success CI for the exact new SHA, all jobs, GNAT compilation/link, and observed 59/57/45 markers. Static readback is not a Native PASS.
+
+## Stage17 PATCH01 acceptance evidence
+Completed/success push CI run 41503462690 on SHA 19af3f5b113bfddf001975fb5e5e4737449e3229, all 19/19 jobs including verify and native-stage17-year-crossing. Observed GNATMAKE 13.3.0, gnatbind-13, gnatlink-13, and exact markers 59 independent Python selfchecks, 57 Native assertions, 45 numerical five-field scalar comparisons. Acceptance is only for the nine selected ordered pairs, not a universal date proof. This evidence supersedes the earlier PENDING line above without deleting the failure history.
