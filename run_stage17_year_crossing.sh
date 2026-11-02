@@ -16,7 +16,7 @@ timeout --signal=TERM --kill-after=5s 600s \
     ./bin/stage17_year_crossing_observer > "$log_file" 2>&1 || status=$?
 cat "$log_file"
 if [ "$status" -ne 0 ]; then
-    echo "STAGE16_OBSERVER_EXIT_CODE=$status" >&2
+    echo "STAGE17_OBSERVER_EXIT_CODE=$status" >&2
     exit "$status"
 fi
 grep -Eq '^STAGE17_NATIVE_YEAR_CROSS_ASSERTIONS= *57$' "$log_file"

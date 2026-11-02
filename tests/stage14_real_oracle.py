@@ -283,7 +283,9 @@ def date(cal,target):
     offset = target-first
     month = months[offset]
     fields = (year,cutlet,cutlet_day,month_names[month],months[:offset+1].count(month))
-    assert 4999<=year<=5001 and 1<=cutlet<=17 and 1<=cutlet_day<=YEAR_LIMIT
+    # Shared numerical oracle also serves the Stage17 +/-5779-day window.
+    # Domain guard is a safety bound, not a restriction to Stage14 sample years.
+    assert 4900<=year<=5100 and 1<=cutlet<=17 and 1<=cutlet_day<=YEAR_LIMIT
     assert 1<=fields[3]<=47 and 1<=fields[4]<=123
     return fields
 
