@@ -103,3 +103,27 @@ jobs:
             exit 1
           fi
           echo 'NATIVE_STAGE_2_DISCOVERY_02_VERIFICATION=PASS'
+
+
+      - name: Verify Stage 2 Discovery 03 intermediate counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/stage02-discovery03.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 240s \
+            stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery03_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            result=$?
+            cat "$log"
+            echo "::error::Stage2 Discovery03 native failure/timeout (exit=$result)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_03_PAIRS_PASIS 26' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_03_CHECKS_PASIS 404' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_03_PASIS' "$log"
+          if grep -Eq 'STAGE_2_DISCOVERY_03_TESTO_FALIIS|STAGE_2_DISCOVERY_03_FALIIS|STAGE_2_DISCOVERY_03_PAIR_COUNT_FALIIS|STAGE_2_DISCOVERY_03_CHECK_COUNT_FALIIS|I don.t know how to' "$log"; then
+            echo "::error::Stage2 Discovery03 failure marker"
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_03_VERIFICATION=PASS'

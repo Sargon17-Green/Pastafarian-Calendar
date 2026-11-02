@@ -1,0 +1,121 @@
+; Stage 2 / Discovery 03: konturi e state-isolado.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "test/normative_reference.logo
+
+make "D3.FAIL "false
+make "D3.N 0
+make "D3.PAIRS 0
+
+to d3.require :ok :tag
+  make "D3.N (:D3.N + 1)
+  if not :ok [
+    make "D3.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_03_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d3.pair :c :t :tag
+  localmake "ctx monster.stage02.workcounts :c :t
+  localmake "oracle nr.work.counts :c :t
+  localmake "a monster.context.get :ctx "actionCount
+  localmake "b monster.context.get :ctx "targetCount
+  localmake "distance monster.context.get :ctx "distanceCount
+  localmake "connection monster.context.get :ctx "connectionCount
+  localmake "direction monster.context.get :ctx "directionCount
+  make "D3.PAIRS (:D3.PAIRS + 1)
+  d3.require (bi.eq :a (item 1 :oracle)) :tag
+  d3.require (bi.eq :b (item 2 :oracle)) :tag
+  d3.require (bi.eq :distance (item 3 :oracle)) :tag
+  d3.require (bi.eq :connection (item 4 :oracle)) :tag
+  d3.require (equalp :direction (item 5 :oracle)) :tag
+  d3.require (bi.eq (monster.context.get :ctx "normalizedCalculationDay) (nr.save :c)) :tag
+  d3.require (bi.eq (monster.context.get :ctx "normalizedTargetDay) (nr.save :t)) :tag
+  d3.require (bi.eq (monster.context.get :ctx "calculationDay) :c) :tag
+  d3.require (bi.eq (monster.context.get :ctx "targetDay) :t) :tag
+  d3.require (equalp (monster.context.get :ctx "phase) "WORK_COUNTS_READY) :tag
+  d3.require (equalp (monster.context.get :ctx "status) "INTERMEDIATE_COUNTS_ONLY) :tag
+  d3.require (and (:direction >= 1) (:direction <= 3)) :tag
+  d3.require (bi.ge :distance (bi.small 1)) :tag
+  d3.require (bi.eq :connection (bi.add :a :b)) :tag
+  d3.require (equalp (monster.context.get :ctx "metrics) [stage02.dispatch stage02.counts]) :tag
+end
+
+to d3.isolation :f :one
+  localmake "a monster.stage02.workcounts :f :f
+  localmake "b monster.stage02.workcounts (bi.sub :f :one) (bi.add :f :one)
+  localmake "again monster.stage02.workcounts :f :f
+  localmake "changed monster.context.put :a "status "LOCAL_ONLY
+  d3.require (equalp :a :again) [repeat_a]
+  d3.require (not (equalp :a :b)) [different_inputs]
+  d3.require (equalp (monster.context.get :a "status) "INTERMEDIATE_COUNTS_ONLY) [unchanged_a]
+  d3.require (equalp (monster.context.get :changed "status) "LOCAL_ONLY) [changed_copy]
+  d3.require (equalp (monster.context.get :again "status) "INTERMEDIATE_COUNTS_ONLY) [unchanged_repeat]
+  d3.require (equalp (monster.context.get :b "status) "INTERMEDIATE_COUNTS_ONLY) [unchanged_b]
+  d3.require (equalp (monster.context.get :a "logs) [stage02.enter stage02.normalized stage02.counts.ready]) [log_isolation]
+  d3.require (bi.eq (monster.context.get :b "distanceCount) (bi.small 3)) [distance_isolation]
+end
+
+to stage02.discovery03.run
+  localmake "f nr.foundation
+  localmake "t nr.tablets
+  localmake "z bi.zero
+  localmake "one bi.small 1
+  localmake "fp1 bi.add :f :one
+  localmake "fm1 bi.sub :f :one
+  localmake "fp2 bi.add :f (bi.small 2)
+  localmake "fm2 bi.sub :f (bi.small 2)
+  localmake "tp1 bi.add :t :one
+  localmake "tm1 bi.sub :t :one
+  localmake "twom bi.mul.small nr.M 2
+  localmake "big bi.mul.small nr.M 1000
+
+  d3.pair :f :f [foundation_equal]
+  d3.pair :f :fp1 [foundation_forward]
+  d3.pair :f :fm1 [foundation_back]
+  d3.pair :fp1 :f [forward_foundation]
+  d3.pair :fm1 :f [back_foundation]
+  d3.pair :fp1 :fm1 [cross_negative]
+  d3.pair :fm1 :fp1 [cross_positive]
+  d3.pair :fp2 :fp2 [positive_equal]
+  d3.pair :fm2 :fm2 [negative_equal]
+  d3.pair :fp2 :fm2 [far_cross_negative]
+  d3.pair :fm2 :fp2 [far_cross_positive]
+  d3.pair :z :z [zero_equal]
+  d3.pair :z :one [zero_forward]
+  d3.pair :one :z [one_backward]
+  d3.pair (bi.small -1) :z [minus_one_forward]
+  d3.pair :z (bi.small -1) [zero_backward]
+  d3.pair :t :t [tablets_equal]
+  d3.pair :t :tp1 [tablets_forward]
+  d3.pair :t :tm1 [tablets_backward]
+  d3.pair :tp1 :tm1 [tablets_cross]
+  d3.pair :twom (bi.neg :twom) [large_direction_down]
+  d3.pair (bi.neg :twom) :twom [large_direction_up]
+  d3.pair :big :f [big_to_foundation]
+  d3.pair :f :big [foundation_to_big]
+  d3.pair (bi.neg :big) :big [big_cross_up]
+  d3.pair :big (bi.neg :big) [big_cross_down]
+
+  localmake "anchor monster.stage02.workcounts :f :f
+  d3.require (bi.eq (monster.context.get :anchor "actionCount) (bi.small 1)) [anchor_action]
+  d3.require (bi.eq (monster.context.get :anchor "targetCount) (bi.small 1)) [anchor_target]
+  d3.require (bi.eq (monster.context.get :anchor "distanceCount) (bi.small 1)) [anchor_distance]
+  d3.require (bi.eq (monster.context.get :anchor "connectionCount) (bi.small 2)) [anchor_connection]
+  d3.require (equalp (monster.context.get :anchor "directionCount) 2) [anchor_direction]
+  d3.require (bi.eq (monster.stage02.dayrank :fm1) (bi.small 2)) [anchor_predecessor]
+  d3.isolation :f :one
+
+  if :D3.FAIL [print [STAGE_2_DISCOVERY_03_FALIIS] stop]
+  if :D3.PAIRS <> 26 [print [STAGE_2_DISCOVERY_03_PAIR_COUNT_FALIIS] stop]
+  if :D3.N <> 404 [print [STAGE_2_DISCOVERY_03_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_03_PAIRS_PASIS] :D3.PAIRS
+  print sentence [STAGE_2_DISCOVERY_03_CHECKS_PASIS] :D3.N
+  print [STAGE_2_DISCOVERY_03_PASIS]
+end
+
+stage02.discovery03.run

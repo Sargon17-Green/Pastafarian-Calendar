@@ -1,0 +1,31 @@
+; Stage 2 / Discovery 03. Intermedia konturi por singla kontexto.
+; Nula test-only oracle en la production-kodo; nula fina quinoplo.
+
+to monster.stage02.dayrank :day
+  localmake "offset bi.sub :day nr.foundation
+  localmake "magnitude bi.mul.small (bi.abs :offset) 2
+  if (bi.sign :offset) < 0 [output :magnitude]
+  output bi.add :magnitude (bi.small 1)
+end
+
+to monster.stage02.workcounts :calculationDay :targetDay
+  localmake "ctx monster.stage02.context :calculationDay :targetDay
+  if (equalp (monster.context.get :ctx "status) "FAILED_VALIDATION) [output :ctx]
+  localmake "a monster.stage02.dayrank :calculationDay
+  localmake "b monster.stage02.dayrank :targetDay
+  localmake "delta bi.sub :targetDay :calculationDay
+  localmake "distance bi.add (bi.abs :delta) (bi.small 1)
+  localmake "connection bi.add :a :b
+  localmake "direction (2 + (bi.sign :delta))
+  make "ctx monster.context.put :ctx "actionCount :a
+  make "ctx monster.context.put :ctx "targetCount :b
+  make "ctx monster.context.put :ctx "distanceCount :distance
+  make "ctx monster.context.put :ctx "connectionCount :connection
+  make "ctx monster.context.put :ctx "directionCount :direction
+  make "ctx monster.context.put :ctx "phase "WORK_COUNTS_READY
+  make "ctx monster.context.put :ctx "mode "STAGE_2_DISCOVERY_03
+  make "ctx monster.context.put :ctx "status "INTERMEDIATE_COUNTS_ONLY
+  make "ctx monster.metrics.bump :ctx "stage02.counts
+  make "ctx monster.logs.append :ctx "stage02.counts.ready
+  output :ctx
+end
