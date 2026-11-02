@@ -1368,3 +1368,27 @@ fn test_stage31_production_46_drop_chain_matches_independent_normative_sauce() {
 	target_day := big_add(foundation, big_from_int(2))
 	stage31_assert_production_sauce_matches_independent_oracle(calculation_day, target_day)
 }
+
+fn test_stage31_numeric_date_candidate_matches_all_five_independent_oracle_fields() {
+	foundation := oracle_foundation_day()
+	calculation_days := [foundation, foundation, foundation,
+		big_add(foundation, big_from_int(3))]
+	target_days := [foundation, big_sub(foundation, big_one()),
+		big_add(foundation, big_one()), big_add(foundation, big_from_int(2))]
+	mut reference_engine := new_oracle_engine()
+	for i in 0 .. calculation_days.len {
+		calculation_day := calculation_days[i]
+		target_day := target_days[i]
+		expected := reference_engine.calendar_date_normative(calculation_day, target_day)
+		got := calendar_date_patch15_numeric_spaghetti(calculation_day, target_day) or {
+			panic(err.msg())
+		}
+		assert discovery15_output_shape_oracle(got)
+		assert big_eq(got.year_number, expected.year_number)
+		assert got.cutlet_name == expected.cutlet_name
+		assert big_eq(got.day_in_cutlet, expected.day_in_cutlet)
+		assert got.month_name == expected.month_name
+		assert big_eq(got.day_in_month, expected.day_in_month)
+		assert discovery15_five_components(got) == discovery15_five_components(expected)
+	}
+}
