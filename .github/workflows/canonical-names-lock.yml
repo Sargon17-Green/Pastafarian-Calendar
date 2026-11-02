@@ -969,3 +969,48 @@ jobs:
           path: evidence-stage52/
           retention-days: 30
           if-no-files-found: warn
+
+
+  stage53-third-hop-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: none
+      - name: Stage53 third-hop failure isolation PHP Native
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence-stage53
+          printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=53\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage53/source.txt
+          php -v > evidence-stage53/php-version.txt
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8
+          php -l tests/stage53_third_hop_failure_isolation.php
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage53_third_hop_failure_isolation.php > evidence-stage53/stdout.txt 2> evidence-stage53/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence-stage53/exit-code.txt
+          cat evidence-stage53/stdout.txt
+          cat evidence-stage53/stderr.txt >&2
+          test "$code" -eq 0
+          test ! -s evidence-stage53/stderr.txt
+          grep -Eq '^STAGE53_THIRD_HOP_ISOLATION checks=[0-9]+ cases=4 faults=16 recovered=16 baselines=4$' evidence-stage53/stdout.txt
+      - name: Preserve Stage53 Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage53-third-hop-isolation
+          path: evidence-stage53/
+          retention-days: 30
+          if-no-files-found: warn
