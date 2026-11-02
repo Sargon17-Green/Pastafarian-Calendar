@@ -11,7 +11,6 @@ stage02Check=: 4 : 0
 )
 
 F2=. _15055671x
-(F2 stage02WorkCounts F2) -: 1x 1x 1x 2x 2x
 ((F2 stage02WorkCounts F2) -: 1x 1x 1x 2x 2x) stage02Check 'egalitate la ziua fundatiei'
 ((stage02CountForDay F2) = 1x) stage02Check 'fundatia are eticheta 1'
 ((stage02CountForDay F2+1x) = 3x) stage02Check 'ziua urmatoare are eticheta 3'
