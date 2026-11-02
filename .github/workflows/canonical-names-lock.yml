@@ -57,8 +57,10 @@ jobs:
           set -euo pipefail
           v version
           v fmt -verify ./pastafari
-      - name: Stage 1 — normative reference
-        run: v test ./pastafari/normative_oracle_test.v
+      - name: Stage 1 — normative reference (bounded to Stage 1 tests)
+        run: v test ./pastafari/normative_oracle_test.v -run-only 'test_stage01_*'
+      - name: Stage 31 — independent 46-drop sauce regression
+        run: v test ./pastafari/normative_oracle_test.v -run-only 'test_stage31_production_46_drop_chain_matches_independent_normative_sauce'
       - name: Discovery 01 — legacy behavior witnesses
         run: v test ./pastafari/discovery01_witness_test.v
       - name: PATCH 01 — formerly RED regression now GREEN
@@ -238,6 +240,25 @@ jobs:
             exit 1
           fi
           echo 'Stage30: GREEN shape witnesses, four intended RED output assertions'
+      - name: Stage 31 — four-anchor five-field numeric differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          timeout --signal=TERM --kill-after=5s 300s \
+            v test ./pastafari/normative_oracle_test.v -run-only 'test_stage31_numeric_date_candidate_matches_all_five_independent_oracle_fields' \
+            2>&1 | tee stage31_numeric.log
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" -eq 124 ] || [ "$code" -eq 137 ]; then
+            echo '::error::Stage31 numeric oracle differential exceeded 300 seconds; NOT ACCEPTED'
+            exit 1
+          fi
+          if [ "$code" -ne 0 ]; then
+            echo "::error::Stage31 numeric oracle differential failed with exit $code; NOT ACCEPTED"
+            exit "$code"
+          fi
+          echo 'Stage31 numeric differential: all four anchors and five fields GREEN'
       - name: Preserve stage 29 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -248,4 +269,5 @@ jobs:
             stage29_patch14.log
             stage30_witness_green.log
             stage30_expected_red.log
+            stage31_numeric.log
           if-no-files-found: ignore
