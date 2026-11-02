@@ -1,7 +1,7 @@
 # Stage36 / Discovery21 — dual-gate calculation–target response (contract-first)
 
 Project: `PC-BRANCH-POWERSHELL-TAGALOG`; **existing** branch `PowerShell+Tagalog`.
-Status: **CONTRACT ONLY; no Stage36 source/test/workflow execution and no Stage36 Native PASS.**
+Status: **IMPLEMENTED PENDING NATIVE; Stage36 code and CI are wired, not accepted until completed exact-SHA logs.**
 All stage numbers are internal development milestones, not Gregorian date parts.
 
 ## Verified prerequisite and exact-SHA seal
@@ -52,3 +52,7 @@ Reject invalid `Seal`/`QueriedBowlId` only if corresponding strict input contrac
 ## State-transition policy
 
 This contract-only step changes **only a research document and non-executable stage planning/evidence metadata**. Keep `CURRENT_STAGE=35`, `LAST_COMPLETED_STAGE=35`, `STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED` and all sealed predecessor flags unchanged. Do not touch production, oracle, CI workflows, main, merge or publication. Next step: implement `tests/Stage36.Tests.ps1`, add a bounded dedicated Windows job and only then change `CURRENT_STAGE=36`, `LAST_COMPLETED_STAGE=35`, `STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE`; inspect existing predecessor dispatch gates before changing them. 
+
+## Stage36 implementing commit / verification policy
+
+The implementation adds `tests/Stage36.Tests.ps1` (independent normative endpoint oracle, 1004 bounded assertions) and a Windows PowerShell 5.1 CI job, with predecessor metadata gate extension for `CURRENT_STAGE=36` and `LAST_COMPLETED_STAGE=35`. `STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE` does not assert a Native result. Test and CI receipts are recorded only from an actual completed run; no predetermined E/R empirical counts are claimed.
