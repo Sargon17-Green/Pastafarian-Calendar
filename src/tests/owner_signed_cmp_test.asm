@@ -344,9 +344,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 204: invalid sign must fail without changing any input/state.
@@ -472,9 +470,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 212: positive nonzero A is above negative nonzero B.
@@ -489,9 +485,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 213: B has length zero with a negative sign (negative zero).
@@ -543,9 +537,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 216: canonical +0 in A > negative 0x7f in B.
@@ -571,9 +563,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 217: two canonical zeros compare equal even though both owners retain
@@ -595,9 +585,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     or a
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 218: positive and negative descriptors may alias the same live owner.
@@ -623,9 +611,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 219: reverse the opposite signs under the SAME live SRAM owner.
@@ -641,9 +627,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 220: two negative descriptors aliasing the same live owner and length
@@ -657,9 +641,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     or a
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 221: two descriptors share owner 46 (SRAM[0]=$7f), yet A's canonical
@@ -675,9 +657,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 222: reverse the same-owner zero/nonzero positions and negate A:
@@ -694,9 +674,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 223: two canonical +0 descriptors alias the SAME live owner.
@@ -713,9 +691,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     or a
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 224: A is invalid negative zero; B is +127 on that same owner.
@@ -730,9 +706,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 3
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 225: reverse invalid negative zero into B, with +127 in A.
@@ -750,9 +724,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 3
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 226: same owner 46 has only two 8-KiB banks (capacity 16384).
@@ -776,9 +748,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 3
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 227: reverse the same-owner over-capacity condition into A.
@@ -794,9 +764,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 3
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 228: both operands alias live owner 46; B length=2 is noncanonical.
@@ -819,9 +787,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 3
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 229: malformed same-owner descriptor in A, canonical +127 in B.
@@ -836,9 +802,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 3
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 230: same owner 46, lengths 8192 versus 8193 across an 8-KiB bank.
@@ -865,9 +829,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 231: reverse the aliasing descriptors; positive longer A > shorter B.
@@ -882,9 +844,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
 
@@ -904,9 +864,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 233: reverse the negative descriptors. Longer magnitude is smaller.
@@ -921,9 +879,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
 
@@ -938,9 +894,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     or a
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 235: same negative descriptors at length 8193 across the bank edge.
@@ -955,9 +909,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     or a
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 236: same live owner, positive 8192-byte A versus negative 8193-byte B.
@@ -972,9 +924,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 237: reverse polarity and lengths: negative 8193-byte A < positive 8192-byte B.
@@ -992,9 +942,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 238: equal 8192-byte magnitude on owner 46, positive A > negative B.
@@ -1010,9 +958,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 239: equal 8193-byte magnitude on owner 46, negative A < positive B.
@@ -1030,9 +976,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
 
     ; 240: owner 46 owns exactly two 8192-byte banks. Store a nonzero
@@ -1069,9 +1013,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
@@ -1089,9 +1031,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
@@ -1108,9 +1048,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     or a
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
@@ -1127,9 +1065,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     or a
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
@@ -1169,9 +1105,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 2
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
@@ -1190,9 +1124,7 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerCmpResult]
     cp 1
     jp nz, .fail
-    call OwnerCmpTestCheckSnapshot
-    jp nc, .fail
-    call OwnerCmpTestCheckBytes
+    call OwnerCmpTestCheckSnapshotAndBytes
     jp nc, .fail
     call OwnerCmpTestCheckCapacityByte
     jp nc, .fail
@@ -1511,6 +1443,14 @@ RunOwnerSignedCmpTests::
     ld [wTestResult], a
     ret
 
+
+; Test-only aggregate: preserve carry from both independent immutability checks.
+; Carry set iff 10 descriptor bytes, all 16 lease tags, and SRAM sentinels match.
+; ret nc returns immediately on changed metadata; jp tail-calls the SRAM checker.
+OwnerCmpTestCheckSnapshotAndBytes:
+    call OwnerCmpTestCheckSnapshot
+    ret nc
+    jp OwnerCmpTestCheckBytes
 
 ; Snapshot exactly the 10 immutable operand bytes and all 16 lease tags.
 ; The shared test buffers are not used by OwnerSignedCmp or its callees.
