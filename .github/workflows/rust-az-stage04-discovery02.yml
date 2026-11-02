@@ -76,7 +76,7 @@ jobs:
               --witness-path src/lib.rs \
               --witness-blob 8a813ba020c9101276007148c93cb00ae7836644 \
               --stage3-closure 716e5a6f335b1a15464029b446edb468f3a8482c \
-              --stage4-introduction 2a7648c345ee63d9e5c81ca0361c6eb3060c6f4f \
+              --stage4-introduction 2a7648c345ee63d9e5c81ca0361c6eb3060c6c4f \
               --branch-head "$GITHUB_SHA" \
               > evidence/stage04_source_pin.json
           python3 -c 'import json; p=json.load(open("evidence/stage04_source_pin.json")); assert p["source_pin_eligible"] is True and p["historical_day_tag_route_proven"] is False and p["observed_runtime_red"] is False and p["stage04_closure"] == "NOT_CLAIMED"'
