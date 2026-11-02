@@ -2137,7 +2137,7 @@ jobs:
           test "$(git hash-object src/legacy_gate_ordinal.lua)" = 7ad9916ae0ef7d3af13fbc7f8b98370af95cdf76
           test "$(git hash-object src/gate_ordinal_patch.lua)" = aafd53040b7e468602b0dd81b2e97b1e310307bd
           test "$(git hash-object src/legacy_gate_reverse_ordinal.lua)" = 43375cebb0e183a35c45f4181dce822847ddf66c
-          test "$(git hash-object src/gate_reverse_ordinal_patch.lua)" = 7f1b9396394c26e22958fb1fb8661a347e688e4
+          test "$(git hash-object src/gate_reverse_ordinal_patch.lua)" = 7f1b9396394c26e22958fb1fb8661a347e688e4e
           test "$(git hash-object src/legacy_gate_nearest_boundary.lua)" = 56fc2dc01b37d6daae6e7711b44b5d6f7788c96c
           test "$(git hash-object src/gate_nearest_boundary_patch.lua)" = 0509c59237de88643d0802aae7882b4496ee420f
           test "$(git hash-object src/legacy_gate_signed_offset.lua)" = c77ef96d47182a3f32e2f19307e75dab57fd4c94
