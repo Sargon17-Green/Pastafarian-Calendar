@@ -67,14 +67,18 @@ OracleChoice oracleChoice(BigInt first, int direction, BigInt count) {
     } else if (accepted < BigInt.one) {
       accepted = ring;
     }
-    rejected++;
+    rejected += BigInt.one;
     if (rejected > BigInt.from(20)) {
       throw StateError('Unexpectedly long rejection');
     }
   }
-  return OracleChoice(initial, accepted, rejected,
+  return OracleChoice(
+      initial,
+      accepted,
+      rejected,
       BigInt.one + ((accepted - BigInt.one) % count),
-      width, width == 1 ? 'short' : 'wide');
+      width,
+      width == 1 ? 'short' : 'wide');
 }
 
 void compareEqual(BigInt first, int direction, BigInt n) {
@@ -134,12 +138,13 @@ void verifyCanonical(BigInt c) {
   final z = BigInt.from(10);
   final first = normalize(
     (bowls.finalBowls[0] + z + BigInt.from(181)).pow(2) +
-    BigInt.from(179) * bowls.finalBowls[following - 1] + z,
+        BigInt.from(179) * bowls.finalBowls[following - 1] +
+        z,
   );
   final d = normalize(
     (first + z + BigInt.from(194)).pow(2) +
-    BigInt.from(193) * first +
-    BigInt.from(197) * bowls.finalBowls[5],
+        BigInt.from(193) * first +
+        BigInt.from(197) * bowls.finalBowls[5],
   );
   final expected = oracleChoice(first, d.isOdd ? 1 : -1, n);
   check(actual.choice.initial == expected.initial, '§M initial answer');
@@ -150,8 +155,8 @@ void verifyCanonical(BigInt c) {
   check(actual.choice.branch == 'short', 'Actual §Q uses short choice');
   final chosen = preview.candidates[(expected.result - BigInt.one).toInt()];
   check(actual.selectedYear.openOrdinal == chosen.openOrdinal, 'Open ordinal');
-  check(actual.selectedYear.closeOrdinal == chosen.closeOrdinal,
-      'Close ordinal');
+  check(
+      actual.selectedYear.closeOrdinal == chosen.closeOrdinal, 'Close ordinal');
   check(actual.selectedYear.contains(c), 'Geometric containment');
   shortCases++;
   canonical++;
@@ -180,10 +185,15 @@ void main() {
   check(shortCases >= 6 && wideCases >= 3, 'Short and wide covered');
   check(rejectedCases >= 2, 'Rejection logic covered');
   check(checks >= 90, 'Substantial independent checks');
-  print('PRODUCTION09_SELECTION_PASS; checks=' + checks.toString() +
-      '; canonical=' + canonical.toString() +
-      '; short=' + shortCases.toString() +
-      '; wide=' + wideCases.toString() +
-      '; rejections=' + rejectedCases.toString() +
+  print('PRODUCTION09_SELECTION_PASS; checks=' +
+      checks.toString() +
+      '; canonical=' +
+      canonical.toString() +
+      '; short=' +
+      shortCases.toString() +
+      '; wide=' +
+      wideCases.toString() +
+      '; rejections=' +
+      rejectedCases.toString() +
       '; year5000_selection_ready=true; five_component_calendar_ready=false');
 }
