@@ -880,3 +880,18 @@ Two genuine adjacent years, 10 fault modes in each direction, 20
 fault rejections, 20 recovery calls and two healthy baselines.
 No production edit and no expected-red historical claim. Stage51
 Native remains AWAITING_CI on the new commit, not PASS.
+
+
+## 2026-11-02 — Stage51 Native GREEN; Stage52 / VERIFICATION29 dibuka
+
+Stage51 on SHA 215d97874bb9094656707df21aaf3b8a98b07621:
+GitHub Actions #41355006529 completed/success, all 22/22 jobs.
+Native PHP 8.3.36/64-bit #124993079200: checks=89, directions=2,
+faults=20, recovered=20, baseline=2; lint PASS, stderr empty, exit=0.
+Artifact #13103606897, ZIP SHA256
+9a8765d344fa0242650e31c19a9f19f6e0abccc4bd40c7c16b89e15d722eb07d.
+Stage52/VERIFICATION29 introduces independent test-only late-hop
+injection in traversal edge two for depth two and three, four fault types,
+two directions, four healthy baselines, 16 failed requests, 16 recoveries.
+No expected-red claim, no production edit, no main/merge.
+Stage52 Native is not yet accepted; require completed job evidence.
