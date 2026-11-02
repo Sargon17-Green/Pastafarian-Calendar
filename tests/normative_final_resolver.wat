@@ -104,4 +104,32 @@
     (i32.const 1))
 
   (func (export "result_ptr") (result i32) (global.get $RESULT))
+
+  ;; QA adicional Stage 01: cuatro bordes de dos chuletas y tejido alterno.
+  ;; Expectativas derivadas manualmente del intervalo (100,110] y la secuencia 1,2.
+  (func $check_interleaved_boundary
+    (param $day i64) (param $cutletIndex i32) (param $cutletDay i32)
+    (param $monthName i32) (param $monthDay i32) (result i32)
+    (call $prepare_interleaved_fixture)
+    (call $resolve
+      (i64.const 5000) (i64.const 100) (local.get $day)
+      (i32.const 2) (i32.const 8192) (i32.const 9000) (i32.const 9100)
+      (global.get $RESULT))
+    (i32.and
+      (i64.eq (i64.load (global.get $RESULT)) (i64.const 5000))
+      (i32.and
+        (i32.eq (i32.load offset=8 (global.get $RESULT)) (local.get $cutletIndex))
+        (i32.and
+          (i32.eq (i32.load offset=12 (global.get $RESULT)) (local.get $cutletDay))
+          (i32.and
+            (i32.eq (i32.load offset=16 (global.get $RESULT)) (local.get $monthName))
+            (i32.eq (i32.load offset=20 (global.get $RESULT)) (local.get $monthDay)))))))
+  (func (export "test_resolver_first_day") (result i32)
+    (call $check_interleaved_boundary (i64.const 101) (i32.const 7) (i32.const 1) (i32.const 31) (i32.const 1)))
+  (func (export "test_resolver_first_cutlet_last_day") (result i32)
+    (call $check_interleaved_boundary (i64.const 105) (i32.const 7) (i32.const 5) (i32.const 31) (i32.const 3)))
+  (func (export "test_resolver_second_cutlet_first_day") (result i32)
+    (call $check_interleaved_boundary (i64.const 106) (i32.const 9) (i32.const 1) (i32.const 47) (i32.const 3)))
+  (func (export "test_resolver_last_day") (result i32)
+    (call $check_interleaved_boundary (i64.const 110) (i32.const 9) (i32.const 5) (i32.const 47) (i32.const 5)))
 )
