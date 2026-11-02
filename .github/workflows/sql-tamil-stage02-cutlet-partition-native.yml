@@ -35,6 +35,10 @@ permissions:
   contents: read
 jobs:
   cutlet-partition-native:
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [g6s1, g6s3, g7s1, g7s3, g8s1, g8s3, g9s1, g9s3, negative]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -63,11 +67,23 @@ jobs:
           python3 sql/test/116_stage02_cutlet_partition_oracle.py --emit-sql > sql-tamil-cutlet-partition-logs/goldens.sql
           test "$(grep -c '^INSERT INTO stage02_partition_goldens' sql-tamil-cutlet-partition-logs/goldens.sql)" -ge 100
           sha256sum sql-tamil-cutlet-partition-logs/goldens.sql | tee sql-tamil-cutlet-partition-logs/goldens-sha256.txt
-      - name: Native cutlet-partition checks 53
+      - name: Native cutlet-partition bounded checks for ${{ matrix.case }}
         shell: bash
+        env:
+          SLICE18_CASE: ${{ matrix.case }}
         run: |
           set -euo pipefail
-          docker exec -u postgres sql-tamil-cutlet-partition-native-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+          case "$SLICE18_CASE" in
+            negative) options=(-v slice18_negative=1) ;;
+            g[6-9]s[13])
+              g="${SLICE18_CASE:1:1}"
+              seed="${SLICE18_CASE:3:1}"
+              options=(-v slice18_gold=1 -v "slice18_g=$g" -v "slice18_seed=$seed")
+              ;;
+            *) echo "unexpected SLICE18_CASE=$SLICE18_CASE" >&2; exit 64 ;;
+          esac
+          printf 'Native matrix case: %s\n' "$SLICE18_CASE" | tee sql-tamil-cutlet-partition-logs/native-case.txt
+          docker exec -u postgres sql-tamil-cutlet-partition-native-pg psql -X -v ON_ERROR_STOP=1 "${options[@]}" -U postgres -d postgres \
             -f /work/sql/00_schema.sql \
             -f /work/sql/01_source_language_catalog.sql \
             -f /work/sql/02_monster_bootstrap.sql \
@@ -96,7 +112,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: sql-tamil-slice18-cutlet-partition-native
+          name: sql-tamil-slice18-cutlet-partition-native-${{ matrix.case }}
           path: sql-tamil-cutlet-partition-logs/
           if-no-files-found: warn
           retention-days: 90

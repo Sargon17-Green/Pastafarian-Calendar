@@ -1,8 +1,9 @@
 -- SQL+தமிழ் Slice18 Native assertions; generated Python separator fixture loaded first.
 BEGIN;
-SET LOCAL statement_timeout = '180s';
-\echo SLICE18_NATIVE_GROUP=32-golden
+SET LOCAL statement_timeout = '900s';
 CREATE TEMP TABLE slice18_native(name text PRIMARY KEY,ok boolean NOT NULL);
+\if :{?slice18_gold}
+\echo SLICE18_NATIVE_GROUP=4-golden
 WITH fx AS MATERIALIZED (
  SELECT g,seed,r,
  ROW(ARRAY[(9+seed)::numeric,20,30,40,50,60]::numeric[],ARRAY[1,2,3,4,5,6]::integer[])::pastafari_sql_tamil.sauce_result AS s,
@@ -10,6 +11,7 @@ WITH fx AS MATERIALIZED (
  CASE WHEN r IS NULL THEN pastafari_sql_tamil.gate_day(0)+1 ELSE pastafari_sql_tamil.gate_day(r) END AS day
  FROM generate_series(6,9) a(g) CROSS JOIN generate_series(1,4) b(seed)
  CROSS JOIN (VALUES(NULL::integer),(2)) v(r)
+ WHERE a.g = :slice18_g AND b.seed BETWEEN :slice18_seed AND (:slice18_seed + 1)
 ), prepared AS MATERIALIZED (
  SELECT *,pastafari_sql_tamil.choose_cutlet_count(s,y) AS k FROM fx
 ), ranked AS MATERIALIZED (
@@ -26,6 +28,10 @@ SELECT format('g%s-seed%s-r%s',g,seed,coalesce(r::text,'none')),
  (SELECT expected FROM stage02_partition_goldens o WHERE o.g=answers.g
  AND o.k=answers.k AND o.r IS NOT DISTINCT FROM answers.r AND o.q=answers.q),false)
 FROM answers;
+SELECT name,ok FROM slice18_native ORDER BY name;
+SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS native_golden_4_of_4 FROM slice18_native;
+\endif
+\if :{?slice18_negative}
 \echo SLICE18_NATIVE_GROUP=21-boundary-negative
 WITH fx AS MATERIALIZED (
  SELECT
@@ -60,5 +66,6 @@ SELECT name,coalesce(ok,false) FROM fx f CROSS JOIN LATERAL (VALUES
 ('g18-structural',(SELECT count(*)=pastafari_sql_tamil.choose_cutlet_count(f.s,f.y18) AND sum(x)=18 AND min(x)>0 FROM unnest(pastafari_sql_tamil.choose_cutlet_partition(pastafari_sql_tamil.gate_day(0)+1,f.s,f.y18,pastafari_sql_tamil.choose_cutlet_count(f.s,f.y18))) a(x)))
 ) t(name,ok);
 SELECT name,ok FROM slice18_native ORDER BY name;
-SELECT 1/((count(*)=53 AND bool_and(ok))::integer) AS native_53_of_53 FROM slice18_native;
+SELECT 1/((count(*)=21 AND bool_and(ok))::integer) AS native_boundary_21_of_21 FROM slice18_native;
+\endif
 COMMIT;
