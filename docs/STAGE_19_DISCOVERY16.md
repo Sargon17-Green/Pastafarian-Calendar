@@ -1,4 +1,4 @@
-# Stage19 DISCOVERY16 — joint wide-axis real-date differential (open)
+# Stage19 DISCOVERY16 — joint wide-axis real-date differential (accepted, bounded)
 
 ## Verified predecessor
 Stage18/DISCOVERY15 was accepted for its *bounded nine-pair scope* on exact SHA b46abde0c596e0ffc85fe24bb71bd2a4808d32c7. GitHub Actions run 41523605711 completed/success 20/20, including verify and native-stage18-wide-calibration; GNATMAKE 13.3.0 compiler, gnatbind-13 and gnatlink-13 executed; log markers observed: independent=53, native=51, five-field numerical=45. No general proof or newly discovered defect is claimed.
@@ -19,4 +19,4 @@ Acceptance only after push CI on the exact committed SHA is completed/success ac
 - STAGE19_NATIVE_JOINT_WIDE_ASSERTIONS=51
 - STAGE19_REAL_FIVEFIELD_SCALARS=45
 
-Neither static preflight nor queued/in_progress CI implies Native PASS. Changes restricted to Ada+తెలుగు; no main, merge or release.
+Stage19 ACCEPTED for exactly nine ordered pairs, run 41536457335 completed/success 21/21 at 39207ca0f8c22eef36f0035b207c9d1d446dcd1d; job 125589408198 GNATMAKE13.3.0 compile/bind/link, and exact markers 53/51/45 observed. This is bounded acceptance; no universal proof. Changes restricted to Ada+తెలుగు; no main, merge or release.
