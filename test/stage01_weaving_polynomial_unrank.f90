@@ -13,8 +13,9 @@ contains
     integer, intent(out) :: word(:)
     logical, intent(out) :: ok
     integer, allocatable :: remaining(:)
-    type(BigInt) :: total, offset, completions
+    type(BigInt) :: total, offset, state_total, leftover, completions
     integer :: p, color, opened, closed, new_opened, new_closed
+    integer :: first_legal, last_legal
     logical :: chosen
 
     word=0
@@ -24,9 +25,7 @@ contains
     if (sum(lengths)>5778) return
     if (size(word)/=sum(lengths)) return
     if (bi_compare(rank,bi_one())<0) return
-    ! A sorted block word (all 1s, then all 2s, etc.) always obeys
-    ! ordered first and last appearances, so rank one is valid for
-    ! every validated nonempty shape. Avoid an expensive total count.
+    ! The lexicographically first word is always sorted blocks.
     if (bi_compare(rank,bi_one())==0) then
        p=0
        do color=1,size(lengths)
@@ -39,58 +38,68 @@ contains
     total=count_weavings_polynomial(lengths)
     if (bi_compare(rank,total)>0) return
 
-    ! The penultimate legal word is the lexicographic predecessor of
-    ! the maximal word. Local legality implies completion is possible:
-    ! close already-open colors in order, then open/close the rest.
-    ! This avoids thousands of expensive prefix-count calls for rank C-1.
+    ! Independently proven C-1 shortcut; retained from prior candidate.
     if (bi_compare(rank,bi_sub(total,bi_one()))==0) then
        call unrank_penultimate(lengths,word,ok)
        return
     end if
+
     remaining=lengths
-    opened=0; closed=0; offset=rank
+    opened=0; closed=0; offset=rank; state_total=total
     do p=1,size(word)
-       chosen=.false.
-       ! Any locally legal next symbol has a legal completion: finish
-       ! already-open colors in closing order, then open/finish the rest.
-       ! Once the residual rank is one, the smallest legal symbol is
-       ! therefore the lexicographically first completion. This fast
-       ! suffix is valid for arbitrary initial ranks, not just rank one.
+       ! Every locally legal symbol permits at least one full completion.
+       ! Thus rank 1 and the current maximum rank have constructive
+       ! lexicographically minimal/maximal suffixes, without any DP calls.
        if (bi_compare(offset,bi_one())==0) then
-          do color=1,size(lengths)
-             if (remaining(color)==0) cycle
-             if (remaining(color)==lengths(color) .and. color/=opened+1) cycle
-             if (remaining(color)==1 .and. color/=closed+1) cycle
-             if (remaining(color)==lengths(color)) opened=color
-             if (remaining(color)==1) closed=color
-             remaining(color)=remaining(color)-1
-             word(p)=color
-             chosen=.true.
-             exit
-          end do
-          if (.not. chosen) then
-             word=0
-             return
-          end if
+          call complete_lexical_suffix(lengths,remaining,opened,closed,word,p,.false.,ok)
+          return
+       end if
+       if (bi_compare(offset,state_total)==0) then
+          call complete_lexical_suffix(lengths,remaining,opened,closed,word,p,.true.,ok)
+          return
+       end if
+
+       first_legal=0; last_legal=0
+       do color=1,size(lengths)
+          if (.not. legal_next(lengths,remaining,opened,closed,color)) cycle
+          if (first_legal==0) first_legal=color
+          last_legal=color
+       end do
+       if (first_legal==0) then
+          word=0
+          return
+       end if
+       ! A forced transition preserves the number of suffix completions.
+       if (first_legal==last_legal) then
+          word(p)=first_legal
+          call consume_next(lengths,remaining,opened,closed,first_legal)
           cycle
        end if
-       do color=1,size(lengths)
-          if (remaining(color)==0) cycle
-          if (remaining(color)==lengths(color) .and. color/=opened+1) cycle
-          if (remaining(color)==1 .and. color/=closed+1) cycle
-          new_opened=opened
-          new_closed=closed
-          if (remaining(color)==lengths(color)) new_opened=color
-          if (remaining(color)==1) new_closed=color
-          remaining(color)=remaining(color)-1
-          completions=count_prefix_weavings_polynomial(lengths,remaining,new_opened,new_closed)
+
+       ! State partition invariant: sum of all legal child completions
+       ! equals state_total. Never recalculate the last child's count.
+       leftover=state_total
+       chosen=.false.
+       do color=first_legal,last_legal
+          if (.not. legal_next(lengths,remaining,opened,closed,color)) cycle
+          if (color==last_legal) then
+             completions=leftover
+          else
+             new_opened=opened; new_closed=closed
+             if (remaining(color)==lengths(color)) new_opened=color
+             if (remaining(color)==1) new_closed=color
+             remaining(color)=remaining(color)-1
+             completions=count_prefix_weavings_polynomial( &
+                  lengths,remaining,new_opened,new_closed)
+             remaining(color)=remaining(color)+1
+          end if
           if (bi_compare(offset,completions)>0) then
              offset=bi_sub(offset,completions)
-             remaining(color)=remaining(color)+1
+             leftover=bi_sub(leftover,completions)
           else
              word(p)=color
-             opened=new_opened
-             closed=new_closed
+             call consume_next(lengths,remaining,opened,closed,color)
+             state_total=completions
              chosen=.true.
              exit
           end if
@@ -103,6 +112,38 @@ contains
     ok=(all(remaining==0) .and. bi_compare(offset,bi_one())==0)
     if (.not. ok) word=0
   end subroutine unrank_weaving_polynomial
+
+  ! Construct an extreme suffix directly, for ANY input rank whose
+  ! residual rank is 1 or the exact remaining state total.
+  subroutine complete_lexical_suffix(lengths,remaining,opened,closed,word,start,largest,ok)
+    integer, intent(in) :: lengths(:), start
+    integer, intent(inout) :: remaining(:), opened, closed, word(:)
+    logical, intent(in) :: largest
+    logical, intent(out) :: ok
+    integer :: p, i, color, n
+    logical :: chosen
+
+    n=size(lengths)
+    ok=.false.
+    do p=start,size(word)
+       chosen=.false.
+       do i=1,n
+          color=i
+          if (largest) color=n+1-i
+          if (.not. legal_next(lengths,remaining,opened,closed,color)) cycle
+          word(p)=color
+          call consume_next(lengths,remaining,opened,closed,color)
+          chosen=.true.
+          exit
+       end do
+       if (.not. chosen) then
+          word=0
+          return
+       end if
+    end do
+    ok=all(remaining==0)
+    if (.not. ok) word=0
+  end subroutine complete_lexical_suffix
 
   ! Construct the greatest legal complete word greedily, recording each
   ! prefix state. Its immediate predecessor is obtained by changing the
