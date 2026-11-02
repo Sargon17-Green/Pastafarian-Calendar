@@ -46,6 +46,44 @@ final class MonsterYearLocator {
   MonsterYearLocator({MonsterMeatballGateCalculator? gates})
       : _gates = gates ?? MonsterMeatballGateCalculator();
 
+  /// Bounded real §O traversal. Strict external sentinels, not the step budget,
+  /// decide completeness. gapFor is not constrained by gatePosition's prefix.
+  /// With minimum gap 42 and maximum year length 5778, 138 intervals
+  /// suffice to cross a 5778-day window when starting at its edge.
+  MonsterYearPreview sentinelSearch(
+    BigInt day, {
+    int maximumIntervalsPerSide = 138,
+  }) {
+    if (maximumIntervalsPerSide < 1 || maximumIntervalsPerSide > 138) {
+      throw RangeError.range(
+        maximumIntervalsPerSide,
+        1,
+        138,
+        'maximumIntervalsPerSide',
+      );
+    }
+    final foundation = MonsterWorkCounter.foundationDay;
+    final positions = <int, BigInt>{0: foundation};
+    var left = foundation;
+    var right = foundation;
+    final leftCutoff = day - maximumLength;
+    final rightCutoff = day + maximumLength - BigInt.one;
+    for (var step = 1; step <= maximumIntervalsPerSide; step++) {
+      if (left >= leftCutoff) {
+        left -= _gates.gapFor(BigInt.from(-step)).length;
+        positions[-step] = left;
+      }
+      if (right <= rightCutoff) {
+        right += _gates.gapFor(BigInt.from(step)).length;
+        positions[step] = right;
+      }
+      if (left < leftCutoff && right > rightCutoff) {
+        break;
+      }
+    }
+    return fromGateSnapshot(day, positions);
+  }
+
   /// Traverse each signed §O gap once; no repeated quadratic gatePosition calls.
   MonsterYearPreview boundedPreview(
     BigInt day, {
