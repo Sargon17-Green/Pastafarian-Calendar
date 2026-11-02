@@ -53,8 +53,7 @@ List<List<BigInt>> _oracle(BigInt day, Map<int, BigInt> positions) {
       var insertion = 0;
       while (insertion < ordered.length) {
         final earlier = ordered[insertion];
-        if (earlier[4] > span ||
-            (earlier[4] == span && earlier[2] > open)) {
+        if (earlier[4] > span || (earlier[4] == span && earlier[2] > open)) {
           break;
         }
         insertion++;
@@ -81,16 +80,13 @@ void _compare(BigInt day, Map<int, BigInt> positions) {
     _check(actual.length == oracle[4], 'Oracle length');
     _check(actual.eligible && actual.contains(day), 'Oracle eligibility');
   }
-  final leftSafe =
-      positions[positions.keys.reduce((a, b) => a < b ? a : b)]! <
-          day - BigInt.from(5778);
-  final rightSafe =
-      positions[positions.keys.reduce((a, b) => a > b ? a : b)]! >
-          day + BigInt.from(5777);
+  final leftSafe = positions[positions.keys.reduce((a, b) => a < b ? a : b)]! <
+      day - BigInt.from(5778);
+  final rightSafe = positions[positions.keys.reduce((a, b) => a > b ? a : b)]! >
+      day + BigInt.from(5777);
   _check(result.complete == (leftSafe && rightSafe), 'Sentinel proof');
   _check(
-    result.missingBoundaries.length ==
-        (leftSafe ? 0 : 1) + (rightSafe ? 0 : 1),
+    result.missingBoundaries.length == (leftSafe ? 0 : 1) + (rightSafe ? 0 : 1),
     'Missing proof directions',
   );
   if (result.complete) {
