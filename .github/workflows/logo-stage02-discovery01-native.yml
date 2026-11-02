@@ -81,3 +81,25 @@ jobs:
             exit 1
           fi
           echo 'NATIVE_STAGE_2_DISCOVERY_01_VERIFICATION=PASS'
+
+      - name: Verify Stage 2 Discovery 02 native context isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/stage02-discovery02.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 240s \
+            stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery02_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            cat "$log"
+            echo "::error::Stage2 Discovery02 native failure or timeout"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_02_PAIRS_PASIS 28' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_02_CHECKS_PASIS 406' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_02_PASIS' "$log"
+          if grep -Eq 'STAGE_2_DISCOVERY_02_TESTO_FALIIS|STAGE_2_DISCOVERY_02_FALIIS|I don.t know how to' "$log"; then
+            echo '::error::Stage2 Discovery02 failure marker'
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_02_VERIFICATION=PASS'

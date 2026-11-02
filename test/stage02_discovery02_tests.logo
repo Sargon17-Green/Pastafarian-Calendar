@@ -1,0 +1,122 @@
+; Stage 2 / DISCOVERY 02: isolation e modulo testado.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "test/normative_reference.logo
+
+make "D2.FAIL "false
+make "D2.N 0
+make "D2.PAIRS 0
+
+to d2.require :ok :label
+  make "D2.N (:D2.N + 1)
+  if not :ok [
+    make "D2.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_02_TESTO_FALIIS:] :label
+  ]
+end
+
+to d2.pair :a :b :tag
+  localmake "ctx monster.stage02.context :a :b
+  localmake "x monster.context.get :ctx "normalizedCalculationDay
+  localmake "y monster.context.get :ctx "normalizedTargetDay
+  make "D2.PAIRS (:D2.PAIRS + 1)
+  d2.require (bi.eq :x (nr.save :a)) :tag
+  d2.require (bi.eq :y (nr.save :b)) :tag
+  d2.require (bi.ge :x (bi.small 1)) :tag
+  d2.require (bi.le :x nr.M) :tag
+  d2.require (bi.ge :y (bi.small 1)) :tag
+  d2.require (bi.le :y nr.M) :tag
+  d2.require (bi.eq (monster.context.get :ctx "calculationDay) :a) :tag
+  d2.require (bi.eq (monster.context.get :ctx "targetDay) :b) :tag
+  d2.require (equalp (monster.context.get :ctx "phase) "MODULO_NORMALIZED) :tag
+  d2.require (equalp (monster.context.get :ctx "mode) "STAGE_2_DISCOVERY_02) :tag
+  d2.require (equalp (monster.context.get :ctx "status) "BOUNDARY_NORMALIZED) :tag
+  d2.require (equalp (monster.context.get :ctx "metrics) [stage02.dispatch]) :tag
+  d2.require (equalp (monster.context.get :ctx "logs) [stage02.enter stage02.normalized]) :tag
+  d2.require ((count :ctx) = 12) :tag
+end
+
+to d2.isolation :m :mp1
+  localmake "a monster.stage02.context :m (bi.zero)
+  localmake "b monster.stage02.context :mp1 (bi.neg :m)
+  localmake "again monster.stage02.context :m (bi.zero)
+  localmake "changed monster.context.put :a "status "LOCAL_ONLY
+  d2.require (equalp :a :again) [repeat_determinism]
+  d2.require (not (equalp :a :b)) [different_inputs]
+  d2.require (equalp (monster.context.get :changed "status) "LOCAL_ONLY) [local_change]
+  d2.require (equalp (monster.context.get :again "status) "BOUNDARY_NORMALIZED) [no_leak_1]
+  d2.require (equalp (monster.context.get :b "status) "BOUNDARY_NORMALIZED) [no_leak_2]
+  d2.require (equalp (monster.context.get :again "logs) [stage02.enter stage02.normalized]) [logs_no_leak]
+  d2.require (equalp (monster.context.get :b "metrics) [stage02.dispatch]) [metrics_no_leak]
+  d2.require (bi.eq (monster.context.get :b "normalizedTargetDay) :m) [second_result]
+end
+
+to d2.invalid :m
+  localmake "bad monster.context.new [] :m
+  localmake "out monster.stage02.dispatch :bad
+  d2.require (equalp (monster.context.get :out "status) "FAILED_VALIDATION) [rejected_input]
+  d2.require (equalp (monster.context.get :out "phase) "FAILED_VALIDATION) [invalid_phase]
+  d2.require (emptyp (monster.context.get :out "normalizedCalculationDay)) [no_calc_result]
+  d2.require (emptyp (monster.context.get :out "normalizedTargetDay)) [no_target_result]
+end
+
+to stage02.discovery02.run
+  localmake "m nr.M
+  localmake "z bi.zero
+  localmake "one bi.small 1
+  localmake "negone bi.small -1
+  localmake "lo bi.sub :m :one
+  localmake "hi bi.add :m :one
+  localmake "nm bi.neg :m
+  localmake "nmhi bi.add :nm :one
+  localmake "nmlo bi.sub :nm :one
+  localmake "m2 bi.mul.small :m 2
+  localmake "m3 bi.mul.small :m 3
+  localmake "nm2 bi.neg :m2
+  localmake "nm3 bi.neg :m3
+  localmake "huge bi.mul.small :m 1000000
+  localmake "negativeHuge bi.neg :huge
+  localmake "hugeOne bi.add :huge :one
+  d2.pair :z :z [zero_zero]
+  d2.pair :one :one [one_one]
+  d2.pair :lo :lo [M_minus_one]
+  d2.pair :m :m [M_M]
+  d2.pair :hi :hi [M_plus_one]
+  d2.pair :nm :nm [negative_M]
+  d2.pair :negone :negone [negative_one]
+  d2.pair :m2 :m2 [twice_M]
+  d2.pair :m3 :m3 [three_M]
+  d2.pair (bi.add :m2 :one) (bi.add :m3 :one) [positive_plus]
+  d2.pair (bi.sub :m2 :one) (bi.sub :m3 :one) [positive_minus]
+  d2.pair :nmhi (bi.add :nm2 :one) [negative_plus]
+  d2.pair :nmlo (bi.sub :nm2 :one) [negative_minus]
+  d2.pair :nm2 :nm3 [negative_multiples]
+  d2.pair :nm3 :nm2 [negative_reverse]
+  d2.pair :z :negone [zero_negative_one]
+  d2.pair :negone :z [negative_one_zero]
+  d2.pair :m :z [M_zero]
+  d2.pair :z :m [zero_M]
+  d2.pair :hi :nmlo [plus_minus]
+  d2.pair :huge :negativeHuge [huge_magnitudes]
+  d2.pair :negativeHuge :huge [huge_reverse]
+  d2.pair :hugeOne (bi.add :negativeHuge :one) [huge_plus]
+  d2.pair (bi.neg :hugeOne) :hugeOne [huge_plus_reverse]
+  d2.pair :one :nm [one_negativeM]
+  d2.pair :nm :one [negativeM_one]
+  d2.pair :lo :hi [cross_M]
+  d2.pair :nmhi :nmlo [cross_negativeM]
+
+  d2.isolation :m :hi
+  d2.invalid :m
+  d2.require (:D2.PAIRS = 28) [exact_28_pairs]
+  d2.require (:D2.N = 405) [exact_406_checks]
+  if :D2.FAIL [print [STAGE_2_DISCOVERY_02_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_02_PAIRS_PASIS] :D2.PAIRS
+  print sentence [STAGE_2_DISCOVERY_02_CHECKS_PASIS] :D2.N
+  print [STAGE_2_DISCOVERY_02_PASIS]
+end
+
+stage02.discovery02.run
