@@ -70,7 +70,7 @@ def verify_pin(repo: Path, witness_commit: str, witness_path: str,
             raise ProvenanceError("revision pin is not a commit")
     if witness_commit == stage4_introduction or not is_ancestor(repo, witness_commit, stage3_closure):
         raise ProvenanceError("source commit is not in the pre-Stage4 Rust ancestry")
-    if not is_ancestor(repo, stage3_closure, stage4_introduction):
+    if stage3_closure == stage4_introduction or not is_ancestor(repo, stage3_closure, stage4_introduction):
         raise ProvenanceError("Stage3 closure is not an ancestor of Stage4 introduction")
     if not is_ancestor(repo, stage4_introduction, branch_head):
         raise ProvenanceError("Stage4 introduction is not an ancestor of current branch HEAD")

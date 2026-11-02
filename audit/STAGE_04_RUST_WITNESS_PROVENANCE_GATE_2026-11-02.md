@@ -45,3 +45,21 @@ Stage3 SAVE regression and Stage04 Native gates.
 
 CI outcomes on the newly committed workflow must be assessed from completed
 run/job logs, not from local test success or queued/in_progress state.
+
+## 2026-11-03: strict Stage3-to-Stage4 chronology PATCH (Rust branch only)
+
+The bounded source validator used `merge-base --is-ancestor`, which accepts
+identical commits. Prior to this patch, the source gate's `stage3_closure ->
+stage4_introduction` relation was therefore non-strict despite the distinct
+historical stage boundary required by this contract. This is a source-eligibility
+QA issue, **not evidence of any historical day-tag runtime defect**.
+
+The predicate now rejects `stage3_closure == stage4_introduction`. Two bounded
+synthetic-history regression/control cases establish (1) rejection of identical
+Stage3/Stage4 boundaries and (2) acceptance when the genuine Stage4 introduction
+itself is the branch HEAD. The CI provenance gate expects **11/11** tests,
+including prior nine. The historical production Rust day-tag route remains
+unproven and Stage04 closure remains NOT_CLAIMED until a genuine callable,
+pre-Stage4 Rust implementation produces observed runtime RED under an independent
+oracle. GitHub CI results must be read from completed job logs; merely committing
+this patch does not establish CI PASS.

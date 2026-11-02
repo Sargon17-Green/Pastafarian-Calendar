@@ -79,6 +79,18 @@ class TestRustWitnessProvenance(unittest.TestCase):
         with self.assertRaises(ProvenanceError):
             self.check(commit=self.c, path="src/discovery02_day_tag_probe.rs", blob=blob)
 
+    def test_rejects_equal_stage3_and_stage4_boundaries(self):
+        # merge-base --is-ancestor returns 0 for identical commits, but
+        # Stage4 introduction must be a strictly later Git revision.
+        with self.assertRaises(ProvenanceError):
+            self.check(stage3=self.c, stage4=self.c)
+
+    def test_allows_stage4_introduction_as_current_head(self):
+        # The only strict boundary is Stage3 -> Stage4, not Stage4 -> HEAD.
+        result = self.check(head=self.c)
+        self.assertTrue(result["source_pin_eligible"])
+        self.assertFalse(result["observed_runtime_red"])
+
     def test_rejects_wrong_blob_sha(self):
         with self.assertRaises(ProvenanceError):
             self.check(blob=self.test_blob)
