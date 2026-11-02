@@ -1,22 +1,44 @@
 name: Kotlin TABLETS date source identity preflight
+
 on:
   push:
-    branches: ['Kotlin+Cymraeg']
+    branches: ['Kotlin\+Cymraeg']
     paths:
       - 'soak/tablets_date_module_provenance.py'
       - 'soak/test_tablets_date_module_provenance.py'
       - '.github/workflows/post55-tablets-date-source-preflight.yml'
   workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   source-identity-preflight:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Compile source identity preflight
-        run: python -m py_compile soak/tablets_date_module_provenance.py soak/test_tablets_date_module_provenance.py
-      - name: Git-backed identity contract tests (synthetic, not date certification)
-        run: python -m unittest discover -s soak -p test_tablets_date_module_provenance.py -v
+      - name: Verify SHA and run focused Git-backed dependency preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 -m py_compile soak/tablets_date_module_provenance.py soak/test_tablets_date_module_provenance.py
+          python3 -m unittest discover -s soak -p 'test_tablets_date_module_provenance.py' -v 2>&1 | tee "$RUNNER_TEMP/tablets-date-source-preflight.log"
+          echo 'PASS_DATE_SOURCE_PREFLIGHT_SYNTHETIC_NOT_CERTIFIED' | tee -a "$RUNNER_TEMP/tablets-date-source-preflight.log"
+      - name: Preserve test evidence even if preflight fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-tablets-date-source-preflight
+          path: ${{ runner.temp }}/tablets-date-source-preflight.log
+          if-no-files-found: warn
+          retention-days: 30
