@@ -115,15 +115,19 @@ proc main() {
   // The product counts possible remaining vectors, not reachable memo states.
   var weavingInputTotal = 0;
   var weavingRemainingVectors = new bigint(1);
+  var weavingGuaranteedReachable = new bigint(1);
   writeln("YEAR_BOUNDARY_WEAVING_MONTH_COUNT=", structure.monthCount);
   for i in 0..#structure.monthCount {
     const monthLength = structure.monthLengths[i];
     weavingInputTotal += monthLength;
     weavingRemainingVectors *= new bigint(monthLength + 1);
+    weavingGuaranteedReachable *= new bigint(monthLength - 1);
     writeln("YEAR_BOUNDARY_WEAVING_LENGTH_", i + 1, "=", monthLength);
   }
   writeln("YEAR_BOUNDARY_WEAVING_INPUT_TOTAL=", weavingInputTotal);
   writeln("YEAR_BOUNDARY_WEAVING_POSSIBLE_REMAINING_VECTORS=", weavingRemainingVectors);
+  // Constructive lower bound: all months opened, none closed, each remaining in 1..length-1.
+  writeln("YEAR_BOUNDARY_WEAVING_GUARANTEED_REACHABLE_STATES=", weavingGuaranteedReachable);
   try! stdout.flush();
   checkpoint("STRUCTURE_MONTH_WEAVING_BEGIN");
   structure.monthWeaving = chooseMonthWeaving(r, structure.monthLengths);

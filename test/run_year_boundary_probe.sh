@@ -3,6 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
+python3 test/weaving_reachability_oracle.py
 chpl -M src -M test test/year_boundary_probe.chpl -o "$tmpdir/year_boundary_probe"
 # Bounded diagnostic: timeout is inconclusive, never an accepted PASS.
 # The native-stage01 workflow has a 45-minute job ceiling; stop this probe
