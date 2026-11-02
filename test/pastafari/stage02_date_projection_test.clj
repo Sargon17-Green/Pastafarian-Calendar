@@ -113,3 +113,16 @@
       (is (= :target-day-outside-proven-year
              (foutcode #(projectie/kies-bewezen-datum nil 0N 1253N))))
       (is @doorgeroepen))))
+
+(deftest ongeldige-weeflengte-is-eerst-afgewezen
+  (testing "Een vector buiten de bewezen lengte wordt geweigerd vóór frequencies."
+    (let [basis (fixture 1000N)
+          onjuist (assoc basis :month-weaving
+                         (conj (:month-weaving basis) 1))
+          oproepen (atom 0)]
+      (with-redefs [clojure.core/frequencies
+                    (fn [_] (swap! oproepen inc)
+                      (throw (ex-info "Onbegrensde telling" {:code :unbounded-frequency}))) ]
+        (is (= :invalid-date-projection-structure
+               (foutcode #(projectie/projecteer-bewezen-dag onjuist 1001N))))
+        (is (zero? @oproepen))))))

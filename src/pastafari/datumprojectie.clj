@@ -29,8 +29,7 @@
 
 (defn- geldige-maanden? [basis duur]
   (let [{:keys [month-count month-lengths month-weaving
-                month-name-indices]} basis
-        aantallen (when (vector? month-weaving) (frequencies month-weaving))]
+                month-name-indices]} basis]
     (and (integer? month-count)
          (<= 3N month-count 47N)
          (vector? month-lengths)
@@ -41,9 +40,10 @@
          (= duur (count month-weaving))
          (every? #(and (integer? %) (<= 1N % month-count))
                  month-weaving)
-         (= month-lengths
-            (mapv #(get aantallen % 0)
-                  (range 1 (inc month-count))))
+         (let [aantallen (frequencies month-weaving)]
+           (= month-lengths
+              (mapv #(get aantallen % 0)
+                    (range 1 (inc month-count)))))
          (vector? month-name-indices)
          (= month-count (count month-name-indices))
          (every? #(and (integer? %) (<= 1N % 47N))

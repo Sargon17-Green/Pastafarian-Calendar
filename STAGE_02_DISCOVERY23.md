@@ -12,7 +12,7 @@
 - De projectie leest uitsluitend **bestaande bewezen velden**. Geen nieuwe saus, ongecontroleerde enumeratie, kalenderheuristiek of normatieve broncode in productie. Het resultaat is alleen geldig voor een structureel gecontroleerd, reeds geselecteerd jaar.
 - Foutcodes: `:invalid-date-projection-structure`, `:target-day-outside-proven-year`, `:date-cutlet-not-found`. Ongeldige structuren worden fail-closed geweigerd.
 - `kies-bewezen-datum` is een expliciete opt-in wrapper van `maandnamen/kies-maandnamen`. Ze bewaart alle metadata, geeft standaard `zoekbudget=128N` en `celbudget=5000000N` onveranderd door en voegt **alleen** `:date-components` toe.
-- Resourcegrens: O(5778 + 47 + 17) geheugen/bewerkingen voor de projectie (zonder voorafgaande DP), exact één jaar, geen zoeklus. De upstream-selector weigert onbewijsbare maandweefkosten vóór de sauskeuze.
+- Resourcegrens: O(5778 + 47 + 17) geheugen/bewerkingen voor de projectie (zonder voorafgaande DP), exact één jaar, geen zoeklus. Controleer eerst de vectorlengte; bereken pas daarna de frequenties, zodat een te grote onbewezen invoer geen lineaire scan veroorzaakt. De upstream-selector weigert onbewijsbare maandweefkosten vóór de sauskeuze.
 
 ## Onafhankelijke bewijsopzet
 - Gebruik de bestaande `normative-oracle/calendar-date-canonical` voor de 252 dagelijkse posities van een gecontroleerd jaar met verweven maanden, plus zeven eindige grensgevallen van een jaar met 47 maanden en 5778 dagen. Stub alleen jaarzoekactie en jaarstructuurbouw; **niet** de canonieke berekening van de vijf velden.
