@@ -62,12 +62,10 @@ final class MonsterYearLocator {
       0: MonsterWorkCounter.foundationDay,
     };
     for (var i = 1; i <= upperOrdinal; i++) {
-      positions[i] =
-          positions[i - 1]! + _gates.gapFor(BigInt.from(i)).length;
+      positions[i] = positions[i - 1]! + _gates.gapFor(BigInt.from(i)).length;
     }
     for (var i = -1; i >= lowerOrdinal; i--) {
-      positions[i] =
-          positions[i + 1]! - _gates.gapFor(BigInt.from(i)).length;
+      positions[i] = positions[i + 1]! - _gates.gapFor(BigInt.from(i)).length;
     }
     return fromGateSnapshot(day, positions);
   }
@@ -124,15 +122,12 @@ final class MonsterYearLocator {
     }
     candidates.sort((a, b) {
       final lengthOrder = a.length.compareTo(b.length);
-      return lengthOrder != 0
-          ? lengthOrder
-          : a.openGate.compareTo(b.openGate);
+      return lengthOrder != 0 ? lengthOrder : a.openGate.compareTo(b.openGate);
     });
 
     // Strict outside sentinels certify every excluded ordinal is too far.
     final leftSafe = positions[lower]! < day - maximumLength;
-    final rightSafe =
-        positions[upper]! > day + maximumLength - BigInt.one;
+    final rightSafe = positions[upper]! > day + maximumLength - BigInt.one;
     final missing = <String>[
       if (!leftSafe) 'LEFT_SENTINEL_NOT_PROVEN',
       if (!rightSafe) 'RIGHT_SENTINEL_NOT_PROVEN',
