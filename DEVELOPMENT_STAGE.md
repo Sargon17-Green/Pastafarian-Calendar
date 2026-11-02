@@ -1,7 +1,7 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=2
-CURRENT_KIND=DISCOVERY
-CURRENT_PATCH=DISCOVERY_01
+CURRENT_STAGE=3
+CURRENT_KIND=PATCH
+CURRENT_PATCH=PATCH_01
 LAST_COMPLETED_STAGE=2
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
@@ -10,14 +10,18 @@ CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
 CROSS_IMPLEMENTATION_HASH_CHECKS=NO
 CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=J
-NATURAL_LANGUAGE=רומנית
+NATURAL_LANGUAGE=Romanian
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=context de bază, dispatcher neutru, validator neutru, înveliș de eroare și colector de metrici fără logică de patch
+MONSTER_ARCHITECTURE_GROWTH=context de baza, dispatcher neutru, validator neutru, invelis de eroare, colector de metrici si canonizarea zilelor intregi la extended integer
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
-GIT_HISTORY_MUTATED=NO
+GIT_HISTORY_MUTATED=YES
 HANDOFF_PACKAGE_PREPARED=YES
 
-Notă: Stage 1 a fost finalizat după o execuție nativă J9.7.1 pe Windows: 63/63 verificări, 17 fixture-uri, audit GREEN, exit code 0. Dovadă: results(20261102-191247).zip, SHA256=f0c43242323ce04c2734c969deb60a9461335056d63767cd7d39c4cebdbb5e2b; sursa testată este commit a836206fd842e18d60f3a5df6a07382cf81573bb, tree d00980351d0123b15fe72b7f01db5151ecce608d. Stage 1 a fost acceptat prin verificarea nativă menționată.
+Stage 1 was completed by native J9.7.1 execution on Windows: 63/63 checks, 17 fixtures, GREEN audit, exit code 0. Evidence: Native QA v13.
 
-Stage 2 / DISCOVERY 01: implementarea in productie pentru cinci valori de lucru (numaratoare, distanta si sens) si teste noi independente. Calea publica pastreaza NOT_INTEGRATED; Stage 2 a fost acceptat prin execuție J nativă pe Windows, cu regresie Stage 1 de 63/63 și verificări Stage 2 de 17/17; cod de ieșire 0. Dovadă: results(20261102-215514).zip SHA256=2afc86d613ca3a990f6876654e76566cad1f5908f49c469f6e43e317a58c4939, manifest 26/26 SHA256, 19/19 Git blobs, runtime J9.7.1, fixture TSV 17 rânduri și audit Stage 1 GREEN. Sursa executată: commit f37e74cce85e3ff30e950194d608190346c91103, tree b877793bda5ec6ef8e656f1abf946a241b798c07. Stage 3 — PATCH 01 este următorul și NU este încă finalizat. Calea publică rămâne NOT_INTEGRATED până la implementarea datei finale.
+Stage 2 / DISCOVERY 01 was accepted after native J9.7.1 execution on Windows: Stage 1 regression 63/63 and Stage 2 17/17, exit code 0. Inputs and outputs remain exact; the public path continues to return NOT_INTEGRATED.
+
+Stage 3 / PATCH 01: exact rational integer inputs (J type 128) pass validation but can promote the five work values to rational. The fix extracts numerator and denominator using 2 x: after validation, requires denominator 1, and stores days as extended integer before calculation. Regression tests cover type 128, forward/reverse/same-day values, a large value, fractional rejection, and preservation of NOT_INTEGRATED.
+
+Stage 3 PATCH 01 is prepared for Native QA on Windows with J9.7.1. It is not accepted until completed/native results are received and reviewed. No main/merge/publication.

@@ -1,29 +1,29 @@
-# Calendarul Pastafarian — J + română
+# Pastafarian Calendar - J + Romanian
 
-Acest arbore reprezintă Stage 1 (Bootstrap) al unei linii de implementare independente, pornite de la zero. Limbajul de programare al întregii linii este J, iar limba-sursă umană este româna.
+This is an independent implementation line started from zero. The programming language is J and the human source language is Romanian. Stage 1 and Stage 2 have been accepted by native execution; Stage 3 / PATCH 01 is prepared for native verification and is not yet accepted.
 
-## Scopul Stage 1
+## Stage 1 scope
 
-Stage 1 fixează catalogul de limbă-sursă, construiește referința normativă de test direct din specificația încorporată, pregătește infrastructura neutră a monstrului și definește un ham de test local. Niciun defect legacy și niciun patch din etapele 2–53 nu este prezent aici.
+Stage 1 freezes the source-language catalog, builds a test-only normative reference directly from the embedded specification, prepares neutral monster infrastructure, and defines a local test harness. No legacy defect or patch from stages 2-53 is present in the initial skeleton.
 
-## Reguli de independență
+## Independence rules
 
-Nu s-a clonat și nu s-a consultat nicio altă implementare a calendarului. Nu s-au copiat teste, fixture-uri, rezultate așteptate, tabele generate, urme sau hash-uri de la o altă linie. Referința normativă din `test/normative_reference.ijs` este scrisă pentru această linie exclusiv din specificația Stage 1.
+No other calendar implementation was cloned or consulted. Tests, fixtures, expected results, generated tables, traces, or hashes were not copied from another line. The normative reference in `test/normative_reference.ijs` is written for this line exclusively from the Stage 1 specification.
 
-## Rulare
+## Running
 
-Din rădăcina proiectului, cu un runtime J 9.7.x, finalizarea Stage 1 se face printr-o singură comandă:
+For native Windows verification, use the versioned Native QA package prepared for the current stage. The J 9.7.1 runtime is downloaded and SHA256-verified by the runner.
+
+The Stage 1 local command remains:
 
 ```text
 jconsole test/complete_stage01.ijs
 ```
 
-Runnerul generează `test/stage01_fixtures.tsv`, execută suita locală și actualizează `DEVELOPMENT_STAGE.md` numai după succes. Generatorul folosește numai referința normativă J din această linie. Pentru detalii, vedeți `HANDOFF_STAGE_01.md`.
+## Numeric precision
 
-## Precizie numerică
+All normative calculations use J extended integers (`x`) and, where an intermediate division is necessary, exact operators that preserve the integer/rational domain. Floating-point arithmetic is not used for normative decisions. PATCH 01 normalizes accepted integral days, including rational inputs with denominator 1, to extended integers before calculating the five work values.
 
-Toate calculele normative folosesc întregi extinși J (`x`) și, unde este necesară o împărțire intermediară, operatori exacți care păstrează domeniul întreg/rational. Nu se folosește aritmetică în virgulă mobilă pentru decizii normative.
+## Development status
 
-## Starea dezvoltării
-
-Vezi `DEVELOPMENT_STAGE.md`. Etapa următoare după un Bootstrap valid este Stage 2 — DISCOVERY 01.
+Stage 1: 63/63 Native PASS. Stage 2: 17/17 Native PASS. Stage 3 / PATCH 01: prepared for Native QA, awaiting results; the public path remains `NOT_INTEGRATED`.
