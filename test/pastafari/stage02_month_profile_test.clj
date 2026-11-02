@@ -69,10 +69,15 @@
                      "rang" r "duur_ns" ns)))))))
 
 (deftest afwijzingen-en-onveilige-maximale-familie
-  (let [{:keys [celbovengrens budgetveilig?]}
-        (profiel/veilige-celgrens (vec (repeat 47 123)))]
+  (let [maximale-geldige-lengtes (conj (vec (repeat 46 123)) 120)
+        {:keys [maanden dagen celbovengrens budgetveilig?]}
+        (profiel/veilige-celgrens maximale-geldige-lengtes)]
+    (is (= 47 maanden))
+    (is (= 5778N dagen))
     (is (> celbovengrens 5000000N))
     (is (false? budgetveilig?)))
+  (is (= :weaving-bound-exceeded
+         (foutcode #(profiel/veilige-celgrens (vec (repeat 47 123))))))
   (is (false? (:budgetveilig? (profiel/veilige-celgrens [4 4 4] 1N))))
   (doseq [lengtes [nil [] [3] [124] [4 0] "444"]]
     (is (= :invalid-weaving-family

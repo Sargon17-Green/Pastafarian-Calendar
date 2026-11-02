@@ -25,9 +25,15 @@ Dit is NIET een looptijd- of BigInt-geheugengrens: aantal bitoperaties en lengte
 - Vijf adversariële lexicografische rangen (1, 2, midden, voorlaatst, laatst) op vier kleine families; onafhankelijke bounded bottom-up DP uit DISCOVERY17 dient als oracle.
 - Grotere families met 6 en 8 maanden, eerste/midden/laatste rang; controle van exact maandmultipliciteiten en first-/last-hit-volgorde.
 - Meet System/nanoTime per rang in GitHub Native-log, uitsluitend diagnostisch; geen tijdsdrempel of benchmarkclaim.
-- Maximum 47x123 dagen moet buiten conservatieve budget-envelop vallen, zonder proberen de volledige unrank uit te voeren.
+- Grootste geldige 47-maandenfamilie: 46 maanden van 123 dagen plus 1 maand van 120 dagen = 5778 dagen. Deze familie moet `budgetveilig? false` geven, zonder volledige unranking. Een familie met 47 maal 123 dagen is **ongeldig** (5781 > 5778) en moet `:weaving-bound-exceeded` opleveren.
 - Negatieve tests voor familie, 47/5778 grens en budget.
 - Clojure Native tests, assertions en verify alleen ACCEPTED na completed/SUCCESS op de nieuwe commit.
 
 ## NEXT
 Na DISCOVERY20 acceptance: DISCOVERY21 onderzoekt selectiedomein op echte binaire kostboekhouding en levert een gecontroleerde, expliciet bewezen koppeling naar de vijfdelige datum, zonder bestaande grenzen stilzwijgend te vergroten. Geen main/merge/publicatie.
+
+## Gerichte reparatie na CI-bewijs
+- Run 41355076497, commit ad26b846529ddf139544abaf199badccaaa9eb90: verify SUCCESS, Clojure Native FAILURE: 95 tests, 39234 assertions, 0 failures, 1 error.
+- De enige exception kwam van de foutieve testvector [123 × 47] (5781 dagen) die ten onrechte als geldige maximale familie was gebruikt.
+- De productiedomeingrens van 5778 dagen blijft ongewijzigd; test gebruikt nu de maximale geldige familie [123 × 46, 120] en toetst de verwachte exception voor [123 × 47] afzonderlijk.
+- Reparatie heeft nog geen Native-acceptatie: uitsluitend een completed SUCCESS voor zowel Native als verify, met ruwe test-/assertion-/failure-/error-tellingen op de nieuwe SHA, kan DISCOVERY20 accepteren.
