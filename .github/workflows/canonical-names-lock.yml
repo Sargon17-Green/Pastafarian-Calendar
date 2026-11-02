@@ -67,7 +67,10 @@ jobs:
           assert allocated + free == ROM0_SIZE
           print(f"ROM0_CASE262_FEASIBILITY=MEASURED allocated={allocated} free={free} "
                 f"max_contiguous_gap={max_gap} tail_gap={tail_gap} sections={sections}", flush=True)
-          print("NATIVE_CASE262=NOT_IMPLEMENTED last_accepted_case=261", flush=True)
+          from test_rom import TOTAL_CASES, MAX_BOOT_AND_TEST_FRAMES
+          assert TOTAL_CASES >= 262, f"native262 CI expects >=262 cases; declared {TOTAL_CASES}"
+          print(f"NATIVE_CASE262=ROM_LINKED_EMULATOR_PENDING expected_cases={TOTAL_CASES} "
+                f"max_frames={MAX_BOOT_AND_TEST_FRAMES}", flush=True)
           PY
       - name: Measure Stage1 ROM0 deduplication against passing predecessor
         if: "${{ github.event_name == 'push' && github.ref == 'refs/heads/SM83-Assembly+ግዕዝ' && github.event.head_commit.message == 'fix(sm83): repair ROM0 measurement workflow YAML' }}"
@@ -89,4 +92,10 @@ jobs:
       - name: Install emulator for test only
         run: python -m pip install 'pyboy>=2,<3'
       - name: Inspect ROM and execute SM83 bootstrap
-        run: python tests/test_rom.py build/calendar.gb
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tests/test_rom.py build/calendar.gb | tee build/native262.log
+          grep -Eq '^ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=262 DISPATCH_STATUS=40 FRAMES=[0-9]+
+ build/native262.log
+          grep -Fxq 'STAGE1_ARITHMETIC_SMOKE=PASS' build/native262.log
