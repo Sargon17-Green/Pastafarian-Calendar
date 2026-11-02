@@ -46,6 +46,7 @@ local LegacyNearestBoundary = require("legacy_gate_nearest_boundary")
 local NearestBoundaryPatch = require("gate_nearest_boundary_patch")
 local LegacySignedOffset = require("legacy_gate_signed_offset")
 local SignedOffsetPatch = require("gate_signed_offset_patch")
+local LegacyGatePhase = require("legacy_gate_phase")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -644,6 +645,11 @@ end
 function S.gateSignedOffsetSpaghetti(day,gateDays)
     local corrected=SignedOffsetPatch.execute(day,gateDays)
     return corrected
+end
+
+-- Stage48 DISCOVERY24: exact phase historical probe, not a sixth date field.
+function S.legacyGatePhaseProbe(day,records)
+    return LegacyGatePhase.execute(day,records)
 end
 
 function S.calendarDateSpaghetti()
