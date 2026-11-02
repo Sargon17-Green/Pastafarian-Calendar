@@ -1,23 +1,23 @@
-# Bootstrap architecture
+# Arhitectura Bootstrap
 
-Stage 1 does not build the final monster in advance. The current architecture contains only neutral elements that can host later historical growth.
+Stage 1 nu construieste anticipat monstrul final. Arhitectura curenta contine doar elemente neutre care pot gazdui cresterea istorica ulterioara.
 
-`src/monster_base.ijs` defines the invocation context, phase dispatcher, base validation, deterministic errors, and observational state. A context is created for one invocation and is not reused across calls.
+`src/monster_base.ijs` defineste contextul de invocare, dispatcherul de faze, validarea de baza, erorile deterministe si starea observationala. Contextul este creat pentru o singura invocare si nu se reutilizeaza intre apeluri.
 
-`src/calendar_spaghetti.ijs` is only the production Bootstrap entry point. It validates input types, creates a context, and explicitly declares that the historical engine is not integrated. It does not call the normative reference.
+`src/calendar_spaghetti.ijs` este numai intrarea de productie Bootstrap. Ea valideaza tipurile de intrare, creeaza contextul si declara explicit ca motorul istoric nu este inca integrat. Nu apeleaza referinta normativa.
 
-`test/normative_reference.ijs` contains the clean test-only oracle. It is not loaded by production files.
+`test/normative_reference.ijs` contine oracle-ul curat, test-only. El nu este incarcat de fisierele de productie.
 
-`test/stage01_tests.ijs` checks local normative properties, the source-language catalog, and that the production skeleton does not import the oracle.
+`test/stage01_tests.ijs` verifica proprietatile normative locale, catalogul de limba-sursa si faptul ca scheletul de productie nu importa oracle-ul.
 
-## Stage 2 - incremental work-count path
+## Stage 2 - calea incrementala pentru valorile de lucru
 
-`src/stage02_counts.ijs` implements production day labels, inclusive distance, sum, and direction. `calendarDateSpaghettiBootstrap` calculates them after input validation and stores them in the context's `semanticPending` field. `MONSTER_STATUS_NOT_INTEGRATED` remains mandatory until the complete date calculation is integrated. `test/stage02_tests.ijs` tests this path with explicit expected values, without importing the normative oracle into production.
+`src/stage02_counts.ijs` implementeaza in productie etichetele zilelor, distanta inclusiva, suma si directia. `calendarDateSpaghettiBootstrap` le calculeaza dupa validarea intrarii si le stocheaza in campul `semanticPending` al contextului. `MONSTER_STATUS_NOT_INTEGRATED` ramane obligatoriu pana la integrarea calculului complet al datei. `test/stage02_tests.ijs` testeaza aceasta cale cu valori asteptate explicite, fara importarea oracle-ului normativ in productie.
 
-## Stage 3 - PATCH 01: canonical integral days
+## Stage 3 - PATCH 01: canonizarea zilelor intregi
 
-The validator accepts exact rational numbers when their value is an integer. In J, however, a rational value remains in the rational domain under operations such as `floor`; mixed arithmetic promotes extended integer operands to rational. Without canonicalization, a valid input such as `_15055671r1` can make the five work values type 128 instead of the extended integer type 64 required by the work-count contract.
+Validatorul accepta numere rational exacte atunci cand valoarea lor este intreaga. In J, o valoare rationala ramane in domeniul rational la operatii precum `floor`; aritmetica mixta promoveaza operanzii extended integer la rational. Fara canonizare, o intrare valida precum `_15055671r1` poate face ca cele cinci valori de lucru sa aiba tipul 128 in loc de tipul extended integer 64 cerut de contract.
 
-`stage02CanonicalDay` extracts the exact numerator and denominator with `2 x:`, verifies denominator 1, and returns the numerator as an extended integer. `stage02CountForDay` and `stage02WorkCounts` use the canonical form; the public entry point also replaces the context's day values with that form after validation. No floating-point arithmetic is used, the five formulas are unchanged, and the oracle is not imported into production.
+`stage02CanonicalDay` extrage numaratorul si numitorul exact cu `2 x:`, verifica numitorul 1 si returneaza numaratorul ca extended integer. `stage02CountForDay` si `stage02WorkCounts` folosesc forma canonica; intrarea publica inlocuieste si valorile zilelor din context cu aceasta forma dupa validare. Nu se foloseste aritmetica in virgula mobila, cele cinci formule nu se schimba, iar oracle-ul nu este importat in productie.
 
-`test/stage03_patch01_tests.ijs` verifies that fixtures are genuinely rational type 128, results and context days are extended integer, forward/reverse/same-day behavior, a large rational integer, fractional rejection, and preservation of `NOT_INTEGRATED`. Stage 3 remains pending native Windows QA.
+`test/stage03_patch01_tests.ijs` verifica faptul ca fixture-urile sunt realmente de tip rational 128, ca rezultatele si zilele din context sunt extended integer, comportamentul inainte/inapoi/aceeasi zi, un rational intreg mare, respingerea fractiilor si pastrarea `NOT_INTEGRATED`. Stage 3 ramane in asteptarea Native QA pe Windows.
