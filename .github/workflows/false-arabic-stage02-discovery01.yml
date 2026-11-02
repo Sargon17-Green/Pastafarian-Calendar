@@ -1,0 +1,30 @@
+name: FALSE Arabic Stage 2 Discovery 01 Math Contract
+
+on:
+  push:
+    branches:
+      - 'FALSE+العربية'
+    paths:
+      - 'test/stage02_discovery01_tests.false'
+      - 'tools/stage02_discovery01_oracle.py'
+      - 'src/bigint.false'
+      - 'test/normative_reference.false'
+      - 'src/monster_bootstrap.false'
+      - '.github/workflows/false-arabic-stage02-discovery01.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mathematical-contract-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Python syntax
+        run: python3 -m py_compile tools/stage02_discovery01_oracle.py
+      - name: Check independent mathematical contract and static source structure
+        run: python3 tools/stage02_discovery01_oracle.py
+      - name: Delimit scope
+        run: echo 'Native FALSE has NOT been executed by this workflow.'
