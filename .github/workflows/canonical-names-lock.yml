@@ -25,7 +25,7 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
-  clojure-native-stage02-discovery21:
+  clojure-native-stage02-discovery22:
     if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -43,5 +43,5 @@ jobs:
           cli: 1.12.5.1664
       - name: Verify native toolchain
         run: clojure -Sdescribe
-      - name: Native Stage 1 regression and Stage 2 DISCOVERY21 budget-gated month selector and independent oracle
+      - name: Native Stage 1 regression and Stage 2 DISCOVERY22 47 unique month names and independent exhaustive oracle
         run: clojure -M:test
