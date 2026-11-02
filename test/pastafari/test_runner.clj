@@ -22,7 +22,8 @@
             [pastafari.stage02-month-unrank-large-test]
             [pastafari.stage02-month-profile-test]
             [pastafari.stage02-month-selection-test]
-            [pastafari.stage02-month-names-test]))
+            [pastafari.stage02-month-names-test]
+            [pastafari.stage02-date-projection-test]))
 
 (defn -main [& _]
   (let [result (test/run-tests 'pastafari.stage01-test
@@ -47,7 +48,8 @@
                                'pastafari.stage02-month-unrank-large-test
                                'pastafari.stage02-month-profile-test
                                'pastafari.stage02-month-selection-test
-                               'pastafari.stage02-month-names-test)
+                               'pastafari.stage02-month-names-test
+                               'pastafari.stage02-date-projection-test)
         failures (+ (:fail result) (:error result))]
     (println (if (zero? failures)
                "Alle Stage-1- en Stage-2-discoverytests zijn geslaagd."
