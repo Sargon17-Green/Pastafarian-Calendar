@@ -96,6 +96,5 @@ jobs:
         run: |
           set -euo pipefail
           python tests/test_rom.py build/calendar.gb | tee build/native262.log
-          grep -Eq '^ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=262 DISPATCH_STATUS=40 FRAMES=[0-9]+
- build/native262.log
+          grep -Fq 'ROM_NATIVE_STATUS=A5 LAST_TEST_CASE=262 DISPATCH_STATUS=40 FRAMES=' build/native262.log
           grep -Fxq 'STAGE1_ARITHMETIC_SMOKE=PASS' build/native262.log
