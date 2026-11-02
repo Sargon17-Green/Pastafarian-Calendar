@@ -1,4 +1,4 @@
-# Stage16 DISCOVERY13 — nonadjacent sparse-window real-date differential (open)
+# Stage16 DISCOVERY13 — nonadjacent sparse-window real-date differential (accepted)
 
 ## Predecessor and motivation
 Stage15 accepted on run 41350147495 / SHA a1dd0cd7a6a26d704aaa9e81cb93b8b8eef81463, 17/17 jobs, 53 independent-reference Python selfchecks, 51 GNAT Native domain/repeat assertions, 45 exact five-field comparisons. Stage15 sampled only offsets {-1,0,1}. The new test deliberately samples nonadjacent offsets and crosses multiple target/calculation-day differences, without assuming date monotonicity or inventing a failure.
@@ -13,3 +13,6 @@ Python preflight: 25x5=125 domain checks, five center-pair established goldens, 
 
 ## Bound and acceptance
 GNAT13 compile/bind/link; Python each 60-second cap; Ada observer 600-second cap and job 15-minute outer timeout. Accept only completed/success on the same exact SHA for verify and native-stage16-sparse-window, plus exact three markers. Source-only Python checks cannot establish GNAT PASS. No main/merge, production change or claim about all possible dates.
+
+## Verified evidence, 2026-11-02
+Original SHA 67c5c2049c00784e58f2539b3804690e7164cbac run 41354952392 failed native compile (wrong observer end identifier), while 17/18 jobs succeeded. One-file PATCH01 07974c96a29b4f3af89a716b88a94b3459368558 corrected only the Ada unit end identifier. Re-run is push-triggered run 41408897365, completed/success 18/18 including verify; GNAT13 compiler, binder and linker observed. Job 125157143105: Python=135, native=131, five-field differential=125. Accepted only for the 25 tested pairs.
