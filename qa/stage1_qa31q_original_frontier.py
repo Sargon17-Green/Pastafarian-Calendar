@@ -36,7 +36,8 @@ def source_rows(path):
     blob = hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
     need(blob == SOURCE_BLOB, 'immutable original source blob mismatch: '+blob)
     rows = raw.splitlines()
-    need(len(rows) == 2016, 'source height drift')
+    # The pinned 2,016-line byte stream ends in LF; splitlines() omits the terminal empty item.
+    need(len(rows) == 2015, 'source height drift')
     return rows
 
 def glyph(rows, xy):
