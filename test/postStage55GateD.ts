@@ -3,7 +3,8 @@ import {projectObservedStage55Date} from "../src/postStage55ObservedDate.ts";
 import {createProductionPatch20Request} from "../src/postStage55ProductionRequest.ts";
 import {MonsterValidationError} from "../src/monsterBase.ts";
 import {cutletNameByCanonicalIndex,monthNameByCanonicalIndex} from "../src/sourceLanguageCatalog.ts";
-import {NormativeOracle,sauce} from "./normativeOracle.ts";
+import {NormativeOracle,sauce,askBowl,chooseRank,weavingFamily} from "./normativeOracle.ts";
+import {IndependentLegalWeavingRank} from "./postStage55IndependentRank.ts";
 import {
   Patch27FullHandler,Discovery27FullHandler,Patch26FullHandler,
   Discovery26FullHandler,Patch25FullHandler,Discovery25FullHandler,
@@ -41,6 +42,22 @@ function fullStage55():Patch27FullHandler {
     ))
   ));
 }
+// Exhaustive small-family equivalence is independent of production Stage49.
+let smallExhaustive=0;
+for(const ls of [[2n,2n,2n],[4n,4n,4n],[4n,4n,5n]]) {
+  const independent=new IndependentLegalWeavingRank(ls);
+  const reference=weavingFamily(ls);
+  const total=reference.count();
+  ok(independent.count()===total,"test-only insertion count equals brute oracle");
+  for(let rank=1n;rank<=total;rank++) {
+    ok(independent.rankWord(reference.unrank1(rank))===rank,
+       "test-only exhaustive inverse rank differs");
+    smallExhaustive++;
+  }
+}
+ok(smallExhaustive===4407,"small exhaustive count 5+1301+3101");
+const certifiedFamilies=new Set<string>();
+let giantRankChecks=0;
 const oracle=new NormativeOracle();
 const anchorC=oracle.gateDay(1n)+1n;
 const year5000=oracle.year5000(anchorC);
@@ -90,6 +107,30 @@ for(const item of cases) {
   }
   ok(counts.every((n,i)=>BigInt(n)===monthLengths[i]),
      title+": independent month-length count");
+  // An independently ranked *complete* word certifies every derived prefix,
+  // including month ID and ordinal on this target day. A production Native
+  // word is a candidate, never the expected rank, which comes only from
+  // independent Sauce/Bowl4/Seal32 and independent insertion-DP counting.
+  const certificateKey=item.c.toString()+":"+year.openGateDay.toString()+
+    ":"+year.closeGateDay.toString();
+  if(!certifiedFamilies.has(certificateKey)) {
+    const independent=new IndependentLegalWeavingRank(monthLengths);
+    ok(independent.totalDays===yearDays&&monthCount<=47&&yearDays<=5778,
+       title+": full-size preflight bounds");
+    const exactTotal=independent.count();
+    const wanted=chooseRank(askBowl(referenceSauce,4,32n),exactTotal);
+    const measuredRank=independent.rankWord(weaving);
+    const costs=independent.statistics();
+    ok(costs.factorTerms<=6000000&&costs.suffixQueries<=300000,
+       title+": bounded non-exponential rank work");
+    ok(measuredRank===wanted,title+": independently ranked full legal weaving");
+    certifiedFamilies.add(certificateKey);
+    giantRankChecks++;
+    console.log("POST_STAGE55_GATE_D_INDEPENDENT_FAMILY_PASS year="+year.number+
+      " rankBits="+wanted.toString(2).length+" days="+yearDays+
+      " months="+monthCount+" factorTerms="+costs.factorTerms+
+      " suffixQueries="+costs.suffixQueries+" mismatches=0");
+  }
   const dayIndex=Number(item.t-year.openGateDay)-1;
   ok(dayIndex>=0&&dayIndex<weaving.length,title+": bounded day index");
   const monthId=weaving[dayIndex]!;
@@ -148,6 +189,10 @@ ok(malformed===malformedPairs.length,"8 malformed public arguments rejected");
 ok(compared===30&&checkedInterleavings===234&&gapChecked===1&&
    exactGateChecked===1&&totalObservedWrites===58n*BigInt(totalObservedCalls),
    "Gate D bounded acceptance invariants");
+ok(certifiedFamilies.size===3&&giantRankChecks===3,
+   "three distinct independently rank-certified full-year structures");
+console.log("POST_STAGE55_GATE_D_INDEPENDENT_RANK_PASS pairs=6 components=30 smallExhaustive="+
+  smallExhaustive+" realFamilyCertificates="+giantRankChecks+" rankMismatches=0");
 console.log("POST_STAGE55_GATE_D_BOUNDED_DIFFERENTIAL_PASS pairs=6 components=30 mismatches=0"+
   " interleavingChecks="+checkedInterleavings+" malformedRejected="+malformed+
   " year5000Day239=1 exactGate=1 observedNativeCalls="+totalObservedCalls+

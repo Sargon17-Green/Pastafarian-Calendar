@@ -42,6 +42,7 @@ jobs:
           set -euo pipefail
           node --experimental-strip-types test/postStage55GateD.ts | tee gate-d-results.log
           grep -Fq 'POST_STAGE55_GATE_D_BOUNDED_DIFFERENTIAL_PASS pairs=6 components=30 mismatches=0 interleavingChecks=234 malformedRejected=8 year5000Day239=1 exactGate=1' gate-d-results.log
+          grep -Fq 'POST_STAGE55_GATE_D_INDEPENDENT_RANK_PASS pairs=6 components=30 smallExhaustive=4407 realFamilyCertificates=3 rankMismatches=0' gate-d-results.log
 
   gate-d-reliability-typescript-marathi:
     if: github.ref == 'refs/heads/TypeScript+मराठी'
