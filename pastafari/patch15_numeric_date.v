@@ -13,8 +13,8 @@ fn patch15_sauce(calculation_day BigInt, target_day BigInt) Patch15SauceChainRes
 }
 
 fn patch15_ask_bowl(result Patch15SauceChainResult, queried_id int, seal int) AnswerStream {
-	return calendar_answer_stream_spaghetti(result.bowls, result.order_at_drop46,
-		queried_id, big_from_int(seal)) or { panic(err.msg()) }
+	return calendar_answer_stream_spaghetti(result.bowls, result.order_at_drop46, queried_id,
+		big_from_int(seal)) or { panic(err.msg()) }
 }
 
 fn patch15_choose_rank(stream AnswerStream, n BigInt) BigInt {
@@ -72,7 +72,6 @@ fn new_patch15_engine() Patch15Engine {
 		}
 	}
 }
-
 
 fn patch15_falling_factorial(n int, k int) BigInt {
 	mut result := big_one()
@@ -390,7 +389,6 @@ fn (mut c Patch15WeaveCounter) unrank1(rank1 BigInt) []int {
 	}
 	return out
 }
-
 
 fn (mut e Patch15Engine) positive_gate_gap(n BigInt) int {
 	target := big_add(patch15_foundation_day(), n)
@@ -819,7 +817,6 @@ fn (mut e Patch15Engine) calendar_date_numeric(calculation_day BigInt, target_da
 		day_in_month:  big_from_int(day_in_month)
 	}
 }
-
 
 // The diagnostic legacy entrypoint remains unchanged until Native acceptance.
 pub fn calendar_date_patch15_numeric_spaghetti(calculation_day BigInt, target_day BigInt) !CalendarResult {

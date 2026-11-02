@@ -1371,8 +1371,7 @@ fn test_stage31_production_46_drop_chain_matches_independent_normative_sauce() {
 
 fn test_stage31_numeric_date_candidate_matches_all_five_independent_oracle_fields() {
 	foundation := oracle_foundation_day()
-	calculation_days := [foundation, foundation, foundation,
-		big_add(foundation, big_from_int(3))]
+	calculation_days := [foundation, foundation, foundation, big_add(foundation, big_from_int(3))]
 	target_days := [foundation, big_sub(foundation, big_one()),
 		big_add(foundation, big_one()), big_add(foundation, big_from_int(2))]
 	mut reference_engine := new_oracle_engine()
