@@ -25,6 +25,24 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
+  gate-d-typescript-marathi:
+    if: github.ref == 'refs/heads/TypeScript+मराठी'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Gate D bounded six-pair public Native differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --experimental-strip-types test/postStage55GateD.ts | tee gate-d-results.log
+          grep -Fq 'POST_STAGE55_GATE_D_BOUNDED_DIFFERENTIAL_PASS pairs=6 components=30 mismatches=0 interleavingChecks=234 malformedRejected=8 year5000Day239=1 exactGate=1' gate-d-results.log
+
   stage27-typescript-marathi:
     timeout-minutes: 35
     if: github.ref == 'refs/heads/TypeScript+मराठी'
