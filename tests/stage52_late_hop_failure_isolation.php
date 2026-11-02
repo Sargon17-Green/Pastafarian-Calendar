@@ -38,21 +38,33 @@ foreach (['forward' => 1, 'backward' => -1] as $direction => $sign) {
     $failDestination = $years[5000 + 2 * $sign];
     $mode = 'ok';
     $trace = [];
+    $gateCalls = 0;
+    $sharedGateFromFirstHop = $sign === 1
+        ? $years[5000 + $sign]['closeGateIndex']
+        : $years[5000 + $sign]['openGateIndex'];
+    $sharedGateAtSecondHop = $sign === 1
+        ? $failDestination['openGateIndex']
+        : $failDestination['closeGateIndex'];
+    semak52($sharedGateFromFirstHop === $sharedGateAtSecondHop,
+        'SHARED_SEAM_' . $direction);
 
     $trusted = static function () use ($anchor, &$trace): array {
         $trace[] = 'trusted:5000';
         return $anchor;
     };
     $gate = static function (int $index) use (
-        $oracle, $failDestination, &$trace, &$mode
+        $oracle, $failDestination, &$trace, &$mode, &$gateCalls
     ): int {
         $trace[] = 'gate:' . $index;
-        if ($mode === 'open_throw' &&
+        ++$gateCalls;
+        // Shared seam indices appear in two adjacent year validations.
+        // Inject only at the second-hop invocation, never at the first hop.
+        if ($mode === 'open_throw' && $gateCalls === 5 &&
             $index === $failDestination['openGateIndex']) {
             throw new RuntimeException('S52_GATE_OPEN_THROW');
         }
         $value = $oracle->ensureGateIndex($index);
-        if ($mode === 'close_mismatch' &&
+        if ($mode === 'close_mismatch' && $gateCalls === 6 &&
             $index === $failDestination['closeGateIndex']) {
             return $value + 1;
         }
@@ -107,9 +119,11 @@ foreach (['forward' => 1, 'backward' => -1] as $direction => $sign) {
         $run = static function () use (
             $kernel, $day, $target, $anchor, $depth,
             $proposedNext, $proposedPrevious,
-            $gate, $trusted, $canonicalNext, $canonicalPrevious, &$trace
+            $gate, $trusted, $canonicalNext, $canonicalPrevious,
+            &$trace, &$gateCalls
         ): array {
             $trace = [];
+            $gateCalls = 0;
             return $kernel->targetYearSequentialPatch22(
                 $day, $target, $anchor, $proposedNext, $proposedPrevious,
                 $gate, $trusted, $canonicalNext, $canonicalPrevious, $depth
