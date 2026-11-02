@@ -101,6 +101,97 @@ def check_owner_id_high_boundary():
         assert compare_read_only(model, a, b) == 3
     print("HOST_OWNER_SIGNED_CMP_OWNER_ID_BOUNDARY=PASS cases=18 valid_max=253 rejected=254,255 tag255=YES revoked=YES payload_and_tags=IMMUTABLE")
 
+
+def check_owner_id_fragmented_high_boundary():
+    """Host-only: owner 253/tag 255 across discontiguous banks, then revocation."""
+    model = OwnedBanks()
+    assert model.alloc(253, 3) == (0, (3, 4, 5))
+    assert model.alloc(1, 1) == (0, (6,))
+    assert model.release(253) == (0, 3)
+    assert model.alloc(2, 1) == (0, (3,))
+    assert model.alloc(3, 1) == (0, (4,))
+    assert model.alloc(253, 2) == (0, (5, 7))
+    assert model.tags[5] == model.tags[7] == 255
+    assert model.tags[6] == 3, "interposed bank belongs to owner 1"
+    assert model.write_byte(253, 0, 0x11) == 0
+    assert model.write_byte(253, SIZE - 1, 0x33) == 0
+    assert model.write_byte(253, SIZE, 0x02) == 0
+    assert model.write_byte(253, 2 * SIZE - 1, 0x77) == 0
+    assert model.write_byte(1, 0, 0x01) == 0
+    assert model.read_byte(253, SIZE - 1) == (0, 0x33)
+    assert model.read_byte(253, SIZE) == (0, 0x02)
+    assert model.read_byte(1, 0) == (0, 0x01)
+
+    short = reference_integer(model, 253, 0, SIZE)
+    long = reference_integer(model, 253, 0, SIZE + 1)
+    full = reference_integer(model, 253, 0, 2 * SIZE)
+    peer = reference_integer(model, 1, 0, 1)
+    assert 0 < peer < short < long < full
+    assert reference_integer(model, 253, 1, 2 * SIZE) == -full
+    # Every tuple includes an independent, explicit expected result.
+    baseline = (
+        ((253, 0, SIZE), (253, 0, SIZE + 1), 2),
+        ((253, 0, SIZE + 1), (253, 0, SIZE), 1),
+        ((253, 1, SIZE), (253, 1, SIZE + 1), 1),
+        ((253, 1, SIZE + 1), (253, 1, SIZE), 2),
+        ((253, 0, SIZE), (253, 1, 2 * SIZE), 1),
+        ((253, 1, 2 * SIZE), (253, 0, SIZE), 2),
+        ((253, 1, SIZE), (253, 0, 2 * SIZE), 2),
+        ((253, 0, 2 * SIZE), (253, 1, SIZE), 1),
+        ((253, 0, 2 * SIZE), (253, 0, 2 * SIZE), 0),
+        ((253, 1, 2 * SIZE), (253, 1, 2 * SIZE), 0),
+        ((253, 0, SIZE), (1, 0, 1), 1),
+        ((1, 0, 1), (253, 0, SIZE), 2),
+        ((253, 1, SIZE), (1, 0, 1), 2),
+        ((1, 0, 1), (253, 1, SIZE), 1),
+        ((254, 0, 1), (253, 0, SIZE), 3),
+        ((253, 0, SIZE), (254, 0, 1), 3),
+        ((255, 0, 1), (253, 0, SIZE), 3),
+        ((253, 0, SIZE), (255, 0, 1), 3),
+        ((253, 0, 2 * SIZE + 1), (1, 0, 1), 3),
+        ((1, 0, 1), (253, 0, 2 * SIZE + 1), 3),
+        ((253, 1, 0), (1, 0, 1), 3),
+        ((1, 0, 1), (253, 1, 0), 3),
+        ((253, 0, 0), (1, 0, 0), 0),
+        ((1, 0, 0), (253, 0, 0), 0),
+    )
+    assert len(baseline) == 24
+    for a, b, expected in baseline:
+        assert compare_read_only(model, a, b) == expected, (
+            f"fragmented boundary mismatch: {a}, {b}, expected={expected}"
+        )
+
+    # A canonical SIZE-byte descriptor survives; SIZE+1 with high zero must fail.
+    assert model.write_byte(253, SIZE, 0) == 0
+    assert reference_integer(model, 253, 0, SIZE) == short
+    high_zero = (
+        ((253, 0, SIZE), (253, 0, SIZE + 1)),
+        ((253, 0, SIZE + 1), (253, 0, SIZE)),
+        ((253, 1, SIZE), (253, 1, SIZE + 1)),
+        ((253, 1, SIZE + 1), (253, 1, SIZE)),
+    )
+    assert len(high_zero) == 4
+    for a, b in high_zero:
+        assert compare_read_only(model, a, b) == 3
+    assert model.write_byte(253, SIZE, 0x02) == 0
+
+    # A release revokes both fragmented banks; the interposed live peer persists.
+    assert model.release(253) == (0, 2)
+    assert model.tags[5] == model.tags[7] == 0
+    assert not any(model.data[5]) and not any(model.data[7])
+    assert model.tags[6] == 3
+    assert reference_integer(model, 1, 0, 1) == peer
+    revoked = (
+        ((253, 0, SIZE), (1, 0, 1)),
+        ((1, 0, 1), (253, 0, SIZE)),
+        ((253, 1, SIZE + 1), (1, 0, 1)),
+        ((1, 0, 1), (253, 1, SIZE + 1)),
+    )
+    assert len(revoked) == 4
+    for a, b in revoked:
+        assert compare_read_only(model, a, b) == 3
+    print("HOST_OWNER_SIGNED_CMP_FRAGMENTED_MAX_OWNER=PASS cases=32 owner=253 tag=255 banks=5,7 peer_bank=6 canonical_and_revoked=YES payload_and_tags=IMMUTABLE")
+
 def main():
     m = OwnedBanks()
     assert m.alloc(41, 3) == (0, (3, 4, 5))
@@ -476,6 +567,7 @@ def main():
         "two revoked owners, reversed, must fail closed"
     )
     check_owner_id_high_boundary()
+    check_owner_id_fragmented_high_boundary()
     print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=36 same_owner_fragmented_alias=6 same_owner_fragmented_noncanonical=2 same_owner_fragmented_mixed_sign_invalid=4 case_id_16bit_oracle=2 stale_fragmented_after_release=1 stale_fragmented_with_live_peer=1 stale_fragmented_as_B_with_live_A=1 both_revoked_distinct_owners=2 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=4 same_owner_full_capacity_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
