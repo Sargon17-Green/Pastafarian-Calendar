@@ -19,21 +19,35 @@ jobs:
       - name: Check out this branch
         uses: actions/checkout@v4
 
-      - name: Install Berkeley Logo and virtual display
+      - name: Build pinned native UCBLogo 6.2.5 without wxWidgets
         shell: bash
         run: |
           set -euo pipefail
+          # Ubuntu's ucblogo binary uses a wxWidgets terminal: it does not
+          # consume redirected stdin or expose Logo's PRINT on stdout.
+          # A --disable-wx build makes this a genuine headless CLI test.
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends ucblogo xvfb xauth
-          version="$(dpkg-query -W -f='${Version}' ucblogo)"
-          echo "UCBLogo package version: $version"
-          case "$version" in
-            6.2.5-*) ;;
-            *)
-              echo "::error::Expected UCBLogo 6.2.5, got $version"
-              exit 1
-              ;;
-          esac
+          sudo apt-get install -y --no-install-recommends \
+            git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 \
+            https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          expected=a0215433f07384e4c42fe247525867f11e6f32f7
+          actual="$(git -C "$source_dir" rev-parse HEAD)"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::UCBLogo tag commit changed: $actual"
+            exit 1
+          fi
+          cd "$source_dir"
+          autoreconf -fi
+          ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" \
+            --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          binary="$RUNNER_TEMP/ucblogo-headless/bin/ucblogo"
+          test -x "$binary"
+          echo "LOGO_BIN=$binary" >> "$GITHUB_ENV"
+          echo "HEADLESS_LOGO_SOURCE_SHA=$actual"
 
       - name: Smoke-check native Logo interpreter
         shell: bash
@@ -41,9 +55,8 @@ jobs:
           set -euo pipefail
           log="$RUNNER_TEMP/logo-smoke.log"
           if printf 'print [CI_LOGO_SMOKE_PASIS]\nbye\n' |
-              xvfb-run -a -s '-screen 0 1024x768x24' \
-                timeout --signal=TERM --kill-after=5s 25s \
-                stdbuf -oL -eL logo >"$log" 2>&1; then
+              timeout --signal=TERM --kill-after=5s 25s \
+                stdbuf -oL -eL "$LOGO_BIN" >"$log" 2>&1; then
             cat "$log"
           else
             result=$?
@@ -95,9 +108,8 @@ jobs:
           )
           PY
           log="$RUNNER_TEMP/logo-stage01-diagnostic.log"
-          if xvfb-run -a -s '-screen 0 1024x768x24' \
-              timeout --signal=TERM --kill-after=5s 180s \
-              stdbuf -oL -eL logo "$CI_DIAGNOSTIC_SCRIPT" </dev/null >"$log" 2>&1; then
+          if timeout --signal=TERM --kill-after=5s 180s \
+              stdbuf -oL -eL "$LOGO_BIN" "$CI_DIAGNOSTIC_SCRIPT" </dev/null >"$log" 2>&1; then
             cat "$log"
           else
             result=$?
@@ -121,9 +133,8 @@ jobs:
           log="$RUNNER_TEMP/logo-stage01.log"
           # Keep the original source unchanged; send BYE only after it finishes.
           if printf 'bye\n' |
-              xvfb-run -a -s '-screen 0 1024x768x24' \
-                timeout --signal=TERM --kill-after=5s 300s \
-                stdbuf -oL -eL logo test/stage01_tests.logo >"$log" 2>&1; then
+              timeout --signal=TERM --kill-after=5s 300s \
+                stdbuf -oL -eL "$LOGO_BIN" test/stage01_tests.logo >"$log" 2>&1; then
             cat "$log"
           else
             result=$?
