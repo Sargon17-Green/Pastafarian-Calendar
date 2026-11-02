@@ -57,7 +57,7 @@ def check_owner_id_high_boundary():
     assert model.tags[3] == 255 and model.tags[4] == 3
     assert model.write_byte(253, 0, 0xA5) == 0
     assert model.write_byte(1, 0, 0x01) == 0
-    assert reference_integer(model, 253, 0, 1) == int.from_bytes(b"\\xa5", "little")
+    assert reference_integer(model, 253, 0, 1) == int.from_bytes(bytes((0xA5,)), "little")
     assert reference_integer(model, 253, 1, 1) == -165
     assert reference_integer(model, 1, 0, 1) == 1
 
