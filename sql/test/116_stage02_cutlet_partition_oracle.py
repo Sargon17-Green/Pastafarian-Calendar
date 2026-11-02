@@ -4,6 +4,7 @@ No production SQL imports and no DP recurrence are used here.
 """
 from __future__ import annotations
 import argparse
+import sys
 from itertools import combinations
 from math import comb
 
@@ -54,15 +55,14 @@ def self_test() -> int:
     assert all(len(parts) == k and sum(parts) == g and min(parts) > 0
                for g, k, _, _, parts in all_rows)
     checks += 2
-    print(f"SEPARATOR_ORACLE_PASS checks={checks} golden_rows={len(all_rows)}")
+    print(f"SEPARATOR_ORACLE_PASS checks={checks} golden_rows={len(all_rows)}", file=sys.stderr)
     return checks
 
 
 def emit_sql() -> None:
     print("CREATE TEMP TABLE stage02_partition_goldens (")
     print("g integer NOT NULL,k integer NOT NULL,r integer,q integer NOT NULL,")
-    print("expected integer[] NOT NULL,")
-    print("PRIMARY KEY (g,k,r,q));")
+    print("expected integer[] NOT NULL);")
     # PostgreSQL UNIQUE treats NULL as distinct; table is only a read-only fixture.
     for g, k, required, rank, parts in enumerate_small():
         r = "NULL" if required is None else str(required)
