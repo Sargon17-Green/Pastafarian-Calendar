@@ -231,6 +231,78 @@ void main() {
     _check(!preview.year5000Ready, 'Canonical selection unimplemented');
     _check(!preview.complete, 'Six-gate preview remains incomplete');
   }
+  // A canonical §O search outside the former [-32,32] preview is accepted
+  // only once strict left and right sentinel positions have been proven.
+  final locator = MonsterYearLocator(gates: gates);
+  final completeCanonical = locator.sentinelSearch(foundation);
+  _check(completeCanonical.complete, 'Foundation canonical domain complete');
+  completeCanonical.requireComplete();
+  _check(!completeCanonical.year5000Ready, '§N selection not implemented');
+  final independentGates = <int, BigInt>{0: foundation};
+  final leftCutoff = foundation - BigInt.from(5778);
+  final rightCutoff = foundation + BigInt.from(5777);
+  var leftPosition = foundation;
+  var leftIndex = 0;
+  while (leftPosition >= leftCutoff && leftIndex > -138) {
+    leftIndex--;
+    leftPosition -= gates.gapFor(BigInt.from(leftIndex)).length;
+    independentGates[leftIndex] = leftPosition;
+  }
+  var rightPosition = foundation;
+  var rightIndex = 0;
+  while (rightPosition <= rightCutoff && rightIndex < 138) {
+    rightIndex++;
+    rightPosition += gates.gapFor(BigInt.from(rightIndex)).length;
+    independentGates[rightIndex] = rightPosition;
+  }
+  _check(leftPosition < leftCutoff, 'Independent left sentinel');
+  _check(rightPosition > rightCutoff, 'Independent right sentinel');
+  _check(leftIndex < 0 && rightIndex > 0, 'Both canonical sides visited');
+  final canonicalOracle = _oracle(foundation, independentGates);
+  _check(
+    canonicalOracle.length == completeCanonical.candidates.length,
+    'Canonical complete candidate count',
+  );
+  for (var k = 0; k < canonicalOracle.length; k++) {
+    final candidate = completeCanonical.candidates[k];
+    final oracle = canonicalOracle[k];
+    _check(candidate.openOrdinal == oracle[0], 'Canonical complete open');
+    _check(candidate.closeOrdinal == oracle[1], 'Canonical complete close');
+    _check(candidate.openGate == oracle[2], 'Canonical complete left gate');
+    _check(candidate.closeGate == oracle[3], 'Canonical complete right gate');
+    _check(candidate.length == oracle[4], 'Canonical complete length');
+  }
+  _compared += canonicalOracle.length;
+  final oneStep = locator.sentinelSearch(
+    foundation,
+    maximumIntervalsPerSide: 1,
+  );
+  _check(!oneStep.complete, 'One interval cannot certify completeness');
+  _check(
+    oneStep.missingBoundaries.length == 2,
+    'One-interval sentinel directions missing',
+  );
+  var incompleteRejected = false;
+  try {
+    oneStep.requireComplete();
+  } on IncompleteMonsterYearDomain {
+    incompleteRejected = true;
+  }
+  _check(incompleteRejected, 'Insufficient canonical budget refused');
+  _reject(
+    () => locator.sentinelSearch(foundation, maximumIntervalsPerSide: 0),
+    'Zero sentinel budget refused',
+  );
+  _reject(
+    () => locator.sentinelSearch(foundation, maximumIntervalsPerSide: 139),
+    'Unproven sentinel budget refused',
+  );
+  final distant = locator.sentinelSearch(
+    foundation + (BigInt.one << 190),
+    maximumIntervalsPerSide: 1,
+  );
+  _check(!distant.complete, 'Distant BigInt day cannot fake completeness');
+
   _check(_complete >= 5, 'Complete synthetic sentinel cases');
   _check(_incomplete >= 4, 'Explicit incomplete-domain cases');
   _check(_compared > 100, 'Oracle A compared eligible candidates');
@@ -238,7 +310,7 @@ void main() {
   print(
     'PRODUCTION09_PREVIEW_PASS; checks=$_checks; '
     'oracle_candidates=$_compared; synthetic_complete=$_complete; '
-    'incomplete=$_incomplete; canonical_preview=bounded; '
+    'incomplete=$_incomplete; canonical_complete=1; '
     'year5000_ready=false; five_component_calendar_ready=false',
   );
 }
