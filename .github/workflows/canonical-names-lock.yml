@@ -43,6 +43,24 @@ jobs:
           node --experimental-strip-types test/postStage55GateD.ts | tee gate-d-results.log
           grep -Fq 'POST_STAGE55_GATE_D_BOUNDED_DIFFERENTIAL_PASS pairs=6 components=30 mismatches=0 interleavingChecks=234 malformedRejected=8 year5000Day239=1 exactGate=1' gate-d-results.log
 
+  gate-d-reliability-typescript-marathi:
+    if: github.ref == 'refs/heads/TypeScript+मराठी'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Gate D public boundary, replay, injected fault, and clean retry
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --experimental-strip-types test/postStage55GateDReliability.ts | tee gate-d-reliability.log
+          grep -Fq 'POST_STAGE55_GATE_D_RELIABILITY_PASS boundaryPairs=1 successfulPublicCalls=4 replayComparisons=10 deepFaultInjected=1 deepFaultPropagated=1 cleanRetry=1 freshOutputObjects=3' gate-d-reliability.log
+
   stage27-typescript-marathi:
     timeout-minutes: 35
     if: github.ref == 'refs/heads/TypeScript+मराठी'
