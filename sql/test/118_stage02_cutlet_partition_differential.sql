@@ -12,7 +12,7 @@ WITH fx AS MATERIALIZED (
  ROW(5000::numeric,0::numeric,g,pastafari_sql_tamil.gate_day(0),pastafari_sql_tamil.gate_day(g))::pastafari_sql_tamil_test.year_rec AS ry
  FROM fx WHERE g IS NOT NULL
 ), variants AS MATERIALIZED (
- SELECT *,v.r,
+ SELECT prepared.*,v.r,
  CASE WHEN v.r IS NULL THEN pastafari_sql_tamil.gate_day(0)+1 ELSE pastafari_sql_tamil.gate_day(v.r) END AS day,
  pastafari_sql_tamil.choose_cutlet_count(s,y) AS k
  FROM prepared CROSS JOIN (VALUES(NULL::integer),(2)) AS v(r)

@@ -1,5 +1,7 @@
 -- SQL+தமிழ் Slice18 Native assertions; generated Python separator fixture loaded first.
 BEGIN;
+SET LOCAL statement_timeout = '180s';
+\echo SLICE18_NATIVE_GROUP=32-golden
 CREATE TEMP TABLE slice18_native(name text PRIMARY KEY,ok boolean NOT NULL);
 WITH fx AS MATERIALIZED (
  SELECT g,seed,r,
@@ -24,6 +26,7 @@ SELECT format('g%s-seed%s-r%s',g,seed,coalesce(r::text,'none')),
  (SELECT expected FROM stage02_partition_goldens o WHERE o.g=answers.g
  AND o.k=answers.k AND o.r IS NOT DISTINCT FROM answers.r AND o.q=answers.q),false)
 FROM answers;
+\echo SLICE18_NATIVE_GROUP=21-boundary-negative
 WITH fx AS MATERIALIZED (
  SELECT
  ROW(ARRAY[10,20,30,40,50,60]::numeric[],ARRAY[1,2,3,4,5,6]::integer[])::pastafari_sql_tamil.sauce_result AS s,
