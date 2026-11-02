@@ -44,6 +44,94 @@ def _git(root: Path, *args: str) -> str:
         raise DateSourceError('E_DATE_SOURCE_GIT') from exc
 
 
+
+def _audit_local_closure(root: Path, entry: Path) -> dict:
+    """Git-check every statically resolvable in-repository Python dependency.
+
+    This is a bounded STATIC closure only. Arbitrary runtime Python behavior,
+    external dependencies, shared caches, and mathematical independence are
+    deliberately NOT claimed to be audited.
+    """
+    visited = {}
+
+    def visit(relative: Path) -> None:
+        key = relative.as_posix()
+        if key in visited:
+            return
+        if len(visited) >= 64:
+            raise DateSourceError('E_INDEPENDENT_DEPENDENCY_BUDGET')
+        full = root / relative
+        if (full.is_symlink() or not full.is_file()
+                or not full.resolve().is_relative_to(root)):
+            raise DateSourceError('E_INDEPENDENT_DEPENDENCY_PATH')
+        data = full.read_bytes()
+        if len(data) > 1024 * 1024:
+            raise DateSourceError('E_INDEPENDENT_DEPENDENCY_BUDGET')
+        if _git(root, 'rev-parse', f'HEAD:{key}') != _git(
+                root, 'hash-object', '--no-filters', str(full)):
+            raise DateSourceError('E_INDEPENDENT_DEPENDENCY_DIRTY')
+        try:
+            tree = ast.parse(data.decode('utf-8'), filename=key)
+        except (SyntaxError, UnicodeError) as exc:
+            raise DateSourceError('E_INDEPENDENT_DEPENDENCY_PARSE') from exc
+        visited[key] = {
+            'git_blob_sha': _git(root, 'rev-parse', f'HEAD:{key}'),
+            'module_sha256': hashlib.sha256(data).hexdigest(),
+        }
+
+        def follow(module: str, base: Path) -> None:
+            if not module:
+                return
+            if any(module == banned or module.startswith(banned + '.')
+                   for banned in _FORBIDDEN):
+                raise DateSourceError('E_INDEPENDENT_TRANSITIVE_PINNED_IMPORT')
+            parts = module.split('.')
+            if not all(part.isidentifier() for part in parts):
+                raise DateSourceError('E_INDEPENDENT_DEPENDENCY_MODULE')
+            tail = Path(*parts)
+            for prefix in (base, root):
+                candidates = (prefix / tail.with_suffix('.py'),
+                              prefix / tail / '__init__.py')
+                for candidate in candidates:
+                    if candidate.exists() or candidate.is_symlink():
+                        if not candidate.resolve().is_relative_to(root):
+                            raise DateSourceError('E_INDEPENDENT_DEPENDENCY_PATH')
+                        visit(candidate.relative_to(root))
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                func = node.func
+                if (isinstance(func, ast.Name)
+                        and func.id in ('__import__', 'eval', 'exec')):
+                    raise DateSourceError('E_INDEPENDENT_TRANSITIVE_DYNAMIC_SOURCE')
+                if (isinstance(func, ast.Attribute) and func.attr in (
+                        'import_module', 'spec_from_file_location',
+                        'run_module', 'run_path', 'SourceFileLoader',
+                        'exec_module', 'load_module')):
+                    raise DateSourceError('E_INDEPENDENT_TRANSITIVE_DYNAMIC_SOURCE')
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    follow(alias.name, full.parent)
+            elif isinstance(node, ast.ImportFrom):
+                if any(alias.name == '*' for alias in node.names):
+                    raise DateSourceError('E_INDEPENDENT_WILDCARD_IMPORT')
+                base = full.parent
+                if node.level:
+                    for _ in range(node.level - 1):
+                        base = base.parent
+                    if not base.is_relative_to(root):
+                        raise DateSourceError('E_INDEPENDENT_DEPENDENCY_PATH')
+                else:
+                    base = root
+                module = node.module or ''
+                follow(module, base)
+                for alias in node.names:
+                    follow(module + '.' + alias.name if module else alias.name,
+                           base)
+
+    visit(entry)
+    return dict(sorted(visited.items()))
+
 def _check_module(source: DateModule, *, independent: bool) -> dict:
     role = 'INDEPENDENT' if independent else 'PINNED'
     if (not isinstance(source, DateModule)
@@ -100,9 +188,11 @@ def _check_module(source: DateModule, *, independent: bool) -> dict:
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) \
                     and node.func.attr == 'import_module':
                 raise DateSourceError('E_INDEPENDENT_DYNAMIC_SOURCE')
+    closure = _audit_local_closure(root, rel) if independent else {}
     return {'commit_sha': source.commit_sha, 'module_sha256': digest,
             'git_blob_sha': expected_blob, 'date_function': source.date_function,
-            'relative_path': rel.as_posix(), 'repo_root': str(root)}
+            'relative_path': rel.as_posix(), 'repo_root': str(root),
+            'static_local_dependency_closure': closure}
 
 
 def verify_date_module_identities(independent: DateModule,
@@ -123,4 +213,4 @@ def verify_date_module_identities(independent: DateModule,
             'algorithmic_independence_certified': False,
             'cache_independence_certified': False,
             'full_date_verified': False, 'certifiable': False,
-            'note': 'Only directly imported names in independent module are checked; transitive and runtime dependencies require review.'}
+            'note': 'Git-verified static in-repository import closure only; runtime imports, third-party dependencies, cache isolation and algorithmic independence remain unproven.'}

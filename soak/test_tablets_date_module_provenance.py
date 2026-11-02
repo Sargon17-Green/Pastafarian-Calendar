@@ -125,5 +125,74 @@ class ProvenanceTests(unittest.TestCase):
         self.assertIn("'certifiable': False", src)
 
 
+    def _commit_independent_dependency(self, helper_code, date_code=None):
+        root = self.roots[0]
+        (root / 'helper.py').write_text(helper_code, encoding='utf-8')
+        (root / 'date.py').write_text(
+            date_code or 'import helper\n'
+                         'def date_tuple(origin, target):\n'
+                         '    return helper.date_tuple(origin, target)\n',
+            encoding='utf-8')
+        git(root, 'add', 'date.py', 'helper.py')
+        git(root, 'commit', '-qm', 'test dependency closure')
+
+    def _verified_closure(self):
+        pinned = self.describe(self.roots[1])
+        with patch('tablets_date_module_provenance.PINNED_SHA',
+                   git(self.roots[1], 'rev-parse', 'HEAD')):
+            return verify_date_module_identities(self.describe(self.roots[0]),
+                                                 pinned)
+
+    def test_committed_local_dependency_is_git_verified(self):
+        self._commit_independent_dependency(
+            'def date_tuple(origin, target):\n'
+            '    return (5000, 1, 1, 1, 1)\n')
+        report = self._verified_closure()
+        closure = report['independent']['static_local_dependency_closure']
+        self.assertEqual(set(closure), {'date.py', 'helper.py'})
+        self.assertEqual(closure['helper.py']['module_sha256'],
+                         hashlib.sha256((self.roots[0]/'helper.py').read_bytes()).hexdigest())
+        self.assertFalse(report['cache_independence_certified'])
+        self.assertFalse(report['certifiable'])
+
+    def test_transitive_reference_import_is_rejected(self):
+        self._commit_independent_dependency(
+            'import post55_differential\n'
+            'def date_tuple(origin, target):\n'
+            '    return (5000, 1, 1, 1, 1)\n')
+        with self.assertRaisesRegex(DateSourceError,
+                                    'E_INDEPENDENT_TRANSITIVE_PINNED_IMPORT'):
+            self._verified_closure()
+
+    def test_dirty_transitive_file_is_rejected(self):
+        self._commit_independent_dependency(
+            'def date_tuple(origin, target):\n'
+            '    return (5000, 1, 1, 1, 1)\n')
+        (self.roots[0]/'helper.py').write_text(
+            'def date_tuple(origin, target): return (5001, 1, 1, 1, 1)\n',
+            encoding='utf-8')
+        with self.assertRaisesRegex(DateSourceError,
+                                    'E_INDEPENDENT_DEPENDENCY_DIRTY'):
+            self._verified_closure()
+
+    def test_dynamic_import_in_transitive_file_is_rejected(self):
+        self._commit_independent_dependency(
+            'def date_tuple(origin, target):\n'
+            '    return __import__("pastafari_calendar")\n')
+        with self.assertRaisesRegex(DateSourceError,
+                                    'E_INDEPENDENT_TRANSITIVE_DYNAMIC_SOURCE'):
+            self._verified_closure()
+
+    def test_wildcard_import_is_rejected(self):
+        self._commit_independent_dependency(
+            'def date_tuple(origin, target): return (5000, 1, 1, 1, 1)\n',
+            'from helper import *\n'
+            'def date_tuple(origin, target): return (5000, 1, 1, 1, 1)\n')
+        with self.assertRaisesRegex(DateSourceError,
+                                    'E_INDEPENDENT_WILDCARD_IMPORT'):
+            self._verified_closure()
+
+
+
 if __name__ == '__main__':
     unittest.main()
