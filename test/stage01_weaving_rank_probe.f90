@@ -51,7 +51,8 @@ program stage01_weaving_rank_probe
   print '(A,I0)', 'STAGE01_RANK_COUNT_MS=',elapsed_ms(startCount,afterCount,clockRate)
   print '(A)', 'STAGE01_RANK_PHASE=UNRANK_BEGIN'
   flush(output_unit)
-  call unrank_weaving_polynomial(lengths,rank,word,ok)
+  ! Reuse the exact total computed above; the unranker accepts this trusted hint.
+  call unrank_weaving_polynomial(lengths,rank,word,ok,total)
   call system_clock(count=afterUnrank)
   print '(A,I0)', 'STAGE01_RANK_UNRANK_MS=',elapsed_ms(afterCount,afterUnrank,clockRate)
   if (.not.ok) error stop 'candidate arbitrary-rank unrank failed'

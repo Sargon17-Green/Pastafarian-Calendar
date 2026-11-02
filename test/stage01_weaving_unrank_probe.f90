@@ -31,7 +31,12 @@ program stage01_weaving_unrank_probe
         count=count_weavings_polynomial(lengths)
         call check(bi_to_int64(count)==int(accepted,int64),'count vs independent enumeration')
         do k=1,accepted
-           call unrank_weaving_polynomial(lengths,bi_from_int64(int(k,int64)),actual,ok)
+           if (k==2) then
+              ! Exercise the fallback path that computes its own exact total.
+              call unrank_weaving_polynomial(lengths,bi_from_int64(int(k,int64)),actual,ok)
+           else
+              call unrank_weaving_polynomial(lengths,bi_from_int64(int(k,int64)),actual,ok,count)
+           end if
            call check(ok .and. all(actual==expected(:,k)),'lexicographic rank vs independent enumeration')
            ranks=ranks+1
         end do
@@ -39,7 +44,7 @@ program stage01_weaving_unrank_probe
         call check(.not.ok .and. all(actual==0),'rank zero rejected')
         call unrank_weaving_polynomial(lengths,bi_from_int64(-1_int64),actual,ok)
         call check(.not.ok .and. all(actual==0),'negative rank rejected')
-        call unrank_weaving_polynomial(lengths,bi_add_small(count,1_int64),actual,ok)
+        call unrank_weaving_polynomial(lengths,bi_add_small(count,1_int64),actual,ok,count)
         call check(.not.ok .and. all(actual==0),'rank count plus one rejected')
         deallocate(lengths,remaining,word,actual,expected)
      end do
