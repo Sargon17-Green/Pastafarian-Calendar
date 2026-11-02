@@ -98,6 +98,17 @@ contains
     if (any(remaining(closed+1:opened)<1)) error stop 'prefix candidate: opened color exhausted'
     if (any(remaining(opened+1:)/=lengths(opened+1:))) &
          error stop 'prefix candidate: unopened color already consumed'
+    ! Once every color has already appeared, only the relative order of
+    ! their FINAL occurrences is constrained. For active colors with
+    ! remaining lengths r_1,...,r_q, the exact number of suffix words is
+    ! product_{j=2..q} C((r_1+...+r_j)-1,r_j-1).
+    ! Insert each subsequent color into the previous legal word, reserving
+    ! the final position for the latest color. This eliminates the
+    ! first-position distribution DP on all-open prefix states.
+    if (opened==size(lengths)) then
+       total=count_closure_only_suffix(remaining,closed)
+       return
+    end if
     allocate(positions(0))
     oldTotal=0
     total=bi_one()
@@ -134,6 +145,30 @@ contains
        end do
     end do
   end function count_prefix_weavings_polynomial
+
+  ! Independent closed-form branch: all colors have opened; close order
+  ! remains ascending. Each insertion has C(oldTotal+n-1,n-1) choices.
+  ! Exact binomials are built as C(oldTotal+k,k), so every division is exact.
+  function count_closure_only_suffix(remaining,closed) result(total)
+    integer, intent(in) :: remaining(:),closed
+    type(BigInt) :: total,choose
+    integer :: m,n,k,oldTotal
+    total=bi_one()
+    oldTotal=0
+    do m=closed+1,size(remaining)
+       n=remaining(m)
+       if (n<=0) error stop 'closure-only candidate: invalid active length'
+       if (oldTotal>0 .and. n>1) then
+          choose=bi_one()
+          do k=1,n-1
+             choose=divide_exact_small( &
+                  bi_mul_small(choose,int(oldTotal+k,int64)),k)
+          end do
+          total=bi_mul(total,choose)
+       end if
+       oldTotal=oldTotal+n
+    end do
+  end function count_closure_only_suffix
 
   ! Exact long division in base 10^9 (nonnegative, positive integral result).
   ! Here all dividends are binomial recurrence numerators and have no remainder.
