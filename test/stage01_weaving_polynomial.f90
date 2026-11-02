@@ -109,10 +109,16 @@ contains
        total=count_closure_only_suffix(remaining,closed)
        return
     end if
-    allocate(positions(0))
-    oldTotal=0
+    ! The already-open active colors have no first-appearance constraint
+    ! left. Count their legal suffixes directly by the exact closure-only
+    ! product; their first-position distributions are not needed.
+    ! The first unopened color starts the distribution afresh, using only
+    ! this base total. Subsequent unopened colors retain the same DP.
+    oldTotal=sum(remaining(closed+1:opened))
     total=bi_one()
-    do m=closed+1,size(lengths)
+    if (opened>closed) total=count_closure_only_suffix(remaining(1:opened),closed)
+    allocate(positions(0))
+    do m=opened+1,size(lengths)
        n=remaining(m)
        allocate(next(oldTotal+n)); next=bi_zero()
        if (n==1) then
