@@ -5,7 +5,7 @@ on:
       - 'MATLAB\+Polski'
     paths:
       - 'tools/run_stage55_year5000_twentysecond_native.m'
-      - 'tools/stage55_after21_interval_five_fields.py'
+      - 'tools/stage55_after22_interval_five_fields.py'
       - '.github/workflows/matlab-stage55-twentysecond-day-differential.yml'
   workflow_dispatch:
 permissions:
@@ -31,6 +31,13 @@ jobs:
       - name: Verify pinned AFTER21
         run: |
           echo 'b90c7b0923bdd53ada5e3de4256fbdb37925f043ab4774bc436b8de7225f8a9f  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_21.json' | sha256sum -c -
+      - name: Preflight AFTER22 independent witness wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tools/stage55_after22_interval_five_fields.py
+          grep -Fqx 'PIN = "b90c7b0923bdd53ada5e3de4256fbdb37925f043ab4774bc436b8de7225f8a9f"' tools/stage55_after22_interval_five_fields.py
+          python3 -m py_compile tools/stage55_after22_interval_five_fields.py
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
@@ -43,7 +50,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/stage55_after21_interval_five_fields.py \
+          python3 tools/stage55_after22_interval_five_fields.py \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_21.json \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_22.json \
             tests/fixtures/stage55_year5000_appendix_a_metadata.json \
