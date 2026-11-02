@@ -1,0 +1,11 @@
+# MATLAB+Polski Stage55 — AFTER19 to AFTER20 bounded contract
+
+Previous gate: commit 07e2fa8d3071b1278a83e537fbc14bc2f3f68661; AFTER19 corrected Native/Python run 41503025825, job 125475106740 completed success; Names Lock 41503026008 completed success. MATLAB R2026a: STEPS=19 REMAINING=4225 LETTER=16 REJECTED=2. Independent Python: 22 tiny brute controls, 16 child blocks, two negative checks, byte-equal five fields. Exact row POSITION=19 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=19 MONTH_INDEX=38 MONTH_DAY=1.
+
+Original seven-member ZIP artifact 13170053951, SHA256 bf64b844204876f8b444aea2929a93a82479bbbc7fb7532d1f5ffe16dd8c140a, CRC 7/7; certified archive /QA_Artifacts/PC-BRANCH-MATLAB-POLSKI/Stage55_AFTER19_41503025825_original.zip. AFTER19 checkpoint SHA256 53a244b51b9439090efb828142fb3f1ea0f6c620f24d6a2fa396d73b23d71aa4. Input pinned to original artifact and exact JSON bytes; no regenerated checkpoint.
+
+Year5000 has 45 months and 4244 days. Prefix 1,2,3,4,5,6,7,4,8,9,10,9,11,6,12,13,14,15,16. BEFORE steps19, openedUpTo16, closedUpTo0, remaining4225, rank in 1..count, done=false. MATLAB native adjoint cursor runs exactly one step with suffix recount and JSON roundtrip; PATCH25 five-field comparison; reject position 0 and 21.
+
+Independent Python must pass 22 tiny exhaustive cases, 17 exact binomial-insertion child counts, parent partition, selected child count and rank interval. Local independent preflight on pinned AFTER19 (NOT Native): 22/22 small and 17/17 partition PASS; symbol16 selected; openedUpTo remains16; remaining4224; month name index38; month day2. Expected row POSITION=20 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=20 MONTH_INDEX=38 MONTH_DAY=2.
+
+Bounded CI fetches AFTER19 artifact from run 41503025825 with pinned JSON SHA256, MATLAB R2026a single-step native, independent Python strict byte-equal five-field row and two negative position rejects; uploads seven preserved files on success/failure. Accept AFTER20 only with completed/success exact-SHA job log, independently checked ZIP SHA256 and 7/7 CRC, AFTER20 JSON digest, and exact output markers. Full-year canonical oracle, cross-engine soak and Stage55 final PASS UNVERIFIED; LAST_COMPLETED_STAGE=54. No main merge, old PASS reruns, or heavy DAG.
