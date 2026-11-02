@@ -43,3 +43,26 @@ run 41522957044 completed SUCCESS, sur commit
 DISCOVERY 01 esas verifikita. Stage 2 ankore ne kompletas la
 kalendarala kvinoplo. La historiala EXPECTED_RED ne esis
 reproduktita; nula bugo esas deklarita sen reproduktajo.
+
+## Stage 2 — DISCOVERY 02 (native GREEN)
+
+Nova production-proceduro monster.stage02.context, separita de la
+Stage1 calendarDateSpaghetti, konstruas unu contexton por singla
+invocation e kalkulas du normaligita BI modulo-valori en [1,M].
+L'originala inputi ne mutacesas; logi e metrics ne fuitegas inter vokoj.
+Nula norma test-only oracle esas vokata da production.
+
+En commit 3de04eef770f9ca7a4aeb82e512a80b0db0b7c27, Native
+Stage2 run 41536277402 completed SUCCESS:
+28 input-pari, 406 asserti, e la marki
+STAGE_2_DISCOVERY_02_PAIRS_PASIS 28,
+STAGE_2_DISCOVERY_02_CHECKS_PASIS 406,
+STAGE_2_DISCOVERY_02_PASIS,
+NATIVE_STAGE_2_DISCOVERY_02_VERIFICATION=PASS.
+Stage2 DISCOVERY01 44/44 anke restis GREEN en la sama run.
+Stage1 native 41536277596 e verify 41536277432 completed SUCCESS.
+
+DISCOVERY02 esas acceptita. La Stage2 entere ne esas deklarita
+completigita; LAST_COMPLETED_STAGE restas 1.
+La futura DISCOVERY03 traktos exakta dayCount/distance/connection/direction
+kom novi intermediate BI state-valori, ne la fina kvinoplo.
