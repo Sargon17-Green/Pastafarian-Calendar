@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..261: signed owner-scoped comparison.
+; Stage 1 native regression 191..262: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1424,15 +1424,87 @@ RunOwnerSignedCmpTests::
     jp nz, .fail
     jr .revokedPeerLoop
 .revokedPeerDone:
-    ld a, 42
+    ; Native case 262: reset the old leases, allocate max owner 253
+    ; (tag 255) beside live owner 1, then compare +2 > +1.
+    ; The immutable 10 operand bytes, 16 lease tags and two SRAM
+    ; payload sentinels are verified independently of the result.
+    call LeaseResetAll
+    ld a, 253
     ld [wOwnerRequest], a
-    call OwnerLeaseRelease
-    ld a, 43
+    ld a, 1
+    ld [wOwnerCount], a
+    call OwnerLeaseAlloc
+    call OwnerCmpTestReadOwnerStatus
+    jp nz, .fail
+    ld a, [wOwnerBanks]
+    cp 3
+    jp nz, .fail
+    ld a, [wLeaseTable+3]
+    cp 255
+    jp nz, .fail
+    ld a, 1
     ld [wOwnerRequest], a
-    call OwnerLeaseRelease
-    ld a, 44
+    call OwnerLeaseAlloc
+    call OwnerCmpTestReadOwnerStatus
+    jp nz, .fail
+    xor a
+    ld [wOwnerOffset], a
+    ld [wOwnerOffset+1], a
+    ld [wOwnerOffset+2], a
+    ld a, 253
     ld [wOwnerRequest], a
-    call OwnerLeaseRelease
+    ld a, 2
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    call OwnerCmpTestReadOwnerStatus
+    jp nz, .fail
+    ld a, 1
+    ld [wOwnerRequest], a
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    call OwnerCmpTestReadOwnerStatus
+    jp nz, .fail
+    ld a, 6
+    ld [wTestCase], a
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .fail
+    ld a, 253
+    ld [wOwnerCmpOwnerA], a
+    ld a, 1
+    ld [wOwnerCmpOwnerB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenB+1], a
+    ld a, 1
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
+    ; SRAM must remain intact as well as the snapshotted descriptors/tags.
+    xor a
+    ld [wOwnerOffset], a
+    ld [wOwnerOffset+1], a
+    ld [wOwnerOffset+2], a
+    ld a, 253
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    call OwnerCmpTestReadOwnerStatus
+    jp nz, .fail
+    ld a, [wOwnerByteValue]
+    cp 2
+    jp nz, .fail
+    ld a, 1
+    ld [wOwnerRequest], a
+    call OwnerByteRead
+    call OwnerCmpTestReadOwnerStatus
+    jp nz, .fail
+    ld a, [wOwnerByteValue]
+    cp 1
+    jp nz, .fail
+    call LeaseResetAll
     call SRAMDisable
     ld a, $a5
     ld [wTestResult], a

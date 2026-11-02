@@ -192,6 +192,27 @@ def check_owner_id_fragmented_high_boundary():
         assert compare_read_only(model, a, b) == 3
     print("HOST_OWNER_SIGNED_CMP_FRAGMENTED_MAX_OWNER=PASS cases=32 owner=253 tag=255 banks=5,7 peer_bank=6 canonical_and_revoked=YES payload_and_tags=IMMUTABLE")
 
+def check_native_case262_oracle():
+    """Independent integer oracle for ROM case 262; not a Native PASS."""
+    model = OwnedBanks()
+    assert model.alloc(253, 1) == (0, (3,))
+    assert model.tags[3] == 255
+    assert model.alloc(1, 1) == (0, (4,))
+    assert model.tags[4] == 3
+    assert model.write_byte(253, 0, 2) == 0
+    assert model.write_byte(1, 0, 1) == 0
+    big = int.from_bytes(bytes((2,)), "little", signed=False)
+    small = int.from_bytes(bytes((1,)), "little", signed=False)
+    assert big == 2 and small == 1 and big > small
+    assert reference_integer(model, 253, 0, 1) == big
+    assert reference_integer(model, 1, 0, 1) == small
+    assert compare_read_only(model, (253, 0, 1), (1, 0, 1)) == 1
+    assert model.read_byte(253, 0) == (0, 2)
+    assert model.read_byte(1, 0) == (0, 1)
+    assert model.tags[3] == 255 and model.tags[4] == 3
+    print("HOST_NATIVE262_INDEPENDENT_ORACLE=PASS owner=253 tag=255 peer=1 A=2 B=1 expected=GT1 payload_and_tags=IMMUTABLE")
+
+
 def main():
     m = OwnedBanks()
     assert m.alloc(41, 3) == (0, (3, 4, 5))
@@ -568,6 +589,7 @@ def main():
     )
     check_owner_id_high_boundary()
     check_owner_id_fragmented_high_boundary()
+    check_native_case262_oracle()
     print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=36 same_owner_fragmented_alias=6 same_owner_fragmented_noncanonical=2 same_owner_fragmented_mixed_sign_invalid=4 case_id_16bit_oracle=2 stale_fragmented_after_release=1 stale_fragmented_with_live_peer=1 stale_fragmented_as_B_with_live_A=1 both_revoked_distinct_owners=2 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=4 same_owner_full_capacity_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")

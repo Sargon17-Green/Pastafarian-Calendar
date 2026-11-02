@@ -9,6 +9,7 @@ from pathlib import Path
 # Cases 242-247 cover positive full-capacity boundaries; 248-255 cover
 # fragmented-owner aliases and both mixed-sign high-zero invalid orientations.
 # Cases 256-260 assert 16-bit ABI transition and both stale-owner operand positions.
+# Case 261: independently revoked owners; 262: max owner-ID native comparison.
 # Keep the measured 9000-frame cap.
 MAX_BOOT_AND_TEST_FRAMES = 9000
 WRAM_RESULT = 0xC000
@@ -17,7 +18,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 261
+TOTAL_CASES = 262
 
 
 def discover_case_high_byte(symbol_path: Path) -> int:
