@@ -1,6 +1,6 @@
 # Stadio 20 — DISCOVERY 16: mallonga ranga elekto el unu respondfluo
 
-**Stato 2026-11-01:** nur memstara kontrakto; produktkodo kaj 12 novaj testoj **NE** estas kreitaj. Stage19-koda HEAD `cc4ac602a0a34990d356128f126c408412a72abf` Native GREEN (202/202, formatter, senmutacia kontrolo) kaj Names Lock SUCCESS sur ĝuste la sama SHA. Ĉi tiu nova dokumenta HEAD ankoraŭ bezonas apartajn Native kaj Names Lock completed/success antaŭ Stage20-kodkomenco.
+**Stato 2026-11-02:** Stage20-kodo kaj ĝuste 12 novaj testoj jam ekzistas. La unua koda HEAD `ecdb21df732db5f8b3332ecbbc33e90aa386bc0a` malsukcesis nur ĉe `gleam format --check` antaŭ iu testo; la precizaj sep formatigaj hunkoj en unu testdosiero estis riparitaj ĉe `9b990ee3176763b9d7aef8fc4c68169830e0d98d`. La riparita koda HEAD atingis Native 214/214 sen fiaskoj, Gleam 1.18.1 / OTP 28, formatter kaj fontintegreco PASS, kaj Names Lock completed/success sur la sama SHA. Ĉi tiu dokumenta fermo bezonas proprajn du CI-pordegojn antaŭ plena Stage20-akcepto aŭ Stage21.
 
 ## Amplekso kaj elekto
 
@@ -58,3 +58,10 @@ Nur `test/discovery_16_test.gleam`; testreferenco restas sub `test/reference`, n
 2. Poste: implementu precize la ĉi-supran API kaj 12 novajn testojn, sen referencimportoj en `src` kaj sen ŝanĝo de antaŭaj algoritmaj semantikoj.
 3. Koda HEAD: readback de branĉo, arbo, ambaŭ bloboj; `gleam format --check src test`, `gleam test`, source integrity kaj Names Lock per du completed/log-pordegoj, kun 214 nur laŭ efektiva mezuro.
 4. Fermu Stage20-dokumentadon kaj apartan doc-HEAD CI antaŭ Stage21; neniu duobla run, main, merge aŭ publikigo. Neniu plena datkalkulo en Stage20.
+
+## Mezurita fermo de la koda HEAD (dokumenta HEAD ankoraŭ ne akceptita)
+
+- Koda HEAD: `9b990ee3176763b9d7aef8fc4c68169830e0d98d`; unu formatiga riparkomito post `ecdb21df732db5f8b3332ecbbc33e90aa386bc0a` (7 precizaj hunkoj en `test/discovery_16_test.gleam`; neniu algoritma ŝanĝo).
+- Native: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41503431210 ; job `125476504241`; Gleam 1.18.1 / OTP 28; **214/214 PASS**, 0 malsukcesoj; `gleam format --check src test` kaj senmutacia fontkontrolo PASS; artifact `13170251086`, SHA256 `84ca23d0f4e520699067a46979ca511c3af239cbac3d3d7fd8bfe725170ba95b`.
+- Canonical Names Lock: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41503430727 ; job `125476501954`, completed/success sur la sama HEAD.
+- La kompara orakolo restas en `test/reference`; 12 novaj testfunkcioj, 202 antaŭaj regrestestoj. La ĉi-tie mezurita koda akcepto **ne** anstataŭas la ankoraŭ postulatan dokumentan HEAD-CI. Neniu Stage21, main/merge aŭ plena datkalkulo.
