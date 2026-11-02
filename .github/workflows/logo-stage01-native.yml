@@ -13,7 +13,9 @@ permissions:
 
 jobs:
   native-stage-1:
-    runs-on: ubuntu-26.04
+    # UCBLogo 6.2.5 CLI's term.c requires legacy termio.h/termio API,
+    # absent on the newer Ubuntu 26.04 runner; use supported 24.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Check out this branch
