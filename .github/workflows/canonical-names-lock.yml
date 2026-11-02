@@ -341,3 +341,22 @@ jobs:
         run: |
           set -euo pipefail
           sh ./run_stage18_wide_calibration.sh
+
+  native-stage19-joint-wide:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNAT 13
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y gnat gprbuild
+          gnatmake --version
+      - name: Verify jointly wide calculation and target calendar-day differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh ./run_stage19_joint_wide.sh
