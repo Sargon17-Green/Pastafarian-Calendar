@@ -1611,38 +1611,8 @@ jobs:
           )
           timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage33-invalid-parse-recovery "${compile_sources[@]}" 2>&1 | tee -a build/stage33-native.log
           timeout --signal=TERM --kill-after=10s 120s ./build/stage33-invalid-parse-recovery 2>&1 | tee -a build/stage33-native.log
-          grep -Eq '^STAGE33_REJECTS=[[:space:]]*0*24[[:space:]]*[[:space:]]*0*24[[:space:]]*$' build/stage33-native.log
-          grep -Eq '^STAGE33_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage33-native.log
-          grep -Eq '^STAGE33_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage33-native.log
-          grep -Fxq 'STAGE33_HEAP_MEASURED=YES' build/stage33-native.log
-          grep -Eq '^STAGE33_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage33-native.log
-          grep -Fxq 'RESULT=PASS_STAGE33_INVALID_PARSE_RECOVERY_DISCOVERY_NATIVE' build/stage33-native.log
-          echo 'STAGE33_NATIVE_GATE=PASS' | tee -a build/stage33-native.log
-      - name: Preserve Stage33 log including failures
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage33-invalid-parse-recovery-evidence
-          path: build/stage33-native.log
-          if-no-files-found: warn
-          retention-days: 30
- build/stage33-native.log
-          grep -Eq '^STAGE33_HEAP_CLEAN=[[:space:]]*0*24[[:space:]]*[[:space:]]*0*24[[:space:]]*$' build/stage33-native.log
-          grep -Eq '^STAGE33_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage33-native.log
-          grep -Eq '^STAGE33_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage33-native.log
-          grep -Fxq 'STAGE33_HEAP_MEASURED=YES' build/stage33-native.log
-          grep -Eq '^STAGE33_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage33-native.log
-          grep -Fxq 'RESULT=PASS_STAGE33_INVALID_PARSE_RECOVERY_DISCOVERY_NATIVE' build/stage33-native.log
-          echo 'STAGE33_NATIVE_GATE=PASS' | tee -a build/stage33-native.log
-      - name: Preserve Stage33 log including failures
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage33-invalid-parse-recovery-evidence
-          path: build/stage33-native.log
-          if-no-files-found: warn
-          retention-days: 30
- build/stage33-native.log
+          grep -Eq '^STAGE33_REJECTS=[[:space:]]*0*24[[:space:]]*$' build/stage33-native.log
+          grep -Eq '^STAGE33_HEAP_CLEAN=[[:space:]]*0*24[[:space:]]*$' build/stage33-native.log
           grep -Eq '^STAGE33_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage33-native.log
           grep -Eq '^STAGE33_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage33-native.log
           grep -Eq '^STAGE33_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage33-native.log
