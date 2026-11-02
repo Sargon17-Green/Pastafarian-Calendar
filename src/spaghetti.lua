@@ -48,6 +48,7 @@ local LegacySignedOffset = require("legacy_gate_signed_offset")
 local SignedOffsetPatch = require("gate_signed_offset_patch")
 local LegacyGatePhase = require("legacy_gate_phase")
 local GatePhasePatch = require("gate_phase_patch")
+local LegacyGateMidpoint = require("legacy_gate_midpoint")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -661,6 +662,11 @@ end
 function S.gatePhaseSpaghetti(day,records)
     local corrected=GatePhasePatch.execute(day,records)
     return corrected
+end
+
+-- Stage50 DISCOVERY25: deliberately wrong exact-midpoint tie, diagnostic only.
+function S.legacyGateMidpointProbe(day,records)
+    return LegacyGateMidpoint.execute(day,records)
 end
 
 function S.calendarDateSpaghetti()
