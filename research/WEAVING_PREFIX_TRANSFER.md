@@ -1,0 +1,21 @@
+# DISCOVERY03 — exact one-dimensional prefix-transfer count (research only)
+
+## Evidence
+
+On SHA 221baf53466f45a4f345d71c332c0cb1e96af5f7, GitHub run 41524234129 completed: verify=success; Native Stage1–5 regressions passed, DISCOVERY03 2518 checks/0 failures, reachability 66/66, small independent oracle 137 cases/1982 rank checks all passed. Native year probe failed with exit 124 after 180 seconds at month weaving. Timeout is INCONCLUSIVE; there is no third proven historical numerical defect and Stage6 is not accepted.
+
+## Exact transfer theorem
+
+For a legal word on months 1..j-1 of total length n, the last symbol is j-1. Let a be the position (1-based) of the first occurrence of j-1. Insert k identical copies of month j into the n+1 gaps of the old word. The first j must occur after old first j-1 (its gap index i satisfies i >= a), and the last j must occur after the last old j-1, hence in the final gap n. For i<n, the number of insertions with the first new letter in gap i is binomial(n-i+k-2, k-2) for k>=2; for i=n it is one, including k=1. All insertion maps are unique after deleting month j.
+
+Store D_j[p], the number of legal words on 1..j with first j at position p. With S_{j-1}(i)=sum_{a<=i} D_{j-1}[a], the exact recurrence is D_j[i+1]=S_{j-1}(i)*w(i,n,k), i=0..n. Initial state D_1[1]=1. Each complete legal word ends with j, so there is no last-position dimension. This is exact integer arithmetic and needs O(m*N) binomial arithmetic operations and O(N) array entries for m months and N total occurrences.
+
+For an arbitrary fixed prefix P, project P onto symbols <=j. In the insertion gaps before each old projected-prefix letter, the number of new j letters is forced exactly. At the gap following the final old prefix letter, the number of new j letters has only a lower bound (the trailing j letters of the target projected prefix). The first nonempty new gap is i and the last is n; enforce these and the forced gap counts. The number of solutions of the remaining nonnegative gap-count composition is binomial(slack+t-1,t-1), where t is the number of unconstrained gaps and slack is the remaining number of identical letters after lower bounds. All boundary cases (including k=1, singleton months, and full prefixes) are counted by this expression. The same D_j recurrence then gives exact count_prefix(lengths,P). An invalid prefix has count zero.
+
+## Tests and limits
+
+New test/weaving_prefix_transfer.py uses its own insertion recurrence, not the existing production remaining-vector recursion or the independent occurrence-poset oracle. The latter is imported ONLY for finite differential checking. Locally: 137 families, 4,983 legal/invalid prefix checks, and 1,982 rank/unrank assertions all passed. For the logged 45-month, 4244-day fixture, the exact total has 22,470 bits; big-endian SHA256 of its integer bytes is 925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da. The full-fixture checks include reverse-and-relabel symmetry, first-letter identity, second-letter partition, and multinomial upper bound. Local full-fixture suite took approximately 3.8 s. The checksum is a reproducibility anchor, NOT an independent full-size count oracle. GitHub Native results remain to be checked.
+
+The core count has at most two Python arrays of length N+1; the full count is <= the multinomial coefficient and therefore exact integer payload for both arrays is bounded approximately by 2*(N+1)*ceil(B/8) bytes, B=ceil(log2(multinomial)), excluding Python object overhead and temporaries. This removes the exponential residual-vector explosion.
+
+IMPORTANT: rank/unrank implementation here repeatedly invokes count_prefix. It is correct only on finite differential cases, NOT proven to meet the 180-second year5000 budget. Worst-case counting calls grow as O(N*m) and each costs O(m*N) arithmetic, hence this naive unrank has O(m^2*N^2) arithmetic cost. The next independent engineering step is to derive and benchmark incremental prefix updates / batched candidate counts with a strict runtime and memory gate, then port to Chapel and compare numeric outputs against an independent normative oracle. Do not modify production, extend timeout, claim Stage6, or merge main on this research result.
