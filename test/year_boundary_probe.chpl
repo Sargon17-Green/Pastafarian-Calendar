@@ -111,6 +111,20 @@ proc main() {
   checkpoint("STRUCTURE_MONTH_LENGTHS_BEGIN");
   structure.monthLengths = chooseMonthLengths(r, year, structure.monthCount);
   checkpoint("STRUCTURE_MONTH_LENGTHS_END");
+  // Bounded snapshot of the exact input to the expensive weaving DP.
+  // The product counts possible remaining vectors, not reachable memo states.
+  var weavingInputTotal = 0;
+  var weavingRemainingVectors = new bigint(1);
+  writeln("YEAR_BOUNDARY_WEAVING_MONTH_COUNT=", structure.monthCount);
+  for i in 0..#structure.monthCount {
+    const monthLength = structure.monthLengths[i];
+    weavingInputTotal += monthLength;
+    weavingRemainingVectors *= new bigint(monthLength + 1);
+    writeln("YEAR_BOUNDARY_WEAVING_LENGTH_", i + 1, "=", monthLength);
+  }
+  writeln("YEAR_BOUNDARY_WEAVING_INPUT_TOTAL=", weavingInputTotal);
+  writeln("YEAR_BOUNDARY_WEAVING_POSSIBLE_REMAINING_VECTORS=", weavingRemainingVectors);
+  try! stdout.flush();
   checkpoint("STRUCTURE_MONTH_WEAVING_BEGIN");
   structure.monthWeaving = chooseMonthWeaving(r, structure.monthLengths);
   checkpoint("STRUCTURE_MONTH_WEAVING_END");
