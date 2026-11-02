@@ -3271,3 +3271,61 @@ jobs:
           path: logs/stage10
           if-no-files-found: warn
           retention-days: 30
+
+  # Stage11: exact stream rank selection with bounded rejection-skip.
+  stage11-stream-rank-native:
+    if: github.ref_name == 'Perl+國語'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Stage11 small-modulus exhaustive and real-M BigInt native QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage11
+          git rev-parse HEAD > logs/stage11/source.txt
+          perl -e 'die "Perl 5.40+ required\n" if $] < 5.040; print "$^V\n"' > logs/stage11/perl-version.txt
+          perl -Ilib -c lib/Pastafari/Monster/StreamRankSelection.pm 2> logs/stage11/syntax.stderr
+          perl -Ilib -c t/56_stage11_stream_rank_selection.t 2>> logs/stage11/syntax.stderr
+          test "$(grep -c 'syntax OK' logs/stage11/syntax.stderr)" -eq 2
+          test "$(wc -l < logs/stage11/syntax.stderr)" -eq 2
+          set +e
+          (
+            ulimit -v 393216
+            ulimit -c 0
+            timeout --signal=TERM --kill-after=5s 120s \
+              prove -e 'perl -CS -Ilib' -v t/56_stage11_stream_rank_selection.t \
+              > logs/stage11/test.stdout 2> logs/stage11/test.stderr
+          )
+          ec=$?
+          set -e
+          printf '%s\n' "$ec" > logs/stage11/test.exit
+          cat logs/stage11/test.stdout
+          cat logs/stage11/test.stderr >&2
+          test "$ec" -eq 0
+          test ! -s logs/stage11/test.stderr
+          grep -q 'All tests successful.' logs/stage11/test.stdout
+          grep -q 'Result: PASS' logs/stage11/test.stdout
+          grep -q 'Tests=6517' logs/stage11/test.stdout
+          grep -q 'STAGE11_SMALL_MODULUS_CASES=6246' logs/stage11/test.stdout
+          grep -q 'STAGE11_REAL_MODULUS_CASES=56' logs/stage11/test.stdout
+          grep -q 'STAGE11_INDEPENDENT_BIGINT_ORACLE=1' logs/stage11/test.stdout
+          grep -q 'STAGE11_FULL_GENERATOR_NOT_VERIFIED' logs/stage11/test.stdout
+          echo 'STAGE11_NATIVE_PASS=1' > logs/stage11/result.txt
+          cat logs/stage11/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perl-stage11-stream-rank-native
+          path: logs/stage11
+          if-no-files-found: warn
+          retention-days: 30
