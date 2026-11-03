@@ -1,6 +1,7 @@
 load 'src/source_language_catalog.ijs'
 load 'src/monster_base.ijs'
 load 'src/stage02_counts.ijs'
+load 'src/stage04_save.ijs'
 
 NB. Intrarea Bootstrap nu importa si nu apeleaza oracle-ul de test.
 NB. Motorul istoric complet va fi construit treptat in etapele urmatoare.
