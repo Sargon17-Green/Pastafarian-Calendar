@@ -222,7 +222,7 @@ pub fn discovery_18_long_rejections_without_oracle_test() {
   let assert Ok(reverse_wide) = select(1, -1, half_wide)
   case forward_short, reverse_short {
     discovery_18_choose_rank.ShortRank(forward),
-    discovery_18_choose_rank.ShortRank(reverse)
+      discovery_18_choose_rank.ShortRank(reverse)
     -> {
       forward.accepted_value |> should.equal(1)
       reverse.accepted_value |> should.equal(half_short)
@@ -231,7 +231,7 @@ pub fn discovery_18_long_rejections_without_oracle_test() {
   }
   case forward_wide, reverse_wide {
     discovery_18_choose_rank.WideRank(forward),
-    discovery_18_choose_rank.WideRank(reverse)
+      discovery_18_choose_rank.WideRank(reverse)
     -> {
       forward.accepted_value |> should.equal(1)
       reverse.accepted_value |> should.equal(half_wide)
@@ -297,6 +297,6 @@ pub fn discovery_18_invalid_inputs_and_priority_test() {
   |> should.equal(
     Error(discovery_18_choose_rank.InvalidContext(
       bootstrap.InvalidRecoveryDepth,
-    ))
+    )),
   )
 }
