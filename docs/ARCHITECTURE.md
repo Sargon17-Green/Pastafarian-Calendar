@@ -20,4 +20,10 @@ Validatorul accepta numere rational exacte atunci cand valoarea lor este intreag
 
 `stage02CanonicalDay` extrage numaratorul si numitorul exact cu `2 x:`, verifica numitorul 1 si returneaza numaratorul ca extended integer. `stage02CountForDay` si `stage02WorkCounts` folosesc forma canonica; intrarea publica inlocuieste si valorile zilelor din context cu aceasta forma dupa validare. Nu se foloseste aritmetica in virgula mobila, cele cinci formule nu se schimba, iar oracle-ul nu este importat in productie.
 
-`test/stage03_patch01_tests.ijs` verifica faptul ca fixture-urile sunt realmente de tip rational 128, ca rezultatele si zilele din context sunt extended integer, comportamentul inainte/inapoi/aceeasi zi, un rational intreg mare, respingerea fractiilor si pastrarea `NOT_INTEGRATED`. Stage 3 ramane in asteptarea Native QA pe Windows.
+`test/stage03_patch01_tests.ijs` verifica faptul ca fixture-urile sunt realmente de tip rational 128, ca rezultatele si zilele din context sunt extended integer, comportamentul inainte/inapoi/aceeasi zi, un rational intreg mare, respingerea fractiilor si pastrarea `NOT_INTEGRATED`. Stage 3 a fost acceptat prin J9.7.1 Native QA pe Windows (63/63, 17/17, 11/11, exit 0).
+
+## Stage 4 - DISCOVERY 02: SAVE pozitiv exact
+
+`src/stage04_save.ijs` implementeaza in productie `SAVE(n)=1+((n-1) mod M)` cu `M=2^127-1`. Intrarea este canonizata prin `stage02CanonicalDay`, fara floating point. Este acceptat un intreg exact sau rational exact cu numitor 1, iar fractiile sunt respinse. `stage04SaveCounts` aplica acelasi reziduu pozitiv vectorului existent de cinci numaratori, fara modificarea contextului public sau calculul componentelor finale de data.
+
+`test/stage04_discovery02_tests.ijs` pregateste 24 de verificari pentru limite, tip J64, rationali, periodicitate, idempotenta, intrari invalide si non-regresie. Stage 4 este implementat, dar Native QA J9.7.1 nu a fost executat; `LAST_COMPLETED_STAGE=3`.
