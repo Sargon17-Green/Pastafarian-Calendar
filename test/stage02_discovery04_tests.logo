@@ -1,0 +1,105 @@
+; Stage 2 / Discovery 04: metamorfala QA de exakta BI e contexto.
+; Pure test-only; no production source changes, no patch reproduction claim.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "test/normative_reference.logo
+
+make "D4.FAIL "false
+make "D4.N 0
+make "D4.PAIRS 0
+
+to d4.require :ok :tag
+  make "D4.N (:D4.N + 1)
+  if not :ok [
+    make "D4.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_04_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d4.pair :c :t :tag
+  localmake "forward monster.stage02.workcounts :c :t
+  localmake "reverse monster.stage02.workcounts :t :c
+  localmake "cs bi.add :c nr.M
+  localmake "ts bi.add :t nr.M
+  localmake "shifted monster.stage02.workcounts :cs :ts
+  localmake "oracle nr.work.counts :c :t
+  localmake "shiftOracle nr.work.counts :cs :ts
+  localmake "fd monster.context.get :forward "distanceCount
+  localmake "fc monster.context.get :forward "connectionCount
+  localmake "direction monster.context.get :forward "directionCount
+  make "D4.PAIRS (:D4.PAIRS + 1)
+  d4.require (bi.eq (monster.context.get :forward "actionCount) (item 1 :oracle)) :tag
+  d4.require (bi.eq (monster.context.get :forward "targetCount) (item 2 :oracle)) :tag
+  d4.require (bi.eq :fd (item 3 :oracle)) :tag
+  d4.require (bi.eq :fc (item 4 :oracle)) :tag
+  d4.require (equalp :direction (item 5 :oracle)) :tag
+  d4.require (bi.eq (monster.context.get :reverse "actionCount) (monster.context.get :forward "targetCount)) :tag
+  d4.require (bi.eq (monster.context.get :reverse "targetCount) (monster.context.get :forward "actionCount)) :tag
+  d4.require (bi.eq (monster.context.get :reverse "distanceCount) :fd) :tag
+  d4.require (bi.eq (monster.context.get :reverse "connectionCount) :fc) :tag
+  d4.require ((:direction + (monster.context.get :reverse "directionCount)) = 4) :tag
+  d4.require (bi.eq (monster.context.get :shifted "normalizedCalculationDay) (monster.context.get :forward "normalizedCalculationDay)) :tag
+  d4.require (bi.eq (monster.context.get :shifted "normalizedTargetDay) (monster.context.get :forward "normalizedTargetDay)) :tag
+  d4.require (bi.eq (monster.context.get :shifted "distanceCount) :fd) :tag
+  d4.require (equalp (monster.context.get :shifted "directionCount) :direction) :tag
+  d4.require (bi.eq (monster.context.get :shifted "actionCount) (item 1 :shiftOracle)) :tag
+  d4.require (bi.eq (monster.context.get :shifted "targetCount) (item 2 :shiftOracle)) :tag
+  d4.require (bi.eq (monster.context.get :shifted "connectionCount) (item 4 :shiftOracle)) :tag
+  d4.require (equalp (monster.context.get :forward "metrics) [stage02.dispatch stage02.counts]) :tag
+end
+
+to stage02.discovery04.run
+  localmake "f nr.foundation
+  localmake "t nr.tablets
+  localmake "m nr.M
+  localmake "z bi.zero
+  localmake "one bi.small 1
+  localmake "minusone bi.neg :one
+  localmake "fp1 bi.add :f :one
+  localmake "fm1 bi.sub :f :one
+  localmake "fp2 bi.add :f (bi.small 2)
+  localmake "fm2 bi.sub :f (bi.small 2)
+  localmake "tp1 bi.add :t :one
+  localmake "tm1 bi.sub :t :one
+  localmake "minusm bi.neg :m
+  localmake "big bi.mul.small :m 1000
+  localmake "minusbig bi.neg :big
+
+  d4.pair :f :f [foundation_equal]
+  d4.pair :f :fp1 [foundation_plus]
+  d4.pair :fp1 :f [plus_foundation]
+  d4.pair :fm1 :f [minus_foundation]
+  d4.pair :f :fm1 [foundation_minus]
+  d4.pair :fm2 :fp2 [cross_up]
+  d4.pair :fp2 :fm2 [cross_down]
+  d4.pair :fp1 :fm1 [near_down]
+  d4.pair :fm1 :fp1 [near_up]
+  d4.pair :fp2 :fp2 [plus_equal]
+  d4.pair :fm2 :fm2 [minus_equal]
+  d4.pair :z :z [zero_equal]
+  d4.pair :z :one [zero_one]
+  d4.pair :one :z [one_zero]
+  d4.pair :minusone :one [signed_up]
+  d4.pair :one :minusone [signed_down]
+  d4.pair :t :t [tablet_equal]
+  d4.pair :t :tp1 [tablet_forward]
+  d4.pair :tp1 :t [tablet_reverse]
+  d4.pair :tm1 :tp1 [tablet_cross_up]
+  d4.pair :tp1 :tm1 [tablet_cross_down]
+  d4.pair :m :minusm [period_down]
+  d4.pair :minusm :m [period_up]
+  d4.pair :big :minusbig [wide_down]
+
+  if :D4.FAIL [print [STAGE_2_DISCOVERY_04_FALIIS] stop]
+  if :D4.PAIRS <> 24 [print [STAGE_2_DISCOVERY_04_PAIR_COUNT_FALIIS] stop]
+  if :D4.N <> 432 [print [STAGE_2_DISCOVERY_04_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_04_PAIRS_PASIS] :D4.PAIRS
+  print sentence [STAGE_2_DISCOVERY_04_CHECKS_PASIS] :D4.N
+  print [STAGE_2_DISCOVERY_04_PASIS]
+end
+
+stage02.discovery04.run

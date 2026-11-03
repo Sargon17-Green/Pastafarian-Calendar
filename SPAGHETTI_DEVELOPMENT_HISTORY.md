@@ -66,3 +66,30 @@ DISCOVERY02 esas acceptita. La Stage2 entere ne esas deklarita
 completigita; LAST_COMPLETED_STAGE restas 1.
 La futura DISCOVERY03 traktos exakta dayCount/distance/connection/direction
 kom novi intermediate BI state-valori, ne la fina kvinoplo.
+ 
+## Stage 2 — DISCOVERY 03 (native GREEN)
+
+En commit `c2dbe2ac93ae8ac2e73ceabafa289daa97f73ea4`, Native Stage2 run 41537356932,
+job 125592479688, completed SUCCESS. La autentika Logo-outputo
+kontenis 26 input-pari, 404 asserti, e la marki
+STAGE_2_DISCOVERY_03_PAIRS_PASIS 26,
+STAGE_2_DISCOVERY_03_CHECKS_PASIS 404,
+STAGE_2_DISCOVERY_03_PASIS,
+NATIVE_STAGE_2_DISCOVERY_03_VERIFICATION=PASS.
+Native Stage1 run 41537356917 (job 125592479713) e verify
+41537356864 (job 125592479140) anke completed SUCCESS.
+DISCOVERY03 esas acceptita; LAST_COMPLETED_STAGE restas 1.
+
+## Stage 2 — DISCOVERY 04 (metamorfala testado, native pendanta)
+
+Ca nexta unajo expandas la QA de la independenta Stage2 workcounts;
+ol ne modifikas production-kodon. 24 determinista input-pari kontrolas
+18 asserti per paro = 432 asserti. La prova-kontrato uzas nur test-only
+nr.work.counts kom sendependa normativa oracle, kune kun inversa input-
+ordino e simultana shift +M. Konservenda invarianti: symetrio de
+distance e connection, reciproka action/target, direkto-sumo 4,
+perioda modulo, sama distance/direkto pos shift, e exacta BI konturi.
+La limiti inkluzas foundation, zero, tablets, -M, +M e +/-1000M.
+Native PASS esas ankor ne deklarita. Nula fliko o historiala bugo
+esas asertita sen reproduktajo; nula main/merge.
+
