@@ -581,7 +581,7 @@ jobs:
           if-no-files-found: warn
 
   stage37-nonunit-seal-preflight:
-    name: Stage37 preflight: bounded nonunit seal response
+    name: "Stage37 preflight: bounded nonunit seal response"
     if: github.ref == 'refs/heads/PowerShell+Tagalog'
     runs-on: windows-latest
     timeout-minutes: 25
