@@ -3,7 +3,8 @@
 module stage01_weaving_polynomial_unrank
   use iso_fortran_env, only: int64
   use big_integer, only: BigInt, bi_one, bi_compare, bi_sub, bi_mul_small
-  use stage01_weaving_polynomial, only: count_weavings_polynomial, count_prefix_weavings_polynomial
+  use stage01_weaving_polynomial, only: count_weavings_polynomial, count_prefix_weavings_polynomial, &
+       PrefixCompletionCache, prepare_prefix_completion_cache
   implicit none
   private
   integer(int64), parameter :: LIMB_BASE=1000000000_int64
@@ -19,6 +20,7 @@ contains
     type(BigInt), intent(in), optional :: total_hint
     integer, allocatable :: remaining(:)
     type(BigInt) :: total, offset, state_total, leftover, completions
+    type(PrefixCompletionCache) :: cache
     integer :: p, color, opened, closed, new_opened, new_closed
     integer :: first_legal, last_legal
     logical :: chosen
@@ -54,6 +56,9 @@ contains
        return
     end if
 
+    call prepare_prefix_completion_cache(lengths,cache)
+    if (bi_compare(count_prefix_weavings_polynomial(lengths,lengths,0,0,cache),total)/=0) &
+         error stop 'prefix cache does not match independent total'
     remaining=lengths
     opened=0; closed=0; offset=rank; state_total=total
     do p=1,size(word)
@@ -106,7 +111,7 @@ contains
              if (remaining(color)==1) new_closed=color
              remaining(color)=remaining(color)-1
              completions=count_prefix_weavings_polynomial( &
-                  lengths,remaining,new_opened,new_closed)
+                  lengths,remaining,new_opened,new_closed,cache)
              remaining(color)=remaining(color)+1
           end if
           if (bi_compare(offset,completions)>0) then

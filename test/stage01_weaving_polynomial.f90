@@ -14,9 +14,64 @@ module stage01_weaving_polynomial
   use big_integer, only: BigInt, bi_zero, bi_one, bi_add, bi_mul, bi_mul_small
   implicit none
   private
+  type :: PrefixCompletionRow
+    type(BigInt), allocatable :: value(:)
+  end type PrefixCompletionRow
+  type, public :: PrefixCompletionCache
+    private
+    integer, allocatable :: source_lengths(:)
+    type(PrefixCompletionRow), allocatable :: rows(:)
+  end type PrefixCompletionCache
   integer(int64), parameter :: LIMB_BASE=1000000000_int64
   public :: count_weavings_polynomial, weaving_first_positions, count_prefix_weavings_polynomial
+  public :: prepare_prefix_completion_cache
 contains
+  ! Independent-factor cache for lexicographic unranking. For each stage s
+  ! and each old-word remainder R, rows(s)%value(R) counts ways to add all
+  ! not-yet-opened colors s..n around ONE fixed old legal suffix of length R.
+  ! This depends only on (s,R), not on the detailed old color ordering.
+  !
+  ! Let k=lengths(s). If R=0, the next symbol must be s, giving
+  ! F_s(0)=F_(s+1)(k-1). For R>0, either the next symbol is old, or
+  ! it is s. In the latter case the last s must follow the last old
+  ! symbol; its other k-2 copies have C(R+k-2,k-2) legal interleavings.
+  ! Hence F_s(R)=F_s(R-1)+C(R+k-2,k-2)*F_(s+1)(R+k-1)
+  ! when k>1; the second term is 0 for k=1.
+  ! Base case F_(n+1)(R)=1. Exact counts, no floating-point arithmetic.
+  subroutine prepare_prefix_completion_cache(lengths,cache)
+    integer, intent(in) :: lengths(:)
+    type(PrefixCompletionCache), intent(inout) :: cache
+    type(BigInt) :: weight
+    integer :: n,s,k,r,limit
+    n=size(lengths)
+    if (n<1 .or. n>47) error stop 'prefix cache: invalid number of colors'
+    if (any(lengths<1) .or. any(lengths>123) .or. sum(lengths)>5778) &
+         error stop 'prefix cache: invalid lengths'
+    if (allocated(cache%rows)) deallocate(cache%rows)
+    if (allocated(cache%source_lengths)) deallocate(cache%source_lengths)
+    cache%source_lengths=lengths
+    allocate(cache%rows(n+1))
+    allocate(cache%rows(n+1)%value(0:sum(lengths)))
+    cache%rows(n+1)%value=bi_one()
+    limit=sum(lengths)
+    do s=n,1,-1
+       k=lengths(s)
+       limit=limit-k
+       allocate(cache%rows(s)%value(0:limit))
+       cache%rows(s)%value(0)=cache%rows(s+1)%value(k-1)
+       weight=bi_one()
+       do r=1,limit
+          if (k==1) then
+             cache%rows(s)%value(r)=cache%rows(s)%value(r-1)
+          else
+             weight=divide_exact_small(bi_mul_small(weight,int(r+k-2,int64)),r)
+             cache%rows(s)%value(r)=bi_add(cache%rows(s)%value(r-1), &
+                  bi_mul(weight,cache%rows(s+1)%value(r+k-1)))
+          end if
+       end do
+    end do
+  end subroutine prepare_prefix_completion_cache
+
   function count_weavings_polynomial(lengths) result(total)
     integer, intent(in) :: lengths(:)
     type(BigInt) :: total
@@ -81,8 +136,9 @@ contains
   ! Independent candidate-only completion count for a valid legal prefix.
   ! Opened colors may begin at any suffix position; as-yet-unopened colors
   ! must open in ascending order. All remaining colors close in order.
-  function count_prefix_weavings_polynomial(lengths,remaining,opened,closed) result(total)
+  function count_prefix_weavings_polynomial(lengths,remaining,opened,closed,cache) result(total)
     integer, intent(in) :: lengths(:),remaining(:),opened,closed
+    type(PrefixCompletionCache), intent(in), optional :: cache
     type(BigInt) :: total,running,ways
     type(BigInt), allocatable :: positions(:),next(:),weights(:)
     integer :: m,n,k,oldTotal
@@ -98,6 +154,17 @@ contains
     if (any(remaining(closed+1:opened)<1)) error stop 'prefix candidate: opened color exhausted'
     if (any(remaining(opened+1:)/=lengths(opened+1:))) &
          error stop 'prefix candidate: unopened color already consumed'
+    if (present(cache)) then
+       if (.not.allocated(cache%source_lengths)) error stop 'prefix cache not prepared'
+       if (size(cache%source_lengths)/=size(lengths)) error stop 'prefix cache size mismatch'
+       if (any(cache%source_lengths/=lengths)) error stop 'prefix cache lengths mismatch'
+       oldTotal=sum(remaining(closed+1:opened))
+       if (oldTotal>size(cache%rows(opened+1)%value)-1) error stop 'prefix cache bound exceeded'
+       total=bi_one()
+       if (opened>closed) total=count_closure_only_suffix(remaining(1:opened),closed)
+       total=bi_mul(total,cache%rows(opened+1)%value(oldTotal))
+       return
+    end if
     ! Once every color has already appeared, only the relative order of
     ! their FINAL occurrences is constrained. For active colors with
     ! remaining lengths r_1,...,r_q, the exact number of suffix words is
