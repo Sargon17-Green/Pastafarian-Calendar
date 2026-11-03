@@ -1628,3 +1628,52 @@ jobs:
           path: build/stage33-native.log
           if-no-files-found: warn
           retention-days: 30
+
+  stage34-declared-length-boundary-discovery-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Strict compile and run bounded Stage34 declared-length-boundary boundary arithmetic
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage34-native.log
+          compile_sources=(
+            test/stage34_discovery_tests.cob
+            src/big_integer.cob
+            src/monster_distance.cob
+            src/legacy_distance.cob
+            src/patched_day_tag.cob
+            src/patched_distance.cob
+          )
+          timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage34-declared-length-boundary "${compile_sources[@]}" 2>&1 | tee -a build/stage34-native.log
+          timeout --signal=TERM --kill-after=10s 120s ./build/stage34-declared-length-boundary 2>&1 | tee -a build/stage34-native.log
+          grep -Eq '^STAGE34_REJECTS=[[:space:]]*0*24[[:space:]]*$' build/stage34-native.log
+          grep -Eq '^STAGE34_HEAP_CLEAN=[[:space:]]*0*24[[:space:]]*$' build/stage34-native.log
+          grep -Eq '^STAGE34_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage34-native.log
+          grep -Eq '^STAGE34_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage34-native.log
+          grep -Eq '^STAGE34_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage34-native.log
+          grep -Fxq 'STAGE34_HEAP_MEASURED=YES' build/stage34-native.log
+          grep -Eq '^STAGE34_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage34-native.log
+          grep -Fxq 'RESULT=PASS_STAGE34_DECLARED_LENGTH_BOUNDARY_DISCOVERY_NATIVE' build/stage34-native.log
+          echo 'STAGE34_NATIVE_GATE=PASS' | tee -a build/stage34-native.log
+      - name: Preserve Stage34 log including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage34-declared-length-boundary-evidence
+          path: build/stage34-native.log
+          if-no-files-found: warn
+          retention-days: 30
