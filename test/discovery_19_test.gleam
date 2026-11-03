@@ -197,7 +197,7 @@ pub fn discovery_19_exact_stage22_preservation_test() {
     discovery_18_choose_rank.dispatch_discovery_18(a, 6, -7, n)
   got.previous |> should.equal(expected)
   got.value |> should.equal(-modulus + expected.rank - 1)
-  got.previous.previous.previous.previous.context.diagnostics
+  got.previous.previous.previous.context.diagnostics
   |> should.equal(["KONTROLO"])
 }
 
