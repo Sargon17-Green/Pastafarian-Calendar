@@ -2,7 +2,7 @@
 ! polynomial prefix completion counts. No calendar-date integration here.
 module stage01_weaving_polynomial_unrank
   use iso_fortran_env, only: int64
-  use big_integer, only: BigInt, bi_one, bi_compare, bi_sub, bi_mul_small
+  use big_integer, only: BigInt, bi_one, bi_compare, bi_sub, bi_mul, bi_mul_small
   use stage01_weaving_polynomial, only: count_weavings_polynomial, count_prefix_weavings_polynomial, &
        PrefixCompletionCache, prepare_prefix_completion_cache
   implicit none
@@ -18,10 +18,11 @@ contains
     ! Optional exact total already computed for these same lengths.
     ! Supplying it avoids repeating the expensive full count in diagnostics.
     type(BigInt), intent(in), optional :: total_hint
-    integer, allocatable :: remaining(:)
+    integer, allocatable :: remaining(:), cumulative(:)
     type(BigInt) :: total, offset, state_total, leftover, completions
+    type(BigInt) :: active_factor, b, child_factor
     type(PrefixCompletionCache) :: cache
-    integer :: p, color, opened, closed, new_opened, new_closed
+    integer :: p, color, opened, closed, new_opened, new_closed, first_active, oldR, j
     integer :: first_legal, last_legal
     logical :: chosen
 
@@ -60,6 +61,8 @@ contains
     if (bi_compare(count_prefix_weavings_polynomial(lengths,lengths,0,0,cache),total)/=0) &
          error stop 'prefix cache does not match independent total'
     remaining=lengths
+    allocate(cumulative(size(lengths)))
+    active_factor=bi_one()
     opened=0; closed=0; offset=rank; state_total=total
     do p=1,size(word)
        ! Every locally legal symbol permits at least one full completion.
@@ -90,8 +93,42 @@ contains
           word=0
           return
        end if
-       ! A forced transition preserves the number of suffix completions.
+
+       ! Maintain the exact number of legal suffixes of already-open colors
+       ! separately from the cached unopened-color factor F_(opened+1)(R).
+       ! For a=closed+1 and S_j=sum(remaining(a:j)), the active child
+       ! closure counts follow solely from small exact ratios:
+       ! B_a=C*product_(j=a+1..opened)(S_(j-1)/(S_j-1));
+       ! B_c=B_(c-1)*(S_c-1)/S_(c-1);
+       ! child_c=B_(c-1)*(r_c-1)/S_(c-1) for c>a.
+       ! The final unopened color is the last lexicographic branch, whose
+       ! completion count is still obtained from the partition remainder.
+       first_active=closed+1
+       oldR=sum(remaining(first_active:opened))
+       if (first_active<=opened) then
+          cumulative(first_active)=remaining(first_active)
+          do j=first_active+1,opened
+             cumulative(j)=cumulative(j-1)+remaining(j)
+          end do
+          b=active_factor
+          do j=opened,first_active+1,-1
+             b=multiply_divide_small(b,cumulative(j-1),cumulative(j)-1)
+          end do
+       end if
+
+       ! A forced transition preserves the full state completion total,
+       ! but its active-color factor still changes.
        if (first_legal==last_legal) then
+          if (first_legal<=opened) then
+             if (first_legal==first_active) then
+                active_factor=b
+             else
+                active_factor=multiply_divide_small( &
+                     b,remaining(first_legal)-1,cumulative(first_legal-1))
+             end if
+          else
+             active_factor=extend_closure_factor(active_factor,oldR,lengths(first_legal)-1)
+          end if
           word(p)=first_legal
           call consume_next(lengths,remaining,opened,closed,first_legal)
           cycle
@@ -103,6 +140,14 @@ contains
        chosen=.false.
        do color=first_legal,last_legal
           if (.not. legal_next(lengths,remaining,opened,closed,color)) cycle
+          if (color<=opened) then
+             if (color==first_active) then
+                child_factor=b
+             else
+                child_factor=multiply_divide_small( &
+                     b,remaining(color)-1,cumulative(color-1))
+             end if
+          end if
           if (color==last_legal) then
              completions=leftover
           else
@@ -111,13 +156,21 @@ contains
              if (remaining(color)==1) new_closed=color
              remaining(color)=remaining(color)-1
              completions=count_prefix_weavings_polynomial( &
-                  lengths,remaining,new_opened,new_closed,cache)
+                  lengths,remaining,new_opened,new_closed,cache,child_factor)
              remaining(color)=remaining(color)+1
           end if
           if (bi_compare(offset,completions)>0) then
              offset=bi_sub(offset,completions)
              leftover=bi_sub(leftover,completions)
+             if (color>first_active .and. color<=opened) then
+                b=multiply_divide_small(b,cumulative(color)-1,cumulative(color-1))
+             end if
           else
+             if (color<=opened) then
+                active_factor=child_factor
+             else
+                active_factor=extend_closure_factor(active_factor,oldR,lengths(color)-1)
+             end if
              word(p)=color
              call consume_next(lengths,remaining,opened,closed,color)
              state_total=completions
@@ -227,6 +280,27 @@ contains
     ok=all(remaining==0) .and. bi_compare(rank,bi_one())==0
     if (.not.ok) word=0
   end subroutine unrank_closure_only_suffix
+
+  ! Add an unopened color to the set of already-open colors by consuming
+  ! its first occurrence. All remaining copies may interleave with the old
+  ! active suffix but its last occurrence must follow every old last.
+  ! Exact factor C(oldR+new_remaining-1,new_remaining-1).
+  function extend_closure_factor(current,oldR,new_remaining) result(updated)
+    type(BigInt), intent(in) :: current
+    integer, intent(in) :: oldR,new_remaining
+    type(BigInt) :: updated,choose
+    integer :: k
+    if (oldR<0 .or. new_remaining<0) error stop 'closure extension: invalid lengths'
+    if (oldR==0 .or. new_remaining<=1) then
+       updated=current
+       return
+    end if
+    choose=bi_one()
+    do k=1,new_remaining-1
+       choose=divide_exact_small(bi_mul_small(choose,int(oldR+k,int64)),k)
+    end do
+    updated=bi_mul(current,choose)
+  end function extend_closure_factor
 
   function multiply_divide_small(a,numerator,denominator) result(q)
     type(BigInt), intent(in) :: a

@@ -136,9 +136,12 @@ contains
   ! Independent candidate-only completion count for a valid legal prefix.
   ! Opened colors may begin at any suffix position; as-yet-unopened colors
   ! must open in ascending order. All remaining colors close in order.
-  function count_prefix_weavings_polynomial(lengths,remaining,opened,closed,cache) result(total)
+  function count_prefix_weavings_polynomial(lengths,remaining,opened,closed,cache,known_closure) result(total)
     integer, intent(in) :: lengths(:),remaining(:),opened,closed
     type(PrefixCompletionCache), intent(in), optional :: cache
+    ! Precomputed exact closure count of the already-opened active colors.
+    ! This removes repetitive binomial products from arbitrary-rank unranking.
+    type(BigInt), intent(in), optional :: known_closure
     type(BigInt) :: total,running,ways
     type(BigInt), allocatable :: positions(:),next(:),weights(:)
     integer :: m,n,k,oldTotal
@@ -160,8 +163,12 @@ contains
        if (any(cache%source_lengths/=lengths)) error stop 'prefix cache lengths mismatch'
        oldTotal=sum(remaining(closed+1:opened))
        if (oldTotal>size(cache%rows(opened+1)%value)-1) error stop 'prefix cache bound exceeded'
-       total=bi_one()
-       if (opened>closed) total=count_closure_only_suffix(remaining(1:opened),closed)
+       if (present(known_closure)) then
+          total=known_closure
+       else
+          total=bi_one()
+          if (opened>closed) total=count_closure_only_suffix(remaining(1:opened),closed)
+       end if
        total=bi_mul(total,cache%rows(opened+1)%value(oldTotal))
        return
     end if
