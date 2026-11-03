@@ -2,6 +2,7 @@ import { calendarDateSpaghetti } from "../src/postStage55FinalDate.ts";
 import { createProductionPatch20Request } from "../src/postStage55ProductionRequest.ts";
 import { projectObservedStage55Date } from "../src/postStage55ObservedDate.ts";
 import { Patch14WideChoiceDispatcher } from "../src/patch14WideChoice.ts";
+import { Patch11OrderLatchHandler } from "../src/patch11OrderLatch.ts";
 import { cutletNameByCanonicalIndex,monthNameByCanonicalIndex } from "../src/sourceLanguageCatalog.ts";
 import { IndependentLegalWeavingRank } from "./postStage55IndependentRank.ts";
 import { NormativeOracle,FOUNDATION_DAY,sauce,askBowl,chooseRank } from "./normativeOracle.ts";
@@ -106,7 +107,8 @@ type Family=Readonly<{
 const families=new Map<string,Family>();
 const verifiedBranches=new Set<string>();
 const originalDispatch=Patch14WideChoiceDispatcher.prototype.dispatch;
-let nativeCalls=0, sharedWrites=0n;
+const originalLatchRun=Patch11OrderLatchHandler.prototype.run;
+let nativeCalls=0, sharedWrites=0n, wideChoiceCalls=0;
 let compared=0, interleavingChecks=0, rankChecks=0;
 let firstPublic:Readonly<(bigint|string)[]>|null=null;
 let replayInput:Readonly<{c:bigint;t:bigint}>|null=null;
@@ -158,17 +160,34 @@ function verifyBranch(
   }
 }
 
+// Count the completed physical 58-write predecessor at Patch11, not just
+// Patch14 dispatches. Stage40's original/corrected Sauce calls reach Patch11
+// directly, and therefore escaped the previous Patch14-only spy.
+Patch11OrderLatchHandler.prototype.run=function(
+  ...args:Parameters<typeof originalLatchRun>
+) {
+  const result=originalLatchRun.apply(this,args);
+  ok(result.sharedMemoryWrites===58 &&
+     result.historical.memoryWrites===58 &&
+     result.drops===46 && result.postStirs===12,
+     "one completed physical 58-write predecessor per Patch11 run");
+  nativeCalls++;
+  sharedWrites+=58n;
+  ok(nativeCalls<=1200,"aggregate Native-call ceiling 1,200 exceeded");
+  return result;
+};
+// Retain an independent narrower Patch14 witness, without counting writes
+// twice: every Patch14 selection must have a completed Patch11 predecessor.
 Patch14WideChoiceDispatcher.prototype.dispatch=function(
   ...args:Parameters<typeof originalDispatch>
 ) {
   const historical=args[0];
   const result=originalDispatch.apply(this,args);
   ok(historical.predecessorSharedMemoryWrites===58 &&
-     historical.legacyShortOnlyCalls===1,
-     "one actual 58-write legacy predecessor per Native dispatch");
-  nativeCalls++;
-  sharedWrites+=58n;
-  ok(nativeCalls<=1200,"aggregate Native-call ceiling 1,200 exceeded");
+     historical.legacyShortOnlyCalls===1 &&
+     nativeCalls>wideChoiceCalls,
+     "Patch14 must reuse a real completed Patch11 predecessor");
+  wideChoiceCalls++;
   return result;
 };
 
@@ -193,24 +212,33 @@ try {
       const before=nativeCalls;
       const request=createProductionPatch20Request(item.c,item.t);
       verifyBranch(item.c,item.t,request);
-      const native=patch27MonthMembership(fullStage55(),request,1,1);
-      const observed=projectObservedStage55Date(request,native);
-      // The physical dispatch spy covers the signed-gate prefix as well as
-      // Stage55 and name selection. The Stage55 observation intentionally
-      // counts only the latter two: compare like-for-like scoped totals.
       const prefix=request.productionConstruction;
       ok(prefix!==undefined,"production-owned prefix accounting required");
+      const physicalPrefix=nativeCalls-before;
+      ok(physicalPrefix===prefix.gateNativeCalls &&
+         prefix.gateSharedWrites===58n*BigInt(physicalPrefix),
+         item.label+": measured prefix Native calls="+physicalPrefix+
+         " recorded="+prefix.gateNativeCalls);
+      const native=patch27MonthMembership(fullStage55(),request,1,1);
+      const observed=projectObservedStage55Date(request,native);
+      // Stage37's predecessor ledger already includes the physically reused
+      // verified gate window, even though the Stage55 runner does not rerun
+      // those gate calls. Compare that inclusive ledger with the complete
+      // physical Patch11 observation, rather than adding prefix a second time.
+      const physicalAfterPrefix=nativeCalls-before-physicalPrefix;
+      const expectedAfterPrefix=observed.totalNativeCalls-prefix.gateNativeCalls;
       const measuredDelta=nativeCalls-before;
-      const expectedDelta=prefix.gateNativeCalls+observed.totalNativeCalls;
-      ok(measuredDelta===expectedDelta &&
-         prefix.gateSharedWrites===58n*BigInt(prefix.gateNativeCalls) &&
+      ok(expectedAfterPrefix>=0 &&
+         physicalAfterPrefix===expectedAfterPrefix &&
+         measuredDelta===observed.totalNativeCalls &&
          observed.totalSharedWrites===58n*BigInt(observed.totalNativeCalls) &&
          sharedWrites===58n*BigInt(nativeCalls) &&
          observed.stage55AdditionalNativeQueries===0,
-         item.label+": scoped physical Native accounting"+
-         " measured="+measuredDelta+" prefix="+prefix.gateNativeCalls+
-         " stage55AndNames="+observed.totalNativeCalls+
-         " expected="+expectedDelta);
+         item.label+": inclusive physical Patch11 Native accounting"+
+         " total="+measuredDelta+" prefix="+physicalPrefix+
+         " afterPrefix="+physicalAfterPrefix+
+         " ledgerTotal="+observed.totalNativeCalls+
+         " ledgerAfterPrefix="+expectedAfterPrefix);
 
       const weaving=
         native.historical.historical.historical.historical.historical.historical
@@ -323,4 +351,5 @@ try {
     " sharedWrites="+sharedWrites+" interleavingChecks="+interleavingChecks);
 }finally{
   Patch14WideChoiceDispatcher.prototype.dispatch=originalDispatch;
+  Patch11OrderLatchHandler.prototype.run=originalLatchRun;
 }
