@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..264: signed owner-scoped comparison.
+; Stage 1 native regression 191..265: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1957,6 +1957,37 @@ OwnerCmpTestCase264:
     ld a, 3
     call OwnerCmpTestExpectResultSnapshot
     jr nc, .bad
+    ld a, 3
+    call SRAMSelectBank
+    ld a, [$a000]
+    or a
+    jr nz, .bad
+    ld a, 4
+    call SRAMSelectBank
+    ld a, [$a000]
+    cp 1
+    jr nz, .bad
+    call OwnerCmpTestCase265
+    jp nc, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Case 265: revoked B has sign=1, length=0 (negative zero), while
+; A is a live sign=0, length=0 owner. All invalid paths must fail closed.
+OwnerCmpTestCase265:
+    ld a, 9
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpSignB], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jr nc, .bad
+    ld a, [wTestCaseHi]
+    cp 1
+    jr nz, .bad
     ld a, 3
     call SRAMSelectBank
     ld a, [$a000]
