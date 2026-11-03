@@ -1369,6 +1369,49 @@ fn test_stage31_production_46_drop_chain_matches_independent_normative_sauce() {
 	stage31_assert_production_sauce_matches_independent_oracle(calculation_day, target_day)
 }
 
+// Diagnostic-only bounded CI probes; these do not replace the full numeric gate.
+fn test_stage31_diag_reference_year_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_oracle_engine()
+	year := engine.year5000(foundation)
+	assert big_cmp(year.open_gate_day, foundation) < 0
+	assert big_cmp(foundation, year.close_gate_day) <= 0
+}
+
+fn test_stage31_diag_reference_month_lengths_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_oracle_engine()
+	year := engine.year5000(foundation)
+	first_day := big_add(year.open_gate_day, big_one())
+	sauce := oracle_sauce(foundation, first_day)
+	month_count := oracle_choose_month_count(sauce, year)
+	lengths := oracle_choose_month_lengths(sauce, year, month_count)
+	assert lengths.len == month_count
+	mut total := 0
+	for value in lengths {
+		total += value
+	}
+	year_days := big_to_int(big_sub(year.close_gate_day, year.open_gate_day)) or {
+		panic(err.msg())
+	}
+	assert total == year_days
+}
+
+fn test_stage31_diag_reference_full_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_oracle_engine()
+	got := engine.calendar_date_normative(foundation, foundation)
+	assert discovery15_output_shape_oracle(got)
+}
+
+fn test_stage31_diag_candidate_full_anchor() {
+	foundation := oracle_foundation_day()
+	got := calendar_date_patch15_numeric_spaghetti(foundation, foundation) or {
+		panic(err.msg())
+	}
+	assert discovery15_output_shape_oracle(got)
+}
+
 fn test_stage31_numeric_date_candidate_matches_all_five_independent_oracle_fields() {
 	foundation := oracle_foundation_day()
 	calculation_days := [foundation, foundation, foundation, big_add(foundation, big_from_int(3))]

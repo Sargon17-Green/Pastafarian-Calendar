@@ -240,6 +240,26 @@ jobs:
             exit 1
           fi
           echo 'Stage30: GREEN shape witnesses, four intended RED output assertions'
+      - name: Stage 31 — bounded independent phase probes (diagnostic only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for probe in \
+            test_stage31_diag_reference_year_anchor \
+            test_stage31_diag_reference_month_lengths_anchor \
+            test_stage31_diag_reference_full_anchor \
+            test_stage31_diag_candidate_full_anchor; do
+            echo "::group::Stage31 diagnostic $probe"
+            set +e
+            timeout --signal=TERM --kill-after=5s 45s \
+              v test ./pastafari/normative_oracle_test.v -run-only "$probe" \
+              > "stage31_${probe}.log" 2>&1
+            status=$?
+            set -e
+            cat "stage31_${probe}.log"
+            echo "Stage31 diagnostic $probe: exit=$status (124=timed out)"
+            echo "::endgroup::"
+          done
       - name: Stage 31 — four-anchor five-field numeric differential
         shell: bash
         run: |
@@ -269,5 +289,6 @@ jobs:
             stage29_patch14.log
             stage30_witness_green.log
             stage30_expected_red.log
+            stage31_test_stage31_diag_*.log
             stage31_numeric.log
           if-no-files-found: ignore
