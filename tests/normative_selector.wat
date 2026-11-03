@@ -422,4 +422,64 @@
     (call $sub (global.get $TMP1) (global.get $N) (global.get $TMP1))
     (call $add_small (global.get $TMP1) (global.get $TMP1) (i32.const 2))
     (i32.eqz (call $cmp (global.get $RESULT) (global.get $TMP1))))
+
+  ;; Unit fixture Stage02 k=3: N=M^2+1, SPACE=M^3, LIMIT=(M-1)*N.
+  ;; It deliberately does not call choose_wide with an enormous rejection chain.
+  (func $test_k3_limit_init
+    (call $init_constants)
+    (call $mul (global.get $N) (global.get $M) (global.get $M))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 1))
+    (call $mul (global.get $SPACE) (global.get $M) (global.get $M))
+    (call $mul (global.get $SPACE) (global.get $SPACE) (global.get $M))
+    (call $divmod_q_lt_m (global.get $Q) (global.get $R) (global.get $SPACE) (global.get $N))
+    (call $mul (global.get $LIMIT) (global.get $Q) (global.get $N)))
+
+  ;; Reject L+1, take one backward step, and accept L with rank N.
+  (func (export "test_discovery01_k3_reject_l_plus_one_backward") (result i32)
+    (local $was_rejected i32)
+    (call $test_k3_limit_init)
+    (call $add_small (global.get $TMP1) (global.get $M) (i32.const 0))
+    (call $sub_small (global.get $TMP1) (global.get $TMP1) (i32.const 1))
+    (if (i32.ne (call $cmp (global.get $Q) (global.get $TMP1)) (i32.const 0)) (then (return (i32.const 0))))
+    (call $add_small (global.get $WIDE) (global.get $LIMIT) (i32.const 1))
+    (local.set $was_rejected (i32.gt_s (call $cmp (global.get $WIDE) (global.get $LIMIT)) (i32.const 0)))
+    (call $wide_ring_step (global.get $WIDE) (global.get $SPACE) (i32.const -1))
+    (if (i32.ne (call $cmp (global.get $WIDE) (global.get $LIMIT)) (i32.const 0)) (then (return (i32.const 0))))
+    (call $sub_small (global.get $TMP0) (global.get $WIDE) (i32.const 1))
+    (call $divmod_q_lt_m (global.get $Q) (global.get $R) (global.get $TMP0) (global.get $N))
+    (call $add_small (global.get $RESULT) (global.get $R) (i32.const 1))
+    (i32.and (local.get $was_rejected) (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))))
+
+  ;; Reject SPACE (outside LIMIT), take one forward step -> 1, accepted with rank 1.
+  (func (export "test_discovery01_k3_reject_space_forward_wrap") (result i32)
+    (local $was_rejected i32)
+    (call $test_k3_limit_init)
+    (call $copy (global.get $WIDE) (global.get $SPACE))
+    (local.set $was_rejected (i32.gt_s (call $cmp (global.get $WIDE) (global.get $LIMIT)) (i32.const 0)))
+    (call $wide_ring_step (global.get $WIDE) (global.get $SPACE) (i32.const 1))
+    (i32.and (local.get $was_rejected)
+      (i32.and (i32.eqz (call $cmp (global.get $WIDE) (global.get $ONE)))
+        (i32.le_s (call $cmp (global.get $WIDE) (global.get $LIMIT)) (i32.const 0)))))
+
+  ;; Walking backward from 1 must wrap to SPACE (which is rejected by LIMIT).
+  (func (export "test_discovery01_k3_one_backward_wraps_to_rejected_space") (result i32)
+    (call $test_k3_limit_init)
+    (call $copy (global.get $WIDE) (global.get $ONE))
+    (call $wide_ring_step (global.get $WIDE) (global.get $SPACE) (i32.const -1))
+    (i32.and (i32.eqz (call $cmp (global.get $WIDE) (global.get $SPACE)))
+      (i32.gt_s (call $cmp (global.get $WIDE) (global.get $LIMIT)) (i32.const 0))))
+
+  ;; L accepted; L+1 rejected; backward by one returns L; L-1 accepted.
+  (func (export "test_discovery01_k3_limit_bidirectional_boundary") (result i32)
+    (local $ok i32)
+    (call $test_k3_limit_init)
+    (call $copy (global.get $WIDE) (global.get $LIMIT))
+    (local.set $ok (i32.le_s (call $cmp (global.get $WIDE) (global.get $LIMIT)) (i32.const 0)))
+    (call $wide_ring_step (global.get $WIDE) (global.get $SPACE) (i32.const 1))
+    (local.set $ok (i32.and (local.get $ok) (i32.gt_s (call $cmp (global.get $WIDE) (global.get $LIMIT)) (i32.const 0))))
+    (call $wide_ring_step (global.get $WIDE) (global.get $SPACE) (i32.const -1))
+    (local.set $ok (i32.and (local.get $ok) (i32.eqz (call $cmp (global.get $WIDE) (global.get $LIMIT)))))
+    (call $wide_ring_step (global.get $WIDE) (global.get $SPACE) (i32.const -1))
+    (call $sub_small (global.get $TMP1) (global.get $LIMIT) (i32.const 1))
+    (i32.and (local.get $ok) (i32.eqz (call $cmp (global.get $WIDE) (global.get $TMP1)))))
 )
