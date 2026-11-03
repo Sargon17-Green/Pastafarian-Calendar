@@ -45,7 +45,7 @@ foreach (['forward' => 1, 'backward' => -1] as $direction => $sign) {
     $sharedGateAtFourthHop = $sign === 1
         ? $failDestination['openGateIndex']
         : $failDestination['closeGateIndex'];
-    semak54($sharedGateFromSecondHop === $sharedGateAtFourthHop,
+    semak54($sharedGateFromThirdHop === $sharedGateAtFourthHop,
         'SHARED_SEAM_' . $direction);
 
     $trusted = static function () use ($anchor, &$trace): array {
@@ -154,8 +154,8 @@ foreach (['forward' => 1, 'backward' => -1] as $direction => $sign) {
             'BASELINE_' . $direction . $depth);
         semak54($trace === $expected, 'TRACE_' . $direction . $depth);
 
-        // The injected fault occurs in edge three. For depth four this also
-        // proves the fourth edge was not invoked after an earlier failure.
+        // The injected fault occurs in edge four. For depth five this also
+        // proves the fifth edge was not invoked after an earlier failure.
         $beforeEdgeFour = 3 + 12;
         $faultCases = [
             ['proposed_throw', 'S54_PROPOSED_THROW', 1],
