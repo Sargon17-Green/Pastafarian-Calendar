@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..265: signed owner-scoped comparison.
+; Stage 1 native regression 191..267: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1998,8 +1998,71 @@ OwnerCmpTestCase265:
     ld a, [$a000]
     cp 1
     jr nz, .bad
+    call OwnerCmpTestCases266To267
+    jp nc, .bad
     scf
     ret
 .bad:
+    and a
+    ret
+
+; Stage1 Native 266: owner 254 (invalid) in operand B, live owner 1 in A.
+; Native 267: owner 255 (invalid) in A, live owner 1 in B.
+; The zero-length fast path must not accept an invalid owner ID.
+OwnerCmpTestCases266To267:
+    ; Existing 263..265 leave both descriptor lengths zero and
+    ; bank3 scrubbed; bank4's live payload remains $01.
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld a, 1
+    ld [wOwnerCmpOwnerA], a
+    ld a, 254
+    ld [wOwnerCmpOwnerB], a
+    ld a, 10
+    ld [wTestCase], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .bad
+    call .checkBytes
+    jp nc, .bad
+
+    ; The opposite operand position and the maximum invalid owner ID.
+    ld a, 255
+    ld [wOwnerCmpOwnerA], a
+    ld a, 1
+    ld [wOwnerCmpOwnerB], a
+    ld a, 11
+    ld [wTestCase], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .bad
+    call .checkBytes
+    jp nc, .bad
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Test-only raw SRAM sentinels after EACH comparison. Cannot use
+; OwnerByteRead on an invalid owner; bank3 must be zero, bank4 $01.
+.checkBytes:
+    ld a, 3
+    call SRAMSelectBank
+    ld a, [$a000]
+    or a
+    jr nz, .bytesBad
+    ld a, 4
+    call SRAMSelectBank
+    ld a, [$a000]
+    cp 1
+    jr nz, .bytesBad
+    scf
+    ret
+.bytesBad:
     and a
     ret

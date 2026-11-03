@@ -2,7 +2,7 @@
 """Independent Python integer oracle for owner-scoped signed magnitudes.
 
 This is a HOST reference contract, not execution of SM83 machine code.
-The ROM exercise covers cases 191..265; extra max-owner boundary checks are Host-only.
+The ROM exercise covers cases 191..267; extra max-owner boundary checks are Host-only.
 """
 from random import Random
 from test_sram_owner_model import OwnedBanks, SIZE
@@ -246,8 +246,8 @@ def check_owner_id_fragmented_high_boundary():
     assert model.tags[5] == model.tags[7] == 0 and model.tags[6] == 3
     print("HOST_OWNER_SIGNED_CMP_FRAGMENTED_MAX_OWNER=PASS cases=44 revoked_zero=8 owner=253 tag=255 banks=5,7 peer_bank=6 canonical_and_revoked=YES payload_and_tags=IMMUTABLE")
 
-def check_native_case262_oracle():
-    """Independent integer oracle for ROM cases 262-265; not a Native PASS."""
+def check_native_cases262_to267_oracle():
+    """Independent integer oracle for ROM cases 262-267; not a Native PASS."""
     model = OwnedBanks()
     assert model.alloc(253, 1) == (0, (3,))
     assert model.tags[3] == 255
@@ -292,6 +292,26 @@ def check_native_case262_oracle():
     assert model.tags[3] == 0 and model.tags[4] == 3
     assert model.data[3][0] == 0 and model.data[4][0] == 1
     print("HOST_NATIVE265_INDEPENDENT_ORACLE=PASS live_A=1 revoked_B=253 negative_zero_B=YES expected=INVALID3 payload_and_tags=IMMUTABLE")
+    # Native 266/267: invalid owner IDs cannot be accepted as numeric zero.
+    # The reference parser rejects metadata (not just a missing lease).
+    for invalid_owner, left, right in (
+        (254, (1, 0, 0), (254, 0, 0)),
+        (255, (255, 0, 0), (1, 0, 0)),
+    ):
+        try:
+            reference_integer(model, invalid_owner, 0, 0)
+        except ValueError as exc:
+            assert str(exc) == "metadata", "invalid owner rejected at ID boundary"
+        else:
+            raise AssertionError(f"owner {invalid_owner} incorrectly accepted")
+        assert compare_read_only(model, left, right) == 3
+        assert model.tags[3] == 0 and model.tags[4] == 3
+        assert model.data[3][0] == 0 and model.data[4][0] == 1
+        print(
+            f"HOST_NATIVE{266 if invalid_owner == 254 else 267}_INDEPENDENT_ORACLE=PASS "
+            f"invalid_owner={invalid_owner} zero_lengths=YES expected=INVALID3 "
+            "payload_and_tags=IMMUTABLE"
+        )
 
 
 def main():
@@ -670,7 +690,7 @@ def main():
     )
     check_owner_id_high_boundary()
     check_owner_id_fragmented_high_boundary()
-    check_native_case262_oracle()
+    check_native_cases262_to267_oracle()
     print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=36 same_owner_fragmented_alias=6 same_owner_fragmented_noncanonical=2 same_owner_fragmented_mixed_sign_invalid=4 case_id_16bit_oracle=2 stale_fragmented_after_release=1 stale_fragmented_with_live_peer=1 stale_fragmented_as_B_with_live_A=1 both_revoked_distinct_owners=2 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=4 same_owner_full_capacity_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")

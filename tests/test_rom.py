@@ -11,7 +11,8 @@ from pathlib import Path
 # Cases 256-260 assert 16-bit ABI transition and both stale-owner operand positions.
 # Case 261: independently revoked owners; 262: live max-owner comparison;
 # 263: revoked max-owner zero versus live zero; 264: reverse operands.
-# 265: revoked B negative-zero; all three verify SRAM sentinels.
+# 265: revoked B negative-zero; 266/267 reject illegal owner IDs 254/255
+# with both operand orientations. Raw SRAM sentinels remain intact.
 # Keep the measured 9000-frame cap.
 MAX_BOOT_AND_TEST_FRAMES = 9000
 WRAM_RESULT = 0xC000
@@ -20,7 +21,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 265
+TOTAL_CASES = 267
 
 
 def discover_case_high_byte(symbol_path: Path) -> int:
