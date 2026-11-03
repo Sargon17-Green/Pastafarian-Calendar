@@ -7,6 +7,7 @@ python3 test/weaving_reachability_oracle.py
 python3 test/weaving_small_exact_oracle.py
 python3 test/weaving_prefix_transfer.py
 python3 test/weaving_prefix_batch.py
+python3 test/weaving_incremental_states.py
 chpl -M src -M test test/year_boundary_probe.chpl -o "$tmpdir/year_boundary_probe"
 # Timeout means inconclusive, not PASS.
 if timeout --signal=TERM --kill-after=5s 180s "$tmpdir/year_boundary_probe"; then

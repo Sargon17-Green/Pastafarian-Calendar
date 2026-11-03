@@ -1,0 +1,15 @@
+# DISCOVERY03 — incremental prefix DP state reuse (research only)
+
+## Status
+Stage1–5 remain CLOSED_PASS on earlier verified commits. On commit 75a45aa2746f0fafeeaf58b7a9ca8ca4ff5ba75f, GitHub Actions run 41618599196 completed with verify success and Native Stage1–5 success, 137 batch families, 17,672 candidate comparisons, 1,982 rank checks PASS; 2 full-size batch profiles on 45 months / 4244 days took 5.822s, peak RSS 221252 KiB. The separate old Chapel year-boundary weaving probe timed out at 180 seconds (exit 124), so the overall Native job failed: INCONCLUSIVE, not Stage6 PASS, not a third Legacy witness.
+
+## New algorithm
+IncrementalWeaving maintains the exact one-dimensional insertion-transfer vectors for every month-stage and the compact prefix specifications (q, fixed_sum, first_fixed, tail). probe(c) evaluates a candidate by recycling the unchanged stages before c; it holds only one temporary vector. take(c,count) mutates the specifications and replaces only the affected DP suffix in place, maintaining first-opening and last-closing order. Rank and unrank iterate exact candidate blocks. Input: nonempty tuple of positive integer month lengths, and a valid full word for rank or zero-based integer rank for unrank. Output: an exact integer rank or a legal complete word. Illegal multiplicity/prefix/rank is rejected. This is research-only Python; it does not modify production or Chapel code.
+
+The recurrence is derived from the already-proved 1D transfer, with a separate occurrence-poset rank oracle and direct permutation enumerator for differential validation. Memory is bounded by O(m*N) bigint vector slots plus temporary storage, NOT by the number of remaining-count vectors. Worst-case time for full rank/unrank still scales as O(m²*N²) bigint operations; the chosen-state update avoids recomputing every baseline from month 1 but DOES NOT establish a <=180s full-year bound.
+
+## Evidence and gates
+A local test using exact-copy transfer helpers and an independent occurrence-poset / direct enumeration oracle passed 137 small finite families, 17,217 next-symbol comparisons across legal prefixes, and 1,982 complete rank/unrank assertions. A single bounded full-size root/first-symbol profile on 45 months, 4,244 days passed the exact 22,470-bit count digest 925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da and the next-symbol sum invariant; elapsed 6.636s and peak RSS 305832 KiB on local Linux. CI must independently verify this exact pushed file. The 25-second / 512 MiB cap applies only to this bounded profile; a full-year rank/unrank was NOT tested.
+
+## Next independent step
+Inspect completed CI logs for exact commit. Then devise a full-length performance gate: at least two nontrivial ranks, corresponding independent rank/oracle or exhaustive small-case proof, full 4244-symbol unrank and reverse rank in <=180 seconds per trial with RSS <=512 MiB. Benchmark without increasing timeout; on failure optimize transfer/candidate enumeration or derive a better algorithm before Chapel research port. Keep research isolated; do not merge, change production, announce Stage6 or infer a third historical defect.
