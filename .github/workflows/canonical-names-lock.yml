@@ -135,6 +135,18 @@ jobs:
             build/stage01_weaving_polynomial_unrank.o \
             -o build/stage01_candidate_five_field_probe
           test -x build/stage01_candidate_five_field_probe
+          gfortran "${flags[@]}" -c test/stage01_fast_calendar_candidate.f90 -o build/stage01_fast_calendar_candidate.o
+          gfortran "${flags[@]}" test/stage01_real_date_candidate_probe.f90 \
+            build/big_integer.o \
+            build/source_language_catalog.o \
+            build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o \
+            build/normative_oracle_calendar.o \
+            build/stage01_weaving_polynomial.o \
+            build/stage01_weaving_polynomial_unrank.o \
+            build/stage01_fast_calendar_candidate.o \
+            -o build/stage01_real_date_candidate_probe
+          test -x build/stage01_real_date_candidate_probe
           test -x build/stage01_weaving_rank_probe
           test -x build/stage01_weaving_scaling_probe
           test -x build/stage01_weaving_unrank_probe
@@ -321,6 +333,31 @@ jobs:
           grep -Fxq 'STAGE01_CANDIDATE_FIVE_FIELD_PASS (synthetic 45-month mapping; NOT full normative date)' <<< "$output"
           echo 'STAGE01_CANDIDATE_FIVE_FIELD_NATIVE_PASS=21220 EXPECTED=21220 (synthetic only)'
           echo 'Candidate 45-month synthetic projection: 21220/21220 exact component checks, NOT full normative calendar integration.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Gate real-date candidate structure and emit 7 exact five-field fixtures (not external differential)
+        shell: bash
+        run: |
+          set -euo pipefail
+          started=$SECONDS
+          set +e
+          output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=5s 110s build/stage01_real_date_candidate_probe) 2>&1)"
+          exit_code=$?
+          set -e
+          printf '%s\n' "$output"
+          echo "STAGE01_REAL_DATE_CANDIDATE_RUNTIME_SECONDS=$((SECONDS-started)) LIMIT=110"
+          if [[ "$exit_code" -ne 0 ]]; then
+            echo "::error::Real-date candidate probe failed or timed out, exit=$exit_code"
+            exit 1
+          fi
+          grep -Fxq 'STAGE01_REAL_DATE_CANDIDATE_CASES=7' <<< "$output"
+          grep -Fxq 'STAGE01_REAL_DATE_CANDIDATE_ASSERTIONS=35' <<< "$output"
+          grep -Fxq 'STAGE01_REAL_DATE_CANDIDATE_FAILURES=0' <<< "$output"
+          grep -Fxq 'STAGE01_REAL_DATE_CANDIDATE_PASS (internal invariants only; NOT independent OracleEngine comparison)' <<< "$output"
+          if [[ "$(grep -c '^STAGE01_REAL_DATE_CASE=' <<< "$output")" -ne 7 ]]; then
+            echo "::error::Expected seven independent real-date case records"
+            exit 1
+          fi
+          echo 'STAGE01_REAL_DATE_CANDIDATE_NATIVE_PASS=35 EXPECTED=35 (NOT external differential)'
+          echo 'Seven real-date candidate fixtures with 35/35 internal invariants; external OracleEngine comparison still needed.' >> "$GITHUB_STEP_SUMMARY"
       - name: Localize first-day slow phase (15s, 1 GiB; NOT a gate)
         shell: bash
         run: |
