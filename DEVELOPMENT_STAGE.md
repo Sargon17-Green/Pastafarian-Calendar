@@ -16,7 +16,7 @@ MONSTER_ARCHITECTURE_GROWTH=context de baza, dispatcher neutru, validator neutru
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=YES
-HANDOFF_PACKAGE_PREPARED=NO
+HANDOFF_PACKAGE_PREPARED=YES
 
 Stage 1 a fost finalizat prin executie nativa J9.7.1 pe Windows: 63/63 verificari, 17 fixture-uri, audit GREEN, exit code 0. Dovada: Native QA v13.
 
