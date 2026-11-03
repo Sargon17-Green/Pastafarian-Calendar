@@ -52,3 +52,4 @@ require_once $root . '/tests/oracle/NormativeMath.php';
 require_once $root . '/tests/oracle/NormativeSauce.php';
 require_once $root . '/tests/oracle/OrderedFamilies.php';
 require_once $root . '/tests/oracle/NormativeOracle.php';
+require_once $root . '/src/Patches/DateTuplePatch23.php';
