@@ -1,6 +1,6 @@
 # Calendarul Pastafarian - J + romana
 
-Aceasta este o linie de implementare independenta, pornita de la zero. Limbajul de programare este J, iar limba-sursa umana este romana. Stage 1 si Stage 2 au fost acceptate prin executii native; Stage 3 / PATCH 01 este pregatit pentru verificare nativa si nu este inca acceptat.
+Aceasta este o linie de implementare independenta, pornita de la zero. Limbajul de programare este J, iar limba-sursa umana este romana. Stage 1, Stage 2 si Stage 3 / PATCH 01 au fost acceptate prin executii native. Stage 4 / DISCOVERY 02 este implementat, dar asteapta Native QA.
 
 ## Scopul Stage 1
 
@@ -26,4 +26,4 @@ Toate calculele normative folosesc intregi extinsi J (`x`) si, unde este necesar
 
 ## Starea dezvoltarii
 
-Stage 1: 63/63 Native PASS. Stage 2: 17/17 Native PASS. Stage 3 / PATCH 01: pregatit pentru Native QA, in asteptarea rezultatelor; calea publica ramane `NOT_INTEGRATED`.
+Stage 1: 63/63 Native PASS. Stage 2: 17/17 Native PASS. Stage 3 / PATCH 01: 11/11 Native PASS, J9.7.1, exit 0. Stage 4 / DISCOVERY 02: operatia SAVE pozitiv exact si 24 de verificari pregatite, Native NOT_RUN / NOT_ACCEPTED; calea publica ramane `NOT_INTEGRATED`.
