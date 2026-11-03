@@ -56,3 +56,17 @@ Nur `test/discovery_18_test.gleam`, plus la ekzistantaj 226 nesanĝitaj testoj; 
 4. Aparta dokumenta HEAD kaj ĝia propra same-SHA CI estas devigaj antaŭ Stage23. Neniu `main`, merge, publikigo aŭ kompleta dato.
 
 **Post kontrakta komito:** Stage21 estas finita kaj Stage22 nur planita; ĝia kodo, Native kaj ĝenerala PASS ankoraŭ ne ekzistas.
+
+## Akcepto de la produkta HEAD (dokumenta HEAD ankoraŭ ne fermita)
+
+La kontrakta HEAD `fd304a08d4333737ab87ad84a5a6a4d47543c35f` jam trapasis ambaŭ sam-SHA pordegojn: [Native 41651566081](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41651566081), job `125970786596`, **226/226**, formato kaj netuŝita fonto; [Names 41651566074](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41651566074), job `125970786255`, SUCCESS.
+
+La unua koda komito `33ec66f52f2be48d5d10b2e20132e36426958759` kreis precize la produktan modulon `src/pastafari/discovery_18_choose_rank.gleam`, **12 novajn** testfunkciojn en `test/discovery_18_test.gleam`, kaj etapajn metadatenojn. [Native 41652198679](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41652198679) haltis nur ĉe la formatkontrolo, sen testoj; Names 41652198631 sukcesis. Ok precizaj formatter-hunk-oj en la testdosiero estis korektitaj ĉe `1b84154d225ad144811d8bfb7dfa65003c7430ed`; [Native 41652368942](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41652368942) ankoraŭ trovis tri format-hunk-ojn, sen testoj; Names 41652368962 sukcesis. Ĉiuj tri estis korektitaj je `b18ef1c136f47d72d9929bee986452a51baa367a`.
+
+[Native 41652635530](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41652635530) plene kompilis kaj efektivigis 238 testojn: **237 pasis, 1 malsukcesis** nur pro malĝusta testatendo `rank=1` anstataŭ la matematike ĝusta `rank=3` por `first=1, step=-1, n=M+1`. La sendependa BigInt-kalkulo donis `W=M²-M+1`, `L=M²-1`, `rank=3`; la ŝanĝo en `e5faf5ac9129b905203e6f3e6a9dcd470a3a65e1` korektis **nur tiun testatendon**. GitHub komparo inter la unua koda HEAD kaj la fina koda HEAD montris nur `test/discovery_18_test.gleam` ŝanĝita tra tri riparaj komitoj; produktokodo ne estis ŝanĝita. La 12 testfunkcioj restis.
+
+La **fina koda HEAD `e5faf5ac9129b905203e6f3e6a9dcd470a3a65e1`** pasis [Native run 41652926461](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41652926461), job `125975552058`: **238/238 testoj, 0 malsukcesoj**, Gleam 1.18.1 / OTP 28 / ERTS 16.4.0.7; `gleam format --check src test`, `gleam test`, senmutacia fontkontrolo ĉiuj trapasis. Artefakto `13238651237`, SHA256 `1410a843c68650b6c53a701c16784bd0734f7456759907d5461d9b4be4b19db1`. [Canonical Names Lock 41652926269](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41652926269), job `125975550960`, completed/success sur la sama SHA.
+
+La nova komuna dissendilo vokas Stage19 unufoje kaj delegas al la jam akceptitaj mallonga aŭ larĝa puraj elektiloj; sendependa malrapida orakolo restas nur en testoj, kun antaŭkalkulita maksimume ok-rifuza limo. La 226 antaŭaj testoj kaj Stage19–21-produktokodo restis senŝanĝaj. Neniu `main`, merge, publikigo aŭ kompleta kvinkomponenta dato.
+
+**La ĉi-nova dokumenta HEAD ankoraŭ bezonas sian propran sam-SHA Native kaj Names Lock.** Ne ŝanĝu `LAST_COMPLETED_STAGE=21` antaŭ fini la dokumentan/finalan pordegon.
