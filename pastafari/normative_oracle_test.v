@@ -1406,9 +1406,7 @@ fn test_stage31_diag_reference_full_anchor() {
 
 fn test_stage31_diag_candidate_full_anchor() {
 	foundation := oracle_foundation_day()
-	got := calendar_date_patch15_numeric_spaghetti(foundation, foundation) or {
-		panic(err.msg())
-	}
+	got := calendar_date_patch15_numeric_spaghetti(foundation, foundation) or { panic(err.msg()) }
 	assert discovery15_output_shape_oracle(got)
 }
 
