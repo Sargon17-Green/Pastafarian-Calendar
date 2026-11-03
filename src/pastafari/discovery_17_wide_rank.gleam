@@ -90,8 +90,7 @@ pub fn select_wide_rank(
       case first < 1 || first > modulus || { step != 1 && step != -1 } {
         True -> Error(InvalidStream)
         False -> {
-          let #(digit_count, space) =
-            covering_power(n, 2, modulus * modulus)
+          let #(digit_count, space) = covering_power(n, 2, modulus * modulus)
           let first_wide = assemble_wide(first, step, 0, digit_count, 1, 1)
           let limit = { space / n } * n
           // Ĉiuj rifuzoj estas unu kontinua fina intervalo.

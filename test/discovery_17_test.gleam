@@ -44,7 +44,8 @@ fn assert_bounded_oracle(a: Int, b: Int, id: Int, seal: Int, n: Int) {
   let first_wide =
     1
     + { sauce.answer_at(stream, 0) - 1 }
-    + { sauce.answer_at(stream, 1) - 1 } * modulus
+    + { sauce.answer_at(stream, 1) - 1 }
+    * modulus
   let limit = { space / n } * n
   let distance = case first_wide <= limit, stream.direction_step {
     True, _ -> 0
@@ -53,7 +54,8 @@ fn assert_bounded_oracle(a: Int, b: Int, id: Int, seal: Int, n: Int) {
     False, _ -> panic as "Nevalida kanona fluo"
   }
   case distance <= 8 {
-    True -> actual(a, b, id, seal, n)
+    True ->
+      actual(a, b, id, seal, n)
       |> should.equal(Ok(sauce.choose_rank_wide(stream, n)))
     False -> {
       let assert Ok(output) =
