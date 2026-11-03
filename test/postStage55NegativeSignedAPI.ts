@@ -195,10 +195,22 @@ try {
       verifyBranch(item.c,item.t,request);
       const native=patch27MonthMembership(fullStage55(),request,1,1);
       const observed=projectObservedStage55Date(request,native);
-      ok(nativeCalls-before===observed.totalNativeCalls &&
+      // The physical dispatch spy covers the signed-gate prefix as well as
+      // Stage55 and name selection. The Stage55 observation intentionally
+      // counts only the latter two: compare like-for-like scoped totals.
+      const prefix=request.productionConstruction;
+      ok(prefix!==undefined,"production-owned prefix accounting required");
+      const measuredDelta=nativeCalls-before;
+      const expectedDelta=prefix.gateNativeCalls+observed.totalNativeCalls;
+      ok(measuredDelta===expectedDelta &&
+         prefix.gateSharedWrites===58n*BigInt(prefix.gateNativeCalls) &&
          observed.totalSharedWrites===58n*BigInt(observed.totalNativeCalls) &&
+         sharedWrites===58n*BigInt(nativeCalls) &&
          observed.stage55AdditionalNativeQueries===0,
-         item.label+": physical Stage55 Native accounting and no extra membership call");
+         item.label+": scoped physical Native accounting"+
+         " measured="+measuredDelta+" prefix="+prefix.gateNativeCalls+
+         " stage55AndNames="+observed.totalNativeCalls+
+         " expected="+expectedDelta);
 
       const weaving=
         native.historical.historical.historical.historical.historical.historical
