@@ -1,0 +1,261 @@
+name: SQL Tamil Stage 2 Slice 20 Month Count
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'sql/00_schema.sql'
+      - 'sql/01_source_language_catalog.sql'
+      - 'sql/02_monster_bootstrap.sql'
+      - 'sql/03_stage02_production_core.sql'
+      - 'sql/04_stage02_stone_states.sql'
+      - 'sql/05_stage02_hidden_drop.sql'
+      - 'sql/06_stage02_visible_drops.sql'
+      - 'sql/07_stage02_bowls.sql'
+      - 'sql/08_stage02_bowl_round.sql'
+      - 'sql/09_stage02_post_stir_round.sql'
+      - 'sql/10_stage02_sauce.sql'
+      - 'sql/11_stage02_answer_stream.sql'
+      - 'sql/12_stage02_choose_rank.sql'
+      - 'sql/13_stage02_gate_gaps.sql'
+      - 'sql/14_stage02_gate_day_selector.sql'
+      - 'sql/15_stage02_year5000_gate_candidates.sql'
+      - 'sql/16_stage02_year5000.sql'
+      - 'sql/17_stage02_adjacent_year_navigation.sql'
+      - 'sql/18_stage02_target_year_navigation.sql'
+      - 'sql/19_stage02_cutlet_count.sql'
+      - 'sql/20_stage02_cutlet_partition.sql'
+      - 'sql/21_stage02_cutlet_names.sql'
+      - 'sql/22_stage02_month_count.sql'
+      - 'sql/test/10_normative_reference.sql'
+      - 'sql/test/122_stage02_month_count_oracle.py'
+      - 'sql/test/123_stage02_month_count_native.sql'
+      - 'sql/test/124_stage02_month_count_differential.sql'
+      - 'sql/test/125_stage02_month_count_isolation.sql'
+      - '.github/workflows/sql-tamil-stage02-month-count-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  month-count-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-month-count-logs
+          docker run --detach --name sql-tamil-slice20-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-slice20-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-slice20-pg postgres --version | tee sql-tamil-month-count-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-month-count-logs/versions.txt
+      - name: Build independent bounded Python fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 sql/test/122_stage02_month_count_oracle.py --self-test | tee sql-tamil-month-count-logs/python-selftest.txt
+          python3 sql/test/122_stage02_month_count_oracle.py --emit-sql > sql-tamil-month-count-logs/goldens.sql
+          test "$(grep -c '^INSERT INTO slice20_goldens' sql-tamil-month-count-logs/goldens.sql)" -eq 50
+          sha256sum sql-tamil-month-count-logs/goldens.sql | tee sql-tamil-month-count-logs/goldens-sha256.txt
+      - name: Native 36 named assertions and 50 fixture checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-slice20-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/17_stage02_adjacent_year_navigation.sql \
+            -f /work/sql/18_stage02_target_year_navigation.sql \
+            -f /work/sql/19_stage02_cutlet_count.sql \
+            -f /work/sql/20_stage02_cutlet_partition.sql \
+            -f /work/sql/21_stage02_cutlet_names.sql \
+            -f /work/sql/22_stage02_month_count.sql \
+            -f /work/sql-tamil-month-count-logs/goldens.sql \
+            -f /work/sql/test/123_stage02_month_count_native.sql 2>&1 | tee sql-tamil-month-count-logs/native.txt
+      - name: Preserve original job evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice20-month-native
+          path: sql-tamil-month-count-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-slice20-pg 2>/dev/null || true
+  production-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-month-count-logs
+          docker run --detach --name sql-tamil-slice20-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-slice20-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-slice20-pg postgres --version | tee sql-tamil-month-count-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-month-count-logs/versions.txt
+      - name: Verify four production-only isolation gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-slice20-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/17_stage02_adjacent_year_navigation.sql \
+            -f /work/sql/18_stage02_target_year_navigation.sql \
+            -f /work/sql/19_stage02_cutlet_count.sql \
+            -f /work/sql/20_stage02_cutlet_partition.sql \
+            -f /work/sql/21_stage02_cutlet_names.sql \
+            -f /work/sql/22_stage02_month_count.sql 2>&1 | tee sql-tamil-month-count-logs/production-load.txt
+          docker exec -u postgres sql-tamil-slice20-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/sql/test/125_stage02_month_count_isolation.sql 2>&1 | tee sql-tamil-month-count-logs/isolation.txt
+      - name: Preserve original job evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice20-month-isolation
+          path: sql-tamil-month-count-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-slice20-pg 2>/dev/null || true
+  month-count-differential:
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [d252a, d252b, d492a, d492b, d2460a, d2460b, d5778a, d5778b]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sql-tamil-month-count-logs
+          docker run --detach --name sql-tamil-slice20-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-slice20-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-slice20-pg postgres --version | tee sql-tamil-month-count-logs/versions.txt
+          echo "Git SHA: $GITHUB_SHA" | tee -a sql-tamil-month-count-logs/versions.txt
+      - name: Create independent reference database
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-slice20-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres             -c 'CREATE DATABASE slice20_differential'
+      - name: Generate exact single-case differential SQL
+        shell: bash
+        env:
+          CASE_LABEL: ${{ matrix.case }}
+        run: |
+          set -euo pipefail
+          case "$CASE_LABEL" in
+            d252a|d252b|d492a|d492b|d2460a|d2460b|d5778a|d5778b) ;;
+            *) echo "Unexpected CASE_LABEL" >&2; exit 64 ;;
+          esac
+          test "$(grep -o '__CASE_LABEL__' sql/test/124_stage02_month_count_differential.sql | wc -l)" -eq 3
+          sed "s/__CASE_LABEL__/$CASE_LABEL/g" sql/test/124_stage02_month_count_differential.sql             > sql-tamil-month-count-logs/differential-case.sql
+          ! grep -q '__CASE_LABEL__' sql-tamil-month-count-logs/differential-case.sql
+          sha256sum sql-tamil-month-count-logs/differential-case.sql             | tee sql-tamil-month-count-logs/differential-case-sha256.txt
+      - name: Verify exact scalar normative equivalence
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker exec -u postgres sql-tamil-slice20-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d slice20_differential \
+            -f /work/sql/00_schema.sql \
+            -f /work/sql/01_source_language_catalog.sql \
+            -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/03_stage02_production_core.sql \
+            -f /work/sql/04_stage02_stone_states.sql \
+            -f /work/sql/05_stage02_hidden_drop.sql \
+            -f /work/sql/06_stage02_visible_drops.sql \
+            -f /work/sql/07_stage02_bowls.sql \
+            -f /work/sql/08_stage02_bowl_round.sql \
+            -f /work/sql/09_stage02_post_stir_round.sql \
+            -f /work/sql/10_stage02_sauce.sql \
+            -f /work/sql/11_stage02_answer_stream.sql \
+            -f /work/sql/12_stage02_choose_rank.sql \
+            -f /work/sql/13_stage02_gate_gaps.sql \
+            -f /work/sql/14_stage02_gate_day_selector.sql \
+            -f /work/sql/15_stage02_year5000_gate_candidates.sql \
+            -f /work/sql/16_stage02_year5000.sql \
+            -f /work/sql/17_stage02_adjacent_year_navigation.sql \
+            -f /work/sql/18_stage02_target_year_navigation.sql \
+            -f /work/sql/19_stage02_cutlet_count.sql \
+            -f /work/sql/20_stage02_cutlet_partition.sql \
+            -f /work/sql/21_stage02_cutlet_names.sql \
+            -f /work/sql/22_stage02_month_count.sql \
+            -f /work/sql/test/10_normative_reference.sql \
+            -f /work/sql-tamil-month-count-logs/differential-case.sql 2>&1 | tee sql-tamil-month-count-logs/differential.txt
+      - name: Preserve original job evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice20-month-diff-${{ matrix.case }}
+          path: sql-tamil-month-count-logs/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop PostgreSQL
+        if: always()
+        shell: bash
+        run: docker rm --force sql-tamil-slice20-pg 2>/dev/null || true
