@@ -48,3 +48,13 @@ La sola nova testdosiero: `test/discovery_19_test.gleam`. La antaŭaj 238 testoj
 3. Koda HEAD: Native **250/250 mezuritaj**, formato kaj fontintegreco PASS, Names Lock SUCCESS sur la sama SHA.
 4. Aparta dokumenta HEAD kaj memstara fina metadata HEAD, ĉiu kun propra sam-SHA Native kaj Names SUCCESS, antaŭ `LAST_COMPLETED_STAGE=23` kaj Stage24.
 5. Neniu ŝanĝo de `main`, merge, publikigo, kalendara pordego aŭ kvinkomponenta dato.
+
+## Koda HEAD akceptita; dokumenta HEAD devas esti aparte kontrolita
+
+La kontrakta HEAD `da68c1aa24e7a292aa7eccdc0a3fa59b5d2f2c87` trapasis [Native 41688948597](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41688948597), 238/238, kaj [Names 41688948574](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41688948574), SUCCESS sur sama SHA.
+
+Unua Stage23-kodo ĉe `bcc97eb979793c8bd9325af53a4fa38e7294ef4c` aldonis la produktan modulon kaj 12 novajn testfunkciojn; [Native 41689347543](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41689347543) malsukcesis nur ĉe formato antaŭ ol ruli testojn. Formata korekto `74078b30a5f558098203cb60a76b3a3de4ae1472` rezultigis [Native 41689614933](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41689614933): eraro dum kompilado de testoj pro malĝusta aliro al enmetita kunteksta kampo; testoj ne ruliĝis. La preciza alirkorekto estis farita ĉe `999151313e66815d4910a0ba072bb04eea365262`.
+
+**Mezurita koda akcepto:** [Native 41689906383](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41689906383), job `126105440215`, completed/success sur ekzakte `999151313e66815d4910a0ba072bb04eea365262`, **250/250 testoj, 0 malsukcesoj**, Gleam 1.18.1 / OTP 28, read-only formato, netuŝita spura fonto PASS. Artefakto [13256484893](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41689906383/artifacts/13256484893), SHA256 `3305b79fd9717e46a5969e164eef5e7130686175e4263cd0812dbfcbb618eb26`. [Canonical Names Lock 41689906121](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41689906121), job `126105438461`, completed/success ĉe la **sama SHA**.
+
+La 12 novaj testfunkcioj estas laŭ la kontrakta listo kaj 238 antaŭaj testoj restas. Ĉi tiu noto estas dokumenta fermo **ne** fina stage-akcepto: dokumenta commit devas mem trapasi Native kaj Names; nur poste eblas aparta fina metadata HEAD kun siaj propraj du CI-pordegoj. `LAST_COMPLETED_STAGE=22` restas ĝis la fina akcepto. Neniu `main`, merge, publikigo aŭ plena dato.
