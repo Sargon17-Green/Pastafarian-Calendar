@@ -840,7 +840,7 @@ fn (mut c OracleWeaveCounter) count(state OracleWeaveState) BigInt {
 			mut weight := oracle_weave_choose_exact(free_previous + length - 2, length - 2)
 			for offset in 0 .. free_previous + 1 {
 				t := free_previous - offset
-				at := fixed_prefix + t
+				at := fixed_prefix + offset
 				next[at] = big_mul(prefixes[at], weight)
 				if t > 0 {
 					weight = big_floor_div(big_mul_small(weight, u32(t)),
