@@ -120,3 +120,18 @@ idempotent finalizer with unchanged metadata SHA256. A later evidence seal
 requires a separate exact-SHA completed/success CI run.
 No main/merge/publish/force update and no statistical uniformity or
 Gregorian mapping claim.
+
+
+## Addendum: independent executable preflight before stage activation
+
+Implementation is deliberately split into two verifiable steps. First,
+`tests/Stage37.Tests.ps1` and a dedicated `stage37-nonunit-seal-preflight`
+job run the finite 516-assertion research **while the canonical metadata
+remain sealed at Stage36**. This is a safe independent preflight, NOT an
+activation, NOT an accepted Stage37 Native stage, and NOT an evidence seal.
+A completed/success preflight with the recorded exact SHA is necessary
+but insufficient for advancing the canonical development stage.
+Second, only after reading its logs, update the exact Stage37 pending
+stage pair and predecessor compatibility gates, repeat Native on that
+new SHA, and subsequently evidence-seal/recheck the new seal SHA.
+No completed run's PASS may be transferred to a different commit.
