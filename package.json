@@ -95,6 +95,7 @@
     "test:discovery27:properties": "node --experimental-strip-types test/discovery27Properties.ts",
     "test:discovery27:native-red:verify": "node test/verifyDiscovery27NativeRed.mjs",
     "test:patch27": "node --experimental-strip-types test/patch27.ts && node --experimental-strip-types test/patch27Properties.ts",
+    "test:post-stage55-negative-signed": "node --experimental-strip-types test/postStage55NegativeSignedAPI.ts",
     "test:post-stage55-question": "node --experimental-strip-types test/postStage55NativeQuestion.ts",
     "test:post-stage55-gates": "node --experimental-strip-types test/postStage55SignedGatePrefix.ts",
     "test:post-stage55-request": "node --experimental-strip-types test/postStage55ProductionRequest.ts",
