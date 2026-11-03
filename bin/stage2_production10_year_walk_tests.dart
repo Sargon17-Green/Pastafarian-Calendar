@@ -30,20 +30,17 @@ void independentNeighbor(
   bool forward,
   MonsterTraversedYear actual,
 ) {
-  final startOrdinal = forward
-      ? current.candidate.closeOrdinal
-      : current.candidate.openOrdinal;
-  final startGate = forward
-      ? current.candidate.closeGate
-      : current.candidate.openGate;
+  final startOrdinal =
+      forward ? current.candidate.closeOrdinal : current.candidate.openOrdinal;
+  final startGate =
+      forward ? current.candidate.closeGate : current.candidate.openGate;
   final options = <List<BigInt>>[];
   final calculator = MonsterMeatballGateCalculator();
   var edge = startGate;
   for (var n = 1; n <= 137; n++) {
     final number = BigInt.from(n);
-    final right = forward
-        ? startOrdinal + number
-        : startOrdinal - number + BigInt.one;
+    final right =
+        forward ? startOrdinal + number : startOrdinal - number + BigInt.one;
     // Independently use §O's two sign-dependent recurrences.
     final gapIndex = right > BigInt.zero ? right : right - BigInt.one;
     final gapLength = calculator.gapFor(gapIndex).length;
@@ -64,9 +61,7 @@ void independentNeighbor(
   }
   options.sort((a, b) {
     final lengthComparison = a[4].compareTo(b[4]);
-    return lengthComparison == 0
-        ? a[2].compareTo(b[2])
-        : lengthComparison;
+    return lengthComparison == 0 ? a[2].compareTo(b[2]) : lengthComparison;
   });
   check(options.isNotEmpty, 'Nonempty brute force choices');
   final work = const MonsterWorkCounter().calculate(
@@ -86,12 +81,12 @@ void independentNeighbor(
     visibleDrops: drops,
     stones: stones,
   );
-  final following =
-      bowls.orderAt46[(bowls.orderAt46.indexOf(1) + 1) % 6];
+  final following = bowls.orderAt46[(bowls.orderAt46.indexOf(1) + 1) % 6];
   final seal = BigInt.from(forward ? 11 : 12);
   final first = ring(
     (bowls.finalBowls[0] + seal + BigInt.from(181)).pow(2) +
-        BigInt.from(179) * bowls.finalBowls[following - 1] + seal,
+        BigInt.from(179) * bowls.finalBowls[following - 1] +
+        seal,
   );
   final directionRaw = ring(
     (first + seal + BigInt.from(194)).pow(2) +
@@ -145,15 +140,26 @@ void examine(BigInt c) {
       'Open gate exclusive');
   check(start.contains(start.candidate.closeGate), 'Close gate inclusive');
   check(!start.contains(start.candidate.openGate), 'Open gate not contained');
-  check(walker.resolve(c, start.candidate.closeGate).yearNumber ==
-      BigInt.from(5000), 'Right boundary belongs to base');
-  check(walker.resolve(c, start.candidate.openGate + BigInt.one).yearNumber ==
-      BigInt.from(5000), 'First day belongs to base');
-  check(walker.resolve(c, start.candidate.closeGate + BigInt.one,
-      maxTransitions: 1).yearNumber == BigInt.from(5001),
+  check(
+      walker.resolve(c, start.candidate.closeGate).yearNumber ==
+          BigInt.from(5000),
+      'Right boundary belongs to base');
+  check(
+      walker.resolve(c, start.candidate.openGate + BigInt.one).yearNumber ==
+          BigInt.from(5000),
+      'First day belongs to base');
+  check(
+      walker
+              .resolve(c, start.candidate.closeGate + BigInt.one,
+                  maxTransitions: 1)
+              .yearNumber ==
+          BigInt.from(5001),
       'First day after base');
-  check(walker.resolve(c, start.candidate.openGate,
-      maxTransitions: 1).yearNumber == BigInt.from(4999),
+  check(
+      walker
+              .resolve(c, start.candidate.openGate, maxTransitions: 1)
+              .yearNumber ==
+          BigInt.from(4999),
       'Left boundary belongs to predecessor');
   var refused = false;
   try {
@@ -186,8 +192,8 @@ void main() {
       'Positive gap convention');
   check(MonsterYearTraversal.signedGapOrdinal(BigInt.zero) == -BigInt.one,
       'Crossing Foundation convention');
-  check(MonsterYearTraversal.signedGapOrdinal(-BigInt.one) ==
-      -BigInt.from(2), 'Negative gap convention');
+  check(MonsterYearTraversal.signedGapOrdinal(-BigInt.one) == -BigInt.from(2),
+      'Negative gap convention');
   var invalid = false;
   try {
     walk.resolve(f, f, maxTransitions: -1);

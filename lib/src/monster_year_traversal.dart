@@ -114,9 +114,8 @@ final class MonsterYearTraversal {
     final boundaryOrdinal = forward
         ? current.candidate.closeOrdinal
         : current.candidate.openOrdinal;
-    final boundaryGate = forward
-        ? current.candidate.closeGate
-        : current.candidate.openGate;
+    final boundaryGate =
+        forward ? current.candidate.closeGate : current.candidate.openGate;
     final candidates = <MonsterYearCandidate>[];
     var edge = boundaryGate;
     for (var step = 1; step <= maximumIntervals; step++) {
@@ -181,8 +180,7 @@ final class MonsterYearTraversal {
       throw StateError('§R continuity broken at the shared gate.');
     }
     return MonsterTraversedYear._(
-      yearNumber: current.yearNumber +
-          (forward ? BigInt.one : -BigInt.one),
+      yearNumber: current.yearNumber + (forward ? BigInt.one : -BigInt.one),
       candidate: candidate,
       questionGate: boundaryGate,
       questionSeal: seal,
