@@ -22,6 +22,10 @@ const oracle = new NormativeOracle();
 const negativeAnchorC = oracle.gateDay(-1n) + 1n;
 const negativeNonAnchorC = negativeAnchorC + 1n;
 const negativeAnchorYear = oracle.year5000(negativeAnchorC);
+const anchorMiddleCandidate = negativeAnchorYear.openGateDay +
+  (negativeAnchorYear.closeGateDay - negativeAnchorYear.openGateDay) / 2n;
+const negativeAnchorMidDay = anchorMiddleCandidate === negativeAnchorC
+  ? anchorMiddleCandidate + 1n : anchorMiddleCandidate;
 const negativeNonAnchorYear = oracle.year5000(negativeNonAnchorC);
 const negativePrevious = oracle.previousYear(negativeNonAnchorC, negativeNonAnchorYear);
 const negativeNext = oracle.nextYear(negativeNonAnchorC, negativeNonAnchorYear);
@@ -29,7 +33,7 @@ const foundationCrossingC = FOUNDATION_DAY + 1n;
 const foundationCrossingT = FOUNDATION_DAY - 1n;
 
 const cases = [
-  { label: "negative-anchor-same-day", c: negativeAnchorC, t: negativeAnchorC },
+  { label: "negative-anchor-middle-day", c: negativeAnchorC, t: negativeAnchorMidDay },
   { label: "negative-anchor-year-first", c: negativeAnchorC,
     t: negativeAnchorYear.openGateDay + 1n },
   { label: "negative-anchor-year-last-gate", c: negativeAnchorC,
@@ -95,3 +99,5 @@ The marker is valid only when all seven outputs match, the branch-specific asser
 This contract authorizes only the test/package/workflow work needed to verify the existing negative signed-input path. Keep changes test/docs/workflow-only unless a completed log proves a production defect and the correction is within the existing authority. Do not open Stage56, change \`main\`, merge, publish, or release as part of this contract.
 
 Implementation clarification (2026-11-03): the previous-year last-day test uses `negativePrevious.closeGateDay` exactly; the previous `-1n` expression denoted the penultimate day and was corrected before implementation.
+
+Fixture correction (2026-11-03): the failed exact-SHA negative-signed job 125972296826 in run 41651997321 stopped at the seven-distinct-pairs preflight. The anchor same-day and anchor year-first selections may coincide; the deterministic interior-day witness is distinct from the anchor c and from both boundary days. This is a test-input collision, not evidence of a production defect.

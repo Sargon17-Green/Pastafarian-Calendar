@@ -49,6 +49,10 @@ const oracle=new NormativeOracle();
 const negativeAnchorC=oracle.gateDay(-1n)+1n;
 const negativeNonAnchorC=negativeAnchorC+1n;
 const negativeAnchorYear=oracle.year5000(negativeAnchorC);
+const anchorMiddleCandidate=negativeAnchorYear.openGateDay+
+  (negativeAnchorYear.closeGateDay-negativeAnchorYear.openGateDay)/2n;
+const negativeAnchorMidDay=anchorMiddleCandidate===negativeAnchorC?
+  anchorMiddleCandidate+1n:anchorMiddleCandidate;
 const negativeNonAnchorYear=oracle.year5000(negativeNonAnchorC);
 const negativePrevious=oracle.previousYear(negativeNonAnchorC,negativeNonAnchorYear);
 const negativeNext=oracle.nextYear(negativeNonAnchorC,negativeNonAnchorYear);
@@ -56,7 +60,7 @@ const foundationCrossingC=FOUNDATION_DAY+1n;
 const foundationCrossingT=FOUNDATION_DAY-1n;
 
 const cases=[
-  {label:"negative-anchor-same-day",c:negativeAnchorC,t:negativeAnchorC},
+  {label:"negative-anchor-middle-day",c:negativeAnchorC,t:negativeAnchorMidDay},
   {label:"negative-anchor-year-first",c:negativeAnchorC,
     t:negativeAnchorYear.openGateDay+1n},
   {label:"negative-anchor-year-last-gate",c:negativeAnchorC,
