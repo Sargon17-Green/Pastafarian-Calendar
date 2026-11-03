@@ -63,3 +63,19 @@ unproven and Stage04 closure remains NOT_CLAIMED until a genuine callable,
 pre-Stage4 Rust implementation produces observed runtime RED under an independent
 oracle. GitHub CI results must be read from completed job logs; merely committing
 this patch does not establish CI PASS.
+
+## 2026-11-03: checkout-HEAD identity QA PATCH (Rust branch only)
+
+The prior validator checked that the supplied branch-head SHA descended from
+Stage4 introduction, but it did **not** bind this caller-supplied SHA to the
+actual Git checkout. In an isolated four-commit Git fixture, the ancestor check
+accepted the Stage4 commit while checkout HEAD was a later commit. This is a
+source-provenance false-positive risk, **not** a historical Rust day-tag bug.
+
+The validator now requires `git rev-parse HEAD == --branch-head`. The
+workflow separately checks the intended Rust+Azərbaycan-dili GitHub ref name
+and checks out the exact event SHA. Two negative tests reject a stale ancestor
+and a future descendant; the prior introduction-as-HEAD positive control now
+actually checks out that introduction commit before verifying it. Total bounded
+provenance cases: **13**. No historical production Rust day-tag route, observed
+runtime RED, Stage4 closure, Stage5, or merge is claimed by this change.

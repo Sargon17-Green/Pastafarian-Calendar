@@ -74,6 +74,9 @@ def verify_pin(repo: Path, witness_commit: str, witness_path: str,
         raise ProvenanceError("Stage3 closure is not an ancestor of Stage4 introduction")
     if not is_ancestor(repo, stage4_introduction, branch_head):
         raise ProvenanceError("Stage4 introduction is not an ancestor of current branch HEAD")
+    # An ancestry-valid SHA may still be a stale or fabricated checkout claim.
+    if git(repo, "rev-parse", "HEAD") != branch_head:
+        raise ProvenanceError("pinned branch HEAD differs from checked-out Git HEAD")
     try:
         actual_blob = git(repo, "rev-parse", f"{witness_commit}:{witness_path}")
     except ProvenanceError as exc:

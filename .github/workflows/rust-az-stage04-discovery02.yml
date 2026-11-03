@@ -44,6 +44,8 @@ jobs:
           test -f audit/STAGE_04_DISCOVERY02_ARCHIVED_ROUTE_CONTRACT_2026-10-31.md
           grep -Fxq 'CURRENT_STAGE=4' DEVELOPMENT_STAGE.md
           grep -Fxq 'LAST_COMPLETED_STAGE=3' DEVELOPMENT_STAGE.md
+          test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           grep -Fq 'pub mod discovery02_day_tag_probe;' src/lib.rs
           test -f audit/STAGE_04_DISCOVERY02_DIRECT_RUNTIME_DIFFERENTIAL_CONTRACT_2026-11-01.md
           cargo fmt --all -- --check
@@ -58,7 +60,7 @@ jobs:
           cat evidence/stage04_tsv_protocol_tests.txt
           grep -Fq 'Ran 6 tests' evidence/stage04_tsv_protocol_tests.txt
           grep -Fxq 'OK' evidence/stage04_tsv_protocol_tests.txt
-      - name: Verify pinned historical Rust source eligibility (11 unit gates, no RED inference)
+      - name: Verify pinned historical Rust source eligibility (13 unit gates, no RED inference)
         shell: bash
         run: |
           set -euo pipefail
@@ -67,7 +69,7 @@ jobs:
             python3 -m unittest discover -s tools/tests -p 'test_stage04_rust_witness_provenance.py' -v \
             > evidence/stage04_provenance_tests.txt 2>&1
           cat evidence/stage04_provenance_tests.txt
-          grep -Fq 'Ran 11 tests' evidence/stage04_provenance_tests.txt
+          grep -Fq 'Ran 13 tests' evidence/stage04_provenance_tests.txt
           grep -Fxq 'OK' evidence/stage04_provenance_tests.txt
           timeout --signal=TERM --kill-after=5s 25s \
             python3 tools/stage04_rust_witness_provenance.py \
@@ -80,7 +82,7 @@ jobs:
               --branch-head "$GITHUB_SHA" \
               > evidence/stage04_source_pin.json
           python3 -c 'import json; p=json.load(open("evidence/stage04_source_pin.json")); assert p["source_pin_eligible"] is True and p["historical_day_tag_route_proven"] is False and p["observed_runtime_red"] is False and p["stage04_closure"] == "NOT_CLAIMED"'
-          printf 'STAGE04_PROVENANCE_QA=11_PASS\nSTAGE04_HISTORICAL_RUST_ROUTE=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/stage04_provenance_result.txt
+          printf 'STAGE04_PROVENANCE_QA=13_PASS\nSTAGE04_HISTORICAL_RUST_ROUTE=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/stage04_provenance_result.txt
           cat evidence/stage04_provenance_result.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Run bounded native baseline and prior regression tests
         shell: bash

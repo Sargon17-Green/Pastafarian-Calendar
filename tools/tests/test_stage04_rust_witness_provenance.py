@@ -86,10 +86,24 @@ class TestRustWitnessProvenance(unittest.TestCase):
             self.check(stage3=self.c, stage4=self.c)
 
     def test_allows_stage4_introduction_as_current_head(self):
-        # The only strict boundary is Stage3 -> Stage4, not Stage4 -> HEAD.
+        # Stage4 may be the current checkout, with no subsequent commit.
+        self.git("checkout", "-q", "--detach", self.c)
+        self.addCleanup(lambda: self.git("checkout", "-q", "main"))
         result = self.check(head=self.c)
         self.assertTrue(result["source_pin_eligible"])
         self.assertFalse(result["observed_runtime_red"])
+
+    def test_rejects_stale_ancestor_disguised_as_checkout_head(self):
+        # c is an ancestor of actual HEAD d, but cannot be claimed as the checkout.
+        with self.assertRaises(ProvenanceError):
+            self.check(head=self.c)
+
+    def test_rejects_future_descendant_disguised_as_checkout_head(self):
+        # Conversely a descendant can exist even while HEAD is at Stage4.
+        self.git("checkout", "-q", "--detach", self.c)
+        self.addCleanup(lambda: self.git("checkout", "-q", "main"))
+        with self.assertRaises(ProvenanceError):
+            self.check(head=self.d)
 
     def test_rejects_wrong_blob_sha(self):
         with self.assertRaises(ProvenanceError):
