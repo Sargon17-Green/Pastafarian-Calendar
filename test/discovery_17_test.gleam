@@ -65,7 +65,7 @@ fn assert_bounded_oracle(a: Int, b: Int, id: Int, seal: Int, n: Int) {
           seal,
           n,
         )
-      output.rank >= 1 && output.rank <= n |> should.equal(True)
+      { output.rank >= 1 && output.rank <= n } |> should.equal(True)
       output.first_wide |> should.equal(first_wide)
     }
   }
@@ -147,7 +147,7 @@ pub fn discovery_17_huge_days_determinism_test() {
   ])
   list.each(values, fn(value) {
     case value {
-      Ok(rank) -> rank >= 1 && rank <= n |> should.equal(True)
+      Ok(rank) -> { rank >= 1 && rank <= n } |> should.equal(True)
       Error(_) -> False |> should.equal(True)
     }
   })
@@ -219,8 +219,8 @@ pub fn discovery_17_long_rejection_without_oracle_test() {
   let assert Ok(backward) = select(1, -1, n)
   forward.limit |> should.equal(n)
   backward.limit |> should.equal(n)
-  forward.first_wide > n |> should.equal(True)
-  backward.first_wide > n |> should.equal(True)
+  { forward.first_wide > n } |> should.equal(True)
+  { backward.first_wide > n } |> should.equal(True)
   forward.accepted_value |> should.equal(1)
   backward.accepted_value |> should.equal(n)
   forward.rank |> should.equal(1)
