@@ -361,4 +361,19 @@
     (call $copy (global.get $FIRST) (global.get $M))
     (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
     (i32.eqz (call $cmp (global.get $RESULT) (global.get $N))))
+
+  ;; Ampliación DISCOVERY 01: el rechazo corto desde M con paso -1 acepta M-1.
+  (func (export "test_discovery01_short_m_minus_one_reject_backward") (result i32)
+    (call $init_constants)
+    (call $copy (global.get $FIRST) (global.get $M))
+    (call $sub_small (global.get $N) (global.get $M) (i32.const 1))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.eqz (call $cmp (global.get $RESULT) (global.get $N))))
+  ;; Para N=M+2, x=M^2-1 y limite=M^2-4; se rechazan x y M^2 y se acepta 1.
+  (func (export "test_discovery01_wide_m_plus_two_reject_wrap") (result i32)
+    (call $init_constants)
+    (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 1))
+    (call $add_small (global.get $N) (global.get $M) (i32.const 2))
+    (call $choose (global.get $FIRST) (i32.const 1) (global.get $N) (global.get $RESULT))
+    (i32.eqz (call $cmp (global.get $RESULT) (global.get $ONE))))
 )
