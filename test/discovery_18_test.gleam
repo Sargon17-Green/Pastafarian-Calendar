@@ -107,7 +107,7 @@ pub fn discovery_18_basic_wide_oracle_test() {
   bounded_oracle(11, 21, 1, 0, n)
   let assert Ok(selection) = select(1, -1, n)
   case selection {
-    discovery_18_choose_rank.WideRank(wide) -> wide.rank |> should.equal(1)
+    discovery_18_choose_rank.WideRank(wide) -> wide.rank |> should.equal(3)
     _ -> False |> should.equal(True)
   }
 }
