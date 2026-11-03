@@ -1,0 +1,43 @@
+name: Fortran Stage1 pinned external Python differential
+on:
+  push:
+    branches:
+      - 'Fortran+English'
+    paths:
+      - 'test/stage01_external_python_reference.py'
+      - '.github/workflows/fortran-stage01-external-diff.yml'
+permissions:
+  contents: read
+jobs:
+  pinned-python-reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check harness syntax and differential logic
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_external_python_reference.py
+          python3 test/stage01_external_python_reference.py --self-test
+      - name: Download immutable external normative source
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          curl --fail --location --silent --show-error --retry 3 \
+            --connect-timeout 15 --max-time 45 \
+            'https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
+            --output build/stage01_python_reference_pinned.py
+          python3 -m py_compile build/stage01_python_reference_pinned.py
+      - name: Compare all seven real dates, 60s per case, at most two workers
+        run: |
+          set -euo pipefail
+          python3 test/stage01_external_python_reference.py \
+            --reference build/stage01_python_reference_pinned.py
+      - name: Retain independent per-field report including timeouts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-python-independent-diff
+          path: stage01_external_diff_report.json
+          if-no-files-found: warn
+          retention-days: 30
