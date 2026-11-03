@@ -3,6 +3,17 @@ on:
   push:
     branches:
       - 'qa-befunge98-stage1-order-isolation-20261008'
+    paths:
+      - 'src/interleaved_work_counts.b98'
+      - 'qa/stage1_spaghetti06_native.py'
+      - 'qa/stage1_spaghetti07_nd17_native.py'
+      - 'qa/stage1_spaghetti08_nd17_native.py'
+      - 'qa/stage1_spaghetti09_fork_native.py'
+      - 'qa/stage1_spaghetti09_eighty_native.py'
+      - 'qa/spaghetti08_17d_concurrent_stack_residue.beq'
+      - 'qa/spaghetti09_nd17_two_worker_rendezvous_fixture.beq'
+      - 'qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq'
+      - 'qa/SPAGHETTI09_17D_EIGHTY_OPCODE_MANIFEST.json'
   workflow_dispatch:
 permissions:
   contents: read
