@@ -1,4 +1,4 @@
-# Stage21 DISCOVERY18 — adjacent sides of the 5778/5779-day boundary (open)
+# Stage21 DISCOVERY18 — adjacent sides of the 5778/5779-day boundary (accepted, bounded)
 
 ## Verified predecessor and coverage gap
 Stage20 accepted only its 25 ordered matrix pairs at 9b170a49d92281d244e73992aa1b70d810de71a6. GitHub Actions push 41536989033 completed/success 22/22; native job 125591236236 shows GNAT 13 compile/bind/link and exact markers 135/131/125.
@@ -21,3 +21,6 @@ Accept only on a completed/success push run for the exact Stage21 commit with **
 - STAGE21_REAL_FIVEFIELD_SCALARS=80
 
 Queued/in_progress is neither failure nor PASS. Do not manually duplicate the push-triggered job. No main merge, protected branch update, or publication.
+
+## Completed acceptance evidence (2026-11-03)
+Push run 41617802891 at 1fbe72c5b962569591b7e8fffc9a4124dc22b913 finished completed/success, 23/23 jobs including verify and native-stage21-edge-adjacent (job 125855515689). Native log confirms GNAT13 compile/bind/link and exact markers 88/85/80. Accepted only for its 16 specific pairs; Stage22 is separately gated.
