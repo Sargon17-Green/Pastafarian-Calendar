@@ -68,11 +68,11 @@ jobs:
                ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and
                ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or
-               ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
+               ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=35') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
              ($stageLines -contains 'STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
              ((($stageLines -contains 'LAST_COMPLETED_STAGE=28') -and
                ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=AWAITING')) -or
-              ((($stageLines -contains 'LAST_COMPLETED_STAGE=29') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=31') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=32') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=33') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=35')) -and
+              ((($stageLines -contains 'LAST_COMPLETED_STAGE=29') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=31') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=32') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=33') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -or ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and
                ($stageLines -contains 'STAGE29_RUNTIME_VERIFICATION=GREEN_CONFIRMED')))) {
             & .\tests\Stage01.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage01 regression failed Stage29' }
@@ -340,8 +340,8 @@ jobs:
             $stage35Allowed = (($stageLines -contains 'CURRENT_STAGE=35') -and
                               ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                               ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and
-                              ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
-            $stage36Allowed = (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+                              ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=35') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+            $stage36Allowed = ((($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')))
             $stage32PriorSeal = (((($stageLines -contains 'CURRENT_STAGE=32') -and
                                    ($stageLines -contains 'LAST_COMPLETED_STAGE=32')) -or
                                   ((($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34')) -and
@@ -400,8 +400,8 @@ jobs:
             $stage35Allowed = (($stageLines -contains 'CURRENT_STAGE=35') -and
                               ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                               ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and
-                              ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
-            $stage36Allowed = (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+                              ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=35') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+            $stage36Allowed = ((($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')))
             $stage33PriorSeal = ((($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34')) -and
                                  ($stageLines -contains 'LAST_COMPLETED_STAGE=33') -and
                                  ($stageLines -contains 'STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -456,11 +456,11 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage34 third-axis research failed' }
             Write-Host ('STAGE34_NATIVE_SHA=' + $sha)
             $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
-            $stage36Allowed = (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+            $stage36Allowed = ((($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')))
             $stage34Seal = (($stageLines -contains 'CURRENT_STAGE=34') -and
                             ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                             ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
-            if ($stage36Allowed -or $stage34Seal -or (($stageLines -contains 'CURRENT_STAGE=35') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) {
+            if ($stage36Allowed -or $stage34Seal -or (($stageLines -contains 'CURRENT_STAGE=35') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=35') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) {
               Add-Content -Path stage34-metadata.txt -Value 'STAGE34_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
               Write-Host 'STAGE34_SEAL_RECHECK=PASS'
             } else {
@@ -496,8 +496,8 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage35 checkout SHA mismatch' }
           $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
-            $stage36Allowed = (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
-          if (-not ($stage36Allowed -or ((($stageLines -contains 'CURRENT_STAGE=35') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))))) { throw 'Stage35 exact metadata invalid' }
+            $stage36Allowed = ((($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')))
+          if (-not ($stage36Allowed -or ((($stageLines -contains 'CURRENT_STAGE=35') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=35') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))))) { throw 'Stage35 exact metadata invalid' }
           @(
             ('STAGE35_HEAD_SHA=' + $sha),
             ('STAGE35_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
@@ -511,7 +511,7 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage35 independent-oracle research failed' }
             Write-Host ('STAGE35_NATIVE_SHA=' + $sha)
             Write-Host 'STAGE35_DISCOVERY20_NATIVE=BOUNDED_RESEARCH_ONLY'
-            if ($stage36Allowed -or (((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')))) {
+            if ($stage36Allowed -or (((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=35') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')))) {
               Add-Content -Path stage35-metadata.txt -Value 'STAGE35_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
               Write-Host 'STAGE35_SEAL_RECHECK=PASS'
             } else {
@@ -546,13 +546,15 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage36 exact checkout SHA mismatch' }
           $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
-          if (-not (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) { throw 'Stage36 pending metadata invalid' }
+          $stage36Sealed = (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+           $stage36Allowed = ((($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage36Sealed)
+           if (-not $stage36Allowed) { throw 'Stage36 pending or sealed metadata invalid' }
           @(
             ('STAGE36_HEAD_SHA=' + $sha),
             ('STAGE36_NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
             'STAGE36_SCOPE=16_CUBES_64_CONTEXTS_128_ENDPOINTS_64_SEAL_EDGES_32_FACES_16_THIRD_AXIS',
             'STAGE36_EXPECTED_ASSERTIONS=1004',
-            'STAGE36_SEAL=NOT_CLAIMED'
+            'STAGE36_SEAL=CHECK_AFTER_TEST'
           ) | Set-Content stage36-metadata.txt -Encoding UTF8
           Start-Transcript -Path stage36-transcript.txt | Out-Null
           try {
@@ -560,6 +562,10 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage36 independent dual-gate research failed' }
             Write-Host ('STAGE36_NATIVE_SHA=' + $sha)
             Write-Host 'STAGE36_DISCOVERY21_NATIVE=BOUNDED_RESEARCH_ONLY'
+             if ($stage36Sealed) {
+               Add-Content -Path stage36-metadata.txt -Value 'STAGE36_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
+               Write-Host 'STAGE36_SEAL_RECHECK=PASS'
+             }
           } finally {
             Stop-Transcript | Out-Null
           }
