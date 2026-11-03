@@ -26,10 +26,14 @@ A fost introdusa o cale de productie J independenta pentru cinci valori de lucru
 
 Testele Stage 2 sunt separate de cele 63 de verificari Stage 1 si au valori asteptate explicite, inclusiv directie inversa, traversarea fundatiei si numere intregi extinse. Nu exista import de oracle in productie. Stage 2 a fost acceptat prin executie nativa J9.7.1 pe Windows: Stage 1 63/63, Stage 2 17/17, exit code 0, manifest 26/26 si 19/19 Git blobs verificate.
 
-## Stage 3 - PATCH 01 - pregatit pentru Native QA, neacceptat
+## Stage 3 - PATCH 01 - acceptat
 
 Revizuirea independenta a codului Stage 2 a identificat un defect de reprezentare: validatorul accepta intrari rational exacte a caror valoare este intreaga, dar calculele mixte pastreaza/promoveaza tipul rational (128). Astfel, cele cinci valori de lucru pot fi rational in loc de extended integer (64), desi valorile lor sunt intregi exacte.
 
 PATCH 01 canonizeaza fiecare zi dupa validare: `2 x:` extrage numaratorul si numitorul ca extended integers, numitorul este verificat ca 1, iar ziua este stocata ca extended integer in context si in calculele de productie. Formulele Stage 2 nu se schimba. Referinta normativa ramane test-only, iar calea publica ramane `NOT_INTEGRATED`.
 
-Noua suita `test/stage03_patch01_tests.ijs` acopera tipul fixture-ului, rezultatele inainte/inapoi/aceeasi zi, un rational intreg mare, tipul 64 pentru rezultate si zilele din context, respingerea fractiilor si pastrarea `NOT_INTEGRATED`. Acceptarea Stage 3 depinde de rezultatele native Windows J9.7.1; pana atunci Stage 3 ramane neacceptat.
+Noua suita `test/stage03_patch01_tests.ijs` acopera tipul fixture-ului, rezultatele inainte/inapoi/aceeasi zi, un rational intreg mare, tipul 64 pentru rezultate si zilele din context, respingerea fractiilor si pastrarea `NOT_INTEGRATED`. Stage 3 a fost acceptat prin Windows Native J9.7.1: manifest 29/29, Stage 1 63/63, Stage 2 17/17, Stage 3 11/11, exit 0.
+
+## Stage 4 - DISCOVERY 02 - implementat, nu acceptat
+
+Primitiva exacta SAVE pentru stari de sauce foloseste modulul M=2^127-1 si da valori in 1..M, inclusiv pentru zero, negative, multipli M si rationali integrali. Helperul stage04SaveCounts reduce doar vectori de cinci valori de lucru; nu modifica public calendar date, care ramane NOT_INTEGRATED. Suita Stage4 are 24 de verificari. Executia Windows Native J9.7.1 nu a avut inca loc; LAST_COMPLETED_STAGE=3. Fara main/merge/publicare.
