@@ -1,7 +1,7 @@
 name: Kotlin TABLETS gated isolated date contract
 on:
   push:
-    branches: ['Kotlin\\+Cymraeg']
+    branches: ['Kotlin\+Cymraeg']
     paths:
       - 'soak/tablets_gated_isolated_date_probe.py'
       - 'soak/test_tablets_gated_isolated_date_probe.py'
