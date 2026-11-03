@@ -482,4 +482,56 @@
     (call $wide_ring_step (global.get $WIDE) (global.get $SPACE) (i32.const -1))
     (call $sub_small (global.get $TMP1) (global.get $LIMIT) (i32.const 1))
     (i32.and (local.get $ok) (i32.eqz (call $cmp (global.get $WIDE) (global.get $TMP1)))))
+
+  ;; DISCOVERY 01: end-to-end choose_wide k=3 using admissible (first,step,N).
+  ;; With first=2, step=-1: digits [1,0,M-1] and x=M^3-M^2+2.
+  ;; For q=1 choose N=x-reject_count, so exactly that many backward rejections.
+  (func $discovery01_k3_full_backward_q1 (param $reject_count i32) (result i32)
+    (call $init_constants)
+    (call $mul (global.get $TMP1) (global.get $M) (global.get $M))
+    (call $mul (global.get $N) (global.get $TMP1) (global.get $M))
+    (call $sub (global.get $N) (global.get $N) (global.get $TMP1))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 2))
+    (call $sub_small (global.get $N) (global.get $N) (local.get $reject_count))
+    (call $from_u64 (global.get $FIRST) (i64.const 2))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.eqz (call $cmp (global.get $RESULT) (global.get $N))))
+  (func (export "test_discovery01_k3_full_backward_one_rejection") (result i32)
+    (call $discovery01_k3_full_backward_q1 (i32.const 1)))
+  (func (export "test_discovery01_k3_full_backward_two_rejections") (result i32)
+    (call $discovery01_k3_full_backward_q1 (i32.const 2)))
+  (func (export "test_discovery01_k3_full_backward_three_rejections") (result i32)
+    (call $discovery01_k3_full_backward_q1 (i32.const 3)))
+
+  ;; first=1, step=-1 wraps the answer digits to [0,M-1,M-2].
+  ;; x=M^3-M^2-M+1; N=x-1; exactly one rejection before rank N.
+  (func (export "test_discovery01_k3_full_backward_digit_wrap_one_rejection") (result i32)
+    (call $init_constants)
+    (call $mul (global.get $TMP1) (global.get $M) (global.get $M))
+    (call $mul (global.get $N) (global.get $TMP1) (global.get $M))
+    (call $sub (global.get $N) (global.get $N) (global.get $TMP1))
+    (call $sub (global.get $N) (global.get $N) (global.get $M))
+    (call $copy (global.get $FIRST) (global.get $ONE))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.eqz (call $cmp (global.get $RESULT) (global.get $N))))
+
+  ;; q=2/3: since q divides M-1, N=((M-1)/q)*M^2 and
+  ;; floor(M^3/N)=q. With first=2, step=-1, x=q*N+2, so two
+  ;; backward rejections reach q*N; accepted rank must be N.
+  (func $discovery01_k3_full_backward_quotient (param $divisor i32) (result i32)
+    (call $init_constants)
+    (call $sub_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.extend_i32_u (local.get $divisor)))
+    (call $divmod_q_lt_m (global.get $Q) (global.get $R) (global.get $TMP1) (global.get $TMP2))
+    (if (i32.ne (call $len (global.get $R)) (i32.const 0))
+      (then (return (i32.const 0))))
+    (call $mul (global.get $N) (global.get $Q) (global.get $M))
+    (call $mul (global.get $N) (global.get $N) (global.get $M))
+    (call $from_u64 (global.get $FIRST) (i64.const 2))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.eqz (call $cmp (global.get $RESULT) (global.get $N))))
+  (func (export "test_discovery01_k3_full_backward_q2_two_rejections") (result i32)
+    (call $discovery01_k3_full_backward_quotient (i32.const 2)))
+  (func (export "test_discovery01_k3_full_backward_q3_two_rejections") (result i32)
+    (call $discovery01_k3_full_backward_quotient (i32.const 3)))
 )
