@@ -68,3 +68,16 @@ Nur `test/discovery_17_test.gleam`; antaŭaj **214** Native-verditaj testoj rest
 4. Fermu Stage21-dokumentadon kaj atendu ĝian propran dokumentan HEAD-CI antaŭ Stage22. Neniu `main`, merge, publikigo, aŭ kompleta kvinkomponenta dato.
 
 **Post ĉi tiu sola kontrakta komito:** Stage20 estas fermita; Stage21 havas kontrakton, sed **ne** havas produkton, Native-PASS aŭ ĝeneralan Stage21-PASS.
+
+
+## Stadio 21 — aparta akcepto de produkta kodo (dokumenta HEAD ankoraŭ ne akceptita)
+
+La origina kontrakta HEAD `147d98bf67b10609445f74305ba0c20895b4d4ee` havis du sam-SHA finajn sukcesojn: [Native 41524044879](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41524044879), job `125547078269`, 214/214 kaj formato/fontintegreco PASS; [Names 41524044995](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41524044995), job `125547077701`, SUCCESS. Tio rajtigis komenci la efektivigon.
+
+La unua produkta komito `d8356c5a240759cd9d14aa791900b08211120a8b` aldonis precize `src/pastafari/discovery_17_wide_rank.gleam`, `test/discovery_17_test.gleam` kun **12 novaj testfunkcioj**, kaj ĝisdatigis la etapajn metadatenojn. La unua Native run [41617827287](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41617827287) malsukcesis nur ĉe formato, sen ekzekuti testojn; la Names Lock [41617827273](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41617827273) sukcesis. Tri precizaj formatter-hunk-oj estis korektitaj en `7afb61bb428d8444e8b5d6d8de2d72bb8bb264bb`. La sekva Native [41618051123](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41618051123) trapasis formaton kaj kompilis la produktokodon, sed kvar malĝuste grupigitaj test-esprimoj kaŭzis tipajn erarojn antaŭ testekzekuto; Names [41618051060](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41618051060) sukcesis. Nur la kvar test-esprimoj estis korektitaj en `db6af903df90137b745b368809c8427cb4ca4ab3`; neniu antaŭa produkto estis modifita.
+
+La fina kod-HEAD `db6af903df90137b745b368809c8427cb4ca4ab3` havis **sam-SHA Native SUCCESS, 226 pasis / 0 malsukcesis**, [run 41618557126](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41618557126), job `125858059763`, Gleam 1.18.1 / OTP 28 / ERTS 16.4.0.7. `gleam format --check src test`, `gleam test` kaj neŝanĝa fontkontrolo trapasis. Evidenca artefakto `13222306904`, SHA256 `9430454e677c92aadd640c830ace1913edc882d34848f13dd4e0573f158b6624`. [Names Lock 41618557248](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41618557248), job `125858061111`, completed/success sur la sama HEAD.
+
+La efektivigo uzas la matematikan unuopan akcepton post ripeta potenco-kalkulo kaj cifera konstruo, `O(k)` aritmetikaj paŝoj (ne konstanta BigInt-bitkosto). La malrapida kanona orakolo troviĝas ekskluzive sub `test/reference`, kaj la novaj testoj ĝin alvokas nur kiam sendependa malakceptodistanco ne superas 8; aliaj trajektorioj kontrolas invariantojn. Stage20 kaj la 214 antaŭaj testoj restis senŝanĝaj. Neniu `main`, merge, publikigo aŭ plena kvinkomponenta dato.
+
+**Ĉi tiu aparta dokumenta komito ankoraŭ bezonas sian propran sam-SHA completed/success Native kaj Names Lock antaŭ ol oni rajtas marki Stadio 21 kiel finitan.** `LAST_COMPLETED_STAGE=20` restas ĝusta ĝis la dokumenta pordego estas konfirmita.
