@@ -1,0 +1,40 @@
+name: Kotlin TABLETS gated isolated date contract
+on:
+  push:
+    branches: ['Kotlin\\+Cymraeg']
+    paths:
+      - 'soak/tablets_gated_isolated_date_probe.py'
+      - 'soak/test_tablets_gated_isolated_date_probe.py'
+      - '.github/workflows/post55-tablets-gated-isolated-dates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gated-isolated-date-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile and run bounded synthetic gate plus date integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p .evidence
+          python3 -m py_compile soak/tablets_gated_isolated_date_probe.py soak/test_tablets_gated_isolated_date_probe.py
+          python3 -m unittest discover -s soak -p 'test_tablets_gated_isolated_date_probe.py' -v 2>&1 | tee .evidence/tablets-gated-isolated-dates.log
+          echo PASS_SYNTHETIC_INTEGRATION_NOT_CERTIFIED | tee -a .evidence/tablets-gated-isolated-dates.log
+      - name: Preserve logs even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-tablets-gated-isolated-dates-synthetic
+          path: .evidence/tablets-gated-isolated-dates.log
+          if-no-files-found: warn
+          retention-days: 30
