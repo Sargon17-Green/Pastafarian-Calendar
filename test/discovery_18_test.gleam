@@ -97,8 +97,7 @@ pub fn discovery_18_basic_short_oracle_test() {
   bounded_oracle(11, 21, 1, 0, 7)
   let assert Ok(selection) = select(1, 1, 7)
   case selection {
-    discovery_18_choose_rank.ShortRank(short) ->
-      short.rank |> should.equal(1)
+    discovery_18_choose_rank.ShortRank(short) -> short.rank |> should.equal(1)
     _ -> False |> should.equal(True)
   }
 }
@@ -108,8 +107,7 @@ pub fn discovery_18_basic_wide_oracle_test() {
   bounded_oracle(11, 21, 1, 0, n)
   let assert Ok(selection) = select(1, -1, n)
   case selection {
-    discovery_18_choose_rank.WideRank(wide) ->
-      wide.rank |> should.equal(1)
+    discovery_18_choose_rank.WideRank(wide) -> wide.rank |> should.equal(1)
     _ -> False |> should.equal(True)
   }
 }
@@ -117,14 +115,12 @@ pub fn discovery_18_basic_wide_oracle_test() {
 pub fn discovery_18_modulus_transition_test() {
   let first = modulus - 1
   let n = [modulus - 1, modulus, modulus + 1, modulus + 2]
-  list.each(n, fn(size) {
-    assert_subselection(first, 1, size)
-  })
+  list.each(n, fn(size) { assert_subselection(first, 1, size) })
   let assert Ok(before) = select(first, 1, modulus)
   let assert Ok(after) = select(first, 1, modulus + 1)
   case before, after {
-    discovery_18_choose_rank.ShortRank(_),
-    discovery_18_choose_rank.WideRank(_) -> True |> should.equal(True)
+    discovery_18_choose_rank.ShortRank(_), discovery_18_choose_rank.WideRank(_)
+    -> True |> should.equal(True)
     _, _ -> False |> should.equal(True)
   }
 }
@@ -226,7 +222,8 @@ pub fn discovery_18_long_rejections_without_oracle_test() {
   let assert Ok(reverse_wide) = select(1, -1, half_wide)
   case forward_short, reverse_short {
     discovery_18_choose_rank.ShortRank(forward),
-    discovery_18_choose_rank.ShortRank(reverse) -> {
+    discovery_18_choose_rank.ShortRank(reverse)
+    -> {
       forward.accepted_value |> should.equal(1)
       reverse.accepted_value |> should.equal(half_short)
     }
@@ -234,7 +231,8 @@ pub fn discovery_18_long_rejections_without_oracle_test() {
   }
   case forward_wide, reverse_wide {
     discovery_18_choose_rank.WideRank(forward),
-    discovery_18_choose_rank.WideRank(reverse) -> {
+    discovery_18_choose_rank.WideRank(reverse)
+    -> {
       forward.accepted_value |> should.equal(1)
       reverse.accepted_value |> should.equal(half_wide)
     }
@@ -255,8 +253,7 @@ pub fn discovery_18_stage19_and_context_isolation_test() {
   let assert Ok(again) =
     discovery_18_choose_rank.dispatch_discovery_18(a, 6, -7, n)
   first |> should.equal(again)
-  let assert Ok(old) =
-    discovery_15_answer_at.dispatch_discovery_15(a, 6, -7, 0)
+  let assert Ok(old) = discovery_15_answer_at.dispatch_discovery_15(a, 6, -7, 0)
   first.previous |> should.equal(old)
   first.previous.index |> should.equal(0)
   second.previous.index |> should.equal(0)
@@ -298,6 +295,8 @@ pub fn discovery_18_invalid_inputs_and_priority_test() {
   let recovery = bootstrap.MonsterContext(..base, recovery_depth: -1)
   discovery_18_choose_rank.dispatch_discovery_18(recovery, 7, 0, -1)
   |> should.equal(
-    Error(discovery_18_choose_rank.InvalidContext(bootstrap.InvalidRecoveryDepth)),
+    Error(discovery_18_choose_rank.InvalidContext(
+      bootstrap.InvalidRecoveryDepth,
+    ))
   )
 }
