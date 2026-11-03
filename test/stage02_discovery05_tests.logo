@@ -1,0 +1,135 @@
+; Stage 2 / Discovery 05. Enumerita sendependa input-oracle.
+; Test-only: l'oraklo listas exakta kanonala valori, ne uzas production guard.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "test/normative_reference.logo
+
+make "D5.FAIL "false
+make "D5.N 0
+make "D5.CASES 0
+
+to d5.oracle.values
+  output [
+    [0 [0]]
+    [1 [1]]
+    [-1 [1]]
+    [-1 [5671 1505]]
+    [-1 [8522 27]]
+    [1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]]
+    [-1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]]
+    [1 [7000 572 8841 3715 8730 7316 9231 6046 1834 141 17]]
+    [-1 [7000 572 8841 3715 8730 7316 9231 6046 1834 141 17]]
+    [1 [0 1]]
+    [-1 [0 1]]
+    [1 [9999 9999 2]]
+  ]
+end
+
+to d5.oracle.member :value :catalog
+  if emptyp :catalog [output "false]
+  if equalp :value first :catalog [output "true]
+  output d5.oracle.member :value butfirst :catalog
+end
+
+to d5.require :condition :tag
+  make "D5.N (:D5.N + 1)
+  if not :condition [
+    make "D5.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_05_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d5.valid :calculation :target :tag
+  localmake "known d5.oracle.values
+  localmake "ctx monster.stage02.workcounts :calculation :target
+  localmake "reference nr.work.counts :calculation :target
+  make "D5.CASES (:D5.CASES + 1)
+  d5.require (d5.oracle.member :calculation :known) :tag
+  d5.require (d5.oracle.member :target :known) :tag
+  d5.require (equalp (monster.context.get :ctx "status) "INTERMEDIATE_COUNTS_ONLY) :tag
+  d5.require (equalp (monster.context.get :ctx "phase) "WORK_COUNTS_READY) :tag
+  d5.require (and
+    (equalp (monster.context.get :ctx "calculationDay) :calculation)
+    (equalp (monster.context.get :ctx "targetDay) :target)) :tag
+  d5.require (and
+    (equalp (monster.context.get :ctx "metrics) [stage02.dispatch stage02.counts])
+    (equalp (monster.context.get :ctx "logs) [stage02.enter stage02.normalized stage02.counts.ready])) :tag
+  d5.require (and
+    (equalp (monster.context.get :ctx "normalizedCalculationDay) (nr.save :calculation))
+    (equalp (monster.context.get :ctx "normalizedTargetDay) (nr.save :target))) :tag
+  d5.require (and
+    (equalp (monster.context.get :ctx "actionCount) (item 1 :reference))
+    (equalp (monster.context.get :ctx "targetCount) (item 2 :reference))
+    (equalp (monster.context.get :ctx "distanceCount) (item 3 :reference))
+    (equalp (monster.context.get :ctx "connectionCount) (item 4 :reference))
+    (equalp (monster.context.get :ctx "directionCount) (item 5 :reference))) :tag
+end
+
+to d5.invalid :calculation :target :tag
+  localmake "known d5.oracle.values
+  localmake "ctx monster.stage02.workcounts :calculation :target
+  localmake "again monster.stage02.workcounts :calculation :target
+  localmake "clean monster.stage02.workcounts [0 [0]] [0 [0]]
+  make "D5.CASES (:D5.CASES + 1)
+  d5.require (not (and (d5.oracle.member :calculation :known) (d5.oracle.member :target :known))) :tag
+  d5.require (equalp (monster.context.get :ctx "status) "FAILED_VALIDATION) :tag
+  d5.require (equalp (monster.context.get :ctx "phase) "FAILED_VALIDATION) :tag
+  d5.require (and
+    (equalp (monster.context.get :ctx "calculationDay) :calculation)
+    (equalp (monster.context.get :ctx "targetDay) :target)) :tag
+  d5.require (emptyp (monster.context.get :ctx "metrics)) :tag
+  d5.require (emptyp (monster.context.get :ctx "logs)) :tag
+  d5.require (and
+    (emptyp (monster.context.get :ctx "normalizedCalculationDay))
+    (emptyp (monster.context.get :ctx "normalizedTargetDay))) :tag
+  d5.require (and
+    (emptyp (monster.context.get :ctx "actionCount))
+    (emptyp (monster.context.get :ctx "targetCount))
+    (emptyp (monster.context.get :ctx "distanceCount))
+    (emptyp (monster.context.get :ctx "connectionCount))
+    (emptyp (monster.context.get :ctx "directionCount))
+    (equalp :ctx :again)
+    (equalp (monster.context.get :clean "metrics) [stage02.dispatch stage02.counts])
+    (equalp (monster.context.get :clean "status) "INTERMEDIATE_COUNTS_ONLY)) :tag
+end
+
+to stage02.discovery05.run
+  d5.valid [0 [0]] [0 [0]] [zero]
+  d5.valid [1 [1]] [-1 [1]] [one_sign]
+  d5.valid [-1 [1]] [1 [1]] [minus_one]
+  d5.valid [-1 [5671 1505]] [-1 [8522 27]] [foundation_tablets]
+  d5.valid [-1 [8522 27]] [-1 [5671 1505]] [tablets_foundation]
+  d5.valid [1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]] [0 [0]] [positive_period]
+  d5.valid [-1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]] [1 [1]] [negative_period]
+  d5.valid [1 [7000 572 8841 3715 8730 7316 9231 6046 1834 141 17]] [-1 [7000 572 8841 3715 8730 7316 9231 6046 1834 141 17]] [thousand_periods]
+  d5.valid [-1 [7000 572 8841 3715 8730 7316 9231 6046 1834 141 17]] [0 [0]] [negative_thousand_periods]
+  d5.valid [1 [0 1]] [-1 [0 1]] [base_boundary]
+  d5.valid [1 [9999 9999 2]] [1 [1]] [wide_bi]
+  d5.valid [1 [1]] [-1 [5671 1505]] [cross_sign]
+
+  d5.invalid [] [0 [0]] [absent_input]
+  d5.invalid "blorp [0 [0]] [unconvertible_word]
+  d5.invalid [0 [1]] [0 [0]] [noncanonical_zero]
+  d5.invalid [2 [1]] [0 [0]] [invalid_sign]
+  d5.invalid [1] [0 [0]] [missing_magnitude]
+  d5.invalid [1 []] [0 [0]] [empty_magnitude]
+  d5.invalid [1 [10000]] [0 [0]] [digit_overflow]
+  d5.invalid [1 [-1]] [0 [0]] [negative_digit]
+  d5.invalid [1 [2 0]] [0 [0]] [high_zero]
+  d5.invalid [1 [1.5]] [0 [0]] [fractional_digit]
+  d5.invalid [1 [trouble]] [0 [0]] [non_numeric_digit]
+  d5.invalid [1 2] [0 [0]] [bad_digit_container]
+
+  if :D5.FAIL [print [STAGE_2_DISCOVERY_05_FALIIS] stop]
+  if :D5.CASES <> 24 [print [STAGE_2_DISCOVERY_05_CASE_COUNT_FALIIS] stop]
+  if :D5.N <> 192 [print [STAGE_2_DISCOVERY_05_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_05_CASES_PASIS] :D5.CASES
+  print sentence [STAGE_2_DISCOVERY_05_CHECKS_PASIS] :D5.N
+  print [STAGE_2_DISCOVERY_05_PASIS]
+end
+
+stage02.discovery05.run

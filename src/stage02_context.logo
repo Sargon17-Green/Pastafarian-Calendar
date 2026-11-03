@@ -1,14 +1,46 @@
-; Stage 2 / Discovery 02: sendependa per-invocation modulo
+; Stage 2 / Discovery 05. Exakta BI formo-validigilo, nur por Stage 2.
+; Nula konverto, nula test-only oracle, nula globala state.
+
+to monster.stage02.bi.digits.valid :digits
+  if emptyp :digits [output "true]
+  localmake "digit first :digits
+  if not numberp :digit [output "false]
+  if (int :digit) <> :digit [output "false]
+  if :digit < 0 [output "false]
+  if :digit >= 10000 [output "false]
+  output monster.stage02.bi.digits.valid butfirst :digits
+end
+
+to monster.stage02.bi.canonical :candidate
+  if not listp :candidate [output "false]
+  if (count :candidate) <> 2 [output "false]
+  localmake "sgn first :candidate
+  localmake "digits last :candidate
+  if not numberp :sgn [output "false]
+  if not listp :digits [output "false]
+  if emptyp :digits [output "false]
+  if not monster.stage02.bi.digits.valid :digits [output "false]
+  if :sgn = 0 [output (equalp :digits [0])]
+  if :sgn <> 1 [
+    if :sgn <> -1 [output "false]
+  ]
+  if (last :digits) = 0 [output "false]
+  output "true
+end
 
 to monster.stage02.dispatch :ctx
+  localmake "calc monster.context.get :ctx "calculationDay
+  localmake "target monster.context.get :ctx "targetDay
+  if not (and (monster.stage02.bi.canonical :calc) (monster.stage02.bi.canonical :target)) [
+    localmake "bad monster.context.put :ctx "phase "FAILED_VALIDATION
+    output monster.context.put :bad "status "FAILED_VALIDATION
+  ]
   localmake "work monster.metrics.bump :ctx "stage02.dispatch
   make "work monster.logs.append :work "stage02.enter
   if not monster.validate.input :work [
     make "work monster.context.put :work "phase "FAILED_VALIDATION
     output monster.context.put :work "status "FAILED_VALIDATION
   ]
-  localmake "calc monster.context.get :work "calculationDay
-  localmake "target monster.context.get :work "targetDay
   localmake "calcR monster.stage02.normalize :calc
   localmake "targetR monster.stage02.normalize :target
   make "work monster.context.put :work "normalizedCalculationDay :calcR

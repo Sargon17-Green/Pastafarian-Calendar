@@ -112,3 +112,14 @@ La proxima injenierala tasko esas valida la strukturo di exakta
 BI-inputo ante modulo o workcounts. La kontrato esas en
 STAGE02_DISCOVERY05_CONTRACT.md. Ca tasko esas defensiva,
 ne aserto pri reproduktita bugo. Nula Stage1 API o main esas modifikita.
+
+## Stage 2 — DISCOVERY 05 (kanonala BI gardilo; Native ankore ne acceptita)
+
+La sendependa Stage2-only gardilo rekonocas la exakta [sign, digits] formo
+ante modulo-kalkulo o mezuro/logado. Nevalida enigo donas
+FAILED_VALIDATION sen kalkuli intermedia konturi, sen state-liko.
+Stage1 validator e calendarDateSpaghetti restas netushita.
+Separita test-only katalogo havas 12 kanonala enigi, 12 nevalida
+enigi; 8 kontrol-punkti por kazo, entute 192 planita asserti.
+La CI provo esas bounded e konservas Discovery01–04 regresio.
+Ca commit NE deklaras Native PASS ni Stage2 acceptance.
