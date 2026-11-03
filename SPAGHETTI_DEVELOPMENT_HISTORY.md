@@ -123,3 +123,24 @@ Separita test-only katalogo havas 12 kanonala enigi, 12 nevalida
 enigi; 8 kontrol-punkti por kazo, entute 192 planita asserti.
 La CI provo esas bounded e konservas Discovery01–04 regresio.
 Ca commit NE deklaras Native PASS ni Stage2 acceptance.
+
+## Stage 2 — DISCOVERY 05: Native acceptita (2026-11-03)
+
+Komito 8201d09b9c2d97b61814dbbaed0d7cd9931da21d efektivigis Stage2-only BI gardilo e
+24 determinista kazi (12 valida, 12 nevalida), 192 asserti.
+Native Stage2 run 41712427420 / job 126183616662 completed SUCCESS:
+STAGE_2_DISCOVERY_05_CASES_PASIS 24,
+STAGE_2_DISCOVERY_05_CHECKS_PASIS 192,
+NATIVE_STAGE_2_DISCOVERY_05_VERIFICATION=PASS.
+Discovery01–04 regresio markeri omna PASS en la sama completed-log.
+Stage1 run 41712427288 / job 126183616905 completed SUCCESS,
+kun STAGE_1_TESTI_PASIS; verify run 41712427305 / job
+126183616678 completed SUCCESS. Nula manuala re-run o merge.
+Stage2 ne esas kompleta; LAST_COMPLETED_STAGE=1 restas.
+
+## Stage 2 — DISCOVERY 06 (planita)
+
+Sequanta substantiva derivado esas la 46-ronda 5-valora stone-series
+recidivo el Appendix A. Exakta algoritmo, 240 asserti e Native
+acceptance-gates esas en STAGE02_DISCOVERY06_CONTRACT.md.
+Ca komito nur dokumentas la nova kontrato, ne implikas Discovery06 PASS.

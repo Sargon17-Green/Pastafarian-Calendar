@@ -1,8 +1,9 @@
 # Stage 2 / DISCOVERY 05 — Exakta BI input-formo (Logo / Ido)
 
-Stato: KONTRATO_READY; nula code-change/nativa PASS por Discovery05.
-La antea Discovery01–04 esas acceptita nur per completed Native/verify
-logi, ne per spekulativa bug-raporti.
+Stato: ACCEPTITA en completed Native/Stage1/verify por implementation SHA 8201d09b9c2d97b61814dbbaed0d7cd9931da21d.
+Discovery01–04 esas revalidigita per completed Native logi; Discovery05
+24/192 PASS en run 41712427420, Stage1 41712427288 kaj verify 41712427305.
+Nula spekulativa bug-raporto.
 
 ## Enigo / eligo
 
