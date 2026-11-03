@@ -212,8 +212,39 @@ def check_owner_id_fragmented_high_boundary():
         assert compare_read_only(model, a, b) == 3, (
             f"revoked max-owner alias compared as valid: {a}, {b}"
         )
+    # Host-only revoked-zero boundary: zero length is not a valid value
+    # when the owner lease is gone, even if both descriptors would equal zero.
+    # No ROM0 increase and no implied Native coverage.
+    assert reference_integer(model, 1, 0, 0) == 0
+    assert reference_integer(model, 1, 0, 1) == int.from_bytes(bytes((1,)), "little")
+    revoked_zero = (
+        ((253, 0, 0), (253, 0, 0)),
+        ((253, 0, 0), (1, 0, 0)),
+        ((1, 0, 0), (253, 0, 0)),
+        ((253, 0, 0), (1, 0, 1)),
+        ((1, 0, 1), (253, 0, 0)),
+        ((253, 1, 0), (1, 0, 0)),
+        ((1, 0, 0), (253, 1, 0)),
+        ((253, 1, 0), (253, 1, 0)),
+    )
+    assert len(revoked_zero) == 8
+    for a, b in revoked_zero:
+        for descriptor in (a, b):
+            if descriptor[0] != 253:
+                continue
+            try:
+                reference_integer(model, *descriptor)
+            except ValueError as exc:
+                assert str(exc) == "capacity", (
+                    "revoked zero must fail lease lookup before sign/zero checks"
+                )
+            else:
+                raise AssertionError(f"revoked zero descriptor accepted: {descriptor}")
+        assert compare_read_only(model, a, b) == 3, (
+            f"revoked zero descriptor compared as valid: {a}, {b}"
+        )
     assert model.tags[5] == model.tags[7] == 0 and model.tags[6] == 3
-    print("HOST_OWNER_SIGNED_CMP_FRAGMENTED_MAX_OWNER=PASS cases=36 owner=253 tag=255 banks=5,7 peer_bank=6 canonical_and_revoked=YES payload_and_tags=IMMUTABLE")
+    print("HOST_OWNER_SIGNED_CMP_FRAGMENTED_MAX_OWNER=PASS cases=44 revoked_zero=8 owner=253 tag=255 banks=5,7 peer_bank=6 canonical_and_revoked=YES payload_and_tags=IMMUTABLE")
 
 def check_native_case262_oracle():
     """Independent integer oracle for ROM case 262; not a Native PASS."""
