@@ -1,4 +1,4 @@
-# Stage20 DISCOVERY17 — 5x5 joint mixed local/remote differential (open)
+# Stage20 DISCOVERY17 — 5x5 joint mixed local/remote differential (accepted, bounded)
 
 ## Verified predecessor and gap
 Stage19/DISCOVERY16 at 39207ca0f8c22eef36f0035b207c9d1d446dcd1d accepted bounded nine-pair grid: GitHub Actions 41536457335 completed/success 21/21 including verify and native-stage19-joint-wide. GNATMAKE13.3.0 compile/bind/link and markers independent=53, Native=51, numerical=45 were observed in job 125589408198.
@@ -14,10 +14,13 @@ Comparator: exact 25 unique pair set and only one Native assertion marker, no ma
 Domain constraints: year 4900..5100; cutlet 1..17; cutlet_day 1..5778; month 1..47; month_day 1..123. Do not assume monotonicity in either input axis. An observed failure must be diagnosed before assigning a historical bug cause.
 Budget: Python selftest <=180s, native executable <=600s, independent comparator <=180s, Actions job <=15 min.
 
-## Acceptance gates (not yet met)
+## Acceptance gates (met for bounded scope)
 Only completed/success push CI on the exact new commit SHA; all 22 jobs including verify and native-stage20-joint-sparse; GNAT13 compile/bind/link evidence; and exact log markers:
 - STAGE20_INDEPENDENT_JOINT_SPARSE_SELFTEST_ASSERTIONS=135
 - STAGE20_NATIVE_JOINT_SPARSE_ASSERTIONS=131
 - STAGE20_REAL_FIVEFIELD_SCALARS=125
 
 No acceptance while queued/in_progress, no duplicate manual dispatch, no modification to main, no merge or publication.
+
+## Completed acceptance evidence
+Push run 41536989033 at 9b170a49d92281d244e73992aa1b70d810de71a6 completed/success with 22/22 jobs, including verify and native-stage20-joint-sparse (job 125591236236). Native log shows GNATMAKE 13.3.0, gcc-13 compilation, gnatbind-13 and gnatlink-13 plus exactly 135 independent checks, 131 Ada invariants and 125 five-field scalar comparisons. Stage20 accepted for the specified 25 pairs only, no universal correctness claim.
