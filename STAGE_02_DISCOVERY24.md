@@ -26,3 +26,12 @@ Draait de huidige echte opt-in-keten zonder test-stubs voor een eindige selectie
 
 ## NEXT
 Inspecteer de ruwe CI-log van DISCOVERY24. Als een geval faalt: herstel de aantoonbare oorzaak in deze tak. Bij nul werkelijk bewezen paren: diagnoseer een eindig, reproduceerbaar budgetveilig profiel en voer echte E2E-differential uit voordat DISCOVERY24 wordt geaccepteerd. Bij groen Native en >=1 bewezen differential: breid de bewezen randgevallen gecontroleerd uit.
+
+
+## DIAG02 — bewezen onmogelijkheid en echte budgetveilige profielzoekactie
+- Vastgestelde ruwe run 41618280369, exact SHA 01a844177c2597c67f4f4108409a86a69bcc4bd3: verify en native completed SUCCESS; 108 tests, 42650 assertions, 0 failures en 0 errors. Werkelijke :bewezen=0, :geweigerd=7 bij 100000N: **DISCOVERY24 NIET GEACCEPTEERD**.
+- Mathematische uitsluiting: bij N>=252 en m>=3 is de bestaande bovengrens N*m*(1+(m+1)*(N+1)) minstens 765828, dus **geen enkele geldige datum** kan onder 100000N als voldoende bewezen worden.
+- Nieuw: maximaal 48 echte berekeningsdagen op stichtingsdag + 97*(k-24), k=0..47; echte jaar-/maandlengtekeuze, geen with-redefs; bereken bestaande veilige-celgrens op werkelijke lengtes. Log werkelijk onderzochte aantal, veilig aantal, minimumgrens en echt bewezen aantal.
+- Alleen ALS de berekende bovengrens voor een bepaald profiel <=5000000N, roep de echte vijfveldige productie aan op berekeningsdag plus eerste/midden/laatste dag van het werkelijke jaar. Vergelijk elk geaccepteerd geval met de **onafhankelijke** canonical oracle; controleer alle vijf integers en de gerapporteerde celbovengrens. Dit verhoogt de *eerder ingestelde productieplafond* niet en omzeilt de productiebudgetpoort niet. Stop na de eerste succesvolle reeks.
+- Verwacht resultaat van een groene diagnose met nul echte bewijzen: alleen een meetresultaat, **geen** acceptatie van DISCOVERY24 of Stage 2. Positief vereist minstens 1 echt geaccepteerd en oracle-identiek paar plus beide completed CI jobs op dezelfde SHA. Bij nul: gebruik gemeten minimum/jaar-/maandlengtes voor een afgebakende volgende algoritmische stap; geen blinde budgetverhoging.
+- Native workflow heeft een absolute tijdgrens van 20 minuten. Geen main, merge, publicatie of algemene datumclaim.
