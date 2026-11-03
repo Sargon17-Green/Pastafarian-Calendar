@@ -64,8 +64,7 @@ fn check_oracle(a: Int, b: Int, id: Int, seal: Int, low: Int, high: Int) {
   let assert Ok(value) = actual(a, b, id, seal, low, high)
   { value >= low && value <= high } |> should.equal(True)
   case rejected <= 8 {
-    True ->
-      value |> should.equal(low + sauce.choose_rank(stream, n) - 1)
+    True -> value |> should.equal(low + sauce.choose_rank(stream, n) - 1)
     False -> {
       let assert Ok(rank) =
         discovery_18_choose_rank.choose_rank_for_days(a, b, id, seal, n)
@@ -116,8 +115,8 @@ pub fn discovery_19_short_wide_transition_test() {
     _ -> False |> should.equal(True)
   }
   case wide.selection, negative.selection {
-    discovery_18_choose_rank.WideRank(_), discovery_18_choose_rank.WideRank(_) ->
-      True |> should.equal(True)
+    discovery_18_choose_rank.WideRank(_), discovery_18_choose_rank.WideRank(_)
+    -> True |> should.equal(True)
     _, _ -> False |> should.equal(True)
   }
   check_pure(1, -1, 0, modulus)
@@ -157,9 +156,7 @@ pub fn discovery_19_very_large_signed_bounds_test() {
 }
 
 pub fn discovery_19_six_bowls_oracle_test() {
-  list.each([1, 2, 3, 4, 5, 6], fn(id) {
-    check_oracle(11, 21, id, 1, 42, 963)
-  })
+  list.each([1, 2, 3, 4, 5, 6], fn(id) { check_oracle(11, 21, id, 1, 42, 963) })
 }
 
 pub fn discovery_19_seal_and_previous_preserved_test() {
@@ -228,11 +225,15 @@ pub fn discovery_19_invalid_interval_stream_and_priority_test() {
   let bad_retry = bootstrap.MonsterContext(..base, retry_budget: -1)
   discovery_19_interval_value.dispatch_discovery_19(bad_retry, 0, 0, 7, 6)
   |> should.equal(
-    Error(discovery_19_interval_value.InvalidContext(bootstrap.InvalidRetryBudget)),
+    Error(discovery_19_interval_value.InvalidContext(
+      bootstrap.InvalidRetryBudget,
+    )),
   )
   let bad_recovery = bootstrap.MonsterContext(..base, recovery_depth: -1)
   discovery_19_interval_value.dispatch_discovery_19(bad_recovery, 7, 0, 7, 6)
   |> should.equal(
-    Error(discovery_19_interval_value.InvalidContext(bootstrap.InvalidRecoveryDepth)),
+    Error(discovery_19_interval_value.InvalidContext(
+      bootstrap.InvalidRecoveryDepth,
+    )),
   )
 }

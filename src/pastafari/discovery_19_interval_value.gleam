@@ -31,7 +31,9 @@ pub type Discovery19Output {
   )
 }
 
-fn map_error(error: discovery_18_choose_rank.Discovery18Error) -> Discovery19Error {
+fn map_error(
+  error: discovery_18_choose_rank.Discovery18Error,
+) -> Discovery19Error {
   case error {
     discovery_18_choose_rank.InvalidContext(reason) -> InvalidContext(reason)
     discovery_18_choose_rank.InvalidBowlId -> InvalidBowlId
