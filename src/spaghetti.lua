@@ -49,6 +49,7 @@ local SignedOffsetPatch = require("gate_signed_offset_patch")
 local LegacyGatePhase = require("legacy_gate_phase")
 local GatePhasePatch = require("gate_phase_patch")
 local LegacyGateMidpoint = require("legacy_gate_midpoint")
+local GateMidpointPatch = require("gate_midpoint_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -667,6 +668,16 @@ end
 -- Stage50 DISCOVERY25: deliberately wrong exact-midpoint tie, diagnostic only.
 function S.legacyGateMidpointProbe(day,records)
     return LegacyGateMidpoint.execute(day,records)
+end
+
+-- Stage51 PATCH25: exact signed-integer equality correction; legacy remains callable.
+function S.gateMidpointPatchProbe(day,records)
+    return GateMidpointPatch.execute(day,records)
+end
+
+function S.gateMidpointSpaghetti(day,records)
+    local corrected=GateMidpointPatch.execute(day,records)
+    return corrected
 end
 
 function S.calendarDateSpaghetti()
