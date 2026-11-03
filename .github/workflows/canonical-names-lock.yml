@@ -434,3 +434,33 @@ jobs:
         run: dart analyze
       - name: Independently verify §R numerical year traversal
         run: dart run bin/stage2_production10_year_walk_tests.dart
+  
+  dart-hebrew-stage2-production11-meatballs:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Resolve packages
+        run: dart pub get
+      - name: Verify §S–T partition and oracle formatting
+        run: |
+          if ! dart format --output=none --set-exit-if-changed lib/src/monster_meatball_partition.dart bin/stage2_production11_meatball_tests.dart; then
+            dart format --output=write lib/src/monster_meatball_partition.dart bin/stage2_production11_meatball_tests.dart
+            for file in lib/src/monster_meatball_partition.dart bin/stage2_production11_meatball_tests.dart; do
+              echo "DART_CAPTURE_BEGIN:$file"
+              base64 -w0 "$file"
+              printf '\n'
+              echo "DART_CAPTURE_END:$file"
+            done
+            exit 1
+          fi
+      - name: Analyze Dart branch
+        run: dart analyze
+      - name: Independently verify §S–T composition and names
+        run: dart run bin/stage2_production11_meatball_tests.dart
