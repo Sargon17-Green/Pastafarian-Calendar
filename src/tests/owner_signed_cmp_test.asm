@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..263: signed owner-scoped comparison.
+; Stage 1 native regression 191..264: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1927,6 +1927,36 @@ OwnerCmpTestCase263:
     ; OwnerLeaseRelease scrubs the revoked physical bank 3.
     ; The live owner's bank 4 retains the old $01 marker even at length 0.
     ; Raw SRAM reads are required: OwnerByteRead correctly rejects owner 253.
+    ld a, 3
+    call SRAMSelectBank
+    ld a, [$a000]
+    or a
+    jr nz, .bad
+    ld a, 4
+    call SRAMSelectBank
+    ld a, [$a000]
+    cp 1
+    jr nz, .bad
+    call OwnerCmpTestCase264
+    jp nc, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Case 264: repeat zero-length revoked-owner comparison in the reverse
+; operand order. Both 10-byte descriptors and 16 lease tags are snapshotted.
+OwnerCmpTestCase264:
+    ld a, 8
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCmpOwnerA], a
+    ld a, 253
+    ld [wOwnerCmpOwnerB], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jr nc, .bad
     ld a, 3
     call SRAMSelectBank
     ld a, [$a000]
