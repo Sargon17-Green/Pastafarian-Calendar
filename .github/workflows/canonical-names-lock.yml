@@ -240,6 +240,8 @@ jobs:
             exit 1
           fi
           echo 'Stage30: GREEN shape witnesses, four intended RED output assertions'
+      - name: Stage 31 — exact polynomial weave vs independent exhaustive oracle
+        run: v test ./pastafari/normative_oracle_test.v -run-only 'test_stage31_weave_polynomial_counts_agree_with_exhaustive_small_states'
       - name: Stage 31 — bounded independent phase probes (diagnostic only)
         shell: bash
         run: |

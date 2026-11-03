@@ -326,29 +326,107 @@ fn (c Patch15WeaveCounter) apply_move(state Patch15WeaveState, j int) Patch15Wea
 	}
 }
 
+
+/*
+An exact insertion DP for the same first/last-constrained multiset words.
+This production implementation is independent of OracleEngine. For a new
+month, choose its first position, force its last occurrence to be last, and
+count the interior insertions with exact binomial coefficients. Every
+intermediate BigInt division below has a mathematically integral result.
+*/
+fn patch15_weave_choose_exact(n int, k int) BigInt {
+	if k < 0 || k > n {
+		return big_zero()
+	}
+	mut r := k
+	if r > n - r {
+		r = n - r
+	}
+	mut numerator := big_one()
+	mut denominator := big_one()
+	for i in 1 .. r + 1 {
+		numerator = big_mul_small(numerator, u32(n - r + i))
+		denominator = big_mul_small(denominator, u32(i))
+	}
+	return big_floor_div(numerator, denominator)
+}
+
 fn (mut c Patch15WeaveCounter) count(state Patch15WeaveState) BigInt {
-	mut done := true
-	for value in state.remaining {
-		if value != 0 {
-			done = false
+	mut unfinished := false
+	for v in state.remaining {
+		if v != 0 {
+			unfinished = true
 			break
 		}
 	}
-	if done {
+	if !unfinished {
 		return big_one()
 	}
 	key := patch15_weave_state_key(state)
 	if key in c.memo {
 		return c.memo[key]
 	}
-	mut total := big_zero()
-	for j in 1 .. c.lengths.len + 1 {
-		if c.legal_move(state, j) {
-			total = big_add(total, c.count(c.apply_move(state, j)))
+	opened := state.opened_up_to
+	mut known_length := c.lengths[0]
+	mut prefix_length := if opened > 0 { c.lengths[0] - state.remaining[0] } else { 0 }
+	mut ways_fixed := big_one()
+	for j in 2 .. opened + 1 {
+		suffix_previous := known_length - prefix_length
+		rest := state.remaining[j - 1]
+		if rest == 0 {
+			if suffix_previous > 0 {
+				c.memo[key] = big_zero()
+				return big_zero()
+			}
+		} else {
+			ways_fixed = big_mul(ways_fixed, patch15_weave_choose_exact(suffix_previous + rest - 1,
+				rest - 1))
 		}
+		prefix_length += c.lengths[j - 1] - rest
+		known_length += c.lengths[j - 1]
 	}
-	c.memo[key] = total
-	return total
+	if opened >= c.lengths.len {
+		c.memo[key] = ways_fixed
+		return ways_fixed
+	}
+	mut first := []BigInt{len: known_length + 1, init: big_zero()}
+	first_index := if opened == 0 { 0 } else { opened - 1 }
+	first[first_index] = ways_fixed
+	lowest_new := if opened < 2 { 2 } else { opened + 1 }
+	for j in lowest_new .. c.lengths.len + 1 {
+		size := c.lengths[j - 1]
+		left := known_length - prefix_length
+		mut running := big_zero()
+		mut sums := []BigInt{len: known_length + 2, init: big_zero()}
+		for p in 0 .. known_length + 1 {
+			running = big_add(running, first[p])
+			sums[p + 1] = running
+		}
+		mut updated := []BigInt{len: known_length + size + 1, init: big_zero()}
+		if size == 1 {
+			updated[prefix_length + left] = sums[prefix_length + left]
+		} else {
+			mut combinations := patch15_weave_choose_exact(left + size - 2, size - 2)
+			for skipped in 0 .. left + 1 {
+				p := prefix_length + skipped
+				updated[p] = big_mul(sums[p], combinations)
+				if skipped < left {
+					numerator := left - skipped
+					denominator := left - skipped + size - 2
+					combinations = big_floor_div(big_mul_small(combinations, u32(numerator)),
+						big_from_int(denominator))
+				}
+			}
+		}
+		first = updated
+		known_length += size
+	}
+	mut answer := big_zero()
+	for item in first {
+		answer = big_add(answer, item)
+	}
+	c.memo[key] = answer
+	return answer
 }
 
 fn (mut c Patch15WeaveCounter) initial_state() Patch15WeaveState {

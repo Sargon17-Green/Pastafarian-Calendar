@@ -751,10 +751,120 @@ fn (c OracleWeaveCounter) apply_move(state OracleWeaveState, j int) OracleWeaveS
 	}
 }
 
+
+/*
+Exact polynomial-time count of legal month weavings.
+For a completed prefix, opening and closing order make the count depend
+only on the remaining multiplicities. We choose a canonical representative
+prefix: open every already-opened month in order, then consume its remaining
+fixed-prefix occurrences in month order. Inserting a new largest month into
+words over smaller months preserves all earlier first/last ordering rules.
+
+For an unopened month of size L, whose first occurrence is at position p,
+the number of insertion patterns is C(N - p + L - 2, L - 2), with the
+last occurrence forced to be last. Prefix sums enforce the first-opening
+order. This DP is exact and has polynomially many states.
+*/
+fn oracle_weave_choose_exact(n int, k int) BigInt {
+	if k < 0 || k > n {
+		return big_zero()
+	}
+	mut reduced := k
+	if reduced > n - reduced {
+		reduced = n - reduced
+	}
+	mut answer := big_one()
+	for step in 1 .. reduced + 1 {
+		answer = big_floor_div(big_mul_small(answer, u32(n - reduced + step)),
+			big_from_int(step))
+	}
+	return answer
+}
+
 fn (mut c OracleWeaveCounter) count(state OracleWeaveState) BigInt {
+	mut all_done := true
+	for remaining in state.remaining {
+		if remaining != 0 {
+			all_done = false
+			break
+		}
+	}
+	if all_done {
+		return big_one()
+	}
+	key := oracle_weave_state_key(state)
+	if key in c.memo {
+		return c.memo[key]
+	}
+	opened := state.opened_up_to
+	mut n_previous := c.lengths[0]
+	mut fixed_prefix := if opened > 0 { c.lengths[0] - state.remaining[0] } else { 0 }
+	mut count_fixed := big_one()
+	for label in 2 .. opened + 1 {
+		free_previous := n_previous - fixed_prefix
+		remain := state.remaining[label - 1]
+		if remain == 0 {
+			if free_previous != 0 {
+				c.memo[key] = big_zero()
+				return big_zero()
+			}
+		} else {
+			ways := oracle_weave_choose_exact(free_previous + remain - 1, remain - 1)
+			count_fixed = big_mul(count_fixed, ways)
+		}
+		fixed_prefix += c.lengths[label - 1] - remain
+		n_previous += c.lengths[label - 1]
+	}
+	if opened == c.lengths.len {
+		c.memo[key] = count_fixed
+		return count_fixed
+	}
+	mut by_first := []BigInt{len: n_previous + 1, init: big_zero()}
+	first_position := if opened > 0 { opened - 1 } else { 0 }
+	by_first[first_position] = count_fixed
+	mut start := opened + 1
+	if start < 2 {
+		start = 2
+	}
+	for label in start .. c.lengths.len + 1 {
+		length := c.lengths[label - 1]
+		free_previous := n_previous - fixed_prefix
+		mut prefixes := []BigInt{len: n_previous + 2, init: big_zero()}
+		for p in 0 .. n_previous + 1 {
+			prefixes[p + 1] = big_add(prefixes[p], by_first[p])
+		}
+		mut next := []BigInt{len: n_previous + length + 1, init: big_zero()}
+		if length == 1 {
+			next[fixed_prefix + free_previous] = prefixes[fixed_prefix + free_previous]
+		} else {
+			mut weight := big_one()
+			for offset in 0 .. free_previous + 1 {
+				t := free_previous - offset
+				at := fixed_prefix + t
+				next[at] = big_mul(prefixes[at], weight)
+				if t > 0 {
+					top := free_previous - t + length - 1
+					bottom := free_previous - t + 1
+					weight = big_floor_div(big_mul_small(weight, u32(top)), big_from_int(bottom))
+				}
+			}
+		}
+		by_first = next
+		n_previous += length
+	}
+	mut result := big_zero()
+	for value in by_first {
+		result = big_add(result, value)
+	}
+	c.memo[key] = result
+	return result
+}
+
+// Preserve an algorithmically separate exhaustive oracle for small states.
+fn oracle_weave_exhaustive_small(c OracleWeaveCounter, state OracleWeaveState) BigInt {
 	mut done := true
-	for value in state.remaining {
-		if value != 0 {
+	for remaining in state.remaining {
+		if remaining != 0 {
 			done = false
 			break
 		}
@@ -762,17 +872,13 @@ fn (mut c OracleWeaveCounter) count(state OracleWeaveState) BigInt {
 	if done {
 		return big_one()
 	}
-	key := oracle_weave_state_key(state)
-	if key in c.memo {
-		return c.memo[key]
-	}
 	mut total := big_zero()
-	for j in 1 .. c.lengths.len + 1 {
-		if c.legal_move(state, j) {
-			total = big_add(total, c.count(c.apply_move(state, j)))
+	for label in 1 .. c.lengths.len + 1 {
+		if c.legal_move(state, label) {
+			total = big_add(total, oracle_weave_exhaustive_small(c, c.apply_move(state,
+				label)))
 		}
 	}
-	c.memo[key] = total
 	return total
 }
 
@@ -1367,6 +1473,39 @@ fn test_stage31_production_46_drop_chain_matches_independent_normative_sauce() {
 	calculation_day := big_add(foundation, big_from_int(3))
 	target_day := big_add(foundation, big_from_int(2))
 	stage31_assert_production_sauce_matches_independent_oracle(calculation_day, target_day)
+}
+
+
+fn stage31_check_small_weave_state(mut oracle OracleWeaveCounter, mut candidate Patch15WeaveCounter,
+	state OracleWeaveState, mut visited map[string]bool) {
+	key := oracle_weave_state_key(state)
+	if key in visited {
+		return
+	}
+	visited[key] = true
+	candidate_state := Patch15WeaveState{
+		remaining:    state.remaining.clone()
+		opened_up_to: state.opened_up_to
+		closed_up_to: state.closed_up_to
+	}
+	slow := oracle_weave_exhaustive_small(oracle, state)
+	assert big_eq(oracle.count(state), slow)
+	assert big_eq(candidate.count(candidate_state), slow)
+	for label in 1 .. oracle.lengths.len + 1 {
+		if oracle.legal_move(state, label) {
+			stage31_check_small_weave_state(mut oracle, mut candidate,
+				oracle.apply_move(state, label), mut visited)
+		}
+	}
+}
+
+fn test_stage31_weave_polynomial_counts_agree_with_exhaustive_small_states() {
+	mut oracle := new_oracle_weave_counter([2, 3, 2])
+	mut candidate := new_patch15_weave_counter([2, 3, 2])
+	mut visited := map[string]bool{}
+	initial := oracle.initial_state()
+	stage31_check_small_weave_state(mut oracle, mut candidate, initial, mut visited)
+	assert visited.len > 4
 }
 
 // Diagnostic-only bounded CI probes; these do not replace the full numeric gate.
