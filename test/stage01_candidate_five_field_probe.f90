@@ -11,7 +11,8 @@ program stage01_candidate_five_field_probe
   use normative_oracle_core, only: foundation_day
   use normative_oracle_calendar, only: CalendarDateResult, YearRecord, &
        YearStructure, project_calendar_date
-  use stage01_weaving_polynomial, only: count_weavings_polynomial
+  use stage01_weaving_polynomial, only: PrefixCompletionCache, &
+       prepare_prefix_completion_cache, count_prefix_weavings_polynomial
   use stage01_weaving_polynomial_unrank, only: unrank_weaving_polynomial
   implicit none
 
@@ -25,6 +26,7 @@ program stage01_candidate_five_field_probe
   type(YearStructure) :: s
   type(CalendarDateResult) :: actual
   type(BigInt) :: base,total,rank,day
+  type(PrefixCompletionCache), target :: shared_cache
   integer :: seen(45),i,dayIndex,month,cut,dayCut,failures,checks
   logical :: ok
 
@@ -49,10 +51,11 @@ program stage01_candidate_five_field_probe
      s%monthNameIndices(i)=46-i
   end do
 
-  total=count_weavings_polynomial(target)
+  call prepare_prefix_completion_cache(target,shared_cache)
+  total=count_prefix_weavings_polynomial(target,target,0,0,shared_cache)
   rank=bi_floor_div(bi_add_small(total,1_int64),bi_from_int64(2_int64))
   if (bi_equal(rank,bi_one())) error stop 'candidate projection: non-middle rank'
-  call unrank_weaving_polynomial(target,rank,s%monthWeaving,ok,total)
+  call unrank_weaving_polynomial(target,rank,s%monthWeaving,ok,total,shared_cache)
   if (.not.ok) error stop 'candidate projection: unrank did not complete'
 
   failures=0; checks=0; seen=0

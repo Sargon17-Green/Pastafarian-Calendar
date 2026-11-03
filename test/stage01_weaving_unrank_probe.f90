@@ -3,14 +3,18 @@
 program stage01_weaving_unrank_probe
   use iso_fortran_env, only: int64
   use big_integer, only: BigInt, bi_from_int64, bi_to_int64, bi_add_small
-  use stage01_weaving_polynomial, only: count_weavings_polynomial
+  use stage01_weaving_polynomial, only: count_weavings_polynomial, &
+       PrefixCompletionCache, prepare_prefix_completion_cache, count_prefix_weavings_polynomial
   use stage01_weaving_polynomial_unrank, only: unrank_weaving_polynomial
   implicit none
-  integer, allocatable :: lengths(:), remaining(:), word(:), expected(:,:), actual(:)
+  integer, allocatable :: lengths(:), remaining(:), word(:), expected(:,:), actual(:), cached(:)
   integer :: n, code, tmp, j, k, total, accepted, cases, ranks, assertions, failures
-  type(BigInt) :: count
-  logical :: ok
+  integer :: cacheAssertions, cacheFailures
+  type(BigInt) :: count, cachedCount
+  type(PrefixCompletionCache), target :: shared_cache
+  logical :: ok, cacheOK
   cases=0; ranks=0; assertions=0; failures=0
+  cacheAssertions=0; cacheFailures=0
   do n=1,4
      do code=0,3**n-1
         allocate(lengths(n))
@@ -24,12 +28,16 @@ program stage01_weaving_unrank_probe
            deallocate(lengths)
            cycle
         end if
-        allocate(remaining(n),word(total),actual(total),expected(total,1000))
+        allocate(remaining(n),word(total),actual(total),cached(total),expected(total,1000))
         remaining=lengths; accepted=0
         call enumerate(1)
         cases=cases+1
         count=count_weavings_polynomial(lengths)
+        call prepare_prefix_completion_cache(lengths,shared_cache)
+        cachedCount=count_prefix_weavings_polynomial(lengths,lengths,0,0,shared_cache)
         call check(bi_to_int64(count)==int(accepted,int64),'count vs independent enumeration')
+        call check_cache(bi_to_int64(cachedCount)==int(accepted,int64), &
+             'cached total vs independent enumeration')
         do k=1,accepted
            if (k==2) then
               ! Exercise the fallback path that computes its own exact total.
@@ -38,6 +46,10 @@ program stage01_weaving_unrank_probe
               call unrank_weaving_polynomial(lengths,bi_from_int64(int(k,int64)),actual,ok,count)
            end if
            call check(ok .and. all(actual==expected(:,k)),'lexicographic rank vs independent enumeration')
+           call unrank_weaving_polynomial(lengths,bi_from_int64(int(k,int64)),cached, &
+                cacheOK,cachedCount,shared_cache)
+           call check_cache(cacheOK .and. all(cached==expected(:,k)), &
+                'reused-cache rank vs independent enumeration')
            ranks=ranks+1
         end do
         call unrank_weaving_polynomial(lengths,bi_from_int64(0_int64),actual,ok)
@@ -46,14 +58,17 @@ program stage01_weaving_unrank_probe
         call check(.not.ok .and. all(actual==0),'negative rank rejected')
         call unrank_weaving_polynomial(lengths,bi_add_small(count,1_int64),actual,ok,count)
         call check(.not.ok .and. all(actual==0),'rank count plus one rejected')
-        deallocate(lengths,remaining,word,actual,expected)
+        deallocate(lengths,remaining,word,actual,cached,expected)
      end do
   end do
   print '(A,I0)', 'STAGE01_POLY_UNRANK_CASES=',cases
   print '(A,I0)', 'STAGE01_POLY_UNRANK_RANKS=',ranks
   print '(A,I0)', 'STAGE01_POLY_UNRANK_ASSERTIONS=',assertions
   print '(A,I0)', 'STAGE01_POLY_UNRANK_FAILURES=',failures
+  print '(A,I0)', 'STAGE01_POLY_REUSED_CACHE_ASSERTIONS=',cacheAssertions
+  print '(A,I0)', 'STAGE01_POLY_REUSED_CACHE_FAILURES=',cacheFailures
   if (cases/=105 .or. ranks/=698 .or. assertions/=1118 .or. failures/=0) error stop 1
+  if (cacheAssertions/=803 .or. cacheFailures/=0) error stop 1
   print '(A)', 'STAGE01_POLY_UNRANK_PASS (independent enumeration; NOT Stage1 acceptance)'
 contains
   recursive subroutine enumerate(position)
@@ -92,6 +107,15 @@ contains
     end do
     valid_word=(next_open==n+1 .and. next_close==n+1)
   end function valid_word
+
+  subroutine check_cache(correct,description)
+    logical, intent(in) :: correct
+    character(len=*), intent(in) :: description
+    cacheAssertions=cacheAssertions+1
+    if (correct) return
+    cacheFailures=cacheFailures+1
+    if (cacheFailures<=10) print '(A)', 'FAIL reused cache: '//description
+  end subroutine check_cache
 
   subroutine check(correct,description)
     logical, intent(in) :: correct

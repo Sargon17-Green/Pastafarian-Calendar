@@ -396,6 +396,8 @@ jobs:
           grep -Fxq 'STAGE01_POLY_UNRANK_RANKS=698' <<< "$output"
           grep -Fxq 'STAGE01_POLY_UNRANK_ASSERTIONS=1118' <<< "$output"
           grep -Fxq 'STAGE01_POLY_UNRANK_FAILURES=0' <<< "$output"
+          grep -Fxq 'STAGE01_POLY_REUSED_CACHE_ASSERTIONS=803' <<< "$output"
+          grep -Fxq 'STAGE01_POLY_REUSED_CACHE_FAILURES=0' <<< "$output"
           grep -Fxq 'STAGE01_POLY_UNRANK_PASS (independent enumeration; NOT Stage1 acceptance)' <<< "$output"
           echo 'STAGE01_POLY_UNRANK_NATIVE_PASS=1118 EXPECTED=1118 (not full Stage1 acceptance)'
           echo 'Fortran Stage1 candidate lex-unrank: 105 shapes, 698 ranks, 1118 independent checks. Not normative.' >> "$GITHUB_STEP_SUMMARY"

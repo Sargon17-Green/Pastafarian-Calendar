@@ -10,7 +10,7 @@ module stage01_weaving_polynomial_unrank
   integer(int64), parameter :: LIMB_BASE=1000000000_int64
   public :: unrank_weaving_polynomial
 contains
-  subroutine unrank_weaving_polynomial(lengths, rank, word, ok, total_hint)
+  subroutine unrank_weaving_polynomial(lengths, rank, word, ok, total_hint, prepared_cache)
     integer, intent(in) :: lengths(:)
     type(BigInt), intent(in) :: rank
     integer, intent(out) :: word(:)
@@ -18,10 +18,14 @@ contains
     ! Optional exact total already computed for these same lengths.
     ! Supplying it avoids repeating the expensive full count in diagnostics.
     type(BigInt), intent(in), optional :: total_hint
+    ! The caller may provide the same exact prefix table used to calculate
+    ! total_hint. This avoids independently rebuilding thousands of BigInts.
+    type(PrefixCompletionCache), intent(in), target, optional :: prepared_cache
     integer, allocatable :: remaining(:), cumulative(:)
     type(BigInt) :: total, offset, state_total, leftover, completions
     type(BigInt) :: active_factor, b, child_factor
-    type(PrefixCompletionCache) :: cache
+    type(PrefixCompletionCache), target :: local_cache
+    type(PrefixCompletionCache), pointer :: used_cache
     integer :: p, color, opened, closed, new_opened, new_closed, first_active, oldR, j
     integer :: first_legal, last_legal
     logical :: chosen
@@ -57,9 +61,14 @@ contains
        return
     end if
 
-    call prepare_prefix_completion_cache(lengths,cache)
-    if (bi_compare(count_prefix_weavings_polynomial(lengths,lengths,0,0,cache),total)/=0) &
-         error stop 'prefix cache does not match independent total'
+    if (present(prepared_cache)) then
+       used_cache=>prepared_cache
+    else
+       call prepare_prefix_completion_cache(lengths,local_cache)
+       used_cache=>local_cache
+    end if
+    if (bi_compare(count_prefix_weavings_polynomial(lengths,lengths,0,0,used_cache),total)/=0) &
+         error stop 'prefix cache does not match exact total'
     remaining=lengths
     allocate(cumulative(size(lengths)))
     active_factor=bi_one()
@@ -156,7 +165,7 @@ contains
              if (remaining(color)==1) new_closed=color
              remaining(color)=remaining(color)-1
              completions=count_prefix_weavings_polynomial( &
-                  lengths,remaining,new_opened,new_closed,cache,child_factor)
+                  lengths,remaining,new_opened,new_closed,used_cache,child_factor)
              remaining(color)=remaining(color)+1
           end if
           if (bi_compare(offset,completions)>0) then

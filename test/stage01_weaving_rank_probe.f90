@@ -6,7 +6,8 @@ program stage01_weaving_rank_probe
   use iso_fortran_env, only: int64, output_unit
   use big_integer, only: BigInt, bi_one, bi_from_int64, bi_add_small, &
        bi_floor_div, bi_sub, bi_compare, bi_to_string
-  use stage01_weaving_polynomial, only: count_weavings_polynomial
+  use stage01_weaving_polynomial, only: count_weavings_polynomial, &
+       PrefixCompletionCache, prepare_prefix_completion_cache, count_prefix_weavings_polynomial
   use stage01_weaving_polynomial_unrank, only: unrank_weaving_polynomial
   implicit none
   integer, parameter :: target(45) = [ &
@@ -17,7 +18,8 @@ program stage01_weaving_rank_probe
   integer :: n, stat, i, color, nextOpen, nextClose, checks
   integer(int64) :: startCount, afterCount, afterUnrank, clockRate
   type(BigInt) :: total, rank
-  logical :: ok
+  type(PrefixCompletionCache), target :: shared_cache
+  logical :: ok, reuse_cache
   character(len=20) :: arg, mode
 
   call get_command_argument(1,arg,status=stat)
@@ -37,7 +39,15 @@ program stage01_weaving_rank_probe
   print '(A)', 'STAGE01_RANK_PHASE=COUNT_BEGIN'
   flush(output_unit)
   call system_clock(count=startCount,count_rate=clockRate)
-  total=count_weavings_polynomial(lengths)
+  reuse_cache=(n==45 .and. trim(mode)=='middle')
+  if (reuse_cache) then
+     call prepare_prefix_completion_cache(lengths,shared_cache)
+     total=count_prefix_weavings_polynomial(lengths,lengths,0,0,shared_cache)
+     print '(A)', 'STAGE01_RANK_TOTAL_METHOD=REUSED_PREFIX_CACHE'
+  else
+     total=count_weavings_polynomial(lengths)
+     print '(A)', 'STAGE01_RANK_TOTAL_METHOD=INDEPENDENT_POLYNOMIAL'
+  end if
   call system_clock(count=afterCount)
   if (bi_compare(total,bi_one())<=0) error stop 'no nontrivial ranks'
   select case(trim(mode))
@@ -51,8 +61,13 @@ program stage01_weaving_rank_probe
   print '(A,I0)', 'STAGE01_RANK_COUNT_MS=',elapsed_ms(startCount,afterCount,clockRate)
   print '(A)', 'STAGE01_RANK_PHASE=UNRANK_BEGIN'
   flush(output_unit)
-  ! Reuse the exact total computed above; the unranker accepts this trusted hint.
-  call unrank_weaving_polynomial(lengths,rank,word,ok,total)
+  ! The 45-color middle rank reuses the prepared table, avoiding the
+  ! redundant polynomial count + second full precomputation.
+  if (reuse_cache) then
+     call unrank_weaving_polynomial(lengths,rank,word,ok,total,shared_cache)
+  else
+     call unrank_weaving_polynomial(lengths,rank,word,ok,total)
+  end if
   call system_clock(count=afterUnrank)
   print '(A,I0)', 'STAGE01_RANK_UNRANK_MS=',elapsed_ms(afterCount,afterUnrank,clockRate)
   if (.not.ok) error stop 'candidate arbitrary-rank unrank failed'
