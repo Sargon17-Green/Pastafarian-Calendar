@@ -9,6 +9,8 @@ on:
       - 'tests/**'
       - 'tools/stage04_cross_runtime_diff.py'
       - 'tools/stage04_rust_witness_provenance.py'
+      - 'tools/stage04_rust_callability_eligibility.py'
+      - 'audit/STAGE_04_RUST_CALLABILITY_ELIGIBILITY_CONTRACT_2026-11-03.md'
       - 'tools/tests/test_stage04_*.py'
       - 'Cargo.toml'
       - 'Cargo.lock'
@@ -84,6 +86,32 @@ jobs:
           python3 -c 'import json; p=json.load(open("evidence/stage04_source_pin.json")); assert p["source_pin_eligible"] is True and p["historical_day_tag_route_proven"] is False and p["observed_runtime_red"] is False and p["stage04_closure"] == "NOT_CLAIMED"'
           printf 'STAGE04_PROVENANCE_QA=13_PASS\nSTAGE04_HISTORICAL_RUST_ROUTE=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/stage04_provenance_result.txt
           cat evidence/stage04_provenance_result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify Stage04 historical Rust day-tag callability (9 controls, synthetic native positive)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          timeout --signal=TERM --kill-after=5s 260s \
+            python3 -m unittest discover -s tools/tests -p 'test_stage04_rust_callability_eligibility.py' -v \
+            > evidence/stage04_callability_tests.txt 2>&1
+          cat evidence/stage04_callability_tests.txt
+          grep -Fq 'Ran 9 tests' evidence/stage04_callability_tests.txt
+          grep -Fxq 'OK' evidence/stage04_callability_tests.txt
+          if grep -Eq 'skipped=[1-9]|FAILED|ERROR' evidence/stage04_callability_tests.txt; then exit 1; fi
+          timeout --signal=TERM --kill-after=5s 30s \
+            python3 tools/stage04_rust_callability_eligibility.py \
+              --repo . \
+              --witness-commit 716e5a6f335b1a15464029b446edb468f3a8482c \
+              --witness-path src/lib.rs \
+              --witness-blob 8a813ba020c9101276007148c93cb00ae7836644 \
+              --stage3-closure 716e5a6f335b1a15464029b446edb468f3a8482c \
+              --stage4-introduction 2a7648c345ee63d9e5c81ca0361c6eb3060c6c4f \
+              --branch-head "$GITHUB_SHA" \
+              --symbol calendar_date_spaghetti \
+              > evidence/stage04_old_rust_callability.json
+          python3 -c 'import json; d=json.load(open("evidence/stage04_old_rust_callability.json")); assert d["source_pin_eligible"] is True and d["callability_status"] == "SOURCE_ONLY_NO_SUPPORTED_SIGNATURE" and d["callable_day_tag_route_verified"] is False and d["observed_runtime_red"] is False and d["stage04_closure"] == "NOT_CLAIMED"'
+          printf 'STAGE04_CALLABILITY_QA=9_PASS (synthetic Rust positive only)\nSTAGE04_ACTUAL_OLD_RUST_CALLABLE_DAY_TAG=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/stage04_callability_result.txt
+          cat evidence/stage04_callability_result.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Run bounded native baseline and prior regression tests
         shell: bash
         run: |
