@@ -2,7 +2,7 @@
 """Independent Python integer oracle for owner-scoped signed magnitudes.
 
 This is a HOST reference contract, not execution of SM83 machine code.
-The ROM exercise covers cases 191..262; extra max-owner boundary checks are Host-only.
+The ROM exercise covers cases 191..263; extra max-owner boundary checks are Host-only.
 """
 from random import Random
 from test_sram_owner_model import OwnedBanks, SIZE
@@ -247,7 +247,7 @@ def check_owner_id_fragmented_high_boundary():
     print("HOST_OWNER_SIGNED_CMP_FRAGMENTED_MAX_OWNER=PASS cases=44 revoked_zero=8 owner=253 tag=255 banks=5,7 peer_bank=6 canonical_and_revoked=YES payload_and_tags=IMMUTABLE")
 
 def check_native_case262_oracle():
-    """Independent integer oracle for ROM case 262; not a Native PASS."""
+    """Independent integer oracle for ROM cases 262-263; not a Native PASS."""
     model = OwnedBanks()
     assert model.alloc(253, 1) == (0, (3,))
     assert model.tags[3] == 255
@@ -265,6 +265,22 @@ def check_native_case262_oracle():
     assert model.read_byte(1, 0) == (0, 1)
     assert model.tags[3] == 255 and model.tags[4] == 3
     print("HOST_NATIVE262_INDEPENDENT_ORACLE=PASS owner=253 tag=255 peer=1 A=2 B=1 expected=GT1 payload_and_tags=IMMUTABLE")
+    # Case 263: physical bank 3 was scrubbed upon revocation, while
+    # physical bank 4 remains owned and contains the stale $01 sentinel.
+    assert model.release(253) == (0, 1)
+    assert model.tags[3] == 0 and model.tags[4] == 3
+    assert model.data[3][0] == 0 and model.data[4][0] == 1
+    assert reference_integer(model, 1, 0, 0) == 0
+    try:
+        reference_integer(model, 253, 0, 0)
+    except ValueError as exc:
+        assert str(exc) == "capacity", "revoked zero must fail lease validation"
+    else:
+        raise AssertionError("revoked owner 253 accepted as a valid zero")
+    assert compare_read_only(model, (253, 0, 0), (1, 0, 0)) == 3
+    assert model.tags[3] == 0 and model.tags[4] == 3
+    assert model.data[3][0] == 0 and model.data[4][0] == 1
+    print("HOST_NATIVE263_INDEPENDENT_ORACLE=PASS revoked_owner=253 old_tag=255 live_owner=1 zero_lengths=YES expected=INVALID3 bank3_scrubbed=YES bank4_preserved=YES payload_and_tags=IMMUTABLE")
 
 
 def main():

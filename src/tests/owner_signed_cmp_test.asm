@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..262: signed owner-scoped comparison.
+; Stage 1 native regression 191..263: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1504,6 +1504,13 @@ RunOwnerSignedCmpTests::
     ld a, [wOwnerByteValue]
     cp 1
     jp nz, .fail
+    ; Native case 263 runs in ROM bank 1 to respect the measured ROM0
+    ; free-space bound (27 bytes total, 25 contiguous before this change).
+    ; MBC5 ROM bank select is independent of the SRAM bank register $4000.
+    ld a, 1
+    ld [$2000], a
+    call OwnerCmpTestCase263
+    jp nc, .fail
     call LeaseResetAll
     call SRAMDisable
     ld a, $a5
@@ -1882,4 +1889,56 @@ OwnerCmpTestExpectResultSnapshot:
 OwnerCmpTestReadOwnerStatus:
     ld a, [wOwnerStatus]
     or a
+    ret
+
+; Test-only overflow into switchable ROM bank 1. No production routine moved.
+; Entered from fixed ROM0 with MBC5 ROM bank 1 explicitly selected.
+SECTION "Owner signed cmp case 263", ROMX, BANK[1]
+OwnerCmpTestCase263:
+    ; Case 263: revoke max owner 253 (tag 255) while owner 1 remains live.
+    ; Both descriptors are canonical sign=0,length=0; stale ownership must
+    ; win over the zero-value fast path, returning INVALID=3.
+    ld a, 253
+    ld [wOwnerRequest], a
+    call OwnerLeaseRelease
+    call OwnerCmpTestReadOwnerStatus
+    jr nz, .bad
+    ld a, [wLeaseTable+3]
+    or a
+    jr nz, .bad
+    ld a, [wLeaseTable+4]
+    cp 3
+    jr nz, .bad
+    ld a, 7
+    ld [wTestCase], a
+    ld a, [wTestCaseHi]
+    cp 1
+    jr nz, .bad
+    xor a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenA+1], a
+    ld [wOwnerCmpLenA+2], a
+    ld [wOwnerCmpLenB], a
+    ld [wOwnerCmpLenB+1], a
+    ld [wOwnerCmpLenB+2], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jr nc, .bad
+    ; OwnerLeaseRelease scrubs the revoked physical bank 3.
+    ; The live owner's bank 4 retains the old $01 marker even at length 0.
+    ; Raw SRAM reads are required: OwnerByteRead correctly rejects owner 253.
+    ld a, 3
+    call SRAMSelectBank
+    ld a, [$a000]
+    or a
+    jr nz, .bad
+    ld a, 4
+    call SRAMSelectBank
+    ld a, [$a000]
+    cp 1
+    jr nz, .bad
+    scf
+    ret
+.bad:
+    and a
     ret
