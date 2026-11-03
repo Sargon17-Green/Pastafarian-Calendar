@@ -1,0 +1,91 @@
+name: Kotlin independent month-weaving differential
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/independent_month_weaving_oracle.py'
+      - 'soak/test_independent_month_weaving_oracle.py'
+      - 'soak/write_independent_weaving_fixtures.py'
+      - 'soak/IndependentMonthWeavingNativeCompare.kt'
+      - '.github/workflows/post55-independent-month-weaving.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-python-weaving:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify exhaustive small cases and large exact counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p .evidence
+          python3 -m py_compile soak/independent_month_weaving_oracle.py soak/test_independent_month_weaving_oracle.py
+          python3 -m unittest discover -s soak -p 'test_independent_month_weaving_oracle.py' -v 2>&1 | tee .evidence/independent-month-weaving-python.log
+          echo PASS_INDEPENDENT_MONTH_WEAVING_COMPONENT_ONLY | tee -a .evidence/independent-month-weaving-python.log
+      - name: Preserve Python oracle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-month-weaving-python
+          path: .evidence/independent-month-weaving-python.log
+          if-no-files-found: warn
+          retention-days: 30
+  kotlin-native-differential:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile exact native weaving engine with pinned Kotlin compiler 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin.zip"
+          unzip -q "$RUNNER_TEMP/kotlin.zip" -d "$RUNNER_TEMP"
+          "$RUNNER_TEMP/kotlinc/bin/kotlinc" \
+            src/main/kotlin/pastafari/ProductionMonthWeavingEngine.kt \
+            soak/IndependentMonthWeavingNativeCompare.kt \
+            -include-runtime -d "$RUNNER_TEMP/native-weaving-compare.jar"
+          test -s "$RUNNER_TEMP/native-weaving-compare.jar"
+      - name: Compare exact independent witnesses with native production
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .evidence
+          python3 soak/write_independent_weaving_fixtures.py .evidence/month-weaving-witnesses.tsv | tee .evidence/native-month-weaving.log
+          java -XX:ActiveProcessorCount=1 -Xmx1200m -cp "$RUNNER_TEMP/native-weaving-compare.jar" \
+            pastafari.IndependentMonthWeavingNativeCompare \
+            .evidence/month-weaving-witnesses.tsv | tee -a .evidence/native-month-weaving.log
+          grep -F 'PASS_NATIVE_INDEPENDENT_MONTH_WEAVING_DIFFERENTIAL_NOT_FULL_DATE_CERTIFIED' .evidence/native-month-weaving.log
+      - name: Preserve native comparison and full witnesses
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-month-weaving-native-differential
+          path: |
+            .evidence/native-month-weaving.log
+            .evidence/month-weaving-witnesses.tsv
+          if-no-files-found: warn
+          retention-days: 30
