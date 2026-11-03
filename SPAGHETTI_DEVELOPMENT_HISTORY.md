@@ -93,3 +93,22 @@ La limiti inkluzas foundation, zero, tablets, -M, +M e +/-1000M.
 Native PASS esas ankor ne deklarita. Nula fliko o historiala bugo
 esas asertita sen reproduktajo; nula main/merge.
 
+## Stage 2 — DISCOVERY 04 (native GREEN)
+
+En commit `7c7e9df6dd56b8fe004704311e81ed716f82d0ff`, Native Stage2 run 41617790643
+(job 125855472320) completed SUCCESS, kun 24 pari, 432 asserti
+e la marki STAGE_2_DISCOVERY_04_PAIRS_PASIS 24,
+STAGE_2_DISCOVERY_04_CHECKS_PASIS 432,
+STAGE_2_DISCOVERY_04_PASIS,
+NATIVE_STAGE_2_DISCOVERY_04_VERIFICATION=PASS.
+La sama job anke verificis DISCOVERY 01–03.
+Native Stage1 run 41617790656 (job 125855472594) e
+Canonical Names verify 41617790663 completed SUCCESS.
+DISCOVERY04 esas acceptita; LAST_COMPLETED_STAGE restas 1.
+
+## Stage 2 — DISCOVERY 05 (kontrato redactita, implemento ne komencita)
+
+La proxima injenierala tasko esas valida la strukturo di exakta
+BI-inputo ante modulo o workcounts. La kontrato esas en
+STAGE02_DISCOVERY05_CONTRACT.md. Ca tasko esas defensiva,
+ne aserto pri reproduktita bugo. Nula Stage1 API o main esas modifikita.
