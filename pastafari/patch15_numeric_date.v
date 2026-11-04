@@ -333,6 +333,27 @@ month, choose its first position, force its last occurrence to be last, and
 count the interior insertions with exact binomial coefficients. Every
 intermediate BigInt division below has a mathematically integral result.
 */
+fn patch15_weave_div_small(value BigInt, divisor int) BigInt {
+	if divisor <= 0 || value.sign < 0 {
+		panic('nonnegative exact weave division required')
+	}
+	if value.is_zero() {
+		return big_zero()
+	}
+	mut limbs := []u32{len: value.limbs.len, init: 0}
+	mut remainder := u64(0)
+	for step in 0 .. value.limbs.len {
+		i := value.limbs.len - 1 - step
+		partial := remainder * bigint_base + u64(value.limbs[i])
+		limbs[i] = u32(partial / u64(divisor))
+		remainder = partial % u64(divisor)
+	}
+	if remainder != 0 {
+		panic('non-exact weave division')
+	}
+	return big_normalized(1, limbs)
+}
+
 fn patch15_weave_choose_exact(n int, k int) BigInt {
 	if k < 0 || k > n {
 		return big_zero()
@@ -412,8 +433,7 @@ fn (mut c Patch15WeaveCounter) count(state Patch15WeaveState) BigInt {
 				if skipped < left {
 					numerator := left - skipped
 					denominator := left - skipped + size - 2
-					combinations = big_floor_div(big_mul_small(combinations, u32(numerator)),
-						big_from_int(denominator))
+					combinations = patch15_weave_div_small(big_mul_small(combinations, u32(numerator)), denominator)
 				}
 			}
 		}

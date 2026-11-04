@@ -764,6 +764,27 @@ the number of insertion patterns is C(N - p + L - 2, L - 2), with the
 last occurrence forced to be last. Prefix sums enforce the first-opening
 order. This DP is exact and has polynomially many states.
 */
+fn oracle_weave_div_small(value BigInt, divisor int) BigInt {
+	if divisor <= 0 || value.sign < 0 {
+		panic('nonnegative exact weave division required')
+	}
+	if value.is_zero() {
+		return big_zero()
+	}
+	mut limbs := []u32{len: value.limbs.len, init: 0}
+	mut remainder := u64(0)
+	for step in 0 .. value.limbs.len {
+		i := value.limbs.len - 1 - step
+		partial := remainder * bigint_base + u64(value.limbs[i])
+		limbs[i] = u32(partial / u64(divisor))
+		remainder = partial % u64(divisor)
+	}
+	if remainder != 0 {
+		panic('non-exact weave division')
+	}
+	return big_normalized(1, limbs)
+}
+
 fn oracle_weave_choose_exact(n int, k int) BigInt {
 	if k < 0 || k > n {
 		return big_zero()
@@ -774,7 +795,7 @@ fn oracle_weave_choose_exact(n int, k int) BigInt {
 	}
 	mut answer := big_one()
 	for step in 1 .. reduced + 1 {
-		answer = big_floor_div(big_mul_small(answer, u32(n - reduced + step)), big_from_int(step))
+		answer = oracle_weave_div_small(big_mul_small(answer, u32(n - reduced + step)), step)
 	}
 	return answer
 }
@@ -841,8 +862,7 @@ fn (mut c OracleWeaveCounter) count(state OracleWeaveState) BigInt {
 				at := fixed_prefix + offset
 				next[at] = big_mul(prefixes[at], weight)
 				if t > 0 {
-					weight = big_floor_div(big_mul_small(weight, u32(t)), big_from_int(t + length -
-						2))
+					weight = oracle_weave_div_small(big_mul_small(weight, u32(t)), t + length - 2)
 				}
 			}
 		}
