@@ -436,3 +436,22 @@ jobs:
         run: |
           set -euo pipefail
           sh ./run_stage23_remote_seven.sh
+
+  native-stage24-limit-seven:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNAT 13
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y gnat gprbuild
+          gnatmake --version
+      - name: Verify cross-axis 5778-adjacent and seven-day five-field differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh ./run_stage24_limit_seven.sh
