@@ -14,6 +14,7 @@ from pathlib import Path
 # 265: revoked B negative-zero; 266/267 reject illegal owner IDs 254/255
 # at zero length, 268/269 at one-byte length, in both operand positions.
 # Cases 270/271 reject reserved owner zero at zero and one-byte lengths.
+# Cases 272/273 reject reserved negative zero and both-operand owner-zero aliasing.
 # Raw SRAM sentinels remain intact.
 # Keep the measured 9000-frame cap.
 MAX_BOOT_AND_TEST_FRAMES = 9000
@@ -23,7 +24,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 271
+TOTAL_CASES = 273
 
 
 def discover_case_high_byte(symbol_path: Path) -> int:
