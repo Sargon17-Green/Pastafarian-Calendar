@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..269: signed owner-scoped comparison.
+; Stage 1 native regression 191..271: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1998,7 +1998,7 @@ OwnerCmpTestCase265:
     ld a, [$a000]
     cp 1
     jr nz, .bad
-    call OwnerCmpTestCases266To269
+    call OwnerCmpTestCases266To271
     jp nc, .bad
     scf
     ret
@@ -2009,7 +2009,7 @@ OwnerCmpTestCase265:
 ; Stage1 Native 266: owner 254 (invalid) in operand B, live owner 1 in A.
 ; Native 267: owner 255 (invalid) in A, live owner 1 in B.
 ; The zero-length fast path must not accept an invalid owner ID.
-OwnerCmpTestCases266To269:
+OwnerCmpTestCases266To271:
     ; Existing 263..265 leave both descriptor lengths zero and
     ; bank3 scrubbed; bank4's live payload remains $01.
     xor a
@@ -2062,6 +2062,36 @@ OwnerCmpTestCases266To269:
     ld a, 1
     ld [wOwnerCmpOwnerB], a
     ld a, 13
+    ld [wTestCase], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .bad
+    call .checkBytes
+    jp nc, .bad
+    ; 270: reserved owner ID 0 in A, both lengths zero. The scrubbing
+    ; marker in free bank3 is NOT a valid lease for owner zero.
+    xor a
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    ld a, 1
+    ld [wOwnerCmpOwnerB], a
+    ld a, 14
+    ld [wTestCase], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .bad
+    call .checkBytes
+    jp nc, .bad
+
+    ; 271: owner ID 0 in B at nonzero length, with a canonical live A.
+    ld a, 1
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    xor a
+    ld [wOwnerCmpOwnerB], a
+    ld a, 15
     ld [wTestCase], a
     ld a, 3
     call OwnerCmpTestExpectResultSnapshot
