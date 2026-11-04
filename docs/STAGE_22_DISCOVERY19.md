@@ -1,4 +1,4 @@
-# Stage22 DISCOVERY19 — mixed local and 5778-adjacent five-field differential (open)
+# Stage22 DISCOVERY19 — mixed local and 5778-adjacent five-field differential (accepted: bounded)
 
 ## Verified predecessor and uncovered scope
 Stage21 at 1fbe72c5b962569591b7e8fffc9a4124dc22b913, push CI 41617802891, completed/success 23/23 including verify and native-stage21-edge-adjacent job 125855515689. GNAT13 compile/bind/link and exact 88/85/80 markers observed.
@@ -14,9 +14,9 @@ Domain checks: year 4900..5100; cutlet 1..17; cutlet-day 1..5778; month 1..47; m
 - Numerical differential: exactly 25 unique ordered pairs, one valid Native marker, no malformed/duplicate/extra/missing records, 25*5 = 125 exact scalar comparisons.
 - Python selftest <=180s; native <=600s; comparator <=180s; GitHub job <=15min.
 
-## Gate (not yet accepted)
-Only completed/success push on exact Stage22 SHA with 24/24 jobs including verify and native-stage22-limit-mixed; observed GNAT13 compile/bind/link; exact:
+## Acceptance evidence (bounded)
+Exact SHA c3f26a380585133ce931ab6965f337d2a64903a9: completed/success push run 41712444973, 24/24 completed/success jobs including verify and native-stage22-limit-mixed (job 126183680869). Native log observed GNATMAKE 13.3.0, gcc-13, gnatbind-13, gnatlink-13, 25 distinct output pairs and exact markers:
 STAGE22_INDEPENDENT_LIMIT_MIXED_SELFTEST_ASSERTIONS=138
 STAGE22_NATIVE_LIMIT_MIXED_ASSERTIONS=131
 STAGE22_REAL_FIVEFIELD_SCALARS=125
-Do not treat queued/in_progress as PASS or block, manually duplicate CI, modify main, merge or publish. Diagnose an actual failure from logs before patching.
+Acceptance is restricted to the stated 25 pairs and is not a universal proof. No main/merge/publication.
