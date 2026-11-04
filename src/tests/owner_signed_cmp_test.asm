@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..273: signed owner-scoped comparison.
+; Stage 1 native regression 191..275: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -1998,7 +1998,7 @@ OwnerCmpTestCase265:
     ld a, [$a000]
     cp 1
     jr nz, .bad
-    call OwnerCmpTestCases266To273
+    call OwnerCmpTestCases266To275
     jp nc, .bad
     scf
     ret
@@ -2009,7 +2009,7 @@ OwnerCmpTestCase265:
 ; Stage1 Native 266: owner 254 (invalid) in operand B, live owner 1 in A.
 ; Native 267: owner 255 (invalid) in A, live owner 1 in B.
 ; The zero-length fast path must not accept an invalid owner ID.
-OwnerCmpTestCases266To273:
+OwnerCmpTestCases266To275:
     ; Existing 263..265 leave both descriptor lengths zero and
     ; bank3 scrubbed; bank4's live payload remains $01.
     xor a
@@ -2129,6 +2129,43 @@ OwnerCmpTestCases266To273:
     jp nc, .bad
     call .checkBytes
     jp nc, .bad
+
+    ; 274: both operands alias invalid owner ID 254 with zero lengths.
+    ; This covers simultaneous invalid metadata, unlike live/invalid pairs.
+    ld a, 254
+    ld [wOwnerCmpOwnerA], a
+    ld [wOwnerCmpOwnerB], a
+    xor a
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpSignB], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    ld a, 18
+    ld [wTestCase], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .bad
+    call .checkBytes
+    jp nc, .bad
+
+    ; 275: different invalid IDs 255/254, both one-byte descriptors.
+    ; Verify fail-closed behavior also with nonzero lengths and opposite signs.
+    ld a, 255
+    ld [wOwnerCmpOwnerA], a
+    ld a, 254
+    ld [wOwnerCmpOwnerB], a
+    ld a, 1
+    ld [wOwnerCmpSignA], a
+    ld [wOwnerCmpLenA], a
+    ld [wOwnerCmpLenB], a
+    ld a, 19
+    ld [wTestCase], a
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .bad
+    call .checkBytes
+    jp nc, .bad
+
     ld a, [wTestCaseHi]
     cp 1
     jp nz, .bad
