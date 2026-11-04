@@ -24,6 +24,55 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+  normative-real-date:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran for exact normative-date gate
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile standalone normative direct-date probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          flags=(-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build)
+          gfortran "${flags[@]}" -c src/big_integer.f90 -o build/big_integer.o
+          gfortran "${flags[@]}" -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran "${flags[@]}" -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran "${flags[@]}" -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran "${flags[@]}" -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran "${flags[@]}" test/stage01_normative_real_date_probe.f90 \
+            build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o build/normative_oracle_calendar.o \
+            -o build/stage01_normative_real_date_probe
+          test -x build/stage01_normative_real_date_probe
+      - name: Compare original normative entry point for seven Python-verified dates (35 exact fields)
+        shell: bash
+        run: |
+          set -euo pipefail
+          targets=(-15057703 -15057702 -15055672 -15055671 -15055670 -15053459 -15053458)
+          passed=0
+          for case_idx in 1 2 3 4 5 6 7; do
+            target="${targets[$((case_idx-1))]}"
+            set +e
+            output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 45s build/stage01_normative_real_date_probe "$case_idx") 2>&1)"
+            exit_code=$?
+            set -e
+            printf '%s\n' "$output"
+            echo "STAGE01_NORMATIVE_DIRECT_CASE=$case_idx EXIT=$exit_code LIMIT=45 MEMORY_KIB=1048576"
+            if [[ "$exit_code" -ne 0 ]] ||
+               ! grep -Fxq "STAGE01_NORMATIVE_CASE=$case_idx TARGET=$target MATCHED_FIELDS=5/5" <<< "$output"; then
+              echo "::error::Independent real-date normative mismatch or timeout at case $case_idx"
+              exit 1
+            fi
+            passed=$((passed+1))
+          done
+          test "$passed" -eq 7
+          echo 'STAGE01_NORMATIVE_DIRECT_EXTERNAL_MATCH=7/7 CASES; 35/35 EXACT FIELDS'
+          echo 'Original normative_calendar_date: 7/7 Python-verified cases, 35/35 exact fields; not full Stage1 acceptance.' >> "$GITHUB_STEP_SUMMARY"
   native-compile:
     runs-on: ubuntu-24.04
     timeout-minutes: 8
