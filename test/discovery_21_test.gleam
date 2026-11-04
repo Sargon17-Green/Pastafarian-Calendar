@@ -18,10 +18,7 @@ fn batch(a: Int, b: Int, ids: List(Int)) {
   )
 }
 
-fn bounded_rank(
-  stream: core.AnswerStream,
-  index: Int,
-) -> Result(Int, Nil) {
+fn bounded_rank(stream: core.AnswerStream, index: Int) -> Result(Int, Nil) {
   let limit = { core.m / span } * span
   case index > 8 {
     True -> Error(Nil)
@@ -60,8 +57,7 @@ fn check_oracle(a: Int, b: Int, ids: List(Int)) {
     let #(id, sample) = pair
     let stream = sauce.ask_bowl(sauce.sauce(a, b), id, core.seal_gate_gap)
     case bounded_rank(stream, 0) {
-      Ok(rank) ->
-        sample.gap |> should.equal(core.gate_gap_min + rank - 1)
+      Ok(rank) -> sample.gap |> should.equal(core.gate_gap_min + rank - 1)
       Error(_) -> {
         let assert Ok(expected) =
           discovery_20_gate_gap.dispatch_discovery_20(
@@ -80,10 +76,7 @@ pub fn discovery_21_empty_valid_test() {
 
 pub fn discovery_21_empty_invalid_context_test() {
   let context =
-    bootstrap.MonsterContext(
-      ..bootstrap.new_context(11, 21),
-      retry_budget: -1,
-    )
+    bootstrap.MonsterContext(..bootstrap.new_context(11, 21), retry_budget: -1)
   discovery_21_gate_batch.dispatch_discovery_21(context, [])
   |> should.equal(Ok([]))
 }
