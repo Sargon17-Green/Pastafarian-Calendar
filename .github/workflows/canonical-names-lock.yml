@@ -1804,60 +1804,9 @@ jobs:
           )
           timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage37-produced-output-reuse "${compile_sources[@]}" 2>&1 | tee -a build/stage37-native.log
           timeout --signal=TERM --kill-after=10s 120s ./build/stage37-produced-output-reuse 2>&1 | tee -a build/stage37-native.log
-          grep -Eq '^STAGE37_INITIAL_SUCCESSES=[[:space:]]*0*24[[:space:]]*
-          grep -Eq '^STAGE37_PRESERVED_OUTPUT=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
-          grep -Eq '^STAGE37_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
-          grep -Eq '^STAGE37_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
-          grep -Eq '^STAGE37_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage37-native.log
-          grep -Fxq 'STAGE37_HEAP_MEASURED=YES' build/stage37-native.log
-          grep -Eq '^STAGE37_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage37-native.log
-          grep -Fxq 'RESULT=PASS_STAGE37_PRODUCED_OUTPUT_REUSE_DISCOVERY_NATIVE' build/stage37-native.log
-          echo 'STAGE37_NATIVE_GATE=PASS' | tee -a build/stage37-native.log
-      - name: Preserve Stage37 log including failures
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage37-produced-output-reuse-evidence
-          path: build/stage37-native.log
-          if-no-files-found: warn
-          retention-days: 30
- build/stage37-native.log
-          grep -Eq '^STAGE37_REJECTS=[[:space:]]*0*24[[:space:]]*
-          grep -Eq '^STAGE37_PRESERVED_OUTPUT=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
-          grep -Eq '^STAGE37_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
-          grep -Eq '^STAGE37_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
-          grep -Eq '^STAGE37_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage37-native.log
-          grep -Fxq 'STAGE37_HEAP_MEASURED=YES' build/stage37-native.log
-          grep -Eq '^STAGE37_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage37-native.log
-          grep -Fxq 'RESULT=PASS_STAGE37_PRODUCED_OUTPUT_REUSE_DISCOVERY_NATIVE' build/stage37-native.log
-          echo 'STAGE37_NATIVE_GATE=PASS' | tee -a build/stage37-native.log
-      - name: Preserve Stage37 log including failures
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage37-produced-output-reuse-evidence
-          path: build/stage37-native.log
-          if-no-files-found: warn
-          retention-days: 30
- build/stage37-native.log
-          grep -Eq '^STAGE37_RETRY_SUCCESSES=[[:space:]]*0*24[[:space:]]*
-          grep -Eq '^STAGE37_PRESERVED_OUTPUT=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
-          grep -Eq '^STAGE37_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
-          grep -Eq '^STAGE37_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
-          grep -Eq '^STAGE37_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage37-native.log
-          grep -Fxq 'STAGE37_HEAP_MEASURED=YES' build/stage37-native.log
-          grep -Eq '^STAGE37_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage37-native.log
-          grep -Fxq 'RESULT=PASS_STAGE37_PRODUCED_OUTPUT_REUSE_DISCOVERY_NATIVE' build/stage37-native.log
-          echo 'STAGE37_NATIVE_GATE=PASS' | tee -a build/stage37-native.log
-      - name: Preserve Stage37 log including failures
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage37-produced-output-reuse-evidence
-          path: build/stage37-native.log
-          if-no-files-found: warn
-          retention-days: 30
- build/stage37-native.log
+          grep -Eq '^STAGE37_INITIAL_SUCCESSES=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
+          grep -Eq '^STAGE37_REJECTS=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
+          grep -Eq '^STAGE37_RETRY_SUCCESSES=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
           grep -Eq '^STAGE37_PRESERVED_OUTPUT=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
           grep -Eq '^STAGE37_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
           grep -Eq '^STAGE37_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage37-native.log
