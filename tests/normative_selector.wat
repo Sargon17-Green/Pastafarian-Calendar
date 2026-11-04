@@ -619,4 +619,40 @@
     (call $discovery01_k3_backward_q3_neighbor (i32.const -1)))
   (func (export "test_discovery01_k3_backward_q3_n_plus_one") (result i32)
     (call $discovery01_k3_backward_q3_neighbor (i32.const 1)))
+
+  ;; q=2, k=3: first=1, step=-1 produces x=(M-1)(M^2-1).
+  ;; With N0=x/2, q=floor(M^3/N0)=2. Neighbors preserve q.
+  ;; N0-1: x is two above LIMIT; backward rejection reaches LIMIT,
+  ;; rank N. N0+1: x is two below LIMIT; accepted rank is N-2.
+  (func $discovery01_k3_backward_q2_neighbor (param $delta i32) (result i32)
+    (call $init_constants)
+    (call $sub_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 2))
+    (call $divmod_q_lt_m (global.get $Q) (global.get $R)
+      (global.get $TMP1) (global.get $TMP2))
+    (if (i32.ne (call $len (global.get $R)) (i32.const 0))
+      (then (return (i32.const 0))))
+    (call $mul (global.get $TMP1) (global.get $M) (global.get $M))
+    (call $sub_small (global.get $TMP1) (global.get $TMP1) (i32.const 1))
+    (call $mul (global.get $N) (global.get $Q) (global.get $TMP1))
+    (if (i32.eq (local.get $delta) (i32.const -1))
+      (then (call $sub_small (global.get $N) (global.get $N) (i32.const 1)))
+      (else (call $add_small (global.get $N) (global.get $N) (i32.const 1))))
+    (call $copy (global.get $FIRST) (global.get $ONE))
+    (call $choose (global.get $FIRST) (i32.const -1)
+      (global.get $N) (global.get $RESULT))
+    (if (i32.eq (local.get $delta) (i32.const -1))
+      (then
+        (return (i32.and
+          (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+          (i32.eqz (call $cmp (global.get $WIDE) (global.get $LIMIT)))))))
+    (call $sub_small (global.get $TMP1) (global.get $N) (i32.const 2))
+    (if (i32.ne (call $cmp (global.get $RESULT) (global.get $TMP1)) (i32.const 0))
+      (then (return (i32.const 0))))
+    (call $sub_small (global.get $TMP1) (global.get $LIMIT) (i32.const 2))
+    (i32.eqz (call $cmp (global.get $WIDE) (global.get $TMP1))))
+  (func (export "test_discovery01_k3_backward_q2_n_minus_one") (result i32)
+    (call $discovery01_k3_backward_q2_neighbor (i32.const -1)))
+  (func (export "test_discovery01_k3_backward_q2_n_plus_one") (result i32)
+    (call $discovery01_k3_backward_q2_neighbor (i32.const 1)))
 )

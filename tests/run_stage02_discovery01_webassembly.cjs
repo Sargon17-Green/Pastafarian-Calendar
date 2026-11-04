@@ -9,9 +9,11 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 const TARGETS = new Map([
-  ['test_discovery01_k3_backward_q3_n_minus_one', -1n],
-  ['test_discovery01_k3_backward_q3_exact_limit', 0n],
-  ['test_discovery01_k3_backward_q3_n_plus_one', 1n]
+  ['test_discovery01_k3_backward_q2_n_minus_one', {q: 2n, delta: -1n}],
+  ['test_discovery01_k3_backward_q2_n_plus_one', {q: 2n, delta: 1n}],
+  ['test_discovery01_k3_backward_q3_n_minus_one', {q: 3n, delta: -1n}],
+  ['test_discovery01_k3_backward_q3_exact_limit', {q: 3n, delta: 0n}],
+  ['test_discovery01_k3_backward_q3_n_plus_one', {q: 3n, delta: 1n}]
 ]);
 const SOURCE = path.join(__dirname, 'normative_selector.wat');
 const PTR = {M: 65536, N: 83200, LIMIT: 96448, SPACE: 100864, WIDE: 105280, RESULT: 145024};
@@ -48,23 +50,23 @@ function child(file, name) {
 }
 function checkNumerics(name, values) {
   assert.ok(TARGETS.has(name), 'unexpected numeric target');
-  const delta = TARGETS.get(name);
+  const {q: expectedQ, delta} = TARGETS.get(name);
   // Independiente del módulo: el flujo de respuestas desde 1 con paso -1
   // produce los dígitos [0, M-1, M-2] en base M.
   const x = 1n + (M - 1n) * M + (M - 2n) * M * M;
-  const t = ((M - 1n) / 3n) * (M * M - 1n);
+  const t = ((M - 1n) / expectedQ) * (M * M - 1n);
   const n = t + delta;
   const space = M ** 3n;
   const q = space / n;
   const limit = q * n;
   const chosen = x <= limit ? x : limit; // step=-1: primera aceptación
   const rank = ((chosen - 1n) % n) + 1n;
-  const expectedRank = delta === -1n ? t - 1n : delta === 0n ? t : t - 2n;
-  assert.equal((M - 1n) % 3n, 0n);
+  const expectedRank = delta === -1n ? t - 1n : delta === 0n ? t : t + 1n - expectedQ;
+  assert.equal((M - 1n) % expectedQ, 0n);
   assert.ok(n > M * M && n < space, 'not a k=3 input');
-  assert.equal(q, 3n);
-  assert.equal(x, 3n * t);
-  assert.equal(x - limit, -3n * delta);
+  assert.equal(q, expectedQ);
+  assert.equal(x, expectedQ * t);
+  assert.equal(x - limit, -expectedQ * delta);
   assert.equal(rank, expectedRank);
   for (const [key, value] of Object.entries({
     M, N: n, SPACE: space, LIMIT: limit, WIDE: chosen, RESULT: rank
@@ -72,7 +74,7 @@ function checkNumerics(name, values) {
     assert.equal(BigInt(values[key]), value, name + ': ' + key);
   }
   return {
-    name, delta: Number(delta), q: '3', n: n.toString(),
+    name, delta: Number(delta), q: expectedQ.toString(), n: n.toString(),
     initial_x: x.toString(), wide: chosen.toString(),
     limit: limit.toString(), rank: rank.toString(),
     acceptance: x > limit ? 'backward_rejection_to_limit' :
@@ -96,8 +98,8 @@ function main() {
     const tests = WebAssembly.Module.exports(mod)
       .filter(e => e.kind === 'function' && e.name.startsWith('test_'))
       .map(e => e.name).sort();
-    assert.equal(tests.length, 31, 'unexpected regression set size');
-    assert.equal(new Set(tests).size, 31, 'duplicate export');
+    assert.equal(tests.length, 33, 'unexpected regression set size');
+    assert.equal(new Set(tests).size, 33, 'duplicate export');
     for (const name of TARGETS.keys()) assert.ok(tests.includes(name), 'missing target: ' + name);
     let passed = 0;
     const numerics = {};
