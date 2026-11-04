@@ -41,8 +41,8 @@ def run(before, after, fixture):
             cases += 1
     assert cases == 22
 
-    p, h29 = read_checkpoint(before, PIN)
-    q, h30 = read_checkpoint(after)
+    p, h30 = read_checkpoint(before, PIN)
+    q, h31 = read_checkpoint(after)
     f = json.loads(Path(fixture).read_text(encoding="utf-8"))
     lengths = f["month_lengths"]
     a, b = p["remaining"], q["remaining"]
@@ -78,7 +78,7 @@ def run(before, after, fixture):
         blocks.append(count)
         print(f"STAGE55_THIRTY_FIRST_INDEPENDENT_BLOCK SYMBOL={j} DIGITS={len(str(count))}")
 
-    assert sum(blocks) == cp, "22 child blocks do not partition parent count"
+    assert len(blocks) == 23 and sum(blocks) == cp, "23 child blocks do not partition parent count"
     assert blocks[symbol - 1] == cq, "native child count differs from independent count"
     lower = sum(blocks[:symbol - 1])
     assert lower == rp - rq and lower < rp <= lower + cq, "rank interval mismatch"
@@ -90,7 +90,7 @@ def run(before, after, fixture):
     position = q["stepsComputed"]
     assert position == 31
     print(f"STAGE55_THIRTY_FIRST_ROW POSITION={position} YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY={position} MONTH_INDEX={month_index} MONTH_DAY={month_day}")
-    print(f"STAGE55_THIRTY_FIRST_INDEPENDENT_PASS SMALL={cases} BLOCKS=22 AFTER30_SHA256={h29} AFTER31_SHA256={h30} REMAINING=4213")
+    print(f"STAGE55_THIRTY_FIRST_INDEPENDENT_PASS SMALL={cases} BLOCKS={len(blocks)} AFTER30_SHA256={h30} AFTER31_SHA256={h31} REMAINING=4213")
     print("STAGE55_FULL_YEAR_CANONICAL_ORACLE_NOT_VERIFIED")
     print("STAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED")
     print("STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED")
@@ -98,8 +98,8 @@ def run(before, after, fixture):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("after29", type=Path)
     ap.add_argument("after30", type=Path)
+    ap.add_argument("after31", type=Path)
     ap.add_argument("fixture", type=Path)
     args = ap.parse_args()
-    run(args.after29, args.after30, args.fixture)
+    run(args.after30, args.after31, args.fixture)
