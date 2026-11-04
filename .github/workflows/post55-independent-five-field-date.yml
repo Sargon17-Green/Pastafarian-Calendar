@@ -1,0 +1,42 @@
+name: Kotlin independent five-field composition diagnostic
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/independent_five_field_date.py'
+      - 'soak/test_independent_five_field_date.py'
+      - '.github/workflows/post55-independent-five-field-date.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic-five-field-date:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify pinned branch and seven synthetic tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p .evidence
+          python3 -m py_compile \
+            soak/independent_five_field_date.py \
+            soak/test_independent_five_field_date.py
+          python3 -m unittest discover -s soak -p 'test_independent_five_field_date.py' -v 2>&1 | tee .evidence/independent-five-field-date.log
+          echo 'PASS_SYNTHETIC_FIVE_FIELDS_NOT_REAL_TABLETS_NOT_CERTIFIED' | tee -a .evidence/independent-five-field-date.log
+      - name: Preserve evidence, including on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-five-field-date-diagnostic
+          path: .evidence/independent-five-field-date.log
+          if-no-files-found: warn
+          retention-days: 30
