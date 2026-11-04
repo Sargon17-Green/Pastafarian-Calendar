@@ -201,9 +201,12 @@ final class WeavingCounter
 {
     /** @var list<int> */
     private array $lengths;
-    /** @var array<string,BigInt> */
-    private array $memo = [];
-    private bool $compactMemoKey;
+    private ?BigInt $allCount = null;
+    /** @var array<int,string> Zlib-compressed, newline-separated exact decimal rows. */
+    private array $suffixCounts = [];
+    private ?int $loadedRowIndex = null;
+    /** @var list<string> */
+    private array $loadedRow = [];
 
     /** @param list<int> $lengths */
     public function __construct(array $lengths)
@@ -212,47 +215,128 @@ final class WeavingCounter
             throw new RuntimeException('WEAVING_LENGTHS');
         }
         $this->lengths = array_values($lengths);
-        // A one-byte-per-counter key is lossless for normative month lengths (4..123).
-        // Keep the original textual key for callers supplying larger counters.
-        $this->compactMemoKey = max($this->lengths) <= 255 && count($this->lengths) <= 255;
     }
 
     public function countAll(): BigInt
     {
-        return $this->count($this->lengths, 0, 0);
+        return $this->allCount ??= $this->countSuffix($this->lengths, 0, 0);
     }
 
-    /** @param list<int> $remaining */
-    private function count(array $remaining, int $openedUpTo, int $closedUpTo): BigInt
+    /** Exact binomial via integer operations; no floating-point approximation. */
+    private static function choose(int $n, int $k): BigInt
     {
-        $done = true;
-        foreach ($remaining as $v) {
-            if ($v !== 0) {
-                $done = false;
-                break;
-            }
+        if ($k < 0 || $k > $n) {
+            throw new RuntimeException('WEAVING_BINOMIAL_ARGUMENT');
         }
-        if ($done) {
+        $k = min($k, $n - $k);
+        $out = BigInt::one();
+        for ($i = 1; $i <= $k; ++$i) {
+            $numerator = $out->mulSmall($n - $k + $i);
+            [$quotient, $remainder] = $numerator->divMod(BigInt::fromInt($i));
+            if (!$remainder->isZero()) {
+                throw new RuntimeException('WEAVING_BINOMIAL_NONINTEGER');
+            }
+            $out = $quotient;
+        }
+        return $out;
+    }
+
+    /** Advance C(a+d-2,d) to C(a+d-1,d+1), with exact division. */
+    private static function nextCoefficient(BigInt $current, int $a, int $d): BigInt
+    {
+        $numerator = $current->mulSmall($a + $d - 1);
+        [$quotient, $remainder] = $numerator->divMod(BigInt::fromInt($d + 1));
+        if (!$remainder->isZero()) {
+            throw new RuntimeException('WEAVING_COEFFICIENT_NONINTEGER');
+        }
+        return $quotient;
+    }
+
+    /**
+     * Exact insertion recurrence: for a new month of length a and t slots
+     * after the preceding new month's first occurrence, choose d old symbols
+     * after the new first occurrence (0 <= d <= t). The multiplicity is
+     * C(a+d-2,d), and the new tail length is a-1+d.
+     *
+     * H[k][t] = sum_{d=0..t} C(a_k+d-2,d) H[k+1][a_k-1+d].
+     * Since H[k][t]-H[k][t-1] is one term, each row needs only O(t)
+     * arithmetic instead of enumerating all interleavings.
+     */
+    private function buildSuffixCounts(): void
+    {
+        if ($this->suffixCounts !== []) {
+            return;
+        }
+        $m = count($this->lengths);
+        $prefixLength = array_sum($this->lengths);
+        $nextRow = [];
+        for ($k = $m; $k >= 1; --$k) {
+            $a = $this->lengths[$k - 1];
+            $prefixLength -= $a;
+            $row = [];
+            $sum = BigInt::zero();
+            $coefficient = BigInt::one();
+            for ($t = 0; $t <= $prefixLength; ++$t) {
+                $following = $k === $m
+                    ? BigInt::one()
+                    : $nextRow[$a - 1 + $t];
+                $sum = $sum->add($coefficient->mul($following));
+                $row[] = $sum;
+                if ($t < $prefixLength) {
+                    $coefficient = self::nextCoefficient($coefficient, $a, $t);
+                }
+            }
+            $decimal = [];
+            foreach ($row as $ways) {
+                $decimal[] = $ways->toString();
+            }
+            $packed = gzcompress(implode("\n", $decimal), 1);
+            if ($packed === false) {
+                throw new RuntimeException('WEAVING_SUFFIX_COMPRESSION');
+            }
+            $this->suffixCounts[$k] = $packed;
+            $nextRow = $row;
+        }
+    }
+
+    private function suffixValue(int $k, int $tail): BigInt
+    {
+        if ($this->loadedRowIndex !== $k) {
+            $plain = gzuncompress($this->suffixCounts[$k]);
+            if ($plain === false) {
+                throw new RuntimeException('WEAVING_SUFFIX_DECOMPRESSION');
+            }
+            $this->loadedRow = explode("\n", $plain);
+            $this->loadedRowIndex = $k;
+        }
+        return BigInt::fromString($this->loadedRow[$tail]);
+    }
+
+    /**
+     * Already-opened but not-yet-closed months have only last-occurrence
+     * constraints. Their exact number of completions is a product of
+     * binomials for ordered final occurrences. All unopened months are
+     * handled by the suffix insertion table using the length of this group.
+     *
+     * @param list<int> $remaining
+     */
+    private function countSuffix(array $remaining, int $openedUpTo, int $closedUpTo): BigInt
+    {
+        if (array_sum($remaining) === 0) {
             return BigInt::one();
         }
-        // Preserve both frontier markers; no semantic equivalence assumption is needed.
-        // PHP strings are binary-safe as hash-table keys, including zero bytes.
-        $key = $this->compactMemoKey
-            ? pack('C*', ...$remaining) . chr($openedUpTo) . chr($closedUpTo)
-            : implode(',', $remaining) . '|' . $openedUpTo . '|' . $closedUpTo;
-        if (isset($this->memo[$key])) {
-            return $this->memo[$key];
+        $this->buildSuffixCounts();
+        $base = BigInt::one();
+        $size = 0;
+        for ($i = $closedUpTo; $i < $openedUpTo; ++$i) {
+            $a = $remaining[$i];
+            $base = $base->mul(self::choose($size + $a - 1, $size));
+            $size += $a;
         }
-        $total = BigInt::zero();
-        $m = count($remaining);
-        for ($j = 1; $j <= $m; $j++) {
-            if (!$this->legal($remaining, $openedUpTo, $closedUpTo, $j)) {
-                continue;
-            }
-            [$nextRemaining, $nextOpened, $nextClosed] = $this->apply($remaining, $openedUpTo, $closedUpTo, $j);
-            $total = $total->add($this->count($nextRemaining, $nextOpened, $nextClosed));
+        if ($openedUpTo === count($this->lengths)) {
+            return $base;
         }
-        return $this->memo[$key] = $total;
+        return $base->mul($this->suffixValue($openedUpTo + 1, $size));
     }
 
     /** @param list<int> $remaining */
@@ -308,7 +392,7 @@ final class WeavingCounter
                     continue;
                 }
                 [$nextRemaining, $nextOpened, $nextClosed] = $this->apply($remaining, $opened, $closed, $j);
-                $block = $this->count($nextRemaining, $nextOpened, $nextClosed);
+                $block = $this->countSuffix($nextRemaining, $nextOpened, $nextClosed);
                 if ($r->compare($block) > 0) {
                     $r = $r->sub($block);
                     continue;
