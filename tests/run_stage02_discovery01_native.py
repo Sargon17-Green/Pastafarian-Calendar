@@ -28,8 +28,8 @@ def main() -> int:
         print(f'MISSING_SOURCE: {source}', file=sys.stderr)
         return 2
     tests = re.findall(r'\(func \(export "([^"]+)"\)', source.read_text(encoding='utf-8'))
-    if len(tests) != 28 or len(set(tests)) != 28:
-        print(f'WRONG_TEST_SET: expected 28 unique exports, got {len(tests)}', file=sys.stderr)
+    if len(tests) != 29 or len(set(tests)) != 29:
+        print(f'WRONG_TEST_SET: expected 29 unique exports, got {len(tests)}', file=sys.stderr)
         return 2
     outcomes = []
     for name in tests:

@@ -561,4 +561,26 @@
     (call $sub (global.get $TMP1) (global.get $N) (global.get $TMP1))
     (call $add_small (global.get $TMP1) (global.get $TMP1) (i32.const 2))
     (i32.eqz (call $cmp (global.get $RESULT) (global.get $TMP1))))
+
+  ;; q=3, k=3: first=1, step=-1 -> digits [0,M-1,M-2].
+  ;; x=1+(M-1)M+(M-2)M^2=(M-1)(M^2-1).
+  ;; N=x/3 is integral because M=2^127-1 is 1 modulo 3.
+  ;; x=3*N=LIMIT: accept at the exact boundary and return rank N.
+  (func (export "test_discovery01_k3_backward_q3_exact_limit") (result i32)
+    (call $init_constants)
+    (call $sub_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 3))
+    (call $divmod_q_lt_m (global.get $Q) (global.get $R)
+      (global.get $TMP1) (global.get $TMP2))
+    (if (i32.ne (call $len (global.get $R)) (i32.const 0))
+      (then (return (i32.const 0))))
+    (call $mul (global.get $TMP1) (global.get $M) (global.get $M))
+    (call $sub_small (global.get $TMP1) (global.get $TMP1) (i32.const 1))
+    (call $mul (global.get $N) (global.get $Q) (global.get $TMP1))
+    (call $copy (global.get $FIRST) (global.get $ONE))
+    (call $choose (global.get $FIRST) (i32.const -1)
+      (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+      (i32.eqz (call $cmp (global.get $WIDE) (global.get $LIMIT)))))
 )
