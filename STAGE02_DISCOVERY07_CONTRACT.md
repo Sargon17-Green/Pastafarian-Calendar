@@ -1,6 +1,6 @@
 # Stage 2 / DISCOVERY 07 — 7 hidden-seed BI valori (Logo / Ido)
 
-Stato: IMPLEMENTED_NATIVE_PENDING; production + 53-assertion test committed; Native PASS NE ankore verificita.
+Stato: ACCEPTED_NATIVE (2026-11-04). Run 41872294990/job 126722352207 completed SUCCESS with 5 contexts / 53 checks on SHA 3e56c8ab5d800a9e9b8d8652d664eb295b9f0a97; Stage1 41872294983 and Canonical Names 41872294959 also completed SUCCESS. LAST_COMPLETED_STAGE=1.
 Prekondico: DISCOVERY06 ACCEPTED sur commit `342e740e830108da40f3da92d147328e1c77e874`.
 Native Stage2 41870469940/job 126715826531 completed SUCCESS,
 46 stone-rondi/240 asserti, plus 128 fast-divmod asserti;

@@ -1,0 +1,58 @@
+; Stage2 Discovery08: first five visible drops, independent exact BI.
+to monster.stage02.visible.prefix.prior :i :back :prefix :hidden
+  localmake "slot (:i - :back)
+  if :slot >= 1 [output item :slot :prefix]
+  output item (1 - :slot) :hidden
+end
+
+to monster.stage02.visible.prefix.initial :i :ctx :stone :p1 :p3 :p7
+  localmake "v bi.mul (item 1 :stone) (monster.context.get :ctx "actionCount)
+  make "v bi.add :v (bi.mul (item 2 :stone) (monster.context.get :ctx "targetCount))
+  make "v bi.add :v (bi.mul (item 3 :stone) (monster.context.get :ctx "distanceCount))
+  make "v bi.add :v (bi.mul (item 4 :stone) (monster.context.get :ctx "connectionCount))
+  make "v bi.add :v (bi.mul.small (item 5 :stone) (monster.context.get :ctx "directionCount))
+  make "v bi.add :v :p1
+  make "v bi.add :v (bi.mul.small :p3 3)
+  make "v bi.add :v (bi.mul.small :p7 5)
+  make "v bi.add :v (bi.small :i)
+  output monster.stage02.normalize :v
+end
+
+to monster.stage02.visible.prefix.weights :g
+  output item :g [[3 5 7 11 1] [5 7 11 13 2] [7 11 13 17 3] [11 13 17 19 4] [13 17 19 23 5] [17 19 23 29 1] [19 23 29 31 2] [23 29 31 37 3] [29 31 37 41 4] [31 37 41 43 5] [37 41 43 47 1]]
+end
+
+to monster.stage02.visible.prefix.grind :g :x :stone :p1 :p3 :p7
+  if :g > 11 [output :x]
+  localmake "co monster.stage02.visible.prefix.weights :g
+  localmake "v bi.mul :x :x
+  make "v bi.add :v (bi.mul.small :x (item 1 :co))
+  make "v bi.add :v (bi.mul.small :p1 (item 2 :co))
+  make "v bi.add :v (bi.mul.small :p3 (item 3 :co))
+  make "v bi.add :v (bi.mul.small :p7 (item 4 :co))
+  make "v bi.add :v (item (item 5 :co) :stone)
+  output monster.stage02.visible.prefix.grind (:g + 1) (monster.stage02.normalize :v) :stone :p1 :p3 :p7
+end
+
+to monster.stage02.visible.prefix.build :i :ctx :stones :hidden :prefix
+  if :i > 5 [output :prefix]
+  localmake "p1 monster.stage02.visible.prefix.prior :i 1 :prefix :hidden
+  localmake "p3 monster.stage02.visible.prefix.prior :i 3 :prefix :hidden
+  localmake "p7 monster.stage02.visible.prefix.prior :i 7 :prefix :hidden
+  localmake "stone item :i :stones
+  localmake "x monster.stage02.visible.prefix.initial :i :ctx :stone :p1 :p3 :p7
+  localmake "v monster.stage02.visible.prefix.grind 1 :x :stone :p1 :p3 :p7
+  output monster.stage02.visible.prefix.build (:i + 1) :ctx :stones :hidden (lput :v :prefix)
+end
+
+to monster.stage02.visible.prefix :ctx
+  if not (equalp (monster.context.get :ctx "status) "HIDDEN_SEEDS_ONLY) [output :ctx]
+  localmake "prefix monster.stage02.visible.prefix.build 1 :ctx (monster.context.get :ctx "stoneSeries) (monster.context.get :ctx "hiddenSeeds) []
+  localmake "work monster.context.put :ctx "visiblePrefix :prefix
+  make "work monster.context.put :work "phase "VISIBLE_PREFIX_READY
+  make "work monster.context.put :work "mode "STAGE_2_DISCOVERY_08
+  make "work monster.context.put :work "status "VISIBLE_PREFIX_ONLY
+  make "work monster.metrics.bump :work "stage02.visible
+  make "work monster.logs.append :work "stage02.visible.prefix.ready
+  output :work
+end

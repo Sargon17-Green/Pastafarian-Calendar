@@ -215,3 +215,24 @@ Tri valida + du nevalida contexti produktas 53 programmita asserti
 konservas Stage2 D1–D6 regressioni, strict 20-minuta job budget.
 Ca commit NE deklaras Native PASS o Stage2 full acceptance.
 LAST_COMPLETED_STAGE=1 restas; nula main/merge.
+ 
+## Stage 2 — DISCOVERY 07 Native acceptita (2026-11-04)
+Native Stage2 run 41872294990 / job 126722352207, completed SUCCESS
+sur SHA 3e56c8ab5d800a9e9b8d8652d664eb295b9f0a97. Real markers:
+STAGE_2_DISCOVERY_07_CASES_PASIS 5,
+STAGE_2_DISCOVERY_07_CHECKS_PASIS 53,
+STAGE_2_DISCOVERY_07_PASIS,
+NATIVE_STAGE_2_DISCOVERY_07_VERIFICATION=PASS.
+Discovery01–06 regressioni anke completed SUCCESS.
+Stage1 Native run 41872294983/job 126722361171 completed SUCCESS
+kun STAGE_1_TESTI_PASIS e NATIVE_STAGE_1_VERIFICATION=PASS.
+Canonical Names run 41872294959/job 126722351770 completed SUCCESS.
+Discovery07 ACCEPTED; plena Stage2 NE acceptita; LAST_COMPLETED_STAGE=1.
+
+## Stage 2 — DISCOVERY 08 (first-five visible prefix; Native pending)
+Nova production `monster.stage02.visible.prefix` konstruktas la prime
+5 visible drops per exakta Appendix-A BI-aritmetiko e 11 grind-rondi.
+La test-only oracle `nr.visible.one` esas sendependa de production.
+2 valida + 2 nevalida contexti, 34 asserti; Native bounded 420s;
+D1–D7, Stage1 e Canonical Names regressioni restas deviga.
+Nula plena 46-drop claim, nula main/merge. LAST_COMPLETED_STAGE=1.

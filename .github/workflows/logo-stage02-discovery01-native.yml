@@ -243,3 +243,26 @@ jobs:
             exit 1
           fi
           echo 'NATIVE_STAGE_2_DISCOVERY_07_VERIFICATION=PASS'
+ 
+      - name: Verify Stage 2 Discovery 08 first-five visible drops against independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/stage02-discovery08.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 420s \
+            stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery08_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            result=$?
+            cat "$log"
+            echo "::error::Stage2 Discovery08 native failure/timeout (exit=$result)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_08_CASES_PASIS 4' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_08_CHECKS_PASIS 34' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_08_PASIS' "$log"
+          if grep -Eq 'STAGE_2_DISCOVERY_08_TESTO_FALIIS|STAGE_2_DISCOVERY_08_FALIIS|STAGE_2_DISCOVERY_08_SHAPE_FALIIS|STAGE_2_DISCOVERY_08_ORACLE_SHAPE_FALIIS|STAGE_2_DISCOVERY_08_CASE_COUNT_FALIIS|STAGE_2_DISCOVERY_08_CHECK_COUNT_FALIIS|I don.t know how to|not enough inputs' "$log"; then
+            echo '::error::Stage2 Discovery08 failure marker'
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_08_VERIFICATION=PASS'
