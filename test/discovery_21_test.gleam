@@ -169,7 +169,8 @@ pub fn discovery_21_invalid_context_priorities_test() {
   let b = bootstrap.MonsterContext(..base, diagnostics: ["B"])
   let assert Ok(one) = discovery_21_gate_batch.dispatch_discovery_21(a, [1])
   let assert Ok(two) = discovery_21_gate_batch.dispatch_discovery_21(b, [1])
-  (one == two) |> should.equal(False)
+  let different = one != two
+  different |> should.equal(True)
 }
 
 pub fn discovery_21_convenience_and_oracle_test() {
