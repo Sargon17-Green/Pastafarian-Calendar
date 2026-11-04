@@ -1,0 +1,47 @@
+; Stage 2 / Discovery 06. Independent production stone-series recurrence.
+; Per-invocation immutable old quintet, modulo normalized by Stage2 production.
+; Never call test-only nr.stones, nr.stone.next or nr.save.
+
+to monster.stage02.stone.initial
+  output (list (bi.small 17) (bi.small 29) (bi.small 43) (bi.small 71) (bi.small 101))
+end
+
+to monster.stage02.stone.mix :squareInput :weightedInput :weight :extra
+  localmake "quadratic bi.mul :squareInput :squareInput
+  localmake "linear bi.mul.small :weightedInput :weight
+  localmake "unreduced bi.add :quadratic :linear
+  output monster.stage02.normalize (bi.add :unreduced :extra)
+end
+
+to monster.stage02.stone.step :roundNumber :previous
+  localmake "w item 1 :previous
+  localmake "b item 2 :previous
+  localmake "s item 3 :previous
+  localmake "m item 4 :previous
+  localmake "r item 5 :previous
+  localmake "newW monster.stage02.stone.mix :w :b 3 (bi.small :roundNumber)
+  localmake "newB monster.stage02.stone.mix :b :s 5 :w
+  localmake "newS monster.stage02.stone.mix :s :m 7 :b
+  localmake "newM monster.stage02.stone.mix :m :r 11 :s
+  localmake "newR monster.stage02.stone.mix :r :w 13 :m
+  output (list :newW :newB :newS :newM :newR)
+end
+
+to monster.stage02.stone.expand :roundNumber :previous :series
+  if :roundNumber > 46 [output :series]
+  localmake "newStone monster.stage02.stone.step :roundNumber :previous
+  output monster.stage02.stone.expand (:roundNumber + 1) :newStone (lput :newStone :series)
+end
+
+to monster.stage02.stones :ctx
+  if not (equalp (monster.context.get :ctx "status) "INTERMEDIATE_COUNTS_ONLY) [output :ctx]
+  localmake "seed monster.stage02.stone.initial
+  localmake "series monster.stage02.stone.expand 2 :seed (list :seed)
+  localmake "work monster.context.put :ctx "stoneSeries :series
+  make "work monster.context.put :work "phase "STONES_READY
+  make "work monster.context.put :work "mode "STAGE_2_DISCOVERY_06
+  make "work monster.context.put :work "status "STONE_SERIES_ONLY
+  make "work monster.metrics.bump :work "stage02.stones
+  make "work monster.logs.append :work "stage02.stones.ready
+  output :work
+end

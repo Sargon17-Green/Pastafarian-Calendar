@@ -144,3 +144,17 @@ Sequanta substantiva derivado esas la 46-ronda 5-valora stone-series
 recidivo el Appendix A. Exakta algoritmo, 240 asserti e Native
 acceptance-gates esas en STAGE02_DISCOVERY06_CONTRACT.md.
 Ca komito nur dokumentas la nova kontrato, ne implikas Discovery06 PASS.
+
+## Stage 2 — DISCOVERY 06 (implementation committed; Native pending)
+
+Nova independanta Stage2-only procedure monster.stage02.stones
+prenas nur valida INTERMEDIATE_COUNTS_ONLY context, uzas immutabla
+antea quinteto per ronda, e konstruktas 46 stone-quinopli.
+Production-normaligo uzas monster.stage02.normalize e bi.*;
+nr.stones e nr.stone.next restas strikte test-only.
+La test-file komparas 46 x 5 exakta BI valori kun Appendix-A
+normativa oracle plus 10 context/isolation kontroli = 240.
+CI konservas Discovery01–05 e Stage1 regresioni.
+Nula Native rezulto por Discovery06 esas ankor deklarita;
+LAST_COMPLETED_STAGE restas 1, nula main/merge.
+

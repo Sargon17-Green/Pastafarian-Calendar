@@ -1,0 +1,77 @@
+; Stage 2 / Discovery 06. Test-only Appendix A oracle versus independent Logo production.
+; Exactly 46*5 = 230 elemental comparisons plus 10 context/isolation assertions.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "src/stage02_stones.logo
+load "test/normative_reference.logo
+
+make "D6.FAIL "false
+make "D6.N 0
+make "D6.ROUNDS 0
+
+to d6.require :condition :tag
+  make "D6.N (:D6.N + 1)
+  if not :condition [
+    make "D6.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_06_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d6.preserved :before :after :keys
+  if emptyp :keys [output "true]
+  localmake "key first :keys
+  if not (equalp (monster.context.get :before :key) (monster.context.get :after :key)) [output "false]
+  output d6.preserved :before :after butfirst :keys
+end
+
+to d6.compare.rounds :roundNumber :actual :expected
+  if :roundNumber > 46 [stop]
+  localmake "a item :roundNumber :actual
+  localmake "e item :roundNumber :expected
+  if (count :a) <> 5 [print [STAGE_2_DISCOVERY_06_SHAPE_FALIIS] stop]
+  if (count :e) <> 5 [print [STAGE_2_DISCOVERY_06_ORACLE_SHAPE_FALIIS] stop]
+  d6.require (equalp (item 1 :a) (item 1 :e)) (list :roundNumber 1)
+  d6.require (equalp (item 2 :a) (item 2 :e)) (list :roundNumber 2)
+  d6.require (equalp (item 3 :a) (item 3 :e)) (list :roundNumber 3)
+  d6.require (equalp (item 4 :a) (item 4 :e)) (list :roundNumber 4)
+  d6.require (equalp (item 5 :a) (item 5 :e)) (list :roundNumber 5)
+  make "D6.ROUNDS (:D6.ROUNDS + 1)
+  d6.compare.rounds (:roundNumber + 1) :actual :expected
+end
+
+to stage02.discovery06.run
+  localmake "before monster.stage02.workcounts [0 [0]] [1 [1]]
+  localmake "after monster.stage02.stones :before
+  localmake "series monster.context.get :after "stoneSeries
+  localmake "oracle nr.stones
+  if (count :series) <> 46 [print [STAGE_2_DISCOVERY_06_ROUND_COUNT_FALIIS] stop]
+  if (count :oracle) <> 46 [print [STAGE_2_DISCOVERY_06_ORACLE_COUNT_FALIIS] stop]
+  d6.compare.rounds 1 :series :oracle
+
+  d6.require (equalp (monster.context.get :after "calculationDay) [0 [0]]) [calculation_preserved]
+  d6.require (equalp (monster.context.get :after "targetDay) [1 [1]]) [target_preserved]
+  d6.require (d6.preserved :before :after [normalizedCalculationDay normalizedTargetDay actionCount targetCount distanceCount connectionCount directionCount]) [normalization_and_counts_preserved]
+  d6.require (equalp (monster.context.get :after "phase) "STONES_READY) [phase]
+  d6.require (equalp (monster.context.get :after "mode) "STAGE_2_DISCOVERY_06) [mode]
+  d6.require (equalp (monster.context.get :after "status) "STONE_SERIES_ONLY) [status]
+  d6.require (equalp (monster.context.get :after "metrics) [stage02.dispatch stage02.counts stage02.stones]) [metrics]
+  d6.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready]) [logs]
+  localmake "again monster.stage02.stones :before
+  d6.require (equalp :after :again) [repeated_call_determinism]
+  localmake "invalid monster.stage02.workcounts [0 [1]] [0 [0]]
+  localmake "unchanged monster.stage02.stones :invalid
+  d6.require (equalp :invalid :unchanged) [invalid_context_unchanged]
+
+  if :D6.FAIL [print [STAGE_2_DISCOVERY_06_FALIIS] stop]
+  if :D6.ROUNDS <> 46 [print [STAGE_2_DISCOVERY_06_ROUND_COUNT_FALIIS] stop]
+  if :D6.N <> 240 [print [STAGE_2_DISCOVERY_06_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_06_ROUNDS_PASIS] :D6.ROUNDS
+  print sentence [STAGE_2_DISCOVERY_06_CHECKS_PASIS] :D6.N
+  print [STAGE_2_DISCOVERY_06_PASIS]
+end
+
+stage02.discovery06.run

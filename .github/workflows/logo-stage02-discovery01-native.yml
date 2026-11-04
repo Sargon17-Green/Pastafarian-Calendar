@@ -174,3 +174,27 @@ jobs:
             exit 1
           fi
           echo 'NATIVE_STAGE_2_DISCOVERY_05_VERIFICATION=PASS'
+
+      - name: Verify Stage 2 Discovery 06 independent 46-round stone recurrence
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/stage02-discovery06.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 240s \
+            stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery06_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            result=$?
+            cat "$log"
+            echo "::error::Stage2 Discovery06 native failure/timeout (exit=$result)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_06_ROUNDS_PASIS 46' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_06_CHECKS_PASIS 240' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_06_PASIS' "$log"
+          if grep -Eq 'STAGE_2_DISCOVERY_06_TESTO_FALIIS|STAGE_2_DISCOVERY_06_FALIIS|STAGE_2_DISCOVERY_06_ROUND_COUNT_FALIIS|STAGE_2_DISCOVERY_06_CHECK_COUNT_FALIIS|STAGE_2_DISCOVERY_06_SHAPE_FALIIS|STAGE_2_DISCOVERY_06_ORACLE_|I don.t know how to|not enough inputs' "$log"; then
+            echo '::error::Stage2 Discovery06 failure marker'
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_06_VERIFICATION=PASS'
+
