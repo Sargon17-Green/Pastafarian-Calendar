@@ -66,9 +66,12 @@ rejections.push({
 ok(rejections.length === 97, "explicit invalid-input matrix must contain 97 probes");
 
 const originalRun = Patch11OrderLatchHandler.prototype.run;
+// Count entries before calling Native, including invocations that throw.
+let nativeAttempts = 0;
 let nativeCalls = 0;
 let nativeWrites = 0n;
 Patch11OrderLatchHandler.prototype.run = function (...args: Parameters<typeof originalRun>) {
+  nativeAttempts++;
   const result = originalRun.apply(this, args);
   ok(result.sharedMemoryWrites === 58 && result.historical.memoryWrites === 58 &&
      result.drops === 46 && result.postStirs === 12,
@@ -79,6 +82,7 @@ Patch11OrderLatchHandler.prototype.run = function (...args: Parameters<typeof or
 };
 
 let rejected = 0;
+let preflightNativeAttempts = -1;
 let exhausted = false;
 let positiveBudgetCalls = 0;
 let negativeBudgetCalls = 0;
@@ -91,10 +95,13 @@ try {
     try { item.run(); } catch (error) { exception = error; }
     ok(exception instanceof MonsterValidationError,
        item.label + ": expected MonsterValidationError before Native");
-    ok(nativeCalls === 0 && nativeWrites === 0n,
-       item.label + ": malformed input must not issue Native calls");
+    ok(nativeAttempts === 0 && nativeCalls === 0 && nativeWrites === 0n,
+       item.label + ": malformed input must not even enter Native");
     rejected++;
   }
+
+  preflightNativeAttempts = nativeAttempts;
+  ok(preflightNativeAttempts === 0, "all 97 invalid probes must enter zero Native calls");
 
   // At most one physical gate gap (41 + rank, rank in [1,922]) is < 963.
   // The required radius is 5782 days: no one-step prefix can cover it.
@@ -103,7 +110,7 @@ try {
   } catch (error) {
     exhausted = error instanceof MonsterValidationError;
   }
-  ok(exhausted && nativeCalls === 1 && nativeWrites === 58n,
+  ok(exhausted && nativeAttempts === 1 && nativeCalls === 1 && nativeWrites === 58n,
      "one-step valid budget must stop before the second Native invocation");
   oneStepCalls = nativeCalls;
   oneStepWrites = nativeWrites;
@@ -116,6 +123,7 @@ try {
     for (const side of ["positive", "negative"] as const) {
       const day = side === "positive" ? FOUNDATION_DAY + 1n
                                       : FOUNDATION_DAY - 100000n;
+      const attemptsBefore = nativeAttempts;
       const callsBefore = nativeCalls;
       const writesBefore = nativeWrites;
       let failure: unknown = null;
@@ -127,7 +135,8 @@ try {
       const expectedCalls = maxPerSide + (side === "negative" ? 1 : 0);
       ok(failure instanceof MonsterValidationError,
          side + ":" + maxPerSide + ": must exhaust the per-side budget");
-      ok(nativeCalls - callsBefore === expectedCalls &&
+      ok(nativeAttempts - attemptsBefore === expectedCalls &&
+         nativeCalls - callsBefore === expectedCalls &&
          nativeWrites - writesBefore === BigInt(expectedCalls) * 58n,
          side + ":" + maxPerSide + ": physical Patch11 budget exceeded/undercounted");
       if (side === "positive") positiveBudgetCalls += expectedCalls;
@@ -138,6 +147,8 @@ try {
   ok(budgetExhaustions === 6 && positiveBudgetCalls === 6 &&
      negativeBudgetCalls === 9,
      "six budget probes must account for exactly fifteen physical Native calls");
+  ok(nativeAttempts === 16 && nativeCalls === 16 && nativeWrites === 928n,
+     "one-step + six per-side probes must account for 16 entries, completions and 928 writes");
 } finally {
   Patch11OrderLatchHandler.prototype.run = originalRun;
 }
@@ -150,3 +161,7 @@ console.log("POST_STAGE55_SIGNED_BUDGET_SIDES_PASS probes=" + budgetExhaustions 
   " totalCalls=" + (positiveBudgetCalls + negativeBudgetCalls) +
   " totalSharedWrites=" + BigInt(positiveBudgetCalls + negativeBudgetCalls) * 58n +
   " budgetExhaustions=" + budgetExhaustions);
+
+console.log("POST_STAGE55_PREFLIGHT_NATIVE_ATTEMPTS_PASS invalidProbes=" + rejected +
+  " invalidAttempts=" + preflightNativeAttempts + " boundedAttempts=" + nativeAttempts +
+  " boundedCompletions=" + nativeCalls + " boundedWrites=" + nativeWrites);

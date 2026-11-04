@@ -50,3 +50,13 @@ old and new preflight markers, plus all other four existing workflow jobs comple
 success. This extends test/docs/CI grep only: no production changes, no Stage56,
 no main/merge/release. Previous 41868643598 result is historical PASS for its
 own SHA, not acceptance of this new extension.
+
+## Follow-up: count attempted Native invocation before dispatch (2026-11-04)
+
+Exact-SHA Actions 41878905211 completed/success on 80a89db5b2728d9dfa07925489fb666b65fd0345 (5/5 jobs). The earlier guard counted only *completed* Patch11.run results. A Native invocation that threw before returning could therefore escape the count. This follow-up closes that instrumentation gap: the test-only wrapper increments an independent entry counter **before** invoking Patch11.run, then increments completion and write counts only after validating a returned physical run. This does not change production or posit a reproduced bug.
+
+Independent check: each of 97 invalid inputs must have zero attempted calls, zero completed calls and zero writes. The original valid one-step test must have one entry/one completion/58 writes. Across six separately bounded positive and negative budget-exhaustion probes, every physical-call delta must agree with the entry delta and the documented mathematical oracle k versus 1+k for k in {1,2,3}. Global total = 1+(1+2+3)+(2+3+4)=16 entries, 16 completions, 16*58=928 writes. The wrapper is always restored in finally. The old two accepted markers remain byte-for-byte unchanged; the new exact marker is:
+
+POST_STAGE55_PREFLIGHT_NATIVE_ATTEMPTS_PASS invalidProbes=97 invalidAttempts=0 boundedAttempts=16 boundedCompletions=16 boundedWrites=928
+
+Acceptance: existing five CI jobs must complete successfully for the exact new SHA; the Stage27 log must contain all three preflight markers, and the branch ref and changed file blobs must read back. Scope limited to test/docs/workflow and no new heavy jobs, no production changes, Stage56, main merge or release. Until completed logs are inspected, this is a test change and not a new-SHA PASS.
