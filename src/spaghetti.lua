@@ -51,6 +51,7 @@ local GatePhasePatch = require("gate_phase_patch")
 local LegacyGateMidpoint = require("legacy_gate_midpoint")
 local GateMidpointPatch = require("gate_midpoint_patch")
 local LegacyGateQuartile = require("legacy_gate_quartile")
+local GateQuartilePatch = require("gate_quartile_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -684,6 +685,16 @@ end
 -- Stage52 DISCOVERY26: independent probe for controlled quartile-edge discrepancy.
 function S.legacyGateQuartileProbe(day,records)
     return LegacyGateQuartile.execute(day,records)
+end
+
+-- Stage53 PATCH26: corrected quarter-edge diagnostic, no public calendar change.
+function S.gateQuartilePatchProbe(day,records)
+    return GateQuartilePatch.execute(day,records)
+end
+
+function S.gateQuartileSpaghetti(day,records)
+    local corrected=GateQuartilePatch.execute(day,records)
+    return corrected
 end
 
 function S.calendarDateSpaghetti()
