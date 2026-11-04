@@ -1874,3 +1874,54 @@ jobs:
           path: build/stage38-native.log
           if-no-files-found: warn
           retention-days: 30
+
+  stage39-input-lifetime-isolation-discovery-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Strict compile and run bounded Stage39 input-lifetime-isolation arithmetic
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage39-native.log
+          compile_sources=(
+            test/stage39_discovery_tests.cob
+            src/big_integer.cob
+            src/monster_distance.cob
+            src/legacy_distance.cob
+            src/patched_day_tag.cob
+            src/patched_distance.cob
+          )
+          timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage39-input-lifetime-isolation "${compile_sources[@]}" 2>&1 | tee -a build/stage39-native.log
+          timeout --signal=TERM --kill-after=10s 120s ./build/stage39-input-lifetime-isolation 2>&1 | tee -a build/stage39-native.log
+          grep -Eq '^STAGE39_INITIAL_SUCCESSES=[[:space:]]*0*24[[:space:]]*$' build/stage39-native.log
+          grep -Eq '^STAGE39_INTERLEAVED_SUCCESSES=[[:space:]]*0*24[[:space:]]*$' build/stage39-native.log
+          grep -Eq '^STAGE39_ISOLATED_OUTPUTS=[[:space:]]*0*24[[:space:]]*$' build/stage39-native.log
+          grep -Eq '^STAGE39_REINITIALIZED_PAIRS=[[:space:]]*0*24[[:space:]]*$' build/stage39-native.log
+          grep -Eq '^STAGE39_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage39-native.log
+          grep -Eq '^STAGE39_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage39-native.log
+          grep -Eq '^STAGE39_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage39-native.log
+          grep -Fxq 'STAGE39_HEAP_MEASURED=YES' build/stage39-native.log
+          grep -Eq '^STAGE39_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage39-native.log
+          grep -Fxq 'RESULT=PASS_STAGE39_INPUT_LIFETIME_ISOLATION_DISCOVERY_NATIVE' build/stage39-native.log
+          echo 'STAGE39_NATIVE_GATE=PASS' | tee -a build/stage39-native.log
+      - name: Preserve Stage39 log including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage39-input-lifetime-isolation-evidence
+          path: build/stage39-native.log
+          if-no-files-found: warn
+          retention-days: 30
