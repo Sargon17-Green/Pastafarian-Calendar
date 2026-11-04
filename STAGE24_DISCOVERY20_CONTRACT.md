@@ -46,3 +46,9 @@ Kontrolu la nombron per `pub fn ..._test()` en nova dosiero. Antaŭaj 250 testoj
 2. Poste kreu la produktan modulon, precize 12 testfunkciojn, metadata ŝanĝon. Akceptu la kodan HEAD nur je Native **262/262 mezuritaj** kaj Names Lock SUCCESS sur sama SHA.
 3. Poste faru apartan dokumentan HEAD kaj finan metadata HEAD, ĉiun kun propra Native kaj Names sama-SHA antaŭ `LAST_COMPLETED_STAGE=24` aŭ Stage25.
 4. Ĉio ĉi estas nur **unu pordeg-interspaca specimeno por eksplicita bovlo**. Neniu vera pordegoserio, jara kalkulo, plena dato, `main`-merge aŭ publikigo.
+
+## Koda kontrolpunkto kaj aparta dokumenta fermo (2026-11-04)
+
+La unua koda HEAD `a5eac1a9cdce9102f707bffda946e77deae66137` ricevis [Native 41713803796](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41713803796), `completed/failure` **nur ĉe formato** (du dosieroj, kvar kanonaj hunkoj; testoj ne ruliĝis), dum Names Lock 41713803822 sukcesis. La eksaktaj kvar formatŝanĝoj estis faritaj sen semantikaj ŝanĝoj ĉe commit `32d0e57fe0d17c2cadc6bb6f5af9dbf4960efe99`. Ĉe tiu sama SHA [Native 41869171874](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41869171874), job `126711210408`, `completed/success`, **262/262 testoj, 0 malsukcesoj**, Gleam 1.18.1 / OTP 28, `gleam format --check` kaj fontintegreco PASS; [artefakto 13344016650](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41869171874/artifacts/13344016650), SHA256 `4ae3713bc2d3007e2d77829304aefc9bda23a3e709179e5f42b749a8468bcc9f`. [Names Lock 41869171901](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41869171901), job `126711204397`, `completed/success` je la sama SHA.
+
+**Ĉi tiu dokumenta ferm-komito ankoraŭ postulas siajn proprajn same-SHA Native kaj Names Lock sukcesojn.** `LAST_COMPLETED_STAGE` restas 23 ĝis la fina metadata HEAD ankaŭ havas ambaŭ konfirmitajn pordegojn. Neniu Stage25, `main`-merge, publikigo aŭ plena datkalkulo estas ĉi tie implicita.
