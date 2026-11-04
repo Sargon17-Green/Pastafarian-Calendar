@@ -1,0 +1,54 @@
+name: Kotlin real independent TABLETS five-field diagnostic
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/tablets_real_independent_five_field_probe.py'
+      - 'soak/test_tablets_real_independent_five_field_probe.py'
+      - '.github/workflows/post55-real-independent-five-field.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-unseeded-five-fields:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: audited-kotlin
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: pinned-python
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check provenance and test synthetic shape and real signed gate replay
+        working-directory: audited-kotlin
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C ../pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
+          mkdir -p evidence
+          python3 -B -m py_compile soak/tablets_real_independent_five_field_probe.py soak/test_tablets_real_independent_five_field_probe.py
+          python3 -B -m unittest discover -s soak -p 'test_tablets_real_independent_five_field_probe.py' -v 2>&1 | tee evidence/real-five-field-synthetic.log
+          python3 -B soak/tablets_real_independent_five_field_probe.py \
+            --pinned-root ../pinned-python/src --timeout-seconds 540 \
+            --evidence evidence/real-five-field-tablets.json
+      - name: Keep bounded evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-tablets-five-field-diagnostic
+          path: |
+            audited-kotlin/evidence/real-five-field-synthetic.log
+            audited-kotlin/evidence/real-five-field-tablets.json
+          if-no-files-found: warn
+          retention-days: 30
