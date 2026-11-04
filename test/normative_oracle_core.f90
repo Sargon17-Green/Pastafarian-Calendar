@@ -745,19 +745,19 @@ contains
 
   ! Insert r remaining new-color symbols after R already-active symbols.
   ! The final new symbol is last, hence C(R+r-1,r-1) arrangements.
-  function weave_extend_closures(previous,R,r) result(next)
+  function weave_extend_closures(previous,oldTokens,newTokens) result(next)
     type(BigInt), intent(in) :: previous
-    integer, intent(in) :: R,r
+    integer, intent(in) :: oldTokens,newTokens
     type(BigInt) :: next,choices
     integer :: t
-    if (R<0 .or. r<0) error stop 'invalid closure extension'
-    if (R==0 .or. r<2) then
+    if (oldTokens<0 .or. newTokens<0) error stop 'invalid closure extension'
+    if (oldTokens==0 .or. newTokens<2) then
        next=previous
        return
     end if
     choices=bi_one()
-    do t=1,r-1
-       choices=weave_divide_small_exact(bi_mul_small(choices,int(R+t,int64)),t)
+    do t=1,newTokens-1
+       choices=weave_divide_small_exact(bi_mul_small(choices,int(oldTokens+t,int64)),t)
     end do
     next=bi_mul(previous,choices)
   end function weave_extend_closures
