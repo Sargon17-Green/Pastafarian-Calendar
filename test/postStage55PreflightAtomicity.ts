@@ -44,7 +44,8 @@ for (let i = 0; i < badBudgets.length; i++) {
   });
 }
 const badYearBudgets: readonly unknown[] = [
-  -1, 1.5, Number.MAX_SAFE_INTEGER + 1, NaN, Infinity, "1", null
+  // The year factory treats null as its documented nullish default.
+  -1, 1.5, Number.MAX_SAFE_INTEGER + 1, NaN, Infinity, "1", true
 ];
 for (let i = 0; i < badYearBudgets.length; i++) {
   const budget = badYearBudgets[i] as number;
