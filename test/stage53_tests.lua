@@ -33,8 +33,8 @@ local function verify(day,records,k,a,b)
  local historic,hctx=S.legacyGateQuartileProbe(day,records)
  local actual,ctx=S.gateQuartilePatchProbe(day,records)
  assert(historic==old and actual==expected,"PATCH26 independent oracle mismatch")
- assert(hctx.mode=="STAGE_53_PATCH_26" and hctx.commitToken==15 and hctx.semanticState.legacyQuartileLabel==historic)
- assert(ctx.mode=="STAGE_52_DISCOVERY_26"
+ assert(hctx.mode=="STAGE_52_DISCOVERY_26" and hctx.commitToken==15 and hctx.semanticState.legacyQuartileLabel==historic)
+ assert(ctx.mode=="STAGE_53_PATCH_26"
   and ctx.phase=="PATCH_QUARTILE_EDGE_EQUALITY"
   and ctx.status=="PATCH_QUARTILE_COMPLETE"
   and ctx.commitToken==16 and #ctx.branchTrace==16 and #ctx.diagnostics==16
