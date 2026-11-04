@@ -136,3 +136,43 @@
                                 1N eerste-maandnaam 1N]
               :date-proof-scope :first-day-only
               :month-weaving-computed? false)))))
+
+
+;; DISCOVERY24 DIAG04. In een legale weving sluiten de maanden in de
+;; volgorde 1..m. Daarom is het LAATSTE symbool maand-ID m. Op de laatste
+;; jaardag is de dag-in-maand exact de lengte van maand m. Dit is een
+;; afzonderlijke begrensde projectie, geen algemene weaving-unrank.
+(defn kies-laatste-dag-zonder-weving
+  "Exact vijf datumvelden uitsluitend voor de laatste dag van het bewezen jaar."
+  ([lijn berekeningsdag doeldag]
+   (kies-laatste-dag-zonder-weving lijn berekeningsdag doeldag 128N))
+  ([lijn berekeningsdag doeldag zoekbudget]
+   (let [{:keys [year cutlets month-count month-lengths] :as basis}
+         (lengtes/kies-maandlengtes lijn berekeningsdag doeldag zoekbudget)
+         open (:open-gate-day year)
+         close (:close-gate-day year)]
+     (when-not (= doeldag close)
+       (weigering :target-not-last-day-of-year))
+     (when-not (and (geldige-delen? cutlets (inc open) close)
+                    (integer? month-count)
+                    (<= 3N month-count 47N)
+                    (vector? month-lengths)
+                    (= month-count (count month-lengths))
+                    (every? #(and (integer? %) (<= 4N % 123N)) month-lengths)
+                    (= (-' close open) (reduce +' 0N month-lengths)))
+       (weigering :invalid-date-projection-structure))
+     (let [totaal (namen/aantal-maandnaamreeksen 47N month-count)
+           saus (verdelingen/structuur-saus berekeningsdag year)
+           stroom (keuzes/vraag-kom saus 5N 33N)
+           naamrang (keuzes/kies-rang stroom totaal)
+           laatste-maandnaam (peek
+                               (namen/maandnamen-op-rang 47N month-count naamrang))
+           laatste-kotelet (peek cutlets)]
+       (assoc basis
+              :date-components [(:number year)
+                                (:name-index laatste-kotelet)
+                                (inc (-' close (:first-day laatste-kotelet)))
+                                laatste-maandnaam
+                                (peek month-lengths)]
+              :date-proof-scope :last-day-only
+              :month-weaving-computed? false)))))

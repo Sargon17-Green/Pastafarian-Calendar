@@ -198,3 +198,82 @@
                      (catch clojure.lang.ExceptionInfo e
                        (:code (ex-data e))))]
           (is (= :target-not-first-day-of-year fout)))))))
+
+
+;; DIAG04: onafhankelijk normatief pad voor een jaareind, zonder de
+;; productieprojectie of volledige maandweving aan te roepen.
+(defn- normatieve-laatste-jaardag [berekening doel]
+  (let [staat (orakel/new-gate-state)
+        jaar (orakel/find-target-year staat berekening doel)
+        eerste (inc (:open-gate-day jaar))]
+    (when-not (= doel (:close-gate-day jaar))
+      (throw (ex-info "Orakel verwacht laatste jaardag."
+                      {:code :oracle-target-not-last-day})))
+    (let [saus (orakel/sauce berekening eerste)
+          aantal-koteletten (orakel/choose-cutlet-count saus jaar)
+          verdeling (orakel/choose-cutlet-partition
+                      staat berekening saus jaar aantal-koteletten)
+          kotelet-namen (orakel/choose-cutlet-names saus aantal-koteletten)
+          koteletten (orakel/materialize-cutlets
+                       staat jaar verdeling kotelet-namen)
+          maand-aantal (orakel/choose-month-count saus jaar)
+          maand-lengtes (orakel/choose-month-lengths saus jaar maand-aantal)
+          maand-namen (orakel/choose-month-names saus maand-aantal)
+          laatste-kotelet (peek koteletten)]
+      (when-not (= (reduce +' 0N maand-lengtes)
+                   (-' (:close-gate-day jaar) (:open-gate-day jaar)))
+        (throw (ex-info "Normatieve maandlengtes onjuist."
+                        {:code :oracle-month-lengths-invalid})))
+      [(:number jaar) (:name-index laatste-kotelet)
+       (inc (-' doel (:first-day laatste-kotelet)))
+       (peek maand-namen) (peek maand-lengtes)])))
+
+(deftest laatste-positie-van-lexicografische-weving
+  (testing "Normatieve weving sluit altijd de hoogste maand-ID als laatste."
+    (doseq [lengten [[4 4] [4 4 4] [4 5 4]]
+            :let [familie (orakel/weaving-family lengten)
+                  aantal ((:count familie))]
+            rang (distinct [1N 2N (quot (inc aantal) 2N) aantal])]
+      (let [woord ((:unrank1 familie) rang)]
+        (is (= (count lengten) (peek woord))
+            (str "lengten=" lengten " rang=" rang))
+        (is (= (peek lengten)
+               (count (filter #(= (count lengten) %) woord))))))))
+
+(deftest echte-laatste-jaardag-zonder-volledige-weving
+  (testing "Vijf werkelijke jaargrenzen, onafhankelijke normatieve vergelijking."
+    (let [basis (zoeken/vind-doeljaar
+                 @lijn dagen/stichtingsdag dagen/stichtingsdag)
+          vorig (zoeken/vind-doeljaar
+                  @lijn dagen/stichtingsdag (:open-gate-day basis))
+          volgend (zoeken/vind-doeljaar
+                    @lijn dagen/stichtingsdag (inc (:close-gate-day basis)))
+          gevallen [[dagen/stichtingsdag (:close-gate-day vorig)]
+                    [dagen/stichtingsdag (:close-gate-day basis)]
+                    [dagen/stichtingsdag (:close-gate-day volgend)]
+                    [(+' dagen/stichtingsdag 17N) nil]
+                    [(-' dagen/stichtingsdag 23N) nil]]]
+      (doseq [[berekening doel0] gevallen]
+        (let [doel (or doel0
+                       (:close-gate-day
+                         (zoeken/vind-doeljaar @lijn berekening berekening)))
+              uitkomst (projectie/kies-laatste-dag-zonder-weving
+                         @lijn berekening doel 128N)
+              verwacht (normatieve-laatste-jaardag berekening doel)]
+          (is (= verwacht (:date-components uitkomst)))
+          (is (= 5 (count (:date-components uitkomst))))
+          (is (every? integer? (:date-components uitkomst)))
+          (is (= :last-day-only (:date-proof-scope uitkomst)))
+          (is (false? (:month-weaving-computed? uitkomst)))
+          (is (not (contains? uitkomst :month-weaving)))
+          (println "DISCOVERY24 DIAG04 werkelijk jaar-einde:"
+                   {:berekening berekening :doel doel
+                    :jaar (first verwacht)
+                    :gelijk? (= verwacht (:date-components uitkomst))})
+          (let [fout (try
+                       (projectie/kies-laatste-dag-zonder-weving
+                        @lijn berekening (dec doel) 128N)
+                       nil
+                       (catch clojure.lang.ExceptionInfo e
+                         (:code (ex-data e))))]
+            (is (= :target-not-last-day-of-year fout))))))))
