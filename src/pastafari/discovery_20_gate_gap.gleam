@@ -4,7 +4,9 @@ import pastafari/bootstrap
 import pastafari/discovery_19_interval_value
 
 pub const gap_min = 42
+
 pub const gap_max = 963
+
 pub const gap_seal = 1
 
 pub type GateGapOutput {

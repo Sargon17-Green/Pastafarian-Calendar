@@ -43,7 +43,10 @@ fn check_pair(a: Int, b: Int, bowl_id: Int) {
 }
 
 // Ĉi tiu paŝa orakol-kontrolo ne uzas la produktan O(1)-rangan formulon.
-fn bounded_reference(stream: core.AnswerStream, index: Int) -> Result(Int, Nil) {
+fn bounded_reference(
+  stream: core.AnswerStream,
+  index: Int,
+) -> Result(Int, Nil) {
   let limit = { core.m / span } * span
   case index > 8 {
     True -> Error(Nil)
@@ -59,8 +62,7 @@ fn check_canonical(a: Int, b: Int, bowl_id: Int) {
   let stream = sauce.ask_bowl(sauce.sauce(a, b), bowl_id, core.seal_gate_gap)
   let assert Ok(got) = output(a, b, bowl_id)
   case bounded_reference(stream, 0) {
-    Ok(rank) ->
-      got.gap |> should.equal(core.gate_gap_min + rank - 1)
+    Ok(rank) -> got.gap |> should.equal(core.gate_gap_min + rank - 1)
     Error(_) -> {
       let assert Ok(expected) = explicit(a, b, bowl_id)
       got.previous |> should.equal(expected)
@@ -108,8 +110,7 @@ pub fn discovery_20_unbounded_signed_days_test() {
 pub fn discovery_20_previous_chain_preserved_test() {
   let base = bootstrap.new_context(-11, 23)
   let context = bootstrap.MonsterContext(..base, diagnostics: ["STADIO24"])
-  let assert Ok(got) =
-    discovery_20_gate_gap.dispatch_discovery_20(context, 6)
+  let assert Ok(got) = discovery_20_gate_gap.dispatch_discovery_20(context, 6)
   let assert Ok(expected) =
     discovery_19_interval_value.dispatch_discovery_19(
       context,
