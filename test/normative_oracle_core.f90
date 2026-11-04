@@ -518,31 +518,71 @@ contains
     end function C
   end subroutine unrank_bounded_composition
 
+  ! Independent exact insertion DP for total legal weavings.
+  ! Each legal word of colors 1..k-1 ends with its highest color (last exits
+  ! are ordered). Track the first position of that color, rather than a
+  ! combinatorial search over all partially opened colors.
+  !
+  ! To insert a new color of multiplicity r >= 2, its final token must be
+  ! last. Place its first token after p old tokens (1 <= p <= n); the earlier
+  ! highest color must first appear among those p old tokens. The remaining
+  ! r-2 tokens interleave with the n-p old suffix tokens in exactly
+  ! binomial(n-p+r-2,r-2) ways. This yields an O(months * days) state DP,
+  ! with exact arbitrary-precision arithmetic and no candidate-factor cache.
   function count_weavings(lengths) result(count)
     integer, intent(in) :: lengths(:)
     type(BigInt) :: count
-    type(WeaveMemo) :: memo
-    integer, allocatable :: rem(:)
-    allocate(memo%entries(0)); rem=lengths
-    count=C(rem,0,0)
-  contains
-    recursive function C(remaining,opened,closed) result(v)
-      integer, intent(in) :: remaining(:),opened,closed
-      type(BigInt) :: v
-      integer :: idx,j,newOpened,newClosed
-      integer, allocatable :: next(:)
-      if (sum(remaining)==0) then; v=bi_one(); return; end if
-      idx=findMemo(memo,remaining,opened,closed)
-      if (idx>0) then; v=memo%entries(idx)%count; return; end if
-      v=bi_zero()
-      do j=1,size(lengths)
-         if (.not. legalMove(remaining,opened,closed,j,lengths)) cycle
-         next=remaining; newOpened=opened; newClosed=closed
-         call applyMove(next,newOpened,newClosed,j,lengths)
-         v=bi_add(v,C(next,newOpened,newClosed))
-      end do
-      call putMemo(memo,remaining,opened,closed,v)
-    end function C
+    type(BigInt), allocatable :: previous(:), current(:), prefix(:)
+    type(BigInt) :: chooseSuffix, multiplied, quotient, remainder
+    integer :: n,color,r,p,q
+
+    if (any(lengths<1)) error stop 'weaving lengths must be positive'
+    if (size(lengths)==0) then
+       count=bi_one()
+       return
+    end if
+
+    n=lengths(1)
+    allocate(previous(n))
+    previous=bi_zero()
+    previous(1)=bi_one()
+
+    do color=2,size(lengths)
+       r=lengths(color)
+       allocate(prefix(0:n))
+       prefix(0)=bi_zero()
+       do p=1,n
+          prefix(p)=bi_add(prefix(p-1),previous(p))
+       end do
+
+       allocate(current(n+r))
+       current=bi_zero()
+       if (r==1) then
+          ! First and last are the same token; its close must follow
+          ! every previous close, so it is appended at the end.
+          current(n+1)=prefix(n)
+       else
+          chooseSuffix=bi_one()
+          do p=n,1,-1
+             current(p+1)=bi_mul(prefix(p),chooseSuffix)
+             if (p>1 .and. r>2) then
+                q=n-p+1
+                multiplied=bi_mul_small(chooseSuffix,int(q+r-2,int64))
+                call bi_divmod_euclid(multiplied,bi_from_int64(int(q,int64)),quotient,remainder)
+                if (.not.bi_is_zero(remainder)) error stop 'nonintegral weaving binomial'
+                chooseSuffix=quotient
+             end if
+          end do
+       end if
+       call move_alloc(current,previous)
+       deallocate(prefix)
+       n=n+r
+    end do
+
+    count=bi_zero()
+    do p=1,n
+       count=bi_add(count,previous(p))
+    end do
   end function count_weavings
 
   subroutine unrank_weaving(lengths,rank1,out)
