@@ -1,0 +1,14 @@
+# DISCOVERY03 — bounded near-minimum rank/unrank (independent research)
+
+## Contract and exact scope
+Input: a nonempty tuple of positive month lengths, and an integer rank within a bounded near-zero window, or a complete legal weaving word. Output: its exact lexicographic word/rank inside the window. This is not general arbitrary-rank unranking, a Chapel port, a new Legacy witness, or Stage6 acceptance.
+
+Ordering rule: occurrences of each month are indistinguishable; first occurrences of months 1..m must be in increasing order, as must last occurrences. For a prefix, an added symbol must not exceed multiplicity, must open only the next unopened month, and may finish only the next unclosed month. Crucial completeness lemma: every legal prefix can be completed by concatenating remaining month symbols in increasing order. Therefore a greedy minimum/maximum legal extension exists, and the rightmost-pivot lexicographic successor/predecessor is exact. Repeating successor from the minimum produces exact low ranks without the enormous intermediate count states.
+
+The method has complexity O(r * n * m + r * n²) in the straightforward tuple-prefix implementation for small rank r (the n² term is worst-case tuple slicing); it is not feasible for an arbitrary large rank because it walks every predecessor/successor. Separate finite oracle exhaustively enumerates all multiplicity words and filters complete first/last occurrence positions without using the frontier algorithm.
+
+## Local evidence (2026-11-04, Linux Python)
+137 independent finite families; 1,982 lexicographic-neighbor assertions and 1,982 exact rank/unrank assertions PASS. Production-size fixture: 45 months / 4,244 symbols, ranks 1 and 2 (both nonzero, not the maximum). Each reconstructed word independently checked for multiplicity and strict first/last occurrence orders, ranked backward by predecessor count, and checked against exact neighboring words. Rank 1 elapsed 0.321 s, RSS 7,680 KiB; rank 2 elapsed 0.526 s, RSS 7,936 KiB; combined 1.011 s. Hard gate per full-size trial: <180 s, RSS <512 MiB. Measurements describe the local host only, not a completed native Chapel CI run. The 22,470-bit full-space total is separately validated by the previous incremental transfer research; this procedure does not recompute it.
+
+## Remaining work
+The incremental transfer algorithm still lacks a complete full-year general-rank/unrank benchmark; these two extremal ranks do not establish a generic performance bound. Existing Chapel year-boundary month weaving still hits the bounded 180-second timeout (INCONCLUSIVE; not a third Legacy bug). CI runner now executes this isolated fast Python research before the still-timeboxed Chapel probe, emitting separate evidence markers. Only mark the new research accepted after completed CI/log on its exact commit; do not infer Stage6/native PASS from local Python results or from the runner's legacy timeout.
