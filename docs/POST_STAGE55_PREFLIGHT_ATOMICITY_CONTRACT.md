@@ -21,3 +21,32 @@ Run this test once in the existing Stage27 npm test chain, without adding a sixt
 POST_STAGE55_PREFLIGHT_ATOMICITY_PASS malformedRejected=97 preflightNativeCalls=0 boundedNativeCalls=1 boundedSharedWrites=58 budgetExhausted=1
 
 The existing five jobs remain required. Exact-SHA completed/success plus actual marker in the Stage27 log is required before accepting this follow-up. Syntax validation alone is not runtime/Native PASS. No src changes, Stage56, main merge, release, or external publication.
+
+## Follow-up: two-sided execution-budget QA (2026-11-04)
+
+After exact-SHA Actions 41868643598 completed/success (5/5), Stage27 logged the accepted
+97-rejection preflight and one-step Native budget marker. This independently bounded
+extension covers the missing positive/negative budget-exhaustion paths without changing
+production semantics, input formats, or the 97 previous probes.
+
+For maxPerSide in {1, 2, 3}, call the production signed-gate prefix for c=t=FOUNDATION+1
+(positive exhaustion) and c=t=FOUNDATION-100000 (negative exhaustion). Each native
+Patch11 call advances a strictly positive gap 41+rank with 1<=rank<=922, hence
+42<=gap<=963. Since the complete requested radius is LEGACY_YEAR_MAX+1=5782,
+three calls cannot reach the positive bound from FOUNDATION+1. For the far-negative
+case, the positive walk must make exactly one Native call before reaching the
+negative-side loop, and that loop cannot reach the lower requested bound in
+three steps. Thus the expected physical Patch11 counts per budget k are k (positive)
+and 1+k (negative). The independent oracle counts physical calls and 58 shared
+writes per call, not Patch14 dispatches. Require MonsterValidationError on all six
+probes and exact per-probe deltas: 6 positive calls + 9 negative calls = 15 Native
+calls, 870 shared writes; no acceptance of a partial prefix.
+
+Exact additional CI marker:
+POST_STAGE55_SIGNED_BUDGET_SIDES_PASS probes=6 positiveCalls=6 negativeCalls=9 totalCalls=15 totalSharedWrites=870 budgetExhaustions=6
+
+Acceptance is contingent on a new exact-SHA Stage27 completed/success log with both
+old and new preflight markers, plus all other four existing workflow jobs completed/
+success. This extends test/docs/CI grep only: no production changes, no Stage56,
+no main/merge/release. Previous 41868643598 result is historical PASS for its
+own SHA, not acceptance of this new extension.

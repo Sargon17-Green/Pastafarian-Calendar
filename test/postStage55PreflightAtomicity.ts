@@ -80,6 +80,11 @@ Patch11OrderLatchHandler.prototype.run = function (...args: Parameters<typeof or
 
 let rejected = 0;
 let exhausted = false;
+let positiveBudgetCalls = 0;
+let negativeBudgetCalls = 0;
+let budgetExhaustions = 0;
+let oneStepCalls = 0;
+let oneStepWrites = 0n;
 try {
   for (const item of rejections) {
     let exception: unknown = null;
@@ -100,9 +105,48 @@ try {
   }
   ok(exhausted && nativeCalls === 1 && nativeWrites === 58n,
      "one-step valid budget must stop before the second Native invocation");
+  oneStepCalls = nativeCalls;
+  oneStepWrites = nativeWrites;
+
+  // Mathematical oracle: every signed gate gap is 41+rank <= 963 days,
+  // while the required neighbourhood radius is 5782 days. Three gates
+  // cannot cover it. A far-negative day makes the positive loop stop after
+  // one real call, then exercises the *negative* per-side budget.
+  for (const maxPerSide of [1, 2, 3] as const) {
+    for (const side of ["positive", "negative"] as const) {
+      const day = side === "positive" ? FOUNDATION_DAY + 1n
+                                      : FOUNDATION_DAY - 100000n;
+      const callsBefore = nativeCalls;
+      const writesBefore = nativeWrites;
+      let failure: unknown = null;
+      try {
+        createProductionSignedGatePrefix(day, day, maxPerSide);
+      } catch (error) {
+        failure = error;
+      }
+      const expectedCalls = maxPerSide + (side === "negative" ? 1 : 0);
+      ok(failure instanceof MonsterValidationError,
+         side + ":" + maxPerSide + ": must exhaust the per-side budget");
+      ok(nativeCalls - callsBefore === expectedCalls &&
+         nativeWrites - writesBefore === BigInt(expectedCalls) * 58n,
+         side + ":" + maxPerSide + ": physical Patch11 budget exceeded/undercounted");
+      if (side === "positive") positiveBudgetCalls += expectedCalls;
+      else negativeBudgetCalls += expectedCalls;
+      budgetExhaustions++;
+    }
+  }
+  ok(budgetExhaustions === 6 && positiveBudgetCalls === 6 &&
+     negativeBudgetCalls === 9,
+     "six budget probes must account for exactly fifteen physical Native calls");
 } finally {
   Patch11OrderLatchHandler.prototype.run = originalRun;
 }
 console.log("POST_STAGE55_PREFLIGHT_ATOMICITY_PASS malformedRejected=" + rejected +
-  " preflightNativeCalls=0 boundedNativeCalls=" + nativeCalls +
-  " boundedSharedWrites=" + nativeWrites + " budgetExhausted=1");
+  " preflightNativeCalls=0 boundedNativeCalls=" + oneStepCalls +
+  " boundedSharedWrites=" + oneStepWrites + " budgetExhausted=1");
+
+console.log("POST_STAGE55_SIGNED_BUDGET_SIDES_PASS probes=" + budgetExhaustions +
+  " positiveCalls=" + positiveBudgetCalls + " negativeCalls=" + negativeBudgetCalls +
+  " totalCalls=" + (positiveBudgetCalls + negativeBudgetCalls) +
+  " totalSharedWrites=" + BigInt(positiveBudgetCalls + negativeBudgetCalls) * 58n +
+  " budgetExhaustions=" + budgetExhaustions);
