@@ -91,7 +91,7 @@ class CallabilityTests(unittest.TestCase):
             self.check()
 
     def test_probe_binds_original_function_type(self):
-        s = test_body("synthetic_rust_daytag", "old_day_tag")
+        s = test_body("synthetic_rust_daytag", "old_numeric_probe")
         self.assertIn("let old: fn(&BigInt) -> BigInt = synthetic_rust_daytag::old_numeric_probe;", s)
 
 if __name__ == "__main__":
