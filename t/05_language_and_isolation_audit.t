@@ -36,7 +36,21 @@ like($state, qr/^SOURCE_LANGUAGE_CATALOG_FROZEN=YES$/m, '來源語言目錄在�
 like($state, qr/^CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO$/m, '沒有使用其他實作的產物');
 like($state, qr/^CROSS_IMPLEMENTATION_HASH_CHECKS=NO$/m, '沒有做跨實作雜湊比較');
 like($state, qr/^CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO$/m, '沒有做跨實作差異測試');
-like($state, qr/^GITHUB_ACTIONS_PERFORMED=NO$/m, '沒有執行 GitHub 動作');
+my ($actions_performed) = $state =~ /^GITHUB_ACTIONS_PERFORMED=(YES|NO)$/m;
+my $actions_audit_ok = defined($actions_performed) && $actions_performed eq 'NO';
+if (defined($actions_performed) && $actions_performed eq 'YES') {
+    for my $report (glob 'docs/STAGE_*_NATIVE_CI_ACCEPTANCE_*.md') {
+        open my $fh, '<:encoding(UTF-8)', $report or die "無法讀取 CI 驗收紀錄：$report\n";
+        my $record = do { local $/; <$fh> };
+        if ($record =~ m{https://github\.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/[1-9]\d*}
+            && $record =~ m{https://github\.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/[1-9]\d*/artifacts/[1-9]\d*}
+            && $record =~ /\b[0-9a-f]{40}\b/) {
+            $actions_audit_ok = 1;
+            last;
+        }
+    }
+}
+ok($actions_audit_ok, 'GitHub Actions 執行狀態附有來源雜湊、CI 執行及原始產物證據');
 like($state, qr/^GIT_HISTORY_MUTATED=NO$/m, '沒有修改 Git 歷史');
 
 done_testing;
