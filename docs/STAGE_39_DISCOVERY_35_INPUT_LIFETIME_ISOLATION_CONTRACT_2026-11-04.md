@@ -62,3 +62,18 @@ STAGE39_NATIVE_GATE=PASS
 Source/static checks are not Native PASS. Inspect a failing job's real
 log before any correction. No main/merge/release, production edits
 or full calendar integration claims.
+ 
+## Actual harness failure and correction (2026-11-04)
+
+First Stage39 run 41884257011 completed/failure: 39/40 successful,
+one Stage39 Native test failed in 12 even-j cases. Actual diagnostic:
+STAGE39_SECOND_LENGTH_FAILED (cases 2,4,...,24); initial=24,
+reinitialized=24, interleaved=12, pass=12, unexpected=12, heap=0.
+The even-j C literal is Y=K-(2j+5) and contains n-1 decimal
+characters. Test harness incorrectly wrote its last digit at position
+n, appending a digit. Correct fixture writes at WS-LAST-T=n-1.
+Odd-j C has n characters, and still uses position WS-N=n.
+Emitted-decimal-string oracle checks verified all 24 corrected cases
+against both BigInt and the independent closed form. This was a
+test-only error; no production defect was established. Corrected CI
+must complete before Stage39 can be accepted.
