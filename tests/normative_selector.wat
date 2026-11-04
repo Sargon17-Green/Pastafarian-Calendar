@@ -282,10 +282,13 @@
     ;; espacio < N*M por minimalidad, así que q=floor(space/N)<M.
     (call $divmod_q_lt_m (global.get $Q) (global.get $R) (global.get $SPACE) (local.get $n))
     (call $mul (global.get $LIMIT) (global.get $Q) (local.get $n))
-    (block $acc (loop $rej
-      (br_if $acc (i32.le_s (call $cmp (global.get $WIDE) (global.get $LIMIT)) (i32.const 0)))
-      (call $wide_ring_step (global.get $WIDE) (global.get $SPACE) (local.get $step))
-      (br $rej)))
+    ;; Salto exacto de rechazo: ambos destinos son el primer valor aceptado
+    ;; del anillo [1,SPACE], preservando el resultado del bucle original.
+    (if (i32.gt_s (call $cmp (global.get $WIDE) (global.get $LIMIT)) (i32.const 0))
+      (then
+        (if (i32.eq (local.get $step) (i32.const 1))
+          (then (call $copy (global.get $WIDE) (global.get $ONE)))
+          (else (call $copy (global.get $WIDE) (global.get $LIMIT))))))
     (call $sub_small (global.get $TMP0) (global.get $WIDE) (i32.const 1))
     ;; valor amplio < espacio < N*M, por tanto floor((wide-1)/N)<M.
     (call $divmod_q_lt_m (global.get $Q) (global.get $R) (global.get $TMP0) (local.get $n))
@@ -534,4 +537,28 @@
     (call $discovery01_k3_full_backward_quotient (i32.const 2)))
   (func (export "test_discovery01_k3_full_backward_q3_two_rejections") (result i32)
     (call $discovery01_k3_full_backward_quotient (i32.const 3)))
+
+  ;; Regression end-to-end: en k=3, first=M-2, step=+1 genera x=S-M-2>L;
+  ;; el bucle original necesitaría M+3 rechazos; el primer aceptado es 1.
+  (func (export "test_discovery01_k3_forward_astronomical_skip") (result i32)
+    (call $init_constants)
+    (call $mul (global.get $N) (global.get $M) (global.get $M))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 1))
+    (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 2))
+    (call $choose (global.get $FIRST) (i32.const 1) (global.get $N) (global.get $RESULT))
+    (i32.eqz (call $cmp (global.get $RESULT) (global.get $ONE))))
+
+  ;; Mismo first y N, step=-1: x=S-4M^2-3M-2<=L.
+  ;; No hay rechazo; rango exacto N-4M+2 (calculado independientemente).
+  (func (export "test_discovery01_k3_backward_near_limit_no_skip") (result i32)
+    (call $init_constants)
+    (call $mul (global.get $N) (global.get $M) (global.get $M))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 1))
+    (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 2))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (call $from_u64 (global.get $TMP1) (i64.const 4))
+    (call $mul (global.get $TMP1) (global.get $M) (global.get $TMP1))
+    (call $sub (global.get $TMP1) (global.get $N) (global.get $TMP1))
+    (call $add_small (global.get $TMP1) (global.get $TMP1) (i32.const 2))
+    (i32.eqz (call $cmp (global.get $RESULT) (global.get $TMP1))))
 )
