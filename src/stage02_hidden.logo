@@ -1,0 +1,61 @@
+; Stage 2 / Discovery 07. Independent, exact 7-seed production pipeline.
+; Reference hidden-seed algorithm remains isolated in test/normative_reference.logo.
+; No normative test oracle or inter-invocation global state is called here.
+
+to monster.stage02.hidden.weights :index
+  output item :index [[3 4 6 8] [5 7 10 12] [7 10 14 16] [9 13 18 20] [11 16 22 24] [13 19 26 28] [15 22 30 32]]
+end
+
+to monster.stage02.hidden.bases :ctx
+  output (list (monster.context.get :ctx "targetCount) (monster.context.get :ctx "distanceCount) (monster.context.get :ctx "connectionCount) (bi.small (monster.context.get :ctx "directionCount)))
+end
+
+to monster.stage02.hidden.weighted :weights :values :sum
+  if emptyp :weights [output :sum]
+  localmake "term bi.mul.small (first :values) (first :weights)
+  output monster.stage02.hidden.weighted (butfirst :weights) (butfirst :values) (bi.add :sum :term)
+end
+
+to monster.stage02.hidden.stone.sum :elements :total
+  if emptyp :elements [output :total]
+  output monster.stage02.hidden.stone.sum (butfirst :elements) (bi.add :total (first :elements))
+end
+
+to monster.stage02.hidden.seed :ctx :stone :index
+  localmake "base monster.context.get :ctx "actionCount
+  localmake "mix monster.stage02.hidden.weighted (monster.stage02.hidden.weights :index) (monster.stage02.hidden.bases :ctx) :base
+  localmake "withStone monster.stage02.hidden.stone.sum :stone :mix
+  output monster.stage02.normalize :withStone
+end
+
+to monster.stage02.hidden.grind :pass :value :stone
+  if :pass > 7 [output :value]
+  localmake "chosen item :pass [1 2 3 4 5 1 2]
+  localmake "quadratic bi.mul :value :value
+  localmake "extra bi.mul.small :value 3
+  localmake "next bi.add :quadratic :extra
+  make "next bi.add :next (item :chosen :stone)
+  make "next bi.add :next (bi.small :pass)
+  output monster.stage02.hidden.grind (:pass + 1) (monster.stage02.normalize :next) :stone
+end
+
+to monster.stage02.hidden.seven :index :ctx :stones :acc
+  if :index > 7 [output :acc]
+  localmake "stone item :index :stones
+  localmake "initial monster.stage02.hidden.seed :ctx :stone :index
+  localmake "finished monster.stage02.hidden.grind 1 :initial :stone
+  output monster.stage02.hidden.seven (:index + 1) :ctx :stones (lput :finished :acc)
+end
+
+to monster.stage02.hidden :ctx
+  if not (equalp (monster.context.get :ctx "status) "STONE_SERIES_ONLY) [output :ctx]
+  localmake "stones monster.context.get :ctx "stoneSeries
+  localmake "hiddenSeeds monster.stage02.hidden.seven 1 :ctx :stones []
+  localmake "work monster.context.put :ctx "hiddenSeeds :hiddenSeeds
+  make "work monster.context.put :work "phase "HIDDEN_READY
+  make "work monster.context.put :work "mode "STAGE_2_DISCOVERY_07
+  make "work monster.context.put :work "status "HIDDEN_SEEDS_ONLY
+  make "work monster.metrics.bump :work "stage02.hidden
+  make "work monster.logs.append :work "stage02.hidden.ready
+  output :work
+end

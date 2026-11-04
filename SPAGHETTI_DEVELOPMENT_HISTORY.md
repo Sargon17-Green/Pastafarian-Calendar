@@ -204,3 +204,14 @@ La aparta `STAGE02_DISCOVERY07_CONTRACT.md` definesas exacta
 inputo, formulas, 3 valida + 2 nevalida contexti, 53 asserti,
 Native test-oracle apartiguro e termino-limiti. Nula D7 Native PASS
 esas deklarita en ca komito.
+
+## Stage 2 — DISCOVERY 07 (independenta implementation, Native pending)
+
+Separata `src/stage02_hidden.logo` implementas exacta 7-hidden-seed
+transformation super Stage2 STONE_SERIES_ONLY context, sen vocar
+`nr.hidden.*`; test-only `nr.hidden.build` esas l'oraklo.
+Tri valida + du nevalida contexti produktas 53 programmita asserti
+(3*(7+9+1)+2). Workflow enplusas bounded 420s Native D7 test-step,
+konservas Stage2 D1–D6 regressioni, strict 20-minuta job budget.
+Ca commit NE deklaras Native PASS o Stage2 full acceptance.
+LAST_COMPLETED_STAGE=1 restas; nula main/merge.

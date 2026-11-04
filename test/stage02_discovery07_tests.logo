@@ -1,0 +1,82 @@
+; Stage 2 / Discovery 07. Independently compare 7 hidden-seed values
+; to Appendix A test-only nr.hidden.build. 3 valid + 2 invalid cases.
+; Per valid: 7 oracle checks + 9 preservation/shape checks + 1 determinism.
+; 3 * 17 + 2 = 53 exact assertions. No fabricated Native result.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "src/stage02_stones.logo
+load "src/stage02_hidden.logo
+load "test/normative_reference.logo
+
+make "D7.N 0
+make "D7.CASES 0
+make "D7.FAIL "false
+
+to d7.require :condition :tag
+  make "D7.N (:D7.N + 1)
+  if not :condition [
+    make "D7.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_07_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d7.preserved :before :after :keys
+  if emptyp :keys [output "true]
+  localmake "key first :keys
+  if not equalp (monster.context.get :before :key) (monster.context.get :after :key) [output "false]
+  output d7.preserved :before :after butfirst :keys
+end
+
+to d7.compare.seeds :position :actual :expected :tag
+  if :position > 7 [stop]
+  d7.require (equalp (item :position :actual) (item :position :expected)) (list :tag :position)
+  d7.compare.seeds (:position + 1) :actual :expected :tag
+end
+
+to d7.valid :calculation :target :tag
+  localmake "countctx monster.stage02.workcounts :calculation :target
+  localmake "before monster.stage02.stones :countctx
+  localmake "after monster.stage02.hidden :before
+  localmake "seeds monster.context.get :after "hiddenSeeds
+  localmake "expected nr.hidden.build (nr.work.counts :calculation :target) (nr.stones)
+  make "D7.CASES (:D7.CASES + 1)
+  if (count :seeds) <> 7 [print [STAGE_2_DISCOVERY_07_SHAPE_FALIIS] stop]
+  if (count :expected) <> 7 [print [STAGE_2_DISCOVERY_07_ORACLE_SHAPE_FALIIS] stop]
+  d7.compare.seeds 1 :seeds :expected :tag
+  d7.require (equalp (monster.context.get :after "calculationDay) :calculation) (list :tag [calculation])
+  d7.require (equalp (monster.context.get :after "targetDay) :target) (list :tag [target])
+  d7.require (d7.preserved :before :after [normalizedCalculationDay normalizedTargetDay actionCount targetCount distanceCount connectionCount directionCount]) (list :tag [workcounts])
+  d7.require (equalp (monster.context.get :after "stoneSeries) (monster.context.get :before "stoneSeries)) (list :tag [stones])
+  d7.require (equalp (monster.context.get :after "phase) "HIDDEN_READY) (list :tag [phase])
+  d7.require (equalp (monster.context.get :after "mode) "STAGE_2_DISCOVERY_07) (list :tag [mode])
+  d7.require (equalp (monster.context.get :after "status) "HIDDEN_SEEDS_ONLY) (list :tag [status])
+  d7.require (equalp (monster.context.get :after "metrics) [stage02.dispatch stage02.counts stage02.stones stage02.hidden]) (list :tag [metrics])
+  d7.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready stage02.hidden.ready]) (list :tag [logs])
+  localmake "again monster.stage02.hidden :before
+  d7.require (equalp :again :after) (list :tag [determinism])
+end
+
+to d7.invalid :ctx :tag
+  make "D7.CASES (:D7.CASES + 1)
+  d7.require (equalp (monster.stage02.hidden :ctx) :ctx) :tag
+end
+
+to stage02.discovery07.run
+  d7.valid [0 [0]] [1 [1]] [zero_one]
+  d7.valid (nr.foundation) (nr.tablets) [foundation_tablets]
+  d7.valid (bi.neg nr.M) (nr.M) [minus_period_plus_period]
+  d7.invalid (monster.stage02.workcounts [0 [1]] [0 [0]]) [failed_validation]
+  d7.invalid (monster.stage02.workcounts [0 [0]] [1 [1]]) [intermediate_counts_only]
+  if :D7.FAIL [print [STAGE_2_DISCOVERY_07_FALIIS] stop]
+  if :D7.CASES <> 5 [print [STAGE_2_DISCOVERY_07_CASE_COUNT_FALIIS] stop]
+  if :D7.N <> 53 [print [STAGE_2_DISCOVERY_07_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_07_CASES_PASIS] :D7.CASES
+  print sentence [STAGE_2_DISCOVERY_07_CHECKS_PASIS] :D7.N
+  print [STAGE_2_DISCOVERY_07_PASIS]
+end
+
+stage02.discovery07.run
