@@ -17,6 +17,7 @@ from pathlib import Path
 # Cases 272/273 reject reserved negative zero and both-operand owner-zero aliasing.
 # Case 274: simultaneous invalid owner254 alias at zero length.
 # Case 275: simultaneous invalid owner255/254 at one-byte lengths.
+# Case 276: reversed invalid owner254/255 at one-byte lengths, opposite signs.
 # Raw SRAM sentinels remain intact.
 # Keep the measured 9000-frame cap.
 MAX_BOOT_AND_TEST_FRAMES = 9000
@@ -26,7 +27,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 275
+TOTAL_CASES = 276
 
 
 def discover_case_high_byte(symbol_path: Path) -> int:

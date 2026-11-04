@@ -2,7 +2,7 @@
 """Independent Python integer oracle for owner-scoped signed magnitudes.
 
 This is a HOST reference contract, not execution of SM83 machine code.
-The ROM exercise covers cases 191..275; extra max-owner boundary checks are Host-only.
+The ROM exercise covers cases 191..276; extra max-owner boundary checks are Host-only.
 """
 from random import Random
 from test_sram_owner_model import OwnedBanks, SIZE
@@ -246,8 +246,8 @@ def check_owner_id_fragmented_high_boundary():
     assert model.tags[5] == model.tags[7] == 0 and model.tags[6] == 3
     print("HOST_OWNER_SIGNED_CMP_FRAGMENTED_MAX_OWNER=PASS cases=44 revoked_zero=8 owner=253 tag=255 banks=5,7 peer_bank=6 canonical_and_revoked=YES payload_and_tags=IMMUTABLE")
 
-def check_native_cases262_to275_oracle():
-    """Independent integer oracle for ROM cases 262-275; not a Native PASS."""
+def check_native_cases262_to276_oracle():
+    """Independent integer oracle for ROM cases 262-276; not a Native PASS."""
     model = OwnedBanks()
     assert model.alloc(253, 1) == (0, (3,))
     assert model.tags[3] == 255
@@ -379,9 +379,9 @@ def check_native_cases262_to275_oracle():
             "expected=INVALID3 payload_and_tags=IMMUTABLE"
         )
 
-    # Native 274/275: both operands are invalid simultaneously.
+    # Native 274-276: both operands are invalid simultaneously.
     # Case 274 aliases invalid owner 254 with zero lengths; case 275 has
-    # owners 255/254, opposite signs, and both lengths one byte.
+    # owners 255/254 or reversed 254/255, opposite signs, one-byte lengths.
     # Decode the live control independently, then reject EACH bad descriptor
     # via the Python integer reference (not an SM83 routine).
     assert reference_integer(model, 1, 0, 1) == int.from_bytes(
@@ -390,6 +390,7 @@ def check_native_cases262_to275_oracle():
     for case_id, left, right in (
         (274, (254, 0, 0), (254, 0, 0)),
         (275, (255, 1, 1), (254, 0, 1)),
+        (276, (254, 0, 1), (255, 1, 1)),
     ):
         for descriptor in (left, right):
             try:
@@ -786,7 +787,7 @@ def main():
     )
     check_owner_id_high_boundary()
     check_owner_id_fragmented_high_boundary()
-    check_native_cases262_to275_oracle()
+    check_native_cases262_to276_oracle()
     print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=36 same_owner_fragmented_alias=6 same_owner_fragmented_noncanonical=2 same_owner_fragmented_mixed_sign_invalid=4 case_id_16bit_oracle=2 stale_fragmented_after_release=1 stale_fragmented_with_live_peer=1 stale_fragmented_as_B_with_live_A=1 both_revoked_distinct_owners=2 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=4 same_owner_full_capacity_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
     print(f"HOST_OWNER_SIGNED_CMP_REFERENCE=PASS randomized_cases={checks} canonical=YES fragmented=YES zero_sign=YES owner_release=YES")
     print("NOT_A_NATIVE_ROM_VERIFICATION=YES")
