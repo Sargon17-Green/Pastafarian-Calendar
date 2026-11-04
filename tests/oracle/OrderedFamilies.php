@@ -203,6 +203,7 @@ final class WeavingCounter
     private array $lengths;
     /** @var array<string,BigInt> */
     private array $memo = [];
+    private bool $compactMemoKey;
 
     /** @param list<int> $lengths */
     public function __construct(array $lengths)
@@ -211,6 +212,9 @@ final class WeavingCounter
             throw new RuntimeException('WEAVING_LENGTHS');
         }
         $this->lengths = array_values($lengths);
+        // A one-byte-per-counter key is lossless for normative month lengths (4..123).
+        // Keep the original textual key for callers supplying larger counters.
+        $this->compactMemoKey = max($this->lengths) <= 255 && count($this->lengths) <= 255;
     }
 
     public function countAll(): BigInt
@@ -231,7 +235,11 @@ final class WeavingCounter
         if ($done) {
             return BigInt::one();
         }
-        $key = implode(',', $remaining) . '|' . $openedUpTo . '|' . $closedUpTo;
+        // Preserve both frontier markers; no semantic equivalence assumption is needed.
+        // PHP strings are binary-safe as hash-table keys, including zero bytes.
+        $key = $this->compactMemoKey
+            ? pack('C*', ...$remaining) . chr($openedUpTo) . chr($closedUpTo)
+            : implode(',', $remaining) . '|' . $openedUpTo . '|' . $closedUpTo;
         if (isset($this->memo[$key])) {
             return $this->memo[$key];
         }

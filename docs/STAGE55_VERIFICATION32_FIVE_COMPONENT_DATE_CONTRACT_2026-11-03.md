@@ -27,3 +27,8 @@ Artifact must include PROJECT_ID, STAGE=55, source SHA, PHP version, stdout/stde
 
 ## NEXT
 If Native fails, inspect actual logs and repair only a proven defect. On GREEN, close Stage55 and plan independent production year-structure generation (not injected Oracle), validating full five-component dates on multiple independent years and boundaries. No claim of standalone full-calendar production until that separate gate passes.
+
+## 2026-11-04 bounded repair attempt — no acceptance implied
+Actions #41712461872 on cf4b938680ca187c0532b92098f5ebc56dd9ff79: 25/26 jobs success, stage55-five-components-native #126183744066 failure. PHP 8.3.36 64-bit and both lint passes; fatal 512MiB exhaustion in tests/oracle/OrderedFamilies.php WeavingCounter::count, line 245 before the five-component acceptance line. Failed diagnostic artifact #13268847518, SHA256 a4c3397b51886405bd402202615600fb24f142d52151e0e662cae525cb67dffb.
+
+Implement a test-oracle-only lossless compact memo key (one unsigned byte per remaining month count plus both frontiers) for input lengths <=255 and monthCount <=255; retain textual encoding otherwise. Add a separate test with independently exhaustive multiset-word enumeration on four small vectors, checking exact count and all 53 unrank positions. Preserve 512MiB / 900s and all 26/26 requirements; this change is unaccepted until the full native run completes and proves the original full-date acceptance line. If memory remains inadequate, pursue a bounded alternative exact counting algorithm, not a higher limit or fixture substitution.
