@@ -7,10 +7,7 @@ import pastafari/discovery_20_gate_gap
 import pastafari/discovery_21_gate_batch
 
 pub type GapPrefix {
-  GapPrefix(
-    sample: discovery_20_gate_gap.GateGapOutput,
-    prefix_total: Int,
-  )
+  GapPrefix(sample: discovery_20_gate_gap.GateGapOutput, prefix_total: Int)
 }
 
 pub type GapPrefixBatch {
@@ -22,10 +19,7 @@ pub fn dispatch_discovery_22(
   requested_bowl_ids: List(Int),
 ) -> Result(GapPrefixBatch, discovery_19_interval_value.Discovery19Error) {
   case
-    discovery_21_gate_batch.dispatch_discovery_21(
-      context,
-      requested_bowl_ids,
-    )
+    discovery_21_gate_batch.dispatch_discovery_21(context, requested_bowl_ids)
   {
     Error(error) -> Error(error)
     Ok(samples) -> Ok(accumulate(samples, 0, []))
@@ -41,11 +35,10 @@ fn accumulate(
     [] -> GapPrefixBatch(entries: list.reverse(reversed), total: running)
     [sample, ..rest] -> {
       let next = running + sample.gap
-      accumulate(
-        rest,
-        next,
-        [GapPrefix(sample: sample, prefix_total: next), ..reversed],
-      )
+      accumulate(rest, next, [
+        GapPrefix(sample: sample, prefix_total: next),
+        ..reversed
+      ])
     }
   }
 }

@@ -157,10 +157,8 @@ pub fn discovery_22_invalid_context_priorities_test() {
 
   let a = bootstrap.MonsterContext(..base, diagnostics: ["A"])
   let b = bootstrap.MonsterContext(..base, diagnostics: ["B"])
-  let assert Ok(one) =
-    discovery_22_gap_prefixes.dispatch_discovery_22(a, [1])
-  let assert Ok(two) =
-    discovery_22_gap_prefixes.dispatch_discovery_22(b, [1])
+  let assert Ok(one) = discovery_22_gap_prefixes.dispatch_discovery_22(a, [1])
+  let assert Ok(two) = discovery_22_gap_prefixes.dispatch_discovery_22(b, [1])
   let assert [first_a] = one.entries
   let assert [first_b] = two.entries
   first_a.sample.previous.previous.previous.previous.context.diagnostics
