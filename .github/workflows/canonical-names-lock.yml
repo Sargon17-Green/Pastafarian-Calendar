@@ -24,3 +24,25 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+
+  wat-stage02-semantic:
+    if: "github.event_name == 'push' && github.ref == 'refs/heads/WAT+Español'"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record exact Git HEAD and WAT SHA256
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          sha256sum tests/normative_selector.wat
+      - name: Install WABT
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends wabt
+          wat2wasm --version
+      - name: Run all 29 Native WAT cases and exact independent BigInt oracle
+        run: node tests/run_stage02_discovery01_webassembly.cjs
