@@ -46,3 +46,11 @@ La antaŭaj **274** Native-testoj devas resti senŝanĝaj; la nova nombro **286 
 2. Koda HEAD: unu nova produkta modulo, precize dek du novaj testoj kaj metadata. Postulu **286/286 mezuritan** Native, formaton, netuŝitan fonton kaj Names SUCCESS sur sama SHA; `queued/in_progress` estas nek PASS nek blokado. Nur pruvitaj eraroj rajtigas flikon.
 3. Dokumenta fermo kaj fina metadata estu **apartaj commit-oj** kun propraj same-SHA Native/Names sukcesoj antaŭ fina Stage26-akcepto aŭ Stage27.
 4. Ne faru `main`-merge, publikigon, supozon pri vera pordegoserio, jarlongo aŭ datkalkulo.
+
+## Koda HEAD kontrolita kaj aparta dokumenta fermo (2026-11-04)
+
+La kontrakta HEAD `237300506d7ff4f8f2151218d00826cc157210bb` pasis [Native 41873805215](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41873805215), job `126727690332`, **274/274 testoj**, kaj same-SHA [Names Lock 41873805097](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41873805097) SUCCESS. La origina koda HEAD `a4aac2de977e87c74f2ca49a167f3b3c1d67233b` enkondukis unu produkmodulon, dek du publike nomitajn testfunkciojn kaj metadata ŝanĝon. Ĝia [Native 41874248497](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41874248497) estis `completed/failure` nur pro **kvin precizaj format-hunkoj en du dosieroj**; la testoj **ne ruliĝis**.
+
+La kvin kanonaj formatter-korektoj, sen semantika ŝanĝo, estas ĉe commit `2b3107bd2ffe45effe4194ac8ac17938a976a68e`. Por tiu sama SHA, [Native 41874439228](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41874439228), job `126729900475`, estas `completed/success`, **286/286 testoj, 0 malsukcesoj**, Gleam **1.18.1**, Erlang/OTP **28**, `gleam format --check src test`, fontintegreco PASS; artefakto `13346760989`. [Names Lock 41874439366](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41874439366), job `126729900964`, estas `completed/success` sur **la sama SHA**. La akceptita produkto restas pura prefiksa aritmetiko por eksplicita petolisto, ne jara/pordega kronologio.
+
+**Ĉi tiu dokumenta HEAD postulas siajn proprajn same-SHA Native 286/286 kaj Names Lock sukcesojn.** Poste aparta fina metadata HEAD devas ankaŭ pasi ambaŭ. `LAST_COMPLETED_STAGE=25` ĝis la finaj pordegoj. Neniu `main`-merge, publikigo aŭ aŭtoritate ne difinita kalendara regulo.
