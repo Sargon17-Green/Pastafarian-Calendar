@@ -614,7 +614,7 @@ contains
     type(WeaveSuffixRow), allocatable :: suffix(:)
     integer, allocatable :: remaining(:), cumulative(:)
     type(BigInt) :: total,rank,stateTotal,closureFactor,partial,childFactor,child,available
-    integer :: n,opened,closed,position,color,first,R,j,oldCount
+    integer :: n,opened,closed,position,color,first,R,j
     logical :: selected
 
     n=size(lengths)
@@ -700,7 +700,6 @@ contains
              end if
           else
              out(position)=color
-             oldCount=remaining(color)
              call applyMove(remaining,opened,closed,color,lengths)
              closureFactor=childFactor
              stateTotal=child
@@ -708,7 +707,7 @@ contains
              exit
           end if
        end do
-       if (.not.selected .or. oldCount<1) error stop 'weaving unrank has no legal completion'
+       if (.not.selected) error stop 'weaving unrank has no legal completion'
     end do
 
     if (any(remaining/=0) .or. bi_compare(rank,bi_one())/=0) &
@@ -757,7 +756,7 @@ contains
        return
     end if
     choices=bi_one()
-    do t=1,r
+    do t=1,r-1
        choices=weave_divide_small_exact(bi_mul_small(choices,int(R+t,int64)),t)
     end do
     next=bi_mul(previous,choices)
