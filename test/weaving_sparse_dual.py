@@ -1,0 +1,286 @@
+#!/usr/bin/env python3
+"""DISCOVERY03 research: sparse forward-state and algebraic reverse-adjoint transfer, not Chapel production.
+
+The one-dimensional forward transfer is optimized by sparse interval states\nand an exact binomial recurrence. Its transpose uses a single-gap closed form\nor the same exact recurrence. Finite
+acceptance uses the independent complete enumeration / occurrence-poset oracle.
+A bounded 6-symbol median-prefix probe does NOT imply full-year rank PASS.
+"""
+from collections import Counter
+from itertools import product
+from time import monotonic
+from resource import getrusage, RUSAGE_SELF
+from hashlib import sha256
+
+from weaving_prefix_batch import extend_spec
+from weaving_prefix_transfer import weight, count_prefix
+
+
+from dataclasses import dataclass
+from math import comb
+
+@dataclass(frozen=True)
+class SparseVector:
+    offset: int
+    values: tuple
+
+    def total(self):
+        return sum(self.values)
+
+    def prefix(self, index):
+        upto = min(len(self.values), index - self.offset + 1)
+        return sum(self.values[:upto]) if upto > 0 else 0
+
+    def dot(self, dense):
+        return sum(value * dense[self.offset + t]
+                   for t, value in enumerate(self.values))
+
+
+def sparse_transfer(previous, n, k, spec):
+    """Exact transfer: one admissible gap or a contiguous suffix interval."""
+    q, fixed_sum, first_fixed, tail = spec
+    if q > n:
+        return SparseVector(0, ())
+    if fixed_sum or tail:
+        i = first_fixed if fixed_sum else q
+        if i < 0 or i > n:
+            return SparseVector(0, ())
+        prefix = previous.prefix(i)
+        coefficient = weight(i, n, k, *spec) if prefix else 0
+        return SparseVector(i+1, (prefix * coefficient,)) if coefficient else SparseVector(0, ())
+    first = max(0, q)
+    if first > n:
+        return SparseVector(0, ())
+    prefix = previous.prefix(first)
+    out = []
+    # For i<n, w(i)=C(k+n-i-2,n-i); for i=n the weight is one.
+    distance = n - first
+    coefficient = comb(k + distance - 2, distance) if k >= 2 and distance else (1 if not distance else 0)
+    for i in range(first, n+1):
+        if i > first and previous.offset <= i < previous.offset + len(previous.values):
+            prefix += previous.values[i-previous.offset]
+        out.append(prefix * (1 if i == n else coefficient))
+        remaining = n-i
+        if remaining > 1 and k >= 2:
+            coefficient = coefficient * remaining // (k+remaining-2)
+    start = first+1
+    left = 0
+    while left < len(out) and out[left] == 0:
+        left += 1
+    if left == len(out):
+        return SparseVector(0, ())
+    right = len(out)
+    while right > left and out[right-1] == 0:
+        right -= 1
+    return SparseVector(start+left, tuple(out[left:right]))
+
+
+def sparse_transpose(after, n, k, spec):
+    """Exact T^t, closed form for single-gap rows; recurrence otherwise."""
+    q, fixed_sum, first_fixed, tail = spec
+    if q > n:
+        return [0] * (n+1)
+    if fixed_sum or tail:
+        i = first_fixed if fixed_sum else q
+        if i < 0 or i > n:
+            return [0] * (n+1)
+        coefficient = weight(i,n,k,*spec)
+        value = after[i+1] * coefficient
+        return [value] * (i+1) + [0] * (n-i)
+    result = [0] * (n+1)
+    acc = after[n+1]
+    result[n] = acc
+    coefficient = 0
+    for distance in range(1, n-q+1):
+        if k >= 2:
+            coefficient = k-1 if distance == 1 else coefficient * (k+distance-2) // distance
+        i = n-distance
+        if after[i+1] and coefficient:
+            acc += after[i+1] * coefficient
+        result[i] = acc
+    if q > 0:
+        result[:min(q,n+1)] = [acc]*min(q,n+1)
+    return result
+
+
+class SparseDualWeaving:
+    def __init__(self, lengths):
+        if not lengths or any(type(x) is not int or x < 1 for x in lengths):
+            raise ValueError("positive integer lengths required")
+        self.lengths = tuple(lengths)
+        self.m = len(lengths)
+        self.n = sum(lengths)
+        self.used = [0] * (self.m + 1)
+        self.opened = self.closed = self.position = 0
+        self.specs = [None, None] + [(0, 0, -1, 0)] * (self.m - 1)
+        self.sizes = [0] * (self.m + 1)
+        self.states = [None] * (self.m + 1)
+        n = lengths[0]
+        v = SparseVector(1, (1,))
+        self.states[1], self.sizes[1] = v, n
+        for j in range(2, self.m + 1):
+            v = sparse_transfer(v, n, lengths[j-1], self.specs[j])
+            n += lengths[j-1]
+            self.states[j], self.sizes[j] = v, n
+        self.total = v.total()
+        self.cached = None
+
+    def eligible(self, c):
+        if not 1 <= c <= self.m:
+            return False
+        left = self.lengths[c-1] - self.used[c]
+        return (left > 0 and c <= self.opened + 1
+                and (left != 1 or c == self.closed + 1))
+
+    @staticmethod
+    def transpose(after,n,k,spec):
+        return sparse_transpose(after,n,k,spec)
+
+    def blocks(self):
+        if self.cached is not None:
+            return self.cached
+        # Stream reverse-adjoint vectors to bound memory. At month j, the
+        # suffix only sees the candidate as an older letter for every c<j.
+        adj = [1] * (self.n + 1)
+        out = [0] * (self.m + 1)
+        for j in range(self.m, 1, -1):
+            if self.eligible(j):
+                own = extend_spec(self.specs[j], j, j)
+                v = sparse_transfer(self.states[j-1], self.sizes[j-1],
+                             self.lengths[j-1], own)
+                out[j] = v.dot(adj)
+            older = extend_spec(self.specs[j], j, 1)
+            adj = self.transpose(adj, self.sizes[j-1],
+                                 self.lengths[j-1], older)
+        if self.eligible(1):
+            out[1] = self.states[1].dot(adj)
+        if sum(out) != self.total:
+            raise AssertionError(("candidate partition", self.position))
+        self.cached = tuple(out)
+        return self.cached
+
+    def take(self, c):
+        if not self.eligible(c):
+            raise ValueError("illegal next symbol")
+        ways = self.blocks()[c]
+        if ways <= 0:
+            raise ValueError("no valid continuation")
+        start = max(2, c)
+        v = self.states[start-1]
+        for j in range(start, self.m + 1):
+            self.specs[j] = extend_spec(self.specs[j], j, c)
+            v = sparse_transfer(v, self.sizes[j-1], self.lengths[j-1],
+                         self.specs[j])
+            self.states[j] = v
+        self.used[c] += 1
+        self.position += 1
+        if self.used[c] == 1:
+            self.opened += 1
+        if self.used[c] == self.lengths[c-1]:
+            self.closed += 1
+        self.total = ways
+        self.cached = None
+        assert self.total == self.states[self.m].total()
+
+
+def dual_unrank(lengths, rank):
+    s = SparseDualWeaving(lengths)
+    if type(rank) is not int or not 0 <= rank < s.total:
+        raise ValueError("invalid rank")
+    word = []
+    for _ in range(s.n):
+        for c, ways in enumerate(s.blocks()[1:], 1):
+            if rank >= ways:
+                rank -= ways
+            else:
+                s.take(c)
+                word.append(c)
+                break
+        else:
+            raise AssertionError("no continuation")
+    assert rank == 0 and s.total == 1
+    return tuple(word)
+
+
+def dual_rank(lengths, word):
+    s = SparseDualWeaving(lengths)
+    if len(word) != s.n or Counter(word) != Counter(
+            {i+1: k for i, k in enumerate(lengths)}):
+        raise ValueError("invalid multiplicity")
+    rank = 0
+    for c in word:
+        rank += sum(s.blocks()[1:c])
+        s.take(c)
+    assert s.total == 1
+    return rank
+
+
+def test_finite():
+    from weaving_small_exact_oracle import brute_words, poset_oracle
+    cases = [p for m in range(1, 5)
+             for p in product(range(1, 5), repeat=m) if sum(p) <= 8]
+    cases += [(2, 2, 2, 2, 2), (2, 3, 2, 2), (3, 2, 3, 2),
+              (2, 2, 3, 3), (3, 3, 2, 2), (4, 3, 2),
+              (2, 4, 3), (1, 2, 1, 3), (3, 1, 2, 2)]
+    cases = list(dict.fromkeys(cases))
+    roundtrips = partitions = 0
+    for lengths in cases:
+        accepted = brute_words(lengths)
+        count, oracle_rank, oracle_unrank, _ = poset_oracle(lengths)
+        assert SparseDualWeaving(lengths).total == count == len(accepted)
+        for i, word in enumerate(accepted):
+            assert dual_unrank(lengths, i) == oracle_unrank(i) == word
+            assert dual_rank(lengths, word) == oracle_rank(word) == i
+            roundtrips += 2
+            state = SparseDualWeaving(lengths)
+            for symbol in word:
+                assert sum(state.blocks()) == state.total
+                state.take(symbol)
+                partitions += 1
+    assert len(cases) == 137 and roundtrips == 1982 and partitions == 8361
+    print("WEAVING_SPARSE_FINITE_CASES=137")
+    print("WEAVING_SPARSE_FINITE_RANK_ROUNDTRIPS=1982")
+    print("WEAVING_SPARSE_FINITE_PARTITIONS=8361")
+    print("WEAVING_SPARSE_FINITE_RESULT=PASS")
+
+
+def test_median_prefix():
+    from weaving_reachability_oracle import MONTH_LENGTHS
+    months = MONTH_LENGTHS
+    assert len(months) == 45 and sum(months) == 4244
+    started = monotonic()
+    state = SparseDualWeaving(months)
+    root = state.total
+    assert root.bit_length() == 22470
+    digest = sha256(root.to_bytes((root.bit_length()+7)//8, "big")).hexdigest()
+    assert digest == "925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da"
+    # This deliberately probes ONLY the first six choices for total//2.
+    residual_rank = root // 2
+    prefix = []
+    for _ in range(6):
+        blocks = state.blocks()
+        for c in range(1, 46):
+            if residual_rank >= blocks[c]:
+                residual_rank -= blocks[c]
+            else:
+                state.take(c)
+                prefix.append(c)
+                break
+        else:
+            raise AssertionError("no legal median-prefix transition")
+    assert tuple(prefix) == (1, 2, 3, 4, 5, 6)
+    assert state.total == count_prefix(months, tuple(prefix))
+    elapsed = monotonic() - started
+    rss = getrusage(RUSAGE_SELF).ru_maxrss
+    assert elapsed < 25.0 and rss < 512*1024, (elapsed, rss)
+    print("WEAVING_SPARSE_FULL_MONTHS=45")
+    print("WEAVING_SPARSE_FULL_DAYS=4244")
+    print("WEAVING_SPARSE_MEDIAN_PREFIX_SYMBOLS=6")
+    print("WEAVING_SPARSE_MEDIAN_PREFIX_SECONDS=" + format(elapsed, ".3f"))
+    print("WEAVING_SPARSE_MEDIAN_PREFIX_RSS_KIB=" + str(rss))
+    print("WEAVING_SPARSE_MEDIAN_PREFIX_RESULT=PASS")
+    print("WEAVING_SPARSE_FULL_MEDIAN_RANK_UNRANK=NOT_TESTED")
+
+
+if __name__ == "__main__":
+    test_finite()
+    test_median_prefix()
