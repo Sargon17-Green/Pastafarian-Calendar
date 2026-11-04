@@ -433,7 +433,8 @@ fn (mut c Patch15WeaveCounter) count(state Patch15WeaveState) BigInt {
 				if skipped < left {
 					numerator := left - skipped
 					denominator := left - skipped + size - 2
-					combinations = patch15_weave_div_small(big_mul_small(combinations, u32(numerator)), denominator)
+					product := big_mul_small(combinations, u32(numerator))
+					combinations = patch15_weave_div_small(product, denominator)
 				}
 			}
 		}
