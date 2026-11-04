@@ -27,9 +27,16 @@ No witness is fabricated. An unsupported signature returns SOURCE_ONLY,
 which makes no global absence claim. Infrastructure/build failures return
 RUNTIME_UNVERIFIED, *not* SOURCE_ONLY and *not* a historical RED.
 
-Output JSON includes source_pin_eligible, callable_day_tag_route_verified,
-callability_status, observed_runtime_red=false and stage04_closure=NOT_CLAIMED;
+Output JSON includes source_pin_eligible, callable_numeric_function_verified,
+callable_day_tag_route_verified, callability_status, observed_runtime_red=false
+and stage04_closure=NOT_CLAIMED;
 actual numeric outputs appear only when a historical function was executed.
+Execution of a typed numeric symbol establishes *only* numeric-function
+callability (`callable_numeric_function_verified=true`), never by itself
+that the symbol implements production day-tag semantics. Accordingly,
+`callable_day_tag_route_verified` remains false until an independent,
+source-pinned semantic route proof is provided; the current CLI does not
+make that proof. A synthetic +7 function must not be labeled a day-tag route.
 Exit 0: source-only or executable eligibility decided. Exit 2: rejected pin.
 Exit 3: runtime not verified. Only an independent normative comparison to
 a genuinely executed old Rust production route can subsequently support a
@@ -45,7 +52,8 @@ closure=NOT_CLAIMED. This is not a universal absence theorem.
 
 Nine isolated synthetic-history checks cover one **native Rust executed**
 positive (outputs -15055665, -15055664, -15055663 from a synthetic +7
-function, no RED claim), source-only negative, wrong/private signature,
+numeric probe; callable_numeric_function_verified=true but
+callable_day_tag_route_verified=false, no RED claim), source-only negative, wrong/private signature,
 module/path mismatch, symbol injection, wrong blob, post-Stage4 source,
 stale checkout HEAD and typed test harness binding. These fixture tests
 are deliberately independent of the Rust production implementation.

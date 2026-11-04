@@ -21,7 +21,7 @@ class CallabilityTests(unittest.TestCase):
         self.git("config", "user.email", "qa@example.invalid")
         self.old = self.commit({
           "Cargo.toml": '[package]\nname="synthetic-rust-daytag"\nversion="0.1.0"\nedition="2021"\n[lib]\nname="synthetic_rust_daytag"\n[dependencies]\nnum-bigint="0.4"\n',
-          "src/lib.rs": 'use num_bigint::BigInt;\npub fn old_day_tag(day: &BigInt) -> BigInt { day + BigInt::from(7) }\n'})
+          "src/lib.rs": 'use num_bigint::BigInt;\npub fn old_numeric_probe(day: &BigInt) -> BigInt { day + BigInt::from(7) }\n'})
         self.blob = self.git("rev-parse", self.old+":src/lib.rs")
         self.stage3 = self.commit({"README.md": "stage3\n"})
         self.stage4 = self.commit({"README.md": "stage4\n"})
@@ -40,7 +40,7 @@ class CallabilityTests(unittest.TestCase):
         self.git("commit", "-qm", "synthetic")
         return self.git("rev-parse", "HEAD")
 
-    def check(self, symbol="old_day_tag", commit=None, path="src/lib.rs", blob=None):
+    def check(self, symbol="old_numeric_probe", commit=None, path="src/lib.rs", blob=None):
         return check_callability(self.repo, commit or self.old, path, blob or self.blob,
                                  self.stage3, self.stage4, self.head, symbol, timeout=180)
 
@@ -50,7 +50,8 @@ class CallabilityTests(unittest.TestCase):
         r = self.check()
         self.assertEqual(r["callability_status"], "EXECUTED_PINNED_RUST_PRODUCTION_FUNCTION")
         self.assertEqual(r["observed_outputs"], [-15055665,-15055664,-15055663])
-        self.assertTrue(r["callable_day_tag_route_verified"])
+        self.assertTrue(r["callable_numeric_function_verified"])
+        self.assertFalse(r["callable_day_tag_route_verified"])
         self.assertFalse(r["observed_runtime_red"])
         self.assertEqual(r["stage04_closure"], "NOT_CLAIMED")
 
@@ -58,6 +59,7 @@ class CallabilityTests(unittest.TestCase):
         r = self.check(symbol="calendar_date_spaghetti")
         self.assertEqual(r["callability_status"], "SOURCE_ONLY_NO_SUPPORTED_SIGNATURE")
         self.assertFalse(r["callable_day_tag_route_verified"])
+        self.assertFalse(r["callable_numeric_function_verified"])
 
     def test_wrong_and_private_signature(self):
         self.assertFalse(supported_signature("fn day(d: &BigInt)->BigInt { d.clone() }", "day"))
@@ -90,7 +92,7 @@ class CallabilityTests(unittest.TestCase):
 
     def test_probe_binds_original_function_type(self):
         s = test_body("synthetic_rust_daytag", "old_day_tag")
-        self.assertIn("let old: fn(&BigInt) -> BigInt = synthetic_rust_daytag::old_day_tag;", s)
+        self.assertIn("let old: fn(&BigInt) -> BigInt = synthetic_rust_daytag::old_numeric_probe;", s)
 
 if __name__ == "__main__":
     unittest.main()

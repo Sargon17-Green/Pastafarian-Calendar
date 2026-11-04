@@ -89,7 +89,8 @@ def check_callability(repo: Path, witness_commit: str, witness_path: str,
     pin = verify_pin(repo, witness_commit, witness_path, witness_blob,
                      stage3_closure, stage4_introduction, branch_head)
     symbol = validated_symbol(witness_path, symbol)
-    verdict = dict(pin, symbol=symbol, callable_day_tag_route_verified=False,
+    verdict = dict(pin, symbol=symbol, callable_numeric_function_verified=False,
+                   callable_day_tag_route_verified=False,
                    observed_runtime_red=False, stage04_closure="NOT_CLAIMED")
     old_source = git(repo, "show", f"{witness_commit}:{witness_path}")
     if not supported_signature(old_source, symbol.split("::")[-1]):
@@ -127,7 +128,8 @@ def check_callability(repo: Path, witness_commit: str, witness_path: str,
             raise RuntimeUnverified("native test lacked unique execution evidence")
         verdict["observed_outputs"] = [int(n) for n in matches[0]]
         verdict["callability_status"] = "EXECUTED_PINNED_RUST_PRODUCTION_FUNCTION"
-        verdict["callable_day_tag_route_verified"] = True
+        # Execution verifies a pinned numeric function, not its day-tag semantics.
+        verdict["callable_numeric_function_verified"] = True
         return verdict
 
 def main() -> int:
@@ -144,12 +146,14 @@ def main() -> int:
                                    a.branch_head, a.symbol, a.timeout)
         code = 0
     except ProvenanceError as exc:
-        result = dict(source_pin_eligible=False, callable_day_tag_route_verified=False,
+        result = dict(source_pin_eligible=False, callable_numeric_function_verified=False,
+                      callable_day_tag_route_verified=False,
                       observed_runtime_red=False, stage04_closure="NOT_CLAIMED",
                       callability_status="SOURCE_INELIGIBLE", reason=str(exc))
         code = 2
     except RuntimeUnverified as exc:
-        result = dict(source_pin_eligible=True, callable_day_tag_route_verified=False,
+        result = dict(source_pin_eligible=True, callable_numeric_function_verified=False,
+                      callable_day_tag_route_verified=False,
                       observed_runtime_red=False, stage04_closure="NOT_CLAIMED",
                       callability_status="RUNTIME_UNVERIFIED", reason=str(exc))
         code = 3
