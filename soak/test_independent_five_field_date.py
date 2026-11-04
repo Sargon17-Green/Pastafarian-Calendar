@@ -27,18 +27,23 @@ class IndependentFiveFieldDateTests(unittest.TestCase):
     def setUpClass(cls):
         cls.ledger = synthetic()
 
-    def test_exact_five_fields_across_cutlet_boundary(self):
-        # Shortest Year-5000 interval is exactly 6 gates, open index -5.
-        # Earliest lex month lengths for 252 days/3 months are 6,123,123.
-        left = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION, first)
-        right = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION+1, first)
-        self.assertEqual(left, (5000, 5, 42, 3, 81))
-        self.assertEqual(right, (5000, 6, 1, 3, 82))
-        self.assertEqual(len(left), 5)
+    def test_exact_five_fields_across_cutlet_and_year_boundaries(self):
+        # The shortest Year-5000 interval is (-252, 0] relative to FOUNDATION.
+        # First lex 252-day/3-month lengths are (6,123,123).
+        cutlet_left = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION-42, first)
+        cutlet_right = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION-41, first)
+        year_left = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION, first)
+        year_right = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION+1, first)
+        self.assertEqual(cutlet_left, (5000, 5, 42, 3, 81))
+        self.assertEqual(cutlet_right, (5000, 6, 1, 3, 82))
+        self.assertEqual(year_left, (5000, 6, 42, 3, 123))
+        self.assertEqual(year_right, (5001, 1, 1, 1, 1))
+        self.assertTrue(all(len(v) == 5 for v in
+                            (cutlet_left, cutlet_right, year_left, year_right)))
 
     def test_year_boundary_forward_and_backward(self):
-        before = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION-210, first)
-        after = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION+43, first)
+        before = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION-252, first)
+        after = date_from_ledger(self.ledger, FOUNDATION, FOUNDATION+1, first)
         self.assertEqual(before[0], 4999)
         self.assertEqual(after[0], 5001)
         for output in (before, after):
