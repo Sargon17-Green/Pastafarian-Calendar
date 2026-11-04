@@ -1,0 +1,27 @@
+# SQL+தமிழ் — Stage 2 Slice21: choose_month_lengths contract
+
+**Date:** 2026-11-04. **Status: CONTRACT ONLY; no Slice21 implementation or PostgreSQL acceptance.**  
+**PROJECT_ID:** `PC-BRANCH-SQL-TAMIL`. Branch-only authorized development, no main/merge/publish.  
+**Prerequisite:** Slice20 ACCEPTED at run https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41714259445 on `9a65e3ef86f174bb68389420334c6c93858a3fad`; permanent report `artifacts/stage-02/POSTGRESQL_NATIVE_MONTH_COUNT_41714259445.md`.  
+**Normative source:** `sql/test/10_normative_reference.sql`, `pastafari_sql_tamil_test.choose_month_lengths`, same-branch blob `ce17bf6fd166451b6904411c5e29d1b26d92e278`. Read and checked; do not modify the reference. Its bounded count and unrank helpers are in the *same* file. No code or fixture copied from another branch.
+
+## Signature and normative behavior
+
+Production function `pastafari_sql_tamil.choose_month_lengths(p_sauce pastafari_sql_tamil.sauce_result, p_year pastafari_sql_tamil.year_rec, p_k integer) RETURNS integer[]`.
+
+For an integer year length `D = close_gate_day - open_gate_day` in `[252,5778]` and a valid month count `k` selected by Slice20, `ceil(D/123) <= k <= min(47,floor(D/4))`. A result is an **ordered** array `(l_1,...,l_k)` with `4 <= l_i <= 123` and `sum(l_i)=D`. The reference computes `cnt = bounded_count(D,k,4,123)`, `rank1 = choose_rank(ask_bowl(p_sauce,3,31),cnt)`, and returns the lexicographic (ascending integer entries) rank-`rank1` bounded composition. All arithmetic in counts/ranks is exact integer/`numeric`: never floating point, truncation, overflow, or modulo bias.
+
+Malformed input (NULL components, fractional or nonpositive year bounds, `D` outside valid range, inconsistent year gate indexes, `k <= 0`, `k > 47`, `4k>D`, `123k<D`, malformed sauce, or null/out-of-range rank) returns SQL NULL rather than silently returning a partial array or an unhandled exception. A genuinely SQL-NULL top-level argument remains STRICT. Caller consistency between sauce and year is not inferred from the signature; do not invent such a check.
+
+## Independent engineering plan
+
+1. Implement `sql/23_stage02_month_lengths.sql` with production-only exact **bounded-composition DP** and rank-unranking, not a port of the reference's inclusion-exclusion formula, no `pastafari_sql_tamil_test` usage and no mutable cross-call cache. Use a reusable DP table `C[n,t]` for the chosen `D,k`, with `C[0,0]=1`, `C[0,t>0]=0` and `C[n,t]=sum_{x=4}^{123} C[n-1,t-x]`. Use rolling/prefix-window sums or equivalent bounded computation. At rank-unranking, scan `x=4..123` and skip `C[remaining_slots-1,remaining_total-x]` until the residual rank falls in a block. A full table must be computed **once** per call and indexed, never recomputed for every candidate. Target `O(kD+120k)` arithmetic steps and `O(kD)` count storage; `k<=47,D<=5778`. The local naive repeated-DP approach exceeded a 20s exploratory limit; **do not** use it.
+2. Independent Python oracle `sql/test/126_stage02_month_lengths_oracle.py`: closed-form finite sum of binomial coefficients for counts and an independent unranking method, plus exhaustive direct enumeration on reduced bounds (4..7, slots 1..4) to detect rank/order mistakes. Ensure oracle does not call production code or reuse the normative reference's fixture generator. Local exploratory DP/table probe passed 340 exhaustive small-case rank checks and five full-boundary sanity cases; these are *design feasibility evidence only*, not PostgreSQL Slice21 PASS.
+3. Test `D in {252,253,492,2460,5778}`, valid minimum/maximum `k`, first/middle/last rank when feasible, repeated deterministic evaluation, output length/sum/bounds and lexicographic rank roundtrip. Include >=12 invalid cases (NULL/fractional/out-of-domain/bad rank/etc.), and at least 32 named PostgreSQL Native assertions with explicit aggregate `ok=t` and count guard. Use local count/oracle goldens chosen before production evaluation.
+4. Production isolation: >=4 active PostgreSQL checks loading production SQL only: function signature/return, volatility/strictness grounded in dependency properties, no reference schema or mutable-table dependency, stable valid output. Do not claim `IMMUTABLE` without inspecting `ask_bowl`/`choose_rank` dependencies.
+5. Differential: >=8 actual numeric-array comparisons on four distinct `D` values and two sauce configurations each, in a separate reference database; assert `IS NOT DISTINCT FROM` and explicit array members/length/sum. Use `pastafari_sql_tamil_test.choose_month_lengths` solely as an independent reference result in the test DB. Shard costly cases and impose a 15-minute hard job timeout.
+6. PostgreSQL17 workflow limited to `SQL+தமிழ்`, exact-SHA checkout, jobs with bounded workload, job-level logs, original ZIP artifacts, golden/differential generated SQL SHA-256. After completed runs, independently re-download ZIP, verify GitHub digest vs job log and local SHA-256, CRC, contained SQL hashes, exact SHA and PostgreSQL version. A queued/in_progress run is never PASS or a blocker.
+
+## Gating and NEXT
+
+**NEXT:** implement the DP function and independent Python closed-form/exhaustive oracle, create Native/isolation/differential fixtures and PG17 workflow, perform local bounded preflight and exact-blob readback, commit only to current `SQL+தமிழ்` via fast-forward/expected-HEAD, then inspect completed CI. Never modify the normative source, merge into main or publish without separate authority. Slice21 remains OPEN / READY, not ACCEPTED.
