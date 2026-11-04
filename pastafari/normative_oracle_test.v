@@ -751,7 +751,6 @@ fn (c OracleWeaveCounter) apply_move(state OracleWeaveState, j int) OracleWeaveS
 	}
 }
 
-
 /*
 Exact polynomial-time count of legal month weavings.
 For a completed prefix, opening and closing order make the count depend
@@ -775,8 +774,7 @@ fn oracle_weave_choose_exact(n int, k int) BigInt {
 	}
 	mut answer := big_one()
 	for step in 1 .. reduced + 1 {
-		answer = big_floor_div(big_mul_small(answer, u32(n - reduced + step)),
-			big_from_int(step))
+		answer = big_floor_div(big_mul_small(answer, u32(n - reduced + step)), big_from_int(step))
 	}
 	return answer
 }
@@ -843,8 +841,8 @@ fn (mut c OracleWeaveCounter) count(state OracleWeaveState) BigInt {
 				at := fixed_prefix + offset
 				next[at] = big_mul(prefixes[at], weight)
 				if t > 0 {
-					weight = big_floor_div(big_mul_small(weight, u32(t)),
-						big_from_int(t + length - 2))
+					weight = big_floor_div(big_mul_small(weight, u32(t)), big_from_int(t + length -
+						2))
 				}
 			}
 		}
@@ -874,8 +872,7 @@ fn oracle_weave_exhaustive_small(c OracleWeaveCounter, state OracleWeaveState) B
 	mut total := big_zero()
 	for label in 1 .. c.lengths.len + 1 {
 		if c.legal_move(state, label) {
-			total = big_add(total, oracle_weave_exhaustive_small(c, c.apply_move(state,
-				label)))
+			total = big_add(total, oracle_weave_exhaustive_small(c, c.apply_move(state, label)))
 		}
 	}
 	return total
@@ -1474,7 +1471,6 @@ fn test_stage31_production_46_drop_chain_matches_independent_normative_sauce() {
 	stage31_assert_production_sauce_matches_independent_oracle(calculation_day, target_day)
 }
 
-
 fn stage31_check_small_weave_state(mut oracle OracleWeaveCounter, mut candidate Patch15WeaveCounter,
 	state OracleWeaveState, mut visited map[string]bool) {
 	key := oracle_weave_state_key(state)
@@ -1492,8 +1488,8 @@ fn stage31_check_small_weave_state(mut oracle OracleWeaveCounter, mut candidate 
 	assert big_eq(candidate.count(candidate_state), slow)
 	for label in 1 .. oracle.lengths.len + 1 {
 		if oracle.legal_move(state, label) {
-			stage31_check_small_weave_state(mut oracle, mut candidate,
-				oracle.apply_move(state, label), mut visited)
+			stage31_check_small_weave_state(mut oracle, mut candidate, oracle.apply_move(state,
+				label), mut visited)
 		}
 	}
 }

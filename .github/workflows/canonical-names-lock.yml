@@ -51,16 +51,6 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
-      - name: Stage31 temporary exact V 0.5.2 formatter diagnostics (restore before verify)
-        shell: bash
-        run: |
-          set -euo pipefail
-          v fmt -w ./pastafari/patch15_numeric_date.v
-          v fmt -w ./pastafari/normative_oracle_test.v
-          echo 'BEGIN_STAGE31_FMT_DIFF'
-          git diff -- pastafari/patch15_numeric_date.v pastafari/normative_oracle_test.v
-          echo 'END_STAGE31_FMT_DIFF'
-          git restore -- pastafari/patch15_numeric_date.v pastafari/normative_oracle_test.v
       - name: Verify V version and source formatting
         shell: bash
         run: |

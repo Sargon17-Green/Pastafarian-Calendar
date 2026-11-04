@@ -326,7 +326,6 @@ fn (c Patch15WeaveCounter) apply_move(state Patch15WeaveState, j int) Patch15Wea
 	}
 }
 
-
 /*
 An exact insertion DP for the same first/last-constrained multiset words.
 This production implementation is independent of OracleEngine. For a new
