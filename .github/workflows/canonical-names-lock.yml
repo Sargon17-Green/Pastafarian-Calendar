@@ -640,3 +640,46 @@ jobs:
             stage37-native-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn
+
+  stage38-full-seal-preflight:
+    name: "Stage38 Native preflight: all ten seals at foundation and distant contexts"
+    if: github.ref == 'refs/heads/PowerShell+Tagalog'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 680 independent-oracle Stage38 preflight assertions
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($sha -cne $env:GITHUB_SHA) { throw 'Stage38 exact checkout SHA mismatch' }
+          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          if (-not (($md -contains 'CURRENT_STAGE=37') -and ($md -contains 'LAST_COMPLETED_STAGE=37') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) { throw 'Stage38 preflight requires Stage37 exact seal' }
+          @(
+            ('STAGE38_NATIVE_SHA=' + $sha),
+            ('STAGE38_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE38_SCOPE=4_CONTEXTS_40_ENDPOINTS_10_SEALS_180_PAIRS_32_TRIPLES',
+            'STAGE38_EXPECTED_ASSERTIONS=680',
+            'STAGE38_ACTIVATION=NOT_CLAIMED'
+          ) | Set-Content stage38-native-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage38-native-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage38.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage38 bounded preflight failed' }
+            Write-Host ('STAGE38_NATIVE_SHA=' + $sha)
+            Write-Host 'STAGE38_DISCOVERY23=PREFLIGHT_ONLY_NO_STAGE_TRANSITION'
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Retain Stage38 exact-SHA preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage38-full-seal-preflight
+          path: |
+            stage38-native-metadata.txt
+            stage38-native-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
