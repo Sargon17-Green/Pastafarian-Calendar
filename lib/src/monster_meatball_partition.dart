@@ -84,8 +84,7 @@ final class MonsterMeatballPartitioner {
     if (k < 1 || k > g) {
       throw RangeError.range(k, 1, g, 'k');
     }
-    if (mandatoryCut != null &&
-        (mandatoryCut <= 0 || mandatoryCut >= g)) {
+    if (mandatoryCut != null && (mandatoryCut <= 0 || mandatoryCut >= g)) {
       throw RangeError.range(mandatoryCut, 1, g - 1, 'mandatoryCut');
     }
   }
@@ -93,9 +92,7 @@ final class MonsterMeatballPartitioner {
   /// Lexicographic positive compositions, optionally containing a required cut.
   static BigInt countCompositions(int g, int k, {int? mandatoryCut}) {
     _validateComposition(g, k, mandatoryCut);
-    return mandatoryCut == null
-        ? _choose(g - 1, k - 1)
-        : _choose(g - 2, k - 2);
+    return mandatoryCut == null ? _choose(g - 1, k - 1) : _choose(g - 2, k - 2);
   }
 
   /// 1-based exact rank, with no list of exponential size materialized.
@@ -121,7 +118,7 @@ final class MonsterMeatballPartitioner {
         final hasCut = fulfilled || end == mandatoryCut;
         final possible = mandatoryCut == null || hasCut
             ? _choose(g - end - 1, partsLeft - 1)
-            : end > mandatoryCut!
+            : end > mandatoryCut
                 ? BigInt.zero
                 : _choose(g - end - 2, partsLeft - 2);
         if (index > possible) {

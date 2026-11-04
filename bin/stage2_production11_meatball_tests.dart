@@ -48,7 +48,10 @@ List<List<int>> bruteNames(int k) {
     for (final candidate in available) {
       visit(
         <int>[...prefix, candidate],
-        <int>[for (final a in available) if (a != candidate) a],
+        <int>[
+          for (final a in available)
+            if (a != candidate) a
+        ],
       );
     }
   }
@@ -158,8 +161,8 @@ void canonicalCase(BigInt c) {
       'Count within canonical 6..17');
   check(p.meatballCount <= p.intervalCount, 'Count <= gate intervals');
   check(p.meatballs.length == p.meatballCount, 'Full partition list');
-  check(p.countChoice.result ==
-      BigInt.from(p.meatballCount - 5), 'Seal20 1-based count mapping');
+  check(p.countChoice.result == BigInt.from(p.meatballCount - 5),
+      'Seal20 1-based count mapping');
   check(
     p.compositionCount ==
         MonsterMeatballPartitioner.countCompositions(
@@ -169,11 +172,13 @@ void canonicalCase(BigInt c) {
         ),
     'Full domain count',
   );
-  check(p.compositionChoice.result >= BigInt.one &&
-      p.compositionChoice.result <= p.compositionCount,
+  check(
+      p.compositionChoice.result >= BigInt.one &&
+          p.compositionChoice.result <= p.compositionCount,
       'Seal21 rank in complete domain');
-  check(p.nameSequenceCount ==
-      MonsterMeatballPartitioner.countNameSequences(p.meatballCount),
+  check(
+      p.nameSequenceCount ==
+          MonsterMeatballPartitioner.countNameSequences(p.meatballCount),
       'Seal22 domain count');
   final chosenNames = MonsterMeatballPartitioner.unrankNames(
     p.meatballCount,
