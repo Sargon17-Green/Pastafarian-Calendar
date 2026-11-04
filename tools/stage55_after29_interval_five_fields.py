@@ -98,8 +98,8 @@ def run(before, after, fixture):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("after27", type=Path)
     ap.add_argument("after28", type=Path)
+    ap.add_argument("after29", type=Path)
     ap.add_argument("fixture", type=Path)
     args = ap.parse_args()
-    run(args.after27, args.after28, args.fixture)
+    run(args.after28, args.after29, args.fixture)
