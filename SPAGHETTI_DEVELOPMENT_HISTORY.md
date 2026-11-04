@@ -177,3 +177,30 @@ markers pro la D6 testa fazi esas adjuntita. Source/Stage1 regresioni
 restas necesa. Ca esas performance remediation e diagnoso, ne
 pruvo di sole causajo: CI Native por la nova commit restas PENDING.
 LAST_COMPLETED_STAGE restas 1. Nula main/merge.
+
+## Stage 2 — DISCOVERY 06 Native acceptita (2026-11-04)
+
+La optimumiga commit `342e740e830108da40f3da92d147328e1c77e874` konservis la exacta BI aritmetiko
+e adjuntis 32 independenta divmod-vektori, 128 asserti.
+Native Stage2 run 41870469940 / job 126715826531 completed SUCCESS:
+`STAGE_2_FAST_DIVMOD_CHECKS_PASIS 128`,
+`NATIVE_BI_DIVMOD_FAST_VERIFICATION=PASS`,
+`STAGE_2_DISCOVERY_06_ROUNDS_PASIS 46`,
+`STAGE_2_DISCOVERY_06_CHECKS_PASIS 240`,
+`STAGE_2_DISCOVERY_06_PASIS` e
+`NATIVE_STAGE_2_DISCOVERY_06_VERIFICATION=PASS`.
+Discovery01–05 regresioni anke completed SUCCESS en sama job,
+sen failure markers. Stage1 run 41870469866 / job 126715826423
+completed SUCCESS kun autentika `STAGE_1_TESTI_PASIS` e
+`NATIVE_STAGE_1_VERIFICATION=PASS`; Canonical Names 41870469889
+completed SUCCESS. DISCOVERY06 ACCEPTED; Stage2 ne esas entere
+completigita, LAST_COMPLETED_STAGE=1. Nula manuala CI rerun, main o merge.
+
+## Stage 2 — DISCOVERY 07 (kontrato derivita; implementation NE komencita)
+
+Sequanta tasko esas la sep hidden-seed BI valori en Appendix A,
+dependanta de la 46 verificita stone-serio e kvin workcounts.
+La aparta `STAGE02_DISCOVERY07_CONTRACT.md` definesas exacta
+inputo, formulas, 3 valida + 2 nevalida contexti, 53 asserti,
+Native test-oracle apartiguro e termino-limiti. Nula D7 Native PASS
+esas deklarita en ca komito.
