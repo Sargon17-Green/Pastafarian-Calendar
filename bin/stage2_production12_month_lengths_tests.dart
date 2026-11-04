@@ -89,7 +89,8 @@ void boundaryOracle() {
     'Only [123,123,123] sums to 369 in three months',
   );
   check(
-    MonsterMonthLengthPlanner.unrankLengthVector(369, 3, BigInt.one).join(',') ==
+    MonsterMonthLengthPlanner.unrankLengthVector(369, 3, BigInt.one)
+            .join(',') ==
         '123,123,123',
     'Maximum-length extreme vector',
   );
@@ -176,8 +177,7 @@ void canonicalCase(BigInt calculationDay) {
     'All canonical lengths bounded',
   );
   check(
-    plan.lengths.fold<int>(0, (sum, length) => sum + length) ==
-        plan.yearLength,
+    plan.lengths.fold<int>(0, (sum, length) => sum + length) == plan.yearLength,
     'Length vector covers the year exactly',
   );
   check(
@@ -186,7 +186,8 @@ void canonicalCase(BigInt calculationDay) {
     'Bowl3 seal30 chooses from full month-count domain',
   );
   check(
-    plan.monthCount == plan.minMonths + plan.monthCountChoice.result.toInt() - 1,
+    plan.monthCount ==
+        plan.minMonths + plan.monthCountChoice.result.toInt() - 1,
     'Seal30 one-based rank mapping',
   );
   check(
