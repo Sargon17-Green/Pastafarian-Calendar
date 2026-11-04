@@ -1,5 +1,8 @@
 (ns pastafari.datumprojectie
-  (:require [pastafari.maandnamen :as namen]))
+  (:require [pastafari.maandnamen :as namen]
+            [pastafari.maandlengtes :as lengtes]
+            [pastafari.koteletverdeling :as verdelingen]
+            [pastafari.keuzestroom :as keuzes]))
 
 ;; DISCOVERY23: een eindige projectie, geen nieuwe selectieprocedure.
 ;; De bron van de volledige jaarstructuur is de opt-in, budgetbewezen keten.
@@ -97,3 +100,39 @@
                 lijn berekeningsdag doeldag zoekbudget celbudget)]
      (assoc basis :date-components
             (projecteer-bewezen-dag basis doeldag)))))
+
+
+;; DIAG03: iedere geldige maandweving begint met maand 1.
+;; Alleen de EERSTE jaardag kan zonder het volledige woord worden bewezen.
+(defn kies-eerste-dag-zonder-weving
+  "Vijf numerieke velden voor uitsluitend de eerste dag van een bewezen jaar."
+  ([lijn berekeningsdag doeldag]
+   (kies-eerste-dag-zonder-weving lijn berekeningsdag doeldag 128N))
+  ([lijn berekeningsdag doeldag zoekbudget]
+   (let [{:keys [year cutlets month-count month-lengths] :as basis}
+         (lengtes/kies-maandlengtes lijn berekeningsdag doeldag zoekbudget)
+         open (:open-gate-day year)
+         close (:close-gate-day year)
+         eerste (inc open)]
+     (when-not (= doeldag eerste)
+       (weigering :target-not-first-day-of-year))
+     (when-not (and (geldige-delen? cutlets eerste close)
+                    (integer? month-count)
+                    (<= 3N month-count 47N)
+                    (vector? month-lengths)
+                    (= month-count (count month-lengths))
+                    (every? #(and (integer? %) (<= 4N % 123N)) month-lengths)
+                    (= (-' close open) (reduce +' 0N month-lengths)))
+       (weigering :invalid-date-projection-structure))
+     (let [totaal (namen/aantal-maandnaamreeksen 47N month-count)
+           saus (verdelingen/structuur-saus berekeningsdag year)
+           stroom (keuzes/vraag-kom saus 5N 33N)
+           naamrang (keuzes/kies-rang stroom totaal)
+           eerste-maandnaam (first
+                              (namen/maandnamen-op-rang 47N month-count naamrang))]
+       (assoc basis
+              :date-components [(:number year)
+                                (:name-index (first cutlets))
+                                1N eerste-maandnaam 1N]
+              :date-proof-scope :first-day-only
+              :month-weaving-computed? false)))))

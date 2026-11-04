@@ -133,3 +133,68 @@
                "maximum" maximum)
       (is (<= (:bewezen @metingen)
               (* 4 (:budgetveilig @metingen)))))))
+
+
+;; DIAG03: normatieve, onafhankelijke keuzen; geen volledige weving.
+;; Haar eerste letter is in ieder geldig woord exact maand-ID 1.
+(defn- normatieve-eerste-jaardag [berekening doel]
+  (let [staat (orakel/new-gate-state)
+        jaar (orakel/find-target-year staat berekening doel)
+        eerste (inc (:open-gate-day jaar))]
+    (when-not (= doel eerste)
+      (throw (ex-info "Orakel verwacht eerste jaardag."
+                      {:code :oracle-target-not-first-day})))
+    (let [saus (orakel/sauce berekening eerste)
+          kotelet-aantal (orakel/choose-cutlet-count saus jaar)
+          verdeling (orakel/choose-cutlet-partition
+                      staat berekening saus jaar kotelet-aantal)
+          kotelet-namen (orakel/choose-cutlet-names saus kotelet-aantal)
+          koteletten (orakel/materialize-cutlets
+                       staat jaar verdeling kotelet-namen)
+          maand-aantal (orakel/choose-month-count saus jaar)
+          maand-lengtes (orakel/choose-month-lengths
+                          saus jaar maand-aantal)
+          maand-namen (orakel/choose-month-names saus maand-aantal)]
+      (when-not (= (reduce +' 0N maand-lengtes)
+                   (-' (:close-gate-day jaar) (:open-gate-day jaar)))
+        (throw (ex-info "Normatieve maandlengtes onjuist."
+                        {:code :oracle-month-lengths-invalid})))
+      [(:number jaar) (:name-index (first koteletten))
+       1N (first maand-namen) 1N])))
+
+(deftest eerste-positie-van-lexicografische-weving
+  (testing "Normatieve oracle op kleine families: eerste ID is altijd 1."
+    (doseq [lengten [[4 4] [4 4 4]]
+            :let [familie (orakel/weaving-family lengten)
+                  aantal ((:count familie))]
+            rang (distinct [1N 2N (quot (inc aantal) 2N) aantal])]
+      (is (= 1 (first ((:unrank1 familie) rang)))
+          (str "lengten=" lengten " rang=" rang)))))
+
+(deftest echte-eerste-jaardag-zonder-volledige-weving
+  (testing "Drie echte rekendagen, vijf velden en afwijzing van dag twee."
+    (doseq [berekening [dagen/stichtingsdag
+                       (+' dagen/stichtingsdag 17N)
+                       (-' dagen/stichtingsdag 23N)]]
+      (let [jaar (zoeken/vind-doeljaar @lijn berekening berekening)
+            eerste (inc (:open-gate-day jaar))
+            uitkomst (projectie/kies-eerste-dag-zonder-weving
+                       @lijn berekening eerste 128N)
+            verwacht (normatieve-eerste-jaardag berekening eerste)]
+        (is (= verwacht (:date-components uitkomst)))
+        (is (= 5 (count (:date-components uitkomst))))
+        (is (every? integer? (:date-components uitkomst)))
+        (is (= :first-day-only (:date-proof-scope uitkomst)))
+        (is (false? (:month-weaving-computed? uitkomst)))
+        (is (not (contains? uitkomst :month-weaving)))
+        (println "DISCOVERY24 DIAG03 echte eerste-jaardag:"
+                 {:berekening berekening :doel eerste
+                  :jaar (:number jaar)
+                  :gelijk? (= verwacht (:date-components uitkomst))})
+        (let [fout (try
+                     (projectie/kies-eerste-dag-zonder-weving
+                      @lijn berekening (inc eerste) 128N)
+                     nil
+                     (catch clojure.lang.ExceptionInfo e
+                       (:code (ex-data e))))]
+          (is (= :target-not-first-day-of-year fout)))))))
