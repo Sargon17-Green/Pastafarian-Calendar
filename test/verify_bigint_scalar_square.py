@@ -45,7 +45,7 @@ def main():
         counts[kind] += 1
     if dict(counts) != EXPECTED or len(rows) != 128:
         raise AssertionError(f"distribution error: {dict(counts)}")
-    print("Oracle Python escalar/quadrado: 128 vetores (64 M, 32 U, 32 S); 256 verificacoes previstas; 0 divergencias.")
+    print("Oracle Python escalar/quadrado: 128 vetores (64 M, 32 U, 32 S); 384 verificacoes previstas; 0 divergencias.")
 
 if __name__ == "__main__":
     main()

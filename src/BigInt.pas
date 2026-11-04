@@ -300,7 +300,8 @@ var
   Carry, Cur: UInt64;
 begin
   if BigIsZero(A) or (B = 0) then Exit(BigZero);
-  SetLength(Result.Digits, Length(A.Digits) + 1);
+  { B may exceed BIG_BASE: final carry can need TWO base-10^9 limbs. }
+  SetLength(Result.Digits, Length(A.Digits) + 2);
   Result.Sign := A.Sign;
   Carry := 0;
   for I := 0 to High(A.Digits) do
@@ -309,10 +310,14 @@ begin
     Result.Digits[I] := UInt32(Cur mod BIG_BASE);
     Carry := Cur div BIG_BASE;
   end;
-  if Carry <> 0 then
-    Result.Digits[Length(A.Digits)] := UInt32(Carry)
-  else
-    SetLength(Result.Digits, Length(A.Digits));
+  I := Length(A.Digits);
+  while Carry <> 0 do
+  begin
+    Result.Digits[I] := UInt32(Carry mod BIG_BASE);
+    Carry := Carry div BIG_BASE;
+    Inc(I);
+  end;
+  SetLength(Result.Digits, I);
   Normalize(Result);
 end;
 

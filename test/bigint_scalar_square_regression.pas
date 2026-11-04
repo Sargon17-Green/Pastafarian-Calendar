@@ -13,7 +13,7 @@ uses
 
 const
   ExpectedCases = 128;
-  ExpectedChecks = 256;
+  ExpectedChecks = 384;
 
 var
   Cases, Passed, Failed: Integer;
@@ -27,6 +27,24 @@ begin
     Inc(Failed);
     Writeln('FALHA caso ', Cases, ': ', Name);
   end;
+end;
+
+function IsCanonical(const A: TBigInt): Boolean;
+var
+  I: Integer;
+begin
+  if A.Sign = 0 then
+    Exit(Length(A.Digits) = 0);
+  if (A.Sign <> -1) and (A.Sign <> 1) then
+    Exit(False);
+  if Length(A.Digits) = 0 then
+    Exit(False);
+  if A.Digits[High(A.Digits)] = 0 then
+    Exit(False);
+  for I := 0 to High(A.Digits) do
+    if UInt64(A.Digits[I]) >= BIG_BASE then
+      Exit(False);
+  Result := True;
 end;
 
 procedure CheckVector(const Fields: TStringList);
@@ -66,6 +84,7 @@ begin
 
   Check('resultado decimal contra oracle', BigToDecimal(Actual) = Fields[3]);
   Check('equivalencia interna multiplicativa', BigCompare(Actual, Alternate) = 0);
+  Check('todos os digitos na base canonica', IsCanonical(Actual));
 end;
 
 procedure RunVectors;
