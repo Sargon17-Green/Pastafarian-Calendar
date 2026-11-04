@@ -494,3 +494,33 @@ jobs:
         run: dart analyze
       - name: Run independent §U month-length oracle and canonical checks
         run: dart run bin/stage2_production12_month_lengths_tests.dart
+
+  dart-hebrew-stage2-discovery13-weave-count:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Resolve packages
+        run: dart pub get
+      - name: Verify independent §V discovery formatting
+        run: |
+          if ! dart format --output=none --set-exit-if-changed lib/src/monster_month_weave_counter.dart bin/stage2_discovery13_weave_count_tests.dart; then
+            dart format --output=write lib/src/monster_month_weave_counter.dart bin/stage2_discovery13_weave_count_tests.dart
+            for file in lib/src/monster_month_weave_counter.dart bin/stage2_discovery13_weave_count_tests.dart; do
+              echo "DART_CAPTURE_BEGIN:$file"
+              base64 -w0 "$file"
+              printf '\n'
+              echo "DART_CAPTURE_END:$file"
+            done
+            exit 1
+          fi
+      - name: Analyze entire Dart branch
+        run: dart analyze
+      - name: Exhaustive independent §V suffix-count oracle
+        run: dart run bin/stage2_discovery13_weave_count_tests.dart
