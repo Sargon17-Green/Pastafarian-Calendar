@@ -44,5 +44,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends wabt
           wat2wasm --version
-      - name: Run all 29 Native WAT cases and exact independent BigInt oracle
+      - name: Verify q3 adjacent oracle on 9 small models and production
+        run: python3 tests/stage02_q3_neighbors_oracle.py
+      - name: Run all 31 Native WAT cases and exact independent BigInt oracle
         run: node tests/run_stage02_discovery01_webassembly.cjs

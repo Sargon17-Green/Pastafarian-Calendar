@@ -583,4 +583,40 @@
     (i32.and
       (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
       (i32.eqz (call $cmp (global.get $WIDE) (global.get $LIMIT)))))
+
+  ;; DISCOVERY 01: vecindad del límite q=3 con los mismos dígitos [1,M,M-1].
+  ;; T=((M-1)/3)*(M^2-1), x=3T, N=T+delta, delta en {-1,+1}.
+  ;; delta=-1: rechazo hacia LIMIT, rango T-1.
+  ;; delta=+1: aceptación sin rechazo, rango T-2.
+  (func $discovery01_k3_backward_q3_neighbor (param $delta i32) (result i32)
+    (call $init_constants)
+    (call $sub_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 3))
+    (call $divmod_q_lt_m (global.get $Q) (global.get $R)
+      (global.get $TMP1) (global.get $TMP2))
+    (if (i32.ne (call $len (global.get $R)) (i32.const 0))
+      (then (return (i32.const 0))))
+    (call $mul (global.get $TMP1) (global.get $M) (global.get $M))
+    (call $sub_small (global.get $TMP1) (global.get $TMP1) (i32.const 1))
+    (call $mul (global.get $N) (global.get $Q) (global.get $TMP1))
+    (if (i32.eq (local.get $delta) (i32.const -1))
+      (then (call $sub_small (global.get $N) (global.get $N) (i32.const 1)))
+      (else (call $add_small (global.get $N) (global.get $N) (i32.const 1))))
+    (call $copy (global.get $FIRST) (global.get $ONE))
+    (call $choose (global.get $FIRST) (i32.const -1)
+      (global.get $N) (global.get $RESULT))
+    (if (i32.eq (local.get $delta) (i32.const -1))
+      (then
+        (return (i32.and
+          (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+          (i32.eqz (call $cmp (global.get $WIDE) (global.get $LIMIT)))))))
+    (call $sub_small (global.get $TMP1) (global.get $N) (i32.const 3))
+    (if (i32.ne (call $cmp (global.get $RESULT) (global.get $TMP1)) (i32.const 0))
+      (then (return (i32.const 0))))
+    (call $sub_small (global.get $TMP1) (global.get $LIMIT) (i32.const 3))
+    (i32.eqz (call $cmp (global.get $WIDE) (global.get $TMP1))))
+  (func (export "test_discovery01_k3_backward_q3_n_minus_one") (result i32)
+    (call $discovery01_k3_backward_q3_neighbor (i32.const -1)))
+  (func (export "test_discovery01_k3_backward_q3_n_plus_one") (result i32)
+    (call $discovery01_k3_backward_q3_neighbor (i32.const 1)))
 )
