@@ -4,6 +4,7 @@
             [pastafari.poortposities :as poorten]
             [pastafari.doeljaar :as zoeken]
             [pastafari.datumprojectie :as projectie]
+            [pastafari.maandrang :as rang]
             [pastafari.maandlengtes :as lengtes]
             [pastafari.maandprofiel :as budgetprofiel]
             [pastafari.normative-oracle :as orakel]))
@@ -277,3 +278,69 @@
                        (catch clojure.lang.ExceptionInfo e
                          (:code (ex-data e))))]
             (is (= :target-not-last-day-of-year fout))))))))
+
+
+;; DIAG05: de onafhankelijk normatieve oracle rangschikt volledige KLEINE
+;; woorden. De productie telt slechts een lexicografisch prefixblok.
+(deftest tweede-positie-onafhankelijke-kleine-families
+  (testing "Vier kleine families, zowel grens- als eindrangen."
+    (doseq [lengten [[4 4] [4 4 4] [4 5 4] [5 4 4]]
+            :let [familie (orakel/weaving-family lengten)
+                  totaal ((:count familie))
+                  tweede-ids (mapv #(second ((:unrank1 familie) %))
+                                   (range 1 (inc totaal)))
+                  grens (count (take-while #(= 1 %) tweede-ids))
+                  rangen (distinct [1N 2N (bigint grens)
+                                    (inc (bigint grens))
+                                    (quot (inc totaal) 2N) totaal])]
+            rang rangen]
+      (let [bewijs (rang/tweede-maand-op-rang-groot lengten rang 5000000N)
+            woord ((:unrank1 familie) rang)]
+        (is (= (mapv bigint (take 2 woord)) (:month-prefix bewijs)))
+        (is (= (bigint grens) (:prefix-block11-count bewijs)))
+        (is (= (bigint (second woord)) (:month-id bewijs)))
+        (is (= (if (= 1 (second woord)) 2N 1N)
+               (:day-in-month bewijs)))
+        (is (<= (:prefix-cell-upper-bound bewijs) 5000000N))
+        (is (false? (:month-weaving-computed? bewijs)))))))
+
+(deftest tweede-dag-prefix-veilig-weigeren
+  (let [code (try
+               (rang/tweede-maand-op-rang-groot [4 4 4] 1N 1N)
+               nil
+               (catch clojure.lang.ExceptionInfo e
+                 (:code (ex-data e))))]
+    (is (= :second-day-prefix-budget-unproven code))))
+
+(deftest echte-tweede-jaardag-alleen-bewezen-prefix
+  (testing "Drie echte rekendagen: vijf velden, budget en dagdrie-weigering."
+    (doseq [berekening [dagen/stichtingsdag
+                       (+' dagen/stichtingsdag 17N)
+                       (-' dagen/stichtingsdag 23N)]]
+      (let [jaar (zoeken/vind-doeljaar @lijn berekening berekening)
+            tweede (+' (:open-gate-day jaar) 2N)
+            uitkomst (projectie/kies-tweede-dag-zonder-weving
+                      @lijn berekening tweede 128N 5000000N)
+            vijf (:date-components uitkomst)
+            prefix (:month-prefix uitkomst)]
+        (is (= 5 (count vijf)))
+        (is (every? integer? vijf))
+        (is (= (:number jaar) (first vijf)))
+        (is (= 1N (first prefix)))
+        (is (contains? #{1N 2N} (second prefix)))
+        (is (= (if (= 1N (second prefix)) 2N 1N) (peek vijf)))
+        (is (= :second-day-prefix-only (:date-proof-scope uitkomst)))
+        (is (false? (:month-weaving-computed? uitkomst)))
+        (is (not (contains? uitkomst :month-weaving)))
+        (is (<= (:month-prefix-cell-upper-bound uitkomst) 5000000N))
+        (println "DISCOVERY24 DIAG05 werkelijk tweede dag:"
+                 {:berekening berekening :doel tweede
+                  :prefix prefix
+                  :kosten (:month-prefix-cell-upper-bound uitkomst)})
+        (let [code (try
+                     (projectie/kies-tweede-dag-zonder-weving
+                      @lijn berekening (inc tweede) 128N 5000000N)
+                     nil
+                     (catch clojure.lang.ExceptionInfo e
+                       (:code (ex-data e))))]
+          (is (= :target-not-second-day-of-year code)))))))

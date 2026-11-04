@@ -106,3 +106,36 @@
            (recur (:restvector keuze) (:open keuze) (:dicht keuze)
                   (:rang keuze) (:kosten keuze)
                   (conj antwoord (:maand keuze)))))))))
+
+
+;; DISCOVERY24 DIAG05: een exact, budgetbegrensd prefix voor jaardag twee.
+;; Iedere legale weving begint met 1; de tweede letter is 1 of 2.
+(defn tweede-maand-op-rang-groot
+  "Geef de tweede maand-ID zonder de volledige maandweving te bouwen."
+  ([lengtes rang]
+   (tweede-maand-op-rang-groot lengtes rang hoogste-begroting))
+  ([lengtes rang begroting]
+   (let [totaal (weving/aantal-wevingen-groot lengtes)
+         begin (mapv int lengtes)]
+     (when (< (count begin) 2)
+       (fout :second-day-needs-two-months))
+     (when-not (and (integer? rang) (<= 1N rang totaal))
+       (fout :invalid-weaving-rank))
+     (when-not (and (integer? begroting)
+                    (<= 1N begroting hoogste-begroting))
+       (fout :invalid-weaving-budget))
+     (let [rest11 (update begin 0 #(- % 2))
+           kosten (raming rest11 1)]
+       (when (> kosten begroting)
+         (fout :second-day-prefix-budget-unproven))
+       (let [blok11 (tel-rest rest11 1 0)
+             maand (if (<= rang blok11) 1N 2N)]
+         (when-not (and (pos? blok11) (< blok11 totaal))
+           (fout :second-day-prefix-invalid-count))
+         {:month-id maand
+          :day-in-month (if (= maand 1N) 2N 1N)
+          :month-prefix [1N maand]
+          :prefix-block11-count blok11
+          :prefix-cell-upper-bound kosten
+          :date-proof-scope :second-day-prefix-only
+          :month-weaving-computed? false})))))

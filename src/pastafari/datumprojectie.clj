@@ -1,5 +1,7 @@
 (ns pastafari.datumprojectie
-  (:require [pastafari.maandnamen :as namen]
+  (:require [pastafari.maandrang :as rang]
+            [pastafari.maandweving :as weving]
+            [pastafari.maandnamen :as namen]
             [pastafari.maandlengtes :as lengtes]
             [pastafari.koteletverdeling :as verdelingen]
             [pastafari.keuzestroom :as keuzes]))
@@ -175,4 +177,51 @@
                                 laatste-maandnaam
                                 (peek month-lengths)]
               :date-proof-scope :last-day-only
+              :month-weaving-computed? false)))))
+
+
+;; DISCOVERY24 DIAG05: exacte tweede jaardag via twee-prefixrang.
+;; De bestaande algemene datumprojectie en budgetpoort blijven ongewijzigd.
+(defn kies-tweede-dag-zonder-weving
+  "Vijf velden uitsluitend op de tweede jaardag; geen volledig maandwoord."
+  ([lijn berekeningsdag doeldag]
+   (kies-tweede-dag-zonder-weving lijn berekeningsdag doeldag 128N 5000000N))
+  ([lijn berekeningsdag doeldag zoekbudget prefixbudget]
+   (let [{:keys [year cutlets month-count month-lengths] :as basis}
+         (lengtes/kies-maandlengtes lijn berekeningsdag doeldag zoekbudget)
+         open (:open-gate-day year)
+         close (:close-gate-day year)]
+     (when-not (= doeldag (+' open 2N))
+       (weigering :target-not-second-day-of-year))
+     (when-not (and (geldige-delen? cutlets (inc open) close)
+                    (integer? month-count) (<= 3N month-count 47N)
+                    (vector? month-lengths)
+                    (= month-count (count month-lengths))
+                    (every? #(and (integer? %) (<= 4N % 123N)) month-lengths)
+                    (= (-' close open) (reduce +' 0N month-lengths)))
+       (weigering :invalid-date-projection-structure))
+     (let [totaal (weving/aantal-wevingen-groot month-lengths)
+           saus (verdelingen/structuur-saus berekeningsdag year)
+           weefrang (keuzes/kies-rang
+                     (keuzes/vraag-kom saus 4N 32N) totaal)
+           prefix (rang/tweede-maand-op-rang-groot
+                   month-lengths weefrang prefixbudget)
+           naam-totaal (namen/aantal-maandnaamreeksen 47N month-count)
+           naamrang (keuzes/kies-rang
+                     (keuzes/vraag-kom saus 5N 33N) naam-totaal)
+           maandnamen (namen/maandnamen-op-rang 47N month-count naamrang)
+           maand-id (:month-id prefix)
+           kotelet (some #(when (<= (:first-day %) doeldag (:last-day %)) %)
+                         cutlets)]
+       (when-not kotelet
+         (weigering :date-cutlet-not-found))
+       (assoc basis
+              :date-components [(:number year)
+                                (:name-index kotelet)
+                                (inc (-' doeldag (:first-day kotelet)))
+                                (nth maandnamen (dec (int maand-id)))
+                                (:day-in-month prefix)]
+              :month-prefix (:month-prefix prefix)
+              :month-prefix-cell-upper-bound (:prefix-cell-upper-bound prefix)
+              :date-proof-scope :second-day-prefix-only
               :month-weaving-computed? false)))))
