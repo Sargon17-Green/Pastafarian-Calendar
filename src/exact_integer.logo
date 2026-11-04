@@ -199,13 +199,24 @@ to bi.square :a
   output bi.mul :a :a
 end
 
+; Compute one base-10000 quotient digit by exact binary search.
+; Invariant: lo*den <= rem < BI.BASE*den, so 0 <= digit < BI.BASE.
+; Unlike repeated subtraction, comparisons are bounded by 14 per digit.
 to bi.mag.qdigit :rem :den
-  output bi.mag.qdigit.work :rem :den 0
+  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)
 end
 
-to bi.mag.qdigit.work :rem :den :q
-  if (bi.mag.compare :rem :den) < 0 [output (list :q :rem)]
-  output bi.mag.qdigit.work (bi.mag.sub :rem :den) :den (:q + 1)
+to bi.mag.qdigit.binary :rem :den :lo :hi
+  if :lo = :hi [
+    localmake "multiple bi.mag.mul.small :den :lo
+    output (list :lo (bi.mag.sub :rem :multiple))
+  ]
+  localmake "mid int ((:lo + :hi + 1) / 2)
+  localmake "multiple bi.mag.mul.small :den :mid
+  if (bi.mag.compare :multiple :rem) <= 0 [
+    output bi.mag.qdigit.binary :rem :den :mid :hi
+  ]
+  output bi.mag.qdigit.binary :rem :den :lo (:mid - 1)
 end
 
 to bi.mag.divmod :num :den

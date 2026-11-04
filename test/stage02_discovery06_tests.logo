@@ -45,12 +45,16 @@ end
 
 to stage02.discovery06.run
   localmake "before monster.stage02.workcounts [0 [0]] [1 [1]]
+  print [STAGE_2_DISCOVERY_06_PROBE_COUNTS_READY]
   localmake "after monster.stage02.stones :before
+  print [STAGE_2_DISCOVERY_06_PROBE_PRODUCTION_READY]
   localmake "series monster.context.get :after "stoneSeries
   localmake "oracle nr.stones
+  print [STAGE_2_DISCOVERY_06_PROBE_ORACLE_READY]
   if (count :series) <> 46 [print [STAGE_2_DISCOVERY_06_ROUND_COUNT_FALIIS] stop]
   if (count :oracle) <> 46 [print [STAGE_2_DISCOVERY_06_ORACLE_COUNT_FALIIS] stop]
   d6.compare.rounds 1 :series :oracle
+  print [STAGE_2_DISCOVERY_06_PROBE_COMPARISON_READY]
 
   d6.require (equalp (monster.context.get :after "calculationDay) [0 [0]]) [calculation_preserved]
   d6.require (equalp (monster.context.get :after "targetDay) [1 [1]]) [target_preserved]

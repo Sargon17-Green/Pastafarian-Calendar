@@ -1,0 +1,66 @@
+; Native exact-integer division regression. 32 fixed arithmetic vectors
+; computed independently using host-language arbitrary-precision integer math.
+; 4 assertions per vector: quotient, remainder, reconstruction, range.
+load "src/exact_integer.logo
+
+make "BF.N 0
+make "BF.FAIL "false
+
+to bf.require :condition :tag
+  make "BF.N (:BF.N + 1)
+  if not :condition [
+    make "BF.FAIL "true
+    print sentence [STAGE_2_FAST_DIVMOD_FALIIS:] :tag
+  ]
+end
+
+to bf.case :a :d :expectedQ :expectedR
+  localmake "result bi.divmod.floor :a :d
+  localmake "q first :result
+  localmake "r last :result
+  bf.require (bi.eq :q :expectedQ) [quotient]
+  bf.require (bi.eq :r :expectedR) [remainder]
+  bf.require (bi.eq (bi.add (bi.mul :q :d) :r) :a) [reconstruction]
+  bf.require (and (bi.ge :r bi.zero) (bi.lt :r :d)) [remainder_bounds]
+end
+
+to bf.run
+  bf.case (bi.make 1 [0]) (bi.make 1 [8901 4567 123 6789 2345 8901 4567 123]) (bi.make 1 [0]) (bi.make 1 [0])
+  bf.case (bi.make 1 [1381 3827 8049 2713 4938 7802 9135 246]) (bi.make 1 [5690 6913 9024 1356 2469 8901 4567 123]) (bi.make 1 [2]) (bi.make 1 [1])
+  bf.case (bi.make 1 [7352 4814 5481 1473 8148 2308 1975 864]) (bi.make 1 [2479 9259 7925 5924 2592 8901 4567 123]) (bi.make 1 [6]) (bi.make 1 [2478 9259 7925 5924 2592 8901 4567 123])
+  bf.case (bi.make -1 [9510 6304 2808 522 5863 4475 8160 5493 123]) (bi.make 1 [9268 1604 6827 492 2716 8901 4567 123]) (bi.make -1 [8 1]) (bi.make 1 [4634 5802 3413 246 6358 9450 7283 61])
+  bf.case (bi.make -1 [6905 9266 5604 6697 492 5260 1987 6543 123]) (bi.make 1 [6057 3950 5728 5060 2839 8901 4567 123]) (bi.make -1 [16 1]) (bi.make 1 [7])
+  bf.case (bi.make 1 [0 2846 6296 4629 9628 2962 8901 4567 123]) (bi.make 1 [2846 6296 4629 9628 2962 8901 4567 123]) (bi.make 1 [0 1]) (bi.make 1 [0])
+  bf.case (bi.make 1 [7446 128 3358 2905 5801 5395 876 5432 123]) (bi.make 1 [9635 8641 3530 4196 3086 8901 4567 123]) (bi.make 1 [7 1]) (bi.make 1 [1])
+  bf.case (bi.make -1 [9935 6674 6024 7563 2466 1038 1753 864 247]) (bi.make 1 [6424 987 2432 8764 3209 8901 4567 123]) (bi.make -1 [14 2]) (bi.make 1 [1])
+  bf.case (bi.make -1 [3718 6666 5879 9970 7999 6414 246 1926 4568 123]) (bi.make 1 [3213 3333 1333 3332 3333 8901 4567 123]) (bi.make -1 [25 0 1]) (bi.make 1 [6607 6666 666 6666 6666 9450 7283 61])
+  bf.case (bi.make 1 [65 4444 8464 1190 6790 9448 9011 3457 5679 1234]) (bi.make 1 [2 5679 234 7900 3456 8901 4567 123]) (bi.make 1 [35 0 10]) (bi.make 1 [9995 5678 234 7900 3456 8901 4567 123])
+  bf.case (bi.make 1 [4895 4563 5622 9037 2822 6126 7230 1168 5339 5787 5241 1]) (bi.make 1 [6791 8024 9135 2467 3580 8901 4567 123]) (bi.make 1 [2345 8901 4567 123]) (bi.make 1 [0])
+  bf.case (bi.make -1 [9381 4073 8407 7393 8740 4950 3950 4938 370 137 6789 2345 1]) (bi.make 1 [3580 370 8037 7035 3703 8901 4567 123]) (bi.make -1 [12 0 0 0 100]) (bi.make 1 [3579 370 8037 7035 3703 8901 4567 123])
+  bf.case (bi.make -1 [9224 7900 3456 92 5679 2534 4197 3086]) (bi.make 1 [369 2716 6938 1603 3827 8901 4567 123]) (bi.make -1 [25]) (bi.make 1 [1])
+  bf.case (bi.make 1 [4899 9999 1499 9949 4999 5506 9999 4999]) (bi.make 1 [7158 5061 5839 6171 3950 8901 4567 123]) (bi.make 1 [40]) (bi.make 1 [8579 7530 7919 3085 6975 9450 7283 61])
+  bf.case (bi.make 1 [2866 7036 9703 3628 370 5183 9505 7283]) (bi.make 1 [3947 7407 4740 739 4074 8901 4567 123]) (bi.make 1 [58]) (bi.make 1 [3940 7407 4740 739 4074 8901 4567 123])
+  bf.case (bi.make -1 [8528 1229 2469 3027 6912 6394 9765 4320 123]) (bi.make 1 [736 9753 3641 5307 4197 8901 4567 123]) (bi.make -1 [9998]) (bi.make 1 [0])
+  bf.case (bi.make -1 [2876 9006 246 672 4690 7842 7419 6419 123]) (bi.make 1 [7525 2098 2543 9875 4320 8901 4567 123]) (bi.make -1 [16 1]) (bi.make 1 [7524 2098 2543 9875 4320 8901 4567 123])
+  bf.case (bi.make 1 [989 9869 4999 6954 9998 5994 8777 8888 123]) (bi.make 1 [4314 4444 1444 4443 4444 8901 4567 123]) (bi.make 1 [34 1]) (bi.make 1 [4313 4444 1444 4443 4444 8901 4567 123])
+  bf.case (bi.make 1 [1216 2954 975 5458 7529 3598 7419 1419 124]) (bi.make 1 [1103 6790 345 9011 4567 8901 4567 123]) (bi.make 1 [55 1]) (bi.make 1 [551 8395 5172 9505 7283 9450 7283 61])
+  bf.case (bi.make -1 [9785 103 1037 492 3701 5894 4962 8518 247]) (bi.make 1 [7892 9135 9246 3578 4691 8901 4567 123]) (bi.make -1 [76 2]) (bi.make 1 [7])
+  bf.case (bi.make -1 [0 0 4681 1481 8148 8146 4814 8901 4567 123]) (bi.make 1 [4681 1481 8148 8146 4814 8901 4567 123]) (bi.make -1 [0 0 1]) (bi.make 1 [0])
+  bf.case (bi.make 1 [9401 6542 5687 2565 9259 5176 740 1484 5679 1234]) (bi.make 1 [1470 3827 7049 2714 4938 8901 4567 123]) (bi.make 1 [20 0 10]) (bi.make 1 [1])
+  bf.case (bi.make 1 [9009 6412 5151 8999 5635 580 2236 9623 5357 5787 5241 1]) (bi.make 1 [8259 6172 5950 7282 5061 8901 4567 123]) (bi.make 1 [2389 8901 4567 123]) (bi.make 1 [8258 6172 5950 7282 5061 8901 4567 123])
+  bf.case (bi.make -1 [836 7036 7203 3608 170 5506 7653 3628 8519 151 6789 2345 1]) (bi.make 1 [5048 8518 4851 1850 5185 8901 4567 123]) (bi.make -1 [70 0 0 0 100]) (bi.make 1 [2524 9259 2425 5925 7592 9450 7283 61])
+  bf.case (bi.make -1 [8182 3825 4049 2582 4938 3448 3085 1975 1]) (bi.make 1 [1837 864 3753 6418 5308 8901 4567 123]) (bi.make -1 [97]) (bi.make 1 [7])
+  bf.case (bi.make 1 [8626 3209 2654 986 5432 8901 4567 123]) (bi.make 1 [8626 3209 2654 986 5432 8901 4567 123]) (bi.make 1 [1]) (bi.make 1 [0])
+  bf.case (bi.make 1 [1621 5555 3555 5516 5555 9243 7900 3456]) (bi.make 1 [5415 5555 1555 5554 5555 8901 4567 123]) (bi.make 1 [28]) (bi.make 1 [1])
+  bf.case (bi.make -1 [6811 968 2111 6925 1109 7462 999 1111 124]) (bi.make 1 [2204 7901 456 122 5679 8901 4567 123]) (bi.make -1 [53 1]) (bi.make 1 [1])
+  bf.case (bi.make -1 [915 9609 6641 967 4196 4084 5320 4876 124]) (bi.make 1 [8993 246 9358 4689 5802 8901 4567 123]) (bi.make -1 [84 1]) (bi.make 1 [4497 123 9679 2344 7901 9450 7283 61])
+  bf.case (bi.make 1 [6487 9113 8925 1424 2591 7412 3344 9012 124]) (bi.make 1 [5782 2592 8259 9257 5925 8901 4567 123]) (bi.make 1 [116 1]) (bi.make 1 [5775 2592 8259 9257 5925 8901 4567 123])
+  bf.case (bi.make 1 [2571 7509 2098 986 9875 4950 3469 4691 123]) (bi.make 1 [2571 4938 7160 3825 6049 8901 4567 123]) (bi.make 1 [1 1]) (bi.make 1 [0])
+  bf.case (bi.make -1 [801 7238 6419 3931 1972 9394 4839 2839 247]) (bi.make 1 [9360 7283 6061 8393 6172 8901 4567 123]) (bi.make -1 [31 2]) (bi.make 1 [9359 7283 6061 8393 6172 8901 4567 123])
+  if :BF.FAIL [print [STAGE_2_FAST_DIVMOD_FALIIS] stop]
+  if :BF.N <> 128 [print [STAGE_2_FAST_DIVMOD_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_FAST_DIVMOD_CHECKS_PASIS] :BF.N
+  print [STAGE_2_FAST_DIVMOD_PASIS]
+end
+
+bf.run

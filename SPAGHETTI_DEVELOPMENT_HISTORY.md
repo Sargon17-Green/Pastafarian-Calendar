@@ -158,3 +158,22 @@ CI konservas Discovery01–05 e Stage1 regresioni.
 Nula Native rezulto por Discovery06 esas ankor deklarita;
 LAST_COMPLETED_STAGE restas 1, nula main/merge.
 
+
+## Stage 2 — DISCOVERY 06 timeout e provizora eficienc-fixo (2026-11-04)
+
+En implementation commit `8e202f67d273d908b08ff1bd645accae954a641f`,
+Native Stage2 run 41776086633 / job 126396653732 completed FAILURE,
+exit=124 post 240s en Discovery06. Discovery01–05 test-steps
+completed SUCCESS. Nula 46/240 PASS marker existas; Discovery06
+NE esas acceptita.
+
+La originala `bi.mag.qdigit` uzis repetata subtrahi por unika
+baz-10000 quotient-digit, teorie til 9999 subtrahi po digit. Ca
+faciĝas severa en 46-ronda modulo recurrence. Substitutas exacta
+binary search en [0,9999] kun maximume 14 compari po quotient-digit;
+la mathematal semantiko ne chanjesas. 32 sendepende generita
+quotient/remainder vektori, 128 Native asserti, e kvar instrumentala
+markers pro la D6 testa fazi esas adjuntita. Source/Stage1 regresioni
+restas necesa. Ca esas performance remediation e diagnoso, ne
+pruvo di sole causajo: CI Native por la nova commit restas PENDING.
+LAST_COMPLETED_STAGE restas 1. Nula main/merge.

@@ -53,6 +53,28 @@ jobs:
           echo "HEADLESS_LOGO_SOURCE_SHA=$actual"
 
 
+      - name: Verify exact BI division binary-search regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/stage02-fast-divmod.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 90s \
+            stdbuf -oL -eL "$LOGO_BIN" test/stage02_divmod_fast_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            result=$?
+            cat "$log"
+            echo "::error::Fast exact BI division regression failed/timed out (exit=$result)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_FAST_DIVMOD_CHECKS_PASIS 128' "$log"
+          grep -Fxq 'STAGE_2_FAST_DIVMOD_PASIS' "$log"
+          if grep -Eq 'STAGE_2_FAST_DIVMOD_FALIIS|STAGE_2_FAST_DIVMOD_COUNT_FALIIS|I don.t know how to|not enough inputs' "$log"; then
+            echo "::error::Fast exact BI division failure marker"
+            exit 1
+          fi
+          echo 'NATIVE_BI_DIVMOD_FAST_VERIFICATION=PASS'
+
       - name: Verify Stage 2 Discovery 01 cases
         shell: bash
         run: |
