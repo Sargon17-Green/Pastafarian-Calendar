@@ -368,20 +368,20 @@ jobs:
           fi
           echo 'STAGE01_REAL_DATE_CANDIDATE_NATIVE_PASS=35 EXPECTED=35 (NOT external differential)'
           echo 'Seven real-date candidate fixtures with 35/35 internal invariants; external OracleEngine comparison still needed.' >> "$GITHUB_STEP_SUMMARY"
-      - name: Localize first-day slow phase (15s, 1 GiB; NOT a gate)
+      - name: Diagnose exact normative first-day timings (45s, 1 GiB; NOT a gate)
         shell: bash
         run: |
           set -euo pipefail
           started=$SECONDS
           set +e
-          output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 15s build/stage01_normative_first_day_probe) 2>&1)"
+          output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 45s build/stage01_normative_first_day_probe) 2>&1)"
           exit_code=$?
           set -e
           elapsed=$((SECONDS-started))
           printf '%s\n' "$output"
           last_phase="$(grep '^STAGE01_PHASE=' <<< "$output" | tail -n 1 || true)"
           echo "STAGE01_PHASE_LAST=${last_phase:-NONE}"
-          echo "STAGE01_PHASE_DIAGNOSTIC_EXIT=$exit_code RUNTIME_SECONDS=$elapsed LIMIT=15 MEMORY_KIB=1048576"
+          echo "STAGE01_PHASE_DIAGNOSTIC_EXIT=$exit_code RUNTIME_SECONDS=$elapsed LIMIT=45 MEMORY_KIB=1048576"
           if [[ "$exit_code" -eq 0 ]] &&
              grep -Fxq 'STAGE01_PHASED_FIRST_DAY_ASSERTIONS=8' <<< "$output" &&
              grep -Fxq 'STAGE01_PHASED_FIRST_DAY_FAILURES=0' <<< "$output" &&

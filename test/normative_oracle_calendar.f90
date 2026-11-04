@@ -460,7 +460,8 @@ contains
     type(SauceResult) :: r
     type(AnswerStream) :: a
     type(BigInt) :: rank,N
-    integer :: G,K,L,lowM,highM,required,i,monthCount,probeStates,clockBegin,clockEnd,clockRate
+    integer :: G,K,L,lowM,highM,required,i,monthCount,probeStates,clockBegin,clockEnd,clockRate, &
+         countStart,countStop,unrankStart,unrankStop
     integer(int64) :: kidx,cursor
     integer(int64) :: gateIdx
     logical :: found,trace,probeComplete
@@ -569,15 +570,28 @@ contains
        flush(output_unit)
        write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_WEAVING_COUNT_BEGIN'
        flush(output_unit)
+       call system_clock(count=countStart)
     end if
     N=count_weavings(s%monthLengths)
     if (trace) then
+       call system_clock(count=countStop)
+       write(output_unit,'(A,I0)') 'STAGE01_WEAVING_COUNT_MS=', &
+            1000_int64*int(countStop-countStart,int64)/int(max(1,clockRate),int64)
        write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_WEAVING_COUNT_READY'
        flush(output_unit)
     end if
     a=ask_bowl(r,4,SEAL_MONTH_WEAVING); rank=choose_rank(a,N)
-    allocate(s%monthWeaving(L)); call unrank_weaving(s%monthLengths,rank,s%monthWeaving,N)
+    allocate(s%monthWeaving(L))
     if (trace) then
+       write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_WEAVING_UNRANK_BEGIN'
+       flush(output_unit)
+       call system_clock(count=unrankStart)
+    end if
+    call unrank_weaving(s%monthLengths,rank,s%monthWeaving,N)
+    if (trace) then
+       call system_clock(count=unrankStop)
+       write(output_unit,'(A,I0)') 'STAGE01_WEAVING_UNRANK_MS=', &
+            1000_int64*int(unrankStop-unrankStart,int64)/int(max(1,clockRate),int64)
        write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_WEAVING_UNRANK_READY'
        flush(output_unit)
     end if
