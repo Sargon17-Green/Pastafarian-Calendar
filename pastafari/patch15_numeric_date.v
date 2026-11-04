@@ -417,7 +417,7 @@ fn (mut c Patch15WeaveCounter) count(state Patch15WeaveState) BigInt {
 				}
 			}
 		}
-		first = updated
+		first = updated.clone()
 		known_length += size
 	}
 	mut answer := big_zero()

@@ -846,7 +846,7 @@ fn (mut c OracleWeaveCounter) count(state OracleWeaveState) BigInt {
 				}
 			}
 		}
-		by_first = next
+		by_first = next.clone()
 		n_previous += length
 	}
 	mut result := big_zero()
