@@ -4,7 +4,7 @@
 Option Explicit
 
 Public Function CalendarSpaghettiStage() As Long
-    CalendarSpaghettiStage = 2
+    CalendarSpaghettiStage = 3
 End Function
 
 Public Function CalendarSpaghettiSkeletonReady() As Boolean
@@ -14,16 +14,16 @@ Public Function CalendarSpaghettiSkeletonReady() As Boolean
     CalendarSpaghettiSkeletonReady = BootstrapValidateContext(ctx)
 End Function
 
-' ਜਾਣ-ਬੁੱਝ ਕੇ ਪੁਰਾਣੀ remainder ਖਰਾਬੀ; ਇੱਥੇ patch ਨਾ ਲਗਾਓ।
+' Stage3: ਪੁਰਾਣਾ API ਨਾਮ ਅਨੁਕੂਲਤਾ ਲਈ ਕਾਇਮ; SAVE ਦਾ 1..M ਨਿਯਮ ਲਾਗੂ।
 Public Function oldRemainder(ByVal x As String) As String
-    oldRemainder = BI_RegularMod(x, BI_M)
+    oldRemainder = BI_Save(x)
 End Function
 
-' ਇਹ diagnostic production route ਹੈ, ਪੰਜ-date result ਨਹੀਂ।
+' ਇਹ diagnostic production route ਹੈ, ਪੰਜ-date result ਨਹੀਂ; correction only.
 Public Function CalendarSpaghettiDiscovery01Remainder(ByVal x As String) As String
     Dim ctx As Variant
     ctx = BootstrapNewContext(x, x)
-    BootstrapDispatch ctx, "DISCOVERY_01_OLD_REMAINDER"
+    BootstrapDispatch ctx, "DISCOVERY_01_SAVE_CORRECTED"
     If Not BootstrapValidateContext(ctx) Then Err.Raise 9301, "CalendarSpaghettiDiscovery01Remainder", "E_DISCOVERY_01_CONTEXT"
     CalendarSpaghettiDiscovery01Remainder = oldRemainder(CStr(ctx(CTX_TARGET_DAY)))
 End Function

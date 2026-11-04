@@ -159,9 +159,9 @@ Sub Main
     CheckBoolean "CTX_VALIDATE_B", BootstrapValidateContext(ctxB)
     CheckString "BOOTSTRAP_NEUTRAL", BootstrapNeutralRun(ORACLE_FOUNDATION_DAY_TEXT, ORACLE_FOUNDATION_DAY_TEXT), "BOOTSTRAP_OK"
     CheckBoolean "PRODUCTION_SKELETON_READY", CalendarSpaghettiSkeletonReady()
-    CheckLong "PRODUCTION_STAGE", CalendarSpaghettiStage(), 2
+    CheckLong "PRODUCTION_STAGE", CalendarSpaghettiStage(), 3
 
-    ' DISCOVERY 01: ਇਹ ਤਿੰਨ expected FAIL ਹਨ ਅਤੇ ਇੱਕ PASS control ਹੈ।
+    ' Stage3: ਪਹਿਲਾਂ ਵਾਲੇ ਤਿੰਨ RED ਹੁਣ PASS ਹਨ; 148 ਵੱਖਰੇ native checks ਸੁਰੱਖਿਅਤ।
     CheckString "DISCOVERY_01_M", CalendarSpaghettiDiscovery01Remainder(BI_M), BI_M
     CheckString "DISCOVERY_01_2M", CalendarSpaghettiDiscovery01Remainder(BI_MulSmall(BI_M, 2)), BI_M
     CheckString "DISCOVERY_01_3M", CalendarSpaghettiDiscovery01Remainder(BI_MulSmall(BI_M, 3)), BI_M
