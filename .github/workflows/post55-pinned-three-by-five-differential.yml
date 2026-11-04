@@ -1,0 +1,69 @@
+name: Kotlin pinned-source TABLETS 3x5 date differential (diagnostic)
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/pinned_five_field_worker.py'
+      - 'soak/tablets_pinned_five_field_differential.py'
+      - 'soak/test_tablets_pinned_five_field_differential.py'
+      - '.github/workflows/post55-pinned-three-by-five-differential.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  pinned-three-by-five:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout audited Kotlin branch
+        uses: actions/checkout@v4
+        with:
+          path: audited-kotlin
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout pinned historical Python reference into distinct Git root
+        uses: actions/checkout@v4
+        with:
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: pinned-python
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download exact already-passed signed-gate evidence without replay
+        uses: actions/download-artifact@v4
+        with:
+          name: real-tablets-five-field-diagnostic
+          run-id: 41787621424
+          repository: Sargon17-Green/Pastafarian-Calendar
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: audited-kotlin/evidence/real-source
+      - name: Run independent 3x5 comparison against cold pinned reference processes
+        shell: bash
+        working-directory: audited-kotlin
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C ../pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
+          mkdir -p evidence
+          python3 -B -m py_compile soak/pinned_five_field_worker.py soak/tablets_pinned_five_field_differential.py soak/test_tablets_pinned_five_field_differential.py
+          python3 -B -m unittest discover -s soak -p 'test_tablets_pinned_five_field_differential.py' -v 2>&1 | tee evidence/pinned-3x5-synthetic.log
+          python3 -B soak/tablets_pinned_five_field_differential.py \
+            --pinned-root ../pinned-python/src \
+            --candidate-evidence evidence/real-source/real-five-field-tablets.json \
+            --worker-timeout 180 --total-timeout 700 \
+            --evidence evidence/pinned-3x5-date-comparison.json
+      - name: Preserve evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pinned-tablets-three-by-five-differential
+          path: |
+            audited-kotlin/evidence/pinned-3x5-synthetic.log
+            audited-kotlin/evidence/pinned-3x5-date-comparison.json
+          retention-days: 30
+          if-no-files-found: warn
