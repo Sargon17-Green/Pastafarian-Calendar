@@ -158,6 +158,11 @@ jobs:
             build/normative_oracle_core.o \
             -o build/stage01_normative_count_dp_probe
           test -x build/stage01_normative_count_dp_probe
+          gfortran "${flags[@]}" test/stage01_normative_unrank_diff_probe.f90 \
+            build/big_integer.o \
+            build/normative_oracle_core.o \
+            -o build/stage01_normative_unrank_diff_probe
+          test -x build/stage01_normative_unrank_diff_probe
           test -x build/stage01_normative_first_day_probe
       - name: Run bounded Stage 1 Oracle smoke (55 selected assertions; not full acceptance)
         shell: bash
@@ -416,6 +421,17 @@ jobs:
           test "$digest" = 'c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8'
           echo 'STAGE01_NORMATIVE_DP_TARGET_PASS (exact total only; unrank and full Stage1 not accepted)'
           echo 'Independent insertion DP count: exact 45-month 6765-digit digest; not full Stage1.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Gate independent exhaustive normative weaving unrank (120 shapes; 4060 checks)
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 30s build/stage01_normative_unrank_diff_probe) 2>&1)"
+          printf '%s\n' "$output"
+          grep -Fxq 'STAGE01_NORMATIVE_UNRANK_DIFF_CASES=120' <<< "$output"
+          grep -Fxq 'STAGE01_NORMATIVE_UNRANK_DIFF_ASSERTIONS=4060' <<< "$output"
+          grep -Fxq 'STAGE01_NORMATIVE_UNRANK_DIFF_FAILURES=0' <<< "$output"
+          grep -Fxq 'STAGE01_NORMATIVE_UNRANK_DIFF_PASS (independent exhaustive words; NOT full Stage1)' <<< "$output"
+          echo 'Normative lex-unrank independently checked: 120 shapes / 3940 words / 4060 assertions.' >> "$GITHUB_STEP_SUMMARY"
       - name: Gate isolated Stage1 polynomial weaving candidate (105 exhaustive shapes)
         shell: bash
         run: |

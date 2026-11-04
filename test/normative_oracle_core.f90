@@ -71,6 +71,13 @@ module normative_oracle_core
      integer :: used = 0
   end type WeaveMemo
 
+  ! A suffix-completion row for a fixed next unopened month.
+  ! Unlike the older memo, states here are indexed only by unopened color
+  ! and the number of already-open suffix symbols.
+  type :: WeaveSuffixRow
+     type(BigInt), allocatable :: completions(:)
+  end type WeaveSuffixRow
+
   public :: normative_M, foundation_day, tablets_day
   public :: save_value, day_count, normative_work_counts
   public :: build_stones, build_hidden_drops, build_visible_drops
@@ -585,49 +592,233 @@ contains
     end do
   end function count_weavings
 
-  subroutine unrank_weaving(lengths,rank1,out)
+  ! Exact lexicographic unranking with suffix factorization, independent of
+  ! the separate polynomial candidate. The input total is optional; the
+  ! calendar passes the count it has just calculated to avoid a second count.
+  !
+  ! For a valid prefix, all opened months have only closing constraints.
+  ! Let H be the exact number of ways to close their remaining occurrences
+  ! in increasing last-appearance order, and R their remaining token count.
+  ! Let F_s(R) count extensions of ONE fixed legal opened suffix when month
+  ! s is the first not yet opened. Then total(prefix)=H*F_s(R).
+  ! F_s(0)=F_(s+1)(length(s)-1);
+  ! F_s(R)=F_s(R-1)+C(R+length(s)-2,length(s)-2)
+  !                  *F_(s+1)(R+length(s)-1), for length(s)>1.
+  ! These exact identities follow by splitting on whether the next token
+  ! belongs to an already-open month or opens month s.
+  subroutine unrank_weaving(lengths,rank1,out,total_hint)
     integer, intent(in) :: lengths(:)
     type(BigInt), intent(in) :: rank1
     integer, intent(out) :: out(sum(lengths))
-    type(WeaveMemo) :: memo
-    integer, allocatable :: remaining(:),next(:)
-    integer :: opened,closed,newOpened,newClosed,pos,j,idx
-    type(BigInt) :: r,block,totalCount
-    allocate(memo%entries(0)); remaining=lengths; opened=0; closed=0
-    totalCount=C(remaining,opened,closed)
-    if (bi_compare(rank1,bi_one())<0 .or. bi_compare(rank1,totalCount)>0) error stop 'weaving rank out of range'
-    r=rank1
-    do pos=1,sum(lengths)
-       do j=1,size(lengths)
-          if (.not. legalMove(remaining,opened,closed,j,lengths)) cycle
-          next=remaining; newOpened=opened; newClosed=closed
-          call applyMove(next,newOpened,newClosed,j,lengths)
-          block=C(next,newOpened,newClosed)
-          if (bi_compare(r,block)>0) then
-             r=bi_sub(r,block)
+    type(BigInt), intent(in), optional :: total_hint
+    type(WeaveSuffixRow), allocatable :: suffix(:)
+    integer, allocatable :: remaining(:), cumulative(:)
+    type(BigInt) :: total,rank,stateTotal,closureFactor,partial,childFactor,child,available
+    integer :: n,opened,closed,position,color,first,R,j,oldCount
+    logical :: selected
+
+    n=size(lengths)
+    if (any(lengths<1)) error stop 'weaving lengths must be positive'
+    if (present(total_hint)) then
+       total=total_hint
+    else
+       total=count_weavings(lengths)
+    end if
+    if (bi_compare(rank1,bi_one())<0 .or. bi_compare(rank1,total)>0) &
+         error stop 'weaving rank out of range'
+    remaining=lengths
+    allocate(cumulative(n))
+    out=0
+    opened=0
+    closed=0
+    rank=rank1
+    stateTotal=total
+    closureFactor=bi_one()
+
+    ! Extremal ranks require no completion table.
+    if (bi_compare(rank,bi_one())==0 .or. bi_compare(rank,stateTotal)==0) then
+       call weave_fill_extreme(lengths,remaining,opened,closed,out,1, &
+            bi_compare(rank,stateTotal)==0)
+       return
+    end if
+
+    call weave_build_suffix_table(lengths,suffix)
+    if (bi_compare(suffix(1)%completions(0),total)/=0) &
+         error stop 'weaving suffix table does not match total'
+
+    do position=1,sum(lengths)
+       if (bi_compare(rank,bi_one())==0 .or. bi_compare(rank,stateTotal)==0) then
+          call weave_fill_extreme(lengths,remaining,opened,closed,out,position, &
+               bi_compare(rank,stateTotal)==0)
+          return
+       end if
+
+       first=closed+1
+       R=0
+       if (first<=opened) then
+          do j=first,opened
+             R=R+remaining(j)
+             cumulative(j)=R
+          end do
+       end if
+
+       ! Number of ways to close the already-open colors after choosing
+       ! the smallest active one. Ratios are evaluated right-to-left so
+       ! each intermediate is an exact integer.
+       partial=closureFactor
+       do j=opened,first+1,-1
+          partial=weave_divide_small_exact( &
+               bi_mul_small(partial,int(cumulative(j-1),int64)),cumulative(j)-1)
+       end do
+
+       available=stateTotal
+       selected=.false.
+       do color=1,n
+          if (.not.legalMove(remaining,opened,closed,color,lengths)) cycle
+          if (color<=opened) then
+             if (color==first) then
+                childFactor=partial
+             else
+                childFactor=weave_divide_small_exact( &
+                     bi_mul_small(partial,int(remaining(color)-1,int64)),cumulative(color-1))
+             end if
+             if (R<1) error stop 'opened suffix exhausted'
+             child=bi_mul(childFactor,suffix(opened+1)%completions(R-1))
           else
-             out(pos)=j; remaining=next; opened=newOpened; closed=newClosed; exit
+             ! The next unopened month has the greatest legal color.
+             ! Subtraction avoids repeating the large suffix product.
+             child=available
+             childFactor=weave_extend_closures(closureFactor,R,lengths(color)-1)
+          end if
+
+          if (bi_compare(rank,child)>0) then
+             rank=bi_sub(rank,child)
+             available=bi_sub(available,child)
+             if (color>first .and. color<=opened) then
+                partial=weave_divide_small_exact( &
+                     bi_mul_small(partial,int(cumulative(color)-1,int64)),cumulative(color-1))
+             end if
+          else
+             out(position)=color
+             oldCount=remaining(color)
+             call applyMove(remaining,opened,closed,color,lengths)
+             closureFactor=childFactor
+             stateTotal=child
+             selected=.true.
+             exit
+          end if
+       end do
+       if (.not.selected .or. oldCount<1) error stop 'weaving unrank has no legal completion'
+    end do
+
+    if (any(remaining/=0) .or. bi_compare(rank,bi_one())/=0) &
+         error stop 'weaving unrank left an incomplete word'
+  end subroutine unrank_weaving
+
+  subroutine weave_build_suffix_table(lengths,table)
+    integer, intent(in) :: lengths(:)
+    type(WeaveSuffixRow), allocatable, intent(out) :: table(:)
+    type(BigInt) :: binomial,product
+    integer :: n,s,k,R,oldLimit
+    n=size(lengths)
+    allocate(table(n+1))
+    oldLimit=sum(lengths)
+    allocate(table(n+1)%completions(0:oldLimit))
+    table(n+1)%completions=bi_one()
+    do s=n,1,-1
+       k=lengths(s)
+       oldLimit=oldLimit-k
+       allocate(table(s)%completions(0:oldLimit))
+       table(s)%completions(0)=table(s+1)%completions(k-1)
+       binomial=bi_one()
+       do R=1,oldLimit
+          if (k==1) then
+             table(s)%completions(R)=table(s)%completions(R-1)
+          else
+             product=bi_mul_small(binomial,int(R+k-2,int64))
+             binomial=weave_divide_small_exact(product,R)
+             table(s)%completions(R)=bi_add(table(s)%completions(R-1), &
+                  bi_mul(binomial,table(s+1)%completions(R+k-1)))
           end if
        end do
     end do
-  contains
-    recursive function C(rem,op,cl) result(v)
-      integer, intent(in) :: rem(:),op,cl
-      type(BigInt) :: v
-      integer :: q,jj,no,nc
-      integer, allocatable :: nxt(:)
-      if (sum(rem)==0) then; v=bi_one(); return; end if
-      q=findMemo(memo,rem,op,cl)
-      if (q>0) then; v=memo%entries(q)%count; return; end if
-      v=bi_zero()
-      do jj=1,size(lengths)
-         if (.not. legalMove(rem,op,cl,jj,lengths)) cycle
-         nxt=rem; no=op; nc=cl; call applyMove(nxt,no,nc,jj,lengths)
-         v=bi_add(v,C(nxt,no,nc))
-      end do
-      call putMemo(memo,rem,op,cl,v)
-    end function C
-  end subroutine unrank_weaving
+  end subroutine weave_build_suffix_table
+
+  ! Insert r remaining new-color symbols after R already-active symbols.
+  ! The final new symbol is last, hence C(R+r-1,r-1) arrangements.
+  function weave_extend_closures(previous,R,r) result(next)
+    type(BigInt), intent(in) :: previous
+    integer, intent(in) :: R,r
+    type(BigInt) :: next,choices
+    integer :: t
+    if (R<0 .or. r<0) error stop 'invalid closure extension'
+    if (R==0 .or. r<2) then
+       next=previous
+       return
+    end if
+    choices=bi_one()
+    do t=1,r
+       choices=weave_divide_small_exact(bi_mul_small(choices,int(R+t,int64)),t)
+    end do
+    next=bi_mul(previous,choices)
+  end function weave_extend_closures
+
+  ! Exact small positive divisor, base 10^9, without quadratic BigInt
+  ! general long division. carry*base always fits signed int64 here.
+  function weave_divide_small_exact(a,d) result(q)
+    type(BigInt), intent(in) :: a
+    integer, intent(in) :: d
+    type(BigInt) :: q
+    integer(int64), parameter :: base=1000000000_int64
+    integer(int64) :: carry,v
+    integer(int64), allocatable :: trimmed(:)
+    integer :: j,top
+    if (d<1 .or. a%sign<0) error stop 'invalid small weaving quotient'
+    if (bi_is_zero(a)) then
+       q=bi_zero()
+       return
+    end if
+    allocate(q%limb(size(a%limb)))
+    carry=0_int64
+    do j=size(a%limb),1,-1
+       v=carry*base+a%limb(j)
+       q%limb(j)=v/int(d,int64)
+       carry=modulo(v,int(d,int64))
+    end do
+    if (carry/=0_int64) error stop 'nonintegral weaving binomial ratio'
+    q%sign=1
+    top=size(q%limb)
+    do while (top>1)
+       if (q%limb(top)/=0_int64) exit
+       top=top-1
+    end do
+    if (top<size(q%limb)) then
+       trimmed=q%limb(1:top)
+       call move_alloc(trimmed,q%limb)
+    end if
+  end function weave_divide_small_exact
+
+  subroutine weave_fill_extreme(lengths,remaining,opened,closed,out,start,largest)
+    integer, intent(in) :: lengths(:),start
+    integer, intent(inout) :: remaining(:),opened,closed,out(:)
+    logical, intent(in) :: largest
+    integer :: p,j,c
+    logical :: found
+    do p=start,size(out)
+       found=.false.
+       do j=1,size(lengths)
+          c=j
+          if (largest) c=size(lengths)+1-j
+          if (.not.legalMove(remaining,opened,closed,c,lengths)) cycle
+          out(p)=c
+          call applyMove(remaining,opened,closed,c,lengths)
+          found=.true.
+          exit
+       end do
+       if (.not.found) error stop 'no extreme weaving completion'
+    end do
+    if (any(remaining/=0)) error stop 'extreme weaving completion incomplete'
+  end subroutine weave_fill_extreme
 
   logical function legalMove(remaining,opened,closed,j,lengths)
     integer, intent(in) :: remaining(:),opened,closed,j,lengths(:)

@@ -576,7 +576,7 @@ contains
        flush(output_unit)
     end if
     a=ask_bowl(r,4,SEAL_MONTH_WEAVING); rank=choose_rank(a,N)
-    allocate(s%monthWeaving(L)); call unrank_weaving(s%monthLengths,rank,s%monthWeaving)
+    allocate(s%monthWeaving(L)); call unrank_weaving(s%monthLengths,rank,s%monthWeaving,N)
     if (trace) then
        write(output_unit,'(A)') 'STAGE01_PHASE=STRUCTURE_WEAVING_UNRANK_READY'
        flush(output_unit)
