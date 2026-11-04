@@ -1531,6 +1531,90 @@ fn test_stage31_diag_reference_month_lengths_anchor() {
 	assert total == year_days
 }
 
+fn test_stage31_diag_reference_cutlets_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_oracle_engine()
+	year := engine.year5000(foundation)
+	first_day := big_add(year.open_gate_day, big_one())
+	sauce := oracle_sauce(foundation, first_day)
+	cutlet_count := engine.choose_cutlet_count(sauce, year)
+	partition := engine.choose_cutlet_partition(foundation, sauce, year, cutlet_count)
+	names := oracle_choose_cutlet_names(sauce, cutlet_count)
+	cutlets := engine.materialize_cutlets(year, partition, names)
+	assert cutlets.len == cutlet_count
+}
+
+fn test_stage31_diag_candidate_cutlets_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_patch15_engine()
+	year := engine.year5000(foundation)
+	first_day := big_add(year.open_gate_day, big_one())
+	sauce := patch15_sauce(foundation, first_day)
+	cutlet_count := engine.choose_cutlet_count(sauce, year)
+	partition := engine.choose_cutlet_partition(foundation, sauce, year, cutlet_count)
+	names := patch15_choose_cutlet_names(sauce, cutlet_count)
+	cutlets := engine.materialize_cutlets(year, partition, names)
+	assert cutlets.len == cutlet_count
+}
+
+fn test_stage31_diag_reference_weave_count_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_oracle_engine()
+	year := engine.year5000(foundation)
+	first_day := big_add(year.open_gate_day, big_one())
+	sauce := oracle_sauce(foundation, first_day)
+	month_count := oracle_choose_month_count(sauce, year)
+	lengths := oracle_choose_month_lengths(sauce, year, month_count)
+	mut family := new_oracle_weave_counter(lengths)
+	total := family.count_all()
+	assert big_cmp(total, big_zero()) > 0
+}
+
+fn test_stage31_diag_candidate_weave_count_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_patch15_engine()
+	year := engine.year5000(foundation)
+	first_day := big_add(year.open_gate_day, big_one())
+	sauce := patch15_sauce(foundation, first_day)
+	month_count := patch15_choose_month_count(sauce, year)
+	lengths := patch15_choose_month_lengths(sauce, year, month_count)
+	mut family := new_patch15_weave_counter(lengths)
+	total := family.count_all()
+	assert big_cmp(total, big_zero()) > 0
+}
+
+fn test_stage31_diag_reference_weave_unrank_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_oracle_engine()
+	year := engine.year5000(foundation)
+	first_day := big_add(year.open_gate_day, big_one())
+	sauce := oracle_sauce(foundation, first_day)
+	month_count := oracle_choose_month_count(sauce, year)
+	lengths := oracle_choose_month_lengths(sauce, year, month_count)
+	weaving := oracle_choose_month_weaving(sauce, lengths)
+	mut days := 0
+	for length in lengths {
+		days += length
+	}
+	assert weaving.len == days
+}
+
+fn test_stage31_diag_candidate_weave_unrank_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_patch15_engine()
+	year := engine.year5000(foundation)
+	first_day := big_add(year.open_gate_day, big_one())
+	sauce := patch15_sauce(foundation, first_day)
+	month_count := patch15_choose_month_count(sauce, year)
+	lengths := patch15_choose_month_lengths(sauce, year, month_count)
+	weaving := patch15_choose_month_weaving(sauce, lengths)
+	mut days := 0
+	for length in lengths {
+		days += length
+	}
+	assert weaving.len == days
+}
+
 fn test_stage31_diag_reference_full_anchor() {
 	foundation := oracle_foundation_day()
 	mut engine := new_oracle_engine()

@@ -249,6 +249,12 @@ jobs:
           for probe in \
             test_stage31_diag_reference_year_anchor \
             test_stage31_diag_reference_month_lengths_anchor \
+            test_stage31_diag_reference_cutlets_anchor \
+            test_stage31_diag_candidate_cutlets_anchor \
+            test_stage31_diag_reference_weave_count_anchor \
+            test_stage31_diag_candidate_weave_count_anchor \
+            test_stage31_diag_reference_weave_unrank_anchor \
+            test_stage31_diag_candidate_weave_unrank_anchor \
             test_stage31_diag_reference_full_anchor \
             test_stage31_diag_candidate_full_anchor; do
             echo "::group::Stage31 diagnostic $probe"
