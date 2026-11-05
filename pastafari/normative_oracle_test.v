@@ -800,7 +800,83 @@ fn oracle_weave_choose_exact(n int, k int) BigInt {
 	return answer
 }
 
+
+/*
+The unopened-month factor depends only on the number of opened labels and
+their remaining total. This reference recurrence is deliberately separate
+from the candidate's bottom-up table. The original polynomial counter
+remains in use for small states and independently validates this shortcut.
+*/
+fn (mut c OracleWeaveCounter) factor_suffix(opened int, left int) BigInt {
+	if opened == c.lengths.len {
+		return big_one()
+	}
+	key := 'factor:${opened}:${left}'
+	if key in c.memo {
+		return c.memo[key]
+	}
+	size := c.lengths[opened]
+	mut result := big_zero()
+	if left == 0 {
+		result = c.factor_suffix(opened + 1, size - 1)
+	} else {
+		result = c.factor_suffix(opened, left - 1)
+		if size > 1 {
+			weight := oracle_weave_choose_exact(left + size - 2, size - 2)
+			tail := c.factor_suffix(opened + 1, left + size - 1)
+			result = big_add(result, big_mul(weight, tail))
+		}
+	}
+	c.memo[key] = result
+	return result
+}
+
+fn (mut c OracleWeaveCounter) count_factorized(state OracleWeaveState) BigInt {
+	mut unfinished := false
+	for value in state.remaining {
+		if value != 0 {
+			unfinished = true
+			break
+		}
+	}
+	if !unfinished {
+		return big_one()
+	}
+	if state.opened_up_to == 0 {
+		return c.count_factorized(c.apply_move(state, 1))
+	}
+	key := oracle_weave_state_key(state)
+	if key in c.memo {
+		return c.memo[key]
+	}
+	mut ways_fixed := big_one()
+	mut left := state.remaining[0]
+	for j in 2 .. state.opened_up_to + 1 {
+		rest := state.remaining[j - 1]
+		if rest == 0 {
+			if left > 0 {
+				c.memo[key] = big_zero()
+				return big_zero()
+			}
+		} else {
+			ways_fixed = big_mul(ways_fixed, oracle_weave_choose_exact(left + rest - 1,
+				rest - 1))
+		}
+		left += rest
+	}
+	result := big_mul(ways_fixed, c.factor_suffix(state.opened_up_to, left))
+	c.memo[key] = result
+	return result
+}
+
 fn (mut c OracleWeaveCounter) count(state OracleWeaveState) BigInt {
+	mut total_length := 0
+	for size in c.lengths {
+		total_length += size
+	}
+	if total_length > 12 {
+		return c.count_factorized(state)
+	}
 	mut all_done := true
 	for remaining in state.remaining {
 		if remaining != 0 {
@@ -1505,6 +1581,7 @@ fn stage31_check_small_weave_state(mut oracle OracleWeaveCounter, mut candidate 
 	}
 	slow := oracle_weave_exhaustive_small(oracle, state)
 	assert big_eq(oracle.count(state), slow)
+	assert big_eq(oracle.count_factorized(state), slow)
 	assert big_eq(candidate.count(candidate_state), slow)
 	for label in 1 .. oracle.lengths.len + 1 {
 		if oracle.legal_move(state, label) {
@@ -1601,6 +1678,38 @@ fn test_stage31_diag_candidate_weave_count_anchor() {
 	mut family := new_patch15_weave_counter(lengths)
 	total := family.count_all()
 	assert big_cmp(total, big_zero()) > 0
+}
+
+fn test_stage31_diag_reference_weave_rank_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_oracle_engine()
+	year := engine.year5000(foundation)
+	first_day := big_add(year.open_gate_day, big_one())
+	sauce := oracle_sauce(foundation, first_day)
+	month_count := oracle_choose_month_count(sauce, year)
+	lengths := oracle_choose_month_lengths(sauce, year, month_count)
+	mut family := new_oracle_weave_counter(lengths)
+	total := family.count_all()
+	stream := oracle_ask_bowl(sauce, 4, 32)
+	rank := oracle_choose_rank(stream, total)
+	assert big_cmp(rank, big_one()) >= 0
+	assert big_cmp(rank, total) <= 0
+}
+
+fn test_stage31_diag_candidate_weave_rank_anchor() {
+	foundation := oracle_foundation_day()
+	mut engine := new_patch15_engine()
+	year := engine.year5000(foundation)
+	first_day := big_add(year.open_gate_day, big_one())
+	sauce := patch15_sauce(foundation, first_day)
+	month_count := patch15_choose_month_count(sauce, year)
+	lengths := patch15_choose_month_lengths(sauce, year, month_count)
+	mut family := new_patch15_weave_counter(lengths)
+	total := family.count_all()
+	stream := patch15_ask_bowl(sauce, 4, 32)
+	rank := patch15_choose_rank(stream, total)
+	assert big_cmp(rank, big_one()) >= 0
+	assert big_cmp(rank, total) <= 0
 }
 
 fn test_stage31_diag_reference_weave_unrank_anchor() {

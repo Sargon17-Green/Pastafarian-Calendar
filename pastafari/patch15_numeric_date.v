@@ -270,7 +270,8 @@ struct Patch15WeaveState {
 struct Patch15WeaveCounter {
 	lengths []int
 mut:
-	memo map[string]BigInt
+	memo          map[string]BigInt
+	factor_matrix [][]BigInt
 }
 
 fn new_patch15_weave_counter(lengths []int) Patch15WeaveCounter {
@@ -370,10 +371,46 @@ fn patch15_weave_choose_exact(n int, k int) BigInt {
 	return answer
 }
 
+
+/*
+For k opened labels and L remaining opened-label occurrences, let s be
+the length of the next unopened label. The exact insertion-factor recurrence:
+F(k,L) = F(k,L-1) + C(L+s-2,s-2)*F(k+1,L+s-1),
+F(k,0) = F(k+1,s-1), F(last,L) = 1.
+This independent bottom-up table is shared by successive unrank calls.
+*/
+fn (mut c Patch15WeaveCounter) prepare_factor_matrix() {
+	if c.factor_matrix.len > 0 {
+		return
+	}
+	month_total := c.lengths.len
+	mut prefix := []int{len: month_total + 1}
+	for i in 0 .. month_total {
+		prefix[i + 1] = prefix[i] + c.lengths[i]
+	}
+	mut factors := [][]BigInt{len: month_total + 1}
+	factors[month_total] = []BigInt{len: prefix[month_total] + 1, init: big_one()}
+	for delta in 1 .. month_total {
+		opened := month_total - delta
+		size := c.lengths[opened]
+		mut row := []BigInt{len: prefix[opened] + 1, init: big_zero()}
+		row[0] = factors[opened + 1][size - 1]
+		mut coefficient := big_one()
+		for left in 1 .. prefix[opened] + 1 {
+			product := big_mul_small(coefficient, u32(left + size - 2))
+			coefficient = patch15_weave_div_small(product, left)
+			row[left] = big_add(row[left - 1], big_mul(coefficient, factors[opened + 1][left +
+				size - 1]))
+		}
+		factors[opened] = row.clone()
+	}
+	c.factor_matrix = factors.clone()
+}
+
 fn (mut c Patch15WeaveCounter) count(state Patch15WeaveState) BigInt {
 	mut unfinished := false
-	for v in state.remaining {
-		if v != 0 {
+	for value in state.remaining {
+		if value != 0 {
 			unfinished = true
 			break
 		}
@@ -381,71 +418,32 @@ fn (mut c Patch15WeaveCounter) count(state Patch15WeaveState) BigInt {
 	if !unfinished {
 		return big_one()
 	}
+	if state.opened_up_to == 0 {
+		return c.count(c.apply_move(state, 1))
+	}
 	key := patch15_weave_state_key(state)
 	if key in c.memo {
 		return c.memo[key]
 	}
-	opened := state.opened_up_to
-	mut known_length := c.lengths[0]
-	mut prefix_length := if opened > 0 { c.lengths[0] - state.remaining[0] } else { 0 }
 	mut ways_fixed := big_one()
-	for j in 2 .. opened + 1 {
-		suffix_previous := known_length - prefix_length
+	mut left := state.remaining[0]
+	for j in 2 .. state.opened_up_to + 1 {
 		rest := state.remaining[j - 1]
 		if rest == 0 {
-			if suffix_previous > 0 {
+			if left > 0 {
 				c.memo[key] = big_zero()
 				return big_zero()
 			}
 		} else {
-			ways_fixed = big_mul(ways_fixed, patch15_weave_choose_exact(suffix_previous + rest - 1,
+			ways_fixed = big_mul(ways_fixed, patch15_weave_choose_exact(left + rest - 1,
 				rest - 1))
 		}
-		prefix_length += c.lengths[j - 1] - rest
-		known_length += c.lengths[j - 1]
+		left += rest
 	}
-	if opened >= c.lengths.len {
-		c.memo[key] = ways_fixed
-		return ways_fixed
-	}
-	mut first := []BigInt{len: known_length + 1, init: big_zero()}
-	first_index := if opened == 0 { 0 } else { opened - 1 }
-	first[first_index] = ways_fixed
-	lowest_new := if opened < 2 { 2 } else { opened + 1 }
-	for j in lowest_new .. c.lengths.len + 1 {
-		size := c.lengths[j - 1]
-		left := known_length - prefix_length
-		mut running := big_zero()
-		mut sums := []BigInt{len: known_length + 2, init: big_zero()}
-		for p in 0 .. known_length + 1 {
-			running = big_add(running, first[p])
-			sums[p + 1] = running
-		}
-		mut updated := []BigInt{len: known_length + size + 1, init: big_zero()}
-		if size == 1 {
-			updated[prefix_length + left] = sums[prefix_length + left]
-		} else {
-			mut combinations := patch15_weave_choose_exact(left + size - 2, size - 2)
-			for skipped in 0 .. left + 1 {
-				p := prefix_length + skipped
-				updated[p] = big_mul(sums[p], combinations)
-				if skipped < left {
-					numerator := left - skipped
-					denominator := left - skipped + size - 2
-					product := big_mul_small(combinations, u32(numerator))
-					combinations = patch15_weave_div_small(product, denominator)
-				}
-			}
-		}
-		first = updated.clone()
-		known_length += size
-	}
-	mut answer := big_zero()
-	for item in first {
-		answer = big_add(answer, item)
-	}
-	c.memo[key] = answer
-	return answer
+	c.prepare_factor_matrix()
+	result := big_mul(ways_fixed, c.factor_matrix[state.opened_up_to][left])
+	c.memo[key] = result
+	return result
 }
 
 fn (mut c Patch15WeaveCounter) initial_state() Patch15WeaveState {
