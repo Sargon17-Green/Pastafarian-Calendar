@@ -70,3 +70,9 @@ Inspecteer de ruwe CI-log van DISCOVERY24. Als een geval faalt: herstel de aanto
 - Onafhankelijke normatieve oracle: volledige wevingen op vier KLEINE families tegen ranggrenzen; op drie ECHTE berekeningsdagen een tweede implementatie van jaar, koteletten en maandnamen, maar **NIET** onafhankelijke volledige lexicografische maandweving. De echte vergelijkingen zijn dus *gedeeltelijke* canonieke vergelijkingen, geen volledig bewezen E2E.
 - Acceptatie DIAG06 uitsluitend na statische broncontrole, commit- en blob-readback, exact-SHA native+verify completed SUCCESS én ruwe aantallen/diagnoselog met drie geldige echte derde-dag-projecties. Zelfs bij groen: DISCOVERY24 en Stage 2 blijven OPEN tot volledige budgetveilige canonical E2E-differential.
 - Geen main, merge, publicatie, universele datumclaim of onbegrensde cijfer-/tijdskosten.
+
+
+## DIAG06 QA-PATCH01 — alle lexicografische derde-prefixgrenzen
+- Onafhankelijke brute enumeratie (niet Clojure-productie en niet het normatieve rangalgoritme) valideerde alle 7921 legale volledige kleine woorden: [4,4] 20, [4,4,4] 1301, [4,5,4] 3499, [5,4,4] 3101; in totaal 15 verschillende aangrenzende ranggrenzen waar de eerste drie IDs wisselen (3+4+4+4). Bestaande DIAG06-tests raakten slechts 4/15 van die grenzen aan BEIDE kanten.
+- Nieuwe onafhankelijke Clojure normatieve QA vergelijkt nu per familie alle exacte overgangsrangen en hun voorgangers, naast oude randen, met productie op het volledige drieletterprefix, de derde maand-ID, voorkomens, celgrens en scope. De vaste totale aantallen en grensfrequenties zijn onafhankelijk van de Clojure oracle berekend.
+- Geen wijziging van productie, budget, algemene API of de bestaande eerste/tweede/laatste-dagclaims. Bij succesvolle CI is dit uitsluitend een sterkere DIAG06-testacceptatie; de originele volledige canonical E2E-gate blijft op 0/7 en DISCOVERY24/Stage 2 OPEN.

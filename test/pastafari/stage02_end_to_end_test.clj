@@ -348,32 +348,47 @@
 
 ;; DIAG06: de onafhankelijke normatieve oracle bouwt volledige KLEINE
 ;; wevingen. De productie telt slechts de eerste drie rangposities.
+
+;; DIAG06 QA-PATCH01: de onafhankelijke normatieve oracle somt de complete
+;; kleine woorden op. Test BEIDE zijden van ALLE drieletter-prefixovergangen.
+;; De vaste aantallen komen uit een afzonderlijke brute permutatie-enumeratie,
+;; niet uit de productieteller of de normatieve rangfunctie.
 (deftest derde-positie-onafhankelijke-kleine-families
-  (testing "Vier families, ranggrenzen en werkelijke derde maandposities."
-    (doseq [lengten [[4 4] [4 4 4] [4 5 4] [5 4 4]]
+  (testing "Alle 15 derde-prefixgrenzen, beide naburige rangen, vier families."
+    (doseq [[lengten verwacht-aantal verwacht-wissels]
+            [[[4 4] 20N 3]
+             [[4 4 4] 1301N 4]
+             [[4 5 4] 3499N 4]
+             [[5 4 4] 3101N 4]]
             :let [familie (orakel/weaving-family lengten)
                   totaal ((:count familie))
-                  tweede-grens (count
-                                (take-while #(= 1 (second %))
-                                  (map #((:unrank1 familie) %)
-                                       (range 1 (inc totaal)))))
+                  woorden (mapv #((:unrank1 familie) %)
+                                (range 1 (inc totaal)))
+                  tweede-grens (count (take-while #(= 1 (second %)) woorden))
+                  wissels (for [i (range 1 (count woorden))
+                                :when (not= (subvec (nth woorden (dec i)) 0 3)
+                                            (subvec (nth woorden i) 0 3))]
+                            (bigint (inc i)))
                   rangen (distinct
-                           (filter #(<= 1N % totaal)
-                             [1N 2N (bigint tweede-grens)
-                              (inc (bigint tweede-grens))
-                              (quot (inc totaal) 2N) totaal]))]
-            r rangen]
-      (let [bewijs (rang/derde-maand-op-rang-groot lengten r 5000000N)
-            woord ((:unrank1 familie) r)
-            prefix (mapv bigint (take 3 woord))
-            maand (peek prefix)]
-        (is (= prefix (:month-prefix bewijs)))
-        (is (= maand (:month-id bewijs)))
-        (is (= (bigint (count (filter #(= maand %) prefix)))
-               (:day-in-month bewijs)))
-        (is (<= 0N (:prefix-cell-upper-bound bewijs) 5000000N))
-        (is (= :third-day-prefix-only (:date-proof-scope bewijs)))
-        (is (false? (:month-weaving-computed? bewijs)))))))
+                          (filter #(<= 1N % totaal)
+                            (concat [1N 2N (bigint tweede-grens)
+                                     (inc (bigint tweede-grens))
+                                     (quot (inc totaal) 2N) totaal]
+                                    (mapcat (fn [r] [(dec r) r]) wissels))))]]
+      (is (= verwacht-aantal totaal))
+      (is (= verwacht-wissels (count wissels)))
+      (doseq [r rangen]
+        (let [bewijs (rang/derde-maand-op-rang-groot lengten r 5000000N)
+              woord (nth woorden (dec (int r)))
+              prefix (mapv bigint (take 3 woord))
+              maand (peek prefix)]
+          (is (= prefix (:month-prefix bewijs)))
+          (is (= maand (:month-id bewijs)))
+          (is (= (bigint (count (filter #(= maand %) prefix)))
+                 (:day-in-month bewijs)))
+          (is (<= 0N (:prefix-cell-upper-bound bewijs) 5000000N))
+          (is (= :third-day-prefix-only (:date-proof-scope bewijs)))
+          (is (false? (:month-weaving-computed? bewijs))))))))
 
 (deftest derde-dag-prefix-budget-en-rang-weigeringen
   (let [fout (fn [lengten r budget]
