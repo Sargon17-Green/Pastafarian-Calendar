@@ -16,6 +16,7 @@ from weaving_prefix_transfer import weight, count_prefix
 
 
 from dataclasses import dataclass
+from functools import lru_cache
 from math import comb
 
 @dataclass(frozen=True)
@@ -33,6 +34,23 @@ class SparseVector:
     def dot(self, dense):
         return sum(value * dense[self.offset + t]
                    for t, value in enumerate(self.values))
+
+
+@lru_cache(maxsize=96)
+def free_gap_coefficients(n, k):
+    """Exact C(k+d-2,d) for 1<=d<=n, reused at each prefix transition.
+
+    The d=0 coefficient is one. With k=1, positive distances are
+    impossible; the cache is bounded independently of the prefix length.
+    """
+    if k < 2:
+        return (1,) + (0,) * n
+    values = [1]
+    value = 1
+    for distance in range(1, n + 1):
+        value = value * (k + distance - 2) // distance
+        values.append(value)
+    return tuple(values)
 
 
 def sparse_transfer(previous, n, k, spec):
@@ -53,15 +71,11 @@ def sparse_transfer(previous, n, k, spec):
     prefix = previous.prefix(first)
     out = []
     # For i<n, w(i)=C(k+n-i-2,n-i); for i=n the weight is one.
-    distance = n - first
-    coefficient = comb(k + distance - 2, distance) if k >= 2 and distance else (1 if not distance else 0)
+    coefficients = free_gap_coefficients(n, k)
     for i in range(first, n+1):
         if i > first and previous.offset <= i < previous.offset + len(previous.values):
             prefix += previous.values[i-previous.offset]
-        out.append(prefix * (1 if i == n else coefficient))
-        remaining = n-i
-        if remaining > 1 and k >= 2:
-            coefficient = coefficient * remaining // (k+remaining-2)
+        out.append(prefix * coefficients[n-i])
     start = first+1
     left = 0
     while left < len(out) and out[left] == 0:
