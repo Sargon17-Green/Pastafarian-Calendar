@@ -5,7 +5,7 @@ on:
       - 'MATLAB\+Polski'
     paths:
       - 'tools/run_stage55_year5000_thirty_second_native.m'
-      - 'tools/stage55_after31_interval_five_fields.py'
+      - 'tools/stage55_after32_interval_five_fields.py'
       - 'tools/stage55_after4_interval_witness.py'
       - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
       - '.github/workflows/matlab-stage55-thirty-second-day-differential.yml'
@@ -37,9 +37,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f tools/stage55_after31_interval_five_fields.py
-          grep -Fqx 'PIN = "b2e5775f248091a6ad109d2bbabe706402a9f7f4e87184952f6070004223fad7"' tools/stage55_after31_interval_five_fields.py
-          python3 -m py_compile tools/stage55_after31_interval_five_fields.py
+          test -f tools/stage55_after32_interval_five_fields.py
+          grep -Fqx 'PIN = "b2e5775f248091a6ad109d2bbabe706402a9f7f4e87184952f6070004223fad7"' tools/stage55_after32_interval_five_fields.py
+          python3 -m py_compile tools/stage55_after32_interval_five_fields.py
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/stage55_after31_interval_five_fields.py \
+          python3 tools/stage55_after32_interval_five_fields.py \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_31.json \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_32.json \
             tests/fixtures/stage55_year5000_appendix_a_metadata.json \
