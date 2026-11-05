@@ -362,13 +362,12 @@ fn patch15_weave_choose_exact(n int, k int) BigInt {
 	if r > n - r {
 		r = n - r
 	}
-	mut numerator := big_one()
-	mut denominator := big_one()
-	for i in 1 .. r + 1 {
-		numerator = big_mul_small(numerator, u32(n - r + i))
-		denominator = big_mul_small(denominator, u32(i))
+	mut answer := big_one()
+	for step in 1 .. r + 1 {
+		product := big_mul_small(answer, u32(n - r + step))
+		answer = patch15_weave_div_small(product, step)
 	}
-	return big_floor_div(numerator, denominator)
+	return answer
 }
 
 fn (mut c Patch15WeaveCounter) count(state Patch15WeaveState) BigInt {
