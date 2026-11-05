@@ -58,7 +58,7 @@ fn prefix_at(prefixes: List(Int), index: Int) -> Int {
     True -> 0
     False -> {
       // Indekso ĉiam troviĝas en 1..size post la valida fenestrokontrolo.
-      let assert Ok(value) = list.at(prefixes, index - 1)
+      let assert [value, ..] = list.drop(prefixes, index - 1)
       value
     }
   }
