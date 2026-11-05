@@ -53,6 +53,7 @@ local GateMidpointPatch = require("gate_midpoint_patch")
 local LegacyGateQuartile = require("legacy_gate_quartile")
 local GateQuartilePatch = require("gate_quartile_patch")
 local LegacyGateOctile = require("legacy_gate_octile")
+local GateOctilePatch = require("gate_octile_patch")
 local S = {}
 
 function S.bootstrapProbe(calculationDay, targetDay)
@@ -701,6 +702,16 @@ end
 -- Stage54 DISCOVERY27: controlled eighth-edge diagnostic; no public date field.
 function S.legacyGateOctileProbe(day,records)
     return LegacyGateOctile.execute(day,records)
+end
+
+-- Stage55 PATCH27: preserve Stage54 legacy; repair exact octile equality.
+function S.gateOctilePatchProbe(day,records)
+    return GateOctilePatch.execute(day,records)
+end
+
+function S.gateOctileSpaghetti(day,records)
+    local corrected=GateOctilePatch.execute(day,records)
+    return corrected
 end
 
 function S.calendarDateSpaghetti()

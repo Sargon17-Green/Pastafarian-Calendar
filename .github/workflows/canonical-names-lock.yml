@@ -2460,3 +2460,64 @@ jobs:
           path: stage54-evidence/
           retention-days: 30
           if-no-files-found: warn
+  lua_stage55_patch:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    needs: lua_stage54_discovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enstale Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Stage55 octile equality patch with source-locked native evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage55-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nTESTED_SHA=%s\n' "$GITHUB_SHA" >stage55-evidence/source.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/legacy_gate_index_lookup.lua)" = 36d90537407ca7f95183800b3d21912081f3035e
+          test "$(git hash-object src/gate_index_patch.lua)" = f427517366aa1cdd0999d142ff31c5f26ac4c985
+          test "$(git hash-object src/legacy_gate_ordinal.lua)" = 7ad9916ae0ef7d3af13fbc7f8b98370af95cdf76
+          test "$(git hash-object src/gate_ordinal_patch.lua)" = aafd53040b7e468602b0dd81b2e97b1e310307bd
+          test "$(git hash-object src/legacy_gate_reverse_ordinal.lua)" = 43375cebb0e183a35c45f4181dce822847ddf66c
+          test "$(git hash-object src/gate_reverse_ordinal_patch.lua)" = 7f1b9396394c26e22958fb1fb8661a347e688e4e
+          test "$(git hash-object src/legacy_gate_nearest_boundary.lua)" = 56fc2dc01b37d6daae6e7711b44b5d6f7788c96c
+          test "$(git hash-object src/gate_nearest_boundary_patch.lua)" = 0509c59237de88643d0802aae7882b4496ee420f
+          test "$(git hash-object src/legacy_gate_signed_offset.lua)" = c77ef96d47182a3f32e2f19307e75dab57fd4c94
+          test "$(git hash-object src/gate_signed_offset_patch.lua)" = 52861e87950fb9991dc71b0bdd50b3ac9473f68c
+          test "$(git hash-object src/legacy_gate_phase.lua)" = fa731a344641c0d843863dd1dba9802f9f253e25
+          test "$(git hash-object src/gate_phase_patch.lua)" = c719ff7dd53ee0a56f9956732ad5ade58f47df8c
+          test "$(git hash-object src/legacy_gate_midpoint.lua)" = 0c8f4a9176efdc9d2f4c4d1096af45cc9a9493e1
+          test "$(git hash-object src/gate_midpoint_patch.lua)" = 68c0306e14465858fa23c51ce969fbd133e9d6b4
+          test "$(git hash-object src/legacy_gate_quartile.lua)" = bc11539b87607f3fbe6d798fb2bf4be00e1aed93
+          test "$(git hash-object src/gate_quartile_patch.lua)" = a0448525342d4c0db54bc23642cb55356ea439ca
+          test "$(git hash-object src/legacy_gate_octile.lua)" = 8f23c25f5e375b4a0eba87aad7ce7d6be2973216
+          find src test -type f -name '*.lua' -print0 | xargs -0 -n1 luac5.3 -p
+          lua5.3 -v >stage55-evidence/lua-version.txt 2>&1
+          set +e
+          timeout --signal=TERM --kill-after=10s 1200s lua5.3 test/stage55_tests.lua . \
+            >stage55-evidence/stdout.txt 2>stage55-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" >stage55-evidence/exit-code.txt
+          cat stage55-evidence/stdout.txt
+          if [ -s stage55-evidence/stderr.txt ]; then cat stage55-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 && test ! -s stage55-evidence/stderr.txt
+          test "$(wc -l <stage55-evidence/stdout.txt)" -eq 3
+          grep -Fxq 'PASS Stage55 canonical: 15 openings MATCH, 14 closings MATCH, 18 commits' stage55-evidence/stdout.txt
+          grep -Fxq 'PASS Stage55 synthetic: 672 signed BigInt octile PATCHED, 1344 flanks MATCH' stage55-evidence/stdout.txt
+          grep -Fxq 'PASS Stage55 hardening: 9 rejects, 2 isolated replays, Stage54 EXPECTED_RED preserved' stage55-evidence/stdout.txt
+          printf '%s\n' 'STAGE55_NATIVE=PATCHED_VERIFIED' >stage55-evidence/result.txt
+      - name: Upload Stage55 evidence (including failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-stage55-patch-evidence
+          path: stage55-evidence/
+          retention-days: 30
+          if-no-files-found: warn
