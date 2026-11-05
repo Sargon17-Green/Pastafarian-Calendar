@@ -130,7 +130,7 @@ def spawn_python(script: Path, root: Path, target: int, timeout: int):
                "PYTHONDONTWRITEBYTECODE": "1", "PYTHONNOUSERSITE": "1"}
         p = subprocess.run(
             [sys.executable, "-I", str(script.resolve(strict=True)), "--worker",
-             "--pinned-root", str(root), "--day", str(target)],
+             "--pinned-root", str(root.resolve(strict=True)), "--day", str(target)],
             cwd=tmp, env=env, text=True, capture_output=True, timeout=timeout)
     if p.returncode or len(p.stdout.splitlines()) != 1:
         raise SevenFieldError("E_REFERENCE_EXEC_" + str(target) + " " + p.stderr[-300:])

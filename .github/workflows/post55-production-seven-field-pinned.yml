@@ -57,7 +57,7 @@ jobs:
             soak/Post55ProductionDateBridge.kt \
             -include-runtime -d "$RUNNER_TEMP/production-date.jar"
           test -s "$RUNNER_TEMP/production-date.jar"
-      - name: Eight bounded synthetic checks
+      - name: Nine bounded synthetic checks
         shell: bash
         working-directory: audited-kotlin
         run: |

@@ -68,5 +68,30 @@ class SevenFieldContractTests(unittest.TestCase):
                     parse_production("\t".join(row), FOUNDATION, FOUNDATION)
 
 
+    def test_reference_root_absolute_under_temporary_cwd(self):
+        # Regression: worker's CWD is a disposable temp directory; the
+        # relative sibling path must be resolved before entering the worker.
+        import json
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        import production_seven_field_pinned_diagnostic as diagnostic
+
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp) / "pinned-python" / "src"
+            root.mkdir(parents=True)
+            fake = SimpleNamespace(returncode=0,
+                                   stdout=json.dumps(self.ref()) + "\n",
+                                   stderr="")
+            with patch.object(diagnostic.subprocess, "run", return_value=fake) as proc:
+                fields = diagnostic.spawn_python(
+                    Path(diagnostic.__file__), root, FOUNDATION, timeout=5)
+            self.assertEqual(fields, [8453, 7, 934, 12, 100])
+            command = proc.call_args.args[0]
+            self.assertEqual(command[5], str(root.resolve(strict=True)))
+            self.assertTrue(Path(command[5]).is_absolute())
+
+
 if __name__ == "__main__":
     unittest.main()
