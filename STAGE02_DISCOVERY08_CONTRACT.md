@@ -1,6 +1,6 @@
 # Stage2 / DISCOVERY08: first-five visible drops, Logo + Ido
 
-Status: IMPLEMENTED_NATIVE_PENDING. Discovery07 accepted on implementation SHA 3e56c8ab5d800a9e9b8d8652d664eb295b9f0a97.
+Status: ACCEPTED_NATIVE 2026-11-05. SHA 023211272cf76b5b56881575d659ba4a2410185e, run 41978796743/job 127083813737 completed SUCCESS with D8 4 cases/34 checks and NATIVE_STAGE_2_DISCOVERY_08_VERIFICATION=PASS; D1-D7 regressions, original Stage1 and Names completed SUCCESS at same SHA. Discovery07 accepted previously on 3e56c8ab5d800a9e9b8d8652d664eb295b9f0a97.
 LAST_COMPLETED_STAGE=1. This is a bounded Stage2 increment, not full Stage2 acceptance.
 
 ## Contract: I/O and mutations

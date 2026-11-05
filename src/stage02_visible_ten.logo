@@ -1,0 +1,26 @@
+; Stage2 Discovery09: extend D8's five visible drops to ten; no test-only oracle.
+to monster.stage02.visible.ten.extend :i :ctx :stones :hidden :acc
+  if :i > 10 [output :acc]
+  localmake "p1 monster.stage02.visible.prefix.prior :i 1 :acc :hidden
+  localmake "p3 monster.stage02.visible.prefix.prior :i 3 :acc :hidden
+  localmake "p7 monster.stage02.visible.prefix.prior :i 7 :acc :hidden
+  localmake "stone item :i :stones
+  localmake "initial monster.stage02.visible.prefix.initial :i :ctx :stone :p1 :p3 :p7
+  localmake "value monster.stage02.visible.prefix.grind 1 :initial :stone :p1 :p3 :p7
+  output monster.stage02.visible.ten.extend (:i + 1) :ctx :stones :hidden (lput :value :acc)
+end
+
+to monster.stage02.visible.ten :ctx
+  if not (equalp (monster.context.get :ctx "status) "VISIBLE_PREFIX_ONLY) [output :ctx]
+  localmake "prefix monster.context.get :ctx "visiblePrefix
+  if not (listp :prefix) [output :ctx]
+  if (count :prefix) <> 5 [output :ctx]
+  localmake "ten monster.stage02.visible.ten.extend 6 :ctx (monster.context.get :ctx "stoneSeries) (monster.context.get :ctx "hiddenSeeds) :prefix
+  localmake "work monster.context.put :ctx "visibleTen :ten
+  make "work monster.context.put :work "phase "VISIBLE_TEN_READY
+  make "work monster.context.put :work "mode "STAGE_2_DISCOVERY_09
+  make "work monster.context.put :work "status "VISIBLE_TEN_ONLY
+  make "work monster.metrics.bump :work "stage02.visible.ten
+  make "work monster.logs.append :work "stage02.visible.ten.ready
+  output :work
+end

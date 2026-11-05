@@ -1,0 +1,92 @@
+; D9 native: 1 valid (5+11+1 checks) + 3 invalid = 20 checks.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "src/stage02_stones.logo
+load "src/stage02_hidden.logo
+load "src/stage02_visible_prefix.logo
+load "src/stage02_visible_ten.logo
+load "test/normative_reference.logo
+make "D9.N 0
+make "D9.CASES 0
+make "D9.FAIL "false
+
+to d9.require :ok :tag
+  make "D9.N (:D9.N + 1)
+  if not :ok [
+    make "D9.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_09_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d9.same :a :b :keys
+  if emptyp :keys [output "true]
+  if not (equalp (monster.context.get :a first :keys) (monster.context.get :b first :keys)) [output "false]
+  output d9.same :a :b (butfirst :keys)
+end
+
+to d9.oracle.ten :i :counts :stones :hidden :acc
+  if :i > 10 [output :acc]
+  localmake "v nr.visible.one :i :counts :stones :hidden :acc
+  output d9.oracle.ten (:i + 1) :counts :stones :hidden (lput :v :acc)
+end
+
+to d9.check.tail :i :actual :expected :tag
+  if :i > 10 [stop]
+  d9.require (equalp (item :i :actual) (item :i :expected)) (list :tag :i)
+  d9.check.tail (:i + 1) :actual :expected :tag
+end
+
+to d9.valid :calculation :target :tag
+  print sentence [STAGE_2_DISCOVERY_09_CASE_BEGIN] :tag
+  localmake "before monster.stage02.visible.prefix (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts :calculation :target)))
+  localmake "after monster.stage02.visible.ten :before
+  localmake "actual monster.context.get :after "visibleTen
+  localmake "counts nr.work.counts :calculation :target
+  localmake "stones nr.stones
+  localmake "hidden nr.hidden.build :counts :stones
+  localmake "expected d9.oracle.ten 1 :counts :stones :hidden []
+  make "D9.CASES (:D9.CASES + 1)
+  if (count :actual) <> 10 [print [STAGE_2_DISCOVERY_09_SHAPE_FALIIS] stop]
+  if (count :expected) <> 10 [print [STAGE_2_DISCOVERY_09_ORACLE_SHAPE_FALIIS] stop]
+  d9.check.tail 6 :actual :expected :tag
+  d9.require (equalp (monster.context.get :after "calculationDay) :calculation) (list :tag [calculation])
+  d9.require (equalp (monster.context.get :after "targetDay) :target) (list :tag [target])
+  d9.require (d9.same :before :after [normalizedCalculationDay normalizedTargetDay actionCount targetCount distanceCount connectionCount directionCount]) (list :tag [counts])
+  d9.require (equalp (monster.context.get :after "stoneSeries) (monster.context.get :before "stoneSeries)) (list :tag [stones])
+  d9.require (equalp (monster.context.get :after "hiddenSeeds) (monster.context.get :before "hiddenSeeds)) (list :tag [hidden])
+  d9.require (equalp (monster.context.get :after "visiblePrefix) (monster.context.get :before "visiblePrefix)) (list :tag [prefix])
+  d9.require (equalp (monster.context.get :after "phase) "VISIBLE_TEN_READY) (list :tag [phase])
+  d9.require (equalp (monster.context.get :after "mode) "STAGE_2_DISCOVERY_09) (list :tag [mode])
+  d9.require (equalp (monster.context.get :after "status) "VISIBLE_TEN_ONLY) (list :tag [status])
+  d9.require (equalp (monster.context.get :after "metrics) [stage02.dispatch stage02.counts stage02.stones stage02.hidden stage02.visible stage02.visible.ten]) (list :tag [metrics])
+  d9.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready stage02.hidden.ready stage02.visible.prefix.ready stage02.visible.ten.ready]) (list :tag [logs])
+  d9.require (equalp (monster.stage02.visible.ten :before) :after) (list :tag [determinism])
+  print sentence [STAGE_2_DISCOVERY_09_CASE_END] :tag
+  output :before
+end
+
+to d9.invalid :ctx :tag
+  print sentence [STAGE_2_DISCOVERY_09_CASE_BEGIN] :tag
+  make "D9.CASES (:D9.CASES + 1)
+  d9.require (equalp (monster.stage02.visible.ten :ctx) :ctx) :tag
+  print sentence [STAGE_2_DISCOVERY_09_CASE_END] :tag
+end
+
+to stage02.discovery09.run
+  localmake "prefix d9.valid (nr.foundation) (nr.tablets) [foundation_tablets]
+  d9.invalid (monster.stage02.workcounts [0 [1]] [0 [0]]) [failed_validation]
+  d9.invalid (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts [0 [0]] [1 [1]]))) [hidden_only]
+  d9.invalid (monster.context.put :prefix "visiblePrefix [1 2 3 4]) [short_prefix]
+  if :D9.FAIL [print [STAGE_2_DISCOVERY_09_FALIIS] stop]
+  if :D9.CASES <> 4 [print [STAGE_2_DISCOVERY_09_CASE_COUNT_FALIIS] stop]
+  if :D9.N <> 20 [print [STAGE_2_DISCOVERY_09_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_09_CASES_PASIS] :D9.CASES
+  print sentence [STAGE_2_DISCOVERY_09_CHECKS_PASIS] :D9.N
+  print [STAGE_2_DISCOVERY_09_PASIS]
+end
+
+stage02.discovery09.run
