@@ -33,8 +33,7 @@ final class MonsterMonthWeaveCounter {
       return result;
     }
     for (var d = 1; d <= previousLength; d++) {
-      result[d] =
-          (result[d - 1] * BigInt.from(k + d - 2)) ~/ BigInt.from(d);
+      result[d] = (result[d - 1] * BigInt.from(k + d - 2)) ~/ BigInt.from(d);
     }
     return result;
   }
@@ -48,9 +47,7 @@ final class MonsterMonthWeaveCounter {
     if (months < 1 || months > maximumMonths) {
       throw RangeError.range(months, 1, maximumMonths, 'months');
     }
-    if (closedUpTo < 0 ||
-        openedUpTo < closedUpTo ||
-        openedUpTo > months) {
+    if (closedUpTo < 0 || openedUpTo < closedUpTo || openedUpTo > months) {
       throw ArgumentError('Invalid opened/closed prefix counters.');
     }
     var days = 0;
@@ -110,11 +107,9 @@ final class MonsterMonthWeaveCounter {
       // active month, whose first occurrence was in the earlier prefix.
       final k = remaining[openedUpTo];
       final weights = _insertionWeights(length, k);
-      distribution =
-          List<BigInt>.filled(length + k + 1, BigInt.zero);
+      distribution = List<BigInt>.filled(length + k + 1, BigInt.zero);
       for (var oldPosition = 0; oldPosition <= length; oldPosition++) {
-        distribution[oldPosition + 1] =
-            base * weights[length - oldPosition];
+        distribution[oldPosition + 1] = base * weights[length - oldPosition];
       }
       length += k;
       firstUnopened++;
@@ -133,8 +128,7 @@ final class MonsterMonthWeaveCounter {
       var prefixCount = BigInt.zero;
       for (var oldPosition = 0; oldPosition <= length; oldPosition++) {
         prefixCount += distribution[oldPosition];
-        next[oldPosition + 1] =
-            prefixCount * weights[length - oldPosition];
+        next[oldPosition + 1] = prefixCount * weights[length - oldPosition];
       }
       distribution = next;
       length += k;
@@ -192,8 +186,7 @@ final class MonsterMonthWeaveCounter {
         }
         remaining[index]--;
         final nextOpened = id == opened + 1 ? opened + 1 : opened;
-        final nextClosed =
-            remaining[index] == 0 ? closed + 1 : closed;
+        final nextClosed = remaining[index] == 0 ? closed + 1 : closed;
         final suffixCount = countCompletions(
           remaining,
           openedUpTo: nextOpened,

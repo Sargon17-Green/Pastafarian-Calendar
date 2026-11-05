@@ -188,17 +188,17 @@ void refusalOracle() {
   check(refused, 'More than 24 days cannot claim discovery unrank');
   check(
     MonsterMonthWeaveCounter.countWholeWeaves(
-      List<int>.filled(47, 4),
-    ) >
+          List<int>.filled(47, 4),
+        ) >
         (BigInt.one << 127),
     'Wide 47-month synthetic count remains exact BigInt',
   );
   check(
     MonsterMonthWeaveCounter.countCompletions(
-      <int>[0, 0],
-      openedUpTo: 2,
-      closedUpTo: 2,
-    ) ==
+          <int>[0, 0],
+          openedUpTo: 2,
+          closedUpTo: 2,
+        ) ==
         BigInt.one,
     'Completed suffix has exactly one empty continuation',
   );
