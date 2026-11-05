@@ -70,6 +70,10 @@ const originalRun = Patch11OrderLatchHandler.prototype.run;
 let nativeAttempts = 0;
 let nativeCalls = 0;
 let nativeWrites = 0n;
+// Keep closure-mutated counters observable despite TypeScript control-flow narrowing.
+function readNativeTotals(): Readonly<{ attempts: number; completions: number; writes: bigint }> {
+  return { attempts: nativeAttempts, completions: nativeCalls, writes: nativeWrites };
+}
 Patch11OrderLatchHandler.prototype.run = function (...args: Parameters<typeof originalRun>) {
   nativeAttempts++;
   const result = originalRun.apply(this, args);
@@ -147,7 +151,8 @@ try {
   ok(budgetExhaustions === 6 && positiveBudgetCalls === 6 &&
      negativeBudgetCalls === 9,
      "six budget probes must account for exactly fifteen physical Native calls");
-  ok(nativeAttempts === 16 && nativeCalls === 16 && nativeWrites === 928n,
+  const boundedTotals = readNativeTotals();
+  ok(boundedTotals.attempts === 16 && boundedTotals.completions === 16 && boundedTotals.writes === 928n,
      "one-step + six per-side probes must account for 16 entries, completions and 928 writes");
 } finally {
   Patch11OrderLatchHandler.prototype.run = originalRun;
