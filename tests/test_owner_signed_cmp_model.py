@@ -412,6 +412,51 @@ def check_native_cases262_to277_oracle():
         )
 
 
+def check_dual_invalid_owner_cartesian():
+    """Host-only exhaustive metadata matrix; no new Native case is claimed.
+
+    The accepted ROM cases 273-277 sample simultaneous invalid owners.
+    This independent oracle exercises all combinations of reserved/illegal
+    IDs, two signs, and the 0/1 byte boundary, with a full read-only check.
+    """
+    model = OwnedBanks()
+    assert model.alloc(1, 1) == (0, (3,))
+    assert model.write_byte(1, 0, 0x5A) == 0
+    assert reference_integer(model, 1, 0, 1) == int.from_bytes(b"\x5a", "little")
+    invalid_owners = (0, 254, 255)
+    checks = 0
+    for owner_a in invalid_owners:
+        for owner_b in invalid_owners:
+            for sign_a in (0, 1):
+                for sign_b in (0, 1):
+                    for length_a in (0, 1):
+                        for length_b in (0, 1):
+                            descriptor_a = (owner_a, sign_a, length_a)
+                            descriptor_b = (owner_b, sign_b, length_b)
+                            for descriptor in (descriptor_a, descriptor_b):
+                                try:
+                                    reference_integer(model, *descriptor)
+                                except ValueError as exc:
+                                    assert str(exc) == "metadata", (
+                                        f"invalid owner not rejected first: {descriptor}"
+                                    )
+                                else:
+                                    raise AssertionError(
+                                        f"illegal descriptor accepted: {descriptor}"
+                                    )
+                            assert compare_read_only(model, descriptor_a, descriptor_b) == 3, (
+                                f"dual invalid operands accepted: {descriptor_a}, {descriptor_b}"
+                            )
+                            checks += 1
+    assert checks == 144
+    assert model.tags[3] == 3 and model.data[3][0] == 0x5A
+    print(
+        "HOST_STAGE1_DUAL_INVALID_OWNER_CARTESIAN=PASS cases=144 "
+        "owners=0,254,255 signs=0,1 lengths=0,1 "
+        "both_invalid=YES payload_and_tags=IMMUTABLE"
+    )
+
+
 def main():
     m = OwnedBanks()
     assert m.alloc(41, 3) == (0, (3, 4, 5))
@@ -787,6 +832,7 @@ def main():
         "two revoked owners, reversed, must fail closed"
     )
     check_owner_id_high_boundary()
+    check_dual_invalid_owner_cartesian()
     check_owner_id_fragmented_high_boundary()
     check_native_cases262_to277_oracle()
     print("HOST_OWNER_SIGNED_CMP_READ_ONLY=PASS success=1 invalid_sign=1 invalid_owner=1 invalid_length=1 invalid_B=6 negative_zero_B=1 invalid_owner_zero_B=1 boundary_sentinels=3 mixed_nonzero_signs=2 zero_orderings=2 zero_equality_stale=1 same_owner_alias=36 same_owner_fragmented_alias=6 same_owner_fragmented_noncanonical=2 same_owner_fragmented_mixed_sign_invalid=4 case_id_16bit_oracle=2 stale_fragmented_after_release=1 stale_fragmented_with_live_peer=1 stale_fragmented_as_B_with_live_A=1 both_revoked_distinct_owners=2 same_owner_capacity_edge=2 same_owner_mixed_sign_boundary=4 same_owner_mixed_sign_equal_length=2 same_owner_boundary=4 same_owner_negative_boundary=2 same_owner_negative_equal_boundary=2 same_owner_noncanonical=4 same_owner_full_capacity_noncanonical=2 same_owner_zero=5 same_owner_negative_zero=2 same_owner_overcapacity=2 same_owner_full_capacity=4 same_owner_full_capacity_equal=2 payload_and_tags=IMMUTABLE")
