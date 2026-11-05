@@ -15,6 +15,14 @@ const TARGETS = new Map([
   ['test_discovery01_k3_backward_q3_exact_limit', {q: 3n, delta: 0n}],
   ['test_discovery01_k3_backward_q3_n_plus_one', {q: 3n, delta: 1n}]
 ]);
+const FORWARD_TARGETS = new Map([
+  ['test_discovery01_k3_forward_q2_n_minus_one', {q: 2n, delta: -1n}],
+  ['test_discovery01_k3_forward_q2_exact_limit', {q: 2n, delta: 0n}],
+  ['test_discovery01_k3_forward_q2_n_plus_one', {q: 2n, delta: 1n}],
+  ['test_discovery01_k3_forward_q3_n_minus_one', {q: 3n, delta: -1n}],
+  ['test_discovery01_k3_forward_q3_floor_boundary', {q: 3n, delta: 0n}],
+  ['test_discovery01_k3_forward_q3_n_plus_one', {q: 3n, delta: 1n}]
+]);
 const SOURCE = path.join(__dirname, 'normative_selector.wat');
 const PTR = {M: 65536, N: 83200, LIMIT: 96448, SPACE: 100864, WIDE: 105280, RESULT: 145024};
 const M = (1n << 127n) - 1n;
@@ -38,7 +46,7 @@ function child(file, name) {
   assert.equal(typeof instance.exports[name], 'function', 'missing export');
   const value = instance.exports[name]();
   const record = {name, value};
-  if (TARGETS.has(name)) {
+  if (TARGETS.has(name) || FORWARD_TARGETS.has(name)) {
     const mem = instance.exports.memory;
     assert.ok(mem instanceof WebAssembly.Memory, 'missing memory export');
     record.numerics = {};
@@ -81,6 +89,36 @@ function checkNumerics(name, values) {
       x === limit ? 'exact_limit' : 'below_limit'
   };
 }
+function checkForwardNumerics(name, values) {
+  assert.ok(FORWARD_TARGETS.has(name), 'unexpected forward numeric target');
+  const {q, delta} = FORWARD_TARGETS.get(name);
+  const space = M ** 3n;
+  const x = space - M - 2n;  // first=M-2, step=+1; exact stream closed form
+  const n = x / q + delta;
+  const actualQ = space / n;
+  const limit = actualQ * n;
+  const chosen = x > limit ? 1n : x; // forward rejection wraps to 1
+  const rank = 1n + ((chosen - 1n) % n);
+  assert.equal((M - 1n) % q, 0n);
+  assert.equal(x % q, q === 2n ? 0n : 1n);
+  assert.ok(n > M * M && n < space, 'forward input not in k=3');
+  assert.equal(actualQ, q);
+  assert.equal(x - limit, q === 2n ? -2n * delta : 1n - 3n * delta);
+  const expectedRank = delta === 1n ? n - 2n :
+    (q === 2n && delta === 0n ? n : 1n);
+  assert.equal(rank, expectedRank);
+  for (const [key, value] of Object.entries({
+    M, N: n, SPACE: space, LIMIT: limit, WIDE: chosen, RESULT: rank
+  })) {
+    assert.equal(BigInt(values[key]), value, name + ': ' + key);
+  }
+  return {
+    name, q: q.toString(), delta: Number(delta), first: (M - 2n).toString(),
+    n: n.toString(), initial_x: x.toString(), limit: limit.toString(),
+    wide: chosen.toString(), rank: rank.toString(),
+    rejection_steps: x > limit ? (space - x + 1n).toString() : '0'
+  };
+}
 function main() {
   if (process.argv[2] === '--one') {
     child(process.argv[3], process.argv[4]);
@@ -98,11 +136,13 @@ function main() {
     const tests = WebAssembly.Module.exports(mod)
       .filter(e => e.kind === 'function' && e.name.startsWith('test_'))
       .map(e => e.name).sort();
-    assert.equal(tests.length, 33, 'unexpected regression set size');
-    assert.equal(new Set(tests).size, 33, 'duplicate export');
+    assert.equal(tests.length, 39, 'unexpected regression set size');
+    assert.equal(new Set(tests).size, 39, 'duplicate export');
     for (const name of TARGETS.keys()) assert.ok(tests.includes(name), 'missing target: ' + name);
+    for (const name of FORWARD_TARGETS.keys()) assert.ok(tests.includes(name), 'missing forward target: ' + name);
     let passed = 0;
     const numerics = {};
+    const forwardNumerics = {};
     for (const name of tests) {
       const p = spawnSync(process.execPath, [__filename, '--one', compiled, name],
         {encoding: 'utf8', timeout: 30000, maxBuffer: 1000000});
@@ -113,15 +153,18 @@ function main() {
       assert.equal(outcome.name, name);
       assert.equal(outcome.value, 1, 'WAT test failed: ' + name);
       if (TARGETS.has(name)) numerics[name] = checkNumerics(name, outcome.numerics);
+      if (FORWARD_TARGETS.has(name)) forwardNumerics[name] = checkForwardNumerics(name, outcome.numerics);
       passed++;
     }
     assert.equal(Object.keys(numerics).length, TARGETS.size, 'missing numeric probes');
+    assert.equal(Object.keys(forwardNumerics).length, FORWARD_TARGETS.size, 'missing forward numeric probes');
     const report = {
       project_id: 'PC-BRANCH-WAT-SPANISH',
       native_engine: 'Node WebAssembly via WABT',
       source_sha256: crypto.createHash('sha256').update(fs.readFileSync(SOURCE)).digest('hex'),
       total: tests.length, passed, failed: tests.length - passed,
-      numeric_oracles: numerics
+      numeric_oracles: numerics,
+      forward_numeric_oracles: forwardNumerics
     };
     process.stdout.write(JSON.stringify(report, null, 2) + '\n');
   } finally {

@@ -655,4 +655,74 @@
     (call $discovery01_k3_backward_q2_neighbor (i32.const -1)))
   (func (export "test_discovery01_k3_backward_q2_n_plus_one") (result i32)
     (call $discovery01_k3_backward_q2_neighbor (i32.const 1)))
+
+  ;; Forward k=3, q=2/3: first=M-2, step=+1, x=M^3-M-2.
+  ;; q2 N0=x/2; q3 N0=floor(x/3). delta is -1, 0, +1.
+  ;; All arithmetic uses exact base-2^30 limbs, never a truncated i64.
+  (func $discovery01_k3_forward_q23_neighbor
+      (param $small_q i32) (param $delta i32) (result i32)
+    (call $init_constants)
+    ;; C = M^2 + M + 1.
+    (call $mul (global.get $TMP1) (global.get $M) (global.get $M))
+    (call $add (global.get $TMP1) (global.get $TMP1) (global.get $M))
+    (call $add_small (global.get $TMP1) (global.get $TMP1) (i32.const 1))
+    ;; A = (M-1)/q; the division quotient fits below M.
+    (call $sub_small (global.get $TERM) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.extend_i32_u (local.get $small_q)))
+    (call $divmod_q_lt_m (global.get $Q) (global.get $R)
+      (global.get $TERM) (global.get $TMP2))
+    (if (i32.ne (call $len (global.get $R)) (i32.const 0))
+      (then (return (i32.const 0))))
+    (call $mul (global.get $N) (global.get $Q) (global.get $TMP1))
+    ;; B = (M+q-1)/q. For M mod 6=1 this division is exact for q=2,3.
+    ;; N0=A*C-B=floor((M^3-M-2)/q), including q=3's remainder 1.
+    (call $add_small (global.get $TERM) (global.get $M)
+      (i32.sub (local.get $small_q) (i32.const 1)))
+    (call $from_u64 (global.get $TMP2) (i64.extend_i32_u (local.get $small_q)))
+    (call $divmod_q_lt_m (global.get $Q) (global.get $R)
+      (global.get $TERM) (global.get $TMP2))
+    (if (i32.ne (call $len (global.get $R)) (i32.const 0))
+      (then (return (i32.const 0))))
+    (call $sub (global.get $N) (global.get $N) (global.get $Q))
+    (if (i32.eq (local.get $delta) (i32.const -1))
+      (then (call $sub_small (global.get $N) (global.get $N) (i32.const 1)))
+      (else
+        (if (i32.eq (local.get $delta) (i32.const 1))
+          (then (call $add_small (global.get $N) (global.get $N) (i32.const 1))))))
+    (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 2))
+    (call $choose (global.get $FIRST) (i32.const 1)
+      (global.get $N) (global.get $RESULT))
+    ;; Expected x = SPACE-M-2, independently of the WIDE reconstruction.
+    (call $sub (global.get $TMP1) (global.get $SPACE) (global.get $M))
+    (call $sub_small (global.get $TMP1) (global.get $TMP1) (i32.const 2))
+    ;; Forward rejection: skip to 1; q3 delta=0 is still rejected by 1.
+    (if (i32.or (i32.eq (local.get $delta) (i32.const -1))
+        (i32.and (i32.eq (local.get $small_q) (i32.const 3))
+                 (i32.eqz (local.get $delta))))
+      (then
+        (return
+          (i32.and
+            (i32.eqz (call $cmp (global.get $WIDE) (global.get $ONE)))
+            (i32.eqz (call $cmp (global.get $RESULT) (global.get $ONE)))))))
+    (if (i32.ne (call $cmp (global.get $WIDE) (global.get $TMP1)) (i32.const 0))
+      (then (return (i32.const 0))))
+    (if (i32.and (i32.eq (local.get $small_q) (i32.const 2))
+                 (i32.eqz (local.get $delta)))
+      (then (return (i32.eqz (call $cmp (global.get $RESULT) (global.get $N))))))
+    (call $sub_small (global.get $TMP1) (global.get $N) (i32.const 2))
+    (i32.eqz (call $cmp (global.get $RESULT) (global.get $TMP1))))
+
+  (func (export "test_discovery01_k3_forward_q2_n_minus_one") (result i32)
+    (call $discovery01_k3_forward_q23_neighbor (i32.const 2) (i32.const -1)))
+  (func (export "test_discovery01_k3_forward_q2_exact_limit") (result i32)
+    (call $discovery01_k3_forward_q23_neighbor (i32.const 2) (i32.const 0)))
+  (func (export "test_discovery01_k3_forward_q2_n_plus_one") (result i32)
+    (call $discovery01_k3_forward_q23_neighbor (i32.const 2) (i32.const 1)))
+  (func (export "test_discovery01_k3_forward_q3_n_minus_one") (result i32)
+    (call $discovery01_k3_forward_q23_neighbor (i32.const 3) (i32.const -1)))
+  (func (export "test_discovery01_k3_forward_q3_floor_boundary") (result i32)
+    (call $discovery01_k3_forward_q23_neighbor (i32.const 3) (i32.const 0)))
+  (func (export "test_discovery01_k3_forward_q3_n_plus_one") (result i32)
+    (call $discovery01_k3_forward_q23_neighbor (i32.const 3) (i32.const 1)))
+
 )
