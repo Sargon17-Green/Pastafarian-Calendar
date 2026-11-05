@@ -27,6 +27,6 @@ No production call to any test-only `nr.*` oracle. Expected prefix uses only `nr
 2 invalid contexts: FAILED_VALIDATION and STONE_SERIES_ONLY; each must be unchanged = 2.
 Total 4 cases / 34 assertions.
 Required native test markers: STAGE_2_DISCOVERY_08_CASES_PASIS 4, STAGE_2_DISCOVERY_08_CHECKS_PASIS 34, STAGE_2_DISCOVERY_08_PASIS, NATIVE_STAGE_2_DISCOVERY_08_VERIFICATION=PASS.
-Time bound: D8 test <=420s; total job <=20 minutes, pinned UCBLogo 6.2.5; no unbounded attempts.
+Time bound (2026-11-05 CI robustness patch): D8 test <=650s; D7 regression <=650s; total job <=30 minutes, pinned UCBLogo 6.2.5; no unbounded attempts. Case BEGIN/END markers report progress without changing 34 assertions. Evidence basis: previous D7 completed 53/53 in ~251s at 3e56c8ab; unchanged D7 source/test timed out at 420s (exit124, run 41879013512/job 126746318536) on 34a966d9. D8 was skipped, not failed or accepted.
 Acceptance: completed SUCCESS Native Stage2 with exact real markers and D1–D7 regressions, plus Stage1 Native and Canonical Names on same implementation SHA. queued/in_progress != PASS. No reruns of prior passing SHA, no main/merge.
 After acceptance, derive next bounded visible extension toward 46, guided by real runtime evidence.

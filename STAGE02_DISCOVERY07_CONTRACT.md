@@ -89,8 +89,13 @@ Test markers:
 `STAGE_2_DISCOVERY_07_PASIS`;
 CI marker: `NATIVE_STAGE_2_DISCOVERY_07_VERIFICATION=PASS`.
 
-La D7 test step devas havar striktan `timeout` <= 420s, e job
-<= 20 minutes inkluzive pinita UCBLogo build. Nula endless search.
+La D7 test step devas havar striktan `timeout` <= 650s, e tota job
+<= 30 minutes inkluzive pinita UCBLogo build e D8. Nula endless search.
+La 2026-11-04 run 41879013512 job 126746318536 sur SHA 34a966d9
+finis per exit 124 pos 420s sen finala D7 markeri; antea la sama D7
+source/test sur 3e56c8ab finis 53/53 en circa 251s. Ca esas
+runtime-variance hard-timeout, NE pruvas algoritmo-manko; CASE_BEGIN/END
+markeri informas pri preciza progresi. Ca reviso NE deklaras PASS.
 Akcepto NUR per completed SUCCESS Native Stage2 log kun exacta
 markers, absento de failure/exception markers, e la D1–D6
 regressioni; completed SUCCESS Stage1 originala native tests e

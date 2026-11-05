@@ -40,6 +40,7 @@ to d8.check.values :i :actual :expected :tag
 end
 
 to d8.valid :calculation :target :tag
+  print sentence [STAGE_2_DISCOVERY_08_CASE_BEGIN] :tag
   localmake "before monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts :calculation :target))
   localmake "after monster.stage02.visible.prefix :before
   localmake "actual monster.context.get :after "visiblePrefix
@@ -62,11 +63,14 @@ to d8.valid :calculation :target :tag
   d8.require (equalp (monster.context.get :after "metrics) [stage02.dispatch stage02.counts stage02.stones stage02.hidden stage02.visible]) (list :tag [metrics])
   d8.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready stage02.hidden.ready stage02.visible.prefix.ready]) (list :tag [logs])
   d8.require (equalp (monster.stage02.visible.prefix :before) :after) (list :tag [determinism])
+  print sentence [STAGE_2_DISCOVERY_08_CASE_END] :tag
 end
 
 to d8.invalid :ctx :tag
+  print sentence [STAGE_2_DISCOVERY_08_CASE_BEGIN] :tag
   make "D8.CASES (:D8.CASES + 1)
   d8.require (equalp (monster.stage02.visible.prefix :ctx) :ctx) :tag
+  print sentence [STAGE_2_DISCOVERY_08_CASE_END] :tag
 end
 
 to stage02.discovery08.run

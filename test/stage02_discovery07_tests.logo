@@ -38,6 +38,7 @@ to d7.compare.seeds :position :actual :expected :tag
 end
 
 to d7.valid :calculation :target :tag
+  print sentence [STAGE_2_DISCOVERY_07_CASE_BEGIN] :tag
   localmake "countctx monster.stage02.workcounts :calculation :target
   localmake "before monster.stage02.stones :countctx
   localmake "after monster.stage02.hidden :before
@@ -58,11 +59,14 @@ to d7.valid :calculation :target :tag
   d7.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready stage02.hidden.ready]) (list :tag [logs])
   localmake "again monster.stage02.hidden :before
   d7.require (equalp :again :after) (list :tag [determinism])
+  print sentence [STAGE_2_DISCOVERY_07_CASE_END] :tag
 end
 
 to d7.invalid :ctx :tag
+  print sentence [STAGE_2_DISCOVERY_07_CASE_BEGIN] :tag
   make "D7.CASES (:D7.CASES + 1)
   d7.require (equalp (monster.stage02.hidden :ctx) :ctx) :tag
+  print sentence [STAGE_2_DISCOVERY_07_CASE_END] :tag
 end
 
 to stage02.discovery07.run

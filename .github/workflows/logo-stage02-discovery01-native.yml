@@ -14,7 +14,7 @@ permissions:
 jobs:
   native-stage-2-discovery-01:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Check out this branch
         uses: actions/checkout@v4
@@ -226,7 +226,7 @@ jobs:
         run: |
           set -euo pipefail
           log="$RUNNER_TEMP/stage02-discovery07.log"
-          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 420s \
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 650s \
             stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery07_tests.logo >"$log" 2>&1; then
             cat "$log"
           else
@@ -249,7 +249,7 @@ jobs:
         run: |
           set -euo pipefail
           log="$RUNNER_TEMP/stage02-discovery08.log"
-          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 420s \
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 650s \
             stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery08_tests.logo >"$log" 2>&1; then
             cat "$log"
           else
