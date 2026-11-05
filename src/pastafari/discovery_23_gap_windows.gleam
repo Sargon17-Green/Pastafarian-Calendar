@@ -20,10 +20,7 @@ pub fn dispatch_discovery_23(
   windows: List(#(Int, Int)),
 ) -> Result(List(WindowTotal), Discovery23Error) {
   case
-    discovery_22_gap_prefixes.dispatch_discovery_22(
-      context,
-      requested_bowl_ids,
-    )
+    discovery_22_gap_prefixes.dispatch_discovery_22(context, requested_bowl_ids)
   {
     Error(error) -> Error(Upstream(error))
     Ok(batch) -> {

@@ -63,15 +63,16 @@ pub fn discovery_23_empty_invalid_context_zero_window_test() {
   let invalid =
     bootstrap.MonsterContext(..bootstrap.new_context(11, 21), retry_budget: -1)
   discovery_23_gap_windows.dispatch_discovery_23(invalid, [], [#(0, 0)])
-  |> should.equal(Ok([
-    discovery_23_gap_windows.WindowTotal(start: 0, end: 0, total: 0),
-  ]))
+  |> should.equal(
+    Ok([
+      discovery_23_gap_windows.WindowTotal(start: 0, end: 0, total: 0),
+    ]),
+  )
 }
 
 pub fn discovery_23_empty_edges_of_nonempty_list_test() {
   check_valid(11, 21, [1, 2, 3, 4], [#(0, 0), #(4, 4)])
-  let assert Ok(got) =
-    windows(11, 21, [1, 2, 3, 4], [#(0, 0), #(4, 4)])
+  let assert Ok(got) = windows(11, 21, [1, 2, 3, 4], [#(0, 0), #(4, 4)])
   list.map(got, fn(item) { item.total }) |> should.equal([0, 0])
 }
 
@@ -95,8 +96,7 @@ pub fn discovery_23_each_single_sample_test() {
 
 pub fn discovery_23_disjoint_windows_sum_to_whole_test() {
   let ids = [2, 4, 6, 1]
-  let assert Ok(got) =
-    windows(11, 21, ids, [#(0, 2), #(2, 4), #(0, 4)])
+  let assert Ok(got) = windows(11, 21, ids, [#(0, 2), #(2, 4), #(0, 4)])
   let assert [left, right, whole] = got
   left.total + right.total |> should.equal(whole.total)
   check_valid(11, 21, ids, [#(0, 2), #(2, 4), #(0, 4)])
@@ -123,28 +123,20 @@ pub fn discovery_23_duplicate_windows_preserved_test() {
 
 pub fn discovery_23_negative_start_is_error_test() {
   windows(11, 21, [1, 2, 3], [#(-1, 0)])
-  |> should.equal(Error(discovery_23_gap_windows.InvalidWindow(
-    start: -1,
-    end: 0,
-    size: 3,
-  )))
+  |> should.equal(
+    Error(discovery_23_gap_windows.InvalidWindow(start: -1, end: 0, size: 3)),
+  )
 }
 
 pub fn discovery_23_out_of_range_and_reversed_errors_test() {
   let bad_end =
-    Error(discovery_23_gap_windows.InvalidWindow(
-      start: 0,
-      end: 4,
-      size: 3,
-    ))
+    Error(discovery_23_gap_windows.InvalidWindow(start: 0, end: 4, size: 3))
   windows(11, 21, [1, 2, 3], [#(0, 4), #(2, 1)])
   |> should.equal(bad_end)
   windows(11, 21, [1, 2, 3], [#(2, 1), #(0, 4)])
-  |> should.equal(Error(discovery_23_gap_windows.InvalidWindow(
-    start: 2,
-    end: 1,
-    size: 3,
-  )))
+  |> should.equal(
+    Error(discovery_23_gap_windows.InvalidWindow(start: 2, end: 1, size: 3)),
+  )
 }
 
 pub fn discovery_23_upstream_priority_over_window_test() {
@@ -156,14 +148,14 @@ pub fn discovery_23_upstream_priority_over_window_test() {
   windows(11, 21, [0, 1], []) |> should.equal(bad)
   let invalid =
     bootstrap.MonsterContext(..bootstrap.new_context(11, 21), retry_budget: -1)
-  discovery_23_gap_windows.dispatch_discovery_23(
-    invalid,
-    [0, 1],
-    [#(-1, 8)],
+  discovery_23_gap_windows.dispatch_discovery_23(invalid, [0, 1], [#(-1, 8)])
+  |> should.equal(
+    Error(
+      discovery_23_gap_windows.Upstream(
+        discovery_19_interval_value.InvalidContext(bootstrap.InvalidRetryBudget),
+      ),
+    ),
   )
-  |> should.equal(Error(discovery_23_gap_windows.Upstream(
-    discovery_19_interval_value.InvalidContext(bootstrap.InvalidRetryBudget),
-  )))
 }
 
 pub fn discovery_23_large_days_context_and_bounded_oracle_test() {
