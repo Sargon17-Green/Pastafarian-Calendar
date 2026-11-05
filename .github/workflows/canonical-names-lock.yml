@@ -1947,6 +1947,7 @@ jobs:
           set -euo pipefail
           mkdir -p build
           printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage40-native.log
+          node test/stage40_oracle_verifier.mjs 2>&1 | tee -a build/stage40-native.log
           compile_sources=(
             test/stage40_discovery_tests.cob
             src/big_integer.cob
