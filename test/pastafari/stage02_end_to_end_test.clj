@@ -5,6 +5,7 @@
             [pastafari.doeljaar :as zoeken]
             [pastafari.datumprojectie :as projectie]
             [pastafari.maandrang :as rang]
+            [pastafari.maandweving :as weving]
             [pastafari.maandlengtes :as lengtes]
             [pastafari.maandprofiel :as budgetprofiel]
             [pastafari.normative-oracle :as orakel]))
@@ -346,6 +347,112 @@
           (is (= :target-not-second-day-of-year code)))))))
 
 
+
+;; DIAG07: zelfstandige insertion-oracle voor exact de eerste drie
+;; maandsymbolen. De productie telt resttoestanden; hier tellen we
+;; juist combinatorisch de manieren om elke nog ongeopende maand in
+;; bestaande, correct sluitende suffixen in te voegen.
+(def ^:private derde-prefix-opties
+  [[1N 1N 1N] [1N 1N 2N] [1N 2N 1N]
+   [1N 2N 2N] [1N 2N 3N]])
+
+(defn- insertion-binomial [n k]
+  (let [klein (min k (- n k))]
+    (loop [j 1N antwoord 1N]
+      (if (> j klein)
+        antwoord
+        (recur (inc j)
+               (quot (*' antwoord (+' (-' n klein) j)) j))))))
+
+(defn- onafhankelijke-prefix-telling [lengten letters]
+  (let [origineel (mapv bigint lengten)
+        start {:rest origineel :geopend 0}
+        na-prefix
+        (reduce
+         (fn [staat maand]
+           (let [{:keys [rest geopend]} staat
+                 index (dec (int maand))]
+             (if (and (<= 0 index) (< index (count rest))
+                      (<= maand (inc geopend))
+                      (pos? (nth rest index))
+                      (or (< (nth rest index) (nth origineel index))
+                          (= maand (inc geopend))))
+               {:rest (update rest index dec)
+                :geopend (max geopend (int maand))}
+               (reduced nil))))
+         start letters)]
+    (if (nil? na-prefix)
+      0N
+      (let [{:keys [rest geopend]} na-prefix
+            ;; Elke maand telt minstens vier dagen: in drie symbolen
+            ;; kan nog geen maand gesloten zijn.
+            actief (subvec rest 0 geopend)
+            basis
+            (reduce (fn [{:keys [dagen telling]} a]
+                      (let [nieuw (+' dagen a)]
+                        {:dagen nieuw
+                         :telling (if (zero? dagen)
+                                    telling
+                                    (*' telling
+                                        (insertion-binomial (dec nieuw)
+                                                            (dec a))))}))
+                    {:dagen 0N :telling 1N}
+                    actief)
+            dagen (int (:dagen basis))
+            initiële-histogram
+            (assoc (vec (repeat (inc dagen) 0N))
+                   0 (:telling basis))]
+        (loop [histogram initiële-histogram
+               volgende-maanden (seq (subvec rest geopend))]
+          (if (nil? volgende-maanden)
+            (reduce +' 0N histogram)
+            (let [b (first volgende-maanden)
+                  n (dec (count histogram))
+                  ;; C(b+t-2,t) telt verdelingen van de b nieuwe
+                  ;; letters, met minstens één letter in de slotgleuf.
+                  coëfficiënten
+                  (loop [t 0N w 1N uit [1N]]
+                    (if (= t n)
+                      uit
+                      (let [nieuw (quot (*' w (+' b t -1N))
+                                        (inc t))]
+                        (recur (inc t) nieuw (conj uit nieuw)))))
+                  nieuw-histogram
+                  (loop [j 0 cumul 0N uit [0N]]
+                    (if (> j n)
+                      uit
+                      (let [som (+' cumul (nth histogram j))]
+                        (recur (inc j) som
+                               (conj uit
+                                     (*' som
+                                         (nth coëfficiënten (- n j))))))))]
+              (recur nieuw-histogram
+                     (next volgende-maanden)))))))))
+
+(deftest derde-prefix-insertion-oracle-kleine-families
+  (testing "Brute lexicografische woorden versus andere invoeg-formule."
+    (doseq [[lengten totaal]
+            [[[4 4] 20N] [[4 4 4] 1301N]
+             [[4 5 4] 3499N] [[5 4 4] 3101N]]
+            :let [familie (orakel/weaving-family lengten)
+                  woorden (map #((:unrank1 familie) %)
+                              (range 1 (inc totaal)))
+                  aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                                  derde-prefix-opties)]]
+      (is (= totaal ((:count familie))))
+      (is (= totaal (reduce +' 0N aantallen)))
+      (doseq [[letters aantal] (map vector derde-prefix-opties aantallen)]
+        (is (= aantal
+               (count (filter #(= letters (mapv bigint (take 3 %)))
+                              woorden)))
+            (str "insertion-oracle mismatch " lengten " " letters))))
+    ;; Vaste onafhankelijke Python-enumeratie van 177260 grote woorden.
+    ;; Geen tijdrovende 177260 maal volledige Clojure-unranking.
+    (let [aantallen (mapv #(onafhankelijke-prefix-telling [4 4 4 4] %)
+                          derde-prefix-opties)]
+      (is (= [10604N 39396N 39396N 26264N 61600N] aantallen))
+      (is (= 177260N (reduce +' 0N aantallen))))))
+
 ;; DIAG06: de onafhankelijke normatieve oracle bouwt volledige KLEINE
 ;; wevingen. De productie telt slechts de eerste drie rangposities.
 
@@ -401,8 +508,8 @@
     (is (= :invalid-weaving-rank (fout [4 4 4] 0N 5000000N)))
     (is (= :invalid-weaving-budget (fout [4 4 4] 1N 5000001N)))))
 
-(deftest echte-derde-jaardag-met-deels-onafhankelijke-oracle
-  (testing "Drie echte rekendagen: vijf velden, onafhankelijke jaar-/naamkeuze, geen volledige maandweving."
+(deftest echte-derde-jaardag-met-onafhankelijke-prefix-oracle
+  (testing "Drie echte rekendagen: onafhankelijke maand-ID, rang, vijf velden en geen volledige weving."
     (doseq [berekening [dagen/stichtingsdag
                        (+' dagen/stichtingsdag 17N)
                        (-' dagen/stichtingsdag 23N)]]
@@ -425,12 +532,35 @@
             norm-kotelet (some #(when (<= (:first-day %) derde (:last-day %)) %)
                                koteletten)
             norm-maand-aantal (orakel/choose-month-count saus normjaar)
+            norm-lengten (orakel/choose-month-lengths
+                          saus normjaar norm-maand-aantal)
             norm-namen (orakel/choose-month-names saus norm-maand-aantal)
+            prefix-aantallen
+            (mapv #(onafhankelijke-prefix-telling norm-lengten %)
+                  derde-prefix-opties)
+            norm-totaal (reduce +' 0N prefix-aantallen)
+            norm-rang (orakel/choose-rank
+                       (orakel/ask-bowl saus 4 orakel/seal-month-weaving)
+                       norm-totaal)
+            norm-prefix
+            (loop [r norm-rang keuzes derde-prefix-opties
+                   aantallen prefix-aantallen]
+              (if (empty? keuzes)
+                (throw (ex-info "Geen normatieve derde-prefix bij rang."
+                                {:code :oracle-third-prefix-not-found}))
+                (let [blok (first aantallen)]
+                  (if (> r blok)
+                    (recur (-' r blok) (rest keuzes) (rest aantallen))
+                    (first keuzes)))))
+            norm-maand (peek norm-prefix)
             verwacht [(:number normjaar)
                       (:name-index norm-kotelet)
                       (inc (-' derde (:first-day norm-kotelet)))
-                      (nth norm-namen (dec (int maand)))
-                      (bigint (count (filter #(= maand %) prefix)))]]
+                      (nth norm-namen (dec (int norm-maand)))
+                      (bigint (count (filter #(= norm-maand %) norm-prefix)))]]
+        (is (= norm-prefix prefix))
+        (is (= norm-totaal (weving/aantal-wevingen-groot norm-lengten)))
+        (is (<= 1N norm-rang norm-totaal))
         (is (= verwacht vijf))
         (is (= 3 (count prefix)))
         (is (= 1N (first prefix)))
