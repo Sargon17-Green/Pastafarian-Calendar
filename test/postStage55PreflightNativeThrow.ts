@@ -16,6 +16,12 @@ let nativeCompletions = 0;
 let observedFaultWrites = 0;
 let propagated = false;
 let recovered = false;
+// A callback mutates these counters; reading through a function prevents
+// TypeScript from freezing their control-flow types at a prior assertion.
+function readNativeCounts(): Readonly<{ entries: number; completions: number; faultWrites: number }> {
+  return { entries: nativeEntries, completions: nativeCompletions, faultWrites: observedFaultWrites };
+}
+
 
 Patch11OrderLatchHandler.prototype.run = function (...args: Parameters<typeof originalRun>) {
   nativeEntries++;
@@ -51,8 +57,9 @@ try {
   } catch (error) { retryError = error; }
   // One real gap is at most 963 days, less than the required 5782-day
   // radius; retry therefore runs once and exhausts its one-step budget.
-  recovered = retryError instanceof MonsterValidationError && nativeEntries === 2 &&
-    nativeCompletions === 1 && observedFaultWrites === 46;
+  const retryCounts = readNativeCounts();
+  recovered = retryError instanceof MonsterValidationError && retryCounts.entries === 2 &&
+    retryCounts.completions === 1 && retryCounts.faultWrites === 46;
   requireTrue(recovered, "clean retry must complete one fresh Native call, then reject budget");
 } finally {
   Patch11OrderLatchHandler.prototype.run = originalRun;
