@@ -73,6 +73,35 @@ jobs:
           test "$passed" -eq 7
           echo 'STAGE01_NORMATIVE_DIRECT_EXTERNAL_MATCH=7/7 CASES; 35/35 EXACT FIELDS'
           echo 'Original normative_calendar_date: 7/7 Python-verified cases, 35/35 exact fields; not full Stage1 acceptance.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Compile original normative same-process cache-reuse probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build \
+            test/stage01_normative_cache_reuse_probe.f90 \
+            build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o build/normative_oracle_calendar.o \
+            -o build/stage01_normative_cache_reuse_probe
+          test -x build/stage01_normative_cache_reuse_probe
+      - name: Gate two original same-process A-B-A / B-A-B sequences (30 exact fields)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for mode in forward reverse; do
+            set +e
+            output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 95s build/stage01_normative_cache_reuse_probe "$mode") 2>&1)"
+            exit_code=$?
+            set -e
+            printf '%s\n' "$output"
+            echo "STAGE01_NORMATIVE_CACHE_RUN MODE=$mode EXIT=$exit_code LIMIT=95 MEMORY_KIB=1048576"
+            if [[ "$exit_code" -ne 0 ]] ||
+               ! grep -Fxq "STAGE01_NORMATIVE_CACHE_PASS MODE=$mode CALLS=3 MATCHED_FIELDS=15/15" <<< "$output"; then
+              echo "::error::Same-process original normative cache reuse failed or timed out: $mode"
+              exit 1
+            fi
+          done
+          echo 'STAGE01_NORMATIVE_CACHE_TOTAL=2/2 SEQUENCES; 30/30 EXACT FIELDS'
+          echo 'Original normative date same-process cache reuse: 2/2 sequences, 30/30 pinned exact fields. Not full Stage1 acceptance.' >> "$GITHUB_STEP_SUMMARY"
   native-compile:
     runs-on: ubuntu-24.04
     timeout-minutes: 8
