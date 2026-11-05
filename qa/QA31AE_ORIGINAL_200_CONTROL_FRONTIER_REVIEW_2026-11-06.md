@@ -33,12 +33,13 @@ Exactly 100 distinct input cases visited each of the 12 observed source sites on
 
 **These are not globally unreachable proofs.** This audit executes neither new Native nor CI, and claims no Stage1 PASS, no global input ownership, no full functional/geometric acceptance, no merge/main or Stage2.
 
-## Permanent reproducible evidence
+## Reproducible evidence — conversation attachment
 
-The separate Library artifact
-`/Befunge_QA_Artifacts/QA31AE_BEFUNGE98_KYRGYZ_ORIGINAL_200_CONTROL_FRONTIER_20261106.zip`
-SHA256 `21e16bd57029e79aa9b701086963a2263406e10355de05e34ab00e7289db49ae` (46,455,068 bytes)
-contains the original frozen QA31Y ZIP, standalone Python primary runner, separately implemented Python independent auditor, Windows batch launcher, source pin, matrix CSV, site summaries, physical predecessor CSV, result JSON files, SHA256 manifest, and extended contract. Both Python auditors executed locally, and package ZIP CRC and Python syntax checked.
+A 46,455,068-byte reproducible ZIP was created for delivery as a conversation file:
+`QA31AE_BEFUNGE98_KYRGYZ_ORIGINAL_200_CONTROL_FRONTIER_20261106.zip`
+SHA256 `21e16bd57029e79aa9b701086963a2263406e10355de05e34ab00e7289db49ae`. It contains the frozen original QA31Y ZIP, independent Python auditors, Windows launcher, 200×15 CSV, source-site snapshot, observed physical predecessor CSV, JSON outputs and contract. The local auditors executed successfully, the ZIP CRC is valid and both scripts compile.
+
+**Persistence scope:** This report is committed to GitHub. The reproducible ZIP exists as a downloadable conversation attachment. An attempted upload of the ZIP to the Library `/Befunge_QA_Artifacts/` failed with `container_session_unavailable`; do NOT infer the Library copy exists. The user's existing original QA31Y evidence archive remains separately available in Drive.
 
 ## NEXT: QA31AF (bounded, independently specified)
 
