@@ -944,3 +944,24 @@ STAGE40_IMPLEMENTATION=NOT_STARTED
 STAGE40_NATIVE=NOT_RUN_NOT_ACCEPTED
 STAGE40_EXPECTED_RED=UNDETERMINED_UNTIL_REPRODUCTION
 STAGE40_FULL_CALENDAR_INTEGRATION=NOT_YET_AVAILABLE
+# Stage40 / DISCOVERY36 implementation prepared (2026-11-05)
+# Test-only three concurrently owned outputs A/B/C: free B first;
+# validate A/C unchanged; recreate B while A/C live; free C/A/B;
+# assert metadata, exact text, disjoint heads and measured heap zero.
+# Input pairs are generated from this branch's own deterministic matrix.
+# Independent source-parsing BigInt oracle verifies exact decimal
+# literal construction against a separate closed form (72 of 72).
+# The eleven required Native value gates, bounded compile/run timeouts,
+# evidence upload and strict -Werror remain REQUIRED for acceptance.
+# These changes do not establish Native PASS or a reproduced defect.
+STAGE40_STARTED=YES
+STAGE40_KIND=DISCOVERY36
+STAGE40_TEST=test/stage40_discovery_tests.cob
+STAGE40_INDEPENDENT_ORACLE=test/stage40_oracle_verifier.mjs
+STAGE40_WORKFLOW=.github/workflows/canonical-names-lock.yml
+STAGE40_IMPLEMENTATION=24_TRIPLE_LIVE_NONLIFO_RELEASE_REBUILD_TEST_ONLY
+STAGE40_STATIC_PREFLIGHT=72_OF_72_INDEPENDENT_BIGINT_VS_CLOSED_FORM_24_UNIQUE_6_AT_8192
+STAGE40_NATIVE=AWAITING_EXACT_SHA_CI_NOT_ACCEPTED
+STAGE40_EXPECTED_RED=UNDETERMINED_UNTIL_REPRODUCTION
+STAGE40_PRODUCTION_CHANGE=NONE
+STAGE40_FULL_CALENDAR_INTEGRATION=NOT_YET_AVAILABLE
