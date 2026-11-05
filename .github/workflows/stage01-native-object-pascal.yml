@@ -62,6 +62,8 @@ jobs:
             divmod_long_status=$?
             sh build_and_run_bigint_regular_mod_signed.sh
             regular_mod_signed_status=$?
+            sh build_and_run_bigint_multiply_long.sh
+            multiply_long_status=$?
             echo "STAGE01_EXIT=$stage01_status"
             echo "CUTLET_BOUNDS_EXIT=$cutlet_status"
             echo "COMPOSITION_BOUNDS_EXIT=$composition_status"
@@ -73,7 +75,8 @@ jobs:
             echo "BIGINT_SCALAR_SQUARE_EXIT=$scalar_square_status"
             echo "BIGINT_DIVMOD_LONG_EXIT=$divmod_long_status"
             echo "BIGINT_REGULAR_MOD_SIGNED_EXIT=$regular_mod_signed_status"
-            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ] || [ "$bigint_status" -ne 0 ] || [ "$divmod_status" -ne 0 ] || [ "$signed_status" -ne 0 ] || [ "$input_contract_status" -ne 0 ] || [ "$conversion_status" -ne 0 ] || [ "$scalar_square_status" -ne 0 ] || [ "$divmod_long_status" -ne 0 ] || [ "$regular_mod_signed_status" -ne 0 ]; then
+            echo "BIGINT_MULTIPLY_LONG_EXIT=$multiply_long_status"
+            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ] || [ "$bigint_status" -ne 0 ] || [ "$divmod_status" -ne 0 ] || [ "$signed_status" -ne 0 ] || [ "$input_contract_status" -ne 0 ] || [ "$conversion_status" -ne 0 ] || [ "$scalar_square_status" -ne 0 ] || [ "$divmod_long_status" -ne 0 ] || [ "$regular_mod_signed_status" -ne 0 ] || [ "$multiply_long_status" -ne 0 ]; then
               exit 1
             fi
           } 2>&1 | tee evidence/stage01-native-fpc.log
