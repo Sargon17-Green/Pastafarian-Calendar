@@ -15,6 +15,12 @@ const TARGETS = new Map([
   ['test_discovery01_k3_backward_q3_exact_limit', {q: 3n, delta: 0n}],
   ['test_discovery01_k3_backward_q3_n_plus_one', {q: 3n, delta: 1n}]
 ]);
+const SHORT_TARGETS = new Map([
+  ['test_discovery01_short_q2_m_backward_limit', {q: 2n, step: -1, first: 'm'}],
+  ['test_discovery01_short_q2_m_forward_wrap', {q: 2n, step: 1, first: 'm'}],
+  ['test_discovery01_short_q1_above_half_forward_wrap', {q: 1n, step: 1, first: 'm'}],
+  ['test_discovery01_short_q1_above_half_at_limit', {q: 1n, step: -1, first: 'n'}]
+]);
 const FORWARD_TARGETS = new Map([
   ['test_discovery01_k3_forward_q2_n_minus_one', {q: 2n, delta: -1n}],
   ['test_discovery01_k3_forward_q2_exact_limit', {q: 2n, delta: 0n}],
@@ -46,7 +52,7 @@ function child(file, name) {
   assert.equal(typeof instance.exports[name], 'function', 'missing export');
   const value = instance.exports[name]();
   const record = {name, value};
-  if (TARGETS.has(name) || FORWARD_TARGETS.has(name)) {
+  if (TARGETS.has(name) || FORWARD_TARGETS.has(name) || SHORT_TARGETS.has(name)) {
     const mem = instance.exports.memory;
     assert.ok(mem instanceof WebAssembly.Memory, 'missing memory export');
     record.numerics = {};
@@ -119,6 +125,23 @@ function checkForwardNumerics(name, values) {
     rejection_steps: x > limit ? (space - x + 1n).toString() : '0'
   };
 }
+function checkShortNumerics(name, values) {
+  assert.ok(SHORT_TARGETS.has(name), 'unexpected short target');
+  const {q: expectedQ, first: source, step} = SHORT_TARGETS.get(name);
+  const n = expectedQ === 2n ? (M - 1n) / 2n : (M + 1n) / 2n;
+  const first = source === 'n' ? n : M;
+  const q = M / n, limit = q * n;
+  const accepted = first <= limit ? first : (step === 1 ? 1n : limit);
+  const rank = ((accepted - 1n) % n) + 1n;
+  assert.equal(q, expectedQ);
+  assert.equal(M - limit, q === 2n ? 1n : n - 1n);
+  assert.equal(rank, source === 'n' || step === -1 ? n : 1n);
+  for (const [key, value] of Object.entries({M, N: n, LIMIT: limit, RESULT: rank})) {
+    assert.equal(BigInt(values[key]), value, name + ': ' + key);
+  }
+  return {name, q: q.toString(), n: n.toString(), first: first.toString(),
+    step, limit: limit.toString(), rank: rank.toString()};
+}
 function main() {
   if (process.argv[2] === '--one') {
     child(process.argv[3], process.argv[4]);
@@ -136,13 +159,15 @@ function main() {
     const tests = WebAssembly.Module.exports(mod)
       .filter(e => e.kind === 'function' && e.name.startsWith('test_'))
       .map(e => e.name).sort();
-    assert.equal(tests.length, 39, 'unexpected regression set size');
-    assert.equal(new Set(tests).size, 39, 'duplicate export');
+    assert.equal(tests.length, 43, 'unexpected regression set size');
+    assert.equal(new Set(tests).size, 43, 'duplicate export');
     for (const name of TARGETS.keys()) assert.ok(tests.includes(name), 'missing target: ' + name);
     for (const name of FORWARD_TARGETS.keys()) assert.ok(tests.includes(name), 'missing forward target: ' + name);
+    for (const name of SHORT_TARGETS.keys()) assert.ok(tests.includes(name), 'missing short target: ' + name);
     let passed = 0;
     const numerics = {};
     const forwardNumerics = {};
+    const shortNumerics = {};
     for (const name of tests) {
       const p = spawnSync(process.execPath, [__filename, '--one', compiled, name],
         {encoding: 'utf8', timeout: 30000, maxBuffer: 1000000});
@@ -154,17 +179,20 @@ function main() {
       assert.equal(outcome.value, 1, 'WAT test failed: ' + name);
       if (TARGETS.has(name)) numerics[name] = checkNumerics(name, outcome.numerics);
       if (FORWARD_TARGETS.has(name)) forwardNumerics[name] = checkForwardNumerics(name, outcome.numerics);
+      if (SHORT_TARGETS.has(name)) shortNumerics[name] = checkShortNumerics(name, outcome.numerics);
       passed++;
     }
     assert.equal(Object.keys(numerics).length, TARGETS.size, 'missing numeric probes');
     assert.equal(Object.keys(forwardNumerics).length, FORWARD_TARGETS.size, 'missing forward numeric probes');
+    assert.equal(Object.keys(shortNumerics).length, SHORT_TARGETS.size, 'missing short numeric probes');
     const report = {
       project_id: 'PC-BRANCH-WAT-SPANISH',
       native_engine: 'Node WebAssembly via WABT',
       source_sha256: crypto.createHash('sha256').update(fs.readFileSync(SOURCE)).digest('hex'),
       total: tests.length, passed, failed: tests.length - passed,
       numeric_oracles: numerics,
-      forward_numeric_oracles: forwardNumerics
+      forward_numeric_oracles: forwardNumerics,
+      short_numeric_oracles: shortNumerics
     };
     process.stdout.write(JSON.stringify(report, null, 2) + '\n');
   } finally {
