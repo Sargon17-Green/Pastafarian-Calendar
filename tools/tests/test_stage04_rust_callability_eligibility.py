@@ -90,6 +90,17 @@ class CallabilityTests(unittest.TestCase):
         with self.assertRaises(ProvenanceError):
             self.check()
 
+    def test_template_placeholders_preserve_rust_identifiers(self):
+        # Regression: number placeholders must resolve before crate/symbol insertion.
+        for tag in ("FM", "FF", "FP", "FM_FF_FP"):
+            with self.subTest(tag=tag):
+                symbol = "old_" + tag + "_probe"
+                self.assertEqual(validated_symbol("src/lib.rs", symbol), symbol)
+                body = test_body("crate_FM_FF_FP", symbol)
+                self.assertIn("crate_FM_FF_FP::" + symbol + ";", body)
+                for value in (-15055672, -15055671, -15055670):
+                    self.assertIn("BigInt::from(" + str(value) + ")", body)
+
     def test_probe_binds_original_function_type(self):
         s = test_body("synthetic_rust_daytag", "old_numeric_probe")
         self.assertIn("let old: fn(&BigInt) -> BigInt = synthetic_rust_daytag::old_numeric_probe;", s)

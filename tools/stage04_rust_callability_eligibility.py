@@ -59,8 +59,9 @@ fn historical_rust_daytag_callable() {
     let c = old(&BigInt::from(FP));
     println!("STAGE04_OLD_RUST_CALLABILITY_OUTPUT={},{},{}", a,b,c);
 }
-'''.replace("CRATE", crate).replace("SYMBOL", symbol)
-       .replace("FM", str(F - 1)).replace("FF", str(F)).replace("FP", str(F + 1)))
+'''.replace("FM", str(F - 1)).replace("FF", str(F))
+       .replace("FP", str(F + 1)).replace("CRATE", crate)
+       .replace("SYMBOL", symbol))
 
 def archive(repo: Path, commit: str, dest: Path) -> None:
     try:
