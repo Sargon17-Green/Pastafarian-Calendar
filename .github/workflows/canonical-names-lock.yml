@@ -1925,3 +1925,55 @@ jobs:
           path: build/stage39-native.log
           if-no-files-found: warn
           retention-days: 30
+
+  stage40-triple-output-nonlifo-discovery-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Strict compile and run bounded Stage40 triple-output non-LIFO isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage40-native.log
+          compile_sources=(
+            test/stage40_discovery_tests.cob
+            src/big_integer.cob
+            src/monster_distance.cob
+            src/legacy_distance.cob
+            src/patched_day_tag.cob
+            src/patched_distance.cob
+          )
+          timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage40-triple-output-nonlifo "${compile_sources[@]}" 2>&1 | tee -a build/stage40-native.log
+          timeout --signal=TERM --kill-after=10s 120s ./build/stage40-triple-output-nonlifo 2>&1 | tee -a build/stage40-native.log
+          grep -Eq '^STAGE40_INITIAL_OUTPUTS=[[:space:]]*0*24[[:space:]]*$' build/stage40-native.log
+          grep -Eq '^STAGE40_TRIPLE_LIVE=[[:space:]]*0*24[[:space:]]*$' build/stage40-native.log
+          grep -Eq '^STAGE40_MIDDLE_RELEASE_ISOLATED=[[:space:]]*0*24[[:space:]]*$' build/stage40-native.log
+          grep -Eq '^STAGE40_MIDDLE_REBUILT=[[:space:]]*0*24[[:space:]]*$' build/stage40-native.log
+          grep -Eq '^STAGE40_NONLIFO_CLEANUP=[[:space:]]*0*24[[:space:]]*$' build/stage40-native.log
+          grep -Eq '^STAGE40_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage40-native.log
+          grep -Eq '^STAGE40_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage40-native.log
+          grep -Eq '^STAGE40_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage40-native.log
+          grep -Fxq 'STAGE40_HEAP_MEASURED=YES' build/stage40-native.log
+          grep -Eq '^STAGE40_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage40-native.log
+          grep -Fxq 'RESULT=PASS_STAGE40_TRIPLE_OUTPUT_NONLIFO_DISCOVERY_NATIVE' build/stage40-native.log
+          echo 'STAGE40_NATIVE_GATE=PASS' | tee -a build/stage40-native.log
+      - name: Preserve Stage40 log including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage40-triple-output-nonlifo-evidence
+          path: build/stage40-native.log
+          if-no-files-found: warn
+          retention-days: 30
