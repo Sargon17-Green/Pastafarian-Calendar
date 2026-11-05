@@ -13,9 +13,12 @@ Invoke public Ada Calendar_Date on each pair and compare all five numeric fields
 - Strict comparator: exactly 25 unique ordered expected pair records, reject missing, extra, malformed or duplicate keys or marker; **125 numerical scalar equalities**.
 - Bounded Python preflight 180s, GNAT Native executable 600s, Python comparison 180s, CI job 15 minutes. Nonzero failure exit on error.
 
-## Acceptance — PENDING
+## Acceptance — ACCEPTED (bounded)
 Require exact-stage-SHA automatic push CI **completed/success in 27/27 jobs**, including verify and native-stage25-limit-one, GNAT13 compile/bind/link and markers:
 `STAGE25_INDEPENDENT_LIMIT_ONE_SELFTEST_ASSERTIONS=139`
 `STAGE25_NATIVE_LIMIT_ONE_ASSERTIONS=131`
 `STAGE25_REAL_FIVEFIELD_SCALARS=125`
 Static QA, queued or in_progress CI do not establish Native PASS. No main/merge/publication.
+
+## Observed completion (2026-11-05)
+Exact SHA `d2df47c6939d9ff242c512283fa3683fc7b3b259`; push CI [41979143455](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41979143455) completed/success attempt 1, 27/27 jobs (including verify and native-stage25-limit-one, job 127084924412). Native log GNATMAKE 13.3.0, gcc-13, gnatbind-13 and gnatlink-13; all 25 unique ordered records; exact Python/Native/differential markers 139/131/125. Bounded acceptance only, not universal proof.

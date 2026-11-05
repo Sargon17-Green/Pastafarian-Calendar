@@ -1,0 +1,14 @@
+# Stage26/DISCOVERY23 — independent ±5778 / ±2 five-field real-date differential
+
+Stage25 predecessor: exact SHA `d2df47c6939d9ff242c512283fa3683fc7b3b259`, [CI 41979143455](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41979143455) completed/success 27/27; direct GNAT13 log and exact 139/131/125 count markers, 25 ordered records.
+
+## Scope and novelty
+Let F=Foundation_Day. Test row-major pairs (F+c,F+t), each axis {-5778,-2,0,+2,+5778}. Union of prior Stage15,16,17 and 18 (asymmetric), Stage20–25 (Stage19 subset of 20) accounts for 9 regression pairs on {-5778,0,+5778}². Exactly 16 ordered combinations having ±2 on at least one axis are new. Python asserts explicit novel pair fixture against prior-matrix set subtraction; no defect is presumed.
+
+## Inputs, oracle, limits
+Public Ada Normative_Oracle.Calendar_Date supplies actual fields. Independent source-derived Python stage14_real_oracle.date supplies expected year/cutlet/cutlet_day/month/month_day. All five components must match numerically for all 25 unique ordered pairs. No expected values are taken from Native output or other branches. Domains year 4900..5100, cutlet 1..17, cutlet_day 1..5778, month 1..47, month_day 1..123. Exact center anchor (5000,10,503,30,52); repeat pivot (F-5778,F+2). No monotonicity assumption.
+
+Python selftest: uniqueness 1 + explicit coverage 1 + norms 2 + 25×5 domains 125 + repeat 5 + center 5 = **139**. Ada Native: 25×5 domains + 5 repeat + center-year 1 = **131**. Strict differential comparator: one exact Native marker, exactly 25 correctly formed unique ordered pair records, no extra/missing/duplicate pair, 25×5 = **125 numerical scalar equalities**. Python timeout 180s each, executable timeout 600s, CI timeout 15 minutes, nonzero exit on mismatch.
+
+## Acceptance — PENDING
+Require same-SHA automatic push CI completed/success **28/28 jobs** including verify and native-stage26-limit-two; direct GNAT13 compile/bind/link log plus exact markers STAGE26_INDEPENDENT_LIMIT_TWO_SELFTEST_ASSERTIONS=139, STAGE26_NATIVE_LIMIT_TWO_ASSERTIONS=131, STAGE26_REAL_FIVEFIELD_SCALARS=125. Static QA and queued/in_progress runs are NOT Native PASS. No main/merge/release.
