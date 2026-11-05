@@ -1,0 +1,92 @@
+name: Kotlin bounded production seven-field pinned differential
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/production_seven_field_pinned_diagnostic.py'
+      - 'soak/test_production_seven_field_pinned_diagnostic.py'
+      - '.github/workflows/post55-production-seven-field-pinned.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  seven-field-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout original Kotlin branch
+        uses: actions/checkout@v4
+        with:
+          path: audited-kotlin
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Checkout pinned historical reference in distinct root
+        uses: actions/checkout@v4
+        with:
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: pinned-python
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Kotlin 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin.zip"
+          unzip -q "$RUNNER_TEMP/kotlin.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile real production plus seven-field bridge
+        shell: bash
+        working-directory: audited-kotlin
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C ../pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
+          mkdir -p evidence
+          kotlinc src/main/kotlin/pastafari/*.kt \
+            soak/Post55ProductionDateBridge.kt \
+            -include-runtime -d "$RUNNER_TEMP/production-date.jar"
+          test -s "$RUNNER_TEMP/production-date.jar"
+      - name: Eight bounded synthetic checks
+        shell: bash
+        working-directory: audited-kotlin
+        run: |
+          set -euo pipefail
+          python3 -B -m py_compile \
+            soak/production_seven_field_pinned_diagnostic.py \
+            soak/test_production_seven_field_pinned_diagnostic.py
+          python3 -B -m unittest discover -s soak \
+            -p 'test_production_seven_field_pinned_diagnostic.py' -v \
+            2>&1 | tee evidence/seven-field-synthetic.log
+      - name: Compare 3 x 7 real production columns with pinned reference
+        shell: bash
+        working-directory: audited-kotlin
+        run: |
+          set -euo pipefail
+          python3 -B soak/production_seven_field_pinned_diagnostic.py \
+            --pinned-root ../pinned-python/src \
+            --jar "$RUNNER_TEMP/production-date.jar" \
+            --worker-timeout 150 --total-timeout 600 \
+            --evidence evidence/seven-field-production-vs-pinned.json \
+            | tee evidence/seven-field-production-vs-pinned.log
+      - name: Preserve evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-seven-field-pinned-diagnostic
+          path: |
+            audited-kotlin/evidence/seven-field-synthetic.log
+            audited-kotlin/evidence/seven-field-production-vs-pinned.log
+            audited-kotlin/evidence/seven-field-production-vs-pinned.json
+          if-no-files-found: warn
+          retention-days: 30
