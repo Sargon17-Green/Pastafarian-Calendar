@@ -51,3 +51,32 @@ jobs:
           name: basic-punjabi-stage3-native-green
           path: ${{ runner.temp }}/basic-punjabi-stage3-results/
           if-no-files-found: warn
+
+  stage4-bigint-differential:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/BASIC+ਪੰਜਾਬੀ'
+    needs: [verify, stage3-native-green]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ephemeral LibreOffice and pyuno
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-core libreoffice-common python3-uno
+          libreoffice --version
+          /usr/bin/python3 -c 'import uno; print("PYUNO_READY")'
+      - name: Stage4 deterministic Python oracle self-test
+        run: /usr/bin/python3 basic/qa/stage4_bigint_differential.py --self-test
+      - name: Stage4 live StarBasic signed BigInt differential and metamorphic tests
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/basic-punjabi-stage4-results"
+          /usr/bin/python3 basic/qa/stage4_bigint_differential.py --basic-dir basic --output-dir "$RUNNER_TEMP/basic-punjabi-stage4-results"
+      - name: Upload Stage4 raw native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basic-punjabi-stage4-bigint-differential
+          path: ${{ runner.temp }}/basic-punjabi-stage4-results/
+          if-no-files-found: warn
