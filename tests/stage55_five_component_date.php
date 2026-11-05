@@ -44,7 +44,14 @@ $years = [
 $structures = [];
 foreach ($years as $n => $year) {
     $structures[$n] = $oracle->buildYearStructure($day, $year);
+    semak55($oracle->buildYearStructure($day, $year) === $structures[$n],
+        'ORACLE_CACHE_STABLE_' . $n);
 }
+$cacheCopy = $structures[5000];
+$cacheCopy['monthWeaving'][0] = -1;
+semak55($oracle->buildYearStructure($day, $anchor)['monthWeaving'][0] !== -1,
+    'ORACLE_CACHE_COPY_ISOLATION');
+unset($cacheCopy);
 $before = serialize([$years, $structures]);
 $next = static fn(array $y): array => $oracle->nextYear($day, $y);
 $previous = static fn(array $y): array => $oracle->previousYear($day, $y);

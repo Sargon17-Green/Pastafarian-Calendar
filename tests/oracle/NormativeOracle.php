@@ -14,6 +14,8 @@ final class NormativeOracle
     private array $gate = [0 => NormativeMath::FOUNDATION_DAY];
     private int $minGateIndex = 0;
     private int $maxGateIndex = 0;
+    /** @var array<string,array<string,mixed>> Exact immutable-by-value test-oracle year structures. */
+    private array $yearStructureCache = [];
 
     public function __construct()
     {
@@ -217,6 +219,16 @@ final class NormativeOracle
     /** @param array{number:int,openGateIndex:int,closeGateIndex:int,openGateDay:int,closeGateDay:int} $year */
     public function buildYearStructure(int $calculationDay, array $year): array
     {
+        // Same normative input must yield the same structure. This cache avoids
+        // recomputing expensive exact weaving unranking for each target date.
+        // Include every year boundary and c so no distinct year is conflated.
+        $cacheKey = implode(':', [
+            $calculationDay, $year['number'], $year['openGateIndex'],
+            $year['closeGateIndex'], $year['openGateDay'], $year['closeGateDay'],
+        ]);
+        if (isset($this->yearStructureCache[$cacheKey])) {
+            return $this->yearStructureCache[$cacheKey];
+        }
         $r = $this->sauce->sauce($calculationDay, $year['openGateDay'] + 1);
         $gapCount = $year['closeGateIndex'] - $year['openGateIndex'];
         $cutletCandidates = [];
@@ -286,7 +298,7 @@ final class NormativeOracle
         $monthNameRank = $this->sauce->chooseRank($stream33, $monthNameSpace);
         $monthNameIndices = DistinctNameFamily::unrankIndices(47, $monthCount, $monthNameRank);
 
-        return [
+        $structure = [
             'cutletCount'=>$cutletCount,
             'cutletPartition'=>$partition,
             'cutletNameIndices'=>$cutletNameIndices,
@@ -296,6 +308,10 @@ final class NormativeOracle
             'monthWeaving'=>$monthWeaving,
             'monthNameIndices'=>$monthNameIndices,
         ];
+        // PHP arrays use copy-on-write: callers may mutate their own returned
+        // structure without changing the canonical cached oracle result.
+        $this->yearStructureCache[$cacheKey] = $structure;
+        return $structure;
     }
 
     /** @return array{0:int,1:string,2:int,3:string,4:int} */
