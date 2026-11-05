@@ -17,6 +17,22 @@ final class NormativeOracle
     /** @var array<string,array<string,mixed>> Exact immutable-by-value test-oracle year structures. */
     private array $yearStructureCache = [];
 
+    /** Optional test-oracle-only phase log; never used by production code. */
+    private function traceStage55(string $phase, int $year, int $value): void
+    {
+        $path = getenv('STAGE55_PROFILE_PATH');
+        if ($path === false || $path === '') {
+            return;
+        }
+        $line = implode("\t", [
+            (string)hrtime(true), $phase, (string)$year, (string)$value,
+            (string)memory_get_usage(true), (string)memory_get_peak_usage(true),
+        ]) . "\n";
+        if (file_put_contents($path, $line, FILE_APPEND | LOCK_EX) === false) {
+            throw new RuntimeException('STAGE55_PROFILE_WRITE_FAILED');
+        }
+    }
+
     public function __construct()
     {
         $this->sauce = new NormativeSauce();
@@ -226,7 +242,9 @@ final class NormativeOracle
             $calculationDay, $year['number'], $year['openGateIndex'],
             $year['closeGateIndex'], $year['openGateDay'], $year['closeGateDay'],
         ]);
+        $this->traceStage55('year_build_start', $year['number'], $year['closeGateDay'] - $year['openGateDay']);
         if (isset($this->yearStructureCache[$cacheKey])) {
+            $this->traceStage55('year_cache_hit', $year['number'], 0);
             return $this->yearStructureCache[$cacheKey];
         }
         $r = $this->sauce->sauce($calculationDay, $year['openGateDay'] + 1);
@@ -250,6 +268,7 @@ final class NormativeOracle
         $stream21 = $this->sauce->askBowl($r, 2, 21);
         $partitionRank = $this->sauce->chooseRank($stream21, $partitionFamily->countAll());
         $partition = $partitionFamily->unrank1($partitionRank);
+        $this->traceStage55('year_partition_ready', $year['number'], $cutletCount);
 
         $stream22 = $this->sauce->askBowl($r, 5, 22);
         $cutletNameSpace = NormativeMath::fallingFactorial(17, $cutletCount);
@@ -287,11 +306,17 @@ final class NormativeOracle
         $stream31 = $this->sauce->askBowl($r, 3, 31);
         $monthLengthRank = $this->sauce->chooseRank($stream31, $monthLengthFamily->countAll());
         $monthLengths = $monthLengthFamily->unrank1($monthLengthRank);
+        $this->traceStage55('year_month_lengths_ready', $year['number'], $monthCount);
 
         $weavingFamily = new WeavingCounter($monthLengths);
         $stream32 = $this->sauce->askBowl($r, 4, 32);
-        $weaveRank = $this->sauce->chooseRank($stream32, $weavingFamily->countAll());
+        $this->traceStage55('year_weaving_count_start', $year['number'], $monthCount);
+        $weaveCount = $weavingFamily->countAll();
+        $this->traceStage55('year_weaving_count_ready', $year['number'], $monthCount);
+        $weaveRank = $this->sauce->chooseRank($stream32, $weaveCount);
+        $this->traceStage55('year_weaving_unrank_start', $year['number'], $monthCount);
         $monthWeaving = $weavingFamily->unrank1($weaveRank);
+        $this->traceStage55('year_weaving_unrank_ready', $year['number'], count($monthWeaving));
 
         $stream33 = $this->sauce->askBowl($r, 5, 33);
         $monthNameSpace = NormativeMath::fallingFactorial(47, $monthCount);
@@ -311,6 +336,7 @@ final class NormativeOracle
         // PHP arrays use copy-on-write: callers may mutate their own returned
         // structure without changing the canonical cached oracle result.
         $this->yearStructureCache[$cacheKey] = $structure;
+        $this->traceStage55('year_structure_ready', $year['number'], count($monthWeaving));
         return $structure;
     }
 

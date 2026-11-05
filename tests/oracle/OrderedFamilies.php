@@ -217,6 +217,22 @@ final class WeavingCounter
         $this->lengths = array_values($lengths);
     }
 
+    /** Progress samples are emitted only when Stage55 CI supplies a file path. */
+    private static function traceStage55(string $phase, int $index, int $size): void
+    {
+        $path = getenv('STAGE55_PROFILE_PATH');
+        if ($path === false || $path === '') {
+            return;
+        }
+        $line = implode("\t", [
+            (string)hrtime(true), $phase, (string)$index, (string)$size,
+            (string)memory_get_usage(true), (string)memory_get_peak_usage(true),
+        ]) . "\n";
+        if (file_put_contents($path, $line, FILE_APPEND | LOCK_EX) === false) {
+            throw new RuntimeException('STAGE55_PROFILE_WRITE_FAILED');
+        }
+    }
+
     public function countAll(): BigInt
     {
         return $this->allCount ??= $this->countSuffix($this->lengths, 0, 0);
@@ -269,6 +285,7 @@ final class WeavingCounter
         }
         $m = count($this->lengths);
         $prefixLength = array_sum($this->lengths);
+        self::traceStage55('weave_table_begin', $m, $prefixLength);
         $nextRow = [];
         for ($k = $m; $k >= 1; --$k) {
             $a = $this->lengths[$k - 1];
@@ -296,6 +313,9 @@ final class WeavingCounter
             }
             $this->suffixCounts[$k] = $packed;
             $nextRow = $row;
+            if ($k === $m || $k === 1 || ($k % 4) === 0) {
+                self::traceStage55('weave_table_row', $k, count($row));
+            }
         }
     }
 
@@ -386,6 +406,7 @@ final class WeavingCounter
         $r = $rank1;
         $out = [];
         $targetLength = array_sum($this->lengths);
+        self::traceStage55('weave_unrank_begin', count($this->lengths), $targetLength);
         while (count($out) < $targetLength) {
             for ($j = 1; $j <= count($remaining); $j++) {
                 if (!$this->legal($remaining, $opened, $closed, $j)) {
@@ -398,12 +419,16 @@ final class WeavingCounter
                     continue;
                 }
                 $out[] = $j;
+                if ((count($out) % 256) === 0) {
+                    self::traceStage55('weave_unrank_step', count($out), $targetLength);
+                }
                 $remaining = $nextRemaining;
                 $opened = $nextOpened;
                 $closed = $nextClosed;
                 break;
             }
         }
+        self::traceStage55('weave_unrank_end', count($out), $targetLength);
         return $out;
     }
 }

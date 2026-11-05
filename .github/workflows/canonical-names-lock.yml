@@ -1089,6 +1089,7 @@ jobs:
           timeout 60s php -d memory_limit=128M tests/stage55_weaving_memo_regression.php > evidence-stage55/memo-regression.txt
           grep -Fx 'STAGE55_MEMO_EXACT cases=4 ranks=53' evidence-stage55/memo-regression.txt
           set +e
+          export STAGE55_PROFILE_PATH=evidence-stage55/profile.tsv
           timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage55_five_component_date.php > evidence-stage55/stdout.txt 2> evidence-stage55/stderr.txt
           code=$?
           set -e
