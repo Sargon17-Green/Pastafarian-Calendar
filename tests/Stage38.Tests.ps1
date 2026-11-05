@@ -5,11 +5,11 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
 
-# Stage38 / Discovery23: research-only preflight with Stage37 sealed.
+# Stage38 / Discovery23: pending Native with Stage37 exact predecessor sealed.
 # Expectations are computed by the independently maintained normative oracle.
 # No production-derived fixtures, mutations or cross-branch code.
 $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition (($md -match '(?m)^CURRENT_STAGE=37\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=37\s*$')) -Name 'Stage37 exact sealed state'
+Assert-StageTrue -Condition (($md -match '(?m)^CURRENT_STAGE=38\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=37\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$')) -Name 'Stage38 exact pending state'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage37 native evidence'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage36 native evidence'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage35 native evidence'
