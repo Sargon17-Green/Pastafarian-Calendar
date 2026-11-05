@@ -344,3 +344,94 @@
                      (catch clojure.lang.ExceptionInfo e
                        (:code (ex-data e))))]
           (is (= :target-not-second-day-of-year code)))))))
+
+
+;; DIAG06: de onafhankelijke normatieve oracle bouwt volledige KLEINE
+;; wevingen. De productie telt slechts de eerste drie rangposities.
+(deftest derde-positie-onafhankelijke-kleine-families
+  (testing "Vier families, ranggrenzen en werkelijke derde maandposities."
+    (doseq [lengten [[4 4] [4 4 4] [4 5 4] [5 4 4]]
+            :let [familie (orakel/weaving-family lengten)
+                  totaal ((:count familie))
+                  tweede-grens (count
+                                (take-while #(= 1 (second %))
+                                  (map #((:unrank1 familie) %)
+                                       (range 1 (inc totaal)))))
+                  rangen (distinct
+                           (filter #(<= 1N % totaal)
+                             [1N 2N (bigint tweede-grens)
+                              (inc (bigint tweede-grens))
+                              (quot (inc totaal) 2N) totaal]))]
+            r rangen]
+      (let [bewijs (rang/derde-maand-op-rang-groot lengten r 5000000N)
+            woord ((:unrank1 familie) r)
+            prefix (mapv bigint (take 3 woord))
+            maand (peek prefix)]
+        (is (= prefix (:month-prefix bewijs)))
+        (is (= maand (:month-id bewijs)))
+        (is (= (bigint (count (filter #(= maand %) prefix)))
+               (:day-in-month bewijs)))
+        (is (<= 0N (:prefix-cell-upper-bound bewijs) 5000000N))
+        (is (= :third-day-prefix-only (:date-proof-scope bewijs)))
+        (is (false? (:month-weaving-computed? bewijs)))))))
+
+(deftest derde-dag-prefix-budget-en-rang-weigeringen
+  (let [fout (fn [lengten r budget]
+               (try
+                 (rang/derde-maand-op-rang-groot lengten r budget)
+                 nil
+                 (catch clojure.lang.ExceptionInfo e
+                   (:code (ex-data e)))))]
+    (is (= :third-day-prefix-budget-unproven (fout [4 4 4] 1N 1N)))
+    (is (= :invalid-weaving-rank (fout [4 4 4] 0N 5000000N)))
+    (is (= :invalid-weaving-budget (fout [4 4 4] 1N 5000001N)))))
+
+(deftest echte-derde-jaardag-met-deels-onafhankelijke-oracle
+  (testing "Drie echte rekendagen: vijf velden, onafhankelijke jaar-/naamkeuze, geen volledige maandweving."
+    (doseq [berekening [dagen/stichtingsdag
+                       (+' dagen/stichtingsdag 17N)
+                       (-' dagen/stichtingsdag 23N)]]
+      (let [jaar (zoeken/vind-doeljaar @lijn berekening berekening)
+            derde (+' (:open-gate-day jaar) 3N)
+            uitkomst (projectie/kies-derde-dag-zonder-weving
+                      @lijn berekening derde 128N 5000000N)
+            vijf (:date-components uitkomst)
+            prefix (:month-prefix uitkomst)
+            maand (peek prefix)
+            staat (orakel/new-gate-state)
+            normjaar (orakel/find-target-year staat berekening derde)
+            saus (orakel/sauce berekening (inc (:open-gate-day normjaar)))
+            kotelet-aantal (orakel/choose-cutlet-count saus normjaar)
+            partitie (orakel/choose-cutlet-partition
+                      staat berekening saus normjaar kotelet-aantal)
+            kotelet-namen (orakel/choose-cutlet-names saus kotelet-aantal)
+            koteletten (orakel/materialize-cutlets
+                       staat normjaar partitie kotelet-namen)
+            norm-kotelet (some #(when (<= (:first-day %) derde (:last-day %)) %)
+                               koteletten)
+            norm-maand-aantal (orakel/choose-month-count saus normjaar)
+            norm-namen (orakel/choose-month-names saus norm-maand-aantal)
+            verwacht [(:number normjaar)
+                      (:name-index norm-kotelet)
+                      (inc (-' derde (:first-day norm-kotelet)))
+                      (nth norm-namen (dec (int maand)))
+                      (bigint (count (filter #(= maand %) prefix)))]]
+        (is (= verwacht vijf))
+        (is (= 3 (count prefix)))
+        (is (= 1N (first prefix)))
+        (is (every? #(<= 1N % 3N) prefix))
+        (is (= :third-day-prefix-only (:date-proof-scope uitkomst)))
+        (is (false? (:month-weaving-computed? uitkomst)))
+        (is (not (contains? uitkomst :month-weaving)))
+        (is (<= 0N (:month-prefix-cell-upper-bound uitkomst) 5000000N))
+        (println "DISCOVERY24 DIAG06 echte derde jaardag:"
+                 {:berekening berekening :doel derde
+                  :prefix prefix :kosten (:month-prefix-cell-upper-bound uitkomst)
+                  :gelijke-deelvelden? (= verwacht vijf)})
+        (let [code (try
+                     (projectie/kies-derde-dag-zonder-weving
+                      @lijn berekening (inc derde) 128N 5000000N)
+                     nil
+                     (catch clojure.lang.ExceptionInfo e
+                       (:code (ex-data e))))]
+          (is (= :target-not-third-day-of-year code)))))))

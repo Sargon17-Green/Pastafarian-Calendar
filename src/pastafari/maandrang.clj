@@ -139,3 +139,62 @@
           :prefix-cell-upper-bound kosten
           :date-proof-scope :second-day-prefix-only
           :month-weaving-computed? false})))))
+
+
+;; DISCOVERY24 DIAG06: rangschik uitsluitend de eerste drie maandtekens.
+;; De reeds bewezen generieke unranking-functie wordt niet aangepast.
+(defn derde-maand-op-rang-groot
+  "Exacte prefix van drie tekens onder dezelfde gecumuleerde celbegroting."
+  ([lengtes rang]
+   (derde-maand-op-rang-groot lengtes rang hoogste-begroting))
+  ([lengtes rang begroting]
+   (let [totaal (weving/aantal-wevingen-groot lengtes)
+         begin (mapv int lengtes)
+         m (count begin)]
+     (when (< m 2)
+       (fout :third-day-needs-two-months))
+     (when-not (and (integer? rang) (<= 1N rang totaal))
+       (fout :invalid-weaving-rank))
+     (when-not (and (integer? begroting)
+                    (<= 1N begroting hoogste-begroting))
+       (fout :invalid-weaving-budget))
+     (loop [positie 2
+            restvector (update begin 0 dec)
+            geopend 1 gesloten 0
+            huidige-rang rang verbruik 0N prefix [1N]]
+       (if (> positie 3)
+         (let [maand (peek prefix)]
+           {:month-id maand
+            :day-in-month (bigint (count (filter #(= maand %) prefix)))
+            :month-prefix prefix
+            :prefix-cell-upper-bound verbruik
+            :date-proof-scope :third-day-prefix-only
+            :month-weaving-computed? false})
+         (let [keuze
+               (loop [maand 1 r huidige-rang kosten verbruik]
+                 (if (> maand (min m (inc geopend)))
+                   (fout :third-day-prefix-invalid-count)
+                   (let [aantal (nth restvector (dec maand))]
+                     (if (or (zero? aantal)
+                             (and (= aantal 1)
+                                  (not= maand (inc gesloten))))
+                       (recur (inc maand) r kosten)
+                       (let [volgende (update restvector (dec maand) dec)
+                             nieuw-geopend (max geopend maand)
+                             nieuw-gesloten (if (= aantal 1)
+                                             (inc gesloten) gesloten)
+                             nieuw-kosten (+' kosten
+                                            (raming volgende nieuw-geopend))]
+                         (when (> nieuw-kosten begroting)
+                           (fout :third-day-prefix-budget-unproven))
+                         (let [blok (tel-rest volgende nieuw-geopend
+                                              nieuw-gesloten)]
+                           (if (> r blok)
+                             (recur (inc maand) (-' r blok) nieuw-kosten)
+                             {:maand maand :restvector volgende
+                              :geopend nieuw-geopend :gesloten nieuw-gesloten
+                              :rang r :kosten nieuw-kosten})))))))]
+           (recur (inc positie) (:restvector keuze)
+                  (:geopend keuze) (:gesloten keuze)
+                  (:rang keuze) (:kosten keuze)
+                  (conj prefix (bigint (:maand keuze))))))))))
