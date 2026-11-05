@@ -60,3 +60,15 @@ Independent check: each of 97 invalid inputs must have zero attempted calls, zer
 POST_STAGE55_PREFLIGHT_NATIVE_ATTEMPTS_PASS invalidProbes=97 invalidAttempts=0 boundedAttempts=16 boundedCompletions=16 boundedWrites=928
 
 Acceptance: existing five CI jobs must complete successfully for the exact new SHA; the Stage27 log must contain all three preflight markers, and the branch ref and changed file blobs must read back. Scope limited to test/docs/workflow and no new heavy jobs, no production changes, Stage56, main merge or release. Until completed logs are inspected, this is a test change and not a new-SHA PASS.
+
+## Follow-up: write-46 physical Native throw and clean recovery (2026-11-06)
+
+The accepted exact-SHA run 41978416339 on a4884e4d58e414cf3fadec4ffd374f15f5e3091e passed all five jobs and the original three Stage27 preflight markers, including 97 invalid attempts rejected before Patch11 and 16 completed bounded calls (928 writes). This enables a small, test-only reliability extension, not Stage56 or a production change. No production fault is asserted.
+
+Input: c=t=FOUNDATION_DAY+1n with maxPerSide=1. On the first physical Patch11 call, run the real handler with its after-write callback; throw a unique sentinel at real write #46 (after the legacy shared write). Require exactly one entered Native invocation, zero completed Native invocations, exactly 46 observed real write callbacks and the SAME sentinel propagated by the signed-gate production factory. The factory must not return a partial prefix. The callback instrument is test-only and restored in a finally block.
+
+Recovery oracle: retry the identical valid input without the injected fault. The first complete native result must report 58 shared writes (and 58 historical writes), then the known mathematical 1-step budget bound must throw MonsterValidationError before a second Native entry because one gate advances at most 963 days, while the neighbourhood radius is 5782. Cumulative entries=2, completions=1; fault callback writes=46; clean completed writes=58. Assert original Patch11 prototype restored. No extra year differential or workflow job.
+
+Exact Stage27 marker: `POST_STAGE55_PREFLIGHT_NATIVE_THROW_RECOVERY_PASS injectedWrite=46 faultEntries=1 faultCompletions=0 faultWrites=46 retryEntries=1 retryCompletions=1 retryWrites=58 propagated=1 recovered=1 restored=1`.
+
+Acceptance requires completed/success all five existing jobs and this exact new marker plus the three old preflight markers on the new commit SHA. Syntax check is not Native acceptance. Do not merge, change main, or release.

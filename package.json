@@ -102,7 +102,7 @@
     "test:post-stage55-names": "node --experimental-strip-types test/postStage55MonthNames.ts",
     "test:post-stage55-cutlets": "node --experimental-strip-types test/postStage55CutletProjection.ts",
     "test:post-stage55-fivepart": "node --experimental-strip-types test/postStage55FivePartProjection.ts",
-    "test:post-stage55-preflight": "node --experimental-strip-types test/postStage55PreflightAtomicity.ts"
+    "test:post-stage55-preflight": "node --experimental-strip-types test/postStage55PreflightAtomicity.ts && node --experimental-strip-types test/postStage55PreflightNativeThrow.ts"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
