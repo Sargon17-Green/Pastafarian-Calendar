@@ -1,4 +1,4 @@
-# Stage24 DISCOVERY21 — cross-axis 5778-adjacent and seven-day five-field differential (open)
+# Stage24 DISCOVERY21 — cross-axis 5778-adjacent and seven-day five-field differential (accepted: bounded)
 
 ## Verified predecessor and uncovered scope
 Stage23 exact SHA 4fe6f92f47d0321456d17b284f471a7210dfeee0, automatic push CI 41775736259 completed/success 25/25 including verify and native-stage23-remote-seven job 126395532007. GNAT13 compile/bind/link and exact independent/native/five-field counts 138/131/125 observed; 25 ordered pairs.
@@ -15,9 +15,12 @@ Domain checks: 4900..5100 years; cutlet 1..17; cutlet_day 1..5778; month 1..47; 
 - Strict differential: exactly 25 expected unique ordered pair records, no malformed/duplicate/unexpected/missing extra pair, exactly one Native count marker, **125 numerical scalar equalities**.
 - Python selftest timeout 180 seconds; Ada execution 600 seconds; Python compare 180 seconds; CI job cap 15 minutes. Failure exit nonzero; retained log is printed before comparator.
 
-## Acceptance gate (not yet accepted)
+## Acceptance gate (satisfied on exact SHA)
 Push CI on exact Stage24 SHA must be completed/success in 26/26 jobs including verify and native-stage24-limit-seven, with GNAT13 compile/bind/link and:
 `STAGE24_INDEPENDENT_LIMIT_SEVEN_SELFTEST_ASSERTIONS=139`
 `STAGE24_NATIVE_LIMIT_SEVEN_ASSERTIONS=131`
 `STAGE24_REAL_FIVEFIELD_SCALARS=125`
 Neither static tests nor a queued/in_progress run establish Stage24 acceptance. No merge, main changes, or publication.
+
+## Acceptance evidence — 2026-11-05
+Push CI [41869345911](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41869345911), exact SHA `ec55ed9f17141f354b003658c496ace512dab265`: 26/26 jobs completed/success, including verify and native-stage24-limit-seven job 126711826529. Direct GNAT13 log confirms compilation, binding and linking, Python=139, Ada Native=131, differential scalars=125 and 25 unique real ordered pairs. Acceptance bounded to this matrix.
