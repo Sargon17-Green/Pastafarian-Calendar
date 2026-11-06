@@ -360,3 +360,48 @@
               :month-prefix-cell-upper-bound (:prefix-cell-upper-bound prefix)
               :date-proof-scope :fifth-day-prefix-only
               :month-weaving-computed? false)))))
+
+;; DIAG10: afzonderlijke zesde-jaardagprojectie, zonder generieke API-wijziging.
+(defn kies-zesde-dag-zonder-weving
+  "Opt-in; vijf numerieke velden met exacte, begrensde vierletterprefix."
+  ([lijn berekeningsdag doeldag]
+   (kies-zesde-dag-zonder-weving lijn berekeningsdag doeldag 128N 5000000N))
+  ([lijn berekeningsdag doeldag zoekbudget prefixbudget]
+   (let [{:keys [year cutlets month-count month-lengths] :as basis}
+         (lengtes/kies-maandlengtes lijn berekeningsdag doeldag zoekbudget)
+         open (:open-gate-day year)
+         close (:close-gate-day year)]
+     (when-not (= doeldag (+' open 6N))
+       (weigering :target-not-sixth-day-of-year))
+     (when-not (and (geldige-delen? cutlets (inc open) close)
+                    (integer? month-count) (<= 3N month-count 47N)
+                    (vector? month-lengths)
+                    (= month-count (count month-lengths))
+                    (every? #(and (integer? %) (<= 4N % 123N)) month-lengths)
+                    (= (-' close open) (reduce +' 0N month-lengths)))
+       (weigering :invalid-date-projection-structure))
+     (let [totaal (weving/aantal-wevingen-groot month-lengths)
+           saus (verdelingen/structuur-saus berekeningsdag year)
+           weefrang (keuzes/kies-rang
+                     (keuzes/vraag-kom saus 4N 32N) totaal)
+           prefix (rang/zesde-maand-op-rang-groot
+                   month-lengths weefrang prefixbudget)
+           naam-totaal (namen/aantal-maandnaamreeksen 47N month-count)
+           naamrang (keuzes/kies-rang
+                     (keuzes/vraag-kom saus 5N 33N) naam-totaal)
+           maandnamen (namen/maandnamen-op-rang 47N month-count naamrang)
+           maand-id (:month-id prefix)
+           kotelet (some #(when (<= (:first-day %) doeldag (:last-day %)) %)
+                         cutlets)]
+       (when-not kotelet
+         (weigering :date-cutlet-not-found))
+       (assoc basis
+              :date-components [(:number year)
+                                (:name-index kotelet)
+                                (inc (-' doeldag (:first-day kotelet)))
+                                (nth maandnamen (dec (int maand-id)))
+                                (:day-in-month prefix)]
+              :month-prefix (:month-prefix prefix)
+              :month-prefix-cell-upper-bound (:prefix-cell-upper-bound prefix)
+              :date-proof-scope :sixth-day-prefix-only
+              :month-weaving-computed? false)))))
