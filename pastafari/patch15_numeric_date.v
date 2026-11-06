@@ -371,7 +371,6 @@ fn patch15_weave_choose_exact(n int, k int) BigInt {
 	return answer
 }
 
-
 /*
 For k opened labels and L remaining opened-label occurrences, let s be
 the length of the next unopened label. The exact insertion-factor recurrence:
@@ -435,8 +434,7 @@ fn (mut c Patch15WeaveCounter) count(state Patch15WeaveState) BigInt {
 				return big_zero()
 			}
 		} else {
-			ways_fixed = big_mul(ways_fixed, patch15_weave_choose_exact(left + rest - 1,
-				rest - 1))
+			ways_fixed = big_mul(ways_fixed, patch15_weave_choose_exact(left + rest - 1, rest - 1))
 		}
 		left += rest
 	}

@@ -800,7 +800,6 @@ fn oracle_weave_choose_exact(n int, k int) BigInt {
 	return answer
 }
 
-
 /*
 The unopened-month factor depends only on the number of opened labels and
 their remaining total. This reference recurrence is deliberately separate
@@ -859,8 +858,7 @@ fn (mut c OracleWeaveCounter) count_factorized(state OracleWeaveState) BigInt {
 				return big_zero()
 			}
 		} else {
-			ways_fixed = big_mul(ways_fixed, oracle_weave_choose_exact(left + rest - 1,
-				rest - 1))
+			ways_fixed = big_mul(ways_fixed, oracle_weave_choose_exact(left + rest - 1, rest - 1))
 		}
 		left += rest
 	}
