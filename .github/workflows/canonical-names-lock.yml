@@ -814,3 +814,68 @@ jobs:
           path: stage01_external_diff_report.json
           if-no-files-found: warn
           retention-days: 30
+  stage01-expanded-real-date-diff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran for three independent interior-date cases
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile original normative calendar date probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          flags='-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build'
+          gfortran $flags -c src/big_integer.f90 -o build/big_integer.o
+          gfortran $flags -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran $flags -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran $flags -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran $flags -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran $flags test/stage01_expanded_real_date_probe.f90 \
+            build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o build/normative_oracle_calendar.o \
+            -o build/stage01_expanded_real_date_probe
+          test -x build/stage01_expanded_real_date_probe
+      - name: Check expanded differential harness and download pinned reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_expanded_real_date_diff.py
+          python3 test/stage01_expanded_real_date_diff.py --self-test | tee build/stage01-expanded-selftest.log
+          grep -Fxq 'STAGE01_EXPANDED_HARNESS_UNIT_ASSERTIONS=6/6' build/stage01-expanded-selftest.log
+          curl --fail --location --silent --show-error --retry 3 \
+            'https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
+            -o build/pinned_normative_reference.py
+          test -s build/pinned_normative_reference.py
+      - name: Gate three new original normative/Python dates with exact five fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          timeout --signal=TERM --kill-after=5s 390s \
+            python3 test/stage01_expanded_real_date_diff.py \
+              --reference build/pinned_normative_reference.py \
+              --fortran-exe build/stage01_expanded_real_date_probe \
+            | tee build/stage01-expanded-diff.log
+          rc=$?
+          set -e
+          if [[ "$rc" -ne 0 ]] || ! grep -Fxq \
+            'STAGE01_EXPANDED_REAL_DATE_DIFFERENTIAL=3/3 CASES; 15/15 EXACT FIELDS' \
+            build/stage01-expanded-diff.log; then
+            echo "::error::Three-date independent differential failed or timed out (exit $rc)"
+            exit 1
+          fi
+          echo 'Original normative Fortran vs SHA-pinned independent Python, NEW interior dates 4999/5000/5001: 3/3 cases; 15/15 fields. NOT full Stage1 acceptance.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve per-field comparison evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-expanded-date-diff
+          path: |
+            stage01_expanded_real_date_diff.json
+            build/stage01-expanded-diff.log
+            build/stage01-expanded-selftest.log
+          if-no-files-found: warn
