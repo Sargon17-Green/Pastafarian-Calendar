@@ -1,0 +1,72 @@
+name: Kotlin pinned checkpoint cache A/B diagnostic
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/pinned_checkpoint_cache_ab.py'
+      - 'soak/test_pinned_checkpoint_cache_ab.py'
+      - '.github/workflows/post55-pinned-checkpoint-cache-ab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-checkpoint-cache-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout audited Kotlin branch
+        uses: actions/checkout@v4
+        with:
+          path: audited-kotlin
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Checkout pinned historical Python source
+        uses: actions/checkout@v4
+        with:
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: pinned-python
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify exact locked source commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git -C audited-kotlin rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
+          test "$(git -C pinned-python rev-parse HEAD:src/pastafari_calendar/final_integration.py)" = 'c927c324f039a94bc36b2ea8827acd58511b6f8c'
+          test "$(git -C pinned-python rev-parse HEAD:src/pastafari_calendar/calendar.py)" = '3ab6fdb56f107cb08b27bb60f3eca27b5164435a'
+          test "$(git -C pinned-python rev-parse HEAD:src/pastafari_calendar/acceleration_scars.py)" = '1f25dff702bde739ab027556457377e01962ee49'
+      - name: Ten bounded synthetic contract tests
+        shell: bash
+        working-directory: audited-kotlin
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python -B -m py_compile soak/pinned_checkpoint_cache_ab.py soak/test_pinned_checkpoint_cache_ab.py
+          python -B -m unittest discover -s soak -p 'test_pinned_checkpoint_cache_ab.py' -v 2>&1 | tee evidence/checkpoint-ab-synthetic.log
+      - name: Six cold pinned reference processes and 15 typed comparisons
+        shell: bash
+        working-directory: audited-kotlin
+        run: |
+          set -euo pipefail
+          python -B soak/pinned_checkpoint_cache_ab.py \
+            --pinned-src ../pinned-python/src \
+            --worker-timeout 90 --total-timeout 420 \
+            --evidence evidence/checkpoint-ab-real.json \
+            | tee evidence/checkpoint-ab-real.log
+      - name: Preserve logs and JSON including failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-pinned-checkpoint-cache-ab
+          path: |
+            audited-kotlin/evidence/checkpoint-ab-synthetic.log
+            audited-kotlin/evidence/checkpoint-ab-real.log
+            audited-kotlin/evidence/checkpoint-ab-real.json
+          if-no-files-found: warn
+          retention-days: 30
