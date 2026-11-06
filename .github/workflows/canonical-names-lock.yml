@@ -702,3 +702,49 @@ jobs:
             stage38-native-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn
+
+  stage39-cross-context-seal-preflight:
+    name: "Stage39 preflight: bounded cross-context full-seal interactions"
+    if: github.ref == 'refs/heads/PowerShell+Tagalog'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Stage39 379 independent-oracle assertions without activation
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($sha -cne $env:GITHUB_SHA) { throw 'Stage39 exact checkout SHA mismatch' }
+          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          $stage38Sealed = (($md -contains 'CURRENT_STAGE=38') -and ($md -contains 'LAST_COMPLETED_STAGE=38') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+          if (-not $stage38Sealed) { throw 'Stage39 preflight requires sealed Stage38 with sealed predecessors' }
+          @(
+            ('STAGE39_PREFLIGHT_HEAD_SHA=' + $sha),
+            ('STAGE39_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE39_SCOPE=4_CONTEXTS_40_ENDPOINTS_10_SEALS_10_FACES_45_PAIRS_8_TRIPLES',
+            'STAGE39_PLANNED_ASSERTIONS=379',
+            'STAGE39_ACTIVATION=NOT_STARTED',
+            'STAGE39_SEAL=NOT_CLAIMED'
+          ) | Set-Content stage39-preflight-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage39-preflight-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage39.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage39 bounded independent-oracle preflight failed' }
+            Write-Host ('STAGE39_PREFLIGHT_NATIVE_SHA=' + $sha)
+            Write-Host 'STAGE39_STAGE_ACTIVATION=NOT_STARTED'
+            Write-Host 'STAGE39_STAGE_SEAL=NOT_CLAIMED'
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Preserve Stage39 exact-SHA research preflight
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage39-cross-context-preflight
+          path: |
+            stage39-preflight-metadata.txt
+            stage39-preflight-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
