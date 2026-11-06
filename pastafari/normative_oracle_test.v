@@ -62,7 +62,8 @@ mut:
 
 struct OracleEngine {
 mut:
-	gate_cache OracleGateCache
+	gate_cache      OracleGateCache
+	structure_cache map[string]OracleYearStructure
 }
 
 fn new_oracle_engine() OracleEngine {
@@ -75,6 +76,7 @@ fn new_oracle_engine() OracleEngine {
 			min_index: big_zero()
 			max_index: big_zero()
 		}
+		structure_cache: map[string]OracleYearStructure{}
 	}
 }
 
@@ -1439,6 +1441,11 @@ fn oracle_choose_month_names(structure_sauce OracleSauceResult, month_count int)
 }
 
 fn (mut e OracleEngine) build_year_structure(calculation_day BigInt, year OracleYear) OracleYearStructure {
+	// The complete year structure depends on the calculation day and the selected year.
+	key := '${calculation_day}:${year.number}:${year.open_gate_index}:${year.close_gate_index}'
+	if key in e.structure_cache {
+		return e.structure_cache[key]
+	}
 	first_day := big_add(year.open_gate_day, big_one())
 	result := oracle_sauce(calculation_day, first_day)
 	cutlet_count := e.choose_cutlet_count(result, year)
@@ -1449,7 +1456,7 @@ fn (mut e OracleEngine) build_year_structure(calculation_day BigInt, year Oracle
 	month_lengths := oracle_choose_month_lengths(result, year, month_count)
 	month_weaving := oracle_choose_month_weaving(result, month_lengths)
 	month_names := oracle_choose_month_names(result, month_count)
-	return OracleYearStructure{
+	structure := OracleYearStructure{
 		cutlet_count:     cutlet_count
 		cutlet_partition: partition
 		cutlet_names:     cutlet_names
@@ -1459,6 +1466,8 @@ fn (mut e OracleEngine) build_year_structure(calculation_day BigInt, year Oracle
 		month_weaving:    month_weaving
 		month_names:      month_names
 	}
+	e.structure_cache[key] = structure
+	return structure
 }
 
 fn (mut e OracleEngine) calendar_date_normative(calculation_day BigInt, target_day BigInt) CalendarResult {
