@@ -19,10 +19,7 @@ pub fn dispatch_discovery_25(
   context: bootstrap.MonsterContext,
   requested_bowl_ids: List(Int),
   thresholds: List(Int),
-) -> Result(
-  List(ThresholdWindow),
-  discovery_19_interval_value.Discovery19Error,
-) {
+) -> Result(List(ThresholdWindow), discovery_19_interval_value.Discovery19Error) {
   case
     discovery_22_gap_prefixes.dispatch_discovery_22(context, requested_bowl_ids)
   {
@@ -94,14 +91,7 @@ fn shrink_left(
   case total >= threshold, left_remaining {
     True, [gap, ..rest] -> {
       let next_best = choose_best(best, left, right, total)
-      shrink_left(
-        rest,
-        threshold,
-        left + 1,
-        right,
-        total - gap,
-        next_best,
-      )
+      shrink_left(rest, threshold, left + 1, right, total - gap, next_best)
     }
     _, _ -> #(left_remaining, left, total, best)
   }
@@ -118,8 +108,9 @@ fn choose_best(
     WindowFound(start: previous_start, end: previous_end, total: _) ->
       case
         end - start < previous_end - previous_start
-        || { end - start == previous_end - previous_start
-          && start < previous_start }
+        || {
+          end - start == previous_end - previous_start && start < previous_start
+        }
       {
         True -> WindowFound(start: start, end: end, total: total)
         False -> best

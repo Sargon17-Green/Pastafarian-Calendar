@@ -101,26 +101,21 @@ fn independent_window(
   threshold: Int,
 ) -> discovery_25_shortest_window.WindowReach {
   case threshold <= 0 {
-    True -> discovery_25_shortest_window.WindowFound(
-      start: 0,
-      end: 0,
-      total: 0,
-    )
-    False -> enumerate_starts(
-      gaps,
-      threshold,
-      0,
-      discovery_25_shortest_window.NoWindow,
-    )
+    True -> discovery_25_shortest_window.WindowFound(start: 0, end: 0, total: 0)
+    False ->
+      enumerate_starts(
+        gaps,
+        threshold,
+        0,
+        discovery_25_shortest_window.NoWindow,
+      )
   }
 }
 
 fn check_valid(a: Int, b: Int, ids: List(Int), thresholds: List(Int)) {
   let context = bootstrap.new_context(a, b)
-  let assert Ok(samples) = discovery_21_gate_batch.dispatch_discovery_21(
-    context,
-    ids,
-  )
+  let assert Ok(samples) =
+    discovery_21_gate_batch.dispatch_discovery_21(context, ids)
   list.each(samples, fn(sample) {
     {
       sample.gap >= discovery_20_gate_gap.gap_min
@@ -129,17 +124,15 @@ fn check_valid(a: Int, b: Int, ids: List(Int), thresholds: List(Int)) {
     |> should.equal(True)
   })
   let gaps = list.map(samples, fn(sample) { sample.gap })
-  let expected = list.map(thresholds, fn(threshold) {
-    discovery_25_shortest_window.ThresholdWindow(
-      threshold: threshold,
-      reach: independent_window(gaps, threshold),
-    )
-  })
-  let assert Ok(actual) = discovery_25_shortest_window.dispatch_discovery_25(
-    context,
-    ids,
-    thresholds,
-  )
+  let expected =
+    list.map(thresholds, fn(threshold) {
+      discovery_25_shortest_window.ThresholdWindow(
+        threshold: threshold,
+        reach: independent_window(gaps, threshold),
+      )
+    })
+  let assert Ok(actual) =
+    discovery_25_shortest_window.dispatch_discovery_25(context, ids, thresholds)
   actual |> should.equal(expected)
 }
 
@@ -218,13 +211,11 @@ pub fn discovery_25_tie_choose_earliest_start_test() {
   let assert Ok(got) = answers(11, 21, ids, [first.gap])
   let assert [item] = got
   item.reach
-  |> should.equal(
-    discovery_25_shortest_window.WindowFound(
-      start: 0,
-      end: 1,
-      total: first.gap,
-    ),
-  )
+  |> should.equal(discovery_25_shortest_window.WindowFound(
+    start: 0,
+    end: 1,
+    total: first.gap,
+  ))
 }
 
 pub fn discovery_25_unsorted_duplicate_thresholds_test() {
@@ -239,25 +230,18 @@ pub fn discovery_25_nonpositive_thresholds_empty_window_test() {
   let assert Ok(got) = answers(11, 21, [2, 6, 1], [-10_000, -1, 0])
   list.each(got, fn(item) {
     item.reach
-    |> should.equal(
-      discovery_25_shortest_window.WindowFound(
-        start: 0,
-        end: 0,
-        total: 0,
-      ),
-    )
+    |> should.equal(discovery_25_shortest_window.WindowFound(
+      start: 0,
+      end: 0,
+      total: 0,
+    ))
   })
 }
 
 pub fn discovery_25_exact_window_and_plus_one_test() {
   let ids = [3, 1, 5]
   let assert [first, second, _] = get_samples(11, 21, ids)
-  check_valid(
-    11,
-    21,
-    ids,
-    [first.gap + second.gap, first.gap + second.gap + 1],
-  )
+  check_valid(11, 21, ids, [first.gap + second.gap, first.gap + second.gap + 1])
 }
 
 pub fn discovery_25_invalid_bowl_before_empty_thresholds_test() {
@@ -278,16 +262,6 @@ pub fn discovery_25_invalid_context_before_nonpositive_threshold_test() {
 
 pub fn discovery_25_huge_days_repetitions_and_large_ints_test() {
   let huge = core.m * core.m + core.m
-  check_valid(
-    huge,
-    -huge,
-    [1, 6, 1, 6, 2],
-    [-huge, 0, 1, huge, huge * huge],
-  )
-  check_valid(
-    -huge,
-    huge,
-    [6, 6, 6],
-    [0, 1, 9_999_999_999, -9_999_999_999],
-  )
+  check_valid(huge, -huge, [1, 6, 1, 6, 2], [-huge, 0, 1, huge, huge * huge])
+  check_valid(-huge, huge, [6, 6, 6], [0, 1, 9_999_999_999, -9_999_999_999])
 }
