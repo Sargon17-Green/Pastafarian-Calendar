@@ -417,10 +417,11 @@
                       (let [nieuw (quot (*' w (+' b t -1N))
                                         (inc t))]
                         (recur (inc t) nieuw (conj uit nieuw)))))
+                  ;; Bewaar de b-1 lege staartcellen: de suffixlengte wordt n+b.
                   nieuw-histogram
                   (loop [j 0 cumul 0N uit [0N]]
                     (if (> j n)
-                      uit
+                      (into uit (repeat (dec (int b)) 0N))
                       (let [som (+' cumul (nth histogram j))]
                         (recur (inc j) som
                                (conj uit
