@@ -1,0 +1,67 @@
+name: Lua Haitian F0 Year5000 Bounded Preflight
+
+on:
+  push:
+    branches:
+      - 'Lua+Kreyòl-ayisyen'
+    paths:
+      - 'test/lua_haitian_f0_year5000_probe_20261106.lua'
+      - '.github/workflows/lua-haitian-f0-year5000-20261106.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  lua_haitian_f0_year5000:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua 5.3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Bounded oracle-only F0 witnesses (not product integration)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          luac5.3 -p test/lua_haitian_f0_year5000_probe_20261106.lua
+          mkdir -p f0-evidence
+          {
+            echo 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN'
+            echo "GITHUB_SHA=$GITHUB_SHA"
+            echo 'SCOPE=F0_REFERENCE_YEAR5000_ONLY'
+            echo 'INPUT_OFFSETS=0,12000'
+            echo 'PER_CASE_TIMEOUT_SECONDS=90'
+            echo "ORACLE_BLOB=$(git hash-object test/normative_oracle.lua)"
+            echo "PROBE_BLOB=$(git hash-object test/lua_haitian_f0_year5000_probe_20261106.lua)"
+          } > f0-evidence/manifest.txt
+          failed=0
+          for offset in 0 12000; do
+            set +e
+            timeout --signal=TERM --kill-after=5s 90s lua5.3 test/lua_haitian_f0_year5000_probe_20261106.lua . "$offset" > "f0-evidence/witness_${offset}.txt" 2> "f0-evidence/stderr_${offset}.txt"
+            code=$?
+            set -e
+            echo "$code" > "f0-evidence/exit_${offset}.txt"
+            echo "F0_OFFSET=${offset} EXIT=${code}"
+            cat "f0-evidence/witness_${offset}.txt"
+            if [ "$code" -ne 0 ] || [ -s "f0-evidence/stderr_${offset}.txt" ] || [ "$(grep -c '^F0_WITNESS|' "f0-evidence/witness_${offset}.txt")" -ne 1 ]; then
+              failed=1
+              cat "f0-evidence/stderr_${offset}.txt" >&2
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo 'F0_INCOMPLETE: reference feasibility is not established within budget'
+            exit 1
+          fi
+          echo 'F0_TWO_WITNESSES_PASS: 2/2 bounded reference-only calls'
+      - name: Upload evidence regardless of outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-f0-year5000-evidence
+          path: f0-evidence/
+          if-no-files-found: warn
