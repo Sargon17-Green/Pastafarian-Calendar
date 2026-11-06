@@ -360,25 +360,25 @@ final class WeavingCounter
     }
 
     /**
-     * Exact one-step branch counts for months already opened.
+     * Test-oracle-only exact opened-frontier branch factorization.
      *
-     * For remaining active counts a_i and prefix sums S_i, the number
-     * satisfying the ordered closing frontier is
-     * F = product_i C(S_i-1, a_i-1).
-     * After decrementing month j, preceding factors stay unchanged,
-     * its own factor becomes C(S_j-2, a_j-2), and following factors
-     * become C(S_i-2, a_i-1). Pascal's identity supplies the own
-     * factor from one binomial and one exact small-divisor quotient.
-     * All opened candidates share the unopened suffix H[o+1][S-1].
-     * This avoids recomputing the complete product for each candidate.
+     * Retain the current A_i=C(S_i-1,a_i-1) across unranking steps.
+     * A decrement at j leaves factors i<j intact, replaces A_j by
+     * C_j=A_j-B_j, and replaces all later A_i with
+     * B_i=A_i*(S_i-a_i)/(S_i-1). All these quotients are exact.
+     * This avoids recomputing 30..46 multi-step binomial coefficients
+     * on every one of several thousand chosen symbols.
      *
      * @param list<int> $remaining
-     * @return array<int,BigInt>
+     * @param array<int,BigInt> $factors Current exact A_i, keyed by month.
+     * @return array{0:array<int,BigInt>,1:array<int,BigInt>,2:array<int,BigInt>}
+     *   Branch counts, chosen-month factors C_i, later-month factors B_i.
      */
-    private function openedBranchBlocks(array $remaining, int $opened, int $closed): array
-    {
+    private function openedBranchBlocks(
+        array $remaining, int $opened, int $closed, array $factors
+    ): array {
         if ($opened <= $closed) {
-            return [];
+            return [[], [], []];
         }
         $prefix = [$closed => BigInt::one()];
         $earlierDecrement = [];
@@ -390,7 +390,7 @@ final class WeavingCounter
                 throw new RuntimeException('WEAVING_OPEN_FRONTIER');
             }
             $activeTotal += $a;
-            $all = self::choose($activeTotal - 1, $a - 1);
+            $all = $factors[$j] ?? throw new RuntimeException('WEAVING_FACTOR_MISSING');
             $prefix[$j] = $prefix[$j - 1]->mul($all);
             if ($j === $closed + 1) {
                 $earlier = BigInt::zero();
@@ -419,7 +419,7 @@ final class WeavingCounter
             $blocks[$j] = $prefix[$j - 1]->mul($ownDecrement[$j])
                 ->mul($suffix[$j + 1])->mul($unopened);
         }
-        return $blocks;
+        return [$blocks, $ownDecrement, $earlierDecrement];
     }
 
     /** @param list<int> $remaining */
@@ -468,10 +468,13 @@ final class WeavingCounter
         $closed = 0;
         $r = $rank1;
         $out = [];
+        /** @var array<int,BigInt> $factorByMonth */
+        $factorByMonth = [];
         $targetLength = array_sum($this->lengths);
         self::traceStage55('weave_unrank_begin', count($this->lengths), $targetLength);
         while (count($out) < $targetLength) {
-            $openedBlocks = $this->openedBranchBlocks($remaining, $opened, $closed);
+            [$openedBlocks, $ownDecrement, $laterDecrement] =
+                $this->openedBranchBlocks($remaining, $opened, $closed, $factorByMonth);
             for ($j = 1; $j <= count($remaining); $j++) {
                 if (!$this->legal($remaining, $opened, $closed, $j)) {
                     continue;
@@ -487,6 +490,32 @@ final class WeavingCounter
                 $out[] = $j;
                 if ((count($out) % 256) === 0) {
                     self::traceStage55('weave_unrank_step', count($out), $targetLength);
+                }
+                if ($j <= $opened) {
+                    // One existing symbol was consumed. Update the exact
+                    // binomial factors in place; preceding months are unchanged.
+                    for ($i = $j; $i <= $opened; ++$i) {
+                        if ($i === $j) {
+                            if ($nextRemaining[$i - 1] === 0) {
+                                unset($factorByMonth[$i]);
+                            } else {
+                                $factorByMonth[$i] = $ownDecrement[$i];
+                            }
+                        } else {
+                            $factorByMonth[$i] = $laterDecrement[$i];
+                        }
+                    }
+                } elseif ($nextRemaining[$j - 1] > 0) {
+                    // A newly opened month's first symbol was consumed;
+                    // a single fresh factor starts its remaining frontier.
+                    $activeTotal = 0;
+                    for ($i = $closed + 1; $i <= $opened; ++$i) {
+                        $activeTotal += $remaining[$i - 1];
+                    }
+                    $left = $nextRemaining[$j - 1];
+                    $factorByMonth[$j] = self::choose(
+                        $activeTotal + $left - 1, $left - 1
+                    );
                 }
                 $remaining = $nextRemaining;
                 $opened = $nextOpened;
