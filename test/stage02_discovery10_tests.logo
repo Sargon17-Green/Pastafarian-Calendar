@@ -65,7 +65,7 @@ to d10.valid :calculation :target :tag
   d10.require (equalp (monster.context.get :after "status) "VISIBLE_FIFTEEN_ONLY) (list :tag [status])
   d10.require (equalp (monster.context.get :after "metrics) [stage02.dispatch stage02.counts stage02.stones stage02.hidden stage02.visible stage02.visible.ten stage02.visible.fifteen]) (list :tag [metrics])
   d10.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready stage02.hidden.ready stage02.visible.prefix.ready stage02.visible.ten.ready stage02.visible.fifteen.ready]) (list :tag [logs])
-  d10.require (equalp (monster.stage02.visible.ten :before) :after) (list :tag [determinism])
+  d10.require (equalp (monster.stage02.visible.fifteen :before) :after) (list :tag [determinism])
   print sentence [STAGE_2_DISCOVERY_10_CASE_END] :tag
   output :before
 end
@@ -73,11 +73,11 @@ end
 to d10.invalid :ctx :tag
   print sentence [STAGE_2_DISCOVERY_10_CASE_BEGIN] :tag
   make "D10.CASES (:D10.CASES + 1)
-  d10.require (equalp (monster.stage02.visible.ten :ctx) :ctx) :tag
+  d10.require (equalp (monster.stage02.visible.fifteen :ctx) :ctx) :tag
   print sentence [STAGE_2_DISCOVERY_10_CASE_END] :tag
 end
 
-to stage02.discovery09.run
+to stage02.discovery10.run
   localmake "prefix d10.valid (nr.foundation) (nr.tablets) [foundation_tablets]
   d10.invalid (monster.stage02.workcounts [0 [1]] [0 [0]]) [failed_validation]
   d10.invalid (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts [0 [0]] [1 [1]]))) [hidden_only]
@@ -90,4 +90,4 @@ to stage02.discovery09.run
   print [STAGE_2_DISCOVERY_10_PASIS]
 end
 
-stage02.discovery09.run
+stage02.discovery10.run

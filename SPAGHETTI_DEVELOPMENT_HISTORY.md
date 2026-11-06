@@ -245,3 +245,6 @@ SHA 3efd58c2e5a0276e6ac2efb88e677b9bc4726ca8: Stage2 run 42125675962/job 1275891
 
 ## Stage 2 — DISCOVERY10 (visible 11–15; Native PENDING)
 Production-only exact BI extension uzas verified prior/initial/grind helpers; test-only normative nr.visible.one independent de production. 1 valida + 3 nevalida, 20 target asserti. Separata Native CI <=900s test, <=20m job, D1–D9, Stage1 e Names still obligatory same SHA. Ca candidate NE deklaras Native PASS; nula main/merge.
+
+## Stage 2 — DISCOVERY10 unua Native FAIL e sola testala fixo (2026-11-06)
+Native run 42173607919/job 127746881149 completed FAILURE; exact marker `STAGE_2_DISCOVERY_10_TESTO_FALIIS: [foundation_tablets] [determinism]`. Origina testala assertion vokis `monster.stage02.visible.ten` por komparar D10 rezulto; invalid guards vokis D9 anke, e D10 runner havis D9 nomo. Ta fixo nur korektigas testala D10 call sites e runner nomo; production, test oracle e cardinali 4 cases/20 asserti nechanjita. D1–D9 42173608092 SUCCESS, Stage1 42173607850 SUCCESS, Names 42173607821 SUCCESS sur originala SHA df4e81746206ae55703dd13c6905ff6c41e9d223. Nova candidate bezonas propra Native PASS e sama-SHA regresioni; nula main/merge, LAST_COMPLETED_STAGE=1.
