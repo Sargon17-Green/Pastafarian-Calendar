@@ -108,6 +108,7 @@ jobs:
           grep -Fq 'POST_STAGE55_PREFLIGHT_NATIVE_THROW_RECOVERY_PASS injectedWrite=46 faultEntries=1 faultCompletions=0 faultWrites=46 retryEntries=1 retryCompletions=1 retryWrites=58 propagated=1 recovered=1 restored=1' stage27-results.log
           grep -Fq 'POST_STAGE55_HUGE_SIGNED_BUDGET_PASS probes=2 digits=501 positiveEntries=1 negativeEntries=2 completions=3 sharedWrites=174 restored=1' stage27-results.log
           grep -Fq 'POST_STAGE55_NEGATIVE_NATIVE_THROW_RECOVERY_PASS injectedWrite=46 firstPositive=1 faultNegative=1 faultWrites=46 retryPositive=1 retryNegative=1 totalEntries=4 totalCompletions=3 completedWrites=174 propagated=1 recovered=1 restored=1' stage27-results.log
+          grep -Fq 'POST_STAGE55_NEGATIVE_FINAL_WRITE_THROW_RECOVERY_PASS injectedWrite=58 firstPositive=1 faultNegative=1 faultWrites=58 retryPositive=1 retryNegative=1 totalEntries=4 totalCompletions=3 completedWrites=174 propagated=1 recovered=1 restored=1' stage27-results.log
           grep -Fq 'STAGE_55_PATCH_27_PROPERTIES_PASS families=256 queries=60160 repaired=39124 equal=21036 correctedMembers=12032 falseAccept=39124 falseReject=0 unexpected=0' stage27-results.log
           grep -Fq 'STAGE_01_PASS' stage27-results.log
           grep -Fq 'STAGE_02_DISCOVERY_01_GUARDS_PASS mismatches=3 matches=1' stage27-results.log
