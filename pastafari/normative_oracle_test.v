@@ -987,6 +987,7 @@ fn (mut c OracleWeaveCounter) count_all() BigInt {
 fn (mut c OracleWeaveCounter) unrank1(rank1 BigInt) []int {
 	mut state := c.initial_state()
 	mut rank := rank1
+	mut ways_fixed := big_one()
 	mut target_length := 0
 	for value in c.lengths {
 		target_length += value
@@ -1000,64 +1001,70 @@ fn (mut c OracleWeaveCounter) unrank1(rank1 BigInt) []int {
 		}
 		opened := state.opened_up_to
 		closed := state.closed_up_to
-		mut prefix := []BigInt{len: opened + 1, init: big_one()}
-		mut suffix := []BigInt{len: opened + 1, init: big_one()}
-		mut removed := []BigInt{len: opened, init: big_zero()}
-		mut shifted := []BigInt{len: opened, init: big_one()}
 		mut left := 0
 		for i in closed .. opened {
-			remaining := state.remaining[i]
-			left += remaining
-			prefix[i + 1] = big_mul(prefix[i], oracle_weave_choose_exact(left - 1, remaining - 1))
-			if remaining > 1 {
-				removed[i] = oracle_weave_choose_exact(left - 2, remaining - 2)
-			} else if i == closed {
-				removed[i] = big_one()
-			}
-			if i > closed {
-				shifted[i] = oracle_weave_choose_exact(left - 2, remaining - 1)
-			}
+			left += state.remaining[i]
 		}
-		for offset in 0 .. opened - closed {
+		if left == 0 {
+			j := opened + 1
+			out << j
+			state = c.apply_move(state, j)
+			continue
+		}
+		old_tail := c.factor_suffix(opened, left - 1)
+		old_block := big_mul(ways_fixed, old_tail)
+		if big_cmp(rank, old_block) > 0 {
+			if opened == c.lengths.len {
+				panic('invalid month weaving rank')
+			}
+			rank = big_sub(rank, old_block)
+			j := opened + 1
+			size := c.lengths[opened]
+			if size <= 1 {
+				panic('invalid single-occurrence month opening')
+			}
+			ways_fixed = big_mul(ways_fixed, oracle_weave_choose_exact(left + size - 2, size - 2))
+			out << j
+			state = c.apply_move(state, j)
+			continue
+		}
+		// Cumulative legal first-symbol counts for currently opened months.
+		// At each reversal, the numerator/denominator ratio is exact.
+		mut running := []int{len: opened + 1}
+		for i in closed .. opened {
+			running[i + 1] = running[i] + state.remaining[i]
+		}
+		mut cumulative := []BigInt{len: opened + 1, init: big_zero()}
+		cumulative[opened] = ways_fixed
+		for offset in 0 .. opened - closed - 1 {
 			i := opened - 1 - offset
-			suffix[i] = big_mul(suffix[i + 1], shifted[i])
+			numerator := big_mul_small(cumulative[i + 1], u32(running[i]))
+			cumulative[i] = oracle_weave_div_small(numerator, running[i + 1] - 1)
 		}
-		mut old_tail := big_zero()
-		if left > 0 {
-			old_tail = c.factor_suffix(opened, left - 1)
-		}
-		mut found := false
-		for j in 1 .. c.lengths.len + 1 {
-			if !c.legal_move(state, j) {
-				continue
-			}
-			mut block := big_zero()
-			if j <= opened {
-				weight := big_mul(prefix[j - 1], removed[j - 1])
-				block = big_mul(big_mul(weight, suffix[j]), old_tail)
+		mut lo := closed + 1
+		mut hi := opened
+		for lo < hi {
+			mid := (lo + hi) / 2
+			boundary := big_mul(cumulative[mid], old_tail)
+			if big_cmp(rank, boundary) <= 0 {
+				hi = mid
 			} else {
-				size := c.lengths[opened]
-				if size == 1 {
-					block = big_mul(prefix[opened], c.factor_suffix(opened + 1, left))
-				} else {
-					weight := oracle_weave_choose_exact(left + size - 2, size - 2)
-					block = big_mul(big_mul(prefix[opened], weight), c.factor_suffix(opened + 1,
-
-						left + size - 1))
-				}
-			}
-			if big_cmp(rank, block) > 0 {
-				rank = big_sub(rank, block)
-			} else {
-				out << j
-				state = c.apply_move(state, j)
-				found = true
-				break
+				lo = mid + 1
 			}
 		}
-		if !found {
-			panic('invalid month weaving rank')
+		j := lo
+		if !c.legal_move(state, j) {
+			panic('invalid month weaving candidate')
 		}
+		if j > closed + 1 {
+			rank = big_sub(rank, big_mul(cumulative[j - 1], old_tail))
+		}
+		ways_fixed = big_sub(cumulative[j], cumulative[j - 1])
+		if ways_fixed.is_zero() {
+			panic('zero month weaving candidate block')
+		}
+		out << j
+		state = c.apply_move(state, j)
 	}
 	return out
 }
