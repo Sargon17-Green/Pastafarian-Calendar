@@ -117,12 +117,22 @@ def sparse_transpose(after, n, k, spec):
 
 
 class SparseDualWeaving:
-    def __init__(self, lengths):
+    def __init__(self, lengths, observe_transfers=False):
         if not lengths or any(type(x) is not int or x < 1 for x in lengths):
             raise ValueError("positive integer lengths required")
         self.lengths = tuple(lengths)
         self.m = len(lengths)
         self.n = sum(lengths)
+        # Opt-in measurement only; neither arithmetic nor state transitions change.
+        self.observe_transfers = bool(observe_transfers)
+        self.transfer_metrics = {
+            phase: {
+                "calls": 0, "seconds": 0.0, "free_interval_cells": 0,
+                "fixed_calls": 0, "output_cells": 0,
+                "per_month_seconds": [0.0] * (self.m + 1),
+                "per_month_calls": [0] * (self.m + 1),
+            } for phase in ("blocks", "take")
+        }
         self.used = [0] * (self.m + 1)
         self.opened = self.closed = self.position = 0
         self.specs = [None, None] + [(0, 0, -1, 0)] * (self.m - 1)
@@ -141,6 +151,30 @@ class SparseDualWeaving:
         # blocks(); retain that exact state until take() consumes the choice.
         self.cached_candidate_states = None
         self.reused_candidate_transfers = 0
+
+    def _forward(self, previous, n, k, spec, phase, month):
+        """Measure exact transfer without modifying its input or output.
+
+        free_interval_cells counts visited output slots, not multiplications.
+        Initial constructor transfers are intentionally excluded.
+        """
+        if not self.observe_transfers:
+            return sparse_transfer(previous, n, k, spec)
+        started = monotonic()
+        result = sparse_transfer(previous, n, k, spec)
+        elapsed = monotonic() - started
+        metric = self.transfer_metrics[phase]
+        metric["calls"] += 1
+        metric["seconds"] += elapsed
+        metric["output_cells"] += len(result.values)
+        metric["per_month_seconds"][month] += elapsed
+        metric["per_month_calls"][month] += 1
+        q, fixed_sum, first_fixed, tail = spec
+        if q <= n and (fixed_sum or tail):
+            metric["fixed_calls"] += 1
+        elif q <= n:
+            metric["free_interval_cells"] += max(0, n - max(0, q) + 1)
+        return result
 
     def eligible(self, c):
         if not 1 <= c <= self.m:
@@ -164,8 +198,8 @@ class SparseDualWeaving:
         for j in range(self.m, 1, -1):
             if self.eligible(j):
                 own = extend_spec(self.specs[j], j, j)
-                v = sparse_transfer(self.states[j-1], self.sizes[j-1],
-                             self.lengths[j-1], own)
+                v = self._forward(self.states[j-1], self.sizes[j-1],
+                                  self.lengths[j-1], own, "blocks", j)
                 out[j] = v.dot(adj)
                 prepared[j] = v
             older = extend_spec(self.specs[j], j, 1)
@@ -198,8 +232,8 @@ class SparseDualWeaving:
                 v = prepared
                 self.reused_candidate_transfers += 1
             else:
-                v = sparse_transfer(v, self.sizes[j-1], self.lengths[j-1],
-                                    self.specs[j])
+                v = self._forward(v, self.sizes[j-1], self.lengths[j-1],
+                                  self.specs[j], "take", j)
             self.states[j] = v
         self.used[c] += 1
         self.position += 1
@@ -281,6 +315,22 @@ def test_finite():
                 partitions += 1
     assert len(cases) == 137 and roundtrips == 1982 and partitions == 8361
     assert 0 < reused < partitions
+    # Exact finite-case differential: instrumentation must preserve all states.
+    sample = (2, 3, 2)
+    word = dual_unrank(sample, 0)
+    watched = SparseDualWeaving(sample, observe_transfers=True)
+    control = SparseDualWeaving(sample)
+    for symbol in word:
+        assert watched.blocks() == control.blocks()
+        watched.take(symbol)
+        control.take(symbol)
+        assert watched.states == control.states
+    assert watched.reused_candidate_transfers == control.reused_candidate_transfers
+    for phase in ("blocks", "take"):
+        metric = watched.transfer_metrics[phase]
+        assert metric["calls"] > 0 and metric["seconds"] >= 0.0
+        assert sum(metric["per_month_calls"]) == metric["calls"]
+    print("WEAVING_SPARSE_OBSERVABILITY_SMOKE=PASS")
     print("WEAVING_SPARSE_FINITE_REUSED_TRANSFERS=" + str(reused))
     print("WEAVING_SPARSE_FINITE_CASES=137")
     print("WEAVING_SPARSE_FINITE_RANK_ROUNDTRIPS=1982")

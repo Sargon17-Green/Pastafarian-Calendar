@@ -22,7 +22,7 @@ def main():
     lengths = tuple(MONTH_LENGTHS)
     assert len(lengths) == 45 and sum(lengths) == 4244
     started = monotonic()
-    state = SparseDualWeaving(lengths)
+    state = SparseDualWeaving(lengths, observe_transfers=True)
     root = state.total
     assert root.bit_length() == 22470
     assert sha256(root.to_bytes((root.bit_length() + 7) // 8, "big")).hexdigest() == ROOT_SHA256
@@ -73,6 +73,21 @@ def main():
             reason = "RSS_LIMIT"
             break
     elapsed = monotonic() - started
+    for phase in ("blocks", "take"):
+        metric = state.transfer_metrics[phase]
+        name = "WEAVING_SPARSE_PROFILE_" + phase.upper() + "_FORWARD_"
+        print(name + "CALLS=" + str(metric["calls"]))
+        print(name + "SECONDS=" + format(metric["seconds"], ".3f"))
+        print(name + "FREE_INTERVAL_CELLS=" + str(metric["free_interval_cells"]))
+        print(name + "FIXED_CALLS=" + str(metric["fixed_calls"]))
+        print(name + "OUTPUT_CELLS=" + str(metric["output_cells"]))
+        hot = sorted(range(2, len(lengths) + 1),
+                     key=lambda month: (-metric["per_month_seconds"][month], month))[:5]
+        print(name + "HOT_MONTHS=" + ",".join(
+            str(month) + ":" + format(metric["per_month_seconds"][month], ".3f")
+            + "s/" + str(metric["per_month_calls"][month])
+            for month in hot))
+        assert sum(metric["per_month_calls"]) == metric["calls"]
     print("WEAVING_SPARSE_PROFILE_REUSED_TRANSFERS="
           + str(state.reused_candidate_transfers))
     print("WEAVING_SPARSE_PROFILE_SYMBOLS=" + str(len(prefix)))
