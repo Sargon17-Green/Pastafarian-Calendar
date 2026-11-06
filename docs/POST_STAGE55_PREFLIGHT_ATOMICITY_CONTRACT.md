@@ -72,3 +72,18 @@ Recovery oracle: retry the identical valid input without the injected fault. The
 Exact Stage27 marker: `POST_STAGE55_PREFLIGHT_NATIVE_THROW_RECOVERY_PASS injectedWrite=46 faultEntries=1 faultCompletions=0 faultWrites=46 retryEntries=1 retryCompletions=1 retryWrites=58 propagated=1 recovered=1 restored=1`.
 
 Acceptance requires completed/success all five existing jobs and this exact new marker plus the three old preflight markers on the new commit SHA. Syntax check is not Native acceptance. Do not merge, change main, or release.
+
+
+## Follow-up: valid extreme signed-bigint budget with physical Native accounting (2026-11-06)
+
+Prerequisite: exact-SHA run 42172555915, commit 406cdbda1ac2d7edc9259646143918acf8639761, **completed/success for all five jobs**; the Stage27 log contains the four accepted preflight markers, including the write-46 throw/retry witness. This is bounded QA within the accepted post-Stage55 integration, not Stage56 or a new calendar rule.
+
+Gap: the 97-probe preflight matrix checks enormous signed bigint values paired with an **invalid** execution budget, but has no accepted test for enormous valid bigint inputs with a *valid* one-step Native budget. A preflight rejection on invalid budget does not prove the valid budget path is free of precision loss or unbounded work.
+
+Independent arithmetic oracle: define H=10^500 and FOUNDATION=-15055671. Every physical signed gate advances 41+rank days, with 1<=rank<=922, hence 42<=gap<=963. The requested radius is 5782 days. Check H>FOUNDATION+6745 and -H<FOUNDATION-6745 before testing. For (c,t)=(H,H), maxPerSide=1, the first positive Patch11 call completes but cannot cover the upper neighbourhood; budget exhaustion must happen before the second call: exactly 1 Native entry/completion and 58 writes. For (c,t)=(-H,-H), the first positive gate is already above the negative upper neighbourhood and takes one physical call; one negative gate still cannot reach the lower neighbourhood. Budget exhaustion must happen before a second negative call: exactly 2 total Native entries/completions and 116 writes. Both calls must throw MonsterValidationError, not return an incomplete prefix. Total: 2 probes, 3 physical calls, 174 historical writes. Restore the Patch11 prototype in finally.
+
+Implementation scope: test/postStage55HugeSignedBudget.ts, one npm script/registration, one Stage27 CI grep and this contract appendix; no src, names, main, merge, release, new heavy CI job, or manual duplicate dispatch. The QA marker is:
+
+POST_STAGE55_HUGE_SIGNED_BUDGET_PASS probes=2 digits=501 positiveEntries=1 negativeEntries=2 completions=3 sharedWrites=174 restored=1
+
+Success of Node's syntax check is not TypeScript/Native acceptance. Accept only on a **new exact SHA** if all five Actions jobs complete successfully and the new Stage27 log contains this marker plus all four prior preflight markers; otherwise repair from the failing step/log and do not claim PASS.
