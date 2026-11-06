@@ -70,6 +70,8 @@ jobs:
             scalar_signed_status=$?
             sh build_and_run_bigint_scalar_multiply_signed.sh
             scalar_multiply_signed_status=$?
+            sh build_and_run_bigint_compare_order.sh
+            compare_order_status=$?
             echo "STAGE01_EXIT=$stage01_status"
             echo "CUTLET_BOUNDS_EXIT=$cutlet_status"
             echo "COMPOSITION_BOUNDS_EXIT=$composition_status"
@@ -85,7 +87,8 @@ jobs:
             echo "BIGINT_ADD_SUB_LONG_EXIT=$add_sub_long_status"
             echo "BIGINT_SCALAR_SIGNED_EXIT=$scalar_signed_status"
             echo "BIGINT_SCALAR_MULTIPLY_SIGNED_EXIT=$scalar_multiply_signed_status"
-            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ] || [ "$bigint_status" -ne 0 ] || [ "$divmod_status" -ne 0 ] || [ "$signed_status" -ne 0 ] || [ "$input_contract_status" -ne 0 ] || [ "$conversion_status" -ne 0 ] || [ "$scalar_square_status" -ne 0 ] || [ "$divmod_long_status" -ne 0 ] || [ "$regular_mod_signed_status" -ne 0 ] || [ "$multiply_long_status" -ne 0 ] || [ "$add_sub_long_status" -ne 0 ] || [ "$scalar_signed_status" -ne 0 ] || [ "$scalar_multiply_signed_status" -ne 0 ]; then
+            echo "BIGINT_COMPARE_ORDER_EXIT=$compare_order_status"
+            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ] || [ "$bigint_status" -ne 0 ] || [ "$divmod_status" -ne 0 ] || [ "$signed_status" -ne 0 ] || [ "$input_contract_status" -ne 0 ] || [ "$conversion_status" -ne 0 ] || [ "$scalar_square_status" -ne 0 ] || [ "$divmod_long_status" -ne 0 ] || [ "$regular_mod_signed_status" -ne 0 ] || [ "$multiply_long_status" -ne 0 ] || [ "$add_sub_long_status" -ne 0 ] || [ "$scalar_signed_status" -ne 0 ] || [ "$scalar_multiply_signed_status" -ne 0 ] || [ "$compare_order_status" -ne 0 ]; then
               exit 1
             fi
           } 2>&1 | tee evidence/stage01-native-fpc.log
