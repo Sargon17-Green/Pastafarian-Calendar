@@ -248,10 +248,14 @@
     (call $divmod_q_lt_m (global.get $Q) (global.get $R) (global.get $M) (local.get $n))
     (call $mul (global.get $LIMIT) (global.get $Q) (local.get $n))
     (call $copy (global.get $CUR) (local.get $first))
-    (block $accept (loop $again
-      (br_if $accept (i32.le_s (call $cmp (global.get $CUR) (global.get $LIMIT)) (i32.const 0)))
-      (call $ring_step (global.get $CUR) (local.get $step))
-      (br $again)))
+    ;; En [1,M], todos los rechazados forman la cola (LIMIT,M].
+    ;; +1 cruza M y llega a 1; -1 llega a LIMIT. Salto exacto sin
+    ;; iterar una distancia potencialmente de orden 2^125.
+    (if (i32.gt_s (call $cmp (global.get $CUR) (global.get $LIMIT)) (i32.const 0))
+      (then
+        (if (i32.eq (local.get $step) (i32.const 1))
+          (then (call $copy (global.get $CUR) (global.get $ONE)))
+          (else (call $copy (global.get $CUR) (global.get $LIMIT))))))
     ;; rango = ((x-1) mod N)+1.
     (call $sub_small (global.get $TMP0) (global.get $CUR) (i32.const 1))
     (call $divmod_q_lt_m (global.get $Q) (global.get $R) (global.get $TMP0) (local.get $n))
@@ -760,7 +764,7 @@
     (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
     (i32.eqz (call $cmp (global.get $RESULT) (global.get $N))))
 
-  ;; q3/q2 short boundary. Do not run first=M, step=-1 at q2 (astronomical).
+  ;; q3/q2 short boundary. q2 from M backward is now bounded by the exact skip.
   (func (export "test_discovery01_short_q23_m_forward_q3") (result i32)
     (call $init_constants)
     (call $sub_small (global.get $TMP1) (global.get $M) (i32.const 1))
@@ -818,4 +822,30 @@
     (call $add (global.get $FIRST) (global.get $N) (global.get $N))
     (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
     (i32.eqz (call $cmp (global.get $RESULT) (global.get $N))))
+
+  ;; Pruebas de liveness de la ruta corta q=2 (antes impracticables).
+  ;; M=3a+1, N=a+1, LIMIT=2N y el salto conserva rank=N.
+  (func (export "test_discovery01_short_q2_m_backward_jump") (result i32)
+    (call $init_constants)
+    (call $sub_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 3))
+    (call $divmod_q_lt_m (global.get $N) (global.get $R) (global.get $TMP1) (global.get $TMP2))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 1))
+    (call $copy (global.get $FIRST) (global.get $M))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+      (i32.eqz (call $cmp (global.get $CUR) (global.get $LIMIT)))))
+
+  (func (export "test_discovery01_short_q2_m_minus_one_backward_jump") (result i32)
+    (call $init_constants)
+    (call $sub_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 3))
+    (call $divmod_q_lt_m (global.get $N) (global.get $R) (global.get $TMP1) (global.get $TMP2))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 1))
+    (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 1))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+      (i32.eqz (call $cmp (global.get $CUR) (global.get $LIMIT)))))
 )
