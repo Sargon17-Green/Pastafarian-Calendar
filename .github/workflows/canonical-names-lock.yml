@@ -493,3 +493,22 @@ jobs:
         run: |
           set -euo pipefail
           sh ./run_stage26_limit_two.sh
+
+  native-stage27-remote-two:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNAT 13
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y gnat gprbuild
+          gnatmake --version
+      - name: Verify cross-axis remote 5779 and two-day real-date differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh ./run_stage27_remote_two.sh

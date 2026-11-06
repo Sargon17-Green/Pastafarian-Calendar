@@ -10,7 +10,7 @@ Public Ada Normative_Oracle.Calendar_Date supplies actual fields. Independent so
 
 Python selftest: uniqueness 1 + explicit coverage 1 + norms 2 + 25×5 domains 125 + repeat 5 + center 5 = **139**. Ada Native: 25×5 domains + 5 repeat + center-year 1 = **131**. Strict differential comparator: one exact Native marker, exactly 25 correctly formed unique ordered pair records, no extra/missing/duplicate pair, 25×5 = **125 numerical scalar equalities**. Python timeout 180s each, executable timeout 600s, CI timeout 15 minutes, nonzero exit on mismatch.
 
-## Acceptance — PENDING
+## Acceptance — ACCEPTED (bounded)
 Require same-SHA automatic push CI completed/success **28/28 jobs** including verify and native-stage26-limit-two; direct GNAT13 compile/bind/link log plus exact markers STAGE26_INDEPENDENT_LIMIT_TWO_SELFTEST_ASSERTIONS=139, STAGE26_NATIVE_LIMIT_TWO_ASSERTIONS=131, STAGE26_REAL_FIVEFIELD_SCALARS=125. Static QA and queued/in_progress runs are NOT Native PASS. No main/merge/release.
 
 ## 2026-11-06 — Stage26 first CI attempt and CI setup PATCH01
@@ -19,4 +19,7 @@ GitHub [push run 42125385167](https://github.com/Sargon17-Green/Pastafarian-Cale
 
 The one cancelled job was historical `native-stage21-edge-adjacent` (job `127588112069`), not the Stage26 job. Its `sudo apt-get update -qq; sudo apt-get install -y gnat gprbuild` setup started at 23:09:46 UTC and only printed GNATMAKE 13.3.0 at 23:24:35 UTC (about 14m49s), leaving fewer than 25 seconds of its 15-minute *job-level* timeout. Its Python selfcheck emitted 88 and GNAT compiled/bound/linked, but the Native executable was terminated at 23:24:58 UTC; its numerical comparison did **not** finish. There is no observed calendar mismatch. PATCH01 increases **only the Stage21 workflow job timeout from 15 to 30 minutes**; existing runner-level 180/600/180-second bounds, data, algorithms, assertion counts and 28-job gate stay unchanged. This is CI setup tolerance, not an Ada correctness fix.
 
-**Stage26 overall acceptance remains PENDING** until a new push-triggered run completes success with **28/28 jobs on the new exact SHA**, plus direct verification of required logs and markers. Do not treat the first cancelled run as a full-stage PASS; do not manually dispatch duplicate CI.
+**At the time PATCH01 was committed, Stage26 overall acceptance remained PENDING** until a new push-triggered run completes success with **28/28 jobs on the new exact SHA**, plus direct verification of required logs and markers. Do not treat the first cancelled run as a full-stage PASS; do not manually dispatch duplicate CI.
+
+## 2026-11-06 — final acceptance on PATCH01 SHA
+Exact `0a95e8f09a91eb43ca35ef1599cb4cb66449399e`, [automatic push CI 42173010037](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42173010037), completed/success **28/28 jobs**, including verify, Stage21 job 127744974912 and Stage26 job 127744974910. Direct GNATMAKE 13.3.0/gcc-13/gnatbind-13/gnatlink-13 evidence, 25 unique ordered pairs, Python selfcheck **139**, Ada Native **131**, five-field scalar differential **125**. Historical Stage21 direct markers **88/85/80** observed. Stage26 ACCEPTED for bounded 25-pair scope only; no main, merge or release.
