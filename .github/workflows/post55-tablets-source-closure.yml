@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-      - name: Fourteen bounded provenance and receipt tests
+      - name: Sixteen bounded provenance and receipt tests
         shell: bash
         run: |
           set -euo pipefail

@@ -100,7 +100,20 @@ def inspect_texts(texts: dict[str, bytes], locks: dict[str, str] = MODULE_BLOBS)
                        "E_CLOSURE_SEED_REFERENCE_" + node.id)
             if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
                     and node.func.id in {"getattr", "setattr", "delattr"}):
-                _check(False, "E_CLOSURE_REFLECTION")
+                # Existing structural witness accesses are fixed, not dynamic
+                # module/file/seed discovery. All other reflection fails closed.
+                allowed_witness_access = (
+                    module == "independent_date_combinatorics"
+                    and node.func.id == "getattr"
+                    and len(node.args) == 3 and not node.keywords
+                    and isinstance(node.args[0], ast.Name)
+                    and node.args[0].id == "witness"
+                    and isinstance(node.args[1], ast.Constant)
+                    and node.args[1].value in {"order_at_drop_46", "bowls"}
+                    and isinstance(node.args[2], ast.Constant)
+                    and node.args[2].value is None
+                )
+                _check(allowed_witness_access, "E_CLOSURE_REFLECTION")
             if (isinstance(node, ast.Name) and node.id == "lru_cache"):
                 _check(module == "independent_date_combinatorics",
                        "E_CLOSURE_UNDECLARED_CACHE")

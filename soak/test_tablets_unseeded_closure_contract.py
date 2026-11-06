@@ -83,6 +83,24 @@ class UnseededClosureContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ContractError, "E_CLOSURE_DYNAMIC"):
             inspect_texts(src, locks)
 
+    def test_unapproved_reflection_rejected_even_when_blob_relocked(self):
+        src = texts()
+        m = "independent_date_combinatorics"
+        src[m] += b'\nextra = getattr(witness, "secret_checkpoint", None)\n'
+        locks = dict(MODULE_BLOBS)
+        locks[m] = git_blob_sha(src[m])
+        with self.assertRaisesRegex(ContractError, "E_CLOSURE_REFLECTION"):
+            inspect_texts(src, locks)
+
+    def test_setattr_rejected_even_when_blob_relocked(self):
+        src = texts()
+        m = "independent_date_combinatorics"
+        src[m] += b'\nsetattr(witness, "order_at_drop_46", None)\n'
+        locks = dict(MODULE_BLOBS)
+        locks[m] = git_blob_sha(src[m])
+        with self.assertRaisesRegex(ContractError, "E_CLOSURE_REFLECTION"):
+            inspect_texts(src, locks)
+
     def test_receipt_only_validates_shape(self):
         result = validate_real_receipt(valid_receipt())
         self.assertEqual(result["typed_cells"], 15)
