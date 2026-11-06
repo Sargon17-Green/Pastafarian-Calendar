@@ -1,0 +1,9 @@
+# Stage55 AFTER35 — bounded transition contract (MATLAB+Polski)
+
+Source lock: exact branch HEAD ecd8ba2337e470264bd575187c19d6646ee62e73. Previous Native+Python run 42177272042 and canonical names lock 42177272112 completed/success at that SHA. AFTER34 artifact 13485207727 original ZIP SHA256 6d0ab2d280cb9a68b6c8f3b0a7544aa933379a688f5de6d70507e63552d550cb, seven CRC-valid members. AFTER34 checkpoint SHA256 2cddd7c7aa8ce3a0bb6fc1cc083c56655e256945f22496926ec43db3f60d8e6e.
+
+Inputs: SHA-pinned JSON AFTER34, year-5000 Appendix-A fixture (45 month lengths, 4244 days), source cursor-restoration and PATCH25 compatibility route. Exact suffix unranking selects one symbol in alphabet 1..24 at rank saved in the cursor. The next checkpoint must preserve the rank interval, decrement one remaining entry and increment steps to 35.
+
+Independent expectation (local preflight, NOT Native): 22/22 tiny brute controls; 24/24 exact child intervals, their sum equals the saved AFTER34 count; chosen symbol 3. Expected cursor: openedUpTo=23, closedUpTo=0, stepsComputed=35, sum(remaining)=4209. Expected row: POSITION=35 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=35 MONTH_INDEX=37 MONTH_DAY=2. Check invalid positions 0 and 36 reject. Python independent witness uses binomial insertion, not MATLAB adjoint rank selector; compare exactly one row of five fields byte-for-byte. Preserve prefix, checkpoint, Native/Python logs and digest, even on failure.
+
+Acceptance: exact commit SHA and completed logs; MATLAB R2026a STAGE55_THIRTY_FIFTH_NATIVE_PASS STEPS=35 REMAINING=4209 LETTER=3 REJECTED=2; Python SMALL=22 BLOCKS=24, rank-subinterval identities and exact expected row; Names Lock success; original artifact ZIP 7/7 CRC, recorded SHA256 and archived permanent copy. STOP on mismatch; do not claim a mathematical defect without reproducing it. This does NOT certify full-year canonical oracle, cross-engine soak, or Stage55 final PASS. LAST_COMPLETED_STAGE remains 54.
