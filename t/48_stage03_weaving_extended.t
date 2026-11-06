@@ -81,7 +81,7 @@ for my $p ([(4) x 6],[24]) {
         is("$rank",$unchanged,'呼叫不修改 BigInt 排名');
     }
 }
-for my $invalid ([],[0],[25],[(1) x 7],[12,13],[2,'3x'],undef) {
+for my $invalid ([],[0],[29],[(1) x 8],[14,15],[2,'3x'],undef) {
     ok(!eval { count_weavings($invalid); 1 },'拒絕超界與非數字月份設定');
 }
 for my $invalid_rank (0,-1,'abc',Math::BigInt->new('9'x60),undef) {

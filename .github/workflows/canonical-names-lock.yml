@@ -3564,3 +3564,64 @@ jobs:
           path: logs/stage15
           if-no-files-found: warn
           retention-days: 30
+
+  stage16-weaving-seven-months-native:
+    if: github.ref_name == 'Perl+國語'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Stage16 seven-month rank/unrank and independent oracle native QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage16
+          git rev-parse HEAD > logs/stage16/source.txt
+          perl -e 'die "Perl 5.40+ required\n" if $] < 5.040; print "$^V\n"' > logs/stage16/perl-version.txt
+          perl -Ilib -c lib/Pastafari/Monster/WeavingPrimitive.pm 2> logs/stage16/syntax.stderr
+          perl -Ilib -c t/61_stage16_weaving_seven_months.t 2>> logs/stage16/syntax.stderr
+          test "$(grep -c 'syntax OK' logs/stage16/syntax.stderr)" -eq 2
+          test "$(wc -l < logs/stage16/syntax.stderr)" -eq 2
+          set +e
+          (
+            ulimit -v 393216
+            ulimit -c 0
+            timeout --signal=TERM --kill-after=5s 120s \
+              prove -e 'perl -CS -Ilib' -v t/61_stage16_weaving_seven_months.t \
+              > logs/stage16/test.stdout 2> logs/stage16/test.stderr
+          )
+          ec=$?
+          set -e
+          printf '%s\n' "$ec" > logs/stage16/test.exit
+          cat logs/stage16/test.stdout
+          cat logs/stage16/test.stderr >&2
+          test "$ec" -eq 0
+          test ! -s logs/stage16/test.stderr
+          grep -q 'All tests successful.' logs/stage16/test.stdout
+          grep -q 'Result: PASS' logs/stage16/test.stdout
+          grep -q 'Tests=1053' logs/stage16/test.stdout
+          grep -q 'STAGE16_EXHAUSTIVE_PROFILES=8' logs/stage16/test.stdout
+          grep -q 'STAGE16_EXHAUSTIVE_POSITIONS=39' logs/stage16/test.stdout
+          grep -q 'STAGE16_CATALAN7_RANKS=429' logs/stage16/test.stdout
+          grep -q 'STAGE16_LARGE_PROFILES=5' logs/stage16/test.stdout
+          grep -q 'STAGE16_INVALID_PROFILES=14' logs/stage16/test.stdout
+          grep -q 'STAGE16_INVALID_RANKS=10' logs/stage16/test.stdout
+          grep -q 'STAGE16_INVALID_WORDS=8' logs/stage16/test.stdout
+          grep -q 'STAGE16_FULL_YEAR_GENERATOR_NOT_VERIFIED' logs/stage16/test.stdout
+          echo 'STAGE16_NATIVE_PASS=1' > logs/stage16/result.txt
+          cat logs/stage16/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perl-stage16-weaving-seven-months-native
+          path: logs/stage16
+          if-no-files-found: warn
+          retention-days: 30
