@@ -1,0 +1,100 @@
+name: SQL Tamil Slice23 Month Names PG17
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/25_stage02_month_names.sql'
+      - 'sql/test/136_stage02_month_names_oracle.py'
+      - 'sql/test/137_stage02_month_names_native.sql'
+      - 'sql/test/138_stage02_month_names_isolation.sql'
+      - 'sql/test/139_stage02_month_names_differential.sql'
+      - '.github/workflows/sql-tamil-stage02-month-names-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  slice23:
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [native, isolation, a1, a2, b1, b2, c1, c2, d1, d2]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Source-lock and oracle preflight
+        shell: bash
+        env:
+          CASE_LABEL: ${{ matrix.case }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p slice23-evidence
+          echo "Git SHA: $GITHUB_SHA" > slice23-evidence/versions.txt
+          echo "Case: $CASE_LABEL" >> slice23-evidence/versions.txt
+          sha256sum sql/25_stage02_month_names.sql sql/test/136_stage02_month_names_oracle.py sql/test/10_normative_reference.sql > slice23-evidence/source-sha256.txt
+          if [ "$CASE_LABEL" = native ]; then
+            python3 sql/test/136_stage02_month_names_oracle.py --self-test | tee slice23-evidence/python-selftest.txt
+            python3 sql/test/136_stage02_month_names_oracle.py --emit-sql > slice23-evidence/goldens.sql
+            python3 sql/test/136_stage02_month_names_oracle.py --emit-hashes > slice23-evidence/golden-hashes.txt
+            test "$(grep -c '^INSERT INTO slice23_goldens VALUES' slice23-evidence/goldens.sql)" -eq 64
+            test "$(wc -l < slice23-evidence/golden-hashes.txt)" -eq 64
+            sha256sum slice23-evidence/goldens.sql slice23-evidence/golden-hashes.txt > slice23-evidence/generated-sha256.txt
+          elif [ "$CASE_LABEL" != isolation ]; then
+            case "$CASE_LABEL" in a1|a2|b1|b2|c1|c2|d1|d2) ;; *) exit 64 ;; esac
+            test "$(grep -o '__CASE_LABEL__' sql/test/139_stage02_month_names_differential.sql | wc -l)" -eq 3
+            sed "s/__CASE_LABEL__/$CASE_LABEL/g" sql/test/139_stage02_month_names_differential.sql > slice23-evidence/differential-case.sql
+            ! grep -q '__CASE_LABEL__' slice23-evidence/differential-case.sql
+            sha256sum slice23-evidence/differential-case.sql > slice23-evidence/generated-sha256.txt
+          fi
+      - name: PostgreSQL 17 Native
+        shell: bash
+        env:
+          CASE_LABEL: ${{ matrix.case }}
+        run: |
+          set -euo pipefail
+          docker run -d --name slice23-pg --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres slice23-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres slice23-pg postgres --version | tee -a slice23-evidence/versions.txt
+          args=()
+          for i in $(seq -w 0 25); do
+            path=$(find sql -maxdepth 1 -name "$i"'_*.sql' -print)
+            test "$(printf '%s\n' "$path" | wc -l)" -eq 1
+            test -f "$path"
+            args+=(-f "/work/$path")
+          done
+          db=postgres
+          if [ "$CASE_LABEL" = native ]; then
+            args+=(-f /work/slice23-evidence/goldens.sql -f /work/sql/test/137_stage02_month_names_native.sql)
+          elif [ "$CASE_LABEL" = isolation ]; then
+            args+=(-f /work/sql/test/138_stage02_month_names_isolation.sql)
+          else
+            db=slice23_diff
+            docker exec -u postgres slice23-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres -c "CREATE DATABASE $db"
+            args+=(-f /work/sql/test/10_normative_reference.sql -f /work/slice23-evidence/differential-case.sql)
+          fi
+          docker exec -u postgres slice23-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d "$db" "${args[@]}" 2>&1 | tee slice23-evidence/result.txt
+          case "$CASE_LABEL" in
+            native) grep -q 'slice23_native_all_green' slice23-evidence/result.txt ;;
+            isolation) grep -q 'slice23_isolation_all_green' slice23-evidence/result.txt ;;
+            *) grep -q 'exact_array' slice23-evidence/result.txt ;;
+          esac
+      - name: Archive original results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice23-${{ matrix.case }}
+          path: slice23-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove container
+        if: always()
+        shell: bash
+        run: docker rm -f slice23-pg 2>/dev/null || true
