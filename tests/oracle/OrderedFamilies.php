@@ -359,6 +359,69 @@ final class WeavingCounter
         return $base->mul($this->suffixValue($openedUpTo + 1, $size));
     }
 
+    /**
+     * Exact one-step branch counts for months already opened.
+     *
+     * For remaining active counts a_i and prefix sums S_i, the number
+     * satisfying the ordered closing frontier is
+     * F = product_i C(S_i-1, a_i-1).
+     * After decrementing month j, preceding factors stay unchanged,
+     * its own factor becomes C(S_j-2, a_j-2), and following factors
+     * become C(S_i-2, a_i-1). Pascal's identity supplies the own
+     * factor from one binomial and one exact small-divisor quotient.
+     * All opened candidates share the unopened suffix H[o+1][S-1].
+     * This avoids recomputing the complete product for each candidate.
+     *
+     * @param list<int> $remaining
+     * @return array<int,BigInt>
+     */
+    private function openedBranchBlocks(array $remaining, int $opened, int $closed): array
+    {
+        if ($opened <= $closed) {
+            return [];
+        }
+        $prefix = [$closed => BigInt::one()];
+        $earlierDecrement = [];
+        $ownDecrement = [];
+        $activeTotal = 0;
+        for ($j = $closed + 1; $j <= $opened; ++$j) {
+            $a = $remaining[$j - 1];
+            if ($a < 1) {
+                throw new RuntimeException('WEAVING_OPEN_FRONTIER');
+            }
+            $activeTotal += $a;
+            $all = self::choose($activeTotal - 1, $a - 1);
+            $prefix[$j] = $prefix[$j - 1]->mul($all);
+            if ($j === $closed + 1) {
+                $earlier = BigInt::zero();
+            } else {
+                [$earlier, $remainder] = $all->mulSmall($activeTotal - $a)
+                    ->divMod(BigInt::fromInt($activeTotal - 1));
+                if (!$remainder->isZero()) {
+                    throw new RuntimeException('WEAVING_BRANCH_NONINTEGER');
+                }
+            }
+            $earlierDecrement[$j] = $earlier;
+            $ownDecrement[$j] = $all->sub($earlier);
+        }
+        $suffix = [$opened + 1 => BigInt::one()];
+        for ($j = $opened; $j > $closed; --$j) {
+            $suffix[$j] = $suffix[$j + 1]->mul($earlierDecrement[$j]);
+        }
+        $unopened = $opened === count($remaining)
+            ? BigInt::one()
+            : $this->suffixValue($opened + 1, $activeTotal - 1);
+        $blocks = [];
+        for ($j = $closed + 1; $j <= $opened; ++$j) {
+            if ($remaining[$j - 1] === 1 && $j !== $closed + 1) {
+                continue;
+            }
+            $blocks[$j] = $prefix[$j - 1]->mul($ownDecrement[$j])
+                ->mul($suffix[$j + 1])->mul($unopened);
+        }
+        return $blocks;
+    }
+
     /** @param list<int> $remaining */
     private function legal(array $remaining, int $openedUpTo, int $closedUpTo, int $j): bool
     {
@@ -408,12 +471,15 @@ final class WeavingCounter
         $targetLength = array_sum($this->lengths);
         self::traceStage55('weave_unrank_begin', count($this->lengths), $targetLength);
         while (count($out) < $targetLength) {
+            $openedBlocks = $this->openedBranchBlocks($remaining, $opened, $closed);
             for ($j = 1; $j <= count($remaining); $j++) {
                 if (!$this->legal($remaining, $opened, $closed, $j)) {
                     continue;
                 }
                 [$nextRemaining, $nextOpened, $nextClosed] = $this->apply($remaining, $opened, $closed, $j);
-                $block = $this->countSuffix($nextRemaining, $nextOpened, $nextClosed);
+                $block = $j <= $opened
+                    ? ($openedBlocks[$j] ?? throw new RuntimeException('WEAVING_OPEN_BRANCH_MISSING'))
+                    : $this->countSuffix($nextRemaining, $nextOpened, $nextClosed);
                 if ($r->compare($block) > 0) {
                     $r = $r->sub($block);
                     continue;
