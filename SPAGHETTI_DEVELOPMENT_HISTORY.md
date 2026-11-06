@@ -239,3 +239,9 @@ Nula plena 46-drop claim, nula main/merge. LAST_COMPLETED_STAGE=1.
 
 ## Stage2 D8 first CI failure triage / bounded timing patch (2026-11-05)
 On 34a966d9fd58146c91cd6ba5dae0704c9c1d53ae completed Stage2 run 41879013512/job 126746318536 failed at Discovery07 regression by timeout exit=124 at 420s; D1-D6 PASS, D8 step skipped, no D8 native acceptance. Same immutable Stage7 production and test had 5 cases/53 assertions PASS in about 251s at 3e56c8ab (run 41872294990). Stage1 41879013378 PASS with STAGE_1_TESTI_PASIS / NATIVE_STAGE_1_VERIFICATION=PASS; Canonical Names 41879013339 SUCCESS; same SHA. No semantic discrepancy demonstrated. Targeted CI-only guard: allow 650s per D7/D8, 30min job, add case BEGIN/END diagnostic markers without altering test counts or algorithm; new SHA Native remains PENDING, not PASS. No main/merge.
+
+## Stage 2 — DISCOVERY09 Native acceptita (2026-11-06)
+SHA 3efd58c2e5a0276e6ac2efb88e677b9bc4726ca8: Stage2 run 42125675962/job 127589109092 completed SUCCESS kun STAGE_2_DISCOVERY_09_CASES_PASIS 4, STAGE_2_DISCOVERY_09_CHECKS_PASIS 20 e NATIVE_STAGE_2_DISCOVERY_09_VERIFICATION=PASS. D1–D8 regressioni SUCCESS. Stage1 run 42125675924/job 127589109571 completed SUCCESS kun STAGE_1_TESTI_PASIS e NATIVE_STAGE_1_VERIFICATION=PASS. Names Lock 42125675872 completed SUCCESS. D9 acceptita; plena Stage2 ne acceptita; LAST_COMPLETED_STAGE=1.
+
+## Stage 2 — DISCOVERY10 (visible 11–15; Native PENDING)
+Production-only exact BI extension uzas verified prior/initial/grind helpers; test-only normative nr.visible.one independent de production. 1 valida + 3 nevalida, 20 target asserti. Separata Native CI <=900s test, <=20m job, D1–D9, Stage1 e Names still obligatory same SHA. Ca candidate NE deklaras Native PASS; nula main/merge.

@@ -1,0 +1,77 @@
+name: Logo Stage 2 Discovery 10 Native
+
+on:
+  push:
+    branches:
+      - 'Logo\+Ido'
+  pull_request:
+    branches:
+      - 'Logo\+Ido'
+
+permissions:
+  contents: read
+
+jobs:
+  native-stage-2-discovery-10:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out this branch
+        uses: actions/checkout@v4
+
+      - name: Build pinned native UCBLogo 6.2.5 without wxWidgets
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Ubuntu's ucblogo binary uses a wxWidgets terminal: it does not
+          # consume redirected stdin or expose Logo's PRINT on stdout.
+          # A --disable-wx build makes this a genuine headless CLI test.
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 \
+            https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          expected=a0215433f07384e4c42fe247525867f11e6f32f7
+          actual="$(git -C "$source_dir" rev-parse HEAD)"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "::error::UCBLogo tag commit changed: $actual"
+            exit 1
+          fi
+          cd "$source_dir"
+          autoreconf -fi
+          # UCBLogo 6.2.5 uses pre-C23 empty-parameter declarations (nop()).
+          # Ubuntu 26.04 compilers default to C23, which rejects legacy calls.
+          # Explicitly compile in GNU C17 mode; do not patch upstream source.
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" \
+            --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          binary="$RUNNER_TEMP/ucblogo-headless/bin/ucblogo"
+          test -x "$binary"
+          echo "LOGO_BIN=$binary" >> "$GITHUB_ENV"
+          echo "HEADLESS_LOGO_SOURCE_SHA=$actual"
+
+
+      - name: Verify Stage 2 Discovery 10 visible drops 11 through 15 against independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/stage02-discovery10.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 900s \
+            stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery10_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            result=$?
+            cat "$log"
+            echo "::error::Stage2 Discovery10 native failure/timeout (exit=$result)"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_10_CASES_PASIS 4' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_10_CHECKS_PASIS 20' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_10_PASIS' "$log"
+          if grep -Eq 'STAGE_2_DISCOVERY_10_TESTO_FALIIS|STAGE_2_DISCOVERY_10_FALIIS|STAGE_2_DISCOVERY_10_SHAPE_FALIIS|STAGE_2_DISCOVERY_10_ORACLE_SHAPE_FALIIS|STAGE_2_DISCOVERY_10_CASE_COUNT_FALIIS|STAGE_2_DISCOVERY_10_CHECK_COUNT_FALIIS|I don.t know how to|not enough inputs' "$log"; then
+            echo "::error::Stage2 Discovery10 failure marker"
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_10_VERIFICATION=PASS'

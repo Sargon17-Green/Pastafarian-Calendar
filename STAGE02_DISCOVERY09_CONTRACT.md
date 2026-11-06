@@ -1,6 +1,6 @@
 # Stage2 / DISCOVERY09 — exact visible values 6–10 (Logo + Ido)
 
-State: IMPLEMENTED_NATIVE_PENDING. D8 accepted on source SHA 023211272cf76b5b56881575d659ba4a2410185e: Native Stage2 run 41978796743/job 127083813737 completed SUCCESS, with D7 5/53 and D8 4/34, all earlier Stage2 regressions and original Stage1 + Names success at the same SHA. LAST_COMPLETED_STAGE=1. No full Stage2 acceptance.
+State: ACCEPTED_NATIVE 2026-11-06. Verified SHA 3efd58c2e5a0276e6ac2efb88e677b9bc4726ca8: Stage2 42125675962/job 127589109092 completed SUCCESS (4 cases/20 assertions; NATIVE_STAGE_2_DISCOVERY_09_VERIFICATION=PASS; D1–D8 regressions success); original Stage1 42125675924/job 127589109571 completed SUCCESS with NATIVE_STAGE_1_VERIFICATION=PASS; Names Lock 42125675872 SUCCESS. LAST_COMPLETED_STAGE=1; no full Stage2 acceptance.  D8 accepted on source SHA 023211272cf76b5b56881575d659ba4a2410185e: Native Stage2 run 41978796743/job 127083813737 completed SUCCESS, with D7 5/53 and D8 4/34, all earlier Stage2 regressions and original Stage1 + Names success at the same SHA. LAST_COMPLETED_STAGE=1. No full Stage2 acceptance.
 
 ## Deterministic I/O
 Input: Stage2 context returned by D8 with status=VISIBLE_PREFIX_ONLY, visiblePrefix exactly five canonical exact BI values, 46 stone quintets, seven hiddenSeeds, five workcounts, original and normalized dates. Other statuses, missing list, or wrong-length prefix return exact original context with no metrics/log side effects.
