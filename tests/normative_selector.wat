@@ -848,4 +848,74 @@
     (i32.and
       (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
       (i32.eqz (call $cmp (global.get $CUR) (global.get $LIMIT)))))
+
+  ;; Q1/Q2/Q3 independent bounded-differential production probes.
+  (func (export "test_discovery01_short_diff_q1_m_backward") (result i32)
+    (call $init_constants)
+    (call $add_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 2))
+    (call $divmod_q_lt_m (global.get $N) (global.get $R) (global.get $TMP1) (global.get $TMP2))
+    (call $copy (global.get $FIRST) (global.get $M))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+      (i32.eqz (call $cmp (global.get $CUR) (global.get $N)))))
+
+  (func (export "test_discovery01_short_diff_q1_n_forward") (result i32)
+    (call $init_constants)
+    (call $add_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 2))
+    (call $divmod_q_lt_m (global.get $N) (global.get $R) (global.get $TMP1) (global.get $TMP2))
+    (call $copy (global.get $FIRST) (global.get $N))
+    (call $choose (global.get $FIRST) (i32.const 1) (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+      (i32.eqz (call $cmp (global.get $CUR) (global.get $N)))))
+
+  (func (export "test_discovery01_short_diff_q2_limit_plus_one_forward") (result i32)
+    (call $init_constants)
+    (call $sub_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 3))
+    (call $divmod_q_lt_m (global.get $N) (global.get $R) (global.get $TMP1) (global.get $TMP2))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 1))
+    (call $add (global.get $FIRST) (global.get $N) (global.get $N))
+    (call $add_small (global.get $FIRST) (global.get $FIRST) (i32.const 1))
+    (call $choose (global.get $FIRST) (i32.const 1) (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $ONE)))
+      (i32.eqz (call $cmp (global.get $CUR) (global.get $ONE)))))
+
+  (func (export "test_discovery01_short_diff_q2_n_plus_one_backward") (result i32)
+    (call $init_constants)
+    (call $sub_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 3))
+    (call $divmod_q_lt_m (global.get $N) (global.get $R) (global.get $TMP1) (global.get $TMP2))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 1))
+    (call $add_small (global.get $FIRST) (global.get $N) (i32.const 1))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $ONE)))
+      (i32.eqz (call $cmp (global.get $CUR) (global.get $FIRST)))))
+
+  (func (export "test_discovery01_short_diff_q3_m_backward") (result i32)
+    (call $init_constants)
+    (call $add_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 4))
+    (call $divmod_q_lt_m (global.get $N) (global.get $R) (global.get $TMP1) (global.get $TMP2))
+    (call $copy (global.get $FIRST) (global.get $M))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+      (i32.eqz (call $cmp (global.get $CUR) (global.get $LIMIT)))))
+
+  (func (export "test_discovery01_short_diff_q3_m_forward") (result i32)
+    (call $init_constants)
+    (call $add_small (global.get $TMP1) (global.get $M) (i32.const 1))
+    (call $from_u64 (global.get $TMP2) (i64.const 4))
+    (call $divmod_q_lt_m (global.get $N) (global.get $R) (global.get $TMP1) (global.get $TMP2))
+    (call $copy (global.get $FIRST) (global.get $M))
+    (call $choose (global.get $FIRST) (i32.const 1) (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $ONE)))
+      (i32.eqz (call $cmp (global.get $CUR) (global.get $ONE)))))
 )
