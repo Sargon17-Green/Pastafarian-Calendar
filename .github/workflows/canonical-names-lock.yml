@@ -151,6 +151,38 @@ jobs:
           done
           echo 'STAGE01_NORMATIVE_CACHE_TOTAL=2/2 SEQUENCES; 30/30 EXACT FIELDS'
           echo 'Original normative date same-process cache reuse: 2/2 sequences, 30/30 pinned exact fields. Not full Stage1 acceptance.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Gate three-year same-process cache revisit (5 calls; 25 exact fields)
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          output="$( (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 160s build/stage01_normative_cache_reuse_probe three-year) 2>&1)"
+          exit_code=$?
+          set -e
+          printf '%s\n' "$output"
+          echo "STAGE01_NORMATIVE_CACHE_THREE_YEAR_EXIT=$exit_code LIMIT=160 MEMORY_KIB=1048576"
+          if [[ "$exit_code" -ne 0 ]] ||
+             ! grep -Fxq 'STAGE01_NORMATIVE_CACHE_PASS MODE=three-year CALLS=5 MATCHED_FIELDS=25/25' <<< "$output"; then
+            echo "::error::Three-year original normative cache revisit failed or timed out"
+            exit 1
+          fi
+          expected_targets=(-15057703 -15055671 -15053458 -15055671 -15057703)
+          expected_fixtures=(1 3 2 3 1)
+          for idx in 1 2 3 4 5; do
+            fixture="${expected_fixtures[$((idx-1))]}"
+            target="${expected_targets[$((idx-1))]}"
+            if ! grep -Fxq "STAGE01_NORMATIVE_CACHE_STEP=$idx MODE=three-year FIXTURE=$fixture TARGET=$target MATCHED_FIELDS=5/5" <<< "$output"; then
+              echo "::error::Missing/mismatched three-year cache step $idx"
+              exit 1
+            fi
+          done
+          actual="$(grep -c '^STAGE01_NORMATIVE_CACHE_STEP=' <<< "$output" || true)"
+          if [[ "$actual" -ne 5 ]]; then
+            echo "::error::Expected five cache steps, observed $actual"
+            exit 1
+          fi
+          echo 'STAGE01_NORMATIVE_CACHE_THREE_YEAR_PASS=5/5 CALLS; 25/25 EXACT FIELDS'
+          echo 'Original normative cache across years 4999/5000/5001 and revisits: 5/5 calls, 25/25 exact Python-verified fields (160s/1GiB). Not full Stage1 acceptance.' >> "$GITHUB_STEP_SUMMARY"
   native-compile:
     runs-on: ubuntu-24.04
     timeout-minutes: 8
