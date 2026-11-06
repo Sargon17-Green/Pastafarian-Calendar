@@ -73,6 +73,8 @@ def main():
             reason = "RSS_LIMIT"
             break
     elapsed = monotonic() - started
+    print("WEAVING_SPARSE_PROFILE_REUSED_TRANSFERS="
+          + str(state.reused_candidate_transfers))
     print("WEAVING_SPARSE_PROFILE_SYMBOLS=" + str(len(prefix)))
     print("WEAVING_SPARSE_PROFILE_BLOCKS_SECONDS=" + format(block_seconds, ".3f"))
     print("WEAVING_SPARSE_PROFILE_TAKE_SECONDS=" + format(take_seconds, ".3f"))

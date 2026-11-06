@@ -137,6 +137,10 @@ class SparseDualWeaving:
             self.states[j], self.sizes[j] = v, n
         self.total = v.total()
         self.cached = None
+        # Candidate j's first downstream transfer is already evaluated in
+        # blocks(); retain that exact state until take() consumes the choice.
+        self.cached_candidate_states = None
+        self.reused_candidate_transfers = 0
 
     def eligible(self, c):
         if not 1 <= c <= self.m:
@@ -156,12 +160,14 @@ class SparseDualWeaving:
         # suffix only sees the candidate as an older letter for every c<j.
         adj = [1] * (self.n + 1)
         out = [0] * (self.m + 1)
+        prepared = [None] * (self.m + 1)
         for j in range(self.m, 1, -1):
             if self.eligible(j):
                 own = extend_spec(self.specs[j], j, j)
                 v = sparse_transfer(self.states[j-1], self.sizes[j-1],
                              self.lengths[j-1], own)
                 out[j] = v.dot(adj)
+                prepared[j] = v
             older = extend_spec(self.specs[j], j, 1)
             adj = self.transpose(adj, self.sizes[j-1],
                                  self.lengths[j-1], older)
@@ -170,6 +176,7 @@ class SparseDualWeaving:
         if sum(out) != self.total:
             raise AssertionError(("candidate partition", self.position))
         self.cached = tuple(out)
+        self.cached_candidate_states = tuple(prepared)
         return self.cached
 
     def take(self, c):
@@ -179,11 +186,20 @@ class SparseDualWeaving:
         if ways <= 0:
             raise ValueError("no valid continuation")
         start = max(2, c)
+        prepared = (self.cached_candidate_states[c]
+                    if c > 1 and self.cached_candidate_states is not None
+                    else None)
         v = self.states[start-1]
         for j in range(start, self.m + 1):
             self.specs[j] = extend_spec(self.specs[j], j, c)
-            v = sparse_transfer(v, self.sizes[j-1], self.lengths[j-1],
-                         self.specs[j])
+            if j == c and prepared is not None:
+                # The same exact transfer from states[c-1] was needed for
+                # the candidate partition; avoid recomputing it in take().
+                v = prepared
+                self.reused_candidate_transfers += 1
+            else:
+                v = sparse_transfer(v, self.sizes[j-1], self.lengths[j-1],
+                                    self.specs[j])
             self.states[j] = v
         self.used[c] += 1
         self.position += 1
@@ -193,6 +209,7 @@ class SparseDualWeaving:
             self.closed += 1
         self.total = ways
         self.cached = None
+        self.cached_candidate_states = None
         assert self.total == self.states[self.m].total()
 
 
@@ -236,7 +253,7 @@ def test_finite():
               (2, 2, 3, 3), (3, 3, 2, 2), (4, 3, 2),
               (2, 4, 3), (1, 2, 1, 3), (3, 1, 2, 2)]
     cases = list(dict.fromkeys(cases))
-    roundtrips = partitions = 0
+    roundtrips = partitions = reused = 0
     for lengths in cases:
         accepted = brute_words(lengths)
         count, oracle_rank, oracle_unrank, _ = poset_oracle(lengths)
@@ -248,9 +265,23 @@ def test_finite():
             state = SparseDualWeaving(lengths)
             for symbol in word:
                 assert sum(state.blocks()) == state.total
+                expected_first = (
+                    sparse_transfer(
+                        state.states[symbol-1], state.sizes[symbol-1],
+                        state.lengths[symbol-1],
+                        extend_spec(state.specs[symbol], symbol, symbol))
+                    if symbol > 1 else None)
+                old_hits = state.reused_candidate_transfers
                 state.take(symbol)
+                hit = state.reused_candidate_transfers - old_hits
+                assert hit == (1 if symbol > 1 else 0)
+                if expected_first is not None:
+                    assert state.states[symbol] == expected_first
+                reused += hit
                 partitions += 1
     assert len(cases) == 137 and roundtrips == 1982 and partitions == 8361
+    assert 0 < reused < partitions
+    print("WEAVING_SPARSE_FINITE_REUSED_TRANSFERS=" + str(reused))
     print("WEAVING_SPARSE_FINITE_CASES=137")
     print("WEAVING_SPARSE_FINITE_RANK_ROUNDTRIPS=1982")
     print("WEAVING_SPARSE_FINITE_PARTITIONS=8361")
