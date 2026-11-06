@@ -911,3 +911,64 @@ jobs:
             build/stage01-expanded-diff.log
             build/stage01-expanded-selftest.log
           if-no-files-found: warn
+
+  stage01-mixed-cache:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran for original mixed-date cache regression
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile original normative mixed-date cache probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          flags=(-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build)
+          gfortran "${flags[@]}" -c src/big_integer.f90 -o build/big_integer.o
+          gfortran "${flags[@]}" -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran "${flags[@]}" -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran "${flags[@]}" -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran "${flags[@]}" -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran "${flags[@]}" test/stage01_normative_cache_reuse_probe.f90 \
+            build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o build/normative_oracle_calendar.o \
+            -o build/stage01_normative_cache_reuse_probe
+          test -x build/stage01_normative_cache_reuse_probe
+      - name: Gate eight same-process mixed dates with exact independent Python fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 240s \
+            build/stage01_normative_cache_reuse_probe mixed-year) > build/stage01-mixed-cache.log 2>&1
+          rc=$?
+          set -e
+          cat build/stage01-mixed-cache.log
+          echo "STAGE01_NORMATIVE_MIXED_CACHE_EXIT=$rc LIMIT=240 MEMORY_KIB=1048576"
+          if [[ "$rc" -ne 0 ]] ||
+             ! grep -Fxq 'STAGE01_NORMATIVE_CACHE_PASS MODE=mixed-year CALLS=8 MATCHED_FIELDS=40/40' build/stage01-mixed-cache.log; then
+            echo "::error::Original normative mixed-date cache failed or timed out"
+            exit 1
+          fi
+          expected_fixtures=(1 4 3 5 2 6 4 5)
+          expected_targets=(-15057703 -15057840 -15055671 -15055400 -15053458 -15053321 -15057840 -15055400)
+          for idx in {1..8}; do
+            fixture="${expected_fixtures[$((idx-1))]}"
+            target="${expected_targets[$((idx-1))]}"
+            grep -Fxq "STAGE01_NORMATIVE_CACHE_STEP=$idx MODE=mixed-year FIXTURE=$fixture TARGET=$target MATCHED_FIELDS=5/5" build/stage01-mixed-cache.log || { echo "::error::Mixed cache step $idx missing"; exit 1; }
+          done
+          actual="$(grep -c '^STAGE01_NORMATIVE_CACHE_STEP=' build/stage01-mixed-cache.log || true)"
+          test "$actual" -eq 8
+          echo 'STAGE01_NORMATIVE_MIXED_CACHE_PASS=8/8 CALLS; 40/40 EXACT FIELDS'
+          echo 'Original Fortran cache mixed dates, 8/8 calls and 40/40 pinned Python fields; not full Stage1 acceptance.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve mixed-date cache evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-mixed-cache
+          path: build/stage01-mixed-cache.log
+          if-no-files-found: warn
+          retention-days: 30
