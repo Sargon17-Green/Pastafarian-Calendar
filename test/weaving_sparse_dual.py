@@ -103,6 +103,38 @@ def sparse_transfer(previous, n, k, spec):
     return SparseVector(start+left, tuple(out[left:right]))
 
 
+
+def _reference_free_gap_transfer(previous, n, k, spec):
+    """Unvectorized pre-optimization recurrence for paired performance QA only.
+
+    This intentionally keeps the original Python loop, as an exact comparator,
+    independent of the new accumulate/map implementation. It is not a new
+    occurrence-poset oracle and is never used by the production algorithm.
+    """
+    q, fixed_sum, _, tail = spec
+    if fixed_sum or tail:
+        raise ValueError("free-gap reference requires zero fixed_sum and tail")
+    first = max(0, q)
+    if first > n:
+        return SparseVector(0, ())
+    prefix = previous.prefix(first)
+    coefficients = free_gap_coefficients(n, k)
+    out = []
+    for i in range(first, n + 1):
+        if i > first and previous.offset <= i < previous.offset + len(previous.values):
+            prefix += previous.values[i - previous.offset]
+        out.append(prefix * coefficients[n - i])
+    left = 0
+    while left < len(out) and out[left] == 0:
+        left += 1
+    if left == len(out):
+        return SparseVector(0, ())
+    right = len(out)
+    while right > left and out[right - 1] == 0:
+        right -= 1
+    return SparseVector(first + 1 + left, tuple(out[left:right]))
+
+
 def sparse_transpose(after, n, k, spec):
     """Exact T^t, closed form for single-gap rows; recurrence otherwise."""
     q, fixed_sum, first_fixed, tail = spec
@@ -400,6 +432,56 @@ def test_finite():
     print("WEAVING_SPARSE_FINITE_RESULT=PASS")
 
 
+
+def test_paired_hot_month_free_gap(state):
+    """Compare both exact kernels on identical large integer state, one runner.
+
+    This is diagnostic A/B telemetry, not a cross-run speedup assertion or
+    a full-length median rank/unrank acceptance. Order ABBA mitigates drift.
+    """
+    from statistics import median
+
+    j = state.m  # Month 45; the independently observed hotspot.
+    previous, n = state.states[j-1], state.sizes[j-1]
+    k, spec = state.lengths[j-1], state.specs[j]
+    assert spec[1] == 0 and spec[3] == 0 and spec[0] <= n
+    assert len(previous.values) > 0 and previous.total() > 0
+    expected = _reference_free_gap_transfer(previous, n, k, spec)
+    assert sparse_transfer(previous, n, k, spec) == expected
+
+    samples = {"loop": [], "accumulate": []}
+    methods = {"loop": _reference_free_gap_transfer,
+               "accumulate": sparse_transfer}
+    checks = 1
+    # Six samples per kernel, interleaved as ABBA to reduce time drift.
+    for _ in range(3):
+        for key in ("loop", "accumulate", "accumulate", "loop"):
+            started = monotonic()
+            result = methods[key](previous, n, k, spec)
+            samples[key].append(monotonic() - started)
+            assert result == expected
+            checks += 1
+    assert checks == 13
+    old = median(samples["loop"])
+    new = median(samples["accumulate"])
+    print("WEAVING_SPARSE_HOT_MONTH_AB_MONTH=" + str(j))
+    print("WEAVING_SPARSE_HOT_MONTH_AB_N=" + str(n))
+    print("WEAVING_SPARSE_HOT_MONTH_AB_INPUT_CELLS=" +
+          str(len(previous.values)))
+    print("WEAVING_SPARSE_HOT_MONTH_AB_OUTPUT_CELLS=" +
+          str(len(expected.values)))
+    print("WEAVING_SPARSE_HOT_MONTH_AB_CHECKS=" + str(checks))
+    print("WEAVING_SPARSE_HOT_MONTH_AB_LOOP_MEDIAN_SECONDS=" +
+          format(old, ".6f"))
+    print("WEAVING_SPARSE_HOT_MONTH_AB_ACCUMULATE_MEDIAN_SECONDS=" +
+          format(new, ".6f"))
+    print("WEAVING_SPARSE_HOT_MONTH_AB_RATIO_NEW_OVER_OLD=" +
+          format(new / old, ".4f") if old else
+          "WEAVING_SPARSE_HOT_MONTH_AB_RATIO_NEW_OVER_OLD=UNAVAILABLE")
+    print("WEAVING_SPARSE_HOT_MONTH_AB_EQUALITY=PASS")
+    print("WEAVING_SPARSE_HOT_MONTH_AB_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
+
+
 def test_median_prefix():
     from weaving_reachability_oracle import MONTH_LENGTHS
     months = MONTH_LENGTHS
@@ -436,6 +518,7 @@ def test_median_prefix():
     print("WEAVING_SPARSE_MEDIAN_PREFIX_RSS_KIB=" + str(rss))
     print("WEAVING_SPARSE_MEDIAN_PREFIX_RESULT=PASS")
     print("WEAVING_SPARSE_FULL_MEDIAN_RANK_UNRANK=NOT_TESTED")
+    test_paired_hot_month_free_gap(state)
 
 
 if __name__ == "__main__":
