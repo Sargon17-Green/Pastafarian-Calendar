@@ -993,19 +993,70 @@ fn (mut c OracleWeaveCounter) unrank1(rank1 BigInt) []int {
 	}
 	mut out := []int{cap: target_length}
 	for out.len < target_length {
+		if state.opened_up_to == 0 {
+			out << 1
+			state = c.apply_move(state, 1)
+			continue
+		}
+		opened := state.opened_up_to
+		closed := state.closed_up_to
+		mut prefix := []BigInt{len: opened + 1, init: big_one()}
+		mut suffix := []BigInt{len: opened + 1, init: big_one()}
+		mut removed := []BigInt{len: opened, init: big_zero()}
+		mut shifted := []BigInt{len: opened, init: big_one()}
+		mut left := 0
+		for i in closed .. opened {
+			remaining := state.remaining[i]
+			left += remaining
+			prefix[i + 1] = big_mul(prefix[i], oracle_weave_choose_exact(left - 1,
+				remaining - 1))
+			if remaining > 1 {
+				removed[i] = oracle_weave_choose_exact(left - 2, remaining - 2)
+			} else if i == closed {
+				removed[i] = big_one()
+			}
+			if i > closed {
+				shifted[i] = oracle_weave_choose_exact(left - 2, remaining - 1)
+			}
+		}
+		for offset in 0 .. opened - closed {
+			i := opened - 1 - offset
+			suffix[i] = big_mul(suffix[i + 1], shifted[i])
+		}
+		mut old_tail := big_zero()
+		if left > 0 {
+			old_tail = c.factor_suffix(opened, left - 1)
+		}
+		mut found := false
 		for j in 1 .. c.lengths.len + 1 {
 			if !c.legal_move(state, j) {
 				continue
 			}
-			next := c.apply_move(state, j)
-			block := c.count(next)
+			mut block := big_zero()
+			if j <= opened {
+				weight := big_mul(prefix[j - 1], removed[j - 1])
+				block = big_mul(big_mul(weight, suffix[j]), old_tail)
+			} else {
+				size := c.lengths[opened]
+				if size == 1 {
+					block = big_mul(prefix[opened], c.factor_suffix(opened + 1, left))
+				} else {
+					weight := oracle_weave_choose_exact(left + size - 2, size - 2)
+					block = big_mul(big_mul(prefix[opened], weight),
+						c.factor_suffix(opened + 1, left + size - 1))
+				}
+			}
 			if big_cmp(rank, block) > 0 {
 				rank = big_sub(rank, block)
 			} else {
 				out << j
-				state = next
+				state = c.apply_move(state, j)
+				found = true
 				break
 			}
+		}
+		if !found {
+			panic('invalid month weaving rank')
 		}
 	}
 	return out
