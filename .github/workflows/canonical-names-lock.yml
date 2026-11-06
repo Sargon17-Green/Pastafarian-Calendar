@@ -44,11 +44,12 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends wabt
           wat2wasm --version
-      - name: Verify short q1/q2 and wide q2/q3 independent Python oracles
+      - name: Verify short q1/q2/q3 and wide q2/q3 independent Python oracles
         run: |
           python3 tests/stage02_q2_neighbors_oracle.py
           python3 tests/stage02_q3_neighbors_oracle.py
           python3 tests/stage02_discovery01_forward_q2_q3_feasibility.py
           python3 tests/stage02_discovery01_short_q1_q2_oracle.py
-      - name: Run all 43 Native WAT cases and 15 exact independent BigInt oracles
+          python3 tests/stage02_discovery01_short_q2_q3_oracle.py
+      - name: Run all 49 Native WAT cases and 21 exact independent BigInt oracles
         run: node tests/run_stage02_discovery01_webassembly.cjs

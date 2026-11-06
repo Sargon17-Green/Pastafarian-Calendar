@@ -21,6 +21,14 @@ const SHORT_TARGETS = new Map([
   ['test_discovery01_short_q1_above_half_forward_wrap', {q: 1n, step: 1, first: 'm'}],
   ['test_discovery01_short_q1_above_half_at_limit', {q: 1n, step: -1, first: 'n'}]
 ]);
+const SHORT_Q23_TARGETS = new Map([
+  ['test_discovery01_short_q23_m_forward_q3', {q:3n, place:'m', step:1}],
+  ['test_discovery01_short_q23_m_backward_q3', {q:3n, place:'m', step:-1}],
+  ['test_discovery01_short_q23_limit_forward_q3', {q:3n, place:'limit', step:1}],
+  ['test_discovery01_short_q23_m_forward_q2', {q:2n, place:'m', step:1}],
+  ['test_discovery01_short_q23_limit_plus_one_backward_q2', {q:2n, place:'limit_plus_one', step:-1}],
+  ['test_discovery01_short_q23_limit_backward_q2', {q:2n, place:'limit', step:-1}]
+]);
 const FORWARD_TARGETS = new Map([
   ['test_discovery01_k3_forward_q2_n_minus_one', {q: 2n, delta: -1n}],
   ['test_discovery01_k3_forward_q2_exact_limit', {q: 2n, delta: 0n}],
@@ -30,7 +38,7 @@ const FORWARD_TARGETS = new Map([
   ['test_discovery01_k3_forward_q3_n_plus_one', {q: 3n, delta: 1n}]
 ]);
 const SOURCE = path.join(__dirname, 'normative_selector.wat');
-const PTR = {M: 65536, N: 83200, LIMIT: 96448, SPACE: 100864, WIDE: 105280, RESULT: 145024};
+const PTR = {M: 65536, FIRST: 74368, N: 83200, LIMIT: 96448, SPACE: 100864, WIDE: 105280, RESULT: 145024};
 const M = (1n << 127n) - 1n;
 const MAX_LIMBS = 1100;
 function bigintFromWasm(memory, offset) {
@@ -52,7 +60,7 @@ function child(file, name) {
   assert.equal(typeof instance.exports[name], 'function', 'missing export');
   const value = instance.exports[name]();
   const record = {name, value};
-  if (TARGETS.has(name) || FORWARD_TARGETS.has(name) || SHORT_TARGETS.has(name)) {
+  if (TARGETS.has(name) || FORWARD_TARGETS.has(name) || SHORT_TARGETS.has(name) || SHORT_Q23_TARGETS.has(name)) {
     const mem = instance.exports.memory;
     assert.ok(mem instanceof WebAssembly.Memory, 'missing memory export');
     record.numerics = {};
@@ -142,6 +150,20 @@ function checkShortNumerics(name, values) {
   return {name, q: q.toString(), n: n.toString(), first: first.toString(),
     step, limit: limit.toString(), rank: rank.toString()};
 }
+function checkShortQ23(name,values) {
+  const {q:expectQ, place, step}=SHORT_Q23_TARGETS.get(name);
+  const n=(M-1n)/3n+(expectQ===2n?1n:0n),q=M/n,limit=q*n;
+  const first=place==='m'?M:place==='limit'?limit:limit+1n;
+  const accepted=first<=limit?first:(step===1?1n:limit);
+  const rank=(accepted-1n)%n+1n;
+  const count=first<=limit?0n:(step===1?M-first+1n:first-limit);
+  assert.equal(q,expectQ);assert.ok(count<=1n);
+  assert.equal(rank,(step===1 && place==='m')?1n:n);
+  for(const [key,value] of Object.entries({M,N:n,FIRST:first,LIMIT:limit,RESULT:rank}))
+    assert.equal(BigInt(values[key]),value,name+' '+key);
+  return {q:String(q),n:String(n),first:String(first),limit:String(limit),
+    rank:String(rank),step,rejections:String(count)};
+}
 function main() {
   if (process.argv[2] === '--one') {
     child(process.argv[3], process.argv[4]);
@@ -159,15 +181,17 @@ function main() {
     const tests = WebAssembly.Module.exports(mod)
       .filter(e => e.kind === 'function' && e.name.startsWith('test_'))
       .map(e => e.name).sort();
-    assert.equal(tests.length, 43, 'unexpected regression set size');
-    assert.equal(new Set(tests).size, 43, 'duplicate export');
+    assert.equal(tests.length, 49, 'unexpected regression set size');
+    assert.equal(new Set(tests).size, 49, 'duplicate export');
     for (const name of TARGETS.keys()) assert.ok(tests.includes(name), 'missing target: ' + name);
     for (const name of FORWARD_TARGETS.keys()) assert.ok(tests.includes(name), 'missing forward target: ' + name);
     for (const name of SHORT_TARGETS.keys()) assert.ok(tests.includes(name), 'missing short target: ' + name);
+    for (const name of SHORT_Q23_TARGETS.keys()) assert.ok(tests.includes(name), 'missing q23: ' + name);
     let passed = 0;
     const numerics = {};
     const forwardNumerics = {};
     const shortNumerics = {};
+    const q23Numerics = {};
     for (const name of tests) {
       const p = spawnSync(process.execPath, [__filename, '--one', compiled, name],
         {encoding: 'utf8', timeout: 30000, maxBuffer: 1000000});
@@ -180,11 +204,13 @@ function main() {
       if (TARGETS.has(name)) numerics[name] = checkNumerics(name, outcome.numerics);
       if (FORWARD_TARGETS.has(name)) forwardNumerics[name] = checkForwardNumerics(name, outcome.numerics);
       if (SHORT_TARGETS.has(name)) shortNumerics[name] = checkShortNumerics(name, outcome.numerics);
+      if (SHORT_Q23_TARGETS.has(name)) q23Numerics[name] = checkShortQ23(name,outcome.numerics);
       passed++;
     }
     assert.equal(Object.keys(numerics).length, TARGETS.size, 'missing numeric probes');
     assert.equal(Object.keys(forwardNumerics).length, FORWARD_TARGETS.size, 'missing forward numeric probes');
     assert.equal(Object.keys(shortNumerics).length, SHORT_TARGETS.size, 'missing short numeric probes');
+    assert.equal(Object.keys(q23Numerics).length, SHORT_Q23_TARGETS.size, 'missing short q23 probes');
     const report = {
       project_id: 'PC-BRANCH-WAT-SPANISH',
       native_engine: 'Node WebAssembly via WABT',
@@ -192,7 +218,8 @@ function main() {
       total: tests.length, passed, failed: tests.length - passed,
       numeric_oracles: numerics,
       forward_numeric_oracles: forwardNumerics,
-      short_numeric_oracles: shortNumerics
+      short_numeric_oracles: shortNumerics,
+      short_q23_numeric_oracles: q23Numerics
     };
     process.stdout.write(JSON.stringify(report, null, 2) + '\n');
   } finally {
