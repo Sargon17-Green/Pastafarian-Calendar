@@ -1,4 +1,4 @@
-; Stage 1 native regression 191..277: signed owner-scoped comparison.
+; Stage 1 native regression 191..283: signed owner-scoped comparison.
 SECTION "Owner signed comparison tests", ROM0
 RunOwnerSignedCmpTests::
     call SRAMEnable
@@ -2210,6 +2210,8 @@ OwnerCmpTestCases266To277:
     ld a, [wTestCaseHi]
     cp 1
     jp nz, .bad
+    call OwnerCmpTestOwner253FullGroup
+    jp nc, .bad
     scf
     ret
 .bad:
@@ -2232,5 +2234,237 @@ OwnerCmpTestCases266To277:
     scf
     ret
 .bytesBad:
+    and a
+    ret
+
+; Native Stage1 cases 278..283, appended in ROMX bank 1.
+; Independent expected allocation/byte semantics are exercised by the
+; previously accepted Host 24 allocation + 14 byte boundary cases.
+; This deliberately does not reuse the Host implementation in SM83.
+OwnerCmpTestOwner253FullGroup:
+    call LeaseResetAll
+    xor a
+    call SRAMSelectBank
+    ld a, $4d
+    ld [$a000], a
+
+    ; 278: owner=253/tag=255 owns every scratch bank 3..15.
+    ld a, 22
+    ld [wTestCase], a
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .bad
+    ld a, 253
+    ld [wOwnerRequest], a
+    ld a, 13
+    ld [wOwnerCount], a
+    call OwnerLeaseAlloc
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .bad
+    ld a, [wOwnerAllocated]
+    cp 13
+    jp nz, .bad
+    ld hl, wOwnerBanks
+    ld b, 13
+    ld c, 3
+.checkHandles:
+    ld a, [hli]
+    cp c
+    jp nz, .bad
+    inc c
+    dec b
+    jr nz, .checkHandles
+    call .checkFullTags
+    jp nc, .bad
+    ld a, [wLeaseTable]
+    cp 2
+    jp nz, .bad
+    ld a, [wLeaseTable+2]
+    cp 2
+    jp nz, .bad
+    xor a
+    call SRAMSelectBank
+    ld a, [$a000]
+    cp $4d
+    jp nz, .bad
+
+    ; 279: 106495 = $019fff is the last legal logical byte.
+    ; OwnerByteWrite/Read must resolve it to physical bank15:$bfff.
+    ld a, 23
+    ld [wTestCase], a
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $9f
+    ld [wOwnerOffset+1], a
+    ld a, 1
+    ld [wOwnerOffset+2], a
+    ld a, $5a
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .bad
+    ld a, [wOwnerSelectedBank]
+    cp 15
+    jp nz, .bad
+    ld a, [$bfff]
+    cp $5a
+    jp nz, .bad
+    xor a
+    ld [wOwnerByteValue], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $5a
+    jp nz, .bad
+    call .checkFullTags
+    jp nc, .bad
+
+    ; 280: 106496 = $01a000 must be rejected, zero-valued,
+    ; without changing the bank15 mapping, its payload or lease tags.
+    ld a, 24
+    ld [wTestCase], a
+    xor a
+    ld [wOwnerOffset], a
+    ld a, $a0
+    ld [wOwnerOffset+1], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    cp 2
+    jp nz, .bad
+    ld a, [wOwnerByteValue]
+    or a
+    jp nz, .bad
+    ld a, [wOwnerSelectedBank]
+    cp $ff
+    jp nz, .bad
+    ld a, [$bfff]
+    cp $5a
+    jp nz, .bad
+    call .checkFullTags
+    jp nc, .bad
+
+    ; 281: an out-of-range write cannot overwrite the last valid byte.
+    ld a, 25
+    ld [wTestCase], a
+    ld a, $a7
+    ld [wOwnerByteValue], a
+    call OwnerByteWrite
+    ld a, [wOwnerStatus]
+    cp 2
+    jp nz, .bad
+    ld a, [wOwnerByteValue]
+    cp $a7
+    jp nz, .bad
+    ld a, [wOwnerSelectedBank]
+    cp $ff
+    jp nz, .bad
+    ld a, [$bfff]
+    cp $5a
+    jp nz, .bad
+    call .checkFullTags
+    jp nc, .bad
+
+    ; 282: duplicate owner253 must fail atomically at full capacity.
+    ld a, 26
+    ld [wTestCase], a
+    ld a, 1
+    ld [wOwnerCount], a
+    call OwnerLeaseAlloc
+    ld a, [wOwnerStatus]
+    cp 3
+    jp nz, .bad
+    ld a, [wOwnerAllocated]
+    or a
+    jp nz, .bad
+    ld a, [$bfff]
+    cp $5a
+    jp nz, .bad
+    call .checkFullTags
+    jp nc, .bad
+
+    ; 283: release exactly 13, scrub bank15 and bank3, preserve bank0.
+    ; A stale owner253 byte read must fail, without remapping SRAM.
+    ld a, 27
+    ld [wTestCase], a
+    call OwnerLeaseRelease
+    ld a, [wOwnerStatus]
+    or a
+    jp nz, .bad
+    ld a, [wOwnerAllocated]
+    cp 13
+    jp nz, .bad
+    ld a, [wOwnerSelectedBank]
+    cp $ff
+    jp nz, .bad
+    ld hl, wLeaseTable+3
+    ld b, 13
+.checkCleared:
+    ld a, [hli]
+    or a
+    jp nz, .bad
+    dec b
+    jr nz, .checkCleared
+    ld a, [$a000]
+    cp $4d
+    jp nz, .bad
+    ld a, 15
+    call SRAMSelectBank
+    ld a, [$bfff]
+    or a
+    jp nz, .bad
+    ld a, 3
+    call SRAMSelectBank
+    ld a, [$a000]
+    or a
+    jp nz, .bad
+    xor a
+    call SRAMSelectBank
+    ld a, 253
+    ld [wOwnerRequest], a
+    ld a, $ff
+    ld [wOwnerOffset], a
+    ld a, $9f
+    ld [wOwnerOffset+1], a
+    ld a, 1
+    ld [wOwnerOffset+2], a
+    call OwnerByteRead
+    ld a, [wOwnerStatus]
+    cp 3
+    jp nz, .bad
+    ld a, [wOwnerByteValue]
+    or a
+    jp nz, .bad
+    ld a, [wOwnerSelectedBank]
+    cp $ff
+    jp nz, .bad
+    ld a, [$a000]
+    cp $4d
+    jp nz, .bad
+    ld a, [wTestCaseHi]
+    cp 1
+    jp nz, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Carry set iff all thirteen scratch tags are exactly owner253 + 2.
+.checkFullTags:
+    ld hl, wLeaseTable+3
+    ld b, 13
+.loop:
+    ld a, [hli]
+    cp 255
+    jr nz, .invalid
+    dec b
+    jr nz, .loop
+    scf
+    ret
+.invalid:
     and a
     ret

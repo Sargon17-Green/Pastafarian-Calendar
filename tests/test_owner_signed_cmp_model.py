@@ -2,7 +2,7 @@
 """Independent Python integer oracle for owner-scoped signed magnitudes.
 
 This is a HOST reference contract, not execution of SM83 machine code.
-The ROM exercise covers cases 191..277; extra max-owner boundary checks are Host-only.
+The ROM exercise covers cases 191..283; the independent max-owner allocation/byte\nHost oracle supplies expected statuses and SRAM/tag immutability for Native278..283.
 """
 from random import Random
 from test_sram_owner_model import OwnedBanks, SIZE
