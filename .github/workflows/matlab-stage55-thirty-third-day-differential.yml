@@ -26,7 +26,7 @@ jobs:
       - name: Download certified AFTER32 checkpoint
         uses: actions/download-artifact@v4
         with:
-          name: stage55-thirty-first-day-differential
+          name: stage55-thirty-second-day-differential
           run-id: 41979140995
           github-token: ${{ github.token }}
           path: logs
