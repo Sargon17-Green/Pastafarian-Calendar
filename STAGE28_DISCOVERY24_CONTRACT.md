@@ -44,3 +44,11 @@ Ne tuŝu antaŭajn 298 testojn. Ne inventu expected-red aŭ kalkulon de tuta kal
 2. **Kodo**: unu nova produktmodulo, 12 testoj, metadata, en aparta commit; **310** estas nur prognozo ĝis reala same-SHA Native 310/310 kaj Names SUCCESS.
 3. **Dokumenta fermo** kaj **fina metadata** estu apartaj commit-oj, ĉiu kun novaj sam-SHA 310/310 Native kaj Names SUCCESS antaŭ Stage28-akcepto.
 4. `queued/in_progress` estas nek PASS nek blokado. Neniu main/merge/eldono aŭ nova jarlonga regulo.
+
+## Koda HEAD akceptita; aparta dokumenta fermo (2026-11-06)
+
+La Stage28-kontrakto ĉe `5b7ffa17647cf7917c408c8c229f18c51ebcfda6` pasis [Native 42174237129](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42174237129), **298/298**, kaj same-SHA [Names Lock 42174237160](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42174237160) SUCCESS. La unua Stage28-kodo `57a656c9c48426fb0c8fbe9e8d8eaf2e31061693` kreis unu produktmodulon, precize 12 sendependajn Stage25-bazitajn testojn kaj metadata. [Native 42174665058](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42174665058) malsukcesis ĉe formatter-kontrolo de la du novaj Gleam-dosieroj **antaŭ testado**; [Names 42174665095](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42174665095) sukcesis. PATCH01 `b836bce8a29bba86350d1f741f015d2204dfe5e4` faris nur la loge postulitajn kanonajn formatkorektojn sen ŝanĝi logikon aŭ nombron de testoj.
+
+[Native 42174994694](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42174994694), job `127751296990`, estas completed/success por tiu sama PATCH01 SHA: Gleam 1.18.1, OTP 28, formato kaj fontintegreco PASS, **310/310 testoj, neniu malsukceso**. Artefakto `13482637777`, SHA256 `22b7168ddb2b1922607d58a3787484be6ef82e7f688951a69c14144b3a236371`. [Names Lock 42174994711](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42174994711), job `127751296923`, estas completed/success ĉe la sama SHA. Neniu kanona kalendara pordegoserio, jarlongo aŭ plena datkalkulo estis enkondukita.
+
+**Ĉi tiu dokumenta HEAD ankoraŭ bezonas siajn proprajn same-SHA Native 310/310 kaj Names Lock sukcesojn.** Poste aparta fina metadata HEAD bezonos ambaŭ pordegojn antaŭ fina Stage28-akcepto. LAST_COMPLETED_STAGE=27 ĝis tiuj sukcesoj; neniu main/merge/eldono.
