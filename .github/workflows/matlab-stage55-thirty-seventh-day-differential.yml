@@ -1,0 +1,84 @@
+name: MATLAB Stage55 Thirty-Seventh Day Native Python Differential
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/run_stage55_year5000_thirty_seventh_native.m'
+      - 'tools/stage55_after37_interval_five_fields.py'
+      - 'tools/stage55_after4_interval_witness.py'
+      - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
+      - '.github/workflows/matlab-stage55-thirty-seventh-day-differential.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: stage55-thirty-seventh-day-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  thirty-seventh-day:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Download certified AFTER36 checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-thirty-sixth-day-differential
+          run-id: 42304165181
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Verify pinned AFTER36
+        run: |
+          echo '06e22129b81b6e9bcc2fd90fefef1c22e3cb9e3b0b0048961b8497b871a586a5  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json' | sha256sum -c -
+      - name: Preflight AFTER37 independent witness wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tools/stage55_after37_interval_five_fields.py
+          grep -Fqx 'PIN = "06e22129b81b6e9bcc2fd90fefef1c22e3cb9e3b0b0048961b8497b871a586a5"' tools/stage55_after37_interval_five_fields.py
+          python3 -m py_compile tools/stage55_after37_interval_five_fields.py
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native thirty-seventh-day exact cursor and PATCH25 projection
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tools'); run_stage55_year5000_thirty_seventh_native
+      - name: Python independent child intervals and strict five-field diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/stage55_after37_interval_five_fields.py \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json \
+            tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            | tee logs/STAGE55_THIRTY_SEVENTH_PYTHON.log
+          grep '^STAGE55_THIRTY_SEVENTH_ROW ' logs/STAGE55_THIRTY_SEVENTH_PYTHON.log > logs/STAGE55_THIRTY_SEVENTH_PYTHON_ROW.txt
+          grep '^STAGE55_THIRTY_SEVENTH_ROW ' logs/STAGE55_THIRTY_SEVENTH_NATIVE.log > logs/STAGE55_THIRTY_SEVENTH_NATIVE_ROW.txt
+          test "$(wc -l < logs/STAGE55_THIRTY_SEVENTH_PYTHON_ROW.txt)" -eq 1
+          test "$(wc -l < logs/STAGE55_THIRTY_SEVENTH_NATIVE_ROW.txt)" -eq 1
+          diff -u logs/STAGE55_THIRTY_SEVENTH_PYTHON_ROW.txt logs/STAGE55_THIRTY_SEVENTH_NATIVE_ROW.txt
+          expected="STAGE55_THIRTY_SEVENTH_ROW POSITION=37 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=37 MONTH_INDEX=35 MONTH_DAY=2"
+          grep -Fqx "$expected" logs/STAGE55_THIRTY_SEVENTH_NATIVE_ROW.txt
+          grep -Fqx "$expected" logs/STAGE55_THIRTY_SEVENTH_PYTHON_ROW.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json | tee logs/STAGE55_THIRTY_SEVENTH_DIGEST.txt
+          echo 'STAGE55_THIRTY_SEVENTH_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
+      - name: Preserve PASS or FAIL artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-thirty-seventh-day-differential
+          path: |
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json
+            logs/STAGE55_THIRTY_SEVENTH_NATIVE.log
+            logs/STAGE55_THIRTY_SEVENTH_PYTHON.log
+            logs/STAGE55_THIRTY_SEVENTH_PYTHON_ROW.txt
+            logs/STAGE55_THIRTY_SEVENTH_NATIVE_ROW.txt
+            logs/STAGE55_THIRTY_SEVENTH_DIGEST.txt
+          if-no-files-found: warn
+          retention-days: 30
