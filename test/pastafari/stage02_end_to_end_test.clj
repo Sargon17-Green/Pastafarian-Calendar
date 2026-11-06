@@ -366,19 +366,24 @@
 
 (defn- onafhankelijke-prefix-telling [lengten letters]
   (let [origineel (mapv bigint lengten)
-        start {:rest origineel :geopend 0}
+        start {:rest origineel :geopend 0 :gesloten 0}
         na-prefix
         (reduce
          (fn [staat maand]
-           (let [{:keys [rest geopend]} staat
+           (let [{:keys [rest geopend gesloten]} staat
                  index (dec (int maand))]
              (if (and (<= 0 index) (< index (count rest))
                       (<= maand (inc geopend))
                       (pos? (nth rest index))
                       (or (< (nth rest index) (nth origineel index))
-                          (= maand (inc geopend))))
+                          (= maand (inc geopend)))
+                      ;; Last appearances must close in the original order.
+                      (or (> (nth rest index) 1)
+                          (= maand (inc gesloten))))
                {:rest (update rest index dec)
-                :geopend (max geopend (int maand))}
+                :geopend (max geopend (int maand))
+                :gesloten (if (= 1 (nth rest index))
+                            (inc gesloten) gesloten)}
                (reduced nil))))
          start letters)]
     (if (nil? na-prefix)
@@ -743,3 +748,169 @@
                      (catch clojure.lang.ExceptionInfo e
                        (:code (ex-data e))))]
           (is (= :target-not-fourth-day-of-year code)))))))
+
+
+;; DIAG09: fifth-day opt-in. The test oracle uses month insertion, not
+;; production's remaining-state rank counter. Closing order matters now.
+(def ^:private vijfde-prefix-opties
+  (vec (mapcat (fn [prefix]
+                 (mapv #(conj prefix (bigint %))
+                       (range 1 (+ 2 (apply max prefix)))))
+               vierde-prefix-opties)))
+
+(deftest vijfde-prefix-oracle-kleine-woorden
+  (testing "52 RGS-prefixklassen; vier volledige kleine woordenfamilies."
+    (is (= 52 (count vijfde-prefix-opties)))
+    (doseq [[lengten totaal] [[[4 4] 20N] [[4 4 4] 1301N]
+                             [[4 5 4] 3499N] [[5 4 4] 3101N]]]
+      (let [familie (orakel/weaving-family lengten)
+            woorden (mapv #((:unrank1 familie) %)
+                          (range 1 (inc totaal)))
+            aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                            vijfde-prefix-opties)]
+        (is (= totaal ((:count familie))))
+        (is (= totaal (reduce +' 0N aantallen)))
+        (doseq [[prefix aantal] (map vector vijfde-prefix-opties aantallen)]
+          (is (= aantal
+                 (bigint (count (filter
+                                 #(= prefix (mapv bigint (take 5 %)))
+                                 woorden))))
+              (str "Independent fifth-prefix " lengten " " prefix))))))
+  (testing "Grotere familie: vijf onafhankelijk brute-geankerde gevallen."
+    (let [lengten [4 4 4 4]
+          aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                          vijfde-prefix-opties)
+          per-prefix (zipmap vijfde-prefix-opties aantallen)]
+      (is (= 177260N (reduce +' 0N aantallen)))
+      (doseq [[prefix verwacht]
+              [[[1N 1N 1N 1N 1N] 0N]
+               [[1N 1N 1N 1N 2N] 1301N]
+               [[1N 2N 2N 2N 2N] 0N]
+               [[1N 2N 3N 4N 5N] 0N]
+               [[1N 1N 2N 3N 4N] 5670N]]]
+        (is (= verwacht (get per-prefix prefix)))))))
+
+(deftest vijfde-prefix-grenzen-kleine-families
+  (testing "Alle beide kanten van niet-lege klassengrenzen voor kleine families."
+    (doseq [lengten [[4 4] [4 4 4] [4 5 4] [5 4 4]]]
+      (let [familie (orakel/weaving-family lengten)
+            totaal ((:count familie))
+            aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                            vijfde-prefix-opties)
+            grenzen (vec (reductions +' 0N aantallen))
+            rangen (distinct
+                    (filter #(<= 1N % totaal)
+                            (mapcat (fn [[laag hoog]] [(inc laag) hoog])
+                                    (partition 2 1 grenzen))))]
+        (doseq [r rangen]
+          (let [bewijs (rang/vijfde-maand-op-rang-groot
+                        lengten r 5000000N)
+                verwacht (mapv bigint (take 5 ((:unrank1 familie) r)))
+                maand (peek verwacht)]
+            (is (= verwacht (:month-prefix bewijs))
+                (str "5-prefix " lengten " rank " r))
+            (is (= maand (:month-id bewijs)))
+            (is (= (bigint (count (filter #(= maand %) verwacht)))
+                   (:day-in-month bewijs)))
+            (is (<= 0N (:prefix-cell-upper-bound bewijs) 5000000N))
+            (is (= :fifth-day-prefix-only (:date-proof-scope bewijs)))
+            (is (false? (:month-weaving-computed? bewijs)))))))))
+
+(deftest vijfde-prefix-sloten-en-budgetpoort
+  (let [code (fn [l r b]
+               (try
+                 (rang/vijfde-maand-op-rang-groot l r b)
+                 nil
+                 (catch clojure.lang.ExceptionInfo e
+                   (:code (ex-data e)))))]
+    (is (= :fifth-day-prefix-budget-unproven (code [4 4 4] 1N 1N)))
+    (is (= :invalid-weaving-rank (code [4 4 4] 0N 5000000N)))
+    (is (= :invalid-weaving-budget (code [4 4 4] 1N 5000001N)))
+    (is (zero? (onafhankelijke-prefix-telling [4 4 4]
+                                              [1N 2N 2N 2N 2N])))
+    (is (= 35N (onafhankelijke-prefix-telling [4 5 4]
+                                            [1N 2N 2N 2N 2N])))
+    (is (= 20N (onafhankelijke-prefix-telling [5 4 4]
+                                            [1N 1N 1N 1N 1N])))))
+
+(deftest echte-vijfde-jaardag-met-onafhankelijke-prefix-oracle
+  (testing "Drie echte vijfde jaardagen en zelfstandige vijfveldige berekening."
+    (doseq [berekening [dagen/stichtingsdag
+                       (+' dagen/stichtingsdag 17N)
+                       (-' dagen/stichtingsdag 23N)]]
+      (let [jaar (zoeken/vind-doeljaar @lijn berekening berekening)
+            vijfde (+' (:open-gate-day jaar) 5N)
+            uitkomst (projectie/kies-vijfde-dag-zonder-weving
+                      @lijn berekening vijfde 128N 5000000N)
+            vijf (:date-components uitkomst)
+            prefix (:month-prefix uitkomst)
+            staat (orakel/new-gate-state)
+            normjaar (orakel/find-target-year staat berekening vijfde)
+            saus (orakel/sauce berekening (inc (:open-gate-day normjaar)))
+            kotelet-aantal (orakel/choose-cutlet-count saus normjaar)
+            partitie (orakel/choose-cutlet-partition
+                      staat berekening saus normjaar kotelet-aantal)
+            kotelet-namen (orakel/choose-cutlet-names saus kotelet-aantal)
+            koteletten (orakel/materialize-cutlets
+                       staat normjaar partitie kotelet-namen)
+            norm-kotelet (some #(when (<= (:first-day %) vijfde (:last-day %)) %)
+                               koteletten)
+            norm-maand-aantal (orakel/choose-month-count saus normjaar)
+            norm-lengten (orakel/choose-month-lengths
+                          saus normjaar norm-maand-aantal)
+            norm-namen (orakel/choose-month-names saus norm-maand-aantal)
+            derde-aantallen (mapv #(onafhankelijke-prefix-telling norm-lengten %)
+                                 derde-prefix-opties)
+            norm-totaal (reduce +' 0N derde-aantallen)
+            norm-rang (orakel/choose-rank
+                       (orakel/ask-bowl saus 4 orakel/seal-month-weaving)
+                       norm-totaal)
+            derde-keuze (kies-onafhankelijk-prefixblok
+                         derde-prefix-opties derde-aantallen norm-rang)
+            kinderen (filterv #(= (:prefix derde-keuze) (subvec % 0 3))
+                              vierde-prefix-opties)
+            kind-aantallen (mapv #(onafhankelijke-prefix-telling norm-lengten %)
+                                 kinderen)
+            vierde-keuze (kies-onafhankelijk-prefixblok
+                          kinderen kind-aantallen (:rest-rank derde-keuze))
+            vijfde-kinderen (filterv #(= (:prefix vierde-keuze) (subvec % 0 4))
+                                    vijfde-prefix-opties)
+            vijfde-aantallen (mapv #(onafhankelijke-prefix-telling norm-lengten %)
+                                   vijfde-kinderen)
+            vijfde-keuze (kies-onafhankelijk-prefixblok
+                          vijfde-kinderen vijfde-aantallen
+                          (:rest-rank vierde-keuze))
+            norm-prefix (:prefix vijfde-keuze)
+            norm-maand (peek norm-prefix)
+            verwacht [(:number normjaar)
+                      (:name-index norm-kotelet)
+                      (inc (-' vijfde (:first-day norm-kotelet)))
+                      (nth norm-namen (dec (int norm-maand)))
+                      (bigint (count (filter #(= norm-maand %) norm-prefix)))]]
+        (is (= (get (zipmap derde-prefix-opties derde-aantallen)
+                    (:prefix derde-keuze))
+               (reduce +' 0N kind-aantallen)))
+        (is (= (get (zipmap kinderen kind-aantallen) (:prefix vierde-keuze))
+               (reduce +' 0N vijfde-aantallen)))
+        (is (= norm-totaal (weving/aantal-wevingen-groot norm-lengten)))
+        (is (<= 1N norm-rang norm-totaal))
+        (is (= norm-prefix prefix))
+        (is (= verwacht vijf))
+        (is (= 5 (count prefix)))
+        (is (= 1N (first prefix)))
+        (is (= :fifth-day-prefix-only (:date-proof-scope uitkomst)))
+        (is (false? (:month-weaving-computed? uitkomst)))
+        (is (not (contains? uitkomst :month-weaving)))
+        (is (<= 0N (:month-prefix-cell-upper-bound uitkomst) 5000000N))
+        (println "DISCOVERY24 DIAG09 echte vijfde jaardag:"
+                 {:berekening berekening :doel vijfde
+                  :prefix prefix
+                  :kosten (:month-prefix-cell-upper-bound uitkomst)
+                  :onafhankelijk-gelijk? (= verwacht vijf)})
+        (let [code (try
+                     (projectie/kies-vijfde-dag-zonder-weving
+                      @lijn berekening (inc vijfde) 128N 5000000N)
+                     nil
+                     (catch clojure.lang.ExceptionInfo e
+                       (:code (ex-data e))))]
+          (is (= :target-not-fifth-day-of-year code)))))))
