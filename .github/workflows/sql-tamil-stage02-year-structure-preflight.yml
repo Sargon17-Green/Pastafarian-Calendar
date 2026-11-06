@@ -1,0 +1,63 @@
+name: SQL Tamil Slice24 Year Structure Preflight PG17
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/140_stage02_year_structure_preflight.py'
+      - 'sql/test/141_stage02_year_structure_input_preflight.sql'
+      - '.github/workflows/sql-tamil-stage02-year-structure-preflight.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Exact SHA and standalone Python structural oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p slice24-preflight-evidence
+          printf 'Git SHA: %s\n' "$GITHUB_SHA" > slice24-preflight-evidence/versions.txt
+          sha256sum sql/test/140_stage02_year_structure_preflight.py sql/test/141_stage02_year_structure_input_preflight.sql sql/16_stage02_year5000.sql sql/25_stage02_month_names.sql sql/test/10_normative_reference.sql > slice24-preflight-evidence/source-sha256.txt
+          python3 sql/test/140_stage02_year_structure_preflight.py --self-test | tee slice24-preflight-evidence/python-results.txt
+          grep -q 'slice24_exhaustive_small_compositions=134 PASS' slice24-preflight-evidence/python-results.txt
+      - name: PostgreSQL 17 source-locked reachable input preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name slice24-preflight-pg --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres slice24-preflight-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres slice24-preflight-pg postgres --version | tee -a slice24-preflight-evidence/versions.txt
+          args=()
+          for i in $(seq -w 0 25); do
+            path=$(find sql -maxdepth 1 -name "$i"'_*.sql' -print)
+            test "$(printf '%s\n' "$path" | wc -l)" -eq 1
+            test -f "$path"
+            args+=(-f "/work/$path")
+          done
+          args+=(-f /work/sql/test/141_stage02_year_structure_input_preflight.sql)
+          docker exec -u postgres slice24-preflight-pg psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" 2>&1 | tee slice24-preflight-evidence/native-results.txt
+          grep -q 'slice24_selector_signatures=7/7; year_rec_fields=5/5' slice24-preflight-evidence/native-results.txt
+          grep -q 'slice24_reachable_inputs=10/10; navigation=8/8; boundary_days=2/2' slice24-preflight-evidence/native-results.txt
+      - name: Archive original evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice24-input-preflight
+          path: slice24-preflight-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove PG17
+        if: always()
+        run: docker rm -f slice24-preflight-pg 2>/dev/null || true
