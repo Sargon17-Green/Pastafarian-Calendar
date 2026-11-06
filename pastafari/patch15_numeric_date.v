@@ -481,8 +481,7 @@ fn (mut c Patch15WeaveCounter) unrank1(rank1 BigInt) []int {
 		for i in closed .. opened {
 			remaining := state.remaining[i]
 			left += remaining
-			prefix[i + 1] = big_mul(prefix[i], patch15_weave_choose_exact(left - 1,
-				remaining - 1))
+			prefix[i + 1] = big_mul(prefix[i], patch15_weave_choose_exact(left - 1, remaining - 1))
 			if remaining > 1 {
 				removed[i] = patch15_weave_choose_exact(left - 2, remaining - 2)
 			} else if i == closed {
@@ -515,8 +514,8 @@ fn (mut c Patch15WeaveCounter) unrank1(rank1 BigInt) []int {
 					block = big_mul(prefix[opened], c.factor_matrix[opened + 1][left])
 				} else {
 					weight := patch15_weave_choose_exact(left + size - 2, size - 2)
-					block = big_mul(big_mul(prefix[opened], weight),
-						c.factor_matrix[opened + 1][left + size - 1])
+					block = big_mul(big_mul(prefix[opened], weight), c.factor_matrix[opened + 1][
+						left + size - 1])
 				}
 			}
 			if big_cmp(rank, block) > 0 {
