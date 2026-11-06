@@ -87,3 +87,17 @@ Implementation scope: test/postStage55HugeSignedBudget.ts, one npm script/regist
 POST_STAGE55_HUGE_SIGNED_BUDGET_PASS probes=2 digits=501 positiveEntries=1 negativeEntries=2 completions=3 sharedWrites=174 restored=1
 
 Success of Node's syntax check is not TypeScript/Native acceptance. Accept only on a **new exact SHA** if all five Actions jobs complete successfully and the new Stage27 log contains this marker plus all four prior preflight markers; otherwise repair from the failing step/log and do not claim PASS.
+
+## Follow-up: physical negative-gate fault after positive success (2026-11-06)
+
+Prerequisite: exact-SHA Actions 42176982226 on cf184345c27b1504e5eab3a74911b566adc8d643 completed/success all five jobs. The Stage27 log contains the exact huge signed 501-digit/3 Native/174-write marker plus the four previously accepted preflight markers.
+
+This additional narrow QA covers a different physical failure point: the positive gate succeeds, but the following **negative** gate throws at its real write #46. Earlier fault injection tested the first (positive) gate only. This is a test coverage gap, not evidence of a production defect.
+
+Input: calculationDay=targetDay=FOUNDATION_DAY-100000n, maxPerSide=1. The production factory's positive loop must perform one physical Patch11 call, with 58 completed shared writes, because its first positive gate is already above the requested upper neighbourhood. Its first negative call then performs 46 real write callbacks; a test-only callback throws a unique sentinel. Require the identical sentinel to propagate with exactly two Native entries, one completed call, 58 completed writes and 46 observed negative-side writes. No partial prefix may return.
+
+Independent bounded recovery oracle: call the same valid inputs again without a fault. The one permitted negative step moves at most 963 days (41+rank, 1<=rank<=922), strictly short of the 100000+5782-day lower bound. The factory must reject the next step with MonsterValidationError **before** entering another Native handler. The retry thus makes exactly two complete 58-write calls. Cumulative counts across fault and retry: four entries, three completions, 174 completed writes, and the fault's 46 observed callbacks. The original Patch11.run is always restored in finally.
+
+Exact marker: `POST_STAGE55_NEGATIVE_NATIVE_THROW_RECOVERY_PASS injectedWrite=46 firstPositive=1 faultNegative=1 faultWrites=46 retryPositive=1 retryNegative=1 totalEntries=4 totalCompletions=3 completedWrites=174 propagated=1 recovered=1 restored=1`
+
+Scope is one test-only file, package script/registration, Stage27 grep and this contract. No production code, no heavy new CI job, no Stage56, no main/merge/release. New exact-SHA typecheck + full npm test with this marker and four other completed-success jobs are mandatory before claiming the follow-up PASS. A new queued/in_progress workflow is NOT a blocker and is NOT acceptance.
