@@ -4,6 +4,7 @@ import gleam/list
 import gleeunit/should
 import pastafari/bootstrap
 import pastafari/discovery_19_interval_value
+import pastafari/discovery_20_gate_gap
 import pastafari/discovery_21_gate_batch
 import pastafari/discovery_23_gap_windows
 import reference/core
@@ -19,7 +20,11 @@ fn windows(a: Int, b: Int, ids: List(Int), asked: List(#(Int, Int))) {
   )
 }
 
-fn independent_total(samples, start: Int, end: Int) -> Int {
+fn independent_total(
+  samples: List(discovery_20_gate_gap.GateGapOutput),
+  start: Int,
+  end: Int,
+) -> Int {
   list.take(list.drop(samples, start), end - start)
   |> list.fold(0, fn(sum, sample) { sum + sample.gap })
 }
