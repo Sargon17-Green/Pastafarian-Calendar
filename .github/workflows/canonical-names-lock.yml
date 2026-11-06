@@ -1073,6 +1073,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+          extensions: gmp
           coverage: none
           tools: none
       - name: Stage55 five-component date PHP Native
@@ -1082,6 +1083,7 @@ jobs:
           mkdir -p evidence-stage55
           printf 'PROJECT_ID=PC-BRANCH-PHP-MALAY\nSTAGE=55\nCOMMIT_SHA=%s\n' "$GITHUB_SHA" > evidence-stage55/source.txt
           php -v > evidence-stage55/php-version.txt
+          php -r 'if (!extension_loaded("gmp")) { exit(17); }'
           test "$(php -r 'echo PHP_INT_SIZE;')" = 8
           php -l src/Patches/DateTuplePatch23.php
           php -l tests/stage55_five_component_date.php
@@ -1091,6 +1093,8 @@ jobs:
           php -l tests/stage55_weaving_fastpath_regression.php
           timeout 60s php -d memory_limit=128M tests/stage55_weaving_fastpath_regression.php > evidence-stage55/fastpath-regression.txt
           grep -Fx 'STAGE55_FASTPATH_EXACT cases=105 ranks=698' evidence-stage55/fastpath-regression.txt
+          STAGE55_PURE_PHP_MULTIPLICATION=1 timeout 60s php -d memory_limit=128M tests/stage55_weaving_fastpath_regression.php > evidence-stage55/fastpath-pure-regression.txt
+          grep -Fx 'STAGE55_FASTPATH_EXACT cases=105 ranks=698' evidence-stage55/fastpath-pure-regression.txt
           set +e
           export STAGE55_PROFILE_PATH=evidence-stage55/profile.tsv
           timeout --signal=TERM --kill-after=5s 900s php -d memory_limit=512M tests/stage55_five_component_date.php > evidence-stage55/stdout.txt 2> evidence-stage55/stderr.txt

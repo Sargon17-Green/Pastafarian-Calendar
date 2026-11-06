@@ -257,6 +257,22 @@ final class WeavingCounter
         return $out;
     }
 
+
+    /**
+     * Oracle-only exact multiplication. GMP accelerates multi-thousand-digit
+     * products; the independent pure-PHP BigInt implementation remains the
+     * fallback and is exercised separately by CI on exhaustive small ranks.
+     */
+    private static function multiplyExact(BigInt $left, BigInt $right): BigInt
+    {
+        if (extension_loaded('gmp') && getenv('STAGE55_PURE_PHP_MULTIPLICATION') !== '1') {
+            return BigInt::fromString(gmp_strval(
+                gmp_mul(gmp_init($left->toString(), 10), gmp_init($right->toString(), 10))
+            ));
+        }
+        return $left->mul($right);
+    }
+
     /** Advance C(a+d-2,d) to C(a+d-1,d+1), with exact division. */
     private static function nextCoefficient(BigInt $current, int $a, int $d): BigInt
     {
@@ -286,6 +302,8 @@ final class WeavingCounter
         $m = count($this->lengths);
         $prefixLength = array_sum($this->lengths);
         self::traceStage55('weave_table_begin', $m, $prefixLength);
+        self::traceStage55('weave_gmp_multiply',
+            (int)(extension_loaded('gmp') && getenv('STAGE55_PURE_PHP_MULTIPLICATION') !== '1'), 0);
         $nextRow = [];
         for ($k = $m; $k >= 1; --$k) {
             $a = $this->lengths[$k - 1];
@@ -297,7 +315,7 @@ final class WeavingCounter
                 $following = $k === $m
                     ? BigInt::one()
                     : $nextRow[$a - 1 + $t];
-                $sum = $sum->add($coefficient->mul($following));
+                $sum = $sum->add(self::multiplyExact($coefficient, $following));
                 $row[] = $sum;
                 if ($t < $prefixLength) {
                     $coefficient = self::nextCoefficient($coefficient, $a, $t);
@@ -350,13 +368,13 @@ final class WeavingCounter
         $size = 0;
         for ($i = $closedUpTo; $i < $openedUpTo; ++$i) {
             $a = $remaining[$i];
-            $base = $base->mul(self::choose($size + $a - 1, $size));
+            $base = self::multiplyExact($base, self::choose($size + $a - 1, $size));
             $size += $a;
         }
         if ($openedUpTo === count($this->lengths)) {
             return $base;
         }
-        return $base->mul($this->suffixValue($openedUpTo + 1, $size));
+        return self::multiplyExact($base, $this->suffixValue($openedUpTo + 1, $size));
     }
 
     /**
@@ -391,7 +409,7 @@ final class WeavingCounter
             }
             $activeTotal += $a;
             $all = $factors[$j] ?? throw new RuntimeException('WEAVING_FACTOR_MISSING');
-            $prefix[$j] = $prefix[$j - 1]->mul($all);
+            $prefix[$j] = self::multiplyExact($prefix[$j - 1], $all);
             if ($j === $closed + 1) {
                 $earlier = BigInt::zero();
             } else {
@@ -406,7 +424,7 @@ final class WeavingCounter
         }
         $suffix = [$opened + 1 => BigInt::one()];
         for ($j = $opened; $j > $closed; --$j) {
-            $suffix[$j] = $suffix[$j + 1]->mul($earlierDecrement[$j]);
+            $suffix[$j] = self::multiplyExact($suffix[$j + 1], $earlierDecrement[$j]);
         }
         $unopened = $opened === count($remaining)
             ? BigInt::one()
@@ -416,8 +434,9 @@ final class WeavingCounter
             if ($remaining[$j - 1] === 1 && $j !== $closed + 1) {
                 continue;
             }
-            $blocks[$j] = $prefix[$j - 1]->mul($ownDecrement[$j])
-                ->mul($suffix[$j + 1])->mul($unopened);
+            $branch = self::multiplyExact($prefix[$j - 1], $ownDecrement[$j]);
+            $branch = self::multiplyExact($branch, $suffix[$j + 1]);
+            $blocks[$j] = self::multiplyExact($branch, $unopened);
         }
         return [$blocks, $ownDecrement, $earlierDecrement];
     }
