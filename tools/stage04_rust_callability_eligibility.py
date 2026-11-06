@@ -50,18 +50,19 @@ def supported_signature(source: str, function: str) -> bool:
         r"\s*\(\s*[A-Za-z_][A-Za-z_0-9]*\s*:\s*&\s*BigInt\s*\)\s*->\s*BigInt\b", source))
 
 def test_body(crate: str, symbol: str) -> str:
-    return ('''use num_bigint::BigInt;
-#[test]
-fn historical_rust_daytag_callable() {
-    let old: fn(&BigInt) -> BigInt = CRATE::SYMBOL;
-    let a = old(&BigInt::from(FM));
-    let b = old(&BigInt::from(FF));
-    let c = old(&BigInt::from(FP));
-    println!("STAGE04_OLD_RUST_CALLABILITY_OUTPUT={},{},{}", a,b,c);
-}
-'''.replace("FM", str(F - 1)).replace("FF", str(F))
-       .replace("FP", str(F + 1)).replace("CRATE", crate)
-       .replace("SYMBOL", symbol))
+    # Interpolate names once: no placeholder token is allowed to rewrite an
+    # otherwise valid Rust crate or function identifier.
+    return (
+        "use num_bigint::BigInt;\n"
+        "#[test]\n"
+        "fn historical_rust_daytag_callable() {\n"
+        f"    let old: fn(&BigInt) -> BigInt = {crate}::{symbol};\n"
+        f"    let a = old(&BigInt::from({F - 1}));\n"
+        f"    let b = old(&BigInt::from({F}));\n"
+        f"    let c = old(&BigInt::from({F + 1}));\n"
+        '    println!("STAGE04_OLD_RUST_CALLABILITY_OUTPUT={},{},{}", a,b,c);\n'
+        "}\n"
+    )
 
 def archive(repo: Path, commit: str, dest: Path) -> None:
     try:

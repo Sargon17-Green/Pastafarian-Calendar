@@ -101,6 +101,20 @@ class CallabilityTests(unittest.TestCase):
                 for value in (-15055672, -15055671, -15055670):
                     self.assertIn("BigInt::from(" + str(value) + ")", body)
 
+    def test_placeholder_words_preserve_literal_rust_identifiers(self):
+        # Original bug: crate_SYMBOL was rewritten by the second .replace().
+        for crate in ("crate_SYMBOL", "CRATE_SYMBOL_FM_FF_FP", "normal_crate"):
+            for symbol in ("old_CRATE_probe", "old_SYMBOL_probe", "old_FM_FF_FP_probe"):
+                with self.subTest(crate=crate, symbol=symbol):
+                    self.assertEqual(validated_symbol("src/lib.rs", symbol), symbol)
+                    body = test_body(crate, symbol)
+                    self.assertIn(
+                        f"let old: fn(&BigInt) -> BigInt = {crate}::{symbol};",
+                        body,
+                    )
+                    for value in (-15055672, -15055671, -15055670):
+                        self.assertIn(f"BigInt::from({value})", body)
+
     def test_probe_binds_original_function_type(self):
         s = test_body("synthetic_rust_daytag", "old_numeric_probe")
         self.assertIn("let old: fn(&BigInt) -> BigInt = synthetic_rust_daytag::old_numeric_probe;", s)
