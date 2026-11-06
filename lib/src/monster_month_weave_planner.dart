@@ -59,8 +59,7 @@ final class MonsterMonthWeavePlanner {
     final suffixNumerator = List<BigInt>.filled(size, BigInt.one);
     final suffixDenominator = List<BigInt>.filled(size, BigInt.one);
     for (var j = size - 2; j >= 0; j--) {
-      suffixNumerator[j] =
-          suffixNumerator[j + 1] * BigInt.from(sums[j]);
+      suffixNumerator[j] = suffixNumerator[j + 1] * BigInt.from(sums[j]);
       suffixDenominator[j] =
           suffixDenominator[j + 1] * BigInt.from(sums[j + 1] - 1);
     }
@@ -72,9 +71,8 @@ final class MonsterMonthWeavePlanner {
       if (j == 0) {
         result[j] = (base * suffixNumerator[j]) ~/ suffixDenominator[j];
       } else {
-        result[j] =
-            (base * BigInt.from(counts[j] - 1) * suffixNumerator[j]) ~/
-                (BigInt.from(sums[j] - 1) * suffixDenominator[j]);
+        result[j] = (base * BigInt.from(counts[j] - 1) * suffixNumerator[j]) ~/
+            (BigInt.from(sums[j] - 1) * suffixDenominator[j]);
       }
     }
     return result;
