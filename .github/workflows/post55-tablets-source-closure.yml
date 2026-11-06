@@ -14,6 +14,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   source-closure:
     runs-on: ubuntu-latest
@@ -41,11 +42,40 @@ jobs:
           mkdir -p evidence
           python -B -m py_compile soak/tablets_unseeded_closure_contract.py soak/test_tablets_unseeded_closure_contract.py
           python -B -m unittest discover -s soak -p 'test_tablets_unseeded_closure_contract.py' -v 2>&1 | tee evidence/tablets-source-closure-tests.log
-      - name: Produce exact five-module closure JSON
+      - name: Download immutable historical TABLETS receipt (no replay)
+        uses: actions/download-artifact@v4
+        with:
+          name: real-tablets-five-field-diagnostic
+          run-id: 41787621424
+          repository: Sargon17-Green/Pastafarian-Calendar
+          github-token: ${{ github.token }}
+          path: evidence/real-tablets
+      - name: Lock real receipt bytes and bounded signed accounting
         shell: bash
         run: |
           set -euo pipefail
-          python -B soak/tablets_unseeded_closure_contract.py --evidence evidence/tablets-source-closure.json | tee evidence/tablets-source-closure-run.log
+          echo 'f0945f38de8abe3b5cd25c7561a59f89bd7f6fc3b8a601a8bf2661a344192638  evidence/real-tablets/real-five-field-tablets.json' | sha256sum --check -
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("evidence/real-tablets/real-five-field-tablets.json").read_text(encoding="utf-8"))
+          expected = [
+              {"day": -278523, "five_fields": [8453, 7, 934, 12, 100]},
+              {"day": -278522, "five_fields": [8453, 7, 935, 26, 87]},
+              {"day": -278521, "five_fields": [8453, 7, 936, 18, 93]},
+          ]
+          assert data["rows"] == expected, "E_REAL_RECEIPT_FIVE_TUPLES"
+          assert data["targets"] == [-278523, -278522, -278521], "E_REAL_RECEIPT_TARGETS"
+          assert (data["positive_prefix_questions"], data["forward_extension_questions"], data["negative_questions"], data["total_unique_gap_questions"]) == (29484, 27, 12, 29523), "E_REAL_RECEIPT_ACCOUNTING"
+          assert data["segment_limit"] == 4096, "E_REAL_RECEIPT_SEGMENT"
+          assert data["checkpoint_seed_used"] is False and data["full_date_certified"] is False, "E_REAL_RECEIPT_UNSUPPORTED"
+          print("PASS_OLD_SIGNED_TABLETS_RECEIPT_LOCK_ONLY_NOT_CERTIFIED")
+          PY
+      - name: Produce five-module closure and validate old real receipt (no replay)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B soak/tablets_unseeded_closure_contract.py --evidence evidence/tablets-source-closure.json --real-evidence evidence/real-tablets/real-five-field-tablets.json | tee evidence/tablets-source-closure-run.log
       - name: Retain success or failure evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,5 +85,6 @@ jobs:
             evidence/tablets-source-closure-tests.log
             evidence/tablets-source-closure-run.log
             evidence/tablets-source-closure.json
+            evidence/real-tablets/real-five-field-tablets.json
           if-no-files-found: warn
           retention-days: 30
