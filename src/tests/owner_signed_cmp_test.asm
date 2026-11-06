@@ -69,10 +69,9 @@ RunOwnerSignedCmpTests::
     ; 191: canonical zero, two independently owned operands.
     ld a, 191
     ld [wTestCase], a
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    or a
-    jp nz, .fail
+    xor a
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
 
     ; 192: compare highest byte at logical 8192, fragmented A.
     ld a, 192
@@ -105,10 +104,9 @@ RunOwnerSignedCmpTests::
     call OwnerByteWrite
     call OwnerCmpTestReadOwnerStatus
     jp nz, .fail
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 2
-    jp nz, .fail
+    ld a, 2
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
 
     ; 193: two negatives reverse the magnitude ordering.
     ld a, 193
@@ -116,10 +114,9 @@ RunOwnerSignedCmpTests::
     ld a, 1
     ld [wOwnerCmpSignA], a
     ld [wOwnerCmpSignB], a
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 1
-    jp nz, .fail
+    ld a, 1
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
 
     ; 194: negative zero is forbidden even if its owner is valid.
     ld a, 194
@@ -127,10 +124,9 @@ RunOwnerSignedCmpTests::
     xor a
     ld [wOwnerCmpLenA], a
     ld [wOwnerCmpLenA+1], a
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
     ld a, 1
     ld [wOwnerCmpLenA], a
     ld a, $20
@@ -152,10 +148,9 @@ RunOwnerSignedCmpTests::
     xor a
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
     ld a, 46
     ld [wOwnerRequest], a
     ld a, 2
@@ -167,10 +162,9 @@ RunOwnerSignedCmpTests::
     ld [wTestCase], a
     ld a, $40
     ld [wOwnerCmpLenB+1], a
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
     ld a, $20
     ld [wOwnerCmpLenB+1], a
 
@@ -206,10 +200,9 @@ RunOwnerSignedCmpTests::
     ld a, $34
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 2
-    jp nz, .fail
+    ld a, 2
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
 
     ; 198: equal operand bytes; after release, invalid ownership.
     ld a, 198
@@ -217,17 +210,15 @@ RunOwnerSignedCmpTests::
     ld a, $33
     ld [wOwnerByteValue], a
     call OwnerByteWrite
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    or a
-    jp nz, .fail
+    xor a
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
     ld a, 45
     ld [wOwnerRequest], a
     call OwnerLeaseRelease
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
     ; 199: canonical +0 is smaller than a nonzero positive magnitude.
     ; Owner 42 is a live, zero-initialized bank; owner 46 has 8193 bytes.
     ld a, 199
@@ -247,10 +238,9 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB], a
     ld a, $20
     ld [wOwnerCmpLenB+1], a
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 2
-    jp nz, .fail
+    ld a, 2
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
 
     ; 200: a nonzero negative magnitude is smaller than canonical +0.
     ld a, 200
@@ -270,20 +260,18 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenB], a
     ld [wOwnerCmpLenB+1], a
     ld [wOwnerCmpLenB+2], a
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 2
-    jp nz, .fail
+    ld a, 2
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
 
     ; 201: sign outside {0,1} must fail closed, even for a valid owner.
     ld a, 201
     ld [wTestCase], a
     ld a, 2
     ld [wOwnerCmpSignA], a
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
 
     ; 202: owner ID zero must fail closed even when length is zero.
     ld a, 202
@@ -294,10 +282,9 @@ RunOwnerSignedCmpTests::
     ld [wOwnerCmpLenA], a
     ld [wOwnerCmpLenA+1], a
     ld [wOwnerCmpLenA+2], a
-    call OwnerSignedCmp
-    ld a, [wOwnerCmpResult]
-    cp 3
-    jp nz, .fail
+    ld a, 3
+    call OwnerCmpTestExpectResultSnapshot
+    jp nc, .fail
 
 
     ; 203-206: compare must never modify operand metadata, bank ownership
