@@ -1,0 +1,55 @@
+name: Befunge QA31AG Pinned Source Upstream Feasibility
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31ag_upstream_feasibility.py'
+      - 'qa/stage1_qa31ag_independent_inverse.py'
+      - 'qa/QA31AG_SOURCE_PINNED_UPSTREAM_FEASIBILITY_CONTRACT_2026-11-06.md'
+      - '.github/workflows/befunge-qa31ag-upstream-feasibility.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-source-offline-inverse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check exact original source blob
+        run: test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
+      - name: Bounded forward source and independent inverse checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa31ag_artifacts
+          python3 -m py_compile qa/stage1_qa31ag_upstream_feasibility.py qa/stage1_qa31ag_independent_inverse.py
+          python3 qa/stage1_qa31ag_upstream_feasibility.py \
+            --source src/interleaved_work_counts.b98 \
+            --qa31r qa/QA31R_SIGNED_NATIVE_ROW29_32_35_38_2026-11-02.md \
+            --qa31af qa/QA31AF_ORIGINAL_200_RESIDUAL_CONTROL_FRONTIER_2026-11-06.md \
+            --out qa31ag_artifacts/forward.json | tee qa31ag_artifacts/forward.log
+          python3 qa/stage1_qa31ag_independent_inverse.py \
+            --source src/interleaved_work_counts.b98 \
+            --forward qa31ag_artifacts/forward.json \
+            --out qa31ag_artifacts/inverse.json | tee qa31ag_artifacts/inverse.log
+          python3 - <<'PY'
+          import json
+          f=json.load(open('qa31ag_artifacts/forward.json'))
+          i=json.load(open('qa31ag_artifacts/inverse.json'))
+          assert f['original_source_site_pins']==18
+          assert f['tested_m_q_gate_states']==30
+          assert f['source_pin_negative_controls']==6
+          assert i['inverse_states_verified']==28
+          assert i['hostile_mutations_rejected']==12
+          assert f['new_native_runs']==i['native_runs']==0
+          assert f['stage1_pass'] is False and i['stage1_pass'] is False
+          print('QA31AG_EXACT_SOURCE_OFFLINE_GATE_PASS')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: befunge-qa31ag-pinned-source-feasibility
+          path: qa31ag_artifacts
+          retention-days: 30
