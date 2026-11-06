@@ -581,3 +581,165 @@
                      (catch clojure.lang.ExceptionInfo e
                        (:code (ex-data e))))]
           (is (= :target-not-third-day-of-year code)))))))
+
+;; DIAG08: onafhankelijke insertion-oracle voor de vierde jaardag.
+;; Het geval [1,1,1,1] sluit de eerste maand exact af: de al bestaande
+;; histogram-oracle ondersteunt nul resterende dagen in een actieve maand.
+(def ^:private vierde-prefix-opties
+  [[1N 1N 1N 1N] [1N 1N 1N 2N]
+   [1N 1N 2N 1N] [1N 1N 2N 2N] [1N 1N 2N 3N]
+   [1N 2N 1N 1N] [1N 2N 1N 2N] [1N 2N 1N 3N]
+   [1N 2N 2N 1N] [1N 2N 2N 2N] [1N 2N 2N 3N]
+   [1N 2N 3N 1N] [1N 2N 3N 2N] [1N 2N 3N 3N]
+   [1N 2N 3N 4N]])
+
+(defn- kies-onafhankelijk-prefixblok [opties aantallen rang]
+  (loop [keuzes (seq opties) blokken (seq aantallen) r rang]
+    (if (empty? keuzes)
+      (throw (ex-info "Geen onafhankelijk vierde-prefixblok."
+                      {:code :oracle-fourth-prefix-not-found}))
+      (if (> r (first blokken))
+        (recur (next keuzes) (next blokken) (-' r (first blokken)))
+        {:prefix (first keuzes) :rest-rank r}))))
+
+(deftest vierde-prefix-insertion-oracle-tegen-brute
+  (testing "15 vierletterklassen; vaste ankers uit 185181 onafhankelijke brute-woorden."
+    (doseq [[lengten totaal ankers]
+            [[[4 4] 20N
+              [1 3 3 3 0 3 3 0 3 1 0 0 0 0 0]]
+             [[4 4 4] 1301N
+              [20 105 105 105 126 105 105 126 105 35 84 126 84 70 0]]
+             [[4 5 4] 3499N
+              [35 224 224 336 280 224 336 280 336 224 280 280 280 160 0]]
+             [[5 4 4] 3101N
+              [125 336 336 224 280 336 224 280 224 56 140 280 140 120 0]]
+             [[4 4 4 4] 177260N
+              [1301 9303 9303 9303 20790 9303 9303 20790
+               9303 3101 13860 20790 13860 11550 15400]]]]
+      (let [aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                            vierde-prefix-opties)]
+        (is (= (mapv bigint ankers) aantallen)
+            (str "Insertion 4-prefix " lengten))
+        (is (= totaal (reduce +' 0N aantallen)))
+        (when (< totaal 10000N)
+          (let [familie (orakel/weaving-family lengten)
+                woorden (mapv #((:unrank1 familie) %)
+                              (range 1 (inc totaal)))]
+            (is (= totaal ((:count familie))))
+            (doseq [[prefix aantal] (map vector vierde-prefix-opties aantallen)]
+              (is (= aantal
+                     (bigint (count
+                              (filter #(= prefix (mapv bigint (take 4 %)))
+                                      woorden))))
+                  (str "Brute vierletterprefix " lengten " " prefix)))))))))
+
+(deftest vierde-positie-grensrangen
+  (testing "Elk begin/einde van een niet-lege prefixklasse; ook maand-1-afsluiting."
+    (doseq [lengten [[4 4] [4 4 4] [4 5 4] [5 4 4] [4 4 4 4]]]
+      (let [familie (orakel/weaving-family lengten)
+            totaal ((:count familie))
+            aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                            vierde-prefix-opties)
+            grenzen (vec (reductions +' 0N aantallen))
+            rangen (distinct
+                    (filter #(<= 1N % totaal)
+                            (mapcat (fn [[laag hoog]] [(inc laag) hoog])
+                                    (partition 2 1 grenzen))))]
+        (doseq [r rangen]
+          (let [bewijs (rang/vierde-maand-op-rang-groot
+                        lengten r 5000000N)
+                verwacht (mapv bigint (take 4 ((:unrank1 familie) r)))
+                maand (peek verwacht)]
+            (is (= verwacht (:month-prefix bewijs))
+                (str "4-prefix " lengten " rang " r))
+            (is (= maand (:month-id bewijs)))
+            (is (= (bigint (count (filter #(= maand %) verwacht)))
+                   (:day-in-month bewijs)))
+            (is (<= 0N (:prefix-cell-upper-bound bewijs) 5000000N))
+            (is (= :fourth-day-prefix-only (:date-proof-scope bewijs)))
+            (is (false? (:month-weaving-computed? bewijs)))))))))
+
+(deftest vierde-prefix-budget-en-rang-weigeringen
+  (let [fout (fn [l r b]
+               (try
+                 (rang/vierde-maand-op-rang-groot l r b)
+                 nil
+                 (catch clojure.lang.ExceptionInfo e
+                   (:code (ex-data e)))))]
+    (is (= :fourth-day-prefix-budget-unproven
+           (fout [4 4 4] 1N 1N)))
+    (is (= :invalid-weaving-rank (fout [4 4 4] 0N 5000000N)))
+    (is (= :invalid-weaving-budget (fout [4 4 4] 1N 5000001N)))))
+
+(deftest echte-vierde-jaardag-met-onafhankelijke-prefix-oracle
+  (testing "Drie echte vierde jaardagen en zelfstandige vijfveldige berekening."
+    (doseq [berekening [dagen/stichtingsdag
+                       (+' dagen/stichtingsdag 17N)
+                       (-' dagen/stichtingsdag 23N)]]
+      (let [jaar (zoeken/vind-doeljaar @lijn berekening berekening)
+            vierde (+' (:open-gate-day jaar) 4N)
+            uitkomst (projectie/kies-vierde-dag-zonder-weving
+                      @lijn berekening vierde 128N 5000000N)
+            vijf (:date-components uitkomst)
+            prefix (:month-prefix uitkomst)
+            staat (orakel/new-gate-state)
+            normjaar (orakel/find-target-year staat berekening vierde)
+            saus (orakel/sauce berekening (inc (:open-gate-day normjaar)))
+            kotelet-aantal (orakel/choose-cutlet-count saus normjaar)
+            partitie (orakel/choose-cutlet-partition
+                      staat berekening saus normjaar kotelet-aantal)
+            kotelet-namen (orakel/choose-cutlet-names saus kotelet-aantal)
+            koteletten (orakel/materialize-cutlets
+                       staat normjaar partitie kotelet-namen)
+            norm-kotelet (some #(when (<= (:first-day %) vierde (:last-day %)) %)
+                               koteletten)
+            norm-maand-aantal (orakel/choose-month-count saus normjaar)
+            norm-lengten (orakel/choose-month-lengths
+                          saus normjaar norm-maand-aantal)
+            norm-namen (orakel/choose-month-names saus norm-maand-aantal)
+            derde-aantallen (mapv #(onafhankelijke-prefix-telling norm-lengten %)
+                                 derde-prefix-opties)
+            norm-totaal (reduce +' 0N derde-aantallen)
+            norm-rang (orakel/choose-rank
+                       (orakel/ask-bowl saus 4 orakel/seal-month-weaving)
+                       norm-totaal)
+            derde-keuze (kies-onafhankelijk-prefixblok
+                         derde-prefix-opties derde-aantallen norm-rang)
+            kinderen (filterv #(= (:prefix derde-keuze) (subvec % 0 3))
+                              vierde-prefix-opties)
+            kind-aantallen (mapv #(onafhankelijke-prefix-telling norm-lengten %)
+                                 kinderen)
+            vierde-keuze (kies-onafhankelijk-prefixblok
+                          kinderen kind-aantallen (:rest-rank derde-keuze))
+            norm-prefix (:prefix vierde-keuze)
+            norm-maand (peek norm-prefix)
+            verwacht [(:number normjaar)
+                      (:name-index norm-kotelet)
+                      (inc (-' vierde (:first-day norm-kotelet)))
+                      (nth norm-namen (dec (int norm-maand)))
+                      (bigint (count (filter #(= norm-maand %) norm-prefix)))]]
+        (is (= (get (zipmap derde-prefix-opties derde-aantallen)
+                    (:prefix derde-keuze))
+               (reduce +' 0N kind-aantallen)))
+        (is (= norm-totaal (weving/aantal-wevingen-groot norm-lengten)))
+        (is (<= 1N norm-rang norm-totaal))
+        (is (= norm-prefix prefix))
+        (is (= verwacht vijf))
+        (is (= 4 (count prefix)))
+        (is (= 1N (first prefix)))
+        (is (= :fourth-day-prefix-only (:date-proof-scope uitkomst)))
+        (is (false? (:month-weaving-computed? uitkomst)))
+        (is (not (contains? uitkomst :month-weaving)))
+        (is (<= 0N (:month-prefix-cell-upper-bound uitkomst) 5000000N))
+        (println "DISCOVERY24 DIAG08 echte vierde jaardag:"
+                 {:berekening berekening :doel vierde
+                  :prefix prefix
+                  :kosten (:month-prefix-cell-upper-bound uitkomst)
+                  :onafhankelijk-gelijk? (= verwacht vijf)})
+        (let [code (try
+                     (projectie/kies-vierde-dag-zonder-weving
+                      @lijn berekening (inc vierde) 128N 5000000N)
+                     nil
+                     (catch clojure.lang.ExceptionInfo e
+                       (:code (ex-data e))))]
+          (is (= :target-not-fourth-day-of-year code)))))))
