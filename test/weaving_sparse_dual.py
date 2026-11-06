@@ -6,7 +6,8 @@ acceptance uses the independent complete enumeration / occurrence-poset oracle.
 A bounded 6-symbol median-prefix probe does NOT imply full-year rank PASS.
 """
 from collections import Counter
-from itertools import product
+from itertools import accumulate, chain, islice, product, repeat
+from operator import mul
 from time import monotonic
 from resource import getrusage, RUSAGE_SELF
 from hashlib import sha256
@@ -68,14 +69,28 @@ def sparse_transfer(previous, n, k, spec):
     first = max(0, q)
     if first > n:
         return SparseVector(0, ())
-    prefix = previous.prefix(first)
-    out = []
-    # For i<n, w(i)=C(k+n-i-2,n-i); for i=n the weight is one.
+    # Assemble the same cumulative prefixes and exact elementwise products
+    # using CPython's C-level itertools/operator loops. This is a research-only
+    # implementation change, not a truncation, approximation, or change of DP.
+    # At i=first the prefix includes previous[first]; later increments are
+    # exactly previous[i] (or zero outside its sparse support).
+    width = n - first
+    begin, stop = first + 1, n + 1
+    overlap_begin = max(begin, previous.offset)
+    overlap_stop = min(stop, previous.offset + len(previous.values))
+    if overlap_begin < overlap_stop:
+        updates = chain(
+            repeat(0, overlap_begin - begin),
+            islice(previous.values, overlap_begin - previous.offset,
+                   overlap_stop - previous.offset),
+            repeat(0, stop - overlap_stop))
+    else:
+        updates = repeat(0, width)
+    # The reversed coefficient row indexes C(k+n-i-2,n-i), i=first..n.
     coefficients = free_gap_coefficients(n, k)
-    for i in range(first, n+1):
-        if i > first and previous.offset <= i < previous.offset + len(previous.values):
-            prefix += previous.values[i-previous.offset]
-        out.append(prefix * coefficients[n-i])
+    out = list(map(mul,
+                   accumulate(updates, initial=previous.prefix(first)),
+                   reversed(coefficients[:width + 1])))
     start = first+1
     left = 0
     while left < len(out) and out[left] == 0:
@@ -279,6 +294,52 @@ def dual_rank(lengths, word):
     return rank
 
 
+def test_free_gap_accumulation_differential():
+    """Exact old-loop comparison on bounded edge/sparse/large-integer shapes.
+
+    Independent dense/transpose and occurrence-poset checks in CI remain
+    mandatory; this test is a *differential regression*, not a standalone
+    performance acceptance or an independent combinatorial oracle.
+    """
+    checks = 0
+    for n in (0, 1, 4, 17, 96, 250):
+        shapes = (
+            SparseVector(0, tuple((i + 3)**4 for i in range(n + 1))),
+            SparseVector(n // 4, tuple((i + 1)**9 for i in range(n // 3))),
+            SparseVector(n // 2, (0, 0, 7, 0, 12)),
+            SparseVector(n + 2, ()),
+        )
+        for k in (1, 2, 7, 125):
+            for q in (-1, 0, 1, n // 2, n, n + 1):
+                for previous in shapes:
+                    expected = SparseVector(0, ())
+                    if q <= n:
+                        first = max(0, q)
+                        prefix = previous.prefix(first)
+                        row = free_gap_coefficients(n, k)
+                        values = []
+                        for i in range(first, n + 1):
+                            if (i > first and previous.offset <= i
+                                    < previous.offset + len(previous.values)):
+                                prefix += previous.values[i - previous.offset]
+                            values.append(prefix * row[n - i])
+                        lo = 0
+                        while lo < len(values) and values[lo] == 0:
+                            lo += 1
+                        if lo < len(values):
+                            hi = len(values)
+                            while hi > lo and values[hi - 1] == 0:
+                                hi -= 1
+                            expected = SparseVector(first + 1 + lo,
+                                                    tuple(values[lo:hi]))
+                    observed = sparse_transfer(previous, n, k, (q, 0, -1, 0))
+                    assert observed == expected, (n, k, q, previous.offset)
+                    checks += 1
+    assert checks == 576
+    print("WEAVING_SPARSE_ACCUMULATE_DIFFERENTIAL_CHECKS=" + str(checks))
+    print("WEAVING_SPARSE_ACCUMULATE_DIFFERENTIAL=PASS")
+
+
 def test_finite():
     from weaving_small_exact_oracle import brute_words, poset_oracle
     cases = [p for m in range(1, 5)
@@ -330,6 +391,7 @@ def test_finite():
         metric = watched.transfer_metrics[phase]
         assert metric["calls"] > 0 and metric["seconds"] >= 0.0
         assert sum(metric["per_month_calls"]) == metric["calls"]
+    test_free_gap_accumulation_differential()
     print("WEAVING_SPARSE_OBSERVABILITY_SMOKE=PASS")
     print("WEAVING_SPARSE_FINITE_REUSED_TRANSFERS=" + str(reused))
     print("WEAVING_SPARSE_FINITE_CASES=137")
