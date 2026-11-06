@@ -45,12 +45,7 @@ fn independent_scan(
   }
 }
 
-fn check_valid(
-  a: Int,
-  b: Int,
-  ids: List(Int),
-  thresholds: List(Int),
-) {
+fn check_valid(a: Int, b: Int, ids: List(Int), thresholds: List(Int)) {
   let context = bootstrap.new_context(a, b)
   let assert Ok(samples) =
     discovery_21_gate_batch.dispatch_discovery_21(context, ids)
@@ -69,11 +64,7 @@ fn check_valid(
       )
     })
   let assert Ok(actual) =
-    discovery_24_threshold_reach.dispatch_discovery_24(
-      context,
-      ids,
-      thresholds,
-    )
+    discovery_24_threshold_reach.dispatch_discovery_24(context, ids, thresholds)
   actual |> should.equal(expected)
 }
 
@@ -129,8 +120,7 @@ pub fn discovery_24_multiple_gaps_total_boundary_test() {
       bootstrap.new_context(11, 21),
       ids,
     )
-  let total =
-    samples |> list.fold(0, fn(sum, sample) { sum + sample.gap })
+  let total = samples |> list.fold(0, fn(sum, sample) { sum + sample.gap })
   check_valid(11, 21, ids, [0, 1, total, total + 1])
   let assert Ok(got) = answers(11, 21, ids, [total, total + 1])
   let assert [last, missing] = got
@@ -140,7 +130,7 @@ pub fn discovery_24_multiple_gaps_total_boundary_test() {
 }
 
 pub fn discovery_24_unsorted_thresholds_preserved_test() {
-  let thresholds = [999999, 1, 420, 0, 150, -50]
+  let thresholds = [999_999, 1, 420, 0, 150, -50]
   check_valid(11, 21, [6, 2, 3], thresholds)
   let assert Ok(got) = answers(11, 21, [6, 2, 3], thresholds)
   list.map(got, fn(item) { item.threshold }) |> should.equal(thresholds)
@@ -215,5 +205,5 @@ pub fn discovery_24_huge_days_repeated_bowls_and_ints_test() {
   let huge = core.m * core.m + core.m
   let ids = [1, 6, 1, 6, 2]
   check_valid(huge, -huge, ids, [-huge, 0, 1, huge, huge * huge])
-  check_valid(-huge, huge, [6, 6, 6], [0, 1, 9999999999, -9999999999])
+  check_valid(-huge, huge, [6, 6, 6], [0, 1, 9_999_999_999, -9_999_999_999])
 }
