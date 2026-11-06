@@ -251,3 +251,6 @@ Native run 42173607919/job 127746881149 completed FAILURE; exact marker `STAGE_2
 
 ## Stage2 DISCOVERY10 Native ACCEPTED, DISCOVERY11 candidate (2026-11-06)
 D10 fix SHA 2c47a2ae7d0d8be06b4b87e0cf92afb6fc9f85a6: 42176772918/job 127756927922 SUCCESS (4 cases, 20 checks, NATIVE_STAGE_2_DISCOVERY_10_VERIFICATION=PASS). Same-SHA D1–D9 42176772883 SUCCESS, original Stage1 42176772872 SUCCESS, Names 42176772880 SUCCESS. D10 aceptita. D11 16..20 exact BI production extension and independent 1..20 normative oracle; four planned cases/twenty assertions; separate bounded Native CI. D11 NOT Native accepted until same-SHA D1–D10, Stage1, Names and D11 completed log evidence. No main/merge, LAST_COMPLETED_STAGE=1.
+
+## Discovery11 static readback correction before Native evidence (2026-11-06)
+Readback of original D11 candidate b953cd5e69c7aa5e89ee4c8e973e3568c156ddb0 detected test output field mistakenly read as visibleFifteen, not visibleTwenty; CI job identifier still said discovery-10. Targeted fix only to D11 test and D11 workflow job identifier. No observed Native failure is claimed; D11 acceptance PENDING, four cases/twenty checks unchanged. Original D10 production, oracle, tests and prior accepted evidence untouched.

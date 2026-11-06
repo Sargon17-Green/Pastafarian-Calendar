@@ -51,7 +51,7 @@ to d11.valid :calculation :target :tag
   print sentence [STAGE_2_DISCOVERY_11_CASE_BEGIN] :tag
   localmake "before monster.stage02.visible.fifteen (monster.stage02.visible.ten (monster.stage02.visible.prefix (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts :calculation :target)))))
   localmake "after monster.stage02.visible.twenty :before
-  localmake "actual monster.context.get :after "visibleFifteen
+  localmake "actual monster.context.get :after "visibleTwenty
   localmake "counts nr.work.counts :calculation :target
   localmake "stones nr.stones
   localmake "hidden nr.hidden.build :counts :stones

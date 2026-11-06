@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  native-stage-2-discovery-10:
+  native-stage-2-discovery-11:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
