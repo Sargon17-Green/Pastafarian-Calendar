@@ -992,3 +992,16 @@ STAGE41_NATIVE=AWAITING_EXACT_SHA_CI_NOT_ACCEPTED
 STAGE41_EXPECTED_RED=UNDETERMINED_UNTIL_REPRODUCTION
 STAGE41_PRODUCTION_CHANGE=NONE
 STAGE41_FULL_CALENDAR_INTEGRATION=NOT_YET_AVAILABLE
+
+# Stage41 YAML diagnostic and corrected atomic workflow-only repair (2026-11-06)
+# Run 42173157713 on 342b3673fabf128907943c927d311cfe71ef5cf9: completed/failure with ZERO jobs.
+# No COBOL compiler or Native test executed. A JavaScript String.replace
+# insertion of a grep expression containing $' expanded the replacement
+# suffix, truncating the quoted grep and duplicating workflow tail.
+# Repair: rebuild Stage41 block from verified Stage40 block at 414a344565db2e82d591e551aeb99419853f1015
+# using callback-based literal insertion. Twelve complete grep markers,
+# exactly two timeouts, one artifact upload; no production/test change.
+STAGE41_FIRST_RUN=42173157713
+STAGE41_FIRST_RUN_RESULT=INVALID_YAML_ZERO_JOBS_NO_NATIVE
+STAGE41_YAML_FIX=LITERAL_CALLBACK_REBUILD_12_GREP_GATES
+STAGE41_NATIVE=AWAITING_CORRECTED_CI_NOT_ACCEPTED
