@@ -22,8 +22,8 @@ final class MonsterMonthNamePlan {
     required this.nameChoice,
     required List<int> nameIndices,
     required List<String> names,
-  }) : nameIndices = List<int>.unmodifiable(nameIndices),
-       names = List<String>.unmodifiable(names);
+  })  : nameIndices = List<int>.unmodifiable(nameIndices),
+        names = List<String>.unmodifiable(names);
 }
 
 /// Exact one-based lexicographic selection of distinct canonical name indices.
