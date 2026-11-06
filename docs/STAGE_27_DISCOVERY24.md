@@ -20,3 +20,10 @@ Require exact committed SHA automatic push CI **completed/success 29/29 jobs**, 
 `STAGE27_NATIVE_REMOTE_TWO_ASSERTIONS=131`
 `STAGE27_REAL_FIVEFIELD_SCALARS=125`
 Source/static preflight, queued and in_progress CI are not Native PASS. No main/merge/release.
+
+## PATCH01 — Stage04 CI setup timeout only (2026-11-06)
+Automatic push run [42176995669](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42176995669) at exact SHA `569577c7857c5cbd0c0cc25cfa8bb40384cbf0a3` completed with **28/29 successful** jobs. Verify job `127757631474` succeeded. Stage27 native job [127757631974](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42176995669/job/127757631974) succeeded: GNAT 13 compile/bind/link, 25 distinct ordered pairs, Python independent selftest 139, Ada invariants 131 and exact numerical five-field scalars 125. These are direct observed results of the Stage27-specific job, **not** full Stage27 acceptance.
+
+Unrelated historical `native-stage04-discovery02` job [127757631563](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42176995669/job/127757631563) was cancelled after approximately ten minutes during `apt-get install -y gnat gprbuild`. Its liveness probe was skipped; no Ada mismatch was observed. Workflow's Stage04-specific `timeout-minutes: 10` exhausted while the package mirror was slow. PATCH01 changes **only** Stage04 job timeout 10 → 30 minutes; no calculations, oracles, fixtures, runners or other job timeouts are altered. It is not a retry or redispatch of the previous run: the next push CI must validate the patch at its own exact SHA.
+
+**Stage27 acceptance remains PENDING** until the new same-SHA automatic run is completed/success with 29/29 jobs, including Stage04, verify and Stage27 direct numeric evidence. No main/merge/release.
