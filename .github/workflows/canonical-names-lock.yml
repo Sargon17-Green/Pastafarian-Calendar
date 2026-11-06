@@ -3506,3 +3506,61 @@ jobs:
           path: logs/stage14
           if-no-files-found: warn
           retention-days: 30
+
+  stage15-canonical-five-field-projection-native:
+    if: github.ref_name == 'Perl+國語'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Stage15 frozen catalog composition and independent daily oracle native QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage15
+          git rev-parse HEAD > logs/stage15/source.txt
+          perl -e 'die "Perl 5.40+ required\n" if $] < 5.040; print "$^V\n"' > logs/stage15/perl-version.txt
+          perl -Ilib -c lib/Pastafari/Monster/CanonicalFiveFieldProjection.pm 2> logs/stage15/syntax.stderr
+          perl -Ilib -c t/60_stage15_canonical_five_field_projection.t 2>> logs/stage15/syntax.stderr
+          test "$(grep -c 'syntax OK' logs/stage15/syntax.stderr)" -eq 2
+          test "$(wc -l < logs/stage15/syntax.stderr)" -eq 2
+          set +e
+          (
+            ulimit -v 393216
+            ulimit -c 0
+            timeout --signal=TERM --kill-after=5s 120s \
+              prove -e 'perl -CS -Ilib' -v t/60_stage15_canonical_five_field_projection.t \
+              > logs/stage15/test.stdout 2> logs/stage15/test.stderr
+          )
+          ec=$?
+          set -e
+          printf '%s\n' "$ec" > logs/stage15/test.exit
+          cat logs/stage15/test.stdout
+          cat logs/stage15/test.stderr >&2
+          test "$ec" -eq 0
+          test ! -s logs/stage15/test.stderr
+          grep -q 'All tests successful.' logs/stage15/test.stdout
+          grep -q 'Result: PASS' logs/stage15/test.stdout
+          grep -q 'Tests=14320' logs/stage15/test.stdout
+          grep -q 'STAGE15_INDEPENDENT_EXPANDED_DAYS=6993' logs/stage15/test.stdout
+          grep -q 'STAGE15_INDEPENDENT_DAY_COMPARISONS=1585' logs/stage15/test.stdout
+          grep -q 'STAGE15_STREAM_BOUNDARY_CONFIGURATIONS=24' logs/stage15/test.stdout
+          grep -q 'STAGE15_INVALID_CASES=28' logs/stage15/test.stdout
+          grep -q 'STAGE15_FULL_GENERATOR_NOT_VERIFIED' logs/stage15/test.stdout
+          echo 'STAGE15_NATIVE_PASS=1' > logs/stage15/result.txt
+          cat logs/stage15/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perl-stage15-canonical-five-field-projection-native
+          path: logs/stage15
+          if-no-files-found: warn
+          retention-days: 30
