@@ -254,3 +254,6 @@ D10 fix SHA 2c47a2ae7d0d8be06b4b87e0cf92afb6fc9f85a6: 42176772918/job 1277569279
 
 ## Discovery11 static readback correction before Native evidence (2026-11-06)
 Readback of original D11 candidate b953cd5e69c7aa5e89ee4c8e973e3568c156ddb0 detected test output field mistakenly read as visibleFifteen, not visibleTwenty; CI job identifier still said discovery-10. Targeted fix only to D11 test and D11 workflow job identifier. No observed Native failure is claimed; D11 acceptance PENDING, four cases/twenty checks unchanged. Original D10 production, oracle, tests and prior accepted evidence untouched.
+
+## Stage 2 Discovery11 Native accepted, Discovery12 implementation (2026-11-06)
+On Logo+Ido SHA 17933d208eb6807eca0de972c097f13e54ca136b, D11 42188439783/job 127794264805 completed SUCCESS (4/20, authentic Native PASS); same-SHA D1–D9 42188439666, D10 42188439679, Stage1 42188439678 and Names 42188439576 completed SUCCESS. D11 accepted, Stage2 overall incomplete. D12 21..25 exact BI implementation uses prior verified production helpers; independent test-only normative oracle derives 1..25. Five planned cases/21 checks. D12 Native pending; no main/merge, LAST_COMPLETED_STAGE=1.

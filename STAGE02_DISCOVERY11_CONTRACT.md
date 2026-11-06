@@ -1,6 +1,6 @@
 # Stage2 / DISCOVERY11 — exact visible drops 16–20 (Logo+Ido)
 
-Status: IMPLEMENTED_NATIVE_PENDING. Discovery10 is Native ACCEPTED on SHA 2c47a2ae7d0d8be06b4b87e0cf92afb6fc9f85a6: D10 run 42176772918/job 127756927922 (4 cases/20 checks, authentic Native PASS), D1–D9 42176772883/job 127756927895, Stage1 42176772872/job 127756927968, Names 42176772880/job 127756928054 all completed SUCCESS. LAST_COMPLETED_STAGE=1; no full Stage2 acceptance.
+Status: ACCEPTED_NATIVE (2026-11-06). Discovery10 is Native ACCEPTED on SHA 2c47a2ae7d0d8be06b4b87e0cf92afb6fc9f85a6: D10 run 42176772918/job 127756927922 (4 cases/20 checks, authentic Native PASS), D1–D9 42176772883/job 127756927895, Stage1 42176772872/job 127756927968, Names 42176772880/job 127756928054 all completed SUCCESS. LAST_COMPLETED_STAGE=1; no full Stage2 acceptance.
 
 ## Input/output and guards
 Input is a D10 context with status VISIBLE_FIFTEEN_ONLY, exact length-15 visibleFifteen list, 46 stone quintets, 7 hidden seeds and five exact BI workcounts. If status is wrong, prefix not a list or length is not 15, return the context exactly unchanged. Valid output adds visibleTwenty, exactly twenty canonical BI values in [1,M] preserving first fifteen; phase VISIBLE_TWENTY_READY, mode STAGE_2_DISCOVERY_11, status VISIBLE_TWENTY_ONLY; append stage02.visible.twenty to metrics and stage02.visible.twenty.ready to logs exactly once. Preserve both raw dates, normalized dates, counts, stones, hiddenSeeds, visiblePrefix, visibleTen and visibleFifteen. Stateless; no final calendar; no Stage1 change.
@@ -13,3 +13,6 @@ One validated foundation/tablets case with five separate exact oracle comparison
 
 ## Discovery11 static readback correction before Native evidence (2026-11-06)
 Readback of original D11 candidate b953cd5e69c7aa5e89ee4c8e973e3568c156ddb0 detected test output field mistakenly read as visibleFifteen, not visibleTwenty; CI job identifier still said discovery-10. Targeted fix only to D11 test and D11 workflow job identifier. No observed Native failure is claimed; D11 acceptance PENDING, four cases/twenty checks unchanged. Original D10 production, oracle, tests and prior accepted evidence untouched.
+
+## Native acceptance of Discovery11 (2026-11-06)
+17933d208eb6807eca0de972c097f13e54ca136b: D11 42188439783/job 127794264805 completed SUCCESS, 4 cases/20 checks, exact native PASS markers. Same-SHA D1–D9 42188439666, D10 42188439679, original Stage1 42188439678 and Names Lock 42188439576 completed SUCCESS. Discovery11 accepted; Stage2 not complete, LAST_COMPLETED_STAGE=1.
