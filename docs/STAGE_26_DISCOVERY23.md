@@ -12,3 +12,11 @@ Python selftest: uniqueness 1 + explicit coverage 1 + norms 2 + 25×5 domains 12
 
 ## Acceptance — PENDING
 Require same-SHA automatic push CI completed/success **28/28 jobs** including verify and native-stage26-limit-two; direct GNAT13 compile/bind/link log plus exact markers STAGE26_INDEPENDENT_LIMIT_TWO_SELFTEST_ASSERTIONS=139, STAGE26_NATIVE_LIMIT_TWO_ASSERTIONS=131, STAGE26_REAL_FIVEFIELD_SCALARS=125. Static QA and queued/in_progress runs are NOT Native PASS. No main/merge/release.
+
+## 2026-11-06 — Stage26 first CI attempt and CI setup PATCH01
+
+GitHub [push run 42125385167](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42125385167) was completed/cancelled on exact SHA `ebc8eaa50be8a9393a536fef57f50199501e46a0`, attempt 1: **27/28 jobs succeeded**, including `verify` and `native-stage26-limit-two` job `127588112089`. Direct GNAT 13 compile/bind/link log reported precisely `STAGE26_INDEPENDENT_LIMIT_TWO_SELFTEST_ASSERTIONS=139`, `STAGE26_NATIVE_LIMIT_TWO_ASSERTIONS=131` and `STAGE26_REAL_FIVEFIELD_SCALARS=125`, and 25 distinct ordered Native pairs; the new bounded Stage26 numerical differential passed in that job.
+
+The one cancelled job was historical `native-stage21-edge-adjacent` (job `127588112069`), not the Stage26 job. Its `sudo apt-get update -qq; sudo apt-get install -y gnat gprbuild` setup started at 23:09:46 UTC and only printed GNATMAKE 13.3.0 at 23:24:35 UTC (about 14m49s), leaving fewer than 25 seconds of its 15-minute *job-level* timeout. Its Python selfcheck emitted 88 and GNAT compiled/bound/linked, but the Native executable was terminated at 23:24:58 UTC; its numerical comparison did **not** finish. There is no observed calendar mismatch. PATCH01 increases **only the Stage21 workflow job timeout from 15 to 30 minutes**; existing runner-level 180/600/180-second bounds, data, algorithms, assertion counts and 28-job gate stay unchanged. This is CI setup tolerance, not an Ada correctness fix.
+
+**Stage26 overall acceptance remains PENDING** until a new push-triggered run completes success with **28/28 jobs on the new exact SHA**, plus direct verification of required logs and markers. Do not treat the first cancelled run as a full-stage PASS; do not manually dispatch duplicate CI.
