@@ -1867,7 +1867,26 @@ OwnerCmpTestExpectResultSnapshot:
     pop bc
     cp b
     jr nz, .bad
-    jp OwnerCmpTestCheckSnapshot
+    call OwnerCmpTestCheckSnapshot
+    jr nc, .bad
+    ; Native191..202: 12 numbered IDs, 13 compare checkpoints (198 twice).
+    ; Keep ROM0 small: the source-specific physical SRAM sentinel check is
+    ; placed in ROM bank 1, entered only from fixed ROM0 after selecting it.
+    ld a, [wTestCaseHi]
+    or a
+    jr nz, .ok
+    ld a, [wTestCase]
+    cp 191
+    jr c, .ok
+    cp 203
+    jr nc, .ok
+    ld a, 1
+    ld [$2000], a
+    call OwnerCmpTestEarlySentinelCheck
+    ret
+.ok:
+    scf
+    ret
 .bad:
     and a
     ret
@@ -2455,3 +2474,108 @@ OwnerCmpTestOwner253FullGroup:
 .invalid:
     and a
     ret
+
+; Targeted ROMX SRAM sentinel instrumentation for all 13 Native191..202
+; comparisons, including both before and after the owner45 release in 198.
+; No production code changes; all expected values are source-derived physical
+; SRAM bytes, independent of the comparator's returned result.
+; This code is called from ROM0 with MBC5 ROM bank 1 explicitly selected.
+SECTION "Owner 191-202 SRAM sentinels", ROMX, BANK[1]
+OwnerCmpTestEarlySentinelCheck:
+    ; Numbered case -> expectation-table row. Case198 has two comparisons:
+    ; before release tag47 at bank5, after release tag0. Rows for 199..202
+    ; shift by one; this guarantees all 13 checkpoints receive an assertion.
+    ld a, [wTestCase]
+    sub 191
+    cp 7
+    jr c, .rowReady
+    jr nz, .after198
+    ld b, a
+    ld a, [wLeaseTable+5]
+    or a
+    ld a, b
+    jr nz, .rowReady
+.after198:
+    inc a
+.rowReady:
+    add a, a
+    add a, a
+    ld c, a
+    ld b, 0
+    ld hl, OwnerCmpTestEarlySentinelExpected
+    add hl, bc
+
+    ; Raw MBC5 SRAM bank mappings are deliberately physical. Never use the
+    ; owner API for revoked banks, and never infer expected values from SRAM.
+    ; Bank5, offset8191: live fragmented owner45, then zero after release.
+    ld a, 5
+    call SRAMSelectBank
+    ld a, [$bfff]
+    cp [hl]
+    jp nz, .bad
+    inc hl
+    ; Also protect its independent lower byte, expected zero throughout.
+    ld a, [$a000]
+    or a
+    jp nz, .bad
+
+    ; Bank7, offset0: owner45's second fragment, scrubbed on release.
+    ld a, 7
+    call SRAMSelectBank
+    ld a, [$a000]
+    cp [hl]
+    jp nz, .bad
+    inc hl
+    ld a, [$bfff]
+    or a
+    jp nz, .bad
+
+    ; Bank8, offset8191: owner46's lower-bank high boundary byte.
+    ld a, 8
+    call SRAMSelectBank
+    ld a, [$bfff]
+    cp [hl]
+    jp nz, .bad
+    inc hl
+    ld a, [$a000]
+    or a
+    jp nz, .bad
+
+    ; Bank9, offset0: owner46's upper-bank low boundary byte.
+    ld a, 9
+    call SRAMSelectBank
+    ld a, [$a000]
+    cp [hl]
+    jp nz, .bad
+
+    ; Independent owner42 at physical bank6 stays zero through case202.
+    ld a, 6
+    call SRAMSelectBank
+    ld a, [$a000]
+    or a
+    jp nz, .bad
+    scf
+    ret
+.bad:
+    and a
+    ret
+
+; Fixed physical SRAM expected bytes per comparison, in the order:
+; bank5[$bfff], bank7[$a000], bank8[$bfff], bank9[$a000].
+; The other four checked physical bytes (5:a000, 7:bfff, 8:a000, 6:a000)
+; are zero across all thirteen source checkpoints.
+OwnerCmpTestEarlySentinelExpected:
+    db $00, $00, $00, $00 ; 191
+    db $00, $01, $00, $02 ; 192
+    db $00, $01, $00, $02 ; 193
+    db $00, $01, $00, $02 ; 194
+    db $00, $01, $00, $00 ; 195
+    db $00, $01, $00, $02 ; 196
+    db $33, $01, $34, $01 ; 197
+    db $33, $01, $33, $01 ; 198 before release
+    db $00, $00, $33, $01 ; 198 after release
+    db $00, $00, $33, $01 ; 199
+    db $00, $00, $33, $01 ; 200
+    db $00, $00, $33, $01 ; 201
+    db $00, $00, $33, $01 ; 202
+; END OwnerCmpTestEarlySentinelExpected

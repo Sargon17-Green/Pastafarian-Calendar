@@ -837,6 +837,8 @@ def main():
     check_native_cases262_to277_oracle()
     from test_sm83_case191_202_oracle import check_native191_202_fixtures
     check_native191_202_fixtures(compare_read_only)
+    from test_sm83_native191_202_sram_guard import check_native191_202_sram_guard
+    check_native191_202_sram_guard()
     from test_sm83_case203_210_oracle import check_native203_210_fixtures
     check_native203_210_fixtures(compare_read_only)
     from test_sm83_case211_220_oracle import check_native211_220_fixtures
