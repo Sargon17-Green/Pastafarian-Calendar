@@ -54,5 +54,5 @@ jobs:
           python3 tests/stage02_short_liveness_oracle.py
           python3 tests/stage02_short_q123_differential_oracle.py
           python3 tests/stage02_short_q45_extension_oracle.py
-      - name: Run all 57 Native WAT cases and 29 exact independent BigInt oracles
+      - name: Run all 67 Native WAT cases and 39 exact independent BigInt oracles
         run: node tests/run_stage02_discovery01_webassembly.cjs
