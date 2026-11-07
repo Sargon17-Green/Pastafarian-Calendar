@@ -26,7 +26,7 @@ def check():
     raw=Path("src/interleaved_work_counts.b98").read_bytes()
     blob=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\0"+raw).hexdigest()
     assert blob==SOURCE,("original source changed",blob)
-    lines=raw.decode("utf8").splitlines()
+    lines=raw.decode("utf8").split("\n")  # Preserve the original final empty LF record.
     assert len(lines)==2016
     assert lines[1354][1335]=="p" and lines[1373][1335]=="x"
     assert lines[1750][1500]==" " and lines[1750][1501]==">" and lines[1751][1500]=="v"
