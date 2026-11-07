@@ -77,5 +77,37 @@
       958,
       1331
     ]
+  ],
+  "forward_syntax_protected_p": [
+    {
+      "source": [
+        369,
+        575
+      ],
+      "forward_syntactic_destination": [
+        5,
+        5
+      ]
+    },
+    {
+      "source": [
+        664,
+        860
+      ],
+      "forward_syntactic_destination": [
+        10,
+        5
+      ]
+    },
+    {
+      "source": [
+        1041,
+        860
+      ],
+      "forward_syntactic_destination": [
+        10,
+        5
+      ]
+    }
   ]
 }

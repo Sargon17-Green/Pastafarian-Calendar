@@ -69,8 +69,12 @@ const protectedRows=new Set([5,6,8,11,14,17,20,23,26,29,32,35,38,44]);
 const direct=certainX.filter(v=>[14,32].includes(v.destination[1]))
   .map(v=>({source:v.ip,destination:v.destination}));
 assert.deepEqual(direct,expectations.direct_certified_ingress);
-for(const p of certainP)assert.ok(!protectedRows.has(p.destination[1]),
-  "new constant p write into protected parser corridor "+JSON.stringify(p));
+const forwardOnlyProtectedP=certainP.filter(p=>protectedRows.has(p.destination[1]))
+  .map(p=>({source:p.ip,forward_syntactic_destination:p.destination}));
+assert.deepEqual(forwardOnlyProtectedP,expectations.forward_syntax_protected_p);
+// This corridor is REVERSE-flow in the original source. A rightward
+// expression suffix is NOT evidence of a physically executed p destination.
+assert.equal(rows[575][385],"<");
 for(const x of direct){
   assert.equal(rows[x.source[1]][x.source[0]],"x");
   assert.equal(rows[x.destination[1]][x.destination[0]],">");
@@ -105,10 +109,10 @@ const report={
   original_source_rows:rows.length,
   original_source_bytes:bytes.length,
   lexical_sites:{x:inventory.x.length,p:inventory.p.length,j:inventory.j.length},
-  certified_literal_only_suffixes:{x:certainX.length,p:certainP.length},
-  unresolved_static_sites:{x:inventory.x.length-certainX.length,p:inventory.p.length-certainP.length},
+  rightward_syntax_only_certificates:{x:certainX.length,p:certainP.length},
+  not_certified_by_rightward_suffix:{x:inventory.x.length-certainX.length,p:inventory.p.length-certainP.length},
   certified_direct_ingress_to_y14_or_y32:direct,
-  certified_p_targets_on_protected_source_rows:0,
+  rightward_syntactic_p_destinations_in_protected_rows:forwardOnlyProtectedP,
   original_j_sites:inventory.j.map(v=>v.ip),
   hostile_nonnoop_source_mutations_detected:mutants.length,
   hostile_details:mutants,
@@ -118,6 +122,7 @@ const report={
   new_full_original_corpus_CI_runs:0,
   uncertified_x_destinations:"UNKNOWN",
   uncertified_p_destinations:"UNKNOWN",
+  original_execution_direction_at_outer_sites:"NOT_CERTIFIED_BY_THIS_RIGHTWARD_SCAN",
   vertical_fallthrough_or_dynamic_source_ingress:"UNKNOWN",
   global_unreachability:"NOT_PROVEN",
   stage1_pass:false
