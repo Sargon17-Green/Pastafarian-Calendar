@@ -25,7 +25,7 @@ program stage01_normative_cache_reuse_probe
   type(CalendarDateResult) :: actual
   character(len=16) :: mode
 
-  if (command_argument_count() /= 1) error stop 'expected forward, reverse, three-year or mixed-year'
+  if (command_argument_count() /= 1) error stop 'expected forward, reverse, three-year, mixed-year or reset-revisit'
   call get_command_argument(1, mode, status=status)
   if (status /= 0) error stop 'cannot read mode'
   select case (trim(mode))
@@ -41,12 +41,20 @@ program stage01_normative_cache_reuse_probe
   case ('mixed-year')
      order = [1, 4, 3, 5, 2, 6, 4, 5]
      nsteps = 8
+  case ('reset-revisit')
+     ! Exactly three already-verified interior dates, repeated after a cache reset.
+     order = [4, 5, 6, 4, 5, 6, 0, 0]
+     nsteps = 6
   case default
      error stop 'unsupported cache-reuse mode'
   end select
 
   call reset_gate_cache()
   do step = 1, nsteps
+     if (trim(mode) == 'reset-revisit' .and. step == 4) then
+        call reset_gate_cache()
+        write(*,'(A)') 'STAGE01_NORMATIVE_CACHE_RESET_AT_STEP=4 MODE=reset-revisit'
+     end if
      fixture = order(step)
      actual = normative_calendar_date(foundation_day(), bi_from_int64(targets(fixture)))
      matched = 0
