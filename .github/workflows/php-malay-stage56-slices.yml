@@ -1,0 +1,65 @@
+name: PHP Malay Stage56 independent production slices
+
+on:
+  push:
+    branches:
+      - 'PHP+Bahasa-Melayu'
+    paths:
+      - 'src/Patches/YearStructureSlices56.php'
+      - 'tests/stage56_production_slices.php'
+      - '.github/workflows/php-malay-stage56-slices.yml'
+  workflow_dispatch:
+
+jobs:
+  stage56-production-slices-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Execute isolated Phase A native gate and retain failure evidence
+        id: gate
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-evidence
+          printf '%s\n' 'PC-BRANCH-PHP-MALAY' > stage56-evidence/PROJECT_ID.txt
+          printf '%s\n' "${GITHUB_SHA}" > stage56-evidence/SHA.txt
+          php -v > stage56-evidence/php-version.txt
+          php -l src/BigInt.php > stage56-evidence/lint-bigint.txt 2>&1
+          l1=$?
+          php -l src/Patches/YearStructureSlices56.php > stage56-evidence/lint-slices.txt 2>&1
+          l2=$?
+          php -l tests/stage56_production_slices.php > stage56-evidence/lint-tests.txt 2>&1
+          l3=$?
+          timeout 900s php -d memory_limit=512M tests/stage56_production_slices.php \
+            > stage56-evidence/stdout.txt 2> stage56-evidence/stderr.txt
+          code=$?
+          printf 'lint_bigint=%s\nlint_slices=%s\nlint_tests=%s\nexit=%s\n' \
+            "$l1" "$l2" "$l3" "$code" > stage56-evidence/exit.txt
+          cat stage56-evidence/lint-bigint.txt stage56-evidence/lint-slices.txt \
+            stage56-evidence/lint-tests.txt stage56-evidence/stdout.txt
+          if (( l1 != 0 || l2 != 0 || l3 != 0 || code != 0 )); then
+            cat stage56-evidence/stderr.txt >&2
+            exit 1
+          fi
+          if [[ -s stage56-evidence/stderr.txt ]]; then
+            cat stage56-evidence/stderr.txt >&2
+            exit 1
+          fi
+          grep -E '^STAGE56_PRODUCTION_SLICES assertions=[0-9]+ cutlet_vectors=[0-9]+ month_vectors=[0-9]+ name_vectors=[0-9]+ rejected=[0-9]+ big_rank_roundtrips=6 status=PASS$' \
+            stage56-evidence/stdout.txt
+      - name: Preserve SHA-bound proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-phase-a-${{ github.sha }}
+          path: stage56-evidence/
+          if-no-files-found: warn
+          retention-days: 30
