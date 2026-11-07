@@ -1,0 +1,59 @@
+name: Kotlin independent FOUNDATION cache-free A/B diagnostic
+on:
+  push:
+    branches: ['Kotlin\\+Cymraeg']
+    paths:
+      - 'soak/independent_five_field_cache_ab.py'
+      - 'soak/test_independent_five_field_cache_ab.py'
+      - '.github/workflows/post55-independent-cache-free-ab.yml'
+      - 'soak/independent_five_field_date.py'
+      - 'soak/independent_date_combinatorics.py'
+      - 'soak/independent_year_geometry_oracle.py'
+      - 'soak/independent_sauce_oracle.py'
+      - 'soak/independent_month_weaving_oracle.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-cache-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify exact branch HEAD
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+      - name: Eight bounded contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python -B -m py_compile soak/independent_five_field_cache_ab.py soak/test_independent_five_field_cache_ab.py
+          python -B -m unittest discover -s soak -p 'test_independent_five_field_cache_ab.py' -v 2>&1 | tee evidence/cache-ab-tests.log
+      - name: Two isolated cold-mode real signed FOUNDATION evaluations
+        shell: bash
+        timeout-minutes: 6
+        run: |
+          set -euo pipefail
+          python -B soak/independent_five_field_cache_ab.py --worker-timeout 140 --evidence evidence/cache-free-foundation.json | tee evidence/cache-free-foundation.log
+      - name: Retain evidence including failure log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-independent-foundation-cache-ab
+          path: |
+            evidence/cache-ab-tests.log
+            evidence/cache-free-foundation.log
+            evidence/cache-free-foundation.json
+          if-no-files-found: warn
+          retention-days: 30
