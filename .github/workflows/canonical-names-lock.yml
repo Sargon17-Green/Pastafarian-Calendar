@@ -51,15 +51,6 @@ jobs:
             exit 1
           fi
           echo "$(dirname "$v_bin")" >> "$GITHUB_PATH"
-      - name: Stage31 temporary exact V0.5.2 vfmt diagnostic (never bypass verify)
-        shell: bash
-        run: |
-          set -euo pipefail
-          v fmt -w ./pastafari/normative_oracle_test.v
-          echo 'BEGIN_STAGE31_ORACLE_FMT_DIFF'
-          git diff -- pastafari/normative_oracle_test.v
-          echo 'END_STAGE31_ORACLE_FMT_DIFF'
-          git restore -- pastafari/normative_oracle_test.v
       - name: Verify V version and source formatting
         shell: bash
         run: |

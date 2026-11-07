@@ -71,7 +71,7 @@ fn new_oracle_engine() OracleEngine {
 	mut gates := map[string]BigInt{}
 	gates['0'] = foundation
 	return OracleEngine{
-		gate_cache: OracleGateCache{
+		gate_cache:      OracleGateCache{
 			gates:     gates
 			min_index: big_zero()
 			max_index: big_zero()
