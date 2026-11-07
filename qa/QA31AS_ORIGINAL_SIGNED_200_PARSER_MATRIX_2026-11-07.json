@@ -1,0 +1,50 @@
+{
+  "schema": "qa31as-finite-original-200-parser-matrix-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_signed_QA31AI_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "evidence_zip_sha256": "f7f4702e84523b852ec40c15cbc59f699f69ae94de2e02c36fd4a1c140aa894e",
+  "signed_cases": 200,
+  "signed_steps": 3628390,
+  "categories": {
+    "two_ascii_digits": 100,
+    "digit_delimiter": 40,
+    "digit_nul_or_ff": 20,
+    "delimiter_digit": 40
+  },
+  "byte_reads": 1800,
+  "EOF_reads": 140,
+  "staging_13_puts": 180,
+  "staging_13_source_writers": {
+    "152,26": 80,
+    "152,35": 100
+  },
+  "staging_13_read_and_handoff_to_M": 140,
+  "staging_11_puts": 140,
+  "staging_11_reads": 140,
+  "initial_M_puts": 140,
+  "j185_runs": 1800,
+  "j185_operand_counts": {
+    "0": 700,
+    "61": 1100
+  },
+  "j335_runs": 700,
+  "j335_operand_counts": {
+    "0": 20,
+    "61": 680
+  },
+  "source_pins_verified": 10,
+  "first_divergence_pairs": {
+    "pair_30_31_vs_30_09": 9118,
+    "pair_30_09_vs_30_00": 9484,
+    "pair_30_31_vs_09_31": 8278,
+    "pair_30_00_vs_30_ff": null
+  },
+  "original_trace_independent_oracles": 2,
+  "hostile_synthetic_reports_rejected": 21,
+  "extra_native_runs": 0,
+  "extra_GitHub_full_signed_CI_runs": 0,
+  "new_natural_counter_target_witness": null,
+  "global_reachability_proven": false,
+  "stage1_pass": false
+}

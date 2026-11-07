@@ -1,0 +1,77 @@
+{
+  "schema": "qa31av-original-signed-200-post-EOF-counter-gate-counts-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_QA31AI_signed_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "evidence_zip_sha256": "7efd888ed86751749499ebf8c835e4a5cdd7257ac9fc96463cd86c4219a9e862",
+  "evidence_zip_members": 11,
+  "evidence_zip_bytes": 71139,
+  "source_ray_pins": {
+    "m29": {
+      "source_start": [
+        10,
+        29
+      ],
+      "source_end": [
+        89,
+        29
+      ],
+      "source_bytes": 80,
+      "opcodes": 73,
+      "sha256": "a9d50261deb05722aa7a465f1dda6790a475816400a593e86bb9d27a6908a64d",
+      "formula": "61*m"
+    },
+    "q32": {
+      "source_start": [
+        10,
+        32
+      ],
+      "source_end": [
+        113,
+        32
+      ],
+      "source_bytes": 104,
+      "opcodes": 97,
+      "sha256": "570dc07da27206e51eab0548078c10e21a1f54633e62040df5b4cd6a588eb61b",
+      "formula": "61*(q>3)"
+    }
+  },
+  "signed_cases": 200,
+  "signed_STEPS": 3628390,
+  "physical_original_ray_opcode_replays": 19920,
+  "real_EOF_cases": 140,
+  "no_EOF_cases": 60,
+  "post_EOF_row29_reads_m1": 100,
+  "post_EOF_row29_reads_m0": 40,
+  "post_EOF_row32_reads_q3": 100,
+  "post_EOF_row32_q_gt3_seen": 0,
+  "j29_61": 100,
+  "j29_0": 40,
+  "j32_0": 100,
+  "post_EOF_counter_reads": 580,
+  "post_EOF_counter_puts": 100,
+  "post_EOF_q38_reads_q4": 140,
+  "post_EOF_q38_owner_248_35": 100,
+  "post_EOF_q38_owner_248_26": 40,
+  "all_original_counter_puts": 2920,
+  "counter_put_site_counts": {
+    "106,2": 200,
+    "202,2": 200,
+    "248,14": 1060,
+    "248,26": 680,
+    "344,26": 680,
+    "248,35": 100
+  },
+  "candidate_outer_p_events_after_EOF": 1710,
+  "candidate_outer_p_into_counters": 0,
+  "independent_source_original_signed_verifiers": 2,
+  "synthetic_hostile_report_mutations_rejected": 22,
+  "new_native_runs": 0,
+  "new_full_corpus_CI_runs": 0,
+  "global_proof": false,
+  "stage1_global_pass": false,
+  "stage1_functional_pass": false,
+  "stage1_geometric_pass": false,
+  "library_mirror_verified": false,
+  "next": "QA31AW"
+}

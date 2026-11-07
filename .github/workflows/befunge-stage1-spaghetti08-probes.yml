@@ -1,0 +1,56 @@
+name: Befunge QA08 Native Concurrency Forensics
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Build pinned native engine with temporary debug logging
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object qa/spaghetti08_17d_concurrent_stack_residue.beq)" = "4ba6902de08cf9483374f43a33f1d4ae7a14e3f6"
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("third_party/funge-plus-plus/src/Unefunge93Strategy.cpp")
+          s = path.read_text()
+          a = "stack.top().push(static_cast<stack_t>(field.get(v+storage)));"
+          b = 'auto observed=field.get(v+storage); if ([](){static unsigned n=0;return n++<40;}()) { std::cerr << "FUNGEPLUS_NATIVE_G xy=" << v << " storage=" << storage << " value=" << observed << std::endl; } stack.top().push(static_cast<stack_t>(observed));'
+          c = "field.put(v+storage, stack.top().pop());"
+          d = 'auto emitted=stack.top().pop(); if ([](){static unsigned n=0;return n++<40;}()) { std::cerr << "FUNGEPLUS_NATIVE_P xy=" << v << " storage=" << storage << " value=" << emitted << std::endl; } field.put(v+storage, emitted);'
+          assert s.count(a)==1 and s.count(c)==1
+          path.write_text(s.replace(a,b).replace(c,d))
+          PY
+          python3 - <<'PY'
+          from pathlib import Path
+          f=Path("third_party/funge-plus-plus/src/FungeRunner.cpp")
+          c=f.read_text()
+          before="inst_t i = ip.get();"
+          after='inst_t i = ip.get(); static int forensic_ticks=0; if (forensic_ticks++<1500) { std::cerr << "FUNGEPLUS_IP_TRACE id=" << id << " pos=" << ip.getPos() << " delta=" << ip.getDelta() << " op=" << (int)i << std::endl; }'
+          assert c.count(before)==1
+          f.write_text(c.replace(before,after))
+          PY
+          make -C third_party/funge-plus-plus funge
+      - name: Diagnose native worker, split, polling and physical reads
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_spaghetti08_native_probes.py
+
+      - name: QA09 native directional check
+        shell: bash
+        run: python3 qa/stage1_spaghetti09_fork_diagnostics.py

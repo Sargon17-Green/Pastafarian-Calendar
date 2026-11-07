@@ -1,0 +1,192 @@
+{
+  "schema": "qa31ap-finite-signed-x-selector-source-counts-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "original_source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_signed_zip_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "evidence_sha256": "2da0fb801bb3f2ea663d787cb19b07b4808a20f5cf6f1ac4573994d9939337b3",
+  "cases": 200,
+  "steps": 3628390,
+  "x_sources": 10,
+  "physical_x_executions": 1570,
+  "physical_p_executions_in_prior_audit": 1710,
+  "source_suffix_opcode_len_min": 12,
+  "source_suffix_opcode_len_max": 22,
+  "source_rpn_suffixes_independent_of_preexisting_stack": 10,
+  "observed_x_alternate_vectors": 0,
+  "independent_hostile_variants_rejected": 20,
+  "native_new_runs": 0,
+  "global_input_reachability_proven": false,
+  "stage1_pass": false,
+  "site_rows": [
+    {
+      "site": [
+        37,
+        0
+      ],
+      "vector": [
+        348,
+        575
+      ],
+      "source_start": [
+        19,
+        0
+      ],
+      "ops": "3a*4+a*8+5a*7+a*5+",
+      "executions": 140,
+      "unique_pre_stacks": 100
+    },
+    {
+      "site": [
+        62,
+        195
+      ],
+      "vector": [
+        513,
+        1235
+      ],
+      "source_start": [
+        84,
+        195
+      ],
+      "ops": "5a*1+a*3+1a*2+a*3+a*5+",
+      "executions": 140,
+      "unique_pre_stacks": 100
+    },
+    {
+      "site": [
+        100,
+        986
+      ],
+      "vector": [
+        0,
+        -506
+      ],
+      "source_start": [
+        100,
+        974
+      ],
+      "ops": "005a*0+a*6+-",
+      "executions": 140,
+      "unique_pre_stacks": 1
+    },
+    {
+      "site": [
+        290,
+        318
+      ],
+      "vector": [
+        0,
+        1112
+      ],
+      "source_start": [
+        290,
+        304
+      ],
+      "ops": "01a*1+a*1+a*2+",
+      "executions": 140,
+      "unique_pre_stacks": 1
+    },
+    {
+      "site": [
+        480,
+        348
+      ],
+      "vector": [
+        475,
+        512
+      ],
+      "source_start": [
+        480,
+        366
+      ],
+      "ops": "4a*7+a*5+5a*1+a*2+",
+      "executions": 140,
+      "unique_pre_stacks": 100
+    },
+    {
+      "site": [
+        575,
+        1295
+      ],
+      "vector": [
+        760,
+        -815
+      ],
+      "source_start": [
+        575,
+        1315
+      ],
+      "ops": "7a*6+a*0+08a*1+a*5+-",
+      "executions": 140,
+      "unique_pre_stacks": 1
+    },
+    {
+      "site": [
+        860,
+        443
+      ],
+      "vector": [
+        -665,
+        512
+      ],
+      "source_start": [
+        860,
+        463
+      ],
+      "ops": "06a*6+a*5+-5a*1+a*2+",
+      "executions": 140,
+      "unique_pre_stacks": 1
+    },
+    {
+      "site": [
+        1000,
+        1050
+      ],
+      "vector": [
+        -140,
+        -950
+      ],
+      "source_start": [
+        978,
+        1050
+      ],
+      "ops": "01a*4+a*0+-09a*5+a*0+-",
+      "executions": 225,
+      "unique_pre_stacks": 100
+    },
+    {
+      "site": [
+        1294,
+        955
+      ],
+      "vector": [
+        -434,
+        190
+      ],
+      "source_start": [
+        1314,
+        955
+      ],
+      "ops": "04a*3+a*4+-1a*9+a*0+",
+      "executions": 140,
+      "unique_pre_stacks": 1
+    },
+    {
+      "site": [
+        1472,
+        1620
+      ],
+      "vector": [
+        -897,
+        -665
+      ],
+      "source_start": [
+        1450,
+        1620
+      ],
+      "ops": "08a*9+a*7+-06a*6+a*5+-",
+      "executions": 225,
+      "unique_pre_stacks": 100
+    }
+  ]
+}

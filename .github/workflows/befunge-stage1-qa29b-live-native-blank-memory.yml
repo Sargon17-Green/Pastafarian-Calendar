@@ -1,0 +1,95 @@
+name: Befunge QA29B Actual Native Live Memory at Original Blank Skip Corridors
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa29b_native_live_blank_corridors.py'
+      - 'qa/stage1_qa29b_independent_runtime_blank_audit.py'
+      - '.github/workflows/befunge-stage1-qa29b-live-native-blank-memory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa29b-native-live-space-and-independent-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Lock immutable original source and both QA29B verifier scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa29b_native_live_blank_corridors.py qa/stage1_qa29b_independent_runtime_blank_audit.py
+      - name: Download original SHA-locked QA20 Native input and QA28 transition witnesses
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh run view 39761821210 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:d0a1c686c4f9244121246aa5b70266c072c3ddce'
+          test "$(gh run view 39985923985 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:7a2a9d64d2080153354d3ef200aece590a3ff997'
+          mkdir -p "$RUNNER_TEMP/qa29b" "$RUNNER_TEMP/qa29b/qa28"
+          get_one() {
+            local run="$1" name="$2" dst="$3" n
+            for n in 1 2 3 4 5; do
+              if gh run download "$run" --repo "$GITHUB_REPOSITORY" --name "$name" --dir "$dst"; then return 0;fi
+              echo "::warning::original GitHub Native artifact transfer retry $n for $name"
+              sleep $((n * 12))
+            done
+            echo "::error::Original Native evidence not accessible: $name"
+            return 1
+          }
+          get_one 39761821210 qa20-shard-0 "$RUNNER_TEMP/qa29b"
+          get_one 39985923985 qa28-fifteen-original-native-directed-witnesses "$RUNNER_TEMP/qa29b/qa28"
+          echo "782fb868a11a105550ef5af6f8f7cd39e4ba9de77d9565f7549e310549b0073a  $RUNNER_TEMP/qa29b/qa20_manifest.json" | sha256sum -c -
+          echo "c5a5beaab308df31222652484e5fb18af554bf75e7b492225b107197fb29aa6e  $RUNNER_TEMP/qa29b/qa28/qa28_signed_15_directed_witnesses.json" | sha256sum -c -
+      - name: Pin actual PyFunge 0.5-rc2 executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay exact full original valid00 Native program, observe real dynamic FungeSpace
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/qa29b:/qa29b" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1300s python -u \
+                qa/stage1_qa29b_native_live_blank_corridors.py \
+                /qa29b /qa29b/qa28/qa28_signed_15_directed_witnesses.json
+            ' | tee "$RUNNER_TEMP/qa29b/qa29b_native_console.log"
+          grep -q QA29B_ORIGINAL_NATIVE_FULL_STEP_REPLAY_PASS "$RUNNER_TEMP/qa29b/qa29b_native_console.log"
+          grep -q QA29B_TWO_LIVE_NATIVE_SEVEN_CELL_BLANK_SNAPSHOTS_PASS "$RUNNER_TEMP/qa29b/qa29b_native_console.log"
+          test -s "$RUNNER_TEMP/qa29b/qa29b_native_live_blank_snapshot.json"
+      - name: Independently audit exact original Native live-memory receipt and 12 forgeries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_qa29b_independent_runtime_blank_audit.py \
+            --source src/interleaved_work_counts.b98 \
+            --qa20 "$RUNNER_TEMP/qa29b/qa20_manifest.json" \
+            --qa28 "$RUNNER_TEMP/qa29b/qa28/qa28_signed_15_directed_witnesses.json" \
+            --native "$RUNNER_TEMP/qa29b/qa29b_native_live_blank_snapshot.json" \
+            --output "$RUNNER_TEMP/qa29b/qa29b_independent_live_blank_audit.json" \
+            | tee "$RUNNER_TEMP/qa29b/qa29b_independent_console.log"
+          grep -q QA29B_INDEPENDENT_TWO_NATIVE_RUNTIME_BLANK_CORRIDORS_AUDITED "$RUNNER_TEMP/qa29b/qa29b_independent_console.log"
+          grep -q QA29B_TWELVE_FORGED_NATIVE_MEMORY_RECEIPTS_REJECTED "$RUNNER_TEMP/qa29b/qa29b_independent_console.log"
+          grep -q QA29B_SOURCE_DEADNESS_AND_GLOBAL_MEMORY_STILL_UNPROVEN "$RUNNER_TEMP/qa29b/qa29b_independent_console.log"
+      - name: Retain original input, real Native live memory, and independent audit on GREEN or RED
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa29b-original-native-live-blank-memory
+          path: |
+            ${{ runner.temp }}/qa29b/qa29b_native_live_blank_snapshot.json
+            ${{ runner.temp }}/qa29b/qa29b_independent_live_blank_audit.json
+            ${{ runner.temp }}/qa29b/qa29b_native_console.log
+            ${{ runner.temp }}/qa29b/qa29b_independent_console.log
+          if-no-files-found: warn

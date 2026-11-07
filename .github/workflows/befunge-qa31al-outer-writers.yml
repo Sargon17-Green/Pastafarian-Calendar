@@ -1,0 +1,52 @@
+name: Befunge QA31AL Source-Pinned Outer p/Ingress
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths:
+      - 'qa/stage1_qa31al_outer_writers.py'
+      - 'qa/stage1_qa31al_independent_ray_oracle.py'
+      - 'qa/QA31AL_OUTER_WRITER_CORRIDORS_AND_ALT_INGRESS_2026-11-07.md'
+      - '.github/workflows/befunge-qa31al-outer-writers.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  finite-source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify exact original source
+        shell: bash
+        run: test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+      - name: Source-only forward and independent reverse checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa31al_evidence
+          python3 -m py_compile qa/stage1_qa31al_outer_writers.py qa/stage1_qa31al_independent_ray_oracle.py
+          python3 qa/stage1_qa31al_outer_writers.py --source src/interleaved_work_counts.b98 --out qa31al_evidence/forward.json | tee qa31al_evidence/forward.log
+          python3 qa/stage1_qa31al_independent_ray_oracle.py --source src/interleaved_work_counts.b98 --forward qa31al_evidence/forward.json --out qa31al_evidence/inverse.json | tee qa31al_evidence/inverse.log
+          python3 - <<'PY'
+          import json
+          a=json.load(open('qa31al_evidence/forward.json'))
+          b=json.load(open('qa31al_evidence/inverse.json'))
+          assert a['literal_p_outside']==b['source_outer_sites_verified']==44
+          assert a['source_straight_corridors']==b['source_pure_corridors_verified']==43
+          assert a['conditional_fixed_non49_y_corridors']==b['conditional_fixed_y_non49_verified']==11
+          assert a['conditional_unknown_y_corridors']==b['conditional_unknown_y_verified']==32
+          assert a['forward_source_mutants_rejected']==10
+          assert b['independent_hostile_rejections']==14
+          assert b['sample_interpretations']>=55
+          assert len(a['alternate_ingress_local_geometry'])==4
+          assert a['outer_p_counter_targets_globally_proven']=='UNKNOWN'
+          assert a['new_native_runs']==b['new_native_runs']==0
+          assert a['stage1_global_pass'] is b['stage1_global_pass'] is False
+          print('QA31AL_FINITE_CONDITIONAL_SOURCE_GATE_ACCEPTED')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: qa31al-source-writer-ingress-evidence
+          path: qa31al_evidence/
+          if-no-files-found: warn

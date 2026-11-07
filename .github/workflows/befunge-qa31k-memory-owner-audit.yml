@@ -1,0 +1,55 @@
+name: Befunge QA31K signed last-writer reader audit
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31k_memory_owner_audit.py'
+      - '.github/workflows/befunge-qa31k-memory-owner-audit.yml'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  qa31k-memory-owner-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Download the two already accepted signed Native artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p qa31k-input
+          curl --fail --location --silent --show-error --retry 2 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/13037899716/zip" \
+            -o qa31k-input/QA31G-native.zip
+          curl --fail --location --silent --show-error --retry 2 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/13046736767/zip" \
+            -o qa31k-input/QA31J-native.zip
+      - name: Compile and run the independent source-pinned auditor
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/stage1_qa31k_memory_owner_audit.py
+          python3 -u qa/stage1_qa31k_memory_owner_audit.py \
+            src/interleaved_work_counts.b98 \
+            qa31k-input/QA31G-native.zip \
+            qa31k-input/QA31J-native.zip \
+            --output-dir qa31k-output | tee qa31k-output-console.log
+          grep -q QA31K_AUDIT_PASS qa31k-output/audit.log
+      - name: Preserve audit report and exact input artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31k-signed-last-writer-reader-audit
+          path: |
+            qa31k-input/
+            qa31k-output/
+            qa31k-output-console.log
+          if-no-files-found: warn

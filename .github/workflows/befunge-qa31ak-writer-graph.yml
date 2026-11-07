@@ -1,0 +1,48 @@
+name: Befunge QA31AK Pinned Ingress Writer Inventory
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths:
+      - 'qa/stage1_qa31ak_source_writer_graph.py'
+      - 'qa/stage1_qa31ak_independent_writer_oracle.py'
+      - 'qa/QA31AK_SOURCE_WRITERS_AND_CANONICAL_INGRESS_2026-11-07.md'
+      - '.github/workflows/befunge-qa31ak-writer-graph.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-only-original-writer-graph:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify frozen original production source
+        run: test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+      - name: Run original source forward and independent inverse
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa31ak_evidence
+          python3 -m py_compile qa/stage1_qa31ak_source_writer_graph.py qa/stage1_qa31ak_independent_writer_oracle.py
+          python3 qa/stage1_qa31ak_source_writer_graph.py --source src/interleaved_work_counts.b98 --out qa31ak_evidence/forward.json | tee qa31ak_evidence/forward.log
+          python3 qa/stage1_qa31ak_independent_writer_oracle.py --source src/interleaved_work_counts.b98 --forward qa31ak_evidence/forward.json --out qa31ak_evidence/inverse.json | tee qa31ak_evidence/inverse.log
+          python3 - <<'PY'
+          import json
+          a=json.load(open('qa31ak_evidence/forward.json'))
+          b=json.load(open('qa31ak_evidence/inverse.json'))
+          assert (a['raw_p_glyphs_full_source'],a['raw_p_glyphs_rows_0_to_44'],a['raw_p_glyphs_outside_focus'])==(57,13,44)
+          assert a['conditional_source_probe_cases']==b['verified_source_conditional_cases']==895
+          assert a['canonical_state_byte_cases']==b['verified_full_state_byte_cases']==2304
+          assert len(a['canonical_source_reachable_q_m_states'])==b['canonical_states']==9
+          assert a['forward_hostile_source_mutations_rejected']==7
+          assert b['independent_opcode_pins']==15 and b['hostile_report_mutations_rejected']==16
+          assert a['new_native_runs']==b['new_native_runs']==0
+          assert a['stage1_pass'] is b['stage1_pass'] is False
+          print('QA31AK_FINITE_SOURCE_ONLY_GATE_ACCEPTED')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: qa31ak-source-writer-graph-evidence
+          path: qa31ak_evidence/
+          if-no-files-found: warn
