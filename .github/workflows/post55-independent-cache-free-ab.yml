@@ -1,7 +1,7 @@
 name: Kotlin independent FOUNDATION cache-free A/B diagnostic
 on:
   push:
-    branches: ['Kotlin\\+Cymraeg']
+    branches: ['Kotlin\+Cymraeg']
     paths:
       - 'soak/independent_five_field_cache_ab.py'
       - 'soak/test_independent_five_field_cache_ab.py'
