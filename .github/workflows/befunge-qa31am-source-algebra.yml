@@ -1,0 +1,49 @@
+name: Befunge QA31AM Original Source Address Algebra
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths:
+      - 'qa/stage1_qa31am_counter_addresses.py'
+      - 'qa/stage1_qa31am_independent_polynomial_oracle.py'
+      - 'qa/QA31AM_COUNTER_ADDRESS_ALGEBRA_CONTRACT_2026-11-07.md'
+      - '.github/workflows/befunge-qa31am-source-algebra.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  finite-original-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Freeze original source
+        run: test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+      - name: Forward affine plus independent polynomial oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa31am_evidence
+          python3 -m py_compile qa/stage1_qa31am_counter_addresses.py qa/stage1_qa31am_independent_polynomial_oracle.py
+          python3 qa/stage1_qa31am_counter_addresses.py --source src/interleaved_work_counts.b98 --out qa31am_evidence/forward.json | tee qa31am_evidence/forward.log
+          python3 qa/stage1_qa31am_independent_polynomial_oracle.py --source src/interleaved_work_counts.b98 --forward qa31am_evidence/forward.json --out qa31am_evidence/inverse.json | tee qa31am_evidence/inverse.log
+          python3 - <<'PY'
+          import json
+          a=json.load(open('qa31am_evidence/forward.json'))
+          b=json.load(open('qa31am_evidence/inverse.json'))
+          assert a['formerly_unknown_y_corridors']==b['conditional_rays_verified']==32
+          assert a['new_affine_congruence_exclusions']==b['affine_excluded']==22
+          assert a['affine_feasible_y49']==8 and a['nonlinear_feasible_y49']==2
+          assert a['hypothetical_counter_address_witness_count']==b['conditional_counter_address_witnesses_verified']==20
+          assert a['compound_two_put_path']['second_put_xy']==b['compound_second_p_target']==[7,1692]
+          assert len(a['alternate_entry_geometry'])==4
+          assert b['mutated_reports_rejected']==15
+          assert a['native_runs']==b['native_runs']==0
+          assert a['stage1_pass'] is b['stage1_pass'] is False
+          print('QA31AM_FINITE_CONDITIONAL_SOURCE_GATE_ACCEPTED')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: qa31am-conditional-counter-address-evidence
+          path: qa31am_evidence/
+          if-no-files-found: warn
