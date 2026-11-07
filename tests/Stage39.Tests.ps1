@@ -9,7 +9,7 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 # Same-branch independent normative oracle, fresh production context per endpoint.
 # No mutation of DEVELOPMENT_STAGE, source, oracle, or predecessor seal.
 $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-$stage38Sealed=(($md -match '(?m)^CURRENT_STAGE=38\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=38\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))
+$stage38Sealed=(($md -match '(?m)^CURRENT_STAGE=(38|39)\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=38\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and (($md -match '(?m)^CURRENT_STAGE=38\s*$') -or ($md -match '(?m)^STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$')))
 Assert-StageTrue -Condition $stage38Sealed -Name 'Stage38 exact sealed predecessor'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage37 predecessor evidence'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage36 predecessor evidence'
