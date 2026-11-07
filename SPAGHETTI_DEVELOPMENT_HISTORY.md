@@ -257,3 +257,9 @@ Readback of original D11 candidate b953cd5e69c7aa5e89ee4c8e973e3568c156ddb0 dete
 
 ## Stage 2 Discovery11 Native accepted, Discovery12 implementation (2026-11-06)
 On Logo+Ido SHA 17933d208eb6807eca0de972c097f13e54ca136b, D11 42188439783/job 127794264805 completed SUCCESS (4/20, authentic Native PASS); same-SHA D1–D9 42188439666, D10 42188439679, Stage1 42188439678 and Names 42188439576 completed SUCCESS. D11 accepted, Stage2 overall incomplete. D12 21..25 exact BI implementation uses prior verified production helpers; independent test-only normative oracle derives 1..25. Five planned cases/21 checks. D12 Native pending; no main/merge, LAST_COMPLETED_STAGE=1.
+
+## Discovery12 Native acceptance — 2026-11-07
+562efcdeb7febb98dd296d4fc6b8de7080769091: original push run 42251281788/job 128006732155 completed SUCCESS, 5 cases/21 checks, all required D12 native PASS markers. Same-SHA D11 42251281200, D10 42251281126, D1–D9 42251281071, original Stage1 42251280958, Names 42251281302 all completed SUCCESS, attempt 1. D12 accepted, overall Stage2 incomplete and LAST_COMPLETED_STAGE=1.
+
+## Discovery13 production/test/CI implementation — 2026-11-07
+Exact 26..30 extension using the D8 production helpers, independent test-only normative full 1..30 oracle, 5 case/21 check contract, pinned bounded CI. D13 Native PENDING until same-SHA D1–D12, Stage1 and Names completed/log evidence. No main/merge.
