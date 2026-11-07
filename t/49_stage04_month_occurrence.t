@@ -70,7 +70,7 @@ for my $bad (0, -1, 5, 'x', '01', undef, [], Math::BigInt->new('9'x80)) {
 for my $bad (0, -1, 'x', Math::BigInt->new('9'x80)) {
     ok(!eval { month_occurrence($p,$bad,1); 1 }, '拒絕非法排名');
 }
-for my $bad ([], [0], [25], [(1)x7]) {
+for my $bad ([], [0], [29], [(1)x8]) {
     ok(!eval { month_occurrence($bad,1,1); 1 }, '拒絕非法月份配置');
 }
 my $immutable = [2,2,2];
