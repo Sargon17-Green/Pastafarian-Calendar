@@ -113,3 +113,17 @@ Independent recovery bound: the negative one-step gap is at most 963 days while 
 `POST_STAGE55_NEGATIVE_FINAL_WRITE_THROW_RECOVERY_PASS injectedWrite=58 firstPositive=1 faultNegative=1 faultWrites=58 retryPositive=1 retryNegative=1 totalEntries=4 totalCompletions=3 completedWrites=174 propagated=1 recovered=1 restored=1`
 
 Implementation updates the existing Stage27 test, this contract and one workflow grep; no package scripts, runtime production source, main, merges, release, extra jobs, or rerun of a previously accepted SHA. Accept this extension only after a new **exact-SHA** five-job completed/success CI and actual Stage27 marker. Until then the change is unverified Native QA.
+
+
+## Follow-up: final physical write on the positive gate (2026-11-07)
+
+Prerequisite: exact-SHA Actions 42250753598 completed/success all five jobs on 7c402f7dcff5251e5bea80503ec4e6f8d9cf832c, with the negative write-46 and write-58 fault/retry markers and the full Stage27 preflight and Gate D markers actually present in completed job logs.
+
+Coverage: the previous **positive** fault/retry witness tested write #46 only, whereas the negative gate tested #46 and the final physical write #58. A last-write callback can fail after all 58 physical shared writes but before the Native method returns. This test-only extension ensures that exception identity propagates and the caller does not accept a partial positive-gate prefix. This does not claim a production bug or open a new Stage.
+
+Input: c=t=FOUNDATION_DAY+1n, maxPerSide=1; inject a unique sentinel in the real Patch11 positive-gate after-write callback at write #58. Require precisely 1 Native entry, 0 successfully returned Native calls, 58 observed callback invocations and the identical sentinel propagated. Retry without a fault, require one complete physical call reporting 58 shared and historical writes, then MonsterValidationError **before** a second entry, since one 41+rank gate advances at most 963 days but the neighbourhood radius is 5782. Cumulative: 2 entries, 1 completion, 58 completed writes; always restore Patch11OrderLatchHandler.prototype.run in finally. Preserve the prior write-46 marker byte-for-byte. Use callback counter snapshots to avoid stale TypeScript narrowing; no production code or additional heavy job.
+
+Exact additional Stage27 marker:
+`POST_STAGE55_PREFLIGHT_FINAL_WRITE_THROW_RECOVERY_PASS injectedWrite=58 faultEntries=1 faultCompletions=0 faultWrites=58 retryEntries=1 retryCompletions=1 retryWrites=58 propagated=1 recovered=1 restored=1`
+
+Acceptance is **only** completed/success all five existing CI jobs on the new exact SHA and observed new marker plus all existing preflight, Stage55 and Gate D markers. No main/merge/release, no Stage56, and no duplicate manual run. If CI fails, isolate and repair only the actual failed check.

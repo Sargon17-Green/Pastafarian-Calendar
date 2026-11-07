@@ -3,67 +3,102 @@ import { createProductionSignedGatePrefix } from "../src/postStage55SignedGatePr
 import { Patch11OrderLatchHandler } from "../src/patch11OrderLatch.ts";
 import { FOUNDATION_DAY } from "./normativeOracle.ts";
 
-/** Test-only fault at the forty-sixth REAL Patch11 shared-memory write. */
+/**
+ * Test-only failure at the 46th AND final (58th) real Patch11
+ * positive-gate after-write callbacks; no production or synthetic handler changes.
+ */
 function requireTrue(value: unknown, message: string): asserts value {
   if (!value) throw new Error("POST_STAGE55_NATIVE_THROW: " + message);
 }
 
 const originalRun = Patch11OrderLatchHandler.prototype.run;
-const injectedFault = new Error("QA_ONLY_WRITE_46_FAULT");
-let armed = true;
-let nativeEntries = 0;
-let nativeCompletions = 0;
-let observedFaultWrites = 0;
-let propagated = false;
-let recovered = false;
-// A callback mutates these counters; reading through a function prevents
-// TypeScript from freezing their control-flow types at a prior assertion.
-function readNativeCounts(): Readonly<{ entries: number; completions: number; faultWrites: number }> {
-  return { entries: nativeEntries, completions: nativeCompletions, faultWrites: observedFaultWrites };
-}
 
+function checkPositiveWriteFailure(injectedWrite: 46 | 58): void {
+  const fault = new Error("QA_ONLY_POSITIVE_WRITE_" + injectedWrite);
+  let nativeEntries = 0;
+  let nativeCompletions = 0;
+  let observedFaultWrites = 0;
+  let completedWrites = 0;
 
-Patch11OrderLatchHandler.prototype.run = function (...args: Parameters<typeof originalRun>) {
-  nativeEntries++;
-  if (armed) {
-    armed = false;
-    // Use the production handler, not a synthetic stand-in. Its after-write
-    // callback fires only after the actual physical legacy shared write.
-    const faultedHandler = new Patch11OrderLatchHandler(writeIndex => {
-      observedFaultWrites++;
-      if (writeIndex === 46) throw injectedFault;
-    });
-    return originalRun.apply(faultedHandler, args);
+  // A callback mutates the counters. Snapshot prevents stale TypeScript
+  // control-flow narrowing and distinguishes an attempted from a completed call.
+  function counts(): Readonly<{
+    entries: number; completions: number; faultWrites: number; completedWrites: number
+  }> {
+    return {
+      entries: nativeEntries, completions: nativeCompletions,
+      faultWrites: observedFaultWrites, completedWrites
+    };
   }
-  const result = originalRun.apply(this, args);
-  requireTrue(result.sharedMemoryWrites === 58 && result.historical.memoryWrites === 58,
-    "successful clean Native retry must perform all 58 real writes");
-  nativeCompletions++;
-  return result;
-};
 
-try {
-  let failure: unknown;
-  try {
-    createProductionSignedGatePrefix(FOUNDATION_DAY + 1n, FOUNDATION_DAY + 1n, 1);
-  } catch (error) { failure = error; }
-  propagated = failure === injectedFault;
-  requireTrue(propagated && nativeEntries === 1 && nativeCompletions === 0 &&
-    observedFaultWrites === 46, "fault must propagate after exactly 46 physical writes and no completion");
+  Patch11OrderLatchHandler.prototype.run = function (...args: Parameters<typeof originalRun>) {
+    nativeEntries++;
+    if (nativeEntries === 1) {
+      const handler = new Patch11OrderLatchHandler(writeIndex => {
+        observedFaultWrites++;
+        if (writeIndex === injectedWrite) throw fault;
+      });
+      return originalRun.apply(handler, args);
+    }
+    const result = originalRun.apply(this, args);
+    requireTrue(result.sharedMemoryWrites === 58 && result.historical.memoryWrites === 58,
+      "clean physical retry must report exactly 58 actual writes");
+    nativeCompletions++;
+    completedWrites += 58;
+    return result;
+  };
 
-  let retryError: unknown;
+  let propagated = false;
+  let recovered = false;
   try {
-    createProductionSignedGatePrefix(FOUNDATION_DAY + 1n, FOUNDATION_DAY + 1n, 1);
-  } catch (error) { retryError = error; }
-  // One real gap is at most 963 days, less than the required 5782-day
-  // radius; retry therefore runs once and exhausts its one-step budget.
-  const retryCounts = readNativeCounts();
-  recovered = retryError instanceof MonsterValidationError && retryCounts.entries === 2 &&
-    retryCounts.completions === 1 && retryCounts.faultWrites === 46;
-  requireTrue(recovered, "clean retry must complete one fresh Native call, then reject budget");
-} finally {
-  Patch11OrderLatchHandler.prototype.run = originalRun;
+    let thrown: unknown = null;
+    try {
+      createProductionSignedGatePrefix(FOUNDATION_DAY + 1n, FOUNDATION_DAY + 1n, 1);
+    } catch (error) {
+      thrown = error;
+    }
+    const first = counts();
+    propagated = thrown === fault;
+    requireTrue(propagated &&
+      first.entries === 1 && first.completions === 0 &&
+      first.completedWrites === 0 && first.faultWrites === injectedWrite,
+      "original sentinel must propagate after exact physical write without completed Native return");
+
+    let retryError: unknown = null;
+    try {
+      createProductionSignedGatePrefix(FOUNDATION_DAY + 1n, FOUNDATION_DAY + 1n, 1);
+    } catch (error) {
+      retryError = error;
+    }
+    const after = counts();
+    // A Patch11 gate advances at most 41+922=963 days. The requested
+    // upper neighbourhood radius is 5782, so budget=1 rejects before
+    // a second physical Native entry.
+    recovered = retryError instanceof MonsterValidationError &&
+      after.entries - first.entries === 1 &&
+      after.completions - first.completions === 1 &&
+      after.completedWrites - first.completedWrites === 58 &&
+      after.faultWrites === injectedWrite;
+    requireTrue(recovered, "clean retry must finish one gate and reject budget before next entry");
+  } finally {
+    Patch11OrderLatchHandler.prototype.run = originalRun;
+  }
+
+  const last = counts();
+  requireTrue(last.entries === 2 && last.completions === 1 &&
+    last.faultWrites === injectedWrite && last.completedWrites === 58 &&
+    Patch11OrderLatchHandler.prototype.run === originalRun,
+    "exact cumulative Native counts and prototype restoration");
+
+  const marker = injectedWrite === 46
+    ? "POST_STAGE55_PREFLIGHT_NATIVE_THROW_RECOVERY_PASS"
+    : "POST_STAGE55_PREFLIGHT_FINAL_WRITE_THROW_RECOVERY_PASS";
+  console.log(marker +
+    " injectedWrite=" + injectedWrite +
+    " faultEntries=1 faultCompletions=0 faultWrites=" + injectedWrite +
+    " retryEntries=1 retryCompletions=1 retryWrites=58 propagated=" + Number(propagated) +
+    " recovered=" + Number(recovered) + " restored=1");
 }
-requireTrue(Patch11OrderLatchHandler.prototype.run === originalRun,
-  "Patch11 prototype must be restored even after fault");
-console.log("POST_STAGE55_PREFLIGHT_NATIVE_THROW_RECOVERY_PASS injectedWrite=46 faultEntries=1 faultCompletions=0 faultWrites=46 retryEntries=1 retryCompletions=1 retryWrites=58 propagated=1 recovered=1 restored=1");
+
+checkPositiveWriteFailure(46);
+checkPositiveWriteFailure(58);
