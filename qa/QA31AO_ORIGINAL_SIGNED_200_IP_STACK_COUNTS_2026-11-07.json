@@ -1,0 +1,210 @@
+{
+  "schema": "qa31ao-original-signed-200-ip-x-predecessor-counts-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "signed_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "evidence_zip_sha256": "68f48fc44260352a4ebe759b4ae63e259efd2e52f3171b022010af25910d45e8",
+  "cases": 200,
+  "steps": 3628390,
+  "cases_with_p": 140,
+  "site_count": 11,
+  "event_count": 1710,
+  "ray_replays": 1710,
+  "x_to_anchor": 1710,
+  "input_tainted_value_events": 1555,
+  "input_or_unknown_tainted_address_events": 0,
+  "candidate_q_m_writes": 0,
+  "independent_hostile_rejected": 16,
+  "original_native_new_runs": 0,
+  "new_github_ci_runs": 0,
+  "stage1_pass": false,
+  "site_events": [
+    {
+      "site": [
+        96,
+        480
+      ],
+      "events": 140,
+      "x": [
+        100,
+        986
+      ],
+      "target": [
+        1500,
+        1860
+      ],
+      "unique_values": 1,
+      "input_values": 140
+    },
+    {
+      "site": [
+        195,
+        958
+      ],
+      "events": 140,
+      "x": [
+        860,
+        443
+      ],
+      "target": [
+        61,
+        1706
+      ],
+      "unique_values": 1,
+      "input_values": 0
+    },
+    {
+      "site": [
+        292,
+        1430
+      ],
+      "events": 140,
+      "x": [
+        290,
+        318
+      ],
+      "target": [
+        3,
+        1690
+      ],
+      "unique_values": 1,
+      "input_values": 140
+    },
+    {
+      "site": [
+        369,
+        575
+      ],
+      "events": 140,
+      "x": [
+        37,
+        0
+      ],
+      "target": [
+        7,
+        1692
+      ],
+      "unique_values": 1,
+      "input_values": 140
+    },
+    {
+      "site": [
+        384,
+        575
+      ],
+      "events": 140,
+      "x": [
+        37,
+        0
+      ],
+      "target": [
+        11,
+        1693
+      ],
+      "unique_values": 100,
+      "input_values": 140
+    },
+    {
+      "site": [
+        575,
+        959
+      ],
+      "events": 225,
+      "x": [
+        1472,
+        1620
+      ],
+      "target": [
+        59,
+        1705
+      ],
+      "unique_values": 100,
+      "input_values": 225
+    },
+    {
+      "site": [
+        577,
+        1430
+      ],
+      "events": 140,
+      "x": [
+        62,
+        195
+      ],
+      "target": [
+        83,
+        1711
+      ],
+      "unique_values": 100,
+      "input_values": 135
+    },
+    {
+      "site": [
+        860,
+        99
+      ],
+      "events": 225,
+      "x": [
+        1000,
+        1050
+      ],
+      "target": [
+        53,
+        1704
+      ],
+      "unique_values": 100,
+      "input_values": 225
+    },
+    {
+      "site": [
+        860,
+        1142
+      ],
+      "events": 140,
+      "x": [
+        1294,
+        955
+      ],
+      "target": [
+        79,
+        1710
+      ],
+      "unique_values": 1,
+      "input_values": 135
+    },
+    {
+      "site": [
+        948,
+        860
+      ],
+      "events": 140,
+      "x": [
+        480,
+        348
+      ],
+      "target": [
+        73,
+        1709
+      ],
+      "unique_values": 100,
+      "input_values": 135
+    },
+    {
+      "site": [
+        1332,
+        480
+      ],
+      "events": 140,
+      "x": [
+        575,
+        1295
+      ],
+      "target": [
+        19,
+        1696
+      ],
+      "unique_values": 1,
+      "input_values": 140
+    }
+  ]
+}
