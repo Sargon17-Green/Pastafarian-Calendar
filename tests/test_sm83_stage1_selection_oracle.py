@@ -67,13 +67,18 @@ def select(flow: AnswerFlow, n: int) -> Choice:
     if n <= modulus:
         limit = (modulus // n) * n
         value = flow.at(0)
-        steps = 0
-        while value > limit:
-            steps += 1
-            value = flow.at(steps)
-            if steps > modulus:
-                raise AssertionError("short selection could not reach an allowed value")
-        return Choice(1 + ((value - 1) % n), 1, flow.first, value, limit, steps)
+        if value <= limit:
+            accepted, steps = value, 0
+        elif flow.step == 1:
+            # The rejected tail is (limit, modulus]. Wrap directly to 1,
+            # even if the exact walk would require ~2^126 increments.
+            accepted, steps = 1, modulus - value + 1
+        else:
+            # Reverse direction reaches the acceptance boundary first.
+            accepted, steps = limit, value - limit
+        assert 1 <= accepted <= limit
+        assert accepted == flow.at(steps)
+        return Choice(1 + ((accepted - 1) % n), 1, flow.first, accepted, limit, steps)
 
     digits, capacity = 1, modulus
     while capacity < n:
