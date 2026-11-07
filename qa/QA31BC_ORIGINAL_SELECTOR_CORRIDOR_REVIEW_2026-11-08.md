@@ -1,0 +1,19 @@
+# QA31BC: original signed selector corridor routes (2026-11-08)
+
+**Project:** PC-BRANCH-BEFUNGE98-KYRGYZ. **Entering QA-only HEAD:** ac5be359e119f969c6d6816ca251fb70987c7015. **Immutable source Git blob:** 560d6aa5807a7f766213a33835cce85eab0fa40c. **Original signed QA31AI ZIP SHA256:** 9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49. **Prior QA31BB ZIP SHA256:** 45c983db1e0ae97faa5a668e6e3d7a470981abbabfcc8fbcf253cab47ffec303.
+
+The original selector cell at (1500,1750) is SPACE. The source p writer (1335,1354) writes ASCII62 '>' or ASCII118 'v'; x(1335,1373) reaches selector with incoming (165,377). Two independent full-readonly original-signed STEP readers audited eight source-hash-verified original QA31V shards, 200 original HALT cases and all 3,628,390 steps. This is historical original-signed-trace inspection, NOT new Native and NOT a fresh original-signed corpus execution in the GitHub workflow.
+
+The unchanged original source contains two exactly 28-character postfix corridors:
+- ASCII62 '>' selects original horizontal code `>02a*8+a*8+-01a*2+a*7+a*0+-x`, ending at x(1528,1750), independently evaluated vector (-288,-1270), direct x destination (1240,480). **140/140** signed selector executions followed all 28 original opcode cells, each original x/vector/target verified.
+- ASCII118 'v' selects original vertical code `v09a*2+a*5+-01a*5+a*8+a*3+-x`, ending at x(1500,1778), independently evaluated vector (-925,-1583), direct x destination (575,195). **225/225** signed executions followed all 28 original opcode cells and x/vector/target.
+
+The independent RPN evaluator checks that each vector is computed from literal-only original bytes without consuming a symbolic unrelated incoming bottom stack element, conditional on the original start and correct direction. **24/24 non-no-op synthetic source mutants** (12 per corridor) altered the computed vector, independently detected. The first full-reader verified **10,220** physical corridor source-opcode STEPs, and the second verified independently all 365 signed branch events against its separate ledger.
+
+In the **200 original signed cases**, there were **zero physical p writes** into the 56 code cells of these two corridors, **zero p writes** on protected parser/control rows, and **zero physical row14/row32 entries after any selector execution**. These finite negatives do not exclude new inputs affecting those places. It is NOT a universal claim that the selector cannot affect the parser: subsequent paths from the two outer x destinations, changed selector values, modified corridor code, noncanonical ingress and unknown inputs remain **UNKNOWN**.
+
+**Permanent full evidence archive:** `/Befunge_QA_Artifacts/QA31BC_BEFUNGE98_KYRGYZ_ORIGINAL_SELECTOR_ROUTES_20261108.zip`; SHA256 `2e4c4809c73438359900e3f54bc616c21282fed83a4784228965da2b8b3b3a77`; 38,864 bytes; ZIP CRC 10/10; embedded file SHA256 9/9. Includes two standalone original-receipt readers, full 365-event and 200-case ledgers, two original replay logs, source RPN checks, portable fixture and manifest; deliberately does not duplicate original 46MB archive.
+
+This QA-only commit adds a reproducible CI job that checks exact original source Git blob, static source corridors and vectors, portable derived counts and **24** source mutants; it does NOT rerun the 46MB signed cases and is not a Stage1 gate. Global, functional and geometric Stage1 remain **OPEN**; no new Native, no production/main/merge/Stage2.
+
+**NEXT QA31BD:** independently source-pin and analyze continuation from actual original outer x targets (1240,480) and (575,195), including signed IP/stack/put last-writer provenance, and investigate whether any dynamic p can change a selector corridor for unobserved inputs. Preserve UNKNOWN without a bounded independently verified natural stdin <=25000 STEPs. No new Native before such witness; no production/main/merge/Stage2.
