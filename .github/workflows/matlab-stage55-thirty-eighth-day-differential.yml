@@ -1,0 +1,84 @@
+name: MATLAB Stage55 Thirty-Eighth Day Native Python Differential
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/run_stage55_year5000_thirty_eighth_native.m'
+      - 'tools/stage55_after38_interval_five_fields.py'
+      - 'tools/stage55_after4_interval_witness.py'
+      - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
+      - '.github/workflows/matlab-stage55-thirty-eighth-day-differential.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: stage55-thirty-eighth-day-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  thirty-eighth-day:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Download certified AFTER37 checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-thirty-sixth-day-differential
+          run-id: 42307997611
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Verify pinned AFTER37
+        run: |
+          echo '8d53c9b5d968d0be353e7e57af829d49bafe51028fdd1a2b25f87e07423d645b  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json' | sha256sum -c -
+      - name: Preflight AFTER38 independent witness wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tools/stage55_after38_interval_five_fields.py
+          grep -Fqx 'PIN = "8d53c9b5d968d0be353e7e57af829d49bafe51028fdd1a2b25f87e07423d645b"' tools/stage55_after38_interval_five_fields.py
+          python3 -m py_compile tools/stage55_after38_interval_five_fields.py
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native thirty-eighth-day exact cursor and PATCH25 projection
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tools'); run_stage55_year5000_thirty_eighth_native
+      - name: Python independent child intervals and strict five-field diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/stage55_after38_interval_five_fields.py \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json \
+            tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            | tee logs/STAGE55_THIRTY_EIGHTH_PYTHON.log
+          grep '^STAGE55_THIRTY_EIGHTH_ROW ' logs/STAGE55_THIRTY_EIGHTH_PYTHON.log > logs/STAGE55_THIRTY_EIGHTH_PYTHON_ROW.txt
+          grep '^STAGE55_THIRTY_EIGHTH_ROW ' logs/STAGE55_THIRTY_EIGHTH_NATIVE.log > logs/STAGE55_THIRTY_EIGHTH_NATIVE_ROW.txt
+          test "$(wc -l < logs/STAGE55_THIRTY_EIGHTH_PYTHON_ROW.txt)" -eq 1
+          test "$(wc -l < logs/STAGE55_THIRTY_EIGHTH_NATIVE_ROW.txt)" -eq 1
+          diff -u logs/STAGE55_THIRTY_EIGHTH_PYTHON_ROW.txt logs/STAGE55_THIRTY_EIGHTH_NATIVE_ROW.txt
+          expected="STAGE55_THIRTY_EIGHTH_ROW POSITION=38 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=38 MONTH_INDEX=1 MONTH_DAY=2"
+          grep -Fqx "$expected" logs/STAGE55_THIRTY_EIGHTH_NATIVE_ROW.txt
+          grep -Fqx "$expected" logs/STAGE55_THIRTY_EIGHTH_PYTHON_ROW.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json | tee logs/STAGE55_THIRTY_EIGHTH_DIGEST.txt
+          echo 'STAGE55_THIRTY_EIGHTH_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
+      - name: Preserve PASS or FAIL artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-thirty-eighth-day-differential
+          path: |
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json
+            logs/STAGE55_THIRTY_EIGHTH_NATIVE.log
+            logs/STAGE55_THIRTY_EIGHTH_PYTHON.log
+            logs/STAGE55_THIRTY_EIGHTH_PYTHON_ROW.txt
+            logs/STAGE55_THIRTY_EIGHTH_NATIVE_ROW.txt
+            logs/STAGE55_THIRTY_EIGHTH_DIGEST.txt
+          if-no-files-found: warn
+          retention-days: 30
