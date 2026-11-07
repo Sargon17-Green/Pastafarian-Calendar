@@ -1,0 +1,19 @@
+name: Befunge98 QA31BA portable derived counts
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31ba_portable_gate.py'
+      - 'qa/QA31BA_ORIGINAL_200_EXECUTION_COUNTS_2026-11-07.json'
+      - 'qa/QA31BA_ORIGINAL_SIGNED_200_EXECUTION_ROUTE_REVIEW_2026-11-07.md'
+      - '.github/workflows/befunge-qa31ba-portable-counts.yml'
+  workflow_dispatch:
+jobs:
+  derived-fixture-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate derived finite signed-200 fixture and 24 hostile controls, NOT Native
+        run: python qa/stage1_qa31ba_portable_gate.py qa/QA31BA_ORIGINAL_200_EXECUTION_COUNTS_2026-11-07.json
