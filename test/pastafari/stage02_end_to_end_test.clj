@@ -1080,3 +1080,146 @@
                        (:code (ex-data e))))]
           (is (= :target-not-sixth-day-of-year code)))))))
 
+;; DISCOVERY24 DIAG11: zevende positie, zonder hoger productiecelbudget.
+(def ^:private zevende-prefix-opties
+  (vec (mapcat (fn [prefix]
+                 (mapv #(conj prefix (bigint %))
+                       (range 1 (+ 2 (apply max prefix)))))
+               zesde-prefix-opties)))
+
+(deftest zevende-prefix-alle-normatieve-overgangen
+  (testing "Alle overgangen van de zevende prefix voor vier kleine families."
+    (doseq [[lengten totaal] [[[4 4] 20N] [[4 4 4] 1301N]
+                             [[4 5 4] 3499N] [[5 4 4] 3101N]]]
+      (let [familie (orakel/weaving-family lengten)
+            woorden (mapv #((:unrank1 familie) %)
+                          (range 1 (inc totaal)))
+            prefixes (mapv #(mapv bigint (take 7 %)) woorden)
+            overgangen (->> (range 1 (count prefixes))
+                            (mapcat (fn [i]
+                                      (if (not= (nth prefixes (dec i))
+                                                (nth prefixes i))
+                                        [i (inc i)] []))))
+            rangen (distinct (concat [1 (count prefixes)] overgangen))]
+        (is (= totaal ((:count familie))))
+        (doseq [r rangen]
+          (let [bewijs (rang/zevende-maand-op-rang-groot
+                        lengten r 5000000N)
+                verwacht (nth prefixes (dec r))
+                maand (peek verwacht)]
+            (is (= verwacht (:month-prefix bewijs))
+                (str "DIAG11 seventh prefix " lengten " rank " r))
+            (is (= maand (:month-id bewijs)))
+            (is (= (bigint (count (filter #(= maand %) verwacht)))
+                   (:day-in-month bewijs)))
+            (is (<= 0N (:prefix-cell-upper-bound bewijs) 5000000N))
+            (is (= :seventh-day-prefix-only (:date-proof-scope bewijs)))
+            (is (false? (:month-weaving-computed? bewijs)))))))))
+
+(deftest zevende-prefix-grote-familie-en-budget
+  (let [familie (orakel/weaving-family [4 4 4 4])
+        totaal ((:count familie))
+        fout (fn [lengten r b]
+               (try
+                 (rang/zevende-maand-op-rang-groot lengten r b)
+                 nil
+                 (catch clojure.lang.ExceptionInfo e
+                   (:code (ex-data e)))))]
+    (is (= 177260N totaal))
+    (doseq [r [1N 2N 88630N 177259N 177260N]]
+      (let [bewijs (rang/zevende-maand-op-rang-groot [4 4 4 4] r)
+            verwacht (mapv bigint (take 7 ((:unrank1 familie) r)))]
+        (is (= verwacht (:month-prefix bewijs)))
+        (is (<= (:prefix-cell-upper-bound bewijs) 5000000N))))
+    (is (= :seventh-day-prefix-budget-unproven
+           (fout [4 4 4] 1N 1N)))
+    (is (= :invalid-weaving-rank
+           (fout [4 4 4] 0N 5000000N)))
+    (is (= :invalid-weaving-budget
+           (fout [4 4 4] 1N 5000001N)))))
+
+(deftest echte-zevende-jaardag-met-onafhankelijke-insertion-oracle
+  (testing "Drie echte zevende dagen: bewijs OF begrensde expliciete weigering."
+    (doseq [berekening [dagen/stichtingsdag
+                       (+' dagen/stichtingsdag 17N)
+                       (-' dagen/stichtingsdag 23N)]]
+      (let [jaar (zoeken/vind-doeljaar @lijn berekening berekening)
+            doel (+' (:open-gate-day jaar) 7N)
+            staat (orakel/new-gate-state)
+            normjaar (orakel/find-target-year staat berekening doel)
+            saus (orakel/sauce berekening (inc (:open-gate-day normjaar)))
+            aantal-koteletten (orakel/choose-cutlet-count saus normjaar)
+            partitie (orakel/choose-cutlet-partition
+                      staat berekening saus normjaar aantal-koteletten)
+            kotelet-namen (orakel/choose-cutlet-names saus aantal-koteletten)
+            koteletten (orakel/materialize-cutlets
+                        staat normjaar partitie kotelet-namen)
+            kotelet (some #(when (<= (:first-day %) doel (:last-day %)) %)
+                         koteletten)
+            aantal-maanden (orakel/choose-month-count saus normjaar)
+            lengten (orakel/choose-month-lengths saus normjaar aantal-maanden)
+            maandnamen (orakel/choose-month-names saus aantal-maanden)
+            derde-aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                                 derde-prefix-opties)
+            totaal (reduce +' 0N derde-aantallen)
+            rang (orakel/choose-rank
+                  (orakel/ask-bowl saus 4 orakel/seal-month-weaving)
+                  totaal)
+            normprefix
+            (loop [diepte 3 huidige nil lokale-rang rang]
+              (let [alle (case diepte
+                           3 derde-prefix-opties
+                           4 vierde-prefix-opties
+                           5 vijfde-prefix-opties
+                           6 zesde-prefix-opties
+                           7 zevende-prefix-opties)
+                    kinderen (if huidige
+                               (filterv #(= (:prefix huidige)
+                                            (subvec % 0 (dec diepte))) alle)
+                               alle)
+                    aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                                   kinderen)
+                    keuze (kies-onafhankelijk-prefixblok
+                           kinderen aantallen lokale-rang)]
+                (if (= diepte 7)
+                  (:prefix keuze)
+                  (recur (inc diepte) keuze (:rest-rank keuze)))))
+            maand (peek normprefix)
+            verwacht [(:number normjaar)
+                      (:name-index kotelet)
+                      (inc (-' doel (:first-day kotelet)))
+                      (nth maandnamen (dec (int maand)))
+                      (bigint (count (filter #(= maand %) normprefix)))]
+            poging (try
+                     {:status :bewezen
+                      :uitkomst (projectie/kies-zevende-dag-zonder-weving
+                                 @lijn berekening doel 128N 5000000N)}
+                     (catch clojure.lang.ExceptionInfo e
+                       {:status :geweigerd :code (:code (ex-data e))}))]
+        (is (= totaal (weving/aantal-wevingen-groot lengten)))
+        (is (= 7 (count normprefix)))
+        (if (= :bewezen (:status poging))
+          (let [uitkomst (:uitkomst poging)]
+            (is (= verwacht (:date-components uitkomst)))
+            (is (= normprefix (:month-prefix uitkomst)))
+            (is (= 5 (count (:date-components uitkomst))))
+            (is (= :seventh-day-prefix-only (:date-proof-scope uitkomst)))
+            (is (false? (:month-weaving-computed? uitkomst)))
+            (is (not (contains? uitkomst :month-weaving)))
+            (is (<= 0N (:month-prefix-cell-upper-bound uitkomst) 5000000N))
+            (println "DISCOVERY24 DIAG11 echte zevende jaardag:"
+                     {:berekening berekening :doel doel
+                      :prefix normprefix
+                      :kosten (:month-prefix-cell-upper-bound uitkomst)
+                      :onafhankelijk-gelijk? (= verwacht (:date-components uitkomst))}))
+          (do
+            (is (= :seventh-day-prefix-budget-unproven (:code poging)))
+            (println "DISCOVERY24 DIAG11 echte zevende jaardag geweigerd:"
+                     {:berekening berekening :doel doel :code (:code poging)})))
+        (let [code (try
+                     (projectie/kies-zevende-dag-zonder-weving
+                      @lijn berekening (inc doel) 128N 5000000N)
+                     nil
+                     (catch clojure.lang.ExceptionInfo e
+                       (:code (ex-data e))))]
+          (is (= :target-not-seventh-day-of-year code)))))))
