@@ -1,0 +1,78 @@
+{
+  "schema": "qa31aw-source-conditioned-q-m-convergence-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "original_source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_signed_QA31AI_SHA256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "evidence_zip_sha256": "900d0108b5967934b70de4df278f4fa2464d8ed7757cb47fc563f1526759256e",
+  "evidence_zip_bytes": 51292,
+  "original_signed_cases": 200,
+  "original_signed_steps": 3628390,
+  "original_source_rays": {
+    "row14": {
+      "xy_start": [
+        10,
+        14
+      ],
+      "xy_end": [
+        248,
+        14
+      ],
+      "source_bytes": 239,
+      "sha256": "a31cd8d5704a346cfcec47ac94cf68a1ab15566dc5c202d4ba6c824a5983d7df",
+      "executions": 1060
+    },
+    "row26": {
+      "xy_start": [
+        10,
+        26
+      ],
+      "xy_end": [
+        344,
+        26
+      ],
+      "source_bytes": 335,
+      "sha256": "dfde5ecd243b54d282d3f439fce299951435462f8eaa576d126570b85df9a192",
+      "executions": 680
+    },
+    "row35": {
+      "xy_start": [
+        10,
+        35
+      ],
+      "xy_end": [
+        248,
+        35
+      ],
+      "source_bytes": 239,
+      "sha256": "af3f2c50916555cd83dd34c877b84244f8808a59ad722f84fdee4ee0330aba0d",
+      "executions": 100
+    }
+  },
+  "original_executed_source_opcodes_replayed": 505040,
+  "original_signed_p_event_ledger_compared": 5040,
+  "signed_case_groups": {
+    "m1_q3_at_row32": 100,
+    "m0_q4_row29_only": 40,
+    "HALT_no_EOF": 60
+  },
+  "source_formulas": {
+    "digit": "n'=10*n+(b-48);m'=1;q unchanged",
+    "delimiter": "storage[10+q,49]=n;q'=q+1;n'=0;m'=0 (provided q!=-9)",
+    "post_EOF": "storage[10+q,49]=n;q'=q+1 (provided q!=-9)"
+  },
+  "hypothetical_q_minus_9_alias_detected": true,
+  "hypothetical_q_minus_9_value_n12_yields_q13": true,
+  "original_signed_observed_q_nonnegative": true,
+  "independent_receipt_readers": 2,
+  "independent_ast_evaluations": 2106,
+  "hostile_nonnoop_reports_rejected": 26,
+  "proposed_candidate_raw_hex": "3120302030203030302030",
+  "proposed_candidate_verified_as_natural_Native_witness": false,
+  "new_original_Native_runs": 0,
+  "new_full_signed_corpus_CI_runs": 0,
+  "Stage1_global_pass": false,
+  "Stage1_functional_pass": false,
+  "Stage1_geometric_pass": false,
+  "qa31av_library_mirror_restored": true,
+  "next": "QA31AX"
+}
