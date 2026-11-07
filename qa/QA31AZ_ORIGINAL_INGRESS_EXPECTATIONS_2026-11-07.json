@@ -1,0 +1,81 @@
+{
+  "original_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_rows": 2016,
+  "counts": {
+    "x": {
+      "total": 279,
+      "certified": 99,
+      "unresolved": 180
+    },
+    "p": {
+      "total": 57,
+      "certified": 27,
+      "unresolved": 30
+    },
+    "j": 10
+  },
+  "direct_certified_ingress": [
+    {
+      "source": [
+        174,
+        11
+      ],
+      "destination": [
+        10,
+        14
+      ]
+    },
+    {
+      "source": [
+        211,
+        29
+      ],
+      "destination": [
+        10,
+        32
+      ]
+    }
+  ],
+  "j_sites": [
+    [
+      164,
+      5
+    ],
+    [
+      185,
+      8
+    ],
+    [
+      113,
+      11
+    ],
+    [
+      335,
+      17
+    ],
+    [
+      89,
+      20
+    ],
+    [
+      113,
+      23
+    ],
+    [
+      89,
+      29
+    ],
+    [
+      113,
+      32
+    ],
+    [
+      114,
+      38
+    ],
+    [
+      958,
+      1331
+    ]
+  ]
+}

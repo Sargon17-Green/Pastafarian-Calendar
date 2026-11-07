@@ -1,0 +1,27 @@
+name: Befunge98 QA31AZ original ingress inventory
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31az_original_ingress_inventory.mjs'
+      - 'qa/QA31AZ_ORIGINAL_INGRESS_EXPECTATIONS_2026-11-07.json'
+      - 'qa/QA31AZ_ORIGINAL_NONCANONICAL_INGRESS_REVIEW_2026-11-07.md'
+      - '.github/workflows/befunge-qa31az-original-ingress.yml'
+  workflow_dispatch:
+jobs:
+  source-ingress-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute exact source-pinned x/p/j ingress and hostile inventory
+        run: node qa/stage1_qa31az_original_ingress_inventory.mjs > qa31az-inventory.json
+      - name: Summarize verification
+        run: |
+          node -e "const a=require('./qa31az-inventory.json'); console.log(JSON.stringify({original_source_git_blob:a.original_source_git_blob,lexical_sites:a.lexical_sites,certified_literal_only_suffixes:a.certified_literal_only_suffixes,unresolved_static_sites:a.unresolved_static_sites,certified_direct_ingress_to_y14_or_y32:a.certified_direct_ingress_to_y14_or_y32,hostile_nonnoop_source_mutations_detected:a.hostile_nonnoop_source_mutations_detected,stage1_pass:a.stage1_pass},null,2))"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qa31az-original-source-ingress-inventory
+          path: qa31az-inventory.json
+          retention-days: 90
