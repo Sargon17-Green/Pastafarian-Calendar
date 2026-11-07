@@ -151,7 +151,7 @@ def hostile(d,rows,sites):
       lambda a:a.__setitem__("source_git_blob","0"),
       lambda a:a.__setitem__("new_affine_congruence_exclusions",21),
       lambda a:a["rays"].pop(),
-      lambda a:a["rays"][0]["ray"].__setitem__("ops","^p"),
+      lambda a:a["rays"][0]["ray"].__setitem__("ops","^pp"),
       lambda a:a["rays"][0].__setitem__("site",[1,1]),
       lambda a:a["rays"][0].__setitem__("conditional_y49_possible",False),
       lambda a:a["rays"][0]["hypothetical_counter_address_witnesses"][0]["incoming_stack_bottom_to_top"].__setitem__(7,0),
