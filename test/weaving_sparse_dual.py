@@ -135,6 +135,50 @@ def _reference_free_gap_transfer(previous, n, k, spec):
     return SparseVector(first + 1 + left, tuple(out[left:right]))
 
 
+def _support_pruned_free_gap_transfer(previous, n, k, spec):
+    """Research-only exact free-gap kernel: omit guaranteed zero input prefix.
+
+    For i < previous.offset, previous.prefix(i) is identically zero even
+    for signed inputs. Starting at max(q, 0, previous.offset) removes only
+    proven zero output slots. This is an optional diagnostic, not a change
+    to sparse_transfer() or to the Chapel implementation.
+    """
+    q, fixed_sum, _, tail = spec
+    if fixed_sum or tail:
+        raise ValueError("support-pruned diagnostic requires a free gap")
+    first = max(0, q)
+    if first > n or not previous.values:
+        return SparseVector(0, ())
+    first = max(first, previous.offset)
+    if first > n:
+        return SparseVector(0, ())
+    width = n - first
+    begin, stop = first + 1, n + 1
+    overlap_begin = max(begin, previous.offset)
+    overlap_stop = min(stop, previous.offset + len(previous.values))
+    if overlap_begin < overlap_stop:
+        updates = chain(
+            repeat(0, overlap_begin - begin),
+            islice(previous.values, overlap_begin - previous.offset,
+                   overlap_stop - previous.offset),
+            repeat(0, stop - overlap_stop))
+    else:
+        updates = repeat(0, width)
+    coefficients = free_gap_coefficients(n, k)
+    out = list(map(mul,
+                   accumulate(updates, initial=previous.prefix(first)),
+                   reversed(coefficients[:width + 1])))
+    left = 0
+    while left < len(out) and out[left] == 0:
+        left += 1
+    if left == len(out):
+        return SparseVector(0, ())
+    right = len(out)
+    while right > left and out[right - 1] == 0:
+        right -= 1
+    return SparseVector(first + 1 + left, tuple(out[left:right]))
+
+
 def sparse_transpose(after, n, k, spec):
     """Exact T^t, closed form for single-gap rows; recurrence otherwise."""
     q, fixed_sum, first_fixed, tail = spec
@@ -365,11 +409,16 @@ def test_free_gap_accumulation_differential():
                             expected = SparseVector(first + 1 + lo,
                                                     tuple(values[lo:hi]))
                     observed = sparse_transfer(previous, n, k, (q, 0, -1, 0))
+                    pruned = _support_pruned_free_gap_transfer(
+                        previous, n, k, (q, 0, -1, 0))
                     assert observed == expected, (n, k, q, previous.offset)
+                    assert pruned == expected, (n, k, q, previous.offset)
                     checks += 1
     assert checks == 576
     print("WEAVING_SPARSE_ACCUMULATE_DIFFERENTIAL_CHECKS=" + str(checks))
     print("WEAVING_SPARSE_ACCUMULATE_DIFFERENTIAL=PASS")
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_DIFFERENTIAL_CHECKS=" + str(checks))
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_DIFFERENTIAL=PASS")
 
 
 def test_finite():
@@ -479,6 +528,33 @@ def test_paired_hot_month_free_gap(state):
           format(new / old, ".4f") if old else
           "WEAVING_SPARSE_HOT_MONTH_AB_RATIO_NEW_OVER_OLD=UNAVAILABLE")
     print("WEAVING_SPARSE_HOT_MONTH_AB_EQUALITY=PASS")
+    # An independently bounded paired diagnostic for the support-aware
+    # alternative. Preserve the existing loop/accumulate ABBA metrics.
+    assert _support_pruned_free_gap_transfer(previous, n, k, spec) == expected
+    support_samples = {"baseline": [], "pruned": []}
+    support_methods = {"baseline": sparse_transfer,
+                       "pruned": _support_pruned_free_gap_transfer}
+    for _ in range(3):
+        for key in ("baseline", "pruned", "pruned", "baseline"):
+            started = monotonic()
+            observed = support_methods[key](previous, n, k, spec)
+            support_samples[key].append(monotonic() - started)
+            assert observed == expected
+    baseline = median(support_samples["baseline"])
+    pruned = median(support_samples["pruned"])
+    guaranteed_zero_slots = max(0, min(n + 1,
+                                      previous.offset - max(0, spec[0])))
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_HOT_MONTH_CHECKS=13")
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_HOT_MONTH_ZERO_SLOTS=" +
+          str(guaranteed_zero_slots))
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_BASELINE_MEDIAN_SECONDS=" +
+          format(baseline, ".6f"))
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_MEDIAN_SECONDS=" +
+          format(pruned, ".6f"))
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_RATIO_NEW_OVER_BASELINE=" +
+          (format(pruned / baseline, ".4f") if baseline else "UNAVAILABLE"))
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_HOT_MONTH_EQUALITY=PASS")
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
     print("WEAVING_SPARSE_HOT_MONTH_AB_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
 
 
