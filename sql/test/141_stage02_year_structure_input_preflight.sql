@@ -1,6 +1,9 @@
 -- SQL+தமிழ் Slice24: bounded source-locked PostgreSQL 17 input feasibility.
 -- Requires ordered production sql/00..25 only. No normative test schema.
 -- Emits actual reachable year records, not independent 8-field golden results.
+-- The anchor is the independently proven Slice14 foundation golden from
+-- sql/test/108_stage02_year5000_native.sql; do not recompute year5000 here.
+-- This avoids repeating a costly, previously accepted prerequisite in preflight.
 \set ON_ERROR_STOP on
 CREATE TEMP TABLE slice24_inputs (
   case_id text PRIMARY KEY,
@@ -26,6 +29,7 @@ DECLARE
     ];
     signature text;
     got_year_fields text;
+    probe_started_at timestamptz := clock_timestamp();
 BEGIN
     FOREACH signature IN ARRAY signatures LOOP
         IF to_regprocedure(signature) IS NULL THEN
@@ -42,20 +46,35 @@ BEGIN
     END IF;
     RAISE NOTICE 'slice24_selector_signatures=7/7; year_rec_fields=5/5';
     RAISE NOTICE 'year_structure_type_preexisting=%', to_regtype('pastafari_sql_tamil.year_structure') IS NOT NULL;
-    baseline := pastafari_sql_tamil.year5000(initial_day);
-    IF baseline IS NULL THEN RAISE EXCEPTION 'year5000 anchor is NULL'; END IF;
+    -- Slice14 accepted golden; current production year_rec schema checked above.
+    -- Verify its endpoints against the current production primitive and ensure
+    -- the current foundation day is contained in this actual year.
+    baseline := ROW(5000::numeric,-4::numeric,4::numeric,
+                    -15057703::numeric,-15053459::numeric)::pastafari_sql_tamil.year_rec;
+    IF (baseline).open_gate_day IS DISTINCT FROM pastafari_sql_tamil.gate_day(-4)
+       OR (baseline).close_gate_day IS DISTINCT FROM pastafari_sql_tamil.gate_day(4)
+       OR NOT ((baseline).open_gate_day < initial_day
+               AND initial_day <= (baseline).close_gate_day) THEN
+        RAISE EXCEPTION 'Slice14 accepted foundation anchor failed current source checks';
+    END IF;
+    RAISE NOTICE 'slice24_reachable_progress=foundation_anchor_verified; elapsed=%',
+                 clock_timestamp()-probe_started_at;
     INSERT INTO slice24_inputs VALUES ('anchor',initial_day,baseline,'year5000');
     current_year := baseline;
     FOR k IN 1..4 LOOP
         current_year := pastafari_sql_tamil.next_year(initial_day,current_year);
         IF current_year IS NULL THEN RAISE EXCEPTION 'next_year % returned NULL',k; END IF;
         INSERT INTO slice24_inputs VALUES ('next_'||k,initial_day,current_year,'next_year');
+        RAISE NOTICE 'slice24_reachable_progress=next_% ; elapsed=%',
+                     k,clock_timestamp()-probe_started_at;
     END LOOP;
     current_year := baseline;
     FOR k IN 1..3 LOOP
         current_year := pastafari_sql_tamil.previous_year(initial_day,current_year);
         IF current_year IS NULL THEN RAISE EXCEPTION 'previous_year % returned NULL',k; END IF;
         INSERT INTO slice24_inputs VALUES ('prev_'||k,initial_day,current_year,'previous_year');
+        RAISE NOTICE 'slice24_reachable_progress=prev_% ; elapsed=%',
+                     k,clock_timestamp()-probe_started_at;
     END LOOP;
     -- Two legitimate day/year pairs exercise exact year boundary days.
     INSERT INTO slice24_inputs VALUES
