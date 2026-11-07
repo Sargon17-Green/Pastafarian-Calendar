@@ -29,8 +29,8 @@ def check_native278_283_fixtures():
 
     size = 13 * SIZE
     assert size == 106496 and size - 1 == 106495
-    assert (size - 1).to_bytes(3, "little") == b"\\xff\\x9f\\x01"
-    assert size.to_bytes(3, "little") == b"\\x00\\xa0\\x01"
+    assert (size - 1).to_bytes(3, "little") == b"\xff\x9f\x01"
+    assert size.to_bytes(3, "little") == b"\x00\xa0\x01"
     model = OwnedBanks()
     model.data[0][0] = 0x4D  # ROM source writes reserved SRAM bank 0.
     assert model.mapped == 0
