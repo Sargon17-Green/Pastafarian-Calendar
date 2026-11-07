@@ -1,0 +1,41 @@
+name: QA31F exact-source prefix frontier
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - qa/stage1_qa31f_x2865_prefix_probe.py
+      - qa/stage1_qa31f_x23523_incoming_edge.py
+      - qa/stage1_qa31f_q149_writer_gate.py
+      - qa/stage1_qa31f_upper_ingress_graph.py
+      - qa/stage1_qa31f_ascii_prefix_lineage.py
+      - .github/workflows/befunge-qa31f-x2865-prefix.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-pinned-prefix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify static-source pin and 257 bounded route probes
+        run: |
+          python -m py_compile qa/stage1_qa31f_x2865_prefix_probe.py
+          python qa/stage1_qa31f_x2865_prefix_probe.py
+      - name: Verify original row20-row23 two-gate route and three hostile guards
+        run: |
+          python -m py_compile qa/stage1_qa31f_x23523_incoming_edge.py
+          python qa/stage1_qa31f_x23523_incoming_edge.py
+      - name: Verify original q149 writers and row11 diversion
+        run: |
+          python -m py_compile qa/stage1_qa31f_q149_writer_gate.py
+          python qa/stage1_qa31f_q149_writer_gate.py
+      - name: Verify upper-band ingress graph (1440 source models, 3 hostile jumps)
+        run: |
+          python -m py_compile qa/stage1_qa31f_upper_ingress_graph.py
+          python qa/stage1_qa31f_upper_ingress_graph.py
+      - name: Audit 60 natural ASCII prefix models and three source mutations
+        run: |
+          python -m py_compile qa/stage1_qa31f_ascii_prefix_lineage.py
+          python qa/stage1_qa31f_ascii_prefix_lineage.py

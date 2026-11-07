@@ -1,0 +1,54 @@
+name: Befunge QA31G unmodified native EOF diagnostic
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31g_native_eof_probe.py'
+      - 'qa/stage1_qa31g_independent_eof_audit.py'
+      - '.github/workflows/befunge-qa31g-native-eof-original.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-native-eof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify original Git blob and independent auditor syntax
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31g_independent_eof_audit.py
+          mkdir -p qa31g-output
+      - name: Pin PyFunge-98 runtime
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Three bounded original Native stdin/EOF traces
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$GITHUB_WORKSPACE/qa31g-output:/qa31g" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=4s 360s python -u qa/stage1_qa31g_native_eof_probe.py /qa31g
+            ' | tee qa31g-output/native.log
+          grep -q QA31G_STAGE1_REMAINS_OPEN qa31g-output/native.log
+      - name: Independent physical receipt checks and negative controls
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31g_independent_eof_audit.py \
+            src/interleaved_work_counts.b98 qa31g-output | tee qa31g-output/audit.log
+          grep -q QA31G_FIVE_FORGERIES_REJECTED qa31g-output/audit.log
+          grep -q QA31G_NO_STAGE1_ACCEPTANCE qa31g-output/audit.log
+      - name: Archive receipts and RED evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31g-native-eof-bounded-diagnostic
+          path: qa31g-output/
+          if-no-files-found: warn

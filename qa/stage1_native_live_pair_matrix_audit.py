@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+"""Independent Stage-1 audit of Native PyFunge live-pair interleaving.
+
+Checks ordered evidence, native-only reference consistency, invariants and
+hostile report mutations. Does not implement calendar computations in Python.
+"""
+import copy
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+PIN = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+# Pinned SHA-256 of the six valid and six invalid independent Native reference
+# outputs captured in the existing Stage-1 live-pair evidence. This detects
+# coordinated edits to expected_by_label and every matching record. It is an
+# evidence-integrity pin, NOT a substitute for a fresh independent Native run.
+NATIVE_REFERENCE_SHA256 = "fe6fe26b32bcda6f2744df0b99f24ba8824f1f4a7288dff0f01f0a35d4860170"
+PAIRS = [
+    ("v0", "v1"), ("v2", "v3"), ("v4", "v5"),
+    ("v0", "i0"), ("v2", "i3"), ("v4", "i4"),
+    ("i1", "v1"), ("i2", "v3"), ("i5", "v5"),
+    ("i0", "i3"), ("i1", "i4"), ("i2", "i5")
+]
+
+def need(ok, msg):
+    if not ok:
+        raise AssertionError(msg)
+
+def source_check():
+    src = Path("src/interleaved_work_counts.b98").read_bytes()
+    digest = hashlib.sha1(b"blob " + str(len(src)).encode("ascii") +
+                          b"\0" + src).hexdigest()
+    need(digest == PIN, "pinned native QA source was modified")
+
+def verify(data):
+    need(data.get("schema") == "befunge-stage1-live-pair-matrix-v1"
+         and data.get("source_git_blob") == PIN
+         and data.get("status") == "QA_ONLY_STAGE1_OPEN"
+         and data.get("interpreter") == "PyFunge-0.5-rc2"
+         and type(data.get("native_pair_runs")) is int
+         and data["native_pair_runs"] == 24
+         and data.get("api_ownership_trace_instrumented") is True
+         and type(data.get("native_program_executions")) is int
+         and data["native_program_executions"] == 48
+         and type(data.get("independent_native_oracle_calls")) is int
+         and data["independent_native_oracle_calls"] == 18
+         and data.get("stage1_final_acceptance") is False,
+         "schema/source/bounded scope or provisional Stage 1 status forged")
+    e = data.get("expected_by_label")
+    need(isinstance(e, dict) and set(e) ==
+         {"v%d" % i for i in range(6)} | {"i%d" % i for i in range(6)},
+         "native expected case labels missing")
+    for label, values in e.items():
+        need(isinstance(values, list) and len(values) == 7 and
+             all(isinstance(x, str) for x in values),
+             "native seven-field reference malformed")
+        if label[0] == "i":
+            need(values == ["-1"] * 7,
+                 "rejected input oracle contains a non-sentinel")
+    # Stable JSON serialization, independent of dict insertion order and
+    # whitespace in the report. Pin the independent Native oracle witness;
+    # AB/BA consistency alone does not prevent coordinated valid-case forgery.
+    native_reference = json.dumps(e, sort_keys=True, separators=(",", ":"),
+                                  ensure_ascii=True).encode("ascii")
+    need(hashlib.sha256(native_reference).hexdigest() == NATIVE_REFERENCE_SHA256,
+         "independent Native reference outputs differ from pinned evidence")
+    rows = data.get("records")
+    need(isinstance(rows, list) and len(rows) == 24,
+         "native live-pair execution evidence incomplete")
+    cross = overlap = steps = gets = puts = 0
+    by_label = {}
+    by_label_steps = {}
+    by_label_written = {}
+    for ix, row in enumerate(rows):
+        schedule = "AB" if ix < 12 else "BA"
+        l, r = PAIRS[ix % 12]
+        need(row.get("left") == l and row.get("right") == r and
+             row.get("schedule") == schedule and
+             row.get("left_output") == e[l] and
+             row.get("right_output") == e[r] and
+             row.get("terminated") is True and
+             row.get("private_programs") is True and
+             row.get("private_spaces") is True and
+             row.get("private_semantics") is True and
+             row.get("private_io") is True and
+             row.get("cross_program_state_unchanged") is True and
+             row.get("every_api_read_write_owned_by_active_program") is True,
+             "native pair order/output/private state invariant violated")
+        for field in ("left_steps", "right_steps", "overlap_rounds",
+                      "cross_program_checks"):
+            need(type(row.get(field)) is int and 0 < row[field] <= 250000,
+                 "invalid exact native execution counter")
+        for side in ("left", "right"):
+            written = row.get(side + "_written_coordinates")
+            need(type(written) is int and written > 0,
+                 "missing Native written-coordinate ownership coverage")
+        need(type(row.get("write_coordinate_checks")) is int and
+             row["write_coordinate_checks"] > 0,
+             "missing prior-written-coordinate peer snapshots")
+        # Each still-live Program executes one tick per round. The producer
+        # snapshots peers in rounds 1..8 and every 211st round.
+        expected_overlap = min(row["left_steps"], row["right_steps"])
+        expected_checks = sum(min(8, ticks) + ticks // 211
+                              for ticks in (row["left_steps"], row["right_steps"]))
+        need(row["overlap_rounds"] == expected_overlap and
+             row["cross_program_checks"] == expected_checks,
+             "Native overlap/snapshot counters inconsistent with actual ticks")
+        if ix >= 12:
+            prior = rows[ix - 12]
+            need(row["left_output"] == prior["left_output"] and
+                 row["right_output"] == prior["right_output"] and
+                 row["left_steps"] == prior["left_steps"] and
+                 row["right_steps"] == prior["right_steps"],
+                 "alternating order unexpectedly changed Native semantics or ticks")
+        for label, side in ((l, "left"), (r, "right")):
+            # A live program must execute the same number of Native steps
+            # regardless of which *other* input runs beside it. AB/BA
+            # parity alone cannot catch a coordinated two-schedule forgery.
+            own_steps = row[side + "_steps"]
+            if label in by_label_steps:
+                need(by_label_steps[label] == own_steps,
+                     "Native Program step count changed with schedule/peer")
+            else:
+                by_label_steps[label] = own_steps
+            nget = row.get(side + "_memory_gets")
+            nput = row.get(side + "_memory_puts")
+            ndirect = row.get(side + "_direct_p_steps")
+            nspace = row.get(side + "_runtime_putspace")
+            need(type(nget) is int and nget > 0 and
+                 type(nput) is int and nput > 0 and
+                 type(ndirect) is int and ndirect > 0 and
+                 type(nspace) is int and nspace == 0 and
+                 nput == ndirect,
+                 "Native live pair memory API write/read ownership invalid")
+            written = row[side + "_written_coordinates"]
+            need(written <= nput,
+                 "unique written coordinates exceed Native p-write events")
+            if label in by_label_written:
+                need(by_label_written[label] == written,
+                     "Native p-write destinations changed with peer/schedule")
+            else:
+                by_label_written[label] = written
+            if label in by_label:
+                need(by_label[label] == (nget, nput),
+                     "Native Program memory API counts changed with schedule/peer")
+            else:
+                by_label[label] = (nget, nput)
+            gets += nget
+            puts += nput
+        cross += row["cross_program_checks"]
+        overlap += row["overlap_rounds"]
+        steps += row["left_steps"] + row["right_steps"]
+    return {"native_pairs": len(rows), "native_programs": 2 * len(rows),
+            "reference_program_invocations": 18,
+            "cross_program_state_snapshots": cross,
+            "tracked_native_memory_reads": gets,
+            "tracked_native_memory_writes": puts,
+            "overlap_rounds": overlap, "total_native_steps": steps}
+
+def main(folder):
+    source_check()
+    path = Path(folder) / "native_live_pair_matrix.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    outcome = verify(data)
+    print("NATIVE_LIVE_PAIR_MATRIX_INDEPENDENT_AUDIT_PASS", outcome)
+    def reject(name, fn):
+        mutant = copy.deepcopy(data)
+        fn(mutant)
+        try:
+            verify(mutant)
+        except AssertionError:
+            print("NATIVE_LIVE_PAIR_TAMPER_REJECT_PASS", name)
+            return name
+        raise AssertionError("independent audit accepted forged native evidence: " + name)
+    def forge_peer_dependent_steps(d):
+        # Keep AB/BA equality intact for one pair while forging a different
+        # step count for v0 with another peer. The new per-label check must
+        # reject this otherwise internally consistent report.
+        for ix in (3, 15):
+            need(d["records"][ix]["left"] == "v0" and
+                 d["records"][ix]["right"] == "i0",
+                 "coordinated peer-dependence control lost its input pair")
+            d["records"][ix]["left_steps"] += 1
+    def forge_coordinated_valid_reference(d):
+        # Forge both the independent reference and *every* matching Native
+        # pair record for v0, preserving AB/BA and all pairwise comparisons.
+        # Without the reference digest pin this report is incorrectly accepted.
+        label = "v0"
+        original = d["expected_by_label"][label][0]
+        forged = str(int(original) + 1)
+        d["expected_by_label"][label][0] = forged
+        hits = 0
+        for row in d["records"]:
+            for side in ("left", "right"):
+                if row[side] == label:
+                    need(row[side + "_output"][0] == original,
+                         "coordinated reference control lost its original output")
+                    row[side + "_output"][0] = forged
+                    hits += 1
+        need(hits == 4, "coordinated reference control lost expected 4 records")
+    def forge_pair_overlap(d):
+        for ix in (0, 12):
+            d["records"][ix]["overlap_rounds"] -= 1
+    def forge_pair_snapshots(d):
+        for ix in (0, 12):
+            d["records"][ix]["cross_program_checks"] += 1
+    attacks = [
+        reject("wrong_source", lambda d: d.__setitem__("source_git_blob", "0"*40)),
+        reject("float_native_pair_count", lambda d: d.__setitem__("native_pair_runs", 24.0)),
+        reject("float_native_execution_count", lambda d: d.__setitem__("native_program_executions", 48.0)),
+        reject("float_native_oracle_count", lambda d: d.__setitem__("independent_native_oracle_calls", 18.0)),
+        reject("missing_pair", lambda d: d["records"].pop()),
+        reject("swapped_schedule", lambda d: d["records"][0].__setitem__("schedule", "BA")),
+        reject("swapped_label", lambda d: d["records"][2].__setitem__("right", "i1")),
+        reject("forged_output", lambda d: d["records"][0]["left_output"].__setitem__(0, "forged")),
+        reject("shared_space", lambda d: d["records"][0].__setitem__("private_spaces", False)),
+        reject("shared_input_output", lambda d: d["records"][0].__setitem__("private_io", False)),
+        reject("cross_mutation", lambda d: d["records"][0].__setitem__("cross_program_state_unchanged", False)),
+        reject("absent_cross_checks", lambda d: d["records"][0].__setitem__("cross_program_checks", 0)),
+        reject("forged_native_steps", lambda d: d["records"][12].__setitem__("left_steps", 1)),
+        reject("peer_dependent_steps_both_schedules", forge_peer_dependent_steps),
+        reject("peer_overlap_both_schedules", forge_pair_overlap),
+        reject("peer_snapshots_both_schedules", forge_pair_snapshots),
+        reject("forged_invalid_oracle", lambda d: d["expected_by_label"]["i0"].__setitem__(0, "0")),
+        reject("coordinated_valid_reference_all_records", forge_coordinated_valid_reference),
+        reject("unowned_memory_api", lambda d: d["records"][0].__setitem__("every_api_read_write_owned_by_active_program", False)),
+        reject("forged_memory_put", lambda d: d["records"][0].__setitem__("left_memory_puts", 0)),
+        reject("no_written_coordinate_witness", lambda d: d["records"][0].__setitem__("write_coordinate_checks", 0)),
+        reject("boolean_written_coordinates", lambda d: d["records"][0].__setitem__("left_written_coordinates", True)),
+        reject("impossible_written_coordinate_count", lambda d: d["records"][0].__setitem__("right_written_coordinates", d["records"][0]["right_memory_puts"] + 1)),
+        reject("float_direct_p_count", lambda d: d["records"][0].__setitem__("left_direct_p_steps", float(d["records"][0]["left_direct_p_steps"]))),
+        reject("bool_putspace_count", lambda d: d["records"][0].__setitem__("right_runtime_putspace", False)),
+        reject("float_putspace_count", lambda d: d["records"][0].__setitem__("right_runtime_putspace", 0.0)),
+        reject("putspace_writes", lambda d: d["records"][0].__setitem__("right_runtime_putspace", 1)),
+        reject("memory_reads_nondeterministic", lambda d: d["records"][12].__setitem__("left_memory_gets", d["records"][12]["left_memory_gets"] + 1)),
+        reject("premature_completion", lambda d: d.__setitem__("stage1_final_acceptance", True)),
+    ]
+    need(len(attacks) == 29, "missing adversarial audit cases")
+    report = {"schema": "befunge-stage1-live-pair-matrix-audit-v2",
+              "source_git_blob": PIN, "verified": outcome,
+              "negative_reports_rejected": attacks,
+              "stage1_final_acceptance": False}
+    output = Path(folder) / "native_live_pair_matrix_audit.json"
+    output.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    print("NATIVE_LIVE_PAIR_MATRIX_29_HOSTILE_REPORTS_REJECTED_PASS")
+
+if __name__ == "__main__":
+    need(len(sys.argv) == 2, "usage: native live-pair evidence folder")
+    main(sys.argv[1])

@@ -1,0 +1,51 @@
+name: Befunge QA31M bounded signed owner audit
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31m_signed_owner_route.py'
+      - '.github/workflows/befunge-qa31m-signed-owner.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa31m-owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin original source and Python
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31m_original_native_route_audit.py qa/stage1_qa31m_signed_owner_route.py
+          mkdir -p qa31m-output
+      - name: Download the EXISTING QA31L artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            'https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/13057227833/zip' \
+            -o qa31m-output/qa31l-original.zip
+          echo '7de4556fda1b3d0b746c5b08e1600e029abb8d3a3565b976ddff804b9d4043b7  qa31m-output/qa31l-original.zip' | sha256sum -c -
+      - name: Original source, all physical STEPs, last-writer and 14 hostile controls
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31m_signed_owner_route.py \
+            src/interleaved_work_counts.b98 qa31m-output/qa31l-original.zip \
+            --out qa31m-output/owner.json | tee qa31m-output/audit.log
+          grep -q QA31M_SOURCE_OWNER_PASS qa31m-output/audit.log
+          grep -q QA31M_HOSTILE_14_OF_14 qa31m-output/audit.log
+          grep -q QA31M_NO_NATIVE_NO_STAGE1_PASS qa31m-output/audit.log
+      - name: Persist audit receipt even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31m-signed-owner
+          path: |
+            qa31m-output/owner.json
+            qa31m-output/audit.log
+          if-no-files-found: warn

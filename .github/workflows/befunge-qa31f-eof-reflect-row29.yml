@@ -1,0 +1,22 @@
+name: QA31F source-pinned EOF reflection candidate
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - qa/stage1_qa31f_eof_reflect_row29.py
+      - qa/stage1_qa31f_ascii_prefix_lineage.py
+      - .github/workflows/befunge-qa31f-eof-reflect-row29.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-eof-reflect-row29:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Check model syntax, six stdin EOF traces and four hostile opcode controls
+        run: |
+          python -m py_compile qa/stage1_qa31f_ascii_prefix_lineage.py qa/stage1_qa31f_eof_reflect_row29.py
+          python qa/stage1_qa31f_eof_reflect_row29.py

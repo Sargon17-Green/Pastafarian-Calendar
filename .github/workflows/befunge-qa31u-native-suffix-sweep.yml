@@ -1,0 +1,71 @@
+name: Befunge QA31U all-byte Native EOF suffix sweep
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31u_native_suffix_matrix.py'
+      - 'qa/stage1_qa31u_independent_suffix_audit.py'
+      - 'qa/QA31U_ONE_BYTE_SUFFIX_FULL_MATRIX_CONTRACT_2026-11-03.md'
+      - '.github/workflows/befunge-qa31u-native-suffix-sweep.yml'
+      - 'src/interleaved_work_counts.b98'
+permissions:
+  contents: read
+jobs:
+  original-native-suffix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin untouched original source and compile independent audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
+          python3 -m py_compile qa/stage1_qa31u_independent_suffix_audit.py
+          mkdir -p qa31u-output
+      - name: Fetch SHA-pinned original PyFunge 0.5-rc2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Original physical Native runs for this 32-byte suffix shard
+        shell: bash
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$GITHUB_WORKSPACE/qa31u-output:/qa31u" -w /work \
+            python:2.7-slim sh -ceu "
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1100s python -u qa/stage1_qa31u_native_suffix_matrix.py $SHARD /qa31u
+            " | tee qa31u-output/native.log
+          grep -q "QA31U_NATIVE_SHARD_COMPLETE $SHARD 32" qa31u-output/native.log
+      - name: Audit every source-pinned physical STEP and all 18 hostile controls
+        shell: bash
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31u_independent_suffix_audit.py \
+            src/interleaved_work_counts.b98 qa31u-output "$SHARD" | tee qa31u-output/audit.log
+          grep -q "QA31U_SHARD_HOSTILE_CONTROLS $SHARD 18 OF_18_REJECTED" qa31u-output/audit.log
+          grep -q QA31U_STAGE1_REMAINS_OPEN qa31u-output/audit.log
+      - name: Preserve receipt, full traces and independent audit for this shard
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31u-native-suffix-shard-${{ matrix.shard }}
+          path: qa31u-output/
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6

@@ -1,0 +1,47 @@
+name: Befunge QA23A Independent Native Streaming Prefix Proof
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa23a_native_stdout_prefix_audit.py'
+      - '.github/workflows/befunge-stage1-qa23a-native-streaming-proof.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-native-stdout-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Preserve production source and static QA script identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa23a_native_stdout_prefix_audit.py
+      - name: Recover exact accepted QA22 Native execution transcript
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh run view 39774061424 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:72b1be429d6e55523692659fff49627d7e06e27a'
+          mkdir -p "$RUNNER_TEMP/qa23a"
+          gh run download 39774061424 --repo "$GITHUB_REPOSITORY" --name qa22-native-mutant-output-followthrough --dir "$RUNNER_TEMP/qa23a"
+          echo "ff85b07dab957de7a97ac32d917ed72f458a0a1ef1827b2744be176debf9d554  $RUNNER_TEMP/qa23a/qa22_native_continuations.json" | sha256sum -c -
+      - name: Independently certify only actual append-only Native stdout prefixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/stage1_qa23a_native_stdout_prefix_audit.py "$RUNNER_TEMP/qa23a/qa22_native_continuations.json" "$RUNNER_TEMP/qa23a/qa23a_streaming_audit.json" | tee "$RUNNER_TEMP/qa23a/qa23a_streaming_audit.log"
+          grep -q QA23A_EIGHT_FORGED_REPORTS_REJECTED "$RUNNER_TEMP/qa23a/qa23a_streaming_audit.log"
+          grep -q QA23A_NO_INFINITE_LOOP_OR_STAGE1_ACCEPTANCE "$RUNNER_TEMP/qa23a/qa23a_streaming_audit.log"
+      - name: Preserve unmodified original Native receipt and independent proof
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa23a-native-stdout-prefix-proof
+          path: ${{ runner.temp }}/qa23a/
+          if-no-files-found: warn

@@ -1,0 +1,102 @@
+name: Befunge QA Spaghetti01 Native Gate
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  spaghetti01-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify immutable base and experimental candidate
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object qa/spaghetti01_interleaved_work_counts_candidate.b98)" = "948cb9332332f6abf35274ecc4be69bbc8c79115"
+          echo "SPAGHETTI01_PINNED $(git rev-parse HEAD)"
+      - name: Native PyFunge independent oracle and three causal mutants
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -v "$GITHUB_WORKSPACE:/work:rw" -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" -w /work python:2.7-slim sh -ceu '
+          pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+          python - <<PY
+          from __future__ import print_function
+          import json,os,subprocess,tempfile
+          source="src/interleaved_work_counts.b98"
+          candidate="qa/spaghetti01_interleaved_work_counts_candidate.b98"
+          cmd=["pyfunge","--disable-fprint","--no-concurrent","--no-filesystem","-v98","-d2"]
+          samples=[
+          ("1 15055672 1 15055670",True),
+          ("0 0 0 0",True),
+          ("0 1 0 2",True),
+          ("1 987654321 0 123456789",True),
+          ("0 123456789 1 987654321",True),
+          ("2 10 0 10",False),
+          ("-0 1 0 1",False)]
+          def run(path,inp):
+              p=subprocess.Popen(["timeout","--kill-after=2s","45s"]+cmd+[path],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+              o,e=p.communicate(inp+"\n")
+              return p.returncode,o.split(),e[-500:]
+          rows=open(candidate,"rb").read().splitlines(True)
+          assert rows[2][11:13]=="v>" and rows[3][20]=="p" and rows[3][23]=="g" and rows[4][14]==" "
+          mutations=[("no_p",20,3,"z"),("no_g",23,3,"z"),("wrong_literal",16,3,"d")]
+          mutants=[]
+          for label,x,y,c in mutations:
+              copy=list(rows)
+              b=bytearray(copy[y])
+              b[x]=ord(c)
+              copy[y]=bytes(b)
+              fd,path=tempfile.mkstemp(prefix="spaghetti01_"+label+"_",suffix=".b98")
+              f=os.fdopen(fd,"wb")
+              f.write("".join(copy))
+              f.close()
+              mutants.append((label,path))
+          results=[]
+          counts=dict((label,0) for label,x,y,c in mutations)
+          try:
+              for inp,valid in samples:
+                  aRC,a,aErr=run(source,inp)
+                  bRC,b,bErr=run(candidate,inp)
+                  if aRC or bRC or a!=b:
+                      raise AssertionError("PARITY input=%r base=%r candidate=%r stderr=%r|%r"%(inp,a,b,aErr,bErr))
+                  if valid:
+                      sc,mc,st,mt=inp.split()
+                      rc1,v1,e1=run("reference/work_counts.b98",inp)
+                      rc2,v2,e2=run("reference/save.b98",sc+" "+mc)
+                      rc3,v3,e3=run("reference/save.b98",st+" "+mt)
+                      if rc1 or rc2 or rc3 or b!=v1+v2+v3:
+                          raise AssertionError("INDEPENDENT_NATIVE_ORACLE input=%r outputs=%r"%(inp,b))
+                  mutated={}
+                  if valid:
+                      for label,path in mutants:
+                          rc,out,err=run(path,inp)
+                          changed=bool(rc or out!=b)
+                          counts[label]+=int(changed)
+                          mutated[label]={"rc":rc,"output_or_termination_changed":changed}
+                  results.append({"input":inp,"valid":valid,"native_parity":True,"negative_controls":mutated})
+                  print("NATIVE_SPAGHETTI01_CASE",inp,mutated)
+              if not all(x>=1 for x in counts.values()):
+                  raise AssertionError("CAUSALITY_NOT_OBSERVED "+repr(counts))
+              print("NATIVE_SPAGHETTI01_CANDIDATE_PARITY_AND_CAUSALITY_PASS",counts)
+          finally:
+              with open("/work/spaghetti01_native_receipt.json","w") as f:
+                  json.dump({"candidate_promotion":False,"stage1_closed":False,
+                             "observations":results,"causal_counts":counts},f,indent=2)
+              for label,path in mutants:
+                  os.unlink(path)
+          PY
+          '
+      - name: Preserve Native report even when evidence fails
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti01-native-evidence
+          path: spaghetti01_native_receipt.json
+          if-no-files-found: warn

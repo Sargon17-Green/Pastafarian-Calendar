@@ -1,0 +1,66 @@
+name: Befunge QA31I signed original native pair differential
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31i_paired_native_differential.py'
+      - 'qa/stage1_qa31i_pair_corruption_audit.py'
+      - '.github/workflows/befunge-qa31i-signed-native-pair.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa31i-paired-original-signed-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify pinned original source and QA files
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31h_last_writer_reader_audit.py \
+            qa/stage1_qa31i_paired_native_differential.py \
+            qa/stage1_qa31i_pair_corruption_audit.py
+          mkdir -p qa31i-output
+      - name: Download original immutable QA31G Native evidence (no Native re-execution)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 2 \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/13037899716/zip" \
+            -o qa31i-output/qa31g-original.zip
+          echo 'e74e4ad35d5653ffd1610827e1351fce62552b0912dc78430908cc288f4e1161  qa31i-output/qa31g-original.zip' | sha256sum -c -
+      - name: Source-pinned, full-STEP paired original Native differential
+        run: |
+          set -euo pipefail
+          PYTHONPATH=qa python3 -u qa/stage1_qa31i_paired_native_differential.py \
+            src/interleaved_work_counts.b98 qa31i-output/qa31g-original.zip \
+            --output qa31i-output/qa31i_pair.json | tee qa31i-output/differential.log
+          grep -q 'QA31I_SIGNED_PHYSICAL_STEPS 5084' qa31i-output/differential.log
+          grep -q 'QA31I_COMMON_PHYSICAL_STEPS 1131' qa31i-output/differential.log
+          grep -q 'QA31I_FIRST_STATE_DIVERGENCE 1132' qa31i-output/differential.log
+          grep -q 'QA31I_NO_NEW_NATIVE_NO_STAGE1_PASS' qa31i-output/differential.log
+      - name: Separate ten-mutation differential corruption auditor
+        run: |
+          set -euo pipefail
+          PYTHONPATH=qa python3 -u qa/stage1_qa31i_pair_corruption_audit.py \
+            qa31i-output/qa31g-original.zip \
+            --output qa31i-output/qa31i_negative_controls.json | tee qa31i-output/negative-controls.log
+          grep -q 'QA31I_HOSTILE_PAIR_MUTATIONS_REJECTED 10' qa31i-output/negative-controls.log
+          grep -q 'QA31I_NEGATIVE_CONTROL_NO_STAGE1_PASS' qa31i-output/negative-controls.log
+      - name: Archive new comparison receipts only (not original Native copy)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31i-original-signed-native-pair-differential
+          path: |
+            qa31i-output/differential.log
+            qa31i-output/negative-controls.log
+            qa31i-output/qa31i_pair.json
+            qa31i-output/qa31i_negative_controls.json
+          if-no-files-found: warn
