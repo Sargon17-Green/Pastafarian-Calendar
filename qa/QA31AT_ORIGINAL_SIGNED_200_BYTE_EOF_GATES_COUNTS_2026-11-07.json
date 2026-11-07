@@ -1,0 +1,120 @@
+{
+  "schema": "qa31at-frozen-signed-200-byte-class-gate-fixture-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "original_source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "QA31AI_original_zip_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "source_gates": [
+    {
+      "ip": [
+        185,
+        8
+      ],
+      "source_start": [
+        11,
+        8
+      ],
+      "source_end": [
+        185,
+        8
+      ],
+      "source_bytes": 175,
+      "source_physical_nonspace_opcodes": 168,
+      "source_slice_sha256": "828c1224365bcf41b07be0822ea3adb14d1e5cdc5da882449874c145f13fc41d",
+      "formula": "61*((C>47)&&(58>C))",
+      "observed": 1800,
+      "observed_61": 1100,
+      "observed_0": 700,
+      "g_sites": [
+        [
+          57,
+          8
+        ],
+        [
+          151,
+          8
+        ]
+      ]
+    },
+    {
+      "ip": [
+        335,
+        17
+      ],
+      "source_start": [
+        11,
+        17
+      ],
+      "source_end": [
+        335,
+        17
+      ],
+      "source_bytes": 325,
+      "source_physical_nonspace_opcodes": 318,
+      "source_slice_sha256": "8987907dd936ad0795ebef2c228810ed6a837ab49325fd011f603a95666062e5",
+      "formula": "61*(C in [9,10,13,32])",
+      "observed": 700,
+      "observed_61": 680,
+      "observed_0": 20,
+      "g_sites": [
+        [
+          57,
+          17
+        ],
+        [
+          129,
+          17
+        ],
+        [
+          202,
+          17
+        ],
+        [
+          275,
+          17
+        ]
+      ]
+    }
+  ],
+  "original_cases": 200,
+  "original_steps": 3628390,
+  "original_input_byte_reads": 1800,
+  "original_EOF_reads": 140,
+  "initial_M_0_49_puts": 200,
+  "input_byte_M_0_49_puts": 1800,
+  "source_byte_values_observed_at_j185": {
+    "0": 10,
+    "9": 20,
+    "10": 20,
+    "13": 20,
+    "32": 620,
+    "48": 630,
+    "49": 230,
+    "50": 30,
+    "51": 30,
+    "52": 30,
+    "53": 30,
+    "54": 30,
+    "55": 30,
+    "56": 30,
+    "57": 30,
+    "255": 10
+  },
+  "distinct_original_observed_byte_values": 16,
+  "source_conditional_byte_domain": 256,
+  "source_conditional_EOF_minus_1_predicate": 0,
+  "physical_EOF_minus_1_puts_into_M_0_49": 0,
+  "physical_EOF_reflection_next_ip": [
+    12,
+    5
+  ],
+  "independent_source_receipt_readers": 2,
+  "synthetic_corrupt_reports_rejected": 28,
+  "new_original_Native_runs": 0,
+  "new_full_corpus_GitHub_CI_runs": 0,
+  "new_concrete_counter_target_stdin": null,
+  "stage1_global_pass": false,
+  "stage1_functional_pass": false,
+  "stage1_geometric_pass": false,
+  "evidence_library_path": "/Befunge_QA_Artifacts/QA31AT_BEFUNGE98_KYRGYZ_SIGNED_BYTE_EOF_GATES_20261107.zip",
+  "evidence_zip_sha256": "b0cd81b8239197831704fdcf23bc1bec67b621daddcc045e0ce1e8a76c567447"
+}
