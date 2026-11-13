@@ -16,6 +16,7 @@ const tests = [
   'browser-cooking-component.js',
   'browser-reverse-vendor.js',
   'browser-component-runtime.js',
+  'browser-day-boundary.js',
 ];
 
 for (const test of tests) {

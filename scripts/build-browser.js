@@ -12,6 +12,8 @@ const BUILD_ID_PLACEHOLDER = '__PASTAFARI_BROWSER_BUILD_ID__';
 
 const MAIN_PARTS = Object.freeze([
   'result-normalizer.js',
+  'venus-day-boundary.js',
+  'observer-location.js',
   'date-axis.js',
   'calendar-memory.js',
   'engine-client.js',
@@ -29,6 +31,8 @@ const BUILD_INPUTS = Object.freeze([
   path.join('browser', 'result-normalizer.js'),
   path.join('browser', 'black-box-cutlet.js'),
   path.join('browser', 'pastafari-worker-entry.js'),
+  path.join('browser', 'venus-day-boundary.js'),
+  path.join('browser', 'observer-location.js'),
   path.join('browser', 'date-axis.js'),
   path.join('browser', 'calendar-memory.js'),
   path.join('browser', 'engine-client.js'),
