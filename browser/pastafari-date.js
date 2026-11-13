@@ -254,6 +254,10 @@
       this._connected = false;
       this._connectionEpoch = 0;
       this._refreshQueuedEpoch = null;
+      this._todayTimer = null;
+      this._todayListener = null;
+      this._todayObserverUnsubscribe = null;
+      this._lastTodayJdn = null;
       this._generation = 0;
       this._navigationGeneration = 0;
       this._value = null;
@@ -1219,6 +1223,7 @@
       this._connected = true;
       this._connectionEpoch += 1;
       this._applyLocale();
+      this._updateTodayTracking();
       this._queueRefresh();
     }
 
@@ -1229,6 +1234,7 @@
       this._generation += 1;
       this._navigationGeneration += 1;
       this._refreshQueuedEpoch = null;
+      this._stopTodayTracking();
       this._cutletLoads.clear();
       this._abortReverseSearch();
       this._clearLoadingNotice();
@@ -1255,6 +1261,7 @@
         }
         return;
       }
+      this._updateTodayTracking();
       this._queueRefresh();
     }
 
@@ -1490,6 +1497,64 @@
         if (!this._connected || this._connectionEpoch !== epoch) return;
         this.refresh().catch(() => {});
       });
+    }
+
+    _stopTodayTracking() {
+      if (this._todayTimer !== null && typeof root.clearTimeout === 'function') root.clearTimeout(this._todayTimer);
+      this._todayTimer = null;
+      if (this._todayListener) {
+        if (typeof root.removeEventListener === 'function') {
+          root.removeEventListener('focus', this._todayListener);
+          root.removeEventListener('pageshow', this._todayListener);
+        }
+        if (root.document && typeof root.document.removeEventListener === 'function') {
+          root.document.removeEventListener('visibilitychange', this._todayListener);
+        }
+      }
+      this._todayListener = null;
+      if (this._todayObserverUnsubscribe) this._todayObserverUnsubscribe();
+      this._todayObserverUnsubscribe = null;
+      this._lastTodayJdn = null;
+    }
+
+    _checkTodayBoundary(force = false) {
+      if (!this._connected || !this._todayListener) return;
+      if (root.document && root.document.visibilityState === 'hidden') return;
+      const snapshot = axis.currentDaySnapshot();
+      if (!snapshot) return;
+      const previous = this._lastTodayJdn;
+      this._lastTodayJdn = snapshot.jdn;
+      if (previous !== null && (force || previous !== snapshot.jdn)) this._queueRefresh();
+
+      if (this._todayTimer !== null && typeof root.clearTimeout === 'function') root.clearTimeout(this._todayTimer);
+      this._todayTimer = null;
+      if (typeof root.setTimeout === 'function') {
+        const remaining = snapshot.nextBoundary.instant.getTime() - Date.now() + 250;
+        this._todayTimer = root.setTimeout(() => {
+          this._todayTimer = null;
+          this._checkTodayBoundary();
+        }, Math.max(50, Math.min(2147483647, remaining)));
+      }
+    }
+
+    _updateTodayTracking() {
+      const hasImplicitDate = !this.hasAttribute('date') || !this.hasAttribute('calculation-date');
+      if (!this._connected || !hasImplicitDate
+          || !root.document || typeof root.document.addEventListener !== 'function'
+          || typeof root.addEventListener !== 'function') {
+        this._stopTodayTracking();
+        return;
+      }
+      if (!this._todayListener) {
+        this._todayListener = () => this._checkTodayBoundary();
+        root.addEventListener('focus', this._todayListener);
+        root.addEventListener('pageshow', this._todayListener);
+        root.document.addEventListener('visibilitychange', this._todayListener);
+        this._todayObserverUnsubscribe = axis.subscribeObserverChange(() => {
+          this._checkTodayBoundary(true);
+        });
+      }
+      this._checkTodayBoundary();
     }
 
     _goToday() {

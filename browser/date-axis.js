@@ -3,6 +3,48 @@
 (function (root) {
   const ns = root.PastafariBrowserInternal || (root.PastafariBrowserInternal = Object.create(null));
   const JDN_MINUS_PROJECT_DAY = 1721425n;
+  const observerSubscribers = new Set();
+  let activeObserver = ns.observerLocation ? ns.observerLocation.KISURRA_OBSERVER : null;
+  let locationStartPromise = null;
+
+  function currentDaySnapshot(now = new Date()) {
+    if (!ns.venusDayBoundary || !activeObserver) return null;
+    return ns.venusDayBoundary.currentDayAt(now, activeObserver);
+  }
+
+  function setObserver(observer) {
+    if (!ns.venusDayBoundary) return false;
+    const normalized = ns.venusDayBoundary.normalizeObserver(observer);
+    if (activeObserver
+      && activeObserver.latitude === normalized.latitude
+      && activeObserver.longitude === normalized.longitude
+      && activeObserver.elevationM === normalized.elevationM) return false;
+    activeObserver = Object.freeze({ ...observer, ...normalized });
+    for (const listener of observerSubscribers) listener(activeObserver);
+    return true;
+  }
+
+  function subscribeObserverChange(listener) {
+    if (typeof listener !== 'function') throw new TypeError('Observer callback must be a function.');
+    observerSubscribers.add(listener);
+    if (!locationStartPromise && ns.observerLocation) {
+      const locationApi = ns.observerLocation;
+      locationStartPromise = Promise.resolve()
+        .then(() => locationApi.resolveObserverLocation({ navigatorObject: root.navigator, timeoutMs: 2000 }))
+        .then((observer) => {
+          setObserver(observer);
+          return locationApi.watchObserverPermission((nextObserver) => {
+            setObserver(nextObserver);
+          }, { navigatorObject: root.navigator });
+        })
+        .catch((error) => {
+          if (root.console && typeof root.console.warn === 'function') {
+            root.console.warn('Pastafari observer location unavailable:', error);
+          }
+        });
+    }
+    return () => observerSubscribers.delete(listener);
+  }
 
   function floorDiv(aValue, bValue) {
     const a = BigInt(aValue);
@@ -38,6 +80,9 @@
   }
 
   function localToday() {
+    const snapshot = currentDaySnapshot();
+    if (snapshot) return jdnToGregorian(snapshot.jdn);
+    // Only isolated legacy unit test harnesses omit the day-boundary modules.
     const now = new Date();
     return Object.freeze({
       year: BigInt(now.getFullYear()),
@@ -132,6 +177,9 @@
     daysInGregorianMonth,
     validateGregorian,
     localToday,
+    currentDaySnapshot,
+    setObserver,
+    subscribeObserverChange,
     parseIsoDate,
     normalizeDateInput,
     gregorianToJdn,
