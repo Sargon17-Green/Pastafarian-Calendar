@@ -52,3 +52,9 @@ Three independent **read-only / no-converter** OTR single-Python preflights exec
 Prototype validator + **simulation-only** scheduler: **16/16 offline Python unit tests PASS**, no actual native Windows child-worker supervision tested. The fully hashed archive `pastafarian_soak_readiness_prototype_v002_20261114.zip` was saved to the ChatGPT Library `/Pastafarian-Soak-Readiness/`, SHA-256 `f015086d1bca38665a730c95655882ead81ab33e5159007dca31d0338205bad9`. The archive and local one-shot evidence **do not** certify any original converter or entire year.
 
 **Next readiness gate:** actual Windows two-worker supervisory process, no-kill dynamic slow path, verified memory/CPU admission, mock mismatch/crash/recovery scenario, and independent boundary+adapter certification before real-engine full-year pilot. Do not modify `main`; do not launch 10,000-year soak from this README.
+
+## Crash-resume code is now checked into this QA branch
+
+`soak/runner/recovery_store.py`, `soak/runner/year_validator.py`, `soak/runner/two_lane_scheduler.py` and `soak/tests/` form a self-contained, **synthetic-only** recovery prototype. Run tests with `python -m unittest discover -s soak/tests -v` (28/28 passed locally). See `soak/docs/CRASH_RECOVERY_DESIGN_HE_v001.md` for crash/power-loss limitations, original-engine checkpoints, and the gate against duplicate in-flight work. No actual converter year-soak has started.
+
+**Windows bridge:** one-shot v009 and v010 were correctly **blocked by memory admission** before child launch, with v010 observing `333123584` available RAM bytes. This is not a Windows crash recovery PASS. The previous empty Job Object CPU cap API configuration passed, but process-level enforcement remains unverified. Do not relax production resource limits; do not modify protected `main`.
