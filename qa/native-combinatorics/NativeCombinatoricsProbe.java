@@ -43,23 +43,6 @@ public final class NativeCombinatoricsProbe {
         }
         System.out.println("MONTH_WAYS_4244_45\t" + rawLimbs(count.invoke(engine,4244,45)));
 
-        Method addFast = arithmeticKind.getMethod("חבר־חוליות",big,big);
-        Method addOld = arithmeticKind.getMethod("חבר",big,big);
-        Object signedOther = small.invoke(arithmetic,-98765432);
-        Object carryBig = small.invoke(arithmetic,999999999);
-        Object carrySmall = small.invoke(arithmetic,9999);
-        String[] sumNames = {"SUM_LARGE","SUM_NEGATIVE","SUM_ZERO","SUM_BOTH_NEGATIVE","SUM_CARRY"};
-        Object[][] sumArgs = {{largeBinomial,other},{negative,largeBinomial},
-            {zero,largeBinomial},{negative,signedOther},{carryBig,carrySmall}};
-        for(int i=0;i<sumNames.length;i++) {
-            Object first=sumArgs[i][0],second=sumArgs[i][1];
-            String got=rawLimbs(addFast.invoke(arithmetic,first,second));
-            String was=rawLimbs(addOld.invoke(arithmetic,first,second));
-            if(!got.equals(was)) throw new AssertionError("SUM_LEGACY_DIFFERENCE " + sumNames[i]);
-            System.out.println(sumNames[i] + "\t" + got);
-        }
-
-
         Method multiplyFast = arithmeticKind.getMethod("כפל־חוליות",big,big);
         Method multiplyOld = arithmeticKind.getMethod("כפל",big,big);
         Method small = arithmeticKind.getMethod("הקם־מספר",int.class);
@@ -77,6 +60,23 @@ public final class NativeCombinatoricsProbe {
             String historical=rawLimbs(multiplyOld.invoke(arithmetic,left,right));
             if(!current.equals(historical)) throw new AssertionError("MUL_LEGACY_DIFFERENCE " + productNames[i]);
             System.out.println(productNames[i] + "\t" + current);
+        }
+
+
+        Method addFast = arithmeticKind.getMethod("חבר־חוליות",big,big);
+        Method addOld = arithmeticKind.getMethod("חבר",big,big);
+        Object signedOther = small.invoke(arithmetic,-98765432);
+        Object carryBig = small.invoke(arithmetic,999999999);
+        Object carrySmall = small.invoke(arithmetic,9999);
+        String[] sumNames = {"SUM_LARGE","SUM_NEGATIVE","SUM_ZERO","SUM_BOTH_NEGATIVE","SUM_CARRY"};
+        Object[][] sumArgs = {{largeBinomial,other},{negative,largeBinomial},
+            {zero,largeBinomial},{negative,signedOther},{carryBig,carrySmall}};
+        for(int i=0;i<sumNames.length;i++) {
+            Object first=sumArgs[i][0],second=sumArgs[i][1];
+            String got=rawLimbs(addFast.invoke(arithmetic,first,second));
+            String was=rawLimbs(addOld.invoke(arithmetic,first,second));
+            if(!got.equals(was)) throw new AssertionError("SUM_LEGACY_DIFFERENCE " + sumNames[i]);
+            System.out.println(sumNames[i] + "\t" + got);
         }
 
 
