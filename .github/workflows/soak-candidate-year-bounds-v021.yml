@@ -1,0 +1,134 @@
+name: Soak v021 candidate year boundaries from pinned native references
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-candidate-year-bounds-v021.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  foundation-year-bounds:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and verify immutable original reference sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/bounds build/sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          mkdir -p build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests
+          mkdir -p build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/src
+          PY=build/sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py
+          JS=build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js
+          NAMES=build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/source-language-catalog.js
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 "https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py" -o "$PY"
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 "https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js" -o "$JS"
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 "https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/source-language-catalog.js" -o "$NAMES"
+          printf '%s\n' \
+            "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  $PY" \
+            "8276e428c3a392ab39429331cdfdd7b80a8b1041efb4c9d806a6c141630a9fa5  $JS" \
+            "211333bff832e597e5388a789c811ae8fffb55780484f28b60b097410c786699  $NAMES" \
+            | tee build/bounds/sources.sha256 | sha256sum -c -
+      - name: Original Python native year5000 (not full-date conversion)
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          nice -n 19 timeout --signal=TERM --kill-after=4s 70s python3 -B - > build/bounds/python.log 2>&1 <<'PY'
+          import importlib.util,json,pathlib,sys,time
+          source=pathlib.Path("build/sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py")
+          s=importlib.util.spec_from_file_location("pinned_py_year",source)
+          mod=importlib.util.module_from_spec(s);sys.modules[s.name]=mod;s.loader.exec_module(mod)
+          c=-15055671
+          start=time.monotonic()
+          y=mod.NormativeCalendar().year5000(c)
+          result={"engine":"REF-41","calculation_day":str(c),"year":str(y.number),
+                  "open_gate_index":str(y.open_gate_index),"close_gate_index":str(y.close_gate_index),
+                  "open_gate_day":str(y.open_gate_day),"close_gate_day":str(y.close_gate_day),
+                  "first_target_day":str(y.open_gate_day+1),"last_target_day":str(y.close_gate_day),
+                  "duration_seconds":round(time.monotonic()-start,6)}
+          pathlib.Path("build/bounds/python.json").write_text(json.dumps(result,sort_keys=True,indent=2)+"\n",encoding="utf8")
+          print("PY_YEAR5000_CANDIDATE="+json.dumps(result,sort_keys=True))
+          PY
+          rc=$?
+          echo "$rc" > build/bounds/python.exit
+          cat build/bounds/python.log
+          if [ "$rc" -ne 0 ]; then echo "PY_YEAR_BOUNDARY_CANDIDATE_BLOCKED exit=$rc"; fi
+          exit 0
+      - name: Original JS native year5000 (not full-date conversion)
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          /usr/bin/time -v -o build/bounds/javascript-resource.txt nice -n 19 \
+            timeout --signal=TERM --kill-after=4s 70s node --max-old-space-size=256 - > build/bounds/javascript.log 2>&1 <<'JS'
+          'use strict';
+          const fs=require('node:fs'),p=require('node:path');
+          const source=p.resolve('build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js');
+          const original=require(source),c=-15055671n;
+          const tick=process.hrtime.bigint();
+          const y=original.year5000(c,original.createGateEngine());
+          const result={engine:'REF-24',calculation_day:c.toString(),year:y.number.toString(),
+            open_gate_index:y.openGateIndex.toString(),close_gate_index:y.closeGateIndex.toString(),
+            open_gate_day:y.openGateDay.toString(),close_gate_day:y.closeGateDay.toString(),
+            first_target_day:(y.openGateDay+1n).toString(),last_target_day:y.closeGateDay.toString(),
+            duration_seconds:Number(process.hrtime.bigint()-tick)/1e9};
+          fs.writeFileSync('build/bounds/javascript.json',JSON.stringify(result,null,2)+'\n');
+          console.log("JS_YEAR5000_CANDIDATE="+JSON.stringify(result));
+          JS
+          rc=$?
+          echo "$rc" > build/bounds/javascript.exit
+          cat build/bounds/javascript.log
+          if [ "$rc" -ne 0 ]; then echo "JS_YEAR_BOUNDARY_CANDIDATE_BLOCKED exit=$rc"; fi
+          exit 0
+      - name: Compare both source-derived candidates and enforce basic constraints
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('build/bounds')
+          result={'calculation_day':'-15055671','year':'5000','status':'BLOCKED',
+                  'independent_boundary_oracle_proven':False,
+                  'verified_whole_year_comparisons':0,'soak_started':False}
+          codes={x:int((root/(x+'.exit')).read_text()) for x in ('python','javascript')}
+          result['native_exit_codes']=codes
+          names=['calculation_day','year','open_gate_index','close_gate_index',
+                 'open_gate_day','close_gate_day','first_target_day','last_target_day']
+          if all(v==0 for v in codes.values()) and all((root/(x+'.json')).exists() for x in codes):
+              a=json.loads((root/'python.json').read_text())
+              b=json.loads((root/'javascript.json').read_text())
+              same=all(a[k]==b[k] for k in names)
+              result['raw_fields_match']=same
+              result['python_candidate']={k:a[k] for k in names}
+              result['javascript_candidate']={k:b[k] for k in names}
+              if same:
+                  o,cl=int(a['open_gate_day']),int(a['close_gate_day'])
+                  oi,ci=int(a['open_gate_index']),int(a['close_gate_index'])
+                  c=int(a['calculation_day'])
+                  if 252<=cl-o<=5778 and ci-oi>=6 and o<c<=cl and int(a['first_target_day'])==o+1:
+                      result['status']='TWO_NATIVE_BOUNDARY_CANDIDATES_AGREE_NOT_INDEPENDENT'
+                      frozen={k:a[k] for k in names}
+                      raw=(json.dumps(frozen,sort_keys=True,separators=(',',':'))+'\n').encode()
+                      result['candidate_receipt_sha256']=hashlib.sha256(raw).hexdigest()
+                  else:
+                      result['status']='INVALID_CANDIDATE_INTERVAL'
+              else: result['status']='BOUNDARY_CANDIDATE_MISMATCH_STOP'
+          (root/'candidate-verdict.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print('YEAR5000_CANDIDATE_VERDICT='+json.dumps(result,sort_keys=True))
+          if result['status']!='TWO_NATIVE_BOUNDARY_CANDIDATES_AGREE_NOT_INDEPENDENT':
+              raise SystemExit(1)
+          PY
+      - name: Preserve pinned raw candidate reports even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-canonical-year5000-two-source-candidate-v021
+          path: build/bounds/
+          if-no-files-found: warn
+          retention-days: 30
