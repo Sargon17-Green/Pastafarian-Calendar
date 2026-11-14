@@ -43,6 +43,26 @@ public final class NativeCombinatoricsProbe {
         }
         System.out.println("MONTH_WAYS_4244_45\t" + rawLimbs(count.invoke(engine,4244,45)));
 
+        Method multiplyFast = arithmeticKind.getMethod("כפל־חוליות",big,big);
+        Method multiplyOld = arithmeticKind.getMethod("כפל",big,big);
+        Method small = arithmeticKind.getMethod("הקם־מספר",int.class);
+        Object other = binomial.invoke(engine,3000,35);
+        Object negative = small.invoke(arithmetic,-123456789);
+        Object one = small.invoke(arithmetic,1);
+        Object zero = small.invoke(arithmetic,0);
+        String[] productNames = {"MUL_LARGE","MUL_SQUARE","MUL_NEGATIVE","MUL_UNIT","MUL_ZERO"};
+        Object[][] productArgs = {{largeBinomial,other},{largeBinomial,largeBinomial},
+            {negative,largeBinomial},{one,largeBinomial},{zero,largeBinomial}};
+        for (int i=0;i<productNames.length;i++) {
+            Object left=productArgs[i][0];
+            Object right=productArgs[i][1];
+            String current=rawLimbs(multiplyFast.invoke(arithmetic,left,right));
+            String historical=rawLimbs(multiplyOld.invoke(arithmetic,left,right));
+            if(!current.equals(historical)) throw new AssertionError("MUL_LEGACY_DIFFERENCE " + productNames[i]);
+            System.out.println(productNames[i] + "\t" + current);
+        }
+
+
         Object monthLengths = unrank.invoke(engine, 4244, 45, rankOne);
         Method length = monthLengths.getClass().getMethod("קח־מנין");
         Method item = monthLengths.getClass().getMethod("קח", int.class);

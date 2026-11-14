@@ -41,7 +41,7 @@ def main():
         result[name] = value
     binomials = [(50,20), (4300,40), (1000,33), (5000,45)]
     divisors = [1,2,3,7,97,100,101,123,1001]
-    expected_keys = {"MONTH_WAYS_4244_45", "MONTH_UNRANK_FIRST_4244_45", "WEAVE_4_4", "WEAVE_4_5_6", "WEAVE_4_5_6_4"}
+    expected_keys = {"MONTH_WAYS_4244_45", "MONTH_UNRANK_FIRST_4244_45", "WEAVE_4_4", "WEAVE_4_5_6", "WEAVE_4_5_6_4", "MUL_LARGE", "MUL_SQUARE", "MUL_NEGATIVE", "MUL_UNIT", "MUL_ZERO"}
     expected_keys.update(f"BINOM_{n}_{k}" for n,k in binomials)
     expected_keys.update(f"QUOTIENT_5000_45_BY_{d}" for d in divisors)
     assert set(result) == expected_keys, (set(result), expected_keys)
@@ -51,6 +51,13 @@ def main():
     for divisor in divisors:
         assert parse_bigint(result[f"QUOTIENT_5000_45_BY_{divisor}"]) == big_number // divisor, divisor
     assert parse_bigint(result["MONTH_WAYS_4244_45"]) == month_ways(4244, 45)
+    values = {"MUL_LARGE": math.comb(5000,45)*math.comb(3000,35),
+        "MUL_SQUARE": math.comb(5000,45)**2,
+        "MUL_NEGATIVE": -123456789*math.comb(5000,45),
+        "MUL_UNIT": math.comb(5000,45), "MUL_ZERO": 0}
+    for name,expected in values.items():
+        assert parse_bigint(result[name]) == expected, (name, expected)
+
     # Native historical fixtures of the Codesh-specific constrained weave,
     # deliberately NOT assumed to equal ordinary multinomial coefficients.
     for key,expected in {"WEAVE_4_4":20, "WEAVE_4_5_6":21594, "WEAVE_4_5_6_4":7342209}.items():
@@ -59,7 +66,7 @@ def main():
     assert len(months) == 45, len(months)
     assert sum(months) == 4244, sum(months)
     assert all(4 <= x <= 123 for x in months), months
-    print(f"CODESH_NATIVE_COMBINATORICS_PASS binomialCases=4 smallDivisorCases=9 monthCountCases=1 unrankCases=1 weaveRegressionCases=3 monthCount={len(months)} monthSum={sum(months)}")
+    print(f"CODESH_NATIVE_COMBINATORICS_PASS binomialCases=4 smallDivisorCases=9 monthCountCases=1 unrankCases=1 weaveRegressionCases=3 multiplicationCases=5 monthCount={len(months)} monthSum={sum(months)}")
 
 
 if __name__ == "__main__":
