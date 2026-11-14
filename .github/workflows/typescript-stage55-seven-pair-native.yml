@@ -1,0 +1,54 @@
+name: TypeScript Marathi Stage55 seven-pair Native smoke
+on:
+  push:
+    branches:
+      - 'TypeScript\+मराठी'
+    paths:
+      - 'src/**'
+      - 'test/postStage55NegativeSignedAPI.ts'
+      - 'test/postStage55IndependentRank.ts'
+      - 'test/normativeOracle.ts'
+      - 'package.json'
+      - '.github/workflows/typescript-stage55-seven-pair-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seven-pair-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify checked-out source and Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa/native-logs
+          git rev-parse HEAD | tee qa/native-logs/HEAD.txt
+          node --version | tee qa/native-logs/node-version.txt
+          test -f src/postStage55FinalDate.ts
+          test -f test/postStage55NegativeSignedAPI.ts
+          test -f test/postStage55IndependentRank.ts
+          test -f test/normativeOracle.ts
+      - name: Bounded Native public API - seven signed pairs
+        shell: bash
+        env:
+          NODE_OPTIONS: --max-old-space-size=5120
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=15s 1800s \
+            node --experimental-strip-types test/postStage55NegativeSignedAPI.ts \
+            2>&1 | tee qa/native-logs/seven-pair-native.log
+      - name: Preserve witness and failure log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typescript-stage55-seven-pair-native-evidence
+          path: qa/native-logs/
+          if-no-files-found: warn
+          retention-days: 30
