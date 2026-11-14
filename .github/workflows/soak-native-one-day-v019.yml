@@ -71,9 +71,11 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          ulimit -v 1572864
+          # Hosted CI only: bounded second-step memory probe after 256MiB JS heap OOM.
+          # This is not a Windows admission and grants no local machine capacity.
+          ulimit -v 3145728
           set +e
-          nice -n 19 timeout --signal=TERM --kill-after=4s 150s node --max-old-space-size=256 - <<'JS' > build/native/javascript.log 2>&1
+          nice -n 19 timeout --signal=TERM --kill-after=4s 150s node --max-old-space-size=768 - <<'JS' > build/native/javascript.log 2>&1
           'use strict';
           const fs=require('node:fs'), p=require('node:path'), base=p.resolve('build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e');
           const original=require(p.join(base,'tests/normative-reference.js'));
