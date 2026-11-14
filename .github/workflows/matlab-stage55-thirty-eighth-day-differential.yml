@@ -32,7 +32,7 @@ jobs:
           path: logs
       - name: Verify pinned AFTER37
         run: |
-          echo '8d53c9b5d968d0be353e7e57af829d49bafe51028fdd1a2b25f87e07423d645b  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json' | sha256sum -c -
+          echo '8d53c9b5d968d0be353e7e57af829d49bafe51028fdd1a2b25f87e07423d645b  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json' | sha256sum -c -
       - name: Preflight AFTER38 independent witness wiring
         shell: bash
         run: |
@@ -53,8 +53,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/stage55_after38_interval_five_fields.py \
-            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_38.json \
             tests/fixtures/stage55_year5000_appendix_a_metadata.json \
             | tee logs/STAGE55_THIRTY_EIGHTH_PYTHON.log
           grep '^STAGE55_THIRTY_EIGHTH_ROW ' logs/STAGE55_THIRTY_EIGHTH_PYTHON.log > logs/STAGE55_THIRTY_EIGHTH_PYTHON_ROW.txt
@@ -65,7 +65,7 @@ jobs:
           expected="STAGE55_THIRTY_EIGHTH_ROW POSITION=38 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=38 MONTH_INDEX=1 MONTH_DAY=2"
           grep -Fqx "$expected" logs/STAGE55_THIRTY_EIGHTH_NATIVE_ROW.txt
           grep -Fqx "$expected" logs/STAGE55_THIRTY_EIGHTH_PYTHON_ROW.txt
-          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json | tee logs/STAGE55_THIRTY_EIGHTH_DIGEST.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_38.json | tee logs/STAGE55_THIRTY_EIGHTH_DIGEST.txt
           echo 'STAGE55_THIRTY_EIGHTH_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
       - name: Preserve PASS or FAIL artifacts
         if: always()
@@ -73,8 +73,8 @@ jobs:
         with:
           name: stage55-thirty-eighth-day-differential
           path: |
-            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_38.json
             logs/STAGE55_THIRTY_EIGHTH_NATIVE.log
             logs/STAGE55_THIRTY_EIGHTH_PYTHON.log
             logs/STAGE55_THIRTY_EIGHTH_PYTHON_ROW.txt

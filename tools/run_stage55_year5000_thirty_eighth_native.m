@@ -9,7 +9,7 @@ cleanupDiary=onCleanup(@()diary('off')); %#ok<NASGU>
 f=jsondecode(fileread(fullfile(root,'tests','fixtures','stage55_year5000_appendix_a_metadata.json')));
 L=double(f.month_lengths(:).');
 assert(f.year==5000 && numel(L)==45 && sum(L)==4244 && f.first_day==-15057702,'Stage55:Fixture');
-[original,before]=pastafari.restoreExactWeaveCursorJson(fileread(fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_36.json')));
+[original,before]=pastafari.restoreExactWeaveCursorJson(fileread(fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json')));
 expected=L; prefix=[1 2 3 4 5 6 7 4 8 9 10 9 11 6 12 13 14 15 16 16 17 7 18 2 19 20 19 5 21 22 9 1 7 23 3 8 23]; for k=prefix, expected(k)=expected(k)-1; end; one=pastafari.BigInt(1);
 assert(isequal(original,L) && isequal(before.remaining,expected) && before.stepsComputed==37 && ...
  before.openedUpTo==23 && before.closedUpTo==0 && ~before.done && sum(before.remaining)==4207 && ...
@@ -30,7 +30,7 @@ recountSeconds=toc(t);
 assert(recount==after.count && after.count<=before.count,'Stage55:After37Recount');
 after.stepsComputed=38;
 body=pastafari.serializeExactWeaveCursorJson(original,after);
-dest=fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_37.json');
+dest=fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_38.json');
 [fid,msg]=fopen(dest,'w','n','UTF-8');
 assert(fid>=0,'Stage55:After37Write',msg);
 closeGuard=onCleanup(@()fclose(fid)); %#ok<NASGU>
@@ -44,10 +44,10 @@ ctx=pastafari.MonsterContext(pastafari.BigInt(f.calculation_day),day);
 [ctx,monthId,monthDay]=pastafari.MonthDayCompatibilityRoute.call(ctx,weave,yearOpen,day);
 occ=sum(weave==letter); names=double(f.month_name_indices(:).');
 catalog=pastafari.sourceLanguageCatalog();
-fields={pastafari.BigInt(5000),catalog.cutlets(15).text,pastafari.BigInt(37), ...
+fields={pastafari.BigInt(5000),catalog.cutlets(15).text,pastafari.BigInt(38), ...
  catalog.months(names(letter)).text,monthDay};
 assert(numel(fields)==5 && names(letter)==1 && fields{1}==pastafari.BigInt(5000) && strcmp(fields{2},'Akad') && ...
- fields{3}==pastafari.BigInt(37) && strcmp(fields{4},catalog.months(names(letter)).text) && ...
+ fields{3}==pastafari.BigInt(38) && strcmp(fields{4},catalog.months(names(letter)).text) && ...
  fields{5}==pastafari.BigInt(occ) && monthId==letter && ...
  any(strcmp(ctx.branchTrace,'PATCH_25_OCCURRENCE_COUNT')),'Stage55:FiveFields');
 assert(position==after.stepsComputed && position==38,'Stage55:RowPosition');
