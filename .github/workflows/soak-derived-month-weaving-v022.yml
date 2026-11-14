@@ -1,0 +1,161 @@
+name: Soak v022 derived JavaScript polynomial-space pilot (NOT independent)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-derived-month-weaving-v022.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  derived-pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independent small exhaustive unranking + bounded 3399-day synthetic test
+        run: |
+          set -euo pipefail
+          mkdir -p build/derived-native
+          /usr/bin/time -v -o build/derived-native/exhaustive-resources.txt \
+            timeout --signal=TERM --kill-after=5s 80s node --max-old-space-size=256 \
+            soak/tests/test_optimized_month_weaving_v022.cjs | tee build/derived-native/exhaustive.jsonl
+      - name: Fetch exact pinned originals and verify SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/pinned/tests build/pinned/src
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js \
+            -o build/pinned/tests/normative-reference.js
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/source-language-catalog.js \
+            -o build/pinned/src/source-language-catalog.js
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py \
+            -o build/pinned/tests/normative_reference.py
+          printf '%s\n' \
+            "8276e428c3a392ab39429331cdfdd7b80a8b1041efb4c9d806a6c141630a9fa5  build/pinned/tests/normative-reference.js" \
+            "211333bff832e597e5388a789c811ae8fffb55780484f28b60b097410c786699  build/pinned/src/source-language-catalog.js" \
+            "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  build/pinned/tests/normative_reference.py" \
+            | tee build/derived-native/locked-sha256.txt | sha256sum -c -
+      - name: Test exact unchanged JS original against small-family exhaustive oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          PINNED_JS_REFERENCE="$GITHUB_WORKSPACE/build/pinned/tests/normative-reference.js" \
+            timeout --signal=TERM --kill-after=5s 90s node --max-old-space-size=384 \
+            soak/tests/test_optimized_month_weaving_v022.cjs | tee build/derived-native/unchanged-js-small-cases.jsonl
+      - name: Create separately identified hash-guarded derived JS reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          node soak/experiments/derive_js_month_weaving_v022.cjs \
+            build/pinned/tests/normative-reference.js \
+            build/pinned/src/source-language-catalog.js \
+            soak/experiments/optimized_month_weaving_v022.cjs \
+            build/experimental-derivative \
+            | tee build/derived-native/derivation.jsonl
+          node --check build/experimental-derivative/tests/normative-reference.js
+      - name: Pinned Python F(c,t) — one real native calculation
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          /usr/bin/time -v -o build/derived-native/python-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=4s 120s python3 -B - \
+            > build/derived-native/python.log 2>&1 <<'PY'
+          import importlib.util,json,pathlib,sys
+          p=pathlib.Path("build/pinned/tests/normative_reference.py")
+          spec=importlib.util.spec_from_file_location("frozen_native_py_for_derived_comparison",p)
+          mod=importlib.util.module_from_spec(spec);sys.modules[spec.name]=mod;spec.loader.exec_module(mod)
+          c=t=-15055671
+          cal=mod.NormativeCalendar()
+          d=cal.calendar_date_ids(c,t)
+          out={"calculation_day":str(c),"target_day":str(t),
+              "year":str(d.year_number),"cutlet_index":d.cutlet_name_index,
+              "day_in_cutlet":d.day_in_cutlet,"month_index":d.month_name_index,
+              "day_in_month":d.day_in_month,
+              "cutlet_name_raw":mod.FROZEN_CUTLET_NAMES[d.cutlet_name_index-1],
+              "month_name_raw":mod.FROZEN_MONTH_NAMES[d.month_name_index-1]}
+          pathlib.Path("build/derived-native/python.json").write_text(json.dumps(out,sort_keys=True,ensure_ascii=False,indent=2)+"\n",encoding="utf8")
+          print("PYTHON_PINNED_NATIVE_RETURNED "+json.dumps(out,sort_keys=True),flush=True)
+          PY
+          rc=$?
+          echo "$rc" > build/derived-native/python.exit
+          tail -40 build/derived-native/python.log
+          exit 0
+      - name: Derived JS F(c,t) — one real calculation, bounded, NOT an original
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 3145728
+          set +e
+          /usr/bin/time -v -o build/derived-native/javascript-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=4s 150s node --max-old-space-size=512 - \
+            > build/derived-native/javascript.log 2>&1 <<'JS'
+          'use strict';
+          const fs=require('node:fs'),p=require('node:path');
+          const base=p.resolve('build/experimental-derivative');
+          const mod=require(p.join(base,'tests/normative-reference.js'));
+          const cat=require(p.join(base,'src/source-language-catalog.js')).SourceLanguageCatalog;
+          const c=-15055671n,t=-15055671n;
+          const result=mod.calendarDate(c,t);
+          const idx=(collection,name)=>{
+            const row=collection.find(x=>x.text===name);
+            if(!row)throw Error('name not in frozen original catalog');
+            return row.canonicalIndex;
+          };
+          const out={calculation_day:c.toString(),target_day:t.toString(),year:result[0].toString(),
+            cutlet_index:idx(cat.cutlets,result[1]),day_in_cutlet:Number(result[2]),
+            month_index:idx(cat.months,result[3]),day_in_month:Number(result[4]),
+            cutlet_name_raw:result[1],month_name_raw:result[3]};
+          fs.writeFileSync('build/derived-native/javascript.json',JSON.stringify(out,null,2)+'\n',{flag:'wx'});
+          console.log('JS_DERIVED_NOT_INDEPENDENT_NATIVE_RETURNED '+JSON.stringify(out));
+          JS
+          rc=$?
+          echo "$rc" > build/derived-native/javascript.exit
+          tail -40 build/derived-native/javascript.log
+          exit 0
+      - name: Compare all five source-derived date fields, without certifying independence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path("build/derived-native")
+          names=("calculation_day","target_day","year","cutlet_index","day_in_cutlet","month_index","day_in_month")
+          codes={key:int((root/(key+".exit")).read_text()) for key in ("python","javascript")}
+          verdict={
+            "schema":"PASTAFARI_DERIVED_JS_SINGLE_DAY_DIAGNOSTIC/1",
+            "status":"BLOCKED_MISSING_DERIVED_NATIVE",
+            "original_js_full_date_was_executed":False,
+            "js_is_independent_of_python":False,
+            "verified_full_year_comparisons":0,"soak_started":False,
+            "native_exit_codes":codes,
+          }
+          if all(x==0 for x in codes.values()):
+            a=json.loads((root/"python.json").read_text(encoding="utf8"))
+            b=json.loads((root/"javascript.json").read_text(encoding="utf8"))
+            same=all(a[k]==b[k] for k in names)
+            verdict["exact_5_fields_and_input_match"]=same
+            verdict["status"]="DERIVED_SINGLE_DAY_MATCH_NOT_INDEPENDENT" if same else "DERIVED_SINGLE_DAY_MISMATCH_STOP"
+            verdict["observed_fields"]={x:{"python":a[x],"derived_js":b[x]} for x in names}
+            verdict["native_raw_sha256"]={name:hashlib.sha256((root/(name+".json")).read_bytes()).hexdigest() for name in ("python","javascript")}
+          (root/"verdict.json").write_text(json.dumps(verdict,indent=2,sort_keys=True)+"\n",encoding="utf8")
+          print("DERIVED_JS_SINGLE_DAY_VERDICT="+json.dumps(verdict,sort_keys=True),flush=True)
+          if verdict["status"]!="DERIVED_SINGLE_DAY_MATCH_NOT_INDEPENDENT":
+            raise SystemExit(1)
+          PY
+      - name: Preserve failure and success evidence — no original source mutation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: derived-polynomial-js-one-day-experimental-v022
+          path: |
+            build/derived-native/
+            build/experimental-derivative/PROVENANCE.json
+          if-no-files-found: warn
+          retention-days: 30
