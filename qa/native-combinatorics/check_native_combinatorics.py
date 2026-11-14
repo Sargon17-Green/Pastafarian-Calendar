@@ -15,6 +15,8 @@ def parse_bigint(row):
     assert all(0 <= x < BASE for x in limbs), limbs
     assert sign in ("0", "1", "2"), sign  # Codesh: 0=zero, 1=positive, 2=negative
     magnitude = sum(x * BASE**i for i, x in enumerate(limbs))
+    assert count == 1 or limbs[-1] != 0, ("noncanonical leading zero", count, limbs[-1])
+    assert (magnitude == 0) == (sign == "0"), ("noncanonical sign",sign,magnitude)
     return 0 if sign == "0" else (1 if sign == "1" else -1) * magnitude
 
 
