@@ -2,7 +2,7 @@ name: Codesh native 5-field compilation and smoke
 on:
   push:
     branches:
-      - 'Codesh+𐤉𐤄𐤅𐤃𐤉𐤕'
+      - 'Codesh\+𐤉𐤄𐤅𐤃𐤉𐤕'
     paths:
       - 'מקור/דרוג־שזירה־טהור.אמן'
       - 'מקור/תאריך־שלם־טהור.אמן'
