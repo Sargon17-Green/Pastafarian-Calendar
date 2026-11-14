@@ -1,0 +1,48 @@
+name: V Amharic Stage31 numeric full-date Native smoke
+
+on:
+  push:
+    branches:
+      - 'V\+አማርኛ'
+    paths:
+      - 'pastafari/**'
+      - '.github/workflows/v-amharic-patch15-native-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  foundation-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up native V 0.5.2 compiler
+        uses: vlang/setup-v@v1.7
+        with:
+          version: '0.5.2'
+      - name: Record exact toolchain and source SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa/native-v
+          git rev-parse HEAD | tee qa/native-v/head.txt
+          v version | tee qa/native-v/v-version.txt
+          test -f pastafari/patch15_numeric_date_native_smoke_test.v
+          test -f pastafari/patch15_numeric_date.v
+      - name: Call actual five-field date API for foundation pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=10s 600s \
+            v test pastafari/patch15_numeric_date_native_smoke_test.v \
+            2>&1 | tee qa/native-v/patch15-foundation.log
+      - name: Preserve PASS or failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v-amharic-patch15-native-smoke-evidence
+          path: qa/native-v/
+          if-no-files-found: warn
+          retention-days: 30
