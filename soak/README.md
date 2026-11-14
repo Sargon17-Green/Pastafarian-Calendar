@@ -40,3 +40,15 @@ The initial offline prototype contains:
 - Unit tests for year completeness, mismatch halt, process caps and no-kill classification.
 
 **This prototype is being validated outside the repository before production activation.** Its tests on Linux do not count as verified native Windows operation. This README and the JSON schema below do not authorize starting the heavy soak or modifying `main`.
+
+
+## Verified Windows bridge readiness — 2026-11-14
+
+Three independent **read-only / no-converter** OTR single-Python preflights executed on an authorized Windows machine and returned Gmail logs:
+1. `v001 PREFLIGHT_ONLY_PASS`: established the isolated owned evidence directory and verified the first ZIP receipt.
+2. `v002 CAPABILITY_READ_ONLY_PASS`: checked available resources and compiler discovery. The measured machine was memory-constrained at the observation; future worker admission must be dynamic and must **not** assume two heavy workers fit.
+3. `v003 CONSOLE_PROBE_PASS`: a console window was visible despite stdout redirection, and writing exactly **89 of 89** diagnostic characters to `CONOUT$` succeeded. A sustained status redraw is a separate uncompleted gate.
+
+Prototype validator + **simulation-only** scheduler: **16/16 offline Python unit tests PASS**, no actual native Windows child-worker supervision tested. The fully hashed archive `pastafarian_soak_readiness_prototype_v002_20261114.zip` was saved to the ChatGPT Library `/Pastafarian-Soak-Readiness/`, SHA-256 `f015086d1bca38665a730c95655882ead81ab33e5159007dca31d0338205bad9`. The archive and local one-shot evidence **do not** certify any original converter or entire year.
+
+**Next readiness gate:** actual Windows two-worker supervisory process, no-kill dynamic slow path, verified memory/CPU admission, mock mismatch/crash/recovery scenario, and independent boundary+adapter certification before real-engine full-year pilot. Do not modify `main`; do not launch 10,000-year soak from this README.
