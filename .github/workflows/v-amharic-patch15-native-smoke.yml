@@ -18,10 +18,21 @@ jobs:
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
-      - name: Set up native V 0.5.2 compiler
-        uses: vlang/setup-v@v1.7
-        with:
-          version: '0.5.2'
+      - name: Install pinned prebuilt V 0.5.2 for Linux x86_64
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/v-release"
+          curl --fail --location --retry 3 --max-time 180 \
+            https://github.com/vlang/v/releases/download/0.5.2/v_linux.zip \
+            --output "$RUNNER_TEMP/v-release/v_linux.zip"
+          echo '86caf9e70c3342d48ef19eb4f6c47b709f18c90ae86255520d5c29df6b482e23  '"$RUNNER_TEMP"'/v-release/v_linux.zip' | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/v-release/v_linux.zip" -d "$RUNNER_TEMP/v-release"
+          vbin=$(find "$RUNNER_TEMP/v-release" -type f -name v -print -quit)
+          test -n "$vbin"
+          chmod +x "$vbin"
+          "$vbin" version
+          echo "$(dirname "$vbin")" >> "$GITHUB_PATH"
       - name: Record exact toolchain and source SHA
         shell: bash
         run: |
