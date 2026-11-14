@@ -34,12 +34,24 @@ A separate hosted-CI native run evaluates one ordered input pair `F(c,t)` with `
 - [Run 43643920160](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43643920160): original Python returned year 5000; cutlet 10, ordinal 503; month 20, ordinal 56, in 14.108s. JavaScript failed with a V8 heap OOM at a **256 MiB configured heap limit** (exit 134). No pair verdict.
 - [Run 43644201078](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43644201078): source fetch connection reset before either native call; NOT an engine failure.
 - [Run 43644278874](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43644278874): original Python again produced the same five fields (14.151s); JavaScript failed with V8 heap OOM at **768 MiB configured heap limit** (exit 134). No pair verdict.
-- **Final bounded hosted-CI diagnostic is configured** at commit `44bbee23387fdadbfcd158cccd504e3e652de0c8`: JavaScript heap 1.5 GiB, process virtual memory 5 GiB, hard 150s wall-time, low OS priority, capture GNU time maximum RSS; await actual result and inspect raw evidence. No local Windows permission is implied by this probe.
+- [Run 43644856799](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43644856799): the final bounded CI test at **1.5 GiB Node heap** still failed with a native V8 heap OOM (exit 134). GNU time measured **2,266,308 KiB (~2.16 GiB) peak RSS** before process abort. Python again returned the same five fields (9.917s). No pair result and no authorization to increase Windows resource usage. Do not automatically increase JavaScript's memory limit further.
 
 ## Strict inference and next steps
 
 1. Do not run JavaScript native on the current Windows system while the resource gate is blocked. The 2 GiB gate is a chosen conservative threshold, not a proved minimum.
-2. Inspect hosted-CI bounded probe's actual Native result/RSS and decide whether original JS is feasible on a sufficiently idle machine or should remain `BLOCKED_MEMORY`.
+2. Original JS full-date reference remains `BLOCKED_MEMORY` at the bounded limits tested. Review memory complexity or use an explicitly non-original optimized alternative, without pretending it is the unchanged original for this soak.
 3. Continue independently checking `B(c,Y)` whole-year boundaries and all original engine/wrapper classifications.
 4. Only after both original converters return actual native output under **verified** local process/job/RAM/disk admission should the `v017` transport and `v018` raw-linkage gate be exercised on Windows.
 5. No completed whole-year comparisons; no 10,000-year soak; `main` remains unchanged.
+
+## Original native year5000 candidate concordance (not independently certified)
+
+[CI 43645077409](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43645077409) computed the year-5000 boundaries directly from both pinned original reference sources **without constructing month weaving**. Both returned:
+
+- Calculation day: `-15055671`.
+- Opening gate: index `-4`, day `-15057703`.
+- Closing gate: index `4`, day `-15053459`.
+- Candidate year's inclusive target interval: `[-15057702,-15053459]` — **4244 days**.
+- Frozen candidate SHA-256: `b464d81b2d02cf6270092ee887f4e0f6d3668b0de67a64c4423e358984cfd276`.
+
+The candidate is recorded in `soak/control/foundation_year5000_two_native_candidate_v021.json`, with explicit negative independent-oracle and soak-admission flags. `soak/tests/test_year_boundary_candidate_v021.py` checks arithmetic consistency and exactly re-derives the candidate receipt SHA. **Matching two source-derived boundaries does not yet establish a source-independent canonical proof or certify a whole-year transcript.**
