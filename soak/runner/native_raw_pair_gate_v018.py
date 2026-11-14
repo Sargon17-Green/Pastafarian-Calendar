@@ -59,6 +59,8 @@ def parse_json_line(data: bytes):
         fail("raw/normalized JSONL record must end with exactly one newline")
     try:
         return json.loads(data.decode("utf-8"), object_pairs_hook=unique_pairs)
+    except EvidenceError:
+        raise
     except (UnicodeError, ValueError, TypeError) as exc:
         raise EvidenceError("malformed UTF-8 JSONL record") from exc
 
