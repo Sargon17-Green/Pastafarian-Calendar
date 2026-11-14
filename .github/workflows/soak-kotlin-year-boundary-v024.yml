@@ -1,0 +1,148 @@
+name: Soak v024 three original year5000 candidate boundary paths (not certified)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-kotlin-year-boundary-v024.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-kotlin-year-5000:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          path: original-kotlin
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Pin source identity and canonical candidate contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git -C original-kotlin rev-parse HEAD)" = "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          d=json.loads(pathlib.Path('coordinator/soak/control/foundation_year5000_two_native_candidate_v021.json').read_text(encoding='utf8'))
+          assert d['status']=='TWO_NATIVE_BOUNDARY_CANDIDATES_AGREE_NOT_INDEPENDENT'
+          assert d['independent_boundary_oracle_proven'] is False
+          names=('calculation_day','year','open_gate_index','close_gate_index',
+                 'open_gate_day','close_gate_day','first_target_day','last_target_day')
+          line=(json.dumps({k:d[k] for k in names},sort_keys=True,separators=(',',':'))+'\n').encode('utf8')
+          assert hashlib.sha256(line).hexdigest()=='b464d81b2d02cf6270092ee887f4e0f6d3668b0de67a64c4423e358984cfd276'
+          print('TWO_REFERENCE_BOUNDARY_CANDIDATE_IDENTITY_PASS independence_proven=false')
+          PY
+      - name: Obtain Kotlin 1.9.0 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged Kotlin production and read-only year gate probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-compile-resources.txt \
+            timeout --signal=TERM --kill-after=5s 180s kotlinc \
+            original-kotlin/src/main/kotlin/pastafari/*.kt \
+            -include-runtime -d evidence/original-production.jar
+          cat > evidence/PinnedYear5000Probe.kt <<'KOTLIN'
+          package pastafari
+          object PinnedYear5000Probe {
+            @JvmStatic fun main(args: Array<String>) {
+              require(args.isEmpty())
+              val c=ExactInt.of(-15055671L)
+              val y=ProductionYearNavigator().year5000(c)
+              val first=y.openDay+1L
+              val row=listOf(
+                c.toString(),y.number.toString(),
+                y.openGateIndex.toString(),y.closeGateIndex.toString(),
+                y.openDay.toString(),y.closeDay.toString(),
+                first.toString(),y.closeDay.toString()
+              )
+              println(row.joinToString("\t"))
+            }
+          }
+          KOTLIN
+          kotlinc -classpath evidence/original-production.jar \
+            evidence/PinnedYear5000Probe.kt -include-runtime -d evidence/read-only-year-probe.jar
+          sha256sum evidence/original-production.jar evidence/read-only-year-probe.jar > evidence/build-hashes.sha256
+      - name: Kotlin original production year5000(c) once with bounded resources
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 3145728
+          set +e
+          /usr/bin/time -v -o evidence/year5000-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=4s 90s \
+            java -Xmx512m -cp evidence/read-only-year-probe.jar:evidence/original-production.jar \
+            pastafari.PinnedYear5000Probe \
+            > evidence/kotlin-year-boundaries.tsv 2> evidence/year5000-error.log
+          rc=$?
+          echo "$rc" > evidence/kotlin.exit
+          cat evidence/kotlin-year-boundaries.tsv
+          tail -15 evidence/year5000-error.log
+          exit 0
+      - name: Compare exact Kotlin native year gates to frozen Python and JS candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib,re,hashlib
+          evidence=pathlib.Path('evidence')
+          ref=json.loads(pathlib.Path('coordinator/soak/control/foundation_year5000_two_native_candidate_v021.json').read_text(encoding='utf8'))
+          names=('calculation_day','year','open_gate_index','close_gate_index',
+                 'open_gate_day','close_gate_day','first_target_day','last_target_day')
+          rc=int((evidence/'kotlin.exit').read_text().strip())
+          lines=(evidence/'kotlin-year-boundaries.tsv').read_text(encoding='utf8').splitlines()
+          r={'schema':'PASTAFARI_THREE_SOURCE_YEAR5000_CANDIDATE_V024/1',
+             'status':'BLOCKED_INCOMPLETE_KOTLIN_BOUNDARY',
+             'kotlin_original_commit':'0c703446d8a3b7435698bd16402ac5fa30e461c9',
+             'reference_candidate_sha256':ref['candidate_receipt_sha256'],
+             'native_exit_code':rc,
+             'independent_canonical_oracle_certified':False,
+             'three_source_algorithmic_independence_certified':False,
+             'verified_whole_year_comparisons':0,
+             'soak_started':False}
+          if rc==0 and len(lines)==1:
+              fields=lines[0].split('\t')
+              if len(fields)==len(names) and all(re.fullmatch(r'(?:0|-?[1-9][0-9]*)',v) for v in fields):
+                  observed=dict(zip(names,fields))
+                  r['kotlin_observed']=observed
+                  r['first_mismatch']=next((k for k in names if observed[k]!=ref[k]),None)
+                  r['status']='THREE_NATIVE_YEAR5000_CANDIDATES_AGREE_NOT_CERTIFIED' if r['first_mismatch'] is None else 'THIRD_SOURCE_BOUNDARY_MISMATCH_STOP'
+                  r['kotlin_native_evidence_sha256']=hashlib.sha256((evidence/'kotlin-year-boundaries.tsv').read_bytes()).hexdigest()
+          (evidence/'boundary-verdict.json').write_text(json.dumps(r,indent=2,sort_keys=True)+'\n',encoding='utf8')
+          print('KOTLIN_THIRD_BOUNDARY_VERDICT='+json.dumps(r,sort_keys=True),flush=True)
+          if r['status']!='THREE_NATIVE_YEAR5000_CANDIDATES_AGREE_NOT_CERTIFIED':
+              raise SystemExit(1)
+          PY
+      - name: Preserve candidate evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-third-original-native-boundary-candidate-v024
+          path: |
+            evidence/*.json
+            evidence/*.tsv
+            evidence/*.txt
+            evidence/*.log
+            evidence/*.sha256
+            evidence/*.kt
+          if-no-files-found: warn
+          retention-days: 30
