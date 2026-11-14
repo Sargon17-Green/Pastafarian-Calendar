@@ -15,8 +15,6 @@
     ויתם:
 
 
-    // Exact base-10000 long division for a small, positive divisor.
-    // Other divisors retain the original arbitrary-precision implementation.
     ויהי מעשה ושמו חלק־בשלם־מהיר נגלה היה ויקח מספר־אין־חקר ושמו מונה ויקח שלם ושמו מכנה וישב מספר־אין־חקר ויאמר:
         ויהי מספר־אין־חקר ושמו תשובה ויהי ויברא מספר־אין־חקר:
         ויהי שלם ושמו מנין־אברים ויהי ויעש מונה ל־קח־מנין־אברים:
