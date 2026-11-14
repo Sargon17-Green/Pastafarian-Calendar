@@ -74,5 +74,6 @@ jobs:
           path: |
             build/CODESH_COMPILER.stdout.log
             build/CODESH_COMPILER.stderr.log
+            build/codesh-native-five-fields.jar
             build/foundation.json
           if-no-files-found: ignore
