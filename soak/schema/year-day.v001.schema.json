@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pastafarian:soak:year-day:v001",
+  "title": "One engine's result for one target day under a fixed calculation day",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "calculation_day",
+    "target_day",
+    "year",
+    "cutlet_index",
+    "day_in_cutlet",
+    "month_index",
+    "day_in_month",
+    "cutlet_name_raw",
+    "month_name_raw",
+    "source_raw_sha256"
+  ],
+  "properties": {
+    "calculation_day": {
+      "type": "string",
+      "pattern": "^(?:0|-?[1-9][0-9]*)$"
+    },
+    "target_day": {
+      "type": "string",
+      "pattern": "^(?:0|-?[1-9][0-9]*)$"
+    },
+    "year": {
+      "type": "string",
+      "pattern": "^(?:0|-?[1-9][0-9]*)$"
+    },
+    "cutlet_index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "day_in_cutlet": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "month_index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "day_in_month": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "cutlet_name_raw": {
+      "type": "string",
+      "minLength": 1
+    },
+    "month_name_raw": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_raw_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "description": "One JSONL row per day. Extra raw output and canonical language-name maps must be preserved as independently hashed evidence. No incomplete years or silent fallback."
+}
