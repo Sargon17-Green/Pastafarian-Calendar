@@ -39,16 +39,23 @@ def main():
         name, value = line.split("\t", 1)
         assert name not in result, f"duplicate key {name}"
         result[name] = value
-    expected_keys = {"BINOM_50_20", "BINOM_4300_40", "MONTH_WAYS_4244_45", "MONTH_UNRANK_FIRST_4244_45"}
+    binomials = [(50,20), (4300,40), (1000,33), (5000,45)]
+    divisors = [1,2,3,7,97,100,101,1001]
+    expected_keys = {"MONTH_WAYS_4244_45", "MONTH_UNRANK_FIRST_4244_45"}
+    expected_keys.update(f"BINOM_{n}_{k}" for n,k in binomials)
+    expected_keys.update(f"QUOTIENT_5000_45_BY_{d}" for d in divisors)
     assert set(result) == expected_keys, (set(result), expected_keys)
-    assert parse_bigint(result["BINOM_50_20"]) == math.comb(50, 20)
-    assert parse_bigint(result["BINOM_4300_40"]) == math.comb(4300, 40)
+    for n,k in binomials:
+        assert parse_bigint(result[f"BINOM_{n}_{k}"]) == math.comb(n,k), (n,k)
+    big_number = math.comb(5000,45)
+    for divisor in divisors:
+        assert parse_bigint(result[f"QUOTIENT_5000_45_BY_{divisor}"]) == big_number // divisor, divisor
     assert parse_bigint(result["MONTH_WAYS_4244_45"]) == month_ways(4244, 45)
     months = [int(x) for x in result["MONTH_UNRANK_FIRST_4244_45"].split(",")]
     assert len(months) == 45, len(months)
     assert sum(months) == 4244, sum(months)
     assert all(4 <= x <= 123 for x in months), months
-    print(f"CODESH_NATIVE_COMBINATORICS_PASS binomialCases=2 monthCountCases=1 unrankCases=1 monthCount={len(months)} monthSum={sum(months)}")
+    print(f"CODESH_NATIVE_COMBINATORICS_PASS binomialCases=4 smallDivisorCases=8 monthCountCases=1 unrankCases=1 monthCount={len(months)} monthSum={sum(months)}")
 
 
 if __name__ == "__main__":

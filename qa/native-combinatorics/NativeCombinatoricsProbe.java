@@ -34,6 +34,13 @@ public final class NativeCombinatoricsProbe {
 
         System.out.println("BINOM_50_20\t" + rawLimbs(binomial.invoke(engine,50,20)));
         System.out.println("BINOM_4300_40\t" + rawLimbs(binomial.invoke(engine,4300,40)));
+        System.out.println("BINOM_1000_33\t" + rawLimbs(binomial.invoke(engine,1000,33)));
+        Object largeBinomial = binomial.invoke(engine,5000,45);
+        System.out.println("BINOM_5000_45\t" + rawLimbs(largeBinomial));
+        Method divide = kind.getMethod("חלק־בשלם־מהיר", big, int.class);
+        for (int divisor : new int[]{1,2,3,7,97,100,101,1001}) {
+            System.out.println("QUOTIENT_5000_45_BY_" + divisor + "\t" + rawLimbs(divide.invoke(engine,largeBinomial,divisor)));
+        }
         System.out.println("MONTH_WAYS_4244_45\t" + rawLimbs(count.invoke(engine,4244,45)));
 
         Object monthLengths = unrank.invoke(engine, 4244, 45, rankOne);

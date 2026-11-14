@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'Codesh\+𐤉𐤄𐤅𐤃𐤉𐤕'
+      - 'perf/codesh-small-divisor-20261114'
     paths:
       - '.github/workflows/codesh-native-combinatorics.yml'
       - 'qa/native-combinatorics/**'
