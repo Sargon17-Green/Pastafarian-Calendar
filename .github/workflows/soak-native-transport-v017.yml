@@ -1,0 +1,46 @@
+name: Soak v017 native transports - no date execution
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/**"
+      - ".github/workflows/soak-native-transport-v017.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pure tests (do not call F)
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s soak/tests -p "test_*.py" -v
+          node soak/tests/test_native_transport_v017.cjs
+      - name: Fetch exactly pinned original source for import/closure checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/pastafari-original-sources"
+          echo "PASTAFARI_SOURCE_ROOT=$root" >> "$GITHUB_ENV"
+          py="$root/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests"
+          jsroot="$root/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e"
+          mkdir -p "$py" "$jsroot/tests" "$jsroot/src"
+          curl -fsSL --max-time 90 "https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py" -o "$py/normative_reference.py"
+          curl -fsSL --max-time 90 "https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js" -o "$jsroot/tests/normative-reference.js"
+          curl -fsSL --max-time 90 "https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/source-language-catalog.js" -o "$jsroot/src/source-language-catalog.js"
+          echo "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  $py/normative_reference.py" | sha256sum -c -
+          echo "8276e428c3a392ab39429331cdfdd7b80a8b1041efb4c9d806a6c141630a9fa5  $jsroot/tests/normative-reference.js" | sha256sum -c -
+          echo "211333bff832e597e5388a789c811ae8fffb55780484f28b60b097410c786699  $jsroot/src/source-language-catalog.js" | sha256sum -c -
+      - name: Pinned native-source import and catalog checks - zero date computations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/runner/pilot_python_transport_v017.py \
+            --sources-root "$PASTAFARI_SOURCE_ROOT" --check-only
+          node soak/runner/pilot_javascript_transport_v017.cjs \
+            --sources-root "$PASTAFARI_SOURCE_ROOT" --check-only
+          echo "PILOT_SOURCE_IMPORT_AND_TRANSPORT_PREFLIGHT_PASS converter_calls=0 soak_started=false"
