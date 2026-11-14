@@ -180,8 +180,11 @@ function main() {
   console.log(JSON.stringify(receipt));
 }
 
-try { main(); }
-catch (error) {
-  console.error('PILOT_TRANSPORT_BLOCKED type=' + error.name + ' message=' + error.message);
-  process.exitCode = 2;
+module.exports = Object.freeze({ exactDay, parseArgs, produce, loadSource });
+if (require.main === module) {
+  try { main(); }
+  catch (error) {
+    console.error('PILOT_TRANSPORT_BLOCKED type=' + error.name + ' message=' + error.message);
+    process.exitCode = 2;
+  }
 }
