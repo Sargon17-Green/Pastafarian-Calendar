@@ -1,0 +1,133 @@
+name: Soak v019 bounded real native one-day CI evidence
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-native-one-day-v019.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-native-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and verify original pinned sources (no branch tracking)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/native build/sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          mkdir -p build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests
+          mkdir -p build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/src
+          PY_SOURCE=build/sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py
+          JS_SOURCE=build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js
+          JS_CATALOG=build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/source-language-catalog.js
+          curl -fsSL --max-time 70 --retry 2 \
+            https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py -o "$PY_SOURCE"
+          curl -fsSL --max-time 70 --retry 2 \
+            https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js -o "$JS_SOURCE"
+          curl -fsSL --max-time 70 --retry 2 \
+            https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/source-language-catalog.js -o "$JS_CATALOG"
+          printf '%s\n' \
+            "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  $PY_SOURCE" \
+            "8276e428c3a392ab39429331cdfdd7b80a8b1041efb4c9d806a6c141630a9fa5  $JS_SOURCE" \
+            "211333bff832e597e5388a789c811ae8fffb55780484f28b60b097410c786699  $JS_CATALOG" |
+            tee build/native/source_lock_receipt.txt | sha256sum -c -
+          echo "PINNED_NATIVE_SOURCE_SHA256_PASS"
+      - name: Python original F(c,t) once — bounded diagnostic, not soak
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          nice -n 19 timeout --signal=TERM --kill-after=4s 150s python3 -B - > build/native/python.log 2>&1 <<'PY'
+          import importlib.util, json, pathlib, sys, time
+          source=pathlib.Path("build/sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py")
+          s=importlib.util.spec_from_file_location("original_pinned_python_reference",source)
+          m=importlib.util.module_from_spec(s);sys.modules[s.name]=m;s.loader.exec_module(m)
+          c=t=-15055671
+          start=time.monotonic()
+          x=m.NormativeCalendar().calendar_date_ids(c,t)
+          native=m.NormativeCalendar # documentary; no extra call
+          out={"native":"REF-41","calculation_day":str(c),"target_day":str(t),
+               "year":str(x.year_number),"cutlet_index":x.cutlet_name_index,
+               "day_in_cutlet":x.day_in_cutlet,"month_index":x.month_name_index,
+               "day_in_month":x.day_in_month,
+               "cutlet_name_raw":m.FROZEN_CUTLET_NAMES[x.cutlet_name_index-1],
+               "month_name_raw":m.FROZEN_MONTH_NAMES[x.month_name_index-1],
+               "duration_seconds":round(time.monotonic()-start,6)}
+          pathlib.Path("build/native/python_original_raw.json").write_text(json.dumps(out,ensure_ascii=False,sort_keys=True,indent=2)+"\n",encoding="utf-8")
+          print("PY_NATIVE_SINGLE_DAY_RETURNED "+json.dumps(out,ensure_ascii=False,sort_keys=True),flush=True)
+          PY
+          rc=$?
+          printf '%s\n' "$rc" > build/native/python.exit
+          cat build/native/python.log
+          if [ "$rc" -eq 124 ]; then echo "PY_NATIVE_SINGLE_DAY_BOUNDED_TIMEOUT_NOT_CERTIFIED"; fi
+          if [ "$rc" -ne 0 ]; then echo "PY_NATIVE_SINGLE_DAY_BLOCKED exit=$rc"; fi
+          exit 0
+      - name: JavaScript original F(c,t) once — bounded diagnostic, not soak
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          nice -n 19 timeout --signal=TERM --kill-after=4s 150s node --max-old-space-size=256 - <<'JS' > build/native/javascript.log 2>&1
+          'use strict';
+          const fs=require('node:fs'), p=require('node:path'), base=p.resolve('build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e');
+          const original=require(p.join(base,'tests/normative-reference.js'));
+          const names=require(p.join(base,'src/source-language-catalog.js')).SourceLanguageCatalog;
+          const c=-15055671n,t=-15055671n;
+          const start=process.hrtime.bigint();
+          const native=original.calendarDate(c,t);
+          const lookup=(entries,name)=>{const e=entries.find(row=>row.text===name);if(!e)throw Error('native name not in frozen original catalog');return e.canonicalIndex;};
+          const out={native:'REF-24',calculation_day:c.toString(),target_day:t.toString(),
+            year:native[0].toString(),cutlet_index:lookup(names.cutlets,native[1]),
+            day_in_cutlet:Number(native[2]),month_index:lookup(names.months,native[3]),
+            day_in_month:Number(native[4]),cutlet_name_raw:native[1],month_name_raw:native[3],
+            duration_seconds:Number(process.hrtime.bigint()-start)/1e9};
+          fs.writeFileSync('build/native/javascript_original_raw.json',JSON.stringify(out,null,2)+'\n');
+          console.log('JS_NATIVE_SINGLE_DAY_RETURNED '+JSON.stringify(out));
+          JS
+          rc=$?
+          printf '%s\n' "$rc" > build/native/javascript.exit
+          cat build/native/javascript.log
+          if [ "$rc" -eq 124 ]; then echo "JS_NATIVE_SINGLE_DAY_BOUNDED_TIMEOUT_NOT_CERTIFIED"; fi
+          if [ "$rc" -ne 0 ]; then echo "JS_NATIVE_SINGLE_DAY_BLOCKED exit=$rc"; fi
+          exit 0
+      - name: Compare only successful complete single-day result files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          folder=pathlib.Path('build/native')
+          status={'scope':'SINGLE_DAY_DIAGNOSTIC_ONLY','whole_year_verified':False,
+                  'verified_whole_year_comparisons':0,'soak_started':False}
+          for key in ('python','javascript'):
+              status[key+'_exit']=int((folder/(key+'.exit')).read_text().strip())
+          files=[folder/'python_original_raw.json', folder/'javascript_original_raw.json']
+          if any(status[k+'_exit'] != 0 for k in ('python','javascript')) or not all(p.is_file() for p in files):
+              status['result']='BLOCKED_INCOMPLETE_NATIVE_ONE_DAY'
+          else:
+              a,b=[json.loads(p.read_text(encoding='utf-8')) for p in files]
+              keys=('calculation_day','target_day','year','cutlet_index',
+                    'day_in_cutlet','month_index','day_in_month')
+              status['first_pair_fields_equal']=all(a[k]==b[k] for k in keys)
+              status['result']='NATIVE_SINGLE_DAY_MATCH_NOT_YEAR' if status['first_pair_fields_equal'] else 'NATIVE_SINGLE_DAY_MISMATCH_STOP'
+              status['field_comparison']={k:{'python':a[k],'javascript':b[k]} for k in keys}
+              status['raw_sha256']={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+          (folder/'verdict.json').write_text(json.dumps(status,sort_keys=True,indent=2)+'\n',encoding='utf-8')
+          print('NATIVE_ONE_DAY_VERDICT='+json.dumps(status,sort_keys=True),flush=True)
+          if status['result']!='NATIVE_SINGLE_DAY_MATCH_NOT_YEAR':
+              raise SystemExit(1)
+          PY
+      - name: Preserve all available evidence even if slow, missing, or mismatched
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pinned-two-reference-single-day-native-ci-evidence-v019
+          path: build/native/
+          if-no-files-found: warn
+          retention-days: 30
