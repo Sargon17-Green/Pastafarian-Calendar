@@ -1,0 +1,71 @@
+{
+  "schema": "PASTAFARI_SOAK_PILOT_SOURCE_LOCK/1",
+  "captured_date": "2026-11-14",
+  "provenance": "Windows v016 Drive-GitHub source download and exact Git blob + SHA256 verification",
+  "evidence_zip_sha256": "041f30b41642f4681b5e4df5c7277e3148571e0acdde2a3a25e3492236e0ff5b",
+  "overall_source_status": "TWO_ENGINE_SOURCES_AND_SYNTAX_PREFLIGHT_PASS",
+  "immutable": true,
+  "syntactic_only": true,
+  "semantics_validated": false,
+  "full_year_run": false,
+  "converter_execution": false,
+  "engines": [
+    {
+      "id": "REF-41",
+      "language": "Python",
+      "natural_language": "Türkçe",
+      "branch": "Python+Türkçe",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+      "entrypoint": "NormativeCalendar().calendar_date_ids(calculation_day,target_day)",
+      "native_named_entrypoint": "NormativeCalendar().calendar_date(calculation_day,target_day)",
+      "native_output": "DateIds{year_number,cutlet_name_index,day_in_cutlet,month_name_index,day_in_month}; canonical indices 1-based",
+      "runtime": "Python 3; Python ints; stdlib only in inspected top-level imports",
+      "sources": [
+        {
+          "path": "tests/normative_reference.py",
+          "git_blob_sha1": "d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53",
+          "sha256": "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378",
+          "bytes": 39749,
+          "syntax_pass": true
+        }
+      ]
+    },
+    {
+      "id": "REF-24",
+      "language": "JavaScript",
+      "natural_language": "Interlingue",
+      "branch": "JavaScript+Interlingue",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "commit": "03ac0c7f4db3c35487993dd31982faa37dd3948e",
+      "entrypoint": "calendarDate(BigInt(calculation_day),BigInt(target_day))",
+      "native_output": "[year:number-like BigInt, cutlet native-name string, day_in_cutlet BigInt, month native-name string, day_in_month BigInt]",
+      "runtime": "Node.js CommonJS, BigInt, original source-language catalog",
+      "sources": [
+        {
+          "path": "tests/normative-reference.js",
+          "git_blob_sha1": "77f57c2d3ae76ac38fb6f59760607fda2c292443",
+          "sha256": "8276e428c3a392ab39429331cdfdd7b80a8b1041efb4c9d806a6c141630a9fa5",
+          "bytes": 31141,
+          "syntax_pass": true
+        },
+        {
+          "path": "src/source-language-catalog.js",
+          "git_blob_sha1": "95761bd92f3fe23b7ee32257baa4000fa7c456e7",
+          "sha256": "211333bff832e597e5388a789c811ae8fffb55780484f28b60b097410c786699",
+          "bytes": 4377,
+          "syntax_pass": true
+        }
+      ]
+    }
+  ],
+  "blocked_until": [
+    "independent calendar-year boundaries for the pilot calculation_day",
+    "strict native transport and name index mapping tests",
+    "one day real native execution in each engine with reliable logs and source identity",
+    "complete-year streaming and real two-engine comparison",
+    "source-independent language/algorithm lineage review",
+    "resource admission before running either engine"
+  ],
+  "main_changes_permitted": false
+}
