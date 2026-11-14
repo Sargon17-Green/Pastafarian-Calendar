@@ -11,6 +11,7 @@ on:
       - 'מקור/מניני־צירופים.אמן'
       - 'מקור/מונה־משזר־חדשים.אמן'
       - 'מקור/מופת־רוטב.אמן'
+      - 'מקור/דרוג־שזירה־טהור.אמן'
       - 'מקור/חשבון־אין־חקר.אמן'
   workflow_dispatch:
 
@@ -53,7 +54,7 @@ jobs:
             > build/compiler-stdout.log 2> build/compiler-stderr.log || {
               cat build/compiler-stderr.log; cat build/compiler-stdout.log; exit 1;
             }
-          javac -encoding UTF-8 -d build qa/native-combinatorics/NativeCombinatoricsProbe.java
+          javac -encoding UTF-8 -d build qa/native-combinatorics/NativeCombinatoricsProbe.java qa/native-combinatorics/NativeMonthRankContract.java
           sha256sum build/codesh-native-five-fields.jar | tee build/jar.sha256
       - name: Bounded Native combinatorics and independent math oracle
         shell: bash
@@ -64,6 +65,9 @@ jobs:
             > build/native-combinatorics.tsv
           python3 qa/native-combinatorics/check_native_combinatorics.py \
             build/native-combinatorics.tsv | tee build/combinatorics-qa.log
+          timeout --signal=TERM --kill-after=5s 20s \
+            java -Xmx768m -cp "build:build/codesh-native-five-fields.jar" NativeMonthRankContract \
+            | tee build/month-rank-contract.log
       - name: Preserve original evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -76,5 +80,6 @@ jobs:
             build/codesh-native-five-fields.jar
             build/native-combinatorics.tsv
             build/combinatorics-qa.log
+            build/month-rank-contract.log
           if-no-files-found: warn
           retention-days: 30
