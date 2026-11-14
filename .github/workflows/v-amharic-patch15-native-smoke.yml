@@ -42,6 +42,13 @@ jobs:
           v version | tee qa/native-v/v-version.txt
           test -f pastafari/patch15_numeric_date_native_smoke_test.v
           test -f pastafari/patch15_numeric_date.v
+      - name: Print exact vfmt diff for touched source (diagnostic only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'VFMT_DIFF_START'
+          v fmt -diff pastafari/patch15_numeric_date_native_smoke_test.v || true
+          echo 'VFMT_DIFF_END'
       - name: Call actual five-field date API for foundation pair
         shell: bash
         run: |
