@@ -86,11 +86,15 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          ulimit -v 3145728
+          # Linux JVM reserves virtual address ranges beyond resident memory.
+          # Do not set ulimit -v; that incorrectly killed JVM before F(c,t).
+          # Keep bounded heap, direct memory, metaspace, code cache, and wall time.
           set +e
           /usr/bin/time -v -o evidence/kotlin-native-resources.txt \
             nice -n 19 timeout --signal=TERM --kill-after=5s 180s \
-            java -Xmx512m -cp evidence/original-kotlin-production.jar \
+            java -Xmx512m -XX:MaxDirectMemorySize=128m \
+            -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=64m \
+            -XX:ActiveProcessorCount=2 -cp evidence/original-kotlin-production.jar \
             pastafari.Post55ProductionDateBridge \
             < evidence/kotlin-input.tsv \
             > evidence/kotlin-seven.tsv 2>evidence/kotlin-stderr.log
