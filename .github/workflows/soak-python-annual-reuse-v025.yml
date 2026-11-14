@@ -1,0 +1,108 @@
+name: Soak v025 derived Python native annual structure - sampled original equivalence
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-python-annual-reuse-v025.yml"
+      - "soak/experiments/python_annual_structure_reuse_v025.py"
+      - "soak/tests/test_python_annual_structure_reuse_v025.py"
+      - "soak/control/foundation_year5000_three_native_candidate_v024.json"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-annual-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Pure test suite for annual reuse edge contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/tests \
+            -p 'test_python_annual_structure_reuse_v025.py' -v \
+            2>&1 | tee evidence/pure-annual-tests.log
+          python3 -B -m py_compile soak/experiments/python_annual_structure_reuse_v025.py
+      - name: Fetch immutable Python original and verify exact SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/pinned-python
+          curl -fsSL --max-time 90 --retry 5 --retry-all-errors --retry-delay 2 \
+            https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py \
+            -o build/pinned-python/normative_reference.py
+          echo "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  build/pinned-python/normative_reference.py" \
+            | tee evidence/source.sha256 | sha256sum -c -
+      - name: Single native year structure -> 4244 derived dates + 14 unchanged F(c,t) checks
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          /usr/bin/time -v -o evidence/reuse-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 400s python3 -B \
+            soak/experiments/python_annual_structure_reuse_v025.py \
+            --original-python build/pinned-python/normative_reference.py \
+            --boundary-candidate soak/control/foundation_year5000_three_native_candidate_v024.json \
+            --output-dir evidence/derived-year \
+            --sample-cap 14 \
+            > evidence/reuse.log 2>&1
+          rc=$?
+          echo "$rc" > evidence/reuse.exit
+          cat evidence/reuse.log
+          echo "ANNUAL_REUSE_EXIT_CODE=$rc"
+          exit 0
+      - name: Independently verify whole derived byte stream, sample receipt and zero-certification flags
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path("evidence")
+          rc=int((root/"reuse.exit").read_text().strip())
+          if rc!=0:
+              print("ANNUAL_REUSE_NOT_ADMITTED native_exit="+str(rc))
+              raise SystemExit(1)
+          folder=root/"derived-year"
+          receipt=json.loads((folder/"derivation_receipt.json").read_text(encoding="utf8"))
+          content=(folder/"derived_python_year5000_all_days.jsonl").read_bytes()
+          if receipt["status"]!="DERIVED_YEAR_TRANSCRIPT_SAMPLED_NATIVE_MATCH_NOT_CERTIFIED":
+              raise AssertionError("incorrect derived status")
+          if len(content.splitlines())!=4244 or receipt["derived_rows"]!=4244:
+              raise AssertionError("not exactly 4244 annual rows")
+          if hashlib.sha256(content).hexdigest()!=receipt["derived_stream_sha256"]:
+              raise AssertionError("derived stream hash mismatch")
+          assert receipt["native_original_sample_count"]==14
+          assert len(set(receipt["native_original_compared_targets"]))==14
+          assert receipt["first_sample_mismatch"] is None
+          for k in ("all_year_days_compared_to_original","independent_calendar_oracle_certified",
+                    "soak_started","derived_python_compared_as_independent","source_rewritten"):
+              assert receipt[k] is False,k
+          assert receipt["independent_engine_count_added"]==0
+          assert receipt["verified_full_year_comparisons"]==0
+          first,last=-15057702,-15053459
+          for i,rawline in enumerate(content.splitlines()):
+              row=json.loads(rawline)
+              assert row["calculation_day"]=="-15055671"
+              assert row["target_day"]==str(first+i)
+              vals=row["native_structure_derived_fields"]
+              assert len(vals)==5 and all(int(v)>0 for v in vals)
+              assert vals[0]=="5000"
+          assert str(last)==receipt["last_target_day"]
+          print("ANNUAL_REUSE_V025_DERIVED_ONLY_VERIFIED_BYTES rows=4244 native_original_samples=14 fully_compared_years=0")
+          print("ANNUAL_REUSE_SHA256="+receipt["derived_stream_sha256"])
+          PY
+      - name: Preserve all available logs, receipts and DERIVED ONLY annual transcript
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-python-annual-structure-sampled-equivalence-v025
+          path: |
+            evidence/
+          if-no-files-found: warn
+          retention-days: 30
