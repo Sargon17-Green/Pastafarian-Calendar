@@ -28,7 +28,11 @@ public final class NativeMonthRankContract {
       for(int rank:new int[]{1,2,10,20}){
         Object rankValue=fromInt.invoke(factory,rank);
         int[] seen=new int[lengths.length];
-        for(int step=1;step<=total;step++){
+        Object first=decode.invoke(nativeSolver,items,rankValue,0);
+        check((int)index.invoke(first)==0 && (int)day.invoke(first)==1,
+             "first offset must map to first month day one");
+        seen[0]=1;
+        for(int step=1;step<total;step++){
           Object value=decode.invoke(nativeSolver,items,rankValue,step);
           int month=(int)index.invoke(value);
           int ordinal=(int)day.invoke(value);
