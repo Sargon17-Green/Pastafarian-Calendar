@@ -24,11 +24,11 @@ jobs:
           PY_SOURCE=build/sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py
           JS_SOURCE=build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js
           JS_CATALOG=build/sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/source-language-catalog.js
-          curl -fsSL --max-time 70 --retry 2 \
+          curl -fsSL --max-time 70 --retry 5 --retry-all-errors --retry-delay 2 \
             https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py -o "$PY_SOURCE"
-          curl -fsSL --max-time 70 --retry 2 \
+          curl -fsSL --max-time 70 --retry 5 --retry-all-errors --retry-delay 2 \
             https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js -o "$JS_SOURCE"
-          curl -fsSL --max-time 70 --retry 2 \
+          curl -fsSL --max-time 70 --retry 5 --retry-all-errors --retry-delay 2 \
             https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/source-language-catalog.js -o "$JS_CATALOG"
           printf '%s\n' \
             "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  $PY_SOURCE" \
