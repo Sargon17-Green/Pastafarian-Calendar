@@ -13,7 +13,7 @@ def parse_bigint(row):
     limbs = [int(x) for x in limbs_text.split(",")]
     assert count == len(limbs) and count >= 1, (count, limbs)
     assert all(0 <= x < BASE for x in limbs), limbs
-    assert sign in ("0", "1", "-1"), sign
+    assert sign in ("0", "1", "2"), sign  # Codesh: 0=zero, 1=positive, 2=negative
     magnitude = sum(x * BASE**i for i, x in enumerate(limbs))
     return 0 if sign == "0" else (1 if sign == "1" else -1) * magnitude
 
