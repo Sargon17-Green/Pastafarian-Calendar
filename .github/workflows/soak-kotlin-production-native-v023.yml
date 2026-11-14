@@ -1,0 +1,167 @@
+name: Soak v023 pinned Kotlin production candidate - three true native dates
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-kotlin-production-native-v023.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  three-day-production-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact original Kotlin production branch commit
+        uses: actions/checkout@v4
+        with:
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          path: original-kotlin
+          persist-credentials: false
+      - name: Checkout exact original Python reference commit (separate root)
+        uses: actions/checkout@v4
+        with:
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          path: original-python
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Verify exact refs, Python SHA and independent source path intent
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git -C original-kotlin rev-parse HEAD)" = "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+          test "$(git -C original-python rev-parse HEAD)" = "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          echo "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py" \
+            | tee evidence/python.sha256 | sha256sum -c -
+          test -f original-kotlin/src/main/kotlin/pastafari/ProductionMonthWeavingEngine.kt
+          test -f original-kotlin/soak/Post55ProductionDateBridge.kt
+          printf "%s\n" \
+            "KOTLIN_PRODUCTION_COMMIT=0c703446d8a3b7435698bd16402ac5fa30e461c9" \
+            "PYTHON_REFERENCE_COMMIT=0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4" \
+            "KOTLIN_NATIVE_SOURCE_IS_UNCHANGED=true" \
+            "INDEPENDENCE_CERTIFIED=false" > evidence/source-revisions.txt
+      - name: Obtain exact Kotlin compiler version 1.9.0 for pinned production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile untouched original Kotlin production with 7-column bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-compile-resources.txt \
+            timeout --signal=TERM --kill-after=5s 210s kotlinc \
+            original-kotlin/src/main/kotlin/pastafari/*.kt \
+            original-kotlin/soak/Post55ProductionDateBridge.kt \
+            -include-runtime -d evidence/pinned-kotlin-production-v023.jar
+          sha256sum evidence/pinned-kotlin-production-v023.jar | tee evidence/kotlin-jar.sha256
+          test -s evidence/pinned-kotlin-production-v023.jar
+      - name: Original Python F(c,t) for three consecutive targets
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          /usr/bin/time -v -o evidence/python-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 150s python3 -B - \
+            > evidence/python.log 2>&1 <<'PY'
+          import importlib.util,hashlib,json,pathlib,sys
+          path=pathlib.Path("original-python/tests/normative_reference.py")
+          spec=importlib.util.spec_from_file_location("kotlin_candidate_pinned_py",path)
+          module=importlib.util.module_from_spec(spec)
+          sys.modules[spec.name]=module;spec.loader.exec_module(module)
+          c=-15055671
+          cal=module.NormativeCalendar()
+          out=[]
+          for t in (c-1,c,c+1):
+              native=cal.calendar_date_ids(c,t)
+              row=[str(v) for v in (c,t,native.year_number,native.cutlet_name_index,
+                                    native.day_in_cutlet,native.month_name_index,native.day_in_month)]
+              out.append(row)
+              print("PINNED_PY_NATIVE_SEVEN="+json.dumps(row),flush=True)
+          pathlib.Path("evidence/python-seven.json").write_text(json.dumps(out,indent=2)+"\n",encoding="utf8")
+          PY
+          rc=$?
+          echo "$rc" > evidence/python.exit
+          tail -30 evidence/python.log
+          exit 0
+      - name: Original Kotlin production F(c,t) for the exact same three targets
+        shell: bash
+        run: |
+          set -uo pipefail
+          printf '%s\n' \
+            "$(printf '%s\t%s' -15055671 -15055672)" \
+            "$(printf '%s\t%s' -15055671 -15055671)" \
+            "$(printf '%s\t%s' -15055671 -15055670)" > evidence/kotlin-input.tsv
+          set +e
+          /usr/bin/time -v -o evidence/kotlin-native-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 150s \
+            java -Xmx512m -cp evidence/pinned-kotlin-production-v023.jar pastafari.Post55ProductionDateBridge \
+            < evidence/kotlin-input.tsv > evidence/kotlin-seven.tsv 2>evidence/kotlin-native.log
+          rc=$?
+          echo "$rc" > evidence/kotlin.exit
+          cat evidence/kotlin-seven.tsv
+          tail -30 evidence/kotlin-native.log
+          exit 0
+      - name: Exact 7-column comparison and noncertification verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,pathlib,re
+          root=pathlib.Path('evidence')
+          e={x:int((root/(x+'.exit')).read_text()) for x in ('python','kotlin')}
+          status={
+            'schema':'PASTAFARI_SOAK_THREE_NATIVE_CANDIDATE/1',
+            'status':'BLOCKED_NATIVE_INCOMPLETE',
+            'engines':['REF-41_PYTHON_TEST_REFERENCE','KOTLIN_CYMRAEG_PRODUCTION'],
+            'kotlin_original_commit':'0c703446d8a3b7435698bd16402ac5fa30e461c9',
+            'python_original_commit':'0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4',
+            'native_exit_codes':e,'whole_year_verified':False,
+            'algorithmic_independence_certified':False,
+            'soak_started':False,'verified_whole_year_comparisons':0,
+          }
+          if all(code==0 for code in e.values()):
+              p=json.loads((root/'python-seven.json').read_text(encoding='utf8'))
+              k=[row.split('\t') for row in (root/'kotlin-seven.tsv').read_text(encoding='utf8').splitlines()]
+              if len(p)==len(k)==3 and all(len(row)==7 and
+                    all(re.fullmatch(r'(?:0|-?[1-9][0-9]*)',field) for field in row)
+                    for row in p+k):
+                  first_mismatch=next(((i,j,p[i][j],k[i][j]) for i in range(3)
+                                       for j in range(7) if p[i][j]!=k[i][j]),None)
+                  status['first_mismatch']=first_mismatch
+                  status['matched_date_fields']=sum(p[i][j]==k[i][j] for i in range(3) for j in range(2,7))
+                  status['matched_total_fields']=sum(p[i][j]==k[i][j] for i in range(3) for j in range(7))
+                  status['status']='THREE_PINNED_KOTLIN_PRODUCTION_DATES_MATCH_NOT_CERTIFIED' if first_mismatch is None else 'PINNED_KOTLIN_PRODUCTION_MISMATCH_STOP'
+                  status['observed_python']=p
+                  status['observed_kotlin']=k
+                # Fail closed: malformed or incomplete output can never pass.
+          status['source_hashes']={s:hashlib.sha256((root/s).read_bytes()).hexdigest() for s in ('python-seven.json','kotlin-seven.tsv') if (root/s).exists()}
+          (root/'verdict.json').write_text(json.dumps(status,indent=2,sort_keys=True)+'\n',encoding='utf8')
+          print('KOTLIN_THREE_REAL_DATE_CANDIDATE='+json.dumps(status,sort_keys=True),flush=True)
+          if status['status']!='THREE_PINNED_KOTLIN_PRODUCTION_DATES_MATCH_NOT_CERTIFIED':
+              raise SystemExit(1)
+          PY
+      - name: Preserve all observations, including blocked runs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-original-production-three-day-evidence-v023
+          path: |
+            evidence/*.json
+            evidence/*.txt
+            evidence/*.tsv
+            evidence/*.log
+            evidence/*.sha256
+          if-no-files-found: warn
+          retention-days: 30
