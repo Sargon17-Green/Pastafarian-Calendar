@@ -6,6 +6,7 @@ on:
     paths:
       - 'מקור/דרוג־שזירה־טהור.אמן'
       - 'מקור/תאריך־שלם־טהור.אמן'
+      - 'מקור/ספר־שמות־המקור.אמן'
       - 'qa/native-e2e/**'
       - '.github/workflows/codesh-native-e2e.yml'
   workflow_dispatch:
