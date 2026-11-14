@@ -71,6 +71,7 @@ jobs:
             build/compiler-stdout.log
             build/compiler-stderr.log
             build/jar.sha256
+            build/codesh-native-five-fields.jar
             build/native-combinatorics.tsv
             build/combinatorics-qa.log
           if-no-files-found: warn
