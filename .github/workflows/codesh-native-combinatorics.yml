@@ -9,6 +9,7 @@ on:
       - '.github/workflows/codesh-native-combinatorics.yml'
       - 'qa/native-combinatorics/**'
       - 'מקור/מניני־צירופים.אמן'
+      - 'מקור/מונה־משזר־חדשים.אמן'
       - 'מקור/חשבון־אין־חקר.אמן'
   workflow_dispatch:
 
