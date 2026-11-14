@@ -204,8 +204,9 @@ jobs:
         run: |
           set -euo pipefail
           v test ./pastafari/patch14_test.v 2>&1 | tee stage29_patch14.log
-          test "$(find ./pastafari -maxdepth 1 -name '*_test.v' | wc -l)" -eq 45
-          echo 'Stage29: 43 previous GREEN files retained; 45 files including Stage30'
+          test "$(find ./pastafari -maxdepth 1 -name '*_test.v' | wc -l)" -eq 46
+          test -f ./pastafari/patch15_numeric_date_native_smoke_test.v
+          echo 'Stage29 baseline retained; 46 test files including new Stage31 Native smoke'
       - name: DISCOVERY 15 — five-field structure GREEN witnesses
         shell: bash
         run: |
