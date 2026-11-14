@@ -156,6 +156,9 @@ def sample_targets(c: int, first: int, last: int, structure, cap: int):
             observed.add(month)
             anchors.append(first + idx)
     targets = list(dict.fromkeys(required))
+    # Sparse synthetic structures can have too few cutlet/month transitions.
+    # Fill with deterministic evenly spaced days, never silently lowering cap.
+    anchors.extend(first + (length * k) // (cap * 3 + 1) for k in range(1, cap * 3 + 1))
     for x in anchors:
         if len(targets) >= cap:
             break
