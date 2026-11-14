@@ -182,6 +182,11 @@ def verify_stream(engine_id: str, source_root: Path, raw_path: Path,
     canonical_decimal(c)
     if first > last or last - first + 1 > 5778:
         fail("invalid or excessive target interval")
+    if (last > first and (not isinstance(receipt.get("boundary_evidence_sha256"), str)
+           or not HEX64.fullmatch(receipt["boundary_evidence_sha256"]))):
+        fail("multi-day transport has no independently pinned year boundary receipt")
+    if receipt.get("verified_comparisons_completed") != 0 or type(receipt.get("rows")) is not int:
+        fail("transport receipt wrongly claims comparisons or has invalid count")
     raw_sha = hashlib.sha256()
     norm_sha = hashlib.sha256()
     rows = 0
