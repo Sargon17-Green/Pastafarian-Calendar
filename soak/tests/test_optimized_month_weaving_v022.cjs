@@ -1,6 +1,7 @@
 'use strict';
 const assert = require('node:assert/strict');
 const {makeFastMonthWeavingFamily}=require('../experiments/optimized_month_weaving_v022.cjs');
+const reference=process.env.PINNED_JS_REFERENCE ? require(require('node:path').resolve(process.env.PINNED_JS_REFERENCE)) : null;
 // Deliberately independent exhaustive enumerator for small legal profiles.
 function brute(lengths){
  const out=[],remaining=lengths.slice(),m=lengths.length,days=lengths.reduce((a,b)=>a+b,0);
@@ -28,6 +29,13 @@ for(let m=1;m<=4;m++){
      if(expected.length>60000)return;
      const family=makeFastMonthWeavingFamily(v);
      assert.equal(family.count(),BigInt(expected.length),`count ${v}`);
+     if(reference){
+       const original=reference.makeMonthWeavingFamily(v);
+       assert.equal(original.count(),BigInt(expected.length),"original count mismatch "+v);
+       for(const k of new Set([1,Math.floor((expected.length+1)/2),expected.length])){
+         assert.equal(original.unrank1(BigInt(k)).join(','),expected[k-1],"original rank mismatch "+v+" at "+k);
+       }
+     }
      for(let k=0;k<expected.length;k++){
        const got=family.unrank1(BigInt(k+1)).join(',');
        assert.equal(got,expected[k],`rank=${k+1} lengths=${v}`);rankTests++;
