@@ -45,8 +45,7 @@ jobs:
           export JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=$PWD/build/tmp"
           "$codeshc" --src . --dest "$PWD/build/codesh-native-five-fields.jar" \
             --jre-path "$JAVA_HOME" --talmud-codesh-path "$PWD/$talmud" \
-            --main-class 'מקור.בחינת־מופת' \
-            > build/CODESH_COMPILER.stdout.log 2> build/CODESH_COMPILER.stderr.log || {
+              > build/CODESH_COMPILER.stdout.log 2> build/CODESH_COMPILER.stderr.log || {
               cat build/CODESH_COMPILER.stderr.log; cat build/CODESH_COMPILER.stdout.log; exit 1;
             }
           sha256sum build/codesh-native-five-fields.jar
