@@ -33,7 +33,13 @@ public final class NativeMonthRankContract {
              "first offset must map to first month day one");
         seen[0]=1;
         for(int step=1;step<total;step++){
-          Object value=decode.invoke(nativeSolver,items,rankValue,step);
+          Object value;
+          try {
+            value=decode.invoke(nativeSolver,items,rankValue,step);
+          } catch (java.lang.reflect.InvocationTargetException failure) {
+            throw new AssertionError("decode failed lengths="+Arrays.toString(lengths)+" rank="+rank+" step="+step,
+                                     failure.getTargetException());
+          }
           int month=(int)index.invoke(value);
           int ordinal=(int)day.invoke(value);
           check(month>=0 && month<lengths.length,
