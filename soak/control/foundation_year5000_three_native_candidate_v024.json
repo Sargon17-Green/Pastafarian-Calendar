@@ -1,0 +1,49 @@
+{
+  "schema": "PASTAFARI_SOAK_THREE_NATIVE_YEAR5000_BOUNDARY_CANDIDATE/1",
+  "observed_date": "2026-11-14",
+  "status": "THREE_NATIVE_YEAR5000_CANDIDATES_AGREE_NOT_CERTIFIED",
+  "calculation_day": "-15055671",
+  "year": "5000",
+  "open_gate_index": "-4",
+  "close_gate_index": "4",
+  "open_gate_day": "-15057703",
+  "close_gate_day": "-15053459",
+  "first_target_day": "-15057702",
+  "last_target_day": "-15053459",
+  "year_days": 4244,
+  "candidate_2_source_sha256": "b464d81b2d02cf6270092ee887f4e0f6d3668b0de67a64c4423e358984cfd276",
+  "sources": [
+    {
+      "id": "REF-41",
+      "branch": "historical Python+Türkçe reference/test",
+      "commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+      "native_entrypoint": "NormativeCalendar().year5000(c)",
+      "run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43645077409"
+    },
+    {
+      "id": "REF-24",
+      "branch": "historical JavaScript+Interlingue reference/test",
+      "commit": "03ac0c7f4db3c35487993dd31982faa37dd3948e",
+      "native_entrypoint": "year5000(c,createGateEngine())",
+      "run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43645077409"
+    },
+    {
+      "id": "KOTLIN-CY-PROD",
+      "branch": "Kotlin+Cymraeg production",
+      "commit": "0c703446d8a3b7435698bd16402ac5fa30e461c9",
+      "native_entrypoint": "ProductionYearNavigator().year5000(c)",
+      "run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43647506647"
+    }
+  ],
+  "kotlin_native_output_sha256": "0738bfd6386a33fb3e5005ced9dbd870656c38ae1ebc496f8af59af7d3828e5d",
+  "kotlin_boundary_rss_kib": 210340,
+  "kotlin_boundary_wall_seconds": 0.34,
+  "kotlin_evidence_artifact_id": 14133963561,
+  "kotlin_evidence_zip_sha256": "0ce677e688eac6b94989d6ef49bba2edf86b52f5a534c33c39314337c9f5cb20",
+  "source_independence_certified": false,
+  "independent_canonical_oracle_certified": false,
+  "comparison_of_all_year_days_completed": false,
+  "derived_js_counted_as_original": false,
+  "validated_entire_year_count": 0,
+  "main_changes_allowed": false
+}
