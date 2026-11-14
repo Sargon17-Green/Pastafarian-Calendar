@@ -1,0 +1,135 @@
+name: Soak v026 original Kotlin vs preserved derived annual Python sample
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-kotlin-vs-python-annual-v026.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  cross-original-source-sample:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - name: Coordinator source only
+        uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - name: Pinned Kotlin original production source only
+        uses: actions/checkout@v4
+        with:
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          path: original-kotlin
+          persist-credentials: false
+      - name: Read the exact successful v025 annual artifact without recomputing Python
+        uses: actions/download-artifact@v4
+        with:
+          name: original-python-annual-structure-sampled-equivalence-v025
+          run-id: 43648121105
+          github-token: ${{ github.token }}
+          path: original-annual
+      - name: SHA-256 and 14 native-original sample witnesses from v025
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-kotlin status --porcelain)"
+          test -f original-annual/derived-year/derivation_receipt.json
+          test -f original-annual/derived-year/derived_python_year5000_all_days.jsonl
+          echo "74742f95e5f11d225d61de9f19406312201a901bebac87f112e704046b96a3e8  original-annual/derived-year/derived_python_year5000_all_days.jsonl" \
+            | tee evidence/annual-stream.sha256 | sha256sum -c -
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('original-annual/derived-year/derivation_receipt.json')
+          d=json.loads(p.read_text(encoding='utf8'))
+          assert d['status']=='DERIVED_YEAR_TRANSCRIPT_SAMPLED_NATIVE_MATCH_NOT_CERTIFIED'
+          assert d['original_source_commit']=='0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4'
+          assert d['native_original_sample_count']==14
+          assert d['verified_full_year_comparisons']==0
+          assert d['all_year_days_compared_to_original'] is False
+          with open('evidence/kotlin-input.tsv','x',encoding='utf8',newline='\n') as f:
+              for target in d['native_original_compared_targets']:
+                  assert target.lstrip('-').isdigit()
+                  f.write(f"{d['calculation_day']}\t{target}\n")
+          print("PINNED_PYTHON_ORIGINAL_NATIVE_SAMPLES_ADMITTED=14 full_year_pass=false")
+          PY
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Obtain original compiler 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile pinned unmodified Kotlin production and original 7-column bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-build-resources.txt \
+            timeout --signal=TERM --kill-after=5s 180s kotlinc \
+            original-kotlin/src/main/kotlin/pastafari/*.kt \
+            original-kotlin/soak/Post55ProductionDateBridge.kt \
+            -include-runtime -d evidence/original-kotlin-production.jar
+          sha256sum evidence/original-kotlin-production.jar > evidence/kotlin-jar.sha256
+          test -s evidence/original-kotlin-production.jar
+      - name: Run all 14 untouched Kotlin original native F(c,t) entries
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 3145728
+          set +e
+          /usr/bin/time -v -o evidence/kotlin-native-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 180s \
+            java -Xmx512m -cp evidence/original-kotlin-production.jar \
+            pastafari.Post55ProductionDateBridge \
+            < evidence/kotlin-input.tsv \
+            > evidence/kotlin-seven.tsv 2>evidence/kotlin-stderr.log
+          rc=$?
+          echo "$rc" > evidence/kotlin.exit
+          cat evidence/kotlin-seven.tsv
+          tail -30 evidence/kotlin-stderr.log
+          exit 0
+      - name: Exact cross-source comparison and explicit no-year-verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat evidence/kotlin.exit)" = 0
+          python3 -B coordinator/soak/runner/compare_kotlin_vs_annual_python_v026.py \
+            --annual-dir original-annual/derived-year \
+            --kotlin-tsv evidence/kotlin-seven.tsv \
+            --output-verdict evidence/cross-native-sample-verdict.json \
+            | tee evidence/cross-verdict.log
+          python3 - <<'PY'
+          import json,pathlib
+          v=json.loads(pathlib.Path('evidence/cross-native-sample-verdict.json').read_text())
+          assert v['status']=='CROSS_ORIGINAL_KOTLIN_VS_DERIVED_PY_14_SAMPLE_MATCH_NOT_YEAR'
+          assert v['samples_compared']==14
+          assert v['numeric_date_fields_compared']==70
+          assert v['input_plus_date_fields_compared']==98
+          assert v['verified_entire_year_comparisons']==0
+          assert v['full_year_cross_engine_verified'] is False
+          print('CROSS_SOURCE_14_NATIVE_SAMPLES_PASS full_years=0 independence_certified=false')
+          PY
+      - name: Preserve all source, input, native output and verdict evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-vs-derived-annual-python-14-native-samples-v026
+          path: |
+            evidence/*.json
+            evidence/*.txt
+            evidence/*.tsv
+            evidence/*.log
+            evidence/*.sha256
+          if-no-files-found: warn
+          retention-days: 30
