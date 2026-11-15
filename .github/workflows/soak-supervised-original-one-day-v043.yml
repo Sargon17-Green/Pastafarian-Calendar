@@ -1,0 +1,95 @@
+name: Soak v043 supervised pinned original Python JS ONE Fct day each (not full year)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/supervised_original_one_day_v043.py"
+      - ".github/workflows/soak-supervised-original-one-day-v043.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  one-original-reference-day-each-engine:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: coordinator
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          path: original-python
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: 03ac0c7f4db3c35487993dd31982faa37dd3948e
+          path: original-javascript
+      - name: Check immutable source snapshots and retain no installed tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test "$GITHUB_ACTIONS" = true
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-javascript rev-parse HEAD)" = 03ac0c7f4db3c35487993dd31982faa37dd3948e
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-javascript status --porcelain)"
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          mkdir -p original-sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests
+          mkdir -p original-sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/src
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          cp original-javascript/tests/normative-reference.js \
+            original-sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/
+          cp original-javascript/src/source-language-catalog.js \
+            original-sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/
+          printf '%s\n' \
+            '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
+            '8276e428c3a392ab39429331cdfdd7b80a8b1041efb4c9d806a6c141630a9fa5  original-sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/tests/normative-reference.js' \
+            '211333bff832e597e5388a789c811ae8fffb55780484f28b60b097410c786699  original-sources/JavaScript-Interlingue/03ac0c7f4db3c35487993dd31982faa37dd3948e/src/source-language-catalog.js' \
+            | sha256sum -c -
+          node --version
+          python3 --version
+      - name: Execute exactly ONE native original Fct per engine sequentially with no computation wall timeout
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          /usr/bin/time -v python3 -B coordinator/soak/runner/supervised_original_one_day_v043.py \
+            --ci-original-one-day --sources-root original-sources --output-root evidence \
+            | tee evidence/gate.log
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path("evidence")
+          verdict=json.loads((root/"one-day-verdict.json").read_bytes())
+          assert verdict["status"]=="ONE_NATIVE_FCT_DAY_EACH_ENGINE_MATCH_NOT_FULL_YEAR"
+          assert verdict["original_date_rows_compared"]==1
+          assert verdict["matching_numeric_date_fields"]==5
+          assert verdict["one_original_date_call_per_engine"] is True
+          assert verdict["original_full_year_soak_passes"]==0
+          assert verdict["long_soak_started"] is False
+          for engine in ("REF-41","REF-24"):
+              r=json.loads((root/engine/"process-evidence.json").read_bytes())
+              assert r["status"]=="SINGLE_ORIGINAL_FCT_DAY_OBSERVED_AND_NATIVE_RAW_VERIFIED_NOT_YEAR"
+              assert r["exit_code"]==0
+              assert r["validated_native_date_calls"]==1
+              assert r["official_native_full_year_soak_passes"]==0
+              assert r["os_stdout_is_native_data"] is False
+              assert (root/engine/"native-raw.jsonl").is_file()
+              assert (root/engine/"native-normalized.jsonl").is_file()
+              assert (root/engine/"os-stdout.log").is_file()
+              assert (root/engine/"os-stderr.log").is_file()
+          print("ONE_NATIVE_DATE_FROM_EACH_PINNED_REFERENCE_MATCHED_NOT_YEAR_SOAK")
+          PY
+      - name: Preserve original Fct raw date evidence and separate process stdout/stderr
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v043-supervised-original-one-native-date-per-engine
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
