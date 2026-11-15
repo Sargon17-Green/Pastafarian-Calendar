@@ -1,0 +1,62 @@
+{
+  "schema": "PASTAFARI_ALTERNATE_C_FULL_DERIVED_YEAR_V034/1",
+  "status": "ALTERNATE_C_3569_DERIVED_ROWS_MATCH_SAMPLED_NATIVE_NOT_CERTIFIED",
+  "run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43754101905",
+  "original_boundary_run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43753574115",
+  "calculation_day": "-15055672",
+  "year": "5000",
+  "first_target_day": "-15056173",
+  "last_target_day": "-15052605",
+  "derived_python_rows": 3569,
+  "derived_kotlin_rows": 3569,
+  "matched_derived_row_pairs": 3569,
+  "matched_derived_seven_column_fields": 24983,
+  "first_mismatch": null,
+  "original_python_unchanged_date_sample_matches": 7,
+  "original_kotlin_unchanged_date_sample_matches": 7,
+  "sample_targets": [
+    "-15056173",
+    "-15056172",
+    "-15054984",
+    "-15055672",
+    "-15053794",
+    "-15052606",
+    "-15052605"
+  ],
+  "sources": {
+    "python_commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "python_source_sha256": "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378",
+    "kotlin_original_production_commit": "0c703446d8a3b7435698bd16402ac5fa30e461c9",
+    "kotlin_derivative_generation": "soak/experiments/derive_kotlin_annual_stream_v028.py",
+    "kotlin_original_bridge": "soak/Post55ProductionDateBridge.kt",
+    "python_annual_helper": "soak/experiments/python_annual_structure_reuse_v025.py"
+  },
+  "hashes": {
+    "python_derived_year_tsv": "8f86001ded71f2cf0d7948553253f01f93215a465f3693a59556c7c700097cf7",
+    "kotlin_derived_year_tsv": "8f86001ded71f2cf0d7948553253f01f93215a465f3693a59556c7c700097cf7",
+    "original_kotlin_seven_native_tsv": "87c19e9ec96156cfe493d55af178999d5ca8896166c9c5acb3d96b2f14d82b14",
+    "artifact_zip_sha256": "064bf054b17412bc2c746ac850a60bc8a72efafdcff0a32f0c8703ad0c8fad86"
+  },
+  "github_artifact_id": 14176968285,
+  "observed_linux_ci": {
+    "python_structure_plus_seven_original_calls_elapsed_seconds": 48.65,
+    "python_max_rss_kib": 88620,
+    "kotlin_original_seven_calls_elapsed_seconds": 7.27,
+    "kotlin_original_max_rss_kib": 346172,
+    "kotlin_derived_year_elapsed_seconds": 1.9,
+    "kotlin_derived_year_max_rss_kib": 319328,
+    "kotlin_original_compile_seconds": 19.76,
+    "kotlin_derived_compile_seconds": 18.69
+  },
+  "cumulative_previous_three_year_derived_rows": 13937,
+  "cumulative_matched_derived_rows_across_both_calculation_coordinates": 17506,
+  "cumulative_original_native_sample_matches_each_engine": 33,
+  "all_3569_native_Fct_calls_in_each_engine_executed": false,
+  "two_unchanged_original_full_year_transcripts_compared": false,
+  "verified_original_native_full_year_soak_passes": 0,
+  "source_algorithm_independence_certified": false,
+  "independent_canonical_oracle_certified": false,
+  "long_soak_started": false,
+  "windows_executions_since_blocked_resource_gate": 0,
+  "main_modified": false
+}
