@@ -1,0 +1,62 @@
+name: Kotlin fresh cache-free TABLETS 3x5 differential diagnostic
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/fresh_cache_free_tablets_differential.py'
+      - 'soak/test_fresh_cache_free_tablets_differential.py'
+      - '.github/workflows/post55-fresh-cache-free-tablets.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cache-free-tablets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout exact candidate branch
+        uses: actions/checkout@v4
+        with:
+          path: audited-kotlin
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout pinned historical reference in distinct root
+        uses: actions/checkout@v4
+        with:
+          ref: 7cb12bf355461e5a179e0deadb7365689288bf29
+          path: pinned-python
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify HEAD and run eight bounded contract tests
+        shell: bash
+        working-directory: audited-kotlin
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C ../pinned-python rev-parse HEAD)" = '7cb12bf355461e5a179e0deadb7365689288bf29'
+          mkdir -p evidence
+          python -B -m py_compile soak/fresh_cache_free_tablets_differential.py soak/test_fresh_cache_free_tablets_differential.py
+          python -B -m unittest discover -s soak -p 'test_fresh_cache_free_tablets_differential.py' -v 2>&1 | tee evidence/fresh-cache-free-tablets-tests.log
+      - name: Fresh signed TABLETS and three cold pinned comparisons
+        shell: bash
+        timeout-minutes: 17
+        working-directory: audited-kotlin
+        run: |
+          set -euo pipefail
+          python -B soak/fresh_cache_free_tablets_differential.py --pinned-root ../pinned-python/src --worker-seconds 620 --total-seconds 960 --evidence evidence/fresh-cache-free-tablets.json | tee evidence/fresh-cache-free-tablets.log
+      - name: Preserve evidence including failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-fresh-cache-free-tablets-3x5
+          path: |
+            audited-kotlin/evidence/fresh-cache-free-tablets-tests.log
+            audited-kotlin/evidence/fresh-cache-free-tablets.log
+            audited-kotlin/evidence/fresh-cache-free-tablets.json
+          if-no-files-found: warn
+          retention-days: 30
