@@ -1,0 +1,69 @@
+{
+  "schema": "PASTAFARI_THREE_YEAR_TWO_SOURCE_DERIVED_AGREEMENT_V032/1",
+  "status": "THREE_DERIVED_YEARS_13937_ROWS_MATCH_SAMPLED_NATIVE_NOT_CERTIFIED",
+  "last_observed_utc": "2026-11-15",
+  "calculation_day": "-15055671",
+  "original_reference_commits": {
+    "python": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "kotlin": "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+  },
+  "years": [
+    {
+      "year": 4999,
+      "first_target": "-15061828",
+      "last_target": "-15057703",
+      "days": 4126,
+      "python_derived_sha256": "7908c1edc71db19e63f2275a5f48ed7778fb2c84914c998afc6400daaf761066",
+      "matched_derived_day_pairs": 4126,
+      "original_native_python_sample_matches": 6,
+      "original_native_kotlin_sample_matches": 6,
+      "run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43750284891"
+    },
+    {
+      "year": 5000,
+      "first_target": "-15057702",
+      "last_target": "-15053459",
+      "days": 4244,
+      "python_derived_sha256": "74742f95e5f11d225d61de9f19406312201a901bebac87f112e704046b96a3e8",
+      "matched_derived_day_pairs": 4244,
+      "original_native_python_sample_matches": 14,
+      "original_native_kotlin_sample_matches": 14,
+      "run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43689273405"
+    },
+    {
+      "year": 5001,
+      "first_target": "-15053458",
+      "last_target": "-15047892",
+      "days": 5567,
+      "python_derived_sha256": "230f74dda49e79bc3614ddd0009daf09b0195fe1b94a42ee6f03c03d2afee5ca",
+      "matched_derived_day_pairs": 5567,
+      "original_native_python_sample_matches": 6,
+      "original_native_kotlin_sample_matches": 6,
+      "run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43750284891"
+    }
+  ],
+  "full_derived_day_pairs_match": 13937,
+  "full_derived_7_column_value_matches": 97559,
+  "original_native_date_sample_matches_per_engine": 26,
+  "original_native_date_sample_matches_both_engines": 52,
+  "kotlin_derived_4999_and_5001_combined_tsv_sha256": "8dc7083698e6dbbf2a49a73752e21ee0254d3d82b33f913ddcb46492f32aab91",
+  "kotlin_derived_5000_tsv_sha256": "6fb3778caec959d6fc01e697c31f2f7bf32cae87fc00ac6f9592fc215e1b51b0",
+  "kotlin_original_12_sample_tsv_sha256": "a4abbbda897d5abfedb70b71a1946aac778ed3b3cfe8d29ab87cf5702bc42a93",
+  "kotlin_adjacent_derived_wall_seconds": 5.77,
+  "kotlin_adjacent_derived_peak_rss_kib": 427364,
+  "kotlin_adjacent_original_12_native_wall_seconds": 22.34,
+  "kotlin_adjacent_original_12_native_peak_rss_kib": 393120,
+  "python_adjacent_structure_and_12_native_seconds": 205.6955,
+  "python_adjacent_peak_rss_kib": 202968,
+  "evidence_artifact_id": 14176531043,
+  "evidence_artifact_zip_sha256": "34072cecec12c95e4639ba5dd510aaaed181be074507bcbb1302094f000c7ba4",
+  "year_boundary_native_run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43749803490",
+  "verified_unchanged_original_fct_full_year_comparisons": 0,
+  "all_13937_days_individually_verified_via_both_original_fct": false,
+  "independent_source_lineage_certified": false,
+  "canonical_oracle_certified": false,
+  "long_soak_started": false,
+  "windows_workloads_launched": false,
+  "main_modified": false,
+  "next_gate": "Adversarial formal audit, classification of original vs derived and safe resource-admitted multiyear stream contract"
+}
