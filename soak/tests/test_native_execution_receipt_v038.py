@@ -104,13 +104,13 @@ class NativeExecutionReceiptTests(unittest.TestCase):
             self.assertFalse(receipt["official_soak_authorized"])
             self.assertEqual(receipt["raw_stdout_sha256"],sha256(raw))
             self.assertEqual(receipt["normalized_chunk_sha256"],sha256(content))
-            self.assertEqual(store.progress()["raw_native_chunk_receipts_integrity_linked"],1)
+            self.assertEqual(store.progress()["native_receipt_rows_recorded_without_revalidation"],1)
             self.assertFalse(store.progress()["native_receipt_execution_attestation_verified"])
             self.assertEqual(store.progress()["original_native_full_year_soak_passes_certified"],0)
         with CrashStore(self.root,self.plan) as store:
             result=store.verify_and_recover()
             self.assertEqual(result["verified_existing_chunks"],1)
-            self.assertEqual(result["progress"]["raw_native_chunk_receipts_integrity_linked"],1)
+            self.assertEqual(result["progress"]["native_receipt_rows_recorded_without_revalidation"],1)
             self.assertEqual(result["progress"]["verified_comparisons_completed"],0)
 
     def test_both_engines_technical_match_with_no_soak_certification(self):
@@ -118,7 +118,7 @@ class NativeExecutionReceiptTests(unittest.TestCase):
             commit(store,"native-a")
             commit(store,"native-b")
             info=store.progress()
-            self.assertEqual(info["raw_native_chunk_receipts_integrity_linked"],2)
+            self.assertEqual(info["native_receipt_rows_recorded_without_revalidation"],2)
             self.assertEqual(info["verified_comparisons_completed"],1)
             self.assertEqual(info["verified_day_pair_comparisons"],2)
             self.assertTrue(info["all_verified"])
@@ -192,7 +192,7 @@ class NativeExecutionReceiptTests(unittest.TestCase):
                 store.commit_chunk("native-a","5000",0,content,
                                    raw_stdout=raw,native_receipt=receipt),
                 "ALREADY_COMMITTED")
-            self.assertEqual(store.progress()["raw_native_chunk_receipts_integrity_linked"],1)
+            self.assertEqual(store.progress()["native_receipt_rows_recorded_without_revalidation"],1)
 
     def test_replay_altered_stdout_is_rejected(self):
         with CrashStore(self.root,self.plan) as store:
@@ -258,7 +258,7 @@ with CrashStore(pathlib.Path(sys.argv[5]),p) as s:
         with CrashStore(self.root,self.plan) as store:
             recovered=store.verify_and_recover()
             self.assertEqual(recovered["recovered_chunks"],1)
-            self.assertEqual(recovered["progress"]["raw_native_chunk_receipts_integrity_linked"],1)
+            self.assertEqual(recovered["progress"]["native_receipt_rows_recorded_without_revalidation"],1)
             self.assertEqual(recovered["progress"]["original_native_full_year_soak_passes_certified"],0)
 
 
