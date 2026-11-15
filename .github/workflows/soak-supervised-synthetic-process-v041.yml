@@ -1,0 +1,67 @@
+name: Soak v041 synthetic supervised OS process observation (no converter)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/supervised_process_observation_v041.py"
+      - "soak/process_tests/test_supervised_process_observation_v041.py"
+      - ".github/workflows/soak-supervised-synthetic-process-v041.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  supervised-synthetic-process:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Enforce Linux CI-only experiment, no converter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = "Linux"
+          test "$GITHUB_ACTIONS" = "true"
+          test -e soak/runner/supervised_process_observation_v041.py
+          test -e soak/process_tests/test_supervised_process_observation_v041.py
+          python3 -B -m py_compile soak/runner/supervised_process_observation_v041.py
+          echo "SUPERVISOR_EXPERIMENT_SCOPE=SYNTHETIC_ONLY"
+      - name: Test live process observation and fail-closed evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v python3 -B -m unittest discover -v \
+            -s soak/process_tests -p 'test_supervised_process_observation_v041.py'
+      - name: Capture one live synthetic process into independent OS output and data files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          /usr/bin/time -v python3 -B soak/runner/supervised_process_observation_v041.py \
+            --synthetic-ci --out-root evidence | tee evidence/gate.log
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path("evidence")
+          s=json.loads((root/"summary.json").read_bytes())
+          r=json.loads((root/"process-observation-ok/process-evidence.json").read_bytes())
+          assert s["status"]=="SYNTHETIC_PROCESS_EVIDENCE_REVALIDATED_NOT_NATIVE_CERTIFIED"
+          assert s["original_native_full_years_certified"]==0
+          assert s["original_converter_calls"]==0
+          assert r["return_code"]==0 and r["process_exit_code_observed"]
+          assert r["real_converter_calls"]==0
+          assert r["official_original_soak_years_certified"]==0
+          assert r["actual_native_execution_certified"] is False
+          assert (root/"process-observation-ok/os-stdout.log").read_bytes() != \
+            (root/"process-observation-ok/raw-data.jsonl").read_bytes()
+          print("SYNTHETIC_OS_PROCESS_CAPTURED_NO_ORIGINAL_FCT_CALLS")
+          PY
+      - name: Preserve pinned synthetic process evidence including OS stdout/stderr
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v041-ci-synthetic-supervised-process-not-native
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
