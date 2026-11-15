@@ -26,17 +26,29 @@ from supervised_process_observation_v041 import (
 SCHEMA="PASTAFARI_SUPERVISED_SOURCE_PREFLIGHT_V042/1"
 SUCCESS="TWO_ORIGINAL_SOURCE_TRANSPORT_PROCESSES_OBSERVED_WITH_ZERO_FCT_CALLS"
 FILE_LIMIT=65536
+PYTHON_ADDRESS_SPACE_BYTES=640*1024*1024
+NODE_ADDRESS_SPACE_BYTES=8*1024*1024*1024
+NODE_MAX_OLD_SPACE_MB=128
+NODE_MAX_SEMI_SPACE_MB=16
+MIN_AVAILABLE_RAM_BYTES=1024*1024*1024
 PYTHON_COMMIT="0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4"
 JS_COMMIT="03ac0c7f4db3c35487993dd31982faa37dd3948e"
 ADAPTERS={"REF-41":"pilot_python_transport_v017.py",
           "REF-24":"pilot_javascript_transport_v017.cjs"}
 
 
-def _child_limits():
+def _child_limits(address_space_bytes:int):
     os.nice(19)
-    resource.setrlimit(resource.RLIMIT_AS,(640*1024*1024,640*1024*1024))
+    resource.setrlimit(resource.RLIMIT_AS,(address_space_bytes,address_space_bytes))
     resource.setrlimit(resource.RLIMIT_CPU,(12,12))
     os.umask(0o077)
+
+
+def _available_ram_bytes() -> int:
+    for line in Path('/proc/meminfo').read_text(encoding='ascii').splitlines():
+        if line.startswith('MemAvailable:'):
+            return int(line.split()[1])*1024
+    return 0
 
 
 def _capture_one(root:Path,source_root:Path,engine_id:str) -> dict:
@@ -63,16 +75,25 @@ def _capture_one(root:Path,source_root:Path,engine_id:str) -> dict:
         raise ValueError("missing exact v017 transport")
     appsha=sha_file(adapter)
     if engine_id=="REF-41":
+        address_space_bytes=PYTHON_ADDRESS_SPACE_BYTES
         binary=Path(sys.executable).resolve(strict=True)
         cmd=[str(binary),"-I","-B",str(adapter),
              "--sources-root",str(source_root),"--check-only"]
     else:
+        address_space_bytes=NODE_ADDRESS_SPACE_BYTES
         node=shutil.which("node")
         if not node:
             raise RuntimeError("Node required for pinned JS original preflight")
         binary=Path(node).resolve(strict=True)
-        cmd=[str(binary),str(adapter),
+        # V8 reserves a large *virtual* address range. 640MiB RLIMIT_AS
+        # prevents startup despite tiny resident use. Keep a larger virtual
+        # cap while independently restricting the JS heap and RAM admission.
+        cmd=[str(binary),f"--max-old-space-size={NODE_MAX_OLD_SPACE_MB}",
+             f"--max-semi-space-size={NODE_MAX_SEMI_SPACE_MB}",str(adapter),
              "--sources-root",str(source_root),"--check-only"]
+    free_ram=_available_ram_bytes()
+    if free_ram<MIN_AVAILABLE_RAM_BYTES:
+        raise RuntimeError('Linux CI available RAM insufficient for source-only probe')
     interpreter_sha=sha_file(binary)
     record={
         "schema":SCHEMA,
@@ -97,15 +118,19 @@ def _capture_one(root:Path,source_root:Path,engine_id:str) -> dict:
         "independence_certified":False,
         "full_original_soak_years_approved":0,
         "windows_processes_started":0,
-        "limits":{"linux_rlimit_as_bytes":640*1024*1024,
-                  "linux_rlimit_cpu_seconds":12,"nice":19},
+        "limits":{"linux_rlimit_as_bytes":address_space_bytes,
+                  "linux_rlimit_cpu_seconds":12,"nice":19,
+                  "ram_admission_min_bytes":MIN_AVAILABLE_RAM_BYTES,
+                  "ram_available_before_launch_bytes":free_ram,
+                  "node_max_old_space_mb":NODE_MAX_OLD_SPACE_MB if engine_id=='REF-24' else None,
+                  "node_max_semi_space_mb":NODE_MAX_SEMI_SPACE_MB if engine_id=='REF-24' else None},
     }
     failed=None
     with (work/"os-stdout.log").open("xb") as out, (work/"os-stderr.log").open("xb") as err:
         proc=subprocess.Popen(cmd,stdin=subprocess.DEVNULL,
                               stdout=out,stderr=err,cwd=str(work),
                               close_fds=True,start_new_session=True,
-                              preexec_fn=_child_limits)
+                              preexec_fn=lambda:_child_limits(address_space_bytes))
         record["pid"]=proc.pid
         try:
             record["process_creation_id"]=_pid_start_id(proc.pid)
