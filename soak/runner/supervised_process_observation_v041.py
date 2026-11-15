@@ -177,6 +177,9 @@ def _status_invariant(raw:bytes, norm:bytes) -> int:
 def run_synthetic_ci_once(root:Path, *, mode:str="ok", wall_seconds:float=WALL_LIMIT_SECONDS) -> dict:
     """Launch ONE bounded fixture. No user computer and no real F(c,t)."""
     _admit(root)
+    # subprocess.cwd is the owned directory. Both argv and child output paths
+    # MUST be absolute or relative roots get accidentally applied twice.
+    root=root.resolve(strict=True)
     if mode not in CASES or not (0.2<=wall_seconds<=WALL_LIMIT_SECONDS):
         raise ValueError("unsupported or unsafe fixture mode/timeout")
     work=root/("process-observation-"+mode)
@@ -276,6 +279,7 @@ def run_synthetic_ci_once(root:Path, *, mode:str="ok", wall_seconds:float=WALL_L
 
 def verify_synthetic_evidence(work:Path) -> dict:
     """Re-read immutable bytes: a receipt alone cannot prove file integrity."""
+    work=work.resolve(strict=True)
     receipt=_read_limited(work/"process-evidence.json")
     obj=json.loads(receipt)
     if (obj.get("schema")!=SCHEMA or obj.get("status")!=STATUS
