@@ -21,3 +21,6 @@ Require exactly 25 unique ordered Native pair rows. Runner timeouts: 180s Python
 `STAGE28_NATIVE_REMOTE_THREE_ASSERTIONS=131`,
 `STAGE28_REAL_FIVEFIELD_SCALARS=125`,
 and 25 unique pair rows. Source-only checks and queued/in-progress jobs are not Native PASS. On actual failure inspect the failing log and apply a focused patch. No main/merge/release.
+
+## Final completed acceptance (2026-11-15 verification)
+On exact source SHA `29d512ac2b6c74dc20938ae190935ccaf9034b81`, automatic push [run 42390633217](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42390633217) attempt 1 is **completed/success 30/30** jobs. Verify, Stage04 (18 assertions), Stage16 (135 Python / 131 Ada / 125 numeric), and Stage27 (139 / 131 / 125) succeeded. Direct Stage28 GNAT 13.3.0 compile/bind/link in [job 128457271595](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/42390633217/job/128457271595) succeeded: independent Python **139**, Ada Native **131**, real five-field comparison **125**, exactly **25 unique** ordered Native pair rows. **Stage28 ACCEPTED bounded to its 25 tested pairs**, not a universal correctness proof. Earlier PENDING statements are historical.
