@@ -1,0 +1,133 @@
+name: Soak v030 original Python and Kotlin adjacent year boundary witness
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-adjacent-original-year-bounds-v030.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-native-year-boundary-candidates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          path: original-kotlin
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          path: original-python
+          persist-credentials: false
+      - name: Verify original commits and Python source hash
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git -C original-kotlin rev-parse HEAD)" = "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+          test "$(git -C original-python rev-parse HEAD)" = "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+          echo "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py" \
+            | tee evidence/py-original-source.sha256 | sha256sum -c -
+      - name: Original Python year5000 plus two adjacent native boundary calculations
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          /usr/bin/time -v -o evidence/python-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=4s 155s \
+            python3 -B coordinator/soak/experiments/probe_original_python_adjacent_year_bounds_v030.py \
+            --source original-python/tests/normative_reference.py \
+            --output evidence/python-native-years.json \
+            > evidence/python.log 2>&1
+          rc=$?
+          echo "$rc" > evidence/python.exit
+          cat evidence/python.log
+          exit 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Download exact Kotlin compiler 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged Kotlin production with read-only external boundary adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-compile-resources.txt \
+            timeout --signal=TERM --kill-after=4s 180s kotlinc \
+            original-kotlin/src/main/kotlin/pastafari/*.kt \
+            coordinator/soak/experiments/AdjacentYearBoundaryProbe_v030.kt \
+            -include-runtime -d evidence/original-kotlin-native-yearbounds.jar
+          sha256sum evidence/original-kotlin-native-yearbounds.jar \
+            > evidence/kotlin-boundary-jar.sha256
+          test -z "$(git -C original-kotlin status --porcelain)"
+      - name: Original Kotlin year5000 plus two adjacent native boundary calculations
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -v -o evidence/kotlin-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=4s 155s \
+            java -Xmx512m -XX:MaxDirectMemorySize=128m \
+            -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=64m \
+            -XX:ActiveProcessorCount=2 \
+            -cp evidence/original-kotlin-native-yearbounds.jar \
+            pastafari.AdjacentYearBoundaryProbeV030 \
+            > evidence/kotlin-native-years.tsv 2> evidence/kotlin.log
+          rc=$?
+          echo "$rc" > evidence/kotlin.exit
+          cat evidence/kotlin-native-years.tsv
+          tail -25 evidence/kotlin.log
+          exit 0
+      - name: Fail-first exact comparison of three original native year intervals
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat evidence/python.exit)" = 0
+          test "$(cat evidence/kotlin.exit)" = 0
+          python3 -B coordinator/soak/runner/compare_adjacent_original_bounds_v030.py \
+            --python evidence/python-native-years.json \
+            --kotlin evidence/kotlin-native-years.tsv \
+            --verdict evidence/three-original-native-boundaries-verdict.json \
+            | tee evidence/comparison.log
+          python3 - <<'PY'
+          import json,pathlib
+          d=json.loads(pathlib.Path("evidence/three-original-native-boundaries-verdict.json").read_text())
+          assert d["status"]=="THREE_ORIGINAL_NATIVE_YEAR_BOUNDARIES_AGREE_NOT_CANONICAL_CERTIFIED"
+          assert d["boundary_fields_compared"]==27
+          assert d["original_full_year_date_comparisons"]==0
+          assert d["original_native_full_date_calls"]==0
+          assert d["canonical_oracle_certified"] is False
+          print("THREE_ORIGINAL_NATIVE_ADJACENT_YEAR_BOUNDARIES_MATCH_NOT_FULL_YEAR")
+          PY
+      - name: Preserve complete success/failure receipts and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: three-original-native-adjacent-year-boundaries-v030
+          path: |
+            evidence/*.json
+            evidence/*.tsv
+            evidence/*.txt
+            evidence/*.log
+            evidence/*.sha256
+          if-no-files-found: warn
+          retention-days: 30
