@@ -1,0 +1,196 @@
+name: Soak v034 alternative calculation c=-15055672 full derived year + 7 original native samples
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-alternate-c-derived-year-v034.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  changed-c-full-derived-year:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 11
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          path: original-python
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          path: original-kotlin
+          persist-credentials: false
+      - name: Guard pinned original sources and locked v033 native year
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          echo "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py" \
+            | tee evidence/pinned-py-sha256.txt | sha256sum -c -
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('coordinator/soak/control/alternate_calculation_original_year5000_v033.json')
+          x=json.loads(p.read_text(encoding='utf8'))
+          assert x['status']=='THREE_CALCULATION_NATIVE_YEAR_BOUNDS_MATCH_NOT_CERTIFIED'
+          assert x['exact_bound_fields_compared']==27
+          assert x['full_date_calls']==0 and x['full_native_year_comparisons']==0
+          assert x['algorithm_independence_certified'] is False
+          row=x['cases'][0]
+          assert row['calculation_day']=='-15055672'
+          assert (row['first_target_day'],row['last_target_day'],row['length_days'])==('-15056173','-15052605',3569)
+          print('ALTERNATE_C_ORIGINAL_BOUNDARY_GUARD_PASS')
+          PY
+      - name: Reuse Python original year once + seven independent original F(c,t) witnesses
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          /usr/bin/time -v -o evidence/python-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 230s python3 -B \
+            coordinator/soak/experiments/python_annual_alternate_calculation_v034.py \
+            --original-python original-python/tests/normative_reference.py \
+            --v025-helper coordinator/soak/experiments/python_annual_structure_reuse_v025.py \
+            --locked-boundaries coordinator/soak/control/alternate_calculation_original_year5000_v033.json \
+            --output-dir evidence/python-annual \
+            > evidence/python.log 2>&1
+          rc=$?
+          echo "$rc" > evidence/python.exit
+          tail -30 evidence/python.log
+          exit 0
+      - name: Record original Kotlin F(c,t) target list based on proven Python samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat evidence/python.exit)" = 0
+          python3 - <<'PY'
+          import json,pathlib
+          d=json.loads(pathlib.Path('evidence/python-annual/receipt.json').read_text())
+          assert d['status']=='ALTERNATE_C_PY_3569_DERIVED_ROWS_SAMPLED_ORIGINAL_NOT_FULL_YEAR'
+          assert d['original_native_sample_matches']==7
+          assert d['verified_original_full_years']==0
+          with open('evidence/original-kotlin-targets.tsv','x',encoding='utf8',newline='\n') as f:
+              for t in d['original_native_sample_targets']:
+                  f.write(d['calculation_day']+'\t'+t+'\n')
+          print('ALTERNATE_C_PY_DERIVED_3569_AND_SEVEN_NATIVE_SAMPLES_ADMITTED')
+          PY
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Obtain Kotlin 1.9.0 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Derive a separate hash-guarded Kotlin original source copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/soak/experiments/derive_kotlin_annual_stream_v028.py \
+            --original-repository original-kotlin \
+            --output-dir build/kotlin-annual-derivative \
+            | tee evidence/kotlin-derivation.log
+          cp build/kotlin-annual-derivative/PROVENANCE.json evidence/kotlin-provenance.json
+          test -z "$(git -C original-kotlin status --porcelain)"
+      - name: Compile unmodified Kotlin original F(c,t) and derived annual readout separately
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-original-build-resources.txt \
+            timeout --signal=TERM --kill-after=5s 155s kotlinc \
+            original-kotlin/src/main/kotlin/pastafari/*.kt \
+            original-kotlin/soak/Post55ProductionDateBridge.kt \
+            -include-runtime -d evidence/original-kotlin-bridge.jar
+          /usr/bin/time -v -o evidence/kotlin-derived-build-resources.txt \
+            timeout --signal=TERM --kill-after=5s 155s kotlinc \
+            build/kotlin-annual-derivative/src/main/kotlin/pastafari/*.kt \
+            coordinator/soak/experiments/AlternateCalculationKotlinDerivedAnnual_v034.kt \
+            -include-runtime -d evidence/derived-kotlin-year.jar
+          sha256sum evidence/original-kotlin-bridge.jar \
+            evidence/derived-kotlin-year.jar | tee evidence/jar-build-sha256.txt
+          test -z "$(git -C original-kotlin status --porcelain)"
+      - name: Seven original unchanged Kotlin full-date F(c,t) calls
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -v -o evidence/kotlin-original-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 90s \
+            java -Xmx512m -XX:MaxDirectMemorySize=128m \
+            -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=64m \
+            -XX:ActiveProcessorCount=2 \
+            -cp evidence/original-kotlin-bridge.jar pastafari.Post55ProductionDateBridge \
+            < evidence/original-kotlin-targets.tsv \
+            > evidence/original-kotlin-seven.tsv 2> evidence/original-kotlin.log
+          rc=$?
+          echo "$rc" > evidence/original-kotlin.exit
+          tail -20 evidence/original-kotlin.log
+          exit 0
+      - name: One-pass 3569-day DERIVED Kotlin readout for changed calculation day
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -v -o evidence/kotlin-derived-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 90s \
+            java -Xmx512m -XX:MaxDirectMemorySize=128m \
+            -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=64m \
+            -XX:ActiveProcessorCount=2 \
+            -cp evidence/derived-kotlin-year.jar \
+            pastafari.AlternateCalculationKotlinDerivedAnnualV034 -15055672 \
+            > evidence/kotlin-3569-derived.tsv 2> evidence/kotlin-derived.log
+          rc=$?
+          echo "$rc" > evidence/kotlin-derived.exit
+          tail -20 evidence/kotlin-derived.log
+          exit 0
+      - name: First-difference comparison of all 3569 derived rows and seven original Kotlin witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat evidence/original-kotlin.exit)" = 0
+          test "$(cat evidence/kotlin-derived.exit)" = 0
+          python3 -B coordinator/soak/runner/compare_annual_alternate_calculation_v034.py \
+            --python-year-dir evidence/python-annual \
+            --kotlin-derived evidence/kotlin-3569-derived.tsv \
+            --kotlin-original-samples evidence/original-kotlin-seven.tsv \
+            --verdict evidence/alternate-c-derived-year-verdict.json \
+            | tee evidence/alternate-c-comparison.log
+          python3 - <<'PY'
+          import json,pathlib
+          v=json.loads(pathlib.Path('evidence/alternate-c-derived-year-verdict.json').read_text())
+          assert v['status']=='ALTERNATE_C_3569_DERIVED_ROWS_MATCH_SAMPLED_NATIVE_NOT_CERTIFIED'
+          assert v['derived_rows_matched']==3569 and v['derived_fields_matched']==24983
+          assert v['original_kotlin_native_sample_matches']==7
+          assert v['full_original_Fct_years_passed']==0
+          assert v['soak_started'] is False
+          print('ALTERNATE_C_DERIVED_ALL_3569_MATCHED_ORIGINAL_NATIVE_SEVEN_EACH')
+          PY
+      - name: Retain raw bytes, checksums and failure evidence, no machine changes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alternate-calculation-c-minus15055672-derived-year-v034
+          path: |
+            evidence/*.json
+            evidence/*.log
+            evidence/*.txt
+            evidence/*.tsv
+            evidence/python-annual/*
+          if-no-files-found: warn
+          retention-days: 30
