@@ -93,6 +93,11 @@ wWorkExpectedDirection:: ds 1
 wWorkLeft:: ds 1
 ; Stable 16-bit test case ABI extension; never move C000-C002.
 wTestCaseHi:: ds 1
+wCalendarRequestedOwner:: ds 1
+wCalendarRequestedBanks:: ds 1
+wCalendarActive:: ds 1
+wCalendarActiveOwner:: ds 1
+wCalendarStatus:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -177,6 +182,13 @@ Bootstrap:
     jp nz, .done
     call RunOwnerSignedCmpTests
 .done:
+    ld a, [wTestResult]
+    cp $a5
+    jr nz, .afterLifecycle
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarInvocationTests
+.afterLifecycle:
     call calendarDateSpaghetti
 .hold:
     jr .hold
@@ -220,3 +232,4 @@ INCLUDE "src/tests/variable_add_test.asm"
 INCLUDE "src/tests/sram_owner_test.asm"
 INCLUDE "src/tests/owner_byte_test.asm"
 INCLUDE "src/tests/owner_signed_cmp_test.asm"
+INCLUDE "src/tests/calendar_invocation_lifecycle_test.asm"

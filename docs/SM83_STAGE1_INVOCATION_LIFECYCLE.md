@@ -1,0 +1,7 @@
+# SM83 Stage1 invocation lifecycle increment
+
+Project PC-BRANCH-SM83-ASSEMBLY-GEEZ; branch SM83-Assembly+ግዕዝ.
+
+Native ROMX bank1 routines CalendarInvocationBegin and CalendarInvocationAbort manage one serialized owner-scoped invocation. They DO NOT convert dates. Caller must select ROM bank 1 by writing 1 to MBC5 register $2000, enable SRAM, initialize lease table and initialize wCalendarActive/wCalendarActiveOwner to zero when idle, with interrupts disabled. New WRAM state is appended after wTestCaseHi, preserving C000/C001/C002 and prior offsets. Begin accepts 1..253 owner and 1..13 banks. Allocated banks are zeroized; active owner is stored independently of mutable request. Status 0 success, 1 capacity, 2 invalid, 3 duplicate, 4 allocator invariant, 5 busy. Abort scrubs and frees the saved active owner only; status 6 means idle. Unexpected release errors retain active state for diagnosis. No reentrancy, semantic transaction or full-calendar claim.
+
+Native 284..289: allocation, busy rejection/payload immutability, rollback after request mutation, idle rejection, invalid owner, invalid count. Host Python oracle also checks 30 owner/count combinations and 8192-byte scrub. Existing 1..283 Native tests and 9000-frame cap remain in force, with exact-SHA completed CI required. DMG/MBC5+128KiB, ROM0 budget and Ge'ez source-name QA remain independent gates. Stage1 still OPEN: arbitrary signed dates, canonical SAVE, 10 native five-field vectors and linguistic catalog are not implemented.
