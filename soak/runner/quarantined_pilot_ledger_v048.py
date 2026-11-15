@@ -55,6 +55,12 @@ def check_plan(store,report):
 
 def _publish(store,path,content):
     staging=path.with_name(path.name+".part")
+    if path.parent.is_symlink() or path.is_symlink() or staging.is_symlink():
+        raise ValueError("symlink cannot be used as original pilot evidence path")
+    if path.exists() and not path.is_file():
+        raise ValueError("non-file evidence path cannot be overwritten")
+    if staging.exists() and not staging.is_file():
+        raise ValueError("non-file staging path cannot be reused")
     if path.exists():
         if path.read_bytes()!=content or staging.exists():
             raise ValueError("existing supervised witness conflict; cannot overwrite")
@@ -77,6 +83,8 @@ def register_one_day_pilot(store,blob:bytes,*,expected_sha256:str=ZIP_SHA):
     check_plan(store,report)
     witness=canonical(report)
     root,archive_path,report_path=paths(store,expected_sha256)
+    if (store.root/"evidence").is_symlink() or root.is_symlink():
+        raise ValueError("unsafe symlink pilot evidence directory")
     root.mkdir(parents=True,exist_ok=True)
     # Committed witnesses cannot be healed by replay.
     prior=store.db.execute(
@@ -114,6 +122,8 @@ def check_registered_pilot_witnesses(store)->int:
     rows=store.db.execute(
         "SELECT artifact_sha256,plan_sha256,report_sha256,archive_bytes,year,target_day "
         "FROM supervised_pilot_witnesses ORDER BY artifact_sha256").fetchall()
+    if (store.root/"evidence").is_symlink() or root.is_symlink():
+        raise ValueError("unsafe symlink pilot evidence directory")
     if not root.exists():
         if rows: raise ValueError("committed pilot evidence directory missing")
         return 0
