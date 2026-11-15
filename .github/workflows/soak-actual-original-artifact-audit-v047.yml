@@ -111,7 +111,7 @@ jobs:
           set -euo pipefail
           python3 -B -m unittest discover -s soak/process_tests             -p 'test_quarantined_actual_pilot_v048.py' -v             |& tee evidence/v048-ledger-tests.log
           test "$(grep -c '^test_' evidence/v048-ledger-tests.log)" -ge 8
-          grep -Eq 'Ran 10 tests' evidence/v048-ledger-tests.log
+          grep -Eq 'Ran 12 tests' evidence/v048-ledger-tests.log
           grep -q '^OK' evidence/v048-ledger-tests.log
           echo "V048_QUARANTINED_ORIGINAL_PILOT_LEDGER_TESTS_PASS_NO_YEAR_CREDIT"
       - name: Archive only checks and logs, not a newly certified native year
