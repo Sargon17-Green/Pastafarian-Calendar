@@ -1,0 +1,112 @@
+name: Soak v047 revalidate immutable observed native date artifact (no Fct)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/supervised_original_pair_artifact_v047.py"
+      - ".github/workflows/soak-actual-original-artifact-audit-v047.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit-real-v045-artifact:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download exact original v045 GitHub Actions artifact, no converter launches
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14181487872/zip             > evidence/observed-original-v045.zip
+          printf '%s\n' '2bcf3c15cc98c977e500caa7432f15e9bce17557f6292d4aae3d6ed9d5704c4d  evidence/observed-original-v045.zip'             | sha256sum -c -
+          echo "REAL_ORIGINAL_ARTIFACT_PINNED_SHA_PASS"
+      - name: Reconcile 17 original CI files, exact process receipts and raw numeric dates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/supervised_original_pair_artifact_v047.py             --artifact evidence/observed-original-v045.zip             --expected-sha256 2bcf3c15cc98c977e500caa7432f15e9bce17557f6292d4aae3d6ed9d5704c4d             | tee evidence/reconciled.json
+          python3 - <<'PY'
+          import json
+          s=json.load(open('evidence/reconciled.json'))
+          assert s['status']=='ONE_NATIVE_DATE_PAIR_RECHECKED_NOT_YEAR_SOAK'
+          assert s['original_native_five_fields']==['5000',10,503,20,56]
+          assert s['compared_native_five_fields']==5
+          assert s['original_native_date_pairs_verified']==1
+          assert s['original_complete_year_soak_passes_certified']==0
+          assert s['host_process_identity_independently_attested'] is False
+          assert s['transport_boundary_sha256'] is None
+          assert s['supervisor_boundary_sha256']=='ad64cc51522d7f19cb8a238e2a6a418e75203c6cbfe017c394f623edeb882e78'
+          print('V047_PINNED_NATIVE_PROCESS_ARTIFACT_REVALIDATED_NO_YEAR_CREDIT')
+          PY
+      - name: Adversarial mutations must fail even with attacker repinning the ZIP hash
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY' | tee evidence/adversarial-tests.txt
+          import importlib.util,hashlib,io,json,zipfile
+          from pathlib import Path
+          path=Path('soak/runner/supervised_original_pair_artifact_v047.py')
+          spec=importlib.util.spec_from_file_location('audit_v047',path)
+          m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          original=Path('evidence/observed-original-v045.zip').read_bytes()
+          good=m.verify_supervised_original_pair_archive(original,expected_sha256=m.sha(original))
+          assert good['original_complete_year_soak_passes_certified']==0
+          failures=0
+          def mutant(path,substitute):
+              with zipfile.ZipFile(io.BytesIO(original)) as inp:
+                  contents={k:inp.read(k) for k in inp.namelist()}
+              contents[path]=substitute(contents[path])
+              dest=io.BytesIO()
+              with zipfile.ZipFile(dest,'w',zipfile.ZIP_DEFLATED) as out:
+                  for k,v in contents.items():out.writestr(k,v)
+              return dest.getvalue()
+          def reject(label,payload):
+              global failures
+              try:
+                  m.verify_supervised_original_pair_archive(payload,expected_sha256=m.sha(payload))
+              except (ValueError,zipfile.BadZipFile,UnicodeError,KeyError) as ex:
+                  print('REJECTED_'+label+'='+type(ex).__name__)
+                  failures+=1
+              else:
+                  raise AssertionError('MUTATION_UNDETECTED_'+label)
+          def change_json(obj,field,value):
+              x=json.loads(obj);x[field]=value
+              return m.canonical(x)
+          reject('python_native_date_changed',mutant('REF-41/native-normalized.jsonl',
+              lambda b:b.replace(b'"cutlet_index":10',b'"cutlet_index":11')))
+          reject('python_raw_tampered',mutant('REF-41/native-raw.jsonl',
+              lambda b:b.replace(b'Akrep',b'OTHER')))
+          reject('kotlin_native_stdout_changed',mutant('PROD-KT-CY/os-stdout.tsv',
+              lambda b:b.replace(b'\t503\t',b'\t504\t')))
+          reject('process_binary_claim_changed',mutant('PROD-KT-CY/process-evidence.json',
+              lambda b:change_json(b,'compiled_original_jar_sha256','0'*64)))
+          reject('original_transport_boundary_backfilled',mutant('REF-41/native-transport-receipt.json',
+              lambda b:json.dumps({**json.loads(b),'boundary_evidence_sha256':m.BOUNDARY_SHA}).encode()))
+          reject('python_process_identity_c_changed',mutant('REF-41/process-evidence.json',
+              lambda b:change_json(b,'calculation_day','-15055672')))
+          reject('forged_certificate',mutant('one-day-original-py-kt-verdict.json',
+              lambda b:change_json(b,'original_complete_years_soak_passed',1)))
+          reject('missing_original_jar',mutant('original-kotlin-production-v045.jar',
+              lambda b:b[:512]))
+          assert failures==8
+          print('V047_ADVERSARIAL_MUTATIONS_REJECTED=8')
+          print('NATIVE_CONVERTER_CALLS_DURING_AUDIT=0')
+          PY
+      - name: Archive only checks and logs, not a newly certified native year
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v047-observed-original-day-audit-no-soak-certificate
+          path: |
+            evidence/reconciled.json
+            evidence/adversarial-tests.txt
+          if-no-files-found: warn
+          retention-days: 30
