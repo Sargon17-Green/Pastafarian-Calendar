@@ -190,6 +190,27 @@ class QuarantinedPilotLedgerTest(unittest.TestCase):
             self.assertEqual(outcome["outcome"],"QUARANTINED_PILOT_RECORDED")
             self.assertEqual(store.verify_and_recover()["quarantined_pilot_witnesses_revalidated"],1)
 
+    def test_symlinked_artifact_refused_before_sqlite_registration(self):
+        with CrashStore(self.root,self.plan) as store:
+            folder,archive,_=paths(store,ZIP_SHA)
+            folder.mkdir(parents=True,exist_ok=True)
+            target=Path(self.tmp.name)/"outside-original.zip"
+            target.write_bytes(self.payload)
+            archive.symlink_to(target)
+            with self.assertRaisesRegex(ValueError,"symlink"):
+                self.register(store)
+            self.assertEqual(store.progress()["quarantined_pilot_records_not_year_chunks"],0)
+
+    def test_symlinked_evidence_directory_is_never_used(self):
+        with CrashStore(self.root,self.plan) as store:
+            folder,_,_=paths(store,ZIP_SHA)
+            target=Path(self.tmp.name)/"elsewhere"
+            target.mkdir()
+            folder.symlink_to(target,target_is_directory=True)
+            with self.assertRaisesRegex(ValueError,"symlink"):
+                self.register(store)
+            self.assertEqual(store.progress()["committed_chunks"],0)
+
     def test_new_pilot_pair_not_counted_as_full_year_even_if_future_year_chunks_pending(self):
         with CrashStore(self.root,self.plan) as store:
             self.register(store)
