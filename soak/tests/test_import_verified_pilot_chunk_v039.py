@@ -151,7 +151,7 @@ class PilotV039WiringTests(unittest.TestCase):
                 self.assertEqual(b["ledger_result"],"COMMITTED")
                 self.assertFalse(a["trusted_process_execution_attested"])
                 self.assertEqual(b["official_original_soak_years_certified"],0)
-                self.assertEqual(s.progress()["raw_native_chunk_receipts_integrity_linked"],2)
+                self.assertEqual(s.progress()["native_receipt_rows_recorded_without_revalidation"],2)
                 self.assertEqual(s.progress()["verified_comparisons_completed"],1)
                 self.assertEqual(s.progress()["original_native_full_year_soak_passes_certified"],0)
             with CrashStore(self.root/"ledger",self.plan) as s:
