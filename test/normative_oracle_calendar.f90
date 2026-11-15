@@ -56,7 +56,7 @@ module normative_oracle_calendar
   type(GateCache), save :: gates
   logical, save :: gatesInitialized = .false.
 
-  public :: reset_gate_cache, ensure_gate_index, gate_day
+  public :: reset_gate_cache, ensure_gate_index, gate_day, gate_cache_bounds
   public :: positive_gate_gap, negative_gate_gap, exact_gate_index
   public :: year5000, next_year, previous_year, find_target_year
   public :: build_year_structure, normative_calendar_date, project_calendar_date
@@ -72,6 +72,15 @@ contains
     gates%maxIndex=0_int64
     gatesInitialized=.true.
   end subroutine reset_gate_cache
+
+  ! Observational test-only accessor: expose cache boundaries, not its storage.
+  ! Does not alter the gate selection or calendar arithmetic.
+  subroutine gate_cache_bounds(low, high)
+    integer(int64), intent(out) :: low, high
+    call ensure_gate_boot()
+    low = gates%minIndex
+    high = gates%maxIndex
+  end subroutine gate_cache_bounds
 
   subroutine ensure_gate_boot()
     if (.not. gatesInitialized) call reset_gate_cache()
