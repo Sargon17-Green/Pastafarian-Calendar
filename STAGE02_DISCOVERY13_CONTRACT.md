@@ -1,5 +1,5 @@
 # Stage2 Discovery13 — exact visible drops 26–30 (Logo+Ido)
-Status: IMPLEMENTED_NATIVE_PENDING (2026-11-07). Discovery12 accepted on 562efcdeb7febb98dd296d4fc6b8de7080769091, completed original Native 42251281788 (5 cases/21 checks and genuine PASS), same-SHA D11, D10, D1–D9, Stage1 Native and Names completed SUCCESS. LAST_COMPLETED_STAGE=1, overall Stage2 incomplete.
+Status: ACCEPTED_NATIVE (2026-11-15). Discovery12 accepted on 562efcdeb7febb98dd296d4fc6b8de7080769091, completed original Native 42251281788 (5 cases/21 checks and genuine PASS), same-SHA D11, D10, D1–D9, Stage1 Native and Names completed SUCCESS. LAST_COMPLETED_STAGE=1, overall Stage2 incomplete.
 
 ## Input/output and identity guards
 Input: valid Discovery12 context with status VISIBLE_TWENTYFIVE_ONLY, twenty-five canonical exact BI visibleTwentyFive entries, forty-six stone quintets, seven hidden seeds, and five workcounts. Wrong status, non-list prefix, or prefix length other than 25 => return input context EXACTLY, including metrics/logs unchanged.
@@ -11,3 +11,6 @@ For i=26..30, read p1=V[i−1], p3=V[i−3], p7=V[i−7] and stone quintet S[i];
 ## Acceptance gates
 One foundation/tablets valid fixture: 5 independent exact checks for positions 26..30, 11 context-preservation/transition checks, 1 repeated-call determinism = 17 checks. Four invalid identity fixtures: failed-validation, hidden-only, 24-element prefix, non-list prefix = 4 checks. Total 5 cases/21 checks.
 Exact completed genuine log markers: STAGE_2_DISCOVERY_13_CASES_PASIS 5; STAGE_2_DISCOVERY_13_CHECKS_PASIS 21; STAGE_2_DISCOVERY_13_PASIS; NATIVE_STAGE_2_DISCOVERY_13_VERIFICATION=PASS. No failure, unknown-procedure, timeout or missing markers. Pinned headless UCBLogo version_6.2.5 source a0215433f07384e4c42fe247525867f11e6f32f7, test <=1200s, whole job <=25 minutes. At identical D13 commit SHA require D1–D12 regression workflows, original Stage1 Native and Canonical Names Lock completed SUCCESS. No manual duplicate dispatch, no main/merge. After acceptance evaluate runtime and design bounded D14 values 31..35.
+
+## Native acceptance — 2026-11-15
+Verified same-SHA c4bc1798478df91358d0e59a112edbd9af223872: original push run 42390655247/job 128457338296 completed SUCCESS (5 cases, 21 checks), genuine STAGE_2_DISCOVERY_13_PASIS and NATIVE_STAGE_2_DISCOVERY_13_VERIFICATION=PASS. Same-SHA D12 42390655194, D11 42390655259, D10 42390655122, D1–D9 42390655133, original Stage1 42390655187, Names 42390655100 all completed SUCCESS, first attempt. Overall Stage2 still incomplete, LAST_COMPLETED_STAGE=1.

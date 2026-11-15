@@ -1,0 +1,15 @@
+# Stage2 Discovery14 — exact visible drops 31–35 (Logo+Ido)
+Status: IMPLEMENTED_NATIVE_PENDING (2026-11-15). D13 accepted at c4bc1798478df91358d0e59a112edbd9af223872, original push run 42390655247/job 128457338296 completed SUCCESS (5 cases, 21 checks, genuine native PASS); same-SHA D12, D11, D10, D1–D9, Stage1 and Names all completed SUCCESS. LAST_COMPLETED_STAGE=1. Stage2 overall incomplete.
+
+## Input/output and immutable identity
+Input: D13-valid context with status VISIBLE_THIRTY_ONLY; 30 canonical exact BI entries visibleThirty, 46 stone quintets, 7 hidden seeds, and five exact workcounts. Wrong status, non-list prefix, or prefix count !=30 => return identical context without changing metrics/logs.
+Valid output: visibleThirtyFive with 35 canonical BI values in [1,M], retaining the first 30 unchanged. Phase VISIBLE_THIRTYFIVE_READY, mode STAGE_2_DISCOVERY_14, status VISIBLE_THIRTYFIVE_ONLY; append once metric stage02.visible.thirtyfive and log stage02.visible.thirtyfive.ready. Preserve raw/normalized dates, 5 workcounts, stones, hidden seeds and all earlier prefix fields (visiblePrefix, visibleTen, visibleFifteen, visibleTwenty, visibleTwentyFive, visibleThirty). No Stage1 or final calendar behavior changes.
+
+## Independent exact Appendix A oracle
+For i=31..35, p1=V[i-1], p3=V[i-3], p7=V[i-7], stone quintet S[i], workcounts A/T/D/C/R. save(z)=1+((z-1) mod M) using exact BI. Initial x0=save(S1*A+S2*T+S3*D+S4*C+S5*R+p1+3*p3+5*p7+i). Perform precisely 11 quadratic rounds with immutable 11 coefficients from STAGE02_DISCOVERY08_CONTRACT.md, save after every round.
+Production uses preexisting D8 production helpers prefix.prior/initial/grind, NEVER nr.*. Test-only oracle independently computes ALL 1..35 using nr.work.counts, nr.stones, nr.hidden.build and nr.visible.one from the raw fixture dates, never using production intermediate expected values. All exact comparisons in native UCBLogo 6.2.5, not numeric float approximations.
+
+## Measurable acceptance
+One valid foundation/tablets fixture: 5 independent comparisons (31..35); 11 context-preservation, transition and exact append checks; 1 repeated-call determinism = 17. Four invalid context identity checks: FAILED_VALIDATION, HIDDEN_SEEDS_ONLY, 29-element prefix, non-list prefix. Total 5 cases / 21 checks.
+Require completed original native push on identical D14 commit SHA with exact log markers STAGE_2_DISCOVERY_14_CASES_PASIS 5; STAGE_2_DISCOVERY_14_CHECKS_PASIS 21; STAGE_2_DISCOVERY_14_PASIS; NATIVE_STAGE_2_DISCOVERY_14_VERIFICATION=PASS. No failure marker, unknown procedure, or timeout; pinned headless UCBLogo version_6.2.5 at a0215433f07384e4c42fe247525867f11e6f32f7; test <=1200 seconds; total job <=25 minutes. Same-SHA D1–D13 workflows, Stage1 native, canonical Names Lock must be completed SUCCESS. Queued/in_progress are neither PASS nor blockers. No manual duplicate dispatch, no main/merge.
+After acceptance assess bounded runtime and design D15 36..40 as a new contract and production increment.

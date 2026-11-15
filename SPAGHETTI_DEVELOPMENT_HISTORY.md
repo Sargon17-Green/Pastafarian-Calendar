@@ -263,3 +263,6 @@ On Logo+Ido SHA 17933d208eb6807eca0de972c097f13e54ca136b, D11 42188439783/job 12
 
 ## Discovery13 production/test/CI implementation — 2026-11-07
 Exact 26..30 extension using the D8 production helpers, independent test-only normative full 1..30 oracle, 5 case/21 check contract, pinned bounded CI. D13 Native PENDING until same-SHA D1–D12, Stage1 and Names completed/log evidence. No main/merge.
+
+## Stage2 DISCOVERY13 Native accepted; DISCOVERY14 candidate — 2026-11-15
+At verified Logo+Ido HEAD c4bc1798478df91358d0e59a112edbd9af223872, D13 original push run 42390655247/job 128457338296 completed SUCCESS with 5/21 native checks and real PASS marker. Same-SHA D12 42390655194, D11 42390655259, D10 42390655122, D1–D9 42390655133, Stage1 42390655187 and Names 42390655100 all completed SUCCESS. D13 accepted. Discovery14 implements exact positions 31..35 with independent normative 1..35 oracle, four invalid identity cases, 21 planned checks, bounded headless CI. Native D14 NOT accepted until completed same-SHA evidence. No main/merge. LAST_COMPLETED_STAGE=1.
