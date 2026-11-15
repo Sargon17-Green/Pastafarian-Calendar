@@ -1,0 +1,188 @@
+name: FALSE Arabic Stage 2 DISCOVERY01 exact-source Native Ubuntu
+
+on:
+  push:
+    branches:
+      - 'FALSE+العربية'
+    paths:
+      - '.github/workflows/false-arabic-stage02-native-ubuntu.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-native-discovery01:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: d05b84ab06a667e2b06d452dc73ca8c7b0837767
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+      ORIGINAL_COMBINED_SHA256: a01f4bd25f812e03dac9c7ec8f23ae75b0cf77461e49bc9210d9cec4f7745bae
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Fetch immutable project and upstream FALSE sources
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence upstream
+          git fetch --no-tags --depth=1 origin "$SOURCE_PIN" > evidence/project_fetch.log 2>&1
+          git rev-parse FETCH_HEAD > evidence/project_observed_sha.txt
+          test "$(cat evidence/project_observed_sha.txt)" = "$SOURCE_PIN"
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/upstream_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/upstream_observed_sha.txt
+          test "$(cat evidence/upstream_observed_sha.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          git -C upstream status --porcelain > evidence/upstream_worktree_status.txt
+          test ! -s evidence/upstream_worktree_status.txt
+
+      - name: Verify unmodified bytes of original Stage 2 combined program
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import hashlib, os, pathlib, subprocess
+          source = os.environ['SOURCE_PIN']
+          paths = ('src/bigint.false', 'test/normative_reference.false',
+                   'src/monster_bootstrap.false', 'test/stage02_discovery01_tests.false')
+          chunks = [subprocess.check_output(['git', 'show', source + ':' + p]).decode('utf-8')
+                    for p in paths]
+          data = ('\n'.join(chunks) + '\n').encode('utf-8')
+          actual = hashlib.sha256(data).hexdigest()
+          pathlib.Path('evidence/stage02_discovery01_combined.false').write_bytes(data)
+          pathlib.Path('evidence/combined_sha256.txt').write_text(actual + '  stage02_discovery01_combined.false\n')
+          assert actual == os.environ['ORIGINAL_COMBINED_SHA256'], (actual, 'original combined SHA mismatch')
+          assert data.count('ø'.encode('utf-8')) == 2, 'unexpected pick glyph count'
+          assert '[z;\\-1-ø]g:'.encode('utf-8') in data
+          assert '[z;\\-ø]h:'.encode('utf-8') in data
+          print('SOURCE_BYTES_LOCKED', actual)
+          PY
+
+      - name: Compile pinned upstream native interpreter under Ubuntu
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/compiler_version.txt
+          cd upstream
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -I. -Isrc \
+            interpreter.c src/false.c utils/file.c src/stack.c src/slice.c src/storage.c src/token.c \
+            -o false_int > ../evidence/compile_stdout.txt 2> ../evidence/compile_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > ../evidence/compiler_exit_code.txt
+          test "$code" -eq 0
+          test -x false_int
+          sha256sum false_int > ../evidence/runtime_executable_sha256.txt
+
+      - name: Test basic, extension, and both pick spellings
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          printf '2 3+.' > evidence/smoke.false
+          printf '2 3<.' > evidence/extension.false
+          printf '4 7 1O.' > evidence/pick_ascii.false
+          printf '4 7 1ø.' > evidence/pick_unicode.false
+          for test_name in smoke extension pick_ascii pick_unicode; do
+            set +e
+            timeout 15s upstream/false_int -e "evidence/$test_name.false" \
+              > "evidence/$test_name.stdout.txt" 2> "evidence/$test_name.stderr.txt"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$test_name.exit_code.txt"
+            test "$code" -eq 0
+          done
+          test "$(cat evidence/smoke.stdout.txt)" = '5'
+          test "$(cat evidence/extension.stdout.txt)" = '-1'
+          test "$(cat evidence/pick_ascii.stdout.txt)" = '4'
+          test "$(cat evidence/pick_unicode.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/preflight_status.txt
+
+      - name: Run unchanged Stage 2 DISCOVERY01 exact bytes (bounded)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          set +e
+          timeout 120s upstream/false_int -e evidence/stage02_discovery01_combined.false \
+            > evidence/native_stdout.txt 2> evidence/native_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/native_exit_code.txt
+          test "$code" -eq 0
+          grep -Fq 'DISCOVERY01_SHAPE_M0_2M0_3M0_MPLUS1_1' evidence/native_stdout.txt
+          grep -Fq 'DISCOVERY01_RECREATED_NATIVE_SHAPE_VERIFIED' evidence/native_stdout.txt
+          if grep -Fq 'فشل استقصاء المرحلة الثانية' evidence/native_stdout.txt; then
+            echo CONTRADICTORY_NATIVE_FAILURE > evidence/native_validation_error.txt
+            exit 2
+          fi
+
+      - name: Finalize explicit provenance and Native evidence
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          folder = pathlib.Path('evidence')
+          folder.mkdir(exist_ok=True)
+          def content(path):
+              p = folder / path
+              return p.read_text(encoding='utf-8').strip() if p.exists() else None
+          def code(path):
+              value = content(path)
+              return int(value) if value is not None else None
+          combined = folder / 'stage02_discovery01_combined.false'
+          hash_actual = hashlib.sha256(combined.read_bytes()).hexdigest() if combined.exists() else None
+          stdout = content('native_stdout.txt') or ''
+          expected = ('DISCOVERY01_SHAPE_M0_2M0_3M0_MPLUS1_1',
+                      'DISCOVERY01_RECREATED_NATIVE_SHAPE_VERIFIED')
+          preflight = content('preflight_status.txt') == 'ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS'
+          success = (preflight and hash_actual == os.environ['ORIGINAL_COMBINED_SHA256'] and
+                     content('project_observed_sha.txt') == os.environ['SOURCE_PIN'] and
+                     content('upstream_observed_sha.txt') == os.environ['RUNTIME_PIN'] and
+                     code('compiler_exit_code.txt') == 0 and code('native_exit_code.txt') == 0 and
+                     all(s in stdout for s in expected) and
+                     'فشل استقصاء المرحلة الثانية' not in stdout)
+          evidence = {
+              'project_id': os.environ['PROJECT_ID'],
+              'platform': 'ubuntu-latest',
+              'execution_mode': 'ORIGINAL_EXACT_SOURCE_UTF8',
+              'source_pin': os.environ['SOURCE_PIN'],
+              'source_observed': content('project_observed_sha.txt'),
+              'runtime_pin': os.environ['RUNTIME_PIN'],
+              'runtime_observed': content('upstream_observed_sha.txt'),
+              'combined_expected_sha256': os.environ['ORIGINAL_COMBINED_SHA256'],
+              'combined_observed_sha256': hash_actual,
+              'compiler_exit_code': code('compiler_exit_code.txt'),
+              'unicode_preflight_pass': preflight,
+              'native_exit_code': code('native_exit_code.txt'),
+              'markers_verified': all(s in stdout for s in expected),
+              'failure_marker_absent': 'فشل استقصاء المرحلة الثانية' not in stdout,
+              'discovery01_native_verified': success,
+              'stage2_full_acceptance': False,
+              'stage3_authorized': False,
+              'github_run_id': os.environ.get('GITHUB_RUN_ID'),
+              'github_sha': os.environ.get('GITHUB_SHA'),
+          }
+          (folder / 'evidence.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(evidence, ensure_ascii=False))
+          if not success:
+              raise SystemExit('Native DISCOVERY01 NOT_VERIFIED; inspect artifact and job logs')
+          PY
+
+      - name: Save bounded evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage02-native-ubuntu
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error
