@@ -15,7 +15,10 @@ import json
 import os
 from pathlib import Path
 import re
-import resource
+try:
+    import resource
+except ImportError:  # Windows is deliberately blocked by _admit().
+    resource = None
 import shutil
 import subprocess
 import sys
@@ -40,6 +43,11 @@ import sys
 import time
 mode, destination = sys.argv[1:]
 work = Path(destination)
+start = time.monotonic()
+while not (work/"go.json").is_file():
+    if time.monotonic()-start > 3:
+        raise SystemExit(19)  # Never run test without supervisor GO.
+    time.sleep(.01)
 if mode == "sleep":
     print("SYNTHETIC_CHILD_INTENTIONALLY_SLEEPING", flush=True)
     time.sleep(30)
@@ -124,7 +132,7 @@ def _child_limit():
 
 
 def _admit(root:Path):
-    if os.name != "posix" or not sys.platform.startswith("linux"):
+    if os.name != "posix" or not sys.platform.startswith("linux") or resource is None:
         raise RuntimeError("v041 supervisor test-only; Windows execution forbidden")
     if (os.environ.get("GITHUB_ACTIONS") != "true"
             or os.environ.get("RUNNER_OS") != "Linux"):
@@ -219,6 +227,11 @@ def run_synthetic_ci_once(root:Path, *, mode:str="ok", wall_seconds:float=WALL_L
         observed["pid"]=proc.pid
         try:
             observed["proc_start_id"]=_pid_start_id(proc.pid)
+            _durable_exclusive(work/"go.json",canonical({
+                "pid":proc.pid,
+                "proc_start_id":observed["proc_start_id"],
+                "command_sha256":observed["command_sha256"],
+            }))
             proc.wait(timeout=wall_seconds)
         except subprocess.TimeoutExpired:
             # Allowed ONLY for synthetic bounded test child. Never apply a
@@ -287,6 +300,10 @@ def verify_synthetic_evidence(work:Path) -> dict:
         raise ValueError("observed command identity differs from recorded command")
     if obj["fixture_sha256"]!=sha(CHILD.encode("utf8")):
         raise ValueError("unexpected fixture source code")
+    go=json.loads(_read_limited(work/"go.json"))
+    if go!={"pid":obj["pid"],"proc_start_id":obj["proc_start_id"],
+           "command_sha256":obj["command_sha256"]}:
+        raise ValueError("supervisor GO does not match OS process identity")
     for name,field in (
         ("child-fixture.py","fixture_sha256"),
         ("os-stdout.log","stdout_sha256"),
