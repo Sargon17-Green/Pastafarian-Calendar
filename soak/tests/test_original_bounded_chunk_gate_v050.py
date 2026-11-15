@@ -86,8 +86,9 @@ class BoundedOriginalGateTests(unittest.TestCase):
         row=json.loads(rows[0])
         self.assertEqual(row["cutlet_name_raw"],"10")
         self.assertEqual(row["month_name_raw"],"20")
-        self.assertEqual(row["native_name_provenance"],
-                         "INDEX_ONLY_NO_CYMRAEG_NAMES_IN_SOURCE")
+        self.assertEqual(out["kotlin_name_field_semantics"],
+                         "NATIVE_INDEX_STRING_NOT_NAME")
+        self.assertEqual(len(row),10)
         self.assertEqual(row["source_raw_sha256"],
                          hashlib.sha256(x["kotlin_original_stdout"]).hexdigest())
 
