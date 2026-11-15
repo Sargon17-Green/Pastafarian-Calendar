@@ -227,6 +227,11 @@ class CrashStore:
               stdout_bytes INTEGER NOT NULL, source_rows INTEGER NOT NULL,
               PRIMARY KEY(engine,year,ordinal),
               FOREIGN KEY(engine,year,ordinal) REFERENCES chunks(engine,year,ordinal));
+            CREATE TABLE IF NOT EXISTS supervised_pilot_witnesses(
+              artifact_sha256 TEXT PRIMARY KEY,
+              plan_sha256 TEXT NOT NULL, report_sha256 TEXT NOT NULL,
+              archive_bytes INTEGER NOT NULL, year TEXT NOT NULL,
+              target_day TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS comparisons(
               year TEXT NOT NULL, candidate TEXT NOT NULL,
               verified_days INTEGER NOT NULL, stream_sha256 TEXT NOT NULL,
@@ -333,6 +338,16 @@ class CrashStore:
         ix = self.engines.index(chunk.engine_id)
         if ix and not self._full_engine(self.engines[ix-1],chunk.year):
             raise ValueError("complete previous engine year before computing this engine")
+
+    def record_quarantined_original_pilot(self, archive_bytes: bytes, *, expected_sha256: str):
+        """Record original one-day process evidence; does not commit any year chunk.
+
+        The pilot can never alter comparisons or grant official source certification.
+        It has its own append-only SQLite table and artifact sidecars.
+        """
+        from quarantined_pilot_ledger_v048 import register_one_day_pilot
+        return register_one_day_pilot(self, archive_bytes,
+                                      expected_sha256=expected_sha256)
 
     def _native_receipt_paths(self, chunk: Chunk) -> tuple[pathlib.Path, pathlib.Path]:
         self._assert_immutable_plan()
@@ -596,8 +611,11 @@ class CrashStore:
                         break
                     self._commit_validated(chunk,sha256(data),len(data),parsed)
                     adopted+=1
+        from quarantined_pilot_ledger_v048 import check_registered_pilot_witnesses
+        validated_pilots = check_registered_pilot_witnesses(self)
         return {"verified_existing_chunks":already,"recovered_chunks":adopted,
                 "recovered_staged_files":staged,"incident":self.incident(),
+                "quarantined_pilot_witnesses_revalidated":validated_pilots,
                 "progress":self.progress()}
 
     def pending_jobs(self) -> list[Chunk]:
@@ -617,6 +635,8 @@ class CrashStore:
         self._assert_immutable_plan()
         rows=self.db.execute("SELECT year,candidate,verified_days FROM comparisons").fetchall()
         native_receipts=self.db.execute("SELECT COUNT(*) FROM native_receipts").fetchone()[0]
+        quarantined_pilots=self.db.execute(
+            "SELECT COUNT(*) FROM supervised_pilot_witnesses").fetchone()[0]
         successful=len(rows)
         days=sum(row[2] for row in rows)
         known={(year,candidate) for year,candidate,_ in rows}
@@ -636,6 +656,7 @@ class CrashStore:
                 "contiguous_verified_years":prefix,
                 "committed_chunks":committed,
                 "native_receipt_rows_recorded_without_revalidation":native_receipts,
+                "quarantined_pilot_records_not_year_chunks":quarantined_pilots,
                 "native_receipt_execution_attestation_verified":False,
                 "incident_present":self.incident() is not None,
                 "all_verified":len(fully_verified)==len(self.years) and self.incident() is None,
