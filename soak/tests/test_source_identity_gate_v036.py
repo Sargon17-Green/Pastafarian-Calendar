@@ -178,6 +178,36 @@ class StrictSourceIdentityTests(unittest.TestCase):
                 with CrashStore(root,p2):
                     pass
 
+    def test_mutating_external_plan_cannot_change_frozen_native_coordinates(self):
+        p=sample_plan()
+        with tempfile.TemporaryDirectory() as tmp:
+            with CrashStore(Path(tmp)/"frozen",p) as store:
+                pinned=store.plan_sha
+                p["calculation_day"]="-15055671"
+                p["years"][0]["first_target_day"]="-15055670"
+                p["years"][0]["boundary_evidence_sha256"]="e"*64
+                p["engines"][0]["provenance"]["source_class"]="derived"
+                self.assertEqual(store.plan["calculation_day"],"-15055672")
+                self.assertEqual(store.years["5000"]["first_target_day"],"-15056173")
+                self.assertEqual(store.years["5000"]["boundary_evidence_sha256"],"f"*64)
+                self.assertEqual(store.plan["engines"][0]["provenance"]["source_class"],"reference")
+                self.assertEqual(store.plan_sha,pinned)
+                self.assertEqual(store._case("5000").calculation_day,"-15055672")
+                self.assertEqual(store._chunk("reference-a","5000",0).first_day,"-15056173")
+                self.assertFalse(store.progress()["independent_source_lineage_certified"])
+
+    def test_tampering_internal_plan_requires_halt_before_any_dispatch_or_progress(self):
+        p=sample_plan()
+        with tempfile.TemporaryDirectory() as tmp:
+            with CrashStore(Path(tmp)/"tamper",p) as store:
+                store.plan["calculation_day"]="-15055671"
+                with self.assertRaisesRegex(Exception,"in-memory run plan changed"):
+                    store.pending_jobs()
+                with self.assertRaisesRegex(Exception,"in-memory run plan changed"):
+                    store.progress()
+                with self.assertRaisesRegex(Exception,"in-memory run plan changed"):
+                    store._chunk("reference-a","5000",0)
+
     def test_legacy_v1_remains_recoverable_but_not_certified(self):
         p=sample_plan()
         p["contract"]=CONTRACT
