@@ -274,7 +274,7 @@
 
 ;; DIAG08: afzonderlijke vierde-jaardagprojectie, met bestaande 5000000N-gate.
 (defn kies-vierde-dag-zonder-weving
-  "Opt-in; vijf numerieke velden met exacte, begrensde zevenletterprefix."
+  "Opt-in; vijf numerieke velden met exacte, begrensde vierletterprefix."
   ([lijn berekeningsdag doeldag]
    (kies-vierde-dag-zonder-weving lijn berekeningsdag doeldag 128N 5000000N))
   ([lijn berekeningsdag doeldag zoekbudget prefixbudget]
@@ -449,4 +449,51 @@
               :month-prefix (:month-prefix prefix)
               :month-prefix-cell-upper-bound (:prefix-cell-upper-bound prefix)
               :date-proof-scope :seventh-day-prefix-only
+              :month-weaving-computed? false)))))
+
+;; DIAG12: parametrische, begrensde prefixdag. Generieke bestaande API ongewijzigd.
+(defn kies-prefixdag-zonder-volledige-weving
+  "Opt-in vijfveldprojectie uitsluitend wanneer het volledige prefixbewijs binnen budget valt."
+  ([lijn berekeningsdag doeldag]
+   (kies-prefixdag-zonder-volledige-weving lijn berekeningsdag doeldag 128N 5000000N))
+  ([lijn berekeningsdag doeldag zoekbudget prefixbudget]
+   (let [{:keys [year cutlets month-count month-lengths] :as basis}
+         (lengtes/kies-maandlengtes lijn berekeningsdag doeldag zoekbudget)
+         open (:open-gate-day year)
+         close (:close-gate-day year)
+         positie (-' doeldag open)]
+     (when-not (and (integer? doeldag) (< open doeldag) (< doeldag close))
+       (weigering :target-not-interior-prefix-day))
+     (when-not (and (geldige-delen? cutlets (inc open) close)
+                    (integer? month-count) (<= 3N month-count 47N)
+                    (vector? month-lengths)
+                    (= month-count (count month-lengths))
+                    (every? #(and (integer? %) (<= 4N % 123N)) month-lengths)
+                    (= (-' close open) (reduce +' 0N month-lengths)))
+       (weigering :invalid-date-projection-structure))
+     (let [totaal (weving/aantal-wevingen-groot month-lengths)
+           saus (verdelingen/structuur-saus berekeningsdag year)
+           weefrang (keuzes/kies-rang
+                     (keuzes/vraag-kom saus 4N 32N) totaal)
+           prefix (rang/prefix-op-rang-begrensd
+                   month-lengths weefrang positie prefixbudget)
+           naam-totaal (namen/aantal-maandnaamreeksen 47N month-count)
+           naamrang (keuzes/kies-rang
+                     (keuzes/vraag-kom saus 5N 33N) naam-totaal)
+           maandnamen (namen/maandnamen-op-rang 47N month-count naamrang)
+           maand-id (:month-id prefix)
+           kotelet (some #(when (<= (:first-day %) doeldag (:last-day %)) %)
+                         cutlets)]
+       (when-not kotelet
+         (weigering :date-cutlet-not-found))
+       (assoc basis
+              :date-components [(:number year)
+                                (:name-index kotelet)
+                                (inc (-' doeldag (:first-day kotelet)))
+                                (nth maandnamen (dec (int maand-id)))
+                                (:day-in-month prefix)]
+              :month-prefix (:month-prefix prefix)
+              :month-prefix-cell-upper-bound (:prefix-cell-upper-bound prefix)
+              :prefix-position (:prefix-position prefix)
+              :date-proof-scope :bounded-prefix-only
               :month-weaving-computed? false)))))

@@ -425,3 +425,62 @@
                   (:geopend keuze) (:gesloten keuze)
                   (:rang keuze) (:kosten keuze)
                   (conj prefix (bigint (:maand keuze))))))))))
+
+;; DIAG12: parametrische opt-in prefixselectie, geen volledige weving en geen budgetverhoging.
+(defn prefix-op-rang-begrensd
+  "Exact lexicografisch prefix op positie 1..(N-1), cumulatieve bovengrens <=5000000."
+  ([lengtes rang positie]
+   (prefix-op-rang-begrensd lengtes rang positie hoogste-begroting))
+  ([lengtes rang positie begroting]
+   (when-not (and (vector? lengtes) (<= 2 (count lengtes) 47)
+                  (every? #(and (integer? %) (<= 4N % 123N)) lengtes))
+     (fout :invalid-prefix-profile))
+   (let [dagen (reduce +' 0N lengtes)]
+     (when-not (and (integer? positie) (<= 1N positie) (< positie dagen))
+       (fout :invalid-prefix-position))
+     (when-not (and (integer? begroting)
+                    (<= 1N begroting hoogste-begroting))
+       (fout :invalid-weaving-budget))
+     (let [totaal (weving/aantal-wevingen-groot lengtes)
+           begin (mapv int lengtes)
+           m (count begin)]
+       (when-not (and (integer? rang) (<= 1N rang totaal))
+         (fout :invalid-weaving-rank))
+       (loop [plaats 2
+              restvector (update begin 0 dec)
+              geopend 1 gesloten 0
+              huidige-rang rang kosten 0N prefix [1N]]
+         (if (> plaats positie)
+           (let [maand (peek prefix)]
+             {:month-id maand
+              :day-in-month (bigint (count (filter #(= maand %) prefix)))
+              :month-prefix prefix
+              :prefix-position (bigint positie)
+              :prefix-cell-upper-bound kosten
+              :date-proof-scope :bounded-prefix-only
+              :month-weaving-computed? false})
+           (let [keuze
+                 (loop [maand 1 r huidige-rang verbruik kosten]
+                   (if (> maand (min m (inc geopend)))
+                     (fout :bounded-prefix-invalid-count)
+                     (let [aantal (nth restvector (dec maand))]
+                       (if (or (zero? aantal)
+                               (and (= aantal 1)
+                                    (not= maand (inc gesloten))))
+                         (recur (inc maand) r verbruik)
+                         (let [volgende (update restvector (dec maand) dec)
+                               open (max geopend maand)
+                               dicht (if (= aantal 1) (inc gesloten) gesloten)
+                               nieuw (+' verbruik (raming volgende open))]
+                           (when (> nieuw begroting)
+                             (fout :bounded-prefix-budget-unproven))
+                           (let [blok (tel-rest volgende open dicht)]
+                             (if (> r blok)
+                               (recur (inc maand) (-' r blok) nieuw)
+                               {:maand maand :restvector volgende
+                                :geopend open :gesloten dicht
+                                :rang r :kosten nieuw})))))))]
+             (recur (inc plaats) (:restvector keuze)
+                    (:geopend keuze) (:gesloten keuze)
+                    (:rang keuze) (:kosten keuze)
+                    (conj prefix (bigint (:maand keuze)))))))))))
