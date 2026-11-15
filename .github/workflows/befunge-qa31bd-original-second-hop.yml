@@ -1,0 +1,19 @@
+name: Befunge98 QA31BD original-source outer second-hop portable gate
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31bd_outer_continuation.py'
+      - 'qa/QA31BD_ORIGINAL_SECOND_HOP_READONLY_REVIEW_2026-11-15.md'
+      - 'qa/QA31BD_SIGNED200_PORTABLE_FIXTURE_2026-11-15.json'
+      - '.github/workflows/befunge-qa31bd-original-second-hop.yml'
+  workflow_dispatch:
+jobs:
+  original-source-and-synthetic-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact source original SHA and static second-hop ownership controls (not signed original replay)
+        run: python3 qa/stage1_qa31bd_outer_continuation.py
