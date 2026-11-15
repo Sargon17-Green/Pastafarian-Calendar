@@ -155,8 +155,7 @@ final class MonsterFiveFieldCalendar {
       if (frequencies[j] != monthLengths[j]) {
         throw ArgumentError('§X weave multiplicities disagree.');
       }
-      if (j > 0 &&
-          (first[j - 1] >= first[j] || last[j - 1] >= last[j])) {
+      if (j > 0 && (first[j - 1] >= first[j] || last[j - 1] >= last[j])) {
         throw ArgumentError('§X weave first/last ordering disagrees.');
       }
     }

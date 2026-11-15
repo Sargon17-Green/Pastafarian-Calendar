@@ -72,11 +72,13 @@ void syntheticOracle() {
           'Independent month index');
       check(date.dayInMonth == expectedMonthDay,
           'Independent inclusive month occurrence');
-      check(date.cutletName ==
-          SourceLanguageCatalog.cutletText(cutletIndices[cutletPosition]),
+      check(
+          date.cutletName ==
+              SourceLanguageCatalog.cutletText(cutletIndices[cutletPosition]),
           'Locked cutlet text');
-      check(date.monthName ==
-          SourceLanguageCatalog.monthText(monthNames[monthId - 1]),
+      check(
+          date.monthName ==
+              SourceLanguageCatalog.monthText(monthNames[monthId - 1]),
           'Locked month text');
       final tuple = date.canonicalComponents;
       check(tuple.length == 5, 'Exactly five components');
@@ -111,6 +113,7 @@ void syntheticOracle() {
       monthNameIndices: indices ?? monthNames,
     );
   }
+
   reject(() => projectWrong(requested: BigInt.zero), 'Open gate excluded');
   reject(() => projectWrong(requested: BigInt.from(13)),
       'After closing gate excluded');
@@ -134,7 +137,8 @@ void syntheticOracle() {
 /// Normative retained-sum README AC.1; never use superseded AC.2.
 void canonicalOracle() {
   final foundation = MonsterWorkCounter.foundationDay;
-  final cases = <({int delta, int cutlet, int cutletDay, int month, int monthDay})>[
+  final cases =
+      <({int delta, int cutlet, int cutletDay, int month, int monthDay})>[
     (delta: 0, cutlet: 10, cutletDay: 503, month: 20, monthDay: 56),
     (delta: -1, cutlet: 10, cutletDay: 502, month: 32, monthDay: 21),
     (delta: 1, cutlet: 14, cutletDay: 1, month: 29, monthDay: 38),
@@ -147,16 +151,14 @@ void canonicalOracle() {
       foundation + BigInt.from(testCase.delta),
     );
     check(result.yearNumber == BigInt.from(5000), 'Canonical year 5000');
-    check(result.cutletCanonicalIndex == testCase.cutlet,
-        'AC.1 cutlet index');
+    check(result.cutletCanonicalIndex == testCase.cutlet, 'AC.1 cutlet index');
     check(result.dayInCutlet == testCase.cutletDay, 'AC.1 cutlet ordinal');
     check(result.monthCanonicalIndex == testCase.month, 'AC.1 month index');
     check(result.dayInMonth == testCase.monthDay, 'AC.1 month ordinal');
-    check(result.cutletName ==
-        SourceLanguageCatalog.cutletText(testCase.cutlet),
+    check(
+        result.cutletName == SourceLanguageCatalog.cutletText(testCase.cutlet),
         'AC.1 Hebrew cutlet');
-    check(result.monthName ==
-        SourceLanguageCatalog.monthText(testCase.month),
+    check(result.monthName == SourceLanguageCatalog.monthText(testCase.month),
         'AC.1 Hebrew month');
     canonicalAnchors++;
   }
