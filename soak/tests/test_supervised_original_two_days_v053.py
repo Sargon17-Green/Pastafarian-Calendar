@@ -6,6 +6,7 @@ the isolated v053 GitHub Linux Actions workflow and separate CI artifact.
 from __future__ import annotations
 
 from pathlib import Path
+import os
 import sys
 import tempfile
 import unittest
@@ -51,8 +52,9 @@ class TwoDaySupervisorPreflightTests(unittest.TestCase):
 
     def test_non_ci_environment_never_dispatches(self):
         with tempfile.TemporaryDirectory() as temp:
-            with self.assertRaisesRegex(RuntimeError,"only allowed in GitHub Actions"):
-                s.run(Path(temp),Path(temp),Path(temp),Path(temp))
+            with patch.dict(os.environ,{"GITHUB_ACTIONS":"false"},clear=False):
+                with self.assertRaisesRegex(RuntimeError,"only allowed in GitHub Actions"):
+                    s.run(Path(temp),Path(temp),Path(temp),Path(temp))
 
     def test_missing_boundary_rejected_before_original_source_launch(self):
         with tempfile.TemporaryDirectory() as tmp:
