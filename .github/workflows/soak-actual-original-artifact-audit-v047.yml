@@ -5,6 +5,9 @@ on:
       - qa/soak-readiness-20261114
     paths:
       - "soak/runner/supervised_original_pair_artifact_v047.py"
+      - "soak/runner/quarantined_pilot_ledger_v048.py"
+      - "soak/runner/recovery_store.py"
+      - "soak/process_tests/test_quarantined_actual_pilot_v048.py"
       - ".github/workflows/soak-actual-original-artifact-audit-v047.yml"
   workflow_dispatch:
 permissions:
@@ -100,6 +103,17 @@ jobs:
           print('V047_ADVERSARIAL_MUTATIONS_REJECTED=8')
           print('NATIVE_CONVERTER_CALLS_DURING_AUDIT=0')
           PY
+      - name: Integrate full original-year plan with separate quarantined PILOT receipt table
+        shell: bash
+        env:
+          PASTAFARI_ACTUAL_V045_ARTIFACT: evidence/observed-original-v045.zip
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests             -p 'test_quarantined_actual_pilot_v048.py' -v             |& tee evidence/v048-ledger-tests.log
+          test "$(grep -c '^test_' evidence/v048-ledger-tests.log)" -ge 8
+          grep -Eq 'Ran 10 tests' evidence/v048-ledger-tests.log
+          grep -q '^OK' evidence/v048-ledger-tests.log
+          echo "V048_QUARANTINED_ORIGINAL_PILOT_LEDGER_TESTS_PASS_NO_YEAR_CREDIT"
       - name: Archive only checks and logs, not a newly certified native year
         if: always()
         uses: actions/upload-artifact@v4
@@ -108,5 +122,6 @@ jobs:
           path: |
             evidence/reconciled.json
             evidence/adversarial-tests.txt
+            evidence/v048-ledger-tests.log
           if-no-files-found: warn
           retention-days: 30
