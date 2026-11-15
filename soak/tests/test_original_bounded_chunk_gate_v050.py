@@ -46,21 +46,22 @@ def original_python_row(t,cd,md):
                           separators=(",",":"))+"\n").encode("utf8")
     return raw_line,norm_line
 
-def fixtures(days=1):
+def fixtures(days=1,start=-15055671):
     raws=[];norms=[];kt=[]
     for i in range(days):
-        t=-15055671+i
-        raw,norm=original_python_row(t,503+i,56+i)
+        t=start+i
+        delta=t+15055671  # synthetic fixture only
+        raw,norm=original_python_row(t,503+delta,56+delta)
         raws.append(raw);norms.append(norm)
-        kt.append((f"{C}\t{t}\t{YEAR}\t10\t{503+i}\t20\t{56+i}\n").encode())
+        kt.append((f"{C}\t{t}\t{YEAR}\t10\t{503+delta}\t20\t{56+delta}\n").encode())
     names=name_tables()
     return dict(
         python_original_raw=b"".join(raws),
         python_original_normalized=b"".join(norms),
         kotlin_original_stdout=b"".join(kt),
         calculation_day=C,year=YEAR,
-        first_target_day="-15055671",
-        last_target_day=str(-15055671+days-1),
+        first_target_day=str(start),
+        last_target_day=str(start+days-1),
         boundary_evidence_sha256=BOUNDARY_SHA,
         frozen_python_cutlets=names[0],
         frozen_python_months=names[1],
