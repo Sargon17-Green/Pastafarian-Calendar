@@ -415,19 +415,10 @@ class CrashStore:
         if not isinstance(content, bytes):
             raise TypeError("content must be raw UTF-8 bytes")
         parsed = self._parse_chunk(chunk, content)
-        if self.plan["contract"] == PROVENANCE_CONTRACT:
-            if raw_stdout is None or native_receipt is None:
-                raise ValueError("v2 requires raw native stdout and an exact receipt for every chunk")
-            # Fail BEFORE writing any output if the source bytes and normalized
-            # bytes do not bind one-to-one to this immutable c/year/source.
-            verify_receipt(self.plan, self.plan_sha, engine, year,
-                           chunk.first_day, chunk.last_day, chunk.ordinal,
-                           content, raw_stdout, native_receipt)
-            self._publish_native_receipt(chunk, raw_stdout, native_receipt)
-        elif raw_stdout is not None or native_receipt is not None:
-            raise ValueError("legacy v1 does not admit v2 native receipts")
         checksum = sha256(content)
         prior = self._chunk_registered(chunk)
+        # A committed receipt is append-only: a missing or damaged sidecar
+        # MUST NOT be silently recreated by replaying the same payload.
         if prior is not None:
             if prior != (checksum,len(content)):
                 self.db.execute("BEGIN IMMEDIATE")
@@ -439,7 +430,29 @@ class CrashStore:
                     raise
                 raise Halted("conflicting replay; preserved first incident")
             self._check_registered_file(chunk, prior)
+            if self.plan["contract"] == PROVENANCE_CONTRACT:
+                if raw_stdout is None or native_receipt is None:
+                    raise ValueError("v2 replay requires original stdout and receipt")
+                verify_receipt(self.plan, self.plan_sha, engine, year,
+                               chunk.first_day, chunk.last_day, chunk.ordinal,
+                               content, raw_stdout, native_receipt)
+                raw_path, receipt_path = self._native_receipt_paths(chunk)
+                if raw_path.read_bytes() != raw_stdout or receipt_path.read_bytes() != receipt_canonical(native_receipt):
+                    raise ValueError("v2 replay bytes differ from immutable native evidence")
+            elif raw_stdout is not None or native_receipt is not None:
+                raise ValueError("legacy v1 does not admit v2 native receipts")
             return "ALREADY_COMMITTED"
+        if self.plan["contract"] == PROVENANCE_CONTRACT:
+            if raw_stdout is None or native_receipt is None:
+                raise ValueError("v2 requires raw native stdout and an exact receipt for every chunk")
+            # Fail BEFORE writing any output if the source bytes and normalized
+            # bytes do not bind one-to-one to this immutable c/year/source.
+            verify_receipt(self.plan, self.plan_sha, engine, year,
+                           chunk.first_day, chunk.last_day, chunk.ordinal,
+                           content, raw_stdout, native_receipt)
+            self._publish_native_receipt(chunk, raw_stdout, native_receipt)
+        elif raw_stdout is not None or native_receipt is not None:
+            raise ValueError("legacy v1 does not admit v2 native receipts")
         path = self._chunk_path(chunk)
         temp = path.with_name(path.name + ".part")
         if not path.exists():
