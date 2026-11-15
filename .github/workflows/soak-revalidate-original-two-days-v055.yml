@@ -33,7 +33,7 @@ jobs:
       - name: Verify original frozen source snapshots and download immutable real process artifact
         shell: bash
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           test "$RUNNER_OS" = Linux
