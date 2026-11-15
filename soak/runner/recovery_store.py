@@ -635,7 +635,7 @@ class CrashStore:
                 "fully_verified_years":len(fully_verified),
                 "contiguous_verified_years":prefix,
                 "committed_chunks":committed,
-                "raw_native_chunk_receipts_integrity_linked":native_receipts,
+                "native_receipt_rows_recorded_without_revalidation":native_receipts,
                 "native_receipt_execution_attestation_verified":False,
                 "incident_present":self.incident() is not None,
                 "all_verified":len(fully_verified)==len(self.years) and self.incident() is None,
