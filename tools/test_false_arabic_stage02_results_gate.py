@@ -28,12 +28,12 @@ class Stage02GateTests(unittest.TestCase):
             'runtime_sha256': 'a' * 64,
         }
 
-    def make(self, evidence=None, source=None, extras=None):
+    def make(self, evidence=None, source=None, extras=None, stdout=None):
         info = self.evidence if evidence is None else evidence
         body = self.source if source is None else source
         with zipfile.ZipFile(self.path, 'w') as z:
             z.writestr('RESULTS/evidence.json', json.dumps(info))
-            z.writestr('RESULTS/native_stdout.txt', '\n'.join(MARKERS))
+            z.writestr('RESULTS/native_stdout.txt', '\n'.join(MARKERS) if stdout is None else stdout)
             z.writestr('RESULTS/combined_sha256.txt', self.digest + '  stage02_discovery01_combined.false\n')
             z.writestr('RESULTS/stage02_discovery01_combined.false', body)
             for key, val in extras or []:
@@ -44,6 +44,28 @@ class Stage02GateTests(unittest.TestCase):
         result = classify(str(self.path))
         self.assertTrue(result['native_pass'])
         self.assertEqual(result['scope'], 'DISCOVERY01_ONLY_NOT_STAGE2_ACCEPTANCE')
+
+    def test_v11_alias_copy_exit_zero_never_claimed_as_native(self):
+        self.make({**self.evidence, 'execution_mode': 'DOCUMENTED_ASCII_PICK_ALIAS_COPY',
+                   'exact_source_bytes_executed': False})
+        result = classify(str(self.path))
+        self.assertEqual(result['classification'], 'ASCII_O_ALIAS_DIAGNOSTIC_ONLY')
+        self.assertFalse(result['native_pass'])
+
+    def test_unknown_execution_mode_rejected(self):
+        self.make({**self.evidence, 'execution_mode': 'UNAUDITED_PATCH'})
+        with self.assertRaisesRegex(ValueError, 'unrecognized source execution mode'):
+            classify(str(self.path))
+
+    def test_explicit_source_bytes_denial_rejected(self):
+        self.make({**self.evidence, 'exact_source_bytes_executed': False})
+        with self.assertRaisesRegex(ValueError, 'source-byte execution explicitly denied'):
+            classify(str(self.path))
+
+    def test_failure_marker_conflicts_with_success_markers(self):
+        self.make(stdout='\\n'.join(MARKERS) + '\\nفشل استقصاء المرحلة الثانية')
+        with self.assertRaisesRegex(ValueError, 'explicit Stage2 failure marker'):
+            classify(str(self.path))
 
     def test_reject_unverified_fetch(self):
         self.make({**self.evidence, 'git_fetch_exit_code': None})
