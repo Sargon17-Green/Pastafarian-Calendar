@@ -1,0 +1,207 @@
+name: Soak v031 two adjacent derived native annual streams with 12 unchanged samples
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-two-adjacent-derived-years-v031.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  two-complete-adjacent-derived-year-comparisons:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          path: original-kotlin
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          path: original-python
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: three-original-native-adjacent-year-boundaries-v030
+          run-id: 43749803490
+          github-token: ${{ github.token }}
+          path: original-boundaries-v030
+      - name: Validate pinned original sources and the v030 native boundary witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git -C original-kotlin rev-parse HEAD)" = "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+          test "$(git -C original-python rev-parse HEAD)" = "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4"
+          echo "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py" \
+            | tee evidence/pinned-original-python.sha256 | sha256sum -c -
+          test -f original-boundaries-v030/three-original-native-boundaries-verdict.json
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('original-boundaries-v030/three-original-native-boundaries-verdict.json')
+          d=json.loads(p.read_text(encoding="utf8"))
+          assert d['schema']=="PASTAFARI_NATIVE_ADJACENT_YEAR_BOUNDARY_V030/1"
+          assert d['status']=="THREE_ORIGINAL_NATIVE_YEAR_BOUNDARIES_AGREE_NOT_CANONICAL_CERTIFIED"
+          assert [int(x["length_days"]) for x in d["python_boundaries"]]==[4126,4244,5567]
+          assert d["python_boundaries"]==d["kotlin_boundaries"]
+          assert d["original_native_full_date_calls"]==0
+          print("ORIGINAL_NATIVE_THREE_YEAR_BOUNDARIES_LOCKED length=[4126,4244,5567]")
+          PY
+      - name: Python derivative two whole years and 12 unchanged original F(c,t) calls
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          /usr/bin/time -v -o evidence/python-native-sample-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 410s python3 -B \
+            coordinator/soak/experiments/python_adjacent_annual_reuse_v031.py \
+            --original-python original-python/tests/normative_reference.py \
+            --v025-helper coordinator/soak/experiments/python_annual_structure_reuse_v025.py \
+            --native-boundary-witness original-boundaries-v030/three-original-native-boundaries-verdict.json \
+            --output-dir evidence/python-adjacent \
+            > evidence/python.log 2>&1
+          rc=$?
+          echo "$rc" > evidence/python.exit
+          tail -40 evidence/python.log
+          exit 0
+      - name: Prepare 12 original native Kotlin targets from successful Python receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat evidence/python.exit)" = 0
+          python3 - <<'PY'
+          import json,pathlib
+          d=json.loads(pathlib.Path("evidence/python-adjacent/receipt.json").read_text())
+          assert d["status"]=="TWO_ADJACENT_PY_ANNUAL_TRANSCRIPTS_SAMPLED_NATIVE_MATCH_NOT_FULL_YEAR"
+          assert [x["derived_rows"] for x in d["years"]]==[4126,5567]
+          assert [x["direct_original_fct_sample_matches"] for x in d["years"]]==[6,6]
+          with open("evidence/original-kotlin-sample-input.tsv","x",encoding="utf8",newline="\n") as f:
+              for y in d["years"]:
+                  for target in y["direct_original_fct_targets"]:
+                      f.write(d["calculation_day"]+"\t"+target+"\n")
+          print("PYTHON_ADJACENT_DERIVED_YEARS_READY_FOR_ORIGINAL_KOTLIN_SAMPLE")
+          PY
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Download original Kotlin 1.9.0 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Generate hash-guarded derived source without modifying original Kotlin branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/soak/experiments/derive_kotlin_annual_stream_v028.py \
+            --original-repository original-kotlin \
+            --output-dir build/derived-kotlin \
+            | tee evidence/kotlin-derivation.log
+          cp build/derived-kotlin/PROVENANCE.json evidence/kotlin-derivative-provenance.json
+          test -z "$(git -C original-kotlin status --porcelain)"
+          echo "ORIGINAL_KOTLIN_SOURCE_UNMODIFIED"
+      - name: Compile Kotlin original F(c,t) bridge and separate annual derivative
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-original-build-resources.txt \
+            timeout --signal=TERM --kill-after=5s 150s kotlinc \
+            original-kotlin/src/main/kotlin/pastafari/*.kt \
+            original-kotlin/soak/Post55ProductionDateBridge.kt \
+            -include-runtime -d evidence/unchanged-original-kotlin.jar
+          /usr/bin/time -v -o evidence/kotlin-derived-build-resources.txt \
+            timeout --signal=TERM --kill-after=5s 150s kotlinc \
+            build/derived-kotlin/src/main/kotlin/pastafari/*.kt \
+            coordinator/soak/experiments/AdjacentKotlinDerivedAnnualBridge_v031.kt \
+            -include-runtime -d evidence/adjacent-derived-kotlin.jar
+          sha256sum evidence/unchanged-original-kotlin.jar \
+            evidence/adjacent-derived-kotlin.jar > evidence/kotlin-build-hashes.sha256
+          test -z "$(git -C original-kotlin status --porcelain)"
+      - name: Execute exactly 12 original native Kotlin F(c,t) samples
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -v -o evidence/kotlin-original-samples-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 120s \
+            java -Xmx512m -XX:MaxDirectMemorySize=128m \
+            -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=64m \
+            -XX:ActiveProcessorCount=2 \
+            -cp evidence/unchanged-original-kotlin.jar \
+            pastafari.Post55ProductionDateBridge \
+            < evidence/original-kotlin-sample-input.tsv \
+            > evidence/original-kotlin-12-samples.tsv 2> evidence/kotlin-original.log
+          rc=$?
+          echo "$rc" > evidence/kotlin-original.exit
+          tail -20 evidence/kotlin-original.log
+          exit 0
+      - name: Execute two whole DERIVED Kotlin annual structures once each
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -v -o evidence/kotlin-derived-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 150s \
+            java -Xmx512m -XX:MaxDirectMemorySize=128m \
+            -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=64m \
+            -XX:ActiveProcessorCount=2 \
+            -cp evidence/adjacent-derived-kotlin.jar \
+            pastafari.AdjacentKotlinDerivedAnnualBridgeV031 -15055671 \
+            > evidence/kotlin-derived-two-years.tsv 2> evidence/kotlin-derived.log
+          rc=$?
+          echo "$rc" > evidence/kotlin-derived.exit
+          tail -20 evidence/kotlin-derived.log
+          exit 0
+      - name: Compare each of 9693 rows + 12 original-native Kotlin samples, stop at first difference
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat evidence/kotlin-original.exit)" = 0
+          test "$(cat evidence/kotlin-derived.exit)" = 0
+          python3 -B coordinator/soak/runner/compare_adjacent_derived_years_v031.py \
+            --python-annual-dir evidence/python-adjacent \
+            --kotlin-derived-years evidence/kotlin-derived-two-years.tsv \
+            --kotlin-original-samples evidence/original-kotlin-12-samples.tsv \
+            --verdict evidence/adjacent-derived-year-verdict.json \
+            | tee evidence/adjacent-comparison.log
+          python3 - <<'PY'
+          import json,pathlib
+          d=json.loads(pathlib.Path("evidence/adjacent-derived-year-verdict.json").read_text())
+          assert d["status"]=="TWO_ADJACENT_DERIVED_YEARS_9693_ROWS_MATCH_NATIVE_SAMPLED_NOT_CERTIFIED"
+          assert d["fully_compared_derived_years"]==2
+          assert d["derived_rows_compared"]==9693
+          assert d["date_fields_matched"]==48465
+          assert d["python_original_sample_matches"]==12
+          assert d["kotlin_original_sample_matches"]==12
+          assert d["verified_original_soak_full_year_comparisons"]==0
+          assert d["soak_started"] is False
+          print("ADJACENT_4999_5001_DERIVED_9693_ROWS_MATCH_PY_KT_NATIVE_12_EACH")
+          PY
+      - name: Preserve all evidence even for blocked/mismatch runs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adjacent-4999-5001-two-derived-native-sampled-v031
+          path: |
+            evidence/*.json
+            evidence/*.log
+            evidence/*.txt
+            evidence/*.sha256
+            evidence/*.tsv
+            evidence/python-adjacent/*
+          if-no-files-found: warn
+          retention-days: 30
