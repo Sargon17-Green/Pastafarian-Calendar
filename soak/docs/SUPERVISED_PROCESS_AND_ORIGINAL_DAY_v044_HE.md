@@ -31,7 +31,7 @@
 [ניסיון ראשון 43764673922](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43764673922) הסתיים **BLOCKED**, לא MISMATCH: Python המקורי חישב תאריך אחד בהצלחה; Node/V8 נכשל ב־`JavaScript heap out of memory` תחת מגבלת 384MiB. בדיקת תוצאת Python המקורית:
 `(year,cutlet_index,day_in_cutlet,month_index,day_in_month)=(5000,10,503,20,56)`; שמות מקור Türkçe: `Akrep`, `Kuyu`. SHA-256 ל־raw המקורי `bbad31d4bbc177c9c002423ccc3134dcb052c2eeff8e06290bb76b2c962c9173`. **ל־JavaScript לא היתה תוצאת תאריך בניסיון הזה, ולכן לא היתה השוואה.**
 
-הועלתה גרסה מתוקנת של v043 שמאפשרת ל־Node עד 1GiB heap בשרת GitHub בלבד, בתנאי שער RAM פנוי של לפחות 5GiB; Python נשאר מוגבל ל־1.5GiB מרחב כתובות. בניסוי זה אין הרצה על Windows, ואין להריץ לולאה של שנה מלאה. יש לבדוק את ה־CI החדש בפועל; **מסמך זה אינו טוען שהניסיון השני עבר**.
+גם [הניסיון השני של v043 — CI 43764826583](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43764826583), שאפשר ל־Node עד 1GiB heap בשרת GitHub בלבד עם לפחות 5GiB RAM פנויים, נכשל ב־V8 heap out of memory לאחר התחלת חישוב התאריך. זו חסימת משאבים, **לא** אי־התאמה של שני תאריכים; פלט JS לא הושלם. מכאן הועבר הפיילוט המפוקח ל־Python מקורי מול Kotlin מקורי. [ההרצה v045 הסופית 43765573521](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43765573521) הסתיימה ב־SUCCESS עם התאמה מדויקת של 5/5 שדות לתאריך יחיד — פרטים וגיבובים ב־[נקודת שחזור v046](./CHECKPOINT_STATUS_HE_v046_20261115.md). אין כאן שנת soak מאושרת.
 
 ## תחומי אמון
 
