@@ -56,7 +56,11 @@ Kotlin המקורי **אינו** מפיק את שמות המקור Cymraeg: בת
 3. הצלבת שתי שורות \`Python raw+normalized\` מול שתי שורות \`Kotlin OS stdout\` בעזרת שער v050; בדיקה מחדש של כל אחד מ־5 שדות התאריך ושל 2 קבלות התהליך.
 4. ארבע התקפות מדומות של שינוי קובץ תאריך, זיהוי JAR, שם מקור או זיוף אישור שנת soak; ההתקפות מרעננות את גיבוב ה־ZIP וגם את גיבובי הקבצים הפגומים כדי לבחון את הבדיקה הסמנטית ולא רק את חתימת הארכיון.
 
-**בעת כתיבת נקודת שחזור זו, הרצת v055 נמצאת במצב queued, לא PASS ולא FAIL.** אין להפעיל העתק נוסף לפני תוצאת completed/log. היעדר PASS עדיין אינו חסימה.
+[GitHub Actions v055 — הרצה 43775678225](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43775678225) הסתיימה ב־**completed/success**. ה־ZIP נעול ל־SHA-256 שנקבע ב־v054; קורא הראיות בדק מחדש את שני מקורות הקוד המקוריים, את JAR של Kotlin, את שני תהליכי ההפעלה ואת שתי שורות ה־raw בכל מקור מול חמשת השדות הקאנוניים. התוצאה: `PINNED_REAL_TWO_NATIVE_DAYS_REVALIDATED_NOT_YEAR_SOAK`, ‏2/2 זוגות מקוריים, ו־0 שנות soak שהוסמכו.
+
+ארבע השחתות מכוונות נדחו גם כשהתוקף החליף את **גיבוב ה־ZIP וכל גיבובי הקבצים ששונו**: שינוי יום Kotlin, אישור שנה מזויף, JAR מקורי מקוטע, ושינוי שם מקור Python. לוגי ההרצה מכילים `V055_REPINNED_ADVERSARIAL_ARCHIVES_REJECTED=4` ו־`NATIVE_FCT_CALLS_DURING_EVIDENCE_AUDIT=0`.
+
+הניסיון הראשון של v055, [43775484682](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43775484682), נעצר ב־`HTTP 401` לפני האימות בגלל תו `\\` מיותר בהגדרת `GH_TOKEN` ב־Workflow. ההגדרה תוקנה, ורק ההרצה השנייה קיבלה PASS. לא היה בכך כשל חישוב.
 
 ## 5. מצב מדעי והצעדים הבאים
 
@@ -67,4 +71,4 @@ Kotlin המקורי **אינו** מפיק את שמות המקור Cymraeg: בת
 - לא החלה הרצת 10,000 השנים, לא הופעל Windows, ולא שונה \`main\`.
 - הצעד הבא לאחר אישור v055: לשלב קבלות תהליך מקוריות אלה ב־\`CrashStore\` **בלי לאשר שנה חלקית**; לפתח איסוף מקור־למקור לאלפי מקטעי שנה, כאשר שנת Python מלאה מתבצעת קודם לשנת Kotlin, עצירה בהפרש הראשון, ועמידות לשחזור. לפני עבודה במחשב המשתמש חובה preflight עדכני ומגבלות משאבים אמיתיות.
 
-**סמן המשך:** \`RESUME_EVIDENCE_FIRST | PROJECT_ID: PASTAFARI_ORIGINAL_NATIVE_YEAR_SOAK | QA=qa/soak-readiness-20261114 | NEXT=VERIFY_v055_COMPLETED_LOGS_AND_INTEGRATE_REAL_NATIVE_PROCESS_RECEIPTS_WITHOUT_YEAR_CREDIT\`.
+**סמן המשך:** \`RESUME_EVIDENCE_FIRST | PROJECT_ID: PASTAFARI_ORIGINAL_NATIVE_YEAR_SOAK | QA=qa/soak-readiness-20261114 | NEXT=INTEGRATE_v053_REAL_TWO_DAY_RECEIPTS_IN_QUARANTINE_LEDGER_WITHOUT_FULL_YEAR_CREDIT\`.
