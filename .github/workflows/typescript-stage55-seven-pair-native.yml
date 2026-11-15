@@ -44,6 +44,23 @@ jobs:
           timeout --signal=TERM --kill-after=15s 1800s \
             node --experimental-strip-types test/postStage55NegativeSignedAPI.ts \
             2>&1 | tee qa/native-logs/seven-pair-native.log
+      - name: Verify exact seven-pair Native acceptance evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          log=qa/native-logs/seven-pair-native.log
+          test -s "$log"
+          test "$(cat qa/native-logs/HEAD.txt)" = "$GITHUB_SHA"
+          test "$(grep -c '^POST_STAGE55_NEGATIVE_PAIR_PASS name=' "$log")" -eq 7
+          test "$(grep -c '^POST_STAGE55_NEGATIVE_FAMILY_PASS name=' "$log")" -eq 5
+          grep -Eq '^POST_STAGE55_NEGATIVE_SIGNED_API_PASS pairs=7 components=35 independentFamilies=5 rankMismatches=0 negativeAnchor=-1 negativeNonAnchor=null foundationCrossing=1 nativeCalls=[0-9]+ sharedWrites=[0-9]+ interleavingChecks=195        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typescript-stage55-seven-pair-native-evidence
+          path: qa/native-logs/
+          if-no-files-found: warn
+          retention-days: 30
+ "$log"
       - name: Preserve witness and failure log
         if: always()
         uses: actions/upload-artifact@v4
