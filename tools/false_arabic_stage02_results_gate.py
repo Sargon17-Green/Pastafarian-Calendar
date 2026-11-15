@@ -43,6 +43,16 @@ def classify(path: str) -> dict:
         info = json.loads(z.read(names['evidence.json']).decode('utf-8-sig'))
         require(info.get('project_id') == PROJECT, 'PROJECT_ID mismatch')
         require(info.get('target_sha') == SHA, 'target SHA mismatch')
+        # V11 executes a translated ASCII-O compatibility copy. Its runner can
+        # legitimately exit zero, but it never executed the immutable source bytes.
+        if info.get('execution_mode') == 'DOCUMENTED_ASCII_PICK_ALIAS_COPY':
+            return {'classification': 'ASCII_O_ALIAS_DIAGNOSTIC_ONLY',
+                    'native_pass': False, 'runner_exit_code': info.get('runner_exit_code'),
+                    'scope': 'TRANSLATED_COPY_NOT_ORIGINAL_SOURCE'}
+        require(info.get('execution_mode') in (None, 'SOURCE_UNMODIFIED'),
+                'unrecognized source execution mode')
+        require(info.get('exact_source_bytes_executed') is not False,
+                'source-byte execution explicitly denied')
         exitcode = info.get('runner_exit_code')
         native = info.get('native_exit_code')
         if exitcode == 3 and native is None:
@@ -59,6 +69,8 @@ def classify(path: str) -> dict:
         stdout = z.read(names['native_stdout.txt']).decode('utf-8-sig')
         require(all(marker in stdout for marker in MARKERS),
                 'missing expected Native marker')
+        require('فشل استقصاء المرحلة الثانية' not in stdout,
+                'explicit Stage2 failure marker in stdout')
         require('combined_sha256.txt' in names, 'missing source SHA evidence')
         require('stage02_discovery01_combined.false' in names,
                 'missing combined source bytes for hash verification')
