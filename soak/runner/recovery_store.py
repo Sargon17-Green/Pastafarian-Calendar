@@ -21,6 +21,8 @@ from dataclasses import dataclass
 from typing import Any
 
 from year_validator import YearCase, parse_line
+from source_identity_gate_v036 import (PROVENANCE_CONTRACT, evaluate_plan_identity,
+                                       validate_provenance_v2)
 
 
 CONTRACT = "PASTAFARI_SOAK_RECOVERY/1"
@@ -49,7 +51,7 @@ def _integer_string(s: str) -> bool:
 
 
 def validate_plan(plan: dict) -> None:
-    if not isinstance(plan, dict) or plan.get("contract") != CONTRACT:
+    if not isinstance(plan, dict) or plan.get("contract") not in (CONTRACT, PROVENANCE_CONTRACT):
         raise ValueError("wrong run-plan contract")
     if not _integer_string(plan.get("calculation_day")):
         raise ValueError("invalid calculation day")
@@ -93,6 +95,11 @@ def validate_plan(plan: dict) -> None:
             raise ValueError("gaps/overlap in consecutive-year plan")
         previous_last = int(y["last_target_day"])
         seen_years.add(key)
+    # v1 is retained solely for reading/replaying historical test and evidence
+    # ledgers. v2 is a NEW no-certification experiment until source lineage
+    # is externally audited and raw native execution receipts are verified.
+    if plan["contract"] == PROVENANCE_CONTRACT:
+        validate_provenance_v2(plan)
 
 
 class Halted(RuntimeError):
@@ -496,10 +503,17 @@ class CrashStore:
             if year not in fully_verified: break
             prefix+=1
         committed=self.db.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
+        source_identity = evaluate_plan_identity(self.plan)
         return {"verified_comparisons_completed":successful,
                 "verified_day_pair_comparisons":days,
                 "fully_verified_years":len(fully_verified),
                 "contiguous_verified_years":prefix,
                 "committed_chunks":committed,
                 "incident_present":self.incident() is not None,
-                "all_verified":len(fully_verified)==len(self.years) and self.incident() is None}
+                "all_verified":len(fully_verified)==len(self.years) and self.incident() is None,
+                "source_identity_status": source_identity["status"],
+                "source_identity_contract": source_identity["schema"],
+                "technical_comparisons_only": True,
+                "original_native_full_year_soak_passes_certified": 0,
+                "independent_source_lineage_certified": False,
+                "unchanged_native_stdout_proven": False}
