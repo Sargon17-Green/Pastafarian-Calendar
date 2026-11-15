@@ -578,6 +578,10 @@ class CrashStore:
         running child or resume within an adapter's *single* uncheckpointed call.
         """
         self._assert_immutable_plan()
+        # Audit independently pinned one-day pilot evidence BEFORE adopting
+        # any orphan year chunk. A damaged receipt must stop recovery first.
+        from quarantined_pilot_ledger_v048 import check_registered_pilot_witnesses
+        validated_pilots = check_registered_pilot_witnesses(self)
         already=0
         adopted=0
         staged=0
@@ -611,8 +615,6 @@ class CrashStore:
                         break
                     self._commit_validated(chunk,sha256(data),len(data),parsed)
                     adopted+=1
-        from quarantined_pilot_ledger_v048 import check_registered_pilot_witnesses
-        validated_pilots = check_registered_pilot_witnesses(self)
         return {"verified_existing_chunks":already,"recovered_chunks":adopted,
                 "recovered_staged_files":staged,"incident":self.incident(),
                 "quarantined_pilot_witnesses_revalidated":validated_pilots,
