@@ -1,5 +1,5 @@
 function run_stage55_year5000_thirty_ninth_native()
-% Stage55 AFTER38 to AFTER38: bounded MATLAB exact cursor and PATCH25 comparison.
+% Stage55 AFTER38 to AFTER39: bounded MATLAB exact cursor and PATCH25 comparison.
 root=fileparts(fileparts(mfilename('fullpath')));
 src=fullfile(root,'src'); addpath(src);
 cleanupPath=onCleanup(@()rmpath(src)); %#ok<NASGU>
@@ -11,9 +11,9 @@ L=double(f.month_lengths(:).');
 assert(f.year==5000 && numel(L)==45 && sum(L)==4244 && f.first_day==-15057702,'Stage55:Fixture');
 [original,before]=pastafari.restoreExactWeaveCursorJson(fileread(fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_38.json')));
 expected=L; prefix=[1 2 3 4 5 6 7 4 8 9 10 9 11 6 12 13 14 15 16 16 17 7 18 2 19 20 19 5 21 22 9 1 7 23 3 8 23 14]; for k=prefix, expected(k)=expected(k)-1; end; one=pastafari.BigInt(1);
-assert(isequal(original,L) && isequal(before.remaining,expected) && before.stepsComputed==37 && ...
+assert(isequal(original,L) && isequal(before.remaining,expected) && before.stepsComputed==38 && ...
  before.openedUpTo==23 && before.closedUpTo==0 && ~before.done && sum(before.remaining)==4206 && ...
- before.rank>=one && before.rank<=before.count,'Stage55:After38');
+ before.rank>=one && before.rank<=before.count,'Stage55:After38','AFTER38 predecessor checkpoint mismatch');
 t=tic;
 [letter,after]=pastafari.unrankGeneralWeaveSuffixChunkAdjoint(original,before.remaining,23,0,before.rank,1);
 selectionSeconds=toc(t);
