@@ -421,6 +421,42 @@ def test_free_gap_accumulation_differential():
     print("WEAVING_SPARSE_SUPPORT_PRUNE_DIFFERENTIAL=PASS")
 
 
+
+def test_support_prune_signed_differential():
+    """Bounded exact signed/cancellation QA for a research-only free-gap kernel.
+
+    Unlike valid counting states, signed vectors can cancel to an interior
+    zero prefix. Trimming may remove only mathematically guaranteed *leading*
+    zeros; never truncate at a cancellation that could reverse later.
+    The original scalar loop is the exact regression comparator; the separate
+    dense/occurrence-poset oracle remains mandatory for combinatorial counts.
+    """
+    checks = 0
+    for n in (0, 1, 4, 17, 64, 127):
+        vectors = (
+            SparseVector(0, tuple((1 if i % 2 == 0 else -1) * (i + 1)
+                                  for i in range(n + 1))),
+            SparseVector(n // 3, tuple((1 if i % 2 == 0 else -1)
+                                      * (i + 3)**3
+                                      for i in range(max(1, n // 2)))),
+            SparseVector(n // 2, (5, -5, 7, -7, 0)),
+            SparseVector(n + 3, ()),
+        )
+        for k in (1, 2, 7, 125):
+            for q in (-1, 0, 1, n // 2, n, n + 1):
+                spec = (q, 0, -1, 0)
+                for previous in vectors:
+                    expected = _reference_free_gap_transfer(previous, n, k,
+                                                            spec)
+                    assert sparse_transfer(previous, n, k, spec) == expected
+                    assert _support_pruned_free_gap_transfer(
+                        previous, n, k, spec) == expected
+                    checks += 1
+    assert checks == 576
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_SIGNED_CHECKS=" + str(checks))
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_SIGNED_DIFFERENTIAL=PASS")
+
+
 def test_finite():
     from weaving_small_exact_oracle import brute_words, poset_oracle
     cases = [p for m in range(1, 5)
@@ -473,6 +509,7 @@ def test_finite():
         assert metric["calls"] > 0 and metric["seconds"] >= 0.0
         assert sum(metric["per_month_calls"]) == metric["calls"]
     test_free_gap_accumulation_differential()
+    test_support_prune_signed_differential()
     print("WEAVING_SPARSE_OBSERVABILITY_SMOKE=PASS")
     print("WEAVING_SPARSE_FINITE_REUSED_TRANSFERS=" + str(reused))
     print("WEAVING_SPARSE_FINITE_CASES=137")
@@ -558,6 +595,66 @@ def test_paired_hot_month_free_gap(state):
     print("WEAVING_SPARSE_HOT_MONTH_AB_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
 
 
+
+def test_support_prune_hotset(state):
+    """Paired exact QA on five empirically hot transfer months, research only.
+
+    Three ABBA rounds per month, always on the same real six-symbol median
+    prefix state. Equality is asserted; timing is diagnostic and must not be
+    interpreted as a full-year or representative performance acceptance.
+    """
+    from statistics import median
+
+    months = (39, 42, 43, 44, 45)
+    assert state.m == 45
+    checks = 0
+    summed_baseline = summed_pruned = 0.0
+    for j in months:
+        previous, n = state.states[j-1], state.sizes[j-1]
+        k, spec = state.lengths[j-1], state.specs[j]
+        assert spec[1] == 0 and spec[3] == 0 and spec[0] <= n
+        assert previous.values
+        expected = _reference_free_gap_transfer(previous, n, k, spec)
+        assert sparse_transfer(previous, n, k, spec) == expected
+        assert _support_pruned_free_gap_transfer(previous, n, k,
+                                                 spec) == expected
+        checks += 1
+        samples = {"baseline": [], "pruned": []}
+        methods = {"baseline": sparse_transfer,
+                   "pruned": _support_pruned_free_gap_transfer}
+        for _ in range(3):
+            for key in ("baseline", "pruned", "pruned", "baseline"):
+                started = monotonic()
+                observed = methods[key](previous, n, k, spec)
+                samples[key].append(monotonic() - started)
+                assert observed == expected
+                checks += 1
+        baseline = median(samples["baseline"])
+        pruned = median(samples["pruned"])
+        assert baseline > 0.0
+        summed_baseline += baseline
+        summed_pruned += pruned
+        zero_slots = max(0, min(n + 1,
+                                previous.offset - max(0, spec[0])))
+        print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_MONTH_" + str(j) +
+              "_ZERO_SLOTS=" + str(zero_slots))
+        print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_MONTH_" + str(j) +
+              "_OUTPUT_CELLS=" + str(len(expected.values)))
+        print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_MONTH_" + str(j) +
+              "_BASELINE_MEDIAN_SECONDS=" + format(baseline, ".6f"))
+        print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_MONTH_" + str(j) +
+              "_PRUNED_MEDIAN_SECONDS=" + format(pruned, ".6f"))
+        print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_MONTH_" + str(j) +
+              "_RATIO=" + format(pruned / baseline, ".4f"))
+    assert checks == 65
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_MONTHS=39,42,43,44,45")
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_CHECKS=" + str(checks))
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_SUM_MEDIAN_RATIO=" +
+          format(summed_pruned / summed_baseline, ".4f"))
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_EQUALITY=PASS")
+    print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
+
+
 def test_median_prefix():
     from weaving_reachability_oracle import MONTH_LENGTHS
     months = MONTH_LENGTHS
@@ -595,6 +692,7 @@ def test_median_prefix():
     print("WEAVING_SPARSE_MEDIAN_PREFIX_RESULT=PASS")
     print("WEAVING_SPARSE_FULL_MEDIAN_RANK_UNRANK=NOT_TESTED")
     test_paired_hot_month_free_gap(state)
+    test_support_prune_hotset(state)
 
 
 if __name__ == "__main__":
