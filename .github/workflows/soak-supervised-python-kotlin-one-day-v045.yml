@@ -1,0 +1,111 @@
+name: Soak v045 supervised original Python and Kotlin ONE native date (no full year)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/supervised_original_python_kotlin_day_v045.py"
+      - ".github/workflows/soak-supervised-python-kotlin-one-day-v045.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  one-unchanged-native-date-each:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Verify pinned original source checkout and Python source hash
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test "$GITHUB_ACTIONS" = true
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
+            | sha256sum -c -
+          mkdir -m 700 evidence
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Fetch exact Kotlin compiler release and record archive digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          sha256sum "$RUNNER_TEMP/kotlin-1.9.0.zip" > evidence/kotlin-compiler-v1.9.0.sha256
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged original Kotlin production sources and original post55 bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-compile-resources.txt \
+            timeout --signal=TERM --kill-after=5s 180s kotlinc \
+              original-kotlin/src/main/kotlin/pastafari/*.kt \
+              original-kotlin/soak/Post55ProductionDateBridge.kt \
+              -include-runtime -d evidence/original-kotlin-production-v045.jar
+          sha256sum evidence/original-kotlin-production-v045.jar \
+            > evidence/original-kotlin-production-v045.jar.sha256
+          test -z "$(git -C original-kotlin status --porcelain)"
+      - name: Execute original Python then Kotlin Fct with no per-date timeout
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/one-native-day-resources.txt python3 -B \
+            coordinator/soak/runner/supervised_original_python_kotlin_day_v045.py \
+              --ci-original-single-day \
+              --python-sources original-sources \
+              --original-kotlin original-kotlin \
+              --kotlin-jar evidence/original-kotlin-production-v045.jar \
+              --evidence-root evidence \
+            | tee evidence/gate.log
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('evidence')
+          v=json.loads((root/'one-day-original-py-kt-verdict.json').read_bytes())
+          assert v['status']=='ONE_ORIGINAL_PYTHON_KOTLIN_FCT_DAY_MATCH_NOT_YEAR_SOAK'
+          assert v['original_python_fct_calls_validated']==1
+          assert v['original_kotlin_fct_calls_validated']==1
+          assert v['matching_native_date_fields']==5
+          assert v['original_complete_years_soak_passed']==0
+          assert v['ten_thousand_year_soak_started'] is False
+          for name in ('REF-41','PROD-KT-CY'):
+              row=json.loads((root/name/'process-evidence.json').read_bytes())
+              assert row['return_code']==0
+              assert row['pid']>0 and row['process_creation_id']
+              assert (root/name/'os-stderr.log').is_file()
+          assert (root/'REF-41/native-raw.jsonl').is_file()
+          assert (root/'PROD-KT-CY/os-stdout.tsv').is_file()
+          print('ORIGINAL_PYTHON_KOTLIN_ONE_NATIVE_DATE_MATCH_NOT_YEAR_SOAK')
+          PY
+      - name: Retain exact observed stdout/stderr, original source hashes, JAR, and mismatch evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v045-original-python-kotlin-native-one-day
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
