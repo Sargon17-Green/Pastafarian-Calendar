@@ -1,0 +1,146 @@
+name: Soak v028 two derived annual streams 4244-row cross-source comparison
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-derived-kotlin-annual-v028.yml"
+      - "soak/experiments/derive_kotlin_annual_stream_v028.py"
+      - "soak/experiments/AnnualKotlinDerivedBridge_v028.kt"
+      - "soak/runner/compare_two_derived_annual_streams_v028.py"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  exact-annual-derivative-pair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 11
+    steps:
+      - name: Checkout QA coordinator without editing main
+        uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - name: Checkout pinned unmodified Kotlin production original
+        uses: actions/checkout@v4
+        with:
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          path: original-kotlin
+          persist-credentials: false
+      - name: Download exactly v025 Python-derived full-year source witness
+        uses: actions/download-artifact@v4
+        with:
+          name: original-python-annual-structure-sampled-equivalence-v025
+          run-id: 43648121105
+          github-token: ${{ github.token }}
+          path: original-python-annual
+      - name: Verify immutable original source and Python year evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-kotlin status --porcelain)"
+          echo "74742f95e5f11d225d61de9f19406312201a901bebac87f112e704046b96a3e8  original-python-annual/derived-year/derived_python_year5000_all_days.jsonl" \
+            | tee evidence/python-year-source.sha256 | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,pathlib,json
+          j=json.loads(pathlib.Path("coordinator/soak/control/annual_structure_cross_native_14_sample_v026.json").read_text())
+          assert j["status"]=="CROSS_ORIGINAL_KOTLIN_VS_DERIVED_PY_14_SAMPLE_MATCH_NOT_YEAR"
+          assert j["original_kotlin_sample_matches"]==14
+          assert j["original_python_sample_matches"]==14
+          assert j["verified_full_year_comparisons"]==0
+          d=json.loads(pathlib.Path("original-python-annual/derived-year/derivation_receipt.json").read_text())
+          assert d["status"]=="DERIVED_YEAR_TRANSCRIPT_SAMPLED_NATIVE_MATCH_NOT_CERTIFIED"
+          assert d["native_original_sample_count"]==14
+          assert d["original_source_commit"]=="0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4"
+          assert d["all_year_days_compared_to_original"] is False
+          print("PINNED_DERIVED_PYTHON_4244_ROWS_AND_14_ORIGINAL_SAMPLES_PASS")
+          PY
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Download pinned Kotlin compiler v1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Hash-guarded clone of exact native Kotlin dayAt, with original source untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/soak/experiments/derive_kotlin_annual_stream_v028.py \
+            --original-repository original-kotlin \
+            --output-dir build/derived-kotlin \
+            | tee evidence/derived-creation.log
+          cp build/derived-kotlin/PROVENANCE.json evidence/derivative-provenance.json
+          test -z "$(git -C original-kotlin status --porcelain)"
+          echo "KOTLIN_ORIGINAL_PRODUCTION_FILES_UNCHANGED=true"
+      - name: Compile explicitly derived Kotlin source separately
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-compile-resources.txt \
+            timeout --signal=TERM --kill-after=5s 180s kotlinc \
+            build/derived-kotlin/src/main/kotlin/pastafari/*.kt \
+            coordinator/soak/experiments/AnnualKotlinDerivedBridge_v028.kt \
+            -include-runtime -d evidence/derived-kotlin-annual-v028.jar
+          sha256sum evidence/derived-kotlin-annual-v028.jar | tee evidence/derived-jar.sha256
+      - name: Derivative Kotlin full year only (4244 days) with 512MiB JVM heap
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -v -o evidence/derived-kotlin-native-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 180s \
+            java -Xmx512m -XX:MaxDirectMemorySize=128m \
+            -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=64m \
+            -XX:ActiveProcessorCount=2 \
+            -cp evidence/derived-kotlin-annual-v028.jar \
+            pastafari.AnnualKotlinDerivedBridgeV028 -15055671 \
+            > evidence/derived-kotlin-4244.tsv 2>evidence/derived-kotlin.log
+          rc=$?
+          echo "$rc" > evidence/derived-kotlin.exit
+          tail -15 evidence/derived-kotlin.log
+          echo "KOTLIN_DERIVED_YEAR_EXIT=$rc"
+          exit 0
+      - name: Compare exact 4244 x 7 rows with pinned Python full-year witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat evidence/derived-kotlin.exit)" = 0
+          python3 -B coordinator/soak/runner/compare_two_derived_annual_streams_v028.py \
+            --python-annual original-python-annual/derived-year/derived_python_year5000_all_days.jsonl \
+            --kotlin-annual evidence/derived-kotlin-4244.tsv \
+            --original-sample-evidence coordinator/soak/control/annual_structure_cross_native_14_sample_v026.json \
+            --verdict evidence/derived-cross-annual-verdict.json \
+            | tee evidence/derived-cross-annual.log
+          python3 - <<'PY'
+          import json,pathlib
+          d=json.loads(pathlib.Path("evidence/derived-cross-annual-verdict.json").read_text())
+          assert d["status"]=="TWO_DERIVED_4244_ROW_TRANSCRIPTS_MATCH_NOT_NATIVE_YEAR_CERTIFIED"
+          assert d["rows_exactly_compared"]==4244
+          assert d["verified_full_year_soak_comparisons"]==0
+          assert d["two_independent_original_full_year_transcripts_compared"] is False
+          assert d["soak_started"] is False
+          print("DERIVED_TWO_SOURCE_4244_DAY_MATCH_PASS original_native_full_year_comparisons=0")
+          PY
+      - name: Preserve all evidence, no permanent changes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: two-derived-original-source-annual-streams-v028
+          path: |
+            evidence/*.json
+            evidence/*.log
+            evidence/*.txt
+            evidence/*.sha256
+            evidence/*.tsv
+          if-no-files-found: warn
+          retention-days: 30
