@@ -1,0 +1,74 @@
+{
+  "schema": "PASTAFARI_ORIGINAL_PYTHON_KOTLIN_TWO_DAY_PIN_V054/1",
+  "status": "TWO_SUPERVISED_ORIGINAL_FCT_PAIRS_MATCH_NOT_FULL_YEAR",
+  "source": "GitHub Actions original binaries Python+Turkce and Kotlin+Cymraeg",
+  "source_run_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43774977104",
+  "artifact_id": 14186295655,
+  "artifact_name": "soak-v053-two-original-native-days-not-year",
+  "artifact_sha256": "f87b2e925b4a400cff2e2469be5b873b66c89ca35498e8fcda1090ab55d5d390",
+  "artifact_size_bytes": 4902059,
+  "artifact_crc_verified": true,
+  "independently_rechecked_raw_and_normalized": true,
+  "calculation_day": "-15055671",
+  "year": "5000",
+  "year_first_target_day": "-15057702",
+  "year_last_target_day": "-15053459",
+  "original_year_days": 4244,
+  "target_days": [
+    "-15055672",
+    "-15055671"
+  ],
+  "canonical_five_fields_per_day": [
+    {
+      "target_day": "-15055672",
+      "year": "5000",
+      "cutlet_index": 10,
+      "day_in_cutlet": 502,
+      "month_index": 32,
+      "day_in_month": 21,
+      "python_native_names": {
+        "cutlet": "Akrep",
+        "month": "Kapalı kapı"
+      }
+    },
+    {
+      "target_day": "-15055671",
+      "year": "5000",
+      "cutlet_index": 10,
+      "day_in_cutlet": 503,
+      "month_index": 20,
+      "day_in_month": 56,
+      "python_native_names": {
+        "cutlet": "Akrep",
+        "month": "Kuyu"
+      }
+    }
+  ],
+  "matched_original_date_pairs": 2,
+  "first_mismatch": null,
+  "boundary_evidence_sha256": "ad64cc51522d7f19cb8a238e2a6a418e75203c6cbfe017c394f623edeb882e78",
+  "source_commits": {
+    "REF-41": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "PROD-KT-CY": "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+  },
+  "source_sha256_ref41": "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378",
+  "original_kotlin_source_closure_sha256": "d25d71bfeda5ef592162f10b564c9eb49f64176e4dc438ab2424c46a95c44ba7",
+  "original_kotlin_jar_sha256": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+  "sha256": {
+    "REF-41/native-raw.jsonl": "88efda9d93bb7fb54d3900b7684054d7155178f84d59c2d60571d9fba5d309ae",
+    "REF-41/native-normalized.jsonl": "db5f16647a3fe71defe9fb5b7d0e46222da57007d561c30ec74da2ff8757ea98",
+    "PROD-KT-CY/os-stdout.tsv": "02508551a01aa6a7297ae7dbd0509d67a6a8567e0ddacb17e0816228a0ad3a2e",
+    "kotlin-index-only-normalized.jsonl": "fb79d781ee3789d197e371920b7addd47fb31a9d2f23180fe2f5acb8179a6f90",
+    "REF-41/process-evidence.json": "6571619d9b9cc59310d3c5e48d1b0b1c135eafd9b4537a58a00bc42b5e9b09d4",
+    "PROD-KT-CY/process-evidence.json": "e143f53d0b1225dd62ad2d319dbea48041c7607e0c3459271770995df504bd5b"
+  },
+  "original_python_native_transport_boundary_sha_present": true,
+  "kotlin_native_name_provenance": "NATIVE_INDEX_STRING_NOT_NAME",
+  "independent_algorithm_lineage_certified": false,
+  "independent_canonical_oracle_certified": false,
+  "host_execution_attested_independently": false,
+  "original_full_year_soak_passes_certified": 0,
+  "ten_thousand_year_soak_started": false,
+  "windows_workload_started": false,
+  "main_changed": false
+}
