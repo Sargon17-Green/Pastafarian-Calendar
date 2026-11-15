@@ -1,0 +1,132 @@
+name: Soak v033 original Python Kotlin year5000 boundaries for changed c
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - ".github/workflows/soak-original-calculation-variation-v033.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  changed-calculation-native-boundaries:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          path: original-python
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          path: original-kotlin
+          persist-credentials: false
+      - name: Verify original source locks and exact code pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git -C original-python rev-parse HEAD)" = "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4"
+          test "$(git -C original-kotlin rev-parse HEAD)" = "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          printf '%s\n' \
+            "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py" \
+            | tee evidence/python-source-lock.sha256 | sha256sum -c -
+      - name: Run three original Python year5000 calculations with changed c
+        shell: bash
+        run: |
+          set -uo pipefail
+          ulimit -v 1572864
+          set +e
+          /usr/bin/time -v -o evidence/python-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 150s python3 -B \
+            coordinator/soak/experiments/original_python_calculation_variation_v033.py \
+            --original-source original-python/tests/normative_reference.py \
+            --output evidence/original-python-alternative-years.json \
+            > evidence/python.log 2>&1
+          rc=$?
+          echo "$rc" > evidence/python.exit
+          tail -25 evidence/python.log
+          exit 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Obtain original Kotlin compiler v1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile untouched original Kotlin with read-only alternative-c probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-build-resources.txt \
+            timeout --signal=TERM --kill-after=5s 180s kotlinc \
+            original-kotlin/src/main/kotlin/pastafari/*.kt \
+            coordinator/soak/experiments/OriginalKotlinCalculationVariation_v033.kt \
+            -include-runtime -d evidence/kotlin-original-alternative-bounds.jar
+          sha256sum evidence/kotlin-original-alternative-bounds.jar \
+            | tee evidence/kotlin-original-build.sha256
+          test -z "$(git -C original-kotlin status --porcelain)"
+      - name: Run three original Kotlin year5000 calculations with changed c
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          /usr/bin/time -v -o evidence/kotlin-native-resources.txt \
+            nice -n 19 timeout --signal=TERM --kill-after=5s 125s \
+            java -Xmx512m -XX:MaxDirectMemorySize=128m \
+            -XX:MaxMetaspaceSize=192m -XX:ReservedCodeCacheSize=64m \
+            -XX:ActiveProcessorCount=2 \
+            -cp evidence/kotlin-original-alternative-bounds.jar \
+            pastafari.OriginalKotlinCalculationVariationV033 \
+            > evidence/original-kotlin-alternative-years.tsv 2> evidence/kotlin.log
+          rc=$?
+          echo "$rc" > evidence/kotlin.exit
+          tail -25 evidence/kotlin.log
+          exit 0
+      - name: Compare exactly all 27 original year boundary fields, stop on mismatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat evidence/python.exit)" = 0
+          test "$(cat evidence/kotlin.exit)" = 0
+          python3 -B coordinator/soak/runner/compare_original_calculation_variation_v033.py \
+            --python evidence/original-python-alternative-years.json \
+            --kotlin evidence/original-kotlin-alternative-years.tsv \
+            --verdict evidence/alternate-original-boundary-verdict.json \
+            | tee evidence/original-boundary-comparison.log
+          python3 - <<'PY'
+          import json,pathlib
+          x=json.loads(pathlib.Path('evidence/alternate-original-boundary-verdict.json').read_text())
+          assert x['status']=='THREE_CALCULATION_NATIVE_YEAR_BOUNDS_MATCH_NOT_CERTIFIED'
+          assert x['boundary_fields_exactly_compared']==27
+          assert x['full_date_native_calls']==0
+          assert x['original_full_year_soak_passes']==0
+          print('ORIGINAL_ALTERNATE_C_BOUNDARIES_PASS no_full_year_pass=true')
+          PY
+      - name: Preserve native raw output, hashes and failed-run evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-py-kt-year5000-changed-calculation-day-v033
+          path: |
+            evidence/*.json
+            evidence/*.tsv
+            evidence/*.log
+            evidence/*.txt
+            evidence/*.sha256
+          if-no-files-found: warn
+          retention-days: 30
