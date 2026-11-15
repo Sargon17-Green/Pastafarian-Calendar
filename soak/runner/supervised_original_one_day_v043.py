@@ -34,7 +34,7 @@ YEAR="5000"
 SCHEMA="PASTAFARI_SUPERVISED_ORIGINAL_REFERENCE_ONE_DAY_V043/1"
 RUNTIME_LIMITS={
     "REF-41":{"as_bytes":1536*1024*1024},
-    "REF-24":{"as_bytes":8*1024*1024*1024,"old_space_mb":384,"semi_space_mb":16},
+    "REF-24":{"as_bytes":8*1024*1024*1024,"old_space_mb":1024,"semi_space_mb":16},
 }
 MAX_OUTPUT_BYTES=256*1024
 BOUNDARY_FILE=Path(__file__).resolve().parents[1]/"control/adjacent_three_original_year_boundaries_v030.json"
@@ -86,7 +86,7 @@ def _run_one(engine_id:str,root:Path,sources:Path,boundary_sha:str)->dict:
         node=shutil.which("node")
         if node is None:raise RuntimeError("node executable unavailable")
         program=Path(node).resolve(strict=True)
-        cmd=[str(program),"--max-old-space-size=384","--max-semi-space-size=16",
+        cmd=[str(program),f"--max-old-space-size={RUNTIME_LIMITS[engine_id]['old_space_mb']}","--max-semi-space-size=16",
              str(adapter)]
     binary_sha=sha_file(program)
     d=root/engine_id
@@ -101,8 +101,9 @@ def _run_one(engine_id:str,root:Path,sources:Path,boundary_sha:str)->dict:
     if (len(set([raw,norm,trans]))!=3 or any(p.exists() for p in (raw,norm,trans))):
         raise RuntimeError("native output paths not unique or not write-once")
     free_ram=_ram_available()
-    if free_ram<2*1024*1024*1024:
-        raise RuntimeError("CI RAM admission blocked, no original date process launched")
+    ram_floor=(5 if engine_id=="REF-24" else 2)*1024*1024*1024
+    if free_ram<ram_floor:
+        raise RuntimeError("CI RAM admission blocked for engine; no original date process launched")
     if shutil.disk_usage(root).free<500*1024*1024:
         raise RuntimeError("CI disk admission blocked, no original date process launched")
     rec={
@@ -120,6 +121,8 @@ def _run_one(engine_id:str,root:Path,sources:Path,boundary_sha:str)->dict:
         "rss_cap_enforced":False,
         "memory_virtual_address_cap_bytes":RUNTIME_LIMITS[engine_id]["as_bytes"],
         "available_ram_before_launch_bytes":free_ram,
+        "required_ram_admission_bytes":ram_floor,
+        "node_old_space_limit_mb":RUNTIME_LIMITS[engine_id].get("old_space_mb"),
         "cpu_nice_requested":19,"explicit_wall_timeout_seconds":None,
         "native_date_calls_expected":1,
         "validated_native_date_calls":0,
