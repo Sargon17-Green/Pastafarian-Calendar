@@ -1,0 +1,77 @@
+{
+  "schema": "PASTAFARI_SUPERVISED_ORIGINAL_PYTHON_KOTLIN_PILOT_V046/1",
+  "status": "ONE_ORIGINAL_FCT_DAY_PER_ENGINE_FIVE_FIELDS_AGREE_NOT_FULL_YEAR",
+  "observed_date": "2026-11-15",
+  "calculation_day": "-15055671",
+  "target_day": "-15055671",
+  "year": "5000",
+  "five_canonical_date_fields": [
+    "5000",
+    10,
+    503,
+    20,
+    56
+  ],
+  "raw_python_original_native_names": [
+    "Akrep",
+    "Kuyu"
+  ],
+  "originals": [
+    {
+      "engine": "REF-41",
+      "source_family": "Python+Türkçe",
+      "commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+      "source_path": "tests/normative_reference.py",
+      "native_entrypoint": "NormativeCalendar().calendar_date_ids(calculation_day,target_day)",
+      "native_raw_sha256": "bbad31d4bbc177c9c002423ccc3134dcb052c2eeff8e06290bb76b2c962c9173",
+      "native_normalized_sha256": "834cc548105faeadb99e5e3fb384d72e957d55c607847800f7cf0f0c8dc627c4",
+      "os_process_exit_code": 0,
+      "native_date_calls_confirmed": 1
+    },
+    {
+      "engine": "PROD-KT-CY",
+      "source_family": "Kotlin+Cymraeg",
+      "commit": "0c703446d8a3b7435698bd16402ac5fa30e461c9",
+      "source_path": "src/main/kotlin/pastafari/*.kt + soak/Post55ProductionDateBridge.kt",
+      "native_entrypoint": "Post55ProductionDateBridge.convert(calculationDay,targetDay)",
+      "native_raw_os_stdout_sha256": "476676d64c9d514dfebd598df53cee8bfacf489422bf12d24d6492bf6bb41c34",
+      "compiled_original_jar_sha256": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+      "os_process_exit_code": 0,
+      "native_date_calls_confirmed": 1
+    }
+  ],
+  "original_pairwise_date_rows_compared": 1,
+  "canonical_date_fields_matched": 5,
+  "first_mismatch": null,
+  "github_action_run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43765573521",
+  "github_artifact_id": 14181487872,
+  "github_artifact_zip_sha256": "2bcf3c15cc98c977e500caa7432f15e9bce17557f6292d4aae3d6ed9d5704c4d",
+  "preflight_synthetic_supervision_run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43763707096",
+  "preflight_original_source_processes_run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43764274836",
+  "javascript_original_pilot": {
+    "engine": "REF-24",
+    "source_family": "JavaScript+Interlingue",
+    "commit": "03ac0c7f4db3c35487993dd31982faa37dd3948e",
+    "status": "BLOCKED_HEAP_MEMORY_NO_NATIVE_DATE_RETURNED",
+    "attempts": [
+      {
+        "heap_mib": 384,
+        "run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43764673922"
+      },
+      {
+        "heap_mib": 1024,
+        "run": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43764826583"
+      }
+    ],
+    "original_native_date_comparisons_credited": 0
+  },
+  "prior_derived_annual_date_pairs_matched": 17506,
+  "prior_original_Fct_samples_per_python_kotlin_engine": 33,
+  "newly_supervised_full_date_pair_observations": 1,
+  "original_native_full_year_soak_passes_certified": 0,
+  "canonical_oracle_certified": false,
+  "algorithmic_independence_certified": false,
+  "ten_thousand_year_soak_started": false,
+  "windows_host_used": false,
+  "main_modified": false
+}
