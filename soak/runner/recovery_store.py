@@ -128,8 +128,11 @@ class CrashStore:
     def __init__(self, root: pathlib.Path, plan: dict):
         validate_plan(plan)
         self.root = pathlib.Path(root).resolve()
-        self.plan = plan
         self.plan_bytes = canonical_bytes(plan)
+        # Snapshot, do not retain mutable caller-owned aliases. A caller may
+        # later edit its plan object without silently changing our active job.
+        self.plan = json.loads(self.plan_bytes.decode("utf-8"),
+                               object_pairs_hook=_duplicates_error)
         self.plan_sha = sha256(self.plan_bytes)
         self.engines = [engine["id"] for engine in plan["engines"]]
         self.years = {y["year"]: y for y in plan["years"]}
@@ -243,12 +246,18 @@ class CrashStore:
             try: os.fsync(fd)
             finally: os.close(fd)
 
+    def _assert_immutable_plan(self) -> None:
+        if canonical_bytes(self.plan) != self.plan_bytes:
+            raise PlanMismatch("active in-memory run plan changed after opening")
+
     def _case(self, year: str) -> YearCase:
+        self._assert_immutable_plan()
         y = self.years[year]
         return YearCase(self.plan["calculation_day"], year, y["first_target_day"],
                         y["last_target_day"], y["boundary_evidence_sha256"])
 
     def _chunk(self, engine: str, year: str, ordinal: int) -> Chunk:
+        self._assert_immutable_plan()
         if engine not in self.engines or year not in self.years or type(ordinal) is not int or ordinal < 0:
             raise ValueError("unplanned chunk")
         y = self.years[year]
@@ -325,6 +334,7 @@ class CrashStore:
         after_db_commit. SQLite + the deterministic blob allow replay without
         re-computing a complete durable chunk.
         """
+        self._assert_immutable_plan()
         self._require_active()
         chunk = self._chunk(engine, year, ordinal)
         self._check_engine_order(chunk)
@@ -440,6 +450,7 @@ class CrashStore:
         Never deletes prior evidence; invalid items fail closed. Cannot adopt a
         running child or resume within an adapter's *single* uncheckpointed call.
         """
+        self._assert_immutable_plan()
         already=0
         adopted=0
         staged=0
@@ -478,6 +489,7 @@ class CrashStore:
                 "progress":self.progress()}
 
     def pending_jobs(self) -> list[Chunk]:
+        self._assert_immutable_plan()
         self._require_active()
         result=[]
         for year in self.years:
@@ -490,6 +502,7 @@ class CrashStore:
         return result
 
     def progress(self) -> dict:
+        self._assert_immutable_plan()
         rows=self.db.execute("SELECT year,candidate,verified_days FROM comparisons").fetchall()
         successful=len(rows)
         days=sum(row[2] for row in rows)
