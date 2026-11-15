@@ -70,7 +70,6 @@ def kotlin_original_row(native:bytes,c:str,t:str,year:str)->dict:
         "month_index":mi,"day_in_month":md,
         # These text fields hold raw native INDEX TOKENS, not Cymraeg names.
         "cutlet_name_raw":fields[3],"month_name_raw":fields[5],
-        "native_name_provenance":"INDEX_ONLY_NO_CYMRAEG_NAMES_IN_SOURCE",
         "source_raw_sha256":sha(native),
     }
 
@@ -141,6 +140,7 @@ def verify_bounded_original_chunk(
         # Never emit a partial chunk on first mismatch.
         "kotlin_index_only_normalized_jsonl":None if difference else b"".join(kotlin_norm),
         "kotlin_native_names_reported":False,
+        "kotlin_name_field_semantics":"NATIVE_INDEX_STRING_NOT_NAME",
         "host_process_identity_attested_by_this_gate":False,
         "algorithmic_independence_certified":False,
         "canonical_oracle_certified":False,
