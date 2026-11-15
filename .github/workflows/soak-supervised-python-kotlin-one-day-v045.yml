@@ -94,7 +94,8 @@ jobs:
           assert v['ten_thousand_year_soak_started'] is False
           for name in ('REF-41','PROD-KT-CY'):
               row=json.loads((root/name/'process-evidence.json').read_bytes())
-              assert row['return_code']==0
+              # REF-41 transport records exit_code; Kotlin process records return_code.
+              assert row.get('return_code',row.get('exit_code'))==0
               assert row['pid']>0 and row['process_creation_id']
               assert (root/name/'os-stderr.log').is_file()
           assert (root/'REF-41/native-raw.jsonl').is_file()
