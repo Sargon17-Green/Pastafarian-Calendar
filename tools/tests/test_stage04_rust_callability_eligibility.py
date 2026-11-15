@@ -8,7 +8,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from stage04_rust_callability_eligibility import (
-    check_callability, supported_signature, validated_symbol, test_body)
+    RuntimeUnverified, check_callability, install_probe, supported_signature,
+    validated_symbol, test_body)
 from stage04_rust_witness_provenance import ProvenanceError
 
 class CallabilityTests(unittest.TestCase):
@@ -114,6 +115,30 @@ class CallabilityTests(unittest.TestCase):
                     )
                     for value in (-15055672, -15055671, -15055670):
                         self.assertIn(f"BigInt::from({value})", body)
+
+    def test_reserved_historical_probe_path_is_preserved(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            probe = root / "tests" / "stage04_callability_gate.rs"
+            probe.parent.mkdir()
+            sentinel = "// PINNED_HISTORICAL_TEST_SENTINEL\\n"
+            probe.write_text(sentinel, encoding="utf-8")
+            with self.assertRaises(RuntimeUnverified):
+                install_probe(root, "synthetic_rust_daytag", "old_numeric_probe")
+            self.assertEqual(probe.read_text(encoding="utf-8"), sentinel)
+
+    def test_exclusive_probe_creation_is_one_use(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            probe = install_probe(root, "synthetic_rust_daytag", "old_numeric_probe")
+            self.assertEqual(
+                probe.read_text(encoding="utf-8"),
+                test_body("synthetic_rust_daytag", "old_numeric_probe"),
+            )
+            before = probe.read_bytes()
+            with self.assertRaises(RuntimeUnverified):
+                install_probe(root, "synthetic_rust_daytag", "old_numeric_probe")
+            self.assertEqual(probe.read_bytes(), before)
 
     def test_probe_binds_original_function_type(self):
         s = test_body("synthetic_rust_daytag", "old_numeric_probe")

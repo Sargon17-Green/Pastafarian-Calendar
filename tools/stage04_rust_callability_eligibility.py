@@ -64,6 +64,22 @@ def test_body(crate: str, symbol: str) -> str:
         "}\n"
     )
 
+def install_probe(dest: Path, crate: str, symbol: str) -> Path:
+    """Create a one-use test without replacing any pinned snapshot entry."""
+    tests = dest / "tests"
+    try:
+        tests.mkdir(exist_ok=True)
+        probe = tests / "stage04_callability_gate.rs"
+        # Exclusive open preserves historical files even if a path appears
+        # between the pre-check and creation.
+        with probe.open("x", encoding="utf-8") as output:
+            output.write(test_body(crate, symbol))
+    except FileExistsError as exc:
+        raise RuntimeUnverified("pinned snapshot already has reserved probe path") from exc
+    except OSError as exc:
+        raise RuntimeUnverified("cannot create exclusive historical test probe") from exc
+    return probe
+
 def archive(repo: Path, commit: str, dest: Path) -> None:
     try:
         r = subprocess.run(["git", "-C", str(repo), "archive", "--format=tar", commit],
@@ -112,9 +128,7 @@ def check_callability(repo: Path, witness_commit: str, witness_path: str,
             raise RuntimeUnverified("invalid pinned Cargo manifest") from exc
         if not isinstance(crate, str) or not IDENT.fullmatch(crate):
             raise RuntimeUnverified("invalid pinned crate name")
-        (dest / "tests").mkdir(exist_ok=True)
-        (dest / "tests" / "stage04_callability_gate.rs").write_text(
-            test_body(crate, symbol), encoding="utf-8")
+        install_probe(dest, crate, symbol)
         env = dict(os.environ, CARGO_TARGET_DIR=str(dest / "target"))
         try:
             run = subprocess.run(["cargo", "test", "--manifest-path", str(cargo),
