@@ -67,6 +67,8 @@ def validate_provenance_v2(plan: dict) -> dict:
     seen_commits = set()
     seen_identity = set()
     seen_lineage = set()
+    seen_source_digests = set()
+    seen_binary_digests = set()
     for engine in engines:
         if not isinstance(engine, dict):
             raise ValueError("malformed source identity descriptor")
@@ -124,9 +126,15 @@ def validate_provenance_v2(plan: dict) -> dict:
             raise ValueError("same original native entrypoint impersonates two engines")
         if full_identity in seen_identity or p["source_family"] in seen_lineage:
             raise ValueError("duplicate source lineage or underlying algorithm family")
+        if engine["source_sha256"] in seen_source_digests:
+            raise ValueError("identical source bytes cannot be independent engines")
+        if engine["binary_sha256"] in seen_binary_digests:
+            raise ValueError("identical executable bytes cannot be independent engines")
         seen_commits.add(commit_identity)
         seen_identity.add(full_identity)
         seen_lineage.add(p["source_family"])
+        seen_source_digests.add(engine["source_sha256"])
+        seen_binary_digests.add(engine["binary_sha256"])
 
     # A source-class receipt is not an independent audit or cryptographically
     # signed proof of who generated a given stdout stream.
