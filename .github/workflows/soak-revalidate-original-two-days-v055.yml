@@ -1,0 +1,154 @@
+name: Soak v055 audit pinned original two-day artifact without Fct execution
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/verify_original_two_day_artifact_v055.py"
+      - "soak/control/supervised_two_original_dates_v054.json"
+      - ".github/workflows/soak-revalidate-original-two-days-v055.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  independently-replay-actual-two-native-days:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Verify original frozen source snapshots and download immutable real process artifact
+        shell: bash
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -m 700 evidence
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
+            | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14186295655/zip \
+            > evidence/real-original-v053.zip
+          printf '%s\n' \
+            'f87b2e925b4a400cff2e2469be5b873b66c89ca35498e8fcda1090ab55d5d390  evidence/real-original-v053.zip' \
+            | sha256sum -c -
+          echo "V055_PINNED_ORIGINAL_2DATE_ARCHIVE_SHA_PASS"
+      - name: Revalidate exact original source, process, raw date rows, and no full-year certification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/soak/runner/verify_original_two_day_artifact_v055.py \
+            --artifact evidence/real-original-v053.zip \
+            --sources-root original-sources \
+            --kotlin-original-repo original-kotlin \
+            --expected-sha256 f87b2e925b4a400cff2e2469be5b873b66c89ca35498e8fcda1090ab55d5d390 \
+            | tee evidence/v055-audit.jsonl
+          python3 - <<'PY'
+          import json
+          s=json.loads(open('evidence/v055-audit.jsonl').read().split('=',1)[1])
+          assert s['status']=='PINNED_REAL_TWO_NATIVE_DAYS_REVALIDATED_NOT_YEAR_SOAK'
+          assert s['original_native_day_pairs_matched']==2
+          assert s['original_native_five_fields_matched_per_day']==5
+          assert s['original_year_length_days']==4244
+          assert s['official_full_year_soak_passes']==0
+          assert s['kotlin_native_names_output'] is False
+          assert s['source_lineage_certified'] is False
+          assert s['canonical_oracle_certified'] is False
+          assert s['windows_workload_started'] is False
+          print('V055_REPLAY_TWO_ORIGINAL_NATIVE_DATE_PAIRS_PASS_ZERO_YEAR_CREDIT')
+          PY
+      - name: Four adversarial modified archives including full repinning of changed files
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 -B - <<'PY' | tee evidence/adversarial-v055.log
+          from pathlib import Path
+          import hashlib,io,json,tempfile,zipfile
+          import verify_original_two_day_artifact_v055 as a
+          source=Path('evidence/real-original-v053.zip').read_bytes()
+          initial=a.PIN
+          control=json.loads(initial.read_text())
+          with zipfile.ZipFile(io.BytesIO(source)) as z:
+              original={n:z.read(n) for n in z.namelist()}
+          def update_json(blob,field,value):
+              d=json.loads(blob)
+              d[field]=value
+              return a.canonical(d)
+          def test_corruption(title,changes):
+              entries=dict(original)
+              entries.update(changes(entries))
+              dst=io.BytesIO()
+              with zipfile.ZipFile(dst,'w',zipfile.ZIP_DEFLATED) as z:
+                  for n,c in entries.items():z.writestr(n,c)
+              fake=dst.getvalue()
+              fake_pin=json.loads(json.dumps(control))
+              fake_pin['artifact_sha256']=hashlib.sha256(fake).hexdigest()
+              # Simulate a complicit reporter updating all affected file hashes.
+              for key in fake_pin['sha256']:
+                  fake_pin['sha256'][key]=hashlib.sha256(entries[key]).hexdigest()
+              with tempfile.TemporaryDirectory() as t:
+                  path=Path(t)/'pin.json'
+                  path.write_text(json.dumps(fake_pin))
+                  a.PIN=path
+                  try:
+                      a.replay_native_witness(fake,Path('original-sources'),
+                                              Path('original-kotlin'),
+                                              expected_zip_sha256=fake_pin['artifact_sha256'])
+                  except (ValueError,KeyError,UnicodeError,zipfile.BadZipFile) as exc:
+                      print('REJECTED_'+title+'='+type(exc).__name__)
+                  else:
+                      raise AssertionError('MUTATION_UNDETECTED_'+title)
+                  finally:
+                      a.PIN=initial
+          test_corruption('kotlin_date_changed_and_raw_sha_repinned',lambda d:{
+              'PROD-KT-CY/os-stdout.tsv':d['PROD-KT-CY/os-stdout.tsv'].replace(
+                  b'\t502\t32\t21\n',b'\t502\t32\t22\n'),
+              'PROD-KT-CY/process-evidence.json':update_json(
+                  d['PROD-KT-CY/process-evidence.json'],'os_stdout_sha256',
+                  hashlib.sha256(d['PROD-KT-CY/os-stdout.tsv'].replace(
+                      b'\t502\t32\t21\n',b'\t502\t32\t22\n')).hexdigest()),
+          })
+          test_corruption('false_year_soak_certificate',lambda d:{
+              'original-two-day-verdict.json':update_json(
+                  d['original-two-day-verdict.json'],'original_complete_years_soak_passed',1),
+          })
+          test_corruption('missing_original_jar',lambda d:{
+              'original-kotlin-v053.jar':d['original-kotlin-v053.jar'][:2048],
+          })
+          test_corruption('python_original_name_changed',lambda d:{
+              'REF-41/native-raw.jsonl':d['REF-41/native-raw.jsonl'].replace(
+                  'Kapalı kapı'.encode(),b'FAKE NAME'),
+          })
+          print('V055_REPINNED_ADVERSARIAL_ARCHIVES_REJECTED=4')
+          print('NATIVE_FCT_CALLS_DURING_EVIDENCE_AUDIT=0')
+          PY
+      - name: Retain audit reports only; no new source work or full year certificate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v055-pinned-two-original-day-revalidation-no-year-credit
+          path: |
+            evidence/v055-audit.jsonl
+            evidence/adversarial-v055.log
+          if-no-files-found: warn
+          retention-days: 30
