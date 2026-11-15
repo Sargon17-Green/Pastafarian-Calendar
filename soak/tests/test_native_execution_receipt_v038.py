@@ -203,6 +203,29 @@ class NativeExecutionReceiptTests(unittest.TestCase):
                                    raw_stdout=changed,native_receipt=receipt)
             self.assertEqual(store.progress()["committed_chunks"],1)
 
+    def test_missing_committed_receipt_cannot_be_recreated_by_idempotent_replay(self):
+        with CrashStore(self.root,self.plan) as store:
+            _,chunk,receipt,raw,content=commit(store,"native-a")
+            _,path=store._native_receipt_paths(chunk)
+            path.unlink()
+            with self.assertRaises((FileNotFoundError,ValueError)):
+                store.commit_chunk("native-a","5000",0,content,
+                                   raw_stdout=raw,native_receipt=receipt)
+            self.assertFalse(path.exists())
+            self.assertEqual(store.progress()["committed_chunks"],1)
+
+    def test_existing_receipt_conflicting_normalized_replay_preserves_first_incident(self):
+        with CrashStore(self.root,self.plan) as store:
+            _,chunk,receipt,raw,content=commit(store,"native-a")
+            modified=content.replace(b'"cutlet_index": 5',b'"cutlet_index": 6',1)
+            with self.assertRaisesRegex(Halted,"conflicting replay"):
+                store.commit_chunk("native-a","5000",0,modified,
+                                   raw_stdout=raw,native_receipt=receipt)
+            incident=store.incident()
+            self.assertEqual(incident["kind"],"CONFLICTING_REPLAY")
+            with self.assertRaises(Halted):
+                store.pending_jobs()
+
     def test_recovery_of_orphaned_v2_payload_reuses_sidecars_without_recompute(self):
         script = r'''import json, pathlib, sys
 sys.path.insert(0,sys.argv[1])
