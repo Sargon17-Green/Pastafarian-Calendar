@@ -25,7 +25,7 @@ def original_engine(engine_id, *, commit, algo, family, sha, source_class="origi
     return {
         "id": engine_id, "algorithm_id": algo,
         "source_sha256": sha * 64,
-        "binary_sha256": "a" * 64,
+        "binary_sha256": ("a" if sha == "1" else "c") * 64,
         "name_map_sha256": "b" * 64,
         "provenance": {
             "schema": IDENTITY_SCHEMA, "source_class": source_class,
@@ -115,6 +115,20 @@ class StrictSourceIdentityTests(unittest.TestCase):
         p=sample_plan()
         p["engines"][1]["provenance"]["original_source_sha256"]="1"*64
         with self.assertRaisesRegex(ValueError,"not equal"):
+            validate_plan(p)
+
+    def test_same_source_bytes_rejected_even_with_distinct_lineage_labels(self):
+        p=sample_plan()
+        e=p["engines"][1]
+        e["source_sha256"]=p["engines"][0]["source_sha256"]
+        e["provenance"]["original_source_sha256"]=e["source_sha256"]
+        with self.assertRaisesRegex(ValueError,"identical source bytes"):
+            validate_plan(p)
+
+    def test_same_native_binary_bytes_rejected_even_if_source_ids_change(self):
+        p=sample_plan()
+        p["engines"][1]["binary_sha256"]=p["engines"][0]["binary_sha256"]
+        with self.assertRaisesRegex(ValueError,"identical executable bytes"):
             validate_plan(p)
 
     def test_fake_independence_claim_rejected(self):
