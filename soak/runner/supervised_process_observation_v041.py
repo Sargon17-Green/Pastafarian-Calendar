@@ -329,3 +329,30 @@ def verify_synthetic_evidence(work:Path) -> dict:
         "original_native_full_years_certified":0,
         "linux_ci_only":True,
     }
+
+
+def _cli():
+    import argparse
+    parser=argparse.ArgumentParser(
+        description="Linux CI-only, original-converter-free, synthetic subprocess capture."
+    )
+    parser.add_argument("--synthetic-ci",action="store_true",required=True)
+    parser.add_argument("--out-root",type=Path,required=True)
+    args=parser.parse_args()
+    _admit(args.out_root)
+    captured=run_synthetic_ci_once(args.out_root,mode="ok")
+    verified=verify_synthetic_evidence(args.out_root/"process-observation-ok")
+    summary={
+        **verified,
+        "actual_process_pid":captured["pid"],
+        "original_converter_calls":0,
+        "run_directory":str(args.out_root/"process-observation-ok"),
+        "process_record_sha256":sha_file(
+            args.out_root/"process-observation-ok"/"process-evidence.json"),
+    }
+    _durable_exclusive(args.out_root/"summary.json",canonical(summary))
+    print("SUPERVISED_SYNTHETIC_V041="+json.dumps(summary,sort_keys=True),flush=True)
+
+
+if __name__=="__main__":
+    _cli()
