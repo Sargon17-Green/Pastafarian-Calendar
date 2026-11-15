@@ -23,6 +23,8 @@ from typing import Any
 from year_validator import YearCase, parse_line
 from source_identity_gate_v036 import (PROVENANCE_CONTRACT, evaluate_plan_identity,
                                        validate_provenance_v2)
+from native_execution_receipt_v038 import (canonical as receipt_canonical,
+                                           verify_receipt)
 
 
 CONTRACT = "PASTAFARI_SOAK_RECOVERY/1"
@@ -219,6 +221,12 @@ class CrashStore:
               first_day TEXT NOT NULL, last_day TEXT NOT NULL,
               file_sha256 TEXT NOT NULL, bytes INTEGER NOT NULL,
               PRIMARY KEY(engine,year,ordinal));
+            CREATE TABLE IF NOT EXISTS native_receipts(
+              engine TEXT NOT NULL, year TEXT NOT NULL, ordinal INTEGER NOT NULL,
+              receipt_sha256 TEXT NOT NULL, stdout_sha256 TEXT NOT NULL,
+              stdout_bytes INTEGER NOT NULL, source_rows INTEGER NOT NULL,
+              PRIMARY KEY(engine,year,ordinal),
+              FOREIGN KEY(engine,year,ordinal) REFERENCES chunks(engine,year,ordinal));
             CREATE TABLE IF NOT EXISTS comparisons(
               year TEXT NOT NULL, candidate TEXT NOT NULL,
               verified_days INTEGER NOT NULL, stream_sha256 TEXT NOT NULL,
@@ -326,8 +334,74 @@ class CrashStore:
         if ix and not self._full_engine(self.engines[ix-1],chunk.year):
             raise ValueError("complete previous engine year before computing this engine")
 
+    def _native_receipt_paths(self, chunk: Chunk) -> tuple[pathlib.Path, pathlib.Path]:
+        self._assert_immutable_plan()
+        name = self._chunk_path(chunk).stem
+        return (self.root / "evidence" / (name + ".native-stdout"),
+                self.root / "evidence" / (name + ".native-receipt.json"))
+
+    def _publish_native_receipt(self, chunk: Chunk, raw: bytes, receipt: dict) -> None:
+        """Durably stage two append-only witnesses BEFORE chunk publication.
+
+        Each deterministic sidecar can survive a crash and be checked by
+        verify_and_recover, but cannot itself attest what executable ran.
+        """
+        self._assert_immutable_plan()
+        raw_path, receipt_path = self._native_receipt_paths(chunk)
+        for path, data in ((raw_path, raw), (receipt_path, receipt_canonical(receipt))):
+            staged = path.with_name(path.name + ".part")
+            if path.exists():
+                if path.read_bytes() != data:
+                    raise ValueError("native stdout or receipt replay conflicts with frozen evidence")
+                if staged.exists():
+                    raise ValueError("ambiguous native evidence file and staging file")
+                continue
+            if staged.exists():
+                if staged.read_bytes() != data:
+                    raise ValueError("conflicting staged native evidence; operator must investigate")
+            else:
+                self._durable_write(staged, data)
+            os.replace(staged, path)
+            self._sync_dir(path.parent)
+
+    def _verified_native_receipt_files(self, chunk: Chunk, content: bytes | None,
+                                       *, expected_content_sha: str,
+                                       require_db: bool = False) -> dict:
+        if self.plan["contract"] != PROVENANCE_CONTRACT:
+            raise ValueError("native receipts are for v2 plans only")
+        raw_path, receipt_path = self._native_receipt_paths(chunk)
+        for p in (raw_path, receipt_path):
+            if p.with_name(p.name + ".part").exists():
+                raise ValueError("ambiguous partial native execution receipt")
+        raw = raw_path.read_bytes()
+        receipt_bytes = receipt_path.read_bytes()
+        metadata = json.loads(receipt_bytes, object_pairs_hook=_duplicates_error)
+        if receipt_bytes != receipt_canonical(metadata):
+            raise ValueError("native receipt bytes are not canonical")
+        if content is None:
+            content = self._chunk_path(chunk).read_bytes()
+        if sha256(content) != expected_content_sha:
+            raise ValueError("native receipt normalized chunk content differs from ledger SHA")
+        checked = verify_receipt(self.plan, self.plan_sha,
+                                 chunk.engine_id, chunk.year,
+                                 chunk.first_day, chunk.last_day, chunk.ordinal,
+                                 content, raw, metadata)
+        row = self.db.execute(
+            "SELECT receipt_sha256,stdout_sha256,stdout_bytes,source_rows "
+            "FROM native_receipts WHERE engine=? AND year=? AND ordinal=?",
+            (chunk.engine_id,chunk.year,chunk.ordinal)).fetchone()
+        expected=(sha256(receipt_bytes),checked["raw_stdout_sha256"],
+                  checked["raw_stdout_bytes"],checked["raw_rows"])
+        if require_db and row is None:
+            raise ValueError("committed v2 chunk lacks atomic native receipt ledger row")
+        if row is not None and row != expected:
+            raise ValueError("native receipt differs from SQLite immutable record")
+        return {**checked, "receipt_sha256":sha256(receipt_bytes)}
+
     def commit_chunk(self, engine: str, year: str, ordinal: int, content: bytes,
-                     *, inject_crash_at: str | None = None):
+                     *, inject_crash_at: str | None = None,
+                     raw_stdout: bytes | None = None,
+                     native_receipt: dict | None = None):
         """Commit one exact chunk; crash injection is test-only, never use on real workloads.
 
         Crash stages: after_payload_fsync / after_payload_publish /
@@ -341,6 +415,17 @@ class CrashStore:
         if not isinstance(content, bytes):
             raise TypeError("content must be raw UTF-8 bytes")
         parsed = self._parse_chunk(chunk, content)
+        if self.plan["contract"] == PROVENANCE_CONTRACT:
+            if raw_stdout is None or native_receipt is None:
+                raise ValueError("v2 requires raw native stdout and an exact receipt for every chunk")
+            # Fail BEFORE writing any output if the source bytes and normalized
+            # bytes do not bind one-to-one to this immutable c/year/source.
+            verify_receipt(self.plan, self.plan_sha, engine, year,
+                           chunk.first_day, chunk.last_day, chunk.ordinal,
+                           content, raw_stdout, native_receipt)
+            self._publish_native_receipt(chunk, raw_stdout, native_receipt)
+        elif raw_stdout is not None or native_receipt is not None:
+            raise ValueError("legacy v1 does not admit v2 native receipts")
         checksum = sha256(content)
         prior = self._chunk_registered(chunk)
         if prior is not None:
@@ -387,6 +472,17 @@ class CrashStore:
                 return
             self.db.execute("INSERT INTO chunks(engine,year,ordinal,first_day,last_day,file_sha256,bytes) VALUES(?,?,?,?,?,?,?)",
                             (chunk.engine_id,chunk.year,chunk.ordinal,chunk.first_day,chunk.last_day,checksum,length))
+            if self.plan["contract"] == PROVENANCE_CONTRACT:
+                # Same SQLite transaction as the chunk and any year comparison.
+                # A source receipt can NEVER be attached to an already-counted
+                # chunk after the fact as a new certification.
+                native = self._verified_native_receipt_files(chunk, None, expected_content_sha=checksum)
+                self.db.execute(
+                    "INSERT INTO native_receipts(engine,year,ordinal,receipt_sha256,stdout_sha256,stdout_bytes,source_rows) "
+                    "VALUES(?,?,?,?,?,?,?)",
+                    (chunk.engine_id, chunk.year, chunk.ordinal,
+                     native["receipt_sha256"], native["raw_stdout_sha256"],
+                     native["raw_stdout_bytes"],native["raw_rows"]))
             ix = self.engines.index(chunk.engine_id)
             if ix:
                 reference = self.engines[0]
@@ -443,6 +539,9 @@ class CrashStore:
         if sha256(data)!=receipt[0] or len(data)!=receipt[1]:
             raise ValueError("committed chunk failed integrity check")
         self._parse_chunk(chunk,data)
+        if self.plan["contract"] == PROVENANCE_CONTRACT:
+            self._verified_native_receipt_files(chunk, data, expected_content_sha=receipt[0],
+                                                require_db=True)
 
     def verify_and_recover(self) -> dict:
         """Audit all committed data, re-adopt full orphan `.part` / final files.
@@ -504,6 +603,7 @@ class CrashStore:
     def progress(self) -> dict:
         self._assert_immutable_plan()
         rows=self.db.execute("SELECT year,candidate,verified_days FROM comparisons").fetchall()
+        native_receipts=self.db.execute("SELECT COUNT(*) FROM native_receipts").fetchone()[0]
         successful=len(rows)
         days=sum(row[2] for row in rows)
         known={(year,candidate) for year,candidate,_ in rows}
@@ -522,6 +622,8 @@ class CrashStore:
                 "fully_verified_years":len(fully_verified),
                 "contiguous_verified_years":prefix,
                 "committed_chunks":committed,
+                "raw_native_chunk_receipts_integrity_linked":native_receipts,
+                "native_receipt_execution_attestation_verified":False,
                 "incident_present":self.incident() is not None,
                 "all_verified":len(fully_verified)==len(self.years) and self.incident() is None,
                 "source_identity_status": source_identity["status"],
