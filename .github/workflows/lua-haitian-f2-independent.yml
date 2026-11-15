@@ -1,0 +1,51 @@
+name: Lua Haitian F2 bounded independent feasibility
+on:
+  push:
+    branches:
+      - 'Lua+Kreyòl-ayisyen'
+    paths:
+      - 'test/lua_haitian_f2_fixtures.json'
+      - 'test/lua_haitian_f2_independent_feasibility.cjs'
+      - 'docs/F2_BOUNDED_INDEPENDENT_FEASIBILITY_LUA_HAITIAN_2026-11-15.md'
+      - '.github/workflows/lua-haitian-f2-independent.yml'
+jobs:
+  lua_haitian_f2_synthetic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce source and contract locks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD:test/normative_oracle.lua)" = "8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d"
+          test "$(git rev-parse HEAD:src/source_language_catalog.lua)" = "5b59ee6bb0ea2c2a551185929b5531ea28a50e49"
+          test "$(git rev-parse HEAD:docs/F0_NATIVE_ACCEPTANCE_F1_BOUNDED_INTERFACE_CONTRACT_LUA_HAITIAN_2026-11-07.md)" = "74277716bf3822ee5728980f4bdebb331075bb19"
+      - name: Node 20 for independent checker
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Bounded F2 evidence with separate streams and exit code
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p f2-evidence
+          date -u +%FT%TZ > f2-evidence/start_utc.txt
+          git rev-parse HEAD > f2-evidence/source_sha.txt
+          sha256sum test/lua_haitian_f2_independent_feasibility.cjs test/lua_haitian_f2_fixtures.json > f2-evidence/sha256.txt
+          timeout 60s node test/lua_haitian_f2_independent_feasibility.cjs > f2-evidence/stdout.txt 2> f2-evidence/stderr.txt
+          code=$?
+          printf '%s\n' "$code" > f2-evidence/exit_code.txt
+          cat f2-evidence/stdout.txt
+          cat f2-evidence/stderr.txt >&2
+          test "$code" -eq 0 || exit "$code"
+          test ! -s f2-evidence/stderr.txt || exit 19
+          grep -Fxq 'F2_INDEPENDENT_4_OF_4_PASS: 4/4 frozen witnesses' f2-evidence/stdout.txt
+          grep -Fxq 'F2_LEDGER_546_DAYS_PASS: 546 enumerated days' f2-evidence/stdout.txt
+          grep -Fxq 'F2_NEGATIVE_5_OF_5_PASS: 5/5 invalid/boundary checks' f2-evidence/stdout.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lua-haitian-f2-bounded-independent-evidence
+          path: f2-evidence/
+          if-no-files-found: error

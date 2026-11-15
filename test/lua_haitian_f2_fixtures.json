@@ -1,0 +1,193 @@
+{
+  "schema": "LUA_HAITIAN_F2_SYNTHETIC_V1",
+  "projectId": "PC-BRANCH-LUA-HAITIAN",
+  "referenceHead": "f2b2baec6d4af5e0692ab0f60c226fce21758c4a",
+  "limits": {
+    "maxYearDays": 512,
+    "maxWeaveRuns": 64,
+    "perTestSeconds": 60
+  },
+  "structures": {
+    "A": {
+      "number": 42,
+      "gates": [
+        -300,
+        -258,
+        -216,
+        -174,
+        -132,
+        -90,
+        -48
+      ],
+      "cutletIndices": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "monthLengths": [
+        84,
+        84,
+        84
+      ],
+      "monthNameIndices": [
+        1,
+        2,
+        3
+      ],
+      "monthRuns": [
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          1,
+          80
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          2,
+          80
+        ],
+        [
+          3,
+          80
+        ]
+      ]
+    },
+    "B": {
+      "number": 43,
+      "gates": [
+        1000,
+        1042,
+        1084,
+        1126,
+        1168,
+        1210,
+        1252,
+        1294
+      ],
+      "cutletIndices": [
+        7,
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "monthLengths": [
+        98,
+        98,
+        98
+      ],
+      "monthNameIndices": [
+        4,
+        5,
+        6
+      ],
+      "monthRuns": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          1,
+          97
+        ],
+        [
+          2,
+          97
+        ],
+        [
+          3,
+          97
+        ]
+      ]
+    }
+  },
+  "witnesses": [
+    {
+      "id": "A_OPEN_PLUS_ONE",
+      "structure": "A",
+      "target": -299,
+      "expected": [
+        42,
+        "bwonz",
+        1,
+        "ajil",
+        1
+      ]
+    },
+    {
+      "id": "A_SECOND_CUTLET_END",
+      "structure": "A",
+      "target": -216,
+      "expected": [
+        42,
+        "rena",
+        42,
+        "ajil",
+        80
+      ]
+    },
+    {
+      "id": "A_RIGHT_CLOSED",
+      "structure": "A",
+      "target": -48,
+      "expected": [
+        42,
+        "kat pati sou nèf",
+        42,
+        "koud",
+        84
+      ]
+    },
+    {
+      "id": "B_FOURTH_CUTLET_WEAVE",
+      "structure": "B",
+      "target": 1127,
+      "expected": [
+        43,
+        "Lagach",
+        1,
+        "Eridou",
+        28
+      ]
+    }
+  ],
+  "cutletNames": {
+    "1": "bwonz",
+    "2": "rena",
+    "3": "ren",
+    "4": "Lagach",
+    "5": "panse",
+    "6": "kat pati sou nèf",
+    "7": "Palgourach"
+  },
+  "monthNames": {
+    "1": "ajil",
+    "2": "grenad",
+    "3": "koud",
+    "4": "jalouzi",
+    "5": "Eridou",
+    "6": "pat dan"
+  }
+}
