@@ -53,6 +53,16 @@ const SHORT_Q45_TARGETS = new Map([
   ['test_discovery01_short_diff_q5_m_backward', {q:5n, place:'m', step:-1}],
   ['test_discovery01_short_diff_q5_m_forward', {q:5n, place:'m', step:1}]
 ]);
+const SHORT_SMALL_N_TARGETS = new Map([
+  ['test_discovery01_short_small_n1_m_backward', {n:1n, step:-1}],
+  ['test_discovery01_short_small_n1_m_forward', {n:1n, step:1}],
+  ['test_discovery01_short_small_n2_m_backward', {n:2n, step:-1}],
+  ['test_discovery01_short_small_n2_m_forward', {n:2n, step:1}],
+  ['test_discovery01_short_small_n4_m_backward', {n:4n, step:-1}],
+  ['test_discovery01_short_small_n4_m_forward', {n:4n, step:1}],
+  ['test_discovery01_short_small_n11_m_backward', {n:11n, step:-1}],
+  ['test_discovery01_short_small_n11_m_forward', {n:11n, step:1}]
+]);
 const FORWARD_TARGETS = new Map([
   ['test_discovery01_k3_forward_q2_n_minus_one', {q: 2n, delta: -1n}],
   ['test_discovery01_k3_forward_q2_exact_limit', {q: 2n, delta: 0n}],
@@ -84,7 +94,7 @@ function child(file, name) {
   assert.equal(typeof instance.exports[name], 'function', 'missing export');
   const value = instance.exports[name]();
   const record = {name, value};
-  if (TARGETS.has(name) || FORWARD_TARGETS.has(name) || SHORT_TARGETS.has(name) || SHORT_Q23_TARGETS.has(name) || SHORT_Q2_LIVENESS_TARGETS.has(name) || SHORT_Q123_DIFFERENTIAL_TARGETS.has(name) || SHORT_Q45_TARGETS.has(name)) {
+  if (TARGETS.has(name) || FORWARD_TARGETS.has(name) || SHORT_TARGETS.has(name) || SHORT_Q23_TARGETS.has(name) || SHORT_Q2_LIVENESS_TARGETS.has(name) || SHORT_Q123_DIFFERENTIAL_TARGETS.has(name) || SHORT_Q45_TARGETS.has(name) || SHORT_SMALL_N_TARGETS.has(name)) {
     const mem = instance.exports.memory;
     assert.ok(mem instanceof WebAssembly.Memory, 'missing memory export');
     record.numerics = {};
@@ -249,6 +259,23 @@ function checkShortQ45(name, values) {
     limit:String(limit), accepted:String(accepted),
     rank:String(rank), mathematical_rejections:String(rejections)};
 }
+function checkShortSmallN(name, values) {
+  const {n, step} = SHORT_SMALL_N_TARGETS.get(name);
+  const expectedRemainder = new Map([[1n,0n],[2n,1n],[4n,3n],[11n,6n]]).get(n);
+  assert.equal(M % n, expectedRemainder, name + ': wrong large-quotient boundary');
+  const first = M, limit = (M / n) * n;
+  const rejected = first <= limit ? 0n : step === 1 ? 1n : first - limit;
+  const accepted = first <= limit ? first : step === 1 ? 1n : limit;
+  const rank = 1n + (accepted - 1n) % n;
+  assert.equal(rejected, n === 1n ? 0n : step === 1 ? 1n : expectedRemainder);
+  assert.ok(rank >= 1n && rank <= n);
+  for (const [key, expected] of Object.entries({
+    M, N:n, FIRST:first, CUR:accepted, LIMIT:limit, RESULT:rank
+  })) assert.equal(BigInt(values[key]), expected, name + ': ' + key);
+  return {name, n:String(n), q:String(M / n), step, first:String(first),
+    limit:String(limit), accepted:String(accepted), rank:String(rank),
+    mathematical_rejections:String(rejected)};
+}
 function main() {
   if (process.argv[2] === '--one') {
     child(process.argv[3], process.argv[4]);
@@ -266,8 +293,8 @@ function main() {
     const tests = WebAssembly.Module.exports(mod)
       .filter(e => e.kind === 'function' && e.name.startsWith('test_'))
       .map(e => e.name).sort();
-    assert.equal(tests.length, 67, 'unexpected regression set size');
-    assert.equal(new Set(tests).size, 67, 'duplicate export');
+    assert.equal(tests.length, 75, 'unexpected regression set size');
+    assert.equal(new Set(tests).size, 75, 'duplicate export');
     for (const name of TARGETS.keys()) assert.ok(tests.includes(name), 'missing target: ' + name);
     for (const name of FORWARD_TARGETS.keys()) assert.ok(tests.includes(name), 'missing forward target: ' + name);
     for (const name of SHORT_TARGETS.keys()) assert.ok(tests.includes(name), 'missing short target: ' + name);
@@ -275,6 +302,7 @@ function main() {
     for (const name of SHORT_Q2_LIVENESS_TARGETS.keys()) assert.ok(tests.includes(name), 'missing liveness: ' + name);
     for (const name of SHORT_Q123_DIFFERENTIAL_TARGETS.keys()) assert.ok(tests.includes(name), 'missing differential: ' + name);
     for (const name of SHORT_Q45_TARGETS.keys()) assert.ok(tests.includes(name), 'missing q45: ' + name);
+    for (const name of SHORT_SMALL_N_TARGETS.keys()) assert.ok(tests.includes(name), 'missing small n: ' + name);
     let passed = 0;
     const numerics = {};
     const forwardNumerics = {};
@@ -283,6 +311,7 @@ function main() {
     const shortQ2LivenessNumerics = {};
     const shortQ123DifferentialNumerics = {};
     const shortQ45Numerics = {};
+    const shortSmallNNumerics = {};
     for (const name of tests) {
       const p = spawnSync(process.execPath, [__filename, '--one', compiled, name],
         {encoding: 'utf8', timeout: 30000, maxBuffer: 1000000});
@@ -299,6 +328,7 @@ function main() {
       if (SHORT_Q2_LIVENESS_TARGETS.has(name)) shortQ2LivenessNumerics[name] = checkShortQ2Liveness(name,outcome.numerics);
       if (SHORT_Q123_DIFFERENTIAL_TARGETS.has(name)) shortQ123DifferentialNumerics[name] = checkShortQ123Differential(name, outcome.numerics);
       if (SHORT_Q45_TARGETS.has(name)) shortQ45Numerics[name] = checkShortQ45(name, outcome.numerics);
+      if (SHORT_SMALL_N_TARGETS.has(name)) shortSmallNNumerics[name] = checkShortSmallN(name, outcome.numerics);
       passed++;
     }
     assert.equal(Object.keys(numerics).length, TARGETS.size, 'missing numeric probes');
@@ -308,6 +338,7 @@ function main() {
     assert.equal(Object.keys(shortQ2LivenessNumerics).length, SHORT_Q2_LIVENESS_TARGETS.size, 'missing short q2 liveness probes');
     assert.equal(Object.keys(shortQ123DifferentialNumerics).length, SHORT_Q123_DIFFERENTIAL_TARGETS.size, 'missing short q123 differential probes');
     assert.equal(Object.keys(shortQ45Numerics).length, SHORT_Q45_TARGETS.size, 'missing short q45 probes');
+    assert.equal(Object.keys(shortSmallNNumerics).length, SHORT_SMALL_N_TARGETS.size, 'missing small n probes');
     const report = {
       project_id: 'PC-BRANCH-WAT-SPANISH',
       native_engine: 'Node WebAssembly via WABT',
@@ -319,7 +350,8 @@ function main() {
       short_q23_numeric_oracles: q23Numerics,
       short_q2_liveness_numeric_oracles: shortQ2LivenessNumerics,
       short_q123_differential_numeric_oracles: shortQ123DifferentialNumerics,
-      short_q45_numeric_oracles: shortQ45Numerics
+      short_q45_numeric_oracles: shortQ45Numerics,
+      short_small_n_numeric_oracles: shortSmallNNumerics
     };
     process.stdout.write(JSON.stringify(report, null, 2) + '\n');
   } finally {
