@@ -1,0 +1,56 @@
+name: SQL Tamil Slice24 PG17
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths: ['sql/26_stage02_year_structure.sql','sql/test/14*_stage02_year_structure_*.sql','.github/workflows/sql-tamil-stage02-year-structure-native.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [native, differential]
+        case: [anchor, boundary_open, boundary_close, next_1, next_2, next_3, prev_2, prev_3]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LANE: ${{ matrix.lane }}
+      CASE_LABEL: ${{ matrix.case }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Exact source lock and PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p slice24-evidence
+          echo "Git SHA: $GITHUB_SHA" > slice24-evidence/versions.txt
+          sha256sum sql/26_stage02_year_structure.sql sql/test/14{2,3,4,5}_stage02_year_structure_* sql/test/10_normative_reference.sql > slice24-evidence/source-sha256.txt
+          if [ "$LANE" = native ]; then file=sql/test/143_stage02_year_structure_native.sql; else file=sql/test/144_stage02_year_structure_differential.sql; fi
+          sed "s/__CASE_LABEL__/$CASE_LABEL/g" "$file" > slice24-evidence/test.sql
+          sha256sum slice24-evidence/test.sql > slice24-evidence/generated-sha256.txt
+          docker run -d --name slice24-pg --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          for n in $(seq 1 60); do if docker exec -u postgres slice24-pg pg_isready -q -U postgres; then break; fi; sleep 2; done
+          docker exec -u postgres slice24-pg postgres --version | tee -a slice24-evidence/versions.txt
+          args=()
+          for i in $(seq -w 0 26); do f=$(find sql -maxdepth 1 -name "$i"'_*.sql' -print); test -f "$f"; args+=(-f "/work/$f"); done
+          if [ "$LANE" = differential ]; then args+=(-f /work/sql/test/10_normative_reference.sql); fi
+          args+=(-f /work/sql/test/142_stage02_year_structure_cases.sql -f /work/slice24-evidence/test.sql)
+          docker exec -u postgres slice24-pg psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" 2>&1 | tee slice24-evidence/results.txt
+          if [ "$LANE" = native ]; then
+            grep -qx 'slice24_native_all_green=1' slice24-evidence/results.txt
+            sed -n 's/^SLICE24_RECORD_JSON //p' slice24-evidence/results.txt > slice24-evidence/records.jsonl
+            python3 sql/test/145_stage02_year_structure_oracle.py --file slice24-evidence/records.jsonl --case "$CASE_LABEL" | tee slice24-evidence/oracle.txt
+          else
+            grep -qx 'slice24_diff_all_green=1' slice24-evidence/results.txt
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sql-tamil-slice24-${{ matrix.lane }}-${{ matrix.case }}
+          path: slice24-evidence/
+          if-no-files-found: warn
