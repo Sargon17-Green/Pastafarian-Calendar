@@ -134,8 +134,8 @@ class CrashStore:
         self.plan = json.loads(self.plan_bytes.decode("utf-8"),
                                object_pairs_hook=_duplicates_error)
         self.plan_sha = sha256(self.plan_bytes)
-        self.engines = [engine["id"] for engine in plan["engines"]]
-        self.years = {y["year"]: y for y in plan["years"]}
+        self.engines = [engine["id"] for engine in self.plan["engines"]]
+        self.years = {y["year"]: y for y in self.plan["years"]}
         self.root.mkdir(parents=True, exist_ok=True)
         self.lock_file = (self.root / "OWNED_SUPERVISOR.lock").open("a+b")
         try:
