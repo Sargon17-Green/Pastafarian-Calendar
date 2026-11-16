@@ -1,0 +1,126 @@
+name: Soak v065 audit original next 2 native dates and repinned forgeries (no native execution)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/verify_next_original_chunk_v065.py"
+      - "soak/control/supervised_next_two_original_dates_v064.json"
+      - ".github/workflows/soak-verify-next-original-chunk-v065.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-native-source-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Fetch exact original pinned native ZIP and prepare original source snapshot
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -m 700 evidence
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14264392351/zip > evidence/original-next-two-v061.zip
+          echo '91985794e9bb8e3c6995aa5634d684872c60aae544eaf780b668797d86557eb9  evidence/original-next-two-v061.zip' | sha256sum -c -
+          echo "V065_PINNED_NEXT_ORIGINAL_ZIP_SHA_PASS"
+      - name: Replay original two date fields from Python raw and Kotlin native OS stdout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/soak/runner/verify_next_original_chunk_v065.py \
+            --artifact evidence/original-next-two-v061.zip \
+            --source-root original-sources \
+            --kotlin-repo original-kotlin | tee evidence/v065-replay.jsonl
+          python3 - <<'PY'
+          import json
+          a=json.loads(open('evidence/v065-replay.jsonl').read().split('=',1)[1])
+          assert a['status']=='PINNED_NEXT_TWO_REAL_ORIGINAL_DATES_REVALIDATED_NOT_YEAR'
+          assert a['chunk_ordinal']==1016
+          assert a['original_native_day_pairs_compared']==2
+          assert (a['first_target_day'],a['last_target_day'])==('-15055670','-15055669')
+          assert a['original_full_year_soak_passes_certified']==0
+          assert a['independent_algorithmic_lineage_certified'] is False
+          assert a['canonical_oracle_certified'] is False
+          print("V065_REPLAYED_TWO_REAL_ORIGINAL_DATES_PASS_NO_YEAR_CREDIT")
+          PY
+      - name: Mutations must be rejected even with updated ZIP SHA and internal manifest hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 -B - <<'PY' | tee evidence/v065-adversarial.log
+          import copy,hashlib,io,json,pathlib,unittest.mock as mock,zipfile
+          import verify_next_original_chunk_v065 as v
+          source=pathlib.Path('evidence/original-next-two-v061.zip').read_bytes()
+          pin=v.frozen_pin()
+          with zipfile.ZipFile(io.BytesIO(source)) as z:
+              items={name:z.read(name) for name in z.namelist()}
+          def altered(title,changed):
+              files=dict(items);files.update(changed(files))
+              out=io.BytesIO()
+              with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED) as w:
+                  for name,raw in files.items():w.writestr(name,raw)
+              fake=out.getvalue()
+              new=copy.deepcopy(pin)
+              new['artifact_zip_sha256']=hashlib.sha256(fake).hexdigest()
+              new['artifact_zip_bytes']=len(fake)
+              for name in new['artifact_files_sha256']:
+                  new['artifact_files_sha256'][name]=hashlib.sha256(files[name]).hexdigest()
+              with mock.patch.object(v,"frozen_pin",return_value=new):
+                  try:
+                      v.audit_next_two_original_dates(fake,pathlib.Path('original-sources'),
+                                                       pathlib.Path('original-kotlin'),
+                                                       expected_sha256=new['artifact_zip_sha256'])
+                  except (ValueError,KeyError,UnicodeError,zipfile.BadZipFile) as ex:
+                      print('REJECTED_'+title+'='+type(ex).__name__)
+                  else:
+                      raise AssertionError('FRAUD_ACCEPTED_'+title)
+          def amend(name,key,value):
+              x=json.loads(items[name]);x[key]=value;return v.canonical(x)
+          altered('false_full_original_year_certificate',lambda files:{
+              'original-two-day-verdict.json':amend('original-two-day-verdict.json',
+                  'original_complete_years_soak_passed',1)})
+          altered('changed_kotlin_real_date',lambda files:{
+              'PROD-KT-CY/os-stdout.tsv':files['PROD-KT-CY/os-stdout.tsv'].replace(
+                  b'\t14\t1\t29\t38\n',b'\t14\t1\t29\t39\n')})
+          altered('changed_python_native_name',lambda files:{
+              'REF-41/native-raw.jsonl':files['REF-41/native-raw.jsonl'].replace(
+                  'Kahkaha'.encode(),b'FAKE_NAME')})
+          altered('modified_kotlin_original_JAR',lambda files:{
+              'original-kotlin-v061.jar':files['original-kotlin-v061.jar'][:4096]})
+          print("V065_FOUR_REPINNED_MUTATIONS_REJECTED_NO_SOURCE_EXECUTION")
+          PY
+      - name: Upload audit report and adversarial proof only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v065-original-next-two-days-revalidation-no-year
+          path: |
+            evidence/v065-replay.jsonl
+            evidence/v065-adversarial.log
+          if-no-files-found: warn
+          retention-days: 30
