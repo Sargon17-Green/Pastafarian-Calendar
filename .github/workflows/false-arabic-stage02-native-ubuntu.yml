@@ -87,8 +87,8 @@ jobs:
           set -Eeuo pipefail
           printf '2 3+.' > evidence/smoke.false
           printf '2 3<.' > evidence/extension.false
-          printf '4 7 1O.%%' > evidence/pick_ascii.false
-          printf '4 7 1ø.%%' > evidence/pick_unicode.false
+          printf '%s' '4 7 1O.%%' > evidence/pick_ascii.false
+          printf '%s' '4 7 1ø.%%' > evidence/pick_unicode.false
           for test_name in smoke extension pick_ascii pick_unicode; do
             set +e
             timeout 15s upstream/false_int -e "evidence/$test_name.false" \
