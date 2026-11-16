@@ -1,0 +1,18 @@
+name: Befunge98 QA31BE exact original source next gate
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31be_source_next_gate.py'
+      - 'qa/QA31BE_ORIGINAL_SIGNED_NEXT_GATE_REVIEW_2026-11-16.md'
+      - '.github/workflows/befunge-qa31be-next-gate.yml'
+  workflow_dispatch:
+jobs:
+  source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact original blob, third x geometry, and 24 hostile source mutants; no Native
+        run: python3 qa/stage1_qa31be_source_next_gate.py
