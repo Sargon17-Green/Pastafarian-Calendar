@@ -13,6 +13,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"runner"))
@@ -228,6 +229,31 @@ class RealOriginalTwoDayQuarantineTests(unittest.TestCase):
             v=store.verify_and_recover()
             self.assertEqual(v["quarantined_two_day_pilots_revalidated"],1)
             self.assertEqual(v["progress"]["original_native_full_year_soak_passes_certified"],0)
+
+    def test_recovery_never_invokes_full_original_source_replay(self):
+        with CrashStore(self.root,self.plan) as store:
+            self.ingest(store)
+        # An offline replay must NOT depend on GitHub, original git checkout,
+        # or a new F(c,t) call after the original archive was committed.
+        with patch("quarantined_two_day_pilot_v057.replay_native_witness",
+                   side_effect=AssertionError("original source replay during recovery")):
+            with CrashStore(self.root,self.plan) as store:
+                result=store.verify_and_recover()
+                self.assertEqual(result["quarantined_two_day_pilots_revalidated"],1)
+                self.assertEqual(result["progress"]["fully_verified_years"],0)
+
+    def test_orphaned_part_file_not_implicitly_adopted_by_recovery(self):
+        with CrashStore(self.root,self.plan) as store:
+            folder,archive,_=get_paths(store)
+            folder.mkdir(parents=True)
+            staged=archive.with_name(archive.name+".part")
+            staged.write_bytes(self.real)
+            with self.assertRaisesRegex(ValueError,"unindexed"):
+                store.verify_and_recover()
+            self.assertEqual(store.progress()["committed_chunks"],0)
+            outcome=self.ingest(store)
+            self.assertEqual(outcome["outcome"],"QUARANTINED_TWO_DAY_PILOT_RECORDED")
+            self.assertEqual(store.verify_and_recover()["quarantined_two_day_pilots_revalidated"],1)
 
     def test_offline_frozen_receipt_proves_only_integrity_not_source_lineage(self):
         rec=frozen_offline_recheck(self.real)
