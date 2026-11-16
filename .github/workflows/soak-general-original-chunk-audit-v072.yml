@@ -1,0 +1,146 @@
+name: Soak v072 independent generalized original ordinal 1017 source artifact audit
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/original_chunk_artifact_gate_v072.py"
+      - "soak/tests/test_original_chunk_artifact_gate_v072.py"
+      - "soak/control/original_native_chunk1017_pin_v071.json"
+      - ".github/workflows/soak-general-original-chunk-audit-v072.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  pinned-original-chunk-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Verify frozen source identities and download exact v070 original ZIP
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -m 700 evidence
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14273257274/zip > evidence/v070-original-chunk1017.zip
+          echo '878b965960662aa27e824fd8f23a02c5d603b57f81ab698cb12ab02465a2e3e4  evidence/v070-original-chunk1017.zip' | sha256sum -c -
+          echo "V072_ORIGINAL_1017_GITHUB_ARTIFACT_BYTES_PINNED"
+      - name: Run eight generalized ordinal/coordinate gate tests, no original computation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s coordinator/soak/tests \
+            -p 'test_original_chunk_artifact_gate_v072.py' -v \
+            2>&1 | tee evidence/v072-unit.log
+          grep -Eq '^Ran 8 tests ' evidence/v072-unit.log
+          grep -q '^OK$' evidence/v072-unit.log
+      - name: Independently replay exactly pinned original source/process/native date bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/soak/runner/original_chunk_artifact_gate_v072.py \
+            --archive evidence/v070-original-chunk1017.zip \
+            --source-root original-sources \
+            --kotlin-repo original-kotlin \
+            | tee evidence/v072-audit.jsonl
+          python3 - <<'PY'
+          import json
+          x=json.loads(open("evidence/v072-audit.jsonl").read().split("=",1)[1])
+          assert x["status"]=="PINNED_ORIGINAL_ORDINAL_TWO_DAYS_MATCH_NOT_YEAR"
+          assert x["ordinal"]==1017
+          assert (x["first_target_day"],x["last_target_day"])==("-15055668","-15055667")
+          assert x["original_source_pairs"]==2
+          assert x["original_numeric_date_fields_per_pair"]==5
+          assert x["original_years_soak_certified"]==0
+          assert x["independent_lineage_certified"] is False
+          assert x["canonical_oracle_certified"] is False
+          print("V072_TWO_UNMODIFIED_ORIGINAL_FCT_DAYS_REAUDITED_NO_YEAR_CREDIT")
+          PY
+      - name: Four modified archives with recomputed outer and inner SHA values must fail
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 -B - <<'PY' | tee evidence/v072-attacks.log
+          from copy import deepcopy
+          import hashlib,io,json,pathlib,zipfile
+          import original_chunk_artifact_gate_v072 as a
+          original=pathlib.Path('evidence/v070-original-chunk1017.zip').read_bytes()
+          pin=a.pinned_manifest()
+          with zipfile.ZipFile(io.BytesIO(original)) as z:
+              original_files={name:z.read(name) for name in z.namelist()}
+          def mutate(title,changer):
+              altered=dict(original_files)
+              changer(altered)
+              out=io.BytesIO()
+              with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED) as z:
+                  for name,data in altered.items():z.writestr(name,data)
+              fake=out.getvalue()
+              fake_pin=deepcopy(pin)
+              fake_pin['artifact_sha256']=hashlib.sha256(fake).hexdigest()
+              fake_pin['artifact_size_bytes']=len(fake)
+              for name in fake_pin['artifacts_file_sha256']:
+                  fake_pin['artifacts_file_sha256'][name]=hashlib.sha256(altered[name]).hexdigest()
+              try:
+                  a.audit_pinned_original_chunk(fake,pathlib.Path('original-sources'),
+                                                pathlib.Path('original-kotlin'),
+                                                manifest=fake_pin)
+              except (ValueError,KeyError,UnicodeError,zipfile.BadZipFile) as exc:
+                  print('REJECTED_'+title+'='+type(exc).__name__)
+              else:
+                  raise AssertionError('MANIFEST_REPINNED_FRAUD_ACCEPTED_'+title)
+          def change_year(files):
+              n='original-two-day-verdict.json'
+              r=json.loads(files[n]);r['original_full_year_soak_passes_certified']=1
+              files[n]=a.canonical(r)
+          def kotlin_date(files):
+              n='PROD-KT-CY/os-stdout.tsv'
+              files[n]=files[n].replace(b'\t37\t52\n',b'\t37\t53\n')
+              r=json.loads(files['PROD-KT-CY/process-evidence.json'])
+              r['os_stdout_sha256']=hashlib.sha256(files[n]).hexdigest()
+              files['PROD-KT-CY/process-evidence.json']=a.canonical(r)
+          def python_name(files):
+              n='REF-41/native-raw.jsonl'
+              files[n]=files[n].replace('Fırtına'.encode(),b'WRONG_SOURCE')
+          def kotlin_jar(files):
+              files['original-kotlin-v070.jar']=files['original-kotlin-v070.jar'][:4096]
+          mutate('forged_complete_year_claim',change_year)
+          mutate('changed_original_kotlin_date_with_receipt_sha_refresh',kotlin_date)
+          mutate('python_original_native_name',python_name)
+          mutate('truncated_original_kotlin_jar',kotlin_jar)
+          print("V072_FOUR_REPINNED_NATIVE_ARCHIVE_MUTATIONS_REJECTED_NO_FCT_EXECUTION")
+          PY
+      - name: Upload only replay and falsification logs, not a fictional full-year result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v072-original-chunk1017-native-proof-no-year
+          path: |
+            evidence/v072-unit.log
+            evidence/v072-audit.jsonl
+            evidence/v072-attacks.log
+          if-no-files-found: warn
+          retention-days: 30
