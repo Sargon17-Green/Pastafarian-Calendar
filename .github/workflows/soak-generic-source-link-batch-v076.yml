@@ -1,0 +1,40 @@
+name: Soak v076 linear source-witness ledger verification (no year)
+on:
+  push:
+    branches:
+      - qa/soak-link-ledger-v076
+    paths:
+      - "soak/runner/original_generic_source_chunk_ledger_v073.py"
+      - "soak/runner/original_ref41_year_chunk_import_v059.py"
+      - "soak/runner/recovery_store.py"
+      - "soak/process_tests/test_generic_source_link_batch_v076.py"
+      - ".github/workflows/soak-generic-source-link-batch-v076.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  linear-link-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test four ledger-only O(N) source-link scan contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_generic_source_link_batch_v076.py' -v \
+            2>&1 | tee v076-ledger-linear-tests.log
+          grep -Eq '^Ran 4 tests ' v076-ledger-linear-tests.log
+          grep -q '^OK$' v076-ledger-linear-tests.log
+          echo V076_LINEAR_LINK_AUDIT_PASS_NO_NATIVE_DATE_CREDIT
+      - name: Publish unit test transcript
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v076-linear-ledger-unit-tests-not-a-year
+          path: v076-ledger-linear-tests.log
+          if-no-files-found: warn
+          retention-days: 30

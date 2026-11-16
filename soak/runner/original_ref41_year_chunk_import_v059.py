@@ -130,7 +130,8 @@ def _check_locked_plan(store:CrashStore,sources:Path,kotlin:Path,blob:bytes):
 
 
 def check_original_process_chunk_links(
-        store:CrashStore, *, allow_explicit_next_link_replay:bool=False)->int:
+        store:CrashStore, *, allow_explicit_next_link_replay:bool=False,
+        generic_witnesses_prevalidated:bool=False)->int:
     """Crash integrity: provenance link points to true original archived bytes.
 
     This is not a new source-repo replay, a proof of child process identity,
@@ -191,6 +192,13 @@ def check_original_process_chunk_links(
                     "original next source chunk lost process ZIP link; explicit replay required")
     if not rows:
         return 0
+    # O(N), not O(N^2): audit all immutable generic archives ONCE before
+    # verifying each per-chunk process link. Recovery has already performed
+    # this scan and explicitly opts out of a second full scan.
+    if (any(1017 <= row[2] <= 2121 for row in rows) and
+            not generic_witnesses_prevalidated):
+        from original_generic_source_chunk_ledger_v073 import check_generic_witnesses
+        check_generic_witnesses(store)
     # Only load first ZIP when there actually is a v059 source link.
     files=None
     if any(r[2]==CHUNK_ORDINAL for r in rows):
@@ -208,7 +216,8 @@ def check_original_process_chunk_links(
         if 1017<=ordinal<=2121:
             from original_generic_source_chunk_ledger_v073 import verify_generic_source_link
             verify_generic_source_link(
-                store,(engine,year,ordinal,artifact,raw_sha,normalized_sha,process_sha))
+                store,(engine,year,ordinal,artifact,raw_sha,normalized_sha,process_sha),
+                generic_witnesses_prevalidated=True)
             continue
         if (engine!=ENGINE or year!=YEAR or ordinal!=CHUNK_ORDINAL or
             artifact!=ARCHIVE_SHA or files is None):

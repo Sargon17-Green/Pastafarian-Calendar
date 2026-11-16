@@ -194,16 +194,18 @@ def check_generic_witnesses(store,*,explicit_replay_ordinal:int|None=None)->int:
     return len(rows)
 
 
-def verify_generic_source_link(store,row:tuple)->None:
+def verify_generic_source_link(
+        store,row:tuple,*,generic_witnesses_prevalidated:bool=False)->None:
     engine,year,ordinal,archive_sha,raw_sha,norm_sha,receipt_sha=row
     if engine!=ENGINE or year!=YEAR:
         raise ValueError("generic source process link engine/year not original Python")
     pin,_=manifest_for(ordinal)
     if archive_sha!=pin["artifact_sha256"]:
         raise ValueError("generic original process link artifact SHA altered")
-    if check_generic_witnesses(store)!=len(store.db.execute(
-        "SELECT ordinal FROM original_generic_source_chunk_witnesses").fetchall()):
-        raise ValueError("missing generic original source witness")
+    # The standalone entrypoint remains fail-closed. The batch verifier may
+    # skip only when the caller has ALREADY audited the entire witness ledger.
+    if not generic_witnesses_prevalidated:
+        check_generic_witnesses(store)
     _,_,archive_path,_=witness_paths(store,ordinal,pin)
     files=archive_files(archive_path.read_bytes(),pin)
     raw=files["REF-41/native-raw.jsonl"]

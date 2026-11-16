@@ -627,7 +627,8 @@ class CrashStore:
         from original_generic_source_chunk_ledger_v073 import check_generic_witnesses
         validated_generic_source_witnesses = check_generic_witnesses(self)
         from original_ref41_year_chunk_import_v059 import check_original_process_chunk_links
-        validated_original_process_links = check_original_process_chunk_links(self)
+        validated_original_process_links = check_original_process_chunk_links(
+            self,generic_witnesses_prevalidated=True)
         already=0
         adopted=0
         staged=0
