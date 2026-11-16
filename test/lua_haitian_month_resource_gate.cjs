@@ -6,7 +6,7 @@ const F0 = [{day:-15055671,open:-15057703,close:-15053459,L:4244},
             {day:-15043671,open:-15047236,close:-15042878,L:4358}];
 const CAPS = {months:8,dpStates:50000,rawVectors:1000000n,memoStates:20000,
               heapMiB:128,seconds:60};
-function months(L) {return [Math.max(3,Math.ceil(L/123)),Math.min(47,Math.floor(L/4))}
+function months(L) {return [Math.max(3,Math.ceil(L/123)),Math.min(47,Math.floor(L/4))]}
 function vectors(a) {return a.reduce((p,n)=>p*BigInt(n+1),1n)}
 function extremes(L,m) {
   assert(m*4<=L&&L<=m*123);
