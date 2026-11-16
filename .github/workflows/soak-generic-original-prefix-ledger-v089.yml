@@ -1,0 +1,135 @@
+name: Soak v089 bounded generic native original source prefix ledger (no year)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/control/original_native_chunk*_pin_v*.json"
+      - "soak/runner/pinned_original_prefix_v089.py"
+      - "soak/process_tests/test_dynamic_pinned_original_prefix_v089.py"
+      - ".github/workflows/soak-generic-original-prefix-ledger-v089.yml"
+concurrency:
+  group: soak-source-evidence-prefix-readiness-qa
+  cancel-in-progress: false
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-prefix-source-audit-and-crash-ledger:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Verify pinned source commits and download all fixed original ZIPs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -m 700 evidence
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' | sha256sum -c -
+          PYTHONPATH=coordinator/soak/runner python3 -B \
+            coordinator/soak/runner/pinned_original_prefix_v089.py \
+            --repo-root coordinator --index-file evidence/pinned-original-prefix-v089.json \
+            | tee evidence/v089-index.log
+          python3 - <<'PY' > evidence/v089-downloads.tsv
+          import json
+          index=json.load(open('evidence/pinned-original-prefix-v089.json'))
+          assert index['schema']=='PASTAFARI_PINNED_ORIGINAL_READINESS_PREFIX_V089/1'
+          for row in index['artifacts']:
+              print(row['ordinal'],row['artifact_id'],row['sha256'],
+                    row['run_id'],row['path'],sep='\t')
+          PY
+          while IFS=$'\t' read -r ordinal artifact_id digest run_id pathname; do
+            if [ "$run_id" != 0 ]; then
+              test "$(gh api "repos/Sargon17-Green/Pastafarian-Calendar/actions/runs/$run_id" --jq '.status')" = completed
+              test "$(gh api "repos/Sargon17-Green/Pastafarian-Calendar/actions/runs/$run_id" --jq '.conclusion')" = success
+            fi
+            gh api "repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/$artifact_id/zip" > "$pathname"
+            printf '%s  %s\n' "$digest" "$pathname" | sha256sum -c -
+            echo "V089_ORIGINAL_SOURCE_ZIP_AUTHENTICATED_ORDINAL=$ordinal"
+          done < evidence/v089-downloads.tsv
+          echo V089_ALL_PINNED_ORIGINAL_ZIPS_DOWNLOADED_AND_VERIFIED
+      - name: Independently re-audit Python and Kotlin original process archives
+        shell: bash
+        env:
+          PYTHONPATH: coordinator/soak/runner
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY' 2>&1 | tee evidence/v089-original-source-audits.log
+          import json
+          from pathlib import Path
+          from original_generic_source_chunk_ledger_v073 import manifest_for,offline_original_chunk
+          from original_chunk_artifact_gate_v072 import audit_pinned_original_chunk
+          from pinned_original_prefix_v089 import verify_new_request
+          index=json.loads(Path('evidence/pinned-original-prefix-v089.json').read_bytes())
+          for row in index['artifacts'][2:]:
+              ordinal=row['ordinal']
+              pin,_=manifest_for(ordinal)
+              original=Path(row['path']).read_bytes()
+              checked=audit_pinned_original_chunk(
+                  original,Path('original-sources'),Path('original-kotlin'),manifest=pin)
+              replay=offline_original_chunk(original,pin)
+              assert checked['status']=='PINNED_ORIGINAL_ORDINAL_TWO_DAYS_MATCH_NOT_YEAR'
+              assert checked['ordinal']==ordinal and checked['original_source_pairs']==2
+              assert checked['original_years_soak_certified']==0
+              assert replay['original_native_date_pairs']==2
+              assert replay['original_full_years_certified']==0
+              assert replay['source_lineage_certified'] is False
+              if ordinal>=1020:
+                  request=verify_new_request(original,pin)
+                  assert request['status']=='V085_NATIVE_DISPATCH_REQUEST_PINNED_NOT_A_YEAR'
+              print('V089_PINNED_ORIGINAL_SOURCE_DAYS_AUDITED_NOT_YEAR',ordinal)
+          assert index['committed_full_original_years']==0
+          print('V089_ALL_ORIGINAL_NATIVE_SOURCE_AUDITS_PASS_NO_YEAR')
+          PY
+          grep -q '^V089_ALL_ORIGINAL_NATIVE_SOURCE_AUDITS_PASS_NO_YEAR$' evidence/v089-original-source-audits.log
+      - name: Six dynamic source-prefix CrashStore recovery and negative tests
+        shell: bash
+        env:
+          PASTAFARI_V089_INDEX: evidence/pinned-original-prefix-v089.json
+          PASTAFARI_ORIGINAL_PYTHON_ROOT: original-sources
+          PASTAFARI_ORIGINAL_KOTLIN_GIT: original-kotlin
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s coordinator/soak/process_tests \
+            -p 'test_dynamic_pinned_original_prefix_v089.py' -v \
+            2>&1 | tee evidence/v089-dynamic-ledger-tests.log
+          grep -Eq '^Ran 6 tests ' evidence/v089-dynamic-ledger-tests.log
+          grep -q '^OK$' evidence/v089-dynamic-ledger-tests.log
+          echo V089_PINNED_ORIGINAL_DYNAMIC_SOURCE_LEDGER_PASS_NO_YEAR
+      - name: Publish only temporary readiness proofs, not full-year evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v089-original-source-prefix-readiness-not-year
+          path: |
+            evidence/pinned-original-prefix-v089.json
+            evidence/v089-index.log
+            evidence/v089-downloads.tsv
+            evidence/v089-original-source-audits.log
+            evidence/v089-dynamic-ledger-tests.log
+          if-no-files-found: warn
+          retention-days: 30
