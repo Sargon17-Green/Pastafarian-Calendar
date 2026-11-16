@@ -21,3 +21,7 @@
 `soak/process_tests/test_generic_source_link_batch_v076.py`: ארבע בדיקות שמוודאות batching, כשל גלובלי fail-closed, התנהגות קריאה ישירה, ואימות ZIP גם לאחר prevalidation. Workflow ייעודי רק לענף v076. אין לטעון PASS עד שה-CI יושלם בהצלחה.
 
 **שום השוואת תאריך חדשה לא נעשית בתיקון זה.** מצב v074 וקבלת מקטע 1017 אינם משתנים; אפס שנות soak מקוריות מלאות הוסמכו. נדרש להכריע את v074 בנפרד לפי לוגי `completed` לפני שיפור שערי ההמשך.
+
+## שער CI משולב — 16 בנובמבר 2026
+
+הרצת v074 [43961579686](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43961579686) עברה 12/12 בדיקות על שלושת ZIP המקוריים; הרצת היחידה הראשונה של v076 [43966769227](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43966769227) עברה 4/4. Workflow v076 הורחב להרצת 12 בדיקות המקור + ארבע הבדיקות החדשות באותו commit. הסמכה מחייבת `completed/success` של הרצה משולבת זו; אין בכך שנת soak מאושרת.
