@@ -2578,3 +2578,50 @@ jobs:
           name: lua-haitian-f0-year5000-evidence
           path: f0-evidence/
           if-no-files-found: warn
+
+  # F2 independent, synthetic-only QA; no normative or product composition is executed.
+  # The standalone feature-branch F2 workflow did not register on its initial push.
+  lua_haitian_f2_synthetic:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source/contract lock and exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD:test/normative_oracle.lua)" = "8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d"
+          test "$(git rev-parse HEAD:src/source_language_catalog.lua)" = "5b59ee6bb0ea2c2a551185929b5531ea28a50e49"
+          test "$(git rev-parse HEAD:docs/F0_NATIVE_ACCEPTANCE_F1_BOUNDED_INTERFACE_CONTRACT_LUA_HAITIAN_2026-11-07.md)" = "74277716bf3822ee5728980f4bdebb331075bb19"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: F2 bounded 4+546+5 evidence with exit and separate streams
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p f2-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\nSCOPE=F2_SYNTHETIC_INDEPENDENT_ONLY\n' "$GITHUB_SHA" > f2-evidence/manifest.txt
+          git rev-parse HEAD > f2-evidence/source_sha.txt
+          sha256sum test/lua_haitian_f2_independent_feasibility.cjs test/lua_haitian_f2_fixtures.json > f2-evidence/sha256.txt
+          timeout --signal=TERM --kill-after=5s 60s node test/lua_haitian_f2_independent_feasibility.cjs > f2-evidence/stdout.txt 2> f2-evidence/stderr.txt
+          code=$?
+          printf '%s\n' "$code" > f2-evidence/exit_code.txt
+          cat f2-evidence/stdout.txt
+          if test -s f2-evidence/stderr.txt; then cat f2-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 || exit "$code"
+          test ! -s f2-evidence/stderr.txt || exit 19
+          grep -Fxq 'F2_INDEPENDENT_4_OF_4_PASS: 4/4 frozen witnesses' f2-evidence/stdout.txt
+          grep -Fxq 'F2_LEDGER_546_DAYS_PASS: 546 enumerated days' f2-evidence/stdout.txt
+          grep -Fxq 'F2_NEGATIVE_5_OF_5_PASS: 5/5 invalid/boundary checks' f2-evidence/stdout.txt
+          printf '%s\n' 'F2_SCOPE_SYNTHETIC_NATIVE_NODE_ACCEPTANCE_ONLY' > f2-evidence/scope.txt
+      - name: Upload F2 evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-f2-bounded-independent-evidence
+          path: f2-evidence/
+          retention-days: 30
+          if-no-files-found: warn
