@@ -179,6 +179,52 @@ def _support_pruned_free_gap_transfer(previous, n, k, spec):
     return SparseVector(first + 1 + left, tuple(out[left:right]))
 
 
+
+def _windowed_free_gap_transfer(previous, n, k, spec):
+    """Research-only exact kernel for the repeated take.forward free-gap path.
+
+    Iterate only over the input support while building changing prefixes.
+    A trailing region past the support reuses its final prefix directly,
+    instead of repeatedly adding zero to large Python integers. Provably
+    zero leading slots are omitted. Signed cancellation is allowed, so
+    neither interior nor trailing zero-prefix values are assumed permanent.
+
+    The Chapel source and the normal sparse_transfer() are not changed.
+    """
+    q, fixed_sum, _, tail = spec
+    if fixed_sum or tail:
+        raise ValueError("windowed diagnostic requires a free gap")
+    first = max(0, q)
+    if first > n or not previous.values:
+        return SparseVector(0, ())
+    first = max(first, previous.offset)
+    if first > n:
+        return SparseVector(0, ())
+
+    end = min(n, previous.offset + len(previous.values) - 1)
+    initial = previous.prefix(first)
+    if end > first:
+        active = islice(previous.values, first + 1 - previous.offset,
+                        end + 1 - previous.offset)
+        prefixes = chain(accumulate(active, initial=initial),
+                         repeat(previous.prefix(end), n - end))
+    else:
+        prefixes = repeat(initial, n - first + 1)
+
+    width = n - first
+    row = free_gap_coefficients(n, k)
+    out = list(map(mul, prefixes, reversed(row[:width + 1])))
+    left = 0
+    while left < len(out) and out[left] == 0:
+        left += 1
+    if left == len(out):
+        return SparseVector(0, ())
+    right = len(out)
+    while right > left and out[right - 1] == 0:
+        right -= 1
+    return SparseVector(first + 1 + left, tuple(out[left:right]))
+
+
 def sparse_transpose(after, n, k, spec):
     """Exact T^t, closed form for single-gap rows; recurrence otherwise."""
     q, fixed_sum, first_fixed, tail = spec
@@ -451,10 +497,14 @@ def test_support_prune_signed_differential():
                     assert sparse_transfer(previous, n, k, spec) == expected
                     assert _support_pruned_free_gap_transfer(
                         previous, n, k, spec) == expected
+                    assert _windowed_free_gap_transfer(
+                        previous, n, k, spec) == expected
                     checks += 1
     assert checks == 576
     print("WEAVING_SPARSE_SUPPORT_PRUNE_SIGNED_CHECKS=" + str(checks))
     print("WEAVING_SPARSE_SUPPORT_PRUNE_SIGNED_DIFFERENTIAL=PASS")
+    print("WEAVING_TAKE_WINDOWED_SIGNED_CHECKS=" + str(checks))
+    print("WEAVING_TAKE_WINDOWED_SIGNED_DIFFERENTIAL=PASS")
 
 
 def test_finite():
@@ -655,6 +705,61 @@ def test_support_prune_hotset(state):
     print("WEAVING_SPARSE_SUPPORT_PRUNE_HOTSET_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
 
 
+
+def test_take_windowed_hotset(state):
+    """Five real post-take month states; exact paired ABBA, diagnostic only.
+
+    The states follow six actual root-verified median choices. Three ABBA
+    rounds per month bound measurement cost. These are representative
+    transfer inputs, NOT a complete 4244-symbol rank/reverse-rank benchmark.
+    """
+    from statistics import median
+
+    months = (39, 42, 43, 44, 45)
+    assert state.m == 45
+    total_checks = 0
+    base_sum = new_sum = 0.0
+    for j in months:
+        previous, n = state.states[j-1], state.sizes[j-1]
+        k, spec = state.lengths[j-1], state.specs[j]
+        assert spec[1] == 0 and spec[3] == 0 and spec[0] <= n
+        expected = _reference_free_gap_transfer(previous, n, k, spec)
+        assert sparse_transfer(previous, n, k, spec) == expected
+        assert _windowed_free_gap_transfer(previous, n, k, spec) == expected
+        total_checks += 1
+        samples = {"base": [], "windowed": []}
+        methods = {"base": sparse_transfer,
+                   "windowed": _windowed_free_gap_transfer}
+        for _ in range(3):
+            for key in ("base", "windowed", "windowed", "base"):
+                started = monotonic()
+                actual = methods[key](previous, n, k, spec)
+                samples[key].append(monotonic() - started)
+                assert actual == expected
+                total_checks += 1
+        old = median(samples["base"])
+        new = median(samples["windowed"])
+        assert old > 0.0
+        base_sum += old
+        new_sum += new
+        supported_end = min(n, previous.offset + len(previous.values) - 1)
+        print("WEAVING_TAKE_WINDOWED_MONTH_" + str(j) +
+              "_SKIPPED_ZERO_TAIL=" + str(max(0, n - supported_end)))
+        print("WEAVING_TAKE_WINDOWED_MONTH_" + str(j) +
+              "_BASE_SECONDS=" + format(old, ".6f"))
+        print("WEAVING_TAKE_WINDOWED_MONTH_" + str(j) +
+              "_NEW_SECONDS=" + format(new, ".6f"))
+        print("WEAVING_TAKE_WINDOWED_MONTH_" + str(j) +
+              "_RATIO=" + format(new / old, ".4f"))
+    assert total_checks == 65
+    print("WEAVING_TAKE_WINDOWED_HOTSET_MONTHS=39,42,43,44,45")
+    print("WEAVING_TAKE_WINDOWED_HOTSET_CHECKS=" + str(total_checks))
+    print("WEAVING_TAKE_WINDOWED_HOTSET_SUM_MEDIAN_RATIO=" +
+          format(new_sum / base_sum, ".4f"))
+    print("WEAVING_TAKE_WINDOWED_HOTSET_EQUALITY=PASS")
+    print("WEAVING_TAKE_WINDOWED_FULL_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
+
+
 def test_median_prefix():
     from weaving_reachability_oracle import MONTH_LENGTHS
     months = MONTH_LENGTHS
@@ -693,6 +798,7 @@ def test_median_prefix():
     print("WEAVING_SPARSE_FULL_MEDIAN_RANK_UNRANK=NOT_TESTED")
     test_paired_hot_month_free_gap(state)
     test_support_prune_hotset(state)
+    test_take_windowed_hotset(state)
 
 
 if __name__ == "__main__":
