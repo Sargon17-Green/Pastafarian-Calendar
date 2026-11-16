@@ -12,6 +12,7 @@ load "src/stage02_visible_ten.logo
 load "src/stage02_visible_fifteen.logo
 load "src/stage02_visible_twenty.logo
 load "src/stage02_visible_twentyfive.logo
+load "src/stage02_visible_thirty.logo
 load "src/stage02_visible_thirtyfive.logo
 load "test/normative_reference.logo
 make "D14.N 0
@@ -22,7 +23,7 @@ to d14.require :ok :tag
   make "D14.N (:D14.N + 1)
   if not :ok [
     make "D14.FAIL "true
-    print sentence [STAGE_2_DISCOVERY_13_TESTO_FALIIS:] :tag
+    print sentence [STAGE_2_DISCOVERY_14_TESTO_FALIIS:] :tag
   ]
 end
 
@@ -50,7 +51,7 @@ to d14.check.tail :i :actual :expected :tag
 end
 
 to d14.valid :calculation :target :tag
-  print sentence [STAGE_2_DISCOVERY_13_CASE_BEGIN] :tag
+  print sentence [STAGE_2_DISCOVERY_14_CASE_BEGIN] :tag
   localmake "before monster.stage02.visible.thirty (monster.stage02.visible.twentyfive (monster.stage02.visible.twenty (monster.stage02.visible.fifteen (monster.stage02.visible.ten (monster.stage02.visible.prefix (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts :calculation :target))))))))
   localmake "after monster.stage02.visible.thirtyfive :before
   localmake "actual monster.context.get :after "visibleThirtyFive
@@ -59,8 +60,8 @@ to d14.valid :calculation :target :tag
   localmake "hidden nr.hidden.build :counts :stones
   localmake "expected d14.oracle.thirtyfive 1 :counts :stones :hidden []
   make "D14.CASES (:D14.CASES + 1)
-  if (count :actual) <> 35 [print [STAGE_2_DISCOVERY_13_SHAPE_FALIIS] stop]
-  if (count :expected) <> 35 [print [STAGE_2_DISCOVERY_13_ORACLE_SHAPE_FALIIS] stop]
+  if (count :actual) <> 35 [print [STAGE_2_DISCOVERY_14_SHAPE_FALIIS] stop]
+  if (count :expected) <> 35 [print [STAGE_2_DISCOVERY_14_ORACLE_SHAPE_FALIIS] stop]
   d14.check.tail 31 :actual :expected :tag
   d14.require (equalp (monster.context.get :after "calculationDay) :calculation) (list :tag [calculation])
   d14.require (equalp (monster.context.get :after "targetDay) :target) (list :tag [target])
@@ -69,34 +70,34 @@ to d14.valid :calculation :target :tag
   d14.require (equalp (monster.context.get :after "hiddenSeeds) (monster.context.get :before "hiddenSeeds)) (list :tag [hidden])
   d14.require (and (d14.same :before :after [visiblePrefix visibleTen visibleFifteen visibleTwenty visibleTwentyFive visibleThirty]) (equalp (d14.take 30 :actual) (monster.context.get :before "visibleThirty))) (list :tag [prefix])
   d14.require (equalp (monster.context.get :after "phase) "VISIBLE_THIRTYFIVE_READY) (list :tag [phase])
-  d14.require (equalp (monster.context.get :after "mode) "STAGE_2_DISCOVERY_13) (list :tag [mode])
+  d14.require (equalp (monster.context.get :after "mode) "STAGE_2_DISCOVERY_14) (list :tag [mode])
   d14.require (equalp (monster.context.get :after "status) "VISIBLE_THIRTYFIVE_ONLY) (list :tag [status])
   d14.require (equalp (monster.context.get :after "metrics) [stage02.dispatch stage02.counts stage02.stones stage02.hidden stage02.visible stage02.visible.ten stage02.visible.fifteen stage02.visible.twenty stage02.visible.twentyfive stage02.visible.thirty stage02.visible.thirtyfive]) (list :tag [metrics])
   d14.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready stage02.hidden.ready stage02.visible.prefix.ready stage02.visible.ten.ready stage02.visible.fifteen.ready stage02.visible.twenty.ready stage02.visible.twentyfive.ready stage02.visible.thirty.ready stage02.visible.thirtyfive.ready]) (list :tag [logs])
   d14.require (equalp (monster.stage02.visible.thirtyfive :before) :after) (list :tag [determinism])
-  print sentence [STAGE_2_DISCOVERY_13_CASE_END] :tag
+  print sentence [STAGE_2_DISCOVERY_14_CASE_END] :tag
   output :before
 end
 
 to d14.invalid :ctx :tag
-  print sentence [STAGE_2_DISCOVERY_13_CASE_BEGIN] :tag
+  print sentence [STAGE_2_DISCOVERY_14_CASE_BEGIN] :tag
   make "D14.CASES (:D14.CASES + 1)
   d14.require (equalp (monster.stage02.visible.thirtyfive :ctx) :ctx) :tag
-  print sentence [STAGE_2_DISCOVERY_13_CASE_END] :tag
+  print sentence [STAGE_2_DISCOVERY_14_CASE_END] :tag
 end
 
-to stage02.discovery13.run
+to stage02.discovery14.run
   localmake "prefix d14.valid (nr.foundation) (nr.tablets) [foundation_tablets]
   d14.invalid (monster.stage02.workcounts [0 [1]] [0 [0]]) [failed_validation]
   d14.invalid (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts [0 [0]] [1 [1]]))) [hidden_only]
   d14.invalid (monster.context.put :prefix "visibleThirty (d14.take 29 (monster.context.get :prefix "visibleThirty))) [short_twentynine]
   d14.invalid (monster.context.put :prefix "visibleThirty "bad) [not_a_list]
-  if :D14.FAIL [print [STAGE_2_DISCOVERY_13_FALIIS] stop]
-  if :D14.CASES <> 5 [print [STAGE_2_DISCOVERY_13_CASE_COUNT_FALIIS] stop]
-  if :D14.N <> 21 [print [STAGE_2_DISCOVERY_13_CHECK_COUNT_FALIIS] stop]
-  print sentence [STAGE_2_DISCOVERY_13_CASES_PASIS] :D14.CASES
-  print sentence [STAGE_2_DISCOVERY_13_CHECKS_PASIS] :D14.N
-  print [STAGE_2_DISCOVERY_13_PASIS]
+  if :D14.FAIL [print [STAGE_2_DISCOVERY_14_FALIIS] stop]
+  if :D14.CASES <> 5 [print [STAGE_2_DISCOVERY_14_CASE_COUNT_FALIIS] stop]
+  if :D14.N <> 21 [print [STAGE_2_DISCOVERY_14_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_14_CASES_PASIS] :D14.CASES
+  print sentence [STAGE_2_DISCOVERY_14_CHECKS_PASIS] :D14.N
+  print [STAGE_2_DISCOVERY_14_PASIS]
 end
 
-stage02.discovery13.run
+stage02.discovery14.run
