@@ -232,6 +232,12 @@ class CrashStore:
               plan_sha256 TEXT NOT NULL, report_sha256 TEXT NOT NULL,
               archive_bytes INTEGER NOT NULL, year TEXT NOT NULL,
               target_day TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS supervised_two_day_pilot_witnesses(
+              artifact_sha256 TEXT PRIMARY KEY,
+              plan_sha256 TEXT NOT NULL, report_sha256 TEXT NOT NULL,
+              artifact_bytes INTEGER NOT NULL, year TEXT NOT NULL,
+              first_target_day TEXT NOT NULL, last_target_day TEXT NOT NULL,
+              native_pairs INTEGER NOT NULL CHECK(native_pairs=2));
             CREATE TABLE IF NOT EXISTS comparisons(
               year TEXT NOT NULL, candidate TEXT NOT NULL,
               verified_days INTEGER NOT NULL, stream_sha256 TEXT NOT NULL,
@@ -347,6 +353,20 @@ class CrashStore:
         """
         from quarantined_pilot_ledger_v048 import register_one_day_pilot
         return register_one_day_pilot(self, archive_bytes,
+                                      expected_sha256=expected_sha256)
+
+    def record_quarantined_original_two_day_pilot(
+        self, archive_bytes: bytes, source_root: pathlib.Path,
+        kotlin_repo: pathlib.Path, *, expected_sha256: str,
+    ):
+        """Reconcile original source at ingest, never create a year chunk.
+
+        Reads exact CI artifact and pinned source repositories; no F(c,t) call.
+        Recovery does not require the source checkout but then attests only
+        continued byte integrity, not independent original source execution.
+        """
+        from quarantined_two_day_pilot_v057 import register_two_day_pilot
+        return register_two_day_pilot(self, archive_bytes, source_root, kotlin_repo,
                                       expected_sha256=expected_sha256)
 
     def _native_receipt_paths(self, chunk: Chunk) -> tuple[pathlib.Path, pathlib.Path]:
@@ -582,6 +602,8 @@ class CrashStore:
         # any orphan year chunk. A damaged receipt must stop recovery first.
         from quarantined_pilot_ledger_v048 import check_registered_pilot_witnesses
         validated_pilots = check_registered_pilot_witnesses(self)
+        from quarantined_two_day_pilot_v057 import check_registered_two_day_pilots
+        validated_two_day_pilots = check_registered_two_day_pilots(self)
         already=0
         adopted=0
         staged=0
@@ -618,6 +640,7 @@ class CrashStore:
         return {"verified_existing_chunks":already,"recovered_chunks":adopted,
                 "recovered_staged_files":staged,"incident":self.incident(),
                 "quarantined_pilot_witnesses_revalidated":validated_pilots,
+                "quarantined_two_day_pilots_revalidated":validated_two_day_pilots,
                 "progress":self.progress()}
 
     def pending_jobs(self) -> list[Chunk]:
@@ -639,6 +662,8 @@ class CrashStore:
         native_receipts=self.db.execute("SELECT COUNT(*) FROM native_receipts").fetchone()[0]
         quarantined_pilots=self.db.execute(
             "SELECT COUNT(*) FROM supervised_pilot_witnesses").fetchone()[0]
+        quarantined_two_day=self.db.execute(
+            "SELECT COUNT(*) FROM supervised_two_day_pilot_witnesses").fetchone()[0]
         successful=len(rows)
         days=sum(row[2] for row in rows)
         known={(year,candidate) for year,candidate,_ in rows}
@@ -659,6 +684,7 @@ class CrashStore:
                 "committed_chunks":committed,
                 "native_receipt_rows_recorded_without_revalidation":native_receipts,
                 "quarantined_pilot_records_not_year_chunks":quarantined_pilots,
+                "quarantined_two_day_pilot_records_not_year_chunks":quarantined_two_day,
                 "native_receipt_execution_attestation_verified":False,
                 "incident_present":self.incident() is not None,
                 "all_verified":len(fully_verified)==len(self.years) and self.incident() is None,
