@@ -1,0 +1,77 @@
+name: Soak v067 two REAL original REF41 source chunks in full year (no year certificate)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/original_next_chunk_import_v066.py"
+      - "soak/runner/original_ref41_year_chunk_import_v059.py"
+      - "soak/runner/recovery_store.py"
+      - "soak/process_tests/test_original_two_source_chunks_v067.py"
+      - ".github/workflows/soak-two-real-original-year-chunks-v067.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  two-real-source-linked-python-chunks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Fetch original two real process ZIPs, verify Git hashes and source bytes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -m 700 evidence
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14186295655/zip > evidence/original-v053-chunk1015.zip
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14264392351/zip > evidence/original-v061-chunk1016.zip
+          echo 'f87b2e925b4a400cff2e2469be5b873b66c89ca35498e8fcda1090ab55d5d390  evidence/original-v053-chunk1015.zip' | sha256sum -c -
+          echo '91985794e9bb8e3c6995aa5634d684872c60aae544eaf780b668797d86557eb9  evidence/original-v061-chunk1016.zip' | sha256sum -c -
+          echo "TWO_ORIGINAL_SOURCE_ARCHIVES_PINNED_PYTHON_KOTLIN_LOCKED"
+      - name: Execute 11 real-source ZIP->CrashStore year chunk tests with crash and tamper recovery
+        shell: bash
+        env:
+          PASTAFARI_V053_REAL_ZIP: evidence/original-v053-chunk1015.zip
+          PASTAFARI_V061_REAL_ZIP: evidence/original-v061-chunk1016.zip
+          PASTAFARI_ORIGINAL_PYTHON_ROOT: original-sources
+          PASTAFARI_ORIGINAL_KOTLIN_GIT: original-kotlin
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s coordinator/soak/process_tests \
+            -p 'test_original_two_source_chunks_v067.py' -v \
+            2>&1 | tee evidence/v067-two-real-chunks-tests.log
+          grep -Eq '^Ran 11 tests ' evidence/v067-two-real-chunks-tests.log
+          grep -q '^OK$' evidence/v067-two-real-chunks-tests.log
+          echo "V067_TWO_GENUINE_ORIGINAL_PYTHON_CHUNKS_PASS_NO_FULL_YEAR_CREDIT"
+      - name: Evidence-only; do not run native converters, preserve test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v067-two-original-python-source-chunks-no-year
+          path: evidence/v067-two-real-chunks-tests.log
+          if-no-files-found: warn
+          retention-days: 30
