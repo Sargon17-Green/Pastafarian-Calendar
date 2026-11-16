@@ -17,14 +17,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Check fifteen strict non-executing source request gates
+      - name: Check seventeen strict non-executing source request gates
         shell: bash
         run: |
           set -euo pipefail
           python3 -B -m unittest discover -s soak/tests \
             -p 'test_source_ordinal_dispatch_v085.py' -v \
             2>&1 | tee v085-request-tests.log
-          grep -Eq '^Ran 15 tests ' v085-request-tests.log
+          grep -Eq '^Ran 17 tests ' v085-request-tests.log
           grep -q '^OK$' v085-request-tests.log
           echo V085_SOURCE_REQUEST_STATIC_GATE_PASS_NO_FCT
       - uses: actions/upload-artifact@v4

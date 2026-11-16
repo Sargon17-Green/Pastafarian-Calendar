@@ -42,7 +42,7 @@ def _pairs_unique(pairs):
     return found
 
 
-def _read_json_canonical(path: Path) -> dict:
+def _read_json_canonical(path: Path, *, require_canonical: bool = True) -> dict:
     if not path.is_file() or path.is_symlink():
         raise ValueError("source request/pin missing or symlinked")
     raw = path.read_bytes()
@@ -53,8 +53,8 @@ def _read_json_canonical(path: Path) -> dict:
         raise ValueError("source request/pin must be JSON object")
     expected = (json.dumps(data, sort_keys=True, separators=(",", ":"),
                            ensure_ascii=False) + "\n").encode("utf-8")
-    if raw != expected:
-        raise ValueError("source request/pin must use canonical JSON with newline")
+    if require_canonical and raw != expected:
+        raise ValueError("new source request must use canonical JSON with newline")
     return data
 
 
@@ -71,7 +71,7 @@ def pinned_prefix(root: Path) -> int:
         ordinal = int(match.group(1))
         if ordinal in found or not 1017 <= ordinal <= LAST_NEW:
             raise ValueError("duplicate or out-of-range original source pin")
-        pin = _read_json_canonical(path)
+        pin = _read_json_canonical(path, require_canonical=False)
         if (pin.get("schema") != PIN_SCHEMA or
                 pin.get("original_source_year", {}).get("ordinal") != ordinal or
                 pin.get("original_source_year", {}).get("calculation_day") != C or

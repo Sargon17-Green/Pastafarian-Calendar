@@ -136,6 +136,16 @@ class FrozenRequestGate(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 self.check(status=change, rel=s.REQUEST_DIR+"/ordinal-01020.json")
 
+    def test_pretty_printed_frozen_manifest_remains_valid(self):
+        path = self.control/"original_native_chunk1019_pin_v071.json"
+        obj = s._read_json_canonical(path)
+        path.write_text(json.dumps(obj, indent=2, ensure_ascii=False)+"\n", encoding="utf-8")
+        self.assertEqual(self.check()["ordinal"], 1020)
+
+    def test_existing_repository_frozen_manifest_format(self):
+        repo = Path(__file__).resolve().parents[2]
+        self.assertGreaterEqual(s.pinned_prefix(repo), 1019)
+
     def test_year_end_2121_formula_is_correct(self):
         self.assertEqual(s.FIRST_DAY+2*2121, -15053460)
         self.assertEqual(s.LAST_NEW, 2121)
