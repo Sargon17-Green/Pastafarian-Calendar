@@ -1,0 +1,80 @@
+{
+  "schema": "PASTAFARI_GENERIC_ORIGINAL_CHUNK_ARTIFACT_PIN_V071/1",
+  "run_id": 43968565331,
+  "artifact_id": 14277208379,
+  "artifact_name": "soak-v078-original-ordinal1018-native-days-not-year",
+  "artifact_size_bytes": 4902934,
+  "artifact_sha256": "329afd1e408c43dfadf96b4ddd844696b59f22a63b786e663413950013c3fb0c",
+  "artifacts_file_sha256": {
+    "PROD-KT-CY/original-native-stdin.tsv": "7c328f6da8429d786be5447e24cb91cd34bbe18ee4438174f3c56768cf43b3a4",
+    "PROD-KT-CY/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "PROD-KT-CY/os-stdout.tsv": "198e0593b5da491023fe6bd4e2877d40e2f129486852eb627c8bdbdefc6046c1",
+    "PROD-KT-CY/process-evidence.json": "78abdc29bae1a3ed68ada88cc18a98a58c4a6a80dd229eebb0635e62164db2fc",
+    "REF-41/native-normalized.jsonl": "a6363bbb5ad36a58e8f8c4a77d5e598fa20aa42c67bd45fb7706f767fb853249",
+    "REF-41/native-raw.jsonl": "1c2d80371bc1bf4856b74b7a5baae9f2e1e5019c317648c959d291d4da13e38c",
+    "REF-41/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "REF-41/os-stdout.log": "c008a3968b0e17286d624ce687e419dd3b6854e6e6a638fea2fb4b1c42476b02",
+    "REF-41/process-evidence.json": "816b96fa626dcc20a3ccb764d4a619c334559ba4af3b98d6b7cad793ba804411",
+    "REF-41/transport-receipt.json": "420c2ef802220318b013e91e79218a2a1127862f2e22342ff4abd6fe6828ddad",
+    "gate.log": "3c90f3c167666c7a6b87dc31795efa316e22aafa13842e20ddd0be3453f250c5",
+    "kotlin-compile-resources.txt": "b64fe46a8c989e3c0ce033badd29c5afe32c7d3686b3a2118097b2517b6b1c1d",
+    "kotlin-compiler-v1.9.0.sha256": "6edc408a9986289fc1a25af1af5dba48983bf06a4a2ff2e4cab567435a0391da",
+    "kotlin-index-only-normalized.jsonl": "5b47a82c3daf9bf07a68d8cc984a3f6c4a5426fdd8f60f83c509a30a2e24540a",
+    "original-kotlin-v070.jar": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+    "original-kotlin-v070.jar.sha256": "1d1bcbd1599bfd742705ef528b620ac7b1754d8a61edc2da6a3b192810ddb51b",
+    "original-two-day-verdict.json": "8c66228f5300a635a1c418b617bfb5d44431ca7b73b89486b18a739afe7c3a0e",
+    "original-ordinal-dispatch.json": "3260e7668a3e86ed8fade3c40be07c19ec79b131e9ade0486d3055485608dabb",
+    "two-native-day-resources.txt": "75a0e0dc24d32d32f23e5f79e77592ec1e1cffdb3d9ca59e3eeed8da98edfa16"
+  },
+  "original_source_commits": {
+    "REF-41": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "PROD-KT-CY": "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+  },
+  "python_source_sha256": "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378",
+  "kotlin_source_closure_sha256": "d25d71bfeda5ef592162f10b564c9eb49f64176e4dc438ab2424c46a95c44ba7",
+  "kotlin_jar_sha256": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+  "original_source_year": {
+    "calculation_day": "-15055671",
+    "year": "5000",
+    "first_target_day": "-15057702",
+    "last_target_day": "-15053459",
+    "chunk_days": 2,
+    "ordinal": 1018,
+    "first_chunk_target_day": "-15055666",
+    "last_chunk_target_day": "-15055665",
+    "boundary_evidence_sha256": "ad64cc51522d7f19cb8a238e2a6a418e75203c6cbfe017c394f623edeb882e78"
+  },
+  "process_runner_sha256": "70ca90bf9da83745a71750c43b8d97e7d706c57209c8cd3b1c8fe244e351822f",
+  "inherited_supervisor_sha256": "47f91b4a53a94997da0dbc5e8c3135c8a96501bf24cbccbf907bd97b4242dd32",
+  "native_rows": [
+    {
+      "target_day": "-15055666",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 5,
+      "month_index": 28,
+      "day_in_month": 61,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Ninova",
+      "source_raw_sha256": "066e9abba448e3f37b313981cb519028ace4aef58cd4c0b9a354cd88a283cd54"
+    },
+    {
+      "target_day": "-15055665",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 6,
+      "month_index": 25,
+      "day_in_month": 36,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Kireçtaşı",
+      "source_raw_sha256": "81a6ca5b8ba9688eb6220235e31f6b4d5d6f760db502cd61532627d4d7af32ac"
+    }
+  ],
+  "comparison": {
+    "original_native_pairs": 2,
+    "first_mismatch": null,
+    "original_year_soak_passes_certified": 0,
+    "algorithmic_source_lineage_certified": false,
+    "canonical_oracle_certified": false
+  }
+}
