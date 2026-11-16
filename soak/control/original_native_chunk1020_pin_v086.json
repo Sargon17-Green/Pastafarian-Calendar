@@ -1,0 +1,88 @@
+{
+  "schema": "PASTAFARI_GENERIC_ORIGINAL_CHUNK_ARTIFACT_PIN_V071/1",
+  "run_id": 43974768278,
+  "artifact_id": 14280447591,
+  "artifact_name": "soak-v085-original-ordinal1020-native-days-not-year",
+  "artifact_size_bytes": 4904488,
+  "artifact_sha256": "706a075b6192a8b11a8992c42d3ec5e2a076c135c06685b93e9b28758f992265",
+  "artifacts_file_sha256": {
+    "PROD-KT-CY/original-native-stdin.tsv": "0ec72ae4b56a2231b3d24788e1c8cd3e7cac8da313a966c9b6e874b557ba08a8",
+    "PROD-KT-CY/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "PROD-KT-CY/os-stdout.tsv": "0305a0db6ab95774720e71f3451fc3dba6ec9657c5ff8cadc8fb854ebfe13f9d",
+    "PROD-KT-CY/process-evidence.json": "974ef0eb473ea49583516c305ded062a29cdcb041707f675fb3148f8bd323ac7",
+    "REF-41/native-raw.jsonl": "0c94305d9b96cd2d3ce09ef7dbb2dbf6ff063cd0f8c6bcba62724adeed99b62a",
+    "REF-41/native-normalized.jsonl": "aad4c2dd418948478b4198ab661dae2f07f71f39cd10340a37a1b797446d84cb",
+    "REF-41/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "REF-41/os-stdout.log": "cc77c55c0bc2c89f99fb57522a1deae3e7d11dd699b5c6b1f518099278e77886",
+    "REF-41/process-evidence.json": "6718d874bb97eee72a76000295fde421d7700be5bf2c825c1a71562a81fc4643",
+    "REF-41/transport-receipt.json": "bc46476aced37cc8d40166e8cb64ae9e149a608ea19320b0a5d97f540bda00e4",
+    "authorized-original-source-request-v085.json": "dffbb7c15c95c2c429f31b7feafc8dee752efa281c2c047b5a7bcae400c839cd",
+    "gate.log": "fd56c34cb936bfa6c9a9096c682b2d29cdae5977cacc33159d26d3ffd4bed99a",
+    "kotlin-compile-resources.txt": "d91a6dff4fe2b22afa069c1e4c34dab9990f94ad11c256461ca8de948ecb4954",
+    "kotlin-compiler-v1.9.0.sha256": "6edc408a9986289fc1a25af1af5dba48983bf06a4a2ff2e4cab567435a0391da",
+    "kotlin-index-only-normalized.jsonl": "0794669286ad31cae593becbb8d773cde6f9936646d1c76c493657ccb4ea9569",
+    "original-kotlin-v070.jar.sha256": "1d1bcbd1599bfd742705ef528b620ac7b1754d8a61edc2da6a3b192810ddb51b",
+    "original-kotlin-v070.jar": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+    "original-ordinal-dispatch.json": "ac824410fe5b0f8a21b5c964006c58a4ec09dc111c7531a67c9e6e2a6d4aa950",
+    "original-two-day-verdict.json": "0f9024ed8544e27a1cef96579b5b1128a752905fb13f962bde32041a9bebf257",
+    "two-native-day-resources.txt": "2f5d88b0df0b8428ecc5646b2cdd72281200813c8e261383bc887d5453238519",
+    "v085-source-authorization.log": "4aec913628434f8c586b49cc41606bf921754ee361299ff951909d87706d7bf0",
+    "v085-source-request-static.log": "27c59c02f4849b600b481a0c489923bc451a155f751ecef8bb10938623ee19bd"
+  },
+  "original_source_commits": {
+    "REF-41": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "PROD-KT-CY": "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+  },
+  "python_source_sha256": "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378",
+  "kotlin_source_closure_sha256": "d25d71bfeda5ef592162f10b564c9eb49f64176e4dc438ab2424c46a95c44ba7",
+  "kotlin_jar_sha256": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+  "original_source_year": {
+    "calculation_day": "-15055671",
+    "year": "5000",
+    "first_target_day": "-15057702",
+    "last_target_day": "-15053459",
+    "chunk_days": 2,
+    "ordinal": 1020,
+    "first_chunk_target_day": "-15055662",
+    "last_chunk_target_day": "-15055661",
+    "boundary_evidence_sha256": "ad64cc51522d7f19cb8a238e2a6a418e75203c6cbfe017c394f623edeb882e78"
+  },
+  "process_runner_sha256": "70ca90bf9da83745a71750c43b8d97e7d706c57209c8cd3b1c8fe244e351822f",
+  "inherited_supervisor_sha256": "47f91b4a53a94997da0dbc5e8c3135c8a96501bf24cbccbf907bd97b4242dd32",
+  "native_rows": [
+    {
+      "target_day": "-15055662",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 9,
+      "month_index": 41,
+      "day_in_month": 45,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Babil",
+      "source_raw_sha256": "27419c49c08c9d1726721f6855dcebe441b309884f2a4ba51850272c31655815"
+    },
+    {
+      "target_day": "-15055661",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 10,
+      "month_index": 26,
+      "day_in_month": 49,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Sevinç",
+      "source_raw_sha256": "5a06cfce9e912336b71e58c9d8a49c6ad12f4e3f5fec8ed21e5cf07aacf6a775"
+    }
+  ],
+  "comparison": {
+    "original_native_pairs": 2,
+    "first_mismatch": null,
+    "original_year_soak_passes_certified": 0,
+    "algorithmic_source_lineage_certified": false,
+    "canonical_oracle_certified": false
+  },
+  "original_ordinal_request": {
+    "schema": "PASTAFARI_ORIGINAL_SOURCE_ORDINAL_REQUEST_V085/1",
+    "source_commit": "4f4a31ee564bc85ba59bae68f1eba290fa6f8f5a",
+    "request_sha256": "dffbb7c15c95c2c429f31b7feafc8dee752efa281c2c047b5a7bcae400c839cd"
+  }
+}
