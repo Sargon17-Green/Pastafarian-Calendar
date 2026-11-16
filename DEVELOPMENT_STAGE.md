@@ -1,8 +1,8 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=17
-CURRENT_KIND=WEAVING_EIGHT_MONTHS_IMPLEMENTED_NATIVE_PENDING
+CURRENT_STAGE=18
+CURRENT_KIND=WEAVING_NINE_MONTHS_DISCOVERY
 CURRENT_PATCH=none
-LAST_COMPLETED_STAGE=16
+LAST_COMPLETED_STAGE=17
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Perl
 NATURAL_LANGUAGE=סינית מנדרינית – מסורתית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Stage16 source 303bc820e2c9250ff21ea0f9bedf7f8ce2119695 accepted via canonical CI 42390320913 17/17 required and verified 7-file ZIP. Stage17 same-branch 8-month/32-day bounded WeavingPrimitive implementation and independent multiset/Dyck oracle tests implemented with local Perl 5.40.1 2972 TAP pass; targeted 3-profile resource preflight under 120s/393216KiB. Native canonical 18/18 and exact-source artifact remain pending; LAST_COMPLETED_STAGE=16. Full-year 252..5778-day generator remains unverified.
+MONSTER_ARCHITECTURE_GROWTH=Stage17 source 457eb0a8c444c5d3416c79e03273d3144dcc3dec accepted by canonical run 43939070420, 18/18 required successful, 18 raw logs inspected, Stage01 113 files/199251 TAP, Stage17 2972 native TAP, 7-file artifact 14263446619 independently SHA256/CRC/source verified. LAST_COMPLETED_STAGE=17 applies only to accepted source. Stage18 bounded nine-month/36-day DISCOVERY contract opened; no Stage18 code or Native acceptance. Full-year 252..5778-day generator remains unverified.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=NO
