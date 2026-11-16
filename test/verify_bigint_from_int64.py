@@ -14,9 +14,9 @@ EXPECTED = (
     [("ZERO", 0)]
     + [("SMALL", n) for n in range(-9, 0)]
     + [("SMALL", n) for n in range(1, 10)]
-    + [("RADIX", sign * (10**k + delta)
+    + [("RADIX", sign * (10**k + delta))
        for k in range(3, 9) for sign in (-1, 1) for delta in (-1, 0, 1)]
-    + [("POW2", sign * (2**k + delta)
+    + [("POW2", sign * (2**k + delta))
        for k in (20, 31, 32, 40) for sign in (-1, 1) for delta in (-1, 0, 1)]
     + [("LIMIT", LOW + i) for i in range(9)]
     + [("LIMIT", HIGH - i) for i in range(8)]
