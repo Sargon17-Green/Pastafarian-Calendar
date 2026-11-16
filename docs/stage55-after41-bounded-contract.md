@@ -1,0 +1,12 @@
+# MATLAB+Polski Stage55 AFTER41 — bounded Native/Python contract
+
+Project: PC-BRANCH-MATLAB-POLSKI. Work branch: MATLAB+Polski. Verified predecessor HEAD: 87de43672e266e2bf011aecf7b900f05f92d371f.
+
+## Certified predecessor AFTER40
+Native MATLAB R2026a/Python https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43825175667 and Canonical Names Lock https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43825175603 both completed/success on exact predecessor SHA. Native STEPS=40 REMAINING=4204 LETTER=9 REJECTED=2; independent Python SMALL=22 BLOCKS=24, byte-identical five-field row. Original GitHub artifact 14205904830, 15440 bytes, SHA256 6edf8eb5abfa7878480504268073e582bea6d09b7465c0f10ed61ba792944080, ZIP CRC 7/7; archived in /QA_Artifacts/PC-BRANCH-MATLAB-POLSKI/Stage55_AFTER40_43825175667_original.zip. AFTER40 JSON SHA256 a649be4cd10ea3d756b22f80b97bd03fa8949cb65129ddd5bcdf0ba927fc6c37.
+
+## Exact bounded input/output
+Input STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_40.json SHA256 a649be4cd10ea3d756b22f80b97bd03fa8949cb65129ddd5bcdf0ba927fc6c37. Appendix-A Year-5000 fixture: 45 months, 4244 days, first_day=-15057702. Predecessor steps=40, remaining=4204, openedUpTo=23, closedUpTo=0. Independent Python preflight (NOT Native): SMALL=22/22 tiny brute cases, BLOCKS=24/24 lexical insertion-count partition, exact parent rank interval, predicted letter=24, steps=41, remaining=4203, openedUpTo=24, closedUpTo=0. Expected five-field row: POSITION=41 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=41 MONTH_INDEX=32 MONTH_DAY=1. Preflight report SHA256 45410860e142e49066dbb678520e334cae5a9b2ae4fb42484d212668d24d97c7; independent script SHA256 6aa83841386398c911094f1cfe3920719e700ed860b4c0a377b0e1877db1356a; archived under /QA_Artifacts/PC-BRANCH-MATLAB-POLSKI/.
+
+## Acceptance conditions
+On exact candidate SHA, require MATLAB R2026a STAGE55_FORTY_FIRST_NATIVE_PASS STEPS=41 REMAINING=4203 LETTER=24 REJECTED=2, independent Python STAGE55_FORTY_FIRST_INDEPENDENT_PASS SMALL=22 BLOCKS=24 with partition/rank equality, exact byte-equal five-field row and negative positions 0 and 42 rejected. Also require Canonical Names Lock completed/success. Verify downloaded original artifact ZIP SHA256 and CRC of all members, pin AFTER41 JSON SHA256 and permanently archive. On real FAIL fix only demonstrated bug, no speculative expected-red. Full-year canonical oracle and cross-engine soak remain unverified, Stage55 not finally accepted, LAST_COMPLETED_STAGE=54. No main/merge/publication.
