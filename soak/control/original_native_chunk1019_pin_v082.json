@@ -1,0 +1,80 @@
+{
+  "schema": "PASTAFARI_GENERIC_ORIGINAL_CHUNK_ARTIFACT_PIN_V071/1",
+  "run_id": 43971203517,
+  "artifact_id": 14277754738,
+  "artifact_name": "soak-v081-original-ordinal1019-native-days-not-year",
+  "artifact_size_bytes": 4902942,
+  "artifact_sha256": "75d930af3c8d0c5bfd80d85f2f6377dda6d9d25c3d4a8791335b219248bfecaf",
+  "artifacts_file_sha256": {
+    "PROD-KT-CY/original-native-stdin.tsv": "5d095e4301a8823202e528d5df9da12f097e8dd2494bd514725b3a8f4e9c497a",
+    "PROD-KT-CY/os-stdout.tsv": "f8dadea3d823c298c244e08da2dd2abd37889b550607127589ad600b8ae071f6",
+    "PROD-KT-CY/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "PROD-KT-CY/process-evidence.json": "67a92443616a3691a52fba120a4335df66927c5b8a72879207f3617b82de9388",
+    "REF-41/native-normalized.jsonl": "0746daf0727ab9b2c1d56135f65488a75cd17453d1adc6be6fe152884c5f9cc7",
+    "REF-41/native-raw.jsonl": "b6128954e1366174d08be646d747eb2868d79d0e8f23f550c36bf3ebde2537d1",
+    "REF-41/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "REF-41/os-stdout.log": "618ea8693958847a8c464ea5e881e7c1f33b33d7062c0043c9dd7468693144b2",
+    "REF-41/process-evidence.json": "81a4b142bea207ab2e04e60ad62337a1467231d238bf0761c1243104920b5cc9",
+    "REF-41/transport-receipt.json": "630ffd9ca059b06d33e8d2e6ddcfe5c5a1da526a6b3b67652e4490125c4ef70f",
+    "gate.log": "91d911ae4b6620e15c6cef49f9e64ef88131bcb38f45353955f353968d70a57f",
+    "kotlin-compile-resources.txt": "1499f5eeb11e7e2d568f2d17889cc066482289053e5b02662dddb674de8d4fb9",
+    "kotlin-compiler-v1.9.0.sha256": "6edc408a9986289fc1a25af1af5dba48983bf06a4a2ff2e4cab567435a0391da",
+    "kotlin-index-only-normalized.jsonl": "22d383adacacd7ac5df3937f9daadf00ba04bc3bb943bc919468b6adcb188242",
+    "original-kotlin-v070.jar": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+    "original-kotlin-v070.jar.sha256": "1d1bcbd1599bfd742705ef528b620ac7b1754d8a61edc2da6a3b192810ddb51b",
+    "original-ordinal-dispatch.json": "948da3ae99683bcae324c9eea0d3856f37b5888bcc65efe4288fc6bf6408382b",
+    "original-two-day-verdict.json": "2e8d03371d662b8ff440e3d4445a08b27d67956c7a8405cda8fb31dde1196639",
+    "two-native-day-resources.txt": "1dcbe062c96e41464a4dc5ffc38ece88a6ebfa309dd5a34dd91a537746f167e2"
+  },
+  "original_source_commits": {
+    "REF-41": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "PROD-KT-CY": "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+  },
+  "python_source_sha256": "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378",
+  "kotlin_source_closure_sha256": "d25d71bfeda5ef592162f10b564c9eb49f64176e4dc438ab2424c46a95c44ba7",
+  "kotlin_jar_sha256": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+  "original_source_year": {
+    "calculation_day": "-15055671",
+    "year": "5000",
+    "first_target_day": "-15057702",
+    "last_target_day": "-15053459",
+    "chunk_days": 2,
+    "ordinal": 1019,
+    "first_chunk_target_day": "-15055664",
+    "last_chunk_target_day": "-15055663",
+    "boundary_evidence_sha256": "ad64cc51522d7f19cb8a238e2a6a418e75203c6cbfe017c394f623edeb882e78"
+  },
+  "process_runner_sha256": "70ca90bf9da83745a71750c43b8d97e7d706c57209c8cd3b1c8fe244e351822f",
+  "inherited_supervisor_sha256": "47f91b4a53a94997da0dbc5e8c3135c8a96501bf24cbccbf907bd97b4242dd32",
+  "native_rows": [
+    {
+      "target_day": "-15055664",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 7,
+      "month_index": 22,
+      "day_in_month": 37,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Yıldız",
+      "source_raw_sha256": "aaa13a09f96fbbcf6901825e115a4a2f8fff5150cde3c477c21f5c3bb03f86d0"
+    },
+    {
+      "target_day": "-15055663",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 8,
+      "month_index": 43,
+      "day_in_month": 53,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Keten",
+      "source_raw_sha256": "b01c54dfca5bd7e6b1662598396b501aed622dbefa3190a0b0391ae0f6f60d50"
+    }
+  ],
+  "comparison": {
+    "original_native_pairs": 2,
+    "first_mismatch": null,
+    "original_year_soak_passes_certified": 0,
+    "algorithmic_source_lineage_certified": false,
+    "canonical_oracle_certified": false
+  }
+}
