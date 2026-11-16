@@ -140,6 +140,30 @@ def check_original_process_chunk_links(store:CrashStore)->int:
         "SELECT engine,year,ordinal,artifact_sha256,native_raw_sha256,"
         "normalized_sha256,process_receipt_sha256 "
         "FROM original_process_chunk_links ORDER BY engine,year,ordinal").fetchall()
+    # Once the true pinned source process artifact and its baseline chunk
+    # are both committed, the corresponding link is mandatory. A crash
+    # between chunk commit and link insertion requires EXPLICIT replay.
+    if (store.plan.get("contract")==PROVENANCE_CONTRACT and
+        store.plan.get("calculation_day")==C and
+        store.plan.get("chunk_days")==CHUNK_DAYS and
+        [e["id"] for e in store.plan["engines"]]==[ENGINE,CANDIDATE] and
+        YEAR in store.years and
+        store.years[YEAR]["first_target_day"]==YEAR_FIRST and
+        store.years[YEAR]["last_target_day"]==YEAR_LAST):
+        chunk=store._chunk(ENGINE,YEAR,CHUNK_ORDINAL)
+        if (chunk.first_day,chunk.last_day)==(FIRST,LAST):
+            archived=store.db.execute(
+                "SELECT artifact_sha256 FROM supervised_two_day_pilot_witnesses "
+                "WHERE artifact_sha256=?",(ARCHIVE_SHA,)).fetchone()
+            if archived is not None and store._chunk_registered(chunk) is not None:
+                link=store.db.execute(
+                    "SELECT artifact_sha256 FROM original_process_chunk_links "
+                    "WHERE engine=? AND year=? AND ordinal=?",
+                    (ENGINE,YEAR,CHUNK_ORDINAL)).fetchone()
+                if link is None:
+                    raise ValueError(
+                        "committed original reference chunk lost source process link; "
+                        "explicit exact original artifact replay required")
     if not rows:
         return 0
     # First revalidate persisted pilot artifact before following any link.
