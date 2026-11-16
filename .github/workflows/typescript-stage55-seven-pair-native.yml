@@ -53,6 +53,32 @@ jobs:
           test "$(grep -c '^POST_STAGE55_NEGATIVE_PAIR_PASS name=' qa/native-logs/seven-pair-native.log)" -eq 7
           test "$(grep -c '^POST_STAGE55_NEGATIVE_FAMILY_PASS name=' qa/native-logs/seven-pair-native.log)" -eq 5
           grep -Fqx 'POST_STAGE55_NEGATIVE_SIGNED_API_PASS pairs=7 components=35 independentFamilies=5 rankMismatches=0 negativeAnchor=-1 negativeNonAnchor=null foundationCrossing=1 nativeCalls=856 sharedWrites=49648 interleavingChecks=195' qa/native-logs/seven-pair-native.log
+      - name: Prove distinct seven-pair and five-family Native evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence=qa/native-logs/seven-pair-native.log
+          verify_unique_witnesses() {
+            local evidence="$1" pair family
+            test "$(grep -c '^POST_STAGE55_NEGATIVE_PAIR_PASS name=' "$evidence")" -eq 7 || return 1
+            test "$(grep -c '^POST_STAGE55_NEGATIVE_FAMILY_PASS name=' "$evidence")" -eq 5 || return 1
+            for pair in 'negative-anchor-middle-day year=5000 components=5 nativeCalls=73' 'negative-anchor-year-first year=5000 components=5 nativeCalls=62' 'negative-anchor-year-last-gate year=5000 components=5 nativeCalls=85' 'negative-non-anchor-same-day year=5000 components=5 nativeCalls=58' 'negative-previous-year-last-day year=4999 components=5 nativeCalls=73' 'negative-next-year-first-day year=5001 components=5 nativeCalls=58' 'foundation-crossing-backward year=5000 components=5 nativeCalls=56'; do
+              test "$(grep -Fxc "POST_STAGE55_NEGATIVE_PAIR_PASS name=$pair" "$evidence")" -eq 1 || return 1
+            done
+            for family in 'negative-anchor-middle-day year=5000' 'negative-non-anchor-same-day year=5000' 'negative-previous-year-last-day year=4999' 'negative-next-year-first-day year=5001' 'foundation-crossing-backward year=5000'; do
+              test "$(grep -Ec "^POST_STAGE55_NEGATIVE_FAMILY_PASS name=$family days=[1-9][0-9]* months=[1-9][0-9]* rankBits=[1-9][0-9]* factorTerms=[1-9][0-9]* suffixQueries=[1-9][0-9]* mismatches=0$" "$evidence")" -eq 1 || return 1
+            done
+          }
+          verify_unique_witnesses "$evidence"
+          duplicate_probe="$(mktemp)"
+          trap 'rm -f "$duplicate_probe"' EXIT
+          for i in {1..7}; do grep -m 1 '^POST_STAGE55_NEGATIVE_PAIR_PASS name=' "$evidence" >> "$duplicate_probe"; done
+          for i in {1..5}; do grep -m 1 '^POST_STAGE55_NEGATIVE_FAMILY_PASS name=' "$evidence" >> "$duplicate_probe"; done
+          if verify_unique_witnesses "$duplicate_probe"; then
+            echo "::error::Repeated pair/family markers were incorrectly accepted"
+            exit 1
+          fi
+          echo 'POST_STAGE55_NATIVE_EVIDENCE_UNIQUENESS_PASS pairs=7 families=5 duplicateRejected=1'
       - name: Preserve witness and failure log
         if: always()
         uses: actions/upload-artifact@v4
