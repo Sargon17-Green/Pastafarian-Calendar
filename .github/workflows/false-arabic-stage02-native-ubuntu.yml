@@ -387,25 +387,45 @@ jobs:
               'stdio_probe': (out / 'stdio_diag_smoke.stdout.txt').read_text(encoding='utf-8'),
               'cases': {},
           }
+          required_suffixes = (
+              'U_HANDLE_BEFORE', 'U_SIGN_BEFORE', 'U_HANDLE_AFTER',
+              'N_HANDLE_AFTER', 'U_SIGN_AFTER', 'N_SIGN_AFTER',
+              'U_DIGITS_AFTER', 'N_DIGITS_AFTER', 'N_VS_U_COMPARE',
+          )
           total = 0
+          complete = True
           for fname in files:
               content = (out / (fname + '.wide_stdio.stdout.txt')).read_text(encoding='utf-8')
               numbers = re.findall(r'\b((?:CASE10|SOLO)_[A-Z_]+)\s+(-?\d+)', content)
               recorded = {label: int(value) for label, value in numbers}
+              prefix = 'SOLO' if fname.startswith('stage02_save_zero_') else 'CASE10'
+              required = {prefix + '_' + suffix for suffix in required_suffixes}
+              labels = [label for label, _ in numbers]
+              missing = sorted(required - recorded.keys())
+              unexpected = sorted(recorded.keys() - required)
+              duplicates = sorted({label for label in labels if labels.count(label) > 1})
+              case_complete = not (missing or unexpected or duplicates) and len(numbers) == len(required)
+              complete = complete and case_complete
               result['cases'][fname] = {
                   'exit_code': int((out / (fname + '.wide_stdio.exit_code.txt')).read_text()),
                   'numeric_label_count': len(recorded),
+                  'required_labels': sorted(required),
+                  'missing_labels': missing,
+                  'unexpected_labels': unexpected,
+                  'duplicate_labels': duplicates,
+                  'numeric_evidence_complete': case_complete,
                   'values': recorded,
                   'stderr': (out / (fname + '.wide_stdio.stderr.txt')).read_text(encoding='utf-8')[-1200:],
               }
-              total += len(recorded)
+              total += len(numbers)
           result['numeric_label_count_total'] = total
+          result['numeric_evidence_complete'] = complete
           (out / 'case10_wide_stdio_diagnostics.json').write_text(
               json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8'
           )
           print('CASE10_DIAGNOSTIC_NUMERIC_LABELS', total)
-          if total < 4:
-              raise SystemExit('NUMERIC_DIAGNOSTIC_INSUFFICIENT: do not infer CASE10 values')
+          if not complete or total != 2 * len(required_suffixes):
+              raise SystemExit('NUMERIC_DIAGNOSTIC_INCOMPLETE: inspect missing/duplicate fields; no CASE10 verdict')
           PY
           echo WIDE_STDIO_NUMERIC_DIAGNOSTIC_ONLY > evidence/stdio_diag_status.txt
 
