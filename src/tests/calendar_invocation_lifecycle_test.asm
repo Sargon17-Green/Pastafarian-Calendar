@@ -399,6 +399,201 @@ RunCalendarInvocationTests::
     ld a, [wCalendarOrdinalLength]
     or a
     jp nz, .fail
+    ; 310: idle SAVE returns 6.
+    ld a, 54
+    ld [wTestCase], a
+    call CalendarSave127InPlace
+    ld a, [wCalendarStatus]
+    cp 6
+    jp nz, .fail
+    ; 311: SAVE(0)=M, sign0 length16, FF..7F.
+    ld a, 55
+    ld [wTestCase], a
+    ld a, 63
+    ld [wCalendarRequestedOwner], a
+    ld a, 1
+    ld [wCalendarRequestedBanks], a
+    call CalendarInvocationBegin
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    call CalendarSave127InPlace
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    cp 16
+    jp nz, .fail
+    ld a, 3
+    call SRAMSelectBank
+    ld a, [$a000]
+    cp $ff
+    jp nz, .fail
+    ld a, [$a00f]
+    cp $7f
+    jp nz, .fail
+    ; 312: SAVE(M)=M.
+    ld a, 56
+    ld [wTestCase], a
+    call CalendarSave127InPlace
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [$a00f]
+    cp $7f
+    jp nz, .fail
+    ; 313: SAVE(+1)=1, clear previously occupied 16-byte footprint.
+    ld a, 57
+    ld [wTestCase], a
+    ld a, 1
+    ld [$a000], a
+    ld [wCalendarOrdinalLength], a
+    call CalendarSave127InPlace
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    cp 1
+    jp nz, .fail
+    ld a, [$a000]
+    cp 1
+    jp nz, .fail
+    ld a, [$a00f]
+    or a
+    jp nz, .fail
+    ; 314: SAVE(-1)=M-1.
+    ld a, 58
+    ld [wTestCase], a
+    ld a, 1
+    ld [wCalendarOrdinalSign], a
+    call CalendarSave127InPlace
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalSign]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    cp 16
+    jp nz, .fail
+    ld a, [$a000]
+    cp $fe
+    jp nz, .fail
+    ld a, [$a00f]
+    cp $7f
+    jp nz, .fail
+    ; 315: SAVE(2^127)=1.
+    ld a, 59
+    ld [wTestCase], a
+    ld hl, $a000
+    ld b, 16
+    xor a
+.clearOne:
+    ld [hli], a
+    dec b
+    jr nz, .clearOne
+    ld a, $80
+    ld [$a00f], a
+    ld a, 16
+    ld [wCalendarOrdinalLength], a
+    call CalendarSave127InPlace
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    cp 1
+    jp nz, .fail
+    ld a, [$a000]
+    cp 1
+    jp nz, .fail
+    ; 316: negative zero fails and preserves SRAM.
+    ld a, 60
+    ld [wTestCase], a
+    xor a
+    ld [wCalendarOrdinalLength], a
+    ld a, 1
+    ld [wCalendarOrdinalSign], a
+    call CalendarSave127InPlace
+    ld a, [wCalendarStatus]
+    cp 2
+    jp nz, .fail
+    ld a, [$a000]
+    cp 1
+    jp nz, .fail
+    ; 317: SAVE(2^128)=2 using 17-byte input.
+    ld a, 61
+    ld [wTestCase], a
+    ld hl, $a000
+    ld b, 16
+    xor a
+.clearTwo:
+    ld [hli], a
+    dec b
+    jr nz, .clearTwo
+    ld a, 1
+    ld [$a010], a
+    ld a, 17
+    ld [wCalendarOrdinalLength], a
+    xor a
+    ld [wCalendarOrdinalSign], a
+    call CalendarSave127InPlace
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    cp 1
+    jp nz, .fail
+    ld a, [$a000]
+    cp 2
+    jp nz, .fail
+    ; 318: SAVE(-2^128)=M-2; old high input byte stays untouched.
+    ld a, 62
+    ld [wTestCase], a
+    ld hl, $a000
+    ld b, 16
+    xor a
+.clearThree:
+    ld [hli], a
+    dec b
+    jr nz, .clearThree
+    ld a, 17
+    ld [wCalendarOrdinalLength], a
+    ld a, 1
+    ld [wCalendarOrdinalSign], a
+    call CalendarSave127InPlace
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    cp 16
+    jp nz, .fail
+    ld a, [$a000]
+    cp $fd
+    jp nz, .fail
+    ld a, [$a00f]
+    cp $7f
+    jp nz, .fail
+    ld a, [$a010]
+    cp 1
+    jp nz, .fail
+    ; 319: abort scrubs output and old high input.
+    ld a, 63
+    ld [wTestCase], a
+    call CalendarInvocationAbort
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wLeaseTable+3]
+    or a
+    jp nz, .fail
+    ld a, 3
+    call SRAMSelectBank
+    ld a, [$a000]
+    or a
+    jp nz, .fail
+    ld a, [$a010]
+    or a
+    jp nz, .fail
     ret
 .fail:
     ld a, $e0

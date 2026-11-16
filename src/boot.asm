@@ -108,6 +108,11 @@ wCalendarUnitRollbackStop:: ds 3
 wCalendarUnitNewLength:: ds 3
 wCalendarUnitNewSign:: ds 1
 wCalendarUnitReplacement:: ds 1
+wCalendarSaveRem:: ds 16
+wCalendarSaveOld:: ds 16
+wCalendarSaveFold:: ds 1
+wCalendarSaveNewLen:: ds 1
+wCalendarSaveRollbackStop:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -225,6 +230,7 @@ INCLUDE "src/runtime/signed_add.asm"
 INCLUDE "src/runtime/dispatcher.asm"
 INCLUDE "src/runtime/ordinal_validate.asm"
 INCLUDE "src/runtime/ordinal_unit.asm"
+INCLUDE "src/runtime/calendar_save127.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"

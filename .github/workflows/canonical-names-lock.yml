@@ -49,6 +49,7 @@ jobs:
           python3 tests/test_sm83_stage1_invocation_lifecycle.py
           python3 tests/test_sm83_stage1_ordinal_validate.py
           python3 tests/test_sm83_stage1_ordinal_unit.py
+          python3 tests/test_sm83_stage1_save127.py
       - name: Build DMG ROM using RGBDS v1.0.4
         run: |
           docker run --rm --mount type=bind,src="$PWD",dst=/work \
