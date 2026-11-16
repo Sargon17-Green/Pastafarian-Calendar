@@ -15,10 +15,10 @@ jobs:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
       PROJECT_ID: PC-BRANCH-FALSE-ARABIC
-      SOURCE_PIN: d05b84ab06a667e2b06d452dc73ca8c7b0837767
+      SOURCE_PIN: 8ab683aee4333ac38056edc4ca64b1904749d8e6
       RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
       # SHA256 of four immutable Git blobs joined by LF and final LF, independently reproduced.
-      ORIGINAL_COMBINED_SHA256: 20596d528c6b399a1bba76ac4b90bd2740cdba9e928f458847af6708341cc12f
+      ORIGINAL_COMBINED_SHA256: 14da009d3c4ba6c5538f146d0c2d35a897435fee5b5e29bcd4af07d6dd3a9f38
     steps:
       - uses: actions/checkout@v4
         with:
@@ -122,7 +122,7 @@ jobs:
             exit 2
           fi
 
-      - name: Run comment-notation-only diagnostic copy (never original Native PASS)
+      - name: Mirror corrected source for bounded diagnostics (not a Native acceptance test)
         if: always()
         shell: bash
         run: |
@@ -135,7 +135,7 @@ jobs:
           import hashlib, pathlib
           source = pathlib.Path('evidence/stage02_discovery01_combined.false')
           text = source.read_text(encoding='utf-8')
-          needles = {'P_{d-1}': 3, 'P_{w+1}': 1}
+          needles = {'P_{d-1}': 0, 'P_{w+1}': 0}
           for token, number in needles.items():
               matches = [line for line in text.splitlines() if token in line]
               assert len(matches) == number, (token, len(matches))
@@ -150,7 +150,7 @@ jobs:
           target_sha = hashlib.sha256(target.read_bytes()).hexdigest()
           pathlib.Path('evidence/comment_diagnostic_sha256.txt').write_text(target_sha + '\n', encoding='utf-8')
           assert target_sha == '14da009d3c4ba6c5538f146d0c2d35a897435fee5b5e29bcd4af07d6dd3a9f38'
-          print('COMMENT_ONLY_DIAGNOSTIC_COPY', target_sha, 'substitutions=4')
+          print('SOURCE_MIRROR_DIAGNOSTIC_COPY', target_sha, 'substitutions=0')
           PY
           set +e
           timeout 120s upstream/false_int -e evidence/stage02_discovery01_comment_sanitized_DIAGNOSTIC.false \
@@ -158,7 +158,7 @@ jobs:
           code=$?
           set -e
           echo "$code" > evidence/comment_diagnostic_exit_code.txt
-          echo DIAGNOSTIC_ONLY_ORIGINAL_SOURCE_NOT_ACCEPTED > evidence/comment_diagnostic_status.txt
+          echo DIAGNOSTIC_MIRROR_NOT_NATIVE_ACCEPTED > evidence/comment_diagnostic_status.txt
 
       - name: Run twelve-case trace on diagnostic copy (not a Native acceptance test)
         if: always()
@@ -257,8 +257,7 @@ jobs:
           marker = '{ إعادة بناء مستقلة لاستقصاء المرحلة الثانية.'
           assert original.count(marker) == 1
           prefix = original.split(marker, 1)[0]
-          assert prefix.count('P_{d-1}') == 3 and prefix.count('P_{w+1}') == 1
-          prefix = prefix.replace('P_{d-1}', 'P_(d-1)').replace('P_{w+1}', 'P_(w+1)')
+          assert prefix.count('P_{') == 0
           assert 'P_{' not in prefix
           standalone = '\n'.join([
               'z;b:0a;!b;21o;!c:',
@@ -424,6 +423,7 @@ jobs:
               json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8'
           )
           print('CASE10_DIAGNOSTIC_NUMERIC_LABELS', total)
+          print('CASE10_NUMERIC_VALUES', json.dumps({k: v['values'] for k, v in result['cases'].items()}, sort_keys=True))
           if not complete or total != 2 * len(required_suffixes):
               raise SystemExit('NUMERIC_DIAGNOSTIC_INCOMPLETE: inspect missing/duplicate fields; no CASE10 verdict')
           PY
