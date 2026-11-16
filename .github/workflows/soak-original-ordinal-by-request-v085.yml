@@ -1,0 +1,170 @@
+name: Soak v085 one new pinned original source ordinal request (no year credit)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/control/original_source_dispatch_requests/ordinal-*.json"
+concurrency:
+  group: soak-original-source-single-qa-lane
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  pinned-original-two-day-source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Authorize exactly one ADDED ordinal request and sealed original predecessor
+        id: authorization
+        shell: bash
+        env:
+          GIT_BEFORE: ${{ github.event.before }}
+          GIT_AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/qa/soak-readiness-20261114
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          mkdir -m 700 evidence
+          python3 -B -m unittest discover -s coordinator/soak/tests \
+            -p 'test_source_ordinal_dispatch_v085.py' -v \
+            2>&1 | tee evidence/v085-source-request-static.log
+          grep -Eq '^Ran 17 tests ' evidence/v085-source-request-static.log
+          grep -q '^OK$' evidence/v085-source-request-static.log
+          python3 -B coordinator/soak/runner/source_ordinal_dispatch_v085.py \
+            --repo-root coordinator --before "$GIT_BEFORE" --after "$GIT_AFTER" \
+            --github-output "$GITHUB_OUTPUT" \
+            | tee evidence/v085-source-authorization.log
+          echo V085_AUTHORIZED_NEW_SOURCE_ORDINAL_NOT_A_YEAR
+      - name: Verify source identity and controlled Linux-only scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test "$GITHUB_ACTIONS" = true
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          printf '%s\n' '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
+            | sha256sum -c -
+          python3 -B -m unittest discover -s coordinator/soak/tests \
+            -p 'test_supervised_original_ordinal_v070.py' -v
+          echo "TWO_DATE_NATIVE_TEST_SCOPE_NO_DATE_CALLS_YET"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Fetch pinned version Kotlin compiler and record exact archive bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 2 --max-time 90 \
+            https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip \
+            -o "$RUNNER_TEMP/kotlin-1.9.0.zip"
+          printf '%s  %s\n' '1fc50d805f9809e92de43e91f089cc8618567c1a350faebdabf8a40c5048bee8' "$RUNNER_TEMP/kotlin-1.9.0.zip" | sha256sum -c -
+          sha256sum "$RUNNER_TEMP/kotlin-1.9.0.zip" > evidence/kotlin-compiler-v1.9.0.sha256
+          unzip -q "$RUNNER_TEMP/kotlin-1.9.0.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile immutable Kotlin original production sources and bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/kotlin-compile-resources.txt \
+            timeout --signal=TERM --kill-after=5s 180s kotlinc \
+            original-kotlin/src/main/kotlin/pastafari/*.kt \
+            original-kotlin/soak/Post55ProductionDateBridge.kt \
+            -include-runtime -d evidence/original-kotlin-v070.jar
+          echo '70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6  evidence/original-kotlin-v070.jar' | sha256sum -c -
+          sha256sum evidence/original-kotlin-v070.jar > evidence/original-kotlin-v070.jar.sha256
+          test -z "$(git -C original-kotlin status --porcelain)"
+      - name: Execute exact two Fct days per original source serially with no native wall timeout
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/two-native-day-resources.txt python3 -B \
+            coordinator/soak/runner/supervised_original_ordinal_v070.py \
+              --ci-original-chunk \
+              --ordinal "${{ steps.authorization.outputs.ordinal }}" \
+              --sources-root original-sources \
+              --original-kotlin-repo original-kotlin \
+              --original-kotlin-jar evidence/original-kotlin-v070.jar \
+              --evidence-root evidence \
+            | tee evidence/gate.log
+          cp "coordinator/${{ steps.authorization.outputs.request_path }}" evidence/authorized-original-source-request-v085.json
+          printf '%s  %s\n' "${{ steps.authorization.outputs.request_sha256 }}" 'evidence/authorized-original-source-request-v085.json' | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('evidence')
+          request=json.loads((root/'authorized-original-source-request-v085.json').read_bytes())
+          v=json.loads((root/'original-two-day-verdict.json').read_bytes())
+          dispatch=json.loads((root/'original-ordinal-dispatch.json').read_bytes())
+          ordinal=request['ordinal']
+          first,last=request['first_target_day'],request['last_target_day']
+          assert type(ordinal) is int and 1020<=ordinal<=2121
+          assert request['schema']=='PASTAFARI_ORIGINAL_SOURCE_ORDINAL_REQUEST_V085/1'
+          assert request['calculation_day']=='-15055671' and request['year']=='5000'
+          assert v['schema']=='PASTAFARI_SUPERVISED_ORIGINAL_ORDINAL_CHUNK_V070/1'
+          assert v['status']=='SUPERVISED_ORIGINAL_TWO_DAYS_MATCH_NOT_FULL_YEAR'
+          assert v['calculation_day']==request['calculation_day']
+          assert (v['first_target_day'],v['last_target_day'])==(first,last)
+          assert v['matched_original_day_pairs']==2
+          assert v['full_year_chunk_ordinal']==ordinal
+          assert dispatch['schema']=='PASTAFARI_SUPERVISED_ORDINAL_DISPATCH_RECEIPT_V070/1'
+          assert dispatch['ordinal']==ordinal
+          assert (dispatch['first_target_day'],dispatch['last_target_day'])==(first,last)
+          assert dispatch['full_original_years_soak_certified']==0
+          assert dispatch['canonical_oracle_certified'] is False
+          assert dispatch['source_lineage_independence_certified'] is False
+          assert v['chunk_days']==2 and v['original_full_year_length']==4244
+          assert v['first_mismatch'] is None and v['halt_new_dispatch'] is False
+          assert v['supervised_original_Fct_calls_per_engine']==2
+          assert v['kotlin_native_names_reported'] is False
+          assert v['kotlin_name_field_semantics']=='NATIVE_INDEX_STRING_NOT_NAME'
+          assert v['algorithmic_independence_certified'] is False
+          assert v['original_complete_years_soak_passed']==0
+          assert v['long_soak_started'] is False
+          assert v['python_original_source_commit']==request['original_source_commits']['REF-41']
+          assert v['kotlin_original_source_commit']==request['original_source_commits']['PROD-KT-CY']
+          for engine in ('REF-41','PROD-KT-CY'):
+              r=json.loads((root/engine/'process-evidence.json').read_bytes())
+              assert r['exit_code']==0 and r['native_rows_validated']==2
+              assert r['pid']>0 and r['process_creation_id']
+              assert r['whole_original_year_soak_passes']==0
+              assert r['resident_memory_hard_cap_enforced'] is False
+              assert r['original_calculation_wall_timeout_seconds'] is None
+              assert (root/engine/'os-stderr.log').is_file()
+          assert (root/'REF-41/native-raw.jsonl').read_bytes().count(b'\n')==2
+          assert (root/'PROD-KT-CY/os-stdout.tsv').read_bytes().count(b'\n')==2
+          normalized=(root/'kotlin-index-only-normalized.jsonl').read_bytes()
+          assert normalized.count(b'\n')==2
+          assert hashlib.sha256(normalized).hexdigest()==v['kotlin_normalized_index_only_sha256']
+          print('V085_NEW_ORDINAL_NATIVE_FCT_TWO_DAYS_MATCHED_NOT_A_YEAR',ordinal)
+          PY
+      - name: Preserve raw native Fct data, separate OS process streams and immutable receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v085-original-ordinal${{ steps.authorization.outputs.ordinal }}-native-days-not-year
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
