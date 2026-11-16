@@ -1,0 +1,60 @@
+name: APL German NARS2000 interface source discovery
+
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-nars-interface-discovery.yml'
+      - 'qa/nars-interface/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Offline scanner contract tests
+        run: python3 -m unittest discover -s qa/nars-interface -p 'test_*.py' -v
+      - name: Read-only official upstream SVN audit (no upstream code execution)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source_probe_evidence
+          echo 'SVN_SOURCE=UNAVAILABLE' > source_probe_evidence/transport_status.txt
+          if ! command -v svn >/dev/null 2>&1; then
+            echo 'SVN_CLIENT=NOT_INSTALLED' >> source_probe_evidence/transport_status.txt
+            exit 1
+          fi
+          echo 'SOURCE_ENDPOINT=https://svn.code.sf.net/p/nars2000/code/trunk' >> source_probe_evidence/transport_status.txt
+          if ! timeout 180s svn info --non-interactive https://svn.code.sf.net/p/nars2000/code/trunk >source_probe_evidence/svn_info.txt 2>source_probe_evidence/svn_error.txt; then
+            echo 'SOURCE_FETCH=FAILED; CLI_SUPPORTED=UNDETERMINED' >> source_probe_evidence/transport_status.txt
+            exit 1
+          fi
+          if ! timeout 240s svn export --non-interactive --ignore-externals https://svn.code.sf.net/p/nars2000/code/trunk upstream >source_probe_evidence/svn_export.log 2>>source_probe_evidence/svn_error.txt; then
+            echo 'SVN_EXPORT=FAILED; CLI_SUPPORTED=UNDETERMINED' >> source_probe_evidence/transport_status.txt
+            exit 1
+          fi
+          du -sh upstream >source_probe_evidence/source_size.txt
+          python3 qa/nars-interface/source_probe.py upstream --out source_probe_evidence/source_interface_scan.json
+          echo 'SOURCE_AUDIT=FINISHED; NATIVE=NOT_RUN; CLI_SUPPORTED=UNDETERMINED' >> source_probe_evidence/transport_status.txt
+      - name: Evidence manifest
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p source_probe_evidence
+          find source_probe_evidence -type f -print0 | sort -z | xargs -0 -r sha256sum >source_probe_evidence.sha256
+      - name: Upload source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nars2000-source-interface-candidate-only
+          path: |
+            source_probe_evidence/
+            source_probe_evidence.sha256
+          if-no-files-found: warn
+          retention-days: 14
