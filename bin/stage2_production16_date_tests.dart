@@ -163,8 +163,8 @@ void canonicalOracle() {
     canonicalAnchors++;
   }
   clock.stop();
-  check(clock.elapsed.inSeconds <= 240, 'Three canonical results <=240s');
-  print('PRODUCTION16_CANONICAL_TIME_MS=$clock.elapsedMilliseconds');
+  check(clock.elapsedMilliseconds <= 240000, 'Three canonical results <=240s');
+  print('PRODUCTION16_CANONICAL_TIME_MS=${clock.elapsedMilliseconds}');
 }
 
 void main() {
