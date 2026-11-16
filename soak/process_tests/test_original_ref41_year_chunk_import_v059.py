@@ -189,6 +189,23 @@ class RealOriginalSourceChunkLedgerTests(unittest.TestCase):
             self.assertFalse(p["native_receipt_execution_attestation_verified"])
             self.assertEqual(p["original_native_full_year_soak_passes_certified"],0)
 
+    def test_deleted_process_link_requires_explicit_source_replay_to_recover(self):
+        with CrashStore(self.root,self.plan) as store:
+            self.import_ref(store)
+            store.db.execute(
+                "DELETE FROM original_process_chunk_links "
+                "WHERE engine=? AND year=? AND ordinal=?",
+                (ENGINE,YEAR,CHUNK_ORDINAL))
+            with self.assertRaisesRegex(ValueError,"lost source process link"):
+                store.verify_and_recover()
+            self.assertEqual(store.progress()["original_process_linked_chunks_not_years"],0)
+        with CrashStore(self.root,self.plan) as store:
+            result=self.import_ref(store)
+            self.assertEqual(result["outcome"],"ALREADY_COMMITTED")
+            self.assertEqual(result["source_process_link_rows_verified"],1)
+            self.assertEqual(store.verify_and_recover()["original_source_process_chunk_links_revalidated"],1)
+            self.assertEqual(store.progress()["fully_verified_years"],0)
+
     def test_missing_quarantine_original_zip_blocks_source_link_recovery(self):
         from quarantined_two_day_pilot_v057 import get_paths
         with CrashStore(self.root,self.plan) as store:
