@@ -45,11 +45,7 @@ fn enumerate_ends(
   }
 }
 
-fn enumerate_starts(
-  suffix: List(Int),
-  threshold: Int,
-  count: Int,
-) -> Int {
+fn enumerate_starts(suffix: List(Int), threshold: Int, count: Int) -> Int {
   case suffix {
     [] -> count
     [_, ..rest] -> {
@@ -84,9 +80,7 @@ fn check_valid(a: Int, b: Int, ids: List(Int), thresholds: List(Int)) {
     discovery_26_window_count.dispatch_discovery_26(context, ids, thresholds)
   actual |> should.equal(expected)
   list.each(actual, fn(item) {
-    {
-      item.qualifying_windows >= 0 && item.qualifying_windows <= upper
-    }
+    { item.qualifying_windows >= 0 && item.qualifying_windows <= upper }
     |> should.equal(True)
   })
 }
@@ -139,12 +133,12 @@ pub fn discovery_26_multiple_gaps_total_boundary_test() {
 pub fn discovery_26_interior_and_nonprefix_windows_test() {
   let ids = [6, 2, 1, 4, 3]
   let assert [first, second, third, _, _] = samples_for(11, 21, ids)
-  check_valid(
-    11,
-    21,
-    ids,
-    [second.gap, third.gap, second.gap + third.gap, first.gap + 1],
-  )
+  check_valid(11, 21, ids, [
+    second.gap,
+    third.gap,
+    second.gap + third.gap,
+    first.gap + 1,
+  ])
 }
 
 pub fn discovery_26_repeated_bowl_positions_test() {
@@ -202,7 +196,14 @@ pub fn discovery_26_huge_days_ints_and_monotonicity_test() {
   let huge = core.m * core.m + core.m
   let ids = [1, 6, 1, 6, 2]
   check_valid(huge, -huge, ids, [-huge, 0, 1, huge, huge * huge])
-  check_valid(-huge, huge, [6, 6, 6], [-9_999_999_999, 0, 1, 42, 963, 9_999_999_999])
+  check_valid(-huge, huge, [6, 6, 6], [
+    -9_999_999_999,
+    0,
+    1,
+    42,
+    963,
+    9_999_999_999,
+  ])
   let thresholds = [1, 42, 43, 963, 964, 999_999_999]
   let assert Ok(got) = answers(11, 21, ids, thresholds)
   let assert [a, b, c, d, e, f] = got
