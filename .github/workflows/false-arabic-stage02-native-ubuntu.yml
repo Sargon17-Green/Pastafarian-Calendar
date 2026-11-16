@@ -160,6 +160,40 @@ jobs:
           echo "$code" > evidence/comment_diagnostic_exit_code.txt
           echo DIAGNOSTIC_ONLY_ORIGINAL_SOURCE_NOT_ACCEPTED > evidence/comment_diagnostic_status.txt
 
+      - name: Run twelve-case trace on diagnostic copy (not a Native acceptance test)
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -x upstream/false_int || exit 0
+          test -f evidence/stage02_discovery01_comment_sanitized_DIAGNOSTIC.false || exit 0
+          python3 - <<'PY'
+          import hashlib, pathlib
+          source = pathlib.Path('evidence/stage02_discovery01_comment_sanitized_DIAGNOSTIC.false')
+          data = source.read_text(encoding='utf-8')
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == '14da009d3c4ba6c5538f146d0c2d35a897435fee5b5e29bcd4af07d6dd3a9f38'
+          lines = data.splitlines(keepends=True)
+          out = []
+          seen = 0
+          for line in lines:
+              if line.startswith('z;b:') and ';!n:n;' in line:
+                  seen += 1
+                  out.append('"TRACE_CASE_%02d"10,\n' % seen)
+              out.append(line)
+          assert seen == 12, ('case_count', seen)
+          dest = pathlib.Path('evidence/stage02_discovery01_case_trace_DIAGNOSTIC.false')
+          dest.write_text(''.join(out), encoding='utf-8')
+          pathlib.Path('evidence/trace_sha256.txt').write_text(hashlib.sha256(dest.read_bytes()).hexdigest() + '\n')
+          print('TRACE_INSERTIONS', seen)
+          PY
+          set +e
+          timeout 120s upstream/false_int -e evidence/stage02_discovery01_case_trace_DIAGNOSTIC.false \
+            > evidence/trace_stdout.txt 2> evidence/trace_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/trace_exit_code.txt
+          echo CASE_TRACE_DIAGNOSTIC_ONLY > evidence/trace_status.txt
+
       - name: Finalize explicit provenance and Native evidence
         if: always()
         shell: bash
