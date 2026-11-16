@@ -31,6 +31,11 @@ CalendarInvocationBegin::
     ld [wCalendarActive], a
     ld a, [wCalendarRequestedOwner]
     ld [wCalendarActiveOwner], a
+    xor a
+    ld [wCalendarOrdinalSign], a
+    ld [wCalendarOrdinalLength], a
+    ld [wCalendarOrdinalLength+1], a
+    ld [wCalendarOrdinalLength+2], a
     ret
 CalendarInvocationAbort::
     ld a, [wCalendarActive]
@@ -50,4 +55,8 @@ CalendarInvocationAbort::
     xor a
     ld [wCalendarActive], a
     ld [wCalendarActiveOwner], a
+    ld [wCalendarOrdinalSign], a
+    ld [wCalendarOrdinalLength], a
+    ld [wCalendarOrdinalLength+1], a
+    ld [wCalendarOrdinalLength+2], a
     ret

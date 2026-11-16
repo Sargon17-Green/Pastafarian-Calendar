@@ -98,6 +98,8 @@ wCalendarRequestedBanks:: ds 1
 wCalendarActive:: ds 1
 wCalendarActiveOwner:: ds 1
 wCalendarStatus:: ds 1
+wCalendarOrdinalSign:: ds 1
+wCalendarOrdinalLength:: ds 3
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -213,6 +215,7 @@ INCLUDE "src/runtime/banked_cmp.asm"
 INCLUDE "src/runtime/signed_cmp.asm"
 INCLUDE "src/runtime/signed_add.asm"
 INCLUDE "src/runtime/dispatcher.asm"
+INCLUDE "src/runtime/ordinal_validate.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
