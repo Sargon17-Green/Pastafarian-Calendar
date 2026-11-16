@@ -1,12 +1,17 @@
 """Synthetic Git histories; no fixture is historical Rust RED."""
+import io
+import json
 import shutil
 import subprocess
+from contextlib import redirect_stdout
+from unittest.mock import patch
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import stage04_rust_callability_eligibility as callability_cli
 from stage04_rust_callability_eligibility import (
     RuntimeUnverified, check_callability, install_probe, supported_signature,
     validated_symbol, test_body)
@@ -143,6 +148,40 @@ class CallabilityTests(unittest.TestCase):
     def test_probe_binds_original_function_type(self):
         s = test_body("synthetic_rust_daytag", "old_numeric_probe")
         self.assertIn("let old: fn(&BigInt) -> BigInt = synthetic_rust_daytag::old_numeric_probe;", s)
+
+    def assert_unavailable_subprocess_is_structured(self, error):
+        # No Git/Cargo execution: inject the OS fault at the CLI boundary.
+        args = ["stage04_rust_callability_eligibility.py"]
+        for key, value in (
+            ("witness-commit", "a"*40),
+            ("witness-path", "src/lib.rs"),
+            ("witness-blob", "b"*40),
+            ("stage3-closure", "c"*40),
+            ("stage4-introduction", "d"*40),
+            ("branch-head", "e"*40),
+            ("symbol", "old_numeric_probe"),
+        ):
+            args.extend(["--" + key, value])
+        output = io.StringIO()
+        with patch.object(callability_cli, "check_callability", side_effect=error):
+            with patch.object(sys, "argv", args), redirect_stdout(output):
+                status = callability_cli.main()
+        payload = json.loads(output.getvalue())
+        self.assertEqual(status, 3)
+        self.assertEqual(payload["callability_status"], "RUNTIME_UNVERIFIED")
+        self.assertFalse(payload["source_pin_eligible"])
+        self.assertFalse(payload["observed_runtime_red"])
+        self.assertFalse(payload["callable_day_tag_route_verified"])
+        self.assertEqual(payload["stage04_closure"], "NOT_CLAIMED")
+        self.assertIn(type(error).__name__, payload["reason"])
+
+    def test_git_timeout_emits_bounded_json_not_traceback(self):
+        self.assert_unavailable_subprocess_is_structured(
+            subprocess.TimeoutExpired(["git", "merge-base"], 12))
+
+    def test_missing_git_executable_emits_bounded_json_not_traceback(self):
+        self.assert_unavailable_subprocess_is_structured(
+            OSError("git executable unavailable"))
 
 if __name__ == "__main__":
     unittest.main()

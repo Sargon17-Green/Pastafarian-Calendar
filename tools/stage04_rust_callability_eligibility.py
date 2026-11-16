@@ -173,6 +173,16 @@ def main() -> int:
                       observed_runtime_red=False, stage04_closure="NOT_CLAIMED",
                       callability_status="RUNTIME_UNVERIFIED", reason=str(exc))
         code = 3
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        # A Git checkout/query can fail before provenance has been established.
+        # Fail closed with a structured result, never a traceback or RED claim.
+        result = dict(source_pin_eligible=False,
+                      callable_numeric_function_verified=False,
+                      callable_day_tag_route_verified=False,
+                      observed_runtime_red=False, stage04_closure="NOT_CLAIMED",
+                      callability_status="RUNTIME_UNVERIFIED",
+                      reason=f"historical subprocess unavailable ({type(exc).__name__})")
+        code = 3
     print(json.dumps(result, sort_keys=True))
     return code
 
