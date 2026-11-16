@@ -1,0 +1,187 @@
+name: Soak v083 FIVE original Python source chunks in CrashStore (no year)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/original_generic_source_chunk_ledger_v073.py"
+      - "soak/runner/recovery_store.py"
+      - "soak/runner/original_ref41_year_chunk_import_v059.py"
+      - "soak/process_tests/test_three_real_original_chunks_v074.py"
+      - "soak/control/original_native_chunk1017_pin_v071.json"
+      - "soak/control/original_native_chunk1018_pin_v079.json"
+      - "soak/runner/original_generic_source_chunk_ledger_v073.py"
+      - "soak/process_tests/test_four_real_original_chunks_v080.py"
+      - "soak/control/original_native_chunk1019_pin_v082.json"
+      - "soak/process_tests/test_five_real_original_chunks_v083.py"
+      - ".github/workflows/soak-five-real-original-source-chunks-v083.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  five-real-source-linked-python-chunks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Retrieve three exact precomputed original Fct process ZIPs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -m 700 evidence
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
+            | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14186295655/zip > evidence/original-v053-chunk1015.zip
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14264392351/zip > evidence/original-v061-chunk1016.zip
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14273257274/zip > evidence/original-v070-chunk1017.zip
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14277208379/zip > evidence/original-v078-chunk1018.zip
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14277754738/zip > evidence/original-v081-chunk1019.zip
+          echo 'f87b2e925b4a400cff2e2469be5b873b66c89ca35498e8fcda1090ab55d5d390  evidence/original-v053-chunk1015.zip' | sha256sum -c -
+          echo '91985794e9bb8e3c6995aa5634d684872c60aae544eaf780b668797d86557eb9  evidence/original-v061-chunk1016.zip' | sha256sum -c -
+          echo '878b965960662aa27e824fd8f23a02c5d603b57f81ab698cb12ab02465a2e3e4  evidence/original-v070-chunk1017.zip' | sha256sum -c -
+          echo '329afd1e408c43dfadf96b4ddd844696b59f22a63b786e663413950013c3fb0c  evidence/original-v078-chunk1018.zip' | sha256sum -c -
+          echo '75d930af3c8d0c5bfd80d85f2f6377dda6d9d25c3d4a8791335b219248bfecaf  evidence/original-v081-chunk1019.zip' | sha256sum -c -
+          echo 'THREE_IMMUTABLE_ORIGINAL_PYTHON_AND_KOTLIN_PROCESS_ARCHIVES_IDENTIFIED'
+      - name: Test twelve true original-source chunks, exact process links and fail-closed recovery
+        shell: bash
+        env:
+          PASTAFARI_V053_REAL_ZIP: evidence/original-v053-chunk1015.zip
+          PASTAFARI_V061_REAL_ZIP: evidence/original-v061-chunk1016.zip
+          PASTAFARI_V070_REAL_ZIP: evidence/original-v070-chunk1017.zip
+          PASTAFARI_ORIGINAL_PYTHON_ROOT: original-sources
+          PASTAFARI_ORIGINAL_KOTLIN_GIT: original-kotlin
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s coordinator/soak/process_tests \
+            -p 'test_three_real_original_chunks_v074.py' -v \
+            2>&1 | tee evidence/v074-three-real-source-chunks.log
+          grep -Eq '^Ran 12 tests ' evidence/v074-three-real-source-chunks.log
+          grep -q '^OK$' evidence/v074-three-real-source-chunks.log
+          echo 'V074_THREE_ORIGINAL_SOURCE_CHUNKS_CRASH_LEDGER_PASS_NO_WHOLE_YEAR_CREDIT'
+      - name: Audit frozen v079 manifest against original Python and Kotlin trees
+        shell: bash
+        env:
+          PYTHONPATH: coordinator/soak/runner
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY' 2>&1 | tee evidence/v079-source-audit.log
+          from pathlib import Path
+          from original_generic_source_chunk_ledger_v073 import manifest_for, offline_original_chunk
+          from original_chunk_artifact_gate_v072 import audit_pinned_original_chunk
+          pin, manifest_sha = manifest_for(1018)
+          archive = Path('evidence/original-v078-chunk1018.zip').read_bytes()
+          result = audit_pinned_original_chunk(
+              archive, Path('original-sources'), Path('original-kotlin'), manifest=pin)
+          replay = offline_original_chunk(archive, pin)
+          assert result['status'] == 'PINNED_ORIGINAL_ORDINAL_TWO_DAYS_MATCH_NOT_YEAR', result
+          assert result['ordinal'] == 1018 and result['original_source_pairs'] == 2
+          assert result['original_years_soak_certified'] == 0
+          assert replay['original_native_date_pairs'] == 2
+          assert replay['original_full_years_certified'] == 0
+          assert replay['source_lineage_certified'] is False
+          print('V079_1018_SOURCE_AND_NATIVE_BYTES_AUDIT_PASS_NOT_A_YEAR')
+          PY
+          grep -q '^V079_1018_SOURCE_AND_NATIVE_BYTES_AUDIT_PASS_NOT_A_YEAR$' evidence/v079-source-audit.log
+      - name: Test eight four-original-chunk ledger and fail-closed recovery contracts
+        shell: bash
+        env:
+          PASTAFARI_V053_REAL_ZIP: evidence/original-v053-chunk1015.zip
+          PASTAFARI_V061_REAL_ZIP: evidence/original-v061-chunk1016.zip
+          PASTAFARI_V070_REAL_ZIP: evidence/original-v070-chunk1017.zip
+          PASTAFARI_V078_REAL_ZIP: evidence/original-v078-chunk1018.zip
+          PASTAFARI_ORIGINAL_PYTHON_ROOT: original-sources
+          PASTAFARI_ORIGINAL_KOTLIN_GIT: original-kotlin
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s coordinator/soak/process_tests \
+            -p 'test_four_real_original_chunks_v080.py' -v \
+            2>&1 | tee evidence/v080-four-original-chunks.log
+          grep -Eq '^Ran 8 tests ' evidence/v080-four-original-chunks.log
+          grep -q '^OK$' evidence/v080-four-original-chunks.log
+          echo V080_FOUR_ORIGINAL_SOURCE_CHUNKS_CRASH_LEDGER_PASS_NO_FULL_YEAR_CREDIT
+      - name: Audit separately pinned ordinal1019 source ZIP against unchanged engines
+        shell: bash
+        env:
+          PYTHONPATH: coordinator/soak/runner
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY' 2>&1 | tee evidence/v082-source-audit.log
+          from pathlib import Path
+          from original_chunk_artifact_gate_v072 import audit_pinned_original_chunk
+          from original_generic_source_chunk_ledger_v073 import manifest_for, offline_original_chunk
+          pin, manifest_sha = manifest_for(1019)
+          archive = Path('evidence/original-v081-chunk1019.zip').read_bytes()
+          verified = audit_pinned_original_chunk(
+              archive, Path('original-sources'), Path('original-kotlin'), manifest=pin)
+          offline = offline_original_chunk(archive, pin)
+          assert verified['status'] == 'PINNED_ORIGINAL_ORDINAL_TWO_DAYS_MATCH_NOT_YEAR', verified
+          assert verified['ordinal'] == 1019 and verified['original_source_pairs'] == 2
+          assert verified['original_years_soak_certified'] == 0
+          assert offline['original_native_date_pairs'] == 2
+          assert offline['original_full_years_certified'] == 0
+          assert offline['source_lineage_certified'] is False
+          print('V082_1019_SOURCE_AND_NATIVE_BYTES_AUDIT_PASS_NOT_A_YEAR')
+          PY
+          grep -q '^V082_1019_SOURCE_AND_NATIVE_BYTES_AUDIT_PASS_NOT_A_YEAR$' evidence/v082-source-audit.log
+      - name: Verify seven five-original-chunk ledger and replay tests
+        shell: bash
+        env:
+          PASTAFARI_V053_REAL_ZIP: evidence/original-v053-chunk1015.zip
+          PASTAFARI_V061_REAL_ZIP: evidence/original-v061-chunk1016.zip
+          PASTAFARI_V070_REAL_ZIP: evidence/original-v070-chunk1017.zip
+          PASTAFARI_V078_REAL_ZIP: evidence/original-v078-chunk1018.zip
+          PASTAFARI_V081_REAL_ZIP: evidence/original-v081-chunk1019.zip
+          PASTAFARI_ORIGINAL_PYTHON_ROOT: original-sources
+          PASTAFARI_ORIGINAL_KOTLIN_GIT: original-kotlin
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s coordinator/soak/process_tests \
+            -p 'test_five_real_original_chunks_v083.py' -v \
+            2>&1 | tee evidence/v083-five-original-chunks.log
+          grep -Eq '^Ran 7 tests ' evidence/v083-five-original-chunks.log
+          grep -q '^OK$' evidence/v083-five-original-chunks.log
+          echo V083_FIVE_ORIGINAL_CHUNKS_LEDGER_PASS_NO_YEAR_CREDIT
+      - name: "Report evidence-only operation - no original Fct or 10k-year run started"
+        shell: bash
+        run: |
+          echo 'V074_NEW_NATIVE_FCT_CALLS=0'
+          echo 'V074_FULL_ORIGINAL_YEAR_CERTIFIED=0'
+          echo 'V074_ALGORITHMIC_LINEAGE_CERTIFIED=false'
+      - name: Retain only crash-ledger test log and resource-free evidence checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v083-five-original-source-chunks-ledger-no-year
+          path: |
+            evidence/v074-three-real-source-chunks.log
+            evidence/v079-source-audit.log
+            evidence/v080-four-original-chunks.log
+            evidence/v082-source-audit.log
+            evidence/v083-five-original-chunks.log
+          if-no-files-found: warn
+          retention-days: 30
