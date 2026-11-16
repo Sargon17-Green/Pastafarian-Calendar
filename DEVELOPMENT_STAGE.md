@@ -1,6 +1,6 @@
 TOTAL_STAGES=55
 CURRENT_STAGE=17
-CURRENT_KIND=WEAVING_EIGHT_MONTHS_DISCOVERY_CONTRACT_ONLY
+CURRENT_KIND=WEAVING_EIGHT_MONTHS_IMPLEMENTED_NATIVE_PENDING
 CURRENT_PATCH=none
 LAST_COMPLETED_STAGE=16
 EXPECTED_REPOSITORY_STATE=GREEN
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Perl
 NATURAL_LANGUAGE=סינית מנדרינית – מסורתית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=第十六階段來源 303bc820e2c9250ff21ea0f9bedf7f8ce2119695 已由 canonical push CI 42390320913 (attempt1) 的 17/17 必需 jobs、17 份原始日誌、Stage01 196279 TAP、Stage16 1053 TAP、來源相同七件證據 ZIP 的 SHA256/CRC 驗收。已開啟 Stage17 8 月／32 日有界探索契約；Stage17 生產碼、獨立測試及 Native CI 尚未實作或通過。252..5778 日完整年度／sauce／askBowl 仍未驗證。
+MONSTER_ARCHITECTURE_GROWTH=Stage16 source 303bc820e2c9250ff21ea0f9bedf7f8ce2119695 accepted via canonical CI 42390320913 17/17 required and verified 7-file ZIP. Stage17 same-branch 8-month/32-day bounded WeavingPrimitive implementation and independent multiset/Dyck oracle tests implemented with local Perl 5.40.1 2972 TAP pass; targeted 3-profile resource preflight under 120s/393216KiB. Native canonical 18/18 and exact-source artifact remain pending; LAST_COMPLETED_STAGE=16. Full-year 252..5778-day generator remains unverified.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=NO
