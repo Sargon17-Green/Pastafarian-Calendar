@@ -74,7 +74,7 @@ jobs:
           grep -Eq '^Ran 12 tests ' evidence/v074-three-real-source-chunks.log
           grep -q '^OK$' evidence/v074-three-real-source-chunks.log
           echo 'V074_THREE_ORIGINAL_SOURCE_CHUNKS_CRASH_LEDGER_PASS_NO_WHOLE_YEAR_CREDIT'
-      - name: Report evidence-only operation: no original Fct or 10k-year run started
+      - name: "Report evidence-only operation - no original Fct or 10k-year run started"
         shell: bash
         run: |
           echo 'V074_NEW_NATIVE_FCT_CALLS=0'
