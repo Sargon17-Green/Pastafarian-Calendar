@@ -64,6 +64,8 @@ assert.equal(simulated,192);
 assert.equal(occupiedProbes,192);
 assert.ok(source.includes("STAGE47_ROLL_PROBES="));
 assert.ok(source.includes("AND WS-ROLL-PROBES = 192"));
+assert.match(source,/MOVE WS-SLOT TO WS-PROBE-TARGET\s+PERFORM PROBE-OCCUPIED\s+MOVE WS-PROBE-TARGET TO WS-SLOT/);
+assert.equal((source.match(/MOVE WS-PROBE-TARGET TO WS-SLOT/g)||[]).length,1);
 console.log("STAGE47_OCCUPIED_MODEL=192/192");
 console.log("STAGE47_ROLLING_MODEL=192/192");
 console.log("STAGE47_ORACLE_PASS=96/96");
