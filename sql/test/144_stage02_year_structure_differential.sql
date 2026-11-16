@@ -7,7 +7,8 @@ DECLARE
   ref_year pastafari_sql_tamil_test.year_rec;
   a pastafari_sql_tamil.year_structure; b pastafari_sql_tamil_test.year_structure;
 BEGIN
-  SELECT x.d,x.y INTO STRICT d,y FROM slice24_cases x WHERE x.id=v_case_label;
+  SELECT x.d INTO STRICT d FROM slice24_cases x WHERE x.id=v_case_label;
+  SELECT x.y INTO STRICT y FROM slice24_cases x WHERE x.id=v_case_label;
   ref_year:=ROW((y).year_number,(y).open_gate_index,(y).close_gate_index,
                 (y).open_gate_day,(y).close_gate_day)::pastafari_sql_tamil_test.year_rec;
   a:=pastafari_sql_tamil.build_year_structure(d,y);

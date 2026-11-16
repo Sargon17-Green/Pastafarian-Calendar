@@ -10,7 +10,8 @@ DECLARE
   c integer; cp integer[]; cn integer[]; m integer; ml integer[]; mw integer[]; mn integer[];
   field_types text;
 BEGIN
-  SELECT x.d,x.y INTO STRICT d,y FROM slice24_cases x WHERE x.id=v_case_label;
+  SELECT x.d INTO STRICT d FROM slice24_cases x WHERE x.id=v_case_label;
+  SELECT x.y INTO STRICT y FROM slice24_cases x WHERE x.id=v_case_label;
   got:=pastafari_sql_tamil.build_year_structure(d,y);
   s:=pastafari_sql_tamil.sauce(d,(y).open_gate_day+1);
   c:=pastafari_sql_tamil.choose_cutlet_count(s,y);
