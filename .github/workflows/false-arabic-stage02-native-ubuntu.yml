@@ -1,11 +1,7 @@
 name: FALSE Arabic Stage 2 DISCOVERY01 exact-source Native Ubuntu
 
 on:
-  push:
-    branches:
-      - 'FALSE+العربية'
-    paths:
-      - '.github/workflows/false-arabic-stage02-native-ubuntu.yml'
+  workflow_call:
   workflow_dispatch:
 
 permissions:
