@@ -5,7 +5,7 @@ on:
       - 'MATLAB\+Polski'
     paths:
       - 'tools/run_stage55_year5000_fortieth_native.m'
-      - 'tools/stage55_@@TEMP_40_after39@@_interval_five_fields.py'
+      - 'tools/stage55_after40_interval_five_fields.py'
       - 'tools/stage55_after4_interval_witness.py'
       - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
       - '.github/workflows/matlab-stage55-fortieth-day-differential.yml'
@@ -33,13 +33,13 @@ jobs:
       - name: Verify pinned AFTER39
         run: |
           echo '91ff49d5ed250db8ed6e58923d984b9a3e523ff1f84c01023ab88406dfdb41b2  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_39.json' | sha256sum -c -
-      - name: Preflight @@TEMP_40_AFTER39@@ independent witness wiring
+      - name: Preflight AFTER40 independent witness wiring
         shell: bash
         run: |
           set -euo pipefail
-          test -f tools/stage55_@@TEMP_40_after39@@_interval_five_fields.py
-          grep -Fqx 'PIN = "91ff49d5ed250db8ed6e58923d984b9a3e523ff1f84c01023ab88406dfdb41b2"' tools/stage55_@@TEMP_40_after39@@_interval_five_fields.py
-          python3 -m py_compile tools/stage55_@@TEMP_40_after39@@_interval_five_fields.py
+          test -f tools/stage55_after40_interval_five_fields.py
+          grep -Fqx 'PIN = "91ff49d5ed250db8ed6e58923d984b9a3e523ff1f84c01023ab88406dfdb41b2"' tools/stage55_after40_interval_five_fields.py
+          python3 -m py_compile tools/stage55_after40_interval_five_fields.py
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
@@ -52,9 +52,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/stage55_@@TEMP_40_after39@@_interval_five_fields.py \
+          python3 tools/stage55_after40_interval_five_fields.py \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_39.json \
-            logs/STAGE55_REAL_YEAR_INNER_CURSOR_@@TEMP_40_AFTER_39@@.json \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_40.json \
             tests/fixtures/stage55_year5000_appendix_a_metadata.json \
             | tee logs/STAGE55_FORTIETH_PYTHON.log
           grep '^STAGE55_FORTIETH_ROW ' logs/STAGE55_FORTIETH_PYTHON.log > logs/STAGE55_FORTIETH_PYTHON_ROW.txt
@@ -65,7 +65,7 @@ jobs:
           expected="STAGE55_FORTIETH_ROW POSITION=40 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=40 MONTH_INDEX=19 MONTH_DAY=4"
           grep -Fqx "$expected" logs/STAGE55_FORTIETH_NATIVE_ROW.txt
           grep -Fqx "$expected" logs/STAGE55_FORTIETH_PYTHON_ROW.txt
-          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_@@TEMP_40_AFTER_39@@.json | tee logs/STAGE55_FORTIETH_DIGEST.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_40.json | tee logs/STAGE55_FORTIETH_DIGEST.txt
           echo 'STAGE55_FORTIETH_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
       - name: Preserve PASS or FAIL artifacts
         if: always()
@@ -74,7 +74,7 @@ jobs:
           name: stage55-fortieth-day-differential
           path: |
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_39.json
-            logs/STAGE55_REAL_YEAR_INNER_CURSOR_@@TEMP_40_AFTER_39@@.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_40.json
             logs/STAGE55_FORTIETH_NATIVE.log
             logs/STAGE55_FORTIETH_PYTHON.log
             logs/STAGE55_FORTIETH_PYTHON_ROW.txt

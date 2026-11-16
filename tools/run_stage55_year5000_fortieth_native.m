@@ -1,5 +1,5 @@
 function run_stage55_year5000_fortieth_native()
-% Stage55 AFTER39 to @@TEMP_40_AFTER39@@: bounded MATLAB exact cursor and PATCH25 comparison.
+% Stage55 AFTER39 to AFTER40: bounded MATLAB exact cursor and PATCH25 comparison.
 root=fileparts(fileparts(mfilename('fullpath')));
 src=fullfile(root,'src'); addpath(src);
 cleanupPath=onCleanup(@()rmpath(src)); %#ok<NASGU>
@@ -30,7 +30,7 @@ recountSeconds=toc(t);
 assert(recount==after.count && after.count<=before.count,'Stage55:After39Recount');
 after.stepsComputed=40;
 body=pastafari.serializeExactWeaveCursorJson(original,after);
-dest=fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_@@TEMP_40_AFTER_39@@.json');
+dest=fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_40.json');
 [fid,msg]=fopen(dest,'w','n','UTF-8');
 assert(fid>=0,'Stage55:After39Write',msg);
 closeGuard=onCleanup(@()fclose(fid)); %#ok<NASGU>

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage55 AFTER39→@@TEMP_40_AFTER39@@: independent insertion-count and strict five-field witness.
+"""Stage55 AFTER39→AFTER40: independent insertion-count and strict five-field witness.
 
 This verifies one bounded transition, NOT the full-year canonical oracle/soak.
 """
@@ -90,7 +90,7 @@ def run(before, after, fixture):
     position = q["stepsComputed"]
     assert position == 40
     print(f"STAGE55_FORTIETH_ROW POSITION={position} YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY={position} MONTH_INDEX={month_index} MONTH_DAY={month_day}")
-    print(f"STAGE55_FORTIETH_INDEPENDENT_PASS SMALL={cases} BLOCKS={len(blocks)} AFTER39_SHA256={h37} @@TEMP_40_AFTER39@@_SHA256={h38} REMAINING=4204")
+    print(f"STAGE55_FORTIETH_INDEPENDENT_PASS SMALL={cases} BLOCKS={len(blocks)} AFTER39_SHA256={h37} AFTER40_SHA256={h38} REMAINING=4204")
     print("STAGE55_FULL_YEAR_CANONICAL_ORACLE_NOT_VERIFIED")
     print("STAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED")
     print("STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED")
@@ -99,7 +99,7 @@ def run(before, after, fixture):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("after39", type=Path)
-    ap.add_argument("@@TEMP_40_after39@@", type=Path)
+    ap.add_argument("after40", type=Path)
     ap.add_argument("fixture", type=Path)
     args = ap.parse_args()
-    run(args.after39, args.@@TEMP_40_after39@@, args.fixture)
+    run(args.after39, args.after40, args.fixture)
