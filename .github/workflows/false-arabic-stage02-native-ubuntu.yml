@@ -17,7 +17,8 @@ jobs:
       PROJECT_ID: PC-BRANCH-FALSE-ARABIC
       SOURCE_PIN: d05b84ab06a667e2b06d452dc73ca8c7b0837767
       RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
-      ORIGINAL_COMBINED_SHA256: a01f4bd25f812e03dac9c7ec8f23ae75b0cf77461e49bc9210d9cec4f7745bae
+      # SHA256 of four immutable Git blobs joined by LF and final LF, independently reproduced.
+      ORIGINAL_COMBINED_SHA256: 20596d528c6b399a1bba76ac4b90bd2740cdba9e928f458847af6708341cc12f
     steps:
       - uses: actions/checkout@v4
         with:
