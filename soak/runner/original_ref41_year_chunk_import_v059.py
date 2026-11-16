@@ -164,18 +164,48 @@ def check_original_process_chunk_links(store:CrashStore)->int:
                     raise ValueError(
                         "committed original reference chunk lost source process link; "
                         "explicit exact original artifact replay required")
+    # The second original chunk is also source-bound; unlike the old
+    # single-chunk implementation, it has an independently sealed v061 ZIP.
+    from original_next_chunk_import_v066 import (
+        frozen_pin as next_pin, verify_next_process_link
+    )
+    if (store.plan.get("contract")==PROVENANCE_CONTRACT and
+        store.plan.get("calculation_day")==C and
+        store.plan.get("chunk_days")==CHUNK_DAYS and
+        [e["id"] for e in store.plan["engines"]]==[ENGINE,CANDIDATE] and
+        YEAR in store.years and
+        store.years[YEAR]["first_target_day"]==YEAR_FIRST and
+        store.years[YEAR]["last_target_day"]==YEAR_LAST):
+        next_chunk=store._chunk(ENGINE,YEAR,1016)
+        witness=store.db.execute(
+            "SELECT artifact_sha256 FROM original_next_chunk_witnesses WHERE artifact_sha256=?",
+            (next_pin()["artifact_zip_sha256"],)).fetchone()
+        if witness is not None and store._chunk_registered(next_chunk) is not None:
+            link=store.db.execute(
+                "SELECT artifact_sha256 FROM original_process_chunk_links "
+                "WHERE engine=? AND year=? AND ordinal=?",
+                (ENGINE,YEAR,1016)).fetchone()
+            if link is None:
+                raise ValueError(
+                    "original next source chunk lost process ZIP link; explicit replay required")
     if not rows:
         return 0
-    # First revalidate persisted pilot artifact before following any link.
-    check_registered_two_day_pilots(store)
-    root=store.root/"evidence"/"supervised_two_day_pilots"
-    zipped=root/(ARCHIVE_SHA+".zip")
-    if not zipped.is_file() or zipped.is_symlink():
-        raise ValueError("source process link has no immutable original artifact")
-    files=load_zip(zipped.read_bytes())
+    # Only load first ZIP when there actually is a v059 source link.
+    files=None
+    if any(r[2]==CHUNK_ORDINAL for r in rows):
+        check_registered_two_day_pilots(store)
+        root=store.root/"evidence"/"supervised_two_day_pilots"
+        zipped=root/(ARCHIVE_SHA+".zip")
+        if not zipped.is_file() or zipped.is_symlink():
+            raise ValueError("source process link has no immutable original artifact")
+        files=load_zip(zipped.read_bytes())
     for engine,year,ordinal,artifact,raw_sha,normalized_sha,process_sha in rows:
+        if ordinal==1016:
+            verify_next_process_link(
+                store,(engine,year,ordinal,artifact,raw_sha,normalized_sha,process_sha))
+            continue
         if (engine!=ENGINE or year!=YEAR or ordinal!=CHUNK_ORDINAL or
-            artifact!=ARCHIVE_SHA):
+            artifact!=ARCHIVE_SHA or files is None):
             raise ValueError("source process chunk-link engine/year/ordinal changed")
         orig_raw=files["REF-41/native-raw.jsonl"]
         orig_norm=files["REF-41/native-normalized.jsonl"]
