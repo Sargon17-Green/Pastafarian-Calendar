@@ -52,7 +52,7 @@ jobs:
             > evidence/pinned-real-original-two-days-v053.zip
           echo 'f87b2e925b4a400cff2e2469be5b873b66c89ca35498e8fcda1090ab55d5d390  evidence/pinned-real-original-two-days-v053.zip' | sha256sum -c -
           echo "V059_EXACT_GITHUB_NATIVE_ORIGINAL_PROCESS_ARTIFACT_PINNED"
-      - name: Test 14 real original process to baseline chunk integration, crash recovery, no candidate early
+      - name: Test 15 real original process to baseline chunk integration, crash recovery, no candidate early
         shell: bash
         env:
           PASTAFARI_V053_REAL_ZIP: evidence/pinned-real-original-two-days-v053.zip
@@ -63,9 +63,9 @@ jobs:
           python3 -B -m unittest discover -s coordinator/soak/process_tests \
             -p 'test_original_ref41_year_chunk_import_v059.py' -v \
             2>&1 | tee evidence/v059-real-reference-chunk-tests.log
-          grep -Eq '^Ran 14 tests ' evidence/v059-real-reference-chunk-tests.log
+          grep -Eq '^Ran 15 tests ' evidence/v059-real-reference-chunk-tests.log
           grep -q '^OK$' evidence/v059-real-reference-chunk-tests.log
-          echo "V059_14_REAL_SOURCE_CHUNK_TESTS_PASS_NO_YEAR_CERTIFICATE"
+          echo "V059_15_REAL_SOURCE_CHUNK_TESTS_PASS_NO_YEAR_CERTIFICATE"
       - name: Assert no original Fct computed and no full-year credit
         shell: bash
         run: |
