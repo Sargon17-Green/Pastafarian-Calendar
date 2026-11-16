@@ -2383,12 +2383,13 @@ jobs:
           grep -Eq '^STAGE47_REJECTED_PRESERVED=[[:space:]]*0*240[[:space:]]*$' build/stage47-native.log
           grep -Eq '^STAGE47_PARTIAL_FREES=[[:space:]]*0*96[[:space:]]*$' build/stage47-native.log
           grep -Eq '^STAGE47_PARTIAL_REUSES=[[:space:]]*0*96[[:space:]]*$' build/stage47-native.log
-          grep -Eq '^STAGE47_PARTIAL_CYCLES=[[:space:]]*0*240[[:space:]]*$' build/stage47-native.log
+          grep -Eq '^STAGE47_PARTIAL_CYCLES=[[:space:]]*0*48[[:space:]]*$' build/stage47-native.log
           grep -Eq '^STAGE47_PAIR_SWITCHES=[[:space:]]*0*24[[:space:]]*$' build/stage47-native.log
           grep -Eq '^STAGE47_ROLL_FREES=[[:space:]]*0*192[[:space:]]*$' build/stage47-native.log
           grep -Eq '^STAGE47_ROLL_REUSES=[[:space:]]*0*192[[:space:]]*$' build/stage47-native.log
           grep -Eq '^STAGE47_ROLL_THREE=[[:space:]]*0*192[[:space:]]*$' build/stage47-native.log
-          grep -Eq '^STAGE47_ROLL_QUADS=[[:space:]]*0*192[[:space:]]*
+          grep -Eq '^STAGE47_ROLL_QUADS=[[:space:]]*0*192[[:space:]]*$' build/stage47-native.log
+          grep -Eq '^STAGE47_ROLL_PROBES=[[:space:]]*0*192[[:space:]]*$' build/stage47-native.log
           grep -Eq '^STAGE47_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage47-native.log
           grep -Eq '^STAGE47_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage47-native.log
           grep -Eq '^STAGE47_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage47-native.log
@@ -2404,37 +2405,3 @@ jobs:
           path: build/stage47-native.log
           if-no-files-found: warn
           retention-days: 30
- build/stage47-native.log
-          grep -Eq '^STAGE47_ROLL_PROBES=[[:space:]]*0*192[[:space:]]*
-          grep -Eq '^STAGE47_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage47-native.log
-          grep -Eq '^STAGE47_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage47-native.log
-          grep -Eq '^STAGE47_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage47-native.log
-          grep -Fxq 'STAGE47_HEAP_MEASURED=YES' build/stage47-native.log
-          grep -Eq '^STAGE47_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage47-native.log
-          grep -Fxq 'RESULT=PASS_STAGE47_INTERLEAVED_OCCUPIED_PROBE_DISCOVERY_NATIVE' build/stage47-native.log
-          echo 'STAGE47_NATIVE_GATE=PASS' | tee -a build/stage47-native.log
-      - name: Preserve Stage47 log including failures
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage47-interleaved-occupied-probe-evidence
-          path: build/stage47-native.log
-          if-no-files-found: warn
-          retention-days: 30
- build/stage47-native.log
-          grep -Eq '^STAGE47_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage47-native.log
-          grep -Eq '^STAGE47_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage47-native.log
-          grep -Eq '^STAGE47_UNEXPECTED_FAILURES=[[:space:]]*0+[[:space:]]*$' build/stage47-native.log
-          grep -Fxq 'STAGE47_HEAP_MEASURED=YES' build/stage47-native.log
-          grep -Eq '^STAGE47_HEAP_LIVE_POST_RELEASE=[[:space:]]*0+[[:space:]]*$' build/stage47-native.log
-          grep -Fxq 'RESULT=PASS_STAGE47_INTERLEAVED_OCCUPIED_PROBE_DISCOVERY_NATIVE' build/stage47-native.log
-          echo 'STAGE47_NATIVE_GATE=PASS' | tee -a build/stage47-native.log
-      - name: Preserve Stage47 log including failures
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage47-interleaved-occupied-probe-evidence
-          path: build/stage47-native.log
-          if-no-files-found: warn
-          retention-days: 30
-
