@@ -1,0 +1,48 @@
+name: Kotlin TABLETS frozen-receipt independent adjacent invariants
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/audit_tablets_adjacent_invariants.py'
+      - 'soak/test_audit_tablets_adjacent_invariants.py'
+      - 'soak/evidence/tablets-cache-free-3x5-run43767624423.json'
+      - '.github/workflows/post55-tablets-adjacent-receipt-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  receipt-invariants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout exact audited branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run frozen receipt and negative tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p evidence
+          echo '930fb15171c73f863577b9e811f741b1d6a149cbd5aea1325d486ef5283fc61d  soak/evidence/tablets-cache-free-3x5-run43767624423.json' | sha256sum --check
+          python -B -m py_compile soak/audit_tablets_adjacent_invariants.py soak/test_audit_tablets_adjacent_invariants.py
+          python -B -m unittest discover -s soak -p 'test_audit_tablets_adjacent_invariants.py' -v 2>&1 | tee evidence/tablets-adjacent-unit.log
+          python -B soak/audit_tablets_adjacent_invariants.py --evidence evidence/tablets-adjacent-audit.json | tee evidence/tablets-adjacent-audit.log
+      - name: Preserve evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-tablets-adjacent-receipt-audit
+          path: |
+            evidence/tablets-adjacent-unit.log
+            evidence/tablets-adjacent-audit.json
+            evidence/tablets-adjacent-audit.log
+          if-no-files-found: warn
+          retention-days: 30

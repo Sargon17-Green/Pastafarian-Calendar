@@ -1,0 +1,105 @@
+{
+  "cache_free": true,
+  "candidate_cold_isolated": true,
+  "candidate_rows": [
+    {
+      "day": -278523,
+      "five_fields": [
+        8453,
+        7,
+        934,
+        12,
+        100
+      ]
+    },
+    {
+      "day": -278522,
+      "five_fields": [
+        8453,
+        7,
+        935,
+        26,
+        87
+      ]
+    },
+    {
+      "day": -278521,
+      "five_fields": [
+        8453,
+        7,
+        936,
+        18,
+        93
+      ]
+    }
+  ],
+  "certifiable": false,
+  "checkpoint_seed_used": false,
+  "distinct_git_roots": true,
+  "elapsed_seconds": 258.156,
+  "five_field_comparisons": 15,
+  "full_date_certified": false,
+  "independent_commit": "71cdac969bc17ef6749f24767f2beebd53f97df2",
+  "pinned_cold_processes": 3,
+  "pinned_commit": "7cb12bf355461e5a179e0deadb7365689288bf29",
+  "pinned_module_sha256": "a9e48e61124221cce39805a825c746a734a5f8f660406a898af38351e2cce6a1",
+  "pinned_reference_used_only_for_comparison": true,
+  "pinned_rows": [
+    {
+      "day": -278523,
+      "five_fields": [
+        8453,
+        7,
+        934,
+        12,
+        100
+      ]
+    },
+    {
+      "day": -278522,
+      "five_fields": [
+        8453,
+        7,
+        935,
+        26,
+        87
+      ]
+    },
+    {
+      "day": -278521,
+      "five_fields": [
+        8453,
+        7,
+        936,
+        18,
+        93
+      ]
+    }
+  ],
+  "pinned_static_checkpoints_may_be_used": true,
+  "production_limit_unchanged": 8192,
+  "signed_gate_questions": 29523,
+  "signed_transcript_sha256": "caaf71076bf738981db4b75af441ae82a8e4341970d24606ffc59bd208f64193",
+  "source_closure_sha256": "81aea10577986a9ed46dcbf7b79c38954f24fa4de01323a756cd4d43f76ebef5",
+  "status": "PASS_FRESH_CACHE_FREE_TABLETS_3X5_DIAGNOSTIC_NOT_CERTIFIED",
+  "structural_brackets": [
+    {
+      "day": -278523,
+      "high": -278115,
+      "index": 29484,
+      "low": -278714
+    },
+    {
+      "day": -278522,
+      "high": -278115,
+      "index": 29484,
+      "low": -278714
+    },
+    {
+      "day": -278521,
+      "high": -278115,
+      "index": 29484,
+      "low": -278714
+    }
+  ]
+}
