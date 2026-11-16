@@ -1,0 +1,83 @@
+name: Soak v059 original Python two-day baseline chunk inside full year (no year certificate)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/original_ref41_year_chunk_import_v059.py"
+      - "soak/process_tests/test_original_ref41_year_chunk_import_v059.py"
+      - "soak/runner/recovery_store.py"
+      - ".github/workflows/soak-original-ref41-year-chunk-v059.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  one-original-source-chunk-not-year:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Verify pinned immutable originals and download exact native v053 ZIP
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -m 700 evidence
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14186295655/zip \
+            > evidence/pinned-real-original-two-days-v053.zip
+          echo 'f87b2e925b4a400cff2e2469be5b873b66c89ca35498e8fcda1090ab55d5d390  evidence/pinned-real-original-two-days-v053.zip' | sha256sum -c -
+          echo "V059_EXACT_GITHUB_NATIVE_ORIGINAL_PROCESS_ARTIFACT_PINNED"
+      - name: Test 14 real original process to baseline chunk integration, crash recovery, no candidate early
+        shell: bash
+        env:
+          PASTAFARI_V053_REAL_ZIP: evidence/pinned-real-original-two-days-v053.zip
+          PASTAFARI_ORIGINAL_PYTHON_ROOT: original-sources
+          PASTAFARI_ORIGINAL_KOTLIN_GIT: original-kotlin
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s coordinator/soak/process_tests \
+            -p 'test_original_ref41_year_chunk_import_v059.py' -v \
+            2>&1 | tee evidence/v059-real-reference-chunk-tests.log
+          grep -Eq '^Ran 14 tests ' evidence/v059-real-reference-chunk-tests.log
+          grep -q '^OK$' evidence/v059-real-reference-chunk-tests.log
+          echo "V059_14_REAL_SOURCE_CHUNK_TESTS_PASS_NO_YEAR_CERTIFICATE"
+      - name: Assert no original Fct computed and no full-year credit
+        shell: bash
+        run: |
+          echo "NEW_NATIVE_DATE_CALLS=0"
+          echo "FULL_YEAR_4244_DAYS_COMPUTED=false"
+          echo "ORIGINAL_FULL_YEAR_SOAK_PASSES=0"
+          echo "ALGORITHMIC_INDEPENDENCE_CERTIFIED=false"
+      - name: Preserve tests and source evidence receipts without claiming a year
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v059-real-two-day-Python-chunk-inside-full-year-not-soak
+          path: evidence/v059-real-reference-chunk-tests.log
+          if-no-files-found: warn
+          retention-days: 30
