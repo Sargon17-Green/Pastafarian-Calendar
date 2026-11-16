@@ -1,0 +1,36 @@
+name: Soak v085 source ordinal request gate tests (no original Fct)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/source_ordinal_dispatch_v085.py"
+      - "soak/tests/test_source_ordinal_dispatch_v085.py"
+      - ".github/workflows/soak-original-request-gate-v085.yml"
+permissions:
+  contents: read
+jobs:
+  verify-v085-dispatch-authorization:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check fifteen strict non-executing source request gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/tests \
+            -p 'test_source_ordinal_dispatch_v085.py' -v \
+            2>&1 | tee v085-request-tests.log
+          grep -Eq '^Ran 15 tests ' v085-request-tests.log
+          grep -q '^OK$' v085-request-tests.log
+          echo V085_SOURCE_REQUEST_STATIC_GATE_PASS_NO_FCT
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v085-ordinal-dispatch-static-tests
+          path: v085-request-tests.log
+          if-no-files-found: warn
+          retention-days: 30
