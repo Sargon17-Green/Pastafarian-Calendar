@@ -238,6 +238,14 @@ class CrashStore:
               artifact_bytes INTEGER NOT NULL, year TEXT NOT NULL,
               first_target_day TEXT NOT NULL, last_target_day TEXT NOT NULL,
               native_pairs INTEGER NOT NULL CHECK(native_pairs=2));
+            CREATE TABLE IF NOT EXISTS original_process_chunk_links(
+              engine TEXT NOT NULL, year TEXT NOT NULL, ordinal INTEGER NOT NULL,
+              artifact_sha256 TEXT NOT NULL,
+              native_raw_sha256 TEXT NOT NULL,
+              normalized_sha256 TEXT NOT NULL,
+              process_receipt_sha256 TEXT NOT NULL,
+              PRIMARY KEY(engine,year,ordinal),
+              FOREIGN KEY(engine,year,ordinal) REFERENCES chunks(engine,year,ordinal));
             CREATE TABLE IF NOT EXISTS comparisons(
               year TEXT NOT NULL, candidate TEXT NOT NULL,
               verified_days INTEGER NOT NULL, stream_sha256 TEXT NOT NULL,
@@ -604,6 +612,8 @@ class CrashStore:
         validated_pilots = check_registered_pilot_witnesses(self)
         from quarantined_two_day_pilot_v057 import check_registered_two_day_pilots
         validated_two_day_pilots = check_registered_two_day_pilots(self)
+        from original_ref41_year_chunk_import_v059 import check_original_process_chunk_links
+        validated_original_process_links = check_original_process_chunk_links(self)
         already=0
         adopted=0
         staged=0
@@ -641,6 +651,7 @@ class CrashStore:
                 "recovered_staged_files":staged,"incident":self.incident(),
                 "quarantined_pilot_witnesses_revalidated":validated_pilots,
                 "quarantined_two_day_pilots_revalidated":validated_two_day_pilots,
+                "original_source_process_chunk_links_revalidated":validated_original_process_links,
                 "progress":self.progress()}
 
     def pending_jobs(self) -> list[Chunk]:
@@ -664,6 +675,8 @@ class CrashStore:
             "SELECT COUNT(*) FROM supervised_pilot_witnesses").fetchone()[0]
         quarantined_two_day=self.db.execute(
             "SELECT COUNT(*) FROM supervised_two_day_pilot_witnesses").fetchone()[0]
+        original_process_links=self.db.execute(
+            "SELECT COUNT(*) FROM original_process_chunk_links").fetchone()[0]
         successful=len(rows)
         days=sum(row[2] for row in rows)
         known={(year,candidate) for year,candidate,_ in rows}
@@ -685,6 +698,7 @@ class CrashStore:
                 "native_receipt_rows_recorded_without_revalidation":native_receipts,
                 "quarantined_pilot_records_not_year_chunks":quarantined_pilots,
                 "quarantined_two_day_pilot_records_not_year_chunks":quarantined_two_day,
+                "original_process_linked_chunks_not_years":original_process_links,
                 "native_receipt_execution_attestation_verified":False,
                 "incident_present":self.incident() is not None,
                 "all_verified":len(fully_verified)==len(self.years) and self.incident() is None,
