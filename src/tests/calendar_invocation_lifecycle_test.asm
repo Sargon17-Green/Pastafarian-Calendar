@@ -594,7 +594,7 @@ RunCalendarInvocationTests::
     ld a, [$a010]
     or a
     jp nz, .fail
-    ret
+    jp RunCalendarYearProjectionTests
 .fail:
     ld a, $e0
     ld [wTestResult], a
