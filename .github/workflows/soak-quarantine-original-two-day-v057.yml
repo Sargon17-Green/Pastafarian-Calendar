@@ -54,7 +54,7 @@ jobs:
           echo 'f87b2e925b4a400cff2e2469be5b873b66c89ca35498e8fcda1090ab55d5d390  evidence/real-original-v053.zip' \
             | sha256sum -c -
           echo "V057_PINNED_ORIGINAL_ARTIFACT_INPUT_VERIFIED"
-      - name: Test 16 real two-day original process evidence crash and tamper scenarios
+      - name: Test 18 real two-day original process evidence crash and tamper scenarios
         shell: bash
         env:
           PASTAFARI_V053_REAL_ZIP: evidence/real-original-v053.zip
@@ -65,9 +65,9 @@ jobs:
           python3 -B -m unittest discover -s coordinator/soak/process_tests \
             -p 'test_original_two_day_quarantine_v057.py' -v \
             2>&1 | tee evidence/v057-real-evidence-ledger-tests.log
-          grep -Eq '^Ran 16 tests ' evidence/v057-real-evidence-ledger-tests.log
+          grep -Eq '^Ran 18 tests ' evidence/v057-real-evidence-ledger-tests.log
           grep -q '^OK$' evidence/v057-real-evidence-ledger-tests.log
-          echo 'V057_REAL_SOURCE_ARTIFACT_LEDGER_16_TESTS_PASS_NO_YEAR_CREDIT'
+          echo 'V057_REAL_SOURCE_ARTIFACT_LEDGER_18_TESTS_PASS_NO_YEAR_CREDIT'
       - name: Verify no converter invoked and preserve noncertifying evidence
         shell: bash
         run: |
