@@ -48,8 +48,8 @@ def main() -> None:
         assert bytes(before) == original
         checks += 1
     # Top-byte boundaries and ownership-independent request corruption.
-    assert validate(True, 61, 1, 0, 2, b"\x01\\x00") == 2
-    assert validate(True, 61, 1, 1, 2, b"\x01\\x01") == 0
+    assert validate(True, 61, 1, 0, 2, b"\x01\x00") == 2
+    assert validate(True, 61, 1, 1, 2, b"\x01\x01") == 0
     assert validate(True, 61, 1, 0, 8192, b"\x00" * 8191 + b"\x01") == 0
     assert validate(True, 61, 1, 0, 8193, b"\x01" * 8193) == 2
     assert validate(True, 61, 2, 0, 8193, b"\x00" * 8192 + b"\x01") == 0
