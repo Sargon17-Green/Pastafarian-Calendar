@@ -8,7 +8,7 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 # Stage40 / Discovery25: calculation-day gate crossings, research preflight only.
 # Each expected First/Step is obtained from an independent normative sauce call.
 $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-$sealed=(($md -match '(?m)^CURRENT_STAGE=39\s*$') -and
+$sealed=((($md -match '(?m)^CURRENT_STAGE=39\s*$') -or (($md -match '(?m)^CURRENT_STAGE=40\s*$') -and ($md -match '(?m)^STAGE40_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$'))) -and
          ($md -match '(?m)^LAST_COMPLETED_STAGE=39\s*$') -and
          ($md -match '(?m)^STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
          ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
