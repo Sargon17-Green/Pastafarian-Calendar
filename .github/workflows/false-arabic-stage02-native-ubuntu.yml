@@ -262,7 +262,7 @@ jobs:
           assert 'P_{' not in prefix
           standalone = '\n'.join([
               'z;b:0a;!b;21o;!c:',
-              '0 22o;!u:',
+              '2 22o;!u:',
               '"SOLO_U_HANDLE_BEFORE "u;.10,',
               '"SOLO_U_SIGN_BEFORE "z;b:u;a;!b;1o;!.10,',
               'z;b:u;a;!b;36o;!n:',
