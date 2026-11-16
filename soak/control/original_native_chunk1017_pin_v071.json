@@ -1,0 +1,80 @@
+{
+  "schema": "PASTAFARI_GENERIC_ORIGINAL_CHUNK_ARTIFACT_PIN_V071/1",
+  "run_id": 43958870392,
+  "artifact_id": 14273257274,
+  "artifact_name": "soak-v070-original-ordinal1017-native-days-not-year",
+  "artifact_size_bytes": 4902927,
+  "artifact_sha256": "878b965960662aa27e824fd8f23a02c5d603b57f81ab698cb12ab02465a2e3e4",
+  "artifacts_file_sha256": {
+    "PROD-KT-CY/original-native-stdin.tsv": "e16303ed901df26a8f8eed99619ee2acd5eafb407c7475f7db6321ba0d029175",
+    "PROD-KT-CY/os-stdout.tsv": "bad801f34e0b16cb77dc998114ccc4a3453ca8e5dcffa54ded628bd61a0f0063",
+    "PROD-KT-CY/process-evidence.json": "686765474f89ee7f4bc77c01fe67047a9c45d3c7f4d1f24207e37136adf231c9",
+    "PROD-KT-CY/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "REF-41/native-normalized.jsonl": "4ac5215f3c363dd4e66f01bce913f793ed9ea310e337b1566adce67990e2e8fc",
+    "REF-41/native-raw.jsonl": "f77c6c3a1d180d30cd8f83f22c3984f01f57c4572af6c8796efe84cda8898501",
+    "REF-41/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "REF-41/os-stdout.log": "c966500f0cf7094589bf2fafb5ae5d1763bf798730fe277ec672d3686a88ffb4",
+    "REF-41/process-evidence.json": "de2d99545ba0dc28251050c0ec26536f42d2e7ab2422978ef6b2b07fb2fe65d3",
+    "REF-41/transport-receipt.json": "526711da40cb18ec55ed95fb8ecfef41a3d6a42d306f77979407860da1e70a8d",
+    "gate.log": "9f0b326d0fcc602788ececc2600b8f02c384d543565f698a405d629606562821",
+    "kotlin-compile-resources.txt": "e83b046744ea1148a5ff481f7ae103bb1afc3d4ff32ba107834ff8eedf319744",
+    "kotlin-compiler-v1.9.0.sha256": "6edc408a9986289fc1a25af1af5dba48983bf06a4a2ff2e4cab567435a0391da",
+    "kotlin-index-only-normalized.jsonl": "363bdffbcd260357bb7d67177d4af00ee7d7890092c3d81836d93d588943966d",
+    "original-kotlin-v070.jar": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+    "original-kotlin-v070.jar.sha256": "1d1bcbd1599bfd742705ef528b620ac7b1754d8a61edc2da6a3b192810ddb51b",
+    "original-two-day-verdict.json": "02914f276b0f0cdcedf46b86e40fd6b5a045be80c9627a460cd938aac432688d",
+    "original-ordinal-dispatch.json": "6e9bb377a777677d66e2ec38cee83409cf615f0dbf125a6d95e55890e7ee64ac",
+    "two-native-day-resources.txt": "faa37486d2c65a69c58f9f4ef941fc258506f1002ba91843de3e45846b76d853"
+  },
+  "original_source_commits": {
+    "REF-41": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "PROD-KT-CY": "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+  },
+  "python_source_sha256": "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378",
+  "kotlin_source_closure_sha256": "d25d71bfeda5ef592162f10b564c9eb49f64176e4dc438ab2424c46a95c44ba7",
+  "kotlin_jar_sha256": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+  "original_source_year": {
+    "calculation_day": "-15055671",
+    "year": "5000",
+    "first_target_day": "-15057702",
+    "last_target_day": "-15053459",
+    "chunk_days": 2,
+    "ordinal": 1017,
+    "first_chunk_target_day": "-15055668",
+    "last_chunk_target_day": "-15055667",
+    "boundary_evidence_sha256": "ad64cc51522d7f19cb8a238e2a6a418e75203c6cbfe017c394f623edeb882e78"
+  },
+  "process_runner_sha256": "70ca90bf9da83745a71750c43b8d97e7d706c57209c8cd3b1c8fe244e351822f",
+  "inherited_supervisor_sha256": "47f91b4a53a94997da0dbc5e8c3135c8a96501bf24cbccbf907bd97b4242dd32",
+  "native_rows": [
+    {
+      "target_day": "-15055668",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 3,
+      "month_index": 37,
+      "day_in_month": 52,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Fırtına",
+      "source_raw_sha256": "6ae1e07cb43ed96504e250fc33c46e85627bc01059756913e0604668dc6b89bf"
+    },
+    {
+      "target_day": "-15055667",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 4,
+      "month_index": 18,
+      "day_in_month": 59,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Deve",
+      "source_raw_sha256": "3b272a9b2ecf0c9b2733ff748288330097fbd41247b8ba8fce2e59d87376368b"
+    }
+  ],
+  "comparison": {
+    "original_native_pairs": 2,
+    "first_mismatch": null,
+    "original_year_soak_passes_certified": 0,
+    "algorithmic_source_lineage_certified": false,
+    "canonical_oracle_certified": false
+  }
+}
