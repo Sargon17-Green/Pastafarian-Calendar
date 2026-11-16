@@ -94,7 +94,7 @@ jobs:
               archive, Path('original-sources'), Path('original-kotlin'), manifest=pin)
           replay = offline_original_chunk(archive, pin)
           assert result['status'] == 'PINNED_ORIGINAL_ORDINAL_TWO_DAYS_MATCH_NOT_YEAR', result
-          assert result['ordinal'] == 1018 and result['matched_original_day_pairs'] == 2
+          assert result['ordinal'] == 1018 and result['original_source_pairs'] == 2
           assert result['original_years_soak_certified'] == 0
           assert replay['original_native_date_pairs'] == 2
           assert replay['original_full_years_certified'] == 0
