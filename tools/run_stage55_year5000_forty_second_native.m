@@ -50,7 +50,7 @@ assert(numel(fields)==5 && names(letter)==14 && fields{1}==pastafari.BigInt(5000
  fields{3}==pastafari.BigInt(42) && strcmp(fields{4},catalog.months(names(letter)).text) && ...
  fields{5}==pastafari.BigInt(occ) && monthId==letter && ...
  any(strcmp(ctx.branchTrace,'PATCH_25_OCCURRENCE_COUNT')),'Stage55:FiveFields');
-assert(position==after.stepsComputed && position==41,'Stage55:RowPosition');
+assert(position==after.stepsComputed && position==42,'Stage55:RowPosition','AFTER42 row position must equal 42 and stepsComputed');
 fprintf('STAGE55_FORTY_SECOND_ROW POSITION=%d YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=%d MONTH_INDEX=%d MONTH_DAY=%d\n',position,position,names(letter),occ);
 for bad=[0 43]
  target=pastafari.BigInt(f.first_day+bad-1);
