@@ -267,11 +267,17 @@ def import_generic_original_ref41_chunk(
             (ENGINE,YEAR,ordinal-1)).fetchone()
         verify_next_process_link(store,prev_row)
     else:
+        # Initial import and explicit repair must audit all frozen witnesses
+        # first, but may tolerate ONLY the missing link of the *current*
+        # already-committed chunk. The predecessor remains mandatory and its
+        # archive, native stdout and checksums are still verified separately.
+        check_generic_witnesses(store,explicit_replay_ordinal=ordinal)
         verify_generic_source_link(store,store.db.execute(
             "SELECT engine,year,ordinal,artifact_sha256,native_raw_sha256,"
             "normalized_sha256,process_receipt_sha256 FROM original_process_chunk_links "
             "WHERE engine=? AND year=? AND ordinal=?",
-            (ENGINE,YEAR,ordinal-1)).fetchone())
+            (ENGINE,YEAR,ordinal-1)).fetchone(),
+            generic_witnesses_prevalidated=True)
     offline=offline_original_chunk(original_archive,pin)
     report=canonical({"schema":SCHEMA,"source_replay":audited,
                       "offline_replay":offline,"not_a_year_certificate":True})

@@ -10,6 +10,7 @@ on:
       - "soak/process_tests/test_three_real_original_chunks_v074.py"
       - "soak/control/original_native_chunk1017_pin_v071.json"
       - "soak/control/original_native_chunk1018_pin_v079.json"
+      - "soak/runner/original_generic_source_chunk_ledger_v073.py"
       - "soak/process_tests/test_four_real_original_chunks_v080.py"
       - ".github/workflows/soak-four-real-original-source-chunks-v080.yml"
   workflow_dispatch:
@@ -102,7 +103,7 @@ jobs:
           print('V079_1018_SOURCE_AND_NATIVE_BYTES_AUDIT_PASS_NOT_A_YEAR')
           PY
           grep -q '^V079_1018_SOURCE_AND_NATIVE_BYTES_AUDIT_PASS_NOT_A_YEAR$' evidence/v079-source-audit.log
-      - name: Test six four-original-chunk ledger and fail-closed recovery contracts
+      - name: Test eight four-original-chunk ledger and fail-closed recovery contracts
         shell: bash
         env:
           PASTAFARI_V053_REAL_ZIP: evidence/original-v053-chunk1015.zip
@@ -116,7 +117,7 @@ jobs:
           python3 -B -m unittest discover -s coordinator/soak/process_tests \
             -p 'test_four_real_original_chunks_v080.py' -v \
             2>&1 | tee evidence/v080-four-original-chunks.log
-          grep -Eq '^Ran 6 tests ' evidence/v080-four-original-chunks.log
+          grep -Eq '^Ran 8 tests ' evidence/v080-four-original-chunks.log
           grep -q '^OK$' evidence/v080-four-original-chunks.log
           echo V080_FOUR_ORIGINAL_SOURCE_CHUNKS_CRASH_LEDGER_PASS_NO_FULL_YEAR_CREDIT
       - name: "Report evidence-only operation - no original Fct or 10k-year run started"

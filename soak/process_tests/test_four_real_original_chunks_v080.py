@@ -116,6 +116,31 @@ class FourOriginalSourceChunks(unittest.TestCase):
             self.assertEqual(
                 store.verify_and_recover()["original_source_process_chunk_links_revalidated"], 4)
 
+    def test_missing_predecessor_1017_link_never_bypassed(self):
+        with CrashStore(self.root, self.plan) as store:
+            self.three(store)
+            store.db.execute(
+                "DELETE FROM original_process_chunk_links "
+                "WHERE engine='REF-41' AND year='5000' AND ordinal=1017")
+            with self.assertRaisesRegex(ValueError, "previous original source chunk"):
+                self.fourth(store)
+            self.assertEqual(store.progress()["committed_chunks"], 3)
+
+    def test_corrupted_predecessor_zip_rejects_explicit_1018_replay(self):
+        with CrashStore(self.root, self.plan) as store:
+            self.three(store)
+            self.fourth(store)
+            store.db.execute(
+                "DELETE FROM original_process_chunk_links "
+                "WHERE engine='REF-41' AND year='5000' AND ordinal=1018")
+            pin1017, _ = manifest_for(1017)
+            _, _, oldzip, _ = witness_paths(store, 1017, pin1017)
+        oldzip.write_bytes(oldzip.read_bytes() + b"INVALID")
+        with CrashStore(self.root, self.plan) as store:
+            with self.assertRaises(ValueError):
+                self.fourth(store)
+            self.assertEqual(store.progress()["original_process_linked_chunks_not_years"], 3)
+
     def test_kotlin_original_still_blocked_until_entire_python_year(self):
         with CrashStore(self.root, self.plan) as store:
             self.three(store)
