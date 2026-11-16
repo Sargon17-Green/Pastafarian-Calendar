@@ -21,3 +21,6 @@ Each result must satisfy year 4900–5100; cutlet 1–17; cutlet-day 1–5778; m
 - Runner bounds: 180-second Python selftest, 600-second Ada observer, 180-second comparator; any failure nonzero. Dedicated GNAT13 job outer budget 30 minutes.
 
 **Stage30 PENDING** until automatic push CI on the exact committed Stage30 SHA is **completed/success 32/32**, including verify and all historical jobs. Inspect direct GNAT compile/bind/link, the exact numerical markers and full 25-pair set before acceptance. No duplicate dispatch, merge, main modification or publication.
+
+## Final acceptance (2026-11-16)
+Automatic push [run 43938804155](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43938804155) on exact SHA `8a8054b9852add87594af1317c3b3a626de8c7b7`, attempt 1, was **completed/success 32/32** including verify and historical native jobs. Direct [GNAT13 Stage30 job 133550445353](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43938804155/job/133550445353) compiled, bound and linked Ada and recorded `STAGE30_INDEPENDENT_REMOTE_FIVE_SELFTEST_ASSERTIONS=139`, `STAGE30_NATIVE_REMOTE_FIVE_ASSERTIONS=131`, `STAGE30_REAL_FIVEFIELD_SCALARS=125`, and exactly 25 distinct ordered `STAGE30_NATIVE_PAIR` records. **Stage30 ACCEPTED for its bounded 25-pair matrix only.** Earlier PENDING is historical; no universal correctness claim.
