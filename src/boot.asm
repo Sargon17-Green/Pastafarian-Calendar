@@ -100,6 +100,14 @@ wCalendarActiveOwner:: ds 1
 wCalendarStatus:: ds 1
 wCalendarOrdinalSign:: ds 1
 wCalendarOrdinalLength:: ds 3
+wCalendarUnitDelta:: ds 1
+wCalendarUnitGrow:: ds 1
+wCalendarUnitRemaining:: ds 3
+wCalendarUnitStop:: ds 3
+wCalendarUnitRollbackStop:: ds 3
+wCalendarUnitNewLength:: ds 3
+wCalendarUnitNewSign:: ds 1
+wCalendarUnitReplacement:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -216,6 +224,7 @@ INCLUDE "src/runtime/signed_cmp.asm"
 INCLUDE "src/runtime/signed_add.asm"
 INCLUDE "src/runtime/dispatcher.asm"
 INCLUDE "src/runtime/ordinal_validate.asm"
+INCLUDE "src/runtime/ordinal_unit.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"

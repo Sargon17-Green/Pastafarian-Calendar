@@ -242,6 +242,163 @@ RunCalendarInvocationTests::
     ld a, [$a000]
     or a
     jp nz, .fail
+    ; 300: +1 while idle fails without SRAM mutation.
+    ld a, 44
+    ld [wTestCase], a
+    xor a
+    ld [wCalendarUnitDelta], a
+    call CalendarOrdinalUnitStep
+    ld a, [wCalendarStatus]
+    cp 6
+    jp nz, .fail
+    ; 301: canonical zero +1 -> +1, owner62.
+    ld a, 45
+    ld [wTestCase], a
+    ld a, 62
+    ld [wCalendarRequestedOwner], a
+    ld a, 1
+    ld [wCalendarRequestedBanks], a
+    call CalendarInvocationBegin
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    xor a
+    ld [wCalendarUnitDelta], a
+    call CalendarOrdinalUnitStep
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    cp 1
+    jp nz, .fail
+    ld a, 3
+    call SRAMSelectBank
+    ld a, [$a000]
+    cp 1
+    jp nz, .fail
+    ; 302: +1 -> +2.
+    ld a, 46
+    ld [wTestCase], a
+    call CalendarOrdinalUnitStep
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [$a000]
+    cp 2
+    jp nz, .fail
+    ; 303: $ff +1 -> $0100.
+    ld a, 47
+    ld [wTestCase], a
+    ld a, $ff
+    ld [$a000], a
+    call CalendarOrdinalUnitStep
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    cp 2
+    jp nz, .fail
+    ld a, [$a000]
+    or a
+    jp nz, .fail
+    ld a, [$a001]
+    cp 1
+    jp nz, .fail
+    ; 304: +256 -1 -> +255, length shrinks.
+    ld a, 48
+    ld [wTestCase], a
+    ld a, 1
+    ld [wCalendarUnitDelta], a
+    call CalendarOrdinalUnitStep
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    cp 1
+    jp nz, .fail
+    ld a, [$a000]
+    cp $ff
+    jp nz, .fail
+    ld a, [$a001]
+    or a
+    jp nz, .fail
+    ; 305: -1 -1 -> -2.
+    ld a, 49
+    ld [wTestCase], a
+    ld a, 1
+    ld [$a000], a
+    ld [wCalendarOrdinalSign], a
+    call CalendarOrdinalUnitStep
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [$a000]
+    cp 2
+    jp nz, .fail
+    ld a, [wCalendarOrdinalSign]
+    cp 1
+    jp nz, .fail
+    ; 306: -2 +1 -> -1.
+    ld a, 50
+    ld [wTestCase], a
+    xor a
+    ld [wCalendarUnitDelta], a
+    call CalendarOrdinalUnitStep
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [$a000]
+    cp 1
+    jp nz, .fail
+    ; 307: -1 +1 -> canonical zero.
+    ld a, 51
+    ld [wTestCase], a
+    call CalendarOrdinalUnitStep
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalSign]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    or a
+    jp nz, .fail
+    ld a, [$a000]
+    or a
+    jp nz, .fail
+    ; 308: invalid delta is all-or-abort.
+    ld a, 52
+    ld [wTestCase], a
+    ld a, 2
+    ld [wCalendarUnitDelta], a
+    call CalendarOrdinalUnitStep
+    ld a, [wCalendarStatus]
+    cp 2
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    or a
+    jp nz, .fail
+    ld a, [wLeaseTable+3]
+    cp 64
+    jp nz, .fail
+    ; 309: abort scrubs owner and metadata.
+    ld a, 53
+    ld [wTestCase], a
+    call CalendarInvocationAbort
+    ld a, [wCalendarStatus]
+    or a
+    jp nz, .fail
+    ld a, [wLeaseTable+3]
+    or a
+    jp nz, .fail
+    ld a, 3
+    call SRAMSelectBank
+    ld a, [$a000]
+    or a
+    jp nz, .fail
+    ld a, [wCalendarOrdinalLength]
+    or a
+    jp nz, .fail
     ret
 .fail:
     ld a, $e0
