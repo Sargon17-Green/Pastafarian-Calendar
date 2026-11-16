@@ -104,3 +104,18 @@ print("4368 comparisons; 0 mismatches")
 4. **Fina metadata**: aparta commit post dokumentaj sukcesoj, poste propraj sam-SHA `334/334` kaj Names SUCCESS antaŭ definitive `LAST_COMPLETED_STAGE=30`.
 5. `queued/in_progress` estas nek PASS nek blokado. Neniu mana duobla CI-dispatch, neniu `main`, merge aŭ publikigo. La 55-stadia programo daŭras.
 
+
+## Stage30 koda akcepto kaj aparta dokumenta fermo (2026-11-16)
+
+La origina kontrakta commit `3986058e5d12673ea01a2daf2562e28192b5f278` pasis siajn **sam-SHA** pordegojn: [Native 43938869835](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43938869835), job `133550677263`, **322/322**, Gleam 1.18.1 / OTP 28, formato kaj fontintegreco PASS; [Names 43938869899](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43938869899), job `133550678033`, completed/success. La antaŭaj kontraktaj paragrafoj priskribas la staton **je kontraktredaktado**, ne la aktualan kodan staton.
+
+Poste la branĉo ricevis unu novan produktmodulon `src/pastafari/discovery_26_window_count.gleam`, precize 12 publikajn sendepend-orakolajn gleeunit-testojn en `test/discovery_26_test.gleam`, kaj metadata-ĝisdatigon ĉe `23485573db0dc98ee07bb9d9391fa76f6e7aa518`. La unua Native [43960177171](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43960177171) (job `133625149672`) malsukcesis **nur en la formatpordego**, antaŭ test-ekzekuto; la sam-SHA [Names 43960177241](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43960177241) sukcesis. La preciza kvar-peca kanona formatter-diferenco estis aplikita en **nur la testdosiero**, sen ŝanĝi produktalgoritmon, la nombron de testoj aŭ iliajn nomojn. La aparta PATCH01-commit estas `1d3d9b5cb8ba07090a172bc9c035ba15057a6c40`.
+
+La pruvita **Stage30-koda pordego** ĉe ĝuste tiu PATCH01 SHA:
+
+- [Native 43960485896](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43960485896), job `133626247148`: **completed/success, 334/334 pasis, 0 malsukcesis**, Gleam 1.18.1 / OTP 28, `gleam format --check` kaj read-only fontintegreco PASS. Artefakto [14273541939](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43960485896/artifacts/14273541939), GitHub-upload SHA256 `24ec7f19da9fef46cb38a6e21e0464674208de6aa5c0cb394af00e56185519d0`.
+- [Canonical Names Lock 43960485736](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43960485736), job `133626246850`: **completed/success** ĉe precize la sama commit SHA.
+
+La produkta modulo uzas unu solan Stage26-dispatch por la ordigitaj petoj, kun du montriloj por ĉiu sojlo (`O(kq+k)` tempo, `O(k+q)` memoro). La test-orakolo aparte enumeracias ĉiun ne-malplenan kontiguan subliston rekte el Stage25-provaĵoj. Ĉi tiuj estas koda kaj Native-atestoj, ne plena kalendara/datkonverta pruvo.
+
+**Ĉi tiu dokumenta fermo estas aparta commit** de la akceptita koda SHA. Ĝi mem postulas novajn sam-SHA Native **334/334**, formatter/fontintegrecon kaj Names SUCCESS antaŭ akcepti la dokumentan pordegon. Nur post tio faru apartan finan metadata-commit, poste kontrolu ĝiajn proprajn sam-SHA Native **334/334** kaj Names SUCCESS antaŭ ol definitive meti `LAST_COMPLETED_STAGE=30`. Ĝis tiam `LAST_COMPLETED_STAGE=29`; `queued` aŭ `in_progress` ne estas PASS kaj ne estas blokado. Neniu `main`, merge aŭ publikigo.
