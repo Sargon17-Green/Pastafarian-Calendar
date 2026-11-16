@@ -129,7 +129,8 @@ def _check_locked_plan(store:CrashStore,sources:Path,kotlin:Path,blob:bytes):
     return chunk
 
 
-def check_original_process_chunk_links(store:CrashStore)->int:
+def check_original_process_chunk_links(
+        store:CrashStore, *, allow_explicit_next_link_replay:bool=False)->int:
     """Crash integrity: provenance link points to true original archived bytes.
 
     This is not a new source-repo replay, a proof of child process identity,
@@ -185,7 +186,7 @@ def check_original_process_chunk_links(store:CrashStore)->int:
                 "SELECT artifact_sha256 FROM original_process_chunk_links "
                 "WHERE engine=? AND year=? AND ordinal=?",
                 (ENGINE,YEAR,1016)).fetchone()
-            if link is None:
+            if link is None and not allow_explicit_next_link_replay:
                 raise ValueError(
                     "original next source chunk lost process ZIP link; explicit replay required")
     if not rows:
