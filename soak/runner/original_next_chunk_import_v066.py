@@ -169,7 +169,8 @@ def import_next_original_python_chunk(store,previous_original_zip,original_next_
         "WHERE engine=? AND year=? AND ordinal=?",(ENGINE,YEAR,1015)).fetchone()
     if store._chunk_registered(previous_chunk) is None or preceding_link is None:
         raise ValueError("original next chunk cannot precede registered source chunk 1015")
-    if check_original_process_chunk_links(store)!=1:
+    if check_original_process_chunk_links(
+            store,allow_explicit_next_link_replay=True)<1:
         raise ValueError("previous original source process link not revalidated")
     offline=offline_receipt(original_next_zip)
     files=original_files(original_next_zip,pin)
@@ -236,7 +237,7 @@ def import_next_original_python_chunk(store,previous_original_zip,original_next_
         or progress["original_native_full_year_soak_passes_certified"]!=0):
         raise ValueError("partial original source chunk was falsely certified as a year")
     return {"schema":SCHEMA,"outcome":status,"chunk_ordinal":ORDINAL,
-            "original_reference_source_rows":2,
+            "reference_original_source_rows":2,
             "new_witness_registered":previous is None,
             "original_full_years_certified":0,
             "kotlin_candidate_chunk_committed":False,
