@@ -1470,3 +1470,51 @@
                      (catch clojure.lang.ExceptionInfo e
                        (:code (ex-data e))))]
           (is (= :target-not-interior-prefix-day code)))))))
+
+
+;; DIAG14: p=9 exhaustief in DIAG13; p=10..N-1 begrensd bemonsterd.
+;; Deterministische 128 grensparen per profiel/diepte, onafhankelijke normering.
+(deftest diag14-diepe-lexicografische-grenzen-bemonsterd
+  (testing "Beide kanten van gelijkmatig gespreide lexicografische grenzen."
+    (doseq [[lengten totaal grensverwachting]
+            [[[4 4 4] 1301N {10 1300, 11 1300}]
+             [[4 5 4] 3499N {10 2658, 11 3498, 12 3498}]
+             [[5 4 4] 3101N {10 2344, 11 3100, 12 3100}]]]
+      (let [familie (orakel/weaving-family lengten)
+            woorden (mapv #((:unrank1 familie) %)
+                          (range 1 (inc totaal)))]
+        (is (= totaal ((:count familie))))
+        (doseq [[positie verwacht-aantal] grensverwachting]
+          (let [prefixes (mapv #(mapv bigint (take positie %)) woorden)
+                grenzen (->> (range 1 (count prefixes))
+                             (filter (fn [i]
+                                       (not= (nth prefixes (dec i))
+                                             (nth prefixes i))))
+                             vec)
+                steekproef (min 128 (count grenzen))
+                gekozen (if (= steekproef 1)
+                          [(first grenzen)]
+                          (mapv (fn [k]
+                                  (nth grenzen
+                                       (quot (* k (dec (count grenzen)))
+                                             (dec steekproef))))
+                                (range steekproef)))]
+            (is (= verwacht-aantal (count grenzen))
+                (str "DIAG14 boundaries " lengten " p=" positie))
+            (is (= steekproef (count (distinct gekozen))))
+            (doseq [grens gekozen
+                    r [grens (inc grens)]]
+              (let [verwacht (nth prefixes (dec r))
+                    maand (peek verwacht)
+                    bewijs (rang/prefix-op-rang-begrensd
+                            lengten r positie 5000000N)]
+                (is (= verwacht (:month-prefix bewijs))
+                    (str "DIAG14 " lengten " p=" positie " r=" r))
+                (is (= maand (:month-id bewijs)))
+                (is (= (bigint (count (filter #(= maand %) verwacht)))
+                       (:day-in-month bewijs)))
+                (is (= (bigint positie) (:prefix-position bewijs)))
+                (is (<= 0N (:prefix-cell-upper-bound bewijs) 5000000N))
+                (is (= :bounded-prefix-only (:date-proof-scope bewijs)))
+                (is (false? (:month-weaving-computed? bewijs)))
+                (is (not (contains? bewijs :month-weaving)))))))))))
