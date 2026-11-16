@@ -1,0 +1,88 @@
+{
+  "schema": "PASTAFARI_GENERIC_ORIGINAL_CHUNK_ARTIFACT_PIN_V071/1",
+  "run_id": 43976583803,
+  "artifact_id": 14281261657,
+  "artifact_name": "soak-v085-original-ordinal1021-native-days-not-year",
+  "artifact_size_bytes": 4904486,
+  "artifact_sha256": "b7f250a98aea07acb4a78bf074e75c5f72d950f00a1d32d7bc81c6eb8c464b32",
+  "artifacts_file_sha256": {
+    "PROD-KT-CY/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "PROD-KT-CY/original-native-stdin.tsv": "a69aae865ea9315db7e05172c8e31e77540318ccb80963212387d95c84e8bf86",
+    "PROD-KT-CY/os-stdout.tsv": "f7b6b06e96f29af5f267f60a29c405a7dacc1657c9a8d50cfc482b4b029ffef0",
+    "PROD-KT-CY/process-evidence.json": "a6d8ab52c39fde5b03c435ac564261a8b4a2c7e885bc836ea184b3e29b5c7347",
+    "REF-41/native-normalized.jsonl": "a0e40e84610bb7db82f6f01a80af08c36c76889af789b41d480ed6c92b030480",
+    "REF-41/native-raw.jsonl": "24c8bd3c6fc71e551e2bc96bb8282ddb60e01dd087450b6bd08c100817d4c117",
+    "REF-41/os-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "REF-41/os-stdout.log": "88a30a20756480d5bbb2f18b9c84cf65c76317185dbca24bc5b1fcb5c7c63642",
+    "REF-41/process-evidence.json": "fc3e8b1ea9dc8cff2c063d3952187613e8caecfdd43a73786830d566ef08d277",
+    "REF-41/transport-receipt.json": "bddd3399ca27ba13fcbfe5f449b2a5ee1a7188843741af3ce3f844029920679f",
+    "authorized-original-source-request-v085.json": "e4303841fcbe70b918c0eb3ffa0ad32ca3a6b1dc139e28b72cec5f64476a8e0f",
+    "gate.log": "8c316a5433149c5af7fadd33de64b03c8c1e9984b573a42b5939770a573237c4",
+    "kotlin-compiler-v1.9.0.sha256": "6edc408a9986289fc1a25af1af5dba48983bf06a4a2ff2e4cab567435a0391da",
+    "kotlin-compile-resources.txt": "662e8f1757969f1982abfb3b894dd2473e50e13c88c27cc45605c1e4ba1af3c8",
+    "kotlin-index-only-normalized.jsonl": "0527875da4ab22d7cf152ee263804868e18d6acc1fe7f28d1368ac4b608078f6",
+    "original-kotlin-v070.jar": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+    "original-kotlin-v070.jar.sha256": "1d1bcbd1599bfd742705ef528b620ac7b1754d8a61edc2da6a3b192810ddb51b",
+    "original-ordinal-dispatch.json": "151e39e33f663ef81246574ddf6c5b0dd58d3f4f3a00bc82af205ee2f224fb42",
+    "original-two-day-verdict.json": "4a33380a964686a2485e3c2c80a2e4aaf00ef1ff7109c9288f54c3ce8c5d0ec9",
+    "two-native-day-resources.txt": "dd8fe3b0a6010bae2a3dbc27a38e55a78ce21af422e6a92b07efb0f4257c585a",
+    "v085-source-authorization.log": "8d078adff6279ddf5c13bf3093dd8ce2d13003c9faa6956ee0ec64907bc27d0a",
+    "v085-source-request-static.log": "1123f812085a4923caed3743c57dbe68613c43c45cd5f833aa38c060cbb8e1b1"
+  },
+  "original_source_commits": {
+    "REF-41": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "PROD-KT-CY": "0c703446d8a3b7435698bd16402ac5fa30e461c9"
+  },
+  "python_source_sha256": "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378",
+  "kotlin_source_closure_sha256": "d25d71bfeda5ef592162f10b564c9eb49f64176e4dc438ab2424c46a95c44ba7",
+  "kotlin_jar_sha256": "70f2567a67712511f7e86c8ed3147c26c373f33150f7d707f390c207c9c522d6",
+  "original_source_year": {
+    "calculation_day": "-15055671",
+    "year": "5000",
+    "first_target_day": "-15057702",
+    "last_target_day": "-15053459",
+    "chunk_days": 2,
+    "ordinal": 1021,
+    "first_chunk_target_day": "-15055660",
+    "last_chunk_target_day": "-15055659",
+    "boundary_evidence_sha256": "ad64cc51522d7f19cb8a238e2a6a418e75203c6cbfe017c394f623edeb882e78"
+  },
+  "process_runner_sha256": "70ca90bf9da83745a71750c43b8d97e7d706c57209c8cd3b1c8fe244e351822f",
+  "inherited_supervisor_sha256": "47f91b4a53a94997da0dbc5e8c3135c8a96501bf24cbccbf907bd97b4242dd32",
+  "native_rows": [
+    {
+      "target_day": "-15055660",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 11,
+      "month_index": 1,
+      "day_in_month": 42,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Kil",
+      "source_raw_sha256": "c5d3ed44578f92115a17ac0319a5c9fe17f99fd89a6eaac2537be12c7ab17215"
+    },
+    {
+      "target_day": "-15055659",
+      "year": "5000",
+      "cutlet_index": 14,
+      "day_in_cutlet": 12,
+      "month_index": 42,
+      "day_in_month": 45,
+      "cutlet_name_raw": "Kahkaha",
+      "month_name_raw": "Dil",
+      "source_raw_sha256": "0c299d1128331a36a47162423f56fcb2f1b6ddb9c817ab5222fb4798c88d14c4"
+    }
+  ],
+  "comparison": {
+    "original_native_pairs": 2,
+    "first_mismatch": null,
+    "original_year_soak_passes_certified": 0,
+    "algorithmic_source_lineage_certified": false,
+    "canonical_oracle_certified": false
+  },
+  "original_ordinal_request": {
+    "schema": "PASTAFARI_ORIGINAL_SOURCE_ORDINAL_REQUEST_V085/1",
+    "source_commit": "9cf61d292d4517aa8af08e50138afd47cba5cecf",
+    "request_sha256": "e4303841fcbe70b918c0eb3ffa0ad32ca3a6b1dc139e28b72cec5f64476a8e0f"
+  }
+}
