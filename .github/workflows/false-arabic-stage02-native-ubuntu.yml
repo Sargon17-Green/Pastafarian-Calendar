@@ -194,6 +194,34 @@ jobs:
           echo "$code" > evidence/trace_exit_code.txt
           echo CASE_TRACE_DIAGNOSTIC_ONLY > evidence/trace_status.txt
 
+      - name: isolate mutable-zero fixture in case 10 (diagnostic only)
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -x upstream/false_int || exit 0
+          test -f evidence/stage02_discovery01_case_trace_DIAGNOSTIC.false || exit 0
+          python3 - <<'PY'
+          import pathlib
+          p = pathlib.Path('evidence/stage02_discovery01_case_trace_DIAGNOSTIC.false')
+          source = p.read_text(encoding='utf-8')
+          needle = 'z;b:u;a;!b;36o;!n:n;u;i;!'
+          assert source.count(needle) == 1
+          assert source.count('TRACE_CASE_10') == 1
+          output = source.replace(needle, '2 22o;!u: { DIAGNOSTIC ONLY: fresh zero }\n' + needle)
+          target = pathlib.Path('evidence/stage02_discovery01_case10_fresh_zero_DIAGNOSTIC.false')
+          target.write_text(output, encoding='utf-8')
+          assert p.read_text(encoding='utf-8') == source
+          print('CASE10_ISOLATION_ONLY')
+          PY
+          set +e
+          timeout 120s upstream/false_int -e evidence/stage02_discovery01_case10_fresh_zero_DIAGNOSTIC.false \
+            > evidence/case10_fresh_zero_stdout.txt 2> evidence/case10_fresh_zero_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/case10_fresh_zero_exit_code.txt
+          echo DIAGNOSTIC_NOT_STAGE2_ACCEPTANCE > evidence/case10_fresh_zero_status.txt
+
       - name: Finalize explicit provenance and Native evidence
         if: always()
         shell: bash
