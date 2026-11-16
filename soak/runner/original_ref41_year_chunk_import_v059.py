@@ -205,6 +205,11 @@ def check_original_process_chunk_links(
             verify_next_process_link(
                 store,(engine,year,ordinal,artifact,raw_sha,normalized_sha,process_sha))
             continue
+        if 1017<=ordinal<=2121:
+            from original_generic_source_chunk_ledger_v073 import verify_generic_source_link
+            verify_generic_source_link(
+                store,(engine,year,ordinal,artifact,raw_sha,normalized_sha,process_sha))
+            continue
         if (engine!=ENGINE or year!=YEAR or ordinal!=CHUNK_ORDINAL or
             artifact!=ARCHIVE_SHA or files is None):
             raise ValueError("source process chunk-link engine/year/ordinal changed")
