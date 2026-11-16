@@ -976,7 +976,7 @@
           (then (i32.and (i32.eqz (call $cmp (global.get $CUR) (global.get $ONE)))
                          (i32.eqz (call $cmp (global.get $RESULT) (global.get $ONE)))))
           (else (i32.and (i32.eqz (call $cmp (global.get $CUR) (global.get $LIMIT)))
-                         (i32.eqz (call $cmp (global.get $RESULT) (global.get $N))))))))
+                         (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))))))))
   (func (export "test_discovery01_short_small_n1_m_backward") (result i32)
     (call $discovery01_short_small_n_probe (i32.const 1) (i32.const -1)))
   (func (export "test_discovery01_short_small_n1_m_forward") (result i32)
