@@ -222,6 +222,86 @@ jobs:
           echo "$code" > evidence/case10_fresh_zero_exit_code.txt
           echo DIAGNOSTIC_NOT_STAGE2_ACCEPTANCE > evidence/case10_fresh_zero_status.txt
 
+      - name: Diagnose CASE10 and standalone SAVE(0) with independent oracle (not acceptance)
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ ! -x upstream/false_int ] || [ ! -f evidence/stage02_discovery01_combined.false ] || [ ! -f evidence/stage02_discovery01_case_trace_DIAGNOSTIC.false ]; then
+            echo DIAGNOSTIC_PREREQUISITES_MISSING > evidence/case10_probe_status.txt
+            exit 0
+          fi
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+          out = pathlib.Path('evidence')
+          trace_path = out / 'stage02_discovery01_case_trace_DIAGNOSTIC.false'
+          trace = trace_path.read_text(encoding='utf-8')
+          needle = 'z;b:u;a;!b;36o;!n:n;u;i;!'
+          assert trace.count(needle) == 1
+          diagnostic = (
+              '"CASE10_U_HANDLE_BEFORE "u;.10,\n'
+              '"CASE10_U_SIGN_BEFORE "z;b:u;a;!b;1o;!.10,\n'
+              'z;b:u;a;!b;36o;!n:\n'
+              '"CASE10_U_HANDLE_AFTER "u;.10,\n'
+              '"CASE10_N_HANDLE_AFTER "n;.10,\n'
+              '"CASE10_U_SIGN_AFTER "z;b:u;a;!b;1o;!.10,\n'
+              '"CASE10_N_SIGN_AFTER "z;b:n;a;!b;1o;!.10,\n'
+              '"CASE10_U_DIGITS_AFTER "z;b:u;a;!b;2o;!.10,\n'
+              '"CASE10_N_DIGITS_AFTER "z;b:n;a;!b;2o;!.10,\n'
+              '"CASE10_N_VS_U_COMPARE "z;b:n;a;!u;a;!b;28o;!.10,\n'
+              'n;u;i;!'
+          )
+          traced = out / 'stage02_case10_structural_probe_DIAGNOSTIC.false'
+          traced.write_text(trace.replace(needle, diagnostic), encoding='utf-8')
+          original = (out / 'stage02_discovery01_combined.false').read_text(encoding='utf-8')
+          marker = '{ إعادة بناء مستقلة لاستقصاء المرحلة الثانية.'
+          assert original.count(marker) == 1
+          prefix = original.split(marker, 1)[0]
+          assert prefix.count('P_{d-1}') == 3 and prefix.count('P_{w+1}') == 1
+          prefix = prefix.replace('P_{d-1}', 'P_(d-1)').replace('P_{w+1}', 'P_(w+1)')
+          assert 'P_{' not in prefix
+          standalone = '\n'.join([
+              'z;b:0a;!b;21o;!c:',
+              '0 22o;!u:',
+              '"SOLO_U_HANDLE_BEFORE "u;.10,',
+              '"SOLO_U_SIGN_BEFORE "z;b:u;a;!b;1o;!.10,',
+              'z;b:u;a;!b;36o;!n:',
+              '"SOLO_U_HANDLE_AFTER "u;.10,',
+              '"SOLO_N_HANDLE_AFTER "n;.10,',
+              '"SOLO_U_SIGN_AFTER "z;b:u;a;!b;1o;!.10,',
+              '"SOLO_N_SIGN_AFTER "z;b:n;a;!b;1o;!.10,',
+              '"SOLO_U_DIGITS_AFTER "z;b:u;a;!b;2o;!.10,',
+              '"SOLO_N_DIGITS_AFTER "z;b:n;a;!b;2o;!.10,',
+              '"SOLO_N_VS_U_COMPARE "z;b:n;a;!u;a;!b;28o;!.10,',
+          ]) + '\n'
+          solo = out / 'stage02_save_zero_standalone_DIAGNOSTIC.false'
+          solo.write_text(prefix + standalone, encoding='utf-8')
+          m = (1 << 127) - 1
+          def oracle(x):
+              return m if x and x % m == 0 else x % m
+          samples = [0, 1, m - 1, m, m + 1, 2*m, 3*m]
+          assert oracle(0) == 0 and oracle(m) == m
+          (out / 'case10_independent_oracle.json').write_text(
+              json.dumps({'native_acceptance': False, 'samples': {str(x): oracle(x) for x in samples}},
+                         sort_keys=True, indent=2) + '\n', encoding='utf-8'
+          )
+          (out / 'case10_probe_sha256.txt').write_text(
+              ''.join(hashlib.sha256(x.read_bytes()).hexdigest() + '  ' + x.name + '\n'
+                      for x in (traced, solo)), encoding='utf-8'
+          )
+          assert trace_path.read_text(encoding='utf-8') == trace
+          print('CASE10_PROBE_GENERATED variants=2 independent_oracle_samples=7')
+          PY
+          for filename in stage02_save_zero_standalone_DIAGNOSTIC.false stage02_case10_structural_probe_DIAGNOSTIC.false; do
+            set +e
+            timeout 25s upstream/false_int -e "evidence/$filename" > "evidence/$filename.stdout.txt" 2> "evidence/$filename.stderr.txt"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$filename.exit_code.txt"
+            echo "$filename exit=$code; DIAGNOSTIC_ONLY"
+          done
+          echo DIAGNOSTIC_ONLY_NO_STAGE2_PASS > evidence/case10_probe_status.txt
+
       - name: Finalize explicit provenance and Native evidence
         if: always()
         shell: bash
