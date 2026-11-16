@@ -3,14 +3,19 @@
 ! Structural cache QA only, NOT an independent full-calendar oracle.
 program stage01_gate_cache_structure_probe
   use iso_fortran_env, only: int64
-  use big_integer, only: BigInt, bi_equal, bi_compare
+  use big_integer, only: BigInt, bi_equal, bi_compare, bi_add_small
   use normative_oracle_core, only: foundation_day
   use normative_oracle_calendar, only: reset_gate_cache, ensure_gate_index, &
-       gate_day, gate_cache_bounds
+       gate_day, gate_cache_bounds, exact_gate_index
   implicit none
 
   type(BigInt) :: anchor, forward_day, backward_day
-  integer :: assertions, failures
+  integer :: assertions, failures, i
+  integer(int64) :: k, idx
+  integer(int64), parameter :: sample_indices(4) = [-2_int64, -1_int64, 1_int64, 3_int64]
+  type(BigInt) :: boundary
+  logical :: found
+  character(len=64) :: assertion_label
 
   assertions = 0
   failures = 0
@@ -53,9 +58,27 @@ program stage01_gate_cache_structure_probe
   call assert_bounds(-2_int64, 3_int64, 'rebuild backward')                  ! 20
   call check(bi_equal(gate_day(-2_int64), backward_day), 'rebuild negative') ! 21
 
+  ! Metamorphic boundary lookup: exact gate, preceding day, succeeding day.
+  ! The expected index is derived from strict gate spacing (each gap >= 42),
+  ! not from the search implementation or an external calendar oracle.
+  do i = 1, size(sample_indices)
+    k = sample_indices(i)
+    boundary = gate_day(k)
+    idx = exact_gate_index(boundary, found)
+    write(assertion_label,'(A,I0)') 'exact lookup gate ', k
+    call check(found .and. idx == k, trim(assertion_label))
+    idx = exact_gate_index(bi_add_small(boundary, -1_int64), found)
+    write(assertion_label,'(A,I0)') 'lookup before gate ', k
+    call check(.not. found .and. idx == k-1_int64, trim(assertion_label))
+    idx = exact_gate_index(bi_add_small(boundary, 1_int64), found)
+    write(assertion_label,'(A,I0)') 'lookup after gate ', k
+    call check(.not. found .and. idx == k, trim(assertion_label))
+  end do
+  call assert_bounds(-3_int64, 4_int64, 'boundary queries extend cache minimally') ! 34
+
   write(*,'(A,I0)') 'STAGE01_GATE_CACHE_STRUCTURE_ASSERTIONS=', assertions
   write(*,'(A,I0)') 'STAGE01_GATE_CACHE_STRUCTURE_FAILURES=', failures
-  if (assertions /= 21 .or. failures /= 0) error stop 'gate cache structural reset contract failed'
+  if (assertions /= 34 .or. failures /= 0) error stop 'gate cache structural reset contract failed'
   write(*,'(A)') 'STAGE01_GATE_CACHE_STRUCTURE_PASS (reset state only; NOT full Stage1)'
 
 contains
