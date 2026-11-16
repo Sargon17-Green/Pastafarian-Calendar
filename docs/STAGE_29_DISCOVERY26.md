@@ -24,3 +24,6 @@ Required markers:
 Python selftest timeout 180 s, Ada observer execution 600 s, comparator 180 s. Nonzero exit on any mismatch or timeout. Dedicated `native-stage29-remote-four` GNAT13 workflow job has 30-minute outer budget for previously observed apt mirror delays.
 
 **Stage29 PENDING**, until the automatic push CI on the exact new SHA is **completed/success 31/31** jobs (including verify and all prior jobs); inspect GNAT13 compile/bind/link and the exact direct markers and 25 unique Native pair rows. A source preflight or queued/in_progress result does **not** constitute Stage29 PASS. No duplicate dispatch, main modification, merge or publication.
+
+## Final completed acceptance (2026-11-16 verification)
+Exact branch SHA `f7943419f74aeb55659c1579eef89b73dbd4b4e3` passed automatic push [run 43767092068](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43767092068), attempt 1: **completed/success 31/31** jobs, including verify, historical native jobs and direct Stage29 job **132974552721**. GNAT 13.3.0 compile/bind/link, independent Python **139**, native Ada assertions **131**, five-field scalar comparisons **125**, and **25 unique ordered STAGE29_NATIVE_PAIR** records were observed in the direct job log. **Stage29 ACCEPTED** only for its bounded 25-pair matrix; earlier PENDING is historical. No universal correctness claim.
