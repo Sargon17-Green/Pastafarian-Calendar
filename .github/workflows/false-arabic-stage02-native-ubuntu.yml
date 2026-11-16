@@ -122,6 +122,44 @@ jobs:
             exit 2
           fi
 
+      - name: Run comment-notation-only diagnostic copy (never original Native PASS)
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ ! -x upstream/false_int ] || [ ! -f evidence/stage02_discovery01_combined.false ]; then
+            echo DIAGNOSTIC_NOT_READY > evidence/comment_diagnostic_status.txt
+            exit 0
+          fi
+          python3 - <<'PY'
+          import hashlib, pathlib
+          source = pathlib.Path('evidence/stage02_discovery01_combined.false')
+          text = source.read_text(encoding='utf-8')
+          needles = {'P_{d-1}': 3, 'P_{w+1}': 1}
+          for token, number in needles.items():
+              matches = [line for line in text.splitlines() if token in line]
+              assert len(matches) == number, (token, len(matches))
+              assert all(line.strip().startswith('{ ') and line.strip().endswith(' }') for line in matches)
+          changed = text
+          for token in needles:
+              changed = changed.replace(token, token.replace('{', '(').replace('}', ')'))
+          assert changed.count('P_{') == 0
+          target = pathlib.Path('evidence/stage02_discovery01_comment_sanitized_DIAGNOSTIC.false')
+          target.write_text(changed, encoding='utf-8')
+          assert source.read_text(encoding='utf-8') == text, 'original changed'
+          target_sha = hashlib.sha256(target.read_bytes()).hexdigest()
+          pathlib.Path('evidence/comment_diagnostic_sha256.txt').write_text(target_sha + '\n', encoding='utf-8')
+          assert target_sha == '14da009d3c4ba6c5538f146d0c2d35a897435fee5b5e29bcd4af07d6dd3a9f38'
+          print('COMMENT_ONLY_DIAGNOSTIC_COPY', target_sha, 'substitutions=4')
+          PY
+          set +e
+          timeout 120s upstream/false_int -e evidence/stage02_discovery01_comment_sanitized_DIAGNOSTIC.false \
+            > evidence/comment_diagnostic_stdout.txt 2> evidence/comment_diagnostic_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/comment_diagnostic_exit_code.txt
+          echo DIAGNOSTIC_ONLY_ORIGINAL_SOURCE_NOT_ACCEPTED > evidence/comment_diagnostic_status.txt
+
       - name: Finalize explicit provenance and Native evidence
         if: always()
         shell: bash
