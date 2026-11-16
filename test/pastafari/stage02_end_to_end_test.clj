@@ -1232,14 +1232,14 @@
                zevende-prefix-opties)))
 
 (deftest parametrische-prefix-alle-normatieve-overgangen
-  (testing "Iedere echte lexicografische grens, posities 1..8, vier complete families."
+  (testing "Iedere echte lexicografische grens, posities 1..9, vier complete families."
     (doseq [[lengten totaal] [[[4 4] 20N] [[4 4 4] 1301N]
                              [[4 5 4] 3499N] [[5 4 4] 3101N]]]
       (let [familie (orakel/weaving-family lengten)
             woorden (mapv #((:unrank1 familie) %)
                           (range 1 (inc totaal)))]
         (is (= totaal ((:count familie))))
-        (doseq [positie (range 1 (min 9 (reduce + lengten)))]
+        (doseq [positie (range 1 (min 10 (reduce + lengten)))]
           (let [prefixes (mapv #(mapv bigint (take positie %)) woorden)
                 grensrangen (->> (range 1 (count prefixes))
                                  (mapcat (fn [i]
@@ -1369,6 +1369,99 @@
           (do
             (is (= :bounded-prefix-budget-unproven (:code poging)))
             (println "DISCOVERY24 DIAG12 achtste jaardag geweigerd:"
+                     {:berekening berekening :doel doel :code (:code poging)})))
+        (let [code (try
+                     (projectie/kies-prefixdag-zonder-volledige-weving
+                      @lijn berekening (:close-gate-day jaar) 128N 5000000N)
+                     nil
+                     (catch clojure.lang.ExceptionInfo e
+                       (:code (ex-data e))))]
+          (is (= :target-not-interior-prefix-day code)))))))
+
+;; DIAG13: negende dag gebruikt hetzelfde gebudgetteerde productiepad,
+;; maar kiest de negende prefix onafhankelijk via insertion-oracle per kindklasse.
+(deftest echte-negende-prefixdag-met-onafhankelijke-normering
+  (testing "Drie echte negende dagen; geen willekeurige vergroting van de celbegroting."
+    (doseq [berekening [dagen/stichtingsdag
+                       (+' dagen/stichtingsdag 17N)
+                       (-' dagen/stichtingsdag 23N)]]
+      (let [jaar (zoeken/vind-doeljaar @lijn berekening berekening)
+            doel (+' (:open-gate-day jaar) 9N)
+            staat (orakel/new-gate-state)
+            normjaar (orakel/find-target-year staat berekening doel)
+            saus (orakel/sauce berekening (inc (:open-gate-day normjaar)))
+            aantal-koteletten (orakel/choose-cutlet-count saus normjaar)
+            partitie (orakel/choose-cutlet-partition
+                      staat berekening saus normjaar aantal-koteletten)
+            kotelet-namen (orakel/choose-cutlet-names saus aantal-koteletten)
+            koteletten (orakel/materialize-cutlets
+                        staat normjaar partitie kotelet-namen)
+            kotelet (some #(when (<= (:first-day %) doel (:last-day %)) %)
+                         koteletten)
+            aantal-maanden (orakel/choose-month-count saus normjaar)
+            lengten (orakel/choose-month-lengths saus normjaar aantal-maanden)
+            maandnamen (orakel/choose-month-names saus aantal-maanden)
+            derde-aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                                  derde-prefix-opties)
+            totaal (reduce +' 0N derde-aantallen)
+            weefrang (orakel/choose-rank
+                      (orakel/ask-bowl saus 4 orakel/seal-month-weaving)
+                      totaal)
+            normprefix
+            (loop [diepte 3 huidige nil lokale-rang weefrang]
+              (let [alle (case diepte
+                          3 derde-prefix-opties
+                          4 vierde-prefix-opties
+                          5 vijfde-prefix-opties
+                          6 zesde-prefix-opties
+                          7 zevende-prefix-opties
+                          8 achtste-prefix-opties
+                           9 (mapv (fn [id]
+                                     (conj (:prefix huidige) (bigint id)))
+                                   (range 1 (+ 2 (apply max (:prefix huidige))))))
+                    kinderen (if huidige
+                               (filterv #(= (:prefix huidige)
+                                            (subvec % 0 (dec diepte))) alle)
+                               alle)
+                    aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                                   kinderen)
+                    keuze (kies-onafhankelijk-prefixblok
+                           kinderen aantallen lokale-rang)]
+                (if (= diepte 9)
+                  (:prefix keuze)
+                  (recur (inc diepte) keuze (:rest-rank keuze)))))
+            maand (peek normprefix)
+            verwacht [(:number normjaar)
+                      (:name-index kotelet)
+                      (inc (-' doel (:first-day kotelet)))
+                      (nth maandnamen (dec (int maand)))
+                      (bigint (count (filter #(= maand %) normprefix)))]
+            poging (try
+                     {:status :bewezen
+                      :uitkomst (projectie/kies-prefixdag-zonder-volledige-weving
+                                 @lijn berekening doel 128N 5000000N)}
+                     (catch clojure.lang.ExceptionInfo e
+                       {:status :geweigerd :code (:code (ex-data e))}))]
+        (is (= totaal (weving/aantal-wevingen-groot lengten)))
+        (is (= 9 (count normprefix)))
+        (if (= :bewezen (:status poging))
+          (let [uitkomst (:uitkomst poging)]
+            (is (= verwacht (:date-components uitkomst)))
+            (is (= normprefix (:month-prefix uitkomst)))
+            (is (= 5 (count (:date-components uitkomst))))
+            (is (= 9N (:prefix-position uitkomst)))
+            (is (= :bounded-prefix-only (:date-proof-scope uitkomst)))
+            (is (false? (:month-weaving-computed? uitkomst)))
+            (is (not (contains? uitkomst :month-weaving)))
+            (is (<= 0N (:month-prefix-cell-upper-bound uitkomst) 5000000N))
+            (println "DISCOVERY24 DIAG13 echte negende jaardag:"
+                     {:berekening berekening :doel doel
+                      :prefix normprefix
+                      :kosten (:month-prefix-cell-upper-bound uitkomst)
+                      :onafhankelijk-gelijk? (= verwacht (:date-components uitkomst))}))
+          (do
+            (is (= :bounded-prefix-budget-unproven (:code poging)))
+            (println "DISCOVERY24 DIAG13 negende jaardag geweigerd:"
                      {:berekening berekening :doel doel :code (:code poging)})))
         (let [code (try
                      (projectie/kies-prefixdag-zonder-volledige-weving
