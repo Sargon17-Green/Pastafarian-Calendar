@@ -41,7 +41,7 @@ jobs:
             exit 1
           fi
           svn --version --quiet > source_probe_evidence/svn_client_version.txt
-          dpkg-query -W -f='\${Package} \${Version}\\n' subversion > source_probe_evidence/svn_package.txt
+          dpkg-query -W -f='${Package} ${Version}\n' subversion > source_probe_evidence/svn_package.txt
           echo 'SVN_SETUP=PASS' >> source_probe_evidence/dependency_status.txt
       - name: Read-only official upstream SVN audit (no upstream code execution)
         shell: bash
@@ -58,11 +58,22 @@ jobs:
             echo 'SOURCE_FETCH=FAILED; CLI_SUPPORTED=UNDETERMINED' >> source_probe_evidence/transport_status.txt
             exit 1
           fi
-          if ! timeout 240s svn export --non-interactive --ignore-externals https://svn.code.sf.net/p/nars2000/code/trunk upstream >source_probe_evidence/svn_export.log 2>>source_probe_evidence/svn_error.txt; then
+          REV=$(sed -n 's/^Revision: //p' source_probe_evidence/svn_info.txt)
+          if ! [[ "$REV" =~ ^[0-9]+$ ]]; then
+            echo 'SOURCE_REVISION=UNKNOWN' >> source_probe_evidence/transport_status.txt
+            exit 1
+          fi
+          printf '%s\n' "$REV" > source_probe_evidence/svn_revision.txt
+          if ! timeout 240s svn export --non-interactive --ignore-externals -r "$REV" https://svn.code.sf.net/p/nars2000/code/trunk upstream >source_probe_evidence/svn_export.log 2>>source_probe_evidence/svn_error.txt; then
             echo 'SVN_EXPORT=FAILED; CLI_SUPPORTED=UNDETERMINED' >> source_probe_evidence/transport_status.txt
             exit 1
           fi
           du -sh upstream >source_probe_evidence/source_size.txt
+          test -s upstream/main.c
+          test -s upstream/sessman.c
+          nl -ba upstream/main.c | sed -n '3890,4160p' > source_probe_evidence/main_cmdline_3890_4160.txt
+          nl -ba upstream/sessman.c | sed -n '950,1005p' > source_probe_evidence/sessman_com_950_1005.txt
+          sha256sum upstream/main.c upstream/sessman.c > source_probe_evidence/review_source_sha256.txt
           python3 qa/nars-interface/source_probe.py upstream --out source_probe_evidence/source_interface_scan.json
           echo 'SOURCE_AUDIT=FINISHED; NATIVE=NOT_RUN; CLI_SUPPORTED=UNDETERMINED' >> source_probe_evidence/transport_status.txt
       - name: Evidence manifest
