@@ -1064,7 +1064,7 @@ jobs:
             build/normative_oracle_core.o build/normative_oracle_calendar.o \
             -o build/stage01_gate_cache_structure_probe
           test -x build/stage01_gate_cache_structure_probe
-      - name: Gate actual cache bounds reset and reverse rebuild (21 assertions)
+      - name: Gate reset, independent gap sums and cold-cache search (55 assertions)
         shell: bash
         run: |
           set -euo pipefail
@@ -1076,12 +1076,12 @@ jobs:
           cat build/stage01-gate-cache-structure.log
           echo "STAGE01_GATE_CACHE_STRUCTURE_EXIT=$rc LIMIT=30 MEMORY_KIB=1048576"
           test "$rc" -eq 0
-          grep -Fxq 'STAGE01_GATE_CACHE_STRUCTURE_ASSERTIONS=34' build/stage01-gate-cache-structure.log
+          grep -Fxq 'STAGE01_GATE_CACHE_STRUCTURE_ASSERTIONS=55' build/stage01-gate-cache-structure.log
           grep -Fxq 'STAGE01_GATE_CACHE_STRUCTURE_FAILURES=0' build/stage01-gate-cache-structure.log
           grep -Fxq 'STAGE01_GATE_CACHE_STRUCTURE_PASS (reset state only; NOT full Stage1)' build/stage01-gate-cache-structure.log
-          test "$(grep -c '^PASS: ' build/stage01-gate-cache-structure.log)" -eq 34
+          test "$(grep -c '^PASS: ' build/stage01-gate-cache-structure.log)" -eq 55
           test "$(grep -c '^FAIL: ' build/stage01-gate-cache-structure.log || true)" -eq 0
-          echo 'Original gate-cache reset and boundary lookup: 34/34 structural assertions, reverse rebuild and double reset; not full Stage1.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Original gate-cache reset, independent gap sums and cold-cache search: 55/55 structural assertions; not full Stage1.' >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve gate-cache structure regression evidence
         if: always()
         uses: actions/upload-artifact@v4

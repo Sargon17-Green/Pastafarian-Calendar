@@ -6,14 +6,14 @@ program stage01_gate_cache_structure_probe
   use big_integer, only: BigInt, bi_equal, bi_compare, bi_add_small
   use normative_oracle_core, only: foundation_day
   use normative_oracle_calendar, only: reset_gate_cache, ensure_gate_index, &
-       gate_day, gate_cache_bounds, exact_gate_index
+       gate_day, gate_cache_bounds, positive_gate_gap, negative_gate_gap, exact_gate_index
   implicit none
 
   type(BigInt) :: anchor, forward_day, backward_day
   integer :: assertions, failures, i
-  integer(int64) :: k, idx
+  integer(int64) :: k, idx, n
   integer(int64), parameter :: sample_indices(4) = [-2_int64, -1_int64, 1_int64, 3_int64]
-  type(BigInt) :: boundary
+  type(BigInt) :: boundary, oracle_days(-3:3)
   logical :: found
   character(len=64) :: assertion_label
 
@@ -76,9 +76,58 @@ program stage01_gate_cache_structure_probe
   end do
   call assert_bounds(-3_int64, 4_int64, 'boundary queries extend cache minimally') ! 34
 
+  ! Independent of gate-cache construction: direct gap-sum reconstruction.
+  ! This is a structural oracle, not an independent sauce/calendar oracle.
+  oracle_days(0) = anchor
+  do n = 1_int64, 3_int64
+    oracle_days(n) = bi_add_small(oracle_days(n-1_int64), int(positive_gate_gap(n), int64))
+    oracle_days(-n) = bi_add_small(oracle_days(-n+1_int64), -int(negative_gate_gap(n), int64))
+  end do
+  do n = -3_int64, 3_int64
+    write(assertion_label,'(A,I0)') 'gap-sum gate ', n
+    call check(bi_equal(gate_day(n), oracle_days(n)), trim(assertion_label))
+  end do
+
+  ! From a cold cache, search must grow only to the nearest bounding gate.
+  ! Each gate gap is at least 42 days, so +/-1 is never itself a gate.
+  call reset_gate_cache()
+  idx = exact_gate_index(bi_add_small(anchor, -1_int64), found)
+  call check(.not. found .and. idx == -1_int64, 'cold anchor predecessor')
+  call assert_bounds(-1_int64, 0_int64, 'cold negative minimal growth')
+
+  call reset_gate_cache()
+  idx = exact_gate_index(bi_add_small(anchor, 1_int64), found)
+  call check(.not. found .and. idx == 0_int64, 'cold anchor successor')
+  call assert_bounds(0_int64, 1_int64, 'cold positive minimal growth')
+
+  call reset_gate_cache()
+  idx = exact_gate_index(anchor, found)
+  call check(found .and. idx == 0_int64, 'cold exact anchor')
+  call assert_bounds(0_int64, 0_int64, 'cold exact no growth')
+
+  call reset_gate_cache()
+  idx = exact_gate_index(oracle_days(-3), found)
+  call check(found .and. idx == -3_int64, 'cold exact negative gate')
+  call assert_bounds(-3_int64, 0_int64, 'cold exact negative growth')
+
+  call reset_gate_cache()
+  idx = exact_gate_index(oracle_days(3), found)
+  call check(found .and. idx == 3_int64, 'cold exact positive gate')
+  call assert_bounds(0_int64, 3_int64, 'cold exact positive growth')
+
+  call reset_gate_cache()
+  idx = exact_gate_index(bi_add_small(oracle_days(-3), 1_int64), found)
+  call check(.not. found .and. idx == -3_int64, 'cold interior negative')
+  call assert_bounds(-3_int64, 0_int64, 'cold negative interior growth')
+
+  call reset_gate_cache()
+  idx = exact_gate_index(bi_add_small(oracle_days(3), -1_int64), found)
+  call check(.not. found .and. idx == 2_int64, 'cold interior positive')
+  call assert_bounds(0_int64, 3_int64, 'cold positive interior growth')
+
   write(*,'(A,I0)') 'STAGE01_GATE_CACHE_STRUCTURE_ASSERTIONS=', assertions
   write(*,'(A,I0)') 'STAGE01_GATE_CACHE_STRUCTURE_FAILURES=', failures
-  if (assertions /= 34 .or. failures /= 0) error stop 'gate cache structural reset contract failed'
+  if (assertions /= 55 .or. failures /= 0) error stop 'gate cache structural reset contract failed'
   write(*,'(A)') 'STAGE01_GATE_CACHE_STRUCTURE_PASS (reset state only; NOT full Stage1)'
 
 contains
