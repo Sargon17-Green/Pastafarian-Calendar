@@ -302,6 +302,113 @@ jobs:
           done
           echo DIAGNOSTIC_ONLY_NO_STAGE2_PASS > evidence/case10_probe_status.txt
 
+      - name: Capture numeric CASE10 evidence with wide-stdio DIAGNOSTIC interpreter only
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [ ! -x upstream/false_int ] || [ ! -f evidence/stage02_save_zero_standalone_DIAGNOSTIC.false ] || [ ! -f evidence/stage02_case10_structural_probe_DIAGNOSTIC.false ]; then
+            echo PREREQUISITES_MISSING > evidence/stdio_diag_status.txt
+            exit 0
+          fi
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+          src = pathlib.Path('upstream/interpreter.c')
+          original = src.read_text(encoding='utf-8')
+          edits = {
+              'printf("%d", number);': 'wprintf(L"%d", number);',
+              'putchar(c);': 'putwchar((wchar_t)(unsigned char)c);',
+          }
+          assert all(original.count(a) == 1 for a in edits), 'upstream stdio source drift'
+          assert original.count('putwchar(wc);') == 1, 'wide emitter source drift'
+          patched = original
+          for old, new in edits.items():
+              patched = patched.replace(old, new)
+          assert patched != original and len(edits) == 2
+          out = pathlib.Path('evidence/interpreter_wide_stdio_DIAGNOSTIC.c')
+          out.write_text(patched, encoding='utf-8')
+          receipt = {
+              'scope': 'DIAGNOSTIC_INTERPRETER_ONLY_NOT_NATIVE_ACCEPTANCE',
+              'upstream_original_sha256': hashlib.sha256(src.read_bytes()).hexdigest(),
+              'diagnostic_interpreter_sha256': hashlib.sha256(out.read_bytes()).hexdigest(),
+              'replacements': edits,
+              'original_upstream_file_unchanged': src.read_text(encoding='utf-8') == original,
+          }
+          pathlib.Path('evidence/stdio_diag_provenance.json').write_text(
+              json.dumps(receipt, indent=2, sort_keys=True) + '\n', encoding='utf-8'
+          )
+          print('DIAGNOSTIC_WIDE_STDIO_SOURCE_CREATED replacements=2')
+          PY
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            evidence/interpreter_wide_stdio_DIAGNOSTIC.c \
+            upstream/src/false.c upstream/utils/file.c upstream/src/stack.c \
+            upstream/src/slice.c upstream/src/storage.c upstream/src/token.c \
+            -o evidence/false_int_wide_stdio_DIAGNOSTIC \
+            > evidence/stdio_diag_compile_stdout.txt 2> evidence/stdio_diag_compile_stderr.txt
+          compile_code=$?
+          set -e
+          echo "$compile_code" > evidence/stdio_diag_compile_exit_code.txt
+          if [ "$compile_code" -ne 0 ]; then
+            echo WIDE_STDIO_DIAGNOSTIC_COMPILE_FAILED > evidence/stdio_diag_status.txt
+            exit 0
+          fi
+          sha256sum evidence/false_int_wide_stdio_DIAGNOSTIC > evidence/stdio_diag_binary_sha256.txt
+          printf '"WIDE_STDIO_PROBE "7.10,' > evidence/stdio_diag_smoke.false
+          set +e
+          timeout 15s evidence/false_int_wide_stdio_DIAGNOSTIC -e evidence/stdio_diag_smoke.false \
+            > evidence/stdio_diag_smoke.stdout.txt 2> evidence/stdio_diag_smoke.stderr.txt
+          smoke_code=$?
+          set -e
+          echo "$smoke_code" > evidence/stdio_diag_smoke.exit_code.txt
+          if [ "$smoke_code" -ne 0 ] || [ "$(cat evidence/stdio_diag_smoke.stdout.txt)" != 'WIDE_STDIO_PROBE 7' ]; then
+            echo WIDE_STDIO_DIAGNOSTIC_SMOKE_FAILED > evidence/stdio_diag_status.txt
+            exit 0
+          fi
+          for filename in stage02_save_zero_standalone_DIAGNOSTIC.false stage02_case10_structural_probe_DIAGNOSTIC.false; do
+            set +e
+            timeout 25s evidence/false_int_wide_stdio_DIAGNOSTIC -e "evidence/$filename" \
+              > "evidence/$filename.wide_stdio.stdout.txt" \
+              2> "evidence/$filename.wide_stdio.stderr.txt"
+            case_code=$?
+            set -e
+            echo "$case_code" > "evidence/$filename.wide_stdio.exit_code.txt"
+            echo "$filename wide_stdio_exit=$case_code DIAGNOSTIC_ONLY"
+          done
+          python3 - <<'PY'
+          import json, pathlib, re
+          out = pathlib.Path('evidence')
+          files = ('stage02_save_zero_standalone_DIAGNOSTIC.false',
+                   'stage02_case10_structural_probe_DIAGNOSTIC.false')
+          result = {
+              'scope': 'DIAGNOSTIC_ONLY_MODIFIED_INTERPRETER_NOT_NATIVE_ACCEPTANCE',
+              'native_pass': False,
+              'stage2_accepted': False,
+              'stdio_probe': (out / 'stdio_diag_smoke.stdout.txt').read_text(encoding='utf-8'),
+              'cases': {},
+          }
+          total = 0
+          for fname in files:
+              content = (out / (fname + '.wide_stdio.stdout.txt')).read_text(encoding='utf-8')
+              numbers = re.findall(r'\b((?:CASE10|SOLO)_[A-Z_]+)\s+(-?\d+)', content)
+              recorded = {label: int(value) for label, value in numbers}
+              result['cases'][fname] = {
+                  'exit_code': int((out / (fname + '.wide_stdio.exit_code.txt')).read_text()),
+                  'numeric_label_count': len(recorded),
+                  'values': recorded,
+                  'stderr': (out / (fname + '.wide_stdio.stderr.txt')).read_text(encoding='utf-8')[-1200:],
+              }
+              total += len(recorded)
+          result['numeric_label_count_total'] = total
+          (out / 'case10_wide_stdio_diagnostics.json').write_text(
+              json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + '\n', encoding='utf-8'
+          )
+          print('CASE10_DIAGNOSTIC_NUMERIC_LABELS', total)
+          if total < 4:
+              raise SystemExit('NUMERIC_DIAGNOSTIC_INSUFFICIENT: do not infer CASE10 values')
+          PY
+          echo WIDE_STDIO_NUMERIC_DIAGNOSTIC_ONLY > evidence/stdio_diag_status.txt
+
       - name: Finalize explicit provenance and Native evidence
         if: always()
         shell: bash
