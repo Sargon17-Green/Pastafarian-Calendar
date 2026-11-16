@@ -993,4 +993,52 @@
     (call $discovery01_short_small_n_probe (i32.const 11) (i32.const -1)))
   (func (export "test_discovery01_short_small_n11_m_forward") (result i32)
     (call $discovery01_short_small_n_probe (i32.const 11) (i32.const 1)))
+
+  ;; DISCOVERY01 k=4, q=1: first=2, step=-1 -> digits [1,0,M-1,M-2].
+  ;; x=M^4-M^3-M^2+2, N=x-reject_count. No selector changes.
+  (func $discovery01_k4_q1_backward (param $reject_count i32) (result i32)
+    (call $init_constants)
+    (call $mul (global.get $TMP1) (global.get $M) (global.get $M))
+    (call $mul (global.get $N) (global.get $TMP1) (global.get $TMP1))
+    (call $mul (global.get $TMP2) (global.get $TMP1) (global.get $M))
+    (call $sub (global.get $N) (global.get $N) (global.get $TMP2))
+    (call $sub (global.get $N) (global.get $N) (global.get $TMP1))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 2))
+    (if (i32.ne (local.get $reject_count) (i32.const 0))
+      (then (call $sub_small (global.get $N) (global.get $N) (local.get $reject_count))))
+    (call $from_u64 (global.get $FIRST) (i64.const 2))
+    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT))
+    (i32.and
+      (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+      (i32.eqz (call $cmp (global.get $WIDE) (global.get $N)))))
+  (func (export "test_discovery01_k4_q1_backward_exact_limit") (result i32)
+    (call $discovery01_k4_q1_backward (i32.const 0)))
+  (func (export "test_discovery01_k4_q1_backward_two_rejections") (result i32)
+    (call $discovery01_k4_q1_backward (i32.const 2)))
+
+  ;; first=M-3, step=+1 -> digits [M-4,M-3,M-2,M-1].
+  ;; x=M^4-M^2-2M-3. With N=x-1, skipping to 1 avoids M^2+2M+4 walks.
+  (func $discovery01_k4_q1_forward (param $reject_count i32) (result i32)
+    (call $init_constants)
+    (call $mul (global.get $TMP1) (global.get $M) (global.get $M))
+    (call $mul (global.get $N) (global.get $TMP1) (global.get $TMP1))
+    (call $sub (global.get $N) (global.get $N) (global.get $TMP1))
+    (call $add (global.get $TMP2) (global.get $M) (global.get $M))
+    (call $sub (global.get $N) (global.get $N) (global.get $TMP2))
+    (call $sub_small (global.get $N) (global.get $N) (i32.const 3))
+    (if (i32.ne (local.get $reject_count) (i32.const 0))
+      (then (call $sub_small (global.get $N) (global.get $N) (local.get $reject_count))))
+    (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 3))
+    (call $choose (global.get $FIRST) (i32.const 1) (global.get $N) (global.get $RESULT))
+    (if (result i32) (i32.eqz (local.get $reject_count))
+      (then (i32.and
+        (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))
+        (i32.eqz (call $cmp (global.get $WIDE) (global.get $N)))))
+      (else (i32.and
+        (i32.eqz (call $cmp (global.get $RESULT) (global.get $ONE)))
+        (i32.eqz (call $cmp (global.get $WIDE) (global.get $ONE)))))))
+  (func (export "test_discovery01_k4_q1_forward_exact_limit") (result i32)
+    (call $discovery01_k4_q1_forward (i32.const 0)))
+  (func (export "test_discovery01_k4_q1_forward_astronomical_skip") (result i32)
+    (call $discovery01_k4_q1_forward (i32.const 1)))
 )
