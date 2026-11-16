@@ -14,12 +14,35 @@ permissions:
 
 jobs:
   source-discovery:
-    runs-on: ubuntu-latest
-    timeout-minutes: 9
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - name: Offline scanner contract tests
         run: python3 -m unittest discover -s qa/nars-interface -p 'test_*.py' -v
+      - name: Provision SVN from authenticated Ubuntu repositories
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source_probe_evidence
+          echo 'PREVIOUS_RUN_MISSING_TOOL=SVN_CLIENT_NOT_INSTALLED' > source_probe_evidence/dependency_status.txt
+          if ! command -v svn >/dev/null 2>&1; then
+            if ! timeout 150s sudo -n apt-get update -qq >source_probe_evidence/apt_update.log 2>&1; then
+              echo 'SVN_SETUP=APT_UPDATE_FAILED' >> source_probe_evidence/dependency_status.txt
+              exit 1
+            fi
+            if ! timeout 150s sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends subversion >source_probe_evidence/apt_install.log 2>&1; then
+              echo 'SVN_SETUP=APT_INSTALL_FAILED' >> source_probe_evidence/dependency_status.txt
+              exit 1
+            fi
+          fi
+          if ! command -v svn >/dev/null 2>&1; then
+            echo 'SVN_SETUP=BINARY_NOT_FOUND_AFTER_INSTALL' >> source_probe_evidence/dependency_status.txt
+            exit 1
+          fi
+          svn --version --quiet > source_probe_evidence/svn_client_version.txt
+          dpkg-query -W -f='\${Package} \${Version}\\n' subversion > source_probe_evidence/svn_package.txt
+          echo 'SVN_SETUP=PASS' >> source_probe_evidence/dependency_status.txt
       - name: Read-only official upstream SVN audit (no upstream code execution)
         shell: bash
         run: |
