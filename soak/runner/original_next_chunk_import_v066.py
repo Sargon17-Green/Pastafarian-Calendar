@@ -162,6 +162,15 @@ def import_next_original_python_chunk(store,previous_original_zip,original_next_
     chunk=store._chunk(ENGINE,YEAR,ORDINAL)
     if (chunk.first_day,chunk.last_day)!=(FIRST,LAST):
         raise ValueError("next original source dates not aligned with year chunk")
+    from original_ref41_year_chunk_import_v059 import check_original_process_chunk_links
+    previous_chunk=store._chunk(ENGINE,YEAR,1015)
+    preceding_link=store.db.execute(
+        "SELECT artifact_sha256 FROM original_process_chunk_links "
+        "WHERE engine=? AND year=? AND ordinal=?",(ENGINE,YEAR,1015)).fetchone()
+    if store._chunk_registered(previous_chunk) is None or preceding_link is None:
+        raise ValueError("original next chunk cannot precede registered source chunk 1015")
+    if check_original_process_chunk_links(store)!=1:
+        raise ValueError("previous original source process link not revalidated")
     offline=offline_receipt(original_next_zip)
     files=original_files(original_next_zip,pin)
     receipt=canonical({"schema":SCHEMA,"source_replay":audited,
