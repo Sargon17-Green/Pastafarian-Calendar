@@ -1,0 +1,73 @@
+{ تفريق مستقل للمرحلة الثانية: 13 مدخلا، عمليتان لكل مدخل. }
+{ الفشل ينهي المفسر بغير الصفر؛ علامة الحالة تأتي بعد المقارنتين. }
+[~["DIFF13_FAILURE"10,0 0/]?]f:
+[e:d:z;b:e;a;!d;a;!b;28o;!0=f;!]i:
+z;b:0a;!b;21o;!c:
+0 22o;!s: { M }
+1 22o;!t: { 1 }
+2 22o;!u: { 0 }
+z;b:s;a;!s;a;!b;25o;!x: { 2M }
+z;b:x;a;!s;a;!b;25o;!y: { 3M }
+z;b:s;a;!t;a;!b;25o;!w: { M+1 }
+z;b:s;a;!t;a;!b;26o;!p: { M-1 }
+z;b:x;a;!t;a;!b;25o;!v: { 2M+1 }
+z;b:y;a;!t;a;!b;26o;!q: { 3M-1 }
+z;b:u;a;!t;a;!b;26o;!j: { -1 }
+z;b:u;a;!s;a;!b;26o;!l: { -M }
+z;b:u;a;!x;a;!b;26o;!m: { -2M }
+z;b:l;a;!t;a;!b;26o;!r: { -M-1 }
+{ ZERO: regularMod and SAVE. }
+z;b:u;a;!s;a;!b;30o;!n:n;u;i;!
+z;b:u;a;!b;36o;!n:n;u;i;!
+"DIFF13_CASE_00_OK"10,
+{ ONE: regularMod and SAVE. }
+z;b:t;a;!s;a;!b;30o;!n:n;t;i;!
+z;b:t;a;!b;36o;!n:n;t;i;!
+"DIFF13_CASE_01_OK"10,
+{ M_MINUS_ONE: regularMod and SAVE. }
+z;b:p;a;!s;a;!b;30o;!n:n;p;i;!
+z;b:p;a;!b;36o;!n:n;p;i;!
+"DIFF13_CASE_02_OK"10,
+{ M: regularMod and SAVE. }
+z;b:s;a;!s;a;!b;30o;!n:n;u;i;!
+z;b:s;a;!b;36o;!n:n;s;i;!
+"DIFF13_CASE_03_OK"10,
+{ M_PLUS_ONE: regularMod and SAVE. }
+z;b:w;a;!s;a;!b;30o;!n:n;t;i;!
+z;b:w;a;!b;36o;!n:n;t;i;!
+"DIFF13_CASE_04_OK"10,
+{ TWO_M: regularMod and SAVE. }
+z;b:x;a;!s;a;!b;30o;!n:n;u;i;!
+z;b:x;a;!b;36o;!n:n;s;i;!
+"DIFF13_CASE_05_OK"10,
+{ TWO_M_PLUS_ONE: regularMod and SAVE. }
+z;b:v;a;!s;a;!b;30o;!n:n;t;i;!
+z;b:v;a;!b;36o;!n:n;t;i;!
+"DIFF13_CASE_06_OK"10,
+{ THREE_M: regularMod and SAVE. }
+z;b:y;a;!s;a;!b;30o;!n:n;u;i;!
+z;b:y;a;!b;36o;!n:n;s;i;!
+"DIFF13_CASE_07_OK"10,
+{ THREE_M_MINUS_ONE: regularMod and SAVE. }
+z;b:q;a;!s;a;!b;30o;!n:n;p;i;!
+z;b:q;a;!b;36o;!n:n;p;i;!
+"DIFF13_CASE_08_OK"10,
+{ NEG_ONE: regularMod and SAVE. }
+z;b:j;a;!s;a;!b;30o;!n:n;p;i;!
+z;b:j;a;!b;36o;!n:n;p;i;!
+"DIFF13_CASE_09_OK"10,
+{ NEG_M: regularMod and SAVE. }
+z;b:l;a;!s;a;!b;30o;!n:n;u;i;!
+z;b:l;a;!b;36o;!n:n;s;i;!
+"DIFF13_CASE_10_OK"10,
+{ NEG_TWO_M: regularMod and SAVE. }
+z;b:m;a;!s;a;!b;30o;!n:n;u;i;!
+z;b:m;a;!b;36o;!n:n;s;i;!
+"DIFF13_CASE_11_OK"10,
+{ NEG_M_MINUS_ONE: regularMod and SAVE. }
+z;b:r;a;!s;a;!b;30o;!n:n;p;i;!
+z;b:r;a;!b;36o;!n:n;p;i;!
+"DIFF13_CASE_12_OK"10,
+"DIFF13_26_CHECKS_VERIFIED"10,
+{ تحرير الكومة بعد اجتياز كل المقارنات. }
+[z;0>][%z;1-z:]#
