@@ -33,3 +33,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage02-native-ubuntu.yml
     permissions:
       contents: read
+
+  false-arabic-stage02-diff13:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-diff13]')
+    uses: ./.github/workflows/false-arabic-stage02-native-differential.yml
+    permissions:
+      contents: read

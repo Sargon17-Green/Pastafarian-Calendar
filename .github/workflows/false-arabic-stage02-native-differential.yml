@@ -1,0 +1,170 @@
+name: FALSE Arabic Stage 2 thirteen-anchor Native differential
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-native-differential:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: acba6e0c4ca4cd94424661273bf3158175e3b9b5
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+      COMBINED_SHA256: a9aac441521ebfcfd20b111e566dda0e9ce848162abca16e1f7e96ab8aa82983
+      FIXTURE_SHA256: e4d535c03f9fb3a504ff3ef8fef58b2cad17cee34a3571e79ae609d67a94510f
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Fetch exact project and upstream runtime commits
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence upstream
+          git fetch --no-tags --depth=1 origin "$SOURCE_PIN" > evidence/project_fetch.log 2>&1
+          git rev-parse FETCH_HEAD > evidence/source_observed.txt
+          test "$(cat evidence/source_observed.txt)" = "$SOURCE_PIN"
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/runtime_observed.txt
+          test "$(cat evidence/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+
+      - name: Verify independent oracle, committed fixture and original source bytes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage02_native_differential_oracle.py > evidence/oracle.json
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          source = os.environ['SOURCE_PIN']
+          parts = ('src/bigint.false', 'test/normative_reference.false',
+                   'src/monster_bootstrap.false', 'test/stage02_differential_13.false')
+          locked = {}
+          for path in (*parts, 'tools/stage02_native_differential_oracle.py'):
+              locked[path] = subprocess.check_output(['git', 'show', source + ':' + path])
+              assert locked[path] == pathlib.Path(path).read_bytes(), ('source drift', path)
+          fixture = locked[parts[-1]]
+          assert hashlib.sha256(fixture).hexdigest() == os.environ['FIXTURE_SHA256']
+          combined = (b'\n'.join(locked[p] for p in parts) + b'\n')
+          assert hashlib.sha256(combined).hexdigest() == os.environ['COMBINED_SHA256']
+          pathlib.Path('evidence/stage02_diff13_exact.false').write_bytes(combined)
+          oracle = json.loads(pathlib.Path('evidence/oracle.json').read_text(encoding='utf-8'))
+          assert oracle['project_id'] == os.environ['PROJECT_ID']
+          assert oracle['native_evidence'] is False
+          assert oracle['fixture_sha256'] == os.environ['FIXTURE_SHA256']
+          assert (oracle['case_count'], oracle['assertion_count'], oracle['distinct_save_cases']) == (13, 26, 5)
+          assert len({x['label'] for x in oracle['cases']}) == 13
+          assert all(f'DIFF13_CASE_{i:02d}_OK' == x['label'] for i, x in enumerate(oracle['cases']))
+          print('DIFF13_SOURCE_LOCKED', hashlib.sha256(combined).hexdigest(), 'cases=13 assertions=26')
+          PY
+
+      - name: Compile pinned original FALSE interpreter and check Unicode
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/compiler_stdout.txt 2> evidence/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/unicode_pick.false \
+            > evidence/unicode_pick.stdout.txt 2> evidence/unicode_pick.stderr.txt
+          test "$(cat evidence/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/preflight.txt
+
+      - name: Execute thirteen cases on exact source with original interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          set +e
+          timeout 60s upstream/false_int -e evidence/stage02_diff13_exact.false \
+            > evidence/native_stdout.txt 2> evidence/native_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/native_exit_code.txt
+          test "$code" -eq 0
+
+      - name: Prove exact thirteen results and write fail-closed evidence
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          d = pathlib.Path('evidence')
+          def read(path):
+              p = d / path
+              return p.read_text(encoding='utf-8').strip() if p.exists() else None
+          def integer(path):
+              value = read(path)
+              return int(value) if value is not None else None
+          oracle_text = read('oracle.json')
+          oracle = json.loads(oracle_text) if oracle_text else {}
+          source = d / 'stage02_diff13_exact.false'
+          combined = hashlib.sha256(source.read_bytes()).hexdigest() if source.exists() else None
+          stdout = read('native_stdout.txt') or ''
+          stderr = read('native_stderr.txt')
+          expected = [entry['label'] for entry in oracle.get('cases', [])]
+          observed = re.findall(r'DIFF13_CASE_\d{2}_OK', stdout)
+          good = (read('source_observed.txt') == os.environ['SOURCE_PIN']
+                  and read('runtime_observed.txt') == os.environ['RUNTIME_PIN']
+                  and combined == os.environ['COMBINED_SHA256']
+                  and oracle.get('fixture_sha256') == os.environ['FIXTURE_SHA256']
+                  and oracle.get('case_count') == 13 and oracle.get('assertion_count') == 26
+                  and read('preflight.txt') == 'ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS'
+                  and integer('compiler_exit_code.txt') == 0 and integer('native_exit_code.txt') == 0
+                  and len(observed) == 13 and observed == expected
+                  and stdout.count('DIFF13_26_CHECKS_VERIFIED') == 1
+                  and 'DIFF13_FAILURE' not in stdout and stderr == '')
+          receipt = {
+              'project_id': os.environ['PROJECT_ID'],
+              'github_run_id': os.environ.get('GITHUB_RUN_ID'),
+              'github_sha': os.environ.get('GITHUB_SHA'),
+              'source_pin': os.environ['SOURCE_PIN'],
+              'source_observed': read('source_observed.txt'),
+              'runtime_pin': os.environ['RUNTIME_PIN'],
+              'runtime_observed': read('runtime_observed.txt'),
+              'combined_sha256_expected': os.environ['COMBINED_SHA256'],
+              'combined_sha256_observed': combined,
+              'fixture_sha256': oracle.get('fixture_sha256'),
+              'case_count_expected': 13,
+              'case_labels_observed': observed,
+              'assertion_count_expected': 26,
+              'native_exit_code': integer('native_exit_code.txt'),
+              'native_differential_verified': good,
+              'stage2_full_acceptance': False,
+              'stage3_authorized': False,
+          }
+          (d / 'evidence.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          print(json.dumps(receipt, sort_keys=True))
+          if not good:
+              raise SystemExit('STAGE2_DIFF13_NATIVE_NOT_VERIFIED')
+          PY
+
+      - name: Preserve evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage02-diff13-native
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error
