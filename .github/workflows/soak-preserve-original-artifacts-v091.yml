@@ -97,7 +97,7 @@ jobs:
             --verify-only | tee evidence/v091-raw-archive-verification.log
           grep -q '^V091_ORIGINAL_ZIP_BYTES_AUDITED_NOT_A_YEAR=7$' evidence/v091-raw-archive-verification.log
           echo V091_APPROVED_ORIGINAL_SOURCE_BYTES_READY_FOR_ARCHIVE
-      - name: Preserve in draft Release, re-download all assets and verify byte identity
+      - name: Attach seven immutable ZIPs to draft Release by numeric ID, verify restore
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -105,49 +105,88 @@ jobs:
           RELEASE_TAG: soak-original-fct-source-1015-1021-v091
         run: |
           set -euo pipefail
-          cat > evidence/release-notes-v091.txt <<'NOTES'
-          ORIGINAL F(c,t) SOURCE ZIP BACKUP — DRAFT / NOT SOFTWARE RELEASE
-          Seven original GitHub Actions archive ZIPs for ordinals 1015..1021,
-          Python REF-41 and Kotlin PROD-KT-CY, c=-15055671, year 5000.
-          Attached manifest contains each SHA-256 and original artifact/run ID.
-          The two converters agree numerically on 14 distinct sampled target days.
-          This is NOT an original full-year soak, nor a canonical oracle or
-          an independent algorithmic-lineage certification. No Windows execution.
-          NOTES
-          if ! gh release view "$RELEASE_TAG" --json isDraft,tagName >/dev/null 2>&1; then
+          printf '%s\n' \
+            'Original source F(c,t) evidence backup; draft only, not software.' \
+            'Seven two-day original source ZIPs, ordinals 1015..1021, c=-15055671.' \
+            'This release certifies zero whole-year comparisons and no algorithmic independence.' \
+            'The attached manifest holds source SHA256 and artifact/run IDs.' \
+            > evidence/release-notes-v091.txt
+          release_ids="$(gh api "repos/$GH_REPO/releases?per_page=100" \
+            --jq '.[] | select(.tag_name=="soak-original-fct-source-1015-1021-v091" and .draft==true) | .id')"
+          if [ -z "$release_ids" ]; then
             gh release create "$RELEASE_TAG" --target "$GITHUB_SHA" \
               --draft --prerelease \
               --title "Source evidence 1015-1021 (DRAFT, NO YEAR CREDIT)" \
               --notes-file evidence/release-notes-v091.txt
+            release_ids="$(gh api "repos/$GH_REPO/releases?per_page=100" \
+              --jq '.[] | select(.tag_name=="soak-original-fct-source-1015-1021-v091" and .draft==true) | .id')"
           fi
-          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft')" = true
-          test "$(gh api "repos/$GH_REPO/git/ref/tags/$RELEASE_TAG" --jq '.object.sha')" = "$GITHUB_SHA"
+          test "$(printf '%s\n' "$release_ids" | wc -l)" -eq 1
+          release_id="$release_ids"
+          release_target="$(gh api "repos/$GH_REPO/releases/$release_id" --jq '.target_commitish')"
+          git -C coordinator merge-base --is-ancestor "$release_target" "$GITHUB_SHA"
+          echo "V091_DRAFT_RELEASE_NUMERIC_ID=$release_id"
           for file in release-assets/source-*.zip release-assets/source-manifest-v091.json; do
             name="$(basename "$file")"
-            if ! gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name' | grep -Fxq "$name"; then
-              gh release upload "$RELEASE_TAG" "$file"
+            existing="$(gh api "repos/$GH_REPO/releases/$release_id/assets?per_page=100" \
+              --jq ".[] | select(.name==\"$name\") | .id")"
+            if [ -n "$existing" ]; then
+              test "$(printf '%s\n' "$existing" | wc -l)" -eq 1
+              echo "V091_EXISTING_DRAFT_ASSET_RECHECK=$name"
+            else
+              mime=application/zip
+              if [ "$name" = source-manifest-v091.json ]; then mime=application/json; fi
+              curl --fail-with-body --silent --show-error --retry 3 \
+                -X POST \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                -H "Content-Type: $mime" \
+                --data-binary @"$file" \
+                "https://uploads.github.com/repos/$GH_REPO/releases/$release_id/assets?name=$name" \
+                > evidence/upload-response-v091.json
+              python3 - "$name" <<'PY'
+          import json,sys
+          obj=json.load(open('evidence/upload-response-v091.json'))
+          assert obj['name']==sys.argv[1] and obj['state']=='uploaded',obj
+          PY
+              echo "V091_ORIGINAL_ZIP_RELEASE_UPLOADED=$name"
             fi
           done
           mkdir -m 700 release-redownload
-          gh release download "$RELEASE_TAG" --dir release-redownload
+          gh api "repos/$GH_REPO/releases/$release_id/assets?per_page=100" \
+            --jq '.[].name' | sort > evidence/v091-release-asset-names.txt
+          (cd release-assets && ls -1 source-*.zip source-manifest-v091.json) \
+            | sort > evidence/v091-expected-asset-names.txt
+          diff -u evidence/v091-expected-asset-names.txt evidence/v091-release-asset-names.txt
+          while IFS= read -r name; do
+            asset_id="$(gh api "repos/$GH_REPO/releases/$release_id/assets?per_page=100" \
+              --jq ".[] | select(.name==\"$name\") | .id")"
+            test -n "$asset_id"
+            curl --fail-with-body --location --silent --show-error --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/octet-stream" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/$GH_REPO/releases/assets/$asset_id" \
+              -o "release-redownload/$name"
+            cmp "release-assets/$name" "release-redownload/$name"
+            echo "V091_VERIFIED_RESTORED_BYTE_EQUAL=$name"
+          done < evidence/v091-expected-asset-names.txt
           python3 - <<'PY' 2>&1 | tee evidence/v091-release-restoration.log
           import hashlib,json
           from pathlib import Path
           source=Path('release-assets')
-          backed=Path('release-redownload')
-          index=json.loads((source/'source-manifest-v091.json').read_bytes())
-          checks={row['filename']:row['sha256'] for row in index['assets']}
-          checks['source-manifest-v091.json']=hashlib.sha256(
+          restored=Path('release-redownload')
+          m=json.loads((source/'source-manifest-v091.json').read_bytes())
+          expected={x['filename']:x['sha256'] for x in m['assets']}
+          expected['source-manifest-v091.json']=hashlib.sha256(
               (source/'source-manifest-v091.json').read_bytes()).hexdigest()
-          actual={p.name for p in backed.iterdir() if p.is_file()}
-          assert actual==set(checks),(actual,set(checks))
-          for name,digest in checks.items():
-              first=(source/name).read_bytes()
-              copy=(backed/name).read_bytes()
-              assert first==copy,'restored release asset differs: '+name
-              assert hashlib.sha256(copy).hexdigest()==digest,'restored SHA differs: '+name
-              print('V091_RESTORED_RELEASE_ASSET_SHA_PASS',name)
-          assert index['whole_original_years_certified']==0
+          assert set(expected)=={p.name for p in restored.iterdir()}
+          assert len(expected)==8 and m['whole_original_years_certified']==0
+          for name,sha in expected.items():
+              b=(restored/name).read_bytes()
+              assert hashlib.sha256(b).hexdigest()==sha
+              print('V091_DRAFT_RELEASE_RESTORED_SHA_OK',name)
           print('V091_EIGHT_DRAFT_RELEASE_ASSETS_VERIFIED_BYTE_IDENTICAL')
           PY
           grep -q '^V091_EIGHT_DRAFT_RELEASE_ASSETS_VERIFIED_BYTE_IDENTICAL$' evidence/v091-release-restoration.log
