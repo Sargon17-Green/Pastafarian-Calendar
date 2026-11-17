@@ -1,0 +1,35 @@
+name: Soak v091 preservation authorization preflight (no release write)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/preserve_original_artifacts_v091.py"
+      - "soak/tests/test_preserve_original_artifacts_v091.py"
+      - ".github/workflows/soak-source-archive-preflight-v091.yml"
+permissions:
+  contents: read
+jobs:
+  archive-approval-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Ten original source archive safety gates (no Fct)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/tests \
+            -p 'test_preserve_original_artifacts_v091.py' -v \
+            2>&1 | tee v091-preservation-preflight.log
+          grep -Eq '^Ran 10 tests ' v091-preservation-preflight.log
+          grep -q '^OK$' v091-preservation-preflight.log
+          echo V091_ARCHIVE_GATE_STATIC_PASS_NO_RELEASE_CREATED
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v091-preservation-static-tests-only
+          path: v091-preservation-preflight.log
+          retention-days: 30
