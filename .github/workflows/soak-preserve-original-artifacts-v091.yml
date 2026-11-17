@@ -3,7 +3,7 @@ on:
   push:
     branches: [qa/soak-readiness-20261114]
     paths:
-      - "soak/control/original_archive_requests/source-1015-1021-v091.json"
+      - "soak/control/original_archive_requests/source-1015-1021-v091*.json"
 concurrency:
   group: soak-v091-original-archive-draft
   cancel-in-progress: false
@@ -49,7 +49,7 @@ jobs:
           python3 -B -m unittest discover -s coordinator/soak/tests \
             -p 'test_preserve_original_artifacts_v091.py' -v \
             2>&1 | tee evidence/v091-static-tests.log
-          grep -Eq '^Ran 10 tests ' evidence/v091-static-tests.log
+          grep -Eq '^Ran 12 tests ' evidence/v091-static-tests.log
           grep -q '^OK$' evidence/v091-static-tests.log
           python3 -B coordinator/soak/runner/preserve_original_artifacts_v091.py \
             --repo-root coordinator --before "$GIT_BEFORE" --after "$GIT_AFTER" \
@@ -59,7 +59,7 @@ jobs:
       - name: Download seven exact GitHub Actions original source ZIPs
         shell: bash
         env:
-          ${{ github.token }}: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           GH_REPO: Sargon17-Green/Pastafarian-Calendar
         run: |
           set -euo pipefail
@@ -100,7 +100,7 @@ jobs:
       - name: Preserve in draft Release, re-download all assets and verify byte identity
         shell: bash
         env:
-          ${{ github.token }}: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           GH_REPO: Sargon17-Green/Pastafarian-Calendar
           RELEASE_TAG: soak-original-fct-source-1015-1021-v091
         run: |

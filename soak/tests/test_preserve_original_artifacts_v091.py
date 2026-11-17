@@ -87,6 +87,18 @@ class ReleaseArchiveAdmission(unittest.TestCase):
                 m.verify_archives(self.root,manifest,Path(d),
                                   Path(d),Path(d))
 
+    def test_approved_new_retry_request_file_accepted(self):
+        path="soak/control/original_archive_requests/source-1015-1021-v091-retry01.json"
+        self.assertEqual(m.check_new_request_path("A\t"+path),path)
+
+    def test_modified_and_wrong_new_request_files_rejected(self):
+        for raw in ("M\tsoak/control/original_archive_requests/source-1015-1021-v091-retry01.json",
+                    "A\tsoak/control/original_archive_requests/random.json",
+                    "A\tsoak/control/original_archive_requests/source-1015-1021-v091-retry999.json",
+                    "A\tsoak/control/original_archive_requests/source-1015-1021-v091-retry01.json\nA\textra"):
+            with self.subTest(raw=raw), self.assertRaises(ValueError):
+                m.check_new_request_path(raw)
+
     def test_archive_tag_and_source_branch_cannot_change(self):
         for k,v in (("release_tag","arbitrary-tag"),
                     ("source_branch","main"),

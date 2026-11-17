@@ -23,7 +23,9 @@ from pinned_original_prefix_v089 import collect, verify_new_request
 from original_generic_source_chunk_ledger_v073 import manifest_for, offline_original_chunk
 from original_chunk_artifact_gate_v072 import audit_pinned_original_chunk
 
-REQUEST_REL = "soak/control/original_archive_requests/source-1015-1021-v091.json"
+REQUEST_RE = re.compile(
+    r"soak/control/original_archive_requests/source-1015-1021-v091(?:-retry[0-9]{2})?\.json\Z"
+)
 TAG = "soak-original-fct-source-1015-1021-v091"
 SCHEMA = "PASTAFARI_SOURCE_ARCHIVE_REQUEST_V091/1"
 MANIFEST_SCHEMA = "PASTAFARI_ORIGINAL_SOURCE_DRAFT_RELEASE_ASSETS_V091/1"
@@ -114,21 +116,29 @@ def git_push_single_added_request(root: Path, before: str, after: str):
         raise ValueError("archive request runner HEAD differs from pushed commit")
     git("merge-base", "--is-ancestor", before, after)
     changed = git("diff", "--name-status", "--no-renames", before, after)
-    if changed != "A\t" + REQUEST_REL:
+    return check_new_request_path(changed)
+
+
+def check_new_request_path(changed: str) -> str:
+    if not changed.startswith("A\t") or changed.count("\n"):
         raise ValueError("archive release requires exactly ONE newly added request file")
+    path = changed[2:]
+    if REQUEST_RE.fullmatch(path) is None:
+        raise ValueError("new request must use approved original archive request/retry path")
+    return path
 
 
 def plan(root: Path, before: str, after: str):
-    git_push_single_added_request(root, before, after)
+    request_path = git_push_single_added_request(root, before, after)
     entries = source_index(root)
-    request = request_data(root / REQUEST_REL)
+    request = request_data(root / request_path)
     validate_request(request, entries, before)
     return {
         "schema": MANIFEST_SCHEMA,
         "release_tag": TAG,
         "source_branch": BRANCH,
         "source_commit_sha": after,
-        "source_request_sha256": hashlib.sha256((root / REQUEST_REL).read_bytes()).hexdigest(),
+        "source_request_sha256": hashlib.sha256((root / request_path).read_bytes()).hexdigest(),
         "original_year": "5000",
         "calculation_day": "-15055671",
         "assets": entries,
