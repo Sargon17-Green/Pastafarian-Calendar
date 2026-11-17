@@ -15,10 +15,10 @@ jobs:
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
       PROJECT_ID: PC-BRANCH-FALSE-ARABIC
-      SOURCE_PIN: 8ab683aee4333ac38056edc4ca64b1904749d8e6
+      SOURCE_PIN: c71a380353400001ccf9fd3296a7eab63530badf
       RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
       # SHA256 of four immutable Git blobs joined by LF and final LF, independently reproduced.
-      ORIGINAL_COMBINED_SHA256: 14da009d3c4ba6c5538f146d0c2d35a897435fee5b5e29bcd4af07d6dd3a9f38
+      ORIGINAL_COMBINED_SHA256: 44c26ba01dc7edd1e3637c79047e3cf6bb76c13b45079ff603af744f0d0b94e4
     steps:
       - uses: actions/checkout@v4
         with:
@@ -149,7 +149,7 @@ jobs:
           assert source.read_text(encoding='utf-8') == text, 'original changed'
           target_sha = hashlib.sha256(target.read_bytes()).hexdigest()
           pathlib.Path('evidence/comment_diagnostic_sha256.txt').write_text(target_sha + '\n', encoding='utf-8')
-          assert target_sha == '14da009d3c4ba6c5538f146d0c2d35a897435fee5b5e29bcd4af07d6dd3a9f38'
+          assert target_sha == '44c26ba01dc7edd1e3637c79047e3cf6bb76c13b45079ff603af744f0d0b94e4'
           print('SOURCE_MIRROR_DIAGNOSTIC_COPY', target_sha, 'substitutions=0')
           PY
           set +e
@@ -171,7 +171,7 @@ jobs:
           import hashlib, pathlib
           source = pathlib.Path('evidence/stage02_discovery01_comment_sanitized_DIAGNOSTIC.false')
           data = source.read_text(encoding='utf-8')
-          assert hashlib.sha256(source.read_bytes()).hexdigest() == '14da009d3c4ba6c5538f146d0c2d35a897435fee5b5e29bcd4af07d6dd3a9f38'
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == '44c26ba01dc7edd1e3637c79047e3cf6bb76c13b45079ff603af744f0d0b94e4'
           lines = data.splitlines(keepends=True)
           out = []
           seen = 0
