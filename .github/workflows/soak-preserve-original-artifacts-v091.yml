@@ -1,0 +1,166 @@
+name: Soak v091 preserve seven original source ZIPs in draft GitHub Release
+on:
+  push:
+    branches: [qa/soak-readiness-20261114]
+    paths:
+      - "soak/control/original_archive_requests/source-1015-1021-v091.json"
+concurrency:
+  group: soak-v091-original-archive-draft
+  cancel-in-progress: false
+permissions:
+  contents: write
+  actions: read
+jobs:
+  approved-original-source-archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-kotlin
+          ref: 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          persist-credentials: false
+      - name: Authorize one new archive request and strict Git source ancestry
+        shell: bash
+        env:
+          GIT_BEFORE: ${{ github.event.before }}
+          GIT_AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$GITHUB_REF" = refs/heads/qa/soak-readiness-20261114
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-kotlin rev-parse HEAD)" = 0c703446d8a3b7435698bd16402ac5fa30e461c9
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-kotlin status --porcelain)"
+          mkdir -m 700 release-assets
+          mkdir -m 700 evidence
+          python3 -B -m unittest discover -s coordinator/soak/tests \
+            -p 'test_preserve_original_artifacts_v091.py' -v \
+            2>&1 | tee evidence/v091-static-tests.log
+          grep -Eq '^Ran 10 tests ' evidence/v091-static-tests.log
+          grep -q '^OK$' evidence/v091-static-tests.log
+          python3 -B coordinator/soak/runner/preserve_original_artifacts_v091.py \
+            --repo-root coordinator --before "$GIT_BEFORE" --after "$GIT_AFTER" \
+            --manifest release-assets/source-manifest-v091.json \
+            | tee evidence/v091-authorization.log
+          grep -q '^V091_ARCHIVE_REQUEST_AUTHORIZED_NO_NATIVE_CALLS=7$' evidence/v091-authorization.log
+      - name: Download seven exact GitHub Actions original source ZIPs
+        shell: bash
+        env:
+          ${{ github.token }}: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > evidence/v091-assets.tsv
+          import json
+          data=json.load(open('release-assets/source-manifest-v091.json'))
+          assert data['schema']=='PASTAFARI_ORIGINAL_SOURCE_DRAFT_RELEASE_ASSETS_V091/1'
+          assert data['whole_original_years_certified']==0
+          for r in data['assets']:
+              print(r['ordinal'],r['artifact_id'],r['run_id'],
+                    r['sha256'],r['filename'],sep='\t')
+          PY
+          while IFS=$'\t' read -r ordinal artifact_id run_id digest filename; do
+            if [ "$run_id" != 0 ]; then
+              test "$(gh api "repos/$GH_REPO/actions/runs/$run_id" --jq '.status')" = completed
+              test "$(gh api "repos/$GH_REPO/actions/runs/$run_id" --jq '.conclusion')" = success
+            fi
+            gh api "repos/$GH_REPO/actions/artifacts/$artifact_id/zip" > "release-assets/$filename"
+            printf '%s  %s\n' "$digest" "release-assets/$filename" | sha256sum -c -
+            echo "V091_PINNED_SOURCE_DOWNLOADED_ORDINAL=$ordinal"
+          done < evidence/v091-assets.tsv
+      - name: Re-audit original sources, archive CRC and v085 dispatch receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' | sha256sum -c -
+          python3 -B coordinator/soak/runner/preserve_original_artifacts_v091.py \
+            --repo-root coordinator \
+            --manifest release-assets/source-manifest-v091.json \
+            --archive-dir release-assets \
+            --python-root original-sources --kotlin-root original-kotlin \
+            --verify-only | tee evidence/v091-raw-archive-verification.log
+          grep -q '^V091_ORIGINAL_ZIP_BYTES_AUDITED_NOT_A_YEAR=7$' evidence/v091-raw-archive-verification.log
+          echo V091_APPROVED_ORIGINAL_SOURCE_BYTES_READY_FOR_ARCHIVE
+      - name: Preserve in draft Release, re-download all assets and verify byte identity
+        shell: bash
+        env:
+          ${{ github.token }}: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+          RELEASE_TAG: soak-original-fct-source-1015-1021-v091
+        run: |
+          set -euo pipefail
+          cat > evidence/release-notes-v091.txt <<'NOTES'
+          ORIGINAL F(c,t) SOURCE ZIP BACKUP — DRAFT / NOT SOFTWARE RELEASE
+          Seven original GitHub Actions archive ZIPs for ordinals 1015..1021,
+          Python REF-41 and Kotlin PROD-KT-CY, c=-15055671, year 5000.
+          Attached manifest contains each SHA-256 and original artifact/run ID.
+          The two converters agree numerically on 14 distinct sampled target days.
+          This is NOT an original full-year soak, nor a canonical oracle or
+          an independent algorithmic-lineage certification. No Windows execution.
+          NOTES
+          if ! gh release view "$RELEASE_TAG" --json isDraft,tagName >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --target "$GITHUB_SHA" \
+              --draft --prerelease \
+              --title "Source evidence 1015-1021 (DRAFT, NO YEAR CREDIT)" \
+              --notes-file evidence/release-notes-v091.txt
+          fi
+          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft')" = true
+          test "$(gh api "repos/$GH_REPO/git/ref/tags/$RELEASE_TAG" --jq '.object.sha')" = "$GITHUB_SHA"
+          for file in release-assets/source-*.zip release-assets/source-manifest-v091.json; do
+            name="$(basename "$file")"
+            if ! gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name' | grep -Fxq "$name"; then
+              gh release upload "$RELEASE_TAG" "$file"
+            fi
+          done
+          mkdir -m 700 release-redownload
+          gh release download "$RELEASE_TAG" --dir release-redownload
+          python3 - <<'PY' 2>&1 | tee evidence/v091-release-restoration.log
+          import hashlib,json
+          from pathlib import Path
+          source=Path('release-assets')
+          backed=Path('release-redownload')
+          index=json.loads((source/'source-manifest-v091.json').read_bytes())
+          checks={row['filename']:row['sha256'] for row in index['assets']}
+          checks['source-manifest-v091.json']=hashlib.sha256(
+              (source/'source-manifest-v091.json').read_bytes()).hexdigest()
+          actual={p.name for p in backed.iterdir() if p.is_file()}
+          assert actual==set(checks),(actual,set(checks))
+          for name,digest in checks.items():
+              first=(source/name).read_bytes()
+              copy=(backed/name).read_bytes()
+              assert first==copy,'restored release asset differs: '+name
+              assert hashlib.sha256(copy).hexdigest()==digest,'restored SHA differs: '+name
+              print('V091_RESTORED_RELEASE_ASSET_SHA_PASS',name)
+          assert index['whole_original_years_certified']==0
+          print('V091_EIGHT_DRAFT_RELEASE_ASSETS_VERIFIED_BYTE_IDENTICAL')
+          PY
+          grep -q '^V091_EIGHT_DRAFT_RELEASE_ASSETS_VERIFIED_BYTE_IDENTICAL$' evidence/v091-release-restoration.log
+          echo V091_DRAFT_RELEASE_PERSISTENT_SOURCE_BACKUP_PASS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v091-durable-source-backup-audit-only
+          path: |
+            evidence/v091-static-tests.log
+            evidence/v091-authorization.log
+            evidence/v091-assets.tsv
+            evidence/v091-raw-archive-verification.log
+            evidence/v091-release-restoration.log
+          if-no-files-found: warn
+          retention-days: 30
