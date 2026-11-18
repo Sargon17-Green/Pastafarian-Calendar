@@ -72,6 +72,7 @@ List<List<int>> independentWords(List<int> lengths) {
       used[j]--;
     }
   }
+
   visit(0);
   return words;
 }
@@ -103,7 +104,13 @@ void projectAllDays(List<int> word, List<int> lengths, int domain) {
     for (var t = 0; t <= day; t++) {
       if (word[t] == id) inclusiveCount++;
     }
-    final cutlet = day < 3 ? 0 : day < 6 ? 1 : day < 9 ? 2 : 3;
+    final cutlet = day < 3
+        ? 0
+        : day < 6
+            ? 1
+            : day < 9
+                ? 2
+                : 3;
     final start = <int>[0, 3, 6, 9][cutlet];
     final date = MonsterFiveFieldCalendar.project(
       yearNumber: year,
@@ -124,18 +131,21 @@ void projectAllDays(List<int> word, List<int> lengths, int domain) {
         'Month canonical index at day $day');
     check(date.dayInMonth == inclusiveCount,
         'Inclusive month prefix at day $day');
-    check(date.cutletName ==
-        SourceLanguageCatalog.cutletText(pieces[cutlet].nameIndex),
+    check(
+        date.cutletName ==
+            SourceLanguageCatalog.cutletText(pieces[cutlet].nameIndex),
         'Hebrew cutlet at day $day');
     check(date.monthName == SourceLanguageCatalog.monthText(names[id - 1]),
         'Hebrew month at day $day');
     final tuple = date.canonicalComponents;
     check(tuple.length == 5, 'Five components at day $day');
-    check(tuple[0] == year &&
-        tuple[1] == pieces[cutlet].nameIndex &&
-        tuple[2] == day - start + 1 &&
-        tuple[3] == names[id - 1] &&
-        tuple[4] == inclusiveCount, 'Numeric tuple at day $day');
+    check(
+        tuple[0] == year &&
+            tuple[1] == pieces[cutlet].nameIndex &&
+            tuple[2] == day - start + 1 &&
+            tuple[3] == names[id - 1] &&
+            tuple[4] == inclusiveCount,
+        'Numeric tuple at day $day');
     projectionCases++;
   }
 }
@@ -175,20 +185,21 @@ void malformedInputs() {
     String? title,
     int openShift = 0,
     int closeShift = 0,
-  }) => <MonsterMeatball>[
-    for (var j = 0; j < cutlets.length; j++)
-      if (j != at)
-        cutlets[j]
-      else
-        MonsterMeatball(
-          number: number ?? cutlets[j].number,
-          intervalCount: cutlets[j].intervalCount,
-          openGate: cutlets[j].openGate + BigInt.from(openShift),
-          closeGate: cutlets[j].closeGate + BigInt.from(closeShift),
-          nameIndex: index ?? cutlets[j].nameIndex,
-          name: title ?? cutlets[j].name,
-        ),
-  ];
+  }) =>
+      <MonsterMeatball>[
+        for (var j = 0; j < cutlets.length; j++)
+          if (j != at)
+            cutlets[j]
+          else
+            MonsterMeatball(
+              number: number ?? cutlets[j].number,
+              intervalCount: cutlets[j].intervalCount,
+              openGate: cutlets[j].openGate + BigInt.from(openShift),
+              closeGate: cutlets[j].closeGate + BigInt.from(closeShift),
+              nameIndex: index ?? cutlets[j].nameIndex,
+              name: title ?? cutlets[j].name,
+            ),
+      ];
 
   reject(() => call(requested: open), 'Open boundary excluded');
   reject(() => call(requested: end + BigInt.one), 'Close boundary exceeded');
@@ -235,8 +246,10 @@ void main() {
     final lengths = domains[d];
     final words = independentWords(lengths);
     check(words.length == expectedCounts[d], 'Exhaustive domain count $d');
-    check(MonsterMonthWeaveCounter.countWholeWeaves(lengths) ==
-        BigInt.from(words.length), 'Production count vs brute $d');
+    check(
+        MonsterMonthWeaveCounter.countWholeWeaves(lengths) ==
+            BigInt.from(words.length),
+        'Production count vs brute $d');
     final ranks = <int>{1, (words.length + 1) ~/ 2, words.length};
     var seed = 170101 + d * 97;
     while (ranks.length < 67) {
@@ -248,7 +261,8 @@ void main() {
     for (final rank in selected) {
       final expected = words[rank - 1];
       final actual = MonsterMonthWeavePlanner.unrankFull(
-        lengths, BigInt.from(rank),
+        lengths,
+        BigInt.from(rank),
       );
       check(same(actual, expected), 'Independent full unrank $d/$rank');
       rankProbes++;
@@ -256,8 +270,10 @@ void main() {
     }
     reject(() => MonsterMonthWeavePlanner.unrankFull(lengths, BigInt.zero),
         'Zero rank $d');
-    reject(() => MonsterMonthWeavePlanner.unrankFull(
-        lengths, BigInt.from(words.length + 1)), 'Too-large rank $d');
+    reject(
+        () => MonsterMonthWeavePlanner.unrankFull(
+            lengths, BigInt.from(words.length + 1)),
+        'Too-large rank $d');
   }
   malformedInputs();
   check(bruteWords == 304920, '304920 independently brute words');
@@ -268,8 +284,8 @@ void main() {
   check(checks >= 30000, 'At least 30000 assertions');
   watch.stop();
   check(watch.elapsedMilliseconds <= 90000, 'Under 90-second QA budget');
-  print('DISCOVERY17_SYNTHETIC_TIME_MS=' +
-      watch.elapsedMilliseconds.toString());
+  print(
+      'DISCOVERY17_SYNTHETIC_TIME_MS=' + watch.elapsedMilliseconds.toString());
   print('DISCOVERY17_COVERAGE_PASS; checks=$checks; '
       'raw_words=$bruteWords; valid_words=$validWords; '
       'rank_probes=$rankProbes; projection_cases=$projectionCases; '
