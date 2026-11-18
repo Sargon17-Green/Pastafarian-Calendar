@@ -58,7 +58,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(grep -o '__YEAR_CASE__' sql/test/146_stage25_calendar_date_preflight.sql | wc -l)" -eq 1
+          test "$(grep -o '__YEAR_CASE__' sql/test/146_stage25_calendar_date_preflight.sql | wc -l)" -eq 2
           sed "s/__YEAR_CASE__/$YEAR_CASE/g" sql/test/146_stage25_calendar_date_preflight.sql > slice25-preflight-evidence/preflight.sql
           sha256sum slice25-preflight-evidence/preflight.sql > slice25-preflight-evidence/generated-sha256.txt
           args=()
