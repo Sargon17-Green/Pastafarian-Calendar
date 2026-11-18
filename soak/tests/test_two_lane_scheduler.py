@@ -75,6 +75,73 @@ class TwoLaneSchedulerTests(unittest.TestCase):
         s.completed_years.add(1)
         self.assertEqual(s.contiguous_verified_years,3)
 
+    def test_time_backwards_does_not_erase_original_live_worker(self):
+        s=TwoLaneCoordinator([1,2],["a","b"],{1:2,2:2})
+        child=s.dispatch(10)[0]
+        with self.assertRaisesRegex(ValueError,"backward"):
+            s.finish("normal",9,verified=True)
+        self.assertIs(s.active["normal"],child)
+        self.assertEqual(s.count_active(),1)
+        self.assertEqual(s.dispatch(11),[])
+        self.assertEqual(s.verified_comparisons_completed,0)
+        self.assertTrue(s.halt_new_work)
+
+    def test_invalid_dispatch_and_overdue_clock_do_not_mutate(self):
+        s=TwoLaneCoordinator([1],["a","b"],{1:1})
+        for bad in (float("nan"),float("inf"),-float("inf"),True,"1"):
+            with self.subTest(bad=repr(bad)),self.assertRaises(ValueError):
+                s.dispatch(bad)
+            self.assertEqual(s.count_active(),0)
+        item=s.dispatch(0)[0]
+        with self.assertRaises(ValueError):
+            s.inspect_overdue(float("nan"))
+        self.assertIs(s.active["normal"],item)
+        self.assertFalse(item.overdue)
+
+    def test_nonfinite_finish_halts_and_retains_worker_identity(self):
+        s=TwoLaneCoordinator([1],["a","b"],{1:1})
+        item=s.dispatch(0)[0]
+        with self.assertRaisesRegex(ValueError,"timestamp invalid"):
+            s.finish("normal",float("inf"),verified=True)
+        self.assertIs(s.active["normal"],item)
+        self.assertTrue(s.halt_new_work)
+        self.assertEqual(s.contiguous_verified_years,0)
+
+    def test_nonboolean_completion_receipt_never_credits_year(self):
+        s=TwoLaneCoordinator([1],["a","b"],{1:1})
+        item=s.dispatch(0)[0]
+        with self.assertRaisesRegex(ValueError,"actual boolean"):
+            s.finish("normal",1,verified="yes")
+        self.assertIs(s.active["normal"],item)
+        self.assertEqual(s.verified_comparisons_completed,0)
+        self.assertTrue(s.halt_new_work)
+
+    def test_engine_order_corruption_does_not_free_or_relaunch_worker(self):
+        s=TwoLaneCoordinator([1,2],["a","b"],{1:1,2:1})
+        item=s.dispatch(0)[0]
+        s.year_next_index[1]=1
+        with self.assertRaisesRegex(AssertionError,"unexpected engine order"):
+            s.finish("normal",1,verified=True)
+        self.assertIs(s.active["normal"],item)
+        self.assertEqual(s.dispatch(2),[])
+        self.assertEqual(s.verified_comparisons_completed,0)
+        self.assertTrue(s.halt_new_work)
+
+    def test_mismatch_frees_finished_lane_but_never_kills_other_worker(self):
+        from collections import deque
+        s=TwoLaneCoordinator([1,2],["a","b"],{1:1,2:1})
+        s.queues["slow"]=deque([Job(2,"a",1)])
+        s.queues["normal"]=deque([Job(1,"a",1)])
+        pair=s.dispatch(0)
+        self.assertEqual(len(pair),2)
+        other=s.active["slow"]
+        s.finish("normal",1,verified=False,incident={"type":"FIRST_MISMATCH"})
+        self.assertIsNone(s.active["normal"])
+        self.assertIs(s.active["slow"],other)
+        self.assertTrue(s.halt_new_work)
+        self.assertEqual(s.dispatch(2),[])
+        self.assertEqual(s.verified_day_pair_comparisons,0)
+
     def test_invalid_configuration_rejected(self):
         with self.assertRaises(ValueError):
             TwoLaneCoordinator([1,1],["a","b"],{1:3})

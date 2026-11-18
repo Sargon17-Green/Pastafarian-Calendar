@@ -7,6 +7,7 @@ processes. Production Popen/Windows Job Object supervision is a later gate.
 from __future__ import annotations
 from collections import defaultdict, deque
 from dataclasses import dataclass
+import math
 from typing import Optional
 from year_validator import robust_slow_threshold
 
@@ -76,7 +77,17 @@ class TwoLaneCoordinator:
             q.append(job)
         return None
 
+    @staticmethod
+    def _valid_clock_value(now: float) -> None:
+        try:
+            valid = type(now) in (int, float) and math.isfinite(now)
+        except OverflowError:
+            valid = False
+        if not valid:
+            raise ValueError("scheduler timestamp must be a finite numeric value")
+
     def dispatch(self, now: float) -> list[Active]:
+        self._valid_clock_value(now)
         if self.halt_new_work:
             return []
         started = []
@@ -96,6 +107,7 @@ class TwoLaneCoordinator:
         return started
 
     def inspect_overdue(self, now: float) -> None:
+        self._valid_clock_value(now)
         item = self.active["normal"]
         if item is None:
             return
@@ -121,10 +133,39 @@ class TwoLaneCoordinator:
         if lane not in self.active or self.active[lane] is None:
             raise ValueError("finish called for non-running lane")
         item = self.active[lane]
-        self.active[lane] = None
         job = item.job
+
+        # A malformed completion must not free the lane. The real child may
+        # still be alive: losing its handle would permit a duplicate dispatch.
+        # Fail closed without ever killing, restarting, or releasing that child.
+        def protocol_violation(reason: str, *, wrong_order: bool = False) -> None:
+            self.halt_new_work = True
+            self.incident = {"type": "INVALID_SCHEDULER_COMPLETION",
+                             "reason": reason, "year": job.year, "engine": job.engine,
+                             "lane": lane}
+            self.events.append({"type": "HALTED_ON_INVALID_SCHEDULER_COMPLETION",
+                                "reason": reason, "year": job.year, "engine": job.engine})
+            if wrong_order:
+                raise AssertionError(reason)
+            raise ValueError(reason)
+
+        try:
+            self._valid_clock_value(now)
+        except ValueError:
+            protocol_violation("completion timestamp invalid")
         if now < item.started:
-            raise ValueError("time moved backward")
+            protocol_violation("completion time moved backward")
+        if type(verified) is not bool:
+            protocol_violation("verified must be an actual boolean")
+        if incident is not None and type(incident) is not dict:
+            protocol_violation("incident must be a dictionary")
+        index = self.year_next_index.get(job.year)
+        if (type(index) is not int or index >= len(self.engines) or
+                self.engines[index] != job.engine):
+            protocol_violation("unexpected engine order", wrong_order=True)
+
+        # Only a structurally valid completion releases the logical lane.
+        self.active[lane] = None
         if not verified or incident is not None:
             self.halt_new_work = True
             self.incident = incident or {"type": "INVALID_EVIDENCE", "year": job.year,
@@ -134,9 +175,6 @@ class TwoLaneCoordinator:
             return
         duration = now - item.started
         self.history[(job.engine, job.expected_days)].append(duration)
-        index = self.year_next_index[job.year]
-        if self.engines[index] != job.engine:
-            raise AssertionError("unexpected engine order")
         self.year_next_index[job.year] = index + 1
         # Baseline output is not counted as a *comparison*.
         if index > 0:
