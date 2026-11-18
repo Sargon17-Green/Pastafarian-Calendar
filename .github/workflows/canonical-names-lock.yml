@@ -3770,7 +3770,7 @@ jobs:
           set -euo pipefail
           mkdir -p logs/stage19
           git rev-parse HEAD > logs/stage19/source.txt
-          perl -e 'die "Perl 5.40+ required\\n" if $] < 5.040; print "$^V\\n"' > logs/stage19/perl-version.txt
+          perl -e 'die "Perl 5.40+ required\n" if $] < 5.040; print "$^V\n"' > logs/stage19/perl-version.txt
           perl -Ilib -c lib/Pastafari/Monster/WeavingPrimitive.pm 2> logs/stage19/syntax.stderr
           perl -Ilib -c t/64_stage19_weaving_ten_months.t 2>> logs/stage19/syntax.stderr
           perl -Ilib -c t/65_stage19_weaving_ten_months_large_profiles.t 2>> logs/stage19/syntax.stderr
@@ -3791,7 +3791,7 @@ jobs:
           )
           ec=$?
           set -e
-          printf '%s\\n' "$ec" > logs/stage19/test.exit
+          printf '%s\n' "$ec" > logs/stage19/test.exit
           cat logs/stage19/test.stdout
           cat logs/stage19/test.stderr >&2
           test "$ec" -eq 0
