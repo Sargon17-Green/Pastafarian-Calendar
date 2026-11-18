@@ -426,9 +426,103 @@
                   (:rang keuze) (:kosten keuze)
                   (conj prefix (bigint (:maand keuze))))))))))
 
-;; DIAG12: parametrische opt-in prefixselectie, geen volledige weving en geen budgetverhoging.
+;; DIAG17: deel de lineaire invoegtransformatie tussen actieve kandidaatmaanden.
+;; Voor j <= geopend blijven de ongeopende maandstaart en het aantal actieve
+;; dagen na één stap gelijk. Alleen de actieve basisfactor verschilt per kandidaat.
+(defn- invoegfactor [restvector geopend actieve-dagen]
+  (loop [i geopend totaal actieve-dagen frequenties nil vrij? true]
+    (if (= i (count restvector))
+      (if (nil? frequenties) 1N (reduce +' 0N frequenties))
+      (let [b (nth restvector i)
+            nieuw (toevoegen frequenties vrij? 1N totaal b)]
+        (recur (inc i) (+ totaal b) nieuw false)))))
+
+(defn- prefix-legale-kandidaten [restvector geopend gesloten]
+  (filterv
+    (fn [maand]
+      (let [aantal (nth restvector (dec maand))]
+        (and (pos? aantal)
+             (or (> aantal 1) (= maand (inc gesloten))))))
+    (range 1 (inc (min (count restvector) (inc geopend))))))
+
+(defn- prefix-gedeelde-raming [restvector geopend]
+  (let [resterende-dagen (dec (reduce +' 0N restvector))]
+    (+' 1N (*' (- (count restvector) geopend)
+                (inc resterende-dagen)))))
+
+(defn- prefix-actieve-blokken [restvector geopend gesloten kandidaten]
+  (let [informatie
+        (mapv
+          (fn [maand]
+            (let [aantal (nth restvector (dec maand))
+                  volgende (update restvector (dec maand) dec)
+                  nieuw-gesloten (if (= aantal 1) (inc gesloten) gesloten)
+                  basis (alleen-laatste volgende nieuw-gesloten geopend)]
+              {:maand maand
+               :restvector volgende
+               :geopend geopend
+               :gesloten nieuw-gesloten
+               :dagen (:dagen basis)
+               :basis (:aantal basis)}))
+          kandidaten)
+        actieve-dagen (:dagen (first informatie))]
+    (when-not (every? #(= actieve-dagen (:dagen %)) informatie)
+      (fout :bounded-prefix-shared-factor-invariant))
+    (let [factor (invoegfactor restvector geopend actieve-dagen)]
+      (mapv (fn [info]
+              (assoc info :blok (*' (:basis info) factor)))
+            informatie))))
+
+(defn- prefix-nieuw-blok [restvector geopend gesloten]
+  (let [maand (inc geopend)
+        aantal (nth restvector geopend)
+        volgende (update restvector geopend dec)
+        nieuw-geopend (inc geopend)
+        nieuw-gesloten (if (= aantal 1) (inc gesloten) gesloten)
+        basis (alleen-laatste volgende nieuw-gesloten nieuw-geopend)
+        factor (invoegfactor volgende nieuw-geopend (:dagen basis))]
+    {:maand maand
+     :restvector volgende
+     :geopend nieuw-geopend
+     :gesloten nieuw-gesloten
+     :blok (*' (:aantal basis) factor)}))
+
+(defn- prefix-volgende-keuze
+  [restvector geopend gesloten huidige-rang begroting kosten]
+  (let [kandidaten (prefix-legale-kandidaten restvector geopend gesloten)
+        actieve (filterv #(<= % geopend) kandidaten)
+        nieuw-maand? (boolean (some #(= % (inc geopend)) kandidaten))
+        actieve-kosten
+        (if (seq actieve)
+          (let [nieuw (+' kosten (prefix-gedeelde-raming restvector geopend))]
+            (when (> nieuw begroting)
+              (fout :bounded-prefix-budget-unproven))
+            nieuw)
+          kosten)
+        blokken (if (seq actieve)
+                  (prefix-actieve-blokken restvector geopend gesloten actieve)
+                  [])]
+    (loop [over blokken r huidige-rang]
+      (if (seq over)
+        (let [blok (first over)]
+          (if (> r (:blok blok))
+            (recur (rest over) (-' r (:blok blok)))
+            (assoc blok :rang r :kosten actieve-kosten)))
+        (if nieuw-maand?
+          (let [nieuw-geopend (inc geopend)
+                nieuw-kosten
+                (+' actieve-kosten
+                    (prefix-gedeelde-raming restvector nieuw-geopend))]
+            (when (> nieuw-kosten begroting)
+              (fout :bounded-prefix-budget-unproven))
+            (let [blok (prefix-nieuw-blok restvector geopend gesloten)]
+              (if (> r (:blok blok))
+                (fout :bounded-prefix-invalid-count)
+                (assoc blok :rang r :kosten nieuw-kosten))))
+          (fout :bounded-prefix-invalid-count))))))
+
 (defn prefix-op-rang-begrensd
-  "Exact lexicografisch prefix op positie 1..(N-1), cumulatieve bovengrens <=5000000."
+  "Exact lexicografisch prefix op positie 1..(N-1), gedeelde invoegfactoren, cumulatieve bovengrens <=5000000."
   ([lengtes rang positie]
    (prefix-op-rang-begrensd lengtes rang positie hoogste-begroting))
   ([lengtes rang positie begroting]
@@ -459,27 +553,8 @@
               :prefix-cell-upper-bound kosten
               :date-proof-scope :bounded-prefix-only
               :month-weaving-computed? false})
-           (let [keuze
-                 (loop [maand 1 r huidige-rang verbruik kosten]
-                   (if (> maand (min m (inc geopend)))
-                     (fout :bounded-prefix-invalid-count)
-                     (let [aantal (nth restvector (dec maand))]
-                       (if (or (zero? aantal)
-                               (and (= aantal 1)
-                                    (not= maand (inc gesloten))))
-                         (recur (inc maand) r verbruik)
-                         (let [volgende (update restvector (dec maand) dec)
-                               open (max geopend maand)
-                               dicht (if (= aantal 1) (inc gesloten) gesloten)
-                               nieuw (+' verbruik (raming volgende open))]
-                           (when (> nieuw begroting)
-                             (fout :bounded-prefix-budget-unproven))
-                           (let [blok (tel-rest volgende open dicht)]
-                             (if (> r blok)
-                               (recur (inc maand) (-' r blok) nieuw)
-                               {:maand maand :restvector volgende
-                                :geopend open :gesloten dicht
-                                :rang r :kosten nieuw})))))))]
+           (let [keuze (prefix-volgende-keuze
+                         restvector geopend gesloten huidige-rang begroting kosten)]
              (recur (inc plaats) (:restvector keuze)
                     (:geopend keuze) (:gesloten keuze)
                     (:rang keuze) (:kosten keuze)

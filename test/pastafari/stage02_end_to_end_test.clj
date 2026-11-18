@@ -1652,8 +1652,8 @@
                  (conj stappen {:positie p :kosten nieuw
                                 :toevoeging bijdrage})))))))
 
-(deftest diag16-kleine-kosten-en-strikte-budgetgrenzen
-  (testing "Independent cell accounting for 4 small exhaustive families."
+(deftest diag16-historische-kostenbasis-kleine-families
+  (testing "Independent old per-candidate accounting baseline for four small families."
     (doseq [lengten [[4 4] [4 4 4] [4 5 4] [5 4 4]]
             :let [familie (orakel/weaving-family lengten)
                   aantal ((:count familie))
@@ -1661,21 +1661,12 @@
             r (distinct [1N (quot (inc aantal) 2N) aantal])
             p (distinct [2 (min 10 laatste) laatste])]
       (let [prefix (mapv bigint (take p ((:unrank1 familie) r)))
-            kosten (:kosten (diag16-celrekening lengten prefix))
-            bewijs (rang/prefix-op-rang-begrensd
-                    lengten r p 5000000N)]
-        (is (= prefix (:month-prefix bewijs)))
-        (is (= kosten (:prefix-cell-upper-bound bewijs))
-            (str "DIAG16 " lengten " rank=" r " position=" p))
-        (is (<= 0N kosten 5000000N))
-        (when (> kosten 1N)
-          (let [code (try
-                       (rang/prefix-op-rang-begrensd
-                        lengten r p (dec kosten))
-                       nil
-                       (catch clojure.lang.ExceptionInfo e
-                         (:code (ex-data e))))]
-            (is (= :bounded-prefix-budget-unproven code))))))))
+            rekening (diag16-celrekening lengten prefix)
+            kosten (:kosten rekening)]
+        (is (= p (count prefix)))
+        (is (= 1N (first prefix)))
+        (is (= (dec p) (count (:stappen rekening))))
+        (is (<= 0N kosten 5000000N))))))
 
 (deftest diag16-drie-echte-tiende-dag-kostengetuigen
   (testing "Three real calculation days: identify first budget overflow."
@@ -1700,20 +1691,45 @@
                     lengten weefrang 10)
             rekening (diag16-celrekening lengten prefix)
             overloop (first (filter #(> (:kosten %) 5000000N)
-                                    (:stappen rekening)))
-            code (try
-                   (projectie/kies-prefixdag-zonder-volledige-weving
-                    @lijn berekening doel 128N 5000000N)
-                   nil
-                   (catch clojure.lang.ExceptionInfo e
-                     (:code (ex-data e))))]
+                                    (:stappen rekening)))]
         (is (= 10 (count prefix)))
         (is (= totaal (weving/aantal-wevingen-groot lengten)))
         (is (> (:kosten rekening) 5000000N))
         (is (some? overloop))
-        (is (= :bounded-prefix-budget-unproven code))
-        (println "DISCOVERY24 DIAG16 onafhankelijke kostengetuige:"
+        (println "DISCOVERY24 DIAG16 historische kostenbasis per kandidaat:"
                  {:berekening berekening :doel doel
                   :cumulatief (:kosten rekening)
                   :eerste-overschrijding (:positie overloop)
-                  :budget 5000000N :code code})))))
+                  :budget 5000000N :methode :oude-per-kandidaat-raming})))))
+
+
+;; DIAG17: gedeelde invoegfactoren moeten dezelfde lexicografische prefix
+;; geven als de onafhankelijke volledige kleine woorden, met strikte budgetgrens.
+(deftest diag17-gedeelde-factor-kosten-en-strikte-grenzen
+  (testing "Vier normatieve families, eerste/midden/laatste rang en diepe prefixposities."
+    (doseq [[lengten totaal]
+            [[[4 4] 20N] [[4 4 4] 1301N]
+             [[4 5 4] 3499N] [[5 4 4] 3101N]]
+            :let [familie (orakel/weaving-family lengten)
+                  laatste (dec (reduce + lengten))]
+            rangnummer (distinct [1N (quot (inc totaal) 2N) totaal])
+            positie (distinct [2 (min 10 laatste) laatste])]
+      (let [verwacht (mapv bigint
+                           (take positie ((:unrank1 familie) rangnummer)))
+            bewijs (rang/prefix-op-rang-begrensd
+                    lengten rangnummer positie 5000000N)
+            kosten (:prefix-cell-upper-bound bewijs)
+            code (when (> kosten 1N)
+                   (try
+                     (rang/prefix-op-rang-begrensd
+                      lengten rangnummer positie (dec kosten))
+                     nil
+                     (catch clojure.lang.ExceptionInfo e
+                       (:code (ex-data e)))))]
+        (is (= verwacht (:month-prefix bewijs)))
+        (is (= (bigint positie) (:prefix-position bewijs)))
+        (is (= :bounded-prefix-only (:date-proof-scope bewijs)))
+        (is (false? (:month-weaving-computed? bewijs)))
+        (is (<= 0N kosten 5000000N))
+        (when (> kosten 1N)
+          (is (= :bounded-prefix-budget-unproven code)))))))
