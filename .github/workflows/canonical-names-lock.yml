@@ -114,3 +114,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage10-native-hidden-grind.yml
     permissions:
       contents: read
+
+  false-arabic-stage11-visible-grind:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-visible50]')
+    uses: ./.github/workflows/false-arabic-stage11-native-visible-grind.yml
+    permissions:
+      contents: read
