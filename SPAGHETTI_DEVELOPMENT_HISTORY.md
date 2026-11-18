@@ -903,3 +903,27 @@ Stage52 repaired SHA 1d56e975270e926f2e2c39593b2f4254e2ba872d: Actions #41503586
 ## 2026-11-03 — Stage53 Native GREEN; Stage54 / VERIFICATION31 opened
 
 Stage53 at fc901da8e26480f6ab3ba7c1a96e5735fd3ff3e4: Actions #41523893343 completed/success 24/24. PHP8.3.36/64-bit job #125546545856: lint PASS, checks=81, cases=4, faults=16, recovered=16, baselines=4, exit0, empty stderr. Evidence #13181070486 ZIP SHA256 8350ad6e25ceaffeafd001c625bbb31f70c1323aab99509d75adf0eeaf73f5ec. Closure artifacts/STAGE53_VERIFICATION30_NATIVE_CLOSURE_2026-11-03.md. New test-only Stage54 fourth-hop isolation (depths four/five and per-request gate callback ordinal 9/10) suppresses fifth hop and requires clean recovery. No expected-red predeclared; native results pending, no production/main/merge.
+
+## 2026-11-18 — Stage56 B3 Native GREEN; Phase B4 ranker opened
+
+B3 on exact SHA 2f294c03645c37857b87188cd0122eef82f4316e: Actions #44375433187 completed/success 30/30.
+Dedicated PHP 8.3.36/64-bit job #135053247694: five lints PASS;
+B1 vectors=120, prefixes=18302, words=3940, rejected=6;
+B3 vectors=120, prefixes=18302, branches=18182, words=3940,
+invalid=8, huge=1; exit=0, stderr empty. Artifact #14463250140
+contains exact PROJECT_ID/SHA, ZIP CRC PASS, SHA256
+dc7c5b12259b45e532e673a8226ff46ba9557e782f7bb60fa6ac16bdfeb1ee73.
+B3 is accepted; Stage56 overall is not.
+
+Phase B4 adds opt-in exact lexicographic rank/unrank through one
+shared B3 sibling-block computation per prefix. This reduces the
+arithmetic upper bound from B2 O(m^2 L^2) to O(m L^2), but is not
+a state-updatable adjoint and is not yet a 512MiB/900s actual-year
+performance claim. Exhaustive Native DFS differential and large
+BigInt roundtrips are wired in a new PHP 8.3 job. No PATCH22/PATCH23
+integration, no main/merge.
+
+The actual-year provider remains absent: DateTuplePatch23 accepts
+a caller-injected yearStructureProvider; YearStructureSlices56 does
+not build year records or weaving; no production YearStructureProvider
+exists in src/Patches. Years 4999/5000/5001 are therefore not profiled.
