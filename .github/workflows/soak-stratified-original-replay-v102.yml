@@ -1,0 +1,117 @@
+name: Soak v102 re-audit four original native source sample ZIP and CPU/RSS (no year)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - 'soak/control/stratified_original_v101_pin_v102.json'
+      - 'soak/runner/replay_stratified_original_v102.py'
+      - 'soak/process_tests/test_stratified_original_replay_v102.py'
+      - '.github/workflows/soak-stratified-original-replay-v102.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  reverify-original-evidence-not-source-rerun:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-typescript
+          ref: cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          persist-credentials: false
+      - name: Verify completed native source run and exact archived ZIP
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-typescript rev-parse HEAD)" = cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          test "$(git -C original-typescript rev-parse HEAD:src)" = e733eb4e82f15efc27f294e09aff2e588b4ea06f
+          test -z "$(git -C original-python status --porcelain)"
+          test -z "$(git -C original-typescript status --porcelain)"
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py' | sha256sum -c -
+          echo 'a611f6b99bf982db7e6f3bbb3ac7b59b2ef9596993fe2f041dbf299d105fa030  original-typescript/src/postStage55FinalDate.ts' | sha256sum -c -
+          echo '3b53acf4f70f5d49096e1783ab703073b571007f751643b2d42af0552f57bff6  original-typescript/src/sourceLanguageCatalog.ts' | sha256sum -c -
+          test "$(gh api "repos/$GH_REPO/actions/runs/44392067310" --jq '.status')" = completed
+          test "$(gh api "repos/$GH_REPO/actions/runs/44392067310" --jq '.conclusion')" = success
+          mkdir -m 700 evidence
+          gh api "repos/$GH_REPO/actions/artifacts/14469537094/zip" \
+            > evidence/stratified-original-v101.zip
+          echo 'bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1  evidence/stratified-original-v101.zip' | sha256sum -c -
+          test "$(wc -c < evidence/stratified-original-v101.zip)" -eq 24119
+          echo V102_REAL_ORIGINAL_SAMPLE_ARCHIVE_AUTHENTICATED
+      - name: Parse verifier modules and run ten strict tamper and replay tests
+        shell: bash
+        env:
+          PASTAFARI_V102_SOURCE_ZIP: evidence/stratified-original-v101.zip
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in (
+              "soak/runner/replay_stratified_original_v102.py",
+              "soak/runner/audit_original_sample_v101.py",
+              "soak/runner/audit_ts_original_v094.py",
+              "soak/process_tests/test_stratified_original_replay_v102.py",
+          ):
+              ast.parse((Path("coordinator")/path).read_text(encoding="utf8"))
+          print("V102_REPLAY_PYTHON_SOURCE_SYNTAX_GATE_PASS")
+          PY
+          PYTHONPATH=coordinator/soak/runner python3 -B -m unittest discover \
+            -s coordinator/soak/process_tests \
+            -p 'test_stratified_original_replay_v102.py' -v \
+            2>&1 | tee evidence/v102-strict-replay-tests.log
+          grep -Eq '^Ran 10 tests ' evidence/v102-strict-replay-tests.log
+          grep -q '^OK$' evidence/v102-strict-replay-tests.log
+          echo V102_TEN_MUTATION_REPLAY_TESTS_PASS
+      - name: Independently re-audit all four original dates and GNU CPU/RSS receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 -B \
+            coordinator/soak/runner/replay_stratified_original_v102.py \
+            --source-zip evidence/stratified-original-v101.zip \
+            --verdict-out evidence/v102-replayed-source-performance-verdict.json \
+            2>&1 | tee evidence/v102-real-source-replay.log
+          grep -q '^V102_FOUR_ORIGINAL_SOURCE_PAIRS_REPLAY_VERIFIED_NOT_YEAR$' evidence/v102-real-source-replay.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('evidence/v102-replayed-source-performance-verdict.json').read_bytes())
+          assert data['status']=='FOUR_SOURCE_ORIGINAL_PAIRS_REPLAY_PASS_NOT_YEAR'
+          assert data['zip_members_checked']==53
+          assert data['pairs_checked']==4 and data['five_fields_checked']==20
+          assert data['first_mismatch'] is None
+          assert data['whole_source_years_certified']==0
+          assert data['ten_thousand_years_certified']==0
+          assert data['algorithmic_independence_certified'] is False
+          assert data['windows_resource_admission_certified'] is False
+          print("V102_FOUR_NATIVE_SOURCE_PAIRS_AND_TIME_RSS_REPLAY_PASS_NOT_YEAR")
+          PY
+      - name: Preserve original-source evidence replay (no native calls)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v102-frozen-original-native-sample-replay-not-year
+          path: |
+            evidence/v102-strict-replay-tests.log
+            evidence/v102-real-source-replay.log
+            evidence/v102-replayed-source-performance-verdict.json
+          if-no-files-found: warn
+          retention-days: 30
