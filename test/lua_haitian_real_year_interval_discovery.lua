@@ -144,7 +144,7 @@ for _, offset in ipairs(OFFSETS) do
             local monthCount = minimumMonths + toNumber(O.chooseRank(stream, B.from(maximumMonths - minimumMonths + 1))) - 1
             local stateUpper = compositionStateUpperBound(length, monthCount)
 
-            local admitted = monthCount <= MAX_MONTHS and stateUpper <= MAX_COMPOSITION_STATES
+            local staticallyAdmitted = monthCount <= MAX_MONTHS and stateUpper <= MAX_COMPOSITION_STATES
             local reason = "ADMITTED"
             if monthCount > MAX_MONTHS then
                 reason = "SELECTED_MONTH_COUNT_OVER_CAP"
@@ -167,11 +167,11 @@ for _, offset in ipairs(OFFSETS) do
                 "maximumMonths=" .. maximumMonths,
                 "selectedMonthCount=" .. monthCount,
                 "compositionStateUpper=" .. stateUpper,
-                "admitted=" .. (admitted and "1" or "0"),
+                "admitted=" .. (staticallyAdmitted and "1" or "0"),
                 "reason=" .. reason
             }, "|"))
 
-            if admitted then
+            if staticallyAdmitted then
                 admitted = {
                     anchorOffset = offset,
                     calculationDay = calculationDay,
