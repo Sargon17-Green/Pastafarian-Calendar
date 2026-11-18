@@ -1,0 +1,101 @@
+{
+  "algorithmic_independence_certified": false,
+  "artifact": {
+    "filename": "soak-v101-serial-four-point-original-source-performance-not-year.zip",
+    "id": 14469537094,
+    "zip_bytes": 24119,
+    "zip_members": 53,
+    "zip_sha256": "bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1"
+  },
+  "calculation_day": "-15055671",
+  "distinct_source_target_days_total": 17,
+  "first_mismatch": null,
+  "full_original_years_certified": 0,
+  "new_unique_targets_from_this_run": 3,
+  "ordered_target_days": [
+    "-15055671",
+    "-15055658",
+    "-15056671",
+    "-15054671"
+  ],
+  "original_day_pair_comparisons": 4,
+  "raw_receipt_sha256": "8c3e8e1bc36c117c198096ef91689f9971800b7e8daa3075c7c83a8f4bdcfe3d",
+  "rows": [
+    {
+      "fields": [
+        "5000",
+        10,
+        503,
+        20,
+        56
+      ],
+      "native_raw_sha256": {
+        "REF-41": "bbad31d4bbc177c9c002423ccc3134dcb052c2eeff8e06290bb76b2c962c9173",
+        "TS-MR": "a0f3a261f8247361d284420984fa6c6a1da84a4075374e89039e3b681d948e5f"
+      },
+      "target_day": "-15055671"
+    },
+    {
+      "fields": [
+        "5000",
+        14,
+        13,
+        3,
+        69
+      ],
+      "native_raw_sha256": {
+        "REF-41": "76196cda04c12f659686397cb9cd8810a4d4342b33fe0ce606d79269d6c5a73b",
+        "TS-MR": "5e09187ddfc72b954a552ee1a09a91c2a845bcf2c39c8aff8ee9cc28895e3bf6"
+      },
+      "target_day": "-15055658"
+    },
+    {
+      "fields": [
+        "5000",
+        17,
+        273,
+        20,
+        29
+      ],
+      "native_raw_sha256": {
+        "REF-41": "77e6e8cab20424c58fc0fb07668867df0321356543d3b3d8d387938776639604",
+        "TS-MR": "35789549eef57e947634353cbe3117565e901ca01f9b3efe32520e63a119a086"
+      },
+      "target_day": "-15056671"
+    },
+    {
+      "fields": [
+        "5000",
+        14,
+        1000,
+        23,
+        36
+      ],
+      "native_raw_sha256": {
+        "REF-41": "5d5b54092378f646ee2978e25697570997e61f5bd87518f077b48881e3e48ca0",
+        "TS-MR": "40086d02305f1a81fce27dc64fb3a98e5e62a2f398cf11c41ad032cf76b299e6"
+      },
+      "target_day": "-15054671"
+    }
+  ],
+  "run": {
+    "conclusion": "success",
+    "head_sha": "749d8d9c9b74889d00135f4b10c6781ad124d42c",
+    "id": 44392067310
+  },
+  "schema": "PASTAFARI_STRATIFIED_ORIGINAL_SOURCE_PIN_V102/1",
+  "source_commits": {
+    "REF-41": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "TS-MR": "cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0"
+  },
+  "source_source_sha256": {
+    "REF-41": "75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378",
+    "TS-MR-catalog": "3b53acf4f70f5d49096e1783ab703073b571007f751643b2d42af0552f57bff6",
+    "TS-MR-entrypoint": "a611f6b99bf982db7e6f3bbb3ac7b59b2ef9596993fe2f041dbf299d105fa030"
+  },
+  "ten_thousand_years_certified": 0,
+  "three_engine_target_days_total": 2,
+  "verified_five_field_comparisons": 20,
+  "windows_runtime_certified": false,
+  "year": 5000
+}
