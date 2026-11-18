@@ -1,7 +1,7 @@
 # Stadio 31 — DISCOVERY 27: nombro de ne-malplenaj sinsekvaj fenestroj kun sumo en fermita intervalo
 
 PROJECT_ID: PC-BRANCH-GLEAM-ESPERANTO
-Programo: 55 stadioj; LAST_COMPLETED_STAGE=30 (akceptita ĉe la antaŭa preciza HEAD). Ĉi tiu commit enhavas NUR la mezureblan Stage31-kontrakton kaj metadata-ĝisdatigon; Stage31-produktkodo, Stage31-testoj kaj Stage31 Native ankoraŭ ne estas efektivigitaj.
+Programo: 55 stadioj. Stage30 estas akceptita. Stage31-produktkodo kaj la 12 publikaj testoj estas efektivigitaj en koda commit 8b9791afe997a5b1941215a00619e945203453f5 kaj trapasis la sam-SHA Native/Names-pordegojn. Ĉi tiu aparta dokumenta commit registras la efektivigon kaj la mezuritan akcepton; ĝi ne fermas la finan Stage31 metadata-pordegon. LAST_COMPLETED_STAGE restos 30 ĝis la aparta fina metadata commit kaj ĝiaj propraj CI-pruvoj estos akceptitaj.
 
 ## Kontrolita antaŭkondiĉo
 
@@ -23,7 +23,7 @@ Por k eksplicitaj interspacoj g_0..g_(k-1), 42 <= g_i <= 963, kaj [a,b) kun 0 <=
 - Ĉiuj limoj inkluzivas siajn egalecojn; la malplena fenestro ne estas kalkulata.
 - Matematike 0 <= B <= k*(k+1)/2. Neniam saturu aŭ konvertu Gleam Int al fiks-larĝa entjero; upper+1 uzas la arbitran precizecon de BEAM Int.
 
-## Planita publika API kaj semantiko
+## Publika API kaj semantiko
 
 Produkta modulo: src/pastafari/discovery_27_sum_bands.gleam
 Testmodulo: test/discovery_27_test.gleam
@@ -43,7 +43,7 @@ La test-orakolo rekte uzu discovery_21_gate_batch.dispatch_discovery_21(context,
 
 Invariantoj: B >= 0; B <= k(k+1)/2; B(lower,upper)=0 kiam lower>upper; larĝigo de valida intervalo ne malpliigas B; suma particio B(lo,hi)+B(hi+1,hi2)=B(lo,hi2) por lo<=hi<hi2; egalecoj ĉe precizaj fenestrosumoj devas inkluzivi la fenestron. Kun ripetataj petoj, la sama gap aperas en ĉiu pozicio aparte. Granda negativa/pozitiva konteksto kaj arbitre grandaj Int-limoj restu precizaj.
 
-## Precize dek du planitaj publikaj gleeunit-testoj
+## Precize dek du efektivigitaj publikaj gleeunit-testoj
 
 1. Malplenaj idoj kaj malplenaj bands -> Ok([]), post unu valida Stage30-dispatch.
 2. Malplenaj idoj, neuzata nevalida kunteksto, bands [-1,0], [0,0], [1,10] -> tri nuloj.
@@ -62,10 +62,20 @@ Invariantoj: B >= 0; B <= k(k+1)/2; B(lower,upper)=0 kiam lower>upper; larĝigo 
 
 Por ĉiu el 364 listoj de longo 0..5 kun eroj en {42,43,963}, komparu 18 intervalojn (inkluzive de inversa, negativa, preciza limo, [0,42], [42,42], [963,1926] kaj tre larĝaj +-10^12): kalkulo per du Stage30-stilaj monotonaj sojloskanoj kontraŭ rekta nesta fenestro-enumeracio. **6,552/6,552 JS-komparoj egalis; nul diferencoj**, ĉiuj limoj 0..k(k+1)/2. La du JS-funkcioj kalkulis sendepende; tio estas dezajna preflight, **ne** Gleam-kompilo, Native-testoj aŭ sendependeco de Stage25-datumoj.
 
+## Efektivigita kodo kaj mezurita akcepto
+
+- Koda komito: https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/8b9791afe997a5b1941215a00619e945203453f5 (komenca koda komito 94f6bb412e016d76c54d44ac60c90b9c2288bda3; posta korekto estis nur la kanona Gleam-formatado en du dosieroj).
+- Produkta modulo: `src/pastafari/discovery_27_sum_bands.gleam`; testmodulo: `test/discovery_27_test.gleam`; precize 12 unikaj publikaj testfunkcioj.
+- Native: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44392284045 — job 135112832721, completed/success, HEAD ekzakte 8b9791afe997a5b1941215a00619e945203453f5, 346 passed/0 failures, Gleam 1.18.1, OTP 28, ERTS 16.4.0.7.
+- La Native job sukcese plenumis `gleam format --check src test`, `gleam test`, `git diff --exit-code`, `git diff --cached --exit-code`, la kontrolon pri neniuj ne-spuritaj `src/test` dosieroj kaj la duoblan HEAD/GITHUB_SHA egalec-kontrolon.
+- Artifact: ID 14467707863, SHA256 `2b423a3b7d9ce3ee3c1bc42edb6c017f374d5c0b0490fed27b7fa0ceef9e7184`.
+- Canonical Names Lock: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44392284017 — job 135112828266, completed/success, sur la sama SHA.
+- Ĉi tiuj pruvoj akceptas nur la koda SHA. Ĉi tiu dokumenta SHA kaj la posta fina metadata SHA bezonas apartajn novajn CI-pordegojn.
+
 ## Akceptopordegoj (ĉiu bezonas propran sam-SHA completed/log-pruvon)
 
 1. **Kontrakto**: nur ĉi tiu kontraktdosiero + DEVELOPMENT_STAGE.md en unu commit; Native 334/334, formatter kaj fontintegreco PASS, Canonical Names Lock SUCCESS. Ĝis ambaŭ rezultoj estas completed, kontrakto estas PENDING, ne PASS.
-2. **Kodo**: post kontrakta akcepto, unu produkta modulo + precize 12 sendependaj publikaj gleeunit-testoj + metadata; prognozo 346/346 Native, Names SUCCESS sur sama koda SHA. Nombro estas antaŭdiro ĝis efektiva mezurado.
-3. **Dokumenta fermo**: aparta commit kun propraj 346/346 Native, formatter/fontintegreco kaj Names SUCCESS.
-4. **Fina metadata**: aparta commit kun propraj 346/346 Native, formatter/fontintegreco kaj Names SUCCESS antaŭ definitive LAST_COMPLETED_STAGE=31.
+2. **Kodo (AKCEPTITA)**: koda SHA 8b9791afe997a5b1941215a00619e945203453f5; unu produkta modulo + precize 12 sendependaj publikaj gleeunit-testoj. Native run 44392284045/job135112832721 completed/success, **346 passed, 0 failures**, Gleam 1.18.1, OTP 28, ERTS 16.4.0.7; formatter kaj source-integrity guard-oj PASS. Artifact 14467707863, SHA256 2b423a3b7d9ce3ee3c1bc42edb6c017f374d5c0b0490fed27b7fa0ceef9e7184. Canonical Names Lock run 44392284017/job135112828266 completed/success sur la sama SHA.
+3. **Dokumenta fermo**: ĉi tiu aparta commit enhavas nur la ĝisdatigitan kontrakton kaj DEVELOPMENT_STAGE.md; ĝi bezonas siajn proprajn sam-SHA 346/346 Native, formatter/source-integrity kaj Names SUCCESS antaŭ la fina metadata commit.
+4. **Fina metadata**: post akceptita dokumenta fermo, aparta commit nur por la fina metadata, kun propraj sam-SHA 346/346 Native, formatter/source-integrity kaj Names SUCCESS; nur tiam agordu LAST_COMPLETED_STAGE=31.
 5. queued/in_progress nek PASS nek bloko. Neniu mana duobla CI-dispatch; neniu main, merge aŭ publikigo.
