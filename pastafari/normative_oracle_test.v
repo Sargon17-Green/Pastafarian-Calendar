@@ -1850,8 +1850,8 @@ fn test_stage32_public_year_gate_boundaries_match_independent_oracle() {
 	foundation := oracle_foundation_day()
 	mut reference := new_oracle_engine()
 	year := reference.year5000(foundation)
-	targets := [year.open_gate_day, big_add(year.open_gate_day, big_one()),
-		year.close_gate_day, big_add(year.close_gate_day, big_one())]
+	targets := [year.open_gate_day, big_add(year.open_gate_day, big_one()), year.close_gate_day,
+		big_add(year.close_gate_day, big_one())]
 	for target in targets {
 		expected := reference.calendar_date_normative(foundation, target)
 		got := calendar_date_spaghetti(foundation, target) or { panic(err.msg()) }
