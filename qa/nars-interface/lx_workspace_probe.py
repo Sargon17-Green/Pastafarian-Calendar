@@ -18,7 +18,7 @@ CANARY = 'APL_LX_CANARY_REAL_NATIVE_0_5_14_11'
 PATH = re.compile(r'^[A-Za-z]:\\[A-Za-z0-9_\\.-]+\.txt$')
 
 
-def make_canary(raw: bytes, marker: str) -> tuple[bytes, dict]:
+def make_canary(raw: bytes, marker: str, mode: str = 'file') -> tuple[bytes, dict]:
     if len(raw) > 25_000_000 or not raw:
         raise ValueError('SOURCE_SIZE_UNSAFE')
     if not PATH.fullmatch(marker) or "'" in marker or '..' in marker:
@@ -50,7 +50,13 @@ def make_canary(raw: bytes, marker: str) -> tuple[bytes, dict]:
     # One APL expression. Do not rely on session-variable lifetime or
     # multi-statement diamond semantics inside the latent-expression evaluator.
     # Right-to-left: create the file, pass its tie handle to NAPPEND.
-    apl = f"'{CANARY}' ⎕NAPPEND ('{marker}' ⎕NCREATE 0)"
+    if mode == 'file':
+        apl = f"'{CANARY}' ⎕NAPPEND ('{marker}' ⎕NCREATE 0)"
+    elif mode == 'display':
+        # Prove ⎕LX startup independently of native-file function support.
+        apl = f"⎕←'{CANARY}'"
+    else:
+        raise ValueError('UNKNOWN_LX_PROBE_MODE')
     # The [Globals] character payload itself is enclosed in APL apostrophes.
     # Double interior apostrophes so the stored character vector decodes to
     # an LX expression with intact quoted path and marker string literals.
@@ -94,6 +100,7 @@ def make_canary(raw: bytes, marker: str) -> tuple[bytes, dict]:
         'actual_apl_characters': len(apl),
         'representation_ascii_characters': len(serialized),
         'native_executed': False,
+        'mode': mode,
     }
     return candidate, info
 
@@ -104,8 +111,9 @@ def main() -> int:
     parser.add_argument('--candidate', type=pathlib.Path, required=True)
     parser.add_argument('--receipt', type=pathlib.Path, required=True)
     parser.add_argument('--canary', required=True)
+    parser.add_argument('--mode', choices=('file', 'display'), default='file')
     a = parser.parse_args()
-    candidate, info = make_canary(a.source.read_bytes(), a.canary)
+    candidate, info = make_canary(a.source.read_bytes(), a.canary, mode=a.mode)
     a.candidate.parent.mkdir(parents=True, exist_ok=True)
     a.receipt.parent.mkdir(parents=True, exist_ok=True)
     a.candidate.write_bytes(candidate)

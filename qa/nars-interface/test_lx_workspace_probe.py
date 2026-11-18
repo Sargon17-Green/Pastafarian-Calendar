@@ -28,6 +28,16 @@ class WorkspaceTests(unittest.TestCase):
     self.assertNotIn('⋄', meta['apl_statement'])
     self.assertTrue(meta['apl_statement'].startswith("'" + CANARY + "' ⎕NAPPEND ("))
     self.assertTrue(meta['apl_statement'].endswith(" ⎕NCREATE 0)"))
+  def test_display_mode_roundtrip_lx_only(self):
+    out, meta = make_canary(BASE, PATH, mode='display')
+    self.assertEqual(meta['mode'], 'display')
+    self.assertEqual(meta['apl_statement'], "⎕←'" + CANARY + "'")
+    self.assertIn(("{quad}{assign}''" + CANARY + "''").encode('ascii'), out)
+    self.assertNotIn(b'{quad}NCREATE', out)
+    self.assertNotIn(b'{quad}NAPPEND', out)
+  def test_reject_unknown_lx_mode(self):
+    with self.assertRaisesRegex(ValueError, 'UNKNOWN_LX_PROBE_MODE'):
+      make_canary(BASE, PATH, mode='typo')
   def test_embedded_apl_quotes_escaped_in_workspace(self):
     out, meta = make_canary(BASE, PATH)
     lines = out.decode('cp1252').splitlines()
