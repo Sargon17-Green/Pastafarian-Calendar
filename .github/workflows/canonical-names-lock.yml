@@ -2446,6 +2446,10 @@ jobs:
           grep -Fxq 'STAGE48_PLANNING_UNIQUE_PAIRS=24' build/stage48-native.log
           grep -Fxq 'STAGE48_PLANNING_8192_DIGIT_CASES=6' build/stage48-native.log
           grep -Fxq 'STAGE48_PLANNING_GATE=PASS_NOT_NATIVE' build/stage48-native.log
+          grep -Fxq 'STAGE48_ORACLE_PASS=96/96' build/stage48-native.log
+          grep -Fxq 'STAGE48_PERMUTATIONS_STATIC=24/24' build/stage48-native.log
+          grep -Fxq 'STAGE48_OCCUPIED_MATRIX_MODEL=768/768' build/stage48-native.log
+          grep -Fxq 'STAGE48_ROLLING_MODEL=192/192' build/stage48-native.log
           for pair in 'INITIAL_OUTPUTS 24' 'QUAD_LIVE 24' 'ORDER_COVERAGE 24' 'REVERSE_REBUILT 24' 'MID_HEAP_ZERO 24' 'FINAL_CLEANUP 24' 'OCCUPIED_REJECTS 816' 'REJECTED_PRESERVED 816' 'PARTIAL_FREES 96' 'PARTIAL_REUSES 96' 'PARTIAL_CYCLES 48' 'PAIR_SWITCHES 24' 'ROLL_FREES 192' 'ROLL_REUSES 192' 'ROLL_THREE 192' 'ROLL_QUADS 192' 'ROLL_PROBES 768' 'TARGET_SLOT_1 192' 'TARGET_SLOT_2 192' 'TARGET_SLOT_3 192' 'TARGET_SLOT_4 192' 'RUNS 24' 'PASS 24' 'UNEXPECTED_FAILURES 0' 'HEAP_LIVE_POST_RELEASE 0'; do
             read -r key value <<<"$pair"
             grep -Eq "^STAGE48_${key}=[[:space:]]*0*${value}[[:space:]]*$" build/stage48-native.log
