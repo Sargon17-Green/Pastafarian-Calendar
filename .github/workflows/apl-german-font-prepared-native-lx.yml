@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/apl-german-font-prepared-native-lx.yml'
       - 'qa/nars-interface/bootstrap_exact_nars.ps1'
+      - 'qa/nars-interface/lx_workspace_probe.py'
+      - 'qa/nars-interface/test_lx_workspace_probe.py'
   workflow_dispatch:
 permissions:
   contents: read

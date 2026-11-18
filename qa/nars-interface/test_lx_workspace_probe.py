@@ -22,6 +22,22 @@ class WorkspaceTests(unittest.TestCase):
     self.assertIn(b'0=foo=:3',out)
     self.assertEqual(meta['canary_token'], CANARY)
     self.assertFalse(meta['native_executed'])
+  def test_embedded_apl_quotes_escaped_in_workspace(self):
+    out, meta = make_canary(BASE, PATH)
+    lines = out.decode('cp1252').splitlines()
+    glob = next(s for s in lines if s.startswith(':4=V C '))
+    self.assertEqual(glob.count("''"), 4)
+    self.assertIn("''D:\\\\a\\\\_temp\\\\LX_canary.txt''", glob)
+    self.assertIn("''APL_LX_CANARY_REAL_NATIVE_0_5_14_11''", glob)
+    self.assertTrue(glob.endswith("'"))
+    self.assertEqual(meta['actual_apl_characters'], len(meta['apl_statement']))
+    self.assertEqual(glob.split(' ', 5)[2], str(len(meta['apl_statement'])))
+  def test_nonlocal_workspace_bytes_unchanged_after_escape(self):
+    out, meta = make_canary(BASE, PATH)
+    old = out.decode('cp1252').splitlines()
+    self.assertEqual([x for x in old if x.startswith('0=foo')], ['0=foo=:3'])
+    self.assertEqual(meta['lx_previous_global'], 3)
+    self.assertEqual(meta['lx_new_global'], 4)
   def test_keep_crlf(self):
     raw=BASE.replace(b'\n',b'\r\n')
     out, _=make_canary(raw,PATH)

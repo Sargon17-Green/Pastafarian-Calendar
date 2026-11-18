@@ -49,7 +49,19 @@ def make_canary(raw: bytes, marker: str) -> tuple[bytes, dict]:
         raise ValueError('GLOBAL_ID_RANGE')
     apl = (f"tn←'{marker}' ⎕NCREATE 0 ⋄ "
            f"'{CANARY}' ⎕NAPPEND tn ⋄ ⎕NUNTIE tn")
-    serialized = apl.replace('←', '{assign}').replace('⎕', '{quad}').replace('⋄', '{diamond}')
+    # The [Globals] character payload itself is enclosed in APL apostrophes.
+    # Double interior apostrophes so the stored character vector decodes to
+    # an LX expression with intact quoted path and marker string literals.
+    serialized = (apl.replace("'", "''")
+                  .replace('←', '{assign}')
+                  .replace('⎕', '{quad}')
+                  .replace('⋄', '{diamond}'))
+    decoded = (serialized.replace('{assign}', '←')
+               .replace('{quad}', '⎕')
+               .replace('{diamond}', '⋄')
+               .replace("''", "'"))
+    if decoded != apl:
+        raise ValueError('LX_SERIALIZATION_NOT_REVERSIBLE')
     if not serialized.isascii() or "'" in marker:
         raise ValueError('ENCODING_FAILED')
     new_global = f":{new_id}=V C {len(apl)} 1 {len(apl)} '{serialized}'{newline}"
