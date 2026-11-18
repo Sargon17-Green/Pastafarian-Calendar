@@ -1,0 +1,108 @@
+# Disposable GitHub-hosted Windows only. Native LX sentinel, NOT Stage1 acceptance.
+[CmdletBinding()]
+param(
+    [string]$Runtime = 'verified_runtime',
+    [string]$Evidence = 'native_lx_evidence'
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+New-Item -ItemType Directory -Force -Path $Evidence | Out-Null
+$Evidence = (Resolve-Path -LiteralPath $Evidence).Path
+$expected = [ordered]@{
+    'NARS2000.exe' = '192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d'
+    'crashrpt.dll' = '461fa51cd64408878cc57da97f740b992c0ad98802ab31fa8a39aa20cc9983c5'
+    'dbghelp.dll' = '159b30d9f1bbe69ae03e0d19669d4fcb565246d81672b7034a69cef9f466dcbe'
+}
+$r = [ordered]@{
+    schema = 'APL_GERMAN_EXTRACTED_NATIVE_LX_CANARY_V1'
+    status = 'STARTED'
+    source_installer_sha256 = '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b'
+    extractor_source_run = 44374156425
+    expected_binary_sha256 = $expected['NARS2000.exe']
+    binary_verified = $false
+    version_verified = $false
+    interpreter_executed = $false
+    lx_canary = 'NOT_RUN'
+    stage01 = 'NOT_RUN'
+    audit_evidence = 'NOT_PRODUCED'
+    errors = @()
+}
+function Save-Report {
+    $r | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $Evidence 'native_lx_canary.json') -Encoding utf8
+}
+try {
+    if (-not $env:RUNNER_TEMP) { throw 'GITHUB_RUNNER_TEMP_MISSING' }
+    $root = (Resolve-Path -LiteralPath $Runtime).Path
+    $files = @(Get-ChildItem -LiteralPath $root -File)
+    if ($files.Count -ne 3) { throw ('RUNTIME_FILE_COUNT_INVALID:'+$files.Count) }
+    foreach ($name in $expected.Keys) {
+        $p = Join-Path $root $name
+        if (-not (Test-Path -LiteralPath $p -PathType Leaf)) { throw ('REQUIRED_RUNTIME_FILE_MISSING:'+$name) }
+        $actual = (Get-FileHash -LiteralPath $p -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($actual -ne $expected[$name]) { throw ('EXTRACTED_FILE_SHA256_MISMATCH:'+$name) }
+    }
+    $exe = Join-Path $root 'NARS2000.exe'
+    $exeInfo = (Get-Item -LiteralPath $exe).VersionInfo
+    $fileVersion = [string]$exeInfo.FileVersion
+    $productVersion = [string]$exeInfo.ProductVersion
+    $r['runtime'] = [ordered]@{
+        path = $root
+        file_version = $fileVersion
+        product_version = $productVersion
+        authenticode = (Get-AuthenticodeSignature -FilePath $exe).Status.ToString()
+        matching_files = 3
+    }
+    $r['binary_verified'] = $true
+    # Version must be explicitly evidenced by the executable's Win32 VERSIONINFO.
+    # No inference of version solely from the installation filename.
+    $versions = @($fileVersion,$productVersion) | ForEach-Object { $_ -replace '[, ]+', '.' }
+    if (-not @($versions | Where-Object { $_ -match '(^|[^0-9])0?\.5\.14\.11([^0-9]|$)' }).Count) {
+        $r['status'] = 'VERSIONINFO_NOT_EXACT'
+        return
+    }
+    $r['version_verified'] = $true
+    $wsUrl = 'https://www.nars2000.org/download/workspaces/2by2.ws.nars'
+    $ws = Join-Path $env:RUNNER_TEMP 'nars_reference_2by2.ws.nars'
+    Invoke-WebRequest -Uri $wsUrl -OutFile $ws -MaximumRedirection 3 -TimeoutSec 90
+    $length = (Get-Item -LiteralPath $ws).Length
+    if ($length -lt 50 -or $length -gt 25000000) { throw 'WORKSPACE_UNEXPECTED_SIZE' }
+    $r['workspace_source'] = [ordered]@{ url=$wsUrl; bytes=$length; sha256=(Get-FileHash -LiteralPath $ws -Algorithm SHA256).Hash.ToLowerInvariant() }
+    $prefix = Join-Path $env:RUNNER_TEMP 'apl_german_lx_canary'
+    $candidate = $prefix + '.ws.nars'
+    $receipt = Join-Path $Evidence 'workspace_candidate_receipt.json'
+    $marker = Join-Path $env:RUNNER_TEMP 'apl_lx_receipt.txt'
+    if (Test-Path -LiteralPath $marker) { throw 'CANARY_ALREADY_EXISTS' }
+    & python qa/nars-interface/lx_workspace_probe.py --source $ws --candidate $candidate --receipt $receipt --canary $marker
+    if ($LASTEXITCODE -ne 0) { throw 'WORKSPACE_CANDIDATE_GENERATOR_FAILED' }
+    $r['candidate_sha256'] = (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant()
+    # Single bounded native process; NO simulated keystrokes, windows messages or GUI automation.
+    $p = Start-Process -FilePath $exe -ArgumentList ('"' + $prefix + '"') -WorkingDirectory $root -PassThru
+    $r['interpreter_executed'] = $true
+    $r['process_id'] = $p.Id
+    $r['process_launch_utc'] = [DateTime]::UtcNow.ToString('o')
+    $limit = [DateTime]::UtcNow.AddSeconds(25)
+    while (-not (Test-Path -LiteralPath $marker) -and [DateTime]::UtcNow -lt $limit) {
+        Start-Sleep -Milliseconds 350
+        $p.Refresh()
+        if ($p.HasExited) { break }
+    }
+    $exists = Test-Path -LiteralPath $marker -PathType Leaf
+    $data = if ($exists) { [System.IO.File]::ReadAllText($marker) } else { '' }
+    $token = 'APL_LX_CANARY_REAL_NATIVE_0_5_14_11'
+    $r['lx_canary'] = [ordered]@{ exists=$exists; matches_exact=($data.Trim() -eq $token); marker_bytes=if ($exists){(Get-Item $marker).Length}else{0} }
+    $p.Refresh()
+    $r['process_exit_code'] = if ($p.HasExited) { $p.ExitCode } else { $null }
+    if (-not $p.HasExited) { & taskkill.exe /PID $p.Id /T /F 2>&1 | Out-Null }
+    $r['status'] = if ($exists -and $data.Trim() -eq $token) { 'LX_NATIVE_RECEIPT_CONFIRMED_NOT_STAGE01' } else { 'LX_NATIVE_RECEIPT_NOT_OBSERVED' }
+} catch {
+    $r['status'] = 'FAIL_CLOSED'
+    $r['errors'] += $_.Exception.Message
+    throw
+} finally {
+    Save-Report
+    Write-Output ('NATIVE_LX_STATUS=' + $r['status'])
+    Write-Output ('BINARY_SHA256_VERIFIED=' + $r['binary_verified'])
+    Write-Output ('VERSION_VERIFIED=' + $r['version_verified'])
+    Write-Output 'STAGE01=NOT_RUN'
+}

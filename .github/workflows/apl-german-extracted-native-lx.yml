@@ -1,0 +1,90 @@
+name: APL German exact extracted NARS2000 LX proof (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-extracted-native-lx.yml'
+      - 'qa/nars-interface/bounded_extracted_lx.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  prepare-sha-verified-runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Extract only runtime EXE and two DLLs, never upload fonts
+        shell: bash
+        run: |
+          set -euo pipefail
+          installer='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
+          test -f "$installer"
+          test "$(wc -c < "$installer")" -eq 9430788
+          test "$(sha256sum "$installer" | cut -d' ' -f1)" = 28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b
+          timeout 150s sudo -n apt-get update -qq
+          timeout 150s sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends innoextract
+          timeout 100s innoextract --extract --output-dir unpacked "$installer"
+          mkdir -p verified_runtime
+          for f in NARS2000.exe crashrpt.dll dbghelp.dll; do
+            test -f "unpacked/app/$f"
+            cp -- "unpacked/app/$f" "verified_runtime/$f"
+          done
+          test "$(find verified_runtime -type f | wc -l)" -eq 3
+          test "$(wc -c < verified_runtime/NARS2000.exe)" -eq 5009920
+          echo '192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d  verified_runtime/NARS2000.exe' > checked_runtime.sha256
+          echo '461fa51cd64408878cc57da97f740b992c0ad98802ab31fa8a39aa20cc9983c5  verified_runtime/crashrpt.dll' >> checked_runtime.sha256
+          echo '159b30d9f1bbe69ae03e0d19669d4fcb565246d81672b7034a69cef9f466dcbe  verified_runtime/dbghelp.dll' >> checked_runtime.sha256
+          sha256sum -c checked_runtime.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apl-german-verified-3-file-runtime-no-fonts
+          path: verified_runtime/
+          retention-days: 1
+          compression-level: 0
+  bounded-windows-lx:
+    needs: prepare-sha-verified-runtime
+    runs-on: windows-2022
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-verified-3-file-runtime-no-fonts
+          path: verified_runtime
+      - name: Validate workspace candidate builder contract
+        shell: pwsh
+        run: python -m unittest discover -s qa/nars-interface -p 'test_lx_workspace_probe.py' -v
+      - name: Execute bounded exact-version LX canary only
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_extracted_lx.ps1 -Runtime verified_runtime -Evidence native_lx_evidence
+      - name: Evidence manifest (always)
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force native_lx_evidence | Out-Null
+          Get-ChildItem native_lx_evidence -File | Sort-Object Name | ForEach-Object {
+            $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.Name)"
+          } | Set-Content -Encoding utf8 native_lx_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-lx-native-canary-evidence-not-stage1
+          path: |
+            native_lx_evidence/
+            native_lx_evidence.sha256
+          retention-days: 14
+          if-no-files-found: warn
