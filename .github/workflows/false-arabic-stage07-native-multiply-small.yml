@@ -1,0 +1,172 @@
+name: FALSE Arabic Stage 7 multiplySmall exact-source Native
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-native-multiply-small:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: 3496649792efb43c4cd1064aa31736f20eb197e7
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+      COMBINED_SHA256: e34f48e51baa723721865fd026b38d6c35e8748c7af6fb9aaa9be5a1bedf6d95
+      FIXTURE_SHA256: f58ee6c7fd14adf7567e57215dec00ec1257680d97102a6e2c44df72e0875ab7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Fetch exact source and original interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence upstream
+          git fetch --no-tags --depth=1 origin "$SOURCE_PIN" > evidence/project_fetch.log 2>&1
+          git rev-parse FETCH_HEAD > evidence/source_observed.txt
+          test "$(cat evidence/source_observed.txt)" = "$SOURCE_PIN"
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/runtime_observed.txt
+          test "$(cat evidence/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+
+      - name: Recompute oracle and lock exact production bytes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage07_multiply_small_oracle.py > evidence/oracle.json
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          source = os.environ['SOURCE_PIN']
+          paths = ('src/bigint.false', 'src/monster_bootstrap.false', 'test/stage07_multiply_small_13.false')
+          locked = {}
+          for path in (*paths, 'tools/stage07_multiply_small_oracle.py'):
+              locked[path] = subprocess.check_output(['git', 'show', source + ':' + path])
+              assert locked[path] == pathlib.Path(path).read_bytes(), ('source drift', path)
+          assert hashlib.sha256(locked[paths[-1]]).hexdigest() == os.environ['FIXTURE_SHA256']
+          combined = b'\n'.join(locked[p] for p in paths) + b'\n'
+          digest = hashlib.sha256(combined).hexdigest()
+          assert digest == os.environ['COMBINED_SHA256'], digest
+          pathlib.Path('evidence/stage07_multiply_small_exact.false').write_bytes(combined)
+          o = json.loads(pathlib.Path('evidence/oracle.json').read_text())
+          assert o['project_id'] == os.environ['PROJECT_ID'] and o['native_evidence'] is False
+          assert (o['case_count'], o['result_assertions'], o['input_assertions'],
+                  o['seeded_property_pairs']) == (13, 13, 26, 384)
+          assert o['fixture_sha256'] == os.environ['FIXTURE_SHA256']
+          assert [c['label'] for c in o['cases']] == [f'STAGE7_MULTIPLY_SMALL_CASE_{i:02d}_OK' for i in range(13)]
+          assert locked[paths[-1]].count(b'23h;!!v:') == 13
+          assert o['negative_small'] == [-1, -2147483647]
+          print('STAGE7_SOURCE_LOCKED', digest, 'cases=13 results=13 inputs=26 seeded=384')
+          PY
+
+      - name: Compile pinned original FALSE interpreter and preflight Unicode
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/compiler_stdout.txt 2> evidence/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/unicode_pick.false \
+            > evidence/unicode_pick.stdout.txt 2> evidence/unicode_pick.stderr.txt
+          test "$(cat evidence/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/preflight.txt
+
+      - name: Run exact source, three negative controls, and fail-closed receipt
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, subprocess, sys
+          sys.path.insert(0, 'tools')
+          import stage07_multiply_small_oracle as oracle_module
+          d = pathlib.Path('evidence')
+          def run(name, program, seconds):
+              try:
+                  p = subprocess.run(['upstream/false_int', '-e', str(program)],
+                                     capture_output=True, timeout=seconds)
+                  code, stdout, stderr = p.returncode, p.stdout, p.stderr
+              except subprocess.TimeoutExpired as e:
+                  code, stdout, stderr = 124, e.stdout or b'', e.stderr or b''
+              (d / f'{name}.exit_code.txt').write_text(str(code) + '\n')
+              (d / f'{name}.stdout.txt').write_bytes(stdout)
+              (d / f'{name}.stderr.txt').write_bytes(stderr)
+              return code, stdout.decode('utf-8'), stderr
+          source = os.environ['SOURCE_PIN']
+          base = b'\n'.join(subprocess.check_output(['git', 'show', source + ':' + p])
+                            for p in ('src/bigint.false', 'src/monster_bootstrap.false')) + b'\n'
+          fixture = subprocess.check_output(['git', 'show', source + ':test/stage07_multiply_small_13.false']).decode()
+          head, tail = fixture.split('{ حالة 0:', 1)
+          assert 'z;b:0a;!b;0h;!!s:' in tail
+          tail = tail.replace('z;b:0a;!b;0h;!!s:', 'z;b:1a;!b;0h;!!s:', 1)
+          mutant = d / 'mutant.false'
+          mutant.write_bytes(base + (head + '{ حالة 0:' + tail).encode())
+          for label, small in (('negative_one', -1), ('negative_max', -2147483647)):
+              (d / f'{label}.false').write_bytes(base + oracle_module.invalid(small).encode())
+          positive = run('native', d / 'stage07_multiply_small_exact.false', 60)
+          negatives = {label: run(label, d / f'{label}.false', 15)
+                       for label in ('mutant', 'negative_one', 'negative_max')}
+          oracle = json.loads((d / 'oracle.json').read_text())
+          labels = re.findall(r'STAGE7_MULTIPLY_SMALL_CASE_\d{2}_OK', positive[1])
+          expected = [c['label'] for c in oracle['cases']]
+          final = 'STAGE7_MULTIPLY_SMALL_13_RESULTS_26_INPUTS_VERIFIED'
+          good = ((d / 'source_observed.txt').read_text().strip() == source
+                  and (d / 'runtime_observed.txt').read_text().strip() == os.environ['RUNTIME_PIN']
+                  and hashlib.sha256((d / 'stage07_multiply_small_exact.false').read_bytes()).hexdigest() == os.environ['COMBINED_SHA256']
+                  and oracle['fixture_sha256'] == os.environ['FIXTURE_SHA256']
+                  and (oracle['case_count'], oracle['result_assertions'], oracle['input_assertions'],
+                       oracle['seeded_property_pairs']) == (13, 13, 26, 384)
+                  and (d / 'compiler_exit_code.txt').read_text().strip() == '0'
+                  and (d / 'preflight.txt').read_text().strip() == 'ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS'
+                  and positive[0] == 0 and positive[2] == b'' and labels == expected
+                  and positive[1].count(final) == 1 and positive[1].rstrip().endswith(final)
+                  and 'STAGE7_MULTIPLY_SMALL_FAILURE' not in positive[1]
+                  and oracle['negative_small'] == [-1, -2147483647]
+                  and negatives['mutant'][0] == 1 and 'STAGE7_MULTIPLY_SMALL_FAILURE' in negatives['mutant'][1]
+                  and all(negatives[s][0] == 1 and 'E_MUL_SMALL_NEGATIVE' in negatives[s][1]
+                          for s in ('negative_one', 'negative_max'))
+                  and all(final not in n[1] for n in negatives.values()))
+          receipt = {'project_id': os.environ['PROJECT_ID'], 'github_run_id': os.environ.get('GITHUB_RUN_ID'),
+                     'github_sha': os.environ.get('GITHUB_SHA'), 'source_pin': source,
+                     'source_observed': (d / 'source_observed.txt').read_text().strip(),
+                     'runtime_pin': os.environ['RUNTIME_PIN'],
+                     'runtime_observed': (d / 'runtime_observed.txt').read_text().strip(),
+                     'combined_sha256': hashlib.sha256((d / 'stage07_multiply_small_exact.false').read_bytes()).hexdigest(),
+                     'fixture_sha256': oracle['fixture_sha256'], 'case_labels': labels,
+                     'result_assertions': 13, 'input_assertions': 26,
+                     'native_exit_code': positive[0],
+                     'negative_exit_codes': [negatives[s][0] for s in ('mutant', 'negative_one', 'negative_max')],
+                     'multiply_small_native_verified': good, 'stage7_full_acceptance': False}
+          (d / 'evidence.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          print(json.dumps(receipt, sort_keys=True))
+          if not good:
+              raise SystemExit('STAGE7_MULTIPLY_SMALL_NATIVE_NOT_VERIFIED')
+          PY
+
+      - name: Preserve bounded evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage07-multiply-small-native
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error

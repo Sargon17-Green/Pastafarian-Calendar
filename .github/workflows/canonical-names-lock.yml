@@ -78,3 +78,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage06-native-add-small.yml
     permissions:
       contents: read
+
+  false-arabic-stage07-multiply-small:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-mulsmall13]')
+    uses: ./.github/workflows/false-arabic-stage07-native-multiply-small.yml
+    permissions:
+      contents: read
