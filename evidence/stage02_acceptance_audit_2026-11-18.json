@@ -1,0 +1,31 @@
+{
+  "decision_scope": "INDEPENDENT_STAGE2_RECONSTRUCTION_NOT_HISTORICAL_ARCHIVE",
+  "differential": {
+    "artifact_sha256": "be325ef511080310ebfc74091b8bab18da9a1acdbca03402b84963f5b668b225",
+    "combined_sha256": "a9aac441521ebfcfd20b111e566dda0e9ce848162abca16e1f7e96ab8aa82983",
+    "distinct_save_cases": 5,
+    "exit_code": 0,
+    "fixture_sha256": "e4d535c03f9fb3a504ff3ef8fef58b2cad17cee34a3571e79ae609d67a94510f",
+    "native_assertions": 26,
+    "native_cases": 13,
+    "run_id": "44159278435"
+  },
+  "discovery": {
+    "artifact_sha256": "4cc6d320d81da46f24963bdaa9733e434337f7454478609fb2df703858720e4b",
+    "combined_sha256": "44c26ba01dc7edd1e3637c79047e3cf6bb76c13b45079ff603af744f0d0b94e4",
+    "exit_code": 0,
+    "native_assertions": 12,
+    "run_id": "44104586872"
+  },
+  "historical_archive_recovered": false,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "python_anchor_cases": 13,
+  "python_seeded_property_cases": 384,
+  "reconstructed_stage2_evidence_gates": "PASS",
+  "shared_source_paths_byte_identical": [
+    "src/bigint.false",
+    "test/normative_reference.false",
+    "src/monster_bootstrap.false"
+  ],
+  "stage3_authorized_by_this_audit": false
+}
