@@ -82,6 +82,8 @@ jobs:
             from_uint64_status=$?
             sh build_and_run_bigint_from_int64.sh
             from_int64_status=$?
+            sh build_and_run_bigint_decimal_long.sh
+            decimal_long_status=$?
             echo "STAGE01_EXIT=$stage01_status"
             echo "CUTLET_BOUNDS_EXIT=$cutlet_status"
             echo "COMPOSITION_BOUNDS_EXIT=$composition_status"
@@ -103,7 +105,8 @@ jobs:
             echo "BIGINT_NEGATE_ABS_EXIT=$negate_abs_status"
             echo "BIGINT_FROM_UINT64_EXIT=$from_uint64_status"
             echo "BIGINT_FROM_INT64_EXIT=$from_int64_status"
-            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ] || [ "$bigint_status" -ne 0 ] || [ "$divmod_status" -ne 0 ] || [ "$signed_status" -ne 0 ] || [ "$input_contract_status" -ne 0 ] || [ "$conversion_status" -ne 0 ] || [ "$scalar_square_status" -ne 0 ] || [ "$divmod_long_status" -ne 0 ] || [ "$regular_mod_signed_status" -ne 0 ] || [ "$multiply_long_status" -ne 0 ] || [ "$add_sub_long_status" -ne 0 ] || [ "$scalar_signed_status" -ne 0 ] || [ "$scalar_multiply_signed_status" -ne 0 ] || [ "$compare_order_status" -ne 0 ] || [ "$min_max_status" -ne 0 ] || [ "$min_max_isolation_status" -ne 0 ] || [ "$negate_abs_status" -ne 0 ] || [ "$from_uint64_status" -ne 0 ] || [ "$from_int64_status" -ne 0 ]; then
+            echo "BIGINT_DECIMAL_LONG_EXIT=$decimal_long_status"
+            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ] || [ "$bigint_status" -ne 0 ] || [ "$divmod_status" -ne 0 ] || [ "$signed_status" -ne 0 ] || [ "$input_contract_status" -ne 0 ] || [ "$conversion_status" -ne 0 ] || [ "$scalar_square_status" -ne 0 ] || [ "$divmod_long_status" -ne 0 ] || [ "$regular_mod_signed_status" -ne 0 ] || [ "$multiply_long_status" -ne 0 ] || [ "$add_sub_long_status" -ne 0 ] || [ "$scalar_signed_status" -ne 0 ] || [ "$scalar_multiply_signed_status" -ne 0 ] || [ "$compare_order_status" -ne 0 ] || [ "$min_max_status" -ne 0 ] || [ "$min_max_isolation_status" -ne 0 ] || [ "$negate_abs_status" -ne 0 ] || [ "$from_uint64_status" -ne 0 ] || [ "$from_int64_status" -ne 0 ] || [ "$decimal_long_status" -ne 0 ]; then
               exit 1
             fi
           } 2>&1 | tee evidence/stage01-native-fpc.log
