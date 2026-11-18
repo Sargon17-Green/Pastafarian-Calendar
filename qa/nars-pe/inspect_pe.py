@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import struct
 import sys
@@ -142,7 +143,8 @@ def parse_pe(b: bytes) -> dict:
             if 0 < nested_lfanew < 2_000_000 and off+nested_lfanew+4<=len(b) and b[off+nested_lfanew:off+nested_lfanew+4]==b'PE\0\0':
                 nested.append({'offset':off,'pe_header':off+nested_lfanew})
         off+=2
-    return {'valid_pe':True,'machine_hex':f'{machine:04x}','optional_magic':f'{magic_hex(magic=is64)}',
+    inno = [(m.start(), m.group(1).decode('ascii', errors='replace')) for m in re.finditer(rb'Inno Setup Setup Data \(([^)\x00]{1,30})\)', b)]
+    return {'valid_pe':True,'inno_setup_signatures':inno,'machine_hex':f'{machine:04x}','optional_magic':f'{magic_hex(magic=is64)}',
             'pe_header_offset':lfanew,'section_count':section_count,'sections':sections,
             'data_directories':dirs,'resources':resources,'resource_error':resource_error,'overlay':{'start':ending,'size':len(overlay),
                 'sha256':hashlib.sha256(overlay).hexdigest() if overlay else None,

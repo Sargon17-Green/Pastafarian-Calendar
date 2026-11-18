@@ -30,6 +30,9 @@ class PEUnit(unittest.TestCase):
         self.assertEqual(r['overlay']['size'],12)
         self.assertEqual(r['signature_candidates']['zip_local_PK0304']['first_offsets'],[0x406])
         self.assertFalse(r['nested_pe_candidates'])
+    def test_inno_signature(self):
+        r=parse_pe(sample_pe(b'Inno Setup Setup Data (5.5.0)'))
+        self.assertEqual(r['inno_setup_signatures'], [(0x400,'5.5.0')])
     def test_not_mz(self):
         with self.assertRaisesRegex(ValueError,'NOT_MZ'):parse_pe(b'XX'+sample_pe()[2:])
     def test_not_pe(self):
