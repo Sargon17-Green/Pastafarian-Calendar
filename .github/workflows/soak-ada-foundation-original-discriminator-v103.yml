@@ -1,0 +1,138 @@
+name: Soak v103 original Ada foundation date vs immutable Python TypeScript reference
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - 'soak/native_probes/v103_one_ada_original_day.adb'
+      - 'soak/runner/audit_ada_original_discriminator_v103.py'
+      - 'soak/tests/test_ada_original_discriminator_v103.py'
+      - '.github/workflows/soak-ada-foundation-original-discriminator-v103.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  one-unaltered-ada-native-fct-compared-not-year:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-ada
+          ref: a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72
+          persist-credentials: false
+      - name: Audit original Ada source Git identity and memory headroom
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-ada rev-parse HEAD)" = a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72
+          test -z "$(git -C original-ada status --porcelain)"
+          test "$(git -C original-ada rev-parse HEAD:src/normative_oracle.adb)" = 923733d4f8face03586aee304640bf7540c28b4c
+          test "$(git -C original-ada rev-parse HEAD:src/month_weaving.adb)" = 9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef
+          test "$(git -C original-ada rev-parse HEAD:src/normative_oracle.ads)" = c4588566076798dd394feeab580ebc3d38c09744
+          mkdir -m 700 evidence
+          python3 - <<'PY' | tee evidence/v103-resource-preflight.json
+          from pathlib import Path
+          import json,shutil
+          available=next(int(l.split()[1])*1024 for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemAvailable:'))
+          disk=shutil.disk_usage('.').free
+          ok=available>=2*1024**3 and disk>=2*1024**3
+          print(json.dumps({'ram_available':available,'disk_free':disk,
+                            'admitted':ok,'original_source_calls_authorized':1,
+                            'windows_certified':False,'whole_years_certified':0},sort_keys=True))
+          assert ok
+          PY
+          echo V103_ADA_CURRENT_SOURCE_GIT_BLOBS_MATCH_HISTORICAL_NATIVE_VERSION
+      - name: Pin completed Python and TypeScript original native source ZIP
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GH_REPO/actions/runs/44392067310" --jq '.status')" = completed
+          test "$(gh api "repos/$GH_REPO/actions/runs/44392067310" --jq '.conclusion')" = success
+          gh api "repos/$GH_REPO/actions/artifacts/14469537094/zip" \
+            > evidence/original-python-typescript-v101.zip
+          echo 'bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1  evidence/original-python-typescript-v101.zip' | sha256sum -c -
+          echo V103_ORIGINAL_PYTHON_TYPESCRIPT_FOUNDATION_WITNESS_PINNED
+      - name: Compile and run strict one-day QA adapter against unchanged Ada original
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for p in ('soak/runner/audit_ada_original_discriminator_v103.py',
+                    'soak/tests/test_ada_original_discriminator_v103.py'):
+              ast.parse((Path('coordinator')/p).read_text(encoding='utf8'))
+          print("V103_ADA_COMPARATOR_PYTHON_AST_PASS")
+          PY
+          python3 -B -m unittest discover -s coordinator/soak/tests \
+            -p 'test_ada_original_discriminator_v103.py' -v \
+            2>&1 | tee evidence/v103-audit-contract-tests.log
+          grep -Eq '^Ran 8 tests ' evidence/v103-audit-contract-tests.log
+          grep -q '^OK$' evidence/v103-audit-contract-tests.log
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gnat-13
+          gnatmake --version | tee evidence/v103-native-compiler-version.log
+          mkdir -p evidence/ada-build
+          gnatmake -gnat2022 -gnatW8 -gnata -gnatwa \
+            -Ioriginal-ada/src -D evidence/ada-build -o evidence/v103_ada_native \
+            coordinator/soak/native_probes/v103_one_ada_original_day.adb \
+            2>&1 | tee evidence/v103-original-ada-build.log
+          sha256sum evidence/v103_ada_native | tee evidence/v103-original-ada-binary.sha256
+          /usr/bin/time -v -o evidence/v103-ada-source-time.txt \
+            nice -n 10 evidence/v103_ada_native \
+            2>&1 | tee evidence/v103-original-ada-native.log
+          test -z "$(git -C original-ada status --porcelain)"
+          test "$(grep -c '^V103_ADA_ORIGINAL_FCT_NATIVE ' evidence/v103-original-ada-native.log)" -eq 1
+          echo V103_ONE_UNCHANGED_ADA_NATIVE_FCT_CALLED_NOT_YEAR
+      - name: Freeze first original-source difference versus real Python native raw
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/soak/runner/audit_ada_original_discriminator_v103.py \
+            --ada-source-log evidence/v103-original-ada-native.log \
+            --original-sample-zip evidence/original-python-typescript-v101.zip \
+            --verdict-out evidence/v103-ada-first-difference-verdict.json \
+            2>&1 | tee evidence/v103-original-first-difference-audit.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          v=json.loads(Path('evidence/v103-ada-first-difference-verdict.json').read_bytes())
+          assert v['schema']=='PASTAFARI_ADA_FOUNDATION_ORIGINAL_SOURCE_DISCRIMINATOR_V103/1'
+          assert v['original_admissions_checked']==1
+          assert v['calculation_day']==v['target_day']=='-15055671'
+          assert v['python_original_five_fields']==[5000,10,503,20,56]
+          assert v['full_years_certified']==v['ten_thousand_years_certified']==0
+          if v['first_mismatch'] is not None:
+              assert v['status']=='ORIGINAL_ADA_CANONICAL_NUMERIC_MISMATCH'
+              print('V103_ORIGINAL_ADA_FCT_FIRST_DIFFERENCE_FROZEN_NO_FULL_YEAR_PASS')
+          else:
+              assert v['status']=='ADA_FOUNDATION_ONE_DAY_MATCH_NOT_WHOLE_YEAR'
+              print('V103_ADA_ONE_NATIVE_DAY_MATCH_NO_FULL_YEAR_PASS')
+          PY
+      - name: Preserve source, first mismatch, compiler and CPU/RSS evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v103-ada-original-foundation-source-discriminator-not-year
+          path: |
+            evidence/v103-resource-preflight.json
+            evidence/v103-audit-contract-tests.log
+            evidence/v103-native-compiler-version.log
+            evidence/v103-original-ada-build.log
+            evidence/v103-original-ada-binary.sha256
+            evidence/v103-ada-source-time.txt
+            evidence/v103-original-ada-native.log
+            evidence/v103-original-first-difference-audit.log
+            evidence/v103-ada-first-difference-verdict.json
+          if-no-files-found: warn
+          retention-days: 30
