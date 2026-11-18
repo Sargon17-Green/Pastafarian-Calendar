@@ -173,3 +173,18 @@ z;27=~["E_HIDDEN_GRIND_LAYOUT"0 0/]?
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
 
+{ المرحلة 11: العملية 28؛ أربع نوافذ من 13 ثابتاً، والعمود الخامس دوري. }
+z;28=~["E_VISIBLE_GRIND_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:x;1+g;!w:
+ y;1<["E_VISIBLE_GRIND"0 0/]?y;10>["E_VISIBLE_GRIND"0 0/]?
+ w;1<["E_VISIBLE_COLUMN"0 0/]?w;5>["E_VISIBLE_COLUMN"0 0/]?
+ y;r:y;5>[y;5-r:]?
+ w;5=~[
+  z;p:13a;!3a;!5a;!7a;!11a;!13a;!17a;!19a;!23a;!29a;!31a;!37a;!41a;!43a;!
+  y;w;+1-q:p;q;+g;!r:
+ ]?
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
+
