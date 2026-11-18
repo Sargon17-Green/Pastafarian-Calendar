@@ -1,0 +1,201 @@
+name: Soak v101 signed original Fct four-point time and RSS sample (no year credit)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - 'soak/runner/pilot_typescript_sample_v101.mjs'
+      - 'soak/runner/audit_original_sample_v101.py'
+      - 'soak/tests/test_original_sample_v101.py'
+      - '.github/workflows/soak-stratified-original-native-sample-v101.yml'
+permissions:
+  contents: read
+jobs:
+  original-source-serial-sample-not-year:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-typescript
+          ref: cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Pin original source commits and verify safe Linux resource headroom
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-typescript rev-parse HEAD)" = cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-typescript rev-parse HEAD:src)" = e733eb4e82f15efc27f294e09aff2e588b4ea06f
+          test -z "$(git -C original-typescript status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py' | sha256sum -c -
+          echo 'a611f6b99bf982db7e6f3bbb3ac7b59b2ef9596993fe2f041dbf299d105fa030  original-typescript/src/postStage55FinalDate.ts' | sha256sum -c -
+          echo '3b53acf4f70f5d49096e1783ab703073b571007f751643b2d42af0552f57bff6  original-typescript/src/sourceLanguageCatalog.ts' | sha256sum -c -
+          mkdir -m 700 evidence
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          python3 - <<'PY' | tee evidence/v101-resource-preflight.json
+          from pathlib import Path
+          import json,shutil,subprocess
+          data={k:int(v.split()[0])*1024 for k,v in
+               (line.split(':',1) for line in Path('/proc/meminfo').read_text().splitlines() if ':' in line)}
+          ram=data['MemAvailable']
+          disk=shutil.disk_usage('.').free
+          files=subprocess.run(['git','-C','original-typescript','ls-files','src'],
+                               capture_output=True,text=True,check=True).stdout.splitlines()
+          ok=ram>=5*1024**3 and disk>=2*1024**3 and len(files)==69 and Path('/usr/bin/time').exists()
+          print(json.dumps({'schema':'PASTAFARI_V101_LINUX_RESOURCE_PREFLIGHT/1',
+                            'available_ram_bytes':ram,'free_disk_bytes':disk,
+                            'typescript_original_source_file_count':len(files),
+                            'admitted':ok,'windows_admission_certified':False,
+                            'whole_years_certified':0},sort_keys=True))
+          assert ok,'original source sample resource headroom too low'
+          PY
+          python3 -B coordinator/soak/runner/pilot_python_transport_v017.py \
+            --sources-root original-sources --check-only \
+            > evidence/v101-python-lock-preflight.log
+          echo V101_ORIGINAL_SOURCE_TREE_AND_RESOURCES_ADMITTED_SAMPLE_ONLY
+      - name: Test adapter syntax and ten first-difference contract regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for name in ('soak/runner/audit_original_sample_v101.py',
+                       'soak/tests/test_original_sample_v101.py',
+                       'soak/runner/audit_ts_original_v094.py'):
+              ast.parse((Path('coordinator')/name).read_text(encoding='utf8'))
+          print('V101_ALL_AUDIT_PYTHON_MODULES_AST_PASS')
+          PY
+          node --check coordinator/soak/runner/pilot_typescript_sample_v101.mjs
+          PYTHONPATH=coordinator/soak/runner python3 -B -m unittest discover \
+            -s coordinator/soak/tests -p 'test_original_sample_v101.py' -v \
+            2>&1 | tee evidence/v101-contract-tests.log
+          grep -Eq '^Ran 10 tests ' evidence/v101-contract-tests.log
+          grep -q '^OK$' evidence/v101-contract-tests.log
+          echo V101_TEN_RAW_COORDINATE_AND_MISMATCH_GATES_PASS
+      - name: Four source-native pairs in one serial lane, compare before next dispatch
+        shell: bash
+        env:
+          PASTAFARI_SOAK_RESOURCE_ADMITTED: '1'
+          PASTAFARI_V101_LINUX_SAMPLE_ADMITTED: '1'
+          NODE_OPTIONS: --max-old-space-size=5120
+          LC_ALL: C
+        run: |
+          set -euo pipefail
+          # A failed source or first mismatch leaves raw partial files and
+          # prevents all later native dispatch. No time-based worker kill here.
+          for index in 0 1 2 3; do
+            case "$index" in
+              0) target=-15055671 ;;
+              1) target=-15055658 ;;
+              2) target=-15056671 ;;
+              3) target=-15054671 ;;
+            esac
+            python3 - "$index" "$target" <<'PY' | tee "evidence/v101-admission-$index.json"
+          import json,sys,shutil
+          from pathlib import Path
+          i,t=sys.argv[1:]
+          ram=next(int(line.split()[1])*1024 for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith('MemAvailable:'))
+          disk=shutil.disk_usage('.').free
+          ok=ram>=5*1024**3 and disk>=2*1024**3
+          print(json.dumps({'sample_index':int(i),'target_day':t,'ram_available':ram,'disk_free':disk,'admitted':ok},sort_keys=True))
+          assert ok,'per-source-case resource guard refused launch'
+          PY
+            /usr/bin/time -v -o "evidence/v101-python-$index-time.txt" \
+              nice -n 10 python3 -B coordinator/soak/runner/pilot_python_transport_v017.py \
+              --sources-root original-sources --calculation-day=-15055671 \
+              --first-target-day="$target" --last-target-day="$target" \
+              --raw-out="evidence/original-python-$index-raw.jsonl" \
+              --normalized-out="evidence/original-python-$index-normalized.jsonl" \
+              --receipt-out="evidence/original-python-$index-receipt.json" \
+              2>&1 | tee "evidence/v101-python-$index-process.log"
+            /usr/bin/time -v -o "evidence/v101-typescript-$index-time.txt" \
+              nice -n 10 node --experimental-strip-types \
+              coordinator/soak/runner/pilot_typescript_sample_v101.mjs \
+              --source-root original-typescript --calculation-day -15055671 \
+              --target-day "$target" \
+              --raw-out "evidence/original-typescript-$index-raw.jsonl" \
+              --catalog-out "evidence/original-typescript-$index-catalog.json" \
+              2>&1 | tee "evidence/v101-typescript-$index-process.log"
+            PYTHONPATH=coordinator/soak/runner python3 -B \
+              coordinator/soak/runner/audit_original_sample_v101.py \
+              --evidence-root evidence --target-day "$target" \
+              --verdict-out "evidence/v101-one-day-verdict-$index.json" \
+              2>&1 | tee "evidence/v101-audit-$index.log"
+            grep -q "^V101_ORIGINAL_SAMPLE_ONE_DAY_MATCH_NOT_YEAR=$target$" "evidence/v101-audit-$index.log"
+            echo "V101_REAL_ORIGINAL_PAIR_VERIFIED_BEFORE_NEXT_DISPATCH=$target"
+          done
+          test -z "$(git -C original-typescript status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+      - name: Save strict four-pair receipt and source process time and RSS metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 - <<'PY' | tee evidence/v101-summary.log
+          import json,hashlib,re
+          from pathlib import Path
+          from audit_original_sample_v101 import SAMPLES,SCHEMA
+          root=Path('evidence')
+          rows=[]
+          for i,t in enumerate(SAMPLES):
+              record=json.loads((root/f'v101-one-day-verdict-{i}.json').read_bytes())
+              assert record['schema']==SCHEMA and record['target_day']==t and record['case_index']==i
+              assert record['whole_original_years_certified']==0
+              measurements={}
+              for engine in ('python','typescript'):
+                  source=(root/f'v101-{engine}-{i}-time.txt').read_text()
+                  def metric(label):
+                      match=re.search(r'^\s*'+re.escape(label)+r':\s*(.*?)\s*$',source,re.M)
+                      assert match,(i,engine,label)
+                      return match.group(1)
+                  user=float(metric('User time (seconds)'))
+                  system=float(metric('System time (seconds)'))
+                  rss=int(metric('Maximum resident set size (kbytes)'))
+                  assert user>=0 and system>=0 and rss>0
+                  measurements[engine]={'user_cpu_seconds':user,'system_cpu_seconds':system,
+                                        'peak_resident_kib':rss,
+                                        'wall_elapsed':metric('Elapsed (wall clock) time (h:mm:ss or m:ss)')}
+              rows.append({'calculation_day':'-15055671','target_day':t,
+                           'matched_original_source_fields':record['canonical_fields'],
+                           'timing_and_memory':measurements,
+                           'raw_sha256':{e:hashlib.sha256((root/f'original-{e}-{i}-raw.jsonl').read_bytes()).hexdigest()
+                                         for e in ('python','typescript')}})
+          receipt={'schema':'PASTAFARI_ORIGINAL_SOURCE_PERFORMANCE_SAMPLE_V101/1',
+                   'status':'FOUR_ORIGINAL_SOURCE_PAIRS_MATCH_NOT_FULL_YEAR',
+                   'source_commits':{'REF-41':'0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4',
+                                     'TS-MR':'cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0'},
+                   'calculation_day':'-15055671','target_days':list(SAMPLES),
+                   'original_source_pairs':4,'matched_fields':20,'first_mismatch':None,
+                   'whole_original_years_certified':0,'ten_thousand_years_certified':0,
+                   'independence_certified':False,'windows_certified':False,'rows':rows}
+          (root/'v101-source-performance-verdict.json').write_text(
+              json.dumps(receipt,ensure_ascii=False,sort_keys=True,indent=2)+'\n',encoding='utf8')
+          print('V101_FOUR_STRATIFIED_NATIVE_ORIGINAL_SOURCE_PAIRS_MATCH_NOT_YEAR')
+          PY
+          grep -q '^V101_FOUR_STRATIFIED_NATIVE_ORIGINAL_SOURCE_PAIRS_MATCH_NOT_YEAR$' evidence/v101-summary.log
+      - name: Preserve raw and partial source evidence even after error
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v101-serial-four-point-original-source-performance-not-year
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
