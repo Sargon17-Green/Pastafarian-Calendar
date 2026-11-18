@@ -1,0 +1,69 @@
+name: APL German native Stage 1 import and RunStage01Tests
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-stage01:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Prepare exact runtime and ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Verify locked source manifest and Stage 1 importer candidate
+        shell: pwsh
+        run: python -m unittest discover -s qa/nars-interface -p 'test_stage01_import_workspace.py' -v
+      - name: Execute 95 ⎕FX imports and RunStage01Tests in native NARS2000
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_extracted_stage01.ps1 -Runtime verified_runtime -Evidence stage01_evidence
+      - name: Diagnose NARS startup if Stage 1 receipt is absent
+        if: always()
+        shell: pwsh
+        run: |
+          $p='stage01_evidence/native_stage01.json'
+          if (Test-Path $p) {
+            $r=Get-Content $p -Raw | ConvertFrom-Json
+            if ($r.status -eq 'NATIVE_STAGE01_PASS_CONFIRMED') {
+              New-Item -ItemType Directory -Force workspace_launch_evidence | Out-Null
+              'Stage 1 native receipt confirmed; no GUI diagnostic required' | Set-Content -Encoding utf8 workspace_launch_evidence/skipped.txt
+            } else {
+              ./qa/nars-interface/diagnose_lx_startup.ps1 -Runtime verified_runtime -Evidence workspace_launch_evidence
+            }
+          } else {
+            New-Item -ItemType Directory -Force workspace_launch_evidence | Out-Null
+            'Stage 1 report missing; previous step failed before native process' | Set-Content -Encoding utf8 workspace_launch_evidence/skipped.txt
+          }
+      - name: Collect metadata evidence only
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force font_bootstrap_evidence,stage01_evidence,workspace_launch_evidence | Out-Null
+          Get-ChildItem font_bootstrap_evidence,stage01_evidence,workspace_launch_evidence -File -Recurse | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName.Replace((Get-Location).Path + '\\',''))"
+          } | Set-Content -Encoding utf8 stage01_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-native-stage01-evidence-not-stage1-accepted
+          path: |
+            font_bootstrap_evidence/
+            stage01_evidence/
+            workspace_launch_evidence/
+            stage01_evidence.sha256
+          retention-days: 14
