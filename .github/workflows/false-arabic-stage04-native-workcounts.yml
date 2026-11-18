@@ -1,0 +1,195 @@
+name: FALSE Arabic Stage 4 workCounts exact-source Native
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-native-workcounts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: de7c5f1c21ce49293f48f83af0d043dd20926075
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+      COMBINED_SHA256: 0d111712efde79e9dc8a3ad503c41e71bdaf7c2d532f58ee5f9c4116fcc0b7a7
+      FIXTURE_SHA256: 7d716dab6d06eae04e92eb72c3f16f149f509d95d6a17602019830c5535524b6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Fetch immutable source and original interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence upstream
+          git fetch --no-tags --depth=1 origin "$SOURCE_PIN" > evidence/project_fetch.log 2>&1
+          git rev-parse FETCH_HEAD > evidence/source_observed.txt
+          test "$(cat evidence/source_observed.txt)" = "$SOURCE_PIN"
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/runtime_observed.txt
+          test "$(cat evidence/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+
+      - name: Recompute oracle and lock exact production bytes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage04_workcounts_oracle.py > evidence/oracle.json
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          source = os.environ['SOURCE_PIN']
+          paths = ('src/bigint.false', 'src/monster_bootstrap.false', 'test/stage04_workcounts_13.false')
+          locked = {}
+          for path in (*paths, 'tools/stage04_workcounts_oracle.py'):
+              locked[path] = subprocess.check_output(['git', 'show', source + ':' + path])
+              assert locked[path] == pathlib.Path(path).read_bytes(), ('source drift', path)
+          fixture = locked[paths[-1]]
+          assert hashlib.sha256(fixture).hexdigest() == os.environ['FIXTURE_SHA256']
+          combined = b'\n'.join(locked[p] for p in paths) + b'\n'
+          digest = hashlib.sha256(combined).hexdigest()
+          assert digest == os.environ['COMBINED_SHA256'], digest
+          pathlib.Path('evidence/stage04_workcounts_exact.false').write_bytes(combined)
+          o = json.loads(pathlib.Path('evidence/oracle.json').read_text())
+          assert o['project_id'] == os.environ['PROJECT_ID'] and o['native_evidence'] is False
+          assert (o['case_count'], o['field_assertions'], o['input_integrity_assertions'], o['seeded_property_pairs']) == (13, 65, 26, 384)
+          assert o['fixture_sha256'] == os.environ['FIXTURE_SHA256']
+          assert [c['label'] for c in o['cases']] == [f'STAGE4_WORKCOUNTS_CASE_{i:02d}_OK' for i in range(13)]
+          assert fixture.count(b'5h;!!0=e;!') == 78
+          print('STAGE4_SOURCE_LOCKED', digest, 'pairs=13 fields=65 inputs=26')
+          PY
+
+      - name: Compile pinned original FALSE interpreter and preflight Unicode
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/compiler_stdout.txt 2> evidence/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/unicode_pick.false \
+            > evidence/unicode_pick.stdout.txt 2> evidence/unicode_pick.stderr.txt
+          test "$(cat evidence/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/preflight.txt
+
+      - name: Run 91 positive comparisons on exact source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          set +e
+          timeout 60s upstream/false_int -e evidence/stage04_workcounts_exact.false \
+            > evidence/native_stdout.txt 2> evidence/native_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/native_exit_code.txt
+          test "$code" -eq 0
+
+      - name: Prove fail-closed mutant and invalid field rejection
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import pathlib, subprocess, os
+          source = os.environ['SOURCE_PIN']
+          base = b'\n'.join(subprocess.check_output(['git', 'show', source + ':' + p])
+                            for p in ('src/bigint.false', 'src/monster_bootstrap.false')) + b'\n'
+          fixture = subprocess.check_output(['git', 'show', source + ':test/stage04_workcounts_13.false']).decode()
+          head, tail = fixture.split('z;b:l;a;!1a;!b;x;!y:', 1)
+          assert 'z;b:1a;!b;0h;!!s:' in tail
+          tail = tail.replace('z;b:1a;!b;0h;!!s:', 'z;b:2a;!b;0h;!!s:', 1)
+          pathlib.Path('evidence/mutant.false').write_bytes(base + (head + 'z;b:l;a;!1a;!b;x;!y:' + tail).encode())
+          for index in (0, 6):
+              suffix = f'z;b:0a;!b;0h;!!u:z;b:u;a;!u;a;!b;f;!l:z;b:l;a;!{index}a;!b;x;!'
+              pathlib.Path(f'evidence/reader_{index}.false').write_bytes(base + suffix.encode())
+          PY
+          for label in mutant reader_0 reader_6; do
+            set +e
+            timeout 15s upstream/false_int -e "evidence/$label.false" \
+              > "evidence/$label.stdout.txt" 2> "evidence/$label.stderr.txt"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$label.exit_code.txt"
+            test "$code" -eq 1
+          done
+          grep -q STAGE4_WORKCOUNTS_FAILURE evidence/mutant.stdout.txt
+          ! grep -q STAGE4_WORKCOUNTS_65_FIELDS_26_INPUTS_VERIFIED evidence/mutant.stdout.txt
+          grep -q E_WORK_FIELD evidence/reader_0.stdout.txt
+          grep -q E_WORK_FIELD evidence/reader_6.stdout.txt
+
+      - name: Verify receipts and save fail-closed conclusion
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          d = pathlib.Path('evidence')
+          def read(name):
+              p = d / name
+              return p.read_text(encoding='utf-8').strip() if p.exists() else None
+          def number(name):
+              v = read(name)
+              return int(v) if v is not None else None
+          source = d / 'stage04_workcounts_exact.false'
+          digest = hashlib.sha256(source.read_bytes()).hexdigest() if source.exists() else None
+          oracle_text = read('oracle.json')
+          o = json.loads(oracle_text) if oracle_text else {}
+          stdout = read('native_stdout.txt') or ''
+          observed = re.findall(r'STAGE4_WORKCOUNTS_CASE_\d{2}_OK', stdout)
+          expected = [c['label'] for c in o.get('cases', [])]
+          mutant = read('mutant.stdout.txt') or ''
+          good = (read('source_observed.txt') == os.environ['SOURCE_PIN']
+                  and read('runtime_observed.txt') == os.environ['RUNTIME_PIN']
+                  and digest == os.environ['COMBINED_SHA256']
+                  and o.get('fixture_sha256') == os.environ['FIXTURE_SHA256']
+                  and (o.get('case_count'), o.get('field_assertions'), o.get('input_integrity_assertions'), o.get('seeded_property_pairs')) == (13, 65, 26, 384)
+                  and read('preflight.txt') == 'ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS'
+                  and number('compiler_exit_code.txt') == number('native_exit_code.txt') == 0
+                  and len(observed) == 13 and observed == expected
+                  and stdout.count('STAGE4_WORKCOUNTS_65_FIELDS_26_INPUTS_VERIFIED') == 1
+                  and 'STAGE4_WORKCOUNTS_FAILURE' not in stdout and read('native_stderr.txt') == ''
+                  and [number(f'{s}.exit_code.txt') for s in ('mutant', 'reader_0', 'reader_6')] == [1, 1, 1]
+                  and 'STAGE4_WORKCOUNTS_FAILURE' in mutant
+                  and 'STAGE4_WORKCOUNTS_65_FIELDS_26_INPUTS_VERIFIED' not in mutant
+                  and all('E_WORK_FIELD' in (read(f'reader_{i}.stdout.txt') or '') for i in (0, 6)))
+          receipt = {'project_id': os.environ['PROJECT_ID'], 'github_run_id': os.environ.get('GITHUB_RUN_ID'),
+                     'github_sha': os.environ.get('GITHUB_SHA'), 'source_pin': os.environ['SOURCE_PIN'],
+                     'source_observed': read('source_observed.txt'), 'runtime_pin': os.environ['RUNTIME_PIN'],
+                     'runtime_observed': read('runtime_observed.txt'), 'combined_sha256': digest,
+                     'fixture_sha256': o.get('fixture_sha256'), 'case_labels': observed,
+                     'field_assertions': 65, 'input_integrity_assertions': 26,
+                     'native_exit_code': number('native_exit_code.txt'),
+                     'negative_exit_codes': [number(f'{s}.exit_code.txt') for s in ('mutant', 'reader_0', 'reader_6')],
+                     'workcounts_native_verified': good, 'stage4_full_acceptance': False}
+          (d / 'evidence.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          print(json.dumps(receipt, sort_keys=True))
+          if not good:
+              raise SystemExit('STAGE4_WORKCOUNTS_NATIVE_NOT_VERIFIED')
+          PY
+
+      - name: Preserve bounded evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage04-workcounts-native
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error
