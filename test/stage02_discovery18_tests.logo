@@ -1,0 +1,120 @@
+; D18 Native: 2 valid Appendix-A differential cases (18 checks each) + 4 exact-identity guards.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "src/stage02_stones.logo
+load "src/stage02_hidden.logo
+load "src/stage02_visible_prefix.logo
+load "src/stage02_visible_ten.logo
+load "src/stage02_visible_fifteen.logo
+load "src/stage02_visible_twenty.logo
+load "src/stage02_visible_twentyfive.logo
+load "src/stage02_visible_thirty.logo
+load "src/stage02_visible_thirtyfive.logo
+load "src/stage02_visible_forty.logo
+load "src/stage02_visible_fortyfive.logo
+load "src/stage02_visible_fortysix.logo
+load "src/stage02_sauce.logo
+load "test/normative_reference.logo
+make "D18.N 0
+make "D18.CASES 0
+make "D18.FAIL "false
+
+to d18.require :ok :tag
+  make "D18.N (:D18.N + 1)
+  if not :ok [
+    make "D18.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_18_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d18.same :a :b :keys
+  if emptyp :keys [output "true]
+  if not (equalp (monster.context.get :a first :keys) (monster.context.get :b first :keys)) [output "false]
+  output d18.same :a :b (butfirst :keys)
+end
+
+to d18.take :n :values
+  if :n = 0 [output []]
+  output fput (first :values) (d18.take (:n - 1) (butfirst :values))
+end
+
+to d18.prefix :calculation :target
+  output monster.stage02.visible.fortysix (monster.stage02.visible.fortyfive (monster.stage02.visible.forty (monster.stage02.visible.thirtyfive (monster.stage02.visible.thirty (monster.stage02.visible.twentyfive (monster.stage02.visible.twenty (monster.stage02.visible.fifteen (monster.stage02.visible.ten (monster.stage02.visible.prefix (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts :calculation :target))))))))))))
+end
+
+to d18.check.bowls :i :actual :expected :tag
+  if :i > 6 [stop]
+  d18.require (equalp (item :i :actual) (item :i :expected)) (list :tag [bowl] :i)
+  d18.check.bowls (:i + 1) :actual :expected :tag
+end
+
+to d18.permutation.valid.work :order :seen
+  if emptyp :order [output "true]
+  localmake "id first :order
+  if not numberp :id [output "false]
+  if or (:id < 1) (:id > 6) [output "false]
+  if memberp :id :seen [output "false]
+  output d18.permutation.valid.work (butfirst :order) (lput :id :seen)
+end
+
+to d18.permutation.valid :order
+  if not listp :order [output "false]
+  if (count :order) <> 6 [output "false]
+  output d18.permutation.valid.work :order []
+end
+
+to d18.valid :calculation :target :tag
+  print sentence [STAGE_2_DISCOVERY_18_CASE_BEGIN] :tag
+  localmake "before d18.prefix :calculation :target
+  localmake "after monster.stage02.sauce :before
+  localmake "actualBowls monster.context.get :after "sauceBowls
+  localmake "actualOrder monster.context.get :after "sauceOrder46
+  localmake "expected nr.sauce :calculation :target
+  localmake "expectedBowls nr.sauce.bowls :expected
+  localmake "expectedOrder nr.sauce.order46 :expected
+  make "D18.CASES (:D18.CASES + 1)
+  d18.require (and (listp :actualBowls) ((count :actualBowls) = 6)) (list :tag [actual_bowl_shape])
+  d18.require (and (listp :expectedBowls) ((count :expectedBowls) = 6)) (list :tag [oracle_bowl_shape])
+  d18.check.bowls 1 :actualBowls :expectedBowls :tag
+  d18.require (equalp :actualOrder :expectedOrder) (list :tag [order46])
+  d18.require (d18.permutation.valid :actualOrder) (list :tag [order46_permutation])
+  d18.require (d18.same :before :after [calculationDay targetDay normalizedCalculationDay normalizedTargetDay actionCount targetCount distanceCount connectionCount directionCount]) (list :tag [counts_and_dates])
+  d18.require (d18.same :before :after [stoneSeries hiddenSeeds visiblePrefix visibleTen visibleFifteen visibleTwenty visibleTwentyFive visibleThirty visibleThirtyFive visibleForty visibleFortyFive visibleFortySix]) (list :tag [all_inputs_preserved])
+  d18.require (equalp (monster.context.get :after "phase) "SAUCE_READY) (list :tag [phase])
+  d18.require (equalp (monster.context.get :after "mode) "STAGE_2_DISCOVERY_18) (list :tag [mode])
+  d18.require (equalp (monster.context.get :after "status) "SAUCE_ONLY) (list :tag [status])
+  d18.require (equalp (monster.context.get :after "metrics) [stage02.dispatch stage02.counts stage02.stones stage02.hidden stage02.visible stage02.visible.ten stage02.visible.fifteen stage02.visible.twenty stage02.visible.twentyfive stage02.visible.thirty stage02.visible.thirtyfive stage02.visible.forty stage02.visible.fortyfive stage02.visible.fortysix stage02.sauce]) (list :tag [metrics])
+  d18.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready stage02.hidden.ready stage02.visible.prefix.ready stage02.visible.ten.ready stage02.visible.fifteen.ready stage02.visible.twenty.ready stage02.visible.twentyfive.ready stage02.visible.thirty.ready stage02.visible.thirtyfive.ready stage02.visible.forty.ready stage02.visible.fortyfive.ready stage02.visible.fortysix.ready stage02.sauce.ready]) (list :tag [logs])
+  d18.require (equalp (monster.stage02.sauce :before) :after) (list :tag [determinism])
+  print sentence [STAGE_2_DISCOVERY_18_CASE_END] :tag
+  output :before
+end
+
+to d18.invalid :ctx :tag
+  print sentence [STAGE_2_DISCOVERY_18_CASE_BEGIN] :tag
+  make "D18.CASES (:D18.CASES + 1)
+  d18.require (equalp (monster.stage02.sauce :ctx) :ctx) :tag
+  print sentence [STAGE_2_DISCOVERY_18_CASE_END] :tag
+end
+
+to stage02.discovery18.run
+  localmake "prefix d18.prefix (nr.foundation) (nr.tablets)
+  d18.valid (nr.foundation) (nr.tablets) [foundation_tablets]
+  d18.valid (nr.tablets) (nr.foundation) [tablets_foundation]
+  d18.invalid (monster.context.put :prefix "status "VISIBLE_FORTYFIVE_ONLY) [wrong_status]
+  d18.invalid (monster.context.put :prefix "visibleFortySix "bad) [visible_not_list]
+  d18.invalid (monster.context.put :prefix "visibleFortySix (d18.take 45 (monster.context.get :prefix "visibleFortySix))) [visible_short]
+  d18.invalid (monster.context.put :prefix "stoneSeries (d18.take 45 (monster.context.get :prefix "stoneSeries))) [stones_short]
+  if :D18.FAIL [print [STAGE_2_DISCOVERY_18_FALIIS] stop]
+  if :D18.CASES <> 6 [print [STAGE_2_DISCOVERY_18_CASE_COUNT_FALIIS] stop]
+  if :D18.N <> 40 [print [STAGE_2_DISCOVERY_18_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_18_CASES_PASIS] :D18.CASES
+  print sentence [STAGE_2_DISCOVERY_18_CHECKS_PASIS] :D18.N
+  print [STAGE_2_DISCOVERY_18_PASIS]
+end
+
+stage02.discovery18.run

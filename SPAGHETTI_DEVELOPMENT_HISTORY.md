@@ -279,3 +279,9 @@ On Logo+Ido SHA e84607fa9e4dfe19ad08f5956f3b0704956ef90c original D15 push 43960
 ## Stage 2 — DISCOVERY 16 acceptita; DISCOVERY 17 implementita (2026-11-18)
 DISCOVERY 16 originala push run 44364739926/job 135015353772 sur SHA 239ee1b5f8bcc51f108e42b4c004021ae969b4af kompletigis SUCCESS, 5 kazi/21 kontroli e la autentika NATIVE_STAGE_2_DISCOVERY_16_VERIFICATION=PASS. Nov regresia workflow-ruli D15–D10, D1–D9, Stage1 e Names Lock anke kompletigis SUCCESS sur la sama SHA. D16 esas acceptita.
 DISCOVERY 17 adicionas nur la 46ma exakta videbla valoro, kun production D8 helperi, separita test-only normativa oracle por 1..46, 5 kazi/17 kontrolaji e limitizita headless CI. La nova kodaro ne esas Native-acceptita ante kompleta loga evidenco. Stage2 tote ankore ne esas kompletigita; LAST_COMPLETED_STAGE restas 1.
+
+
+## Stage 2 — DISCOVERY 17 Native accepted; DISCOVERY 18 implemented — 2026-11-18
+D17 original push on 05b49e0eb730724eb3fdf66993a6314f90783a0a completed SUCCESS at run 44373979219/job 135048049707, attempt 1. Its authentic Native log reports 5 cases, 17 checks, STAGE_2_DISCOVERY_17_PASIS and NATIVE_STAGE_2_DISCOVERY_17_VERIFICATION=PASS. All ten same-SHA regressions D16-D10, D1-D9, Stage1 and Names Lock completed SUCCESS. D17 is accepted; Stage2 remains incomplete and LAST_COMPLETED_STAGE remains 1.
+
+DISCOVERY 18 implements the Appendix-A final aggregation in production-only Logo: initial six bowls, all 46 drop transitions with immutable old-state updates, the order-46 latch, and exactly 12 post-stirs. The independent test-only oracle nr.sauce recomputes the entire result from raw dates. Contract: two valid directional differential cases, four exact-identity invalid cases, 40 planned checks, pinned bounded headless UCBLogo CI. D18 Native is pending; no PASS before its original push log and all eleven same-SHA regressions complete. No main/merge.

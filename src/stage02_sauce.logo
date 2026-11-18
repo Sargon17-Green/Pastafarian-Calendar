@@ -1,0 +1,167 @@
+; Stage2 Discovery18 — Appendix-A final aggregation, production-only.
+; The independent normative oracle remains isolated in test/normative_reference.logo.
+
+to monster.stage02.sauce.factorial :n
+  if :n <= 1 [output 1]
+  output :n * monster.stage02.sauce.factorial (:n - 1)
+end
+
+to monster.stage02.sauce.list.remove :items :index
+  if :index = 1 [output butfirst :items]
+  output fput first :items monster.stage02.sauce.list.remove butfirst :items (:index - 1)
+end
+
+to monster.stage02.sauce.list.replace :items :index :value
+  if :index = 1 [output fput :value butfirst :items]
+  output fput first :items monster.stage02.sauce.list.replace butfirst :items (:index - 1) :value
+end
+
+to monster.stage02.sauce.permutation.zero :rank0 :items
+  if emptyp :items [output []]
+  localmake "block monster.stage02.sauce.factorial ((count :items) - 1)
+  localmake "q quotient :rank0 :block
+  localmake "r remainder :rank0 :block
+  localmake "chosen item (:q + 1) :items
+  output fput :chosen monster.stage02.sauce.permutation.zero :r (monster.stage02.sauce.list.remove :items (:q + 1))
+end
+
+to monster.stage02.sauce.permutation :orderNumber
+  output monster.stage02.sauce.permutation.zero (:orderNumber - 1) [1 2 3 4 5 6]
+end
+
+to monster.stage02.sauce.order.from.value :value
+  localmake "rank bi.regmod bi.sub :value bi.small 1 bi.small 720
+  output monster.stage02.sauce.permutation ((bi.to.small :rank) + 1)
+end
+
+to monster.stage02.sauce.wrap :position :size
+  if :position < 1 [output monster.stage02.sauce.wrap (:position + :size) :size]
+  if :position > :size [output monster.stage02.sauce.wrap (:position - :size) :size]
+  output :position
+end
+
+to monster.stage02.sauce.initial.one :id :ctx
+  localmake "prime item :id [17 19 23 29 31 37]
+  localmake "s monster.context.get :ctx "actionCount
+  make "s bi.add :s bi.mul.small (monster.context.get :ctx "targetCount) :id
+  make "s bi.add :s (monster.context.get :ctx "distanceCount)
+  make "s bi.add :s (monster.context.get :ctx "connectionCount)
+  make "s bi.add :s bi.small (monster.context.get :ctx "directionCount)
+  make "s bi.add :s bi.small (:prime * :prime)
+  localmake "value bi.square :s
+  make "value bi.add :value bi.small :id
+  output monster.stage02.normalize :value
+end
+
+to monster.stage02.sauce.initial.build :id :ctx :acc
+  if :id > 6 [output :acc]
+  localmake "value monster.stage02.sauce.initial.one :id :ctx
+  output monster.stage02.sauce.initial.build (:id + 1) :ctx (lput :value :acc)
+end
+
+to monster.stage02.sauce.sum :values
+  if emptyp :values [output bi.zero]
+  output bi.add first :values monster.stage02.sauce.sum butfirst :values
+end
+
+to monster.stage02.sauce.pours :i :drop :stone :old :order
+  localmake "square bi.square :drop
+  localmake "p1 bi.add :square bi.mul (item 1 :stone) (item (item 1 :order) :old)
+  make "p1 bi.add :p1 bi.small (3 * :i)
+  localmake "p2 bi.add :square bi.mul (item 2 :stone) (item (item 2 :order) :old)
+  make "p2 bi.add :p2 bi.small (5 * :i)
+  localmake "p3 bi.add :square bi.mul (item 3 :stone) (item (item 3 :order) :old)
+  make "p3 bi.add :p3 bi.small (7 * :i)
+  output (list (monster.stage02.normalize :p1) (monster.stage02.normalize :p2) (monster.stage02.normalize :p3) bi.zero bi.zero bi.zero)
+end
+
+to monster.stage02.sauce.bowl.value :position :i :drop :stone :old :order :pours
+  localmake "id item :position :order
+  localmake "prev item monster.stage02.sauce.wrap (:position - 1) 6 :order
+  localmake "next item monster.stage02.sauce.wrap (:position + 1) 6 :order
+  localmake "stoneKind item :position [1 2 3 4 5 1]
+  localmake "mix bi.add (item :id :old) bi.mul.small (item :prev :old) 2
+  make "mix bi.add :mix bi.mul.small (item :next :old) 3
+  make "mix bi.add :mix (item :position :pours)
+  make "mix bi.add :mix :drop
+  make "mix bi.add :mix (item :stoneKind :stone)
+  localmake "value bi.square :mix
+  localmake "cross bi.mul (item :prev :old) (item :next :old)
+  make "value bi.add :value bi.mul.small :cross 5
+  make "value bi.add :value bi.small (:i * :position)
+  output monster.stage02.normalize :value
+end
+
+to monster.stage02.sauce.bowl.round :position :i :drop :stone :old :order :pours :pending
+  if :position > 6 [output :pending]
+  localmake "id item :position :order
+  localmake "value monster.stage02.sauce.bowl.value :position :i :drop :stone :old :order :pours
+  output monster.stage02.sauce.bowl.round (:position + 1) :i :drop :stone :old :order :pours (monster.stage02.sauce.list.replace :pending :id :value)
+end
+
+to monster.stage02.sauce.drops :i :bowls :visible :stones :latch
+  if :i > 46 [output (list :bowls :latch)]
+  localmake "drop item :i :visible
+  localmake "order monster.stage02.sauce.order.from.value :drop
+  localmake "old :bowls
+  localmake "stone item :i :stones
+  localmake "pours monster.stage02.sauce.pours :i :drop :stone :old :order
+  localmake "next monster.stage02.sauce.bowl.round 1 :i :drop :stone :old :order :pours :old
+  localmake "newLatch :latch
+  if :i = 46 [make "newLatch :order]
+  output monster.stage02.sauce.drops (:i + 1) :next :visible :stones :newLatch
+end
+
+to monster.stage02.sauce.post.value :position :old :order :saved :stir
+  localmake "id item :position :order
+  localmake "prev item monster.stage02.sauce.wrap (:position - 1) 6 :order
+  localmake "next item monster.stage02.sauce.wrap (:position + 1) 6 :order
+  localmake "mix bi.add (item :id :old) bi.mul.small (item :prev :old) 3
+  make "mix bi.add :mix bi.mul.small (item :next :old) 5
+  make "mix bi.add :mix :saved
+  make "mix bi.add :mix bi.small :stir
+  make "mix bi.add :mix bi.small (:position * :position)
+  localmake "value bi.square :mix
+  localmake "cross bi.mul (item :prev :old) (item :next :old)
+  make "value bi.add :value bi.mul.small :cross 7
+  output monster.stage02.normalize :value
+end
+
+to monster.stage02.sauce.post.round :position :old :order :saved :stir :pending
+  if :position > 6 [output :pending]
+  localmake "id item :position :order
+  localmake "value monster.stage02.sauce.post.value :position :old :order :saved :stir
+  output monster.stage02.sauce.post.round (:position + 1) :old :order :saved :stir (monster.stage02.sauce.list.replace :pending :id :value)
+end
+
+to monster.stage02.sauce.post.stirs :stir :bowls
+  if :stir > 12 [output :bowls]
+  localmake "saved bi.add (monster.stage02.sauce.sum :bowls) bi.small (149 * :stir)
+  make "saved monster.stage02.normalize :saved
+  localmake "order monster.stage02.sauce.order.from.value :saved
+  localmake "next monster.stage02.sauce.post.round 1 :bowls :order :saved :stir :bowls
+  output monster.stage02.sauce.post.stirs (:stir + 1) :next
+end
+
+to monster.stage02.sauce :ctx
+  if not (equalp (monster.context.get :ctx "status) "VISIBLE_FORTYSIX_ONLY) [output :ctx]
+  localmake "visible monster.context.get :ctx "visibleFortySix
+  if not (listp :visible) [output :ctx]
+  if (count :visible) <> 46 [output :ctx]
+  localmake "stones monster.context.get :ctx "stoneSeries
+  if not (listp :stones) [output :ctx]
+  if (count :stones) <> 46 [output :ctx]
+  localmake "bowls monster.stage02.sauce.initial.build 1 :ctx []
+  localmake "dropResult monster.stage02.sauce.drops 1 :bowls :visible :stones []
+  localmake "afterDrops item 1 :dropResult
+  localmake "order46 item 2 :dropResult
+  localmake "finalBowls monster.stage02.sauce.post.stirs 1 :afterDrops
+  localmake "work monster.context.put :ctx "sauceBowls :finalBowls
+  make "work monster.context.put :work "sauceOrder46 :order46
+  make "work monster.context.put :work "phase "SAUCE_READY
+  make "work monster.context.put :work "mode "STAGE_2_DISCOVERY_18
+  make "work monster.context.put :work "status "SAUCE_ONLY
+  make "work monster.metrics.bump :work "stage02.sauce
+  make "work monster.logs.append :work "stage02.sauce.ready
+  output :work
+end
