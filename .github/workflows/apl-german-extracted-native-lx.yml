@@ -33,7 +33,7 @@ jobs:
           timeout 150s sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends innoextract
           timeout 100s innoextract --extract --output-dir unpacked "$installer"
           mkdir -p verified_runtime
-          for f in NARS2000.exe crashrpt.dll dbghelp.dll SendRpt.exe; do
+          for f in NARS2000.exe crashrpt.dll dbghelp.dll sendrpt.exe; do
             test -f "unpacked/app/$f"
             cp -- "unpacked/app/$f" "verified_runtime/$f"
           done
@@ -42,7 +42,7 @@ jobs:
           echo '192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d  verified_runtime/NARS2000.exe' > checked_runtime.sha256
           echo '461fa51cd64408878cc57da97f740b992c0ad98802ab31fa8a39aa20cc9983c5  verified_runtime/crashrpt.dll' >> checked_runtime.sha256
           echo '159b30d9f1bbe69ae03e0d19669d4fcb565246d81672b7034a69cef9f466dcbe  verified_runtime/dbghelp.dll' >> checked_runtime.sha256
-          echo '4726c90412275df4942d1a8051687918c9838486c3c8aabe327f1bfdbf8899c2  verified_runtime/SendRpt.exe' >> checked_runtime.sha256
+          echo '4726c90412275df4942d1a8051687918c9838486c3c8aabe327f1bfdbf8899c2  verified_runtime/sendrpt.exe' >> checked_runtime.sha256
           sha256sum -c checked_runtime.sha256
       - uses: actions/upload-artifact@v4
         with:
