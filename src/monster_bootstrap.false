@@ -149,3 +149,17 @@ z;23=~["E_MUL_SMALL_LAYOUT"0 0/]?
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
 
+{ المرحلة 9: العملية 26؛ معامل القطرة الخفية من صيغة العمود، دون جدول مرجعي. }
+z;26=~["E_HIDDEN_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:x;1+g;!w:
+ y;1<["E_HIDDEN_K"0 0/]?y;7>["E_HIDDEN_K"0 0/]?
+ w;1<["E_HIDDEN_COLUMN"0 0/]?w;4>["E_HIDDEN_COLUMN"0 0/]?
+ y;2*1+r:
+ w;2=[y;3*1+r:]?
+ w;3=[y;4*2+r:]?
+ w;4=[y;4*4+r:]?
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
+
