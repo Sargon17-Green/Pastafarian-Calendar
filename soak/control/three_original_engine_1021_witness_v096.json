@@ -1,0 +1,77 @@
+{
+  "algorithmic_independence_certified": false,
+  "artifact_sources": {
+    "python_kotlin": {
+      "artifact_id": 14281261657,
+      "members_count": 22,
+      "run_id": 43976583803,
+      "zip_sha256": "b7f250a98aea07acb4a78bf074e75c5f72d950f00a1d32d7bc81c6eb8c464b32"
+    },
+    "typescript_python": {
+      "artifact_id": 14454273351,
+      "members_count": 17,
+      "run_id": 44363057604,
+      "zip_sha256": "a798cac07e77e704c97af637009cf1fcbcaf1f1358767f3f7690bad4acb54a70"
+    }
+  },
+  "calculation_day": "-15055671",
+  "canonical_oracle_certified": false,
+  "first_mismatch": null,
+  "matched_target_days": 2,
+  "matching_field_comparisons": 20,
+  "matching_five_field_engine_observations": 6,
+  "new_unique_days_certified": 0,
+  "ordinal": 1021,
+  "rows": [
+    {
+      "canonical_fields": [
+        5000,
+        14,
+        11,
+        1,
+        42
+      ],
+      "kotlin_has_native_names": false,
+      "matching_original_engines": [
+        "REF-41",
+        "PROD-KT-CY",
+        "TS-MR"
+      ],
+      "python_raw_cutlet_name": "Kahkaha",
+      "python_raw_month_name": "Kil",
+      "target_day": "-15055660",
+      "typescript_raw_cutlet_name": "हसू",
+      "typescript_raw_month_name": "चिकणमाती"
+    },
+    {
+      "canonical_fields": [
+        5000,
+        14,
+        12,
+        42,
+        45
+      ],
+      "kotlin_has_native_names": false,
+      "matching_original_engines": [
+        "REF-41",
+        "PROD-KT-CY",
+        "TS-MR"
+      ],
+      "python_raw_cutlet_name": "Kahkaha",
+      "python_raw_month_name": "Dil",
+      "target_day": "-15055659",
+      "typescript_raw_cutlet_name": "हसू",
+      "typescript_raw_month_name": "जीभ"
+    }
+  ],
+  "schema": "PASTAFARI_THREE_ORIGINAL_ENGINE_ARCHIVE_CROSS_WITNESS_V096/1",
+  "source_commits": {
+    "PROD-KT-CY": "0c703446d8a3b7435698bd16402ac5fa30e461c9",
+    "REF-41": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "TS-MR": "cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0"
+  },
+  "status": "TWO_DAYS_THREE_ORIGINAL_ENGINES_FIVE_FIELDS_EQUAL_NOT_YEAR",
+  "whole_original_years_certified": 0,
+  "windows_run_started": false,
+  "year": "5000"
+}
