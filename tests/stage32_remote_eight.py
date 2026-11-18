@@ -65,7 +65,7 @@ def selftest():
         assert actual == anchor
         checked += 1
     assert checked == 139
-    print(f"STAGE32_INDEPENDENT_REMOTE_SIX_SELFTEST_ASSERTIONS={checked}")
+    print(f"STAGE32_INDEPENDENT_REMOTE_EIGHT_SELFTEST_ASSERTIONS={checked}")
 
 
 def compare(path):
@@ -80,8 +80,8 @@ def compare(path):
             key=n[:2]
             if key in found: raise AssertionError(f"duplicate pair {key}")
             found[key]=n[2:]
-        elif p[0].startswith("STAGE32_NATIVE_REMOTE_SIX_ASSERTIONS="):
-            if "".join(p)!="STAGE32_NATIVE_REMOTE_SIX_ASSERTIONS=131":
+        elif p[0].startswith("STAGE32_NATIVE_REMOTE_EIGHT_ASSERTIONS="):
+            if "".join(p)!="STAGE32_NATIVE_REMOTE_EIGHT_ASSERTIONS=131":
                 raise AssertionError(f"invalid marker: {line}")
             markers+=1
     if markers!=1: raise AssertionError(f"native marker count={markers}")
@@ -100,5 +100,5 @@ def compare(path):
     print(f"STAGE32_REAL_FIVEFIELD_SCALARS={checked}")
 
 if __name__=="__main__":
-    if len(sys.argv)!=2: sys.exit("usage: stage32_remote_eight.py --selftest | <log>")
+    if len(sys.argv)!=2: sys.exit("usage: stage32_remote_six.py --selftest | <log>")
     selftest() if sys.argv[1]=="--selftest" else compare(sys.argv[1])
