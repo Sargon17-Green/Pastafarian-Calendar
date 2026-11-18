@@ -75,3 +75,28 @@ Stage16、17、18 依序驗收 7 個月／28 日、8 個月／32 日、9 個月�
 ## 五、明確排除
 
 完整年曆產生器（252..5778 日）仍未驗證。Stage19 只涵蓋 10 個月／40 日的 WeavingPrimitive；不得將本階段的成功擴大宣稱為全年支援。
+
+
+## Implementation / QA addendum — 2026-11-18
+
+This addendum supersedes conflicting test-file and CI details in Sections III–IV above.
+
+The first combined test draft placed an 11-day multiset brute-force oracle (about 19.96 million candidate permutations) in the same file as the full Catalan10 oracle. The combined test hit its 120-second bound. This was an oracle-test design issue, not a production failure. The suite was split into three independently bounded test files:
+
+- `t/64_stage19_weaving_ten_months.t`: the ten-month all-single-day boundary plus the complete independent Catalan10 / Dyck oracle, all 16,796 words and all 16,796 rank/unrank positions.
+- `t/66_stage19_weaving_ten_months_small_oracle.t`: three small nine-month profiles, each exhaustively enumerated by an independent complete-multiset-permutation oracle. Together t/64 and t/66 cover four small/boundary profiles.
+- `t/65_stage19_weaving_ten_months_large_profiles.t`: four larger profiles `[3 x 10]`, `[4 x 10]`, `[31,1 x 9]`, and `[40]`; first/middle/last BigInt roundtrips. Its marker is `STAGE19_LARGE_PROFILES=4`. These counts are roundtrip-only, not independent count oracles.
+
+Local Perl 5.40.1 QA on the exact candidate source passed:
+
+| Test | TAP | Wall time | Exit | stderr |
+|---|---:|---:|---:|---|
+| t/64 | 33,634 | 76 s | 0 | empty |
+| t/66 | 9 | 24 s | 0 | empty |
+| t/65 | 60 | 81 s | 0 | empty |
+
+Combined Stage19 native test total: **33,703 TAP assertions**. The module and all three test files passed **4/4 syntax checks**. Each prove invocation has its own 120-second timeout and 393216-KiB virtual-memory cap; the Stage19 job has a 5-minute timeout.
+
+The existing Stage01 full-suite job previously took 538 seconds and reported 114 files / 209,070 tests. Adding the three Stage19 test files raises the expected suite to 117 files / 242,773 tests. Its timeout is increased from 12 to **15 minutes** to leave a measured runtime margin. This is still the complete `prove -lr t` suite; Stage19 tests are not excluded from Stage01.
+
+The canonical workflow adds one required Stage19 job, so the new acceptance run must show **20/20 required jobs completed/success**. The Stage19 job checks all three TAP summaries, the exact test totals and markers, 4/4 syntax, exit 0, empty stderr, and uploads the same seven evidence files listed above. None of the local QA results alone constitutes Stage19 Native CI acceptance.

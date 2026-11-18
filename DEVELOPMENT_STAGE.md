@@ -1,6 +1,6 @@
 TOTAL_STAGES=55
 CURRENT_STAGE=19
-CURRENT_KIND=WEAVING_TEN_MONTHS_DISCOVERY
+CURRENT_KIND=WEAVING_TEN_MONTHS_NATIVE_PENDING
 CURRENT_PATCH=none
 LAST_COMPLETED_STAGE=18
 EXPECTED_REPOSITORY_STATE=GREEN
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Perl
 NATURAL_LANGUAGE=סינית מנדרינית – מסורתית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Stage17 accepted on source 457eb0a8c444c5d3416c79e03273d3144dcc3dec. Stage18 accepted on source 7ae6fc32ce7ce9593ad41dc5c75056fa564aa591 by canonical push run 44365406989: 19/19 required success, Stage01 114 files/209070 TAP, Stage18 9819 TAP, artifact 14461669928 SHA256 146fd95dd91efee3da91c645f4b71a161ab3dcd7ff34afc099f9ecba64570f00 CRC7/7 verified; acceptance commit 7d12f88c5f976f13e2c157903fd3719fac88900f. Stage19 discovery selected 10 months/40 days from the 7/28,8/32,9/36 progression. Temporary exact-source boundary candidate f2fed952d134a3b59f9a9a8b61edcc311267c16d: Perl5.40.1; [2x10] Catalan10=16796 full independent Dyck rank/unrank 16796/16796 in 62.015s exit0; [3x10] 3515569641156 first/mid/last 1.521s; [4x10] 4971032496120057390920 first/mid/last 75.985s, VmHWM101372KiB, exit0; [31,1x9] and [40] roundtrip pass. Candidate differs only bounds 9->10 months and 36->40 days; no production Stage19 changes committed yet. Full-year generator remains unverified.
+MONSTER_ARCHITECTURE_GROWTH=Stage17 accepted on source 457eb0a8c444c5d3416c79e03273d3144dcc3dec. Stage18 accepted on source 7ae6fc32ce7ce9593ad41dc5c75056fa564aa591 by canonical push run 44365406989: 19/19 required success, Stage01 114 files/209070 TAP, Stage18 9819 TAP, artifact 14461669928 SHA256 146fd95dd91efee3da91c645f4b71a161ab3dcd7ff34afc099f9ecba64570f00 CRC7/7 verified. Stage19 10-month/40-day implementation now committed as a bounded extension only: module blob 3d731e16bfd88b7ad00c9f5f04f17509467fb91a, bounds 9->10 months and 36->40 days; legacy newly-legal negative fixtures updated. Local Perl5.40.1: syntax4/4; t/64 33634 PASS/76s; t/66 9 PASS/24s; t/65 60 PASS/81s; combined 33703 TAP; 120s and 393216-KiB per test. Stage01 timeout 15m, expected 117 files/242773 tests. Stage19 canonical Native CI pending; LAST_COMPLETED_STAGE remains 18. Full-year generator remains unverified.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=NO
