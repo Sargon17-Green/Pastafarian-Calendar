@@ -2625,3 +2625,45 @@ jobs:
           path: f2-evidence/
           retention-days: 30
           if-no-files-found: warn
+
+  # Separate read-only bounded Lua reference-composition QA; no full-year builder.
+  lua_haitian_bounded_reference_composition:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Guarded reference-composition differential, abort and resource evidence
+        shell: bash
+        run: |
+          set -uo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || exit 20
+          test "$(git rev-parse HEAD:test/normative_oracle.lua)" = "8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d" || exit 21
+          mkdir -p reference-composition-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\nSCOPE=BOUNDED_REFERENCE_ONLY\n' "$GITHUB_SHA" > reference-composition-evidence/manifest.txt
+          git rev-parse HEAD > reference-composition-evidence/source_sha.txt
+          sha256sum test/lua_haitian_bounded_reference_composition_probe.lua docs/LUA_HAITIAN_BOUNDED_REFERENCE_COMPOSITION_PROBE_2026-11-18.md > reference-composition-evidence/sha256.txt
+          ( ulimit -v 131072; timeout --signal=TERM --kill-after=2s 60s lua5.3 test/lua_haitian_bounded_reference_composition_probe.lua . ) > reference-composition-evidence/stdout.txt 2> reference-composition-evidence/stderr.txt
+          code=$?
+          printf '%s\n' "$code" > reference-composition-evidence/exit_code.txt
+          cat reference-composition-evidence/stdout.txt
+          if test -s reference-composition-evidence/stderr.txt; then cat reference-composition-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 || exit "$code"
+          test ! -s reference-composition-evidence/stderr.txt || exit 22
+          grep -Fxq 'REFERENCE_COMPOSITION_BOUNDED_SELFTEST_PASS: 10/10' reference-composition-evidence/stdout.txt
+          grep -Fxq 'F0_PROFILES_NOT_EXECUTED: 2/2' reference-composition-evidence/stdout.txt
+          grep -Fxq 'SCOPE=BOUNDED_LUA_REFERENCE_COMPOSITION_QA_ONLY; FULL_DATE=NOT_RUN' reference-composition-evidence/stdout.txt
+      - name: Upload bounded-reference evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-reference-composition-bounded-evidence
+          path: reference-composition-evidence/
+          retention-days: 30
+          if-no-files-found: warn
