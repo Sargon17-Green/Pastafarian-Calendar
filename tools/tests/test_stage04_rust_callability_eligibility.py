@@ -183,5 +183,39 @@ class CallabilityTests(unittest.TestCase):
         self.assert_unavailable_subprocess_is_structured(
             OSError("git executable unavailable"))
 
+
+    def test_malformed_cargo_metadata_fails_closed_as_json(self):
+        # Valid TOML syntax can still contain invalid Cargo metadata types.
+        cases = (
+            ("lib-string", 'lib = "bad"\\n[package]\\nname = "fixture"\\n'),
+            ("package-string", 'package = "bad"\\n'),
+            ("package-name-integer", '[package]\\nname = 12\\n'),
+        )
+        args = ["stage04_rust_callability_eligibility.py",
+                "--repo", str(self.repo),
+                "--witness-commit", self.old,
+                "--witness-path", "src/lib.rs",
+                "--witness-blob", self.blob,
+                "--stage3-closure", self.stage3,
+                "--stage4-introduction", self.stage4,
+                "--branch-head", self.head,
+                "--symbol", "old_numeric_probe"]
+        for label, manifest_text in cases:
+            with self.subTest(case=label):
+                def fake_archive(_repo, _commit, dest):
+                    (dest / "Cargo.toml").write_text(manifest_text, encoding="utf-8")
+                output = io.StringIO()
+                with patch.object(callability_cli, "archive", side_effect=fake_archive):
+                    with patch.object(sys, "argv", args), redirect_stdout(output):
+                        status = callability_cli.main()
+                payload = json.loads(output.getvalue())
+                self.assertEqual(status, 3)
+                self.assertEqual(payload["callability_status"], "RUNTIME_UNVERIFIED")
+                self.assertTrue(payload["source_pin_eligible"])
+                self.assertFalse(payload["callable_numeric_function_verified"])
+                self.assertFalse(payload["callable_day_tag_route_verified"])
+                self.assertFalse(payload["observed_runtime_red"])
+                self.assertEqual(payload["stage04_closure"], "NOT_CLAIMED")
+
 if __name__ == "__main__":
     unittest.main()

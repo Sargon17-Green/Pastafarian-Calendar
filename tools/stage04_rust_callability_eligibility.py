@@ -122,10 +122,18 @@ def check_callability(repo: Path, witness_commit: str, witness_path: str,
             raise RuntimeUnverified("pinned snapshot lacks Cargo.toml")
         try:
             manifest = tomllib.loads(cargo.read_text(encoding="utf-8"))
-            crate = manifest.get("lib", {}).get("name",
-                     manifest.get("package", {}).get("name", "").replace("-", "_"))
         except (ValueError, OSError) as exc:
             raise RuntimeUnverified("invalid pinned Cargo manifest") from exc
+        # TOML syntax can be valid while Cargo metadata has invalid shapes.
+        # Validate the container types before using .get() or .replace().
+        library = manifest.get("lib", {})
+        package = manifest.get("package", {})
+        if not isinstance(library, dict) or not isinstance(package, dict):
+            raise RuntimeUnverified("invalid pinned Cargo manifest sections")
+        package_name = package.get("name", "")
+        if not isinstance(package_name, str):
+            raise RuntimeUnverified("invalid pinned Cargo package name")
+        crate = library.get("name", package_name.replace("-", "_"))
         if not isinstance(crate, str) or not IDENT.fullmatch(crate):
             raise RuntimeUnverified("invalid pinned crate name")
         install_probe(dest, crate, symbol)
