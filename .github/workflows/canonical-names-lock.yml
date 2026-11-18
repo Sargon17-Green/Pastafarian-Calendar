@@ -819,3 +819,44 @@ jobs:
             stage40-preflight-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn
+
+  stage41-coupled-year-gate-preflight:
+    name: "Stage41 preflight: coupled calculation/target gate seams"
+    if: github.ref == 'refs/heads/PowerShell+Tagalog'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 481 Stage41 independent-oracle assertions
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($sha -cne $env:GITHUB_SHA) { throw 'Stage41 exact SHA mismatch' }
+          $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          if (-not (($stageLines -contains 'CURRENT_STAGE=40') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=40') -and ($stageLines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) { throw 'Stage40 exact seal required' }
+          @(
+            ('STAGE41_PREFLIGHT_SHA=' + $sha),
+            ('STAGE41_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE41_SCOPE=48_ENDPOINTS_24_CALC_SEAMS_24_TARGET_SEAMS_12_MIXED_FACES_32_SEAL_PAIRS',
+            'STAGE41_PLANNED_ASSERTIONS=481',
+            'STAGE41_ACTIVATION=NOT_STARTED'
+          ) | Set-Content stage41-preflight-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage41-preflight-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage41.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage41 bounded preflight failed' }
+            Write-Host ('STAGE41_PREFLIGHT_SHA=' + $sha)
+            Write-Host 'STAGE41_ACTIVATION=NOT_STARTED'
+          } finally { Stop-Transcript | Out-Null }
+      - name: Retain Stage41 exact-SHA preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage41-coupled-gates-preflight
+          path: |
+            stage41-preflight-metadata.txt
+            stage41-preflight-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
