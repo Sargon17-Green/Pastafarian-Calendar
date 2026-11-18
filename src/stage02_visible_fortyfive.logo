@@ -1,0 +1,26 @@
+; Stage2 Discovery16 — exact BI visible 41..45, production-only D8 helpers.
+to monster.stage02.visible.fortyfive.extend :i :ctx :stones :hidden :acc
+  if :i > 45 [output :acc]
+  localmake "p1 monster.stage02.visible.prefix.prior :i 1 :acc :hidden
+  localmake "p3 monster.stage02.visible.prefix.prior :i 3 :acc :hidden
+  localmake "p7 monster.stage02.visible.prefix.prior :i 7 :acc :hidden
+  localmake "stone item :i :stones
+  localmake "initial monster.stage02.visible.prefix.initial :i :ctx :stone :p1 :p3 :p7
+  localmake "value monster.stage02.visible.prefix.grind 1 :initial :stone :p1 :p3 :p7
+  output monster.stage02.visible.fortyfive.extend (:i + 1) :ctx :stones :hidden (lput :value :acc)
+end
+
+to monster.stage02.visible.fortyfive :ctx
+  if not (equalp (monster.context.get :ctx "status) "VISIBLE_FORTY_ONLY) [output :ctx]
+  localmake "forty monster.context.get :ctx "visibleForty
+  if not (listp :forty) [output :ctx]
+  if (count :forty) <> 40 [output :ctx]
+  localmake "fortyfive monster.stage02.visible.fortyfive.extend 41 :ctx (monster.context.get :ctx "stoneSeries) (monster.context.get :ctx "hiddenSeeds) :forty
+  localmake "work monster.context.put :ctx "visibleFortyFive :fortyfive
+  make "work monster.context.put :work "phase "VISIBLE_FORTYFIVE_READY
+  make "work monster.context.put :work "mode "STAGE_2_DISCOVERY_16
+  make "work monster.context.put :work "status "VISIBLE_FORTYFIVE_ONLY
+  make "work monster.metrics.bump :work "stage02.visible.fortyfive
+  make "work monster.logs.append :work "stage02.visible.fortyfive.ready
+  output :work
+end
