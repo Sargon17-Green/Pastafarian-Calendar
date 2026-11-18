@@ -204,7 +204,7 @@ jobs:
           retention-days: 30
 
   gmpy2-research:
-    if: ${{ github.ref == 'refs/heads/Chapel+Українська-мова' }}
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/Chapel') }}
     needs: verify
     runs-on: ubuntu-24.04
     timeout-minutes: 15
