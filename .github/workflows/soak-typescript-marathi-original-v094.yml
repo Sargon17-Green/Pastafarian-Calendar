@@ -1,0 +1,169 @@
+name: Soak v094 real original TypeScript Marathi vs Python Turkish two-day evidence
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/pilot_typescript_marathi_v094.mjs"
+      - "soak/runner/audit_ts_original_v094.py"
+      - "soak/tests/test_audit_ts_original_v094.py"
+      - ".github/workflows/soak-typescript-marathi-original-v094.yml"
+permissions:
+  contents: read
+jobs:
+  two-original-engines-not-year:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-typescript
+          ref: cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify source git identity, closure, machine RAM and disk
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-typescript rev-parse HEAD)" = cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test -z "$(git -C original-typescript status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+          test -f original-typescript/src/postStage55FinalDate.ts
+          test -f original-typescript/src/sourceLanguageCatalog.ts
+          test -f original-python/tests/normative_reference.py
+          mkdir -m 700 evidence
+          mkdir -p original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests
+          cp original-python/tests/normative_reference.py \
+            original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-sources/Python-Turkce/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' | sha256sum -c -
+          python3 - <<'PY' | tee evidence/v094-resource-preflight.log
+          from pathlib import Path
+          import shutil
+          data={k:int(v.split()[0])*1024 for k,v in (
+              line.split(':',1) for line in Path('/proc/meminfo').read_text().splitlines() if ':' in line
+          )}
+          ram=data['MemAvailable']
+          disk=shutil.disk_usage('.').free
+          # A bounded CI native smoke; this is NOT Windows worker admission.
+          assert ram>=5*1024**3 and disk>=2*1024**3, (ram,disk)
+          print('V094_LINUX_NATIVE_RESOURCE_ADMITTED_FOR_TWO_DAY_SMOKE')
+          print('V094_RESOURCE_BYTES_RAM_AVAILABLE=',ram)
+          print('V094_RESOURCE_BYTES_DISK_FREE=',disk)
+          PY
+          grep -q '^V094_LINUX_NATIVE_RESOURCE_ADMITTED_FOR_TWO_DAY_SMOKE$' evidence/v094-resource-preflight.log
+          python3 - <<'PY'
+          import hashlib,json,subprocess
+          from pathlib import Path
+          root=Path("original-typescript")
+          listed=subprocess.run(["git","-C",str(root),"ls-files","src"],capture_output=True,text=True,check=True).stdout.splitlines()
+          assert len(listed)>=50
+          rows=[]
+          for rel in sorted(listed):
+              p=root/rel
+              assert p.is_file() and not p.is_symlink()
+              rows.append({"path":rel,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()})
+          tree=subprocess.run(["git","-C",str(root),"rev-parse","HEAD:src"],capture_output=True,text=True,check=True).stdout.strip()
+          record={"schema":"PASTAFARI_TS_SOURCE_CLOSURE_V094/1","source_commit":"cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0",
+                  "source_tree_git_sha1":tree,"source_files":rows,
+                  "native_entrypoint":"calendarDateSpaghetti(c:bigint,t:bigint)",
+                  "full_year_soak_certified":0,"algorithms_independent":False}
+          Path("evidence/typescript-source-closure.json").write_text(json.dumps(record,sort_keys=True,ensure_ascii=False,indent=2)+"\n",encoding="utf8")
+          print("V094_TYPESCRIPT_ORIGINAL_SOURCE_FILES_PINNED=",len(rows))
+          PY
+      - name: Twelve strict offline raw evidence audit tests plus Node syntax gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s coordinator/soak/tests \
+            -p 'test_audit_ts_original_v094.py' -v \
+            2>&1 | tee evidence/v094-static-audit-tests.log
+          grep -Eq '^Ran 12 tests ' evidence/v094-static-audit-tests.log
+          grep -q '^OK$' evidence/v094-static-audit-tests.log
+          node --check coordinator/soak/runner/pilot_typescript_marathi_v094.mjs
+          echo V094_STATIC_RAW_EVIDENCE_CONTRACT_PASS_NOT_YEAR
+      - name: Run unchanged Python original exactly twice, one F(c,t) per child
+        shell: bash
+        env:
+          PASTAFARI_SOAK_RESOURCE_ADMITTED: "1"
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/soak/runner/pilot_python_transport_v017.py \
+            --sources-root original-sources --check-only \
+            2>&1 | tee evidence/v094-python-locked-preflight.log
+          for index in 0 1; do
+            case "$index" in
+              0) day=-15055660 ;;
+              1) day=-15055659 ;;
+            esac
+            python3 -B coordinator/soak/runner/pilot_python_transport_v017.py \
+              --sources-root original-sources --calculation-day=-15055671 \
+              --first-target-day="$day" --last-target-day="$day" \
+              --raw-out="evidence/python-$index-raw.jsonl" \
+              --normalized-out="evidence/python-$index-normalized.jsonl" \
+              --receipt-out="evidence/python-$index-receipt.json" \
+              2>&1 | tee "evidence/v094-python-$index-process.log"
+          done
+          echo V094_TWO_UNCHANGED_PYTHON_NATIVE_DATE_PROCESSES_COMPLETE_NOT_YEAR
+      - name: Run genuine unchanged TypeScript public API on the same two target days
+        shell: bash
+        env:
+          NODE_OPTIONS: --max-old-space-size=5120
+          PASTAFARI_V094_LINUX_QA_ADMITTED: "1"
+        run: |
+          set -euo pipefail
+          node --experimental-strip-types \
+            coordinator/soak/runner/pilot_typescript_marathi_v094.mjs \
+            --source-root original-typescript --calculation-day=-15055671 \
+            --first-target-day=-15055660 --last-target-day=-15055659 \
+            --raw-out evidence/typescript-native-raw.jsonl \
+            --catalog-out evidence/typescript-source-catalog.json \
+            2>&1 | tee evidence/v094-typescript-native-process.log
+          grep -c '^V094_ORIGINAL_TYPESCRIPT_NATIVE_DAY_OBSERVED=' evidence/v094-typescript-native-process.log | grep -qx 2
+          grep -q '^V094_TYPESCRIPT_ORIGINAL_TWO_DAYS_NATIVE_NOT_YEAR ' evidence/v094-typescript-native-process.log
+          test -z "$(git -C original-typescript status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+          echo V094_UNCHANGED_TYPESCRIPT_MARATHI_ORIGINAL_SOURCE_PRODUCED_TWO_DAYS
+      - name: Compare original Marathi name indices with actual Python original raw
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/soak/runner/audit_ts_original_v094.py \
+            --evidence-dir evidence \
+            --verdict-out evidence/v094-five-field-original-source-verdict.json \
+            2>&1 | tee evidence/v094-independent-raw-comparison.log
+          grep -q '^V094_ORIGINAL_TYPESCRIPT_PYTHON_TWO_DAYS_MATCH_NOT_YEAR=' evidence/v094-independent-raw-comparison.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("evidence/v094-five-field-original-source-verdict.json")
+          o=json.loads(p.read_bytes())
+          assert o['status']=='TWO_ORIGINAL_NATIVE_DATES_MATCH_NOT_FULL_YEAR'
+          assert o['matched_native_pairs']==2 and o['matched_five_fields']==10
+          assert o['original_native_target_days']==['-15055660','-15055659']
+          assert o['first_mismatch'] is None
+          assert o['full_original_years_certified']==0
+          assert o['algorithmic_independence_certified'] is False
+          print("V094_THIRD_SOURCE_TWO_NATIVE_TARGETS_MATCH_PYTHON_NOT_YEAR")
+          PY
+      - name: Always preserve source lock, raw logs, receipts and mismatch evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v094-original-typescript-marathi-two-day-not-year
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
