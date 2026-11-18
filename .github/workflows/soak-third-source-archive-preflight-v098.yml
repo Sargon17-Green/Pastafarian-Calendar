@@ -1,0 +1,48 @@
+name: Soak v098 third original source archive authorization tests (read-only)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/approve_third_original_archive_v098.py"
+      - "soak/tests/test_approve_third_original_archive_v098.py"
+      - ".github/workflows/soak-third-source-archive-preflight-v098.yml"
+permissions:
+  contents: read
+jobs:
+  reject-unsafe-original-third-source-preservation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require syntax and ten strict offline release gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          paths = [
+              "soak/runner/approve_third_original_archive_v098.py",
+              "soak/runner/replay_third_original_v095.py",
+              "soak/tests/test_approve_third_original_archive_v098.py",
+          ]
+          for name in paths:
+              ast.parse(Path(name).read_text(encoding="utf-8"))
+          print("V098_THIRD_SOURCE_ARCHIVE_PYTHON_AST_PASS")
+          PY
+          python3 -B -m unittest discover -s soak/tests \
+            -p 'test_approve_third_original_archive_v098.py' -v \
+            2>&1 | tee v098-preservation-gates.log
+          grep -Eq '^Ran 10 tests ' v098-preservation-gates.log
+          grep -q '^OK$' v098-preservation-gates.log
+          echo V098_ARCHIVE_AUTHORIZATION_TEN_TESTS_PASS_NO_REMOTE_WRITE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v098-preservation-preflight-only-not-year
+          path: v098-preservation-gates.log
+          if-no-files-found: warn
+          retention-days: 30

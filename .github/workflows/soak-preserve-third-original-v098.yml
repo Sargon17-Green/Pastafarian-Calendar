@@ -1,0 +1,200 @@
+name: Soak v098 preserve verified TypeScript original source ZIP in private draft Release
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/control/original_archive_requests/typescript-marathi-1021-v098.json"
+concurrency:
+  group: soak-third-original-immutable-archive-v098
+  cancel-in-progress: false
+permissions:
+  contents: write
+  actions: read
+jobs:
+  preserve-third-original-no-whole-year:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-typescript
+          ref: cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - name: Gate on exactly one added request and immutable original source identity
+        shell: bash
+        env:
+          GIT_BEFORE: ${{ github.event.before }}
+          GIT_AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$GITHUB_REF" = refs/heads/qa/soak-readiness-20261114
+          test "$(git -C original-typescript rev-parse HEAD)" = cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test -z "$(git -C original-typescript status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+          mkdir -m 700 evidence
+          mkdir -m 700 release-assets
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for p in (
+              "soak/runner/approve_third_original_archive_v098.py",
+              "soak/runner/replay_third_original_v095.py",
+              "soak/tests/test_approve_third_original_archive_v098.py",
+          ):
+              ast.parse((Path("coordinator")/p).read_text(encoding="utf-8"))
+          print("V098_ALL_PYTHON_MODULES_AST_PASS")
+          PY
+          python3 -B -m unittest discover -s coordinator/soak/tests \
+            -p 'test_approve_third_original_archive_v098.py' -v \
+            2>&1 | tee evidence/v098-source-archive-tests.log
+          grep -Eq '^Ran 10 tests ' evidence/v098-source-archive-tests.log
+          grep -q '^OK$' evidence/v098-source-archive-tests.log
+          python3 -B coordinator/soak/runner/approve_third_original_archive_v098.py \
+            --repo-root coordinator \
+            --before "$GIT_BEFORE" --after "$GIT_AFTER" \
+            --manifest-out release-assets/typescript-original-manifest-v098.json \
+            2>&1 | tee evidence/v098-approval.log
+          grep -q '^V098_SOURCE_THIRD_ORIGINAL_ARCHIVE_AUTHORIZED_NOT_YEAR$' evidence/v098-approval.log
+      - name: Download true original artifact and replay 69-file TypeScript source closure
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GH_REPO/actions/runs/44363057604" --jq '.status')" = completed
+          test "$(gh api "repos/$GH_REPO/actions/runs/44363057604" --jq '.conclusion')" = success
+          gh api "repos/$GH_REPO/actions/artifacts/14454273351/zip" \
+            > release-assets/typescript-marathi-1021-native.zip
+          echo 'a798cac07e77e704c97af637009cf1fcbcaf1f1358767f3f7690bad4acb54a70  release-assets/typescript-marathi-1021-native.zip' | sha256sum -c -
+          test "$(wc -c < release-assets/typescript-marathi-1021-native.zip)" -eq 10817
+          PYTHONPATH=coordinator/soak/runner python3 -B \
+            coordinator/soak/runner/replay_third_original_v095.py \
+            --zip release-assets/typescript-marathi-1021-native.zip \
+            --typescript-source-repo original-typescript \
+            --python-source-repo original-python \
+            --output evidence/v098-third-original-replayed-verdict.json \
+            | tee evidence/v098-full-source-replay.log
+          grep -q '^V095_THIRD_ORIGINAL_SOURCE_PINNED_TWO_DAYS_REPLAY_PASS_NOT_YEAR$' evidence/v098-full-source-replay.log
+          python3 - <<'PY'
+          import json
+          z=json.load(open('evidence/v098-third-original-replayed-verdict.json'))
+          assert z['source_closure_files_checked']==69
+          assert z['source_artifact_members_checked']==17
+          assert z['verified_original_five_field_pairs']==2
+          assert z['full_original_years_certified']==0
+          assert z['algorithmic_independence_certified'] is False
+          print('V098_COMPLETE_THIRD_ORIGINAL_PROVENANCE_AUDIT_PASS')
+          PY
+      - name: Private draft Release numeric-ID upload, read-back and byte-identical check
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+          TAG: soak-native-typescript-marathi-ordinal1021-v098
+        run: |
+          set -euo pipefail
+          printf '%s\n' \
+            'Source-original TypeScript+Marathi evidence archive; DRAFT only.' \
+            'c=-15055671, t=-15055660/-15055659; two real source calls.' \
+            'Seventeen pinned ZIP members; 69 original source files.' \
+            'Zero complete years, no source-lineage/independence certification.' \
+            > evidence/v098-draft-release-notes.txt
+          ids="$(gh api "repos/$GH_REPO/releases?per_page=100" \
+            --jq '.[] | select(.tag_name=="soak-native-typescript-marathi-ordinal1021-v098" and .draft==true) | .id')"
+          if [ -z "$ids" ]; then
+            gh release create "$TAG" --target "$GITHUB_SHA" --draft --prerelease \
+              --title "Original TypeScript Marathi source evidence (DRAFT, NOT YEAR)" \
+              --notes-file evidence/v098-draft-release-notes.txt
+            ids="$(gh api "repos/$GH_REPO/releases?per_page=100" \
+              --jq '.[] | select(.tag_name=="soak-native-typescript-marathi-ordinal1021-v098" and .draft==true) | .id')"
+          fi
+          test -n "$ids"
+          test "$(printf '%s\n' "$ids" | wc -l)" -eq 1
+          rid="$ids"
+          test "$(gh api "repos/$GH_REPO/releases/$rid" --jq '.draft')" = true
+          release_target="$(gh api "repos/$GH_REPO/releases/$rid" --jq '.target_commitish')"
+          git -C coordinator merge-base --is-ancestor "$release_target" "$GITHUB_SHA"
+          for f in release-assets/typescript-marathi-1021-native.zip release-assets/typescript-original-manifest-v098.json; do
+            name="$(basename "$f")"
+            existing="$(gh api "repos/$GH_REPO/releases/$rid/assets?per_page=100" \
+              --jq ".[] | select(.name==\"$name\") | .id")"
+            if [ -z "$existing" ]; then
+              mime=application/zip
+              if [ "$name" = typescript-original-manifest-v098.json ]; then mime=application/json; fi
+              curl --fail-with-body --silent --show-error --retry 3 -X POST \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                -H "Content-Type: $mime" \
+                --data-binary @"$f" \
+                "https://uploads.github.com/repos/$GH_REPO/releases/$rid/assets?name=$name" \
+                > evidence/v098-upload-response.json
+              python3 - "$name" <<'PY'
+          import json,sys
+          data=json.load(open("evidence/v098-upload-response.json"))
+          assert data['state']=='uploaded' and data['name']==sys.argv[1]
+          PY
+            fi
+          done
+          mkdir -m 700 verified-redownload
+          gh api "repos/$GH_REPO/releases/$rid/assets?per_page=100" --jq '.[].name' \
+            | sort > evidence/v098-actual-assets.txt
+          printf '%s\n' typescript-marathi-1021-native.zip typescript-original-manifest-v098.json \
+            | sort > evidence/v098-expected-assets.txt
+          diff -u evidence/v098-expected-assets.txt evidence/v098-actual-assets.txt
+          while IFS= read -r name; do
+            aid="$(gh api "repos/$GH_REPO/releases/$rid/assets?per_page=100" \
+              --jq ".[] | select(.name==\"$name\") | .id")"
+            test -n "$aid"
+            curl --fail-with-body --location --silent --show-error --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/octet-stream" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/$GH_REPO/releases/assets/$aid" \
+              -o "verified-redownload/$name"
+            cmp "release-assets/$name" "verified-redownload/$name"
+            echo "V098_ARCHIVED_SOURCE_ASSET_REDOWNLOADED_BYTE_IDENTICAL=$name"
+          done < evidence/v098-expected-assets.txt
+          echo 'a798cac07e77e704c97af637009cf1fcbcaf1f1358767f3f7690bad4acb54a70  verified-redownload/typescript-marathi-1021-native.zip' | sha256sum -c -
+          python3 - <<'PY' | tee evidence/v098-restoration-verdict.txt
+          import hashlib,json
+          from pathlib import Path
+          manifest=Path('verified-redownload/typescript-original-manifest-v098.json')
+          z=json.loads(manifest.read_bytes())
+          assert z['schema']=='PASTAFARI_ORIGINAL_TYPESCRIPT_DRAFT_ARCHIVE_MANIFEST_V098/1'
+          assert z['whole_original_years_certified']==0
+          assert z['independence_certified'] is False
+          assert z['asset']['sha256']=='a798cac07e77e704c97af637009cf1fcbcaf1f1358767f3f7690bad4acb54a70'
+          assert len(list(Path('verified-redownload').iterdir()))==2
+          print("V098_DRAFT_RELEASE_TWO_ASSETS_RESTORED_SHA_AND_BYTES_PASS")
+          PY
+          grep -q '^V098_DRAFT_RELEASE_TWO_ASSETS_RESTORED_SHA_AND_BYTES_PASS$' evidence/v098-restoration-verdict.txt
+      - name: Preserve audit logs (no original date reexecution)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v098-typescript-original-draft-backup-audit-not-year
+          path: |
+            evidence/v098-source-archive-tests.log
+            evidence/v098-approval.log
+            evidence/v098-third-original-replayed-verdict.json
+            evidence/v098-full-source-replay.log
+            evidence/v098-actual-assets.txt
+            evidence/v098-restoration-verdict.txt
+          if-no-files-found: warn
+          retention-days: 30
