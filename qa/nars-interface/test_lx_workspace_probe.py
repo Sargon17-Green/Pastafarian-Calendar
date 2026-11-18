@@ -27,7 +27,7 @@ class WorkspaceTests(unittest.TestCase):
     lines = out.decode('cp1252').splitlines()
     glob = next(s for s in lines if s.startswith(':4=V C '))
     self.assertEqual(glob.count("''"), 4)
-    self.assertIn("''D:\\\\a\\\\_temp\\\\LX_canary.txt''", glob)
+    self.assertIn("''" + PATH + "''", glob)
     self.assertIn("''APL_LX_CANARY_REAL_NATIVE_0_5_14_11''", glob)
     self.assertTrue(glob.endswith("'"))
     self.assertEqual(meta['actual_apl_characters'], len(meta['apl_statement']))
