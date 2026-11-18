@@ -1103,4 +1103,72 @@
     (call $test_k5_q2 (i32.const -1) (i32.const 0)))
   (func (export "test_discovery01_k5_q2_backward_two_rejections") (result i32)
     (call $test_k5_q2 (i32.const -1) (i32.const 1)))
+
+  ;; k5 q3: fixture-only division by 3 in the base-2^30 representation.
+  ;; Long division from most significant limb, remainder must be exactly zero.
+  (func $test_third_exact (param $p i32)
+    (local $i i32) (local $r i64) (local $v i64)
+    (local.set $i (call $len (local.get $p)))
+    (local.set $r (i64.const 0))
+    (block $done (loop $again
+      (br_if $done (i32.eqz (local.get $i)))
+      (local.set $i (i32.sub (local.get $i) (i32.const 1)))
+      (local.set $v (i64.add
+        (i64.mul (local.get $r) (global.get $BASE))
+        (i64.extend_i32_u (call $limb (local.get $p) (local.get $i)))))
+      (call $set_limb (local.get $p) (local.get $i)
+        (i32.wrap_i64 (i64.div_u (local.get $v) (i64.const 3))))
+      (local.set $r (i64.rem_u (local.get $v) (i64.const 3)))
+      (br $again)))
+    (if (i64.ne (local.get $r) (i64.const 0)) (then unreachable))
+    (call $normalize (local.get $p)))
+  ;; For M=2^127-1: M mod 3=1. Both digit streams give x divisible by 3.
+  ;; forward FIRST=M-4 => x=M^5-(M^3+2M^2+3M+4).
+  ;; backward FIRST=M-3 => x=M^5-(7M^4+6M^3+5M^2+4M+3).
+  ;; N=x/3-delta. delta=0 accepts at limit; delta=1 rejects three
+  ;; backwards, or wraps forwards to 1. No changes to $choose.
+  (func $test_k5_q3 (param $step i32) (param $delta i32) (result i32)
+    (local $j i32)
+    (call $init_constants)
+    (if (i32.eq (local.get $step) (i32.const 1))
+      (then
+        (call $sub_small (global.get $N) (global.get $M) (i32.const 1))
+        (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 4)))
+      (else
+        (call $sub_small (global.get $N) (global.get $M) (i32.const 8))
+        (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 3))))
+    (local.set $j (i32.const 0))
+    (block $done (loop $again
+      (br_if $done (i32.ge_u (local.get $j) (i32.const 4)))
+      (call $mul (global.get $N) (global.get $N) (global.get $M))
+      (if (i32.eq (local.get $step) (i32.const 1))
+        (then (call $sub_small (global.get $TMP1) (global.get $M)
+          (i32.add (i32.const 2) (local.get $j))))
+        (else (call $sub_small (global.get $TMP1) (global.get $M)
+          (i32.sub (i32.const 7) (local.get $j)))))
+      (call $add (global.get $N) (global.get $N) (global.get $TMP1))
+      (local.set $j (i32.add (local.get $j) (i32.const 1)))
+      (br $again)))
+    (call $add_small (global.get $N) (global.get $N) (i32.const 1))
+    (call $test_third_exact (global.get $N))
+    (if (i32.ne (local.get $delta) (i32.const 0))
+      (then (call $sub_small (global.get $N) (global.get $N) (local.get $delta))))
+    (call $choose (global.get $FIRST) (local.get $step)
+      (global.get $N) (global.get $RESULT))
+    (if (result i32) (i32.and (i32.eq (local.get $step) (i32.const 1))
+                               (i32.eq (local.get $delta) (i32.const 1)))
+      (then (i32.and
+        (i32.eqz (call $cmp (global.get $WIDE) (global.get $ONE)))
+        (i32.eqz (call $cmp (global.get $RESULT) (global.get $ONE)))))
+      (else (i32.and
+        (i32.eqz (call $cmp (global.get $WIDE) (global.get $LIMIT)))
+        (i32.eqz (call $cmp (global.get $RESULT) (global.get $N)))))))
+  (func (export "test_discovery01_k5_q3_forward_exact_limit") (result i32)
+    (call $test_k5_q3 (i32.const 1) (i32.const 0)))
+  (func (export "test_discovery01_k5_q3_forward_wrap") (result i32)
+    (call $test_k5_q3 (i32.const 1) (i32.const 1)))
+  (func (export "test_discovery01_k5_q3_backward_exact_limit") (result i32)
+    (call $test_k5_q3 (i32.const -1) (i32.const 0)))
+  (func (export "test_discovery01_k5_q3_backward_three_rejections") (result i32)
+    (call $test_k5_q3 (i32.const -1) (i32.const 1)))
 )
