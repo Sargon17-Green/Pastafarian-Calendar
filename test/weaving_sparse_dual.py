@@ -225,6 +225,49 @@ def _windowed_free_gap_transfer(previous, n, k, spec):
     return SparseVector(first + 1 + left, tuple(out[left:right]))
 
 
+def _unsliced_coeff_free_gap_transfer(previous, n, k, spec):
+    """Research-only take.forward kernel: traverse cached coefficient row.
+
+    Avoid allocating the coefficients[:width+1] pointer slice at each
+    free-gap transfer. Reverse the intact cached row and skip the first
+    'first' entries; the yielded coefficient for i is exactly row[n-i].
+    Prefix arithmetic and signed cancellation remain unchanged.
+    This is a bounded experiment, not a Chapel/production change.
+    """
+    q, fixed_sum, _, tail = spec
+    if fixed_sum or tail:
+        raise ValueError("unsliced diagnostic requires a free gap")
+    first = max(0, q)
+    if first > n:
+        return SparseVector(0, ())
+    width = n - first
+    begin, stop = first + 1, n + 1
+    overlap_begin = max(begin, previous.offset)
+    overlap_stop = min(stop, previous.offset + len(previous.values))
+    if overlap_begin < overlap_stop:
+        updates = chain(repeat(0, overlap_begin - begin),
+                        islice(previous.values,
+                               overlap_begin - previous.offset,
+                               overlap_stop - previous.offset),
+                        repeat(0, stop - overlap_stop))
+    else:
+        updates = repeat(0, width)
+    coefficients = islice(reversed(free_gap_coefficients(n, k)), first, None)
+    out = list(map(mul, accumulate(updates,
+                                   initial=previous.prefix(first)),
+                   coefficients))
+    assert len(out) == width + 1
+    left = 0
+    while left < len(out) and out[left] == 0:
+        left += 1
+    if left == len(out):
+        return SparseVector(0, ())
+    right = len(out)
+    while right > left and out[right - 1] == 0:
+        right -= 1
+    return SparseVector(first + 1 + left, tuple(out[left:right]))
+
+
 def sparse_transpose(after, n, k, spec):
     """Exact T^t, closed form for single-gap rows; recurrence otherwise."""
     q, fixed_sum, first_fixed, tail = spec
@@ -499,12 +542,16 @@ def test_support_prune_signed_differential():
                         previous, n, k, spec) == expected
                     assert _windowed_free_gap_transfer(
                         previous, n, k, spec) == expected
+                    assert _unsliced_coeff_free_gap_transfer(
+                        previous, n, k, spec) == expected
                     checks += 1
     assert checks == 576
     print("WEAVING_SPARSE_SUPPORT_PRUNE_SIGNED_CHECKS=" + str(checks))
     print("WEAVING_SPARSE_SUPPORT_PRUNE_SIGNED_DIFFERENTIAL=PASS")
     print("WEAVING_TAKE_WINDOWED_SIGNED_CHECKS=" + str(checks))
     print("WEAVING_TAKE_WINDOWED_SIGNED_DIFFERENTIAL=PASS")
+    print("WEAVING_TAKE_UNSLICED_SIGNED_CHECKS=" + str(checks))
+    print("WEAVING_TAKE_UNSLICED_SIGNED_DIFFERENTIAL=PASS")
 
 
 def test_finite():
@@ -515,7 +562,7 @@ def test_finite():
               (2, 2, 3, 3), (3, 3, 2, 2), (4, 3, 2),
               (2, 4, 3), (1, 2, 1, 3), (3, 1, 2, 2)]
     cases = list(dict.fromkeys(cases))
-    roundtrips = partitions = reused = 0
+    roundtrips = partitions = reused = unsliced_linked = 0
     for lengths in cases:
         accepted = brute_words(lengths)
         count, oracle_rank, oracle_unrank, _ = poset_oracle(lengths)
@@ -535,6 +582,14 @@ def test_finite():
                     if symbol > 1 else None)
                 old_hits = state.reused_candidate_transfers
                 state.take(symbol)
+                for month in range(max(2, symbol), state.m + 1):
+                    current_spec = state.specs[month]
+                    if current_spec[1] == 0 and current_spec[3] == 0:
+                        actual = _unsliced_coeff_free_gap_transfer(
+                            state.states[month - 1], state.sizes[month - 1],
+                            state.lengths[month - 1], current_spec)
+                        assert actual == state.states[month]
+                        unsliced_linked += 1
                 hit = state.reused_candidate_transfers - old_hits
                 assert hit == (1 if symbol > 1 else 0)
                 if expected_first is not None:
@@ -543,6 +598,7 @@ def test_finite():
                 partitions += 1
     assert len(cases) == 137 and roundtrips == 1982 and partitions == 8361
     assert 0 < reused < partitions
+    assert unsliced_linked > 0
     # Exact finite-case differential: instrumentation must preserve all states.
     sample = (2, 3, 2)
     word = dual_unrank(sample, 0)
@@ -566,6 +622,9 @@ def test_finite():
     print("WEAVING_SPARSE_FINITE_RANK_ROUNDTRIPS=1982")
     print("WEAVING_SPARSE_FINITE_PARTITIONS=8361")
     print("WEAVING_SPARSE_FINITE_RESULT=PASS")
+    print("WEAVING_TAKE_UNSLICED_ORACLE_LINKED_CHECKS=" +
+          str(unsliced_linked))
+    print("WEAVING_TAKE_UNSLICED_ORACLE_LINKED_RESULT=PASS")
 
 
 
@@ -760,6 +819,58 @@ def test_take_windowed_hotset(state):
     print("WEAVING_TAKE_WINDOWED_FULL_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
 
 
+def test_take_unsliced_hotset(state):
+    """Paired bounded ABBA on actual median-prefix take states.
+
+    The complete finite rank/unrank occurrence-poset oracle and signed
+    scalar differential remain independent correctness gates. This test
+    compares only five transfer states, not the full 4244-day workload.
+    """
+    from statistics import median
+
+    months = (39, 42, 43, 44, 45)
+    assert state.m == 45
+    checks = 0
+    baseline_sum = candidate_sum = 0.0
+    for month in months:
+        previous, n = state.states[month-1], state.sizes[month-1]
+        k, spec = state.lengths[month-1], state.specs[month]
+        assert spec[1] == 0 and spec[3] == 0 and spec[0] <= n
+        expected = _reference_free_gap_transfer(previous, n, k, spec)
+        assert sparse_transfer(previous, n, k, spec) == expected
+        assert _unsliced_coeff_free_gap_transfer(
+            previous, n, k, spec) == expected
+        checks += 1
+        times = {"baseline": [], "unsliced": []}
+        functions = {"baseline": sparse_transfer,
+                     "unsliced": _unsliced_coeff_free_gap_transfer}
+        for _ in range(3):
+            for key in ("baseline", "unsliced", "unsliced", "baseline"):
+                start = monotonic()
+                observed = functions[key](previous, n, k, spec)
+                times[key].append(monotonic() - start)
+                assert observed == expected
+                checks += 1
+        baseline = median(times["baseline"])
+        candidate = median(times["unsliced"])
+        assert baseline > 0
+        baseline_sum += baseline
+        candidate_sum += candidate
+        print("WEAVING_TAKE_UNSLICED_MONTH_" + str(month) +
+              "_BASE_SECONDS=" + format(baseline, ".6f"))
+        print("WEAVING_TAKE_UNSLICED_MONTH_" + str(month) +
+              "_NEW_SECONDS=" + format(candidate, ".6f"))
+        print("WEAVING_TAKE_UNSLICED_MONTH_" + str(month) +
+              "_RATIO=" + format(candidate / baseline, ".4f"))
+    assert checks == 65
+    print("WEAVING_TAKE_UNSLICED_HOTSET_MONTHS=39,42,43,44,45")
+    print("WEAVING_TAKE_UNSLICED_HOTSET_CHECKS=" + str(checks))
+    print("WEAVING_TAKE_UNSLICED_HOTSET_SUM_MEDIAN_RATIO=" +
+          format(candidate_sum / baseline_sum, ".4f"))
+    print("WEAVING_TAKE_UNSLICED_HOTSET_EQUALITY=PASS")
+    print("WEAVING_TAKE_UNSLICED_FULL_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
+
+
 def test_median_prefix():
     from weaving_reachability_oracle import MONTH_LENGTHS
     months = MONTH_LENGTHS
@@ -799,6 +910,7 @@ def test_median_prefix():
     test_paired_hot_month_free_gap(state)
     test_support_prune_hotset(state)
     test_take_windowed_hotset(state)
+    test_take_unsliced_hotset(state)
 
 
 if __name__ == "__main__":
