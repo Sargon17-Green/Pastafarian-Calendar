@@ -30,7 +30,7 @@ class WorkspaceTests(unittest.TestCase):
     self.assertNotIn('⋄', meta['apl_statement'])
     token_codes = ' '.join(str(ord(ch)) for ch in CANARY)
     path_codes = ' '.join(str(ord(ch)) for ch in PATH)
-    expected = f"(⎕UCS {token_codes}) ⎕NAPPEND (⎕UCS {path_codes} ⎕NCREATE 0)"
+    expected = f"(⎕UCS {token_codes}) ⎕NAPPEND ((⎕UCS {path_codes}) ⎕NCREATE 0)"
     self.assertEqual(meta['apl_statement'], expected)
     self.assertNotIn("'", meta['apl_statement'])
     self.assertNotIn('"', meta['apl_statement'])
@@ -40,6 +40,8 @@ class WorkspaceTests(unittest.TestCase):
     self.assertEqual(statement.count('⎕UCS'), 2)
     self.assertEqual(statement.count('⎕NAPPEND'), 1)
     self.assertEqual(statement.count('⎕NCREATE'), 1)
+    self.assertIn('⎕NAPPEND ((⎕UCS ', statement)
+    self.assertTrue(statement.endswith(' ⎕NCREATE 0)'))
     self.assertFalse(any(ch in statement for ch in ["'", '"']))
     self.assertTrue(meta['canary_path'].endswith('LX_canary.txt'))
   def test_display_mode_roundtrip_lx_only(self):

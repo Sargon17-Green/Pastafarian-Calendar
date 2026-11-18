@@ -63,7 +63,7 @@ def make_canary(raw: bytes, marker: str, mode: str = 'file') -> tuple[bytes, dic
     if mode == 'file':
         # ⎕NCREATE returns its tie number; ⎕NAPPEND consumes it directly.
         # Both filename and payload are numeric Unicode vectors: no APL quotes.
-        apl = f"({apl_ucs(CANARY)}) ⎕NAPPEND ({apl_ucs(marker)} ⎕NCREATE 0)"
+        apl = f"({apl_ucs(CANARY)}) ⎕NAPPEND (({apl_ucs(marker)}) ⎕NCREATE 0)"
     elif mode == 'display':
         # Prove ⎕LX startup independently of native-file function support.
         apl = "⎕←⎕UCS " + " ".join(str(ord(ch)) for ch in CANARY)

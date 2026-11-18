@@ -81,7 +81,7 @@ try {
     if ($candidateMeta.canary_path -ine $marker) { throw 'CANDIDATE_CANARY_PATH_MISMATCH' }
     if ($candidateMeta.input_sha256 -ne $r['workspace_source'].sha256) { throw 'CANDIDATE_INPUT_SHA256_MISMATCH' }
     if ($candidateMeta.apl_statement.Contains("'") -or $candidateMeta.apl_statement.Contains('"')) { throw 'CANDIDATE_LX_NOT_QUOTE_FREE' }
-    if (-not $candidateMeta.apl_statement.Contains('⎕NAPPEND') -or -not $candidateMeta.apl_statement.Contains('⎕NCREATE') -or -not $candidateMeta.apl_statement.Contains('⎕UCS')) { throw 'CANDIDATE_NATIVE_FILE_EXPRESSION_INCOMPLETE' }
+    if (-not $candidateMeta.apl_statement.Contains('⎕NAPPEND ((⎕UCS') -or -not $candidateMeta.apl_statement.Contains('⎕NCREATE 0)') -or -not $candidateMeta.apl_statement.Contains('⎕UCS')) { throw 'CANDIDATE_NATIVE_FILE_EXPRESSION_INCOMPLETE_OR_UNGROUPED' }
     $r['candidate_sha256'] = (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($candidateMeta.output_sha256 -ne $r['candidate_sha256']) { throw 'CANDIDATE_OUTPUT_SHA256_MISMATCH' }
     # Single bounded native process; NO simulated keystrokes, windows messages or GUI automation.
