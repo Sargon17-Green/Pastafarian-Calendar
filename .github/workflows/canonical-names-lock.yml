@@ -642,3 +642,33 @@ jobs:
         run: dart analyze
       - name: Verify Discovery17 exhaustive small-domain differential oracle
         run: dart run bin/stage2_discovery17_coverage_tests.dart
+
+  dart-hebrew-stage3-public-api:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Resolve packages
+        run: dart pub get
+      - name: Verify public API and integration test formatting
+        run: |
+          if ! dart format --output=none --set-exit-if-changed lib/pastafari_calendar.dart bin/stage3_public_api_tests.dart; then
+            dart format --output=write lib/pastafari_calendar.dart bin/stage3_public_api_tests.dart
+            for file in lib/pastafari_calendar.dart bin/stage3_public_api_tests.dart; do
+              echo "DART_CAPTURE_BEGIN:$file"
+              base64 -w0 "$file"
+              printf '\n'
+              echo "DART_CAPTURE_END:$file"
+            done
+            exit 1
+          fi
+      - name: Analyze entire Dart branch
+        run: dart analyze
+      - name: Verify canonical date via public package entrypoint
+        run: dart run bin/stage3_public_api_tests.dart
