@@ -1845,7 +1845,6 @@ fn test_stage31_numeric_date_candidate_matches_all_five_independent_oracle_field
 	}
 }
 
-
 // Stage 32: independent oracle across both inclusive/exclusive year-gate edges.
 fn test_stage32_public_year_gate_boundaries_match_independent_oracle() {
 	foundation := oracle_foundation_day()
