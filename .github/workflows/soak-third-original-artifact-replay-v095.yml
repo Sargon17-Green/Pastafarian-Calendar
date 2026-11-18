@@ -53,6 +53,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in ("soak/runner/replay_third_original_v095.py",
+                       "soak/runner/audit_ts_original_v094.py",
+                       "soak/tests/test_replay_third_original_v095.py"):
+              ast.parse((Path("coordinator")/path).read_text(encoding="utf8"))
+          print("V095_ALL_REPLAY_PYTHON_MODULES_SYNTAX_VALID")
+          PY
           PYTHONPATH=coordinator/soak/runner python3 -B -m unittest discover \
             -s coordinator/soak/tests -p 'test_replay_third_original_v095.py' -v \
             2>&1 | tee evidence/v095-tamper-rejection-tests.log
