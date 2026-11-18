@@ -87,3 +87,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage07-native-multiply-small.yml
     permissions:
       contents: read
+
+  false-arabic-stage08-stones:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-stones46]')
+    uses: ./.github/workflows/false-arabic-stage08-native-stones.yml
+    permissions:
+      contents: read
