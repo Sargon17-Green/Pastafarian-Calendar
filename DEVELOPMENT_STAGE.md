@@ -1,6 +1,6 @@
 TOTAL_STAGES=55
 CURRENT_STAGE=18
-CURRENT_KIND=WEAVING_NINE_MONTHS_DISCOVERY
+CURRENT_KIND=WEAVING_NINE_MONTHS_NATIVE_PENDING
 CURRENT_PATCH=none
 LAST_COMPLETED_STAGE=17
 EXPECTED_REPOSITORY_STATE=GREEN
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Perl
 NATURAL_LANGUAGE=סינית מנדרינית – מסורתית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Stage17 source 457eb0a8c444c5d3416c79e03273d3144dcc3dec accepted by canonical run 43939070420, 18/18 required successful, 18 raw logs inspected, Stage01 113 files/199251 TAP, Stage17 2972 native TAP, 7-file artifact 14263446619 independently SHA256/CRC/source verified. LAST_COMPLETED_STAGE=17 applies only to accepted source. Stage18 bounded nine-month/36-day DISCOVERY contract opened; no Stage18 code or Native acceptance. Full-year 252..5778-day generator remains unverified.
+MONSTER_ARCHITECTURE_GROWTH=Stage17 source 457eb0a8c444c5d3416c79e03273d3144dcc3dec accepted by canonical run 43939070420, 18/18 required successful, 18 raw logs inspected, Stage01 113 files/199251 TAP, Stage17 2972 native TAP, 7-file artifact 14263446619 independently SHA256/CRC/source verified. LAST_COMPLETED_STAGE=17 applies only to accepted source. Stage18 bounded nine-month/36-day production extension and independently tested t/63 authored; Stage18 Native CI acceptance pending. Full-year 252..5778-day generator remains unverified.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=NO
