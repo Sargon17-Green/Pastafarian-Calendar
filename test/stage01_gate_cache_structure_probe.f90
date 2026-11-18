@@ -13,7 +13,9 @@ program stage01_gate_cache_structure_probe
   integer :: assertions, failures, i
   integer(int64) :: k, idx, n
   integer(int64), parameter :: sample_indices(4) = [-2_int64, -1_int64, 1_int64, 3_int64]
-  type(BigInt) :: boundary, oracle_days(-3:3)
+  type(BigInt) :: boundary, oracle_days(-3:3), wide_days(-8:8)
+  integer(int64) :: observed_low, observed_high
+  integer :: j, gap_length, offset
   logical :: found
   character(len=64) :: assertion_label
 
@@ -125,9 +127,64 @@ program stage01_gate_cache_structure_probe
   call check(.not. found .and. idx == 2_int64, 'cold interior positive')
   call assert_bounds(0_int64, 3_int64, 'cold positive interior growth')
 
+
+  ! Independent interval-search oracle: reconstruct 17 boundaries from direct
+  ! per-gate gaps, then check the binary search against known half-open ranges.
+  ! This tests index lookup, not the independent sauce or full calendar.
+  wide_days(0) = anchor
+  do n = 1_int64, 8_int64
+    wide_days(n) = bi_add_small(wide_days(n-1_int64), int(positive_gate_gap(n), int64))
+    wide_days(-n) = bi_add_small(wide_days(-n+1_int64), -int(negative_gate_gap(n), int64))
+  end do
+
+  ! 16 intervals x 4 offsets = 64 checks, across both directions.
+  ! Querying in increasing order exercises hot-cache binary search.
+  do k = -8_int64, 7_int64
+    if (k < 0_int64) then
+      gap_length = negative_gate_gap(-k)
+    else
+      gap_length = positive_gate_gap(k+1_int64)
+    end if
+    do j = 1, 4
+      select case (j)
+      case (1)
+        offset = 0
+      case (2)
+        offset = 1
+      case (3)
+        offset = gap_length / 2
+      case (4)
+        offset = gap_length - 1
+      end select
+      boundary = bi_add_small(wide_days(k), int(offset, int64))
+      idx = exact_gate_index(boundary, found)
+      write(assertion_label,'(A,I0,A,I0)') 'warm interval ', k, ' offset ', offset
+      call check(idx == k .and. (found .eqv. (offset == 0)), trim(assertion_label))
+    end do
+  end do
+
+  ! 16 middle-of-gap probes from a fresh cache in reverse index order:
+  ! one index result and one minimal-extension bound check per interval.
+  do k = 7_int64, -8_int64, -1_int64
+    if (k < 0_int64) then
+      gap_length = negative_gate_gap(-k)
+    else
+      gap_length = positive_gate_gap(k+1_int64)
+    end if
+    boundary = bi_add_small(wide_days(k), int(gap_length/2, int64))
+    call reset_gate_cache()
+    idx = exact_gate_index(boundary, found)
+    write(assertion_label,'(A,I0)') 'cold reverse middle index ', k
+    call check(idx == k .and. .not. found, trim(assertion_label))
+    call gate_cache_bounds(observed_low, observed_high)
+    write(assertion_label,'(A,I0)') 'cold reverse minimal bounds ', k
+    call check(observed_low == min(k, 0_int64) .and. &
+         observed_high == max(k+1_int64, 0_int64), trim(assertion_label))
+  end do
+
   write(*,'(A,I0)') 'STAGE01_GATE_CACHE_STRUCTURE_ASSERTIONS=', assertions
   write(*,'(A,I0)') 'STAGE01_GATE_CACHE_STRUCTURE_FAILURES=', failures
-  if (assertions /= 55 .or. failures /= 0) error stop 'gate cache structural reset contract failed'
+  if (assertions /= 151 .or. failures /= 0) error stop 'gate cache structural reset contract failed'
   write(*,'(A)') 'STAGE01_GATE_CACHE_STRUCTURE_PASS (reset state only; NOT full Stage1)'
 
 contains
