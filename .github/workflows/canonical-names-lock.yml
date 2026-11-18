@@ -60,3 +60,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage04-native-workcounts.yml
     permissions:
       contents: read
+
+  false-arabic-stage05-stone-type:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-stone13]')
+    uses: ./.github/workflows/false-arabic-stage05-native-stone-type.yml
+    permissions:
+      contents: read
