@@ -1,8 +1,8 @@
 TOTAL_STAGES=55
 CURRENT_STAGE=18
-CURRENT_KIND=WEAVING_NINE_MONTHS_NATIVE_PENDING
+CURRENT_KIND=WEAVING_NINE_MONTHS_NATIVE_ACCEPTED
 CURRENT_PATCH=none
-LAST_COMPLETED_STAGE=17
+LAST_COMPLETED_STAGE=18
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Perl
 NATURAL_LANGUAGE=סינית מנדרינית – מסורתית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Stage17 source 457eb0a8c444c5d3416c79e03273d3144dcc3dec accepted by canonical run 43939070420, 18/18 required successful, 18 raw logs inspected, Stage01 113 files/199251 TAP, Stage17 2972 native TAP, 7-file artifact 14263446619 independently SHA256/CRC/source verified. LAST_COMPLETED_STAGE=17 applies only to accepted source. Stage18 bounded nine-month/36-day production extension and independently tested t/63 authored; Stage18 Native CI acceptance pending. Full-year 252..5778-day generator remains unverified.
+MONSTER_ARCHITECTURE_GROWTH=Stage17 accepted on source 457eb0a8c444c5d3416c79e03273d3144dcc3dec. Stage18 source 7ae6fc32ce7ce9593ad41dc5c75056fa564aa591 accepted by canonical push run 44365406989 attempt1: 19/19 required jobs completed/success, 19 raw logs inspected, 146 skipped; Stage01 114 files/209070 TAP PASS; Stage18 dedicated native job 9819/9819 TAP PASS in 67s, Catalan9/Dyck 4862/4862, 4 exhaustive profiles, 3 large 36-day profiles, invalid 14/11/8; Perl 5.40.5, syntax2, stderr0, exit0. Artifact 14461669928: 7 files, 26561 bytes, SHA256 146fd95dd91efee3da91c645f4b71a161ab3dcd7ff34afc099f9ecba64570f00 matches upload log, GitHub artifact digest and local ZIP; CRC7/7; source.txt exact. Full-year 252..5778-day generator remains unverified.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=NO
