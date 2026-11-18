@@ -99,3 +99,53 @@ z;23=~["E_MUL_SMALL_LAYOUT"0 0/]?
  z;b:y;a;!v;a;!b;14h;!!r:
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
+
+{ المرحلة 8: العملية 24؛ بناء 46 صفاً ثابتاً من خمسة أحجار لكل صف. }
+{ تحفظ قائمة عقد [row,next] مؤقتة، ثم تُفرَد بترتيب الصفوف إلى جدول مباشر. }
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ z;b:17a;!b;0h;!!w:z;b:29a;!b;0h;!!v:z;b:43a;!b;0h;!!u:
+ z;b:71a;!b;0h;!!t:z;b:101a;!b;0h;!!s:
+ z;p:5a;!w;a;!v;a;!u;a;!t;a;!s;a;!
+ z;n:p;a;!0a;!2r:
+ [r;47<][
+  z;b:w;a;!w;a;!b;14h;!!d:
+  z;b:v;a;!3a;!b;23h;!!l:z;b:d;a;!l;a;!b;9h;!!d:
+  z;b:d;a;!r;a;!b;22h;!!d:z;b:d;a;!b;25h;!!d:
+  z;b:v;a;!v;a;!b;14h;!!e:
+  z;b:u;a;!5a;!b;23h;!!l:z;b:e;a;!l;a;!b;9h;!!e:
+  z;b:e;a;!w;a;!b;9h;!!e:z;b:e;a;!b;25h;!!e:
+  z;b:u;a;!u;a;!b;14h;!!f:
+  z;b:t;a;!7a;!b;23h;!!l:z;b:f;a;!l;a;!b;9h;!!f:
+  z;b:f;a;!v;a;!b;9h;!!f:z;b:f;a;!b;25h;!!f:
+  z;b:t;a;!t;a;!b;14h;!!i:
+  z;b:s;a;!11a;!b;23h;!!l:z;b:i;a;!l;a;!b;9h;!!i:
+  z;b:i;a;!u;a;!b;9h;!!i:z;b:i;a;!b;25h;!!i:
+  z;b:s;a;!s;a;!b;14h;!!j:
+  z;b:w;a;!13a;!b;23h;!!l:z;b:j;a;!l;a;!b;9h;!!j:
+  z;b:j;a;!t;a;!b;9h;!!j:z;b:j;a;!b;25h;!!j:
+  z;p:5a;!d;a;!e;a;!f;a;!i;a;!j;a;!
+  z;l:p;a;!n;a;!l;n:
+  d;w:e;v:f;u:i;t:j;s:
+  r;1+r:
+ ]#
+ z;y:46a;!1p:
+ [p;47<][
+  n;q:46p;-m:
+  [m;0>][q;1+g;!q:m;1-m:]#
+  q;g;!a;!p;1+p:
+ ]#
+ y;d:
+ d;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
+
+{ المرحلة 8: العملية 25؛ SAVE لعدد غير سالب، مع إبقاء M למכפלה חיובית. }
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:
+ z;b:0a;!b;19h;!!w:
+ z;b:y;a;!w;a;!b;16h;!!r:
+ r;g;!0=y;g;!0>&[w;r:]?
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
+
