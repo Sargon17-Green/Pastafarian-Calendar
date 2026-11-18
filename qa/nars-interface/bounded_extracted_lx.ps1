@@ -74,28 +74,38 @@ try {
     $receipt = Join-Path $Evidence 'workspace_candidate_receipt.json'
     $marker = Join-Path $env:RUNNER_TEMP 'apl_lx_receipt.txt'
     if (Test-Path -LiteralPath $marker) { throw 'CANARY_ALREADY_EXISTS' }
-    & python qa/nars-interface/lx_workspace_probe.py --source $ws --candidate $candidate --receipt $receipt --canary $marker
+    & python qa/nars-interface/lx_workspace_probe.py --source $ws --candidate $candidate --receipt $receipt --canary $marker --mode file
     if ($LASTEXITCODE -ne 0) { throw 'WORKSPACE_CANDIDATE_GENERATOR_FAILED' }
+    $candidateMeta = Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
+    if ($candidateMeta.status -ne 'GENERATED_NOT_NATIVE_VALIDATED' -or $candidateMeta.mode -ne 'file' -or $candidateMeta.native_executed -ne $false) { throw 'CANDIDATE_RECEIPT_CONTRACT_MISMATCH' }
+    if ($candidateMeta.canary_path -ine $marker) { throw 'CANDIDATE_CANARY_PATH_MISMATCH' }
+    if ($candidateMeta.input_sha256 -ne $r['workspace_source'].sha256) { throw 'CANDIDATE_INPUT_SHA256_MISMATCH' }
+    if ($candidateMeta.apl_statement.Contains("'") -or $candidateMeta.apl_statement.Contains('"')) { throw 'CANDIDATE_LX_NOT_QUOTE_FREE' }
+    if (-not $candidateMeta.apl_statement.Contains('⎕NAPPEND') -or -not $candidateMeta.apl_statement.Contains('⎕NCREATE') -or -not $candidateMeta.apl_statement.Contains('⎕UCS')) { throw 'CANDIDATE_NATIVE_FILE_EXPRESSION_INCOMPLETE' }
     $r['candidate_sha256'] = (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($candidateMeta.output_sha256 -ne $r['candidate_sha256']) { throw 'CANDIDATE_OUTPUT_SHA256_MISMATCH' }
     # Single bounded native process; NO simulated keystrokes, windows messages or GUI automation.
     $p = Start-Process -FilePath $exe -ArgumentList ('"' + $prefix + '"') -WorkingDirectory $root -PassThru
     $r['interpreter_executed'] = $true
     $r['process_id'] = $p.Id
     $r['process_launch_utc'] = [DateTime]::UtcNow.ToString('o')
     $limit = [DateTime]::UtcNow.AddSeconds(25)
-    while (-not (Test-Path -LiteralPath $marker) -and [DateTime]::UtcNow -lt $limit) {
+    while (-not (Test-Path -LiteralPath $marker -PathType Leaf) -and [DateTime]::UtcNow -lt $limit) {
         Start-Sleep -Milliseconds 350
         $p.Refresh()
         if ($p.HasExited) { break }
     }
     $exists = Test-Path -LiteralPath $marker -PathType Leaf
-    $data = if ($exists) { [System.IO.File]::ReadAllText($marker) } else { '' }
     $token = 'APL_LX_CANARY_REAL_NATIVE_0_5_14_11'
-    $r['lx_canary'] = [ordered]@{ exists=$exists; matches_exact=($data.Trim() -eq $token); marker_bytes=if ($exists){(Get-Item $marker).Length}else{0} }
+    $expectedBytes = [System.Text.Encoding]::ASCII.GetBytes($token)
+    $actualBytes = if ($exists) { [System.IO.File]::ReadAllBytes($marker) } else { [byte[]]@() }
+    $matchesExact = ($actualBytes.Length -eq $expectedBytes.Length) -and ([Convert]::ToBase64String($actualBytes) -ceq [Convert]::ToBase64String($expectedBytes))
+    $markerSha = if ($exists) { (Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
+    $r['lx_canary'] = [ordered]@{ exists=$exists; matches_exact=$matchesExact; marker_bytes=$actualBytes.Length; marker_sha256=$markerSha; expected_bytes=$expectedBytes.Length; process_exited=$p.HasExited }
     $p.Refresh()
     $r['process_exit_code'] = if ($p.HasExited) { $p.ExitCode } else { $null }
     if (-not $p.HasExited) { & taskkill.exe /PID $p.Id /T /F 2>&1 | Out-Null }
-    $r['status'] = if ($exists -and $data.Trim() -eq $token) { 'LX_NATIVE_RECEIPT_CONFIRMED_NOT_STAGE01' } else { 'LX_NATIVE_RECEIPT_NOT_OBSERVED' }
+    $r['status'] = if ($exists -and $matchesExact) { 'NATIVE_LX_RECEIPT_CONFIRMED_NOT_STAGE01' } else { 'NATIVE_LX_RECEIPT_NOT_OBSERVED' }
 } catch {
     $r['status'] = 'FAIL_CLOSED'
     $r['errors'] += $_.Exception.Message
@@ -105,5 +115,7 @@ try {
     Write-Output ('NATIVE_LX_STATUS=' + $r['status'])
     Write-Output ('BINARY_SHA256_VERIFIED=' + $r['binary_verified'])
     Write-Output ('VERSION_VERIFIED=' + $r['version_verified'])
+    Write-Output ('LX_FILE_EXISTS=' + $r['lx_canary'].exists)
+    Write-Output ('LX_FILE_EXACT=' + $r['lx_canary'].matches_exact)
     Write-Output 'STAGE01=NOT_RUN'
 }

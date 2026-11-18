@@ -17,6 +17,8 @@ class WorkspaceTests(unittest.TestCase):
     out, meta=make_canary(BASE, PATH)
     self.assertIn(b':4=V C ',out)
     self.assertIn(b'{quad}NCREATE',out)
+    self.assertIn(b'{quad}NAPPEND',out)
+    self.assertIn(b'{quad}UCS ',out)
     self.assertNotIn(b'{diamond}',out)
     self.assertIn(b'5={quad}lx=:4',out)
     self.assertIn(b'0=foo=:3',out)
@@ -26,8 +28,20 @@ class WorkspaceTests(unittest.TestCase):
     out, meta = make_canary(BASE, PATH)
     self.assertNotIn('tn', meta['apl_statement'])
     self.assertNotIn('⋄', meta['apl_statement'])
-    self.assertTrue(meta['apl_statement'].startswith("'" + CANARY + "' ⎕NAPPEND ("))
-    self.assertTrue(meta['apl_statement'].endswith(" ⎕NCREATE 0)"))
+    token_codes = ' '.join(str(ord(ch)) for ch in CANARY)
+    path_codes = ' '.join(str(ord(ch)) for ch in PATH)
+    expected = f"(⎕UCS {token_codes}) ⎕NAPPEND (⎕UCS {path_codes} ⎕NCREATE 0)"
+    self.assertEqual(meta['apl_statement'], expected)
+    self.assertNotIn("'", meta['apl_statement'])
+    self.assertNotIn('"', meta['apl_statement'])
+  def test_file_mode_uses_two_unicode_vectors(self):
+    out, meta = make_canary(BASE, PATH, mode='file')
+    statement = meta['apl_statement']
+    self.assertEqual(statement.count('⎕UCS'), 2)
+    self.assertEqual(statement.count('⎕NAPPEND'), 1)
+    self.assertEqual(statement.count('⎕NCREATE'), 1)
+    self.assertFalse(any(ch in statement for ch in ["'", '"']))
+    self.assertTrue(meta['canary_path'].endswith('LX_canary.txt'))
   def test_display_mode_roundtrip_lx_only(self):
     out, meta = make_canary(BASE, PATH, mode='display')
     self.assertEqual(meta['mode'], 'display')
@@ -41,13 +55,17 @@ class WorkspaceTests(unittest.TestCase):
   def test_reject_unknown_lx_mode(self):
     with self.assertRaisesRegex(ValueError, 'UNKNOWN_LX_PROBE_MODE'):
       make_canary(BASE, PATH, mode='typo')
-  def test_embedded_apl_quotes_escaped_in_workspace(self):
+  def test_file_payload_is_quote_free_in_workspace(self):
     out, meta = make_canary(BASE, PATH)
     lines = out.decode('cp1252').splitlines()
     glob = next(s for s in lines if s.startswith(':4=V C '))
-    self.assertEqual(glob.count("''"), 4)
-    self.assertIn("''" + PATH + "''", glob)
-    self.assertIn("''APL_LX_CANARY_REAL_NATIVE_0_5_14_11''", glob)
+    self.assertEqual(glob.count("'"), 2)
+    payload = glob.split("'", 2)[1]
+    self.assertNotIn("'", payload)
+    self.assertNotIn('"', payload)
+    self.assertIn('{quad}UCS ', payload)
+    self.assertIn('{quad}NAPPEND', payload)
+    self.assertIn('{quad}NCREATE', payload)
     self.assertTrue(glob.endswith("'"))
     self.assertEqual(meta['actual_apl_characters'], len(meta['apl_statement']))
     self.assertEqual(glob.split(' ', 5)[2], str(len(meta['apl_statement'])))

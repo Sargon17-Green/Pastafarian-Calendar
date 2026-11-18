@@ -18,6 +18,16 @@ CANARY = 'APL_LX_CANARY_REAL_NATIVE_0_5_14_11'
 PATH = re.compile(r'^[A-Za-z]:\\[A-Za-z0-9_\\.-]+\.txt$')
 
 
+def apl_ucs(text: str) -> str:
+    """Return a quote-free NARS APL ⎕UCS expression for a BMP character vector."""
+    if not text:
+        raise ValueError('EMPTY_UCS_TEXT')
+    codes = [ord(ch) for ch in text]
+    if any(code < 0x20 or code > 0xFFFF for code in codes):
+        raise ValueError('UCS_TEXT_OUTSIDE_NARS_BMP_SAFE_RANGE')
+    return '⎕UCS ' + ' '.join(str(code) for code in codes)
+
+
 def make_canary(raw: bytes, marker: str, mode: str = 'file') -> tuple[bytes, dict]:
     if len(raw) > 25_000_000 or not raw:
         raise ValueError('SOURCE_SIZE_UNSAFE')
@@ -51,7 +61,9 @@ def make_canary(raw: bytes, marker: str, mode: str = 'file') -> tuple[bytes, dic
     # multi-statement diamond semantics inside the latent-expression evaluator.
     # Right-to-left: create the file, pass its tie handle to NAPPEND.
     if mode == 'file':
-        apl = f"'{CANARY}' ⎕NAPPEND ('{marker}' ⎕NCREATE 0)"
+        # ⎕NCREATE returns its tie number; ⎕NAPPEND consumes it directly.
+        # Both filename and payload are numeric Unicode vectors: no APL quotes.
+        apl = f"({apl_ucs(CANARY)}) ⎕NAPPEND ({apl_ucs(marker)} ⎕NCREATE 0)"
     elif mode == 'display':
         # Prove ⎕LX startup independently of native-file function support.
         apl = "⎕←⎕UCS " + " ".join(str(ord(ch)) for ch in CANARY)
@@ -72,6 +84,8 @@ def make_canary(raw: bytes, marker: str, mode: str = 'file') -> tuple[bytes, dic
         raise ValueError('LX_SERIALIZATION_NOT_REVERSIBLE')
     if not serialized.isascii() or "'" in marker:
         raise ValueError('ENCODING_FAILED')
+    if mode == 'file' and ("'" in apl or '"' in apl):
+        raise ValueError('FILE_LX_EXPRESSION_NOT_QUOTE_FREE')
     new_global = f":{new_id}=V C {len(apl)} 1 {len(apl)} '{serialized}'{newline}"
     lx_index, old = lx_matches[0]
     old_line = lines[lx_index]

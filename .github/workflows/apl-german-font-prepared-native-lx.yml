@@ -1,4 +1,4 @@
-name: APL German NARS LX test with publisher-font prepared ephemeral CI (NOT Stage1)
+name: APL German NARS quote-free native-file LX receipt (NOT Stage1)
 on:
   push:
     branches:
@@ -7,6 +7,7 @@ on:
       - '.github/workflows/apl-german-font-prepared-native-lx.yml'
       - 'qa/nars-interface/bootstrap_exact_nars.ps1'
       - 'qa/nars-interface/lx_workspace_probe.py'
+      - 'qa/nars-interface/bounded_extracted_lx.ps1'
       - 'qa/nars-interface/test_lx_workspace_probe.py'
   workflow_dispatch:
 permissions:
@@ -43,7 +44,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $native = Get-Content 'native_lx_evidence/native_lx_canary.json' -Raw | ConvertFrom-Json
-          if ($native.status -ne 'NATIVE_LX_SMOKE_PASS_NOT_STAGE01') {
+          if ($native.status -ne 'NATIVE_LX_RECEIPT_CONFIRMED_NOT_STAGE01') {
             ./qa/nars-interface/diagnose_lx_startup.ps1 -Runtime verified_runtime -Evidence workspace_launch_evidence
           } else {
             New-Item -ItemType Directory -Force -Path workspace_launch_evidence | Out-Null
