@@ -63,8 +63,14 @@ try {
     $meta = Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
     if ($meta.status -ne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false) { throw 'STAGE01_CANDIDATE_NOT_PREPARED' }
     if ($meta.source_commit -ne $sourceCommit -or $meta.source_file_count -ne 5 -or $meta.function_count -ne 95 -or $meta.unique_function_count -ne 95) { throw 'STAGE01_SOURCE_MANIFEST_GATE_FAILED' }
-    if ($manifest.source_commit -ne $sourceCommit -or $manifest.function_count -ne 95 -or $manifest.unique_function_count -ne 95) { throw 'STAGE01_MANIFEST_GATE_FAILED' }
+    if ($manifest.source_commit -ne $sourceCommit -or $manifest.function_count -ne 95 -or $manifest.unique_function_count -ne 95 -or $manifest.ordered_files.Count -ne 5 -or $manifest.ordered_function_names.Count -ne 95) { throw 'STAGE01_MANIFEST_GATE_FAILED' }
+    if ($meta.function_names.Count -ne 95) { throw 'STAGE01_FUNCTION_NAME_RECEIPTS_COUNT_MISMATCH' }
+    $manifestSha = (Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($meta.source_manifest_sha256 -ne $manifestSha) { throw 'STAGE01_SOURCE_MANIFEST_SHA256_MISMATCH' }
+    $expectedToken = 'APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=' + $sourceCommit + '|FILES=5|FX=95|TEST=STAGE01_PASS'
+    if ($meta.marker_token -cne $expectedToken) { throw 'STAGE01_MARKER_TOKEN_CONTRACT_MISMATCH' }
     if ($meta.marker_path -ine $marker) { throw 'STAGE01_MARKER_PATH_MISMATCH' }
+    if ($meta.outer_lx_characters -le 0 -or $meta.outer_lx_characters -gt 3000000 -or $meta.inner_program_characters -le 0) { throw 'STAGE01_PROGRAM_SIZE_OUT_OF_BOUNDS' }
     $candidateSha = (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($candidateSha -ne $meta.candidate_sha256) { throw 'STAGE01_CANDIDATE_SHA256_MISMATCH' }
     Copy-Item -LiteralPath $candidate -Destination (Join-Path $Evidence 'stage01_candidate.ws.nars') -Force
