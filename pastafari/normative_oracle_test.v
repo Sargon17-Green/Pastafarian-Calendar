@@ -1844,3 +1844,23 @@ fn test_stage31_numeric_date_candidate_matches_all_five_independent_oracle_field
 		assert discovery15_five_components(got) == discovery15_five_components(expected)
 	}
 }
+
+
+// Stage 32: independent oracle across both inclusive/exclusive year-gate edges.
+fn test_stage32_public_year_gate_boundaries_match_independent_oracle() {
+	foundation := oracle_foundation_day()
+	mut reference := new_oracle_engine()
+	year := reference.year5000(foundation)
+	targets := [year.open_gate_day, big_add(year.open_gate_day, big_one()),
+		year.close_gate_day, big_add(year.close_gate_day, big_one())]
+	for target in targets {
+		expected := reference.calendar_date_normative(foundation, target)
+		got := calendar_date_spaghetti(foundation, target) or { panic(err.msg()) }
+		assert discovery15_output_shape_oracle(got)
+		assert big_eq(got.year_number, expected.year_number)
+		assert got.cutlet_name == expected.cutlet_name
+		assert big_eq(got.day_in_cutlet, expected.day_in_cutlet)
+		assert got.month_name == expected.month_name
+		assert big_eq(got.day_in_month, expected.day_in_month)
+	}
+}

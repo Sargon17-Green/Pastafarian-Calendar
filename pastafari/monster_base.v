@@ -108,7 +108,14 @@ pub fn bootstrap_validate(calculation_day BigInt, target_day BigInt) !MonsterCon
 	return context
 }
 
+// Public Stage 31 date conversion now delegates to the independently verified PATCH15 path.
 pub fn calendar_date_spaghetti(calculation_day BigInt, target_day BigInt) !CalendarResult {
+	_ = bootstrap_validate(calculation_day, target_day)!
+	return calendar_date_patch15_numeric_spaghetti(calculation_day, target_day)
+}
+
+// Preserve the Stage 30 historical diagnostic for regression evidence.
+fn calendar_date_stage30_legacy_diagnostic_spaghetti(calculation_day BigInt, target_day BigInt) !CalendarResult {
 	_ = bootstrap_validate(calculation_day, target_day)!
 	// ደረጃ 3፦ የታሪካዊውን adapter ተከትሎ PATCH 01 ይጠራል።
 	patched_probe := calendar_save_spaghetti(calculation_day)

@@ -213,34 +213,14 @@ jobs:
           set -euo pipefail
           v -check ./pastafari/discovery15_witness_test.v
           v test ./pastafari/discovery15_witness_test.v 2>&1 | tee stage30_witness_green.log
-      - name: DISCOVERY 15 — four intentional RED output witnesses
+      - name: DISCOVERY 15 — four formerly RED public date witnesses now GREEN
         shell: bash
         run: |
           set -euo pipefail
           v -check ./pastafari/discovery15_expected_red_test.v
-          set +e
-          v test ./pastafari/discovery15_expected_red_test.v 2>&1 | tee stage30_expected_red.log
-          code=${PIPESTATUS[0]}
-          set -e
-          if [ "$code" -eq 0 ]; then
-            echo '::error::Stage30 unexpectedly GREEN before five-field assembly'
-            exit 1
-          fi
-          for test_name in \
-            test_discovery15_expected_red_foundation_same_day \
-            test_discovery15_expected_red_one_day_before_foundation \
-            test_discovery15_expected_red_one_day_after_foundation \
-            test_discovery15_expected_red_distinct_calculation_day; do
-            if ! grep -Fq "$test_name" stage30_expected_red.log; then
-              echo "::error::Missing intended RED assertion: $test_name"
-              exit 1
-            fi
-          done
-          if grep -Eiq '(panic:|cannot find|unknown identifier|compilation failed)' stage30_expected_red.log; then
-            echo '::error::Stage30 failed for a reason other than intended assertions'
-            exit 1
-          fi
-          echo 'Stage30: GREEN shape witnesses, four intended RED output assertions'
+          test "$(grep -Ec '^fn test_discovery15_expected_red_' ./pastafari/discovery15_expected_red_test.v)" -eq 4
+          v test ./pastafari/discovery15_expected_red_test.v 2>&1 | tee stage30_promoted_green.log
+          echo 'Stage30: four formerly RED public date witnesses now GREEN'
       - name: Stage 31 — exact polynomial weave vs independent exhaustive oracle
         run: v test ./pastafari/normative_oracle_test.v -run-only 'test_stage31_weave_polynomial_counts_agree_with_exhaustive_small_states'
       - name: Stage 31 — bounded independent phase probes (diagnostic only)
@@ -290,6 +270,13 @@ jobs:
             exit "$code"
           fi
           echo 'Stage31 numeric differential: all four anchors and five fields GREEN'
+      - name: Stage 32 — public year-gate boundary vs independent normative oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 600s \
+            v test ./pastafari/normative_oracle_test.v -run-only 'test_stage32_public_year_gate_boundaries_match_independent_oracle' \
+            2>&1 | tee stage32_boundaries.log
       - name: Preserve stage 29 native V evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -299,7 +286,8 @@ jobs:
             stage29_expected_green.log
             stage29_patch14.log
             stage30_witness_green.log
-            stage30_expected_red.log
+            stage30_promoted_green.log
             stage31_test_stage31_diag_*.log
             stage31_numeric.log
+            stage32_boundaries.log
           if-no-files-found: ignore

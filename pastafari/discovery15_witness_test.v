@@ -55,13 +55,13 @@ fn test_discovery15_shape_oracle_has_four_negative_controls() {
 	})
 }
 
-fn test_discovery15_valid_anchor_inputs_still_return_a_diagnostic() {
+fn test_discovery15_historical_route_still_returns_diagnostic() {
 	foundation := big_from_i64(-15_055_671)
 	for offset in [-2, -1, 0, 1, 2] {
 		target := big_add(foundation, big_from_int(offset))
 		mut failed := false
 		mut diagnostic := ''
-		_ = calendar_date_spaghetti(foundation, target) or {
+		_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, target) or {
 			failed = true
 			diagnostic = err.msg()
 			CalendarResult{}

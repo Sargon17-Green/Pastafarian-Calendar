@@ -1,6 +1,6 @@
 module pastafari
 
-// Stage 30: intentional RED until the actual five-part date assembly exists.
+// Stage 30: four formerly intentional RED cases, promoted to public date GREEN.
 fn discovery15_has_valid_public_date_shape(calculation_day BigInt, target_day BigInt) bool {
 	value := calendar_date_spaghetti(calculation_day, target_day) or { CalendarResult{} }
 	if discovery15_five_components(value).len != 5 {
