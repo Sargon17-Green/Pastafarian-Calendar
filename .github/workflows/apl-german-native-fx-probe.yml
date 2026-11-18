@@ -1,0 +1,76 @@
+name: APL German native ⎕EC and ⎕FX execution probe (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-native-fx-probe.yml'
+      - 'qa/nars-interface/fx_probe_workspace.py'
+      - 'qa/nars-interface/test_fx_probe_workspace.py'
+      - 'qa/nars-interface/bounded_extracted_fx_probe.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-fx-ec-probe:
+    runs-on: windows-2022
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Prepare exact runtime and ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Test quote-free ⎕FX workspace candidate
+        shell: pwsh
+        run: python -m unittest discover -s qa/nars-interface -p 'test_fx_probe_workspace.py' -v
+      - name: Run native ⎕EC plus ⎕FX function execution probe
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_extracted_fx_probe.ps1 -Runtime verified_runtime -Evidence fx_probe_evidence
+      - name: Diagnose NARS window if FX probe receipt is absent
+        if: always()
+        shell: pwsh
+        run: |
+          $p='fx_probe_evidence/native_fx_probe.json'
+          if (Test-Path $p) {
+            $r=Get-Content $p -Raw | ConvertFrom-Json
+            if ($r.status -eq 'NATIVE_FX_EC_PROBE_CONFIRMED_NOT_STAGE01') {
+              New-Item -ItemType Directory -Force workspace_launch_evidence | Out-Null
+              'FX probe confirmed; no GUI diagnostic required' | Set-Content -Encoding utf8 workspace_launch_evidence/skipped.txt
+            } else {
+              ./qa/nars-interface/diagnose_lx_startup.ps1 -Runtime verified_runtime -Evidence workspace_launch_evidence
+            }
+          } else {
+            New-Item -ItemType Directory -Force workspace_launch_evidence | Out-Null
+            'FX probe report missing; previous step failed before native process' | Set-Content -Encoding utf8 workspace_launch_evidence/skipped.txt
+          }
+      - name: Collect metadata evidence only
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force font_bootstrap_evidence,fx_probe_evidence,workspace_launch_evidence | Out-Null
+          Get-ChildItem font_bootstrap_evidence,fx_probe_evidence,workspace_launch_evidence -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName.Replace((Get-Location).Path + '\\',''))"
+          } | Set-Content -Encoding utf8 fx_probe_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-native-fx-ec-probe-evidence-not-stage1
+          path: |
+            font_bootstrap_evidence/
+            fx_probe_evidence/
+            workspace_launch_evidence/
+            fx_probe_evidence.sha256
+          retention-days: 14
