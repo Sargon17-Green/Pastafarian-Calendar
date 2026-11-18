@@ -275,3 +275,7 @@ D14 sur HEAD 0a3011e8d4f99c3848c703ae8521f8881889a1b6, originala push 4393884119
 
 ## Discovery15 Native accepted; Discovery16 implemented — 2026-11-18
 On Logo+Ido SHA e84607fa9e4dfe19ad08f5956f3b0704956ef90c original D15 push 43960869831/job 133627582019 completed SUCCESS with authentic 5/21 native PASS. Same-SHA D14 43960869731, D13 43960869624, D12 43960869910, D11 43960869592, D10 43960869720, D1–D9 43960869959, Stage1 43960869583, Names 43960869834 all completed SUCCESS. D15 accepted, Stage2 incomplete. D16 exact 41..45: production D8 helpers, independent test-only 1..45 oracle, 5 cases/21 planned checks, bounded headless Native CI. D16 Native PENDING; no PASS before same-SHA logs/regressions. LAST_COMPLETED_STAGE=1, no main/merge.
+
+## Stage 2 — DISCOVERY 16 acceptita; DISCOVERY 17 implementita (2026-11-18)
+DISCOVERY 16 originala push run 44364739926/job 135015353772 sur SHA 239ee1b5f8bcc51f108e42b4c004021ae969b4af kompletigis SUCCESS, 5 kazi/21 kontroli e la autentika NATIVE_STAGE_2_DISCOVERY_16_VERIFICATION=PASS. Nov regresia workflow-ruli D15–D10, D1–D9, Stage1 e Names Lock anke kompletigis SUCCESS sur la sama SHA. D16 esas acceptita.
+DISCOVERY 17 adicionas nur la 46ma exakta videbla valoro, kun production D8 helperi, separita test-only normativa oracle por 1..46, 5 kazi/17 kontrolaji e limitizita headless CI. La nova kodaro ne esas Native-acceptita ante kompleta loga evidenco. Stage2 tote ankore ne esas kompletigita; LAST_COMPLETED_STAGE restas 1.
