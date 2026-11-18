@@ -13,3 +13,7 @@
 ## نتيجة محلية
 
 اجتاز المفسر الأصلي 50 مقارنة نتيجة و100 تحققاً من ثبات الخليتين، خرج 0 وstderr فارغ. رُفض الموتنت الذي بدّل أول توقع من 3 إلى 4، وكذلك الفهارس `(0,1),(11,1),(1,0),(1,6)` بخروج 1 وعلامة الخطأ المناسبة. SHA-256 للـfixture `2cdead9481eb2e8095300d321e08681b4756bc66c6f61aea4ddb25d4fd029a16` وللبرنامج المجمع `ac1ec6efc77c34514853d3691660706a615d077fd31ce531a53b32f62788c51f`. هذه نتيجة محلية؛ CI وتدقيق artifact مطلوبان للقبول.
+
+## قرار القبول بعد CI
+
+اكتمل [run 44364391828](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44364391828) completed/success على workflow SHA `8372aed80312f163a58615063df17f9b1237c268` بوابتي verify وNative. مصدر التنفيذ `34120b256d21ff5b931f17a5c97236076e2cfa98` والمفسر الأصلي `eb3135565a8670cced3f6bbca4dbf7b014c45634`. الأرشيف 14456583627، SHA-256 `583fcf84d3b8255dbe420e1e62091f6cb8aa9a6a7d05d8184f75818e77322982`، وCRC صحيح. دقق `tools/stage11_visible_grind_acceptance_audit.py` بايتات المصدر والمنفذ، اشتق الأعداد الأولية مستقلاً وقارن 50 قيمة و100 مدخل، ثم تحقق من فشل خمسة ضوابط سالبة وتغيير oracle. تقرير `evidence/stage11_visible_grind_acceptance_2026-11-18.json`، SHA-256 `6d29c69a0b31a2ef77c21f104670a302a619c9a6f5f8757a2bb11f4c45491588`: **STAGE11_ACCEPTED=YES**. حقل CI `stage11_full_acceptance=false` سُجّل قبل التدقيق النهائي.
