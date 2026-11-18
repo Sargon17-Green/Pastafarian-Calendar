@@ -1,0 +1,342 @@
+{ المرحلة 5: جدول اصطناعي مستقل من 46 صفاً و13 نمطاً. }
+z;b:512a;!b;0h;!!q: { أساس كتابة الأعداد الكبيرة للاختبار. }
+z;b:0a;!b;0h;!!s:
+z;b:1000077a;!b;0h;!!u:
+z;b:1000114_a;!b;0h;!!v:
+z;b:1000151a;!b;0h;!!w:
+z;b:2a;!b;0h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:5a;!b;0h;!!t:
+z;b:y;a;!t;a;!b;9h;!!y:
+z;c:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:2000043a;!b;0h;!!s:
+z;b:2000080_a;!b;0h;!!u:
+z;b:2000117a;!b;0h;!!v:
+z;b:2000154_a;!b;0h;!!w:
+z;b:2000191a;!b;0h;!!y:
+z;d:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:3000046_a;!b;0h;!!s:
+z;b:3000083a;!b;0h;!!u:
+z;b:3000120_a;!b;0h;!!v:
+z;b:3000157a;!b;0h;!!w:
+z;b:3000194_a;!b;0h;!!y:
+z;e:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:4000049a;!b;0h;!!s:
+z;b:4000086_a;!b;0h;!!u:
+z;b:4000123a;!b;0h;!!v:
+z;b:4000160_a;!b;0h;!!w:
+z;b:4000197a;!b;0h;!!y:
+z;f:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:5000052_a;!b;0h;!!s:
+z;b:5000089a;!b;0h;!!u:
+z;b:5000126_a;!b;0h;!!v:
+z;b:5000163a;!b;0h;!!w:
+z;b:5000200_a;!b;0h;!!y:
+z;i:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:6000055a;!b;0h;!!s:
+z;b:6000092_a;!b;0h;!!u:
+z;b:2a;!b;0h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:v;a;!q;a;!b;14h;!!v:
+z;b:508a;!b;0h;!!t:
+z;b:v;a;!t;a;!b;9h;!!v:
+z;b:v;a;!b;8h;!!v:
+z;b:6000166_a;!b;0h;!!w:
+z;b:6000203a;!b;0h;!!y:
+z;j:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:7000058_a;!b;0h;!!s:
+z;b:7000095a;!b;0h;!!u:
+z;b:7000132_a;!b;0h;!!v:
+z;b:7000169a;!b;0h;!!w:
+z;b:2a;!b;0h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:1a;!b;0h;!!t:
+z;b:y;a;!t;a;!b;9h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:99a;!b;0h;!!t:
+z;b:y;a;!t;a;!b;9h;!!y:
+z;l:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:8000061a;!b;0h;!!s:
+z;b:8000098_a;!b;0h;!!u:
+z;b:8000135a;!b;0h;!!v:
+z;b:8000172_a;!b;0h;!!w:
+z;b:8000209a;!b;0h;!!y:
+z;m:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:9000064_a;!b;0h;!!s:
+z;b:9000101a;!b;0h;!!u:
+z;b:9000138_a;!b;0h;!!v:
+z;b:9000175a;!b;0h;!!w:
+z;b:9000212_a;!b;0h;!!y:
+z;n:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:10000067a;!b;0h;!!s:
+z;b:10000104_a;!b;0h;!!u:
+z;b:10000141a;!b;0h;!!v:
+z;b:10000178_a;!b;0h;!!w:
+z;b:10000215a;!b;0h;!!y:
+z;o:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:11000070_a;!b;0h;!!s:
+z;b:11000107a;!b;0h;!!u:
+z;b:11000144_a;!b;0h;!!v:
+z;b:11000181a;!b;0h;!!w:
+z;b:11000218_a;!b;0h;!!y:
+z;p:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:12000073a;!b;0h;!!s:
+z;b:12000110_a;!b;0h;!!u:
+z;b:12000147a;!b;0h;!!v:
+z;b:12000184_a;!b;0h;!!w:
+z;b:2a;!b;0h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:2a;!b;0h;!!t:
+z;b:y;a;!t;a;!b;9h;!!y:
+z;b:y;a;!q;a;!b;14h;!!y:
+z;b:92a;!b;0h;!!t:
+z;b:y;a;!t;a;!b;9h;!!y:
+z;b:y;a;!b;8h;!!y:
+z;r:5a;!s;a;!u;a;!v;a;!w;a;!y;a;!
+z;b:13000076_a;!b;0h;!!s:
+z;b:13000113a;!b;0h;!!u:
+z;b:13000150_a;!b;0h;!!v:
+z;x:3a;!s;a;!u;a;!v;a;!
+z;w:46a;!c;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!r;a;!x;a;!c;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!r;a;!x;a;!c;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!r;a;!x;a;!c;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!
+[~["STAGE5_STONE_FAILURE"10,0 0/]?]y:
+{ حالة 0: row=1, kind=1, value=0. }
+c;1+g;!v:
+z;b:w;a;!1a;!1a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:0a;!b;0h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!c;g;!5=y;!
+"STAGE5_STONE_CASE_00_OK"10,
+{ حالة 1: row=1, kind=5, value=170141183460469231731687303715884105733. }
+c;5+g;!v:
+z;b:w;a;!1a;!5a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:2a;!b;0h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:5a;!b;0h;!!t:
+z;b:s;a;!t;a;!b;9h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!c;g;!5=y;!
+"STAGE5_STONE_CASE_01_OK"10,
+{ حالة 2: row=2, kind=2, value=-2000080. }
+d;2+g;!v:
+z;b:w;a;!2a;!2a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:2000080_a;!b;0h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!d;g;!5=y;!
+"STAGE5_STONE_CASE_02_OK"10,
+{ حالة 3: row=12, kind=5, value=-170141183460469231731687303715884106844. }
+r;5+g;!v:
+z;b:w;a;!12a;!5a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:2a;!b;0h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:2a;!b;0h;!!t:
+z;b:s;a;!t;a;!b;9h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:92a;!b;0h;!!t:
+z;b:s;a;!t;a;!b;9h;!!s:
+z;b:s;a;!b;8h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!r;g;!5=y;!
+"STAGE5_STONE_CASE_03_OK"10,
+{ حالة 4: row=13, kind=3, value=-13000150. }
+x;3+g;!v:
+z;b:w;a;!13a;!3a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:13000150_a;!b;0h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!x;g;!3=y;!
+"STAGE5_STONE_CASE_04_OK"10,
+{ حالة 5: row=14, kind=1, value=0. }
+c;1+g;!v:
+z;b:w;a;!14a;!1a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:0a;!b;0h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!c;g;!5=y;!
+"STAGE5_STONE_CASE_05_OK"10,
+{ حالة 6: row=25, kind=4, value=-12000184. }
+r;4+g;!v:
+z;b:w;a;!25a;!4a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:12000184_a;!b;0h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!r;g;!5=y;!
+"STAGE5_STONE_CASE_06_OK"10,
+{ حالة 7: row=27, kind=2, value=1000077. }
+c;2+g;!v:
+z;b:w;a;!27a;!2a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:1000077a;!b;0h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!c;g;!5=y;!
+"STAGE5_STONE_CASE_07_OK"10,
+{ حالة 8: row=32, kind=3, value=-170141183460469231731687303715884106236. }
+j;3+g;!v:
+z;b:w;a;!32a;!3a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:2a;!b;0h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:508a;!b;0h;!!t:
+z;b:s;a;!t;a;!b;9h;!!s:
+z;b:s;a;!b;8h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!j;g;!5=y;!
+"STAGE5_STONE_CASE_08_OK"10,
+{ حالة 9: row=40, kind=5, value=170141183460469231731687303715884105733. }
+c;5+g;!v:
+z;b:w;a;!40a;!5a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:2a;!b;0h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:5a;!b;0h;!!t:
+z;b:s;a;!t;a;!b;9h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!c;g;!5=y;!
+"STAGE5_STONE_CASE_09_OK"10,
+{ حالة 10: row=45, kind=4, value=-6000166. }
+j;4+g;!v:
+z;b:w;a;!45a;!4a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:6000166_a;!b;0h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!j;g;!5=y;!
+"STAGE5_STONE_CASE_10_OK"10,
+{ حالة 11: row=46, kind=5, value=170141183460469231731687303715884106339. }
+l;5+g;!v:
+z;b:w;a;!46a;!5a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:2a;!b;0h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:1a;!b;0h;!!t:
+z;b:s;a;!t;a;!b;9h;!!s:
+z;b:s;a;!q;a;!b;14h;!!s:
+z;b:99a;!b;0h;!!t:
+z;b:s;a;!t;a;!b;9h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!l;g;!5=y;!
+"STAGE5_STONE_CASE_11_OK"10,
+{ حالة 12: row=46, kind=1, value=-7000058. }
+l;1+g;!v:
+z;b:w;a;!46a;!1a;!b;21h;!!u:
+u;v;=y;! { هوية المقبض. }
+z;b:7000058_a;!b;0h;!!s:
+z;b:u;a;!s;a;!b;5h;!!0=y;! { المقارنة العددية المستقلة. }
+w;g;!46=y;!l;g;!5=y;!
+"STAGE5_STONE_CASE_12_OK"10,
+"STAGE5_STONE_13_VALUES_13_HANDLES_VERIFIED"10,
+[z;0>][%z;1-z:]#
