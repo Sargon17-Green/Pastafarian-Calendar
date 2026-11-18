@@ -95,17 +95,25 @@ try {
         $p.Refresh()
         if ($p.HasExited) { break }
     }
-    $exists = Test-Path -LiteralPath $marker -PathType Leaf
     $token = 'APL_LX_CANARY_REAL_NATIVE_0_5_14_11'
     $expectedBytes = [System.Text.Encoding]::ASCII.GetBytes($token)
+    $p.Refresh()
+    $processWasRunningAtReceiptCheck = -not $p.HasExited
+    # NARS keeps the native-file tie open after ⎕NAPPEND. Terminate the bounded
+    # process first so Windows releases the handle before the independent byte read.
+    if ($processWasRunningAtReceiptCheck) {
+        & taskkill.exe /PID $p.Id /T /F 2>&1 | Out-Null
+        try { Wait-Process -Id $p.Id -Timeout 5 -ErrorAction Stop } catch { }
+        $p.Refresh()
+    }
+    if (-not $p.HasExited) { throw 'NARS_PROCESS_NOT_TERMINATED_AFTER_LX_RECEIPT' }
+    $exists = Test-Path -LiteralPath $marker -PathType Leaf
     [byte[]]$actualBytes = @()
     if ($exists) { $actualBytes = [System.IO.File]::ReadAllBytes($marker) }
     $matchesExact = ($actualBytes.Length -eq $expectedBytes.Length) -and ([Convert]::ToBase64String($actualBytes) -ceq [Convert]::ToBase64String($expectedBytes))
     $markerSha = if ($exists) { (Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
-    $r['lx_canary'] = [ordered]@{ exists=$exists; matches_exact=$matchesExact; marker_bytes=$actualBytes.Length; marker_sha256=$markerSha; expected_bytes=$expectedBytes.Length; process_exited=$p.HasExited }
-    $p.Refresh()
+    $r['lx_canary'] = [ordered]@{ exists=$exists; matches_exact=$matchesExact; marker_bytes=$actualBytes.Length; marker_sha256=$markerSha; expected_bytes=$expectedBytes.Length; process_exited=$p.HasExited; process_was_running_at_receipt_check=$processWasRunningAtReceiptCheck }
     $r['process_exit_code'] = if ($p.HasExited) { $p.ExitCode } else { $null }
-    if (-not $p.HasExited) { & taskkill.exe /PID $p.Id /T /F 2>&1 | Out-Null }
     $r['status'] = if ($exists -and $matchesExact) { 'NATIVE_LX_RECEIPT_CONFIRMED_NOT_STAGE01' } else { 'NATIVE_LX_RECEIPT_NOT_OBSERVED' }
 } catch {
     $r['status'] = 'FAIL_CLOSED'
