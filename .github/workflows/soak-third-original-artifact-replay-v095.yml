@@ -1,0 +1,98 @@
+name: Soak v095 replay pinned third original-source TypeScript evidence (no year)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/control/typescript_marathi_original_v094_pin_v095.json"
+      - "soak/runner/replay_third_original_v095.py"
+      - "soak/tests/test_replay_third_original_v095.py"
+      - ".github/workflows/soak-third-original-artifact-replay-v095.yml"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  replay-source-evidence-no-native-calls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-typescript
+          ref: cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - name: Pin original source commits and authenticate finished v094 artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-typescript rev-parse HEAD)" = cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test -z "$(git -C original-typescript status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+          test "$(gh api "repos/$GH_REPO/actions/runs/44363057604" --jq '.status')" = completed
+          test "$(gh api "repos/$GH_REPO/actions/runs/44363057604" --jq '.conclusion')" = success
+          mkdir -m 700 evidence
+          gh api "repos/$GH_REPO/actions/artifacts/14454273351/zip" > evidence/source-third-original-v094.zip
+          echo 'a798cac07e77e704c97af637009cf1fcbcaf1f1358767f3f7690bad4acb54a70  evidence/source-third-original-v094.zip' | sha256sum -c -
+          echo V095_FROZEN_SOURCE_ARTIFACT_ZIP_REDOWNLOADED_AND_SHA_VERIFIED
+      - name: Reject tampered archive pins and test pure replay contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 -B -m unittest discover \
+            -s coordinator/soak/tests -p 'test_replay_third_original_v095.py' -v \
+            2>&1 | tee evidence/v095-tamper-rejection-tests.log
+          grep -Eq '^Ran 12 tests ' evidence/v095-tamper-rejection-tests.log
+          grep -q '^OK$' evidence/v095-tamper-rejection-tests.log
+          echo V095_TWELVE_NEGATIVE_SOURCE_ARCHIVE_TESTS_PASS
+      - name: Replay all 17 raw members against both original Git trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 -B \
+            coordinator/soak/runner/replay_third_original_v095.py \
+            --zip evidence/source-third-original-v094.zip \
+            --typescript-source-repo original-typescript \
+            --python-source-repo original-python \
+            --output evidence/v095-replayed-third-original-verdict.json \
+            2>&1 | tee evidence/v095-replay-log.txt
+          grep -q '^V095_THIRD_ORIGINAL_SOURCE_PINNED_TWO_DAYS_REPLAY_PASS_NOT_YEAR$' evidence/v095-replay-log.txt
+          python3 - <<'PY'
+          import json
+          p=json.load(open('evidence/v095-replayed-third-original-verdict.json'))
+          assert p['status']=='PINNED_THIRD_ORIGINAL_SOURCE_TWO_DAYS_REPLAY_PASS_NOT_YEAR'
+          assert p['original_source_artifact_id']==14454273351
+          assert p['source_closure_files_checked']==69
+          assert p['source_artifact_members_checked']==17
+          assert p['original_native_target_days']==['-15055660','-15055659']
+          assert p['verified_original_five_field_pairs']==2
+          assert p['new_unique_target_days']==0
+          assert p['full_original_years_certified']==0
+          assert p['algorithmic_independence_certified'] is False
+          print('V095_TWO_THIRD_ENGINE_ORIGINAL_PAIRS_LOCKED_NO_YEAR_CREDIT')
+          PY
+      - name: Preserve replay decision and negative logs, no rerun of Fct
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v095-typescript-original-replay-audit-not-year
+          path: |
+            evidence/v095-tamper-rejection-tests.log
+            evidence/v095-replay-log.txt
+            evidence/v095-replayed-third-original-verdict.json
+          if-no-files-found: warn
+          retention-days: 30
