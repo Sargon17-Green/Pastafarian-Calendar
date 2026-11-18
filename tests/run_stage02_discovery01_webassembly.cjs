@@ -90,6 +90,12 @@ const K5_Q3_TARGETS = new Map([
   ['test_discovery01_k5_q3_backward_exact_limit',{step:-1,offset:0n}],
   ['test_discovery01_k5_q3_backward_three_rejections',{step:-1,offset:1n}]
 ]);
+const K5_Q4_TARGETS = new Map([
+  ['test_discovery01_k5_q4_forward_exact_limit',{step:1,offset:0n}],
+  ['test_discovery01_k5_q4_forward_wrap',{step:1,offset:1n}],
+  ['test_discovery01_k5_q4_backward_exact_limit',{step:-1,offset:0n}],
+  ['test_discovery01_k5_q4_backward_four_rejections',{step:-1,offset:1n}]
+]);
 const SOURCE = path.join(__dirname, 'normative_selector.wat');
 const PTR = {M: 65536, FIRST: 74368, CUR: 78784, N: 83200, LIMIT: 96448, SPACE: 100864, WIDE: 105280, RESULT: 145024};
 const M = (1n << 127n) - 1n;
@@ -113,7 +119,7 @@ function child(file, name) {
   assert.equal(typeof instance.exports[name], 'function', 'missing export');
   const value = instance.exports[name]();
   const record = {name, value};
-  if (TARGETS.has(name) || FORWARD_TARGETS.has(name) || SHORT_TARGETS.has(name) || SHORT_Q23_TARGETS.has(name) || SHORT_Q2_LIVENESS_TARGETS.has(name) || SHORT_Q123_DIFFERENTIAL_TARGETS.has(name) || SHORT_Q45_TARGETS.has(name) || SHORT_SMALL_N_TARGETS.has(name) || K4_Q1_TARGETS.has(name) || K5_Q2_TARGETS.has(name) || K5_Q3_TARGETS.has(name)) {
+  if (TARGETS.has(name) || FORWARD_TARGETS.has(name) || SHORT_TARGETS.has(name) || SHORT_Q23_TARGETS.has(name) || SHORT_Q2_LIVENESS_TARGETS.has(name) || SHORT_Q123_DIFFERENTIAL_TARGETS.has(name) || SHORT_Q45_TARGETS.has(name) || SHORT_SMALL_N_TARGETS.has(name) || K4_Q1_TARGETS.has(name) || K5_Q2_TARGETS.has(name) || K5_Q3_TARGETS.has(name) || K5_Q4_TARGETS.has(name)) {
     const mem = instance.exports.memory;
     assert.ok(mem instanceof WebAssembly.Memory, 'missing memory export');
     record.numerics = {};
@@ -393,6 +399,39 @@ function checkK5Q3(name, values) {
     rank:String(rank),mathematical_rejections:String(reject)};
 }
 
+function checkK5Q4(name, values) {
+  assert.ok(K5_Q4_TARGETS.has(name), 'unexpected k5 q4 case');
+  const {step,offset}=K5_Q4_TARGETS.get(name);
+  const space=M**5n,first=step===1?M-5n:M-1n;
+  let x=1n,digit=first,weight=1n;
+  for(let j=0;j<5;j++) {
+    x+=(digit-1n)*weight;
+    digit=1n+(digit-1n+BigInt(step)+M)%M;
+    weight*=M;
+  }
+  const polynomial=step===1?
+    space-(M**4n+2n*M**3n+3n*M**2n+4n*M+5n):
+    space-(5n*M**4n+4n*M**3n+3n*M**2n+2n*M+1n);
+  assert.equal(x,polynomial,name+': independent closed form');
+  assert.equal(M%4n,3n);
+  assert.equal(x%4n,0n);
+  const n=x/4n-offset,q=space/n,limit=q*n;
+  assert.ok(n>M**4n&&n<space,name+': not k5');
+  assert.equal(q,4n,name+': not q4');
+  assert.equal(limit,x-4n*offset);
+  const accepted=offset===0n?x:step===1?1n:limit;
+  const rank=1n+(accepted-1n)%n;
+  assert.equal(rank,step===1&&offset?1n:n);
+  assert.equal(digit,step===1?M:M-6n);
+  for(const [key,v] of Object.entries({M,FIRST:first,CUR:digit,N:n,SPACE:space,
+    LIMIT:limit,WIDE:accepted,RESULT:rank}))
+    assert.equal(BigInt(values[key]),v,name+': '+key);
+  const reject=!offset?0n:step===1?space-x+1n:4n;
+  return {name,k:5,q:'4',first:String(first),step,n:String(n),
+    initial_x:String(x),limit:String(limit),accepted:String(accepted),
+    rank:String(rank),mathematical_rejections:String(reject)};
+}
+
 function main() {
   if (process.argv[2] === '--one') {
     child(process.argv[3], process.argv[4]);
@@ -410,8 +449,8 @@ function main() {
     const tests = WebAssembly.Module.exports(mod)
       .filter(e => e.kind === 'function' && e.name.startsWith('test_'))
       .map(e => e.name).sort();
-    assert.equal(tests.length, 87, 'unexpected regression set size');
-    assert.equal(new Set(tests).size, 87, 'duplicate export');
+    assert.equal(tests.length, 91, 'unexpected regression set size');
+    assert.equal(new Set(tests).size, 91, 'duplicate export');
     for (const name of TARGETS.keys()) assert.ok(tests.includes(name), 'missing target: ' + name);
     for (const name of FORWARD_TARGETS.keys()) assert.ok(tests.includes(name), 'missing forward target: ' + name);
     for (const name of SHORT_TARGETS.keys()) assert.ok(tests.includes(name), 'missing short target: ' + name);
@@ -423,6 +462,7 @@ function main() {
     for (const name of K4_Q1_TARGETS.keys()) assert.ok(tests.includes(name), 'missing k4 q1: ' + name);
     for (const name of K5_Q2_TARGETS.keys()) assert.ok(tests.includes(name), 'missing k5 q2: ' + name);
     for (const name of K5_Q3_TARGETS.keys()) assert.ok(tests.includes(name), 'missing k5 q3: ' + name);
+    for (const name of K5_Q4_TARGETS.keys()) assert.ok(tests.includes(name), 'missing k5 q4: ' + name);
     let passed = 0;
     const numerics = {};
     const forwardNumerics = {};
@@ -435,6 +475,7 @@ function main() {
     const k4Q1Numerics = {};
     const k5Q2Numerics = {};
     const k5Q3Numerics = {};
+    const k5Q4Numerics = {};
     for (const name of tests) {
       const p = spawnSync(process.execPath, [__filename, '--one', compiled, name],
         {encoding: 'utf8', timeout: 30000, maxBuffer: 1000000});
@@ -455,6 +496,7 @@ function main() {
       if (K4_Q1_TARGETS.has(name)) k4Q1Numerics[name] = checkK4Q1(name, outcome.numerics);
       if (K5_Q2_TARGETS.has(name)) k5Q2Numerics[name] = checkK5Q2(name, outcome.numerics);
       if (K5_Q3_TARGETS.has(name)) k5Q3Numerics[name] = checkK5Q3(name, outcome.numerics);
+      if (K5_Q4_TARGETS.has(name)) k5Q4Numerics[name] = checkK5Q4(name, outcome.numerics);
       passed++;
     }
     assert.equal(Object.keys(numerics).length, TARGETS.size, 'missing numeric probes');
@@ -468,6 +510,7 @@ function main() {
     assert.equal(Object.keys(k4Q1Numerics).length, K4_Q1_TARGETS.size, 'missing k4 q1 probes');
     assert.equal(Object.keys(k5Q2Numerics).length, K5_Q2_TARGETS.size, 'missing k5 q2 probes');
     assert.equal(Object.keys(k5Q3Numerics).length, K5_Q3_TARGETS.size, 'missing k5 q3 probes');
+    assert.equal(Object.keys(k5Q4Numerics).length, K5_Q4_TARGETS.size, 'missing k5 q4 probes');
     const report = {
       project_id: 'PC-BRANCH-WAT-SPANISH',
       native_engine: 'Node WebAssembly via WABT',
@@ -483,7 +526,8 @@ function main() {
       short_small_n_numeric_oracles: shortSmallNNumerics,
       k4_q1_numeric_oracles: k4Q1Numerics,
       k5_q2_numeric_oracles: k5Q2Numerics,
-      k5_q3_numeric_oracles: k5Q3Numerics
+      k5_q3_numeric_oracles: k5Q3Numerics,
+      k5_q4_numeric_oracles: k5Q4Numerics
     };
     process.stdout.write(JSON.stringify(report, null, 2) + '\n');
   } finally {
