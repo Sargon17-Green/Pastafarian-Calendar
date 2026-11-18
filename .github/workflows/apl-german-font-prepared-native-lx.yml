@@ -36,12 +36,23 @@ jobs:
       - name: Run exact native LX canary without GUI automation
         shell: pwsh
         run: ./qa/nars-interface/bounded_extracted_lx.ps1 -Runtime verified_runtime -Evidence native_lx_evidence
+      - name: Diagnose post-font NARS startup if LX receipt is absent
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $native = Get-Content 'native_lx_evidence/native_lx_canary.json' -Raw | ConvertFrom-Json
+          if ($native.status -ne 'NATIVE_LX_SMOKE_PASS_NOT_STAGE01') {
+            ./qa/nars-interface/diagnose_lx_startup.ps1 -Runtime verified_runtime -Evidence workspace_launch_evidence
+          } else {
+            New-Item -ItemType Directory -Force -Path workspace_launch_evidence | Out-Null
+            "Native canary confirmed; no repeat diagnostic" | Set-Content -Encoding utf8 workspace_launch_evidence/skipped.txt
+          }
       - name: Collect metadata evidence (no fonts, no binaries)
         if: always()
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force font_bootstrap_evidence,native_lx_evidence | Out-Null
-          Get-ChildItem font_bootstrap_evidence,native_lx_evidence -File | Sort-Object FullName | ForEach-Object {
+          New-Item -ItemType Directory -Force font_bootstrap_evidence,native_lx_evidence,workspace_launch_evidence | Out-Null
+          Get-ChildItem font_bootstrap_evidence,native_lx_evidence,workspace_launch_evidence -File | Sort-Object FullName | ForEach-Object {
             $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             "$h  $($_.FullName.Replace((Get-Location).Path + '\',''))"
           } | Set-Content -Encoding utf8 font_native_evidence.sha256
@@ -52,5 +63,6 @@ jobs:
           path: |
             font_bootstrap_evidence/
             native_lx_evidence/
+            workspace_launch_evidence/
             font_native_evidence.sha256
           retention-days: 14
