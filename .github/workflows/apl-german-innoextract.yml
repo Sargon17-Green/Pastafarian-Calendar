@@ -1,0 +1,65 @@
+name: APL German Inno Setup 5.5.0 offline extraction proof
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-innoextract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inno-extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Download SHA-pinned official EXE from completed Windows verification run
+        uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Verify exact bytes and install trusted innoextract from Ubuntu packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p extraction_evidence
+          exe='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
+          test -f "$exe"
+          bytes="$(wc -c < "$exe")"
+          hash="$(sha256sum "$exe" | cut -d' ' -f1)"
+          printf 'installer_bytes=%s\ninstaller_sha256=%s\nfrom_run_id=44372361730\nno_binary_execution=true\n' "$bytes" "$hash" >extraction_evidence/source_verification.txt
+          test "$bytes" -eq 9430788
+          test "$hash" = '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b'
+          timeout 150s sudo -n apt-get update -qq >extraction_evidence/apt_update.log 2>&1
+          timeout 150s sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends innoextract >extraction_evidence/apt_install.log 2>&1
+          innoextract --version >extraction_evidence/innoextract_version.txt
+          echo 'INPUT_VALIDATED=PASS' >>extraction_evidence/source_verification.txt
+      - name: Enumerate and extract Inno Setup payload without running it
+        shell: bash
+        run: |
+          set -euo pipefail
+          exe='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
+          timeout 100s innoextract --list "$exe" >extraction_evidence/inno_list.txt 2>extraction_evidence/inno_list_error.txt
+          timeout 120s innoextract --extract --output-dir extracted "$exe" >extraction_evidence/inno_extract_stdout.txt 2>extraction_evidence/inno_extract_stderr.txt
+          count="$(find extracted -type f | wc -l)"
+          bytes="$(du -sb extracted | awk '{print $1}')"
+          printf 'extracted_files=%s\nextracted_tree_bytes=%s\n' "$count" "$bytes" >extraction_evidence/extract_summary.txt
+          test "$count" -gt 0
+          test "$count" -le 1000
+          test "$bytes" -le 150000000
+          find extracted -type f -print0 | sort -z | xargs -0 -r sha256sum >extraction_evidence/file_manifest.sha256
+          find extracted -type f -printf '%P\t%s bytes\n' | sort >extraction_evidence/file_inventory.tsv
+          find extracted -type f -iname 'NARS2000.exe' -print >extraction_evidence/nars_exe_locations.txt
+          test -s extraction_evidence/nars_exe_locations.txt
+          echo 'EXTRACTION_COMPLETE_NO_EXECUTION=true' >>extraction_evidence/extract_summary.txt
+      - name: Preserve proof and executable metadata (not fonts or payload)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apl-german-innoextract-metadata-only
+          path: extraction_evidence/
+          if-no-files-found: warn
+          retention-days: 14
