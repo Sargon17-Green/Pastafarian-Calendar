@@ -1,0 +1,93 @@
+name: Soak v096 three original engines cross-check pinned raw evidence (no year)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/verify_three_original_artifacts_v096.py"
+      - "soak/process_tests/test_three_original_archive_cross_v096.py"
+      - "soak/control/three_original_engine_1021_witness_v096.json"
+      - ".github/workflows/soak-three-original-archive-cross-v096.yml"
+permissions:
+  contents: read
+  actions: read
+jobs:
+  archived-three-engine-triangulation-not-year:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - name: Download both source-original ZIPs using exact authenticated Actions IDs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          for id in 43976583803 44363057604; do
+            test "$(gh api "repos/$GH_REPO/actions/runs/$id" --jq '.status')" = completed
+            test "$(gh api "repos/$GH_REPO/actions/runs/$id" --jq '.conclusion')" = success
+          done
+          gh api "repos/$GH_REPO/actions/artifacts/14281261657/zip" \
+            > evidence/original-python-kotlin-1021.zip
+          gh api "repos/$GH_REPO/actions/artifacts/14454273351/zip" \
+            > evidence/original-typescript-python-1021.zip
+          echo 'b7f250a98aea07acb4a78bf074e75c5f72d950f00a1d32d7bc81c6eb8c464b32  evidence/original-python-kotlin-1021.zip' | sha256sum -c -
+          echo 'a798cac07e77e704c97af637009cf1fcbcaf1f1358767f3f7690bad4acb54a70  evidence/original-typescript-python-1021.zip' | sha256sum -c -
+          echo V096_TWO_COMPLETED_SOURCE_ORIGINAL_ARCHIVES_AUTHENTICATED
+      - name: Seven source-evidence tamper checks on real raw archives
+        shell: bash
+        env:
+          PASTAFARI_V096_TS_ZIP: evidence/original-typescript-python-1021.zip
+          PASTAFARI_V096_PY_KT_ZIP: evidence/original-python-kotlin-1021.zip
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 -B -m unittest discover \
+            -s coordinator/soak/process_tests \
+            -p 'test_three_original_archive_cross_v096.py' -v \
+            2>&1 | tee evidence/v096-seven-cross-tests.log
+          grep -Eq '^Ran 7 tests ' evidence/v096-seven-cross-tests.log
+          grep -q '^OK$' evidence/v096-seven-cross-tests.log
+          echo V096_SEVEN_THREE_ENGINE_RAW_ARCHIVE_TESTS_PASS
+      - name: Independent fixed full-byte comparison across three original engines
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 -B \
+            coordinator/soak/runner/verify_three_original_artifacts_v096.py \
+            --typescript-zip evidence/original-typescript-python-1021.zip \
+            --python-kotlin-zip evidence/original-python-kotlin-1021.zip \
+            --output evidence/v096-three-native-source-verdict.json \
+            2>&1 | tee evidence/v096-archive-cross-log.txt
+          grep -q '^V096_THREE_ORIGINAL_ENGINES_TWO_DAYS_ARCHIVE_CROSS_MATCH_NOT_YEAR$' evidence/v096-archive-cross-log.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          got=json.loads(Path('evidence/v096-three-native-source-verdict.json').read_bytes())
+          locked=json.loads(Path('coordinator/soak/control/three_original_engine_1021_witness_v096.json').read_bytes())
+          assert got==locked,"new source triad differs from frozen two-day witness"
+          assert got['matched_target_days']==2
+          assert got['matching_five_field_engine_observations']==6
+          assert got['matching_field_comparisons']==20
+          assert got['new_unique_days_certified']==0
+          assert got['whole_original_years_certified']==0
+          assert got['algorithmic_independence_certified'] is False
+          print('V096_TRIPLE_ORIGINAL_TWO_DAYS_FROZEN_REPLAY_PASS_ZERO_FULL_YEARS')
+          PY
+      - name: Preserve replay-only logs and verdict, never complete-year credit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v096-three-original-engine-archive-cross-not-year
+          path: |
+            evidence/v096-seven-cross-tests.log
+            evidence/v096-archive-cross-log.txt
+            evidence/v096-three-native-source-verdict.json
+          if-no-files-found: warn
+          retention-days: 30
