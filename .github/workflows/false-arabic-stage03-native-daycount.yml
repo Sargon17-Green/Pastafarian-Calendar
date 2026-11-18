@@ -1,0 +1,164 @@
+name: FALSE Arabic Stage 3 dayCount exact-source Native
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-native-daycount:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: 874656d7e855e530704356098943dd472cece187
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+      COMBINED_SHA256: 726954b9d84bfc19bd6bdacf1bd78489285029d72b83ea2c9454bce6a2f8228d
+      FIXTURE_SHA256: 36c6e80c00bff6f13e6945b4e25ff52ea3a05bd79cc69a46ba54735e57d42734
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Fetch pinned sources
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence upstream
+          git fetch --no-tags --depth=1 origin "$SOURCE_PIN" > evidence/project_fetch.log 2>&1
+          git rev-parse FETCH_HEAD > evidence/source_observed.txt
+          test "$(cat evidence/source_observed.txt)" = "$SOURCE_PIN"
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/runtime_observed.txt
+          test "$(cat evidence/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+
+      - name: Verify independent oracle and exact production bytes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage03_daycount_oracle.py > evidence/oracle.json
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          pin = os.environ['SOURCE_PIN']
+          parts = ('src/bigint.false', 'src/monster_bootstrap.false', 'test/stage03_daycount_13.false')
+          locked = {}
+          for path in (*parts, 'tools/stage03_daycount_oracle.py'):
+              locked[path] = subprocess.check_output(['git', 'show', pin + ':' + path])
+              assert locked[path] == pathlib.Path(path).read_bytes(), ('drift', path)
+          assert hashlib.sha256(locked[parts[-1]]).hexdigest() == os.environ['FIXTURE_SHA256']
+          combined = b'\n'.join(locked[path] for path in parts) + b'\n'
+          digest = hashlib.sha256(combined).hexdigest()
+          assert digest == os.environ['COMBINED_SHA256'], digest
+          pathlib.Path('evidence/stage03_daycount_exact.false').write_bytes(combined)
+          oracle = json.loads(pathlib.Path('evidence/oracle.json').read_text())
+          assert oracle['project_id'] == os.environ['PROJECT_ID'] and oracle['native_evidence'] is False
+          assert oracle['epoch'] == 15055671 and oracle['fixture_sha256'] == os.environ['FIXTURE_SHA256']
+          assert oracle['anchor_count'] == 13 and oracle['seeded_property_cases'] == 384
+          assert [c['label'] for c in oracle['anchor_cases']] == [f'STAGE3_DAYCOUNT_CASE_{i:02d}_OK' for i in range(13)]
+          assert locked[parts[-1]].count(b'5h;!!0=f;!') == 13
+          print('STAGE3_SOURCE_LOCKED', digest, 'anchors=13 seeded=384')
+          PY
+
+      - name: Compile original interpreter and preflight Unicode
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/compiler_stdout.txt 2> evidence/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/unicode_pick.false \
+            > evidence/unicode_pick.stdout.txt 2> evidence/unicode_pick.stderr.txt
+          test "$(cat evidence/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/preflight.txt
+
+      - name: Run bounded original FALSE dayCount
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          set +e
+          timeout 60s upstream/false_int -e evidence/stage03_daycount_exact.false \
+            > evidence/native_stdout.txt 2> evidence/native_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/native_exit_code.txt
+          test "$code" -eq 0
+
+      - name: Verify thirteen ordered answers and record receipt
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          d = pathlib.Path('evidence')
+          def read(name):
+              p = d / name
+              return p.read_text(encoding='utf-8').strip() if p.exists() else None
+          def number(name):
+              v = read(name)
+              return int(v) if v is not None else None
+          source = d / 'stage03_daycount_exact.false'
+          digest = hashlib.sha256(source.read_bytes()).hexdigest() if source.exists() else None
+          oracle_text = read('oracle.json')
+          oracle = json.loads(oracle_text) if oracle_text else {}
+          stdout = read('native_stdout.txt') or ''
+          expected = [x['label'] for x in oracle.get('anchor_cases', [])]
+          observed = re.findall(r'STAGE3_DAYCOUNT_CASE_\d{2}_OK', stdout)
+          good = (read('source_observed.txt') == os.environ['SOURCE_PIN']
+                  and read('runtime_observed.txt') == os.environ['RUNTIME_PIN']
+                  and digest == os.environ['COMBINED_SHA256']
+                  and oracle.get('fixture_sha256') == os.environ['FIXTURE_SHA256']
+                  and oracle.get('anchor_count') == 13 and oracle.get('seeded_property_cases') == 384
+                  and read('preflight.txt') == 'ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS'
+                  and number('compiler_exit_code.txt') == 0 and number('native_exit_code.txt') == 0
+                  and observed == expected and len(observed) == 13
+                  and stdout.count('STAGE3_DAYCOUNT_13_CHECKS_VERIFIED') == 1
+                  and 'STAGE3_DAYCOUNT_FAILURE' not in stdout and read('native_stderr.txt') == '')
+          receipt = {
+              'project_id': os.environ['PROJECT_ID'],
+              'github_run_id': os.environ.get('GITHUB_RUN_ID'),
+              'github_sha': os.environ.get('GITHUB_SHA'),
+              'source_pin': os.environ['SOURCE_PIN'],
+              'source_observed': read('source_observed.txt'),
+              'runtime_pin': os.environ['RUNTIME_PIN'],
+              'runtime_observed': read('runtime_observed.txt'),
+              'combined_sha256_expected': os.environ['COMBINED_SHA256'],
+              'combined_sha256_observed': digest,
+              'fixture_sha256': oracle.get('fixture_sha256'),
+              'native_cases_observed': observed,
+              'native_exit_code': number('native_exit_code.txt'),
+              'daycount_native_verified': good,
+              'stage3_full_acceptance': False,
+          }
+          (d / 'evidence.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          print(json.dumps(receipt, sort_keys=True))
+          if not good:
+              raise SystemExit('STAGE3_DAYCOUNT_NATIVE_NOT_VERIFIED')
+          PY
+
+      - name: Preserve evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage03-daycount-native
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error

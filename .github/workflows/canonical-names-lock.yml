@@ -42,3 +42,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage02-native-differential.yml
     permissions:
       contents: read
+
+  false-arabic-stage03-daycount:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-daycount13]')
+    uses: ./.github/workflows/false-arabic-stage03-native-daycount.yml
+    permissions:
+      contents: read
