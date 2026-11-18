@@ -48,6 +48,16 @@ jobs:
           PASTAFARI_V096_PY_KT_ZIP: evidence/original-python-kotlin-1021.zip
         run: |
           set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in (
+              "soak/runner/verify_three_original_artifacts_v096.py",
+              "soak/process_tests/test_three_original_archive_cross_v096.py",
+          ):
+              ast.parse((Path("coordinator") / path).read_text(encoding="utf-8"))
+          print("V096_ALL_TRIANGULATION_PYTHON_MODULES_SYNTAX_VALID")
+          PY
           PYTHONPATH=coordinator/soak/runner python3 -B -m unittest discover \
             -s coordinator/soak/process_tests \
             -p 'test_three_original_archive_cross_v096.py' -v \

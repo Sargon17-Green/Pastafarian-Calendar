@@ -133,7 +133,7 @@ def replay(typescript_zip:bytes,python_kotlin_zip:bytes,kpin:dict,tpin:dict):
         pyraw=js(pr_raw[i])
         kt=kt_raw[i].split("\t")
         kn=kt_norm[i]
-        if (ts["calculation_day"],ts["target_day"])!=(C,day) or
+        if ((ts["calculation_day"],ts["target_day"])!=(C,day) or
             (py["calculation_day"],py["target_day"])!=(C,day) or
             (kn["calculation_day"],kn["target_day"])!=(C,day) or
             kt[:2]!=[C,day] or len(kt)!=7 or
