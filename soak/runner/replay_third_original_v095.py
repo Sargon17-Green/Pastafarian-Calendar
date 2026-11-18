@@ -98,10 +98,10 @@ def zip_members(zip_raw:bytes,expected:dict)->dict[str,bytes]:
         raise ValueError("source evidence ZIP absent or too large")
     with zipfile.ZipFile(io.BytesIO(zip_raw)) as z:
         infos=z.infolist()
-        if len(infos)!=len(expected) or {i.filename for i in infos}!=set(expected):
-            raise ValueError("ZIP member set does not equal immutable source inventory")
         if len({i.filename for i in infos})!=len(infos):
             raise ValueError("duplicate source ZIP members")
+        if len(infos)!=len(expected) or {i.filename for i in infos}!=set(expected):
+            raise ValueError("ZIP member set does not equal immutable source inventory")
         if z.testzip() is not None:raise ValueError("ZIP CRC failure")
         result={}
         for info in infos:
