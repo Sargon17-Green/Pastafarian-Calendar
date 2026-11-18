@@ -156,8 +156,8 @@ def check_sources(p:dict,files:dict[str,bytes],ts_repo:Path,py_repo:Path)->int:
             HEX64.fullmatch(row["sha256"]) is None):
             raise ValueError("unsafe original TypeScript source closure")
         source_file=ts_repo/path
-        if source_file.is_symlink() or not source_file.is_file() or
-            sha(source_file.read_bytes())!=row["sha256"]:
+        if (source_file.is_symlink() or not source_file.is_file() or
+                sha(source_file.read_bytes())!=row["sha256"]):
             raise ValueError("original TypeScript source bytes drift: "+path)
         seen.add(path)
     paths_to_check={
