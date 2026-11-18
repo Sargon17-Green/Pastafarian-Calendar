@@ -32,7 +32,8 @@ class WorkspaceTests(unittest.TestCase):
     out, meta = make_canary(BASE, PATH, mode='display')
     self.assertEqual(meta['mode'], 'display')
     self.assertEqual(meta['apl_statement'], "⎕←'" + CANARY + "'")
-    self.assertIn(("{quad}{assign}''" + CANARY + "''").encode('ascii'), out)
+    self.assertIn(("{quad}{leftarrow}''" + CANARY + "''").encode('ascii'), out)
+    self.assertNotIn(b'{assign}', out)
     self.assertNotIn(b'{quad}NCREATE', out)
     self.assertNotIn(b'{quad}NAPPEND', out)
   def test_reject_unknown_lx_mode(self):

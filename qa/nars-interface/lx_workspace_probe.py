@@ -61,10 +61,10 @@ def make_canary(raw: bytes, marker: str, mode: str = 'file') -> tuple[bytes, dic
     # Double interior apostrophes so the stored character vector decodes to
     # an LX expression with intact quoted path and marker string literals.
     serialized = (apl.replace("'", "''")
-                  .replace('←', '{assign}')
+                  .replace('←', '{leftarrow}')
                   .replace('⎕', '{quad}')
                   .replace('⋄', '{diamond}'))
-    decoded = (serialized.replace('{assign}', '←')
+    decoded = (serialized.replace('{leftarrow}', '←')
                .replace('{quad}', '⎕')
                .replace('{diamond}', '⋄')
                .replace("''", "'"))
