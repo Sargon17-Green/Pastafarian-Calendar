@@ -32,7 +32,7 @@ jobs:
           path: logs
       - name: Verify pinned AFTER43
         run: |
-          echo '12f37236f6769a748603a5a2a4ddd25a705e052af27922f7c7c1dded78afa6e6  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_42.json' | sha256sum -c -
+          echo '12f37236f6769a748603a5a2a4ddd25a705e052af27922f7c7c1dded78afa6e6  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_43.json' | sha256sum -c -
       - name: Preflight AFTER44 independent witness wiring
         shell: bash
         run: |
@@ -40,6 +40,8 @@ jobs:
           test -f tools/stage55_after44_interval_five_fields.py
           grep -Fqx 'PIN = "12f37236f6769a748603a5a2a4ddd25a705e052af27922f7c7c1dded78afa6e6"' tools/stage55_after44_interval_five_fields.py
           python3 -m py_compile tools/stage55_after44_interval_five_fields.py
+          grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_43.json' tools/run_stage55_year5000_forty_fourth_native.m
+          grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_44.json' tools/run_stage55_year5000_forty_fourth_native.m
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
@@ -53,8 +55,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/stage55_after44_interval_five_fields.py \
-            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_42.json \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_43.json \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_44.json \
             tests/fixtures/stage55_year5000_appendix_a_metadata.json \
             | tee logs/STAGE55_FORTY_FOURTH_PYTHON.log
           grep '^STAGE55_FORTY_FOURTH_ROW ' logs/STAGE55_FORTY_FOURTH_PYTHON.log > logs/STAGE55_FORTY_FOURTH_PYTHON_ROW.txt
@@ -65,7 +67,7 @@ jobs:
           expected="STAGE55_FORTY_FOURTH_ROW POSITION=44 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=44 MONTH_INDEX=46 MONTH_DAY=2"
           grep -Fqx "$expected" logs/STAGE55_FORTY_FOURTH_NATIVE_ROW.txt
           grep -Fqx "$expected" logs/STAGE55_FORTY_FOURTH_PYTHON_ROW.txt
-          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_43.json | tee logs/STAGE55_FORTY_FOURTH_DIGEST.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_44.json | tee logs/STAGE55_FORTY_FOURTH_DIGEST.txt
           echo 'STAGE55_FORTY_FOURTH_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
       - name: Preserve PASS or FAIL artifacts
         if: always()
@@ -75,6 +77,7 @@ jobs:
           path: |
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_42.json
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_43.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_44.json
             logs/STAGE55_FORTY_FOURTH_NATIVE.log
             logs/STAGE55_FORTY_FOURTH_PYTHON.log
             logs/STAGE55_FORTY_FOURTH_PYTHON_ROW.txt

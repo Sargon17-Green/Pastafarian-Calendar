@@ -9,11 +9,11 @@ cleanupDiary=onCleanup(@()diary('off')); %#ok<NASGU>
 f=jsondecode(fileread(fullfile(root,'tests','fixtures','stage55_year5000_appendix_a_metadata.json')));
 L=double(f.month_lengths(:).');
 assert(f.year==5000 && numel(L)==45 && sum(L)==4244 && f.first_day==-15057702,'Stage55:Fixture');
-[original,before]=pastafari.restoreExactWeaveCursorJson(fileread(fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_42.json')));
+[original,before]=pastafari.restoreExactWeaveCursorJson(fileread(fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_43.json')));
 expected=L; prefix=[1 2 3 4 5 6 7 4 8 9 10 9 11 6 12 13 14 15 16 16 17 7 18 2 19 20 19 5 21 22 9 1 7 23 3 8 23 14 10 9 24 2 25]; for k=prefix, expected(k)=expected(k)-1; end; one=pastafari.BigInt(1);
 assert(isequal(original,L) && isequal(before.remaining,expected) && before.stepsComputed==43 && ...
  before.openedUpTo==25 && before.closedUpTo==0 && ~before.done && sum(before.remaining)==4201 && ...
- before.rank>=one && before.rank<=before.count,'Stage55:After42','AFTER43 predecessor checkpoint mismatch');
+ before.rank>=one && before.rank<=before.count,'Stage55:After43','AFTER43 predecessor checkpoint mismatch');
 t=tic;
 [letter,after]=pastafari.unrankGeneralWeaveSuffixChunkAdjoint(original,before.remaining,25,0,before.rank,1);
 selectionSeconds=toc(t);
@@ -23,20 +23,20 @@ assert(isscalar(letter) && letter==18 && n>1 && ...
  isequal(after.remaining,r) && (letter==before.openedUpTo+1)==(n==L(letter)) && ...
  after.openedUpTo==25 && after.closedUpTo==0 && ...
  ~after.done && sum(after.remaining)==4200 && ...
- after.rank>=one && after.rank<=after.count,'Stage55:After42Selection');
+ after.rank>=one && after.rank<=after.count,'Stage55:After43Selection');
 t=tic;
 recount=pastafari.countWholeWeavingSuffixByFirstEndpoint(after.remaining,after.openedUpTo,after.closedUpTo);
 recountSeconds=toc(t);
-assert(recount==after.count && after.count<=before.count,'Stage55:After42Recount');
+assert(recount==after.count && after.count<=before.count,'Stage55:After43Recount');
 after.stepsComputed=44;
 body=pastafari.serializeExactWeaveCursorJson(original,after);
-dest=fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_43.json');
+dest=fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_44.json');
 [fid,msg]=fopen(dest,'w','n','UTF-8');
-assert(fid>=0,'Stage55:After42Write',msg);
+assert(fid>=0,'Stage55:After43Write',msg);
 closeGuard=onCleanup(@()fclose(fid)); %#ok<NASGU>
-assert(fwrite(fid,body,'char')==numel(body),'Stage55:After42Truncated');
+assert(fwrite(fid,body,'char')==numel(body),'Stage55:After43Truncated');
 clear closeGuard
-assert(strcmp(fileread(dest),body),'Stage55:After42Readback');
+assert(strcmp(fileread(dest),body),'Stage55:After43Readback');
 weave=[prefix letter]; position=44;
 day=pastafari.BigInt(f.first_day+position-1);
 yearOpen=pastafari.BigInt(f.first_day-1);

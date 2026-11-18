@@ -41,8 +41,8 @@ def run(before, after, fixture):
             cases += 1
     assert cases == 22
 
-    p, h42 = read_checkpoint(before, PIN)
-    q, h43 = read_checkpoint(after)
+    p, h_after43 = read_checkpoint(before, PIN)
+    q, h_after44 = read_checkpoint(after)
     f = json.loads(Path(fixture).read_text(encoding="utf-8"))
     lengths = f["month_lengths"]
     a, b = p["remaining"], q["remaining"]
@@ -90,7 +90,7 @@ def run(before, after, fixture):
     position = q["stepsComputed"]
     assert position == 44
     print(f"STAGE55_FORTY_FOURTH_ROW POSITION={position} YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY={position} MONTH_INDEX={month_index} MONTH_DAY={month_day}")
-    print(f"STAGE55_FORTY_FOURTH_INDEPENDENT_PASS SMALL={cases} BLOCKS={len(blocks)} AFTER43_SHA256={h42} AFTER44_SHA256={h43} REMAINING=4200")
+    print(f"STAGE55_FORTY_FOURTH_INDEPENDENT_PASS SMALL={cases} BLOCKS={len(blocks)} AFTER43_SHA256={h_after43} AFTER44_SHA256={h_after44} REMAINING=4200")
     print("STAGE55_FULL_YEAR_CANONICAL_ORACLE_NOT_VERIFIED")
     print("STAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED")
     print("STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED")
