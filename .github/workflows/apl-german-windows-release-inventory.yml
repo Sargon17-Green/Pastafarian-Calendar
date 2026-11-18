@@ -1,0 +1,39 @@
+name: APL German NARS2000 exact Windows release inventory
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-windows-release-inventory.yml'
+      - 'qa/nars-interface/windows_release_inventory.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-exact-version:
+    runs-on: windows-2022
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect exact-version release without running it
+        shell: pwsh
+        run: ./qa/nars-interface/windows_release_inventory.ps1 -Evidence native_release_evidence
+      - name: Evidence manifest
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force native_release_evidence | Out-Null
+          Get-ChildItem native_release_evidence -File | Sort-Object Name | ForEach-Object {
+            $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.Name)"
+          } | Set-Content -Encoding utf8 native_release_evidence.sha256
+      - name: Upload evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apl-german-exact-nars-release-static-only
+          path: |
+            native_release_evidence/
+            native_release_evidence.sha256
+          retention-days: 14
+          if-no-files-found: warn
