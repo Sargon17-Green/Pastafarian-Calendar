@@ -98,6 +98,8 @@ def replay(typescript_zip:bytes,python_kotlin_zip:bytes,kpin:dict,tpin:dict):
         kpin["run_id"]!=43976583803 or
         kpin["artifact_id"]!=14281261657 or
         kpin["original_source_year"]["ordinal"]!=1021 or
+        kpin["original_source_commits"]!={"REF-41":"0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4","PROD-KT-CY":"0c703446d8a3b7435698bd16402ac5fa30e461c9"} or
+        tpin["source_commits"]!={"REF-41":"0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4","TS-MR":"cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0"} or
         kpin["comparison"]["first_mismatch"] is not None or
         kpin["comparison"]["original_year_soak_passes_certified"]!=0 or
         tpin["whole_original_years_certified"]!=0 or
