@@ -19,3 +19,6 @@ Required domain per pair: year 4900–5100, cutlet 1–17, cutlet-day 1–5778, 
 - Timed runner: Python selftest 180s, Native observer 600s, comparator 180s; nonzero on mismatch/timeout; dedicated Ubuntu GNAT13 job 30m outer limit.
 
 **Stage31 NOT ACCEPTED** until natural push CI on exact Stage31 SHA completes **success 33/33** including verify, all historical Native jobs and the direct Stage31 GNAT compile/bind/link; inspect all markers and Native pair set. No duplicate dispatch, main/merge or publication. Queued/in_progress is neither PASS nor a blocker.
+
+## Final bounded acceptance (2026-11-18)
+Natural push [run 43960263147](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43960263147) on exact SHA `d859272cfaf02aa3967338204db6f4dff57fb82c` attempt 1 completed/success **33/33**. Direct [GNAT 13 job 133625453885](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/43960263147/job/133625453885) compiled, bound and linked Ada, observed Python 139, Native Ada 131, five-field 125, and exactly 25 unique ordered `STAGE31_NATIVE_PAIR` records. **Stage31 ACCEPTED only for its 25-pair matrix**, not a universal correctness proof.
