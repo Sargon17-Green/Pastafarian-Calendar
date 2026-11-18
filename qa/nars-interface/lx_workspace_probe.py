@@ -47,8 +47,10 @@ def make_canary(raw: bytes, marker: str) -> tuple[bytes, dict]:
     new_id = max(ids) + 1
     if new_id >= 1_000_000:
         raise ValueError('GLOBAL_ID_RANGE')
-    apl = (f"tn←'{marker}' ⎕NCREATE 0 ⋄ "
-           f"'{CANARY}' ⎕NAPPEND tn ⋄ ⎕NUNTIE tn")
+    # One APL expression. Do not rely on session-variable lifetime or
+    # multi-statement diamond semantics inside the latent-expression evaluator.
+    # Right-to-left: create the file, pass its tie handle to NAPPEND.
+    apl = f"'{CANARY}' ⎕NAPPEND ('{marker}' ⎕NCREATE 0)"
     # The [Globals] character payload itself is enclosed in APL apostrophes.
     # Double interior apostrophes so the stored character vector decodes to
     # an LX expression with intact quoted path and marker string literals.

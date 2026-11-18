@@ -17,11 +17,17 @@ class WorkspaceTests(unittest.TestCase):
     out, meta=make_canary(BASE, PATH)
     self.assertIn(b':4=V C ',out)
     self.assertIn(b'{quad}NCREATE',out)
-    self.assertIn(b'{diamond}',out)
+    self.assertNotIn(b'{diamond}',out)
     self.assertIn(b'5={quad}lx=:4',out)
     self.assertIn(b'0=foo=:3',out)
     self.assertEqual(meta['canary_token'], CANARY)
     self.assertFalse(meta['native_executed'])
+  def test_lx_is_single_expression_and_does_not_reference_tn(self):
+    out, meta = make_canary(BASE, PATH)
+    self.assertNotIn('tn', meta['apl_statement'])
+    self.assertNotIn('⋄', meta['apl_statement'])
+    self.assertTrue(meta['apl_statement'].startswith("'" + CANARY + "' ⎕NAPPEND ("))
+    self.assertTrue(meta['apl_statement'].endswith(" ⎕NCREATE 0)"))
   def test_embedded_apl_quotes_escaped_in_workspace(self):
     out, meta = make_canary(BASE, PATH)
     lines = out.decode('cp1252').splitlines()
