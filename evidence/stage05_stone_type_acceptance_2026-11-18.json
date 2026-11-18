@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "7b9151b99ebb6ff8f4265c58e36563f80227129c6dc65ef8429ef4619a048a3d",
+  "audit": "OFFLINE_INDEPENDENT",
+  "audit_negative_control": "REJECTED_CORRUPTED_ORACLE_VALUE",
+  "combined_sha256": "12a92dcb790cd79f72bf1aa9f36c2f03cb99c0a013f27a277bdef5d4dc7a31d8",
+  "distinct_row_patterns": 13,
+  "fixture_sha256": "269af91c68a4e16829f2e97ea513f37b5b820a81146b2f5fff798917d88a4ea2",
+  "handle_assertions": 13,
+  "native_cases": 13,
+  "negative_controls": [
+    "mutant",
+    "row_0",
+    "row_47",
+    "kind_0",
+    "kind_6",
+    "short_kind_4"
+  ],
+  "next_stage": 6,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "rows": 46,
+  "run_id": "44319896000",
+  "runtime_sha": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "source_sha": "2dd1003a2ecaf457e29baad038b5f89e8d9ea2fb",
+  "stage": 5,
+  "status": "ACCEPTED",
+  "structural_assertions": 26,
+  "value_assertions": 13,
+  "workflow_sha": "a968489f0b1ff8ab586af2a56caf96832174620c"
+}
