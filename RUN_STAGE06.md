@@ -12,3 +12,7 @@
 ## نتيجة محلية قبل CI
 
 نجح المفسر الأصلي في 13 حالة: 13 نتيجة حسابية و26 تحققاً مستقلاً من عدم تغيير المدخلين؛ خرج 0 وstderr فارغ. تحقق oracle الحسابي من 384 زوجاً حتمياً. تغيير التوقع في أول حالة جعل المفسر يخرج 1 دون علامة النهاية. SHA-256 للبرنامج المجمع `fd9c53df2335b0ab1ed7aac0f70998cd5ddfb8cb728957b09af362eac35162cc`، وللـfixture `118ec416f4dad0b0e5371dc53f4057199fcd595807265d675ca676b177040f93`. هذه نتيجة محلية؛ القرار يتطلب CI وأرشيفاً وتدقيقاً مستقلاً.
+
+## قرار القبول بعد CI
+
+أكمل [run 44321283079](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44321283079) على commit `1d567fe7613a4960dee96b02ad78c0e346e6961b` وظيفتي Native وverify بنجاح، وتخطى وظائف المراحل السابقة. مصدر التنفيذ المثبت `ef0b974aad41079ded998326bf6e92f3c83a57f1`، والمفسر الأصلي `eb3135565a8670cced3f6bbca4dbf7b014c45634`. الأرشيف 14434721993، SHA-256 `1064264892eae57154ab6554ea75a89d22044bce305e38542342fe76c12adcf8` وCRC صحيح. فحص `tools/stage06_add_small_acceptance_audit.py` بايتات التنفيذ، 13 نتيجة و26 تحقق مدخلات، والخروج 0 دون stderr، والموتنت بخروج 1؛ رفض تغيير توقع واحد في oracle. تقرير القبول `evidence/stage06_add_small_acceptance_2026-11-18.json`، SHA-256 `b7ad747c6152a0fa565a5184d6c2d67d83684e439d04faa39dcadef147b21aa2`: **STAGE6_ACCEPTED=YES**. التقرير المستقل لاحق لسجل CI الذي ما زال يحمل `stage6_full_acceptance=false` لحظة إنشائه.
