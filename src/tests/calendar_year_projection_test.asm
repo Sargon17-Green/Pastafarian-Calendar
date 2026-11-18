@@ -142,7 +142,7 @@ RunCalendarYearProjectionTests::
     ld a, [$a000]
     or a
     jp nz, .fail
-    ret
+    jp RunCalendarYearStepTests
 .writeMagnitude:
     push hl
     ld a, 3

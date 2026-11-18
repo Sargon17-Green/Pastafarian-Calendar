@@ -122,6 +122,11 @@ wCalendarYearOpen:: ds 4
 wCalendarYearClose:: ds 4
 wCalendarYearCandidate:: ds 2
 wCalendarYearOutput:: ds 2
+; Stage1 bounded NEXT/PREVIOUS selected span handoff; proposed gates adjacent.
+wCalendarYearProposedOpen:: ds 4
+wCalendarYearProposedClose:: ds 4
+wCalendarYearDirection:: ds 1
+wCalendarYearSpanLen:: ds 2
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -241,6 +246,7 @@ INCLUDE "src/runtime/ordinal_validate.asm"
 INCLUDE "src/runtime/ordinal_unit.asm"
 INCLUDE "src/runtime/calendar_save127.asm"
 INCLUDE "src/runtime/calendar_year_projection.asm"
+INCLUDE "src/runtime/calendar_year_step.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -262,3 +268,4 @@ INCLUDE "src/tests/owner_byte_test.asm"
 INCLUDE "src/tests/owner_signed_cmp_test.asm"
 INCLUDE "src/tests/calendar_invocation_lifecycle_test.asm"
 INCLUDE "src/tests/calendar_year_projection_test.asm"
+INCLUDE "src/tests/calendar_year_step_test.asm"
