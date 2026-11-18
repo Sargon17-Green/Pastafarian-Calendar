@@ -13,3 +13,7 @@
 ## نتيجة محلية
 
 اجتاز المفسر الأصلي 7 نتائج و7 مقارنات لثبات المدخل، خروج 0 وstderr فارغ. رُفض موتنت غيّر أول توقع من 1 إلى 2، والفهرسان 0 و8 بعلامة `E_HIDDEN_GRIND`، وكلها خروج 1 دون علامة النهاية. SHA-256 للـfixture `afe4ee2f7823107005e903fa4a9ac56821fb101fbc8b2de97e98cdafe170ec4f` وللبرنامج المجمع `53073a3ec73ec355c6eedba5d8737a125105b1a69fe732be445a7e15b4bc8cb4`. لا قبول قبل CI وتدقيق artifact.
+
+## قرار القبول بعد CI
+
+اكتمل [run 44363249164](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44363249164) بنجاح على workflow SHA `bace9bf4f704096564ac75540f2f1502688f806a`، مع verify وNative ناجحين. المصدر المثبت `ab5046ecff16139fefd7eb5c0ea09dfc8daafadf` والمفسر الأصلي `eb3135565a8670cced3f6bbca4dbf7b014c45634`. الأرشيف 14455022292، SHA-256 `6109313ee4f9c234ec4216189a7991f1192f7b1e80e7edd9d8c84d4853f25195`، وCRC صحيح. دقق `tools/stage10_hidden_grind_acceptance_audit.py` بايتات التنفيذ والقيم السبع، خرج صفر دون stderr، ورفض موتنت ومدخلَي 0 و8 بخروج 1؛ كما رفض فساد قيمة oracle. تقرير `evidence/stage10_hidden_grind_acceptance_2026-11-18.json`، SHA-256 `ba54ea6855b2e251373e590ddce96b29164d72004882101222a0e9ac5cf66f4e`: **STAGE10_ACCEPTED=YES**. حقل `stage10_full_acceptance=false` في إيصال CI سبق التدقيق المستقل.
