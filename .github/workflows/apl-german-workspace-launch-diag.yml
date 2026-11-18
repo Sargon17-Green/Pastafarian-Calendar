@@ -1,4 +1,4 @@
-name: APL German bounded NARS workspace startup observations (NOT Stage1)
+name: APL German NARS startup observations with CrashRpt dependencies (NOT Stage1)
 on:
   push:
     branches:
@@ -23,8 +23,8 @@ jobs:
           python-version: '3.12'
       - uses: actions/download-artifact@v4
         with:
-          name: apl-german-verified-3-file-runtime-no-fonts
-          run-id: 44379437067
+          name: apl-german-verified-4-file-runtime-no-fonts
+          run-id: 44381169710
           github-token: ${{ github.token }}
           path: verified_runtime
       - name: Observe two bounded workspace startup arguments and window titles
