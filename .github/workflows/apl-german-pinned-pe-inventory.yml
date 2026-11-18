@@ -1,0 +1,43 @@
+name: APL German exact NARS installer PE offline evidence
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-pinned-pe-inventory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-and-preserve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Download exact 0.5.14.11 release over HTTPS, fail closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p verified_release pe_inspection
+          url='https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe'
+          out='verified_release/NARS2000-0.5.14.11.exe'
+          curl --fail --location --show-error --silent --max-time 120 --retry 1 "$url" --output "$out"
+          bytes="$(wc -c < "$out")"
+          digest="$(sha256sum "$out" | cut -d' ' -f1)"
+          printf 'source=%s\nbytes=%s\nsha256=%s\nnative_executed=false\n' "$url" "$bytes" "$digest" >pe_inspection/pinned_release_metadata.txt
+          test "$bytes" -eq 9430788
+          test "$digest" = '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b'
+          file "$out" >pe_inspection/file_type.txt
+          objdump -p "$out" >pe_inspection/pe_headers.txt 2>pe_inspection/objdump_errors.txt || true
+          strings -n 9 "$out" | grep -Ei -m 150 'NARS2000|Inno Setup|Nullsoft|NSIS|InstallShield|SImPL|setup|\.exe|\.ttf|UPX|expand|compress|resource' >pe_inspection/strings_ascii.txt || true
+          strings -el -n 9 "$out" | grep -Ei -m 150 'NARS2000|Inno Setup|Nullsoft|NSIS|InstallShield|SImPL|setup|\.exe|\.ttf|UPX|expand|compress|resource' >pe_inspection/strings_utf16.txt || true
+          sha256sum "$out" >pe_inspection/sha256_manifest.txt
+      - name: Publish verified artifact for read-only PE inspection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apl-german-pinned-official-pe-for-static-analysis
+          path: |
+            pe_inspection/
+            verified_release/
+          if-no-files-found: warn
+          retention-days: 5
