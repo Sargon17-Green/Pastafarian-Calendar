@@ -1,0 +1,49 @@
+name: APL German bounded Native LX canary (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-native-lx-smoke.yml'
+      - 'qa/nars-interface/native_bounded_smoke.ps1'
+      - 'qa/nars-interface/lx_workspace_probe.py'
+      - 'qa/nars-interface/test_lx_workspace_probe.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-lx-probe:
+    runs-on: windows-2022
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify candidate construction and mutation rejection
+        shell: pwsh
+        run: python -m unittest discover -s qa/nars-interface -p 'test_lx_workspace_probe.py' -v
+      - name: Bounded exact-SHA native LX canary in disposable CI
+        shell: pwsh
+        run: ./qa/nars-interface/native_bounded_smoke.ps1 -Evidence native_smoke_evidence
+      - name: Evidence SHA256 manifest
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force native_smoke_evidence | Out-Null
+          Get-ChildItem native_smoke_evidence -File | Sort-Object Name | ForEach-Object {
+            $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.Name)"
+          } | Set-Content -Encoding utf8 native_smoke_evidence.sha256
+      - name: Upload diagnostic evidence irrespective of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apl-german-native-lx-candidate-only
+          path: |
+            native_smoke_evidence/
+            native_smoke_evidence.sha256
+          if-no-files-found: warn
+          retention-days: 14
