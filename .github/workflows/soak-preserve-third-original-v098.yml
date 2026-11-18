@@ -4,7 +4,7 @@ on:
     branches:
       - qa/soak-readiness-20261114
     paths:
-      - "soak/control/original_archive_requests/typescript-marathi-1021-v098.json"
+      - "soak/control/original_archive_requests/typescript-marathi-1021-v098*.json"
 concurrency:
   group: soak-third-original-immutable-archive-v098
   cancel-in-progress: false
@@ -61,7 +61,7 @@ jobs:
           python3 -B -m unittest discover -s coordinator/soak/tests \
             -p 'test_approve_third_original_archive_v098.py' -v \
             2>&1 | tee evidence/v098-source-archive-tests.log
-          grep -Eq '^Ran 10 tests ' evidence/v098-source-archive-tests.log
+          grep -Eq '^Ran 12 tests ' evidence/v098-source-archive-tests.log
           grep -q '^OK$' evidence/v098-source-archive-tests.log
           python3 -B coordinator/soak/runner/approve_third_original_archive_v098.py \
             --repo-root coordinator \
@@ -120,9 +120,16 @@ jobs:
             gh release create "$TAG" --target "$GITHUB_SHA" --draft --prerelease \
               --title "Original TypeScript Marathi source evidence (DRAFT, NOT YEAR)" \
               --notes-file evidence/v098-draft-release-notes.txt
+          fi
+          # Draft releases can take several seconds to appear in the list API.
+          # Re-read their numeric ID rather than attempting a second release.
+          ids=""
+          for attempt in 1 2 3 4 5; do
             ids="$(gh api "repos/$GH_REPO/releases?per_page=100" \
               --jq '.[] | select(.tag_name=="soak-native-typescript-marathi-ordinal1021-v098" and .draft==true) | .id')"
-          fi
+            if [ -n "$ids" ]; then break; fi
+            sleep 3
+          done
           test -n "$ids"
           test "$(printf '%s\n' "$ids" | wc -l)" -eq 1
           rid="$ids"

@@ -62,6 +62,19 @@ class OriginalMarathiReleaseAdmissionV098(unittest.TestCase):
         self.assertTrue(b.endswith(b"\n"))
         self.assertEqual(b,v.canon(v.pair_unique(list(self.obj.items()))))
 
+    def test_approved_fresh_retry_request_path(self):
+        path="soak/control/original_archive_requests/typescript-marathi-1021-v098-retry01.json"
+        self.assertEqual(v.approved_new_request_path("A\t"+path),path)
+
+    def test_multiple_or_modified_request_paths_fail_closed(self):
+        bad=("M\tsoak/control/original_archive_requests/typescript-marathi-1021-v098.json",
+             "A\tsoak/control/original_archive_requests/wrong.json",
+             "A\tsoak/control/original_archive_requests/typescript-marathi-1021-v098-retry001.json",
+             "A\tsoak/control/original_archive_requests/typescript-marathi-1021-v098.json\nA\tother")
+        for case in bad:
+            with self.subTest(case=case),self.assertRaises(ValueError):
+                v.approved_new_request_path(case)
+
     def test_duplicate_json_keys_fails_closed(self):
         with self.assertRaisesRegex(ValueError,"duplicate"):
             v.pair_unique([("a",1),("a",2)])

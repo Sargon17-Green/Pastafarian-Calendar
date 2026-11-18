@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Require syntax and ten strict offline release gates
+      - name: Require syntax and twelve strict offline release gates
         shell: bash
         run: |
           set -euo pipefail
@@ -36,9 +36,9 @@ jobs:
           python3 -B -m unittest discover -s soak/tests \
             -p 'test_approve_third_original_archive_v098.py' -v \
             2>&1 | tee v098-preservation-gates.log
-          grep -Eq '^Ran 10 tests ' v098-preservation-gates.log
+          grep -Eq '^Ran 12 tests ' v098-preservation-gates.log
           grep -q '^OK$' v098-preservation-gates.log
-          echo V098_ARCHIVE_AUTHORIZATION_TEN_TESTS_PASS_NO_REMOTE_WRITE
+          echo V098_ARCHIVE_AUTHORIZATION_TWELVE_TESTS_PASS_NO_REMOTE_WRITE
       - uses: actions/upload-artifact@v4
         if: always()
         with:

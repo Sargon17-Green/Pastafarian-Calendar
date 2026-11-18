@@ -18,7 +18,9 @@ from replay_third_original_v095 import pinned, validate_manifest
 
 SCHEMA="PASTAFARI_ORIGINAL_TYPESCRIPT_ARCHIVE_REQUEST_V098/1"
 OUTPUT_SCHEMA="PASTAFARI_ORIGINAL_TYPESCRIPT_DRAFT_ARCHIVE_MANIFEST_V098/1"
-REQUEST="soak/control/original_archive_requests/typescript-marathi-1021-v098.json"
+REQUEST_RE=re.compile(
+    r"soak/control/original_archive_requests/typescript-marathi-1021-v098(?:-retry[0-9]{2})?\.json\Z"
+)
 BRANCH="qa/soak-readiness-20261114"
 TAG="soak-native-typescript-marathi-ordinal1021-v098"
 FILENAME="typescript-marathi-1021-native.zip"
@@ -81,13 +83,22 @@ def git_check(root,before,after):
     if git("rev-parse","HEAD")!=after:
         raise ValueError("build checkout is not triggering source approval commit")
     git("merge-base","--is-ancestor",before,after)
-    if git("diff","--name-status","--no-renames",before,after)!="A\t"+REQUEST:
+    changed=git("diff","--name-status","--no-renames",before,after)
+    return approved_new_request_path(changed)
+
+
+def approved_new_request_path(changed: str) -> str:
+    if not changed.startswith("A\t") or changed.count("\n"):
         raise ValueError("only one newly added archive approval file allowed")
+    path=changed[2:]
+    if REQUEST_RE.fullmatch(path) is None:
+        raise ValueError("unexpected original archive request filename")
+    return path
 
 
 def produce(root,before,after):
-    git_check(root,before,after)
-    request=root/REQUEST
+    request_path=git_check(root,before,after)
+    request=root/request_path
     if request.is_symlink() or not request.is_file() or request.stat().st_size>16384:
         raise ValueError("original archive approval request absent or unsafe")
     raw=request.read_bytes()
