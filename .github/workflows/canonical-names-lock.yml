@@ -2405,3 +2405,59 @@ jobs:
           path: build/stage47-native.log
           if-no-files-found: warn
           retention-days: 30
+
+  stage48-full-occupied-matrix-discovery-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Bounded strict Native Stage48 and independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage48-native.log
+          node test/stage48_planning_oracle.mjs 2>&1 | tee -a build/stage48-native.log
+          compile_sources=(
+            test/stage48_discovery_tests.cob
+            src/big_integer.cob
+            src/monster_distance.cob
+            src/legacy_distance.cob
+            src/patched_day_tag.cob
+            src/patched_distance.cob
+          )
+          timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage48-full-occupied-matrix "${compile_sources[@]}" 2>&1 | tee -a build/stage48-native.log
+          timeout --signal=TERM --kill-after=10s 120s ./build/stage48-full-occupied-matrix 2>&1 | tee -a build/stage48-native.log
+          grep -Fxq 'STAGE48_PLANNING_ORACLE=96/96' build/stage48-native.log
+          grep -Fxq 'STAGE48_PLANNING_OCCUPIED_MATRIX=768/768' build/stage48-native.log
+          grep -Fxq 'STAGE48_PLANNING_ROLLING_MODEL=192/192' build/stage48-native.log
+          grep -Fxq 'STAGE48_PLANNING_TARGET_BALANCE=192,192,192,192' build/stage48-native.log
+          grep -Fxq 'STAGE48_PLANNING_PERMUTATIONS=24/24' build/stage48-native.log
+          grep -Fxq 'STAGE48_PLANNING_UNIQUE_PAIRS=24' build/stage48-native.log
+          grep -Fxq 'STAGE48_PLANNING_8192_DIGIT_CASES=6' build/stage48-native.log
+          grep -Fxq 'STAGE48_PLANNING_GATE=PASS_NOT_NATIVE' build/stage48-native.log
+          for pair in 'INITIAL_OUTPUTS 24' 'QUAD_LIVE 24' 'ORDER_COVERAGE 24' 'REVERSE_REBUILT 24' 'MID_HEAP_ZERO 24' 'FINAL_CLEANUP 24' 'OCCUPIED_REJECTS 816' 'REJECTED_PRESERVED 816' 'PARTIAL_FREES 96' 'PARTIAL_REUSES 96' 'PARTIAL_CYCLES 48' 'PAIR_SWITCHES 24' 'ROLL_FREES 192' 'ROLL_REUSES 192' 'ROLL_THREE 192' 'ROLL_QUADS 192' 'ROLL_PROBES 768' 'TARGET_SLOT_1 192' 'TARGET_SLOT_2 192' 'TARGET_SLOT_3 192' 'TARGET_SLOT_4 192' 'RUNS 24' 'PASS 24' 'UNEXPECTED_FAILURES 0' 'HEAP_LIVE_POST_RELEASE 0'; do
+            read -r key value <<<"$pair"
+            grep -Eq "^STAGE48_${key}=[[:space:]]*0*${value}[[:space:]]*$" build/stage48-native.log
+          done
+          grep -Fxq 'STAGE48_HEAP_MEASURED=YES' build/stage48-native.log
+          grep -Fxq 'RESULT=PASS_STAGE48_FULL_OCCUPIED_MATRIX_DISCOVERY_NATIVE' build/stage48-native.log
+          echo 'STAGE48_NATIVE_GATE=PASS' | tee -a build/stage48-native.log
+      - name: Preserve Stage48 evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage48-full-occupied-matrix-evidence
+          path: build/stage48-native.log
+          if-no-files-found: warn
+          retention-days: 30
