@@ -1,0 +1,77 @@
+name: Kotlin production year/gate versus independent unseeded geometry
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/Post55ProductionYearGateProbe.kt'
+      - 'soak/audit_production_year_gate_unseeded.py'
+      - 'soak/test_audit_production_year_gate_unseeded.py'
+      - '.github/workflows/post55-production-year-gate-unseeded.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-year-gate-differential:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify exact branch and source SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          grep -Fq 'maxGateAbsIndex: Int = 8192' src/main/kotlin/pastafari/ProductionYearNavigator.kt
+          echo 'SOURCE_AND_8192_LIMIT_LOCK_GREEN'
+      - name: Synthetic fail-closed mutation tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .evidence
+          python3 -m py_compile soak/audit_production_year_gate_unseeded.py soak/test_audit_production_year_gate_unseeded.py
+          python3 -m unittest discover -s soak -p 'test_audit_production_year_gate_unseeded.py' -v 2>&1 | tee .evidence/year-gate-unit.log
+      - name: Install pinned Kotlin 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin.zip"
+          unzip -q "$RUNNER_TEMP/kotlin.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile actual production and read-only gate/year probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc src/main/kotlin/pastafari/*.kt soak/Post55ProductionYearGateProbe.kt \
+            -include-runtime -d "$RUNNER_TEMP/year-gate-probe.jar"
+          test -s "$RUNNER_TEMP/year-gate-probe.jar"
+          echo 'PRODUCTION_PROBE_COMPILED_GREEN'
+      - name: Independent unseeded real year and gate comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/audit_production_year_gate_unseeded.py \
+            --jar "$RUNNER_TEMP/year-gate-probe.jar" \
+            --timeout-seconds 780 \
+            --evidence .evidence/year-gate-unseeded.json \
+            2>&1 | tee .evidence/year-gate-unseeded.log
+      - name: Preserve bounded evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-cymraeg-year-gate-unseeded-diagnostic
+          path: .evidence/year-gate-*
+          if-no-files-found: warn
+          retention-days: 30
