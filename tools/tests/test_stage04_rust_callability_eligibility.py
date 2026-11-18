@@ -7,6 +7,7 @@ from contextlib import redirect_stdout
 from unittest.mock import patch
 import sys
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -187,9 +188,9 @@ class CallabilityTests(unittest.TestCase):
     def test_malformed_cargo_metadata_fails_closed_as_json(self):
         # Valid TOML syntax can still contain invalid Cargo metadata types.
         cases = (
-            ("lib-string", 'lib = "bad"\\n[package]\\nname = "fixture"\\n'),
-            ("package-string", 'package = "bad"\\n'),
-            ("package-name-integer", '[package]\\nname = 12\\n'),
+            ("lib-string", 'lib = "bad"\n[package]\nname = "fixture"\n'),
+            ("package-string", 'package = "bad"\n'),
+            ("package-name-integer", '[package]\nname = 12\n'),
         )
         args = ["stage04_rust_callability_eligibility.py",
                 "--repo", str(self.repo),
@@ -202,6 +203,8 @@ class CallabilityTests(unittest.TestCase):
                 "--symbol", "old_numeric_probe"]
         for label, manifest_text in cases:
             with self.subTest(case=label):
+                # Valid TOML is required: malformed metadata, not invalid syntax.
+                self.assertIsInstance(tomllib.loads(manifest_text), dict)
                 def fake_archive(_repo, _commit, dest):
                     (dest / "Cargo.toml").write_text(manifest_text, encoding="utf-8")
                 output = io.StringIO()
