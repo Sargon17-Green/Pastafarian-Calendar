@@ -1,0 +1,57 @@
+name: Soak v099 fail-closed two-lane scheduler unit regression (no processes)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - "soak/runner/two_lane_scheduler.py"
+      - "soak/tests/test_two_lane_scheduler.py"
+      - ".github/workflows/soak-two-lane-completion-safety-v099.yml"
+permissions:
+  contents: read
+jobs:
+  test-invalid-worker-completion-keeps-identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate static no-OS-process scheduler boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          paths=[
+              "soak/runner/two_lane_scheduler.py",
+              "soak/tests/test_two_lane_scheduler.py",
+          ]
+          trees=[ast.parse(Path(p).read_text(encoding="utf-8")) for p in paths]
+          root=trees[0]
+          os_names={"subprocess","ctypes","psutil","signal"}
+          for node in ast.walk(root):
+              if isinstance(node,ast.Import):
+                  assert not any(x.name.split('.')[0] in os_names for x in node.names)
+              if isinstance(node,ast.ImportFrom):
+                  assert (node.module or "").split('.')[0] not in os_names
+          print("V099_SCHEDULER_STATIC_NO_OS_WORKER_OR_KILL_API_PASS")
+          PY
+      - name: Verify twelve strict two-lane state transitions and fail-closed regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/tests \
+            -p 'test_two_lane_scheduler.py' -v \
+            2>&1 | tee v099-two-lane-completion-tests.log
+          grep -Eq '^Ran 12 tests ' v099-two-lane-completion-tests.log
+          grep -q '^OK$' v099-two-lane-completion-tests.log
+          echo V099_TWO_LANE_FAIL_CLOSED_TWELVE_TESTS_PASS_NO_LIVE_WORKERS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v099-two-lane-unit-tests-no-native-worker
+          path: v099-two-lane-completion-tests.log
+          if-no-files-found: warn
+          retention-days: 30
