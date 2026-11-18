@@ -9,11 +9,11 @@ use Scalar::Util qw(blessed);
 
 our @EXPORT_OK = qw(count_weavings rank_weaving unrank_weaving);
 
-# Stage17 same-branch bounded extension: eight months / 32 days (not a full-year generator).
+# Stage18 same-branch bounded extension: nine months / 36 days (not a full-year generator).
 sub _counts ($profile) {
     die "月份長度須為陣列參照\n" if ref($profile) ne 'ARRAY';
     my $m = scalar @$profile;
-    die "月份數超出本階段範圍\n" if $m < 1 || $m > 8;
+    die "月份數超出本階段範圍\n" if $m < 1 || $m > 9;
     my @lengths;
     my $days = 0;
     for my $v (@$profile) {
@@ -21,7 +21,7 @@ sub _counts ($profile) {
         die "總日數超出本階段範圍\n" if length("$v") > 2;
         my $length = int($v);
         $days += $length;
-        die "總日數超出本階段範圍\n" if $days > 32;
+        die "總日數超出本階段範圍\n" if $days > 36;
         push @lengths, $length;
     }
     return (\@lengths, $days);
