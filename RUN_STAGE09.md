@@ -16,3 +16,7 @@
 ## نتيجة محلية
 
 المفسر الأصلي نفّذ 28 مقارنة للنتائج و56 تحققاً من ثبات خليتي الإدخال، خروج 0 وstderr فارغ. رُفض موتنت غيّر النتيجة الأولى من 3 إلى 4، وكذلك الفهارس الأربعة غير الصالحة `(0,1),(8,1),(1,0),(1,5)`، بخروج 1؛ كل رفض يحمل علامة الخطأ المتوقعة ولا يحمل علامة النهاية. SHA-256 للـfixture `c308fb57856a5147d7245d4ef5b5005f8f37c71ed7ab8505a63f092ad4a815cc`، وللبرنامج المجمع `66bf60cf2bf090be76b20dd19c24f24e69afe103c6b0b5f6ffca6331bdbfe569`. ما زالت بوابة CI وتدقيق artifact مطلوبة.
+
+## قرار القبول بعد CI
+
+اكتمل [run 44361993055](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44361993055) بنجاح على workflow SHA `9ddb883133f1a64cd1e12034bd23450eed8f6f0e`، مع verify وNative ناجحين. المصدر المثبت `127ebedf45eeef25da673d1f6b33cdb003b65890` والمفسر الأصلي `eb3135565a8670cced3f6bbca4dbf7b014c45634`. الأرشيف 14456295916، SHA-256 `d42b7fc8316bf09d10f66b4b741af7b2c6143035679c38e046edc32947388f43`، وCRC صحيح. أعاد `tools/stage09_hidden_coefficient_acceptance_audit.py` حساب كل المعاملات الـ28 مستقلاً، وفحص بايتات المصدر و56 تحققاً من المدخلات، خروج صفر دون stderr، ورفض خمسة ضوابط سالبة بخروج 1. رفض audit تغييراً متعمداً للقيمة الأولى في oracle. تقرير `evidence/stage09_hidden_coefficient_acceptance_2026-11-18.json`، SHA-256 `251c47dda05e8a4c52419114c0210467593c72bf50a352d171aaa1f955765bf8`: **STAGE9_ACCEPTED=YES**. حقل `stage9_full_acceptance=false` في إيصال CI سبق قرار التدقيق المستقل.

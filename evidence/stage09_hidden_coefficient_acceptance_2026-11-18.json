@@ -1,0 +1,25 @@
+{
+  "archive_sha256": "d42b7fc8316bf09d10f66b4b741af7b2c6143035679c38e046edc32947388f43",
+  "audit": "OFFLINE_INDEPENDENT",
+  "audit_negative_control": "REJECTED_CORRUPTED_EXPECTED_VALUE",
+  "cases": 28,
+  "combined_sha256": "66bf60cf2bf090be76b20dd19c24f24e69afe103c6b0b5f6ffca6331bdbfe569",
+  "fixture_sha256": "c308fb57856a5147d7245d4ef5b5005f8f37c71ed7ab8505a63f092ad4a815cc",
+  "input_assertions": 56,
+  "negative_controls": [
+    "mutant",
+    "invalid_0_1",
+    "invalid_8_1",
+    "invalid_1_0",
+    "invalid_1_5"
+  ],
+  "next_stage": 10,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "result_assertions": 28,
+  "run_id": "44361993055",
+  "runtime_sha": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "source_sha": "127ebedf45eeef25da673d1f6b33cdb003b65890",
+  "stage": 9,
+  "status": "ACCEPTED",
+  "workflow_sha": "9ddb883133f1a64cd1e12034bd23450eed8f6f0e"
+}
