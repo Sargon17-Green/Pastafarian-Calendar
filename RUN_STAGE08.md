@@ -17,3 +17,7 @@
 ## בדיקת מימוש מקומית
 
 בוצעה הרצה תחומה במפרש FALSE המקורי הנעול: 46/46 תוויות שורה, 230 ערכי BigInt, 47 בדיקות צורה, 10 השוואות ערך חוזרות ו־10 בדיקות זהות ידית. יציאה 0 ו־stderr ריק. מוטנט ששינה את התוצאה הצפויה הראשונה מ־17 ל־18 נדחה ביציאה 1 עם `STAGE8_STONES_FAILURE` וללא תווית סיום. SHA-256 של ה־fixture `c5fe3f77d4c92b900e07a3f2a8dee01d0a2f8a9d0663c2d741e27fcd51e03c8b`, ושל התוכנית המאוחדת `d627910d98a9e3bb2c9df87a45e1f912035e76d9aa231a8c9e311456c85bc90f`. זו תוצאה מקומית בלבד; CI וביקורת ארטיפקט עדיין נדרשים לקבלה.
+
+## החלטת קבלה אחרי CI
+
+[run 44360322387](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44360322387) הסתיים completed/success ב־workflow commit `004f3b1be8bd4e99254b651e48f27742ea000a3f` עם verify ו־Native מוצלחים. מקור ההרצה הוא `07da4d7b99d804c25754a93eab1db7e5c156ab0d`, המפרש `eb3135565a8670cced3f6bbca4dbf7b014c45634`; ארטיפקט 14454995093, SHA-256 `7c7f9c14b63b2aef3bca0bd6fda92ff726090e0f4b023261aefb9654bb736fab`, CRC תקין. `tools/stage08_stones_acceptance_audit.py` השווה בייטים נעולים, גזר באופן בלתי־תלוי 230 ערכים, בדק 47 מבנים, 10 קריאות חוזרות ו־10 זהויות, וידא יציאה 0 ו־stderr ריק, ואת דחיית המוטנט ביציאה 1. שינוי מכוון בערך oracle אחד נדחה בביקורת. דוח `evidence/stage08_stones_acceptance_2026-11-18.json`, SHA-256 `374ecbcaaf133c4b1a5313d088b518bd5c255353650cd456a76fbf97ee24e7ef`: **STAGE8_ACCEPTED=YES**. הסימון `stage8_full_acceptance=false` באסמכתת CI נכתב לפני ביקורת הארטיפקט; ההחלטה כאן מאוחרת ומגובה בה.
