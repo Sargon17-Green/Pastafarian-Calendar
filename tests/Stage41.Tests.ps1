@@ -5,8 +5,12 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
 $md = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-$required = @('CURRENT_STAGE=40','LAST_COMPLETED_STAGE=40','STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')
-foreach($line in $required) { if(-not ($md -split '\r?\n' -ccontains $line)) { throw "Stage41 predecessor seal missing $line" } }
+$metadataLines = @($md -split '\r?\n')
+$stage41Pending = ($metadataLines -ccontains 'CURRENT_STAGE=41') -and ($metadataLines -ccontains 'LAST_COMPLETED_STAGE=40') -and ($metadataLines -ccontains 'STAGE41_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0')
+$stage41Sealed = ($metadataLines -ccontains 'CURRENT_STAGE=41') -and ($metadataLines -ccontains 'LAST_COMPLETED_STAGE=41') -and ($metadataLines -ccontains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0')
+if(-not ($stage41Pending -or $stage41Sealed)) { throw 'Stage41 requires exact PENDING_NATIVE or evidence-sealed metadata backed by completed preflight' }
+$required = @('STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')
+foreach($line in $required) { if(-not ($metadataLines -ccontains $line)) { throw "Stage41 predecessor seal missing $line" } }
 
 function Mod41 { param([System.Numerics.BigInteger]$Value,[System.Numerics.BigInteger]$Modulus)
     return [System.Numerics.BigInteger]((($Value % $Modulus) + $Modulus) % $Modulus)
@@ -97,6 +101,6 @@ Write-Host "STAGE41_MIXED_FACES=$faces"
 Write-Host "STAGE41_SEAL_PAIRS=$sealPairs"
 Write-Host "STAGE41_ASSERTIONS_PASSED=$script:StageTestPassed"
 Write-Host "STAGE41_ASSERTIONS_FAILED=$script:StageTestFailed"
-if($endpoints -ne 48 -or $calculationSeams -ne 24 -or $targetSeams -ne 24 -or $faces -ne 12 -or $sealPairs -ne 32 -or $script:StageTestPassed -ne 481 -or $script:StageTestFailed -ne 0) { Write-Host 'STAGE41_PREFLIGHT=FAIL'; exit 1 }
-Write-Host 'STAGE41_PREFLIGHT=BOUNDED_RESEARCH_ONLY'
+if($endpoints -ne 48 -or $calculationSeams -ne 24 -or $targetSeams -ne 24 -or $faces -ne 12 -or $sealPairs -ne 32 -or $script:StageTestPassed -ne 481 -or $script:StageTestFailed -ne 0) { Write-Host 'STAGE41_NATIVE=FAIL'; exit 1 }
+if($stage41Sealed) { Write-Host 'STAGE41_NATIVE=SEALED_RECHECK_PASS' } else { Write-Host 'STAGE41_NATIVE=PASS_PENDING_NO_SEAL' }
 exit 0
