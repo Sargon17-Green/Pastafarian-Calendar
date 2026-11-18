@@ -188,3 +188,53 @@ z;28=~["E_VISIBLE_GRIND_LAYOUT"0 0/]?
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
 
+{ المرحلة 12: العملية 29؛ قطرات خفية سبع مستقلة من سجل العدّ والحجارة. }
+{ تبنى قائمة عقد عكسية [drop,next] ثم يفرد الجدول [7,drop1,...,drop7]. }
+z;29=~["E_HIDDEN_DROPS_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:x;1+g;!w:
+ 0q:1v:
+ [v;8<][
+  y;1+g;!u:1t:
+  [t;5<][
+   z;b:v;a;!t;a;!b;26h;!!s:
+   z;b:s;a;!b;0h;!!s:
+   y;t;+1+g;!r:
+   t;4=[z;b:r;a;!b;0h;!!r:]?
+   z;b:s;a;!r;a;!b;14h;!!s:
+   z;b:u;a;!s;a;!b;9h;!!u:
+   t;1+t:
+  ]#
+  1t:
+  [t;6<][
+   z;b:w;a;!v;a;!t;a;!b;21h;!!s:
+   z;b:u;a;!s;a;!b;9h;!!u:
+   t;1+t:
+  ]#
+  z;b:u;a;!b;25h;!!u:
+  1t:
+  [t;8<][
+   z;b:u;a;!u;a;!b;14h;!!d:
+   z;b:u;a;!3a;!b;23h;!!e:
+   z;b:d;a;!e;a;!b;9h;!!d:
+   z;b:t;a;!b;27h;!!i:
+   z;b:w;a;!v;a;!i;a;!b;21h;!!e:
+   z;b:d;a;!e;a;!b;9h;!!d:
+   z;b:d;a;!t;a;!b;22h;!!d:
+   z;b:d;a;!b;25h;!!u:
+   t;1+t:
+  ]#
+  z;l:u;a;!q;a;!l;q:
+  v;1+v:
+ ]#
+ z;p:7a;!1v:
+ [v;8<][
+  q;n:7v;-m:
+  [m;0>][n;1+g;!n:m;1-m:]#
+  n;g;!a;!v;1+v:
+ ]#
+ p;r:
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
+
