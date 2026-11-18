@@ -268,6 +268,70 @@ def _unsliced_coeff_free_gap_transfer(previous, n, k, spec):
     return SparseVector(first + 1 + left, tuple(out[left:right]))
 
 
+
+def _phased_free_gap_transfer(previous, n, k, spec):
+    """Research-only split-phase *surrogate* for transfer cost attribution.
+
+    Separating prefix materialization from big-int multiplication changes the
+    allocation schedule, so phase times are diagnostic; they are NOT direct
+    percentages of the fused production kernel. Never select this for Chapel.
+    The output remains bit-for-bit equal to sparse_transfer for all signed
+    inputs, including cancellation, k=1, empty support and q>n.
+    """
+    q, fixed_sum, _, tail = spec
+    if fixed_sum or tail:
+        raise ValueError("phased diagnostic requires a free gap")
+    started = monotonic()
+    first = max(0, q)
+    if first > n:
+        ended = monotonic()
+        return SparseVector(0, ()), {
+            "prepare": ended - started, "prefix": 0.0,
+            "multiply": 0.0, "trim": 0.0,
+            "total": ended - started, "cells": 0,
+            "flat_tail_cells": 0}
+    width = n - first
+    begin, stop = first + 1, n + 1
+    overlap_begin = max(begin, previous.offset)
+    overlap_stop = min(stop, previous.offset + len(previous.values))
+    if overlap_begin < overlap_stop:
+        updates = chain(
+            repeat(0, overlap_begin - begin),
+            islice(previous.values, overlap_begin - previous.offset,
+                   overlap_stop - previous.offset),
+            repeat(0, stop - overlap_stop))
+    else:
+        updates = repeat(0, width)
+    prepared = monotonic()
+    prefixes = tuple(accumulate(updates, initial=previous.prefix(first)))
+    accumulated = monotonic()
+    coefficients = free_gap_coefficients(n, k)
+    out = list(map(mul, prefixes, reversed(coefficients[:width + 1])))
+    multiplied = monotonic()
+    left = 0
+    while left < len(out) and out[left] == 0:
+        left += 1
+    if left == len(out):
+        result = SparseVector(0, ())
+    else:
+        right = len(out)
+        while right > left and out[right - 1] == 0:
+            right -= 1
+        result = SparseVector(first + 1 + left, tuple(out[left:right]))
+    finished = monotonic()
+    assert len(prefixes) == len(out) == width + 1
+    return result, {
+        "prepare": prepared - started,
+        "prefix": accumulated - prepared,
+        "multiply": multiplied - accumulated,
+        "trim": finished - multiplied,
+        "total": finished - started,
+        "cells": width + 1,
+        "flat_tail_cells": max(
+            0, n - max(first, previous.offset + len(previous.values) - 1))
+    }
+
+
 def sparse_transpose(after, n, k, spec):
     """Exact T^t, closed form for single-gap rows; recurrence otherwise."""
     q, fixed_sum, first_fixed, tail = spec
@@ -544,6 +608,10 @@ def test_support_prune_signed_differential():
                         previous, n, k, spec) == expected
                     assert _unsliced_coeff_free_gap_transfer(
                         previous, n, k, spec) == expected
+                    phased, phase_times = _phased_free_gap_transfer(
+                        previous, n, k, spec)
+                    assert phased == expected
+                    assert phase_times["cells"] == max(0, n - max(0, q) + 1)
                     checks += 1
     assert checks == 576
     print("WEAVING_SPARSE_SUPPORT_PRUNE_SIGNED_CHECKS=" + str(checks))
@@ -552,6 +620,8 @@ def test_support_prune_signed_differential():
     print("WEAVING_TAKE_WINDOWED_SIGNED_DIFFERENTIAL=PASS")
     print("WEAVING_TAKE_UNSLICED_SIGNED_CHECKS=" + str(checks))
     print("WEAVING_TAKE_UNSLICED_SIGNED_DIFFERENTIAL=PASS")
+    print("WEAVING_TAKE_PHASE_SIGNED_CHECKS=" + str(checks))
+    print("WEAVING_TAKE_PHASE_SIGNED_DIFFERENTIAL=PASS")
 
 
 def test_finite():
@@ -871,6 +941,94 @@ def test_take_unsliced_hotset(state):
     print("WEAVING_TAKE_UNSLICED_FULL_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
 
 
+
+def test_take_phase_hotset(state):
+    """Bounded exact five-month, six-sample/arm phase-attribution experiment.
+
+    A 65-check paired ABBA compares the original fused transfer to a
+    split-phase surrogate. Report prefix/multiply/trim as surrogate costs,
+    NOT calibrated shares of the original kernel. No 4244-day acceptance.
+    """
+    from statistics import median
+
+    months = (39, 42, 43, 44, 45)
+    assert state.m == 45
+    checks = 0
+    aggregate = {key: 0.0 for key in
+                 ("baseline", "phased", "prefix", "multiply", "trim")}
+    total_cells = flat_tail_cells = 0
+    for month in months:
+        previous, n = state.states[month-1], state.sizes[month-1]
+        k, spec = state.lengths[month-1], state.specs[month]
+        assert spec[1] == 0 and spec[3] == 0 and spec[0] <= n
+        expected = _reference_free_gap_transfer(previous, n, k, spec)
+        observed, metrics = _phased_free_gap_transfer(
+            previous, n, k, spec)
+        assert observed == expected == sparse_transfer(
+            previous, n, k, spec)
+        checks += 1
+        samples = {"baseline": [], "phased": []}
+        phase_samples = {key: [] for key in
+                         ("prefix", "multiply", "trim")}
+        for _ in range(3):
+            for method in ("baseline", "phased", "phased", "baseline"):
+                if method == "baseline":
+                    start = monotonic()
+                    actual = sparse_transfer(previous, n, k, spec)
+                    duration = monotonic() - start
+                else:
+                    actual, details = _phased_free_gap_transfer(
+                        previous, n, k, spec)
+                    duration = details["total"]
+                    assert (abs(
+                        sum(details[key] for key in
+                            ("prepare", "prefix", "multiply", "trim"))
+                        - duration) < 0.000001)
+                    for key in phase_samples:
+                        phase_samples[key].append(details[key])
+                assert actual == expected
+                samples[method].append(duration)
+                checks += 1
+        baseline = median(samples["baseline"])
+        phased = median(samples["phased"])
+        assert baseline > 0.0 and phased > 0.0
+        for key, value in (("baseline", baseline), ("phased", phased)):
+            aggregate[key] += value
+        for key in phase_samples:
+            aggregate[key] += median(phase_samples[key])
+        total_cells += metrics["cells"]
+        flat_tail_cells += metrics["flat_tail_cells"]
+        print("WEAVING_TAKE_PHASE_MONTH_" + str(month) +
+              "_BASE_SECONDS=" + format(baseline, ".6f"))
+        print("WEAVING_TAKE_PHASE_MONTH_" + str(month) +
+              "_SPLIT_SECONDS=" + format(phased, ".6f"))
+        print("WEAVING_TAKE_PHASE_MONTH_" + str(month) +
+              "_PREFIX_SECONDS=" +
+              format(median(phase_samples["prefix"]), ".6f"))
+        print("WEAVING_TAKE_PHASE_MONTH_" + str(month) +
+              "_MULTIPLY_SECONDS=" +
+              format(median(phase_samples["multiply"]), ".6f"))
+        print("WEAVING_TAKE_PHASE_MONTH_" + str(month) +
+              "_TRIM_SECONDS=" +
+              format(median(phase_samples["trim"]), ".6f"))
+        print("WEAVING_TAKE_PHASE_MONTH_" + str(month) +
+              "_FLAT_TAIL_CELLS=" + str(metrics["flat_tail_cells"]))
+    assert checks == 65
+    assert total_cells > 0 and 0 <= flat_tail_cells <= total_cells
+    print("WEAVING_TAKE_PHASE_HOTSET_MONTHS=39,42,43,44,45")
+    print("WEAVING_TAKE_PHASE_HOTSET_CHECKS=" + str(checks))
+    print("WEAVING_TAKE_PHASE_HOTSET_CELLS=" + str(total_cells))
+    print("WEAVING_TAKE_PHASE_HOTSET_FLAT_TAIL_CELLS=" +
+          str(flat_tail_cells))
+    for key in ("baseline", "phased", "prefix", "multiply", "trim"):
+        print("WEAVING_TAKE_PHASE_SUM_" + key.upper() + "_SECONDS=" +
+              format(aggregate[key], ".6f"))
+    print("WEAVING_TAKE_PHASE_SPLIT_OVER_BASE=" +
+          format(aggregate["phased"] / aggregate["baseline"], ".4f"))
+    print("WEAVING_TAKE_PHASE_HOTSET_EQUALITY=PASS")
+    print("WEAVING_TAKE_PHASE_FULL_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
+
+
 def test_median_prefix():
     from weaving_reachability_oracle import MONTH_LENGTHS
     months = MONTH_LENGTHS
@@ -911,6 +1069,7 @@ def test_median_prefix():
     test_support_prune_hotset(state)
     test_take_windowed_hotset(state)
     test_take_unsliced_hotset(state)
+    test_take_phase_hotset(state)
 
 
 if __name__ == "__main__":
