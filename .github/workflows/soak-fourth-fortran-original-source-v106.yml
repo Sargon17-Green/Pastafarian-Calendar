@@ -1,0 +1,152 @@
+name: Soak v106 Fortran fourth original source foundation Fct only
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - 'soak/native_probes/v106_one_fortran_original_day.f90'
+      - 'soak/runner/audit_fourth_original_fortran_v106.py'
+      - 'soak/tests/test_fourth_original_fortran_v106.py'
+      - '.github/workflows/soak-fourth-fortran-original-source-v106.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  one-source-call-not-year:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-fortran
+          ref: 23349b9748859a1032b8a3afad0812b1d392be94
+          persist-credentials: false
+      - name: Pin five source blobs, verify runtime and resource headroom
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-fortran rev-parse HEAD)" = 23349b9748859a1032b8a3afad0812b1d392be94
+          test "$(git -C original-fortran rev-parse HEAD:src/big_integer.f90)" = 5046e05220c58f0c14c73253cecec7d7c93e8d35
+          test "$(git -C original-fortran rev-parse HEAD:src/source_language_catalog.f90)" = c1f80d2a1ffbf81f091d5e515b0a9a0efb33015b
+          test "$(git -C original-fortran rev-parse HEAD:src/bootstrap_infrastructure.f90)" = 68e7577aad5430b3004e8722217f62ec31940958
+          test "$(git -C original-fortran rev-parse HEAD:test/normative_oracle_core.f90)" = 7dff7b5e5f33b5b23cb171543ce92bcb11a00e47
+          test "$(git -C original-fortran rev-parse HEAD:test/normative_oracle_calendar.f90)" = 7491d53d10bd2a30072732e2b3ea718be804bf61
+          test -z "$(git -C original-fortran status --porcelain)"
+          command -v gfortran
+          command -v /usr/bin/time
+          mkdir -m 700 evidence
+          mkdir -m 700 evidence/fortran-build
+          python3 - <<'PY' | tee evidence/v106-resource-preflight.json
+          from pathlib import Path
+          import json,shutil
+          ram=next(int(line.split()[1])*1024 for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith('MemAvailable:'))
+          disk=shutil.disk_usage('.').free
+          ok=ram>=2*1024**3 and disk>=2*1024**3
+          print(json.dumps({'ram_available_bytes':ram,'disk_free_bytes':disk,'admitted':ok,
+                            'single_native_call':True,'windows_certified':False,
+                            'full_years_certified':0},sort_keys=True))
+          assert ok
+          PY
+          echo V106_PINNED_FORTRAN_SOURCE_AND_RESOURCES_PASS
+      - name: Authenticate completed Python original sample ZIP
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GH_REPO/actions/runs/44392067310" --jq '.status')" = completed
+          test "$(gh api "repos/$GH_REPO/actions/runs/44392067310" --jq '.conclusion')" = success
+          gh api "repos/$GH_REPO/actions/artifacts/14469537094/zip" > evidence/v106-python-source.zip
+          echo 'bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1  evidence/v106-python-source.zip' | sha256sum -c -
+          test "$(wc -c < evidence/v106-python-source.zip)" -eq 24119
+          echo V106_ORIGINAL_PYTHON_REFERENCE_SOURCE_ZIP_PINNED
+      - name: Parser AST and eight negative original-date checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for name in ('soak/runner/audit_fourth_original_fortran_v106.py',
+                       'soak/tests/test_fourth_original_fortran_v106.py'):
+              ast.parse((Path('coordinator')/name).read_text(encoding='utf8'))
+          print('V106_SOURCE_AUDIT_AST_VALID')
+          PY
+          PYTHONPATH=coordinator/soak/runner python3 -B -m unittest discover -s coordinator/soak/tests \
+            -p 'test_fourth_original_fortran_v106.py' -v 2>&1 | tee evidence/v106-unit-tests.log
+          grep -Eq '^Ran 8 tests ' evidence/v106-unit-tests.log
+          grep -q '^OK$' evidence/v106-unit-tests.log
+          echo V106_EIGHT_SOURCE_CONTRACT_GATES_PASS
+      - name: Build original module source untouched, invoke native Fct once
+        shell: bash
+        run: |
+          set -euo pipefail
+          gfortran --version | head -n 1 | tee evidence/v106-compiler.log
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J evidence/fortran-build \
+            -c original-fortran/src/big_integer.f90 -o evidence/fortran-build/big_integer.o \
+            2>&1 | tee evidence/v106-compile-bigint.log
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J evidence/fortran-build \
+            -I evidence/fortran-build -c original-fortran/src/source_language_catalog.f90 \
+            -o evidence/fortran-build/source_language_catalog.o 2>&1 | tee evidence/v106-compile-catalog.log
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J evidence/fortran-build \
+            -I evidence/fortran-build -c original-fortran/src/bootstrap_infrastructure.f90 \
+            -o evidence/fortran-build/bootstrap_infrastructure.o 2>&1 | tee evidence/v106-compile-bootstrap.log
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J evidence/fortran-build \
+            -I evidence/fortran-build -c original-fortran/test/normative_oracle_core.f90 \
+            -o evidence/fortran-build/normative_oracle_core.o 2>&1 | tee evidence/v106-compile-core.log
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J evidence/fortran-build \
+            -I evidence/fortran-build -c original-fortran/test/normative_oracle_calendar.f90 \
+            -o evidence/fortran-build/normative_oracle_calendar.o 2>&1 | tee evidence/v106-compile-calendar.log
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J evidence/fortran-build \
+            -I evidence/fortran-build coordinator/soak/native_probes/v106_one_fortran_original_day.f90 \
+            evidence/fortran-build/big_integer.o evidence/fortran-build/source_language_catalog.o \
+            evidence/fortran-build/bootstrap_infrastructure.o evidence/fortran-build/normative_oracle_core.o \
+            evidence/fortran-build/normative_oracle_calendar.o -o evidence/v106-original-fortran-native \
+            2>&1 | tee evidence/v106-link.log
+          sha256sum evidence/v106-original-fortran-native | tee evidence/v106-binary.sha256
+          /usr/bin/time -v -o evidence/v106-runtime-resource.log \
+            nice -n 10 evidence/v106-original-fortran-native 2>&1 | tee evidence/v106-native-output.log
+          test "$(grep -c '^V106_FORTRAN_ORIGINAL_FCT_NATIVE ' evidence/v106-native-output.log)" -eq 1
+          test -z "$(git -C original-fortran status --porcelain)"
+          echo V106_ONE_AUTHENTIC_FORTRAN_NATIVE_CALL_NOT_YEAR
+      - name: Evaluate frozen Python native source versus unchanged Fortran result
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=coordinator/soak/runner python3 -B \
+            coordinator/soak/runner/audit_fourth_original_fortran_v106.py \
+            --fortran-native-log evidence/v106-native-output.log \
+            --python-original-zip evidence/v106-python-source.zip \
+            --verdict-out evidence/v106-source-verdict.json 2>&1 | tee evidence/v106-source-audit.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v106-source-verdict.json').read_bytes())
+          assert r['schema']=='PASTAFARI_FORTRAN_FOURTH_ORIGINAL_ENGINE_ONE_DAY_V106/1'
+          assert r['calculation_day']==r['target_day']=='-15055671'
+          assert r['python_native_five_fields']==[5000,10,503,20,56]
+          assert r['full_original_years_certified']==0
+          assert r['ten_thousand_years_certified']==0
+          assert r['algorithmic_independence_certified'] is False
+          if r['first_mismatch'] is None:
+              assert r['status']=='FOURTH_ORIGINAL_ENGINE_ONE_DAY_MATCH_NOT_YEAR'
+              print('V106_FOURTH_ORIGINAL_FORTRAN_ONE_DAY_MATCH_NO_YEAR')
+          else:
+              assert r['status']=='ORIGINAL_FORTRAN_FIRST_MISMATCH_RECORDED'
+              print('V106_ORIGINAL_FORTRAN_FIRST_DIFFERENCE_FROZEN_NO_PASS')
+          PY
+      - name: Preserve native, compiler, resource and first-difference evidence always
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v106-fourth-original-fortran-source-one-day-not-year
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
