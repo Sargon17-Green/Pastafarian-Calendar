@@ -10,34 +10,56 @@ permissions:
   contents: read
 jobs:
   verify-and-preserve:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 6
+    runs-on: windows-2022
+    timeout-minutes: 7
     steps:
-      - name: Download exact 0.5.14.11 release over HTTPS, fail closed
-        shell: bash
+      - name: Download exact official release and verify before publishing bytes
+        shell: pwsh
         run: |
-          set -euo pipefail
-          mkdir -p verified_release pe_inspection
-          url='https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe'
-          out='verified_release/NARS2000-0.5.14.11.exe'
-          curl --fail --location --show-error --silent --max-time 120 --retry 1 "$url" --output "$out"
-          bytes="$(wc -c < "$out")"
-          digest="$(sha256sum "$out" | cut -d' ' -f1)"
-          printf 'source=%s\nbytes=%s\nsha256=%s\nnative_executed=false\n' "$url" "$bytes" "$digest" >pe_inspection/pinned_release_metadata.txt
-          test "$bytes" -eq 9430788
-          test "$digest" = '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b'
-          file "$out" >pe_inspection/file_type.txt
-          objdump -p "$out" >pe_inspection/pe_headers.txt 2>pe_inspection/objdump_errors.txt || true
-          strings -n 9 "$out" | grep -Ei -m 150 'NARS2000|Inno Setup|Nullsoft|NSIS|InstallShield|SImPL|setup|\.exe|\.ttf|UPX|expand|compress|resource' >pe_inspection/strings_ascii.txt || true
-          strings -el -n 9 "$out" | grep -Ei -m 150 'NARS2000|Inno Setup|Nullsoft|NSIS|InstallShield|SImPL|setup|\.exe|\.ttf|UPX|expand|compress|resource' >pe_inspection/strings_utf16.txt || true
-          sha256sum "$out" >pe_inspection/sha256_manifest.txt
-      - name: Publish verified artifact for read-only PE inspection
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path 'pe_inspection' | Out-Null
+          $url = 'https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe'
+          $tempFile = Join-Path $env:RUNNER_TEMP 'NARS2000-0.5.14.11.exe'
+          $expectedHash = '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b'
+          $expectedBytes = [long]9430788
+          $report = [ordered]@{
+            schema='NARS_WINDOWS_RELEASE_VERIFICATION_V2'
+            url=$url
+            expected_bytes=$expectedBytes
+            expected_sha256=$expectedHash
+            status='STARTED'
+            executable_executed=$false
+            native_tests_executed=$false
+          }
+          try {
+            Invoke-WebRequest -Uri $url -OutFile $tempFile -TimeoutSec 100 -MaximumRedirection 3 -ErrorAction Stop
+            $report['actual_bytes'] = (Get-Item -LiteralPath $tempFile).Length
+            $report['actual_sha256'] = (Get-FileHash -LiteralPath $tempFile -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($report['actual_bytes'] -ne $expectedBytes) { throw 'PINNED_SIZE_MISMATCH' }
+            if ($report['actual_sha256'] -ne $expectedHash) { throw 'PINNED_SHA_MISMATCH' }
+            $signature = Get-AuthenticodeSignature -FilePath $tempFile
+            $report['authenticode_status'] = $signature.Status.ToString()
+            $report['authenticode_subject'] = if ($signature.SignerCertificate) { $signature.SignerCertificate.Subject } else { $null }
+            New-Item -ItemType Directory -Force -Path 'verified_release' | Out-Null
+            Copy-Item -LiteralPath $tempFile -Destination 'verified_release/NARS2000-0.5.14.11.exe'
+            $report['status'] = 'PINNED_SHA_AND_SIZE_PASS_BINARY_STORED_NO_EXECUTION'
+          } catch {
+            $report['status'] = 'FAIL_CLOSED'
+            $report['error'] = $_.Exception.Message
+            throw
+          } finally {
+            $report | ConvertTo-Json -Depth 6 | Set-Content -Encoding utf8 'pe_inspection/verified_binary.json'
+            Write-Output ('RELEASE_STATUS=' + $report['status'])
+            Write-Output 'NATIVE=NOT_RUN'
+          }
+      - name: Publish SHA-pinned binary and diagnostics for offline static analysis
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: apl-german-pinned-official-pe-for-static-analysis
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
           path: |
             pe_inspection/
             verified_release/
           if-no-files-found: warn
-          retention-days: 5
+          compression-level: 0
+          retention-days: 3
