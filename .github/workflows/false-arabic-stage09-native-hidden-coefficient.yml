@@ -1,0 +1,171 @@
+name: FALSE Arabic Stage 9 hidden coefficient exact-source Native
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-native-hidden-coefficient:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: 127ebedf45eeef25da673d1f6b33cdb003b65890
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+      COMBINED_SHA256: 66bf60cf2bf090be76b20dd19c24f24e69afe103c6b0b5f6ffca6331bdbfe569
+      FIXTURE_SHA256: c308fb57856a5147d7245d4ef5b5005f8f37c71ed7ab8505a63f092ad4a815cc
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Fetch exact source and original interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence upstream
+          git fetch --no-tags --depth=1 origin "$SOURCE_PIN" > evidence/project_fetch.log 2>&1
+          git rev-parse FETCH_HEAD > evidence/source_observed.txt
+          test "$(cat evidence/source_observed.txt)" = "$SOURCE_PIN"
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/runtime_observed.txt
+          test "$(cat evidence/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+
+      - name: Recompute oracle and lock exact production bytes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage09_hidden_coefficient_oracle.py > evidence/oracle.json
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          source = os.environ['SOURCE_PIN']
+          paths = ('src/bigint.false', 'src/monster_bootstrap.false',
+                   'test/stage09_hidden_coefficient_28.false')
+          locked = {}
+          for path in (*paths, 'tools/stage09_hidden_coefficient_oracle.py'):
+              locked[path] = subprocess.check_output(['git', 'show', source + ':' + path])
+              assert locked[path] == pathlib.Path(path).read_bytes(), ('source drift', path)
+          assert hashlib.sha256(locked[paths[-1]]).hexdigest() == os.environ['FIXTURE_SHA256']
+          combined = b'\n'.join(locked[p] for p in paths) + b'\n'
+          assert hashlib.sha256(combined).hexdigest() == os.environ['COMBINED_SHA256']
+          pathlib.Path('evidence/stage09_hidden_coefficient_exact.false').write_bytes(combined)
+          o = json.loads(pathlib.Path('evidence/oracle.json').read_text())
+          assert o['project_id'] == os.environ['PROJECT_ID'] and o['native_evidence'] is False
+          assert (o['case_count'], o['result_assertions'], o['input_assertions']) == (28, 28, 56)
+          assert o['fixture_sha256'] == os.environ['FIXTURE_SHA256']
+          assert len(o['cases']) == 28 and locked[paths[-1]].count(b'26h;!!v:') == 28
+          print('STAGE9_SOURCE_LOCKED', os.environ['COMBINED_SHA256'], 'cases=28 results=28 inputs=56')
+          PY
+
+      - name: Compile pinned original FALSE interpreter and preflight Unicode
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/compiler_stdout.txt 2> evidence/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/unicode_pick.false \
+            > evidence/unicode_pick.stdout.txt 2> evidence/unicode_pick.stderr.txt
+          test "$(cat evidence/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/preflight.txt
+
+      - name: Run exact source, mutant, four invalid inputs, and receipt
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, subprocess, sys
+          sys.path.insert(0, 'tools')
+          import stage09_hidden_coefficient_oracle as oracle_module
+          d = pathlib.Path('evidence')
+          def run(name, program, seconds=15):
+              try:
+                  p = subprocess.run(['upstream/false_int', '-e', str(program)],
+                                     capture_output=True, timeout=seconds)
+                  code, stdout, stderr = p.returncode, p.stdout, p.stderr
+              except subprocess.TimeoutExpired as e:
+                  code, stdout, stderr = 124, e.stdout or b'', e.stderr or b''
+              (d / f'{name}.exit_code.txt').write_text(str(code) + '\n')
+              (d / f'{name}.stdout.txt').write_bytes(stdout)
+              (d / f'{name}.stderr.txt').write_bytes(stderr)
+              return code, stdout.decode('utf-8'), stderr
+          source = os.environ['SOURCE_PIN']
+          base = b'\n'.join(subprocess.check_output(['git', 'show', source + ':' + p])
+                            for p in ('src/bigint.false', 'src/monster_bootstrap.false')) + b'\n'
+          fixture = subprocess.check_output(['git', 'show', source + ':test/stage09_hidden_coefficient_28.false'])
+          needle = b'v;3=e;!'
+          assert fixture.count(needle) == 1
+          mutant = d / 'mutant.false'
+          mutant.write_bytes(base + fixture.replace(needle, b'v;4=e;!', 1) + b'\n')
+          negative_names = []
+          for k, column in ((0, 1), (8, 1), (1, 0), (1, 5)):
+              name = f'invalid_{k}_{column}'
+              (d / f'{name}.false').write_bytes(base + oracle_module.invalid(k, column).encode())
+              negative_names.append(name)
+          positive = run('native', d / 'stage09_hidden_coefficient_exact.false')
+          negatives = {'mutant': run('mutant', mutant)}
+          negatives.update({name: run(name, d / f'{name}.false') for name in negative_names})
+          oracle = json.loads((d / 'oracle.json').read_text())
+          labels = re.findall(r'STAGE9_HIDDEN_CASE_[1-7]_[1-4]_OK', positive[1])
+          expected = [case['label'] for case in oracle['cases']]
+          final = 'STAGE9_HIDDEN_28_RESULTS_56_INPUTS_VERIFIED'
+          good = ((d / 'source_observed.txt').read_text().strip() == source
+                  and (d / 'runtime_observed.txt').read_text().strip() == os.environ['RUNTIME_PIN']
+                  and hashlib.sha256((d / 'stage09_hidden_coefficient_exact.false').read_bytes()).hexdigest() == os.environ['COMBINED_SHA256']
+                  and oracle['fixture_sha256'] == os.environ['FIXTURE_SHA256']
+                  and (oracle['case_count'], oracle['result_assertions'], oracle['input_assertions']) == (28, 28, 56)
+                  and (d / 'compiler_exit_code.txt').read_text().strip() == '0'
+                  and (d / 'preflight.txt').read_text().strip() == 'ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS'
+                  and positive[0] == 0 and positive[2] == b'' and labels == expected
+                  and positive[1].count(final) == 1 and positive[1].rstrip().endswith(final)
+                  and 'STAGE9_HIDDEN_COEFFICIENT_FAILURE' not in positive[1]
+                  and negatives['mutant'][0] == 1
+                  and 'STAGE9_HIDDEN_COEFFICIENT_FAILURE' in negatives['mutant'][1]
+                  and all(negatives[name][0] == 1 and
+                          ('E_HIDDEN_K' if name in ('invalid_0_1', 'invalid_8_1') else 'E_HIDDEN_COLUMN')
+                          in negatives[name][1] for name in negative_names)
+                  and all(final not in n[1] for n in negatives.values()))
+          receipt = {'project_id': os.environ['PROJECT_ID'], 'github_run_id': os.environ.get('GITHUB_RUN_ID'),
+                     'github_sha': os.environ.get('GITHUB_SHA'), 'source_pin': source,
+                     'source_observed': (d / 'source_observed.txt').read_text().strip(),
+                     'runtime_pin': os.environ['RUNTIME_PIN'],
+                     'runtime_observed': (d / 'runtime_observed.txt').read_text().strip(),
+                     'combined_sha256': hashlib.sha256((d / 'stage09_hidden_coefficient_exact.false').read_bytes()).hexdigest(),
+                     'fixture_sha256': oracle['fixture_sha256'], 'case_labels': labels,
+                     'result_assertions': 28, 'input_assertions': 56,
+                     'native_exit_code': positive[0],
+                     'negative_exit_codes': [negatives[s][0] for s in ('mutant', *negative_names)],
+                     'hidden_coefficient_native_verified': good, 'stage9_full_acceptance': False}
+          (d / 'evidence.json').write_text(json.dumps(receipt, indent=2, sort_keys=True) + '\n')
+          print(json.dumps(receipt, sort_keys=True))
+          if not good:
+              raise SystemExit('STAGE9_HIDDEN_NATIVE_NOT_VERIFIED')
+          PY
+
+      - name: Preserve bounded evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage09-hidden-native
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error

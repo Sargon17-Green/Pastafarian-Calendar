@@ -96,3 +96,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage08-native-stones.yml
     permissions:
       contents: read
+
+  false-arabic-stage09-hidden-coefficient:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-hidden28]')
+    uses: ./.github/workflows/false-arabic-stage09-native-hidden-coefficient.yml
+    permissions:
+      contents: read
