@@ -54,7 +54,7 @@ def make_canary(raw: bytes, marker: str, mode: str = 'file') -> tuple[bytes, dic
         apl = f"'{CANARY}' ⎕NAPPEND ('{marker}' ⎕NCREATE 0)"
     elif mode == 'display':
         # Prove ⎕LX startup independently of native-file function support.
-        apl = f"⎕←'{CANARY}'"
+        apl = "⎕←⎕UCS " + " ".join(str(ord(ch)) for ch in CANARY)
     else:
         raise ValueError('UNKNOWN_LX_PROBE_MODE')
     # The [Globals] character payload itself is enclosed in APL apostrophes.

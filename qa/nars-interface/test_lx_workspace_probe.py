@@ -31,8 +31,10 @@ class WorkspaceTests(unittest.TestCase):
   def test_display_mode_roundtrip_lx_only(self):
     out, meta = make_canary(BASE, PATH, mode='display')
     self.assertEqual(meta['mode'], 'display')
-    self.assertEqual(meta['apl_statement'], "⎕←'" + CANARY + "'")
-    self.assertIn(("{quad}{leftarrow}''" + CANARY + "''").encode('ascii'), out)
+    self.assertEqual(meta['apl_statement'], "⎕←⎕UCS " + " ".join(str(ord(ch)) for ch in CANARY))
+    self.assertIn(b'{quad}{leftarrow}{quad}UCS ', out)
+    self.assertNotIn(b"''APL_LX_", out)
+    self.assertNotIn("'00'", meta['apl_statement'])
     self.assertNotIn(b'{assign}', out)
     self.assertNotIn(b'{quad}NCREATE', out)
     self.assertNotIn(b'{quad}NAPPEND', out)
