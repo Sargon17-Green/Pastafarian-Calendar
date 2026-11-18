@@ -13,6 +13,7 @@ $expected = [ordered]@{
     'NARS2000.exe' = '192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d'
     'crashrpt.dll' = '461fa51cd64408878cc57da97f740b992c0ad98802ab31fa8a39aa20cc9983c5'
     'dbghelp.dll' = '159b30d9f1bbe69ae03e0d19669d4fcb565246d81672b7034a69cef9f466dcbe'
+    'SendRpt.exe' = '4726c90412275df4942d1a8051687918c9838486c3c8aabe327f1bfdbf8899c2'
 }
 $r = [ordered]@{
     schema = 'APL_GERMAN_EXTRACTED_NATIVE_LX_CANARY_V1'
@@ -35,7 +36,7 @@ try {
     if (-not $env:RUNNER_TEMP) { throw 'GITHUB_RUNNER_TEMP_MISSING' }
     $root = (Resolve-Path -LiteralPath $Runtime).Path
     $files = @(Get-ChildItem -LiteralPath $root -File)
-    if ($files.Count -ne 3) { throw ('RUNTIME_FILE_COUNT_INVALID:'+$files.Count) }
+    if ($files.Count -ne 4) { throw ('RUNTIME_FILE_COUNT_INVALID:'+$files.Count) }
     foreach ($name in $expected.Keys) {
         $p = Join-Path $root $name
         if (-not (Test-Path -LiteralPath $p -PathType Leaf)) { throw ('REQUIRED_RUNTIME_FILE_MISSING:'+$name) }
@@ -51,7 +52,7 @@ try {
         file_version = $fileVersion
         product_version = $productVersion
         authenticode = (Get-AuthenticodeSignature -FilePath $exe).Status.ToString()
-        matching_files = 3
+        matching_files = 4
     }
     $r['binary_verified'] = $true
     # Version must be explicitly evidenced by the executable's Win32 VERSIONINFO.

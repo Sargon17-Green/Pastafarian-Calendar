@@ -1,4 +1,4 @@
-name: APL German exact extracted NARS2000 LX proof (NOT Stage1)
+name: APL German exact extracted NARS2000 LX proof with CrashRpt dependency (NOT Stage1)
 on:
   push:
     branches:
@@ -33,19 +33,20 @@ jobs:
           timeout 150s sudo -n env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends innoextract
           timeout 100s innoextract --extract --output-dir unpacked "$installer"
           mkdir -p verified_runtime
-          for f in NARS2000.exe crashrpt.dll dbghelp.dll; do
+          for f in NARS2000.exe crashrpt.dll dbghelp.dll SendRpt.exe; do
             test -f "unpacked/app/$f"
             cp -- "unpacked/app/$f" "verified_runtime/$f"
           done
-          test "$(find verified_runtime -type f | wc -l)" -eq 3
+          test "$(find verified_runtime -type f | wc -l)" -eq 4
           test "$(wc -c < verified_runtime/NARS2000.exe)" -eq 5009920
           echo '192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d  verified_runtime/NARS2000.exe' > checked_runtime.sha256
           echo '461fa51cd64408878cc57da97f740b992c0ad98802ab31fa8a39aa20cc9983c5  verified_runtime/crashrpt.dll' >> checked_runtime.sha256
           echo '159b30d9f1bbe69ae03e0d19669d4fcb565246d81672b7034a69cef9f466dcbe  verified_runtime/dbghelp.dll' >> checked_runtime.sha256
+          echo '4726c90412275df4942d1a8051687918c9838486c3c8aabe327f1bfdbf8899c2  verified_runtime/SendRpt.exe' >> checked_runtime.sha256
           sha256sum -c checked_runtime.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: apl-german-verified-3-file-runtime-no-fonts
+          name: apl-german-verified-4-file-runtime-no-fonts
           path: verified_runtime/
           retention-days: 1
           compression-level: 0
@@ -62,7 +63,7 @@ jobs:
           python-version: '3.12'
       - uses: actions/download-artifact@v4
         with:
-          name: apl-german-verified-3-file-runtime-no-fonts
+          name: apl-german-verified-4-file-runtime-no-fonts
           path: verified_runtime
       - name: Validate workspace candidate builder contract
         shell: pwsh
