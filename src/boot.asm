@@ -113,6 +113,15 @@ wCalendarSaveOld:: ds 16
 wCalendarSaveFold:: ds 1
 wCalendarSaveNewLen:: ds 1
 wCalendarSaveRollbackStop:: ds 1
+; Stage1 known-year signed32 projection scratch ABI. Keep opening and closing
+; gates contiguous: native fixture copies the two signed32 gates as 8 bytes.
+wCalendarYearInputLen:: ds 1
+wCalendarYearIndex:: ds 1
+wCalendarYearTarget:: ds 4
+wCalendarYearOpen:: ds 4
+wCalendarYearClose:: ds 4
+wCalendarYearCandidate:: ds 2
+wCalendarYearOutput:: ds 2
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
