@@ -1,0 +1,49 @@
+name: APL German bounded NARS workspace startup observations (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-workspace-launch-diag.yml'
+      - 'qa/nars-interface/diagnose_lx_startup.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  observe-runtime:
+    runs-on: windows-2022
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-verified-3-file-runtime-no-fonts
+          run-id: 44379437067
+          github-token: ${{ github.token }}
+          path: verified_runtime
+      - name: Observe two bounded workspace startup arguments and window titles
+        shell: pwsh
+        run: ./qa/nars-interface/diagnose_lx_startup.ps1 -Runtime verified_runtime -Evidence workspace_launch_evidence
+      - name: Manifest (always)
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force workspace_launch_evidence | Out-Null
+          Get-ChildItem workspace_launch_evidence -File | Sort-Object Name | ForEach-Object {
+            $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.Name)"
+          } | Set-Content -Encoding utf8 workspace_launch_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-workspace-startup-observation-not-stage1
+          path: |
+            workspace_launch_evidence/
+            workspace_launch_evidence.sha256
+          retention-days: 14
