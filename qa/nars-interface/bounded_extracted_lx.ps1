@@ -24,7 +24,7 @@ $r = [ordered]@{
     binary_verified = $false
     version_verified = $false
     interpreter_executed = $false
-    lx_canary = 'NOT_RUN'
+    lx_canary = [ordered]@{ exists=$false; matches_exact=$false; marker_bytes=0; marker_sha256=$null; expected_bytes=0; process_exited=$false }
     stage01 = 'NOT_RUN'
     audit_evidence = 'NOT_PRODUCED'
     errors = @()
@@ -98,7 +98,8 @@ try {
     $exists = Test-Path -LiteralPath $marker -PathType Leaf
     $token = 'APL_LX_CANARY_REAL_NATIVE_0_5_14_11'
     $expectedBytes = [System.Text.Encoding]::ASCII.GetBytes($token)
-    $actualBytes = if ($exists) { [System.IO.File]::ReadAllBytes($marker) } else { [byte[]]@() }
+    [byte[]]$actualBytes = @()
+    if ($exists) { $actualBytes = [System.IO.File]::ReadAllBytes($marker) }
     $matchesExact = ($actualBytes.Length -eq $expectedBytes.Length) -and ([Convert]::ToBase64String($actualBytes) -ceq [Convert]::ToBase64String($expectedBytes))
     $markerSha = if ($exists) { (Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
     $r['lx_canary'] = [ordered]@{ exists=$exists; matches_exact=$matchesExact; marker_bytes=$actualBytes.Length; marker_sha256=$markerSha; expected_bytes=$expectedBytes.Length; process_exited=$p.HasExited }
