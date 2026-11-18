@@ -2667,3 +2667,52 @@ jobs:
           path: reference-composition-evidence/
           retention-days: 30
           if-no-files-found: warn
+
+  lua_haitian_real_year_interval_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+
+      - name: Bounded real-year interval static admission
+        shell: bash
+        run: |
+          set -uo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || exit 20
+          test "$(git rev-parse HEAD:test/normative_oracle.lua)" = "8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d" || exit 21
+          test "$(git rev-parse HEAD:src/bigint.lua)" = "fcff58bcaaf8bb3f205e7a9c624a51069c0e5a5d" || exit 22
+          test "$(git rev-parse HEAD:src/source_language_catalog.lua)" = "5b59ee6bb0ea2c2a551185929b5531ea28a50e49" || exit 23
+          mkdir -p real-year-interval-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\nSCOPE=REAL_YEAR_INTERVAL_STATIC_DISCOVERY_ONLY\nANCHORS=12\nGATE_GAP_CAP=200\nCPU_SECONDS=55\nLUA_HEAP_KIB=131072\nCOMPOSITION_STATE_CAP=20000\nCOMPOSITION_INVOKED=NO\n' "$GITHUB_SHA" > real-year-interval-evidence/manifest.txt
+          git rev-parse HEAD > real-year-interval-evidence/source_sha.txt
+          sha256sum test/lua_haitian_real_year_interval_discovery.lua docs/LUA_HAITIAN_REAL_YEAR_INTERVAL_DISCOVERY_2026-11-18.md test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua > real-year-interval-evidence/sha256.txt
+          set +e
+          ( ulimit -v 131072; timeout --signal=TERM --kill-after=2s 60s lua5.3 test/lua_haitian_real_year_interval_discovery.lua . ) > real-year-interval-evidence/stdout.txt 2> real-year-interval-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > real-year-interval-evidence/exit_code.txt
+          cat real-year-interval-evidence/stdout.txt
+          if test -s real-year-interval-evidence/stderr.txt; then cat real-year-interval-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 || exit "$code"
+          test ! -s real-year-interval-evidence/stderr.txt || exit 24
+          grep -Eq '^REAL_YEAR_INTERVAL_DISCOVERY_COMPLETED: [0-9]+/12$' real-year-interval-evidence/stdout.txt
+          grep -Eq '^REAL_YEAR_STATIC_ADMISSION_(PASS: 1/1|NONE: 0/[0-9]+)$' real-year-interval-evidence/stdout.txt
+          grep -Fxq 'COMPOSITION_NOT_INVOKED: YES' real-year-interval-evidence/stdout.txt
+          grep -Fxq 'SCOPE=REAL_YEAR_INTERVAL_STATIC_DISCOVERY_ONLY; COMPOSITION=NOT_RUN; FULL_DATE=NOT_RUN' real-year-interval-evidence/stdout.txt
+
+      - name: Upload discovery evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-real-year-interval-discovery-evidence
+          path: real-year-interval-evidence/
+          retention-days: 30
+          if-no-files-found: warn
