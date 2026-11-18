@@ -1,0 +1,182 @@
+{ المرحلة 3: تحقق يوم الترتيب من الإنتاج دون تحميل المرجع المعياري. }
+{ الفشل يخرج برمز غير صفري قبل علامة الحالة أو علامة النهاية. }
+[~["STAGE3_DAYCOUNT_FAILURE"10,0 0/]?]f:
+z;b:512a;!b;0h;!!x: { أساس بناء أعداد الاختبار الكبيرة. }
+{ EPOCH_MINUS_TWO: day=15055669, rank=4. }
+z;b:15055669a;!b;0h;!!p:
+z;b:4a;!b;0h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_00_OK"10,
+{ EPOCH_MINUS_ONE: day=15055670, rank=2. }
+z;b:15055670a;!b;0h;!!p:
+z;b:2a;!b;0h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_01_OK"10,
+{ EPOCH: day=15055671, rank=1. }
+z;b:15055671a;!b;0h;!!p:
+z;b:1a;!b;0h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_02_OK"10,
+{ EPOCH_PLUS_ONE: day=15055672, rank=3. }
+z;b:15055672a;!b;0h;!!p:
+z;b:3a;!b;0h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_03_OK"10,
+{ EPOCH_PLUS_TWO: day=15055673, rank=5. }
+z;b:15055673a;!b;0h;!!p:
+z;b:5a;!b;0h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_04_OK"10,
+{ ZERO_DAY: day=0, rank=30111342. }
+z;b:0a;!b;0h;!!p:
+z;b:30111342a;!b;0h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_05_OK"10,
+{ NEGATIVE_ONE_DAY: day=-1, rank=30111344. }
+z;b:1_a;!b;0h;!!p:
+z;b:30111344a;!b;0h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_06_OK"10,
+{ ONE_DAY: day=1, rank=30111340. }
+z;b:1a;!b;0h;!!p:
+z;b:30111340a;!b;0h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_07_OK"10,
+{ EPOCH_MINUS_2_31: day=-2132427977, rank=4294967296. }
+z;b:2132427977_a;!b;0h;!!p:
+z;b:32a;!b;0h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_08_OK"10,
+{ EPOCH_PLUS_2_31: day=2162539319, rank=4294967297. }
+z;b:16a;!b;0h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:57a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:221a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:311a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:32a;!b;0h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:1a;!b;0h;!!e:
+z;b:m;a;!e;a;!b;9h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_09_OK"10,
+{ EPOCH_MINUS_2_127: day=-170141183460469231731687303715869050057, rank=340282366920938463463374607431768211456. }
+z;b:1a;!b;0h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:511a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:454a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:290a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:201a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!b;8h;!!p:
+z;b:4a;!b;0h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_10_OK"10,
+{ EPOCH_PLUS_2_127: day=170141183460469231731687303715899161399, rank=340282366920938463463374607431768211457. }
+z;b:2a;!b;0h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:57a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:221a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:p;a;!x;a;!b;14h;!!p:
+z;b:311a;!b;0h;!!e:
+z;b:p;a;!e;a;!b;9h;!!p:
+z;b:4a;!b;0h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:m;a;!x;a;!b;14h;!!m:
+z;b:1a;!b;0h;!!e:
+z;b:m;a;!e;a;!b;9h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_11_OK"10,
+{ NEGATIVE_EPOCH: day=-15055671, rank=60222684. }
+z;b:15055671_a;!b;0h;!!p:
+z;b:60222684a;!b;0h;!!m:
+p;j;!y:z;b:y;a;!m;a;!b;5h;!!0=f;!
+"STAGE3_DAYCOUNT_CASE_12_OK"10,
+"STAGE3_DAYCOUNT_13_CHECKS_VERIFIED"10,
+{ استعادة الكومة بعد إنجاز كل المقارنات. }
+[z;0>][%z;1-z:]#
