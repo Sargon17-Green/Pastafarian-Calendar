@@ -1,0 +1,40 @@
+name: BASIC Punjabi Stage5 Semantic Integration
+
+on:
+  push:
+    branches:
+      - 'BASIC+ਪੰਜਾਬੀ'
+    paths:
+      - 'basic/qa/stage5_calendar_semantic_ci.py'
+      - '.github/workflows/basic-punjabi-stage5.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  stage5-semantic-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ephemeral LibreOffice and pyuno
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-core libreoffice-common python3-uno
+          libreoffice --version
+          /usr/bin/python3 -c 'import uno; print("PYUNO_READY")'
+      - name: Independent arithmetic self-test
+        run: /usr/bin/python3 basic/qa/stage5_calendar_semantic_ci.py --self-test
+      - name: Native Stage5 characterization and structural integration
+        run: |
+          set -euo pipefail
+          mkdir -p stage5_results
+          /usr/bin/python3 basic/qa/stage5_calendar_semantic_ci.py --basic-dir basic --output-dir stage5_results
+      - name: Preserve native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basic-punjabi-stage5-semantic-evidence
+          path: stage5_results/
+          if-no-files-found: warn

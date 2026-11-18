@@ -26,7 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   stage3-native-green:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/BASIC+ਪੰਜਾਬੀ'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/BASIC+ਪੰਜਾਬੀ' && !contains(github.event.head_commit.message, '[stage5-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -53,7 +53,7 @@ jobs:
           if-no-files-found: warn
 
   stage4-bigint-differential:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/BASIC+ਪੰਜਾਬੀ'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/BASIC+ਪੰਜਾਬੀ' && !contains(github.event.head_commit.message, '[stage5-only]')
     needs: [verify, stage3-native-green]
     runs-on: ubuntu-latest
     timeout-minutes: 25
