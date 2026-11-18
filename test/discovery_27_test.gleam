@@ -14,7 +14,12 @@ fn band(lower: Int, upper: Int) {
   discovery_27_sum_bands.SumBand(lower: lower, upper: upper)
 }
 
-fn answers(a: Int, b: Int, ids: List(Int), bands: List(discovery_27_sum_bands.SumBand)) {
+fn answers(
+  a: Int,
+  b: Int,
+  ids: List(Int),
+  bands: List(discovery_27_sum_bands.SumBand),
+) {
   discovery_27_sum_bands.dispatch_discovery_27(
     bootstrap.new_context(a, b),
     ids,
@@ -68,7 +73,8 @@ fn check_valid(
   bands: List(discovery_27_sum_bands.SumBand),
 ) {
   let context = bootstrap.new_context(a, b)
-  let assert Ok(samples) = discovery_21_gate_batch.dispatch_discovery_21(context, ids)
+  let assert Ok(samples) =
+    discovery_21_gate_batch.dispatch_discovery_21(context, ids)
   list.each(samples, fn(sample) {
     {
       sample.gap >= discovery_20_gate_gap.gap_min
@@ -103,16 +109,18 @@ pub fn discovery_27_empty_bowls_and_bands_test() {
 pub fn discovery_27_empty_bowls_invalid_unused_context_test() {
   let invalid =
     bootstrap.MonsterContext(..bootstrap.new_context(11, 21), retry_budget: -1)
-  discovery_27_sum_bands.dispatch_discovery_27(
-    invalid,
-    [],
-    [band(-1, 0), band(0, 0), band(1, 10)],
+  discovery_27_sum_bands.dispatch_discovery_27(invalid, [], [
+    band(-1, 0),
+    band(0, 0),
+    band(1, 10),
+  ])
+  |> should.equal(
+    Ok([
+      discovery_27_sum_bands.SumBandCount(-1, 0, 0),
+      discovery_27_sum_bands.SumBandCount(0, 0, 0),
+      discovery_27_sum_bands.SumBandCount(1, 10, 0),
+    ]),
   )
-  |> should.equal(Ok([
-    discovery_27_sum_bands.SumBandCount(-1, 0, 0),
-    discovery_27_sum_bands.SumBandCount(0, 0, 0),
-    discovery_27_sum_bands.SumBandCount(1, 10, 0),
-  ]))
 }
 
 pub fn discovery_27_single_gap_exact_boundaries_test() {
@@ -221,14 +229,15 @@ pub fn discovery_27_invalid_bowl_even_when_empty_bands_test() {
 pub fn discovery_27_invalid_context_even_when_inverted_test() {
   let invalid =
     bootstrap.MonsterContext(..bootstrap.new_context(11, 21), retry_budget: -1)
-  discovery_27_sum_bands.dispatch_discovery_27(
-    invalid,
-    [1],
-    [band(1000, 1), band(2, 1)],
+  discovery_27_sum_bands.dispatch_discovery_27(invalid, [1], [
+    band(1000, 1),
+    band(2, 1),
+  ])
+  |> should.equal(
+    Error(discovery_19_interval_value.InvalidContext(
+      bootstrap.InvalidRetryBudget,
+    )),
   )
-  |> should.equal(Error(discovery_19_interval_value.InvalidContext(
-    bootstrap.InvalidRetryBudget,
-  )))
 }
 
 pub fn discovery_27_huge_days_large_bands_partition_test() {
@@ -253,7 +262,10 @@ pub fn discovery_27_huge_days_large_bands_partition_test() {
   let assert Ok(got) = answers(huge, -huge, ids, requests)
   let assert [whole, low, high, combined, wider, inverted, empty] = got
   whole.qualifying_windows |> should.equal(210)
-  { low.qualifying_windows + high.qualifying_windows == combined.qualifying_windows }
+  {
+    low.qualifying_windows + high.qualifying_windows
+    == combined.qualifying_windows
+  }
   |> should.equal(True)
   { wider.qualifying_windows >= combined.qualifying_windows }
   |> should.equal(True)

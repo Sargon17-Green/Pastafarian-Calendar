@@ -17,14 +17,9 @@ pub fn dispatch_discovery_27(
   context: bootstrap.MonsterContext,
   requested_bowl_ids: List(Int),
   bands: List(SumBand),
-) -> Result(
-  List(SumBandCount),
-  discovery_19_interval_value.Discovery19Error,
-) {
+) -> Result(List(SumBandCount), discovery_19_interval_value.Discovery19Error) {
   let thresholds =
-    list.fold(bands, [], fn(acc, band) {
-      [band.upper + 1, band.lower, ..acc]
-    })
+    list.fold(bands, [], fn(acc, band) { [band.upper + 1, band.lower, ..acc] })
     |> list.reverse
 
   case
@@ -53,18 +48,14 @@ fn assemble_counts(
         True -> 0
         False -> at_lower.qualifying_windows - past_upper.qualifying_windows
       }
-      assemble_counts(
-        rest,
-        remaining,
-        [
-          SumBandCount(
-            lower: band.lower,
-            upper: band.upper,
-            qualifying_windows: qualifying,
-          ),
-          ..reversed
-        ],
-      )
+      assemble_counts(rest, remaining, [
+        SumBandCount(
+          lower: band.lower,
+          upper: band.upper,
+          qualifying_windows: qualifying,
+        ),
+        ..reversed
+      ])
     }
   }
 }
