@@ -123,3 +123,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage11-native-visible-grind.yml
     permissions:
       contents: read
+
+  false-arabic-stage12-hidden-drops:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-drops21]')
+    uses: ./.github/workflows/false-arabic-stage12-native-hidden-drops.yml
+    permissions:
+      contents: read
