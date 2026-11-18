@@ -1,7 +1,7 @@
 name: SQL Tamil Slice25 Calendar Date Feasibility PG17
 on:
   push:
-    branches: ['SQL+தமிழ்']
+    branches: ['SQL\+தமிழ்']
     paths:
       - 'sql/test/146_stage25_calendar_date_preflight.sql'
       - 'sql/test/150_stage25_calendar_date_oracle.py'
