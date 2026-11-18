@@ -1,0 +1,19 @@
+{
+  "artifact_id": 14426179505,
+  "artifact_sha256": "5174013b77af64e6403dc310cf21630167ad1448dde4293c94ae7abe66b23cd3",
+  "ci_completed_success": "CHECK_SEPARATELY_IN_GITHUB",
+  "combined_sha256": "726954b9d84bfc19bd6bdacf1bd78489285029d72b83ea2c9454bce6a2f8228d",
+  "contract": "DAYCOUNT_AROUND_15055671",
+  "fixture_sha256": "36c6e80c00bff6f13e6945b4e25ff52ea3a05bd79cc69a46ba54735e57d42734",
+  "independent_seeded_property_cases": 384,
+  "main_merged": false,
+  "native_cases": 13,
+  "offline_evidence_gates": "PASS",
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "run_id": "44303526690",
+  "runtime_commit": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "source_commit": "874656d7e855e530704356098943dd472cece187",
+  "stage": 3,
+  "workflow_commit": "344838775b28a3841492e3280b076470040c4199",
+  "zip_crc": "PASS"
+}
