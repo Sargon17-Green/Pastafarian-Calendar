@@ -1,0 +1,37 @@
+program stage01_calculation_context_probe
+  use iso_fortran_env, only: int64
+  use big_integer, only: BigInt, bi_add_small, bi_to_string
+  use normative_oracle_core, only: foundation_day
+  use normative_oracle_calendar, only: CalendarDateResult, normative_calendar_date, reset_gate_cache
+  implicit none
+
+  integer(int64), parameter :: calculation_offsets(3) = [ &
+       -8192_int64, 8192_int64, 137_int64 ]
+  integer(int64), parameter :: target_offsets(3) = [ &
+       -3192_int64, 3192_int64, 137_int64 ]
+  type(BigInt) :: foundation, calculation_day, target_day
+  type(CalendarDateResult) :: actual
+  character(len=16) :: argument
+  integer :: case_index, status
+
+  if (command_argument_count() /= 1) error stop 'provide one calculation-context case 1..3'
+  call get_command_argument(1, argument, status=status)
+  if (status /= 0) error stop 'cannot read calculation-context case'
+  read(argument, *, iostat=status) case_index
+  if (status /= 0) error stop 'invalid calculation-context case'
+  if (case_index < 1 .or. case_index > 3) error stop 'calculation-context case out of range'
+
+  foundation = foundation_day()
+  calculation_day = bi_add_small(foundation, calculation_offsets(case_index))
+  target_day = bi_add_small(foundation, target_offsets(case_index))
+  call reset_gate_cache()
+  actual = normative_calendar_date(calculation_day, target_day)
+
+  write(*, '(A,I0)') 'STAGE01_CONTEXT_CASE=', case_index
+  write(*, '(A,A)') 'STAGE01_CONTEXT_CALCULATION_DAY=', trim(bi_to_string(calculation_day))
+  write(*, '(A,A)') 'STAGE01_CONTEXT_TARGET_DAY=', trim(bi_to_string(target_day))
+  write(*, '(A,A,A,I0,A,I0,A,I0,A,I0)') &
+       'STAGE01_CONTEXT_FIELDS=', trim(bi_to_string(actual%yearNumber)), ',', &
+       actual%cutletCanonicalIndex, ',', actual%dayInCutlet, ',', &
+       actual%monthCanonicalIndex, ',', actual%dayInMonth
+end program stage01_calculation_context_probe

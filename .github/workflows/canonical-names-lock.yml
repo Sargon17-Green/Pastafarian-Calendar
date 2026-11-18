@@ -1090,3 +1090,65 @@ jobs:
           path: build/stage01-gate-cache-structure.log
           if-no-files-found: warn
           retention-days: 30
+
+stage01-calculation-context-diff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran for calculation-context differential
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile original normative calculation-context probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          flags=(-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build)
+          gfortran "\${flags[@]}" -c src/big_integer.f90 -o build/big_integer.o
+          gfortran "\${flags[@]}" -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran "\${flags[@]}" -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran "\${flags[@]}" -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran "\${flags[@]}" -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran "\${flags[@]}" test/stage01_calculation_context_probe.f90 \
+            build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o build/normative_oracle_calendar.o \
+            -o build/stage01_calculation_context_probe
+          test -x build/stage01_calculation_context_probe
+      - name: Verify harness and download pinned independent Python reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_calculation_context_diff.py
+          python3 test/stage01_calculation_context_diff.py --self-test | tee build/stage01-calculation-context-selftest.log
+          grep -Fxq 'STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=7/7' build/stage01-calculation-context-selftest.log
+          curl --fail --location --silent --show-error --retry 3 \
+            --connect-timeout 15 --max-time 45 \
+            'https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
+            --output build/stage01_python_reference_pinned.py
+          test -s build/stage01_python_reference_pinned.py
+      - name: Compare original normative dates across three calculation-day contexts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/stage01_calculation_context_diff.py \
+            --reference build/stage01_python_reference_pinned.py \
+            --fortran-exe build/stage01_calculation_context_probe \
+            --fortran-commit "$GITHUB_SHA" \
+            --fortran-branch "$GITHUB_REF_NAME" \
+            --workflow-run "$GITHUB_RUN_ID" \
+            | tee build/stage01-calculation-context-diff.log
+          grep -Fxq 'STAGE01_CALC_CONTEXT_DIFFERENTIAL=3/3 CASES; 15/15 EXACT FIELDS' \
+            build/stage01-calculation-context-diff.log
+      - name: Preserve calculation-context differential evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-calculation-context-diff
+          path: |
+            stage01_calculation_context_diff.json
+            build/stage01-calculation-context-diff.log
+            build/stage01-calculation-context-selftest.log
+          if-no-files-found: warn
+          retention-days: 30
