@@ -21,6 +21,7 @@ from pathlib import Path
 # Case 277: invalid owner255/255 alias, both one-byte lengths, opposite signs.
 # Native 278..283: owner253 full 13-bank lease, byte106495/106496, atomic duplicate,
 # release scrub and stale-owner rejection, with preserved tags/SRAM sentinels.
+# Native341..357: short Equal Selection rank, exact 127-bit boundaries, and owner/SRAM immutability.
 # Raw SRAM sentinels remain intact.
 # Keep the measured 9000-frame cap.
 MAX_BOOT_AND_TEST_FRAMES = 9000
@@ -30,7 +31,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 340
+TOTAL_CASES = 357
 
 
 def discover_case_high_byte(symbol_path: Path) -> int:

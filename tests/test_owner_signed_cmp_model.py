@@ -865,6 +865,8 @@ def main():
     check_stage1_year_projection_abi()
     from test_sm83_stage1_year_step_abi import check_stage1_year_step_abi
     check_stage1_year_step_abi()
+    from test_sm83_stage1_short_select_abi import check_stage1_short_select_abi
+    check_stage1_short_select_abi()
     from test_sm83_stage1_structure_oracle import check_stage1_structure_oracle
     check_stage1_structure_oracle()
     from test_sm83_stage1_month_weave_oracle import check_stage1_five_field_oracle

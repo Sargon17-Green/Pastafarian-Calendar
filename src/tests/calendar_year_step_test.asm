@@ -199,7 +199,7 @@ RunCalendarYearStepTests::
     ld a, [$a000]
     or a
     jp nz, .fail
-    ret
+    jp RunCalendarAnswerSelectTests
 .setCurrent:
     ld de, wCalendarYearOpen
     jr .copyEight

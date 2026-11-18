@@ -127,6 +127,19 @@ wCalendarYearProposedOpen:: ds 4
 wCalendarYearProposedClose:: ds 4
 wCalendarYearDirection:: ds 1
 wCalendarYearSpanLen:: ds 2
+; Stage1 short Equal Selection ABI: fixed 127-bit A0 and bounded 16-bit N.
+wCalendarSelectValue:: ds 16
+wCalendarSelectCount:: ds 2
+wCalendarSelectDirection:: ds 1
+wCalendarSelectRank:: ds 2
+wCalendarSelectExpected:: ds 2
+wCalendarSelectValueRem:: ds 2
+wCalendarSelectRem:: ds 2
+wCalendarSelectLimit:: ds 16
+wCalendarSelectByteIndex:: ds 1
+wCalendarSelectInputByte:: ds 1
+wCalendarSelectMask:: ds 1
+wCalendarSelectBitsRemaining:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -247,6 +260,7 @@ INCLUDE "src/runtime/ordinal_unit.asm"
 INCLUDE "src/runtime/calendar_save127.asm"
 INCLUDE "src/runtime/calendar_year_projection.asm"
 INCLUDE "src/runtime/calendar_year_step.asm"
+INCLUDE "src/runtime/calendar_select_short.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -269,3 +283,4 @@ INCLUDE "src/tests/owner_signed_cmp_test.asm"
 INCLUDE "src/tests/calendar_invocation_lifecycle_test.asm"
 INCLUDE "src/tests/calendar_year_projection_test.asm"
 INCLUDE "src/tests/calendar_year_step_test.asm"
+INCLUDE "src/tests/calendar_answer_select_test.asm"
