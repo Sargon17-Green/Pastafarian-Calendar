@@ -1,0 +1,25 @@
+{ المرحلة 10: أنواع الحجر للعمليات السبع. }
+[~["STAGE10_HIDDEN_GRIND_FAILURE"10,0 0/]?]e:
+z;d:1a;!d;27h;!!v:
+v;1=e;!d;g;!1=e;!
+"STAGE10_HIDDEN_GRIND_1_OK"10,
+z;d:2a;!d;27h;!!v:
+v;2=e;!d;g;!2=e;!
+"STAGE10_HIDDEN_GRIND_2_OK"10,
+z;d:3a;!d;27h;!!v:
+v;3=e;!d;g;!3=e;!
+"STAGE10_HIDDEN_GRIND_3_OK"10,
+z;d:4a;!d;27h;!!v:
+v;4=e;!d;g;!4=e;!
+"STAGE10_HIDDEN_GRIND_4_OK"10,
+z;d:5a;!d;27h;!!v:
+v;5=e;!d;g;!5=e;!
+"STAGE10_HIDDEN_GRIND_5_OK"10,
+z;d:6a;!d;27h;!!v:
+v;1=e;!d;g;!6=e;!
+"STAGE10_HIDDEN_GRIND_6_OK"10,
+z;d:7a;!d;27h;!!v:
+v;2=e;!d;g;!7=e;!
+"STAGE10_HIDDEN_GRIND_7_OK"10,
+"STAGE10_HIDDEN_GRIND_7_RESULTS_7_INPUTS_VERIFIED"10,
+[z;0>][%z;1-z:]#

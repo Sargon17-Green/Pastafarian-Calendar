@@ -163,3 +163,13 @@ z;26=~["E_HIDDEN_LAYOUT"0 0/]?
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
 
+{ المرحلة 10: العملية 27؛ نوع الحجر للطحن الخفي، إعادة لف واحدة فقط للنطاق 6..7. }
+z;27=~["E_HIDDEN_GRIND_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:
+ y;1<["E_HIDDEN_GRIND"0 0/]?y;7>["E_HIDDEN_GRIND"0 0/]?
+ y;r:y;5>[y;5-r:]?
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
+
