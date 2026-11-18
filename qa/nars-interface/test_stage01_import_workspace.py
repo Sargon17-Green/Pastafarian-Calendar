@@ -43,17 +43,19 @@ class Stage01ImportWorkspaceTests(unittest.TestCase):
         self.assertIn("RunStage01Tests", m["ordered_function_names"])
 
     def test_inner_program_fixes_every_name_checks_count_runs_tests_then_writes_marker(self):
-        inner_outer, token = build_inner_program(self.loaded, MARKER)
-        self.assertTrue(inner_outer.startswith("⎕EC ⎕UCS "))
-        self.assertNotIn("'", inner_outer)
-        self.assertNotIn('"', inner_outer)
+        outer, token = build_inner_program(self.loaded, MARKER)
+        self.assertTrue(outer.startswith("⎕EC ⎕UCS "))
+        self.assertNotIn("'", outer)
+        self.assertNotIn('"', outer)
         self.assertEqual(token, "APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=" + SOURCE_COMMIT + "|FILES=5|FX=95|TEST=STAGE01_PASS")
-        self.assertEqual(inner_outer.count("Stage01Fix ("), EXPECTED_TOTAL_FUNCTIONS)
-        self.assertIn("Stage01FXCount←0", inner_outer)
-        self.assertIn("Stage01CheckFXCount", inner_outer)
-        self.assertLess(inner_outer.index("RunStage01Tests"), inner_outer.index("⎕NAPPEND"))
+        prefix = "⎕EC ⎕UCS "
+        inner = "".join(chr(int(x)) for x in outer[len(prefix):].split())
+        self.assertEqual(inner.count("Stage01Fix ("), EXPECTED_TOTAL_FUNCTIONS)
+        self.assertIn("Stage01FXCount←0", inner)
+        self.assertIn("Stage01CheckFXCount", inner)
+        self.assertLess(inner.index("RunStage01Tests"), inner.index("⎕NAPPEND"))
         for name in self.loaded["manifest"]["ordered_function_names"]:
-            self.assertIn("⎕UCS " + " ".join(str(ord(c)) for c in name) + ") Stage01Fix", inner_outer)
+            self.assertIn("⎕UCS " + " ".join(str(ord(c)) for c in name) + ") Stage01Fix", inner)
 
     def test_outer_unicode_vector_decodes_to_complete_inner_program(self):
         outer, _ = build_inner_program(self.loaded, MARKER)
