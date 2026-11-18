@@ -1,6 +1,6 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=18
-CURRENT_KIND=WEAVING_NINE_MONTHS_NATIVE_ACCEPTED
+CURRENT_STAGE=19
+CURRENT_KIND=WEAVING_TEN_MONTHS_DISCOVERY
 CURRENT_PATCH=none
 LAST_COMPLETED_STAGE=18
 EXPECTED_REPOSITORY_STATE=GREEN
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Perl
 NATURAL_LANGUAGE=סינית מנדרינית – מסורתית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Stage17 accepted on source 457eb0a8c444c5d3416c79e03273d3144dcc3dec. Stage18 source 7ae6fc32ce7ce9593ad41dc5c75056fa564aa591 accepted by canonical push run 44365406989 attempt1: 19/19 required jobs completed/success, 19 raw logs inspected, 146 skipped; Stage01 114 files/209070 TAP PASS; Stage18 dedicated native job 9819/9819 TAP PASS in 67s, Catalan9/Dyck 4862/4862, 4 exhaustive profiles, 3 large 36-day profiles, invalid 14/11/8; Perl 5.40.5, syntax2, stderr0, exit0. Artifact 14461669928: 7 files, 26561 bytes, SHA256 146fd95dd91efee3da91c645f4b71a161ab3dcd7ff34afc099f9ecba64570f00 matches upload log, GitHub artifact digest and local ZIP; CRC7/7; source.txt exact. Full-year 252..5778-day generator remains unverified.
+MONSTER_ARCHITECTURE_GROWTH=Stage17 accepted on source 457eb0a8c444c5d3416c79e03273d3144dcc3dec. Stage18 accepted on source 7ae6fc32ce7ce9593ad41dc5c75056fa564aa591 by canonical push run 44365406989: 19/19 required success, Stage01 114 files/209070 TAP, Stage18 9819 TAP, artifact 14461669928 SHA256 146fd95dd91efee3da91c645f4b71a161ab3dcd7ff34afc099f9ecba64570f00 CRC7/7 verified; acceptance commit 7d12f88c5f976f13e2c157903fd3719fac88900f. Stage19 discovery selected 10 months/40 days from the 7/28,8/32,9/36 progression. Temporary exact-source boundary candidate f2fed952d134a3b59f9a9a8b61edcc311267c16d: Perl5.40.1; [2x10] Catalan10=16796 full independent Dyck rank/unrank 16796/16796 in 62.015s exit0; [3x10] 3515569641156 first/mid/last 1.521s; [4x10] 4971032496120057390920 first/mid/last 75.985s, VmHWM101372KiB, exit0; [31,1x9] and [40] roundtrip pass. Candidate differs only bounds 9->10 months and 36->40 days; no production Stage19 changes committed yet. Full-year generator remains unverified.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=NO
