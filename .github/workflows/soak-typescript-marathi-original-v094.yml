@@ -127,8 +127,8 @@ jobs:
           set -euo pipefail
           node --experimental-strip-types \
             coordinator/soak/runner/pilot_typescript_marathi_v094.mjs \
-            --source-root original-typescript --calculation-day=-15055671 \
-            --first-target-day=-15055660 --last-target-day=-15055659 \
+            --source-root original-typescript --calculation-day -15055671 \
+            --first-target-day -15055660 --last-target-day -15055659 \
             --raw-out evidence/typescript-native-raw.jsonl \
             --catalog-out evidence/typescript-source-catalog.json \
             2>&1 | tee evidence/v094-typescript-native-process.log
