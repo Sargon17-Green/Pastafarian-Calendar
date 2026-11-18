@@ -1,0 +1,217 @@
+name: Soak v105 preserve four-point genuine native Python TypeScript evidence in draft Release
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - 'soak/control/original_archive_requests/stratified-v101-v105.json'
+concurrency:
+  group: soak-v105-immutable-original-sample-backup
+  cancel-in-progress: false
+permissions:
+  contents: write
+  actions: read
+jobs:
+  durable-preservation-no-native-rerun:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: coordinator
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Authorize exactly one new immutable source archive request
+        shell: bash
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$GITHUB_REF" = refs/heads/qa/soak-readiness-20261114
+          test "$(git -C coordinator rev-parse HEAD)" = "$AFTER"
+          git -C coordinator merge-base --is-ancestor "$BEFORE" "$AFTER"
+          mkdir -m 700 evidence
+          mkdir -m 700 release-assets
+          python3 - <<'PY' | tee evidence/v105-approval.log
+          import hashlib,json,os,subprocess
+          from pathlib import Path
+          root=Path('coordinator')
+          name='soak/control/original_archive_requests/stratified-v101-v105.json'
+          changed=subprocess.run(['git','-C',str(root),'diff','--name-status','--no-renames',
+                                  os.environ['BEFORE'],os.environ['AFTER']],
+                                 capture_output=True,text=True,check=True).stdout.strip()
+          assert changed=='A\t'+name,repr(changed)
+          data=(root/name).read_bytes()
+          def uniq(pairs):
+              d={}
+              for k,v in pairs:
+                  assert k not in d,'duplicate archive request field'
+                  d[k]=v
+              return d
+          obj=json.loads(data,object_pairs_hook=uniq)
+          canonical=(json.dumps(obj,sort_keys=True,ensure_ascii=False,separators=(',',':'))+'\n').encode()
+          assert data==canonical,'noncanonical archive request'
+          pin=json.loads((root/'soak/control/stratified_original_v101_pin_v102.json').read_bytes())
+          assert set(obj)=={'schema','approved_parent_sha','release_tag','source_branch',
+                            'artifact','source_commits','source_digest','full_years_certified',
+                            'independence_certified','canonical_oracle_certified'}
+          assert obj['schema']=='PASTAFARI_STRATIFIED_NATIVE_ARCHIVE_REQUEST_V105/1'
+          assert obj['release_tag']=='soak-original-stratified-source-v101-v105'
+          assert obj['source_branch']=='qa/soak-readiness-20261114'
+          assert obj['approved_parent_sha']==os.environ['BEFORE']
+          assert obj['artifact']==pin['artifact']
+          assert obj['source_commits']==pin['source_commits']
+          assert obj['source_digest']==pin['raw_receipt_sha256']
+          assert obj['full_years_certified']==0
+          assert obj['independence_certified'] is False
+          assert obj['canonical_oracle_certified'] is False
+          manifest={
+              'schema':'PASTAFARI_STRATIFIED_NATIVE_DRAFT_RELEASE_MANIFEST_V105/1',
+              'source_head_sha':os.environ['AFTER'],
+              'source_branch':obj['source_branch'],
+              'archive_asset':{'name':'stratified-v101-original-source.zip',
+                               'sha256':obj['artifact']['zip_sha256'],
+                               'bytes':obj['artifact']['zip_bytes'],
+                               'artifact_id':obj['artifact']['id'],
+                               'run_id':pin['run']['id'],
+                               'member_count':obj['artifact']['zip_members']},
+              'source_commits':obj['source_commits'],
+              'native_target_days':pin['ordered_target_days'],
+              'original_comparison_count':4,'new_unique_target_days':3,
+              'whole_years_certified':0,
+              'ten_thousand_years_certified':0,
+              'independence_certified':False,
+              'windows_source_run':False
+          }
+          target=Path('release-assets/stratified-original-manifest-v105.json')
+          target.write_bytes((json.dumps(manifest,sort_keys=True,ensure_ascii=False,
+                                         separators=(',',':'))+'\n').encode())
+          print('V105_SINGLE_QA_SOURCE_ARCHIVE_REQUEST_PINNED_AND_AUTHORIZED')
+          PY
+          grep -q '^V105_SINGLE_QA_SOURCE_ARCHIVE_REQUEST_PINNED_AND_AUTHORIZED$' evidence/v105-approval.log
+      - name: Download and independently re-audit original source ZIP and all CPU/RSS evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GH_REPO/actions/runs/44392067310" --jq '.status')" = completed
+          test "$(gh api "repos/$GH_REPO/actions/runs/44392067310" --jq '.conclusion')" = success
+          gh api "repos/$GH_REPO/actions/artifacts/14469537094/zip" > release-assets/stratified-v101-original-source.zip
+          echo 'bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1  release-assets/stratified-v101-original-source.zip' | sha256sum -c -
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in ("soak/runner/replay_stratified_original_v102.py",
+                       "soak/runner/audit_original_sample_v101.py",
+                       "soak/runner/audit_ts_original_v094.py"):
+              ast.parse((Path('coordinator')/path).read_text(encoding='utf8'))
+          PY
+          PYTHONPATH=coordinator/soak/runner python3 -B \
+            coordinator/soak/runner/replay_stratified_original_v102.py \
+            --source-zip release-assets/stratified-v101-original-source.zip \
+            --verdict-out evidence/v105-replayed-original-source-verdict.json \
+            2>&1 | tee evidence/v105-replay.log
+          grep -q '^V102_FOUR_ORIGINAL_SOURCE_PAIRS_REPLAY_VERIFIED_NOT_YEAR$' evidence/v105-replay.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v105-replayed-original-source-verdict.json').read_bytes())
+          assert r['pairs_checked']==4 and r['five_fields_checked']==20
+          assert r['zip_members_checked']==53
+          assert r['whole_source_years_certified']==0
+          assert r['ten_thousand_years_certified']==0
+          assert r['algorithmic_independence_certified'] is False
+          print('V105_FULL_FOUR_POINT_SOURCE_ARCHIVE_AUDITED_NO_YEAR')
+          PY
+      - name: Create or reuse draft only, upload via numeric ID and re-download both exact bytes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+          TAG: soak-original-stratified-source-v101-v105
+        run: |
+          set -euo pipefail
+          printf '%s\n' 'Exact four-point original Python+TypeScript source evidence archive.' \
+            'DRAFT ONLY, NOT RELEASED SOFTWARE. Zero whole-year soak credits.' \
+            'First mismatch and independent engine lineage NOT certified for 10,000 years.' \
+            > evidence/v105-draft-notes.txt
+          ids="$(gh api "repos/$GH_REPO/releases?per_page=100" \
+            --jq '.[] | select(.tag_name=="soak-original-stratified-source-v101-v105" and .draft==true) | .id')"
+          if [ -z "$ids" ]; then
+            gh release create "$TAG" --target "$GITHUB_SHA" \
+              --draft --prerelease \
+              --title "Original four-point Python TypeScript source evidence (DRAFT, NOT YEAR)" \
+              --notes-file evidence/v105-draft-notes.txt
+          fi
+          ids=""
+          for attempt in 1 2 3 4 5; do
+            ids="$(gh api "repos/$GH_REPO/releases?per_page=100" \
+              --jq '.[] | select(.tag_name=="soak-original-stratified-source-v101-v105" and .draft==true) | .id')"
+            if [ -n "$ids" ]; then break; fi
+            sleep 3
+          done
+          test -n "$ids"
+          test "$(printf '%s\n' "$ids" | wc -l)" -eq 1
+          rid="$ids"
+          test "$(gh api "repos/$GH_REPO/releases/$rid" --jq '.draft')" = true
+          target="$(gh api "repos/$GH_REPO/releases/$rid" --jq '.target_commitish')"
+          git -C coordinator merge-base --is-ancestor "$target" "$GITHUB_SHA"
+          for f in release-assets/stratified-v101-original-source.zip release-assets/stratified-original-manifest-v105.json; do
+            name="$(basename "$f")"
+            present="$(gh api "repos/$GH_REPO/releases/$rid/assets?per_page=100" \
+              --jq ".[] | select(.name==\"$name\") | .id")"
+            if [ -z "$present" ]; then
+              mime=application/zip
+              if [ "$name" = stratified-original-manifest-v105.json ]; then mime=application/json; fi
+              curl --fail-with-body --silent --show-error --retry 3 -X POST \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                -H "Content-Type: $mime" --data-binary @"$f" \
+                "https://uploads.github.com/repos/$GH_REPO/releases/$rid/assets?name=$name" \
+                > evidence/v105-upload-response.json
+              python3 - "$name" <<'PY'
+          import json,sys
+          obj=json.load(open('evidence/v105-upload-response.json'))
+          assert obj['state']=='uploaded' and obj['name']==sys.argv[1]
+          PY
+            fi
+          done
+          mkdir -m 700 redownloaded
+          gh api "repos/$GH_REPO/releases/$rid/assets?per_page=100" \
+            --jq '.[].name' | sort > evidence/v105-actual-assets.txt
+          printf '%s\n' stratified-v101-original-source.zip stratified-original-manifest-v105.json \
+            | sort > evidence/v105-expected-assets.txt
+          diff -u evidence/v105-expected-assets.txt evidence/v105-actual-assets.txt
+          while IFS= read -r name; do
+            aid="$(gh api "repos/$GH_REPO/releases/$rid/assets?per_page=100" \
+              --jq ".[] | select(.name==\"$name\") | .id")"
+            test -n "$aid"
+            curl --fail-with-body --location --silent --show-error --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/octet-stream" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/$GH_REPO/releases/assets/$aid" \
+              -o "redownloaded/$name"
+            cmp "release-assets/$name" "redownloaded/$name"
+            echo "V105_ARCHIVED_SOURCE_ASSET_BYTE_IDENTICAL=$name"
+          done < evidence/v105-expected-assets.txt
+          echo 'bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1  redownloaded/stratified-v101-original-source.zip' | sha256sum -c -
+          echo V105_TWO_DRAFT_ASSETS_RESTORED_BYTE_IDENTICAL_SOURCE_NOT_YEAR | tee evidence/v105-restoration.log
+      - name: Preserve archive source audit and approval logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v105-long-retention-fourpoint-original-source-audit
+          path: |
+            evidence/v105-approval.log
+            evidence/v105-replay.log
+            evidence/v105-replayed-original-source-verdict.json
+            evidence/v105-restoration.log
+          if-no-files-found: warn
+          retention-days: 30
