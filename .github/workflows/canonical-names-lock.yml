@@ -95,8 +95,11 @@ jobs:
           sudo apt-get install -y --no-install-recommends libreoffice-core libreoffice-common python3-uno
           libreoffice --version
           /usr/bin/python3 -c 'import uno; print("PYUNO_READY")'
-      - name: Independent arithmetic self-test
-        run: /usr/bin/python3 basic/qa/stage5_calendar_semantic_ci.py --self-test
+      - name: Python syntax and independent arithmetic self-test
+        run: |
+          set -euo pipefail
+          /usr/bin/python3 -m py_compile basic/qa/stage5_calendar_semantic_ci.py
+          /usr/bin/python3 basic/qa/stage5_calendar_semantic_ci.py --self-test
       - name: Live StarBasic Stage5 semantic characterization
         run: |
           set -euo pipefail
@@ -109,8 +112,10 @@ jobs:
           /usr/bin/python3 - "$RUNNER_TEMP/basic-punjabi-stage5-results" <<'PY'
           import csv, json, os, pathlib, sys
           p = pathlib.Path(sys.argv[1])
-          required = ('cases.tsv', 'assertions.json', 'source_metadata.json', 'status.txt', 'lo-startup.log')
+          required = ('cases.tsv', 'assertions.json', 'source_metadata.json', 'status.txt', 'lo-startup.log', 'progress.log')
           assert all((p / f).is_file() for f in required), 'STAGE5_EVIDENCE_MISSING'
+          progress = (p / 'progress.log').read_text()
+          assert 'RUN_START' in progress and 'RUN_END' in progress, 'STAGE5_PROGRESS_INCOMPLETE'
           assert (p / 'status.txt').read_text().strip() == 'PASS', 'STAGE5_STATUS_NOT_PASS'
           a = json.loads((p / 'assertions.json').read_text())
           m = json.loads((p / 'source_metadata.json').read_text())
@@ -126,7 +131,7 @@ jobs:
           assert all(r['result'] == 'PASS' for r in rows), 'STAGE5_CASE_FAILURE'
           assert sum(r['category'] == 'production' for r in rows) == 2, 'STAGE5_PRODUCTION_ERROR_COUNT'
           assert all(r['provenance'] == 'EXPECTED_ERROR_NOT_CALENDAR_IMPLEMENTATION' and r['actual'].startswith('9302|') for r in rows if r['category'] == 'production'), 'STAGE5_PRODUCTION_ERROR_CONTRACT'
-          print('STAGE5_EVIDENCE_CONTRACT_PASS 46/46; FULL_PRODUCTION_CALENDAR_NOT_IMPLEMENTED')
+          print('STAGE5_EVIDENCE_CONTRACT_PASS 46/46; PROGRESS_COMPLETE; FULL_PRODUCTION_CALENDAR_NOT_IMPLEMENTED')
           PY
       - name: Upload Stage5 raw native evidence
         if: always()
