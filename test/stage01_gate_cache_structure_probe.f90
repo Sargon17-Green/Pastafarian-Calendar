@@ -182,9 +182,42 @@ program stage01_gate_cache_structure_probe
          observed_high == max(k+1_int64, 0_int64), trim(assertion_label))
   end do
 
+  ! A hot cache with both directions populated must be observationally stable
+  ! under shuffled cross-direction queries. 5 is coprime to 16, so all 16
+  ! intervals are visited exactly once in a non-monotone permutation.
+  ! Expected indices use the independent direct-gap-sum wide_days oracle.
+  call reset_gate_cache()
+  call ensure_gate_index(-8_int64)
+  call ensure_gate_index(8_int64)
+  do j = 0, 15
+    k = int(mod(5*j+3, 16)-8, int64)
+    if (k < 0_int64) then
+      gap_length = negative_gate_gap(-k)
+    else
+      gap_length = positive_gate_gap(k+1_int64)
+    end if
+    do i = 1, 3
+      select case (i)
+      case (1)
+        offset = 0
+      case (2)
+        offset = gap_length / 2
+      case (3)
+        offset = gap_length - 1
+      end select
+      boundary = bi_add_small(wide_days(k), int(offset, int64))
+      idx = exact_gate_index(boundary, found)
+      write(assertion_label,'(A,I0,A,I0)') 'shuffled hot interval ', k, ' offset ', offset
+      call check(idx == k .and. (found .eqv. (offset == 0)), trim(assertion_label))
+    end do
+    call gate_cache_bounds(observed_low, observed_high)
+    write(assertion_label,'(A,I0)') 'shuffled hot stable bounds ', k
+    call check(observed_low == -8_int64 .and. observed_high == 8_int64, trim(assertion_label))
+  end do
+
   write(*,'(A,I0)') 'STAGE01_GATE_CACHE_STRUCTURE_ASSERTIONS=', assertions
   write(*,'(A,I0)') 'STAGE01_GATE_CACHE_STRUCTURE_FAILURES=', failures
-  if (assertions /= 151 .or. failures /= 0) error stop 'gate cache structural reset contract failed'
+  if (assertions /= 215 .or. failures /= 0) error stop 'gate cache structural reset contract failed'
   write(*,'(A)') 'STAGE01_GATE_CACHE_STRUCTURE_PASS (reset state only; NOT full Stage1)'
 
 contains
