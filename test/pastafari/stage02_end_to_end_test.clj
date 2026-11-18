@@ -1614,3 +1614,106 @@
                        {:berekening berekening :doel doel :code (:code poging)})))))
       (is (= 3 (+ (:bewezen @tellingen) (:geweigerd @tellingen))))
       (println "DISCOVERY24 DIAG15 tiende-dag-haalbaarheid:" @tellingen))))
+
+
+;; DIAG16: independent account of the bounded prefix's cell estimate.
+;; Canonical insertion-derived prefix is the input; no production counter.
+(defn- diag16-celrekening [lengten prefix]
+  (let [m (count lengten) dagen (reduce +' 0N lengten)]
+    (when-not (= 1N (first prefix))
+      (throw (ex-info "Bad independent prefix" {:code :diag16-invalid-prefix})))
+    (loop [p 2, over (update (mapv bigint lengten) 0 dec)
+           open 1, dicht 0, totaal 0N, stappen []]
+      (if (> p (count prefix))
+        {:kosten totaal :stappen stappen}
+        (let [keuze (int (nth prefix (dec p)))
+              toegestaan? (fn [id]
+                             (let [a (nth over (dec id))]
+                               (and (pos? a)
+                                    (or (> a 1N) (= id (inc dicht))))))
+              correct? (and (<= 1 keuze (min m (inc open)))
+                            (toegestaan? keuze))
+              kandidaten (filterv toegestaan? (range 1 (inc keuze)))
+              bijdrage (reduce
+                        +' 0N
+                        (map (fn [id]
+                               (+' 1N (*' (inc (- m (max open id)))
+                                            (inc (-' dagen p)))))
+                             kandidaten))
+              nieuw (+' totaal bijdrage)
+              restgekozen (nth over (dec keuze))]
+          (when-not correct?
+            (throw (ex-info "Invalid independent prefix"
+                            {:code :diag16-invalid-prefix :position p})))
+          (recur (inc p) (update over (dec keuze) dec)
+                 (max open keuze)
+                 (if (= 1N restgekozen) (inc dicht) dicht)
+                 nieuw
+                 (conj stappen {:positie p :kosten nieuw
+                                :toevoeging bijdrage})))))))
+
+(deftest diag16-kleine-kosten-en-strikte-budgetgrenzen
+  (testing "Independent cell accounting for 4 small exhaustive families."
+    (doseq [lengten [[4 4] [4 4 4] [4 5 4] [5 4 4]]
+            :let [familie (orakel/weaving-family lengten)
+                  aantal ((:count familie))
+                  laatste (dec (reduce + lengten))]
+            r (distinct [1N (quot (inc aantal) 2N) aantal])
+            p (distinct [2 (min 10 laatste) laatste])]
+      (let [prefix (mapv bigint (take p ((:unrank1 familie) r)))
+            kosten (:kosten (diag16-celrekening lengten prefix))
+            bewijs (rang/prefix-op-rang-begrensd
+                    lengten r p 5000000N)]
+        (is (= prefix (:month-prefix bewijs)))
+        (is (= kosten (:prefix-cell-upper-bound bewijs))
+            (str "DIAG16 " lengten " rank=" r " position=" p))
+        (is (<= 0N kosten 5000000N))
+        (when (> kosten 1N)
+          (let [code (try
+                       (rang/prefix-op-rang-begrensd
+                        lengten r p (dec kosten))
+                       nil
+                       (catch clojure.lang.ExceptionInfo e
+                         (:code (ex-data e))))]
+            (is (= :bounded-prefix-budget-unproven code))))))))
+
+(deftest diag16-drie-echte-tiende-dag-kostengetuigen
+  (testing "Three real calculation days: identify first budget overflow."
+    (doseq [berekening [dagen/stichtingsdag
+                       (+' dagen/stichtingsdag 17N)
+                       (-' dagen/stichtingsdag 23N)]]
+      (let [jaar (zoeken/vind-doeljaar @lijn berekening berekening)
+            doel (+' (:open-gate-day jaar) 10N)
+            staat (orakel/new-gate-state)
+            normjaar (orakel/find-target-year staat berekening doel)
+            saus (orakel/sauce berekening (inc (:open-gate-day normjaar)))
+            maand-aantal (orakel/choose-month-count saus normjaar)
+            lengten (orakel/choose-month-lengths
+                     saus normjaar maand-aantal)
+            derde-aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                                  derde-prefix-opties)
+            totaal (reduce +' 0N derde-aantallen)
+            weefrang (orakel/choose-rank
+                      (orakel/ask-bowl saus 4 orakel/seal-month-weaving)
+                      totaal)
+            prefix (onafhankelijk-prefix-tot-positie
+                    lengten weefrang 10)
+            rekening (diag16-celrekening lengten prefix)
+            overloop (first (filter #(> (:kosten %) 5000000N)
+                                    (:stappen rekening)))
+            code (try
+                   (projectie/kies-prefixdag-zonder-volledige-weving
+                    @lijn berekening doel 128N 5000000N)
+                   nil
+                   (catch clojure.lang.ExceptionInfo e
+                     (:code (ex-data e))))]
+        (is (= 10 (count prefix)))
+        (is (= totaal (weving/aantal-wevingen-groot lengten)))
+        (is (> (:kosten rekening) 5000000N))
+        (is (some? overloop))
+        (is (= :bounded-prefix-budget-unproven code))
+        (println "DISCOVERY24 DIAG16 onafhankelijke kostengetuige:"
+                 {:berekening berekening :doel doel
+                  :cumulatief (:kosten rekening)
+                  :eerste-overschrijding (:positie overloop)
+                  :budget 5000000N :code code})))))
