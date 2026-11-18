@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage32: cross-axis 5783-remote/eight-day differential against independent Stage14 source-derived oracle."""
+"""Stage32: cross-axis 5784-remote/eight-day differential against independent Stage14 source-derived oracle."""
 import sys
 from pathlib import Path
 from stage14_real_oracle import FOUNDATION, date
@@ -100,5 +100,5 @@ def compare(path):
     print(f"STAGE32_REAL_FIVEFIELD_SCALARS={checked}")
 
 if __name__=="__main__":
-    if len(sys.argv)!=2: sys.exit("usage: stage32_remote_six.py --selftest | <log>")
+    if len(sys.argv)!=2: sys.exit("usage: stage32_remote_eight.py --selftest | <log>")
     selftest() if sys.argv[1]=="--selftest" else compare(sys.argv[1])

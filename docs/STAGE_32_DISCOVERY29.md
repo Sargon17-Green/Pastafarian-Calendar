@@ -17,5 +17,8 @@ STAGE32_REAL_FIVEFIELD_SCALARS=125
 ```
 Runner limits: Python selftest 180s; Ada observation 600s; Python comparator 180s; nonzero for failed checks or timeouts. GitHub Actions native-stage32-remote-eight runs Ubuntu 24.04 GNAT13, outer limit 30 minutes.
 
-## Gate (pending)
-Require first natural push on exact Stage32 SHA `completed/success` across **34/34 jobs**, including verify, all 33 historical jobs, and direct Stage32 GNAT compile/bind/link. Read completed Native log; verify exact 139/131/125 markers and all 25 distinct pairs. Never classify queued/in_progress as PASS or block. No manual redispatch, main/merge or release.
+## Final bounded acceptance (2026-11-18)
+Natural push CI run 44364672112 on exact SHA a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72, attempt 1, completed/success **34/34**. All 34 jobs reported the same head SHA. Direct GNAT 13 Native job 135015110791 compiled, bound and linked the Ada observer; the completed log recorded 139 Python selftest checks, 25 unique ordered STAGE32_NATIVE_PAIR records, 131 Ada Native invariants and 125 five-field numerical comparisons. Branch Ada+తెలుగు was read back at the same exact SHA. **Stage32 ACCEPTED only for its defined 25-pair matrix**, not as a universal correctness proof. No manual redispatch, main/merge or release.
+
+## Next stage
+Stage33/DISCOVERY30 extends the remote frontier to ±5785 and the near cross-axis to ±9 days. Its independent novelty preflight accounts for Stage15–18 and Stage20–32 and must prove 24 new ordered pairs before Native acceptance.
