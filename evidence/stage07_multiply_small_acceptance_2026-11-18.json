@@ -1,0 +1,24 @@
+{
+  "archive_sha256": "5ed70d572a3d8a335a9bde1199ad27ea617c046fb05256c428435026b247f3ec",
+  "audit": "OFFLINE_INDEPENDENT",
+  "audit_negative_control": "REJECTED_CORRUPTED_EXPECTED_VALUE",
+  "combined_sha256": "e34f48e51baa723721865fd026b38d6c35e8748c7af6fb9aaa9be5a1bedf6d95",
+  "fixture_sha256": "f58ee6c7fd14adf7567e57215dec00ec1257680d97102a6e2c44df72e0875ab7",
+  "input_assertions": 26,
+  "native_cases": 13,
+  "negative_controls": [
+    "mutant",
+    "negative_one",
+    "negative_max"
+  ],
+  "next_stage": 8,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "result_assertions": 13,
+  "run_id": "44322610182",
+  "runtime_sha": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "seeded_python_pairs": 384,
+  "source_sha": "3496649792efb43c4cd1064aa31736f20eb197e7",
+  "stage": 7,
+  "status": "ACCEPTED",
+  "workflow_sha": "698f42b93cc58671f3faf66195ebdbe1fd2b71fe"
+}

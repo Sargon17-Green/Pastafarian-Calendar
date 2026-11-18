@@ -12,3 +12,7 @@
 ## نتيجة محلية قبل CI
 
 نجحت 13 نتيجة Native و26 مقارنة تحفظ المدخلين في المفسر الأصلي، بخروج 0 وstderr فارغ؛ ونجحت 384 حالة جبرية محددة في Python. رُفض الموتنت والخلّيتان السالبتان بخروج 1، دون علامة النهاية. SHA-256 للبرنامج المجمع `e34f48e51baa723721865fd026b38d6c35e8748c7af6fb9aaa9be5a1bedf6d95`، ولـfixture `f58ee6c7fd14adf7567e57215dec00ec1257680d97102a6e2c44df72e0875ab7`. قرار القبول ينتظر CI وأرشيفه وتدقيقاً مستقلاً.
+
+## قرار القبول بعد CI
+
+أكمل [run 44322610182](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44322610182) عند workflow commit `698f42b93cc58671f3faf66195ebdbe1fd2b71fe` بوابتي verify وNative بنجاح. ثُبِّت مصدر التنفيذ `3496649792efb43c4cd1064aa31736f20eb197e7` والمفسر الأصلي `eb3135565a8670cced3f6bbca4dbf7b014c45634`. الأرشيف 14434538956، SHA-256 `5ed70d572a3d8a335a9bde1199ad27ea617c046fb05256c428435026b247f3ec`، وCRC صحيح. فحص `tools/stage07_multiply_small_acceptance_audit.py` بايتات المصدر المنفذ والـfixture، 13 نتيجة و26 فحص مدخلات، خروج صفر دون stderr، ورفض الموتنت والقيم السالبة بخروج 1. بקרה تغيّرت فيها قيمة متوقعة אחת في oracle رُفضت. تقرير `evidence/stage07_multiply_small_acceptance_2026-11-18.json`، SHA-256 `5dc114c9b312708cf40b58f6f568cf3491d8c2343061f037909eb041df08ce47`: **STAGE7_ACCEPTED=YES**. سجل CI עצמו נוצר לפני التدقيق ולכן מסמן `stage7_full_acceptance=false`; החלטת הקבלה מבוססת על הבדיקה המאוחרת.
