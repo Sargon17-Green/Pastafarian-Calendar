@@ -1375,3 +1375,50 @@ jobs:
           path: stage56-b4-evidence/
           if-no-files-found: error
           retention-days: 30
+
+stage56-real-year-profile-b5-preflight-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Validate SHA-bound B5 input gate without substituting synthetic years
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-b5-evidence
+          printf '%s\n' 'PC-BRANCH-PHP-MALAY' > stage56-b5-evidence/PROJECT_ID.txt
+          printf '%s\n' "$GITHUB_SHA" > stage56-b5-evidence/SHA.txt
+          php -v > stage56-b5-evidence/php-version.txt
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8 || exit 1
+          php -l tests/stage56_actual_year_profile.php > stage56-b5-evidence/lint-profiler.txt 2>&1; l1=$?
+          php -l tests/stage56_actual_year_profile_preflight_tests.php > stage56-b5-evidence/lint-preflight.txt 2>&1; l2=$?
+          timeout 60s php -d memory_limit=512M tests/stage56_actual_year_profile_preflight_tests.php \
+            > stage56-b5-evidence/stdout.txt 2> stage56-b5-evidence/stderr.txt
+          code=$?
+          printf 'lint_profiler=%s\nlint_preflight=%s\nexit=%s\n' "$l1" "$l2" "$code" > stage56-b5-evidence/exit.txt
+          cat stage56-b5-evidence/lint-*.txt stage56-b5-evidence/stdout.txt
+          if (( l1 != 0 || l2 != 0 || code != 0 )); then
+            cat stage56-b5-evidence/stderr.txt >&2
+            exit 1
+          fi
+          if [[ -s stage56-b5-evidence/stderr.txt ]]; then
+            cat stage56-b5-evidence/stderr.txt >&2
+            exit 1
+          fi
+          grep -Fx 'STAGE56_B5_PREFLIGHT checks=16 synthetic_structure_only=YES provenance=NOT_VERIFIED status=PASS' stage56-b5-evidence/stdout.txt
+      - name: Retain SHA-bound B5 preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-b5-preflight-${{ github.sha }}
+          path: stage56-b5-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
