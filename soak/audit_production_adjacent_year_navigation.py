@@ -25,8 +25,16 @@ from independent_date_combinatorics import DateCombinatoricsError
 MAX_PRODUCTION_GATE_INDEX = 8192
 ORACLE_HALF_WIDTH = 280
 GATE_COUNT = ORACLE_HALF_WIDTH * 2 + 1
-EXPECTED_ROWS = GATE_COUNT + 11
-PASS = "PASS_BOUNDED_REAL_PRODUCTION_TWO_HOP_YEAR_NAVIGATION_NOT_CERTIFIED"
+EXPECTED_INTERVAL_CASES = 18
+EXPECTED_ROWS = GATE_COUNT + 11 + EXPECTED_INTERVAL_CASES
+INTERVAL_KINDS = ("AFTER_OPEN", "AT_CLOSE", "AT_OPEN", "AFTER_CLOSE")
+EXPECTED_INTERVAL_KEYS = {
+    (year, kind) for year in range(4998, 5003)
+    for kind in INTERVAL_KINDS
+    if (kind != "AT_OPEN" or year > 4998)
+    and (kind != "AFTER_CLOSE" or year < 5002)
+}
+PASS = "PASS_BOUNDED_REAL_PRODUCTION_INTERVAL_ENDPOINTS_NOT_CERTIFIED"
 CANONICAL = re.compile(r"(?:0|-?[1-9][0-9]*)\Z")
 
 
@@ -49,6 +57,7 @@ def parse_transcript(raw: str) -> dict:
 
     observed = {
         "GATE": {},
+        "INTERVAL": {},
         "YEAR": None,
         "NEXT": None,
         "PREVIOUS": None,
@@ -71,6 +80,17 @@ def parse_transcript(raw: str) -> dict:
             if index in observed["GATE"]:
                 raise AuditError("E_DUPLICATE_GATE")
             observed["GATE"][index] = day
+        elif kind == "INTERVAL" and len(columns) == 9:
+            year_number = number(columns[1])
+            endpoint_kind = columns[2]
+            if endpoint_kind not in INTERVAL_KINDS:
+                raise AuditError("E_INTERVAL_KIND")
+            target = number(columns[3])
+            resolved = tuple(map(number, columns[4:]))
+            key = (year_number, endpoint_kind)
+            if key in observed["INTERVAL"]:
+                raise AuditError("E_DUPLICATE_INTERVAL_CASE")
+            observed["INTERVAL"][key] = (target, resolved)
         elif kind in ("YEAR", "NEXT", "PREVIOUS", "NEXT2", "PREVIOUS2") and len(columns) == 6:
             if observed[kind] is not None:
                 raise AuditError(f"E_DUPLICATE_{kind}")
@@ -93,6 +113,8 @@ def parse_transcript(raw: str) -> dict:
                 "PRODUCTION_GATE_LIMIT", "PRODUCTION_EXPANDED_GATES"):
         if observed[key] is None:
             raise AuditError(f"E_MISSING_{key}")
+    if set(observed["INTERVAL"]) != EXPECTED_INTERVAL_KEYS:
+        raise AuditError("E_INTERVAL_CASE_SET")
     if observed["PRODUCTION_GATE_LIMIT"] != MAX_PRODUCTION_GATE_INDEX:
         raise AuditError("E_PRODUCTION_LIMIT_DRIFT")
     if observed["PRODUCTION_EXPANDED_GATES"] != GATE_COUNT:
@@ -193,7 +215,37 @@ def compare(parsed: dict, ledger, geometry, selector) -> dict:
     if parsed["FIND_BACKWARD2"][1] != as_tuple(found_backward2):
         raise AuditError("E_REAL_FIND_BACKWARD2_MISMATCH")
 
+    # Independent expected endpoints from the unseeded Python year geometry.
+    independent_years = [previous2, previous_year, base, next_year, next2]
+    endpoint_count = 0
+    for position, source in enumerate(independent_years):
+        checks = [("AFTER_OPEN", source.open_day + 1, source),
+                  ("AT_CLOSE", source.close_day, source)]
+        if position > 0:
+            checks.append(("AT_OPEN", source.open_day, independent_years[position - 1]))
+        if position < len(independent_years) - 1:
+            checks.append(("AFTER_CLOSE", source.close_day + 1,
+                           independent_years[position + 1]))
+        for kind, target, expected in checks:
+            actual_target, actual_year = parsed["INTERVAL"][(source.number, kind)]
+            if actual_target != target:
+                raise AuditError(f"E_INTERVAL_TARGET_{source.number}_{kind}")
+            oracle_year, transitions = geometry.find(FOUNDATION, target, selector)
+            if (oracle_year != expected or
+                    transitions != abs(expected.number - 5000) or
+                    not oracle_year.open_day < target <= oracle_year.close_day):
+                raise AuditError(f"E_INDEPENDENT_INTERVAL_SEMANTICS_{source.number}_{kind}")
+            if actual_year != as_tuple(expected):
+                raise AuditError(f"E_REAL_INTERVAL_MISMATCH_{source.number}_{kind}")
+            endpoint_count += 1
+    if endpoint_count != EXPECTED_INTERVAL_CASES:
+        raise AuditError("E_INTERVAL_COMPARISON_COUNT")
+
     return {
+        "interval_endpoint_comparisons": endpoint_count,
+        "interior_endpoint_comparisons": 10,
+        "shared_boundary_comparisons": 8,
+        "max_interval_transitions": 2,
         "production_gate_day_comparisons": GATE_COUNT,
         "year5000_comparisons": 1,
         "adjacent_year_comparisons": 2,
@@ -227,8 +279,8 @@ def write_evidence(path: Path, report: dict) -> None:
 def run(jar: Path, evidence: Path, timeout: int) -> int:
     started = time.monotonic()
     report = {
-        "schema": "post55-production-adjacent-year-navigation-unseeded-v2-two-hop",
-        "status": "FAIL_BOUNDED_REAL_PRODUCTION_ADJACENT_YEAR_NAVIGATION",
+        "schema": "post55-production-interval-endpoints-unseeded-v3-two-hop",
+        "status": "FAIL_BOUNDED_REAL_PRODUCTION_INTERVAL_ENDPOINTS",
         "project_id": "PC-BRANCH-KOTLIN-CYMRAEG",
         "github_sha": os.environ.get("GITHUB_SHA", "UNVERIFIED_LOCAL"),
         "probe_class": "pastafari.Post55ProductionAdjacentYearProbe",
@@ -243,6 +295,7 @@ def run(jar: Path, evidence: Path, timeout: int) -> int:
         "production_gate_index_abs_requested": ORACLE_HALF_WIDTH,
         "production_expanded_gate_count_expected": GATE_COUNT,
         "real_oracle_gate_queries_expected": ORACLE_HALF_WIDTH * 2,
+        "interval_endpoint_comparisons_expected": EXPECTED_INTERVAL_CASES,
     }
     try:
         if type(timeout) is not int or not 60 <= timeout <= 900:

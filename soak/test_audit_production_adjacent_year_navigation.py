@@ -52,16 +52,9 @@ class FakeGeometry:
 
     def find(self, calculation_day, target, selector):
         assert calculation_day == FOUNDATION
-        if target == BASE.close_day + 1:
-            return NEXT, 1
-        if target == BASE.open_day:
-            return PREVIOUS, 1
-        if target == NEXT.close_day + 1:
-            return NEXT2, 2
-        if target == PREVIOUS.open_day:
-            return PREVIOUS2, 2
-        if BASE.open_day < target <= BASE.close_day:
-            return BASE, 0
+        for year in (PREVIOUS2, PREVIOUS, BASE, NEXT, NEXT2):
+            if year.open_day < target <= year.close_day:
+                return year, abs(year.number - 5000)
         raise AuditError("E_FAKE_TARGET_OUTSIDE")
 
 
@@ -93,6 +86,20 @@ def valid_transcript():
         "PRODUCTION_GATE_LIMIT\t8192",
         f"PRODUCTION_EXPANDED_GATES\t{GATE_COUNT}",
     ))
+    neighbors = (PREVIOUS2, PREVIOUS, BASE, NEXT, NEXT2)
+    fake_geometry = FakeGeometry()
+    for position, year in enumerate(neighbors):
+        entries = [("AFTER_OPEN", year.open_day + 1),
+                   ("AT_CLOSE", year.close_day)]
+        if position > 0:
+            entries.append(("AT_OPEN", year.open_day))
+        if position < len(neighbors) - 1:
+            entries.append(("AFTER_CLOSE", year.close_day + 1))
+        for kind, target in entries:
+            resolved, _ = fake_geometry.find(FOUNDATION, target, None)
+            lines.append("INTERVAL\t" + str(year.number) + "\t" + kind +
+                         "\t" + str(target) + "\t" +
+                         "\t".join(map(str, fields(resolved))))
     assert len(lines) == EXPECTED_ROWS
     return "\n".join(lines) + "\n"
 
@@ -112,6 +119,7 @@ class AdjacentYearContractTests(unittest.TestCase):
             "find_target_transition_comparisons", "find_two_hop_transition_comparisons",
             "production_gate_limit_checks",
             "production_expanded_gate_count_checks",
+            "interval_endpoint_comparisons",
         ))
         self.assertEqual(comparisons, EXPECTED_ROWS)
         self.assertEqual(result["forward_transitions"], 1)
@@ -274,6 +282,58 @@ class AdjacentYearContractTests(unittest.TestCase):
             1,
         )
         with self.assertRaisesRegex(AuditError, "E_UNKNOWN_TRANSCRIPT_ROW"):
+            parse_transcript(changed)
+
+    def test_interval_close_included_mutation_is_detected(self):
+        needle = f"INTERVAL\t5000\tAT_CLOSE\t{BASE.close_day}\t5000"
+        changed = self.text.replace(needle, needle[:-1] + "1", 1)
+        with self.assertRaisesRegex(AuditError, "E_REAL_INTERVAL_MISMATCH_5000_AT_CLOSE"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_interval_open_excluded_mutation_is_detected(self):
+        needle = f"INTERVAL\t5000\tAT_OPEN\t{BASE.open_day}\t4999"
+        changed = self.text.replace(needle, needle[:-1] + "0", 1)
+        with self.assertRaisesRegex(AuditError, "E_REAL_INTERVAL_MISMATCH_5000_AT_OPEN"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_interval_target_spoof_is_rejected(self):
+        needle = f"INTERVAL\t5000\tAT_OPEN\t{BASE.open_day}\t"
+        changed = self.text.replace(
+            needle, f"INTERVAL\t5000\tAT_OPEN\t{BASE.open_day + 1}\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_INTERVAL_TARGET_5000_AT_OPEN"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_duplicate_interval_case_is_rejected(self):
+        changed = self.text.replace(
+            "INTERVAL\t5000\tAFTER_OPEN\t",
+            "INTERVAL\t5000\tAT_CLOSE\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_DUPLICATE_INTERVAL_CASE"):
+            parse_transcript(changed)
+
+    def test_missing_interval_case_is_rejected(self):
+        row = next(row for row in self.text.splitlines()
+                   if row.startswith("INTERVAL\t5000\tAT_CLOSE\t"))
+        changed = self.text.replace(row + "\n", "", 1)
+        with self.assertRaisesRegex(AuditError, "E_TRANSCRIPT_ROW_COUNT"):
+            parse_transcript(changed)
+
+    def test_unknown_interval_kind_is_rejected(self):
+        changed = self.text.replace("INTERVAL\t5000\tAT_CLOSE\t",
+                                    "INTERVAL\t5000\tAT_END\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_INTERVAL_KIND"):
+            parse_transcript(changed)
+
+    def test_noncanonical_interval_target_is_rejected(self):
+        needle = f"INTERVAL\t5000\tAT_CLOSE\t{BASE.close_day}\t"
+        changed = self.text.replace(
+            needle, f"INTERVAL\t5000\tAT_CLOSE\t+{BASE.close_day}\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_NONCANONICAL_INTEGER"):
+            parse_transcript(changed)
+
+    def test_unexpected_interval_year_is_rejected(self):
+        changed = self.text.replace("INTERVAL\t5000\tAFTER_OPEN\t",
+                                    "INTERVAL\t5003\tAFTER_OPEN\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_INTERVAL_CASE_SET"):
             parse_transcript(changed)
 
 
