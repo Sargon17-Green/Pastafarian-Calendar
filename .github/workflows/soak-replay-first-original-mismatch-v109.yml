@@ -32,7 +32,7 @@ jobs:
           gh api "repos/$GH_REPO/actions/artifacts/14472835490/zip" > evidence/ada-original-v103.zip
           gh api "repos/$GH_REPO/actions/artifacts/14473652463/zip" > evidence/fortran-original-v106.zip
           gh api "repos/$GH_REPO/actions/artifacts/14469537094/zip" > evidence/python-typescript-original-v101.zip
-          echo '3d8c594ae761aa6eeb8c11b241755b2f11ef472d41483ffb5e0c1cdc2bd8cbe  evidence/ada-original-v103.zip' | sha256sum -c -
+          echo '3d8c594ae761aa6eeb8c11b241755b2f11ef472d41483ffb5be0c1cdc2bd8cbe  evidence/ada-original-v103.zip' | sha256sum -c -
           echo '7f8e57308aee0c80ffedc9634e59b65d11a1bc94982830dd3217623878e3e48f  evidence/fortran-original-v106.zip' | sha256sum -c -
           echo 'bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1  evidence/python-typescript-original-v101.zip' | sha256sum -c -
           echo V109_THREE_TRUE_ORIGINAL_SOURCE_ZIPS_SHA_PINNED
