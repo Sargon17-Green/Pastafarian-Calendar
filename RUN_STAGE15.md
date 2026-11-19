@@ -11,3 +11,7 @@
 ראיית התכנון: `evidence/stage15_factorial_design_oracle_2026-11-19.json` SHA-256 `4683827443030853060f022ba52ffc6814be67559996dffdf3c4cf1057180e5b`; fixture שחזור המקור `test/stage15_factorial_reference_probe.false` SHA-256 `3872c9076965fe00aa1e9e363b37e420bd2f12f2d46dfeaaae11f317c6cfbd18`, ומקור `test/normative_reference.false` SHA-256 `465e7b14224de68f8720aa62fabc26fcbff656e4f1861d59ffec9bf3a310ccf6`. המקור הזהה נמצא ב־HEAD שקדם לחוזה. זהו probe מקומי, לא אישור Native של השלב. מועמד מקומי לא־משולב עבר 9 תוצאות (שבעה ערכי תחום ושתי חזרות), מוטציה, ושתי חריגות תחום/קריאה ללא מצביע שנדחו; שער Stage 14 הקודם טרם הוכרע.
 
 **STAGE15_CANDIDATE_NOT_ACCEPTED**: מקור op32 ו־fixture מכסים 7 ערכי תחום, שתי חזרות, מוטציה, ערכים ‎−1/7 וקריאה ללא מצביע. כל אלה עברו מקומית במפרש המקורי; CI וארטיפקט של Stage 15 עדיין נדרשים.
+
+## עדכון קבלה — 19 בנובמבר 2026
+
+ריצת [44485784628](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44485784628) על SHA `d7c5620e0d46a56fa7dbc2e131f269393d09561e` הסתיימה `completed/success` עם Native למקור `68efc06198d77fb0fafeb1a3b5eae1effb68de01`. ארטיפקט `14510511996` SHA256 `0ddbaea1242937c405e9bdee23e81f512e22c64b610123f99a3aa463ace16842` עבר CRC. ביקורת עצמאית בדקה התאמת שלושה Git blob SHA, שבע תוצאות ושתיים חוזרות, ארבע בדיקות שליליות ובקרת השחתת ציפייה. דוח `evidence/stage15_factorial_acceptance_2026-11-19.json`, SHA256 `6d62bd21e5e34c5b557e053fbbd8c6cfbbf1d93609952677a7cb5dbadbe5c7a`. **Stage 15 ACCEPTED**. סמן המועמד ההיסטורי לעיל מתייחס למצב שקדם לקבלה.

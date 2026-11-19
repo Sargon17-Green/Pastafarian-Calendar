@@ -1,0 +1,203 @@
+{
+  "anchors": [
+    {
+      "chosen": 1,
+      "position": 1,
+      "remaining": [],
+      "sequence": [
+        1
+      ]
+    },
+    {
+      "chosen": 1,
+      "position": 1,
+      "remaining": [
+        2
+      ],
+      "sequence": [
+        1,
+        2
+      ]
+    },
+    {
+      "chosen": 2,
+      "position": 2,
+      "remaining": [
+        1
+      ],
+      "sequence": [
+        1,
+        2
+      ]
+    },
+    {
+      "chosen": 1,
+      "position": 1,
+      "remaining": [
+        2,
+        3
+      ],
+      "sequence": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "chosen": 3,
+      "position": 3,
+      "remaining": [
+        1,
+        2
+      ],
+      "sequence": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "chosen": 1,
+      "position": 1,
+      "remaining": [
+        2,
+        3,
+        4
+      ],
+      "sequence": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "chosen": 4,
+      "position": 4,
+      "remaining": [
+        1,
+        2,
+        3
+      ],
+      "sequence": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "chosen": 1,
+      "position": 1,
+      "remaining": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "sequence": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "chosen": 5,
+      "position": 5,
+      "remaining": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sequence": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "chosen": 1,
+      "position": 1,
+      "remaining": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "sequence": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "chosen": 6,
+      "position": 6,
+      "remaining": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "sequence": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "chosen": 4,
+      "position": 3,
+      "remaining": [
+        4,
+        2,
+        2,
+        5
+      ],
+      "sequence": [
+        4,
+        2,
+        4,
+        2,
+        5
+      ]
+    }
+  ],
+  "domain": {
+    "position_base": 1,
+    "sequence_length_max": 6,
+    "sequence_length_min": 1
+  },
+  "exhaustive_permutation_position_cases": 5039,
+  "input_shape": "[sequence,pos] with sequence=[n,x1,...,xn]",
+  "invalid_native_shapes_to_test": [
+    "n=0",
+    "n=7",
+    "pos=0",
+    "pos=n+1",
+    "tuple_missing_sequence",
+    "tuple_missing_position"
+  ],
+  "native_anchor_cases": 12,
+  "native_evidence": false,
+  "output_shape": "[chosen,newSequence] with newSequence=[n-1,...]",
+  "production_operation_planned": 33,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "reference_operation": 50,
+  "stage": 16,
+  "stage16_accepted": false,
+  "status": "DESIGN_ORACLE_ONLY"
+}

@@ -1,0 +1,20 @@
+{
+  "artifact_id": 14510511996,
+  "artifact_sha256": "0ddbaea1242937c405e9bdee23e81f512e22c64b610123f99a3aa463ace16842",
+  "audit": "OFFLINE_INDEPENDENT_SOURCE_BLOB_AND_ARITHMETIC",
+  "audit_negative_control": "REJECTED_CORRUPTED_FACTORIAL",
+  "combined_sha256": "d766bbe6a5eb8aaeb511ae24cea6f46e5736b533e99f373cc095d64cf8c0463a",
+  "negative_controls": 4,
+  "next_stage": 16,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "replay_assertions": 2,
+  "result_assertions": 7,
+  "run_id": "44485784628",
+  "runtime_sha": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "source_blob_git_sha_match": 3,
+  "source_sha": "68efc06198d77fb0fafeb1a3b5eae1effb68de01",
+  "stage": 15,
+  "status": "ACCEPTED",
+  "workflow_sha": "d7c5620e0d46a56fa7dbc2e131f269393d09561e",
+  "zip_crc": "PASS"
+}
