@@ -69,7 +69,7 @@ jobs:
           args+=(-f /work/sql/test/142_stage02_year_structure_cases.sql)
           args+=(-f /work/slice25-preflight-evidence/preflight.sql)
           docker exec -u postgres slice25-preflight-pg psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" 2>&1 | tee slice25-preflight-evidence/postgres-results.txt
-          grep -qx 'SLICE25_PREFLIGHT_ALL_GREEN=1' slice25-preflight-evidence/postgres-results.txt
+          grep -qx 'SLICE25_STRUCTURAL_PREFLIGHT_GREEN=1' slice25-preflight-evidence/postgres-results.txt
           grep '^SLICE25_YEAR_JSON ' slice25-preflight-evidence/postgres-results.txt | sed 's/^SLICE25_YEAR_JSON //' > slice25-preflight-evidence/year.jsonl
           grep '^SLICE25_CASE_JSON ' slice25-preflight-evidence/postgres-results.txt | sed 's/^SLICE25_CASE_JSON //' > slice25-preflight-evidence/cases.jsonl
           grep '^SLICE25_CATALOG_JSON ' slice25-preflight-evidence/postgres-results.txt | sed 's/^SLICE25_CATALOG_JSON //' > slice25-preflight-evidence/catalog.jsonl

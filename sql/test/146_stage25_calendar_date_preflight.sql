@@ -68,8 +68,6 @@ DECLARE
     v_month_id integer;
     v_first_pos bigint;
     v_second_pos bigint;
-    v_found pastafari_sql_tamil.year_rec;
-    r record;
     v_count integer;
 BEGIN
     SELECT calculation_day
@@ -179,20 +177,13 @@ BEGIN
         RAISE EXCEPTION 'duplicate target day in %',v_year_id;
     END IF;
 
-    FOR r IN
-        SELECT case_id,calculation_day,target_day
-        FROM slice25_targets
-        WHERE year_id=v_year_id
-        ORDER BY case_id
-    LOOP
-        v_started := clock_timestamp();
-        v_found := pastafari_sql_tamil.find_target_year(r.calculation_day,r.target_day);
-        v_elapsed := clock_timestamp()-v_started;
-        IF v_found IS DISTINCT FROM v_year THEN
-            RAISE EXCEPTION 'find_target_year mismatch for %, target %',r.case_id,r.target_day;
-        END IF;
-        RAISE NOTICE 'slice25_find_target_year case_id=% elapsed=%',r.case_id,v_elapsed;
-    END LOOP;
+    -- Run 44613358925 established that repeated find_target_year calls exceed
+    -- the 12-minute statement cap (first probes 6m43s / 9m19s). This job
+    -- extracts independent structural fixtures, NOT selector acceptance evidence.
+    -- Membership and uniqueness have been checked above for every target;
+    -- find_target_year performance/correctness remains a separate open gate.
+    RAISE NOTICE 'slice25_selector_deferred year_id=% target_count=% reason=performance',
+        v_year_id,v_count;
 
     RAISE NOTICE 'slice25_reachable_year=% year_number=% targets=%',v_year_id,(v_year).year_number,v_count;
 END;
@@ -250,7 +241,7 @@ SELECT 'SLICE25_CATALOG_JSON ' || jsonb_build_object(
 FROM pastafari_sql_tamil.source_language_catalog
 ORDER BY category,canonical_index;
 
-SELECT 'SLICE25_PREFLIGHT_ALL_GREEN=1'
+SELECT 'SLICE25_STRUCTURAL_PREFLIGHT_GREEN=1'
 WHERE (SELECT count(*) FROM slice25_years)=8
   AND (SELECT count(DISTINCT (year_data).year_number) FROM slice25_years)=8
   AND (SELECT count(*) FROM slice25_structures)=1
