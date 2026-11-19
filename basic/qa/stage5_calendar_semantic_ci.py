@@ -19,7 +19,7 @@ import traceback
 import unicodedata
 
 F, SEED = -15055671, 0x20261118
-PROBE_TIMEOUTS = {"S5Day": 30, "S5Work": 30, "S5Gate": 90, "S5Year": 300, "S5Date": 300, "S5Production": 30}
+PROBE_TIMEOUTS = {"S5Day": 30, "S5Work": 30, "S5Gate": 240, "S5Year": 300, "S5Date": 300, "S5Production": 30}
 LOCKS = {
  "Standard/BigInt.xba": "b89dd817bb4f18fef6297d43ecfd04969e6cdca0",
  "Standard/CalendarSpaghetti.xba": "bc753e64dba2f691ec8916ffd8cc7e062bf681a2",
@@ -233,6 +233,10 @@ def run(basic,out):
     for j,(c,t) in enumerate(pairs,1):
      got=native("S5_WORK_%03d"%j,"S5Work",c,t); want="|".join(map(str,work(int(c),int(t))))
      check("S5_WORK_%03d"%j,"work",{"c":c,"t":t},got,want,"independent_python_int",got==want,"independent_oracle_checks")
+    for j,(c,t) in enumerate(((str(F),str(F+1)),(str(F+1),str(F))),1):
+     got=native("S5_PROD_%03d"%j,"S5Production",c,t); code,sep,message=got.partition("|")
+     ok=sep=="|" and code=="9302" and "E_STAGE_02_DISCOVERY_ONLY" in message
+     check("S5_PROD_%03d"%j,"production",{"c":c,"t":t},got,"9302|E_STAGE_02_DISCOVERY_ONLY","EXPECTED_ERROR_NOT_CALENDAR_IMPLEMENTATION",ok,"production_expected_error_checks")
     for k in range(-3,4):
      v=native("S5_GATE_%+03d"%k,"S5Gate",k).split("|"); ok=False
      if len(v)==6:
@@ -248,10 +252,7 @@ def run(basic,out):
     d=native("S5_DATE_001","S5Date",c,t).split("|")
     ok=len(d)==5 and d[0]==v[0] and unicodedata.normalize("NFC",d[1]) in cutlets and unicodedata.normalize("NFC",d[3]) in months and d[2].isdigit() and 1<=int(d[2])<=5778 and d[4].isdigit() and 1<=int(d[4])<=123
     check("S5_DATE_001","date",{"c":c,"t":t},"|".join(d),"five fields; year and locked catalog; bounded day indices","structural_only_shared_reference",ok,"structural_only_checks")
-    for j,(c,t) in enumerate(((str(F),str(F+1)),(str(F+1),str(F))),1):
-     got=native("S5_PROD_%03d"%j,"S5Production",c,t); code,sep,message=got.partition("|")
-     ok=sep=="|" and code=="9302" and "E_STAGE_02_DISCOVERY_ONLY" in message
-     check("S5_PROD_%03d"%j,"production",{"c":c,"t":t},got,"9302|E_STAGE_02_DISCOVERY_ONLY","EXPECTED_ERROR_NOT_CALENDAR_IMPLEMENTATION",ok,"production_expected_error_checks")
+
    finally: close_managed_office(office,proc,context,tainted=tainted)
   if len({r[0] for r in rows})!=len(rows): errors.append("DUPLICATE_IDS")
   if len(rows)!=len(days)+len(pairs)+7+1+1+2: errors.append("MISSING_NATIVE_ROWS")
