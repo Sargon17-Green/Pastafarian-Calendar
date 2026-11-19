@@ -68,8 +68,8 @@ jobs:
                       assert all(n.name.split('.')[0] not in
                                  {'subprocess','ctypes','psutil'} for n in node.names)
                   if isinstance(node,ast.ImportFrom):
-                      assert (node.module or '').split('.')[0] not in
-                             {'subprocess','ctypes','psutil'}
+                      assert ((node.module or '').split('.')[0] not in
+                              {'subprocess','ctypes','psutil'})
           print('V110_NO_ORIGINAL_CONVERTER_PROCESS_LAUNCH_INTERFACE')
           PY
           PYTHONPATH=qa/soak/runner python3 -B -m unittest discover \
