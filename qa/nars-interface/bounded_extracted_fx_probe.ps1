@@ -105,29 +105,9 @@ try {
     $ecExists = Test-Path -LiteralPath $diagnostic -PathType Leaf
     $ecCode = if ($ecExists) { [System.IO.File]::ReadAllText($diagnostic).Trim() } else { '' }
     $ecSha = if ($ecExists) { (Get-FileHash -LiteralPath $diagnostic -Algorithm SHA256).Hash.ToLowerInvariant() } else { $null }
-    # NARS renders the nested three-item ⎕EC result as a whitespace-separated
-    # vector such as '2 00 02 0'. Its *first* integer is the return class;
-    # the original strict whole-string check incorrectly rejected success.
-    # Still require the independently verified exact "42" function receipt.
-    $ecFormatValid = ($ecCode -match '^([0-5])(?:\s+[0-9]+)*
-    $r['fx_probe'] = [ordered]@{exists=$exists;matches_exact=$exact;bytes=$actualBytes.Length;expected_bytes=$expectedBytes.Length;sha256=$markerSha;process_was_running_at_check=$wasRunning}
-    $r['process_exit_code'] = if ($p.HasExited) { $p.ExitCode } else { $null }
-    $r['status'] = if ($exact -and $r['ec_status'].success) { 'NATIVE_FX_EC_PROBE_CONFIRMED_NOT_STAGE01' } else { 'NATIVE_FX_EC_PROBE_NOT_OBSERVED' }
-} catch {
-    $r['status'] = 'FAIL_CLOSED'
-    $r['errors'] += $_.Exception.Message
-    throw
-} finally {
-    Save-Report
-    Write-Output ('NATIVE_FX_EC_STATUS=' + $r['status'])
-    Write-Output ('BINARY_SHA256_VERIFIED=' + $r['binary_verified'])
-    Write-Output ('VERSION_VERIFIED=' + $r['version_verified'])
-    Write-Output ('FX_PROBE_FILE_EXISTS=' + $r['fx_probe'].exists)
-    Write-Output ('FX_PROBE_FILE_EXACT=' + $r['fx_probe'].matches_exact)
-    if ($r.Contains('ec_status')) { Write-Output ('FX_PROBE_EC_CODE=' + $r['ec_status'].code) }
-    Write-Output 'STAGE01=NOT_RUN'
-}
-)
+    # The first integer of the nested ⎕EC result is the return class.
+    # NARS can format it as '2 00 02 0'; keep the entire raw string.
+    $ecFormatValid = ($ecCode -match '^([0-5])(?:\s+[0-9]+)*$')
     $ecClass = if ($ecFormatValid) { [int]$Matches[1] } else { $null }
     $ecSuccess = $ecFormatValid -and ($ecClass -in @(1,2,3))
     $r['ec_status'] = [ordered]@{exists=$ecExists;code=$ecCode;class=$ecClass;sha256=$ecSha;format_valid=$ecFormatValid;success=$ecSuccess}
