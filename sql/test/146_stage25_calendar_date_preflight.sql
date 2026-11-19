@@ -72,8 +72,13 @@ DECLARE
     r record;
     v_count integer;
 BEGIN
-    SELECT calculation_day,year_data
-      INTO STRICT v_calculation_day,v_year
+    SELECT calculation_day
+      INTO STRICT v_calculation_day
+      FROM slice25_years
+     WHERE year_id=v_year_id;
+
+    SELECT (year_data).*
+      INTO STRICT v_year
       FROM slice25_years
      WHERE year_id=v_year_id;
 
