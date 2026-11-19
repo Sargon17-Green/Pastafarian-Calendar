@@ -33,10 +33,17 @@ jobs:
 
       - name: Download and verify Chapel 2.10.0 package
         shell: bash
+        env:
+          CHAPEL_RELEASE_READ_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           package='chapel-2.10.0-1.ubuntu24.amd64.deb'
+          # Authenticate the release-metadata request to avoid anonymous API
+          # rate limits on shared GitHub-hosted runner IPs. The package still
+          # must match the publisher's SHA-256 digest before installation.
           curl --fail --location --silent --show-error --retry 3 \
+            --header "Authorization: Bearer ${CHAPEL_RELEASE_READ_TOKEN}" \
+            --header 'Accept: application/vnd.github+json' \
             'https://api.github.com/repos/chapel-lang/chapel/releases/tags/2.10.0' \
             --output chapel-release.json
           python3 - <<'PY'
