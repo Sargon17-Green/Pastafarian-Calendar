@@ -4,10 +4,9 @@ with Pure_Full_Weave_V122;
 
 procedure Test_Pure_Full_Weave_V122 is
    use Ada.Numerics.Big_Numbers.Big_Integers;
-   use Pure_Full_Weave_V122;
 
-   procedure Expect (Lengths : Natural_Array; Expected : Natural) is
-      Observed : constant Big_Integer := Count (Lengths);
+   procedure Expect (Lengths : Pure_Full_Weave_V122.Natural_Array; Expected : Natural) is
+      Observed : constant Big_Integer := Pure_Full_Weave_V122.Count (Lengths);
    begin
       if Observed /= To_Big_Integer (Integer (Expected)) then
          raise Program_Error with
@@ -15,7 +14,7 @@ procedure Test_Pure_Full_Weave_V122 is
       end if;
    end Expect;
 
-   Lengths : Natural_Array (1 .. 47) := (others => 123);
+   Lengths : Pure_Full_Weave_V122.Natural_Array (1 .. 47) := (others => 123);
    Huge_Count : Big_Integer := To_Big_Integer (0);
 begin
    Expect ((1 => 2, 2 => 2), 2);
@@ -27,7 +26,7 @@ begin
    Ada.Text_IO.Put_Line ("V122_SIX_SMALL_EXACT_ADA_MATH_COUNTS_PASS");
 
    Lengths (47) := 120;
-   Huge_Count := Count (Lengths);
+   Huge_Count := Pure_Full_Weave_V122.Count (Lengths);
    -- No normal integer or 128-bit modulus can store this exact value.
    Ada.Text_IO.Put_Line
      ("V122_MAX_47_MONTH_5778_DAY_EXACT_INTEGER "
