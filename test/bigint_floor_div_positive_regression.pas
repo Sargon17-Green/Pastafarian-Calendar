@@ -13,7 +13,7 @@ uses
 
 const
   ExpectedCases = 96;
-  ExpectedChecks = 1347;
+  ExpectedChecks = 1923;
 
 var
   Cases, Passed, Failed: Integer;
@@ -119,6 +119,43 @@ begin
     BigToDecimal(Q) = Fields[3]);
 end;
 
+{ Stage 1 metamorphic QA on Python-int quotient/remainder oracles:
+  floor((A + k*B)/B) = Q + k, residual stays R (k=1,17).
+  floor((2*A)/(2*B)) = Q, residual becomes 2*R.
+  Inputs remain at most 406 decimal digits before scaling. }
+procedure CheckAffineRelations(const Fields: TStringList);
+var
+  A, B, ExpectedQ, ExpectedR: TBigInt;
+  ShiftedA, ShiftedQ, ScaledA, ScaledB, ScaledQ, Residual: TBigInt;
+begin
+  A := BigFromDecimal(Fields[1]);
+  B := BigFromDecimal(Fields[2]);
+  ExpectedQ := BigFromDecimal(Fields[3]);
+  ExpectedR := BigFromDecimal(Fields[4]);
+
+  ShiftedA := BigAdd(A, B);
+  ShiftedQ := BigFloorDivPositive(ShiftedA, B);
+  Check('translacao por B: quociente', 
+    BigCompare(ShiftedQ, BigAdd(ExpectedQ, BigOne)) = 0);
+  Residual := BigSubtract(ShiftedA, BigMultiply(ShiftedQ, B));
+  Check('translacao por B: resto', BigCompare(Residual, ExpectedR) = 0);
+
+  ShiftedA := BigAdd(A, BigMultiplyUInt32(B, 17));
+  ShiftedQ := BigFloorDivPositive(ShiftedA, B);
+  Check('translacao por 17B: quociente',
+    BigCompare(ShiftedQ, BigAdd(ExpectedQ, BigFromInt64(17))) = 0);
+  Residual := BigSubtract(ShiftedA, BigMultiply(ShiftedQ, B));
+  Check('translacao por 17B: resto', BigCompare(Residual, ExpectedR) = 0);
+
+  ScaledA := BigMultiplyUInt32(A, 2);
+  ScaledB := BigMultiplyUInt32(B, 2);
+  ScaledQ := BigFloorDivPositive(ScaledA, ScaledB);
+  Check('escala por dois: quociente', BigCompare(ScaledQ, ExpectedQ) = 0);
+  Residual := BigSubtract(ScaledA, BigMultiply(ScaledQ, ScaledB));
+  Check('escala por dois: resto',
+    BigCompare(Residual, BigMultiplyUInt32(ExpectedR, 2)) = 0);
+end;
+
 procedure RunVectors;
 var
   F: TextFile;
@@ -141,6 +178,7 @@ begin
         Inc(Cases);
         CheckVector(Fields);
         CheckIsolation(Fields);
+        CheckAffineRelations(Fields);
       end;
     finally
       CloseFile(F);
