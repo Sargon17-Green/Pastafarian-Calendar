@@ -32,3 +32,7 @@ tests/stage56_actual_year_profile_preflight_tests.php constructs one explicitly 
 3. Run exact 3-year profiles, preserving original JSON SHA and logs; compare <=512MiB/900s separately. If O(mL²) fails, derive an independently proven state-updatable adjoint; no PATCH22/PATCH23 integration before that gate.
 4. Stage56 remains IN_PROGRESS; no main/merge, no green for real-year profiling.
 
+
+## B5 CLI negative-boundary QA addendum (2026-11-20)
+
+New `tests/stage56_actual_year_profile_cli_contract_tests.php` runs 12 deliberate rejection cases against the real B5 command entrypoint, covering argument count, invalid year/hash syntax, SHA mismatch, nonexistent file, malformed/scalar/null JSON, project, source-claim and anchor shape. The test suite never starts a count/rank/unrank benchmark and never represents any fixture as production data. Verified locally with PHP 8.4.24 (64-bit): syntax 1/1 and rejection cases 12/12 PASS; local profiler blob matched the pre-existing B5 source blob `0af9ed38a8e795c403a89bddeeb223e002381625`. This is not PHP 8.3 Native acceptance. The canonical B5 job now captures a third lint, CLI subprocess logs and exit status, and independently checks both the original 16 synthetic validator cases and these 12 CLI rejections. Exact-SHA completed Native run and source-bound actual-year profiles remain outstanding.
