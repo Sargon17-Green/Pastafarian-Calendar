@@ -1,0 +1,756 @@
+{
+  "schema": "PASTAFARI_SOAK_ARCHIVED_ROSTER_PROVENANCE_V127/1",
+  "source_file": "pastafarian_converter_inventory_v21_20261114.json",
+  "source_internal_schema": "pastafarian_converter_inventory/v15",
+  "source_created_utc_date": "2026-11-14",
+  "source_scope": "Sargon17-Green and Sargon-17-Green (eliezergreen001 excluded)",
+  "source_counts": {
+    "reference_records": 58,
+    "extra_language_branch_triage_records": 10,
+    "production_or_candidate_records": 20,
+    "new_seer_next_binary_variants": 3,
+    "distinct_language_branches": 66,
+    "total_owned_repositories": 9,
+    "total_branch_names_counted_previously": 258,
+    "total_catalog_rows_including_overlap": 91,
+    "app_non_main_branches_compared_v12": 39,
+    "app_branches_total_v12": 40
+  },
+  "records": [
+    {
+      "record_id": "REF-01",
+      "branch": "APL+Deutsch",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/normative_oracle.apl",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/APL%2BDeutsch/src/normative_oracle.apl"
+    },
+    {
+      "record_id": "REF-02",
+      "branch": "AWK+nynorsk",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/normative_oracle.awk",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/AWK%2Bnynorsk/src/normative_oracle.awk"
+    },
+    {
+      "record_id": "REF-03",
+      "branch": "Ada+తెలుగు",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/normative_oracle.adb",
+      "source_status_as_of_2026_11_14": "DIRECT_FULL_DATE_CI_BOUNDED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Ada%2B%E0%B0%A4%E0%B1%86%E0%B0%B2%E0%B1%81%E0%B0%97%E0%B1%81/src/normative_oracle.adb"
+    },
+    {
+      "record_id": "REF-04",
+      "branch": "BASIC+ਪੰਜਾਬੀ",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "basic/Standard/Oracle.xba",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/BASIC%2B%E0%A8%AA%E0%A9%B0%E0%A8%9C%E0%A8%BE%E0%A8%AC%E0%A9%80/basic/Standard/Oracle.xba"
+    },
+    {
+      "record_id": "REF-05",
+      "branch": "C#+العربية-الفصحى",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/PastafarianCalendar.Stage01Tests/Normative/NormativeScroll.Calendar.cs",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/C%23%2B%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-%D8%A7%D9%84%D9%81%D8%B5%D8%AD%D9%89/tests/PastafarianCalendar.Stage01Tests/Normative/NormativeScroll.Calendar.cs"
+    },
+    {
+      "record_id": "REF-06",
+      "branch": "C++&Latina",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/reference/normative_reference.cpp",
+      "source_status_as_of_2026_11_14": "ALTERNATE_REFERENCE_CI_ONLY",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/C%2B%2B%26Latina/tests/reference/normative_reference.cpp"
+    },
+    {
+      "record_id": "REF-07",
+      "branch": "COBOL+简体中文",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/oracle/normative_oracle.cob",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/COBOL%2B%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87/test/oracle/normative_oracle.cob"
+    },
+    {
+      "record_id": "REF-08",
+      "branch": "Chapel+Українська-мова",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/NormativeOracle.chpl",
+      "source_status_as_of_2026_11_14": "DIRECT_DATE_CI_TIMEOUT_INCONCLUSIVE",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Chapel%2B%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D1%81%D1%8C%D0%BA%D0%B0-%D0%BC%D0%BE%D0%B2%D0%B0/src/NormativeOracle.chpl"
+    },
+    {
+      "record_id": "REF-09",
+      "branch": "Clojure+Nederlands",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/pastafari/normative_oracle.clj",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Clojure%2BNederlands/test/pastafari/normative_oracle.clj"
+    },
+    {
+      "record_id": "REF-10",
+      "branch": "Common-Lisp+Latviešu-valoda",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative-oracle.lisp",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Common-Lisp%2BLatvie%C5%A1u-valoda/test/normative-oracle.lisp"
+    },
+    {
+      "record_id": "REF-11",
+      "branch": "Crystal+ગુજરાતી",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative_scroll.cr",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Crystal%2B%E0%AA%97%E0%AB%81%E0%AA%9C%E0%AA%B0%E0%AA%BE%E0%AA%A4%E0%AB%80/test/normative_scroll.cr"
+    },
+    {
+      "record_id": "REF-12",
+      "branch": "D+Հայերեն",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/normative_oracle.d",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/D%2B%D5%80%D5%A1%D5%B5%D5%A5%D6%80%D5%A5%D5%B6/tests/normative_oracle.d"
+    },
+    {
+      "record_id": "REF-13",
+      "branch": "Dart+עברית",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test_support/normative_reference.dart",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Dart%2B%D7%A2%D7%91%D7%A8%D7%99%D7%AA/test_support/normative_reference.dart"
+    },
+    {
+      "record_id": "REF-14",
+      "branch": "Elixir+tiếng-Việt",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/support/normative_reference.ex",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Elixir%2Bti%E1%BA%BFng-Vi%E1%BB%87t/test/support/normative_reference.ex"
+    },
+    {
+      "record_id": "REF-15",
+      "branch": "Elm+íslensku",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/NormativeOracle.elm",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Elm%2B%C3%ADslensku/tests/NormativeOracle.elm"
+    },
+    {
+      "record_id": "REF-16",
+      "branch": "Erlang+יידיש",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative_oracle.erl",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Erlang%2B%D7%99%D7%99%D7%93%D7%99%D7%A9/test/normative_oracle.erl"
+    },
+    {
+      "record_id": "REF-17",
+      "branch": "FALSE+العربية",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative_reference.false",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/FALSE%2B%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9/test/normative_reference.false"
+    },
+    {
+      "record_id": "REF-18",
+      "branch": "Fortran+English",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative_oracle_calendar.f90",
+      "source_status_as_of_2026_11_14": "DIRECT_FULL_DATE_CI_BOUNDED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Fortran%2BEnglish/test/normative_oracle_calendar.f90"
+    },
+    {
+      "record_id": "REF-19",
+      "branch": "Gleam+Esperanto",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/reference/calendar.gleam",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Gleam%2BEsperanto/test/reference/calendar.gleam"
+    },
+    {
+      "record_id": "REF-20",
+      "branch": "Haskell+čeština",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/Pastafari/NormativeOracle.hs",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Haskell%2B%C4%8De%C5%A1tina/src/Pastafari/NormativeOracle.hs"
+    },
+    {
+      "record_id": "REF-21",
+      "branch": "Haxe+Svenska",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/pastafari/oracle/NormativeReference.hx",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Haxe%2BSvenska/src/pastafari/oracle/NormativeReference.hx"
+    },
+    {
+      "record_id": "REF-22",
+      "branch": "J+Română",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative_reference.ijs",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/J%2BRom%C3%A2n%C4%83/test/normative_reference.ijs"
+    },
+    {
+      "record_id": "REF-23",
+      "branch": "Java+Lojban",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/test/java/org/pastafari/javalojban/NormativeOracle.java",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Java%2BLojban/src/test/java/org/pastafari/javalojban/NormativeOracle.java"
+    },
+    {
+      "record_id": "REF-24",
+      "branch": "JavaScript+Interlingue",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/normative-reference.js",
+      "source_status_as_of_2026_11_14": "ALTERNATE_REFERENCE_CI_ONLY",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/JavaScript%2BInterlingue/tests/normative-reference.js"
+    },
+    {
+      "record_id": "REF-25",
+      "branch": "Julia+New-Ithkuil",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "repo_delta/test/support/NormativeOracle.jl",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Julia%2BNew-Ithkuil/repo_delta/test/support/NormativeOracle.jl"
+    },
+    {
+      "record_id": "REF-26",
+      "branch": "Kotlin+Cymraeg",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/test/kotlin/pastafari/NormativeCalendar.kt",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Kotlin%2BCymraeg/src/test/kotlin/pastafari/NormativeCalendar.kt"
+    },
+    {
+      "record_id": "REF-27",
+      "branch": "Lean+Norsk",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "PastafariLean/NormativeOracle.lean",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Lean%2BNorsk/PastafariLean/NormativeOracle.lean"
+    },
+    {
+      "record_id": "REF-28",
+      "branch": "Logo+Ido",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative_reference.logo",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Logo%2BIdo/test/normative_reference.logo"
+    },
+    {
+      "record_id": "REF-29",
+      "branch": "Lua+Kreyòl-ayisyen",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative_oracle.lua",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Lua%2BKrey%C3%B2l-ayisyen/test/normative_oracle.lua"
+    },
+    {
+      "record_id": "REF-30",
+      "branch": "MATLAB+Polski",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/oracle/normative_oracle.m",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/MATLAB%2BPolski/tests/oracle/normative_oracle.m"
+    },
+    {
+      "record_id": "REF-31",
+      "branch": "Mercury+ᠮᠣᠩᠭᠣᠯ-ᠬᠡᠯᠡ",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative_reference.m",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Mercury%2B%E1%A0%AE%E1%A0%A3%E1%A0%A9%E1%A0%AD%E1%A0%A3%E1%A0%AF-%E1%A0%AC%E1%A0%A1%E1%A0%AF%E1%A0%A1/test/normative_reference.m"
+    },
+    {
+      "record_id": "REF-32",
+      "branch": "Nim+Magyar-nyelv",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/normative_oracle.nim",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Nim%2BMagyar-nyelv/tests/normative_oracle.nim"
+    },
+    {
+      "record_id": "REF-33",
+      "branch": "Object-Pascal+Português",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/NormativeCalendarOracle.pas",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Object-Pascal%2BPortugu%C3%AAs/test/NormativeCalendarOracle.pas"
+    },
+    {
+      "record_id": "REF-34",
+      "branch": "Oz+hrvatski",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/NormativeReference.oz",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Oz%2Bhrvatski/test/NormativeReference.oz"
+    },
+    {
+      "record_id": "REF-35",
+      "branch": "PHP+Bahasa-Melayu",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/oracle/NormativeOracle.php",
+      "source_status_as_of_2026_11_14": "DIRECT_FULL_DATE_CI_BOUNDED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/PHP%2BBahasa-Melayu/tests/oracle/NormativeOracle.php"
+    },
+    {
+      "record_id": "REF-36",
+      "branch": "Perl+國語",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "t/lib/Pastafari/NormativeScroll.pm",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Perl%2B%E5%9C%8B%E8%AA%9E/t/lib/Pastafari/NormativeScroll.pm"
+    },
+    {
+      "record_id": "REF-37",
+      "branch": "Pony+ภาษาไทย",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "oracle/normative_calendar.pony",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Pony%2B%E0%B8%A0%E0%B8%B2%E0%B8%A9%E0%B8%B2%E0%B9%84%E0%B8%97%E0%B8%A2/oracle/normative_calendar.pony"
+    },
+    {
+      "record_id": "REF-38",
+      "branch": "PowerShell+Tagalog",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "oracle/NormativeCalendar.ps1",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/PowerShell%2BTagalog/oracle/NormativeCalendar.ps1"
+    },
+    {
+      "record_id": "REF-39",
+      "branch": "Prolog+Galego",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/normative_oracle.pl",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Prolog%2BGalego/src/normative_oracle.pl"
+    },
+    {
+      "record_id": "REF-40",
+      "branch": "PureScript+नेपाली",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/Pastafari/Normative/Calendar.purs",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/PureScript%2B%E0%A4%A8%E0%A5%87%E0%A4%AA%E0%A4%BE%E0%A4%B2%E0%A5%80/src/Pastafari/Normative/Calendar.purs"
+    },
+    {
+      "record_id": "REF-41",
+      "branch": "Python+Türkçe",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/normative_reference.py",
+      "source_status_as_of_2026_11_14": "DIRECT_FULL_DATE_CI_BOUNDED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Python%2BT%C3%BCrk%C3%A7e/tests/normative_reference.py"
+    },
+    {
+      "record_id": "REF-42",
+      "branch": "Q#+日本語の初期基盤を構築",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/NormativeOracle.qs",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Q%23%2B%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%81%AE%E5%88%9D%E6%9C%9F%E5%9F%BA%E7%9B%A4%E3%82%92%E6%A7%8B%E7%AF%89/src/NormativeOracle.qs"
+    },
+    {
+      "record_id": "REF-43",
+      "branch": "R+Català",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "R/normative_calendar.R",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/R%2BCatal%C3%A0/R/normative_calendar.R"
+    },
+    {
+      "record_id": "REF-44",
+      "branch": "Racket+Lietuvių-kalba",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/normative-oracle.rkt",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Racket%2BLietuvi%C5%B3-kalba/src/normative-oracle.rkt"
+    },
+    {
+      "record_id": "REF-45",
+      "branch": "Raku+Eesti-keel",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "t/lib/Pastafari/Normative/Oracle.rakumod",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Raku%2BEesti-keel/t/lib/Pastafari/Normative/Oracle.rakumod"
+    },
+    {
+      "record_id": "REF-46",
+      "branch": "Red+српски",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative-oracle.red",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Red%2B%D1%81%D1%80%D0%BF%D1%81%D0%BA%D0%B8/test/normative-oracle.red"
+    },
+    {
+      "record_id": "REF-47",
+      "branch": "Rust+Azərbaycan-dili",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "tests/support/normative_oracle.rs",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Rust%2BAz%C9%99rbaycan-dili/tests/support/normative_oracle.rs"
+    },
+    {
+      "record_id": "REF-48",
+      "branch": "SQL+தமிழ்",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "sql/test/10_normative_reference.sql",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/SQL%2B%E0%AE%A4%E0%AE%AE%E0%AE%BF%E0%AE%B4%E0%AF%8D/sql/test/10_normative_reference.sql"
+    },
+    {
+      "record_id": "REF-49",
+      "branch": "Scala+Italiano",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/test/scala/pastafari/oracle/NormativeOracle.scala",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Scala%2BItaliano/src/test/scala/pastafari/oracle/NormativeOracle.scala"
+    },
+    {
+      "record_id": "REF-50",
+      "branch": "Scheme+Dansk",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normative-oracle.scm",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Scheme%2BDansk/test/normative-oracle.scm"
+    },
+    {
+      "record_id": "REF-51",
+      "branch": "Smalltalk+اردو",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/PSTNormativeOracle.st",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Smalltalk%2B%D8%A7%D8%B1%D8%AF%D9%88/src/PSTNormativeOracle.st"
+    },
+    {
+      "record_id": "REF-52",
+      "branch": "TypeScript+मराठी",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "test/normativeOracle.ts",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/TypeScript%2B%E0%A4%AE%E0%A4%B0%E0%A4%BE%E0%A4%A0%E0%A5%80/test/normativeOracle.ts"
+    },
+    {
+      "record_id": "REF-53",
+      "branch": "Unicon+ಕನ್ನಡ",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/normative_oracle.icn",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Unicon%2B%E0%B2%95%E0%B2%A8%E0%B3%8D%E0%B2%A8%E0%B2%A1/src/normative_oracle.icn"
+    },
+    {
+      "record_id": "REF-54",
+      "branch": "V+አማርኛ",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "pastafari/normative_oracle_test.v",
+      "source_status_as_of_2026_11_14": "DIRECT_FULL_DATE_CI_BOUNDED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/V%2B%E1%8A%A0%E1%88%9B%E1%88%AD%E1%8A%9B/pastafari/normative_oracle_test.v"
+    },
+    {
+      "record_id": "REF-55",
+      "branch": "WAT+Español",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "oracle/normative_calendar_wide.wat",
+      "source_status_as_of_2026_11_14": "ARCHIVED_SELF_TEST_LOG_ONLY",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/WAT%2BEspa%C3%B1ol/oracle/normative_calendar_wide.wat"
+    },
+    {
+      "record_id": "REF-56",
+      "branch": "Zig+Қазақ-тілі",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/calendar_oracle.zig",
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NO_DIRECT_E2E_PROOF",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Zig%2B%D2%9A%D0%B0%D0%B7%D0%B0%D2%9B-%D1%82%D1%96%D0%BB%D1%96/src/calendar_oracle.zig"
+    },
+    {
+      "record_id": "REF-57",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "verification/reference-oracle/reference.mjs",
+      "source_status_as_of_2026_11_14": "DIRECT_NATIVE_NODE_FULL_DATE_CI_PASS_CURRENT_HEAD_IN_OVERALL_FAILING_SUITE",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/6b580f9fe914968c57470bec9d8cf3903c463483/verification/reference-oracle/reference.mjs"
+    },
+    {
+      "record_id": "REF-58",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "implementations/tests/generate_spec_canonical.py",
+      "source_status_as_of_2026_11_14": "COMPLETE_INDEPENDENT_GENERATOR_CONVERTER__NO_CURRENT_HEAD_DIRECT_CI_IN_THIS_AUDIT",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/6b580f9fe914968c57470bec9d8cf3903c463483/implementations/tests/generate_spec_canonical.py"
+    },
+    {
+      "record_id": "TRIAGE-01",
+      "branch": "Befunge+Кыргызча",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "NO_FULL_NATIVE_DATE",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/Befunge%2B%D0%9A%D1%8B%D1%80%D0%B3%D1%8B%D0%B7%D1%87%D0%B0"
+    },
+    {
+      "record_id": "TRIAGE-02",
+      "branch": "Codesh+𐤉𐤄𐤅𐤃𐤉𐤕",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NATIVE_UNVERIFIED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/Codesh%2B%F0%90%A4%89%F0%90%A4%84%F0%90%A4%85%F0%90%A4%83%F0%90%A4%89%F0%90%A4%95"
+    },
+    {
+      "record_id": "TRIAGE-03",
+      "branch": "Excel-VBA+ᐃᓄᒃᑎᑐᑦ",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "NOT_IMPLEMENTED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/Excel-VBA%2B%E1%90%83%E1%93%84%E1%92%83%E1%91%8E%E1%91%90%E1%91%A6"
+    },
+    {
+      "record_id": "TRIAGE-04",
+      "branch": "LabVIEW/G+lingua-franca-nova",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "NOT_IMPLEMENTED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/LabVIEW%2FG%2Blingua-franca-nova"
+    },
+    {
+      "record_id": "TRIAGE-05",
+      "branch": "Plain-English-Programming+English",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NATIVE_UNVERIFIED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/Plain-English-Programming%2BEnglish"
+    },
+    {
+      "record_id": "TRIAGE-06",
+      "branch": "SM83-Assembly+ግዕዝ",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "NOT_IMPLEMENTED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/SM83-Assembly%2B%E1%8C%8D%E1%8B%95%E1%8B%9D"
+    },
+    {
+      "record_id": "TRIAGE-07",
+      "branch": "Shakespeare-Programming-Language+മലയാളം",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "SOURCE_COMPLETE_NATIVE_UNVERIFIED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/Shakespeare-Programming-Language%2B%E0%B4%AE%E0%B4%B2%E0%B4%AF%E0%B4%BE%E0%B4%B3%E0%B4%82"
+    },
+    {
+      "record_id": "TRIAGE-08",
+      "branch": "SystemVerilog+Kalaallisut",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "NOT_IMPLEMENTED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/SystemVerilog%2BKalaallisut"
+    },
+    {
+      "record_id": "TRIAGE-09",
+      "branch": "Word-VBA+Mapudungun",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "NOT_IMPLEMENTED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/Word-VBA%2BMapudungun"
+    },
+    {
+      "record_id": "TRIAGE-10",
+      "branch": "x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": null,
+      "source_status_as_of_2026_11_14": "PRODUCTION_NATIVE_CI_VERIFIED",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/tree/x86-64-Assembly%2B%CF%AF%E2%B2%99%E2%B2%89%E2%B2%A7%E2%B2%A3%E2%B2%89%E2%B2%99%E2%B2%9B%CC%80%E2%B2%AD%E2%B2%8F%E2%B2%99%E2%B2%93"
+    },
+    {
+      "record_id": "MAIN-AUTH-JS",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "browser/pastafari-calendar-core.js",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/main/browser/pastafari-calendar-core.js"
+    },
+    {
+      "record_id": "MAIN-FAST-JS",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "browser/pastafari-calendar-fast.js",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/main/browser/pastafari-calendar-fast.js"
+    },
+    {
+      "record_id": "MAIN-PY",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "implementations/python/pastafari_calendar/core.py",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/main/implementations/python/pastafari_calendar/core.py"
+    },
+    {
+      "record_id": "MAIN-RUBY",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "implementations/ruby/pastafari_calendar.rb",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/main/implementations/ruby/pastafari_calendar.rb"
+    },
+    {
+      "record_id": "MAIN-JAVA",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "implementations/java/src/main/java/org/appointedtimes/PastafariCalendar.java",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/main/implementations/java/src/main/java/org/appointedtimes/PastafariCalendar.java"
+    },
+    {
+      "record_id": "MAIN-C",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "implementations/c/src/calendar_core.c",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/main/implementations/c/src/calendar_core.c"
+    },
+    {
+      "record_id": "MAIN-CPP",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "implementations/cpp/src/calendar.cpp",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/main/implementations/cpp/src/calendar.cpp"
+    },
+    {
+      "record_id": "MAIN-COBOL",
+      "branch": "main",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_path": "implementations/cobol/src/pastafari-engine.cob",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/pastafari-calendar/blob/main/implementations/cobol/src/pastafari-engine.cob"
+    },
+    {
+      "record_id": "SEER-NATIVE",
+      "branch": "main",
+      "repository": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+      "source_path": "query/index.mjs",
+      "source_status_as_of_2026_11_14": "מימוש מלא; runtime native דרוש",
+      "source_url": "https://github.com/Sargon-17-Green/Pastafarian-Calendar-Seer/blob/main/query/index.mjs"
+    },
+    {
+      "record_id": "LATIN-CPP",
+      "branch": "C++&Latina",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "include/pastafari/monster.hpp",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/C%2B%2B%26Latina/include/pastafari/monster.hpp"
+    },
+    {
+      "record_id": "LATIN-CELERITAS",
+      "branch": "Celeritas-per-Sepulcra",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/celeritas_engine_port.cpp",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Celeritas-per-Sepulcra/src/celeritas_engine_port.cpp"
+    },
+    {
+      "record_id": "VIET-ELIXIR",
+      "branch": "Elixir+tiếng-Việt",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "lib/pastafari_calendar_elixir_vietnamese.ex",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Elixir%2Bti%E1%BA%BFng-Vi%E1%BB%87t/lib/pastafari_calendar_elixir_vietnamese.ex"
+    },
+    {
+      "record_id": "INTERLINGUE-JS",
+      "branch": "JavaScript+Interlingue",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/index.js",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/JavaScript%2BInterlingue/src/index.js"
+    },
+    {
+      "record_id": "TURKISH-PY",
+      "branch": "Python+Türkçe",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/pastafari_calendar/calendar.py",
+      "source_status_as_of_2026_11_14": "מימוש מלא; הרצה לא בוצעה",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Python%2BT%C3%BCrk%C3%A7e/src/pastafari_calendar/calendar.py"
+    },
+    {
+      "record_id": "POLISH-MATLAB",
+      "branch": "MATLAB+Polski",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/calendarDateSpaghetti.m",
+      "source_status_as_of_2026_11_14": "קוד מלא; Native אישור ממתין",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/MATLAB%2BPolski/src/calendarDateSpaghetti.m"
+    },
+    {
+      "record_id": "COPTIC-X64",
+      "branch": "x86-64-Assembly+ϯⲙⲉⲧⲣⲉⲙⲛ̀ⲭⲏⲙⲓ",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/production/stage54_integration.s",
+      "source_status_as_of_2026_11_14": "קוד מלא לכאורה; ABI/Native דורש אימות",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/x86-64-Assembly%2B%CF%AF%E2%B2%99%E2%B2%89%E2%B2%A7%E2%B2%A3%E2%B2%89%E2%B2%99%E2%B2%9B%CC%80%E2%B2%AD%E2%B2%8F%E2%B2%99%E2%B2%93/src/production/stage54_integration.s"
+    },
+    {
+      "record_id": "AMHARIC-V",
+      "branch": "V+አማርኛ",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "pastafari/patch15_numeric_date.v",
+      "source_status_as_of_2026_11_14": "מבחני 5 רכיבים קיימים; נתיב ייצור אינו סופי",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/V%2B%E1%8A%A0%E1%88%9B%E1%88%AD%E1%8A%9B/pastafari/patch15_numeric_date.v"
+    },
+    {
+      "record_id": "MARATHI-TS",
+      "branch": "TypeScript+मराठी",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "src/postStage55FinalDate.ts",
+      "source_status_as_of_2026_11_14": "קוד מלא; DEVELOPMENT_STAGE מציין אינטגרציה עדיין לא התחילה",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/TypeScript%2B%E0%A4%AE%E0%A4%B0%E0%A4%BE%E0%A4%A0%E0%A5%80/src/postStage55FinalDate.ts"
+    },
+    {
+      "record_id": "PALEO-CODESH",
+      "branch": "Codesh+𐤉𐤄𐤅𐤃𐤉𐤕",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "מקור/תאריך־שלם־טהור.אמן",
+      "source_status_as_of_2026_11_14": "קוד מלא; בדיקת 100 מקרים היתה היברידית ושמות Native לא אומתו",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Codesh%2B%F0%90%A4%89%F0%90%A4%84%F0%90%A4%85%F0%90%A4%83%F0%90%A4%89%F0%90%A4%95/%D7%9E%D7%A7%D7%95%D7%A8/%D7%AA%D7%90%D7%A8%D7%99%D7%9A%D6%BE%D7%A9%D7%9C%D7%9D%D6%BE%D7%98%D7%94%D7%95%D7%A8.%D7%90%D7%9E%D7%9F"
+    },
+    {
+      "record_id": "WELSH-KOTLIN-PRODUCTION",
+      "branch": "Kotlin+Cymraeg",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_path": "soak/Post55ProductionDateBridge.kt",
+      "source_status_as_of_2026_11_14": "Production Kotlin native full-date bridge previously CI-run; production code unchanged to HEAD",
+      "source_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/Kotlin%2BCymraeg/soak/Post55ProductionDateBridge.kt"
+    },
+    {
+      "record_id": "SEER-NEXT-YEAR-CACHE",
+      "branch": "research/seer-next-first-principles-2026-11-06",
+      "repository": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+      "source_path": "research/seer-next/src/seer_next_engine_service.cpp",
+      "source_status_as_of_2026_11_14": "SEPARATE_NATIVE_SERVICE_WITH_HISTORIC_CI__CURRENT_HEAD_NOT_VERIFIED",
+      "source_url": "https://github.com/Sargon-17-Green/Pastafarian-Calendar-Seer/tree/research/seer-next-first-principles-2026-11-06"
+    },
+    {
+      "record_id": "SEER-NEXT-HYBRID",
+      "branch": "research/seer-next-first-principles-2026-11-06",
+      "repository": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+      "source_path": "research/seer-next/src/seer_next_hybrid_engine_service.cpp",
+      "source_status_as_of_2026_11_14": "SEPARATE_NATIVE_SERVICE_WITH_HISTORIC_CI__CURRENT_HEAD_NOT_VERIFIED",
+      "source_url": "https://github.com/Sargon-17-Green/Pastafarian-Calendar-Seer/tree/research/seer-next-first-principles-2026-11-06"
+    },
+    {
+      "record_id": "SEER-NEXT-COLD-PROBE",
+      "branch": "research/seer-next-first-principles-2026-11-06",
+      "repository": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+      "source_path": "research/seer-next/src/seer_next_hybrid_engine_service.cpp",
+      "source_status_as_of_2026_11_14": "RESEARCH_NATIVE_COLD_PROBE__CURRENT_HEAD_NOT_VERIFIED",
+      "source_url": "https://github.com/Sargon-17-Green/Pastafarian-Calendar-Seer/tree/research/seer-next-first-principles-2026-11-06"
+    }
+  ],
+  "caveats": [
+    "ARCHIVED 2026-11-14, NOT a 2026-11-20 live GitHub branch audit",
+    "Every algorithm_id is UNASSESSED until external lineage review; never assume 91 independent engines",
+    "Duplicate/derivative and full-date availability decisions require current source and completed CI evidence",
+    "Do not dispatch native original converters while #29 STOP_NEW_NATIVE_SOAK_DISPATCH remains active",
+    "A roster alone is not a runnable 10000-year plan or an acceptance certificate"
+  ]
+}
