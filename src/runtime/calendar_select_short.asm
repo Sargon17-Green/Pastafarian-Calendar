@@ -37,7 +37,7 @@ CalendarSelectShortRank::
     ld a, [wCalendarSelectCount+1]
     cp $4a
     jr c, .countOkay
-    jr nz, .invalid
+    jp nz, .invalid
     ld a, [wCalendarSelectCount]
     cp $65
     jp nc, .invalid
