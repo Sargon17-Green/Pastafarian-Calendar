@@ -31,7 +31,7 @@ def stones_independent(previous: tuple[int, ...], iteration: int) -> tuple[int, 
 
 
 def table(source: str, label: str) -> tuple[int, ...]:
-    match = re.search(r"(?m)^\\."+label+r":\\s*\\n((?:\\s+db [^\\n]+\\n){5})", source)
+    match = re.search(r"(?m)^\."+label+r":\s*\n((?:\s+db [^\n]+\n){5})", source)
     assert match, f"missing 5-row table {label}"
     values = []
     for row in match.group(1).splitlines():
