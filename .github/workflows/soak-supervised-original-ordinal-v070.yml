@@ -13,6 +13,10 @@ permissions:
   contents: read
 jobs:
   supervised-original-ordinal-1017:
+    # SOAK v114 INCIDENT #29: confirmed Ada F(c,t) first numerical mismatch.
+    # No new converter/native-derived dispatch on QA (manual or push).
+    # Resume only after reviewed source disposition and deliberate new gate.
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     steps:
