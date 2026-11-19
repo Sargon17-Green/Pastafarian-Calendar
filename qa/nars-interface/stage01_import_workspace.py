@@ -285,8 +285,11 @@ def main() -> int:
         args.manifest.parent.mkdir(parents=True, exist_ok=True)
         args.receipt.parent.mkdir(parents=True, exist_ok=True)
         args.candidate.write_bytes(candidate)
-        args.manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        args.receipt.write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        # On Windows, Path.write_text() translates LF to CRLF. The receipt
+        # commits to exact serialized UTF-8 bytes, not platform-normalized
+        # line endings. Write bytes directly to keep hashes reproducible.
+        args.manifest.write_bytes((json.dumps(manifest, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+        args.receipt.write_bytes((json.dumps(receipt, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
         print("STAGE01_CANDIDATE_ONLY", receipt["candidate_sha256"], "FUNCTIONS=95")
         return 0
     except Exception as exc:
@@ -297,7 +300,7 @@ def main() -> int:
             "error": f"{type(exc).__name__}:{exc}",
         }
         args.receipt.parent.mkdir(parents=True, exist_ok=True)
-        args.receipt.write_text(json.dumps(failure, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        args.receipt.write_bytes((json.dumps(failure, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
         print(failure["error"], file=sys.stderr)
         return 2
 

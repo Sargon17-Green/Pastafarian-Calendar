@@ -1,6 +1,10 @@
 import pathlib
 import tempfile
 import unittest
+import hashlib
+import json
+import subprocess
+import sys
 
 from stage01_import_workspace import (
     SOURCE_COMMIT, SOURCE_FILES, EXPECTED_TOTAL_FUNCTIONS,
@@ -97,6 +101,31 @@ class Stage01ImportWorkspaceTests(unittest.TestCase):
         self.assertFalse(receipt["native_executed"])
         self.assertEqual(receipt["candidate_sha256"], __import__("hashlib").sha256(candidate).hexdigest())
         self.assertEqual(manifest["manifest_sha256"], self.loaded["manifest"]["manifest_sha256"])
+
+
+    def test_cli_emits_exact_lf_manifest_bytes_on_current_os(self):
+        with tempfile.TemporaryDirectory() as root:
+            d = pathlib.Path(root)
+            source_workspace = d / "reference.ws.nars"
+            candidate = d / "candidate.ws.nars"
+            manifest_path = d / "source_manifest.json"
+            receipt_path = d / "workspace_candidate_receipt.json"
+            source_workspace.write_bytes(BASE)
+            proc = subprocess.run(
+                [sys.executable, str(REPO / "qa/nars-interface/stage01_import_workspace.py"),
+                 "--repo-root", str(REPO), "--source-workspace", str(source_workspace),
+                 "--candidate", str(candidate), "--manifest", str(manifest_path),
+                 "--receipt", str(receipt_path), "--marker-path", MARKER],
+                capture_output=True, text=True, timeout=60, check=False,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr[:1000])
+            raw = manifest_path.read_bytes()
+            self.assertNotIn(b"\\r\\n", raw)
+            self.assertTrue(raw.endswith(b"\\n"))
+            receipt = json.loads(receipt_path.read_bytes())
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), receipt["source_manifest_sha256"])
+            self.assertEqual(hashlib.sha256(candidate.read_bytes()).hexdigest(), receipt["candidate_sha256"])
+            self.assertFalse(receipt["native_executed"])
 
     def test_program_is_bounded_and_bmp_only(self):
         outer, _ = build_inner_program(self.loaded, MARKER)
