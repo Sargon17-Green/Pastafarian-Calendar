@@ -13,7 +13,7 @@ uses
 
 const
   ExpectedCases = 96;
-  ExpectedChecks = 963;
+  ExpectedChecks = 1347;
 
 var
   Cases, Passed, Failed: Integer;
@@ -81,6 +81,44 @@ begin
   Check('predicado de resto zero', BigIsZero(Residual) = (ExpectedR = '0'));
 end;
 
+{ Verify that the quotient has no mutable digit aliases with either input.
+  Uses the independently generated quotient oracle from the existing TSV. }
+procedure MutateForIsolation(var X: TBigInt);
+begin
+  if Length(X.Digits) = 0 then
+  begin
+    X.Sign := 1;
+    SetLength(X.Digits, 1);
+    X.Digits[0] := 1;
+  end
+  else if X.Digits[0] = UInt32(BIG_BASE - 1) then
+    X.Digits[0] := 0
+  else
+    X.Digits[0] := X.Digits[0] + 1;
+end;
+
+procedure CheckIsolation(const Fields: TStringList);
+var
+  A, B, Q: TBigInt;
+begin
+  A := BigFromDecimal(Fields[1]);
+  B := BigFromDecimal(Fields[2]);
+  Q := BigFloorDivPositive(A, B);
+  MutateForIsolation(Q);
+  Check('mutacao do quociente preserva dividendo',
+    BigToDecimal(A) = Fields[1]);
+  Check('mutacao do quociente preserva divisor',
+    BigToDecimal(B) = Fields[2]);
+
+  Q := BigFloorDivPositive(A, B);
+  MutateForIsolation(A);
+  Check('mutacao do dividendo preserva quociente',
+    BigToDecimal(Q) = Fields[3]);
+  MutateForIsolation(B);
+  Check('mutacao do divisor preserva quociente',
+    BigToDecimal(Q) = Fields[3]);
+end;
+
 procedure RunVectors;
 var
   F: TextFile;
@@ -102,6 +140,7 @@ begin
         Fields.DelimitedText := Line;
         Inc(Cases);
         CheckVector(Fields);
+        CheckIsolation(Fields);
       end;
     finally
       CloseFile(F);
