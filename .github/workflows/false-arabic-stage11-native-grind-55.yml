@@ -1,0 +1,78 @@
+name: FALSE Arabic Stage 11 grind row expansion for Stage 14 exact-source Native
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-native-grind-55:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: 7f52bc68f33dd732e6d2605ad40cb0bd75bf74d3
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+      COMBINED_SHA256: c74344f0bd206604c37c0be7477d8a504c3fafeeb5882a95024f9c974b5618bb
+      FIXTURE_SHA256: 4eb957182723103913e405a627464631a687847225d3d5b9dc64ba93db13fb6a
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Fetch exact source and original interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence upstream
+          git fetch --no-tags --depth=1 origin "$SOURCE_PIN" > evidence/project_fetch.log 2>&1
+          git rev-parse FETCH_HEAD > evidence/source_observed.txt
+          test "$(cat evidence/source_observed.txt)" = "$SOURCE_PIN"
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/runtime_observed.txt
+          test "$(cat evidence/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+
+      - name: Compile pinned original FALSE interpreter and preflight Unicode
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/compiler_stdout.txt 2> evidence/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/unicode_pick.false \
+            > evidence/unicode_pick.stdout.txt 2> evidence/unicode_pick.stderr.txt
+          test "$(cat evidence/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/preflight.txt
+
+      - name: Run exact source, normative row, mutant, four invalid inputs, and receipt
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage11_visible_grind_55_ci.py
+
+      - name: Preserve bounded evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage11-grind-55-native
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error
