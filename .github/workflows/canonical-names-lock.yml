@@ -160,6 +160,15 @@ jobs:
     permissions:
       contents: read
 
+  false-arabic-stage16-remove:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-remove14]')
+    uses: ./.github/workflows/false-arabic-stage16-native-sequence-remove.yml
+    permissions:
+      contents: read
+
   false-arabic-stage11-grind-55:
     if: >-
       github.event_name == 'push' &&

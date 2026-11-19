@@ -1,17 +1,8 @@
 name: FALSE Arabic Stage 16 original interpreter exact-source remove-by-position
 
 on:
-  push:
-    branches:
-      - 'FALSE+العربية'
-    paths:
-      - 'src/monster_bootstrap.false'
-      - 'test/stage16_sequence_remove_14.false'
-      - 'tools/stage16_sequence_remove_oracle.py'
-      - 'tools/stage16_sequence_remove_ci.py'
-      - '.github/workflows/false-arabic-stage16-native-sequence-remove.yml'
-  workflow_dispatch:
   workflow_call:
+  workflow_dispatch:
 
 permissions:
   contents: read
