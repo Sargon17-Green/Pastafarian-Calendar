@@ -1,0 +1,91 @@
+name: Soak v115 audit ALL 55 QA workflows, native dispatch HALT on 24 jobs
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - '.github/workflows/**'
+      - 'soak/control/native_dispatch_halt_inventory_v114.json'
+      - 'soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json'
+      - 'soak/runner/audit_workflow_native_dispatch_halt_v115.py'
+      - 'soak/process_tests/test_workflow_native_dispatch_halt_v115.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa-native-dispatch-halt-static-audit-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check original first mismatch still halts new source/native dates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in ('soak/runner/audit_workflow_native_dispatch_halt_v115.py',
+                       'soak/process_tests/test_workflow_native_dispatch_halt_v115.py'):
+              src=Path(path).read_text(encoding='utf8')
+              tree=ast.parse(src)
+              for item in ast.walk(tree):
+                  if isinstance(item,ast.Import):
+                      assert all(x.name.split('.')[0] not in
+                                 {'subprocess','ctypes','psutil','multiprocessing'} for x in item.names)
+                  if isinstance(item,ast.ImportFrom):
+                      assert ((item.module or '').split('.')[0] not in
+                              {'subprocess','ctypes','psutil','multiprocessing'})
+          print('V115_STATIC_ONLY_NO_NATIVE_CONVERTER_DISPATCH_INTERFACE')
+          PY
+      - name: Ten native halt, unknown-new-workflow and bypass-tamper checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          PYTHONPATH=soak/runner python3 -B -m unittest discover \
+            -s soak/process_tests -p 'test_workflow_native_dispatch_halt_v115.py' -v \
+            2>&1 | tee evidence/v115-interlock-ten-tests.log
+          grep -Eq '^Ran 10 tests ' evidence/v115-interlock-ten-tests.log
+          grep -q '^OK$' evidence/v115-interlock-ten-tests.log
+          echo V115_TEN_JOB_LEVEL_FAIL_CLOSED_TESTS_PASS
+      - name: Enforce all QA workflow jobs classified and 24 original/derived launchers disabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=soak/runner python3 -B \
+            soak/runner/audit_workflow_native_dispatch_halt_v115.py \
+            --root . --verdict-out evidence/v115-qa-native-halt-audit.json \
+            2>&1 | tee evidence/v115-workflow-audit.log
+          grep -q '^V115_ALL_24_NATIVE_JOBS_VERIFIED_DISABLED_NO_SOURCE_EXECUTION$' \
+            evidence/v115-workflow-audit.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('evidence/v115-qa-native-halt-audit.json').read_bytes())
+          assert x['status']=='QA_NATIVE_SOAK_DISPATCH_FAIL_CLOSED_ALL_24_JOBS'
+          assert x['classified_workflows']==55
+          assert x['blocked_native_workflows']==24
+          assert x['preserved_readonly_or_control_workflows']==31
+          assert x['scientific_incident_status']=='CONFIRMED_CROSS_SOURCE_DIFFERENCE'
+          assert x['new_original_conversions_started_by_audit']==0
+          assert x['full_original_years_certified']==0
+          assert x['ten_thousand_years_certified']==0
+          assert x['protected_historic_commits_or_other_branches'] is False
+          print('V115_QA_ALL_NATIVE_SOAK_DISPATCH_JOBS_SKIP_LOCK_AND_INVENTORY_PASS')
+          PY
+      - name: Preserve read-only safety audit
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v115-all-qa-native-dispatch-jobs-halted-not-year
+          path: |
+            evidence/v115-interlock-ten-tests.log
+            evidence/v115-qa-native-halt-audit.json
+            evidence/v115-workflow-audit.log
+          if-no-files-found: warn
+          retention-days: 30
