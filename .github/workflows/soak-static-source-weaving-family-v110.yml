@@ -135,21 +135,7 @@ jobs:
             -s qa/soak/process_tests -p 'test_exact_month_weaving_pure_v120.py' -v \
             2>&1 | tee evidence/v120-pure-exact-tests.log
           grep -Eq '^Ran 14 tests ' evidence/v120-pure-exact-tests.log
-          grep -q '^OK
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: soak-v110-static-source-weaving-counterexample-NO-NATIVE
-          path: |
-            evidence/v110-math-tests.log
-            evidence/v110-source-math-audit.log
-            evidence/v110-month-weaving-family-counterexample.json
-            evidence/v120-pure-exact-tests.log
-            evidence/v120-exact-count.log
-            evidence/v120-full-family-exact-count-verdict.json
-          if-no-files-found: warn
-          retention-days: 30
- evidence/v120-pure-exact-tests.log
+          grep -q '^OK$' evidence/v120-pure-exact-tests.log
           echo V120_FOURTEEN_PURE_EXACT_WEAVING_TESTS_PASS_NO_FCT
       - name: Exact 47-month 5778-day count proof with no Fct and no year credit
         shell: bash
@@ -158,18 +144,7 @@ jobs:
           python3 -B qa/soak/runner/exact_month_weaving_pure_v119.py \
             --verdict-out evidence/v120-full-family-exact-count-verdict.json \
             2>&1 | tee evidence/v120-exact-count.log
-          grep -q '^V119_EXACT_MONTH_WEAVE_COUNT_47_MONTHS_NO_DATE_PASS
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: soak-v110-static-source-weaving-counterexample-NO-NATIVE
-          path: |
-            evidence/v110-math-tests.log
-            evidence/v110-source-math-audit.log
-            evidence/v110-month-weaving-family-counterexample.json
-          if-no-files-found: warn
-          retention-days: 30
- \
+          grep -q '^V119_EXACT_MONTH_WEAVE_COUNT_47_MONTHS_NO_DATE_PASS$' \
             evidence/v120-exact-count.log
           python3 - <<'PY'
           import json
@@ -197,5 +172,8 @@ jobs:
             evidence/v110-math-tests.log
             evidence/v110-source-math-audit.log
             evidence/v110-month-weaving-family-counterexample.json
+            evidence/v120-pure-exact-tests.log
+            evidence/v120-exact-count.log
+            evidence/v120-full-family-exact-count-verdict.json
           if-no-files-found: warn
           retention-days: 30
