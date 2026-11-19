@@ -86,7 +86,7 @@ def selftest():
         checked += 1
 
     assert checked == 139
-    print(f"STAGE34_INDEPENDENT_REMOTE_NINE_SELFTEST_ASSERTIONS={checked}")
+    print(f"STAGE34_INDEPENDENT_REMOTE_TEN_SELFTEST_ASSERTIONS={checked}")
 
 
 def compare(path):
@@ -104,8 +104,8 @@ def compare(path):
             if key in found:
                 raise AssertionError(f"duplicate pair {key}")
             found[key] = numbers[2:]
-        elif parts[0].startswith("STAGE34_NATIVE_REMOTE_NINE_ASSERTIONS="):
-            if "".join(parts) != "STAGE34_NATIVE_REMOTE_NINE_ASSERTIONS=131":
+        elif parts[0].startswith("STAGE34_NATIVE_REMOTE_TEN_ASSERTIONS="):
+            if "".join(parts) != "STAGE34_NATIVE_REMOTE_TEN_ASSERTIONS=131":
                 raise AssertionError(f"invalid native marker: {line}")
             markers += 1
 
