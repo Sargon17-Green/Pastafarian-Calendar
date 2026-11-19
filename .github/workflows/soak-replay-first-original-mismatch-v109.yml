@@ -1,0 +1,108 @@
+name: Soak v109 read-only frozen first original source mismatch replay - HALT NEW NATIVE
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - 'soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json'
+      - 'soak/runner/replay_first_original_mismatch_v109.py'
+      - 'soak/process_tests/test_replay_first_original_mismatch_v109.py'
+      - '.github/workflows/soak-replay-first-original-mismatch-v109.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  confirmed-source-mismatch-readonly-audit-not-date-pass:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify dispatch HALT lock and original frozen source ZIP SHA
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          mkdir -m 700 evidence
+          gh api "repos/$GH_REPO/actions/artifacts/14472835490/zip" > evidence/ada-original-v103.zip
+          gh api "repos/$GH_REPO/actions/artifacts/14473652463/zip" > evidence/fortran-original-v106.zip
+          gh api "repos/$GH_REPO/actions/artifacts/14469537094/zip" > evidence/python-typescript-original-v101.zip
+          echo '3d8c594ae761aa6eeb8c11b241755b2f11ef472d41483ffb5e0c1cdc2bd8cbe  evidence/ada-original-v103.zip' | sha256sum -c -
+          echo '7f8e57308aee0c80ffedc9634e59b65d11a1bc94982830dd3217623878e3e48f  evidence/fortran-original-v106.zip' | sha256sum -c -
+          echo 'bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1  evidence/python-typescript-original-v101.zip' | sha256sum -c -
+          echo V109_THREE_TRUE_ORIGINAL_SOURCE_ZIPS_SHA_PINNED
+      - name: Verify Python AST and twelve evidence-tamper tests (NO native converters)
+        shell: bash
+        env:
+          PASTAFARI_V109_ADA_ZIP: evidence/ada-original-v103.zip
+          PASTAFARI_V109_FORTRAN_ZIP: evidence/fortran-original-v106.zip
+          PASTAFARI_V109_REFERENCE_ZIP: evidence/python-typescript-original-v101.zip
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          paths=[
+              'soak/runner/replay_first_original_mismatch_v109.py',
+              'soak/process_tests/test_replay_first_original_mismatch_v109.py'
+          ]
+          for p in paths:
+              ast.parse(Path(p).read_text(encoding='utf-8'))
+          for node in ast.walk(ast.parse(Path(paths[0]).read_text(encoding='utf-8'))):
+              assert not (isinstance(node,ast.Import) and any(
+                  x.name.split('.')[0] in {'subprocess','ctypes','psutil'} for x in node.names))
+              assert not (isinstance(node,ast.ImportFrom) and
+                          (node.module or '').split('.')[0] in {'subprocess','ctypes','psutil'})
+          print("V109_READ_ONLY_SOURCE_AUDIT_AST_NO_NATIVE_PROCESS_INTERFACE")
+          PY
+          PYTHONPATH=soak/runner python3 -B -m unittest discover \
+            -s soak/process_tests -p 'test_replay_first_original_mismatch_v109.py' -v \
+            2>&1 | tee evidence/v109-twelve-replay-tests.log
+          grep -Eq '^Ran 12 tests ' evidence/v109-twelve-replay-tests.log
+          grep -q '^OK$' evidence/v109-twelve-replay-tests.log
+          echo V109_TWELVE_SOURCE_MISMATCH_REPLAY_TESTS_PASS_SCIENTIFIC_FAIL
+      - name: Record the FIRST actual source mismatch and assert NO soak PASS credit
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=soak/runner python3 -B \
+            soak/runner/replay_first_original_mismatch_v109.py \
+            --ada-artifact evidence/ada-original-v103.zip \
+            --fortran-artifact evidence/fortran-original-v106.zip \
+            --reference-artifact evidence/python-typescript-original-v101.zip \
+            --report-out evidence/v109-first-difference-readonly-report.json \
+            2>&1 | tee evidence/v109-source-dispatch-halt.log
+          grep -q '^V109_READ_ONLY_ARTIFACT_AUDIT_PASS_SCIENTIFIC_MISMATCH_HALT_DISPATCH$' \
+            evidence/v109-source-dispatch-halt.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('evidence/v109-first-difference-readonly-report.json').read_bytes())
+          assert d['schema']=='PASTAFARI_READ_ONLY_FIRST_ORIGINAL_MISMATCH_REPLAY_V109/1'
+          assert d['scientific_status']=='CONFIRMED_DIFFERENTIAL_FAIL'
+          assert d['stop_new_native_soak_dispatch'] is True
+          assert d['first_difference']=={'field':'month_index','index':4,'ada':30,'reference':20}
+          assert d['ada_original']==[5000,10,503,30,52]
+          assert d['python_typescript_fortran_original']==[5000,10,503,20,56]
+          assert d['native_engines_observed']==4
+          assert d['successful_whole_years']==0
+          assert d['successful_ten_thousand_soak_years']==0
+          assert d['canonical_oracle_independence_proven'] is False
+          print('V109_CONFIRMED_FOUR_ENGINE_FIRST_DIFFERENCE_NO_MORE_NATIVE_SOAK_DISPATCH')
+          PY
+      - name: Preserve scientifically FAILED source evidence audit log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v109-first-original-source-mismatch-halt-audit-NOT-PASS
+          path: |
+            evidence/v109-twelve-replay-tests.log
+            evidence/v109-source-dispatch-halt.log
+            evidence/v109-first-difference-readonly-report.json
+          if-no-files-found: warn
+          retention-days: 30
