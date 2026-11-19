@@ -71,8 +71,16 @@ try {
     $p = Start-Process -FilePath $exe -ArgumentList ('"' + $prefix + '"') -WorkingDirectory $root -PassThru
     $r['interpreter_executed'] = $true
     $r['process_id'] = $p.Id
+    # NARS ⎕NCREATE makes a zero-byte file before ⎕NAPPEND writes the data.
+    # Existence alone is NOT a completion signal and previously caused the
+    # runner to terminate a still-writing NARS process prematurely.
     $deadline = [DateTime]::UtcNow.AddSeconds(25)
-    while (-not (Test-Path -LiteralPath $marker -PathType Leaf) -and [DateTime]::UtcNow -lt $deadline) {
+    $expectedLength = [System.Text.Encoding]::ASCII.GetByteCount([string]$meta.canary_token)
+    while ([DateTime]::UtcNow -lt $deadline) {
+        if (Test-Path -LiteralPath $marker -PathType Leaf) {
+            $observedLength = (Get-Item -LiteralPath $marker).Length
+            if ($observedLength -ge $expectedLength) { break }
+        }
         Start-Sleep -Milliseconds 300
         $p.Refresh()
         if ($p.HasExited) { break }
