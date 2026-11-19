@@ -1,0 +1,239 @@
+name: Soak v112 preserve first ORIGINAL SOURCE mismatch in draft archive (NO NATIVE)
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - 'soak/control/original_archive_requests/first-difference-v112.json'
+concurrency:
+  group: soak-v112-first-source-mismatch-immutable-archive
+  cancel-in-progress: false
+permissions:
+  contents: write
+  actions: read
+jobs:
+  archive-evidence-not-a-soak-pass:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: qa
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify single QA-only request, first-mismatch HALT and fixed sources
+        shell: bash
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$GITHUB_REF" = refs/heads/qa/soak-readiness-20261114
+          test "$(git -C qa rev-parse HEAD)" = "$AFTER"
+          git -C qa merge-base --is-ancestor "$BEFORE" "$AFTER"
+          mkdir -m 700 evidence
+          mkdir -m 700 release-assets
+          python3 - <<'PY' | tee evidence/v112-approval.log
+          import json,os,subprocess
+          from pathlib import Path
+          root=Path('qa')
+          name='soak/control/original_archive_requests/first-difference-v112.json'
+          changed=subprocess.run(['git','-C',str(root),'diff','--name-status','--no-renames',
+                                  os.environ['BEFORE'],os.environ['AFTER']],
+                                 check=True,capture_output=True,text=True).stdout.strip()
+          assert changed=='A\t'+name,repr(changed)
+          def unique(pairs):
+              obj={}
+              for k,v in pairs:
+                  assert k not in obj,'duplicate source approval field'
+                  obj[k]=v
+              return obj
+          raw=(root/name).read_bytes()
+          r=json.loads(raw.decode('utf8'),object_pairs_hook=unique)
+          canonical=(json.dumps(r,sort_keys=True,separators=(',',':'),ensure_ascii=False)+'\n').encode()
+          assert raw==canonical,'noncanonical immutable approval request'
+          halt=json.loads((root/'soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_bytes())
+          assert set(r)=={'schema','approved_parent_sha','source_branch','tag',
+                          'first_difference_issue','ada_source_zip_sha256',
+                          'fortran_source_zip_sha256','reference_source_zip_sha256',
+                          'allow_native_converter_execution','full_years_accepted',
+                          'ten_thousand_years_accepted'}
+          assert r['schema']=='PASTAFARI_FIRST_DIFFERENCE_DRAFT_ARCHIVE_REQUEST_V112/1'
+          assert r['approved_parent_sha']==os.environ['BEFORE']
+          assert r['source_branch']=='qa/soak-readiness-20261114'
+          assert r['tag']=='soak-first-original-ada-mismatch-v112'
+          assert r['first_difference_issue']==29
+          assert r['ada_source_zip_sha256']==halt['run']['artifact_sha256']
+          assert r['fortran_source_zip_sha256']==halt['independent_fourth_observation']['artifact_sha256']
+          assert r['reference_source_zip_sha256']==halt['reference_python_ts']['archive_sha256']
+          assert r['allow_native_converter_execution'] is False
+          assert r['full_years_accepted']==0 and r['ten_thousand_years_accepted']==0
+          assert halt['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          print('V112_SINGLE_SOURCE_EVIDENCE_ARCHIVE_REQUEST_ADMITTED_SCIENTIFIC_FAIL')
+          PY
+          grep -q '^V112_SINGLE_SOURCE_EVIDENCE_ARCHIVE_REQUEST_ADMITTED_SCIENTIFIC_FAIL$' \
+            evidence/v112-approval.log
+      - name: Download three original archives and reproduce first difference WITHOUT source execution
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+        run: |
+          set -euo pipefail
+          for run in 44394781099 44397451131 44392067310; do
+            test "$(gh api "repos/$GH_REPO/actions/runs/$run" --jq '.status')" = completed
+            test "$(gh api "repos/$GH_REPO/actions/runs/$run" --jq '.conclusion')" = success
+          done
+          gh api "repos/$GH_REPO/actions/artifacts/14472835490/zip" \
+            > release-assets/original-ada-first-difference-v103.zip
+          gh api "repos/$GH_REPO/actions/artifacts/14473652463/zip" \
+            > release-assets/original-fortran-confirmation-v106.zip
+          gh api "repos/$GH_REPO/actions/artifacts/14469537094/zip" \
+            > evidence/v101-original-python-typescript.zip
+          echo '3d8c594ae761aa6eeb8c11b241755b2f11ef472d41483ffb5be0c1cdc2bd8cbe  release-assets/original-ada-first-difference-v103.zip' | sha256sum -c -
+          echo '7f8e57308aee0c80ffedc9634e59b65d11a1bc94982830dd3217623878e3e48f  release-assets/original-fortran-confirmation-v106.zip' | sha256sum -c -
+          echo 'bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1  evidence/v101-original-python-typescript.zip' | sha256sum -c -
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          ast.parse(Path('qa/soak/runner/replay_first_original_mismatch_v109.py').read_text(encoding='utf8'))
+          PY
+          PYTHONPATH=qa/soak/runner python3 -B \
+            qa/soak/runner/replay_first_original_mismatch_v109.py \
+            --ada-artifact release-assets/original-ada-first-difference-v103.zip \
+            --fortran-artifact release-assets/original-fortran-confirmation-v106.zip \
+            --reference-artifact evidence/v101-original-python-typescript.zip \
+            --report-out evidence/v112-frozen-first-difference.json \
+            2>&1 | tee evidence/v112-three-original-source-replay.log
+          grep -q '^V109_READ_ONLY_ARTIFACT_AUDIT_PASS_SCIENTIFIC_MISMATCH_HALT_DISPATCH$' \
+            evidence/v112-three-original-source-replay.log
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          r=json.loads(Path('evidence/v112-frozen-first-difference.json').read_bytes())
+          assert r['scientific_status']=='CONFIRMED_DIFFERENTIAL_FAIL'
+          assert r['first_difference']=={'field':'month_index','index':4,'ada':30,'reference':20}
+          assert r['stop_new_native_soak_dispatch'] is True
+          assert r['successful_whole_years']==r['successful_ten_thousand_soak_years']==0
+          assert r['canonical_oracle_independence_proven'] is False
+          manifest={
+              'schema':'PASTAFARI_IMMUTABLE_FIRST_NATIVE_MISMATCH_DRAFT_V112/1',
+              'source_qa_commit':os.environ['GITHUB_SHA'],
+              'incident_issue':29,'scientific_status':'CONFIRMED_DIFFERENTIAL_FAIL',
+              'calculation_day':'-15055671','target_day':'-15055671',
+              'first_difference':r['first_difference'],
+              'source_artifacts':[
+                  {'name':'original-ada-first-difference-v103.zip','artifact_id':14472835490,
+                   'sha256':'3d8c594ae761aa6eeb8c11b241755b2f11ef472d41483ffb5be0c1cdc2bd8cbe',
+                   'bytes':3641,'original_source_commit':'a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72'},
+                  {'name':'original-fortran-confirmation-v106.zip','artifact_id':14473652463,
+                   'sha256':'7f8e57308aee0c80ffedc9634e59b65d11a1bc94982830dd3217623878e3e48f',
+                   'bytes':279096,'original_source_commit':'23349b9748859a1032b8a3afad0812b1d392be94'}
+              ],
+              'original_reference_artifact_id':14469537094,
+              'original_reference_sha256':'bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1',
+              'stop_new_native_soak_dispatch':True,
+              'full_years_certified':0,'ten_thousand_years_certified':0,
+              'algorithmic_independence_certified':False,
+              'windows_native_soak_run_certified':False
+          }
+          Path('release-assets/original-first-difference-manifest-v112.json').write_bytes(
+              (json.dumps(manifest,sort_keys=True,separators=(',',':'),ensure_ascii=False)+'\n').encode())
+          print('V112_SCIENTIFIC_FIRST_MISMATCH_REPLAYED_AND_MANIFEST_LOCKED')
+          PY
+      - name: Preserve mismatch evidence in private draft GitHub Release, verify all assets after redownload
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: Sargon17-Green/Pastafarian-Calendar
+          TAG: soak-first-original-ada-mismatch-v112
+        run: |
+          set -euo pipefail
+          printf '%s\n' 'DRAFT only: confirmed original Ada vs Python/TypeScript/Fortran numeric mismatch.' \
+            'Scientific FAIL, not a converter PASS. No whole-year or 10k-year credit.' \
+            'Reference archive separately pinned in v105 draft Release ID 450580215.' \
+            'No new native converter dispatch; incident issue #29.' \
+            > evidence/v112-release-notes.txt
+          ids="$(gh api "repos/$GH_REPO/releases?per_page=100" \
+            --jq '.[] | select(.tag_name=="soak-first-original-ada-mismatch-v112" and .draft==true) | .id')"
+          if [ -z "$ids" ]; then
+            gh release create "$TAG" --target "$GITHUB_SHA" \
+              --draft --prerelease \
+              --title 'CONFIRMED Original Ada first month mismatch (DRAFT SCIENTIFIC FAIL)' \
+              --notes-file evidence/v112-release-notes.txt
+          fi
+          ids=""
+          for attempt in 1 2 3 4 5; do
+            ids="$(gh api "repos/$GH_REPO/releases?per_page=100" \
+              --jq '.[] | select(.tag_name=="soak-first-original-ada-mismatch-v112" and .draft==true) | .id')"
+            if [ -n "$ids" ]; then break; fi
+            sleep 3
+          done
+          test -n "$ids"
+          test "$(printf '%s\n' "$ids" | wc -l)" -eq 1
+          rid="$ids"
+          test "$(gh api "repos/$GH_REPO/releases/$rid" --jq '.draft')" = true
+          target="$(gh api "repos/$GH_REPO/releases/$rid" --jq '.target_commitish')"
+          git -C qa merge-base --is-ancestor "$target" "$GITHUB_SHA"
+          for f in release-assets/original-ada-first-difference-v103.zip \
+                   release-assets/original-fortran-confirmation-v106.zip \
+                   release-assets/original-first-difference-manifest-v112.json; do
+            name="$(basename "$f")"
+            present="$(gh api "repos/$GH_REPO/releases/$rid/assets?per_page=100" \
+              --jq ".[] | select(.name==\"$name\") | .id")"
+            if [ -z "$present" ]; then
+              mime=application/zip
+              if [ "$name" = original-first-difference-manifest-v112.json ]; then mime=application/json; fi
+              curl --fail-with-body --silent --show-error --retry 3 -X POST \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                -H "Content-Type: $mime" --data-binary @"$f" \
+                "https://uploads.github.com/repos/$GH_REPO/releases/$rid/assets?name=$name" \
+                > evidence/v112-upload-response.json
+              python3 - "$name" <<'PY'
+          import json,sys
+          obj=json.load(open('evidence/v112-upload-response.json'))
+          assert obj['state']=='uploaded' and obj['name']==sys.argv[1]
+          PY
+            fi
+          done
+          mkdir -m 700 redownloaded
+          gh api "repos/$GH_REPO/releases/$rid/assets?per_page=100" --jq '.[].name' \
+            | sort > evidence/v112-actual-assets.txt
+          printf '%s\n' original-ada-first-difference-v103.zip \
+            original-fortran-confirmation-v106.zip \
+            original-first-difference-manifest-v112.json \
+            | sort > evidence/v112-expected-assets.txt
+          diff -u evidence/v112-expected-assets.txt evidence/v112-actual-assets.txt
+          while IFS= read -r name; do
+            aid="$(gh api "repos/$GH_REPO/releases/$rid/assets?per_page=100" \
+              --jq ".[] | select(.name==\"$name\") | .id")"
+            test -n "$aid"
+            curl --fail-with-body --location --silent --show-error --retry 3 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/octet-stream" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/$GH_REPO/releases/assets/$aid" \
+              -o "redownloaded/$name"
+            cmp "release-assets/$name" "redownloaded/$name"
+            echo "V112_ORIGINAL_SCIENTIFIC_FAIL_ASSET_REDOWNLOADED_BYTE_IDENTICAL=$name"
+          done < evidence/v112-expected-assets.txt
+          echo '3d8c594ae761aa6eeb8c11b241755b2f11ef472d41483ffb5be0c1cdc2bd8cbe  redownloaded/original-ada-first-difference-v103.zip' | sha256sum -c -
+          echo '7f8e57308aee0c80ffedc9634e59b65d11a1bc94982830dd3217623878e3e48f  redownloaded/original-fortran-confirmation-v106.zip' | sha256sum -c -
+          echo V112_MISMATCH_ORIGINAL_ZIPS_AND_MANIFEST_DRAFT_ARCHIVED_THREE_OF_THREE_BYTES | tee evidence/v112-rearchive-pass.log
+      - name: Preserve audit logs without a native source invocation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v112-original-mismatch-draft-backup-audit-NOT-PASS
+          path: |
+            evidence/v112-approval.log
+            evidence/v112-three-original-source-replay.log
+            evidence/v112-frozen-first-difference.json
+            evidence/v112-actual-assets.txt
+            evidence/v112-rearchive-pass.log
+          if-no-files-found: warn
+          retention-days: 30
