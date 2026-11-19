@@ -1,0 +1,551 @@
+{
+  "schema": "PASTAFARI_SOAK_SOURCE_ROSTER_V127/1",
+  "records": [
+    {
+      "record_id": "REF-01",
+      "engine_id": "REF-01",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-02",
+      "engine_id": "REF-02",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-03",
+      "engine_id": "REF-03",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-04",
+      "engine_id": "REF-04",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-05",
+      "engine_id": "REF-05",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-06",
+      "engine_id": "REF-06",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-07",
+      "engine_id": "REF-07",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-08",
+      "engine_id": "REF-08",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-09",
+      "engine_id": "REF-09",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-10",
+      "engine_id": "REF-10",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-11",
+      "engine_id": "REF-11",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-12",
+      "engine_id": "REF-12",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-13",
+      "engine_id": "REF-13",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-14",
+      "engine_id": "REF-14",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-15",
+      "engine_id": "REF-15",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-16",
+      "engine_id": "REF-16",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-17",
+      "engine_id": "REF-17",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-18",
+      "engine_id": "REF-18",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-19",
+      "engine_id": "REF-19",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-20",
+      "engine_id": "REF-20",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-21",
+      "engine_id": "REF-21",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-22",
+      "engine_id": "REF-22",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-23",
+      "engine_id": "REF-23",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-24",
+      "engine_id": "REF-24",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-25",
+      "engine_id": "REF-25",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-26",
+      "engine_id": "REF-26",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-27",
+      "engine_id": "REF-27",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-28",
+      "engine_id": "REF-28",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-29",
+      "engine_id": "REF-29",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-30",
+      "engine_id": "REF-30",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-31",
+      "engine_id": "REF-31",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-32",
+      "engine_id": "REF-32",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-33",
+      "engine_id": "REF-33",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-34",
+      "engine_id": "REF-34",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-35",
+      "engine_id": "REF-35",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-36",
+      "engine_id": "REF-36",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-37",
+      "engine_id": "REF-37",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-38",
+      "engine_id": "REF-38",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-39",
+      "engine_id": "REF-39",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-40",
+      "engine_id": "REF-40",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-41",
+      "engine_id": "REF-41",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-42",
+      "engine_id": "REF-42",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-43",
+      "engine_id": "REF-43",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-44",
+      "engine_id": "REF-44",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-45",
+      "engine_id": "REF-45",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-46",
+      "engine_id": "REF-46",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-47",
+      "engine_id": "REF-47",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-48",
+      "engine_id": "REF-48",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-49",
+      "engine_id": "REF-49",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-50",
+      "engine_id": "REF-50",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-51",
+      "engine_id": "REF-51",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-52",
+      "engine_id": "REF-52",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-53",
+      "engine_id": "REF-53",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-54",
+      "engine_id": "REF-54",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-55",
+      "engine_id": "REF-55",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-56",
+      "engine_id": "REF-56",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-57",
+      "engine_id": "REF-57",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "REF-58",
+      "engine_id": "REF-58",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "reference"
+    },
+    {
+      "record_id": "TRIAGE-01",
+      "engine_id": "TRIAGE-01",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "TRIAGE-02",
+      "engine_id": "TRIAGE-02",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "TRIAGE-03",
+      "engine_id": "TRIAGE-03",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "TRIAGE-04",
+      "engine_id": "TRIAGE-04",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "TRIAGE-05",
+      "engine_id": "TRIAGE-05",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "TRIAGE-06",
+      "engine_id": "TRIAGE-06",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "TRIAGE-07",
+      "engine_id": "TRIAGE-07",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "TRIAGE-08",
+      "engine_id": "TRIAGE-08",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "TRIAGE-09",
+      "engine_id": "TRIAGE-09",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "TRIAGE-10",
+      "engine_id": "TRIAGE-10",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "triage"
+    },
+    {
+      "record_id": "MAIN-AUTH-JS",
+      "engine_id": "MAIN-AUTH-JS",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "MAIN-FAST-JS",
+      "engine_id": "MAIN-FAST-JS",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "MAIN-PY",
+      "engine_id": "MAIN-PY",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "MAIN-RUBY",
+      "engine_id": "MAIN-RUBY",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "MAIN-JAVA",
+      "engine_id": "MAIN-JAVA",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "MAIN-C",
+      "engine_id": "MAIN-C",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "MAIN-CPP",
+      "engine_id": "MAIN-CPP",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "MAIN-COBOL",
+      "engine_id": "MAIN-COBOL",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "SEER-NATIVE",
+      "engine_id": "SEER-NATIVE",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "LATIN-CPP",
+      "engine_id": "LATIN-CPP",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "LATIN-CELERITAS",
+      "engine_id": "LATIN-CELERITAS",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "VIET-ELIXIR",
+      "engine_id": "VIET-ELIXIR",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "INTERLINGUE-JS",
+      "engine_id": "INTERLINGUE-JS",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "TURKISH-PY",
+      "engine_id": "TURKISH-PY",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "POLISH-MATLAB",
+      "engine_id": "POLISH-MATLAB",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "COPTIC-X64",
+      "engine_id": "COPTIC-X64",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "AMHARIC-V",
+      "engine_id": "AMHARIC-V",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "MARATHI-TS",
+      "engine_id": "MARATHI-TS",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "PALEO-CODESH",
+      "engine_id": "PALEO-CODESH",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "WELSH-KOTLIN-PRODUCTION",
+      "engine_id": "WELSH-KOTLIN-PRODUCTION",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "production_candidate"
+    },
+    {
+      "record_id": "SEER-NEXT-YEAR-CACHE",
+      "engine_id": "SEER-NEXT-YEAR-CACHE",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "variant"
+    },
+    {
+      "record_id": "SEER-NEXT-HYBRID",
+      "engine_id": "SEER-NEXT-HYBRID",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "variant"
+    },
+    {
+      "record_id": "SEER-NEXT-COLD-PROBE",
+      "engine_id": "SEER-NEXT-COLD-PROBE",
+      "algorithm_id": "UNASSESSED",
+      "source_kind": "variant"
+    }
+  ]
+}
