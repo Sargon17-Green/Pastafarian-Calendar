@@ -110,7 +110,8 @@ to d18.valid :calculation :target :tag
   d18.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready stage02.hidden.ready stage02.visible.prefix.ready stage02.visible.ten.ready stage02.visible.fifteen.ready stage02.visible.twenty.ready stage02.visible.twentyfive.ready stage02.visible.thirty.ready stage02.visible.thirtyfive.ready stage02.visible.forty.ready stage02.visible.fortyfive.ready stage02.visible.fortysix.ready stage02.sauce.ready]) (list :tag [logs])
   d18.require (equalp (monster.stage02.sauce :before) :after) (list :tag [determinism])
   print sentence [STAGE_2_DISCOVERY_18_CASE_END] :tag
-  output :before
+  ; Invoked as a command by the D18 runner: no value may escape into the caller.
+  stop
 end
 
 to d18.invalid :ctx :tag

@@ -1,6 +1,6 @@
 # Stage 2 Discovery18 — Appendix-A final aggregation (Logo+Ido)
 
-Status: NATIVE_FIX_IMPLEMENTED_PENDING (2026-11-19). D17 ACCEPTED_NATIVE on 05b49e0eb730724eb3fdf66993a6314f90783a0a; original push run 44373979219/job 135048049707 completed SUCCESS with five cases, 17 checks and the genuine NATIVE_STAGE_2_DISCOVERY_17_VERIFICATION=PASS marker. Ten same-SHA regressions completed SUCCESS. Stage2 remains incomplete; LAST_COMPLETED_STAGE=1.
+Status: TEST_COMMAND_OUTPUT_FIX_IMPLEMENTED_NATIVE_PENDING (2026-11-20). D17 ACCEPTED_NATIVE on 05b49e0eb730724eb3fdf66993a6314f90783a0a; original push run 44373979219/job 135048049707 completed SUCCESS with five cases, 17 checks and the genuine NATIVE_STAGE_2_DISCOVERY_17_VERIFICATION=PASS marker. Ten same-SHA regressions completed SUCCESS. Stage2 remains incomplete; LAST_COMPLETED_STAGE=1.
 
 ## Scope and boundary
 
@@ -82,3 +82,10 @@ Original push on `010d009956f094c0bb7152556bb1aee879dd46bb`, run 44393624959/job
 Root cause: production factoradic unranking used `quotient :rank0 :block` as though it returned integer division, but it returned a fractional ratio. For nonnegative rank and positive block, `int (quotient :rank0 :block)` yields the needed factoradic digit (0..5), while `remainder` continues to provide the remainder. The independent normative oracle uses repeated subtraction (`nr.small.divmod`), and no oracle code is used in production.
 
 The native test now checks all 720 zero-based permutation ranks against the independently implemented normative unranking, before costly sauce cases. New required marker: `STAGE_2_DISCOVERY_18_PERMUTATION_CHECKS_PASIS 720`. This adds 720 permutation checks without changing the six sauce cases or their 40 assertions. Accept only if this marker, the original 6/40 markers, final Native marker, lack of failure/timeout/unknown, and all eleven new same-SHA regressions are verified on the new original push. This patch is NOT a Native PASS.
+
+
+## Evidence-based D18 test command correction — 2026-11-20
+
+On exactly `12106171d782b15fe2fe5b9e92e4d35fb6bcb011`, natural push run 44613654807 / job 135876459684 / attempt 1 completed FAILURE. UCBLogo 6.2.5 genuinely printed `STAGE_2_DISCOVERY_18_PERMUTATION_CHECKS_PASIS 720`, `STAGE_2_DISCOVERY_18_CASE_BEGIN foundation_tablets`, and `STAGE_2_DISCOVERY_18_CASE_END foundation_tablets`, then `You don't say what to do with [[calculationDay ...]] in stage02.discovery18.run` followed by exit 1. The 6/40 acceptance and final Native markers were absent. Root cause: test-only `d18.valid` was invoked as a command by `stage02.discovery18.run` but used `output :before` at its end. Logo therefore rejected the unused context returned to a command caller. Corrected only the test helper's terminal `output :before` to `stop`; production sauce, test-only independent oracle, fixtures, 720 permutation domain, six sauce cases, 40 sauce assertions and workflow gates remain unchanged.
+
+All eleven same-SHA natural push regressions (D17..D10, D1..D9, Stage1 and Names Lock) completed SUCCESS, attempt 1: 44613654535, 44613654592, 44613655182, 44613654619, 44613654697, 44613654699, 44613654545, 44613654663, 44613654516, 44613654853, 44613654573. That is not D18 acceptance. The next new commit's native D18 requires original push completed SUCCESS, authentic 720 and 6/40 and final PASS markers, and all eleven regressions SUCCESS on that new SHA. No manual reruns, main or merge.
