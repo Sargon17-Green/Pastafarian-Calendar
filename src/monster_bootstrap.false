@@ -238,3 +238,23 @@ z;29=~["E_HIDDEN_DROPS_LAYOUT"0 0/]?
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
 
+
+{ المرحلة 13: العملية 30؛ سلف القطرة المرئية من المقدمة أو القطرات الخفية. }
+z;30=~["E_VISIBLE_PREDECESSOR_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:x;1+g;!w:x;2+g;!v:x;3+g;!u:
+ v;1<["E_VISIBLE_INDEX"0 0/]?v;46>["E_VISIBLE_INDEX"0 0/]?
+ u;1<["E_VISIBLE_BACK"0 0/]?u;7>["E_VISIBLE_BACK"0 0/]?
+ y;g;!v;1-=~["E_VISIBLE_PREFIX"0 0/]?
+ w;g;!7=~["E_HIDDEN_LENGTH"0 0/]?
+ v;u;-t:
+ t;0>[
+  y;t;+g;!r:
+ ]?
+ t;0>~[
+  w;1t;-+g;!r:
+ ]?
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
+

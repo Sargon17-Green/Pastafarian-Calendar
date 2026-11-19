@@ -13,3 +13,5 @@
 **STAGE13_NOT_ACCEPTED** עד למימוש ובדיקות.
 
 תכנון בלתי תלוי: `tools/stage13_visible_predecessor_design_oracle.py` הניב 322 זוגות תחום ו־18 עוגנים, מהם 8 ענף hidden ו־10 visible. דוח `evidence/stage13_design_oracle_2026-11-19.json`, SHA-256 `72a7096beedd6ad84723ec09c45bdf74eba574a1c0b2a47b691e0132ccf3b4b4`. טרם הורצה בדיקת Native לשלב 13.
+
+המימוש המקומי בפעולה 30 החזיר 18/18 ידיות זהות ו־18/18 ערכים תואמים; 36 אורכי טבלאות נשמרו. ששת מקרי המבנה הפסול ובקרת מוטציה נדחו ב־exit 1. מקור משולב SHA-256 `1dfcc99c9fd758443202212a3c23fefc5ae29d3e3f4c71fc9a37b30bb4871503`; fixture SHA-256 `d4ff3b8e13633f243528cbe5ab1e33213526e4d5bc37f1c6b8322b92a06acd63`. זוהי בדיקה מקומית בלבד, לא קבלת השלב.
