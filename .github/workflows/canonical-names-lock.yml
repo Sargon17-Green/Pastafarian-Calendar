@@ -2703,20 +2703,7 @@ jobs:
           if test -s real-year-interval-evidence/stderr.txt; then cat real-year-interval-evidence/stderr.txt >&2; fi
           test "$code" -eq 0 || exit "$code"
           test ! -s real-year-interval-evidence/stderr.txt || exit 24
-          grep -Eq '^REAL_YEAR_INTERVAL_DISCOVERY_COMPLETED: [0-9]+/15 real-year-interval-evidence/stdout.txt
-          grep -Eq '^REAL_YEAR_STATIC_ADMISSION_(PASS: 1/1|NONE: 0/[0-9]+)$' real-year-interval-evidence/stdout.txt
-          grep -Fxq 'COMPOSITION_NOT_INVOKED: YES' real-year-interval-evidence/stdout.txt
-          grep -Fxq 'SCOPE=REAL_YEAR_INTERVAL_STATIC_DISCOVERY_ONLY; COMPOSITION=NOT_RUN; FULL_DATE=NOT_RUN' real-year-interval-evidence/stdout.txt
-
-      - name: Upload discovery evidence even on failure
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lua-haitian-real-year-interval-discovery-evidence
-          path: real-year-interval-evidence/
-          retention-days: 30
-          if-no-files-found: warn
- real-year-interval-evidence/stdout.txt
+          grep -Eq '^REAL_YEAR_INTERVAL_DISCOVERY_COMPLETED: [0-9]+/15$' real-year-interval-evidence/stdout.txt
           grep -Eq '^REAL_YEAR_STATIC_ADMISSION_(PASS: 1/1|NONE: 0/[0-9]+)$' real-year-interval-evidence/stdout.txt
           grep -Fxq 'COMPOSITION_NOT_INVOKED: YES' real-year-interval-evidence/stdout.txt
           grep -Fxq 'SCOPE=REAL_YEAR_INTERVAL_STATIC_DISCOVERY_ONLY; COMPOSITION=NOT_RUN; FULL_DATE=NOT_RUN' real-year-interval-evidence/stdout.txt
