@@ -314,3 +314,29 @@ z;32=~["E_FACTORIAL_LAYOUT"0 0/]?
  1r:1i:[i;y;1+<][r;i;*r:i;1+i:]#
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
+
+{ المرحلة 16: العملية 33؛ إزالة خلية حسب الموضع من جدول مباشر مستقل. }
+{ [sequence,position] -> [chosen,[n-1,remaining...]]؛ لا تكتب فوق خلايا المصدر. }
+{ -1 is an explicit missing-field sentinel; truly truncated tuples have no safe extent metadata. }
+z;33=~["E_REMOVE_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:x;1+g;!w:
+ y;0<["E_REMOVE_MISSING_SEQUENCE"0 0/]?
+ w;0<["E_REMOVE_MISSING_POSITION"0 0/]?
+ y;g;!v:
+ v;1<["E_REMOVE_LENGTH"0 0/]?
+ v;6>["E_REMOVE_LENGTH"0 0/]?
+ w;1<["E_REMOVE_POSITION"0 0/]?
+ w;v;>["E_REMOVE_POSITION"0 0/]?
+ z;p:v;1-a;!
+ 1i:0r:
+ [i;v;1+<][
+  y;i;+g;!s:
+  i;w;=[s;r:]?
+  i;w;=~[s;a;!]?
+  i;1+i:
+ ]#
+ z;t:r;a;!p;a;!
+ t;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
