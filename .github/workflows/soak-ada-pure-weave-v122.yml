@@ -1,0 +1,131 @@
+name: Soak v122 pure Ada full-family exact count, no date converters
+on:
+  push:
+    branches:
+      - qa/ada-pure-full-month-weave-v122
+    paths:
+      - 'soak/ada_pure_candidate_v122/**'
+      - '.github/workflows/soak-ada-pure-weave-v122.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-ada-math-only-no-fct:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - name: Confirm original source SHA and incident new-native-date dispatch stop
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py' | sha256sum -c -
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          lock=json.loads(Path('candidate/soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_bytes())
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          assert lock['first_difference']['field']=='month_index'
+          assert lock['successful_ten_thousand_soak_years']==0
+          print('V122_ORIGINAL_ADA_MISMATCH_HALT_LOCK_ACTIVE')
+          PY
+          mkdir -m 700 evidence
+          mkdir -m 700 evidence/build
+      - name: Install GNAT Ada 2022 and compile research-only pure package
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gnat-13
+          gnatmake --version | tee evidence/v122-ada-compiler-version.txt
+          gnatmake -gnat2022 -gnata -gnatwa \
+            -Icandidate/soak/ada_pure_candidate_v122 \
+            -D evidence/build -o evidence/pure-full-month-weaving-count \
+            candidate/soak/ada_pure_candidate_v122/test_pure_full_weave_v122.adb \
+            2>&1 | tee evidence/v122-pure-ada-compile.log
+          sha256sum evidence/pure-full-month-weaving-count > evidence/v122-binary.sha256
+          echo V122_GNAT_COMPILED_PURE_FULL_MONTH_WEAVE_COUNT_NO_FCT
+      - name: Six pure Ada small counts and maximum year-bound count
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/v122-resource.log \
+            timeout --signal=TERM --kill-after=5s 240s \
+            evidence/pure-full-month-weaving-count \
+            2>&1 | tee evidence/v122-pure-ada-native.log
+          grep -q '^V122_SIX_SMALL_EXACT_ADA_MATH_COUNTS_PASS$' evidence/v122-pure-ada-native.log
+          grep -q '^V122_PURE_ADA_MONTH_WEAVING_COUNT_ONLY_NO_FCT$' evidence/v122-pure-ada-native.log
+          echo V122_ADA_PURE_MONTH_WEAVE_COUNTS_NO_NATIVE_DATE_CALL_PASS
+      - name: Independent exact large-count comparison to original Python class
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee evidence/v122-pure-source-large-count-verdict.json
+          import hashlib
+          import importlib.util
+          import json
+          import re
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'candidate/soak/runner')
+          from exact_month_weaving_pure_v119 import ExactMonthWeaves
+          path=Path('original-python/tests/normative_reference.py')
+          spec=importlib.util.spec_from_file_location('native_reference_full_weaving_v122',path)
+          module=importlib.util.module_from_spec(spec)
+          sys.modules[spec.name]=module
+          spec.loader.exec_module(module)
+          logs=Path('evidence/v122-pure-ada-native.log').read_text(encoding='utf8')
+          m=re.findall(r'^V122_MAX_47_MONTH_5778_DAY_EXACT_INTEGER ([0-9]+)$',logs,re.M)
+          assert len(m)==1,'exactly one large original-Ada-math count required'
+          sys.set_int_max_str_digits(20000)
+          observed=int(m[0])
+          lengths=(123,)*46+(120,)
+          expected=ExactMonthWeaves(lengths).count()
+          independent=module.MonthWeavingFamily(lengths).count()
+          assert expected==independent,'pure candidate and pinned original Python count differ'
+          assert observed==expected,'Ada full family candidate count differs from exact Python'
+          raw=observed.to_bytes((observed.bit_length()+7)//8,'big')
+          digest=hashlib.sha256(raw).hexdigest()
+          assert observed.bit_length()==31483,'maximal-month stress bits changed'
+          assert digest=='d2fad6a82c67a5d2c4422110f4f11637a70fda1125dc03fe1f3288c2093771bd'
+          result={'schema':'PASTAFARI_ADA_PURE_FULL_WEAVE_COUNT_CROSSCHECK_V122/1',
+                  'status':'ADA_PURE_BIGINT_COUNT_EQUIVALENT_TO_ORIGINAL_PYTHON_NOT_DATE',
+                  'month_count':47,'total_days':5778,'count_bits':observed.bit_length(),
+                  'count_sha256_big_endian':digest,
+                  'source_original_python_commit':'0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4',
+                  'Ada_production_source_modified':False,
+                  'original_Fct_executed':False,
+                  'Ada_calendar_date_bug_fixed':False,
+                  'first_original_source_mismatch_halt_still_active':True,
+                  'full_source_years_certified':0,
+                  'ten_thousand_years_certified':0}
+          print(json.dumps(result,sort_keys=True))
+          PY
+          grep -q '"status": "ADA_PURE_BIGINT_COUNT_EQUIVALENT_TO_ORIGINAL_PYTHON_NOT_DATE"' \
+            evidence/v122-pure-source-large-count-verdict.json
+          echo V122_ADA_MAX_47_MONTH_EXACT_COUNT_ORIGINAL_PYTHON_EQUAL_NO_FCT
+      - name: Preserve true native Ada pure math evidence without running date conversion
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v122-ada-full-family-arbitrary-precision-pure-count-NO-FCT
+          path: |
+            evidence/v122-ada-compiler-version.txt
+            evidence/v122-pure-ada-compile.log
+            evidence/v122-binary.sha256
+            evidence/v122-resource.log
+            evidence/v122-pure-ada-native.log
+            evidence/v122-pure-source-large-count-verdict.json
+          if-no-files-found: warn
+          retention-days: 30
