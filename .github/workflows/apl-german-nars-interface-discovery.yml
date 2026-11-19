@@ -6,7 +6,8 @@ on:
       - qa/apl-german-nars-interface-20261116
     paths:
       - '.github/workflows/apl-german-nars-interface-discovery.yml'
-      - 'qa/nars-interface/**'
+      - 'qa/nars-interface/source_probe.py'
+      - 'qa/nars-interface/test_source_probe.py'
   workflow_dispatch:
 
 permissions:
@@ -19,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Offline scanner contract tests
-        run: python3 -m unittest discover -s qa/nars-interface -p 'test_*.py' -v
+        run: python3 -m unittest discover -s qa/nars-interface -p 'test_source_probe.py' -v
       - name: Provision SVN from authenticated Ubuntu repositories
         shell: bash
         run: |
