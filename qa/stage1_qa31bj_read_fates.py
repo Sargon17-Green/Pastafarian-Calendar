@@ -72,9 +72,13 @@ def structural(ev: dict) -> tuple[str,int,int]:
     if op == '\\': return ('swap',2,2)
     if op in '$.,_|j': return ('drop',1,0)
     if op in 'xw': return ('drop',2,0)
+    if op == 'k' and ev['ip']==[1475,101] and len(ev['pre'])>=3 and ev['pre'][-1]==1 and ev['next']==[1476,101] and ev['post']==ev['pre'][:-3]+[ev['pre'][-3]+ev['pre'][-2]]:
+        return ('iterate_once_add',3,1)
     if op == 'p': return ('put',3,0)
     if op == 'g': return ('get',2,1)
-    if op in '~&': return ('input',0,1)
+    if op in '~&':
+        growth=len(ev['post'])-len(ev['pre'])
+        return ('input',0,growth) if growth in (0,1) else ('unknown',0,0)
     if op in NO_STACK: return ('identity',0,0)
     return ('unknown',0,0)
 
@@ -85,6 +89,9 @@ def physical_check(rows: list[dict], witness: dict) -> None:
     for i, e in enumerate(rows):
         need(e['t'] == i+1 and isinstance(e['pre'],list) and isinstance(e['post'],list),
              'tick or stack shape')
+        if e['op']==107 and e['ip']==[1475,101] and len(e['pre'])>=3 and e['pre'][-1]==1:
+            need(i+1<len(rows) and rows[i+1]['op']==43 and rows[i+1]['ip']==[1476,101],
+                 'source k iterates signed next +')
         if i:
             prior = rows[i-1]
             need((prior['next'],prior['next_delta'],prior['post']) ==
@@ -158,7 +165,7 @@ def forward(rows: list[dict], roots: set[int]):
                     destinations[root].append({'t':t,'ip':ip,'op':op,'kind':'read_address'})
         if kind in ('literal','input','string'):
             stack += [ZERO] * pushes
-        elif kind in ('binary','unary'):
+        elif kind in ('binary','unary','iterate_once_add'):
             stack.append(affected)
         elif kind=='dup':
             stack.extend([taken[0],taken[0]])
@@ -218,11 +225,15 @@ def inverse_arity(ev: dict) -> tuple[str,int,int]:
     if o=='!':return ('unary',1,1)
     if o==':':return ('dup',1,2)
     if o=='\\':return ('swap',2,2)
+    if o=='k' and ev['ip']==[1475,101] and len(ev['pre'])>=3 and ev['pre'][-1]==1 and ev['next']==[1476,101] and ev['post']==ev['pre'][:-3]+[ev['pre'][-3]+ev['pre'][-2]]:
+        return ('iterate_once_add',3,1)
     if o=='p':return ('put',3,0)
     if o=='g':return ('get',2,1)
     if o in ('.',',','$','_','|','j'):return ('drop',1,0)
     if o in ('x','w'):return ('drop',2,0)
-    if o=='~' or o=='&':return ('input',0,1)
+    if o=='~' or o=='&':
+        growth=len(ev['post'])-len(ev['pre'])
+        return ('input',0,growth) if growth in (0,1) else ('unknown',0,0)
     if o in (' ','>','<','^','v','#','[',']','r','z','@','"'):
         return ('identity',0,0)
     return ('unknown',0,0)
@@ -262,7 +273,7 @@ def backward(rows: list[dict], roots: set[int]):
                     if d not in destinations[root]:destinations[root].append(d)
         if k in ('literal','input','string'):
             slots.extend(graph.add() for _ in range(m))
-        elif k in ('binary','unary'):
+        elif k in ('binary','unary','iterate_once_add'):
             slots.append(graph.add(consumed))
         elif k=='dup':
             slots.extend([consumed[0],consumed[0]])
@@ -282,8 +293,9 @@ def backward(rows: list[dict], roots: set[int]):
 def analyze_case(rows,witness):
     physical_check(rows,witness)
     roots={r[0] for r in witness['reads']}
-    a,b,c=forward(rows,roots)
-    a2,b2,c2=backward(rows,roots)
+    suffix=rows[min(roots)-1:]
+    a,b,c=forward(suffix,roots)
+    a2,b2,c2=backward(suffix,roots)
     need((a,b,c)==(a2,b2,c2),'forward/reverse lineage divergence')
     records=[]
     for tick,ip,value in witness['reads']:
@@ -312,6 +324,23 @@ def hostile():
     need(f==b,'synthetic graph equality')
     need(f[0][1]['t']==2 and f[1][1][0]['kind']=='write_value','synthetic source-to-writer')
     count=2
+    # Original corpus revealed EOF ~ with 0 pushes and k iterating one +.
+    r_iter=[event(1,'g',[61,1706],[3],[195,1508]),
+            event(2,'1',[3],[3,1]),event(3,'1',[3,1],[3,1,1]),
+            event(4,'k',[3,1,1],[4],[1475,101])]
+    r_iter[-1]['next']=[1476,101]
+    fi,bi=forward(r_iter,{1}),backward(r_iter,{1})
+    need(fi==bi and fi[0][1]['t']==4,'signed k one-iteration addition lineage')
+    count+=1
+    need(structural(r_iter[-1])==inverse_arity(r_iter[-1])==('iterate_once_add',3,1),
+         'separate bounded k grammars')
+    count+=1
+    for post in ([],[65]):
+        inp=event(1,'~',[],post)
+        need(forward([inp],set())==backward([inp],set()) and
+             structural(inp)==inverse_arity(inp)==('input',0,len(post)),
+             'EOF/native input push size')
+        count+=1
     # Independent positive sink categories: branch, output, and a g from a put.
     r_branch=[event(1,'g',[61,1706],[3],[195,1508]),event(2,'_',[3],[]),event(3,'@',[],[])]
     r_output=[event(1,'g',[61,1706],[3],[195,1508]),event(2,'.',[3],[]),event(3,'@',[],[])]
@@ -358,8 +387,60 @@ def hostile():
             except ValueError:pass
             else:raise ValueError('accepted forged physical record '+name)
         count+=1
-    need(count==18,'synthetic verification count')
+    need(count==22,'synthetic verification count')
     return count
+
+
+
+def signed_trace_mutations(rows, witness):
+    """Non-no-op changes to actual signed original STEPs; each must fail closed.
+
+    Checks the whole unchanged trace (except exactly one edited event) against the
+    original QA31BI witness, rather than comparing fabricated summary objects.
+    """
+    import copy
+    root0,root1=(r[0]-1 for r in witness['reads'])
+    put=witness['p61_tick']-1
+    halt=len(rows)-1
+    ks=[i for i,e in enumerate(rows) if e['op']==107 and e['ip']==[1475,101]]
+    need(len(ks)==1,'expected source k instance')
+    k=ks[0]
+    def op(e):e.__setitem__('op',112)
+    def x(e):e['ip'].__setitem__(0,e['ip'][0]+1)
+    def y(e):e['ip'].__setitem__(1,e['ip'][1]+1)
+    def addr_x(e):e['pre'].__setitem__(-2,e['pre'][-2]+1)
+    def addr_y(e):e['pre'].__setitem__(-1,e['pre'][-1]+1)
+    def val(e):e['post'].__setitem__(-1,e['post'][-1]+1)
+    controls=[
+        ('read0-op',root0,op),('read1-op',root1,op),
+        ('read0-site-x',root0,x),('read1-site-y',root1,y),
+        ('read0-address-x',root0,addr_x),('read1-address-y',root1,addr_y),
+        ('read0-value',root0,val),('read1-value',root1,val),
+        ('read0-string',root0,lambda e:e.update(string=True)),
+        ('read1-string',root1,lambda e:e.update(string=True)),
+        ('owner-value',put,lambda e:e['pre'].__setitem__(-3,e['pre'][-3]+1)),
+        ('owner-address',put,addr_y),('owner-site',put,x),
+        ('source-k-value',k,val),
+        ('source-k-count',k,lambda e:e['pre'].__setitem__(-1,2)),
+        ('source-k-next',k,lambda e:e.update(next=[1477,101])),
+        ('halt-op',halt,op),('halt-successor',halt,lambda e:e.update(next=[0,0])),
+        ('read0-clock',root0,lambda e:e.update(t=e['t']+1)),
+        ('read0-predecessor',root0-1,lambda e:e.update(next=[-1000,0]))
+    ]
+    labels=[]
+    for label,i,edit in controls:
+        bad=rows[:];event=copy.deepcopy(rows[i]);edit(event)
+        need(event!=rows[i],'no-op original mutation '+label)
+        bad[i]=event
+        try:
+            analyze_case(bad,witness)
+        except ValueError as exc:
+            need(str(exc) not in ('no-op original mutation '+label,), 'wrong negative '+label)
+        else:
+            raise ValueError('accepted original signed corruption '+label)
+        labels.append(label)
+    need(len(labels)==20,'source mutation count')
+    return labels
 
 
 def run(args):
@@ -376,7 +457,7 @@ def run(args):
     need(json.loads(bh.read('summary.json'))['source_blob']==SOURCE,'BH source identity')
     need(json.loads(bg.read('QA31BG_PHYSICAL.json')).get('source_blob',SOURCE)==SOURCE,'BG source identity')
     membership={(r['shard'],r['trace_sha256']):r for r in idx['per_case']}
-    results=[];corpus_steps=0;corpus_cases=0;checked=0
+    results=[];corpus_steps=0;corpus_cases=0;checked=0;real_mutations=None
     for sn in range(8):
         ci=json.loads(bh.read('summary.json'))
         pin=ci['shard_ids_and_hashes'][sn][1]
@@ -396,11 +477,17 @@ def run(args):
             if key[1] in select:
                 rows=[json.loads(line) for line in gzip.decompress(blob).splitlines()]
                 need(len(rows)==case['steps'],'physical compressed steps')
-                results.extend(analyze_case(rows,select.pop(key[1])))
+                witness=select.pop(key[1])
+                results.extend(analyze_case(rows,witness))
+                if real_mutations is None:
+                    real_mutations=signed_trace_mutations(rows,witness)
                 checked+=1
     need(not membership and not select and (corpus_cases,corpus_steps,checked)==(200,3628390,135),
          '200 original cases / 135 selected')
-    need(len(results)==270,'270 independent g roots')
+    need(len(results)==270 and real_mutations is not None,'270 independent g roots')
+    need(all(not r['uncertain'] and r['first_use'] and len(r['destinations'])==2 and
+             all(d['kind']=='write_value' for d in r['destinations']) for r in results),
+         'complete finite double-write structural witness')
     tests=hostile()
     args.out.mkdir(parents=True,exist_ok=False)
     encoded=b''.join(clean_json(r)+b'\n' for r in results)
@@ -411,6 +498,9 @@ def run(args):
              'cases_selected':checked,'read_roots':len(results),
              'unknown_roots':sum(r['uncertain'] for r in results),
              'sinks_by_kind':dict(cnt),'synthetic_and_hostile_checks':tests,
+             'signed_original_mutations_rejected':real_mutations,
+             'first_use_by_site':dict(Counter(str((r['read_ip'],r['first_use']['ip'],r['first_use']['op'])) for r in results)),
+             'write_value_sites':dict(Counter(str(d['ip']) for r in results for d in r['destinations'] if d['kind']=='write_value')),
              'witnesses_sha256':digest(encoded), 'new_native_runs':0,
              'stage1_pass':False,'global_causality_proven':False}
     (args.out/'summary.json').write_text(json.dumps(summary,ensure_ascii=False,sort_keys=True,indent=2)+'\n',encoding='utf-8')
