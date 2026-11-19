@@ -1,0 +1,87 @@
+name: FALSE Arabic Stage 16 original interpreter exact-source remove-by-position
+
+on:
+  push:
+    branches:
+      - 'FALSE+العربية'
+    paths:
+      - 'src/monster_bootstrap.false'
+      - 'test/stage16_sequence_remove_14.false'
+      - 'tools/stage16_sequence_remove_oracle.py'
+      - 'tools/stage16_sequence_remove_ci.py'
+      - '.github/workflows/false-arabic-stage16-native-sequence-remove.yml'
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  stage16-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: 6f28e9400f5c6e867fbe998629a02f739f91a4a9
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 3
+          persist-credentials: false
+
+      - name: Verify pinned stage source and original upstream interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/stage16_native upstream
+          git cat-file -e "$SOURCE_PIN^{commit}"
+          git merge-base --is-ancestor "$SOURCE_PIN" HEAD
+          git rev-parse "$SOURCE_PIN" > evidence/stage16_native/source_observed.txt
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/stage16_native/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/stage16_native/runtime_observed.txt
+          test "$(cat evidence/stage16_native/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+
+      - name: Compile exact original FALSE and Unicode smoke test
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/stage16_native/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/stage16_native/compiler_stdout.txt 2> evidence/stage16_native/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/stage16_native/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/stage16_native/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/stage16_native/unicode_pick.false \
+            > evidence/stage16_native/unicode_pick.stdout.txt \
+            2> evidence/stage16_native/unicode_pick.stderr.txt
+          test "$(cat evidence/stage16_native/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/stage16_native/preflight.txt
+
+      - name: Independently reproduce finite design oracle and run bounded Native
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage16_sequence_remove_design_oracle.py | tee evidence/stage16_native/design_oracle.log
+          PYTHONPATH=tools python3 tools/stage16_sequence_remove_ci.py
+
+      - name: Upload SHA-identified original Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage16-remove-native
+          path: evidence/stage16_native/
+          if-no-files-found: error
+          retention-days: 30
