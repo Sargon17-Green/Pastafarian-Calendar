@@ -151,6 +151,15 @@ jobs:
     permissions:
       contents: read
 
+  false-arabic-stage15-factorial:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-factorial7]')
+    uses: ./.github/workflows/false-arabic-stage15-native-factorial.yml
+    permissions:
+      contents: read
+
   false-arabic-stage11-grind-55:
     if: >-
       github.event_name == 'push' &&
