@@ -142,6 +142,15 @@ jobs:
     permissions:
       contents: read
 
+  false-arabic-stage14-visible-drops:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-visible46]')
+    uses: ./.github/workflows/false-arabic-stage14-native-visible-drops.yml
+    permissions:
+      contents: read
+
   false-arabic-stage11-grind-55:
     if: >-
       github.event_name == 'push' &&
