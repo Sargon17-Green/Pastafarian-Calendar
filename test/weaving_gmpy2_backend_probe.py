@@ -215,10 +215,111 @@ def test_paired_hotset():
     print("WEAVING_GMPY2_PERFORMANCE_ACCEPTANCE=NOT_TESTED")
 
 
+
+def test_bounded_extended_median_prefix():
+    """Research only: exact GMP rank-prefix steps, bounded by wall time and RSS.
+
+    This deliberately cannot certify full 4244-day rank or reverse-rank.
+    A separate process isolates peak RSS from the preceding comparison runs.
+    """
+    import signal
+
+    assert sys.platform.startswith("linux"), "Linux CI is required for RSS KiB and SIGALRM"
+    target, seconds_limit, rss_limit_kib = 96, 110.0, 512 * 1024
+    reference_depths = (6, 16, 32, 64, 96)
+    expected_root = "925c8a377ab6e61ed5d71f5ca7b7b5b184923308a0b7a27113bbd0085af0c5da"
+    completed = []
+    reference_checks = 0
+    outcome = "UNSET"
+    remaining = 0
+    began = time.monotonic()
+    saved_transfer = dual.sparse_transfer
+    saved_handler = signal.getsignal(signal.SIGALRM)
+
+    def alarm_handler(_signum, _frame):
+        raise TimeoutError("bounded GMP median-prefix wall clock expired")
+
+    print("WEAVING_GMPY2_EXTENDED_TARGET=" + str(target), flush=True)
+    print("WEAVING_GMPY2_EXTENDED_LIMIT_SECONDS=" + str(seconds_limit), flush=True)
+    print("WEAVING_GMPY2_EXTENDED_RSS_LIMIT_KIB=" + str(rss_limit_kib), flush=True)
+    signal.signal(signal.SIGALRM, alarm_handler)
+    signal.setitimer(signal.ITIMER_REAL, seconds_limit)
+    try:
+        dual.sparse_transfer = gmp_transfer
+        state = dual.SparseDualWeaving(MONTH_LENGTHS)
+        root = int(state.total)
+        assert root.bit_length() == 22470
+        assert hashlib.sha256(root.to_bytes((root.bit_length() + 7) // 8, "big")).hexdigest() == expected_root
+        remaining = root // 2
+        for _ in range(target):
+            assert 0 <= remaining < state.total
+            blocks = state.blocks()
+            assert sum(blocks) == state.total
+            choice = None
+            for symbol in range(1, len(MONTH_LENGTHS) + 1):
+                if remaining >= blocks[symbol]:
+                    remaining -= blocks[symbol]
+                else:
+                    choice = symbol
+                    break
+            assert choice is not None, "no legal median-prefix choice"
+            state.take(choice)
+            completed.append(choice)
+            assert 0 <= remaining < state.total
+            if len(completed) == 6:
+                assert tuple(completed) == (1, 2, 3, 4, 5, 6)
+            if len(completed) in reference_depths:
+                # Separate dense insertion recurrence, not GMP sparse state.
+                independent = dual.count_prefix(MONTH_LENGTHS, tuple(completed))
+                assert independent == int(state.total), "independent prefix-count mismatch"
+                reference_checks += 1
+                print("WEAVING_GMPY2_EXTENDED_CHECKPOINT=" + str(len(completed)) +
+                      ":DENSE_REFERENCE_EQUAL", flush=True)
+            rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            if rss > rss_limit_kib:
+                outcome = "INCONCLUSIVE_RSS_BUDGET"
+                break
+        else:
+            outcome = "PREFIX_TARGET_REACHED_ONLY"
+    except TimeoutError:
+        outcome = "INCONCLUSIVE_TIME_BUDGET"
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, saved_handler)
+        dual.sparse_transfer = saved_transfer
+    # Six previously verified positions plus independent dense confirmation are
+    # minimum QA gates. A shorter run is a regression, not a successful probe.
+    assert len(completed) >= 6 and reference_checks >= 1, (
+        "extended prefix failed minimum 6-symbol/independent-reference gate",
+        len(completed), reference_checks, outcome)
+    prefix_bytes = ",".join(map(str, completed)).encode("ascii")
+    print("WEAVING_GMPY2_EXTENDED_RESULT=" + outcome)
+    print("WEAVING_GMPY2_EXTENDED_SYMBOLS=" + str(len(completed)))
+    print("WEAVING_GMPY2_EXTENDED_REFERENCE_CHECKS=" + str(reference_checks))
+    print("WEAVING_GMPY2_EXTENDED_PREFIX_SHA256=" + hashlib.sha256(prefix_bytes).hexdigest())
+    print("WEAVING_GMPY2_EXTENDED_REMAINING_BITS=" + str(int(remaining).bit_length()))
+    print("WEAVING_GMPY2_EXTENDED_SECONDS=" + format(time.monotonic() - began, ".6f"))
+    print("WEAVING_GMPY2_EXTENDED_RSS_KIB=" +
+          str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
+    print("WEAVING_GMPY2_EXTENDED_FULL_4244_RANK_UNRANK=NOT_TESTED")
+    print("WEAVING_GMPY2_EXTENDED_PRODUCTION_CHANGE=NONE")
+
+
 if __name__ == "__main__":
-    print("WEAVING_GMPY2_VERSION=" + gmpy2.version())
-    test_signed_differential()
-    test_finite_oracle()
-    test_paired_hotset()
-    print("WEAVING_GMPY2_FULL_4244_RANK_UNRANK=NOT_TESTED")
-    print("WEAVING_GMPY2_PRODUCTION_CHANGE=NONE")
+    import subprocess
+
+    if sys.argv[1:] == ["--extended-prefix"]:
+        test_bounded_extended_median_prefix()
+    elif len(sys.argv) == 1:
+        print("WEAVING_GMPY2_VERSION=" + gmpy2.version())
+        test_signed_differential()
+        test_finite_oracle()
+        test_paired_hotset()
+        print("WEAVING_GMPY2_FULL_4244_RANK_UNRANK=NOT_TESTED")
+        print("WEAVING_GMPY2_PRODUCTION_CHANGE=NONE")
+        # Process isolation keeps the expanded prefix peak RSS attributable.
+        # The child has an internal 110s alarm and an external 125s hard cap.
+        subprocess.run([sys.executable, "-u", str(Path(__file__).resolve()),
+                        "--extended-prefix"], check=True, timeout=125)
+    else:
+        raise SystemExit("unexpected probe arguments")
