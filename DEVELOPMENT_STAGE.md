@@ -1,8 +1,8 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=19
-CURRENT_KIND=WEAVING_TEN_MONTHS_NATIVE_PENDING
+CURRENT_STAGE=20
+CURRENT_KIND=WEAVING_ELEVEN_MONTHS_DISCOVERY
 CURRENT_PATCH=none
-LAST_COMPLETED_STAGE=18
+LAST_COMPLETED_STAGE=19
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -12,7 +12,7 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=Perl
 NATURAL_LANGUAGE=סינית מנדרינית – מסורתית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=Stage17 accepted on source 457eb0a8c444c5d3416c79e03273d3144dcc3dec. Stage18 accepted on source 7ae6fc32ce7ce9593ad41dc5c75056fa564aa591 by canonical push run 44365406989: 19/19 required success, Stage01 114 files/209070 TAP, Stage18 9819 TAP, artifact 14461669928 SHA256 146fd95dd91efee3da91c645f4b71a161ab3dcd7ff34afc099f9ecba64570f00 CRC7/7 verified. Stage19 10-month/40-day implementation now committed as a bounded extension only: module blob 3d731e16bfd88b7ad00c9f5f04f17509467fb91a, bounds 9->10 months and 36->40 days; legacy newly-legal negative fixtures updated. Local Perl5.40.1: syntax4/4; t/64 33634 PASS/76s; t/66 9 PASS/24s; t/65 60 PASS/81s; combined 33703 TAP; 120s and 393216-KiB per test. Stage01 timeout 15m, expected 117 files/242773 tests. Stage19 canonical Native CI pending; LAST_COMPLETED_STAGE remains 18. Full-year generator remains unverified.
+MONSTER_ARCHITECTURE_GROWTH=Stage17 accepted source 457eb0a8c444c5d3416c79e03273d3144dcc3dec. Stage18 accepted source 7ae6fc32ce7ce9593ad41dc5c75056fa564aa591 by run 44365406989, 19/19 required jobs and seven-file artifact verified. Stage19 accepted exact source 70ace36b86d71b83e44884e033080a491239212c by canonical push run 44613592783, 20/20 mandatory jobs and all 20 raw logs, Stage01 117 files/242773 TAP, Stage04 385 TAP, Stage19 33703 TAP, seven-file artifact 14576430937 SHA256 0806044132cba87d2e497d12e158a1c2a60c58475ef6944db1b8b95db072fdbb; Perl v5.40.5; 4 syntax OK; exit0/stderr0; Stage19 production domain 10 months/40 days, MonthOccurrence domain <=9/36 retained. Stage20 only DISCOVERY (11 months/44 days), independent Python Catalan11=58786 and lexicographic oracle hash 3b7ad5a789d66bfc799fbbc96669e79a46e551fa0d19453bdef7d228f8626c0c verified; candidate production and Native CI not yet run. Full-year generator unverified.
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=YES
 GIT_HISTORY_MUTATED=NO
