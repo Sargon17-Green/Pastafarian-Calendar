@@ -40,6 +40,9 @@ CASES = (
     {"label": "fixed-foundation-target-before", "calculation_offset": -1, "target_offset": 0},
     {"label": "fixed-foundation-target-equal", "calculation_offset": 0, "target_offset": 0},
     {"label": "fixed-foundation-target-after", "calculation_offset": 1, "target_offset": 0},
+    # Independent distant contexts: target is identical, not recomputed from calculation day.
+    {"label": "fixed-foundation-target-distant-before", "calculation_offset": -2048, "target_offset": 0},
+    {"label": "fixed-foundation-target-distant-after", "calculation_offset": 2048, "target_offset": 0},
 )
 REFERENCE_TIMEOUT_SECONDS = 75
 FORTRAN_TIMEOUT_SECONDS = 75
@@ -156,15 +159,18 @@ def run_fortran(case_index: int, executable: Path) -> tuple[tuple[int, ...], str
     return extract_five(process.stdout, "STAGE01_CONTEXT_FIELDS="), process.stdout
 
 def self_test() -> None:
-    assert len(CASES) == 6
-    assert len({case["calculation_offset"] for case in CASES}) == 6
+    assert len(CASES) == 8
+    assert len({case["calculation_offset"] for case in CASES}) == 8
     assert CASES[0]["target_offset"] - CASES[0]["calculation_offset"] == 5000
     assert CASES[1]["target_offset"] - CASES[1]["calculation_offset"] == -5000
     assert CASES[2]["target_offset"] == CASES[2]["calculation_offset"]
-    assert tuple(c["calculation_offset"] for c in CASES[3:]) == (-1, 0, 1)
+    assert tuple(c["calculation_offset"] for c in CASES[3:6]) == (-1, 0, 1)
     assert all(c["target_offset"] == 0 for c in CASES[3:])
     assert case_days(4) == (FOUNDATION_DAY - 1, FOUNDATION_DAY)
     assert case_days(6) == (FOUNDATION_DAY + 1, FOUNDATION_DAY)
+    assert tuple(c["calculation_offset"] for c in CASES[6:]) == (-2048, 2048)
+    assert case_days(7) == (FOUNDATION_DAY - 2048, FOUNDATION_DAY)
+    assert case_days(8) == (FOUNDATION_DAY + 2048, FOUNDATION_DAY)
     assert extract_five(
         "STAGE01_CONTEXT_FIELDS=5000,15,1,18,1",
         "STAGE01_CONTEXT_FIELDS=",
@@ -175,7 +181,7 @@ def self_test() -> None:
         pass
     else:
         raise AssertionError("Malformed four-field result was accepted")
-    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=11/11")
+    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=14/14")
 
 def compare(reference: Path, executable: Path, commit: str, branch: str, run_id: int) -> int:
     if len(commit) != 40 or any(ch not in "0123456789abcdef" for ch in commit.lower()):
