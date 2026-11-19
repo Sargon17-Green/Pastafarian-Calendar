@@ -5,21 +5,21 @@ program stage01_calculation_context_probe
   use normative_oracle_calendar, only: CalendarDateResult, normative_calendar_date, reset_gate_cache
   implicit none
 
-  integer(int64), parameter :: calculation_offsets(3) = [ &
-       -8192_int64, 8192_int64, 137_int64 ]
-  integer(int64), parameter :: target_offsets(3) = [ &
-       -3192_int64, 3192_int64, 137_int64 ]
+  integer(int64), parameter :: calculation_offsets(6) = [ &
+       -8192_int64, 8192_int64, 137_int64, -1_int64, 0_int64, 1_int64 ]
+  integer(int64), parameter :: target_offsets(6) = [ &
+       -3192_int64, 3192_int64, 137_int64, 0_int64, 0_int64, 0_int64 ]
   type(BigInt) :: foundation, calculation_day, target_day
   type(CalendarDateResult) :: actual
   character(len=16) :: argument
   integer :: case_index, status
 
-  if (command_argument_count() /= 1) error stop 'provide one calculation-context case 1..3'
+  if (command_argument_count() /= 1) error stop 'provide one calculation-context case 1..6'
   call get_command_argument(1, argument, status=status)
   if (status /= 0) error stop 'cannot read calculation-context case'
   read(argument, *, iostat=status) case_index
   if (status /= 0) error stop 'invalid calculation-context case'
-  if (case_index < 1 .or. case_index > 3) error stop 'calculation-context case out of range'
+  if (case_index < 1 .or. case_index > 6) error stop 'calculation-context case out of range'
 
   foundation = foundation_day()
   calculation_day = bi_add_small(foundation, calculation_offsets(case_index))
