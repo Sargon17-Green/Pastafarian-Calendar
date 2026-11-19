@@ -34,7 +34,7 @@ class FullFamilyPureMathV120(unittest.TestCase):
         sys.modules[spec.name]=module
         spec.loader.exec_module(module)
         cls.OriginalFamily=module.MonthWeavingFamily
-        cls.OriginalBrute=module.brute_weavings
+        cls.OriginalBrute=staticmethod(module.brute_weavings)
 
     def test_minimum_two_month_full_family(self):
         self.assertEqual(ExactMonthWeaves((2,2)).count(),2)
