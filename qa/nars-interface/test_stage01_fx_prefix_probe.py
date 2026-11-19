@@ -2,7 +2,7 @@ import hashlib
 import pathlib
 import unittest
 
-from stage01_fx_prefix_probe import create_prefix
+from stage01_fx_prefix_probe import create_prefix, nested_fx_expression
 from stage01_import_workspace import load_locked_sources, fx_definition_lines
 
 BASE = """[General]
@@ -43,6 +43,15 @@ class PrefixTests(unittest.TestCase):
         c,r=create_prefix(BASE,MARKER,ROOT)
         self.assertLess(len(c),300000)
         self.assertLess(r["outer_lx_chars"],200000)
+
+    def test_nested_character_strand_without_padding(self):
+        expression=nested_fx_expression(["z←Test x", "z←x+1"])
+        self.assertTrue(expression.startswith("((⎕UCS "))
+        self.assertIn(") (⎕UCS ",expression)
+        self.assertNotIn("⍴",expression)
+        self.assertEqual(expression.count("⎕UCS"),2)
+        _,receipt=create_prefix(BASE,MARKER,ROOT)
+        self.assertEqual(receipt["fx_transport"],"NESTED_CHARACTER_VECTOR_STRAND_V1")
 
     def test_crlf_preserved(self):
         raw=BASE.replace(b"\n",b"\r\n")
