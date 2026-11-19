@@ -75,8 +75,11 @@ class Stage01ImportWorkspaceTests(unittest.TestCase):
         codes = [int(x) for x in outer[len(prefix):].split()]
         inner = "".join(chr(x) for x in codes)
         self.assertIn("RunStage01Tests", inner)
-        self.assertIn("STAGE01_FX_IMPORT_FAILED", inner)
-        self.assertIn("STAGE01_FX_COUNT_MISMATCH", inner)
+        # Function bodies are serialized into numeric ⎕UCS vectors, so
+        # their German error messages do not occur as plaintext in inner.
+        for message in ("STAGE01_FX_IMPORT_FAILED", "STAGE01_FX_COUNT_MISMATCH"):
+            numeric = " ".join(str(ord(c)) for c in message)
+            self.assertIn(numeric, inner)
         self.assertTrue(inner.endswith("⎕NCREATE 0)"))
 
     def test_candidate_changes_only_the_new_lx_global(self):
