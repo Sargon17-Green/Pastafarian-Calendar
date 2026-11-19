@@ -33,7 +33,7 @@
   "invalid_cases": [
     -1,
     7,
-    "empty_tuple"
+    "missing_argument_handle"
   ],
   "native_acceptance": false,
   "project_id": "PC-BRANCH-FALSE-ARABIC",

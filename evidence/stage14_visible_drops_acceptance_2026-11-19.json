@@ -1,0 +1,15 @@
+{
+  "artifact_sha256": "5f79754f968cc38c1d67b1480f1c6b0c0809385fb9da16594c92dabad2f666a8",
+  "audit": "OFFLINE_INDEPENDENT",
+  "audit_negative_control": "REJECTED_CORRUPT_EXPECTED_VALUE",
+  "negative_controls": 4,
+  "next_stage": 15,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "result_assertions": 46,
+  "run_id": "44483758027",
+  "runtime_sha": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "source_sha": "f97f71c52f8791ecaa7b58296e6d59e1fbd52b36",
+  "stage": 14,
+  "status": "ACCEPTED",
+  "workflow_sha": "b8ab33bde847d4dad9a14088d7c263642b4ea08f"
+}
