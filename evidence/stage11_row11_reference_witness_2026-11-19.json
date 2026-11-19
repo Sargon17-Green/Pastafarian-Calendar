@@ -1,0 +1,14 @@
+{
+  "combined_sha256": "2a1115c0b06d99241bc1b35cba2aff3849ac6ad2701d0d03fda52732f52d715a",
+  "interpreter_sha256": "d540a94ca615a055ffc332b44c76fd34d766f3a046646530972dd2c5c99b3107",
+  "native_exit_code": 0,
+  "native_stderr": "",
+  "native_stdout": "REF_ROW11_COL4_47_COL5_1_OK",
+  "normative_sha256": "465e7b14224de68f8720aa62fabc26fcbff656e4f1861d59ffec9bf3a310ccf6",
+  "probe_sha256": "5d1f65663736d7573a8c588f7af59aac80c8c767cada966906fb6e08d7aa0325",
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "row11_col4": 47,
+  "row11_col5": 1,
+  "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "scope": "STAGE11_ROW11_REFERENCE_WITNESS"
+}
