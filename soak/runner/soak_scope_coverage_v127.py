@@ -92,7 +92,7 @@ def validate_inventory(inventory: dict) -> dict[str, dict]:
         key = ident(row["record_id"], "record_id")
         ident(row["engine_id"], "engine_id")
         ident(row["algorithm_id"], "algorithm_id")
-        if row["source_kind"] not in KINDS:
+        if type(row["source_kind"]) is not str or row["source_kind"] not in KINDS:
             raise ValueError("unknown inventory source kind")
         if key in found:
             raise ValueError("repeated inventory record_id")
@@ -106,11 +106,11 @@ def validate_plan(plan: dict, inventory: dict, records: dict) -> tuple[list[dict
                "scope plan")
     if plan["schema"] != PLAN_SCHEMA or sha(plan["inventory_sha256"], "inventory") != digest(inventory):
         raise ValueError("scope plan does not lock exact inventory contents")
-    if plan["incident_status"] not in {"OPEN", "RESOLVED_WITH_REVIEW"}:
+    if type(plan["incident_status"]) is not str or plan["incident_status"] not in {"OPEN", "RESOLVED_WITH_REVIEW"}:
         raise ValueError("unknown first-difference incident status")
     if type(plan["dispatch_halt"]) is not bool:
         raise ValueError("dispatch_halt must be a boolean")
-    if plan["independence_audit"] not in {"NOT_CERTIFIED", "EXTERNALLY_REVIEWED"}:
+    if type(plan["independence_audit"]) is not str or plan["independence_audit"] not in {"NOT_CERTIFIED", "EXTERNALLY_REVIEWED"}:
         raise ValueError("invalid independence review assertion")
     years = plan["years"]
     if type(years) is not list or not 1 <= len(years) <= 10_000:
@@ -144,7 +144,7 @@ def validate_plan(plan: dict, inventory: dict, records: dict) -> tuple[list[dict
         if rid not in records or rid in by_record:
             raise ValueError("unknown or repeated inventory disposition")
         decision = item["decision"]
-        if decision not in DECISIONS:
+        if type(decision) is not str or decision not in DECISIONS:
             raise ValueError("unknown disposition")
         target, review = item["duplicate_of"], item["review_evidence_sha256"]
         if decision == "DUPLICATE_OF":
@@ -204,7 +204,7 @@ def analyze(inventory: dict, plan: dict, evidence: dict) -> dict:
         signed(row["year"], "receipt year")
         if key not in allowed or key in seen:
             raise ValueError("unplanned, duplicate or previously omitted engine/year receipt")
-        if row["status"] not in OUTCOMES:
+        if type(row["status"]) is not str or row["status"] not in OUTCOMES:
             raise ValueError("unknown upstream verification status")
         if row["status"] == "UPSTREAM_VERIFIED":
             if type(row["days"]) is not int or row["days"] <= 0:
@@ -225,7 +225,7 @@ def analyze(inventory: dict, plan: dict, evidence: dict) -> dict:
     pending = 0
     invalid = 0
     mismatch = 0
-    for y in years:
+    for ordinal, y in enumerate(years):
         year_id = y["year"]
         expected_days = int(y["last_target_day"]) - int(y["first_target_day"]) + 1
         stream_sha = None
@@ -270,7 +270,7 @@ def analyze(inventory: dict, plan: dict, evidence: dict) -> dict:
                                      "year": year_id, "engine": engine}
         if year_ok:
             verified_pair_years += len(engines) - 1
-            if contiguous_years == years.index(y):
+            if contiguous_years == ordinal:
                 contiguous_years += 1
 
     structural_complete = (not pending and not invalid and not mismatch and
