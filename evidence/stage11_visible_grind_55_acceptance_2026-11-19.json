@@ -1,0 +1,23 @@
+{
+  "archive_sha256": "b646a25fcda60c20851f1db9ca12f6f4a4374d4c11d1dec35cbb873a39fad251",
+  "audit_negative_control": "REJECTED_CORRUPTED_ROW11_VALUE",
+  "combined_sha256": "c74344f0bd206604c37c0be7477d8a504c3fafeeb5882a95024f9c974b5618bb",
+  "fixture_sha256": "4eb957182723103913e405a627464631a687847225d3d5b9dc64ba93db13fb6a",
+  "input_assertions": 110,
+  "negative_controls": [
+    "mutant",
+    "grind_0",
+    "grind_12",
+    "column_0",
+    "column_6"
+  ],
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "result_assertions": 55,
+  "run_id": "44480074938",
+  "runtime_sha": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "scope": "STAGE11_PATCH_FOR_STAGE14",
+  "source_sha": "7f52bc68f33dd732e6d2605ad40cb0bd75bf74d3",
+  "stage14_full_acceptance": false,
+  "status": "ACCEPTED",
+  "workflow_sha": "2f0573f40456004b9903429145cb6c7791686507"
+}
