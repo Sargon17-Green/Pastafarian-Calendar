@@ -43,3 +43,12 @@ The WAT fixture performs exact long division by four, then calls the unchanged s
 ## Execution state at authoring
 
 The code and test contract are being committed. The new CI run has not yet completed; therefore 91/91, 63/63, and overall CI success are pending and must not be claimed until completed logs are inspected.
+
+## Completed CI acceptance evidence (2026-11-19 verification)
+
+- Run: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44393290303
+- Event: push, attempt 1, head branch `WAT+Español`, exact head SHA `c8f1d5f43a8be3e57087d29b1b815c52cdc95cab`.
+- Status: completed/success; verify job ID `135116397978` completed/success with canonical names lock; semantic job ID `135116399013` completed/success.
+- Semantic job log: WABT 1.0.34; Python k5 q4 14/14, 526908 bounded rejected positions; Native 91/91 and 63/63 independent BigInt memory-field comparisons, zero failures.
+- This validates the q4 Native increment, **not** global Stage02 acceptance; no historical missing ZIP was reconstructed.
+- The subsequent independent research question is the k5/q5 exact-limit and ring-boundary behavior; see the separately versioned q5 math-only report. No Native claim is made for q5.
