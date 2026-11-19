@@ -701,3 +701,42 @@ jobs:
         run: dart analyze
       - name: Verify public package URI and AC.1 boundary oracle
         run: dart run bin/stage4_package_consumer_tests.dart
+
+dart-hebrew-stage5-external-consumer:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Verify independent child package boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fxq 'name: pastafari_calendar_external_consumer' integration/dart_hebrew_consumer/pubspec.yaml
+          grep -Fxq '    path: ../..' integration/dart_hebrew_consumer/pubspec.yaml
+          grep -Fxq "import 'package:pastafari_calendar_dart_hebrew/pastafari_calendar.dart';" integration/dart_hebrew_consumer/bin/main.dart
+      - name: Resolve dependencies from external package
+        working-directory: integration/dart_hebrew_consumer
+        run: dart pub get
+      - name: Check child consumer formatting with captured repair evidence
+        shell: bash
+        run: |
+          if ! dart format --output=none --set-exit-if-changed integration/dart_hebrew_consumer/bin/main.dart; then
+            dart format --output=write integration/dart_hebrew_consumer/bin/main.dart
+            echo 'DART_CAPTURE_BEGIN:integration/dart_hebrew_consumer/bin/main.dart'
+            base64 -w0 integration/dart_hebrew_consumer/bin/main.dart
+            printf '\n'
+            echo 'DART_CAPTURE_END:integration/dart_hebrew_consumer/bin/main.dart'
+            exit 1
+          fi
+      - name: Analyze external package
+        working-directory: integration/dart_hebrew_consumer
+        run: dart analyze
+      - name: Run isolated external package consumer
+        working-directory: integration/dart_hebrew_consumer
+        run: dart run bin/main.dart

@@ -1,0 +1,8 @@
+name: pastafari_calendar_external_consumer
+publish_to: none
+description: Independent package boundary verification for Dart Hebrew.
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  pastafari_calendar_dart_hebrew:
+    path: ../..
