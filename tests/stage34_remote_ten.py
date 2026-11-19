@@ -54,9 +54,9 @@ def selftest():
     assert len(expected_new) == 24 and new_pairs == expected_new
     checked += 1
 
-    assert sorted({abs(day - FOUNDATION) for day in CAL_DAYS}) == [0, 9, 5786]
+    assert sorted({abs(day - FOUNDATION) for day in CAL_DAYS}) == [0, 10, 5786]
     checked += 1
-    assert sorted({abs(day - FOUNDATION) for day in TARGET_DAYS}) == [0, 9, 5786]
+    assert sorted({abs(day - FOUNDATION) for day in TARGET_DAYS}) == [0, 10, 5786]
     checked += 1
 
     expected = {(cal, target): tuple(date(cal, target)) for cal, target in PAIRS}
