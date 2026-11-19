@@ -2,6 +2,7 @@
 """Read-only v115 native dispatch gate: 55 classified workflows, 24 stopped jobs."""
 from __future__ import annotations
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -87,11 +88,21 @@ def check_inventory(m:dict,lock:dict,files:dict[str,str])->dict:
                 raise ValueError("unguarded native job "+name+"/"+j.group(1))
             if name in remaining and conditions==[HALT]:
                 raise ValueError("readonly job unexpectedly stopped "+name)
+    approved=m.get("approved_readonly_workflow_git_blob_sha1")
+    if (type(approved) is not dict or set(approved)!=set(remaining)):
+        raise ValueError("read-only source content pin inventory incomplete")
+    for name in remaining:
+        raw=files[name].encode("utf-8")
+        calculated=hashlib.sha1(
+            b"blob "+str(len(raw)).encode("ascii")+b"\0"+raw).hexdigest()
+        if approved[name]!=calculated:
+            raise ValueError("readonly workflow Git blob SHA drift: "+name)
     return {"schema":OUT,
             "status":"QA_NATIVE_SOAK_DISPATCH_FAIL_CLOSED_ALL_24_JOBS",
             "classified_workflows":len(all_files),
             "blocked_native_workflows":len(halted),
             "preserved_readonly_or_control_workflows":len(remaining),
+            "pinned_readonly_workflow_git_blobs_checked":len(remaining),
             "jobs_inspected":inspected,
             "scientific_incident_status":"CONFIRMED_CROSS_SOURCE_DIFFERENCE",
             "protected_historic_commits_or_other_branches":False,

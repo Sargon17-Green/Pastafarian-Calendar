@@ -84,5 +84,12 @@ class FirstMismatchNativeWorkflowInterlock(unittest.TestCase):
             self.audit(files=files)
 
 
+    def test_readonly_workflow_content_changed_without_new_guard_rejected(self):
+        files=self.workflows.copy()
+        path=self.manifest["classified_readonly_or_control_workflows"][0]
+        files[path]+="\n# unexpected unchecked change to previously approved audit job\n"
+        with self.assertRaisesRegex(ValueError,"readonly workflow Git blob SHA drift"):
+            self.audit(files=files)
+
 if __name__=="__main__":
     unittest.main()

@@ -1,4 +1,4 @@
-name: Soak v115 audit ALL 55 QA workflows, native dispatch HALT on 24 jobs
+name: Soak v116 pin 31 read-only workflow blobs and halt 24 native jobs
 on:
   push:
     branches:
@@ -42,7 +42,7 @@ jobs:
                               {'subprocess','ctypes','psutil','multiprocessing'})
           print('V115_STATIC_ONLY_NO_NATIVE_CONVERTER_DISPATCH_INTERFACE')
           PY
-      - name: Ten native halt, unknown-new-workflow and bypass-tamper checks
+      - name: Eleven native halt, unchanged-readonly-source and bypass-tamper checks
         shell: bash
         run: |
           set -euo pipefail
@@ -50,9 +50,9 @@ jobs:
           PYTHONPATH=soak/runner python3 -B -m unittest discover \
             -s soak/process_tests -p 'test_workflow_native_dispatch_halt_v115.py' -v \
             2>&1 | tee evidence/v115-interlock-ten-tests.log
-          grep -Eq '^Ran 10 tests ' evidence/v115-interlock-ten-tests.log
+          grep -Eq '^Ran 11 tests ' evidence/v115-interlock-ten-tests.log
           grep -q '^OK$' evidence/v115-interlock-ten-tests.log
-          echo V115_TEN_JOB_LEVEL_FAIL_CLOSED_TESTS_PASS
+          echo V116_ELEVEN_JOB_LEVEL_HALT_AND_READONLY_PIN_TESTS_PASS
       - name: Enforce all QA workflow jobs classified and 24 original/derived launchers disabled
         shell: bash
         run: |
@@ -71,6 +71,7 @@ jobs:
           assert x['classified_workflows']==55
           assert x['blocked_native_workflows']==24
           assert x['preserved_readonly_or_control_workflows']==31
+          assert x['pinned_readonly_workflow_git_blobs_checked']==31
           assert x['scientific_incident_status']=='CONFIRMED_CROSS_SOURCE_DIFFERENCE'
           assert x['new_original_conversions_started_by_audit']==0
           assert x['full_original_years_certified']==0
