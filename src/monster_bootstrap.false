@@ -258,3 +258,49 @@ z;30=~["E_VISIBLE_PREDECESSOR_LAYOUT"0 0/]?
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
 
+{ المرحلة 14: العملية 31؛ تبني ستاً وأربعين قطرة مرئية في جداول مقدمة غير قابلة للتغيير. }
+z;31=~["E_VISIBLE_DROPS_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ y;g;!5=~["E_VISIBLE_COUNTS"0 0/]?
+ w;g;!46=~["E_VISIBLE_STONES"0 0/]?
+ v;g;!7=~["E_VISIBLE_HIDDEN"0 0/]?
+ z;p:0a;!
+ 1i:
+ [i;47<][
+  z;b:p;a;!v;a;!i;a;!1a;!b;30h;!!e:
+  z;b:p;a;!v;a;!i;a;!3a;!b;30h;!!f:
+  z;b:p;a;!v;a;!i;a;!7a;!b;30h;!!j:
+  z;b:0a;!b;0h;!!u:1t:
+  [t;6<][
+   z;b:w;a;!i;a;!t;a;!b;21h;!!d:
+   y;t;+g;!m:
+   t;5=[z;b:m;a;!b;0h;!!m:]?
+   z;b:d;a;!m;a;!b;14h;!!d:
+   z;b:u;a;!d;a;!b;9h;!!u:
+   z;b:u;a;!b;25h;!!u:
+   t;1+t:
+  ]#
+  z;b:u;a;!e;a;!b;9h;!!u:
+  z;b:f;a;!3a;!b;23h;!!d:z;b:u;a;!d;a;!b;9h;!!u:
+  z;b:j;a;!5a;!b;23h;!!d:z;b:u;a;!d;a;!b;9h;!!u:
+  z;b:u;a;!i;a;!b;22h;!!u:z;b:u;a;!b;25h;!!u:
+  1t:
+  [t;12<][
+   u;n:z;b:n;a;!n;a;!b;14h;!!d:
+   z;b:t;a;!1a;!b;28h;!!l:z;b:n;a;!l;a;!b;23h;!!m:z;b:d;a;!m;a;!b;9h;!!d:z;b:d;a;!b;25h;!!d:
+   z;b:t;a;!2a;!b;28h;!!l:z;b:e;a;!l;a;!b;23h;!!m:z;b:d;a;!m;a;!b;9h;!!d:z;b:d;a;!b;25h;!!d:
+   z;b:t;a;!3a;!b;28h;!!l:z;b:f;a;!l;a;!b;23h;!!m:z;b:d;a;!m;a;!b;9h;!!d:z;b:d;a;!b;25h;!!d:
+   z;b:t;a;!4a;!b;28h;!!l:z;b:j;a;!l;a;!b;23h;!!m:z;b:d;a;!m;a;!b;9h;!!d:z;b:d;a;!b;25h;!!d:
+   z;b:t;a;!5a;!b;28h;!!l:z;b:w;a;!i;a;!l;a;!b;21h;!!m:z;b:d;a;!m;a;!b;9h;!!d:z;b:d;a;!b;25h;!!u:
+   t;1+t:
+  ]#
+  z;l:i;a;!1t:
+  [t;i;<][p;t;+g;!a;!t;1+t:]#
+  u;a;!l;p:i;1+i:
+ ]#
+ p;r:
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
+
