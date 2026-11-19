@@ -140,6 +140,12 @@ wCalendarSelectByteIndex:: ds 1
 wCalendarSelectInputByte:: ds 1
 wCalendarSelectMask:: ds 1
 wCalendarSelectBitsRemaining:: ds 1
+; Stage1 bounded i=2 five-stone transition; old input is never overwritten.
+wCalendarStoneIteration:: ds 1
+wCalendarStoneOld:: ds 80
+wCalendarStoneOutput:: ds 80
+wCalendarStoneIndex:: ds 1
+wCalendarStoneRepeat:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -261,6 +267,7 @@ INCLUDE "src/runtime/calendar_save127.asm"
 INCLUDE "src/runtime/calendar_year_projection.asm"
 INCLUDE "src/runtime/calendar_year_step.asm"
 INCLUDE "src/runtime/calendar_select_short.asm"
+INCLUDE "src/runtime/calendar_stone_transition.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -284,3 +291,4 @@ INCLUDE "src/tests/calendar_invocation_lifecycle_test.asm"
 INCLUDE "src/tests/calendar_year_projection_test.asm"
 INCLUDE "src/tests/calendar_year_step_test.asm"
 INCLUDE "src/tests/calendar_answer_select_test.asm"
+INCLUDE "src/tests/calendar_stone_transition_test.asm"

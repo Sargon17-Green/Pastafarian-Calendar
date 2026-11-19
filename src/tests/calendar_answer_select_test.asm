@@ -292,7 +292,7 @@ RunCalendarAnswerSelectTests::
     ld a, [$a000]
     or a
     jp nz, .fail
-    ret
+    jp RunCalendarStoneTransitionTests
 
 .setSentinelRank:
     ld a, $ef
