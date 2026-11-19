@@ -100,8 +100,7 @@ void main() {
   check(checks >= 60, 'At least sixty package-consumer checks');
 
   print(
-    'STAGE4_PACKAGE_CONSUMER_TIME_MS=' +
-        clock.elapsedMilliseconds.toString(),
+    'STAGE4_PACKAGE_CONSUMER_TIME_MS=' + clock.elapsedMilliseconds.toString(),
   );
   print(
     'STAGE4_PACKAGE_CONSUMER_PASS; checks=' +
