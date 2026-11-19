@@ -13,7 +13,20 @@ our @EXPORT_OK = qw(month_occurrence);
 # 第四階段只投影規範第四、第五欄的月份索引和月內日數。
 # 日期年份、肉排邊界、月份名稱及完整年曆不由此原語計算。
 sub month_occurrence ($lengths, $rank, $position) {
-    # 先由已驗收的有界交織原語檢查配置及排名，不共用可變快取。
+    # Stage04 的投影域保留最多九個月／三十六日；
+    # Stage19 的 WeavingPrimitive 可接受十個月／四十日，不得隱式擴張本 API。
+    # 無效的月份元素仍交由原有交織驗證器處理。
+    if (ref($lengths) eq 'ARRAY') {
+        die "月份數超出本投影範圍\n" if @$lengths > 9;
+        my $days = 0;
+        for my $length (@$lengths) {
+            last if !defined($length) || ref($length)
+                || "$length" !~ /\A[1-9][0-9]*\z/;
+            die "總日數超出本投影範圍\n" if length("$length") > 2;
+            $days += int($length);
+            die "總日數超出本投影範圍\n" if $days > 36;
+        }
+    }
     my $word = unrank_weaving($lengths, $rank);
     die "日期位置須為一基正整數\n" if !defined($position)
         || (ref($position) && !(blessed($position) && $position->isa('Math::BigInt')))
