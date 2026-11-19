@@ -1,0 +1,10 @@
+{ Stage 15 discovery: normative operation 49, valid domain only. }
+z;b:0a;!b;49o;!1=~["REF_FACTORIAL_0_MISMATCH"0 0/]?
+z;b:1a;!b;49o;!1=~["REF_FACTORIAL_1_MISMATCH"0 0/]?
+z;b:2a;!b;49o;!2=~["REF_FACTORIAL_2_MISMATCH"0 0/]?
+z;b:3a;!b;49o;!6=~["REF_FACTORIAL_3_MISMATCH"0 0/]?
+z;b:4a;!b;49o;!24=~["REF_FACTORIAL_4_MISMATCH"0 0/]?
+z;b:5a;!b;49o;!120=~["REF_FACTORIAL_5_MISMATCH"0 0/]?
+z;b:6a;!b;49o;!720=~["REF_FACTORIAL_6_MISMATCH"0 0/]?
+"REF_FACTORIAL_0_TO_6_OK"10,
+[z;0>][%z;1-z:]#
