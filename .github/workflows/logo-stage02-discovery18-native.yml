@@ -61,10 +61,11 @@ jobs:
             echo "::error::Stage2 Discovery18 native failure/timeout (exit=$result)"
             exit 1
           fi
+          grep -Fxq 'STAGE_2_DISCOVERY_18_PERMUTATION_CHECKS_PASIS 720' "$log"
           grep -Fxq 'STAGE_2_DISCOVERY_18_CASES_PASIS 6' "$log"
           grep -Fxq 'STAGE_2_DISCOVERY_18_CHECKS_PASIS 40' "$log"
           grep -Fxq 'STAGE_2_DISCOVERY_18_PASIS' "$log"
-          if grep -Eq 'STAGE_2_DISCOVERY_18_TESTO_FALIIS|STAGE_2_DISCOVERY_18_FALIIS|STAGE_2_DISCOVERY_18_SHAPE_FALIIS|STAGE_2_DISCOVERY_18_ORACLE_SHAPE_FALIIS|STAGE_2_DISCOVERY_18_CASE_COUNT_FALIIS|STAGE_2_DISCOVERY_18_CHECK_COUNT_FALIIS|I don.t know how to|not enough inputs' "$log"; then
+          if grep -Eq 'STAGE_2_DISCOVERY_18_TESTO_FALIIS|STAGE_2_DISCOVERY_18_PERMUTATION_FALIIS|STAGE_2_DISCOVERY_18_FALIIS|STAGE_2_DISCOVERY_18_SHAPE_FALIIS|STAGE_2_DISCOVERY_18_ORACLE_SHAPE_FALIIS|STAGE_2_DISCOVERY_18_CASE_COUNT_FALIIS|STAGE_2_DISCOVERY_18_CHECK_COUNT_FALIIS|I don.t know how to|not enough inputs' "$log"; then
             echo "::error::Stage2 Discovery18 failure marker"
             exit 1
           fi

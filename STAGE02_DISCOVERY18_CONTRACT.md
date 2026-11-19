@@ -1,6 +1,6 @@
 # Stage 2 Discovery18 — Appendix-A final aggregation (Logo+Ido)
 
-Status: IMPLEMENTED_NATIVE_PENDING (2026-11-18). D17 ACCEPTED_NATIVE on 05b49e0eb730724eb3fdf66993a6314f90783a0a; original push run 44373979219/job 135048049707 completed SUCCESS with five cases, 17 checks and the genuine NATIVE_STAGE_2_DISCOVERY_17_VERIFICATION=PASS marker. Ten same-SHA regressions completed SUCCESS. Stage2 remains incomplete; LAST_COMPLETED_STAGE=1.
+Status: NATIVE_FIX_IMPLEMENTED_PENDING (2026-11-19). D17 ACCEPTED_NATIVE on 05b49e0eb730724eb3fdf66993a6314f90783a0a; original push run 44373979219/job 135048049707 completed SUCCESS with five cases, 17 checks and the genuine NATIVE_STAGE_2_DISCOVERY_17_VERIFICATION=PASS marker. Ten same-SHA regressions completed SUCCESS. Stage2 remains incomplete; LAST_COMPLETED_STAGE=1.
 
 ## Scope and boundary
 
@@ -74,3 +74,11 @@ Acceptance requires the completed original push on this exact SHA with genuine m
 No fail/unknown/timeout marker may appear. Native uses pinned headless UCBLogo 6.2.5 source a0215433f07384e4c42fe247525867f11e6f32f7, test timeout <=1200s and job timeout <=25min.
 
 All eleven same-SHA regressions must complete SUCCESS: D17, D16, D15, D14, D13, D12, D11, D10, D1-D9, Stage1 Native, and Canonical Names Lock. Queued/in_progress is neither PASS nor blocker. No duplicate manual dispatch, no main/merge. D18 acceptance does not complete Stage2.
+
+## Evidence-based D18 native correction — 2026-11-19
+
+Original push on `010d009956f094c0bb7152556bb1aee879dd46bb`, run 44393624959/job 135117568246 attempt 1, completed FAILURE. After `STAGE_2_DISCOVERY_18_CASE_BEGIN foundation_tablets` the genuine UCBLogo log reported `item doesn't like 2.51666666666667 as input in monster.stage02.sauce.permutation.zero` at `item (:q + 1) :items`. All eleven same-SHA regressions D17-D10, D1-D9, Stage1, Names Lock completed SUCCESS; this does not accept D18.
+
+Root cause: production factoradic unranking used `quotient :rank0 :block` as though it returned integer division, but it returned a fractional ratio. For nonnegative rank and positive block, `int (quotient :rank0 :block)` yields the needed factoradic digit (0..5), while `remainder` continues to provide the remainder. The independent normative oracle uses repeated subtraction (`nr.small.divmod`), and no oracle code is used in production.
+
+The native test now checks all 720 zero-based permutation ranks against the independently implemented normative unranking, before costly sauce cases. New required marker: `STAGE_2_DISCOVERY_18_PERMUTATION_CHECKS_PASIS 720`. This adds 720 permutation checks without changing the six sauce cases or their 40 assertions. Accept only if this marker, the original 6/40 markers, final Native marker, lack of failure/timeout/unknown, and all eleven new same-SHA regressions are verified on the new original push. This patch is NOT a Native PASS.

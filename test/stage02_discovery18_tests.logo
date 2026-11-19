@@ -22,6 +22,8 @@ load "test/normative_reference.logo
 make "D18.N 0
 make "D18.CASES 0
 make "D18.FAIL "false
+make "D18.PERM.N 0
+make "D18.PERM.FAIL "false
 
 to d18.require :ok :tag
   make "D18.N (:D18.N + 1)
@@ -67,6 +69,23 @@ to d18.permutation.valid :order
   output d18.permutation.valid.work :order []
 end
 
+to d18.permutation.full.domain
+  ; Independent normative unrank uses repeated subtraction, not quotient/int.
+  repeat 720 [
+    localmake "rank (repcount - 1)
+    localmake "actual monster.stage02.sauce.permutation (:rank + 1)
+    localmake "expected nr.order.from.number (:rank + 1)
+    make "D18.PERM.N (:D18.PERM.N + 1)
+    if not (equalp :actual :expected) [
+      make "D18.PERM.FAIL "true
+      print sentence [STAGE_2_DISCOVERY_18_PERMUTATION_FALIIS:] :rank
+    ]
+  ]
+  if not :D18.PERM.FAIL [
+    print sentence [STAGE_2_DISCOVERY_18_PERMUTATION_CHECKS_PASIS] :D18.PERM.N
+  ]
+end
+
 to d18.valid :calculation :target :tag
   print sentence [STAGE_2_DISCOVERY_18_CASE_BEGIN] :tag
   localmake "before d18.prefix :calculation :target
@@ -102,6 +121,8 @@ to d18.invalid :ctx :tag
 end
 
 to stage02.discovery18.run
+  d18.permutation.full.domain
+  if :D18.PERM.FAIL [print [STAGE_2_DISCOVERY_18_FALIIS] stop]
   localmake "prefix d18.prefix (nr.foundation) (nr.tablets)
   d18.valid (nr.foundation) (nr.tablets) [foundation_tablets]
   d18.valid (nr.tablets) (nr.foundation) [tablets_foundation]

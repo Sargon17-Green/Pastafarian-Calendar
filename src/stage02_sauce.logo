@@ -19,7 +19,9 @@ end
 to monster.stage02.sauce.permutation.zero :rank0 :items
   if emptyp :items [output []]
   localmake "block monster.stage02.sauce.factorial ((count :items) - 1)
-  localmake "q quotient :rank0 :block
+  ; UCBLogo quotient returns a real ratio; the factoradic digit must be integral.
+  ; Rank is 0..719, block is positive, so int computes floor exactly.
+  localmake "q int (quotient :rank0 :block)
   localmake "r remainder :rank0 :block
   localmake "chosen item (:q + 1) :items
   output fput :chosen monster.stage02.sauce.permutation.zero :r (monster.stage02.sauce.list.remove :items (:q + 1))
