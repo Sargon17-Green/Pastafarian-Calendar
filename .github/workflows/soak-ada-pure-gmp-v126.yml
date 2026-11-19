@@ -1,0 +1,133 @@
+name: Soak v126 Ada pure GMP exact-count experiment, NO Fct
+on:
+  push:
+    branches:
+      - qa/ada-pure-gmp-v126
+    paths:
+      - 'soak/ada_pure_candidate_v126/**'
+      - '.github/workflows/soak-ada-pure-gmp-v126.yml'
+permissions:
+  contents: read
+jobs:
+  gmp-exact-math-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - name: Verify pinned source and original mismatch HALT
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py' | sha256sum -c -
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          lock=json.loads(Path('candidate/soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          assert lock['first_difference']['field']=='month_index'
+          assert lock['successful_ten_thousand_soak_years']==0
+          paths=list(Path('candidate/soak/ada_pure_candidate_v126').glob('*.ad?'))
+          assert len(paths)==3
+          assert all('Calendar_Date' not in p.read_text() and 'F(c,t)' not in p.read_text().replace('No F(c,t)','') for p in paths)
+          print('V126_NO_DATE_CONVERSION_AND_HALT_LOCK_CONFIRMED')
+          PY
+          mkdir -m 700 evidence
+          mkdir -m 700 evidence/build
+      - name: GNAT and GMP toolchain; compile Ada DP and pure GMP binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gnat-13 libgmp-dev
+          gnatmake --version | tee evidence/v126-gnat-version.txt
+          dpkg-query -W -f='${Package} ${Version}\n' gnat-13 libgmp-dev | tee evidence/v126-dependencies.txt
+          gnatmake -gnat2022 -gnata -gnatwa \
+            -Icandidate/soak/ada_pure_candidate_v126 \
+            -D evidence/build -o evidence/pure-ada-gmp-count \
+            candidate/soak/ada_pure_candidate_v126/test_gmp_full_weave_v126.adb \
+            -largs -lgmp 2>&1 | tee evidence/v126-compile.log
+          sha256sum evidence/pure-ada-gmp-count > evidence/v126-binary.sha256
+          echo V126_COMPILED_PURE_ADA_GMP_NO_FCT
+      - name: Run six small counts and one exact 31483-bit stress count
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o evidence/v126-resource.log \
+            timeout --signal=TERM --kill-after=5s 240s \
+            evidence/pure-ada-gmp-count \
+            2>&1 | tee evidence/v126-native-counts.log
+          grep -q '^V126_SIX_SMALL_EXACT_ADA_GMP_MATH_COUNTS_PASS$' evidence/v126-native-counts.log
+          grep -q '^V126_PURE_ADA_GMP_MONTH_WEAVING_COUNT_ONLY_NO_FCT$' evidence/v126-native-counts.log
+          echo V126_PURE_ADA_GMP_NO_FCT_COUNTERS_PASS
+      - name: Independently verify GMP-derived integer against pinned Python source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee evidence/v126-exact-verdict.json
+          import hashlib
+          import importlib.util
+          import json
+          import re
+          import sys
+          from pathlib import Path
+          sys.set_int_max_str_digits(20000)
+          sys.path.insert(0,'candidate/soak/runner')
+          from exact_month_weaving_pure_v119 import ExactMonthWeaves
+          source=Path('original-python/tests/normative_reference.py')
+          spec=importlib.util.spec_from_file_location('pinned_v126_python_month_class',source)
+          mod=importlib.util.module_from_spec(spec)
+          sys.modules[spec.name]=mod
+          spec.loader.exec_module(mod)
+          evidence=Path('evidence/v126-native-counts.log').read_text()
+          numbers=re.findall(r'^V126_MAX_47_MONTH_5778_DAY_EXACT_INTEGER ([0-9]+)$',evidence,re.M)
+          assert len(numbers)==1
+          ada=int(numbers[0])
+          lengths=(123,)*46+(120,)
+          pure=ExactMonthWeaves(lengths).count()
+          original=mod.MonthWeavingFamily(lengths).count()
+          assert ada==pure==original,'Ada/GMP count must equal exact pinned original family'
+          blob=ada.to_bytes((ada.bit_length()+7)//8,'big')
+          digest=hashlib.sha256(blob).hexdigest()
+          assert ada.bit_length()==31483
+          assert digest=='d2fad6a82c67a5d2c4422110f4f11637a70fda1125dc03fe1f3288c2093771bd'
+          print(json.dumps({
+            'schema':'PASTAFARI_ADA_GMP_PURE_WEAVE_V126/1',
+            'status':'PURE_ADA_GMP_COUNT_EQUIVALENT_TO_PINNED_PYTHON_NOT_CALENDAR',
+            'count_bits':ada.bit_length(),
+            'count_sha256_big_endian':digest,
+            'month_count':47,'total_days':5778,
+            'original_python_sha':'0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4',
+            'original_converter_executed':False,
+            'original_ada_modified':False,
+            'original_mismatch_open':True,
+            'full_years_certified':0,
+            'soak_10000_credit':0},sort_keys=True))
+          PY
+          grep -q '"status": "PURE_ADA_GMP_COUNT_EQUIVALENT_TO_PINNED_PYTHON_NOT_CALENDAR"' evidence/v126-exact-verdict.json
+          echo V126_CROSS_LANGUAGE_BIGINT_EQUIVALENCE_PASS_NOT_DATE
+      - name: Save audit evidence without any original-date conversion
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v126-Ada-GMP-pure-full-weave-count-NO-FCT
+          path: |
+            evidence/v126-gnat-version.txt
+            evidence/v126-dependencies.txt
+            evidence/v126-compile.log
+            evidence/v126-binary.sha256
+            evidence/v126-native-counts.log
+            evidence/v126-resource.log
+            evidence/v126-exact-verdict.json
+          if-no-files-found: warn
+          retention-days: 30
