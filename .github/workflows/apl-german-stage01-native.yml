@@ -1,6 +1,14 @@
 name: APL German native Stage 1 import and RunStage01Tests
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-stage01-native.yml'
+      - 'qa/nars-interface/stage01_import_workspace.py'
+      - 'qa/nars-interface/test_stage01_import_workspace.py'
+      - 'qa/nars-interface/bounded_extracted_stage01.ps1'
 permissions:
   contents: read
   actions: read

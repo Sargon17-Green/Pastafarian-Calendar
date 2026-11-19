@@ -5,6 +5,7 @@ import unittest
 from stage01_import_workspace import (
     SOURCE_COMMIT, SOURCE_FILES, EXPECTED_TOTAL_FUNCTIONS,
     load_locked_sources, build_inner_program, make_stage01_candidate,
+    fx_definition_lines, HELPER_LINES, COUNT_HELPER_LINES,
 )
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
@@ -41,6 +42,17 @@ class Stage01ImportWorkspaceTests(unittest.TestCase):
         self.assertEqual(m["test_entrypoint"], "RunStage01Tests")
         self.assertEqual(m["test_initializers"], ["SourceLanguageCatalogInit", "MonsterBootstrapInit", "OracleInit", "Stage01FixturesInit"])
         self.assertIn("RunStage01Tests", m["ordered_function_names"])
+
+    def test_native_fx_excludes_editor_delimiters_for_all_95_functions(self):
+        self.assertFalse(any("∇" in line for line in HELPER_LINES))
+        self.assertFalse(any("∇" in line for line in COUNT_HELPER_LINES))
+        for block in self.loaded["blocks"]:
+            native = fx_definition_lines(block)
+            self.assertEqual(native[0], block["lines"][0][1:].strip())
+            self.assertEqual(native[1:], block["lines"][1:-1])
+            self.assertFalse(native[0].startswith("∇"))
+            self.assertNotEqual(native[-1], "∇")
+        self.assertEqual(len(self.loaded["blocks"]), 95)
 
     def test_inner_program_fixes_every_name_checks_count_runs_tests_then_writes_marker(self):
         outer, token = build_inner_program(self.loaded, MARKER)

@@ -37,12 +37,17 @@ class FxProbeWorkspaceTests(unittest.TestCase):
     def test_inner_program_fixes_and_executes_function_before_file_write(self):
         _, meta = make_fx_probe(BASE, PATH)
         inner = meta["inner_apl_statement"]
-        self.assertIn("⎕FX (3 ", inner)
+        self.assertIn("⎕FX (2 ", inner)
         self.assertIn("⍴⎕UCS ", inner)
         self.assertIn("⋄ (⍕" + FX_NAME + " 41) ⎕NAPPEND", inner)
         self.assertIn("⎕NCREATE 0)", inner)
         self.assertIn("APL_GERMAN_FX_PROBE_20261118", inner)
         self.assertEqual(meta["fx_matrix_shape"][0], len(FX_LINES))
+
+    def test_nars_fx_canonical_header_excludes_delimiters(self):
+        self.assertEqual(len(FX_LINES), 2)
+        self.assertFalse(any("∇" in line for line in FX_LINES))
+        self.assertEqual(FX_LINES[0], "z←" + FX_NAME + " x")
 
     def test_matrix_codes_reconstruct_exact_function_lines(self):
         _, meta = make_fx_probe(BASE, PATH)

@@ -12,9 +12,8 @@ from lx_workspace_probe import make_canary
 FX_NAME = "APL_GERMAN_FX_PROBE_20261118"
 FX_TOKEN = "42"
 FX_LINES = [
-    f"∇ z←{FX_NAME} x",
-    "  z←x+1",
-    "∇",
+    f"z←{FX_NAME} x",
+    "z←x+1",
 ]
 
 

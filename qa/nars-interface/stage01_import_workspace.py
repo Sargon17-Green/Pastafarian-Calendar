@@ -20,7 +20,7 @@ SOURCE_FILES = [
     ("test/stage01_tests.apl", "3371f1575da8c03cb4175b0031f244ee1757ed00", 6),
 ]
 HELPER_LINES = [
-    "∇ z←name Stage01Fix source;fixed",
+    "z←name Stage01Fix source;fixed",
     "  fixed←⎕FX source",
     "  :If ~name≡fixed",
     "      ⎕←'STAGE01_FX_IMPORT_FAILED: ',name",
@@ -28,14 +28,12 @@ HELPER_LINES = [
     "  :EndIf",
     "  Stage01FXCount←Stage01FXCount+1",
     "  z←fixed",
-    "∇",
 ]
 COUNT_HELPER_LINES = [
-    "∇ Stage01CheckFXCount",
+    "Stage01CheckFXCount",
     "  :If Stage01FXCount≠95",
     "      ⎕ERROR 'STAGE01_FX_COUNT_MISMATCH'",
     "  :EndIf",
-    "∇",
 ]
 
 
@@ -173,6 +171,20 @@ def _matrix_expression(lines: list[str]) -> str:
     return f"({rows} {cols}⍴⎕UCS {_codes(flat)})"
 
 
+def fx_definition_lines(block: dict) -> list[str]:
+    """Convert editor-style ∇ ... ∇ to NARS ⎕FX header-and-body input."""
+    source = block["lines"]
+    if len(source) < 3 or not source[0].startswith("∇") or source[-1].strip() != "∇":
+        raise ValueError("FX_BLOCK_MISSING_EDITOR_DELIMITERS:" + block["name"])
+    header = source[0][1:].strip()
+    if _function_name(source[0]) != block["name"]:
+        raise ValueError("FX_BLOCK_HEADER_NAME_MISMATCH:" + block["name"])
+    body = source[1:-1]
+    if any(line.strip() == "∇" for line in body):
+        raise ValueError("FX_BLOCK_NESTED_EDITOR_DELIMITER:" + block["name"])
+    return [header] + body
+
+
 def build_inner_program(loaded: dict, marker_path: str) -> tuple[str, str]:
     manifest = loaded["manifest"]
     blocks = loaded["blocks"]
@@ -190,7 +202,7 @@ def build_inner_program(loaded: dict, marker_path: str) -> tuple[str, str]:
     for block in blocks:
         parts.append(
             f"(⎕UCS {_codes(block['name'])}) Stage01Fix "
-            + _matrix_expression(block["lines"])
+            + _matrix_expression(fx_definition_lines(block))
         )
     parts.extend([
         "Stage01CheckFXCount",
