@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import random
 import re
+import signal
 import shutil
 import subprocess
 import sys
@@ -100,6 +101,43 @@ def inject(target):
  mark="]]></script:module>"
  if s.count(mark)!=1 or "Public Function S5Day" in s: raise AssertionError("TEMP_INJECTION_REFUSED")
  path.write_text(s.replace(mark,PROBE+mark),encoding="utf-8")
+
+def kill_owned_office_group(proc):
+ # Stage5 launches LibreOffice in its own POSIX session. Kill that entire
+ # session's process group, including soffice.bin even if the launcher exited.
+ try:
+  os.killpg(proc.pid, signal.SIGKILL)
+ except ProcessLookupError:
+  pass
+ if proc.poll() is None:
+  try:
+   proc.wait(timeout=8)
+  except subprocess.TimeoutExpired:
+   proc.kill()
+   proc.wait(timeout=8)
+
+def managed_office_session(office, profile, log_path):
+ # A per-session process group is essential: killing only the 'libreoffice'
+ # launcher does not interrupt an in-progress Basic/UNO call.
+ port=office.allocated_port()
+ cmd=["libreoffice","-env:UserInstallation="+profile.resolve().as_uri(),
+      "--headless","--nodefault","--norestore","--nofirststartwizard",
+      "--accept=socket,host=127.0.0.1,port=%d;urp;StarOffice.ServiceManager"%port]
+ with log_path.open("ab") as log:
+  proc=subprocess.Popen(cmd,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+ try:
+  return proc,office.connect_context(port,proc)
+ except Exception:
+  kill_owned_office_group(proc)
+  raise
+
+def close_managed_office(office,proc,context,tainted=False):
+ try:
+  if not tainted:
+   office.stop_office(proc,context)
+ finally:
+  kill_owned_office_group(proc)
+
 def run(basic,out):
  import stage3_native_ci as office
  out.mkdir(parents=True,exist_ok=True)
@@ -125,14 +163,15 @@ def run(basic,out):
   progress("PREFLIGHT_PASS")
   days,pairs=inputs()
   progress("INPUTS_READY days=%d pairs=%d"%(len(days),len(pairs)))
+  metadata["office_isolation"]="owned_posix_session_and_process_group_kill"
   metadata["lo_version"]=subprocess.run(["libreoffice","--version"],check=True,capture_output=True,text=True,timeout=15).stdout.strip()
   metadata["python_version"]=sys.version.split()[0]
   with tempfile.TemporaryDirectory(prefix="pc-basic-punjabi-stage5-") as root:
    profile=Path(root)/"isolated-lo-profile"
    progress("OFFICE_SESSION_START")
-   proc,context=office.office_session(profile,out/"lo-startup.log")
+   proc,context=managed_office_session(office,profile,out/"lo-startup.log")
    progress("OFFICE_SESSION_READY")
-   office.stop_office(proc,context)
+   close_managed_office(office,proc,context)
    progress("OFFICE_SESSION_STOPPED")
    target=profile/"user"/"basic"
    if target.exists(): shutil.rmtree(target) # only new owned profile
@@ -141,13 +180,15 @@ def run(basic,out):
    inject(target)
    progress("TEMP_TEST_PROBE_INJECTED")
    progress("OFFICE_SESSION_START")
-   proc,context=office.office_session(profile,out/"lo-startup.log")
+   proc,context=managed_office_session(office,profile,out/"lo-startup.log")
    progress("OFFICE_SESSION_READY")
    try:
     factory=context.ServiceManager.createInstanceWithContext("com.sun.star.script.provider.MasterScriptProviderFactory",context)
     provider=factory.createScriptProvider("")
     cache={}
+    tainted=False
     def native(case_id,name,*args):
+     nonlocal tainted
      timeout=PROBE_TIMEOUTS.get(name,60)
      started=time.monotonic()
      progress("START "+case_id+" function="+name+" timeout_s="+str(timeout))
@@ -156,8 +197,9 @@ def run(basic,out):
      def expire():
       if finished.is_set(): return
       timed_out.set()
-      try: proc.kill()
-      except Exception: pass
+      progress("WATCHDOG_KILL_GROUP "+case_id+" function="+name)
+      try: kill_owned_office_group(proc)
+      except Exception as exc: progress("WATCHDOG_KILL_ERROR "+type(exc).__name__+" "+str(exc))
      watchdog=threading.Timer(timeout,expire)
      watchdog.daemon=True
      watchdog.start()
@@ -173,6 +215,7 @@ def run(basic,out):
       watchdog.cancel()
      elapsed=time.monotonic()-started
      if timed_out.is_set():
+      tainted=True
       progress("TIMEOUT "+case_id+" function="+name+" elapsed_s=%.3f"%elapsed)
       raise TimeoutError("NATIVE_PROBE_TIMEOUT "+case_id+" "+name+" after "+str(timeout)+" seconds") from call_error
      if call_error is not None:
@@ -209,7 +252,7 @@ def run(basic,out):
      got=native("S5_PROD_%03d"%j,"S5Production",c,t); code,sep,message=got.partition("|")
      ok=sep=="|" and code=="9302" and "E_STAGE_02_DISCOVERY_ONLY" in message
      check("S5_PROD_%03d"%j,"production",{"c":c,"t":t},got,"9302|E_STAGE_02_DISCOVERY_ONLY","EXPECTED_ERROR_NOT_CALENDAR_IMPLEMENTATION",ok,"production_expected_error_checks")
-   finally: office.stop_office(proc,context)
+   finally: close_managed_office(office,proc,context,tainted=tainted)
   if len({r[0] for r in rows})!=len(rows): errors.append("DUPLICATE_IDS")
   if len(rows)!=len(days)+len(pairs)+7+1+1+2: errors.append("MISSING_NATIVE_ROWS")
   if min(counters.values())<=0: errors.append("COVERAGE_ZERO")
