@@ -2465,3 +2465,77 @@ jobs:
           path: build/stage48-native.log
           if-no-files-found: warn
           retention-days: 30
+
+  stage49-four-output-input-reinit-discovery-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Bounded strict Native Stage49 and independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage49-native.log
+          node test/stage49_planning_oracle.mjs 2>&1 | tee -a build/stage49-native.log
+          compile_sources=(
+            test/stage49_discovery_tests.cob
+            src/big_integer.cob
+            src/monster_distance.cob
+            src/legacy_distance.cob
+            src/patched_day_tag.cob
+            src/patched_distance.cob
+          )
+          timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage49-four-output-input-reinit "${compile_sources[@]}" 2>&1 | tee -a build/stage49-native.log
+          timeout --signal=TERM --kill-after=10s 120s ./build/stage49-four-output-input-reinit 2>&1 | tee -a build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_ARITHMETIC=192/192' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_CASES=24/24' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_UNIQUE_PAIRS=24' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_8192_DIGIT_CASES=6' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_INPUT_REBUILDS=96/96' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_PRESERVED_AFTER_MUTATION=96/96' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_SURVIVORS_AFTER_FREE=72/72' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_SURVIVORS_AFTER_REUSE=72/72' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_FRESH_OWNERS=24/24' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_RESTORED_OWNERS=24/24' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_TARGET_BALANCE=6,6,6,6' build/stage49-native.log
+          grep -Fxq 'STAGE49_PLANNING_GATE=PASS_NOT_NATIVE' build/stage49-native.log
+          grep -Fxq 'STAGE49_HEAP_MEASURED=YES' build/stage49-native.log
+          grep -Fxq 'RESULT=PASS_STAGE49_FOUR_OUTPUT_INPUT_REINIT_NATIVE' build/stage49-native.log
+          grep -Eq '^STAGE49_INITIAL_QUADS=[[:space:]]*0*24[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_INPUT_REBUILDS=[[:space:]]*0*96[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_PRESERVED_OUTPUTS=[[:space:]]*0*96[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_SURVIVORS_AFTER_FREE=[[:space:]]*0*72[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_SURVIVORS_AFTER_REUSE=[[:space:]]*0*72[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_NEW_OUTPUTS=[[:space:]]*0*24[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_RESTORED_OUTPUTS=[[:space:]]*0*24[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_OCCUPIED_REJECTS=[[:space:]]*0*24[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_REJECT_PRESERVED=[[:space:]]*0*96[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_TARGET_SLOT_1=[[:space:]]*0*6[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_TARGET_SLOT_2=[[:space:]]*0*6[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_TARGET_SLOT_3=[[:space:]]*0*6[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_TARGET_SLOT_4=[[:space:]]*0*6[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_FINAL_CLEANUP=[[:space:]]*0*24[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_RUNS=[[:space:]]*0*24[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_PASS=[[:space:]]*0*24[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_UNEXPECTED_FAILURES=[[:space:]]*0*0[[:space:]]*$' build/stage49-native.log
+          grep -Eq '^STAGE49_HEAP_LIVE_POST_RELEASE=[[:space:]]*0*0[[:space:]]*$' build/stage49-native.log
+          echo 'STAGE49_NATIVE_GATE=PASS' | tee -a build/stage49-native.log
+      - name: Preserve Stage49 evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage49-four-output-input-reinit-evidence
+          path: build/stage49-native.log
+          if-no-files-found: warn
+          retention-days: 30
