@@ -60,5 +60,5 @@ jobs:
           python3 tests/stage02_k5_q3_boundary_oracle.py
           python3 tests/stage02_k5_q4_boundary_oracle.py
           node tests/stage02_k5_q5_boundary_oracle.cjs
-      - name: Run all 91 Native WAT cases and 63 exact independent BigInt oracles
+      - name: Run all 95 Native WAT cases and 67 exact independent BigInt oracles
         run: node tests/run_stage02_discovery01_webassembly.cjs
