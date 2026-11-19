@@ -1,0 +1,69 @@
+name: Soak v127 full-scope and 10000-year coverage gate, synthetic only
+on:
+  push:
+    branches:
+      - qa/soak-scope-coverage-v127
+    paths:
+      - 'soak/runner/soak_scope_coverage_v127.py'
+      - 'soak/process_tests/test_soak_scope_coverage_v127.py'
+      - '.github/workflows/soak-scope-coverage-v127.yml'
+permissions:
+  contents: read
+jobs:
+  pure-coverage-no-native-converters:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Confirm unresolved first difference and no native soak dispatch
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          lock=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text(encoding='utf-8'))
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          assert lock['first_difference']['field']=='month_index'
+          assert lock['successful_ten_thousand_soak_years']==0
+          assert Path('soak/runner/soak_scope_coverage_v127.py').is_file()
+          print('V127_ORIGINAL_MISMATCH_DISPATCH_HALT_RETAINED')
+          PY
+      - name: Prove gate contains no native dispatch or converter imports
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for path in ('soak/runner/soak_scope_coverage_v127.py',
+                       'soak/process_tests/test_soak_scope_coverage_v127.py'):
+              tree=ast.parse(Path(path).read_text(encoding='utf-8'))
+              for node in ast.walk(tree):
+                  if isinstance(node,ast.Import):
+                      assert all(n.name.split('.')[0] not in
+                                 {'subprocess','ctypes','multiprocessing','psutil'}
+                                 for n in node.names)
+                  if isinstance(node,ast.ImportFrom):
+                      assert ((node.module or '').split('.')[0] not in
+                              {'subprocess','ctypes','multiprocessing','psutil'})
+          print('V127_NO_NATIVE_CONVERTER_DISPATCH_INTERFACE')
+          PY
+      - name: Twenty independent synthetic coverage and tamper checks
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_scope_coverage_v127.py' -v \
+            2>&1 | tee evidence/v127-test.log
+          grep -Eq '^Ran 20 tests ' evidence/v127-test.log
+          grep -q '^OK$' evidence/v127-test.log
+          echo V127_TWENTY_COVERAGE_TESTS_PASS_ZERO_NATIVE_DATES
+      - name: Preserve read-only test transcript
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v127-synthetic-scope-coverage-NO-FCT
+          path: evidence/v127-test.log
+          if-no-files-found: warn
+          retention-days: 30
