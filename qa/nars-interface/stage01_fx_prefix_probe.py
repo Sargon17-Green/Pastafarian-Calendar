@@ -23,6 +23,19 @@ PREFIX_HELPER = [
     "  z←actual",
 ]
 
+
+def nested_fx_expression(lines: list[str]) -> str:
+    """Use ⎕FX nested character-vector strand without matrix space padding."""
+    if not lines:
+        raise ValueError("NESTED_FX_NO_LINES")
+    entries = []
+    for line in lines:
+        if not line:
+            entries.append("(0⍴⎕UCS 32)")
+        else:
+            entries.append("(⎕UCS " + _codes(line) + ")")
+    return "(" + " ".join(entries) + ")"
+
 def create_prefix(raw_workspace: bytes, marker: str, repo_root: pathlib.Path) -> tuple[bytes, dict]:
     locked = load_locked_sources(repo_root)
     subset = locked["blocks"][:PREFIX_COUNT]
@@ -32,11 +45,11 @@ def create_prefix(raw_workspace: bytes, marker: str, repo_root: pathlib.Path) ->
     if len(set(names)) != PREFIX_COUNT:
         raise ValueError("PREFIX_NAME_NOT_UNIQUE")
     token = "APL_GERMAN_PREFIX_5_FX_VERIFIED_SOURCE_" + SOURCE_COMMIT
-    program = ["⎕FX " + _matrix_expression(PREFIX_HELPER), "Stage01PrefixCount←0"]
+    program = ["⎕FX " + nested_fx_expression(PREFIX_HELPER), "Stage01PrefixCount←0"]
     for block in subset:
         program.append(
             f"(⎕UCS {_codes(block['name'])}) Stage01PrefixFix " +
-            _matrix_expression(fx_definition_lines(block))
+            nested_fx_expression(fx_definition_lines(block))
         )
     # Only reached after the five independent exact-name comparisons succeed.
     program.append(
@@ -69,6 +82,7 @@ def create_prefix(raw_workspace: bytes, marker: str, repo_root: pathlib.Path) ->
         "source_commit": SOURCE_COMMIT,
         "source_manifest_sha256": locked["manifest"]["manifest_sha256"],
         "fx_count": PREFIX_COUNT,
+        "fx_transport": "NESTED_CHARACTER_VECTOR_STRAND_V1",
         "fx_names": names,
         "fx_blocks": [{"name": b["name"], "path": b["path"], "source_lines": [b["start_line"], b["end_line"]]} for b in subset],
         "candidate_sha256": hashlib.sha256(candidate).hexdigest(),
