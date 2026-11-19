@@ -702,7 +702,7 @@ jobs:
       - name: Verify public package URI and AC.1 boundary oracle
         run: dart run bin/stage4_package_consumer_tests.dart
 
-dart-hebrew-stage5-external-consumer:
+  dart-hebrew-stage5-external-consumer:
     if: github.ref == 'refs/heads/Dart+עברית'
     runs-on: ubuntu-latest
     timeout-minutes: 8
