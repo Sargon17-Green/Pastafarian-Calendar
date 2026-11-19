@@ -1,0 +1,23 @@
+{
+  "anchor_pairs": 3,
+  "archive_sha256": "65bbf11753ff6a08ac8ecddafffe7f38c9918c546f4c49bf8702ad17ffaab166",
+  "audit": "OFFLINE_INDEPENDENT",
+  "audit_negative_control": "REJECTED_CORRUPTED_EXPECTED_DROP",
+  "combined_sha256": "693edf03ffdffae2fad2e39753f1a0daf83b783de1ed35b0ce13c2a490e8a96d",
+  "fixture_sha256": "7122e5c33700f00f951a2d51c47c1ca8fe754dbf7c7f28a40b40954a537ff166",
+  "input_assertions": 15,
+  "negative_controls": [
+    "mutant"
+  ],
+  "next_stage": 13,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "replay_assertions": 6,
+  "result_assertions": 21,
+  "run_id": "44367931777",
+  "runtime_sha": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "shape_assertions": 3,
+  "source_sha": "c7b84a6cbdb5e5147f35ba58629aac17b87ff74d",
+  "stage": 12,
+  "status": "ACCEPTED",
+  "workflow_sha": "5e46f82567c31ab3bad71508b9549cb4bdf10823"
+}

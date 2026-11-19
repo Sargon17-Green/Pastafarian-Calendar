@@ -1,0 +1,136 @@
+{
+  "anchors": [
+    {
+      "back": 1,
+      "expected": 20001,
+      "i": 1,
+      "source": "hidden",
+      "source_index": 1
+    },
+    {
+      "back": 3,
+      "expected": 20003,
+      "i": 1,
+      "source": "hidden",
+      "source_index": 3
+    },
+    {
+      "back": 7,
+      "expected": 20007,
+      "i": 1,
+      "source": "hidden",
+      "source_index": 7
+    },
+    {
+      "back": 1,
+      "expected": 10001,
+      "i": 2,
+      "source": "visible",
+      "source_index": 1
+    },
+    {
+      "back": 3,
+      "expected": 20002,
+      "i": 2,
+      "source": "hidden",
+      "source_index": 2
+    },
+    {
+      "back": 7,
+      "expected": 20006,
+      "i": 2,
+      "source": "hidden",
+      "source_index": 6
+    },
+    {
+      "back": 1,
+      "expected": 10002,
+      "i": 3,
+      "source": "visible",
+      "source_index": 2
+    },
+    {
+      "back": 3,
+      "expected": 20001,
+      "i": 3,
+      "source": "hidden",
+      "source_index": 1
+    },
+    {
+      "back": 7,
+      "expected": 20005,
+      "i": 3,
+      "source": "hidden",
+      "source_index": 5
+    },
+    {
+      "back": 1,
+      "expected": 10006,
+      "i": 7,
+      "source": "visible",
+      "source_index": 6
+    },
+    {
+      "back": 3,
+      "expected": 10004,
+      "i": 7,
+      "source": "visible",
+      "source_index": 4
+    },
+    {
+      "back": 7,
+      "expected": 20001,
+      "i": 7,
+      "source": "hidden",
+      "source_index": 1
+    },
+    {
+      "back": 1,
+      "expected": 10007,
+      "i": 8,
+      "source": "visible",
+      "source_index": 7
+    },
+    {
+      "back": 3,
+      "expected": 10005,
+      "i": 8,
+      "source": "visible",
+      "source_index": 5
+    },
+    {
+      "back": 7,
+      "expected": 10001,
+      "i": 8,
+      "source": "visible",
+      "source_index": 1
+    },
+    {
+      "back": 1,
+      "expected": 10045,
+      "i": 46,
+      "source": "visible",
+      "source_index": 45
+    },
+    {
+      "back": 3,
+      "expected": 10043,
+      "i": 46,
+      "source": "visible",
+      "source_index": 43
+    },
+    {
+      "back": 7,
+      "expected": 10039,
+      "i": 46,
+      "source": "visible",
+      "source_index": 39
+    }
+  ],
+  "native_anchor_count": 18,
+  "native_evidence": false,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "python_domain_pairs": 322,
+  "stage": 13,
+  "status": "DESIGN_ONLY"
+}
