@@ -27,3 +27,11 @@ Runner limits: Python selftest 180s; Ada observation 600s; Python comparator 180
 ## Acceptance gate
 
 Require the first natural push on the exact Stage33 SHA to complete successfully across 35/35 jobs, including verify, all historical jobs and direct Stage33 GNAT compile/bind/link. Inspect the completed Native log; require the exact 139/131/125 markers and all 25 distinct ordered pairs. A queued or in_progress run is neither PASS nor a blocker. No duplicate dispatch, main/merge or release.
+
+## Final bounded acceptance (2026-11-19)
+
+Original natural push [run 44393141682](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44393141682), attempt 1, on exact SHA `75295de952d337fe5f77a7277e477335609bdc8a` completed/success **35/35**, including verify job 135115856699. The direct [Native job 135115857722](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44393141682/job/135115857722) logged GNATMAKE 13.3.0 and compilation, binding and linking, `STAGE33_INDEPENDENT_REMOTE_NINE_SELFTEST_ASSERTIONS=139`, `STAGE33_NATIVE_REMOTE_NINE_ASSERTIONS= 131`, `STAGE33_REAL_FIVEFIELD_SCALARS=125`, and 25 unique `STAGE33_NATIVE_PAIR` records. Branch `Ada+తెలుగు` HEAD readback equals the exact SHA. This is **bounded Stage33 acceptance only**, not a proof over arbitrary input dates. No manual redispatch, merge, main update or release.
+
+## Next stage
+
+Stage34/DISCOVERY31 extends the frontier to ±5786 and the near cross-axis to ±10 days. Its coverage selftest must prove exactly 24 unseen ordered pairs versus Stage15–18 and 20–33 before Stage34 Native acceptance.
