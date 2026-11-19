@@ -25,8 +25,8 @@ from independent_date_combinatorics import DateCombinatoricsError
 MAX_PRODUCTION_GATE_INDEX = 8192
 ORACLE_HALF_WIDTH = 280
 GATE_COUNT = ORACLE_HALF_WIDTH * 2 + 1
-EXPECTED_ROWS = GATE_COUNT + 7
-PASS = "PASS_BOUNDED_REAL_PRODUCTION_ADJACENT_YEAR_NAVIGATION_NOT_CERTIFIED"
+EXPECTED_ROWS = GATE_COUNT + 11
+PASS = "PASS_BOUNDED_REAL_PRODUCTION_TWO_HOP_YEAR_NAVIGATION_NOT_CERTIFIED"
 CANONICAL = re.compile(r"(?:0|-?[1-9][0-9]*)\Z")
 
 
@@ -52,8 +52,12 @@ def parse_transcript(raw: str) -> dict:
         "YEAR": None,
         "NEXT": None,
         "PREVIOUS": None,
+        "NEXT2": None,
+        "PREVIOUS2": None,
         "FIND_FORWARD": None,
         "FIND_BACKWARD": None,
+        "FIND_FORWARD2": None,
+        "FIND_BACKWARD2": None,
         "PRODUCTION_GATE_LIMIT": None,
         "PRODUCTION_EXPANDED_GATES": None,
     }
@@ -67,11 +71,11 @@ def parse_transcript(raw: str) -> dict:
             if index in observed["GATE"]:
                 raise AuditError("E_DUPLICATE_GATE")
             observed["GATE"][index] = day
-        elif kind in ("YEAR", "NEXT", "PREVIOUS") and len(columns) == 6:
+        elif kind in ("YEAR", "NEXT", "PREVIOUS", "NEXT2", "PREVIOUS2") and len(columns) == 6:
             if observed[kind] is not None:
                 raise AuditError(f"E_DUPLICATE_{kind}")
             observed[kind] = tuple(map(number, columns[1:]))
-        elif kind in ("FIND_FORWARD", "FIND_BACKWARD") and len(columns) == 7:
+        elif kind in ("FIND_FORWARD", "FIND_BACKWARD", "FIND_FORWARD2", "FIND_BACKWARD2") and len(columns) == 7:
             if observed[kind] is not None:
                 raise AuditError(f"E_DUPLICATE_{kind}")
             observed[kind] = (number(columns[1]), tuple(map(number, columns[2:])))
@@ -84,7 +88,8 @@ def parse_transcript(raw: str) -> dict:
 
     if set(observed["GATE"]) != set(range(-ORACLE_HALF_WIDTH, ORACLE_HALF_WIDTH + 1)):
         raise AuditError("E_GATE_INDEX_SET")
-    for key in ("YEAR", "NEXT", "PREVIOUS", "FIND_FORWARD", "FIND_BACKWARD",
+    for key in ("YEAR", "NEXT", "PREVIOUS", "NEXT2", "PREVIOUS2",
+                "FIND_FORWARD", "FIND_BACKWARD", "FIND_FORWARD2", "FIND_BACKWARD2",
                 "PRODUCTION_GATE_LIMIT", "PRODUCTION_EXPANDED_GATES"):
         if observed[key] is None:
             raise AuditError(f"E_MISSING_{key}")
@@ -117,6 +122,22 @@ def compare(parsed: dict, ledger, geometry, selector) -> dict:
         raise AuditError("E_REAL_NEXT_YEAR_MISMATCH")
     if parsed["PREVIOUS"] != as_tuple(previous_year):
         raise AuditError("E_REAL_PREVIOUS_YEAR_MISMATCH")
+    next2 = geometry.next(next_year, selector)
+    previous2 = geometry.previous(previous_year, selector)
+    if parsed["NEXT2"] != as_tuple(next2):
+        raise AuditError("E_REAL_NEXT2_YEAR_MISMATCH")
+    if parsed["PREVIOUS2"] != as_tuple(previous2):
+        raise AuditError("E_REAL_PREVIOUS2_YEAR_MISMATCH")
+    if (next2.number != next_year.number + 1 or
+            next2.open_index != next_year.close_index or
+            next2.open_day != next_year.close_day or
+            not next2.open_day < next2.close_day):
+        raise AuditError("E_INDEPENDENT_FORWARD2_CONTIGUITY")
+    if (previous2.number != previous_year.number - 1 or
+            previous2.close_index != previous_year.open_index or
+            previous2.close_day != previous_year.open_day or
+            not previous2.open_day < previous2.close_day):
+        raise AuditError("E_INDEPENDENT_BACKWARD2_CONTIGUITY")
 
     if (next_year.number != base.number + 1 or
             next_year.open_index != base.close_index or
@@ -151,18 +172,45 @@ def compare(parsed: dict, ledger, geometry, selector) -> dict:
     if parsed["FIND_BACKWARD"][1] != as_tuple(expected_backward):
         raise AuditError("E_REAL_FIND_BACKWARD_MISMATCH")
 
+    forward_target2 = next_year.close_day + 1
+    backward_target2 = previous_year.open_day
+    if parsed["FIND_FORWARD2"][0] != forward_target2:
+        raise AuditError("E_FIND_FORWARD2_TARGET")
+    if parsed["FIND_BACKWARD2"][0] != backward_target2:
+        raise AuditError("E_FIND_BACKWARD2_TARGET")
+    found_forward2, forward_transitions2 = geometry.find(
+        FOUNDATION, forward_target2, selector
+    )
+    found_backward2, backward_transitions2 = geometry.find(
+        FOUNDATION, backward_target2, selector
+    )
+    if forward_transitions2 != 2 or found_forward2 != next2:
+        raise AuditError("E_INDEPENDENT_FORWARD2_TRANSITION")
+    if backward_transitions2 != 2 or found_backward2 != previous2:
+        raise AuditError("E_INDEPENDENT_BACKWARD2_TRANSITION")
+    if parsed["FIND_FORWARD2"][1] != as_tuple(found_forward2):
+        raise AuditError("E_REAL_FIND_FORWARD2_MISMATCH")
+    if parsed["FIND_BACKWARD2"][1] != as_tuple(found_backward2):
+        raise AuditError("E_REAL_FIND_BACKWARD2_MISMATCH")
+
     return {
         "production_gate_day_comparisons": GATE_COUNT,
         "year5000_comparisons": 1,
         "adjacent_year_comparisons": 2,
+        "two_hop_year_comparisons": 2,
         "find_target_transition_comparisons": 2,
+        "find_two_hop_transition_comparisons": 2,
         "production_gate_limit_checks": 1,
         "production_expanded_gate_count_checks": 1,
         "forward_transitions": forward_transitions,
         "backward_transitions": backward_transitions,
+        "forward_two_hop_transitions": forward_transitions2,
+        "backward_two_hop_transitions": backward_transitions2,
         "base_year": as_tuple(base),
         "next_year": as_tuple(next_year),
         "previous_year": as_tuple(previous_year),
+        "next2_year": as_tuple(next2),
+        "previous2_year": as_tuple(previous2),
     }
 
 
@@ -179,7 +227,7 @@ def write_evidence(path: Path, report: dict) -> None:
 def run(jar: Path, evidence: Path, timeout: int) -> int:
     started = time.monotonic()
     report = {
-        "schema": "post55-production-adjacent-year-navigation-unseeded-v1",
+        "schema": "post55-production-adjacent-year-navigation-unseeded-v2-two-hop",
         "status": "FAIL_BOUNDED_REAL_PRODUCTION_ADJACENT_YEAR_NAVIGATION",
         "project_id": "PC-BRANCH-KOTLIN-CYMRAEG",
         "github_sha": os.environ.get("GITHUB_SHA", "UNVERIFIED_LOCAL"),

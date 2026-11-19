@@ -22,6 +22,8 @@ class FakeYear:
 BASE = FakeYear(5000, -3, 4, FOUNDATION - 300, FOUNDATION + 400)
 NEXT = FakeYear(5001, 4, 11, FOUNDATION + 400, FOUNDATION + 1100)
 PREVIOUS = FakeYear(4999, -10, -3, FOUNDATION - 1000, FOUNDATION - 300)
+NEXT2 = FakeYear(5002, 11, 18, FOUNDATION + 1100, FOUNDATION + 1800)
+PREVIOUS2 = FakeYear(4998, -17, -10, FOUNDATION - 1700, FOUNDATION - 1000)
 
 class FakeLedger:
     def day(self, index):
@@ -35,12 +37,18 @@ class FakeGeometry:
         return BASE
 
     def next(self, year, selector):
-        assert year == BASE
-        return NEXT
+        if year == BASE:
+            return NEXT
+        if year == NEXT:
+            return NEXT2
+        raise AuditError("E_FAKE_NEXT_SOURCE")
 
     def previous(self, year, selector):
-        assert year == BASE
-        return PREVIOUS
+        if year == BASE:
+            return PREVIOUS
+        if year == PREVIOUS:
+            return PREVIOUS2
+        raise AuditError("E_FAKE_PREVIOUS_SOURCE")
 
     def find(self, calculation_day, target, selector):
         assert calculation_day == FOUNDATION
@@ -48,6 +56,10 @@ class FakeGeometry:
             return NEXT, 1
         if target == BASE.open_day:
             return PREVIOUS, 1
+        if target == NEXT.close_day + 1:
+            return NEXT2, 2
+        if target == PREVIOUS.open_day:
+            return PREVIOUS2, 2
         if BASE.open_day < target <= BASE.close_day:
             return BASE, 0
         raise AuditError("E_FAKE_TARGET_OUTSIDE")
@@ -68,10 +80,16 @@ def valid_transcript():
         "YEAR\t" + "\t".join(map(str, fields(BASE))),
         "NEXT\t" + "\t".join(map(str, fields(NEXT))),
         "PREVIOUS\t" + "\t".join(map(str, fields(PREVIOUS))),
+        "NEXT2\t" + "\t".join(map(str, fields(NEXT2))),
+        "PREVIOUS2\t" + "\t".join(map(str, fields(PREVIOUS2))),
         "FIND_FORWARD\t" + str(BASE.close_day + 1) + "\t" +
             "\t".join(map(str, fields(NEXT))),
         "FIND_BACKWARD\t" + str(BASE.open_day) + "\t" +
             "\t".join(map(str, fields(PREVIOUS))),
+        "FIND_FORWARD2\t" + str(NEXT.close_day + 1) + "\t" +
+            "\t".join(map(str, fields(NEXT2))),
+        "FIND_BACKWARD2\t" + str(PREVIOUS.open_day) + "\t" +
+            "\t".join(map(str, fields(PREVIOUS2))),
         "PRODUCTION_GATE_LIMIT\t8192",
         f"PRODUCTION_EXPANDED_GATES\t{GATE_COUNT}",
     ))
@@ -90,13 +108,16 @@ class AdjacentYearContractTests(unittest.TestCase):
         result = compare(parsed, self.ledger, self.geometry, lambda *_: 1)
         comparisons = sum(result[key] for key in (
             "production_gate_day_comparisons", "year5000_comparisons",
-            "adjacent_year_comparisons", "find_target_transition_comparisons",
+            "adjacent_year_comparisons", "two_hop_year_comparisons",
+            "find_target_transition_comparisons", "find_two_hop_transition_comparisons",
             "production_gate_limit_checks",
             "production_expanded_gate_count_checks",
         ))
         self.assertEqual(comparisons, EXPECTED_ROWS)
         self.assertEqual(result["forward_transitions"], 1)
         self.assertEqual(result["backward_transitions"], 1)
+        self.assertEqual(result["forward_two_hop_transitions"], 2)
+        self.assertEqual(result["backward_two_hop_transitions"], 2)
 
     def test_gate_mutation_is_detected(self):
         changed = self.text.replace(
@@ -156,6 +177,45 @@ class AdjacentYearContractTests(unittest.TestCase):
             1,
         )
         with self.assertRaisesRegex(AuditError, "E_FIND_BACKWARD_TARGET"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+
+    def test_next2_year_mutation_is_detected(self):
+        changed = self.text.replace("NEXT2\t5002", "NEXT2\t5003", 1)
+        with self.assertRaisesRegex(AuditError, "E_REAL_NEXT2_YEAR_MISMATCH"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_previous2_year_mutation_is_detected(self):
+        changed = self.text.replace("PREVIOUS2\t4998", "PREVIOUS2\t4997", 1)
+        with self.assertRaisesRegex(AuditError, "E_REAL_PREVIOUS2_YEAR_MISMATCH"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_forward2_find_result_mutation_is_detected(self):
+        needle = f"FIND_FORWARD2\t{NEXT.close_day + 1}\t5002"
+        changed = self.text.replace(needle, needle[:-1] + "3", 1)
+        with self.assertRaisesRegex(AuditError, "E_REAL_FIND_FORWARD2_MISMATCH"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_backward2_find_result_mutation_is_detected(self):
+        needle = f"FIND_BACKWARD2\t{PREVIOUS.open_day}\t4998"
+        changed = self.text.replace(needle, needle[:-1] + "7", 1)
+        with self.assertRaisesRegex(AuditError, "E_REAL_FIND_BACKWARD2_MISMATCH"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_forward2_find_target_spoof_is_rejected(self):
+        changed = self.text.replace(
+            f"FIND_FORWARD2\t{NEXT.close_day + 1}\t",
+            f"FIND_FORWARD2\t{NEXT.close_day + 2}\t", 1,
+        )
+        with self.assertRaisesRegex(AuditError, "E_FIND_FORWARD2_TARGET"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_backward2_find_target_spoof_is_rejected(self):
+        changed = self.text.replace(
+            f"FIND_BACKWARD2\t{PREVIOUS.open_day}\t",
+            f"FIND_BACKWARD2\t{PREVIOUS.open_day - 1}\t", 1,
+        )
+        with self.assertRaisesRegex(AuditError, "E_FIND_BACKWARD2_TARGET"):
             compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
 
     def test_duplicate_gate_is_rejected(self):
