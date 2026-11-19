@@ -64,7 +64,7 @@ try {
     if ($meta.status -ne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.mode -ne 'fx_probe' -or $meta.native_executed -ne $false) { throw 'FX_PROBE_CANDIDATE_CONTRACT_MISMATCH' }
     if ($meta.canary_token -ne '42' -or $meta.canary_path -ine $marker) { throw 'FX_PROBE_TOKEN_OR_PATH_MISMATCH' }
     if ($meta.apl_statement.Contains("'") -or $meta.apl_statement.Contains('"')) { throw 'FX_PROBE_LX_NOT_QUOTE_FREE' }
-    if (-not $meta.apl_statement.StartsWith('(⍕⊃⎕EC ⎕UCS ')) { throw 'FX_PROBE_LX_NOT_EC_UCS' }
+    if (-not $meta.apl_statement.StartsWith('⎕EC ⎕UCS ') -or -not $meta.diagnostic_apl_statement.StartsWith('(⍕⊃⎕EC ⎕UCS ')) { throw 'FX_PROBE_LX_NOT_NESTED_EC_UCS' }
     $diagnostic = [string]$meta.diagnostic_path
     if ($diagnostic -ine ($marker.Substring(0, $marker.Length - 4) + '.ec.txt')) { throw 'FX_PROBE_DIAG_PATH_MISMATCH' }
     if (Test-Path -LiteralPath $diagnostic) { throw 'FX_PROBE_DIAG_PREEXISTS' }

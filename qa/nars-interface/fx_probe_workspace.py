@@ -48,7 +48,10 @@ def make_fx_probe(raw: bytes, marker: str) -> tuple[bytes, dict]:
     # Persist the independently machine-readable ⎕EC return class. In NARS
     # the first item is 0 on an execution error and 1/2/3 on normal evaluation.
     diagnostic = marker[:-4] + ".ec.txt"
-    apl = f"(⍕⊃⎕EC ⎕UCS {_codes(inner)}) ⎕NAPPEND ((⎕UCS {_codes(diagnostic)}) ⎕NCREATE 0)"
+    diagnostic_apl = f"(⍕⊃⎕EC ⎕UCS {_codes(inner)}) ⎕NAPPEND ((⎕UCS {_codes(diagnostic)}) ⎕NCREATE 0)"
+    # The NARS workspace serializer permits ASCII mnemonic escape tokens,
+    # not raw ⍕ or ⊃. Encode *all* non-ASCII APL in an ASCII numeric LX.
+    apl = "⎕EC ⎕UCS " + _codes(diagnostic_apl)
     if "'" in apl or '"' in apl:
         raise ValueError("FX_PROBE_OUTER_EXPRESSION_NOT_QUOTE_FREE")
     serialized = apl.replace("⎕", "{quad}")
@@ -78,6 +81,7 @@ def make_fx_probe(raw: bytes, marker: str) -> tuple[bytes, dict]:
         "mode": "fx_probe",
         "canary_token": FX_TOKEN,
         "diagnostic_path": diagnostic,
+        "diagnostic_apl_statement": diagnostic_apl,
         "apl_statement": apl,
         "inner_apl_statement": inner,
         "fx_function_name": FX_NAME,
