@@ -1,0 +1,59 @@
+name: APL German NARS native FX prefix five (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-stage01-fx-prefix.yml'
+      - 'qa/nars-interface/stage01_fx_prefix_probe.py'
+      - 'qa/nars-interface/test_stage01_fx_prefix_probe.py'
+      - 'qa/nars-interface/bounded_stage01_fx_prefix.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-prefix-5:
+    runs-on: windows-2022
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Provision pinned NARS plus ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Test fixed source prefix generation
+        shell: pwsh
+        run: python -m unittest discover -s qa/nars-interface -p 'test_stage01_fx_prefix_probe.py' -v
+      - name: Run five native ⎕FX source functions
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_fx_prefix.ps1 -Runtime verified_runtime -Evidence prefix_fx_evidence
+      - name: Collect evidence
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force prefix_fx_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem prefix_fx_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName.Replace((Get-Location).Path + '\\',''))"
+          } | Set-Content -Encoding utf8 prefix_fx_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-prefix5-native-fx-evidence-not-stage1
+          path: |
+            font_bootstrap_evidence/
+            prefix_fx_evidence/
+            prefix_fx_evidence.sha256
+          retention-days: 14
