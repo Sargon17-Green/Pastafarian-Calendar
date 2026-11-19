@@ -37,7 +37,7 @@ package body Pure_Full_Weave_V122 is
          end loop;
 
          H (M) := new Big_Vector (0 .. Prefix (M));
-         for X in H (M)'Range loop
+         for X in H (M).all'Range loop
             H (M) (X) := B (1);
          end loop;
 
