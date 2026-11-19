@@ -45,7 +45,10 @@ def make_fx_probe(raw: bytes, marker: str) -> tuple[bytes, dict]:
         f"(⍕{FX_NAME} 41) ⎕NAPPEND "
         f"((⎕UCS {_codes(marker)}) ⎕NCREATE 0)"
     )
-    apl = "⎕EC ⎕UCS " + _codes(inner)
+    # Persist the independently machine-readable ⎕EC return class. In NARS
+    # the first item is 0 on an execution error and 1/2/3 on normal evaluation.
+    diagnostic = marker[:-4] + ".ec.txt"
+    apl = f"(⍕⊃⎕EC ⎕UCS {_codes(inner)}) ⎕NAPPEND ((⎕UCS {_codes(diagnostic)}) ⎕NCREATE 0)"
     if "'" in apl or '"' in apl:
         raise ValueError("FX_PROBE_OUTER_EXPRESSION_NOT_QUOTE_FREE")
     serialized = apl.replace("⎕", "{quad}")
@@ -74,6 +77,7 @@ def make_fx_probe(raw: bytes, marker: str) -> tuple[bytes, dict]:
         "status": "GENERATED_NOT_NATIVE_VALIDATED",
         "mode": "fx_probe",
         "canary_token": FX_TOKEN,
+        "diagnostic_path": diagnostic,
         "apl_statement": apl,
         "inner_apl_statement": inner,
         "fx_function_name": FX_NAME,

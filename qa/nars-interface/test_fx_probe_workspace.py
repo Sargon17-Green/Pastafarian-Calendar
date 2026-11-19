@@ -20,7 +20,7 @@ PATH = "D:\\a\\_temp\\apl_fx_probe.txt"
 class FxProbeWorkspaceTests(unittest.TestCase):
     def test_outer_lx_is_quote_free_ec_ucs(self):
         out, meta = make_fx_probe(BASE, PATH)
-        self.assertTrue(meta["apl_statement"].startswith("⎕EC ⎕UCS "))
+        self.assertTrue(meta["apl_statement"].startswith("(⍕⊃⎕EC ⎕UCS "))
         self.assertNotIn("'", meta["apl_statement"])
         self.assertNotIn('"', meta["apl_statement"])
         self.assertIn(b"{quad}EC {quad}UCS ", out)
@@ -30,8 +30,9 @@ class FxProbeWorkspaceTests(unittest.TestCase):
 
     def test_ec_numeric_vector_decodes_to_exact_inner_program(self):
         _, meta = make_fx_probe(BASE, PATH)
-        prefix = "⎕EC ⎕UCS "
-        codes = [int(x) for x in meta["apl_statement"][len(prefix):].split()]
+        prefix = "(⍕⊃⎕EC ⎕UCS "
+        encoded = meta["apl_statement"][len(prefix):].split(") ⎕NAPPEND ", 1)[0]
+        codes = [int(x) for x in encoded.split()]
         self.assertEqual("".join(chr(x) for x in codes), meta["inner_apl_statement"])
 
     def test_inner_program_fixes_and_executes_function_before_file_write(self):
@@ -43,6 +44,12 @@ class FxProbeWorkspaceTests(unittest.TestCase):
         self.assertIn("⎕NCREATE 0)", inner)
         self.assertIn("APL_GERMAN_FX_PROBE_20261118", inner)
         self.assertEqual(meta["fx_matrix_shape"][0], len(FX_LINES))
+
+    def test_independent_ec_status_receipt_path_and_outer_file_writer(self):
+        _, meta = make_fx_probe(BASE, PATH)
+        self.assertEqual(meta["diagnostic_path"], PATH[:-4] + ".ec.txt")
+        self.assertIn(") ⎕NAPPEND ((⎕UCS ", meta["apl_statement"])
+        self.assertIn(" ⎕NCREATE 0)", meta["apl_statement"])
 
     def test_nars_fx_canonical_header_excludes_delimiters(self):
         self.assertEqual(len(FX_LINES), 2)
