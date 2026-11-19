@@ -1,4 +1,4 @@
-name: Soak v110 static source algorithm-family difference, NO converter calls
+name: Soak v120 pure exact full weaving rank-unrank vs original, NO converter Fct
 on:
   push:
     branches:
@@ -7,6 +7,8 @@ on:
       - 'soak/runner/audit_weaving_family_divergence_v110.py'
       - 'soak/process_tests/test_weaving_family_divergence_v110.py'
       - '.github/workflows/soak-static-source-weaving-family-v110.yml'
+      - 'soak/runner/exact_month_weaving_pure_v119.py'
+      - 'soak/process_tests/test_exact_month_weaving_pure_v120.py'
 permissions:
   contents: read
 jobs:
@@ -107,6 +109,84 @@ jobs:
           assert d['stop_new_native_soak_dispatch'] is True
           assert d['full_years_certified']==0 and d['ten_thousand_years_certified']==0
           print('V110_STATIC_FAMILY_NON_EQUIVALENCE_PROVEN_CAUSALITY_NOT_YET_PROVEN')
+          PY
+      - name: Fourteen independent pure weaving tests against original month-family definitions (NO Fct)
+        shell: bash
+        env:
+          PASTAFARI_V120_ORIGINAL_PYTHON: original-python/tests/normative_reference.py
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          for p in ('qa/soak/runner/exact_month_weaving_pure_v119.py',
+                    'qa/soak/process_tests/test_exact_month_weaving_pure_v120.py'):
+              tree=ast.parse(Path(p).read_text(encoding='utf8'))
+              for node in ast.walk(tree):
+                  if isinstance(node,ast.Import):
+                      assert all(x.name.split('.')[0] not in
+                                 {'subprocess','ctypes','psutil','multiprocessing'} for x in node.names)
+                  if isinstance(node,ast.ImportFrom):
+                      assert ((node.module or '').split('.')[0] not in
+                              {'subprocess','ctypes','psutil','multiprocessing'})
+          print('V120_PURE_EXACT_MATH_NO_DATE_PROCESS_DISPATCH_INTERFACE')
+          PY
+          PYTHONPATH=qa/soak/runner python3 -B -m unittest discover \
+            -s qa/soak/process_tests -p 'test_exact_month_weaving_pure_v120.py' -v \
+            2>&1 | tee evidence/v120-pure-exact-tests.log
+          grep -Eq '^Ran 14 tests ' evidence/v120-pure-exact-tests.log
+          grep -q '^OK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v110-static-source-weaving-counterexample-NO-NATIVE
+          path: |
+            evidence/v110-math-tests.log
+            evidence/v110-source-math-audit.log
+            evidence/v110-month-weaving-family-counterexample.json
+            evidence/v120-pure-exact-tests.log
+            evidence/v120-exact-count.log
+            evidence/v120-full-family-exact-count-verdict.json
+          if-no-files-found: warn
+          retention-days: 30
+ evidence/v120-pure-exact-tests.log
+          echo V120_FOURTEEN_PURE_EXACT_WEAVING_TESTS_PASS_NO_FCT
+      - name: Exact 47-month 5778-day count proof with no Fct and no year credit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B qa/soak/runner/exact_month_weaving_pure_v119.py \
+            --verdict-out evidence/v120-full-family-exact-count-verdict.json \
+            2>&1 | tee evidence/v120-exact-count.log
+          grep -q '^V119_EXACT_MONTH_WEAVE_COUNT_47_MONTHS_NO_DATE_PASS
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v110-static-source-weaving-counterexample-NO-NATIVE
+          path: |
+            evidence/v110-math-tests.log
+            evidence/v110-source-math-audit.log
+            evidence/v110-month-weaving-family-counterexample.json
+          if-no-files-found: warn
+          retention-days: 30
+ \
+            evidence/v120-exact-count.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('evidence/v120-full-family-exact-count-verdict.json').read_bytes())
+          assert x['schema']=='PASTAFARI_PURE_EXACT_MONTH_WEAVE_MODEL_V119/1'
+          assert x['status']=='EXACT_COMBINATORIAL_COUNT_AND_SMALL_RANK_UNRANK_NOT_DATE'
+          assert x['small_family_count']==20
+          assert x['large_months']==47 and x['large_total_days']==5778
+          assert x['large_count_bit_length']>10_000
+          assert x['native_calendar_conversion_executed'] is False
+          assert x['ada_candidate_source_modified'] is False
+          assert x['scientific_source_mismatch_resolved'] is False
+          assert x['new_native_soak_dispatch_stopped'] is True
+          assert x['full_original_years_certified']==0
+          assert x['ten_thousand_years_certified']==0
+          print('V120_FULL_FAMILY_5778_DAY_BIGINT_PROOF_NO_CONVERTER_EXECUTION')
           PY
       - name: Preserve source-only mathematical counterexample evidence
         if: always()
