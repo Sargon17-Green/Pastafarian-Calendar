@@ -1,0 +1,121 @@
+name: Soak v110 static source algorithm-family difference, NO converter calls
+on:
+  push:
+    branches:
+      - qa/soak-readiness-20261114
+    paths:
+      - 'soak/runner/audit_weaving_family_divergence_v110.py'
+      - 'soak/process_tests/test_weaving_family_divergence_v110.py'
+      - '.github/workflows/soak-static-source-weaving-family-v110.yml'
+permissions:
+  contents: read
+jobs:
+  read-only-source-mathematics-not-year:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: qa
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-ada
+          ref: a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - name: Verify source immutable blobs and v108 native dispatch HALT
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-ada rev-parse HEAD)" = a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-ada rev-parse HEAD:src/normative_oracle.adb)" = 923733d4f8face03586aee304640bf7540c28b4c
+          test "$(git -C original-ada rev-parse HEAD:src/month_weaving.adb)" = 9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py' | sha256sum -c -
+          test -z "$(git -C original-ada status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('qa/soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text(encoding='utf-8'))
+          assert d['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          assert d['first_difference']['field']=='month_index'
+          assert d['first_difference']['ada']==30 and d['first_difference']['reference']==20
+          assert d['successful_ten_thousand_soak_years']==0
+          print('V110_SOURCE_FIRST_DIFFERENCE_HALT_ENFORCED_FOR_READONLY_AUDIT')
+          PY
+      - name: Ten purely combinatorial regressions and source signature checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          src=Path('qa/soak/runner/audit_weaving_family_divergence_v110.py')
+          test=Path('qa/soak/process_tests/test_weaving_family_divergence_v110.py')
+          for p in (src,test):
+              tree=ast.parse(p.read_text(encoding='utf-8'))
+              for node in ast.walk(tree):
+                  if isinstance(node,ast.Import):
+                      assert all(n.name.split('.')[0] not in
+                                 {'subprocess','ctypes','psutil'} for n in node.names)
+                  if isinstance(node,ast.ImportFrom):
+                      assert (node.module or '').split('.')[0] not in
+                             {'subprocess','ctypes','psutil'}
+          print('V110_NO_ORIGINAL_CONVERTER_PROCESS_LAUNCH_INTERFACE')
+          PY
+          PYTHONPATH=qa/soak/runner python3 -B -m unittest discover \
+            -s qa/soak/process_tests -p 'test_weaving_family_divergence_v110.py' -v \
+            2>&1 | tee evidence/v110-math-tests.log
+          grep -Eq '^Ran 10 tests ' evidence/v110-math-tests.log
+          grep -q '^OK$' evidence/v110-math-tests.log
+          echo V110_TEN_STATIC_MATH_REGRESSIONS_PASS
+      - name: Compare actual original source construction and prove family inequality
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B qa/soak/runner/audit_weaving_family_divergence_v110.py \
+            --ada-month-weave original-ada/src/month_weaving.adb \
+            --ada-calendar original-ada/src/normative_oracle.adb \
+            --python-reference original-python/tests/normative_reference.py \
+            --report-out evidence/v110-month-weaving-family-counterexample.json \
+            2>&1 | tee evidence/v110-source-math-audit.log
+          grep -q '^V110_STATIC_ORIGINAL_MONTH_WEAVING_MATH_DIVERGENCE_PROVEN_NO_NATIVE_SOAK$' \
+            evidence/v110-source-math-audit.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('evidence/v110-month-weaving-family-counterexample.json').read_bytes())
+          assert d['status']=='STATIC_ORIGINAL_SOURCE_MONTH_WEAVING_FAMILIES_NOT_EQUIVALENT'
+          assert d['proof_examples'][0]['month_lengths']==[2,2]
+          assert d['proof_examples'][0]['python_source_family_count']==2
+          assert d['proof_examples'][0]['ada_fixed_rails_family_count']==1
+          assert d['proof_examples'][1]['month_lengths']==[4,4]
+          assert d['proof_examples'][1]['python_source_family_count']==20
+          assert d['proof_examples'][1]['ada_fixed_rails_family_count']==6
+          assert d['proof_examples'][1]['unrepresentable_python_sequences_in_ada']==14
+          assert d['caused_foundation_day_specific_mismatch_proven'] is False
+          assert d['no_native_converter_call'] is True
+          assert d['stop_new_native_soak_dispatch'] is True
+          assert d['full_years_certified']==0 and d['ten_thousand_years_certified']==0
+          print('V110_STATIC_FAMILY_NON_EQUIVALENCE_PROVEN_CAUSALITY_NOT_YET_PROVEN')
+          PY
+      - name: Preserve source-only mathematical counterexample evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v110-static-source-weaving-counterexample-NO-NATIVE
+          path: |
+            evidence/v110-math-tests.log
+            evidence/v110-source-math-audit.log
+            evidence/v110-month-weaving-family-counterexample.json
+          if-no-files-found: warn
+          retention-days: 30
