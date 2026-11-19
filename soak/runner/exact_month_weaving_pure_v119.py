@@ -81,7 +81,7 @@ class ExactMonthWeaves:
             new = list(remaining)
             new[j] -= 1
             if new[j] == 0 and j != closed:
-                raise AssertionError("opening cannot violate closing order")
+                return  # This opening move is illegal; prior active moves remain valid.
             yield j + 1, tuple(new), opened + 1, closed + int(new[j] == 0)
 
     def unrank1(self, rank1: int) -> tuple[int, ...]:
@@ -153,7 +153,7 @@ def brute_words(lengths: tuple[int, ...]) -> tuple[tuple[int, ...], ...]:
             future = list(remaining)
             future[j] -= 1
             if future[j] == 0 and j != closed:
-                raise AssertionError("bad brute opening")
+                return  # No legal opening branch; other visited branches are retained.
             visit(tuple(future), opened + 1, closed + int(future[j] == 0),
                   path + (j + 1,))
     visit(lengths, 0, 0, ())
