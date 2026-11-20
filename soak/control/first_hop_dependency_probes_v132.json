@@ -1,0 +1,73 @@
+{
+  "schema": "PASTAFARI_SOAK_FIRST_HOP_DEPENDENCY_PROBES_V132/1",
+  "v131_source_lineage_contract": "PASTAFARI_SOAK_SOURCE_LINEAGE_SCREEN_V131/1",
+  "source_mode": "IMMUTABLE_GITHUB_COMMIT_READONLY",
+  "probes": [
+    {
+      "record_id": "REF-41",
+      "family": "PYTHON_TURKISH",
+      "parser": "PYTHON_RELATIVE_IMPORTS",
+      "role": "ORIGINAL_TEST_REFERENCE"
+    },
+    {
+      "record_id": "TURKISH-PY",
+      "family": "PYTHON_TURKISH",
+      "parser": "PYTHON_RELATIVE_IMPORTS",
+      "role": "PRODUCTION_CANDIDATE"
+    },
+    {
+      "record_id": "REF-24",
+      "family": "JAVASCRIPT_INTERLINGUE",
+      "parser": "JS_LITERAL_RELATIVE_REQUIRE",
+      "role": "ORIGINAL_TEST_REFERENCE"
+    },
+    {
+      "record_id": "INTERLINGUE-JS",
+      "family": "JAVASCRIPT_INTERLINGUE",
+      "parser": "JS_LITERAL_RELATIVE_REQUIRE",
+      "role": "PRODUCTION_CANDIDATE"
+    },
+    {
+      "record_id": "SEER-NEXT-HYBRID",
+      "family": "SEER_CPP",
+      "parser": "CPP_QUOTED_INCLUDE",
+      "role": "RESEARCH_CANDIDATE"
+    },
+    {
+      "record_id": "SEER-NEXT-YEAR-CACHE",
+      "family": "SEER_CPP",
+      "parser": "CPP_QUOTED_INCLUDE",
+      "role": "RESEARCH_CANDIDATE"
+    },
+    {
+      "record_id": "COPTIC-X64",
+      "family": "COPTIC_ASSEMBLY",
+      "parser": "ASSEMBLY_EXTERN_SYMBOLS",
+      "role": "PRODUCTION_CANDIDATE"
+    },
+    {
+      "record_id": "PALEO-CODESH",
+      "family": "CODESH_DSL",
+      "parser": "UNSUPPORTED_DSL_NEEDS_REVIEW",
+      "role": "UNREVIEWED_SOURCE_CANDIDATE"
+    }
+  ],
+  "frozen_duplicate_pairs": [
+    [
+      "COPTIC-X64",
+      "TRIAGE-10"
+    ],
+    [
+      "PALEO-CODESH",
+      "TRIAGE-02"
+    ],
+    [
+      "SEER-NEXT-COLD-PROBE",
+      "SEER-NEXT-HYBRID"
+    ]
+  ],
+  "prohibit_binary_build": true,
+  "prohibit_native_date_execution": true,
+  "automatic_independence_decision": false,
+  "soak_dispatch_authorized": false
+}
