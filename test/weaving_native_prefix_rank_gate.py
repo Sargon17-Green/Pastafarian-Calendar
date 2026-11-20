@@ -91,7 +91,14 @@ def main():
     assert observed_prefixes == prefix_reference, "Incorrect finite prefix counts"
     assert observed_invalid == {
         lengths: (len(lengths),0) for lengths in cases if len(lengths) > 1}
+    baseline_layers = int(summaries.pop("NATIVE_PREFIX_INCREMENTAL_BASELINE_LAYERS"))
+    visited_layers = int(summaries.pop("NATIVE_PREFIX_INCREMENTAL_VISITED_LAYERS"))
+    calls = int(summaries.pop("NATIVE_PREFIX_INCREMENTAL_EVALUATIONS"))
+    assert 0 < visited_layers < baseline_layers and calls > 0
     assert summaries == {
+        "NATIVE_PREFIX_INCREMENTAL_PREFIX_CHECKS":"2698",
+        "NATIVE_PREFIX_INCREMENTAL_RANK_ROUNDTRIPS":"662",
+        "NATIVE_PREFIX_INCREMENTAL_RESULT":"PASS",
         "NATIVE_PREFIX_FINITE_FAMILIES":"88",
         "NATIVE_PREFIX_FINITE_WORDS":"331",
         "NATIVE_PREFIX_FINITE_PREFIX_CHECKS":"2698",
@@ -114,6 +121,11 @@ def main():
     print("WEAVING_NATIVE_PREFIX_RSS_KIB="+str(rss))
     print("WEAVING_NATIVE_PREFIX_FULL_4244=NOT_TESTED")
     print("WEAVING_NATIVE_PREFIX_STAGE6_ACCEPTANCE=NOT_CLAIMED")
+    print("WEAVING_NATIVE_PREFIX_INCREMENTAL_BASELINE_LAYERS="+str(baseline_layers))
+    print("WEAVING_NATIVE_PREFIX_INCREMENTAL_VISITED_LAYERS="+str(visited_layers))
+    print("WEAVING_NATIVE_PREFIX_INCREMENTAL_SAVED_LAYERS="+str(baseline_layers-visited_layers))
+    print("WEAVING_NATIVE_PREFIX_INCREMENTAL_EVALUATIONS="+str(calls))
+    print("WEAVING_NATIVE_PREFIX_INCREMENTAL_RESULT=PASS")
     print("WEAVING_NATIVE_PREFIX_RESULT=PASS")
 
 if __name__ == "__main__":

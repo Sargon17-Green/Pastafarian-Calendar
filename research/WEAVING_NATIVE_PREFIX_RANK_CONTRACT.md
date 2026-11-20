@@ -15,3 +15,19 @@ Independent oracle: Python standard-library **direct multiset permutations**, or
 This is a finite **polynomial prefix-count baseline**, not an optimized incremental retained-state implementation. Rank/unrank currently recomputes prefix counts and has no bounded full-year median runtime evidence. Its 4244-symbol rank and reverse-rank status is **NOT_TESTED**; Stage 6 and Legacy witness #3 are NOT_CLAIMED. No edits to `src/`, main, releases or protected branches.
 
 Once exact Native CI passes, implement and verify reusable incremental prefix DP/state updates and reverse-adjoint block computation on bounded finite cases with the independent oracle; then two separate 4244-symbol Native median rank/unrank runs each <=180 s and <=512 MiB with dense checkpoints, FIFO witness, and SHA-256 before considering a Stage 6 contract.
+
+
+## Retained-state finite research extension (after Native finite PASS)
+Appending month symbol s leaves DP layers m < s unaffected. In this Chapel
+research implementation a tentative candidate recomputes only layers
+m >= max(2,s) and commits those rows only after selection; preceding layers are
+retained. The original full-recomputation rank/unrank remains the finite
+within-Chapel baseline. The Python oracle still directly enumerates unique
+multiset permutations (not any DP recurrence).
+
+Acceptance: Native Chapel 2.10; the original 88 finite families, 42,221
+independent unique permutations, 331 legal words, 662 retained-state
+rank/unrank checks, 2,698 retained-state prefix checks, 85 forbidden-first
+checks; strictly positive saved DP layers (report baseline/visited/evaluations),
+<90s and <=512MiB RSS. Stage6 and 4244-symbol Native rank remain NOT_TESTED.
+Dense retained tables are research-only, not a proven full-year implementation.
