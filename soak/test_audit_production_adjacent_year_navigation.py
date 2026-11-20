@@ -8,7 +8,7 @@ import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from audit_production_adjacent_year_navigation import (
     AuditError, FOUNDATION, GATE_COUNT, ORACLE_HALF_WIDTH, compare,
-    parse_transcript, EXPECTED_ROWS,
+    parse_transcript, EXPECTED_ROWS, independent_interior_targets,
 )
 
 @dataclass(frozen=True)
@@ -100,6 +100,12 @@ def valid_transcript():
             lines.append("INTERVAL\t" + str(year.number) + "\t" + kind +
                          "\t" + str(target) + "\t" +
                          "\t".join(map(str, fields(resolved))))
+    for year in neighbors:
+        for ordinal, target in enumerate(independent_interior_targets(year), 1):
+            resolved, _ = fake_geometry.find(FOUNDATION, target, None)
+            lines.append("INTERIOR_YEAR\t" + str(year.number) + "\t" +
+                         str(ordinal) + "\t" + str(target) + "\t" +
+                         "\t".join(map(str, fields(resolved))))
     assert len(lines) == EXPECTED_ROWS
     return "\n".join(lines) + "\n"
 
@@ -119,7 +125,7 @@ class AdjacentYearContractTests(unittest.TestCase):
             "find_target_transition_comparisons", "find_two_hop_transition_comparisons",
             "production_gate_limit_checks",
             "production_expanded_gate_count_checks",
-            "interval_endpoint_comparisons",
+            "interval_endpoint_comparisons", "interior_target_comparisons",
         ))
         self.assertEqual(comparisons, EXPECTED_ROWS)
         self.assertEqual(result["forward_transitions"], 1)
@@ -336,6 +342,64 @@ class AdjacentYearContractTests(unittest.TestCase):
         with self.assertRaisesRegex(AuditError, "E_INTERVAL_CASE_SET"):
             parse_transcript(changed)
 
+    def test_real_interior_target_mutation_is_detected(self):
+        target = independent_interior_targets(BASE)[1]
+        needle = f"INTERIOR_YEAR\t5000\t2\t{target}\t"
+        changed = self.text.replace(needle, f"INTERIOR_YEAR\t5000\t2\t{target + 1}\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_INTERIOR_TARGET_5000_2"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_real_interior_year_mutation_is_detected(self):
+        target = independent_interior_targets(BASE)[1]
+        needle = f"INTERIOR_YEAR\t5000\t2\t{target}\t5000"
+        changed = self.text.replace(needle, needle[:-1] + "1", 1)
+        with self.assertRaisesRegex(AuditError, "E_REAL_INTERIOR_MISMATCH_5000_2"):
+            compare(parse_transcript(changed), self.ledger, self.geometry, lambda *_: 1)
+
+    def test_duplicate_interior_ordinal_is_rejected(self):
+        changed = self.text.replace("INTERIOR_YEAR\t5000\t1\t",
+                                    "INTERIOR_YEAR\t5000\t2\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_DUPLICATE_INTERIOR_CASE"):
+            parse_transcript(changed)
+
+    def test_missing_interior_case_is_rejected(self):
+        line = next(line for line in self.text.splitlines()
+                    if line.startswith("INTERIOR_YEAR\t5000\t1\t"))
+        with self.assertRaisesRegex(AuditError, "E_TRANSCRIPT_ROW_COUNT"):
+            parse_transcript(self.text.replace(line + "\n", "", 1))
+
+    def test_out_of_range_interior_ordinal_is_rejected(self):
+        changed = self.text.replace("INTERIOR_YEAR\t5000\t1\t",
+                                    "INTERIOR_YEAR\t5000\t4\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_INTERIOR_ORDINAL"):
+            parse_transcript(changed)
+
+    def test_unexpected_interior_year_is_rejected(self):
+        changed = self.text.replace("INTERIOR_YEAR\t5000\t1\t",
+                                    "INTERIOR_YEAR\t5003\t1\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_INTERIOR_CASE_SET"):
+            parse_transcript(changed)
+
+    def test_noncanonical_interior_target_is_rejected(self):
+        needle = f"INTERIOR_YEAR\t5000\t2\t{independent_interior_targets(BASE)[1]}\t"
+        changed = self.text.replace(needle, f"INTERIOR_YEAR\t5000\t2\t+{independent_interior_targets(BASE)[1]}\t", 1)
+        with self.assertRaisesRegex(AuditError, "E_NONCANONICAL_INTEGER"):
+            parse_transcript(changed)
+
+    def test_independent_interior_sampling_collapse_is_rejected(self):
+        undersized = FakeYear(5000, 0, 1, FOUNDATION, FOUNDATION + 3)
+        with self.assertRaisesRegex(AuditError, "E_INTERIOR_SAMPLE_COLLAPSE"):
+            independent_interior_targets(undersized)
+
+    def test_all_fifteen_strict_interior_samples_are_checked(self):
+        parsed = parse_transcript(self.text)
+        result = compare(parsed, self.ledger, self.geometry, lambda *_: 1)
+        self.assertEqual(result["interior_target_comparisons"], 15)
+        self.assertEqual(result["independent_year_boundaries"], 5)
+        self.assertTrue(result["strict_internal_samples"])
+        targets = [independent_interior_targets(year) for year in
+                   (PREVIOUS2, PREVIOUS, BASE, NEXT, NEXT2)]
+        self.assertEqual(len({target for sample in targets for target in sample}), 15)
 
 if __name__ == "__main__":
     unittest.main()

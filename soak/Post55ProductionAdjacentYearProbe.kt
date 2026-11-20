@@ -1,6 +1,6 @@
 package pastafari
 
-/** Bounded production probe for two-hop navigation and 18 interval endpoints. */
+/** Bounded production probe for two-hop navigation, 18 endpoints and 15 strict interiors. */
 object Post55ProductionAdjacentYearProbe {
     private const val MAX_GATE_ABS_INDEX = 8192
     private const val GATE_HALF_WIDTH = 280
@@ -61,6 +61,27 @@ object Post55ProductionAdjacentYearProbe {
             check(resolved == expected) { "E_PRODUCTION_INTERVAL_ENDPOINT_SEMANTICS" }
             entry to resolved
         }
+        // Three non-boundary days within each of five production intervals.
+        // Independent Python checks the targets against separately derived geometry.
+        val quarterDivisor = ExactInt.of(4L)
+        val halfDivisor = ExactInt.of(2L)
+        val interiorResults = ArrayList<Pair<Triple<ProductionYearInterval, Int, ExactInt>, ProductionYearInterval>>()
+        for (year in intervals) {
+            val span = year.closeDay - year.openDay
+            val quarter = span / quarterDivisor
+            val middle = span / halfDivisor
+            val targets = listOf(year.openDay + quarter, year.openDay + middle,
+                year.closeDay - quarter)
+            check(targets[0] > year.openDay && targets[0] < targets[1] &&
+                targets[1] < targets[2] && targets[2] < year.closeDay
+            ) { "E_PRODUCTION_INTERIOR_SAMPLE_COLLAPSE" }
+            for ((position, target) in targets.withIndex()) {
+                val resolved = navigator.findTargetYear(calculationDay, target)
+                check(resolved == year) { "E_PRODUCTION_INTERIOR_YEAR_MISMATCH" }
+                interiorResults.add(Triple(year, position + 1, target) to resolved)
+            }
+        }
+        check(interiorResults.size == 15) { "E_PRODUCTION_INTERIOR_CASE_COUNT" }
         check(foundForward == next) { "E_ADJACENT_FORWARD_FIND_DISAGREES" }
         check(foundBackward == previous) { "E_ADJACENT_BACKWARD_FIND_DISAGREES" }
         check(foundForward2 == next2) { "E_TWO_HOP_FORWARD_FIND_DISAGREES" }
@@ -83,6 +104,11 @@ object Post55ProductionAdjacentYearProbe {
         println("FIND_BACKWARD2\t$backwardTarget2\t${fields(foundBackward2)}")
         for ((entry, resolved) in endpointResults) {
             println(listOf("INTERVAL", entry.first.number, entry.second, entry.third,
+                resolved.number, resolved.openGateIndex, resolved.closeGateIndex,
+                resolved.openDay, resolved.closeDay).joinToString("\t"))
+        }
+        for ((entry, resolved) in interiorResults) {
+            println(listOf("INTERIOR_YEAR", entry.first.number, entry.second, entry.third,
                 resolved.number, resolved.openGateIndex, resolved.closeGateIndex,
                 resolved.openDay, resolved.closeDay).joinToString("\t"))
         }

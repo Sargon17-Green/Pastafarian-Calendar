@@ -26,7 +26,9 @@ MAX_PRODUCTION_GATE_INDEX = 8192
 ORACLE_HALF_WIDTH = 280
 GATE_COUNT = ORACLE_HALF_WIDTH * 2 + 1
 EXPECTED_INTERVAL_CASES = 18
-EXPECTED_ROWS = GATE_COUNT + 11 + EXPECTED_INTERVAL_CASES
+EXPECTED_INTERIOR_CASES = 15
+EXPECTED_ROWS = GATE_COUNT + 11 + EXPECTED_INTERVAL_CASES + EXPECTED_INTERIOR_CASES
+EXPECTED_INTERIOR_KEYS = {(year, ordinal) for year in range(4998, 5003) for ordinal in (1, 2, 3)}
 INTERVAL_KINDS = ("AFTER_OPEN", "AT_CLOSE", "AT_OPEN", "AFTER_CLOSE")
 EXPECTED_INTERVAL_KEYS = {
     (year, kind) for year in range(4998, 5003)
@@ -34,7 +36,7 @@ EXPECTED_INTERVAL_KEYS = {
     if (kind != "AT_OPEN" or year > 4998)
     and (kind != "AFTER_CLOSE" or year < 5002)
 }
-PASS = "PASS_BOUNDED_REAL_PRODUCTION_INTERVAL_ENDPOINTS_NOT_CERTIFIED"
+PASS = "PASS_BOUNDED_REAL_PRODUCTION_INTERIOR_TARGETS_NOT_CERTIFIED"
 CANONICAL = re.compile(r"(?:0|-?[1-9][0-9]*)\Z")
 
 
@@ -58,6 +60,7 @@ def parse_transcript(raw: str) -> dict:
     observed = {
         "GATE": {},
         "INTERVAL": {},
+        "INTERIOR_YEAR": {},
         "YEAR": None,
         "NEXT": None,
         "PREVIOUS": None,
@@ -91,6 +94,15 @@ def parse_transcript(raw: str) -> dict:
             if key in observed["INTERVAL"]:
                 raise AuditError("E_DUPLICATE_INTERVAL_CASE")
             observed["INTERVAL"][key] = (target, resolved)
+        elif kind == "INTERIOR_YEAR" and len(columns) == 9:
+            year_number, ordinal, target = map(number, columns[1:4])
+            resolved = tuple(map(number, columns[4:]))
+            if ordinal not in (1, 2, 3):
+                raise AuditError("E_INTERIOR_ORDINAL")
+            key = (year_number, ordinal)
+            if key in observed["INTERIOR_YEAR"]:
+                raise AuditError("E_DUPLICATE_INTERIOR_CASE")
+            observed["INTERIOR_YEAR"][key] = (target, resolved)
         elif kind in ("YEAR", "NEXT", "PREVIOUS", "NEXT2", "PREVIOUS2") and len(columns) == 6:
             if observed[kind] is not None:
                 raise AuditError(f"E_DUPLICATE_{kind}")
@@ -115,6 +127,8 @@ def parse_transcript(raw: str) -> dict:
             raise AuditError(f"E_MISSING_{key}")
     if set(observed["INTERVAL"]) != EXPECTED_INTERVAL_KEYS:
         raise AuditError("E_INTERVAL_CASE_SET")
+    if set(observed["INTERIOR_YEAR"]) != EXPECTED_INTERIOR_KEYS:
+        raise AuditError("E_INTERIOR_CASE_SET")
     if observed["PRODUCTION_GATE_LIMIT"] != MAX_PRODUCTION_GATE_INDEX:
         raise AuditError("E_PRODUCTION_LIMIT_DRIFT")
     if observed["PRODUCTION_EXPANDED_GATES"] != GATE_COUNT:
@@ -127,6 +141,18 @@ def parse_transcript(raw: str) -> dict:
 def as_tuple(year) -> tuple[int, int, int, int, int]:
     return (year.number, year.open_index, year.close_index,
             year.open_day, year.close_day)
+
+
+def independent_interior_targets(year) -> tuple[int, int, int]:
+    """Strict internal quartile/median probes from independent interval boundaries."""
+    span = year.close_day - year.open_day
+    quarter = span // 4
+    targets = (year.open_day + quarter, year.open_day + span // 2,
+               year.close_day - quarter)
+    if not (year.open_day < targets[0] < targets[1] <
+            targets[2] < year.close_day):
+        raise AuditError("E_INTERIOR_SAMPLE_COLLAPSE")
+    return targets
 
 
 def compare(parsed: dict, ledger, geometry, selector) -> dict:
@@ -241,7 +267,35 @@ def compare(parsed: dict, ledger, geometry, selector) -> dict:
     if endpoint_count != EXPECTED_INTERVAL_CASES:
         raise AuditError("E_INTERVAL_COMPARISON_COUNT")
 
+    # All target days are derived from independent, unseeded year boundaries.
+    # This does not compare the full-date conversion or prove global independence.
+    interior_count = 0
+    expected_year_numbers = list(range(4998, 5003))
+    if [year.number for year in independent_years] != expected_year_numbers:
+        raise AuditError("E_INDEPENDENT_INTERIOR_YEAR_SET")
+    for previous, following in zip(independent_years, independent_years[1:]):
+        if (previous.close_index != following.open_index or
+                previous.close_day != following.open_day):
+            raise AuditError("E_INDEPENDENT_INTERIOR_CONTIGUITY")
+    for year in independent_years:
+        for ordinal, target in enumerate(independent_interior_targets(year), 1):
+            actual_target, actual_year = parsed["INTERIOR_YEAR"][(year.number, ordinal)]
+            if actual_target != target:
+                raise AuditError(f"E_INTERIOR_TARGET_{year.number}_{ordinal}")
+            oracle_year, transitions = geometry.find(FOUNDATION, target, selector)
+            if (oracle_year != year or transitions != abs(year.number - 5000)
+                    or transitions > 8 or not year.open_day < target < year.close_day):
+                raise AuditError(f"E_INDEPENDENT_INTERIOR_SEMANTICS_{year.number}_{ordinal}")
+            if actual_year != as_tuple(year):
+                raise AuditError(f"E_REAL_INTERIOR_MISMATCH_{year.number}_{ordinal}")
+            interior_count += 1
+    if interior_count != EXPECTED_INTERIOR_CASES:
+        raise AuditError("E_INTERIOR_COMPARISON_COUNT")
+
     return {
+        "interior_target_comparisons": interior_count,
+        "independent_year_boundaries": len(independent_years),
+        "strict_internal_samples": True,
         "interval_endpoint_comparisons": endpoint_count,
         "interior_endpoint_comparisons": 10,
         "shared_boundary_comparisons": 8,
@@ -279,7 +333,7 @@ def write_evidence(path: Path, report: dict) -> None:
 def run(jar: Path, evidence: Path, timeout: int) -> int:
     started = time.monotonic()
     report = {
-        "schema": "post55-production-interval-endpoints-unseeded-v3-two-hop",
+        "schema": "post55-production-interior-targets-unseeded-v4-five-years",
         "status": "FAIL_BOUNDED_REAL_PRODUCTION_INTERVAL_ENDPOINTS",
         "project_id": "PC-BRANCH-KOTLIN-CYMRAEG",
         "github_sha": os.environ.get("GITHUB_SHA", "UNVERIFIED_LOCAL"),
@@ -296,6 +350,8 @@ def run(jar: Path, evidence: Path, timeout: int) -> int:
         "production_expanded_gate_count_expected": GATE_COUNT,
         "real_oracle_gate_queries_expected": ORACLE_HALF_WIDTH * 2,
         "interval_endpoint_comparisons_expected": EXPECTED_INTERVAL_CASES,
+        "interior_target_comparisons_expected": EXPECTED_INTERIOR_CASES,
+        "year_boundaries_independent_expected": 5,
     }
     try:
         if type(timeout) is not int or not 60 <= timeout <= 900:
