@@ -1,0 +1,123 @@
+name: Soak v140 original weave selector schedule and historical receipt audit, no Fct
+on:
+  push:
+    branches:
+      - qa/soak-weave-selector-archive-v140
+    paths:
+      - 'soak/control/weave_selector_original_archive_v140.json'
+      - 'soak/runner/soak_weave_selector_original_archives_v140.py'
+      - 'soak/process_tests/test_soak_weave_selector_original_archives_v140.py'
+      - '.github/workflows/soak-weave-selector-archive-v140.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-only-selector-and-prior-native-archive-metadata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Prove original first mismatch stop remains and prohibit native launch APIs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast,json
+          from pathlib import Path
+          x=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert x['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for path in ('soak/runner/soak_weave_selector_original_archives_v140.py',
+                       'soak/process_tests/test_soak_weave_selector_original_archives_v140.py'):
+              t=ast.parse(Path(path).read_text(encoding='utf-8'))
+              for obj in ast.walk(t):
+                  if isinstance(obj,ast.Import):
+                      assert all(a.name.split('.')[0] not in {'subprocess','ctypes','multiprocessing','psutil'}
+                                 for a in obj.names)
+                  elif isinstance(obj,ast.ImportFrom):
+                      assert (obj.module or '').split('.')[0] not in (
+                        'subprocess','ctypes','multiprocessing','psutil')
+          print('V140_ORIGINAL_NATIVE_DISPATCH_HALT_CONFIRMED')
+          PY
+      - name: Run 22 pure tiny-family synthetic selector and archival negative controls
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+             -p 'test_soak_weave_selector_original_archives_v140.py' -v \
+             2>&1 | tee evidence/v140-tests.log
+          grep -Eq '^Ran 22 tests ' evidence/v140-tests.log
+          grep -q '^OK$' evidence/v140-tests.log
+      - name: Verify immutable successful v139 source receipt
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          from urllib.request import Request,urlopen
+          prefix='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              req=Request(prefix+path,headers={
+                'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                'Accept':'application/vnd.github+json',
+                'X-GitHub-Api-Version':'2022-11-28',
+                'User-Agent':'pastafari-soak-v140-readonly'})
+              with urlopen(req,timeout=30) as r:return json.load(r)
+          r=get('/actions/runs/44811104026')
+          assert r['id']==44811104026
+          assert r['head_sha']=='0b21e0eeb9f6bce08e5dc9a9c28bde27ea8274ea'
+          assert r['status']=='completed' and r['conclusion']=='success'
+          art=get('/actions/runs/44811104026/artifacts')
+          assert any(a['id']==14665137651
+                     and a['name']=='soak-v139-original-weave-family-static-subset-no-native'
+                     and a['digest']=='sha256:f87f1ee607b678bea94f048746c488cc276e259a7da01ac3e5e4939e4a1090cc'
+                     and a['expired'] is False for a in art['artifacts'])
+          print('V140_V139_COMPLETED_CI_RECEIPT_VERIFIED')
+          PY
+      - name: Audit exactly three historical original source receipt ZIPs by read-only API metadata
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_weave_selector_original_archives_v140.py \
+            --manifest soak/control/weave_selector_original_archive_v140.json \
+            --output evidence/v140-source-selector-original-archive-metadata.json \
+            | tee evidence/v140-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('evidence/v140-source-selector-original-archive-metadata.json').read_text())
+          s=x['pinned_original_sources']
+          t=x['tiny_non_date_selector_discriminator']
+          assert s['pinned_source_blobs']==3
+          assert s['Ada_rank_per_shifted_interior_ticket'] is True
+          assert s['Python_one_rank_for_all_legal_weavings'] is True
+          assert t['family_count_python']==20 and t['family_count_ada']==6
+          assert t['per_slot_ada_tickets']==[1,2,1,1]
+          assert t['result_python_global_rank']==[1,1,1,1,2,2,2,2]
+          assert t['result_ada_tickets']==[1,2,1,2,1,2,1,2]
+          assert t['counterfactual_global_rank_in_ada_only_family']==[1,2,1,1,2,2,1,2]
+          assert len(x['original_completed_run_artifact_metadata'])==3
+          assert x['original_archive_bytes_examined_this_execution'] is False
+          assert x['historical_zip_byte_receipts'] is None
+          assert x['real_foundation_interior_ranks_proven'] is False
+          assert x['sole_numeric_cause_proven'] is False
+          assert x['original_native_calls_new']==0
+          assert x['full_original_years_certified']==0
+          assert x['independent_algorithms_certified']==0
+          assert x['dispatch_authorized'] is False
+          print('V140_TWO_SELECTOR_SOURCE_DIFFERENCES_AND_THREE_HISTORIC_METADATA_PASS_NO_FCT')
+          PY
+      - name: Preserve source-only receipt, no new original native launch
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v140-original-selector-two-differences-and-three-witness-metadata
+          path: |
+            evidence/v140-tests.log
+            evidence/v140-summary.json
+            evidence/v140-source-selector-original-archive-metadata.json
+          if-no-files-found: warn
+          retention-days: 30
