@@ -25,3 +25,7 @@ The comparator rejects absent/duplicate/extra/malformed records, an incorrect pa
 The bounded shell runner `run_stage35_remote_eleven.sh` requires Python3, GNAT13 and `timeout`, exits nonzero on missing prerequisites or failure, caps Python selftest and comparator at 180s each and Ada execution at 600s. A new **push-only** `native-stage35-remote-eleven` Ubuntu 24.04 workflow job has a 30-minute cap. No manual dispatch or duplicate CI.
 
 This stage is NOT ACCEPTED on commit: require natural push on the precise Stage35 SHA to finish `completed/success` across **37/37 jobs** including `verify` and previous jobs, plus direct GNAT compile/bind/link and exact 139/131/125 markers, 25 unique ordered native pairs. A queued/in_progress run is neither PASS nor a blocker. No main, merge or external release.
+
+## Verified bounded acceptance — 2026-11-20
+
+Exact Stage35 source `32022e7cd24f588442b07186a37451127809b479` first natural [push run 44701116102](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44701116102): attempt 1, completed/success, 37/37 jobs including verify 136169461239. Direct GNAT13 job [136169461345](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44701116102/job/136169461345) compiled/bound/linked, with Python=139, native Ada=131, five-field differential=125 and 25 distinct ordered STAGE35_NATIVE_PAIR records. ACCEPTED for this bounded matrix only, not a general proof. No main/merge/release.
