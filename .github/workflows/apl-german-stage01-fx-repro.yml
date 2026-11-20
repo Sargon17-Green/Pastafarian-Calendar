@@ -1,0 +1,86 @@
+name: APL German native prefix identical-input reproducibility (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-stage01-fx-repro.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-repro:
+    name: native-repro-${{ matrix.count }}-attempt${{ matrix.attempt }}
+    runs-on: windows-2022
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        count: [15, 19, 20]
+        attempt: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Verify SHA-pinned native runtime and ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Verify locked five-source manifest and candidate generator
+        shell: pwsh
+        run: python -m unittest discover -s qa/nars-interface -p 'test_stage01_fx_prefix_probe.py' -v
+      - name: Execute isolated native run with bounded cutoff
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_fx_prefix.ps1 -Runtime verified_runtime -Evidence reproducibility_evidence -Count ${{ matrix.count }}
+      - name: Verify identical candidate bytes and exact native receipt
+        shell: pwsh
+        env:
+          EXPECTED_COUNT: ${{ matrix.count }}
+        run: |
+          $candidate='reproducibility_evidence/candidate.json'
+          $native='reproducibility_evidence/native_prefix_fx.json'
+          if (-not (Test-Path -LiteralPath $candidate) -or -not (Test-Path -LiteralPath $native)) { throw 'NATIVE_EVIDENCE_MISSING' }
+          $c=Get-Content -LiteralPath $candidate -Raw | ConvertFrom-Json
+          $n=Get-Content -LiteralPath $native -Raw | ConvertFrom-Json
+          $count=[int]$env:EXPECTED_COUNT
+          $sha=@{
+            15='12db1673b22e824d2c1f0fa85a02eb31ef6a1d1f1cc57190dd525d6588fe2aed'
+            19='d2bc8d9b6b8bd926f2105de9979d4ec0db3af8de0111c359c5a1556765de5278'
+            20='12553ba741f902879f4cc93bc76cc19edb94aec37aaa07dae64dfc016b874caa'
+          }
+          if ($c.fx_count -ne $count -or $c.candidate_sha256 -cne $sha[$count] -or $n.candidate_sha256 -cne $sha[$count]) {
+            throw 'IDENTICAL_INPUT_SOURCE_SHA_LOCK_FAILED'
+          }
+          Write-Output ('IDENTICAL_SOURCE_SHA_LOCK_PASS_COUNT='+$count)
+          if ($n.status -cne ('NATIVE_FX_PREFIX'+$count+'_CONFIRMED_NOT_STAGE01') -or $n.stage01 -cne 'NOT_RUN' -or $n.marker.exact -ne $true) {
+            throw ('NATIVE_REPRO_COUNT_'+$count+'_NOT_CONFIRMED')
+          }
+          Write-Output ('NATIVE_REPRO_COUNT_'+$count+'_CONFIRMED_NOT_STAGE01')
+      - name: Hash all diagnostic evidence
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force reproducibility_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem reproducibility_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName)"
+          } | Set-Content -Encoding utf8 reproducibility_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-identical-input-count${{ matrix.count }}-attempt${{ matrix.attempt }}-not-stage1
+          path: |
+            font_bootstrap_evidence/
+            reproducibility_evidence/
+            reproducibility_evidence.sha256
+          retention-days: 14
