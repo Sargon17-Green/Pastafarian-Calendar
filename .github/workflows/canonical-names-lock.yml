@@ -230,4 +230,6 @@ jobs:
           fi
           python -m pip install --disable-pip-version-check --only-binary=:all: gmpy2==2.2.1
           python test/weaving_gmpy2_backend_probe.py
+          # Separate branch-only full-year feasibility probe. Inconclusive budgets are not PASS.
+          python test/weaving_gmp_full_year_gate.py
 
