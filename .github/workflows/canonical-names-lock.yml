@@ -769,3 +769,32 @@ jobs:
         run: dart analyze
       - name: Profile six production phases with AC.1 literal oracle
         run: dart run bin/stage6_profile_components.dart
+
+  dart-hebrew-stage7-weave-hotpath:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Resolve project dependencies
+        run: dart pub get
+      - name: Check Stage7 formatting and capture repair evidence
+        shell: bash
+        run: |
+          if ! dart format --output=none --set-exit-if-changed bin/stage7_weave_hotpath_profile.dart; then
+            dart format --output=write bin/stage7_weave_hotpath_profile.dart
+            echo 'DART_CAPTURE_BEGIN:bin/stage7_weave_hotpath_profile.dart'
+            base64 -w0 bin/stage7_weave_hotpath_profile.dart
+            printf '\n'
+            echo 'DART_CAPTURE_END:bin/stage7_weave_hotpath_profile.dart'
+            exit 1
+          fi
+      - name: Analyze Dart package
+        run: dart analyze
+      - name: Attribute §V full-year count, unrank and canonical plan costs
+        run: dart run bin/stage7_weave_hotpath_profile.dart
