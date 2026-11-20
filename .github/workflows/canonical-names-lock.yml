@@ -2855,23 +2855,7 @@ jobs:
           test "$(grep -Ec '^GATE_INDEX[|]index=' gate-window-expanded-evidence/stdout.txt)" -eq 81
           test "$(grep -Ec '^GATE_WINDOW[|]i=' gate-window-expanded-evidence/stdout.txt)" -eq 75
           grep -Fxq 'GATE_WINDOWS_TOTAL: 75' gate-window-expanded-evidence/stdout.txt
-          grep -Eq '^MIN_SIX_GAP_WINDOW: [0-9]+
-          grep -Eq '^SHORT_SIX_GAP_WINDOWS: [0-9]+$' gate-window-expanded-evidence/stdout.txt
-          grep -Eq '^GATE_TARGET_PROBES: [0-8]/8$' gate-window-expanded-evidence/stdout.txt
-          grep -Eq '^SHORT_SELECTED_YEAR_INTERVALS: [0-9]+$' gate-window-expanded-evidence/stdout.txt
-          grep -Eq '^GATE_TARGET_ADMISSION_(PASS: 1/1|NONE: 0/[0-8])$' gate-window-expanded-evidence/stdout.txt
-          grep -Eq '^GATE_GAP_EVALUATIONS: [0-9]+$' gate-window-expanded-evidence/stdout.txt
-          grep -Fxq 'COMPOSITION_NOT_INVOKED: YES' gate-window-expanded-evidence/stdout.txt
-          grep -Fxq 'SCOPE=EXPANDED_GATE_WINDOW_STATIC_DISCOVERY_ONLY; COMPOSITION=NOT_RUN; FULL_DATE=NOT_RUN' gate-window-expanded-evidence/stdout.txt
-      - name: Upload gate-window discovery evidence even on failure
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lua-haitian-gate-window-expanded-evidence
-          path: gate-window-expanded-evidence/
-          retention-days: 30
-          if-no-files-found: warn
- gate-window-expanded-evidence/stdout.txt
+          grep -Eq '^MIN_SIX_GAP_WINDOW: [0-9]+$' gate-window-expanded-evidence/stdout.txt
           grep -Eq '^SHORT_SIX_GAP_WINDOWS: [0-9]+$' gate-window-expanded-evidence/stdout.txt
           grep -Eq '^GATE_TARGET_PROBES: [0-8]/8$' gate-window-expanded-evidence/stdout.txt
           grep -Eq '^SHORT_SELECTED_YEAR_INTERVALS: [0-9]+$' gate-window-expanded-evidence/stdout.txt
