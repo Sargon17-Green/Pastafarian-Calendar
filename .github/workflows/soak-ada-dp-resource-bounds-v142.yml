@@ -1,0 +1,98 @@
+name: Soak v142 Ada month weaving DP resource envelopes, synthetic only
+on:
+  push:
+    branches:
+      - qa/soak-ada-dp-complexity-v142
+    paths:
+      - 'soak/control/ada_dp_resource_bounds_v142.json'
+      - 'soak/runner/soak_ada_dp_resource_bounds_v142.py'
+      - 'soak/process_tests/test_soak_ada_dp_resource_bounds_v142.py'
+      - '.github/workflows/soak-ada-dp-resource-bounds-v142.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-locked-pure-math-capacity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate original first mismatch STOP and no native/calendar modules
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 - <<'PY'
+          import ast,json
+          from pathlib import Path
+          m=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert m['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for p in ('soak/runner/soak_ada_dp_resource_bounds_v142.py',
+                    'soak/process_tests/test_soak_ada_dp_resource_bounds_v142.py'):
+              t=ast.parse(Path(p).read_text(encoding='utf-8'))
+              for n in ast.walk(t):
+                  if isinstance(n,ast.Import):
+                      assert all(a.name.split('.')[0] not in (
+                        'subprocess','ctypes','multiprocessing','psutil','pastafari_calendar')
+                        for a in n.names)
+                  if isinstance(n,ast.ImportFrom):
+                      assert (n.module or '').split('.')[0] not in (
+                        'subprocess','ctypes','multiprocessing','psutil','pastafari_calendar')
+          print('V142_HISTORIC_ORIGINAL_FCT_DISPATCH_STOP_CONFIRMED')
+          PY
+      - name: Run 30 synthetic negative controls and mathematical capacity assertions
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_ada_dp_resource_bounds_v142.py' -v \
+            2>&1 | tee evidence/v142-tests.log
+          grep -Eq '^Ran 30 tests ' evidence/v142-tests.log
+          grep -q '^OK$' evidence/v142-tests.log
+      - name: Read original source SHA pins, accepted v141 and issue 29; synthesize no dates
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_ada_dp_resource_bounds_v142.py \
+            --manifest soak/control/ada_dp_resource_bounds_v142.json \
+            --output evidence/v142-resource-report.json \
+            | tee evidence/v142-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v142-resource-report.json').read_text())
+          b=r['analytical_upper_bounds_not_measured_full_year']
+          assert r['source']['pinned_source_blobs']==2
+          assert r['previous_CI']['status']=='completed/success'
+          assert r['previous_CI']['issue29_open'] is True
+          assert b['max_stored_H_cells']==138789
+          assert b['max_H_cell_bits_in_conservative_encoding']==32270
+          assert b['full_legal_family_global_rank_bits_unconstrained_upper']==31877
+          assert b['ranked_candidate_tests_coarse_upper']==277344
+          assert b['active_month_scans_coarse_upper']==13035168
+          assert b['full_domain_dp_not_evaluated'] is True
+          assert b['python_storage_model_upper_is_not_real_allocation_or_Ada_memory'] is True
+          a=r['only_synthetic_profiles']
+          assert [x['days'] for x in a]==[32,128,256,144]
+          assert len(a)==4
+          assert all(x['sample_global_ranks']==3 for x in a)
+          assert all(x['timing_memory_not_Ada_and_not_pass_fail_gate'] for x in a)
+          assert r['production_Ada_resource_proven'] is False
+          assert r['original_calendar_Fct_executions']==0
+          assert r['original_full_years_certified']==0
+          assert r['independent_algorithms_certified']==0
+          assert r['STOP_NEW_NATIVE_SOAK_DISPATCH'] is True
+          print('V142_ANALYTIC_ENVELOPE_PLUS_BOUNDED_SYNTHETIC_PROFILE_PASS_NO_NATIVE_FCT')
+          PY
+      - name: Retain original-source and bounded synthetic resource evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v142-original-month-DP-complexity-static-no-native
+          path: |
+            evidence/v142-tests.log
+            evidence/v142-summary.json
+            evidence/v142-resource-report.json
+          if-no-files-found: warn
+          retention-days: 30
