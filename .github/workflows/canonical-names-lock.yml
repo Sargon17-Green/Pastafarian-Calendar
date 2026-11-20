@@ -874,3 +874,46 @@ jobs:
             stage41-native-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn
+
+  stage42-all-seals-coupled-gates-preflight:
+    name: "Stage42 preflight: coupled year-gate seams under all ten seals"
+    if: github.ref == 'refs/heads/PowerShell+Tagalog'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 1657 bounded independent-oracle Stage42 preflight assertions
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($sha -cne $env:GITHUB_SHA) { throw 'Stage42 exact checkout SHA mismatch' }
+          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          if (-not (($md -contains 'CURRENT_STAGE=41') -and ($md -contains 'LAST_COMPLETED_STAGE=41') -and ($md -contains 'STAGE41_SEAL_COMMIT_NATIVE_RECHECK=PASS') -and ($md -contains 'STAGE41_SEAL_CI_RUN=44633607543') -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) { throw 'Stage42 predecessor gate mismatch' }
+          @(
+            ('STAGE42_PREFLIGHT_SHA=' + $sha),
+            ('STAGE42_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE42_SCOPE=160_ENDPOINTS_80_CALC_SEAMS_80_TARGET_SEAMS_40_MIXED_FACES_144_SEAL_PAIRS',
+            'STAGE42_EXPECTED_ASSERTIONS=1657',
+            'STAGE42_ACTIVATION=NOT_ACTIVATED',
+            'STAGE42_NATIVE_ACCEPTANCE=NOT_CLAIMED'
+          ) | Set-Content stage42-preflight-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage42-preflight-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage42.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage42 preflight failed' }
+            Write-Host ('STAGE42_PREFLIGHT_SHA=' + $sha)
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Retain Stage42 preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage42-all-seals-preflight
+          path: |
+            stage42-preflight-metadata.txt
+            stage42-preflight-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
