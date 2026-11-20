@@ -1,0 +1,88 @@
+name: Soak v129 read-only source census for 91 archived entries
+on:
+  push:
+    branches:
+      - qa/soak-source-census-v129
+    paths:
+      - 'soak/runner/soak_source_census_v129.py'
+      - 'soak/process_tests/test_soak_source_census_v129.py'
+      - 'soak/control/source_roster_archived_v21_v127.json'
+      - 'soak/control/source_roster_archived_v21_v127_provenance.json'
+      - 'soak/control/pilot_two_engine_source_locks_v001.json'
+      - '.github/workflows/soak-source-census-v129.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-only-no-calendar-execution:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Retain first-original-mismatch dispatch stop and static no-launch requirement
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import ast,json
+          root=Path('soak')
+          lock=json.loads((root/'control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for path in ('soak/runner/soak_source_census_v129.py',
+                       'soak/process_tests/test_soak_source_census_v129.py'):
+              tree=ast.parse(Path(path).read_text(encoding='utf8'))
+              for node in ast.walk(tree):
+                  if isinstance(node,ast.Import):
+                      assert all(n.name.split('.')[0] not in
+                                 {'subprocess','ctypes','multiprocessing','psutil'}
+                                 for n in node.names)
+                  if isinstance(node,ast.ImportFrom):
+                      assert ((node.module or '').split('.')[0] not in
+                              {'subprocess','ctypes','multiprocessing','psutil'})
+          print('V129_GITHUB_METADATA_ONLY_NO_CONVERTER_DISPATCH')
+          PY
+      - name: Run thirteen synthetic source and immutable-lock tests
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_source_census_v129.py' -v \
+            2>&1 | tee evidence/v129-tests.log
+          grep -Eq '^Ran 13 tests ' evidence/v129-tests.log
+          grep -q '^OK$' evidence/v129-tests.log
+      - name: Observe current GitHub source blobs for all 91 historical roster entries
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_source_census_v129.py \
+            --roster soak/control/source_roster_archived_v21_v127.json \
+            --archived-provenance soak/control/source_roster_archived_v21_v127_provenance.json \
+            --frozen-locks soak/control/pilot_two_engine_source_locks_v001.json \
+            --output evidence/v129-source-census.json \
+            | tee evidence/v129-summary.json
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          result=json.loads(Path('evidence/v129-source-census.json').read_text())
+          assert result['record_count']==91
+          assert len(result['records'])==91
+          assert not result['soak_dispatch_authorized']
+          assert result['official_years_certified']==0
+          assert result['native_date_calls']==0
+          assert not any(row['eligible_for_soak'] for row in result['records'])
+          assert set(row['record_id'] for row in result['records'])==set(
+              item['record_id'] for item in json.loads(
+                  Path('soak/control/source_roster_archived_v21_v127.json').read_text())['records'])
+          print('V129_91_SOURCE_EVIDENCE_ROWS_INVENTORIED_NO_NATIVE_SOAK')
+          PY
+      - name: Preserve offline tests and GitHub observations for audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v129-91-entry-source-census-no-native-execution
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
