@@ -1,0 +1,165 @@
+name: Soak v144 isolated Ada global wide-rank + resource probes, NO original Fct
+on:
+  push:
+    branches:
+      - qa/soak-ada-isolated-wide-rank-v144
+    paths:
+      - 'soak/control/ada_isolated_wide_rank_vectors_v144.json'
+      - 'soak/ada_port_v144/**'
+      - '.github/workflows/soak-ada-isolated-wide-rank-v144.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  GNAT-isolated-synthetic-wide-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Source and vector preflight, original STOP, independent pure-math fixture comparison
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' | tee evidence/v144-preflight.log
+          import json,re,sys
+          from pathlib import Path
+          root=Path('soak')
+          original_stop=json.loads((root/'control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert original_stop['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          manifest=json.loads((root/'control/ada_isolated_wide_rank_vectors_v144.json').read_text())
+          assert manifest['schema']=='PASTAFARI_SOAK_ADA_ISOLATED_WIDE_GLOBAL_RANK_V144/1'
+          assert manifest['purpose']=='PURE_SYNTHETIC_GNAT_BIG_INTEGER_PRECISION_AND_RESOURCE_CHECK_NO_ORIGINAL_FCT'
+          assert manifest['scientific_status']['STOP_NEW_NATIVE_SOAK_DISPATCH'] is True
+          assert manifest['scientific_status']['original_native_converter_builds']==0
+          assert manifest['scientific_status']['real_date_executions']==0
+          assert manifest['scientific_status']['original_full_years_accepted']==0
+          assert manifest['scientific_status']['production_Ada_patch_applied'] is False
+          assert manifest['bounded_Ada']['max_months']==12
+          assert manifest['bounded_Ada']['max_total_days']==256
+          assert manifest['bounded_Ada']['original_calendar_oracle_imported'] is False
+          assert manifest['bounded_Ada']['original_wide_rank_stream_not_implemented'] is True
+          assert manifest['hash_contract']['modulus_decimal']=='2305843009213693951'
+          assert manifest['hash_contract']['multiplier']==257
+          assert manifest['rank_kinds']==['one','2^127+1','floor((N+1)/2)','N']
+          groups=manifest['golden_groups']
+          assert [(g['months'],g['length'],g['total_days'],g['count_bits']) for g in groups]==[
+            (8,16,128,332),(8,32,256,713),(12,12,144,427)]
+          assert len(groups)==3 and all(len(g['hashes'])==4 for g in groups)
+          for p in sorted((root/'ada_port_v144').glob('*.ad?')):
+              text=p.read_text()
+              withs=re.findall(r'^with\s+([^;]+);',text,re.MULTILINE)
+              assert all(w.strip() in ('Ada.Numerics.Big_Numbers.Big_Integers','Ada.Text_IO',
+                        'Legal_Month_Weave_DP') for w in withs), (p,withs)
+              assert not re.search(r'\b(?:Normative_Oracle|Calendar_Date|Foundation_Day)\b',
+                '\n'.join(z for z in text.splitlines() if not z.strip().startswith('--'))),p
+          body=(root/'ada_port_v144'/'legal_month_weave_dp.adb').read_text()
+          assert 'Max_Months : constant Positive := 12;' in body
+          assert 'Max_Days   : constant Positive := 256;' in body
+          ada=(root/'ada_port_v144'/'test_legal_month_weave_wide_v144.adb').read_text()
+          assert ada.count('   Check_Family\n')==3
+          for g in groups:
+              for marker in [f'M => {g["months"]}',f'Days_Per_Month => {g["length"]}',
+                             f'Expected_Bits => {g["count_bits"]}',
+                             f'Expected_Count => "{g["count"]}"']:
+                  assert marker in ada,marker
+              for key,value in zip(['H_First','H_Wide','H_Middle','H_Last'],g['hashes']):
+                  assert f'{key} => "{value}"' in ada, (key,value)
+          sys.path.insert(0,str(root/'runner'))
+          from soak_ada_dp_resource_bounds_v142 import SyntheticDP
+          P=(1<<61)-1
+          wide=(1<<127)+1
+          for g in groups:
+              lengths=(g['length'],)*g['months']
+              dp=SyntheticDP(lengths)
+              n=dp.count()
+              assert str(n)==g['count'] and n.bit_length()==g['count_bits']
+              assert n>wide
+              assert sum(lengths)==g['total_days']
+              for rank,want_hash in zip((1,wide,(n+1)//2,n),g['hashes']):
+                  seq=dp.unrank(rank)
+                  h=0
+                  for month_id in seq:
+                      h=(h*257+month_id)%P
+                  assert str(h)==want_hash, (lengths,rank,h)
+          gold=json.loads((root/'control/ada_month_weave_rank_vectors_v141.json').read_text())
+          smalltest=(root/'ada_port_v144'/'test_legal_month_weave_dp.adb').read_text()
+          assert sum(map(lambda g:len(g['vectors']),gold['families']))==35
+          assert len(re.findall(r'^   Check \(Month_Lengths\x27\(',smalltest,re.MULTILINE))==35
+          print('V144_12_WIDE_GOLDEN_HASHES_AND_3_BIG_COUNT_DIGITS_VERIFIED_INDEPENDENT_MATH')
+          print('V144_ORIGINAL_NATIVE_SOAK_STOP_AND_IMPORT_ALLOWLIST_VERIFIED')
+          PY
+      - name: Reverify v143 completed success artifact and Issue 29 open main SHA frozen
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee evidence/v144-source-lock.log
+          import json,os
+          from urllib.request import urlopen,Request
+          repo=os.environ['GITHUB_REPOSITORY']
+          base='https://api.github.com/repos/'+repo
+          headers={'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+            'Accept':'application/vnd.github+json',
+            'X-GitHub-Api-Version':'2022-11-28',
+            'User-Agent':'pastafari-v144-qa-readonly'}
+          def get(path):
+              with urlopen(Request(base+path,headers=headers),timeout=40) as r:return json.load(r)
+          r=get('/actions/runs/44823109703')
+          assert r['status']=='completed' and r['conclusion']=='success'
+          assert r['head_sha']=='b2dedda824f5e4297b0b26ac87077d4d5c1fe3c6'
+          a=get('/actions/runs/44823109703/artifacts')
+          assert any(z['id']==14670869052 and z['expired'] is False
+             and z['digest']=='sha256:6419e1e4429c97bf9d8ff517cffb6256d1c3ccf65a806bb834982d3bd6c9b7b9'
+             for z in a['artifacts'])
+          assert get('/issues/29')['state']=='open'
+          assert get('/branches/main')['commit']['sha']=='56bc4173aae4975ded019ef5ab5a36249f1424df'
+          src=get('/contents/tests/normative_reference.py?ref=0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4')
+          assert src['sha']=='d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53'
+          print('V144_V143_ACCEPTED_GNAT_SOURCE_LOCK_VERIFIED')
+          PY
+      - name: Install GNAT 13 and GNU time strictly for isolated synthetic Ada tests
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq >/dev/null
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 time >/dev/null
+          gnatmake --version | head -n 1 | tee evidence/v144-gnat-version.log
+      - name: Compile ONLY bounded standalone Ada sources and test 35+12 vectors, collect synthetic RSS
+        run: |
+          set -euo pipefail
+          cd soak/ada_port_v144
+          trap 'rm -f ./test_legal_month_weave_dp ./test_legal_month_weave_wide_v144 ./*.ali ./*.o' EXIT
+          gnatmake -gnat2022 -gnata -O1 -o test_legal_month_weave_dp \
+            test_legal_month_weave_dp.adb 2>&1 | tee ../../evidence/v144-build-small.log
+          gnatmake -gnat2022 -gnata -O1 -o test_legal_month_weave_wide_v144 \
+            test_legal_month_weave_wide_v144.adb 2>&1 | tee ../../evidence/v144-build-wide.log
+          timeout 90s ./test_legal_month_weave_dp | tee ../../evidence/v144-small.log
+          grep -Eq '^V143_ADA_ISOLATED_GOLDEN_VECTORS= *35$' ../../evidence/v144-small.log
+          /usr/bin/time -f 'V144_SYNTHETIC_ONLY_WALL_SECONDS=%e\nV144_SYNTHETIC_ONLY_MAX_RSS_KiB=%M' \
+            -o ../../evidence/v144-resource-informational.log \
+            timeout 90s ./test_legal_month_weave_wide_v144 | tee ../../evidence/v144-wide.log
+          grep -Fx 'V144_STANDALONE_WIDE_FAMILIES=3' ../../evidence/v144-wide.log
+          grep -Fx 'V144_ADA_WIDE_GLOBAL_RANK_GOLDENS=12' ../../evidence/v144-wide.log
+          grep -Fx 'V144_ADA_EXACT_FAMILY_COUNT_BITS=332,713,427' ../../evidence/v144-wide.log
+          grep -Fx 'V144_ORIGINAL_CALENDAR_FCT_CALLS=0' ../../evidence/v144-wide.log
+          grep -Fx 'V144_PRODUCTION_ADA_PATCH_APPLIED=FALSE' ../../evidence/v144-wide.log
+          echo 'V144_GNAT_ISOLATED_WIDE_35_PLUS_12_PASS_NO_ORIGINAL_FCT' | tee ../../evidence/v144-verdict.log
+      - name: Retain only logs, not any compiled binary nor native original calendar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v144-ada-isolated-332-427-713bit-bigint-golden-logs-only
+          path: |
+            evidence/v144-preflight.log
+            evidence/v144-source-lock.log
+            evidence/v144-gnat-version.log
+            evidence/v144-build-small.log
+            evidence/v144-build-wide.log
+            evidence/v144-small.log
+            evidence/v144-wide.log
+            evidence/v144-resource-informational.log
+            evidence/v144-verdict.log
+          if-no-files-found: warn
+          retention-days: 30
