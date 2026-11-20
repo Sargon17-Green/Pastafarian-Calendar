@@ -12,7 +12,7 @@ jobs:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
       PROJECT_ID: PC-BRANCH-FALSE-ARABIC
-      SOURCE_PIN: dfa6352c88768336e4ab3317d0c540f532e3c0b7
+      SOURCE_PIN: cc39bd7007d27f00643b800338432430167dbb40
       RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
     steps:
       - uses: actions/checkout@v4
