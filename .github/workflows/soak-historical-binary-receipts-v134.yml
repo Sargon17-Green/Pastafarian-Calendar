@@ -1,0 +1,127 @@
+name: Soak v134 historical binary CI receipt audit, no original Fct
+on:
+  push:
+    branches:
+      - qa/soak-historical-binary-receipts-v134
+    paths:
+      - 'soak/control/historical_binary_receipts_index_v134.json'
+      - 'soak/runner/soak_historical_binary_receipts_v134.py'
+      - 'soak/process_tests/test_soak_historical_binary_receipts_v134.py'
+      - '.github/workflows/soak-historical-binary-receipts-v134.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  historical-receipt-metadata-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Keep original mismatch stop and reject new subprocess imports
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast,json
+          from pathlib import Path
+          x=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert x['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for path in ('soak/runner/soak_historical_binary_receipts_v134.py',
+                       'soak/process_tests/test_soak_historical_binary_receipts_v134.py'):
+              tree=ast.parse(Path(path).read_text(encoding='utf8'))
+              for n in ast.walk(tree):
+                  if isinstance(n,ast.Import):
+                      assert all(y.name.split('.')[0] not in {'subprocess','ctypes','multiprocessing','psutil'} for y in n.names)
+                  if isinstance(n,ast.ImportFrom):
+                      assert ((n.module or '').split('.')[0] not in
+                              {'subprocess','ctypes','multiprocessing','psutil'})
+          print('V134_NO_NEW_NATIVE_PROCESS_AND_DISPATCH_STOP_PASS')
+          PY
+      - name: Run fifteen synthetic historical evidence failure controls
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_historical_binary_receipts_v134.py' -v \
+            2>&1 | tee evidence/v134-tests.log
+          grep -Eq '^Ran 15 tests ' evidence/v134-tests.log
+          grep -q '^OK$' evidence/v134-tests.log
+      - name: Verify v133 frozen CI completed run and immutable artifact digest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,json
+          from urllib.request import Request,urlopen
+          base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              req=Request(base+path,headers={
+                  'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                  'Accept':'application/vnd.github+json',
+                  'X-GitHub-Api-Version':'2022-11-28',
+                  'User-Agent':'pastafari-v134-readonly-historical-ci'})
+              with urlopen(req,timeout=30) as stream:return json.load(stream)
+          run=get('/actions/runs/44733669943')
+          assert run['id']==44733669943
+          assert run['head_sha']=='53fad39f25b2298cb9e599899ff6071f511380ab'
+          assert run['status']=='completed' and run['conclusion']=='success'
+          artifacts=get('/actions/runs/44733669943/artifacts')
+          assert any(a['id']==14627247618
+            and a['name']=='soak-v133-frozen-build-graph-source-only'
+            and a['digest']=='sha256:8bfca18a1027e138b4e9e711996c605c33fac9ec51083296bd1bd7052f954ccc'
+            and not a['expired'] for a in artifacts['artifacts'])
+          print('V134_V133_ARTIFACT_AND_COMPLETED_CI_SOURCE_LOCK_PASS')
+          PY
+      - name: Download original v133 report and leave it unchanged
+        uses: actions/download-artifact@v4
+        with:
+          name: soak-v133-frozen-build-graph-source-only
+          run-id: 44733669943
+          github-token: ${{ github.token }}
+          path: evidence/v133
+      - name: Audit historic Assembly completed jobs and present artifact inventory, exact Seer SHA
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_historical_binary_receipts_v134.py \
+            --index soak/control/historical_binary_receipts_index_v134.json \
+            --v133-report evidence/v133/v133-build-graph.json \
+            --output evidence/v134-historical-binary-receipts.json \
+            | tee evidence/v134-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v134-historical-binary-receipts.json').read_text())
+          a=r['coptic'];s=r['seer']
+          assert a['historical_completed_success_run_count']==2
+          assert len(a['historical_successful_build_job_receipts'])==2
+          assert all(x['run_status']=='completed/success'
+                     and x['job_status']=='completed/success'
+                     for x in a['historical_successful_build_job_receipts'])
+          assert all(not x['linked_binary_identified']
+                     and not x['nm_symbol_table_obtained']
+                     and not x['binary_file_sha256_obtained']
+                     for x in a['historical_successful_build_job_receipts'])
+          assert s['frozen_commit_binary_sha256_attested'] is False
+          assert r['native_date_calls']==0
+          assert r['new_native_builds_or_linker_calls']==0
+          assert r['binary_identity_for_scientific_soak_certified']==0
+          assert r['original_full_years_certified']==0
+          assert not r['soak_dispatch_authorized']
+          print('V134_HISTORIC_BUILD_SUCCESS_BUT_NO_VERIFIED_BINARY_IDENTITY')
+          PY
+      - name: Preserve actual read-only historical receipt matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v134-historical-build-receipts-no-binary-certification
+          path: |
+            evidence/v134-tests.log
+            evidence/v134-summary.json
+            evidence/v134-historical-binary-receipts.json
+          if-no-files-found: warn
+          retention-days: 30
