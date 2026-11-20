@@ -921,3 +921,52 @@ jobs:
             stage42-preflight-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: warn
+
+  stage43-neighbor-year-boundary-preflight:
+    name: "Stage43 preflight: independent oracle at neighboring year gates"
+    if: github.ref == 'refs/heads/PowerShell+Tagalog'
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact-SHA Windows PowerShell 5.1 Stage43 bounded research only
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Stage43 requires Windows PowerShell 5.1' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($sha -cne $env:GITHUB_SHA) { throw 'Stage43 exact checkout SHA mismatch' }
+          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          if (-not (($md -ccontains 'CURRENT_STAGE=42') -and ($md -ccontains 'CURRENT_DISCOVERY=27') -and ($md -ccontains 'LAST_COMPLETED_STAGE=42') -and ($md -ccontains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) { throw 'Stage43 research requires sealed Stage42 without Stage43 activation' }
+          @(
+            ('PROJECT_ID=PC-BRANCH-POWERSHELL-TAGALOG'),
+            ('STAGE43_PREFLIGHT_SHA=' + $sha),
+            ('STAGE43_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            'STAGE43_SCOPE=2_CONTEXTS_4_GATES_3_OFFSETS_10_SEALS',
+            'STAGE43_PLANNED_ENDPOINTS=240',
+            'STAGE43_PLANNED_TARGET_PAIRS=160',
+            'STAGE43_PLANNED_SEAL_PAIRS=216',
+            'STAGE43_PLANNED_STRUCTURAL_GUARDS=23',
+            'STAGE43_PLANNED_ASSERTIONS=2215',
+            'STAGE43_ACTIVATION=NOT_ACTIVATED',
+            'STAGE43_STAGE_SEAL=NOT_CLAIMED'
+          ) | Set-Content stage43-preflight-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage43-preflight-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage43.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage43 bounded independent-oracle preflight failed' }
+            Add-Content -Path stage43-preflight-metadata.txt -Value 'STAGE43_PREFLIGHT_RESULT=BOUNDED_ORACLE_PASS' -Encoding UTF8
+            Write-Host ('STAGE43_PREFLIGHT_SHA=' + $sha)
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Retain Stage43 SHA-bound Windows native preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage43-neighbor-year-preflight
+          path: |
+            stage43-preflight-metadata.txt
+            stage43-preflight-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: warn
