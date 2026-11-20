@@ -11,7 +11,7 @@ $stage39Sealed = (
   (
     ($md -match '(?m)^LAST_COMPLETED_STAGE=39\s*$') -or
     (($md -match '(?m)^LAST_COMPLETED_STAGE=40\s*$') -and ($md -match '(?m)^STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or
-    (($md -match '(?m)^LAST_COMPLETED_STAGE=41\s*$') -and ($md -match '(?m)^STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))
+    ((($md -match '(?m)^LAST_COMPLETED_STAGE=41\s*$') -or (($md -match '(?m)^LAST_COMPLETED_STAGE=42\s*$') -and ($md -match '(?m)^STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))) -and ($md -match '(?m)^STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))
   ) -and
   ($md -match '(?m)^STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
   ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
