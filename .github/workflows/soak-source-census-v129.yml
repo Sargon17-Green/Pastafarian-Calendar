@@ -6,6 +6,9 @@ on:
     paths:
       - 'soak/runner/soak_source_census_v129.py'
       - 'soak/process_tests/test_soak_source_census_v129.py'
+      - 'soak/runner/soak_pinned_ci_audit_v129.py'
+      - 'soak/process_tests/test_soak_pinned_ci_audit_v129.py'
+      - 'soak/control/pinned_ci_job_evidence_index_v129.json'
       - 'soak/control/source_roster_archived_v21_v127.json'
       - 'soak/control/source_roster_archived_v21_v127_provenance.json'
       - 'soak/control/pilot_two_engine_source_locks_v001.json'
@@ -52,6 +55,14 @@ jobs:
             2>&1 | tee evidence/v129-tests.log
           grep -Eq '^Ran 13 tests ' evidence/v129-tests.log
           grep -q '^OK$' evidence/v129-tests.log
+      - name: Run thirteen synthetic pinned CI run/job evidence tests
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_pinned_ci_audit_v129.py' -v \
+            2>&1 | tee evidence/v129-pinned-ci-tests.log
+          grep -Eq '^Ran 13 tests ' evidence/v129-pinned-ci-tests.log
+          grep -q '^OK$' evidence/v129-pinned-ci-tests.log
       - name: Observe current GitHub source blobs for all 91 historical roster entries
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -77,6 +88,27 @@ jobs:
               item['record_id'] for item in json.loads(
                   Path('soak/control/source_roster_archived_v21_v127.json').read_text())['records'])
           print('V129_91_SOURCE_EVIDENCE_ROWS_INVENTORIED_NO_NATIVE_SOAK')
+          PY
+      - name: Check historical completed run and exact pinned CI job on original source commit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_pinned_ci_audit_v129.py \
+            --ci-index soak/control/pinned_ci_job_evidence_index_v129.json \
+            --frozen-locks soak/control/pilot_two_engine_source_locks_v001.json \
+            --source-census evidence/v129-source-census.json \
+            --output evidence/v129-source-ci-observations.json \
+            | tee evidence/v129-ci-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('evidence/v129-source-ci-observations.json').read_text())
+          assert x['claims_checked']==2
+          assert x['original_full_years_certified']==0
+          assert not x['soak_dispatch_authorized']
+          assert not any(r['eligible_for_soak'] for r in x['observations'])
+          print('V129_CI_JOB_STATUS_BOUND_TO_TWO_PINNED_COMMITS_NOT_SOAK')
           PY
       - name: Preserve offline tests and GitHub observations for audit
         if: always()
