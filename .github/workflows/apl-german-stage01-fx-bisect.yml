@@ -1,0 +1,74 @@
+name: APL German native FX bisect 11 13 15 18 (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-stage01-fx-bisect.yml'
+      - 'qa/nars-interface/bounded_stage01_fx_prefix.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  bisect-prefix:
+    runs-on: windows-2022
+    timeout-minutes: 7
+    strategy:
+      fail-fast: false
+      matrix:
+        count: [11, 13, 15, 18]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Provision exact runtime and ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Verify locked source and prefix generator
+        shell: pwsh
+        run: python -m unittest discover -s qa/nars-interface -p 'test_stage01_fx_prefix_probe.py' -v
+      - name: Execute bounded prefix only
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_fx_prefix.ps1 -Runtime verified_runtime -Evidence prefix_bisect_evidence -Count ${{ matrix.count }}
+      - name: Require exact native prefix receipt
+        shell: pwsh
+        env:
+          EXPECTED_COUNT: ${{ matrix.count }}
+        run: |
+          $path='prefix_bisect_evidence/native_prefix_fx.json'
+          if (-not (Test-Path -LiteralPath $path)) { throw 'NATIVE_PREFIX_RECEIPT_MISSING' }
+          $result=Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
+          $n=[int]$env:EXPECTED_COUNT
+          if ($result.fx_count -ne $n -or $result.status -cne ('NATIVE_FX_PREFIX'+$n+'_CONFIRMED_NOT_STAGE01') -or $result.marker.exact -ne $true -or $result.stage01 -cne 'NOT_RUN') {
+            throw ('NATIVE_PREFIX_'+$n+'_NOT_CONFIRMED')
+          }
+          Write-Output ('NATIVE_PREFIX_'+$n+'_PASS_NOT_STAGE1')
+      - name: Evidence manifest
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force prefix_bisect_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem prefix_bisect_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName)"
+          } | Set-Content -Encoding utf8 prefix_bisect_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-prefix${{ matrix.count }}-bisect-native-not-stage1
+          path: |
+            font_bootstrap_evidence/
+            prefix_bisect_evidence/
+            prefix_bisect_evidence.sha256
+          retention-days: 14

@@ -59,6 +59,31 @@ try {
  }
  $p.Refresh()
  $wasRunning=-not $p.HasExited
+ $r['diagnostic_screenshot']='NOT_NEEDED'
+ if($wasRunning -and -not (Test-Path -LiteralPath $marker -PathType Leaf)){
+   # Only record the isolated GitHub CI VM. Useful for Native APL errors;
+   # never include the ephemeral font, process dumps or unredacted environment.
+   try {
+     Add-Type -AssemblyName System.Drawing -ErrorAction Stop
+     Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
+     $screen=[System.Windows.Forms.Screen]::PrimaryScreen
+     if($null -eq $screen -or $screen.Bounds.Width -le 0 -or $screen.Bounds.Height -le 0){
+       $r['diagnostic_screenshot']='SCREEN_UNAVAILABLE'
+     }else{
+       $area=$screen.Bounds
+       $bitmap=New-Object System.Drawing.Bitmap($area.Width,$area.Height)
+       try {
+         $g=[System.Drawing.Graphics]::FromImage($bitmap)
+         try { $g.CopyFromScreen($area.Location,[System.Drawing.Point]::Empty,$area.Size) } finally { $g.Dispose() }
+         $bitmap.Save((Join-Path $Evidence 'prefix_native_failure_screen.png'),[System.Drawing.Imaging.ImageFormat]::Png)
+         $r['diagnostic_screenshot']='SCREEN_CAPTURED'
+       }finally{$bitmap.Dispose()}
+     }
+   }catch{
+     $r['diagnostic_screenshot']='SCREEN_CAPTURE_FAILED'
+     $r['screenshot_error_type']=$_.Exception.GetType().Name
+   }
+ }
  if($wasRunning){
    & taskkill.exe /PID $p.Id /T /F 2>&1 | Out-Null
    try{Wait-Process -Id $p.Id -Timeout 8 -ErrorAction Stop}catch{}
