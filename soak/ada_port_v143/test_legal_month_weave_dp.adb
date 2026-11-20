@@ -6,7 +6,6 @@ with Legal_Month_Weave_DP;
 --  pinned v141 rank golden vectors, NOT recomputed by an original converter.
 procedure Test_Legal_Month_Weave_DP is
    use Ada.Numerics.Big_Numbers.Big_Integers;
-   use Ada.Text_IO;
    use Legal_Month_Weave_DP;
 
    Checked : Natural := 0;
@@ -23,7 +22,7 @@ procedure Test_Legal_Month_Weave_DP is
    begin
       if Got_Count /= B (Expected_Count) or else Got_Sequence /= Expected
         or else Got_Rank /= B (R) then
-         Put_Line ("V143_ADA_GOLDEN_MISMATCH case=" & Natural'Image (Checked + 1));
+         Ada.Text_IO.Put_Line ("V143_ADA_GOLDEN_MISMATCH case=" & Natural'Image (Checked + 1));
          raise Program_Error with "isolated month weave does not match v141 golden";
       end if;
       Checked := Checked + 1;
@@ -164,7 +163,7 @@ begin
       raise Program_Error with "wrong number of fixed v141 golden vectors";
    end if;
    Check_Rejections;
-   Put_Line ("V143_ADA_ISOLATED_GOLDEN_VECTORS=" & Natural'Image (Checked));
-   Put_Line ("V143_ORIGINAL_CALENDAR_FCT_CALLS=0");
-   Put_Line ("V143_PRODUCTION_ADA_PATCH_APPLIED=FALSE");
+   Ada.Text_IO.Put_Line ("V143_ADA_ISOLATED_GOLDEN_VECTORS=" & Natural'Image (Checked));
+   Ada.Text_IO.Put_Line ("V143_ORIGINAL_CALENDAR_FCT_CALLS=0");
+   Ada.Text_IO.Put_Line ("V143_PRODUCTION_ADA_PATCH_APPLIED=FALSE");
 end Test_Legal_Month_Weave_DP;
