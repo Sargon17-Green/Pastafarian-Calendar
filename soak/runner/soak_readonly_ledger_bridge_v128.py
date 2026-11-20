@@ -49,6 +49,8 @@ def check_sqlite_rows(db: sqlite3.Connection, table: str,
 def audit(root: Path, inventory: dict, scope: dict) -> tuple[dict, dict]:
     records = validate_inventory(inventory)
     years, included = validate_scope(scope, inventory, records)
+    if root.is_symlink():
+        raise ValueError("ledger root symlink is forbidden")
     root = root.resolve(strict=True)
     for name in ("chunks", "evidence"):
         d = root / name
@@ -65,6 +67,13 @@ def audit(root: Path, inventory: dict, scope: dict) -> tuple[dict, dict]:
     scoped_ids = [r["engine_id"] for r in included]
     if original_engine_ids != scoped_ids:
         raise ValueError("v127 in-scope engine order differs from immutable v2 source plan")
+    for roster_engine, frozen_engine in zip(included, plan["engines"]):
+        if roster_engine["algorithm_id"] != frozen_engine["algorithm_id"]:
+            raise ValueError("v127 algorithm lineage differs from immutable v2 plan")
+        required_kind = ("reference" if frozen_engine["provenance"]["source_class"] == "reference"
+                         else "production_candidate")
+        if roster_engine["source_kind"] != required_kind:
+            raise ValueError("roster source kind differs from immutable v2 original class")
     if plan["years"] != years:
         raise ValueError("v127 years differ from frozen original ledger plan")
     plan_sha = hash_bytes(canonical_bytes(plan))
