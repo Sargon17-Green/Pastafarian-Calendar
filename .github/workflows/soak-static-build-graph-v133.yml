@@ -1,0 +1,121 @@
+name: Soak v133 static Coptic link and Seer include-source graph, no Fct
+on:
+  push:
+    branches:
+      - qa/soak-build-graph-v133
+    paths:
+      - 'soak/runner/soak_static_build_graph_v133.py'
+      - 'soak/process_tests/test_soak_static_build_graph_v133.py'
+      - 'soak/control/static_build_graph_v133.json'
+      - '.github/workflows/soak-static-build-graph-v133.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline-native-build-script-evidence-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Enforce permanent original Fct dispatch halt and no subprocess imports
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import ast,json
+          x=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert x['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for f in ('soak/runner/soak_static_build_graph_v133.py',
+                    'soak/process_tests/test_soak_static_build_graph_v133.py'):
+              tree=ast.parse(Path(f).read_text())
+              for n in ast.walk(tree):
+                  if isinstance(n,ast.Import):
+                      assert all(y.name.split('.')[0] not in {'subprocess','ctypes','multiprocessing','psutil'} for y in n.names)
+                  if isinstance(n,ast.ImportFrom):
+                      assert (n.module or '').split('.')[0] not in {'subprocess','ctypes','multiprocessing','psutil'}
+          print('V133_ORIGINAL_DISPATCH_STOP_CONFIRMED')
+          PY
+      - name: Run fourteen synthetic static build dependency controls
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_static_build_graph_v133.py' -v \
+            2>&1 | tee evidence/v133-tests.log
+          grep -Eq '^Ran 14 tests ' evidence/v133-tests.log
+          grep -q '^OK$' evidence/v133-tests.log
+      - name: Confirm prior successful v132 artifact identity by GitHub REST
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          from urllib.request import Request,urlopen
+          base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              r=Request(base+path,headers={
+                'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                'Accept':'application/vnd.github+json',
+                'X-GitHub-Api-Version':'2022-11-28',
+                'User-Agent':'pastafari-readonly-v133'})
+              with urlopen(r,timeout=30) as h:return json.load(h)
+          r=get('/actions/runs/44725310090')
+          assert r['id']==44725310090
+          assert r['head_sha']=='a225c84106dca0e8760d97269cf71c67769da048'
+          assert r['status']=='completed' and r['conclusion']=='success'
+          a=get('/actions/runs/44725310090/artifacts')
+          assert any(x['id']==14623058885 and
+                x['name']=='soak-v132-first-hop-static-dependency-audit-not-soak'
+                and x['digest']=='sha256:6e949b67da61bdd9e322a1b34b55ee9769f63798cbce292e0fab86a24bcfd22e'
+                and not x['expired'] for x in a['artifacts'])
+          print('V133_PINNED_V132_CI_SOURCE_RECEIPT_PASS')
+          PY
+      - name: Download original immutable v132 evidence without recomputing
+        uses: actions/download-artifact@v4
+        with:
+          name: soak-v132-first-hop-static-dependency-audit-not-soak
+          run-id: 44725310090
+          github-token: ${{ github.token }}
+          path: evidence/v132
+      - name: Source-only inspection of original Coptic and Seer build configuration
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_static_build_graph_v133.py \
+            --manifest soak/control/static_build_graph_v133.json \
+            --v132-report evidence/v132/v132-first-hop.json \
+            --output evidence/v133-build-graph.json \
+            | tee evidence/v133-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v133-build-graph.json').read_text())
+          a=r['assembly'];s=r['seer']
+          assert len(a['object_sources'])==8
+          assert len(a['extern_symbols'])==36
+          assert len(s['services'])==2
+          assert len(s['shared_core_source_sha256'])==4
+          assert a['actual_binary_verified'] is False
+          assert s['actual_compiler_flags_attested'] is False
+          assert r['native_builds_executed']==0
+          assert r['native_date_calls']==0 and r['original_full_years_certified']==0
+          assert r['independent_algorithms_certified']==0
+          assert r['soak_dispatch_authorized'] is False
+          print('V133_EIGHT_ASSEMBLY_LINK_SOURCES_AND_TWO_SEER_SCRIPTS_STATIC_ONLY')
+          PY
+      - name: Retain reproducible evidence and negative controls
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v133-frozen-build-graph-source-only
+          path: |
+            evidence/v133-tests.log
+            evidence/v133-summary.json
+            evidence/v133-build-graph.json
+          if-no-files-found: warn
+          retention-days: 30
