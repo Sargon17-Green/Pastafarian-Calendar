@@ -16,6 +16,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   source-only-no-calendar-execution:
     runs-on: ubuntu-24.04
@@ -34,7 +35,9 @@ jobs:
           lock=json.loads((root/'control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
           assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
           for path in ('soak/runner/soak_source_census_v129.py',
-                       'soak/process_tests/test_soak_source_census_v129.py'):
+                       'soak/process_tests/test_soak_source_census_v129.py',
+                       'soak/runner/soak_pinned_ci_audit_v129.py',
+                       'soak/process_tests/test_soak_pinned_ci_audit_v129.py'):
               tree=ast.parse(Path(path).read_text(encoding='utf8'))
               for node in ast.walk(tree):
                   if isinstance(node,ast.Import):
@@ -108,7 +111,10 @@ jobs:
           assert x['original_full_years_certified']==0
           assert not x['soak_dispatch_authorized']
           assert not any(r['eligible_for_soak'] for r in x['observations'])
-          print('V129_CI_JOB_STATUS_BOUND_TO_TWO_PINNED_COMMITS_NOT_SOAK')
+          for row in x['observations']:
+              assert row['ci_status']=='PINNED_COMPLETED_CI_JOB_STEPS_OBSERVED', row
+              assert row['combined_source_ci_status']=='SOURCE_LOCK_AND_HISTORICAL_CI_STATUS_OBSERVED', row
+          print('V129_TWO_HISTORICAL_CI_JOBS_SOURCE_PIN_PASS_NOT_SOAK')
           PY
       - name: Preserve offline tests and GitHub observations for audit
         if: always()
