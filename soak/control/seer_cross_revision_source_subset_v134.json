@@ -1,0 +1,67 @@
+{
+  "schema": "PASTAFARI_SOAK_SEER_CROSS_REVISION_SOURCE_SUBSET_V134/1",
+  "repo": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+  "research_frozen_commit": "866e9bbff59399310416ae25de1b664f9b6c3124",
+  "historic_ci_source_commit": "4716594fc98fa882a9401455ae56f30895518e8c",
+  "historic_ci_run_id": 42423259653,
+  "historic_ci_job_candidate_hybrid_id": 128556040187,
+  "historic_ci_run_status": "completed/success",
+  "historic_ci_candidate_and_hybrid_build_steps_completed_success": true,
+  "both_recursive_git_trees_truncated": false,
+  "source_subset": [
+    {
+      "path": "research/seer-next/scripts/build_candidate.sh",
+      "git_blob_sha1_at_both_commits": "2e238c6406097d04efc20c274e9bb4e91d5bfa3b",
+      "bytes_at_both_commits": 1228
+    },
+    {
+      "path": "research/seer-next/scripts/build_hybrid.sh",
+      "git_blob_sha1_at_both_commits": "399219bf6f8abf21db39efc3b5ae59761a1033ee",
+      "bytes_at_both_commits": 1249
+    },
+    {
+      "path": "research/seer-next/src/seer_next_engine_service.cpp",
+      "git_blob_sha1_at_both_commits": "28c4c1213483601c01d0355b60171ea8989935b6",
+      "bytes_at_both_commits": 25123
+    },
+    {
+      "path": "research/seer-next/src/seer_next_hybrid_engine_service.cpp",
+      "git_blob_sha1_at_both_commits": "ce2192613412d1fec16b08edb4289704841dc3d2",
+      "bytes_at_both_commits": 37441
+    },
+    {
+      "path": "prototype/src/seer_year_core.cpp",
+      "git_blob_sha1_at_both_commits": "09fa2b08b2468c2148a8ade436531eb594216189",
+      "bytes_at_both_commits": 6288
+    },
+    {
+      "path": "prototype/src/seer_calendar_core.cpp",
+      "git_blob_sha1_at_both_commits": "29bd8bc61eb112ea23c69e6c6c0b8818c1400207",
+      "bytes_at_both_commits": 6733
+    },
+    {
+      "path": "prototype/src/seer_calendar_core.hpp",
+      "git_blob_sha1_at_both_commits": "32b49b7003a9d5073fc26a2a0cf49fc4883d5ada",
+      "bytes_at_both_commits": 1111
+    },
+    {
+      "path": "prototype/src/seer_weave_portable.cpp",
+      "git_blob_sha1_at_both_commits": "1d203900271d97b73fee4f9960f48f8bb9df2aa5",
+      "bytes_at_both_commits": 34535
+    },
+    {
+      "path": "prototype/src/seer_weave_avx2.cpp",
+      "git_blob_sha1_at_both_commits": "752a131865bd71f948eb33ed0bb1e12ca7952d57",
+      "bytes_at_both_commits": 36084
+    }
+  ],
+  "same_file_count": 9,
+  "complete_transitive_dependency_closure_verified": false,
+  "compiler_invocation_at_frozen_commit_verified": false,
+  "binary_identity_at_frozen_commit_verified": false,
+  "native_original_Fct_attested": false,
+  "independent_algorithms_certified": 0,
+  "original_full_years_certified": 0,
+  "soak_dispatch_authorized": false,
+  "caveat": "Nine verified identical file blobs across commits are a source subset. Different repository revisions can vary in other source headers, toolchains, flags, dependencies, or workflows; no binary SHA / Fct execution certification."
+}
