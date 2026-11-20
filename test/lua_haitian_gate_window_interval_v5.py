@@ -2,9 +2,10 @@
 """Independent interval checker: consumes Lua stdout, never executes Lua."""
 import re
 import sys
+import hashlib
 from pathlib import Path
 
-def check(txt, radius):
+def check(txt, radius, seed_path=None):
     if not 6 <= radius <= 96: raise ValueError("invalid radius")
     gates, windows, values, targets = {}, {}, {}, []
     for line in txt.splitlines():
@@ -50,7 +51,29 @@ def check(txt, radius):
     for k, v in expected.items():
         if values.get(k) != v: raise ValueError("marker "+k)
     evals = int(values["GATE_GAP_EVALUATIONS"])
-    if not len(gaps) <= evals <= 200 or len(targets) > 8: raise ValueError("budget")
+    if radius == 64:
+        if seed_path is None: raise ValueError("v4 seed mandatory for radius64")
+        raw = Path(seed_path).read_bytes()
+        blob = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
+        if blob != "31f3d0d0ec125279d5fba67eb79372a812cb4dd8": raise ValueError("v4 seed git blob lock")
+        core = {}
+        for line in raw.decode("utf-8").splitlines():
+            if not line or line.startswith("#"): continue
+            m = re.fullmatch(r"(-?\d+)\s+(-?\d+)", line)
+            if not m: raise ValueError("v4 seed row")
+            i, day = map(int, m.groups())
+            if i in core: raise ValueError("duplicate v4 seed index")
+            core[i] = day
+        if set(core) != set(range(-40, 41)): raise ValueError("v4 seed range")
+        if any(gates[i] != day for i, day in core.items()): raise ValueError("v4 seed mismatch")
+        if (values.get("GATE_CORE_SEED") != "-40/40" or
+                values.get("GATE_CORE_VERIFIED_RUN") != "44715871183" or
+                values.get("GATE_CORE_SEED_BLOB") != blob):
+            raise ValueError("v4 provenance markers")
+        if not 48 <= evals <= 200: raise ValueError("new gap evaluation budget")
+    else:
+        if not len(gaps) <= evals <= 200: raise ValueError("gap evaluation budget")
+    if len(targets) > 8: raise ValueError("target budget")
     if not targets and (values.get("SHORT_SELECTED_YEAR_INTERVALS") != "0"
                         or values.get("GATE_TARGET_ADMISSION_NONE") != "0/0"):
         raise ValueError("zero-probe admission")
@@ -88,10 +111,11 @@ def selftest():
 if __name__ == "__main__":
     try:
         if len(sys.argv) == 2 and sys.argv[1] == "--selftest": selftest()
-        elif len(sys.argv) == 3:
+        elif len(sys.argv) in (3, 4):
+            seed = sys.argv[3] if len(sys.argv) == 4 else None
             print("INDEPENDENT_INTERVAL_VERIFIER: PASS gates/gaps/windows/min=" +
-                  "/".join(map(str,check(Path(sys.argv[1]).read_text(),int(sys.argv[2])))))
-        else: raise ValueError("usage: checker.py --selftest OR checker.py stdout.txt radius")
+                  "/".join(map(str,check(Path(sys.argv[1]).read_text(),int(sys.argv[2]),seed))))
+        else: raise ValueError("usage: checker.py --selftest OR checker.py stdout.txt radius [v4_seed.tsv]")
     except (ValueError, AssertionError, KeyError) as e:
         print("INDEPENDENT_INTERVAL_VERIFIER: FAIL "+str(e), file=sys.stderr)
         sys.exit(1)

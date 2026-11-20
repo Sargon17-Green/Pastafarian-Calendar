@@ -73,12 +73,49 @@ local gates, windows = {}, {}
 local tested = {}
 local attempts, selectedShort, admitted = 0, 0, nil
 
+-- v4 Native-accepted core is immutable; extend its boundaries using the same frozen
+-- normative gap oracle, instead of recomputing the 80 already attested gaps.
+local SEED_MIN, SEED_MAX = -40, 40
+local seed = {}
+local seedCount = 0
+local seedFile = assert(io.open(root .. "/test/lua_haitian_gate_window_radius40_v4_seed.tsv", "r"))
+for line in seedFile:lines() do
+    if line ~= "" and line:sub(1,1) ~= "#" then
+        local a, b = line:match("^(-?%d+)%s+(-?%d+)$")
+        assert(a and b, "invalid v4 seed line")
+        local i, day = tonumber(a), tonumber(b)
+        assert(i >= SEED_MIN and i <= SEED_MAX and seed[i] == nil,
+            "duplicate or out-of-range v4 gate")
+        seed[i] = day
+        seedCount = seedCount + 1
+    end
+end
+seedFile:close()
+assert(seedCount == 81 and seed[0] == O.FOUNDATION_DAY, "v4 seed identity")
+for i = SEED_MIN, SEED_MAX do
+    assert(seed[i] ~= nil, "v4 seed incomplete")
+    gates[i] = seed[i]
+    if i > SEED_MIN then
+        local gap = seed[i] - seed[i-1]
+        assert(gap >= O.GATE_GAP_MIN and gap <= O.GATE_GAP_MAX, "v4 seed gap")
+    end
+end
+
 O.resetGateCache()
 debug.sethook(checkBudget, "", 10000)
-
+for i = SEED_MIN - 1, SCAN_MIN, -1 do
+    checkBudget()
+    gates[i] = gates[i+1] - O.negativeGateGap(-i)
+end
+for i = SEED_MAX + 1, SCAN_MAX do
+    checkBudget()
+    gates[i] = gates[i-1] + O.positiveGateGap(i)
+end
+print("GATE_CORE_SEED: -40/40")
+print("GATE_CORE_VERIFIED_RUN: 44715871183")
+print("GATE_CORE_SEED_BLOB: 31f3d0d0ec125279d5fba67eb79372a812cb4dd8")
 for i = SCAN_MIN, SCAN_MAX do
     checkBudget()
-    gates[i] = O.ensureGateIndex(i)
     if i > SCAN_MIN then
         local gap = gates[i] - gates[i - 1]
         assert(gap >= O.GATE_GAP_MIN and gap <= O.GATE_GAP_MAX, "gate gap outside oracle bounds")
