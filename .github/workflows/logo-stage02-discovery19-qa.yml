@@ -58,3 +58,75 @@ jobs:
             exit 1
           fi
           echo 'NATIVE_STAGE_2_DISCOVERY_19_QA_VERIFICATION=PASS'
+
+  d19-qa-reverse-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact QA commit
+        uses: actions/checkout@v4
+      - name: Build pinned headless UCBLogo for reverse differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          expected=a0215433f07384e4c42fe247525867f11e6f32f7
+          actual="$(git -C "$source_dir" rev-parse HEAD)"
+          test "$actual" = "$expected"
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          binary="$RUNNER_TEMP/ucblogo-headless/bin/ucblogo"
+          test -x "$binary"
+          echo "LOGO_BIN=$binary" >> "$GITHUB_ENV"
+          echo "HEADLESS_LOGO_SOURCE_SHA=$actual"
+      - name: Generate reverse-input differential fixture with strict substitutions
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 - <<'PY'
+          from pathlib import Path
+          source_path = Path("test/stage02_discovery19_tests.logo")
+          text = source_path.read_text(encoding="utf-8")
+          ordered = "(nr.foundation) (nr.tablets)"
+          reversed_pair = "(nr.tablets) (nr.foundation)"
+          assert text.count(ordered) == 2, "two date-direction sites required"
+          text = text.replace(ordered, reversed_pair)
+          ctx_line = '  localmake "ctx monster.stage02.sauce :prefix\n'
+          assert text.count(ctx_line) == 1, "one context construction required"
+          independent_check = '  d19.require (equalp (monster.context.get :ctx "directionCount) (item 5 (nr.work.counts (nr.tablets) (nr.foundation)))) [reverse_direction_count]\n'
+          text = text.replace(ctx_line, ctx_line + independent_check)
+          assert text.count("if :D19.CHECKS <> 61") == 1
+          text = text.replace("if :D19.CHECKS <> 61", "if :D19.CHECKS <> 62")
+          Path("test/stage02_discovery19_reverse_generated.logo").write_text(text, encoding="utf-8")
+          print("D19_REVERSE_FIXTURE_GENERATED two swapped inputs, one independent workcount assertion")
+          PY
+      - name: Execute independent D19 reverse-direction QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          log="$RUNNER_TEMP/stage02-discovery19-reverse.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 1800s \
+            stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery19_reverse_generated.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::D19 reverse Native failed or timed out, exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_19_CASES_PASIS 17' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_19_CHECKS_PASIS 62' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_19_PASIS' "$log"
+          if grep -Eq 'STAGE_2_DISCOVERY_19_.*FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs' "$log"; then
+            echo "::error::D19 reverse QA failure marker"
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_19_REVERSE_QA_VERIFICATION=PASS'
