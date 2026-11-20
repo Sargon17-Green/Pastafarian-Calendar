@@ -1406,18 +1406,24 @@ jobs:
           timeout 60s php -d memory_limit=512M tests/stage56_actual_year_profile_cli_contract_tests.php \
             > stage56-b5-evidence/cli-stdout.txt 2> stage56-b5-evidence/cli-stderr.txt
           cli_code=$?
-          printf 'lint_profiler=%s\nlint_preflight=%s\nlint_cli=%s\nexit=%s\ncli_exit=%s\n' "$l1" "$l2" "$l3" "$code" "$cli_code" > stage56-b5-evidence/exit.txt
-          cat stage56-b5-evidence/lint-*.txt stage56-b5-evidence/stdout.txt stage56-b5-evidence/cli-stdout.txt
-          if (( l1 != 0 || l2 != 0 || l3 != 0 || code != 0 || cli_code != 0 )); then
-            cat stage56-b5-evidence/stderr.txt stage56-b5-evidence/cli-stderr.txt >&2
+          python3 -m py_compile tests/stage56_b5_source_binding_audit.py > stage56-b5-evidence/binding-compile.txt 2>&1
+          binding_compile=$?
+          timeout 60s python3 tests/stage56_b5_source_binding_audit.py --self-test \
+            > stage56-b5-evidence/binding-stdout.txt 2> stage56-b5-evidence/binding-stderr.txt
+          binding_code=$?
+          printf 'lint_profiler=%s\nlint_preflight=%s\nlint_cli=%s\nexit=%s\ncli_exit=%s\nbinding_compile=%s\nbinding_exit=%s\n' "$l1" "$l2" "$l3" "$code" "$cli_code" "$binding_compile" "$binding_code" > stage56-b5-evidence/exit.txt
+          cat stage56-b5-evidence/lint-*.txt stage56-b5-evidence/stdout.txt stage56-b5-evidence/cli-stdout.txt stage56-b5-evidence/binding-stdout.txt
+          if (( l1 != 0 || l2 != 0 || l3 != 0 || code != 0 || cli_code != 0 || binding_compile != 0 || binding_code != 0 )); then
+            cat stage56-b5-evidence/stderr.txt stage56-b5-evidence/cli-stderr.txt stage56-b5-evidence/binding-stderr.txt stage56-b5-evidence/binding-compile.txt >&2
             exit 1
           fi
-          if [[ -s stage56-b5-evidence/stderr.txt || -s stage56-b5-evidence/cli-stderr.txt ]]; then
-            cat stage56-b5-evidence/stderr.txt stage56-b5-evidence/cli-stderr.txt >&2
+          if [[ -s stage56-b5-evidence/stderr.txt || -s stage56-b5-evidence/cli-stderr.txt || -s stage56-b5-evidence/binding-stderr.txt || -s stage56-b5-evidence/binding-compile.txt ]]; then
+            cat stage56-b5-evidence/stderr.txt stage56-b5-evidence/cli-stderr.txt stage56-b5-evidence/binding-stderr.txt stage56-b5-evidence/binding-compile.txt >&2
             exit 1
           fi
           grep -Fx 'STAGE56_B5_PREFLIGHT checks=16 synthetic_structure_only=YES provenance=NOT_VERIFIED status=PASS' stage56-b5-evidence/stdout.txt
           grep -Fx 'STAGE56_B5_CLI_NEGATIVE checks=12 real_year_profiles=0 provenance=NOT_VERIFIED status=PASS' stage56-b5-evidence/cli-stdout.txt
+          grep -Fx 'STAGE56_B5_SOURCE_BINDING_SELF_TEST checks=19 synthetic_only=YES status=PASS' stage56-b5-evidence/binding-stdout.txt
       - name: Retain SHA-bound B5 preflight evidence
         if: always()
         uses: actions/upload-artifact@v4

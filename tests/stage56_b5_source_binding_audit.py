@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -84,6 +85,16 @@ def git_file(repo: Path, commit: str, path: str) -> bytes:
     return git(repo, 'show', f'{commit}:{path}')
 
 
+def verify_worktree_file(repo: Path, relative_path: str, pinned_sha256: str) -> None:
+    """Reject a dirty, missing or symlinked checkout despite a pinned Git blob."""
+    current = repo.resolve(strict=True)
+    for segment in relative_path.split('/'):
+        current = current / segment
+        require(not current.is_symlink(), 'WORKTREE_SYMLINK')
+    require(current.is_file(), 'WORKTREE_FILE_MISSING')
+    require(sha256(current.read_bytes()) == pinned_sha256, 'WORKTREE_BYTES_MISMATCH')
+
+
 def verify(export_bytes: bytes, export_pin: str, repo: Path, commit: str,
            provider_path: str, provider_pin: str, anchor_path: str,
            anchor_pin: str) -> None:
@@ -114,6 +125,8 @@ def verify(export_bytes: bytes, export_pin: str, repo: Path, commit: str,
     anchor_bytes = git_file(repo, commit, anchor_path)
     require(sha256(provider_bytes) == provider_pin, 'PROVIDER_BLOB_MISMATCH')
     require(sha256(anchor_bytes) == anchor_pin, 'ANCHOR_BLOB_MISMATCH')
+    verify_worktree_file(repo, provider_path, provider_pin)
+    verify_worktree_file(repo, anchor_path, anchor_pin)
 
     anchor = parse_json(anchor_bytes)
     require(isinstance(anchor, dict) and set(anchor) == {'number', 'open_gate_day'}
@@ -146,7 +159,8 @@ def self_test() -> None:
         (repo / 'canonical').mkdir()
         provider_path = 'src/YearStructureProvider.php'
         anchor_path = 'canonical/year5000_anchor.json'
-        (repo / provider_path).write_bytes(b'<?php // synthetic self-test only\n')
+        provider_bytes = b'<?php // synthetic self-test only\n'
+        (repo / provider_path).write_bytes(provider_bytes)
         anchor_bytes = b'{"number":5000,"open_gate_day":252}\n'
         (repo / anchor_path).write_bytes(anchor_bytes)
         run('git', '-C', tmp, 'init', '-q')
@@ -211,8 +225,33 @@ def self_test() -> None:
         reject('SOURCE_CLAIM_MISMATCH', data=encode(mutation))
         dup = good.replace(b'"project_id":', b'"project_id":"DUPLICATE", "project_id":', 1)
         reject('DUPLICATE_JSON_KEY', data=dup)
-        require(count == 15, 'SELFTEST_CASE_COUNT')
-        print('STAGE56_B5_SOURCE_BINDING_SELF_TEST checks=15 synthetic_only=YES status=PASS')
+        # Pinned committed bytes must not conceal changed checkout bytes.
+        (repo / provider_path).write_bytes(b'<?php // synthetic dirty worktree\n')
+        reject('WORKTREE_BYTES_MISMATCH')
+        (repo / provider_path).write_bytes(provider_bytes)
+        (repo / anchor_path).write_bytes(b'{"number":5000,"open_gate_day":253}\n')
+        reject('WORKTREE_BYTES_MISMATCH')
+        (repo / anchor_path).write_bytes(anchor_bytes)
+
+        # POSIX: reject symlinks even if the target bytes match the Git blob.
+        if os.name != 'nt':
+            (repo / 'canonical/provider-copy.php').write_bytes(provider_bytes)
+            (repo / provider_path).unlink()
+            (repo / provider_path).symlink_to('../canonical/provider-copy.php')
+            reject('WORKTREE_SYMLINK')
+            (repo / provider_path).unlink()
+            (repo / provider_path).write_bytes(provider_bytes)
+
+            (repo / 'canonical/anchor-copy.json').write_bytes(anchor_bytes)
+            (repo / anchor_path).unlink()
+            (repo / anchor_path).symlink_to('anchor-copy.json')
+            reject('WORKTREE_SYMLINK')
+            (repo / anchor_path).unlink()
+            (repo / anchor_path).write_bytes(anchor_bytes)
+
+        expected = 19 if os.name != 'nt' else 17
+        require(count == expected, 'SELFTEST_CASE_COUNT')
+        print(f'STAGE56_B5_SOURCE_BINDING_SELF_TEST checks={count} synthetic_only=YES status=PASS')
 
 
 def main(argv: list[str]) -> int:
