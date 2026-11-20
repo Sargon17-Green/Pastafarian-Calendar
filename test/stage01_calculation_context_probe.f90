@@ -16,26 +16,32 @@ program stage01_calculation_context_probe
   type(BigInt) :: foundation, calculation_day, target_day
   type(CalendarDateResult) :: actual
   character(len=16) :: argument
-  integer :: case_index, status
+  integer :: case_index, status, step, steps
 
-  if (command_argument_count() /= 1) error stop 'provide one calculation-context case 1..14'
-  call get_command_argument(1, argument, status=status)
-  if (status /= 0) error stop 'cannot read calculation-context case'
-  read(argument, *, iostat=status) case_index
-  if (status /= 0) error stop 'invalid calculation-context case'
-  if (case_index < 1 .or. case_index > 14) error stop 'calculation-context case out of range'
-
+  steps = command_argument_count()
+  if (steps < 1 .or. steps > 6) error stop 'provide 1..6 calculation-context cases'
   foundation = foundation_day()
-  calculation_day = bi_add_small(foundation, calculation_offsets(case_index))
-  target_day = bi_add_small(foundation, target_offsets(case_index))
+  ! Reset exactly once: subsequent contexts must reuse the same process state.
   call reset_gate_cache()
-  actual = normative_calendar_date(calculation_day, target_day)
+  do step = 1, steps
+     call get_command_argument(step, argument, status=status)
+     if (status /= 0) error stop 'cannot read calculation-context case'
+     read(argument, *, iostat=status) case_index
+     if (status /= 0) error stop 'invalid calculation-context case'
+     if (case_index < 1 .or. case_index > 14) error stop 'calculation-context case out of range'
 
-  write(*, '(A,I0)') 'STAGE01_CONTEXT_CASE=', case_index
-  write(*, '(A,A)') 'STAGE01_CONTEXT_CALCULATION_DAY=', trim(bi_to_string(calculation_day))
-  write(*, '(A,A)') 'STAGE01_CONTEXT_TARGET_DAY=', trim(bi_to_string(target_day))
-  write(*, '(A,A,A,I0,A,I0,A,I0,A,I0)') &
-       'STAGE01_CONTEXT_FIELDS=', trim(bi_to_string(actual%yearNumber)), ',', &
-       actual%cutletCanonicalIndex, ',', actual%dayInCutlet, ',', &
-       actual%monthCanonicalIndex, ',', actual%dayInMonth
+     calculation_day = bi_add_small(foundation, calculation_offsets(case_index))
+     target_day = bi_add_small(foundation, target_offsets(case_index))
+     actual = normative_calendar_date(calculation_day, target_day)
+
+     ! The one-case protocol remains byte-for-byte compatible with existing QA.
+     if (steps > 1) write(*, '(A,I0)') 'STAGE01_CONTEXT_SEQ_STEP=', step
+     write(*, '(A,I0)') 'STAGE01_CONTEXT_CASE=', case_index
+     write(*, '(A,A)') 'STAGE01_CONTEXT_CALCULATION_DAY=', trim(bi_to_string(calculation_day))
+     write(*, '(A,A)') 'STAGE01_CONTEXT_TARGET_DAY=', trim(bi_to_string(target_day))
+     write(*, '(A,A,A,I0,A,I0,A,I0,A,I0)') &
+          'STAGE01_CONTEXT_FIELDS=', trim(bi_to_string(actual%yearNumber)), ',', &
+          actual%cutletCanonicalIndex, ',', actual%dayInCutlet, ',', &
+          actual%monthCanonicalIndex, ',', actual%dayInMonth
+  end do
 end program stage01_calculation_context_probe
