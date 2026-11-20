@@ -17,6 +17,30 @@ function stage56B5Sha(mixed $value): bool
     return is_string($value) && preg_match('/\A[a-f0-9]{64}\z/iD', $value) === 1;
 }
 
+/**
+ * Mirror the independent Git-byte audit's conservative source path policy.
+ * This is a structural filter, NOT proof of production provenance.
+ */
+function stage56B5SafeProviderPath(mixed $value): bool
+{
+    if (!is_string($value) || $value === '' || str_contains($value, '\\') ||
+        str_contains($value, "\0")) {
+        return false;
+    }
+    $parts = explode('/', $value);
+    if (count($parts) < 2 || $parts[0] !== 'src' ||
+        !str_ends_with($value, '.php')) {
+        return false;
+    }
+    foreach ($parts as $part) {
+        if (in_array($part, ['', '.', '..'], true) ||
+            in_array(strtolower($part), ['tests', 'fixtures', 'oracle'], true)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 /** @return array<int, array<string, mixed>> keyed by year */
 function stage56B5Validate(array $input): array
 {
@@ -25,9 +49,7 @@ function stage56B5Validate(array $input): array
     }
     $source = $input['source'] ?? null;
     if (!is_array($source) || ($source['kind'] ?? null) !== 'production_export' ||
-        !is_string($source['provider_path'] ?? null) ||
-        trim($source['provider_path']) === '' ||
-        preg_match('~(^|[/\\\\])(tests|fixtures|oracle)([/\\\\]|$)~i', $source['provider_path']) ||
+        !stage56B5SafeProviderPath($source['provider_path'] ?? null) ||
         !is_string($source['source_commit'] ?? null) ||
         preg_match('/\A[a-f0-9]{40}\z/iD', $source['source_commit']) !== 1 ||
         !stage56B5Sha($source['provider_sha256'] ?? null) ||

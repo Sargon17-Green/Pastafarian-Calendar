@@ -56,6 +56,15 @@ $mutate = static function (callable $fn, string $expected) use ($good, &$checks)
 $mutate(static function (&$v) {$v['project_id'] = 'WRONG';}, 'PROJECT');
 $mutate(static function (&$v) {$v['source']['kind'] = 'fixture';}, 'SOURCE_CLAIM');
 $mutate(static function (&$v) {$v['source']['provider_path'] = 'tests/oracle/Provider.php';}, 'SOURCE_CLAIM');
+$mutate(static function (&$v) {$v['source']['provider_path'] = 'src/../Provider.php';}, 'SOURCE_CLAIM');
+$mutate(static function (&$v) {$v['source']['provider_path'] = 'src/./Provider.php';}, 'SOURCE_CLAIM');
+$mutate(static function (&$v) {$v['source']['provider_path'] = 'src//Provider.php';}, 'SOURCE_CLAIM');
+$mutate(static function (&$v) {$v['source']['provider_path'] = '/tmp/Provider.php';}, 'SOURCE_CLAIM');
+$mutate(static function (&$v) {$v['source']['provider_path'] = 'lib/Provider.php';}, 'SOURCE_CLAIM');
+$mutate(static function (&$v) {$v['source']['provider_path'] = 'src\Provider.php';}, 'SOURCE_CLAIM');
+$mutate(static function (&$v) {$v['source']['provider_path'] = 'src/Provider.txt';}, 'SOURCE_CLAIM');
+$mutate(static function (&$v) {$v['source']['provider_path'] = 'src/MiXeD/FiXtUrEs/Provider.php';}, 'SOURCE_CLAIM');
+$mutate(static function (&$v) {$v['source']['provider_path'] = "src/Provider.php\0";}, 'SOURCE_CLAIM');
 $mutate(static function (&$v) {$v['source']['provider_sha256'] = 'bad';}, 'SOURCE_CLAIM');
 $mutate(static function (&$v) {$v['year5000_anchor']['number'] = 4999;}, 'ANCHOR');
 $mutate(static function (&$v) {$v['year5000_anchor']['open_gate_day']++;}, 'ANCHOR_MISMATCH');
@@ -71,7 +80,7 @@ $mutate(static function (&$v) {
     $v['years'][0]['month_weaving'][0] = 2;
     $v['years'][0]['month_weaving'][1] = 1;
 }, 'MONTH_ORDER');
-if ($checks !== 16) {
+if ($checks !== 25) {
     throw new RuntimeException('STAGE56_B5_CHECK_COUNT');
 }
 echo "STAGE56_B5_PREFLIGHT checks=$checks synthetic_structure_only=YES provenance=NOT_VERIFIED status=PASS\n";
