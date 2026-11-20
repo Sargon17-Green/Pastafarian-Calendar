@@ -63,7 +63,7 @@ for bad=[0 50]
  end
  assert(rejected,'Stage55:InvalidPosition');
 end
-fprintf('STAGE55_FORTY_NINTH_NATIVE_PASS STEPS=48 REMAINING=4196 LETTER=%d SELECT_SEC=%.3f RECOUNT_SEC=%.3f REJECTED=2\n',letter,selectionSeconds,recountSeconds);
+fprintf('STAGE55_FORTY_NINTH_NATIVE_PASS STEPS=%d REMAINING=%d LETTER=%d SELECT_SEC=%.3f RECOUNT_SEC=%.3f REJECTED=2\n',after.stepsComputed,sum(after.remaining),letter,selectionSeconds,recountSeconds);
 fprintf('STAGE55_FULL_YEAR_CANONICAL_ORACLE_NOT_VERIFIED\n');
 fprintf('STAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED\n');
 fprintf('STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED\n');
