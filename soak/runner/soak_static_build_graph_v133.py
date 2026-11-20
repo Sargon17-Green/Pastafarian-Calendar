@@ -90,7 +90,7 @@ def assembly(g,row):
         txt,proof=g.read(mapper[obj])
         for symbol in globals_of(txt): providers[symbol].append(obj)
         sources.append({"object":obj,"source":mapper[obj],"sha256":proof["source_sha256"],"nm_verified":False})
-    externs=sorted(set(re.findall(r"(?m)^\\s*\\.extern\\s+([A-Za-z_.$][A-Za-z0-9_.$]*)",entry)))
+    externs=sorted(set(re.findall(r"(?m)^\s*\.extern\s+([A-Za-z_.$][A-Za-z0-9_.$]*)",entry)))
     observations=[{"symbol":name,"declared_in_objects":sorted(providers.get(name,[])),
         "status":"NO_DECLARED_PROVIDER" if not providers.get(name) else "MULTIPLE_DECLARED_PROVIDERS" if len(providers[name])>1 else "ONE_DECLARED_PROVIDER_NOT_LINKER_VERIFIED",
         "nm_verified":False} for name in externs]
@@ -141,7 +141,7 @@ def main():
     a=p.parse_args()
     r=run(parse_json(a.manifest.read_bytes()),parse_json(a.v132_report.read_bytes()),
           GitHubReadOnly(os.environ.get("GITHUB_TOKEN","")))
-    with a.output.open("xb") as f:f.write(canonical(r)+b"\\n")
+    with a.output.open("xb") as f:f.write(canonical(r)+b"\n")
     print(json.dumps({"object_count":len(r["assembly"]["object_sources"]),
       "extern_count":len(r["assembly"]["extern_symbols"]),
       "extern_status":r["assembly"]["extern_status_counts"],
