@@ -93,6 +93,20 @@ def verify_pin(repo: Path, witness_commit: str, witness_path: str,
         raise ProvenanceError("pinned path did not exist in the proposed revision") from exc
     if actual_blob != witness_blob or git(repo, "cat-file", "-t", actual_blob) != "blob":
         raise ProvenanceError("source blob SHA differs from pinned Git object")
+    # Git symlinks (mode 120000) also have blob objects. A matching blob
+    # and source-looking path are insufficient: require a regular tree entry.
+    # -z and exact path equality prevent ambiguous pathspec/wildcard matches.
+    raw_tree = git(repo, "ls-tree", "-r", "-z", "--full-tree",
+                   witness_commit, "--", witness_path)
+    matching = []
+    for record in raw_tree.split("\0"):
+        metadata, separator, path = record.partition("\t")
+        if separator and path == witness_path:
+            matching.append(metadata.split())
+    if (len(matching) != 1 or len(matching[0]) != 3
+            or matching[0][0] not in ("100644", "100755")
+            or matching[0][1:] != ["blob", witness_blob]):
+        raise ProvenanceError("historical Rust witness is not a regular Git tree blob")
     return {
         "project_id": "PC-BRANCH-RUST-AZERBAIJANI",
         "source_pin_eligible": True,

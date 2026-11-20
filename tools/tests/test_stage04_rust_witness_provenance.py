@@ -145,5 +145,50 @@ class TestRustWitnessProvenance(unittest.TestCase):
             self.check(commit="abc123")
 
 
+    def test_rejects_symlink_git_tree_blob_despite_matching_sha(self):
+        # Git mode 120000 is a *blob*, but never a production Rust source file.
+        # Construct the entry directly in the index; works without OS symlink rights.
+        self.git("checkout", "-qb", "symlink_fixture", self.a)
+        self.addCleanup(lambda: self.git("checkout", "-q", "main"))
+        pointer = self.repo / "synthetic_symlink_target.txt"
+        pointer.write_text("lib.rs", encoding="utf-8")
+        link_blob = self.git("hash-object", "-w", "synthetic_symlink_target.txt")
+        pointer.unlink()
+        self.git("update-index", "--add", "--cacheinfo",
+                 f"120000,{link_blob},src/symlink_witness.rs")
+        self.git("commit", "-qm", "synthetic pre-stage3 symlink")
+        witness = self.git("rev-parse", "HEAD")
+        self.assertEqual(self.git("rev-parse", witness + ":src/symlink_witness.rs"), link_blob)
+        self.assertEqual(self.git("cat-file", "-t", link_blob), "blob")
+        stage3 = self.commit({"SYMLINK_STAGE3.txt": "closure\n"})
+        stage4 = self.commit({"SYMLINK_STAGE4.txt": "introduction\n"})
+        head = self.commit({"SYMLINK_HEAD.txt": "head\n"})
+        with patch.multiple(provenance, CANONICAL_STAGE3_CLOSURE=stage3,
+                            CANONICAL_STAGE4_INTRODUCTION=stage4):
+            with self.assertRaisesRegex(ProvenanceError, "regular Git tree blob"):
+                verify_pin(self.repo, witness, "src/symlink_witness.rs", link_blob,
+                           stage3, stage4, head)
+
+    def test_accepts_executable_regular_git_tree_blob(self):
+        # 100755 is a regular blob, unlike symlink mode 120000.
+        self.git("checkout", "-qb", "executable_fixture", self.a)
+        self.addCleanup(lambda: self.git("checkout", "-q", "main"))
+        self.git("update-index", "--chmod=+x", "src/lib.rs")
+        self.git("commit", "-qm", "synthetic executable regular Rust file")
+        witness = self.git("rev-parse", "HEAD")
+        blob = self.git("rev-parse", witness + ":src/lib.rs")
+        stage3 = self.commit({"EXEC_STAGE3.txt": "closure\n"})
+        stage4 = self.commit({"EXEC_STAGE4.txt": "introduction\n"})
+        head = self.commit({"EXEC_HEAD.txt": "head\n"})
+        with patch.multiple(provenance, CANONICAL_STAGE3_CLOSURE=stage3,
+                            CANONICAL_STAGE4_INTRODUCTION=stage4):
+            result = verify_pin(self.repo, witness, "src/lib.rs", blob,
+                                stage3, stage4, head)
+        self.assertTrue(result["source_pin_eligible"])
+        self.assertFalse(result["historical_day_tag_route_proven"])
+        self.assertFalse(result["observed_runtime_red"])
+        self.assertEqual(result["stage04_closure"], "NOT_CLAIMED")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -62,7 +62,7 @@ jobs:
           cat evidence/stage04_tsv_protocol_tests.txt
           grep -Fq 'Ran 6 tests' evidence/stage04_tsv_protocol_tests.txt
           grep -Fxq 'OK' evidence/stage04_tsv_protocol_tests.txt
-      - name: Verify pinned historical Rust source eligibility (14 unit gates, no RED inference)
+      - name: Verify pinned historical Rust source eligibility (16 unit gates, no RED inference)
         shell: bash
         run: |
           set -euo pipefail
@@ -71,7 +71,7 @@ jobs:
             python3 -m unittest discover -s tools/tests -p 'test_stage04_rust_witness_provenance.py' -v \
             > evidence/stage04_provenance_tests.txt 2>&1
           cat evidence/stage04_provenance_tests.txt
-          grep -Fq 'Ran 14 tests' evidence/stage04_provenance_tests.txt
+          grep -Fq 'Ran 16 tests' evidence/stage04_provenance_tests.txt
           grep -Fxq 'OK' evidence/stage04_provenance_tests.txt
           timeout --signal=TERM --kill-after=5s 25s \
             python3 tools/stage04_rust_witness_provenance.py \
@@ -84,7 +84,7 @@ jobs:
               --branch-head "$GITHUB_SHA" \
               > evidence/stage04_source_pin.json
           python3 -c 'import json; p=json.load(open("evidence/stage04_source_pin.json")); assert p["source_pin_eligible"] is True and p["historical_day_tag_route_proven"] is False and p["observed_runtime_red"] is False and p["stage04_closure"] == "NOT_CLAIMED"'
-          printf 'STAGE04_PROVENANCE_QA=14_PASS\nSTAGE04_HISTORICAL_RUST_ROUTE=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/stage04_provenance_result.txt
+          printf 'STAGE04_PROVENANCE_QA=16_PASS\nSTAGE04_HISTORICAL_RUST_ROUTE=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/stage04_provenance_result.txt
           cat evidence/stage04_provenance_result.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Verify Stage04 historical Rust day-tag callability (16 controls, synthetic native positive)
         shell: bash
