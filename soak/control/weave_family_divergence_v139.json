@@ -1,0 +1,99 @@
+{
+  "schema": "PASTAFARI_SOAK_STATIC_WEAVE_FAMILY_DIVERGENCE_V139/1",
+  "purpose": "STATIC_SOURCE_FAMILY_DISCRIMINATOR_NOT_PROOF_OF_ALL_FIRST_MISMATCH_CAUSES",
+  "repository": "Sargon17-Green/Pastafarian-Calendar",
+  "ada": {
+    "commit": "a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72",
+    "files": {
+      "src/month_weaving.adb": "9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef",
+      "src/normative_oracle.adb": "923733d4f8face03586aee304640bf7540c28b4c",
+      "tests/stage14_real_oracle.py": "0922f5cbb32697106d4537463e56f7edb74e3355",
+      "tests/stage14_real_differential.py": "44a38a1a8d9fac1bf2f454c2828a8545cd0e1d5b"
+    }
+  },
+  "python_original": {
+    "commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "files": {
+      "tests/normative_reference.py": "d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53",
+      "src/pastafari_calendar/legacy_month_weaving.py": "b07103088c853f61eafa135eaac3142d58b096d7"
+    }
+  },
+  "observed_original_Fct": {
+    "c": -15055671,
+    "t": -15055671,
+    "python_turkish": [
+      5000,
+      10,
+      503,
+      20,
+      56
+    ],
+    "typescript_marathi": [
+      5000,
+      10,
+      503,
+      20,
+      56
+    ],
+    "fortran_english": [
+      5000,
+      10,
+      503,
+      20,
+      56
+    ],
+    "ada_telugu": [
+      5000,
+      10,
+      503,
+      30,
+      52
+    ],
+    "first_different_field": "month_index",
+    "source": "issue_29_original_native_provenance"
+  },
+  "mathematical_family_scope": {
+    "month_lengths": [
+      4,
+      4
+    ],
+    "month_count": 2,
+    "total_days": 8,
+    "python_legal_count": 20,
+    "ada_two_rail_count": 6,
+    "python_valid_ada_forbidden_example": [
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      2,
+      2
+    ],
+    "ada_rail_first_ids": [
+      1,
+      2
+    ],
+    "ada_rail_last_ids": [
+      1,
+      2
+    ],
+    "python_allows_interleaved_opens_and_closes": true,
+    "ada_requires_fixed_all_opening_prefix_and_all_closing_suffix": true,
+    "counts_are_small_model_not_original_Fct_source_execution": true
+  },
+  "local_ada_provisional_oracle_has_same_ada_foundation": [
+    5000,
+    10,
+    503,
+    30,
+    52
+  ],
+  "no_original_native_runs": true,
+  "no_original_10000_years_certified": true,
+  "scientific_soak_dispatch_authorized": false,
+  "year_10000_pass": false,
+  "independent_algorithms_certified": 0,
+  "not_proven_that_rail_only_explains_foundation_numeric_difference": true
+}
