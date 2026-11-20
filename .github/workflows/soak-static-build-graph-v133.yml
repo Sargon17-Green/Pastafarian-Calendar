@@ -37,14 +37,14 @@ jobs:
                       assert (n.module or '').split('.')[0] not in {'subprocess','ctypes','multiprocessing','psutil'}
           print('V133_ORIGINAL_DISPATCH_STOP_CONFIRMED')
           PY
-      - name: Run fourteen synthetic static build dependency controls
+      - name: Run fifteen synthetic static build dependency controls
         run: |
           set -euo pipefail
           mkdir -p evidence
           python3 -B -m unittest discover -s soak/process_tests \
             -p 'test_soak_static_build_graph_v133.py' -v \
             2>&1 | tee evidence/v133-tests.log
-          grep -Eq '^Ran 14 tests ' evidence/v133-tests.log
+          grep -Eq '^Ran 15 tests ' evidence/v133-tests.log
           grep -q '^OK$' evidence/v133-tests.log
       - name: Confirm prior successful v132 artifact identity by GitHub REST
         env:
