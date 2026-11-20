@@ -2237,3 +2237,252 @@
                        {:berekening berekening :doel doel :code (:code poging)})))))
       (is (= 1 (+ (:bewezen @tellingen) (:geweigerd @tellingen))))
       (println "DISCOVERY24 DIAG24 vijftiende-dag-haalbaarheid:" @tellingen))))
+
+
+;; DISCOVERY24 generic E2E feasibility: exact classification only, without
+;; any full-weaving dispatch. The seven pairs are identical to the original
+;; 100000N canonical test. This diagnostic does not alter that test or API.
+(defn- discovery24-verifieer! [waar? code gegevens]
+  (when-not waar?
+    (throw (ex-info "DISCOVERY24 generic feasibility gate failed"
+                    (assoc gegevens :code code)))))
+
+(defn- discovery24-zeven-gevallen [poortlijn]
+  (let [berekening dagen/stichtingsdag
+        basis (zoeken/vind-doeljaar poortlijn berekening berekening)
+        vorig (zoeken/vind-doeljaar poortlijn berekening
+                                    (:open-gate-day basis))
+        volgend (zoeken/vind-doeljaar poortlijn berekening
+                                     (inc (:close-gate-day basis)))
+        midden (+' (:open-gate-day basis)
+                   (quot (-' (:close-gate-day basis)
+                             (:open-gate-day basis)) 2N))]
+    (discovery24-verifieer!
+     (= [4999N 5000N 5001N] (mapv :number [vorig basis volgend]))
+     :unexpected-canonical-years
+     {:numbers (mapv :number [vorig basis volgend])})
+    [[:base-first berekening (inc (:open-gate-day basis))]
+     [:base-middle berekening midden]
+     [:base-last berekening (:close-gate-day basis)]
+     [:previous-last berekening (:close-gate-day vorig)]
+     [:next-first berekening (inc (:open-gate-day volgend))]
+     [:shifted-plus-17 (+' berekening 17N) (+' berekening 17N)]
+     [:shifted-minus-23 (-' berekening 23N) (-' berekening 23N)]]))
+
+(defn- discovery24-classificeer-zeven [poortlijn]
+  (let [gevallen (discovery24-zeven-gevallen poortlijn)]
+    (discovery24-verifieer! (= 7 (count gevallen))
+                           :canonical-case-count {:actual (count gevallen)})
+    (mapv
+     (fn [[id berekening doel]]
+       (let [selectie (lengtes/kies-maandlengtes
+                       poortlijn berekening doel 128N)
+             jaar (:year selectie)
+             open (:open-gate-day jaar)
+             close (:close-gate-day jaar)
+             positie (-' doel open)
+             lengte (-' close open)
+             maandlengten (:month-lengths selectie)
+             volledige-grens (:celbovengrens
+                              (budgetprofiel/veilige-celgrens
+                               maandlengten 5000000N))
+             totaal (weving/aantal-wevingen-groot maandlengten)
+             normsaus (orakel/sauce berekening (inc open))
+             weefrang (orakel/choose-rank
+                       (orakel/ask-bowl normsaus
+                                        4 orakel/seal-month-weaving)
+                       totaal)
+             klasse (cond (= positie 1N) :first-day-fast-path
+                          (= positie lengte) :last-day-fast-path
+                          :else :interior-selective-prefix)]
+         (discovery24-verifieer!
+          (and (<= 1N positie lengte)
+               (= lengte (reduce +' 0N maandlengten))
+               (= (:month-count selectie) (count maandlengten))
+               (<= 1N weefrang totaal)
+               (> volledige-grens 100000N))
+          :invalid-classification
+          {:id id :position positie :year-length lengte
+           :full-bound volledige-grens})
+         {:id id
+          :calculation-day berekening
+          :target-day doel
+          :year (:number jaar)
+          :open-gate-day open
+          :close-gate-day close
+          :position-1-based positie
+          :year-length lengte
+          :classification klasse
+          :month-lengths maandlengten
+          :weaving-rank-1-based weefrang
+          :weaving-rank-total totaal
+          :legacy-cell-budget 100000N
+          :legacy-full-weaving-sufficient-bound volledige-grens
+          :legacy-refusal-code :weaving-unrank-budget-unproven
+          :legacy-refusal-evidence-run 44799993951
+          :selective-prefix-cell-cost :not-measured
+          :independently-proven-five-fields? false}))
+     gevallen)))
+
+(defn- discovery24-kleine-model-qa! []
+  ;; The first family is EXHAUSTIVE over all 20 ranks and all interior
+  ;; positions 3..7; the second checks the first, middle, and last ranks
+  ;; at every position 3..11. Neither invokes the production prefix counter.
+  (let [vergelijkingen (atom 0)]
+    (doseq [lengten [[4 4] [4 4 4]]
+            :let [familie (orakel/weaving-family lengten)
+                  totaal ((:count familie))
+                  rangen (if (= lengten [4 4])
+                           (range 1 (inc (int totaal)))
+                           (distinct [1N (quot (inc totaal) 2N) totaal]))]
+            rang rangen
+            positie (range 3 (reduce + lengten))]
+      (let [normwoord ((:unrank1 familie) rang)
+            verwacht (mapv bigint (take positie normwoord))
+            actueel (onafhankelijk-prefix-tot-positie
+                      lengten (bigint rang) positie)]
+        (discovery24-verifieer!
+         (= verwacht actueel)
+         :small-family-independent-prefix-mismatch
+         {:lengths lengten :rank rang :position positie})
+        (swap! vergelijkingen inc)))
+    (discovery24-verifieer! (= 127 @vergelijkingen)
+                           :small-family-coverage
+                           {:comparisons @vergelijkingen})
+    (println "DISCOVERY24 GENERIC MODEL_QA" @vergelijkingen
+             "independent small-family prefix comparisons PASS")
+    @vergelijkingen))
+
+(defn- discovery24-een-zestiende-dag [poortlijn]
+  ;; One NEW genuine interior position, following the accepted 15th-day
+  ;; +17N anchor. Only a single production bounded-prefix attempt is made.
+  ;; Its separate independent insertion-oracle is evaluated on SUCCESS only.
+  (let [berekening (+' dagen/stichtingsdag 17N)
+        jaar (zoeken/vind-doeljaar poortlijn berekening berekening)
+        doel (+' (:open-gate-day jaar) 16N)
+        poging (try
+                 {:status :bewezen
+                  :uitkomst (projectie/kies-prefixdag-zonder-volledige-weving
+                             poortlijn berekening doel 128N 5000000N)}
+                 (catch clojure.lang.ExceptionInfo e
+                   {:status :geweigerd :code (:code (ex-data e))}))]
+    (if (= :geweigerd (:status poging))
+      (do
+        (discovery24-verifieer!
+         (= :bounded-prefix-budget-unproven (:code poging))
+         :unexpected-selective-refusal
+         {:code (:code poging)})
+        (println "DISCOVERY24 GENERIC position 16 refused, NOT a five-field proof:"
+                 (:code poging))
+        {:status :geweigerd :code (:code poging)
+         :calculation-day berekening :target-day doel
+         :position-1-based 16N
+         :five-fields-proven? false})
+      (let [staat (orakel/new-gate-state)
+            normjaar (orakel/find-target-year staat berekening doel)
+            normsaus (orakel/sauce
+                      berekening (inc (:open-gate-day normjaar)))
+            aantal-koteletten (orakel/choose-cutlet-count normsaus normjaar)
+            partitie (orakel/choose-cutlet-partition
+                      staat berekening normsaus normjaar aantal-koteletten)
+            kotelet-namen (orakel/choose-cutlet-names
+                           normsaus aantal-koteletten)
+            koteletten (orakel/materialize-cutlets
+                        staat normjaar partitie kotelet-namen)
+            kotelet (some #(when (<= (:first-day %) doel (:last-day %)) %)
+                          koteletten)
+            maanden (orakel/choose-month-count normsaus normjaar)
+            lengten (orakel/choose-month-lengths normsaus normjaar maanden)
+            maandnamen (orakel/choose-month-names normsaus maanden)
+            drie-tellingen (mapv #(onafhankelijke-prefix-telling lengten %)
+                                 derde-prefix-opties)
+            totaal (reduce +' 0N drie-tellingen)
+            weefrang (orakel/choose-rank
+                      (orakel/ask-bowl normsaus
+                                       4 orakel/seal-month-weaving)
+                      totaal)
+            normprefix (onafhankelijk-prefix-tot-positie
+                        lengten weefrang 16)
+            maand (peek normprefix)
+            verwacht [(:number normjaar)
+                      (:name-index kotelet)
+                      (inc (-' doel (:first-day kotelet)))
+                      (nth maandnamen (dec (int maand)))
+                      (bigint (count (filter #(= maand %) normprefix)))]
+            actueel (:uitkomst poging)
+            kosten (:month-prefix-cell-upper-bound actueel)]
+        (discovery24-verifieer!
+         (and kotelet
+              (= (:number jaar) (:number normjaar))
+              (= totaal (weving/aantal-wevingen-groot lengten))
+              (= 16 (count normprefix))
+              (< 16 (reduce + lengten))
+              (= 5 (count verwacht))
+              (every? integer? verwacht)
+              (= verwacht (:date-components actueel))
+              (= normprefix (:month-prefix actueel))
+              (= 16N (:prefix-position actueel))
+              (= :bounded-prefix-only (:date-proof-scope actueel))
+              (false? (:month-weaving-computed? actueel))
+              (not (contains? actueel :month-weaving))
+              (integer? kosten)
+              (<= 0N kosten 5000000N))
+         :independent-sixteenth-day-differential-failed
+         {:calculation-day berekening :target-day doel
+          :expected-fields verwacht :actual-fields (:date-components actueel)
+          :expected-prefix normprefix :actual-prefix (:month-prefix actueel)
+          :cost kosten})
+        (println "DISCOVERY24 GENERIC position 16 INDEPENDENT 5-FIELD MATCH"
+                 {:calculation-day berekening :target-day doel :cells kosten})
+        {:status :bewezen :calculation-day berekening :target-day doel
+         :position-1-based 16N :five-fields-proven? true
+         :independent-expected-fields verwacht
+         :actual-fields (:date-components actueel)
+         :independent-prefix normprefix :reported-prefix-cells kosten
+         :scope :bounded-prefix-only :full-weaving-computed? false}))))
+
+(defn- discovery24-schrijf-qa! [gegevens]
+  (.mkdirs (java.io.File. "qa"))
+  (spit "qa/discovery24_generic_feasibility.edn"
+        (str (pr-str gegevens) "\n")))
+
+(defn run-discovery24-generic-feasibility!
+  "Explicit opt-in QA: seven canonical classifications, small oracle, one
+   real day-16 bounded probe. A refusal is diagnostic, not an E2E PASS."
+  []
+  (let [poortlijn @lijn
+        basis {:project-id "PC-BRANCH-CLOJURE-DUTCH"
+               :github-sha (System/getenv "GITHUB_SHA")
+               :canonical-legacy-run 44799993951
+               :legacy-generic-e2e-proven 0
+               :legacy-generic-e2e-refused 7
+               :legacy-budget 100000N
+               :search-budget 128N
+               :selective-prefix-budget 5000000N
+               :stage2-accepted? false}
+        gevallen (discovery24-classificeer-zeven poortlijn)
+        stap1 (assoc basis :canonical-cases gevallen
+                     :probe-status :not-run)]
+    (discovery24-schrijf-qa! stap1)
+    (doseq [rij gevallen]
+      (println "DISCOVERY24 CANONICAL CLASSIFICATION"
+               (select-keys rij [:id :year :calculation-day :target-day
+                                 :position-1-based :year-length :classification
+                                 :legacy-full-weaving-sufficient-bound])))
+    (let [model-count (discovery24-kleine-model-qa!)
+          stap2 (assoc stap1 :small-family-comparisons model-count
+                       :probe-status :pending-one-attempt)
+          _ (discovery24-schrijf-qa! stap2)
+          proef (discovery24-een-zestiende-dag poortlijn)
+          eind (assoc stap2 :probe proef
+                           :probe-status (:status proef)
+                           :stage2-accepted? false)]
+      (discovery24-schrijf-qa! eind)
+      (println "DISCOVERY24 GENERIC FINAL"
+               {:canonical-classified (count gevallen)
+                :small-model-comparisons model-count
+                :pilot (:status proef)
+                :pilot-five-fields-proven? (:five-fields-proven? proef)
+                :generic-seven-of-seven-accepted? false
+                :stage2-accepted? false})
+      eind)))
