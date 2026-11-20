@@ -146,6 +146,23 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Bounded Native Chapel polynomial weaving feasibility (research only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'SOURCE_HEAD=%s\n' "$(git rev-parse HEAD)" | tee chapel-weaving-native-poly.log
+          python3 test/weaving_native_polynomial_gate.py 2>&1 | tee -a chapel-weaving-native-poly.log
+          grep -Fxq 'WEAVING_NATIVE_POLY_RESULT=PASS' chapel-weaving-native-poly.log
+
+      - name: Retain Native polynomial feasibility evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-weaving-native-poly-evidence
+          path: chapel-weaving-native-poly.log
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Independent GateOracle year-boundary and calendarDate decomposition probe
         shell: bash
         run: |
