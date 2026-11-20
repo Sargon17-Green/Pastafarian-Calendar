@@ -8,8 +8,8 @@ New-Item -ItemType Directory -Force $Evidence | Out-Null
 $Evidence=(Resolve-Path -LiteralPath $Evidence).Path
 $sha='192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d'
 $report=[ordered]@{
- schema='NARS2000_WORKSPACE_ARGUMENT_AND_WINDOW_DIAGNOSTIC_V1';
- source_run=44379437067;
+ schema='NARS2000_WORKSPACE_ARGUMENT_AND_WINDOW_DIAGNOSTIC_V2';
+ pinned_installer_artifact_run=44372361730;
  expected_binary_sha256=$sha;
  stage01='NOT_RUN';
  status='STARTED';
@@ -55,17 +55,36 @@ function TryMode([string]$mode,[string]$exe,[string]$base,[string]$marker,[int]$
       if($p.HasExited){break}
     }
     $trial['marker_found']=Test-Path -LiteralPath $marker -PathType Leaf
-    if($trial['marker_found']){
-       $actual=[IO.File]::ReadAllText($marker)
-       $trial['marker_exact']=($actual.Trim() -eq 'APL_LX_CANARY_REAL_NATIVE_0_5_14_11')
-       $trial['marker_bytes']=(Get-Item $marker).Length
-    }
     $p.Refresh()
     if($p.HasExited){$trial['process_exit_code']=$p.ExitCode}
   }catch{$trial['error']=$_.Exception.Message}
   finally{
     $timer.Stop();$trial['elapsed_seconds']=[math]::Round($timer.Elapsed.TotalSeconds,2)
-    if($null -ne $p -and -not $p.HasExited){& taskkill.exe /PID $p.Id /T /F 2>&1 | Out-Null}
+    if($null -ne $p){
+      $p.Refresh()
+      if(-not $p.HasExited){
+        & taskkill.exe /PID $p.Id /T /F 2>&1 | Out-Null
+        try {Wait-Process -Id $p.Id -Timeout 8 -ErrorAction Stop} catch {}
+      }
+    }
+  }
+  # ⎕NCREATE may hold an exclusive file lock while NARS runs.
+  # Only inspect the native result after terminating the isolated process.
+  if($trial['marker_found']){
+    [byte[]]$expectedBytes=[Text.Encoding]::ASCII.GetBytes('APL_LX_CANARY_REAL_NATIVE_0_5_14_11')
+    for($attempt=0;$attempt -lt 20;$attempt++){
+      try{
+        [byte[]]$actualBytes=[IO.File]::ReadAllBytes($marker)
+        $trial['marker_bytes']=$actualBytes.Length
+        $trial['marker_exact']=($actualBytes.Length -eq $expectedBytes.Length) -and
+          ([Convert]::ToBase64String($actualBytes) -ceq [Convert]::ToBase64String($expectedBytes))
+        $trial['marker_read_error']=$null
+        break
+      }catch [IO.IOException]{
+        $trial['marker_read_error']=$_.Exception.Message
+        Start-Sleep -Milliseconds 200
+      }
+    }
   }
   return $trial
 }
