@@ -46,6 +46,10 @@ CASES = (
     # Dual axis: hold the calculation day fixed, change target by one day.
     {"label": "fixed-calculation-target-before", "calculation_offset": 0, "target_offset": -1},
     {"label": "fixed-calculation-target-after", "calculation_offset": 0, "target_offset": 1},
+    # Cross-year target-axis: boundary target from a calculation day on the
+    # opposite side of Foundation, independently of target selection.
+    {"label": "year-4999-final-from-after-foundation", "calculation_offset": 1, "target_offset": -2032},
+    {"label": "year-5001-first-from-before-foundation", "calculation_offset": -1, "target_offset": 2213},
 )
 REFERENCE_TIMEOUT_SECONDS = 75
 FORTRAN_TIMEOUT_SECONDS = 75
@@ -162,7 +166,7 @@ def run_fortran(case_index: int, executable: Path) -> tuple[tuple[int, ...], str
     return extract_five(process.stdout, "STAGE01_CONTEXT_FIELDS="), process.stdout
 
 def self_test() -> None:
-    assert len(CASES) == 10
+    assert len(CASES) == 12
     assert len({case["calculation_offset"] for case in CASES}) == 8
     assert CASES[0]["target_offset"] - CASES[0]["calculation_offset"] == 5000
     assert CASES[1]["target_offset"] - CASES[1]["calculation_offset"] == -5000
@@ -174,10 +178,14 @@ def self_test() -> None:
     assert tuple(c["calculation_offset"] for c in CASES[6:8]) == (-2048, 2048)
     assert case_days(7) == (FOUNDATION_DAY - 2048, FOUNDATION_DAY)
     assert case_days(8) == (FOUNDATION_DAY + 2048, FOUNDATION_DAY)
-    assert tuple(c["calculation_offset"] for c in CASES[8:]) == (0, 0)
-    assert tuple(c["target_offset"] for c in CASES[8:]) == (-1, 1)
+    assert tuple(c["calculation_offset"] for c in CASES[8:10]) == (0, 0)
+    assert tuple(c["target_offset"] for c in CASES[8:10]) == (-1, 1)
     assert case_days(9) == (FOUNDATION_DAY, FOUNDATION_DAY - 1)
     assert case_days(10) == (FOUNDATION_DAY, FOUNDATION_DAY + 1)
+    assert tuple(c["calculation_offset"] for c in CASES[10:]) == (1, -1)
+    assert tuple(c["target_offset"] for c in CASES[10:]) == (-2032, 2213)
+    assert case_days(11) == (FOUNDATION_DAY + 1, -15057703)
+    assert case_days(12) == (FOUNDATION_DAY - 1, -15053458)
     assert extract_five(
         "STAGE01_CONTEXT_FIELDS=5000,15,1,18,1",
         "STAGE01_CONTEXT_FIELDS=",
@@ -188,7 +196,7 @@ def self_test() -> None:
         pass
     else:
         raise AssertionError("Malformed four-field result was accepted")
-    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=18/18")
+    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=22/22")
 
 def compare(reference: Path, executable: Path, commit: str, branch: str, run_id: int) -> int:
     if len(commit) != 40 or any(ch not in "0123456789abcdef" for ch in commit.lower()):

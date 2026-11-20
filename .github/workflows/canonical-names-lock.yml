@@ -1122,13 +1122,13 @@ jobs:
           set -euo pipefail
           python3 -m py_compile test/stage01_calculation_context_diff.py
           python3 test/stage01_calculation_context_diff.py --self-test | tee build/stage01-calculation-context-selftest.log
-          grep -Fxq 'STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=18/18' build/stage01-calculation-context-selftest.log
+          grep -Fxq 'STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=22/22' build/stage01-calculation-context-selftest.log
           curl --fail --location --silent --show-error --retry 3 \
             --connect-timeout 15 --max-time 45 \
             'https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
             --output build/stage01_python_reference_pinned.py
           test -s build/stage01_python_reference_pinned.py
-      - name: Compare original normative dates across ten calculation-day and target-day contexts
+      - name: Compare original normative dates across twelve calculation-day and target-day contexts
         shell: bash
         run: |
           set -euo pipefail
@@ -1139,7 +1139,7 @@ jobs:
             --fortran-branch "$GITHUB_REF_NAME" \
             --workflow-run "$GITHUB_RUN_ID" \
             | tee build/stage01-calculation-context-diff.log
-          grep -Fxq 'STAGE01_CALC_CONTEXT_DIFFERENTIAL=10/10 CASES; 50/50 EXACT FIELDS' \
+          grep -Fxq 'STAGE01_CALC_CONTEXT_DIFFERENTIAL=12/12 CASES; 60/60 EXACT FIELDS' \
             build/stage01-calculation-context-diff.log
       - name: Preserve calculation-context differential evidence
         if: always()
