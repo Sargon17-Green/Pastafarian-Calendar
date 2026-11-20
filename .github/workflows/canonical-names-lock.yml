@@ -2765,3 +2765,55 @@ jobs:
           path: real-year-interval-negative-evidence/
           retention-days: 30
           if-no-files-found: warn
+
+
+  # Deterministic short-six-gate-window candidates, separate from the earlier 20 offset samples.
+  lua_haitian_gate_window_targeted_discovery:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Target short six-gate windows under hard resource caps
+        shell: bash
+        run: |
+          set -uo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || exit 20
+          test "$(git rev-parse HEAD:test/normative_oracle.lua)" = "8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d" || exit 21
+          test "$(git rev-parse HEAD:src/bigint.lua)" = "fcff58bcaaf8bb3f205e7a9c624a51069c0e5a5d" || exit 22
+          test "$(git rev-parse HEAD:src/source_language_catalog.lua)" = "5b59ee6bb0ea2c2a551185929b5531ea28a50e49" || exit 23
+          mkdir -p gate-window-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\nSCOPE=TARGETED_GATE_WINDOW_STATIC_DISCOVERY_ONLY\nGATE_INDEX_SCAN=-24..24\nTARGET_PROBE_CAP=8\nGATE_GAP_CAP=200\nCPU_SECONDS=55\nLUA_HEAP_KIB=131072\nCOMPOSITION_STATE_CAP=20000\nCOMPOSITION_INVOKED=NO\n' "$GITHUB_SHA" > gate-window-evidence/manifest.txt
+          git rev-parse HEAD > gate-window-evidence/source_sha.txt
+          sha256sum test/lua_haitian_gate_window_targeted_discovery.lua docs/LUA_HAITIAN_GATE_WINDOW_TARGETED_DISCOVERY_2026-11-20.md test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua > gate-window-evidence/sha256.txt
+          set +e
+          ( ulimit -v 131072; timeout --signal=TERM --kill-after=2s 60s lua5.3 test/lua_haitian_gate_window_targeted_discovery.lua . ) > gate-window-evidence/stdout.txt 2> gate-window-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > gate-window-evidence/exit_code.txt
+          cat gate-window-evidence/stdout.txt
+          if test -s gate-window-evidence/stderr.txt; then cat gate-window-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 || exit "$code"
+          test ! -s gate-window-evidence/stderr.txt || exit 24
+          grep -Fxq 'GATE_WINDOW_SCAN: -24/24' gate-window-evidence/stdout.txt
+          grep -Eq '^SHORT_SIX_GAP_WINDOWS: [0-9]+$' gate-window-evidence/stdout.txt
+          grep -Eq '^GATE_TARGET_PROBES: [0-8]/8$' gate-window-evidence/stdout.txt
+          grep -Eq '^SHORT_SELECTED_YEAR_INTERVALS: [0-9]+$' gate-window-evidence/stdout.txt
+          grep -Eq '^GATE_TARGET_ADMISSION_(PASS: 1/1|NONE: 0/[0-8])$' gate-window-evidence/stdout.txt
+          grep -Eq '^GATE_GAP_EVALUATIONS: [0-9]+$' gate-window-evidence/stdout.txt
+          grep -Fxq 'COMPOSITION_NOT_INVOKED: YES' gate-window-evidence/stdout.txt
+          grep -Fxq 'SCOPE=TARGETED_GATE_WINDOW_STATIC_DISCOVERY_ONLY; COMPOSITION=NOT_RUN; FULL_DATE=NOT_RUN' gate-window-evidence/stdout.txt
+      - name: Upload gate-window discovery evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-gate-window-targeted-evidence
+          path: gate-window-evidence/
+          retention-days: 30
+          if-no-files-found: warn
