@@ -47,7 +47,7 @@ try {
  if($LASTEXITCODE -ne 0){throw 'PROGRESS_GENERATOR_FAILED'}
  $meta=Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
  if($meta.status -cne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.stage01 -cne 'NOT_RUN' -or $meta.count -ne $Count -or $meta.mode -cne $Mode -or $meta.fx_count -ne $(if($Mode -in @('canary_only','padded_canary')){0}else{$Count}) -or $meta.source_commit -cne $source){throw 'CANDIDATE_METADATA_CONTRACT_FAILED'}
- if($meta.marker_path -cne $marker -or $meta.checkpoints.Count -ne 1 -or $meta.names.Count -ne 20){throw 'CANDIDATE_MANIFEST_COUNT_OR_PATH_INVALID'}
+ if($meta.marker_path -cne $marker -or $meta.checkpoints.Count -ne 1 -or $meta.names.Count -ne $Count -or @($meta.names | Sort-Object -Unique).Count -ne $Count){throw 'CANDIDATE_MANIFEST_COUNT_OR_PATH_INVALID'}
  foreach($i in 0..0){
    $point=$meta.checkpoints[$i]
    $after=$indices[$i]

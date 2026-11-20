@@ -97,6 +97,13 @@ class NativeProgressCandidateTests(unittest.TestCase):
         self.assertNotIn("Stage01PrefixFix", inner)
         self.assertEqual(inner.count("⎕NAPPEND"), 2)
 
+    def test_native_runner_manifest_gate_tracks_requested_count(self):
+        ps = (ROOT / "qa" / "nars-interface" / "bounded_progress_variant.ps1").read_text(encoding="utf-8")
+        self.assertIn("$meta.names.Count -ne $Count", ps)
+        self.assertNotIn("$meta.names.Count -ne 20", ps)
+        self.assertIn("$meta.checkpoints.Count -ne 1", ps)
+        self.assertIn("if($Count -lt 1 -or $Count -gt 20", ps)
+
     def test_smaller_source_locked_start_only_prefixes(self):
         for count in (1, 5, 10, 18):
             with self.subTest(count=count):

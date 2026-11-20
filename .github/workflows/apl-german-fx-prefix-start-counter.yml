@@ -5,6 +5,8 @@ on:
       - qa/apl-german-nars-interface-20261116
     paths:
       - '.github/workflows/apl-german-fx-prefix-start-counter.yml'
+      - 'qa/nars-interface/bounded_progress_variant.ps1'
+      - 'qa/nars-interface/test_progress_fx_probe.py'
   workflow_dispatch:
 permissions:
   contents: read
