@@ -19,7 +19,7 @@ program stage01_calculation_context_probe
   integer :: case_index, status, step, steps
 
   steps = command_argument_count()
-  if (steps < 1 .or. steps > 6) error stop 'provide 1..6 calculation-context cases'
+  if (steps < 1 .or. steps > 8) error stop 'provide 1..8 calculation-context cases'
   foundation = foundation_day()
   ! Reset exactly once: subsequent contexts must reuse the same process state.
   call reset_gate_cache()

@@ -57,8 +57,9 @@ CASES = (
 REFERENCE_TIMEOUT_SECONDS = 75
 FORTRAN_TIMEOUT_SECONDS = 75
 SAME_PROCESS_TIMEOUT_SECONDS = 480
-# Two reference-backed context-sensitive boundary targets; revisit without reset.
-CONTEXT_SEQUENCE = (11, 13, 12, 14, 11, 13)
+# Two reference-backed context-sensitive boundary targets: warm and revisit
+# BOTH 4999 and 5001 boundary pairs in the same original process, with no reset.
+CONTEXT_SEQUENCE = (11, 13, 12, 14, 11, 13, 12, 14)
 
 def case_days(case_index: int) -> tuple[int, int]:
     if not 1 <= case_index <= len(CASES):
@@ -209,6 +210,8 @@ def run_same_process(executable: Path) -> list[tuple[int, ...]]:
 
 def self_test() -> None:
     assert len(CASES) == 14
+    assert CONTEXT_SEQUENCE == (11, 13, 12, 14, 11, 13, 12, 14)
+    assert tuple(case_days(i) for i in CONTEXT_SEQUENCE[:4]) == tuple(case_days(i) for i in CONTEXT_SEQUENCE[4:])
     assert len({case["calculation_offset"] for case in CASES}) == 8
     assert CASES[0]["target_offset"] - CASES[0]["calculation_offset"] == 5000
     assert CASES[1]["target_offset"] - CASES[1]["calculation_offset"] == -5000
@@ -284,7 +287,7 @@ def self_test() -> None:
             pass
         else:
             raise AssertionError("Malformed same-process context records were accepted")
-    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=34/34")
+    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=36/36")
 
 
 def is_context_sensitive_pair(first: dict, second: dict) -> bool:
