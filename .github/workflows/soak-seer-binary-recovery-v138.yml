@@ -1,0 +1,131 @@
+name: Soak v138 historical Seer binary recovery provenance, no Fct
+on:
+  push:
+    branches:
+      - qa/soak-seer-binary-recovery-contract-v138
+    paths:
+      - 'soak/control/seer_historical_binary_recovery_v138.json'
+      - 'soak/runner/soak_seer_historical_binary_recovery_v138.py'
+      - 'soak/process_tests/test_soak_seer_historical_binary_recovery_v138.py'
+      - '.github/workflows/soak-seer-binary-recovery-v138.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify-static-original-recovery-receipts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify original dispatch stop and statically prohibit process APIs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast,json
+          from pathlib import Path
+          lock=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for fn in ('soak/runner/soak_seer_historical_binary_recovery_v138.py',
+                     'soak/process_tests/test_soak_seer_historical_binary_recovery_v138.py'):
+              t=ast.parse(Path(fn).read_text(encoding='utf-8'))
+              for n in ast.walk(t):
+                  if isinstance(n,ast.Import):
+                      assert all(z.name.split('.')[0] not in
+                          {'subprocess','ctypes','multiprocessing','psutil'} for z in n.names)
+                  if isinstance(n,ast.ImportFrom):
+                      assert ((n.module or '').split('.')[0] not in
+                          {'subprocess','ctypes','multiprocessing','psutil'})
+          print('V138_ORIGINAL_SOAK_DISPATCH_STOP_CONFIRMED')
+          PY
+      - name: Run 18 synthetic negative-controls for historical provenance
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_seer_historical_binary_recovery_v138.py' -v \
+            2>&1 | tee evidence/v138-tests.log
+          grep -Eq '^Ran 18 tests ' evidence/v138-tests.log
+          grep -q '^OK$' evidence/v138-tests.log
+      - name: Confirm v137 source-scoped CI and immutable archive receipt
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          from urllib.request import Request,urlopen
+          prefix='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              req=Request(prefix+path,headers={
+                  'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                  'Accept':'application/vnd.github+json',
+                  'X-GitHub-Api-Version':'2022-11-28',
+                  'User-Agent':'pastafari-soak-v138-readonly'})
+              with urlopen(req,timeout=30) as f:return json.load(f)
+          r=get('/actions/runs/44799704486')
+          assert r['id']==44799704486
+          assert r['head_sha']=='46b38827bbf90407c41800ad7dc6e63f0b17e9a9'
+          assert r['status']=='completed' and r['conclusion']=='success'
+          a=get('/actions/runs/44799704486/artifacts')
+          assert any(x['id']==14659759266
+             and x['name']=='soak-v137-historical-cross-run-prebuilt-metadata-not-soak'
+             and x['digest']=='sha256:cc2c4f6f17c8e5f68c1d12f0950e5307dc894ea9d2ea421fd2933d51739585d3'
+             and x['expired'] is False for x in a['artifacts'])
+          print('V138_V137_COMPLETED_SOURCE_CI_RECEIPT_PASS')
+          PY
+      - name: Audit historic source build recipes and JSON-only upload; try read-only historic log
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_seer_historical_binary_recovery_v138.py \
+            --index soak/control/seer_historical_binary_recovery_v138.json \
+            --output evidence/v138-historic-recovery.json \
+            --fetch-historical-log \
+            | tee evidence/v138-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v138-historic-recovery.json').read_text())
+          a=r['static_historical_recipe']
+          assert a['frozen_source_blobs_verified']==7
+          assert a['exact_original_artifact_json_paths']==34
+          assert a['original_result_artifact_includes_build_or_binary_path'] is False
+          assert a['startingCommit_field_derived_from_live_git'] is False
+          b=r['completed_ci_run_job_and_archived_results']
+          assert b['run_status']=='completed/success'
+          assert len(b['required_successful_build_steps'])==4
+          assert b['binary_bytes_in_the_original_archived_artifact'] is False
+          assert r['historical_log_verification']['state'] in (
+            'AVAILABLE_VERIFIED_FROM_HISTORIC_JOB_LOG',
+            'UNAVAILABLE_OR_UNVERIFIED')
+          if r['historical_log_verification']['state']=='UNAVAILABLE_OR_UNVERIFIED':
+              assert not r['historical_job_log_reverified_in_this_execution']
+              print('V138_HISTORIC_JOB_LOG_UNAVAILABLE_NOT_CERTIFIED')
+          else:
+              assert r['historical_job_log_reverified_in_this_execution']
+              print('V138_HISTORIC_JOB_LOG_VERIFIED')
+          assert r['original_candidate_or_baseline_executable_bytes_found'] is False
+          assert r['GHA_cache_absence_proven'] is False
+          assert r['reproducible_bit_identical_binary_proven'] is False
+          assert r['new_compiler_or_linker_calls']==0
+          assert r['new_original_date_Fct_calls']==0
+          assert r['scientific_original_10000_years_certified']==0
+          assert r['independent_algorithms_certified']==0
+          assert r['soak_dispatch_authorized'] is False
+          print('V138_RECIPE_SOURCE_AND_JSON_UPLOAD_AUDIT_PASS_NOT_BINARY_REBUILD')
+          PY
+      - name: Archive read-only source/CI evidence and historical-log availability state
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v138-seer-historic-recipe-source-only-no-rebuild
+          path: |
+            evidence/v138-tests.log
+            evidence/v138-summary.json
+            evidence/v138-historic-recovery.json
+          if-no-files-found: warn
+          retention-days: 30
