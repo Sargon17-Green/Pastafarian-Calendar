@@ -175,4 +175,30 @@ class V141Synthetic(unittest.TestCase):
         self.assertFalse(result["sole_cause_of_foundation_mismatch_proven"])
         self.assertTrue(result["STOP_NEW_NATIVE_SOAK_DISPATCH"])
 
+    def test_29_portable_goldens_verify_35_exact_one_based_sequences(self):
+        path=P.parent/"ada_month_weave_rank_vectors_v141.json"
+        vectors=json.loads(path.read_text(encoding="utf-8"))
+        result=v.golden_vectors_check(vectors)
+        self.assertEqual(result["portable_rank_vector_groups"],6)
+        self.assertEqual(result["portable_rank_vectors_verified"],35)
+        self.assertFalse(result["production_Ada_code_compiled"])
+    def test_30_mutated_portable_golden_day_rejected(self):
+        path=P.parent/"ada_month_weave_rank_vectors_v141.json"
+        vectors=json.loads(path.read_text(encoding="utf-8"))
+        vectors["families"][0]["vectors"][0][1][0]=2
+        with self.assertRaisesRegex(ValueError,"golden vector differs"):
+            v.golden_vectors_check(vectors)
+    def test_31_removed_portable_family_rejected(self):
+        path=P.parent/"ada_month_weave_rank_vectors_v141.json"
+        vectors=json.loads(path.read_text(encoding="utf-8"))
+        vectors["families"].pop()
+        with self.assertRaisesRegex(ValueError,"family count changed"):
+            v.golden_vectors_check(vectors)
+    def test_32_portable_goldens_cannot_authorize_original_native_soak(self):
+        path=P.parent/"ada_month_weave_rank_vectors_v141.json"
+        vectors=json.loads(path.read_text(encoding="utf-8"))
+        vectors["allowed_in_original_soak_dispatch"]=True
+        with self.assertRaisesRegex(ValueError,"not approved original"):
+            v.golden_vectors_check(vectors)
+
 if __name__=="__main__":unittest.main()
