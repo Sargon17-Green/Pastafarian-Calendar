@@ -1,0 +1,131 @@
+{
+  "schema": "PASTAFARI_SOAK_V137_CROSS_RUN_NATIVE_HASH_INDEX/1",
+  "scope": "ARCHIVED_PREBUILT_EXECUTABLE_BYTES_NOT_SEER_NEXT_EXPERIMENT",
+  "repo": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+  "original_next_frozen_commit": "866e9bbff59399310416ae25de1b664f9b6c3124",
+  "original_next_ci_commit": "4716594fc98fa882a9401455ae56f30895518e8c",
+  "original_next_run": 42423259653,
+  "neighboring_failed_next_run": 42421321405,
+  "neighboring_failed_next_run_expected_status": "completed/failure",
+  "experiment_binary_hashes": {
+    "baseline": "8191de4ccd416f159ac8400a7e12920b8464a0066b32651be69d76c54c47ab2b",
+    "candidate": "46dded4a81d884936fc0bd80a89a32fba6a821cf28c6b55fbfd1a6ff6f253ac8"
+  },
+  "artifacts": [
+    {
+      "run_id": 42423263952,
+      "source_head": "4716594fc98fa882a9401455ae56f30895518e8c",
+      "artifact_id": 13594347792,
+      "zip_sha256": "ed3c380c3790e22e86e269dc3afc5afb95f2ef8c6b66631834e113557fbc1770",
+      "zip_bytes": 4900691,
+      "platform": "linux-x64",
+      "inner_source": "29d18adba6844728c6be8331be181ea00b669eb5",
+      "binaries": {
+        "bin/seer_engine_service": "e8b2db999880ca1112e87cd09337b4a6e8fa6eace2aa88ca1511fb9581d5a8db",
+        "bin/seer_year_batch": "c4e01a23ac57410165e735353458689fb6cbfd94460f235d5a06f5c563ba9ff5",
+        "bin/seer_year_locator": "578cb40495778e8a5f1287786cbbc471d7564faf9c00bed7eca626d312812321",
+        "bin/seer_year_structure": "b121b83251dc6580540ba6d712f70ab829b4803e05fc2e2a92095f6545726819"
+      },
+      "entry_count": 13
+    },
+    {
+      "run_id": 42423263952,
+      "source_head": "4716594fc98fa882a9401455ae56f30895518e8c",
+      "artifact_id": 13595475137,
+      "zip_sha256": "3d506b322c761d1ad5bc45278a4d12ea1bc56a59d6dcc1780ccd49ae5571cd0b",
+      "zip_bytes": 5729393,
+      "platform": "win32-x64",
+      "inner_source": "29d18adba6844728c6be8331be181ea00b669eb5",
+      "binaries": {
+        "bin/seer_year_batch.exe": "c6a1bfff9401d69f7abc414638a65c9a48dba0895a727a362cfcd9213f6b294e",
+        "bin/seer_engine_service.exe": "31bbd08e3c242ff42c216f702e4b3130b586b5f8619f218dd02958bfbe406e36",
+        "bin/seer_year_locator.exe": "9afc8b9b904ad739bc61f749dd1c7af84d416b496150fa6c8caeb261259a69bf",
+        "bin/seer_year_structure.exe": "415f95b2fa5331694c80b79136c9d492a9418427a5a4f9d765c194cf3a26ad65"
+      },
+      "entry_count": 14
+    },
+    {
+      "run_id": 42423263952,
+      "source_head": "4716594fc98fa882a9401455ae56f30895518e8c",
+      "artifact_id": 13594263914,
+      "zip_sha256": "fd9959a3ad0a756149df70cfb21b5cffa76d8517ebd3a8c962dced08647df2f6",
+      "zip_bytes": 4852864,
+      "platform": "linux-arm64",
+      "inner_source": "29d18adba6844728c6be8331be181ea00b669eb5",
+      "binaries": {
+        "bin/seer_engine_service": "1ce739bae7f8b5ebff0e24a0cb63a271c8c4e776cd52088db0c349de8bf0fc5a",
+        "bin/seer_year_batch": "7bf0d7082b65549b32bc29678dd12e91c5a4d46320347e01a79ddd5c09e71cd1",
+        "bin/seer_year_locator": "62f24bd3b5039fe963088bdbbdc11a3d7de9a76ac040fb8933a39bdd73a720ad",
+        "bin/seer_year_structure": "d8a418be1b92b04adedb9cdd2bd915c93c8e7048c1613757a7a0c7e95d38bef0"
+      },
+      "entry_count": 13
+    },
+    {
+      "run_id": 42421325317,
+      "source_head": "54e1d5d4eaa9f88887f1ed5c5b887ed318c31efa",
+      "artifact_id": 13593383581,
+      "zip_sha256": "8102f73d1c278c1586f12f6ec9971fe13abe8367dc84ec9193baa27d823d3e77",
+      "zip_bytes": 4900689,
+      "platform": "linux-x64",
+      "inner_source": "5f9a47dc961eddca5a77a9aff5b2358ec9aae1f9",
+      "binaries": {
+        "bin/seer_engine_service": "e8b2db999880ca1112e87cd09337b4a6e8fa6eace2aa88ca1511fb9581d5a8db",
+        "bin/seer_year_batch": "c4e01a23ac57410165e735353458689fb6cbfd94460f235d5a06f5c563ba9ff5",
+        "bin/seer_year_locator": "578cb40495778e8a5f1287786cbbc471d7564faf9c00bed7eca626d312812321",
+        "bin/seer_year_structure": "b121b83251dc6580540ba6d712f70ab829b4803e05fc2e2a92095f6545726819"
+      },
+      "entry_count": 13
+    },
+    {
+      "run_id": 42421325317,
+      "source_head": "54e1d5d4eaa9f88887f1ed5c5b887ed318c31efa",
+      "artifact_id": 13594370074,
+      "zip_sha256": "999f9f616af52b285214698d665bb661e7e3c6245c3f3e60ec38e13d36b8e682",
+      "zip_bytes": 5729393,
+      "platform": "win32-x64",
+      "inner_source": "5f9a47dc961eddca5a77a9aff5b2358ec9aae1f9",
+      "binaries": {
+        "bin/seer_engine_service.exe": "715af56f5fcd0f1e56b27405efffa91a03191fd83f1993d156b368bcf5224f20",
+        "bin/seer_year_batch.exe": "a816807d1e7f009d1a2df54a34c7cb9b62598f0533b0868b320635d5b4664c92",
+        "bin/seer_year_locator.exe": "695e87dffa76e472954697bf73592355eae5ccdf440c7abb1a1092b1426d48f8",
+        "bin/seer_year_structure.exe": "d0f5d245e8712485b3eb8069545bfb8b64d2fb4532474146fbe1cbf9895ed78c"
+      },
+      "entry_count": 14
+    },
+    {
+      "run_id": 42421325317,
+      "source_head": "54e1d5d4eaa9f88887f1ed5c5b887ed318c31efa",
+      "artifact_id": 13593332766,
+      "zip_sha256": "44cdc05e7c25c181fd7683e792392c5ebacbfc7c26dc6d49e831a535bef78a9f",
+      "zip_bytes": 4852864,
+      "platform": "linux-arm64",
+      "inner_source": "5f9a47dc961eddca5a77a9aff5b2358ec9aae1f9",
+      "binaries": {
+        "bin/seer_engine_service": "1ce739bae7f8b5ebff0e24a0cb63a271c8c4e776cd52088db0c349de8bf0fc5a",
+        "bin/seer_year_batch": "7bf0d7082b65549b32bc29678dd12e91c5a4d46320347e01a79ddd5c09e71cd1",
+        "bin/seer_year_locator": "62f24bd3b5039fe963088bdbbdc11a3d7de9a76ac040fb8933a39bdd73a720ad",
+        "bin/seer_year_structure": "d8a418be1b92b04adedb9cdd2bd915c93c8e7048c1613757a7a0c7e95d38bef0"
+      },
+      "entry_count": 13
+    }
+  ],
+  "platforms": [
+    "linux-x64",
+    "win32-x64",
+    "linux-arm64"
+  ],
+  "source_internal_commits": [
+    "29d18adba6844728c6be8331be181ea00b669eb5",
+    "5f9a47dc961eddca5a77a9aff5b2358ec9aae1f9"
+  ],
+  "expected_archives": 6,
+  "expected_executable_entries": 24,
+  "expected_unique_executable_sha256": 16,
+  "expected_original_hash_matches": 0,
+  "original_soak_years_certified": 0,
+  "independent_algorithms_certified": 0,
+  "soak_dispatch_authorized": false,
+  "archive_contents_are_not_original_seer_next_binaries": true,
+  "no_native_executables_executed": true,
+  "caveat": "Six externally archived prebuilt release ZIPs from two nearby Actions SHAs. They are not the Seer Next experimental baseline/candidate build. Matching sourceCommit metadata or head SHA cannot substitute for original binary bytes or independent original Soak."
+}
