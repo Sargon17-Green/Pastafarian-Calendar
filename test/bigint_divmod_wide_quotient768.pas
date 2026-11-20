@@ -12,7 +12,7 @@ uses
 
 const
   ExpectedCases = 48;
-  ExpectedChecks = 384;
+  ExpectedChecks = 768;
 
 var
   Cases, Passed, Failed: Integer;
@@ -46,10 +46,11 @@ end;
 
 procedure CheckVector(const F: TStringList);
 var
-  A, B, Q, R, FloorQ, Rebuilt: TBigInt;
+  A, B, Q, R, FloorQ, Rebuilt, AMinus, APlus, QMinus, RMinus,
+  QPlus, RPlus, FloorMinus, FloorPlus: TBigInt;
 begin
-  if F.Count <> 5 then
-    raise EConvertError.Create('wide quotient768 TSV exige cinco campos.');
+  if F.Count <> 9 then
+    raise EConvertError.Create('wide quotient768 TSV exige nove campos.');
   if not ((F[0] = 'SPARSE_EXACT') or (F[0] = 'SPARSE_ONE') or
           (F[0] = 'DENSE_EXACT') or (F[0] = 'DENSE_MAX_REM') or
           (F[0] = 'NINES_ONE') or (F[0] = 'ALTERNATING_HALF')) then
@@ -69,6 +70,27 @@ begin
         (BigCompare(R, BigZero) >= 0) and (BigCompare(R, B) < 0));
   Check('dividendo preservado', BigToDecimal(A) = F[1]);
   Check('divisor preservado', BigToDecimal(B) = F[2]);
+
+  { Independent Python-int divmod oracles for A-1 and A+1. The two
+    neighbors cross quotient boundaries when R=0 or R=B-1. }
+  AMinus := BigSubtract(A, BigFromInt64(1));
+  APlus := BigAdd(A, BigFromInt64(1));
+  BigDivModPositive(AMinus, B, QMinus, RMinus);
+  BigDivModPositive(APlus, B, QPlus, RPlus);
+  FloorMinus := BigFloorDivPositive(AMinus, B);
+  FloorPlus := BigFloorDivPositive(APlus, B);
+  Check('A-1 quociente Python-int', BigToDecimal(QMinus) = F[5]);
+  Check('A-1 resto Python-int', BigToDecimal(RMinus) = F[6]);
+  Check('A-1 piso Python-int', BigToDecimal(FloorMinus) = F[5]);
+  Check('A+1 quociente Python-int', BigToDecimal(QPlus) = F[7]);
+  Check('A+1 resto Python-int', BigToDecimal(RPlus) = F[8]);
+  Check('A+1 piso Python-int', BigToDecimal(FloorPlus) = F[7]);
+  Check('restos vizinhos dentro dos limites',
+        (BigCompare(RMinus, BigZero) >= 0) and (BigCompare(RMinus, B) < 0) and
+        (BigCompare(RPlus, BigZero) >= 0) and (BigCompare(RPlus, B) < 0));
+  Check('identidades dos vizinhos',
+        (BigCompare(BigAdd(BigMultiply(QMinus, B), RMinus), AMinus) = 0) and
+        (BigCompare(BigAdd(BigMultiply(QPlus, B), RPlus), APlus) = 0));
 end;
 
 procedure RunVectors;

@@ -49,6 +49,7 @@ def main():
         raise AssertionError("wrong total cardinality")
     seen = set()
     lines = []
+    crossings_minus = crossings_plus = 0
     for group, a, b, q_expected, r_expected in rows:
         if b <= 0 or a < 0 or (a, b) in seen:
             raise AssertionError("nonpositive/duplicate input")
@@ -60,12 +61,22 @@ def main():
             raise AssertionError("Euclidean invariant failed")
         if (len(str(a)), len(str(b)), len(str(q))) != (768, 384, 384):
             raise AssertionError(f"operand/quotient width mismatch: {group}")
-        lines.append("\t".join(map(str, (group, a, b, q, r))))
+        q_minus, r_minus = divmod(a - 1, b)
+        q_plus, r_plus = divmod(a + 1, b)
+        if (a - 1 != b * q_minus + r_minus or a + 1 != b * q_plus + r_plus or
+                not (0 <= r_minus < b and 0 <= r_plus < b)):
+            raise AssertionError(f"neighbor division invariant failed: {group}")
+        crossings_minus += (q_minus != q)
+        crossings_plus += (q_plus != q)
+        lines.append("\t".join(map(str, (group, a, b, q, r,
+                                       q_minus, r_minus, q_plus, r_plus))))
     OUTPUT.write_text("\n".join(lines) + "\n", encoding="ascii")
     if OUTPUT.read_text(encoding="ascii").splitlines() != lines:
         raise AssertionError("TSV readback mismatch")
     print("Python-int wide quotient768: 48/48 unique, six groups x8, "
           "A=768 B=384 Q=384 digits, 0 divergences")
+    print(f"Neighbor perturbations -1/+1: 48/48 each, quotient crossings "
+          f"minus={crossings_minus}, plus={crossings_plus}; 0 divergences")
 
 
 if __name__ == "__main__":
