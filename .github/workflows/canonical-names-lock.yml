@@ -154,6 +154,24 @@ jobs:
           python3 test/weaving_native_polynomial_gate.py 2>&1 | tee -a chapel-weaving-native-poly.log
           grep -Fxq 'WEAVING_NATIVE_POLY_RESULT=PASS' chapel-weaving-native-poly.log
 
+      - name: Finite Native Chapel prefix rank/unrank oracle (research only)
+        if: github.ref == 'refs/heads/Chapel+Українська-мова'
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'SOURCE_HEAD=%s\n' "$(git rev-parse HEAD)" | tee chapel-weaving-native-prefix.log
+          python3 test/weaving_native_prefix_rank_gate.py 2>&1 | tee -a chapel-weaving-native-prefix.log
+          grep -Fxq 'WEAVING_NATIVE_PREFIX_RESULT=PASS' chapel-weaving-native-prefix.log
+
+      - name: Retain Native prefix-rank research evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-weaving-native-prefix-evidence
+          path: chapel-weaving-native-prefix.log
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Retain Native polynomial feasibility evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
