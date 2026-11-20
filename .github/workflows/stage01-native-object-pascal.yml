@@ -92,6 +92,8 @@ jobs:
             boundary512_status=$?
             sh build_and_run_bigint_floor_div_positive_quotient512.sh
             quotient512_status=$?
+            sh build_and_run_bigint_divmod_wide_quotient768.sh
+            wide768_status=$?
             echo "STAGE01_EXIT=$stage01_status"
             echo "CUTLET_BOUNDS_EXIT=$cutlet_status"
             echo "COMPOSITION_BOUNDS_EXIT=$composition_status"
@@ -118,7 +120,8 @@ jobs:
             echo "BIGINT_FLOOR_DIV_POSITIVE_EXIT=$floor_div_positive_status"
             echo "BIGINT_FLOOR_DIV_POSITIVE_BOUNDARY512_EXIT=$boundary512_status"
             echo "BIGINT_FLOOR_DIV_POSITIVE_QUOTIENT512_EXIT=$quotient512_status"
-            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ] || [ "$bigint_status" -ne 0 ] || [ "$divmod_status" -ne 0 ] || [ "$signed_status" -ne 0 ] || [ "$input_contract_status" -ne 0 ] || [ "$conversion_status" -ne 0 ] || [ "$scalar_square_status" -ne 0 ] || [ "$divmod_long_status" -ne 0 ] || [ "$regular_mod_signed_status" -ne 0 ] || [ "$multiply_long_status" -ne 0 ] || [ "$add_sub_long_status" -ne 0 ] || [ "$scalar_signed_status" -ne 0 ] || [ "$scalar_multiply_signed_status" -ne 0 ] || [ "$compare_order_status" -ne 0 ] || [ "$min_max_status" -ne 0 ] || [ "$min_max_isolation_status" -ne 0 ] || [ "$negate_abs_status" -ne 0 ] || [ "$from_uint64_status" -ne 0 ] || [ "$from_int64_status" -ne 0 ] || [ "$decimal_long_status" -ne 0 ] || [ "$to_decimal_status" -ne 0 ] || [ "$floor_div_positive_status" -ne 0 ] || [ "$boundary512_status" -ne 0 ] || [ "$quotient512_status" -ne 0 ]; then
+            echo "BIGINT_DIVMOD_WIDE_QUOTIENT768_EXIT=$wide768_status"
+            if [ "$stage01_status" -ne 0 ] || [ "$cutlet_status" -ne 0 ] || [ "$composition_status" -ne 0 ] || [ "$bigint_status" -ne 0 ] || [ "$divmod_status" -ne 0 ] || [ "$signed_status" -ne 0 ] || [ "$input_contract_status" -ne 0 ] || [ "$conversion_status" -ne 0 ] || [ "$scalar_square_status" -ne 0 ] || [ "$divmod_long_status" -ne 0 ] || [ "$regular_mod_signed_status" -ne 0 ] || [ "$multiply_long_status" -ne 0 ] || [ "$add_sub_long_status" -ne 0 ] || [ "$scalar_signed_status" -ne 0 ] || [ "$scalar_multiply_signed_status" -ne 0 ] || [ "$compare_order_status" -ne 0 ] || [ "$min_max_status" -ne 0 ] || [ "$min_max_isolation_status" -ne 0 ] || [ "$negate_abs_status" -ne 0 ] || [ "$from_uint64_status" -ne 0 ] || [ "$from_int64_status" -ne 0 ] || [ "$decimal_long_status" -ne 0 ] || [ "$to_decimal_status" -ne 0 ] || [ "$floor_div_positive_status" -ne 0 ] || [ "$boundary512_status" -ne 0 ] || [ "$quotient512_status" -ne 0 ] || [ "$wide768_status" -ne 0 ]; then
               exit 1
             fi
           } 2>&1 | tee evidence/stage01-native-fpc.log
