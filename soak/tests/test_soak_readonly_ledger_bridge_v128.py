@@ -156,16 +156,18 @@ class ReadonlyBridgeV128Tests(unittest.TestCase):
     def test_forged_receipt_sha_in_db_fails_closed(self):
         with CrashStore(self.root,self.p) as store:
             commit_one(store,"e0",0)
-        with sqlite3.connect(self.root/"ledger.sqlite") as db:
+        db=sqlite3.connect(self.root/"ledger.sqlite")
+        try:
             db.execute("UPDATE native_receipts SET receipt_sha256=? WHERE engine='e0'",("f"*64,))
+            db.commit()
+        finally:
+            db.close()
         with self.assertRaisesRegex(ValueError,"atomic registration"):
             audit(self.root,self.inventory,self.scope)
 
     def test_scope_source_order_change_fails_closed(self):
         self.populate()
-        self.scope["dispositions"].reverse()
-        # disposition order is allowed, but order of frozen engine descriptors is not.
-        # Reverse plan engine order via distinct frozen source plan in a fresh root.
+        # Freeze a source plan in the opposite engine order while keeping the\n        # original v127 dispositions order unchanged.
         other=copy.deepcopy(self.p)
         other["engines"].reverse()
         self.scope["inventory_sha256"]=digest(self.inventory)
@@ -187,16 +189,24 @@ class ReadonlyBridgeV128Tests(unittest.TestCase):
 
     def test_foreign_sqlite_comparison_claim_fails_closed(self):
         self.populate()
-        with sqlite3.connect(self.root/"ledger.sqlite") as db:
+        db=sqlite3.connect(self.root/"ledger.sqlite")
+        try:
             db.execute("UPDATE comparisons SET stream_sha256=?",("e"*64,))
+            db.commit()
+        finally:
+            db.close()
         with self.assertRaisesRegex(ValueError,"comparison lacks exact"):
             audit(self.root,self.inventory,self.scope)
 
     def test_rogue_sqlite_chunk_not_in_scope_fails_closed(self):
         self.populate()
-        with sqlite3.connect(self.root/"ledger.sqlite") as db:
+        db=sqlite3.connect(self.root/"ledger.sqlite")
+        try:
             db.execute("INSERT INTO chunks VALUES (?,?,?,?,?,?,?)",
                        ("unplanned","5000",0,"1","1","a"*64,1))
+            db.commit()
+        finally:
+            db.close()
         with self.assertRaisesRegex(ValueError,"unexpected/missing"):
             audit(self.root,self.inventory,self.scope)
 
