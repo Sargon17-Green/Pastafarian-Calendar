@@ -182,15 +182,22 @@ pub fn discovery_29_inverted_bands_outside_total_test() {
 
 pub fn discovery_29_duplicate_nested_bands_test() {
   let ids = [1, 2, 3]
-  let one = check_valid(11, 21, ids, [band(40, 1000)], [
-    band(40, 1000),
-  ])
+  let one =
+    check_valid(11, 21, ids, [band(40, 1000)], [
+      band(40, 1000),
+    ])
   let many =
-    check_valid(11, 21, ids, [
-      band(100, 200),
-      band(40, 1000),
-      band(40, 1000),
-    ], [band(40, 1000)])
+    check_valid(
+      11,
+      21,
+      ids,
+      [
+        band(100, 200),
+        band(40, 1000),
+        band(40, 1000),
+      ],
+      [band(40, 1000)],
+    )
   one |> should.equal(many)
 }
 
@@ -260,9 +267,10 @@ pub fn discovery_29_extreme_limits_monotonicity_test() {
     [band(-extreme, extreme)],
   )
   |> should.equal(0)
-  let narrow = check_valid(11, 21, ids, [band(42, 963)], [
-    band(42, 963),
-  ])
+  let narrow =
+    check_valid(11, 21, ids, [band(42, 963)], [
+      band(42, 963),
+    ])
   let expanded =
     check_valid(11, 21, ids, [band(42, 963), band(964, 1926)], [
       band(42, 1926),

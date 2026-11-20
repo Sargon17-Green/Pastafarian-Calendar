@@ -19,10 +19,7 @@ pub fn dispatch_discovery_29(
   context: bootstrap.MonsterContext,
   requested_bowl_ids: List(Int),
   bands: List(discovery_27_sum_bands.SumBand),
-) -> Result(
-  ComplementWindowCount,
-  discovery_19_interval_value.Discovery19Error,
-) {
+) -> Result(ComplementWindowCount, discovery_19_interval_value.Discovery19Error) {
   // Stage32 faras la validigon unufoje eĉ se bands aŭ ids estas malplenaj.
   case
     discovery_28_union_bands.dispatch_discovery_28(
