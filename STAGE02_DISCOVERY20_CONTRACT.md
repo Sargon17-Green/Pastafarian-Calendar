@@ -1,6 +1,6 @@
 # Stage 2 / Discovery 20 — bounded ANSWER-AT stream indexing (Logo+Ido)
 
-Status: CONTRACT_ONLY_NOT_IMPLEMENTED_NOT_NATIVE. This document belongs to the QA branch `qa/logo-ido-d20-answer-at` forked from the D19 canonical acceptance SHA `4002280506a93999e64159155f2e9f8b89ae4c23`. It does not advance LAST_COMPLETED_STAGE, merge anything, or authorize a completed Stage 2.
+Status: QA_NATIVE_PASS_VERIFIED; CANONICAL_CANDIDATE_PENDING_NATIVE_AND_SAME_SHA_REGRESSIONS. This document belongs to the QA branch `qa/logo-ido-d20-answer-at` forked from the D19 canonical acceptance SHA `4002280506a93999e64159155f2e9f8b89ae4c23`. It does not advance LAST_COMPLETED_STAGE, merge anything, or authorize a completed Stage 2.
 
 ## Prerequisite and scope
 
@@ -52,8 +52,14 @@ Implement D20 code and its independent walker/test fixture on this QA branch fir
 
 A dependent aggregate may emit `STAGE_2_DISCOVERY_20_CASES_PASIS 120`, `STAGE_2_DISCOVERY_20_CHECKS_PASIS 409`, and `NATIVE_STAGE_2_DISCOVERY_20_VERIFICATION=PASS` only when both source-locked shards have completed successfully. Reject missing/unknown/failure/timeout markers and malformed outputs. The target counts alone are not evidence of successful execution.
 
-No D20 Native PASS, canonical D20 acceptance, Stage 2 completion, main write, or public release may be claimed until new exact-SHA completed job logs, all required same-SHA regressions, branch/HEAD/blob checks, and separate canonical promotion gates are satisfied. Do not re-run already accepted D19 on its unchanged SHA. Queued/in_progress is neither PASS nor blocker.
+QA D20 Native PASS has now been verified against run 44820146210, but no canonical D20 acceptance, Stage 2 completion, main write, or public release may be claimed until completed exact-canonical-SHA job logs and all required regressions are checked. Do not re-run already accepted D19 on its unchanged SHA. Queued/in_progress is neither PASS nor blocker.
 
 ## Next authorized action
 
-Implement the exact bounded reporter and *algorithmically distinct* test-only iterative walker on `qa/logo-ido-d20-answer-at`; add the naturally triggered two-shard Native QA workflow, then inspect genuine completed evidence. Keep `Logo+Ido` pinned at the D19 accepted SHA until a reviewed D20 candidate satisfies the promotion gate.
+The QA implementation and algorithmically distinct test-only walker are committed at `19de85e8a78e8735913851fd3e50a772b621e18e` with completed success evidence. Promote only through a reviewed, non-protected `Logo+Ido` branch-only descendant (never main or merge), and inspect the naturally triggered canonical D20 dual-shard Native workflow plus every same-SHA regression. Queued/in_progress is neither acceptance nor blocker.
+
+## Verified QA evidence and controlled canonical-candidate handoff (2026-11-21)
+
+QA HEAD `19de85e8a78e8735913851fd3e50a772b621e18e` remained exactly two commits ahead of accepted canonical D19 `4002280506a93999e64159155f2e9f8b89ae4c23`, with six added files and no modified pre-existing source/reference files. Run [44820146210](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44820146210) completed success on that exact QA SHA: forward job 136578625166 60/204 with authentic shard PASS, reverse job 136578624567 60/205 with authentic shard PASS, dependent job 136592092959 120/409 and NATIVE_STAGE_2_DISCOVERY_20_VERIFICATION=PASS. Artifact IDs: forward 14672692683, reverse 14673535730; both preserved in the original run. Canonical Names Lock run 44820146113/job 136578624379 completed success. These are **QA**, not canonical or Stage 2 acceptance.
+
+The new canonical D20 workflow is a separate push-only `Logo\\+Ido` gate, derived from the validated QA workflow but additionally source-locks the newly introduced D20 production/test files by Git blob SHA. It has two independent 1800s/35min bounded Native jobs and one dependent acceptance job. Check every completed canonical job's real log/artifacts/trigger SHA and all same-SHA D01–D19, Stage1, Names Lock regressions before setting D20 ACCEPTED=YES. LAST_COMPLETED_STAGE remains 1. No main/merge.
