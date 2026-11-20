@@ -23,10 +23,13 @@ jobs:
           python-version: '3.12'
       - uses: actions/download-artifact@v4
         with:
-          name: apl-german-verified-4-file-runtime-no-fonts
-          run-id: 44381169710
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
           github-token: ${{ github.token }}
-          path: verified_runtime
+          path: pinned_release
+      - name: Provision pinned NARS runtime and ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Runtime verified_runtime -Evidence font_bootstrap_evidence
       - name: Observe two bounded workspace startup arguments and window titles
         shell: pwsh
         run: ./qa/nars-interface/diagnose_lx_startup.ps1 -Runtime verified_runtime -Evidence workspace_launch_evidence
@@ -34,8 +37,8 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force workspace_launch_evidence | Out-Null
-          Get-ChildItem workspace_launch_evidence -File | Sort-Object Name | ForEach-Object {
+          New-Item -ItemType Directory -Force workspace_launch_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem workspace_launch_evidence,font_bootstrap_evidence -File -Recurse | Sort-Object FullName | ForEach-Object {
             $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             "$h  $($_.Name)"
           } | Set-Content -Encoding utf8 workspace_launch_evidence.sha256
@@ -45,5 +48,6 @@ jobs:
           name: apl-german-workspace-startup-observation-not-stage1
           path: |
             workspace_launch_evidence/
+            font_bootstrap_evidence/
             workspace_launch_evidence.sha256
           retention-days: 14

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Native NARS ⎕FX prefix experiment: compile first five functions, not Stage1 acceptance."""
+"""Bounded native NARS ⎕FX prefix experiments; never constitute Stage 1 acceptance."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -53,7 +53,7 @@ def create_prefix(raw_workspace: bytes, marker: str, repo_root: pathlib.Path, co
             f"(⎕UCS {_codes(block['name'])}) Stage01PrefixFix " +
             nested_fx_expression(fx_definition_lines(block))
         )
-    # Only reached after the five independent exact-name comparisons succeed.
+    # Only reached after all selected exact-name comparisons succeed.
     program.append(
         f"(⎕UCS {_codes(token)}) ⎕NAPPEND ((⎕UCS {_codes(marker)}) ⎕NCREATE 0)"
     )
@@ -114,7 +114,7 @@ def main() -> int:
         args.receipt.parent.mkdir(parents=True, exist_ok=True)
         args.candidate.write_bytes(candidate)
         args.receipt.write_bytes((json.dumps(receipt, indent=2, ensure_ascii=False) + "\n").encode("utf-8"))
-        print("PREFIX_FX_5_CANDIDATE_ONLY", receipt["candidate_sha256"])
+        print(f"PREFIX_FX_{args.count}_CANDIDATE_ONLY", receipt["candidate_sha256"])
         return 0
     except Exception as exc:
         args.receipt.parent.mkdir(parents=True, exist_ok=True)

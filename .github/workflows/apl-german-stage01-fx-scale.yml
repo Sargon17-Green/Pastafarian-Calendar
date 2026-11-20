@@ -1,0 +1,76 @@
+name: APL German native FX prefix scale 20 40 70 (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-stage01-fx-scale.yml'
+      - 'qa/nars-interface/stage01_fx_prefix_probe.py'
+      - 'qa/nars-interface/bounded_stage01_fx_prefix.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  scale-prefix:
+    runs-on: windows-2022
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        count: [20, 40, 70]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Prepare exact runtime and ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Runtime verified_runtime -Evidence font_bootstrap_evidence
+      - name: Verify original prefix generator and source lock
+        shell: pwsh
+        run: python -m unittest discover -s qa/nars-interface -p 'test_stage01_fx_prefix_probe.py' -v
+      - name: Execute native prefix only
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_fx_prefix.ps1 -Runtime verified_runtime -Evidence prefix_scale_evidence -Count ${{ matrix.count }}
+      - name: Verify exact native prefix receipt (never Stage1)
+        shell: pwsh
+        env:
+          EXPECTED_PREFIX_COUNT: ${{ matrix.count }}
+        run: |
+          $path='prefix_scale_evidence/native_prefix_fx.json'
+          if (-not (Test-Path -LiteralPath $path)) { throw 'PREFIX_NATIVE_RESULT_MISSING' }
+          $r=Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
+          $count=[int]$env:EXPECTED_PREFIX_COUNT
+          $expected='NATIVE_FX_PREFIX'+$count+'_CONFIRMED_NOT_STAGE01'
+          if ($r.status -cne $expected -or $r.fx_count -ne $count -or $r.stage01 -cne 'NOT_RUN' -or $r.marker.exact -ne $true -or $r.fx_expected_names.Count -ne $count) {
+            throw ('PREFIX_NATIVE_NOT_CONFIRMED_'+$count)
+          }
+          Write-Output ('PREFIX_NATIVE_CONFIRMED_NOT_STAGE01_COUNT='+$count)
+      - name: Collect evidence hashes
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force prefix_scale_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem prefix_scale_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName)"
+          } | Set-Content -Encoding utf8 prefix_scale_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-prefix${{ matrix.count }}-native-evidence-not-stage1
+          path: |
+            font_bootstrap_evidence/
+            prefix_scale_evidence/
+            prefix_scale_evidence.sha256
+          retention-days: 14

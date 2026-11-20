@@ -1,4 +1,4 @@
-# Ephemeral, version-pinned NARS2000 diagnostic: five locked source functions via ⎕FX.
+# Ephemeral, version-pinned NARS2000 diagnostic: bounded locked-source prefix via ⎕FX.
 [CmdletBinding()]
 param([string]$Runtime='verified_runtime',[string]$Evidence='prefix_fx_evidence',[int]$Count=5)
 Set-StrictMode -Version Latest
@@ -29,7 +29,7 @@ try {
  $ws=Join-Path $env:RUNNER_TEMP 'nars_reference_2by2.ws.nars'
  Invoke-WebRequest -Uri 'https://www.nars2000.org/download/workspaces/2by2.ws.nars' -OutFile $ws -TimeoutSec 90 -MaximumRedirection 3
  if((Get-Item $ws).Length -gt 25000000){throw 'WORKSPACE_SIZE_UNSAFE'}
- $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_fx_prefix_5'
+ $prefix=Join-Path $env:RUNNER_TEMP ('apl_german_fx_prefix_'+$Count)
  $candidate=$prefix+'.ws.nars'
  $receipt=Join-Path $Evidence 'candidate.json'
  $marker=Join-Path $env:RUNNER_TEMP ('apl_stage01_prefix_fx_'+$Count+'.txt')
