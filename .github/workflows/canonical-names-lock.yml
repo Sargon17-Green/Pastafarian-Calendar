@@ -759,3 +759,22 @@ jobs:
         run: |
           set -euo pipefail
           sh ./run_stage40_remote_sixteen.sh
+
+  native-stage41-remote-seventeen:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNAT 13
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y gnat gprbuild
+          gnatmake --version
+      - name: Verify Stage41 independent ±5793/±17 and seven parser negative categories
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh ./run_stage41_remote_seventeen.sh
