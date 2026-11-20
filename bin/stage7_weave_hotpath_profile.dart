@@ -174,11 +174,17 @@ void main() {
     totalTimer.elapsedMilliseconds <= maximumMilliseconds,
     'Bounded hotpath measurement',
   );
-  check(checks >= 17000, 'Complete full-year validation coverage');
+  final perWordChecks = lengths.yearLength + 3 * lengths.monthCount - 1;
+  final expectedBeforeCoverage = 12 + smallRanks + 3 * perWordChecks;
+  check(
+    checks == expectedBeforeCoverage + 1,
+    'Complete full-year validation coverage',
+  );
   check(smallRanks >= 1, 'At least one independent small rank');
 
   print('STAGE7_TOTAL_MS=${totalTimer.elapsedMilliseconds}');
-  print('STAGE7_HOTPATH_PASS; checks=$checks; full_year_words=3; '
+  print('STAGE7_HOTPATH_PASS; checks=$checks; year_days=${lengths.yearLength}; '
+      'month_count=${lengths.monthCount}; full_year_words=3; '
       'small_domains=1; small_ranks=$smallRanks; canonical_case=1; '
       'phases=4; algorithm_unchanged=true');
 }

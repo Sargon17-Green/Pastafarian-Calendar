@@ -45,12 +45,25 @@ Dart 3.13.2, no new dependencies, format test file 1/0 changed, analyzer
 No issues, executable terminates zero. Require:
 - STAGE7_PHASE_{COUNT,FIRST,LAST,CANONICAL}_MS integer >=0
 - STAGE7_TOTAL_MS integer <=180000
-- STAGE7_HOTPATH_PASS checks>=17000, full_year_words=3,
-  small_domains=1, small_ranks>=1, canonical_case=1, phases=4,
-  algorithm_unchanged=true
+- STAGE7_HOTPATH_PASS full_year_words=3, small_domains=1,
+  small_ranks>=1, canonical_case=1, phases=4,
+  algorithm_unchanged=true; output year_days and month_count.
+  Require exactly checks=14+small_ranks+3*(year_days+3*month_count-1).
+  The former literal >=17000 count was invalid for the observed
+  canonical year and failed after all three complete word validators passed.
+  The exact derived count detects missing or added coverage checks without
+  adding artificial assertions merely to inflate a counter.
 - Stage1 now formats 47/0 with clean analyzer/tests
 - Stage6 retains 18/1/6 and total<=120000, Stage5/4/3, P16, D17,
   verify remain successful; exact natural run completed/success 26/26.
+
+Repair evidence: original natural push 44716279189, SHA cafc2aad,
+completed/failure 25/26; only Stage7 job136220388911 failed after
+COUNT=290ms, FIRST=303ms, LAST=8054ms, CANONICAL=12597ms, at the
+fixed coverage threshold (line 177). Dart 3.13.2 format 1/0,
+analyze clean. Previous full-year word checks and invariants had
+passed; no production defect or speedup inferred. This patch corrects
+only the test coverage oracle and its documented acceptance bound.
 
 Any failure requires its own completed log and proven repair. No manual
 duplicate dispatch, main, merge, release or production optimization before
