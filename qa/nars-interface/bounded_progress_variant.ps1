@@ -1,6 +1,6 @@
 # Disposable GitHub Windows VM only. Diagnostic checkpoints, NEVER Stage 1 acceptance.
 [CmdletBinding()]
-param([string]$Runtime='verified_runtime',[string]$Evidence='progress_fx_evidence',[ValidateSet('canary_only','start_only')][string]$Mode='start_only')
+param([string]$Runtime='verified_runtime',[string]$Evidence='progress_fx_evidence',[ValidateSet('canary_only','start_only','padded_canary')][string]$Mode='start_only')
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
@@ -44,7 +44,7 @@ try {
  & python qa/nars-interface/progress_fx_probe.py --repo-root . --source $ws --candidate $candidate --receipt $receipt --marker $marker --mode $Mode
  if($LASTEXITCODE -ne 0){throw 'PROGRESS_GENERATOR_FAILED'}
  $meta=Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
- if($meta.status -cne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.stage01 -cne 'NOT_RUN' -or $meta.count -ne 20 -or $meta.mode -cne $Mode -or $meta.fx_count -ne $(if($Mode -eq 'canary_only'){0}else{20}) -or $meta.source_commit -cne $source){throw 'CANDIDATE_METADATA_CONTRACT_FAILED'}
+ if($meta.status -cne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.stage01 -cne 'NOT_RUN' -or $meta.count -ne 20 -or $meta.mode -cne $Mode -or $meta.fx_count -ne $(if($Mode -in @('canary_only','padded_canary')){0}else{20}) -or $meta.source_commit -cne $source){throw 'CANDIDATE_METADATA_CONTRACT_FAILED'}
  if($meta.marker_path -cne $marker -or $meta.checkpoints.Count -ne 1 -or $meta.names.Count -ne 20){throw 'CANDIDATE_MANIFEST_COUNT_OR_PATH_INVALID'}
  foreach($i in 0..0){
    $point=$meta.checkpoints[$i]
@@ -63,6 +63,7 @@ try {
  $r['candidate_sha256']=$csha
  $r['checkpoint_manifest_sha256']=(Get-FileHash -LiteralPath $receipt -Algorithm SHA256).Hash.ToLowerInvariant()
  $r['outer_lx_chars']=[int]$meta.outer_lx_chars
+ if($Mode -eq 'padded_canary' -and [Math]::Abs([int]$meta.outer_lx_chars - 95883) -ge 10){throw 'PADDED_CANARY_LENGTH_NOT_MATCHED'}
  $p=Start-Process -FilePath $exe -ArgumentList ('"'+$prefix+'"') -WorkingDirectory $root -PassThru
  $r['interpreter_executed']=$true
  $r['process_id']=$p.Id

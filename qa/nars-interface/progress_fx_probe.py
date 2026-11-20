@@ -39,7 +39,7 @@ def record(marker: str, index: int, names: list[str]) -> dict:
 
 
 def create_progress(raw: bytes, marker: str, repo: pathlib.Path, mode: str = "full") -> tuple[bytes, dict]:
-    if mode not in ("full", "start_only", "canary_only"):
+    if mode not in ("full", "start_only", "canary_only", "padded_canary"):
         raise ValueError("INVALID_PROGRESS_MODE")
     locked = load_locked_sources(repo)
     blocks = locked["blocks"][:COUNT]
@@ -53,11 +53,11 @@ def create_progress(raw: bytes, marker: str, repo: pathlib.Path, mode: str = "fu
     by_index = {x["after"]: x for x in traces}
     token = (
         f"APL_GERMAN_FX_TRACE_CANARY_V1|SOURCE={SOURCE_COMMIT}"
-        if mode == "canary_only"
+        if mode in ("canary_only", "padded_canary")
         else f"APL_GERMAN_PREFIX_{COUNT}_FX_VERIFIED_SOURCE_{SOURCE_COMMIT}"
     )
     parts = [write_expr(traces[0]["token"], traces[0]["path"])]
-    if mode != "canary_only":
+    if mode not in ("canary_only", "padded_canary"):
         parts += ["⎕FX " + nested_fx_expression(PREFIX_HELPER), "Stage01PrefixCount←0"]
         for index, block in enumerate(blocks, 1):
             parts.append(
@@ -68,6 +68,15 @@ def create_progress(raw: bytes, marker: str, repo: pathlib.Path, mode: str = "fu
                 checkpoint = by_index[index]
                 parts.append(write_expr(checkpoint["token"], checkpoint["path"]))
     parts.append(write_expr(token, marker))
+    if mode == "padded_canary":
+        # Isolate serialized program length without loading user functions.
+        # A further " 65" appends nine ASCII chars to the outer UCS expression.
+        def outer_size(entries: list[str]) -> int:
+            return len("⎕EC ⎕UCS " + _codes(" ⋄ ".join(entries)))
+        base_entries = [parts[0], "Stage01PadCount←⍴⎕UCS 65", parts[-1]]
+        desired = 95883  # start_only observed value
+        repeats = max(0, (desired - outer_size(base_entries)) // 9)
+        parts = [parts[0], "Stage01PadCount←⍴⎕UCS 65" + (" 65" * repeats), parts[-1]]
     inner = " ⋄ ".join(parts)
     outer = "⎕EC ⎕UCS " + _codes(inner)
     base, meta = make_canary(raw, marker, mode="display")
@@ -94,12 +103,13 @@ def create_progress(raw: bytes, marker: str, repo: pathlib.Path, mode: str = "fu
         "source_commit": SOURCE_COMMIT,
         "source_manifest_sha256": locked["manifest"]["manifest_sha256"],
         "count": COUNT,
-        "fx_count": 0 if mode == "canary_only" else COUNT,
+        "fx_count": 0 if mode in ("canary_only", "padded_canary") else COUNT,
         "mode": mode,
         "names": names,
         "candidate_sha256": hashlib.sha256(candidate).hexdigest(),
         "workspace_source_sha256": meta["input_sha256"],
         "outer_lx_chars": len(outer),
+        "padding_length_target": 95883 if mode == "padded_canary" else None,
         "inner_sha256": hashlib.sha256(inner.encode("utf-8")).hexdigest(),
         "marker_path": marker,
         "marker_token": token,
@@ -115,7 +125,7 @@ def main() -> int:
     ap.add_argument("--candidate", type=pathlib.Path, required=True)
     ap.add_argument("--receipt", type=pathlib.Path, required=True)
     ap.add_argument("--marker", required=True)
-    ap.add_argument("--mode", choices=("full", "start_only", "canary_only"), default="full")
+    ap.add_argument("--mode", choices=("full", "start_only", "canary_only", "padded_canary"), default="full")
     args = ap.parse_args()
     try:
         candidate, receipt = create_progress(args.source.read_bytes(), args.marker, args.repo_root.resolve(), mode=args.mode)

@@ -82,6 +82,21 @@ class NativeProgressCandidateTests(unittest.TestCase):
         self.assertLess(inner.index("⎕NAPPEND"), inner.index("⎕FX"))
         self.assertEqual(r["candidate_sha256"], hashlib.sha256(c).hexdigest())
 
+    def test_padded_canary_is_length_matched_without_any_fx(self):
+        c, receipt = create_progress(BASE, MARKER, ROOT, mode="padded_canary")
+        self.assertEqual(receipt["mode"], "padded_canary")
+        self.assertEqual(receipt["fx_count"], 0)
+        self.assertEqual([row["after"] for row in receipt["checkpoints"]], [0])
+        self.assertTrue(abs(receipt["outer_lx_chars"] - 95883) < 10)
+        self.assertEqual(receipt["candidate_sha256"], hashlib.sha256(c).hexdigest())
+        expression = next(s for s in c.decode("cp1252").splitlines() if s.startswith(":4=V C ")).split("'", 2)[1].replace("{quad}", "⎕")
+        self.assertTrue(expression.startswith("⎕EC ⎕UCS "))
+        inner = "".join(chr(int(x)) for x in expression[len("⎕EC ⎕UCS "):].split())
+        self.assertIn("Stage01PadCount←⍴⎕UCS 65", inner)
+        self.assertNotIn("⎕FX", inner)
+        self.assertNotIn("Stage01PrefixFix", inner)
+        self.assertEqual(inner.count("⎕NAPPEND"), 2)
+
     def test_invalid_mode_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "INVALID_PROGRESS_MODE"):
             create_progress(BASE, MARKER, ROOT, mode="typo")
