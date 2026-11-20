@@ -131,17 +131,17 @@ class BuildGraphTests(unittest.TestCase):
 
     def test_seer_header_missing_fails(self):
         self.gh.missing="prototype/src/seer_calendar_core.hpp"
-        with self.assertRaisesRegex(ValueError,"source missing"):
+        with self.assertRaisesRegex(ValueError,"missing source"):
             self.output()
 
     def test_wrong_Git_tree_blob_fails(self):
         self.gh.wrong_sha="a"*40
-        with self.assertRaisesRegex(ValueError,"tree/contents disagree"):
+        with self.assertRaisesRegex(ValueError,"tree/blob disagreement"):
             self.output()
 
     def test_missing_assembler_object_source_fails(self):
         self.gh.missing="src/runtime/arena.s"
-        with self.assertRaisesRegex(ValueError,"source missing"):
+        with self.assertRaisesRegex(ValueError,"missing source"):
             self.output()
 
     def test_link_target_missing_fails(self):
