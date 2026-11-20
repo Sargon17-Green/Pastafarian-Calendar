@@ -86,12 +86,13 @@ to d18.permutation.full.domain
   ]
 end
 
-to d18.valid :calculation :target :tag
+to d18.valid.from.prefix :calculation :target :tag :before
   print sentence [STAGE_2_DISCOVERY_18_CASE_BEGIN] :tag
-  localmake "before d18.prefix :calculation :target
+  print [STAGE_2_DISCOVERY_18_STEP production_sauce]
   localmake "after monster.stage02.sauce :before
   localmake "actualBowls monster.context.get :after "sauceBowls
   localmake "actualOrder monster.context.get :after "sauceOrder46
+  print [STAGE_2_DISCOVERY_18_STEP independent_oracle]
   localmake "expected nr.sauce :calculation :target
   localmake "expectedBowls nr.sauce.bowls :expected
   localmake "expectedOrder nr.sauce.order46 :expected
@@ -108,6 +109,7 @@ to d18.valid :calculation :target :tag
   d18.require (equalp (monster.context.get :after "status) "SAUCE_ONLY) (list :tag [status])
   d18.require (equalp (monster.context.get :after "metrics) [stage02.dispatch stage02.counts stage02.stones stage02.hidden stage02.visible stage02.visible.ten stage02.visible.fifteen stage02.visible.twenty stage02.visible.twentyfive stage02.visible.thirty stage02.visible.thirtyfive stage02.visible.forty stage02.visible.fortyfive stage02.visible.fortysix stage02.sauce]) (list :tag [metrics])
   d18.require (equalp (monster.context.get :after "logs) [stage02.enter stage02.normalized stage02.counts.ready stage02.stones.ready stage02.hidden.ready stage02.visible.prefix.ready stage02.visible.ten.ready stage02.visible.fifteen.ready stage02.visible.twenty.ready stage02.visible.twentyfive.ready stage02.visible.thirty.ready stage02.visible.thirtyfive.ready stage02.visible.forty.ready stage02.visible.fortyfive.ready stage02.visible.fortysix.ready stage02.sauce.ready]) (list :tag [logs])
+  print [STAGE_2_DISCOVERY_18_STEP determinism]
   d18.require (equalp (monster.stage02.sauce :before) :after) (list :tag [determinism])
   print sentence [STAGE_2_DISCOVERY_18_CASE_END] :tag
   ; Invoked as a command by the D18 runner: no value may escape into the caller.
@@ -121,16 +123,54 @@ to d18.invalid :ctx :tag
   print sentence [STAGE_2_DISCOVERY_18_CASE_END] :tag
 end
 
-to stage02.discovery18.run
+to d18.shard.forward
   d18.permutation.full.domain
   if :D18.PERM.FAIL [print [STAGE_2_DISCOVERY_18_FALIIS] stop]
+  print [STAGE_2_DISCOVERY_18_STEP forward_prefix]
   localmake "prefix d18.prefix (nr.foundation) (nr.tablets)
-  d18.valid (nr.foundation) (nr.tablets) [foundation_tablets]
-  d18.valid (nr.tablets) (nr.foundation) [tablets_foundation]
+  d18.valid.from.prefix (nr.foundation) (nr.tablets) [foundation_tablets] :prefix
+  if :D18.FAIL [print [STAGE_2_DISCOVERY_18_FALIIS] stop]
+  if :D18.CASES <> 1 [print [STAGE_2_DISCOVERY_18_CASE_COUNT_FALIIS] stop]
+  if :D18.N <> 18 [print [STAGE_2_DISCOVERY_18_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_18_FORWARD_CASES_PASIS] :D18.CASES
+  print sentence [STAGE_2_DISCOVERY_18_FORWARD_CHECKS_PASIS] :D18.N
+  print [STAGE_2_DISCOVERY_18_FORWARD_PASIS]
+end
+
+to d18.shard.reverse
+  print [STAGE_2_DISCOVERY_18_STEP reverse_prefix]
+  localmake "prefix d18.prefix (nr.tablets) (nr.foundation)
+  d18.valid.from.prefix (nr.tablets) (nr.foundation) [tablets_foundation] :prefix
   d18.invalid (monster.context.put :prefix "status "VISIBLE_FORTYFIVE_ONLY) [wrong_status]
   d18.invalid (monster.context.put :prefix "visibleFortySix "bad) [visible_not_list]
   d18.invalid (monster.context.put :prefix "visibleFortySix (d18.take 45 (monster.context.get :prefix "visibleFortySix))) [visible_short]
   d18.invalid (monster.context.put :prefix "stoneSeries (d18.take 45 (monster.context.get :prefix "stoneSeries))) [stones_short]
+  if :D18.FAIL [print [STAGE_2_DISCOVERY_18_FALIIS] stop]
+  if :D18.CASES <> 5 [print [STAGE_2_DISCOVERY_18_CASE_COUNT_FALIIS] stop]
+  if :D18.N <> 22 [print [STAGE_2_DISCOVERY_18_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_18_REVERSE_CASES_PASIS] :D18.CASES
+  print sentence [STAGE_2_DISCOVERY_18_REVERSE_CHECKS_PASIS] :D18.N
+  print [STAGE_2_DISCOVERY_18_REVERSE_PASIS]
+end
+
+to stage02.discovery18.run
+  if namep "D18.SHARD [
+    if equalp :D18.SHARD "forward [d18.shard.forward stop]
+    if equalp :D18.SHARD "reverse [d18.shard.reverse stop]
+    print [STAGE_2_DISCOVERY_18_SHARD_FALIIS]
+    stop
+  ]
+  ; Unsharded local fallback retains the original 6/40 assertions.
+  d18.permutation.full.domain
+  if :D18.PERM.FAIL [print [STAGE_2_DISCOVERY_18_FALIIS] stop]
+  localmake "forwardPrefix d18.prefix (nr.foundation) (nr.tablets)
+  d18.valid.from.prefix (nr.foundation) (nr.tablets) [foundation_tablets] :forwardPrefix
+  localmake "reversePrefix d18.prefix (nr.tablets) (nr.foundation)
+  d18.valid.from.prefix (nr.tablets) (nr.foundation) [tablets_foundation] :reversePrefix
+  d18.invalid (monster.context.put :forwardPrefix "status "VISIBLE_FORTYFIVE_ONLY) [wrong_status]
+  d18.invalid (monster.context.put :forwardPrefix "visibleFortySix "bad) [visible_not_list]
+  d18.invalid (monster.context.put :forwardPrefix "visibleFortySix (d18.take 45 (monster.context.get :forwardPrefix "visibleFortySix))) [visible_short]
+  d18.invalid (monster.context.put :forwardPrefix "stoneSeries (d18.take 45 (monster.context.get :forwardPrefix "stoneSeries))) [stones_short]
   if :D18.FAIL [print [STAGE_2_DISCOVERY_18_FALIIS] stop]
   if :D18.CASES <> 6 [print [STAGE_2_DISCOVERY_18_CASE_COUNT_FALIIS] stop]
   if :D18.N <> 40 [print [STAGE_2_DISCOVERY_18_CHECK_COUNT_FALIIS] stop]
