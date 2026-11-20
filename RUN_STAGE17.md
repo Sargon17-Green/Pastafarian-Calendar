@@ -24,6 +24,14 @@ PROJECT_ID: `PC-BRANCH-FALSE-ARABIC`. חוזה זה נגזר בנפרד מפעו
 3. להריץ בדיקות מקומיות תחומות, ולאחר מכן GitHub CI עם מקור הייצור ומבחן נעולים ל־SHA ועם מפרש FALSE המקורי ב־`eb3135565a8670cced3f6bbca4dbf7b014c45634`. אין חזרה על PASS היסטורי ללא שינוי מקור או חוזה.
 4. לקבוע `Stage17 ACCEPTED` רק אחרי completed/log Native, ספירת assertions מפורשת, ארטיפקט ZIP מאומת CRC/SHA ומבקר בלתי תלוי שמשווה blob SHA של קבצים, בודק את ציפיות התוצאות ומסרב לקבל oracle מושחת. בדיקות Python של העיצוב לבדן אינן מספיקות.
 
+## הבחנה בין אורקל Native המקורי ובדיקת QA מאוחרת
+
+ה־SHA-256 `955ff871f12a9ff602ac3097701639f557c56de4d248fe8bc20a30296657fc55` המופיע לעיל הוא של **גרסת אורקל העיצוב שננעלה בריצת Native ההיסטורית** `44812320919`; אין להחליפו בדיעבד או לייחס לריצה קוד שהתווסף אחריה.
+
+לאחר קבלת Stage17 התחום תוקנה באותו ענף בדיקת עוגנים טאוטולוגית באורקל Python, כך שהעוגנים נבדקים מול מניית תמורות עצמאית. גרסת QA המאוחרת: commit `5ba7998a1a846eae67fc932479876a82b4734c81`, Git blob `65e25de5b9f345755932254d77983b2f002efb25`, SHA-256 `370331cb082cef8ace00f40787ae2fb0c1b3afd33465296df4b11da96e64640d`. הקבלה התיעודית: `evidence/stage17_postacceptance_design_oracle_qa_2026-11-20.json` ב־commit `88bc99d53b23c0e7c8185914a0fdefb40b425194`: `720/720` דירוגים, `720/720` היפוכים וייחודיות, `14/14` עוגנים, וארבע בקרות שליליות ייעודיות שנדחו. SHA-256 של דוח התכנון נשאר `b8dd736a6ee67c1b77a62202141daaa9b1e81766f98159eebf97808f76a22a7b`.
+
+זהו **תיקון QA מקומי לאחר הקבלה בלבד**: אין בו הרצת Native חדשה, שינוי מקור FALSE או הרחבת החוזה. Stage17 נשאר ACCEPTED_BOUNDED_CONTRACT_ONLY; בדיקת מצביעים לא מוקצים אינה כלולה. Stage18 לא נפתח.
+
 **STAGE17_ACCEPTED_BOUNDED_CONTRACT; ORIGINAL_NATIVE_PASS; INDEPENDENT_ARTIFACT_AUDIT_PASS; INVALID_POINTER_SAFETY_UNASSESSED; NO_STAGE18_MAIN_OR_MERGE.**
 
 Source and test fixture prepared under the Stage17 bounded contract. The generator `tools/stage17_rank_to_order_fixture.py` covers 14 anchors, 2 replays, 160 embedded assertions, 4 invalid numeric constructions and a deliberate mutant; these are not Native results. Source/runtime pinning and exact-interpreter execution remain mandatory.
