@@ -35,8 +35,8 @@ jobs:
                       assert all(z.name.split('.')[0] not in
                          {'subprocess','ctypes','multiprocessing','psutil'} for z in n.names)
                   if isinstance(n,ast.ImportFrom):
-                      assert (n.module or '').split('.')[0] not in
-                         {'subprocess','ctypes','multiprocessing','psutil'}
+                      assert ((n.module or '').split('.')[0] not in
+                              {'subprocess','ctypes','multiprocessing','psutil'})
           print('V135_ORIGINAL_DATE_DISPATCH_BLOCKED')
           PY
       - name: Run sixteen synthetic CI/archive provenance gates
