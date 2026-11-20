@@ -5,6 +5,7 @@ on:
       - qa/soak-ada-month-weave-dp-contract-v141
     paths:
       - 'soak/control/ada_month_weave_dp_contract_v141.json'
+      - 'soak/control/ada_month_weave_rank_vectors_v141.json'
       - 'soak/runner/soak_ada_month_weave_dp_contract_v141.py'
       - 'soak/process_tests/test_soak_ada_month_weave_dp_contract_v141.py'
       - '.github/workflows/soak-original-month-weave-dp-v141.yml'
@@ -40,14 +41,14 @@ jobs:
                         'subprocess','ctypes','multiprocessing','psutil'}
           print('V141_STOP_NEW_NATIVE_SOAK_DISPATCH_CONFIRMED')
           PY
-      - name: Test 28 independent finite combinatorial rank/count/roundtrip and negative controls
+      - name: Test 32 finite family/golden vector negative controls without date engine
         run: |
           set -euo pipefail
           mkdir -p evidence
           python3 -B -m unittest discover -s soak/process_tests \
             -p 'test_soak_ada_month_weave_dp_contract_v141.py' -v \
             2>&1 | tee evidence/v141-tests.log
-          grep -Eq '^Ran 28 tests ' evidence/v141-tests.log
+          grep -Eq '^Ran 32 tests ' evidence/v141-tests.log
           grep -q '^OK$' evidence/v141-tests.log
       - name: Reverify v140 exact completed source and artifact receipt
         env:
@@ -99,6 +100,10 @@ jobs:
           assert f['all_expected_legal_counts_and_rank_bijections_verified'] is True
           assert f['original_Fct_covered'] is False
           assert f['production_Ada_implementation_complete'] is False
+          assert r['portable_golden_vectors']['portable_rank_vectors_verified']==35
+          assert r['portable_golden_vectors']['portable_rank_vector_groups']==6
+          assert r['portable_golden_vectors']['original_native_calls']==0
+          assert r['portable_golden_vectors']['production_Ada_code_compiled'] is False
           assert r['new_native_or_calendar_Fct_executions']==0
           assert r['scientific_original_full_years_certified']==0
           assert r['independent_original_algorithms_certified']==0
