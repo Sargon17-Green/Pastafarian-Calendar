@@ -1,0 +1,112 @@
+{
+  "schema": "PASTAFARI_SOAK_TRIAGE_SOURCE_PATH_CANDIDATES_V130/1",
+  "source_roster": "soak/control/source_roster_archived_v21_v127.json",
+  "source_provenance": "soak/control/source_roster_archived_v21_v127_provenance.json",
+  "source_census_contract": "PASTAFARI_SOAK_GITHUB_SOURCE_CENSUS_V129/1",
+  "observation_type": "HISTORICAL_COMMIT_PATH_CANDIDATE_NOT_NATIVE_ENTRYPOINT_CERTIFICATION",
+  "entries": [
+    {
+      "record_id": "TRIAGE-01",
+      "source_commit": "ad11cb9be5553c3666b118363a21ba9a839e104b",
+      "candidate_path": "src/bootstrap.b98",
+      "candidate_class": "CODE_BOOTSTRAP_ONLY",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    },
+    {
+      "record_id": "TRIAGE-02",
+      "source_commit": "349ae65542948c9d77de0c6b6ffe51a932517876",
+      "candidate_path": "מקור/תאריך־שלם־טהור.אמן",
+      "candidate_class": "SOURCE_ENTRYPOINT_CANDIDATE_NOT_REVIEWED",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    },
+    {
+      "record_id": "TRIAGE-03",
+      "source_commit": "6542fc660e6513957b3b7a15d7b230a3a70d7604",
+      "candidate_path": "src/PastafarianExcel.bas",
+      "candidate_class": "SOURCE_ENTRYPOINT_CANDIDATE_NOT_REVIEWED",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    },
+    {
+      "record_id": "TRIAGE-04",
+      "source_commit": "08bff0e77939eb3f5ba3fd6361be7b7afdace9f9",
+      "candidate_path": "labview-project/PastafariCalendar-LabVIEW-G.lvproj",
+      "candidate_class": "PROJECT_MANIFEST_ONLY_NO_VI_SOURCE",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    },
+    {
+      "record_id": "TRIAGE-05",
+      "source_commit": "c6e3867752d407fa3d4a5e1cdabe388dceffcbf9",
+      "candidate_path": "source/the complete date",
+      "candidate_class": "SOURCE_ENTRYPOINT_CANDIDATE_NOT_REVIEWED",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    },
+    {
+      "record_id": "TRIAGE-06",
+      "source_commit": "53dfe1b4fc597f6b72967c820a06f49d466cf676",
+      "candidate_path": "src/boot.asm",
+      "candidate_class": "CODE_BOOTSTRAP_ONLY",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    },
+    {
+      "record_id": "TRIAGE-07",
+      "source_commit": "70fe86a1346b8702d5558f5f89ae570229063636",
+      "candidate_path": "src/monster_bootstrap.spl",
+      "candidate_class": "CODE_BOOTSTRAP_ONLY",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    },
+    {
+      "record_id": "TRIAGE-08",
+      "source_commit": "0c2bad7393f4d66b77f884520f8ab6f5025feedd",
+      "candidate_path": "rtl/pcal_stage1_bootstrap.sv",
+      "candidate_class": "CODE_BOOTSTRAP_ONLY",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    },
+    {
+      "record_id": "TRIAGE-09",
+      "source_commit": "4f4925f781dad998e4ded008269d2f09fe893cb7",
+      "candidate_path": "src/PastafarianWord.bas",
+      "candidate_class": "SOURCE_ENTRYPOINT_CANDIDATE_NOT_REVIEWED",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    },
+    {
+      "record_id": "TRIAGE-10",
+      "source_commit": "1a1ea6a89f1f7a2cde9cba1f91aa1625a9284334",
+      "candidate_path": "src/production/stage54_integration.s",
+      "candidate_class": "SOURCE_ENTRYPOINT_CANDIDATE_NOT_REVIEWED",
+      "candidate_explicitly_not_certified_as_Fct": true,
+      "source_identity_audit_required": true,
+      "full_date_native_execution_verified": false,
+      "immutable_source_dependency_manifest_verified": false
+    }
+  ],
+  "safe_to_promote_into_v127_scope": false,
+  "all_source_lineage_unassessed": true,
+  "native_soak_dispatch_authorized": false
+}
