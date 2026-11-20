@@ -1,0 +1,66 @@
+name: Soak v128 read-only native evidence link, synthetic no Fct
+on:
+  push:
+    branches:
+      - qa/soak-evidence-link-v128
+    paths:
+      - 'soak/runner/soak_readonly_ledger_bridge_v128.py'
+      - 'soak/tests/test_soak_readonly_ledger_bridge_v128.py'
+      - '.github/workflows/soak-readonly-evidence-link-v128.yml'
+permissions:
+  contents: read
+jobs:
+  offline-ledger-evidence-integrity-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Confirm no dispatch allowed by scientific first difference
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          lock=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          assert lock['first_difference']['field']=='month_index'
+          assert lock['successful_ten_thousand_soak_years']==0
+          print('V128_NO_NEW_NATIVE_DISPATCH_LOCK_RETAINED')
+          PY
+      - name: Static proof new files have no native process launcher
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          path=Path('soak/runner/soak_readonly_ledger_bridge_v128.py')
+          tree=ast.parse(path.read_text())
+          for node in ast.walk(tree):
+              if isinstance(node,ast.Import):
+                  assert all(n.name.split('.')[0] not in {'subprocess','ctypes','psutil',
+                                                           'multiprocessing'} for n in node.names)
+              if isinstance(node,ast.ImportFrom):
+                  assert ((node.module or '').split('.')[0] not in {'subprocess','ctypes',
+                                                                     'psutil','multiprocessing'})
+          print('V128_BRIDGE_READ_ONLY_NO_EXECUTION_IMPORTS')
+          PY
+      - name: Ten synthetic v2 native-receipt and SQLite audit tests
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          python3 -B -m unittest discover -s soak/tests \
+            -p 'test_soak_readonly_ledger_bridge_v128.py' -v \
+            2>&1 | tee evidence/v128-test.log
+          grep -Eq '^Ran 10 tests ' evidence/v128-test.log
+          grep -q '^OK$' evidence/v128-test.log
+          echo V128_TEN_READONLY_NATIVE_RECEIPT_TESTS_PASS_NO_FCT
+      - name: Save test evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v128-readonly-ledger-bridge-synthetic-no-Fct
+          path: evidence/v128-test.log
+          if-no-files-found: warn
+          retention-days: 30
