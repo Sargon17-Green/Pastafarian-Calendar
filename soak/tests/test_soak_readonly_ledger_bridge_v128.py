@@ -142,16 +142,21 @@ class ReadonlyBridgeV128Tests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"checksum"):
             audit(self.root,self.inventory,self.scope)
 
-    def test_missing_native_stdout_or_receipt_fails_closed(self):
+    def test_missing_native_stdout_fails_closed(self):
         with CrashStore(self.root,self.p) as store:
             c=commit_one(store,"e0",0)
-            raw,receipt=store._native_receipt_paths(c)
-        for missing in (raw,receipt):
-            original=missing.read_bytes()
-            missing.unlink()
-            with self.assertRaisesRegex(ValueError,"missing"):
-                audit(self.root,self.inventory,self.scope)
-            missing.write_bytes(original)
+            raw,_=store._native_receipt_paths(c)
+        raw.unlink()
+        with self.assertRaisesRegex(ValueError,"missing"):
+            audit(self.root,self.inventory,self.scope)
+
+    def test_missing_native_receipt_fails_closed(self):
+        with CrashStore(self.root,self.p) as store:
+            c=commit_one(store,"e0",0)
+            _,receipt=store._native_receipt_paths(c)
+        receipt.unlink()
+        with self.assertRaisesRegex(ValueError,"missing"):
+            audit(self.root,self.inventory,self.scope)
 
     def test_forged_receipt_sha_in_db_fails_closed(self):
         with CrashStore(self.root,self.p) as store:
