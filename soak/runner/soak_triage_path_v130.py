@@ -12,6 +12,7 @@ from collections import Counter
 import json
 import os
 from pathlib import Path
+from urllib.parse import quote
 
 from soak_scope_coverage_v127 import canonical, digest, parse_json
 from soak_source_census_v129 import (
@@ -134,7 +135,7 @@ def run(manifest:dict, provenance:dict, census:dict, gh:GitHubReadOnly)->dict:
             status="SOURCE_LOOKUP_UNAVAILABLE_"+err.code
         # Head movement is reported, not treated as disappearance of frozen bytes.
         try:
-            now=gh.get("/repos/"+repo+"/branches/"+__import__("urllib.parse",fromlist=["quote"]).quote(origin["branch"],safe=""))
+            now=gh.get("/repos/"+repo+"/branches/"+quote(origin["branch"],safe=""))
             head=now.get("commit",{}).get("sha") if isinstance(now,dict) else None
             if type(head) is str:
                 sha40(head)
