@@ -1,0 +1,136 @@
+{
+  "schema": "PASTAFARI_SOAK_WEAVE_SELECTOR_AND_ORIGINAL_ARCHIVES_V140/1",
+  "scope": "TWO_DISTINCT_STATIC_SELECTOR_DIFFERENCES_PLUS_PREVIOUSLY_RUN_ORIGINAL_BYTES_NO_DISPATCH",
+  "repository": "Sargon17-Green/Pastafarian-Calendar",
+  "source_refs": {
+    "ada": "a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72",
+    "python": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "fortran": "23349b9748859a1032b8a3afad0812b1d392be94"
+  },
+  "source_blobs": {
+    "ada_month": "9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef",
+    "ada_date": "923733d4f8face03586aee304640bf7540c28b4c",
+    "python_oracle": "d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53"
+  },
+  "source_contract": {
+    "ada": "one rank per remaining interior ticket using shifted successive stream answers",
+    "python": "one global rank over the complete legal month-weaving family",
+    "families_not_equal": true,
+    "selectors_not_equivalent": true,
+    "neither_is_proof_of_sole_foundation_root_cause": true
+  },
+  "synthetic_stream": {
+    "month_lengths": [
+      4,
+      4
+    ],
+    "first": 1,
+    "direction": 1,
+    "modulus_decimal": "170141183460469231731687303715884105727",
+    "ada_tickets": [
+      1,
+      2,
+      1,
+      1
+    ],
+    "ada_result": [
+      1,
+      2,
+      1,
+      2,
+      1,
+      2,
+      1,
+      2
+    ],
+    "python_full_family_global_rank": 1,
+    "python_result": [
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      2,
+      2
+    ],
+    "counterfactual_ada_rail_global_rank1_result": [
+      1,
+      2,
+      1,
+      1,
+      2,
+      2,
+      1,
+      2
+    ]
+  },
+  "archived_original_runs": [
+    {
+      "role": "ada",
+      "run_id": 44394781099,
+      "artifact_id": 14472835490,
+      "file": "v140-original-ada-v103-evidence.zip",
+      "sha256": "3d8c594ae761aa6eeb8c11b241755b2f11ef472d41483ffb5be0c1cdc2bd8cbe",
+      "members": 9,
+      "source_commit": "a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72",
+      "observed": [
+        5000,
+        10,
+        503,
+        30,
+        52
+      ],
+      "receipt_file": "v103-original-ada-native.log",
+      "receipt_sha256": "cd8d3079a7f158ca454e58226742eab0ce93cf0779e1fae7e8c2aa3d5a38ae78"
+    },
+    {
+      "role": "python_ts",
+      "run_id": 44392067310,
+      "artifact_id": 14469537094,
+      "file": "v140-original-py-ts-v101-evidence.zip",
+      "sha256": "bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1",
+      "members": 53,
+      "source_commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+      "observed": [
+        5000,
+        10,
+        503,
+        20,
+        56
+      ],
+      "receipt_file": "original-python-0-normalized.jsonl",
+      "receipt_sha256": "834cc548105faeadb99e5e3fb384d72e957d55c607847800f7cf0f0c8dc627c4",
+      "typescript_member": "original-typescript-0-raw.jsonl",
+      "typescript_member_sha256": "a0f3a261f8247361d284420984fa6c6a1da84a4075374e89039e3b681d948e5f"
+    },
+    {
+      "role": "fortran",
+      "run_id": 44397451131,
+      "artifact_id": 14473652463,
+      "file": "v140-original-fortran-v106-evidence.zip",
+      "sha256": "7f8e57308aee0c80ffedc9634e59b65d11a1bc94982830dd3217623878e3e48f",
+      "members": 26,
+      "source_commit": "23349b9748859a1032b8a3afad0812b1d392be94",
+      "observed": [
+        5000,
+        10,
+        503,
+        20,
+        56
+      ],
+      "receipt_file": "v106-native-output.log",
+      "receipt_sha256": "e4dbf6d7bb954481eb85f819f4816f90e9413b86afced8b5252512bbd81e85fb",
+      "binary_member": "v106-original-fortran-native",
+      "binary_sha256": "738a4f48aa9cd489d1cf48882ed15874cbd640600598d87979b8dcd6efc20ef1"
+    }
+  ],
+  "original_fct_coordinates": {
+    "calculation_day": -15055671,
+    "target_day": -15055671
+  },
+  "original_native_executions_in_v140": 0,
+  "original_soak_10000_years_certified": 0,
+  "independent_algorithms_certified": 0,
+  "dispatch_authorized": false
+}
