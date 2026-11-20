@@ -131,7 +131,9 @@ proc lexRank(const ref lengths: list(int),
     if countPrefix(lengths, prefix) == 0 then
       halt("Illegal word supplied to finite rank.");
   }
-  if prefix.size != + reduce lengths.toArray() then
+  var expectedDays = 0;
+  for k in lengths do expectedDays += k;
+  if prefix.size != expectedDays then
     halt("Finite word length mismatch.");
   return rank;
 }
