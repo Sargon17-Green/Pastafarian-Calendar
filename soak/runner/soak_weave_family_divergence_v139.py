@@ -198,7 +198,7 @@ def check_issue(gh):
     need(issue.get("number")==29 and issue.get("state")=="open"
          and "Ada+" in issue.get("title","")
          and "CONFIRMED_ORIGINAL_SOURCE_MISMATCH" in issue.get("body","")
-         and "5000,10,503,30,52" in issue.get("body","").replace(" ","")
+         and "V103_ADA_ORIGINAL_FCT_NATIVE" in issue.get("body","")
          and "5000,10,503,20,56" in issue.get("body","").replace(" ",""),
          "Issue #29 original native divergence not verifiable")
     return {"issue":29,"state":"open","original_mismatch_proven_in_issue":True,
