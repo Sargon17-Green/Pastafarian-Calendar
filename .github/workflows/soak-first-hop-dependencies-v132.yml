@@ -1,0 +1,131 @@
+name: Soak v132 pinned source first-hop dependencies, no native Fct
+on:
+  push:
+    branches:
+      - qa/soak-first-hop-deps-v132
+    paths:
+      - 'soak/runner/soak_first_hop_dependencies_v132.py'
+      - 'soak/process_tests/test_soak_first_hop_dependencies_v132.py'
+      - 'soak/control/first_hop_dependency_probes_v132.json'
+      - '.github/workflows/soak-first-hop-dependencies-v132.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  first-hop-source-bytes-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Keep v108 first-original-difference dispatch lock and reject new converter process code
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import ast,json
+          lock=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for name in ('soak/runner/soak_first_hop_dependencies_v132.py',
+                       'soak/process_tests/test_soak_first_hop_dependencies_v132.py'):
+              tree=ast.parse(Path(name).read_text(encoding='utf8'))
+              for node in ast.walk(tree):
+                  if isinstance(node,ast.Import):
+                      assert all(n.name.split('.')[0] not in
+                          {'subprocess','ctypes','multiprocessing','psutil'} for n in node.names)
+                  if isinstance(node,ast.ImportFrom):
+                      assert ((node.module or '').split('.')[0] not in
+                          {'subprocess','ctypes','multiprocessing','psutil'})
+          print('V132_ORIGINAL_DISPATCH_STOP_AND_STATIC_READ_ONLY_GUARD_PASS')
+          PY
+      - name: Run 17 synthetic immutable source direct-dependency tests
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_first_hop_dependencies_v132.py' -v \
+            2>&1 | tee evidence/v132-tests.log
+          grep -Eq '^Ran 17 tests ' evidence/v132-tests.log
+          grep -q '^OK$' evidence/v132-tests.log
+      - name: Validate immutable v131 completed run and GitHub artifact identity
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,json
+          from urllib.request import Request,urlopen
+          base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              r=Request(base+path,headers={
+                 'Accept':'application/vnd.github+json',
+                 'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                 'X-GitHub-Api-Version':'2022-11-28',
+                 'User-Agent':'v132-static-source-provenance'})
+              with urlopen(r,timeout=25) as h:return json.load(h)
+          run=get('/actions/runs/44715717410')
+          assert run['id']==44715717410
+          assert run['head_sha']=='1c99c36ee9da266f354bfebdbfdaa047c075e3fa'
+          assert run['status']=='completed' and run['conclusion']=='success'
+          artifacts=get('/actions/runs/44715717410/artifacts')
+          matches=[a for a in artifacts['artifacts'] if
+                   a['id']==14618673805 and
+                   a['name']=='soak-v131-frozen-91-source-lineage-screen-not-native-soak'
+                   and a['digest']=='sha256:383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2'
+                   and a['expired'] is False]
+          assert len(matches)==1
+          print('V132_FROZEN_V131_COMPLETED_CI_AND_ARTIFACT_DIGEST_PASS')
+          PY
+      - name: Download frozen v131 source witness, do not recompute past evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: soak-v131-frozen-91-source-lineage-screen-not-native-soak
+          run-id: 44715717410
+          github-token: ${{ github.token }}
+          path: evidence/v131
+      - name: Verify roots and first-hop source dependencies at original immutable Git commits
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_first_hop_dependencies_v132.py \
+            --manifest soak/control/first_hop_dependency_probes_v132.json \
+            --v131-lineage evidence/v131/v131-lineage-screen.json \
+            --output evidence/v132-first-hop.json \
+            | tee evidence/v132-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v132-first-hop.json').read_text())
+          assert r['eight_verified_root_files']==8
+          assert len(r['observations'])==8
+          assert len(r['distinct_source_families'])==5
+          assert r['native_date_calls']==0
+          assert r['original_full_years_certified']==0
+          assert r['independent_algorithms_certified']==0
+          assert not r['soak_dispatch_authorized']
+          assert not r['native_binary_identity_attested']
+          assert not r['full_dependency_closure_certified']
+          assert not r['scientific_soak_10000_pass']
+          assert not any(x['eligible_for_soak'] for x in r['observations'])
+          cpp=[x for x in r['observations'] if x['family']=='SEER_CPP']
+          assert len(cpp)==2
+          assert all(any(d['status']=='HEADER_ELSEWHERE_HASH_VERIFIED_INCLUDE_PATH_UNVERIFIED'
+                         and d['resolved_path']=='prototype/src/seer_calendar_core.hpp'
+                         for d in x['direct_file_references']) for x in cpp)
+          print('V132_EIGHT_SOURCE_ROOTS_RECHECKED_NO_NATIVE_SOAK_CREDIT')
+          PY
+      - name: Preserve reproducible source-byte evidence and tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v132-first-hop-static-dependency-audit-not-soak
+          path: |
+            evidence/v132-tests.log
+            evidence/v132-summary.json
+            evidence/v132-first-hop.json
+          if-no-files-found: warn
+          retention-days: 30
