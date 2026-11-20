@@ -204,20 +204,50 @@ SELECT 'SLICE25_YEAR_JSON ' || jsonb_build_object(
         'month_name_indices',(s.year_structure).month_name_indices
     ),
     'cutlet_prefix_gates',(
+        -- gate_day(index) re-sums every gap from the foundation. Repeating it
+        -- at each cutlet boundary is quadratic in the number of gaps.
+        -- One forward pass from the source-locked open gate is equivalent:
+        -- gate_day(i) - gate_day(i-1) = positive_gate_gap(i) for i>0,
+        -- and negative_gate_gap(1-i) for i<=0 (including crossing zero).
+        WITH cutlet_prefixes AS MATERIALIZED (
+            SELECT 0::bigint AS ordinal,0::numeric AS prefix
+            UNION ALL
+            SELECT ord,sum(part) OVER(ORDER BY ord)::numeric AS prefix
+            FROM unnest((s.year_structure).cutlet_partition)
+                 WITH ORDINALITY AS u(part,ord)
+        ),
+        gap_steps AS MATERIALIZED (
+            SELECT step_index,
+                   CASE WHEN step_index>0
+                        THEN pastafari_sql_tamil.positive_gate_gap(step_index)
+                        ELSE pastafari_sql_tamil.negative_gate_gap(1-step_index)
+                   END AS gap
+            FROM generate_series(
+                (s.year_data).open_gate_index+1,
+                (s.year_data).close_gate_index,
+                1::numeric
+            ) AS step(step_index)
+        ),
+        cumulative_gaps AS MATERIALIZED (
+            SELECT step_index,
+                   sum(gap) OVER(ORDER BY step_index ROWS UNBOUNDED PRECEDING)
+                       AS cumulative_gap
+            FROM gap_steps
+        )
         SELECT jsonb_agg(
             jsonb_build_object(
                 'ordinal',p.ordinal,
                 'prefix',p.prefix,
                 'gate_index',(s.year_data).open_gate_index+p.prefix,
-                'gate_day',pastafari_sql_tamil.gate_day((s.year_data).open_gate_index+p.prefix)
+                'gate_day',CASE WHEN p.ordinal=0
+                               THEN (s.year_data).open_gate_day
+                               ELSE (s.year_data).open_gate_day+g.cumulative_gap
+                          END
             ) ORDER BY p.ordinal
         )
-        FROM (
-            SELECT 0::bigint AS ordinal,0::numeric AS prefix
-            UNION ALL
-            SELECT ord,sum(part) OVER(ORDER BY ord)::numeric AS prefix
-            FROM unnest((s.year_structure).cutlet_partition) WITH ORDINALITY AS u(part,ord)
-        ) AS p
+        FROM cutlet_prefixes AS p
+        LEFT JOIN cumulative_gaps AS g
+          ON g.step_index=(s.year_data).open_gate_index+p.prefix
     )
 )::text
 FROM slice25_structures AS s;
