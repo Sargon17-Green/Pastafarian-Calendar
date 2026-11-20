@@ -60,6 +60,7 @@ SAME_PROCESS_TIMEOUT_SECONDS = 480
 # Two reference-backed context-sensitive boundary targets: warm and revisit
 # BOTH 4999 and 5001 boundary pairs in the same original process, with no reset.
 CONTEXT_SEQUENCE = (11, 13, 12, 14, 11, 13, 12, 14)
+CONTEXT_REVERSE_SEQUENCE = (14, 12, 13, 11, 14, 12, 13, 11)
 
 def case_days(case_index: int) -> tuple[int, int]:
     if not 1 <= case_index <= len(CASES):
@@ -193,9 +194,9 @@ def parse_same_process_stdout(stdout: str, order: tuple[int, ...]) -> list[tuple
     return values
 
 
-def run_same_process(executable: Path) -> list[tuple[int, ...]]:
+def run_same_process(executable: Path, order: tuple[int, ...]) -> list[tuple[int, ...]]:
     process = subprocess.run(
-        [str(executable.resolve()), *(str(case) for case in CONTEXT_SEQUENCE)],
+        [str(executable.resolve()), *(str(case) for case in order)],
         capture_output=True, text=True,
         timeout=SAME_PROCESS_TIMEOUT_SECONDS, check=False,
         preexec_fn=memory_limiter(1024),
@@ -205,12 +206,16 @@ def run_same_process(executable: Path) -> list[tuple[int, ...]]:
             f"Same-process Fortran exit={process.returncode}; "
             f"stdout={process.stdout[-1200:]}; stderr={process.stderr[-1200:]}"
         )
-    return parse_same_process_stdout(process.stdout, CONTEXT_SEQUENCE)
+    return parse_same_process_stdout(process.stdout, order)
 
 
 def self_test() -> None:
     assert len(CASES) == 14
     assert CONTEXT_SEQUENCE == (11, 13, 12, 14, 11, 13, 12, 14)
+    assert CONTEXT_REVERSE_SEQUENCE == (14, 12, 13, 11, 14, 12, 13, 11)
+    assert CONTEXT_REVERSE_SEQUENCE[:4] == tuple(reversed(CONTEXT_SEQUENCE[:4]))
+    assert CONTEXT_REVERSE_SEQUENCE[:4] == CONTEXT_REVERSE_SEQUENCE[4:]
+    assert {case_days(i)[1] for i in CONTEXT_REVERSE_SEQUENCE} == {-15057703, -15053458}
     assert tuple(case_days(i) for i in CONTEXT_SEQUENCE[:4]) == tuple(case_days(i) for i in CONTEXT_SEQUENCE[4:])
     assert len({case["calculation_offset"] for case in CASES}) == 8
     assert CASES[0]["target_offset"] - CASES[0]["calculation_offset"] == 5000
@@ -287,7 +292,7 @@ def self_test() -> None:
             pass
         else:
             raise AssertionError("Malformed same-process context records were accepted")
-    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=36/36")
+    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=40/40")
 
 
 def is_context_sensitive_pair(first: dict, second: dict) -> bool:
@@ -306,6 +311,52 @@ def is_context_sensitive_pair(first: dict, second: dict) -> bool:
         and first.get("python") != second.get("python")
     )
 
+
+def evaluate_same_process(
+    executable: Path, rows: list[dict], order: tuple[int, ...]
+) -> dict:
+    """One original Fortran process per cache-warming order; pinned Python fields."""
+    evidence = {
+        "order": list(order),
+        "reset_between_calls": False,
+        "status": "not_run",
+        "matched_calls": 0,
+        "matched_fields": 0,
+        "total_fields": len(FIELD_NAMES) * len(order),
+        "results": [],
+    }
+    if all(row["status"] == "match" and row["matched_fields"] == 5 for row in rows):
+        try:
+            actual_sequence = run_same_process(executable, order)
+            if len(actual_sequence) != len(order):
+                raise ValueError("Same-process call count mismatch")
+            for position, (case_index, observed) in enumerate(
+                zip(order, actual_sequence), 1
+            ):
+                expected = tuple(
+                    rows[case_index - 1]["python"][name] for name in FIELD_NAMES
+                )
+                correct = sum(a == b for a, b in zip(observed, expected))
+                evidence["matched_fields"] += correct
+                evidence["matched_calls"] += int(correct == 5)
+                evidence["results"].append({
+                    "step": position, "case": case_index,
+                    "calculation_day": case_days(case_index)[0],
+                    "target_day": case_days(case_index)[1],
+                    "expected_python": dict(zip(FIELD_NAMES, expected)),
+                    "actual_fortran": dict(zip(FIELD_NAMES, observed)),
+                    "matched_fields": correct,
+                })
+            evidence["status"] = (
+                "match" if evidence["matched_calls"] == len(order) else "mismatch"
+            )
+        except subprocess.TimeoutExpired as err:
+            evidence["status"] = "timeout"
+            evidence["error"] = f"timeout after {err.timeout} seconds"
+        except Exception as err:
+            evidence["status"] = "error"
+            evidence["error"] = repr(err)
+    return evidence
 
 def compare(reference: Path, executable: Path, commit: str, branch: str, run_id: int) -> int:
     if len(commit) != 40 or any(ch not in "0123456789abcdef" for ch in commit.lower()):
@@ -371,50 +422,22 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
         for a, b in boundary_pairs
     )
     print(f"STAGE01_CALC_CONTEXT_SENSITIVITY={context_sensitive_pairs}/2 PAIRS", flush=True)
-    # Unlike the single-case differential, this exercises the ORIGINAL Fortran
-    # function repeatedly within one process without resetting its gate cache.
-    same_process = {
-        "order": list(CONTEXT_SEQUENCE),
-        "reset_between_calls": False,
-        "status": "not_run",
-        "matched_calls": 0,
-        "matched_fields": 0,
-        "total_fields": 5 * len(CONTEXT_SEQUENCE),
-        "results": [],
-    }
-    if matched_cases == len(CASES) and matched_fields == 5 * len(CASES):
-        try:
-            actual_sequence = run_same_process(executable)
-            for position, (case_index, observed) in enumerate(
-                zip(CONTEXT_SEQUENCE, actual_sequence), 1
-            ):
-                expected = tuple(rows[case_index - 1]["python"][name]
-                                 for name in FIELD_NAMES)
-                correct = sum(a == b for a, b in zip(observed, expected))
-                same_process["matched_fields"] += correct
-                same_process["matched_calls"] += int(correct == 5)
-                same_process["results"].append({
-                    "step": position, "case": case_index,
-                    "calculation_day": case_days(case_index)[0],
-                    "target_day": case_days(case_index)[1],
-                    "expected_python": dict(zip(FIELD_NAMES, expected)),
-                    "actual_fortran": dict(zip(FIELD_NAMES, observed)),
-                    "matched_fields": correct,
-                })
-            same_process["status"] = (
-                "match" if same_process["matched_calls"] == len(CONTEXT_SEQUENCE)
-                else "mismatch"
-            )
-        except subprocess.TimeoutExpired as err:
-            same_process["status"] = "timeout"
-            same_process["error"] = f"timeout after {err.timeout} seconds"
-        except Exception as err:
-            same_process["status"] = "error"
-            same_process["error"] = repr(err)
+    # Each sequence invokes the ORIGINAL normative date entry point in its
+    # own process, without a reset between calls; first-call warming differs.
+    same_process = evaluate_same_process(executable, rows, CONTEXT_SEQUENCE)
+    reverse_same_process = evaluate_same_process(
+        executable, rows, CONTEXT_REVERSE_SEQUENCE
+    )
     print(
         f"STAGE01_CALC_CONTEXT_SAME_PROCESS={same_process['matched_calls']}/"
         f"{len(CONTEXT_SEQUENCE)} CALLS; {same_process['matched_fields']}/"
         f"{same_process['total_fields']} EXACT FIELDS",
+        flush=True,
+    )
+    print(
+        f"STAGE01_CALC_CONTEXT_REVERSE_SAME_PROCESS={reverse_same_process['matched_calls']}/"
+        f"{len(CONTEXT_REVERSE_SEQUENCE)} CALLS; {reverse_same_process['matched_fields']}/"
+        f"{reverse_same_process['total_fields']} EXACT FIELDS",
         flush=True,
     )
     report = {
@@ -433,6 +456,7 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
         "total_fields": 5 * len(CASES),
         "boundary_context_sensitive_pairs": context_sensitive_pairs,
         "same_process_context_sequence": same_process,
+        "same_process_reverse_context_sequence": reverse_same_process,
         "boundary_context_expected_pairs": len(boundary_pairs),
         "reference_timeout_seconds": REFERENCE_TIMEOUT_SECONDS,
         "fortran_timeout_seconds": FORTRAN_TIMEOUT_SECONDS,
@@ -448,7 +472,8 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
         f"{matched_fields}/{5 * len(CASES)} EXACT FIELDS"
     )
     if (matched_cases == len(CASES) and matched_fields == 5 * len(CASES)
-            and context_sensitive_pairs == 2 and same_process["status"] == "match"):
+            and context_sensitive_pairs == 2 and same_process["status"] == "match"
+            and reverse_same_process["status"] == "match"):
         print("STAGE01_CALC_CONTEXT_PASS_ONLY_NOT_FULL_STAGE1_ACCEPTANCE")
         return 0
     print("STAGE01_CALC_CONTEXT_NOT_ACCEPTED; see stage01_calculation_context_diff.json")
