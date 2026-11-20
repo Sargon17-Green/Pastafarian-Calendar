@@ -255,7 +255,7 @@ class FirstHopDependencyTests(unittest.TestCase):
         r=self.by_id("TURKISH-PY")
         self.assertTrue(any(x["status"]=="DIRECT_DEPENDENCY_UNRESOLVED"
                             for x in r["direct_file_references"]))
-        self.assertFalse(r["full_dependency_closure_verified"])
+        self.assertFalse(r["transitive_dependencies_verified"])
 
     def test_extra_header_missing_does_not_become_linked(self):
         self.gh.drop="prototype/src/seer_calendar_core.hpp"
