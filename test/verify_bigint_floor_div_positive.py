@@ -15,6 +15,7 @@ COUNTS = {
 }
 SOURCE = Path(__file__).with_name("bigint_floor_div_positive_vectors.tsv")
 PERTURBED_SOURCE = Path(__file__).with_name("bigint_floor_div_positive_divisor_plus_one.tsv")
+DECREMENTED_SOURCE = Path(__file__).with_name("bigint_floor_div_positive_divisor_minus_one.tsv")
 
 
 def limbs_value(digits):
@@ -121,6 +122,8 @@ def main():
     rows = []
     perturbed_seen = set()
     perturbed_rows = []
+    decremented_seen = set()
+    decremented_rows = []
     max_a_digits = 0
     max_b_digits = 0
     max_q_digits = 0
@@ -169,19 +172,46 @@ def main():
             raise AssertionError("divisor+1 vector exceeds 512 decimal digits")
         perturbed_rows.append("\t".join((category, *perturbed_fields)))
 
+        # Python-int oracle using divmod(A,B-1), not a baseline-Q adjustment.
+        # The eight B=1 rows are excluded rather than dividing by zero.
+        if divisor > 1:
+            decremented_divisor = divisor - 1
+            decremented_pair = (dividend, decremented_divisor)
+            if decremented_pair in decremented_seen:
+                raise AssertionError("duplicate divisor-1 input")
+            decremented_seen.add(decremented_pair)
+            decremented_q, decremented_r = divmod(dividend, decremented_divisor)
+            if dividend != decremented_q * decremented_divisor + decremented_r:
+                raise AssertionError("divisor-1 identity failed")
+            if not (0 <= decremented_r < decremented_divisor):
+                raise AssertionError("divisor-1 remainder bounds failed")
+            decremented_fields = tuple(
+                str(number) for number in
+                (dividend, decremented_divisor, decremented_q, decremented_r)
+            )
+            if max(map(len, decremented_fields)) > 512:
+                raise AssertionError("divisor-1 vector exceeds 512 digits")
+            decremented_rows.append("\t".join((category, *decremented_fields)))
+
     if len(seen) != 96:
         raise AssertionError("not all input pairs are unique")
     if len(perturbed_seen) != 96 or len(perturbed_rows) != 96:
         raise AssertionError("not all divisor+1 input pairs are unique")
+    if len(decremented_seen) != 88 or len(decremented_rows) != 88:
+        raise AssertionError("expected 88 unique divisor-1 cases")
     SOURCE.write_text("\n".join(rows) + "\n", encoding="ascii")
     PERTURBED_SOURCE.write_text(
         "\n".join(perturbed_rows) + "\n", encoding="ascii"
+    )
+    DECREMENTED_SOURCE.write_text(
+        "\n".join(decremented_rows) + "\n", encoding="ascii"
     )
     print(
         "Python-int BigFloorDivPositive oracle: 96/96 unique, "
         f"categories={dict(counts)}, max A={max_a_digits} digits, "
         f"max B={max_b_digits} digits, max Q={max_q_digits} digits, "
-        "0 divergences; divisor+1 Python-int oracle: 96/96 unique generated"
+        "0 divergences; divisor+1 Python-int oracle: 96/96 unique generated; "
+        "divisor-1 Python-int oracle: 88/88 unique generated"
     )
 
 

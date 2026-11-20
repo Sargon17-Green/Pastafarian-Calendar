@@ -13,10 +13,10 @@ uses
 
 const
   ExpectedCases = 96;
-  ExpectedChecks = 2691;
+  ExpectedChecks = 3043;
 
 var
-  Cases, PerturbedCases, Passed, Failed: Integer;
+  Cases, PerturbedCases, DecrementedCases, Passed, Failed: Integer;
 
 procedure Check(const Name: string; OK: Boolean);
 begin
@@ -25,7 +25,7 @@ begin
   else
   begin
     Inc(Failed);
-    Writeln('FALHA caso ', Cases + PerturbedCases, ': ', Name);
+    Writeln('FALHA caso ', Cases + PerturbedCases + DecrementedCases, ': ', Name);
   end;
 end;
 
@@ -249,6 +249,65 @@ begin
   end;
 end;
 
+{ Python divmod(A,B-1) supplies an independent oracle for positive B-1.
+  Exactly eight original B=1 cases are excluded. }
+procedure CheckDecrementedVector(const Fields: TStringList);
+var
+  A, B, Q, Residual: TBigInt;
+begin
+  if Fields.Count <> 5 then
+    raise EConvertError.Create('TSV divisor-1 exige cinco campos.');
+  if not ((Fields[0] = 'SMALL_UNIT') or (Fields[0] = 'LESS') or
+          (Fields[0] = 'RADIX') or (Fields[0] = 'EXACT') or
+          (Fields[0] = 'MAX_REM') or (Fields[0] = 'DENSE')) then
+    raise EConvertError.Create('Grupo divisor-1 desconhecido.');
+
+  A := BigFromDecimal(Fields[1]);
+  B := BigFromDecimal(Fields[2]);
+  Q := BigFloorDivPositive(A, B);
+  Residual := BigSubtract(A, BigMultiply(Q, B));
+
+  Check('divisor-1: quociente Python-int independente',
+    BigToDecimal(Q) = Fields[3]);
+  Check('divisor-1: resto Python-int independente',
+    BigToDecimal(Residual) = Fields[4]);
+  Check('divisor-1: quociente e resto canonicos',
+    IsCanonicalNonnegative(Q) and IsCanonicalNonnegative(Residual));
+  Check('divisor-1: resto no intervalo [0,B)',
+    (BigCompare(Residual, BigZero) >= 0) and
+    (BigCompare(Residual, B) < 0));
+end;
+
+procedure RunDecrementedVectors;
+var
+  F: TextFile;
+  Line: string;
+  Fields: TStringList;
+begin
+  Fields := TStringList.Create;
+  try
+    Fields.Delimiter := #9;
+    Fields.StrictDelimiter := True;
+    AssignFile(F, 'bigint_floor_div_positive_divisor_minus_one.tsv');
+    Reset(F);
+    try
+      while not EOF(F) do
+      begin
+        ReadLn(F, Line);
+        if Line = '' then
+          Continue;
+        Fields.DelimitedText := Line;
+        Inc(DecrementedCases);
+        CheckDecrementedVector(Fields);
+      end;
+    finally
+      CloseFile(F);
+    end;
+  finally
+    Fields.Free;
+  end;
+end;
+
 procedure RunVectors;
 var
   F: TextFile;
@@ -325,11 +384,13 @@ end;
 begin
   Cases := 0;
   PerturbedCases := 0;
+  DecrementedCases := 0;
   Passed := 0;
   Failed := 0;
   try
     RunVectors;
     RunPerturbedVectors;
+    RunDecrementedVectors;
     CheckExpectedRangeError;
     CheckExpectedDivByZero('divisor zero gera EDivByZero', BigOne, BigZero);
     CheckExpectedDivByZero('divisor negativo gera EDivByZero',
@@ -343,9 +404,10 @@ begin
   end;
 
   Writeln('Resumo BigFloorDivPositive: ', Cases, ' casos base; ',
-    PerturbedCases, ' casos divisor+1; ', Passed, ' verificacoes OK; ',
+    PerturbedCases, ' casos divisor+1; ', DecrementedCases,
+    ' casos divisor-1; ', Passed, ' verificacoes OK; ',
     Failed, ' falhas.');
   if (Cases <> ExpectedCases) or (PerturbedCases <> ExpectedCases) or
-     (Passed <> ExpectedChecks) or (Failed <> 0) then
+     (DecrementedCases <> 88) or (Passed <> ExpectedChecks) or (Failed <> 0) then
     Halt(1);
 end.
