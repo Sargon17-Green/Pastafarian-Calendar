@@ -177,7 +177,7 @@ void main() {
   final perWordChecks = lengths.yearLength + 3 * lengths.monthCount - 1;
   final expectedBeforeCoverage = 12 + smallRanks + 3 * perWordChecks;
   check(
-    checks == expectedBeforeCoverage + 1,
+    checks == expectedBeforeCoverage,
     'Complete full-year validation coverage',
   );
   check(smallRanks >= 1, 'At least one independent small rank');
