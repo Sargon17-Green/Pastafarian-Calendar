@@ -1,0 +1,123 @@
+name: Soak v130 pinned Git-tree triage candidate path audit, no native Fct
+on:
+  push:
+    branches:
+      - qa/soak-triage-path-v130
+    paths:
+      - 'soak/runner/soak_triage_path_v130.py'
+      - 'soak/process_tests/test_soak_triage_path_v130.py'
+      - 'soak/control/triage_candidate_sources_v130.json'
+      - '.github/workflows/soak-triage-path-v130.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  readonly-ten-candidate-git-tree-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require original mismatch stop and no new converter process calls
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import ast,json
+          lock=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for p in (Path('soak/runner/soak_triage_path_v130.py'),
+                    Path('soak/process_tests/test_soak_triage_path_v130.py')):
+              tree=ast.parse(p.read_text())
+              for node in ast.walk(tree):
+                  if isinstance(node,ast.Import):
+                      assert all(x.name.split('.')[0] not in {'subprocess','ctypes','multiprocessing'}
+                                 for x in node.names)
+                  if isinstance(node,ast.ImportFrom):
+                      assert (node.module or '').split('.')[0] not in {'subprocess','ctypes','multiprocessing'}
+          print('V130_STOP_NATIVE_DISPATCH_RETAINED')
+          PY
+      - name: Run 13 synthetic immutable-tree and candidate-status regressions
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_triage_path_v130.py' -v \
+            2>&1 | tee evidence/v130-tests.log
+          grep -Eq '^Ran 13 tests ' evidence/v130-tests.log
+          grep -q '^OK$' evidence/v130-tests.log
+      - name: Validate frozen v129 completed source census CI and archive ID
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,json
+          from urllib.request import Request,urlopen
+          root='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def fetch(path):
+              r=Request(root+path,headers={
+                  'Accept':'application/vnd.github+json',
+                  'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                  'X-GitHub-Api-Version':'2022-11-28',
+                  'User-Agent':'v130-readonly-source-evidence-gate'})
+              with urlopen(r,timeout=25) as p:
+                  return json.load(p)
+          source=fetch('/actions/runs/44704866938')
+          assert source['head_sha']=='e1b0d888f296a111191c714b2d9c4fad58f3c6d0'
+          assert source['status']=='completed' and source['conclusion']=='success'
+          artifacts=fetch('/actions/runs/44704866938/artifacts')
+          matching=[r for r in artifacts['artifacts']
+              if r['id']==14615867472 and
+                 r['name']=='soak-v129-91-entry-source-census-no-native-execution']
+          assert len(matching)==1 and not matching[0]['expired']
+          assert matching[0].get('digest')==(
+              'sha256:6ae0a6aac2607bffffe5c3303421e0a8684d92dd03e2a8e82005d60a7d3f5d7d')
+          print('V130_V129_PINNED_RUN_AND_ARCHIVE_METADATA_LOCK_PASS')
+          PY
+      - name: Retrieve pinned v129 source census evidence, not new source execution
+        uses: actions/download-artifact@v4
+        with:
+          name: soak-v129-91-entry-source-census-no-native-execution
+          run-id: 44704866938
+          github-token: ${{ github.token }}
+          path: evidence/v129
+      - name: Verify all 10 historical source-path candidates by original Git trees
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_triage_path_v130.py \
+            --candidates soak/control/triage_candidate_sources_v130.json \
+            --provenance soak/control/source_roster_archived_v21_v127_provenance.json \
+            --census evidence/v129/v129-source-census.json \
+            --output evidence/v130-triage-path-audit.json \
+            | tee evidence/v130-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v130-triage-path-audit.json').read_text())
+          assert r['candidate_count']==10 and r['unresolved_native_entrypoints']==10
+          assert r['observation_counts']=={
+              'CANDIDATE_BYTES_VERIFIED_NOT_EXECUTABLE_CERTIFIED':10
+          },r['observation_counts']
+          assert r['native_date_calls']==0
+          assert r['original_full_years_certified']==0
+          assert not r['native_dispatch_authorized'] and not r['scientific_soak_10000_pass']
+          assert not any(x['eligible_for_soak'] or x['candidate_is_verified_original_Fct']
+                         for x in r['records'])
+          print('V130_ALL_TEN_CANDIDATE_PATHS_CONFIRMED_NOT_READY_FOR_SOAK')
+          PY
+      - name: Preserve candidate SHA, branch drift and test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v130-ten-unmapped-candidates-no-fct
+          path: |
+            evidence/v130-tests.log
+            evidence/v130-summary.json
+            evidence/v130-triage-path-audit.json
+          if-no-files-found: warn
+          retention-days: 30
