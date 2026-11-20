@@ -240,7 +240,8 @@ def verify_historical_log_text(log):
     need(type(log) is str and len(log)<1000000,
          "historical job log size or type invalid")
     missing=[s for s in LOG_TOKENS if s not in log]
-    need(not missing,"missing historic toolchain/log evidence token: "+missing[0])
+    if missing:
+        raise ValueError("missing historic toolchain/log evidence token: "+missing[0])
     return {"state":"AVAILABLE_VERIFIED_FROM_HISTORIC_JOB_LOG",
             "observed_package_versions_and_build_success":True,
             "original_binary_hashes_recorded_in_job_log":2,
