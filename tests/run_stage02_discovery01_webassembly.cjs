@@ -487,7 +487,7 @@ function main() {
       .filter(e => e.kind === 'function' && e.name.startsWith('test_'))
       .map(e => e.name).sort();
     assert.equal(tests.length, 95, 'unexpected regression set size');
-    assert.equal(new Set(tests).size, 91, 'duplicate export');
+    assert.equal(new Set(tests).size, tests.length, 'duplicate export');
     for (const name of TARGETS.keys()) assert.ok(tests.includes(name), 'missing target: ' + name);
     for (const name of FORWARD_TARGETS.keys()) assert.ok(tests.includes(name), 'missing forward target: ' + name);
     for (const name of SHORT_TARGETS.keys()) assert.ok(tests.includes(name), 'missing short target: ' + name);
