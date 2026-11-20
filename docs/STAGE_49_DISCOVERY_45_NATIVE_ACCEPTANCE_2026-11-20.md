@@ -1,0 +1,50 @@
+# Stage49 / DISCOVERY45 — native acceptance (2026-11-20)
+PROJECT_ID: PC-BRANCH-COBOL-SIMPLIFIED-CHINESE
+Branch: COBOL+简体中文
+Accepted exact SHA: c808be10ae308f5b49dcef1510be5bf474833dc1
+Natural push run: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44700966287
+Run attempt 1: completed/success; paginated REST GET /jobs?per_page=100 confirms 50/50 completed/success.
+Native job: 136168966090 stage49-four-output-input-reinit-discovery-native; completed/success.
+Compiler: cobc (GnuCOBOL) 3.1.2.0, strict -Werror compile and actual native execution.
+Artifact: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44700966287/artifacts/14613840661
+ZIP SHA256: 43bfa9ece29d34f9c2eb0bd204c46ef49689aef481aaa83c000938837c0597ca
+Downloaded ZIP bytes SHA256 matched GitHub digest; ZIP CRC PASS, exactly one stage49-native.log entry; embedded PROJECT_ID and HEAD match this project and SHA.
+
+## Checked gate and raw counters
+STAGE49_PLANNING_ARITHMETIC=192/192
+STAGE49_PLANNING_CASES=24/24
+STAGE49_PLANNING_UNIQUE_PAIRS=24
+STAGE49_PLANNING_8192_DIGIT_CASES=6
+STAGE49_PLANNING_INPUT_REBUILDS=96/96
+STAGE49_PLANNING_PRESERVED_AFTER_MUTATION=96/96
+STAGE49_PLANNING_SURVIVORS_AFTER_FREE=72/72
+STAGE49_PLANNING_SURVIVORS_AFTER_REUSE=72/72
+STAGE49_PLANNING_FRESH_OWNERS=24/24
+STAGE49_PLANNING_RESTORED_OWNERS=24/24
+STAGE49_PLANNING_TARGET_BALANCE=6,6,6,6
+STAGE49_PLANNING_GATE=PASS_NOT_NATIVE
+STAGE49_INITIAL_QUADS=24
+STAGE49_INPUT_REBUILDS=96
+STAGE49_PRESERVED_OUTPUTS=96
+STAGE49_SURVIVORS_AFTER_FREE=72
+STAGE49_SURVIVORS_AFTER_REUSE=72
+STAGE49_NEW_OUTPUTS=24
+STAGE49_RESTORED_OUTPUTS=24
+STAGE49_OCCUPIED_REJECTS=24
+STAGE49_REJECT_PRESERVED=96
+STAGE49_TARGET_SLOT_1=6
+STAGE49_TARGET_SLOT_2=6
+STAGE49_TARGET_SLOT_3=6
+STAGE49_TARGET_SLOT_4=6
+STAGE49_FINAL_CLEANUP=24
+STAGE49_RUNS=24
+STAGE49_PASS=24
+STAGE49_UNEXPECTED_FAILURES=0
+STAGE49_HEAP_MEASURED=YES
+STAGE49_HEAP_LIVE_POST_RELEASE=0
+RESULT=PASS_STAGE49_FOUR_OUTPUT_INPUT_REINIT_NATIVE
+STAGE49_NATIVE_GATE=PASS
+
+Prior run 44635219556 on dd146f2db10be8724f619019dc81088b2382ab67 failed GnuCOBOL compilation before Native; a test-only PIC width/slice correction at accepted SHA fixed that genuine harness failure. No production defect was shown. _FORTIFY_SOURCE redefinition warnings were nonfatal and do not change strict -Werror success.
+
+Verdict: ACCEPTED_NO_DEFECT_REPRODUCED_IN_24_BOUNDED_CASES. Does NOT imply full calendar integration. No main/merge/release and no production code edit.
