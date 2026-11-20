@@ -20,13 +20,13 @@ def write_expr(token: str, path: str) -> str:
     return f"(⎕UCS {_codes(token)}) ⎕NAPPEND ((⎕UCS {_codes(path)}) ⎕NCREATE 0)"
 
 
-def record(marker: str, index: int, names: list[str]) -> dict:
+def record(marker: str, index: int, names: list[str], count: int = COUNT) -> dict:
     base = pathlib.PureWindowsPath(marker)
     path = str(base.with_name(f"{base.stem}_after_{index:02d}.txt"))
     name = "START" if index == 0 else names[index - 1]
     token = (
         f"APL_GERMAN_FX_TRACE_V1|SOURCE={SOURCE_COMMIT}"
-        f"|COUNT={COUNT}|AFTER={index:02d}|NAME={name}"
+        f"|COUNT={count}|AFTER={index:02d}|NAME={name}"
     )
     return {
         "after": index,
@@ -38,23 +38,25 @@ def record(marker: str, index: int, names: list[str]) -> dict:
     }
 
 
-def create_progress(raw: bytes, marker: str, repo: pathlib.Path, mode: str = "full") -> tuple[bytes, dict]:
+def create_progress(raw: bytes, marker: str, repo: pathlib.Path, mode: str = "full", count: int = COUNT) -> tuple[bytes, dict]:
+    if not 1 <= count <= COUNT or (mode != "start_only" and count != COUNT):
+        raise ValueError("INVALID_PROGRESS_COUNT")
     if mode not in ("full", "start_only", "canary_only", "padded_canary"):
         raise ValueError("INVALID_PROGRESS_MODE")
     locked = load_locked_sources(repo)
-    blocks = locked["blocks"][:COUNT]
-    if len(blocks) != COUNT:
+    blocks = locked["blocks"][:count]
+    if len(blocks) != count:
         raise ValueError("LOCKED_BLOCK_COUNT_MISMATCH")
     names = [b["name"] for b in blocks]
-    if len(set(names)) != COUNT:
+    if len(set(names)) != count:
         raise ValueError("LOCKED_FUNCTION_NAMES_NOT_UNIQUE")
     indexes = CHECKPOINTS if mode == "full" else (0,)
-    traces = [record(marker, i, names) for i in indexes]
+    traces = [record(marker, i, names, count) for i in indexes]
     by_index = {x["after"]: x for x in traces}
     token = (
         f"APL_GERMAN_FX_TRACE_CANARY_V1|SOURCE={SOURCE_COMMIT}"
         if mode in ("canary_only", "padded_canary")
-        else f"APL_GERMAN_PREFIX_{COUNT}_FX_VERIFIED_SOURCE_{SOURCE_COMMIT}"
+        else f"APL_GERMAN_PREFIX_{count}_FX_VERIFIED_SOURCE_{SOURCE_COMMIT}"
     )
     parts = [write_expr(traces[0]["token"], traces[0]["path"])]
     if mode not in ("canary_only", "padded_canary"):
@@ -102,8 +104,8 @@ def create_progress(raw: bytes, marker: str, repo: pathlib.Path, mode: str = "fu
         "stage01": "NOT_RUN",
         "source_commit": SOURCE_COMMIT,
         "source_manifest_sha256": locked["manifest"]["manifest_sha256"],
-        "count": COUNT,
-        "fx_count": 0 if mode in ("canary_only", "padded_canary") else COUNT,
+        "count": count,
+        "fx_count": 0 if mode in ("canary_only", "padded_canary") else count,
         "mode": mode,
         "names": names,
         "candidate_sha256": hashlib.sha256(candidate).hexdigest(),
@@ -126,9 +128,10 @@ def main() -> int:
     ap.add_argument("--receipt", type=pathlib.Path, required=True)
     ap.add_argument("--marker", required=True)
     ap.add_argument("--mode", choices=("full", "start_only", "canary_only", "padded_canary"), default="full")
+    ap.add_argument("--count", type=int, default=COUNT)
     args = ap.parse_args()
     try:
-        candidate, receipt = create_progress(args.source.read_bytes(), args.marker, args.repo_root.resolve(), mode=args.mode)
+        candidate, receipt = create_progress(args.source.read_bytes(), args.marker, args.repo_root.resolve(), mode=args.mode, count=args.count)
         args.candidate.parent.mkdir(parents=True, exist_ok=True)
         args.receipt.parent.mkdir(parents=True, exist_ok=True)
         args.candidate.write_bytes(candidate)

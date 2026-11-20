@@ -97,6 +97,21 @@ class NativeProgressCandidateTests(unittest.TestCase):
         self.assertNotIn("Stage01PrefixFix", inner)
         self.assertEqual(inner.count("⎕NAPPEND"), 2)
 
+    def test_smaller_source_locked_start_only_prefixes(self):
+        for count in (1, 5, 10, 18):
+            with self.subTest(count=count):
+                c, receipt = create_progress(BASE, MARKER, ROOT, mode="start_only", count=count)
+                self.assertEqual(receipt["count"], count)
+                self.assertEqual(receipt["fx_count"], count)
+                self.assertEqual(receipt["names"], [b["name"] for b in self.locked["blocks"][:count]])
+                self.assertEqual(receipt["checkpoints"][0]["after"], 0)
+                self.assertEqual(receipt["candidate_sha256"], hashlib.sha256(c).hexdigest())
+                self.assertIn(f"PREFIX_{count}_FX_", receipt["marker_token"])
+        for count, mode in ((0, "start_only"), (21, "start_only"), (5, "full"), (5, "padded_canary")):
+            with self.subTest(count=count, mode=mode):
+                with self.assertRaisesRegex(ValueError, "INVALID_PROGRESS_COUNT"):
+                    create_progress(BASE, MARKER, ROOT, mode=mode, count=count)
+
     def test_invalid_mode_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "INVALID_PROGRESS_MODE"):
             create_progress(BASE, MARKER, ROOT, mode="typo")

@@ -1,9 +1,10 @@
 # Disposable GitHub Windows VM only. Diagnostic checkpoints, NEVER Stage 1 acceptance.
 [CmdletBinding()]
-param([string]$Runtime='verified_runtime',[string]$Evidence='progress_fx_evidence',[ValidateSet('canary_only','start_only','padded_canary')][string]$Mode='start_only')
+param([string]$Runtime='verified_runtime',[string]$Evidence='progress_fx_evidence',[ValidateSet('canary_only','start_only','padded_canary')][string]$Mode='start_only',[int]$Count=20)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
+if($Count -lt 1 -or $Count -gt 20 -or ($Mode -ne 'start_only' -and $Count -ne 20)){throw 'INVALID_PROGRESS_COUNT'}
 New-Item -ItemType Directory -Force $Evidence | Out-Null
 $Evidence=(Resolve-Path -LiteralPath $Evidence).Path
 $expectedExe='192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d'
@@ -12,6 +13,7 @@ $indices=@(0)
 $r=[ordered]@{
  schema='APL_GERMAN_NATIVE_FX_PROGRESS_RUN_V2'
  mode=$Mode
+ count=$Count
  status='STARTED'
  stage01='NOT_RUN'
  source_commit=$source
@@ -36,20 +38,20 @@ try {
  Invoke-WebRequest -Uri 'https://www.nars2000.org/download/workspaces/2by2.ws.nars' -OutFile $ws -MaximumRedirection 3 -TimeoutSec 90
  if((Get-Item -LiteralPath $ws).Length -lt 50 -or (Get-Item -LiteralPath $ws).Length -gt 25000000){throw 'REFERENCE_WORKSPACE_SIZE_OUT_OF_BOUNDS'}
  $r['workspace_source_sha256']=(Get-FileHash -LiteralPath $ws -Algorithm SHA256).Hash.ToLowerInvariant()
- $prefix=Join-Path $env:RUNNER_TEMP ('apl_german_fx_progress_'+$Mode)
+ $prefix=Join-Path $env:RUNNER_TEMP ('apl_german_fx_progress_'+$Mode+'_'+$Count)
  $candidate=$prefix+'.ws.nars'
  $receipt=Join-Path $Evidence 'progress_candidate.json'
- $marker=Join-Path $env:RUNNER_TEMP 'apl_german_progress_20.txt'
+ $marker=Join-Path $env:RUNNER_TEMP ('apl_german_progress_'+$Count+'.txt')
  if(Test-Path -LiteralPath $marker){throw 'FINAL_MARKER_PREEXISTS'}
- & python qa/nars-interface/progress_fx_probe.py --repo-root . --source $ws --candidate $candidate --receipt $receipt --marker $marker --mode $Mode
+ & python qa/nars-interface/progress_fx_probe.py --repo-root . --source $ws --candidate $candidate --receipt $receipt --marker $marker --mode $Mode --count $Count
  if($LASTEXITCODE -ne 0){throw 'PROGRESS_GENERATOR_FAILED'}
  $meta=Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
- if($meta.status -cne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.stage01 -cne 'NOT_RUN' -or $meta.count -ne 20 -or $meta.mode -cne $Mode -or $meta.fx_count -ne $(if($Mode -in @('canary_only','padded_canary')){0}else{20}) -or $meta.source_commit -cne $source){throw 'CANDIDATE_METADATA_CONTRACT_FAILED'}
+ if($meta.status -cne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.stage01 -cne 'NOT_RUN' -or $meta.count -ne $Count -or $meta.mode -cne $Mode -or $meta.fx_count -ne $(if($Mode -in @('canary_only','padded_canary')){0}else{$Count}) -or $meta.source_commit -cne $source){throw 'CANDIDATE_METADATA_CONTRACT_FAILED'}
  if($meta.marker_path -cne $marker -or $meta.checkpoints.Count -ne 1 -or $meta.names.Count -ne 20){throw 'CANDIDATE_MANIFEST_COUNT_OR_PATH_INVALID'}
  foreach($i in 0..0){
    $point=$meta.checkpoints[$i]
    $after=$indices[$i]
-   $expectedPath=Join-Path $env:RUNNER_TEMP ('apl_german_progress_20_after_{0:D2}.txt' -f $after)
+   $expectedPath=Join-Path $env:RUNNER_TEMP (('apl_german_progress_'+$Count+'_after_{0:D2}.txt') -f $after)
    if($point.after -ne $after -or $point.path -cne $expectedPath){throw 'CHECKPOINT_PATH_OR_INDEX_MISMATCH'}
    if(Test-Path -LiteralPath $expectedPath){throw 'CHECKPOINT_PREEXISTS'}
    [byte[]]$expectedToken=[Text.Encoding]::ASCII.GetBytes([string]$point.token)
@@ -144,7 +146,7 @@ try {
  $finalSha=if($existsFinal){(Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null}
  $r['final_marker']=@{exists=[bool]$existsFinal;exact=[bool]$matchFinal;bytes=$actualFinal.Length;expected_bytes=$want.Length;sha256=$finalSha}
  $success=$matchFinal -and $last -eq 0 -and -not $inconsistent
- $r['status']=if($success){'NATIVE_FX20_'+$Mode.ToUpperInvariant()+'_COMPLETE_NOT_STAGE01'}else{'NATIVE_FX20_'+$Mode.ToUpperInvariant()+'_INCOMPLETE_NOT_STAGE01'}
+ $r['status']=if($success){'NATIVE_FX'+$Count+'_'+$Mode.ToUpperInvariant()+'_COMPLETE_NOT_STAGE01'}else{'NATIVE_FX'+$Count+'_'+$Mode.ToUpperInvariant()+'_INCOMPLETE_NOT_STAGE01'}
 }catch{
  $r['status']='FAIL_CLOSED'
  $r['errors']+= $_.Exception.Message
