@@ -1,19 +1,21 @@
 # Ephemeral, version-pinned NARS2000 diagnostic: five locked source functions via ⎕FX.
 [CmdletBinding()]
-param([string]$Runtime='verified_runtime',[string]$Evidence='prefix_fx_evidence')
+param([string]$Runtime='verified_runtime',[string]$Evidence='prefix_fx_evidence',[int]$Count=5)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
+if($Count -lt 1 -or $Count -gt 95){throw 'PREFIX_COUNT_OUT_OF_BOUNDS'}
 New-Item -ItemType Directory -Force $Evidence | Out-Null
 $Evidence=(Resolve-Path -LiteralPath $Evidence).Path
 $expectedExe='192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d'
 $r=[ordered]@{
- schema='APL_GERMAN_NATIVE_STAGE01_FX_PREFIX_V1'
+ schema='APL_GERMAN_NATIVE_STAGE01_FX_PREFIX_V2'
+ fx_count=$Count
  status='STARTED'
  stage01='NOT_RUN'
  runtime_verified=$false
  native_started=$false
- native_fx5='NOT_CONFIRMED'
+ native_fx='NOT_CONFIRMED'
  marker=[ordered]@{exists=$false;exact=$false;bytes=0;sha256=$null}
  errors=@()
 }
@@ -30,12 +32,12 @@ try {
  $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_fx_prefix_5'
  $candidate=$prefix+'.ws.nars'
  $receipt=Join-Path $Evidence 'candidate.json'
- $marker=Join-Path $env:RUNNER_TEMP 'apl_stage01_prefix_fx.txt'
+ $marker=Join-Path $env:RUNNER_TEMP ('apl_stage01_prefix_fx_'+$Count+'.txt')
  if(Test-Path $marker){throw 'MARKER_PREEXISTING'}
- & python qa/nars-interface/stage01_fx_prefix_probe.py --repo-root . --source $ws --candidate $candidate --receipt $receipt --marker $marker
+ & python qa/nars-interface/stage01_fx_prefix_probe.py --repo-root . --source $ws --candidate $candidate --receipt $receipt --marker $marker --count $Count
  if($LASTEXITCODE -ne 0){throw 'PREFIX_GENERATOR_FAILED'}
  $meta=Get-Content $receipt -Raw | ConvertFrom-Json
- if($meta.status -ne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.fx_count -ne 5 -or $meta.fx_names.Count -ne 5){throw 'PREFIX_METADATA_GATE_FAILED'}
+ if($meta.status -ne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.fx_count -ne $Count -or $meta.fx_names.Count -ne $Count){throw 'PREFIX_METADATA_GATE_FAILED'}
  $csha=(Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant()
  if($csha -cne $meta.candidate_sha256){throw 'PREFIX_CANDIDATE_HASH_MISMATCH'}
  $r['candidate_sha256']=$csha
@@ -46,7 +48,7 @@ try {
  $r['native_started']=$true
  $r['process_id']=$p.Id
  $expected=[System.Text.Encoding]::ASCII.GetBytes([string]$meta.marker_token)
- $deadline=[DateTime]::UtcNow.AddSeconds(45)
+ $deadline=[DateTime]::UtcNow.AddSeconds($(if($Count -le 5){45}else{90}))
  while([DateTime]::UtcNow -lt $deadline){
    if(Test-Path -LiteralPath $marker -PathType Leaf){
      if((Get-Item -LiteralPath $marker).Length -ge $expected.Length){break}
@@ -69,8 +71,8 @@ try {
  $exact=($actual.Length -eq $expected.Length) -and ([Convert]::ToBase64String($actual) -ceq [Convert]::ToBase64String($expected))
  $sha=if($exists){(Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null}
  $r['marker']=[ordered]@{exists=$exists;exact=$exact;bytes=$actual.Length;expected_bytes=$expected.Length;sha256=$sha;was_running=$wasRunning}
- $r['native_fx5']=if($exact){'CONFIRMED'}else{'NOT_CONFIRMED'}
- $r['status']=if($exact){'NATIVE_FX_PREFIX5_CONFIRMED_NOT_STAGE01'}else{'NATIVE_FX_PREFIX5_NOT_CONFIRMED'}
+ $r['native_fx']=if($exact){'CONFIRMED'}else{'NOT_CONFIRMED'}
+ $r['status']=if($exact){'NATIVE_FX_PREFIX'+$Count+'_CONFIRMED_NOT_STAGE01'}else{'NATIVE_FX_PREFIX'+$Count+'_NOT_CONFIRMED'}
 }catch{
  $r['status']='FAIL_CLOSED'
  $r['errors']+=$_.Exception.Message
@@ -78,6 +80,7 @@ try {
 }finally{
  $r | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $Evidence 'native_prefix_fx.json') -Encoding utf8
  Write-Output ('PREFIX_NATIVE_STATUS='+$r['status'])
+ Write-Output ('PREFIX_COUNT='+$Count)
  Write-Output ('PREFIX_SOURCE_COMMIT='+$r['source_commit'])
  Write-Output ('PREFIX_MARKER_EXACT='+$r['marker'].exact)
  Write-Output 'STAGE01=NOT_RUN'

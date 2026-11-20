@@ -36,15 +36,17 @@ def nested_fx_expression(lines: list[str]) -> str:
             entries.append("(⎕UCS " + _codes(line) + ")")
     return "(" + " ".join(entries) + ")"
 
-def create_prefix(raw_workspace: bytes, marker: str, repo_root: pathlib.Path) -> tuple[bytes, dict]:
+def create_prefix(raw_workspace: bytes, marker: str, repo_root: pathlib.Path, count: int = PREFIX_COUNT) -> tuple[bytes, dict]:
+    if not 1 <= count <= 95:
+        raise ValueError("PREFIX_COUNT_OUT_OF_BOUNDS")
     locked = load_locked_sources(repo_root)
-    subset = locked["blocks"][:PREFIX_COUNT]
-    if len(subset) != PREFIX_COUNT:
+    subset = locked["blocks"][:count]
+    if len(subset) != count:
         raise ValueError("PREFIX_INVENTORY_TOO_SMALL")
     names = [b["name"] for b in subset]
-    if len(set(names)) != PREFIX_COUNT:
+    if len(set(names)) != count:
         raise ValueError("PREFIX_NAME_NOT_UNIQUE")
-    token = "APL_GERMAN_PREFIX_5_FX_VERIFIED_SOURCE_" + SOURCE_COMMIT
+    token = f"APL_GERMAN_PREFIX_{count}_FX_VERIFIED_SOURCE_" + SOURCE_COMMIT
     program = ["⎕FX " + nested_fx_expression(PREFIX_HELPER), "Stage01PrefixCount←0"]
     for block in subset:
         program.append(
@@ -81,7 +83,7 @@ def create_prefix(raw_workspace: bytes, marker: str, repo_root: pathlib.Path) ->
         "native_executed": False,
         "source_commit": SOURCE_COMMIT,
         "source_manifest_sha256": locked["manifest"]["manifest_sha256"],
-        "fx_count": PREFIX_COUNT,
+        "fx_count": count,
         "fx_transport": "NESTED_CHARACTER_VECTOR_STRAND_V1",
         "fx_names": names,
         "fx_blocks": [{"name": b["name"], "path": b["path"], "source_lines": [b["start_line"], b["end_line"]]} for b in subset],
@@ -104,9 +106,10 @@ def main() -> int:
     p.add_argument("--candidate", type=pathlib.Path, required=True)
     p.add_argument("--receipt", type=pathlib.Path, required=True)
     p.add_argument("--marker", type=str, required=True)
+    p.add_argument("--count", type=int, default=PREFIX_COUNT)
     args = p.parse_args()
     try:
-        candidate, receipt = create_prefix(args.source.read_bytes(), args.marker, args.repo_root)
+        candidate, receipt = create_prefix(args.source.read_bytes(), args.marker, args.repo_root, args.count)
         args.candidate.parent.mkdir(parents=True, exist_ok=True)
         args.receipt.parent.mkdir(parents=True, exist_ok=True)
         args.candidate.write_bytes(candidate)

@@ -86,7 +86,7 @@ try{
  $marker=Join-Path $env:RUNNER_TEMP 'APL_LX_DIAG_receipt.txt'
  $report['marker_path']=$marker
  $base=Join-Path $env:RUNNER_TEMP 'nars_diagnostic_workspace'
- & python qa/nars-interface/lx_workspace_probe.py --source $reference --candidate ($base+'.ws.nars') --receipt (Join-Path $Evidence 'workspace_receipt.json') --canary $marker --mode display
+ & python qa/nars-interface/lx_workspace_probe.py --source $reference --candidate ($base+'.ws.nars') --receipt (Join-Path $Evidence 'workspace_receipt.json') --canary $marker --mode file
  if($LASTEXITCODE -ne 0){throw 'CANDIDATE_BUILD_FAILED'}
  $report['candidate_sha256']=(Get-FileHash ($base+'.ws.nars') -Algorithm SHA256).Hash.ToLowerInvariant()
  foreach($mode in @('FULL_EXTENSION','BARE_BASE')){

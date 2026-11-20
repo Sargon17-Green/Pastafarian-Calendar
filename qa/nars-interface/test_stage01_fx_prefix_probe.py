@@ -53,6 +53,26 @@ class PrefixTests(unittest.TestCase):
         _,receipt=create_prefix(BASE,MARKER,ROOT)
         self.assertEqual(receipt["fx_transport"],"NESTED_CHARACTER_VECTOR_STRAND_V1")
 
+    def test_ten_function_probe_is_distinct_and_locked(self):
+        five, five_receipt = create_prefix(BASE, MARKER, ROOT)
+        ten, ten_receipt = create_prefix(BASE, MARKER, ROOT, count=10)
+        self.assertEqual(ten_receipt["fx_count"], 10)
+        self.assertEqual(len(ten_receipt["fx_names"]), 10)
+        self.assertEqual(ten_receipt["fx_names"], [b["name"] for b in self.locked["blocks"][:10]])
+        self.assertEqual(len(set(ten_receipt["fx_names"])), 10)
+        self.assertEqual(ten_receipt["fx_transport"], "NESTED_CHARACTER_VECTOR_STRAND_V1")
+        self.assertEqual(ten_receipt["candidate_sha256"], hashlib.sha256(ten).hexdigest())
+        self.assertNotEqual(ten, five)
+        self.assertNotEqual(ten_receipt["marker_token"], five_receipt["marker_token"])
+        self.assertIn("PREFIX_10_FX", ten_receipt["marker_token"])
+        self.assertFalse(ten_receipt["native_executed"])
+
+    def test_invalid_prefix_counts_fail_closed(self):
+        for n in (0, -1, 96):
+            with self.subTest(count=n):
+                with self.assertRaisesRegex(ValueError, "PREFIX_COUNT_OUT_OF_BOUNDS"):
+                    create_prefix(BASE, MARKER, ROOT, count=n)
+
     def test_crlf_preserved(self):
         raw=BASE.replace(b"\n",b"\r\n")
         c,_=create_prefix(raw,MARKER,ROOT)
