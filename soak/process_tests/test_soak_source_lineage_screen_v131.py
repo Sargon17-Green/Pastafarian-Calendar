@@ -230,6 +230,10 @@ class SourceLineageTests(unittest.TestCase):
 
     def test_source_observation_cannot_promote_to_eligible(self):
         self.docs[2]["records"][10]["eligible_for_soak"]=True
+        # Rebind the derivative v130 and CI document digests so the test
+        # reaches the *semantic* self-certification guard, not just the
+        # outer immutable-input hash gate.
+        self.relock()
         with self.assertRaisesRegex(ValueError,"self-certified historical source"):
             self.screen()
 
