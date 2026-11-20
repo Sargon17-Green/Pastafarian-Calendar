@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from audit_production_gate_inverse import (
-    FOUNDATION, GATE_COUNT, HALF_WIDTH, EXPECTED_CHECKS,
+    FOUNDATION, GATE_COUNT, HALF_WIDTH, EXPECTED_CHECKS, INTERIOR_INDICES, INTERIOR_COUNT,
     InverseAuditError, parse_transcript, compare,
 )
 
@@ -33,6 +33,12 @@ def valid_transcript():
         rows.append(f"SHARED\t{index}")
         for offset in (-1, 1):
             rows.append(f"NEAR\t{index}\t{offset}\t{ledger.day(index)+offset}\tNONE")
+    for index in INTERIOR_INDICES:
+        left, right = ledger.day(index), ledger.day(index + 1)
+        gap = right - left
+        targets = (left + gap // 4, left + gap // 2, right - gap // 4)
+        for ordinal, target in enumerate(targets, 1):
+            rows.append(f"INTERIOR\t{index}\t{ordinal}\t{target}\tNONE")
     rows += ["PRODUCTION_GATE_LIMIT\t8192", f"PRODUCTION_EXPANDED_GATES\t{GATE_COUNT}"]
     return "\n".join(rows) + "\n"
 
@@ -55,6 +61,9 @@ class GateInverseContractTests(unittest.TestCase):
         self.assertEqual(result["typed_comparisons"], EXPECTED_CHECKS)
         self.assertEqual(result["exact_inverse_comparisons"], 561)
         self.assertEqual(result["non_gate_neighbor_comparisons"], 8)
+        self.assertEqual(result["non_gate_interior_comparisons"], INTERIOR_COUNT)
+        self.assertEqual(result["interior_sampled_intervals"], 16)
+        self.assertEqual(EXPECTED_CHECKS, 1184)
 
     def test_gate_day_mutation_detected(self):
         i = 7
@@ -88,6 +97,41 @@ class GateInverseContractTests(unittest.TestCase):
         self.mutation(f"NEAR\t{i}\t-1\t{self.ledger.day(i)-1}\tNONE",
                       f"NEAR\t{i}\t-1\t{self.ledger.day(i)-2}\tNONE",
                       "E_NEAR_TARGET_MISMATCH_4_-1")
+
+    def test_interior_false_positive_detected(self):
+        index, ordinal = INTERIOR_INDICES[0], 1
+        day = self.ledger.day(index) + 25
+        self.mutation(f"INTERIOR\t{index}\t{ordinal}\t{day}\tNONE",
+                      f"INTERIOR\t{index}\t{ordinal}\t{day}\t{index}",
+                      f"E_INTERIOR_FALSE_POSITIVE_{index}_{ordinal}")
+
+    def test_interior_day_spoof_detected(self):
+        index, ordinal = INTERIOR_INDICES[1], 2
+        day = self.ledger.day(index) + 50
+        self.mutation(f"INTERIOR\t{index}\t{ordinal}\t{day}\tNONE",
+                      f"INTERIOR\t{index}\t{ordinal}\t{day+1}\tNONE",
+                      f"E_INTERIOR_TARGET_MISMATCH_{index}_{ordinal}")
+
+    def test_duplicate_interior_detected(self):
+        index = INTERIOR_INDICES[2]
+        first, second = self.ledger.day(index) + 25, self.ledger.day(index) + 50
+        self.mutation(f"INTERIOR\t{index}\t1\t{first}\tNONE",
+                      f"INTERIOR\t{index}\t2\t{first}\tNONE",
+                      "E_DUPLICATE_INTERIOR", compare_result=False)
+
+    def test_interior_unknown_ordinal_detected(self):
+        index = INTERIOR_INDICES[3]
+        day = self.ledger.day(index) + 25
+        self.mutation(f"INTERIOR\t{index}\t1\t{day}\tNONE",
+                      f"INTERIOR\t{index}\t4\t{day}\tNONE",
+                      "E_INTERIOR_SET", compare_result=False)
+
+    def test_interior_noncanonical_ordinal_detected(self):
+        index = INTERIOR_INDICES[4]
+        day = self.ledger.day(index) + 25
+        self.mutation(f"INTERIOR\t{index}\t1\t{day}\tNONE",
+                      f"INTERIOR\t{index}\t01\t{day}\tNONE",
+                      "E_NONCANONICAL_INTEGER", compare_result=False)
 
     def test_duplicate_gate_detected(self):
         self.mutation(f"GATE\t1\t{self.ledger.day(1)}",

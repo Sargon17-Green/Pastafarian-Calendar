@@ -22,9 +22,12 @@ GATE_COUNT = 2 * HALF_WIDTH + 1
 MAX_GATE_ABS_INDEX = 8192
 SHARED_COUNT = 4
 NEAR_COUNT = 8
-TOTAL_ROWS = 2 * GATE_COUNT + SHARED_COUNT + NEAR_COUNT + 2
+INTERIOR_INDICES = (-271, -231, -191, -151, -111, -71, -31, -1,
+                    0, 29, 69, 109, 149, 189, 229, 269)
+INTERIOR_COUNT = 3 * len(INTERIOR_INDICES)
+TOTAL_ROWS = 2 * GATE_COUNT + SHARED_COUNT + NEAR_COUNT + INTERIOR_COUNT + 2
 EXPECTED_CHECKS = TOTAL_ROWS
-PASS = "PASS_BOUNDED_REAL_PRODUCTION_GATE_INVERSE_NOT_CERTIFIED"
+PASS = "PASS_BOUNDED_REAL_PRODUCTION_GATE_INVERSE_INTERIOR_NOT_CERTIFIED"
 CANONICAL = re.compile(r"(?:0|-?[1-9][0-9]*)\Z")
 
 
@@ -44,7 +47,7 @@ def parse_transcript(raw):
     rows = raw.splitlines()
     if len(rows) != TOTAL_ROWS:
         raise InverseAuditError("E_ROW_COUNT")
-    gates, inverses, nearby, shared = {}, {}, {}, []
+    gates, inverses, nearby, interiors, shared = {}, {}, {}, {}, []
     limit, expanded = None, None
     for line in rows:
         columns = line.split("\t")
@@ -71,6 +74,15 @@ def parse_transcript(raw):
             if key in nearby:
                 raise InverseAuditError("E_DUPLICATE_NEAR")
             nearby[key] = (day, outcome)
+        elif tag == "INTERIOR" and len(columns) == 5:
+            index, ordinal, day = map(integer, columns[1:4])
+            outcome = columns[4]
+            if outcome != "NONE":
+                integer(outcome)
+            key = (index, ordinal)
+            if key in interiors:
+                raise InverseAuditError("E_DUPLICATE_INTERIOR")
+            interiors[key] = (day, outcome)
         elif tag == "PRODUCTION_GATE_LIMIT" and len(columns) == 2:
             if limit is not None:
                 raise InverseAuditError("E_DUPLICATE_LIMIT")
@@ -90,12 +102,15 @@ def parse_transcript(raw):
         raise InverseAuditError("E_SHARED_SHAPE")
     if set(nearby) != {(index, delta) for index in shared for delta in (-1, 1)}:
         raise InverseAuditError("E_NEAR_SET")
+    if set(interiors) != {(index, ordinal) for index in INTERIOR_INDICES
+                         for ordinal in (1, 2, 3)}:
+        raise InverseAuditError("E_INTERIOR_SET")
     if limit != MAX_GATE_ABS_INDEX:
         raise InverseAuditError("E_PRODUCTION_LIMIT")
     if expanded != GATE_COUNT or expanded > limit:
         raise InverseAuditError("E_PRODUCTION_EXPANDED")
     return {"gates": gates, "inverses": inverses,
-            "shared": tuple(shared), "near": nearby,
+            "shared": tuple(shared), "near": nearby, "interior": interiors,
             "limit": limit, "expanded": expanded}
 
 
@@ -126,11 +141,27 @@ def compare(parsed, ledger, independent_shared):
                 raise InverseAuditError(f"E_INDEPENDENT_NEAR_GATE_{index}_{delta}")
             if result != "NONE":
                 raise InverseAuditError(f"E_FALSE_POSITIVE_INVERSE_{index}_{delta}")
+    for index in INTERIOR_INDICES:
+        left, right = ledger.day(index), ledger.day(index + 1)
+        gap = right - left
+        targets = (left + gap // 4, left + gap // 2, right - gap // 4)
+        if not (left < targets[0] < targets[1] < targets[2] < right):
+            raise InverseAuditError(f"E_ORACLE_INTERIOR_GEOMETRY_{index}")
+        for ordinal, target in enumerate(targets, 1):
+            observed_day, outcome = parsed["interior"][(index, ordinal)]
+            if observed_day != target:
+                raise InverseAuditError(f"E_INTERIOR_TARGET_MISMATCH_{index}_{ordinal}")
+            if ledger.gate_index(target) is not None:
+                raise InverseAuditError(f"E_ORACLE_INTERIOR_GATE_{index}_{ordinal}")
+            if outcome != "NONE":
+                raise InverseAuditError(f"E_INTERIOR_FALSE_POSITIVE_{index}_{ordinal}")
     return {
         "gate_day_comparisons": GATE_COUNT,
         "exact_inverse_comparisons": GATE_COUNT,
         "shared_boundary_comparisons": SHARED_COUNT,
         "non_gate_neighbor_comparisons": NEAR_COUNT,
+        "non_gate_interior_comparisons": INTERIOR_COUNT,
+        "interior_sampled_intervals": len(INTERIOR_INDICES),
         "production_gate_limit_checks": 1,
         "production_expanded_gate_count_checks": 1,
         "typed_comparisons": EXPECTED_CHECKS,
@@ -145,7 +176,7 @@ def write_report(path, value):
 def run(jar, evidence, timeout):
     start = time.monotonic()
     report = {
-        "schema": "post55-production-gate-inverse-unseeded-v1",
+        "schema": "post55-production-gate-inverse-unseeded-interior-v2",
         "project_id": "PC-BRANCH-KOTLIN-CYMRAEG",
         "github_sha": os.environ.get("GITHUB_SHA", "UNVERIFIED_LOCAL"),
         "status": "FAIL_BOUNDED_GATE_INVERSE",

@@ -5,6 +5,10 @@ object Post55ProductionGateInverseProbe {
     private const val HALF_WIDTH = 280
     private const val MAX_GATE_ABS_INDEX = 8192
     private const val EXPECTED_EXPANDED = 2 * HALF_WIDTH + 1
+    private val INTERIOR_INDICES = listOf(
+        -271, -231, -191, -151, -111, -71, -31, -1,
+        0, 29, 69, 109, 149, 189, 229, 269
+    )
 
     @JvmStatic fun main(args: Array<String>) {
         require(args.isEmpty()) { "E_GATE_INVERSE_ARGS" }
@@ -51,6 +55,23 @@ object Post55ProductionGateInverseProbe {
                 val actual = navigator.exactGateIndex(candidate)
                 check(actual == null) { "E_GATE_INVERSE_NEIGHBOR_FALSE_POSITIVE" }
                 println("NEAR\t$boundary\t$delta\t$candidate\tNONE")
+            }
+        }
+        val four = ExactInt.of(4L)
+        val two = ExactInt.of(2L)
+        for (index in INTERIOR_INDICES) {
+            val left = navigator.gateDay(ExactInt.of(index.toLong()))
+            val right = navigator.gateDay(ExactInt.of((index + 1).toLong()))
+            val span = right - left
+            val targets = listOf(left + span / four, left + span / two, right - span / four)
+            check(targets[0] > left && targets[0] < targets[1] &&
+                targets[1] < targets[2] && targets[2] < right
+            ) { "E_GATE_INVERSE_INTERIOR_GEOMETRY" }
+            for ((ordinal, day) in targets.withIndex()) {
+                check(navigator.exactGateIndex(day) == null) {
+                    "E_GATE_INVERSE_INTERIOR_FALSE_POSITIVE"
+                }
+                println("INTERIOR\t$index\t${ordinal + 1}\t$day\tNONE")
             }
         }
         println("PRODUCTION_GATE_LIMIT\t$MAX_GATE_ABS_INDEX")
