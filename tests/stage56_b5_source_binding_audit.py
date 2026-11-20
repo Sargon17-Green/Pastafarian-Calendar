@@ -65,8 +65,11 @@ def safe_path(value: str, provider: bool) -> str:
             not value.startswith('/') and '\x00' not in value, 'UNSAFE_PATH')
     parts = value.split('/')
     require(all(p not in ('', '.', '..') for p in parts), 'UNSAFE_PATH')
-    require(parts[0] not in ('tests', 'fixtures', 'oracle') and
-            not any(p in ('fixtures', 'oracle') for p in parts), 'TEST_INPUT_AS_SOURCE')
+    # Treat every path component case-insensitively: Windows filesystems may
+    # resolve case variants to the same test-only directory.
+    forbidden_source_dirs = {'tests', 'fixtures', 'oracle'}
+    require(not any(p.casefold() in forbidden_source_dirs for p in parts),
+            'TEST_INPUT_AS_SOURCE')
     if provider:
         require(len(parts) > 1 and parts[0] == 'src' and value.endswith('.php'),
                 'NOT_PRODUCTION_PROVIDER_PATH')
@@ -199,6 +202,23 @@ def self_test() -> None:
             else:
                 raise AssertionError('SELFTEST_MISSING_REJECTION_' + expected)
 
+        # Direct regression probes: these look production-like but reside
+        # under forbidden test directories. No synthetic export is trusted.
+        def reject_test_path(path: str, is_provider: bool) -> None:
+            nonlocal count
+            try:
+                safe_path(path, is_provider)
+            except AuditError as exc:
+                require(str(exc) == 'TEST_INPUT_AS_SOURCE',
+                        'SELFTEST_WRONG_SOURCE_PATH_ERROR')
+            else:
+                raise AssertionError('SELFTEST_TEST_SOURCE_ACCEPTED_' + path)
+            count += 1
+
+        reject_test_path('src/tests/YearStructureProvider.php', True)
+        reject_test_path('src/FiXtUrEs/YearStructureProvider.php', True)
+        reject_test_path('canonical/TESTS/year5000_anchor.json', False)
+
         reject('EXPORT_PIN_MISMATCH', export_pin='0'*64)
         reject('PIN_FORMAT', check_commit='invalid')
         reject('UNSAFE_PATH', prov_path='../src/YearStructureProvider.php')
@@ -249,7 +269,7 @@ def self_test() -> None:
             (repo / anchor_path).unlink()
             (repo / anchor_path).write_bytes(anchor_bytes)
 
-        expected = 19 if os.name != 'nt' else 17
+        expected = 22 if os.name != 'nt' else 20
         require(count == expected, 'SELFTEST_CASE_COUNT')
         print(f'STAGE56_B5_SOURCE_BINDING_SELF_TEST checks={count} synthetic_only=YES status=PASS')
 

@@ -1423,7 +1423,7 @@ jobs:
           fi
           grep -Fx 'STAGE56_B5_PREFLIGHT checks=16 synthetic_structure_only=YES provenance=NOT_VERIFIED status=PASS' stage56-b5-evidence/stdout.txt
           grep -Fx 'STAGE56_B5_CLI_NEGATIVE checks=12 real_year_profiles=0 provenance=NOT_VERIFIED status=PASS' stage56-b5-evidence/cli-stdout.txt
-          grep -Fx 'STAGE56_B5_SOURCE_BINDING_SELF_TEST checks=19 synthetic_only=YES status=PASS' stage56-b5-evidence/binding-stdout.txt
+          grep -Fx 'STAGE56_B5_SOURCE_BINDING_SELF_TEST checks=22 synthetic_only=YES status=PASS' stage56-b5-evidence/binding-stdout.txt
       - name: Retain SHA-bound B5 preflight evidence
         if: always()
         uses: actions/upload-artifact@v4
