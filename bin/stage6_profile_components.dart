@@ -74,7 +74,8 @@ void main() {
   total.stop();
 
   requireCondition(year.yearNumber == BigInt.from(5000), 'Year 5000');
-  requireCondition(year.contains(foundation), 'Foundation within selected year');
+  requireCondition(
+      year.contains(foundation), 'Foundation within selected year');
   requireCondition(cutlets.meatballs.isNotEmpty, 'At least one cutlet');
   requireCondition(
     lengths.lengths.length >= 3 && lengths.lengths.length <= 47,
