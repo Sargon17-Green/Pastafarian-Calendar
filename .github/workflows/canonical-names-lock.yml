@@ -62,5 +62,6 @@ jobs:
           node tests/stage02_k5_q5_boundary_oracle.cjs
           node tests/stage02_k5_q6_boundary_oracle.cjs
           node tests/stage02_k5_q7_boundary_oracle.cjs
+          node tests/stage02_k5_q8_boundary_oracle.cjs
       - name: Run all 103 Native WAT cases and 75 exact independent BigInt oracles
         run: node tests/run_stage02_discovery01_webassembly.cjs
