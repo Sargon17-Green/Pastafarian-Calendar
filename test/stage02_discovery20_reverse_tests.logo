@@ -1,0 +1,2 @@
+load "test/stage02_discovery20_common.logo
+d20.run (nr.tablets) (nr.foundation) "REVERSE

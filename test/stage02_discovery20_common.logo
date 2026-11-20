@@ -1,0 +1,168 @@
+; D20 independent bounded differential, test-only, two directions.
+; Oracle is an iterative +/-1 walker; it does NOT call nr.answer.at.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "src/stage02_stones.logo
+load "src/stage02_hidden.logo
+load "src/stage02_visible_prefix.logo
+load "src/stage02_visible_ten.logo
+load "src/stage02_visible_fifteen.logo
+load "src/stage02_visible_twenty.logo
+load "src/stage02_visible_twentyfive.logo
+load "src/stage02_visible_thirty.logo
+load "src/stage02_visible_thirtyfive.logo
+load "src/stage02_visible_forty.logo
+load "src/stage02_visible_fortyfive.logo
+load "src/stage02_visible_fortysix.logo
+load "src/stage02_sauce.logo
+load "src/stage02_ask.logo
+load "src/stage02_answer_at.logo
+load "test/normative_reference.logo
+make "D20.CASES 0
+make "D20.CHECKS 0
+make "D20.FAIL "false
+
+to d20.require :condition :tag
+  make "D20.CHECKS (:D20.CHECKS + 1)
+  if not :condition [
+    make "D20.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_20_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d20.source.require :condition :tag
+  if not :condition [
+    make "D20.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_20_SOURCE_LOCK_FALIIS:] :tag
+  ]
+end
+
+to d20.bi.equal :actual :expected
+  if not monster.stage02.bi.canonical :actual [output "false]
+  output bi.eq :actual :expected
+end
+
+to d20.bi.in.range :actual
+  if not monster.stage02.bi.canonical :actual [output "false]
+  output and (bi.ge :actual (bi.small 1)) (bi.le :actual nr.M)
+end
+
+; Independent iterative oracle. Never evaluate a modular expression here.
+to d20.walk :current :step :remaining
+  if :remaining = 0 [output :current]
+  localmake "next bi.zero
+  if :step = 1 [
+    if bi.eq :current nr.M [make "next bi.small 1]
+    if not (bi.eq :current nr.M) [make "next bi.add :current (bi.small 1)]
+  ]
+  if :step = -1 [
+    if bi.eq :current (bi.small 1) [make "next nr.M]
+    if not (bi.eq :current (bi.small 1)) [make "next bi.sub :current (bi.small 1)]
+  ]
+  output d20.walk :next :step (:remaining - 1)
+end
+
+to d20.prefix :calculation :target
+  output monster.stage02.visible.fortysix (monster.stage02.visible.fortyfive (monster.stage02.visible.forty (monster.stage02.visible.thirtyfive (monster.stage02.visible.thirty (monster.stage02.visible.twentyfive (monster.stage02.visible.twenty (monster.stage02.visible.fifteen (monster.stage02.visible.ten (monster.stage02.visible.prefix (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts :calculation :target))))))))))))
+end
+
+to d20.one.index :actualStream :oracleStream :k :pair
+  localmake "actual monster.stage02.answer.at :actualStream :k
+  localmake "expected d20.walk (first :oracleStream) (last :oracleStream) :k
+  make "D20.CASES (:D20.CASES + 1)
+  d20.require (monster.stage02.bi.canonical :actual) (list :pair :k [shape])
+  d20.require (d20.bi.equal :actual :expected) (list :pair :k [iterative_differential])
+  d20.require (d20.bi.in.range :actual) (list :pair :k [range])
+  d20.require (equalp :actual (monster.stage02.answer.at :actualStream :k)) (list :pair :k [repeat])
+end
+
+to d20.indices :actualStream :oracleStream :pair :indices
+  if emptyp :indices [stop]
+  d20.one.index :actualStream :oracleStream first :indices :pair
+  d20.indices :actualStream :oracleStream :pair butfirst :indices
+end
+
+to d20.selector :ctx :oracleSauce :pair
+  localmake "id first :pair
+  localmake "seal last :pair
+  localmake "actualStream monster.stage02.ask :ctx :id :seal
+  localmake "oracleStream nr.ask :oracleSauce :id :seal
+  d20.source.require (equalp :actualStream :oracleStream) (list :pair [d19_stream_equality])
+  d20.indices :actualStream :oracleStream :pair [0 1 2 31]
+end
+
+to d20.selectors :ctx :oracleSauce :pairs
+  if emptyp :pairs [stop]
+  d20.selector :ctx :oracleSauce first :pairs
+  d20.selectors :ctx :oracleSauce butfirst :pairs
+end
+
+to d20.synthetic :stream :k :expected :tag
+  localmake "actual monster.stage02.answer.at :stream :k
+  make "D20.CASES (:D20.CASES + 1)
+  d20.require (monster.stage02.bi.canonical :actual) (list :tag [shape])
+  d20.require (d20.bi.equal :actual :expected) (list :tag [expected])
+  d20.require (d20.bi.in.range :actual) (list :tag [range])
+end
+
+to d20.synthetic.cases
+  d20.synthetic (list (bi.small 1) 1) 0 (bi.small 1) [first_positive_zero]
+  d20.synthetic (list nr.M 1) 1 (bi.small 1) [positive_wrap]
+  d20.synthetic (list (bi.small 1) -1) 1 nr.M [negative_wrap]
+  d20.synthetic (list nr.M -1) 1 (bi.sub nr.M (bi.small 1)) [max_negative]
+  d20.synthetic (list (bi.small 2) -1) 31 (bi.sub nr.M (bi.small 29)) [long_negative]
+  d20.synthetic (list (bi.sub nr.M (bi.small 1)) 1) 31 (bi.small 30) [long_positive]
+end
+
+to d20.invalid :stream :k :tag
+  make "D20.CASES (:D20.CASES + 1)
+  d20.require (equalp (monster.stage02.answer.at :stream :k) []) :tag
+end
+
+to d20.invalid.cases
+  d20.invalid "not_a_list 0 [stream_nonlist]
+  d20.invalid (butlast (list (bi.small 1) 1)) 0 [stream_length_one]
+  d20.invalid (lput 1 (list (bi.small 1) 1)) 0 [stream_length_three]
+  d20.invalid (list bi.zero 1) 0 [first_zero]
+  d20.invalid (list (bi.add nr.M (bi.small 1)) 1) 0 [first_above_m]
+  d20.invalid (list (bi.small 1) 0) 0 [step_zero]
+  d20.invalid (list (bi.small 1) 2) 0 [step_two]
+  d20.invalid (list (bi.small 1) 1) -1 [index_negative]
+  d20.invalid (list (bi.small 1) 1) 32 [index_too_large]
+  d20.invalid (list (bi.small 1) 1) 0.5 [index_fractional]
+end
+
+to d20.run :calculation :target :shard
+  print [STAGE_2_DISCOVERY_20_STEP production_context]
+  localmake "prefix d20.prefix :calculation :target
+  localmake "ctx monster.stage02.sauce :prefix
+  print [STAGE_2_DISCOVERY_20_STEP independent_sauce]
+  localmake "oracleSauce nr.sauce :calculation :target
+  if equalp :shard "REVERSE [
+    d20.require (equalp (monster.context.get :ctx "directionCount) (item 5 (nr.work.counts :calculation :target))) [reverse_direction_count]
+  ]
+  print [STAGE_2_DISCOVERY_20_STEP eleven_selectors_four_indices]
+  d20.selectors :ctx :oracleSauce [[1 1] [1 10] [1 11] [1 12] [2 20] [2 21] [5 22] [3 30] [3 31] [4 32] [5 33]]
+  print [STAGE_2_DISCOVERY_20_STEP six_synthetic_ten_invalid]
+  d20.synthetic.cases
+  d20.invalid.cases
+  if :D20.FAIL [print [STAGE_2_DISCOVERY_20_FALIIS] stop]
+  if :D20.CASES <> 60 [print [STAGE_2_DISCOVERY_20_CASE_COUNT_FALIIS] stop]
+  localmake "expectedChecks 204
+  if equalp :shard "REVERSE [make "expectedChecks 205]
+  if :D20.CHECKS <> :expectedChecks [print [STAGE_2_DISCOVERY_20_CHECK_COUNT_FALIIS] stop]
+  if equalp :shard "FORWARD [
+    print sentence [STAGE_2_DISCOVERY_20_FORWARD_CASES_PASIS] :D20.CASES
+    print sentence [STAGE_2_DISCOVERY_20_FORWARD_CHECKS_PASIS] :D20.CHECKS
+    print [STAGE_2_DISCOVERY_20_FORWARD_PASIS]
+  ]
+  if equalp :shard "REVERSE [
+    print sentence [STAGE_2_DISCOVERY_20_REVERSE_CASES_PASIS] :D20.CASES
+    print sentence [STAGE_2_DISCOVERY_20_REVERSE_CHECKS_PASIS] :D20.CHECKS
+    print [STAGE_2_DISCOVERY_20_REVERSE_PASIS]
+  ]
+end

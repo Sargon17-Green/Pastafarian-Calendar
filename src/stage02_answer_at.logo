@@ -1,0 +1,21 @@
+; Stage 2 / Discovery 20 — pure bounded ASK stream element, 0-based.
+; Inputs: [canonical BI first in 1..M, step in {-1,+1}], k in 0..31.
+; Invalid bounded input yields [], never a floating-point BI conversion.
+
+to monster.stage02.answer.at :stream :k
+  if not listp :stream [output []]
+  if (count :stream) <> 2 [output []]
+  localmake "firstv first :stream
+  localmake "step last :stream
+  if not monster.stage02.bi.canonical :firstv [output []]
+  if (bi.lt :firstv (bi.small 1)) [output []]
+  if (bi.gt :firstv nr.M) [output []]
+  if not numberp :step [output []]
+  if not (equalp :step (int :step)) [output []]
+  if not (or (:step = 1) (:step = -1)) [output []]
+  if not numberp :k [output []]
+  if not (equalp :k (int :k)) [output []]
+  if or (:k < 0) (:k > 31) [output []]
+  localmake "shifted bi.add :firstv (bi.small (:step * :k))
+  output bi.add (bi.small 1) (bi.regmod (bi.sub :shifted (bi.small 1)) nr.M)
+end

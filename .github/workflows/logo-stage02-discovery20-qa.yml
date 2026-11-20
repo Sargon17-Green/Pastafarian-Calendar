@@ -1,0 +1,138 @@
+name: Logo Stage 2 Discovery 20 QA Native
+
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-d20-answer-at'
+
+permissions:
+  contents: read
+
+jobs:
+  d20-forward-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact QA commit
+        uses: actions/checkout@v4
+      - name: Build pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          actual="$(git -C "$source_dir" rev-parse HEAD)"
+          test "$actual" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+          echo "HEADLESS_LOGO_SOURCE_SHA=$actual"
+      - name: Run D20 forward independent differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/stage02_ask.logo)" = 8e15fa48c9e7f83d1df54aeb0929216945852e36
+          test "$(git hash-object src/stage02_sauce.logo)" = f74fd03fbccab378dfc5999f5d40ede0cc94fa88
+          test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb8381686f2b2f6b29ed3649cf
+          log="$RUNNER_TEMP/stage02-discovery20-forward.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 1800s stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery20_forward_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::D20 forward Native failed or timed out, exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_20_FORWARD_CASES_PASIS 60' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_20_FORWARD_CHECKS_PASIS 204' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_20_FORWARD_PASIS' "$log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$log"; then
+            echo "::error::D20 forward failure marker"
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_20_FORWARD_SHARD=PASS'
+      - name: Preserve forward log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d20-forward-native-log
+          path: ${{ runner.temp }}/stage02-discovery20-forward.log
+          if-no-files-found: warn
+          retention-days: 30
+
+  d20-reverse-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact QA commit
+        uses: actions/checkout@v4
+      - name: Build pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          actual="$(git -C "$source_dir" rev-parse HEAD)"
+          test "$actual" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+          echo "HEADLESS_LOGO_SOURCE_SHA=$actual"
+      - name: Run D20 reverse independent differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/stage02_ask.logo)" = 8e15fa48c9e7f83d1df54aeb0929216945852e36
+          test "$(git hash-object src/stage02_sauce.logo)" = f74fd03fbccab378dfc5999f5d40ede0cc94fa88
+          test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb8381686f2b2f6b29ed3649cf
+          log="$RUNNER_TEMP/stage02-discovery20-reverse.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 1800s stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery20_reverse_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::D20 reverse Native failed or timed out, exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_20_REVERSE_CASES_PASIS 60' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_20_REVERSE_CHECKS_PASIS 205' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_20_REVERSE_PASIS' "$log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$log"; then
+            echo "::error::D20 reverse failure marker"
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_20_REVERSE_SHARD=PASS'
+      - name: Preserve reverse log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d20-reverse-native-log
+          path: ${{ runner.temp }}/stage02-discovery20-reverse.log
+          if-no-files-found: warn
+          retention-days: 30
+
+  d20-qa-aggregate:
+    needs: [d20-forward-native, d20-reverse-native]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Accept two genuinely successful source-locked Native shards
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ needs.d20-forward-native.result }}" = success
+          test "${{ needs.d20-reverse-native.result }}" = success
+          echo 'STAGE_2_DISCOVERY_20_CASES_PASIS 120'
+          echo 'STAGE_2_DISCOVERY_20_CHECKS_PASIS 409'
+          echo 'NATIVE_STAGE_2_DISCOVERY_20_VERIFICATION=PASS'
