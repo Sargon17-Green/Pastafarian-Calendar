@@ -177,3 +177,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage11-native-grind-55.yml
     permissions:
       contents: read
+
+  false-arabic-stage17-order:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-order16]')
+    uses: ./.github/workflows/false-arabic-stage17-native-order.yml
+    permissions:
+      contents: read

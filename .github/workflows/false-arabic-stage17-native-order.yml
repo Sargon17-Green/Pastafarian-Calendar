@@ -1,0 +1,71 @@
+name: FALSE Arabic Stage 17 bounded original-interpreter ball order
+on:
+  workflow_call:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage17-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: dfa6352c88768336e4ab3317d0c540f532e3c0b7
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 4
+          persist-credentials: false
+      - name: Lock source and exact upstream interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/stage17_native upstream
+          git cat-file -e "$SOURCE_PIN^{commit}"
+          git merge-base --is-ancestor "$SOURCE_PIN" HEAD
+          git rev-parse "$SOURCE_PIN" > evidence/stage17_native/source_observed.txt
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/stage17_native/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/stage17_native/runtime_observed.txt
+          test "$(cat evidence/stage17_native/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+      - name: Compile exact interpreter and Unicode preflight
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/stage17_native/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/stage17_native/compiler_stdout.txt 2> evidence/stage17_native/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/stage17_native/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/stage17_native/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/stage17_native/unicode_pick.false \
+            > evidence/stage17_native/unicode_pick.stdout.txt \
+            2> evidence/stage17_native/unicode_pick.stderr.txt
+          test "$(cat evidence/stage17_native/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/stage17_native/preflight.txt
+      - name: Execute Stage17 source-locked Native, negatives and independent design oracle
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage17_rank_to_order_design_oracle.py | tee evidence/stage17_native/design_oracle.log
+          PYTHONPATH=tools python3 tools/stage17_rank_to_order_ci.py
+      - name: Preserve all Stage17 Native artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage17-order-native
+          path: evidence/stage17_native/
+          if-no-files-found: error
+          retention-days: 30
