@@ -1,0 +1,116 @@
+{
+  "schema": "PASTAFARI_SOAK_ORIGINAL_MONTH_WEAVE_DP_PORT_SPEC_V141/1",
+  "project": "Cross-branch original Fct soak testbench",
+  "scope": "PURE_FINITE_COMBINATORIAL_MONTH_WEAVE_SPEC_AND_INDEPENDENT_SMALL_ORACLE_NO_CALENDAR_ENGINE",
+  "repository": "Sargon17-Green/Pastafarian-Calendar",
+  "source_ref": {
+    "commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "path": "tests/normative_reference.py",
+    "git_blob_sha1": "d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53",
+    "class_name": "MonthWeavingFamily",
+    "method_name": "unrank1",
+    "count_method": "count",
+    "state_count_method": "_state_count",
+    "moves_method": "_moves"
+  },
+  "ada_ref": {
+    "commit": "a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72",
+    "path": "src/month_weaving.adb",
+    "git_blob_sha1": "9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef"
+  },
+  "previous_qa": {
+    "v140_ci_run_id": 44812535351,
+    "v140_ci_sha": "8498d3a465dcef93cc41f043a4fbba0bc1f1f96e",
+    "v140_artifact_id": 14667641480,
+    "v140_artifact_digest": "9ee8aef1a43c6a8ca24a319d0e1714bb6c4d7aa1dda25c6144e890c4f65051ba"
+  },
+  "family_fixtures": [
+    {
+      "lengths": [
+        4,
+        4
+      ],
+      "count": 20,
+      "ada_two_rail_count": 6
+    },
+    {
+      "lengths": [
+        4,
+        5
+      ],
+      "count": 35
+    },
+    {
+      "lengths": [
+        4,
+        4,
+        4
+      ],
+      "count": 1301
+    },
+    {
+      "lengths": [
+        4,
+        5,
+        4
+      ],
+      "count": 3499
+    },
+    {
+      "lengths": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "count": 177260
+    },
+    {
+      "lengths": [
+        2,
+        2,
+        2
+      ],
+      "count": 5
+    }
+  ],
+  "source_ordered_transitions": {
+    "state": [
+      "remaining_counts",
+      "opened_prefix",
+      "closed_prefix"
+    ],
+    "open_condition": "opened < month_count",
+    "opened_month_day_condition": "closed <= index < opened && remaining[index] > 0",
+    "close_condition": "remaining[index] == 1 implies index == closed",
+    "move_order": "currently_open_months_in_ascending_ID_then_open_next_month",
+    "rank_domain": "1..count(all legal weaves)",
+    "rank_schedule": "one global rank, not one ticket per interior position",
+    "all_month_open_prefix_required": false,
+    "all_month_close_suffix_required": false
+  },
+  "dp_contract": {
+    "H_base": "H[m][x]=1",
+    "H_recurrence": "H[i][x]=sum_{y=n_i-1}^{x+n_i-1} binom(y-1,n_i-2)*H[i+1][y] for n_i>=2",
+    "H_singleton": "H[i][x]=H[i+1][0] if n_i==1",
+    "active_interleavings": "product of binom(remaining_j+previous_total-1,previous_total) for active months in order",
+    "big_integer_arithmetic_required": true,
+    "lexicographic_one_based_rank": true,
+    "production_ada_implementation_not_yet_provided": true
+  },
+  "limits": {
+    "max_total_days_synthetic": 30,
+    "max_months_synthetic": 6,
+    "do_not_invoke_original_Fct": true,
+    "no_source_changes_to_Ada": true
+  },
+  "scientific_status": {
+    "issue_29_open": true,
+    "first_original_mismatch_proven": true,
+    "sole_foundation_cause_proven": false,
+    "original_full_years_certified": 0,
+    "independent_algorithm_lineages_certified": 0,
+    "STOP_NEW_NATIVE_SOAK_DISPATCH": true,
+    "original_native_date_executions": 0
+  }
+}
