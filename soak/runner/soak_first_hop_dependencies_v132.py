@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import ast
 import base64
+import binascii
 from collections import Counter
 import hashlib
 import json
@@ -74,7 +75,7 @@ def checked_blob(gh, repo: str, commit: str, path: str) -> tuple[bytes,dict]:
         raise APIProblem("SOURCE_GIT_BLOB_MISSING")
     try:
         payload=base64.b64decode(response["content"].replace("\n",""),validate=True)
-    except (KeyError,AttributeError,ValueError,TypeError) as exc:
+    except (KeyError,AttributeError,ValueError,TypeError,binascii.Error) as exc:
         raise APIProblem("SOURCE_BASE64_NOT_DECODABLE") from exc
     if len(payload)!=size or git_blob_sha1(payload)!=blob:
         raise APIProblem("SOURCE_BYTES_GIT_BLOB_MISMATCH")
@@ -137,6 +138,14 @@ def validate(manifest:dict, lineage:dict)->list[dict]:
         rid=row["record_id"]
         demand(rid not in by_id,"duplicate v131 record")
         by_id[rid]=row
+    for left,right in DUPLICATE_PAIRS:
+        left_row,right_row=by_id.get(left),by_id.get(right)
+        demand(type(left_row) is dict and type(right_row) is dict
+               and all(left_row.get(key)==right_row.get(key)
+                       for key in ("repository","branch","historical_head_commit",
+                                   "observed_source_path","source_sha256",
+                                   "git_blob_sha1","source_bytes")),
+               "v131 frozen duplicate pair does not share identical source identity")
     for rid in EXPECTED:
         row=by_id.get(rid)
         demand(type(row) is dict and row.get("eligible_for_soak") is False
@@ -294,8 +303,21 @@ def audit(manifest:dict,lineage:dict,gh:GitHubReadOnly)->dict:
                 matches=[p for p in tree if
                          posixpath.basename(p)==posixpath.basename(candidates[0])]
                 if probe["parser"]=="CPP_QUOTED_INCLUDE" and len(matches)==1:
-                    rec["status"]="HEADER_ELSEWHERE_INCLUDE_PATH_UNVERIFIED"
-                    rec["resolved_path"]=matches[0]
+                    name=matches[0]
+                    try:
+                        _,proof=checked_blob(gh,repo,commit,name)
+                    except APIProblem as exc:
+                        rec["status"]="HEADER_ELSEWHERE_BYTES_UNAVAILABLE_"+exc.code
+                    else:
+                        if (proof["git_blob_sha1"]!=tree[name].get("sha") or
+                            proof["bytes"]!=tree[name].get("size")):
+                            rec["status"]="HEADER_ELSEWHERE_GIT_BLOB_MISMATCH"
+                        else:
+                            rec["status"]="HEADER_ELSEWHERE_HASH_VERIFIED_INCLUDE_PATH_UNVERIFIED"
+                            rec.update({"resolved_path":name,
+                                        "sha256":proof["source_sha256"],
+                                        "git_blob_sha1":proof["git_blob_sha1"],
+                                        "bytes":proof["bytes"]})
                 else:
                     rec["status"]="DIRECT_DEPENDENCY_UNRESOLVED"
             dependency_summary[rec["status"]]+=1
