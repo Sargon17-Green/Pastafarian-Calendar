@@ -2,6 +2,23 @@
 
 **ענף:** `qa/soak-ada-isolated-month-dp-v143`. **מטרה:** לממש באופן מעשי את חוזה ה־DP של v141, ולא רק להציג נוסחאות או סימולציה ב־Python. אין לערבב את המודול החדש עם המקור ההיסטורי של Ada לפני החלטה פורמלית ב־Issue #29.
 
+## תוצאת קבלה מאומתת — GNAT 13.3.0
+
+[ריצת CI מספר 44823109703](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44823109703) הסתיימה `completed/success` ב־SHA `b2dedda824f5e4297b0b26ac87077d4d5c1fe3c6`. שלב ה־preflight אימת את 35 הווקטורים הקבועים, את SHA המקור, את Issue #29 הפתוח ואת `main` הקפוא. `gnatmake` דיווח **GNATMAKE 13.3.0**; קובצי המימוש והבדיקות החדשים קומפלו וקושרו, והרצת תוכנית ה־Ada פלטה:
+
+```text
+V143_ADA_ISOLATED_GOLDEN_VECTORS= 35
+V143_ORIGINAL_CALENDAR_FCT_CALLS=0
+V143_PRODUCTION_ADA_PATCH_APPLIED=FALSE
+V143_GNAT_STANDALONE_ADA_35_GOLDENS_PASS
+```
+
+ארטיפקט לוגים בלבד: **14670869052**, `soak-v143-standalone-ada-month-weave-35-vectors-no-original-native`, SHA-256 של ה־ZIP `6419e1e4429c97bf9d8ff517cffb6256d1c3ccf65a806bb834982d3bd6c9b7b9`, בגודל **1,226 בתים**. הוא מכיל לוגים של preflight, מקור/ממשל, גרסת GNAT, קומפילציה, 35 בדיקות ו־verdict; לא מצורף בינארי.
+
+**תיקון שגיאת קומפילציה קודמת:** [הרצת 44822840680](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44822840680) נכשלה בקובץ הבדיקה מפני שה־`use Ada.Text_IO` הסתיר את הפונקציה `Legal_Month_Weave_DP.Count` באמצעות השם `Ada.Text_IO.Count`. תיקנתי נקודתית את הקובץ להשתמש ב־`Ada.Text_IO.Put_Line` מפורש ולהימנע מה־`use` המבלבל; המימוש האלגוריתמי והווקטורים **לא שונו**. הריצה החוזרת לעיל התקבלה.
+
+**הסמכה מדויקת:** 35 וקטורי דוגמה מדורגים, 3 בדיקות דחייה, וקומפילציית GNAT של מודול Ada מבודד **עברו**. **לא הוסמך** תחום השנים, wide-rank, מודול `Normative_Oracle.Calendar_Date`, או 10,000 שנות Soak.
+
 ## תחום, קבצים וממשק
 
 נוצר מודול עצמאי `soak/ada_port_v143/legal_month_weave_dp.ads/.adb`, המייבא רק `Ada.Numerics.Big_Numbers.Big_Integers`, ולצדו `test_legal_month_weave_dp.adb`. אין תלות ב־`Normative_Oracle`, ב־`Calendar_Date`, בקוד השנים או ב־`F(c,t)` המקורי. אלה קבצי QA חדשים; אין שינוי בקובצי `src/` ההיסטוריים.
