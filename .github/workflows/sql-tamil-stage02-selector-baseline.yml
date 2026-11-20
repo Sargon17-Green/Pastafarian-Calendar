@@ -1,0 +1,101 @@
+name: SQL Tamil Slice25 Target Year Selector Bounded Baseline PG17
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/152_stage25_selector_locked_years.jsonl'
+      - 'sql/test/153_stage25_selector_input.py'
+      - 'sql/test/154_stage25_selector_benchmark.sql'
+      - '.github/workflows/sql-tamil-stage02-selector-baseline.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  selector-baseline:
+    strategy:
+      fail-fast: false
+      matrix:
+        year_case: [prev_3_prev, prev_3, prev_2, anchor, next_1, next_2, next_3, next_3_next]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      YEAR_CASE: ${{ matrix.year_case }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify source lock and generate one bounded selector probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p slice25-selector-evidence
+          printf 'GITHUB_SHA=%s\nYEAR_CASE=%s\n' "$GITHUB_SHA" "$YEAR_CASE" > slice25-selector-evidence/versions.txt
+          python3 --version | tee -a slice25-selector-evidence/versions.txt
+          python3 sql/test/153_stage25_selector_input.py \
+            --locked-records sql/test/152_stage25_selector_locked_years.jsonl \
+            --goldens sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl \
+            --year-case "$YEAR_CASE" \
+            --output slice25-selector-evidence/input.sql \
+            2>&1 | tee slice25-selector-evidence/fixture-check.txt
+          grep -qx 'SLICE25_SELECTOR_INPUT_LOCK=29_goldens_8_years_8_first_days PASS' slice25-selector-evidence/fixture-check.txt
+          grep -qx "SLICE25_SELECTOR_INPUT_GENERATED=$YEAR_CASE" slice25-selector-evidence/fixture-check.txt
+          sha256sum \
+            sql/test/142_stage02_year_structure_cases.sql \
+            sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl \
+            sql/test/152_stage25_selector_locked_years.jsonl \
+            sql/test/153_stage25_selector_input.py \
+            sql/test/154_stage25_selector_benchmark.sql \
+            .github/workflows/sql-tamil-stage02-selector-baseline.yml > slice25-selector-evidence/source-sha256.txt
+          for i in $(seq -w 0 26); do
+            mapfile -t matches < <(find sql -maxdepth 1 -name "$i"'_*.sql' -type f)
+            test "${#matches[@]}" -eq 1
+            sha256sum "${matches[0]}" >> slice25-selector-evidence/source-sha256.txt
+          done
+          sha256sum slice25-selector-evidence/input.sql > slice25-selector-evidence/generated-sha256.txt
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name slice25-selector-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres slice25-selector-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres slice25-selector-pg postgres --version | tee -a slice25-selector-evidence/versions.txt
+      - name: Measure exact five-field selector equivalence and six invalid inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 26); do
+            mapfile -t matches < <(find sql -maxdepth 1 -name "$i"'_*.sql' -type f)
+            test "${#matches[@]}" -eq 1
+            args+=(-f "/work/${matches[0]}")
+          done
+          args+=(-f /work/slice25-selector-evidence/input.sql)
+          args+=(-f /work/sql/test/154_stage25_selector_benchmark.sql)
+          docker exec -u postgres slice25-selector-pg \
+            psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" \
+            2>&1 | tee slice25-selector-evidence/postgres-results.txt
+          grep -q 'SLICE25_SELECTOR_BASELINE_GREEN=1' slice25-selector-evidence/postgres-results.txt
+          test "$(grep -c 'SLICE25_SELECTOR_FIELD_PASS=' slice25-selector-evidence/postgres-results.txt)" -eq 5
+          test "$(grep -c 'SLICE25_SELECTOR_INVALID_PASS=' slice25-selector-evidence/postgres-results.txt)" -eq 6
+          grep -q 'SLICE25_SELECTOR_ELAPSED_MS ' slice25-selector-evidence/postgres-results.txt
+          printf 'SOURCE_LOCKED_SELECTOR_PROBE=1\n' > slice25-selector-evidence/completion.txt
+      - name: Preserve original evidence even on failure or timeout
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice25-selector-${{ matrix.year_case }}
+          path: slice25-selector-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Stop isolated PostgreSQL 17
+        if: always()
+        shell: bash
+        run: docker rm -f slice25-selector-pg 2>/dev/null || true
