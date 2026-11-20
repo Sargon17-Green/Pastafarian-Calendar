@@ -31,3 +31,43 @@ Independent verifier: positional (first/last occurrence) FIFO and multiplicities
 This commit provides the actual executable JSON verifier with self-test (one positive and ten deliberately invalid evidence mutations) and an exact contract. The static self-test does NOT run Chapel and MUST print NATIVE_4244=NOT_TESTED. The current dense retained-state Chapel finite prototype has not demonstrated feasibility at 4244 symbols; the Native benchmark executable and OS-supervised runner do not yet exist. Next: design and implement sparse, memory-bounded, reverse-adjoint candidate-block enumeration in Native Chapel; verify a small independent positional oracle; then run the two isolated Native median directions under the above caps, preserve artifacts, and only then use --verify. The old GateOracle 180-second result remains separate and INCONCLUSIVE.
 
 No Stage 6 acceptance, no production/src changes, and no main, merge, release, or publication.
+
+## Next bounded Native research increment (candidate-block reverse adjoint)
+
+The branch-scoped and non-production probe \`test/weaving_native_adjoint_probe.chpl\`
+implements exact candidate blocks with a reverse sweep of the algebraic
+transpose of each month transfer. The stored forward states are trimmed to
+their contiguous support interval (offset + big-integer values); each transfer
+and transpose uses one temporary dense O(N) vector before trimming. The
+candidate-count vector must partition the total completion count exactly.
+
+For each candidate j, the suffix adjoint treats the appended symbol as older
+in every month > j and uses the candidate's own-gap specification at month j:
+\`block[j] = dot(adjoint[j], T_own_j(forward[j-1]))\`.
+The reverse update is \`adjoint[j-1] = T_older_j^T(adjoint[j])\`,
+where \`T[i+1,p]=1(p<=i)*weight(i)\`.
+The transpose therefore computes
+\`adjoint[j-1][p] = sum(i>=p) adjoint[j][i+1]*weight(i)\`.
+No numeric approximation, truncation, or changed first/last occurrence rule
+is allowed. Each chosen prefix is committed to the forward states and all
+candidate counts are recomputed from the exact retained prefix state.
+
+Independent oracle: \`test/weaving_native_adjoint_gate.py\` directly enumerates
+unique multiset words and filters by first/last occurrence positions; it
+compares all Native family roots, each lexicographically ranked word, and all
+candidate blocks emitted before each symbol selection, including duplicates.
+The finite contract is 88 families / 331 legal words / 2367 candidate-block
+rows and five deliberately corrupted/truncated evidence variations rejected
+by Python self-test. Each finite program execution is bounded to 90 seconds
+in the branch-only CI step, preserving stdout, stderr, executable SHA and
+the exact checkout HEAD in an artifact. The Python self-test may PASS on its
+own; Native compile, Native output, and positional differential are not PASS
+until a completed CI job and logs prove each step.
+
+This is a finite Native algorithm prototype, not an established 4244-symbol
+budget result. The O(N) temporary vectors and stored support intervals need
+actual 4244 memory/time measurements. They have no demonstrated <=512 MiB
+or <=180s guarantee. Full two-process median UNRANK / RANK remains NOT_TESTED
+and Stage 6 remains NOT_CLAIMED. The existing legacy GateOracle timeout is
+independent and must not be converted to a finite adjoint failure.
+

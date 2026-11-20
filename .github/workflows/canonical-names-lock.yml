@@ -199,6 +199,35 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Bounded Native Chapel reverse-adjoint finite research (NOT median 4244)
+        if: github.ref == 'refs/heads/Chapel+Українська-мова'
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'SOURCE_HEAD=%s\n' "$(git rev-parse HEAD)" | tee chapel-native-adjoint-gate.log
+          chpl --fast test/weaving_native_adjoint_probe.chpl -o ./chapel-native-adjoint-probe
+          sha256sum ./chapel-native-adjoint-probe | tee -a chapel-native-adjoint-gate.log
+          python3 test/weaving_native_adjoint_gate.py --self-test | tee -a chapel-native-adjoint-gate.log
+          timeout --signal=TERM --kill-after=10s 90s \
+            ./chapel-native-adjoint-probe > chapel-native-adjoint-output.log \
+            2> chapel-native-adjoint-stderr.log
+          python3 test/weaving_native_adjoint_gate.py --log chapel-native-adjoint-output.log \
+            | tee -a chapel-native-adjoint-gate.log
+          grep -Fxq 'NATIVE_ADJOINT_FINITE_RESULT=PASS' chapel-native-adjoint-gate.log
+          grep -Fxq 'NATIVE_ADJOINT_4244=NOT_TESTED' chapel-native-adjoint-gate.log
+
+      - name: Retain Native reverse-adjoint finite research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-native-adjoint-finite-evidence
+          path: |
+            chapel-native-adjoint-gate.log
+            chapel-native-adjoint-output.log
+            chapel-native-adjoint-stderr.log
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Independent GateOracle year-boundary and calendarDate decomposition probe
         shell: bash
         run: |
