@@ -61,12 +61,22 @@ def validate():
             pass
         else:
             raise AssertionError(('invalid rank accepted', invalid))
+    # Replays must match an independently enumerated expected permutation,
+    # not merely compare the implementation to itself (a tautology).
     for rank in ANCHOR_RANKS:
-        assert unrank_factoradic(rank) == unrank_factoradic(rank)
-    # A deliberate false expectation must be rejected by the independent oracle.
-    corrupted = list(expected)
-    corrupted[0] = tuple(reversed(corrupted[0]))
-    assert unrank_factoradic(1) != corrupted[0]
+        reference = expected[rank - 1]
+        assert unrank_factoradic(rank) == reference, ('anchor mismatch', rank)
+        assert unrank_factoradic(rank) == reference, ('anchor replay mismatch', rank)
+    # Negative controls: corrupted expectations at the beginning, middle and
+    # end of the finite domain must each be detected at the exact rank.
+    for wrong_rank in (1, 360, 720):
+        corrupted = list(expected)
+        bad = list(corrupted[wrong_rank - 1])
+        bad[0], bad[1] = bad[1], bad[0]
+        corrupted[wrong_rank - 1] = tuple(bad)
+        mismatches = [r for r, value in enumerate(corrupted, 1)
+                      if unrank_factoradic(r) != value]
+        assert mismatches == [wrong_rank], ('mutant not isolated', wrong_rank)
     return {
         'project_id': PROJECT_ID,
         'stage': 17,
