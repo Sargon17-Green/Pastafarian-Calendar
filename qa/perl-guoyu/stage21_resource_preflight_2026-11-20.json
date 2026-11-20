@@ -1,0 +1,104 @@
+{
+  "project_id": "PC-BRANCH-PERL-GUOYU",
+  "branch": "Perl+國語",
+  "source_commit": "a9d28ff3d41a4d6111aa478e7dbdf7cd97388fec",
+  "source_blob": "1ec5dc479b5a91df65bab83583d75ff05bfc59b7",
+  "perl": "5.40.1",
+  "limit_seconds_per_process": 120,
+  "virtual_memory_limit_kib": 393216,
+  "scratch_candidates": [
+    {
+      "label": "bounds-only",
+      "git_blob": "ad83c07cc2507429f30c6f51f6f80da0a50c7bc3"
+    },
+    {
+      "label": "binary-memo-key",
+      "git_blob": "2790770bd480120c4b4325b4272a13b50e1a525c"
+    },
+    {
+      "label": "compact-string-memo-and-skip-forced-states",
+      "git_blob": "46a81fc12a2c11b831f2e6f92be59d0893cd5919"
+    }
+  ],
+  "light_cases": [
+    {
+      "profile": "1x12",
+      "count": "1",
+      "count_seconds": 0.04,
+      "count_rss_kib": 10496,
+      "rank1_seconds": 0.05,
+      "rank1_rss_kib": 10496
+    },
+    {
+      "profile": "2x12",
+      "count": "208012",
+      "count_seconds": 0.03,
+      "count_rss_kib": 10624,
+      "rank1_seconds": 0.03,
+      "rank1_rss_kib": 10624
+    },
+    {
+      "profile": "3x12",
+      "count": "13903319821066836",
+      "count_seconds": 0.98,
+      "count_rss_kib": 20992,
+      "rank1_seconds": 0.97,
+      "rank1_rss_kib": 21120
+    },
+    {
+      "profile": "[37,1x11]",
+      "count": "1",
+      "count_seconds": 0.03,
+      "count_rss_kib": 10624,
+      "rank1_seconds": 0.03,
+      "rank1_rss_kib": 10624
+    },
+    {
+      "profile": "[48]",
+      "count": "1",
+      "count_seconds": 0.03,
+      "count_rss_kib": 10624,
+      "rank1_seconds": 0.03,
+      "rank1_rss_kib": 10624
+    }
+  ],
+  "heavy_count": [
+    {
+      "candidate": "bounds-only",
+      "exit": 1,
+      "elapsed_seconds": 42.36,
+      "max_rss_kib": 388224,
+      "stderr": "Out of memory in perl:util:safesysmalloc",
+      "count": null
+    },
+    {
+      "candidate": "binary-memo-key",
+      "exit": 1,
+      "elapsed_seconds": 40.33,
+      "max_rss_kib": 388352,
+      "stderr": "Out of memory in perl:util:safesysmalloc",
+      "count": null
+    },
+    {
+      "candidate": "compact-string-memo-and-skip-forced-states",
+      "exit": 124,
+      "elapsed_seconds": 120.01,
+      "max_rss_kib": 230528,
+      "stderr": "",
+      "count": null
+    }
+  ],
+  "independent_catalan12": {
+    "count": 208012,
+    "sha256": "0dbe36d23b6ffaa14822b1556d3eabc777d5961bdfd2fd79be39ee2daee76bbe",
+    "sentinel_ranks": [
+      1,
+      104006,
+      104007,
+      208012
+    ],
+    "sentinel_pairs_passed": 4
+  },
+  "results": "Stage21 discovery preflight only; production unchanged; Stage20 remains last accepted; no Stage21 Native or whole-year generator PASS",
+  "next": "Design and measure a distinct bounded DP resource optimization for 4x12 count and rank1 under 120s and 393216KiB VSZ, without changing accepted production; then proceed to exhaustive oracle QA only after resource gates pass."
+}
