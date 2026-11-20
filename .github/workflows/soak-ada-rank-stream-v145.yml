@@ -1,0 +1,156 @@
+name: Soak v145 source-equivalent synthetic Ask_Bowl + short/wide Ada rank, original Fct halted
+on:
+  push:
+    branches:
+      - qa/soak-ada-rank-stream-v145
+    paths:
+      - 'soak/control/ada_rank_stream_source_v145.json'
+      - 'soak/runner/soak_rank_stream_source_proof_v145.py'
+      - 'soak/process_tests/test_soak_rank_stream_source_v145.py'
+      - 'soak/ada_rank_v145/**'
+      - '.github/workflows/soak-ada-rank-stream-v145.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic-original-rank-selector-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Enforce scientific STOP, source purity, 26 rank and 6 bowl literal receipts
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' | tee evidence/v145-preflight.log
+          import ast,json,re
+          from pathlib import Path
+          root=Path('soak')
+          stop=json.loads((root/'control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert stop['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          m=json.loads((root/'control/ada_rank_stream_source_v145.json').read_text())
+          assert m['scientific_gates']['STOP_NEW_NATIVE_SOAK_DISPATCH'] is True
+          assert m['scientific_gates']['original_Fct_calls']==0
+          assert m['scientific_gates']['original_native_compiles']==0
+          assert m['scientific_gates']['original_full_years_accepted']==0
+          assert m['scientific_gates']['production_patch'] is False
+          direct=m['direct_vectors']
+          bowl=m['synthetic_bowl_vectors']
+          assert len(direct)==26 and len(bowl)==6
+          ads=root/'ada_rank_v145/synthetic_rank_stream_v145.ads'
+          adb=root/'ada_rank_v145/synthetic_rank_stream_v145.adb'
+          test=root/'ada_rank_v145/test_synthetic_rank_stream_v145.adb'
+          for p in (ads,adb,test):
+              text=p.read_text(encoding='utf-8')
+              imports=re.findall(r'^with\s+([^;]+);',text,re.MULTILINE)
+              assert all(x.strip() in (
+                'Ada.Numerics.Big_Numbers.Big_Integers','Ada.Text_IO',
+                'Synthetic_Rank_Stream_V145') for x in imports), (p,imports)
+              assert not re.search(r'\b(?:Normative_Oracle|Calendar_Date|Foundation_Day)\b',
+                '\n'.join(l for l in text.splitlines() if not l.lstrip().startswith('--'))),p
+          ada=test.read_text()
+          assert ada.count('   Check_Direct\n')==26
+          assert ada.count('   Check_Bowl\n')==6
+          for f in direct:
+              line=(f'("{f["name"]}", "{f["first"]}", {f["direction_step"]},\n'
+                    f'      "{f["n"]}", "{f["rank"]}");')
+              assert line in ada,('different Ada rank golden',f['name'])
+          for f in bowl:
+              a=', '.join(f'{i+1} => From_String ("{n}")' for i,n in enumerate(f['bowls']))
+              b=', '.join(f'{i+1} => {n}' for i,n in enumerate(f['order']))
+              line=(f"Bowl_Array'({a}),\n"
+                    f"      Bowl_Order'({b}),\n"
+                    f'      {f["queried_id"]}, {f["seal"]}, "{f["first"]}", {f["direction_step"]},\n'
+                    f'      "{f["short_37"]}", "{f["wide_256"]}");')
+              assert line in ada,('different Ada bowl golden',f['queried_id'])
+          for path in ('soak/runner/soak_rank_stream_source_proof_v145.py',
+                       'soak/process_tests/test_soak_rank_stream_source_v145.py'):
+              t=ast.parse(Path(path).read_text())
+              for node in ast.walk(t):
+                  if isinstance(node,ast.Import):
+                      assert all(n.name.split('.')[0] not in (
+                        'subprocess','ctypes','multiprocessing','pastafari_calendar')
+                        for n in node.names)
+                  if isinstance(node,ast.ImportFrom):
+                      assert (node.module or '').split('.')[0] not in (
+                        'subprocess','ctypes','multiprocessing','pastafari_calendar')
+          print('V145_26_DIRECT_AND_6_BOWL_ADA_SOURCE_LITERAL_GOLDENS_LOCKED')
+          print('V145_NO_ORIGINAL_CALENDAR_IMPORTS_AND_NATIVE_DISPATCH_STOP')
+          PY
+      - name: 22 synthetic negative controls including complete tiny literal walk
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_rank_stream_source_v145.py' -v 2>&1 | tee evidence/v145-tests.log
+          grep -Eq '^Ran 22 tests ' evidence/v145-tests.log
+          grep -q '^OK$' evidence/v145-tests.log
+      - name: Reverify original Python/Ada blobs and accepted v144, audit source rank and 3564 toy cases
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_rank_stream_source_proof_v145.py \
+             --manifest soak/control/ada_rank_stream_source_v145.json \
+             --output evidence/v145-source-rank-math.json \
+             | tee evidence/v145-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('evidence/v145-source-rank-math.json').read_text())
+          assert x['original_source']['pinned_source_git_blobs']==2
+          assert x['previous_QA']['v144_completed_success_at_exact_SHA'] is True
+          assert x['previous_QA']['issue29_open'] is True
+          assert x['previous_QA']['main_unchanged'] is True
+          assert x['fixed_goldens']['direct_golden_vectors']==26
+          assert x['fixed_goldens']['synthetic_bowl_vectors']==6
+          assert x['independent_tiny_literal_walk_proof']['total_exact_literal_walk_checks']==3564
+          assert x['independent_tiny_literal_walk_proof']['endpoint_equivalence_for_pm1_proven_in_toy_domain'] is True
+          assert x['independent_tiny_literal_walk_proof']['original_modulus_full_state_exhaustively_checked'] is False
+          assert x['actual_Fct_intermediate_rank_values_observed'] is False
+          assert x['original_Fct_calls_new']==0
+          assert x['original_full_years_accepted']==0
+          assert x['STOP_NEW_NATIVE_SOAK_DISPATCH'] is True
+          print('V145_SOURCE_PINNED_RANK_EQUIVALENCE_3564_TOYS_PASS_NO_FCT')
+          PY
+      - name: Install GNAT 13 for isolated pure synthetic rank selector only
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq >/dev/null
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 time >/dev/null
+          gnatmake --version | head -n 1 | tee evidence/v145-gnat-version.log
+      - name: Compile and run ONLY new standalone synthetic Ask_Bowl and short/wide rank tests
+        run: |
+          set -euo pipefail
+          cd soak/ada_rank_v145
+          trap 'rm -f ./test_synthetic_rank_stream_v145 ./*.o ./*.ali' EXIT
+          gnatmake -gnat2022 -gnata -O1 -o test_synthetic_rank_stream_v145 \
+             test_synthetic_rank_stream_v145.adb 2>&1 | tee ../../evidence/v145-ada-build.log
+          /usr/bin/time -f 'V145_SYNTHETIC_RANK_WALL_SECONDS=%e\nV145_SYNTHETIC_RANK_MAX_RSS_KiB=%M' \
+            -o ../../evidence/v145-resource-informational.log \
+            timeout 60s ./test_synthetic_rank_stream_v145 | tee ../../evidence/v145-ada-goldens.log
+          grep -Fx 'V145_ADA_SHORT_WIDE_DIRECT_GOLDENS=26' ../../evidence/v145-ada-goldens.log
+          grep -Fx 'V145_ADA_SYNTHETIC_ASK_BOWL_GOLDENS=6' ../../evidence/v145-ada-goldens.log
+          grep -Fx 'V145_ADA_REJECTION_CHECKS=5' ../../evidence/v145-ada-goldens.log
+          grep -Fx 'V145_ORIGINAL_CALENDAR_FCT_CALLS=0' ../../evidence/v145-ada-goldens.log
+          grep -Fx 'V145_PRODUCTION_ADA_PATCH_APPLIED=FALSE' ../../evidence/v145-ada-goldens.log
+          echo 'V145_GNAT_SYNTHETIC_RANK_26_PLUS_6_PASS_NO_ORIGINAL_FCT' |
+             tee ../../evidence/v145-verdict.log
+      - name: Upload log-only source and synthetic Ada proof, never original binaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v145-rank-stream-source-pm1-3564-toy-26plus6-ada-gnat-no-original-fct
+          path: |
+            evidence/v145-preflight.log
+            evidence/v145-tests.log
+            evidence/v145-source-rank-math.json
+            evidence/v145-summary.json
+            evidence/v145-gnat-version.log
+            evidence/v145-ada-build.log
+            evidence/v145-ada-goldens.log
+            evidence/v145-resource-informational.log
+            evidence/v145-verdict.log
+          if-no-files-found: warn
+          retention-days: 30
