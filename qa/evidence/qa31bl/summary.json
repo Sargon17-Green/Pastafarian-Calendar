@@ -1,0 +1,98 @@
+{
+  "cases_sha256": "364f34ee16a4b3e9343f688063d918eac40fece73213843ecb60301cea5c9634",
+  "counterfactual_causality_proven": false,
+  "counts": {
+    "g": 540,
+    "mod_M_steps": 270,
+    "numeric_steps_forward": 147825,
+    "numeric_steps_reverse": 21330,
+    "original_cases": 200,
+    "original_steps": 3628390,
+    "overwrites": 270,
+    "selected_cases": 135
+  },
+  "modulo_semantics": "Python Euclidean remainder for positive divisor M; no global machine-int wrap",
+  "modulus": "170141183460469231731687303715884105727",
+  "mutation_count": 12,
+  "mutations": [
+    {
+      "op": "*",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17586 *",
+      "tick": 17586
+    },
+    {
+      "op": "+",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17588 +",
+      "tick": 17588
+    },
+    {
+      "op": "*",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17590 *",
+      "tick": 17590
+    },
+    {
+      "op": "+",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17592 +",
+      "tick": 17592
+    },
+    {
+      "op": "*",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17594 *",
+      "tick": 17594
+    },
+    {
+      "op": "+",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17596 +",
+      "tick": 17596
+    },
+    {
+      "op": "*",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17618 *",
+      "tick": 17618
+    },
+    {
+      "op": "+",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17620 +",
+      "tick": 17620
+    },
+    {
+      "op": "*",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17622 *",
+      "tick": 17622
+    },
+    {
+      "op": "+",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17624 +",
+      "tick": 17624
+    },
+    {
+      "op": "*",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17626 *",
+      "tick": 17626
+    },
+    {
+      "op": "+",
+      "reason": "A_NUMERIC arithmetic/transition mismatch at 17628 +",
+      "tick": 17628
+    }
+  ],
+  "new_native_runs": 0,
+  "numeric_steps_raw_sha256": "860eb4c1baa4e33a1b7719f025b3ccf8bd2f9e50221f4f511e9c57279a6dbc53",
+  "oracles": [
+    "A forward complete concrete STEP replay",
+    "B independent reverse stack-slot expression"
+  ],
+  "pins": {
+    "AH": "4c17deae595262dcbcb8863da005810f60288c483273e32b3b2955b9fb13e271",
+    "AI": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+    "BI": "7660413b191784de8ec4f54ee51aea66c509a6726ea30f19401432a2816733d2",
+    "BJ": "cba7da292cf8d595a5a680743ea29ca3642299bd9aecd62094fb8f42652251c3",
+    "BK": "16aa91dfc48b0329d396d311dc7f68d826286484debc9024deeca78e12a9f9e2",
+    "Y": "1c97b51823ed98b3d333fcb2d0b35d72f7546b04ed8e86c5adebe3aca5703e8a"
+  },
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "scope": "finite 135 original signed cases; no new Native; Stage1 OPEN",
+  "source_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "stage1_pass": false,
+  "toy_checks": 7
+}
