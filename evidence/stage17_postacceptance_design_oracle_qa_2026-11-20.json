@@ -1,0 +1,33 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "evidence_type": "STAGE17_POST_ACCEPTANCE_DESIGN_ORACLE_QA_ONLY",
+  "branch": "FALSE+العربية",
+  "acceptance_base_head": "41ad117206c2f7cac89d4b4a8b7f7a006a00704b",
+  "qa_code_commit": "5ba7998a1a846eae67fc932479876a82b4734c81",
+  "modified_file": "tools/stage17_rank_to_order_design_oracle.py",
+  "modified_file_git_blob_sha1": "65e25de5b9f345755932254d77983b2f002efb25",
+  "modified_file_sha256": "370331cb082cef8ace00f40787ae2fb0c1b3afd33465296df4b11da96e64640d",
+  "generated_report_sha256": "b8dd736a6ee67c1b77a62202141daaa9b1e81766f98159eebf97808f76a22a7b",
+  "local_python_version": "3.13.5",
+  "local_checks": {
+    "py_compile": "PASS",
+    "permutation_lexicographic_checks": "720/720",
+    "inverse_rank_checks": "720/720",
+    "uniqueness_checks": "720/720",
+    "anchor_replays_against_independent_enumeration": "14/14",
+    "invalid_numeric_inputs": "4/4",
+    "corrupted_expected_rank_1": "REJECTED",
+    "corrupted_expected_rank_360": "REJECTED",
+    "corrupted_expected_rank_720": "REJECTED",
+    "injected_wrong_unrank_at_360": "REJECTED",
+    "report_bytes_unchanged": true
+  },
+  "native_checks_run_in_this_qa_pass": false,
+  "stage17_bounded_acceptance_receipt": "evidence/stage17_bounded_acceptance_2026-11-20.json",
+  "accepted_stage17_native_run_id": 44812320919,
+  "original_interpreter_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "source_pin": "cc39bd7007d27f00643b800338432430167dbb40",
+  "stage18_opened": false,
+  "unallocated_pointer_safety_assessed": false,
+  "main_or_merge": false
+}
