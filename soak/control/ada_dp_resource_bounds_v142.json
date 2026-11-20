@@ -1,0 +1,135 @@
+{
+  "schema": "PASTAFARI_SOAK_ADA_MONTH_WEAVE_DP_RESOURCE_BOUNDS_V142/1",
+  "scope": "PURE_MATH_SYNTHETIC_RESOURCE_ANALYSIS_NOT_ORIGINAL_FCT_OR_ADA_BENCHMARK",
+  "repository": "Sargon17-Green/Pastafarian-Calendar",
+  "pinned_python": {
+    "commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "path": "tests/normative_reference.py",
+    "blob_sha": "d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53"
+  },
+  "pinned_ada": {
+    "commit": "a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72",
+    "path": "src/normative_oracle.adb",
+    "blob_sha": "923733d4f8face03586aee304640bf7540c28b4c"
+  },
+  "accepted_v141": {
+    "run_id": 44815438421,
+    "head_sha": "a121deaf3d9a5f8c43ad8e767f688176feddf3e8",
+    "artifact_id": 14667883353,
+    "artifact_digest": "aea406ca90324febadb4cb28d6120b6c5d533367a8e19df87192267ef25dc8d6",
+    "completed_success": true,
+    "synthetic_tests_passed": 32,
+    "golden_vectors_passed": 35
+  },
+  "original_domain": {
+    "min_days": 252,
+    "max_days": 5778,
+    "min_months": 3,
+    "max_months": 47,
+    "min_month_length": 4,
+    "max_month_length": 123
+  },
+  "analytical_maximum": {
+    "month_count": 47,
+    "total_days": 5778,
+    "month_lengths_distribution": {
+      "120": 1,
+      "123": 46
+    },
+    "total_dp_H_entries": 138789,
+    "integer_value_bit_upper_bound": 32270,
+    "biggest_unrestricted_multinomial_bit_upper_bound": 31877,
+    "unrank_candidate_test_upper_bound": 277344,
+    "active_month_scans_upper_bound": 13035168
+  },
+  "synthetic_fixtures": [
+    {
+      "lengths": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "total_days": 32,
+      "H_entries": 153,
+      "full_family_count_bits": 53
+    },
+    {
+      "lengths": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16,
+        16
+      ],
+      "total_days": 128,
+      "H_entries": 585,
+      "full_family_count_bits": 332
+    },
+    {
+      "lengths": [
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32,
+        32
+      ],
+      "total_days": 256,
+      "H_entries": 1161,
+      "full_family_count_bits": 713
+    },
+    {
+      "lengths": [
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+      ],
+      "total_days": 144,
+      "H_entries": 949,
+      "full_family_count_bits": 427
+    }
+  ],
+  "synthetic_execution_cap": {
+    "months": 12,
+    "days": 256,
+    "max_single_month": 32,
+    "three_rank_samples_per_fixture": true,
+    "no_date_input": true
+  },
+  "interpretation": {
+    "time_measurements_informational_only": true,
+    "memory_measurements_informational_only": true,
+    "CPython_runtime_not_Ada": true,
+    "max_table_bytes_CPython_model_only": true,
+    "full_domain_dynamic_program_not_executed": true,
+    "original_Fct_not_executed": true,
+    "production_Ada_implementation_not_certified": true
+  },
+  "scientific_state": {
+    "issue29_open": true,
+    "first_mismatch_not_resolved": true,
+    "STOP_NEW_NATIVE_SOAK_DISPATCH": true,
+    "original_Fct_calls": 0,
+    "full_years_accepted": 0,
+    "independent_algorithms_certified": 0
+  }
+}
