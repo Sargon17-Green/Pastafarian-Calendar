@@ -349,12 +349,67 @@ def mathematical_fixture_checks(m):
        "original_full_years_certified":0,
        "production_Ada_implementation_complete":False}
 
+def golden_vectors_check(records):
+    """Read-only portable fixtures, generated independently of future Ada port."""
+    require(type(records) is dict
+       and records.get("schema")==
+          "PASTAFARI_SOAK_ORIGINAL_MONTH_WEAVE_PORTABLE_RANK_VECTORS_V141/1"
+       and records.get("source_commit")==PY_SHA
+       and records.get("source_git_blob")==PY_BLOB
+       and records.get("result_type")==
+          "purely synthetic ordered month-ID weaving, NOT date F(c,t)"
+       and records.get("fixed_opening_closing_rails") is False
+       and records.get("global_one_based_rank") is True
+       and records.get("original_native_date_engine_invocations")==0
+       and records.get("allowed_in_original_soak_dispatch") is False,
+       "v141 portable vectors are not approved original source math-only fixtures")
+    groups=records.get("families")
+    require(type(groups) is list and len(groups)==len(FIXTURES),
+       "v141 portable family count changed")
+    observed=set()
+    count=0
+    for group in groups:
+        lengths=tuple(group.get("lengths",[]))
+        require(lengths in FIXTURES and lengths not in observed
+                and group.get("count")==FIXTURES[lengths],
+                "portable family count/rank scope changed")
+        observed.add(lengths)
+        entries=group.get("vectors")
+        require(type(entries) is list and 5<=len(entries)<=6,
+                "portable golden rank inventory incomplete")
+        seen=set()
+        dp=FullFamilyDP(lengths)
+        for item in entries:
+            require(type(item) is list and len(item)==2,
+                    "golden vector rank/value pair invalid")
+            rank,seq=item
+            require(type(rank) is int and 1<=rank<=dp.count()
+                    and rank not in seen
+                    and type(seq) is list and len(seq)==sum(lengths)
+                    and all(type(x) is int for x in seq),
+                    "v141 portable golden vector malformed or duplicated")
+            seen.add(rank)
+            got=dp.unrank(rank)
+            require(tuple(seq)==got and dp.rank(tuple(seq))==rank,
+                    "portable golden vector differs from source-defined legal rank")
+            count+=1
+        require(1 in seen and FIXTURES[lengths] in seen,
+                "missing one-based extreme rank golden fixture")
+    require(observed==set(FIXTURES) and count==35,
+            "missing or extraneous portable golden fixtures")
+    return {"portable_rank_vector_groups":len(groups),
+            "portable_rank_vectors_verified":count,
+            "source_commit":PY_SHA,
+            "original_native_calls":0,
+            "production_Ada_code_compiled":False}
+
 def audit(m,gh):
     manifest_check(m)
     return {"schema":REPORT,"manifest_sha256":digest(m),
        "exact_source":source_check(m,gh),
        "prior_qa":previous_qa_check(gh),
        "finite_mathematical_evidence":mathematical_fixture_checks(m),
+       "portable_golden_vectors":golden_vectors_check(parse_json((Path(__file__).resolve().parents[1]/"control"/"ada_month_weave_rank_vectors_v141.json").read_bytes())),
        "new_native_or_calendar_Fct_executions":0,
        "scientific_original_full_years_certified":0,
        "independent_original_algorithms_certified":0,
@@ -372,6 +427,7 @@ def main():
     with args.output.open("xb") as f:f.write(canonical(result)+b"\n")
     print(json.dumps({"fixtures":len(result["finite_mathematical_evidence"]["fixtures"]),
       "source_blobs":result["exact_source"]["original_source_blobs_pinned"],
+      "golden_vectors":result["portable_golden_vectors"]["portable_rank_vectors_verified"],
       "new_original_Fct_calls":0,
       "Ada_production_patch_made":False,
       "original_soak_full_years_certified":0},sort_keys=True))
