@@ -20,3 +20,12 @@ test: build/calendar.gb
 
 clean:
 	rm -rf build
+
+# Explicit alternate ROM: all prior Native 1..370 and its 9000-frame gate
+# remain unchanged. Depend on the base object for complete source freshness.
+build/calendar_i46.o: build/calendar.o src/tests/calendar_stone_i46_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_I46_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_i46.gb: build/calendar_i46.o
+	$(RGBLINK) -n build/calendar_i46.sym -m build/calendar_i46.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@

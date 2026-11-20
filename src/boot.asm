@@ -159,6 +159,12 @@ Bootstrap:
     ld [wTestCase], a
     ld [wTestCaseHi], a
     ld [wRunStatus], a
+IF DEF(STAGE1_I46_NATIVE_BENCH)
+    ; Standalone i=46 ROM: never append to the accepted 9000-frame route.
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarStoneI46Bench
+ELSE
     call RunSelfTests
     ld a, [wTestResult]
     cp $a5
@@ -239,6 +245,7 @@ Bootstrap:
     ld a, 1
     ld [$2000], a
     call RunCalendarInvocationTests
+ENDC
 .afterLifecycle:
     call calendarDateSpaghetti
 .hold:
@@ -296,3 +303,6 @@ INCLUDE "src/tests/calendar_year_step_test.asm"
 INCLUDE "src/tests/calendar_answer_select_test.asm"
 INCLUDE "src/tests/calendar_stone_transition_test.asm"
 INCLUDE "src/tests/calendar_stone_range_test.asm"
+IF DEF(STAGE1_I46_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_stone_i46_native_test.asm"
+ENDC
