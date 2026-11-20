@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent bigint k=3 oracle and bounded Native373 static ABI contract."""
+"""Independent bigint k=3 oracle and bounded Native374 static ABI contract."""
 from __future__ import annotations
 import random
 import re
@@ -83,13 +83,13 @@ def main() -> None:
     assert "call Mul128x128" in asm and "call SaveWide256" in asm
     assert ".checkStone:" in asm and ".publish:" in asm
     assert "wCalendarStoneOutput:: ds 80" in BOOT.read_text(encoding="utf-8")
-    assert "RunCalendarHidden2Bench::" in source
+    assert "RunCalendarHidden3Bench::" in source
     assert "ld a, 118" in source and ".checkRejected:" in source
     assert "dmg-hidden3-native:" in WORKFLOW.read_text(encoding="utf-8")
     print("HOST_STAGE1_HIDDEN3=PASS independent_pairs=72 "
           "k3_stones=5 fixture_bytes=16 invalid_early_reject=YES "
-          "signed32_endpoints=YES PyBoy_Native373=CI_REQUIRED "
-          "hidden3_7_and_visible46=NOT_IMPLEMENTED", flush=True)
+          "signed32_endpoints=YES PyBoy_Native374=CI_REQUIRED "
+          "hidden4_7_and_visible46=NOT_IMPLEMENTED", flush=True)
 
 
 if __name__ == "__main__":
