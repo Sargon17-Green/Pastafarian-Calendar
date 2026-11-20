@@ -1,0 +1,118 @@
+name: Soak v137 cross-run archived native executable hash receipts, no Fct
+on:
+  push:
+    branches:
+      - qa/soak-cross-run-native-hash-v137
+    paths:
+      - 'soak/control/seer_cross_run_native_hash_v137.json'
+      - 'soak/runner/soak_seer_cross_run_native_hash_v137.py'
+      - 'soak/process_tests/test_soak_seer_cross_run_native_hash_v137.py'
+      - '.github/workflows/soak-seer-cross-run-native-v137.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  immutable-historical-prebuilt-metadata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Preserve original mismatch stop and deny native process APIs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast,json
+          from pathlib import Path
+          stop=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert stop['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for path in ('soak/runner/soak_seer_cross_run_native_hash_v137.py',
+                       'soak/process_tests/test_soak_seer_cross_run_native_hash_v137.py'):
+              tree=ast.parse(Path(path).read_text(encoding='utf-8'))
+              for n in ast.walk(tree):
+                  if isinstance(n,ast.Import):
+                      assert all(a.name.split('.')[0] not in
+                        {'subprocess','ctypes','multiprocessing','psutil'} for a in n.names)
+                  if isinstance(n,ast.ImportFrom):
+                      assert (n.module or '').split('.')[0] not in (
+                        'subprocess','ctypes','multiprocessing','psutil')
+          print('V137_ORIGINAL_DISPATCH_HALT_CONFIRMED')
+          PY
+      - name: Twenty synthetic artifact, provenance, and original Soak negative controls
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_seer_cross_run_native_hash_v137.py' -v \
+            2>&1 | tee evidence/v137-tests.log
+          grep -Eq '^Ran 20 tests ' evidence/v137-tests.log
+          grep -q '^OK$' evidence/v137-tests.log
+      - name: Pin completed v136 QA run and immutable artifact digest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          from urllib.request import Request,urlopen
+          prefix='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              req=Request(prefix+path,headers={
+                'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                'Accept':'application/vnd.github+json',
+                'X-GitHub-Api-Version':'2022-11-28',
+                'User-Agent':'pastafari-soak-v137-readonly'})
+              with urlopen(req,timeout=30) as r:return json.load(r)
+          run=get('/actions/runs/44747695559')
+          assert run['id']==44747695559
+          assert run['head_sha']=='951f2656ff7d2de46b96fb2fd171aef20a002ef8'
+          assert run['status']=='completed' and run['conclusion']=='success'
+          a=get('/actions/runs/44747695559/artifacts')
+          assert any(x['id']==14634076451
+              and x['name']=='soak-v136-seer-exact-commit-artifact-census-no-binary-soak'
+              and x['digest']=='sha256:cfdc1676f5625278625e75d38352cb3e06f21b829389be1614aac36030077f07'
+              and x['expired'] is False for x in a['artifacts'])
+          print('V137_V136_FROZEN_CI_ARTIFACT_PASS')
+          PY
+      - name: Verify two distinct exact SHA runs, six prebuilt ZIP metadata and failed Seer Next
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_seer_cross_run_native_hash_v137.py \
+            --index soak/control/seer_cross_run_native_hash_v137.json \
+            --output evidence/v137-cross-run-metadata.json \
+            | tee evidence/v137-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v137-cross-run-metadata.json').read_text())
+          h=r['historical_github_metadata']
+          assert h['exact_completed_prebuilt_runs']==2
+          assert h['prebuilt_artifacts_verified']==6
+          assert h['adjacent_seer_next_status']=='completed/failure'
+          assert h['binary_bytes_reexamined_in_this_live_metadata_scan'] is False
+          assert r['archive_bytes_checked_this_execution'] is False
+          assert r['local_byte_reports'] is None
+          assert r['executables_sha256_recomputed_from_real_bytes']==0
+          assert r['matching_original_seer_next_experimental_hashes'] is None
+          assert r['new_native_binary_execution_count']==0
+          assert r['new_original_Fct_dispatch_count']==0
+          assert r['original_full_years_certified']==0
+          assert r['independent_algorithms_certified']==0
+          assert r['soak_dispatch_authorized'] is False
+          print('V137_CROSS_RUN_ARCHIVE_METADATA_PASS_NO_ORIGINAL_FCT')
+          PY
+      - name: Save source-only QA evidence, never promote the six ZIPs to original Seer Next
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v137-historical-cross-run-prebuilt-metadata-not-soak
+          path: |
+            evidence/v137-tests.log
+            evidence/v137-summary.json
+            evidence/v137-cross-run-metadata.json
+          if-no-files-found: warn
+          retention-days: 30
