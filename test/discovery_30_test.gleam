@@ -23,10 +23,7 @@ fn actual(
   discovery_30_difference_bands.dispatch_discovery_30(context, ids, a, b)
 }
 
-fn gaps_for(
-  context: bootstrap.MonsterContext,
-  ids: List(Int),
-) -> List(Int) {
+fn gaps_for(context: bootstrap.MonsterContext, ids: List(Int)) -> List(Int) {
   let assert Ok(samples) =
     discovery_21_gate_batch.dispatch_discovery_21(context, ids)
   list.each(samples, fn(sample) {
@@ -79,13 +76,11 @@ fn enumerate_ends(
         True -> difference + 1
         False -> difference
       }
-      enumerate_ends(
-        rest,
-        a,
-        b,
-        next_sum,
-        #(next_combined, next_excluded, next_difference),
-      )
+      enumerate_ends(rest, a, b, next_sum, #(
+        next_combined,
+        next_excluded,
+        next_difference,
+      ))
     }
   }
 }
@@ -327,30 +322,33 @@ pub fn discovery_30_huge_limits_and_monotonicity_test() {
     [band(-extreme, extreme)],
     [band(42, 963)],
   )
-  let narrow = check_valid(
-    context,
-    ids,
-    [band(42, 963)],
-    [band(100, 200)],
-    [band(42, 963)],
-    [band(100, 200)],
-  )
-  let more_b = check_valid(
-    context,
-    ids,
-    [band(42, 963)],
-    [band(100, 200), band(201, 1926)],
-    [band(42, 1926)],
-    [band(100, 1926)],
-  )
-  let more_a = check_valid(
-    context,
-    ids,
-    [band(42, 963), band(964, 1926)],
-    [band(100, 200)],
-    [band(42, 1926)],
-    [band(100, 200)],
-  )
+  let narrow =
+    check_valid(
+      context,
+      ids,
+      [band(42, 963)],
+      [band(100, 200)],
+      [band(42, 963)],
+      [band(100, 200)],
+    )
+  let more_b =
+    check_valid(
+      context,
+      ids,
+      [band(42, 963)],
+      [band(100, 200), band(201, 1926)],
+      [band(42, 1926)],
+      [band(100, 1926)],
+    )
+  let more_a =
+    check_valid(
+      context,
+      ids,
+      [band(42, 963), band(964, 1926)],
+      [band(100, 200)],
+      [band(42, 1926)],
+      [band(100, 200)],
+    )
   { more_b <= narrow } |> should.equal(True)
   { more_a >= narrow } |> should.equal(True)
   check_valid(
