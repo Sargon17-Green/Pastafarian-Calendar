@@ -1,0 +1,64 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "stage": 16,
+  "verdict": "STAGE16_ACCEPTED_BOUNDED_CONTRACT",
+  "date": "2026-11-20",
+  "scope": "Exactly two allocated input tuple cells; missing fields represented by negative sentinels -1,-2,-7. Physically truncated tuples and unallocated pointers excluded.",
+  "stage17_started": false,
+  "main_modified": false,
+  "run": {
+    "id": 44707638014,
+    "job_id": 136191099287,
+    "head_sha": "b04574ed16e7d2362be9e78a265895926a580a4e",
+    "conclusion": "success",
+    "job_conclusion": "success",
+    "url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44707638014"
+  },
+  "pins": {
+    "source_sha": "f297b38ae19ffedd7c5da52db44fb477721d73b8",
+    "original_false_runtime_sha": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+    "audit_script_commit": "b133d275ef7f1393e23c24adcf60af0f7f8fd0a0",
+    "audit_script_git_blob": "b7838592c4bab5757b7da064e37c65688e987c08"
+  },
+  "artifact": {
+    "id": 14617511194,
+    "sha256": "072b031de725bc819d469d0db481e7c5b7edfe47f3ff96763465e158e7617d2a",
+    "size_bytes": 87541,
+    "zip_entries": 62,
+    "crc": "PASS",
+    "url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44707638014/artifacts/14617511194"
+  },
+  "tests": {
+    "source_git_blob_matches": 3,
+    "positive_result_cases": 12,
+    "deterministic_replays": 2,
+    "ordered_native_labels": 14,
+    "embedded_positive_assertions": 160,
+    "negative_input_cases": 10,
+    "negative_mutants": 1,
+    "independent_oracle_anchor_checks": 14,
+    "independent_permutation_position_cases": 5039,
+    "corrupted_oracle_rejected": true,
+    "native_exit_code": 0,
+    "native_stderr_empty": true
+  },
+  "source_blobs": {
+    "src/bigint.false": {
+      "git_blob_sha1": "1e8de1147ba46cd0eb75a47f24673bbd9783946f",
+      "sha256": "2a67528b19ea8cb1f8db907f8c13fabf95480bed2b4c88c1e8c82e49c3d084d0"
+    },
+    "src/monster_bootstrap.false": {
+      "git_blob_sha1": "90e8d919c3dc88e352f61ecac21f53ddffa8cd40",
+      "sha256": "c0bc55aaa867fbc60f888e4ff061afe39210cdc61f6a21340a35677a795e2c30"
+    },
+    "test/stage16_sequence_remove_14.false": {
+      "git_blob_sha1": "bdc95f06e5ccfaaf1e5e81c26b059261d2f8bf7a",
+      "sha256": "6ffa6b59a6c6f0004e1a630dd4afe94e7d664fc767c37c9256a7228cea0490ad"
+    }
+  },
+  "limits": {
+    "physical_truncation_memory_safety_assessed": false,
+    "global_stage_acceptance_unbounded": false
+  },
+  "next": "Keep stage17 closed under current checkpoint; plan only after authorized scope/contract. Preserve Stage16 bounded evidence and no main/merge."
+}
