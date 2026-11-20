@@ -16,6 +16,7 @@ RUNTIME = os.environ["RUNTIME_PIN"]
 PATHS = ("src/bigint.false", "src/monster_bootstrap.false",
          "test/stage16_sequence_remove_14.false")
 OTHER_LOCKS = ("tools/stage16_sequence_remove_oracle.py",
+               "tools/stage16_sequence_remove_ci.py",
                "tools/stage16_sequence_remove_design_oracle.py",
                "evidence/stage16_sequence_remove_design_oracle_2026-11-19.json")
 
@@ -53,7 +54,7 @@ def main():
     generated, cases = oracle.build()
     assert generated.encode() == files[-1], "FIXTURE_NOT_REPRODUCIBLE"
     assert len(cases) == 14 and sum(c["replay"] for c in cases) == 2
-    assert len(oracle.NEGATIVE_MARKERS) == 6
+    assert len(oracle.NEGATIVE_MARKERS) == 10
     assert files[-1].count(b'=~["STAGE16_REMOVE_') == 160
     combined = b"\n".join(files)+b"\n"
     prefix = b"\n".join(files[:2])+b"\n"
@@ -72,7 +73,7 @@ def main():
         and positive[1].rstrip().endswith(oracle.FINAL)
         and mutation[0] == 1 and "STAGE16_REMOVE_00_RESULT_FAIL" in mutation[1]
         and oracle.FINAL not in mutation[1]
-        and all(code == 1 and marker in out and oracle.FINAL not in out
+        and all(code == 1 and out == marker and oracle.FINAL not in out
                 for name, marker in oracle.NEGATIVE_MARKERS.items()
                 for code, out, _ in [invalid[name]])
     )
@@ -85,14 +86,17 @@ def main():
         "source_blob_sha256": {p: sha(b) for p,b in zip(PATHS,files)},
         "combined_sha256": sha(combined), "fixture_sha256": sha(files[-1]),
         "result_cases": 12, "deterministic_replays": 2,
-        "positive_assertions_embedded": 160, "invalid_cases": 6,
-        "negative_controls": 7, "expected_labels": expected,
+        "positive_assertions_embedded": 160, "invalid_cases": 10,
+        "negative_controls": 11, "expected_labels": expected,
         "actual_labels": labels, "native_exit_code": positive[0],
         "mutant_exit_code": mutation[0],
         "invalid_exit_codes": {n:r[0] for n,r in invalid.items()},
         "native_verified": accepted_native, "stage16_full_acceptance": False,
         "truncated_tuple_rejection_verified": False,
-        "missing_field_semantics": "explicit -1 sentinels, not truly truncated tuple"
+        "missing_field_semantics": "negative sentinel in exactly two allocated cells; physically truncated tuple excluded",
+        "input_tuple_allocated_cells": 2, "truncated_tuple_in_scope": False,
+        "negative_sentinel_values_tested": [-1, -2, -7],
+        "bounded_contract_native_verified": accepted_native
     }
     (E/"oracle.json").write_text(json.dumps({
         "cases":cases, "negative_markers":oracle.NEGATIVE_MARKERS,

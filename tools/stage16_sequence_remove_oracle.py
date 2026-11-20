@@ -2,8 +2,8 @@
 """Independent Stage 16 fixture generator from positional Python list slicing.
 
 This oracle does NOT parse/call normative_reference.false or calculate via op33.
-Missing-field tests use explicit -1 sentinels; truncated pointer tuples cannot
-be proven invalid with the current untagged two-cell memory layout.
+Missing-field tests use negative sentinels in two allocated tuple cells.
+Physically truncated tuples are OUT OF SCOPE for this untagged memory layout.
 """
 import json
 from pathlib import Path
@@ -64,6 +64,14 @@ def invalid(kind):
         return 'z;b:1_a;!1a;!b;33h;!!\n'
     if kind == "missing_position_sentinel":
         return 'z;s:2a;!1a;!2a;!z;b:s;a;!1_a;!b;33h;!!\n'
+    if kind == "missing_sequence_negative2":
+        return 'z;b:2_a;!1a;!b;33h;!!\n'
+    if kind == "missing_position_negative2":
+        return 'z;s:2a;!1a;!2a;!z;b:s;a;!2_a;!b;33h;!!\n'
+    if kind == "missing_sequence_negative7":
+        return 'z;b:7_a;!1a;!b;33h;!!\n'
+    if kind == "missing_position_negative7":
+        return 'z;s:2a;!1a;!2a;!z;b:s;a;!7_a;!b;33h;!!\n'
     raise ValueError(kind)
 
 NEGATIVE_MARKERS = {
@@ -73,6 +81,10 @@ NEGATIVE_MARKERS = {
     "high_position": "E_REMOVE_POSITION",
     "missing_sequence_sentinel": "E_REMOVE_MISSING_SEQUENCE",
     "missing_position_sentinel": "E_REMOVE_MISSING_POSITION",
+    "missing_sequence_negative2": "E_REMOVE_MISSING_SEQUENCE",
+    "missing_position_negative2": "E_REMOVE_MISSING_POSITION",
+    "missing_sequence_negative7": "E_REMOVE_MISSING_SEQUENCE",
+    "missing_position_negative7": "E_REMOVE_MISSING_POSITION",
 }
 
 if __name__ == "__main__":

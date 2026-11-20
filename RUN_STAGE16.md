@@ -17,3 +17,9 @@
 לממש op33 ב־FALSE באופן עצמאי באמצעות פעולות טבלה קיימות, ללא טעינת המקור הנורמטיבי בבדיקת Native. להפיק fixture בן לפחות 12 עוגנים, בדיקות אורכי קלט ופלט ואי־שינוי מקור, שתי קריאות חוזרות, שש צורות פסולות, ומוטנט ציפייה שיוצא בקוד 1. לאחר QA מקומי תחום, להריץ CI מקור־נעול עם מפרש FALSE המקורי `eb3135565a8670cced3f6bbca4dbf7b014c45634`; לקבל את השלב רק לאחר completed/log, ארטיפקט עם CRC/SHA וביקורת עצמאית המסוגלת לדחות השחתת oracle.
 
 **STAGE16_DESIGN_COMPLETE; IMPLEMENTATION_NOT_STARTED; NATIVE_NOT_RUN; NOT_ACCEPTED.**
+
+## 2026-11-20 — Stage16 bounded layout scope clarification
+
+The Stage16 input is a pointer to exactly **two allocated cells** [sequence_pointer,position]. A negative value in either allocated field represents an explicit missing-field sentinel. Supported test values are -1, -2, -7. The sequence pointer must refer to a fully allocated [n,x1,...,xn] table, with 1<=n<=6 and 1<=position<=n. Valid output and the 5039 independent mathematical cases remain unchanged.
+
+Physically truncated tuple memory, dangling/invalid pointers and undersized sequence allocations are **OUT OF SCOPE**, cannot be safely detected by the untagged layout and MUST NOT be reported as rejected or memory-safe. The 10 invalid Native probes cover 4 numeric limits and 6 sentinel values; an additional mutant probes an intentionally incorrect result. Run the exact-source Native gate and a NEW independent artifact audit before marking Stage16 accepted within this bounded contract. No Stage17 and no main/merge until evidence is checked.

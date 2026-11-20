@@ -317,7 +317,7 @@ z;32=~["E_FACTORIAL_LAYOUT"0 0/]?
 
 { المرحلة 16: العملية 33؛ إزالة خلية حسب الموضع من جدول مباشر مستقل. }
 { [sequence,position] -> [chosen,[n-1,remaining...]]؛ لا تكتب فوق خلايا المصدر. }
-{ -1 is an explicit missing-field sentinel; truly truncated tuples have no safe extent metadata. }
+{ Any negative field is a missing-value sentinel in an allocated two-cell tuple. Physically truncated tuples have no safe extent metadata and are out of scope. }
 z;33=~["E_REMOVE_LAYOUT"0 0/]?
 [
  k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
