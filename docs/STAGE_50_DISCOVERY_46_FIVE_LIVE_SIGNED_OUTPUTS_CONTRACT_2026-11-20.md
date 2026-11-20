@@ -20,6 +20,9 @@ Next implement test/stage50_discovery_tests.cob using the accepted interfaces of
 Add exactly one Stage50 strict CI job to existing canonical workflow after Stage49 (expected 51/51 jobs), with bounded compile <=300 s, execution <=120 s, job <=20 min and uploaded raw evidence. Require exact HEAD and run SHA, completed native log, verified jobs pagination, ZIP SHA256 and CRC, and actual counters before accepting. No duplicate manual rerun of an already accepted SHA.
 If actual Native produces a failing counter, record exact case, source and logs before classifying expected-red; investigate test errors independently of production defects. No main/merge/release.
 
+## Native ABI clarification (2026-11-20)
+BIG-INTEGER-SERVICE uses LK-TEXT PIC X(8192), and INIT-TEXT rejects input lengths above 8192 bytes. A negative 8192-digit operand cannot be supplied directly as signed text (8193 bytes). For Stage50 the Native harness initializes the unsigned magnitude with INIT-TEXT and then assigns the normalized signed descriptor SIGN=-1, before invoking the existing signed DISTANCE-PATCH ABI. Negative baseline T has n-1 magnitude digits and uses standard signed INIT-TEXT. The harness verifies input metadata, ownership and magnitude through TO-TEXT with a temporarily positive sign (restored immediately). This is test-only; no production parser change or 8193-byte INIT-TEXT claim.
+
 ## Current status
 PLANNING_ORACLE_ONLY / NOT_NATIVE / STAGE50_NOT_ACCEPTED.
 NEXT: implement isolated Stage50 COBOL Native harness and strict CI, source-oracle fixture readback, then assess exact-SHA completed logs, ZIP digest and CRC. This planning step does not imply an application release or the entire calendar implementation.
