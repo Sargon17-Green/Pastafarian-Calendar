@@ -740,3 +740,32 @@ jobs:
       - name: Run isolated external package consumer
         working-directory: integration/dart_hebrew_consumer
         run: dart run bin/main.dart
+
+  dart-hebrew-stage6-component-profile:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Resolve project dependencies
+        run: dart pub get
+      - name: Check Stage6 formatter and capture repair evidence
+        shell: bash
+        run: |
+          if ! dart format --output=none --set-exit-if-changed bin/stage6_profile_components.dart; then
+            dart format --output=write bin/stage6_profile_components.dart
+            echo 'DART_CAPTURE_BEGIN:bin/stage6_profile_components.dart'
+            base64 -w0 bin/stage6_profile_components.dart
+            printf '\n'
+            echo 'DART_CAPTURE_END:bin/stage6_profile_components.dart'
+            exit 1
+          fi
+      - name: Analyze Dart package
+        run: dart analyze
+      - name: Profile six production phases with AC.1 literal oracle
+        run: dart run bin/stage6_profile_components.dart
