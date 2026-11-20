@@ -1,0 +1,84 @@
+name: Kotlin bounded production gateDay exactGateIndex inverse differential
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/Post55ProductionGateInverseProbe.kt'
+      - 'soak/audit_production_gate_inverse.py'
+      - 'soak/test_audit_production_gate_inverse.py'
+      - '.github/workflows/post55-production-gate-inverse-differential.yml'
+      - 'soak/independent_year_geometry_oracle.py'
+      - 'soak/independent_sauce_oracle.py'
+      - 'soak/independent_date_combinatorics.py'
+      - 'src/main/kotlin/pastafari/ProductionYearNavigator.kt'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-real-production-inverse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify exact branch SHA and production budget
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          grep -Fq 'maxGateAbsIndex: Int = 8192' src/main/kotlin/pastafari/ProductionYearNavigator.kt
+          grep -Fq 'private const val MAX_GATE_ABS_INDEX = 8192' soak/Post55ProductionGateInverseProbe.kt
+          echo 'GATE_INVERSE_SOURCE_AND_BUDGET_GREEN'
+      - name: Run strict protocol mutation tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -m py_compile soak/audit_production_gate_inverse.py soak/test_audit_production_gate_inverse.py
+          python3 -m unittest discover -s soak -p 'test_audit_production_gate_inverse.py' -v 2>&1 | tee evidence/gate-inverse-unit.log
+      - name: Install Kotlin 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin.zip"
+          unzip -q "$RUNNER_TEMP/kotlin.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile actual Kotlin production and inverse probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc src/main/kotlin/pastafari/*.kt soak/Post55ProductionGateInverseProbe.kt \
+            -include-runtime -d "$RUNNER_TEMP/gate-inverse.jar"
+          test -s "$RUNNER_TEMP/gate-inverse.jar"
+          echo 'GATE_INVERSE_PRODUCTION_COMPILE_GREEN'
+      - name: Run independent unseeded real inverse differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/audit_production_gate_inverse.py \
+            --jar "$RUNNER_TEMP/gate-inverse.jar" \
+            --timeout-seconds 780 \
+            --evidence evidence/gate-inverse.json \
+            2>&1 | tee evidence/gate-inverse.log
+      - name: Preserve evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-cymraeg-production-gate-inverse
+          path: evidence/gate-inverse*
+          if-no-files-found: warn
+          retention-days: 30
