@@ -1,0 +1,116 @@
+name: Soak v135 Seer native archive source and reported-binary-hash receipts, no Fct
+on:
+  push:
+    branches:
+      - qa/soak-seer-native-archive-v135
+    paths:
+      - 'soak/control/seer_native_archive_v135.json'
+      - 'soak/runner/soak_seer_native_archive_v135.py'
+      - 'soak/process_tests/test_soak_seer_native_archive_v135.py'
+      - '.github/workflows/soak-seer-native-archive-v135.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  live-historical-metadata-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Freeze original mismatch gate and bar process-dispatch APIs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast,json
+          from pathlib import Path
+          lock=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for fname in ('soak/runner/soak_seer_native_archive_v135.py',
+                        'soak/process_tests/test_soak_seer_native_archive_v135.py'):
+              tree=ast.parse(Path(fname).read_text(encoding='utf-8'))
+              for n in ast.walk(tree):
+                  if isinstance(n,ast.Import):
+                      assert all(z.name.split('.')[0] not in
+                         {'subprocess','ctypes','multiprocessing','psutil'} for z in n.names)
+                  if isinstance(n,ast.ImportFrom):
+                      assert (n.module or '').split('.')[0] not in
+                         {'subprocess','ctypes','multiprocessing','psutil'}
+          print('V135_ORIGINAL_DATE_DISPATCH_BLOCKED')
+          PY
+      - name: Run sixteen synthetic CI/archive provenance gates
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_seer_native_archive_v135.py' -v \
+            2>&1 | tee evidence/v135-tests.log
+          grep -Eq '^Ran 16 tests ' evidence/v135-tests.log
+          grep -q '^OK$' evidence/v135-tests.log
+      - name: Verify v134 completed evidence and original digest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,json
+          from urllib.request import Request,urlopen
+          base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(uri):
+              q=Request(base+uri,headers={
+                'Accept':'application/vnd.github+json',
+                'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                'X-GitHub-Api-Version':'2022-11-28',
+                'User-Agent':'pastafari-seer-v135-evidence-only'})
+              with urlopen(q,timeout=30) as r:return json.load(r)
+          run=get('/actions/runs/44735989028')
+          assert run['id']==44735989028
+          assert run['head_sha']=='c1c478469ca46c73d20cb69e59e954026e074422'
+          assert run['status']=='completed' and run['conclusion']=='success'
+          artifacts=get('/actions/runs/44735989028/artifacts')
+          assert any(a['id']==14629234676
+             and a['name']=='soak-v134-historical-build-receipts-no-binary-certification'
+             and a['digest']=='sha256:a668a594af94f69343aece2b19990c030cca8fd1adf20415873707820f113b39'
+             and a['expired'] is False for a in artifacts['artifacts'])
+          print('V135_V134_COMPLETED_CI_AND_ARTIFACT_RECHECKED')
+          PY
+      - name: Historical Seer completed job, 1177 identical Git blobs and ZIP metadata
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_seer_native_archive_v135.py \
+            --manifest soak/control/seer_native_archive_v135.json \
+            --output evidence/v135-seer-archive-metadata.json \
+            | tee evidence/v135-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('evidence/v135-seer-archive-metadata.json').read_text())
+          src=x['read_only_cross_commit_ci_and_archive_metadata']
+          assert src['source_git_blob_identical_to_CI_for_common_paths']==1177
+          assert src['identical_non_results_repository_files']==561
+          assert src['later_result_only_files']==38
+          assert src['historical_artifact_id']==13595506317
+          assert x['historical_binary_hashes_recorded_not_binaries_reexamined']==2
+          assert x['original_archive_bytes_examined_in_this_execution'] is False
+          assert x['original_archive_zip_byte_report'] is None
+          assert x['original_date_calls']==0 and x['new_native_build_calls']==0
+          assert x['original_full_years_certified']==0
+          assert x['independent_algorithms_certified']==0
+          assert x['soak_dispatch_authorized'] is False
+          print('V135_SOURCE_ARCHIVE_METADATA_PASS_NOT_BINARY_PROOF')
+          PY
+      - name: Keep a precise record of metadata-only CI validation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v135-seer-source-archive-metadata-no-native-soak
+          path: |
+            evidence/v135-tests.log
+            evidence/v135-summary.json
+            evidence/v135-seer-archive-metadata.json
+          if-no-files-found: warn
+          retention-days: 30
