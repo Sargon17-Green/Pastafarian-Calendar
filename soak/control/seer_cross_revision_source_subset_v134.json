@@ -83,5 +83,27 @@
   },
   "exact_frozen_commit_CI_run_found": false,
   "extra_original_full_years_certified_by_tree_diff": 0,
-  "historical_CI_build_process_original_source_subset_matched": true
+  "historical_CI_build_process_original_source_subset_matched": true,
+  "commit_ancestry": {
+    "comparator": "github_rest_compare_4716594_to_866e9bb",
+    "relation": "frozen_source_commit_is_descendant_of_successful_ci_commit",
+    "ahead_by": 2,
+    "behind_by": 0,
+    "exact_added_files": 38,
+    "all_added_files_under": "research/seer-next/results/",
+    "no_existing_file_content_changes": true,
+    "commits": [
+      {
+        "sha": "e45f4ef7e1d6ac59ff068aab4ebcbb12c3dd0435",
+        "subject": "research(seer-next): archive isolated RNS cache ROI for 4716594fc98f [skip ci]"
+      },
+      {
+        "sha": "866e9bbff59399310416ae25de1b664f9b6c3124",
+        "subject": "research(seer-next): archive CI evidence for 4716594fc98f [skip ci]"
+      }
+    ],
+    "no_exact_head_CI_run_explained_by_archival_skip_ci": true,
+    "static_source_equivalence_supported": true,
+    "original_executable_binary_attested": false
+  }
 }
