@@ -1,0 +1,35 @@
+{
+  "schema": "PASTAFARI_SOAK_PINNED_SOURCE_CI_JOB_INDEX_V129/1",
+  "frozen_source_locks_path": "soak/control/pilot_two_engine_source_locks_v001.json",
+  "interpretation": "Historical GitHub Actions workflow and exact job completed-success evidence only. NOT full native F(c,t) execution, NOT source binary identity, NOT year or independent lineage certification.",
+  "claims": [
+    {
+      "record_id": "REF-41",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+      "run_id": 41040177568,
+      "job_id": 124010760550,
+      "required_successful_steps": [
+        "Temiz Release ağacında sdist ve wheel oluştur",
+        "Wheel'i temiz venv içinde doğrula",
+        "Final doğrulama özetini yaz"
+      ],
+      "claim_scope": "PINNED_CI_JOB_STATUS_NOT_NATIVE_EXECUTION"
+    },
+    {
+      "record_id": "REF-24",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_commit": "03ac0c7f4db3c35487993dd31982faa37dd3948e",
+      "run_id": 43498241933,
+      "job_id": 132136903885,
+      "required_successful_steps": [
+        "Executer Audit 55 E2E",
+        "Conservar li log"
+      ],
+      "claim_scope": "PINNED_CI_JOB_STATUS_NOT_NATIVE_EXECUTION"
+    }
+  ],
+  "full_year_verified": false,
+  "native_execution_attested": false,
+  "independent_algorithms_certified": false
+}
