@@ -1,0 +1,78 @@
+name: APL German native FX20 intermediate trace (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-fx20-progress.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  progress-trace:
+    name: native-fx20-trace-attempt${{ matrix.attempt }}
+    runs-on: windows-2022
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        attempt: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Provision SHA-pinned runtime and temporary APL font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Runtime verified_runtime -Evidence font_bootstrap_evidence
+      - name: Verify diagnostic checkpoints and locked source order
+        shell: pwsh
+        run: |
+          python -m unittest discover -s qa/nars-interface -p 'test_progress_fx_probe.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'PROGRESS_GENERATOR_UNIT_TESTS_FAILED' }
+      - name: Execute bounded NARS2000 native checkpoint trace
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_progress_fx.ps1 -Runtime verified_runtime -Evidence progress_fx_evidence
+      - name: Validate native checkpoint evidence independently
+        shell: pwsh
+        run: |
+          $p='progress_fx_evidence/native_fx_progress.json'
+          if (-not (Test-Path -LiteralPath $p)) { throw 'TRACE_REPORT_MISSING' }
+          $r=Get-Content -LiteralPath $p -Raw | ConvertFrom-Json
+          if ($r.stage01 -cne 'NOT_RUN' -or $r.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or $r.checkpoints.Count -ne 10) {
+            throw 'TRACE_SOURCE_OR_STAGE1_CONTRACT_FAILED'
+          }
+          Write-Output ('TRACE_LAST_CONTIGUOUS_AFTER='+$r.last_contiguous_after)
+          Write-Output ('TRACE_FINAL_EXACT='+$r.final_marker.exact)
+          if ($r.status -cne 'NATIVE_FX20_TRACE_COMPLETE_NOT_STAGE01' -or $r.last_contiguous_after -ne 20 -or $r.noncontiguous_exact -ne $false -or $r.final_marker.exact -ne $true) {
+            throw 'FX20_INTERMEDIATE_NATIVE_TRACE_NOT_CONFIRMED'
+          }
+          Write-Output 'FX20_INTERMEDIATE_NATIVE_TRACE_CONFIRMED_NOT_STAGE01'
+      - name: Hash metadata and marker files without bundling font
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force progress_fx_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem progress_fx_evidence,font_bootstrap_evidence -File -Recurse | Sort-Object FullName | ForEach-Object {
+            $sha=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$sha  $($_.FullName)"
+          } | Set-Content -Encoding utf8 progress_fx_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-fx20-progress-attempt${{ matrix.attempt }}-not-stage1
+          path: |
+            font_bootstrap_evidence/
+            progress_fx_evidence/
+            progress_fx_evidence.sha256
+          retention-days: 14
