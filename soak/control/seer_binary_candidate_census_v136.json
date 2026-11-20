@@ -1,0 +1,82 @@
+{
+  "schema": "PASTAFARI_SOAK_SEER_BINARY_CANDIDATE_CENSUS_V136/1",
+  "claim_scope": "EXACT_CI_RUN_ARTIFACT_METADATA_AND_ONE_DOWNLOADED_PREBUILT_BINARY_ZIP_NOT_ORIGINAL_SEER_NEXT_BINARY",
+  "repo": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+  "exact_ci_head": "4716594fc98fa882a9401455ae56f30895518e8c",
+  "frozen_seer_head": "866e9bbff59399310416ae25de1b664f9b6c3124",
+  "ci_run_ids": [
+    42423264458,
+    42423264025,
+    42423263936,
+    42423263979,
+    42423263866,
+    42423263952,
+    42423264010,
+    42423263869,
+    42423263856,
+    42423263953,
+    42423259653
+  ],
+  "expected_artifacts": {
+    "42423263979": [
+      13593748655
+    ],
+    "42423263952": [
+      13595475137,
+      13594347792,
+      13594263914
+    ],
+    "42423264010": [
+      13594935213,
+      13594610534
+    ],
+    "42423263856": [
+      13595090031,
+      13594237378,
+      13594209238,
+      13593793721
+    ],
+    "42423263953": [
+      13594516120,
+      13594224485
+    ],
+    "42423259653": [
+      13595506317,
+      13595075588
+    ]
+  },
+  "native_linux_artifact": {
+    "run_id": 42423263952,
+    "id": 13594347792,
+    "name": "native-linux-x64-29d18adba6844728c6be8331be181ea00b669eb5",
+    "zip_bytes": 4900691,
+    "zip_sha256": "ed3c380c3790e22e86e269dc3afc5afb95f2ef8c6b66631834e113557fbc1770",
+    "package": "pastafarian-calendar-seer-linux-x64",
+    "version": "0.2.5",
+    "embedded_source_commit": "29d18adba6844728c6be8331be181ea00b669eb5",
+    "backend": "portable",
+    "binary_files": {
+      "bin/seer_engine_service": "e8b2db999880ca1112e87cd09337b4a6e8fa6eace2aa88ca1511fb9581d5a8db",
+      "bin/seer_year_batch": "c4e01a23ac57410165e735353458689fb6cbfd94460f235d5a06f5c563ba9ff5",
+      "bin/seer_year_locator": "578cb40495778e8a5f1287786cbbc471d7564faf9c00bed7eca626d312812321",
+      "bin/seer_year_structure": "b121b83251dc6580540ba6d712f70ab829b4803e05fc2e2a92095f6545726819"
+    }
+  },
+  "historical_trial": {
+    "run_id": 42423259653,
+    "id": 13595506317,
+    "name": "seer-next-native-ab-linux-avx2",
+    "zip_sha256": "ed4757a6f9dde8b5302a73413102cba88fef8f02ac70875b309c2ebea9a56bab",
+    "reported_binary_hashes": {
+      "baseline": "8191de4ccd416f159ac8400a7e12920b8464a0066b32651be69d76c54c47ab2b",
+      "candidate": "46dded4a81d884936fc0bd80a89a32fba6a821cf28c6b55fbfd1a6ff6f253ac8"
+    }
+  },
+  "full_exact_commit_artifact_inventory_may_be_incomplete_if_artifacts_expire": true,
+  "no_original_date_calls": true,
+  "no_new_compiler_or_linker": true,
+  "no_binary_bytes_from_original_Seer_Next_experiment_verified": true,
+  "independent_algorithms_certified": 0,
+  "original_full_years_certified": 0,
+  "soak_dispatch_authorized": false
+}
