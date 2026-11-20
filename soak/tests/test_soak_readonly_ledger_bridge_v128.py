@@ -198,6 +198,20 @@ class ReadonlyBridgeV128Tests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"comparison lacks exact"):
             audit(self.root,self.inventory,self.scope)
 
+    def test_roster_algorithm_id_must_match_frozen_source_plan(self):
+        self.populate()
+        self.inventory["records"][0]["algorithm_id"] = "some-other-algorithm"
+        self.scope["inventory_sha256"] = digest(self.inventory)
+        with self.assertRaisesRegex(ValueError, "algorithm lineage"):
+            audit(self.root,self.inventory,self.scope)
+
+    def test_roster_source_kind_must_match_original_class(self):
+        self.populate()
+        self.inventory["records"][0]["source_kind"] = "production_candidate"
+        self.scope["inventory_sha256"] = digest(self.inventory)
+        with self.assertRaisesRegex(ValueError, "source kind"):
+            audit(self.root,self.inventory,self.scope)
+
     def test_rogue_sqlite_chunk_not_in_scope_fails_closed(self):
         self.populate()
         db=sqlite3.connect(self.root/"ledger.sqlite")
