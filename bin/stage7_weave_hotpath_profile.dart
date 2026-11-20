@@ -1,9 +1,21 @@
 import 'dart:io';
 
+import '../lib/src/monster_bowl_processor.dart';
+import '../lib/src/monster_bowl_questions.dart';
 import '../lib/src/monster_month_lengths.dart';
 import '../lib/src/monster_month_weave_counter.dart';
 import '../lib/src/monster_month_weave_planner.dart';
+import '../lib/src/monster_seed_feeder.dart';
+import '../lib/src/monster_visible_droplets.dart';
+import '../lib/src/monster_work_counts.dart';
 import '../lib/src/monster_year_traversal.dart';
+
+const expectedStage7Hashes = <String, String>{
+  'COUNT': 'c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8',
+  'FIRST': 'dc2dabc1c69f5007425c032e576577195ea6cf7b1d1054a9faca74e025aaf13c',
+  'LAST': '71b78eb2ce0c68252f404e6c6d34b52a2f8f2b834eb6a2eff687bbc6c0bccdd8',
+  'CANONICAL': '7093c6c666dc19642d650fe7fd8a9bbe43cd12238ac4f563ebe668d370eacdda',
+};
 
 var checks = 0;
 var smallRanks = 0;
@@ -104,6 +116,10 @@ void recordBaselineDigest(String label, String payload) {
     if (run.exitCode != 0 || match == null) {
       throw StateError('Stage7 baseline SHA-256 unavailable: $label');
     }
+    final expected = expectedStage7Hashes[label];
+    if (expected == null || expected != match.group(0)) {
+      throw StateError('Stage7 digest regression: $label');
+    }
     print('STAGE7_BASELINE_${label}_SHA256=${match.group(0)}');
   } finally {
     temp.deleteSync(recursive: true);
@@ -117,6 +133,91 @@ bool rejectsRank(List<int> lengths, BigInt rank) {
     return true;
   }
   return false;
+}
+
+// QA-only pre-change canonical reference: same §V selection, but the
+// public unrankFull method recomputes the total after the modulus count.
+// Independent combinatorial correctness is tested by independentSmallWords.
+List<int> legacyCanonicalPath(
+  BigInt calculationDay,
+  MonsterTraversedYear year,
+  MonsterMonthLengthPlan lengths,
+) {
+  final firstDay = year.candidate.openGate + BigInt.one;
+  final work = const MonsterWorkCounter().calculate(
+    calculationDay,
+    firstDay,
+  );
+  final feeder = const MonsterSeedFeeder();
+  final stones = feeder.buildStones();
+  final feeds = feeder.buildHiddenFeeds(work, stones);
+  final drops = const MonsterVisibleDropGenerator().buildVisibleDrops(
+    counts: work,
+    hiddenFeeds: feeds,
+    stones: stones,
+  );
+  final bowls = const MonsterBowlProcessor().process(
+    counts: work,
+    visibleDrops: drops,
+    stones: stones,
+  );
+  final count = MonsterMonthWeaveCounter.countWholeWeaves(lengths.lengths);
+  const questions = MonsterBowlQuestionEngine();
+  final choice = questions.chooseEqual(
+    sequence: questions.createAnswerSequence(
+      bowls: bowls,
+      bowlId: 4,
+      seal: 32,
+    ),
+    modulus: count,
+  );
+  return MonsterMonthWeavePlanner.unrankFull(lengths.lengths, choice.result);
+}
+
+int timeExactCanonical(List<int> Function() compute, List<int> expected) {
+  final timer = Stopwatch()..start();
+  final word = compute();
+  timer.stop();
+  check(word.join(',') == expected.join(','), 'Paired full-year word equality');
+  return timer.elapsedMilliseconds;
+}
+
+int medianMilliseconds(List<int> times) {
+  final sorted = List<int>.of(times)..sort();
+  return sorted[sorted.length ~/ 2];
+}
+
+// Static count-call audit; not a substitute for the Native paired benchmark.
+void auditCountReuse() {
+  final source = File('lib/src/monster_month_weave_planner.dart')
+      .readAsStringSync();
+  const helperSignature = 'static List<int> _unrankWithKnownTotal(';
+  const publicSignature = 'static List<int> unrankFull(';
+  const canonicalSection = '/// Canonical §V selection: bowl 4, seal 32';
+  final helperIndex = source.indexOf(helperSignature);
+  final publicIndex = source.indexOf(publicSignature);
+  final planIndex = source.indexOf(canonicalSection);
+  check(
+    publicIndex >= 0 && helperIndex > publicIndex && planIndex > helperIndex,
+    'Public/private unrank path boundaries',
+  );
+  final helper = source.substring(helperIndex, planIndex);
+  final publicWrapper = source.substring(publicIndex, helperIndex);
+  final plan = source.substring(planIndex);
+  check(
+    !helper.contains('countWholeWeaves(') &&
+        publicWrapper.contains('countWholeWeaves(monthLengths)'),
+    'Known-total helper does not re-count; public wrapper still counts',
+  );
+  check(
+    plan.contains(
+      'monthIds: _unrankWithKnownTotal(lengths.lengths, choice.result, count)',
+    ) &&
+        plan.contains(
+          'MonsterMonthWeaveCounter.countWholeWeaves(lengths.lengths)',
+        ),
+    'Canonical plan passes one precomputed total',
+  );
 }
 
 void main() {
@@ -259,9 +360,50 @@ void main() {
   );
   check(smallRanks >= 1, 'At least one independent small rank');
 
+  auditCountReuse();
+  final baselinePairs = <int>[];
+  final candidatePairs = <int>[];
+  final pairsTimer = Stopwatch()..start();
+  for (var sample = 0; sample < 5; sample++) {
+    int baseline() => timeExactCanonical(
+          () => legacyCanonicalPath(foundation, year, lengths),
+          canonical.monthIds,
+        );
+    int candidate() => timeExactCanonical(
+          () => const MonsterMonthWeavePlanner().plan(
+            foundation,
+            year,
+            lengths,
+          ).monthIds,
+          canonical.monthIds,
+        );
+    final baselineMs = sample.isEven ? baseline() : null;
+    final candidateMs = candidate();
+    final baselineObservedMs = baselineMs ?? baseline();
+    baselinePairs.add(baselineObservedMs);
+    candidatePairs.add(candidateMs);
+    print(
+      'STAGE7_PAIR_${sample + 1}_BASELINE_MS=$baselineObservedMs '
+      'CANDIDATE_MS=$candidateMs',
+    );
+  }
+  pairsTimer.stop();
+  check(
+    pairsTimer.elapsedMilliseconds <= 360000,
+    'Five paired canonical cases within bounded runtime',
+  );
+  print(
+    'STAGE7_CANDIDATE_A_PAIRED; pairs=5; '
+    'baseline_ms=${baselinePairs.join(",")}; '
+    'candidate_ms=${candidatePairs.join(",")}; '
+    'median_baseline_ms=${medianMilliseconds(baselinePairs)}; '
+    'median_candidate_ms=${medianMilliseconds(candidatePairs)}; '
+    'total_ms=${pairsTimer.elapsedMilliseconds}',
+  );
+
   print('STAGE7_TOTAL_MS=${totalTimer.elapsedMilliseconds}');
   print('STAGE7_HOTPATH_PASS; checks=$checks; year_days=${lengths.yearLength}; '
       'month_count=${lengths.monthCount}; full_year_words=3; '
       'small_domains=6; small_ranks=$smallRanks; canonical_case=1; '
-      'phases=4; algorithm_unchanged=true');
+      'phases=4; optimization=candidate_a_count_reuse');
 }

@@ -103,6 +103,16 @@ final class MonsterMonthWeavePlanner {
   /// A single unopened-color factor is computed per consumed active token.
   static List<int> unrankFull(List<int> monthLengths, BigInt rank) {
     final total = MonsterMonthWeaveCounter.countWholeWeaves(monthLengths);
+    return _unrankWithKnownTotal(monthLengths, rank, total);
+  }
+
+  /// Same exact unrank with a trusted whole-domain total from §V plan().
+  /// The public unrankFull API still computes and checks its own total.
+  static List<int> _unrankWithKnownTotal(
+    List<int> monthLengths,
+    BigInt rank,
+    BigInt total,
+  ) {
     if (rank < BigInt.one || rank > total) {
       throw ArgumentError.value(rank, 'rank', 'Outside weave domain.');
     }
@@ -211,7 +221,7 @@ final class MonsterMonthWeavePlanner {
     return MonsterMonthWeavePlan._(
       weaveCount: count,
       weaveChoice: choice,
-      monthIds: unrankFull(lengths.lengths, choice.result),
+      monthIds: _unrankWithKnownTotal(lengths.lengths, choice.result, count),
     );
   }
 }
