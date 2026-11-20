@@ -9,7 +9,7 @@ import sys
 from stage01_import_workspace import (
     SOURCE_COMMIT, SOURCE_FILES, EXPECTED_TOTAL_FUNCTIONS,
     load_locked_sources, build_inner_program, make_stage01_candidate,
-    fx_definition_lines, HELPER_LINES, COUNT_HELPER_LINES,
+    fx_definition_lines, HELPER_LINES, COUNT_HELPER_LINES, _nested_fx_expression,
 )
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
@@ -102,6 +102,25 @@ class Stage01ImportWorkspaceTests(unittest.TestCase):
         self.assertEqual(receipt["candidate_sha256"], __import__("hashlib").sha256(candidate).hexdigest())
         self.assertEqual(manifest["manifest_sha256"], self.loaded["manifest"]["manifest_sha256"])
 
+
+    def test_full_stage01_uses_verified_nested_fx_transport(self):
+        lines = ["z←Test x", "", "  z←x+1"]
+        expression = _nested_fx_expression(lines)
+        self.assertEqual(expression.count("⎕UCS"), 3)
+        self.assertIn("(0⍴⎕UCS 32)", expression)
+        self.assertIn(") (⎕UCS ", expression)
+        outer, _ = build_inner_program(self.loaded, MARKER)
+        inner = "".join(chr(int(x)) for x in outer[len("⎕EC ⎕UCS "):].split())
+        self.assertIn("⎕FX ((⎕UCS ", inner)
+        self.assertEqual(inner.count("Stage01Fix ((⎕UCS "), EXPECTED_TOTAL_FUNCTIONS)
+        self.assertNotIn("⍴⎕UCS", inner.replace("(0⍴⎕UCS 32)", ""))
+        _, _, receipt = make_stage01_candidate(BASE, MARKER, REPO)
+        self.assertEqual(receipt["fx_transport"], "NESTED_CHARACTER_VECTOR_STRAND_V1")
+        self.assertFalse(receipt["native_executed"])
+
+    def test_empty_fx_input_fails_closed(self):
+        with self.assertRaisesRegex(ValueError, "EMPTY_APL_FUNCTION"):
+            _nested_fx_expression([])
 
     def test_cli_emits_exact_lf_manifest_bytes_on_current_os(self):
         with tempfile.TemporaryDirectory() as root:

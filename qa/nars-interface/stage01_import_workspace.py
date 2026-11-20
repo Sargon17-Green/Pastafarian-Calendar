@@ -171,6 +171,23 @@ def _matrix_expression(lines: list[str]) -> str:
     return f"({rows} {cols}⍴⎕UCS {_codes(flat)})"
 
 
+def _nested_fx_expression(lines: list[str]) -> str:
+    """Serialize ⎕FX as nested character vectors; do not pad variable-length APL lines.
+
+    Native FX prefix-five evidence confirmed this transport; Stage 1 remains
+    unaccepted until a full 95-function native receipt is verified.
+    """
+    if not lines:
+        raise ValueError("EMPTY_APL_FUNCTION")
+    entries = []
+    for line in lines:
+        if not line:
+            entries.append("(0⍴⎕UCS 32)")
+        else:
+            entries.append("(⎕UCS " + _codes(line) + ")")
+    return "(" + " ".join(entries) + ")"
+
+
 def fx_definition_lines(block: dict) -> list[str]:
     """Convert editor-style ∇ ... ∇ to NARS ⎕FX header-and-body input."""
     source = block["lines"]
@@ -195,14 +212,14 @@ def build_inner_program(loaded: dict, marker_path: str) -> tuple[str, str]:
         f"|SOURCE={SOURCE_COMMIT}|FILES=5|FX=95|TEST=STAGE01_PASS"
     )
     parts = [
-        "⎕FX " + _matrix_expression(HELPER_LINES),
-        "⎕FX " + _matrix_expression(COUNT_HELPER_LINES),
+        "⎕FX " + _nested_fx_expression(HELPER_LINES),
+        "⎕FX " + _nested_fx_expression(COUNT_HELPER_LINES),
         "Stage01FXCount←0",
     ]
     for block in blocks:
         parts.append(
             f"(⎕UCS {_codes(block['name'])}) Stage01Fix "
-            + _matrix_expression(fx_definition_lines(block))
+            + _nested_fx_expression(fx_definition_lines(block))
         )
     parts.extend([
         "Stage01CheckFXCount",
@@ -245,6 +262,7 @@ def make_stage01_candidate(raw_workspace: bytes, marker_path: str, repo_root: pa
         "schema": "APL_GERMAN_STAGE01_IMPORT_CANDIDATE_V1",
         "status": "GENERATED_NOT_NATIVE_VALIDATED",
         "native_executed": False,
+        "fx_transport": "NESTED_CHARACTER_VECTOR_STRAND_V1",
         "source_commit": SOURCE_COMMIT,
         "source_file_count": len(manifest["ordered_files"]),
         "function_count": manifest["function_count"],

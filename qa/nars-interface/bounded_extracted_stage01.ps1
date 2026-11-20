@@ -61,7 +61,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'STAGE01_CANDIDATE_GENERATION_FAILED' }
     $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
     $meta = Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
-    if ($meta.status -ne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false) { throw 'STAGE01_CANDIDATE_NOT_PREPARED' }
+    if ($meta.status -ne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.fx_transport -cne 'NESTED_CHARACTER_VECTOR_STRAND_V1') { throw 'STAGE01_CANDIDATE_NOT_PREPARED' }
     if ($meta.source_commit -ne $sourceCommit -or $meta.source_file_count -ne 5 -or $meta.function_count -ne 95 -or $meta.unique_function_count -ne 95) { throw 'STAGE01_SOURCE_MANIFEST_GATE_FAILED' }
     if ($manifest.source_commit -ne $sourceCommit -or $manifest.function_count -ne 95 -or $manifest.unique_function_count -ne 95 -or $manifest.ordered_files.Count -ne 5 -or $manifest.ordered_function_names.Count -ne 95) { throw 'STAGE01_MANIFEST_GATE_FAILED' }
     if ($meta.function_names.Count -ne 95) { throw 'STAGE01_FUNCTION_NAME_RECEIPTS_COUNT_MISMATCH' }
