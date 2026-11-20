@@ -31,9 +31,8 @@ class FakeGitHub:
         self.new=copy.deepcopy(self.old)
         for i in range(38):
             self.new["research/seer-next/results/new_artifact_"+str(i)+".json"]=("aabb"+str(i),"100644","blob")
-        self.override=None
+        self.truncated=False
     def get(self,path):
-        if self.override is not None:return self.override(path)
         stem="/repos/"+target.REPO
         if path==stem+"/actions/runs/"+str(target.RUN_ID):return self.run
         if path==stem+"/actions/runs/"+str(target.RUN_ID)+"/jobs?per_page=100":return self.jobs
@@ -41,7 +40,7 @@ class FakeGitHub:
         if path in (stem+"/git/trees/"+target.CI_SHA+"?recursive=1",
                     stem+"/git/trees/"+target.FROZEN+"?recursive=1"):
             source=self.old if target.CI_SHA in path else self.new
-            return {"truncated":False,"tree":[
+            return {"truncated":self.truncated,"tree":[
                 {"path":k,"sha":v[0],"mode":v[1],"type":v[2]}
                 for k,v in source.items()]}
         raise AssertionError("Unexpected API request "+path)
@@ -120,12 +119,7 @@ class NativeArchiveTests(unittest.TestCase):
             self.audit_remote()
 
     def test_truncated_git_tree_rejected(self):
-        old=self.fake.get
-        def broken(p):
-            x=old(p)
-            if "/git/trees/" in p:return {**x,"truncated":True}
-            return x
-        self.fake.override=broken
+        self.fake.truncated=True
         with self.assertRaisesRegex(ValueError,"truncated/incomplete"):
             self.audit_remote()
 
