@@ -19,17 +19,17 @@ import traceback
 import stage3_native_ci as office
 import stage5_calendar_semantic_ci as s5
 
-# Phase order is cumulative, so the first timed-out phase bounds the expensive
-# chain without immediately repeating the 240-second all-in-one gate call.
+# Diagnostic phase order scales one exact-source recurrence clone in an owned
+# temporary Basic profile. No production source file or stage acceptance changes.
 PHASES = [
-    ("stones", "S5DiagStones", 45),
-    ("hidden", "S5DiagHidden", 60),
-    ("visible", "S5DiagVisible", 90),
-    ("initial_bowls", "S5DiagInitial", 30),
-    ("drops", "S5DiagDrops", 120),
-    ("post_stir", "S5DiagStir", 150),
-    ("sauce", "S5DiagSauce", 180),
-    ("one_gate_gap", "S5DiagGap", 180),
+    ("stones_cap_1", "S5DiagStonesCap1", 12),
+    ("stones_cap_2", "S5DiagStonesCap2", 15),
+    ("stones_cap_4", "S5DiagStonesCap4", 20),
+    ("stones_cap_8", "S5DiagStonesCap8", 30),
+    ("stones_cap_16", "S5DiagStonesCap16", 40),
+    ("stones_cap_24", "S5DiagStonesCap24", 50),
+    ("stones_cap_32", "S5DiagStonesCap32", 60),
+    ("stones_cap_46", "S5DiagStonesCap46", 80),
 ]
 PROBE = r'''
 ' Temporary Stage5 cost diagnostics, NEVER committed as production Basic.
@@ -93,6 +93,46 @@ End Function
 Public Function S5DiagGap() As String
  S5DiagGap = CStr(OracleOneGateGap("-3"))
 End Function
+Public Function S5DiagStonesCap1() As String
+ Dim stones As Variant
+ stones = OracleBuildStonesCapped(1)
+ S5DiagStonesCap1 = CStr(Len(CStr(stones(1, 1))))
+End Function
+Public Function S5DiagStonesCap2() As String
+ Dim stones As Variant
+ stones = OracleBuildStonesCapped(2)
+ S5DiagStonesCap2 = CStr(Len(CStr(stones(2, 1))))
+End Function
+Public Function S5DiagStonesCap4() As String
+ Dim stones As Variant
+ stones = OracleBuildStonesCapped(4)
+ S5DiagStonesCap4 = CStr(Len(CStr(stones(4, 1))))
+End Function
+Public Function S5DiagStonesCap8() As String
+ Dim stones As Variant
+ stones = OracleBuildStonesCapped(8)
+ S5DiagStonesCap8 = CStr(Len(CStr(stones(8, 1))))
+End Function
+Public Function S5DiagStonesCap16() As String
+ Dim stones As Variant
+ stones = OracleBuildStonesCapped(16)
+ S5DiagStonesCap16 = CStr(Len(CStr(stones(16, 1))))
+End Function
+Public Function S5DiagStonesCap24() As String
+ Dim stones As Variant
+ stones = OracleBuildStonesCapped(24)
+ S5DiagStonesCap24 = CStr(Len(CStr(stones(24, 1))))
+End Function
+Public Function S5DiagStonesCap32() As String
+ Dim stones As Variant
+ stones = OracleBuildStonesCapped(32)
+ S5DiagStonesCap32 = CStr(Len(CStr(stones(32, 1))))
+End Function
+Public Function S5DiagStonesCap46() As String
+ Dim stones As Variant
+ stones = OracleBuildStonesCapped(46)
+ S5DiagStonesCap46 = CStr(Len(CStr(stones(46, 1))))
+End Function
 '''
 
 def inject_owned(profile_target):
@@ -102,6 +142,23 @@ def inject_owned(profile_target):
     if source.count(marker) != 1 or "S5DiagStones" in source:
         raise AssertionError("DIAGNOSTIC_INJECTION_REFUSED")
     path.write_text(source.replace(marker, PROBE + marker), encoding="utf-8")
+    # Clone the pinned recurrence into the owned temporary Basic profile.
+    oracle_path = profile_target / "Standard" / "Oracle.xba"
+    oracle_source = oracle_path.read_text(encoding="utf-8")
+    signature = "Public Function OracleBuildStones() As Variant"
+    if oracle_source.count(signature) != 1 or oracle_source.count(marker) != 1:
+        raise AssertionError("STONE_SOURCE_REPRODUCTION_REFUSED")
+    begin = oracle_source.index(signature)
+    end = oracle_source.index("End Function", begin) + len("End Function")
+    original = oracle_source[begin:end]
+    if original.count("For i = 2 To 46") != 1 or original.count("OracleBuildStones = s") != 1:
+        raise AssertionError("STONE_SOURCE_SHAPE_REFUSED")
+    cloned = original.replace(signature, "Public Function OracleBuildStonesCapped(ByVal stopRow As Long) As Variant", 1)
+    cloned = cloned.replace("For i = 2 To 46", "For i = 2 To stopRow", 1)
+    cloned = cloned.replace("OracleBuildStones = s", "OracleBuildStonesCapped = s", 1)
+    if "OracleBuildStonesCapped" in oracle_source:
+        raise AssertionError("STONE_CLONE_CONFLICT")
+    oracle_path.write_text(oracle_source.replace(marker, cloned + "\n" + marker), encoding="utf-8")
 
 
 def run(basic, out):
@@ -237,8 +294,8 @@ def main():
     if a.self_test:
         assert len(PHASES) == 8 and len(set(x[0] for x in PHASES)) == 8
         assert all(x[2] > 0 for x in PHASES)
-        assert PROBE.count("Public Function S5Diag") == len(PHASES)
-        print("STAGE5_GATE_DIAG_SELFTEST_PASS phases=8")
+        assert PROBE.count("Public Function S5DiagStonesCap") == len(PHASES)
+        print("STAGE5_GATE_DIAG_SELFTEST_PASS stones_scaling_phases=8")
         return 0
     if a.basic_dir is None or a.output_dir is None:
         p.error("--basic-dir and --output-dir are required")
