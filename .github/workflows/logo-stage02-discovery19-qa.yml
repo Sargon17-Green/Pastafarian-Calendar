@@ -1,0 +1,60 @@
+name: Logo Stage 2 Discovery 19 QA Candidate Native
+
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-d19-ask'
+
+permissions:
+  contents: read
+
+jobs:
+  d19-qa-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact QA commit
+        uses: actions/checkout@v4
+      - name: Build pinned headless UCBLogo
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          expected=a0215433f07384e4c42fe247525867f11e6f32f7
+          actual="$(git -C "$source_dir" rev-parse HEAD)"
+          test "$actual" = "$expected"
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          binary="$RUNNER_TEMP/ucblogo-headless/bin/ucblogo"
+          test -x "$binary"
+          echo "LOGO_BIN=$binary" >> "$GITHUB_ENV"
+          echo "HEADLESS_LOGO_SOURCE_SHA=$actual"
+      - name: Execute independent D19 QA candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          log="$RUNNER_TEMP/stage02-discovery19.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 1800s \
+            stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery19_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::D19 QA Native failed or timed out, exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_19_CASES_PASIS 17' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_19_CHECKS_PASIS 61' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_19_PASIS' "$log"
+          if grep -Eq 'STAGE_2_DISCOVERY_19_.*FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs' "$log"; then
+            echo "::error::D19 QA failure marker"
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_19_QA_VERIFICATION=PASS'

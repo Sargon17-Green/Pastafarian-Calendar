@@ -1,0 +1,86 @@
+; D19 QA candidate. Independent oracle from the same branch's frozen Appendix-A reference.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "src/stage02_stones.logo
+load "src/stage02_hidden.logo
+load "src/stage02_visible_prefix.logo
+load "src/stage02_visible_ten.logo
+load "src/stage02_visible_fifteen.logo
+load "src/stage02_visible_twenty.logo
+load "src/stage02_visible_twentyfive.logo
+load "src/stage02_visible_thirty.logo
+load "src/stage02_visible_thirtyfive.logo
+load "src/stage02_visible_forty.logo
+load "src/stage02_visible_fortyfive.logo
+load "src/stage02_visible_fortysix.logo
+load "src/stage02_sauce.logo
+load "src/stage02_ask.logo
+load "test/normative_reference.logo
+make "D19.CASES 0
+make "D19.CHECKS 0
+make "D19.FAIL "false
+
+to d19.require :condition :tag
+  make "D19.CHECKS (:D19.CHECKS + 1)
+  if not :condition [
+    make "D19.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_19_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d19.prefix :calculation :target
+  output monster.stage02.visible.fortysix (monster.stage02.visible.fortyfive (monster.stage02.visible.forty (monster.stage02.visible.thirtyfive (monster.stage02.visible.thirty (monster.stage02.visible.twentyfive (monster.stage02.visible.twenty (monster.stage02.visible.fifteen (monster.stage02.visible.ten (monster.stage02.visible.prefix (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts :calculation :target))))))))))))
+end
+
+to d19.case :ctx :oracleSauce :pair
+  localmake "queriedId first :pair
+  localmake "seal last :pair
+  localmake "actual monster.stage02.ask :ctx :queriedId :seal
+  localmake "expected nr.ask :oracleSauce :queriedId :seal
+  make "D19.CASES (:D19.CASES + 1)
+  d19.require (and (listp :actual) ((count :actual) = 2)) (list :pair [shape])
+  d19.require (equalp (first :actual) (first :expected)) (list :pair [firstValue])
+  d19.require (equalp (last :actual) (last :expected)) (list :pair [direction])
+  d19.require (and (bi.ge (first :actual) (bi.small 1)) (bi.le (first :actual) nr.M)) (list :pair [range])
+  d19.require (equalp :actual (monster.stage02.ask :ctx :queriedId :seal)) (list :pair [repeat])
+end
+
+to d19.cases :ctx :oracleSauce :pairs
+  if emptyp :pairs [stop]
+  d19.case :ctx :oracleSauce first :pairs
+  d19.cases :ctx :oracleSauce butfirst :pairs
+end
+
+to d19.invalid :ctx :queriedId :seal :tag
+  make "D19.CASES (:D19.CASES + 1)
+  d19.require (equalp (monster.stage02.ask :ctx :queriedId :seal) []) :tag
+end
+
+to d19.run
+  print [STAGE_2_DISCOVERY_19_STEP production_prefix]
+  localmake "prefix d19.prefix (nr.foundation) (nr.tablets)
+  localmake "ctx monster.stage02.sauce :prefix
+  print [STAGE_2_DISCOVERY_19_STEP independent_sauce]
+  localmake "oracleSauce nr.sauce (nr.foundation) (nr.tablets)
+  print [STAGE_2_DISCOVERY_19_STEP eleven_normative_selectors]
+  d19.cases :ctx :oracleSauce [[1 1] [1 10] [1 11] [1 12] [2 20] [2 21] [5 22] [3 30] [3 31] [4 32] [5 33]]
+  print [STAGE_2_DISCOVERY_19_STEP invalid_guards]
+  d19.invalid (monster.context.put :ctx "status "VISIBLE_FORTYSIX_ONLY) 1 1 [wrong_status]
+  d19.invalid (monster.context.put :ctx "sauceBowls "bad) 1 1 [bowls_nonlist]
+  d19.invalid (monster.context.put :ctx "sauceBowls (butlast (monster.context.get :ctx "sauceBowls))) 1 1 [bowls_short]
+  d19.invalid (monster.context.put :ctx "sauceOrder46 [1 1 1 1 1 1]) 1 1 [latch_nonpermutation]
+  d19.invalid :ctx 7 1 [queriedid_outside]
+  d19.invalid :ctx 1 100 [seal_outside]
+  if :D19.FAIL [print [STAGE_2_DISCOVERY_19_FALIIS] stop]
+  if :D19.CASES <> 17 [print [STAGE_2_DISCOVERY_19_CASE_COUNT_FALIIS] stop]
+  if :D19.CHECKS <> 61 [print [STAGE_2_DISCOVERY_19_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_19_CASES_PASIS] :D19.CASES
+  print sentence [STAGE_2_DISCOVERY_19_CHECKS_PASIS] :D19.CHECKS
+  print [STAGE_2_DISCOVERY_19_PASIS]
+end
+
+d19.run

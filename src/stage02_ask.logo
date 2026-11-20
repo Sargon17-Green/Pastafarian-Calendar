@@ -1,0 +1,47 @@
+; Stage2 / Discovery19 — pure bounded Appendix-A ASK stream.
+; Production uses only exact BI arithmetic and the D18 final bowls/latch.
+
+to monster.stage02.ask.next.work :order :queriedId
+  if equalp first :order :queriedId [output first butfirst :order]
+  output monster.stage02.ask.next.work butfirst :order :queriedId
+end
+
+to monster.stage02.ask.next :order :queriedId
+  if equalp (last :order) :queriedId [output first :order]
+  output monster.stage02.ask.next.work :order :queriedId
+end
+
+to monster.stage02.ask :ctx :queriedId :seal
+  if not (equalp (monster.context.get :ctx "status) "SAUCE_ONLY) [output []]
+  localmake "bowls monster.context.get :ctx "sauceBowls
+  if not (listp :bowls) [output []]
+  if (count :bowls) <> 6 [output []]
+  localmake "order monster.context.get :ctx "sauceOrder46
+  if not (listp :order) [output []]
+  if (count :order) <> 6 [output []]
+  if not (memberp 1 :order) [output []]
+  if not (memberp 2 :order) [output []]
+  if not (memberp 3 :order) [output []]
+  if not (memberp 4 :order) [output []]
+  if not (memberp 5 :order) [output []]
+  if not (memberp 6 :order) [output []]
+  if not (numberp :queriedId) [output []]
+  if not (equalp :queriedId (int :queriedId)) [output []]
+  if or (:queriedId < 1) (:queriedId > 6) [output []]
+  if not (numberp :seal) [output []]
+  if not (equalp :seal (int :seal)) [output []]
+  if or (:seal < 0) (:seal > 99) [output []]
+
+  localmake "nextId monster.stage02.ask.next :order :queriedId
+  localmake "mixed bi.add (item :queriedId :bowls) (bi.small (:seal + 181))
+  make "mixed bi.add :mixed (bi.mul.small (item :nextId :bowls) 179)
+  localmake "firstValue monster.stage02.normalize (bi.add (bi.square :mixed) (bi.small :seal))
+  localmake "directionBase bi.add :firstValue (bi.small (:seal + 194))
+  localmake "directionValue bi.add (bi.square :directionBase) (bi.mul.small :firstValue 193)
+  make "directionValue bi.add :directionValue (bi.mul.small (item 6 :bowls) 197)
+  make "directionValue monster.stage02.normalize :directionValue
+  localmake "parity bi.to.small (bi.regmod :directionValue (bi.small 2))
+  localmake "step -1
+  if :parity = 1 [make "step 1]
+  output (list :firstValue :step)
+end
