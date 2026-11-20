@@ -1,0 +1,52 @@
+{
+  "schema": "PASTAFARI_SOAK_HISTORICAL_BINARY_RECEIPTS_INDEX_V134/1",
+  "parent_stage": "PASTAFARI_SOAK_STATIC_BUILD_GRAPH_REPORT_V133/1",
+  "source_commit_coptic": "1a1ea6a89f1f7a2cde9cba1f91aa1625a9284334",
+  "source_commit_seer": "866e9bbff59399310416ae25de1b664f9b6c3124",
+  "evidence_scope": "HISTORICAL_GITHUB_RUN_JOB_AND_ARTIFACT_METADATA_ONLY_NO_BINARY_PROVENANCE",
+  "coptic": {
+    "repository": "Sargon17-Green/Pastafarian-Calendar",
+    "workflows": [
+      {
+        "run_id": 35640916185,
+        "job_id": 106469736387,
+        "workflow_path": ".github/workflows/assembly-sahidic-stage56-final-audit.yml",
+        "workflow_name": "Ⲡaudit ⲛϩⲁⲏ ⲙⲡⲃⲁⲑⲙⲟⲥ 56 — Assembly x86-64 / Ⲙⲉⲧⲣⲉⲙⲛⲕⲏⲙⲉ",
+        "historical_upload_name": "assembly-sahidic-stage56-audit-evidence",
+        "historical_upload_artifact_id": 10659901058,
+        "expected_successful_steps": [
+          "Ⲡbuild ⲙⲡmonster",
+          "Ⲡsemantic/runtime audit ⲙⲡⲃⲁⲑⲙⲟⲥ 56",
+          "Ⲡstatic/scar audit"
+        ],
+        "historical_zip_digest_from_job_log": "sha256:175b1ce82085340a73852d2b93123fd9639a9db576a230fb7b362336d2b4fea4"
+      },
+      {
+        "run_id": 35640916171,
+        "job_id": 106469736990,
+        "workflow_path": ".github/workflows/assembly-sahidic-stage56-final-audit-closure.yml",
+        "workflow_name": "Assembly Sahidic Stage 56 final audit closure",
+        "historical_upload_name": "assembly-sahidic-stage56-audit-closure-evidence",
+        "historical_upload_artifact_id": 10659366977,
+        "expected_successful_steps": [
+          "Build",
+          "Stage56 semantic runtime audit",
+          "Static runtime audit"
+        ],
+        "historical_zip_digest_from_job_log": "sha256:e09c09a687e5335d0773779b70be27c7caf3beb9b851cd35f2cc9209d13da706"
+      }
+    ]
+  },
+  "seer": {
+    "repository": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+    "research_branch": "research/seer-next-first-principles-2026-11-06",
+    "workflow_path": ".github/workflows/seer-next-experiment.yml",
+    "observation": "NO_RUN_AT_EXACT_FROZEN_HEAD_SHA_IN_GITHUB_ACTIONS_SEARCH",
+    "other_revision_ci_runs_do_not_attest_frozen_commit": true
+  },
+  "no_native_build": true,
+  "no_original_date_dispatch": true,
+  "auto_binary_attestation": false,
+  "auto_independence_promotion": false,
+  "soak_dispatch_authorized": false
+}
