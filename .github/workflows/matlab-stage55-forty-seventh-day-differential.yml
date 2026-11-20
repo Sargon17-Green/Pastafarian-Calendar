@@ -5,7 +5,7 @@ on:
       - 'MATLAB\+Polski'
     paths:
       - 'tools/run_stage55_year5000_forty_seventh_native.m'
-      - 'tools/stage55_after46_interval_five_fields.py'
+      - 'tools/stage55_after47_interval_five_fields.py'
       - 'tools/stage55_after4_interval_witness.py'
       - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
       - '.github/workflows/matlab-stage55-forty-seventh-day-differential.yml'
@@ -37,9 +37,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f tools/stage55_after46_interval_five_fields.py
-          grep -Fqx 'PIN = "cc1883f92e90f1b56fd1cf5c26167e913f44743f080bae18efcf9239a0279703"' tools/stage55_after46_interval_five_fields.py
-          python3 -m py_compile tools/stage55_after46_interval_five_fields.py
+          test -f tools/stage55_after47_interval_five_fields.py
+          grep -Fqx 'PIN = "cc1883f92e90f1b56fd1cf5c26167e913f44743f080bae18efcf9239a0279703"' tools/stage55_after47_interval_five_fields.py
+          python3 -m py_compile tools/stage55_after47_interval_five_fields.py
           grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_46.json' tools/run_stage55_year5000_forty_seventh_native.m
           grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_47.json' tools/run_stage55_year5000_forty_seventh_native.m
       - name: Set up MATLAB R2026a
@@ -54,7 +54,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/stage55_after46_interval_five_fields.py \
+          python3 tools/stage55_after47_interval_five_fields.py \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_46.json \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_47.json \
             tests/fixtures/stage55_year5000_appendix_a_metadata.json \
