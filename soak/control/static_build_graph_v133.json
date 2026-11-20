@@ -1,0 +1,37 @@
+{
+  "schema": "PASTAFARI_SOAK_STATIC_BUILD_GRAPH_V133/1",
+  "scope": "FROZEN_REPOSITORY_BUILD_SCRIPTS_AND_SOURCE_SYMBOLS_ONLY",
+  "input_v132_schema": "PASTAFARI_SOAK_FIRST_HOP_DEPENDENCIES_V132/1",
+  "assembly": {
+    "repository": "Sargon17-Green/Pastafarian-Calendar",
+    "commit": "1a1ea6a89f1f7a2cde9cba1f91aa1625a9284334",
+    "build_script": "build.sh",
+    "entrypoint": "src/production/stage54_integration.s",
+    "link_target": "build/stage54_final_integration"
+  },
+  "seer": {
+    "repository": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+    "commit": "866e9bbff59399310416ae25de1b664f9b6c3124",
+    "header": "prototype/src/seer_calendar_core.hpp",
+    "include_dir": "prototype/src",
+    "modes": [
+      {
+        "record_id": "SEER-NEXT-YEAR-CACHE",
+        "script": "research/seer-next/scripts/build_candidate.sh",
+        "root": "research/seer-next/src/seer_next_engine_service.cpp",
+        "output": "research/seer-next/build/seer_next_engine_service"
+      },
+      {
+        "record_id": "SEER-NEXT-HYBRID",
+        "script": "research/seer-next/scripts/build_hybrid.sh",
+        "root": "research/seer-next/src/seer_next_hybrid_engine_service.cpp",
+        "output": "research/seer-next/build/seer_next_hybrid_engine_service"
+      }
+    ]
+  },
+  "no_compiler_invocation": true,
+  "no_linker_invocation": true,
+  "no_original_date_calls": true,
+  "readiness_upgrade_permitted": false,
+  "soak_dispatch_authorized": false
+}
