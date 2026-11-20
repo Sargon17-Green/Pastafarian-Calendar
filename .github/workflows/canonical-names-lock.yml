@@ -82,7 +82,7 @@ jobs:
           if-no-files-found: warn
 
   stage5-semantic-native:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/BASIC+ਪੰਜਾਬੀ' && contains(github.event.head_commit.message, '[stage5-only]')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/BASIC+ਪੰਜਾਬੀ' && contains(github.event.head_commit.message, '[stage5-only]') && !contains(github.event.head_commit.message, '[stage5-diagnostic]')
     needs: [verify]
     runs-on: ubuntu-latest
     timeout-minutes: 55
@@ -139,4 +139,60 @@ jobs:
         with:
           name: basic-punjabi-stage5-semantic-evidence
           path: ${{ runner.temp }}/basic-punjabi-stage5-results/
+          if-no-files-found: warn
+
+  stage5-gate-cost-diagnostic:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/BASIC+ਪੰਜਾਬੀ' && contains(github.event.head_commit.message, '[stage5-diagnostic]')
+    needs: [verify]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install temporary LibreOffice and system pyuno
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libreoffice-core libreoffice-common python3-uno
+          libreoffice --version
+          /usr/bin/python3 -c 'import uno; print("PYUNO_READY")'
+      - name: Static syntax and diagnostic self-test
+        run: |
+          set -euo pipefail
+          /usr/bin/python3 -m py_compile basic/qa/stage5_gate_cost_diagnostic.py
+          /usr/bin/python3 basic/qa/stage5_gate_cost_diagnostic.py --self-test
+      - name: Bounded native cost breakdown, diagnostic only
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/basic-punjabi-stage5-gate-diagnostic"
+          /usr/bin/python3 basic/qa/stage5_gate_cost_diagnostic.py --basic-dir basic --output-dir "$RUNNER_TEMP/basic-punjabi-stage5-gate-diagnostic"
+      - name: Verify diagnostic evidence is not Stage5 acceptance
+        run: |
+          set -euo pipefail
+          /usr/bin/python3 - "$RUNNER_TEMP/basic-punjabi-stage5-gate-diagnostic" <<'PY'
+          import csv, json, pathlib, sys, os
+          p = pathlib.Path(sys.argv[1])
+          required = ("timings.tsv", "diagnostic.json", "source_metadata.json", "status.txt", "progress.log")
+          assert all((p / f).is_file() for f in required), "STAGE5_DIAGNOSTIC_EVIDENCE_MISSING"
+          report = json.loads((p / "diagnostic.json").read_text())
+          metadata = json.loads((p / "source_metadata.json").read_text())
+          status = (p / "status.txt").read_text().strip()
+          assert status in ("DIAGNOSTIC_TIMEOUT_CAPTURED", "DIAGNOSTIC_NATIVE_ERROR_CAPTURED", "DIAGNOSTIC_ALL_PHASES_RETURNED")
+          assert report["outcome"] == status
+          assert report["scope"] == "QA_NATIVE_DIAGNOSTIC_ONLY_NOT_STAGE5_ACCEPTANCE"
+          assert report["complete_stage5_probes"] == 0
+          assert report["full_production_calendar"] == "NOT_IMPLEMENTED"
+          assert metadata["source_sha_locked"] is True
+          assert metadata["candidate_commit"] == os.environ["GITHUB_SHA"]
+          with (p / "timings.tsv").open(newline="") as f:
+              rows = list(csv.DictReader(f, delimiter="\t"))
+          assert len(rows) == report["phases_attempted"] and 1 <= len(rows) <= 8
+          assert "DIAG_END" in (p / "progress.log").read_text()
+          print("STAGE5_DIAGNOSTIC_EVIDENCE_CAPTURED; NOT_STAGE5_ACCEPTANCE", status, len(rows))
+          PY
+      - name: Upload raw Stage5 diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: basic-punjabi-stage5-gate-cost-diagnostic
+          path: ${{ runner.temp }}/basic-punjabi-stage5-gate-diagnostic/
           if-no-files-found: warn
