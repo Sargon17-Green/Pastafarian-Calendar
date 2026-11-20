@@ -1,0 +1,48 @@
+{
+  "schema": "PASTAFARI_SOAK_ADA_ISOLATED_MONTH_DP_V143/1",
+  "purpose": "QA_ONLY_SYNTHETIC_ADA_COMPONENT_NOT_ORIGINAL_FCT_OR_NATIVE_CONVERTER",
+  "repo": "Sargon17-Green/Pastafarian-Calendar",
+  "base_qa_sha": "17e57a65814cc972aec26c895bbf2a7693333cd4",
+  "canonical_python": {
+    "commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "path": "tests/normative_reference.py",
+    "git_blob_sha1": "d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53"
+  },
+  "known_bad_ada": {
+    "commit": "a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72",
+    "path": "src/month_weaving.adb",
+    "git_blob_sha1": "9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef"
+  },
+  "golden_vectors": {
+    "path": "soak/control/ada_month_weave_rank_vectors_v141.json",
+    "git_blob_sha1": "180d11aa4360cf810a6be8e995d096dbc3d8ff7a",
+    "family_count": 6,
+    "vector_count": 35
+  },
+  "isolated_code_paths": [
+    "soak/ada_port_v143/legal_month_weave_dp.ads",
+    "soak/ada_port_v143/legal_month_weave_dp.adb",
+    "soak/ada_port_v143/test_legal_month_weave_dp.adb"
+  ],
+  "synthetics_only": {
+    "max_months": 6,
+    "max_days": 30,
+    "global_rank_big_integer": true,
+    "exact_H_dp": true,
+    "lexicographic_inverse": true,
+    "hardcoded_vector_count": 35,
+    "rejection_cases": 3
+  },
+  "allowed_compiler_use": "compile and run only the isolated synthetic test_legal_month_weave_dp.adb within QA folder; never original Ada Calendar_Date, Normative_Oracle, F(c,t), or source native converter",
+  "scientific_gates": {
+    "issue_29_open": true,
+    "main_frozen_sha": "56bc4173aae4975ded019ef5ab5a36249f1424df",
+    "STOP_NEW_NATIVE_SOAK_DISPATCH": true,
+    "original_native_converter_builds": 0,
+    "original_Fct_calls": 0,
+    "original_soak_years_certified": 0,
+    "independent_original_algorithms_certified": 0,
+    "production_Ada_patch_applied": false,
+    "isolated_GNAT_compile_not_a_production_acceptance": true
+  }
+}
