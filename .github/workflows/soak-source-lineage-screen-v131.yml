@@ -1,0 +1,144 @@
+name: Soak v131 91-record offline source lineage screening, no original Fct
+on:
+  push:
+    branches:
+      - qa/soak-lineage-screen-v131
+    paths:
+      - 'soak/runner/soak_source_lineage_screen_v131.py'
+      - 'soak/process_tests/test_soak_source_lineage_screen_v131.py'
+      - '.github/workflows/soak-source-lineage-screen-v131.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  frozen-source-evidence-lineage-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Enforce unchanged original first-difference dispatch halt
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import ast,json
+          lock=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert lock['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for path in ('soak/runner/soak_source_lineage_screen_v131.py',
+                       'soak/process_tests/test_soak_source_lineage_screen_v131.py'):
+              tree=ast.parse(Path(path).read_text(encoding='utf-8'))
+              for node in ast.walk(tree):
+                  if isinstance(node,ast.Import):
+                      assert all(n.name.split('.')[0] not in
+                          {'subprocess','ctypes','multiprocessing','psutil'} for n in node.names)
+                  if isinstance(node,ast.ImportFrom):
+                      assert (node.module or '').split('.')[0] not in
+                          {'subprocess','ctypes','multiprocessing','psutil'}
+          print('V131_NO_NATIVE_DISPATCH_ALL_ANALYSIS_LOCAL')
+          PY
+      - name: Run sixteen synthetic lineage and tamper regression checks
+        run: |
+          set -euo pipefail
+          mkdir -m 700 evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_source_lineage_screen_v131.py' -v \
+            2>&1 | tee evidence/v131-tests.log
+          grep -Eq '^Ran 16 tests ' evidence/v131-tests.log
+          grep -q '^OK$' evidence/v131-tests.log
+      - name: Verify pinned completed v129 and v130 GitHub run and artifact metadata
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          from urllib.request import Request,urlopen
+          base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              req=Request(base+path,headers={
+                  'Accept':'application/vnd.github+json',
+                  'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                  'X-GitHub-Api-Version':'2022-11-28',
+                  'User-Agent':'pastafari-v131-frozen-source-evidence'})
+              with urlopen(req,timeout=35) as h: return json.load(h)
+          locks=[
+              (44704866938,'e1b0d888f296a111191c714b2d9c4fad58f3c6d0',
+               14615867472,'soak-v129-91-entry-source-census-no-native-execution',
+               'sha256:6ae0a6aac2607bffffe5c3303421e0a8684d92dd03e2a8e82005d60a7d3f5d7d'),
+              (44712740306,'a19c533284d64d7cfe598bc1f3789163361da769',
+               14617838031,'soak-v130-ten-unmapped-candidates-no-fct',
+               'sha256:b4aaecfe4560a1b660ff4d0e413adaae4df6b670890d154baf74384ae5e3066b')
+          ]
+          for run_id,source_sha,artifact_id,name,digest in locks:
+              run=get('/actions/runs/'+str(run_id))
+              assert run['id']==run_id and run['head_sha']==source_sha
+              assert run['status']=='completed' and run['conclusion']=='success'
+              artifacts=get('/actions/runs/'+str(run_id)+'/artifacts')
+              match=[a for a in artifacts['artifacts']
+                     if a['id']==artifact_id and a['name']==name and
+                        a['digest']==digest and not a['expired']]
+              assert len(match)==1,(run_id,'frozen artifact is missing or has changed')
+          print('V131_BOTH_HISTORICAL_RUN_AND_ARTIFACT_DIGEST_LOCKS_PASS')
+          PY
+      - name: Download immutable v129 source and completed CI observation
+        uses: actions/download-artifact@v4
+        with:
+          name: soak-v129-91-entry-source-census-no-native-execution
+          run-id: 44704866938
+          github-token: ${{ github.token }}
+          path: evidence/v129
+      - name: Download immutable v130 source candidate Git-tree evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: soak-v130-ten-unmapped-candidates-no-fct
+          run-id: 44712740306
+          github-token: ${{ github.token }}
+          path: evidence/v130
+      - name: Generate lineage screening from evidence only without any converter execution
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_source_lineage_screen_v131.py \
+            --roster soak/control/source_roster_archived_v21_v127.json \
+            --provenance soak/control/source_roster_archived_v21_v127_provenance.json \
+            --v129-census evidence/v129/v129-source-census.json \
+            --v130-candidates soak/control/triage_candidate_sources_v130.json \
+            --v130-triage evidence/v130/v130-triage-path-audit.json \
+            --v129-ci-index soak/control/pinned_ci_job_evidence_index_v129.json \
+            --v129-ci-evidence evidence/v129/v129-source-ci-observations.json \
+            --source-locks soak/control/pilot_two_engine_source_locks_v001.json \
+            --output evidence/v131-lineage-screen.json \
+            | tee evidence/v131-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v131-lineage-screen.json').read_text())
+          assert len(r['records'])==91
+          assert r['total_historical_records']==91
+          assert r['source_rows_bound_to_git_sha256']==91
+          assert r['archived_source_paths_verified']==81
+          assert r['additional_triage_paths_verified_without_native_certification']==10
+          assert r['pinned_source_and_historical_ci_record_ids']==['REF-24','REF-41']
+          assert r['independent_algorithm_count_certified']==0
+          assert r['native_original_full_date_engines_certified']==0
+          assert r['official_10000_year_soak_credit']==0
+          assert r['native_date_calls']==0
+          assert not r['soak_dispatch_authorized'] and not r['scientific_soak_10000_pass']
+          assert not any(row['eligible_for_soak'] or
+                         row['algorithmic_independence_certified']
+                         for row in r['records'])
+          print('V131_91_PAIRED_SOURCE_EVIDENCE_ROWS_SCREENED_NO_SOAK_PASS')
+          PY
+      - name: Preserve read-only evidence and screening results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v131-frozen-91-source-lineage-screen-not-native-soak
+          path: |
+            evidence/v131-tests.log
+            evidence/v131-summary.json
+            evidence/v131-lineage-screen.json
+          if-no-files-found: warn
+          retention-days: 30
