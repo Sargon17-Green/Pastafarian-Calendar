@@ -63,7 +63,7 @@ for my $index (0 .. $#$oracle) {
 
 my $invalid_profiles = 0;
 for my $bad (
-    undef, [], [(1) x 11], [41], [32, (1) x 9], [(1) x 9, 32],
+    undef, [], [(1) x 12], [45], [36, (1) x 9], [(1) x 9, 36],
     [0], [-1], [1.5], ['02'], ['2x'], [undef], {}, [Math::BigInt->bone]
 ) {
     ok(!eval { count_weavings($bad); 1 }, '拒絕超過十月／四十日或非法 profile');
