@@ -12,6 +12,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import stage04_rust_witness_provenance as provenance
 import stage04_rust_callability_eligibility as callability_cli
 from stage04_rust_callability_eligibility import (
     RuntimeUnverified, check_callability, install_probe, supported_signature,
@@ -33,6 +34,11 @@ class CallabilityTests(unittest.TestCase):
         self.stage3 = self.commit({"README.md": "stage3\n"})
         self.stage4 = self.commit({"README.md": "stage4\n"})
         self.head = self.commit({"README.md": "head\n"})
+        self.boundary_patch = patch.multiple(
+            provenance, CANONICAL_STAGE3_CLOSURE=self.stage3,
+            CANONICAL_STAGE4_INTRODUCTION=self.stage4)
+        self.boundary_patch.start()
+        self.addCleanup(self.boundary_patch.stop)
 
     def git(self, *args):
         return subprocess.check_output(["git","-C",str(self.repo),*args],

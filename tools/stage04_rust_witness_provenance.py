@@ -17,6 +17,13 @@ from pathlib import Path, PurePosixPath
 _SHA = re.compile(r"[0-9a-f]{40}\Z")
 
 
+# Project-specific immutable history anchors. Caller-supplied stage pins must
+# match these exact canonical commits; ancestry alone permits relabeling a
+# post-Stage04 source as supposedly pre-Stage04.
+CANONICAL_STAGE3_CLOSURE = "716e5a6f335b1a15464029b446edb468f3a8482c"
+CANONICAL_STAGE4_INTRODUCTION = "2a7648c345ee63d9e5c81ca0361c6eb3060c6c4f"
+
+
 class ProvenanceError(ValueError):
     """The supplied source has not met the eligibility contract."""
 
@@ -65,6 +72,9 @@ def verify_pin(repo: Path, witness_commit: str, witness_path: str,
     )]
     witness_commit, witness_blob, stage3_closure, stage4_introduction, branch_head = pins
     witness_path = checked_rust_path(witness_path)
+    if (stage3_closure != CANONICAL_STAGE3_CLOSURE
+            or stage4_introduction != CANONICAL_STAGE4_INTRODUCTION):
+        raise ProvenanceError("stage boundary pins disagree with canonical Stage03/Stage04 commits")
     for rev in (witness_commit, stage3_closure, stage4_introduction, branch_head):
         if git(repo, "cat-file", "-t", rev) != "commit":
             raise ProvenanceError("revision pin is not a commit")

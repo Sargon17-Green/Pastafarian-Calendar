@@ -4,9 +4,11 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import stage04_rust_witness_provenance as provenance
 from stage04_rust_witness_provenance import ProvenanceError, verify_pin
 
 
@@ -35,6 +37,12 @@ class TestRustWitnessProvenance(unittest.TestCase):
         self.foreign_blob = self.git("rev-parse", f"{self.foreign}:src/legacy_day_tag.rs")
         self.python_blob = self.git("rev-parse", f"{self.foreign}:src/pastafari_calendar/legacy_day_counts.py")
         self.git("checkout", "-q", "main")
+        # The synthetic repository has its own explicitly pinned boundaries.
+        self.boundary_patch = patch.multiple(
+            provenance, CANONICAL_STAGE3_CLOSURE=self.b,
+            CANONICAL_STAGE4_INTRODUCTION=self.c)
+        self.boundary_patch.start()
+        self.addCleanup(self.boundary_patch.stop)
 
     def git(self, *args):
         return subprocess.check_output(["git", "-C", str(self.repo), *args],
@@ -54,6 +62,21 @@ class TestRustWitnessProvenance(unittest.TestCase):
         return verify_pin(self.repo, commit or self.a, path,
                           blob or self.good_blob, stage3 or self.b,
                           stage4 or self.c, head or self.d)
+
+    def test_forged_later_boundaries_cannot_make_post_stage4_source_eligible(self):
+        # All Git ancestry and blob checks pass under the old implementation.
+        # Only binding the checkpoint identities to their canonical values
+        # prevents relabeling a newly added source as historical.
+        post4 = self.commit({
+            "src/post_stage4.rs": "pub fn fake_old_daytag() {}\n",
+        })
+        blob = self.git("rev-parse", f"{post4}:src/post_stage4.rs")
+        forged_stage3 = self.commit({"forged_stage3.txt": "later checkpoint\n"})
+        forged_stage4 = self.commit({"forged_stage4.txt": "later introduction\n"})
+        with self.assertRaisesRegex(ProvenanceError, "canonical Stage03/Stage04"):
+            self.check(commit=post4, path="src/post_stage4.rs", blob=blob,
+                       stage3=forged_stage3, stage4=forged_stage4,
+                       head=forged_stage4)
 
     def test_valid_source_blob_pin_does_not_imply_runtime_red(self):
         result = self.check()
