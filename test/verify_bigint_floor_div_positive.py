@@ -14,6 +14,7 @@ COUNTS = {
     "DENSE": 16,
 }
 SOURCE = Path(__file__).with_name("bigint_floor_div_positive_vectors.tsv")
+PERTURBED_SOURCE = Path(__file__).with_name("bigint_floor_div_positive_divisor_plus_one.tsv")
 
 
 def limbs_value(digits):
@@ -118,6 +119,8 @@ def main():
 
     seen = set()
     rows = []
+    perturbed_seen = set()
+    perturbed_rows = []
     max_a_digits = 0
     max_b_digits = 0
     max_q_digits = 0
@@ -147,14 +150,38 @@ def main():
 
         rows.append("\t".join((category, a_text, b_text, q_text, r_text)))
 
+        # Independent integer division: never derive Q' or R' from the baseline oracle.
+        perturbed_divisor = divisor + 1
+        perturbed_pair = (dividend, perturbed_divisor)
+        if perturbed_pair in perturbed_seen:
+            raise AssertionError("duplicate divisor+1 input pair")
+        perturbed_seen.add(perturbed_pair)
+        perturbed_q, perturbed_r = divmod(dividend, perturbed_divisor)
+        if dividend != perturbed_q * perturbed_divisor + perturbed_r:
+            raise AssertionError("divisor+1 identity failed")
+        if not (0 <= perturbed_r < perturbed_divisor):
+            raise AssertionError("divisor+1 remainder bounds failed")
+        perturbed_fields = tuple(
+            str(number) for number in
+            (dividend, perturbed_divisor, perturbed_q, perturbed_r)
+        )
+        if max(map(len, perturbed_fields)) > 512:
+            raise AssertionError("divisor+1 vector exceeds 512 decimal digits")
+        perturbed_rows.append("\t".join((category, *perturbed_fields)))
+
     if len(seen) != 96:
         raise AssertionError("not all input pairs are unique")
+    if len(perturbed_seen) != 96 or len(perturbed_rows) != 96:
+        raise AssertionError("not all divisor+1 input pairs are unique")
     SOURCE.write_text("\n".join(rows) + "\n", encoding="ascii")
+    PERTURBED_SOURCE.write_text(
+        "\n".join(perturbed_rows) + "\n", encoding="ascii"
+    )
     print(
         "Python-int BigFloorDivPositive oracle: 96/96 unique, "
         f"categories={dict(counts)}, max A={max_a_digits} digits, "
         f"max B={max_b_digits} digits, max Q={max_q_digits} digits, "
-        "0 divergences"
+        "0 divergences; divisor+1 Python-int oracle: 96/96 unique generated"
     )
 
 
