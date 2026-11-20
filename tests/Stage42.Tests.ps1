@@ -6,20 +6,34 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'tests/TestHarness.ps1')
 $md = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
 $metadataLines = @($md -split '\r?\n')
+$predecessorsSealed = ($metadataLines -ccontains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+                    ($metadataLines -ccontains 'STAGE41_SEAL_COMMIT_NATIVE_RECHECK=PASS') -and
+                    ($metadataLines -ccontains 'STAGE41_SEAL_CI_RUN=44633607543') -and
+                    ($metadataLines -ccontains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+                    ($metadataLines -ccontains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+                    ($metadataLines -ccontains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+                    ($metadataLines -ccontains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+                    ($metadataLines -ccontains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+                    ($metadataLines -ccontains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')
+$stage42Preflight = ($metadataLines -ccontains 'CURRENT_STAGE=41') -and
+                    ($metadataLines -ccontains 'LAST_COMPLETED_STAGE=41')
+$stage42Evidence = ($metadataLines -ccontains 'STAGE42_PREFLIGHT_CI_RUN=44701413210') -and
+                   ($metadataLines -ccontains 'STAGE42_PREFLIGHT_CI_SHA=c0d3ae0bc1578cd4cee6163eb0a4526e1f27c917') -and
+                   ($metadataLines -ccontains 'STAGE42_PREFLIGHT_JOBS=16_OF_16_SUCCESS') -and
+                   ($metadataLines -ccontains 'STAGE42_PREFLIGHT_ASSERTIONS_PASSED=1657') -and
+                   ($metadataLines -ccontains 'STAGE42_PREFLIGHT_ASSERTIONS_FAILED=0')
+$stage42Pending = ($metadataLines -ccontains 'CURRENT_STAGE=42') -and
+                  ($metadataLines -ccontains 'CURRENT_DISCOVERY=27') -and
+                  ($metadataLines -ccontains 'LAST_COMPLETED_STAGE=41') -and
+                  ($metadataLines -ccontains 'STAGE42_RUNTIME_VERIFICATION=PENDING_NATIVE') -and $stage42Evidence
+$stage42Sealed = ($metadataLines -ccontains 'CURRENT_STAGE=42') -and
+                 ($metadataLines -ccontains 'CURRENT_DISCOVERY=27') -and
+                 ($metadataLines -ccontains 'LAST_COMPLETED_STAGE=42') -and
+                 ($metadataLines -ccontains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and $stage42Evidence
 $ready = ($metadataLines -ccontains 'TOTAL_STAGES=55') -and
-         ($metadataLines -ccontains 'CURRENT_STAGE=41') -and
-         ($metadataLines -ccontains 'LAST_COMPLETED_STAGE=41') -and
-         ($metadataLines -ccontains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
-         ($metadataLines -ccontains 'STAGE41_SEAL_COMMIT_NATIVE_RECHECK=PASS') -and
-         ($metadataLines -ccontains 'STAGE41_SEAL_CI_RUN=44633607543') -and
-         ($metadataLines -ccontains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
-         ($metadataLines -ccontains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
-         ($metadataLines -ccontains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
-         ($metadataLines -ccontains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
-         ($metadataLines -ccontains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
-         ($metadataLines -ccontains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')
-if (-not $ready) { throw 'Stage42 requires exact Stage41 seal and predecessor metadata' }
-# Preflight-only research; Stage42 is not activated.
+         $predecessorsSealed -and ($stage42Preflight -or $stage42Pending -or $stage42Sealed)
+if (-not $ready) { throw 'Stage42 requires the exact sealed Stage41 and one consistent Stage42 preflight/pending/sealed state' }
+# Finite research oracle; the stage state determines whether this is preflight, activated Native, or a seal recheck.
 function Mod42 { param([System.Numerics.BigInteger]$Value,[System.Numerics.BigInteger]$Modulus)
     return [System.Numerics.BigInteger]((($Value % $Modulus) + $Modulus) % $Modulus)
 }
@@ -110,5 +124,7 @@ Write-Host "STAGE42_SEAL_PAIRS=$sealPairs"
 Write-Host "STAGE42_ASSERTIONS_PASSED=$script:StageTestPassed"
 Write-Host "STAGE42_ASSERTIONS_FAILED=$script:StageTestFailed"
 if($endpoints -ne 160 -or $calculationSeams -ne 80 -or $targetSeams -ne 80 -or $faces -ne 40 -or $sealPairs -ne 144 -or $script:StageTestPassed -ne 1657 -or $script:StageTestFailed -ne 0) { Write-Host 'STAGE42_NATIVE=FAIL'; exit 1 }
-Write-Host 'STAGE42_PREFLIGHT=BOUNDED_RESEARCH_ONLY'
+if ($stage42Pending) { Write-Host 'STAGE42_NATIVE=PASS_PENDING_NO_SEAL' }
+elseif ($stage42Sealed) { Write-Host 'STAGE42_NATIVE=SEALED_RECHECK_PASS' }
+else { Write-Host 'STAGE42_PREFLIGHT=BOUNDED_RESEARCH_ONLY' }
 exit 0
