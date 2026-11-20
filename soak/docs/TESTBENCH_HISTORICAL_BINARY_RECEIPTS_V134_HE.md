@@ -46,6 +46,26 @@
 
 לא ניתן לייחס תוצאת CI מקומיט אחד לקובץ מקור בקומיט אחר בלי אימות מדויק של קובצי המקור, הבנייה והבינארי. לכן הראיות מקומיט המחקר האחר **אינן** מחליפות הוכחת בינארי עבור הקומיט הנעול.
 
+### השוואה משלימה — מקור Seer בין הקומיט הנעול לקומיט שהריץ CI
+
+נמצאה ריצת [42423259653](https://github.com/Sargon-17-Green/Pastafarian-Calendar-Seer/actions/runs/42423259653), עם `completed/success` בקומיט `4716594fc98fa882a9401455ae56f30895518e8c`; העבודה כללה שלבי **Build isolated experimental candidate** ו־**Build isolated hybrid day-plus-year cache candidate** שהסתיימו בהצלחה.
+
+בוצעה השוואה נפרדת של עצי Git מלאים (`truncated=false`) בין הקומיט הנעול `866e9bbff59399310416ae25de1b664f9b6c3124` ובין קומיט ה־CI `4716594fc98fa882a9401455ae56f30895518e8c`. תשעת הקבצים הבאים זהים **ב־Git blob SHA-1 ובגודל הבתים**:
+
+| קובץ | Git blob SHA-1 זהה בשני הקומיטים |
+|---|---|
+| `research/seer-next/scripts/build_candidate.sh` | `2e238c6406097d04efc20c274e9bb4e91d5bfa3b` |
+| `research/seer-next/scripts/build_hybrid.sh` | `399219bf6f8abf21db39efc3b5ae59761a1033ee` |
+| `research/seer-next/src/seer_next_engine_service.cpp` | `28c4c1213483601c01d0355b60171ea8989935b6` |
+| `research/seer-next/src/seer_next_hybrid_engine_service.cpp` | `ce2192613412d1fec16b08edb4289704841dc3d2` |
+| `prototype/src/seer_year_core.cpp` | `09fa2b08b2468c2148a8ade436531eb594216189` |
+| `prototype/src/seer_calendar_core.cpp` | `29bd8bc61eb112ea23c69e6c6c0b8818c1400207` |
+| `prototype/src/seer_calendar_core.hpp` | `32b49b7003a9d5073fc26a2a0cf49fc4883d5ada` |
+| `prototype/src/seer_weave_portable.cpp` | `1d203900271d97b73fee4f9960f48f8bb9df2aa5` |
+| `prototype/src/seer_weave_avx2.cpp` | `752a131865bd71f948eb33ed0bb1e12ca7952d57` |
+
+**הכרעה מדויקת:** יש כאן ראיה למקור זהה ברמת תשעת הקבצים הקונקרטיים, ואף ראיה לבנייה היסטורית מוצלחת בקומיט המאוחר. אין בכך אימות לכל עצי התלויות (במיוחד קבצי header נוספים, ספריות חיצוניות, משתני סביבה, דגלי כלי הבנייה, גרסת קומפיילר), ואין ראיה לגיבוב בינארי שנבנה בקומיט הנעול. לכן יש לשמר את ההבחנה בין **source subset identity** לבין **binary/process attestation**.
+
 ## מה בודק v134
 
 - קיבוע שני מזהי ה־Run וה־Job, SHA המקור, שמות שלבי הבנייה ובדיקות הסגירה, ומזהי העלאת הארטיפקטים מתוך היומנים ההיסטוריים.
