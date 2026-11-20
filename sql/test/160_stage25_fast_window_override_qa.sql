@@ -1,16 +1,17 @@
 \set ON_ERROR_STOP on
 -- QA ONLY. Overrides year5000_gate_window solely in the disposable offline PG17 job.
 -- The production sql/00..26 files in Git are NOT changed.
+-- PostgreSQL CREATE OR REPLACE preserves the existing input argument name (p_calculation_day).
 -- Exact function from sql/test/158 at e4dccbfa3ab999031f2c1b51bab6e2567712360c; only function name changed.
-CREATE OR REPLACE FUNCTION pastafari_sql_tamil.year5000_gate_window(p_day numeric)
+CREATE OR REPLACE FUNCTION pastafari_sql_tamil.year5000_gate_window(p_calculation_day numeric)
 RETURNS TABLE(first_gate_index numeric, gate_days numeric[])
 LANGUAGE SQL STABLE STRICT AS $fast$
 WITH RECURSIVE
 base AS MATERIALIZED (
   SELECT pastafari_sql_tamil.foundation_day() AS foundation,
-         p_day-5778::numeric AS lower_day,
-         p_day+5778::numeric AS upper_day
-  WHERE p_day=trunc(p_day)
+         p_calculation_day-5778::numeric AS lower_day,
+         p_calculation_day+5778::numeric AS upper_day
+  WHERE p_calculation_day=trunc(p_calculation_day)
 ),
 starts AS (
   SELECT 1::integer AS dir,0::numeric AS gate_index,
