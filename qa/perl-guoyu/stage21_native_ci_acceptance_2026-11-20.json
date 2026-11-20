@@ -1,0 +1,288 @@
+{
+  "project_id": "PC-BRANCH-PERL-GUOYU",
+  "branch": "Perl+國語",
+  "stage": 21,
+  "last_completed_before": 20,
+  "accepted_source_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0",
+  "ci": {
+    "run_id": 44812489647,
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "total_jobs": 168,
+    "mandatory_pass": 22,
+    "skipped": 146,
+    "mandatory_raw_logs_inspected": 22,
+    "stage01_files": 120,
+    "stage01_tests": 243130,
+    "jobs": [
+      {
+        "id": 136552317472,
+        "name": "verify",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552317816,
+        "name": "perl-stage01",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552328954,
+        "name": "stage14-canonical-name-selection-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329028,
+        "name": "stage19-weaving-ten-months-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329083,
+        "name": "stage18-weaving-nine-months-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329134,
+        "name": "stage12-stream-distinct-name-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329157,
+        "name": "stage11-stream-rank-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329213,
+        "name": "stage13-stream-name-materialization-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329245,
+        "name": "stage07-five-field-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329277,
+        "name": "stage16-weaving-seven-months-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329325,
+        "name": "stage03-weaving-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329340,
+        "name": "stage17-weaving-eight-months-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329380,
+        "name": "Perl Stage21 twelve-month / forty-eight-day native QA",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329410,
+        "name": "stage05-cutlet-occurrence-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329419,
+        "name": "stage02-weaving-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329471,
+        "name": "stage06-year-occurrence-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329507,
+        "name": "stage15-canonical-five-field-projection-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329510,
+        "name": "stage20-weaving-eleven-months-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329543,
+        "name": "stage08-month-length-generation-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329550,
+        "name": "stage09-cutlet-partition-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329597,
+        "name": "stage04-month-occurrence-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      },
+      {
+        "id": 136552329987,
+        "name": "stage10-distinct-name-native",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0"
+      }
+    ]
+  },
+  "stage21": {
+    "job_id": 136552329380,
+    "native_perl": "v5.40.5",
+    "syntax_ok": 3,
+    "shards": [
+      {
+        "index": 0,
+        "tests": 26044
+      },
+      {
+        "index": 1,
+        "tests": 26044
+      },
+      {
+        "index": 2,
+        "tests": 26044
+      },
+      {
+        "index": 3,
+        "tests": 26044
+      },
+      {
+        "index": 4,
+        "tests": 26044
+      },
+      {
+        "index": 5,
+        "tests": 26044
+      },
+      {
+        "index": 6,
+        "tests": 26044
+      },
+      {
+        "index": 7,
+        "tests": 26044
+      },
+      {
+        "index": 8,
+        "tests": 26044
+      },
+      {
+        "index": 9,
+        "tests": 26044
+      },
+      {
+        "index": 10,
+        "tests": 26044
+      },
+      {
+        "index": 11,
+        "tests": 26044
+      },
+      {
+        "index": 12,
+        "tests": 26042
+      },
+      {
+        "index": 13,
+        "tests": 26042
+      },
+      {
+        "index": 14,
+        "tests": 26042
+      },
+      {
+        "index": 15,
+        "tests": 26042
+      }
+    ],
+    "mixed_tests": 208,
+    "total_tests": 416904,
+    "passing_prove_invocations": 17,
+    "oracle_words": 208012,
+    "oracle_hash": "0dbe36d23b6ffaa14822b1556d3eabc777d5961bdfd2fd79be39ee2daee76bbe",
+    "oracle_hash_matches": 16,
+    "mixed_oracle_words": 74,
+    "count_4x12": "11105730970797793977337986040",
+    "last_rank_inverse": "PASS",
+    "exit": 0,
+    "stderr_bytes": 0,
+    "result": "STAGE21_NATIVE_PASS=1"
+  },
+  "artifact": {
+    "id": 14668587498,
+    "bytes": 1153656,
+    "github_sha256": "9f1473a57a9be9a5da6ebf392b745c6b5fc57b3f449c2cedddea01f731a93c16",
+    "upload_log_sha256": "9f1473a57a9be9a5da6ebf392b745c6b5fc57b3f449c2cedddea01f731a93c16",
+    "downloaded_local_sha256": "9f1473a57a9be9a5da6ebf392b745c6b5fc57b3f449c2cedddea01f731a93c16",
+    "zip_entries": 7,
+    "zip_crc_pass": 7,
+    "source_sha": "a06fb9ee6d78c47a7abb5bf10950f45d9bf518c0",
+    "files": [
+      "perl-version.txt",
+      "result.txt",
+      "source.txt",
+      "syntax.stderr",
+      "test.exit",
+      "test.stderr",
+      "test.stdout"
+    ]
+  },
+  "limits": {
+    "month_occurrence_months": 9,
+    "month_occurrence_days": 36,
+    "full_year_generator_verified": false,
+    "stage22_opened": false,
+    "merged_to_main": false
+  },
+  "source_links": [
+    "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44812489647",
+    "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44812489647/artifacts/14668587498"
+  ]
+}
