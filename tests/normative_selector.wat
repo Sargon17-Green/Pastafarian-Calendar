@@ -1453,10 +1453,10 @@
     (call $init_constants)
     (if (i32.eq (local.get $step) (i32.const 1))
       (then
-        (call $sub_small (global.get $N) (global.get $M) (i32.const 5))
+        (call $sub_small (global.get $N) (global.get $M) (i32.const 6))
         (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 9)))
       (else
-        (call $sub_small (global.get $N) (global.get $M) (i32.const 9))
+        (call $sub_small (global.get $N) (global.get $M) (i32.const 10))
         (call $sub_small (global.get $FIRST) (global.get $M) (i32.const 5))))
     (local.set $j (i32.const 0))
     (block $done (loop $again
@@ -1464,9 +1464,9 @@
       (call $mul (global.get $N) (global.get $N) (global.get $M))
       (if (i32.eq (local.get $step) (i32.const 1))
         (then (call $sub_small (global.get $TMP1) (global.get $M)
-          (i32.add (i32.const 6) (local.get $j))))
+          (i32.add (i32.const 7) (local.get $j))))
         (else (call $sub_small (global.get $TMP1) (global.get $M)
-          (i32.sub (i32.const 8) (local.get $j)))))
+          (i32.sub (i32.const 9) (local.get $j)))))
       (call $add (global.get $N) (global.get $N) (global.get $TMP1))
       (local.set $j (i32.add (local.get $j) (i32.const 1)))
       (br $again)))

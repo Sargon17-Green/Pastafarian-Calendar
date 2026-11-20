@@ -14,3 +14,8 @@ Four new WAT exports invoke unchanged production $choose; helper computes N by e
 
 ## Acceptance
 New exact-SHA CI and its verify/semantic job logs must prove 107/107 Native and 79 independent numeric checks, full SHA checkout, WABT version and 0 fail. Stage02 globally NOT ACCEPTED; WasmKit and historical ZIP equivalence remain unverified. No merge/main, release or EXPECTED_RED.
+
+## 2026-11-21 Horner preflight correction before Native acceptance
+The initial q8 WAT candidate in commit 5cd0aa8e50f80865f8fdb85e48fa5435c3ad5491 contained an off-by-one in the numeric coefficients (using digit instead of digit−1). This was caught in independent static review before Native acceptance; no claim that it was tested or expected-red.
+Corrected q8-only fixture coefficients: forward seed M−6, then M−7 through M−10; backward seed M−10, then M−9 through M−6. FIRST and the production selector are unchanged.
+Both step directions were checked by independently evaluating the five radix coefficients in Horner order and by positional BigInt summation, producing exact equality and zero remainder modulo 8. Existing export count remains 107; this check is mathematical/static, not CI or Native.
