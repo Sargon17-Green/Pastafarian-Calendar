@@ -1,0 +1,83 @@
+name: APL German native FX chunked five-at-a-time (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-fx-chunked.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-chunked:
+    name: chunked-fx-${{ matrix.count }}-attempt${{ matrix.attempt }}
+    runs-on: windows-2022
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        count: [15, 20]
+        attempt: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Verify exact native runtime and ephemeral APL font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Runtime verified_runtime -Evidence font_bootstrap_evidence
+      - name: Check locked source manifest, chunks, order, and marker contracts
+        shell: pwsh
+        run: |
+          python -m unittest discover -s qa/nars-interface -p 'test_chunked_fx_probe.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'CHUNKED_GENERATOR_UNIT_TEST_FAILURE' }
+      - name: Execute isolated bounded NARS2000 chunks
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_chunked_fx.ps1 -Runtime verified_runtime -Evidence chunked_fx_evidence -Count ${{ matrix.count }}
+      - name: Confirm exact native intermediate and final markers
+        shell: pwsh
+        env:
+          EXPECTED_COUNT: ${{ matrix.count }}
+        run: |
+          $p='chunked_fx_evidence/native_fx_progress.json'
+          if (-not (Test-Path $p)) { throw 'CHUNKED_NATIVE_EVIDENCE_MISSING' }
+          $r=Get-Content $p -Raw | ConvertFrom-Json
+          $count=[int]$env:EXPECTED_COUNT
+          if ($r.stage01 -cne 'NOT_RUN' -or $r.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4') {
+            throw 'CHUNKED_SOURCE_STAGE1_LOCK_BROKEN'
+          }
+          if ($r.count -ne $count -or $r.checkpoints.Count -ne ($count/5) -or $r.last_contiguous_after -ne $count -or $r.noncontiguous_exact -ne $false -or $r.final_marker.exact -ne $true -or $r.status -cne ('NATIVE_CHUNKED_FX'+$count+'_CONFIRMED_NOT_STAGE01')) {
+            throw ('NATIVE_CHUNKED_FX'+$count+'_NOT_CONFIRMED')
+          }
+          if (@($r.checkpoints | Where-Object { $_.exact -ne $true }).Count -ne 0) {
+            throw 'CHUNKED_CHECKPOINT_EXACTNESS_FAILED'
+          }
+          Write-Output ('NATIVE_CHUNKED_FX'+$count+'_CONFIRMED_NOT_STAGE01')
+      - name: Hash all evidence (exclude runtime, font and workspace)
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force chunked_fx_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem chunked_fx_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName)"
+          } | Set-Content -Encoding utf8 chunked_fx_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-chunked-fx-${{ matrix.count }}-attempt${{ matrix.attempt }}-not-stage1
+          path: |
+            font_bootstrap_evidence/
+            chunked_fx_evidence/
+            chunked_fx_evidence.sha256
+          retention-days: 14
