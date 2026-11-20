@@ -12,9 +12,9 @@ record GapSpec {
 record SparseVec {
   var first: int = 0;
   var values: list(bigint);
-  proc at(index: int): bigint {
-    if index < first || index >= first + values.size then return new bigint(0);
-    return values[index-first];
+  proc at(position: int): bigint {
+    if position < first || position >= first + values.size then return new bigint(0);
+    return values[position-first];
   }
   proc mass(): bigint {
     var result = new bigint(0);
