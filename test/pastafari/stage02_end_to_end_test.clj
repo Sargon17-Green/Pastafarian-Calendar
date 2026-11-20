@@ -2166,3 +2166,74 @@
                        {:berekening berekening :doel doel :code (:code poging)})))))
       (is (= 1 (+ (:bewezen @tellingen) (:geweigerd @tellingen))))
       (println "DISCOVERY24 DIAG23 vijftiende-dag-haalbaarheid:" @tellingen))))
+
+;; DIAG24: vijftiende echte jaardag via bestaande begrensde parametrische prefix.
+;; De normatieve insertion-oracle gebruikt uitsluitend test-only tellingen.
+(deftest diag24-echte-vijftiende-prefixdag-onafhankelijke-haalbaarheid
+  (testing "Eén laatste onafhankelijke echte vijftiende dag; geen grotere begroting of volledige weving."
+    (let [tellingen (atom {:bewezen 0 :geweigerd 0})]
+      (doseq [berekening [(-' dagen/stichtingsdag 23N)]]
+        (let [jaar (zoeken/vind-doeljaar @lijn berekening berekening)
+              doel (+' (:open-gate-day jaar) 15N)
+              staat (orakel/new-gate-state)
+              normjaar (orakel/find-target-year staat berekening doel)
+              saus (orakel/sauce berekening (inc (:open-gate-day normjaar)))
+              aantal-koteletten (orakel/choose-cutlet-count saus normjaar)
+              partitie (orakel/choose-cutlet-partition
+                        staat berekening saus normjaar aantal-koteletten)
+              kotelet-namen (orakel/choose-cutlet-names saus aantal-koteletten)
+              koteletten (orakel/materialize-cutlets
+                          staat normjaar partitie kotelet-namen)
+              kotelet (some #(when (<= (:first-day %) doel (:last-day %)) %)
+                            koteletten)
+              aantal-maanden (orakel/choose-month-count saus normjaar)
+              lengten (orakel/choose-month-lengths saus normjaar aantal-maanden)
+              maandnamen (orakel/choose-month-names saus aantal-maanden)
+              derde-aantallen (mapv #(onafhankelijke-prefix-telling lengten %)
+                                    derde-prefix-opties)
+              totaal (reduce +' 0N derde-aantallen)
+              weefrang (orakel/choose-rank
+                        (orakel/ask-bowl saus 4 orakel/seal-month-weaving)
+                        totaal)
+              normprefix (onafhankelijk-prefix-tot-positie
+                          lengten weefrang 15)
+              maand (peek normprefix)
+              verwacht [(:number normjaar)
+                        (:name-index kotelet)
+                        (inc (-' doel (:first-day kotelet)))
+                        (nth maandnamen (dec (int maand)))
+                        (bigint (count (filter #(= maand %) normprefix)))]
+              poging (try
+                       {:status :bewezen
+                        :uitkomst (projectie/kies-prefixdag-zonder-volledige-weving
+                                   @lijn berekening doel 128N 5000000N)}
+                       (catch clojure.lang.ExceptionInfo e
+                         {:status :geweigerd
+                          :code (:code (ex-data e))}))]
+          (is (= totaal (weving/aantal-wevingen-groot lengten)))
+          (is (< 15 (reduce + lengten)))
+          (is (= 15 (count normprefix)))
+          (is (= 5 (count verwacht)))
+          (if (= :bewezen (:status poging))
+            (let [uitkomst (:uitkomst poging)]
+              (swap! tellingen update :bewezen inc)
+              (is (= verwacht (:date-components uitkomst)))
+              (is (= normprefix (:month-prefix uitkomst)))
+              (is (= 5 (count (:date-components uitkomst))))
+              (is (= 15N (:prefix-position uitkomst)))
+              (is (= :bounded-prefix-only (:date-proof-scope uitkomst)))
+              (is (false? (:month-weaving-computed? uitkomst)))
+              (is (not (contains? uitkomst :month-weaving)))
+              (is (<= 0N (:month-prefix-cell-upper-bound uitkomst) 5000000N))
+              (println "DISCOVERY24 DIAG24 echte vijftiende jaardag:"
+                       {:berekening berekening :doel doel
+                        :prefix normprefix
+                        :kosten (:month-prefix-cell-upper-bound uitkomst)
+                        :onafhankelijk-gelijk? (= verwacht (:date-components uitkomst))}))
+            (do
+              (swap! tellingen update :geweigerd inc)
+              (is (= :bounded-prefix-budget-unproven (:code poging)))
+              (println "DISCOVERY24 DIAG24 vijftiende jaardag geweigerd:"
+                       {:berekening berekening :doel doel :code (:code poging)})))))
+      (is (= 1 (+ (:bewezen @tellingen) (:geweigerd @tellingen))))
+      (println "DISCOVERY24 DIAG24 vijftiende-dag-haalbaarheid:" @tellingen))))
