@@ -13,7 +13,7 @@ uses
 
 const
   ExpectedCases = 96;
-  ExpectedChecks = 1923;
+  ExpectedChecks = 2307;
 
 var
   Cases, Passed, Failed: Integer;
@@ -156,6 +156,38 @@ begin
     BigCompare(Residual, BigMultiplyUInt32(ExpectedR, 2)) = 0);
 end;
 
+
+{ Independent threshold QA derived from Python-int quotient/remainder oracles.
+  If A=Q*B+R (0<=R<B), the last dividend with quotient Q is
+  L=A+(B-1-R)=(Q+1)*B-1, and the first with quotient Q+1 is
+  U=A+(B-R)=(Q+1)*B. These inputs are always nonnegative,
+  including B=1 and A=0. The boundary is checked on all 96 vectors. }
+procedure CheckQuotientThresholds(const Fields: TStringList);
+var
+  A, B, ExpectedQ, ExpectedR, MaxR: TBigInt;
+  LastA, FirstA, LastQ, FirstQ: TBigInt;
+begin
+  A := BigFromDecimal(Fields[1]);
+  B := BigFromDecimal(Fields[2]);
+  ExpectedQ := BigFromDecimal(Fields[3]);
+  ExpectedR := BigFromDecimal(Fields[4]);
+  MaxR := BigSubtract(B, BigOne);
+
+  LastA := BigAdd(A, BigSubtract(MaxR, ExpectedR));
+  LastQ := BigFloorDivPositive(LastA, B);
+  Check('limiar anterior: quociente Q',
+    BigCompare(LastQ, ExpectedQ) = 0);
+  Check('limiar anterior: resto B-1',
+    BigCompare(BigSubtract(LastA, BigMultiply(LastQ, B)), MaxR) = 0);
+
+  FirstA := BigAdd(A, BigSubtract(B, ExpectedR));
+  FirstQ := BigFloorDivPositive(FirstA, B);
+  Check('limiar seguinte: quociente Q+1',
+    BigCompare(FirstQ, BigAdd(ExpectedQ, BigOne)) = 0);
+  Check('limiar seguinte: resto zero',
+    BigIsZero(BigSubtract(FirstA, BigMultiply(FirstQ, B))));
+end;
+
 procedure RunVectors;
 var
   F: TextFile;
@@ -179,6 +211,7 @@ begin
         CheckVector(Fields);
         CheckIsolation(Fields);
         CheckAffineRelations(Fields);
+        CheckQuotientThresholds(Fields);
       end;
     finally
       CloseFile(F);
