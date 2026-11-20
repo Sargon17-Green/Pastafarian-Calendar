@@ -50,6 +50,9 @@ CASES = (
     # opposite side of Foundation, independently of target selection.
     {"label": "year-4999-final-from-after-foundation", "calculation_offset": 1, "target_offset": -2032},
     {"label": "year-5001-first-from-before-foundation", "calculation_offset": -1, "target_offset": 2213},
+    # Same boundary targets, but the reverse side of Foundation for calculation day.
+    {"label": "year-4999-final-from-before-foundation", "calculation_offset": -1, "target_offset": -2032},
+    {"label": "year-5001-first-from-after-foundation", "calculation_offset": 1, "target_offset": 2213},
 )
 REFERENCE_TIMEOUT_SECONDS = 75
 FORTRAN_TIMEOUT_SECONDS = 75
@@ -166,7 +169,7 @@ def run_fortran(case_index: int, executable: Path) -> tuple[tuple[int, ...], str
     return extract_five(process.stdout, "STAGE01_CONTEXT_FIELDS="), process.stdout
 
 def self_test() -> None:
-    assert len(CASES) == 12
+    assert len(CASES) == 14
     assert len({case["calculation_offset"] for case in CASES}) == 8
     assert CASES[0]["target_offset"] - CASES[0]["calculation_offset"] == 5000
     assert CASES[1]["target_offset"] - CASES[1]["calculation_offset"] == -5000
@@ -182,10 +185,16 @@ def self_test() -> None:
     assert tuple(c["target_offset"] for c in CASES[8:10]) == (-1, 1)
     assert case_days(9) == (FOUNDATION_DAY, FOUNDATION_DAY - 1)
     assert case_days(10) == (FOUNDATION_DAY, FOUNDATION_DAY + 1)
-    assert tuple(c["calculation_offset"] for c in CASES[10:]) == (1, -1)
-    assert tuple(c["target_offset"] for c in CASES[10:]) == (-2032, 2213)
+    assert tuple(c["calculation_offset"] for c in CASES[10:12]) == (1, -1)
+    assert tuple(c["target_offset"] for c in CASES[10:12]) == (-2032, 2213)
     assert case_days(11) == (FOUNDATION_DAY + 1, -15057703)
     assert case_days(12) == (FOUNDATION_DAY - 1, -15053458)
+    assert tuple(c["calculation_offset"] for c in CASES[12:]) == (-1, 1)
+    assert tuple(c["target_offset"] for c in CASES[12:]) == (-2032, 2213)
+    assert case_days(13) == (FOUNDATION_DAY - 1, -15057703)
+    assert case_days(14) == (FOUNDATION_DAY + 1, -15053458)
+    assert CASES[10]["target_offset"] == CASES[12]["target_offset"]
+    assert CASES[11]["target_offset"] == CASES[13]["target_offset"]
     assert extract_five(
         "STAGE01_CONTEXT_FIELDS=5000,15,1,18,1",
         "STAGE01_CONTEXT_FIELDS=",
@@ -196,7 +205,7 @@ def self_test() -> None:
         pass
     else:
         raise AssertionError("Malformed four-field result was accepted")
-    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=22/22")
+    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=28/28")
 
 def compare(reference: Path, executable: Path, commit: str, branch: str, run_id: int) -> int:
     if len(commit) != 40 or any(ch not in "0123456789abcdef" for ch in commit.lower()):
@@ -254,6 +263,18 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
 
     matched_cases = sum(row["status"] == "match" for row in rows)
     matched_fields = sum(row["matched_fields"] for row in rows)
+    # Metamorphic property of the original public Fortran entry point:
+    # the calendar date of a fixed target must not change with calculation day.
+    boundary_pairs = ((11, 13), (12, 14))
+    invariant_pairs = sum(
+        rows[a - 1]["status"] == "match"
+        and rows[b - 1]["status"] == "match"
+        and rows[a - 1]["target_day"] == rows[b - 1]["target_day"]
+        and rows[a - 1].get("fortran") == rows[b - 1].get("fortran")
+        and rows[a - 1].get("python") == rows[b - 1].get("python")
+        for a, b in boundary_pairs
+    )
+    print(f"STAGE01_CALC_CONTEXT_BOUNDARY_INVARIANCE={invariant_pairs}/2 PAIRS", flush=True)
     report = {
         "project_id": PROJECT_ID,
         "fortran_commit": commit.lower(),
@@ -268,6 +289,8 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
         "matched_cases": matched_cases,
         "matched_fields": matched_fields,
         "total_fields": 5 * len(CASES),
+        "boundary_invariant_pairs": invariant_pairs,
+        "boundary_invariant_expected_pairs": len(boundary_pairs),
         "reference_timeout_seconds": REFERENCE_TIMEOUT_SECONDS,
         "fortran_timeout_seconds": FORTRAN_TIMEOUT_SECONDS,
         "full_stage1_accepted": False,
@@ -281,7 +304,7 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
         f"STAGE01_CALC_CONTEXT_DIFFERENTIAL={matched_cases}/{len(CASES)} CASES; "
         f"{matched_fields}/{5 * len(CASES)} EXACT FIELDS"
     )
-    if matched_cases == len(CASES) and matched_fields == 5 * len(CASES):
+    if matched_cases == len(CASES) and matched_fields == 5 * len(CASES) and invariant_pairs == 2:
         print("STAGE01_CALC_CONTEXT_PASS_ONLY_NOT_FULL_STAGE1_ACCEPTANCE")
         return 0
     print("STAGE01_CALC_CONTEXT_NOT_ACCEPTED; see stage01_calculation_context_diff.json")
