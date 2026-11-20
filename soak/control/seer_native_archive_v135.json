@@ -1,0 +1,68 @@
+{
+  "schema": "PASTAFARI_SOAK_SEER_NATIVE_ARCHIVE_V135/1",
+  "evidence_scope": "HISTORIC_CI_ZIP_BYTES_AND_RECORDED_BINARY_HASHES_NOT_SOAK",
+  "seer_repo": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+  "frozen_commit": "866e9bbff59399310416ae25de1b664f9b6c3124",
+  "actual_ci_commit": "4716594fc98fa882a9401455ae56f30895518e8c",
+  "git_compare": {
+    "ahead_by": 2,
+    "behind_by": 0,
+    "common_blob_count": 1177,
+    "source_and_non_results_blob_count": 561,
+    "only_frozen_results_blob_count": 38,
+    "changed_common_blob_count": 0,
+    "all_added_files_under": "research/seer-next/results/"
+  },
+  "historical_run": {
+    "id": 42423259653,
+    "job_id": 128556040187,
+    "status": "completed",
+    "conclusion": "success",
+    "required_successful_steps": [
+      "Build unchanged baseline",
+      "Build isolated experimental candidate",
+      "Build isolated hybrid day-plus-year cache candidate",
+      "Verify hybrid and original against independent canonical oracle"
+    ]
+  },
+  "archive": {
+    "artifact_id": 13595506317,
+    "name": "seer-next-native-ab-linux-avx2",
+    "zip_sha256": "ed4757a6f9dde8b5302a73413102cba88fef8f02ac70875b309c2ebea9a56bab",
+    "zip_bytes": 206012,
+    "entry_count": 34,
+    "uncompressed_bytes": 2120061,
+    "zip_crc32_all_entries_checked": true,
+    "all_json": true,
+    "contains_native_executable_binary": false
+  },
+  "files": {
+    "ab.json": {
+      "sha256": "62f2c3f44f0638f56864c4a4f08ebd738f5ba555f2226464f96d03124ada78c7",
+      "schema": "seer-next-full-year-memo-ab-v1",
+      "reported_baseline_binary_sha256": "8191de4ccd416f159ac8400a7e12920b8464a0066b32651be69d76c54c47ab2b",
+      "reported_candidate_binary_sha256": "46dded4a81d884936fc0bd80a89a32fba6a821cf28c6b55fbfd1a6ff6f253ac8",
+      "binary_hash_generation_script": "research/seer-next/scripts/compare_candidate.mjs",
+      "binary_hash_generation_source_blob": "d0b3a9e139c5e41b057eafb2e332914a72a189b1",
+      "binary_hash_computed_in_script_via_file_stream": true
+    },
+    "full-year-512.json": {
+      "sha256": "8e701a3f3b49b87cc1195e12c6af75f62dbb0fece48b4b801baf7c56cc8263b7",
+      "schema": "seer-next-full-year-512-parity-v1",
+      "full_year_comparisons": 6,
+      "all_uncapped_full_replies_equal": true
+    },
+    "full-year-warm-cold.json": {
+      "sha256": "1ae21f9d4b9ea8d00c46954b03be943f272f305e61b777975c7c40a99e5926c0",
+      "schema": "seer-next-full-year-warm-cold-v1",
+      "complete_full_json_parity": true
+    }
+  },
+  "no_original_native_Fct_invocation": true,
+  "no_new_compiler_or_linker_invocation": true,
+  "reported_binary_hashes_do_not_equal_binary_bytes_rechecked": true,
+  "historical_Seer_full_year_checks_do_not_count_as_10k_original_full_year_soak": true,
+  "independent_algorithms_certified": 0,
+  "original_full_years_certified": 0,
+  "soak_dispatch_authorized": false
+}
