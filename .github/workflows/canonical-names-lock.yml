@@ -2929,3 +2929,56 @@ jobs:
           path: gate-window-radius64-evidence/
           retention-days: 30
           if-no-files-found: warn
+
+  lua_haitian_gate_window_radius96_scan_only:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+      - name: Radius96 scan-only Native and independent geometry verification
+        shell: bash
+        run: |
+          set -uo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || exit 20
+          test "$(git rev-parse HEAD:test/normative_oracle.lua)" = "8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d" || exit 21
+          test "$(git rev-parse HEAD:src/bigint.lua)" = "fcff58bcaaf8bb3f205e7a9c624a51069c0e5a5d" || exit 22
+          test "$(git rev-parse HEAD:src/source_language_catalog.lua)" = "5b59ee6bb0ea2c2a551185929b5531ea28a50e49" || exit 23
+          test "$(git rev-parse HEAD:test/lua_haitian_gate_window_radius64_v5_1_seed.tsv)" = "95e77bc49a4c9e944bbac72b744ae0b3628043e5" || exit 25
+          mkdir -p gate-window-radius96-scan-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\nSOURCE_RUN=44800290037\nSOURCE_JOB=136510368350\nSOURCE_ARTIFACT=14662180678\nSCOPE=RADIUS96_GATE_WINDOW_SCAN_ONLY\nGATE_INDEX_SCAN=-96..96\nNOVEL_GAP_EVALS=64\nCPU_SECONDS=110\nWALL_SECONDS=120\nLUA_HEAP_KIB=131072\nPROCESS_VM_KIB=131072\nCOMPOSITION_INVOKED=NO\n' "$GITHUB_SHA" > gate-window-radius96-scan-evidence/manifest.txt
+          git rev-parse HEAD > gate-window-radius96-scan-evidence/source_sha.txt
+          sha256sum test/lua_haitian_gate_window_radius96_scan_only.lua test/lua_haitian_gate_window_radius96_scan_verify.py test/lua_haitian_gate_window_radius64_v5_1_seed.tsv docs/LUA_HAITIAN_GATE_WINDOW_RADIUS96_SCAN_ONLY_CONTRACT_2026-11-20.md test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua > gate-window-radius96-scan-evidence/sha256.txt
+          set +e
+          ( ulimit -v 131072; timeout --signal=TERM --kill-after=2s 120s lua5.3 test/lua_haitian_gate_window_radius96_scan_only.lua . ) > gate-window-radius96-scan-evidence/stdout.txt 2> gate-window-radius96-scan-evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > gate-window-radius96-scan-evidence/exit_code.txt
+          cat gate-window-radius96-scan-evidence/stdout.txt
+          if test -s gate-window-radius96-scan-evidence/stderr.txt; then cat gate-window-radius96-scan-evidence/stderr.txt >&2; fi
+          test "$code" -eq 0 || exit "$code"
+          test ! -s gate-window-radius96-scan-evidence/stderr.txt || exit 24
+          grep -Fxq 'GATE_CORE_SEED_BLOB: 95e77bc49a4c9e944bbac72b744ae0b3628043e5' gate-window-radius96-scan-evidence/stdout.txt
+          grep -Fxq 'GATE_WINDOW_SCAN: -96/96' gate-window-radius96-scan-evidence/stdout.txt
+          test "$(grep -Ec '^GATE_INDEX[|]index=' gate-window-radius96-scan-evidence/stdout.txt)" -eq 193
+          test "$(grep -Ec '^GATE_WINDOW[|]i=' gate-window-radius96-scan-evidence/stdout.txt)" -eq 187
+          grep -Fxq 'GATE_WINDOWS_TOTAL: 187' gate-window-radius96-scan-evidence/stdout.txt
+          grep -Fxq 'GATE_GAP_EVALUATIONS: 64' gate-window-radius96-scan-evidence/stdout.txt
+          grep -Fxq 'SCAN_ONLY: YES' gate-window-radius96-scan-evidence/stdout.txt
+          grep -Fxq 'COMPOSITION_NOT_INVOKED: YES' gate-window-radius96-scan-evidence/stdout.txt
+          python3 test/lua_haitian_gate_window_radius96_scan_verify.py --selftest | tee gate-window-radius96-scan-evidence/verifier_selftest.txt
+          python3 test/lua_haitian_gate_window_radius96_scan_verify.py gate-window-radius96-scan-evidence/stdout.txt test/lua_haitian_gate_window_radius64_v5_1_seed.tsv | tee gate-window-radius96-scan-evidence/verifier_result.txt
+      - name: Upload radius96 scan-only evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-gate-window-radius96-scan-only-evidence
+          path: gate-window-radius96-scan-evidence/
+          retention-days: 30
+          if-no-files-found: warn
