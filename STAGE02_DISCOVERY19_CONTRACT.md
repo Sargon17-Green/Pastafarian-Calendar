@@ -1,6 +1,6 @@
 # Stage 2 / Discovery 19 — bounded Appendix-A ASK stream (Logo+Ido)
 
-Status: QA_CANDIDATE_ONLY. Base branch Logo+Ido at a9de9c5beb9dc241955517d23a4f3a8964551b7f. D18 has two authentic Native shard PASS logs and all eleven same-SHA regressions SUCCESS, but its dependent acceptance job was still queued when this QA branch was authored. D19 is NOT accepted; no Stage 2 completion, main, or merge is implied.
+Status: CANONICAL_CANDIDATE_NATIVE_PENDING. D18 has authenticated Native aggregate PASS (6 cases / 40 checks) and eleven successful same-SHA regressions at a9de9c5beb9dc241955517d23a4f3a8964551b7f. D19 forward/reverse QA completed successfully on d9e7e9ea922bbcf8f49718851f34d47870c5f4c4 (17/61 and 17/62; run 44734200593). Promotion into Logo+Ido requires fresh canonical same-SHA Native and existing regression workflows. D19 is NOT yet accepted; no Stage 2 completion, main, or merge is implied.
 
 ## Scope
 
@@ -36,3 +36,9 @@ First require the original canonical D18 run 44701301631 on a9de9c5 to finish SU
 ## QA finding and bounded repair (2026-11-20)
 
 Original QA natural push 44707859113, native job 136191823885, completed FAILURE on 94a3e191baaacc2275647f61cc4660f96e33c7c5. Authentic runtime output showed 11/11 firstValue mismatches and seven direction mismatches versus frozen test-only nr.ask; no invalid-guard failure marker. The production code incorrectly included `179*B[nextId]` inside the square, while nr.ask adds it afterward. This correction changes only the D19 production expression and its contract, not nr.ask or the D18 sauce implementation. The prior failed QA is not counted as PASS; require a fresh, naturally triggered exact-SHA 17-case/61-check Native verification. D18's canonical acceptance is separately proven by original run 44701301631 (three successful jobs, authentic 6/40 aggregate PASS); canonical branch SHA is a9de9c5beb9dc241955517d23a4f3a8964551b7f. Further reverse-direction differential QA is required before promotion.
+
+## Canonical branch-only candidate (2026-11-20)
+
+QA-only forward and independently generated reverse-date Native shards both completed SUCCESS with authentic markers in run 44734200593, jobs 136281350906 and 136281351530, on QA HEAD d9e7e9ea922bbcf8f49718851f34d47870c5f4c4. Distinct asserted check totals were 61 and 62, for 34 case executions / 123 checks. The normative reference remained frozen and separate from production.
+
+The canonical-only workflow `.github/workflows/logo-stage02-discovery19-native.yml` runs on Logo+Ido, checks exact checkout SHA, pins UCBLogo 6.2.5 at a0215433f07384e4c42fe247525867f11e6f32f7, executes both bounded Native differential shards, and gates a dependent 34/123 acceptance aggregator. Its aggregate PASS must not be claimed before a completed/log-confirmed run on the exact canonical candidate SHA. All eleven previously existing regressions must also succeed on that SHA before D19 acceptance. The retained QA-only workflow is triggered only on qa/logo-ido-d19-ask, not on the canonical branch.
