@@ -34,8 +34,8 @@ jobs:
                       assert all(n.name.split('.')[0] not in
                           {'subprocess','ctypes','multiprocessing','psutil'} for n in node.names)
                   if isinstance(node,ast.ImportFrom):
-                      assert (node.module or '').split('.')[0] not in
-                          {'subprocess','ctypes','multiprocessing','psutil'}
+                      assert ((node.module or '').split('.')[0] not in
+                              {'subprocess','ctypes','multiprocessing','psutil'})
           print('V131_NO_NATIVE_DISPATCH_ALL_ANALYSIS_LOCAL')
           PY
       - name: Run sixteen synthetic lineage and tamper regression checks
