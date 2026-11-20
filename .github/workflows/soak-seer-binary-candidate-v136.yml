@@ -1,0 +1,118 @@
+name: Soak v136 Seer exact-run artifact census and nonmatching prebuilt SHA, no Fct
+on:
+  push:
+    branches:
+      - qa/soak-binary-candidate-census-v136
+    paths:
+      - 'soak/control/seer_binary_candidate_census_v136.json'
+      - 'soak/runner/soak_seer_binary_census_v136.py'
+      - 'soak/process_tests/test_soak_seer_binary_census_v136.py'
+      - '.github/workflows/soak-seer-binary-candidate-v136.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  exact-commit-artifact-metadata-no-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Confirm original mismatch stop and reject native process calls
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast,json
+          from pathlib import Path
+          x=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert x['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for f in ('soak/runner/soak_seer_binary_census_v136.py',
+                    'soak/process_tests/test_soak_seer_binary_census_v136.py'):
+              tree=ast.parse(Path(f).read_text(encoding='utf8'))
+              for n in ast.walk(tree):
+                  if isinstance(n,ast.Import):
+                      assert all(q.name.split('.')[0] not in {'subprocess','ctypes','multiprocessing','psutil'}
+                                 for q in n.names)
+                  if isinstance(n,ast.ImportFrom):
+                      assert ((n.module or '').split('.')[0] not in
+                              {'subprocess','ctypes','multiprocessing','psutil'})
+          print('V136_DISPATCH_HALT_RECONFIRMED')
+          PY
+      - name: Run seventeen synthetic artifact identity and negative-control checks
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_seer_binary_census_v136.py' -v \
+            2>&1 | tee evidence/v136-tests.log
+          grep -Eq '^Ran 17 tests ' evidence/v136-tests.log
+          grep -q '^OK$' evidence/v136-tests.log
+      - name: Check v135 successful source evidence before new external reads
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          from urllib.request import Request,urlopen
+          prefix='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              req=Request(prefix+path,headers={
+                  'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                  'Accept':'application/vnd.github+json',
+                  'X-GitHub-Api-Version':'2022-11-28',
+                  'User-Agent':'pastafari-readonly-v136'})
+              with urlopen(req,timeout=30) as f:return json.load(f)
+          run=get('/actions/runs/44744740005')
+          assert run['id']==44744740005
+          assert run['head_sha']=='f6be213d465aacba90148077a8501e9e8916ca43'
+          assert run['status']=='completed' and run['conclusion']=='success'
+          a=get('/actions/runs/44744740005/artifacts')
+          assert any(x['id']==14632018291
+              and x['name']=='soak-v135-seer-source-archive-metadata-no-native-soak'
+              and x['digest']=='sha256:d37766b985265fe45b5cdbebaa70a9ee4f66a8660daf3d7e4bfca817ed23e112'
+              and x['expired'] is False for x in a['artifacts'])
+          print('V136_V135_FROZEN_COMPLETED_CI_RECEIPT_PASS')
+          PY
+      - name: Count eleven exact-head runs and their retained artifacts without downloading or executing binaries
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_seer_binary_census_v136.py \
+            --manifest soak/control/seer_binary_candidate_census_v136.json \
+            --output evidence/v136-exact-commit-artifacts.json \
+            | tee evidence/v136-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v136-exact-commit-artifacts.json').read_text())
+          x=r['read_only_live_exact_CI_artifact_inventory']
+          assert x['run_count_at_exact_head']==11
+          assert x['listed_artifact_ids']==14
+          assert x['visible_artifact_ids']==14
+          assert x['prebuilt_artifact_from_different_internal_source_commit'] is True
+          assert x['binary_bytes_downloaded_by_this_remote_metadata_scan'] is False
+          assert r['candidate_executable_bytes_examined_here'] is False
+          assert r['local_prebuilt_executable_scan'] is None
+          assert r['Seer_Next_original_executable_bytes_verified'] is False
+          assert r['original_date_calls']==0
+          assert r['new_compiler_or_linker_calls']==0
+          assert r['original_full_years_certified']==0
+          assert r['independent_algorithms_certified']==0
+          assert r['soak_dispatch_authorized'] is False
+          print('V136_EXACT_CI_ARTIFACT_METADATA_ACCEPTED_NO_BINARY_SOAK')
+          PY
+      - name: Archive QA evidence and no-native execution safeguards
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v136-seer-exact-commit-artifact-census-no-binary-soak
+          path: |
+            evidence/v136-tests.log
+            evidence/v136-summary.json
+            evidence/v136-exact-commit-artifacts.json
+          if-no-files-found: warn
+          retention-days: 30
