@@ -181,6 +181,24 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Native median evidence contract static self-test (NOT Native 4244)
+        if: github.ref == 'refs/heads/Chapel+Українська-мова'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/weaving_native_median_evidence_gate.py --self-test | tee chapel-native-median-evidence-selftest.log
+          grep -Fxq 'NATIVE_MEDIAN_EVIDENCE_SELFTEST_RESULT=PASS' chapel-native-median-evidence-selftest.log
+          grep -Fxq 'NATIVE_MEDIAN_EVIDENCE_NATIVE_4244=NOT_TESTED' chapel-native-median-evidence-selftest.log
+
+      - name: Retain native median evidence contract self-test
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-native-median-contract-static-evidence
+          path: chapel-native-median-evidence-selftest.log
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Independent GateOracle year-boundary and calendarDate decomposition probe
         shell: bash
         run: |
