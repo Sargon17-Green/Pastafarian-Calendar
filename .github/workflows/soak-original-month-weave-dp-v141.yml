@@ -1,0 +1,120 @@
+name: Soak v141 full legal month-weave DP and lexicographic rank contract, no Fct
+on:
+  push:
+    branches:
+      - qa/soak-ada-month-weave-dp-contract-v141
+    paths:
+      - 'soak/control/ada_month_weave_dp_contract_v141.json'
+      - 'soak/runner/soak_ada_month_weave_dp_contract_v141.py'
+      - 'soak/process_tests/test_soak_ada_month_weave_dp_contract_v141.py'
+      - '.github/workflows/soak-original-month-weave-dp-v141.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static-full-family-mathematical-spec:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Preserve Issue 29 native dispatch stop and deny local processes
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast,json
+          from pathlib import Path
+          x=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert x['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for path in ('soak/runner/soak_ada_month_weave_dp_contract_v141.py',
+                       'soak/process_tests/test_soak_ada_month_weave_dp_contract_v141.py'):
+              t=ast.parse(Path(path).read_text(encoding='utf-8'))
+              for node in ast.walk(t):
+                  if isinstance(node,ast.Import):
+                      assert all(a.name.split('.')[0] not in {
+                        'subprocess','ctypes','multiprocessing','psutil'}
+                        for a in node.names)
+                  elif isinstance(node,ast.ImportFrom):
+                      assert (node.module or '').split('.')[0] not in {
+                        'subprocess','ctypes','multiprocessing','psutil'}
+          print('V141_STOP_NEW_NATIVE_SOAK_DISPATCH_CONFIRMED')
+          PY
+      - name: Test 28 independent finite combinatorial rank/count/roundtrip and negative controls
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_ada_month_weave_dp_contract_v141.py' -v \
+            2>&1 | tee evidence/v141-tests.log
+          grep -Eq '^Ran 28 tests ' evidence/v141-tests.log
+          grep -q '^OK$' evidence/v141-tests.log
+      - name: Reverify v140 exact completed source and artifact receipt
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,json
+          from urllib.request import urlopen,Request
+          base='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(url):
+              req=Request(base+url,headers={
+                'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                'Accept':'application/vnd.github+json',
+                'X-GitHub-Api-Version':'2022-11-28',
+                'User-Agent':'pastafari-soak-v141-readonly'})
+              with urlopen(req,timeout=30) as r:return json.load(r)
+          r=get('/actions/runs/44812535351')
+          assert r['id']==44812535351
+          assert r['head_sha']=='8498d3a465dcef93cc41f043a4fbba0bc1f1f96e'
+          assert r['status']=='completed' and r['conclusion']=='success'
+          a=get('/actions/runs/44812535351/artifacts')
+          assert any(x['id']==14667641480
+            and x['digest']=='sha256:9ee8aef1a43c6a8ca24a319d0e1714bb6c4d7aa1dda25c6144e890c4f65051ba'
+            and x['expired'] is False for x in a['artifacts'])
+          print('V141_PREVIOUS_SOURCE_QA_CI_SUCCESS_PINNED')
+          PY
+      - name: Validate source-pinned month-Weaving DP and mathematical fixtures only
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_ada_month_weave_dp_contract_v141.py \
+            --manifest soak/control/ada_month_weave_dp_contract_v141.json \
+            --output evidence/v141-month-family-mathematical-evidence.json \
+            | tee evidence/v141-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v141-month-family-mathematical-evidence.json').read_text())
+          assert r['exact_source']['original_source_blobs_pinned']==2
+          assert r['exact_source']['source_global_lexicographic_rank_verified'] is True
+          assert r['prior_qa']['issue_29_open'] is True
+          f=r['finite_mathematical_evidence']
+          assert len(f['fixtures'])==6
+          assert f['source_full_family_count_4_4']==20
+          assert f['Ada_two_rail_family_count_4_4']==6
+          assert f['all_expected_legal_counts_and_rank_bijections_verified'] is True
+          assert f['original_Fct_covered'] is False
+          assert f['production_Ada_implementation_complete'] is False
+          assert r['new_native_or_calendar_Fct_executions']==0
+          assert r['scientific_original_full_years_certified']==0
+          assert r['independent_original_algorithms_certified']==0
+          assert r['Ada_production_patch_made'] is False
+          assert r['sole_cause_of_foundation_mismatch_proven'] is False
+          assert r['STOP_NEW_NATIVE_SOAK_DISPATCH'] is True
+          print('V141_FINITE_FULL_MONTH_FAMILY_DP_SPEC_PASSED_NO_ORIGINAL_FCT')
+          PY
+      - name: Upload synthetic proof only, not native or date outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v141-original-month-weave-dp-port-contract-no-native
+          path: |
+            evidence/v141-tests.log
+            evidence/v141-summary.json
+            evidence/v141-month-family-mathematical-evidence.json
+          if-no-files-found: warn
+          retention-days: 30
