@@ -12,6 +12,12 @@ $preSeal = ($lines -contains 'LAST_COMPLETED_STAGE=22') -and
            ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=AWAITING')
 $postSeal = (($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24') -or ($lines -contains 'LAST_COMPLETED_STAGE=25') -or ($lines -contains 'LAST_COMPLETED_STAGE=26') -or ($lines -contains 'LAST_COMPLETED_STAGE=27') -or ($lines -contains 'LAST_COMPLETED_STAGE=28') -or ($lines -contains 'LAST_COMPLETED_STAGE=29') -or (($lines -contains 'LAST_COMPLETED_STAGE=30') -or (($lines -contains 'LAST_COMPLETED_STAGE=31') -or ($lines -contains 'LAST_COMPLETED_STAGE=32') -or ($lines -contains 'LAST_COMPLETED_STAGE=33') -or ($lines -contains 'LAST_COMPLETED_STAGE=34') -or ($lines -contains 'LAST_COMPLETED_STAGE=35') -or (($lines -contains 'LAST_COMPLETED_STAGE=36') -or ($lines -contains 'LAST_COMPLETED_STAGE=37') -or (($lines -contains 'LAST_COMPLETED_STAGE=38') -or (($lines -contains 'LAST_COMPLETED_STAGE=39') -or (($lines -contains 'LAST_COMPLETED_STAGE=40') -or (($lines -contains 'LAST_COMPLETED_STAGE=41') -and ($lines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))))))))) -and
             ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED')
+$stage42Sealed = ($lines -contains 'CURRENT_STAGE=42') -and
+                 ($lines -contains 'LAST_COMPLETED_STAGE=42') -and
+                 ($lines -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+                 ($lines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+                 ($lines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
+                 ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED')
 if ($preSeal) {
     $updatedLines = foreach ($line in $lines) {
         if ($line -eq 'LAST_COMPLETED_STAGE=22') {
@@ -27,7 +33,7 @@ if ($preSeal) {
     Set-Content -Path $stageFile -Value $updatedLines -Encoding utf8
     Write-Host 'STAGE23_FINALIZED=YES'
 }
-elseif ($postSeal) {
+elseif ($postSeal -or $stage42Sealed) {
     Write-Host 'STAGE23_ALREADY_FINALIZED=YES'
 }
 else {
