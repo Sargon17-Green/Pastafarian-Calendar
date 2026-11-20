@@ -1,0 +1,29 @@
+{
+  "anchor_cases": 14,
+  "artifact_id": 14668076412,
+  "artifact_sha256": "362f6563185edb21adc1d053015db112258459ac32aa352c70a02ebe68cbeb50",
+  "ci_sha": "4459e2a7aadcbd7cd2c964895f969c15d67f2d60",
+  "independent_oracle_corruption_rejected": true,
+  "job_id": 136551746892,
+  "mutant_rejected_at_value_check": true,
+  "native_case_labels_verified": 16,
+  "native_exit_zero_stderr_empty": true,
+  "negative_exits_markers_verified": 4,
+  "physical_invalid_pointers_assessed": false,
+  "positive_assertions_verified_against_independent_math": 160,
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "replay_cases": 2,
+  "run_id": "44812320919",
+  "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "source_git_blobs_verified": {
+    "src/bigint.false": "1e8de1147ba46cd0eb75a47f24673bbd9783946f",
+    "src/monster_bootstrap.false": "1257aeb7021d104fffac7822db6190e882f421cf",
+    "test/stage17_rank_to_order_16.false": "cd4c20c3879a03228b853489f7c9204c83b7716e"
+  },
+  "source_pin": "cc39bd7007d27f00643b800338432430167dbb40",
+  "stage": 17,
+  "stage17_acceptance_scope": "one physically allocated input rank cell, 1..720; fresh direct 7-cell output",
+  "stage17_unbounded_pointer_safety_certified": false,
+  "status": "INDEPENDENT_BOUNDED_NATIVE_ARTIFACT_AUDIT_PASS",
+  "zip_entries_crc_pass": 37
+}

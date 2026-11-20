@@ -2,9 +2,9 @@
 
 ## מקור ההמשך ומצב השער
 
-PROJECT_ID: `PC-BRANCH-FALSE-ARABIC`. חוזה זה נגזר בנפרד מפעולה 51 בקובץ `test/normative_reference.false` בענף `FALSE+العربية` בנקודת בסיס `f2d633c500f12c2a76bdc669cb85b02486d7fe23` (Git blob `3e9acc012bedf83294a6ec3cccb081a069556b5b`). Stage16 התקבל **רק** לפי החוזה המוגבל המתועד ב־`evidence/stage16_bounded_contract_acceptance_2026-11-20.json` ובריצת Native `44707638014`. אין לייחס לו בטיחות זיכרון עבור מצביעים לא תקפים או הקצאה חסרה. Stage17 נפתח **לתכנון בלבד**; עדיין אין מימוש FALSE, הרצת Native או קבלת שלב 17.
+PROJECT_ID: `PC-BRANCH-FALSE-ARABIC`. חוזה זה נגזר בנפרד מפעולה 51 בקובץ `test/normative_reference.false` בענף `FALSE+العربية` בנקודת בסיס `f2d633c500f12c2a76bdc669cb85b02486d7fe23` (Git blob `3e9acc012bedf83294a6ec3cccb081a069556b5b`). Stage16 התקבל **רק** לפי החוזה המוגבל המתועד ב־`evidence/stage16_bounded_contract_acceptance_2026-11-20.json` ובריצת Native `44707638014`. אין לייחס לו בטיחות זיכרון עבור מצביעים לא תקפים או הקצאה חסרה. Stage17 התקבל **לפי החוזה המצומצם בלבד** לאחר Native מוצלח וביקורת בלתי תלויה. המגבלות על מצביעים לא חוקיים ועל גודל הקצאה נשארות בעינן.
 
-## חוזה מדיד מוצע — op34 (חדש בייצור, בלתי תלוי ב־op51)
+## חוזה מדיד שהתקבל בגבולותיו — op34 (חדש בייצור, בלתי תלוי ב־op51)
 
 - **קלט:** מצביע ל־tuple פיזי שהוקצה בו **תא אחד** ובו מספר שלם קטן `rank` בתחום הסגור `1..720`. אין תא length עבור ה־tuple. הפעולה תופעל כ־`34h` מתוך מערכת הקריאות הקיימת. המספר אינו מצביע BigInt.
 - **פלט:** מצביע לטבלה ישירה טרייה בת שבעה תאים `[6,o1,o2,o3,o4,o5,o6]`, כאשר `o1..o6` הם כל המספרים `1..6` בדיוק פעם אחת, בסדר התמורה הלקסיקוגרפית בעלת דירוג `rank` המתחיל מ־1. בניגוד לרצפי ה־descriptor שבמקור הנורמטיבי, זהו פורמט הייצור המוגבל, בדומה לטבלה הישירה של Stage16.
@@ -24,6 +24,15 @@ PROJECT_ID: `PC-BRANCH-FALSE-ARABIC`. חוזה זה נגזר בנפרד מפעו
 3. להריץ בדיקות מקומיות תחומות, ולאחר מכן GitHub CI עם מקור הייצור ומבחן נעולים ל־SHA ועם מפרש FALSE המקורי ב־`eb3135565a8670cced3f6bbca4dbf7b014c45634`. אין חזרה על PASS היסטורי ללא שינוי מקור או חוזה.
 4. לקבוע `Stage17 ACCEPTED` רק אחרי completed/log Native, ספירת assertions מפורשת, ארטיפקט ZIP מאומת CRC/SHA ומבקר בלתי תלוי שמשווה blob SHA של קבצים, בודק את ציפיות התוצאות ומסרב לקבל oracle מושחת. בדיקות Python של העיצוב לבדן אינן מספיקות.
 
-**STAGE17_OP34_SOURCE_CANDIDATE_AND_16_CASE_FIXTURE_PREPARED; STATIC_ONLY; NATIVE_NOT_RUN; STAGE17_NOT_ACCEPTED; NO_MAIN_OR_MERGE.**
+**STAGE17_ACCEPTED_BOUNDED_CONTRACT; ORIGINAL_NATIVE_PASS; INDEPENDENT_ARTIFACT_AUDIT_PASS; INVALID_POINTER_SAFETY_UNASSESSED; NO_STAGE18_MAIN_OR_MERGE.**
 
 Source and test fixture prepared under the Stage17 bounded contract. The generator `tools/stage17_rank_to_order_fixture.py` covers 14 anchors, 2 replays, 160 embedded assertions, 4 invalid numeric constructions and a deliberate mutant; these are not Native results. Source/runtime pinning and exact-interpreter execution remain mandatory.
+
+## קבלת Stage17 — ראיות נצפות
+
+- הכשל הראשון: GitHub run `44811842615` / job `136550139613` completed/failure; שגיאת טיפוס בצירוף תנאי `s;0=&w;0=&` אומתה בארטיפקט `14668095856`, ותוקנה ב־`cc39bd7007d27f00643b800338432430167dbb40`.
+- Native מקורי מתוקן: [run 44812320919](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44812320919), job `136551746892` completed/success; verify job `136551746211` success. קוד המקור נעול ל־`cc39bd7007d27f00643b800338432430167dbb40`, המפרש המקורי `eb3135565a8670cced3f6bbca4dbf7b014c45634`. קוד יציאה חיובי 0; stderr ריק.
+- [ZIP artifact 14668076412](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44812320919/artifacts/14668076412): SHA-256 `362f6563185edb21adc1d053015db112258459ac32aa352c70a02ebe68cbeb50`, 37 כניסות תקינות CRC.
+- ביקורת בלתי תלויה מתוך ה־ZIP: שלושת מקורות ה־FALSE התאימו גם ל־SHA-256 שהוקלט וגם ל־Git blob SHA-1 החי של המאגר; 14 עוגנים ושתי חזרות השוו מול `itertools.permutations(1..6)`, עם 160 בדיקות מקור משובצות. ארבעת הקלטים `-1, 0, 721, 722` נדחו בקוד יציאה 1 וסמן `E_BALL_RANK`; מוטנט עם ערך ראשון מושחת נדחה בסמן `STAGE17_ORDER_00_VALUE_1_FAIL`. אורקל מושחת בנפרד נדחה בביקורת.
+- קבלה תחומה: `evidence/stage17_bounded_acceptance_2026-11-20.json`. ביקורת ה־artifact אינה אישור לבטיחות מצביעים לא מוקצים, tuples מקוצצים פיזית, heap פגום או קלט מחוץ לחוזה. לא נפתח Stage18.
+
