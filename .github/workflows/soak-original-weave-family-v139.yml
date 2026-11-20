@@ -1,0 +1,121 @@
+name: Soak v139 original Ada vs Python legal month-weave family static discriminator
+on:
+  push:
+    branches:
+      - qa/soak-month-weaving-family-divergence-v139
+    paths:
+      - 'soak/control/weave_family_divergence_v139.json'
+      - 'soak/runner/soak_weave_family_divergence_v139.py'
+      - 'soak/process_tests/test_soak_weave_family_divergence_v139.py'
+      - '.github/workflows/soak-original-weave-family-v139.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  exact-source-original-family-census:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Preserve Issue 29 original source stop and prohibit converter launches
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import ast,json
+          from pathlib import Path
+          stop=json.loads(Path('soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert stop['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          for f in ('soak/runner/soak_weave_family_divergence_v139.py',
+                    'soak/process_tests/test_soak_weave_family_divergence_v139.py'):
+              t=ast.parse(Path(f).read_text(encoding='utf8'))
+              for x in ast.walk(t):
+                  if isinstance(x,ast.Import):
+                      assert all(z.name.split('.')[0] not in
+                          {'subprocess','ctypes','multiprocessing','psutil'}
+                          for z in x.names)
+                  elif isinstance(x,ast.ImportFrom):
+                      assert ((x.module or '').split('.')[0] not in
+                          {'subprocess','ctypes','multiprocessing','psutil'})
+          print('V139_ORIGINAL_NATIVE_DISPATCH_STOP_CONFIRMED')
+          PY
+      - name: Run 16 fail-closed synthetic family and exact source receipt controls
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_weave_family_divergence_v139.py' -v \
+            2>&1 | tee evidence/v139-tests.log
+          grep -Eq '^Ran 16 tests ' evidence/v139-tests.log
+          grep -q '^OK$' evidence/v139-tests.log
+      - name: Verify accepted v138 QA source receipt and archive digest
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os
+          from urllib.request import Request,urlopen
+          prefix='https://api.github.com/repos/'+os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              req=Request(prefix+path,headers={
+                 'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                 'Accept':'application/vnd.github+json',
+                 'X-GitHub-Api-Version':'2022-11-28',
+                 'User-Agent':'pastafari-soak-v139-readonly'})
+              with urlopen(req,timeout=30) as f:return json.load(f)
+          r=get('/actions/runs/44810427233')
+          assert r['id']==44810427233
+          assert r['head_sha']=='54ffcb8b6296b0fe0662c4418b35d74092e18948'
+          assert r['status']=='completed' and r['conclusion']=='success'
+          result=get('/actions/runs/44810427233/artifacts')
+          assert any(a['id']==14666715918
+             and a['name']=='soak-v138-seer-historic-recipe-source-only-no-rebuild'
+             and a['digest']=='sha256:8de02c6539f8add5ea45e7e6d891a74a53b1da57e3cbdf4917b24ae312ae5279'
+             and a['expired'] is False for a in result['artifacts'])
+          print('V139_V138_HISTORICAL_SOURCE_CI_ACCEPTED')
+          PY
+      - name: Audit six pinned Ada/Python original source blobs and finite weave discrepancy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_weave_family_divergence_v139.py \
+            --manifest soak/control/weave_family_divergence_v139.json \
+            --output evidence/v139-original-family-static-report.json \
+            | tee evidence/v139-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('evidence/v139-original-family-static-report.json').read_text())
+          s=x['source'];m=x['finite_toy_family']
+          assert s['pinned_source_blobs_fetched']==6
+          assert s['Ada_fixed_two_rail_source_confirmed'] is True
+          assert s['Python_original_open_close_interleaving_source_confirmed'] is True
+          assert s['Ada_branch_local_Python_oracle_replicates_two_rail'] is True
+          assert s['Ada_branch_local_provisional_foundation_not_independent_REF41'] is True
+          assert s['sole_cause_of_original_foundation_Fct_mismatch_proven'] is False
+          assert m['python_legal_count']==20 and m['ada_two_rail_count']==6
+          assert m['ada_subset_of_python'] is True
+          assert m['original_only_legal_sequences']==14
+          assert x['original_mismatch_issue']['state']=='open'
+          assert x['original_native_Fct_calls']==0 and x['native_builds']==0
+          assert x['scientific_years_certified']==0
+          assert x['independent_algorithms_certified']==0
+          assert x['soak_dispatch_authorized'] is False
+          assert x['foundation_mismatch_single_root_cause_not_proven'] is True
+          print('V139_STRUCTURAL_SOURCE_FAMILY_DIFFERENCE_PROVEN_NO_FCT')
+          PY
+      - name: Archive source-only proof and no-native negative controls
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v139-original-weave-family-static-subset-no-native
+          path: |
+            evidence/v139-tests.log
+            evidence/v139-summary.json
+            evidence/v139-original-family-static-report.json
+          if-no-files-found: warn
+          retention-days: 30
