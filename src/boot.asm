@@ -149,6 +149,11 @@ wCalendarStoneRepeat:: ds 1
 ; Work state for iterative i=2..46, separate from caller-owned source.
 wCalendarStoneScratch:: ds 80
 wCalendarStoneRound:: ds 1
+; First hidden drop: bounded working residue, atomic publication and scratch.
+wCalendarHiddenWorking:: ds 16
+wCalendarHiddenOutput:: ds 16
+wCalendarHiddenRepeat:: ds 1
+wCalendarHiddenRound:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -164,6 +169,10 @@ IF DEF(STAGE1_I46_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarStoneI46Bench
+ELIF DEF(STAGE1_HIDDEN1_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarHidden1Bench
 ELSE
     call RunSelfTests
     ld a, [wTestResult]
@@ -278,6 +287,7 @@ INCLUDE "src/runtime/calendar_year_projection.asm"
 INCLUDE "src/runtime/calendar_year_step.asm"
 INCLUDE "src/runtime/calendar_select_short.asm"
 INCLUDE "src/runtime/calendar_stone_transition.asm"
+INCLUDE "src/runtime/calendar_hidden1.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -305,4 +315,8 @@ INCLUDE "src/tests/calendar_stone_transition_test.asm"
 INCLUDE "src/tests/calendar_stone_range_test.asm"
 IF DEF(STAGE1_I46_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_stone_i46_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_HIDDEN1_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_hidden1_native_test.asm"
 ENDC

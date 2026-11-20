@@ -53,6 +53,7 @@ jobs:
           python3 tests/test_sm83_stage1_stone_transition_abi.py
           python3 tests/test_sm83_stage1_stone_range_abi.py
           python3 tests/test_sm83_stage1_stone_i46_abi.py
+          python3 tests/test_sm83_stage1_hidden1_abi.py
       - name: Build DMG ROM using RGBDS v1.0.4
         run: |
           docker run --rm --mount type=bind,src="$PWD",dst=/work \
@@ -133,3 +134,35 @@ jobs:
         run: python -m pip install 'pyboy>=2,<3'
       - name: Run isolated Native i46 test under bounded 30000-frame gate
         run: python tests/test_rom_i46.py build/calendar_i46.gb
+
+  dmg-hidden1-native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independent first hidden drop oracle
+        run: python3 tests/test_sm83_stage1_hidden1_abi.py
+      - name: Build isolated hidden1 cartridge using RGBDS v1.0.4
+        run: |
+          docker run --rm --mount type=bind,src="$PWD",dst=/work \
+            -w /work ghcr.io/gbdev/rgbds:v1.0.4 \
+            sh -c 'make build/calendar_hidden1.gb'
+      - name: Measure hidden1 ROM0 and verify default native gate
+        run: |
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path("tests").resolve()))
+          from test_rom0_budget import ROM0_SIZE, rom0_usage
+          a, free, gap, tail, sections = rom0_usage("build/calendar_hidden1.map")
+          assert a + free == ROM0_SIZE and free >= 10
+          from test_rom import TOTAL_CASES, MAX_BOOT_AND_TEST_FRAMES
+          assert (TOTAL_CASES, MAX_BOOT_AND_TEST_FRAMES) == (370, 9000)
+          print(f"ROM0_HIDDEN1=MEASURED allocated={a} free={free} maxgap={gap}")
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install emulator
+        run: python -m pip install 'pyboy>=2,<3'
+      - name: Real Native372 execution, bounded 30000 frames
+        run: python tests/test_rom_hidden1.py build/calendar_hidden1.gb
