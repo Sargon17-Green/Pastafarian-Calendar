@@ -3892,3 +3892,84 @@ jobs:
           path: logs/stage20
           if-no-files-found: warn
           retention-days: 30
+
+
+  stage21-weaving-twelve-months-native:
+    name: Perl Stage21 twelve-month / forty-eight-day native QA
+    if: github.ref_name == 'Perl+國語'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Stage21 exact dense count, independent mixed profiles and 16 Catalan12 shards
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage21
+          git rev-parse HEAD > logs/stage21/source.txt
+          perl -e 'die "Perl 5.40+ required\n" if $] < 5.040; print "$^V\n"' > logs/stage21/perl-version.txt
+          perl -Ilib -c lib/Pastafari/Monster/WeavingPrimitive.pm 2> logs/stage21/syntax.stderr
+          perl -Ilib -c t/68_stage21_weaving_twelve_months.t 2>> logs/stage21/syntax.stderr
+          perl -Ilib -c t/69_stage21_mixed_profiles.t 2>> logs/stage21/syntax.stderr
+          test "$(grep -c 'syntax OK' logs/stage21/syntax.stderr)" -eq 3
+          test "$(wc -l < logs/stage21/syntax.stderr)" -eq 3
+          : > logs/stage21/test.stdout
+          : > logs/stage21/test.stderr
+          set +e
+          (
+            set -euo pipefail
+            ulimit -v 393216
+            ulimit -c 0
+            timeout --signal=TERM --kill-after=5s 120s \
+              prove -e 'perl -CS -Ilib' -v t/69_stage21_mixed_profiles.t \
+              >> logs/stage21/test.stdout 2>> logs/stage21/test.stderr
+            for shard in $(seq 0 15); do
+              STAGE21_SHARD="$shard" timeout --signal=TERM --kill-after=5s 120s \
+                prove -e 'perl -CS -Ilib' -v t/68_stage21_weaving_twelve_months.t \
+                >> logs/stage21/test.stdout 2>> logs/stage21/test.stderr
+            done
+            timeout --signal=TERM --kill-after=5s 120s \
+              perl -Ilib -MPastafari::Monster::WeavingPrimitive=count_weavings -e \
+              'my $v=count_weavings([(4)x12]); die "exact count mismatch\n" unless "$v" eq "11105730970797793977337986040"; print "STAGE21_4X12_COUNT=$v\n";' \
+              >> logs/stage21/test.stdout 2>> logs/stage21/test.stderr
+            timeout --signal=TERM --kill-after=5s 120s \
+              perl -Ilib -MPastafari::Monster::WeavingPrimitive=rank_weaving,unrank_weaving,count_weavings -e \
+              'my $p=[(4)x12]; my $last=count_weavings($p); my $word=unrank_weaving($p,$last); die "length\n" unless @$word==48; die "inverse\n" unless rank_weaving($p,$word)==$last; print "STAGE21_4X12_LAST_RANK_INVERSE=PASS\n";' \
+              >> logs/stage21/test.stdout 2>> logs/stage21/test.stderr
+          )
+          ec=$?
+          set -e
+          printf '%s\n' "$ec" > logs/stage21/test.exit
+          test "$ec" -eq 0
+          test ! -s logs/stage21/test.stderr
+          test "$(grep -c 'All tests successful.' logs/stage21/test.stdout)" -eq 17
+          test "$(grep -c 'Result: PASS' logs/stage21/test.stdout)" -eq 17
+          grep -q 'Tests=208' logs/stage21/test.stdout
+          test "$(grep -c 'Tests=26044' logs/stage21/test.stdout)" -eq 12
+          test "$(grep -c 'Tests=26042' logs/stage21/test.stdout)" -eq 4
+          test "$(grep -c 'STAGE21_CATALAN12_DYCK_WORDS=208012' logs/stage21/test.stdout)" -eq 16
+          test "$(grep -c 'STAGE21_ORACLE_HASH=0dbe36d23b6ffaa14822b1556d3eabc777d5961bdfd2fd79be39ee2daee76bbe' logs/stage21/test.stdout)" -eq 16
+          test "$(grep -c 'STAGE21_SHARD=' logs/stage21/test.stdout)" -eq 16
+          grep -q 'STAGE21_INDEPENDENT_MIXED_WORDS=74' logs/stage21/test.stdout
+          grep -q 'STAGE21_4X12_COUNT=11105730970797793977337986040' logs/stage21/test.stdout
+          grep -q 'STAGE21_4X12_LAST_RANK_INVERSE=PASS' logs/stage21/test.stdout
+          grep -q 'STAGE21_FULL_YEAR_GENERATOR_NOT_VERIFIED' logs/stage21/test.stdout
+          echo 'STAGE21_NATIVE_PASS=1' > logs/stage21/result.txt
+          cat logs/stage21/result.txt >> "$GITHUB_STEP_SUMMARY"
+          echo 'STAGE21_NATIVE_EVIDENCE_SHA:' "$(cat logs/stage21/source.txt)"
+          echo 'STAGE21_NATIVE_SHARDS=16 TAP_SUCCESS=17 EXACT_COUNT_AND_LAST_RANK=PASS'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perl-stage21-weaving-twelve-months-native
+          path: logs/stage21
+          if-no-files-found: warn
+          retention-days: 30
