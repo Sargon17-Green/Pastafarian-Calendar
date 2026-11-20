@@ -1,11 +1,8 @@
-; Stage1 milestone 1: one simultaneous five-stone transition, i=2 only.
-; Input: wCalendarStoneOld 5*16 LE canonical residues 1..M,
-; wCalendarStoneIteration=2 and active valid ordinal owner.
-; Output: wCalendarStoneOutput 5*16 LE canonical residues, status=0.
-; Idle status=6; invalid step/state/ordinal status=2. No output writes
-; occur before all input validation; input/ordinal/lease/SRAM read-only.
-; Arithmetic: exact Mul128x128 + SaveWide256, then individually
-; canonicalized modular additions. No historical golden used as inputs.
+; Stage1 stone-state computation: old input is immutable, output is published
+; only after all five canonical residues and the active ordinal validate.
+; CalendarStoneTransition2 preserves the accepted exact-i=2 ABI.
+; CalendarStoneTransitionRange iterates from i=2 through caller's target 2..46.
+; Both use simultaneous old-round state, 127-bit SAVE and 256-bit multiply.
 SECTION "Calendar five stone simultaneous transition", ROMX, BANK[1]
 CalendarStoneTransition2::
     call CalendarOrdinalValidate
@@ -14,8 +11,30 @@ CalendarStoneTransition2::
     ret nz
     ld a, [wCalendarStoneIteration]
     cp 2
-    jp nz, .invalid
-    ; Check all five residues before publishing any output.
+    jp z, CalendarStoneRunValidated
+.invalid:
+    ld a, 2
+    ld [wCalendarStatus], a
+    ret
+
+CalendarStoneTransitionRange::
+    call CalendarOrdinalValidate
+    ld a, [wCalendarStatus]
+    or a
+    ret nz
+    ld a, [wCalendarStoneIteration]
+    cp 2
+    jr c, .invalid
+    cp 47
+    jr nc, .invalid
+    jp CalendarStoneRunValidated
+.invalid:
+    ld a, 2
+    ld [wCalendarStatus], a
+    ret
+
+CalendarStoneRunValidated::
+    ; Validate ALL five inputs before touching the published output.
     ld hl, wCalendarStoneOld
     ld b, 5
 .checkStone:
@@ -34,6 +53,10 @@ CalendarStoneTransition2::
     jp z, .invalid
     dec b
     jr nz, .checkStone
+    call .seedScratch
+    ld a, 2
+    ld [wCalendarStoneRound], a
+.round:
     xor a
     ld [wCalendarStoneIndex], a
 .nextStone:
@@ -43,6 +66,16 @@ CalendarStoneTransition2::
     ld a, [hl]
     cp 5
     jr nz, .nextStone
+    ld a, [wCalendarStoneRound]
+    ld b, a
+    ld a, [wCalendarStoneIteration]
+    cp b
+    jr z, .success
+    call .advanceScratch
+    ld hl, wCalendarStoneRound
+    inc [hl]
+    jp .round
+.success:
     xor a
     ld [wCalendarStatus], a
     ret
@@ -51,13 +84,38 @@ CalendarStoneTransition2::
     ld [wCalendarStatus], a
     ret
 
+.seedScratch:
+    ld hl, wCalendarStoneOld
+    ld de, wCalendarStoneScratch
+    ld b, 80
+.copyInput:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .copyInput
+    ret
+
+.advanceScratch:
+    ; Copy only AFTER computing every result from the previous snapshot.
+    ld hl, wCalendarStoneOutput
+    ld de, wCalendarStoneScratch
+    ld b, 80
+.copyOutput:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .copyOutput
+    ret
+
 .calculateStone:
-    ; Square the OLD indexed stone, never the already published result.
+    ; Square the OLD ROUND indexed stone, never a just-published result.
     ld a, [wCalendarStoneIndex]
     swap a
     ld e, a
     ld d, 0
-    ld hl, wCalendarStoneOld
+    ld hl, wCalendarStoneScratch
     add hl, de
     ld de, wMulA
     ld b, 16
@@ -99,13 +157,13 @@ CalendarStoneTransition2::
     ld hl, wCalendarStoneRepeat
     dec [hl]
     jr nz, .addPrimary
-    ; Secondary term is i for wheat, otherwise an OLD predecessor.
+    ; Secondary term is i for wheat, otherwise an OLD ROUND predecessor.
     ld a, [wCalendarStoneIndex]
     or a
     jr nz, .oldSecondary
     ld hl, wAddend
     call Clear16
-    ld a, [wCalendarStoneIteration]
+    ld a, [wCalendarStoneRound]
     ld [wAddend], a
     jr .addSecondary
 .oldSecondary:
@@ -118,7 +176,6 @@ CalendarStoneTransition2::
 .addSecondary:
     call Add16
     call Save127
-    ; Store result only after the full state vector passed preflight.
     ld a, [wCalendarStoneIndex]
     swap a
     ld e, a
@@ -136,11 +193,11 @@ CalendarStoneTransition2::
     ret
 
 .loadAddend:
-    ; A=old stone index 0..4; wValue is untouched.
+    ; A=old-round stone index 0..4; wValue is untouched.
     swap a
     ld e, a
     ld d, 0
-    ld hl, wCalendarStoneOld
+    ld hl, wCalendarStoneScratch
     add hl, de
     ld de, wAddend
     ld b, 16

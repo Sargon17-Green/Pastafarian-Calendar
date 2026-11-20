@@ -113,7 +113,7 @@ RunCalendarStoneTransitionTests::
     ld a, [$a000]
     or a
     jp nz, .fail
-    ret
+    jp RunCalendarStoneRangeTests
 
 .sentinelOutput:
     ld hl, wCalendarStoneOutput

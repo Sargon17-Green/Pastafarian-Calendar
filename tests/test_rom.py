@@ -23,6 +23,7 @@ from pathlib import Path
 # release scrub and stale-owner rejection, with preserved tags/SRAM sentinels.
 # Native341..357: short Equal Selection rank, exact 127-bit boundaries, and owner/SRAM immutability.
 # Native358..364: i=2 simultaneous five-stone transition, invalid/idle/lease guards.
+# Native365..370: bounded range i=3/5 sampled transitions and invalid/idle/lease guards; i=46 Host-only.
 # Raw SRAM sentinels remain intact.
 # Keep the measured 9000-frame cap.
 MAX_BOOT_AND_TEST_FRAMES = 9000
@@ -32,7 +33,7 @@ WRAM_DISPATCH = 0xC002
 SUCCESS = 0xA5
 FAILURE = 0xE0
 UNIMPLEMENTED = 0x40
-TOTAL_CASES = 364
+TOTAL_CASES = 370
 
 
 def discover_case_high_byte(symbol_path: Path) -> int:

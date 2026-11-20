@@ -146,6 +146,9 @@ wCalendarStoneOld:: ds 80
 wCalendarStoneOutput:: ds 80
 wCalendarStoneIndex:: ds 1
 wCalendarStoneRepeat:: ds 1
+; Work state for iterative i=2..46, separate from caller-owned source.
+wCalendarStoneScratch:: ds 80
+wCalendarStoneRound:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -292,3 +295,4 @@ INCLUDE "src/tests/calendar_year_projection_test.asm"
 INCLUDE "src/tests/calendar_year_step_test.asm"
 INCLUDE "src/tests/calendar_answer_select_test.asm"
 INCLUDE "src/tests/calendar_stone_transition_test.asm"
+INCLUDE "src/tests/calendar_stone_range_test.asm"
