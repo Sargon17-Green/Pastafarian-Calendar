@@ -1,0 +1,114 @@
+{
+  "schema": "PASTAFARI_SOAK_SEER_HISTORICAL_BINARY_RECOVERY_CONTRACT_V138/1",
+  "evidence_scope": "HISTORICAL_SOURCE_TOOLCHAIN_UPLOAD_SCOPE_AND_MISSING_BYTES_NO_NATIVE_REBUILD",
+  "source_repo": "Sargon-17-Green/Pastafarian-Calendar-Seer",
+  "historical_run_id": 42423259653,
+  "historical_job_id": 128556040187,
+  "historical_ci_head": "4716594fc98fa882a9401455ae56f30895518e8c",
+  "frozen_source_head": "866e9bbff59399310416ae25de1b664f9b6c3124",
+  "historical_run_state": "completed/success",
+  "required_successful_steps": [
+    "Build unchanged baseline",
+    "Build isolated experimental candidate",
+    "Build isolated hybrid day-plus-year cache candidate",
+    "Verify hybrid and original against independent canonical oracle"
+  ],
+  "source_files": [
+    {
+      "path": ".github/workflows/seer-next-experiment.yml",
+      "git_blob_sha1": "72c60f4f2c85af5c89ff4c89c48bfe32ddbae0d1"
+    },
+    {
+      "path": ".github/actions/native-deps/action.yml",
+      "git_blob_sha1": "a34a67ffdb697bf887f1085b55912f31f1ad9663"
+    },
+    {
+      "path": ".github/actions/node-setup/action.yml",
+      "git_blob_sha1": "5008f501d9e5e84d622ee41b60731db9962fc704"
+    },
+    {
+      "path": "prototype/scripts/build_engine_service.sh",
+      "git_blob_sha1": "eb6386c8018360858d74140512d2cf55fd3576f7"
+    },
+    {
+      "path": "research/seer-next/scripts/build_candidate.sh",
+      "git_blob_sha1": "2e238c6406097d04efc20c274e9bb4e91d5bfa3b"
+    },
+    {
+      "path": "research/seer-next/scripts/build_hybrid.sh",
+      "git_blob_sha1": "399219bf6f8abf21db39efc3b5ae59761a1033ee"
+    },
+    {
+      "path": "research/seer-next/scripts/compare_candidate.mjs",
+      "git_blob_sha1": "d0b3a9e139c5e41b057eafb2e332914a72a189b1"
+    }
+  ],
+  "three_build_outputs": [
+    {
+      "role": "baseline",
+      "path": "prototype/build/seer_engine_service",
+      "reported_sha256": "8191de4ccd416f159ac8400a7e12920b8464a0066b32651be69d76c54c47ab2b",
+      "original_executable_bytes_available": false
+    },
+    {
+      "role": "candidate",
+      "path": "research/seer-next/build/seer_next_engine_service",
+      "reported_sha256": "46dded4a81d884936fc0bd80a89a32fba6a821cf28c6b55fbfd1a6ff6f253ac8",
+      "original_executable_bytes_available": false
+    },
+    {
+      "role": "hybrid",
+      "path": "research/seer-next/build/seer_next_hybrid_engine_service",
+      "reported_sha256": null,
+      "original_executable_bytes_available": false
+    }
+  ],
+  "historic_log_observation": {
+    "log_review_source": "github_actions_job_log_128556040187_observed_not_CI_byte_pinned",
+    "runner_image": "ubuntu-24.04",
+    "runner_image_version": "20261101.360.1",
+    "hosted_agent_version": "20261028.624",
+    "gxx_ubuntu_package": "4:13.2.0-7ubuntu1",
+    "libgmp_dev_ubuntu_package": "2:6.3.0+dfsg-2ubuntu6.1",
+    "libboost_dev_ubuntu_package": "1.83.0.1ubuntu2",
+    "libboost183_dev_ubuntu_package": "1.83.0-2.1ubuntu3.2",
+    "node_runtime_observed": "24.22.2",
+    "backend": "avx2",
+    "march": "x86-64",
+    "historical_cli_flags": [
+      "-O3",
+      "-DNDEBUG",
+      "-std=c++20",
+      "-fopenmp",
+      "-pthread",
+      "-march=x86-64",
+      "-mavx2"
+    ],
+    "date": "2026-11-07",
+    "not_all_toolchain_dependency_file_hashes_known": true,
+    "original_binary_SHA_recomputation_permitted_by_existing_archives": false
+  },
+  "reporter_static_field": {
+    "field": "startingCommit",
+    "hardcoded_value": "7f1b3098332d891a9ea6cf8e31383d4fd39141cf",
+    "github_actions_actual_head": "4716594fc98fa882a9401455ae56f30895518e8c",
+    "must_not_infer_binary_git_source_from_hardcoded_field": true
+  },
+  "original_results_artifact": {
+    "id": 13595506317,
+    "name": "seer-next-native-ab-linux-avx2",
+    "sha256_zip": "ed4757a6f9dde8b5302a73413102cba88fef8f02ac70875b309c2ebea9a56bab",
+    "file_count": 34,
+    "upload_scope": "only_explicit_34_JSON_result_paths",
+    "contains_binary_files": false,
+    "retention_currently_valid": true
+  },
+  "github_actions_cache_api_contents_read": false,
+  "github_actions_cache_presence_or_absence_asserted": false,
+  "externally_reproducible_byte_identical_binary_proven": false,
+  "run_native_compilers_permitted": false,
+  "run_original_Fct_permitted": false,
+  "certified_10000_soak_years": 0,
+  "certified_independent_algorithms": 0,
+  "soak_dispatch_authorized": false
+}
