@@ -108,7 +108,7 @@ class V137Test(unittest.TestCase):
             validate(self.m)
     def test_swapped_linux_binary_sha_between_commits_rejected(self):
         self.m["artifacts"][3]["binaries"]["bin/seer_engine_service"]="f"*64
-        with self.assertRaisesRegex(ValueError,"byte-identical"):
+        with self.assertRaisesRegex(ValueError,"16 unique values"):
             validate(self.m)
     def test_release_binary_must_not_implicitly_equal_seer_next(self):
         self.m["artifacts"][0]["binaries"]["bin/seer_engine_service"]=TARGETS["baseline"]
