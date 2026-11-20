@@ -1,0 +1,96 @@
+{
+  "schema": "PASTAFARI_SOAK_ADA_ISOLATED_WIDE_GLOBAL_RANK_V144/1",
+  "purpose": "PURE_SYNTHETIC_GNAT_BIG_INTEGER_PRECISION_AND_RESOURCE_CHECK_NO_ORIGINAL_FCT",
+  "repo": "Sargon17-Green/Pastafarian-Calendar",
+  "prior_accepted": {
+    "run_id": 44823109703,
+    "head_sha": "b2dedda824f5e4297b0b26ac87077d4d5c1fe3c6",
+    "artifact_id": 14670869052,
+    "artifact_digest": "6419e1e4429c97bf9d8ff517cffb6256d1c3ccf65a806bb834982d3bd6c9b7b9",
+    "frozen_v141_vectors": 35
+  },
+  "reference": {
+    "source_commit": "0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4",
+    "source_blob_sha": "d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53",
+    "source_path": "tests/normative_reference.py",
+    "synthetic_math": "soak/runner/soak_ada_dp_resource_bounds_v142.py"
+  },
+  "bounded_Ada": {
+    "max_months": 12,
+    "max_total_days": 256,
+    "original_calendar_oracle_imported": false,
+    "big_integer_rank": true,
+    "original_wide_rank_stream_not_implemented": true
+  },
+  "hash_contract": {
+    "modulus_decimal": "2305843009213693951",
+    "multiplier": 257,
+    "initial": 0,
+    "algorithm": "h=(((h*257)+month_ID) mod (2^61-1)) for all labels in original order",
+    "cryptographic": false
+  },
+  "rank_kinds": [
+    "one",
+    "2^127+1",
+    "floor((N+1)/2)",
+    "N"
+  ],
+  "golden_groups": [
+    {
+      "months": 8,
+      "length": 16,
+      "total_days": 128,
+      "count": "8484570857678108456252429355893789531769120343894823957866334278987787485159718203651318043348194800",
+      "count_bits": 332,
+      "hashes": [
+        "716973684692580079",
+        "1776394615692406099",
+        "203723759202362302",
+        "853333561835942501"
+      ]
+    },
+    {
+      "months": 8,
+      "length": 32,
+      "total_days": 256,
+      "count": "26254089435165697729528393257871603255707257609737749025501387135406164344323199990591639256125823042318635882820638131218736213447130931322662579357911091228956700002794085172789952584178523338265523391407270930400",
+      "count_bits": 713,
+      "hashes": [
+        "1675301637606544654",
+        "721533734026488729",
+        "1752890047684416739",
+        "1656766864843718784"
+      ]
+    },
+    {
+      "months": 12,
+      "length": 12,
+      "total_days": 144,
+      "count": "300023061462656623377368054467125768149585357472311800429674901748375323502606423930061133993742830823476708866723045193185973392",
+      "count_bits": 427,
+      "hashes": [
+        "940787654782621958",
+        "1827887923208027127",
+        "1406895117283389262",
+        "1962590964466250543"
+      ]
+    }
+  ],
+  "scientific_status": {
+    "issue29_open": true,
+    "STOP_NEW_NATIVE_SOAK_DISPATCH": true,
+    "real_date_executions": 0,
+    "original_native_converter_builds": 0,
+    "original_full_years_accepted": 0,
+    "independent_original_algorithms_accepted": 0,
+    "production_Ada_patch_applied": false,
+    "Ada_original_47_month_domain_certified": false
+  },
+  "metrics": {
+    "max_runtime_seconds_guard": 90,
+    "report_elapsed_ms": true,
+    "report_maximum_RSS_KiB": true,
+    "performance_pass_thresholds": false,
+    "CI_machine_profile_not_Ada_production_capacity": true
+  }
+}
