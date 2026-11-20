@@ -171,7 +171,7 @@ def self_test() -> None:
     assert all(c["target_offset"] == 0 for c in CASES[3:8])
     assert case_days(4) == (FOUNDATION_DAY - 1, FOUNDATION_DAY)
     assert case_days(6) == (FOUNDATION_DAY + 1, FOUNDATION_DAY)
-    assert tuple(c["calculation_offset"] for c in CASES[6:]) == (-2048, 2048)
+    assert tuple(c["calculation_offset"] for c in CASES[6:8]) == (-2048, 2048)
     assert case_days(7) == (FOUNDATION_DAY - 2048, FOUNDATION_DAY)
     assert case_days(8) == (FOUNDATION_DAY + 2048, FOUNDATION_DAY)
     assert tuple(c["calculation_offset"] for c in CASES[8:]) == (0, 0)
