@@ -17,6 +17,7 @@ from collections import Counter
 from pathlib import Path
 
 import weaving_gmpy2_backend_probe as g
+from weaving_full_word_order_oracle import verify_fifo_word, test_small_exhaustive
 
 LENGTHS = g.MONTH_LENGTHS
 TARGET = sum(LENGTHS)
@@ -77,6 +78,8 @@ def bounded_phase(mode, word_path):
             word = tuple(int(x) for x in word_path.read_text(encoding="ascii").strip().split(","))
             assert len(word) == TARGET
             assert Counter(word) == Counter({i + 1: n for i, n in enumerate(LENGTHS)})
+            assert verify_fifo_word(LENGTHS, word) == TARGET
+            print("WEAVING_GMP_FULL_GATE_FIFO_ORDER_POSITIONS=4244", flush=True)
         else:
             word = None
             residual = median
@@ -111,6 +114,8 @@ def bounded_phase(mode, word_path):
                 assert residual == 0
                 assert Counter(completed) == Counter(
                     {i + 1: n for i, n in enumerate(LENGTHS)})
+                assert verify_fifo_word(LENGTHS, completed) == TARGET
+                print("WEAVING_GMP_FULL_GATE_FIFO_ORDER_POSITIONS=4244", flush=True)
                 word_path.write_text(",".join(map(str, completed)) + "\n", encoding="ascii")
                 status = "COMPLETE_UNRANK_ONLY"
             else:
@@ -145,6 +150,7 @@ def main():
         raise SystemExit("usage: weaving_gmp_full_year_gate.py [--unrank|--rank wordpath]")
 
     print("WEAVING_GMP_FULL_GATE_CONTRACT=4244_EXACT_MEDIAN_TWO_ISOLATED_DIRECTIONS", flush=True)
+    test_small_exhaustive()
     with tempfile.TemporaryDirectory(prefix="chapel-gmp-median-") as directory:
         word_path = Path(directory) / "median-word.txt"
         subprocess.run([sys.executable, "-u", __file__, "--unrank", str(word_path)],
