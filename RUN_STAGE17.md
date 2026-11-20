@@ -24,4 +24,6 @@ PROJECT_ID: `PC-BRANCH-FALSE-ARABIC`. חוזה זה נגזר בנפרד מפעו
 3. להריץ בדיקות מקומיות תחומות, ולאחר מכן GitHub CI עם מקור הייצור ומבחן נעולים ל־SHA ועם מפרש FALSE המקורי ב־`eb3135565a8670cced3f6bbca4dbf7b014c45634`. אין חזרה על PASS היסטורי ללא שינוי מקור או חוזה.
 4. לקבוע `Stage17 ACCEPTED` רק אחרי completed/log Native, ספירת assertions מפורשת, ארטיפקט ZIP מאומת CRC/SHA ומבקר בלתי תלוי שמשווה blob SHA של קבצים, בודק את ציפיות התוצאות ומסרב לקבל oracle מושחת. בדיקות Python של העיצוב לבדן אינן מספיקות.
 
-**STAGE17_DESIGN_CONTRACT_AND_ORACLE_VERIFIED_LOCALLY; FALSE_IMPLEMENTATION_NOT_STARTED; NATIVE_NOT_RUN; STAGE17_NOT_ACCEPTED; NO_MAIN_OR_MERGE.**
+**STAGE17_OP34_SOURCE_CANDIDATE_AND_16_CASE_FIXTURE_PREPARED; STATIC_ONLY; NATIVE_NOT_RUN; STAGE17_NOT_ACCEPTED; NO_MAIN_OR_MERGE.**
+
+Source and test fixture prepared under the Stage17 bounded contract. The generator `tools/stage17_rank_to_order_fixture.py` covers 14 anchors, 2 replays, 160 embedded assertions, 4 invalid numeric constructions and a deliberate mutant; these are not Native results. Source/runtime pinning and exact-interpreter execution remain mandatory.
