@@ -31,7 +31,8 @@ def build(mutant=False):
 
 def invalid(rank):
     assert rank in INVALID
-    return (f'z;b:{rank}a;!b;34h;!!"STAGE17_INVALID_UNEXPECTED_SUCCESS"10,\n'
+    literal = f"{-rank}_" if rank < 0 else str(rank)
+    return (f'z;b:{literal}a;!b;34h;!!"STAGE17_INVALID_UNEXPECTED_SUCCESS"10,\n'
             '[z;0>][%z;1-z:]#\n')
 
 def main():
