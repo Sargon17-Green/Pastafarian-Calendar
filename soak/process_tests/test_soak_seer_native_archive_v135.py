@@ -48,6 +48,7 @@ class FakeGitHub:
 def mock_blob(_gh,_repo,_sha,_path):
     s=("import { createReadStream } from 'node:fs';\n"+
        "import { createHash } from 'node:crypto';\n"+
+       "const hash=createHash('sha256');\n"+
        "baselineBinarySHA256:await sha256(src)\n"+
        "candidateBinarySHA256:await sha256(candidate)\n").encode()
     return s,{"git_blob_sha1":"d0b3a9e139c5e41b057eafb2e332914a72a189b1"}
