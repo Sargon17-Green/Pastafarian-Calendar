@@ -1,0 +1,78 @@
+name: APL German native FX startup contrast (NOT Stage1)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-fx-startup-contrast.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  contrast:
+    name: fx-${{ matrix.mode }}-attempt${{ matrix.attempt }}
+    runs-on: windows-2022
+    timeout-minutes: 7
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [canary_only, start_only]
+        attempt: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Install exact native runtime and ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Verify locked source and both diagnostic candidates
+        shell: pwsh
+        run: |
+          python -m unittest discover -s qa/nars-interface -p 'test_progress_fx_probe.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'DIAGNOSTIC_UNIT_TESTS_FAILED' }
+      - name: Execute bounded native startup contrast
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_progress_variant.ps1 -Evidence fx_variant_evidence -Runtime verified_runtime -Mode ${{ matrix.mode }}
+      - name: Require exact native marker for diagnostic mode
+        shell: pwsh
+        env:
+          EXPECTED_MODE: ${{ matrix.mode }}
+        run: |
+          $p='fx_variant_evidence/native_fx_progress.json'
+          if (-not (Test-Path -LiteralPath $p)) { throw 'DIAGNOSTIC_REPORT_NOT_FOUND' }
+          $r=Get-Content -LiteralPath $p -Raw | ConvertFrom-Json
+          $mode=$env:EXPECTED_MODE
+          $status='NATIVE_FX20_'+$mode.ToUpperInvariant()+'_COMPLETE_NOT_STAGE01'
+          if ($r.mode -cne $mode -or $r.status -cne $status -or $r.stage01 -cne 'NOT_RUN' -or $r.checkpoints.Count -ne 1 -or $r.checkpoints[0].after -ne 0 -or $r.checkpoints[0].exact -ne $true -or $r.final_marker.exact -ne $true) {
+            throw ('NATIVE_FX20_'+$mode.ToUpperInvariant()+'_NOT_CONFIRMED')
+          }
+          Write-Output ('NATIVE_FX20_'+$mode.ToUpperInvariant()+'_CONFIRMED_NOT_STAGE01')
+      - name: Hash collected evidence
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force fx_variant_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem fx_variant_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $sha=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$sha  $($_.FullName)"
+          } | Set-Content -Encoding utf8 fx_variant_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-fx-${{ matrix.mode }}-attempt${{ matrix.attempt }}-not-stage1
+          path: |
+            font_bootstrap_evidence/
+            fx_variant_evidence/
+            fx_variant_evidence.sha256
+          retention-days: 14

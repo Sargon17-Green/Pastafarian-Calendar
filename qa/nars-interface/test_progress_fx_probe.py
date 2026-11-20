@@ -60,6 +60,36 @@ class NativeProgressCandidateTests(unittest.TestCase):
         self.assertEqual(inner.count(" Stage01PrefixFix "), COUNT)
         self.assertIn("⎕FX ", inner)
 
+    def test_small_canary_has_first_marker_and_no_fx(self):
+        c, r = create_progress(BASE, MARKER, ROOT, mode="canary_only")
+        self.assertEqual(r["mode"], "canary_only")
+        self.assertEqual(r["fx_count"], 0)
+        self.assertEqual([point["after"] for point in r["checkpoints"]], [0])
+        self.assertEqual(r["checkpoints"][0]["name"], "START")
+        self.assertIn("TRACE_CANARY_V1", r["marker_token"])
+        self.assertEqual(r["candidate_sha256"], hashlib.sha256(c).hexdigest())
+
+    def test_start_only_has_twenty_fx_and_initial_marker(self):
+        c, r = create_progress(BASE, MARKER, ROOT, mode="start_only")
+        self.assertEqual(r["mode"], "start_only")
+        self.assertEqual(r["fx_count"], 20)
+        self.assertEqual([p["after"] for p in r["checkpoints"]], [0])
+        payload = next(s for s in c.decode("cp1252").splitlines() if s.startswith(":4=V C ")).split("'", 2)[1].replace("{quad}", "⎕")
+        prefix = "⎕EC ⎕UCS "
+        self.assertTrue(payload.startswith(prefix))
+        inner = "".join(chr(int(n)) for n in payload[len(prefix):].split())
+        self.assertEqual(inner.count(" Stage01PrefixFix "), 20)
+        self.assertLess(inner.index("⎕NAPPEND"), inner.index("⎕FX"))
+        self.assertEqual(r["candidate_sha256"], hashlib.sha256(c).hexdigest())
+
+    def test_invalid_mode_fails_closed(self):
+        with self.assertRaisesRegex(ValueError, "INVALID_PROGRESS_MODE"):
+            create_progress(BASE, MARKER, ROOT, mode="typo")
+        self.assertNotEqual(
+            create_progress(BASE, MARKER, ROOT, mode="full")[0],
+            create_progress(BASE, MARKER, ROOT, mode="start_only")[0],
+        )
+
     def test_crlf_preserved_and_manifest_reproducible(self):
         a, ra = create_progress(BASE, MARKER, ROOT)
         b, rb = create_progress(BASE, MARKER, ROOT)

@@ -38,7 +38,9 @@ def record(marker: str, index: int, names: list[str]) -> dict:
     }
 
 
-def create_progress(raw: bytes, marker: str, repo: pathlib.Path) -> tuple[bytes, dict]:
+def create_progress(raw: bytes, marker: str, repo: pathlib.Path, mode: str = "full") -> tuple[bytes, dict]:
+    if mode not in ("full", "start_only", "canary_only"):
+        raise ValueError("INVALID_PROGRESS_MODE")
     locked = load_locked_sources(repo)
     blocks = locked["blocks"][:COUNT]
     if len(blocks) != COUNT:
@@ -46,19 +48,25 @@ def create_progress(raw: bytes, marker: str, repo: pathlib.Path) -> tuple[bytes,
     names = [b["name"] for b in blocks]
     if len(set(names)) != COUNT:
         raise ValueError("LOCKED_FUNCTION_NAMES_NOT_UNIQUE")
-    traces = [record(marker, i, names) for i in CHECKPOINTS]
+    indexes = CHECKPOINTS if mode == "full" else (0,)
+    traces = [record(marker, i, names) for i in indexes]
     by_index = {x["after"]: x for x in traces}
-    token = f"APL_GERMAN_PREFIX_{COUNT}_FX_VERIFIED_SOURCE_{SOURCE_COMMIT}"
+    token = (
+        f"APL_GERMAN_FX_TRACE_CANARY_V1|SOURCE={SOURCE_COMMIT}"
+        if mode == "canary_only"
+        else f"APL_GERMAN_PREFIX_{COUNT}_FX_VERIFIED_SOURCE_{SOURCE_COMMIT}"
+    )
     parts = [write_expr(traces[0]["token"], traces[0]["path"])]
-    parts += ["⎕FX " + nested_fx_expression(PREFIX_HELPER), "Stage01PrefixCount←0"]
-    for index, block in enumerate(blocks, 1):
-        parts.append(
-            f"(⎕UCS {_codes(block['name'])}) Stage01PrefixFix "
-            + nested_fx_expression(fx_definition_lines(block))
-        )
-        if index in by_index:
-            checkpoint = by_index[index]
-            parts.append(write_expr(checkpoint["token"], checkpoint["path"]))
+    if mode != "canary_only":
+        parts += ["⎕FX " + nested_fx_expression(PREFIX_HELPER), "Stage01PrefixCount←0"]
+        for index, block in enumerate(blocks, 1):
+            parts.append(
+                f"(⎕UCS {_codes(block['name'])}) Stage01PrefixFix "
+                + nested_fx_expression(fx_definition_lines(block))
+            )
+            if index in by_index:
+                checkpoint = by_index[index]
+                parts.append(write_expr(checkpoint["token"], checkpoint["path"]))
     parts.append(write_expr(token, marker))
     inner = " ⋄ ".join(parts)
     outer = "⎕EC ⎕UCS " + _codes(inner)
@@ -86,6 +94,8 @@ def create_progress(raw: bytes, marker: str, repo: pathlib.Path) -> tuple[bytes,
         "source_commit": SOURCE_COMMIT,
         "source_manifest_sha256": locked["manifest"]["manifest_sha256"],
         "count": COUNT,
+        "fx_count": 0 if mode == "canary_only" else COUNT,
+        "mode": mode,
         "names": names,
         "candidate_sha256": hashlib.sha256(candidate).hexdigest(),
         "workspace_source_sha256": meta["input_sha256"],
@@ -105,9 +115,10 @@ def main() -> int:
     ap.add_argument("--candidate", type=pathlib.Path, required=True)
     ap.add_argument("--receipt", type=pathlib.Path, required=True)
     ap.add_argument("--marker", required=True)
+    ap.add_argument("--mode", choices=("full", "start_only", "canary_only"), default="full")
     args = ap.parse_args()
     try:
-        candidate, receipt = create_progress(args.source.read_bytes(), args.marker, args.repo_root.resolve())
+        candidate, receipt = create_progress(args.source.read_bytes(), args.marker, args.repo_root.resolve(), mode=args.mode)
         args.candidate.parent.mkdir(parents=True, exist_ok=True)
         args.receipt.parent.mkdir(parents=True, exist_ok=True)
         args.candidate.write_bytes(candidate)
