@@ -46,16 +46,16 @@ jobs:
                                                                      'psutil','multiprocessing'})
           print('V128_BRIDGE_READ_ONLY_NO_EXECUTION_IMPORTS')
           PY
-      - name: Ten synthetic v2 native-receipt and SQLite audit tests
+      - name: Twelve synthetic v2 native-receipt and SQLite audit tests
         run: |
           set -euo pipefail
           mkdir -m 700 evidence
           python3 -B -m unittest discover -s soak/tests \
             -p 'test_soak_readonly_ledger_bridge_v128.py' -v \
             2>&1 | tee evidence/v128-test.log
-          grep -Eq '^Ran 10 tests ' evidence/v128-test.log
+          grep -Eq '^Ran 12 tests ' evidence/v128-test.log
           grep -q '^OK$' evidence/v128-test.log
-          echo V128_TEN_READONLY_NATIVE_RECEIPT_TESTS_PASS_NO_FCT
+          echo V128_TWELVE_READONLY_NATIVE_RECEIPT_TESTS_PASS_NO_FCT
       - name: Save test evidence only
         if: always()
         uses: actions/upload-artifact@v4
