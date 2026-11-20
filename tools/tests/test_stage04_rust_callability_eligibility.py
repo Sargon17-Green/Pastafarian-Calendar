@@ -78,6 +78,42 @@ class CallabilityTests(unittest.TestCase):
         self.assertFalse(supported_signature("fn day(d: &BigInt)->BigInt { d.clone() }", "day"))
         self.assertFalse(supported_signature("pub fn day(d: i64)->i64 {d}", "day"))
 
+    def test_comment_and_literal_signature_spoof_rejected(self):
+        fragments = [
+            "// pub fn day(d: &BigInt) -> BigInt { d.clone() }\n",
+            "/*\npub fn day(d: &BigInt) -> BigInt { d.clone() }\n*/",
+            "/* outer /*\npub fn day(d: &BigInt) -> BigInt { d.clone() }\n*/ */",
+            'const X: &str = r#"\npub fn day(d: &BigInt) -> BigInt { d.clone() }\n"#;',
+            "/* unterminated\npub fn day(d: &BigInt) -> BigInt { d.clone() }",
+        ]
+        for source in fragments:
+            with self.subTest(source=source[:35]):
+                self.assertFalse(supported_signature(source, "day"))
+
+    def test_reexport_and_nested_module_cannot_spoof_direct_witness(self):
+        # Old regex accepted these signatures despite no direct file-scope
+        # Rust function; a pub use alias would compile from a different file.
+        source = (
+            "use num_bigint::BigInt;\n"
+            "mod actual {\n"
+            "  use num_bigint::BigInt;\n"
+            "  pub fn day(d: &BigInt) -> BigInt { d.clone() }\n"
+            "}\n"
+            "pub use actual::day;\n"
+            "/*\npub fn day(d: &BigInt) -> BigInt { d.clone() }\n*/"
+        )
+        self.assertFalse(supported_signature(source, "day"))
+        self.assertFalse(supported_signature(
+            "impl T {\npub fn day(d: &BigInt) -> BigInt { d.clone() }\n}", "day"))
+
+    def test_real_top_level_definition_remains_eligible(self):
+        self.assertTrue(supported_signature(
+            'const S: &str = "/* not a comment */";\n'
+            "pub /* comment */ fn day(d: &BigInt) -> BigInt { d.clone() }\n",
+            "day"))
+        self.assertFalse(supported_signature(
+            "trait T {\npub fn day(d: &BigInt) -> BigInt;\n}", "day"))
+
     def test_module_path_is_pinned(self):
         self.assertEqual(validated_symbol("src/old.rs","old::day"),"old::day")
         with self.assertRaises(ProvenanceError):

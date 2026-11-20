@@ -86,7 +86,7 @@ jobs:
           python3 -c 'import json; p=json.load(open("evidence/stage04_source_pin.json")); assert p["source_pin_eligible"] is True and p["historical_day_tag_route_proven"] is False and p["observed_runtime_red"] is False and p["stage04_closure"] == "NOT_CLAIMED"'
           printf 'STAGE04_PROVENANCE_QA=16_PASS\nSTAGE04_HISTORICAL_RUST_ROUTE=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/stage04_provenance_result.txt
           cat evidence/stage04_provenance_result.txt >> "$GITHUB_STEP_SUMMARY"
-      - name: Verify Stage04 historical Rust day-tag callability (16 controls, synthetic native positive)
+      - name: Verify Stage04 historical Rust day-tag callability (19 controls, synthetic native positive)
         shell: bash
         run: |
           set -euo pipefail
@@ -95,7 +95,7 @@ jobs:
             python3 -m unittest discover -s tools/tests -p 'test_stage04_rust_callability_eligibility.py' -v \
             > evidence/stage04_callability_tests.txt 2>&1
           cat evidence/stage04_callability_tests.txt
-          grep -Fq 'Ran 16 tests' evidence/stage04_callability_tests.txt
+          grep -Fq 'Ran 19 tests' evidence/stage04_callability_tests.txt
           grep -Fxq 'OK' evidence/stage04_callability_tests.txt
           if grep -Eq 'skipped=[1-9]|FAILED|ERROR' evidence/stage04_callability_tests.txt; then exit 1; fi
           timeout --signal=TERM --kill-after=5s 30s \

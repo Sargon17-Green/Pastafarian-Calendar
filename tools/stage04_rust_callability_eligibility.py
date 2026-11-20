@@ -43,11 +43,101 @@ def validated_symbol(path: str, symbol: str) -> str:
         raise ProvenanceError("symbol must map directly to pinned Rust file")
     return symbol
 
+def _mask_rust_noncode(source: str) -> str | None:
+    """Mask comments and literal contents, preserving positions and newlines.
+
+    Conservative source-only filter, not a substitute for Cargo execution.
+    Unterminated block comments or strings reject source-only eligibility.
+    """
+    out = list(source)
+    n = len(source)
+    i = 0
+
+    def blank(start: int, end: int) -> None:
+        for j in range(start, end):
+            if out[j] != "\n":
+                out[j] = " "
+
+    while i < n:
+        start = i
+        if source.startswith("//", i):
+            end = source.find("\n", i)
+            i = n if end < 0 else end
+            blank(start, i)
+            continue
+        if source.startswith("/*", i):
+            depth = 1
+            i += 2
+            while i < n and depth:
+                if source.startswith("/*", i):
+                    depth += 1
+                    i += 2
+                elif source.startswith("*/", i):
+                    depth -= 1
+                    i += 2
+                else:
+                    i += 1
+            if depth:
+                return None
+            blank(start, i)
+            continue
+        # Rust raw strings include r"...", r#"..."#, and br#"..."#.
+        raw = re.match(r'(?:b)?r(#{0,32})"', source[i:])
+        if raw and (i == 0 or not (source[i-1].isalnum() or source[i-1] == "_")):
+            marker = '"' + raw.group(1)
+            end = source.find(marker, i + len(raw.group(0)))
+            if end < 0:
+                return None
+            i = end + len(marker)
+            blank(start, i)
+            continue
+        if source[i] == '"' or (source.startswith('b"', i)
+                and (i == 0 or not source[i-1].isalnum())):
+            if source[i] == "b":
+                i += 1
+            i += 1
+            while i < n:
+                if source[i] == "\\":
+                    i += 2
+                elif source[i] == '"':
+                    i += 1
+                    break
+                else:
+                    i += 1
+            else:
+                return None
+            blank(start, i)
+            continue
+        # Distinguish short quoted chars from lifetime annotations like 'a.
+        if source[i] == "'":
+            char = re.match(r"'(?:\\.|[^'\\\n])'", source[i:])
+            if char:
+                i += len(char.group())
+                blank(start, i)
+                continue
+        i += 1
+    return "".join(out)
+
+
 def supported_signature(source: str, function: str) -> bool:
-    # Conservative eligibility for a directly exported day-tag BigInt API.
-    # Compiling and invoking the historical source is the definitive check.
-    return bool(re.search(r"(?m)^\s*pub\s+fn\s+" + re.escape(function) +
-        r"\s*\(\s*[A-Za-z_][A-Za-z_0-9]*\s*:\s*&\s*BigInt\s*\)\s*->\s*BigInt\b", source))
+    # A textual match in a comment, string, nested module, impl or re-export
+    # is not proof that this pinned file directly defines the called symbol.
+    clean = _mask_rust_noncode(source)
+    if clean is None:
+        return False
+    pattern = re.compile(
+        r"(?m)^[ \t]*pub[ \t]+fn[ \t]+" + re.escape(function)
+        + r"[ \t]*\([ \t]*[A-Za-z_][A-Za-z_0-9]*[ \t]*:[ \t]*&[ \t]*BigInt"
+        + r"[ \t]*\)[ \t]*->[ \t]*BigInt\b[ \t]*\{"
+    )
+    for match in pattern.finditer(clean):
+        # Only direct file-scope definitions can support a path-derived symbol.
+        # In particular, nested-module functions cannot validate pub use aliases.
+        prefix = clean[:match.start()]
+        if prefix.count("{") == prefix.count("}"):
+            return True
+    return False
+
 
 def test_body(crate: str, symbol: str) -> str:
     # Interpolate names once: no placeholder token is allowed to rewrite an
