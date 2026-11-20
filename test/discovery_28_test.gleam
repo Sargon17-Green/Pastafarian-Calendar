@@ -44,7 +44,8 @@ fn in_original_bands(
   case requests {
     [] -> False
     [request, ..rest] -> {
-      case request.lower <= request.upper
+      case
+        request.lower <= request.upper
         && sum >= request.lower
         && sum <= request.upper
       {
@@ -113,9 +114,7 @@ fn check_valid(
     discovery_28_union_bands.dispatch_discovery_28(context, ids, original)
   actual.canonical_bands |> should.equal(expected_canonical)
   actual.qualifying_windows |> should.equal(expected)
-  {
-    actual.qualifying_windows >= 0 && actual.qualifying_windows <= maximum
-  }
+  { actual.qualifying_windows >= 0 && actual.qualifying_windows <= maximum }
   |> should.equal(True)
   actual.qualifying_windows
 }
@@ -134,10 +133,12 @@ pub fn discovery_28_empty_ids_unused_invalid_context_test() {
     band(-5, -1),
     band(7, 6),
   ])
-  |> should.equal(Ok(discovery_28_union_bands.UnionWindowCount(
-    canonical_bands: [band(-5, 1), band(4, 8)],
-    qualifying_windows: 0,
-  )))
+  |> should.equal(
+    Ok(discovery_28_union_bands.UnionWindowCount(
+      canonical_bands: [band(-5, 1), band(4, 8)],
+      qualifying_windows: 0,
+    )),
+  )
 }
 
 pub fn discovery_28_single_gap_exact_and_outside_test() {
@@ -145,13 +146,10 @@ pub fn discovery_28_single_gap_exact_and_outside_test() {
   let gap = sample.gap
   check_valid(11, 21, [1], [band(gap, gap)], [band(gap, gap)])
   |> should.equal(1)
-  check_valid(
-    11,
-    21,
-    [1],
-    [band(gap - 1, gap - 1), band(gap + 1, gap + 1)],
-    [band(gap - 1, gap - 1), band(gap + 1, gap + 1)],
-  )
+  check_valid(11, 21, [1], [band(gap - 1, gap - 1), band(gap + 1, gap + 1)], [
+    band(gap - 1, gap - 1),
+    band(gap + 1, gap + 1),
+  ])
   |> should.equal(0)
 }
 
@@ -171,41 +169,65 @@ pub fn discovery_28_overlap_inclusive_endpoints_test() {
   let ids = [1, 3, 2]
   let assert [first, second, _] = samples_for(11, 21, ids)
   let boundary = first.gap + second.gap
-  check_valid(11, 21, ids, [
-    band(first.gap, boundary),
-    band(boundary, boundary + 1),
-  ], [band(first.gap, boundary + 1)])
+  check_valid(
+    11,
+    21,
+    ids,
+    [
+      band(first.gap, boundary),
+      band(boundary, boundary + 1),
+    ],
+    [band(first.gap, boundary + 1)],
+  )
 }
 
 pub fn discovery_28_adjacent_integer_bands_merge_test() {
   let assert [sample] = samples_for(11, 21, [1])
   let gap = sample.gap
-  check_valid(11, 21, [1], [
-    band(gap - 3, gap - 2),
-    band(gap - 1, gap),
-  ], [band(gap - 3, gap)])
+  check_valid(
+    11,
+    21,
+    [1],
+    [
+      band(gap - 3, gap - 2),
+      band(gap - 1, gap),
+    ],
+    [band(gap - 3, gap)],
+  )
   |> should.equal(1)
 }
 
 pub fn discovery_28_unsorted_nested_canonical_order_test() {
   let ids = [6, 2, 3, 1]
-  check_valid(11, 21, ids, [
-    band(5000, 6000),
-    band(200, 201),
-    band(100, 3000),
-    band(0, 20),
-    band(3000, 4000),
-    band(5000, 5500),
-  ], [band(0, 20), band(100, 4000), band(5000, 6000)])
+  check_valid(
+    11,
+    21,
+    ids,
+    [
+      band(5000, 6000),
+      band(200, 201),
+      band(100, 3000),
+      band(0, 20),
+      band(3000, 4000),
+      band(5000, 5500),
+    ],
+    [band(0, 20), band(100, 4000), band(5000, 6000)],
+  )
 }
 
 pub fn discovery_28_negative_and_all_inverted_bands_test() {
   let ids = [2, 6, 1, 4]
-  check_valid(11, 21, ids, [
-    band(-100, 0),
-    band(10, 9),
-    band(2, -2),
-  ], [band(-100, 0)])
+  check_valid(
+    11,
+    21,
+    ids,
+    [
+      band(-100, 0),
+      band(10, 9),
+      band(2, -2),
+    ],
+    [band(-100, 0)],
+  )
   |> should.equal(0)
   check_valid(11, 21, ids, [band(20, 19), band(1, -1)], [])
   |> should.equal(0)
@@ -215,21 +237,33 @@ pub fn discovery_28_disjoint_single_and_multi_gap_windows_test() {
   let ids = [1, 3, 2, 6]
   let assert [first, second, _, _] = samples_for(11, 21, ids)
   let total = first.gap + second.gap
-  check_valid(11, 21, ids, [
-    band(total, total),
-    band(first.gap, first.gap),
-  ], [band(first.gap, first.gap), band(total, total)])
+  check_valid(
+    11,
+    21,
+    ids,
+    [
+      band(total, total),
+      band(first.gap, first.gap),
+    ],
+    [band(first.gap, first.gap), band(total, total)],
+  )
 }
 
 pub fn discovery_28_repeated_bowl_positions_distinct_windows_test() {
   let ids = [1, 1, 1, 1]
   let assert [first, _, _, _] = samples_for(11, 21, ids)
   let gap = first.gap
-  check_valid(11, 21, ids, [
-    band(gap, gap),
-    band(2 * gap, 2 * gap),
-    band(gap, gap),
-  ], [band(gap, gap), band(2 * gap, 2 * gap)])
+  check_valid(
+    11,
+    21,
+    ids,
+    [
+      band(gap, gap),
+      band(2 * gap, 2 * gap),
+      band(gap, gap),
+    ],
+    [band(gap, gap), band(2 * gap, 2 * gap)],
+  )
   |> should.equal(7)
 }
 
@@ -242,34 +276,56 @@ pub fn discovery_28_invalid_ids_and_context_with_empty_union_test() {
     band(1000, 1),
     band(3, 2),
   ])
-  |> should.equal(Error(discovery_19_interval_value.InvalidContext(
-    bootstrap.InvalidRetryBudget,
-  )))
+  |> should.equal(
+    Error(discovery_19_interval_value.InvalidContext(
+      bootstrap.InvalidRetryBudget,
+    )),
+  )
 }
 
 pub fn discovery_28_huge_limits_context_and_monotonicity_test() {
   let huge = core.m * core.m + core.m
   let extreme = huge * huge
   let ids = [1, 6, 1, 6, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 1, 1, 3, 6, 2]
-  check_valid(huge, -huge, ids, [
-    band(-extreme, extreme),
-    band(42, 963),
-    band(964, 1926),
-    band(42, 1926),
-    band(1000, 999),
-  ], [band(-extreme, extreme)])
+  check_valid(
+    huge,
+    -huge,
+    ids,
+    [
+      band(-extreme, extreme),
+      band(42, 963),
+      band(964, 1926),
+      band(42, 1926),
+      band(1000, 999),
+    ],
+    [band(-extreme, extreme)],
+  )
   |> should.equal(210)
-  check_valid(-huge, huge, [6, 6, 6], [
-    band(-extreme, -1),
-    band(1, extreme),
-  ], [band(-extreme, -1), band(1, extreme)])
+  check_valid(
+    -huge,
+    huge,
+    [6, 6, 6],
+    [
+      band(-extreme, -1),
+      band(1, extreme),
+    ],
+    [band(-extreme, -1), band(1, extreme)],
+  )
   |> should.equal(6)
-  let narrow = check_valid(11, 21, ids, [band(42, 963)], [
-    band(42, 963),
-  ])
-  let expanded = check_valid(11, 21, ids, [
-    band(42, 963),
-    band(964, 1926),
-  ], [band(42, 1926)])
+  let narrow =
+    check_valid(11, 21, ids, [band(42, 963)], [
+      band(42, 963),
+    ])
+  let expanded =
+    check_valid(
+      11,
+      21,
+      ids,
+      [
+        band(42, 963),
+        band(964, 1926),
+      ],
+      [band(42, 1926)],
+    )
   { expanded >= narrow } |> should.equal(True)
 }

@@ -65,10 +65,7 @@ fn sum_checked(
 ) -> Result(UnionWindowCount, discovery_19_interval_value.Discovery19Error) {
   case remaining, counts {
     [], [] ->
-      Ok(UnionWindowCount(
-        canonical_bands: original,
-        qualifying_windows: total,
-      ))
+      Ok(UnionWindowCount(canonical_bands: original, qualifying_windows: total))
     [band, ..other_bands], [count, ..other_counts] -> {
       case band.lower == count.lower && band.upper == count.upper {
         True ->
