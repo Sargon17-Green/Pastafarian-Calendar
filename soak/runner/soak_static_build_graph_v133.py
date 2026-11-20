@@ -72,7 +72,7 @@ def assembly(g,row):
     ensure(ehash["source_sha256"]==row["root_sha256"],"Coptic v132/root mismatch")
     mapper={}
     links=[]
-    for line in build.splitlines():
+    for line in re.sub(r"\\\r?\n[ \t]*"," ",build).splitlines():
         line=line.strip()
         if line.startswith(("as --64 ","ld ")):
             parts=shlex.split(line)

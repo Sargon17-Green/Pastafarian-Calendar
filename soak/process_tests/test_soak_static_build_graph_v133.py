@@ -144,6 +144,14 @@ class BuildGraphTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"missing source"):
             self.output()
 
+    def test_real_shell_multiline_link_inputs_preserved(self):
+        src=self.data[AR,AC,"build.sh"]
+        self.put(AR,AC,"build.sh",src.replace(
+            b"build/arena.o build/stage54_integration.o",
+            b"build/arena.o \\\n  build/stage54_integration.o"))
+        result=self.output()
+        self.assertEqual(len(result["assembly"]["object_sources"]),3)
+
     def test_link_target_missing_fails(self):
         raw=self.data[AR,AC,"build.sh"]
         self.put(AR,AC,"build.sh",raw.replace(b"build/stage54_final_integration",b"build/not-final"))
