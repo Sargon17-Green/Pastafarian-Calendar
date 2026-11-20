@@ -63,5 +63,25 @@
   "independent_algorithms_certified": 0,
   "original_full_years_certified": 0,
   "soak_dispatch_authorized": false,
-  "caveat": "Nine verified identical file blobs across commits are a source subset. Different repository revisions can vary in other source headers, toolchains, flags, dependencies, or workflows; no binary SHA / Fct execution certification."
+  "caveat": "Nine verified identical file blobs across commits are a source subset. Different repository revisions can vary in other source headers, toolchains, flags, dependencies, or workflows; no binary SHA / Fct execution certification.",
+  "whole_recursive_tree_comparison": {
+    "frozen_total_blobs": 1215,
+    "ci_total_blobs": 1177,
+    "frozen_total_trees": 93,
+    "ci_total_trees": 91,
+    "frozen_non_results_blob_entries": 561,
+    "ci_non_results_blob_entries": 561,
+    "all_common_paths_same_blob_sha_mode_and_type": true,
+    "unchanged_common_blob_paths": 1177,
+    "files_present_only_in_frozen_tree": 38,
+    "files_present_only_in_ci_tree": 0,
+    "common_paths_with_changed_blob_bytes": 0,
+    "all_differing_paths_within_prefix": "research/seer-next/results/",
+    "both_recursive_tree_responses_untruncated": true,
+    "equivalent_non_results_tree_entries": true,
+    "caveat": "Non-results repository paths are identical, but result-file removal differs, and external toolchain/dependencies/process/binary cannot be inferred from tree snapshots."
+  },
+  "exact_frozen_commit_CI_run_found": false,
+  "extra_original_full_years_certified_by_tree_diff": 0,
+  "historical_CI_build_process_original_source_subset_matched": true
 }
