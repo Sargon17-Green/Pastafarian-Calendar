@@ -12,7 +12,7 @@ Precondition: ctx.status = SAUCE_ONLY; ctx.sauceBowls is a six-element BI list; 
 
 Valid result [firstValue, step]:
 - nextId is the element cyclically following queriedId in the *drop-46 latch* sauceOrder46, NOT an order inferred from post-stirs.
-- firstValue = SAVE((B[queriedId] + seal + 181 + 179*B[nextId])² + seal).
+- firstValue = SAVE((B[queriedId] + seal + 181)² + 179*B[nextId] + seal).
 - directionValue = SAVE((firstValue + seal + 194)² + 193*firstValue + 197*B[6]).
 - step = +1 if directionValue mod 2 = 1, otherwise -1.
 - SAVE(x)=1+((x-1) mod M), using the branch's exact BI semantics and frozen M.
@@ -32,3 +32,7 @@ QA-only CI on branch qa/logo-ido-d19-ask: natural push, pinned headless UCBLogo 
 ## Promotion and acceptance gate
 
 First require the original canonical D18 run 44701301631 on a9de9c5 to finish SUCCESS, with its dependent aggregation job, genuine 6/40 marker and final Native PASS; eleven already-completed same-SHA regressions must remain valid. Then perform explicit code/contract review and add reverse-direction differential coverage, if indicated by the results, before a *new* canonical Logo+Ido branch-only commit and natural push. D19 acceptance will require completed Native logs, complete same-SHA regressions, source/HEAD/branch readback, and zero errors/timeouts. Do not claim Stage2 accepted, update LAST_COMPLETED_STAGE, merge into main, or publicize based on this QA work.
+
+## QA finding and bounded repair (2026-11-20)
+
+Original QA natural push 44707859113, native job 136191823885, completed FAILURE on 94a3e191baaacc2275647f61cc4660f96e33c7c5. Authentic runtime output showed 11/11 firstValue mismatches and seven direction mismatches versus frozen test-only nr.ask; no invalid-guard failure marker. The production code incorrectly included `179*B[nextId]` inside the square, while nr.ask adds it afterward. This correction changes only the D19 production expression and its contract, not nr.ask or the D18 sauce implementation. The prior failed QA is not counted as PASS; require a fresh, naturally triggered exact-SHA 17-case/61-check Native verification. D18's canonical acceptance is separately proven by original run 44701301631 (three successful jobs, authentic 6/40 aggregate PASS); canonical branch SHA is a9de9c5beb9dc241955517d23a4f3a8964551b7f. Further reverse-direction differential QA is required before promotion.
