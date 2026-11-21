@@ -1,0 +1,87 @@
+name: SQL Tamil Slice25 source-locked sharding pilot PG17
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/164_stage25_calendar_date_matrix.py'
+      - 'sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl'
+      - '.github/workflows/sql-tamil-stage02-calendar-date-matrix-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-case:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {mode: native, case_id: anchor_first}
+          - {mode: isolation, case_id: next_1_first}
+          - {mode: differential, case_id: next_2_first}
+    env:
+      TEST_MODE: ${{ matrix.mode}}
+      TEST_CASE: ${{ matrix.case_id}}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lock source, verify corpus and generate single-case SQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          test "$(git hash-object sql/test/10_normative_reference.sql)" = 'ce17bf6fd166451b6904411c5e29d1b26d92e278'
+          mkdir -p slice25-matrix-evidence
+          printf 'GITHUB_SHA=%s\nGITHUB_REF_NAME=%s\nMODE=%s\nCASE=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$TEST_MODE" "$TEST_CASE" > slice25-matrix-evidence/versions.txt
+          python3 sql/test/150_stage25_calendar_date_oracle.py --self-test | tee slice25-matrix-evidence/ordinal-selftest.txt
+          python3 sql/test/164_stage25_calendar_date_matrix.py --audit | tee slice25-matrix-evidence/audit.txt
+          python3 sql/test/164_stage25_calendar_date_matrix.py --mode "$TEST_MODE" --case-id "$TEST_CASE" --output slice25-matrix-evidence/test.sql | tee slice25-matrix-evidence/generator.txt
+          sha256sum sql/test/150_stage25_calendar_date_oracle.py sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl sql/test/164_stage25_calendar_date_matrix.py sql/test/10_normative_reference.sql .github/workflows/sql-tamil-stage02-calendar-date-matrix-pilot.yml slice25-matrix-evidence/test.sql > slice25-matrix-evidence/source-sha256.txt
+          for i in $(seq -w 0 27); do
+            mapfile -t matches < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#matches[@]}" -eq 1
+            sha256sum "${matches[0]}" >> slice25-matrix-evidence/source-sha256.txt
+          done
+      - name: Start offline isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name sql-tamil-slice25-matrix-pg --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for i in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-slice25-matrix-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-slice25-matrix-pg postgres --version | tee -a slice25-matrix-evidence/versions.txt
+      - name: Execute bounded production / isolation / normative differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t matches < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#matches[@]}" -eq 1
+            args+=(-f "/work/${matches[0]}")
+          done
+          if [ "$TEST_MODE" = 'differential' ]; then args+=(-f /work/sql/test/10_normative_reference.sql); fi
+          args+=(-f /work/slice25-matrix-evidence/test.sql)
+          docker exec -u postgres sql-tamil-slice25-matrix-pg psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" 2>&1 | tee slice25-matrix-evidence/postgres-results.txt
+          test "$(grep -c 'SLICE25_NATIVE_FIELD_PASS=' slice25-matrix-evidence/postgres-results.txt)" -eq 5
+          if [ "$TEST_MODE" = 'differential' ]; then test "$(grep -c 'SLICE25_DIFFERENTIAL_FIELD_PASS=' slice25-matrix-evidence/postgres-results.txt)" -eq 5; fi
+          if [ "$TEST_MODE" = 'isolation' ]; then grep -q 'SLICE25_ISOLATION_SCHEMA_PASS=' slice25-matrix-evidence/postgres-results.txt; grep -q 'SLICE25_ISOLATION_BODY_PASS=' slice25-matrix-evidence/postgres-results.txt; fi
+          grep -q "SLICE25_MATRIX_GREEN=$TEST_MODE:$TEST_CASE" slice25-matrix-evidence/postgres-results.txt
+          printf 'SLICE25_PILOT_CASE_GREEN=%s:%s\n' "$TEST_MODE" "$TEST_CASE" > slice25-matrix-evidence/completion.txt
+      - name: Preserve original job logs, SQL, oracle, source and version hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice25-matrix-pilot-${{ matrix.mode}}-${{ matrix.case_id}}-${{ github.run_id}}
+          path: slice25-matrix-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated PostgreSQL
+        if: always()
+        run: docker rm -f sql-tamil-slice25-matrix-pg 2>/dev/null || true

@@ -1,0 +1,18 @@
+# SQL+தமிழ் Slice25 — exact-SHA completed CI verification and sharded PG17 pilot
+
+PROJECT_ID: PC-BRANCH-SQL-TAMIL; branch SQL+தமிழ்; verified parent 41666694df0c6cc22eee296ab5d6adbc4901e2b2. This is not a Slice25 acceptance report. No main, merge, or release.
+
+## Original completed runs (2026-11-21, exact parent SHA)
+- Production smoke 44884495975, job 136786718604 completed/success, PG 17.12: source-locked static window oracle 1200/1200, 5/5 typed fields, 5/5 invalid inputs and GREEN=1 in original log and original ZIP 14700335297. Measured 224237.814 ms versus historical old SHA smoke 703835.717 ms; non-controlled across independent CI runners.
+- Slice14 44884495871, six completed/success jobs: native job 136786718365, 23 native + 4 clean-DB isolation; five differential jobs 136786718169, 136786718334, 136786718359, 136786718364, 136786718438 (5 named checks each). All job logs and source-locked PG17.12 version lines inspected.
+- Stage1 44884495869 job 136786718363 completed/success: 52 normative + 7 saved sum + 4 production-isolation flags. Names lock 44884495832 job 136786718226 completed/success.
+- Independently downloaded the 8 original ZIPs for production smoke + Slice14 (six) + Stage1: ZIP bytes SHA256 compared with GitHub digest and upload-job log digest, 8/8; ZIP CRC 8/8. Source-locked current branch SHA and versions inside artifacts checked. IDs and SHA256 digests available via GitHub artifacts API. Historical input anchor ZIP 14613743791 independently opened and CRC checked, containing source-locked PG17 structure, Tamil source catalog and independent ordinal output.
+- New-SHA production smoke duration 224237.814 ms; old source 703835.717 ms (about 68.1% lower elapsed, one measurement each). This is not a statistical performance guarantee.
+
+## Engineering extension; pilot, not the full matrix
+- New generator sql/test/164_stage25_calendar_date_matrix.py hard-locks 29 distinct reachable cases, eight years, 145 nonempty five-field independent goldens, source artifact IDs and source-SHA provenance. It generates one bounded SQL test per case in native/isolation/differential modes; checks the production output against immutable independently computed ordinals; differential additionally compares five typed fields directly to the normative reference with IS DISTINCT FROM, not hashes. Isolation runs in a fresh production-only database with no normative schema and checks the production function body.
+- New pilot workflow starts THREE distinct source-locked jobs, one case each: Native anchor_first; production-only isolation next_1_first; typed differential next_2_first. Each job has 15-minute limit, PostgreSQL 17, `psql -At -X -v ON_ERROR_STOP=1`, locked normative file SHA, 12-minute SQL timeout, independent oracle synthetic self-test, generated SQL SHA, original result log, exact branch/commit version, preserved artifact even on failure. Failure of a pilot case must be diagnosed from its original log, not called a mismatch without evidence.
+- This bounded pilot is a prerequisite for choosing the full 29 native / 8 isolation / 24 differential case matrix; do not dispatch unmeasured heavy PostgreSQL normative comparisons en masse. The pilot itself is not a Slice25 Native≥40 / isolation≥8 / differential≥24 acceptance.
+
+## NEXT
+Inspect naturally triggered pilot run on this new SHA after completed: 3 jobs, original logs/ZIP SHA256 triplets/CRC, typed results and elapsed per case. Fix an observed failure only with proof; if bounded, promote full exact-SHA sharded matrix: native ≥40 with ≥24 cases across 8 years, eight independent clean-DB isolation cases, ≥24 separate five-field normative differential cases. No duplicate manual dispatch, no stage-wide PASS until every acceptance gate.
