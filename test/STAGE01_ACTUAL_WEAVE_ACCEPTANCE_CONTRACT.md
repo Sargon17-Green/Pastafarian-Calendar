@@ -37,13 +37,16 @@ actual year structure and full-year build-plus-projection comparison; it
 does not establish 4,244 calls to the public entry point.
 
 The rank-boundary extension below is a new QA gate and is not evidence until
-a completed run on its own SHA has matching job logs and artifact. Even if
-it passes, full Stage1 acceptance remains open: the public
-`normative_calendar_date` entry point has not been executed for every day
-of the 4,244-day year, and differential agreement with Python does not by
-itself independently prove the specification. The eight selected
-public-entry comparisons are bounded witnesses, not an exhaustive
-substitute. No Stage2, main change, merge or publication.
+a completed run on its own SHA has matching job logs and artifact. The
+full-year probe calls the original `build_year_structure` once and
+`project_calendar_date` for all 4,244 days; the eight selected
+`normative_calendar_date` calls remain a separate public-entry check.
+This contract does not silently add a requirement to call that public
+entry point 4,244 times. The remaining normative gap is that agreement with
+a pinned Python implementation, even across every date and rank boundary,
+does not by itself independently prove the canonical specification; that
+requires independently grounded normative evidence. No Stage2, main change,
+merge or publication.
 
 
 ## QA-only extension: actual 45-month weaving rank boundaries

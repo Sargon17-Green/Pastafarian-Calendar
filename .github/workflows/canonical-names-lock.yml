@@ -1458,6 +1458,8 @@ jobs:
           assert len(p['month_lengths'])==45 and sum(p['month_lengths'])==4244
           assert p['matched_month_ids']==p['total_month_ids']==4244
           assert p['matched_fields']==p['total_fields']==21220
+          assert p['fortran_actual_weaving_matches_reference'] is True
+          assert len(p['fortran_actual_weaving_sha256'])==64
           assert p['weaving_count_matches_reference'] is True
           assert p['weaving_count_digits']==6765
           assert len(p['weaving_count_sha256'])==64

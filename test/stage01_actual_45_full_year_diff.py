@@ -275,7 +275,8 @@ def compare(python_path, fortran_exe):
     for index, raw in enumerate(output_rows, 1):
         target = year.open_gate_day + index
         month_id = structure.month_weaving[index - 1]
-        actual_sequence.append(month_id)
+        observed_month_id = parse_csv(raw[len("STAGE01_45_ROW="):], 7)[1]
+        actual_sequence.append(observed_month_id)
         ordinal[month_id] += 1
         while cutlet_index + 1 < len(structure.cutlets) and (
                 target > structure.cutlets[cutlet_index].last_day):
@@ -339,6 +340,10 @@ def compare(python_path, fortran_exe):
         "rank_boundary_cases": 4,
         "rank_boundary_cases_passed": 4,
         "matched_month_ids": matched_weave_ids, "total_month_ids": days,
+        "matched_fields": matched_fields, "total_fields": 5 * days,
+        "fortran_actual_weaving_sha256": hashlib.sha256(bytes(actual_sequence)).hexdigest(),
+        "fortran_actual_weaving_matches_reference": (
+            tuple(actual_sequence) == tuple(structure.month_weaving)),
         "matched_rank1_ids": rank_matches[0], "total_rank1_ids": days,
         "matched_rank2_ids": rank_matches[1], "total_rank2_ids": days,
         "matched_rank_penultimate_ids": rank_matches[2], "total_rank_penultimate_ids": days,
