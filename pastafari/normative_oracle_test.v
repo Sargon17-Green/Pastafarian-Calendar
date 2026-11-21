@@ -1883,7 +1883,8 @@ fn stage33_enumerate_legal_weaves(oracle OracleWeaveCounter, state OracleWeaveSt
 		if oracle.legal_move(state, label) {
 			mut next_prefix := prefix.clone()
 			next_prefix << label
-			stage33_enumerate_legal_weaves(oracle, oracle.apply_move(state, label), next_prefix, mut words)
+			stage33_enumerate_legal_weaves(oracle, oracle.apply_move(state, label), next_prefix, mut
+				words)
 		}
 	}
 }
