@@ -14,7 +14,8 @@ const expectedStage7Hashes = <String, String>{
   'COUNT': 'c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8',
   'FIRST': 'dc2dabc1c69f5007425c032e576577195ea6cf7b1d1054a9faca74e025aaf13c',
   'LAST': '71b78eb2ce0c68252f404e6c6d34b52a2f8f2b834eb6a2eff687bbc6c0bccdd8',
-  'CANONICAL': '7093c6c666dc19642d650fe7fd8a9bbe43cd12238ac4f563ebe668d370eacdda',
+  'CANONICAL':
+      '7093c6c666dc19642d650fe7fd8a9bbe43cd12238ac4f563ebe668d370eacdda',
 };
 
 var checks = 0;
@@ -189,8 +190,8 @@ int medianMilliseconds(List<int> times) {
 
 // Static count-call audit; not a substitute for the Native paired benchmark.
 void auditCountReuse() {
-  final source = File('lib/src/monster_month_weave_planner.dart')
-      .readAsStringSync();
+  final source =
+      File('lib/src/monster_month_weave_planner.dart').readAsStringSync();
   const helperSignature = 'static List<int> _unrankWithKnownTotal(';
   const publicSignature = 'static List<int> unrankFull(';
   const canonicalSection = '/// Canonical §V selection: bowl 4, seal 32';
@@ -211,8 +212,8 @@ void auditCountReuse() {
   );
   check(
     plan.contains(
-      'monthIds: _unrankWithKnownTotal(lengths.lengths, choice.result, count)',
-    ) &&
+          'monthIds: _unrankWithKnownTotal(lengths.lengths, choice.result, count)',
+        ) &&
         plan.contains(
           'MonsterMonthWeaveCounter.countWholeWeaves(lengths.lengths)',
         ),
@@ -370,11 +371,13 @@ void main() {
           canonical.monthIds,
         );
     int candidate() => timeExactCanonical(
-          () => const MonsterMonthWeavePlanner().plan(
-            foundation,
-            year,
-            lengths,
-          ).monthIds,
+          () => const MonsterMonthWeavePlanner()
+              .plan(
+                foundation,
+                year,
+                lengths,
+              )
+              .monthIds,
           canonical.monthIds,
         );
     final baselineMs = sample.isEven ? baseline() : null;
