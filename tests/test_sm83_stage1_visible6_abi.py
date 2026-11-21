@@ -2,7 +2,7 @@
 """Independent Python-bigint signed32 V6 oracle for Native385."""
 from pathlib import Path
 import random,re
-from test_sm83_stage1_visible6_abi import compute as prior_five, ROWS
+from test_sm83_stage1_visible5_abi import compute as prior_five, ROWS
 from test_sm83_stage1_chain1_abi import expected_hidden
 M=(1<<127)-1
 ROOT=Path(__file__).resolve().parents[1]
@@ -49,7 +49,7 @@ def main():
     assert "call CalendarHiddenVisible5Chain" in chain and "call CalendarStoneTransitionStep" in chain
     assert "wCalendarHiddenRetained+80" in chain and "wCalendarVisibleFifth" in chain and "wCalendarVisibleThird" in chain
     assert "CalendarStoneRunValidated.validateSource" in transition
-    assert "wCalendarVisibleFourth:: ds 16" in boot and "STAGE1_CHAIN6_NATIVE_BENCH" in boot
+    assert "wCalendarVisibleFifth:: ds 16" in boot and "STAGE1_CHAIN6_NATIVE_BENCH" in boot
     assert "cp 6" in visible and "ld a, 129" in bench and ".checkFifth:" in bench
     assert "build/calendar_chain6.gb" in (ROOT/"Makefile").read_text()
     assert "dmg-chain6-native:" in (ROOT/".github/workflows/canonical-names-lock.yml").read_text()
