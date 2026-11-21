@@ -1151,6 +1151,17 @@ jobs:
             build/stage01-calculation-context-diff.log
           grep -Fxq 'STAGE01_CALC_CONTEXT_FOUNDATION_SAME_PROCESS=8/8 CALLS; 40/40 EXACT FIELDS' \
             build/stage01-calculation-context-diff.log
+      - name: Independently audit context JSON and reject corrupt evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/stage01_context_artifact_audit.py \
+            --json stage01_calculation_context_diff.json \
+            --expected-commit "$GITHUB_SHA" \
+            --run-id "$GITHUB_RUN_ID" \
+            --mutations | tee build/stage01-context-artifact-audit.log
+          grep -Fxq 'STAGE01_CONTEXT_ARTIFACT_AUDIT_PASS=190/190 EXACT FIELDS' build/stage01-context-artifact-audit.log
+          grep -Fxq 'STAGE01_CONTEXT_ARTIFACT_MUTATIONS_REJECTED=15/15' build/stage01-context-artifact-audit.log
       - name: Preserve calculation-context differential evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -1160,5 +1171,6 @@ jobs:
             stage01_calculation_context_diff.json
             build/stage01-calculation-context-diff.log
             build/stage01-calculation-context-selftest.log
+            build/stage01-context-artifact-audit.log
           if-no-files-found: warn
           retention-days: 30
