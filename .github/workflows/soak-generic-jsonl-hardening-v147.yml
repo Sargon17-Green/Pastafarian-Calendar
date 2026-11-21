@@ -47,8 +47,8 @@ jobs:
                           ("subprocess","ctypes","multiprocessing","pastafari_calendar")
                           for x in n.names),source
                   elif isinstance(n,ast.ImportFrom):
-                      assert (n.module or "").split(".")[0] not in
-                          ("subprocess","ctypes","multiprocessing","pastafari_calendar"),source
+                      assert ((n.module or "").split(".")[0] not in
+                          ("subprocess","ctypes","multiprocessing","pastafari_calendar")),source
           import os
           url="https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/branches/main"
           req=urllib.request.Request(url,headers={
