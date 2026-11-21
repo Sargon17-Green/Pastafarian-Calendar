@@ -1,0 +1,77 @@
+name: SQL Tamil Slice25 source-locked year and negative-gap trace
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/171_stage25_year_gap_trace.py'
+      - '.github/workflows/sql-tamil-stage02-slice25-year-gap-trace.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-source-locked-profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source-lock and construct independently checked QA-only aliases
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          mkdir -p qa-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nSHA=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > qa-evidence/versions.txt
+          python3 sql/test/171_stage25_year_gap_trace.py --self-test | tee qa-evidence/static.txt
+          python3 sql/test/171_stage25_year_gap_trace.py --out-dir qa-evidence | tee qa-evidence/generation.txt
+          sha256sum sql/test/171_stage25_year_gap_trace.py qa-evidence/aliases.sql qa-evidence/gap.sql qa-evidence/navigation.sql > qa-evidence/sha256.txt
+      - name: Start isolated PostgreSQL 17 without external network
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name tamil-year-gap --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          for i in $(seq 1 60); do
+            if docker exec -u postgres tamil-year-gap pg_isready -q -U postgres; then break; fi
+            sleep 2
+          done
+          docker exec -u postgres tamil-year-gap pg_isready -q -U postgres
+          docker exec -u postgres tamil-year-gap postgres --version | tee -a qa-evidence/versions.txt
+      - name: Load unchanged production 00-27 and QA aliases
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t found < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#found[@]}" -eq 1
+            args+=(-f "/work/${found[0]}")
+            git hash-object "${found[0]}" >> qa-evidence/production-blobs.txt
+          done
+          docker exec -u postgres tamil-year-gap psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" -f /work/qa-evidence/aliases.sql > qa-evidence/load.log 2>&1 || {
+            cat qa-evidence/load.log; exit 3;
+          }
+      - name: Two bounded diagnostics, no full matrix or retries
+        shell: bash
+        run: |
+          set -uo pipefail
+          docker exec -u postgres tamil-year-gap psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/qa-evidence/gap.sql > qa-evidence/gap.log 2>&1
+          gap_exit=$?
+          docker exec -u postgres tamil-year-gap psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/qa-evidence/navigation.sql > qa-evidence/navigation.log 2>&1
+          nav_exit=$?
+          printf 'GAP_EXIT=%s\nNAV_EXIT=%s\n' "$gap_exit" "$nav_exit" | tee qa-evidence/exits.txt
+          tail -30 qa-evidence/gap.log || true
+          tail -30 qa-evidence/navigation.log || true
+          if [ "$gap_exit" -ne 0 ] || [ "$nav_exit" -ne 0 ]; then exit 3; fi
+          grep -q 'SQL_TAMIL_S25_GAP_EQUIVALENCE=1/1 PASS' qa-evidence/gap.log || exit 4
+          grep -q 'SQL_TAMIL_S25_YEAR_BOUNDARY=3/3 PASS' qa-evidence/navigation.log || exit 5
+      - name: Preserve exact logs and generated files, even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamil-slice25-year-gap-${{ github.run_id }}
+          path: qa-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated PostgreSQL container
+        if: always()
+        run: docker rm -f tamil-year-gap 2>/dev/null || true
