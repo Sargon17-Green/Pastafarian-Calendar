@@ -1,0 +1,118 @@
+name: WAT Stage02 k253 WasmKit differential QA (isolated, not production)
+
+on:
+  push:
+    branches:
+      - 'qa/wat-k253-focused-native-20261121'
+    paths:
+      - 'tests/stage02_k253_wasmkit_witness.py'
+      - '.github/workflows/wat-stage02-k253-wasmkit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  k253-wasmkit-two-directions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Assert exact QA checkout and immutable normative source
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'PROJECT_ID=PC-BRANCH-WAT-SPANISH\nQA_SHA=%s\n' "$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object tests/normative_selector.wat)" = e23f013ab96b498b0ac365dbb1b25273c845e790
+          echo '18e2c15a142b3a262ff38a1e084d86bdc1a139ce030b0318f279dbcdb23f8980  tests/normative_selector.wat' | sha256sum -c -
+          git cat-file -e '871f9b70216c16c57abcd552ec6fb0ed1010e305^{commit}'
+          test "$(git rev-parse 871f9b70216c16c57abcd552ec6fb0ed1010e305:tests/normative_selector.wat)" = e23f013ab96b498b0ac365dbb1b25273c845e790
+
+      - name: Install WABT and generate independent full-limb oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends wabt
+          mkdir -p evidence/wat-k253-wasmkit
+          python3 --version | tee evidence/wat-k253-wasmkit/python-version.txt
+          wat2wasm --version | tee evidence/wat-k253-wasmkit/wabt-version.txt
+          python3 tests/stage02_k253_wasmkit_witness.py | tee evidence/wat-k253-wasmkit/prepare.stdout.json
+          wat2wasm evidence/wat-k253-wasmkit/instrumented.wat -o evidence/wat-k253-wasmkit/instrumented.wasm
+          wasm-validate evidence/wat-k253-wasmkit/instrumented.wasm
+          sha256sum evidence/wat-k253-wasmkit/instrumented.wat evidence/wat-k253-wasmkit/instrumented.wasm > evidence/wat-k253-wasmkit/instrumented.sha256
+
+      - name: Install pinned WasmKit 0.1.6 and verify release archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "x86_64"
+          release='https://github.com/swiftwasm/WasmKit/releases/download/0.1.6/wasmkit-x86_64-swift-linux-musl.tar.gz'
+          expected='57085becd37769ed618a9057dee6d70303195e31d3b46d09dac1cfb5d477aa24'
+          archive="$RUNNER_TEMP/wasmkit-x86_64-swift-linux-musl.tar.gz"
+          curl --fail --location --retry 3 --silent --show-error "$release" -o "$archive"
+          printf '%s  %s\n' "$expected" "$archive" | sha256sum --check --status
+          tar -xzf "$archive" -C "$RUNNER_TEMP"
+          bin_dir="$RUNNER_TEMP/wasmkit-x86_64-swift-linux-musl"
+          test -x "$bin_dir/wasmkit"
+          printf '%s\n' "$bin_dir" >> "$GITHUB_PATH"
+          version="$("$bin_dir/wasmkit" --version)"
+          printf '%s\n' "$version" | tee evidence/wat-k253-wasmkit/wasmkit-version.txt
+          grep -Fq '0.1.6' <<< "$version"
+          printf '%s  %s\n' "$expected" "$archive" > evidence/wat-k253-wasmkit/wasmkit-release.sha256
+          sha256sum "$bin_dir/wasmkit" > evidence/wat-k253-wasmkit/wasmkit-binary.sha256
+
+      - name: Execute exact forward and backward k253 full-limb checks in WasmKit
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="evidence/wat-k253-wasmkit"
+          module="$evidence/instrumented.wasm"
+          printf 'export\tstatus\texit_code\n' > "$evidence/cases.tsv"
+          passed=0
+          failed=0
+          for name in qa_k253_wasmkit_forward qa_k253_wasmkit_backward; do
+            set +e
+            timeout 120s wasmkit run "$module" "$name" > "$evidence/$name.stdout.txt" 2> "$evidence/$name.stderr.txt"
+            exit_code=$?
+            set -e
+            if [[ "$exit_code" -eq 0 ]] && grep -qxE '\[(I32|i32|WasmTypes[.]Value[.]i32)\(1\)\]' "$evidence/$name.stdout.txt"; then
+              status='PASS'
+              passed=$((passed + 1))
+            elif [[ "$exit_code" -eq 124 ]]; then
+              status='TIMEOUT'
+              failed=$((failed + 1))
+            elif [[ "$exit_code" -ne 0 ]]; then
+              status='RUNTIME_ERROR'
+              failed=$((failed + 1))
+            else
+              status='UNEXPECTED_RESULT'
+              failed=$((failed + 1))
+            fi
+            printf '%s\t%s\t%s\n' "$name" "$status" "$exit_code" | tee -a "$evidence/cases.tsv"
+          done
+          {
+            printf 'PROJECT_ID=PC-BRANCH-WAT-SPANISH\n'
+            printf 'SOURCE_COMMIT=871f9b70216c16c57abcd552ec6fb0ed1010e305\n'
+            printf 'SOURCE_SHA256=18e2c15a142b3a262ff38a1e084d86bdc1a139ce030b0318f279dbcdb23f8980\n'
+            printf 'EXPECTED=2\nPASSED=%s\nFAILED=%s\n' "$passed" "$failed"
+            printf 'GATE=WASMKIT_K253_FULL_LIMB_DIFFERENTIAL_ONLY\n'
+            printf 'STAGE02_ACCEPTED=no\n'
+          } > "$evidence/summary.txt"
+          test "$passed" -eq 2
+          test "$failed" -eq 0
+          echo 'WasmKit k253 forward/backward full-limb differential: 2/2 PASS'
+
+      - name: Upload focused WasmKit evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wat-k253-wasmkit-differential-evidence
+          path: evidence/wat-k253-wasmkit/
+          if-no-files-found: warn
+          retention-days: 30
