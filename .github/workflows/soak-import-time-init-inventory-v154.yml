@@ -327,9 +327,9 @@ jobs:
       - name: Reject hidden import-time date work and changed original eager STONES initializers
         run: |
           set -euo pipefail
-          python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_import_time_init_inventory_v154.py' -v 2>&1 | tee evidence/v154-import-time-20-tests.log
-          grep -Eq '^Ran 20 tests ' evidence/v154-import-time-20-tests.log
-          grep -Fx 'OK' evidence/v154-import-time-20-tests.log
+          python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_import_time_init_inventory_v154.py' -v 2>&1 | tee evidence/v154-import-time-23-tests.log
+          grep -Eq '^Ran 23 tests ' evidence/v154-import-time-23-tests.log
+          grep -Fx 'OK' evidence/v154-import-time-23-tests.log
       - name: Inventory static import-time work in three SHA-locked historical source files
         run: |
           set -euo pipefail
@@ -361,14 +361,14 @@ jobs:
           print("V154_CHECKONLY_ZERO_FCT_NOT_ZERO_IMPORT_WORK")
           print("V154_STATIC_INVENTORY_NOT_RUNTIME_RESOURCE_OR_SIDE_EFFECT_ATTESTATION")
           print("V154_PRIOR_PYTHON_REGRESSIONS=172")
-          print("V154_NEW_PYTHON_REGRESSIONS=20")
-          print("V154_TOTAL_PYTHON_REGRESSIONS=192")
+          print("V154_NEW_PYTHON_REGRESSIONS=23")
+          print("V154_TOTAL_PYTHON_REGRESSIONS=195")
           print("V154_NATIVE_DATE_CALLS=0")
           PY
       - name: Archive synthetic-only logs (never engine binaries)
         uses: actions/upload-artifact@v4
         with:
-          name: soak-v154-import-time-inventory-192-tests-0-native-executions
+          name: soak-v154-import-time-inventory-195-tests-0-native-executions
           path: |
             evidence/v147-preflight.log
             evidence/v147-existing-year-validator-tests.log
@@ -398,7 +398,7 @@ jobs:
             evidence/v153-pinned-transport-static-verdict.json
             evidence/v153-pinned-transport-static-verdict.log
             evidence/v153-contract-witness.log
-            evidence/v154-import-time-20-tests.log
+            evidence/v154-import-time-23-tests.log
             evidence/v154-pinned-import-time-verdict.json
             evidence/v154-pinned-import-time-verdict.log
             evidence/v154-contract-witness.log
