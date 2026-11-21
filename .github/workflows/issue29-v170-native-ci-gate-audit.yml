@@ -1,0 +1,63 @@
+name: Issue29 v170 native Ada CI gate audit (STATIC ONLY, ZERO F)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-native-ci-gates-v170
+    paths:
+      - '.github/workflows/canonical-names-lock.yml'
+      - '.github/workflows/issue29-v170-native-ci-gate-audit.yml'
+      - 'tests/issue29_v170_native_ci_gate_audit.py'
+permissions:
+  contents: read
+jobs:
+  audit-native-stage-opt-ins:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Checkout QA gate proposal
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Confirm proposal changes only workflow and static audit files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check e17ab44aa3fd1d08eb14644164735a7c5c87721d...HEAD
+          python3 -B - <<'PY'
+          import json,subprocess
+          changed=subprocess.check_output(
+              ["git","diff","--name-only",
+               "e17ab44aa3fd1d08eb14644164735a7c5c87721d...HEAD"],
+              text=True).splitlines()
+          allowed={
+              ".github/workflows/canonical-names-lock.yml",
+              ".github/workflows/issue29-v170-native-ci-gate-audit.yml",
+              "tests/issue29_v170_native_ci_gate_audit.py",
+          }
+          assert set(changed)==allowed, changed
+          print(json.dumps({"changed_files":changed,
+                            "production_source_changes":0,
+                            "native_runner_script_changes":0},indent=2))
+          PY
+      - name: Parse GitHub workflow YAML syntax without executing workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e 'require "yaml"; YAML.parse_file(".github/workflows/canonical-names-lock.yml"); YAML.parse_file(".github/workflows/issue29-v170-native-ci-gate-audit.yml"); puts "V170_YAML_PARSE_PASS_NO_WORKFLOW_EXECUTION"'
+      - name: Audit every native job has a unique default-off repository-variable gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v170_native_ci_gate_audit.py | tee v170-gate-audit.json
+          grep -F '"native_job_count": 41' v170-gate-audit.json
+          grep -F '"calendar_date_invocations": 0' v170-gate-audit.json
+          grep -F '"status": "PASS_STATIC_ONLY_41_NATIVE_JOBS_INDEPENDENTLY_GATED"' v170-gate-audit.json
+      - name: Archive static gate audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v170-41-native-stage-gates-static-audit-zero-F
+          path: v170-gate-audit.json
+          retention-days: 30
+          if-no-files-found: warn
