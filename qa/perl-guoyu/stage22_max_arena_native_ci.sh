@@ -9,7 +9,7 @@ trap 'rc=$?; printf "%s\n" "$rc" > "$LOG/harness.exit"; exit "$rc"' EXIT
 PRODUCER=lib/Pastafari/Monster/WeavingPrimitive.pm
 ORACLE=qa/perl-guoyu/stage22_max_arena_forward_oracle.cpp
 EXPECTED_PRODUCER=4a7cd53e7132a6b3ab5fdaffd2d93a498e9296a6
-EXPECTED_ORACLE=993fd19509f970f4467eece681cc017e3d831959
+EXPECTED_ORACLE=9270a948805da5f0caf28db96c07ad51880dac78
 EXPECTED_COUNT=214592873590014046152008360029870
 MIDDLE=107296436795007023076004180014935
 {
