@@ -62,4 +62,6 @@ begin
    Ada.Text_IO.Put_Line ("V164_GMP_45_MONTH_4244_DAY_SYNTHETIC_RANK1_PASS_NO_F");
    Ada.Text_IO.Put_Line
      ("V164_GMP_EXACT_COUNT_DECIMAL_DIGITS=" & Natural'Image (G.Image (Options)'Length));
+   Ada.Text_IO.Put_Line
+     ("V164_GMP_EXACT_COUNT_HEX=" & G.Image (Options, Base => 16));
 end Benchmark_Issue29_GMP_V164;
