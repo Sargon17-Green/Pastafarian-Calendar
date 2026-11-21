@@ -7,7 +7,6 @@ on:
     paths:
       - 'tests/stage02_k259_capacity_witness.py'
       - 'tests/stage02_k259_capacity_witness.cjs'
-      - '.github/workflows/wat-stage02-k259-capacity-edge.yml'
 
 permissions:
   contents: read
@@ -105,6 +104,8 @@ jobs:
           set -euo pipefail
           evidence='evidence/wat-k259-capacity-edge'
           test -f "$evidence/cases.tsv"
+          node_passed="$(python3 -c 'import json; print(json.load(open("evidence/wat-k259-capacity-edge/node.stdout.json"))["passed"])')"
+          node_failed="$(python3 -c 'import json; print(json.load(open("evidence/wat-k259-capacity-edge/node.stdout.json"))["failed"])')"
           passed=0
           failed=0
           for name in qa_k259_capacity_forward qa_k259_capacity_backward; do
@@ -127,16 +128,24 @@ jobs:
             fi
             printf 'WasmKit\t%s\t%s\t%s\n' "$name" "$status" "$exit_code" | tee -a "$evidence/cases.tsv"
           done
+          total_passed=$((node_passed + passed))
+          total_failed=$((node_failed + failed))
           {
             printf 'PROJECT_ID=PC-BRANCH-WAT-SPANISH\n'
             printf 'SOURCE_COMMIT=871f9b70216c16c57abcd552ec6fb0ed1010e305\n'
             printf 'SOURCE_SHA256=18e2c15a142b3a262ff38a1e084d86bdc1a139ce030b0318f279dbcdb23f8980\n'
-            printf 'EXPECTED=4\nPASSED=%s\nFAILED=%s\n' "$passed" "$failed"
+            printf 'EXPECTED_NODE=2\nPASSED_NODE=%s\nFAILED_NODE=%s\n' "$node_passed" "$node_failed"
+            printf 'EXPECTED_WASMKIT=2\nPASSED_WASMKIT=%s\nFAILED_WASMKIT=%s\n' "$passed" "$failed"
+            printf 'EXPECTED_TOTAL=4\nPASSED_TOTAL=%s\nFAILED_TOTAL=%s\n' "$total_passed" "$total_failed"
             printf 'GATE=CAPACITY_EDGE_K259_STRESS_ONLY\nLEGAL_DOMAIN_MAX_VERIFIED=no\nSTAGE02_ACCEPTED=no\n'
           } > "$evidence/summary.txt"
+          test "$node_passed" -eq 2
+          test "$node_failed" -eq 0
           test "$passed" -eq 2
           test "$failed" -eq 0
-          echo 'WasmKit capacity-edge k259 full-limb cases: 2/2 PASS'
+          test "$total_passed" -eq 4
+          test "$total_failed" -eq 0
+          echo 'Node + WasmKit capacity-edge k259 full-limb cases: 4/4 PASS'
 
       - name: Upload capacity-edge evidence on success or failure
         if: always()
