@@ -42,12 +42,12 @@ begin
   else Fail(Name, 'TRUE', 'FALSE');
 end;
 
-procedure AssertBig(const Name, ExpectedValue: string; const ActualValue: TBigInt);
+procedure AssertBig(const Name: UnicodeString; const ExpectedValue: string; const ActualValue: TBigInt);
 begin
   AssertEqualText(Name, ExpectedValue, BigToDecimal(ActualValue));
 end;
 
-procedure AssertOrder(const Name: string; const Order: TBowlOrder; A1, A2, A3, A4, A5, A6: Integer);
+procedure AssertOrder(const Name: UnicodeString; const Order: TBowlOrder; A1, A2, A3, A4, A5, A6: Integer);
 var
   ActualValue, ExpectedValue: string;
 begin
