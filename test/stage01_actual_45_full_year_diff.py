@@ -48,6 +48,24 @@ def parse_csv(text, size):
     return tuple(int(part) for part in parts)
 
 
+def score_row(raw, index, month_id, expected):
+    """Validate the same wire row used by the 4244-day differential gate."""
+    check(raw.startswith("STAGE01_45_ROW="), "wrong row marker")
+    observed = parse_csv(raw[len("STAGE01_45_ROW="):], 7)
+    check(observed[0] == index, "out-of-order/duplicate row index")
+    month_match = int(observed[1] == month_id)
+    actual_fields = observed[2:]
+    field_matches = sum(a == b for a, b in zip(actual_fields, expected))
+    issues = []
+    if not month_match:
+        issues.append({"day": index, "kind": "month_id",
+                       "expected": month_id, "actual": observed[1]})
+    if field_matches != len(FIELDS):
+        issues.append({"day": index, "kind": "date",
+                       "expected": expected, "actual": actual_fields})
+    return month_match, field_matches, issues
+
+
 def selftest():
     check(parse_csv("1,2,3,4,5,6,7", 7) == tuple(range(1, 8)), "CSV roundtrip")
     check(exactly_one(["STAGE01_45_DONE=4"], "STAGE01_45_DONE=") == "4", "marker")
@@ -65,6 +83,33 @@ def selftest():
     else:
         raise AssertionError("duplicate marker accepted")
     check(len(FIELDS) == 5, "five-field schema")
+    # Adversarial QA: every corrupted field and the month ID must be detected.
+    baseline = [1, 18, 5000, 2, 7, 31, 4]
+    expected = tuple(baseline[2:])
+    wire = lambda values: "STAGE01_45_ROW=" + ",".join(str(v) for v in values)
+    check(score_row(wire(baseline), 1, 18, expected) == (1, 5, []),
+          "intact row rejected")
+    for position in range(2, 7):
+        changed = list(baseline)
+        changed[position] += 1
+        month_ok, fields_ok, issues = score_row(wire(changed), 1, 18, expected)
+        check(month_ok == 1 and fields_ok == 4 and
+              [issue["kind"] for issue in issues] == ["date"],
+              "corrupted date component accepted: " + str(position))
+    changed = list(baseline)
+    changed[1] += 1
+    month_ok, fields_ok, issues = score_row(wire(changed), 1, 18, expected)
+    check(month_ok == 0 and fields_ok == 5 and
+          [issue["kind"] for issue in issues] == ["month_id"],
+          "corrupted weaving ID accepted")
+    for bad in (wire([2, *baseline[1:]]), wire(baseline[:-1])):
+        try:
+            score_row(bad, 1, 18, expected)
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError("out-of-order or truncated row accepted")
+    print("STAGE01_ACTUAL_45_FULL_YEAR_MUTATIONS=8/8")
     print("STAGE01_ACTUAL_45_FULL_YEAR_SELFTEST=6/6")
 
 
@@ -146,18 +191,13 @@ def compare(python_path, fortran_exe):
         expected = (EXPECTED_YEAR, cutlet.name_index,
                     target - cutlet.first_day + 1,
                     structure.month_name_indices[month_id - 1], ordinal[month_id])
-        observed = parse_csv(raw[len("STAGE01_45_ROW="):], 7)
-        check(observed[0] == index, "out-of-order/duplicate row index")
-        if observed[1] == month_id:
-            matched_weave_ids += 1
-        else:
-            failures.append({"day": index, "kind": "month_id",
-                             "expected": month_id, "actual": observed[1]})
-        actual_fields = observed[2:]
-        matched_fields += sum(a == b for a, b in zip(actual_fields, expected))
-        if actual_fields != expected and len(failures) < 30:
-            failures.append({"day": index, "kind": "date",
-                             "expected": expected, "actual": actual_fields})
+        month_matches, field_matches, row_failures = score_row(
+            raw, index, month_id, expected)
+        matched_weave_ids += month_matches
+        matched_fields += field_matches
+        for issue in row_failures:
+            if len(failures) < 30:
+                failures.append(issue)
     check(tuple(ordinal[1:]) == tuple(structure.month_lengths),
           "yearwide independent ordinal mismatch")
     result = {
