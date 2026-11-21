@@ -80,7 +80,7 @@ def main() -> int:
         or sha(rank_hex.encode("ascii")) != RANK_HEX_SHA256
         or sha(json.dumps(weave, separators=(",", ":")).encode("ascii")) != WEAVE_JSON_SHA256
         or lengths != observed["month_lengths"]
-        or len(lengths) != len(names) != 45
+        or len(lengths) != 45 or len(names) != 45
         or len(weave) != sum(lengths) != 4244
         or observed["month_count"] != 45
         or observed["target_offset0"] != 2031
