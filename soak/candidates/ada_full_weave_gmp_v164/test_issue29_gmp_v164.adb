@@ -19,7 +19,7 @@ procedure Test_Issue29_GMP_V164 is
       end loop;
       declare
          F : CW.Family (M);
-         Rem : Natural_Array (1 .. M);
+         Remaining : Natural_Array (1 .. M);
          Word : Natural_Array (1 .. Total);
          First_Pos : Natural_Array (1 .. M);
          Last_Pos : Natural_Array (1 .. M);
@@ -64,17 +64,17 @@ procedure Test_Issue29_GMP_V164 is
                return;
             end if;
             for J in 1 .. M loop
-               if Rem (J) > 0 then
-                  Rem (J) := Rem (J) - 1;
+               if Remaining (J) > 0 then
+                  Remaining (J) := Remaining (J) - 1;
                   Word (P) := J;
                   Walk (P + 1);
-                  Rem (J) := Rem (J) + 1;
+                  Remaining (J) := Remaining (J) + 1;
                end if;
             end loop;
          end Walk;
       begin
          for J in 1 .. M loop
-            Rem (J) := Lengths (Lengths'First + J - 1);
+            Remaining (J) := Lengths (Lengths'First + J - 1);
          end loop;
          CW.Build (F, Lengths);
          Walk (1);
