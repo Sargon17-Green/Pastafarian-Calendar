@@ -44,7 +44,7 @@ def main():
                           'o;1=["STAGE19_DIAG_RESULT_ONE"10,]?\n'
                           'o;2=["STAGE19_DIAG_RESULT_TWO"10,]?\n'
                           'o;6=["STAGE19_DIAG_RESULT_SIX"10,]?\n'
-                          'o;6>=["STAGE19_DIAG_RESULT_GE6"10,]?\n'
+                          'o;6>["STAGE19_DIAG_RESULT_GT6"10,]?\n'
                           'o;0<["STAGE19_DIAG_RESULT_NEGATIVE"10,]?\n'
                           'd;g;!6=["STAGE19_DIAG_HEADER_SIX"10,]?\n'
                           'b;g;!d;=["STAGE19_DIAG_ORDER_ARGUMENT_MATCH"10,]?\n'
