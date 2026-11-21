@@ -800,7 +800,7 @@ jobs:
         run: dart run bin/stage7_weave_hotpath_profile.dart
 
   dart-hebrew-stage7-ab-qa-only:
-    if: github.ref == 'refs/heads/Dart+עברית'
+    if: github.ref == 'refs/heads/Dart+עברית' && !contains(github.event.head_commit.message, '[stage7-target-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -823,3 +823,29 @@ jobs:
           name: dart-hebrew-stage7-ab-qa
           path: out/dart-hebrew-stage7-ab/
           if-no-files-found: warn
+
+
+  dart-hebrew-stage7-targeted-ab-qa-only:
+    if: github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[stage7-target-only]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact source history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Verify targeted runner Python syntax
+        run: python3 -m py_compile tool/dart_hebrew_stage7_targeted_ab_runner.py
+      - name: Independently verify two ranked words and trace A/B factor path
+        run: python3 tool/dart_hebrew_stage7_targeted_ab_runner.py
+      - name: Upload raw synthetic trace and paired measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-stage7-targeted-ab-qa
+          path: out/dart-hebrew-stage7-targeted-ab/
+          if-no-files-found: error
