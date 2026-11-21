@@ -16,27 +16,27 @@ uses
 var
   Passed, Failed: Integer;
 
-procedure Fail(const Name, ExpectedValue, ActualValue: string);
+procedure Fail(const Name: UnicodeString; const ExpectedValue, ActualValue: string);
 begin
   Inc(Failed);
-  Writeln('FALHA: ', Name);
+  Writeln('FALHA: ', UTF8Encode(Name));
   Writeln('  esperado: ', ExpectedValue);
   Writeln('  obtido:   ', ActualValue);
 end;
 
-procedure Pass(const Name: string);
+procedure Pass(const Name: UnicodeString);
 begin
   Inc(Passed);
-  Writeln('OK: ', Name);
+  Writeln('OK: ', UTF8Encode(Name));
 end;
 
-procedure AssertEqualText(const Name, ExpectedValue, ActualValue: string);
+procedure AssertEqualText(const Name: UnicodeString; const ExpectedValue, ActualValue: string);
 begin
   if ExpectedValue = ActualValue then Pass(Name)
   else Fail(Name, ExpectedValue, ActualValue);
 end;
 
-procedure AssertTrue(const Name: string; Value: Boolean);
+procedure AssertTrue(const Name: UnicodeString; Value: Boolean);
 begin
   if Value then Pass(Name)
   else Fail(Name, 'TRUE', 'FALSE');
