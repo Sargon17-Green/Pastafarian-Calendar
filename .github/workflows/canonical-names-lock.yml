@@ -1249,3 +1249,51 @@ jobs:
             build/stage01-boundary-neighbors.json
           if-no-files-found: warn
           retention-days: 30
+
+  stage01-actual-weave-diff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile original normative entry point and new QA adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build -c src/big_integer.f90 -o build/big_integer.o
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build test/stage01_actual_weave_probe.f90 build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o build/normative_oracle_core.o build/normative_oracle_calendar.o -o build/stage01_actual_weave_probe
+      - name: Self-test harness and acquire SHA-pinned independent Python
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_actual_weave_diff.py
+          python3 test/stage01_actual_weave_diff.py --self-test | tee build/stage01-actual-weave-selftest.log
+          grep -Fxq 'STAGE01_ACTUAL_WEAVE_HARNESS=7/7' build/stage01-actual-weave-selftest.log
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 45 'https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' --output build/stage01_python_reference_pinned.py
+          test -s build/stage01_python_reference_pinned.py
+      - name: Eight genuinely new actual-weaving dates
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=3s 900s python3 -u test/stage01_actual_weave_diff.py --reference build/stage01_python_reference_pinned.py --fortran-exe build/stage01_actual_weave_probe | tee build/stage01-actual-weave.log
+          grep -Fxq 'STAGE01_ACTUAL_WEAVE_DIFFERENTIAL=8/8 CASES; 40/40 FIELDS' build/stage01-actual-weave.log
+          grep -Fxq 'STAGE01_ACTUAL_WEAVE_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-actual-weave.log
+      - name: Retain actual-weaving evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-actual-weave
+          path: |
+            build/stage01-actual-weave-selftest.log
+            build/stage01-actual-weave.log
+            build/stage01-actual-weave.json
+          if-no-files-found: warn
+          retention-days: 30
