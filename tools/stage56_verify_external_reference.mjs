@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { assertJsonSemanticEqual as eq } from './stage56_semantic_compare.mjs';
 
 const SOURCE_SHA = 'cc2cf0b422757a5e7c33218ce30cffa8f99c6786';
 const PROJECT = 'PC-BRANCH-PHP-MALAY';
@@ -12,11 +13,6 @@ const getArg = name => {
   const at = args.indexOf(name);
   if (at < 0 || !args[at + 1]) throw Error(`Missing ${name}`);
   return args[at + 1];
-};
-const eq = (a, b, where) => {
-  if (JSON.stringify(a) !== JSON.stringify(b)) {
-    throw Error(`${where}: ${JSON.stringify(a)} != ${JSON.stringify(b)}`);
-  }
 };
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const readBoundJson = path => {

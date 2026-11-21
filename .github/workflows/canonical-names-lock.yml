@@ -1509,6 +1509,8 @@ jobs:
           cat stage56-external-evidence/samples.stdout
           cat stage56-external-evidence/samples.stderr >&2
           exit "$rc"
+      - name: Verify object-order-neutral comparator with fail-closed mutations
+        run: node --test tests/stage56_external_semantic_equality.test.mjs
       - name: Compare full month weaving and JS/Python/Scroll semantic tuples
         shell: bash
         run: |
