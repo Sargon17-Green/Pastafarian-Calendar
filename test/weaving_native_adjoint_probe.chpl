@@ -102,12 +102,30 @@ proc transfer(const ref previous: SparseVec, n: int, k: int,
               spec: GapSpec): SparseVec {
   var dense: [0..n+k] bigint;
   var cumulative = new bigint(0);
+  // In the empty-fixed-gap case, weight(i)=C(k-2+n-i,n-i) for i>=q.
+  // Advance adjacent coefficients by exact integer ratios instead of
+  // recomputing a full binomial product at every supported position.
+  // Keep the original path for short ranges, small k, and all other specs.
+  const firstActive = max(spec.q, previous.first);
+  const useRecurrence = spec.fixedSum == 0 && spec.tail == 0 &&
+                        k >= 8 && previous.values.size > 0 &&
+                        firstActive <= n && n-firstActive >= 8;
+  var coefficient = new bigint(0);
+  if useRecurrence then
+    coefficient = chooseBig(k-2+n-firstActive,n-firstActive);
   for i in 0..n {
     cumulative += previous.at(i);
     if cumulative != 0 {
-      const factor = weight(i,n,k,spec);
-      if factor != 0 then dense[i+1] = cumulative*factor;
+      if useRecurrence && i >= firstActive {
+        if coefficient != 0 then dense[i+1] = cumulative*coefficient;
+      } else {
+        const factor = weight(i,n,k,spec);
+        if factor != 0 then dense[i+1] = cumulative*factor;
+      }
     }
+    if useRecurrence && i >= firstActive && i < n then
+      coefficient = (coefficient * new bigint(n-i)) /
+                    new bigint(k-2+n-i);
   }
   return pack(dense);
 }
@@ -116,13 +134,30 @@ proc transpose(const ref after: SparseVec, n: int, k: int,
                spec: GapSpec): SparseVec {
   var dense: [0..n] bigint;
   var suffix = new bigint(0);
+  // Only indices overlapping the stored sparse vector can contribute.
+  // In the common empty-fixed-gap case, walk C(k-2+n-i,n-i) backwards
+  // using w(i-1)=w(i)*(k-1+n-i)/(n-i+1), with exact integer division.
+  const lowActive = max(spec.q, after.first-1);
+  const highActive = min(n, after.first+after.values.size-2);
+  const useRecurrence = spec.fixedSum == 0 && spec.tail == 0 &&
+                        k >= 8 && highActive-lowActive >= 8;
+  var coefficient = new bigint(0);
+  if useRecurrence then
+    coefficient = chooseBig(k-2+n-highActive,n-highActive);
   for i in 0..n by -1 {
     const a = after.at(i+1);
     if a != 0 {
-      const factor = weight(i,n,k,spec);
-      if factor != 0 then suffix += a*factor;
+      if useRecurrence && i >= lowActive && i <= highActive {
+        if coefficient != 0 then suffix += a*coefficient;
+      } else {
+        const factor = weight(i,n,k,spec);
+        if factor != 0 then suffix += a*factor;
+      }
     }
     dense[i] = suffix;
+    if useRecurrence && i <= highActive && i > lowActive then
+      coefficient = (coefficient * new bigint(k-1+n-i)) /
+                    new bigint(n-i+1);
   }
   return pack(dense);
 }
