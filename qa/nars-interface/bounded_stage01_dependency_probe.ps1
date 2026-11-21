@@ -67,8 +67,11 @@ try{
  foreach($c in $m.chunk_records){if(Test-Path $c.marker_path){throw 'OLD_FX_RECEIPT'}}
  foreach($collection in @($m.calls,$m.dependency_probes)){
   foreach($s in $collection){
-   foreach($field in @('start_path','captured_path','code_path','message_code_path','message_path')){
-    if($null -ne $s.$field -and (Test-Path -LiteralPath $s.$field)){throw 'OLD_PROBE_RECEIPT'}
+   foreach($field in @('start_path','captured_path','code_path','value_path','message_code_path','message_path')){
+    $property=$s.PSObject.Properties[$field]
+    if($null -ne $property -and $null -ne $property.Value -and
+       -not [string]::IsNullOrEmpty([string]$property.Value) -and
+       (Test-Path -LiteralPath ([string]$property.Value))){throw 'OLD_PROBE_RECEIPT'}
    }
   }
  }
