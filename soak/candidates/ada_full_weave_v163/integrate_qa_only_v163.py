@@ -16,8 +16,8 @@ import sys
 
 COMMIT = "a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72"
 ORIGINAL_BLOB = "923733d4f8face03586aee304640bf7540c28b4c"
-START = "    -- Canonical two-rail family: open every month in order, rank an exact\n"
-END = "    function Calendar_Date\n"
+START = "   -- Canonical two-rail family: open every month in order, rank an exact\n"
+END = "   function Calendar_Date\n"
 CONTEXT = "with Month_Weaving;\n"
 ADDED_CONTEXT = "with Canonical_Full_Weave_V163;\n"
 NEW_FUNCTION = """    --  QA v163: exact complete family, global lexicographic rank per Spec V.
