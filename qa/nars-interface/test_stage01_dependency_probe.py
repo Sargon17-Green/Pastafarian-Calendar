@@ -32,7 +32,7 @@ class RootCauseTests(unittest.TestCase):
         self.assertEqual(self.receipt["prior_candidate_sha256"], hashlib.sha256(previous).hexdigest())
         self.assertEqual((self.receipt["function_count"], self.receipt["chunk_count"]), (95, 23))
         self.assertEqual((len(self.receipt["tests"]), len(self.receipt["calls"])), (3, 3))
-        self.assertEqual(self.receipt["program_count"], 88)
+        self.assertEqual(self.receipt["program_count"], 96)
 
     def test_exact_original_source_lines_and_diagnostic_anchors(self):
         anchors = self.receipt["source_dependency_anchors"]
@@ -48,15 +48,15 @@ class RootCauseTests(unittest.TestCase):
 
     def test_messages_and_probe_inventory_are_complete_not_acceptance(self):
         r = self.receipt
-        self.assertEqual(r["schema"], "APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V3")
+        self.assertEqual(r["schema"], "APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V4")
         self.assertEqual(r["stage01"], "NOT_ACCEPTED")
         self.assertFalse(r["final_original_stage01_tests_executed"])
         self.assertFalse(r["original_stage01_acceptance_token_present"])
         self.assertEqual(r["marker_token"], FINAL)
-        self.assertEqual(r["program_count"], 88)
-        self.assertEqual(len(r["dependency_probes"]), 54)
-        self.assertEqual(len({p["start_path"] for p in r["dependency_probes"]}), 54)
-        self.assertEqual(len({p["message_path"] for p in r["dependency_probes"]}), 54)
+        self.assertEqual(r["program_count"], 96)
+        self.assertEqual(len(r["dependency_probes"]), 61)
+        self.assertEqual(len({p["start_path"] for p in r["dependency_probes"]}), 61)
+        self.assertEqual(len({p["message_path"] for p in r["dependency_probes"]}), 61)
         self.assertTrue(all(c["message_code_path"] for c in r["calls"]))
         self.assertEqual(
             [p["name"] for p in r["dependency_probes"][13:18]],
@@ -85,6 +85,20 @@ class RootCauseTests(unittest.TestCase):
              "sauce_post_saved_known_vector_rank", "sauce_post_rank_shape",
              "sauce_post_rank_rank"]
         )
+        self.assertEqual(
+            [p["name"] for p in r["dependency_probes"][54:]],
+            ["sauce_fixed_fx_exists", "sauce_fixed_saved_known", "sauce_fixed_saved_actual",
+             "sauce_fixed_saved_actual_rank", "sauce_fixed_order",
+             "sauce_fixed_poststir12", "sauce_fixed_poststir12_value"]
+        )
+        fixed = r["qa_fixed_poststir"]
+        self.assertEqual(fixed["source_function"], "PostStir12")
+        self.assertEqual(fixed["copy_function"], "QAFixedPostStir12")
+        self.assertEqual(fixed["helper_function"], "QAFixedPostStirSavedSum")
+        self.assertEqual(len(fixed["source_sha256"]), 64)
+        self.assertEqual(len(fixed["copy_sha256"]), 64)
+        self.assertEqual(len(fixed["helper_sha256"]), 64)
+        self.assertIn("bowls←⊃⊃args[1]", fixed["only_logic_change"])
         for p in r["dependency_probes"]:
             self.assertTrue(p["start_token"].endswith("START"))
             self.assertTrue(p["captured_token"].endswith("CAPTURED_NOT_PASS"))

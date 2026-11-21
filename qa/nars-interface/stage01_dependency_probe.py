@@ -10,7 +10,7 @@ from chunked_fx_probe import marker_write
 from stage01_import_workspace import SOURCE_COMMIT, _codes, load_locked_sources
 from stage01_statement_probe import build_statement_probe, decode_programs
 
-FINAL = "APL_GERMAN_ROOTCAUSE_DIAGNOSTIC_V3_COMPLETE_NOT_STAGE01"
+FINAL = "APL_GERMAN_ROOTCAUSE_DIAGNOSTIC_V4_COMPLETE_NOT_STAGE01"
 
 
 def anchor(blocks, name, needle=None, required_line=None):
@@ -163,14 +163,53 @@ def build_dependency_probe(raw, root, marker):
         ("sauce_post_saved_known_vector_rank", "", "⍴⍴PostStirSavedSum (⊂1 2 3 4 5 6) 1", "value", "post_saved"),
         ("sauce_post_rank_shape", "", "⍴QAPostRank", "value", "post_stir_rank"),
         ("sauce_post_rank_rank", "", "⍴⍴QAPostRank", "value", "post_stir_rank"),
+        ("sauce_fixed_fx_exists", "", "⎕NC 'QAFixedPostStirSavedSum'", "value", "post_saved"),
+        ("sauce_fixed_saved_known", "", "QAFixedPostStirSavedSum (⊂1 2 3 4 5 6) 1", "value", "post_saved"),
+        ("sauce_fixed_saved_actual", "", "QAFixedPostStirSavedSum (⊂QAPostOld) 1", "value", "post_saved"),
+        ("sauce_fixed_saved_actual_rank", "", "⍴⍴QAFixedPostStirSavedSum (⊂QAPostOld) 1", "value", "post_saved"),
+        ("sauce_fixed_order", "", "QAFixedOrder←PermutationUnrank1 (1+(720 RegularMod (QAFixedPostStirSavedSum (⊂QAPostOld) 1)-1))", "call", "post_stir_order"),
+        ("sauce_fixed_poststir12", "", "QAFixedPostStir12 ⊃QASaucePair[1]", "call", "post_stir_old"),
+        ("sauce_fixed_poststir12_value", "", "QAFixedPostStir12 ⊃QASaucePair[1]", "value", "post_stir_old"),
     ]
-    if len(specs) != 54:
+    if len(specs) != 61:
         raise ValueError("ROOTCAUSE_PROBE_COUNT_INVALID")
 
     entries = []
     programs = programs[:-1]
+    post_block = next(b for b in blocks if b["name"] == "PostStir12")
+    fixed_post_lines = []
+    for source_line in post_block["lines"]:
+        fixed_line = source_line
+        if fixed_line.lstrip().startswith("∇") and "PostStir12" in fixed_line:
+            fixed_line = fixed_line.replace("PostStir12", "QAFixedPostStir12", 1)
+        if "PostStirSavedSum (⊂old) stir" in fixed_line:
+            fixed_line = fixed_line.replace("PostStirSavedSum", "QAFixedPostStirSavedSum", 1)
+        fixed_post_lines.append(fixed_line)
+    if not any("QAFixedPostStir12" in x for x in fixed_post_lines):
+        raise ValueError("QA_POSTSTIR_COPY_HEADER_MISSING")
+    if not any("QAFixedPostStirSavedSum" in x for x in fixed_post_lines):
+        raise ValueError("QA_POSTSTIR_COPY_HELPER_MISSING")
+    fixed_saved_lines = [
+        "∇ z←QAFixedPostStirSavedSum args;bowls;stir",
+        "  bowls←⊃⊃args[1] ⋄ stir←args[2]",
+        "  z←Save ((+/bowls)+(149×stir))",
+        "∇",
+    ]
+    fx_lines = fixed_saved_lines + fixed_post_lines
+    fx_program = "QAFixedFX←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in fx_lines)
+    programs.append(fx_program)
+    fixed_receipt = {
+        "source_function": "PostStir12",
+        "source_sha256": hashlib.sha256("\n".join(post_block["lines"]).encode("utf-8")).hexdigest(),
+        "copy_function": "QAFixedPostStir12",
+        "copy_sha256": hashlib.sha256("\n".join(fixed_post_lines).encode("utf-8")).hexdigest(),
+        "helper_function": "QAFixedPostStirSavedSum",
+        "helper_sha256": hashlib.sha256("\n".join(fixed_saved_lines).encode("utf-8")).hexdigest(),
+        "only_logic_change": "PostStirSavedSum (⊂old) stir -> QAFixedPostStirSavedSum (⊂old) stir; helper uses bowls←⊃⊃args[1]",
+        "fx_program_sha256": hashlib.sha256(fx_program.encode("utf-8")).hexdigest(),
+    }
     for index, (name, setup, expression, mode, origin) in enumerate(specs, 1):
-        prefix = f"APL_GERMAN_ROOT_V3|SOURCE={SOURCE_COMMIT}|INDEX={index:02d}|NAME={name}"
+        prefix = f"APL_GERMAN_ROOT_V4|SOURCE={SOURCE_COMMIT}|INDEX={index:02d}|NAME={name}"
         paths = {phase + "_path": str(p.with_name(f"{p.stem}_dep_{index:02d}_{phase}.txt"))
                  for phase in ("start", "captured", "code", "value", "message")}
         start_token = prefix + "|PHASE=START"
@@ -206,10 +245,11 @@ def build_dependency_probe(raw, root, marker):
                        f"'{serial}'{match['ending']}")
     candidate = "".join(lines).encode("cp1252")
     receipt = dict(base)
-    receipt.update(schema="APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V3",
+    receipt.update(schema="APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V4",
                    stage01="NOT_ACCEPTED", status="GENERATED_NOT_NATIVE_VALIDATED",
                    source_commit=SOURCE_COMMIT, source_dependency_anchors=anchors,
                    dependency_probes=entries, marker_token=FINAL, marker_path=marker,
+                   qa_fixed_poststir=fixed_receipt,
                    program_count=len(programs), prior_candidate_sha256=base["candidate_sha256"],
                    final_original_stage01_tests_executed=False,
                    original_stage01_acceptance_token_present=False,
