@@ -26,7 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   clojure-native-stage02-discovery24:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands' && !contains(github.event.head_commit.message, '[generic-e2e-next-year-p1]')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands' && !contains(github.event.head_commit.message, '[generic-e2e-next-year-p1]') && !contains(github.event.head_commit.message, '[generic-e2e-canonical-plus17]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -155,5 +155,43 @@ jobs:
         with:
           name: clojure-dutch-next-year-first-day-e2e-witness
           path: qa/discovery24_next_year_first_day_feasibility.edn
+          if-no-files-found: warn
+          retention-days: 90
+
+
+  clojure-dutch-canonical-plus17-p520-e2e-witness:
+    # Exactly one new canonical date: shifted +17 calculation day itself (p=520).
+    # The full Native suite is deliberately skipped on this opt-in commit.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands' && contains(github.event.head_commit.message, '[generic-e2e-canonical-plus17]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact feature-branch SHA
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Clojure CLI
+        uses: DeLaGuardo/setup-clojure@13.7.0
+        with:
+          cli: 1.12.5.1664
+      - name: Assert exact project/source identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "PROJECT_ID=PC-BRANCH-CLOJURE-DUTCH"
+          echo "SOURCE_SHA=$GITHUB_SHA"
+      - name: One canonical shifted-plus17 position-520 bounded witness
+        run: |
+          set -euo pipefail
+          clojure -Sdeps '{:paths ["src" "test"]}' -M -e "(require 'pastafari.stage02-end-to-end-test) (pastafari.stage02-end-to-end-test/run-discovery24-canonical-plus17-feasibility!)"
+      - name: Preserve exact-SHA EDN on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clojure-dutch-canonical-plus17-p520-e2e-witness
+          path: qa/discovery24_canonical_plus17_feasibility.edn
           if-no-files-found: warn
           retention-days: 90
