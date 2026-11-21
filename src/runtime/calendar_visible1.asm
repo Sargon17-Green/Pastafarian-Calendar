@@ -1,4 +1,4 @@
-; Stage1 visible drop i=1..6 with three caller-supplied predecessors.
+; Stage1 visible drop i=1..46 with three caller-supplied predecessors.
 ; The already accepted i=1 interface is preserved. Only a successful
 ; invocation publishes the 16-byte output; runtime has no fixture data.
 SECTION "Calendar visible1 native", ROMX, BANK[1]
@@ -9,17 +9,9 @@ CalendarVisibleDrop1::
     ret nz
     ld a, [wCalendarVisibleIteration]
     cp 1
-    jr z, .validIteration
-    cp 2
-    jr z, .validIteration
-    cp 3
-    jr z, .validIteration
-    cp 4
-    jr z, .validIteration
-    cp 5
-    jr z, .validIteration
-    cp 6
-    jp nz, .invalid
+    jp c, .invalid
+    cp 47
+    jp nc, .invalid
 .validIteration:
     ld hl, wCalendarStoneOld
     ld b, 5
@@ -79,7 +71,7 @@ CalendarVisibleDrop1::
     xor a
     ld [wCalendarVisibleRound], a
 .grind:
-    ; x*x + a*x + b*H1 + c*H3 + d*H7 + stone[j].
+    ; x*x + a*x + b*drop[i-1] + c*drop[i-3] + d*drop[i-7] + stone[j].
     ; Every non-square term uses the OLD x, never the updated wValue.
     ld hl, wCalendarVisibleWorking
     ld de, wMulA
@@ -170,7 +162,7 @@ CalendarVisibleDrop1::
     jr nz, .nextByte
     ret
 .loadStoneToMulA:
-    ; A=index 0..4, input stones in original i=1 source buffer.
+    ; A=index 0..4, input stones in current wCalendarStoneOld=S_i.
     swap a
     ld e, a
     ld d, 0
@@ -187,7 +179,7 @@ CalendarVisibleDrop1::
     ld de, wAddend
     jp .copy16
 .loadDrop:
-    ; A=0,1,2 => k=1,3,7 respectively.
+    ; A=0,1,2 => caller-supplied D[i-1], D[i-3], D[i-7].
     swap a
     ld e, a
     ld d, 0
