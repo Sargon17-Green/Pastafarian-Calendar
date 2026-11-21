@@ -1,0 +1,126 @@
+name: Issue29 v167 ONE corrected QA Ada foundation call, no retry, no Soak
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-foundation-v167
+    paths:
+      - .github/workflows/issue29-v167-one-shot-corrected-foundation.yml
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v167-single-corrected-QA-foundation
+  cancel-in-progress: false
+jobs:
+  exactly-one-QA-invocation:
+    if: ${{ github.run_attempt == 1 }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Enforce exact preflight acceptance, fixed source and native Soak halt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import ast,json,hashlib,os
+          from pathlib import Path
+          d=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text())
+          assert d["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert d["main_changes_permitted"] is False and d["successful_original_source_full_years"]==0
+          a=json.loads(Path("soak/control/issue29_v167_preflight_accepted.json").read_text())
+          assert a["source_preflight_run_id"]==44928644965
+          assert a["source_preflight_commit"]=="f8cd2e9f3cb42fc70146225202efb257693129b1"
+          assert a["preflight_status"]=="SUCCESS"
+          assert a["preflight_includes_calendar_calls"] is False
+          assert a["preflight_artifact_sha256"].startswith("sha256:") and len(a["preflight_artifact_sha256"])==71
+          assert os.environ["GITHUB_RUN_ATTEMPT"]=="1"
+          assert os.environ["GITHUB_EVENT_NAME"]=="push"
+          assert os.environ["GITHUB_REF"]=="refs/heads/qa/issue29-ada-gmp-foundation-v167"
+          s=Path("soak/candidates/ada_full_weave_gmp_v164/issue29_v167_one_shot_runner.py")
+          ast.parse(s.read_text())
+          print("V167_PRECONDITIONS_LOCKED_ONE_EXPLICIT_QA_F_NO_SOAK")
+          PY
+          git rev-parse HEAD > evidence/workflow-commit.txt
+          cp soak/control/issue29_v167_preflight_accepted.json evidence/
+      - name: Install locked Ada GMP runtime dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gpr-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/library-versions.txt
+      - name: Verify historical README/source locks and create reversible corrected Ada QA copy
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/issue29_foundation_capture_v160.py prepare --root "$RUNNER_TEMP/issue29-v167-one-off" > evidence/source-preparation.stdout 2> evidence/source-preparation.stderr
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/integrate_gmp_qa_only_v164.py "$RUNNER_TEMP/issue29-v167-one-off" soak/candidates/ada_full_weave_gmp_v164 > evidence/reversible-adapter.stdout 2> evidence/reversible-adapter.stderr
+          cp "$RUNNER_TEMP/issue29-v167-one-off/v164-qa-integration-receipt.json" evidence/
+          cp "$RUNNER_TEMP/issue29-v167-one-off/v164-qa-oracle.patch" evidence/
+      - name: Build and link exactly one corrected foundation QA executable, but do not launch here
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/issue29-v167-one-off/ada-build"
+          cat > "$ROOT/issue29_v167_foundation_link.gpr" <<'GPR'
+          with "gnatcoll_gmp.gpr";
+          project Issue29_V167_Foundation_Link is
+             for Source_Dirs use ("src", "tests");
+             for Object_Dir use "obj";
+             for Exec_Dir use "bin";
+             for Main use ("issue29_foundation_probe.adb");
+             package Compiler is
+                for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata");
+             end Compiler;
+          end Issue29_V167_Foundation_Link;
+          GPR
+          gprbuild -p -P "$ROOT/issue29_v167_foundation_link.gpr" -j2 > evidence/build.stdout 2> evidence/build.stderr
+          test -x "$ROOT/bin/issue29_foundation_probe"
+          sha256sum "$ROOT/bin/issue29_foundation_probe" > evidence/linked-binary-sha256.txt
+          ldd "$ROOT/bin/issue29_foundation_probe" > evidence/linked-runtime-dependencies.txt
+      - name: Persist immutable SHA preflight before creating any date-conversion process
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/issue29_v167_one_shot_runner.py "$RUNNER_TEMP/issue29-v167-one-off" preflight > evidence/final-preflight.stdout 2> evidence/final-preflight.stderr
+          grep -Fx V167_PREFLIGHT_LOCKED_CORRECTED_ADA_QA_BINARY_ONLY evidence/final-preflight.stdout
+          cp "$RUNNER_TEMP/issue29-v167-one-off/v167-preflight.json" evidence/
+      - name: Exactly ONE corrected QA F(-15055671,-15055671) invocation, hard-bounded, no retry
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/issue29_v167_one_shot_runner.py "$RUNNER_TEMP/issue29-v167-one-off" run-once > evidence/run-verdict.stdout 2> evidence/run-verdict.stderr
+          grep -Fx V167_SINGLE_QA_FOUNDATION_ALL_FIVE_FIELDS_EQUAL evidence/run-verdict.stdout
+          echo "V167_SINGLE_CORRECTED_QA_F_MATCHES_CANONICAL_NOT_PRODUCTION_CERTIFIED" > evidence/acceptance-verdict.txt
+      - name: Preserve one-shot marker, stdout/stderr and audit receipts even if F failed
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/issue29-v167-one-off"
+          for item in RUN_STARTED_ONCE v167-corrected-ada.stdout v167-corrected-ada.stderr v167-foundation-run-receipt.json v167-preflight.json; do
+            if test -f "$ROOT/$item"; then
+              cp "$ROOT/$item" "evidence/$item"
+            fi
+          done
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("evidence")
+          d={f.name:{"bytes":f.stat().st_size,"sha256":hashlib.sha256(f.read_bytes()).hexdigest()} for f in sorted(p.iterdir()) if f.is_file()}
+          (p/"v167-evidence-member-hashes.json").write_text(json.dumps(d,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Upload single-usage QA foundation evidence, never any native Soak outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v167-single-corrected-QA-ada-foundation-never-rerun
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
