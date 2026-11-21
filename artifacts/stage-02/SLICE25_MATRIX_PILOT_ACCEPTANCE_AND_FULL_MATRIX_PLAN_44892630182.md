@@ -1,0 +1,23 @@
+# SQL+தமிழ் — Slice25 corrected pilot verification and full matrix plan
+
+PROJECT_ID: PC-BRANCH-SQL-TAMIL. Branch: `SQL+தமிழ்`. Verified source commit: `8d33c5054cf5dc66962df2ebb40c5553b38bd49a` and run [44892630182](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44892630182), completed/success, PostgreSQL 17.12. The verified parent had failed isolation before PG due to Python SQL notice formatting; this new exact-source run resolves it. **Only the pilot is accepted; Slice25 as a whole is NOT ACCEPTED.** No production/normative SQL change, no main, merge, or release.
+
+## Independent examination of completed original artifacts and job logs
+
+| Job | Case / evidence | Original artifact ID | Raw ZIP SHA256 = GitHub digest = upload digest |
+| --- | --- | --- | --- |
+| 136811537014 | native anchor_first: 5/5 independent full-field notices; elapsed 328170.184 ms | 14703261784 | `c855f1ea607e0178f536da56ce764523fdc9db4be457857021ab02fac5d1daa9` |
+| 136811537263 | isolation next_1_first: 5/5 independent fields, schema and body isolation notices; elapsed 327743.310 ms | 14703023125 | `a36d08ab2c8c3fd1d38b47c1ea22a56ebb06a61820a4a495f9b3ae442250f5e3` |
+| 136811537257 | differential next_2_first: 5/5 independent production fields + 5/5 normative typed field comparisons; elapsed 540616.287 ms | 14702868755 | `8e176fe04e86347c76379c68c710d9f02e2a69ec43e28bbd6b0328ccc80007d3` |
+
+For each original ZIP, locally recomputed raw SHA256 equals GitHub metadata and original action-upload log digest, ZIP CRC passes, `versions.txt` pins the exact source SHA, and generated `test.sql` SHA matches `source-sha256.txt`. Each job independently logged generator 87/87, locked 29/29 records across 8 years and 145 expected fields; ordinal oracle selftests 9,411 cutlet-days and 22,890 month positions. The pilot is three distinct fresh PostgreSQL 17.12 jobs with per-job 15-minute caps. Source-lock normative Git blob `ce17bf6fd166451b6904411c5e29d1b26d92e278`.
+
+Other completed, unchanged regression runs on identical SHA: [Stage 1 run 44892630221](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44892630221), job 136811537466 completed/success, original ZIP 14702298643 SHA256 `b3c291abd377eaf8a6585e1c9c38dcf4bfcaba794f079c990c6132a2fb38e9f0`, CRC PASS, 52 normative assertions, 7 saved-sum assertions, 4 production isolation assertions; [Names Lock run 44892630180](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44892630180), job 136811537290 completed/success and original log examined, no artifact emitted. The Stage 1 outcome does not imply Slice25 acceptance.
+
+## Measurable full-matrix design and execution conditions
+
+Source-locked inputs are drawn **only** from the immutable existing 29-case, 8-year independent ordinal corpus, not from a normative or production `calendar_date` invocation. The full planned workflow consists of 56 separately limited jobs: 24 independent-golden Native cases, 8 fresh production-only isolation cases (one first day in each year), and 24 distinct typed differential cases. Native and differential each cover all eight years' first and last days (16), three anchor cutlet boundary minus/equal/plus inputs, two first/repeated month occurrences, and three middle cases; 24 unique target days per mode, 120 named five-field assertions each. Each differential case **also** requires five independent production-golden matches before the typed normative comparisons. Isolation requires the schema to be absent and checks production function body dependencies plus all five independent fields.
+
+All 56 shards: `timeout-minutes: 15`; generated SQL `statement_timeout=12min`; `max-parallel: 4`; `psql -At -X -v ON_ERROR_STOP=1`; branch/SHA check; fresh offline PostgreSQL 17 container; immutable normative blob SHA; 87/87 generator preflight; 29/29 locked source corpus; same independent oracle selftest; source and generated-SQL SHA256; original per-job log and artifact ZIP with versions/SQL/results. `sql/test/165_stage25_calendar_date_full_matrix_contract.py` validates 56/56 unique case selections, all eight years, mandatory boundaries, per-mode counts and hard limits before PG. Automatic push triggers this full workflow on the new workflow/coverage script and later source-affecting changes; no manual duplicate dispatch.
+
+**Pending acceptance:** Only completed original PG17 jobs and independently verified downloaded ZIP bytes may promote each full-matrix gate. The 56 planned jobs, Native>=40, isolation>=8, differential>=24 and **entire Slice25 acceptance are NOT PASS simply because this workflow is committed**. On observed failure, diagnose exact job/log and repair evidenced cause only; no repeat on same SHA without new information.
