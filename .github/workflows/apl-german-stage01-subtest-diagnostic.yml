@@ -1,0 +1,80 @@
+name: APL German source-locked original subtest isolation (DIAGNOSTIC ONLY)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-stage01-subtest-diagnostic.yml'
+      - 'qa/nars-interface/stage01_subtest_probe.py'
+      - 'qa/nars-interface/test_stage01_subtest_probe.py'
+      - 'qa/nars-interface/bounded_stage01_subtests.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-subtest-diagnosis:
+    name: 95FX plus 7 source-locked original APL stage probes
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Provision pinned native NARS2000 and temporary APL font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Independently test 95-FX locked original subtest probe generator
+        shell: pwsh
+        run: |
+          python -m unittest discover -s qa/nars-interface -p 'test_stage01_subtest_probe.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'SUBTEST_DIAGNOSTIC_GENERATOR_TEST_FAILED' }
+      - name: Native 95-FX plus separately observed original initializer and subtests
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_subtests.ps1 -Runtime verified_runtime -Evidence subtest_diag_evidence
+      - name: Independently inspect exact native phase markers (NOT Stage1)
+        shell: pwsh
+        run: |
+          $a=Get-Content subtest_diag_evidence/native_subtest_diag.json -Raw | ConvertFrom-Json
+          $b=Get-Content subtest_diag_evidence/subtest_candidate.json -Raw | ConvertFrom-Json
+          if ($a.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or $b.source_commit -cne $a.source_commit) {throw 'SOURCE_LOCK_MISMATCH'}
+          if ($a.stage01 -cne 'NOT_ACCEPTED' -or $b.stage01 -cne 'NOT_ACCEPTED') {throw 'DIAGNOSTIC_CANNOT_ACCEPT_STAGE01'}
+          if ($a.fx_checkpoints.Count -ne 23 -or $b.chunk_count -ne 23 -or $b.function_count -ne 95 -or $a.fx_last_contiguous -ne 95) {throw 'FX95_NOT_CONFIRMED_IN_DIAGNOSTIC'}
+          if (@($a.fx_checkpoints | Where-Object { $_.exact -ne $true }).Count -ne 0) {throw 'FX_CHUNK_MARKER_NOT_EXACT'}
+          if ($a.probes.Count -ne 7 -or $b.probe_count -ne 7) {throw 'SUBTEST_STAGE_COUNT_INVALID'}
+          foreach($p in $a.probes) {
+            Write-Output ('NATIVE_ORIGINAL_PROBE '+$p.index+' '+$p.name+' START='+$p.start.exact+' END='+$p.end.exact)
+          }
+          if ($a.status -cne 'ALL_ORIGINAL_SUBTESTS_DIAGNOSTIC_COMPLETE_NOT_STAGE01' -or $a.last_completed_probe -ne 7 -or $a.final_diagnostic_marker.exact -ne $true) {
+            throw 'ORIGINAL_SUBTESTS_NOT_FULLY_CONFIRMED_DIAGNOSTIC_ONLY'
+          }
+          if (@($a.probes | Where-Object {$_.start.exact -ne $true -or $_.end.exact -ne $true}).Count -ne 0) {throw 'SUBTEST_MARKER_NOT_EXACT'}
+          Write-Output 'ORIGINAL_SUBTESTS_DIAGNOSTIC_COMPLETE_NOT_STAGE01'
+      - name: Hash all native receipts and diagnostic evidence
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force subtest_diag_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem subtest_diag_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName)"
+          } | Set-Content -Encoding utf8 subtest_diag_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-stage01-native-original-subtests-diagnostic-only
+          path: |
+            font_bootstrap_evidence/
+            subtest_diag_evidence/
+            subtest_diag_evidence.sha256
+          retention-days: 21
