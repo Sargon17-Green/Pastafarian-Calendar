@@ -16,6 +16,61 @@ proc check(condition: bool, description: string) {
   }
 }
 
+proc sameWord(const ref a: list(int), const ref b: list(int)): bool {
+  if a.size != b.size then return false;
+  for i in 0..<a.size do if a[i] != b[i] then return false;
+  return true;
+}
+
+proc checkSparseWeavingDifferential() {
+  var families = 0;
+  var rankChecks = 0;
+  for m in 1..4 {
+    var possibilities = 1;
+    for j in 1..m do possibilities *= 3;
+    for raw in 0..<possibilities {
+      var digits = raw;
+      var lens: [1..m] int;
+      var days = 0;
+      for j in 1..m by -1 {
+        lens[j] = 1 + digits%3;
+        digits /= 3;
+        days += lens[j];
+      }
+      if days > 8 then continue;
+      var legacy: WeavingCounter;
+      var sparse: SparseWeavingCounter;
+      for j in 1..m {
+        legacy.lengths.pushBack(lens[j]);
+        sparse.lengths.pushBack(lens[j]);
+      }
+      const legacyRoot = legacy.countAll();
+      const sparseRoot = sparse.countAll();
+      check(legacyRoot == sparseRoot,
+            "sparse/legacy root mismatch family=" + families:string);
+      if legacyRoot == sparseRoot {
+        const rootCount = legacyRoot:int;
+        for r in 1..rootCount {
+          const rank1 = new bigint(r);
+          const legacyWord = legacy.unrank1(rank1);
+          const sparseWord = sparse.unrank1(rank1);
+          check(sameWord(legacyWord,sparseWord) && sparse.rank1(sparseWord) == rank1,
+                "sparse/legacy rank roundtrip family=" + families:string +
+                " rank=" + r:string);
+          rankChecks += 1;
+        }
+      }
+      families += 1;
+    }
+  }
+  writeln("YEAR_BOUNDARY_SPARSE_DIFFERENTIAL_FAMILIES=",families);
+  writeln("YEAR_BOUNDARY_SPARSE_DIFFERENTIAL_RANKS=",rankChecks);
+  check(families == 137 && rankChecks == 1982,
+        "sparse/legacy differential cardinality");
+  if failures == 0 then writeln("YEAR_BOUNDARY_SPARSE_DIFFERENTIAL_RESULT=PASS");
+  else writeln("YEAR_BOUNDARY_SPARSE_DIFFERENTIAL_RESULT=FAIL");
+}
+
 proc sameDate(const ref a: CalendarDateResult,
               const ref b: CalendarDateResult): bool {
   return a.yearNumber == b.yearNumber &&
@@ -72,6 +127,7 @@ proc checkpoint(phaseName: string) {
 }
 
 proc main() {
+  checkSparseWeavingDifferential();
   const calculationDay = FOUNDATION_DAY;
   var gates: GateOracle;
   checkpoint("YEAR5000_BEGIN");
@@ -234,9 +290,18 @@ proc main() {
   sampleDays.pushBack(lastDay);
 
   var calendarDateChecks = 0;
+  var fullCalendarDateCalls = 0;
+  var reusedStructureDateCalls = 0;
   for targetDay in sampleDays {
     checkpoint("CALENDAR_DATE_BEGIN_" + targetDay:string);
-    const actual = calendarDate(gates, calculationDay, targetDay);
+    var actual: CalendarDateResult;
+    if targetDay == firstDay {
+      actual = calendarDate(gates, calculationDay, targetDay);
+      fullCalendarDateCalls += 1;
+    } else {
+      actual = calendarDateFromStructure(year, structure, targetDay);
+      reusedStructureDateCalls += 1;
+    }
     checkpoint("CALENDAR_DATE_END_" + targetDay:string);
     checkpoint("INDEPENDENT_DATE_BEGIN_" + targetDay:string);
     const expected = independentDate(gates, year, structure, targetDay);
@@ -258,6 +323,11 @@ proc main() {
     }
   }
 
+  check(fullCalendarDateCalls == 1 &&
+        reusedStructureDateCalls == sampleDays.size-1,
+        "calendarDate full-build and reused-structure call counts");
+  writeln("YEAR_BOUNDARY_CALENDAR_DATE_FULL_BUILD_CALLS=",fullCalendarDateCalls);
+  writeln("YEAR_BOUNDARY_CALENDAR_DATE_REUSED_STRUCTURE_CALLS=",reusedStructureDateCalls);
   writeln("YEAR_BOUNDARY_PROBE_CHECKS=", checks);
   writeln("YEAR_BOUNDARY_PROBE_FAILURES=", failures);
   writeln("YEAR_BOUNDARY_CALENDAR_DATE_COMPARISONS=", calendarDateChecks);

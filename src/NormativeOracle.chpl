@@ -976,9 +976,348 @@ module NormativeOracle {
     }
   }
 
+
+  // Exact sparse transfer/adjoint implementation. The legacy WeavingCounter
+  // above remains the exhaustive small-input differential oracle.
+  record SparseWeavingGapSpec {
+    var q: int = 0;
+    var fixedSum: int = 0;
+    var firstFixed: int = -1;
+    var tail: int = 0;
+  }
+
+  record SparseWeavingVec {
+    var first: int = 0;
+    var values: list(bigint);
+    proc at(position: int): bigint {
+      if position < first || position >= first + values.size then return new bigint(0);
+      return values[position-first];
+    }
+    proc mass(): bigint {
+      var result = new bigint(0);
+      for x in values do result += x;
+      return result;
+    }
+  }
+
+  proc sparseWeavingPack(const ref dense: [?D] bigint): SparseWeavingVec {
+    var first = -1, last = -1;
+    for i in D {
+      if dense[i] != 0 {
+        if first < 0 then first = i;
+        last = i;
+      }
+    }
+    var result: SparseWeavingVec;
+    if first >= 0 {
+      result.first = first;
+      for i in first..last do result.values.pushBack(dense[i]);
+    }
+    return result;
+  }
+
+  proc sparseWeavingChooseBig(n: int, k: int): bigint {
+    if k < 0 || k > n then return new bigint(0);
+    const small = min(k, n-k);
+    var result = new bigint(1);
+    for t in 1..small {
+      result = (result * new bigint(n-small+t)) / new bigint(t);
+    }
+    return result;
+  }
+
+  proc sparseWeavingWeight(i: int, n: int, k: int,
+                           spec: SparseWeavingGapSpec): bigint {
+    const q = spec.q;
+    if i < q {
+      if spec.firstFixed != i then return new bigint(0);
+    } else if spec.fixedSum != 0 || (i > q && spec.tail != 0) {
+      return new bigint(0);
+    }
+    const start = max(i,q);
+    if start > n then return new bigint(0);
+    var required = spec.fixedSum;
+    if i >= q {
+      if i == n {
+        if q == n then required += max(1, spec.tail);
+        else required += 1;
+      } else {
+        required += 2;
+        if q == i && spec.tail > 1 then required += spec.tail - 1;
+      }
+    } else {
+      if q == n then required += max(1, spec.tail);
+      else required += spec.tail + 1;
+    }
+    const slack = k-required;
+    if slack < 0 then return new bigint(0);
+    return sparseWeavingChooseBig(slack + n-start,n-start);
+  }
+
+  proc sparseWeavingExtendSpec(old: SparseWeavingGapSpec,
+                               month: int, candidate: int): SparseWeavingGapSpec {
+    var result = old;
+    if candidate == month {
+      result.tail += 1;
+    } else {
+      if result.firstFixed < 0 && result.tail > 0 then result.firstFixed = result.q;
+      result.q += 1;
+      result.fixedSum += result.tail;
+      result.tail = 0;
+    }
+    return result;
+  }
+
+  proc sparseWeavingTransfer(const ref previous: SparseWeavingVec,
+                             n: int, k: int,
+                             spec: SparseWeavingGapSpec): SparseWeavingVec {
+    var dense: [0..n+k] bigint;
+    var cumulative = new bigint(0);
+    const firstActive = max(spec.q, previous.first);
+    const useRecurrence = spec.fixedSum == 0 && spec.tail == 0 &&
+                          k >= 8 && previous.values.size > 0 &&
+                          firstActive <= n && n-firstActive >= 8;
+    var coefficient = new bigint(0);
+    if useRecurrence then
+      coefficient = sparseWeavingChooseBig(k-2+n-firstActive,n-firstActive);
+    for i in 0..n {
+      cumulative += previous.at(i);
+      if cumulative != 0 {
+        if useRecurrence && i >= firstActive {
+          if coefficient != 0 then dense[i+1] = cumulative*coefficient;
+        } else {
+          const factor = sparseWeavingWeight(i,n,k,spec);
+          if factor != 0 then dense[i+1] = cumulative*factor;
+        }
+      }
+      if useRecurrence && i >= firstActive && i < n then
+        coefficient = (coefficient * new bigint(n-i)) /
+                      new bigint(k-2+n-i);
+    }
+    return sparseWeavingPack(dense);
+  }
+
+  proc sparseWeavingTranspose(const ref after: SparseWeavingVec,
+                              n: int, k: int,
+                              spec: SparseWeavingGapSpec): SparseWeavingVec {
+    var dense: [0..n] bigint;
+    var suffix = new bigint(0);
+    const lowActive = max(spec.q,after.first-1);
+    const highActive = min(n,after.first+after.values.size-2);
+    const useRecurrence = spec.fixedSum == 0 && spec.tail == 0 &&
+                          k >= 8 && highActive-lowActive >= 8;
+    var coefficient = new bigint(0);
+    if useRecurrence then
+      coefficient = sparseWeavingChooseBig(k-2+n-highActive,n-highActive);
+    for i in 0..n by -1 {
+      const a = after.at(i+1);
+      if a != 0 {
+        if useRecurrence && i >= lowActive && i <= highActive {
+          if coefficient != 0 then suffix += a*coefficient;
+        } else {
+          const factor = sparseWeavingWeight(i,n,k,spec);
+          if factor != 0 then suffix += a*factor;
+        }
+      }
+      dense[i] = suffix;
+      if useRecurrence && i <= highActive && i > lowActive then
+        coefficient = (coefficient * new bigint(k-1+n-i)) /
+                      new bigint(n-i+1);
+    }
+    return sparseWeavingPack(dense);
+  }
+
+  proc sparseWeavingDot(const ref a: SparseWeavingVec,
+                        const ref b: SparseWeavingVec): bigint {
+    var result = new bigint(0);
+    for t in 0..<b.values.size {
+      const i = b.first + t;
+      const x = a.at(i);
+      if x != 0 then result += x*b.values[t];
+    }
+    return result;
+  }
+
+  proc sparseWeavingSetup(const ref lens: [?D] int,
+                          ref states: [?S] SparseWeavingVec,
+                          ref sizes: [?Z] int,
+                          const ref specs: [?Q] SparseWeavingGapSpec): bigint {
+    const m = D.high;
+    var start: [0..lens[1]] bigint;
+    start[1] = new bigint(1);
+    states[1] = sparseWeavingPack(start);
+    sizes[1] = lens[1];
+    for j in 2..m {
+      states[j] = sparseWeavingTransfer(states[j-1],sizes[j-1],lens[j],specs[j]);
+      sizes[j] = sizes[j-1] + lens[j];
+    }
+    return states[m].mass();
+  }
+
+  proc sparseWeavingEligible(c: int, const ref lens: [?D] int,
+                             const ref used: [?U] int,
+                             opened: int, closed: int): bool {
+    const remaining = lens[c] - used[c];
+    return remaining > 0 && c <= opened+1 &&
+           (remaining != 1 || c == closed+1);
+  }
+
+  proc sparseWeavingCandidateBlocks(const ref lens: [?D] int,
+                                    const ref states: [?S] SparseWeavingVec,
+                                    const ref sizes: [?Z] int,
+                                    const ref specs: [?Q] SparseWeavingGapSpec,
+                                    const ref used: [?U] int,
+                                    opened: int, closed: int,
+                                    const ref total: bigint): [D] bigint {
+    const m = D.high;
+    var result: [D] bigint;
+    var identity: [0..sizes[m]] bigint;
+    for i in 0..sizes[m] do identity[i] = new bigint(1);
+    var adjoint = sparseWeavingPack(identity);
+    if m >= 2 {
+      for j in 2..m by -1 {
+        if sparseWeavingEligible(j,lens,used,opened,closed) {
+          const own = sparseWeavingExtendSpec(specs[j],j,j);
+          const trial = sparseWeavingTransfer(states[j-1],sizes[j-1],lens[j],own);
+          result[j] = sparseWeavingDot(adjoint,trial);
+        }
+        const older = sparseWeavingExtendSpec(specs[j],j,1);
+        adjoint = sparseWeavingTranspose(adjoint,sizes[j-1],lens[j],older);
+      }
+    }
+    if sparseWeavingEligible(1,lens,used,opened,closed) then
+      result[1] = sparseWeavingDot(adjoint,states[1]);
+    var partition = new bigint(0);
+    for j in 1..m do partition += result[j];
+    if partition != total then halt("Sparse weaving reverse-adjoint candidate partition mismatch");
+    return result;
+  }
+
+  proc sparseWeavingTake(c: int, const ref lens: [?D] int,
+                         ref states: [?S] SparseWeavingVec,
+                         const ref sizes: [?Z] int,
+                         ref specs: [?Q] SparseWeavingGapSpec,
+                         ref used: [?U] int,
+                         ref opened: int, ref closed: int,
+                         ref total: bigint, const ref ways: bigint) {
+    if !sparseWeavingEligible(c,lens,used,opened,closed) || ways <= 0 then
+      halt("Sparse weaving attempted an illegal or empty candidate");
+    for j in max(2,c)..D.high {
+      specs[j] = sparseWeavingExtendSpec(specs[j],j,c);
+      states[j] = sparseWeavingTransfer(states[j-1],sizes[j-1],lens[j],specs[j]);
+    }
+    used[c] += 1;
+    if used[c] == 1 then opened += 1;
+    if used[c] == lens[c] then closed += 1;
+    total = ways;
+    if states[D.high].mass() != total then
+      halt("Sparse weaving forward state and selected block differ");
+  }
+
+  proc sparseWeavingUnrankFromState(const ref lens: [?D] int,
+                                    ref states: [?S] SparseWeavingVec,
+                                    const ref sizes: [?Z] int,
+                                    ref specs: [?Q] SparseWeavingGapSpec,
+                                    ref total: bigint, rank0: bigint): list(int) {
+    const m = D.high;
+    if rank0 < 0 || rank0 >= total then halt("Sparse weaving rank0 out of range");
+    var used: [D] int;
+    var opened = 0, closed = 0;
+    var residual = rank0;
+    var word = new list(int);
+    for step in 1..sizes[m] {
+      const blocks = sparseWeavingCandidateBlocks(lens,states,sizes,specs,
+                                                   used,opened,closed,total);
+      var chosen = 0;
+      for c in 1..m {
+        if residual >= blocks[c] then residual -= blocks[c];
+        else {
+          chosen = c;
+          sparseWeavingTake(c,lens,states,sizes,specs,used,opened,closed,total,blocks[c]);
+          word.pushBack(c);
+          break;
+        }
+      }
+      if chosen == 0 then halt("Sparse weaving unrank selection failed");
+    }
+    if residual != 0 || total != 1 then halt("Sparse weaving unrank terminal invariant failed");
+    return word;
+  }
+
+  proc sparseWeavingRankFromState(const ref lens: [?D] int,
+                                  ref states: [?S] SparseWeavingVec,
+                                  const ref sizes: [?Z] int,
+                                  ref specs: [?Q] SparseWeavingGapSpec,
+                                  ref total: bigint,
+                                  const ref word: list(int)): bigint {
+    const m = D.high;
+    if word.size != sizes[m] then halt("Sparse weaving rank word length mismatch");
+    var used: [D] int;
+    var opened = 0, closed = 0;
+    var rank0 = new bigint(0);
+    for c in word {
+      if c < 1 || c > m then halt("Sparse weaving rank symbol outside family");
+      const blocks = sparseWeavingCandidateBlocks(lens,states,sizes,specs,
+                                                   used,opened,closed,total);
+      for earlier in 1..<c do rank0 += blocks[earlier];
+      sparseWeavingTake(c,lens,states,sizes,specs,used,opened,closed,total,blocks[c]);
+    }
+    if total != 1 then halt("Sparse weaving rank terminal invariant failed");
+    return rank0;
+  }
+
+  record SparseWeavingCounter {
+    var lengths: list(int);
+
+    proc ref countAll(): bigint {
+      const m = lengths.size;
+      if m < 1 then halt("Sparse weaving requires at least one month");
+      var lens: [1..m] int;
+      for i in 1..m {
+        if lengths[i-1] < 1 then halt("Sparse weaving month lengths must be positive");
+        lens[i] = lengths[i-1];
+      }
+      var specs: [1..m] SparseWeavingGapSpec;
+      var states: [1..m] SparseWeavingVec;
+      var sizes: [1..m] int;
+      return sparseWeavingSetup(lens,states,sizes,specs);
+    }
+
+    proc ref unrank1(const ref rank1: bigint): list(int) {
+      const m = lengths.size;
+      if m < 1 then halt("Sparse weaving requires at least one month");
+      var lens: [1..m] int;
+      for i in 1..m {
+        if lengths[i-1] < 1 then halt("Sparse weaving month lengths must be positive");
+        lens[i] = lengths[i-1];
+      }
+      var specs: [1..m] SparseWeavingGapSpec;
+      var states: [1..m] SparseWeavingVec;
+      var sizes: [1..m] int;
+      var total = sparseWeavingSetup(lens,states,sizes,specs);
+      if rank1 < 1 || rank1 > total then halt("Sparse weaving 1-based rank out of range");
+      return sparseWeavingUnrankFromState(lens,states,sizes,specs,total,rank1-new bigint(1));
+    }
+
+    proc ref rank1(const ref word: list(int)): bigint {
+      const m = lengths.size;
+      if m < 1 then halt("Sparse weaving requires at least one month");
+      var lens: [1..m] int;
+      for i in 1..m {
+        if lengths[i-1] < 1 then halt("Sparse weaving month lengths must be positive");
+        lens[i] = lengths[i-1];
+      }
+      var specs: [1..m] SparseWeavingGapSpec;
+      var states: [1..m] SparseWeavingVec;
+      var sizes: [1..m] int;
+      var total = sparseWeavingSetup(lens,states,sizes,specs);
+      return sparseWeavingRankFromState(lens,states,sizes,specs,total,word)+new bigint(1);
+    }
+  }
+
   proc chooseMonthWeaving(const ref structureSauce: SauceResult,
                           const ref monthLengths: list(int)): list(int) {
-    var counter: WeavingCounter;
+    var counter: SparseWeavingCounter;
     counter.lengths = monthLengths;
     const stream = askBowl(structureSauce, 4, SEAL_MONTH_WEAVING);
     return counter.unrank1(chooseRank(stream, counter.countAll()));
@@ -1008,12 +1347,11 @@ module NormativeOracle {
     return resultValue;
   }
 
-  proc calendarDate(ref gates: GateOracle,
-                    const ref calculationDay: bigint,
-                    const ref targetDay: bigint): CalendarDateResult {
-    const year = gates.findTargetYear(calculationDay, targetDay);
-    const structure = buildYearStructure(gates, calculationDay, year);
-
+  proc calendarDateFromStructure(const ref year: Year,
+                                 const ref structure: YearStructure,
+                                 const ref targetDay: bigint): CalendarDateResult {
+    if targetDay < year.openGateDay + 1 || targetDay > year.closeGateDay then
+      halt("Target day is outside the supplied year structure.");
     var chosenCutletIndex = -1;
     for i in structure.cutlets.indices {
       const c = structure.cutlets[i];
@@ -1040,5 +1378,13 @@ module NormativeOracle {
     result.monthName = monthNameByCanonicalIndex(monthNameIndex);
     result.dayInMonth = dayInMonth;
     return result;
+  }
+
+  proc calendarDate(ref gates: GateOracle,
+                    const ref calculationDay: bigint,
+                    const ref targetDay: bigint): CalendarDateResult {
+    const year = gates.findTargetYear(calculationDay, targetDay);
+    const structure = buildYearStructure(gates, calculationDay, year);
+    return calendarDateFromStructure(year,structure,targetDay);
   }
 }
