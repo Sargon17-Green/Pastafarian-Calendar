@@ -1,0 +1,64 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "branch": "FALSE+العربية",
+  "source_head": "aca2f4a52f746fa3172389d5d3e1308a1f17ed4f",
+  "scope": "STAGE18_DESIGN_ONLY_INDEPENDENT_QA",
+  "date": "2026-11-21",
+  "input_fixture": "test/stage18_drop_order_design_vectors.json",
+  "fixture_git_blob": "843d48951b43fab941e0c1f46e48018a679e08d4",
+  "normative_source_git_blob": "3e9acc012bedf83294a6ec3cccb081a069556b5b",
+  "primary_design_oracle_git_blob": "f84d3d10c470b0669c4735af5aebbaeaee0b7464",
+  "independent_methods": [
+    "Rank: signed Euclidean normalization r=((D%720)+720)%720; rank=720 if r=0 else r, independent of D-1 formula",
+    "Permutation: factorial-number-system unranking with 5!,4!,3!,2!,1!,0! and removal from ordered [1,2,3,4,5,6], not recursive permutation enumeration",
+    "Inverse: rank permutation by sum(index_in_remaining_set * factorial(remaining_positions-1))+1",
+    "BigInt: validate sign/limb count/range/zero/padding and independently decode sum(limb_i * 512^i) * sign"
+  ],
+  "checks": {
+    "fixture_cases": 28,
+    "fixture_fields_checked": 112,
+    "unique_fixture_ranks": 17,
+    "complete_720_rank_permutations_checked": 720,
+    "all_inverse_ranks_checked": 720,
+    "all_720_lexicographic_unique": true,
+    "fixture_mismatches": 0,
+    "cycle_errors": 0
+  },
+  "deliberate_negative_controls": [
+    {
+      "name": "rank_plus_one",
+      "rejected": true,
+      "reason": "rank mismatch"
+    },
+    {
+      "name": "swapped_order",
+      "rejected": true,
+      "reason": "permutation mismatch"
+    },
+    {
+      "name": "bad_limb",
+      "rejected": true,
+      "reason": "non-canonical base512 digit"
+    },
+    {
+      "name": "bad_sign",
+      "rejected": true,
+      "reason": "decoded BigInt differs"
+    }
+  ],
+  "execution_environment": "GitHub connector source reads plus independent in-memory ECMAScript/V8 QA; not GitHub Actions or native FALSE",
+  "ci_run_checked": "44829385016",
+  "ci_verify_job": "136610171791",
+  "ci_verify_status": "completed/success",
+  "ci_native_jobs": "skipped",
+  "implementation_changed": false,
+  "stage18_native_run": false,
+  "stage18_accepted": false,
+  "last_accepted_stage": "17_BOUNDED",
+  "limitations": [
+    "28 fixture cases do not constitute an exhaustive signed BigInt domain test",
+    "No original FALSE interpreter invoked",
+    "No physical invalid-pointer or truncated-allocation testing",
+    "This QA receipt is design-only and does not authorize implementation or CI dispatch"
+  ]
+}
