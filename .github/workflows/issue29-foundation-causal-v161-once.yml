@@ -1,16 +1,14 @@
 name: Issue29 v161 authorized one-shot foundation trace (QA-only, NO SOAK)
+# Authorization fully consumed: v161 QA calls one Python and one Ada in run 44905873294.
+# Disabled even for workflow_dispatch: no further foundation execution on this lineage.
 on:
-  push:
-    branches:
-      - qa/issue29-foundation-causal-v160
-    paths:
-      - .github/workflows/issue29-foundation-causal-v161-once.yml
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
   one-foundation-day-only:
-    if: >-
-      ${{ github.event_name == 'push' && github.ref == 'refs/heads/qa/issue29-foundation-causal-v160' && github.event.head_commit.message == 'qa(issue29): authorized one-shot foundation v161' }}
+    # The v161 authorization was already used; this step is deliberately impossible.
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     env:
