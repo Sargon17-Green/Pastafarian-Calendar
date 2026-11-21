@@ -2660,6 +2660,23 @@ jobs:
           grep -Fxq 'STAGE51_INIT_VALIDATION_GATE=PASS' build/stage51-native.log
           grep -Fxq 'STAGE51_TO_TEXT_GATE=PASS' build/stage51-native.log
           grep -Fxq 'STAGE51_FREE_A_GATE=PASS' build/stage51-native.log
+          grep -Fxq 'STAGE51_TO_TEXT_OVERFLOW_GATE=PASS' build/stage51-native.log
+          grep -Eq '^STAGE51_TO_TEXT_OVERFLOW_REJECTS=[[:space:]]*0*1[[:space:]]*
+          grep -Eq '^STAGE51_TO_TEXT_REJECTS=[[:space:]]*0*50[[:space:]]*$' build/stage51-native.log
+          for pair in 'INIT_VALIDATION_REJECTS 75' 'FREE_A_REJECTS 50' 'INITIAL_OWNERS 125' 'INPUT_REBUILDS 100' 'PRESERVED_AFTER_INPUT_CHANGE 125' 'OCCUPIED_REJECTS 25' 'INVALID_SIGN_REJECTS 25' 'PRESERVED_AFTER_REJECT 125' 'SURVIVORS_AFTER_FREE 100' 'SURVIVORS_AFTER_REUSE 100' 'REPLACEMENT_OWNERS 25' 'RESTORED_OWNERS 25' 'RESTORED_SNAPSHOTS 125' 'FINAL_CLEANUP 25' 'TARGET_SLOT_1 5' 'TARGET_SLOT_2 5' 'TARGET_SLOT_3 5' 'TARGET_SLOT_4 5' 'TARGET_SLOT_5 5' 'RUNS 25' 'PASS 25' 'UNEXPECTED_FAILURES 0' 'HEAP_LIVE_POST_RELEASE 0'; do
+            read -r key value <<<"$pair"
+            grep -Eq "^STAGE51_${key}=[[:space:]]*0*${value}[[:space:]]*$" build/stage51-native.log
+          done
+          echo 'STAGE51_NATIVE_GATE=PASS' | tee -a build/stage51-native.log
+      - name: Preserve Stage50 evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage51-five-live-same-sign-cancellation-evidence
+          path: build/stage51-native.log
+          if-no-files-found: warn
+          retention-days: 30
+ build/stage51-native.log
           grep -Eq '^STAGE51_TO_TEXT_REJECTS=[[:space:]]*0*50[[:space:]]*$' build/stage51-native.log
           for pair in 'INIT_VALIDATION_REJECTS 75' 'FREE_A_REJECTS 50' 'INITIAL_OWNERS 125' 'INPUT_REBUILDS 100' 'PRESERVED_AFTER_INPUT_CHANGE 125' 'OCCUPIED_REJECTS 25' 'INVALID_SIGN_REJECTS 25' 'PRESERVED_AFTER_REJECT 125' 'SURVIVORS_AFTER_FREE 100' 'SURVIVORS_AFTER_REUSE 100' 'REPLACEMENT_OWNERS 25' 'RESTORED_OWNERS 25' 'RESTORED_SNAPSHOTS 125' 'FINAL_CLEANUP 25' 'TARGET_SLOT_1 5' 'TARGET_SLOT_2 5' 'TARGET_SLOT_3 5' 'TARGET_SLOT_4 5' 'TARGET_SLOT_5 5' 'RUNS 25' 'PASS 25' 'UNEXPECTED_FAILURES 0' 'HEAP_LIVE_POST_RELEASE 0'; do
             read -r key value <<<"$pair"
