@@ -8,6 +8,7 @@ on:
       - 'soak/candidates/ada_full_weave_gmp_v164/**'
 permissions:
   contents: read
+  actions: read
 jobs:
   gmp-exact-full-family:
     runs-on: ubuntu-24.04
@@ -105,6 +106,31 @@ jobs:
             timeout --signal=KILL 90s               python3 -B soak/candidates/ada_full_weave_gmp_v164/check_gmp_global_rank_vs_independent_v164.py                 evidence/full-rank.stdout evidence/full-rank-independently-verified.json
           ) > evidence/full-rank-check.stdout 2> evidence/full-rank-check.stderr
           grep -Fx V164_INDEPENDENT_EXACT_GLOBAL_RANK_AND_ALL_4244_WEAVE_IDS_PASS_NO_F             evidence/full-rank-check.stdout
+      - name: Pin and stage only already-recorded v161 source-QA month-selector intermediate evidence
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/prepare_issue29_v161_replay_v164.py             "$RUNNER_TEMP/issue29-v164-v161-pinned"             > evidence/pinned-v161-preparation.stdout             2> evidence/pinned-v161-preparation.stderr
+          cp "$RUNNER_TEMP/issue29-v164-v161-pinned/v164-captured-v161-expected.json"             evidence/v164-captured-v161-expected.json
+          grep -Fx V164_V161_SOURCE_LOCKED_REPLAY_PREPARED_NO_NEW_F evidence/pinned-v161-preparation.stdout
+      - name: Bounded Ada GMP unranking of sealed v161 selector WITHOUT calendar call
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            ulimit -v 524288
+            /usr/bin/time -v timeout --signal=KILL 90s               ./soak/candidates/ada_full_weave_gmp_v164/bin/replay_issue29_v161_gmp_v164                 "$RUNNER_TEMP/issue29-v164-v161-pinned/v164-captured-selector.txt"
+          ) > evidence/pinned-v161-replay.stdout 2> evidence/pinned-v161-replay.stderr
+          grep -Fx V164_PINNED_V161_INTERMEDIATE_REPLAY_COMPLETE_NO_NEW_F evidence/pinned-v161-replay.stdout
+      - name: Confirm native GMP count, all 4244 slots and month20/day56 match already-pinned Python QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/verify_issue29_v161_replay_v164.py             evidence/v164-captured-v161-expected.json             evidence/pinned-v161-replay.stdout             evidence/v164-v161-prior-intermediate-replay-verified.json             > evidence/pinned-v161-check.stdout 2> evidence/pinned-v161-check.stderr
+          grep -Fx V164_PINNED_V161_PYTHON_QA_VS_ADA_GMP_COUNT_AND_ALL_4244_WEAVE_MATCH             evidence/pinned-v161-check.stdout
+          grep -Fx V164_PINNED_V161_PROJECTION_MONTH20_DAY56_RECOVERED_NO_F             evidence/pinned-v161-check.stdout
       - name: Reconstruct byte-locked historical Ada into reversible QA-only GMP integration
         shell: bash
         env:
