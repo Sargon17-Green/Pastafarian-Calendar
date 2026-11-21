@@ -24,9 +24,15 @@ procedure Test_Issue29_GMP_Edge_V165 is
       end if;
       for Pass in 1 .. (if Check_Last then 2 else 1) loop
          declare
-            Rank : constant G.Big_Integer :=
-              (if Pass = 1 then G.Make ("1") else N);
-            Word : constant CW.Natural_Array := CW.Unrank (F, Rank);
+            Rank : G.Big_Integer;
+         begin
+            if Pass = 1 then
+               G.Set (Rank, G.Make ("1"));
+            else
+               G.Set (Rank, N);
+            end if;
+            declare
+               Word : constant CW.Natural_Array := CW.Unrank (F, Rank);
             Frequencies : CW.Natural_Array (1 .. Lengths'Length) := (others => 0);
             First : CW.Natural_Array (1 .. Lengths'Length) := (others => 0);
             Last : CW.Natural_Array (1 .. Lengths'Length) := (others => 0);
@@ -63,6 +69,7 @@ procedure Test_Issue29_GMP_Edge_V165 is
             Ada.Text_IO.Put_Line
               ("V165_EDGE_PASS|" & Label & "|" & Natural'Image (Pass)
                & "|" & Natural'Image (Word'Length));
+            end;
          end;
       end loop;
       Ada.Text_IO.Put_Line
