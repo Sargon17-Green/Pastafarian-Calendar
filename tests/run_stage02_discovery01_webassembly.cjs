@@ -120,6 +120,12 @@ const K5_Q8_TARGETS = new Map([
   ['test_discovery01_k5_q8_backward_exact_limit',{step:-1,offset:0n}],
   ['test_discovery01_k5_q8_backward_eight_rejections',{step:-1,offset:1n}]
 ]);
+const K5_Q9_TARGETS = new Map([
+  ['test_discovery01_k5_q9_forward_exact_limit',{step:1,offset:0n}],
+  ['test_discovery01_k5_q9_forward_wrap',{step:1,offset:1n}],
+  ['test_discovery01_k5_q9_backward_exact_limit',{step:-1,offset:0n}],
+  ['test_discovery01_k5_q9_backward_nine_rejections',{step:-1,offset:1n}]
+]);
 const SOURCE = path.join(__dirname, 'normative_selector.wat');
 const PTR = {M: 65536, FIRST: 74368, CUR: 78784, N: 83200, LIMIT: 96448, SPACE: 100864, WIDE: 105280, RESULT: 145024};
 const M = (1n << 127n) - 1n;
@@ -585,6 +591,40 @@ function checkK5Q8(name,values) {
     mathematical_rejections:String(rejected)};
 }
 
+function checkK5Q9(name,values) {
+  assert.ok(K5_Q9_TARGETS.has(name),'unexpected q9 witness');
+  const {step,offset}=K5_Q9_TARGETS.get(name);
+  // Independent BigInt positional and closed-form equations, not WAT Horner code.
+  const first=step===1?M-13n:M-9n;
+  const digits=Array.from({length:5},(_,j)=>first+BigInt(step*j));
+  assert.ok(digits.every(d=>d>=1n&&d<=M),name+': answer domain');
+  const space=M**5n;
+  const x=1n+digits.reduce((total,d,j)=>total+(d-1n)*M**BigInt(j),0n);
+  const deficit=step===1
+    ?9n*M**4n+10n*M**3n+11n*M**2n+12n*M+13n
+    :13n*M**4n+12n*M**3n+11n*M**2n+10n*M+9n;
+  assert.equal(M%9n,1n,name+': base congruence');
+  assert.equal(x,space-deficit,name+': independent polynomial');
+  assert.equal(x%9n,0n,name+': exact divisibility');
+  const n=x/9n-offset;
+  assert.ok(n>M**4n&&n<space,name+': k=5 domain');
+  const q=space/n,limit=q*n;
+  assert.equal(q,9n,name+': exact quotient');
+  assert.equal(limit,x-9n*offset,name+': exact boundary');
+  const accepted=offset===0n?x:step===1?1n:limit;
+  const rank=(accepted-1n)%n+1n;
+  assert.equal(rank,step===1&&offset===1n?1n:n,name+': rank');
+  const cur=step===1?M-8n:M-14n;
+  for(const [key,v] of Object.entries({
+    M,FIRST:first,CUR:cur,N:n,SPACE:space,LIMIT:limit,WIDE:accepted,RESULT:rank
+  })) assert.equal(BigInt(values[key]),v,name+': '+key);
+  const rejected=offset===0n?0n:step===1?deficit+1n:9n;
+  return {name,k:5,q:'9',step,offset:String(offset),first:String(first),
+    n:String(n),initial_x:String(x),limit:String(limit),
+    accepted:String(accepted),rank:String(rank),
+    mathematical_rejections:String(rejected)};
+}
+
 function main() {
   if (process.argv[2] === '--one') {
     child(process.argv[3], process.argv[4]);
@@ -602,7 +642,7 @@ function main() {
     const tests = WebAssembly.Module.exports(mod)
       .filter(e => e.kind === 'function' && e.name.startsWith('test_'))
       .map(e => e.name).sort();
-    assert.equal(tests.length, 107, 'unexpected regression set size');
+    assert.equal(tests.length, 111, 'unexpected regression set size');
     assert.equal(new Set(tests).size, tests.length, 'duplicate export');
     for (const name of TARGETS.keys()) assert.ok(tests.includes(name), 'missing target: ' + name);
     for (const name of FORWARD_TARGETS.keys()) assert.ok(tests.includes(name), 'missing forward target: ' + name);
@@ -620,6 +660,7 @@ function main() {
     for (const name of K5_Q6_TARGETS.keys()) assert.ok(tests.includes(name), 'missing k5 q6: ' + name);
     for (const name of K5_Q7_TARGETS.keys()) assert.ok(tests.includes(name), 'missing k5 q7: ' + name);
     for (const name of K5_Q8_TARGETS.keys()) assert.ok(tests.includes(name), 'missing k5 q8: ' + name);
+    for (const name of K5_Q9_TARGETS.keys()) assert.ok(tests.includes(name), 'missing k5 q9: ' + name);
     let passed = 0;
     const numerics = {};
     const forwardNumerics = {};
@@ -637,6 +678,7 @@ function main() {
     const k5Q6Numerics = {};
     const k5Q7Numerics = {};
     const k5Q8Numerics = {};
+    const k5Q9Numerics = {};
     for (const name of tests) {
       const p = spawnSync(process.execPath, [__filename, '--one', compiled, name],
         {encoding: 'utf8', timeout: 30000, maxBuffer: 1000000});
@@ -662,6 +704,7 @@ function main() {
       if (K5_Q6_TARGETS.has(name)) k5Q6Numerics[name] = checkK5Q6(name, outcome.numerics);
       if (K5_Q7_TARGETS.has(name)) k5Q7Numerics[name] = checkK5Q7(name, outcome.numerics);
       if (K5_Q8_TARGETS.has(name)) k5Q8Numerics[name] = checkK5Q8(name, outcome.numerics);
+      if (K5_Q9_TARGETS.has(name)) k5Q9Numerics[name] = checkK5Q9(name, outcome.numerics);
       passed++;
     }
     assert.equal(Object.keys(numerics).length, TARGETS.size, 'missing numeric probes');
@@ -680,6 +723,7 @@ function main() {
     assert.equal(Object.keys(k5Q6Numerics).length, K5_Q6_TARGETS.size, 'missing k5 q6 probes');
     assert.equal(Object.keys(k5Q7Numerics).length, K5_Q7_TARGETS.size, 'missing k5 q7 probes');
     assert.equal(Object.keys(k5Q8Numerics).length, K5_Q8_TARGETS.size, 'missing k5 q8 probes');
+    assert.equal(Object.keys(k5Q9Numerics).length, K5_Q9_TARGETS.size, 'missing k5 q9 probes');
     const report = {
       project_id: 'PC-BRANCH-WAT-SPANISH',
       native_engine: 'Node WebAssembly via WABT',
@@ -700,7 +744,8 @@ function main() {
       k5_q5_numeric_oracles: k5Q5Numerics,
       k5_q6_numeric_oracles: k5Q6Numerics,
       k5_q7_numeric_oracles: k5Q7Numerics,
-      k5_q8_numeric_oracles: k5Q8Numerics
+      k5_q8_numeric_oracles: k5Q8Numerics,
+      k5_q9_numeric_oracles: k5Q9Numerics
     };
     process.stdout.write(JSON.stringify(report, null, 2) + '\n');
   } finally {
