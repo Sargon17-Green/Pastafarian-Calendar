@@ -4,6 +4,8 @@
             [pastafari.poortposities :as poorten]
             [pastafari.maandlengtes :as production-lengths]
             [pastafari.maandweving :as weving]
+            [pastafari.koteletverdeling :as production-sauce]
+            [pastafari.keuzestroom :as production-choice]
             [pastafari.normative-oracle :as oracle]))
 
 (def ^:private project-id "PC-BRANCH-CLOJURE-DUTCH")
@@ -20,10 +22,10 @@
 
 (defn write-canonical-input! []
   (let [source-sha (System/getenv "GITHUB_SHA")
-        _ (eis! (and source-sha
+        source-sha-check (eis! (and source-sha
                      (re-matches #"[0-9a-f]{40}" source-sha))
                 :missing-source-sha {:source-sha source-sha})
-        _ (eis! (= calculation-day (+' dagen/stichtingsdag 17N))
+        calculation-anchor-check (eis! (= calculation-day (+' dagen/stichtingsdag 17N))
                 :calculation-anchor-drift
                 {:calculation-day calculation-day
                  :foundation-day dagen/stichtingsdag})
@@ -46,6 +48,12 @@
         weaving-stream (oracle/ask-bowl
                         structure-sauce 4N oracle/seal-month-weaving)
         rank (oracle/choose-rank weaving-stream total)
+        production-structure-sauce
+        (production-sauce/structuur-saus calculation-day production-year)
+        production-weaving-stream
+        (production-choice/vraag-kom production-structure-sauce 4N 32N)
+        production-rank (production-choice/kies-rang production-weaving-stream total)
+        rank-matches? (= rank production-rank)
         year-matches?
         (and (= (:number production-year) (:number norm-year))
              (= (:open-gate-index production-year)
@@ -59,7 +67,7 @@
         profile-matches? (= production-profile profile)
         duration (-' (:close-gate-day norm-year)
                      (:open-gate-day norm-year))
-        _ (eis! (and year-matches?
+        canonical-cross-check (eis! (and year-matches?
                      (= 5000N (:number norm-year))
                      (= month-count (:month-count production-selection))
                      profile-matches?
@@ -68,7 +76,8 @@
                      (every? #(<= 4N % 123N) profile)
                      (= duration (reduce +' 0N profile))
                      (pos? total)
-                     (<= 1N rank total))
+                     (<= 1N rank total)
+                     rank-matches?)
                 :canonical-input-cross-check-failed
                 {:normative-year norm-year
                  :production-year production-year
@@ -76,7 +85,9 @@
                  :production-month-count (:month-count production-selection)
                  :normative-profile profile
                  :production-profile production-profile
-                 :total total :rank rank})
+                 :total total :normative-rank rank
+                 :production-rank production-rank
+                 :rank-matches? rank-matches?})
         payload
         (str "{"
              "\"project_id\":\"" project-id "\","
@@ -94,6 +105,7 @@
              "\"profile\":" (json-array profile) ","
              "\"weaving_total\":\"" total "\","
              "\"weaving_rank\":\"" rank "\","
+             "\"production_weaving_rank\":\"" production-rank "\","
              "\"profile_source\":\"normative-oracle/choose-month-lengths\","
              "\"rank_source\":\"normative-oracle/choose-rank over exact production family count\","
              "\"normative_oracle_blob_sha\":\"5b2f486a12aeb8ff3cea0d762ba26882d67fb4cc\","
@@ -101,7 +113,8 @@
              "\"production_month_count_blob_sha\":\"166b87a11124f0be4594a4b537c1e87d336ba659\","
              "\"production_month_weaving_blob_sha\":\"e3954a4742414435f85c95955f0d319d136877d2\","
              "\"production_year_matches_normative\":true,"
-             "\"production_profile_matches_normative\":true"
+             "\"production_profile_matches_normative\":true,"
+             "\"production_rank_matches_normative\":true"
              "}")
         output-path "qa/clojure-dutch/discovery24_canonical_dp_input.json"]
     (spit output-path payload)

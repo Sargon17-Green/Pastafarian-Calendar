@@ -147,6 +147,10 @@ def run_canonical_diagnostic(input_path, output_path):
         data = json.load(stream)
     if data.get("project_id") != "PC-BRANCH-CLOJURE-DUTCH":
         raise ValueError("PROJECT_ID mismatch")
+    if (data.get("production_year_matches_normative") is not True
+            or data.get("production_profile_matches_normative") is not True
+            or data.get("production_rank_matches_normative") is not True):
+        raise ValueError("normative/production canonical input cross-check failed")
     source_sha = data.get("source_sha")
     if not isinstance(source_sha, str) or len(source_sha) != 40:
         raise ValueError("missing or malformed source SHA")
@@ -225,7 +229,7 @@ def run_canonical_diagnostic(input_path, output_path):
         exit_code = 2
     with open(output_path, "w", encoding="utf-8") as stream:
         json.dump(result, stream, ensure_ascii=False, indent=2, sort_keys=True)
-        stream.write("\\n")
+        stream.write("\n")
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
     return exit_code
 
