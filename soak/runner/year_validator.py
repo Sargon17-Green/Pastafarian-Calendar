@@ -8,6 +8,7 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import json
+import os
 import pathlib
 import re
 from typing import Iterator, TextIO
@@ -127,6 +128,11 @@ def compare_years(path_a: pathlib.Path, path_b: pathlib.Path,
     compared = 0
     try:
         with pathlib.Path(path_a).open("r", encoding="utf-8") as fa, pathlib.Path(path_b).open("r", encoding="utf-8") as fb:
+            # Different engine labels cannot self-certify by reading one inode.
+            # Compare the handles after opening to cover symlinks and hardlinks,
+            # while allowing separately produced byte-identical transcripts.
+            if os.path.sameopenfile(fa.fileno(), fb.fileno()):
+                raise TranscriptError("both engines reference the same physical transcript file", 0)
             ita, itb = iter_checked(fa, case), iter_checked(fb, case)
             for da, db in zip(ita, itb):
                 compared += 1
