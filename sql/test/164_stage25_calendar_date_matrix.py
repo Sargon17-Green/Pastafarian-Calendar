@@ -87,7 +87,7 @@ def sql_for(row: dict, mode: str) -> str:
             "    IF to_regnamespace('pastafari_sql_tamil_test') IS NOT NULL THEN",
             "        RAISE EXCEPTION 'reference schema present in production-only database';",
             "    END IF;",
-            "    RAISE NOTICE 'SLICE25_ISOLATION_SCHEMA_PASS=%';" % case,
+            f"    RAISE NOTICE 'SLICE25_ISOLATION_SCHEMA_PASS={case}';",
         ]
     statements += [
         f"    v_prod := pastafari_sql_tamil.calendar_date({calc},{target});",
@@ -156,6 +156,18 @@ def main() -> None:
     args = parser.parse_args()
     cases = checked_cases(args.locked)
     if args.audit:
+        generated_count = 0
+        for name, row in cases.items():
+            for mode in ("native", "isolation", "differential"):
+                generated = sql_for(row, mode)
+                assert generated.count("SLICE25_NATIVE_FIELD_PASS=") == 5
+                assert generated.count("SLICE25_DIFFERENTIAL_FIELD_PASS=") == (5 if mode == "differential" else 0)
+                assert ("SLICE25_ISOLATION_SCHEMA_PASS=" in generated) == (mode == "isolation")
+                assert ("SLICE25_ISOLATION_BODY_PASS=" in generated) == (mode == "isolation")
+                assert f"SLICE25_MATRIX_GREEN={mode}:{name}" in generated
+                generated_count += 1
+        assert generated_count == 87
+        print("SLICE25_GENERATOR_PREFLIGHT=87/87 PASS")
         print("SLICE25_LOCKED_CASES=29/29 PASS")
         print("SLICE25_LOCKED_YEARS=8/8 PASS")
         print("SLICE25_FIELD_EXPECTATIONS=145/145 PRESENT")
