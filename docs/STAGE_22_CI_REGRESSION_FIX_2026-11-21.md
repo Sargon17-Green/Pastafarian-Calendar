@@ -22,7 +22,7 @@ Exactly seven archive members were read, all seven ZIP CRCs passed. source.txt w
 Perl v5.40.5; test.exit=0, test.stderr empty, syntax checks OK, result.txt=STAGE22_NATIVE_PASS=1.
 Independent scan of test.stdout: smoke + every integer shard 0..31 exactly once, no 'not ok',
 33/33 Result: PASS; 742900 independent ballot oracle comparisons across the 32 shards;
-32*46467 + 61 = 1487005 TAP assertions. Oracle count 742900 and CSV SHA256
+20*46469 + 12*46467 + 61 = 1487045 TAP assertions. Oracle count 742900 and CSV SHA256
 67edb036b070b196c6b889b161a27baef6b0ec7852717586550ef2f8b4d7173d verified.
 The 13x4 count was 21604722570792867375065793772732; first/middle/last rank inverse checks passed.
 This is a **dedicated Stage22 Native PASS only**, not full-stage acceptance or a full-year claim.

@@ -1,0 +1,292 @@
+{
+  "project_id": "PC-BRANCH-PERL-GUOYU",
+  "branch": "Perl+國語",
+  "stage": 22,
+  "accepted_source_sha": "e28e6186c108b2ba2e2e7c4e5f32f778df33bd6a",
+  "last_completed_before": 21,
+  "last_completed_after": 22,
+  "ci": {
+    "run_id": 44904659215,
+    "attempt": 1,
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "head_branch": "Perl+國語",
+    "head_sha": "e28e6186c108b2ba2e2e7c4e5f32f778df33bd6a",
+    "total_jobs": 169,
+    "mandatory_success": 23,
+    "conditional_skipped": 146,
+    "mandatory_raw_logs_inspected": 23,
+    "stage01_files": 121,
+    "stage01_tests": 243194,
+    "stage02_tests": 263,
+    "stage03_tests": 289,
+    "jobs": [
+      {
+        "id": 136847546226,
+        "name": "Perl Stage21 twelve-month / forty-eight-day native QA",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847541199,
+        "name": "perl-stage01",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546031,
+        "name": "stage02-weaving-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847545970,
+        "name": "stage03-weaving-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847545914,
+        "name": "stage04-month-occurrence-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546039,
+        "name": "stage05-cutlet-occurrence-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546175,
+        "name": "stage06-year-occurrence-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546018,
+        "name": "stage07-five-field-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546083,
+        "name": "stage08-month-length-generation-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546057,
+        "name": "stage09-cutlet-partition-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546088,
+        "name": "stage10-distinct-name-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546189,
+        "name": "stage11-stream-rank-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847545967,
+        "name": "stage12-stream-distinct-name-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546081,
+        "name": "stage13-stream-name-materialization-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546241,
+        "name": "stage14-canonical-name-selection-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546113,
+        "name": "stage15-canonical-five-field-projection-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546207,
+        "name": "stage16-weaving-seven-months-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546199,
+        "name": "stage17-weaving-eight-months-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546037,
+        "name": "stage18-weaving-nine-months-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546139,
+        "name": "stage19-weaving-ten-months-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546229,
+        "name": "stage20-weaving-eleven-months-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847546239,
+        "name": "stage22-weaving-thirteen-months-native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 136847540928,
+        "name": "verify",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "stage22": {
+    "job_id": 136847546239,
+    "perl_version": "v5.40.5",
+    "syntax_checks_ok": 2,
+    "shard_count": 32,
+    "shard_indexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "shard_tap_counts": [
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46469,
+      46467,
+      46467,
+      46467,
+      46467,
+      46467,
+      46467,
+      46467,
+      46467,
+      46467,
+      46467,
+      46467,
+      46467
+    ],
+    "smoke_tap": 61,
+    "total_tap": 1487045,
+    "prove_pass": 33,
+    "oracle_compared_shards": 742900,
+    "oracle_compared_smoke": 12,
+    "oracle_catalan13_count": 742900,
+    "discovery_csv_sha256": "67edb036b070b196c6b889b161a27baef6b0ec7852717586550ef2f8b4d7173d",
+    "count_4x13": "21604722570792867375065793772732",
+    "first_middle_last_inverse": "PASS",
+    "independent_4x13_count_oracle": false,
+    "exit": 0,
+    "stderr_bytes": 0,
+    "result": "STAGE22_NATIVE_PASS=1",
+    "timeout_seconds_per_process": 120,
+    "virtual_memory_limit_kib": 393216
+  },
+  "artifact": {
+    "id": 14708038426,
+    "bytes": 3989812,
+    "provider_sha256": "ddef2e09f29b460ad4e5ddf8de4f9bd74b79e2befbd1a83f37dfa388c3de66d8",
+    "workflow_upload_sha256": "ddef2e09f29b460ad4e5ddf8de4f9bd74b79e2befbd1a83f37dfa388c3de66d8",
+    "downloaded_sha256": "ddef2e09f29b460ad4e5ddf8de4f9bd74b79e2befbd1a83f37dfa388c3de66d8",
+    "members": [
+      "perl-version.txt",
+      "result.txt",
+      "source.txt",
+      "syntax.stderr",
+      "test.exit",
+      "test.stdout",
+      "test.stderr"
+    ],
+    "crc_pass": 7,
+    "source_sha": "e28e6186c108b2ba2e2e7c4e5f32f778df33bd6a"
+  },
+  "historical_erratum": {
+    "old_run_id": 44896322930,
+    "old_reported_tap": 1487005,
+    "correct_tap": 1487045,
+    "correct_formula": "20*46469+12*46467+61",
+    "earlier_dedicated_stage22_native_pass_only": true
+  },
+  "limits": {
+    "months_max": 13,
+    "days_max": 52,
+    "month_occurrence_months_max": 9,
+    "month_occurrence_days_max": 36,
+    "full_year_generator_verified": false,
+    "stage23_opened": false,
+    "merged_to_main": false
+  },
+  "links": {
+    "ci": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44904659215",
+    "artifact": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44904659215/artifacts/14708038426"
+  }
+}

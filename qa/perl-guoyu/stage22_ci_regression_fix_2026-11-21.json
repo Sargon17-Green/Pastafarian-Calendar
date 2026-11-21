@@ -31,8 +31,9 @@
     "stderr_bytes": 0,
     "shards": 32,
     "oracle_compared": 742900,
-    "tap": 1487005,
-    "stage22_job": "success"
+    "tap": 1487045,
+    "stage22_job": "success",
+    "tap_erratum": "20x46469 + 12x46467 + 61; corrected after independent shard-log recount (2026-11-21)"
   },
   "changes": [
     {
