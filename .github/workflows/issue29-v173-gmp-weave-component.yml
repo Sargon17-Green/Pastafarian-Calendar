@@ -1,0 +1,107 @@
+name: Issue29 v173 production GMP full-weave component (ZERO Calendar_Date)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-weave-component-v173
+    paths:
+      - '.github/workflows/issue29-v173-gmp-weave-component.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v173-production-gmp-weave-component-one-shot
+  cancel-in-progress: false
+jobs:
+  bounded-production-gmp-weave-component:
+    if: ${{ github.run_attempt == 1 && github.ref == 'refs/heads/qa/issue29-ada-gmp-weave-component-v173' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout source-locked production GMP component descendants
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify runner Python syntax before any native execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tests/issue29_v173_gmp_weave_runner.py
+          echo "V173_RUNNER_SYNTAX_PASS_NO_EXECUTION"
+      - name: Install GNAT 13, GPRBuild, GNATCOLL GMP and GNU time
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils time > apt-install.log 2>&1
+          gnat --version > gnat-version.txt
+          gprbuild --version > gprbuild-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 time > gmp-and-time-packages.txt
+          test -x /usr/bin/time
+      - name: Lock production sources and audit no Calendar_Date call sites
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v173_gmp_weave_runner.py preflight | tee v173-preflight.stdout
+          grep -Fx V173_SOURCE_LOCK_AND_NO_CALENDAR_DATE_AUDIT_PASS v173-preflight.stdout
+          test -f evidence/preflight.json
+          test ! -e evidence/RUN_STARTED_GMP_WEAVE
+      - name: Compile and link direct production GMP full-weave test; execute none yet
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v173_gmp_weave_runner.py build | tee v173-build.stdout
+          grep -Fx V173_PRODUCTION_GMP_WEAVE_BUILD_LINK_PASS_NO_EXECUTION v173-build.stdout
+          test -f evidence/build-manifest.json
+      - name: Execute one bounded GMP component test and independent rank/reference checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v173_gmp_weave_runner.py run-once | tee v173-run.stdout
+          grep -Fx V173_PRODUCTION_GMP_FULL_WEAVE_2846_ASSERTIONS_PASS_ZERO_F_ZERO_SOAK v173-run.stdout
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("evidence/result.json").read_bytes())
+          assert d["status"]=="PASS_PRODUCTION_GMP_FULL_WEAVE_COMPONENT_ONLY"
+          assert d["assertions"]==2846
+          assert d["calendar_date_invocations"]==0
+          assert d["full_calendar_F_invocations"]==0
+          assert d["soak_years"]==0
+          assert d["process"]["exit_code"]==0
+          assert d["gnu_time"]["exit_code"]==0
+          assert d["process"]["limit_violation"] is None
+          print("V173_INDEPENDENT_GMP_WEAVE_RESULT_PASS_ZERO_F_ZERO_SOAK")
+          PY
+      - name: Hash and preserve evidence on success or failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          d=Path("evidence");d.mkdir(exist_ok=True)
+          files={}
+          for p in sorted(d.iterdir()):
+              if p.is_file() and p.name!="manifest.sha256.json":
+                  raw=p.read_bytes()
+                  files[p.name]={"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest()}
+          (d/"manifest.sha256.json").write_text(json.dumps(files,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Upload one-shot production GMP weave component evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v173-production-gmp-weave-component-no-calendar-date
+          path: |
+            evidence/
+            apt-update.log
+            apt-install.log
+            gnat-version.txt
+            gprbuild-version.txt
+            gmp-and-time-packages.txt
+            v173-preflight.stdout
+            v173-build.stdout
+            v173-run.stdout
+          retention-days: 30
+          if-no-files-found: warn
