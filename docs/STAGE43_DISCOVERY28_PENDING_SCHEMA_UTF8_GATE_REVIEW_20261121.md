@@ -33,7 +33,7 @@ At blob `a3f53b67e4445bdc835179cd484fe27b3e2648f7`, the file contains:
 - 728 distinct keys, with no duplicate keys;
 - no malformed assignment lines and no empty values;
 - all keys satisfy the ASCII grammar `[A-Z][A-Z0-9_]*`;
-- the value of `NATURAL_LANGUAGE` is legitimately non-ASCII: `טגלוג / Filipino`. Values must therefore not be restricted to ASCII.
+- the value of `NATURAL_LANGUAGE` is legitimately non-ASCII: `U+05D8 U+05D2 U+05DC U+05D5 U+05D2 / Filipino`. Values must therefore not be restricted to ASCII.
 
 The current phase markers are `TOTAL_STAGES=55`, `CURRENT_STAGE=42`, `CURRENT_KIND=DISCOVERY`, `CURRENT_DISCOVERY=27`, `LAST_COMPLETED_STAGE=42`, and `STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED`. No Stage43 key is present. The Stage42 historical record includes `STAGE42_SEAL_COMMIT_NATIVE_RECHECK=PENDING_NEW_SHA`; this review preserves that value verbatim.
 
