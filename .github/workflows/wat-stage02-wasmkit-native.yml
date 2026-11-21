@@ -65,6 +65,25 @@ jobs:
           sha256sum "$RUNNER_TEMP/wat-stage02-evidence/source.wasm" \
             > "$RUNNER_TEMP/wat-stage02-evidence/source-wasm.sha256"
 
+      - name: Smoke test WasmKit invocation and capture actual return-value notation
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/wat-stage02-evidence"
+          cat > "$evidence/smoke.wat" <<'WAT'
+          (module (func (export "smoke") (result i32) i32.const 1))
+          WAT
+          wat2wasm "$evidence/smoke.wat" -o "$evidence/smoke.wasm"
+          set +e
+          timeout 30s wasmkit run "$evidence/smoke.wasm" smoke > "$evidence/smoke.stdout" 2> "$evidence/smoke.stderr"
+          smoke_exit=$?
+          set -e
+          printf 'SMOKE_EXIT_CODE\t%s\n' "$smoke_exit" >> "$evidence/manifest.tsv"
+          cat "$evidence/smoke.stdout"
+          cat "$evidence/smoke.stderr" >&2
+          test "$smoke_exit" -eq 0
+          grep -qxE '\[(I32|i32|WasmTypes[.]Value[.]i32)\(1\)\]' "$evidence/smoke.stdout"
+
       - name: Independently enumerate exactly 111 parameterless i32 test exports
         shell: bash
         run: |
@@ -109,7 +128,7 @@ jobs:
             timeout 30s wasmkit run "$module" "$name" > "$evidence/$name.log" 2>&1
             exit_code=$?
             set -e
-            if [[ "$exit_code" -eq 0 ]] && grep -qxE '\[(I32|i32)\(1\)\]' "$evidence/$name.log"; then
+            if [[ "$exit_code" -eq 0 ]] && grep -qxE '\[(I32|i32|WasmTypes[.]Value[.]i32)\(1\)\]' "$evidence/$name.log"; then
               status='PASS'
               passed=$((passed + 1))
             elif [[ "$exit_code" -eq 124 ]]; then
