@@ -24,6 +24,13 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+          if [ "$GITHUB_REF" = "refs/heads/qa/issue29-ada-native-ci-gates-v170" ]; then
+            ruby -e 'require "yaml"; YAML.parse_file(".github/workflows/canonical-names-lock.yml"); puts "V170_YAML_PARSE_PASS_NO_WORKFLOW_EXECUTION"'
+            python3 -B tests/issue29_v170_native_ci_gate_audit.py | tee v170-gate-audit.json
+            grep -F '"native_job_count": 41' v170-gate-audit.json
+            grep -F '"calendar_date_invocations": 0' v170-gate-audit.json
+            grep -F '"status": "PASS_STATIC_ONLY_41_NATIVE_JOBS_INDEPENDENTLY_GATED"' v170-gate-audit.json
+          fi
 
   native-stage01:
     if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE01_ENABLED == 'true'
