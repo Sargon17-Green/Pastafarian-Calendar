@@ -1,6 +1,6 @@
 # Stage18 — תכנון, מימוש ובדיקת Native: סדר קערות מערך טיפה חתום
 
-PROJECT_ID: `PC-BRANCH-FALSE-ARABIC` · branch `FALSE+العربية` · IMPLEMENTATION_CANDIDATE_NATIVE_NOT_ACCEPTED · 2026-11-21.
+PROJECT_ID: `PC-BRANCH-FALSE-ARABIC` · branch `FALSE+العربية` · ACCEPTED_BOUNDED_CONTRACT_ONLY · 2026-11-21.
 
 ## עוגן נורמטיבי וחוזה
 
@@ -43,3 +43,11 @@ Stage17 התקבל בחוזה תחום לפי run `44812320919`, source `cc39bd7
 - ארטיפקט כשל 14702648556, SHA256 `7af629749fcf5437325525345c2987140237ebb174590592b929b75643c6a89f`, מכיל 25 קבצים תקינים ב־ZIP CRC. בקרה `bad_sign` לא הגיעה לסמן המצופה ולכן אינה PASS.
 - התיקון המצומצם למחולל ב־`9abeace3ff87a231ef25881b06da6bbe9bb1be56` משתמש ב־`b;g;!d;-0=~`, כשיטת השוואת מצביעים שכבר נוסתה ב־Stage16/17. המבקר העצמאי עודכן ב־`9446b5278cb61919d2d7ba4f0a06b2b60c5b7a71`. קוד הייצור והאורקל המתמטי אינם משתנים.
 - דוח כשל: `evidence/stage18_native_failure_diagnostic_2026-11-21.md`. Stage18 עדיין NOT_ACCEPTED עד Native completed עם חמש קבוצות, שני מוטנטים, artifact audit עצמאי ו־corrupted-oracle rejection. LAST_ACCEPTED_STAGE=17 BOUNDED. אין main/merge.
+
+## קבלה תחומה ומאומתת — 2026-11-21 (גוברת על סטטוסים מוקדמים)
+
+Stage18 **ACCEPTED_BOUNDED_CONTRACT_ONLY**; Stage17 אינו עוד השלב האחרון שהתקבל. ההרצה [44928155271](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44928155271), commit `f90e9004b562cec163dddb5c6c73dcf174818ea2`, job `136918700270`, הסתיימה `completed/success` במפרש FALSE מקורי נעול `eb3135565a8670cced3f6bbca4dbf7b014c45634`, SOURCE_PIN `9abeace3ff87a231ef25881b06da6bbe9bb1be56`.
+
+חמשת מקטעי Native כללו 750 מקרים, 11,231 בדיקות assertion פנימיות ו־750 סמני הצלחה; בכל מקטע exit0 ו־stderr ריק. שתי בקרות שליליות (`bad_order`, `bad_sign`) יצאו exit1 עם סמני כשל צפויים. artifact `14717932567` קיים, SHA-256 `f8fe2c0f3f1b1f5a345e2a7524c4ad38a0e9a9073ebad58480fde7e43b88990b`, 41 entries ו־ZIP CRC תקין. בשחזור בלתי תלוי של קלטי Base512 הושוו כל 750 התוצאות לתמורה לקסיקוגרפית לפי factoradic; אורקל שהושחת במכוון נדחה. כל ששת קובצי source/fixture/QA אומתו בנפרד לפי SHA-256 של תוכנם מול GitHub בקומיט המקור, ושני קובצי הייצור גם לפי Git blob SHA1. תוצאות ומזהים מפורטים ב־`evidence/stage18_bounded_acceptance_2026-11-21.json`. מבקר הריפו הותאם ל־SHA של הרצת Native המוצלחת ב־`14e57f456722ca29c362739b017ec63027b52727`; הוא עצמו לא הורץ בסביבה מקומית ללא clone, אך בוצעה ביקורת ZIP נפרדת בפועל.
+
+**גבול קבלה:** הקלטים הקנוניים והמצביעים המוקצים כהגדרת החוזה. לא נבדקה בטיחות מול מצביעים פגומים פיזית, הקצאות חסרות או heap מושחת. לא נבדקו ביצועי Native לכל טווח BigInt אפשרי. אין merge/main. **אין הרשאה לפתוח שלב נוסף**; מעבר לשלב נוסף דורש החלטת משתמש.
