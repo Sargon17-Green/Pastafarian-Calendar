@@ -36,11 +36,18 @@ def main() -> None:
 
     completed = subprocess.run(
         [str(args.fortran_exe.resolve())],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
         timeout=180,
     )
+    if completed.returncode != 0:
+        print("STAGE01_FOUNDATION_CANDIDATE_PROBE_EXIT={}".format(completed.returncode))
+        print("STAGE01_FOUNDATION_CANDIDATE_PROBE_STDOUT_BEGIN")
+        print(completed.stdout)
+        print("STAGE01_FOUNDATION_CANDIDATE_PROBE_STDERR_BEGIN")
+        print(completed.stderr)
+        raise SystemExit("Foundation-Day candidate probe failed; raw diagnostics are above")
     lines = completed.stdout.splitlines()
     if "STAGE01_FOUNDATION_CANDIDATE_INVARIANTS=PASS" not in lines:
         raise AssertionError("Fortran candidate probe omitted invariant PASS")
