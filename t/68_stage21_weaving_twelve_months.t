@@ -64,7 +64,7 @@ if (defined($shard)) {
     }
 }
 
-for my $bad (undef, [], [49], [(1)x13], [38,(1)x11], [40,(1)x9],
+for my $bad (undef, [], [53], [(1)x14], [42,(1)x11], [44,(1)x9],
              [0], [-1], [1.5], ['02'], ['2x'], [undef], {}, [Math::BigInt->bone]) {
     ok(!eval { count_weavings($bad); 1 }, 'reject invalid Stage21 profile');
 }

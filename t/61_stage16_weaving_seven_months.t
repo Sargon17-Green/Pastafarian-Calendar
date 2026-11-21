@@ -105,9 +105,9 @@ for my $profile (
 
 my $invalid_profiles = 0;
 for my $profile (
-    undef, [], [(1) x 13], [49], [41,(1) x 8],
+    undef, [], [(1) x 14], [53], [45,(1) x 8],
     [0], [-1], [1.5], ['2x'], ['03'], [undef],
-    [1,1,1,1,1,1,43], {}, [Math::BigInt->bone],
+    [1,1,1,1,1,1,47], {}, [Math::BigInt->bone],
 ) {
     ok(!eval { count_weavings($profile); 1 }, '拒絕非法月份數／日數／資料型態');
     ++$invalid_profiles;

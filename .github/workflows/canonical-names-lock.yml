@@ -3973,3 +3973,85 @@ jobs:
           path: logs/stage21
           if-no-files-found: warn
           retention-days: 30
+
+  stage22-weaving-thirteen-months-native:
+    timeout-minutes: 60
+    if: github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語'
+    runs-on: ubuntu-latest
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Stage22 independent oracle, 32 deterministic shards and 13x4 bounded production
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage22
+          git rev-parse HEAD > logs/stage22/source.txt
+          test "$(cat logs/stage22/source.txt)" = "$GITHUB_SHA"
+          perl -e 'die "Perl 5.40+ required\n" if $] < 5.040; print "$^V\n"' > logs/stage22/perl-version.txt
+          perl -Ilib -c lib/Pastafari/Monster/WeavingPrimitive.pm 2> logs/stage22/syntax.stderr
+          perl -Ilib -c t/70_stage22_weaving_thirteen_months.t 2>> logs/stage22/syntax.stderr
+          test "$(grep -c 'syntax OK' logs/stage22/syntax.stderr)" -eq 2
+          test "$(wc -l < logs/stage22/syntax.stderr)" -eq 2
+          : > logs/stage22/test.stdout
+          : > logs/stage22/test.stderr
+          set +e
+          (
+            set -euo pipefail
+            ulimit -v 393216
+            ulimit -c 0
+            timeout --signal=TERM --kill-after=5s 120s \
+              perl qa/perl-guoyu/stage22_independent_catalan13_oracle.pl \
+              >> logs/stage22/test.stdout 2>> logs/stage22/test.stderr
+            grep -q 'COUNT=742900' logs/stage22/test.stdout
+            grep -q 'CSV_NUMERIC_LEXICAL_LF_SHA256=67edb036b070b196c6b889b161a27baef6b0ec7852717586550ef2f8b4d7173d' logs/stage22/test.stdout
+            timeout --signal=TERM --kill-after=5s 120s \
+              prove -e 'perl -CS -Ilib' -v t/70_stage22_weaving_thirteen_months.t \
+              >> logs/stage22/test.stdout 2>> logs/stage22/test.stderr
+            for shard in $(seq 0 31); do
+              STAGE22_SHARD="$shard" timeout --signal=TERM --kill-after=5s 120s \
+                prove -e 'perl -CS -Ilib' -v t/70_stage22_weaving_thirteen_months.t \
+                >> logs/stage22/test.stdout 2>> logs/stage22/test.stderr
+            done
+            timeout --signal=TERM --kill-after=5s 120s \
+              perl -Ilib -MPastafari::Monster::WeavingPrimitive=count_weavings -e \
+              'my $v=count_weavings([(4)x13]); die "13x4 count mismatch\n" unless "$v" eq "21604722570792867375065793772732"; print "STAGE22_4X13_COUNT=$v\n";' \
+              >> logs/stage22/test.stdout 2>> logs/stage22/test.stderr
+            for rank in 1 10802361285396433687532896886366 21604722570792867375065793772732; do
+              timeout --signal=TERM --kill-after=5s 120s \
+                perl -Ilib -MPastafari::Monster::WeavingPrimitive=rank_weaving,unrank_weaving -e \
+                'my $p=[(4)x13]; my $r=$ARGV[0]; my $word=unrank_weaving($p,$r); die "length\n" unless @$word==52; my $back=rank_weaving($p,$word); die "inverse mismatch\n" unless "$back" eq "$r"; print "STAGE22_4X13_RANK_$r=PASS\n";' "$rank" \
+                >> logs/stage22/test.stdout 2>> logs/stage22/test.stderr
+            done
+          )
+          ec=$?
+          set -e
+          printf '%s\n' "$ec" > logs/stage22/test.exit
+          test "$ec" -eq 0
+          test ! -s logs/stage22/test.stderr
+          test "$(grep -c 'All tests successful.' logs/stage22/test.stdout)" -eq 33
+          test "$(grep -c 'Result: PASS' logs/stage22/test.stdout)" -eq 33
+          test "$(grep -c 'STAGE22_BALLOT_COUNT=742900' logs/stage22/test.stdout)" -eq 33
+          test "$(grep -c 'STAGE22_SHARD=' logs/stage22/test.stdout)" -eq 33
+          grep -q 'STAGE22_ORACLE_COMPARED=23216' logs/stage22/test.stdout
+          grep -q 'STAGE22_ORACLE_COMPARED=23215' logs/stage22/test.stdout
+          grep -q 'STAGE22_4X13_COUNT=21604722570792867375065793772732' logs/stage22/test.stdout
+          test "$(grep -c 'STAGE22_4X13_RANK_.*=PASS' logs/stage22/test.stdout)" -eq 3
+          grep -q 'STAGE22_FULL_YEAR_GENERATOR_NOT_VERIFIED' logs/stage22/test.stdout
+          echo 'STAGE22_NATIVE_PASS=1' > logs/stage22/result.txt
+          cat logs/stage22/result.txt >> "$GITHUB_STEP_SUMMARY"
+          echo 'STAGE22_NATIVE_EVIDENCE_SHA:' "$(cat logs/stage22/source.txt)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perl-stage22-weaving-thirteen-months-native
+          path: logs/stage22
+          if-no-files-found: warn
+          retention-days: 30

@@ -8,11 +8,11 @@ use Math::BigInt;
 use Scalar::Util qw(blessed);
 our @EXPORT_OK = qw(count_weavings rank_weaving unrank_weaving);
 
-# Stage21 accepted primitive: twelve months / forty-eight days. No date semantics.
+# Stage22 production candidate: thirteen months / fifty-two days. No date semantics.
 sub _counts ($profile) {
     die "月份長度須為陣列參照\n" if ref($profile) ne 'ARRAY';
     my $m = scalar @$profile;
-    die "月份數超出本階段範圍\n" if $m < 1 || $m > 12;
+    die "月份數超出本階段範圍\n" if $m < 1 || $m > 13;
     my (@lengths, $days);
     $days = 0;
     for my $v (@$profile) {
@@ -20,7 +20,7 @@ sub _counts ($profile) {
         die "總日數超出本階段範圍\n" if length("$v") > 2;
         my $length = int($v);
         $days += $length;
-        die "總日數超出本階段範圍\n" if $days > 48;
+        die "總日數超出本階段範圍\n" if $days > 52;
         push @lengths, $length;
     }
     return (\@lengths, $days);
@@ -51,14 +51,20 @@ sub _solver ($lengths) {
             $capacity += $size;
         }
     }
-    my @memo;
+    # Dense memo arena: 32 bytes per state and one explicit visited bit.
+    my $memo = "\0" x ($capacity * 32);
+    my $seen = "\0" x int(($capacity + 7) / 8);
     my $one = pack('Q<4',1,0,0,0);
     my $base = 1_000_000_000_000;
     my $solve;
     $solve = sub ($self, $opened, $closed, $code) {
         my $index = $offset[$opened][$closed] + $code;
-        return $memo[$index] if defined $memo[$index];
-        return $memo[$index] = $one if $closed == $m;
+        return substr($memo,$index*32,32) if vec($seen,$index,1);
+        if ($closed == $m) {
+            substr($memo,$index*32,32,$one);
+            vec($seen,$index,1) = 1;
+            return $one;
+        }
         my ($a,$b,$c,$d) = (0,0,0,0);
         my $add = sub ($packed) {
             my ($x,$y,$z,$w) = unpack('Q<4',$packed);
@@ -86,7 +92,10 @@ sub _solver ($lengths) {
             }
         }
         die "計數超出精確位數\n" if $d >= $base;
-        return $memo[$index] = pack('Q<4',$a,$b,$c,$d);
+        my $packed = pack('Q<4',$a,$b,$c,$d);
+        substr($memo,$index*32,32,$packed);
+        vec($seen,$index,1) = 1;
+        return $packed;
     };
     return ($solve, \@weight);
 }

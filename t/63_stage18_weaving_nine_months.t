@@ -130,8 +130,8 @@ for my $profile ([(4)x9], [28,(1)x8], [36]) {
 
 my $invalid_profiles = 0;
 for my $bad (
-    undef, [], [(1)x13], [49], [40,(1)x9],
-    [1,1,1,1,1,1,1,1,1,40], [0], [-1], [1.5],
+    undef, [], [(1)x14], [53], [44,(1)x9],
+    [1,1,1,1,1,1,1,1,1,44], [0], [-1], [1.5],
     ['02'], ['2x'], [undef], {}, [Math::BigInt->bone]
 ) {
     ok(!eval {count_weavings($bad);1}, 'reject invalid profile');
