@@ -156,6 +156,10 @@ begin
 end;
 
 begin
+  {$IFDEF FPC}
+  { Assert labels must be written in UTF-8, not the host's legacy CP_ACP. }
+  SetTextCodePage(Output, CP_UTF8);
+  {$ENDIF}
   Passed := 0;
   Failed := 0;
   try

@@ -135,6 +135,12 @@ jobs:
             fi
           } 2>&1 | tee evidence/stage01-native-fpc.log
 
+      - name: Verify Stage 1 Portuguese diagnostics are UTF-8
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/verify_stage01_utf8_labels.py evidence/stage01-native-fpc.log
+
       - name: Preserve native execution log
         if: always()
         uses: actions/upload-artifact@v4
