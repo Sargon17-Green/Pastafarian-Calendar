@@ -176,7 +176,7 @@ def source_guard() -> dict:
     bootstrap = Path("src/monster_bootstrap.adb").read_text(encoding="utf-8")
     # The only Calendar_Date occurrences in the source package are its spec
     # declaration and its body definition; there is no call site in src/tests.
-    matches = git("grep", "-n", "-E", r"Calendar_Date[[:space:]]*\(", "--", "src", "tests/stage01_tests.adb", "tests/stage03_patch01_tests.adb", "tests/stage05_patch02_tests.adb").decode().splitlines()
+    matches = git("grep", "-n", "-F", "Calendar_Date", "--", "src", "tests/stage01_tests.adb", "tests/stage03_patch01_tests.adb", "tests/stage05_patch02_tests.adb").decode().splitlines()
     expected_matches = [
         "src/normative_oracle.adb:1113:    function Calendar_Date",
         "src/normative_oracle.ads:68:   function Calendar_Date",
