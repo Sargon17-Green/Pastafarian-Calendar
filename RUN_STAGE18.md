@@ -36,3 +36,10 @@ Stage17 התקבל בחוזה תחום לפי run `44812320919`, source `cc39bd7
 - מחולל נפרד ב־Python מפענח fixtures ב־Base512 ומחשב תמורות באמצעות `itertools.permutations`; בדיקת ביקורת עצמאית תשתמש באורקל Factoradic ללא ייבוא קוד הייצור או fixture כמקור יחיד.
 - שער ה־Native ב־`tools/stage18_drop_order_ci.py` בודק מקור נעול, exit codes, stdout/stderr, סדר סמני הצלחה, אימות יצירת fixture ומוטנטים. הרצה אינה קבלה ללא בדיקת artifact offline נפרדת.
 - בשלב כתיבת רשומה זו אין מסקנת Native verified, אין artifact audit ואין Stage18 acceptance.
+
+## תיקון שער Stage18 בעקבות Native failure (2026-11-21)
+
+- ריצת 44893419729, משימה 136813908499, הסתיימה בכישלון על commit `300cc893f1f1901cae1ad2b71835930cf8145466`; build ו־Unicode preflight עברו, אך Native exit=1 ב־`positive_0.false:784:7`. לא התקבל אף סמן CASE שלם. זהו כשל fixture מסוג `stack type mismatch` בהשוואת handle ישירה `b;g;!d=~`, ולא הוכחה לשגיאת תמורה ב־op35.
+- ארטיפקט כשל 14702648556, SHA256 `7af629749fcf5437325525345c2987140237ebb174590592b929b75643c6a89f`, מכיל 25 קבצים תקינים ב־ZIP CRC. בקרה `bad_sign` לא הגיעה לסמן המצופה ולכן אינה PASS.
+- התיקון המצומצם למחולל ב־`9abeace3ff87a231ef25881b06da6bbe9bb1be56` משתמש ב־`b;g;!d;-0=~`, כשיטת השוואת מצביעים שכבר נוסתה ב־Stage16/17. המבקר העצמאי עודכן ב־`9446b5278cb61919d2d7ba4f0a06b2b60c5b7a71`. קוד הייצור והאורקל המתמטי אינם משתנים.
+- דוח כשל: `evidence/stage18_native_failure_diagnostic_2026-11-21.md`. Stage18 עדיין NOT_ACCEPTED עד Native completed עם חמש קבוצות, שני מוטנטים, artifact audit עצמאי ו־corrupted-oracle rejection. LAST_ACCEPTED_STAGE=17 BOUNDED. אין main/merge.
