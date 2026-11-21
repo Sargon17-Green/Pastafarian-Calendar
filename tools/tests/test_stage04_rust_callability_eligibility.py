@@ -183,7 +183,7 @@ class CallabilityTests(unittest.TestCase):
                     for value in (-15055672, -15055671, -15055670):
                         self.assertIn(f"BigInt::from({value})", body)
 
-    def test_reserved_historical_probe_path_is_preserved(self):
+    def test_reserved_probe_and_original_archive_tree_are_preserved(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             probe = root / "tests" / "stage04_callability_gate.rs"
@@ -193,6 +193,30 @@ class CallabilityTests(unittest.TestCase):
             with self.assertRaises(RuntimeUnverified):
                 install_probe(root, "synthetic_rust_daytag", "old_numeric_probe")
             self.assertEqual(probe.read_text(encoding="utf-8"), sentinel)
+
+        # A normal Git archive must reproduce all pinned tree members byte for
+        # byte, even before the one-use test probe is installed.
+        with tempfile.TemporaryDirectory() as temp:
+            callability_cli.archive(self.repo, self.old, Path(temp))
+            self.assertTrue((Path(temp) / "src/lib.rs").is_file())
+
+        # git archive applies .gitattributes transformations. A successful
+        # Cargo build from modified export bytes is not pinned historical code.
+        changed = self.commit({
+            ".gitattributes": "src/lib.rs export-subst\n",
+            "src/lib.rs": 'const PIN: &str = "$Format:%H$";\n',
+        })
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaisesRegex(RuntimeUnverified, "archived file bytes"):
+                callability_cli.archive(self.repo, changed, Path(temp))
+
+        changed = self.commit({
+            ".gitattributes": "evidence.txt export-ignore\n",
+            "evidence.txt": "historical tree member\n",
+        })
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaisesRegex(RuntimeUnverified, "tree membership"):
+                callability_cli.archive(self.repo, changed, Path(temp))
 
     def test_exclusive_probe_creation_is_one_use(self):
         with tempfile.TemporaryDirectory() as temp:
