@@ -34,7 +34,7 @@ jobs:
           assert d["native_jobs_before_source_review_can_execute"] is False
           assert d["soak_dispatch_allowed"] is False
           w=pathlib.Path(".github/workflows/canonical-names-lock.yml").read_text()
-          assert w.count("if: ${{ false }}")==42
+          assert w.count("if: " + "$" + "{{ false }}")==42
           assert w.count("  verify:\n")==1
           assert d["staged_sha256"]==hashlib.sha256(w.encode()).hexdigest()
           print("V170_ALL_42_ORIGINAL_ADA_LEGACY_NATIVE_JOBS_FAIL_SHUT")
