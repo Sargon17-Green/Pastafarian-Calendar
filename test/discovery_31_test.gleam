@@ -35,9 +35,8 @@ fn in_original_bands(
   case bands {
     [] -> False
     [band, ..rest] ->
-      case band.lower <= band.upper
-        && band.lower <= value
-        && value <= band.upper
+      case
+        band.lower <= band.upper && band.lower <= value && value <= band.upper
       {
         True -> True
         False -> in_original_bands(value, rest)
@@ -193,15 +192,9 @@ pub fn discovery_31_single_gap_one_side_only_test() {
     [],
   )
   |> should.equal(0)
-  check_valid(
-    context,
-    [1],
-    [],
-    [band(gap, gap)],
-    [],
-    [band(gap, gap)],
-    [band(gap, gap)],
-  )
+  check_valid(context, [1], [], [band(gap, gap)], [], [band(gap, gap)], [
+    band(gap, gap),
+  ])
   |> should.equal(0)
 }
 
@@ -230,15 +223,9 @@ pub fn discovery_31_multiple_gaps_direct_oracle_test() {
 pub fn discovery_31_empty_left_or_right_bands_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 2, 3]
-  check_valid(
-    context,
-    ids,
-    [],
-    [band(42, 963)],
-    [],
-    [band(42, 963)],
-    [band(42, 963)],
-  )
+  check_valid(context, ids, [], [band(42, 963)], [], [band(42, 963)], [
+    band(42, 963),
+  ])
   |> should.equal(0)
   check_valid(
     context,
@@ -354,43 +341,29 @@ pub fn discovery_31_extremes_commutativity_monotonicity_test() {
   |> should.equal(78)
   let a = [band(42, 963)]
   let b = [band(100, 200)]
-  let base = check_valid(
-    context,
-    ids,
-    a,
-    b,
-    a,
-    [band(42, 963)],
-    b,
-  )
-  let reversed = check_valid(
-    context,
-    ids,
-    b,
-    a,
-    b,
-    [band(42, 963)],
-    a,
-  )
+  let base = check_valid(context, ids, a, b, a, [band(42, 963)], b)
+  let reversed = check_valid(context, ids, b, a, b, [band(42, 963)], a)
   base |> should.equal(reversed)
-  let larger_a = check_valid(
-    context,
-    ids,
-    [band(42, 963), band(964, 1926)],
-    b,
-    [band(42, 1926)],
-    [band(42, 1926)],
-    b,
-  )
-  let larger_b = check_valid(
-    context,
-    ids,
-    a,
-    [band(100, 200), band(201, 1926)],
-    a,
-    [band(42, 1926)],
-    [band(100, 1926)],
-  )
+  let larger_a =
+    check_valid(
+      context,
+      ids,
+      [band(42, 963), band(964, 1926)],
+      b,
+      [band(42, 1926)],
+      [band(42, 1926)],
+      b,
+    )
+  let larger_b =
+    check_valid(
+      context,
+      ids,
+      a,
+      [band(100, 200), band(201, 1926)],
+      a,
+      [band(42, 1926)],
+      [band(100, 1926)],
+    )
   { larger_a >= base && larger_b >= base }
   |> should.equal(True)
 }

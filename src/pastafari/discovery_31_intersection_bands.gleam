@@ -26,7 +26,10 @@ pub fn dispatch_discovery_31(
   requested_bowl_ids: List(Int),
   left_bands: List(discovery_27_sum_bands.SumBand),
   right_bands: List(discovery_27_sum_bands.SumBand),
-) -> Result(IntersectionWindowCount, discovery_19_interval_value.Discovery19Error) {
+) -> Result(
+  IntersectionWindowCount,
+  discovery_19_interval_value.Discovery19Error,
+) {
   case
     discovery_28_union_bands.dispatch_discovery_28(
       context,
