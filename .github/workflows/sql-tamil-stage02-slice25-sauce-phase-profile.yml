@@ -1,0 +1,75 @@
+name: SQL Tamil Slice25 bounded sauce phase QA PG17
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/169_stage25_sauce_phase_profile.py'
+      - '.github/workflows/sql-tamil-stage02-slice25-sauce-phase-profile.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-locked-one-case:
+    runs-on: ubuntu-latest
+    timeout-minutes: 32
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lock source and generate reversible QA-only one-case probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          mkdir -p phase-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nGITHUB_SHA=%s\nBRANCH=%s\nCASE=prev_3_prev_middle\nCALC=-15055671\nTARGET=-15072356\nFAILED_RUN=44910633756\nFAILED_JOB=136865492170\nFAILED_ARTIFACT=14710610663\nFAILED_ORIGINAL_SHA256=5b972d19d81e14b6e885a0d43d4647159b78ac693780bd7ad100939efac26873\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > phase-evidence/versions.txt
+          python3 sql/test/169_stage25_sauce_phase_profile.py --self-test | tee phase-evidence/static.txt
+          python3 sql/test/164_stage25_calendar_date_matrix.py --audit | tee phase-evidence/oracle-audit.txt
+          python3 sql/test/169_stage25_sauce_phase_profile.py --out-dir phase-evidence | tee phase-evidence/generator.txt
+          sha256sum sql/test/169_stage25_sauce_phase_profile.py sql/test/164_stage25_calendar_date_matrix.py sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl .github/workflows/sql-tamil-stage02-slice25-sauce-phase-profile.yml phase-evidence/phase-overrides.sql phase-evidence/test.sql phase-evidence/original.sql > phase-evidence/source-sha256.txt
+          for i in $(seq -w 0 27); do
+            mapfile -t found < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#found[@]}" -eq 1
+            sha256sum "${found[0]}" >> phase-evidence/source-sha256.txt
+            git hash-object "${found[0]}" >> phase-evidence/production-blobs.txt
+          done
+      - name: Start isolated offline PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name tamil-profile --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for i in $(seq 1 60); do
+            if docker exec -u postgres tamil-profile pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres tamil-profile postgres --version | tee -a phase-evidence/versions.txt
+      - name: One instrumented case, then original equivalence only if probe passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t found < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#found[@]}" -eq 1
+            args+=(-f "/work/${found[0]}")
+          done
+          docker exec -u postgres tamil-profile psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" -f /work/phase-evidence/phase-overrides.sql -f /work/phase-evidence/test.sql 2>&1 | tee phase-evidence/postgres-phase.txt
+          test "$(grep -c 'SLICE25_QA_PHASE_FIELD_PASS=prev_3_prev_middle' phase-evidence/postgres-phase.txt)" -eq 5
+          grep -q 'SLICE25_QA_PHASE_GREEN=native:prev_3_prev_middle' phase-evidence/postgres-phase.txt
+          printf 'QA_PHASE_FIVE_FIELDS=5/5\nORIGINAL_EQUIVALENCE=NOT_YET_VERIFIED\n' > phase-evidence/phase-completion.txt
+          docker exec -u postgres tamil-profile psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/phase-evidence/original.sql 2>&1 | tee phase-evidence/postgres-original.txt
+          test "$(grep -c 'SLICE25_NATIVE_FIELD_PASS=prev_3_prev_middle' phase-evidence/postgres-original.txt)" -eq 5
+          grep -q 'SLICE25_MATRIX_GREEN=native:prev_3_prev_middle' phase-evidence/postgres-original.txt
+          printf 'QA_AND_ORIGINAL_EQUAL_VIA_INDEPENDENT_FIVE_FIELD_ORACLE=5/5\n' > phase-evidence/equivalence.txt
+      - name: Preserve all source, phase logs and timeout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamil-slice25-sauce-phase-prev3-${{ github.run_id }}
+          path: phase-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove PostgreSQL container
+        if: always()
+        run: docker rm -f tamil-profile 2>/dev/null || true
