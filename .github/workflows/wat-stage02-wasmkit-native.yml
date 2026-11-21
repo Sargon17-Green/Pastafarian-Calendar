@@ -35,10 +35,29 @@ jobs:
           test "$actual_wat" = "$WAT_SHA256"
           git status --short
 
-      - name: Install Swift 6.3.3 for WasmKit CLI
-        uses: swift-actions/setup-swift@v3
-        with:
-          swift-version: '6.3.3'
+      - name: Install verified WasmKit 0.1.6 Linux x86_64 release binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "x86_64"
+          release='https://github.com/swiftwasm/WasmKit/releases/download/0.1.6/wasmkit-x86_64-swift-linux-musl.tar.gz'
+          expected='57085becd37769ed618a9057dee6d70303195e31d3b46d09dac1cfb5d477aa24'
+          archive="$RUNNER_TEMP/wasmkit-x86_64-swift-linux-musl.tar.gz"
+          curl --fail --location --retry 3 --silent --show-error "$release" -o "$archive"
+          printf '%s  %s\n' "$expected" "$archive" | sha256sum --check --status
+          tar -xzf "$archive" -C "$RUNNER_TEMP"
+          bin_dir="$RUNNER_TEMP/wasmkit-x86_64-swift-linux-musl"
+          test -x "$bin_dir/wasmkit"
+          printf '%s\n' "$bin_dir" >> "$GITHUB_PATH"
+          version="$("$bin_dir/wasmkit" --version)"
+          printf '%s\n' "$version"
+          grep -Fq '0.1.6' <<< "$version"
+          {
+            printf 'WASMKIT_RELEASE\t0.1.6\n'
+            printf 'WASMKIT_RELEASE_URL\t%s\n' "$release"
+            printf 'WASMKIT_RELEASE_ARCHIVE_SHA256\t%s\n' "$expected"
+            printf 'WASMKIT_RELEASE_VERSION_OUTPUT\t%s\n' "$version"
+          } >> "$RUNNER_TEMP/wat-stage02-evidence/manifest.tsv"
 
       - name: Install WABT and record all runtime tool identities
         shell: bash
