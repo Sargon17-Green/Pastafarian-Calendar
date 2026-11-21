@@ -13,13 +13,14 @@ from stage01_statement_probe import build_statement_probe, decode_programs
 FINAL = "APL_GERMAN_DEPENDENCY_DIAGNOSTIC_COMPLETE_NOT_STAGE01"
 
 
-def anchor(blocks, name, needle=None):
+def anchor(blocks, name, needle=None, required_line=None):
     matches = [b for b in blocks if b["name"] == name]
     if len(matches) != 1:
         raise ValueError("SOURCE_NAME_NOT_UNIQUE:" + name)
     b = matches[0]
     hits = [(i, s) for i, s in enumerate(b["lines"])
-            if (needle is None and i == 0) or (needle is not None and needle in s)]
+            if ((needle is None and i == 0) or (needle is not None and needle in s))
+            and (required_line is None or b["start_line"] + i == required_line)]
     if len(hits) != 1:
         raise ValueError("SOURCE_ANCHOR_NOT_UNIQUE:" + name)
     i, source_text = hits[0]
@@ -40,7 +41,7 @@ def build_dependency_probe(raw, root, marker):
     anchors = {
         "ownership": anchor(blocks, "RunStage01OwnershipTests",
                             "AssertEqual (⊂2) (⊂⍴MonsterBaseSemanticState ctxB0)"),
-        "oracle": anchor(blocks, "RunStage01OracleStateTests", "EnsureGate 1"),
+        "oracle": anchor(blocks, "RunStage01OracleStateTests", "EnsureGate 1", required_line=108),
         "year": anchor(blocks, "RunStage01YearTests", "anchor←Year5000 FOUNDATION_DAY"),
         "get": anchor(blocks, "GateGet"),
         "put": anchor(blocks, "GatePut"),
