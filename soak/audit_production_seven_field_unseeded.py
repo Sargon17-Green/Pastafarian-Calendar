@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Nine real seven-column dates: FOUNDATION neighborhood and year-5000 edges.
+"""Eleven real seven-column dates: FOUNDATION neighborhood and year-5000 edges.
 
 Project PC-BRANCH-KOTLIN-CYMRAEG, QA only, NOT CERTIFIED.
-Production: actual JDK21/Kotlin1.9 bridge, one JVM and nine independently checked
+Production: actual JDK21/Kotlin1.9 bridge, one JVM and eleven independently checked
 convert() requests, including both sides of year-5000 boundaries. Oracle: branch-local, separately authored Python sauce,
 year geometry, composition and combinatorial month weaving; no pinned Python
 reference, checkpoint, production output seed or cross-branch fixture.
@@ -34,7 +34,7 @@ TARGETS = tuple(FOUNDATION + offset for offset in (-2, -1, 0, 1, 2))
 HALF_WIDTH = 280
 QUESTION_COUNT = HALF_WIDTH * 2
 GATE_LIMIT = 8192
-PASS = "PASS_BOUNDED_UNSEEDED_YEAR_EDGE_NINE_DATES_NOT_CERTIFIED"
+PASS = "PASS_BOUNDED_UNSEEDED_YEAR_EDGE_ELEVEN_DATES_NOT_CERTIFIED"
 DECIMAL = re.compile(r"(?:0|-?[1-9][0-9]*)\Z", re.ASCII)
 MODULES = (independent_date_combinatorics, independent_month_weaving_oracle,
            independent_sauce_oracle, independent_year_geometry_oracle,
@@ -85,16 +85,27 @@ def validate_ledger_trace(pairs: list[tuple[int, int]], count: int = QUESTION_CO
         raise SevenFieldAuditError("E_UNSEEDED_SIGNED_TRACE")
 
 
-def boundary_targets(year: Year) -> tuple[int, int, int, int]:
-    """Last/first day across both independently located year-5000 edges."""
+def boundary_targets(year: Year) -> tuple[int, ...]:
+    """Three-day windows around both independently located year-5000 edges."""
     if (not isinstance(year, Year) or year.number != 5000
             or not year.open_day < FOUNDATION <= year.close_day
             or year.close_day - year.open_day < 252):
         raise SevenFieldAuditError("E_INDEPENDENT_YEAR_BOUNDARY")
-    result = (year.open_day, year.open_day + 1, year.close_day, year.close_day + 1)
-    if len(set(result)) != 4:
+    result = (year.open_day - 1, year.open_day, year.open_day + 1,
+              year.close_day - 1, year.close_day, year.close_day + 1)
+    if len(set(result)) != 6:
         raise SevenFieldAuditError("E_YEAR_BOUNDARY_DUPLICATE")
     return result
+
+
+def validate_boundary_years(reference_rows: list[tuple[int, ...]]) -> None:
+    """Fail closed unless the independent oracle proves adjacent year identities."""
+    expected = (4999, 5000, 5000, 5000, 5000, 5001)
+    if (len(reference_rows) != len(expected)
+            or any(type(row) is not tuple or len(row) != 5
+                   or type(row[0]) is not int or row[0] != year
+                   for row, year in zip(reference_rows, expected))):
+        raise SevenFieldAuditError("E_YEAR_EDGE_INDEPENDENT_YEAR_WITNESS")
 
 
 def verified_source(root: Path, jar: Path) -> dict:
@@ -177,9 +188,9 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
     edges = boundary_targets(year5000)
     targets = TARGETS + edges
     # Reuse five accepted neighborhood dates as a regression baseline.
-    # Four additional questions cross the independently selected year edges.
-    if len(targets) != 9:
-        raise SevenFieldAuditError("E_NINE_DATE_SCOPE")
+    # Six questions cover previous/first/next day at year opening and closing.
+    if len(targets) != 11:
+        raise SevenFieldAuditError("E_ELEVEN_DATE_SCOPE")
     cmd = ["java", "-XX:ActiveProcessorCount=1", "-Xmx1200m", "-Xss8m",
            "-cp", str(jar.resolve()), "pastafari.Post55ProductionDateBridge"]
     input_text = "".join(f"{FOUNDATION}\t{target}\n" for target in targets)
@@ -201,6 +212,7 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
         if monotonic() >= deadline:
             raise SevenFieldAuditError("E_INDEPENDENT_TIME_BUDGET")
         references.append(date_with_independent_sauce(ledger, target, deadline=deadline))
+    validate_boundary_years(references[len(TARGETS):])
     matches = compare_rows(rows, references, targets)
     return {
         "status": PASS, "project_id": PROJECT_ID, "branch": BRANCH,

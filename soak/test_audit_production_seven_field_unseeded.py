@@ -7,7 +7,7 @@ from independent_year_geometry_oracle import Year
 from audit_production_seven_field_unseeded import (
     FOUNDATION, TARGETS, HALF_WIDTH, QUESTION_COUNT, SevenFieldAuditError,
     boundary_targets, canonical_number, compare_rows, expected_indices, parse_production,
-    validate_ledger_trace,
+    validate_boundary_years, validate_ledger_trace,
 )
 
 
@@ -95,8 +95,8 @@ class SevenFieldIndependentProtocolTests(unittest.TestCase):
     def test_boundary_target_oracle(self):
         year = Year(5000, -10, 10, FOUNDATION - 300, FOUNDATION + 400)
         self.assertEqual(boundary_targets(year), (
-            FOUNDATION - 300, FOUNDATION - 299,
-            FOUNDATION + 400, FOUNDATION + 401))
+            FOUNDATION - 301, FOUNDATION - 300, FOUNDATION - 299,
+            FOUNDATION + 399, FOUNDATION + 400, FOUNDATION + 401))
 
     def test_boundary_target_fails_closed(self):
         for year in (
@@ -109,16 +109,35 @@ class SevenFieldIndependentProtocolTests(unittest.TestCase):
             ):
                 boundary_targets(year)
 
-    def test_nine_real_row_protocol_with_boundary_witnesses(self):
+    def test_eleven_real_row_protocol_with_boundary_witnesses(self):
         year = Year(5000, -10, 10, FOUNDATION - 300, FOUNDATION + 400)
         targets = TARGETS + boundary_targets(year)
         payload = "".join(self.record(target) for target in targets)
         rows = parse_production(payload, targets)
-        self.assertEqual(len(rows), 9)
+        self.assertEqual(len(rows), 11)
         self.assertEqual(len(compare_rows(
-            rows, [(5000, 7, 24, 12, 3)] * 9, targets)), 9)
+            rows, [(5000, 7, 24, 12, 3)] * 11, targets)), 11)
         with self.assertRaisesRegex(SevenFieldAuditError, "E_SEVEN_INPUT_ECHO"):
             parse_production(payload, targets[:-2] + (targets[-1], targets[-2]))
+
+    def test_independent_boundary_year_witnesses(self):
+        years = (4999, 5000, 5000, 5000, 5000, 5001)
+        validate_boundary_years([(year, 1, 1, 1, 1) for year in years])
+
+    def test_boundary_year_witness_drift_fails_closed(self):
+        years = (4999, 5000, 5000, 5000, 5000, 5001)
+        original = [(year, 1, 1, 1, 1) for year in years]
+        for position in range(len(years)):
+            drift = list(original)
+            drift[position] = (years[position] + 1, 1, 1, 1, 1)
+            with self.subTest(position=position), self.assertRaisesRegex(
+                SevenFieldAuditError, "E_YEAR_EDGE_INDEPENDENT_YEAR_WITNESS"
+            ):
+                validate_boundary_years(drift)
+        with self.assertRaisesRegex(
+            SevenFieldAuditError, "E_YEAR_EDGE_INDEPENDENT_YEAR_WITNESS"
+        ):
+            validate_boundary_years(original[:-1])
 
     def test_boolean_oracle_field_rejected(self):
         rows = parse_production(self.valid())
