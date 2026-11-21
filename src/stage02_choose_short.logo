@@ -1,0 +1,31 @@
+; D21 unrestricted-N production candidate. QA branch only; no canonical promotion.
+; Stream [canonical exact BI first in 1..M, step +/-1].
+; N canonical exact BI in 1..M. Return canonical rank in 1..N.
+; Contiguous reject tail permits O(1) step selection (no step walk).
+to monster.stage02.choose.short :stream :N
+  if not listp :stream [output []]
+  if (count :stream) <> 2 [output []]
+  localmake "firstv first :stream
+  localmake "step last :stream
+  if not (monster.stage02.bi.canonical :firstv) [output []]
+  if not (monster.stage02.bi.canonical :N) [output []]
+  if (bi.lt :firstv (bi.small 1)) [output []]
+  if (bi.gt :firstv nr.M) [output []]
+  if (bi.lt :N (bi.small 1)) [output []]
+  if (bi.gt :N nr.M) [output []]
+  if not numberp :step [output []]
+  if not (equalp :step (int :step)) [output []]
+  if not (or (:step = 1) (:step = -1)) [output []]
+
+  localmake "quotrem bi.divmod.floor nr.M :N
+  localmake "remainder last :quotrem
+  localmake "limit bi.sub nr.M :remainder
+  if bi.le :firstv :limit [
+    output bi.add (bi.small 1) (bi.regmod (bi.sub :firstv (bi.small 1)) :N)
+  ]
+  ; The initial sample lies in the rejected suffix (limit,M].
+  ; +1 next accepts x=1 after wrap, so rank=1.
+  ; -1 next accepts x=limit, a multiple of N, so rank=N.
+  if :step = 1 [output bi.small 1]
+  output :N
+end
