@@ -1,8 +1,6 @@
 name: FALSE Arabic Stage 19 bowl position original-runtime Native
 on:
-  push:
-    branches:
-      - "FALSE+العربية"
+  workflow_call
 permissions:
   contents: read
 jobs:

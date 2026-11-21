@@ -4,7 +4,7 @@ import hashlib,json,os,re,subprocess,sys
 from pathlib import Path
 import stage19_bowl_position_fixture as fixture
 E=Path("evidence/stage19_native");SOURCE=os.environ["SOURCE_PIN"];RUNTIME=os.environ["RUNTIME_PIN"]
-LOCKED=("src/bigint.false","src/monster_bootstrap.false","test/stage19_bowl_position_design_vectors.json","tools/stage19_bowl_position_design_oracle.mjs","tools/stage19_bowl_position_fixture.py","tools/stage19_bowl_position_ci.py","RUN_STAGE19.md","STAGE_19_EXECUTION_STATUS.txt",".github/workflows/false-arabic-stage19-native-bowl-position.yml")
+LOCKED=("src/bigint.false","src/monster_bootstrap.false","test/stage19_bowl_position_design_vectors.json","tools/stage19_bowl_position_design_oracle.mjs","tools/stage19_bowl_position_fixture.py","tools/stage19_bowl_position_ci.py","RUN_STAGE19.md","STAGE_19_EXECUTION_STATUS.txt",".github/workflows/canonical-names-lock.yml",".github/workflows/false-arabic-stage19-native-bowl-position.yml")
 def sha(data):return hashlib.sha256(data).hexdigest()
 def source_bytes(path):
     expected=subprocess.check_output(["git","show",f"{SOURCE}:{path}"]);actual=Path(path).read_bytes()

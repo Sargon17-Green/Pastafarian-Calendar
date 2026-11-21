@@ -195,3 +195,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage18-native-drop-order.yml
     permissions:
       contents: read
+
+  false-arabic-stage19-bowl-position:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-stage19]')
+    uses: ./.github/workflows/false-arabic-stage19-native-bowl-position.yml
+    permissions:
+      contents: read
