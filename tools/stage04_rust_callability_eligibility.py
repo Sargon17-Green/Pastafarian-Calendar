@@ -81,8 +81,9 @@ def _mask_rust_noncode(source: str) -> str | None:
                 return None
             blank(start, i)
             continue
-        # Rust raw strings include r"...", r#"..."#, and br#"..."#.
-        raw = re.match(r'(?:b)?r(#{0,32})"', source[i:])
+        # Rust permits up to 255 raw-string hashes; byte and C raw literals
+        # also contain non-code even when their contents resemble a function.
+        raw = re.match(r'(?:[bc])?r(#{0,255})"', source[i:])
         if raw and (i == 0 or not (source[i-1].isalnum() or source[i-1] == "_")):
             marker = '"' + raw.group(1)
             end = source.find(marker, i + len(raw.group(0)))
@@ -91,9 +92,9 @@ def _mask_rust_noncode(source: str) -> str | None:
             i = end + len(marker)
             blank(start, i)
             continue
-        if source[i] == '"' or (source.startswith('b"', i)
-                and (i == 0 or not source[i-1].isalnum())):
-            if source[i] == "b":
+        if source[i] == '"' or (source.startswith(('b"', 'c"'), i)
+                and (i == 0 or not (source[i-1].isalnum() or source[i-1] == "_"))):
+            if source[i] in ("b", "c"):
                 i += 1
             i += 1
             while i < n:
@@ -119,6 +120,28 @@ def _mask_rust_noncode(source: str) -> str | None:
     return "".join(out)
 
 
+def _has_attached_outer_attribute(clean: str, position: int) -> bool:
+    """Conservatively refuse source-only classification for attributed functions.
+
+    An outer attribute can remove or rewrite a function (cfg/proc macro). The
+    native probe remains the only authority for callable production semantics.
+    """
+    end = position
+    while end and clean[end - 1].isspace():
+        end -= 1
+    if not end or clean[end - 1] != "]":
+        return False
+    depth = 0
+    for j in range(end - 1, -1, -1):
+        if clean[j] == "]":
+            depth += 1
+        elif clean[j] == "[":
+            depth -= 1
+            if depth == 0:
+                return j > 0 and clean[j - 1] == "#"
+    return False
+
+
 def supported_signature(source: str, function: str) -> bool:
     # A textual match in a comment, string, nested module, impl or re-export
     # is not proof that this pinned file directly defines the called symbol.
@@ -134,8 +157,15 @@ def supported_signature(source: str, function: str) -> bool:
         # Only direct file-scope definitions can support a path-derived symbol.
         # In particular, nested-module functions cannot validate pub use aliases.
         prefix = clean[:match.start()]
-        if prefix.count("{") == prefix.count("}"):
-            return True
+        if prefix.count("{") != prefix.count("}"):
+            continue
+        # Source-only eligibility must not treat cfg-disabled or macro-rewritten
+        # function declarations as callable historical production functions.
+        if _has_attached_outer_attribute(clean, match.start()):
+            continue
+        if re.search(r"(?m)^[ \\t]*#!\\s*\\[", prefix):
+            continue
+        return True
     return False
 
 
