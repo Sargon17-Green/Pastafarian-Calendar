@@ -1,0 +1,76 @@
+name: Lua Haitian Composition Resource Boundary QA
+
+on:
+  push:
+    branches:
+      - 'Lua+Kreyòl-ayisyen'
+    paths:
+      - 'test/lua_haitian_composition_resource_adapter.lua'
+      - 'test/lua_haitian_composition_resource_boundary.lua'
+      - 'docs/LUA_HAITIAN_COMPOSITION_RESOURCE_BOUNDARY_NATIVE_QA_2026-11-21.md'
+      - '.github/workflows/lua-haitian-composition-resource-gate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  lua_haitian_resource_boundary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua 5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.3
+
+      - name: Verify immutable sources and independent Python QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p lua-composition-resource-evidence
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\nSCOPE=QA_ONLY_PRE_COMPOSITION_RESOURCE_BOUNDARY\nWITNESS_DAY=-15017676\nQA_MONTH_CAP=16\nNORMATIVE_MAX_MONTHS=47\nNATIVE_CPU_CAP_SECONDS=110\nNATIVE_WALL_CAP_SECONDS=135\nHEAP_CAP_KIB=131072\nGAP_CAP=200\n' "$GITHUB_SHA" > lua-composition-resource-evidence/manifest.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || exit 20
+          test "$(git rev-parse HEAD:test/normative_oracle.lua)" = "8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d" || exit 21
+          test "$(git rev-parse HEAD:src/bigint.lua)" = "fcff58bcaaf8bb3f205e7a9c624a51069c0e5a5d" || exit 22
+          test "$(git rev-parse HEAD:src/source_language_catalog.lua)" = "5b59ee6bb0ea2c2a551185929b5531ea28a50e49" || exit 23
+          git rev-parse HEAD > lua-composition-resource-evidence/source_sha.txt
+          sha256sum test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua test/lua_haitian_composition_boundary_oracle.py test/lua_haitian_composition_resource_adapter.lua test/lua_haitian_composition_resource_boundary.lua docs/LUA_HAITIAN_COMPOSITION_RESOURCE_BOUNDARY_NATIVE_QA_2026-11-21.md .github/workflows/lua-haitian-composition-resource-gate.yml > lua-composition-resource-evidence/sha256.txt
+          python3 test/lua_haitian_composition_boundary_oracle.py --check-source test/normative_oracle.lua > lua-composition-resource-evidence/python_stdout.txt 2> lua-composition-resource-evidence/python_stderr.txt
+          test ! -s lua-composition-resource-evidence/python_stderr.txt || exit 24
+          grep -Fxq 'COMPOSITION_BOUNDARY_STATIC_SELFTEST_PASS: 286/286' lua-composition-resource-evidence/python_stdout.txt || exit 25
+          grep -q '"sourceLock": "MATCH"' lua-composition-resource-evidence/python_stdout.txt || exit 26
+          echo 'PYTHON_EXACT_SOURCE_LOCK_AND_STATIC_QA: PASS'
+
+      - name: Bounded genuine Lua witness, fail-closed before composition
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          ( ulimit -v 131072; timeout --signal=TERM --kill-after=2s 135s lua5.3 test/lua_haitian_composition_resource_boundary.lua . native ) > lua-composition-resource-evidence/lua_stdout.txt 2> lua-composition-resource-evidence/lua_stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > lua-composition-resource-evidence/exit_code.txt
+          cat lua-composition-resource-evidence/lua_stdout.txt
+          if test -s lua-composition-resource-evidence/lua_stderr.txt; then cat lua-composition-resource-evidence/lua_stderr.txt >&2; fi
+          test "$code" -eq 0 || exit "$code"
+          test ! -s lua-composition-resource-evidence/lua_stderr.txt || exit 27
+          grep -Fxq 'QA_BOUNDARY_ADAPTER_SELFTEST_PASS: 15/15' lua-composition-resource-evidence/lua_stdout.txt || exit 28
+          grep -Fxq 'NATIVE_QA_RESOURCE_REJECT_BEFORE_COMPOSITION: PASS' lua-composition-resource-evidence/lua_stdout.txt || exit 29
+          grep -Fxq 'COMPOSITION_SPY_CALLS: 0' lua-composition-resource-evidence/lua_stdout.txt || exit 30
+          grep -Fxq 'WEAVING_NOT_INVOKED: YES' lua-composition-resource-evidence/lua_stdout.txt || exit 31
+          grep -Fxq 'FULL_DATE: NOT_RUN' lua-composition-resource-evidence/lua_stdout.txt || exit 32
+          grep -Fxq 'QA_BOUNDARY_NATIVE_ASSERTIONS_PASS: 28/28' lua-composition-resource-evidence/lua_stdout.txt || exit 33
+          grep -Eq '^SELECTED_YEAR_RECEIPT\|sourceSha=[0-9a-f]{40}\|day=-15017676\|year=5000\|candidateCount=69\|rank1=56\|openIndex=71\|closeIndex=82\|openDay=-15018117\|closeDay=-15012823\|length=5294\|minMonths=44\|maxMonths=47\|qaCap=16\|status=RESOURCE_REJECT$' lua-composition-resource-evidence/lua_stdout.txt || exit 34
+
+      - name: Upload all evidence even if native QA fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-composition-resource-boundary-evidence
+          path: lua-composition-resource-evidence/
+          retention-days: 30
+          if-no-files-found: warn
