@@ -86,8 +86,14 @@ def main() -> None:
         raise AssertionError("cutlet day dimensions disagree")
     if sum(cutlet_partition) != gate_indices[1] - gate_indices[0]:
         raise AssertionError("cutlet partition does not span gate interval")
-    if any(last < first or last - first + 1 != length for first, last, length in zip(cutlet_first_days, cutlet_last_days, cutlet_partition)):
-        raise AssertionError("cutlet day boundaries differ from partition")
+    if any(last < first for first, last in zip(cutlet_first_days, cutlet_last_days)):
+        raise AssertionError("cutlet day interval is reversed")
+    if cutlet_first_days[0] != int(gate_days[0]) + 1:
+        raise AssertionError("first cutlet does not begin after the opening gate")
+    if cutlet_last_days[-1] != int(gate_days[1]):
+        raise AssertionError("last cutlet does not end on the closing gate")
+    if any(first != previous_last + 1 for previous_last, first in zip(cutlet_last_days, cutlet_first_days[1:])):
+        raise AssertionError("cutlet day intervals are not contiguous")
     if len(month_lengths) != month_count or len(month_names) != month_count:
         raise AssertionError("month dimensions disagree")
     if day_count != sum(month_lengths) or day_count != len(month_weaving):

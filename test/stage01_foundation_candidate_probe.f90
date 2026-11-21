@@ -64,13 +64,21 @@ program stage01_foundation_candidate_probe
      if (last_pos(i)<=last_pos(i-1)) error stop 'last occurrence ordering invalid'
   end do
 
+  if (bi_compare(structure%cutletLastDays(structure%cutletCount),year%closeGateDay)/=0) &
+       error stop 'last cutlet does not end on year close gate day'
   do i=1,structure%cutletCount
      if (structure%cutletNameIndices(i)<1 .or. structure%cutletNameIndices(i)>17) &
           error stop 'cutlet name index outside catalog'
      if (bi_compare(structure%cutletFirstDays(i),structure%cutletLastDays(i))>0) &
           error stop 'cutlet first day exceeds last day'
-     if (bi_to_int64(bi_add_small(bi_sub(structure%cutletLastDays(i),structure%cutletFirstDays(i)),1_int64)) &
-         /=int(structure%cutletPartition(i),int64)) error stop 'cutlet span differs from partition'
+     if (i==1) then
+        if (bi_compare(structure%cutletFirstDays(i),structure%yearFirstDay)/=0) &
+             error stop 'first cutlet does not begin on year first day'
+     else
+        if (bi_compare(structure%cutletFirstDays(i), &
+            bi_add_small(structure%cutletLastDays(i-1),1_int64))/=0) &
+             error stop 'cutlet day boundaries are not contiguous'
+     end if
      do j=i+1,structure%cutletCount
         if (structure%cutletNameIndices(i)==structure%cutletNameIndices(j)) &
              error stop 'duplicate cutlet name index'

@@ -62,7 +62,8 @@ The diagnostic captures the corrected Fortran output for calculationDay=targetDa
 - Input: the actual Fortran `foundation_day()` used as both calculation day and target day.
 - Output: the five date fields, selected year gates, cutlet partition and names, month lengths and names, and the complete month-weaving sequence.
 - The five projected fields contain canonical **name indices** for cutlet and month, not their positional indices. The probe separately identifies the containing cutlet position and woven month ID before checking the projection.
-- Internal checks: array dimensions, cutlet span, month bounds, exact weaving frequencies, first/last occurrence ordering, and projection-to-structure consistency.
+- Internal checks: array dimensions, cutlet partition across gate intervals, contiguous calendar-day boundaries derived from the gate days, month bounds, exact weaving frequencies, first/last occurrence ordering, and projection-to-structure consistency.
+- Cutlet partition values count gate intervals, not days. For a cutlet beginning at gate index g and containing q gate intervals, its first calendar day is gate_day(g)+1 and its last calendar day is gate_day(g+q). The day span is the sum of the q intervening gate gaps, not q itself.
 - The artifact is explicitly candidate-only. It records no canonical expected tuple and cannot accept Stage 1.
 
 The legacy actual-weave artifact's 45-month/4,244-day metadata came from the Python reference structure, not from the corrected Fortran structure. The legacy full-year Fortran probe stops at its hard-coded 45/4,244 assertion before reporting the actual structure.
