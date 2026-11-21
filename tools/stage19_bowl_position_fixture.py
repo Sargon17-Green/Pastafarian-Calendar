@@ -12,7 +12,7 @@ def position(order,bowl_id):
     for i,value in enumerate(order,1):
         if value==bowl_id: return i
     return 0
-# op36 produces a scalar, so the caller needs exactly one dereference after 36h.
+# Two tuple cells must be contiguous; push the tuple handle once, then call op36 via 36h;!!.
 def order_block(order,order_index,mutant=None):
     code=["z;d:6a;!"+"".join(literal(x)+"a;!" for x in order)]
     labels=[];checks=0
@@ -21,7 +21,7 @@ def order_block(order,order_index,mutant=None):
         tag=f"STAGE19_CASE_{case_index:04d}"
         expected=position(order,bowl_id)
         if mutant=="wrong_expected" and case_index==0: expected=2
-        code.append(f"z;b:d;a;!b;{literal(bowl_id)}a;!b;s:b;36h;!o:")
+        code.append(f"z;b:d;a;!{literal(bowl_id)}a;!b;s:b;36h;!!o:")
         code.append(f'o;{literal(expected)}=~["{tag}_POSITION_FAIL"0 0/]?')
         code.append(f'b;g;!d;-0=~["{tag}_ORDER_HANDLE_FAIL"0 0/]?')
         code.append(f'b;1+g;!{literal(bowl_id)}=~["{tag}_BOWL_ID_FAIL"0 0/]?')
@@ -53,7 +53,7 @@ def probe_fixture(probes=None,mutant=None):
         if mutant=="wrong_duplicate_last" and item["label"]=="duplicate-first-match":expected=3
         tag=f"STAGE19_PROBE_{i:03d}"
         code.append("z;d:6a;!"+"".join(literal(x)+"a;!" for x in order))
-        code.append(f"z;b:d;a;!b;{literal(bowl)}a;!b;s:b;36h;!o:")
+        code.append(f"z;b:d;a;!{literal(bowl)}a;!b;s:b;36h;!!o:")
         code.append(f'o;{literal(expected)}=~["{tag}_POSITION_FAIL"0 0/]?')
         code.append(f'b;g;!d;-0=~["{tag}_ORDER_HANDLE_FAIL"0 0/]?')
         code.append(f'b;1+g;!{literal(bowl)}=~["{tag}_BOWL_ID_FAIL"0 0/]?')
@@ -66,7 +66,7 @@ def probe_fixture(probes=None,mutant=None):
 def invalid_length_fixture(length):
     code=["{ Stage19 invalid direct-table header control. }",
           "z;d:"+literal(length)+"a;!1a;!2a;!3a;!4a;!5a;!6a;!",
-          "z;b:d;a;!b;1a;!b;s:b;36h;!o:",
+          "z;b:d;a;!1a;!b;s:b;36h;!!o:",
           '"STAGE19_BAD_LENGTH_ACCEPTED"10,',"[z;0>][%z;1-z:]#"]
     return "\n".join(code)+"\n"
 def chunks():return [(start,PERMS[start:start+120]) for start in range(0,720,120)]

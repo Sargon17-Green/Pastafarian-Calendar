@@ -28,3 +28,9 @@ Native gate: original FALSE runtime pin `eb3135565a8670cced3f6bbca4dbf7b014c4563
 ## Transition policy
 
 Routine advancement to the next numbered project stage does not require separate user approval. This records the user's clarification on 2026-11-21; substantive scope or policy changes remain separate decisions.
+
+## 2026-11-21 — Stack-layout correction following run 44947691306
+
+Verified run 44947691306 / job 136978517135 as completed/failure on source 8a0d58e218dac1b588ce63904be55ea4ad728348. Artifact 14723939744 SHA-256 `0507a30ae095fb651bd4d574ed16b4c89d3591726b2a468a92859af6c7b8210c`, 44 entries, ZIP CRC clean. `diagnostic_first_scalar.stdout.txt` yielded `STAGE19_DIAG_RESULT_SIX` for the first expected position 1, and the original interpreter emitted `STAGE19_BAD_LENGTH_ACCEPTED` for headers 5 and 7. The earlier double-dispatch candidate (run 44940370617) failed at the second `!`, before a positive marker.
+
+The fixture generator incorrectly inserted `b;` between appending the order pointer and the bowl ID to the two-cell tuple (`d;a;!b;1a;!`). This pushed an uncounted stack item while `z` was used as the indexed heap length. As a result, `36h;!` fetched the nearby numeric table header (6) instead of the stored op36 quotation; double execution tried to execute a number, causing the earlier stack type mismatch. The corrected form is `z;b:d;a;!1a;!b;s:b;36h;!!o:`. The same repair applies to exhaustive cases, probes and invalid-header controls; the diagnostic injection anchor is updated accordingly. This is a QA-fixture correction, **not** a production code correction, Native PASS, or Stage19 acceptance. Stage18 remains last bounded accepted. Require the single marked push's completed original-FALSE Native evidence plus independent offline artifact verification before acceptance.

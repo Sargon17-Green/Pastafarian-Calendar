@@ -37,9 +37,9 @@ def main():
             if start == 0:
                 # Independent on-failure original-runtime diagnostic, not a PASS or a production mutation.
                 first_program = fixture.positive_fixture(orders[:1], start)[0]
-                anchor = "36h;!o:\n"
+                anchor = "36h;!!o:\n"
                 assert first_program.count(anchor) == 6
-                traced = ('36h;!o:\n'
+                traced = ('36h;!!o:\n'
                           'o;0=["STAGE19_DIAG_RESULT_ZERO"10,]?\n'
                           'o;1=["STAGE19_DIAG_RESULT_ONE"10,]?\n'
                           'o;2=["STAGE19_DIAG_RESULT_TWO"10,]?\n'
