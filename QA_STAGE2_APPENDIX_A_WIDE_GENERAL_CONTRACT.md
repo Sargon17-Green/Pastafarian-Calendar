@@ -118,7 +118,7 @@ No Native workflow or production source is added by this contract commit. After 
    - src/stage02_context.logo: f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
    - src/stage02_answer_at.logo: f0951ba68a191667208b2a2b99b386c5336e49c2
    - src/stage02_choose_wide.logo: 8fb2dc47c827b8ccd8fa6fdd817b9fa088c51013
-   - test/normative_reference.logo: 625171ecd5fd93fb838168f6b2f6b29ed3649cf
+   - test/normative_reference.logo: 625171ecd5fd93fb8381686f2b2f6b29ed3649cf
    - CANONICAL_NAMES_LOCK.sha256: 0d5b3dec0b01551b1304ee7104d08a57aa1f440b
    The future general production source, Native test harness, fixture generator, contract and workflow must also be locked by their exact Git blob IDs.
 4. Generate Native expected values using Python integers only. Neither the production reporter nor nr.choose.wide may generate expected values.
