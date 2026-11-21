@@ -1,0 +1,111 @@
+name: Befunge QA18 Physical Source Glyph Contact Provenance
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa18_static_glyph_provenance.py'
+      - '.github/workflows/befunge-stage1-qa18-source-glyph-contact.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  executed-native-frontier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout QA branch; pin unchanged 2D production
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin source and reject seven forged event timelines
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
+          python3 -m py_compile qa/stage1_qa17_native_frontier.py qa/stage1_qa18_static_glyph_provenance.py
+          python3 qa/stage1_qa18_static_glyph_provenance.py --selftest
+      - name: Download original source-pinned QA13 and QA14 Native trace evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh run view 39108506703 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:76e09db067c1a044763d23e5f219b3fe8bac32cc'
+          test "$(gh run view 39374913267 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:1184e7a3728808d46d359e88973820af4fa5f00d'
+          root="$RUNNER_TEMP/qa17"
+          mkdir -p "$root/qa13" "$root/qa14-0" "$root/qa14-1" "$root/qa14-2" "$root/qa14-3"
+          gh run download 39108506703 --repo "$GITHUB_REPOSITORY" --name befunge-kyrgyz-native-diverse-geometry --dir "$root/qa13"
+          for i in 0 1 2 3; do
+            gh run download 39374913267 --repo "$GITHUB_REPOSITORY" --name "qa14-shard-$i" --dir "$root/qa14-$i"
+          done
+          python3 - <<'PY'
+          import os,zipfile
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'qa17'
+          for label in ('qa13','qa14-0','qa14-1','qa14-2','qa14-3'):
+              folder=root/label
+              marker='diverse_manifest.json' if label=='qa13' else 'native_manifest.json'
+              assert (folder/marker).is_file(),f'Original GitHub {label} artifact missing {marker}'
+              with zipfile.ZipFile(root/(label+'.zip'),'w',compression=zipfile.ZIP_DEFLATED) as out:
+                  for file in sorted(folder.iterdir()):
+                      if file.is_file():out.write(file,file.name)
+          print('QA17_FIVE_ORIGINAL_NATIVE_ARCHIVES_RETRIEVED')
+          PY
+      - name: Independently audit source mutation and cross-corpus execution coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/qa17"
+          python3 qa/stage1_qa17_native_frontier.py \
+            --qa13 "$root/qa13.zip" \
+            --shard "$root/qa14-0.zip" --shard "$root/qa14-1.zip" \
+            --shard "$root/qa14-2.zip" --shard "$root/qa14-3.zip" \
+            --source src/interleaved_work_counts.b98 \
+            --output "$root/qa17_executed_frontier.json" | tee "$root/qa17_console.log"
+          grep -q QA17_NATIVE_49_CROSS_CORPUS_EXECUTED_FRONTIER_PASS "$root/qa17_console.log"
+          python3 - "$root/qa17_executed_frontier.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding='utf-8'))
+          assert r['case_counts']=={'qa13':17,'qa14':32,'all':49}
+          assert r['native_witness_sets']['arith_coords']['new_in_qa14']==0
+          assert r['native_witness_sets']['arith_edges']['new_in_qa14']==0
+          assert r['native_witness_sets']['mutated_executable']['new_in_qa14']==0
+          assert r['native_witness_sets']['arith_coords']['not_seen_in_qa14']==41
+          assert r['native_witness_sets']['arith_edges']['not_seen_in_qa14']==43
+          assert r['stage1_final_accepted'] is False
+          assert len(r['qa13_only_arithmetic_coordinates'])==41
+          assert r['static_glyph_coverage'] is not None
+          print('QA17_CROSS_CORPUS_GEOMETRY_NOVELTY_RECEIPT_PASS')
+          print('STAGE1_OPEN_UNOBSERVED_SOURCE_IS_NOT_DEAD_CODE_PROOF')
+          PY
+      - name: Classify the 982 original source glyphs by native execution, g and p
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/qa17"
+          python3 qa/stage1_qa18_static_glyph_provenance.py \
+            --qa13 "$root/qa13.zip" \
+            --shard "$root/qa14-0.zip" --shard "$root/qa14-1.zip" \
+            --shard "$root/qa14-2.zip" --shard "$root/qa14-3.zip" \
+            --source src/interleaved_work_counts.b98 \
+            --output "$root/qa18_glyph_roles.json" | tee "$root/qa18_console.log"
+          grep -q QA18_NATIVE_49_SOURCE_GLYPH_ROLE_PARTITION_PASS "$root/qa18_console.log"
+          python3 - "$root/qa18_glyph_roles.json" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1],encoding='utf8'))
+          assert d['native_STEP_nonblank_unvisited']==982
+          assert d['native_STEP_nonblank_visited']==12460
+          assert sum(d['counts'].values())==13442
+          assert d['dead_code_certified'] is False and d['stage1_complete'] is False
+          print('QA18_NATIVE_SOURCE_ROLE_PARTITION_RECEIPT_PASS')
+          PY
+      - name: Preserve QA18 scoped physical source contact evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa18-native-source-glyph-physical-contact
+          path: |
+            ${{ runner.temp }}/qa17/qa17_executed_frontier.json
+            ${{ runner.temp }}/qa17/qa17_console.log
+            ${{ runner.temp }}/qa17/qa18_glyph_roles.json
+            ${{ runner.temp }}/qa17/qa18_console.log
+          if-no-files-found: warn

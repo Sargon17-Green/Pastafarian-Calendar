@@ -1,0 +1,64 @@
+name: Befunge QA29A Signed Control Semantics and Static Source Blank Corridors
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa29a_original_source_plane_control_audit.py'
+      - '.github/workflows/befunge-stage1-qa29a-source-plane-controls.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-plane-original-native-control-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Lock exact 2D production bytecode and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa29a_original_source_plane_control_audit.py
+      - name: Retrieve unchanged QA28 accepted original directed Native artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qa29a"
+          test "$(gh run view 39985923985 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:7a2a9d64d2080153354d3ef200aece590a3ff997'
+          downloaded=0
+          for attempt in 1 2 3 4 5; do
+            if gh run download 39985923985 --repo "$GITHUB_REPOSITORY" --name qa28-fifteen-original-native-directed-witnesses --dir "$RUNNER_TEMP/qa29a"; then downloaded=1;break;fi
+            echo "::warning::QA29A original evidence download attempt $attempt failed"
+            sleep $((attempt * 12))
+          done
+          test "$downloaded" -eq 1 || { echo "::error::QA28 signed original Native source artifact unavailable";exit 1; }
+          echo "c5a5beaab308df31222652484e5fb18af554bf75e7b492225b107197fb29aa6e  $RUNNER_TEMP/qa29a/qa28_signed_15_directed_witnesses.json" | sha256sum -c -
+      - name: Independently explain static source geometry of 15 signed Native witness edges
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa29a_original_source_plane_control_audit.py \
+            --source src/interleaved_work_counts.b98 \
+            --qa28 "$RUNNER_TEMP/qa29a/qa28_signed_15_directed_witnesses.json" \
+            --output "$RUNNER_TEMP/qa29a/qa29a_static_source_controls.json" \
+            | tee "$RUNNER_TEMP/qa29a/qa29a_audit_console.log"
+          grep -q QA29A_FIFTEEN_NATIVE_TRANSITIONS_SOURCE_CHECKED "$RUNNER_TEMP/qa29a/qa29a_audit_console.log"
+          grep -q QA29A_TWO_SEVEN_STATIC_BLANK_SOURCE_CORRIDORS_CONFIRMED "$RUNNER_TEMP/qa29a/qa29a_audit_console.log"
+          grep -q QA29A_ONE_HUNDRED_TWENTY_MUTATED_RECEIPTS_REJECTED "$RUNNER_TEMP/qa29a/qa29a_audit_console.log"
+          grep -q QA29A_RUNTIME_MEMORY_AND_GLOBAL_STAGE1_STILL_UNPROVEN "$RUNNER_TEMP/qa29a/qa29a_audit_console.log"
+          python3 -c 'import json,sys;x=json.load(open(sys.argv[1]));assert len(x["records"])==15 and x["adversarial_signed_transition_mutations_rejected"]==120 and x["eight_cell_exits_over_seven_original_static_blanks"]==2 and not x["stage1_complete"]' \
+            "$RUNNER_TEMP/qa29a/qa29a_static_source_controls.json"
+      - name: Preserve exact audit result and original receipt even on RED
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa29a-signed-native-static-source-corridors
+          path: |
+            ${{ runner.temp }}/qa29a/qa29a_static_source_controls.json
+            ${{ runner.temp }}/qa29a/qa29a_audit_console.log
+            ${{ runner.temp }}/qa29a/qa28_signed_15_directed_witnesses.json
+          if-no-files-found: warn

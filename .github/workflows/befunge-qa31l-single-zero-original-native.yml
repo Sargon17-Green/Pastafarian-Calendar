@@ -1,0 +1,75 @@
+name: Befunge QA31L single-zero original Native
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31l_single_zero_native.py'
+      - 'qa/stage1_qa31l_independent_audit.py'
+      - '.github/workflows/befunge-qa31l-single-zero-original-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa31l-single-zero-original-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Preflight immutable source, Python 3 and receipt inputs
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31l_independent_audit.py
+          python3 - <<'PY'
+          import hashlib
+          assert hashlib.sha256(b'0').hexdigest() == '5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9'
+          print('QA31L_RAW_HEX_30_PRECHECK_PASS')
+          PY
+          mkdir -p qa31l-output
+      - name: Download pinned PyFunge 0.5 rc2
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: One NEW input original PyFunge-98 Native trace (7000 STEPs max)
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$GITHUB_WORKSPACE/qa31l-output:/qa31l" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=4s 360s python -u qa/stage1_qa31l_single_zero_native.py /qa31l
+            ' | tee qa31l-output/native.log
+          grep -q QA31L_SINGLE_BYTE_ZERO_ONLY qa31l-output/native.log
+          grep -q QA31L_NO_STAGE1_PASS qa31l-output/native.log
+      - name: Seal receipt and compressed full-STEP trace as CRC-checked ZIP
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          d = Path('qa31l-output')
+          names = ('qa31l_receipt.json', 'qa31g_single_zero.jsonl.gz')
+          assert all((d/n).is_file() for n in names)
+          with zipfile.ZipFile(d/'qa31l-native-evidence.zip', 'w', compression=zipfile.ZIP_DEFLATED) as z:
+              for n in names:
+                  z.write(d/n, arcname=n)
+          with zipfile.ZipFile(d/'qa31l-native-evidence.zip') as z:
+              assert z.testzip() is None and set(z.namelist()) == set(names)
+          print('QA31L_ZIP_CRC_PASS')
+          PY
+      - name: Independent source/STEP/j/p/g/EOF audit and hostile controls
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31l_independent_audit.py src/interleaved_work_counts.b98 qa31l-output | tee qa31l-output/audit.log
+          grep -q QA31L_NO_STAGE1_PASS qa31l-output/audit.log
+          grep -Eq 'QA31L_AUDIT_PASS|QA31L_ORACLE_COVERAGE_INCOMPLETE' qa31l-output/audit.log
+      - name: Preserve ALL evidence on failure and success
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31l-single-zero-new-original-native
+          path: qa31l-output/
+          if-no-files-found: warn

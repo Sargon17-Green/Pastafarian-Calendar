@@ -1,0 +1,19 @@
+name: Befunge98 QA31BC original-source selector corridor gate
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31bc_original_selector_source_gate.py'
+      - 'qa/QA31BC_ORIGINAL_SELECTOR_PORTABLE_FIXTURE_2026-11-08.json'
+      - 'qa/QA31BC_ORIGINAL_SELECTOR_CORRIDOR_REVIEW_2026-11-08.md'
+      - '.github/workflows/befunge-qa31bc-selector-source.yml'
+  workflow_dispatch:
+jobs:
+  original-source-derived-fixture-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate exact original source and selector arithmetic; derived finite signed counts only
+        run: python3 qa/stage1_qa31bc_original_selector_source_gate.py

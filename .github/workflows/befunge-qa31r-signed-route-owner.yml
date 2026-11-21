@@ -1,0 +1,75 @@
+name: Befunge QA31R Signed Native p-g Last Writer Route
+
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31r_signed_route_owner.py'
+      - 'qa/QA31R_SIGNED_NATIVE_ROW29_32_35_38_2026-11-02.md'
+      - '.github/workflows/befunge-qa31r-signed-route-owner.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  signed-native-route-owner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch pre-existing immutable QA31G and QA31D Native receipts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qa31r"
+          for item in '13037899716 qa31g' '12825616476 qa31d'; do
+            read -r id label <<< "$item"
+            curl --fail --location --silent --show-error --retry 2 \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${id}/zip" \
+              -o "$RUNNER_TEMP/qa31r/${label}.zip"
+            unzip -t "$RUNNER_TEMP/qa31r/${label}.zip" >/dev/null
+          done
+          echo 'e74e4ad35d5653ffd1610827e1351fce62552b0912dc78430908cc288f4e1161  '"$RUNNER_TEMP/qa31r/qa31g.zip" | sha256sum -c -
+          echo 'b8df61e31a3f28bfcc21bbccb4d2ee26b5ccfeca534969e87d95a211fbb40eeb  '"$RUNNER_TEMP/qa31r/qa31d.zip" | sha256sum -c -
+      - name: Verify exact source, p-g last writers, route edges, and hostile controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
+          python3 -m py_compile qa/stage1_qa31r_signed_route_owner.py
+          python3 qa/stage1_qa31r_signed_route_owner.py \
+            "$RUNNER_TEMP/qa31r/qa31g.zip" \
+            "$RUNNER_TEMP/qa31r/qa31d.zip" \
+            --source src/interleaved_work_counts.b98 \
+            --out "$RUNNER_TEMP/qa31r/qa31r_signed_route_owner.json" \
+            | tee "$RUNNER_TEMP/qa31r/qa31r.log"
+          python3 - "$RUNNER_TEMP/qa31r/qa31r_signed_route_owner.json" <<'PY'
+          import json,sys
+          a=json.load(open(sys.argv[1]))
+          r=a['natural_digit_route']
+          assert a['source_bytes_verified'] is True
+          assert r['row29_m']==1 and r['row32_q']==0 and r['row35_q_before_increment']==0 and r['row38_q']==1
+          assert r['row29_to_row32_next']==[10,32]
+          assert r['row32_to_row35_next']==[10,35]
+          assert r['row35_to_row38_next']==[10,38]
+          assert len(r['qa20_unseen_controls_hit'])==12
+          assert r['qa20_unseen_controls_still_unwitnessed']==[[286,5],[235,23],[235,32]]
+          assert a['event_mutations_rejected']==14 and a['source_opcode_mutations_rejected']==4
+          assert a['fresh_native']==0 and a['stage1_pass'] is False
+          print('QA31R_EXACT_SOURCE_SIGNED_NATIVE_ROUTE_GATE_PASS')
+          PY
+      - name: Preserve independently verifiable finite evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31r-signed-native-route-owner
+          path: |
+            ${{ runner.temp }}/qa31r/qa31r_signed_route_owner.json
+            ${{ runner.temp }}/qa31r/qa31r.log
+          retention-days: 30

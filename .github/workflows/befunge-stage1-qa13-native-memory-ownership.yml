@@ -1,0 +1,62 @@
+name: Befunge QA13 Physical Memory Native Trace Audit
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa13_native_memory_audit.py'
+      - 'qa/stage1_qa13_native_memory_audit_selftest.py'
+      - '.github/workflows/befunge-stage1-qa13-native-memory-ownership.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa13-independent-native-physical-memory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact QA branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify source pins and reject seven forged physical event streams
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          python3 -m py_compile qa/stage1_qa13_native_memory_audit.py qa/stage1_qa13_native_memory_audit_selftest.py
+          PYTHONPATH=qa python3 qa/stage1_qa13_native_memory_audit_selftest.py
+          PYTHONPATH=qa python3 qa/stage1_native_diverse_manifest_contract.py
+      - name: Retrieve archived original actual Native execution traces
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh run view 39108506703 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = "success:76e09db067c1a044763d23e5f219b3fe8bac32cc"
+          mkdir -p "$RUNNER_TEMP/qa13-original-native"
+          gh run download 39108506703 --repo "$GITHUB_REPOSITORY" --name befunge-kyrgyz-native-diverse-geometry --dir "$RUNNER_TEMP/qa13-original-native"
+          test -s "$RUNNER_TEMP/qa13-original-native/diverse_manifest.json"
+          test -s "$RUNNER_TEMP/qa13-original-native/zero_equal.tsv"
+      - name: Independently verify 17 real p/g physical memory histories
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=qa python3 qa/stage1_qa13_native_memory_audit.py "$RUNNER_TEMP/qa13-original-native" src/interleaved_work_counts.b98 qa13_native_memory_receipt.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('qa13_native_memory_receipt.json',encoding='utf8'))
+          assert x['schema']=='qa13-native-2d-fungespace-ownership-v1'
+          assert x['native_run']==39108506703 and x['artifact']==12129457903
+          assert x['source_git_blob']=='560d6aa5807a7f766213a33835cce85eab0fa40c'
+          assert (x['physical_put'], x['physical_get'], x['executed_previously_written'])==(2919,5585,136)
+          assert x['input_dependent_histories']==17 and (x['valid_gate_118'],x['invalid_gate_62'])==(14,3)
+          assert x['stage1_final_pass'] is False and len(x['records'])==17
+          print('QA13_FROZEN_NATIVE_PHYSICAL_MEMORY_RECEIPT_PASS')
+          print('QA13_NOT_GLOBAL_OWNERSHIP_OR_STAGE1_ACCEPTANCE')
+          PY
+      - name: Upload receipt on PASS or RED
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa13-original-native-physical-memory-audit
+          path: qa13_native_memory_receipt.json
+          if-no-files-found: warn

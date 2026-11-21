@@ -1,0 +1,100 @@
+{
+  "actual_modulus_reductions": 0,
+  "bh_artifact_sha256": "5db9170c1c856fd6fe440a1a32155eceebf2db44a3812678445baac844d9a933",
+  "bh_ledger_sha256": "553b69d156d6c547c84a601bb7151e13142a16e6dbc1d3d856dba7f86892236d",
+  "canonical_archives": {
+    "AH": "4c17deae595262dcbcb8863da005810f60288c483273e32b3b2955b9fb13e271",
+    "AI": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+    "BC": "2e4c4809c73438359900e3f54bc616c21282fed83a4784228965da2b8b3b3a77",
+    "BG": "55ffd0b31d26c14b55b26666ec6705f9db6686ca80028cac71329b70899052d7",
+    "Y": "1c97b51823ed98b3d333fcb2d0b35d72f7546b04ed8e86c5adebe3aca5703e8a"
+  },
+  "ci_member_crc_count": 203,
+  "ci_member_manifest_count": 202,
+  "conditional_unit_increments": 225,
+  "counts": {
+    "cases": 200,
+    "conditional_pairs": 225,
+    "independent_epochs": 225,
+    "original_formula_checks": 225,
+    "overwritten": 90,
+    "owned_fetches": 0,
+    "owned_reads": 360,
+    "reached_halt": 135,
+    "steps": 3628390,
+    "windows": 225
+  },
+  "equal_value_overwrites": 0,
+  "first_reader_offset_from_second_x": {
+    "3208": 90,
+    "4042": 135
+  },
+  "lifetime_step_range": [
+    2326,
+    6962
+  ],
+  "new_native": 0,
+  "old61_range": [
+    0,
+    9
+  ],
+  "outcomes": {
+    "reads_then_HALT": 135,
+    "reads_then_overwrite": 90
+  },
+  "overwrite_sites": {
+    "[1440, 575]": 90
+  },
+  "project": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "projection_and_edge_mutations_rejected": [
+    "forged-read",
+    "forged-fetch",
+    "wrong-next-writer",
+    "read-tick",
+    "overwrite-tick",
+    "read-site",
+    "overwrite-site",
+    "read-value",
+    "overwrite-value",
+    "read-after-equal-overwrite",
+    "string-mode-op-counted",
+    "missed-same-tick-fetch",
+    "invented-overwrite-at-HALT"
+  ],
+  "reader_sites": {
+    "[193, 195]": 90,
+    "[195, 1508]": 135,
+    "[960, 1620]": 135
+  },
+  "reads_per_writer": {
+    "1": 90,
+    "2": 135
+  },
+  "root43_range": [
+    0,
+    90
+  ],
+  "signed_record_mutations_rejected": [
+    "reader-x",
+    "reader-y",
+    "reader-in-string",
+    "reader-elided",
+    "reader-result",
+    "reader-stack-shape",
+    "reader-instruction-site",
+    "reader-clock",
+    "writer-numeric-value",
+    "interposed-equal-value-p",
+    "interposed-g",
+    "interposed-code-fetch"
+  ],
+  "source_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "stage1_pass": false,
+  "stored61_range": [
+    0,
+    99
+  ],
+  "synthetic_positive_epochs": 3,
+  "unique_cases_with_windows": 135,
+  "witnesses_sha256": "7660413b191784de8ec4f54ee51aea66c509a6726ea30f19401432a2816733d2"
+}

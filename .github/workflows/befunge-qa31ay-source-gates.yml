@@ -1,0 +1,18 @@
+name: Befunge98 QA31AY bounded original source gates
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31ay_canonical_gate_audit.mjs'
+      - 'qa/QA31AY_ORIGINAL_CANONICAL_SOURCE_GATE_INVARIANT_2026-11-07.md'
+      - '.github/workflows/befunge-qa31ay-source-gates.yml'
+  workflow_dispatch:
+jobs:
+  original-source-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source-pinned canonical gate and counter audit
+        run: node qa/stage1_qa31ay_canonical_gate_audit.mjs

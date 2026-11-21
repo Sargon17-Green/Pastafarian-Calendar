@@ -1,0 +1,45 @@
+name: Befunge QA31AJ Source-Pinned Q4 Counter
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths:
+      - 'qa/stage1_qa31aj_source_counter_cycle.py'
+      - 'qa/stage1_qa31aj_independent_counter_oracle.py'
+      - 'qa/QA31AJ_FINITE_Q4_POSTINCREMENT_COUNTER_CYCLE_2026-11-06.md'
+      - '.github/workflows/befunge-qa31aj-source-counter-cycle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-source-q4-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Frozen source blob
+        run: test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+      - name: Exact source and independent inverse
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa31aj_out
+          python3 -m py_compile qa/stage1_qa31aj_source_counter_cycle.py qa/stage1_qa31aj_independent_counter_oracle.py
+          python3 qa/stage1_qa31aj_source_counter_cycle.py --source src/interleaved_work_counts.b98 --out qa31aj_out/forward.json | tee qa31aj_out/forward.log
+          python3 qa/stage1_qa31aj_independent_counter_oracle.py --source src/interleaved_work_counts.b98 --forward qa31aj_out/forward.json --out qa31aj_out/inverse.json | tee qa31aj_out/inverse.log
+          python3 - <<'PY'
+          import json
+          a=json.load(open('qa31aj_out/forward.json'))
+          b=json.load(open('qa31aj_out/inverse.json'))
+          assert a['byte_cases']==b['bytes_verified']==256
+          assert a['site_pins']==16 and b['source_pins']==9
+          assert a['forward_controls']==8 and b['hostile_rejected']==12
+          assert a['new_native_runs']==b['new_native_runs']==0
+          assert a['stage1_pass'] is b['stage1_pass'] is False
+          print('QA31AJ_FINITE_ONLY_ACCEPTED')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: qa31aj-bounded-source-evidence
+          path: qa31aj_out/
+          if-no-files-found: warn

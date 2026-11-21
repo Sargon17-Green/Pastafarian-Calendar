@@ -1,0 +1,57 @@
+{
+  "schema": "qa31bc-original-signed200-derived-source-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_signed_archive_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "prior_qa31bb_sha256": "45c983db1e0ae97faa5a668e6e3d7a470981abbabfcc8fbcf253cab47ffec303",
+  "signed_cases_replayed_externally": 200,
+  "signed_steps_replayed_externally": 3628390,
+  "selector_executions": 365,
+  "selector_writes": 365,
+  "original_selector_x_validated": 365,
+  "source_corridor_verified_steps": 10220,
+  "physical_post_selector_gate_reentries": 0,
+  "physical_corridor_p_overwrites": 0,
+  "source_hostile_nonnoop_mutations_rejected": 24,
+  "original_selector_values": {
+    "62": 140,
+    "118": 225
+  },
+  "branch_routes": [
+    {
+      "selector_ascii": 62,
+      "source_x": [
+        1528,
+        1750
+      ],
+      "dest": [
+        1240,
+        480
+      ],
+      "delta": [
+        -288,
+        -1270
+      ],
+      "events": 140
+    },
+    {
+      "selector_ascii": 118,
+      "source_x": [
+        1500,
+        1778
+      ],
+      "dest": [
+        575,
+        195
+      ],
+      "delta": [
+        -925,
+        -1583
+      ],
+      "events": 225
+    }
+  ],
+  "new_original_native_executions": 0,
+  "stage1_global_pass": false,
+  "unobserved_inputs": "UNKNOWN"
+}

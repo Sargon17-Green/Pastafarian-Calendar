@@ -1,0 +1,43 @@
+{
+  "ai_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "bi_sha256": "7660413b191784de8ec4f54ee51aea66c509a6726ea30f19401432a2816733d2",
+  "bj_sha256": "cba7da292cf8d595a5a680743ea29ca3642299bd9aecd62094fb8f42652251c3",
+  "counts": {
+    "fetch": 0,
+    "g": 540,
+    "overwrites": 270,
+    "p": 540,
+    "sink_write_value": 540
+  },
+  "downstream_projection": "QA31BJ forward stack tags vs independent inverse-slot graph",
+  "independent_owner_oracles": [
+    "forward last-writer map",
+    "reverse prior-p search"
+  ],
+  "negative_real_mutations": [
+    "p0-op",
+    "p1-op",
+    "p2-ip",
+    "p3-ip",
+    "p0-coordinate",
+    "p2-coordinate",
+    "g0-op",
+    "g1-op",
+    "g0-value",
+    "g1-value",
+    "g0-coordinate",
+    "g1-coordinate",
+    "g0-tick",
+    "halt-op"
+  ],
+  "new_native_runs": 0,
+  "original_corpus_cases": 200,
+  "original_source_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_steps": 3628390,
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "scope": "finite signed originals; no new Native; Stage1 open",
+  "selected_cases": 135,
+  "stage1_pass": false,
+  "toy_tests": 2,
+  "witnesses_sha256": "16aa91dfc48b0329d396d311dc7f68d826286484debc9024deeca78e12a9f9e2"
+}

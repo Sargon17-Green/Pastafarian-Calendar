@@ -1,0 +1,32 @@
+{
+  "schema": "qa31bb-original-signed200-derived-fixture-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_signed_archive_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "cases": 200,
+  "steps": 3628390,
+  "row14_entries_via_x_174_11": 1060,
+  "row32_entries_via_x_211_29": 100,
+  "row14_32_nonx_incoming_entries": 0,
+  "selector_writer_ip": [
+    1335,
+    1354
+  ],
+  "selector_address": [
+    1500,
+    1750
+  ],
+  "selector_original_static_source_character": " ",
+  "selector_write_and_execute_pairs": 365,
+  "selector_execute_exactly_20_steps_after_write": 365,
+  "selector_value62_right_arrow": 140,
+  "selector_value118_down_arrow": 225,
+  "selector_executions_without_earlier_same_case_write": 0,
+  "selector_execution_without_matching_value": 0,
+  "physical_p_to_protected_parser_rows": 0,
+  "independent_original_signed_full_readers": 2,
+  "independent_original_signed_mutant_reports_rejected": 24,
+  "new_original_native_runs": 0,
+  "stage1_pass": false,
+  "unobserved_inputs": "UNKNOWN"
+}

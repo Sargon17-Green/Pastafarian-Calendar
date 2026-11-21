@@ -1,0 +1,63 @@
+{
+  "schema": "qa31bd-original-200-derived-second-hop-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_signed_archive_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "prior_original_qa31bc_archive_sha256": "2e4c4809c73438359900e3f54bc616c21282fed83a4784228965da2b8b3b3a77",
+  "source_checked_separately_from_signed_runtime": true,
+  "replayed_signed_original_cases": 200,
+  "replayed_signed_original_steps": 3628390,
+  "second_hops": [
+    {
+      "selector": 62,
+      "gate": [
+        1240,
+        519
+      ],
+      "destination": [
+        1145,
+        1620
+      ],
+      "count": 140
+    },
+    {
+      "selector": 118,
+      "gate": [
+        540,
+        195
+      ],
+      "destination": [
+        575,
+        670
+      ],
+      "count": 225
+    }
+  ],
+  "second_hop_source_op_steps": 13700,
+  "signed_g_reads": 225,
+  "g_last_writer_sites": [
+    {
+      "ip": [
+        1059,
+        1430
+      ],
+      "count": 135
+    },
+    {
+      "ip": [
+        765,
+        1518
+      ],
+      "count": 90
+    }
+  ],
+  "p_site_hits": 56,
+  "p_steps": 14820,
+  "signed_p_writes_to_56_original_corridor_cells": 0,
+  "post_selector_signed_parser_row14_32_reentries": 0,
+  "hostile_derived_ledger_mutations_rejected": 12,
+  "hostile_source_arithmetic_mutations_rejected_locally": 24,
+  "native_executed_now": false,
+  "stage1_global_pass": false,
+  "unobserved_inputs": "UNKNOWN"
+}

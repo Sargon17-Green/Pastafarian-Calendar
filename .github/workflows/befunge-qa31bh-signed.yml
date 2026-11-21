@@ -1,0 +1,37 @@
+name: Befunge98 QA31BH archived signed continuations
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths:
+      - 'qa/stage1_qa31bh_*.py'
+      - '.github/workflows/befunge-qa31bh-signed.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  signed-trace-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve eight immutable original archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          mkdir shards
+          python3 qa/stage1_qa31bh_windows.py --artifact-ids > "$RUNNER_TEMP/bh-artifact-ids"
+          while IFS= read -r id; do
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" > "shards/$id.zip"
+          done < "$RUNNER_TEMP/bh-artifact-ids"
+      - name: Audit archived physical steps
+        run: python3 qa/stage1_qa31bh_windows.py --shards shards --out bh-evidence
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qa31bh-signed-windows
+          path: bh-evidence/
+          if-no-files-found: error
+          retention-days: 30

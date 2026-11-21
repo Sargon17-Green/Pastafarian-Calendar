@@ -1,0 +1,48 @@
+name: Befunge QA31O conditional original-source row41 ingress
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31o_conditional_row41.py'
+      - '.github/workflows/befunge-qa31o-row41.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-conditional-row41:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Source pin and Python syntax
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31o_conditional_row41.py
+          mkdir -p qa31o-evidence
+      - name: Original source bounded conditional QA
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31o_conditional_row41.py \
+            src/interleaved_work_counts.b98 --out qa31o-evidence/row41.json \
+            | tee qa31o-evidence/audit.log
+          grep -q QA31O_CONDITIONAL_SOURCE_MODEL_8_OF_8 qa31o-evidence/audit.log
+          grep -q QA31O_HOSTILE_SOURCE_10_OF_10 qa31o-evidence/audit.log
+          grep -q QA31O_NO_NATIVE_NO_GLOBAL_PASS qa31o-evidence/audit.log
+          python3 - <<'PY'
+          import json
+          r=json.load(open('qa31o-evidence/row41.json'))
+          assert r['source_provenance']=='560d6aa5807a7f766213a33835cce85eab0fa40c'
+          assert r['cases_passed']==8 and r['hostile_rejected']==10
+          assert r['stage1_pass'] is False and r['global_reachability_proven'] is False
+          assert r['row41_exit']==[4,0]
+          PY
+      - name: Save finite original-source evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31o-row41-original-source
+          path: |
+            qa31o-evidence/row41.json
+            qa31o-evidence/audit.log
+          if-no-files-found: warn
