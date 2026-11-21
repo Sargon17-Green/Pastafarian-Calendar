@@ -51,3 +51,13 @@ Issue #29 מכיל אי־התאמה מוכחת בתאריך `F(c=-15055671,t=-15
 [GitHub Actions של v158](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/workflows/soak-foundation-intermediate-receipts-v158.yml) מריץ 20 בדיקות v157 ו־40 בדיקות v158, מאמת שוב את גיבובי המקור ההיסטוריים (קריאה בלבד), מייצר קבלות סינתטיות על הדיסק ומוודא אותן בתהליך נפרד. **60 בדיקות מתוכננות**, לא ספירה מצטברת של כל הבדיקות ההיסטוריות. קבלה מחייבת `completed/success`, לוגים וארטיפקט.
 
 סטטוס מדעי שאינו משתנה: Issue #29 פתוח; `main=56bc4173aae4975ded019ef5ab5a36249f1424df`; `STOP_NEW_NATIVE_SOAK_DISPATCH=true`; **0/10,000** שנות מקור מאושרות.
+
+## תוצאות קבלה מאומתות
+
+[הרצת GitHub Actions מספר 44901545980](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44901545980) הסתיימה ב־`completed/success` על **קומיט הקוד שנבדק `eaef566f637cd2a68591e4b1467ef37b70131358`**. הלוגים מאשרים `20/20` בדיקות v157 ועוד `40/40` בדיקות v158 — יחד **60/60** בדיקות בהרצה זו. שלושת קובצי המקור ההיסטוריים נבדקו שוב לפי Git blob, בלי לייבא אותם כממירים ובלי להריץ `F(c,t)`.
+
+הארטיפקט [14706261841](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44901545980) הורד ונבדק גם מחוץ ל־GitHub Actions: **8,969 בתים**, **11 חברי ZIP**, בדיקת CRC עברה ללא שגיאה, SHA-256 שחושב עצמאית: `b5f20157243465b81f4d82885c2721846414118da940344d0a0f6911de33781b`. זהה לגיבוב שמדווח GitHub.
+
+הקובץ `v158-two-synthetic-intermediate-receipts.json` שבתוך הארטיפקט מכיל שתי קבלות בנות שמונה שלבים כל אחת; SHA-256 של בתיו `d3e889f1a5d9327ae52a88891b9d5cfd085dde1371316021e2feee4d4eb1e789`. שדות שער המקור נותרים `native_original_dispatch_admitted=false` ו־`original_soak_years_certified=0`.
+
+**הכרעה:** v158 מתקבל כמאמת חוזה קבלות **סינתטי בלבד** ובדיקת אימות נפרדת לאחר כתיבת קובץ בלתי ניתן לדריסה. אין אישור שהחוזה יכול לאמת אותנטיות של מקור אמיתי, ואין שינוי בהרשאת dispatch של הממירים המקוריים. שנות מקור מאושרות: **0/10,000**.
