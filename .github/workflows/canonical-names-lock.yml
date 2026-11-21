@@ -250,6 +250,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Set up independent GMP Python for branch-only nonmedian QA
+        if: github.ref == 'refs/heads/Chapel+Українська-мова'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Native nonmedian 4244 near-neighbor research (NOT Stage 6)
         if: github.ref == 'refs/heads/Chapel+Українська-мова'
         shell: bash
@@ -263,6 +269,7 @@ jobs:
             --source-sha "$(git rev-parse HEAD)" \
             --outdir chapel-native-nonmedian-evidence \
             | tee chapel-native-nonmedian-runner.log
+          grep -Fxq 'NATIVE_NONMEDIAN_RESULT=PASS_RESEARCH_ONLY' chapel-native-nonmedian-runner.log
 
       - name: Retain nonmedian 4244 research and incomplete evidence
         if: always() && github.ref == 'refs/heads/Chapel+Українська-мова'
