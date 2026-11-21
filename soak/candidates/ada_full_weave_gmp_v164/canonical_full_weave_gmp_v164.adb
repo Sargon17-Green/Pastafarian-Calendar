@@ -2,6 +2,7 @@ with Ada.Unchecked_Deallocation;
 with GNATCOLL.GMP;
 
 package body Canonical_Full_Weave_GMP_V164 is
+   use G;
    procedure Free_Row is new Ada.Unchecked_Deallocation (Big_Row, Big_Row_Access);
 
    procedure Set_N (To : out G.Big_Integer; Value : Natural) is
