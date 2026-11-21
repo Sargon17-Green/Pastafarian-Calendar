@@ -1923,8 +1923,9 @@ fn test_stage33_weave_unrank_exhaustive_lexicographic_small_states() {
 fn stage34_check_catalan_month_boundary(month_count int) {
 	lengths := []int{len: month_count, init: 2}
 	mut candidate := new_patch15_weave_counter(lengths)
-	expected := oracle_weave_div_small(
-		oracle_weave_choose_exact(2 * month_count, month_count), month_count + 1)
+	expected := oracle_weave_div_small(oracle_weave_choose_exact(2 * month_count, month_count),
+
+		month_count + 1)
 	assert big_eq(candidate.count_all(), expected)
 	mut first := []int{cap: 2 * month_count}
 	mut last := []int{cap: 2 * month_count}
