@@ -42,9 +42,9 @@ PY_ANCHORS=(
     "        return DateIds(",
 )
 ADA_ANCHORS=(
-    '       Stage13_Trace ("month_lengths_begin");',
-    '           Stage13_Trace ("month_weave_tickets_done");',
-    '             Stage13_Trace ("calendar_result_ready");',
+    '      Stage13_Trace ("month_lengths_begin");',
+    '          Stage13_Trace ("month_weave_tickets_done");',
+    '            Stage13_Trace ("calendar_result_ready");',
 )
 
 
