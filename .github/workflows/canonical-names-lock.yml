@@ -1437,6 +1437,10 @@ jobs:
     if: github.ref == 'refs/heads/PHP+Bahasa-Melayu'
     runs-on: ubuntu-latest
     timeout-minutes: 70
+    env:
+      # Preserve the exact pinned canonical checkout as read-only evidence.
+      # importlib loads core.py and otherwise writes untracked __pycache__ files.
+      PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - name: Checkout PHP feature branch
         uses: actions/checkout@v4
@@ -1470,7 +1474,7 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          timeout 3600s python3 tools/stage56_export_external_canonical_reference.py \
+          timeout 3600s python3 -B tools/stage56_export_external_canonical_reference.py \
             --canonical-repo .external-canonical-source \
             --source-commit cc2cf0b422757a5e7c33218ce30cffa8f99c6786 \
             --calculation-jdn=-13334246 \
@@ -1481,11 +1485,21 @@ jobs:
           cat stage56-external-evidence/export.stdout
           cat stage56-external-evidence/export.stderr >&2
           exit "$rc"
+      - name: Audit canonical checkout after Python reference export
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C .external-canonical-source status --porcelain --untracked-files=all > stage56-external-evidence/canonical-post-export-status.txt
+          if test -s stage56-external-evidence/canonical-post-export-status.txt; then
+            cat stage56-external-evidence/canonical-post-export-status.txt >&2
+            echo "::error::Pinned canonical source checkout was modified during export; inspect retained artifact."
+            exit 1
+          fi
       - name: Export source-bound Python semantic samples
         shell: bash
         run: |
           set -uo pipefail
-          timeout 1200s python3 tools/stage56_external_semantic_samples.py \
+          timeout 1200s python3 -B tools/stage56_external_semantic_samples.py \
             --canonical-repo .external-canonical-source \
             --input stage56-external-evidence/reference.json \
             --output stage56-external-evidence/python-tuples.json \
