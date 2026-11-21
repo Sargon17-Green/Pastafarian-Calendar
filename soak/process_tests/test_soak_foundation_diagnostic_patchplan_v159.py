@@ -54,8 +54,8 @@ class PatchProposalUnitTests(unittest.TestCase):
 
     def test_07_markers_tamper_close_refused(self):
         p=insert_once(PY_SAMPLE,"    return y","T",["    pass"],"PY")
-        p=p.replace(b"PY_DIAG_INSTRUMENTED_COPY_ONLY T\n",
-                    b"PY_DIAG_INSTRUMENTED_COPY_ONLY U\n",1)
+        p=p.replace(b"V159_QA_DIAG_INSTRUMENTED_COPY_ONLY T\n",
+                    b"V159_QA_DIAG_INSTRUMENTED_COPY_ONLY U\n",1)
         with self.assertRaises(ValueError):
             strip_insertions(p,("T",),"PY")
 
