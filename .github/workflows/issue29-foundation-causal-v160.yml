@@ -1,11 +1,5 @@
 name: Issue29 v160 pinned foundation-day causal capture (QA-only, NO SOAK)
 on:
-  push:
-    branches:
-      - qa/issue29-foundation-causal-v160
-    paths:
-      - '.github/workflows/issue29-foundation-causal-v160.yml'
-      - 'soak/runner/issue29_foundation_capture_v160.py'
   workflow_dispatch:
 permissions:
   contents: read
