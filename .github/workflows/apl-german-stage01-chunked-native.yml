@@ -1,0 +1,80 @@
+name: APL German native chunked Stage 1 exact 95 FX (NO Stage2)
+on:
+  push:
+    branches:
+      - qa/apl-german-nars-interface-20261116
+    paths:
+      - '.github/workflows/apl-german-stage01-chunked-native.yml'
+      - 'qa/nars-interface/stage01_chunked_import.py'
+      - 'qa/nars-interface/test_stage01_chunked_import.py'
+      - 'qa/nars-interface/bounded_stage01_chunked.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  stage01-native:
+    name: source-locked-95-FX-native-run
+    runs-on: windows-2022
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Provision exact pinned NARS2000 and temporary APL font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Validate locked five source files and Stage 1 marker ordering
+        shell: pwsh
+        run: |
+          python -m unittest discover -s qa/nars-interface -p 'test_stage01_chunked_import.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'STAGE01_CHUNKED_UNIT_TESTS_FAILED' }
+      - name: Run native NARS2000 exact 95 function chunks and Stage 1 tests
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_chunked.ps1 -Runtime verified_runtime -Evidence stage01_chunked_evidence
+      - name: Independently check exact native Stage 1 acceptance receipt
+        shell: pwsh
+        run: |
+          $p='stage01_chunked_evidence/native_fx_progress.json'
+          $candidate='stage01_chunked_evidence/progress_candidate.json'
+          if (-not (Test-Path -LiteralPath $p) -or -not (Test-Path -LiteralPath $candidate)) { throw 'STAGE01_RECEIPTS_MISSING' }
+          $r=Get-Content -LiteralPath $p -Raw | ConvertFrom-Json
+          $c=Get-Content -LiteralPath $candidate -Raw | ConvertFrom-Json
+          $token='APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=7161824b9fcbfaca91f20d1ea492417e77003ff4|FILES=5|FX=95|TEST=STAGE01_PASS'
+          if ($r.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or $c.source_commit -cne $r.source_commit -or $c.marker_token -cne $token -or $c.final_expression -cne 'SAME_EC_AFTER_TEST') { throw 'STAGE01_SOURCE_OR_TEST_LOCK_FAILED' }
+          if ($r.stage01 -cne 'ACCEPTED' -or $r.status -cne 'NATIVE_STAGE01_CHUNKED_ACCEPTED' -or $r.last_contiguous_after -ne 95 -or $r.noncontiguous_exact -ne $false -or $r.final_marker.exact -ne $true -or $r.checkpoints.Count -ne 19 -or $c.chunk_count -ne 19 -or $c.function_count -ne 95) { throw 'NATIVE_STAGE01_EXACT_NOT_CONFIRMED' }
+          if (@($r.checkpoints | Where-Object { $_.exact -ne $true }).Count -ne 0) { throw 'STAGE01_CHUNK_MARKER_MISMATCH' }
+          $nativeMarker='stage01_chunked_evidence/final_native_marker.txt'
+          if (-not (Test-Path -LiteralPath $nativeMarker)) { throw 'STAGE01_NATIVE_MARKER_NOT_ARCHIVED' }
+          [byte[]]$actual=[IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $nativeMarker).Path)
+          [byte[]]$wanted=[Text.Encoding]::ASCII.GetBytes($token)
+          if ($actual.Length -ne $wanted.Length -or [Convert]::ToBase64String($actual) -cne [Convert]::ToBase64String($wanted)) { throw 'STAGE01_NATIVE_MARKER_BYTES_MISMATCH' }
+          Write-Output 'APL_GERMAN_STAGE01_NATIVE_PASS_EXACT_CHUNKED_95'
+      - name: Hash all receipts and native markers
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force stage01_chunked_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem stage01_chunked_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName)"
+          } | Set-Content -Encoding utf8 stage01_chunked_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-stage01-chunked-native-receipts
+          path: |
+            font_bootstrap_evidence/
+            stage01_chunked_evidence/
+            stage01_chunked_evidence.sha256
+          retention-days: 21
