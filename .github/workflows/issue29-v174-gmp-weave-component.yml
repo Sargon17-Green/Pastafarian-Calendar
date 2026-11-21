@@ -9,6 +9,7 @@ permissions:
   contents: read
 concurrency:
   group: issue29-v174-exhaustive-gmp-weave-one-shot
+# The exact assertion total includes every parsed reference-symbol range check.
   cancel-in-progress: false
 jobs:
   bounded-production-gmp-weave-exhaustive-oracle:

@@ -28,7 +28,7 @@ ACTIVATION_MESSAGE = (
 GPR = Path("issue29_v174_gmp_weave_component.gpr")
 TEST = Path("tests/issue29_v174_gmp_weave_tests.adb")
 GPR_BLOB = "f11ef9ea7d5373eead77b947880ebde5e7372ea6"
-TEST_BLOB = "d787a3cda50338ff81a34d96f56228f8bce9f732"
+TEST_BLOB = "2672e0c47e37f43ba978db7ef2ee2fe1fd8a8bca"
 SCHEMA = "ISSUE29_V174_EXHAUSTIVE_NORMATIVE_GMP_WEAVE/1"
 SPEC = {
     "repository": "Sargon17-Green/Pastafarian-Calendar",
@@ -183,7 +183,7 @@ def source_guard() -> dict:
         "Full.Unrank",
         "Is_Normatively_Valid",
         "evidence/v174-reference.dat",
-        "10_574",
+        "56_221",
     ):
         insist(required in test_text, "required v174 test feature missing: " + required)
     insist('with "gnatcoll_gmp.gpr";' in gpr_text, "GMP project import missing")
