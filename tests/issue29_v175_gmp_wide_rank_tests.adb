@@ -103,13 +103,16 @@ procedure Issue29_V175_GMP_Wide_Rank_Tests is
       Places : out Natural;
       Rejected : out Boolean)
    is
-      Space : G.Big_Integer := M_GMP;
-      Weight : G.Big_Integer := One_GMP;
-      Wide_Value : G.Big_Integer := One_GMP;
+      Space : G.Big_Integer;
+      Weight : G.Big_Integer;
+      Wide_Value : G.Big_Integer;
       Quotient : G.Big_Integer;
       Limit : G.Big_Integer;
       Temp : G.Big_Integer;
    begin
+      G.Set (Space, M_GMP);
+      G.Set (Weight, One_GMP);
+      G.Set (Wide_Value, One_GMP);
       Places := 1;
       while Space < N loop
          G.Multiply (Space, M_GMP);

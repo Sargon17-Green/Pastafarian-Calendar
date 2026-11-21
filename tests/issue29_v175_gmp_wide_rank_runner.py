@@ -17,12 +17,12 @@ BASE_COMMIT = "1160096aa847c54cbef27c232771ce1549d7ba8f"
 SOURCE_BASE = "e17ab44aa3fd1d08eb14644164735a7c5c87721d"
 BRANCH = "qa/issue29-ada-gmp-wide-rank-v175"
 ACTIVATION_MESSAGE = (
-    "test(issue29-v175): exercise 179-place GMP rank selection with production weave unrank"
+    "fix(issue29-v175): initialize limited GMP values through Set"
 )
 GPR = Path("issue29_v175_gmp_wide_rank.gpr")
 TEST = Path("tests/issue29_v175_gmp_wide_rank_tests.adb")
 GPR_BLOB = "ccd133d596bc625dfe2086d87450106bf83e26f2"
-TEST_BLOB = "77c21b29af29d8289cd81622a4fd9b4f4a42efa3"
+TEST_BLOB = "d6b70c30fdd7e780d6643a512b938921385b74fd"
 SCHEMA = "ISSUE29_V175_GMP_WIDE_RANK_179_PLACE_COMPOSITION/1"
 SOURCE_BLOBS = {
     "src/normative_oracle.adb": "0be8f8ab4ddef26d34963d5567707a511ebda50b",

@@ -9,6 +9,7 @@ permissions:
   contents: read
 concurrency:
   group: issue29-v175-gmp-wide-rank-one-shot
+# The GMP test uses Set to initialize limited values without copies.
   cancel-in-progress: false
 jobs:
   bounded-production-gmp-wide-rank-composition:
