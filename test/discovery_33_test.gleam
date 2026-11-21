@@ -60,7 +60,8 @@ fn examine_endings(
       let next_sum = rolling_sum + gap
       let in_left = contains_directly(next_sum, original_left)
       let in_right = contains_directly(next_sum, original_right)
-      let updated = DirectCounts(
+      let updated =
+        DirectCounts(
         left: counts.left + bit(in_left),
         right: counts.right + bit(in_right),
         intersection: counts.intersection + bit(in_left && in_right),
@@ -90,13 +91,7 @@ fn enumerate_all_starts(
   case suffix {
     [] -> counts
     [_, ..remaining] -> {
-      let updated = examine_endings(
-        suffix,
-        0,
-        original_left,
-        original_right,
-        counts,
-      )
+      let updated = examine_endings(suffix, 0, original_left, original_right, counts)
       enumerate_all_starts(remaining, original_left, original_right, updated)
     }
   }
@@ -129,7 +124,8 @@ fn direct_counts(
   original_left: List(discovery_27_sum_bands.SumBand),
   original_right: List(discovery_27_sum_bands.SumBand),
 ) -> DirectCounts {
-  let raw = enumerate_all_starts(
+  let raw =
+    enumerate_all_starts(
     gaps,
     original_left,
     original_right,
@@ -235,8 +231,7 @@ fn find_distinct_after(
     [id, ..rest_ids], [gap, ..rest_gaps] ->
       case gap != first_gap {
         True -> #(first_id, first_gap, id, gap)
-        False ->
-          find_distinct_after(rest_ids, rest_gaps, first_id, first_gap)
+        False -> find_distinct_after(rest_ids, rest_gaps, first_id, first_gap)
       }
     [], [] -> panic as "Du malsamaj Stage21-interspacoj atenditaj"
     _, _ -> panic as "Malsama longo de ID- kaj interspac-listoj"
@@ -256,15 +251,7 @@ fn first_distinct_pair(
 
 pub fn discovery_33_empty_ids_and_bands_test() {
   let context = bootstrap.new_context(11, 21)
-  direct_check(
-    context,
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-  )
+  direct_check(context, [], [], [], [], [], [])
   |> should.equal(DirectCounts(
     left: 0,
     right: 0,
@@ -462,29 +449,25 @@ pub fn discovery_33_four_equal_gaps_nontrivial_reduction_test() {
 pub fn discovery_33_empty_side_swapped_and_zero_union_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 2, 3]
-  let one_side = direct_check(
-    context,
-    ids,
-    [],
-    [band(42, 963)],
-    [],
-    [band(42, 963)],
-    [band(42, 963)],
-  )
+  let one_side =
+    direct_check(context, ids, [], [band(42, 963)], [], [band(42, 963)], [
+      band(42, 963),
+    ])
   one_side.left |> should.equal(0)
   { one_side.right > 0 } |> should.equal(True)
   one_side.numerator |> should.equal(0)
   one_side.denominator |> should.equal(1)
 
-  let swapped = direct_check(
-    context,
-    ids,
-    [band(42, 963)],
-    [],
-    [band(42, 963)],
-    [band(42, 963)],
-    [],
-  )
+  let swapped =
+    direct_check(
+      context,
+      ids,
+      [band(42, 963)],
+      [],
+      [band(42, 963)],
+      [band(42, 963)],
+      [],
+    )
   swapped.left |> should.equal(one_side.right)
   swapped.right |> should.equal(one_side.left)
   swapped.numerator |> should.equal(one_side.numerator)
@@ -494,10 +477,10 @@ pub fn discovery_33_empty_side_swapped_and_zero_union_test() {
     context,
     ids,
     [band(-1000, -900)],
-    [band(100000, 200000)],
+    [band(100_000, 200_000)],
     [band(-1000, -900)],
-    [band(-1000, -900), band(100000, 200000)],
-    [band(100000, 200000)],
+    [band(-1000, -900), band(100_000, 200_000)],
+    [band(100_000, 200_000)],
   )
   |> should.equal(DirectCounts(
     left: 0,
@@ -518,18 +501,11 @@ pub fn discovery_33_equal_sets_duplicates_nested_and_disjoint_test() {
     band(42, 963),
     band(80, 200),
     band(42, 963),
-    band(10000, 11000),
+    band(10_000, 11_000),
   ]
-  let canonical = [band(42, 963), band(10000, 11000)]
-  let result = direct_check(
-    context,
-    ids,
-    bands,
-    bands,
-    canonical,
-    canonical,
-    canonical,
-  )
+  let canonical = [band(42, 963), band(10_000, 11_000)]
+  let result =
+    direct_check(context, ids, bands, bands, canonical, canonical, canonical)
   { result.left >= 4 } |> should.equal(True)
   result.left |> should.equal(result.right)
   result.intersection |> should.equal(result.union)
@@ -588,32 +564,17 @@ pub fn discovery_33_repeated_ids_are_distinct_index_windows_test() {
 
 pub fn discovery_33_invalid_inputs_and_stage32_error_priority_test() {
   let context = bootstrap.new_context(11, 21)
-  discovery_33_jaccard_bands.dispatch_discovery_33(
-    context,
-    [7],
-    [],
-    [],
-  )
+  discovery_33_jaccard_bands.dispatch_discovery_33(context, [7], [], [])
   |> should.equal(Error(discovery_19_interval_value.InvalidBowlId))
 
   let invalid_retry = bootstrap.MonsterContext(..context, retry_budget: -1)
-  discovery_33_jaccard_bands.dispatch_discovery_33(
-    invalid_retry,
-    [1],
-    [],
-    [],
-  )
+  discovery_33_jaccard_bands.dispatch_discovery_33(invalid_retry, [1], [], [])
   |> should.equal(
     Error(discovery_19_interval_value.InvalidContext(
       bootstrap.InvalidRetryBudget,
     )),
   )
-  discovery_33_jaccard_bands.dispatch_discovery_33(
-    invalid_retry,
-    [7],
-    [],
-    [],
-  )
+  discovery_33_jaccard_bands.dispatch_discovery_33(invalid_retry, [7], [], [])
   |> should.equal(
     Error(discovery_19_interval_value.InvalidContext(
       bootstrap.InvalidRetryBudget,
@@ -621,12 +582,7 @@ pub fn discovery_33_invalid_inputs_and_stage32_error_priority_test() {
   )
 
   let invalid_recovery = bootstrap.MonsterContext(..context, recovery_depth: -1)
-  discovery_33_jaccard_bands.dispatch_discovery_33(
-    invalid_recovery,
-    [7],
-    [],
-    [],
-  )
+  discovery_33_jaccard_bands.dispatch_discovery_33(invalid_recovery, [7], [], [])
   |> should.equal(
     Error(discovery_19_interval_value.InvalidContext(
       bootstrap.InvalidRecoveryDepth,
@@ -643,16 +599,7 @@ pub fn discovery_33_beam_large_limits_symmetry_and_no_monotonicity_claim_test() 
   let all = [band(-wide, wide)]
   let high = [band(2 * wide, 3 * wide)]
 
-  direct_check_with_gaps(
-    context,
-    ids,
-    gaps,
-    all,
-    all,
-    all,
-    all,
-    all,
-  )
+  direct_check_with_gaps(context, ids, gaps, all, all, all, all, all)
   |> should.equal(DirectCounts(
     left: 78,
     right: 78,
@@ -664,26 +611,28 @@ pub fn discovery_33_beam_large_limits_symmetry_and_no_monotonicity_claim_test() 
     denominator: 1,
   ))
 
-  let forward = direct_check_with_gaps(
-    context,
-    ids,
-    gaps,
-    all,
-    high,
-    all,
-    [band(-wide, wide), band(2 * wide, 3 * wide)],
-    high,
-  )
-  let reverse = direct_check_with_gaps(
-    context,
-    ids,
-    gaps,
-    high,
-    all,
-    high,
-    [band(-wide, wide), band(2 * wide, 3 * wide)],
-    all,
-  )
+  let forward =
+    direct_check_with_gaps(
+      context,
+      ids,
+      gaps,
+      all,
+      high,
+      all,
+      [band(-wide, wide), band(2 * wide, 3 * wide)],
+      high,
+    )
+  let reverse =
+    direct_check_with_gaps(
+      context,
+      ids,
+      gaps,
+      high,
+      all,
+      high,
+      [band(-wide, wide), band(2 * wide, 3 * wide)],
+      all,
+    )
   forward.numerator |> should.equal(reverse.numerator)
   forward.denominator |> should.equal(reverse.denominator)
   forward.numerator |> should.equal(0)

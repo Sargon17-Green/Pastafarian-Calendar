@@ -77,10 +77,7 @@ pub fn dispatch_discovery_33(
             True -> #(1, 1)
             False -> {
               let divisor = greatest_common_divisor(intersection, combined)
-              #(
-                intersection / divisor,
-                combined / divisor,
-              )
+              #(intersection / divisor, combined / divisor)
             }
           }
 
