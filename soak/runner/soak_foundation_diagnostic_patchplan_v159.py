@@ -38,7 +38,7 @@ TARGETS={
 # Exact original source snippets. These anchors must remain unique and the
 # historical whole-file Git blob must match before insertion.
 PY_ANCHORS=(
-    "        return family.unrank1(rank)",
+    "        rank = choose_rank(ask_bowl(result, 4, SEAL_MONTH_WEAVING), family.count())",
     "        return DateIds(",
 )
 ADA_ANCHORS=(
@@ -66,7 +66,7 @@ def detect_eol(data:bytes)->bytes:
 
 
 def insert_once(original:bytes, anchor:str, label:str,
-                code_lines:list[str], language:str) -> bytes:
+                code_lines:list[str], language:str, *, after:bool=False) -> bytes:
     require(language in ("PY","ADA") and type(original) is bytes
             and type(anchor) is str and type(label) is str
             and type(code_lines) is list and code_lines
@@ -87,7 +87,7 @@ def insert_once(original:bytes, anchor:str, label:str,
             and start not in newlines and end not in newlines,
             "marker collision/recursive source injection")
     block=start+newlines+end
-    return original.replace(needle,block+needle,1)
+    return original.replace(needle,needle+block if after else block+needle,1)
 
 
 def strip_insertions(patched:bytes,labels:tuple[str,...],
@@ -229,7 +229,7 @@ def make_patched(originals:dict[str,bytes])->dict[str,bytes]:
     py=originals["REF-41"]
     ada=originals["ADA-TELUGU"]
     select,final=python_blocks()
-    py=insert_once(py,PY_ANCHORS[0],"PY_SELECTOR_GLOBAL_RANK",select,"PY")
+    py=insert_once(py,PY_ANCHORS[0],"PY_SELECTOR_GLOBAL_RANK",select,"PY",after=True)
     py=insert_once(py,PY_ANCHORS[1],"PY_FINAL_NAME_AND_WEAVE",final,"PY")
     rank_assignment=b"        rank = choose_rank(ask_bowl(result, 4, SEAL_MONTH_WEAVING), family.count())"
     selector_marker=b"# >>> V159_QA_DIAG_INSTRUMENTED_COPY_ONLY PY_SELECTOR_GLOBAL_RANK"
