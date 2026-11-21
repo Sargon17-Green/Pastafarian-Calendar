@@ -96,7 +96,7 @@ proc transpose(const ref after: SparseVec, n: int, k: int,
                spec: GapSpec): SparseVec {
   var dense: [0..n] bigint;
   var suffix = new bigint(0);
-  for i in n..0 by -1 {
+  for i in 0..n by -1 {
     const a = after.at(i+1);
     if a != 0 {
       const factor = weight(i,n,k,spec);
@@ -146,7 +146,7 @@ proc candidateBlocks(const ref lens: [?D] int,
   for i in 0..sizes[m] do identity[i] = new bigint(1);
   var adjoint = pack(identity);
   if m >= 2 {
-    for j in m..2 by -1 {
+    for j in 2..m by -1 {
       if eligible(j,lens,used,opened,closed) {
         const own = extendSpec(specs[j],j,j);
         const trial = transfer(states[j-1],sizes[j-1],lens[j],own);
