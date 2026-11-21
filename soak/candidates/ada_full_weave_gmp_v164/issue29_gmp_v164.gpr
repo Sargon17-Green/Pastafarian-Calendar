@@ -5,7 +5,8 @@ project Issue29_Gmp_V164 is
    for Object_Dir use "obj";
    for Exec_Dir use "bin";
    for Main use
-     ("test_issue29_gmp_v164.adb", "benchmark_issue29_gmp_v164.adb");
+     ("test_issue29_gmp_v164.adb", "benchmark_issue29_gmp_v164.adb",
+      "test_issue29_wide_rank_gmp_v164.adb");
    package Compiler is
       for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata");
    end Compiler;
