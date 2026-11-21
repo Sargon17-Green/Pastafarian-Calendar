@@ -7,6 +7,7 @@ procedure Test_Issue29_Full_Weave_V163 is
    use Ada.Numerics.Big_Numbers.Big_Integers;
    package CW renames Canonical_Full_Weave_V163;
    subtype Natural_Array is CW.Natural_Array;
+   use type CW.Natural_Array;
 
    function B (X : Natural) return Big_Integer is (To_Big_Integer (Integer (X)));
 
