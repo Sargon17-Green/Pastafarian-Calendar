@@ -4,12 +4,20 @@
 Cost is abstract cached states + legal transitions, NOT production insertion cells.
 """
 import argparse
+import json
+import os
 from collections import Counter
 
 LIMIT = 5_000_000
 
 class Unproven(Exception):
-    pass
+    def __init__(self, reason="abstract-budget-exceeded", spent=(0, 0),
+                 production_work=0, next_cost=0):
+        super().__init__(reason)
+        self.reason = reason
+        self.spent = tuple(spent)
+        self.production_work = production_work
+        self.next_cost = next_cost
 
 
 def brute(profile):
@@ -36,17 +44,33 @@ def brute(profile):
     return result
 
 
-def unrank(profile, rank, position, budget=LIMIT):
+def _unrank(profile, rank, position, budget=LIMIT, production_budget=None):
     """Exact suffix-state DP: f(s)=sum(f(s')) over legal next letters."""
     if not (2 <= len(profile) <= 47 and all(1 <= x <= 123 for x in profile)):
         raise ValueError("invalid profile")
     if not 1 <= budget <= LIMIT or not 1 <= position <= sum(profile):
         raise ValueError("invalid budget or position")
-    spent = [0, 0]  # states, transitions
-    def charge(which):
+    spent = [0, 0]  # unique states, legal transitions
+    production_work = [0]
+    month_count = len(profile)
+
+    def production_raming(rest, opened):
+        # Exact conservative per-candidate insertion-cell bound used by
+        # production maandrang/raming:
+        # 1 + (m - opened + 1) * (1 + sum(rest)).
+        return 1 + (month_count - opened + 1) * (1 + sum(rest))
+
+    def charge(which, work_cost):
+        # Both budgets are charged before the corresponding operation.
         if sum(spent) >= budget:
-            raise Unproven("abstract-cell budget exceeded")
+            raise Unproven("abstract-budget-exceeded", spent,
+                           production_work[0], work_cost)
+        if (production_budget is not None
+                and production_work[0] + work_cost > production_budget):
+            raise Unproven("production-equivalent-work-budget-exceeded",
+                           spent, production_work[0], work_cost)
         spent[which] += 1
+        production_work[0] += work_cost
     def next_states(rest, opened, closed):
         for i in range(1, min(len(rest), opened + 1) + 1):
             n = rest[i - 1]
@@ -72,14 +96,15 @@ def unrank(profile, rank, position, budget=LIMIT):
                 # Every child has been evaluated by depth-first postorder.
                 memo[state] = sum((memo[child] for child in edges), 0)
                 continue
-            charge(0)
+            charge(0, 1)
             if not any(remaining):
                 memo[state] = int(opened_count == closed_count == len(profile))
                 continue
             children = []
             for _, updated, new_opened, new_closed in next_states(*state):
-                charge(1)
-                children.append((updated, new_opened, new_closed))
+                child = (updated, new_opened, new_closed)
+                charge(1, production_raming(updated, new_opened))
+                children.append(child)
             stack.append((state, children))
             # Preserve lexicographic traversal order; the cache collapses
             # repeated suffix states without consuming further units.
@@ -104,7 +129,105 @@ def unrank(profile, rank, position, budget=LIMIT):
                 break
         else:
             raise AssertionError("no legal suffix")
-    return tuple(prefix), total, tuple(spent)
+    return tuple(prefix), total, tuple(spent), production_work[0]
+
+
+def unrank(profile, rank, position, budget=LIMIT):
+    prefix, total, spent, _ = _unrank(profile, rank, position, budget, None)
+    return prefix, total, spent
+
+
+def unrank_diagnostic(profile, rank, position, budget=LIMIT,
+                      production_budget=LIMIT):
+    return _unrank(profile, rank, position, budget, production_budget)
+
+
+def run_canonical_diagnostic(input_path, output_path):
+    with open(input_path, "r", encoding="utf-8") as stream:
+        data = json.load(stream)
+    if data.get("project_id") != "PC-BRANCH-CLOJURE-DUTCH":
+        raise ValueError("PROJECT_ID mismatch")
+    source_sha = data.get("source_sha")
+    if not isinstance(source_sha, str) or len(source_sha) != 40:
+        raise ValueError("missing or malformed source SHA")
+    expected_sha = os.environ.get("GITHUB_SHA")
+    if expected_sha and expected_sha != source_sha:
+        raise ValueError("input SHA does not match checked-out GITHUB_SHA")
+    profile = tuple(int(x) for x in data["profile"])
+    rank = int(data["weaving_rank"])
+    expected_total = int(data["weaving_total"])
+    if (not 3 <= len(profile) <= 47
+            or any(not 4 <= x <= 123 for x in profile)
+            or sum(profile) > 5778 or sum(profile) < 520
+            or not 1 <= rank <= expected_total):
+        raise ValueError("canonical profile/rank outside the declared domain")
+
+    common = {
+        "project_id": data["project_id"],
+        "source_sha": source_sha,
+        "calculation_day": data["calculation_day"],
+        "target_day": data["target_day"],
+        "target_year": data["target_year"],
+        "search_budget": data["search_budget"],
+        "profile": list(profile),
+        "month_count": len(profile),
+        "weaving_rank": str(rank),
+        "production_weaving_total": str(expected_total),
+        "abstract_budget": LIMIT,
+        "production_equivalent_budget": LIMIT,
+        "abstract_cost_model": "unique memo states + legal outgoing transitions",
+        "production_equivalent_cost_model": (
+            "one unit per unique state plus production_raming(rest, opened) "
+            "per legal transition; raming=1+(m-opened+1)*(1+sum(rest))"
+        ),
+        "production_cost_model_source": "src/pastafari/maandrang.clj:raming",
+        "prefix_positions": [82, 520],
+        "five_field_differential": False,
+        "full_month_weaving_computed": False,
+        "stage2_accepted": False,
+    }
+    try:
+        prefix, total, spent, production_work = unrank_diagnostic(
+            profile, rank, 520, LIMIT, LIMIT)
+        if total != expected_total:
+            raise AssertionError(
+                f"DP total {total} disagrees with production total {expected_total}")
+        if len(prefix) != 520:
+            raise AssertionError("DP did not return the complete 520-letter prefix")
+        result = dict(common)
+        result.update({
+            "status": "DP_FEASIBILITY_PROVEN",
+            "dp_weaving_total": str(total),
+            "abstract_unique_states": spent[0],
+            "abstract_legal_transitions": spent[1],
+            "abstract_units": sum(spent),
+            "production_equivalent_work_upper_bound": production_work,
+            "prefix_p82": list(prefix[:82]),
+            "prefix_p520": list(prefix),
+        })
+        exit_code = 0
+    except Unproven as exc:
+        result = dict(common)
+        result.update({
+            "status": "DP_FEASIBILITY_UNPROVEN",
+            "reason": exc.reason,
+            "abstract_unique_states": exc.spent[0],
+            "abstract_legal_transitions": exc.spent[1],
+            "abstract_units_charged": sum(exc.spent),
+            "production_equivalent_work_charged": exc.production_work,
+            "next_operation_cost": exc.next_cost,
+            "minimum_if_next_operation_is_charged": (
+                exc.production_work + exc.next_cost),
+            "prefix_p82": None,
+            "prefix_p520": None,
+            "numeric_witness_emitted": False,
+        })
+        exit_code = 2
+    with open(output_path, "w", encoding="utf-8") as stream:
+        json.dump(result, stream, ensure_ascii=False, indent=2, sort_keys=True)
+        stream.write("\\n")
+    print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+    return exit_code
 
 
 def test():
@@ -146,7 +269,14 @@ if __name__ == "__main__":
     p.add_argument("--rank", type=int, default=2)
     p.add_argument("--position", type=int, default=5)
     p.add_argument("--budget", type=int, default=LIMIT)
+    p.add_argument("--canonical-input")
+    p.add_argument("--diagnostic-output")
     a = p.parse_args()
+    if a.canonical_input:
+        if not a.diagnostic_output:
+            p.error("--diagnostic-output is required with --canonical-input")
+        raise SystemExit(run_canonical_diagnostic(
+            a.canonical_input, a.diagnostic_output))
     if a.self_test:
         test()
     else:
