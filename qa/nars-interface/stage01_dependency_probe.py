@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Source-locked QA-only Stage1 dependency probes. No Stage1 acceptance."""
+"""Source-locked QA-only Stage1 root-cause probes. Never accepts Stage1."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -10,7 +10,7 @@ from chunked_fx_probe import marker_write
 from stage01_import_workspace import SOURCE_COMMIT, _codes, load_locked_sources
 from stage01_statement_probe import build_statement_probe, decode_programs
 
-FINAL = "APL_GERMAN_DEPENDENCY_DIAGNOSTIC_COMPLETE_NOT_STAGE01"
+FINAL = "APL_GERMAN_ROOTCAUSE_DIAGNOSTIC_COMPLETE_NOT_STAGE01"
 
 
 def anchor(blocks, name, needle=None, required_line=None):
@@ -37,6 +37,27 @@ def build_dependency_probe(raw, root, marker):
         raise ValueError("STATEMENT_BASE_NOT_LOCKED")
     if base["function_count"] != 95 or base["chunk_count"] != 23:
         raise ValueError("FX_PREFIX_NOT_LOCKED")
+
+    p = pathlib.PureWindowsPath(marker)
+
+    # Add the actual ⎕EC message capture to the three source-locked test calls.
+    # The source test functions themselves remain untouched.
+    for offset, call in enumerate(base["calls"]):
+        index = int(call["index"])
+        message_path = str(p.with_name(f"{p.stem}_stmt_{index:02d}_message_codes.txt"))
+        call["message_code_path"] = message_path
+        var = f"QAStmtEC{index:02d}"
+        statement = (
+            "95 Stage01ChunkAssert 0 ⋄ "
+            + marker_write(call["start_token"], call["start_path"])
+            + f" ⋄ {var}←⎕EC ⎕UCS {_codes(call['alias'])}"
+            + f" ⋄ (⍕{var}[1]) ⎕NAPPEND ((⎕UCS {_codes(call['code_path'])}) ⎕NCREATE 0)"
+            + f" ⋄ (⍕⎕UCS ⊃{var}[3]) ⎕NAPPEND ((⎕UCS {_codes(message_path)}) ⎕NCREATE 0)"
+            + " ⋄ " + marker_write(call["captured_token"], call["captured_path"])
+        )
+        call["inner_sha256"] = hashlib.sha256(statement.encode("utf-8")).hexdigest()
+        programs[30 + offset] = statement
+
     blocks = load_locked_sources(root)["blocks"]
     anchors = {
         "ownership": anchor(blocks, "RunStage01OwnershipTests",
@@ -54,12 +75,15 @@ def build_dependency_probe(raw, root, marker):
     }
     if [anchors[x]["source_line"] for x in ("ownership", "oracle", "year")] != [39, 108, 147]:
         raise ValueError("TEST_ANCHOR_LINE_CHANGED")
+
     original_assert = anchors["ownership"]["source_text"].strip()
     if original_assert.count("ctxB0") != 1:
         raise ValueError("OWNERSHIP_ASSERT_SOURCE_CHANGED")
     original_assert = original_assert.replace("ctxB0", "QACTXB")
     new_b = "QACTXB←(FOUNDATION_DAY+100) MonsterNewContext FOUNDATION_DAY+120"
+
     specs = [
+        # Original 13 dependency probes, now with full ⎕EC message capture.
         ("ownership_length", new_b, "⍴MonsterBaseSemanticState QACTXB", "value", "ownership"),
         ("ownership_committed_length", new_b, "⍴⊃QACTXB[CTX_COMMITTED]", "value", "ownership"),
         ("ownership_committed_values", new_b, "⊃QACTXB[CTX_COMMITTED]", "value", "ownership"),
@@ -68,38 +92,67 @@ def build_dependency_probe(raw, root, marker):
         ("gate_get_zero", "GateReset", "GateGet 0", "value", "get"),
         ("gate_put_one", "GateReset", "GatePut 1 (FOUNDATION_DAY+42)", "call", "put"),
         ("gate_gap_one", "GateReset", "GateGap 1", "value", "gap"),
-        ("gate_sauce_one", "GateReset", "FOUNDATION_DAY Sauce (FOUNDATION_DAY+1)", "call", "sauce"),
-        ("gate_askbowl_one", "GateReset",
+        ("gate_sauce_one", "", "FOUNDATION_DAY Sauce (FOUNDATION_DAY+1)", "call", "sauce"),
+        ("gate_askbowl_one", "",
          "(FOUNDATION_DAY Sauce (FOUNDATION_DAY+1)) AskBowl 1 SEAL_GATE_GAP", "call", "ask"),
-        ("gate_choose_rank_one", "GateReset",
+        ("gate_choose_rank_one", "",
          "41+((FOUNDATION_DAY Sauce (FOUNDATION_DAY+1)) AskBowl 1 SEAL_GATE_GAP) ChooseRank 922",
          "value", "rank"),
         ("ensure_gate_one", "GateReset", "EnsureGate 1", "call", "ensure"),
         ("ensure_gates_cover", "GateReset",
          "EnsureGatesCover (FOUNDATION_DAY-YEAR_MAX_DAYS) (FOUNDATION_DAY+YEAR_MAX_DAYS)",
          "call", "cover"),
+
+        # Distinguish a value mismatch from a type/rank mismatch in line 39.
+        ("ownership_expected_dr", new_b, "⎕DR 2", "value", "ownership"),
+        ("ownership_actual_dr", new_b, "⎕DR ⍴MonsterBaseSemanticState QACTXB", "value", "ownership"),
+        ("ownership_numeric_equal", new_b, "2=⍴MonsterBaseSemanticState QACTXB", "value", "ownership"),
+        ("ownership_expected_rank", new_b, "⍴⍴2", "value", "ownership"),
+        ("ownership_actual_rank", new_b, "⍴⍴⍴MonsterBaseSemanticState QACTXB", "value", "ownership"),
+
+        # Isolate the first failing statement inside Sauce, then its consumers.
+        ("sauce_work_counts", "", "QASauceCounts←FOUNDATION_DAY WorkCounts (FOUNDATION_DAY+1)", "call", "sauce"),
+        ("sauce_build_hidden", "", "QASauceHidden←BuildHidden QASauceCounts", "call", "sauce"),
+        ("sauce_build_visible", "", "QASauceVisible←QASauceCounts BuildVisible QASauceHidden", "call", "sauce"),
+        ("sauce_initial_bowls", "", "QASauceBowls←InitialBowls QASauceCounts", "call", "sauce"),
+        ("sauce_apply_visible", "", "QASaucePair←QASauceBowls ApplyVisible QASauceVisible", "call", "sauce"),
+        ("sauce_post_stir", "", "QASauceFinal←PostStir12 ⊃QASaucePair[1]", "call", "sauce"),
+        ("sauce_result", "", "QASauce←FOUNDATION_DAY Sauce (FOUNDATION_DAY+1)", "call", "sauce"),
+        ("sauce_next_bowl", "", "QASauceNext←QASauce NextBowlInDrop46Order 1", "call", "ask"),
+        ("sauce_ask_bowl", "", "QASauceAsk←QASauce AskBowl 1 SEAL_GATE_GAP", "call", "ask"),
+        ("sauce_choose_rank", "", "QASauceRank←QASauceAsk ChooseRank 922", "call", "rank"),
     ]
-    p = pathlib.PureWindowsPath(marker)
+    if len(specs) != 28:
+        raise ValueError("ROOTCAUSE_PROBE_COUNT_INVALID")
+
     entries = []
     programs = programs[:-1]
     for index, (name, setup, expression, mode, origin) in enumerate(specs, 1):
-        prefix = f"APL_GERMAN_DEP_V1|SOURCE={SOURCE_COMMIT}|INDEX={index:02d}|NAME={name}"
+        prefix = f"APL_GERMAN_ROOT_V1|SOURCE={SOURCE_COMMIT}|INDEX={index:02d}|NAME={name}"
         paths = {phase + "_path": str(p.with_name(f"{p.stem}_dep_{index:02d}_{phase}.txt"))
-                 for phase in ("start", "captured", "code", "value")}
-        start_token, captured_token = prefix + "|PHASE=START", prefix + "|PHASE=CAPTURED_NOT_PASS"
+                 for phase in ("start", "captured", "code", "value", "message")}
+        start_token = prefix + "|PHASE=START"
+        captured_token = prefix + "|PHASE=CAPTURED_NOT_PASS"
         if mode == "value":
-            expression = "(⍕(" + expression + ")) ⎕NAPPEND ((⎕UCS " + _codes(paths["value_path"]) + ") ⎕NCREATE 0)"
-        var = f"QADepEC{index:02d}"
-        code = ("95 Stage01ChunkAssert 0 ⋄ " + setup + " ⋄ "
-                + marker_write(start_token, paths["start_path"])
-                + f" ⋄ {var}←⎕EC ⎕UCS {_codes(expression)}"
-                + f" ⋄ (⍕{var}[1]) ⎕NAPPEND ((⎕UCS {_codes(paths['code_path'])}) ⎕NCREATE 0)"
-                + " ⋄ " + marker_write(captured_token, paths["captured_path"]))
+            expression = ("(⍕(" + expression + ")) ⎕NAPPEND ((⎕UCS "
+                          + _codes(paths["value_path"]) + ") ⎕NCREATE 0)")
+        var = f"QARootEC{index:02d}"
+        code = "95 Stage01ChunkAssert 0"
+        if setup:
+            code += " ⋄ " + setup
+        code += (
+            " ⋄ " + marker_write(start_token, paths["start_path"])
+            + f" ⋄ {var}←⎕EC ⎕UCS {_codes(expression)}"
+            + f" ⋄ (⍕{var}[1]) ⎕NAPPEND ((⎕UCS {_codes(paths['code_path'])}) ⎕NCREATE 0)"
+            + f" ⋄ (⍕⎕UCS ⊃{var}[3]) ⎕NAPPEND ((⎕UCS {_codes(paths['message_path'])}) ⎕NCREATE 0)"
+            + " ⋄ " + marker_write(captured_token, paths["captured_path"])
+        )
         programs.append(code)
         entries.append(dict(index=index, name=name, setup=setup, expression=expression,
                             mode=mode, start_token=start_token, captured_token=captured_token,
-                            program_sha256=hashlib.sha256(code.encode()).hexdigest(),
+                            program_sha256=hashlib.sha256(code.encode("utf-8")).hexdigest(),
                             **paths, **anchors[origin]))
+
     programs.append("95 Stage01ChunkAssert 0 ⋄ " + marker_write(FINAL, marker))
     outer = " ⋄ ".join("⎕EC ⎕UCS " + _codes(code) for code in programs)
     serial = outer.replace("⎕", "{quad}").replace("⋄", "{diamond}")
@@ -110,7 +163,7 @@ def build_dependency_probe(raw, root, marker):
                        f"'{serial}'{match['ending']}")
     candidate = "".join(lines).encode("cp1252")
     receipt = dict(base)
-    receipt.update(schema="APL_GERMAN_STAGE01_DEPENDENCY_DIAGNOSTIC_V1",
+    receipt.update(schema="APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V1",
                    stage01="NOT_ACCEPTED", status="GENERATED_NOT_NATIVE_VALIDATED",
                    source_commit=SOURCE_COMMIT, source_dependency_anchors=anchors,
                    dependency_probes=entries, marker_token=FINAL, marker_path=marker,
@@ -134,13 +187,13 @@ def main():
         pathlib.Path(a.candidate).parent.mkdir(parents=True, exist_ok=True)
         pathlib.Path(a.candidate).write_bytes(candidate)
         out.write_bytes((json.dumps(receipt, ensure_ascii=False, indent=2) + "\n").encode())
-        print("DEP_CANDIDATE_ONLY", receipt["candidate_sha256"])
+        print("ROOTCAUSE_CANDIDATE_ONLY", receipt["candidate_sha256"])
         return 0
     except Exception as e:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_bytes((json.dumps(dict(stage01="NOT_ACCEPTED",
                  status="GENERATION_FAILED", error=f"{type(e).__name__}:{e}")) + "\n").encode())
-        print(f"DEPENDENCY_GENERATOR_FAILED:{e}", file=sys.stderr)
+        print(f"ROOTCAUSE_GENERATOR_FAILED:{e}", file=sys.stderr)
         return 2
 
 

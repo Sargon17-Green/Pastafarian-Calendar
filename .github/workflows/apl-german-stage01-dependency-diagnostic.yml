@@ -1,4 +1,4 @@
-name: APL German Stage1 dependency diagnosis (QA ONLY)
+name: APL German Stage1 root-cause diagnostic (QA ONLY)
 on:
   push:
     branches: [qa/apl-german-nars-interface-20261116]
@@ -12,7 +12,7 @@ permissions:
   contents: read
   actions: read
 jobs:
-  ec-capture-diagnostic:
+  rootcause-capture-diagnostic:
     runs-on: windows-2022
     timeout-minutes: 12
     steps:
@@ -40,41 +40,44 @@ jobs:
       - name: Provision pinned NARS and ephemeral APL font
         shell: pwsh
         run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
-      - name: Test source-locked EC candidate generator
+      - name: Test source-locked root-cause candidate generator
         shell: pwsh
         run: |
           python -m unittest discover -s qa/nars-interface -p 'test_stage01_dependency_probe.py' -v
-          if ($LASTEXITCODE -ne 0) { throw 'STATEMENT_GENERATOR_TEST_FAILED' }
-      - name: Run actual NARS EC diagnostic with bounded evidence capture
+          if ($LASTEXITCODE -ne 0) { throw 'ROOTCAUSE_GENERATOR_TEST_FAILED' }
+      - name: Run actual NARS root-cause diagnostic with bounded evidence capture
         shell: pwsh
-        run: ./qa/nars-interface/bounded_stage01_dependency_probe.ps1 -Runtime verified_runtime -Evidence dependency_probe_evidence
+        run: ./qa/nars-interface/bounded_stage01_dependency_probe.ps1 -Runtime verified_runtime -Evidence rootcause_probe_evidence
       - name: Independent diagnostic gate, not Stage1
         shell: pwsh
         run: |
-          $a=Get-Content dependency_probe_evidence/native_dependency_diag.json -Raw | ConvertFrom-Json
-          $b=Get-Content dependency_probe_evidence/dependency_candidate.json -Raw | ConvertFrom-Json
+          $a=Get-Content rootcause_probe_evidence/native_rootcause_diag.json -Raw | ConvertFrom-Json
+          $b=Get-Content rootcause_probe_evidence/rootcause_candidate.json -Raw | ConvertFrom-Json
           if($a.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or $b.source_commit -cne $a.source_commit){throw 'SOURCE_LOCK_MISMATCH'}
           if($a.stage01 -cne 'NOT_ACCEPTED' -or $b.stage01 -cne 'NOT_ACCEPTED'){throw 'FALSE_STAGE01_ACCEPTANCE'}
           if($a.fx_last_contiguous -ne 95 -or $a.fx_checkpoints.Count -ne 23 -or @($a.fx_checkpoints | Where-Object {$_.exact -ne $true}).Count -gt 0){throw 'FX95_UNPROVEN'}
-          foreach($p in $a.probes){Write-Output ('NATIVE_STATEMENT_EC '+$p.index+' '+$p.name+' '+$p.first_ec_code)}
-          if($a.status -cne 'DEPENDENCY_CAPTURE_COMPLETE_DIAGNOSTIC_ONLY' -or $a.probes.Count -ne 3 -or $a.statement_tests.Count -ne 3 -or $a.dependency_probes.Count -ne 13 -or $a.final_marker_exact -ne $true){throw 'DEPENDENCY_CAPTURE_INCOMPLETE'}
+          if($a.status -cne 'ROOTCAUSE_CAPTURE_COMPLETE_DIAGNOSTIC_ONLY' -or $a.probes.Count -ne 3 -or $a.statement_tests.Count -ne 3 -or $a.dependency_probes.Count -ne 28 -or $a.final_marker_exact -ne $true){throw 'ROOTCAUSE_CAPTURE_INCOMPLETE'}
           if(@($a.statement_tests | Where-Object {$null -eq $_.first_unfinished}).Count -ne 0){throw 'FIRST_SOURCE_LINE_NOT_ISOLATED'}
-          Write-Output 'SOURCE_DEPENDENCY_DIAGNOSTIC_COMPLETE_NOT_STAGE01'
+          if(@($a.probes | Where-Object {$_.start_exact -ne $true -or $_.captured_exact -ne $true -or $null -eq $_.first_ec_code}).Count -ne 0){throw 'SUBTEST_EC_RECEIPTS_INCOMPLETE'}
+          if(@($a.probes | Where-Object {$_.first_ec_code -eq '0' -and [string]::IsNullOrWhiteSpace($_.error_message)}).Count -ne 0){throw 'SUBTEST_ERROR_MESSAGE_MISSING'}
+          if(@($a.dependency_probes | Where-Object {$_.start_exact -ne $true -or $_.captured_exact -ne $true -or $null -eq $_.first_ec_code}).Count -ne 0){throw 'DEPENDENCY_EC_RECEIPTS_INCOMPLETE'}
+          if(@($a.dependency_probes | Where-Object {$_.first_ec_code -eq '0' -and [string]::IsNullOrWhiteSpace($_.error_message)}).Count -ne 0){throw 'DEPENDENCY_ERROR_MESSAGE_MISSING'}
+          Write-Output 'SOURCE_ROOTCAUSE_DIAGNOSTIC_COMPLETE_NOT_STAGE01'
       - name: Hash all receipts and evidence
         if: always()
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force dependency_probe_evidence,font_bootstrap_evidence | Out-Null
-          Get-ChildItem dependency_probe_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+          New-Item -ItemType Directory -Force rootcause_probe_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem rootcause_probe_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
             $h=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             "$h  $($_.FullName)"
-          } | Set-Content -Encoding utf8 dependency_probe_evidence.sha256
+          } | Set-Content -Encoding utf8 rootcause_probe_evidence.sha256
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-dependency-diagnostic-only
+          name: apl-german-stage01-rootcause-diagnostic-only
           path: |
-            dependency_probe_evidence/
+            rootcause_probe_evidence/
             font_bootstrap_evidence/
-            dependency_probe_evidence.sha256
+            rootcause_probe_evidence.sha256
           retention-days: 21
