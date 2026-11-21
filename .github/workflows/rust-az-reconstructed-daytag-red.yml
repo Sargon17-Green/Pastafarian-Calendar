@@ -1,4 +1,5 @@
-name: Rust Azerbaijani Reconstructed Day-tag RED Native
+# Historical file name preserved so the existing push workflow runs on the correction.
+name: Rust Azerbaijani Reconstructed Day-tag GREEN Native
 
 on:
   push:
@@ -16,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  reconstructed-daytag-red:
+  reconstructed-daytag-green:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -29,21 +30,22 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - name: Verify original Stage03 ancestor and exact code
+      - name: Verify Stage03 and immutable executed RED ancestor
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor 716e5a6f335b1a15464029b446edb468f3a8482c "$GITHUB_SHA"
+          git merge-base --is-ancestor 108833d04786be22bfcadc987c7208b35c373451 "$GITHUB_SHA"
           grep -Fq 'pub mod discovery02_legacy_day_tag;' src/lib.rs
           test -f src/discovery02_legacy_day_tag.rs
           test -f tests/reconstruction_stage03_daytag_red.rs
-      - name: Run native Rust RED and prior stage regressions
+      - name: Run native GREEN, differential and prior stage regressions
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p evidence
-          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\nBRANCH=%s\nSHA=%s\nRECONSTRUCTION=YES\n' "$GITHUB_REF_NAME" "$GITHUB_SHA" > evidence/sha.txt
+          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\nBRANCH=%s\nSHA=%s\nRECONSTRUCTION=YES\nRED_ANCESTOR=108833d04786be22bfcadc987c7208b35c373451\n' "$GITHUB_REF_NAME" "$GITHUB_SHA" > evidence/sha.txt
           rustc --version > evidence/toolchain.txt
           cargo --version >> evidence/toolchain.txt
           set +e
@@ -57,21 +59,22 @@ jobs:
             cat evidence/stderr.txt >&2
             exit "$code"
           fi
-          grep -Fq 'RECONSTRUCTED_RUST_DAYTAG_RED=3 CONTROL=3 UNEXPECTED=0' evidence/stdout.txt
+          grep -Fq 'RECONSTRUCTED_RUST_DAYTAG_GREEN=6 PRIOR_RED_FIXED=3 PRIOR_CONTROL_PRESERVED=3 UNEXPECTED=0' evidence/stdout.txt
+          grep -Fq 'RECONSTRUCTED_RUST_DAYTAG_DIFFERENTIAL=128 GREEN=128 UNEXPECTED=0' evidence/stdout.txt
           grep -Fq 'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' evidence/stdout.txt
           grep -Fq 'STAGE03_PATCH01_BOUNDARY_OK=8' evidence/stdout.txt
           grep -Fq 'STAGE03_PATCH01_LEGACY_RED=3 CONTROL=1 UNEXPECTED=0' evidence/stdout.txt
           grep -Eq 'test result: ok\. 16 passed; 0 failed' evidence/stdout.txt
           grep -Eq 'test result: ok\. 3 passed; 0 failed' evidence/stdout.txt
           grep -Eq 'test result: ok\. 4 passed; 0 failed' evidence/stdout.txt
-          grep -Eq 'test result: ok\. 1 passed; 0 failed' evidence/stdout.txt
-          printf 'RECONSTRUCTION_NATIVE_RED=PASS\nRECONSTRUCTION_EXPECTED_RED=3 CONTROL=3\nORIGINAL_STAGE04=NOT_CLAIMED\n' > evidence/result.txt
+          grep -Eq 'test result: ok\. 2 passed; 0 failed' evidence/stdout.txt
+          printf 'RECONSTRUCTION_NATIVE_GREEN=PASS\nPREVIOUSLY_RED_FIXED=3\nCONTROLS_PRESERVED=3\nDIFFERENTIAL=128\nORIGINAL_STAGE04=NOT_CLAIMED\n' > evidence/result.txt
           cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve exact SHA, toolchain, exit and output
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rust-az-reconstructed-daytag-red
+          name: rust-az-reconstructed-daytag-green
           path: evidence/
           if-no-files-found: warn
           retention-days: 30

@@ -1,9 +1,9 @@
-//! Stage03-dən budaqlanan tarixi DAY-TAG səhvinin açıq yenidən qurulması.
-//! Bu kod 2026-10-30 tarixindəki orijinal istehsal mənbəyi deyildir.
-//! Səhv qəsdən saxlanılır: təməl gündən əvvəl +1 ofseti yanlışdır.
+//! Stage03-dən ayrılan 2026-cı il Rust gün etiketi yenidənqurmasının düzəlişi.
+//! Orijinal Stage03 mənbəyinin tarixi dəyişdirilməyib; səhv RED SHA-da saxlanılıb.
+//! Köhnə API adı müqayisə və geriyə uyğunluq üçün qalır, hesab isə düzəldilib.
 use crate::{MonsterContext, MonsterError, MonsterErrorCode, MonsterManager, PhaseHandler};
 use num_bigint::BigInt;
-use num_traits::Signed;
+use num_traits::{One, Signed};
 
 pub struct LegacyDayTagHandler;
 
@@ -14,12 +14,16 @@ pub struct LegacyDayTagObservation {
     pub context: MonsterContext,
 }
 
-/// Qəsdən səhv: hər iki istiqamət üçün 2*abs(day-foundation)+1.
-/// Təməl gündən ƏVVƏL normativ cavabda sondakı +1 olmamalıdır.
+/// Düzəliş: gün F-dən əvvəldirsə 2*(F-gün), əks halda 2*(gün-F)+1.
+/// Məhdudiyyətsiz işarəli BigInt ilə işləyir; köhnə ad RED tarixi ilə bağlıdır.
 pub fn legacy_day_tag(day: &BigInt) -> BigInt {
-    let foundation = BigInt::from(-15_055_671i64);
-    let distance = (day - foundation).abs();
-    distance * BigInt::from(2u8) + BigInt::from(1u8)
+    let delta = day - BigInt::from(-15_055_671i64);
+    let doubled_distance = delta.abs() << 1usize;
+    if delta.is_negative() {
+        doubled_distance
+    } else {
+        doubled_distance + BigInt::one()
+    }
 }
 
 impl PhaseHandler for LegacyDayTagHandler {
@@ -30,12 +34,12 @@ impl PhaseHandler for LegacyDayTagHandler {
     fn handle(&self, context: &mut MonsterContext) -> Result<(), MonsterError> {
         context.legacy_day_tag_observation = Some(legacy_day_tag(&context.calculation_day));
         context.metrics.bump("discovery02.legacy_day_tag.calls");
-        context.logs.push("DISCOVERY02: səhv tarixi gün etiketi müşahidə edildi.");
+        context.logs.push("DISCOVERY02: düzəldilmiş gün etiketi müşahidə edildi.");
         Ok(())
     }
 }
 
-/// Yeni çağırış üçün müstəqil MonsterContext və real dispetçer.
+/// Hər çağırış üçün müstəqil MonsterContext və həqiqi dispetçer.
 pub fn observe_legacy_day_tag(input: BigInt) -> Result<LegacyDayTagObservation, MonsterError> {
     let mut manager = MonsterManager::default();
     manager.dispatcher_mut().register(LegacyDayTagHandler);
