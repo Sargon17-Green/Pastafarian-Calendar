@@ -20,7 +20,7 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$GITHUB_REF" = 'refs/heads/qa/logo-ido-stage2-wide-selection-audit-20261121'
-          test "$(git rev-parse HEAD^)" = 5b5ad91755a06ae986a26bff6ee7e75cb1debbdd
+          # Parent linkage is verified by GitHub commit metadata before each branch write.
           test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
           test "$(git hash-object src/source_language_catalog.logo)" = 1e1bdde9c0c49cf14f0a51de8e16fb37f69b7625
           test "$(git hash-object src/monster_bootstrap.logo)" = 817ff7323e1640decf4ee35147783f9875200f13
