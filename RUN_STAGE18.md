@@ -1,10 +1,10 @@
-# Stage18 — תכנון בלבד: סדר קערות מערך טיפה חתום
+# Stage18 — תכנון, מימוש ובדיקת Native: סדר קערות מערך טיפה חתום
 
-PROJECT_ID: `PC-BRANCH-FALSE-ARABIC` · branch `FALSE+العربية` · DESIGN_ONLY · 2026-11-21.
+PROJECT_ID: `PC-BRANCH-FALSE-ARABIC` · branch `FALSE+العربية` · IMPLEMENTATION_CANDIDATE_NATIVE_NOT_ACCEPTED · 2026-11-21.
 
 ## עוגן נורמטיבי וחוזה
 
-הפעולה הבאה היא **op52** בתוך `test/normative_reference.false` (Git blob `3e9acc012bedf83294a6ec3cccb081a069556b5b`). היא קוראת ערך טיפה `D` מסוג BigInt חתום, מחשבת `rank=1+EuclideanMod(D-1,720)`, ומעבירה אותו לפעולת תמורה לקסיקוגרפית op51. הפעולה החדשה **המוצעת** בייצור תהיה `op35`, בנפרד מקוד המקור הנורמטיבי. אין בשלב זה מימוש op35.
+הפעולה הבאה היא **op52** בתוך `test/normative_reference.false` (Git blob `3e9acc012bedf83294a6ec3cccb081a069556b5b`). היא קוראת ערך טיפה `D` מסוג BigInt חתום, מחשבת `rank=1+EuclideanMod(D-1,720)`, ומעבירה אותו לפעולת תמורה לקסיקוגרפית op51. הפעולה `op35` מומשה בענף המורשה בלבד בקומיט `74260a604d972647f31b7c749a98c8ae23de08b6`, בנפרד מקוד המקור הנורמטיבי. מימוש אינו מהווה אישור Native או קבלת Stage18.
 
 - **קלט תקין:** handle תקין לתא ארגומנט מוקצה אחד, המכיל handle תקין ל־BigInt חתום קנוני במבנה `[sign,limb_count,limbs_base512_le...]`. הסימן -1/0/+1, `limb_count>=1`, כל digit בטווח `0..511`, אין padding עם הספרה המשמעותית אפס; אפס מקודד `[0,1,0]`. כל התאים המוצהרים מוקצים בפועל. אין מגבלת ערך מספרית; עד 2048 ביט נבדקים באורקל המקומי, לא כהצהרת ביצועים של Native.
 - **פלט:** handle חדש לטבלה ישירה בת שבעה תאים `[6,o1,o2,o3,o4,o5,o6]`. האיברים הם תמורה של `1..6`, לקסיקוגרפית בדירוג `rank` המתחיל ב־1. הפלט אינו descriptor של sequence כמו במקור הנורמטיבי; ההתאמה היא סמנטית ולא בינארית.
@@ -18,14 +18,21 @@ PROJECT_ID: `PC-BRANCH-FALSE-ARABIC` · branch `FALSE+العربية` · DESIGN_
 
 שערי התכנון: 720 דירוגים מלאים; עוגנים מפורשים לרבות 0 ושליליים; `D=-1440..1440`; גבולות של חזקות שתיים מ־9 עד 2048 ביט; 384 ערכים דטרמיניסטיים חתומים; בדיקות `D+720k`; roundtrip של Base512; חמישה mutants ל־off-by-one, סימן, שארית מחלוקת ו־64-bit truncation. כל mutant חייב להידחות על ידי עדות מספרית.
 
-## שערי ביצוע עתידיים — לא בוצעו ולא מאושרים בשלב זה
+## שערי ביצוע לאחר אישור המשתמש — Stage18 עדיין אינו מאושר
 
-1. הרשאה נפרדת ל־Stage18 implementation לפני הוספת op35, fixtures בפורמט FALSE או workflow. אין לשנות op34 או המקור הנורמטיבי.
-2. במימוש עתידי: fixture Native עם עוגני חיובי/אפס/שלילי, 720 דירוגים לכל הפחות, תכונות המחזוריות, השוואת כל 7 התאים, בדיקת אי־שינוי קלט, 2 חזרות ומוטנט דחוי.
-3. Native ב־original interpreter הנעול `eb3135565a8670cced3f6bbca4dbf7b014c45634`, עם SOURCE_PIN מדויק ל־SHA של מימוש עתידי. אין לשגר ריצה כפולה; תחילה לעבור על תוצאה completed+log+artifact.
+1. המשתמש אישר במפורש מימוש Stage18, בדיקות Native וביקורת קבלה עצמאית; לא ניתנה הרשאה ל־main/merge. קוד `op34` והמקור הנורמטיבי אינם משתנים.
+2. מחולל `tools/stage18_drop_order_fixture.py` מגדיר 750 מקרי Native בחמש קבוצות: 720 דירוגים מלאים, 28 וקטורים signed BigInt ושתי חזרות. כל מקרה כולל השוואת שבעה תאי תוצאה, שימור תא הארגומנט, זהות המצביע וערכי sign/count/digits. שני מוטנטים מגדירים בקרות שליליות מכוונות; תוצאותיהן עדיין אינן מאומתות.
+3. ה־Native workflow `false-arabic-stage18-native-drop-order.yml` נועל מפרש מקורי `eb3135565a8670cced3f6bbca4dbf7b014c45634` ו־SOURCE_PIN=`9ab8511b05158f7ddbd0c664b8d6cc9f7efc1339` (כולל קוד ותסריטי בדיקה). הרצה דרך push marker יחיד `[false-arabic-drop750]`; אין לשגר כפילות.
 4. קבלת שלב רק לפי Native completed, exit0, פלט/stderr, ארטיפקט ZIP CRC/SHA וביקורת offline עצמאית על Git blobs, קלט/פלט, ויכולת דחיית oracle מושחת. QA מקומי אינו Native, אינו differential ב־FALSE ואינו קבלה.
-5. בטיחות מצביעים פיזיים מחוץ לחוזה. עד סוף שלב התכנון: LAST_ACCEPTED_STAGE=17, `STAGE18_DESIGN_ONLY`, `STAGE18_NATIVE_NOT_RUN`, `STAGE18_NOT_ACCEPTED`. אין main/merge.
+5. בטיחות מצביעים פיזיים מחוץ לחוזה. עד ראיות Native וביקורת עצמאית: LAST_ACCEPTED_STAGE=17, `STAGE18_IMPLEMENTED_CANDIDATE`, `STAGE18_NOT_ACCEPTED`. אין main/merge.
 
 ## היסטוריית הבסיס
 
 Stage17 התקבל בחוזה תחום לפי run `44812320919`, source `cc39bd7007d27f00643b800338432430167dbb40`, artifact `14668076412`. QA תיעודי בסיום הקודם ב־HEAD `d6a61e29276389a49d66cd57895c884d5bff0c33`. אין להריץ מחדש Native של Stage17 ללא צורך ממוקד.
+
+## ביצוע ב־2026-11-21
+
+- `op35` נכתב בקומיט `74260a604d972647f31b7c749a98c8ae23de08b6`; מימוש החישוב: `D-1` → EuclideanMod(720) → `+1` → op34. אין שינוי בתא BigInt המקורי.
+- מחולל נפרד ב־Python מפענח fixtures ב־Base512 ומחשב תמורות באמצעות `itertools.permutations`; בדיקת ביקורת עצמאית תשתמש באורקל Factoradic ללא ייבוא קוד הייצור או fixture כמקור יחיד.
+- שער ה־Native ב־`tools/stage18_drop_order_ci.py` בודק מקור נעול, exit codes, stdout/stderr, סדר סמני הצלחה, אימות יצירת fixture ומוטנטים. הרצה אינה קבלה ללא בדיקת artifact offline נפרדת.
+- בשלב כתיבת רשומה זו אין מסקנת Native verified, אין artifact audit ואין Stage18 acceptance.
