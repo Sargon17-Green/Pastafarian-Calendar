@@ -23,12 +23,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: actions/download-artifact@v4
-        with:
-          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
-          run-id: 44372361730
-          github-token: ${{ github.token }}
-          path: pinned_release
+      - name: Fetch exact publisher NARS2000 release (independent SHA lock)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $ProgressPreference='SilentlyContinue'
+          New-Item -ItemType Directory -Force 'pinned_release/verified_release' | Out-Null
+          $installer='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
+          Invoke-WebRequest -Uri 'https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe' -OutFile $installer -MaximumRedirection 3 -TimeoutSec 90
+          if ((Get-Item -LiteralPath $installer).Length -ne 9430788 -or
+              (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant() -cne
+              '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b') {
+            throw 'PUBLISHER_INSTALLER_SIZE_OR_SHA_MISMATCH'
+          }
+          Write-Output 'PUBLISHER_NARS_INSTALLER_SHA_LOCK_PASS'
       - name: Provision pinned NARS and ephemeral APL font
         shell: pwsh
         run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
