@@ -1,0 +1,106 @@
+name: Issue29 v163 Ada full canonical weave QA (synthetic only, NO F)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-canonical-weave-v163
+    paths:
+      - .github/workflows/issue29-ada-full-weave-v163.yml
+permissions:
+  contents: read
+jobs:
+  compile-and-exhaustive-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify Soak halt; prohibit any foundation-date execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          obj=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text())
+          assert obj["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert obj["incident_issue"]==29
+          assert obj["main_changes_permitted"] is False
+          assert obj["successful_original_source_full_years"]==0
+          print("V163_HALT_ENFORCED_NO_CALENDAR_FCT_CALLS")
+          PY
+          git rev-parse HEAD > evidence/v163-workflow-head.txt
+          python3 -B -m py_compile soak/candidates/ada_full_weave_v163/integrate_qa_only_v163.py
+      - name: Install GNAT 13 for pure Ada compilation and toy-family enumerations
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/v163-apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 > evidence/v163-apt-install.log 2>&1
+          gnatmake --version > evidence/v163-compiler-version.txt
+      - name: Compile standalone exact DP and independent exhaustive test program
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd soak/candidates/ada_full_weave_v163
+            gnatmake -gnat2022 -gnatW8 -gnata test_issue29_full_weave_v163.adb
+          ) > evidence/v163-toy-compile.stdout 2> evidence/v163-toy-compile.stderr
+          sha256sum soak/candidates/ada_full_weave_v163/test_issue29_full_weave_v163             > evidence/v163-toy-executable.sha256
+      - name: Check all seven finite full-legal-family oracles (no calendar F)
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            ulimit -v 524288
+            timeout --signal=KILL 30s               ./soak/candidates/ada_full_weave_v163/test_issue29_full_weave_v163
+          ) > evidence/v163-toy-run.stdout 2> evidence/v163-toy-run.stderr
+          grep -F "V163_ALL_SEVEN_EXHAUSTIVE_FAMILIES_PASS_NO_FCT" evidence/v163-toy-run.stdout
+          grep -c "V163_PASS_MONTH_LENGTHS=" evidence/v163-toy-run.stdout | grep -Fx "7"
+      - name: Download immutable historical source and make reversible integration QA copy
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/issue29_foundation_capture_v160.py prepare             --root "$RUNNER_TEMP/issue29-v163" > evidence/v163-prepare.stdout             2> evidence/v163-prepare.stderr
+          python3 -B soak/candidates/ada_full_weave_v163/integrate_qa_only_v163.py             "$RUNNER_TEMP/issue29-v163" soak/candidates/ada_full_weave_v163             > evidence/v163-adapter.stdout 2> evidence/v163-adapter.stderr
+          cp "$RUNNER_TEMP/issue29-v163/v163-qa-adapter-manifest.json" evidence/
+          cp "$RUNNER_TEMP/issue29-v163/v163-qa-integration.diff" evidence/
+      - name: Compile Ada production oracle QA copy with full-family method (NEVER call F)
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd "$RUNNER_TEMP/issue29-v163/ada-build"
+            gnatmake -c -gnat2022 -gnatW8 -gnata -Isrc src/normative_oracle.adb
+          ) > evidence/v163-oracle-compile.stdout 2> evidence/v163-oracle-compile.stderr
+          echo "V163_PRODUCTION_ORACLE_QA_COPY_COMPILED_NOT_EXECUTED" > evidence/v163-integration-verdict.txt
+          echo "ORIGINAL_FCT_CALLS=0; QA_FCT_CALLS=0; SOAK_YEARS=0" >> evidence/v163-integration-verdict.txt
+      - name: Hash all recorded QA evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("evidence")
+          data={f.name:{"bytes":f.stat().st_size,
+                        "sha256":hashlib.sha256(f.read_bytes()).hexdigest()}
+                for f in sorted(p.iterdir()) if f.is_file()}
+          (p/"v163-member-hashes.json").write_text(
+            json.dumps(data,indent=2,sort_keys=True)+"\n")
+          print("V163_ARTIFACT_HASHES_READY")
+          PY
+      - name: Upload compile, exhaustive-test, adapter and halt receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v163-ada-canonical-full-family-candidate-no-date-calls
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
