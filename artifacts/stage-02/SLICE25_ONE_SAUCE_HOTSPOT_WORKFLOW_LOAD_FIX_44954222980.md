@@ -50,3 +50,8 @@
 השינוי הוא ב־workflow ובדוח QA בלבד. לא שונו קובצי SQL של הייצור, האלגוריתם או נתוני קלט. ה־probe משווה את ה־clone למימוש המקורי, ולכן אינו oracle מתמטי עצמאי ל־sauce. אין עדיין בסיס לשינוי ביצועים בייצור; oracle עצמאי נדרש לפני שינוי כזה.
 
 ה־commit החדש יפעיל CI טבעי על ה־SHA החדש. אין לבצע dispatch כפול, full 56-job matrix, merge, main או release. Slice25 נשאר NOT ACCEPTED עד לבדיקת run חדש שהושלם, job/log, SHA, artifact המקורי, ZIP SHA-256/CRC, exit codes, equivalence ותזמונים.
+
+
+## תיקון escaping לפני הרצת CI
+
+ב־readback של commit `0ddc7c5efdef2b52a9d70c2557aa69d074f0e3ff` נמצאה בעיית escaping בעריכת ה־workflow: מסנן הענף ומחרוזות `printf` הכילו שני backslashes במקום אחד. תוקן למסנן `SQL\+தமிழ்` ול־`\\n` יחיד במחרוזות ה־shell, כך ש־GitHub Actions יתאים לענף המדויק וקובצי הראיות יקבלו שורות נפרדות. ההרצה על ה־commit הביניים אינה משמשת ראיית קבלה; יש לבדוק רק הרצה טבעית על ה־SHA הסופי.

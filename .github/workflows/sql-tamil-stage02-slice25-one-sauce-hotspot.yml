@@ -1,7 +1,7 @@
 name: SQL Tamil Slice25 one-case bowl and stone hotspot
 on:
   push:
-    branches: ['SQL\\+தமிழ்']
+    branches: ['SQL\+தமிழ்']
     paths:
       - 'sql/test/173_stage25_sauce_bowl_stone_hotspot.py'
       - '.github/workflows/sql-tamil-stage02-slice25-one-sauce-hotspot.yml'
@@ -21,7 +21,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
           mkdir -p hot-evidence
-          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\\nSHA=%s\\nBRANCH=%s\\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > hot-evidence/versions.txt
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nSHA=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > hot-evidence/versions.txt
           python3 sql/test/173_stage25_sauce_bowl_stone_hotspot.py --self-test | tee hot-evidence/static.txt
           python3 sql/test/173_stage25_sauce_bowl_stone_hotspot.py --out-dir hot-evidence | tee hot-evidence/generation.txt
           sha256sum hot-evidence/*.sql sql/test/173_stage25_sauce_bowl_stone_hotspot.py > hot-evidence/sha256.txt
@@ -45,7 +45,7 @@ jobs:
           args=()
           for i in $(seq -w 0 27); do
             found=$(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
-            test "$(printf '%s\\n' "$found" | grep -c .)" = 1
+            test "$(printf '%s\n' "$found" | grep -c .)" = 1
             args+=(-f "/work/$found")
             git hash-object "$found" >> hot-evidence/production-blobs.txt
           done
@@ -56,7 +56,7 @@ jobs:
           else
             source_load_exit=$?
           fi
-          printf 'SOURCE_LOAD_EXIT=%s\\n' "$source_load_exit" >> hot-evidence/exits.txt
+          printf 'SOURCE_LOAD_EXIT=%s\n' "$source_load_exit" >> hot-evidence/exits.txt
           if [ "$source_load_exit" -ne 0 ]; then
             cat hot-evidence/production-load.log
             exit 3
@@ -66,7 +66,7 @@ jobs:
           else
             schema_check_exit=$?
           fi
-          printf 'SCHEMA_CHECK_EXIT=%s\\n' "$schema_check_exit" >> hot-evidence/exits.txt
+          printf 'SCHEMA_CHECK_EXIT=%s\n' "$schema_check_exit" >> hot-evidence/exits.txt
           if [ "$schema_check_exit" -ne 0 ]; then
             cat hot-evidence/schema-check.log
             exit 4
@@ -76,7 +76,7 @@ jobs:
           else
             qa_load_exit=$?
           fi
-          printf 'QA_ALIAS_LOAD_EXIT=%s\\n' "$qa_load_exit" >> hot-evidence/exits.txt
+          printf 'QA_ALIAS_LOAD_EXIT=%s\n' "$qa_load_exit" >> hot-evidence/exits.txt
           if [ "$qa_load_exit" -ne 0 ]; then
             cat hot-evidence/qa-load.log
             exit 5
@@ -88,7 +88,7 @@ jobs:
           set +e
           docker exec -u postgres tamil-hotspot psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/hot-evidence/hotspot_probe.sql > hot-evidence/probe.log 2>&1
           result=$?
-          printf 'PROBE_EXIT=%s\\n' "$result" >> hot-evidence/exits.txt
+          printf 'PROBE_EXIT=%s\n' "$result" >> hot-evidence/exits.txt
           tail -60 hot-evidence/probe.log || true
           if [ "$result" -ne 0 ]; then exit 6; fi
           grep -q 'SQL_TAMIL_HOT_STONE_EQUIVALENCE=1/1 PASS' hot-evidence/probe.log || exit 7
