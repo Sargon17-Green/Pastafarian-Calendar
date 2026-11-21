@@ -74,7 +74,11 @@ def build_chunked(raw: bytes, root: pathlib.Path, marker: str,
     base, meta = make_canary(raw, marker, mode="display")
     gid = meta["lx_new_global"]
     prefix = f":{gid}=V C "
-    serialized = outer.replace("⎕", "{quad}")
+    # NARS .ws.nars syntax escapes diamond separators as {diamond}.
+    # This matches the established lx_workspace_probe workspace serializer.
+    serialized = outer.replace("⎕", "{quad}").replace("⋄", "{diamond}")
+    if serialized.replace("{diamond}", "⋄").replace("{quad}", "⎕") != outer:
+        raise ValueError("OUTER_LX_SERIALIZATION_NOT_REVERSIBLE")
     if not serialized.isascii() or "'" in serialized:
         raise ValueError("UNSAFE_OUTER_EXPRESSION")
     lines = base.decode("cp1252").splitlines(keepends=True)

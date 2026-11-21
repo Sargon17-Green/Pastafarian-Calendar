@@ -5,6 +5,8 @@ on:
       - qa/apl-german-nars-interface-20261116
     paths:
       - '.github/workflows/apl-german-fx-chunked.yml'
+      - 'qa/nars-interface/chunked_fx_probe.py'
+      - 'qa/nars-interface/test_chunked_fx_probe.py'
   workflow_dispatch:
 permissions:
   contents: read

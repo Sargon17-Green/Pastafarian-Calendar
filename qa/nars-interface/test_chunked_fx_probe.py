@@ -46,8 +46,11 @@ class ChunkedFxTests(unittest.TestCase):
     def test_outer_has_independent_ec_expressions_and_count_guards(self):
         candidate, receipt = build_chunked(BASE, ROOT, MARKER, count=15)
         line = next(l for l in candidate.decode("cp1252").splitlines() if l.startswith(":4=V C "))
-        payload = line.split("'", 2)[1].replace("{quad}", "⎕")
+        payload = line.split("'", 2)[1].replace("{quad}", "⎕").replace("{diamond}", "⋄")
         self.assertEqual(payload.count("⎕EC ⎕UCS "), 4)
+        self.assertIn("{diamond}", line)
+        self.assertTrue(line.isascii())
+        self.assertNotIn("⋄", line)
         programs = []
         for fragment in payload.split(" ⋄ "):
             self.assertTrue(fragment.startswith("⎕EC ⎕UCS "))
@@ -60,6 +63,19 @@ class ChunkedFxTests(unittest.TestCase):
         self.assertIn("15 Stage01ChunkAssert 0", programs[-1])
         self.assertIn("⎕NAPPEND", programs[-1])
         self.assertEqual(receipt["outer_lx_chars"], len(payload))
+
+    def test_diamond_storage_encoding_is_reversible_and_not_literal(self):
+        for count in (15, 20):
+            candidate, receipt = build_chunked(BASE, ROOT, MARKER, count=count)
+            lx = next(l for l in candidate.decode("cp1252").splitlines()
+                      if l.startswith(":4=V C "))
+            stored = lx.split("'", 2)[1]
+            self.assertEqual(stored.count("{diamond}"), count//5)
+            self.assertNotIn("⋄", stored)
+            self.assertTrue(stored.isascii())
+            restored = stored.replace("{diamond}", "⋄").replace("{quad}", "⎕")
+            self.assertEqual(len(restored), receipt["outer_lx_chars"])
+            self.assertEqual(restored.count("⎕EC ⎕UCS "), count//5 + 1)
 
     def test_native_markers_are_independent_and_byte_locked(self):
         _, r = build_chunked(BASE, ROOT, MARKER, count=20)
