@@ -1,0 +1,71 @@
+name: APL German native Stage1 EC capture (DIAGNOSTIC ONLY)
+on:
+  push:
+    branches: [qa/apl-german-nars-interface-20261116]
+    paths:
+      - '.github/workflows/apl-german-stage01-ec-capture-diagnostic.yml'
+      - 'qa/nars-interface/stage01_ec_probe.py'
+      - 'qa/nars-interface/test_stage01_ec_probe.py'
+      - 'qa/nars-interface/bounded_stage01_ec_probe.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  ec-capture-diagnostic:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
+          run-id: 44372361730
+          github-token: ${{ github.token }}
+          path: pinned_release
+      - name: Provision pinned NARS and ephemeral APL font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Test source-locked EC candidate generator
+        shell: pwsh
+        run: |
+          python -m unittest discover -s qa/nars-interface -p 'test_stage01_ec_probe.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'EC_GENERATOR_TEST_FAILED' }
+      - name: Run actual NARS EC diagnostic with bounded evidence capture
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_ec_probe.ps1 -Runtime verified_runtime -Evidence ec_probe_evidence
+      - name: Independent diagnostic gate, not Stage1
+        shell: pwsh
+        run: |
+          $a=Get-Content ec_probe_evidence/native_ec_diag.json -Raw | ConvertFrom-Json
+          $b=Get-Content ec_probe_evidence/ec_candidate.json -Raw | ConvertFrom-Json
+          if($a.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or $b.source_commit -cne $a.source_commit){throw 'SOURCE_LOCK_MISMATCH'}
+          if($a.stage01 -cne 'NOT_ACCEPTED' -or $b.stage01 -cne 'NOT_ACCEPTED'){throw 'FALSE_STAGE01_ACCEPTANCE'}
+          if($a.fx_last_contiguous -ne 95 -or $a.fx_checkpoints.Count -ne 23 -or @($a.fx_checkpoints | Where-Object {$_.exact -ne $true}).Count -gt 0){throw 'FX95_UNPROVEN'}
+          foreach($p in $a.probes){Write-Output ('NATIVE_RAW_EC '+$p.index+' '+$p.name+' '+$p.first_ec_code)}
+          if($a.status -cne 'EC_CAPTURE_COMPLETE_DIAGNOSTIC_ONLY' -or $a.probes.Count -ne 7 -or $a.final_marker_exact -ne $true){throw 'EC_CAPTURE_INCOMPLETE'}
+          Write-Output 'DIAGNOSTIC_COMPLETE_NOT_STAGE01'
+      - name: Hash all receipts and evidence
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force ec_probe_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem ec_probe_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName)"
+          } | Set-Content -Encoding utf8 ec_probe_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-stage01-ec-capture-diagnostic-only
+          path: |
+            ec_probe_evidence/
+            font_bootstrap_evidence/
+            ec_probe_evidence.sha256
+          retention-days: 21
