@@ -1,0 +1,107 @@
+name: Lua Haitian one-day held-out year-selection differential QA
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  lua_haitian_heldout_year_selection:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source preflight and independent verifier selftest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p heldout-evidence
+          printf '%s\n' "$GITHUB_SHA" > heldout-evidence/source_sha.txt
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nBRANCH=Lua+Kreyòl-ayisyen\nRUN_ID=%s\nJOB_KEY=%s\nSOURCE_SHA=%s\nDAY=-15017676\nSCOPE=HELDOUT_YEAR5000_SELECTION_ONLY\nPYTHON_WALL_CAP=25\nNATIVE_WALL_CAP=120\nNATIVE_CPU_CAP=110\nNATIVE_MEMORY_KIB=131072\nNATIVE_GAP_CAP=200\nCOMPOSITION_NOT_INVOKED=YES\nFULL_DATE=NOT_RUN\n' "$GITHUB_RUN_ID" "$GITHUB_JOB" "$GITHUB_SHA" > heldout-evidence/manifest.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object test/normative_oracle.lua)" = 8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d
+          test "$(git hash-object src/bigint.lua)" = fcff58bcaaf8bb3f205e7a9c624a51069c0e5a5d
+          test "$(git hash-object src/source_language_catalog.lua)" = 5b59ee6bb0ea2c2a551185929b5531ea28a50e49
+          test "$(git hash-object test/lua_haitian_independent_rank_decision.py)" = a2d08aebd46fe2a135b3dbebf61b425204bcbe87
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.3
+          luac5.3 -p test/lua_haitian_heldout_year_selection.lua
+          python3 -m py_compile test/lua_haitian_heldout_verify.py test/lua_haitian_independent_rank_decision.py
+          sha256sum test/lua_haitian_heldout_year_selection.lua test/lua_haitian_heldout_verify.py test/lua_haitian_independent_rank_decision.py test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua > heldout-evidence/source_files_sha256.txt
+          python3 test/lua_haitian_heldout_verify.py --selftest | tee heldout-evidence/verifier_selftest.txt
+          grep -Fxq 'HELDOUT_VERIFIER_SYNTHETIC_SELFTEST: 14/14 PASS' heldout-evidence/verifier_selftest.txt
+
+      - name: Independently execute frozen Python prediction
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          ( ulimit -v 196608; timeout --signal=TERM --kill-after=2s 25s \
+            python3 test/lua_haitian_independent_rank_decision.py ) \
+            > heldout-evidence/python_stdout.txt 2> heldout-evidence/python_stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > heldout-evidence/python_exit_code.txt
+          cat heldout-evidence/python_stdout.txt
+          if test -s heldout-evidence/python_stderr.txt; then cat heldout-evidence/python_stderr.txt >&2; fi
+          test "$code" -eq 0
+          test ! -s heldout-evidence/python_stderr.txt
+          grep -Fxq 'STATIC_PYTHON_SELFTEST: 16/16 PASS' heldout-evidence/python_stdout.txt
+          grep -Fxq 'REPORT_SHA256: 89fae158fad5cb09fb320cef76ef801855002422624bacc135cbe34785410caf' heldout-evidence/python_stdout.txt
+
+      - name: Execute one resource-capped Lua 5.3 Native witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          ( ulimit -v 131072; ulimit -t 110; /usr/bin/time \
+            -f 'WALL_SECONDS=%e\nCPU_SECONDS=%U\nMAX_RSS_KB=%M' \
+            -o heldout-evidence/native_time.txt \
+            timeout --signal=TERM --kill-after=2s 120s \
+            lua5.3 test/lua_haitian_heldout_year_selection.lua . -15017676 ) \
+            > heldout-evidence/native_stdout.txt 2> heldout-evidence/native_stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > heldout-evidence/native_exit_code.txt
+          printf 'NATIVE_EXIT_CODE: %s\n' "$code"
+          cat heldout-evidence/native_stdout.txt
+          if test -s heldout-evidence/native_stderr.txt; then cat heldout-evidence/native_stderr.txt >&2; fi
+
+      - name: Verify independent held-out differential and bounds
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          python3 test/lua_haitian_heldout_verify.py --verify \
+            heldout-evidence/python_stdout.txt \
+            heldout-evidence/native_stdout.txt \
+            heldout-evidence/native_time.txt \
+            heldout-evidence/native_stderr.txt \
+            heldout-evidence/native_exit_code.txt "$GITHUB_SHA" \
+            > heldout-evidence/verification_stdout.txt \
+            2> heldout-evidence/verification_stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > heldout-evidence/verification_exit_code.txt
+          cat heldout-evidence/verification_stdout.txt
+          if test -s heldout-evidence/verification_stderr.txt; then cat heldout-evidence/verification_stderr.txt >&2; fi
+          test "$code" -eq 0
+
+      - name: Inventory complete evidence even after failure
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p heldout-evidence
+          find heldout-evidence -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 -r sha256sum > heldout-evidence/SHA256SUMS.txt
+          ls -lah heldout-evidence
+
+      - name: Upload exact-SHA scoped evidence (not Stage56 acceptance)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-heldout-year-selection-evidence
+          path: heldout-evidence/
+          retention-days: 30
+          if-no-files-found: warn

@@ -2989,3 +2989,9 @@ jobs:
       contents: read
       actions: read
     uses: ./.github/workflows/lua-haitian-four-target-static-admission.yml
+
+  lua_haitian_heldout_year_selection:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lua-haitian-heldout-year-selection.yml
