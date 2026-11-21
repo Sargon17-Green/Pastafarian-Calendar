@@ -1515,7 +1515,7 @@ jobs:
           set -uo pipefail
           timeout 1200s node tools/stage56_verify_external_reference.mjs \
             --canonical-repo .external-canonical-source \
-            --calculation-jdn=-13334246 \
+            --calculation-jdn -13334246 \
             --input stage56-external-evidence/reference.json \
             --python-samples stage56-external-evidence/python-tuples.json \
             --report stage56-external-evidence/differential-report.json \
