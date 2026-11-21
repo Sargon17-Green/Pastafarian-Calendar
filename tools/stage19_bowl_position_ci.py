@@ -23,6 +23,47 @@ def main():
     blobs={p:source_bytes(p) for p in LOCKED};source=blobs["src/monster_bootstrap.false"].decode()
     assert "z;36=~" in source and "E_BOWL_POSITION_LENGTH" in source
     prefix=blobs["src/bigint.false"]+b"\n"+blobs["src/monster_bootstrap.false"]+b"\n"
+    # One-case memory/call diagnostic. This is evidence only; it does not gate or ACCEPT Stage19.
+    diagnostic_lines = [
+        "{ Stage19 tuple/table layout diagnostic; no acceptance claim. }",
+        "z;d:6a;!1a;!2a;!3a;!4a;!5a;!6a;!",
+        'd;g;!6=["STAGE19_DIAG_TABLE_HEADER_OK"10,]?',
+        'd;g;!6=~["STAGE19_DIAG_TABLE_HEADER_BAD"10,]?',
+        'd;1+g;!1=["STAGE19_DIAG_TABLE_CELL1_OK"10,]?',
+        'd;1+g;!1=~["STAGE19_DIAG_TABLE_CELL1_BAD"10,]?',
+        'd;2+g;!2=["STAGE19_DIAG_TABLE_CELL2_OK"10,]?',
+        'd;2+g;!2=~["STAGE19_DIAG_TABLE_CELL2_BAD"10,]?',
+        'd;3+g;!3=["STAGE19_DIAG_TABLE_CELL3_OK"10,]?',
+        'd;3+g;!3=~["STAGE19_DIAG_TABLE_CELL3_BAD"10,]?',
+        'd;4+g;!4=["STAGE19_DIAG_TABLE_CELL4_OK"10,]?',
+        'd;4+g;!4=~["STAGE19_DIAG_TABLE_CELL4_BAD"10,]?',
+        'd;5+g;!5=["STAGE19_DIAG_TABLE_CELL5_OK"10,]?',
+        'd;5+g;!5=~["STAGE19_DIAG_TABLE_CELL5_BAD"10,]?',
+        'd;6+g;!6=["STAGE19_DIAG_TABLE_CELL6_OK"10,]?',
+        'd;6+g;!6=~["STAGE19_DIAG_TABLE_CELL6_BAD"10,]?',
+        "z;b:d;a;!1a;!b;s:b;36h;!!o:",
+        'b;g;!d;=["STAGE19_DIAG_TUPLE_TABLE_OK"10,]?',
+        'b;g;!d;=~["STAGE19_DIAG_TUPLE_TABLE_BAD"10,]?',
+        'b;1+g;!1=["STAGE19_DIAG_TUPLE_BOWL_OK"10,]?',
+        'b;1+g;!1=~["STAGE19_DIAG_TUPLE_BOWL_BAD"10,]?',
+        'o;0=["STAGE19_DIAG_RESULT_ZERO"10,]?',
+        'o;1=["STAGE19_DIAG_RESULT_ONE"10,]?',
+        'o;2=["STAGE19_DIAG_RESULT_TWO"10,]?',
+        'o;3=["STAGE19_DIAG_RESULT_THREE"10,]?',
+        'o;4=["STAGE19_DIAG_RESULT_FOUR"10,]?',
+        'o;5=["STAGE19_DIAG_RESULT_FIVE"10,]?',
+        'o;6=["STAGE19_DIAG_RESULT_SIX"10,]?',
+        '"STAGE19_DIAG_RESULT="o;48+,10,',
+        'd;g;!6=["STAGE19_DIAG_POST_HEADER_OK"10,]?',
+        'b;g;!d;=["STAGE19_DIAG_POST_TUPLE_TABLE_OK"10,]?',
+        'b;1+g;!1=["STAGE19_DIAG_POST_TUPLE_BOWL_OK"10,]?',
+        '"STAGE19_DIAG_DONE"10,',
+    ]
+    diagnostic_code = prefix + ("\n".join(diagnostic_lines) + "\n").encode()
+    diagnostic_exit, diagnostic_out, diagnostic_err = execute("tuple_diagnostic", diagnostic_code, 30)
+    tuple_diagnostic = dict(exit_code=diagnostic_exit,
+                            stdout=diagnostic_out.decode("utf-8", "replace"),
+                            stderr=diagnostic_err.decode("utf-8", "replace"))
     summary=fixture.integrity();assert len(summary)==6 and sum(x["cases"] for x in summary)==4320
     positive=[];verified=True
     for start,orders in fixture.chunks():
@@ -69,7 +110,7 @@ def main():
         lc,lo,le=execute("bad_length_"+str(length),prefix+fixture.invalid_length_fixture(length).encode(),30);lt=(lo+le).decode("utf-8","replace")
         bad_lengths[str(length)]=dict(exit_code=lc,rejected=lc==1 and "E_BOWL_POSITION_LENGTH" in lt,observed=lt)
     passed=verified and len(positive)==6 and all(x["passed"] for x in positive) and probes_passed and all(x["rejected"] for x in mutants.values()) and all(x["rejected"] for x in bad_lengths.values())
-    receipt=dict(project_id=os.environ["PROJECT_ID"],stage=19,reference_operation=53,production_operation=36,github_sha=os.getenv("GITHUB_SHA"),github_run_id=os.getenv("GITHUB_RUN_ID"),source_pin=SOURCE,runtime_pin=RUNTIME,source_sha256={p:sha(v) for p,v in blobs.items()},combined_source_sha256=sha(prefix),fixture_generation=summary,positive=positive,positive_cases=sum(x["cases"] for x in positive),positive_assertions=sum(x["assertions"] for x in positive),probes=dict(cases=len(probe_wanted),assertions=probe_checks,exit_code=probe_code,labels_seen=len(probe_labels),passed=probes_passed),mutants=mutants,invalid_length_controls=bad_lengths,native_gate_passed=passed,stage19_accepted=False,physical_pointer_safety_assessed=False)
+    receipt=dict(project_id=os.environ["PROJECT_ID"],stage=19,reference_operation=53,production_operation=36,github_sha=os.getenv("GITHUB_SHA"),github_run_id=os.getenv("GITHUB_RUN_ID"),source_pin=SOURCE,runtime_pin=RUNTIME,source_sha256={p:sha(v) for p,v in blobs.items()},combined_source_sha256=sha(prefix),fixture_generation=summary,tuple_diagnostic=tuple_diagnostic,positive=positive,positive_cases=sum(x["cases"] for x in positive),positive_assertions=sum(x["assertions"] for x in positive),probes=dict(cases=len(probe_wanted),assertions=probe_checks,exit_code=probe_code,labels_seen=len(probe_labels),passed=probes_passed),mutants=mutants,invalid_length_controls=bad_lengths,native_gate_passed=passed,stage19_accepted=False,physical_pointer_safety_assessed=False)
     (E/"evidence.json").write_text(json.dumps(receipt,sort_keys=True,indent=2)+"\n");print(json.dumps(receipt,sort_keys=True))
     if not passed:sys.exit("STAGE19_NATIVE_GATE_NOT_VERIFIED")
 if __name__=="__main__":main()
