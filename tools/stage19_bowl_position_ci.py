@@ -39,11 +39,17 @@ def main():
                 first_program = fixture.positive_fixture(orders[:1], start)[0]
                 anchor = "36h;!o:\n"
                 assert first_program.count(anchor) == 6
-                traced = ('36h;!o:\n'
-                          '"STAGE19_DIAG_OP36_RESULT="o;.'
-                          '"|TABLE_HEADER="d;g;!.'
-                          '"|TUPLE_ORDER_HANDLE="b;g;!.'
-                          '"|TUPLE_BOWL="b;1+g;!.10,\n')
+                traced = ('36h;!o:\\n'
+                          'o;0=["STAGE19_DIAG_RESULT_ZERO"10,]?\\n'
+                          'o;1=["STAGE19_DIAG_RESULT_ONE"10,]?\\n'
+                          'o;2=["STAGE19_DIAG_RESULT_TWO"10,]?\\n'
+                          'o;6=["STAGE19_DIAG_RESULT_SIX"10,]?\\n'
+                          'o;6>=["STAGE19_DIAG_RESULT_GE6"10,]?\\n'
+                          'o;0<["STAGE19_DIAG_RESULT_NEGATIVE"10,]?\\n'
+                          'd;g;!6=["STAGE19_DIAG_HEADER_SIX"10,]?\\n'
+                          'b;g;!d;=["STAGE19_DIAG_ORDER_ARGUMENT_MATCH"10,]?\\n'
+                          'b;1+g;!1=["STAGE19_DIAG_BOWL_ONE"10,]?\\n'
+                          '"STAGE19_DIAG_ASCII_RESULT="o;48+,10,\\n')
                 first_program = first_program.replace(anchor, traced, 1)
                 execute("diagnostic_first_scalar", prefix + first_program.encode(), 30)
             break
