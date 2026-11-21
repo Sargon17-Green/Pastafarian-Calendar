@@ -49,8 +49,8 @@ try{
  $r['candidate_sha256']=$m.candidate_sha256
  foreach($c in $m.chunk_records){if(Test-Path $c.marker_path){throw 'OLD_FX_RECEIPT'}}
  foreach($s in $m.probes){
-   foreach($field in @('start_path','captured_path','code_path')){
-     if(Test-Path $s.$field){throw 'OLD_PROBE_RECEIPT'}
+   foreach($field in @('start_path','captured_path','code_path','message_code_path')){
+     if($null -ne $s.$field -and (Test-Path -LiteralPath $s.$field)){throw 'OLD_PROBE_RECEIPT'}
    }
  }
  $p=Start-Process -FilePath $exe -ArgumentList ('"'+$prefix+'"') -WorkingDirectory $rt -PassThru
@@ -91,8 +91,38 @@ try{
    $t=[Text.Encoding]::ASCII.GetString($bytes)
    if($bytes.Length -ge 1 -and $bytes.Length -le 64 -and $t -cmatch '^[0-9 ]+$'){$code=$t.Trim()}
   }
-  $r['probes']+=@{index=[int]$s.index;name=$s.name;start_exact=[bool]$start.exact;captured_exact=[bool]$captured.exact;first_ec_code=$code;code_sha256=$hash}
-  Write-Output ('NATIVE_EC_PROBE '+$s.index+' '+$s.name+' START='+$start.exact+' CAPTURED='+$captured.exact+' FIRST_CODE='+$code)
+  $message=$null;$messageSha=$null
+  if($null -ne $s.message_code_path -and (Test-Path -LiteralPath $s.message_code_path -PathType Leaf)){
+    [byte[]]$msgBytes=[IO.File]::ReadAllBytes($s.message_code_path)
+    Copy-Item -LiteralPath $s.message_code_path -Destination (Join-Path $probeDir ('ec_{0:D2}_message_codes.txt' -f [int]$s.index))
+    $messageSha=(Get-FileHash -LiteralPath $s.message_code_path -Algorithm SHA256).Hash.ToLowerInvariant()
+    $numeric=[Text.Encoding]::ASCII.GetString($msgBytes)
+    if($msgBytes.Length -gt 0 -and $msgBytes.Length -le 8192 -and $numeric -cmatch '^\s*\d+(\s+\d+)*\s*
+ }
+ $fm=Read-Token $marker $m.marker_token (Join-Path $Evidence 'ec_final_marker.txt')
+ $r['final_marker_exact']=[bool]$fm.exact
+ $complete=($r['fx_checkpoints'].Count -eq 23) -and ($r['fx_last_contiguous'] -eq 95) -and $fm.exact -and
+   (@($r['probes'] | Where-Object {$_.start_exact -ne $true -or $_.captured_exact -ne $true -or $null -eq $_.first_ec_code}).Count -eq 0) -and
+   (@($r['probes'] | Where-Object {$_.index -ge 5 -and ($_.first_ec_code -ne '0' -or [string]::IsNullOrWhiteSpace($_.error_message))}).Count -eq 0)
+ $r['status']=if($complete){'EC_CAPTURE_COMPLETE_DIAGNOSTIC_ONLY'}else{'EC_CAPTURE_PARTIAL_DIAGNOSTIC_ONLY'}
+ Write-Output ('NATIVE_DIAGNOSTIC='+$r['status'])
+ Write-Output 'STAGE01=NOT_ACCEPTED'
+}catch{
+ $r['status']='FAIL_CLOSED_NOT_STAGE01'
+ $r['errors']+=$_.Exception.Message
+ throw
+}finally{
+ $r | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath (Join-Path $Evidence 'native_ec_diag.json') -Encoding utf8
+}
+){
+      $points=@([regex]::Matches($numeric,'\d+') | ForEach-Object {[int]$_.Value})
+      if($points.Count -gt 0 -and @($points | Where-Object {$_ -lt 32 -or $_ -gt 65535}).Count -eq 0){
+        $message=-join @($points | ForEach-Object {[char]$_})
+      }
+    }
+  }
+  $r['probes']+=@{index=[int]$s.index;name=$s.name;start_exact=[bool]$start.exact;captured_exact=[bool]$captured.exact;first_ec_code=$code;code_sha256=$hash;error_message=$message;message_code_sha256=$messageSha}
+  Write-Output ('NATIVE_EC_PROBE '+$s.index+' '+$s.name+' START='+$start.exact+' CAPTURED='+$captured.exact+' FIRST_CODE='+$code+' ERROR_MESSAGE='+$message)
  }
  $fm=Read-Token $marker $m.marker_token (Join-Path $Evidence 'ec_final_marker.txt')
  $r['final_marker_exact']=[bool]$fm.exact

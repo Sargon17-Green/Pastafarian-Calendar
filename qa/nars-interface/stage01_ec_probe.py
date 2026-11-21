@@ -57,6 +57,16 @@ def build_error_code_probe(raw: bytes, root: pathlib.Path, marker: str) -> tuple
             f"|INDEX={i:02d}|NAME={name}|PHASE=CAPTURED_NOT_PASS"
         )
         v = f"Stage01EC{i:02d}"
+        message_code_path = (
+            str(root_path.with_name(f"{root_path.stem}_ec_{i:02d}_message_codes.txt"))
+            if i >= 5 else None
+        )
+        # Error messages are Unicode; store ordinal values as ASCII digits.
+        message_capture = (
+            f" ⋄ (⍕⎕UCS ⊃{v}[3]) ⎕NAPPEND "
+            f"((⎕UCS {_codes(message_code_path)}) ⎕NCREATE 0)"
+            if message_code_path is not None else ""
+        )
         # Separately catch each ORIGINAL (unchanged) call. Unlike an END marker,
         # CAPTURED signifies only that ⎕EC returned a status, not test success.
         statement = (
@@ -64,7 +74,7 @@ def build_error_code_probe(raw: bytes, root: pathlib.Path, marker: str) -> tuple
             + marker_write(previous_probe["start_token"], previous_probe["start_path"])
             + f" ⋄ {v}←⎕EC ⎕UCS {_codes(name)}"
             + f" ⋄ (⍕{v}[1]) ⎕NAPPEND ((⎕UCS {_codes(ec_path)}) ⎕NCREATE 0)"
-            + " ⋄ " + marker_write(captured_token, captured_path)
+            + message_capture + " ⋄ " + marker_write(captured_token, captured_path)
         )
         programs.append(statement)
         codes.append({
@@ -74,6 +84,7 @@ def build_error_code_probe(raw: bytes, root: pathlib.Path, marker: str) -> tuple
             "captured_path": captured_path,
             "captured_token": captured_token,
             "code_path": ec_path,
+            "message_code_path": message_code_path,
             "inner_sha256": hashlib.sha256(statement.encode("utf-8")).hexdigest(),
         })
     final = "95 Stage01ChunkAssert 0 ⋄ " + marker_write(FINAL_TOKEN, marker)

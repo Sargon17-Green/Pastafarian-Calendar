@@ -50,6 +50,7 @@ jobs:
           if($a.fx_last_contiguous -ne 95 -or $a.fx_checkpoints.Count -ne 23 -or @($a.fx_checkpoints | Where-Object {$_.exact -ne $true}).Count -gt 0){throw 'FX95_UNPROVEN'}
           foreach($p in $a.probes){Write-Output ('NATIVE_RAW_EC '+$p.index+' '+$p.name+' '+$p.first_ec_code)}
           if($a.status -cne 'EC_CAPTURE_COMPLETE_DIAGNOSTIC_ONLY' -or $a.probes.Count -ne 7 -or $a.final_marker_exact -ne $true){throw 'EC_CAPTURE_INCOMPLETE'}
+          if(@($a.probes | Where-Object {$_.index -ge 5 -and ($_.first_ec_code -ne '0' -or [string]::IsNullOrWhiteSpace($_.error_message) -or -not $_.message_code_sha256)}).Count -ne 0){throw 'NATIVE_ERROR_DETAIL_UNPROVEN'}
           Write-Output 'DIAGNOSTIC_COMPLETE_NOT_STAGE01'
       - name: Hash all receipts and evidence
         if: always()

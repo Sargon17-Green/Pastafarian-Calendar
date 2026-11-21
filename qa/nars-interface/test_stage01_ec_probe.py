@@ -60,7 +60,12 @@ class ErrorCodeProbeTests(unittest.TestCase):
                 self.assertIn("⍕Stage01EC",p)
                 self.assertIn(f"Stage01EC{i:02d}[1]",p)
                 self.assertIn("CAPTURED_NOT_PASS",self.receipt["probes"][i-1]["captured_token"])
-                self.assertEqual(p.count("⎕NAPPEND"),3)
+                self.assertEqual(p.count("⎕NAPPEND"),4 if i >= 5 else 3)
+                if i >= 5:
+                    self.assertIn("⍕⎕UCS ⊃Stage01EC",p)
+                    self.assertTrue(self.receipt["probes"][i-1]["message_code_path"].endswith(f"ec_{i:02d}_message_codes.txt"))
+                else:
+                    self.assertIsNone(self.receipt["probes"][i-1]["message_code_path"])
                 self.assertNotIn("RunStage01Tests",p)
         self.assertNotIn("RunStage01Tests",b[-1])
         self.assertNotIn("STAGE01_NATIVE_PASS",b[-1])
