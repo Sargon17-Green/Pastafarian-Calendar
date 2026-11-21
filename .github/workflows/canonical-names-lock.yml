@@ -283,6 +283,24 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Source-fresh Year 5000 normative rank selection bridge (research only)
+        run: |
+          python3 test/weaving_canonical_rank_bridge.py --self-test | tee chapel-canonical-rank-selftest.log
+          grep -Fxq 'CANONICAL_BRIDGE_SELFTEST_RESULT=PASS' chapel-canonical-rank-selftest.log
+          python3 test/weaving_canonical_rank_bridge.py --source-sha="$(git rev-parse HEAD)" --outdir chapel-canonical-rank-evidence | tee chapel-canonical-rank-bridge.log
+          grep -Fxq 'CANONICAL_RANK_BRIDGE_RESULT=PASS_RESEARCH_ONLY' chapel-canonical-rank-bridge.log
+
+      - name: Retain Year 5000 normative rank bridge evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-canonical-rank-bridge
+          path: |
+            chapel-canonical-rank-selftest.log
+            chapel-canonical-rank-bridge.log
+            chapel-canonical-rank-evidence/
+          if-no-files-found: warn
+
       - name: Independent GateOracle year-boundary and calendarDate decomposition probe
         shell: bash
         run: |
