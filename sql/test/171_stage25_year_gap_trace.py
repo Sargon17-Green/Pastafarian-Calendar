@@ -27,7 +27,7 @@ LOCKS = {
 
 
 def git_blob(raw: bytes) -> str:
-    return hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\\0" + raw).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
 
 
 def locked() -> dict[str, str]:
@@ -43,8 +43,8 @@ def definition(source: str, name: str) -> str:
     anchor = "CREATE OR REPLACE FUNCTION " + PREFIX + name + "("
     assert source.count(anchor) == 1, f"function anchor changed: {name}"
     start = source.index(anchor)
-    next_def = source.find("\\nCREATE OR REPLACE FUNCTION ", start + len(anchor))
-    return source[start:next_def if next_def >= 0 else len(source)].strip() + "\\n"
+    next_def = source.find("\nCREATE OR REPLACE FUNCTION ", start + len(anchor))
+    return source[start:next_def if next_def >= 0 else len(source)].strip() + "\n"
 
 
 def clone(source: str, name: str, replacements: list[tuple[str, str]]) -> str:
@@ -123,7 +123,7 @@ def generate(source: dict[str, str]) -> str:
     out.append(clone(find, "find_target_year",
                      [swap_call("year5000"), swap_call("next_year"),
                       swap_call("previous_year")]))
-    result = "\\n".join(out)
+    result = "\n".join(out)
     for name in ("gate_gap_signed", "positive_gate_gap", "negative_gate_gap",
                  "year5000_gate_window", "year5000", "next_year",
                  "previous_year", "find_target_year"):
@@ -160,7 +160,7 @@ def boundaries(source: dict[str, str]) -> dict:
 
 def sql_cases(records: dict) -> dict[str, str]:
     open_day, close_day = records[4996]
-    common = "\\set ON_ERROR_STOP on\\n"
+    common = "\\set ON_ERROR_STOP on\n"
     gap = common + """SET statement_timeout = '60s';
 DO $qagap$
 DECLARE v_qa numeric; v_original numeric;
