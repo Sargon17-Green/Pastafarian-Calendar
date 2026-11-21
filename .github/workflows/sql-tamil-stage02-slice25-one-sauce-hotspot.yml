@@ -1,7 +1,7 @@
 name: SQL Tamil Slice25 one-case bowl and stone hotspot
 on:
   push:
-    branches: ['SQL\+தமிழ்']
+    branches: ['SQL\\+தமிழ்']
     paths:
       - 'sql/test/173_stage25_sauce_bowl_stone_hotspot.py'
       - '.github/workflows/sql-tamil-stage02-slice25-one-sauce-hotspot.yml'
@@ -21,7 +21,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
           mkdir -p hot-evidence
-          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nSHA=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > hot-evidence/versions.txt
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\\nSHA=%s\\nBRANCH=%s\\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > hot-evidence/versions.txt
           python3 sql/test/173_stage25_sauce_bowl_stone_hotspot.py --self-test | tee hot-evidence/static.txt
           python3 sql/test/173_stage25_sauce_bowl_stone_hotspot.py --out-dir hot-evidence | tee hot-evidence/generation.txt
           sha256sum hot-evidence/*.sql sql/test/173_stage25_sauce_bowl_stone_hotspot.py > hot-evidence/sha256.txt
@@ -36,21 +36,51 @@ jobs:
           done
           docker exec -u postgres tamil-hotspot pg_isready -q -U postgres
           docker exec -u postgres tamil-hotspot postgres --version | tee -a hot-evidence/versions.txt
-      - name: Load original 00 through 27 then QA-only clones
+      - name: Load original SQL 00 through 27, verify schema, then load QA-only clones
         shell: bash
         run: |
           set -euo pipefail
+          : > hot-evidence/production-blobs.txt
+          : > hot-evidence/exits.txt
           args=()
           for i in $(seq -w 0 27); do
             found=$(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
-            test "$(printf '%s\n' "$found" | grep -c .)" = 1
+            test "$(printf '%s\\n' "$found" | grep -c .)" = 1
             args+=(-f "/work/$found")
             git hash-object "$found" >> hot-evidence/production-blobs.txt
           done
-          docker exec -u postgres tamil-hotspot psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/hot-evidence/hotspot_aliases.sql > hot-evidence/load.log 2>&1 || {
-            cat hot-evidence/load.log
+          test "${#args[@]}" -eq 56
+          test "$(wc -l < hot-evidence/production-blobs.txt)" -eq 28
+          if docker exec -u postgres tamil-hotspot psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" > hot-evidence/production-load.log 2>&1; then
+            source_load_exit=0
+          else
+            source_load_exit=$?
+          fi
+          printf 'SOURCE_LOAD_EXIT=%s\\n' "$source_load_exit" >> hot-evidence/exits.txt
+          if [ "$source_load_exit" -ne 0 ]; then
+            cat hot-evidence/production-load.log
             exit 3
-          }
+          fi
+          if docker exec -u postgres tamil-hotspot psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -c "SELECT 1 / ((to_regnamespace('pastafari_sql_tamil') IS NOT NULL AND to_regprocedure('pastafari_sql_tamil.sauce(numeric,numeric)') IS NOT NULL AND to_regprocedure('pastafari_sql_tamil.bowl_round(numeric[],numeric,integer)') IS NOT NULL AND to_regprocedure('pastafari_sql_tamil.stone_value(integer,integer)') IS NOT NULL)::integer) AS production_source_ready" > hot-evidence/schema-check.log 2>&1; then
+            schema_check_exit=0
+          else
+            schema_check_exit=$?
+          fi
+          printf 'SCHEMA_CHECK_EXIT=%s\\n' "$schema_check_exit" >> hot-evidence/exits.txt
+          if [ "$schema_check_exit" -ne 0 ]; then
+            cat hot-evidence/schema-check.log
+            exit 4
+          fi
+          if docker exec -u postgres tamil-hotspot psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/hot-evidence/hotspot_aliases.sql > hot-evidence/qa-load.log 2>&1; then
+            qa_load_exit=0
+          else
+            qa_load_exit=$?
+          fi
+          printf 'QA_ALIAS_LOAD_EXIT=%s\\n' "$qa_load_exit" >> hot-evidence/exits.txt
+          if [ "$qa_load_exit" -ne 0 ]; then
+            cat hot-evidence/qa-load.log
+            exit 5
+          fi
       - name: Bounded new single-case Native trace with real exit capture
         shell: bash
         run: |
@@ -58,12 +88,13 @@ jobs:
           set +e
           docker exec -u postgres tamil-hotspot psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/hot-evidence/hotspot_probe.sql > hot-evidence/probe.log 2>&1
           result=$?
-          printf 'PROBE_EXIT=%s\n' "$result" | tee hot-evidence/exits.txt
+          printf 'PROBE_EXIT=%s\\n' "$result" >> hot-evidence/exits.txt
           tail -60 hot-evidence/probe.log || true
-          if [ "$result" -ne 0 ]; then exit 3; fi
-          grep -q 'SQL_TAMIL_HOT_STONE_EQUIVALENCE=1/1 PASS' hot-evidence/probe.log || exit 4
-          grep -q 'SQL_TAMIL_HOT_SAUCE_EQUIVALENCE=1/1 PASS' hot-evidence/probe.log || exit 5
-          grep -q 'SQL_TAMIL_HOT_ENTER=bowl_round:' hot-evidence/probe.log || exit 6
+          if [ "$result" -ne 0 ]; then exit 6; fi
+          grep -q 'SQL_TAMIL_HOT_STONE_EQUIVALENCE=1/1 PASS' hot-evidence/probe.log || exit 7
+          grep -q 'SQL_TAMIL_HOT_SAUCE_EQUIVALENCE=1/1 PASS' hot-evidence/probe.log || exit 8
+          test "$(grep -c 'SQL_TAMIL_HOT_ENTER=bowl_round:' hot-evidence/probe.log)" -eq 46 || exit 9
+          test "$(grep -c 'SQL_TAMIL_HOT_EXIT=bowl_round:' hot-evidence/probe.log)" -eq 46 || exit 10
       - name: Preserve full raw artifact on success or failure
         if: always()
         uses: actions/upload-artifact@v4
