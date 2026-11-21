@@ -13,6 +13,8 @@ CalendarVisibleDrop1::
     cp 2
     jr z, .validIteration
     cp 3
+    jr z, .validIteration
+    cp 4
     jp nz, .invalid
 .validIteration:
     ld hl, wCalendarStoneOld
