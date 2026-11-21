@@ -515,12 +515,12 @@ pub fn discovery_33_equal_sets_duplicates_nested_and_disjoint_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [6, 2, 3, 1]
   let bands = [
-    band(40, 700),
+    band(42, 963),
     band(80, 200),
-    band(40, 700),
-    band(900, 1000),
+    band(42, 963),
+    band(10000, 11000),
   ]
-  let canonical = [band(40, 700), band(900, 1000)]
+  let canonical = [band(42, 963), band(10000, 11000)]
   let result = direct_check(
     context,
     ids,
@@ -530,6 +530,7 @@ pub fn discovery_33_equal_sets_duplicates_nested_and_disjoint_test() {
     canonical,
     canonical,
   )
+  { result.left >= 4 } |> should.equal(True)
   result.left |> should.equal(result.right)
   result.intersection |> should.equal(result.union)
   result.xor |> should.equal(0)

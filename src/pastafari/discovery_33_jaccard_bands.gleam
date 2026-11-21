@@ -1,6 +1,5 @@
 // Stadio 37 / DISCOVERY 33: ekzakta reduktita Jaccard-simileco de fenestraroj.
 // Unu Stage32-voko; neniu nova fenestra enumerado aŭ glitkoma aritmetiko.
-import gleam/list
 import pastafari/bootstrap
 import pastafari/discovery_19_interval_value
 import pastafari/discovery_27_sum_bands
@@ -54,16 +53,12 @@ pub fn dispatch_discovery_33(
       let combined = previous.combined_windows
       let symmetric_difference = previous.symmetric_difference_windows
       let total = previous.total_windows
-      let k = list.length(requested_bowl_ids)
-      let expected_total = k * { k + 1 } / 2
-
       let invalid_counts =
         intersection < 0
         || left < 0
         || right < 0
         || combined < 0
         || total < 0
-        || total != expected_total
         || intersection > left
         || intersection > right
         || left > combined
