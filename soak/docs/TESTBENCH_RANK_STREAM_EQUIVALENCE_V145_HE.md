@@ -3,6 +3,12 @@
 **ענף עבודה:** `qa/soak-ada-rank-stream-v145`.  
 **מטרה:** לבודד את יצירת זרם הבחירה ואת מנגנון דירוג המשפחה מתוך מימושי המקור Python ו־Ada. אין שינויים ב־`src/` המקורי, ב־`main`, במקור הפלט של תאריך היסוד או במשימות Soak.
 
+## קבלת CI סופית — v145 התקבל
+
+[הרצת GitHub Actions 44829715837](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44829715837), במזהה קוד `c365ab7dc7bb13a0382872f395b0e6f305b2b573`, הסתיימה ב־**`completed/success`**. לוגי GNAT 13.3.0 הוכיחו קומפילציה, קישור והרצת תוכנית Ada הסינתטית. התקבלו `V145_ADA_SHORT_WIDE_DIRECT_GOLDENS=26`, `V145_ADA_SYNTHETIC_ASK_BOWL_GOLDENS=6`, `V145_ADA_REJECTION_CHECKS=5`, `V145_ORIGINAL_CALENDAR_FCT_CALLS=0`. גם **22/22 בדיקות Python** ו־**3,564/3,564** השוואות ללולאת הדחייה המילולית עברו.
+
+ארטיפקט הלוגים הוא **14678040271**, עם SHA-256 `88c1413e472b8600464e7153991bacb8eede3525bc89f7bc3f771a135086596f`. אין בו תוכנת תאריכים מקורית. זהו אישור לתחום בדיקות סינתטי ומבודד, לא אישור ל־`F(c,t)`.
+
 ## 1. ראיות המקור
 
 Python מקורי: [`tests/normative_reference.py`](https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py), קומיט `0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4`, Git blob `d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53`, פונקציות `ask_bowl` (470–483), `answer_at` (486–487), `choose_rank_short` (490–499), `choose_rank_wide` (502–518) ו־`choose_rank` (521–526).
