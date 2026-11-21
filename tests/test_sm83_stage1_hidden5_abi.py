@@ -70,7 +70,7 @@ def main() -> None:
         assert 1 <= x <= M and all(1 <= s <= M for s in stones)
         assert x == compute_sauce(FOUNDATION+c, FOUNDATION+t).hidden[4], (c, t)
     asm = RUNTIME.read_text(encoding="utf-8")
-    assert "CalendarHiddenDrop4::" in asm
+    assert "CalendarHiddenDrop5::" in asm
     assert "call CalendarOrdinalValidate" in asm
     assert "call CalendarStoneTransitionRange" in source
     assert "call WorkCountsFromOffsets32" in asm
@@ -80,7 +80,7 @@ def main() -> None:
     assert "RunCalendarHidden5Bench::" in source
     assert "ld a, 120" in source and ".checkRejected:" in source
     assert "dmg-hidden5-native:" in WORKFLOW.read_text(encoding="utf-8")
-    print("HOST_STAGE1_HIDDEN4=PASS independent_pairs=72 "
+    print("HOST_STAGE1_HIDDEN5=PASS independent_pairs=72 "
           "k5_stones=5 fixture_bytes=16 invalid_early_reject=YES "
           "signed32_endpoints=YES PyBoy_Native376=CI_REQUIRED "
           "hidden6_7_and_visible46=NOT_IMPLEMENTED", flush=True)
