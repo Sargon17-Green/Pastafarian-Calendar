@@ -119,9 +119,11 @@ function ConvertFrom-StrictStageMetadataBytes {
 
     $crlfCount = [System.Text.RegularExpressions.Regex]::Matches($text, "\r\n").Count
     $withoutCrlf = $text.Replace(([string][char]13 + [char]10), '')
-    $standaloneCrIndex = $withoutCrlf.IndexOf([char]13)
-    if ($standaloneCrIndex -ge 0) {
-        $badLine = Get-StrictStageMetadataTextLineNumber -Text $withoutCrlf -CharacterIndex $standaloneCrIndex
+    $standaloneCrMatch = [System.Text.RegularExpressions.Regex]::Match($text, "\r(?!\n)")
+    if ($standaloneCrMatch.Success) {
+        # Count preceding LF characters in the original text so CRLF lines
+        # remain represented when reporting the standalone-CR line number.
+        $badLine = Get-StrictStageMetadataTextLineNumber -Text $text -CharacterIndex $standaloneCrMatch.Index
         return New-StrictStageMetadataResult -Success $false -ReasonCode 'STANDALONE_CR' -LineNumber $badLine -BomPresent $bomPresent -InputSha256 $inputHash
     }
 

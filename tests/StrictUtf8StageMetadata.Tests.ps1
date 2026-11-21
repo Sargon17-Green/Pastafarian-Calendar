@@ -114,6 +114,12 @@ Assert-StrictUtf8Failure -Result $mixed -ReasonCode 'MIXED_LINE_ENDINGS' -Name '
 $standaloneCr = ConvertFrom-StrictStageMetadataBytes -Bytes (New-StrictUtf8TestBytes -Text ('A=1' + $cr + 'B=2')) -RequiredKeys @()
 Assert-StrictUtf8Failure -Result $standaloneCr -ReasonCode 'STANDALONE_CR' -Name 'Standalone CR' -LineNumber 1
 
+$standaloneCrAfterCrlf = ConvertFrom-StrictStageMetadataBytes -Bytes (New-StrictUtf8TestBytes -Text ('A=1' + $cr + $lf + 'B=2' + $cr + 'C=3')) -RequiredKeys @()
+Assert-StrictUtf8Failure -Result $standaloneCrAfterCrlf -ReasonCode 'STANDALONE_CR' -Name 'Standalone CR after CRLF' -LineNumber 2
+
+$standaloneCrAfterTwoCrlf = ConvertFrom-StrictStageMetadataBytes -Bytes (New-StrictUtf8TestBytes -Text ('A=1' + $cr + $lf + 'B=2' + $cr + $lf + 'C=3' + $cr + 'D=4')) -RequiredKeys @()
+Assert-StrictUtf8Failure -Result $standaloneCrAfterTwoCrlf -ReasonCode 'STANDALONE_CR' -Name 'Standalone CR after two CRLF lines' -LineNumber 3
+
 $tab = ConvertFrom-StrictStageMetadataBytes -Bytes (New-StrictUtf8TestBytes -Text ('A=1' + [char]9 + 'B=2')) -RequiredKeys @()
 Assert-StrictUtf8Failure -Result $tab -ReasonCode 'FORBIDDEN_CONTROL' -Name 'Tab control rejected'
 
