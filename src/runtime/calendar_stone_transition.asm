@@ -33,7 +33,29 @@ CalendarStoneTransitionRange::
     ld [wCalendarStatus], a
     ret
 
+CalendarStoneTransitionStep::
+    ; Input snapshot is from i-1: make exactly one simultaneous i update.
+    ; Preserve existing seed-based CalendarStoneTransitionRange behavior.
+    call CalendarOrdinalValidate
+    ld a, [wCalendarStatus]
+    or a
+    ret nz
+    ld a, [wCalendarStoneIteration]
+    cp 3
+    jr c, .invalid
+    cp 47
+    jr nc, .invalid
+    ld [wCalendarStoneRound], a
+    jp CalendarStoneRunValidated.validateSource
+.invalid:
+    ld a, 2
+    ld [wCalendarStatus], a
+    ret
+
 CalendarStoneRunValidated::
+    ld a, 2
+    ld [wCalendarStoneRound], a
+.validateSource:
     ; Validate ALL five inputs before touching the published output.
     ld hl, wCalendarStoneOld
     ld b, 5
@@ -54,8 +76,6 @@ CalendarStoneRunValidated::
     dec b
     jr nz, .checkStone
     call .seedScratch
-    ld a, 2
-    ld [wCalendarStoneRound], a
 .round:
     xor a
     ld [wCalendarStoneIndex], a

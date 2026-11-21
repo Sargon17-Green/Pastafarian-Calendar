@@ -167,6 +167,8 @@ wCalendarVisibleRepeat:: ds 1
 wCalendarHiddenRetained:: ds 112
 ; Stage1 visible2: retain V1 for the next recurrence.
 wCalendarVisibleFirst:: ds 16
+; Retained second visible residue for i3.
+wCalendarVisibleSecond:: ds 16
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -222,6 +224,10 @@ ELIF DEF(STAGE1_CHAIN2_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarHiddenVisible2ChainBench
+ELIF DEF(STAGE1_CHAIN3_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarHiddenVisible3ChainBench
 ELSE
     call RunSelfTests
     ld a, [wTestResult]
@@ -346,6 +352,7 @@ INCLUDE "src/runtime/calendar_hidden7.asm"
 INCLUDE "src/runtime/calendar_visible1.asm"
 INCLUDE "src/runtime/calendar_hidden_visible1_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible2_chain.asm"
+INCLUDE "src/runtime/calendar_hidden_visible3_chain.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -413,4 +420,8 @@ ENDC
 
 IF DEF(STAGE1_CHAIN2_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_hidden_visible2_chain_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_CHAIN3_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_hidden_visible3_chain_native_test.asm"
 ENDC

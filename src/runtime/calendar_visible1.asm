@@ -1,4 +1,4 @@
-; Stage1 visible drop i=1 or i=2 with three caller-supplied predecessors.
+; Stage1 visible drop i=1,2,3 with three caller-supplied predecessors.
 ; The already accepted i=1 interface is preserved. Only a successful
 ; invocation publishes the 16-byte output; runtime has no fixture data.
 SECTION "Calendar visible1 native", ROMX, BANK[1]
@@ -11,6 +11,8 @@ CalendarVisibleDrop1::
     cp 1
     jr z, .validIteration
     cp 2
+    jr z, .validIteration
+    cp 3
     jp nz, .invalid
 .validIteration:
     ld hl, wCalendarStoneOld

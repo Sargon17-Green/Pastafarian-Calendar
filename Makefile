@@ -109,3 +109,11 @@ build/calendar_chain2.o: build/calendar.o src/runtime/calendar_hidden_visible2_c
 build/calendar_chain2.gb: build/calendar_chain2.o
 	$(RGBLINK) -n build/calendar_chain2.sym -m build/calendar_chain2.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+# Isolated V3 Native382; previous Native370..381 cartridges unchanged.
+build/calendar_chain3.o: build/calendar.o src/runtime/calendar_hidden_visible3_chain.asm src/tests/calendar_hidden_visible3_chain_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_CHAIN3_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_chain3.gb: build/calendar_chain3.o
+	$(RGBLINK) -n build/calendar_chain3.sym -m build/calendar_chain3.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
