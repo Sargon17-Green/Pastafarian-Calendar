@@ -2995,3 +2995,9 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/lua-haitian-heldout-year-selection.yml
+
+  lua_haitian_composition_resource_boundary:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lua-haitian-composition-resource-gate.yml

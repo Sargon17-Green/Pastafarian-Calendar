@@ -1,14 +1,7 @@
 name: Lua Haitian Composition Resource Boundary QA
 
 on:
-  push:
-    branches:
-      - 'Lua+Kreyòl-ayisyen'
-    paths:
-      - 'test/lua_haitian_composition_resource_adapter.lua'
-      - 'test/lua_haitian_composition_resource_boundary.lua'
-      - 'docs/LUA_HAITIAN_COMPOSITION_RESOURCE_BOUNDARY_NATIVE_QA_2026-11-21.md'
-      - '.github/workflows/lua-haitian-composition-resource-gate.yml'
+  workflow_call:
 
 permissions:
   contents: read
