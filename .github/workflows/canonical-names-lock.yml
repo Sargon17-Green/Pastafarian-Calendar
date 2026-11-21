@@ -589,6 +589,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Independent 46-drop signed32 Host72 oracle and ring contract
         run: python3 tests/test_sm83_stage1_visible46_abi.py
+      - name: Independent 72-pair bowl snapshot, post-stir and factoradic oracle
+        run: python3 tests/test_sm83_stage1_bowls_abi.py
       - name: RGBDS v1.0.4 isolated Native386
         run: |
           docker run --rm --mount type=bind,src="$PWD",dst=/work \

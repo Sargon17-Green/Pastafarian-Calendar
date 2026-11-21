@@ -24,7 +24,7 @@
 
 ## Execution state
 
-The implementation and tests are committed, but Native386 has not been executed or accepted. The workflow has a push trigger; the GitHub connector's ref update did not create a push run, and the workflow does not expose workflow_dispatch. No queued or in-progress run exists for the commit. Do not label Native386 PASS until an exact-SHA completed run provides the job log and ROM artifact.
+The implementation and tests are committed, but Native386 has not been executed or accepted. Push-triggered run 44960737740 was created on exact SHA `5dae507ce8eb5c3bdae5a2cbd32d536112002e7d`; it was queued at the last readback, so it is not PASS. Do not label Native386 PASS until that exact-SHA run completes and provides the job log and ROM artifact.
 
 ## Next
 
