@@ -38,8 +38,8 @@ class RootCauseTests(unittest.TestCase):
         anchors = self.receipt["source_dependency_anchors"]
         self.assertEqual([anchors[x]["source_line"] for x in ("ownership", "oracle", "year")],
                          [39, 108, 147])
-        self.assertIn("Sauce", anchors)
-        self.assertIn("GateGap", anchors)
+        self.assertEqual(anchors["sauce"]["source_function"], "Sauce")
+        self.assertEqual(anchors["gap"]["source_function"], "GateGap")
         for a in anchors.values():
             self.assertEqual(a["source_sha256"], hashlib.sha256(a["source_text"].encode()).hexdigest())
 
