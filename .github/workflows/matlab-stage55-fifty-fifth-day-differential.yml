@@ -32,7 +32,7 @@ jobs:
           path: logs
       - name: Verify pinned AFTER54
         run: |
-          echo '643ce151a2ab76998f4032911c5eb290d6529bc253025939f0366a6dd9cb1ae6  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_53.json' | sha256sum -c -
+          echo '643ce151a2ab76998f4032911c5eb290d6529bc253025939f0366a6dd9cb1ae6  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_54.json' | sha256sum -c -
       - name: Preflight AFTER55 independent witness wiring
         shell: bash
         run: |
@@ -40,8 +40,8 @@ jobs:
           test -f tools/stage55_after55_interval_five_fields.py
           grep -Fqx 'PIN = "643ce151a2ab76998f4032911c5eb290d6529bc253025939f0366a6dd9cb1ae6"' tools/stage55_after55_interval_five_fields.py
           python3 -m py_compile tools/stage55_after55_interval_five_fields.py
-          grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_53.json' tools/run_stage55_year5000_fifty_fifth_native.m
           grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_54.json' tools/run_stage55_year5000_fifty_fifth_native.m
+          grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_55.json' tools/run_stage55_year5000_fifty_fifth_native.m
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
@@ -55,8 +55,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/stage55_after55_interval_five_fields.py \
-            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_53.json \
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_54.json \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_55.json \
             tests/fixtures/stage55_year5000_appendix_a_metadata.json \
             | tee logs/STAGE55_FIFTY_FIFTH_PYTHON.log
           grep '^STAGE55_FIFTY_FIFTH_ROW ' logs/STAGE55_FIFTY_FIFTH_PYTHON.log > logs/STAGE55_FIFTY_FIFTH_PYTHON_ROW.txt
@@ -67,7 +67,7 @@ jobs:
           expected="STAGE55_FIFTY_FIFTH_ROW POSITION=55 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=55 MONTH_INDEX=24 MONTH_DAY=3"
           grep -Fqx "$expected" logs/STAGE55_FIFTY_FIFTH_NATIVE_ROW.txt
           grep -Fqx "$expected" logs/STAGE55_FIFTY_FIFTH_PYTHON_ROW.txt
-          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_54.json | tee logs/STAGE55_FIFTY_FIFTH_DIGEST.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_55.json | tee logs/STAGE55_FIFTY_FIFTH_DIGEST.txt
           echo 'STAGE55_FIFTY_FIFTH_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
       - name: Preserve PASS or FAIL artifacts
         if: always()
@@ -75,8 +75,8 @@ jobs:
         with:
           name: stage55-fifty-fifth-day-differential
           path: |
-            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_53.json
             logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_54.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_55.json
             logs/STAGE55_FIFTY_FIFTH_NATIVE.log
             logs/STAGE55_FIFTY_FIFTH_PYTHON.log
             logs/STAGE55_FIFTY_FIFTH_PYTHON_ROW.txt

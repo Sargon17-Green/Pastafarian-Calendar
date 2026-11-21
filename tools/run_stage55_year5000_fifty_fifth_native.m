@@ -9,7 +9,7 @@ cleanupDiary=onCleanup(@()diary('off')); %#ok<NASGU>
 f=jsondecode(fileread(fullfile(root,'tests','fixtures','stage55_year5000_appendix_a_metadata.json')));
 L=double(f.month_lengths(:).');
 assert(f.year==5000 && numel(L)==45 && sum(L)==4244 && f.first_day==-15057702,'Stage55:Fixture');
-[original,before]=pastafari.restoreExactWeaveCursorJson(fileread(fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_53.json')));
+[original,before]=pastafari.restoreExactWeaveCursorJson(fileread(fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_54.json')));
 expected=L; prefix=[1 2 3 4 5 6 7 4 8 9 10 9 11 6 12 13 14 15 16 16 17 7 18 2 19 20 19 5 21 22 9 1 7 23 3 8 23 14 10 9 24 2 25 18 7 15 26 3 3 21 27 22 28 11]; for k=prefix, expected(k)=expected(k)-1; end; one=pastafari.BigInt(1);
 assert(isequal(original,L) && isequal(before.remaining,expected) && before.stepsComputed==54 && ...
  before.openedUpTo==28 && before.closedUpTo==0 && ~before.done && sum(before.remaining)==4190 && ...
@@ -30,7 +30,7 @@ recountSeconds=toc(t);
 assert(recount==after.count && after.count<=before.count,'Stage55:After55Recount');
 after.stepsComputed=55;
 body=pastafari.serializeExactWeaveCursorJson(original,after);
-dest=fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_54.json');
+dest=fullfile(logs,'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_55.json');
 [fid,msg]=fopen(dest,'w','n','UTF-8');
 assert(fid>=0,'Stage55:After55Write',msg);
 closeGuard=onCleanup(@()fclose(fid)); %#ok<NASGU>

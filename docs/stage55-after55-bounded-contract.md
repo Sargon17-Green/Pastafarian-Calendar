@@ -28,3 +28,9 @@ Stage55 OPEN; LAST_COMPLETED_STAGE=54; no merge/main/release.
 5. Completed exact-SHA CI and Names Lock; original AFTER55 ZIP SHA/CRC7/7 and checkpoint digest verified and archived.
 Queued/in_progress never PASS; do not dispatch duplicate work.
 Whole-year canonical oracle and cross-engine soak remain unverified. Stage55 final acceptance remains OPEN.
+
+## AFTER55 CI wiring correction (2026-11-21)
+- Initial push run [44904948935](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44904948935), job 136848417132, completed/failure on `f24a3094e3f3ecfc5e6ef6cb1795dda981993ec5` at pinned predecessor verification; the download of certified AFTER54 artifact 14704805568 succeeded and its ZIP digest matched `446b12eb15775257aceda67f90e4cbbe434cadeda477d39f79f4e0864863e411`.
+- Root cause: the new AFTER55 workflow mistakenly verified `STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_53.json` against the certified AFTER54 digest `643ce151a2ab76998f4032911c5eb290d6529bc253025939f0366a6dd9cb1ae6`; predecessor run 44895775469 independently confirms its output is `STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_54.json` with that digest. MATLAB and workflow output paths were off by one as well.
+- Fix: consume `AFTER_54.json` and produce `AFTER_55.json` in both MATLAB and the workflow, preserving the certified checkpoint SHA, independent Python algorithm, and 5-field oracle. The failed run never reached MATLAB/native or Python differential and does not count as an expected-red algorithm failure.
+- Acceptance remains CONDITIONAL: only a new completed exact-SHA workflow with Native/Python logs, original artifact SHA/CRC, negative cases and strict 5-field equality can certify AFTER55; full-year oracle/soak remain open.
