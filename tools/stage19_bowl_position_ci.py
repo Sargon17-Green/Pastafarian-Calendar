@@ -33,7 +33,20 @@ def main():
         passed=code==0 and err==b"" and labels==wanted and order_labels==order_wanted and not errors and txt.count(final)==1 and txt.rstrip().endswith(final)
         positive.append(dict(start_order=start,orders=len(orders),cases=len(wanted),assertions=checks,exit_code=code,labels_seen=len(labels),order_markers_seen=len(order_labels),passed=passed,generated_fixture_sha256=sha(program.encode())))
         verified=verified and passed
-        if not passed:break
+        if not passed:
+            if start == 0:
+                # Independent on-failure original-runtime diagnostic, not a PASS or a production mutation.
+                first_program = fixture.positive_fixture(orders[:1], start)[0]
+                anchor = "36h;!o:\n"
+                assert first_program.count(anchor) == 6
+                traced = ('36h;!o:\n'
+                          '"STAGE19_DIAG_OP36_RESULT="o;.'
+                          '"|TABLE_HEADER="d;g;!.'
+                          '"|TUPLE_ORDER_HANDLE="b;g;!.'
+                          '"|TUPLE_BOWL="b;1+g;!.10,\n')
+                first_program = first_program.replace(anchor, traced, 1)
+                execute("diagnostic_first_scalar", prefix + first_program.encode(), 30)
+            break
     parsed=json.loads(Path("test/stage19_bowl_position_design_vectors.json").read_text(encoding="utf-8"))
     probe_program,probe_wanted,probe_final,probe_checks=fixture.probe_fixture(parsed["probes"])
     probe_code,probe_out,probe_err=execute("positive_probes",prefix+probe_program.encode(),60);probe_txt=probe_out.decode("utf-8","replace")
