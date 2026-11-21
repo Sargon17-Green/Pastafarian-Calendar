@@ -62,15 +62,15 @@ fn examine_endings(
       let in_right = contains_directly(next_sum, original_right)
       let updated =
         DirectCounts(
-        left: counts.left + bit(in_left),
-        right: counts.right + bit(in_right),
-        intersection: counts.intersection + bit(in_left && in_right),
-        union: counts.union + bit(in_left || in_right),
-        xor: counts.xor + bit(in_left != in_right),
-        total: counts.total,
-        numerator: counts.numerator,
-        denominator: counts.denominator,
-      )
+          left: counts.left + bit(in_left),
+          right: counts.right + bit(in_right),
+          intersection: counts.intersection + bit(in_left && in_right),
+          union: counts.union + bit(in_left || in_right),
+          xor: counts.xor + bit(in_left != in_right),
+          total: counts.total,
+          numerator: counts.numerator,
+          denominator: counts.denominator,
+        )
       examine_endings(
         remaining,
         next_sum,
@@ -91,7 +91,8 @@ fn enumerate_all_starts(
   case suffix {
     [] -> counts
     [_, ..remaining] -> {
-      let updated = examine_endings(suffix, 0, original_left, original_right, counts)
+      let updated =
+        examine_endings(suffix, 0, original_left, original_right, counts)
       enumerate_all_starts(remaining, original_left, original_right, updated)
     }
   }
@@ -126,20 +127,20 @@ fn direct_counts(
 ) -> DirectCounts {
   let raw =
     enumerate_all_starts(
-    gaps,
-    original_left,
-    original_right,
-    DirectCounts(
-      left: 0,
-      right: 0,
-      intersection: 0,
-      union: 0,
-      xor: 0,
-      total: 0,
-      numerator: 0,
-      denominator: 1,
-    ),
-  )
+      gaps,
+      original_left,
+      original_right,
+      DirectCounts(
+        left: 0,
+        right: 0,
+        intersection: 0,
+        union: 0,
+        xor: 0,
+        total: 0,
+        numerator: 0,
+        denominator: 1,
+      ),
+    )
   let k = list.length(gaps)
   let #(numerator, denominator) = direct_fraction(raw.intersection, raw.union)
   DirectCounts(
@@ -582,7 +583,12 @@ pub fn discovery_33_invalid_inputs_and_stage32_error_priority_test() {
   )
 
   let invalid_recovery = bootstrap.MonsterContext(..context, recovery_depth: -1)
-  discovery_33_jaccard_bands.dispatch_discovery_33(invalid_recovery, [7], [], [])
+  discovery_33_jaccard_bands.dispatch_discovery_33(
+    invalid_recovery,
+    [7],
+    [],
+    [],
+  )
   |> should.equal(
     Error(discovery_19_interval_value.InvalidContext(
       bootstrap.InvalidRecoveryDepth,
