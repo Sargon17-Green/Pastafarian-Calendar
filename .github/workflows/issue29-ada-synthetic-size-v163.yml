@@ -1,0 +1,83 @@
+name: Issue29 v163 Ada synthetic 45-month 4244-day bounded benchmark (NO F)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-canonical-weave-v163
+    paths:
+      - .github/workflows/issue29-ada-synthetic-size-v163.yml
+permissions:
+  contents: read
+jobs:
+  bounded-synthetic-shape:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check immutable issue halt and forbid calendar F
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json")
+          d=json.loads(p.read_text())
+          assert d["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert d["main_changes_permitted"] is False
+          assert d["successful_original_source_full_years"]==0
+          s=Path("soak/candidates/ada_full_weave_v163/benchmark_issue29_full_weave_v163.adb").read_text()
+          assert "Calendar_Date" in s and "CW.Build" in s
+          assert "Normative_Oracle.Calendar_Date" not in s
+          print("V163_SYNTHETIC_ONLY_NO_CALENDAR_FCT")
+          PY
+          git rev-parse HEAD > evidence/commit.txt
+      - name: Install GNAT 13
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 > evidence/apt-install.log 2>&1
+          gnatmake --version > evidence/gnat-version.txt
+      - name: Compile independent 45-month size benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd soak/candidates/ada_full_weave_v163
+            gnatmake -gnat2022 -gnatW8 -gnata benchmark_issue29_full_weave_v163.adb
+          ) > evidence/compile.stdout 2> evidence/compile.stderr
+          sha256sum soak/candidates/ada_full_weave_v163/benchmark_issue29_full_weave_v163             > evidence/executable.sha256
+      - name: Bound synthetic count plus rank-one full-size weave to 512 MiB and 90 s
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            ulimit -v 524288
+            /usr/bin/time -v timeout --signal=KILL 90s               ./soak/candidates/ada_full_weave_v163/benchmark_issue29_full_weave_v163
+          ) > evidence/synthetic-run.stdout 2> evidence/synthetic-run.stderr
+          grep -Fx V163_SYNTHETIC_FULL_LENGTH_45_MONTHS_4244_DAYS_RANK1_PASS_NO_F             evidence/synthetic-run.stdout
+          echo 'V163_SINGLE_SYNTHETIC_SIZE_ONLY_NO_FOUNDATION_CALLS' > evidence/verdict.txt
+      - name: Preserve all available traces and hashes even on failure
+        if: always()
+        shell: bash
+        run: |
+          python3 -B - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          e=Path("evidence")
+          d={p.name:{"size":p.stat().st_size,
+                     "sha256":hashlib.sha256(p.read_bytes()).hexdigest()}
+             for p in sorted(e.iterdir()) if p.is_file()}
+          (e/"member-hashes.json").write_text(json.dumps(d,indent=2,sort_keys=True)+"\n")
+          PY
+      - name: Upload synthetic-only benchmark result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v163-synthetic-45x4244-no-F-bound-512MiB-90s
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
