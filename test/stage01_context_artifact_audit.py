@@ -160,9 +160,11 @@ def main() -> None:
         with zipfile.ZipFile(args.zip) as archive:
             require(archive.testzip() is None, "archive CRC failure")
             names = set(archive.namelist())
-            require(names == {"stage01_calculation_context_diff.json",
-                              "build/stage01-calculation-context-diff.log",
-                              "build/stage01-calculation-context-selftest.log"}, "artifact members")
+            required = {"stage01_calculation_context_diff.json",
+                        "build/stage01-calculation-context-diff.log",
+                        "build/stage01-calculation-context-selftest.log"}
+            optional = {"build/stage01-context-artifact-audit.log"}
+            require(required <= names and names <= required | optional, "artifact members")
             content = archive.read("stage01_calculation_context_diff.json")
     else:
         content = args.json.read_bytes()
