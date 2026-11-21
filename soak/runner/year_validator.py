@@ -20,6 +20,21 @@ MANDATORY = frozenset({
 })
 
 
+def _reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Fail closed on ambiguous native JSONL, including nested extension fields."""
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON key: " + key)
+        result[key] = value
+    return result
+
+
+def _reject_non_json_number(token: str) -> None:
+    """Python json.loads otherwise accepts NaN and Infinity, contrary to JSON."""
+    raise ValueError("non-JSON numeric token: " + token)
+
+
 @dataclasses.dataclass(frozen=True)
 class YearCase:
     calculation_day: str
@@ -56,9 +71,10 @@ class TranscriptError(ValueError):
 
 def parse_line(raw_line: str, row_number: int, case: YearCase, expected_t: int) -> CheckedDay:
     try:
-        row = json.loads(raw_line)
+        row = json.loads(raw_line, object_pairs_hook=_reject_duplicate_json_keys,
+                         parse_constant=_reject_non_json_number)
     except (ValueError, TypeError) as exc:
-        raise TranscriptError(f"invalid JSON ({type(exc).__name__})", row_number) from exc
+        raise TranscriptError(f"invalid JSON ({type(exc).__name__}: {exc})", row_number) from exc
     if not isinstance(row, dict) or not MANDATORY.issubset(row):
         raise TranscriptError("missing mandatory normalized/raw fields", row_number)
     for key in ("calculation_day", "target_day", "year"):
