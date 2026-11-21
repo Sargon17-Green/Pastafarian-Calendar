@@ -29,7 +29,7 @@ A strict, source-derived frozen profile S42 contains 728 distinct ASCII keys, 72
 - LAST_COMPLETED_STAGE=42
 - STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED
 - NATURAL_LANGUAGE contains legitimate non-ASCII Unicode. Do not use ASCII-only values.
-All other existing 722 key-value pairs and the historical Stage42 record must remain unchanged in this *frozen snapshot* profile. This is a phase-bound regression oracle, not a general extensible production schema.
+All other existing 721 key-value pairs and the historical Stage42 record must remain unchanged in this *frozen snapshot* profile. This is a phase-bound regression oracle, not a general extensible production schema.
 
 **Draft only, S43_PENDING_PROPOSAL:** begin with the same 728-pair snapshot, change exactly CURRENT_STAGE from 42 to 43 and CURRENT_DISCOVERY from 27 to 28, and add exactly one new key STAGE43_RUNTIME_VERIFICATION=PENDING_NATIVE (729 unique keys total). CURRENT_KIND=DISCOVERY, LAST_COMPLETED_STAGE=42 and the entire sealed Stage42 record stay unchanged. This is one measurable candidate, **not authoritative**: policy may require a different activation vocabulary, evidence keys or transition process. No runtime component may treat this proposal as approved.
 
