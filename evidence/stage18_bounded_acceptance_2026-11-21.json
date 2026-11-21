@@ -1,0 +1,63 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "stage": 18,
+  "acceptance": "ACCEPTED_BOUNDED_CONTRACT_ONLY",
+  "date_utc": "2026-11-21",
+  "branch": "FALSE+العربية",
+  "run_id": 44928155271,
+  "run_head_sha": "f90e9004b562cec163dddb5c6c73dcf174818ea2",
+  "native_job_id": 136918700270,
+  "native_job_status": "completed",
+  "native_job_conclusion": "success",
+  "canonical_job_id": 136918699809,
+  "canonical_job_conclusion": "success",
+  "source_pin": "9abeace3ff87a231ef25881b06da6bbe9bb1be56",
+  "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "artifact_id": 14717932567,
+  "artifact_sha256": "f8fe2c0f3f1b1f5a345e2a7524c4ad38a0e9a9073ebad58480fde7e43b88990b",
+  "artifact_crc_pass": true,
+  "artifact_entries": 41,
+  "positive_native_cases": 750,
+  "positive_chunks": 5,
+  "native_output_assertions": 11231,
+  "positive_exit_codes": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "negative_controls": [
+    "bad_order",
+    "bad_sign"
+  ],
+  "negative_controls_rejected": true,
+  "corrupted_oracle_rejected_by_independent_factoradic_audit": true,
+  "independent_math_oracle": "factoradic rank=1+EuclideanMod(D-1,720), lexical six-permutation sequence",
+  "exact_sha256_github_source_matches": {
+    "src/bigint.false": "2a67528b19ea8cb1f8db907f8c13fabf95480bed2b4c88c1e8c82e49c3d084d0",
+    "src/monster_bootstrap.false": "209014f89b6d1f19af949b440afd88793a463fb4cbeaf61c9596835b335dd178",
+    "test/stage18_drop_order_design_vectors.json": "ab07f6e915917ca315956a9cb8bf4bfb9186096846154e5f56fe15518e0ad68f",
+    "tools/stage18_drop_order_ci.py": "54f1a0f04a57de7d23f1dc8827ddda582cbf3163040ed88038c9a090c473c1a9",
+    "tools/stage18_drop_order_design_oracle.mjs": "5805624ad0f89993866610d9c41026c39c1babfce12e60d9e0a26824edc10cd9",
+    "tools/stage18_drop_order_fixture.py": "29bde1aa3fa702bfc6349fb0175b39344f5c721310c3e47a82ca6949191b5f80"
+  },
+  "original_production_git_blobs": {
+    "src/bigint.false": "1e8de1147ba46cd0eb75a47f24673bbd9783946f",
+    "src/monster_bootstrap.false": "3b8d6ba8a12b6b3e31ea8820fcb59a572113210b"
+  },
+  "combined_native_source_sha256": "3746cd77d76a459eae23e46f8eec769d047bb0678e9da6fdd4521119a6acefd6",
+  "qa_only_auditor_pin_corrected_at_commit": "14e57f456722ca29c362739b017ec63027b52727",
+  "independently_executed_local_audit_script_sha256": "cb184dd0bf893b99dc5e7341d3d7bb17960bb1c5dbc5cd14db7c8da48746c616",
+  "independent_local_audit_result_sha256": "0868ad1caec37bd0dc209c9127f0150e5cd238640904f8e45e129aa0be033826",
+  "qa_method_note": "Independent local ZIP trace/factoradic audit and SHA-256 verification of six files fetched from exact GitHub source commit. Repository offline auditor pinned to current run; it was not itself executed in local environment, which has no GitHub network.",
+  "excluded_from_contract": [
+    "physically invalid/unallocated pointers",
+    "truncated physical tuples",
+    "corrupt heap",
+    "noncanonical metadata"
+  ],
+  "physical_pointer_safety_assessed": false,
+  "main_merge_performed": false,
+  "next_stage_authorized": false
+}
