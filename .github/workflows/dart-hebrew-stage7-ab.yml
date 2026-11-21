@@ -1,0 +1,38 @@
+name: Dart Hebrew Stage7 Controlled A-B QA
+
+on:
+  push:
+    branches:
+      - 'Dart+עברית'
+    paths:
+      - 'tool/dart_hebrew_stage7_ab_runner.py'
+      - '.github/workflows/dart-hebrew-stage7-ab.yml'
+      - 'docs/dart_hebrew_stage7_ab_contract_20261121.md'
+
+permissions:
+  contents: read
+
+jobs:
+  dart-hebrew-stage7-ab-qa-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact branch with both historical source commits
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install the same Dart version used for A and B acceptance
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Report Dart version
+        run: dart --version
+      - name: Validate and run isolated A vs B benchmark
+        run: python3 tool/dart_hebrew_stage7_ab_runner.py
+      - name: Upload raw evidence even if a gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-stage7-ab-qa
+          path: out/dart-hebrew-stage7-ab/
+          if-no-files-found: warn
