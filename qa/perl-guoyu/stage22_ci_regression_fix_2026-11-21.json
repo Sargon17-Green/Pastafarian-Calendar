@@ -1,0 +1,59 @@
+{
+  "project_id": "PC-BRANCH-PERL-GUOYU",
+  "branch": "Perl+國語",
+  "failed_run_id": 44896322930,
+  "failed_source_sha": "f5dee97df97a66adfed96bca04493f40f3d9f877",
+  "job_ids": {
+    "stage01": 136822646118,
+    "stage02": 136822650105,
+    "stage03": 136822650148,
+    "stage22": 136822650301
+  },
+  "failed_assertions": {
+    "t/47_stage02_weaving_primitive.t": [
+      212,
+      213
+    ],
+    "t/48_stage03_weaving_extended.t": [
+      274,
+      275,
+      276
+    ]
+  },
+  "archive": {
+    "artifact_id": 14705127360,
+    "sha256": "081f5154d1633e0536d4c96a71f7ce244b827deee2cc3186aa5b9a1293cfc9ed",
+    "entries": 7,
+    "crc_pass": 7,
+    "source_sha": "f5dee97df97a66adfed96bca04493f40f3d9f877",
+    "perl_version": "v5.40.5",
+    "exit_code": 0,
+    "stderr_bytes": 0,
+    "shards": 32,
+    "oracle_compared": 742900,
+    "tap": 1487005,
+    "stage22_job": "success"
+  },
+  "changes": [
+    {
+      "file": "t/47_stage02_weaving_primitive.t",
+      "invalid_replacements": [
+        "49->53",
+        "13x1->14x1"
+      ],
+      "new_positive_assertions": 2
+    },
+    {
+      "file": "t/48_stage03_weaving_extended.t",
+      "invalid_replacements": [
+        "49->53",
+        "13x1->14x1",
+        "[22,27]->[22,31]"
+      ],
+      "new_positive_assertions": 1
+    }
+  ],
+  "stage22_complete": false,
+  "last_completed_stage": 21,
+  "full_year_verified": false
+}

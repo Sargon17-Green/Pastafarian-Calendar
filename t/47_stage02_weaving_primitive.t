@@ -59,10 +59,13 @@ cmp_ok($cases,'>=',100,'已核對至少一百個獨立窮舉案例');
 is_deeply(unrank_weaving([2,2],2),[1,2,1,2],'明確的規範二日示例');
 is(''.rank_weaving([2,2],[1,1,2,2]),'1','第一個序列排名為一');
 
-for my $invalid ([],[0],[49],[(1) x 13],[1,'2x'],undef) {
+# Stage22 permits 49 days and thirteen one-day months; reject only beyond 13/52.
+for my $invalid ([],[0],[53],[(1) x 14],[1,'2x'],undef) {
     my $ok = eval { count_weavings($invalid); 1 };
     ok(!$ok,'不合法月份長度遭拒');
 }
+is(''.count_weavings([49]), '1', '49-day single month now legal');
+is(''.count_weavings([(1) x 13]), '1', 'thirteen one-day months now legal');
 for my $rank (0,-1,3,Math::BigInt->new('9'x50),'abc',undef) {
     my $ok = eval { unrank_weaving([2,2],$rank); 1 };
     ok(!$ok,'超出範圍排名遭拒');

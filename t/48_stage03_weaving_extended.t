@@ -81,9 +81,11 @@ for my $p ([(4) x 6],[24]) {
         is("$rank",$unchanged,'呼叫不修改 BigInt 排名');
     }
 }
-for my $invalid ([],[0],[49],[(1) x 13],[22,27],[2,'3x'],undef) {
+# Stage22 permits all three old 49-day / thirteen-month fixtures.
+for my $invalid ([],[0],[53],[(1) x 14],[22,31],[2,'3x'],undef) {
     ok(!eval { count_weavings($invalid); 1 },'拒絕超界與非數字月份設定');
 }
+cmp_ok(count_weavings([22,27]), '>', 0, '49-day two-month profile now legal');
 for my $invalid_rank (0,-1,'abc',Math::BigInt->new('9'x60),undef) {
     ok(!eval { unrank_weaving([(4) x 6],$invalid_rank); 1 },'拒絕非法排名');
 }
