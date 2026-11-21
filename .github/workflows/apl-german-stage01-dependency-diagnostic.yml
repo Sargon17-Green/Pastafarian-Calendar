@@ -1,0 +1,80 @@
+name: APL German Stage1 dependency diagnosis (QA ONLY)
+on:
+  push:
+    branches: [qa/apl-german-nars-interface-20261116]
+    paths:
+      - '.github/workflows/apl-german-stage01-dependency-diagnostic.yml'
+      - 'qa/nars-interface/stage01_dependency_probe.py'
+      - 'qa/nars-interface/test_stage01_dependency_probe.py'
+      - 'qa/nars-interface/bounded_stage01_dependency_probe.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  ec-capture-diagnostic:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch exact publisher NARS2000 release (independent SHA lock)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $ProgressPreference='SilentlyContinue'
+          New-Item -ItemType Directory -Force 'pinned_release/verified_release' | Out-Null
+          $installer='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
+          Invoke-WebRequest -Uri 'https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe' -OutFile $installer -MaximumRedirection 3 -TimeoutSec 90
+          if ((Get-Item -LiteralPath $installer).Length -ne 9430788 -or
+              (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant() -cne
+              '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b') {
+            throw 'PUBLISHER_INSTALLER_SIZE_OR_SHA_MISMATCH'
+          }
+          Write-Output 'PUBLISHER_NARS_INSTALLER_SHA_LOCK_PASS'
+      - name: Provision pinned NARS and ephemeral APL font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
+      - name: Test source-locked EC candidate generator
+        shell: pwsh
+        run: |
+          python -m unittest discover -s qa/nars-interface -p 'test_stage01_dependency_probe.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'STATEMENT_GENERATOR_TEST_FAILED' }
+      - name: Run actual NARS EC diagnostic with bounded evidence capture
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_dependency_probe.ps1 -Runtime verified_runtime -Evidence dependency_probe_evidence
+      - name: Independent diagnostic gate, not Stage1
+        shell: pwsh
+        run: |
+          $a=Get-Content dependency_probe_evidence/native_dependency_diag.json -Raw | ConvertFrom-Json
+          $b=Get-Content dependency_probe_evidence/dependency_candidate.json -Raw | ConvertFrom-Json
+          if($a.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or $b.source_commit -cne $a.source_commit){throw 'SOURCE_LOCK_MISMATCH'}
+          if($a.stage01 -cne 'NOT_ACCEPTED' -or $b.stage01 -cne 'NOT_ACCEPTED'){throw 'FALSE_STAGE01_ACCEPTANCE'}
+          if($a.fx_last_contiguous -ne 95 -or $a.fx_checkpoints.Count -ne 23 -or @($a.fx_checkpoints | Where-Object {$_.exact -ne $true}).Count -gt 0){throw 'FX95_UNPROVEN'}
+          foreach($p in $a.probes){Write-Output ('NATIVE_STATEMENT_EC '+$p.index+' '+$p.name+' '+$p.first_ec_code)}
+          if($a.status -cne 'DEPENDENCY_CAPTURE_COMPLETE_DIAGNOSTIC_ONLY' -or $a.probes.Count -ne 3 -or $a.statement_tests.Count -ne 3 -or $a.dependency_probes.Count -ne 13 -or $a.final_marker_exact -ne $true){throw 'DEPENDENCY_CAPTURE_INCOMPLETE'}
+          if(@($a.statement_tests | Where-Object {$null -eq $_.first_unfinished}).Count -ne 0){throw 'FIRST_SOURCE_LINE_NOT_ISOLATED'}
+          Write-Output 'SOURCE_DEPENDENCY_DIAGNOSTIC_COMPLETE_NOT_STAGE01'
+      - name: Hash all receipts and evidence
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dependency_probe_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem dependency_probe_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName)"
+          } | Set-Content -Encoding utf8 dependency_probe_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-stage01-dependency-diagnostic-only
+          path: |
+            dependency_probe_evidence/
+            font_bootstrap_evidence/
+            dependency_probe_evidence.sha256
+          retention-days: 21
