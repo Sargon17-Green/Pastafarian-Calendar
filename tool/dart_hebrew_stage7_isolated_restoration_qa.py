@@ -82,7 +82,7 @@ def git_blob(text: str) -> str:
 
 def write_results(out: Path, results: dict) -> None:
     (out / "results.json").write_text(
-        json.dumps(results, indent=2, ensure_ascii=False) + "\\n",
+        json.dumps(results, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
 
@@ -172,9 +172,9 @@ def main() -> None:
                         fmt_output = (fmt_proc.stdout or "") + (fmt_proc.stderr or "")
                         if fmt_proc.returncode != 0:
                             raise RuntimeError(
-                                f"dart format diagnostic failed for locked A (exit={fmt_proc.returncode})\\n{fmt_output[-4000:]}"
+                                f"dart format diagnostic failed for locked A (exit={fmt_proc.returncode})\n{fmt_output[-4000:]}"
                             )
-                        changed_match = re.search(r"Formatted \\d+ files? \\((\\d+) changed\\)", fmt_output)
+                        changed_match = re.search(r"Formatted \d+ files? \((\d+) changed\)", fmt_output)
                         if changed_match is None:
                             raise RuntimeError("Could not parse Dart formatter summary for locked A: " + fmt_output[-2000:])
                         changed_files = int(changed_match.group(1))
