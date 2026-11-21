@@ -1,0 +1,62 @@
+name: PHP Malay Stage56 unbounded production choice
+
+on:
+  push:
+    branches:
+      - 'PHP+Bahasa-Melayu'
+    paths:
+      - 'src/Patches/UnboundedUniformChoice56.php'
+      - 'tests/stage56_unbounded_choice.php'
+      - '.github/workflows/php-malay-stage56-unbounded-choice.yml'
+  workflow_dispatch:
+
+jobs:
+  stage56-unbounded-choice-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Exact SHA and resource bounded native proof
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-choice-evidence
+          printf '%s\n' 'PC-BRANCH-PHP-MALAY' > stage56-choice-evidence/PROJECT_ID.txt
+          printf '%s\n' "${GITHUB_SHA}" > stage56-choice-evidence/SHA.txt
+          php -v > stage56-choice-evidence/php-version.txt
+          php -r 'exit(PHP_INT_SIZE === 8 ? 0 : 1);' > stage56-choice-evidence/architecture.txt 2>&1
+          arch=$?
+          php -l src/Patches/UnboundedUniformChoice56.php > stage56-choice-evidence/lint-production.txt 2>&1
+          l1=$?
+          php -l tests/stage56_unbounded_choice.php > stage56-choice-evidence/lint-tests.txt 2>&1
+          l2=$?
+          timeout 900s php -d memory_limit=512M tests/stage56_unbounded_choice.php \
+            > stage56-choice-evidence/stdout.txt 2> stage56-choice-evidence/stderr.txt
+          code=$?
+          printf 'arch=%s\nlint_production=%s\nlint_tests=%s\nexit=%s\n' \
+            "$arch" "$l1" "$l2" "$code" > stage56-choice-evidence/exit.txt
+          cat stage56-choice-evidence/lint-production.txt stage56-choice-evidence/lint-tests.txt stage56-choice-evidence/stdout.txt
+          if (( arch != 0 || l1 != 0 || l2 != 0 || code != 0 )); then
+            cat stage56-choice-evidence/stderr.txt >&2
+            exit 1
+          fi
+          if [[ -s stage56-choice-evidence/stderr.txt ]]; then
+            cat stage56-choice-evidence/stderr.txt >&2
+            exit 1
+          fi
+          grep -E '^STAGE56_UNBOUNDED_CHOICE checks=[0-9]+ real=18 invalid=7 status=PASS; YEAR_PROVIDER=NOT_IMPLEMENTED$' stage56-choice-evidence/stdout.txt
+      - name: Preserve exact SHA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-choice-${{ github.sha }}
+          path: stage56-choice-evidence/
+          if-no-files-found: warn
+          retention-days: 30
