@@ -1,0 +1,120 @@
+name: Soak v157 source-locked foundation causal observability and inverse ambiguity (NO Fct)
+on:
+  push:
+    branches:
+      - qa/soak-foundation-provenance-gap-v157
+    paths:
+      - 'soak/runner/soak_foundation_causal_observability_v157.py'
+      - 'soak/process_tests/test_soak_foundation_causal_observability_v157.py'
+      - 'soak/runner/soak_ada_month_family_divergence_v156.py'
+      - 'soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json'
+      - '.github/workflows/soak-foundation-causal-observability-v157.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-only-dag-and-synthetic-inverse-witness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Reaffirm original mismatch halt, no source Fct permission
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' | tee evidence/v157-halt-gate.log
+          import json
+          from pathlib import Path
+          d=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text())
+          assert d["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert d["incident_issue"]==29
+          assert d["main_changes_permitted"] is False
+          assert d["successful_original_source_full_years"]==0
+          assert d["successful_ten_thousand_soak_years"]==0
+          print("V157_ISSUE29_HALT_ENFORCED_NO_FCT")
+          PY
+      - name: Run 20 new toy inverse-identifiability, source contract and DAG controls
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_foundation_causal_observability_v157.py' -v 2>&1 | tee evidence/v157-causal-dag-20-tests.log
+          grep -Eq '^Ran 20 tests ' evidence/v157-causal-dag-20-tests.log
+          grep -Fx 'OK' evidence/v157-causal-dag-20-tests.log
+      - name: Download exact three original source blobs read-only for path-DAG witness
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY' | tee evidence/v157-locked-source-download.log
+          import base64,os,json,urllib.parse,urllib.request,sys
+          from pathlib import Path
+          sys.path.insert(0,"soak/runner")
+          from soak_foundation_causal_observability_v157 import SOURCE_LOCKS
+          from soak_ada_month_family_divergence_v156 import blob_sha
+          base=Path(os.environ["RUNNER_TEMP"])/"soak-v157-pinned-sources"
+          base.mkdir(exist_ok=False)
+          for key,source in SOURCE_LOCKS.items():
+              url=("https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/contents/"
+                   +urllib.parse.quote(source["path"],safe="/")
+                   +"?ref="+source["commit"])
+              req=urllib.request.Request(url,headers={
+                  "Authorization":"Bearer "+os.environ["GITHUB_TOKEN"],
+                  "Accept":"application/vnd.github+json",
+                  "User-Agent":"soak-v157-readonly-foundation-provenance",
+              })
+              with urllib.request.urlopen(req,timeout=25) as result:
+                  obj=json.load(result)
+              assert obj["type"]=="file" and obj["encoding"]=="base64"
+              assert obj["sha"]==source["git_blob_sha1"]
+              data=base64.b64decode("".join(obj["content"].split()),validate=True)
+              assert blob_sha(data)==source["git_blob_sha1"]
+              language="Python-Turkce" if key=="REF-41" else "Ada-Telugu"
+              dest=base/language/source["commit"]/source["path"]
+              dest.parent.mkdir(parents=True,exist_ok=True)
+              with dest.open("xb") as f:
+                  f.write(data)
+              print("V157_SOURCE_LOCKED",key,obj["sha"],len(data))
+          print("V157_DOWNLOADS_ONLY_NO_HISTORICAL_FCT")
+          PY
+      - name: Audit original final name-index derivation and prove multi-branch toy ambiguity
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_foundation_causal_observability_v157.py \
+            --sources-root "$RUNNER_TEMP/soak-v157-pinned-sources" \
+            --report evidence/v157-source-bound-causal-observability.json \
+            | tee evidence/v157-source-bound-causal-observability.log
+          python3 -B - <<'PY' | tee evidence/v157-acceptance-witness.log
+          import json
+          from pathlib import Path
+          x=json.loads(Path("evidence/v157-source-bound-causal-observability.json").read_text())
+          assert x["status"]=="LOCKED_SOURCE_CAUSAL_DEPENDENCIES_AND_INVERSE_AMBIGUITY_VERIFIED"
+          assert set(x["historical_source_blobs_verified"])=={"REF-41","ADA-TELUGU","ADA-WEAVING"}
+          a=x["toy_inverse_ambiguity"]
+          assert a["identical_final_month_index"]==20
+          assert a["identical_final_day_in_month"]==2
+          assert a["different_internal_month_ids"]==[1,2]
+          assert set(a["minimal_observed_differences"])=={"month_weaving","month_name_indices"}
+          assert x["month_index_means_canonical_name_index_not_month_position"] is True
+          assert x["native_intermediate_receipts_for_foundation_attested"] is False
+          assert x["native_first_internal_numeric_divergence_isolated"] is False
+          assert x["source_native_Fct_calls"]==0
+          assert x["native_source_executed"] is False
+          assert x["original_full_years_certified"]==0
+          assert x["halt_new_native_soak_dispatch"] is True
+          assert x["main_changes_permitted"] is False
+          print("V157_CANONICAL_MONTH_INDEX_IS_NAME_LOOKUP_NOT_MONTH_ORDINAL")
+          print("V157_FINAL_OUTPUT_CANNOT_INVERT_UNIQUE_WEAVE_AND_NAME_MAPPING")
+          print("V157_FIELD_DEPENDENCIES_FORM_PARTIAL_ORDER_NOT_SINGLE_CAUSAL_LINE")
+          print("V157_HISTORICAL_FOUNDATION_INTERMEDIATES_UNAVAILABLE")
+          print("V157_NEW_TOY_REGRESSIONS=20")
+          print("V157_ORIGINAL_FCT_CALLS=0")
+          PY
+      - name: Archive source-only analyses, no binaries or native execution
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v157-foundation-causal-observability-20-toy-tests-no-original-calls
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
