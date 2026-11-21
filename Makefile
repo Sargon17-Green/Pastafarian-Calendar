@@ -93,3 +93,11 @@ build/calendar_visible1.o: build/calendar.o src/tests/calendar_visible1_native_t
 build/calendar_visible1.gb: build/calendar_visible1.o
 	$(RGBLINK) -n build/calendar_visible1.sym -m build/calendar_visible1.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+# Isolated Stage1 chain Native380; do not append to existing Native370..379.
+build/calendar_chain1.o: build/calendar.o src/runtime/calendar_hidden_visible1_chain.asm src/tests/calendar_hidden_visible1_chain_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_CHAIN1_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_chain1.gb: build/calendar_chain1.o
+	$(RGBLINK) -n build/calendar_chain1.sym -m build/calendar_chain1.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
