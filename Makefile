@@ -85,3 +85,11 @@ build/calendar_hidden7.o: build/calendar.o src/tests/calendar_hidden7_native_tes
 build/calendar_hidden7.gb: build/calendar_hidden7.o
 	$(RGBLINK) -n build/calendar_hidden7.sym -m build/calendar_hidden7.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+# Isolated Stage1 visible1 Native379: preserve accepted Native370-378 targets.
+build/calendar_visible1.o: build/calendar.o src/tests/calendar_visible1_native_test.asm src/runtime/calendar_visible1.asm
+	$(RGBASM) -Wall -D STAGE1_VISIBLE1_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_visible1.gb: build/calendar_visible1.o
+	$(RGBLINK) -n build/calendar_visible1.sym -m build/calendar_visible1.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@

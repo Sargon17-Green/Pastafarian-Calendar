@@ -154,6 +154,15 @@ wCalendarHiddenWorking:: ds 16
 wCalendarHiddenOutput:: ds 16
 wCalendarHiddenRepeat:: ds 1
 wCalendarHiddenRound:: ds 1
+; Stage1 visible1 modular input H1,H3,H7 and atomic result.
+wCalendarVisibleIteration:: ds 1
+wCalendarVisibleInputs:: ds 48
+wCalendarVisibleOutput:: ds 16
+wCalendarVisibleWorking:: ds 16
+wCalendarVisibleAccum:: ds 16
+wCalendarVisibleRound:: ds 1
+wCalendarVisibleIndex:: ds 1
+wCalendarVisibleRepeat:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -197,6 +206,10 @@ ELIF DEF(STAGE1_HIDDEN7_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarHidden7Bench
+ELIF DEF(STAGE1_VISIBLE1_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarVisible1Bench
 ELSE
     call RunSelfTests
     ld a, [wTestResult]
@@ -318,6 +331,7 @@ INCLUDE "src/runtime/calendar_hidden4.asm"
 INCLUDE "src/runtime/calendar_hidden5.asm"
 INCLUDE "src/runtime/calendar_hidden6.asm"
 INCLUDE "src/runtime/calendar_hidden7.asm"
+INCLUDE "src/runtime/calendar_visible1.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -373,4 +387,8 @@ ENDC
 
 IF DEF(STAGE1_HIDDEN7_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_hidden7_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_VISIBLE1_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_visible1_native_test.asm"
 ENDC
