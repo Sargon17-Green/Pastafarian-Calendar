@@ -46,7 +46,7 @@ def expected_hidden(c: int, t: int) -> tuple[int, ...]:
     return tuple(out)
 
 def data(label: str, asm: str) -> bytes:
-    m = re.search(r"(?m)^\\." + label + r":\\s*\\n((?:\\s*db\\s+[^\\n]+\\n?)+)", asm)
+    m = re.search(r"(?m)^\." + label + r":\s*\n((?:\s*db\s+[^\n]+\n?)+)", asm)
     assert m is not None, label
     return bytes(int(tok.strip()[1:], 16)
                  for line in m.group(1).splitlines()
