@@ -1669,12 +1669,47 @@ jobs:
           cat stage56-external-evidence/differential.stdout
           cat stage56-external-evidence/differential.stderr >&2
           exit "$rc"
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Stage56 source-bound PHP real years and bounded profiles (not acceptance)
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-php-real-evidence
+          printf '%s\n' PC-BRANCH-PHP-MALAY > stage56-php-real-evidence/PROJECT_ID.txt
+          printf '%s\n' "$GITHUB_SHA" > stage56-php-real-evidence/SHA.txt
+          php -v > stage56-php-real-evidence/php-version.txt
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8 || exit 1
+          php -l tests/stage56_source_bound_php_year.php > stage56-php-real-evidence/lint.txt 2>&1 || exit 1
+          bad=0
+          for year in 4999 5000 5001; do
+            timeout 900s php -d memory_limit=512M tests/stage56_source_bound_php_year.php \
+              .external-canonical-source \
+              stage56-external-evidence/reference.json \
+              stage56-external-evidence/external-gates.json \
+              stage56-external-evidence/scroll-gates-report.json \
+              "$year" "stage56-php-real-evidence/$year.json" \
+              > "stage56-php-real-evidence/$year.stdout" \
+              2> "stage56-php-real-evidence/$year.stderr"
+            rc=$?
+            printf '%s\n' "$rc" > "stage56-php-real-evidence/$year.exit"
+            cat "stage56-php-real-evidence/$year.stdout"
+            cat "stage56-php-real-evidence/$year.stderr" >&2
+            if [ "$rc" -ne 0 ] || [ -s "stage56-php-real-evidence/$year.stderr" ] || [ ! -s "stage56-php-real-evidence/$year.json" ]; then bad=1; fi
+          done
+          test "$bad" -eq 0
       - name: Emit evidence hashes
         if: always()
         shell: bash
         run: |
           set -eu
-          find stage56-external-evidence -maxdepth 1 -type f -print0 | sort -z | xargs -0 -r sha256sum > stage56-evidence-files.sha256
+          find stage56-external-evidence -maxdepth 1 -type f -print0 > stage56-evidence-inputs0
+          if test -d stage56-php-real-evidence; then
+            find stage56-php-real-evidence -maxdepth 1 -type f -print0 >> stage56-evidence-inputs0
+          fi
+          sort -z stage56-evidence-inputs0 | xargs -0 -r sha256sum > stage56-evidence-files.sha256
+          rm stage56-evidence-inputs0
           cat stage56-evidence-files.sha256
       - name: Upload evidence even if differential fails
         if: always()
@@ -1683,6 +1718,7 @@ jobs:
           name: php-malay-stage56-external-qa-${{ github.sha }}
           path: |
             stage56-external-evidence/
+            stage56-php-real-evidence/
             stage56-evidence-files.sha256
           if-no-files-found: error
           retention-days: 30
