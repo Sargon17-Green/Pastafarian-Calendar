@@ -65,12 +65,22 @@ proc weight(i: int, n: int, k: int, spec: GapSpec): bigint {
   }
   const start = max(i,q);
   if start > n then return new bigint(0);
-  var lower: [0..n] int;
-  if i >= q then lower[i] = 1;
-  if q >= i then lower[q] = max(lower[q],spec.tail);
-  lower[n] = max(lower[n],1);
+  // The lower-bound vector has support only at i, q, and n.
+  // Sum those at most three positions without allocating/scanning [0..n].
+  // Coincident positions use max, exactly as the original lower[] updates.
   var required = spec.fixedSum;
-  for slot in start..n do required += lower[slot];
+  if i >= q {
+    if i == n {
+      if q == n then required += max(1, spec.tail);
+      else required += 1;
+    } else {
+      required += 2; // lower[i]=1 and lower[n]=1
+      if q == i && spec.tail > 1 then required += spec.tail - 1;
+    }
+  } else {
+    if q == n then required += max(1, spec.tail);
+    else required += spec.tail + 1;
+  }
   const slack = k-required;
   if slack < 0 then return new bigint(0);
   return chooseBig(slack + n-start,n-start);
