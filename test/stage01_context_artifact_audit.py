@@ -81,6 +81,13 @@ def audit(data: dict, sha: str, run: int) -> int:
         actual = fields(row.get("fortran"), f"case {index} Fortran")
         require(expected == actual and row.get("differences") == [], f"case {index}: numeric comparison")
         require(row.get("matched_fields") == 5 and row.get("status") == "match", f"case {index}: status/accounting")
+        expected_tail = (
+            f"STAGE01_CONTEXT_CASE={index}\n"
+            f"STAGE01_CONTEXT_CALCULATION_DAY={row['calculation_day']}\n"
+            f"STAGE01_CONTEXT_TARGET_DAY={row['target_day']}\n"
+            "STAGE01_CONTEXT_FIELDS=" + ",".join(str(actual[name]) for name in FIELDS) + "\n"
+        )
+        require(row.get("fortran_stdout_tail") == expected_tail, f"case {index}: exact Fortran stdout")
 
     for pair, label in [((11, 13), "4999-boundary"), ((12, 14), "5001-boundary"),
                         ((7, 8), "Foundation distant"), ((4, 6), "Foundation adjacent"),
@@ -141,6 +148,62 @@ def mutation_audit(data: dict, sha: str, run: int) -> int:
     return len(tests)
 
 
+
+def audit_zip_logs(data: dict, diff: str, selftest: str, own_audit: str | None) -> int:
+    """Check retained log lines and their order against validated JSON and CI counters."""
+    expected = [
+        f"STAGE01_CALC_CONTEXT_CASE={row['case']} CALC={row['calculation_day']} "
+        f"TARGET={row['target_day']} STATUS={row['status']} "
+        f"MATCHED_FIELDS={row['matched_fields']}/5"
+        for row in data["results"]
+    ]
+    expected.extend((
+        "STAGE01_CALC_CONTEXT_SENSITIVITY=2/2 PAIRS",
+        "STAGE01_CALC_CONTEXT_FOUNDATION_SENSITIVITY=3/3 PAIRS",
+        "STAGE01_CALC_CONTEXT_SAME_PROCESS=8/8 CALLS; 40/40 EXACT FIELDS",
+        "STAGE01_CALC_CONTEXT_REVERSE_SAME_PROCESS=8/8 CALLS; 40/40 EXACT FIELDS",
+        "STAGE01_CALC_CONTEXT_FOUNDATION_SAME_PROCESS=8/8 CALLS; 40/40 EXACT FIELDS",
+        "STAGE01_CALC_CONTEXT_DIFFERENTIAL=14/14 CASES; 70/70 EXACT FIELDS",
+        "STAGE01_CALC_CONTEXT_PASS_ONLY_NOT_FULL_STAGE1_ACCEPTANCE",
+    ))
+    require(diff.splitlines() == expected, "diff log missing, extra, reordered or inconsistent with JSON")
+    require(selftest.splitlines() == [
+        "STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=46/46"
+    ], "harness selftest log mismatch")
+    checked = len(expected) + 1
+    if own_audit is not None:
+        require(own_audit.splitlines() == [
+            "STAGE01_CONTEXT_ARTIFACT_AUDIT_PASS=190/190 EXACT FIELDS",
+            "STAGE01_CONTEXT_ARTIFACT_MUTATIONS_REJECTED=15/15",
+            "STAGE01_CONTEXT_ARTIFACT_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE",
+        ], "audit log mismatch")
+        checked += 3
+    return checked
+
+
+def zip_log_mutation_audit(data: dict, diff: str, selftest: str, own_audit: str | None) -> int:
+    """Prove bounded hostile mutations of ZIP text evidence are rejected."""
+    mutations = (
+        ("changed-case", diff.replace("CASE=1 CALC=", "CASE=2 CALC=", 1), selftest, own_audit),
+        ("changed-input", diff.replace("CALC=-15063863", "CALC=0", 1), selftest, own_audit),
+        ("missing-line", "\n".join(diff.splitlines()[1:]), selftest, own_audit),
+        ("extra-line", diff + "FORGED=PASS\n", selftest, own_audit),
+        ("false-total", diff.replace("14/14 CASES", "13/14 CASES", 1), selftest, own_audit),
+        ("selftest-total", diff, selftest.replace("46/46", "45/46", 1), own_audit),
+        ("audit-or-sequence", diff if own_audit is not None else
+            diff.replace("40/40 EXACT FIELDS", "39/40 EXACT FIELDS", 1),
+            selftest,
+            own_audit.replace("190/190", "189/190", 1) if own_audit is not None else None),
+    )
+    for label, altered_diff, altered_selftest, altered_audit in mutations:
+        try:
+            audit_zip_logs(data, altered_diff, altered_selftest, altered_audit)
+        except EvidenceError:
+            continue
+        raise EvidenceError("Corrupted ZIP log unexpectedly accepted: " + label)
+    return len(mutations)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     src = parser.add_mutually_exclusive_group(required=True)
@@ -159,13 +222,19 @@ def main() -> None:
             require(hashlib.sha256(data_bytes).hexdigest() == args.zip_sha256, "ZIP SHA-256 mismatch")
         with zipfile.ZipFile(args.zip) as archive:
             require(archive.testzip() is None, "archive CRC failure")
-            names = set(archive.namelist())
+            entries = archive.namelist()
+            require(len(entries) == len(set(entries)), "duplicate ZIP member names")
+            names = set(entries)
             required = {"stage01_calculation_context_diff.json",
                         "build/stage01-calculation-context-diff.log",
                         "build/stage01-calculation-context-selftest.log"}
             optional = {"build/stage01-context-artifact-audit.log"}
             require(required <= names and names <= required | optional, "artifact members")
             content = archive.read("stage01_calculation_context_diff.json")
+            diff_log = archive.read("build/stage01-calculation-context-diff.log").decode("utf-8")
+            selftest_log = archive.read("build/stage01-calculation-context-selftest.log").decode("utf-8")
+            audit_log = (archive.read("build/stage01-context-artifact-audit.log").decode("utf-8")
+                         if "build/stage01-context-artifact-audit.log" in names else None)
     else:
         content = args.json.read_bytes()
     if args.json_sha256:
@@ -176,6 +245,12 @@ def main() -> None:
     if args.mutations:
         tested = mutation_audit(data, args.expected_commit, args.run_id)
         print(f"STAGE01_CONTEXT_ARTIFACT_MUTATIONS_REJECTED={tested}/{tested}")
+    if args.zip:
+        lines = audit_zip_logs(data, diff_log, selftest_log, audit_log)
+        print(f"STAGE01_CONTEXT_ARTIFACT_ZIP_LOGS_PASS={lines}/{lines} EXACT LINES")
+        if args.mutations:
+            rejected = zip_log_mutation_audit(data, diff_log, selftest_log, audit_log)
+            print(f"STAGE01_CONTEXT_ARTIFACT_LOG_MUTATIONS_REJECTED={rejected}/{rejected}")
     print("STAGE01_CONTEXT_ARTIFACT_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE")
 
 

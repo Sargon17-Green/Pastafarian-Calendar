@@ -1162,6 +1162,23 @@ jobs:
             --mutations | tee build/stage01-context-artifact-audit.log
           grep -Fxq 'STAGE01_CONTEXT_ARTIFACT_AUDIT_PASS=190/190 EXACT FIELDS' build/stage01-context-artifact-audit.log
           grep -Fxq 'STAGE01_CONTEXT_ARTIFACT_MUTATIONS_REJECTED=15/15' build/stage01-context-artifact-audit.log
+      - name: Verify Stage1 preupload ZIP logs against JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          zip -q build/stage01-local-evidence.zip \
+            stage01_calculation_context_diff.json \
+            build/stage01-calculation-context-diff.log \
+            build/stage01-calculation-context-selftest.log \
+            build/stage01-context-artifact-audit.log
+          python3 test/stage01_context_artifact_audit.py \
+            --zip build/stage01-local-evidence.zip \
+            --expected-commit "$GITHUB_SHA" \
+            --run-id "$GITHUB_RUN_ID" \
+            --mutations | tee build/stage01-preupload-zip-audit.log
+          grep -Fxq 'STAGE01_CONTEXT_ARTIFACT_AUDIT_PASS=190/190 EXACT FIELDS' build/stage01-preupload-zip-audit.log
+          grep -Fxq 'STAGE01_CONTEXT_ARTIFACT_ZIP_LOGS_PASS=25/25 EXACT LINES' build/stage01-preupload-zip-audit.log
+          grep -Fxq 'STAGE01_CONTEXT_ARTIFACT_LOG_MUTATIONS_REJECTED=7/7' build/stage01-preupload-zip-audit.log
       - name: Preserve calculation-context differential evidence
         if: always()
         uses: actions/upload-artifact@v4
