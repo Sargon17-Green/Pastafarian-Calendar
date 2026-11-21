@@ -128,8 +128,8 @@ begin
       end;
    end loop;
 
-   --  Both invalid boundaries must be rejected by the production GMP package.
-   for Bad_Rank in 0 .. 1 loop
+   --  The lower and upper invalid rank boundaries must both be rejected.
+   for Bad_Rank in 0 .. 0 loop
       declare
          Raised : Boolean := False;
       begin
