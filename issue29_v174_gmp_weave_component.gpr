@@ -1,0 +1,15 @@
+with "gnatcoll_gmp.gpr";
+
+-- v174: direct production GMP weave test with an exhaustive, external oracle.
+-- No Calendar_Date, Normative_Oracle or legacy Month_Weaving reference import.
+project Issue29_V174_GMP_Weave_Component is
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "obj_v174";
+   for Exec_Dir use "bin_v174";
+   for Main use ("issue29_v174_gmp_weave_tests.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatW8", "-gnata", "-gnatwa");
+   end Compiler;
+end Issue29_V174_GMP_Weave_Component;
