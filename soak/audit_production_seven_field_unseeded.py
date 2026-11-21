@@ -100,7 +100,8 @@ def boundary_targets(year: Year) -> tuple[int, ...]:
 
 def validate_boundary_years(reference_rows: list[tuple[int, ...]]) -> None:
     """Fail closed unless the independent oracle proves adjacent year identities."""
-    expected = (4999, 5000, 5000, 5000, 5000, 5001)
+    # Calendar years cover (open_day, close_day], so open_day is still year 4999.
+    expected = (4999, 4999, 5000, 5000, 5000, 5001)
     if (len(reference_rows) != len(expected)
             or any(type(row) is not tuple or len(row) != 5
                    or type(row[0]) is not int or row[0] != year
@@ -188,7 +189,8 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
     edges = boundary_targets(year5000)
     targets = TARGETS + edges
     # Reuse five accepted neighborhood dates as a regression baseline.
-    # Six questions cover previous/first/next day at year opening and closing.
+    # Exclusive open: open_day belongs to year 4999; open_day+1 begins 5000.
+    # Inclusive close: close_day ends 5000; close_day+1 begins 5001.
     if len(targets) != 11:
         raise SevenFieldAuditError("E_ELEVEN_DATE_SCOPE")
     cmd = ["java", "-XX:ActiveProcessorCount=1", "-Xmx1200m", "-Xss8m",

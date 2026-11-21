@@ -121,11 +121,11 @@ class SevenFieldIndependentProtocolTests(unittest.TestCase):
             parse_production(payload, targets[:-2] + (targets[-1], targets[-2]))
 
     def test_independent_boundary_year_witnesses(self):
-        years = (4999, 5000, 5000, 5000, 5000, 5001)
+        years = (4999, 4999, 5000, 5000, 5000, 5001)
         validate_boundary_years([(year, 1, 1, 1, 1) for year in years])
 
     def test_boundary_year_witness_drift_fails_closed(self):
-        years = (4999, 5000, 5000, 5000, 5000, 5001)
+        years = (4999, 4999, 5000, 5000, 5000, 5001)
         original = [(year, 1, 1, 1, 1) for year in years]
         for position in range(len(years)):
             drift = list(original)
