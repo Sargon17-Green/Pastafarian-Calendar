@@ -430,7 +430,7 @@ pub fn discovery_33_two_gap_partial_overlap_reduced_half_test() {
   ))
 }
 
-pub fn discovery_33_four_equal_gaps_reduced_two_thirds_test() {
+pub fn discovery_33_four_equal_gaps_nontrivial_reduction_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 1, 1, 1]
   let gaps = gaps_from_stage21(context, ids)
@@ -441,21 +441,21 @@ pub fn discovery_33_four_equal_gaps_reduced_two_thirds_test() {
     context,
     ids,
     gaps,
-    [band(3 * gap, 3 * gap)],
-    [band(3 * gap, 4 * gap)],
-    [band(3 * gap, 3 * gap)],
-    [band(3 * gap, 4 * gap)],
-    [band(3 * gap, 4 * gap)],
+    [band(gap, 3 * gap)],
+    [band(2 * gap, 4 * gap)],
+    [band(gap, 3 * gap)],
+    [band(gap, 4 * gap)],
+    [band(2 * gap, 4 * gap)],
   )
   |> should.equal(DirectCounts(
-    left: 2,
-    right: 3,
-    intersection: 2,
-    union: 3,
-    xor: 1,
+    left: 9,
+    right: 6,
+    intersection: 5,
+    union: 10,
+    xor: 5,
     total: 10,
-    numerator: 2,
-    denominator: 3,
+    numerator: 1,
+    denominator: 2,
   ))
 }
 
