@@ -104,7 +104,7 @@ class V146PureSyntheticTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"mathematical fixture mismatch"):
             v.compute_expected(self.m,self.b)
     def test_15_one_synthetic_bowl_value_mutation_fails(self):
-        self.b["synthetic_bowl_vectors"][0]["bowls"][0]="987654321"
+        self.b["synthetic_bowl_vectors"][0]["bowls"][3]="987654321"
         with self.assertRaisesRegex(ValueError,"mathematical fixture mismatch"):
             v.compute_expected(self.m,self.b)
     def test_16_omitted_case_fails_before_execution(self):
