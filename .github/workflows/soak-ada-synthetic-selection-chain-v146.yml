@@ -65,8 +65,8 @@ jobs:
                          ('subprocess','ctypes','multiprocessing','pastafari_calendar')
                          for x in n.names)
                   if isinstance(n,ast.ImportFrom):
-                      assert (n.module or '').split('.')[0] not in
-                         ('subprocess','ctypes','multiprocessing','pastafari_calendar')
+                      assert (n.module or '').split('.')[0] not in (
+                         'subprocess','ctypes','multiprocessing','pastafari_calendar')
           print('V146_NO_ORIGINAL_FCT_OR_NATIVE_ENGINES_IMPORTED')
           print('V146_ORIGINAL_NATIVE_DISPATCH_STOP_CONFIRMED')
           PY
@@ -115,7 +115,7 @@ jobs:
       - name: GNAT compile and test synthetic Ask_Bowl to rank to full legal month sequence only
         run: |
           set -euo pipefail
-          trap 'find soak/ada_chain_v146 soak/ada_port_v144 soak/ada_rank_v145 -type f \( -name "*.ali" -o -name "*.o" -o -name "test_synthetic_selection_chain_v146" \) -delete' EXIT
+          trap 'find "$GITHUB_WORKSPACE/soak/ada_chain_v146" "$GITHUB_WORKSPACE/soak/ada_port_v144" "$GITHUB_WORKSPACE/soak/ada_rank_v145" -type f \( -name "*.ali" -o -name "*.o" -o -name "test_synthetic_selection_chain_v146" \) -delete' EXIT
           cd soak/ada_chain_v146
           gnatmake -gnat2022 -gnata -O1 \
             -I../ada_port_v144 -I../ada_rank_v145 \
