@@ -525,15 +525,17 @@ pub fn discovery_33_overlapping_adjacent_inverted_canonical_bands_test() {
     band(3000, 3100),
     band(2000, 1999),
   ]
-  direct_check(
-    context,
-    ids,
-    left,
-    right,
-    [band(40, 1000)],
-    [band(40, 1001), band(3000, 3100)],
-    [band(101, 102), band(1001, 1001), band(3000, 3100)],
-  )
+  let result =
+    direct_check(
+      context,
+      ids,
+      left,
+      right,
+      [band(40, 1000)],
+      [band(40, 1001), band(3000, 3100)],
+      [band(101, 102), band(1001, 1001), band(3000, 3100)],
+    )
+  result.total |> should.equal(10)
 }
 
 pub fn discovery_33_repeated_ids_are_distinct_index_windows_test() {
