@@ -7,6 +7,7 @@ declare(strict_types=1);
  * Invocation: php tests/stage56_source_bound_php_year.php CANONICAL_REPO REFERENCE GATES SCROLL_REPORT YEAR OUTPUT
  */
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/stage56_cutlet_semantic_oracle.php';
 foreach (['YearStructureSlices56', 'MonthWeavingFrontier56', 'MonthWeavingAdjoint56',
     'MonthWeavingRanker56', 'UnboundedUniformChoice56', 'ContextualYear5000Anchor56',
     'YearStructureProvider56'] as $class) {
@@ -26,6 +27,15 @@ const S56_JDN = -13334246;
 
 function s56Require(bool $ok, string $why): void {
     if (!$ok) throw new RuntimeException('STAGE56_PHP_QA_' . $why);
+}
+function s56FirstDifference(array $actual, array $expected): ?array {
+    $limit = max(count($actual), count($expected));
+    for ($i = 0; $i < $limit; ++$i) {
+        $a = $actual[$i] ?? null;
+        $e = $expected[$i] ?? null;
+        if ($a !== $e) return ['index'=>$i, 'actual'=>$a, 'expected'=>$e];
+    }
+    return null;
 }
 function s56Json(string $path, ?string $pin = null): array {
     $raw = @file_get_contents($path);
@@ -158,14 +168,84 @@ function s56Main(array $args): int {
     };
     $idx=(int)$args[5]-4999;
     $start=hrtime(true);
+    echo "STAGE56_PHP_REAL_YEAR_BEGIN year={$args[5]} source_commit=" . S56_SOURCE . "\n";
+    flush();
     $provider = new YearStructureProvider56(new BootstrapKernel());
     $structure = $provider->buildVerified(S56_JDN, $candidate,
         $trustedAnchor, $years[$idx], $trustedYear, $gateDay);
     unset($provider);
     gc_collect_cycles();
-    s56Require($structure['monthLengths'] === $refs[$idx]['month_lengths'] &&
-        $structure['monthWeaving'] === $refs[$idx]['month_weaving'],
-        'PHP_EXTERNAL_MONTH_DIFFERENTIAL');
+    $providerSeconds = (hrtime(true)-$start)/1e9;
+    $cutletOracleStart = hrtime(true);
+    $cutletReport = Stage56CutletSemanticOracle::validateStructure(
+        $structure, $years[$idx], $positions, S56_JDN);
+    $cutletOracleSeconds = (hrtime(true)-$cutletOracleStart)/1e9;
+    $branchSha = getenv('GITHUB_SHA');
+    $cutletEvidence = [
+        'project_id'=>S56_PROJECT,
+        'status'=>'PHP_CUTLET_SEMANTIC_ORACLE_PASS_NOT_STAGE56_ACCEPTANCE',
+        'branch_sha'=>is_string($branchSha) ? $branchSha : null,
+        'source_commit'=>S56_SOURCE,
+        'reference_sha256'=>S56_REFERENCE_SHA,
+        'gates_sha256'=>S56_GATES_SHA,
+        'scroll_oracle_sha256'=>S56_SCROLL_SHA,
+        'year'=>(int)$args[5],
+        'calculation_jdn'=>S56_JDN,
+        'year_record'=>$years[$idx],
+        'cutlet_report'=>$cutletReport,
+        'cutlet_partition'=>$structure['cutletPartition'],
+        'cutlet_name_indices'=>$structure['cutletNameIndices'],
+        'cutlets'=>$structure['cutlets'],
+        'provider_seconds'=>$providerSeconds,
+        'oracle_seconds'=>$cutletOracleSeconds,
+        'stage56_accepted'=>false
+    ];
+    $cutletEncoded=json_encode($cutletEvidence,JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES)."\n";
+    s56Require(@file_put_contents($args[6].'.cutlet.json',$cutletEncoded,LOCK_EX)===strlen($cutletEncoded),
+        'CUTLET_ORACLE_OUTPUT');
+    $requiredLabel=$cutletReport['required_cut']===null?'none':(string)$cutletReport['required_cut'];
+    echo "STAGE56_PHP_CUTLET_ORACLE_PASS year={$args[5]} gaps={$cutletReport['gap_count']} " .
+        "cutlets={$cutletReport['cutlet_count']} required_cut={$requiredLabel}\n";
+    flush();
+
+    $actualLengths=$structure['monthLengths'];
+    $expectedLengths=$refs[$idx]['month_lengths'];
+    $actualWeaving=$structure['monthWeaving'];
+    $expectedWeaving=$refs[$idx]['month_weaving'];
+    $lengthsMatch=$actualLengths===$expectedLengths;
+    $weavingMatch=$actualWeaving===$expectedWeaving;
+    if (!$lengthsMatch || !$weavingMatch) {
+        $diagnostic=[
+            'project_id'=>S56_PROJECT,
+            'status'=>'PHP_EXTERNAL_MONTH_DIFFERENTIAL_FAIL',
+            'branch_sha'=>is_string($branchSha)?$branchSha:null,
+            'source_commit'=>S56_SOURCE,
+            'year'=>(int)$args[5],
+            'provider_seconds'=>$providerSeconds,
+            'cutlet_oracle'=>'PASS_SOURCE_FREE_ORACLE',
+            'cutlet_oracle_seconds'=>$cutletOracleSeconds,
+            'month_count_actual'=>$structure['monthCount'],
+            'month_count_expected'=>count($expectedLengths),
+            'month_lengths_match'=>$lengthsMatch,
+            'month_lengths_actual'=>$actualLengths,
+            'month_lengths_expected'=>$expectedLengths,
+            'month_lengths_first_difference'=>s56FirstDifference($actualLengths,$expectedLengths),
+            'month_weaving_match'=>$weavingMatch,
+            'month_weaving_length_actual'=>count($actualWeaving),
+            'month_weaving_length_expected'=>count($expectedWeaving),
+            'month_weaving_first_difference'=>s56FirstDifference($actualWeaving,$expectedWeaving),
+            'month_weaving_actual_prefix'=>array_slice($actualWeaving,0,32),
+            'month_weaving_expected_prefix'=>array_slice($expectedWeaving,0,32),
+            'month_weaving_actual_tail'=>array_slice($actualWeaving,-16),
+            'month_weaving_expected_tail'=>array_slice($expectedWeaving,-16),
+            'stage56_accepted'=>false
+        ];
+        $diagnosticEncoded=json_encode($diagnostic,JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES)."\n";
+        s56Require(@file_put_contents($args[6].'.diagnostic.json',$diagnosticEncoded,LOCK_EX)===strlen($diagnosticEncoded),
+            'MONTH_DIAGNOSTIC_OUTPUT');
+        fwrite(STDERR,'STAGE56_PHP_MONTH_DIAGNOSTIC:'.$diagnosticEncoded);
+        throw new RuntimeException('STAGE56_PHP_QA_PHP_EXTERNAL_MONTH_DIFFERENTIAL');
+    }
     s56Require(array_sum($structure['cutletPartition']) ===
         $years[$idx]['closeGateIndex']-$years[$idx]['openGateIndex'] &&
         count($structure['cutlets']) === $structure['cutletCount'],
@@ -195,14 +275,16 @@ function s56Main(array $args): int {
         'calculation_jdn'=>S56_JDN, 'year_record'=>$years[$idx],
         'structure'=>$structure, 'rank_digits'=>strlen($rank->toString()),
         'count_digits'=>strlen($count->toString()),
-        'provider_seconds'=>($tCount-$start)/1e9,
+        'provider_seconds'=>$providerSeconds,
+        'cutlet_oracle_seconds'=>$cutletOracleSeconds,
+        'cutlet_oracle'=>$cutletReport,
         'count_seconds'=>($tRank-$tCount)/1e9,
         'rank_seconds'=>($tUnrank-$tRank)/1e9,
         'unrank_seconds'=>($end-$tUnrank)/1e9,
         'total_seconds'=>($end-$start)/1e9,
         'peak_bytes'=>memory_get_peak_usage(true),
         'month_differential'=>'PASS', 'rank_roundtrip'=>'PASS',
-        'cutlet_external_semantics'=>'NOT_INDEPENDENTLY_ASSESSED',
+        'cutlet_external_semantics'=>'PASS_SOURCE_FREE_ORACLE',
         'stage56_accepted'=>false
     ];
     $encoded=json_encode($result,JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES)."\n";
