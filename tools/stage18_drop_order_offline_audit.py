@@ -14,7 +14,7 @@ import sys
 import zipfile
 
 EXPECTED_PROJECT = "PC-BRANCH-FALSE-ARABIC"
-EXPECTED_SOURCE = "9ab8511b05158f7ddbd0c664b8d6cc9f7efc1339"
+EXPECTED_SOURCE = "9abeace3ff87a231ef25881b06da6bbe9bb1be56"
 EXPECTED_RUNTIME = "eb3135565a8670cced3f6bbca4dbf7b014c45634"
 EXPECTED_RUN_SHA = "300cc893f1f1901cae1ad2b71835930cf8145466"
 SIZES = (0, 150, 300, 450, 600)
@@ -74,7 +74,7 @@ def check_generated(code, start, expected_length):
             assert int(cell) == pos and int(label) == pos
             assert signed(got) == wanted, ("OUTPUT_ORACLE", tag, pos, got, wanted)
         markers = [
-            f'b;g;!d=~["{tag}_ARG_CELL_FAIL"',
+            f'b;g;!d;-0=~["{tag}_ARG_CELL_FAIL"',
             f'b;s;-0=~["{tag}_ARG_HANDLE_FAIL"',
             f'o;b;-0=["{tag}_OUTPUT_ARG_ALIAS_FAIL"',
             f'o;d;-0=["{tag}_OUTPUT_BIG_ALIAS_FAIL"',
