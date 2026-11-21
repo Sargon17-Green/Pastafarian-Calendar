@@ -1,0 +1,31 @@
+{
+  "schema": "qa31cb-source-cell-metadata-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob_sha1": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "source_line_count_splitlines": 2015,
+  "coordinate_convention": "zero-based x,y; source.splitlines() row index is y",
+  "cells": {
+    "input_owner": {
+      "coordinate": [19, 1696],
+      "source_row_length": 0,
+      "source_row_empty": true,
+      "source_cell_present_in_source": false,
+      "source_char": null,
+      "source_codepoint": null,
+      "initial_funge_space_value": 32
+    },
+    "dynamic_code_cell": {
+      "coordinate": [1500, 1860],
+      "source_row_length": 1531,
+      "source_cell_present_in_source": true,
+      "source_char": " ",
+      "source_codepoint": 32,
+      "initial_funge_space_value": 32,
+      "next_cell_coordinate": [1501, 1860],
+      "next_cell_source_char": ">",
+      "next_cell_source_codepoint": 62
+    }
+  },
+  "candidate_relation": "code_value = 56 * g_value + 62",
+  "stage1_accepted": false
+}
