@@ -3036,6 +3036,45 @@ BEGIN {
     }
     expect_exact("wide original seventy-seventh+1 seventy-eighth-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
 
+
+    # Seventy-eighth-digit to seventy-ninth-digit transition, M = 2^127 - 1.
+    # Independent direct-positional BigInt vs symbolic witnesses 4/4:
+    # boundary/backward 2983 decimal digits; rejection rank 1; wrap 2946.
+    WIDE_SEVENTY_EIGHTH=bi_mul(WIDE_SEVENTY_SEVENTH,M)
+    STREAM_FIRST=bi_sub(M,"78"); STREAM_STEP=1
+    choose_rank_wide(WIDE_SEVENTY_EIGHTH)
+    EXPECTED_SEVENTY_EIGHTH=WIDE_SEVENTY_EIGHTH
+    QA_POWER="1"
+    for (QA_I=0;QA_I<78;QA_I++) {
+        EXPECTED_SEVENTY_EIGHTH=bi_sub(EXPECTED_SEVENTY_EIGHTH,bi_mul_small(QA_POWER,78-QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original seventy-eighth seventy-eighth-digit boundary", CHOSEN_RANK, EXPECTED_SEVENTY_EIGHTH)
+
+    WIDE_N=bi_add(WIDE_SEVENTY_EIGHTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original seventy-eighth+1 seventy-ninth-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=WIDE_SEVENTY_EIGHTH
+    QA_POWER=M
+    for (QA_I=1;QA_I<78;QA_I++) {
+        EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(QA_POWER,QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,M)
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"79")
+    expect_exact("wide original seventy-eighth+1 seventy-ninth-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_sub(M,"77")
+    QA_POWER=bi_square(M)
+    for (QA_I=2;QA_I<78;QA_I++) {
+        EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(QA_POWER,QA_I-1))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original seventy-eighth+1 seventy-ninth-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
