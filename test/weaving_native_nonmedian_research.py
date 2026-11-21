@@ -130,8 +130,8 @@ def self_test():
                 raw[:-1],
                 raw.replace(b"NATIVE_MEDIAN_COMPLETE=1",b"NATIVE_MEDIAN_COMPLETE=0"),
                 raw.replace(b"NATIVE_MEDIAN_ROOT=2",b"NATIVE_MEDIAN_ROOT=3"),
-                raw.replace(b"NATIVE_MEDIAN_CHECKPOINT=1;1",
-                            b"NATIVE_MEDIAN_CHECKPOINT=1;2"),
+                raw.replace(b"NATIVE_MEDIAN_CHECKPOINT=1;2",
+                            b"NATIVE_MEDIAN_CHECKPOINT=1;3"),
                 raw.replace(b"NATIVE_MEDIAN_WORD=",b"NATIVE_MEDIAN_WORD=9,"),
                 raw+b"EXTRA=1\n",
             ]
