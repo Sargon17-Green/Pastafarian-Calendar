@@ -1,0 +1,125 @@
+name: Lua Haitian four-target static admission QA
+on:
+  push:
+    branches:
+      - 'Lua+Kreyòl-ayisyen'
+    paths:
+      - 'test/lua_haitian_four_target_static_admission.lua'
+      - 'test/lua_haitian_four_target_static_verify.py'
+      - '.github/workflows/lua-haitian-four-target-static-admission.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  lua_haitian_four_target_static_admission:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lua 5.3 and prepare immutable source locks
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.3
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object test/normative_oracle.lua)" = 8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d
+          test "$(git hash-object src/bigint.lua)" = fcff58bcaaf8bb3f205e7a9c624a51069c0e5a5d
+          test "$(git hash-object src/source_language_catalog.lua)" = 5b59ee6bb0ea2c2a551185929b5531ea28a50e49
+          test "$(git hash-object test/lua_haitian_gate_window_radius64_v5_1_seed.tsv)" = 95e77bc49a4c9e944bbac72b744ae0b3628043e5
+          test "$(git hash-object test/lua_haitian_gate_window_radius96_scan_verify.py)" = ebe3908d22b29ff12f5d2b92ef0702d3efff2a88
+          luac5.3 -p test/lua_haitian_four_target_static_admission.lua
+          python3 -m py_compile test/lua_haitian_four_target_static_verify.py
+          mkdir -p admission-evidence
+          printf '%s\n' "$GITHUB_SHA" > admission-evidence/source_sha.txt
+          printf '%s\n' ce4d541029c5d81c9f9c185ff734da0ed1d7c18a > admission-evidence/frozen_source_sha.txt
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nBRANCH=Lua+Kreyòl-ayisyen\nRUN_ID=%s\nJOB_KEY=%s\nSOURCE_SHA=%s\nSCOPE=FOUR_TARGET_STATIC_ADMISSION_ONLY\nTARGET_CAP=4\nGAP_CAP_PER_PROCESS=200\nCPU_CAP_SECONDS=110\nWALL_CAP_SECONDS=120\nVIRTUAL_MEMORY_KIB=131072\nMONTH_CAP=16\nSTATE_CAP=20000\nCOMPOSITION_NOT_INVOKED=YES\nFULL_DATE=NOT_RUN\n' "$GITHUB_RUN_ID" "$GITHUB_JOB" "$GITHUB_SHA" > admission-evidence/manifest.txt
+          sha256sum test/lua_haitian_four_target_static_admission.lua test/lua_haitian_four_target_static_verify.py test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua test/lua_haitian_gate_window_radius64_v5_1_seed.tsv test/lua_haitian_gate_window_radius96_scan_verify.py > admission-evidence/source_files_sha256.txt
+          python3 test/lua_haitian_four_target_static_verify.py --selftest | tee admission-evidence/verifier_selftest.txt
+          grep -Fxq 'FOUR_TARGET_INDEPENDENT_SELFTEST: 10/10 PASS' admission-evidence/verifier_selftest.txt
+
+      - name: Retrieve and authenticate accepted radius96 transcript
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p frozen-radius96
+          curl --fail --location --silent --show-error --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14670954537/zip" \
+            -o admission-evidence/frozen-radius96.zip
+          printf '6e5aeec25cae0201e3181d652e63da0642196e39b414150a748c1fe80291cbca  admission-evidence/frozen-radius96.zip\n' | sha256sum --check
+          unzip -t admission-evidence/frozen-radius96.zip | tee admission-evidence/frozen_zip_crc.txt
+          unzip -q admission-evidence/frozen-radius96.zip -d frozen-radius96
+          test "$(cat frozen-radius96/source_sha.txt)" = ce4d541029c5d81c9f9c185ff734da0ed1d7c18a
+          test "$(cat frozen-radius96/exit_code.txt)" = 0
+          test ! -s frozen-radius96/stderr.txt
+          grep -Fq 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN' frozen-radius96/manifest.txt
+          grep -Fxq 'RADIUS96_INDEPENDENT_SELFTEST: 9/9 PASS' frozen-radius96/verifier_selftest.txt
+          grep -Fq 'RADIUS96_INDEPENDENT_VERIFIER: PASS gates/gaps/windows/min=193/192/187/1689' frozen-radius96/verifier_result.txt
+          python3 test/lua_haitian_four_target_static_verify.py --prepare \
+            frozen-radius96/stdout.txt test/lua_haitian_gate_window_radius64_v5_1_seed.tsv \
+            admission-evidence/verified_targets.tsv | tee admission-evidence/prepare_result.txt
+          grep -Fxq 'FOUR_TARGET_PLAN_VERIFIED: 4/4' admission-evidence/prepare_result.txt
+
+      - name: Four separated bounded Lua Native processes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4; do
+            d="admission-evidence/probe-$i"
+            mkdir -p "$d"
+            printf '%s\n' "$GITHUB_SHA" > "$d/source_sha.txt"
+            printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nRUN_ID=%s\nJOB_KEY=%s\nSOURCE_SHA=%s\nORDINAL=%s\n' "$GITHUB_RUN_ID" "$GITHUB_JOB" "$GITHUB_SHA" "$i" > "$d/manifest.txt"
+            set +e
+            ( ulimit -v 131072; /usr/bin/time -f 'WALL_SECONDS=%e\nCPU_SECONDS=%U\nMAX_RSS_KB=%M' -o "$d/time.txt" \
+              timeout --signal=TERM --kill-after=2s 120s \
+              lua5.3 test/lua_haitian_four_target_static_admission.lua . "$i" admission-evidence/verified_targets.tsv ) \
+              > "$d/stdout.txt" 2> "$d/stderr.txt"
+            code=$?
+            set -e
+            printf '%s\n' "$code" > "$d/exit_code.txt"
+            printf 'TARGET_%s_EXIT: %s\n' "$i" "$code"
+            cat "$d/stdout.txt"
+            if test -s "$d/stderr.txt"; then cat "$d/stderr.txt" >&2; fi
+          done
+
+      - name: Independent receipt and resource verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          python3 test/lua_haitian_four_target_static_verify.py --verify \
+            frozen-radius96/stdout.txt test/lua_haitian_gate_window_radius64_v5_1_seed.tsv \
+            admission-evidence/verified_targets.tsv admission-evidence "$GITHUB_SHA" \
+            > admission-evidence/verification_stdout.txt 2> admission-evidence/verification_stderr.txt
+          code=$?
+          set -e
+          cat admission-evidence/verification_stdout.txt
+          if test -s admission-evidence/verification_stderr.txt; then
+            cat admission-evidence/verification_stderr.txt >&2
+          fi
+          printf '%s\n' "$code" > admission-evidence/verification_exit_code.txt
+          test "$code" -eq 0
+
+      - name: Inventory audit evidence even on failures
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p admission-evidence
+          find admission-evidence -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 -r sha256sum > admission-evidence/SHA256SUMS.txt
+          ls -lah admission-evidence
+
+      - name: Upload immutable QA evidence (not stage acceptance)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-four-target-static-admission-evidence
+          path: admission-evidence/
+          retention-days: 30
+          if-no-files-found: warn
