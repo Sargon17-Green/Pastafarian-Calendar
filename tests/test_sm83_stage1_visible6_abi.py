@@ -28,7 +28,8 @@ def main():
     first,second,third,fourth,fifth,sixth,prev,new=compute(0,0)
     for label,nums in (("visible1Expected",(first,)),("visible2Expected",(second,)),
                        ("visible3Expected",(third,)),("visible4Expected",(fourth,)),
-                       ("visible5Expected",(fifth,)),("visibleExpected",(sixth,)),("selectedExpected",prev),("stones6Expected",new)):
+                       ("visible5Expected",(fifth,)),("selectedExpected",prev),
+                       ("stones6Expected",new),("visibleExpected",(sixth,))):
         assert fixture(bench,label)==b"".join(x.to_bytes(16,"little") for x in nums),label
     rng=random.Random(0x385176)
     pairs=[(0,0),(1,2),(-1,-2),(-2,1),(-(1<<31),(1<<31)-1),
