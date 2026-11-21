@@ -1,0 +1,109 @@
+name: Issue29 v171 low-level Ada component suites (Stage01/03/05, ZERO Calendar_Date)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-low-level-stage-tests-v171
+    paths:
+      - '.github/workflows/issue29-v171-low-level-component-tests.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v171-stage01-stage03-stage05-component-one-shot
+  cancel-in-progress: false
+jobs:
+  bounded-low-level-component-tests:
+    if: ${{ github.run_attempt == 1 && github.ref == 'refs/heads/qa/issue29-ada-low-level-stage-tests-v171' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact corrected Ada source descendants
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify runner Python syntax before any native execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tests/issue29_v171_component_test_runner.py
+          echo "V171_RUNNER_SYNTAX_PASS_NO_EXECUTION"
+      - name: Install GNAT 13, GPRBuild, GNATCOLL GMP and GNU time
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils time > apt-install.log 2>&1
+          gnat --version > gnat-version.txt
+          gprbuild --version > gprbuild-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 time > gmp-and-time-packages.txt
+          test -x /usr/bin/time
+      - name: Source lock and static call-site audit; zero Calendar_Date execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v171_component_test_runner.py preflight | tee v171-preflight.stdout
+          grep -Fx V171_STATIC_NO_CALENDAR_DATE_CALLS_AND_SOURCE_LOCKS_PASS v171-preflight.stdout
+          test -f evidence/preflight.json
+          test ! -e evidence/RUN_STARTED_STAGE01
+          test ! -e evidence/RUN_STARTED_STAGE03
+          test ! -e evidence/RUN_STARTED_STAGE05
+      - name: Compile and link all three unchanged low-level test mains; execute none yet
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v171_component_test_runner.py build | tee v171-build.stdout
+          grep -Fx V171_STAGE01_STAGE03_STAGE05_GMP_AWARE_BUILD_LINK_PASS_NO_EXECUTION v171-build.stdout
+          test -f evidence/build-manifest.json
+      - name: Run Stage01, Stage03 and Stage05 exactly once under per-process caps
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v171_component_test_runner.py run-once | tee v171-run.stdout
+          grep -Fx V171_STAGE01_STAGE03_STAGE05_PASS_ZERO_CALENDAR_DATE_ZERO_SOAK v171-run.stdout
+          test -f evidence/result.json
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("evidence/result.json").read_bytes())
+          assert d["status"]=="PASS_STAGE01_STAGE03_STAGE05_LOW_LEVEL_COMPONENTS_ONLY"
+          assert d["calendar_date_invocations"]==0
+          assert d["full_calendar_F_invocations"]==0
+          assert d["soak_years"]==0
+          assert [x["name"] for x in d["results"]]==["stage01","stage03","stage05"]
+          assert all(x["status"]=="PASS" and x["process"]["exit_code"]==0 for x in d["results"])
+          assert d["results"][2]["assertions_reported"]==1465
+          print("V171_INDEPENDENT_RESULT_RECEIPT_PASS_NO_F_NO_SOAK")
+          PY
+      - name: Hash and preserve evidence on success or failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          d=Path("evidence");d.mkdir(exist_ok=True)
+          files={}
+          for p in sorted(d.iterdir()):
+              if p.is_file() and p.name!="manifest.sha256.json":
+                  raw=p.read_bytes()
+                  files[p.name]={"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest()}
+          (d/"manifest.sha256.json").write_text(json.dumps(files,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Upload one-shot low-level component evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v171-stage01-stage03-stage05-low-level-no-calendar-date
+          path: |
+            evidence/
+            apt-update.log
+            apt-install.log
+            gnat-version.txt
+            gprbuild-version.txt
+            gmp-and-time-packages.txt
+            v171-preflight.stdout
+            v171-build.stdout
+            v171-run.stdout
+          retention-days: 30
+          if-no-files-found: warn
