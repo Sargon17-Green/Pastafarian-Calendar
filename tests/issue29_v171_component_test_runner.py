@@ -456,10 +456,8 @@ def run_once() -> None:
 
 
 def main() -> int:
-    if len(sys.argv) != 3 or sys.argv[1] not in {"preflight", "build", "run-once"}:
-        raise SystemExit("usage: runner.py {preflight|build|run-once} --evidence evidence")
-    if sys.argv[2] != "--evidence":
-        raise SystemExit("usage: runner.py {preflight|build|run-once} --evidence evidence")
+    if len(sys.argv) != 2 or sys.argv[1] not in {"preflight", "build", "run-once"}:
+        raise SystemExit("usage: runner.py {preflight|build|run-once}")
     mode = sys.argv[1]
     if mode == "preflight":
         preflight()
@@ -473,7 +471,7 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except BaseException as exc:
+    except Exception as exc:
         EVIDENCE.mkdir(exist_ok=True)
         failure = {
             "schema": SCHEMA,
