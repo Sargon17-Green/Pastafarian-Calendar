@@ -1,0 +1,121 @@
+name: Issue29 v165 offline archive replay and 47-month extremes (NO F)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-full-weave-v165
+    paths:
+      - .github/workflows/issue29-v165-offline-replay-edge.yml
+      - 'soak/candidates/ada_full_weave_gmp_v164/**'
+permissions:
+  contents: read
+jobs:
+  replay-and-edges:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Preserve STOP_NEW_NATIVE_SOAK_DISPATCH, verify source-free test scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text())
+          assert d["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert d["main_changes_permitted"] is False
+          assert d["successful_original_source_full_years"]==0
+          for name in ("test_issue29_gmp_edge_v165.adb", "replay_issue29_v161_gmp_v164.adb"):
+              assert "with Normative_Oracle;" not in Path("soak/candidates/ada_full_weave_gmp_v164",name).read_text()
+          print("V165_NO_NATIVE_SOAK_DISPATCH_NO_CALENDAR_EXECUTION")
+          PY
+          git rev-parse HEAD > evidence/tested-head.txt
+      - name: Install GNAT and GNATCOLL GMP
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/apt-install.log 2>&1
+          gnatmake --version > evidence/gnat-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/dependency-versions.txt
+      - name: Compile isolated exact GMP and offline replay/edge test executables
+        shell: bash
+        run: |
+          set -euo pipefail
+          gprbuild -p -P soak/candidates/ada_full_weave_gmp_v164/issue29_gmp_v164.gpr -j2 > evidence/build.stdout 2> evidence/build.stderr
+          sha256sum soak/candidates/ada_full_weave_gmp_v164/bin/* > evidence/binaries.sha256
+      - name: Reconstitute cryptographically pinned v161 rank witness without network
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/prepare_v161_replay_offline_v165.py soak/candidates/ada_full_weave_gmp_v164/v161_rank_archive_v165.b64 "$RUNNER_TEMP/v165-pinned" > evidence/fixture.stdout 2> evidence/fixture.stderr
+          grep -Fx V165_OFFLINE_REPLAY_FIXTURE_LOCKS_PASS evidence/fixture.stdout
+          cp "$RUNNER_TEMP/v165-pinned/v165-locked-replay-expectation.json" evidence/
+      - name: Run standalone native Ada GMP unrank using only previously recorded v161 intermediates
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            ulimit -v 786432
+            /usr/bin/time -v timeout --signal=KILL 120s ./soak/candidates/ada_full_weave_gmp_v164/bin/replay_issue29_v161_gmp_v164 "$RUNNER_TEMP/v165-pinned/v164-captured-selector.txt"
+          ) > evidence/replay.stdout 2> evidence/replay.stderr
+          grep -Fx V164_PINNED_V161_INTERMEDIATE_REPLAY_COMPLETE_NO_NEW_F evidence/replay.stdout
+      - name: Verify full recorded 4244-ID weave by independent pinned SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/verify_v161_replay_offline_v165.py evidence/v165-locked-replay-expectation.json evidence/replay.stdout evidence/v165-replay-verdict.json > evidence/replay-check.stdout 2> evidence/replay-check.stderr
+          grep -Fx V165_PINNED_ARCHIVED_V161_ADA_GMP_FULL_WEAVE_ALL_4244_MATCH_PASS evidence/replay-check.stdout
+      - name: Run bounded synthetic 47-month 252-day and 5778-day extremes
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            ulimit -v 1048576
+            /usr/bin/time -v timeout --signal=KILL 180s ./soak/candidates/ada_full_weave_gmp_v164/bin/test_issue29_gmp_edge_v165
+          ) > evidence/edges.stdout 2> evidence/edges.stderr
+          grep -Fx V165_ALL_THREE_EDGE_FAMILIES_PASS_NO_F evidence/edges.stdout
+          grep -c '^V165_EDGE_PASS|' evidence/edges.stdout | grep -Fx 6
+      - name: Independently compute all edge-family counts in Python-int
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            ulimit -v 1048576
+            /usr/bin/time -v timeout --signal=KILL 180s python3 -B soak/candidates/ada_full_weave_gmp_v164/check_issue29_gmp_edge_v165.py evidence/edges.stdout evidence/v165-edge-verdict.json
+          ) > evidence/edge-check.stdout 2> evidence/edge-check.stderr
+          grep -Fx V165_EXACT_GMP_EDGE_47x252_AND_47x5778_PASS_NO_F evidence/edge-check.stdout
+      - name: Compile historical QA Ada oracle with GMP repair without running it
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/issue29_foundation_capture_v160.py prepare --root "$RUNNER_TEMP/v165-ada-qa" > evidence/prepare.stdout 2> evidence/prepare.stderr
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/integrate_gmp_qa_only_v164.py "$RUNNER_TEMP/v165-ada-qa" soak/candidates/ada_full_weave_gmp_v164 > evidence/adapter.stdout 2> evidence/adapter.stderr
+          cp "$RUNNER_TEMP/v165-ada-qa/v164-qa-integration-receipt.json" evidence/
+          gprbuild -p -c -P "$RUNNER_TEMP/v165-ada-qa/ada-build/issue29_gmp_oracle_qa_compile.gpr" -j2 > evidence/oracle-compile.stdout 2> evidence/oracle-compile.stderr
+          echo "V165_GMP_ORACLE_QA_COMPILE_ONLY_SUCCESS" > evidence/summary-verdict.txt
+          echo "ORIGINAL_FCT_CALLS=0 QA_FCT_CALLS=0 FULL_SOAK_YEARS=0" >> evidence/summary-verdict.txt
+      - name: Hash evidence members even on failure
+        if: always()
+        shell: bash
+        run: |
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("evidence")
+          out={f.name:{"bytes":f.stat().st_size,"sha256":hashlib.sha256(f.read_bytes()).hexdigest()} for f in sorted(p.iterdir()) if f.is_file()}
+          (p/"member-hashes.json").write_text(json.dumps(out,indent=2,sort_keys=True)+"\n")
+          PY
+      - name: Upload replay and synthetic extreme receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v165-archived-v161-replay-and-47-month-edges-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error
