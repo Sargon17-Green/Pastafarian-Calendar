@@ -3,7 +3,9 @@ on:
   push:
     branches: ['SQL\+தமிழ்']
     paths:
+      - 'sql/16_stage02_year5000.sql'
       - 'sql/27_stage02_calendar_date.sql'
+      - 'sql/test/163_stage25_window_bound_oracle.py'
       - 'sql/test/162_stage25_calendar_date_smoke.sql'
       - '.github/workflows/sql-tamil-stage02-calendar-date-smoke.yml'
   workflow_dispatch:
@@ -27,6 +29,7 @@ jobs:
           printf 'GITHUB_SHA=%s\nGITHUB_REF_NAME=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > slice25-native-smoke-evidence/versions.txt
           sha256sum sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl \
             sql/test/162_stage25_calendar_date_smoke.sql \
+            sql/test/163_stage25_window_bound_oracle.py \
             .github/workflows/sql-tamil-stage02-calendar-date-smoke.yml \
             > slice25-native-smoke-evidence/source-sha256.txt
           for i in $(seq -w 0 27); do
@@ -34,6 +37,8 @@ jobs:
             test "${#matches[@]}" -eq 1
             sha256sum "${matches[0]}" >> slice25-native-smoke-evidence/source-sha256.txt
           done
+      - name: Independent synthetic boundary oracle (not Native)
+        run: python3 sql/test/163_stage25_window_bound_oracle.py
       - name: Start offline PostgreSQL 17
         shell: bash
         run: |
