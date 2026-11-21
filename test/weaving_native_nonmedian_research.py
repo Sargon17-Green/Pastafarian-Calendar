@@ -196,7 +196,7 @@ def execute(args):
                   flush=True)
             print("NATIVE_NONMEDIAN_RESULT=NOT_ACCEPTED")
             return 0 if rres["status"].startswith("INCONCLUSIVE") else 1
-        ranked_word,re=parse_trace(rpath.read_bytes(),"rank",target,root,
+        ranked_word,rank_entries=parse_trace(rpath.read_bytes(),"rank",target,root,
                                    LENGTHS,DEPTHS)
         require(word==ranked_word, "roundtrip word differs")
         independent=independently_rank(word,root,target)
@@ -206,10 +206,10 @@ def execute(args):
             "root_sha256":oracle.ROOT_SHA256,
             "witness_sha256":oracle.digest_word(word),
             "word_symbols":len(word),"independent_gmp_rank":str(independent),
-            "independent_dense_comparisons":len(ue)+len(re),
+            "independent_dense_comparisons":len(ue)+len(rank_entries),
             "unrank":ures,"rank_direction":rres,
             "unrank_checkpoints":[{"depth":d,"count":str(n)} for d,n in ue],
-            "rank_checkpoints":[{"depth":d,"count":str(n)} for d,n in re],
+            "rank_checkpoints":[{"depth":d,"count":str(n)} for d,n in rank_entries],
             "status":"PASS_RESEARCH_ONLY","stage6":"NOT_CLAIMED"}
         require(evidence["independent_dense_comparisons"]==24,
                 "dense checkpoint cardinality")
