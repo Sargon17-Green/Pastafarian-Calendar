@@ -31,12 +31,23 @@ jobs:
           test "$(git rev-parse HEAD:src/bigint.lua)" = "fcff58bcaaf8bb3f205e7a9c624a51069c0e5a5d" || exit 22
           test "$(git rev-parse HEAD:src/source_language_catalog.lua)" = "5b59ee6bb0ea2c2a551185929b5531ea28a50e49" || exit 23
           git rev-parse HEAD > lua-composition-resource-evidence/source_sha.txt
-          sha256sum test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua test/lua_haitian_composition_boundary_oracle.py test/lua_haitian_composition_resource_adapter.lua test/lua_haitian_composition_resource_boundary.lua docs/LUA_HAITIAN_COMPOSITION_RESOURCE_BOUNDARY_NATIVE_QA_2026-11-21.md .github/workflows/lua-haitian-composition-resource-gate.yml > lua-composition-resource-evidence/sha256.txt
+          sha256sum test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua test/lua_haitian_composition_boundary_oracle.py test/lua_haitian_composition_resource_adapter.lua test/lua_haitian_composition_resource_boundary.lua docs/LUA_HAITIAN_COMPOSITION_RESOURCE_BOUNDARY_NATIVE_QA_2026-11-21.md test/lua_haitian_weaving_state_budget_qa.py .github/workflows/lua-haitian-composition-resource-gate.yml > lua-composition-resource-evidence/sha256.txt
           python3 test/lua_haitian_composition_boundary_oracle.py --check-source test/normative_oracle.lua > lua-composition-resource-evidence/python_stdout.txt 2> lua-composition-resource-evidence/python_stderr.txt
           test ! -s lua-composition-resource-evidence/python_stderr.txt || exit 24
           grep -Fxq 'COMPOSITION_BOUNDARY_STATIC_SELFTEST_PASS: 286/286' lua-composition-resource-evidence/python_stdout.txt || exit 25
           grep -q '"sourceLock": "MATCH"' lua-composition-resource-evidence/python_stdout.txt || exit 26
           echo 'PYTHON_EXACT_SOURCE_LOCK_AND_STATIC_QA: PASS'
+
+      - name: Exact independent small-domain weaving budget
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/lua_haitian_weaving_state_budget_qa.py --check-source test/normative_oracle.lua > lua-composition-resource-evidence/weaving_stdout.txt 2> lua-composition-resource-evidence/weaving_stderr.txt
+          test ! -s lua-composition-resource-evidence/weaving_stderr.txt || exit 35
+          grep -Fxq 'WEAVING_SMALL_DOMAIN_EXACT_PASS: 44/44' lua-composition-resource-evidence/weaving_stdout.txt || exit 36
+          grep -q '"sourceLock": "MATCH"' lua-composition-resource-evidence/weaving_stdout.txt || exit 37
+          grep -q '"realWitnessStatus": "NOT_EVALUATED_QA_DOMAIN"' lua-composition-resource-evidence/weaving_stdout.txt || exit 38
+          echo 'WEAVING_INDEPENDENT_SMALL_DOMAIN: PASS'
 
       - name: Bounded genuine Lua witness, fail-closed before composition
         shell: bash
