@@ -169,6 +169,7 @@ class PatchProposalUnitTests(unittest.TestCase):
     def test_28_python_source_anchor_count_pinned(self):
         self.assertEqual(len(PY_ANCHORS),2)
         self.assertEqual(len(set(PY_ANCHORS)),2)
+        self.assertEqual(PY_ANCHORS[0],"        return family.unrank1(rank)")
 
     def test_29_source_relative_paths_from_exact_commits(self):
         p=source_paths(Path("/tmp/example"))
