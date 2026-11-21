@@ -1,11 +1,13 @@
-name: Befunge QA31CB natural-input sweep 100-999
+name: Befunge QA31CB natural-input sweep 100-999 (plain-text source)
 on:
   push:
     branches:
       - qa-befunge98-stage1-order-isolation-20261008
     paths:
-      - 'qa/QA31CB_CODE.tar.gz'
-      - 'qa/QA31CB_NATURAL_INPUT_SWEEP_100_999_CONTRACT_2026-11-21.md'
+      - 'qa/qa31cb_natural_input_sweep.py'
+      - 'qa/qa31cb_independent_audit.py'
+      - 'qa/qa31cb_source_cells.json'
+      - 'qa/QA31CB_NATURAL_INPUT_SWEEP_100_999_PLAIN_TEXT_CONTRACT_2026-11-22.md'
       - '.github/workflows/befunge-qa31cb-natural-input-sweep.yml'
 permissions:
   contents: read
@@ -13,78 +15,81 @@ permissions:
 jobs:
   natural-input-domain:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Pin original source, unpack QA code and compile the independent auditor
+      - name: Verify immutable source and reviewable QA inputs
         shell: bash
         run: |
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
           mkdir -p qa31cb-out "$RUNNER_TEMP/qa31cb-traces"
-          echo '434b28e54bab23155606fde529a4d5bbe43a9f32acb317257a3ee8a60e1651f3  qa/QA31CB_CODE.tar.gz' | sha256sum -c -
-          tar -tzf qa/QA31CB_CODE.tar.gz >/dev/null
-          tar -xzf qa/QA31CB_CODE.tar.gz -C qa
-          python3 -m py_compile qa/qa31cb_natural_input_sweep.py qa/qa31cb_independent_audit.py
-          cp qa/qa31cb_source_cells.json qa31cb-out/qa31cb_source_cells.json
+          python3 -m py_compile qa/qa31cb_independent_audit.py
+          python3 - <<'PY'
+          import json
+          m=json.load(open('qa/qa31cb_source_cells.json',encoding='utf-8'))
+          assert m['project_id']=='PC-BRANCH-BEFUNGE98-KYRGYZ'
+          assert m['source_git_blob_sha1']=='560d6aa5807a7f766213a33835cce85eab0fa40c'
+          assert m['cells']['input_owner']['coordinate']==[19,1696]
+          assert m['cells']['dynamic_code_cell']['coordinate']==[1500,1860]
+          assert m['stage1_accepted'] is False
+          PY
       - name: Fetch immutable PyFunge 0.5-rc2
         shell: bash
         run: |
           set -euo pipefail
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
-          echo 'e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  '"$RUNNER_TEMP"'/PyFunge-0.5-rc2.tar.gz' | sha256sum -c -
-      - name: Execute 900 fresh Native cases with unmodified stdin and source
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute 900 fresh Native cases with unchanged stdin and source
         shell: bash
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
-          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
-            -e GITHUB_SHA="$GITHUB_SHA" -e GITHUB_RUN_ID="$GITHUB_RUN_ID" \
-            -v "$GITHUB_WORKSPACE:/work:ro" \
-            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
-            -v "$RUNNER_TEMP/qa31cb-traces:/qa31cb-traces:rw" \
-            -v "$GITHUB_WORKSPACE/qa31cb-out:/qa31cb-out:rw" -w /work \
-            python:2.7-slim sh -ceu "
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa             -v "$GITHUB_WORKSPACE:/work:ro"             -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro"             -v "$RUNNER_TEMP/qa31cb-traces:/qa31cb-traces:rw"             -v "$GITHUB_WORKSPACE/qa31cb-out:/qa31cb-out:rw" -w /work             python:2.7-slim sh -ceu "
+              cp /work/qa/qa31cb_natural_input_sweep.py /tmp/qa31cb_natural_input_sweep.py
+              python -m py_compile /tmp/qa31cb_natural_input_sweep.py
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
-              timeout --kill-after=10s 2400s python -u qa/qa31cb_natural_input_sweep.py /qa31cb-traces /qa31cb-out
+              timeout --kill-after=10s 3000s python -u /work/qa/qa31cb_natural_input_sweep.py /qa31cb-traces /qa31cb-out
             " | tee qa31cb-out/native-sweep.log
-      - name: Independent trace, memory, code-fetch and hostile-evidence audit
+      - name: Independently audit all physical traces and detached hostile mutations
         shell: bash
         run: |
           set -euo pipefail
-          python3 -u qa/qa31cb_independent_audit.py \
-            --traces "$RUNNER_TEMP/qa31cb-traces" --out qa31cb-out \
-            | tee qa31cb-out/independent-audit.log
+          python3 -u qa/qa31cb_independent_audit.py             --traces "$RUNNER_TEMP/qa31cb-traces"             --out qa31cb-out             --source src/interleaved_work_counts.b98             --metadata qa/qa31cb_source_cells.json             | tee qa31cb-out/independent-audit.log
           python3 - <<'PY'
           import json
-          v=json.load(open('qa31cb-out/qa31cb_audit.json'))
-          assert v['evidence_integrity'] == 'PASS'
-          assert v['cases'] == 900
-          assert v['hostile_mutations_rejected'] == 20
+          v=json.load(open('qa31cb-out/qa31cb_audit.json',encoding='utf-8'))
+          assert v['evidence_integrity']=='PASS'
+          assert v['cases']==900
+          assert v['trace_sha256_verified_cases']==900
+          assert v['hostile_mutations_rejected']==20
           assert v['stage1_accepted'] is False
+          assert v['global_reachability_proven'] is False
           PY
       - name: Finalize artifact file hashes
         if: always()
         shell: bash
         run: |
           python3 - <<'PY'
-          import hashlib,json
+          import hashlib,json,os
           from pathlib import Path
           root=Path('qa31cb-out')
           root.mkdir(parents=True,exist_ok=True)
           files={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
-                 for p in sorted(root.rglob('*')) if p.is_file() and p.name!='qa31cb_artifact_manifest.json'}
+                 for p in sorted(root.rglob('*'))
+                 if p.is_file() and p.name!='qa31cb_artifact_manifest.json'}
           (root/'qa31cb_artifact_manifest.json').write_text(json.dumps(
             {'project_id':'PC-BRANCH-BEFUNGE98-KYRGYZ','qa':'QA31CB',
-             'files':files,'stage1_accepted':False},indent=2,sort_keys=True)+'\n',encoding='utf-8')
+             'head_sha':os.environ.get('GITHUB_SHA'),
+             'run_id':os.environ.get('GITHUB_RUN_ID'),
+             'files':files,'stage1_accepted':False,
+             'global_reachability_proven':False},indent=2,sort_keys=True)+'\n',
+            encoding='utf-8')
           PY
       - name: Upload verified receipts, boundary traces and anomalies
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: befunge-qa31cb-natural-input-sweep-100-999
+          name: befunge-qa31cb-natural-input-sweep-100-999-plain-text
           path: qa31cb-out/
           if-no-files-found: warn
           retention-days: 30
