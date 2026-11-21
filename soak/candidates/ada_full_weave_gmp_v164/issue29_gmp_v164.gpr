@@ -8,7 +8,8 @@ project Issue29_Gmp_V164 is
      ("test_issue29_gmp_v164.adb", "benchmark_issue29_gmp_v164.adb",
       "test_issue29_wide_rank_gmp_v164.adb",
       "benchmark_issue29_gmp_global_rank_v164.adb",
-      "replay_issue29_v161_gmp_v164.adb");
+      "replay_issue29_v161_gmp_v164.adb",
+      "test_issue29_gmp_edge_v165.adb");
    package Compiler is
       for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata");
    end Compiler;
