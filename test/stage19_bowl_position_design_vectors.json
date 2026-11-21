@@ -6,7 +6,7 @@
   "planned_production_operation": 36,
   "reference_git_blob": "3e9acc012bedf83294a6ec3cccb081a069556b5b",
   "input": "allocated two-cell tuple [directOrderTable,bowlId]; directOrderTable=[6,v1,...,v6]",
-  "output": "greatest 1-based position i in 1..6 where vi===bowlId, or 0 when absent",
+  "output": "first 1-based position i in 1..6 where vi===bowlId, or 0 when absent",
   "probes": [
     {
       "label": "identity-first",
