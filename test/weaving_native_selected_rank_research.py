@@ -18,7 +18,7 @@ sys.set_int_max_str_digits(10000)
 
 import run_native_4244_research as native
 import weaving_native_median_evidence_gate as oracle
-from weaving_canonical_rank_bridge import M, choose_rank_direct
+from weaving_canonical_rank_bridge import M, choose_rank_direct, choose_rank_reference
 from weaving_native_nonmedian_research import independently_rank
 
 LENGTHS = oracle.MONTH_LENGTHS
@@ -94,8 +94,9 @@ def load_bridge(bridge_json, bridge_log, source_sha, root, root_digest):
     step = selection.get("step")
     require(type(step) is int and step in (-1, 1), "stream direction")
     require(selection.get("is_median") is False, "expected a nonmedian canonical selection")
-    require(choose_rank_direct(first, step, root, M) == target,
-            "selected rank does not match independent direct arithmetic")
+    expected_rank1 = choose_rank_direct(first, step, root, M)
+    require(expected_rank1 == int(rank1_text) and target == expected_rank1 - 1,
+            "selected rank0 does not match independent 1-based rank arithmetic")
 
     lines = Path(bridge_log).read_text(encoding="utf-8").splitlines()
     require(one_log_value(lines, "CANONICAL_BRIDGE_SOURCE_SHA") == source_sha,
@@ -207,6 +208,18 @@ def self_test():
     lengths = (2, 2)
     word = (1, 2, 1, 2)
     root = oracle.count_prefix(lengths, ())
+    bridge_index_cases = 0
+    for n in (2, 7, 19):
+        for first in range(1, 6):
+            for step in (-1, 1):
+                rank1 = choose_rank_direct(first, step, n, 5)
+                reference1 = choose_rank_reference(first, step, n, 5)
+                rank0 = rank1 - 1
+                require(rank1 == reference1 and 1 <= rank1 <= n and
+                        0 <= rank0 < n and rank0 + 1 == rank1,
+                        "bridge rank1/rank0 conversion")
+                bridge_index_cases += 1
+    require(bridge_index_cases == 30, "bridge index self-test cardinality")
     target = 1
     depths = (1, 2, 3, 4)
     positives = 0
@@ -254,6 +267,7 @@ def self_test():
     require(positives == 2 and rejects == 20, "selected trace self-test cardinality")
     print("NATIVE_SELECTED_SELFTEST_POSITIVE=" + str(positives))
     print("NATIVE_SELECTED_SELFTEST_MUTATION_REJECTS=" + str(rejects))
+    print("NATIVE_SELECTED_SELFTEST_BRIDGE_INDEX_CASES=" + str(bridge_index_cases))
     print("NATIVE_SELECTED_SELFTEST_RESULT=PASS")
     print("NATIVE_SELECTED_4244=NOT_TESTED")
     print("NATIVE_SELECTED_STAGE6=NOT_CLAIMED")
