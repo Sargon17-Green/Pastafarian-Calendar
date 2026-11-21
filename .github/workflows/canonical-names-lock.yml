@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   verify:
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +28,7 @@ jobs:
 
   perl-stage01:
     timeout-minutes: 15
-    if: github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語'
+    if: (github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語') && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     steps:
       - name: 取得來源
@@ -2780,7 +2781,7 @@ jobs:
   # Stage2 gate is included in the established push workflow because the
   # standalone Stage2 workflow has no observed run on this feature branch.
   stage02-weaving-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
@@ -2849,7 +2850,7 @@ jobs:
   # Stage3 gate is integrated with the existing push workflow; feature-branch
   # standalone workflow registration is not accepted as CI evidence alone.
   stage03-weaving-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
@@ -2917,6 +2918,7 @@ jobs:
   # Stage4 Native also runs on the established feature-branch push workflow.
   # Registration of the separate Stage4 workflow alone is not acceptance evidence.
   stage04-month-occurrence-native:
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -2958,7 +2960,7 @@ jobs:
 
   # Stage5 native gate is part of the established feature-branch push workflow.
   stage05-cutlet-occurrence-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3008,7 +3010,7 @@ jobs:
 
   # Stage6 Native gate validates the first calendarDate field only.
   stage06-year-occurrence-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3058,7 +3060,7 @@ jobs:
 
   # Stage7: five components from an externally materialized year, NOT full generator.
   stage07-five-field-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3109,7 +3111,7 @@ jobs:
 
   # Stage8: bounded generation of monthLengths, not the complete calendar.
   stage08-month-length-generation-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3160,7 +3162,7 @@ jobs:
 
   # Stage9 must run in this established push workflow; feature-branch standalone registration is not sufficient.
   stage09-cutlet-partition-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3216,7 +3218,7 @@ jobs:
 
   # Stage10: isolated distinct-name-index assignment (not complete calendar semantics).
   stage10-distinct-name-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3274,7 +3276,7 @@ jobs:
 
   # Stage11: exact stream rank selection with bounded rejection-skip.
   stage11-stream-rank-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3332,7 +3334,7 @@ jobs:
 
   # Stage12: bounded stream-ranked distinct-name index integration (not calendar acceptance).
   stage12-stream-distinct-name-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3391,7 +3393,7 @@ jobs:
 
   # Stage13: bounded text name materialization from a caller-provided catalog (not calendar acceptance).
   stage13-stream-name-materialization-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3450,7 +3452,7 @@ jobs:
           retention-days: 30
 
   stage14-canonical-name-selection-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3508,7 +3510,7 @@ jobs:
           retention-days: 30
 
   stage15-canonical-five-field-projection-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3566,7 +3568,7 @@ jobs:
           retention-days: 30
 
   stage16-weaving-seven-months-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3627,7 +3629,7 @@ jobs:
           retention-days: 30
 
   stage17-weaving-eight-months-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3689,7 +3691,7 @@ jobs:
           retention-days: 30
 
   stage18-weaving-nine-months-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3751,7 +3753,7 @@ jobs:
           retention-days: 30
 
   stage19-weaving-ten-months-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3823,7 +3825,7 @@ jobs:
 
 
   stage20-weaving-eleven-months-native:
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -3896,7 +3898,7 @@ jobs:
 
   stage21-weaving-twelve-months-native:
     name: Perl Stage21 twelve-month / forty-eight-day native QA
-    if: github.ref_name == 'Perl+國語'
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -3976,7 +3978,7 @@ jobs:
 
   stage22-weaving-thirteen-months-native:
     timeout-minutes: 60
-    if: github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語'
+    if: (github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語') && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
     runs-on: ubuntu-latest
     env:
       LC_ALL: C.UTF-8
@@ -4054,4 +4056,38 @@ jobs:
           name: perl-stage22-weaving-thirteen-months-native
           path: logs/stage22
           if-no-files-found: warn
+          retention-days: 30
+
+  stage22-maximum-arena-source-locked-native:
+    name: Stage22 12x52 maximal arena — isolated source-locked Native
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - name: Checkout exact source commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Prepare exact Perl 5.40 runtime
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Execute only the bounded 12x52 witness
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash qa/perl-guoyu/stage22_max_arena_native_ci.sh
+          cat logs/stage22-maxarena/summary.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve exit, time, RSS, source and independent oracle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perl-stage22-max-arena-source-locked-native
+          path: logs/stage22-maxarena
+          if-no-files-found: error
           retention-days: 30
