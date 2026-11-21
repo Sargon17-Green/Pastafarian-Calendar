@@ -1,0 +1,15 @@
+with "gnatcoll_gmp.gpr";
+
+-- v175: compose the production 179-place GMP rank selector with GMP Unrank.
+-- No Calendar_Date, Sauce, Normative_Oracle or original converter is executed.
+project Issue29_V175_GMP_Wide_Rank is
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "obj_v175";
+   for Exec_Dir use "bin_v175";
+   for Main use ("issue29_v175_gmp_wide_rank_tests.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatW8", "-gnata", "-gnatwa");
+   end Compiler;
+end Issue29_V175_GMP_Wide_Rank;
