@@ -2982,3 +2982,10 @@ jobs:
           path: gate-window-radius96-scan-evidence/
           retention-days: 30
           if-no-files-found: warn
+
+  lua_haitian_four_target_static_admission:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/lua-haitian-four-target-static-admission.yml
