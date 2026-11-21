@@ -15,15 +15,26 @@ function Get-StrictStageMetadataSha256 {
     return [System.BitConverter]::ToString($digest).Replace('-', '').ToLowerInvariant()
 }
 
-function Get-StrictStageMetadataByteLineNumber {
-    param([AllowEmptyCollection()][byte[]]$Bytes, [int]$ByteIndex)
-    if ($ByteIndex -lt 0) { return $null }
-    $limit = [Math]::Min($ByteIndex, $Bytes.Length)
+function Get-StrictStageMetadataInvalidUtf8LineNumber {
+    param([Parameter(Mandatory=$true)][AllowEmptyCollection()][byte[]]$Bytes)
+    # The .NET Framework decoder's reported exception index is not a stable
+    # source offset on every runtime. Re-decode complete LF-delimited byte
+    # segments to locate the earliest genuinely invalid UTF-8 line.
+    $strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
+    $start = 0
     $line = 1
-    for ($i = 0; $i -lt $limit; $i++) {
-        if ($Bytes[$i] -eq 10) { $line++ }
+    for ($i = 0; $i -le $Bytes.Length; $i++) {
+        if ($i -eq $Bytes.Length -or $Bytes[$i] -eq 0x0A) {
+            try {
+                $null = $strictUtf8.GetString($Bytes, $start, ($i - $start))
+            } catch [System.Text.DecoderFallbackException] {
+                return $line
+            }
+            $start = $i + 1
+            $line++
+        }
     }
-    return $line
+    return $null
 }
 
 function Get-StrictStageMetadataTextLineNumber {
@@ -100,8 +111,8 @@ function ConvertFrom-StrictStageMetadataBytes {
     try {
         $text = $utf8.GetString($payload)
     } catch [System.Text.DecoderFallbackException] {
-        $badLine = Get-StrictStageMetadataByteLineNumber -Bytes $payload -ByteIndex $_.Exception.Index
-        return New-StrictStageMetadataResult -Success $false -ReasonCode 'INVALID_UTF8' -LineNumber $badLine -BomPresent $bomPresent -InputSha256 $inputHash -Detail ('byte_index=' + $_.Exception.Index)
+        $badLine = Get-StrictStageMetadataInvalidUtf8LineNumber -Bytes $payload
+        return New-StrictStageMetadataResult -Success $false -ReasonCode 'INVALID_UTF8' -LineNumber $badLine -BomPresent $bomPresent -InputSha256 $inputHash -Detail 'strict_decoder_rejected_bytes'
     } catch {
         return New-StrictStageMetadataResult -Success $false -ReasonCode 'DECODE_ERROR' -BomPresent $bomPresent -InputSha256 $inputHash -Detail $_.Exception.GetType().FullName
     }

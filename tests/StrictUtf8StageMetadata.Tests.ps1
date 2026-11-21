@@ -37,24 +37,6 @@ function Assert-StrictUtf8Failure {
     Assert-StageEqual -Expected 0 -Actual $Result.Values.Count -Name ($Name + ' exposes no partial map')
 }
 
-function Get-StrictUtf8GitBlobSha1 {
-    param([AllowEmptyCollection()][byte[]]$Bytes)
-    $headerText = 'blob ' + $Bytes.Length.ToString([System.Globalization.CultureInfo]::InvariantCulture) + [char]0
-    [byte[]]$header = [System.Text.Encoding]::ASCII.GetBytes($headerText)
-    [byte[]]$gitObject = New-Object byte[] ($header.Length + $Bytes.Length)
-    [System.Array]::Copy($header, 0, $gitObject, 0, $header.Length)
-    if ($Bytes.Length -gt 0) {
-        [System.Array]::Copy($Bytes, 0, $gitObject, $header.Length, $Bytes.Length)
-    }
-    $sha1 = [System.Security.Cryptography.SHA1]::Create()
-    try {
-        $digest = $sha1.ComputeHash($gitObject)
-    } finally {
-        $sha1.Dispose()
-    }
-    return [System.BitConverter]::ToString($digest).Replace('-', '').ToLowerInvariant()
-}
-
 $lf = [string][char]10
 $cr = [string][char]13
 $validText = 'A=1' + $lf + 'B=two' + $lf
@@ -173,6 +155,13 @@ $invalidAfterLf = [byte[]](0x41, 0x3D, 0x31, 0x0A, 0xFF)
 $invalidLineResult = ConvertFrom-StrictStageMetadataBytes -Bytes $invalidAfterLf -RequiredKeys @()
 Assert-StrictUtf8Failure -Result $invalidLineResult -ReasonCode 'INVALID_UTF8' -Name 'Invalid UTF-8 line location' -LineNumber 2
 
+$invalidAfterTwoLines = [byte[]](0x41, 0x3D, 0x31, 0x0A, 0x42, 0x3D, 0x32, 0x0A, 0xFF)
+$invalidThird = ConvertFrom-StrictStageMetadataBytes -Bytes $invalidAfterTwoLines -RequiredKeys @()
+Assert-StrictUtf8Failure -Result $invalidThird -ReasonCode 'INVALID_UTF8' -Name 'Invalid UTF-8 after two lines' -LineNumber 3
+
+$invalidFirst = ConvertFrom-StrictStageMetadataBytes -Bytes ([byte[]](0xFF, 0x0A, 0x41, 0x3D, 0x31)) -RequiredKeys @()
+Assert-StrictUtf8Failure -Result $invalidFirst -ReasonCode 'INVALID_UTF8' -Name 'Invalid UTF-8 first line' -LineNumber 1
+
 $strictMetadataPath = Join-Path $strictUtf8MetadataRoot 'DEVELOPMENT_STAGE.md'
 [byte[]]$strictMetadataBytes = [System.IO.File]::ReadAllBytes($strictMetadataPath)
 $strictMetadataResult = ConvertFrom-StrictStageMetadataBytes -Bytes $strictMetadataBytes -RequiredKeys @(
@@ -190,8 +179,15 @@ Assert-StageEqual -Expected 'EVIDENCE_ONLY_CONFIRMED' -Actual $strictMetadataRes
 Assert-StageEqual -Expected $hebrewValue -Actual $strictMetadataResult.Values['NATURAL_LANGUAGE'] -Name 'Pinned non-ASCII language value'
 $stage43Keys = @($strictMetadataResult.Values.Keys | Where-Object { $_.StartsWith('STAGE43_', [System.StringComparison]::Ordinal) })
 Assert-StageEqual -Expected 0 -Actual $stage43Keys.Count -Name 'Pinned Stage42 has no Stage43 lifecycle keys'
-$metadataGitBlob = Get-StrictUtf8GitBlobSha1 -Bytes $strictMetadataBytes
-Assert-StageEqual -Expected 'a3f53b67e4445bdc835179cd484fe27b3e2648f7' -Actual $metadataGitBlob -Name 'Pinned metadata bytes match exact Stage42 blob'
+# Git checkout on Windows can materialize CRLF bytes from an LF Git blob.
+# Verify the immutable blob identity from the commit, not the worktree bytes.
+# The worktree bytes were parsed and checked independently above.
+$gitBlobOutput = @(& git -C $strictUtf8MetadataRoot rev-parse 'HEAD:DEVELOPMENT_STAGE.md')
+if ($LASTEXITCODE -ne 0 -or $gitBlobOutput.Count -ne 1) {
+    throw 'Unable to resolve committed metadata blob from HEAD'
+}
+$metadataGitBlob = ([string]$gitBlobOutput[0]).Trim()
+Assert-StageEqual -Expected 'a3f53b67e4445bdc835179cd484fe27b3e2648f7' -Actual $metadataGitBlob -Name 'Pinned Stage42 commit has exact metadata blob'
 
 $tempMetadataPath = Join-Path ([System.IO.Path]::GetTempPath()) ('strict-stage-metadata-' + [guid]::NewGuid().ToString('N') + '.bin')
 $missingMetadataPath = $tempMetadataPath + '.missing'
