@@ -1,0 +1,34 @@
+; Stage2 Appendix-A bounded two-digit wide rank reporter.
+; QA-only production candidate, not promoted to canonical Logo+Ido.
+; Input [first BI in 1..M, step exactly +1 or -1], N canonical M<N<=M^2.
+; Invalid bounded input returns []. All large values remain exact BI.
+to monster.stage02.choose.wide :stream :N
+  if not listp :stream [output []]
+  if (count :stream) <> 2 [output []]
+  localmake "firstv first :stream
+  localmake "step last :stream
+  if not (monster.stage02.bi.canonical :firstv) [output []]
+  if not (monster.stage02.bi.canonical :N) [output []]
+  if (bi.lt :firstv (bi.small 1)) [output []]
+  if (bi.gt :firstv nr.M) [output []]
+  if not numberp :step [output []]
+  if not (equalp :step (int :step)) [output []]
+  if not (or (:step = 1) (:step = -1)) [output []]
+
+  localmake "space bi.square nr.M
+  if (bi.le :N nr.M) [output []]
+  if (bi.gt :N :space) [output []]
+
+  ; D20's accepted exact stream element at offset 1; no float conversion.
+  localmake "second monster.stage02.answer.at :stream 1
+  localmake "wide bi.add :firstv (bi.mul nr.M (bi.sub :second (bi.small 1)))
+  localmake "qr bi.divmod.floor :space :N
+  localmake "limit bi.sub :space (last :qr)
+  if (bi.le :wide :limit) [
+    output bi.add (bi.small 1) (bi.regmod (bi.sub :wide (bi.small 1)) :N)
+  ]
+  ; Rejected suffix is (limit,space], and limit is a multiple of N.
+  ; +1 first accepts 1 after wrap; -1 first accepts limit.
+  if :step = 1 [output bi.small 1]
+  output :N
+end

@@ -1,0 +1,99 @@
+name: Logo Stage2 Appendix-A Two-Digit Wide Native QA
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-stage2-wide-selection-audit-20261121'
+permissions:
+  contents: read
+
+jobs:
+  wide-two-digit-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout pinned QA branch
+        uses: actions/checkout@v4
+
+      - name: Verify source locks and generate independent host fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF" = 'refs/heads/qa/logo-ido-stage2-wide-selection-audit-20261121'
+          test "$(git rev-parse HEAD^)" = 5b5ad91755a06ae986a26bff6ee7e75cb1debbdd
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/source_language_catalog.logo)" = 1e1bdde9c0c49cf14f0a51de8e16fb37f69b7625
+          test "$(git hash-object src/monster_bootstrap.logo)" = 817ff7323e1640decf4ee35147783f9875200f13
+          test "$(git hash-object src/stage02_boundary.logo)" = 7445e52e422ceefd537067d2d3e09a4e723d75d5
+          test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
+          test "$(git hash-object src/stage02_answer_at.logo)" = f0951ba68a191667208b2a2b99b386c5336e49c2
+          test "$(git hash-object src/stage02_choose_wide.logo)" = 8fb2dc47c827b8ccd8fa6fdd817b9fa088c51013
+          test "$(git hash-object qa/logo_stage2_wide_selection_host_oracle.py)" = 18516fe4a98ded9be6374b3064223db46a6d3c01
+          test "$(git hash-object qa/logo_stage2_wide_native_vectors.py)" = 25e2ad15efd34a839cad5bf1caeb308e9f791ad4
+          test "$(git hash-object QA_STAGE2_APPENDIX_A_WIDE_NATIVE_GATE.md)" = ece982f3d65fc95f2e054ec18298e0a8b2f6fc65
+          git rev-parse HEAD > "$RUNNER_TEMP/wide2-commit.txt"
+          sha256sum src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo qa/logo_stage2_wide_selection_host_oracle.py qa/logo_stage2_wide_native_vectors.py QA_STAGE2_APPENDIX_A_WIDE_NATIVE_GATE.md > "$RUNNER_TEMP/wide2-source-sha256.txt"
+          python3 qa/logo_stage2_wide_native_vectors.py --output "$RUNNER_TEMP/wide2-native.logo" | tee "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_ENUM_CASES 3340' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_REJECTION_CASES 669' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_FULL_MODULUS_VECTORS 5' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_MATHEMATICAL_ORACLE=PASS' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_VALID 96' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_REJECTED 11' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_REJECTED_PLUS 5' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_REJECTED_MINUS 6' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_CASES 112' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_CHECKS 400' "$RUNNER_TEMP/wide2-host.log"
+          grep -Fxq 'WIDE_HOST_ORACLE=PASS' "$RUNNER_TEMP/wide2-host.log"
+
+      - name: Build pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          test "$(git -C "$source_dir" rev-parse HEAD)" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+
+      - name: Execute exact-BI two-digit Native differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/wide2-native.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 1200s stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/wide2-native.logo" > "$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::Wide two-digit Native failure/timeout exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'WIDE_NATIVE_CASES_PASIS 112' "$log"
+          grep -Fxq 'WIDE_NATIVE_CHECKS_PASIS 400' "$log"
+          grep -Fxq 'WIDE_NATIVE_PASIS' "$log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$log"; then
+            echo "::error::Native failure text present"
+            exit 1
+          fi
+          echo 'NATIVE_LOGO_STAGE2_WIDE2=PASS'
+
+      - name: Preserve exact inputs and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logo-stage2-wide2-native-evidence
+          path: |
+            ${{ runner.temp }}/wide2-commit.txt
+            ${{ runner.temp }}/wide2-source-sha256.txt
+            ${{ runner.temp }}/wide2-host.log
+            ${{ runner.temp }}/wide2-native.logo
+            ${{ runner.temp }}/wide2-native.log
+          if-no-files-found: warn
+          retention-days: 30
