@@ -1115,6 +1115,59 @@ jobs:
           retention-days: 30
           if-no-files-found: warn
 
+  stage56-structure-provider-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Run SHA-bound optional chooser and synthetic YearStructureProvider QA
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-provider-evidence
+          printf '%s\n' PC-BRANCH-PHP-MALAY > stage56-provider-evidence/PROJECT_ID.txt
+          printf '%s\n' "${GITHUB_SHA}" > stage56-provider-evidence/SHA.txt
+          php -v > stage56-provider-evidence/php-version.txt
+          php -r 'exit(PHP_INT_SIZE === 8 ? 0 : 1);' > stage56-provider-evidence/architecture.txt 2>&1
+          arch=$?
+          php -l src/Patches/UnboundedUniformChoice56.php > stage56-provider-evidence/lint-chooser.txt 2>&1
+          l1=$?
+          php -l src/Patches/YearStructureProvider56.php > stage56-provider-evidence/lint-provider.txt 2>&1
+          l2=$?
+          php -l tests/stage56_unbounded_choice.php > stage56-provider-evidence/lint-chooser-test.txt 2>&1
+          l3=$?
+          php -l tests/stage56_year_structure_provider.php > stage56-provider-evidence/lint-provider-test.txt 2>&1
+          l4=$?
+          timeout 900s php -d memory_limit=512M tests/stage56_unbounded_choice.php > stage56-provider-evidence/chooser-stdout.txt 2> stage56-provider-evidence/chooser-stderr.txt
+          x=$?
+          timeout 900s php -d memory_limit=512M tests/stage56_year_structure_provider.php > stage56-provider-evidence/provider-stdout.txt 2> stage56-provider-evidence/provider-stderr.txt
+          y=$?
+          printf 'arch=%s\nlint_chooser=%s\nlint_provider=%s\nlint_chooser_test=%s\nlint_provider_test=%s\nchooser=%s\nprovider=%s\n' "$arch" "$l1" "$l2" "$l3" "$l4" "$x" "$y" > stage56-provider-evidence/exit.txt
+          cat stage56-provider-evidence/chooser-stdout.txt stage56-provider-evidence/provider-stdout.txt
+          if (( arch != 0 || l1 != 0 || l2 != 0 || l3 != 0 || l4 != 0 || x != 0 || y != 0 )); then
+            cat stage56-provider-evidence/chooser-stderr.txt stage56-provider-evidence/provider-stderr.txt >&2
+            exit 1
+          fi
+          [[ ! -s stage56-provider-evidence/chooser-stderr.txt && ! -s stage56-provider-evidence/provider-stderr.txt ]] || exit 1
+          grep -E '^STAGE56_UNBOUNDED_CHOICE checks=[0-9]+ real=18 invalid=7 status=PASS; YEAR_PROVIDER=NOT_IMPLEMENTED$' stage56-provider-evidence/chooser-stdout.txt
+          grep -E '^STAGE56_PROVIDER_MICROGATE assertions=[0-9]+ synthetic=YES source_attested=NO profiles=0 PASS$' stage56-provider-evidence/provider-stdout.txt
+      - name: Retain provenance and test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-provider-${{ github.sha }}
+          path: stage56-provider-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+
   stage56-production-slices-native:
     if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
     runs-on: ubuntu-latest

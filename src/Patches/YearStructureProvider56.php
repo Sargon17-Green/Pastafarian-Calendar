@@ -1,0 +1,148 @@
+<?php
+declare(strict_types=1);
+namespace Pastafari\Stage01\Patches;
+use Pastafari\Stage01\BigInt;
+use Pastafari\Stage01\BootstrapKernel;
+use InvalidArgumentException;
+use RuntimeException;
+use LogicException;
+
+/** Opt-in production PHP construction; external witness origin is not attested here. */
+final class YearStructureProvider56
+{
+    private YearStructureSlices56 $slices;
+    private MonthWeavingRanker56 $ranker;
+    private UnboundedUniformChoice56 $chooser;
+    private ContextualYear5000Anchor56 $binder;
+    private const FIELDS=['number','openGateIndex','closeGateIndex','openGateDay','closeGateDay'];
+
+    public function __construct(private readonly BootstrapKernel $kernel)
+    {
+        $this->slices=new YearStructureSlices56();
+        $this->ranker=new MonthWeavingRanker56();
+        $this->chooser=new UnboundedUniformChoice56();
+        $this->binder=new ContextualYear5000Anchor56();
+    }
+
+    /**
+     * @param callable(int):array<string,mixed> $trustedAnchor
+     * @param callable(int,int):array<string,mixed> $trustedYear
+     * @param callable(int):int $gateDay
+     * @return array<string,mixed>
+     */
+    public function buildVerified(int $c,array $anchorCandidate,callable $trustedAnchor,
+        array $year,callable $trustedYear,callable $gateDay):array
+    {
+        $anchor=$this->binder->bind($c,$anchorCandidate,$trustedAnchor);
+        $this->validateYear($year);
+        $trusted=$trustedYear($c,$year['number']);
+        if (!is_array($trusted) || ($trusted['calculation_jdn']??null)!==$c ||
+            ($trusted['source_commit']??null)!==$anchorCandidate['source_commit'] ||
+            !is_array($trusted['year']??null)) {
+            throw new RuntimeException('STAGE56_YEAR_WITNESS_ENVELOPE');
+        }
+        $this->validateYear($trusted['year']);
+        foreach (self::FIELDS as $key) {
+            if ($year[$key]!==$trusted['year'][$key]) {
+                throw new RuntimeException('STAGE56_YEAR_WITNESS_MISMATCH_'.$key);
+            }
+            if ($year['number']===5000 && $year[$key]!==$anchor[$key]) {
+                throw new RuntimeException('STAGE56_YEAR5000_MISMATCH_'.$key);
+            }
+        }
+        if ($year['number']===4999 &&
+            ($year['closeGateIndex']!==$anchor['openGateIndex'] ||
+             $year['closeGateDay']!==$anchor['openGateDay'])) {
+            throw new RuntimeException('STAGE56_ADJACENT_4999_MISMATCH');
+        }
+        if ($year['number']===5001 &&
+            ($year['openGateIndex']!==$anchor['closeGateIndex'] ||
+             $year['openGateDay']!==$anchor['closeGateDay'])) {
+            throw new RuntimeException('STAGE56_ADJACENT_5001_MISMATCH');
+        }
+        return $this->build($c,$year,$gateDay);
+    }
+
+    private function validateYear(array $y):void
+    {
+        foreach (self::FIELDS as $key) {
+            if (!isset($y[$key]) || !is_int($y[$key])) {
+                throw new InvalidArgumentException('STAGE56_YEAR_FIELD_'.$key);
+            }
+        }
+        $g=$y['closeGateIndex']-$y['openGateIndex'];
+        $d=$y['closeGateDay']-$y['openGateDay'];
+        if (!is_int($g)||!is_int($d)||$g<6||$g>137||$d<252||$d>5778) {
+            throw new InvalidArgumentException('STAGE56_YEAR_INTERVAL');
+        }
+    }
+
+    private function readGates(array $y,callable $gateDay):array
+    {
+        $p=$y['openGateIndex']; $q=$y['closeGateIndex']; $positions=[];
+        for ($i=$p;$i<=$q;++$i) {
+            $day=$gateDay($i);
+            if (!is_int($day)) throw new InvalidArgumentException('STAGE56_GATE_TYPE');
+            if ($i>$p) {
+                $delta=$day-$positions[$i-1];
+                if (!is_int($delta)||$delta<42||$delta>963) {
+                    throw new InvalidArgumentException('STAGE56_GATE_DISTANCE');
+                }
+            }
+            $positions[$i]=$day;
+        }
+        if ($positions[$p]!==$y['openGateDay']||$positions[$q]!==$y['closeGateDay']) {
+            throw new RuntimeException('STAGE56_GATE_ENDPOINTS');
+        }
+        return $positions;
+    }
+
+    private function choice(int $c,int $t,int $bowl,int $seal,BigInt $count):BigInt
+    {
+        if ($count->sign()<1) throw new LogicException('STAGE56_EMPTY_FAMILY');
+        return $this->chooser->chooseFromKernel($this->kernel,$c,$t,$bowl,$seal,$count);
+    }
+
+    private function build(int $c,array $y,callable $gateDay):array
+    {
+        $gate=$this->readGates($y,$gateDay);
+        $p=$y['openGateIndex'];$q=$y['closeGateIndex'];
+        $g=$q-$p;$days=$y['closeGateDay']-$y['openGateDay'];
+        $t=$y['openGateDay']+1;
+        $forced=null;
+        if ($c>$y['openGateDay']&&$c<=$y['closeGateDay']) {
+            for ($i=$p+1;$i<$q;++$i) {
+                if ($gate[$i]===$c) {$forced=$i-$p;break;}
+            }
+        }
+        $k=5+$this->choice($c,$t,2,20,BigInt::fromInt(min(17,$g)-5))->toIntExact();
+        $partition=$this->slices->unrankCutletPartitions($g,$k,$forced,
+            $this->choice($c,$t,2,21,$this->slices->countCutletPartitions($g,$k,$forced)));
+        $cutletNames=$this->slices->unrankOrderedNames(17,$k,
+            $this->choice($c,$t,5,22,$this->slices->countOrderedNames(17,$k)));
+        $cutlets=[];$cursor=$p;
+        foreach ($partition as $j=>$count) {
+            $old=$cursor; $cursor+=$count;
+            $cutlets[]=['canonicalIndex'=>$cutletNames[$j],
+                'openGateIndex'=>$old,'closeGateIndex'=>$cursor,
+                'firstDay'=>$gate[$old]+1,'lastDay'=>$gate[$cursor]];
+        }
+        if ($cursor!==$q) throw new LogicException('STAGE56_CUTLET_COVERAGE');
+        $min=intdiv($days+122,123);$max=min(47,intdiv($days,4));
+        if ($min<3||$min>$max) throw new LogicException('STAGE56_MONTH_RANGE');
+        $m=$min-1+$this->choice($c,$t,3,30,BigInt::fromInt($max-$min+1))->toIntExact();
+        $lengths=$this->slices->unrankMonthLengths($days,$m,
+            $this->choice($c,$t,3,31,$this->slices->countMonthLengths($days,$m)));
+        $weave=$this->ranker->unrank($lengths,
+            $this->choice($c,$t,4,32,$this->ranker->count($lengths)));
+        $monthNames=$this->slices->unrankOrderedNames(47,$m,
+            $this->choice($c,$t,5,33,$this->slices->countOrderedNames(47,$m)));
+        if (count($weave)!==$days||array_sum($lengths)!==$days) {
+            throw new LogicException('STAGE56_MONTH_COVERAGE');
+        }
+        return ['cutletCount'=>$k,'cutletPartition'=>$partition,
+            'cutletNameIndices'=>$cutletNames,'cutlets'=>$cutlets,
+            'monthCount'=>$m,'monthLengths'=>$lengths,
+            'monthWeaving'=>$weave,'monthNameIndices'=>$monthNames];
+    }
+}
