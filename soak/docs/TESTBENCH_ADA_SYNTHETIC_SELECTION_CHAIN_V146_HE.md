@@ -75,3 +75,15 @@ Rank(L,רצף)=r
 **שערי ממשל:** `STOP_NEW_NATIVE_SOAK_DISPATCH` עדיין בתוקף; Issue #29 פתוח; `main` נעול בקומיט `56bc4173aae4975ded019ef5ab5a36249f1424df`; אין קריאות `F(c,t)` חדשות; מספר שנות ה־Soak המקוריות שאושרו נשאר **0/10,000** ומספר האלגוריתמים המקוריים העצמאיים שהוסמכו הוא **0**.
 
 **סטטוס קבלה:** נקבע אך ורק לפי הרצת GitHub Actions `completed/success` הכוללת לוגי בדיקה, לוג GNAT וארטיפקט ראיות מלא. שורת דיווח או קומיט לבדם אינם מספיקים.
+
+## 6. קבלת v146 — 2026-11-21 (CI אמיתי)
+
+**התקבל:** [GitHub Actions 44876459365](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44876459365) הסתיים `completed/success` עבור **מקור הבדיקה שבוצע בפועל** `0d65a6226d717358dd002cb93b2a29fda213d96e`. כל עשרת שלבי העבודה הסתיימו בהצלחה, ובהם 24/24 בדיקות Python, בדיקת קיבוע המקורות וראיות v144/v145, קומפילציית GNAT 13.3.0 ובדיקת 30 שרשראות `Ask_Bowl → Count → Choose_Rank → Unrank → Rank` תוך השוואת 30 רצפי חודשים שלמים; 18 מקרי דירוג רחב.
+
+**פלט מדויק מלוג GNAT:** `V146_SYNTHETIC_FULL_SELECTION_CHAINS=30`, `V146_WIDE_GLOBAL_RANK_CHAIN_CASES=18`, `V146_FULL_SEQUENCES_COMPARED_EXACTLY=30`, `V146_ORIGINAL_CALENDAR_FCT_CALLS=0`, `V146_PRODUCTION_ADA_PATCH_APPLIED=FALSE`.
+
+**ארטיפקט ראיות:** `14697060200`, שם `soak-v146-30-exact-full-synthetic-month-chain-GNAT-logs-only`, תשעה קובצי יומן, 3,837 bytes, GitHub-reported ZIP SHA-256 `693f43c64fbd9f88cf54a2bce50a2b54fefecd9ce8f93c486367e7cf70c4d773`. הגיבוב הוא ערך מטא-נתוני Actions; אין כאן טענה לאימות הורדה עצמאי של בתיו.
+
+קומיט תיעוד מאוחר יותר בענף (`935e880ca25866fec43d0bdb2378815334511150`) **אינו** ה־SHA של המקור שנבדק בהרצה, ואין להסיק ממנו שהוא עבר את אותו CI. ההרצה הקודמת `44876357996` נכשלה לפני התחלת בדיקות האלגוריתם, ונותרת היסטורית ככשל.
+
+**גבולות הקבלה אינם משתנים:** אינטגרציית QA סינתטית בלבד; לא נבדק הממיר המקורי, לא נפתרה סיבת אי־ההסכמה ביום היסוד, Issue #29 נשאר פתוח, `STOP_NEW_NATIVE_SOAK_DISPATCH` נשאר בתוקף, `main=56bc4173aae4975ded019ef5ab5a36249f1424df` לא שונה, **0/10,000 שנות Soak מקוריות מאושרות** ו־**0 אלגוריתמים מקוריים בלתי תלויים מוסמכים**.
