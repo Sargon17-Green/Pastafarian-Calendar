@@ -43,7 +43,7 @@ def direct_children(pid):
         return []
 
 
-def run_native(binary, outdir, direction, word=None, rank_delta=0):
+def run_native(binary, outdir, direction, word=None, rank_delta=0, rank0=None):
     name = direction
     stdout_path = outdir / (name + ".stdout")
     stderr_path = outdir / (name + ".stderr")
@@ -51,13 +51,20 @@ def run_native(binary, outdir, direction, word=None, rank_delta=0):
     argv = [str(binary), "--runMode=" + direction]
     if direction == "unrank" and rank_delta:
         argv.append("--rankDelta=" + str(rank_delta))
-    if direction == "rank":
+    if direction in ("selected-unrank", "selected-rank"):
+        if rank0 is None:
+            raise ValueError("selected Native mode requires rank0")
+        argv.append("--rank0Input=" + str(rank0))
+    if direction in ("rank", "selected-rank"):
+        if word is None:
+            raise ValueError("Native rank mode requires a word")
         argv.append("--rankInput=" + ",".join(map(str, word)))
     command = ["/usr/bin/time", "-f", "OS_WALL_SECONDS=%e\\nOS_MAX_RSS_KIB=%M\\nOS_EXIT=%x",
                "-o", str(metrics_path), *argv]
     (outdir / (name + ".command.json")).write_text(
         json.dumps({"argv": argv,
-                "witness_sha256": oracle.digest_word(word) if direction == "rank" else None,
+                "witness_sha256": oracle.digest_word(word) if direction in ("rank", "selected-rank") else None,
+                "rank0": str(rank0) if rank0 is not None else None,
                 "source": "Native Chapel binary"}, ensure_ascii=False) + "\n")
     begin = time.monotonic()
     reason = None
@@ -73,9 +80,12 @@ def run_native(binary, outdir, direction, word=None, rank_delta=0):
             payload = stdout_path.read_bytes()
         except FileNotFoundError:
             return
-        for match in re.finditer(
-                rb"(?m)^NATIVE_MEDIAN_CHECKPOINT=([1-9][0-9]*);[0-9]+\n",
-                payload):
+        checkpoint_key = (b"NATIVE_SELECTED_CHECKPOINT"
+                          if direction.startswith("selected-")
+                          else b"NATIVE_MEDIAN_CHECKPOINT")
+        checkpoint_pattern = (rb"(?m)^" + re.escape(checkpoint_key) +
+                              rb"=([1-9][0-9]*);[0-9]+\n")
+        for match in re.finditer(checkpoint_pattern, payload):
             depth = int(match.group(1))
             if depth not in DEPTHS or depth in observed_depths:
                 continue

@@ -301,6 +301,34 @@ jobs:
             chapel-canonical-rank-evidence/
           if-no-files-found: warn
 
+      - name: Bounded Native 4244 canonical selected-rank research (NOT Stage 6)
+        if: github.ref == 'refs/heads/Chapel+Українська-мова'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/weaving_native_selected_rank_research.py --self-test | tee chapel-native-selected-rank-selftest.log
+          grep -Fxq 'NATIVE_SELECTED_SELFTEST_RESULT=PASS' chapel-native-selected-rank-selftest.log
+          python3 test/weaving_native_selected_rank_research.py \
+            --binary ./chapel-native-adjoint-probe \
+            --bridge-json chapel-canonical-rank-evidence/validated.json \
+            --bridge-log chapel-canonical-rank-bridge.log \
+            --source-sha "$(git rev-parse HEAD)" \
+            --outdir chapel-native-selected-rank-evidence \
+            | tee chapel-native-selected-rank-runner.log
+          grep -Fxq 'NATIVE_SELECTED_RESULT=PASS_RESEARCH_ONLY' chapel-native-selected-rank-runner.log
+
+      - name: Retain Native selected-rank research evidence even on failure
+        if: always() && github.ref == 'refs/heads/Chapel+Українська-мова'
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-native-selected-rank-research-evidence
+          path: |
+            chapel-native-selected-rank-selftest.log
+            chapel-native-selected-rank-runner.log
+            chapel-native-selected-rank-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Independent GateOracle year-boundary and calendarDate decomposition probe
         shell: bash
         run: |

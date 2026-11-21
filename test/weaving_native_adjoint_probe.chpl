@@ -5,6 +5,7 @@ use List;
 
 config const runMode = "finite";
 config const rankInput = "";
+config const rank0Input = "";
 // Research-only near-median probes; zero preserves the accepted median path.
 config const rankDelta = 0;
 
@@ -13,6 +14,13 @@ proc isCheckpoint(depth: int): bool {
          depth == 96 || depth == 128 || depth == 256 ||
          depth == 512 || depth == 1024 || depth == 2048 ||
          depth == 4096 || depth == 4244;
+}
+proc emitCheckpoint(step: int, const ref total: bigint) {
+  if runMode == "selected-unrank" || runMode == "selected-rank" {
+    writeln("NATIVE_SELECTED_CHECKPOINT=", step, ";", total);
+  } else if runMode != "finite" {
+    writeln("NATIVE_MEDIAN_CHECKPOINT=", step, ";", total);
+  }
 }
 
 record GapSpec {
@@ -257,8 +265,7 @@ proc unrank(const ref lens: [?D] int, rank0: bigint): list(int) {
         chosen = c;
         take(c,lens,states,sizes,specs,used,opened,closed,total,blocks[c]);
         word.pushBack(c);
-        if runMode != "finite" && isCheckpoint(step) then
-          writeln("NATIVE_MEDIAN_CHECKPOINT=", step, ";", total);
+        if isCheckpoint(step) then emitCheckpoint(step, total);
         break;
       }
     }
@@ -284,8 +291,7 @@ proc rankWord(const ref lens: [?D] int, const ref word: list(int)): bigint {
     for earlier in 1..<c do rank += blocks[earlier];
     take(c,lens,states,sizes,specs,used,opened,closed,total,blocks[c]);
     step += 1;
-    if runMode != "finite" && isCheckpoint(step) then
-      writeln("NATIVE_MEDIAN_CHECKPOINT=", step, ";", total);
+    if isCheckpoint(step) then emitCheckpoint(step, total);
   }
   if total != 1 then halt("Rank terminal invariant failed");
   return rank;
@@ -342,13 +348,44 @@ proc runFullYear() {
   var states: [1..45] SparseVec;
   var sizes: [1..45] int;
   const root = setup(lens,states,sizes,specs);
-  writeln("NATIVE_MEDIAN_ROOT=",root);
-  if runMode == "unrank" {
+  const selectedMode = runMode == "selected-unrank" || runMode == "selected-rank";
+  if selectedMode {
+    writeln("NATIVE_SELECTED_ROOT=",root);
+  } else {
+    writeln("NATIVE_MEDIAN_ROOT=",root);
+  }
+  if runMode == "selected-unrank" {
+    if rank0Input == "" then halt("Missing selected rank0Input");
+    const targetRank0 = new bigint(rank0Input);
+    if targetRank0 < 0 || targetRank0 >= root then halt("Selected rank out of range");
+    const word = unrank(lens,targetRank0);
+    writeln("NATIVE_SELECTED_RANK0=",targetRank0);
+    writeln("NATIVE_SELECTED_WORD=",csv(word));
+    writeln("NATIVE_SELECTED_RESIDUAL=0");
+    writeln("NATIVE_SELECTED_COMPLETE=1");
+  } else if runMode == "selected-rank" {
+    if rank0Input == "" then halt("Missing expected selected rank0Input");
+    if rankInput == "" then halt("Missing selected rankInput witness");
+    const expectedRank0 = new bigint(rank0Input);
+    if expectedRank0 < 0 || expectedRank0 >= root then halt("Expected selected rank out of range");
+    var word = new list(int);
+    for token in rankInput.split(",") {
+      if token == "" then halt("Empty selected rankInput field");
+      word.pushBack(token:int);
+    }
+    const result = rankWord(lens,word);
+    writeln("NATIVE_SELECTED_EXPECTED_RANK0=",expectedRank0);
+    writeln("NATIVE_SELECTED_WORD=",csv(word));
+    writeln("NATIVE_SELECTED_RESULT_RANK0=",result);
+    if result != expectedRank0 then halt("Selected reverse rank mismatch");
+    writeln("NATIVE_SELECTED_COMPLETE=1");
+  } else if runMode == "unrank" {
     if rankDelta < -1 || rankDelta > 1 then halt("Unsupported research rankDelta");
     if rankDelta != 0 then writeln("NATIVE_NONMEDIAN_RANK_DELTA=",rankDelta);
     const word = unrank(lens,root / new bigint(2) + new bigint(rankDelta));
     writeln("NATIVE_MEDIAN_WORD=",csv(word));
     writeln("NATIVE_MEDIAN_RESIDUAL=0");
+    writeln("NATIVE_MEDIAN_COMPLETE=1");
   } else if runMode == "rank" {
     if rankInput == "" then halt("Missing rankInput witness");
     var word = new list(int);
@@ -359,10 +396,10 @@ proc runFullYear() {
     const result = rankWord(lens,word);
     writeln("NATIVE_MEDIAN_WORD=",csv(word));
     writeln("NATIVE_MEDIAN_RESULT_RANK=",result);
+    writeln("NATIVE_MEDIAN_COMPLETE=1");
   } else {
     halt("Unknown research runMode");
   }
-  writeln("NATIVE_MEDIAN_COMPLETE=1");
 }
 proc main() {
   if runMode != "finite" {
