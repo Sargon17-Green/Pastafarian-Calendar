@@ -1093,7 +1093,7 @@ jobs:
 
   stage01-calculation-context-diff:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Install GNU Fortran for calculation-context differential
@@ -1122,13 +1122,13 @@ jobs:
           set -euo pipefail
           python3 -m py_compile test/stage01_calculation_context_diff.py
           python3 test/stage01_calculation_context_diff.py --self-test | tee build/stage01-calculation-context-selftest.log
-          grep -Fxq 'STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=40/40' build/stage01-calculation-context-selftest.log
+          grep -Fxq 'STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=46/46' build/stage01-calculation-context-selftest.log
           curl --fail --location --silent --show-error --retry 3 \
             --connect-timeout 15 --max-time 45 \
             'https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
             --output build/stage01_python_reference_pinned.py
           test -s build/stage01_python_reference_pinned.py
-      - name: Gate fourteen contexts and forward/reverse eight-call cache sequences
+      - name: Gate fourteen contexts and three eight-call cache sequences
         shell: bash
         run: |
           set -euo pipefail
@@ -1143,9 +1143,13 @@ jobs:
             build/stage01-calculation-context-diff.log
           grep -Fxq 'STAGE01_CALC_CONTEXT_SENSITIVITY=2/2 PAIRS' \
             build/stage01-calculation-context-diff.log
+          grep -Fxq 'STAGE01_CALC_CONTEXT_FOUNDATION_SENSITIVITY=3/3 PAIRS' \
+            build/stage01-calculation-context-diff.log
           grep -Fxq 'STAGE01_CALC_CONTEXT_SAME_PROCESS=8/8 CALLS; 40/40 EXACT FIELDS' \
             build/stage01-calculation-context-diff.log
           grep -Fxq 'STAGE01_CALC_CONTEXT_REVERSE_SAME_PROCESS=8/8 CALLS; 40/40 EXACT FIELDS' \
+            build/stage01-calculation-context-diff.log
+          grep -Fxq 'STAGE01_CALC_CONTEXT_FOUNDATION_SAME_PROCESS=8/8 CALLS; 40/40 EXACT FIELDS' \
             build/stage01-calculation-context-diff.log
       - name: Preserve calculation-context differential evidence
         if: always()

@@ -61,6 +61,9 @@ SAME_PROCESS_TIMEOUT_SECONDS = 480
 # BOTH 4999 and 5001 boundary pairs in the same original process, with no reset.
 CONTEXT_SEQUENCE = (11, 13, 12, 14, 11, 13, 12, 14)
 CONTEXT_REVERSE_SEQUENCE = (14, 12, 13, 11, 14, 12, 13, 11)
+# Same Foundation target under five distinct calculation contexts, then warm revisits.
+# This guards against a cache improperly keyed by target day alone.
+CONTEXT_FOUNDATION_SEQUENCE = (7, 8, 5, 4, 6, 7, 8, 5)
 
 def case_days(case_index: int) -> tuple[int, int]:
     if not 1 <= case_index <= len(CASES):
@@ -215,6 +218,12 @@ def self_test() -> None:
     assert CONTEXT_REVERSE_SEQUENCE == (14, 12, 13, 11, 14, 12, 13, 11)
     assert CONTEXT_REVERSE_SEQUENCE[:4] == tuple(reversed(CONTEXT_SEQUENCE[:4]))
     assert CONTEXT_REVERSE_SEQUENCE[:4] == CONTEXT_REVERSE_SEQUENCE[4:]
+    assert CONTEXT_FOUNDATION_SEQUENCE == (7, 8, 5, 4, 6, 7, 8, 5)
+    assert len(CONTEXT_FOUNDATION_SEQUENCE) == 8
+    assert len({case_days(i)[0] for i in CONTEXT_FOUNDATION_SEQUENCE[:5]}) == 5
+    assert tuple(CASES[i - 1]["calculation_offset"] for i in CONTEXT_FOUNDATION_SEQUENCE[:5]) == (-2048, 2048, 0, -1, 1)
+    assert {case_days(i)[1] for i in CONTEXT_FOUNDATION_SEQUENCE} == {FOUNDATION_DAY}
+    assert CONTEXT_FOUNDATION_SEQUENCE[:3] == CONTEXT_FOUNDATION_SEQUENCE[5:]
     assert {case_days(i)[1] for i in CONTEXT_REVERSE_SEQUENCE} == {-15057703, -15053458}
     assert tuple(case_days(i) for i in CONTEXT_SEQUENCE[:4]) == tuple(case_days(i) for i in CONTEXT_SEQUENCE[4:])
     assert len({case["calculation_offset"] for case in CASES}) == 8
@@ -292,7 +301,7 @@ def self_test() -> None:
             pass
         else:
             raise AssertionError("Malformed same-process context records were accepted")
-    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=40/40")
+    print("STAGE01_CALC_CONTEXT_HARNESS_UNIT_ASSERTIONS=46/46")
 
 
 def is_context_sensitive_pair(first: dict, second: dict) -> bool:
@@ -422,11 +431,20 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
         for a, b in boundary_pairs
     )
     print(f"STAGE01_CALC_CONTEXT_SENSITIVITY={context_sensitive_pairs}/2 PAIRS", flush=True)
+    foundation_pairs = ((7, 8), (4, 6), (5, 7))
+    foundation_sensitive_pairs = sum(
+        is_context_sensitive_pair(rows[a - 1], rows[b - 1])
+        for a, b in foundation_pairs
+    )
+    print(f"STAGE01_CALC_CONTEXT_FOUNDATION_SENSITIVITY={foundation_sensitive_pairs}/3 PAIRS", flush=True)
     # Each sequence invokes the ORIGINAL normative date entry point in its
     # own process, without a reset between calls; first-call warming differs.
     same_process = evaluate_same_process(executable, rows, CONTEXT_SEQUENCE)
     reverse_same_process = evaluate_same_process(
         executable, rows, CONTEXT_REVERSE_SEQUENCE
+    )
+    foundation_same_process = evaluate_same_process(
+        executable, rows, CONTEXT_FOUNDATION_SEQUENCE
     )
     print(
         f"STAGE01_CALC_CONTEXT_SAME_PROCESS={same_process['matched_calls']}/"
@@ -438,6 +456,12 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
         f"STAGE01_CALC_CONTEXT_REVERSE_SAME_PROCESS={reverse_same_process['matched_calls']}/"
         f"{len(CONTEXT_REVERSE_SEQUENCE)} CALLS; {reverse_same_process['matched_fields']}/"
         f"{reverse_same_process['total_fields']} EXACT FIELDS",
+        flush=True,
+    )
+    print(
+        f"STAGE01_CALC_CONTEXT_FOUNDATION_SAME_PROCESS={foundation_same_process['matched_calls']}/"
+        f"{len(CONTEXT_FOUNDATION_SEQUENCE)} CALLS; {foundation_same_process['matched_fields']}/"
+        f"{foundation_same_process['total_fields']} EXACT FIELDS",
         flush=True,
     )
     report = {
@@ -455,8 +479,10 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
         "matched_fields": matched_fields,
         "total_fields": 5 * len(CASES),
         "boundary_context_sensitive_pairs": context_sensitive_pairs,
+        "foundation_context_sensitive_pairs": foundation_sensitive_pairs,
         "same_process_context_sequence": same_process,
         "same_process_reverse_context_sequence": reverse_same_process,
+        "same_process_foundation_context_sequence": foundation_same_process,
         "boundary_context_expected_pairs": len(boundary_pairs),
         "reference_timeout_seconds": REFERENCE_TIMEOUT_SECONDS,
         "fortran_timeout_seconds": FORTRAN_TIMEOUT_SECONDS,
@@ -472,8 +498,10 @@ def compare(reference: Path, executable: Path, commit: str, branch: str, run_id:
         f"{matched_fields}/{5 * len(CASES)} EXACT FIELDS"
     )
     if (matched_cases == len(CASES) and matched_fields == 5 * len(CASES)
-            and context_sensitive_pairs == 2 and same_process["status"] == "match"
-            and reverse_same_process["status"] == "match"):
+            and context_sensitive_pairs == 2 and foundation_sensitive_pairs == 3
+            and same_process["status"] == "match"
+            and reverse_same_process["status"] == "match"
+            and foundation_same_process["status"] == "match"):
         print("STAGE01_CALC_CONTEXT_PASS_ONLY_NOT_FULL_STAGE1_ACCEPTANCE")
         return 0
     print("STAGE01_CALC_CONTEXT_NOT_ACCEPTED; see stage01_calculation_context_diff.json")
