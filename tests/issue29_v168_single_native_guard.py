@@ -26,6 +26,7 @@ BASE = "e17ab44aa3fd1d08eb14644164735a7c5c87721d"
 MAIN = "56bc4173aae4975ded019ef5ab5a36249f1424df"
 README_BLOB = "74c424b44eadd4ece3f29072ddbf873236557604"
 BRANCH = "qa/issue29-ada-native-foundation-v168"
+ACTIVATION_MESSAGE = "ci(issue29-v168): one and only one original-development Ada foundation F, no Soak"
 EXPECTED = [5000, 10, 503, 20, 56]
 HISTORICAL_ADA = [5000, 10, 503, 30, 52]
 WALL_LIMIT_SECONDS = 90
@@ -88,6 +89,11 @@ def environment_guard() -> dict:
            "wrong branch: no execution permitted")
     insist(os.environ.get("GITHUB_EVENT_NAME") == "push",
            "no manual/PR native F trigger permitted")
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+    insist(bool(event_path) and Path(event_path).is_file(), "GitHub event receipt missing")
+    event = json.loads(Path(event_path).read_bytes())
+    insist(event.get("head_commit", {}).get("message") == ACTIVATION_MESSAGE,
+           "not the unique approved v168 activation commit")
     run_id = os.environ.get("GITHUB_RUN_ID", "")
     insist(run_id.isdigit() and int(run_id) > 0, "missing GitHub run identity")
     head = git("rev-parse", "HEAD").decode().strip()
