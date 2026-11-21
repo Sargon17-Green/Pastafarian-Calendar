@@ -397,3 +397,22 @@ z;35=~["E_DROP_ORDER_LAYOUT"0 0/]?
  z;b:t;a;!b;34h;!!r:
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
+
+
+{ المرحلة 19: العملية 36؛ موضع bowlId في جدول ترتيب مباشر من ست كرات. }
+{ الوسيطة [orderTable,bowlId]؛ الجدول [6,o1,...,o6]؛ تعيد آخر موضع 1..6 أو 0 إن غاب. }
+{ تحاكي op53 المعيارية التي تبحث المواضع 1..6؛ لا تعدل الجدول أو الوسيطة. }
+z;36=~["E_BOWL_POSITION_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:x;1+g;!w:
+ y;g;!v:
+ v;6=~["E_BOWL_POSITION_LENGTH"0 0/]?
+ 0r:1i:
+ [i;7<][
+  y;i;+g;!s:
+  s;w;=[i;r:]?
+  i;1+i:
+ ]#
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:g;!k:z;1-g;!
+]a;!

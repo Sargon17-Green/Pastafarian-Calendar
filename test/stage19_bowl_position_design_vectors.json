@@ -1,0 +1,168 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "stage": 19,
+  "scope": "DESIGN_ONLY",
+  "normative_operation": 53,
+  "planned_production_operation": 36,
+  "reference_git_blob": "3e9acc012bedf83294a6ec3cccb081a069556b5b",
+  "input": "allocated two-cell tuple [directOrderTable,bowlId]; directOrderTable=[6,v1,...,v6]",
+  "output": "greatest 1-based position i in 1..6 where vi===bowlId, or 0 when absent",
+  "probes": [
+    {
+      "label": "identity-first",
+      "order": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "bowl_id": 1,
+      "expected": 1
+    },
+    {
+      "label": "identity-last",
+      "order": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "bowl_id": 6,
+      "expected": 6
+    },
+    {
+      "label": "reverse-first",
+      "order": [
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "bowl_id": 1,
+      "expected": 6
+    },
+    {
+      "label": "reverse-last",
+      "order": [
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "bowl_id": 6,
+      "expected": 1
+    },
+    {
+      "label": "rotation-wrap",
+      "order": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        1
+      ],
+      "bowl_id": 1,
+      "expected": 6
+    },
+    {
+      "label": "duplicate-last-match",
+      "order": [
+        1,
+        2,
+        1,
+        4,
+        5,
+        6
+      ],
+      "bowl_id": 1,
+      "expected": 3
+    },
+    {
+      "label": "duplicate-missing",
+      "order": [
+        1,
+        2,
+        1,
+        4,
+        5,
+        6
+      ],
+      "bowl_id": 3,
+      "expected": 0
+    },
+    {
+      "label": "negative-value",
+      "order": [
+        0,
+        -2,
+        7,
+        9,
+        4,
+        5
+      ],
+      "bowl_id": -2,
+      "expected": 2
+    },
+    {
+      "label": "noncanonical-positive",
+      "order": [
+        0,
+        -2,
+        7,
+        9,
+        4,
+        5
+      ],
+      "bowl_id": 7,
+      "expected": 3
+    },
+    {
+      "label": "not-found",
+      "order": [
+        0,
+        -2,
+        7,
+        9,
+        4,
+        5
+      ],
+      "bowl_id": 8,
+      "expected": 0
+    },
+    {
+      "label": "all-duplicates-last",
+      "order": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "bowl_id": 6,
+      "expected": 6
+    },
+    {
+      "label": "all-duplicates-absent",
+      "order": [
+        6,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "bowl_id": 1,
+      "expected": 0
+    }
+  ]
+}
