@@ -1,0 +1,14 @@
+with "gnatcoll_gmp.gpr";
+
+-- Separate QA-only executable; original src/*.adb and original GPR stay immutable.
+project Issue29_V168_Native_Foundation is
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "obj_v168";
+   for Exec_Dir use "bin_v168";
+   for Main use ("issue29_v168_native_foundation_probe.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatW8", "-gnata", "-gnatwa");
+   end Compiler;
+end Issue29_V168_Native_Foundation;
