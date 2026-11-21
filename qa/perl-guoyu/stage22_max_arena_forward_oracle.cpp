@@ -1,6 +1,6 @@
 // Independent forward count: enumerate interleavings by month openings, continuations, closings.
 // This does not include or invoke the Perl producer.
-#include <boost/multiprecision/cpp_int.hpp>
+#include <algorithm>
 #include <cstdint>
 #include <iostream>
 #include <fstream>
@@ -9,7 +9,25 @@
 #include <vector>
 #include <array>
 #include <stdexcept>
-using boost::multiprecision::uint256_t;
+// The fixed 12x52 target count fits in 128 bits. Checked additions keep the
+// independent oracle exact without Boost's template-heavy compile footprint.
+using u128 = unsigned __int128;
+static u128 checked_add(u128 a, u128 b) {
+    const u128 max = ~static_cast<u128>(0);
+    if (max - a < b) throw std::overflow_error("uint128 oracle count overflow");
+    return a + b;
+}
+static std::string decimal(u128 value) {
+    if (value == 0) return "0";
+    std::string out;
+    while (value != 0) {
+        const unsigned digit = static_cast<unsigned>(value % 10);
+        out.push_back(static_cast<char>('0' + digit));
+        value /= 10;
+    }
+    std::reverse(out.begin(), out.end());
+    return out;
+}
 int main(int argc, char** argv) {
     const std::vector<int> L={3,4,4,5,5,5,5,5,5,4,4,3};
     const int m=(int)L.size();
@@ -36,7 +54,7 @@ int main(int argc, char** argv) {
             uint32_t idx=r.offset+code;rid[idx]=k;layer[used].push_back(idx);
         }
     }
-    std::vector<uint256_t> count(cap);
+    std::vector<u128> count(cap);
     count[0]=1;
     uint64_t live=0,edges=0;
     for(int d=0;d<days;++d){
@@ -48,44 +66,44 @@ int main(int argc, char** argv) {
             if(r.opened<m){
                 if(L[r.opened]>1){
                     const auto&target=ranges[range_id[r.opened+1][r.closed]];
-                    count[target.offset+code]+=count[i];++edges;
+                    count[target.offset+code]=checked_add(count[target.offset+code],count[i]);++edges;
                 } else if(r.opened==r.closed){
                     const auto&target=ranges[range_id[r.opened+1][r.closed+1]];
-                    count[target.offset]+=count[i];++edges;
+                    count[target.offset]=checked_add(count[target.offset],count[i]);++edges;
                 }
             }
             for(int j=r.closed+1;j<=r.opened;++j){
                 int radix=L[j-1]-1;
                 int digit=(code/r.weight[j])%radix;
                 if(digit+1<radix){
-                    count[i+r.weight[j]]+=count[i];++edges;
+                    count[i+r.weight[j]]=checked_add(count[i+r.weight[j]],count[i]);++edges;
                 }else if(j==r.closed+1){
                     const auto&target=ranges[range_id[r.opened][r.closed+1]];
-                    count[target.offset+code/radix]+=count[i];++edges;
+                    count[target.offset+code/radix]=checked_add(count[target.offset+code/radix],count[i]);++edges;
                 }
             }
         }
     }
     const auto& terminal=ranges[range_id[m][m]];
-    const uint256_t total=count[terminal.offset];
-    std::cout<<total<<"\n";
+    const u128 total=count[terminal.offset];
+    std::cout<<decimal(total)<<"\n";
     count.clear(); count.shrink_to_fit();
     std::cerr<<"profile_months="<<m<<" days="<<days<<" capacity="<<cap<<" live_states="<<live<<" forward_edges="<<edges<<"\n";
     if(argc>1){
-        std::vector<uint256_t> suffix(cap);
+        std::vector<u128> suffix(cap);
         suffix[terminal.offset]=1;
         for(int d=days-1;d>=0;--d){
             for(uint32_t i:layer[d]){
                 const auto &r=ranges[rid[i]];uint32_t code=i-r.offset;
-                uint256_t sum=0;
+                u128 sum=0;
                 if(r.opened<m){
-                    if(L[r.opened]>1)sum+=suffix[ranges[range_id[r.opened+1][r.closed]].offset+code];
-                    else if(r.opened==r.closed)sum+=suffix[ranges[range_id[r.opened+1][r.closed+1]].offset];
+                    if(L[r.opened]>1)sum=checked_add(sum,suffix[ranges[range_id[r.opened+1][r.closed]].offset+code]);
+                    else if(r.opened==r.closed)sum=checked_add(sum,suffix[ranges[range_id[r.opened+1][r.closed+1]].offset]);
                 }
                 for(int j=r.closed+1;j<=r.opened;++j){
                     int radix=L[j-1]-1, digit=(code/r.weight[j])%radix;
-                    if(digit+1<radix)sum+=suffix[i+r.weight[j]];
-                    else if(j==r.closed+1)sum+=suffix[ranges[range_id[r.opened][r.closed+1]].offset+code/radix];
+                    if(digit+1<radix)sum=checked_add(sum,suffix[i+r.weight[j]]);
+                    else if(j==r.closed+1)sum=checked_add(sum,suffix[ranges[range_id[r.opened][r.closed+1]].offset+code/radix]);
                 }
                 suffix[i]=sum;
             }
@@ -96,7 +114,7 @@ int main(int argc, char** argv) {
         std::stringstream words(line);std::string token;std::vector<int> word;
         while(std::getline(words,token,','))word.push_back(std::stoi(token));
         if((int)word.size()!=days)throw std::runtime_error("word length differs from 52");
-        uint256_t ordinal=1;int opened=0,closed=0;uint32_t code=0;
+        u128 ordinal=1;int opened=0,closed=0;uint32_t code=0;
         for(int value:word){
             const auto&r=ranges[range_id[opened][closed]];
             bool selected=false;
@@ -114,14 +132,14 @@ int main(int argc, char** argv) {
                     else continue;
                 }
                 auto nextIndex=ranges[range_id[no][nc]].offset+nextCode;
-                if(j<value){ordinal+=suffix[nextIndex];continue;}
+                if(j<value){ordinal=checked_add(ordinal,suffix[nextIndex]);continue;}
                 if(j==value){opened=no;closed=nc;code=nextCode;selected=true;break;}
                 break;
             }
             if(!selected)throw std::runtime_error("lexically invalid word");
         }
         if(opened!=m||closed!=m)throw std::runtime_error("incomplete word");
-        std::cout<<"lexical_ordinal="<<ordinal<<"\n";
+        std::cout<<"lexical_ordinal="<<decimal(ordinal)<<"\n";
     }
     return 0;
 }

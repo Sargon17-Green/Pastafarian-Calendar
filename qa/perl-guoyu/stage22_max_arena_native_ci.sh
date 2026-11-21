@@ -30,10 +30,7 @@ test "$(git rev-parse "HEAD:$ORACLE")" = "$EXPECTED_ORACLE"
 test "$GITHUB_SHA" = "$(git rev-parse HEAD)"
 test "$GITHUB_REF_NAME" = 'Perl+國語'
 sha256sum "$PRODUCER" "$ORACLE" > "$LOG/source.sha256"
-if [[ ! -r /usr/include/boost/multiprecision/cpp_int.hpp ]]; then
-  sudo apt-get update -qq
-  sudo apt-get install -y -qq libboost-dev
-fi
+# The fixed 12x52 target fits in checked uint128 arithmetic; no Boost dependency is needed.
 run_case() {
   local name="$1" status=0 rss
   shift
