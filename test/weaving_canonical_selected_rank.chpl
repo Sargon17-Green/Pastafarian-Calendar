@@ -8,12 +8,12 @@ use NormativeOracle;
 config const rootDecimal = "";
 
 proc csvLengths(const ref values: list(int)): string {
-  var out = "";
+  var csv = "";
   for value in values {
-    if out != "" then out += ",";
-    out += value:string;
+    if csv != "" then csv += ",";
+    csv += value:string;
   }
-  return out;
+  return csv;
 }
 
 proc main() {
