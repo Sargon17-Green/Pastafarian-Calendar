@@ -2745,3 +2745,153 @@
                         :error-code (:code (ex-data e))
                         :error-message (.getMessage e)))
         (throw e)))))
+;; DISCOVERY24: precisely the canonical shifted-plus-17 calculation day
+;; (not the previously proven shifted-profile position 16). Test-only,
+;; one bounded production call; independent insertion oracle on success.
+(defn- discovery24-canonieke-plus17-dag [poortlijn]
+  (let [berekening (+' dagen/stichtingsdag 17N)
+        doel berekening
+        jaar (zoeken/vind-doeljaar poortlijn berekening doel)
+        positie (-' doel (:open-gate-day jaar))]
+    (discovery24-verifieer!
+     (and (= 5000N (:number jaar))
+          (= 520N positie)
+          (= -15055654N doel)
+          (= -15056174N (:open-gate-day jaar))
+          (< 1N positie (-' (:close-gate-day jaar)
+                            (:open-gate-day jaar))))
+     :canonical-plus17-position-drift
+     {:year (:number jaar) :calculation-day berekening
+      :target-day doel :position positie})
+    (let [poging
+          (try
+            {:status :bewezen
+             :uitkomst (projectie/kies-prefixdag-zonder-volledige-weving
+                        poortlijn berekening doel 128N 5000000N)}
+            (catch clojure.lang.ExceptionInfo e
+              {:status :geweigerd :code (:code (ex-data e))}))]
+      (if (= :geweigerd (:status poging))
+        (do
+          (discovery24-verifieer!
+           (= :bounded-prefix-budget-unproven (:code poging))
+           :unexpected-canonical-plus17-refusal
+           {:code (:code poging) :target-day doel :position positie})
+          (println "DISCOVERY24 CANONICAL PLUS17 BOUNDED REFUSAL (NO NUMERIC PROOF)"
+                   {:year 5000N :position positie :code (:code poging)})
+          {:case :canonical-shifted-plus17
+           :status :geweigerd :code (:code poging)
+           :calculation-day berekening :target-day doel
+           :target-year 5000N :position-1-based positie
+           :five-fields-proven? false
+           :selective-prefix-cell-cost :not-proven})
+        (let [staat (orakel/new-gate-state)
+              normjaar (orakel/find-target-year staat berekening doel)
+              normsaus (orakel/sauce
+                        berekening (inc (:open-gate-day normjaar)))
+              aantal-koteletten (orakel/choose-cutlet-count normsaus normjaar)
+              partitie (orakel/choose-cutlet-partition
+                        staat berekening normsaus normjaar aantal-koteletten)
+              kotelet-namen (orakel/choose-cutlet-names
+                             normsaus aantal-koteletten)
+              koteletten (orakel/materialize-cutlets
+                          staat normjaar partitie kotelet-namen)
+              kotelet (some #(when (<= (:first-day %) doel (:last-day %)) %)
+                            koteletten)
+              maanden (orakel/choose-month-count normsaus normjaar)
+              lengten (orakel/choose-month-lengths normsaus normjaar maanden)
+              maandnamen (orakel/choose-month-names normsaus maanden)
+              tellingen (mapv #(onafhankelijke-prefix-telling lengten %)
+                              derde-prefix-opties)
+              totaal (reduce +' 0N tellingen)
+              weefrang (orakel/choose-rank
+                        (orakel/ask-bowl normsaus
+                                         4 orakel/seal-month-weaving)
+                        totaal)
+              normprefix (onafhankelijk-prefix-tot-positie
+                          lengten weefrang 520)
+              maand (peek normprefix)
+              verwacht [(:number normjaar)
+                        (:name-index kotelet)
+                        (inc (-' doel (:first-day kotelet)))
+                        (nth maandnamen (dec (int maand)))
+                        (bigint (count (filter #(= maand %) normprefix)))]
+              actueel (:uitkomst poging)
+              kosten (:month-prefix-cell-upper-bound actueel)]
+          (discovery24-verifieer!
+           (and kotelet
+                (= 5000N (:number normjaar))
+                (= (:number jaar) (:number normjaar))
+                (= 520N (-' doel (:open-gate-day normjaar)))
+                (= (-' (:close-gate-day normjaar)
+                        (:open-gate-day normjaar))
+                   (reduce +' 0N lengten))
+                (= totaal (weving/aantal-wevingen-groot lengten))
+                (<= 1N weefrang totaal)
+                (= 520 (count normprefix))
+                (< 520 (reduce +' 0N lengten))
+                (= 5 (count verwacht))
+                (every? integer? verwacht)
+                (= verwacht (:date-components actueel))
+                (= normprefix (:month-prefix actueel))
+                (= 520N (:prefix-position actueel))
+                (= :bounded-prefix-only (:date-proof-scope actueel))
+                (false? (:month-weaving-computed? actueel))
+                (not (contains? actueel :month-weaving))
+                (integer? kosten)
+                (<= 0N kosten 5000000N))
+           :independent-canonical-plus17-differential-failed
+           {:target-day doel :expected-fields verwacht
+            :actual-fields (:date-components actueel)
+            :expected-prefix normprefix
+            :actual-prefix (:month-prefix actueel)
+            :observed-cells kosten})
+          (println "DISCOVERY24 CANONICAL PLUS17 INDEPENDENT FIVE-FIELD MATCH"
+                   {:year 5000N :position 520N :fields verwacht :cells kosten})
+          {:case :canonical-shifted-plus17
+           :status :bewezen :calculation-day berekening :target-day doel
+           :target-year 5000N :position-1-based 520N
+           :five-fields-proven? true
+           :independent-expected-fields verwacht
+           :actual-fields (:date-components actueel)
+           :independent-prefix normprefix
+           :actual-prefix (:month-prefix actueel)
+           :reported-prefix-cells kosten
+           :scope :bounded-prefix-only
+           :full-weaving-computed? false})))))
+
+(defn run-discovery24-canonical-plus17-feasibility!
+  "One canonical shifted-plus-17 position-520 probe, never Stage2 acceptance."
+  []
+  (let [pad "qa/discovery24_canonical_plus17_feasibility.edn"
+        basis {:project-id "PC-BRANCH-CLOJURE-DUTCH"
+               :github-sha (System/getenv "GITHUB_SHA")
+               :case :canonical-shifted-plus17
+               :legacy-generic-e2e-proven 0
+               :legacy-generic-e2e-refused 7
+               :legacy-budget 100000N
+               :search-budget 128N
+               :selective-prefix-budget 5000000N
+               :probe-status :pending-one-attempt
+               :stage2-accepted? false}
+        schrijf! (fn [gegevens]
+                   (.mkdirs (java.io.File. "qa"))
+                   (spit pad (str (pr-str gegevens) "\n")))]
+    (discovery24-verifieer!
+     (boolean (re-matches #"[0-9a-f]{40}" (or (:github-sha basis) "")))
+     :missing-exact-source-sha {:github-sha (:github-sha basis)})
+    (schrijf! basis)
+    (try
+      (let [proef (discovery24-canonieke-plus17-dag @lijn)
+            eind (assoc basis :probe proef :probe-status (:status proef)
+                        :stage2-accepted? false)]
+        (schrijf! eind)
+        (println "DISCOVERY24 CANONICAL PLUS17 FINAL"
+                 {:position 520N :status (:status proef)
+                  :five-fields-proven? (:five-fields-proven? proef)
+                  :stage2-accepted? false})
+        eind)
+      (catch Exception e
+        (schrijf! (assoc basis :probe-status :unexpected-failure
+                        :error-code (:code (ex-data e))
+                        :error-message (.getMessage e)))
+        (throw e)))))
