@@ -79,16 +79,16 @@ def fixture(cases, index, mutant=None):
         checks = [
             (f'b;g;!d=', "ARG_CELL"),
             ('b;s;-0=', "ARG_HANDLE"),
-            ('o;b;-0=~', "OUTPUT_ARG_ALIAS"),
-            ('o;d;-0=~', "OUTPUT_BIG_ALIAS"),
+            ('o;b;-0=', "OUTPUT_ARG_ALIAS"),
+            ('o;d;-0=', "OUTPUT_BIG_ALIAS"),
             (f'd;g;!{literal(sign)}=', "SIGN"),
             (f'd;1+g;!{literal(count)}=', "LIMB_COUNT"),
         ]
         if mutant == "bad_sign" and i == 0:
             checks[4] = (f'd;g;!{literal(-1 if sign != -1 else 1)}=', "SIGN")
         for expr, suffix in checks:
-            # Alias expressions already encode expected non-equality with 0.
-            condition = expr if expr.endswith("=~") else expr + "~"
+            # Non-alias checks fail on inequality; alias checks fail on equality.
+            condition = expr if suffix.startswith("OUTPUT_") else expr + "~"
             code.append(f'{condition}["{tag}_{suffix}_FAIL"0 0/]?')
             assertions += 1
         for limb_index, value in enumerate(limbs, 2):
