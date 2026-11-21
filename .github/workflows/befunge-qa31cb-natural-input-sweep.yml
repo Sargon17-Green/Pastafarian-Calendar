@@ -21,8 +21,9 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
-          echo 'c4cd888e84b317c73bb844d8afadb3e7017d478e6b8a2c915a5c159c995a80c5  qa/QA31CB_CODE.tar.gz' | sha256sum -c -
           mkdir -p qa31cb-out "$RUNNER_TEMP/qa31cb-traces"
+          echo '434b28e54bab23155606fde529a4d5bbe43a9f32acb317257a3ee8a60e1651f3  qa/QA31CB_CODE.tar.gz' | sha256sum -c -
+          tar -tzf qa/QA31CB_CODE.tar.gz >/dev/null
           tar -xzf qa/QA31CB_CODE.tar.gz -C qa
           python3 -m py_compile qa/qa31cb_natural_input_sweep.py qa/qa31cb_independent_audit.py
           cp qa/qa31cb_source_cells.json qa31cb-out/qa31cb_source_cells.json
@@ -35,8 +36,8 @@ jobs:
       - name: Execute 900 fresh Native cases with unmodified stdin and source
         shell: bash
         env:
-          GITHUB_SHA: \${{ github.sha }}
-          GITHUB_RUN_ID: \${{ github.run_id }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
           docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
@@ -72,6 +73,7 @@ jobs:
           import hashlib,json
           from pathlib import Path
           root=Path('qa31cb-out')
+          root.mkdir(parents=True,exist_ok=True)
           files={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
                  for p in sorted(root.rglob('*')) if p.is_file() and p.name!='qa31cb_artifact_manifest.json'}
           (root/'qa31cb_artifact_manifest.json').write_text(json.dumps(
