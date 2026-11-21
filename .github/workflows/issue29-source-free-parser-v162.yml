@@ -1,0 +1,54 @@
+name: Issue29 v162 source-free evidence parser QA (zero foundation calls)
+on:
+  push:
+    branches:
+      - qa/issue29-foundation-causal-v160
+    paths:
+      - .github/workflows/issue29-source-free-parser-v162.yml
+permissions:
+  contents: read
+jobs:
+  parser-only-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify halt, consumed v161 authorization, and static-only test scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text())
+          assert d["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert d["incident_issue"]==29
+          assert d["main_changes_permitted"] is False
+          assert d["successful_original_source_full_years"]==0
+          w=Path(".github/workflows/issue29-foundation-causal-v161-once.yml").read_text()
+          assert "if: " + chr(36) + "{{ false }}" in w
+          assert "workflow_dispatch:" in w and "  push:" not in w
+          print("V162_ALL_FOUNDATION_WORKFLOWS_DISABLED")
+          PY
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_issue29_v162_parser_static.py' -v \
+            > evidence/v162-parser-regressions.log 2>&1 || {
+            cat evidence/v162-parser-regressions.log
+            exit 1
+          }
+          cat evidence/v162-parser-regressions.log
+          grep -Eq '^Ran 3 tests ' evidence/v162-parser-regressions.log
+          grep -Fx 'OK' evidence/v162-parser-regressions.log
+          python3 -B -m py_compile soak/runner/issue29_analyze_foundation_v161.py
+          git rev-parse HEAD > evidence/v162-tested-commit.txt
+          echo 'ORIGINAL_FCT_CALLS=0; QA_FCT_CALLS=0; SOAK_YEARS=0' > evidence/v162-no-date-calls.txt
+      - name: Upload source-free parser CI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v162-source-free-parser-tests
+          path: evidence/
+          retention-days: 30
