@@ -178,11 +178,12 @@ def source_guard() -> dict:
     # declaration and its body definition; there is no call site in src/tests.
     matches = git("grep", "-n", "-F", "Calendar_Date", "--", "src", "tests/stage01_tests.adb", "tests/stage03_patch01_tests.adb", "tests/stage05_patch02_tests.adb").decode().splitlines()
     expected_matches = [
-        "src/normative_oracle.adb:1113:    function Calendar_Date",
+        "src/normative_oracle.adb:1113:   function Calendar_Date",
+        "src/normative_oracle.adb:1199:   end Calendar_Date;",
         "src/normative_oracle.ads:68:   function Calendar_Date",
     ]
     insist(matches == expected_matches, "unexpected Calendar_Date reference/call site: " + repr(matches))
-    insist(oracle.count("Calendar_Date") == 1 and spec.count("Calendar_Date") == 1,
+    insist(oracle.count("Calendar_Date") == 2 and spec.count("Calendar_Date") == 1,
            "Calendar_Date source declaration/definition changed")
     insist("Calendar_Date" not in bootstrap, "bootstrap package unexpectedly references Calendar_Date")
 
