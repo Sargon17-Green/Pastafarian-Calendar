@@ -2625,3 +2625,123 @@
                         :error-code (:code (ex-data e))
                         :error-message (.getMessage e)))
         (throw e)))))
+
+
+;; DISCOVERY24 NEXT-YEAR P1: exactly one NEW canonical case (year 5001).
+;; The independent calendar oracle below never calls production prefix-rank
+;; logic. Every admissible lexicographic weaving starts with month ID 1.
+(defn- discovery24-een-eerste-dag-volgend-jaar [poortlijn]
+  (let [berekening dagen/stichtingsdag
+        basis (zoeken/vind-doeljaar poortlijn berekening berekening)
+        grens (inc (:close-gate-day basis))
+        volgend (zoeken/vind-doeljaar poortlijn berekening grens)
+        doel (inc (:open-gate-day volgend))]
+    (discovery24-verifieer!
+     (and (= 5000N (:number basis))
+          (= 5001N (:number volgend))
+          (= grens doel)
+          (= (:close-gate-day basis) (:open-gate-day volgend)))
+     :unexpected-next-year-boundary
+     {:base-year (:number basis) :next-year (:number volgend)
+      :first-next-day doel :boundary grens})
+    (let [poging (try
+                   {:status :bewezen
+                    :uitkomst (projectie/kies-prefixdag-zonder-volledige-weving
+                               poortlijn berekening doel 128N 5000000N)}
+                   (catch clojure.lang.ExceptionInfo e
+                     {:status :geweigerd :code (:code (ex-data e))}))]
+      (if (= :geweigerd (:status poging))
+        (do
+          (discovery24-verifieer!
+           (= :bounded-prefix-budget-unproven (:code poging))
+           :unexpected-next-year-refusal
+           {:target-day doel :code (:code poging)})
+          (println "DISCOVERY24 NEXT-YEAR P1 BOUNDED REFUSAL (NOT PASS)"
+                   {:target-day doel :code (:code poging)})
+          {:case :next-year-first :status :geweigerd
+           :code (:code poging)
+           :calculation-day berekening :target-day doel
+           :target-year 5001N :position-1-based 1N
+           :five-fields-proven? false
+           :selective-prefix-cell-cost :not-proven})
+        (let [normstaat (orakel/new-gate-state)
+              normjaar (orakel/find-target-year normstaat berekening doel)
+              ;; Normative first-day oracle independently chooses the
+              ;; year, cutlet partition/name and month names/lengths.
+              ;; Month-ID 1 is forced by the restricted-growth rule.
+              verwacht (normatieve-eerste-jaardag berekening doel)
+              actueel (:uitkomst poging)
+              kosten (:month-prefix-cell-upper-bound actueel)]
+          (discovery24-verifieer!
+           (and (= 5001N (:number normjaar))
+                (= (:open-gate-day volgend) (:open-gate-day normjaar))
+                (= doel (inc (:open-gate-day normjaar)))
+                (= 5 (count verwacht))
+                (every? integer? verwacht)
+                (= 5001N (first verwacht))
+                (= 1N (last verwacht))
+                (= verwacht (:date-components actueel))
+                (= [1N] (:month-prefix actueel))
+                (= 1N (:prefix-position actueel))
+                (= :bounded-prefix-only (:date-proof-scope actueel))
+                (false? (:month-weaving-computed? actueel))
+                (not (contains? actueel :month-weaving))
+                (integer? kosten)
+                (<= 0N kosten 5000000N))
+           :independent-next-year-first-day-differential-failed
+           {:expected-fields verwacht
+            :actual-fields (:date-components actueel)
+            :expected-month-id 1N
+            :actual-prefix (:month-prefix actueel)
+            :observed-cells kosten
+            :target-day doel})
+          (println "DISCOVERY24 NEXT-YEAR P1 INDEPENDENT MATCH"
+                   {:year 5001N :target-day doel :fields verwacht
+                    :month-id 1N :cells kosten})
+          {:case :next-year-first :status :bewezen
+           :calculation-day berekening :target-day doel
+           :target-year 5001N :position-1-based 1N
+           :independent-expected-fields verwacht
+           :actual-fields (:date-components actueel)
+           :independent-month-id 1N :actual-month-prefix (:month-prefix actueel)
+           :five-fields-proven? true
+           :reported-prefix-cells kosten
+           :scope :bounded-prefix-only
+           :full-weaving-computed? false})))))
+
+(defn run-discovery24-next-year-first-day-feasibility!
+  "Single opt-in canonical year-5001 first-day witness with exact-SHA EDN."
+  []
+  (let [pad "qa/discovery24_next_year_first_day_feasibility.edn"
+        basis {:project-id "PC-BRANCH-CLOJURE-DUTCH"
+               :github-sha (System/getenv "GITHUB_SHA")
+               :case :next-year-first
+               :legacy-generic-e2e-proven 0
+               :legacy-generic-e2e-refused 7
+               :legacy-budget 100000N
+               :search-budget 128N
+               :selective-prefix-budget 5000000N
+               :probe-status :pending-one-attempt
+               :stage2-accepted? false}
+        schrijf! (fn [gegevens]
+                   (.mkdirs (java.io.File. "qa"))
+                   (spit pad (str (pr-str gegevens) "\n")))]
+    (discovery24-verifieer!
+     (boolean (re-matches #"[0-9a-f]{40}" (or (:github-sha basis) "")))
+     :missing-exact-source-sha {:github-sha (:github-sha basis)})
+    (schrijf! basis)
+    (try
+      (let [proef (discovery24-een-eerste-dag-volgend-jaar @lijn)
+            eind (assoc basis :probe proef :probe-status (:status proef)
+                        :stage2-accepted? false)]
+        (schrijf! eind)
+        (println "DISCOVERY24 NEXT-YEAR P1 FINAL"
+                 {:year 5001N :status (:status proef)
+                  :five-fields-proven? (:five-fields-proven? proef)
+                  :stage2-accepted? false})
+        eind)
+      (catch Exception e
+        (schrijf! (assoc basis :probe-status :unexpected-failure
+                        :error-code (:code (ex-data e))
+                        :error-message (.getMessage e)))
+        (throw e)))))
