@@ -1,0 +1,117 @@
+name: Issue29 v169 GMP-aware legacy Stage01 Stage03 Stage05 build checks (ZERO F)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-legacy-build-v169
+    paths:
+      - '.github/workflows/issue29-v169-gmp-aware-legacy-native-compile-no-F.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-gnatcoll-gmp-legacy-compile-no-F:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify exact unchanged Ada development source identity and inspect historical CI blocker
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' > evidence/source-identity.json
+          import json,subprocess,sys
+          from pathlib import Path
+          sys.path.insert(0,"tests")
+          from issue29_v168_single_native_guard import source_guard, BASE
+          receipt=source_guard()
+          head=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
+          subprocess.run(["git","merge-base","--is-ancestor",BASE,head],check=True)
+          changed=subprocess.check_output(["git","diff","--name-only",BASE,head],text=True).splitlines()
+          assert all(not x.startswith("src/") for x in changed),changed
+          assert all(x in (
+              ".github/workflows/issue29-v168-single-development-foundation.yml",
+              ".github/workflows/issue29-v169-gmp-aware-legacy-native-compile-no-F.yml",
+              "issue29_v168_native_foundation.gpr",
+              "issue29_v169_gmp_aware_legacy_compile.gpr",
+              "tests/issue29_v168_native_foundation_probe.adb",
+              "tests/issue29_v168_single_native_guard.py"
+          ) for x in changed), changed
+          old=Path(".github/workflows/canonical-names-lock.yml").read_text()
+          assert "sudo apt-get install -y gnat gprbuild" in old
+          assert "libgnatcoll-gmp-dev" not in old
+          for p in ("run_stage03_patch01.sh","run_stage05_patch02.sh"):
+              t=Path(p).read_text()
+              assert "gnatmake " in t and "-Isrc -Itests" in t
+          print(json.dumps({"status":"SOURCE_LOCKED_LEGACY_NATIVE_COMPILE_ONLY",
+                            "head":head,"baseline":BASE,
+                            "source":receipt,"changed_files":changed,
+                            "legacy_ci_missing_gmp_apt_dependency":True,
+                            "legacy_scripts_use_gnatmake_without_gmp_gpr_linkage":True,
+                            "new_native_F_calls":0,"original_soak_years":0},
+                           sort_keys=True,indent=2))
+          PY
+      - name: Install GNAT 2022, GPRBuild and GNATCOLL GMP from Ubuntu repositories
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/gmp-package-versions.txt
+      - name: Compile and LINK all three legacy Ada test entrypoints using explicit GMP-aware project, execute NONE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import os,subprocess,hashlib,json,pathlib
+          from pathlib import Path
+          results=[]
+          for name in ("stage01_tests","stage03_patch01_tests","stage05_patch02_tests"):
+              env=dict(os.environ,NATIVE_MAIN=name+".adb")
+              args=["timeout","--signal=KILL","120s","gprbuild","-p","-j2",
+                    "-P","issue29_v169_gmp_aware_legacy_compile.gpr",
+                    "-XNATIVE_MAIN="+name+".adb"]
+              output=subprocess.run(args,env=env,capture_output=True,timeout=130)
+              Path("evidence",name+".build.stdout").write_bytes(output.stdout[:1024*1024])
+              Path("evidence",name+".build.stderr").write_bytes(output.stderr[:1024*1024])
+              assert output.returncode==0,(name,output.returncode,output.stderr[-3000:])
+              binary=Path("bin_v169",name)
+              assert binary.is_file(),name
+              results.append({"name":name,"gprbuild_exit":output.returncode,
+                              "binary_sha256":hashlib.sha256(binary.read_bytes()).hexdigest(),
+                              "binary_bytes":binary.stat().st_size,
+                              "original_calendar_F_invocations":0,
+                              "binary_executed":False})
+          Path("evidence","v169-compile-verdict.json").write_text(
+              json.dumps({"status":"GMP_AWARE_GPR_LEGACY_STAGE01_STAGE03_STAGE05_LINK_PASS_NO_F",
+                          "entries":results,
+                          "all_binaries_executed":False,
+                          "original_full_years_certified":0,
+                          "soak_dispatch_allowed":False},sort_keys=True,indent=2)+"\n")
+          print("V169_THREE_LEGACY_ENTRYPOINTS_COMPILE_LINK_PASS_ZERO_NATIVE_F")
+          PY
+      - name: Hash QA evidence and archive even if compilation fails
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          d=Path("evidence");d.mkdir(exist_ok=True)
+          out={p.name:{"bytes":p.stat().st_size,
+                       "sha256":hashlib.sha256(p.read_bytes()).hexdigest()}
+               for p in d.iterdir() if p.is_file() and p.name!="manifest.sha256.json"}
+          (d/"manifest.sha256.json").write_text(json.dumps(out,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Upload compile-only GMP-aware baseline/legacy comparison (NO F)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v169-legacy-gmp-aware-native-compile-only-zero-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
