@@ -45,7 +45,7 @@ jobs:
           gnatmake --version > evidence/gnat-version.txt
           gprbuild --version > evidence/gpr-version.txt
           dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/installed-gmp-versions.txt
-      - name: Compile GMP all-legal-family engine and two independent test programs
+      - name: Compile GMP full-family engine, independent exhaustive tests and rank oracle
         shell: bash
         run: |
           set -euo pipefail
@@ -61,6 +61,16 @@ jobs:
           ) > evidence/small.stdout 2> evidence/small.stderr
           grep -F V164_ALL_SEVEN_GMP_EXHAUSTIVE_CASES_PASS_NO_CALENDAR_F evidence/small.stdout
           grep -c '^V164_GMP_SMALL_EXHAUSTIVE_PASS_' evidence/small.stdout | grep -Fx 7
+      - name: Check thirteen exact GMP rank vectors against independent Python-int constants
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            ulimit -v 262144
+            timeout --signal=KILL 20s               ./soak/candidates/ada_full_weave_gmp_v164/bin/test_issue29_wide_rank_gmp_v164
+          ) > evidence/ranks.stdout 2> evidence/ranks.stderr
+          grep -Fx V164_ALL_13_GMP_EXACT_RANK_VECTORS_PASS_NO_CALENDAR_F evidence/ranks.stdout
+          grep -c '^V164_GMP_WIDE_RANK_VECTOR_PASS' evidence/ranks.stdout | grep -Fx 13
       - name: Bounded synthetic 45-month 4244-day count and rank-one unranking
         shell: bash
         run: |
@@ -71,6 +81,30 @@ jobs:
           ) > evidence/large.stdout 2> evidence/large.stderr
           grep -F V164_GMP_45_MONTH_4244_DAY_SYNTHETIC_RANK1_PASS_NO_F evidence/large.stdout
           echo "QA_SYNTHETIC_ONLY_NO_FCT_CALLS; NO_SOAK_YEARS" > evidence/verdict.txt
+      - name: Verify 22734-bit GMP count against independent Python-int dynamic programming
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/check_gmp_count_against_independent_dp_v164.py             evidence/large.stdout evidence/independent-count-verified.json             > evidence/independent-count.stdout 2> evidence/independent-count.stderr
+          grep -Fx V164_INDEPENDENT_45x4244_EXACT_GMP_BIG_INTEGER_COUNT_EQUAL             evidence/independent-count.stdout
+      - name: Reconstruct byte-locked historical Ada into reversible QA-only GMP integration
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/issue29_foundation_capture_v160.py prepare             --root "$RUNNER_TEMP/issue29-v164-qa"             > evidence/prepare.stdout 2> evidence/prepare.stderr
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/integrate_gmp_qa_only_v164.py             "$RUNNER_TEMP/issue29-v164-qa"             soak/candidates/ada_full_weave_gmp_v164             > evidence/oracle-adapter.stdout 2> evidence/oracle-adapter.stderr
+          cp "$RUNNER_TEMP/issue29-v164-qa/v164-qa-integration-receipt.json" evidence/
+          cp "$RUNNER_TEMP/issue29-v164-qa/v164-qa-oracle.patch" evidence/
+          echo "V164_ORACLE_SOURCE_QA_ONLY_NO_CALENDAR_EXECUTION" > evidence/oracle-source-status.txt
+      - name: Compile integrated historical Ada QA oracle with full GMP rank and weaving (DO NOT RUN)
+        shell: bash
+        run: |
+          set -euo pipefail
+          gprbuild -p -c -P "$RUNNER_TEMP/issue29-v164-qa/ada-build/issue29_gmp_oracle_qa_compile.gpr"             -j2 > evidence/oracle-compile.stdout 2> evidence/oracle-compile.stderr
+          echo "V164_GMP_ORACLE_QA_FULL_COMPILATION_PASS_NO_F" > evidence/oracle-compile-verdict.txt
+          echo "ORIGINAL_FCT_CALLS=0; QA_FCT_CALLS=0; SOAK_YEARS=0" >> evidence/oracle-compile-verdict.txt
       - name: Hash every saved diagnostic member even if a test failed
         if: always()
         shell: bash
