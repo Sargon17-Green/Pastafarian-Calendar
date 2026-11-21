@@ -139,27 +139,85 @@ final class BigInt
 
     public function mul(self $other): self
     {
-        if ($this->isZero() || $other->isZero()) {
-            return self::zero();
-        }
-        $out = array_fill(0, count($this->limbs) + count($other->limbs) + 1, 0);
-        foreach ($this->limbs as $i => $a) {
-            $carry = 0;
-            foreach ($other->limbs as $j => $b) {
-                $idx = $i + $j;
-                $cur = $out[$idx] + $a * $b + $carry;
-                $out[$idx] = $cur % self::BASE;
-                $carry = intdiv($cur, self::BASE);
-            }
-            $idx = $i + count($other->limbs);
-            while ($carry > 0) {
-                $cur = $out[$idx] + $carry;
-                $out[$idx] = $cur % self::BASE;
-                $carry = intdiv($cur, self::BASE);
-                $idx++;
-            }
-        }
+        if ($this->isZero() || $other->isZero()) return self::zero();
+        $out = self::multiplyAbsLimbs($this->limbs, $other->limbs);
         return new self($this->sign * $other->sign, $out);
+    }
+
+    /**
+     * Karatsuba multiplication for large operands, with a schoolbook base case.
+     * @param list<int> $a
+     * @param list<int> $b
+     * @return list<int>
+     */
+    private static function multiplyAbsLimbs(array $a, array $b): array
+    {
+        while (count($a) > 1 && $a[array_key_last($a)] === 0) array_pop($a);
+        while (count($b) > 1 && $b[array_key_last($b)] === 0) array_pop($b);
+        if ((count($a) === 1 && $a[0] === 0) || (count($b) === 1 && $b[0] === 0)) return [0];
+        if (count($a) === 1 && $a[0] === 1) return $b;
+        if (count($b) === 1 && $b[0] === 1) return $a;
+        if (min(count($a), count($b)) <= 32) return self::multiplySchoolbookLimbs($a, $b);
+
+        $split = intdiv(max(count($a), count($b)), 2);
+        $a0 = array_slice($a, 0, $split);
+        $a1 = array_slice($a, $split);
+        $b0 = array_slice($b, 0, $split);
+        $b1 = array_slice($b, $split);
+        if ($a0 === []) $a0 = [0];
+        if ($a1 === []) $a1 = [0];
+        if ($b0 === []) $b0 = [0];
+        if ($b1 === []) $b1 = [0];
+
+        $z0 = self::multiplyAbsLimbs($a0, $b0);
+        $z2 = self::multiplyAbsLimbs($a1, $b1);
+        $z1 = self::multiplyAbsLimbs(self::addAbsLimbs($a0, $a1), self::addAbsLimbs($b0, $b1));
+        $z1 = self::subAbsLimbs($z1, $z0);
+        $z1 = self::subAbsLimbs($z1, $z2);
+
+        $out = [];
+        self::addShiftedLimbs($out, $z0, 0);
+        self::addShiftedLimbs($out, $z1, $split);
+        self::addShiftedLimbs($out, $z2, 2 * $split);
+        while (count($out) > 1 && $out[array_key_last($out)] === 0) array_pop($out);
+        return $out;
+    }
+
+    /** @param list<int> $a @param list<int> $b @return list<int> */
+    private static function multiplySchoolbookLimbs(array $a, array $b): array
+    {
+        $out = array_fill(0, count($a) + count($b) + 1, 0);
+        foreach ($a as $i => $left) {
+            $carry = 0;
+            foreach ($b as $j => $right) {
+                $index = $i + $j;
+                $current = $out[$index] + $left * $right + $carry;
+                $out[$index] = $current % self::BASE;
+                $carry = intdiv($current, self::BASE);
+            }
+            $index = $i + count($b);
+            while ($carry > 0) {
+                $current = $out[$index] + $carry;
+                $out[$index] = $current % self::BASE;
+                $carry = intdiv($current, self::BASE);
+                ++$index;
+            }
+        }
+        while (count($out) > 1 && $out[array_key_last($out)] === 0) array_pop($out);
+        return $out;
+    }
+
+    /** @param list<int> $part */
+    private static function addShiftedLimbs(array &$out, array $part, int $offset): void
+    {
+        $carry = 0;
+        $length = count($part);
+        for ($i = 0; $i < $length || $carry > 0; ++$i) {
+            $index = $offset + $i;
+            $current = ($out[$index] ?? 0) + ($part[$i] ?? 0) + $carry;
+            $out[$index] = $current % self::BASE;
+            $carry = intdiv($current, self::BASE);
+        }
     }
 
     public function mulSmall(int $factor): self

@@ -1391,7 +1391,7 @@ jobs:
         with:
           php-version: '8.3'
           coverage: none
-      - name: Exact-SHA B4 rank/unrank via shared B3 sibling blocks
+      - name: Exact-SHA B4 rank/unrank via suffix DP with bounded B3 fallback
         shell: bash
         run: |
           set -uo pipefail
@@ -1400,26 +1400,29 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > stage56-b4-evidence/SHA.txt
           php -v > stage56-b4-evidence/php-version.txt
           test "$(php -r 'echo PHP_INT_SIZE;')" = 8 || exit 1
-          php -l src/BigInt.php > stage56-b4-evidence/lint-bigint.txt 2>&1; l1=$?
-          php -l src/Patches/MonthWeavingFrontier56.php > stage56-b4-evidence/lint-frontier.txt 2>&1; l2=$?
-          php -l src/Patches/MonthWeavingAdjoint56.php > stage56-b4-evidence/lint-adjoint.txt 2>&1; l3=$?
-          php -l src/Patches/MonthWeavingRanker56.php > stage56-b4-evidence/lint-ranker.txt 2>&1; l4=$?
-          php -l tests/stage56_weaving_frontier.php > stage56-b4-evidence/lint-oracle.txt 2>&1; l5=$?
-          php -l tests/stage56_weaving_ranker.php > stage56-b4-evidence/lint-b4.txt 2>&1; l6=$?
-          timeout 900s php -d memory_limit=512M tests/stage56_weaving_ranker.php > stage56-b4-evidence/stdout.txt 2> stage56-b4-evidence/stderr.txt
-          code=$?
-          printf 'lint_bigint=%s\nlint_frontier=%s\nlint_adjoint=%s\nlint_ranker=%s\nlint_oracle=%s\nlint_b4=%s\nexit=%s\n' \
-            "$l1" "$l2" "$l3" "$l4" "$l5" "$l6" "$code" > stage56-b4-evidence/exit.txt
-          cat stage56-b4-evidence/lint-*.txt stage56-b4-evidence/stdout.txt
-          if (( l1 != 0 || l2 != 0 || l3 != 0 || l4 != 0 || l5 != 0 || l6 != 0 || code != 0 )); then
-            cat stage56-b4-evidence/stderr.txt >&2
+          if php -l src/BigInt.php > stage56-b4-evidence/lint-bigint.txt 2>&1; then l1=0; else l1=$?; fi
+          if php -l src/Patches/MonthWeavingFrontier56.php > stage56-b4-evidence/lint-frontier.txt 2>&1; then l2=0; else l2=$?; fi
+          if php -l src/Patches/MonthWeavingAdjoint56.php > stage56-b4-evidence/lint-adjoint.txt 2>&1; then l3=0; else l3=$?; fi
+          if php -l src/Patches/MonthWeavingInterleaving56.php > stage56-b4-evidence/lint-interleaving.txt 2>&1; then l4=0; else l4=$?; fi
+          if php -l src/Patches/MonthWeavingRanker56.php > stage56-b4-evidence/lint-ranker.txt 2>&1; then l5=0; else l5=$?; fi
+          if php -l tests/stage56_weaving_frontier.php > stage56-b4-evidence/lint-oracle.txt 2>&1; then l6=0; else l6=$?; fi
+          if php -l tests/stage56_weaving_ranker.php > stage56-b4-evidence/lint-b4.txt 2>&1; then l7=0; else l7=$?; fi
+          if php -l tests/stage56_bigint_karatsuba.php > stage56-b4-evidence/lint-karatsuba.txt 2>&1; then l8=0; else l8=$?; fi
+          if php -d memory_limit=512M tests/stage56_bigint_karatsuba.php > stage56-b4-evidence/karatsuba-stdout.txt 2> stage56-b4-evidence/karatsuba-stderr.txt; then bigint=0; else bigint=$?; fi
+          if timeout 900s php -d memory_limit=512M tests/stage56_weaving_ranker.php > stage56-b4-evidence/stdout.txt 2> stage56-b4-evidence/stderr.txt; then code=0; else code=$?; fi
+          printf 'lint_bigint=%s\nlint_frontier=%s\nlint_adjoint=%s\nlint_interleaving=%s\nlint_ranker=%s\nlint_oracle=%s\nlint_b4=%s\nlint_karatsuba=%s\nkaratsuba=%s\nranker=%s\n' \
+            "$l1" "$l2" "$l3" "$l4" "$l5" "$l6" "$l7" "$l8" "$bigint" "$code" > stage56-b4-evidence/exit.txt
+          cat stage56-b4-evidence/lint-*.txt stage56-b4-evidence/karatsuba-stdout.txt stage56-b4-evidence/stdout.txt
+          if (( l1 != 0 || l2 != 0 || l3 != 0 || l4 != 0 || l5 != 0 || l6 != 0 || l7 != 0 || l8 != 0 || bigint != 0 || code != 0 )); then
+            cat stage56-b4-evidence/karatsuba-stderr.txt stage56-b4-evidence/stderr.txt >&2
             exit 1
           fi
-          if [[ -s stage56-b4-evidence/stderr.txt ]]; then
-            cat stage56-b4-evidence/stderr.txt >&2
+          if [[ -s stage56-b4-evidence/karatsuba-stderr.txt || -s stage56-b4-evidence/stderr.txt ]]; then
+            cat stage56-b4-evidence/karatsuba-stderr.txt stage56-b4-evidence/stderr.txt >&2
             exit 1
           fi
-          grep -Fx 'STAGE56_WEAVING_RANKER_B4 vectors=120 words=3940 rank_checks=3940 unrank_checks=3940 positions=83776 out_of_range=360 invalid=5 huge=2 status=PASS' stage56-b4-evidence/stdout.txt
+          grep -Fx 'STAGE56_BIGINT_KARATSUBA_PASS cases=5 max_digits=3000' stage56-b4-evidence/karatsuba-stdout.txt
+          grep -Fx 'STAGE56_WEAVING_RANKER_B4 vectors=120 words=3940 rank_checks=3940 unrank_checks=3940 positions=83776 out_of_range=360 invalid=5 fast_vectors=4 fast_words=31419 legacy_checks=12 huge=2 status=PASS' stage56-b4-evidence/stdout.txt
       - name: Retain SHA-bound B4 Native evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -1681,18 +1684,24 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > stage56-php-real-evidence/SHA.txt
           php -v > stage56-php-real-evidence/php-version.txt
           test "$(php -r 'echo PHP_INT_SIZE;')" = 8 || exit 1
+          php -l src/BigInt.php > stage56-php-real-evidence/lint-bigint.txt 2>&1 || exit 1
+          php -l src/Patches/MonthWeavingInterleaving56.php > stage56-php-real-evidence/lint-interleaving.txt 2>&1 || exit 1
+          php -l src/Patches/MonthWeavingRanker56.php > stage56-php-real-evidence/lint-ranker.txt 2>&1 || exit 1
           php -l tests/stage56_source_bound_php_year.php > stage56-php-real-evidence/lint.txt 2>&1 || exit 1
           bad=0
           for year in 4999 5000 5001; do
-            timeout 900s php -d memory_limit=512M tests/stage56_source_bound_php_year.php \
+            if timeout 900s php -d memory_limit=512M tests/stage56_source_bound_php_year.php \
               .external-canonical-source \
               stage56-external-evidence/reference.json \
               stage56-external-evidence/external-gates.json \
               stage56-external-evidence/scroll-gates-report.json \
               "$year" "stage56-php-real-evidence/$year.json" \
               > "stage56-php-real-evidence/$year.stdout" \
-              2> "stage56-php-real-evidence/$year.stderr"
-            rc=$?
+              2> "stage56-php-real-evidence/$year.stderr"; then
+              rc=0
+            else
+              rc=$?
+            fi
             printf '%s\n' "$rc" > "stage56-php-real-evidence/$year.exit"
             cat "stage56-php-real-evidence/$year.stdout"
             cat "stage56-php-real-evidence/$year.stderr" >&2

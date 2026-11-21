@@ -102,6 +102,46 @@ foreach ($invalidWords as [$counts, $word]) {
     ++$invalid;
 }
 
+$fastVectors = 0;
+$fastWords = 0;
+$legacyChecks = 0;
+$fastConfigurations = [[4, 4], [4, 4, 4], [4, 5, 4], [5, 5, 5]];
+$legacyRanker = new MonthWeavingRanker56(new MonthWeavingAdjoint56());
+foreach ($fastConfigurations as $counts) {
+    $oracle = enumerate56($counts);
+    usort($oracle, static function (array $a, array $b): int {
+        foreach ($a as $i => $value) if ($value !== $b[$i]) return $value <=> $b[$i];
+        return 0;
+    });
+    $total = $ranker->count($counts);
+    if ($total->toString() !== (string) count($oracle)) {
+        throw new RuntimeException('STAGE56_RANKER_FAST_COUNT_' . implode(',', $counts));
+    }
+    foreach ($oracle as $index => $word) {
+        $expected = BigInt::fromInt($index + 1);
+        if (!$ranker->rank($counts, $word)->equals($expected)) {
+            throw new RuntimeException('STAGE56_RANKER_FAST_RANK_' . implode(',', $counts) . '_' . $index);
+        }
+        if ($ranker->unrank($counts, $expected) !== $word) {
+            throw new RuntimeException('STAGE56_RANKER_FAST_UNRANK_' . implode(',', $counts) . '_' . $index);
+        }
+        ++$fastWords;
+    }
+    $legacyTotal = $legacyRanker->count($counts);
+    if (!$legacyTotal->equals($total)) throw new RuntimeException('STAGE56_RANKER_FAST_LEGACY_COUNT_' . implode(',', $counts));
+    $sampleIndexes = array_values(array_unique([0, intdiv(count($oracle), 2), count($oracle) - 1]));
+    foreach ($sampleIndexes as $index) {
+        $word = $oracle[$index];
+        $expected = BigInt::fromInt($index + 1);
+        if (!$legacyRanker->rank($counts, $word)->equals($expected) ||
+            $legacyRanker->unrank($counts, $expected) !== $word) {
+            throw new RuntimeException('STAGE56_RANKER_FAST_LEGACY_SAMPLE_' . implode(',', $counts) . '_' . $index);
+        }
+        ++$legacyChecks;
+    }
+    ++$fastVectors;
+}
+
 $largeCounts = array_fill(0, 8, 6);
 $largeTotal = $ranker->count($largeCounts);
 if (strlen($largeTotal->toString()) <= 19) {
@@ -116,10 +156,10 @@ foreach ([BigInt::one(), $largeTotal] as $largeRank) {
 
 if ($vectors !== 120 || $words !== 3940 || $rankChecks !== 3940 ||
     $unrankChecks !== 3940 || $positions !== 83776 || $outOfRange !== 360 ||
-    $invalid !== 5) {
+    $invalid !== 5 || $fastVectors !== 4 || $fastWords !== 31419 || $legacyChecks !== 12) {
     throw new RuntimeException('STAGE56_RANKER_EXPECTED_TOTALS');
 }
 
 echo "STAGE56_WEAVING_RANKER_B4 vectors=$vectors words=$words rank_checks=$rankChecks " .
     "unrank_checks=$unrankChecks positions=$positions out_of_range=$outOfRange " .
-    "invalid=$invalid huge=2 status=PASS\n";
+    "invalid=$invalid fast_vectors=$fastVectors fast_words=$fastWords legacy_checks=$legacyChecks huge=2 status=PASS\n";

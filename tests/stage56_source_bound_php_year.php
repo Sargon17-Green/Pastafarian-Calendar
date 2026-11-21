@@ -161,6 +161,8 @@ function s56Main(array $args): int {
     $provider = new YearStructureProvider56(new BootstrapKernel());
     $structure = $provider->buildVerified(S56_JDN, $candidate,
         $trustedAnchor, $years[$idx], $trustedYear, $gateDay);
+    unset($provider);
+    gc_collect_cycles();
     s56Require($structure['monthLengths'] === $refs[$idx]['month_lengths'] &&
         $structure['monthWeaving'] === $refs[$idx]['month_weaving'],
         'PHP_EXTERNAL_MONTH_DIFFERENTIAL');

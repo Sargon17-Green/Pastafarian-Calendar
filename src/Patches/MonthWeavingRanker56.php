@@ -7,6 +7,8 @@ use InvalidArgumentException;
 use LogicException;
 use Pastafari\Stage01\BigInt;
 
+require_once __DIR__ . '/MonthWeavingInterleaving56.php';
+
 /**
  * Stage56 Phase B4: exact lexicographic rank/unrank using one shared B3
  * sibling-block computation per prefix. This is opt-in and not wired to PATCH23.
@@ -14,15 +16,21 @@ use Pastafari\Stage01\BigInt;
 final class MonthWeavingRanker56
 {
     private MonthWeavingAdjoint56 $adjoint;
+    private bool $forceLegacy;
+    private ?MonthWeavingInterleaving56 $fastEngine = null;
+    /** @var list<int>|null */
+    private ?array $fastCounts = null;
 
     public function __construct(?MonthWeavingAdjoint56 $adjoint = null)
     {
+        $this->forceLegacy = $adjoint !== null;
         $this->adjoint = $adjoint ?? new MonthWeavingAdjoint56();
     }
 
     /** @param list<int> $counts */
     public function count(array $counts): BigInt
     {
+        if ($this->shouldUseFastEngine($counts)) return $this->fastEngineFor($counts)->count();
         [$blocks] = $this->initialState($counts);
         return self::sumBlocks($blocks);
     }
@@ -34,6 +42,7 @@ final class MonthWeavingRanker56
      */
     public function rank(array $counts, array $word): BigInt
     {
+        if ($this->shouldUseFastEngine($counts)) return $this->fastEngineFor($counts)->rank($this->toZeroBasedWord($counts, $word));
         [$blocks, $length] = $this->initialState($counts);
         if (!array_is_list($word) || count($word) !== $length) {
             throw new InvalidArgumentException('STAGE56_RANKER_WORD_LENGTH');
@@ -83,6 +92,9 @@ final class MonthWeavingRanker56
      */
     public function unrank(array $counts, BigInt $rank): array
     {
+        if ($this->shouldUseFastEngine($counts)) {
+            return array_map(static fn (int $monthId): int => $monthId + 1, $this->fastEngineFor($counts)->unrank($rank));
+        }
         [$blocks, $length, $total] = $this->initialState($counts);
         if ($rank->compare(BigInt::one()) < 0 || $rank->compare($total) > 0) {
             throw new InvalidArgumentException('STAGE56_RANKER_RANK_RANGE');
@@ -125,6 +137,41 @@ final class MonthWeavingRanker56
      * @param list<int> $counts
      * @return array{0:array<int,BigInt>,1:int,2:BigInt}
      */
+    private function shouldUseFastEngine(array $counts): bool
+    {
+        if ($this->forceLegacy || !array_is_list($counts) || $counts === [] || count($counts) > 47) return false;
+        $total = 0;
+        foreach ($counts as $count) {
+            if (!is_int($count) || $count < 4 || $count > 123) return false;
+            $total += $count;
+        }
+        return $total <= 5778;
+    }
+
+    private function fastEngineFor(array $counts): MonthWeavingInterleaving56
+    {
+        if ($this->fastEngine === null || $this->fastCounts !== $counts) {
+            $this->fastEngine = new MonthWeavingInterleaving56($counts);
+            $this->fastCounts = array_values($counts);
+        }
+        return $this->fastEngine;
+    }
+
+    /** @param list<int> $counts @param list<int> $word @return list<int> */
+    private function toZeroBasedWord(array $counts, array $word): array
+    {
+        if (!array_is_list($word)) throw new InvalidArgumentException('STAGE56_RANKER_WORD');
+        $monthCount = count($counts);
+        $zeroBased = [];
+        foreach ($word as $monthId) {
+            if (!is_int($monthId) || $monthId < 1 || $monthId > $monthCount) {
+                throw new InvalidArgumentException('STAGE56_RANKER_WORD_ID');
+            }
+            $zeroBased[] = $monthId - 1;
+        }
+        return $zeroBased;
+    }
+
     private function initialState(array $counts): array
     {
         if (!array_is_list($counts) || $counts === [] || count($counts) > 47) {
