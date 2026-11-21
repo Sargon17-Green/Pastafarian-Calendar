@@ -2486,3 +2486,142 @@
                 :generic-seven-of-seven-accepted? false
                 :stage2-accepted? false})
       eind)))
+
+
+;; DISCOVERY24 GENERIC base-first: één canonieke dag-1 productieproef.
+;; De normatieve jaar-/kotelet-/maandkeuzen en rang worden onafhankelijk
+;; uit de test-oracle bepaald; de prefix [1] volgt uit de originele
+;; restricted-growth definitie en NIET uit productie-unranking.
+(defn- discovery24-een-eerste-basisdag [poortlijn]
+  (let [berekening dagen/stichtingsdag
+        basis (zoeken/vind-doeljaar poortlijn berekening berekening)
+        doel (inc (:open-gate-day basis))
+        _ (discovery24-verifieer!
+           (= 5000N (:number basis))
+           :unexpected-base-year {:year (:number basis)})
+        poging (try
+                 {:status :bewezen
+                  :uitkomst (projectie/kies-prefixdag-zonder-volledige-weving
+                             poortlijn berekening doel 128N 5000000N)}
+                 (catch clojure.lang.ExceptionInfo e
+                   {:status :geweigerd :code (:code (ex-data e))}))]
+    (if (= :geweigerd (:status poging))
+      (do
+        (discovery24-verifieer!
+         (= :bounded-prefix-budget-unproven (:code poging))
+         :unexpected-first-day-refusal
+         {:observed-code (:code poging) :calculation-day berekening
+          :target-day doel})
+        (println "DISCOVERY24 FIRST DAY bounded refusal (NOT PASS)"
+                 {:code (:code poging) :target-day doel})
+        {:case :base-first :status :geweigerd :code (:code poging)
+         :calculation-day berekening :target-day doel
+         :position-1-based 1N :five-fields-proven? false
+         :selective-prefix-cell-cost :not-proven})
+      (let [staat (orakel/new-gate-state)
+            normjaar (orakel/find-target-year staat berekening doel)
+            saus (orakel/sauce berekening (inc (:open-gate-day normjaar)))
+            aantal-koteletten (orakel/choose-cutlet-count saus normjaar)
+            partitie (orakel/choose-cutlet-partition
+                      staat berekening saus normjaar aantal-koteletten)
+            kotelet-namen (orakel/choose-cutlet-names saus aantal-koteletten)
+            koteletten (orakel/materialize-cutlets
+                       staat normjaar partitie kotelet-namen)
+            kotelet (some #(when (<= (:first-day %) doel (:last-day %)) %)
+                          koteletten)
+            aantal-maanden (orakel/choose-month-count saus normjaar)
+            lengten (orakel/choose-month-lengths
+                     saus normjaar aantal-maanden)
+            maandnamen (orakel/choose-month-names saus aantal-maanden)
+            prefix [1N]
+            onafhankelijk-totaal
+            (reduce +' 0N
+                    (map #(onafhankelijke-prefix-telling lengten %)
+                         derde-prefix-opties))
+            eerste-blok (onafhankelijke-prefix-telling lengten prefix)
+            rang (orakel/choose-rank
+                  (orakel/ask-bowl saus 4 orakel/seal-month-weaving)
+                  onafhankelijk-totaal)
+            verwacht [(:number normjaar)
+                      (:name-index kotelet)
+                      (inc (-' doel (:first-day kotelet)))
+                      (first maandnamen)
+                      1N]
+            werkelijk (:uitkomst poging)
+            kosten (:month-prefix-cell-upper-bound werkelijk)]
+        (discovery24-verifieer!
+         (and kotelet
+              (= 5000N (:number normjaar))
+              (= (:number basis) (:number normjaar))
+              (= 1N (-' doel (:open-gate-day normjaar)))
+              (= (-' (:close-gate-day normjaar)
+                      (:open-gate-day normjaar))
+                 (reduce +' 0N lengten))
+              (= aantal-maanden (count lengten))
+              (= onafhankelijk-totaal eerste-blok)
+              (<= 1N rang onafhankelijk-totaal)
+              (= 5 (count verwacht))
+              (every? integer? verwacht)
+              (= verwacht (:date-components werkelijk))
+              (= prefix (:month-prefix werkelijk))
+              (= 1N (:prefix-position werkelijk))
+              (= :bounded-prefix-only (:date-proof-scope werkelijk))
+              (false? (:month-weaving-computed? werkelijk))
+              (not (contains? werkelijk :month-weaving))
+              (integer? kosten)
+              (<= 0N kosten 5000000N))
+         :independent-first-day-differential-failed
+         {:expected-fields verwacht
+          :actual-fields (:date-components werkelijk)
+          :independent-prefix prefix
+          :actual-prefix (:month-prefix werkelijk)
+          :observed-cost kosten
+          :target-day doel})
+        (println "DISCOVERY24 FIRST DAY independent five-field match"
+                 {:target-day doel :fields verwacht
+                  :month-id 1N :cells kosten})
+        {:case :base-first :status :bewezen
+         :calculation-day berekening :target-day doel
+         :position-1-based 1N :five-fields-proven? true
+         :independent-expected-fields verwacht
+         :actual-fields (:date-components werkelijk)
+         :independent-month-id 1N :actual-month-prefix (:month-prefix werkelijk)
+         :independent-total-rank-count onafhankelijk-totaal
+         :independent-first-prefix-count eerste-blok
+         :normative-rank rang :reported-prefix-cells kosten
+         :scope :bounded-prefix-only :full-weaving-computed? false}))))
+
+(defn run-discovery24-first-day-feasibility!
+  "Opt-in: precies één base-first p=1 productieproef, geen Stage2-acceptatie."
+  []
+  (let [pad "qa/discovery24_first_day_feasibility.edn"
+        basis {:project-id "PC-BRANCH-CLOJURE-DUTCH"
+               :github-sha (System/getenv "GITHUB_SHA")
+               :case :base-first
+               :legacy-generic-e2e-proven 0
+               :legacy-generic-e2e-refused 7
+               :legacy-budget 100000N
+               :search-budget 128N
+               :selective-prefix-budget 5000000N
+               :probe-status :pending-one-attempt
+               :stage2-accepted? false}
+        schrijf! (fn [gegevens]
+                   (.mkdirs (java.io.File. "qa"))
+                   (spit pad (str (pr-str gegevens) "\n")))]
+    (schrijf! basis)
+    (try
+      (let [proef (discovery24-een-eerste-basisdag @lijn)
+            eind (assoc basis :probe proef :probe-status (:status proef)
+                        :stage2-accepted? false)]
+        (schrijf! eind)
+        (println "DISCOVERY24 FIRST DAY FINAL"
+                 {:case :base-first
+                  :status (:status proef)
+                  :five-fields-proven? (:five-fields-proven? proef)
+                  :stage2-accepted? false})
+        eind)
+      (catch Exception e
+        (schrijf! (assoc basis :probe-status :unexpected-failure
+                        :error-code (:code (ex-data e))
+                        :error-message (.getMessage e)))
+        (throw e)))))

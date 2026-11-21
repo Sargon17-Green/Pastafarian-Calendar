@@ -82,3 +82,40 @@ jobs:
           path: qa/discovery24_generic_feasibility.edn
           if-no-files-found: warn
           retention-days: 90
+
+
+  clojure-dutch-first-day-e2e-witness:
+    # Opt-in new first-day proof; do not rerun the accepted position-16 probe.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands' && contains(github.event.head_commit.message, '[generic-e2e-first-day]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact feature-branch SHA
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Clojure CLI
+        uses: DeLaGuardo/setup-clojure@13.7.0
+        with:
+          cli: 1.12.5.1664
+      - name: Assert exact project/source identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "PROJECT_ID=PC-BRANCH-CLOJURE-DUTCH"
+          echo "SOURCE_SHA=$GITHUB_SHA"
+      - name: One canonical base-first p1 independent numeric witness
+        run: |
+          set -euo pipefail
+          clojure -Sdeps '{:paths ["src" "test"]}' -M -e "(require 'pastafari.stage02-end-to-end-test) (pastafari.stage02-end-to-end-test/run-discovery24-first-day-feasibility!)"
+      - name: Preserve first-day witness EDN even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clojure-dutch-first-day-e2e-witness
+          path: qa/discovery24_first_day_feasibility.edn
+          if-no-files-found: warn
+          retention-days: 90
