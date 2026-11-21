@@ -45,3 +45,40 @@ jobs:
         run: clojure -Sdescribe
       - name: Native Stage 1 regression and Stage 2 DISCOVERY24 genuine end-to-end bounded numerical differential
         run: clojure -M:test
+
+  clojure-dutch-generic-e2e-feasibility:
+    # New workflows added only on this feature branch are not registered for
+    # dispatch. Run this explicit one-case probe inside the existing CI workflow.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands' && contains(github.event.head_commit.message, '[generic-e2e-probe]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact branch SHA
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Clojure CLI
+        uses: DeLaGuardo/setup-clojure@13.7.0
+        with:
+          cli: 1.12.5.1664
+      - name: Verify project and exact source revision
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "PROJECT_ID=PC-BRANCH-CLOJURE-DUTCH"
+          echo "SOURCE_SHA=$GITHUB_SHA"
+      - name: Seven canonical classifications, 127 independent comparisons, one bounded day-16 probe
+        run: |
+          set -euo pipefail
+          clojure -Sdeps '{:paths ["src" "test"]}' -M -e "(require 'pastafari.stage02-end-to-end-test) (pastafari.stage02-end-to-end-test/run-discovery24-generic-feasibility!)"
+      - name: Preserve bounded feasibility evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clojure-dutch-generic-e2e-feasibility
+          path: qa/discovery24_generic_feasibility.edn
+          if-no-files-found: warn
+          retention-days: 90
