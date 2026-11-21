@@ -1,4 +1,4 @@
-name: Issue29 v171 low-level Ada component suites (Stage01/03/05, ZERO Calendar_Date)
+name: Issue29 v171 low-level Ada component suites (Stage01/03/05, static no-F guard, ZERO Calendar_Date)
 on:
   push:
     branches:
