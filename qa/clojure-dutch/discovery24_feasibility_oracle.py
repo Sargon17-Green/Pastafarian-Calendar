@@ -5,7 +5,6 @@ Cost is abstract cached states + legal transitions, NOT production insertion cel
 """
 import argparse
 from collections import Counter
-from functools import lru_cache
 
 LIMIT = 5_000_000
 
@@ -56,16 +55,38 @@ def unrank(profile, rank, position, budget=LIMIT):
             updated = list(rest)
             updated[i - 1] -= 1
             yield i, tuple(updated), max(opened, i), closed + (n == 1)
-    @lru_cache(None)
+    # Explicit postorder stack: recursion would fail on canonical year
+    # profiles whose suffixes exceed Python's call-stack limit.
+    memo = {}
     def count(rest, opened, closed):
-        charge(0)
-        if not any(rest):
-            return int(opened == closed == len(profile))
-        total = 0
-        for _, updated, new_opened, new_closed in next_states(rest, opened, closed):
-            charge(1)
-            total += count(updated, new_opened, new_closed)
-        return total
+        root = (rest, opened, closed)
+        if root in memo:
+            return memo[root]
+        stack = [(root, None)]
+        while stack:
+            state, edges = stack.pop()
+            if state in memo:
+                continue
+            remaining, opened_count, closed_count = state
+            if edges is not None:
+                # Every child has been evaluated by depth-first postorder.
+                memo[state] = sum((memo[child] for child in edges), 0)
+                continue
+            charge(0)
+            if not any(remaining):
+                memo[state] = int(opened_count == closed_count == len(profile))
+                continue
+            children = []
+            for _, updated, new_opened, new_closed in next_states(*state):
+                charge(1)
+                children.append((updated, new_opened, new_closed))
+            stack.append((state, children))
+            # Preserve lexicographic traversal order; the cache collapses
+            # repeated suffix states without consuming further units.
+            for child in reversed(children):
+                if child not in memo:
+                    stack.append((child, None))
+        return memo[root]
     rest = (profile[0] - 1,) + profile[1:]
     opened, closed = 1, int(profile[0] == 1)
     total = count(rest, opened, closed)
@@ -107,6 +128,14 @@ def test():
         pass
     assert 4_995_675 <= LIMIT < 5_002_652
     assert 5_002_652 - LIMIT == 2_652
+    # Long suffixes must fail with an explicit budget refusal, not
+    # RecursionError; these are stress fixtures, not canonical date proofs.
+    for long_profile in ((123,) * 9, (123,) * 29):
+        try:
+            unrank(long_profile, 1, 2, 2000)
+            raise AssertionError("unexpected long-profile proof")
+        except Unproven:
+            pass
     print(f"STATIC_QA_PASS profiles={len(profiles)} words={words} "
           f"rank_position_checks={checks} max_abstract_cells={max_spent}")
 
