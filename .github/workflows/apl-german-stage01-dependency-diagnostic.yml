@@ -1,4 +1,4 @@
-name: APL German Stage1 root-cause diagnostic (QA ONLY)
+name: APL German Stage1 root-cause diagnostic V2 (QA ONLY)
 on:
   push:
     branches: [qa/apl-german-nars-interface-20261116]
@@ -56,13 +56,13 @@ jobs:
           if($a.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or $b.source_commit -cne $a.source_commit){throw 'SOURCE_LOCK_MISMATCH'}
           if($a.stage01 -cne 'NOT_ACCEPTED' -or $b.stage01 -cne 'NOT_ACCEPTED'){throw 'FALSE_STAGE01_ACCEPTANCE'}
           if($a.fx_last_contiguous -ne 95 -or $a.fx_checkpoints.Count -ne 23 -or @($a.fx_checkpoints | Where-Object {$_.exact -ne $true}).Count -gt 0){throw 'FX95_UNPROVEN'}
-          if($a.status -cne 'ROOTCAUSE_CAPTURE_COMPLETE_DIAGNOSTIC_ONLY' -or $a.probes.Count -ne 3 -or $a.statement_tests.Count -ne 3 -or $a.dependency_probes.Count -ne 28 -or $a.final_marker_exact -ne $true){throw 'ROOTCAUSE_CAPTURE_INCOMPLETE'}
+          if($a.status -cne 'ROOTCAUSE_CAPTURE_COMPLETE_DIAGNOSTIC_ONLY' -or $a.probes.Count -ne 3 -or $a.statement_tests.Count -ne 3 -or $a.dependency_probes.Count -ne 43 -or $a.final_marker_exact -ne $true){throw 'ROOTCAUSE_CAPTURE_INCOMPLETE'}
           if(@($a.statement_tests | Where-Object {$null -eq $_.first_unfinished}).Count -ne 0){throw 'FIRST_SOURCE_LINE_NOT_ISOLATED'}
           if(@($a.probes | Where-Object {$_.start_exact -ne $true -or $_.captured_exact -ne $true -or $null -eq $_.first_ec_code}).Count -ne 0){throw 'SUBTEST_EC_RECEIPTS_INCOMPLETE'}
           if(@($a.probes | Where-Object {$_.first_ec_code -eq '0' -and [string]::IsNullOrWhiteSpace($_.error_message)}).Count -ne 0){throw 'SUBTEST_ERROR_MESSAGE_MISSING'}
           if(@($a.dependency_probes | Where-Object {$_.start_exact -ne $true -or $_.captured_exact -ne $true -or $null -eq $_.first_ec_code}).Count -ne 0){throw 'DEPENDENCY_EC_RECEIPTS_INCOMPLETE'}
           if(@($a.dependency_probes | Where-Object {$_.first_ec_code -eq '0' -and [string]::IsNullOrWhiteSpace($_.error_message)}).Count -ne 0){throw 'DEPENDENCY_ERROR_MESSAGE_MISSING'}
-          Write-Output 'SOURCE_ROOTCAUSE_DIAGNOSTIC_COMPLETE_NOT_STAGE01'
+          Write-Output 'SOURCE_ROOTCAUSE_DIAGNOSTIC_V2_COMPLETE_NOT_STAGE01'
       - name: Hash all receipts and evidence
         if: always()
         shell: pwsh
@@ -75,7 +75,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-rootcause-diagnostic-only
+          name: apl-german-stage01-rootcause-diagnostic-v2
           path: |
             rootcause_probe_evidence/
             font_bootstrap_evidence/

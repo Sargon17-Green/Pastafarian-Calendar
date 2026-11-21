@@ -6,7 +6,7 @@ $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
 $source='7161824b9fcbfaca91f20d1ea492417e77003ff4'
 $r=[ordered]@{
- schema='APL_GERMAN_NATIVE_STAGE01_ROOTCAUSE_CAPTURE_V1';source_commit=$source;
+ schema='APL_GERMAN_NATIVE_STAGE01_ROOTCAUSE_CAPTURE_V2';source_commit=$source;
  stage01='NOT_ACCEPTED';status='STARTED';runtime_verified=$false;native_executed=$false;
  fx_checkpoints=@();fx_last_contiguous=0;probes=@();dependency_probes=@();final_marker_exact=$false;
  process_running_after_receipt=$false;stopped_by_runner=$false;errors=@()
@@ -34,8 +34,10 @@ function Read-EcMessage([string]$path,[string]$dest){
  $numeric=[Text.Encoding]::ASCII.GetString($bytes)
  if($bytes.Length -gt 0 -and $bytes.Length -le 8192 -and $numeric -cmatch '^\s*\d+(\s+\d+)*\s*$'){
    $points=@([regex]::Matches($numeric,'\d+') | ForEach-Object {[int]$_.Value})
-   if($points.Count -gt 0 -and @($points | Where-Object {$_ -lt 0 -or $_ -gt 65535}).Count -eq 0){
-     $message=-join @($points | ForEach-Object {[char]$_})
+   if($points.Count -gt 0 -and @($points | Where-Object {$_ -lt 0 -or $_ -gt 1114111 -or ($_ -ge 55296 -and $_ -le 57343)}).Count -eq 0){
+     $builder=New-Object System.Text.StringBuilder
+     foreach($point in $points){[void]$builder.Append([char]::ConvertFromUtf32($point))}
+     $message=$builder.ToString().Trim()
    }
  }
  return @{message=$message;sha256=$sha;exists=$true}
@@ -59,9 +61,9 @@ try{
  & python qa/nars-interface/stage01_dependency_probe.py --repo-root . --source $official --candidate $candidate --receipt $receipt --marker $marker
  if($LASTEXITCODE -ne 0){throw 'ROOTCAUSE_CANDIDATE_FAILED'}
  $m=Get-Content $receipt -Raw | ConvertFrom-Json
- if($m.schema -cne 'APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V1' -or $m.stage01 -cne 'NOT_ACCEPTED' -or $m.source_commit -cne $source -or
-    $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or $m.calls.Count -ne 3 -or $m.tests.Count -ne 3 -or $m.dependency_probes.Count -ne 28 -or
-    $m.program_count -ne 62 -or $m.final_original_stage01_tests_executed -ne $false -or $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'}
+ if($m.schema -cne 'APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V2' -or $m.stage01 -cne 'NOT_ACCEPTED' -or $m.source_commit -cne $source -or
+    $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or $m.calls.Count -ne 3 -or $m.tests.Count -ne 3 -or $m.dependency_probes.Count -ne 43 -or
+    $m.program_count -ne 77 -or $m.final_original_stage01_tests_executed -ne $false -or $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'}
  if((Get-FileHash $candidate -Algorithm SHA256).Hash.ToLowerInvariant() -cne $m.candidate_sha256){throw 'CANDIDATE_SHA_MISMATCH'}
  $r['candidate_sha256']=$m.candidate_sha256
  foreach($c in $m.chunk_records){if(Test-Path $c.marker_path){throw 'OLD_FX_RECEIPT'}}
@@ -184,7 +186,7 @@ try{
    (@($r['probes'] | Where-Object {$_.start_exact -ne $true -or $_.captured_exact -ne $true -or $null -eq $_.first_ec_code}).Count -eq 0) -and
    $callErrorsComplete -and ($r['statement_tests'].Count -eq 3) -and
    (@($r['statement_tests'] | Where-Object {$null -eq $_.first_unfinished}).Count -eq 0) -and
-   ($r['dependency_probes'].Count -eq 28) -and
+   ($r['dependency_probes'].Count -eq 43) -and
    (@($r['dependency_probes'] | Where-Object {$_.start_exact -ne $true -or $_.captured_exact -ne $true -or $null -eq $_.first_ec_code}).Count -eq 0) -and
    $depErrorsComplete
  $r['status']=if($complete){'ROOTCAUSE_CAPTURE_COMPLETE_DIAGNOSTIC_ONLY'}else{'ROOTCAUSE_CAPTURE_PARTIAL_DIAGNOSTIC_ONLY'}

@@ -10,7 +10,7 @@ from chunked_fx_probe import marker_write
 from stage01_import_workspace import SOURCE_COMMIT, _codes, load_locked_sources
 from stage01_statement_probe import build_statement_probe, decode_programs
 
-FINAL = "APL_GERMAN_ROOTCAUSE_DIAGNOSTIC_COMPLETE_NOT_STAGE01"
+FINAL = "APL_GERMAN_ROOTCAUSE_DIAGNOSTIC_V2_COMPLETE_NOT_STAGE01"
 
 
 def anchor(blocks, name, needle=None, required_line=None):
@@ -47,12 +47,13 @@ def build_dependency_probe(raw, root, marker):
         message_path = str(p.with_name(f"{p.stem}_stmt_{index:02d}_message_codes.txt"))
         call["message_code_path"] = message_path
         var = f"QAStmtEC{index:02d}"
+        message_expression = f"(⍕⎕UCS ⊃{var}[3]) ⎕NAPPEND ((⎕UCS {_codes(message_path)}) ⎕NCREATE 0)"
         statement = (
             "95 Stage01ChunkAssert 0 ⋄ "
             + marker_write(call["start_token"], call["start_path"])
             + f" ⋄ {var}←⎕EC ⎕UCS {_codes(call['alias'])}"
             + f" ⋄ (⍕{var}[1]) ⎕NAPPEND ((⎕UCS {_codes(call['code_path'])}) ⎕NCREATE 0)"
-            + f" ⋄ (⍕⎕UCS ⊃{var}[3]) ⎕NAPPEND ((⎕UCS {_codes(message_path)}) ⎕NCREATE 0)"
+            + f" ⋄ QAMsgStmt{index:02d}←⎕EC ⎕UCS {_codes(message_expression)}"
             + " ⋄ " + marker_write(call["captured_token"], call["captured_path"])
         )
         call["inner_sha256"] = hashlib.sha256(statement.encode("utf-8")).hexdigest()
@@ -72,6 +73,21 @@ def build_dependency_probe(raw, root, marker):
         "sauce": anchor(blocks, "Sauce"),
         "ask": anchor(blocks, "AskBowl"),
         "rank": anchor(blocks, "ChooseRank"),
+        "post_stir_old": anchor(blocks, "PostStir12", "old←bowls"),
+        "post_stir_saved": anchor(blocks, "PostStir12", "saved←PostStirSavedSum (⊂old) stir"),
+        "post_saved": anchor(blocks, "PostStirSavedSum", "z←Save ((+/bowls)+(149×stir))"),
+        "post_stir_rank": anchor(blocks, "PostStir12", "rank←1+(720 RegularMod (saved-1))"),
+        "post_stir_order": anchor(blocks, "PostStir12", "order←PermutationUnrank1 rank"),
+        "post_stir_id": anchor(blocks, "PostStir12", "id←order[position]"),
+        "post_stir_prev": anchor(blocks, "PostStir12", "prev←order[6 Wrap1 (position-1)]"),
+        "post_stir_next": anchor(blocks, "PostStir12", "next←order[6 Wrap1 (position+1)]"),
+        "post_stir_s": anchor(blocks, "PostStir12", "s←old[id]+(3×old[prev])+(5×old[next])+saved+stir+(position×position)"),
+        "post_stir_value": anchor(blocks, "PostStir12", "nextBowls[id]←Save ((s×s)+(7×old[prev]×old[next]))"),
+        "post_stir_next_bowls": anchor(blocks, "PostStir12", "nextBowls←6⍴0x"),
+        "post_stir_assign": anchor(blocks, "PostStir12", "nextBowls[id]←Save ((s×s)+(7×old[prev]×old[next]))"),
+        "post_stir_wrap": anchor(blocks, "Wrap1", "z←1+(size RegularMod (position-1))"),
+        "post_stir_save": anchor(blocks, "Save", "z←1+(M RegularMod (x-1))"),
+        "post_stir_perm": anchor(blocks, "PermutationUnrank1", "z←result"),
     }
     if [anchors[x]["source_line"] for x in ("ownership", "oracle", "year")] != [39, 108, 147]:
         raise ValueError("TEST_ANCHOR_LINE_CHANGED")
@@ -121,14 +137,29 @@ def build_dependency_probe(raw, root, marker):
         ("sauce_next_bowl", "", "QASauceNext←QASauce NextBowlInDrop46Order 1", "call", "ask"),
         ("sauce_ask_bowl", "", "QASauceAsk←QASauce AskBowl 1 SEAL_GATE_GAP", "call", "ask"),
         ("sauce_choose_rank", "", "QASauceRank←QASauceAsk ChooseRank 922", "call", "rank"),
+        ("ownership_vector_match", new_b, ",2≡⍴MonsterBaseSemanticState QACTXB", "value", "ownership"),
+        ("sauce_post_old", "", "QAPostOld←⊃QASaucePair[1]", "call", "post_stir_old"),
+        ("sauce_post_saved", "", "QAPostSaved←PostStirSavedSum (⊂QAPostOld) 1", "call", "post_stir_saved"),
+        ("sauce_post_saved_value", "", "QAPostSaved", "value", "post_saved"),
+        ("sauce_post_rank", "", "QAPostRank←1+(720 RegularMod (QAPostSaved-1))", "call", "post_stir_rank"),
+        ("sauce_post_rank_value", "", "QAPostRank", "value", "post_stir_rank"),
+        ("sauce_post_order", "", "QAPostOrder←PermutationUnrank1 QAPostRank", "call", "post_stir_order"),
+        ("sauce_post_order_value", "", "QAPostOrder", "value", "post_stir_perm"),
+        ("sauce_post_first_id", "", "QAPostId←QAPostOrder[1]", "call", "post_stir_id"),
+        ("sauce_post_first_prev", "", "QAPostPrev←QAPostOrder[6 Wrap1 (1-1)]", "call", "post_stir_wrap"),
+        ("sauce_post_first_next", "", "QAPostNext←QAPostOrder[6 Wrap1 (1+1)]", "call", "post_stir_wrap"),
+        ("sauce_post_first_s", "", "QAPostS←QAPostOld[QAPostId]+(3×QAPostOld[QAPostPrev])+(5×QAPostOld[QAPostNext])+QAPostSaved+1+(1×1)", "call", "post_stir_s"),
+        ("sauce_post_first_value", "", "QAPostValue←Save ((QAPostS×QAPostS)+(7×QAPostOld[QAPostPrev]×QAPostOld[QAPostNext]))", "call", "post_stir_save"),
+        ("sauce_post_next_bowls", "", "QAPostNextBowls←6⍴0x", "call", "post_stir_next_bowls"),
+        ("sauce_post_assign_first", "", "QAPostNextBowls[QAPostId]←QAPostValue", "call", "post_stir_assign"),
     ]
-    if len(specs) != 28:
+    if len(specs) != 43:
         raise ValueError("ROOTCAUSE_PROBE_COUNT_INVALID")
 
     entries = []
     programs = programs[:-1]
     for index, (name, setup, expression, mode, origin) in enumerate(specs, 1):
-        prefix = f"APL_GERMAN_ROOT_V1|SOURCE={SOURCE_COMMIT}|INDEX={index:02d}|NAME={name}"
+        prefix = f"APL_GERMAN_ROOT_V2|SOURCE={SOURCE_COMMIT}|INDEX={index:02d}|NAME={name}"
         paths = {phase + "_path": str(p.with_name(f"{p.stem}_dep_{index:02d}_{phase}.txt"))
                  for phase in ("start", "captured", "code", "value", "message")}
         start_token = prefix + "|PHASE=START"
@@ -137,6 +168,7 @@ def build_dependency_probe(raw, root, marker):
             expression = ("(⍕(" + expression + ")) ⎕NAPPEND ((⎕UCS "
                           + _codes(paths["value_path"]) + ") ⎕NCREATE 0)")
         var = f"QARootEC{index:02d}"
+        message_expression = f"(⍕⎕UCS ⊃{var}[3]) ⎕NAPPEND ((⎕UCS {_codes(paths['message_path'])}) ⎕NCREATE 0)"
         code = "95 Stage01ChunkAssert 0"
         if setup:
             code += " ⋄ " + setup
@@ -144,7 +176,7 @@ def build_dependency_probe(raw, root, marker):
             " ⋄ " + marker_write(start_token, paths["start_path"])
             + f" ⋄ {var}←⎕EC ⎕UCS {_codes(expression)}"
             + f" ⋄ (⍕{var}[1]) ⎕NAPPEND ((⎕UCS {_codes(paths['code_path'])}) ⎕NCREATE 0)"
-            + f" ⋄ (⍕⎕UCS ⊃{var}[3]) ⎕NAPPEND ((⎕UCS {_codes(paths['message_path'])}) ⎕NCREATE 0)"
+            + f" ⋄ QAMsgDep{index:02d}←⎕EC ⎕UCS {_codes(message_expression)}"
             + " ⋄ " + marker_write(captured_token, paths["captured_path"])
         )
         programs.append(code)
@@ -163,7 +195,7 @@ def build_dependency_probe(raw, root, marker):
                        f"'{serial}'{match['ending']}")
     candidate = "".join(lines).encode("cp1252")
     receipt = dict(base)
-    receipt.update(schema="APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V1",
+    receipt.update(schema="APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V2",
                    stage01="NOT_ACCEPTED", status="GENERATED_NOT_NATIVE_VALIDATED",
                    source_commit=SOURCE_COMMIT, source_dependency_anchors=anchors,
                    dependency_probes=entries, marker_token=FINAL, marker_path=marker,
