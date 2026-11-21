@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Eleven real seven-column dates: FOUNDATION neighborhood and year-5000 edges.
+"""Three orderings of eleven real seven-column dates: FOUNDATION and year-5000 edges.
 
 Project PC-BRANCH-KOTLIN-CYMRAEG, QA only, NOT CERTIFIED.
-Production: actual JDK21/Kotlin1.9 bridge, one JVM and eleven independently checked
-convert() requests, including both sides of year-5000 boundaries. Oracle: branch-local, separately authored Python sauce,
+Production: actual JDK21/Kotlin1.9 bridge, one JVM and 33 independently checked
+convert() requests over three distinct orderings, including both sides of year-5000 boundaries. Oracle: branch-local, separately authored Python sauce,
 year geometry, composition and combinatorial month weaving; no pinned Python
 reference, checkpoint, production output seed or cross-branch fixture.
 The independent techniques are not proof of GLOBAL algorithmic independence.
@@ -34,7 +34,7 @@ TARGETS = tuple(FOUNDATION + offset for offset in (-2, -1, 0, 1, 2))
 HALF_WIDTH = 280
 QUESTION_COUNT = HALF_WIDTH * 2
 GATE_LIMIT = 8192
-PASS = "PASS_BOUNDED_UNSEEDED_YEAR_EDGE_ELEVEN_DATES_NOT_CERTIFIED"
+PASS = "PASS_BOUNDED_UNSEEDED_THREE_ORDER_YEAR_EDGE_NOT_CERTIFIED"
 DECIMAL = re.compile(r"(?:0|-?[1-9][0-9]*)\Z", re.ASCII)
 MODULES = (independent_date_combinatorics, independent_month_weaving_oracle,
            independent_sauce_oracle, independent_year_geometry_oracle,
@@ -108,6 +108,47 @@ def validate_boundary_years(reference_rows: list[tuple[int, ...]]) -> None:
                    for row, year in zip(reference_rows, expected))):
         raise SevenFieldAuditError("E_YEAR_EDGE_INDEPENDENT_YEAR_WITNESS")
 
+
+
+INTERLEAVED_INDICES = (10, 5, 9, 6, 8, 7, 4, 0, 3, 1, 2)
+
+
+def target_orders(targets: tuple[int, ...]) -> tuple[tuple[int, ...], ...]:
+    """Three fixed distinct bijections; fail closed on any duplicate."""
+    if (type(targets) is not tuple or len(targets) != 11
+            or any(type(t) is not int for t in targets)
+            or len(set(targets)) != 11):
+        raise SevenFieldAuditError("E_ORDER_TARGET_SCOPE")
+    if set(INTERLEAVED_INDICES) != set(range(11)):
+        raise SevenFieldAuditError("E_ORDER_PERMUTATION_DEFINITION")
+    orders = (targets, tuple(reversed(targets)),
+              tuple(targets[i] for i in INTERLEAVED_INDICES))
+    if len(set(orders)) != 3 or any(set(order) != set(targets) for order in orders):
+        raise SevenFieldAuditError("E_ORDER_NOT_BIJECTIVE")
+    return orders
+
+
+def validate_order_invariance(groups: list[list[list[int]]],
+                              orders: tuple[tuple[int, ...], ...]) -> None:
+    if len(groups) != 3 or len(orders) != 3:
+        raise SevenFieldAuditError("E_ORDER_GROUP_COUNT")
+    target_orders(orders[0])
+    expected_targets = set(orders[0])
+    baseline: dict[int, tuple[int, ...]] | None = None
+    for group, order in zip(groups, orders):
+        if (type(order) is not tuple or len(order) != 11
+                or set(order) != expected_targets or len(group) != 11):
+            raise SevenFieldAuditError("E_ORDER_GROUP_SCOPE")
+        actual: dict[int, tuple[int, ...]] = {}
+        for row, target in zip(group, order):
+            if (type(row) is not list or len(row) != 7
+                    or any(type(x) is not int for x in row)
+                    or row[0] != FOUNDATION or row[1] != target):
+                raise SevenFieldAuditError("E_ORDER_ROW_PROTOCOL")
+            actual[target] = tuple(row[2:])
+        if baseline is not None and actual != baseline:
+            raise SevenFieldAuditError("E_ORDER_DEPENDENT_PRODUCTION")
+        baseline = actual
 
 def verified_source(root: Path, jar: Path) -> dict:
     root = root.resolve(strict=True)
@@ -195,7 +236,9 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
         raise SevenFieldAuditError("E_ELEVEN_DATE_SCOPE")
     cmd = ["java", "-XX:ActiveProcessorCount=1", "-Xmx1200m", "-Xss8m",
            "-cp", str(jar.resolve()), "pastafari.Post55ProductionDateBridge"]
-    input_text = "".join(f"{FOUNDATION}\t{target}\n" for target in targets)
+    orders = target_orders(targets)
+    input_text = "".join(f"{FOUNDATION}\t{target}\n"
+                         for order in orders for target in order)
     remaining = max(1, int(deadline - monotonic()))
     try:
         proc = subprocess.run(cmd, input=input_text, capture_output=True,
@@ -206,7 +249,15 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
     if proc.returncode != 0:
         raise SevenFieldAuditError("E_NATIVE_EXIT_" + str(proc.returncode) +
                                    "_STDERR_" + proc.stderr[-300:])
-    rows = parse_production(proc.stdout, targets)
+    output_lines = proc.stdout.splitlines(keepends=True)
+    if len(output_lines) != len(targets) * len(orders):
+        raise SevenFieldAuditError("E_ORDER_TOTAL_ROW_COUNT")
+    groups = []
+    for group_index, order in enumerate(orders):
+        start = group_index * len(targets)
+        group_raw = "".join(output_lines[start:start + len(targets)])
+        groups.append(parse_production(group_raw, order))
+    validate_order_invariance(groups, orders)
     trace_raw = "".join(f"{index}\t{width}\n" for index, width in trace)
     trace_digest = atomic_text(gaps_file, trace_raw)
     references = []
@@ -215,14 +266,20 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
             raise SevenFieldAuditError("E_INDEPENDENT_TIME_BUDGET")
         references.append(date_with_independent_sauce(ledger, target, deadline=deadline))
     validate_boundary_years(references[len(TARGETS):])
-    matches = compare_rows(rows, references, targets)
+    reference_by_target = dict(zip(targets, references))
+    matches = []
+    for group, order in zip(groups, orders):
+        matches.extend(compare_rows(group, [reference_by_target[t] for t in order], order))
     return {
         "status": PASS, "project_id": PROJECT_ID, "branch": BRANCH,
         "source": provenance, "calculation_day": FOUNDATION,
         "target_offsets": [t - FOUNDATION for t in targets],
         "year5000_edges": list(edges),
         "year5000_open_close": [year5000.open_day, year5000.close_day],
-        "production_calls": len(rows), "production_columns": 7,
+        "production_calls": sum(map(len, groups)), "production_columns": 7,
+        "distinct_targets": len(targets), "order_count": len(orders),
+        "order_names": ["natural", "reverse", "interleaved"],
+        "single_jvm_session": True, "order_invariance_verified": True,
         "independent_five_field_comparisons": len(matches) * 5,
         "matches": matches, "mismatches": 0,
         "signed_gate_gap_questions": ledger.question_count,

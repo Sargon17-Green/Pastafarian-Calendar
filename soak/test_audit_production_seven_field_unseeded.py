@@ -7,7 +7,7 @@ from independent_year_geometry_oracle import Year
 from audit_production_seven_field_unseeded import (
     FOUNDATION, TARGETS, HALF_WIDTH, QUESTION_COUNT, SevenFieldAuditError,
     boundary_targets, canonical_number, compare_rows, expected_indices, parse_production,
-    validate_boundary_years, validate_ledger_trace,
+    target_orders, validate_order_invariance, validate_boundary_years, validate_ledger_trace,
 )
 
 
@@ -145,6 +145,55 @@ class SevenFieldIndependentProtocolTests(unittest.TestCase):
         refs[0] = (True, 7, 24, 12, 3)
         with self.assertRaisesRegex(SevenFieldAuditError, "E_ORACLE_FIVE_FIELD_SHAPE"):
             compare_rows(rows, refs)
+
+
+    def test_three_orders_are_distinct_bijections(self):
+        year = Year(5000, -10, 10, FOUNDATION - 300, FOUNDATION + 400)
+        targets = TARGETS + boundary_targets(year)
+        orders = target_orders(targets)
+        self.assertEqual(len(orders), 3)
+        self.assertEqual(orders[0], targets)
+        self.assertEqual(orders[1], targets[::-1])
+        for order in orders:
+            self.assertEqual(set(order), set(targets))
+            self.assertEqual(len(set(order)), 11)
+        self.assertEqual(orders[2][0], targets[10])
+        self.assertEqual(orders[2][1], targets[5])
+
+    def test_duplicate_and_missing_targets_fail_closed(self):
+        year = Year(5000, -10, 10, FOUNDATION - 300, FOUNDATION + 400)
+        targets = TARGETS + boundary_targets(year)
+        for bad in (targets[:-1], targets[:-1] + (targets[0],),
+                    targets[:-1] + (True,)):
+            with self.subTest(bad=bad), self.assertRaisesRegex(
+                SevenFieldAuditError, "E_ORDER_TARGET_SCOPE"
+            ):
+                target_orders(bad)
+
+    def test_three_order_production_stability(self):
+        year = Year(5000, -10, 10, FOUNDATION - 300, FOUNDATION + 400)
+        orders = target_orders(TARGETS + boundary_targets(year))
+        groups = [parse_production(
+            "".join(self.record(t) for t in order), order
+        ) for order in orders]
+        validate_order_invariance(groups, orders)
+        groups[2][3][6] += 1
+        with self.assertRaisesRegex(
+            SevenFieldAuditError, "E_ORDER_DEPENDENT_PRODUCTION"
+        ):
+            validate_order_invariance(groups, orders)
+
+    def test_order_group_and_row_corruption_fail_closed(self):
+        year = Year(5000, -10, 10, FOUNDATION - 300, FOUNDATION + 400)
+        orders = target_orders(TARGETS + boundary_targets(year))
+        groups = [parse_production(
+            "".join(self.record(t) for t in order), order
+        ) for order in orders]
+        with self.assertRaisesRegex(SevenFieldAuditError, "E_ORDER_GROUP_COUNT"):
+            validate_order_invariance(groups[:-1], orders)
+        groups[1][1][0] += 1
+        with self.assertRaisesRegex(SevenFieldAuditError, "E_ORDER_ROW_PROTOCOL"):
+            validate_order_invariance(groups, orders)
 
 
 if __name__ == "__main__":

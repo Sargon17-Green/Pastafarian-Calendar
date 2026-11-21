@@ -1,4 +1,4 @@
-name: Kotlin bounded independent unseeded 11-date year-edge seven-field QA
+name: Kotlin bounded independent unseeded three-order year-edge QA
 on:
   push:
     branches: ['Kotlin\+Cymraeg']
@@ -58,7 +58,7 @@ jobs:
           kotlinc src/main/kotlin/pastafari/*.kt soak/Post55ProductionDateBridge.kt -include-runtime -d "$RUNNER_TEMP/seven-field-unseeded.jar"
           test -s "$RUNNER_TEMP/seven-field-unseeded.jar"
           echo 'SEVEN_FIELD_REAL_PRODUCTION_COMPILED'
-      - name: Compare eleven real dates bracketing year edges with unseeded oracle
+      - name: Compare 33 real production calls in three orders with unseeded oracle
         shell: bash
         run: |
           set -euo pipefail
