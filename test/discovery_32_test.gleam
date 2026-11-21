@@ -11,7 +11,13 @@ import pastafari/discovery_32_symmetric_difference_bands
 import reference/core
 
 type DirectCounts {
-  DirectCounts(left: Int, right: Int, intersection: Int, combined: Int, xor: Int)
+  DirectCounts(
+    left: Int,
+    right: Int,
+    intersection: Int,
+    combined: Int,
+    xor: Int,
+  )
 }
 
 fn band(lower: Int, upper: Int) {
@@ -52,14 +58,21 @@ fn examine_endings(
       let next_sum = rolling_sum + gap
       let a = contains_directly(next_sum, original_left)
       let b = contains_directly(next_sum, original_right)
-      let updated = DirectCounts(
-        left: counts.left + bit(a),
-        right: counts.right + bit(b),
-        intersection: counts.intersection + bit(a && b),
-        combined: counts.combined + bit(a || b),
-        xor: counts.xor + bit(a != b),
+      let updated =
+        DirectCounts(
+          left: counts.left + bit(a),
+          right: counts.right + bit(b),
+          intersection: counts.intersection + bit(a && b),
+          combined: counts.combined + bit(a || b),
+          xor: counts.xor + bit(a != b),
+        )
+      examine_endings(
+        remaining,
+        next_sum,
+        original_left,
+        original_right,
+        updated,
       )
-      examine_endings(remaining, next_sum, original_left, original_right, updated)
     }
   }
 }
@@ -99,8 +112,7 @@ fn direct_check(
   expected_b: List(discovery_27_sum_bands.SumBand),
 ) -> Int {
   let gaps = gaps_from_stage21(context, ids)
-  let expected =
-    enumerate_all_starts(gaps, a, b, DirectCounts(0, 0, 0, 0, 0))
+  let expected = enumerate_all_starts(gaps, a, b, DirectCounts(0, 0, 0, 0, 0))
   let k = list.length(gaps)
   let assert Ok(actual) =
     discovery_32_symmetric_difference_bands.dispatch_discovery_32(
@@ -118,9 +130,11 @@ fn direct_check(
   actual.combined_windows |> should.equal(expected.combined)
   actual.symmetric_difference_windows |> should.equal(expected.xor)
   actual.total_windows |> should.equal(k * { k + 1 } / 2)
-  { actual.symmetric_difference_windows >= 0
+  {
+    actual.symmetric_difference_windows >= 0
     && actual.symmetric_difference_windows <= actual.combined_windows
-    && actual.combined_windows <= actual.total_windows }
+    && actual.combined_windows <= actual.total_windows
+  }
   |> should.equal(True)
   expected.xor
 }
@@ -203,15 +217,9 @@ pub fn discovery_32_single_gap_one_side_and_outside_test() {
     [],
   )
   |> should.equal(1)
-  direct_check(
-    context,
-    [1],
-    [],
-    [band(gap, gap)],
-    [],
-    [band(gap, gap)],
-    [band(gap, gap)],
-  )
+  direct_check(context, [1], [], [band(gap, gap)], [], [band(gap, gap)], [
+    band(gap, gap),
+  ])
   |> should.equal(1)
   direct_check(
     context,
@@ -250,24 +258,20 @@ pub fn discovery_32_two_and_four_gaps_direct_enumeration_test() {
 pub fn discovery_32_empty_side_and_empty_valid_bands_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 2, 3]
-  let x = direct_check(
-    context,
-    ids,
-    [],
-    [band(42, 963)],
-    [],
-    [band(42, 963)],
-    [band(42, 963)],
-  )
-  let y = direct_check(
-    context,
-    ids,
-    [band(42, 963)],
-    [],
-    [band(42, 963)],
-    [band(42, 963)],
-    [],
-  )
+  let x =
+    direct_check(context, ids, [], [band(42, 963)], [], [band(42, 963)], [
+      band(42, 963),
+    ])
+  let y =
+    direct_check(
+      context,
+      ids,
+      [band(42, 963)],
+      [],
+      [band(42, 963)],
+      [band(42, 963)],
+      [],
+    )
   x |> should.equal(y)
   direct_check(context, ids, [], [], [], [], [])
   |> should.equal(0)
@@ -282,24 +286,26 @@ pub fn discovery_32_equal_sets_and_swapped_sides_test() {
   let canonical = [band(42, 100), band(300, 1000)]
   direct_check(context, ids, a, a, canonical, canonical, canonical)
   |> should.equal(0)
-  let x = direct_check(
-    context,
-    ids,
-    a,
-    [band(101, 299)],
-    canonical,
-    [band(42, 1000)],
-    [band(101, 299)],
-  )
-  let y = direct_check(
-    context,
-    ids,
-    [band(101, 299)],
-    a,
-    [band(101, 299)],
-    [band(42, 1000)],
-    canonical,
-  )
+  let x =
+    direct_check(
+      context,
+      ids,
+      a,
+      [band(101, 299)],
+      canonical,
+      [band(42, 1000)],
+      [band(101, 299)],
+    )
+  let y =
+    direct_check(
+      context,
+      ids,
+      [band(101, 299)],
+      a,
+      [band(101, 299)],
+      [band(42, 1000)],
+      canonical,
+    )
   x |> should.equal(y)
 }
 
